@@ -28,6 +28,7 @@
 //            if err != nil {
 //                log.Fatal("could not create CPU profile: ", err)
 //            }
+//            defer f.Close() // error handling omitted for example
 //            if err := pprof.StartCPUProfile(f); err != nil {
 //                log.Fatal("could not start CPU profile: ", err)
 //            }
@@ -41,11 +42,11 @@
 //            if err != nil {
 //                log.Fatal("could not create memory profile: ", err)
 //            }
+//            defer f.Close() // error handling omitted for example
 //            runtime.GC() // get up-to-date statistics
 //            if err := pprof.WriteHeapProfile(f); err != nil {
 //                log.Fatal("could not write memory profile: ", err)
 //            }
-//            f.Close()
 //        }
 //    }
 //
@@ -68,8 +69,8 @@
 // all pprof commands.
 //
 // For more information about pprof, see
-// https://github.com/google/pprof/blob/master/doc/pprof.md.
-// package pprof -- go2cs converted at 2020 August 29 08:22:50 UTC
+// https://github.com/google/pprof/blob/master/doc/README.md.
+// package pprof -- go2cs converted at 2020 October 08 03:26:15 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Go\src\runtime\pprof\pprof.go
 using bufio = go.bufio_package;
@@ -106,7 +107,8 @@ namespace runtime
         // Each Profile has a unique name. A few profiles are predefined:
         //
         //    goroutine    - stack traces of all current goroutines
-        //    heap         - a sampling of all heap allocations
+        //    heap         - a sampling of memory allocations of live objects
+        //    allocs       - a sampling of all past memory allocations
         //    threadcreate - stack traces that led to the creation of new OS threads
         //    block        - stack traces that led to blocking on synchronization primitives
         //    mutex        - stack traces of holders of contended mutexes
@@ -120,6 +122,16 @@ namespace runtime
         // If there has been no garbage collection at all, the heap profile reports
         // all known allocations. This exception helps mainly in programs running
         // without garbage collection enabled, usually for debugging purposes.
+        //
+        // The heap profile tracks both the allocation sites for all live objects in
+        // the application memory and for all objects allocated since the program start.
+        // Pprof's -inuse_space, -inuse_objects, -alloc_space, and -alloc_objects
+        // flags select which to display, defaulting to -inuse_space (live objects,
+        // scaled by size).
+        //
+        // The allocs profile is the same as the heap profile but changes the default
+        // pprof display to -alloc_space, the total number of bytes allocated since
+        // the program began (including garbage-collected bytes).
         //
         // The CPU profile is not available as a Profile. It has a special API,
         // the StartCPUProfile and StopCPUProfile functions, because it streams
@@ -136,15 +148,17 @@ namespace runtime
         // profiles records all registered profiles.
         private static var profiles = default;
 
-        private static Profile goroutineProfile = ref new Profile(name:"goroutine",count:countGoroutine,write:writeGoroutine,);
+        private static ptr<Profile> goroutineProfile = addr(new Profile(name:"goroutine",count:countGoroutine,write:writeGoroutine,));
 
-        private static Profile threadcreateProfile = ref new Profile(name:"threadcreate",count:countThreadCreate,write:writeThreadCreate,);
+        private static ptr<Profile> threadcreateProfile = addr(new Profile(name:"threadcreate",count:countThreadCreate,write:writeThreadCreate,));
 
-        private static Profile heapProfile = ref new Profile(name:"heap",count:countHeap,write:writeHeap,);
+        private static ptr<Profile> heapProfile = addr(new Profile(name:"heap",count:countHeap,write:writeHeap,));
 
-        private static Profile blockProfile = ref new Profile(name:"block",count:countBlock,write:writeBlock,);
+        private static ptr<Profile> allocsProfile = addr(new Profile(name:"allocs",count:countHeap,write:writeAlloc,));
 
-        private static Profile mutexProfile = ref new Profile(name:"mutex",count:countMutex,write:writeMutex,);
+        private static ptr<Profile> blockProfile = addr(new Profile(name:"block",count:countBlock,write:writeBlock,));
+
+        private static ptr<Profile> mutexProfile = addr(new Profile(name:"mutex",count:countMutex,write:writeMutex,));
 
         private static void lockProfiles()
         {
@@ -152,8 +166,10 @@ namespace runtime
             if (profiles.m == null)
             { 
                 // Initial built-in profiles.
-                profiles.m = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, ref Profile>{"goroutine":goroutineProfile,"threadcreate":threadcreateProfile,"heap":heapProfile,"block":blockProfile,"mutex":mutexProfile,};
+                profiles.m = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, ptr<Profile>>{"goroutine":goroutineProfile,"threadcreate":threadcreateProfile,"heap":heapProfile,"allocs":allocsProfile,"block":blockProfile,"mutex":mutexProfile,};
+
             }
+
         }
 
         private static void unlockProfiles()
@@ -167,7 +183,7 @@ namespace runtime
         // separate name spaces for each package.
         // For compatibility with various tools that read pprof data,
         // profile names should not contain spaces.
-        public static ref Profile NewProfile(@string name) => func((defer, panic, _) =>
+        public static ptr<Profile> NewProfile(@string name) => func((defer, panic, _) =>
         {
             lockProfiles();
             defer(unlockProfiles());
@@ -175,54 +191,64 @@ namespace runtime
             {
                 panic("pprof: NewProfile with empty name");
             }
+
             if (profiles.m[name] != null)
             {
                 panic("pprof: NewProfile name already in use: " + name);
             }
-            Profile p = ref new Profile(name:name,m:map[interface{}][]uintptr{},);
+
+            ptr<Profile> p = addr(new Profile(name:name,m:map[interface{}][]uintptr{},));
             profiles.m[name] = p;
-            return p;
+            return _addr_p!;
+
         });
 
         // Lookup returns the profile with the given name, or nil if no such profile exists.
-        public static ref Profile Lookup(@string name) => func((defer, _, __) =>
+        public static ptr<Profile> Lookup(@string name) => func((defer, _, __) =>
         {
             lockProfiles();
             defer(unlockProfiles());
-            return profiles.m[name];
+            return _addr_profiles.m[name]!;
         });
 
         // Profiles returns a slice of all the known profiles, sorted by name.
-        public static slice<ref Profile> Profiles() => func((defer, _, __) =>
+        public static slice<ptr<Profile>> Profiles() => func((defer, _, __) =>
         {
             lockProfiles();
             defer(unlockProfiles());
 
-            var all = make_slice<ref Profile>(0L, len(profiles.m));
+            var all = make_slice<ptr<Profile>>(0L, len(profiles.m));
             foreach (var (_, p) in profiles.m)
             {
                 all = append(all, p);
             }
             sort.Slice(all, (i, j) => all[i].name < all[j].name);
             return all;
+
         });
 
         // Name returns this profile's name, which can be passed to Lookup to reobtain the profile.
-        private static @string Name(this ref Profile p)
+        private static @string Name(this ptr<Profile> _addr_p)
         {
+            ref Profile p = ref _addr_p.val;
+
             return p.name;
         }
 
         // Count returns the number of execution stacks currently in the profile.
-        private static long Count(this ref Profile _p) => func(_p, (ref Profile p, Defer defer, Panic _, Recover __) =>
+        private static long Count(this ptr<Profile> _addr_p) => func((defer, _, __) =>
         {
+            ref Profile p = ref _addr_p.val;
+
             p.mu.Lock();
             defer(p.mu.Unlock());
             if (p.count != null)
             {
                 return p.count();
             }
+
             return len(p.m);
+
         });
 
         // Add adds the current execution stack to the profile, associated with value.
@@ -243,16 +269,20 @@ namespace runtime
         // Passing skip=0 begins the stack trace at the call to Add inside rpc.NewClient.
         // Passing skip=1 begins the stack trace at the call to NewClient inside mypkg.Run.
         //
-        private static void Add(this ref Profile _p, object value, long skip) => func(_p, (ref Profile p, Defer defer, Panic panic, Recover _) =>
+        private static void Add(this ptr<Profile> _addr_p, object value, long skip) => func((defer, panic, _) =>
         {
+            ref Profile p = ref _addr_p.val;
+
             if (p.name == "")
             {
                 panic("pprof: use of uninitialized Profile");
             }
+
             if (p.write != null)
             {
                 panic("pprof: Add called on built-in Profile " + p.name);
             }
+
             var stk = make_slice<System.UIntPtr>(32L);
             var n = runtime.Callers(skip + 1L, stk[..]);
             stk = stk[..n];
@@ -260,20 +290,26 @@ namespace runtime
             { 
                 // The value for skip is too large, and there's no stack trace to record.
                 stk = new slice<System.UIntPtr>(new System.UIntPtr[] { funcPC(lostProfileEvent) });
+
             }
+
             p.mu.Lock();
             defer(p.mu.Unlock());
             if (p.m[value] != null)
             {
                 panic("pprof: Profile.Add of duplicate value");
             }
+
             p.m[value] = stk;
+
         });
 
         // Remove removes the execution stack associated with value from the profile.
         // It is a no-op if the value is not in the profile.
-        private static void Remove(this ref Profile _p, object value) => func(_p, (ref Profile p, Defer defer, Panic _, Recover __) =>
+        private static void Remove(this ptr<Profile> _addr_p, object value) => func((defer, _, __) =>
         {
+            ref Profile p = ref _addr_p.val;
+
             p.mu.Lock();
             defer(p.mu.Unlock());
             delete(p.m, value);
@@ -284,23 +320,28 @@ namespace runtime
         // Otherwise, WriteTo returns nil.
         //
         // The debug parameter enables additional output.
-        // Passing debug=0 prints only the hexadecimal addresses that pprof needs.
-        // Passing debug=1 adds comments translating addresses to function names
-        // and line numbers, so that a programmer can read the profile without tools.
+        // Passing debug=0 writes the gzip-compressed protocol buffer described
+        // in https://github.com/google/pprof/tree/master/proto#overview.
+        // Passing debug=1 writes the legacy text format with comments
+        // translating addresses to function names and line numbers, so that a
+        // programmer can read the profile without tools.
         //
         // The predefined profiles may assign meaning to other debug values;
         // for example, when printing the "goroutine" profile, debug=2 means to
         // print the goroutine stacks in the same form that a Go program uses
         // when dying due to an unrecovered panic.
-        private static error WriteTo(this ref Profile _p, io.Writer w, long debug) => func(_p, (ref Profile p, Defer _, Panic panic, Recover __) =>
+        private static error WriteTo(this ptr<Profile> _addr_p, io.Writer w, long debug) => func((_, panic, __) =>
         {
+            ref Profile p = ref _addr_p.val;
+
             if (p.name == "")
             {
                 panic("pprof: use of zero Profile");
             }
+
             if (p.write != null)
             {
-                return error.As(p.write(w, debug));
+                return error.As(p.write(w, debug))!;
             } 
 
             // Obtain consistent snapshot under lock; then process without lock.
@@ -321,14 +362,17 @@ namespace runtime
                 {
                     if (t[k] != u[k])
                     {
-                        return error.As(t[k] < u[k]);
+                        return error.As(t[k] < u[k])!;
                     }
+
                 }
 
-                return error.As(len(t) < len(u));
+                return error.As(len(t) < len(u))!;
+
             });
 
-            return error.As(printCountProfile(w, debug, p.name, stackProfile(all)));
+            return error.As(printCountProfile(w, debug, p.name, stackProfile(all)))!;
+
         });
 
         private partial struct stackProfile // : slice<slice<System.UIntPtr>>
@@ -343,6 +387,10 @@ namespace runtime
         {
             return x[i];
         }
+        private static ptr<labelMap> Label(this stackProfile x, long i)
+        {
+            return _addr_null!;
+        }
 
         // A countProfile is a set of stack traces to be printed as counts
         // grouped by stack trace. There are multiple implementations:
@@ -350,8 +398,9 @@ namespace runtime
         // and obtain each trace in turn.
         private partial interface countProfile
         {
-            slice<System.UIntPtr> Len();
-            slice<System.UIntPtr> Stack(long i);
+            ptr<labelMap> Len();
+            ptr<labelMap> Stack(long i);
+            ptr<labelMap> Label(long i);
         }
 
         // printCountCycleProfile outputs block profile records (for block or mutex profiles)
@@ -376,23 +425,16 @@ namespace runtime
             {
                 var (count, nanosec) = scaler(r.Count, float64(r.Cycles) / cpuGHz);
                 values[0L] = count;
-                values[1L] = int64(nanosec);
-                locs = locs[..0L];
-                foreach (var (_, addr) in r.Stack())
-                { 
-                    // For count profiles, all stack addresses are
-                    // return PCs, which is what locForPC expects.
-                    var l = b.locForPC(addr);
-                    if (l == 0L)
-                    { // runtime.goexit
-                        continue;
-                    }
-                    locs = append(locs, l);
-                }
+                values[1L] = int64(nanosec); 
+                // For count profiles, all stack addresses are
+                // return PCs, which is what appendLocsForStack expects.
+                locs = b.appendLocsForStack(locs[..0L], r.Stack());
                 b.pbSample(values, locs, null);
+
             }
             b.build();
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // printCountProfile prints a countProfile at the specified debug level.
@@ -400,16 +442,23 @@ namespace runtime
         private static error printCountProfile(io.Writer w, long debug, @string name, countProfile p)
         { 
             // Build count of each stack.
-            bytes.Buffer buf = default;
-            Func<slice<System.UIntPtr>, @string> key = stk =>
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            Func<slice<System.UIntPtr>, ptr<labelMap>, @string> key = (stk, lbls) =>
             {
                 buf.Reset();
-                fmt.Fprintf(ref buf, "@");
+                fmt.Fprintf(_addr_buf, "@");
                 foreach (var (_, pc) in stk)
                 {
-                    fmt.Fprintf(ref buf, " %#x", pc);
+                    fmt.Fprintf(_addr_buf, " %#x", pc);
                 }
-                return error.As(buf.String());
+                if (lbls != null)
+                {
+                    buf.WriteString("\n# labels: ");
+                    buf.WriteString(lbls.String());
+                }
+
+                return error.As(buf.String())!;
+
             }
 ;
             map count = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, long>{};
@@ -418,17 +467,19 @@ namespace runtime
             var n = p.Len();
             for (long i = 0L; i < n; i++)
             {
-                var k = key(p.Stack(i));
+                var k = key(p.Stack(i), p.Label(i));
                 if (count[k] == 0L)
                 {
                     index[k] = i;
                     keys = append(keys, k);
                 }
+
                 count[k]++;
+
             }
 
 
-            sort.Sort(ref new keysByCount(keys,count));
+            sort.Sort(addr(new keysByCount(keys,count)));
 
             if (debug > 0L)
             { 
@@ -448,7 +499,8 @@ namespace runtime
                     k = k__prev1;
                 }
 
-                return error.As(tw.Flush());
+                return error.As(tw.Flush())!;
+
             } 
 
             // Output profile in protobuf form.
@@ -465,27 +517,43 @@ namespace runtime
                 foreach (var (_, __k) in keys)
                 {
                     k = __k;
-                    values[0L] = int64(count[k]);
-                    locs = locs[..0L];
-                    foreach (var (_, addr) in p.Stack(index[k]))
-                    { 
-                        // For count profiles, all stack addresses are
-                        // return PCs, which is what locForPC expects.
-                        var l = b.locForPC(addr);
-                        if (l == 0L)
-                        { // runtime.goexit
-                            continue;
+                    values[0L] = int64(count[k]); 
+                    // For count profiles, all stack addresses are
+                    // return PCs, which is what appendLocsForStack expects.
+                    locs = b.appendLocsForStack(locs[..0L], p.Stack(index[k]));
+                    var idx = index[k];
+                    Action labels = default;
+                    if (p.Label(idx) != null)
+                    {
+                        labels = () =>
+                        {
+                            {
+                                var k__prev2 = k;
+
+                                foreach (var (__k, __v) in new ptr<ptr<p.Label>>(idx))
+                                {
+                                    k = __k;
+                                    v = __v;
+                                    b.pbLabel(tagSample_Label, k, v, 0L);
+                                }
+
+                                k = k__prev2;
+                            }
                         }
-                        locs = append(locs, l);
+;
+
                     }
-                    b.pbSample(values, locs, null);
+
+                    b.pbSample(values, locs, labels);
+
                 }
 
                 k = k__prev1;
             }
 
             b.build();
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // keysByCount sorts keys with higher counts first, breaking ties by key string order.
@@ -495,18 +563,23 @@ namespace runtime
             public map<@string, long> count;
         }
 
-        private static long Len(this ref keysByCount x)
+        private static long Len(this ptr<keysByCount> _addr_x)
         {
+            ref keysByCount x = ref _addr_x.val;
+
             return len(x.keys);
         }
-        private static void Swap(this ref keysByCount x, long i, long j)
+        private static void Swap(this ptr<keysByCount> _addr_x, long i, long j)
         {
+            ref keysByCount x = ref _addr_x.val;
+
             x.keys[i] = x.keys[j];
             x.keys[j] = x.keys[i];
-
         }
-        private static bool Less(this ref keysByCount x, long i, long j)
+        private static bool Less(this ptr<keysByCount> _addr_x, long i, long j)
         {
+            ref keysByCount x = ref _addr_x.val;
+
             var ki = x.keys[i];
             var kj = x.keys[j];
             var ci = x.count[ki];
@@ -515,7 +588,9 @@ namespace runtime
             {
                 return ci > cj;
             }
+
             return ki < kj;
+
         }
 
         // printStackRecord prints the function + source line information
@@ -539,11 +614,14 @@ namespace runtime
                     // This is useful mainly for allocation traces.
                     show = true;
                     fmt.Fprintf(w, "#\t%#x\t%s+%#x\t%s:%d\n", frame.PC, name, frame.PC - frame.Entry, frame.File, frame.Line);
+
                 }
+
                 if (!more)
                 {
                     break;
                 }
+
             }
 
             if (!show)
@@ -551,9 +629,12 @@ namespace runtime
                 // We didn't print anything; do it again,
                 // and this time include runtime functions.
                 printStackRecord(w, stk, true);
-                return;
+                return ;
+
             }
+
             fmt.Fprintf(w, "\n");
+
         }
 
         // Interface to system profiles.
@@ -562,7 +643,7 @@ namespace runtime
         // It is preserved for backwards compatibility.
         public static error WriteHeapProfile(io.Writer w)
         {
-            return error.As(writeHeap(w, 0L));
+            return error.As(writeHeap(w, 0L))!;
         }
 
         // countHeap returns the number of records in the heap profile.
@@ -575,13 +656,26 @@ namespace runtime
         // writeHeap writes the current runtime heap profile to w.
         private static error writeHeap(io.Writer w, long debug)
         {
-            ref runtime.MemStats memStats = default;
+            return error.As(writeHeapInternal(w, debug, ""))!;
+        }
+
+        // writeAlloc writes the current runtime heap profile to w
+        // with the total allocation space as the default sample type.
+        private static error writeAlloc(io.Writer w, long debug)
+        {
+            return error.As(writeHeapInternal(w, debug, "alloc_space"))!;
+        }
+
+        private static error writeHeapInternal(io.Writer w, long debug, @string defaultSampleType)
+        {
+            ptr<runtime.MemStats> memStats;
             if (debug != 0L)
             { 
                 // Read mem stats first, so that our other allocations
                 // do not appear in the statistics.
                 memStats = @new<runtime.MemStats>();
                 runtime.ReadMemStats(memStats);
+
             } 
 
             // Find out how many records there are (MemProfile(nil, true)),
@@ -610,9 +704,10 @@ namespace runtime
 
             if (debug == 0L)
             {
-                return error.As(writeHeapProto(w, p, int64(runtime.MemProfileRate)));
+                return error.As(writeHeapProto(w, p, int64(runtime.MemProfileRate), defaultSampleType))!;
             }
-            sort.Slice(p, (i, j) => error.As(p[i].InUseBytes() > p[j].InUseBytes()));
+
+            sort.Slice(p, (i, j) => error.As(p[i].InUseBytes() > p[j].InUseBytes())!);
 
             var b = bufio.NewWriter(w);
             var tw = tabwriter.NewWriter(b, 1L, 8L, 1L, '\t', 0L);
@@ -625,7 +720,7 @@ namespace runtime
                 foreach (var (__i) in p)
                 {
                     i = __i;
-                    var r = ref p[i];
+                    var r = _addr_p[i];
                     total.AllocBytes += r.AllocBytes;
                     total.AllocObjects += r.AllocObjects;
                     total.FreeBytes += r.FreeBytes;
@@ -647,7 +742,7 @@ namespace runtime
                 foreach (var (__i) in p)
                 {
                     i = __i;
-                    r = ref p[i];
+                    r = _addr_p[i];
                     fmt.Fprintf(w, "%d: %d [%d: %d] @", r.InUseObjects(), r.InUseBytes(), r.AllocObjects, r.AllocBytes);
                     foreach (var (_, pc) in r.Stack())
                     {
@@ -655,6 +750,7 @@ namespace runtime
                     }
                     fmt.Fprintf(w, "\n");
                     printStackRecord(w, r.Stack(), false);
+
                 } 
 
                 // Print memstats information too.
@@ -693,10 +789,14 @@ namespace runtime
             fmt.Fprintf(w, "# NumGC = %d\n", s.NumGC);
             fmt.Fprintf(w, "# NumForcedGC = %d\n", s.NumForcedGC);
             fmt.Fprintf(w, "# GCCPUFraction = %v\n", s.GCCPUFraction);
-            fmt.Fprintf(w, "# DebugGC = %v\n", s.DebugGC);
+            fmt.Fprintf(w, "# DebugGC = %v\n", s.DebugGC); 
+
+            // Also flush out MaxRSS on supported platforms.
+            addMaxRSS(w);
 
             tw.Flush();
-            return error.As(b.Flush());
+            return error.As(b.Flush())!;
+
         }
 
         // countThreadCreate returns the size of the current ThreadCreateProfile.
@@ -708,8 +808,15 @@ namespace runtime
 
         // writeThreadCreate writes the current runtime ThreadCreateProfile to w.
         private static error writeThreadCreate(io.Writer w, long debug)
-        {
-            return error.As(writeRuntimeProfile(w, debug, "threadcreate", runtime.ThreadCreateProfile));
+        { 
+            // Until https://golang.org/issues/6104 is addressed, wrap
+            // ThreadCreateProfile because there's no point in tracking labels when we
+            // don't get any stack-traces.
+            return error.As(writeRuntimeProfile(w, debug, "threadcreate", (p, _) =>
+            {
+                return error.As(runtime.ThreadCreateProfile(p))!;
+            }))!;
+
         }
 
         // countGoroutine returns the number of goroutines.
@@ -718,14 +825,20 @@ namespace runtime
             return runtime.NumGoroutine();
         }
 
+        // runtime_goroutineProfileWithLabels is defined in runtime/mprof.go
+        private static (long, bool) runtime_goroutineProfileWithLabels(slice<runtime.StackRecord> p, slice<unsafe.Pointer> labels)
+;
+
         // writeGoroutine writes the current runtime GoroutineProfile to w.
         private static error writeGoroutine(io.Writer w, long debug)
         {
             if (debug >= 2L)
-            {
-                return error.As(writeGoroutineStacks(w));
+            {>>MARKER:FUNCTION_runtime_goroutineProfileWithLabels_BLOCK_PREFIX<<
+                return error.As(writeGoroutineStacks(w))!;
             }
-            return error.As(writeRuntimeProfile(w, debug, "goroutine", runtime.GoroutineProfile));
+
+            return error.As(writeRuntimeProfile(w, debug, "goroutine", runtime_goroutineProfileWithLabels))!;
+
         }
 
         private static error writeGoroutineStacks(io.Writer w)
@@ -742,19 +855,24 @@ namespace runtime
                     buf = buf[..n];
                     break;
                 }
+
                 if (len(buf) >= 64L << (int)(20L))
                 { 
                     // Filled 64 MB - stop there.
                     break;
+
                 }
+
                 buf = make_slice<byte>(2L * len(buf));
+
             }
 
             var (_, err) = w.Write(buf);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
-        private static error writeRuntimeProfile(io.Writer w, long debug, @string name, Func<slice<runtime.StackRecord>, (long, bool)> fetch)
+        private static error writeRuntimeProfile(io.Writer w, long debug, @string name, Func<slice<runtime.StackRecord>, slice<unsafe.Pointer>, (long, bool)> fetch)
         { 
             // Find out how many records there are (fetch(nil)),
             // allocate that many records, and get the data.
@@ -763,14 +881,16 @@ namespace runtime
             // and also try again if we're very unlucky.
             // The loop should only execute one iteration in the common case.
             slice<runtime.StackRecord> p = default;
-            var (n, ok) = fetch(null);
+            slice<unsafe.Pointer> labels = default;
+            var (n, ok) = fetch(null, null);
             while (true)
             { 
                 // Allocate room for a slightly bigger profile,
                 // in case a few more entries have been added
                 // since the call to ThreadProfile.
                 p = make_slice<runtime.StackRecord>(n + 10L);
-                n, ok = fetch(p);
+                labels = make_slice<unsafe.Pointer>(n + 10L);
+                n, ok = fetch(p, labels);
                 if (ok)
                 {
                     p = p[0L..n];
@@ -780,20 +900,33 @@ namespace runtime
             }
 
 
-            return error.As(printCountProfile(w, debug, name, runtimeProfile(p)));
+            return error.As(printCountProfile(w, debug, name, addr(new runtimeProfile(p,labels))))!;
+
         }
 
-        private partial struct runtimeProfile // : slice<runtime.StackRecord>
+        private partial struct runtimeProfile
         {
+            public slice<runtime.StackRecord> stk;
+            public slice<unsafe.Pointer> labels;
         }
 
-        private static long Len(this runtimeProfile p)
+        private static long Len(this ptr<runtimeProfile> _addr_p)
         {
-            return len(p);
+            ref runtimeProfile p = ref _addr_p.val;
+
+            return len(p.stk);
         }
-        private static slice<System.UIntPtr> Stack(this runtimeProfile p, long i)
+        private static slice<System.UIntPtr> Stack(this ptr<runtimeProfile> _addr_p, long i)
         {
-            return p[i].Stack();
+            ref runtimeProfile p = ref _addr_p.val;
+
+            return p.stk[i].Stack();
+        }
+        private static ptr<labelMap> Label(this ptr<runtimeProfile> _addr_p, long i)
+        {
+            ref runtimeProfile p = ref _addr_p.val;
+
+            return _addr_(labelMap.val)(p.labels[i])!;
         }
 
         private static var cpu = default;
@@ -820,7 +953,7 @@ namespace runtime
             // system, and a nice round number to make it easy to
             // convert sample counts to seconds. Instead of requiring
             // each client to specify the frequency, we hard code it.
-            const long hz = 100L;
+            const long hz = (long)100L;
 
 
 
@@ -833,12 +966,14 @@ namespace runtime
             // Double-check.
             if (cpu.profiling)
             {
-                return error.As(fmt.Errorf("cpu profiling already in use"));
+                return error.As(fmt.Errorf("cpu profiling already in use"))!;
             }
+
             cpu.profiling = true;
             runtime.SetCPUProfileRate(hz);
             go_(() => profileWriter(w));
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // readProfile, provided by the runtime, returns the next chunk of
@@ -852,7 +987,7 @@ namespace runtime
         private static void profileWriter(io.Writer w) => func((_, panic, __) =>
         {
             var b = newProfileBuilder(w);
-            error err = default;
+            error err = default!;
             while (true)
             {>>MARKER:FUNCTION_readProfile_BLOCK_PREFIX<<
                 time.Sleep(100L * time.Millisecond);
@@ -862,14 +997,16 @@ namespace runtime
 
                     if (e != null && err == null)
                     {
-                        err = error.As(e);
+                        err = error.As(e)!;
                     }
 
                 }
+
                 if (eof)
                 {
                     break;
                 }
+
             }
 
             if (err != null)
@@ -877,9 +1014,12 @@ namespace runtime
                 // The runtime should never produce an invalid or truncated profile.
                 // It drops records that can't fit into its log buffers.
                 panic("runtime/pprof: converting profile: " + err.Error());
+
             }
+
             b.build();
             cpu.done.Send(true);
+
         });
 
         // StopCPUProfile stops the current CPU profile, if any.
@@ -892,10 +1032,12 @@ namespace runtime
 
             if (!cpu.profiling)
             {
-                return;
+                return ;
             }
+
             cpu.profiling = false;
             runtime.SetCPUProfileRate(0L).Send(cpu.done);
+
         });
 
         // countBlock returns the number of records in the blocking profile.
@@ -926,15 +1068,17 @@ namespace runtime
                     p = p[..n];
                     break;
                 }
+
             }
 
 
-            sort.Slice(p, (i, j) => error.As(p[i].Cycles > p[j].Cycles));
+            sort.Slice(p, (i, j) => error.As(p[i].Cycles > p[j].Cycles)!);
 
             if (debug <= 0L)
             {
-                return error.As(printCountCycleProfile(w, "contentions", "delay", scaleBlockProfile, p));
+                return error.As(printCountCycleProfile(w, "contentions", "delay", scaleBlockProfile, p))!;
             }
+
             var b = bufio.NewWriter(w);
             var tw = tabwriter.NewWriter(w, 1L, 8L, 1L, '\t', 0L);
             w = tw;
@@ -943,7 +1087,7 @@ namespace runtime
             fmt.Fprintf(w, "cycles/second=%v\n", runtime_cyclesPerSecond());
             foreach (var (i) in p)
             {
-                var r = ref p[i];
+                var r = _addr_p[i];
                 fmt.Fprintf(w, "%v %v @", r.Cycles, r.Count);
                 foreach (var (_, pc) in r.Stack())
                 {
@@ -954,21 +1098,28 @@ namespace runtime
                 {
                     printStackRecord(w, r.Stack(), true);
                 }
+
             }
             if (tw != null)
             {
                 tw.Flush();
             }
-            return error.As(b.Flush());
+
+            return error.As(b.Flush())!;
+
         }
 
         private static (long, double) scaleBlockProfile(long cnt, double ns)
-        { 
+        {
+            long _p0 = default;
+            double _p0 = default;
+ 
             // Do nothing.
             // The current way of block profile sampling makes it
             // hard to compute the unsampled number. The legacy block
             // profile parse doesn't attempt to scale or unsample.
             return (cnt, ns);
+
         }
 
         // writeMutex writes the current mutex profile to w.
@@ -986,15 +1137,17 @@ namespace runtime
                     p = p[..n];
                     break;
                 }
+
             }
 
 
-            sort.Slice(p, (i, j) => error.As(p[i].Cycles > p[j].Cycles));
+            sort.Slice(p, (i, j) => error.As(p[i].Cycles > p[j].Cycles)!);
 
             if (debug <= 0L)
             {
-                return error.As(printCountCycleProfile(w, "contentions", "delay", scaleMutexProfile, p));
+                return error.As(printCountCycleProfile(w, "contentions", "delay", scaleMutexProfile, p))!;
             }
+
             var b = bufio.NewWriter(w);
             var tw = tabwriter.NewWriter(w, 1L, 8L, 1L, '\t', 0L);
             w = tw;
@@ -1004,7 +1157,7 @@ namespace runtime
             fmt.Fprintf(w, "sampling period=%d\n", runtime.SetMutexProfileFraction(-1L));
             foreach (var (i) in p)
             {
-                var r = ref p[i];
+                var r = _addr_p[i];
                 fmt.Fprintf(w, "%v %v @", r.Cycles, r.Count);
                 foreach (var (_, pc) in r.Stack())
                 {
@@ -1015,16 +1168,22 @@ namespace runtime
                 {
                     printStackRecord(w, r.Stack(), true);
                 }
+
             }
             if (tw != null)
             {
                 tw.Flush();
             }
-            return error.As(b.Flush());
+
+            return error.As(b.Flush())!;
+
         }
 
         private static (long, double) scaleMutexProfile(long cnt, double ns)
         {
+            long _p0 = default;
+            double _p0 = default;
+
             var period = runtime.SetMutexProfileFraction(-1L);
             return (cnt * int64(period), ns * float64(period));
         }

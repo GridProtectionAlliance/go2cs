@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:51:31 UTC
+//     Generated on 2020 October 08 04:07:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using exec = go.os.exec_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -36,7 +40,7 @@ namespace @internal
                 this.IsReturnValue = default;
                 this.IsInlFormal = default;
                 this.StackOffset = default;
-                this.LocationList = default;
+                this.PutLocationList = default;
                 this.Scope = default;
                 this.Type = default;
                 this.DeclFile = default;
@@ -47,14 +51,14 @@ namespace @internal
                 this.IsInAbstract = default;
             }
 
-            public Var(@string Name = default, long Abbrev = default, bool IsReturnValue = default, bool IsInlFormal = default, int StackOffset = default, slice<Location> LocationList = default, int Scope = default, Sym Type = default, @string DeclFile = default, ulong DeclLine = default, ulong DeclCol = default, int InlIndex = default, int ChildIndex = default, bool IsInAbstract = default)
+            public Var(@string Name = default, long Abbrev = default, bool IsReturnValue = default, bool IsInlFormal = default, int StackOffset = default, Action<Sym, Sym> PutLocationList = default, int Scope = default, Sym Type = default, @string DeclFile = default, ulong DeclLine = default, ulong DeclCol = default, int InlIndex = default, int ChildIndex = default, bool IsInAbstract = default)
             {
                 this.Name = Name;
                 this.Abbrev = Abbrev;
                 this.IsReturnValue = IsReturnValue;
                 this.IsInlFormal = IsInlFormal;
                 this.StackOffset = StackOffset;
-                this.LocationList = LocationList;
+                this.PutLocationList = PutLocationList;
                 this.Scope = Scope;
                 this.Type = Type;
                 this.DeclFile = DeclFile;
@@ -85,7 +89,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Var Var_cast(dynamic value)
         {
-            return new Var(value.Name, value.Abbrev, value.IsReturnValue, value.IsInlFormal, value.StackOffset, value.LocationList, value.Scope, value.Type, value.DeclFile, value.DeclLine, value.DeclCol, value.InlIndex, value.ChildIndex, value.IsInAbstract);
+            return new Var(value.Name, value.Abbrev, value.IsReturnValue, value.IsInlFormal, value.StackOffset, value.PutLocationList, value.Scope, value.Type, value.DeclFile, value.DeclLine, value.DeclCol, value.InlIndex, value.ChildIndex, value.IsInAbstract);
         }
     }
 }}}

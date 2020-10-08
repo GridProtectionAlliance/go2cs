@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:55 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:20 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\log10.go
 
@@ -36,7 +36,9 @@ namespace go
             {>>MARKER:FUNCTION_Log2_BLOCK_PREFIX<<
                 return float64(exp - 1L);
             }
+
             return Log(frac) * (1L / Ln2) + float64(exp);
+
         }
     }
 }

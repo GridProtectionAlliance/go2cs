@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:22:31 UTC
+//     Generated on 2020 October 08 03:32:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using static go.builtin;
+using syscall = go.syscall_package;
+using @unsafe = go.@unsafe_package;
 using go;
 
 namespace go {

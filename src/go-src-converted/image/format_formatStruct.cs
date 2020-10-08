@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:35 UTC
+//     Generated on 2020 October 08 04:59:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,8 @@ using static go.builtin;
 using bufio = go.bufio_package;
 using errors = go.errors_package;
 using io = go.io_package;
+using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 
 namespace go
 {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package multipart -- go2cs converted at 2020 August 29 08:32:27 UTC
+// package multipart -- go2cs converted at 2020 October 08 03:38:27 UTC
 // import "mime/multipart" ==> using multipart = go.mime.multipart_package
 // Original source: C:\Go\src\mime\multipart\formdata.go
 using bytes = go.bytes_package;
@@ -33,20 +33,29 @@ namespace mime
         // disk in temporary files.
         // It returns ErrMessageTooLarge if all non-file parts can't be stored in
         // memory.
-        private static (ref Form, error) ReadForm(this ref Reader r, long maxMemory)
+        private static (ptr<Form>, error) ReadForm(this ptr<Reader> _addr_r, long maxMemory)
         {
-            return r.readForm(maxMemory);
+            ptr<Form> _p0 = default!;
+            error _p0 = default!;
+            ref Reader r = ref _addr_r.val;
+
+            return _addr_r.readForm(maxMemory)!;
         }
 
-        private static (ref Form, error) readForm(this ref Reader _r, long maxMemory) => func(_r, (ref Reader r, Defer defer, Panic _, Recover __) =>
+        private static (ptr<Form>, error) readForm(this ptr<Reader> _addr_r, long maxMemory) => func((defer, _, __) =>
         {
-            Form form = ref new Form(make(map[string][]string),make(map[string][]*FileHeader));
+            ptr<Form> _ = default!;
+            error err = default!;
+            ref Reader r = ref _addr_r.val;
+
+            ptr<Form> form = addr(new Form(make(map[string][]string),make(map[string][]*FileHeader)));
             defer(() =>
             {
                 if (err != null)
                 {
                     form.RemoveAll();
                 }
+
             }()); 
 
             // Reserve an additional 10 MB for non-file parts.
@@ -58,53 +67,60 @@ namespace mime
                 {
                     break;
                 }
+
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
                 var name = p.FormName();
                 if (name == "")
                 {
                     continue;
                 }
+
                 var filename = p.FileName();
 
-                bytes.Buffer b = default;
+                ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
 
-                var (_, hasContentTypeHeader) = p.Header["Content-Type"];
-                if (!hasContentTypeHeader && filename == "")
+                if (filename == "")
                 { 
                     // value, store as string in memory
-                    var (n, err) = io.CopyN(ref b, p, maxValueBytes + 1L);
+                    var (n, err) = io.CopyN(_addr_b, p, maxValueBytes + 1L);
                     if (err != null && err != io.EOF)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
+
                     maxValueBytes -= n;
                     if (maxValueBytes < 0L)
                     {
-                        return (null, ErrMessageTooLarge);
+                        return (_addr_null!, error.As(ErrMessageTooLarge)!);
                     }
+
                     form.Value[name] = append(form.Value[name], b.String());
                     continue;
+
                 } 
 
                 // file, store in memory or on disk
-                FileHeader fh = ref new FileHeader(Filename:filename,Header:p.Header,);
-                (n, err) = io.CopyN(ref b, p, maxMemory + 1L);
+                ptr<FileHeader> fh = addr(new FileHeader(Filename:filename,Header:p.Header,));
+                (n, err) = io.CopyN(_addr_b, p, maxMemory + 1L);
                 if (err != null && err != io.EOF)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
                 if (n > maxMemory)
                 { 
                     // too big, write to disk and flush buffer
                     var (file, err) = ioutil.TempFile("", "multipart-");
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
-                    var (size, err) = io.Copy(file, io.MultiReader(ref b, p));
+
+                    var (size, err) = io.Copy(file, io.MultiReader(_addr_b, p));
                     {
                         var cerr = file.Close();
 
@@ -114,13 +130,16 @@ namespace mime
                         }
 
                     }
+
                     if (err != null)
                     {
                         os.Remove(file.Name());
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
+
                     fh.tmpfile = file.Name();
                     fh.Size = size;
+
                 }
                 else
                 {
@@ -129,11 +148,14 @@ namespace mime
                     maxMemory -= n;
                     maxValueBytes -= n;
                 }
+
                 form.File[name] = append(form.File[name], fh);
+
             }
 
 
-            return (form, null);
+            return (_addr_form!, error.As(null!)!);
+
         });
 
         // Form is a parsed multipart form.
@@ -144,13 +166,15 @@ namespace mime
         public partial struct Form
         {
             public map<@string, slice<@string>> Value;
-            public map<@string, slice<ref FileHeader>> File;
+            public map<@string, slice<ptr<FileHeader>>> File;
         }
 
         // RemoveAll removes any temporary files associated with a Form.
-        private static error RemoveAll(this ref Form f)
+        private static error RemoveAll(this ptr<Form> _addr_f)
         {
-            error err = default;
+            ref Form f = ref _addr_f.val;
+
+            error err = default!;
             foreach (var (_, fhs) in f.File)
             {
                 foreach (var (_, fh) in fhs)
@@ -160,12 +184,16 @@ namespace mime
                         var e = os.Remove(fh.tmpfile);
                         if (e != null && err == null)
                         {
-                            err = error.As(e);
+                            err = error.As(e)!;
                         }
+
                     }
+
                 }
+
             }
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // A FileHeader describes a file part of a multipart request.
@@ -179,19 +207,25 @@ namespace mime
         }
 
         // Open opens and returns the FileHeader's associated File.
-        private static (File, error) Open(this ref FileHeader fh)
+        private static (File, error) Open(this ptr<FileHeader> _addr_fh)
         {
+            File _p0 = default;
+            error _p0 = default!;
+            ref FileHeader fh = ref _addr_fh.val;
+
             {
                 var b = fh.content;
 
                 if (b != null)
                 {
                     var r = io.NewSectionReader(bytes.NewReader(b), 0L, int64(len(b)));
-                    return (new sectionReadCloser(r), null);
+                    return (new sectionReadCloser(r), error.As(null!)!);
                 }
 
             }
+
             return os.Open(fh.tmpfile);
+
         }
 
         // File is an interface to access the file part of a multipart message.
@@ -205,12 +239,12 @@ namespace mime
 
         private partial struct sectionReadCloser
         {
-            public ref io.SectionReader SectionReader => ref SectionReader_ptr;
+            public ref ptr<io.SectionReader> SectionReader> => ref SectionReader>_ptr;
         }
 
         private static error Close(this sectionReadCloser rc)
         {
-            return error.As(null);
+            return error.As(null!)!;
         }
     }
 }}

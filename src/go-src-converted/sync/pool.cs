@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 August 29 08:36:43 UTC
+// package sync -- go2cs converted at 2020 October 08 01:30:45 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\pool.go
 using race = go.@internal.race_package;
@@ -52,6 +52,9 @@ namespace go
             public unsafe.Pointer local; // local fixed-size per-P pool, actual type is [P]poolLocal
             public System.UIntPtr localSize; // size of the local array
 
+            public unsafe.Pointer victim; // local from previous cycle
+            public System.UIntPtr victimSize; // size of victims array
+
 // New optionally specifies a function to generate
 // a value when Get would otherwise return nil.
 // It may not be changed concurrently with calls to Get.
@@ -61,8 +64,7 @@ namespace go
         // Local per-P Pool appendix.
         private partial struct poolLocalInternal
         {
-            public slice<object> shared; // Can be used by any P.
-            public ref Mutex Mutex => ref Mutex_val; // Protects shared.
+            public poolChain shared; // Local P can pushHead/popHead; any P can popTail.
         }
 
         private partial struct poolLocal
@@ -85,45 +87,53 @@ namespace go
         // See discussion on golang.org/cl/31589.
         private static unsafe.Pointer poolRaceAddr(object x)
         {
-            var ptr = uintptr(new ptr<ref array<unsafe.Pointer>>(@unsafe.Pointer(ref x))[1L]);
+            var ptr = uintptr(new ptr<ptr<array<unsafe.Pointer>>>(@unsafe.Pointer(_addr_x))[1L]);
             var h = uint32((uint64(uint32(ptr)) * 0x85ebca6bUL) >> (int)(16L));
-            return @unsafe.Pointer(ref poolRaceHash[h % uint32(len(poolRaceHash))]);
+            return @unsafe.Pointer(_addr_poolRaceHash[h % uint32(len(poolRaceHash))]);
         }
 
         // Put adds x to the pool.
-        private static void Put(this ref Pool p, object x)
-        {>>MARKER:FUNCTION_fastrand_BLOCK_PREFIX<<
+        private static void Put(this ptr<Pool> _addr_p, object x)
+        {
+            ref Pool p = ref _addr_p.val;
+
             if (x == null)
-            {
-                return;
+            {>>MARKER:FUNCTION_fastrand_BLOCK_PREFIX<<
+                return ;
             }
+
             if (race.Enabled)
             {
                 if (fastrand() % 4L == 0L)
                 { 
                     // Randomly drop x on floor.
-                    return;
+                    return ;
+
                 }
+
                 race.ReleaseMerge(poolRaceAddr(x));
                 race.Disable();
+
             }
-            var l = p.pin();
+
+            var (l, _) = p.pin();
             if (l.@private == null)
             {
                 l.@private = x;
                 x = null;
             }
-            runtime_procUnpin();
+
             if (x != null)
             {
-                l.Lock();
-                l.shared = append(l.shared, x);
-                l.Unlock();
+                l.shared.pushHead(x);
             }
+
+            runtime_procUnpin();
             if (race.Enabled)
             {
                 race.Enable();
             }
+
         }
 
         // Get selects an arbitrary item from the Pool, removes it from the
@@ -134,31 +144,32 @@ namespace go
         //
         // If Get would otherwise return nil and p.New is non-nil, Get returns
         // the result of calling p.New.
-        private static void Get(this ref Pool p)
+        private static void Get(this ptr<Pool> _addr_p)
         {
+            ref Pool p = ref _addr_p.val;
+
             if (race.Enabled)
             {
                 race.Disable();
             }
-            var l = p.pin();
+
+            var (l, pid) = p.pin();
             var x = l.@private;
             l.@private = null;
-            runtime_procUnpin();
             if (x == null)
-            {
-                l.Lock();
-                var last = len(l.shared) - 1L;
-                if (last >= 0L)
-                {
-                    x = l.shared[last];
-                    l.shared = l.shared[..last];
-                }
-                l.Unlock();
+            { 
+                // Try to pop the head of the local shard. We prefer
+                // the head over the tail for temporal locality of
+                // reuse.
+                x, _ = l.shared.popHead();
                 if (x == null)
                 {
-                    x = p.getSlow();
+                    x = p.getSlow(pid);
                 }
+
             }
+
+            runtime_procUnpin();
             if (race.Enabled)
             {
                 race.Enable();
@@ -166,60 +177,150 @@ namespace go
                 {
                     race.Acquire(poolRaceAddr(x));
                 }
+
             }
+
             if (x == null && p.New != null)
             {
                 x = p.New();
             }
+
             return x;
+
         }
 
-        private static object getSlow(this ref Pool p)
-        { 
+        private static void getSlow(this ptr<Pool> _addr_p, long pid)
+        {
+            ref Pool p = ref _addr_p.val;
+ 
             // See the comment in pin regarding ordering of the loads.
-            var size = atomic.LoadUintptr(ref p.localSize); // load-acquire
-            var local = p.local; // load-consume
+            var size = atomic.LoadUintptr(_addr_p.localSize); // load-acquire
+            var locals = p.local; // load-consume
             // Try to steal one element from other procs.
-            var pid = runtime_procPin();
-            runtime_procUnpin();
-            for (long i = 0L; i < int(size); i++)
             {
-                var l = indexLocal(local, (pid + i + 1L) % int(size));
-                l.Lock();
-                var last = len(l.shared) - 1L;
-                if (last >= 0L)
+                long i__prev1 = i;
+
+                for (long i = 0L; i < int(size); i++)
                 {
-                    x = l.shared[last];
-                    l.shared = l.shared[..last];
-                    l.Unlock();
-                    break;
-                }
-                l.Unlock();
+                    var l = indexLocal(locals, (pid + i + 1L) % int(size));
+                    {
+                        var x__prev1 = x;
+
+                        var (x, _) = l.shared.popTail();
+
+                        if (x != null)
+                        {
+                            return x;
+                        }
+
+                        x = x__prev1;
+
+                    }
+
+                } 
+
+                // Try the victim cache. We do this after attempting to steal
+                // from all primary caches because we want objects in the
+                // victim cache to age out if at all possible.
+
+
+                i = i__prev1;
+            } 
+
+            // Try the victim cache. We do this after attempting to steal
+            // from all primary caches because we want objects in the
+            // victim cache to age out if at all possible.
+            size = atomic.LoadUintptr(_addr_p.victimSize);
+            if (uintptr(pid) >= size)
+            {
+                return null;
             }
 
-            return x;
+            locals = p.victim;
+            l = indexLocal(locals, pid);
+            {
+                var x__prev1 = x;
+
+                var x = l.@private;
+
+                if (x != null)
+                {
+                    l.@private = null;
+                    return x;
+                }
+
+                x = x__prev1;
+
+            }
+
+            {
+                long i__prev1 = i;
+
+                for (i = 0L; i < int(size); i++)
+                {
+                    l = indexLocal(locals, (pid + i) % int(size));
+                    {
+                        var x__prev1 = x;
+
+                        (x, _) = l.shared.popTail();
+
+                        if (x != null)
+                        {
+                            return x;
+                        }
+
+                        x = x__prev1;
+
+                    }
+
+                } 
+
+                // Mark the victim cache as empty for future gets don't bother
+                // with it.
+
+
+                i = i__prev1;
+            } 
+
+            // Mark the victim cache as empty for future gets don't bother
+            // with it.
+            atomic.StoreUintptr(_addr_p.victimSize, 0L);
+
+            return null;
+
         }
 
-        // pin pins the current goroutine to P, disables preemption and returns poolLocal pool for the P.
+        // pin pins the current goroutine to P, disables preemption and
+        // returns poolLocal pool for the P and the P's id.
         // Caller must call runtime_procUnpin() when done with the pool.
-        private static ref poolLocal pin(this ref Pool p)
+        private static (ptr<poolLocal>, long) pin(this ptr<Pool> _addr_p)
         {
+            ptr<poolLocal> _p0 = default!;
+            long _p0 = default;
+            ref Pool p = ref _addr_p.val;
+
             var pid = runtime_procPin(); 
-            // In pinSlow we store to localSize and then to local, here we load in opposite order.
+            // In pinSlow we store to local and then to localSize, here we load in opposite order.
             // Since we've disabled preemption, GC cannot happen in between.
             // Thus here we must observe local at least as large localSize.
             // We can observe a newer/larger local, it is fine (we must observe its zero-initialized-ness).
-            var s = atomic.LoadUintptr(ref p.localSize); // load-acquire
+            var s = atomic.LoadUintptr(_addr_p.localSize); // load-acquire
             var l = p.local; // load-consume
             if (uintptr(pid) < s)
             {
-                return indexLocal(l, pid);
+                return (_addr_indexLocal(l, pid)!, pid);
             }
-            return p.pinSlow();
+
+            return _addr_p.pinSlow()!;
+
         }
 
-        private static ref poolLocal pinSlow(this ref Pool _p) => func(_p, (ref Pool p, Defer defer, Panic _, Recover __) =>
-        { 
+        private static (ptr<poolLocal>, long) pinSlow(this ptr<Pool> _addr_p) => func((defer, _, __) =>
+        {
+            ptr<poolLocal> _p0 = default!;
+            long _p0 = default;
+            ref Pool p = ref _addr_p.val;
+ 
             // Retry under the mutex.
             // Can not lock the mutex while pinned.
             runtime_procUnpin();
@@ -231,8 +332,9 @@ namespace go
             var l = p.local;
             if (uintptr(pid) < s)
             {
-                return indexLocal(l, pid);
+                return (_addr_indexLocal(l, pid)!, pid);
             }
+
             if (p.local == null)
             {
                 allPools = append(allPools, p);
@@ -240,65 +342,70 @@ namespace go
             // If GOMAXPROCS changes between GCs, we re-allocate the array and lose the old one.
             var size = runtime.GOMAXPROCS(0L);
             var local = make_slice<poolLocal>(size);
-            atomic.StorePointer(ref p.local, @unsafe.Pointer(ref local[0L])); // store-release
-            atomic.StoreUintptr(ref p.localSize, uintptr(size)); // store-release
-            return ref local[pid];
+            atomic.StorePointer(_addr_p.local, @unsafe.Pointer(_addr_local[0L])); // store-release
+            atomic.StoreUintptr(_addr_p.localSize, uintptr(size)); // store-release
+            return (_addr__addr_local[pid]!, pid);
+
         });
 
         private static void poolCleanup()
         { 
             // This function is called with the world stopped, at the beginning of a garbage collection.
             // It must not allocate and probably should not call any runtime functions.
-            // Defensively zero out everything, 2 reasons:
-            // 1. To prevent false retention of whole Pools.
-            // 2. If GC happens while a goroutine works with l.shared in Put/Get,
-            //    it will retain whole Pool. So next cycle memory consumption would be doubled.
+
+            // Because the world is stopped, no pool user can be in a
+            // pinned section (in effect, this has all Ps pinned).
+
+            // Drop victim caches from all pools.
             {
-                var i__prev1 = i;
+                var p__prev1 = p;
 
-                foreach (var (__i, __p) in allPools)
+                foreach (var (_, __p) in oldPools)
                 {
-                    i = __i;
                     p = __p;
-                    allPools[i] = null;
-                    {
-                        var i__prev2 = i;
+                    p.victim = null;
+                    p.victimSize = 0L;
+                } 
 
-                        for (long i = 0L; i < int(p.localSize); i++)
-                        {
-                            var l = indexLocal(p.local, i);
-                            l.@private = null;
-                            foreach (var (j) in l.shared)
-                            {
-                                l.shared[j] = null;
-                            }
-                            l.shared = null;
-                        }
+                // Move primary cache to victim cache.
 
-
-                        i = i__prev2;
-                    }
-                    p.local = null;
-                    p.localSize = 0L;
-                }
-
-                i = i__prev1;
+                p = p__prev1;
             }
 
-            allPools = new slice<ref Pool>(new ref Pool[] {  });
+            {
+                var p__prev1 = p;
+
+                foreach (var (_, __p) in allPools)
+                {
+                    p = __p;
+                    p.victim = p.local;
+                    p.victimSize = p.localSize;
+                    p.local = null;
+                    p.localSize = 0L;
+                } 
+
+                // The pools with non-empty primary caches now have non-empty
+                // victim caches and no pools have primary caches.
+
+                p = p__prev1;
+            }
+
+            oldPools = allPools;
+            allPools = null;
+
         }
 
-        private static Mutex allPoolsMu = default;        private static slice<ref Pool> allPools = default;
+        private static Mutex allPoolsMu = default;        private static slice<ptr<Pool>> allPools = default;        private static slice<ptr<Pool>> oldPools = default;
 
         private static void init()
         {
             runtime_registerPoolCleanup(poolCleanup);
         }
 
-        private static ref poolLocal indexLocal(unsafe.Pointer l, long i)
+        private static ptr<poolLocal> indexLocal(unsafe.Pointer l, long i)
         {
             var lp = @unsafe.Pointer(uintptr(l) + uintptr(i) * @unsafe.Sizeof(new poolLocal()));
-            return (poolLocal.Value)(lp);
+            return _addr_(poolLocal.val)(lp)!;
         }
 
         // Implemented in runtime.

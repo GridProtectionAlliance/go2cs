@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:03 UTC
+//     Generated on 2020 October 08 03:43:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -56,7 +56,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -70,23 +70,24 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate error UnmarshalXMLByRef(ref T value, ref Decoder d, StartElement start);
-            private delegate error UnmarshalXMLByVal(T value, ref Decoder d, StartElement start);
+            private delegate error UnmarshalXMLByPtr(ptr<T> value, ptr<Decoder> d, StartElement start);
+            private delegate error UnmarshalXMLByVal(T value, ptr<Decoder> d, StartElement start);
 
-            private static readonly UnmarshalXMLByRef s_UnmarshalXMLByRef;
+            private static readonly UnmarshalXMLByPtr s_UnmarshalXMLByPtr;
             private static readonly UnmarshalXMLByVal s_UnmarshalXMLByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error UnmarshalXML(ref Decoder d, StartElement start)
+            public error UnmarshalXML(ptr<Decoder> d, StartElement start)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnmarshalXMLByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnmarshalXMLByPtr is null || !m_target_is_ptr)
                     return s_UnmarshalXMLByVal!(target, d, start);
 
-                return s_UnmarshalXMLByRef(ref target, d, start);
+                return s_UnmarshalXMLByPtr(m_target_ptr, d, start);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -95,23 +96,20 @@ namespace encoding
             static Unmarshaler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UnmarshalXML");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UnmarshalXML");
 
                 if (!(extensionMethod is null))
-                    s_UnmarshalXMLByRef = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLByRef)) as UnmarshalXMLByRef;
+                    s_UnmarshalXMLByPtr = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLByPtr)) as UnmarshalXMLByPtr;
 
-                if (s_UnmarshalXMLByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UnmarshalXML");
+                extensionMethod = targetType.GetExtensionMethod("UnmarshalXML");
 
-                    if (!(extensionMethod is null))
-                        s_UnmarshalXMLByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLByVal)) as UnmarshalXMLByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnmarshalXMLByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLByVal)) as UnmarshalXMLByVal;
 
-                if (s_UnmarshalXMLByRef is null && s_UnmarshalXMLByVal is null)
+                if (s_UnmarshalXMLByPtr is null && s_UnmarshalXMLByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Unmarshaler.UnmarshalXML method", new Exception("UnmarshalXML"));
             }
 

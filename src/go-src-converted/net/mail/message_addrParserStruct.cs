@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:30 UTC
+//     Generated on 2020 October 08 03:43:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
-using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
@@ -22,6 +21,7 @@ using log = go.log_package;
 using mime = go.mime_package;
 using textproto = go.net.textproto_package;
 using strings = go.strings_package;
+using sync = go.sync_package;
 using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
 using go;

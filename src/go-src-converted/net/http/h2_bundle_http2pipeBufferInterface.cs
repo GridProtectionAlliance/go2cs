@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:18 UTC
+//     Generated on 2020 October 08 03:39:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -78,7 +79,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -92,10 +93,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate long LenByRef(ref T value);
+            private delegate long LenByPtr(ptr<T> value);
             private delegate long LenByVal(T value);
 
-            private static readonly LenByRef s_LenByRef;
+            private static readonly LenByPtr s_LenByPtr;
             private static readonly LenByVal s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,17 +105,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByRef(ref target);
+                return s_LenByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) WriteByRef(ref T value, slice<byte> p);
+            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByRef s_WriteByRef;
+            private static readonly WriteByPtr s_WriteByPtr;
             private static readonly WriteByVal s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,17 +125,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, p);
 
-                return s_WriteByRef(ref target, p);
+                return s_WriteByPtr(m_target_ptr, p);
             }
 
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,11 +145,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, p);
 
-                return s_ReadByRef(ref target, p);
+                return s_ReadByPtr(m_target_ptr, p);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -155,55 +159,46 @@ namespace net
             static http2pipeBuffer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Len");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
                 if (!(extensionMethod is null))
-                    s_LenByRef = extensionMethod.CreateStaticDelegate(typeof(LenByRef)) as LenByRef;
+                    s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
-                if (s_LenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Len");
+                extensionMethod = targetType.GetExtensionMethod("Len");
 
-                    if (!(extensionMethod is null))
-                        s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
-                if (s_LenByRef is null && s_LenByVal is null)
+                if (s_LenByPtr is null && s_LenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2pipeBuffer.Len method", new Exception("Len"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Write");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
                 if (!(extensionMethod is null))
-                    s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
+                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
-                if (s_WriteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Write");
+                extensionMethod = targetType.GetExtensionMethod("Write");
 
-                    if (!(extensionMethod is null))
-                        s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
-                if (s_WriteByRef is null && s_WriteByVal is null)
+                if (s_WriteByPtr is null && s_WriteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2pipeBuffer.Write method", new Exception("Write"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2pipeBuffer.Read method", new Exception("Read"));
             }
 

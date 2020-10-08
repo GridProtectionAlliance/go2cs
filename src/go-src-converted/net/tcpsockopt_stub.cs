@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build nacl
+// +build js,wasm
 
-// package net -- go2cs converted at 2020 August 29 08:27:54 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:49 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\tcpsockopt_stub.go
 using syscall = go.syscall_package;
@@ -15,14 +15,18 @@ namespace go
 {
     public static partial class net_package
     {
-        private static error setNoDelay(ref netFD fd, bool noDelay)
+        private static error setNoDelay(ptr<netFD> _addr_fd, bool noDelay)
         {
-            return error.As(syscall.ENOPROTOOPT);
+            ref netFD fd = ref _addr_fd.val;
+
+            return error.As(syscall.ENOPROTOOPT)!;
         }
 
-        private static error setKeepAlivePeriod(ref netFD fd, time.Duration d)
+        private static error setKeepAlivePeriod(ptr<netFD> _addr_fd, time.Duration d)
         {
-            return error.As(syscall.ENOPROTOOPT);
+            ref netFD fd = ref _addr_fd.val;
+
+            return error.As(syscall.ENOPROTOOPT)!;
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:16 UTC
+//     Generated on 2020 October 08 04:39:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,16 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using macho = go.debug.macho_package;
+using binary = go.encoding.binary_package;
+using fmt = go.fmt_package;
+using io = go.io_package;
+using os = go.os_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using go;

@@ -23,7 +23,7 @@
 // NOTE: This package is a copy of golang.org/x/sys/windows/registry
 // with KeyInfo.ModTime removed to prevent dependency cycles.
 //
-// package registry -- go2cs converted at 2020 August 29 08:22:37 UTC
+// package registry -- go2cs converted at 2020 October 08 03:32:33 UTC
 // import "internal/syscall/windows/registry" ==> using registry = go.@internal.syscall.windows.registry_package
 // Original source: C:\Go\src\internal\syscall\windows\registry\key.go
 using io = go.io_package;
@@ -41,18 +41,19 @@ namespace windows
         // Registry key security and access rights.
         // See https://msdn.microsoft.com/en-us/library/windows/desktop/ms724878.aspx
         // for details.
-        public static readonly ulong ALL_ACCESS = 0xf003fUL;
-        public static readonly ulong CREATE_LINK = 0x00020UL;
-        public static readonly ulong CREATE_SUB_KEY = 0x00004UL;
-        public static readonly ulong ENUMERATE_SUB_KEYS = 0x00008UL;
-        public static readonly ulong EXECUTE = 0x20019UL;
-        public static readonly ulong NOTIFY = 0x00010UL;
-        public static readonly ulong QUERY_VALUE = 0x00001UL;
-        public static readonly ulong READ = 0x20019UL;
-        public static readonly ulong SET_VALUE = 0x00002UL;
-        public static readonly ulong WOW64_32KEY = 0x00200UL;
-        public static readonly ulong WOW64_64KEY = 0x00100UL;
-        public static readonly ulong WRITE = 0x20006UL;
+        public static readonly ulong ALL_ACCESS = (ulong)0xf003fUL;
+        public static readonly ulong CREATE_LINK = (ulong)0x00020UL;
+        public static readonly ulong CREATE_SUB_KEY = (ulong)0x00004UL;
+        public static readonly ulong ENUMERATE_SUB_KEYS = (ulong)0x00008UL;
+        public static readonly ulong EXECUTE = (ulong)0x20019UL;
+        public static readonly ulong NOTIFY = (ulong)0x00010UL;
+        public static readonly ulong QUERY_VALUE = (ulong)0x00001UL;
+        public static readonly ulong READ = (ulong)0x20019UL;
+        public static readonly ulong SET_VALUE = (ulong)0x00002UL;
+        public static readonly ulong WOW64_32KEY = (ulong)0x00200UL;
+        public static readonly ulong WOW64_64KEY = (ulong)0x00100UL;
+        public static readonly ulong WRITE = (ulong)0x20006UL;
+
 
         // Key is a handle to an open Windows registry key.
         // Keys can be obtained by calling OpenKey; there are
@@ -67,16 +68,17 @@ namespace windows
         // An application can use these keys as entry points to the registry.
         // Normally these keys are used in OpenKey to open new keys,
         // but they can also be used anywhere a Key is required.
-        public static readonly var CLASSES_ROOT = Key(syscall.HKEY_CLASSES_ROOT);
-        public static readonly var CURRENT_USER = Key(syscall.HKEY_CURRENT_USER);
-        public static readonly var LOCAL_MACHINE = Key(syscall.HKEY_LOCAL_MACHINE);
-        public static readonly var USERS = Key(syscall.HKEY_USERS);
-        public static readonly var CURRENT_CONFIG = Key(syscall.HKEY_CURRENT_CONFIG);
+        public static readonly var CLASSES_ROOT = (var)Key(syscall.HKEY_CLASSES_ROOT);
+        public static readonly var CURRENT_USER = (var)Key(syscall.HKEY_CURRENT_USER);
+        public static readonly var LOCAL_MACHINE = (var)Key(syscall.HKEY_LOCAL_MACHINE);
+        public static readonly var USERS = (var)Key(syscall.HKEY_USERS);
+        public static readonly var CURRENT_CONFIG = (var)Key(syscall.HKEY_CURRENT_CONFIG);
+
 
         // Close closes open key k.
         public static error Close(this Key k)
         {
-            return error.As(syscall.RegCloseKey(syscall.Handle(k)));
+            return error.As(syscall.RegCloseKey(syscall.Handle(k)))!;
         }
 
         // OpenKey opens a new key with path name relative to key k.
@@ -86,18 +88,24 @@ namespace windows
         // key to be opened.
         public static (Key, error) OpenKey(Key k, @string path, uint access)
         {
+            Key _p0 = default;
+            error _p0 = default!;
+
             var (p, err) = syscall.UTF16PtrFromString(path);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
-            syscall.Handle subkey = default;
-            err = syscall.RegOpenKeyEx(syscall.Handle(k), p, 0L, access, ref subkey);
+
+            ref syscall.Handle subkey = ref heap(out ptr<syscall.Handle> _addr_subkey);
+            err = syscall.RegOpenKeyEx(syscall.Handle(k), p, 0L, access, _addr_subkey);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
-            return (Key(subkey), null);
+
+            return (Key(subkey), error.As(null!)!);
+
         }
 
         // ReadSubKeyNames returns the names of subkeys of key k.
@@ -105,13 +113,13 @@ namespace windows
         // analogous to the way os.File.Readdirnames works.
         public static (slice<@string>, error) ReadSubKeyNames(this Key k, long n)
         {
-            var (ki, err) = k.Stat();
-            if (err != null)
-            {
-                return (null, err);
-            }
-            var names = make_slice<@string>(0L, ki.SubKeyCount);
-            var buf = make_slice<ushort>(ki.MaxSubKeyLen + 1L); // extra room for terminating zero byte
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+
+            var names = make_slice<@string>(0L); 
+            // Registry key size limit is 255 bytes and described there:
+            // https://msdn.microsoft.com/library/windows/desktop/ms724872.aspx
+            var buf = make_slice<ushort>(256L); //plus extra room for terminating zero byte
 loopItems:
             for (var i = uint32(0L); >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
             {
@@ -119,39 +127,49 @@ loopItems:
                 {
                     if (len(names) == n)
                     {
-                        return (names, null);
+                        return (names, error.As(null!)!);
                     }
+
                 }
-                var l = uint32(len(buf));
+
+                ref var l = ref heap(uint32(len(buf)), out ptr<var> _addr_l);
                 while (true)
                 {
-                    var err = syscall.RegEnumKeyEx(syscall.Handle(k), i, ref buf[0L], ref l, null, null, null, null);
+                    var err = syscall.RegEnumKeyEx(syscall.Handle(k), i, _addr_buf[0L], _addr_l, null, null, null, null);
                     if (err == null)
                     {
                         break;
                     }
+
                     if (err == syscall.ERROR_MORE_DATA)
                     { 
                         // Double buffer size and try again.
                         l = uint32(2L * len(buf));
                         buf = make_slice<ushort>(l);
                         continue;
+
                     }
+
                     if (err == _ERROR_NO_MORE_ITEMS)
                     {
                         _breakloopItems = true;
                         break;
                     }
-                    return (names, err);
+
+                    return (names, error.As(err)!);
+
                 }
 
                 names = append(names, syscall.UTF16ToString(buf[..l]));
+
             }
             if (n > len(names))
             {
-                return (names, io.EOF);
+                return (names, error.As(io.EOF)!);
             }
-            return (names, null);
+
+            return (names, error.As(null!)!);
+
         }
 
         // CreateKey creates a key named path under open key k.
@@ -161,20 +179,26 @@ loopItems:
         // to be created.
         public static (Key, bool, error) CreateKey(Key k, @string path, uint access)
         {
-            syscall.Handle h = default;
-            uint d = default;
-            err = regCreateKeyEx(syscall.Handle(k), syscall.StringToUTF16Ptr(path), 0L, null, _REG_OPTION_NON_VOLATILE, access, null, ref h, ref d);
+            Key newk = default;
+            bool openedExisting = default;
+            error err = default!;
+
+            ref syscall.Handle h = ref heap(out ptr<syscall.Handle> _addr_h);
+            ref uint d = ref heap(out ptr<uint> _addr_d);
+            err = regCreateKeyEx(syscall.Handle(k), syscall.StringToUTF16Ptr(path), 0L, null, _REG_OPTION_NON_VOLATILE, access, null, _addr_h, _addr_d);
             if (err != null)
             {
-                return (0L, false, err);
+                return (0L, false, error.As(err)!);
             }
-            return (Key(h), d == _REG_OPENED_EXISTING_KEY, null);
+
+            return (Key(h), d == _REG_OPENED_EXISTING_KEY, error.As(null!)!);
+
         }
 
         // DeleteKey deletes the subkey path of key k and its values.
         public static error DeleteKey(Key k, @string path)
         {
-            return error.As(regDeleteKey(syscall.Handle(k), syscall.StringToUTF16Ptr(path)));
+            return error.As(regDeleteKey(syscall.Handle(k), syscall.StringToUTF16Ptr(path)))!;
         }
 
         // A KeyInfo describes the statistics of a key. It is returned by Stat.
@@ -189,15 +213,20 @@ loopItems:
         }
 
         // Stat retrieves information about the open key k.
-        public static (ref KeyInfo, error) Stat(this Key k)
+        public static (ptr<KeyInfo>, error) Stat(this Key k)
         {
-            KeyInfo ki = default;
-            var err = syscall.RegQueryInfoKey(syscall.Handle(k), null, null, null, ref ki.SubKeyCount, ref ki.MaxSubKeyLen, null, ref ki.ValueCount, ref ki.MaxValueNameLen, ref ki.MaxValueLen, null, ref ki.lastWriteTime);
+            ptr<KeyInfo> _p0 = default!;
+            error _p0 = default!;
+
+            ref KeyInfo ki = ref heap(out ptr<KeyInfo> _addr_ki);
+            var err = syscall.RegQueryInfoKey(syscall.Handle(k), null, null, null, _addr_ki.SubKeyCount, _addr_ki.MaxSubKeyLen, null, _addr_ki.ValueCount, _addr_ki.MaxValueNameLen, _addr_ki.MaxValueLen, null, _addr_ki.lastWriteTime);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (ref ki, null);
+
+            return (_addr__addr_ki!, error.As(null!)!);
+
         }
     }
 }}}}

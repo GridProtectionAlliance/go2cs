@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 August 29 08:25:01 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:06 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\threadpprof.go
 // Run a slow C function saving a CPU profile.
 
@@ -30,6 +30,9 @@ void cpuHogThread() {
     threadSalt2 = foo;
 }
 
+void cpuHogThread2() {
+}
+
 static int cpuHogThreadCount;
 
 struct cgoTracebackArg {
@@ -44,7 +47,8 @@ struct cgoTracebackArg {
 void pprofCgoThreadTraceback(void* parg) {
     struct cgoTracebackArg* arg = (struct cgoTracebackArg*)(parg);
     arg->buf[0] = (uintptr_t)(cpuHogThread) + 0x10;
-    arg->buf[1] = 0;
+    arg->buf[1] = (uintptr_t)(cpuHogThread2) + 0x4;
+    arg->buf[2] = 0;
     __sync_add_and_fetch(&cpuHogThreadCount, 1);
 }
 
@@ -90,6 +94,9 @@ void cpuHogThread() {
     threadSalt2 = foo;
 }
 
+void cpuHogThread2() {
+}
+
 static int cpuHogThreadCount;
 
 struct cgoTracebackArg {
@@ -104,7 +111,8 @@ struct cgoTracebackArg {
 void pprofCgoThreadTraceback(void* parg) {
     struct cgoTracebackArg* arg = (struct cgoTracebackArg*)(parg);
     arg->buf[0] = (uintptr_t)(cpuHogThread) + 0x10;
-    arg->buf[1] = 0;
+    arg->buf[1] = (uintptr_t)(cpuHogThread2) + 0x4;
+    arg->buf[2] = 0;
     __sync_add_and_fetch(&cpuHogThreadCount, 1);
 }
 
@@ -166,6 +174,7 @@ namespace go
                 fmt.Fprintln(os.Stderr, err);
                 os.Exit(2L);
             }
+
             {
                 var err__prev1 = err;
 
@@ -180,6 +189,7 @@ namespace go
                 err = err__prev1;
 
             }
+
 
             C.runCPUHogThread();
 
@@ -208,7 +218,9 @@ namespace go
 
             }
 
+
             fmt.Println(name);
+
         }
     }
 }

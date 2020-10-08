@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2020 August 29 08:38:17 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:27:39 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_openbsd_arm.go
 
@@ -22,25 +22,33 @@ namespace go
             return new Timeval(Sec:sec,Usec:int32(usec));
         }
 
-        public static void SetKevent(ref Kevent_t k, long fd, long mode, long flags)
+        public static void SetKevent(ptr<Kevent_t> _addr_k, long fd, long mode, long flags)
         {
+            ref Kevent_t k = ref _addr_k.val;
+
             k.Ident = uint32(fd);
             k.Filter = int16(mode);
             k.Flags = uint16(flags);
         }
 
-        private static void SetLen(this ref Iovec iov, long length)
+        private static void SetLen(this ptr<Iovec> _addr_iov, long length)
         {
+            ref Iovec iov = ref _addr_iov.val;
+
             iov.Len = uint32(length);
         }
 
-        private static void SetControllen(this ref Msghdr msghdr, long length)
+        private static void SetControllen(this ptr<Msghdr> _addr_msghdr, long length)
         {
+            ref Msghdr msghdr = ref _addr_msghdr.val;
+
             msghdr.Controllen = uint32(length);
         }
 
-        private static void SetLen(this ref Cmsghdr cmsg, long length)
+        private static void SetLen(this ptr<Cmsghdr> _addr_cmsg, long length)
         {
+            ref Cmsghdr cmsg = ref _addr_cmsg.val;
+
             cmsg.Len = uint32(length);
         }
     }

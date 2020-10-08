@@ -3,8 +3,9 @@
 // license that can be found in the LICENSE file.
 
 // +build dragonfly darwin freebsd !android,linux netbsd openbsd
+// +build cgo,!osusergo
 
-// package user -- go2cs converted at 2020 August 29 08:31:49 UTC
+// package user -- go2cs converted at 2020 October 08 03:45:31 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\listgroups_unix.go
 using fmt = go.fmt_package;
@@ -18,45 +19,53 @@ namespace os
 {
     public static partial class user_package
     {
-        private static readonly long maxGroups = 2048L;
+        private static readonly long maxGroups = (long)2048L;
 
 
 
-        private static (slice<@string>, error) listGroups(ref User u)
+        private static (slice<@string>, error) listGroups(ptr<User> _addr_u)
         {
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref User u = ref _addr_u.val;
+
             var (ug, err) = strconv.Atoi(u.Gid);
             if (err != null)
             {
-                return (null, fmt.Errorf("user: list groups for %s: invalid gid %q", u.Username, u.Gid));
+                return (null, error.As(fmt.Errorf("user: list groups for %s: invalid gid %q", u.Username, u.Gid))!);
             }
+
             var userGID = C.gid_t(ug);
             var nameC = make_slice<byte>(len(u.Username) + 1L);
             copy(nameC, u.Username);
 
-            var n = C.@int(256L);
-            var gidsC = make_slice<C.gid_t>(n);
-            var rv = getGroupList((C.@char.Value)(@unsafe.Pointer(ref nameC[0L])), userGID, ref gidsC[0L], ref n);
+            ref var n = ref heap(C.@int(256L), out ptr<var> _addr_n);
+            ref var gidsC = ref heap(make_slice<C.gid_t>(n), out ptr<var> _addr_gidsC);
+            var rv = getGroupList((C.@char.val)(@unsafe.Pointer(_addr_nameC[0L])), userGID, _addr_gidsC[0L], _addr_n);
             if (rv == -1L)
             { 
                 // Mac is the only Unix that does not set n properly when rv == -1, so
                 // we need to use different logic for Mac vs. the other OS's.
                 {
-                    var err = groupRetry(u.Username, nameC, userGID, ref gidsC, ref n);
+                    var err = groupRetry(u.Username, nameC, userGID, _addr_gidsC, _addr_n);
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
 
                 }
+
             }
+
             gidsC = gidsC[..n];
             var gids = make_slice<@string>(0L, n);
             foreach (var (_, g) in gidsC[..n])
             {
                 gids = append(gids, strconv.Itoa(int(g)));
             }
-            return (gids, null);
+            return (gids, error.As(null!)!);
+
         }
     }
 }}

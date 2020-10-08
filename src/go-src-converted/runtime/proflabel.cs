@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:42 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:46 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\proflabel.go
 using @unsafe = go.@unsafe_package;
@@ -37,9 +37,11 @@ namespace go
             // ultimately carries forward to the acquire in profBuf.read.
             if (raceenabled)
             {
-                racereleasemerge(@unsafe.Pointer(ref labelSync));
+                racereleasemerge(@unsafe.Pointer(_addr_labelSync));
             }
+
             getg().labels = labels;
+
         }
 
         //go:linkname runtime_getProfLabel runtime/pprof.runtime_getProfLabel

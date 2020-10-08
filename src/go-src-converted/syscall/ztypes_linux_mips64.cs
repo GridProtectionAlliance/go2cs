@@ -1,7 +1,7 @@
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs types_linux.go
 
-// package syscall -- go2cs converted at 2020 August 29 08:42:11 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:30:37 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\ztypes_linux_mips64.go
 
@@ -11,12 +11,13 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly ulong sizeofPtr = 0x8UL;
-        private static readonly ulong sizeofShort = 0x2UL;
-        private static readonly ulong sizeofInt = 0x4UL;
-        private static readonly ulong sizeofLong = 0x8UL;
-        private static readonly ulong sizeofLongLong = 0x8UL;
-        public static readonly ulong PathMax = 0x1000UL;
+        private static readonly ulong sizeofPtr = (ulong)0x8UL;
+        private static readonly ulong sizeofShort = (ulong)0x2UL;
+        private static readonly ulong sizeofInt = (ulong)0x4UL;
+        private static readonly ulong sizeofLong = (ulong)0x8UL;
+        private static readonly ulong sizeofLongLong = (ulong)0x8UL;
+        public static readonly ulong PathMax = (ulong)0x1000UL;
+
 
         private partial struct _C_short // : short
         {
@@ -29,7 +30,8 @@ namespace go
         }
         private partial struct _C_long_long // : long
         {
-        }        public partial struct Timespec
+        }
+        public partial struct Timespec
         {
             public long Sec;
             public long Nsec;
@@ -354,116 +356,118 @@ namespace go
             public uint Total_retrans;
         }
 
-        public static readonly ulong SizeofSockaddrInet4 = 0x10UL;
-        public static readonly ulong SizeofSockaddrInet6 = 0x1cUL;
-        public static readonly ulong SizeofSockaddrAny = 0x70UL;
-        public static readonly ulong SizeofSockaddrUnix = 0x6eUL;
-        public static readonly ulong SizeofSockaddrLinklayer = 0x14UL;
-        public static readonly ulong SizeofSockaddrNetlink = 0xcUL;
-        public static readonly ulong SizeofLinger = 0x8UL;
-        public static readonly ulong SizeofIPMreq = 0x8UL;
-        public static readonly ulong SizeofIPMreqn = 0xcUL;
-        public static readonly ulong SizeofIPv6Mreq = 0x14UL;
-        public static readonly ulong SizeofMsghdr = 0x38UL;
-        public static readonly ulong SizeofCmsghdr = 0x10UL;
-        public static readonly ulong SizeofInet4Pktinfo = 0xcUL;
-        public static readonly ulong SizeofInet6Pktinfo = 0x14UL;
-        public static readonly ulong SizeofIPv6MTUInfo = 0x20UL;
-        public static readonly ulong SizeofICMPv6Filter = 0x20UL;
-        public static readonly ulong SizeofUcred = 0xcUL;
-        public static readonly ulong SizeofTCPInfo = 0x68UL;
+        public static readonly ulong SizeofSockaddrInet4 = (ulong)0x10UL;
+        public static readonly ulong SizeofSockaddrInet6 = (ulong)0x1cUL;
+        public static readonly ulong SizeofSockaddrAny = (ulong)0x70UL;
+        public static readonly ulong SizeofSockaddrUnix = (ulong)0x6eUL;
+        public static readonly ulong SizeofSockaddrLinklayer = (ulong)0x14UL;
+        public static readonly ulong SizeofSockaddrNetlink = (ulong)0xcUL;
+        public static readonly ulong SizeofLinger = (ulong)0x8UL;
+        public static readonly ulong SizeofIPMreq = (ulong)0x8UL;
+        public static readonly ulong SizeofIPMreqn = (ulong)0xcUL;
+        public static readonly ulong SizeofIPv6Mreq = (ulong)0x14UL;
+        public static readonly ulong SizeofMsghdr = (ulong)0x38UL;
+        public static readonly ulong SizeofCmsghdr = (ulong)0x10UL;
+        public static readonly ulong SizeofInet4Pktinfo = (ulong)0xcUL;
+        public static readonly ulong SizeofInet6Pktinfo = (ulong)0x14UL;
+        public static readonly ulong SizeofIPv6MTUInfo = (ulong)0x20UL;
+        public static readonly ulong SizeofICMPv6Filter = (ulong)0x20UL;
+        public static readonly ulong SizeofUcred = (ulong)0xcUL;
+        public static readonly ulong SizeofTCPInfo = (ulong)0x68UL;
 
-        public static readonly ulong IFA_UNSPEC = 0x0UL;
-        public static readonly ulong IFA_ADDRESS = 0x1UL;
-        public static readonly ulong IFA_LOCAL = 0x2UL;
-        public static readonly ulong IFA_LABEL = 0x3UL;
-        public static readonly ulong IFA_BROADCAST = 0x4UL;
-        public static readonly ulong IFA_ANYCAST = 0x5UL;
-        public static readonly ulong IFA_CACHEINFO = 0x6UL;
-        public static readonly ulong IFA_MULTICAST = 0x7UL;
-        public static readonly ulong IFLA_UNSPEC = 0x0UL;
-        public static readonly ulong IFLA_ADDRESS = 0x1UL;
-        public static readonly ulong IFLA_BROADCAST = 0x2UL;
-        public static readonly ulong IFLA_IFNAME = 0x3UL;
-        public static readonly ulong IFLA_MTU = 0x4UL;
-        public static readonly ulong IFLA_LINK = 0x5UL;
-        public static readonly ulong IFLA_QDISC = 0x6UL;
-        public static readonly ulong IFLA_STATS = 0x7UL;
-        public static readonly ulong IFLA_COST = 0x8UL;
-        public static readonly ulong IFLA_PRIORITY = 0x9UL;
-        public static readonly ulong IFLA_MASTER = 0xaUL;
-        public static readonly ulong IFLA_WIRELESS = 0xbUL;
-        public static readonly ulong IFLA_PROTINFO = 0xcUL;
-        public static readonly ulong IFLA_TXQLEN = 0xdUL;
-        public static readonly ulong IFLA_MAP = 0xeUL;
-        public static readonly ulong IFLA_WEIGHT = 0xfUL;
-        public static readonly ulong IFLA_OPERSTATE = 0x10UL;
-        public static readonly ulong IFLA_LINKMODE = 0x11UL;
-        public static readonly ulong IFLA_LINKINFO = 0x12UL;
-        public static readonly ulong IFLA_NET_NS_PID = 0x13UL;
-        public static readonly ulong IFLA_IFALIAS = 0x14UL;
-        public static readonly ulong IFLA_MAX = 0x22UL;
-        public static readonly ulong RT_SCOPE_UNIVERSE = 0x0UL;
-        public static readonly ulong RT_SCOPE_SITE = 0xc8UL;
-        public static readonly ulong RT_SCOPE_LINK = 0xfdUL;
-        public static readonly ulong RT_SCOPE_HOST = 0xfeUL;
-        public static readonly ulong RT_SCOPE_NOWHERE = 0xffUL;
-        public static readonly ulong RT_TABLE_UNSPEC = 0x0UL;
-        public static readonly ulong RT_TABLE_COMPAT = 0xfcUL;
-        public static readonly ulong RT_TABLE_DEFAULT = 0xfdUL;
-        public static readonly ulong RT_TABLE_MAIN = 0xfeUL;
-        public static readonly ulong RT_TABLE_LOCAL = 0xffUL;
-        public static readonly ulong RT_TABLE_MAX = 0xffffffffUL;
-        public static readonly ulong RTA_UNSPEC = 0x0UL;
-        public static readonly ulong RTA_DST = 0x1UL;
-        public static readonly ulong RTA_SRC = 0x2UL;
-        public static readonly ulong RTA_IIF = 0x3UL;
-        public static readonly ulong RTA_OIF = 0x4UL;
-        public static readonly ulong RTA_GATEWAY = 0x5UL;
-        public static readonly ulong RTA_PRIORITY = 0x6UL;
-        public static readonly ulong RTA_PREFSRC = 0x7UL;
-        public static readonly ulong RTA_METRICS = 0x8UL;
-        public static readonly ulong RTA_MULTIPATH = 0x9UL;
-        public static readonly ulong RTA_FLOW = 0xbUL;
-        public static readonly ulong RTA_CACHEINFO = 0xcUL;
-        public static readonly ulong RTA_TABLE = 0xfUL;
-        public static readonly ulong RTN_UNSPEC = 0x0UL;
-        public static readonly ulong RTN_UNICAST = 0x1UL;
-        public static readonly ulong RTN_LOCAL = 0x2UL;
-        public static readonly ulong RTN_BROADCAST = 0x3UL;
-        public static readonly ulong RTN_ANYCAST = 0x4UL;
-        public static readonly ulong RTN_MULTICAST = 0x5UL;
-        public static readonly ulong RTN_BLACKHOLE = 0x6UL;
-        public static readonly ulong RTN_UNREACHABLE = 0x7UL;
-        public static readonly ulong RTN_PROHIBIT = 0x8UL;
-        public static readonly ulong RTN_THROW = 0x9UL;
-        public static readonly ulong RTN_NAT = 0xaUL;
-        public static readonly ulong RTN_XRESOLVE = 0xbUL;
-        public static readonly ulong RTNLGRP_NONE = 0x0UL;
-        public static readonly ulong RTNLGRP_LINK = 0x1UL;
-        public static readonly ulong RTNLGRP_NOTIFY = 0x2UL;
-        public static readonly ulong RTNLGRP_NEIGH = 0x3UL;
-        public static readonly ulong RTNLGRP_TC = 0x4UL;
-        public static readonly ulong RTNLGRP_IPV4_IFADDR = 0x5UL;
-        public static readonly ulong RTNLGRP_IPV4_MROUTE = 0x6UL;
-        public static readonly ulong RTNLGRP_IPV4_ROUTE = 0x7UL;
-        public static readonly ulong RTNLGRP_IPV4_RULE = 0x8UL;
-        public static readonly ulong RTNLGRP_IPV6_IFADDR = 0x9UL;
-        public static readonly ulong RTNLGRP_IPV6_MROUTE = 0xaUL;
-        public static readonly ulong RTNLGRP_IPV6_ROUTE = 0xbUL;
-        public static readonly ulong RTNLGRP_IPV6_IFINFO = 0xcUL;
-        public static readonly ulong RTNLGRP_IPV6_PREFIX = 0x12UL;
-        public static readonly ulong RTNLGRP_IPV6_RULE = 0x13UL;
-        public static readonly ulong RTNLGRP_ND_USEROPT = 0x14UL;
-        public static readonly ulong SizeofNlMsghdr = 0x10UL;
-        public static readonly ulong SizeofNlMsgerr = 0x14UL;
-        public static readonly ulong SizeofRtGenmsg = 0x1UL;
-        public static readonly ulong SizeofNlAttr = 0x4UL;
-        public static readonly ulong SizeofRtAttr = 0x4UL;
-        public static readonly ulong SizeofIfInfomsg = 0x10UL;
-        public static readonly ulong SizeofIfAddrmsg = 0x8UL;
-        public static readonly ulong SizeofRtMsg = 0xcUL;
-        public static readonly ulong SizeofRtNexthop = 0x8UL;
+
+        public static readonly ulong IFA_UNSPEC = (ulong)0x0UL;
+        public static readonly ulong IFA_ADDRESS = (ulong)0x1UL;
+        public static readonly ulong IFA_LOCAL = (ulong)0x2UL;
+        public static readonly ulong IFA_LABEL = (ulong)0x3UL;
+        public static readonly ulong IFA_BROADCAST = (ulong)0x4UL;
+        public static readonly ulong IFA_ANYCAST = (ulong)0x5UL;
+        public static readonly ulong IFA_CACHEINFO = (ulong)0x6UL;
+        public static readonly ulong IFA_MULTICAST = (ulong)0x7UL;
+        public static readonly ulong IFLA_UNSPEC = (ulong)0x0UL;
+        public static readonly ulong IFLA_ADDRESS = (ulong)0x1UL;
+        public static readonly ulong IFLA_BROADCAST = (ulong)0x2UL;
+        public static readonly ulong IFLA_IFNAME = (ulong)0x3UL;
+        public static readonly ulong IFLA_MTU = (ulong)0x4UL;
+        public static readonly ulong IFLA_LINK = (ulong)0x5UL;
+        public static readonly ulong IFLA_QDISC = (ulong)0x6UL;
+        public static readonly ulong IFLA_STATS = (ulong)0x7UL;
+        public static readonly ulong IFLA_COST = (ulong)0x8UL;
+        public static readonly ulong IFLA_PRIORITY = (ulong)0x9UL;
+        public static readonly ulong IFLA_MASTER = (ulong)0xaUL;
+        public static readonly ulong IFLA_WIRELESS = (ulong)0xbUL;
+        public static readonly ulong IFLA_PROTINFO = (ulong)0xcUL;
+        public static readonly ulong IFLA_TXQLEN = (ulong)0xdUL;
+        public static readonly ulong IFLA_MAP = (ulong)0xeUL;
+        public static readonly ulong IFLA_WEIGHT = (ulong)0xfUL;
+        public static readonly ulong IFLA_OPERSTATE = (ulong)0x10UL;
+        public static readonly ulong IFLA_LINKMODE = (ulong)0x11UL;
+        public static readonly ulong IFLA_LINKINFO = (ulong)0x12UL;
+        public static readonly ulong IFLA_NET_NS_PID = (ulong)0x13UL;
+        public static readonly ulong IFLA_IFALIAS = (ulong)0x14UL;
+        public static readonly ulong IFLA_MAX = (ulong)0x22UL;
+        public static readonly ulong RT_SCOPE_UNIVERSE = (ulong)0x0UL;
+        public static readonly ulong RT_SCOPE_SITE = (ulong)0xc8UL;
+        public static readonly ulong RT_SCOPE_LINK = (ulong)0xfdUL;
+        public static readonly ulong RT_SCOPE_HOST = (ulong)0xfeUL;
+        public static readonly ulong RT_SCOPE_NOWHERE = (ulong)0xffUL;
+        public static readonly ulong RT_TABLE_UNSPEC = (ulong)0x0UL;
+        public static readonly ulong RT_TABLE_COMPAT = (ulong)0xfcUL;
+        public static readonly ulong RT_TABLE_DEFAULT = (ulong)0xfdUL;
+        public static readonly ulong RT_TABLE_MAIN = (ulong)0xfeUL;
+        public static readonly ulong RT_TABLE_LOCAL = (ulong)0xffUL;
+        public static readonly ulong RT_TABLE_MAX = (ulong)0xffffffffUL;
+        public static readonly ulong RTA_UNSPEC = (ulong)0x0UL;
+        public static readonly ulong RTA_DST = (ulong)0x1UL;
+        public static readonly ulong RTA_SRC = (ulong)0x2UL;
+        public static readonly ulong RTA_IIF = (ulong)0x3UL;
+        public static readonly ulong RTA_OIF = (ulong)0x4UL;
+        public static readonly ulong RTA_GATEWAY = (ulong)0x5UL;
+        public static readonly ulong RTA_PRIORITY = (ulong)0x6UL;
+        public static readonly ulong RTA_PREFSRC = (ulong)0x7UL;
+        public static readonly ulong RTA_METRICS = (ulong)0x8UL;
+        public static readonly ulong RTA_MULTIPATH = (ulong)0x9UL;
+        public static readonly ulong RTA_FLOW = (ulong)0xbUL;
+        public static readonly ulong RTA_CACHEINFO = (ulong)0xcUL;
+        public static readonly ulong RTA_TABLE = (ulong)0xfUL;
+        public static readonly ulong RTN_UNSPEC = (ulong)0x0UL;
+        public static readonly ulong RTN_UNICAST = (ulong)0x1UL;
+        public static readonly ulong RTN_LOCAL = (ulong)0x2UL;
+        public static readonly ulong RTN_BROADCAST = (ulong)0x3UL;
+        public static readonly ulong RTN_ANYCAST = (ulong)0x4UL;
+        public static readonly ulong RTN_MULTICAST = (ulong)0x5UL;
+        public static readonly ulong RTN_BLACKHOLE = (ulong)0x6UL;
+        public static readonly ulong RTN_UNREACHABLE = (ulong)0x7UL;
+        public static readonly ulong RTN_PROHIBIT = (ulong)0x8UL;
+        public static readonly ulong RTN_THROW = (ulong)0x9UL;
+        public static readonly ulong RTN_NAT = (ulong)0xaUL;
+        public static readonly ulong RTN_XRESOLVE = (ulong)0xbUL;
+        public static readonly ulong RTNLGRP_NONE = (ulong)0x0UL;
+        public static readonly ulong RTNLGRP_LINK = (ulong)0x1UL;
+        public static readonly ulong RTNLGRP_NOTIFY = (ulong)0x2UL;
+        public static readonly ulong RTNLGRP_NEIGH = (ulong)0x3UL;
+        public static readonly ulong RTNLGRP_TC = (ulong)0x4UL;
+        public static readonly ulong RTNLGRP_IPV4_IFADDR = (ulong)0x5UL;
+        public static readonly ulong RTNLGRP_IPV4_MROUTE = (ulong)0x6UL;
+        public static readonly ulong RTNLGRP_IPV4_ROUTE = (ulong)0x7UL;
+        public static readonly ulong RTNLGRP_IPV4_RULE = (ulong)0x8UL;
+        public static readonly ulong RTNLGRP_IPV6_IFADDR = (ulong)0x9UL;
+        public static readonly ulong RTNLGRP_IPV6_MROUTE = (ulong)0xaUL;
+        public static readonly ulong RTNLGRP_IPV6_ROUTE = (ulong)0xbUL;
+        public static readonly ulong RTNLGRP_IPV6_IFINFO = (ulong)0xcUL;
+        public static readonly ulong RTNLGRP_IPV6_PREFIX = (ulong)0x12UL;
+        public static readonly ulong RTNLGRP_IPV6_RULE = (ulong)0x13UL;
+        public static readonly ulong RTNLGRP_ND_USEROPT = (ulong)0x14UL;
+        public static readonly ulong SizeofNlMsghdr = (ulong)0x10UL;
+        public static readonly ulong SizeofNlMsgerr = (ulong)0x14UL;
+        public static readonly ulong SizeofRtGenmsg = (ulong)0x1UL;
+        public static readonly ulong SizeofNlAttr = (ulong)0x4UL;
+        public static readonly ulong SizeofRtAttr = (ulong)0x4UL;
+        public static readonly ulong SizeofIfInfomsg = (ulong)0x10UL;
+        public static readonly ulong SizeofIfAddrmsg = (ulong)0x8UL;
+        public static readonly ulong SizeofRtMsg = (ulong)0xcUL;
+        public static readonly ulong SizeofRtNexthop = (ulong)0x8UL;
+
 
         public partial struct NlMsghdr
         {
@@ -537,8 +541,9 @@ namespace go
             public int Ifindex;
         }
 
-        public static readonly ulong SizeofSockFilter = 0x8UL;
-        public static readonly ulong SizeofSockFprog = 0x10UL;
+        public static readonly ulong SizeofSockFilter = (ulong)0x8UL;
+        public static readonly ulong SizeofSockFprog = (ulong)0x10UL;
+
 
         public partial struct SockFilter
         {
@@ -564,7 +569,7 @@ namespace go
             public array<sbyte> Name;
         }
 
-        public static readonly ulong SizeofInotifyEvent = 0x10UL;
+        public static readonly ulong SizeofInotifyEvent = (ulong)0x10UL;
 
 
 
@@ -631,13 +636,23 @@ namespace go
         public partial struct EpollEvent
         {
             public uint Events;
+            public int _;
             public int Fd;
             public int Pad;
         }
 
-        private static readonly ulong _AT_FDCWD = -0x64UL;
-        private static readonly ulong _AT_REMOVEDIR = 0x200UL;
-        private static readonly ulong _AT_SYMLINK_NOFOLLOW = 0x100UL;
+        private static readonly ulong _AT_FDCWD = (ulong)-0x64UL;
+        private static readonly ulong _AT_REMOVEDIR = (ulong)0x200UL;
+        private static readonly ulong _AT_SYMLINK_NOFOLLOW = (ulong)0x100UL;
+        private static readonly ulong _AT_EACCESS = (ulong)0x200UL;
+
+
+        private partial struct pollFd
+        {
+            public int Fd;
+            public short Events;
+            public short Revents;
+        }
 
         public partial struct Termios
         {
@@ -650,10 +665,11 @@ namespace go
             public array<byte> Pad_cgo_0;
         }
 
-        public static readonly ulong IUCLC = 0x200UL;
-        public static readonly ulong OLCUC = 0x2UL;
-        public static readonly ulong TCGETS = 0x540dUL;
-        public static readonly ulong TCSETS = 0x540eUL;
-        public static readonly ulong XCASE = 0x4UL;
+        public static readonly ulong IUCLC = (ulong)0x200UL;
+        public static readonly ulong OLCUC = (ulong)0x2UL;
+        public static readonly ulong TCGETS = (ulong)0x540dUL;
+        public static readonly ulong TCSETS = (ulong)0x540eUL;
+        public static readonly ulong XCASE = (ulong)0x4UL;
+
     }
 }

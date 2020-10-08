@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:28 UTC
+//     Generated on 2020 October 08 04:31:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,10 +14,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using ssa = go.cmd.compile.@internal.ssa_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -49,10 +50,10 @@ namespace @internal
                 this.flags = default;
                 this.Esc = default;
                 this.Op = default;
-                this.Etype = default;
+                this.aux = default;
             }
 
-            public Node(ref ptr<Node> Left = default, ref ptr<Node> Right = default, Nodes Ninit = default, Nodes Nbody = default, Nodes List = default, Nodes Rlist = default, ref ptr<types.Type> Type = default, ref ptr<Node> Orig = default, ref ptr<Func> Func = default, ref ptr<Name> Name = default, ref ptr<types.Sym> Sym = default, long Xoffset = default, src.XPos Pos = default, bitset32 flags = default, ushort Esc = default, Op Op = default, types.EType Etype = default)
+            public Node(ref ptr<Node> Left = default, ref ptr<Node> Right = default, Nodes Ninit = default, Nodes Nbody = default, Nodes List = default, Nodes Rlist = default, ref ptr<types.Type> Type = default, ref ptr<Node> Orig = default, ref ptr<Func> Func = default, ref ptr<Name> Name = default, ref ptr<types.Sym> Sym = default, long Xoffset = default, src.XPos Pos = default, bitset32 flags = default, ushort Esc = default, Op Op = default, byte aux = default)
             {
                 this.Left = Left;
                 this.Right = Right;
@@ -70,7 +71,7 @@ namespace @internal
                 this.flags = flags;
                 this.Esc = Esc;
                 this.Op = Op;
-                this.Etype = Etype;
+                this.aux = aux;
             }
 
             // Enable comparisons between nil and Node struct
@@ -93,7 +94,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Node Node_cast(dynamic value)
         {
-            return new Node(ref value.Left, ref value.Right, value.Ninit, value.Nbody, value.List, value.Rlist, ref value.Type, ref value.Orig, ref value.Func, ref value.Name, ref value.Sym, value.Xoffset, value.Pos, value.flags, value.Esc, value.Op, value.Etype);
+            return new Node(ref value.Left, ref value.Right, value.Ninit, value.Nbody, value.List, value.Rlist, ref value.Type, ref value.Orig, ref value.Func, ref value.Name, ref value.Sym, value.Xoffset, value.Pos, value.flags, value.Esc, value.Op, value.aux);
         }
     }
 }}}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:59 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:37 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\likelyadjust.go
 using fmt = go.fmt_package;
@@ -21,8 +21,8 @@ namespace @internal
             public ptr<loop> outer; // loop containing this loop
 
 // By default, children, exits, and depth are not initialized.
-            public slice<ref loop> children; // loops nested directly within this loop. Initialized by assembleChildren().
-            public slice<ref Block> exits; // exits records blocks reached by exits from this loop. Initialized by findExits().
+            public slice<ptr<loop>> children; // loops nested directly within this loop. Initialized by assembleChildren().
+            public slice<ptr<Block>> exits; // exits records blocks reached by exits from this loop. Initialized by findExits().
 
 // Next three fields used by regalloc and/or
 // aid in computation of inner-ness and list of blocks.
@@ -31,12 +31,15 @@ namespace @internal
             public bool isInner; // True if never discovered to contain a loop
 
 // register allocation uses this.
-            public bool containsCall; // if any block in this loop or any loop within it contains has a call
+            public bool containsUnavoidableCall; // True if all paths through the loop have a call
         }
 
         // outerinner records that outer contains inner
-        public static void outerinner(this SparseTree sdom, ref loop outer, ref loop inner)
-        { 
+        public static void outerinner(this SparseTree sdom, ptr<loop> _addr_outer, ptr<loop> _addr_inner)
+        {
+            ref loop outer = ref _addr_outer.val;
+            ref loop inner = ref _addr_inner.val;
+ 
             // There could be other outer loops found in some random order,
             // locate the new outer loop appropriately among them.
 
@@ -51,54 +54,47 @@ namespace @internal
 
             if (outer == oldouter)
             {
-                return;
+                return ;
             }
+
             if (oldouter != null)
             {
                 sdom.outerinner(oldouter, outer);
             }
+
             inner.outer = outer;
             outer.isInner = false;
-            if (inner.containsCall)
-            {
-                outer.setContainsCall();
-            }
-        }
-
-        private static void setContainsCall(this ref loop l)
-        {
-            while (l != null && !l.containsCall)
-            {
-                l.containsCall = true;
-                l = l.outer;
-            }
-
 
         }
-        private static void checkContainsCall(this ref loop l, ref Block bb)
+
+        private static bool checkContainsCall(ptr<Block> _addr_bb)
         {
+            ref Block bb = ref _addr_bb.val;
+
             if (bb.Kind == BlockDefer)
             {
-                l.setContainsCall();
-                return;
+                return true;
             }
+
             foreach (var (_, v) in bb.Values)
             {
                 if (opcodeTable[v.Op].call)
                 {
-                    l.setContainsCall();
-                    return;
+                    return true;
                 }
+
             }
+            return false;
+
         }
 
         private partial struct loopnest
         {
             public ptr<Func> f;
-            public slice<ref loop> b2l;
-            public slice<ref Block> po;
+            public slice<ptr<loop>> b2l;
+            public slice<ptr<Block>> po;
             public SparseTree sdom;
-            public slice<ref loop> loops;
+            public slice<ptr<loop>> loops;
             public bool hasIrreducible; // TODO current treatment of irreducible loops is very flaky, if accurate loops are needed, must punt at function level.
 
 // Record which of the lazily initialized fields have actually been initialized.
@@ -113,7 +109,9 @@ namespace @internal
             {
                 return a;
             }
+
             return b;
+
         }
 
         private static sbyte max8(sbyte a, sbyte b)
@@ -122,19 +120,24 @@ namespace @internal
             {
                 return a;
             }
+
             return b;
+
         }
 
-        private static readonly long blDEFAULT = 0L;
-        private static readonly var blMin = blDEFAULT;
-        private static readonly long blCALL = 1L;
-        private static readonly long blRET = 2L;
-        private static readonly long blEXIT = 3L;
+        private static readonly long blDEFAULT = (long)0L;
+        private static readonly var blMin = (var)blDEFAULT;
+        private static readonly long blCALL = (long)1L;
+        private static readonly long blRET = (long)2L;
+        private static readonly long blEXIT = (long)3L;
+
 
         private static array<@string> bllikelies = new array<@string>(new @string[] { "default", "call", "ret", "exit" });
 
-        private static @string describePredictionAgrees(ref Block b, BranchPrediction prediction)
+        private static @string describePredictionAgrees(ptr<Block> _addr_b, BranchPrediction prediction)
         {
+            ref Block b = ref _addr_b.val;
+
             @string s = "";
             if (prediction == b.Likely)
             {
@@ -144,16 +147,23 @@ namespace @internal
             {
                 s = " (disagrees with previous, ignored)";
             }
+
             return s;
+
         }
 
-        private static void describeBranchPrediction(ref Func f, ref Block b, sbyte likely, sbyte not, BranchPrediction prediction)
+        private static void describeBranchPrediction(ptr<Func> _addr_f, ptr<Block> _addr_b, sbyte likely, sbyte not, BranchPrediction prediction)
         {
-            f.Warnl(b.Pos, "Branch prediction rule %s < %s%s", bllikelies[likely - blMin], bllikelies[not - blMin], describePredictionAgrees(b, prediction));
+            ref Func f = ref _addr_f.val;
+            ref Block b = ref _addr_b.val;
+
+            f.Warnl(b.Pos, "Branch prediction rule %s < %s%s", bllikelies[likely - blMin], bllikelies[not - blMin], describePredictionAgrees(_addr_b, prediction));
         }
 
-        private static void likelyadjust(ref Func f)
-        { 
+        private static void likelyadjust(ptr<Func> _addr_f)
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // The values assigned to certain and local only matter
             // in their rank order.  0 is default, more positive
             // is less likely. It's possible to assign a negative
@@ -228,8 +238,9 @@ namespace @internal
                                 noprediction = true;
                                                         if (f.pass.debug > 0L && !noprediction)
                             {
-                                f.Warnl(b.Pos, "Branch prediction rule stay in loop%s", describePredictionAgrees(b, prediction));
+                                f.Warnl(b.Pos, "Branch prediction rule stay in loop%s", describePredictionAgrees(_addr_b, prediction));
                             }
+
                         }
                         else
                         { 
@@ -239,41 +250,49 @@ namespace @internal
                                 prediction = BranchLikely;
                                 if (f.pass.debug > 0L)
                                 {
-                                    describeBranchPrediction(f, b, certain[b0], certain[b1], prediction);
+                                    describeBranchPrediction(_addr_f, _addr_b, certain[b0], certain[b1], prediction);
                                 }
+
                             }
                             else if (certain[b0] > certain[b1])
                             {
                                 prediction = BranchUnlikely;
                                 if (f.pass.debug > 0L)
                                 {
-                                    describeBranchPrediction(f, b, certain[b1], certain[b0], prediction);
+                                    describeBranchPrediction(_addr_f, _addr_b, certain[b1], certain[b0], prediction);
                                 }
+
                             }
                             else if (local[b1] > local[b0])
                             {
                                 prediction = BranchLikely;
                                 if (f.pass.debug > 0L)
                                 {
-                                    describeBranchPrediction(f, b, local[b0], local[b1], prediction);
+                                    describeBranchPrediction(_addr_f, _addr_b, local[b0], local[b1], prediction);
                                 }
+
                             }
                             else if (local[b0] > local[b1])
                             {
                                 prediction = BranchUnlikely;
                                 if (f.pass.debug > 0L)
                                 {
-                                    describeBranchPrediction(f, b, local[b1], local[b0], prediction);
+                                    describeBranchPrediction(_addr_f, _addr_b, local[b1], local[b0], prediction);
                                 }
+
                             }
+
                         }
+
                         if (b.Likely != prediction)
                         {
                             if (b.Likely == BranchUnknown)
                             {
                                 b.Likely = prediction;
                             }
+
                         }
+
                     } 
                     // Look for calls in the block.  If there is one, make this block unlikely.
                     foreach (var (_, v) in b.Values)
@@ -283,40 +302,55 @@ namespace @internal
                             local[b.ID] = blCALL;
                             certain[b.ID] = max8(blCALL, certain[b.Succs[0L].b.ID]);
                         }
+
                     }
                                 if (f.pass.debug > 2L)
                 {
                     f.Warnl(b.Pos, "BP: Block %s, local=%s, certain=%s", b, bllikelies[local[b.ID] - blMin], bllikelies[certain[b.ID] - blMin]);
                 }
+
             }
+
         }
 
-        private static @string String(this ref loop l)
+        private static @string String(this ptr<loop> _addr_l)
         {
+            ref loop l = ref _addr_l.val;
+
             return fmt.Sprintf("hdr:%s", l.header);
         }
 
-        private static @string LongString(this ref loop l)
+        private static @string LongString(this ptr<loop> _addr_l)
         {
+            ref loop l = ref _addr_l.val;
+
             @string i = "";
             @string o = "";
             if (l.isInner)
             {
                 i = ", INNER";
             }
+
             if (l.outer != null)
             {
                 o = ", o=" + l.outer.header.String();
             }
+
             return fmt.Sprintf("hdr:%s%s%s", l.header, i, o);
+
         }
 
-        private static bool isWithinOrEq(this ref loop l, ref loop ll)
+        private static bool isWithinOrEq(this ptr<loop> _addr_l, ptr<loop> _addr_ll)
         {
+            ref loop l = ref _addr_l.val;
+            ref loop ll = ref _addr_ll.val;
+
             if (ll == null)
             { // nil means whole program
                 return true;
+
             }
+
             while (l != null)
             {
                 if (l == ll)
@@ -324,34 +358,42 @@ namespace @internal
                     return true;
                 l = l.outer;
                 }
+
             }
 
             return false;
+
         }
 
         // nearestOuterLoop returns the outer loop of loop most nearly
         // containing block b; the header must dominate b.  loop itself
         // is assumed to not be that loop. For acceptable performance,
         // we're relying on loop nests to not be terribly deep.
-        private static ref loop nearestOuterLoop(this ref loop l, SparseTree sdom, ref Block b)
+        private static ptr<loop> nearestOuterLoop(this ptr<loop> _addr_l, SparseTree sdom, ptr<Block> _addr_b)
         {
-            ref loop o = default;
+            ref loop l = ref _addr_l.val;
+            ref Block b = ref _addr_b.val;
+
+            ptr<loop> o;
             o = l.outer;
 
-            while (o != null && !sdom.isAncestorEq(o.header, b))
+            while (o != null && !sdom.IsAncestorEq(o.header, b))
             {
                 o = o.outer;
             }
 
-            return o;
+            return _addr_o!;
+
         }
 
-        private static ref loopnest loopnestfor(ref Func f)
+        private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             var po = f.postorder();
-            var sdom = f.sdom();
-            var b2l = make_slice<ref loop>(f.NumBlocks());
-            var loops = make_slice<ref loop>(0L);
+            var sdom = f.Sdom();
+            var b2l = make_slice<ptr<loop>>(f.NumBlocks());
+            var loops = make_slice<ptr<loop>>(0L);
             var visited = make_slice<bool>(f.NumBlocks());
             var sawIrred = false;
 
@@ -371,7 +413,8 @@ namespace @internal
                     {
                         fmt.Printf("loop finding at %s\n", b);
                     }
-                    ref loop innermost = default; // innermost header reachable from this block
+
+                    ptr<loop> innermost; // innermost header reachable from this block
 
                     // IF any successor s of b is in a loop headed by h
                     // AND h dominates b
@@ -388,19 +431,20 @@ namespace @internal
                         var bb = e.b;
                         var l = b2l[bb.ID];
 
-                        if (sdom.isAncestorEq(bb, b))
+                        if (sdom.IsAncestorEq(bb, b))
                         { // Found a loop header
                             if (f.pass != null && f.pass.debug > 4L)
                             {
                                 fmt.Printf("loop finding    succ %s of %s is header\n", bb.String(), b.String());
                             }
+
                             if (l == null)
                             {
-                                l = ref new loop(header:bb,isInner:true);
+                                l = addr(new loop(header:bb,isInner:true));
                                 loops = append(loops, l);
                                 b2l[bb.ID] = l;
-                                l.checkContainsCall(bb);
                             }
+
                         }
                         else if (!visited[bb.ID])
                         { // Found an irreducible loop
@@ -409,6 +453,7 @@ namespace @internal
                             {
                                 fmt.Printf("loop finding    succ %s of %s is IRRED, in %s\n", bb.String(), b.String(), f.Name);
                             }
+
                         }
                         else if (l != null)
                         { 
@@ -416,10 +461,11 @@ namespace @internal
                             // Perhaps a loop header is inherited.
                             // is there any loop containing our successor whose
                             // header dominates b?
-                            if (!sdom.isAncestorEq(l.header, b))
+                            if (!sdom.IsAncestorEq(l.header, b))
                             {
                                 l = l.nearestOuterLoop(sdom, b);
                             }
+
                             if (f.pass != null && f.pass.debug > 4L)
                             {
                                 if (l == null)
@@ -430,7 +476,9 @@ namespace @internal
                                 {
                                     fmt.Printf("loop finding    succ %s of %s provides loop with header %s\n", bb.String(), b.String(), l.header.String());
                                 }
+
                             }
+
                         }
                         else
                         { // No loop
@@ -438,16 +486,20 @@ namespace @internal
                             {
                                 fmt.Printf("loop finding    succ %s of %s has no loop\n", bb.String(), b.String());
                             }
+
                         }
+
                         if (l == null || innermost == l)
                         {
                             continue;
                         }
+
                         if (innermost == null)
                         {
                             innermost = l;
                             continue;
                         }
+
                         if (sdom.isAncestor(innermost.header, l.header))
                         {
                             sdom.outerinner(innermost, l);
@@ -457,22 +509,135 @@ namespace @internal
                         {
                             sdom.outerinner(l, innermost);
                         }
+
                     }
                     if (innermost != null)
                     {
                         b2l[b.ID] = innermost;
-                        innermost.checkContainsCall(b);
                         innermost.nBlocks++;
                     }
+
                     visited[b.ID] = true;
+
                 }
 
                 b = b__prev1;
             }
 
-            loopnest ln = ref new loopnest(f:f,b2l:b2l,po:po,sdom:sdom,loops:loops,hasIrreducible:sawIrred); 
+            ptr<loopnest> ln = addr(new loopnest(f:f,b2l:b2l,po:po,sdom:sdom,loops:loops,hasIrreducible:sawIrred)); 
 
-            // Curious about the loopiness? "-d=ssa/likelyadjust/stats"
+            // Calculate containsUnavoidableCall for regalloc
+            var dominatedByCall = make_slice<bool>(f.NumBlocks());
+            {
+                var b__prev1 = b;
+
+                foreach (var (_, __b) in po)
+                {
+                    b = __b;
+                    if (checkContainsCall(_addr_b))
+                    {
+                        dominatedByCall[b.ID] = true;
+                    }
+
+                } 
+                // Run dfs to find path through the loop that avoids all calls.
+                // Such path either escapes loop or return back to header.
+                // It isn't enough to have exit not dominated by any call, for example:
+                // ... some loop
+                // call1   call2
+                //   \      /
+                //     exit
+                // ...
+                // exit is not dominated by any call, but we don't have call-free path to it.
+
+                b = b__prev1;
+            }
+
+            {
+                var l__prev1 = l;
+
+                foreach (var (_, __l) in loops)
+                {
+                    l = __l; 
+                    // Header contains call.
+                    if (dominatedByCall[l.header.ID])
+                    {
+                        l.containsUnavoidableCall = true;
+                        continue;
+                    }
+
+                    var callfreepath = false;
+                    var tovisit = make_slice<ptr<Block>>(0L, len(l.header.Succs)); 
+                    // Push all non-loop non-exit successors of header onto toVisit.
+                    {
+                        var s__prev2 = s;
+
+                        foreach (var (_, __s) in l.header.Succs)
+                        {
+                            s = __s;
+                            var nb = s.Block(); 
+                            // This corresponds to loop with zero iterations.
+                            if (!l.iterationEnd(nb, b2l))
+                            {
+                                tovisit = append(tovisit, nb);
+                            }
+
+                        }
+
+                        s = s__prev2;
+                    }
+
+                    while (len(tovisit) > 0L)
+                    {
+                        var cur = tovisit[len(tovisit) - 1L];
+                        tovisit = tovisit[..len(tovisit) - 1L];
+                        if (dominatedByCall[cur.ID])
+                        {
+                            continue;
+                        } 
+                        // Record visited in dominatedByCall.
+                        dominatedByCall[cur.ID] = true;
+                        {
+                            var s__prev3 = s;
+
+                            foreach (var (_, __s) in cur.Succs)
+                            {
+                                s = __s;
+                                nb = s.Block();
+                                if (l.iterationEnd(nb, b2l))
+                                {
+                                    callfreepath = true;
+                                }
+
+                                if (!dominatedByCall[nb.ID])
+                                {
+                                    tovisit = append(tovisit, nb);
+                                }
+
+                            }
+
+                            s = s__prev3;
+                        }
+
+                        if (callfreepath)
+                        {
+                            break;
+                        }
+
+                    }
+
+                    if (!callfreepath)
+                    {
+                        l.containsUnavoidableCall = true;
+                    }
+
+                } 
+
+                // Curious about the loopiness? "-d=ssa/likelyadjust/stats"
+
+                l = l__prev1;
+            }
+
             if (f.pass != null && f.pass.stats > 0L && len(loops) > 0L)
             {
                 ln.assembleChildren();
@@ -490,22 +655,25 @@ namespace @internal
                         l = __l;
                         var x = len(l.exits);
                         long cf = 0L;
-                        if (!l.containsCall)
+                        if (!l.containsUnavoidableCall)
                         {
                             cf = 1L;
                         }
+
                         long inner = 0L;
                         if (l.isInner)
                         {
                             inner++;
                         }
-                        f.LogStat("loopstats:", l.depth, "depth", x, "exits", inner, "is_inner", cf, "is_callfree", l.nBlocks, "n_blocks");
+
+                        f.LogStat("loopstats:", l.depth, "depth", x, "exits", inner, "is_inner", cf, "always_calls", l.nBlocks, "n_blocks");
+
                     }
 
                     l = l__prev1;
                 }
-
             }
+
             if (f.pass != null && f.pass.debug > 1L && len(loops) > 0L)
             {
                 fmt.Printf("Loops in %s:\n", f.Name);
@@ -526,12 +694,14 @@ namespace @internal
                                 {
                                     fmt.Printf(" %s", b);
                                 }
+
                             }
 
                             b = b__prev2;
                         }
 
                         fmt.Print("\n");
+
                     }
 
                     l = l__prev1;
@@ -548,45 +718,57 @@ namespace @internal
                         {
                             fmt.Printf(" %s", b);
                         }
+
                     }
 
                     b = b__prev1;
                 }
 
                 fmt.Print("\n");
+
             }
-            return ln;
+
+            return _addr_ln!;
+
         }
 
         // assembleChildren initializes the children field of each
         // loop in the nest.  Loop A is a child of loop B if A is
         // directly nested within B (based on the reducible-loops
         // detection above)
-        private static void assembleChildren(this ref loopnest ln)
+        private static void assembleChildren(this ptr<loopnest> _addr_ln)
         {
+            ref loopnest ln = ref _addr_ln.val;
+
             if (ln.initializedChildren)
             {
-                return;
+                return ;
             }
+
             foreach (var (_, l) in ln.loops)
             {
                 if (l.outer != null)
                 {
                     l.outer.children = append(l.outer.children, l);
                 }
+
             }
             ln.initializedChildren = true;
+
         }
 
         // calculateDepths uses the children field of loops
         // to determine the nesting depth (outer=1) of each
         // loop.  This is helpful for finding exit edges.
-        private static void calculateDepths(this ref loopnest ln)
+        private static void calculateDepths(this ptr<loopnest> _addr_ln)
         {
+            ref loopnest ln = ref _addr_ln.val;
+
             if (ln.initializedDepth)
             {
-                return;
+                return ;
             }
+
             ln.assembleChildren();
             foreach (var (_, l) in ln.loops)
             {
@@ -594,18 +776,23 @@ namespace @internal
                 {
                     l.setDepth(1L);
                 }
+
             }
             ln.initializedDepth = true;
+
         }
 
         // findExits uses loop depth information to find the
         // exits from a loop.
-        private static void findExits(this ref loopnest ln)
+        private static void findExits(this ptr<loopnest> _addr_ln)
         {
+            ref loopnest ln = ref _addr_ln.val;
+
             if (ln.initializedExits)
             {
-                return;
+                return ;
             }
+
             ln.calculateDepths();
             var b2l = ln.b2l;
             foreach (var (_, b) in ln.po)
@@ -614,23 +801,29 @@ namespace @internal
                 if (l != null && len(b.Succs) == 2L)
                 {
                     var sl = b2l[b.Succs[0L].b.ID];
-                    if (recordIfExit(l, sl, b.Succs[0L].b))
+                    if (recordIfExit(_addr_l, _addr_sl, _addr_b.Succs[0L].b))
                     {
                         continue;
                     }
+
                     sl = b2l[b.Succs[1L].b.ID];
-                    if (recordIfExit(l, sl, b.Succs[1L].b))
+                    if (recordIfExit(_addr_l, _addr_sl, _addr_b.Succs[1L].b))
                     {
                         continue;
                     }
+
                 }
+
             }
             ln.initializedExits = true;
+
         }
 
         // depth returns the loop nesting level of block b.
-        private static short depth(this ref loopnest ln, ID b)
+        private static short depth(this ptr<loopnest> _addr_ln, ID b)
         {
+            ref loopnest ln = ref _addr_ln.val;
+
             {
                 var l = ln.b2l[b];
 
@@ -640,14 +833,20 @@ namespace @internal
                 }
 
             }
+
             return 0L;
+
         }
 
         // recordIfExit checks sl (the loop containing b) to see if it
         // is outside of loop l, and if so, records b as an exit block
         // from l and returns true.
-        private static bool recordIfExit(ref loop l, ref loop sl, ref Block b)
+        private static bool recordIfExit(ptr<loop> _addr_l, ptr<loop> _addr_sl, ptr<Block> _addr_b)
         {
+            ref loop l = ref _addr_l.val;
+            ref loop sl = ref _addr_sl.val;
+            ref Block b = ref _addr_b.val;
+
             if (sl != l)
             {
                 if (sl == null || sl.depth <= l.depth)
@@ -667,17 +866,34 @@ namespace @internal
                     l.exits = append(l.exits, b);
                     return true;
                 }
+
             }
+
             return false;
+
         }
 
-        private static void setDepth(this ref loop l, short d)
+        private static void setDepth(this ptr<loop> _addr_l, short d)
         {
+            ref loop l = ref _addr_l.val;
+
             l.depth = d;
             foreach (var (_, c) in l.children)
             {
                 c.setDepth(d + 1L);
             }
+
+        }
+
+        // iterationEnd checks if block b ends iteration of loop l.
+        // Ending iteration means either escaping to outer loop/code or
+        // going back to header
+        private static bool iterationEnd(this ptr<loop> _addr_l, ptr<Block> _addr_b, slice<ptr<loop>> b2l)
+        {
+            ref loop l = ref _addr_l.val;
+            ref Block b = ref _addr_b.val;
+
+            return b == l.header || b2l[b.ID] == null || (b2l[b.ID] != l && b2l[b.ID].depth <= l.depth);
         }
     }
 }}}}

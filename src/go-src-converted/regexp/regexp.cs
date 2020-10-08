@@ -16,7 +16,7 @@
 // (This is a property not guaranteed by most open source
 // implementations of regular expressions.) For more information
 // about this property, see
-//    http://swtch.com/~rsc/regexp/regexp1.html
+//    https://swtch.com/~rsc/regexp/regexp1.html
 // or any book about automata theory.
 //
 // All characters are UTF-8-encoded code points.
@@ -30,8 +30,8 @@
 // matches of the entire expression. Empty matches abutting a preceding
 // match are ignored. The return value is a slice containing the successive
 // return values of the corresponding non-'All' routine. These routines take
-// an extra integer argument, n; if n >= 0, the function returns at most n
-// matches/submatches.
+// an extra integer argument, n. If n >= 0, the function returns at most n
+// matches/submatches; otherwise, it returns all of them.
 //
 // If 'String' is present, the argument is a string; otherwise it is a slice
 // of bytes; return values are adjusted as appropriate.
@@ -46,9 +46,10 @@
 // If 'Index' is present, matches and submatches are identified by byte index
 // pairs within the input string: result[2*n:2*n+1] identifies the indexes of
 // the nth submatch. The pair for n==0 identifies the match of the entire
-// expression. If 'Index' is not present, the match is identified by the
-// text of the match/submatch. If an index is negative, it means that
-// subexpression did not match any string in the input.
+// expression. If 'Index' is not present, the match is identified by the text
+// of the match/submatch. If an index is negative or text is nil, it means that
+// subexpression did not match any string in the input. For 'String' versions
+// an empty string means either no match or an empty match.
 //
 // There is also a subset of the methods that can be applied to text read
 // from a RuneReader:
@@ -62,7 +63,7 @@
 //
 // (There are a few other methods that do not match this pattern.)
 //
-// package regexp -- go2cs converted at 2020 August 29 08:24:11 UTC
+// package regexp -- go2cs converted at 2020 October 08 03:41:17 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Go\src\regexp\regexp.go
 using bytes = go.bytes_package;
@@ -85,42 +86,49 @@ namespace go
         // except for configuration methods, such as Longest.
         public partial struct Regexp
         {
-            public ref regexpRO regexpRO => ref regexpRO_val; // cache of machines for running regexp
-            public sync.Mutex mu;
-            public slice<ref machine> machine;
-        }
-
-        private partial struct regexpRO
-        {
             public @string expr; // as passed to Compile
             public ptr<syntax.Prog> prog; // compiled program
             public ptr<onePassProg> onepass; // onepass program or nil
+            public long numSubexp;
+            public long maxBitStateLen;
+            public slice<@string> subexpNames;
             public @string prefix; // required prefix in unanchored matches
             public slice<byte> prefixBytes; // prefix, as a []byte
-            public bool prefixComplete; // prefix is the entire regexp
             public int prefixRune; // first rune in prefix
             public uint prefixEnd; // pc for last rune in prefix
+            public long mpool; // pool for machines
+            public long matchcap; // size of recorded match lengths
+            public bool prefixComplete; // prefix is the entire regexp
             public syntax.EmptyOp cond; // empty-width conditions required at start of match
-            public long numSubexp;
-            public slice<@string> subexpNames;
-            public bool longest;
+            public long minInputLen; // minimum length of the input in bytes
+
+// This field can be modified by the Longest method,
+// but it is otherwise read-only.
+            public bool longest; // whether regexp prefers leftmost-longest match
         }
 
         // String returns the source text used to compile the regular expression.
-        private static @string String(this ref Regexp re)
+        private static @string String(this ptr<Regexp> _addr_re)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.expr;
         }
 
         // Copy returns a new Regexp object copied from re.
+        // Calling Longest on one copy does not affect another.
         //
-        // When using a Regexp in multiple goroutines, giving each goroutine
-        // its own copy helps to avoid lock contention.
-        private static ref Regexp Copy(this ref Regexp re)
-        { 
-            // It is not safe to copy Regexp by value
-            // since it contains a sync.Mutex.
-            return ref new Regexp(regexpRO:re.regexpRO,);
+        // Deprecated: In earlier releases, when using a Regexp in multiple goroutines,
+        // giving each goroutine its own copy helped to avoid lock contention.
+        // As of Go 1.12, using Copy is no longer necessary to avoid lock contention.
+        // Copy may still be appropriate if the reason for its use is to make
+        // two copies with different Longest settings.
+        private static ptr<Regexp> Copy(this ptr<Regexp> _addr_re)
+        {
+            ref Regexp re = ref _addr_re.val;
+
+            ref var re2 = ref heap(re.val, out ptr<var> _addr_re2);
+            return _addr__addr_re2!;
         }
 
         // Compile parses a regular expression and returns, if successful,
@@ -133,9 +141,12 @@ namespace go
         // that Perl, Python, and other implementations use, although this
         // package implements it without the expense of backtracking.
         // For POSIX leftmost-longest matching, see CompilePOSIX.
-        public static (ref Regexp, error) Compile(@string expr)
+        public static (ptr<Regexp>, error) Compile(@string expr)
         {
-            return compile(expr, syntax.Perl, false);
+            ptr<Regexp> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_compile(expr, syntax.Perl, false)!;
         }
 
         // CompilePOSIX is like Compile but restricts the regular expression
@@ -156,10 +167,13 @@ namespace go
         // specifies that the match be chosen to maximize the length of the first
         // subexpression, then the second, and so on from left to right.
         // The POSIX rule is computationally prohibitive and not even well-defined.
-        // See http://swtch.com/~rsc/regexp/regexp2.html#posix for details.
-        public static (ref Regexp, error) CompilePOSIX(@string expr)
+        // See https://swtch.com/~rsc/regexp/regexp2.html#posix for details.
+        public static (ptr<Regexp>, error) CompilePOSIX(@string expr)
         {
-            return compile(expr, syntax.POSIX, true);
+            ptr<Regexp> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_compile(expr, syntax.POSIX, true)!;
         }
 
         // Longest makes future searches prefer the leftmost-longest match.
@@ -168,18 +182,24 @@ namespace go
         // it chooses a match that is as long as possible.
         // This method modifies the Regexp and may not be called concurrently
         // with any other methods.
-        private static void Longest(this ref Regexp re)
+        private static void Longest(this ptr<Regexp> _addr_re)
         {
+            ref Regexp re = ref _addr_re.val;
+
             re.longest = true;
         }
 
-        private static (ref Regexp, error) compile(@string expr, syntax.Flags mode, bool longest)
+        private static (ptr<Regexp>, error) compile(@string expr, syntax.Flags mode, bool longest)
         {
+            ptr<Regexp> _p0 = default!;
+            error _p0 = default!;
+
             var (re, err) = syntax.Parse(expr, mode);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var maxCap = re.MaxCap();
             var capNames = re.CapNames();
 
@@ -187,86 +207,200 @@ namespace go
             var (prog, err) = syntax.Compile(re);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            Regexp regexp = ref new Regexp(regexpRO:regexpRO{expr:expr,prog:prog,onepass:compileOnePass(prog),numSubexp:maxCap,subexpNames:capNames,cond:prog.StartCond(),longest:longest,},);
-            if (regexp.onepass == notOnePass)
+
+            var matchcap = prog.NumCap;
+            if (matchcap < 2L)
+            {
+                matchcap = 2L;
+            }
+
+            ptr<Regexp> regexp = addr(new Regexp(expr:expr,prog:prog,onepass:compileOnePass(prog),numSubexp:maxCap,subexpNames:capNames,cond:prog.StartCond(),longest:longest,matchcap:matchcap,minInputLen:minInputLen(re),));
+            if (regexp.onepass == null)
             {
                 regexp.prefix, regexp.prefixComplete = prog.Prefix();
+                regexp.maxBitStateLen = maxBitStateLen(prog);
             }
             else
             {
                 regexp.prefix, regexp.prefixComplete, regexp.prefixEnd = onePassPrefix(prog);
             }
+
             if (regexp.prefix != "")
             { 
                 // TODO(rsc): Remove this allocation by adding
                 // IndexString to package bytes.
                 regexp.prefixBytes = (slice<byte>)regexp.prefix;
                 regexp.prefixRune, _ = utf8.DecodeRuneInString(regexp.prefix);
+
             }
-            return (regexp, null);
+
+            var n = len(prog.Inst);
+            long i = 0L;
+            while (matchSize[i] != 0L && matchSize[i] < n)
+            {
+                i++;
+            }
+
+            regexp.mpool = i;
+
+            return (_addr_regexp!, error.As(null!)!);
+
         }
+
+        // Pools of *machine for use during (*Regexp).doExecute,
+        // split up by the size of the execution queues.
+        // matchPool[i] machines have queue size matchSize[i].
+        // On a 64-bit system each queue entry is 16 bytes,
+        // so matchPool[0] has 16*2*128 = 4kB queues, etc.
+        // The final matchPool is a catch-all for very large queues.
+        private static array<long> matchSize = new array<long>(new long[] { 128, 512, 2048, 16384, 0 });        private static array<sync.Pool> matchPool = new array<sync.Pool>(len(matchSize));
 
         // get returns a machine to use for matching re.
         // It uses the re's machine cache if possible, to avoid
         // unnecessary allocation.
-        private static ref machine get(this ref Regexp re)
+        private static ptr<machine> get(this ptr<Regexp> _addr_re)
         {
-            re.mu.Lock();
-            {
-                var n = len(re.machine);
+            ref Regexp re = ref _addr_re.val;
 
-                if (n > 0L)
+            ptr<machine> (m, ok) = matchPool[re.mpool].Get()._<ptr<machine>>();
+            if (!ok)
+            {
+                m = @new<machine>();
+            }
+
+            m.re = re;
+            m.p = re.prog;
+            if (cap(m.matchcap) < re.matchcap)
+            {
+                m.matchcap = make_slice<long>(re.matchcap);
+                foreach (var (_, t) in m.pool)
                 {
-                    var z = re.machine[n - 1L];
-                    re.machine = re.machine[..n - 1L];
-                    re.mu.Unlock();
-                    return z;
+                    t.cap = make_slice<long>(re.matchcap);
                 }
 
+            } 
+
+            // Allocate queues if needed.
+            // Or reallocate, for "large" match pool.
+            var n = matchSize[re.mpool];
+            if (n == 0L)
+            { // large pool
+                n = len(re.prog.Inst);
+
             }
-            re.mu.Unlock();
-            z = progMachine(re.prog, re.onepass);
-            z.re = re;
-            return z;
+
+            if (len(m.q0.sparse) < n)
+            {
+                m.q0 = new queue(make([]uint32,n),make([]entry,0,n));
+                m.q1 = new queue(make([]uint32,n),make([]entry,0,n));
+            }
+
+            return _addr_m!;
+
         }
 
-        // put returns a machine to the re's machine cache.
-        // There is no attempt to limit the size of the cache, so it will
-        // grow to the maximum number of simultaneous matches
-        // run using re.  (The cache empties when re gets garbage collected.)
-        private static void put(this ref Regexp re, ref machine z)
+        // put returns a machine to the correct machine pool.
+        private static void put(this ptr<Regexp> _addr_re, ptr<machine> _addr_m)
         {
-            re.mu.Lock();
-            re.machine = append(re.machine, z);
-            re.mu.Unlock();
+            ref Regexp re = ref _addr_re.val;
+            ref machine m = ref _addr_m.val;
+
+            m.re = null;
+            m.p = null;
+            m.inputs.clear();
+            matchPool[re.mpool].Put(m);
+        }
+
+        // minInputLen walks the regexp to find the minimum length of any matchable input
+        private static long minInputLen(ptr<syntax.Regexp> _addr_re)
+        {
+            ref syntax.Regexp re = ref _addr_re.val;
+
+
+            if (re.Op == syntax.OpAnyChar || re.Op == syntax.OpAnyCharNotNL || re.Op == syntax.OpCharClass) 
+                return 1L;
+            else if (re.Op == syntax.OpLiteral) 
+                long l = 0L;
+                foreach (var (_, r) in re.Rune)
+                {
+                    l += utf8.RuneLen(r);
+                }
+                return l;
+            else if (re.Op == syntax.OpCapture || re.Op == syntax.OpPlus) 
+                return minInputLen(_addr_re.Sub[0L]);
+            else if (re.Op == syntax.OpRepeat) 
+                return re.Min * minInputLen(_addr_re.Sub[0L]);
+            else if (re.Op == syntax.OpConcat) 
+                l = 0L;
+                {
+                    var sub__prev1 = sub;
+
+                    foreach (var (_, __sub) in re.Sub)
+                    {
+                        sub = __sub;
+                        l += minInputLen(_addr_sub);
+                    }
+
+                    sub = sub__prev1;
+                }
+
+                return l;
+            else if (re.Op == syntax.OpAlternate) 
+                l = minInputLen(_addr_re.Sub[0L]);
+                long lnext = default;
+                {
+                    var sub__prev1 = sub;
+
+                    foreach (var (_, __sub) in re.Sub[1L..])
+                    {
+                        sub = __sub;
+                        lnext = minInputLen(_addr_sub);
+                        if (lnext < l)
+                        {
+                            l = lnext;
+                        }
+
+                    }
+
+                    sub = sub__prev1;
+                }
+
+                return l;
+            else 
+                return 0L;
+            
         }
 
         // MustCompile is like Compile but panics if the expression cannot be parsed.
         // It simplifies safe initialization of global variables holding compiled regular
         // expressions.
-        public static ref Regexp MustCompile(@string str) => func((_, panic, __) =>
+        public static ptr<Regexp> MustCompile(@string str) => func((_, panic, __) =>
         {
-            var (regexp, error) = Compile(str);
-            if (error != null)
+            var (regexp, err) = Compile(str);
+            if (err != null)
             {
-                panic("regexp: Compile(" + quote(str) + "): " + error.Error());
+                panic("regexp: Compile(" + quote(str) + "): " + err.Error());
             }
-            return regexp;
+
+            return _addr_regexp!;
+
         });
 
         // MustCompilePOSIX is like CompilePOSIX but panics if the expression cannot be parsed.
         // It simplifies safe initialization of global variables holding compiled regular
         // expressions.
-        public static ref Regexp MustCompilePOSIX(@string str) => func((_, panic, __) =>
+        public static ptr<Regexp> MustCompilePOSIX(@string str) => func((_, panic, __) =>
         {
-            var (regexp, error) = CompilePOSIX(str);
-            if (error != null)
+            var (regexp, err) = CompilePOSIX(str);
+            if (err != null)
             {
-                panic("regexp: CompilePOSIX(" + quote(str) + "): " + error.Error());
+                panic("regexp: CompilePOSIX(" + quote(str) + "): " + err.Error());
             }
-            return regexp;
+
+            return _addr_regexp!;
+
         });
 
         private static @string quote(@string s)
@@ -275,12 +409,16 @@ namespace go
             {
                 return "`" + s + "`";
             }
+
             return strconv.Quote(s);
+
         }
 
         // NumSubexp returns the number of parenthesized subexpressions in this Regexp.
-        private static long NumSubexp(this ref Regexp re)
+        private static long NumSubexp(this ptr<Regexp> _addr_re)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.numSubexp;
         }
 
@@ -289,12 +427,42 @@ namespace go
         // so that if m is a match slice, the name for m[i] is SubexpNames()[i].
         // Since the Regexp as a whole cannot be named, names[0] is always
         // the empty string. The slice should not be modified.
-        private static slice<@string> SubexpNames(this ref Regexp re)
+        private static slice<@string> SubexpNames(this ptr<Regexp> _addr_re)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.subexpNames;
         }
 
-        private static readonly int endOfText = -1L;
+        // SubexpIndex returns the index of the first subexpression with the given name,
+        // or -1 if there is no subexpression with that name.
+        //
+        // Note that multiple subexpressions can be written using the same name, as in
+        // (?P<bob>a+)(?P<bob>b+), which declares two subexpressions named "bob".
+        // In this case, SubexpIndex returns the index of the leftmost such subexpression
+        // in the regular expression.
+        private static long SubexpIndex(this ptr<Regexp> _addr_re, @string name)
+        {
+            ref Regexp re = ref _addr_re.val;
+
+            if (name != "")
+            {
+                foreach (var (i, s) in re.subexpNames)
+                {
+                    if (name == s)
+                    {
+                        return i;
+                    }
+
+                }
+
+            }
+
+            return -1L;
+
+        }
+
+        private static readonly int endOfText = (int)-1L;
 
         // input abstracts different representations of the input text. It provides
         // one-character lookahead.
@@ -304,11 +472,11 @@ namespace go
         // one-character lookahead.
         private partial interface input
         {
-            syntax.EmptyOp step(long pos); // advance one rune
-            syntax.EmptyOp canCheckPrefix(); // can we look ahead without losing info?
-            syntax.EmptyOp hasPrefix(ref Regexp re);
-            syntax.EmptyOp index(ref Regexp re, long pos);
-            syntax.EmptyOp context(long pos);
+            lazyFlag step(long pos); // advance one rune
+            lazyFlag canCheckPrefix(); // can we look ahead without losing info?
+            lazyFlag hasPrefix(ptr<Regexp> re);
+            lazyFlag index(ptr<Regexp> re, long pos);
+            lazyFlag context(long pos);
         }
 
         // inputString scans a string.
@@ -317,8 +485,12 @@ namespace go
             public @string str;
         }
 
-        private static (int, long) step(this ref inputString i, long pos)
+        private static (int, long) step(this ptr<inputString> _addr_i, long pos)
         {
+            int _p0 = default;
+            long _p0 = default;
+            ref inputString i = ref _addr_i.val;
+
             if (pos < len(i.str))
             {
                 var c = i.str[pos];
@@ -326,28 +498,42 @@ namespace go
                 {
                     return (rune(c), 1L);
                 }
+
                 return utf8.DecodeRuneInString(i.str[pos..]);
+
             }
+
             return (endOfText, 0L);
+
         }
 
-        private static bool canCheckPrefix(this ref inputString i)
+        private static bool canCheckPrefix(this ptr<inputString> _addr_i)
         {
+            ref inputString i = ref _addr_i.val;
+
             return true;
         }
 
-        private static bool hasPrefix(this ref inputString i, ref Regexp re)
+        private static bool hasPrefix(this ptr<inputString> _addr_i, ptr<Regexp> _addr_re)
         {
+            ref inputString i = ref _addr_i.val;
+            ref Regexp re = ref _addr_re.val;
+
             return strings.HasPrefix(i.str, re.prefix);
         }
 
-        private static long index(this ref inputString i, ref Regexp re, long pos)
+        private static long index(this ptr<inputString> _addr_i, ptr<Regexp> _addr_re, long pos)
         {
+            ref inputString i = ref _addr_i.val;
+            ref Regexp re = ref _addr_re.val;
+
             return strings.Index(i.str[pos..], re.prefix);
         }
 
-        private static syntax.EmptyOp context(this ref inputString i, long pos)
+        private static lazyFlag context(this ptr<inputString> _addr_i, long pos)
         {
+            ref inputString i = ref _addr_i.val;
+
             var r1 = endOfText;
             var r2 = endOfText; 
             // 0 < pos && pos <= len(i.str)
@@ -358,6 +544,7 @@ namespace go
                 {
                     r1, _ = utf8.DecodeLastRuneInString(i.str[..pos]);
                 }
+
             } 
             // 0 <= pos && pos < len(i.str)
             if (uint(pos) < uint(len(i.str)))
@@ -367,8 +554,11 @@ namespace go
                 {
                     r2, _ = utf8.DecodeRuneInString(i.str[pos..]);
                 }
+
             }
-            return syntax.EmptyOpContext(r1, r2);
+
+            return newLazyFlag(r1, r2);
+
         }
 
         // inputBytes scans a byte slice.
@@ -377,8 +567,12 @@ namespace go
             public slice<byte> str;
         }
 
-        private static (int, long) step(this ref inputBytes i, long pos)
+        private static (int, long) step(this ptr<inputBytes> _addr_i, long pos)
         {
+            int _p0 = default;
+            long _p0 = default;
+            ref inputBytes i = ref _addr_i.val;
+
             if (pos < len(i.str))
             {
                 var c = i.str[pos];
@@ -386,28 +580,42 @@ namespace go
                 {
                     return (rune(c), 1L);
                 }
+
                 return utf8.DecodeRune(i.str[pos..]);
+
             }
+
             return (endOfText, 0L);
+
         }
 
-        private static bool canCheckPrefix(this ref inputBytes i)
+        private static bool canCheckPrefix(this ptr<inputBytes> _addr_i)
         {
+            ref inputBytes i = ref _addr_i.val;
+
             return true;
         }
 
-        private static bool hasPrefix(this ref inputBytes i, ref Regexp re)
+        private static bool hasPrefix(this ptr<inputBytes> _addr_i, ptr<Regexp> _addr_re)
         {
+            ref inputBytes i = ref _addr_i.val;
+            ref Regexp re = ref _addr_re.val;
+
             return bytes.HasPrefix(i.str, re.prefixBytes);
         }
 
-        private static long index(this ref inputBytes i, ref Regexp re, long pos)
+        private static long index(this ptr<inputBytes> _addr_i, ptr<Regexp> _addr_re, long pos)
         {
+            ref inputBytes i = ref _addr_i.val;
+            ref Regexp re = ref _addr_re.val;
+
             return bytes.Index(i.str[pos..], re.prefixBytes);
         }
 
-        private static syntax.EmptyOp context(this ref inputBytes i, long pos)
+        private static lazyFlag context(this ptr<inputBytes> _addr_i, long pos)
         {
+            ref inputBytes i = ref _addr_i.val;
+
             var r1 = endOfText;
             var r2 = endOfText; 
             // 0 < pos && pos <= len(i.str)
@@ -418,6 +626,7 @@ namespace go
                 {
                     r1, _ = utf8.DecodeLastRune(i.str[..pos]);
                 }
+
             } 
             // 0 <= pos && pos < len(i.str)
             if (uint(pos) < uint(len(i.str)))
@@ -427,8 +636,11 @@ namespace go
                 {
                     r2, _ = utf8.DecodeRune(i.str[pos..]);
                 }
+
             }
-            return syntax.EmptyOpContext(r1, r2);
+
+            return newLazyFlag(r1, r2);
+
         }
 
         // inputReader scans a RuneReader.
@@ -439,152 +651,207 @@ namespace go
             public long pos;
         }
 
-        private static (int, long) step(this ref inputReader i, long pos)
+        private static (int, long) step(this ptr<inputReader> _addr_i, long pos)
         {
+            int _p0 = default;
+            long _p0 = default;
+            ref inputReader i = ref _addr_i.val;
+
             if (!i.atEOT && pos != i.pos)
             {
                 return (endOfText, 0L);
-
             }
+
             var (r, w, err) = i.r.ReadRune();
             if (err != null)
             {
                 i.atEOT = true;
                 return (endOfText, 0L);
             }
+
             i.pos += w;
             return (r, w);
+
         }
 
-        private static bool canCheckPrefix(this ref inputReader i)
+        private static bool canCheckPrefix(this ptr<inputReader> _addr_i)
         {
+            ref inputReader i = ref _addr_i.val;
+
             return false;
         }
 
-        private static bool hasPrefix(this ref inputReader i, ref Regexp re)
+        private static bool hasPrefix(this ptr<inputReader> _addr_i, ptr<Regexp> _addr_re)
         {
+            ref inputReader i = ref _addr_i.val;
+            ref Regexp re = ref _addr_re.val;
+
             return false;
         }
 
-        private static long index(this ref inputReader i, ref Regexp re, long pos)
+        private static long index(this ptr<inputReader> _addr_i, ptr<Regexp> _addr_re, long pos)
         {
+            ref inputReader i = ref _addr_i.val;
+            ref Regexp re = ref _addr_re.val;
+
             return -1L;
         }
 
-        private static syntax.EmptyOp context(this ref inputReader i, long pos)
+        private static lazyFlag context(this ptr<inputReader> _addr_i, long pos)
         {
-            return 0L;
+            ref inputReader i = ref _addr_i.val;
+
+            return 0L; // not used
         }
 
         // LiteralPrefix returns a literal string that must begin any match
         // of the regular expression re. It returns the boolean true if the
         // literal string comprises the entire regular expression.
-        private static (@string, bool) LiteralPrefix(this ref Regexp re)
+        private static (@string, bool) LiteralPrefix(this ptr<Regexp> _addr_re)
         {
+            @string prefix = default;
+            bool complete = default;
+            ref Regexp re = ref _addr_re.val;
+
             return (re.prefix, re.prefixComplete);
         }
 
-        // MatchReader reports whether the Regexp matches the text read by the
-        // RuneReader.
-        private static bool MatchReader(this ref Regexp re, io.RuneReader r)
+        // MatchReader reports whether the text returned by the RuneReader
+        // contains any match of the regular expression re.
+        private static bool MatchReader(this ptr<Regexp> _addr_re, io.RuneReader r)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.doMatch(r, null, "");
         }
 
-        // MatchString reports whether the Regexp matches the string s.
-        private static bool MatchString(this ref Regexp re, @string s)
+        // MatchString reports whether the string s
+        // contains any match of the regular expression re.
+        private static bool MatchString(this ptr<Regexp> _addr_re, @string s)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.doMatch(null, null, s);
         }
 
-        // Match reports whether the Regexp matches the byte slice b.
-        private static bool Match(this ref Regexp re, slice<byte> b)
+        // Match reports whether the byte slice b
+        // contains any match of the regular expression re.
+        private static bool Match(this ptr<Regexp> _addr_re, slice<byte> b)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.doMatch(null, b, "");
         }
 
-        // MatchReader checks whether a textual regular expression matches the text
-        // read by the RuneReader. More complicated queries need to use Compile and
-        // the full Regexp interface.
+        // MatchReader reports whether the text returned by the RuneReader
+        // contains any match of the regular expression pattern.
+        // More complicated queries need to use Compile and the full Regexp interface.
         public static (bool, error) MatchReader(@string pattern, io.RuneReader r)
         {
+            bool matched = default;
+            error err = default!;
+
             var (re, err) = Compile(pattern);
             if (err != null)
             {
-                return (false, err);
+                return (false, error.As(err)!);
             }
-            return (re.MatchReader(r), null);
+
+            return (re.MatchReader(r), error.As(null!)!);
+
         }
 
-        // MatchString checks whether a textual regular expression
-        // matches a string. More complicated queries need
-        // to use Compile and the full Regexp interface.
+        // MatchString reports whether the string s
+        // contains any match of the regular expression pattern.
+        // More complicated queries need to use Compile and the full Regexp interface.
         public static (bool, error) MatchString(@string pattern, @string s)
         {
+            bool matched = default;
+            error err = default!;
+
             var (re, err) = Compile(pattern);
             if (err != null)
             {
-                return (false, err);
+                return (false, error.As(err)!);
             }
-            return (re.MatchString(s), null);
+
+            return (re.MatchString(s), error.As(null!)!);
+
         }
 
-        // Match checks whether a textual regular expression
-        // matches a byte slice. More complicated queries need
-        // to use Compile and the full Regexp interface.
+        // Match reports whether the byte slice b
+        // contains any match of the regular expression pattern.
+        // More complicated queries need to use Compile and the full Regexp interface.
         public static (bool, error) Match(@string pattern, slice<byte> b)
         {
+            bool matched = default;
+            error err = default!;
+
             var (re, err) = Compile(pattern);
             if (err != null)
             {
-                return (false, err);
+                return (false, error.As(err)!);
             }
-            return (re.Match(b), null);
+
+            return (re.Match(b), error.As(null!)!);
+
         }
 
         // ReplaceAllString returns a copy of src, replacing matches of the Regexp
         // with the replacement string repl. Inside repl, $ signs are interpreted as
         // in Expand, so for instance $1 represents the text of the first submatch.
-        private static @string ReplaceAllString(this ref Regexp re, @string src, @string repl)
+        private static @string ReplaceAllString(this ptr<Regexp> _addr_re, @string src, @string repl)
         {
+            ref Regexp re = ref _addr_re.val;
+
             long n = 2L;
             if (strings.Contains(repl, "$"))
             {
                 n = 2L * (re.numSubexp + 1L);
             }
+
             var b = re.replaceAll(null, src, n, (dst, match) =>
             {
                 return re.expand(dst, repl, null, src, match);
             });
             return string(b);
+
         }
 
         // ReplaceAllLiteralString returns a copy of src, replacing matches of the Regexp
         // with the replacement string repl. The replacement repl is substituted directly,
         // without using Expand.
-        private static @string ReplaceAllLiteralString(this ref Regexp re, @string src, @string repl)
+        private static @string ReplaceAllLiteralString(this ptr<Regexp> _addr_re, @string src, @string repl)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return string(re.replaceAll(null, src, 2L, (dst, match) =>
             {
                 return append(dst, repl);
             }));
+
         }
 
         // ReplaceAllStringFunc returns a copy of src in which all matches of the
         // Regexp have been replaced by the return value of function repl applied
         // to the matched substring. The replacement returned by repl is substituted
         // directly, without using Expand.
-        private static @string ReplaceAllStringFunc(this ref Regexp re, @string src, Func<@string, @string> repl)
+        private static @string ReplaceAllStringFunc(this ptr<Regexp> _addr_re, @string src, Func<@string, @string> repl)
         {
+            ref Regexp re = ref _addr_re.val;
+
             var b = re.replaceAll(null, src, 2L, (dst, match) =>
             {
                 return append(dst, repl(src[match[0L]..match[1L]]));
             });
             return string(b);
+
         }
 
-        private static slice<byte> replaceAll(this ref Regexp re, slice<byte> bsrc, @string src, long nmatch, Func<slice<byte>, slice<long>, slice<byte>> repl)
+        private static slice<byte> replaceAll(this ptr<Regexp> _addr_re, slice<byte> bsrc, @string src, long nmatch, Func<slice<byte>, slice<long>, slice<byte>> repl)
         {
+            ref Regexp re = ref _addr_re.val;
+
             long lastMatchEnd = 0L; // end position of the most recent match
             long searchPos = 0L; // position where we next look for a match
             slice<byte> buf = default;
@@ -597,10 +864,12 @@ namespace go
             {
                 endPos = len(src);
             }
+
             if (nmatch > re.prog.NumCap)
             {
                 nmatch = re.prog.NumCap;
             }
+
             array<long> dstCap = new array<long>(2L);
             while (searchPos <= endPos)
             {
@@ -628,6 +897,7 @@ namespace go
                 {
                     buf = repl(buf, a);
                 }
+
                 lastMatchEnd = a[1L]; 
 
                 // Advance past this match; always advance at least one character.
@@ -640,6 +910,7 @@ namespace go
                 {
                     _, width = utf8.DecodeRuneInString(src[searchPos..]);
                 }
+
                 if (searchPos + width > a[1L])
                 {
                     searchPos += width;
@@ -649,11 +920,13 @@ namespace go
                     // This clause is only needed at the end of the input
                     // string. In that case, DecodeRuneInString returns width=0.
                     searchPos++;
+
                 }
                 else
                 {
                     searchPos = a[1L];
                 }
+
             } 
 
             // Copy the unmatched characters after the last match.
@@ -668,19 +941,24 @@ namespace go
             {
                 buf = append(buf, src[lastMatchEnd..]);
             }
+
             return buf;
+
         }
 
         // ReplaceAll returns a copy of src, replacing matches of the Regexp
         // with the replacement text repl. Inside repl, $ signs are interpreted as
         // in Expand, so for instance $1 represents the text of the first submatch.
-        private static slice<byte> ReplaceAll(this ref Regexp re, slice<byte> src, slice<byte> repl)
+        private static slice<byte> ReplaceAll(this ptr<Regexp> _addr_re, slice<byte> src, slice<byte> repl)
         {
+            ref Regexp re = ref _addr_re.val;
+
             long n = 2L;
             if (bytes.IndexByte(repl, '$') >= 0L)
             {
                 n = 2L * (re.numSubexp + 1L);
             }
+
             @string srepl = "";
             var b = re.replaceAll(src, "", n, (dst, match) =>
             {
@@ -688,32 +966,41 @@ namespace go
                 {
                     srepl = string(repl);
                 }
+
                 return re.expand(dst, srepl, src, "", match);
+
             });
             return b;
+
         }
 
         // ReplaceAllLiteral returns a copy of src, replacing matches of the Regexp
         // with the replacement bytes repl. The replacement repl is substituted directly,
         // without using Expand.
-        private static slice<byte> ReplaceAllLiteral(this ref Regexp re, slice<byte> src, slice<byte> repl)
+        private static slice<byte> ReplaceAllLiteral(this ptr<Regexp> _addr_re, slice<byte> src, slice<byte> repl)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.replaceAll(src, "", 2L, (dst, match) =>
             {
                 return append(dst, repl);
             });
+
         }
 
         // ReplaceAllFunc returns a copy of src in which all matches of the
         // Regexp have been replaced by the return value of function repl applied
         // to the matched byte slice. The replacement returned by repl is substituted
         // directly, without using Expand.
-        private static slice<byte> ReplaceAllFunc(this ref Regexp re, slice<byte> src, Func<slice<byte>, slice<byte>> repl)
+        private static slice<byte> ReplaceAllFunc(this ptr<Regexp> _addr_re, slice<byte> src, Func<slice<byte>, slice<byte>> repl)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.replaceAll(src, "", 2L, (dst, match) =>
             {
                 return append(dst, repl(src[match[0L]..match[1L]]));
             });
+
         }
 
         // Bitmap used by func special to check whether a character needs to be escaped.
@@ -731,11 +1018,12 @@ namespace go
             {
                 specialBytes[b % 16L] |= 1L << (int)((b / 16L));
             }
+
         }
 
-        // QuoteMeta returns a string that quotes all regular expression metacharacters
+        // QuoteMeta returns a string that escapes all regular expression metacharacters
         // inside the argument text; the returned string is a regular expression matching
-        // the literal text. For example, QuoteMeta(`[foo]`) returns `\[foo\]`.
+        // the literal text.
         public static @string QuoteMeta(@string s)
         { 
             // A byte loop is correct because all metacharacters are ASCII.
@@ -746,6 +1034,7 @@ namespace go
                 {
                     break;
                 }
+
             } 
             // No meta characters found, so return original string.
  
@@ -754,6 +1043,7 @@ namespace go
             {
                 return s;
             }
+
             var b = make_slice<byte>(2L * len(s) - i);
             copy(b, s[..i]);
             var j = i;
@@ -765,11 +1055,14 @@ namespace go
                     j++;
                 i++;
                 }
+
                 b[j] = s[i];
                 j++;
+
             }
 
             return string(b[..j]);
+
         }
 
         // The number of capture values in the program may correspond
@@ -777,13 +1070,17 @@ namespace go
         // For example, "(a){0}" turns into an empty program, so the
         // maximum capture in the program is 0 but we need to return
         // an expression for \1.  Pad appends -1s to the slice a as needed.
-        private static slice<long> pad(this ref Regexp re, slice<long> a)
+        private static slice<long> pad(this ptr<Regexp> _addr_re, slice<long> a)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (a == null)
             { 
                 // No match.
                 return null;
+
             }
+
             long n = (1L + re.numSubexp) * 2L;
             while (len(a) < n)
             {
@@ -791,11 +1088,16 @@ namespace go
             }
 
             return a;
+
         }
 
-        // Find matches in slice b if b is non-nil, otherwise find matches in string s.
-        private static void allMatches(this ref Regexp re, @string s, slice<byte> b, long n, Action<slice<long>> deliver)
+        // allMatches calls deliver at most n times
+        // with the location of successive matches in the input text.
+        // The input text is b if non-nil, otherwise s.
+        private static void allMatches(this ptr<Regexp> _addr_re, @string s, slice<byte> b, long n, Action<slice<long>> deliver)
         {
+            ref Regexp re = ref _addr_re.val;
+
             long end = default;
             if (b == null)
             {
@@ -805,6 +1107,7 @@ namespace go
             {
                 end = len(b);
             }
+
             {
                 long pos = 0L;
                 long i = 0L;
@@ -817,6 +1120,7 @@ namespace go
                     {
                         break;
                     }
+
                     var accept = true;
                     if (matches[1L] == pos)
                     { 
@@ -826,7 +1130,9 @@ namespace go
                             // We don't allow an empty match right
                             // after a previous match, so ignore it.
                             accept = false;
+
                         }
+
                         long width = default; 
                         // TODO: use step()
                         if (b == null)
@@ -837,6 +1143,7 @@ namespace go
                         {
                             _, width = utf8.DecodeRune(b[pos..end]);
                         }
+
                         if (width > 0L)
                         {
                             pos += width;
@@ -845,11 +1152,13 @@ namespace go
                         {
                             pos = end + 1L;
                         }
+
                     }
                     else
                     {
                         pos = matches[1L];
                     }
+
                     prevMatchEnd = matches[1L];
 
                     if (accept)
@@ -857,36 +1166,47 @@ namespace go
                         deliver(re.pad(matches));
                         i++;
                     }
+
                 }
 
             }
+
         }
 
         // Find returns a slice holding the text of the leftmost match in b of the regular expression.
         // A return value of nil indicates no match.
-        private static slice<byte> Find(this ref Regexp re, slice<byte> b)
+        private static slice<byte> Find(this ptr<Regexp> _addr_re, slice<byte> b)
         {
+            ref Regexp re = ref _addr_re.val;
+
             array<long> dstCap = new array<long>(2L);
             var a = re.doExecute(null, b, "", 0L, 2L, dstCap[..0L]);
             if (a == null)
             {
                 return null;
             }
-            return b[a[0L]..a[1L]];
+
+            return b.slice(a[0L], a[1L], a[1L]);
+
         }
 
         // FindIndex returns a two-element slice of integers defining the location of
         // the leftmost match in b of the regular expression. The match itself is at
         // b[loc[0]:loc[1]].
         // A return value of nil indicates no match.
-        private static slice<long> FindIndex(this ref Regexp re, slice<byte> b)
+        private static slice<long> FindIndex(this ptr<Regexp> _addr_re, slice<byte> b)
         {
+            slice<long> loc = default;
+            ref Regexp re = ref _addr_re.val;
+
             var a = re.doExecute(null, b, "", 0L, 2L, null);
             if (a == null)
             {
                 return null;
             }
+
             return a[0L..2L];
+
         }
 
         // FindString returns a string holding the text of the leftmost match in s of the regular
@@ -894,29 +1214,38 @@ namespace go
         // but it will also be empty if the regular expression successfully matches
         // an empty string. Use FindStringIndex or FindStringSubmatch if it is
         // necessary to distinguish these cases.
-        private static @string FindString(this ref Regexp re, @string s)
+        private static @string FindString(this ptr<Regexp> _addr_re, @string s)
         {
+            ref Regexp re = ref _addr_re.val;
+
             array<long> dstCap = new array<long>(2L);
             var a = re.doExecute(null, null, s, 0L, 2L, dstCap[..0L]);
             if (a == null)
             {
                 return "";
             }
+
             return s[a[0L]..a[1L]];
+
         }
 
         // FindStringIndex returns a two-element slice of integers defining the
         // location of the leftmost match in s of the regular expression. The match
         // itself is at s[loc[0]:loc[1]].
         // A return value of nil indicates no match.
-        private static slice<long> FindStringIndex(this ref Regexp re, @string s)
+        private static slice<long> FindStringIndex(this ptr<Regexp> _addr_re, @string s)
         {
+            slice<long> loc = default;
+            ref Regexp re = ref _addr_re.val;
+
             var a = re.doExecute(null, null, s, 0L, 2L, null);
             if (a == null)
             {
                 return null;
             }
+
             return a[0L..2L];
+
         }
 
         // FindReaderIndex returns a two-element slice of integers defining the
@@ -924,14 +1253,19 @@ namespace go
         // the RuneReader. The match text was found in the input stream at
         // byte offset loc[0] through loc[1]-1.
         // A return value of nil indicates no match.
-        private static slice<long> FindReaderIndex(this ref Regexp re, io.RuneReader r)
+        private static slice<long> FindReaderIndex(this ptr<Regexp> _addr_re, io.RuneReader r)
         {
+            slice<long> loc = default;
+            ref Regexp re = ref _addr_re.val;
+
             var a = re.doExecute(r, null, "", 0L, 2L, null);
             if (a == null)
             {
                 return null;
             }
+
             return a[0L..2L];
+
         }
 
         // FindSubmatch returns a slice of slices holding the text of the leftmost
@@ -939,23 +1273,28 @@ namespace go
         // subexpressions, as defined by the 'Submatch' descriptions in the package
         // comment.
         // A return value of nil indicates no match.
-        private static slice<slice<byte>> FindSubmatch(this ref Regexp re, slice<byte> b)
+        private static slice<slice<byte>> FindSubmatch(this ptr<Regexp> _addr_re, slice<byte> b)
         {
+            ref Regexp re = ref _addr_re.val;
+
             array<long> dstCap = new array<long>(4L);
             var a = re.doExecute(null, b, "", 0L, re.prog.NumCap, dstCap[..0L]);
             if (a == null)
             {
                 return null;
             }
+
             var ret = make_slice<slice<byte>>(1L + re.numSubexp);
             foreach (var (i) in ret)
             {
                 if (2L * i < len(a) && a[2L * i] >= 0L)
                 {
-                    ret[i] = b[a[2L * i]..a[2L * i + 1L]];
+                    ret[i] = b.slice(a[2L * i], a[2L * i + 1L], a[2L * i + 1L]);
                 }
+
             }
             return ret;
+
         }
 
         // Expand appends template to dst and returns the result; during the
@@ -975,21 +1314,27 @@ namespace go
         // equivalent to ${1x}, not ${1}x, and, $10 is equivalent to ${10}, not ${1}0.
         //
         // To insert a literal $ in the output, use $$ in the template.
-        private static slice<byte> Expand(this ref Regexp re, slice<byte> dst, slice<byte> template, slice<byte> src, slice<long> match)
+        private static slice<byte> Expand(this ptr<Regexp> _addr_re, slice<byte> dst, slice<byte> template, slice<byte> src, slice<long> match)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.expand(dst, string(template), src, "", match);
         }
 
         // ExpandString is like Expand but the template and source are strings.
         // It appends to and returns a byte slice in order to give the calling
         // code control over allocation.
-        private static slice<byte> ExpandString(this ref Regexp re, slice<byte> dst, @string template, @string src, slice<long> match)
+        private static slice<byte> ExpandString(this ptr<Regexp> _addr_re, slice<byte> dst, @string template, @string src, slice<long> match)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.expand(dst, template, null, src, match);
         }
 
-        private static slice<byte> expand(this ref Regexp re, slice<byte> dst, @string template, slice<byte> bsrc, @string src, slice<long> match)
+        private static slice<byte> expand(this ptr<Regexp> _addr_re, slice<byte> dst, @string template, slice<byte> bsrc, @string src, slice<long> match)
         {
+            ref Regexp re = ref _addr_re.val;
+
             while (len(template) > 0L)
             {
                 var i = strings.Index(template, "$");
@@ -997,6 +1342,7 @@ namespace go
                 {
                     break;
                 }
+
                 dst = append(dst, template[..i]);
                 template = template[i..];
                 if (len(template) > 1L && template[1L] == '$')
@@ -1005,7 +1351,9 @@ namespace go
                     dst = append(dst, '$');
                     template = template[2L..];
                     continue;
+
                 }
+
                 var (name, num, rest, ok) = extract(template);
                 if (!ok)
                 { 
@@ -1013,7 +1361,9 @@ namespace go
                     dst = append(dst, '$');
                     template = template[1L..];
                     continue;
+
                 }
+
                 template = rest;
                 if (num >= 0L)
                 {
@@ -1027,7 +1377,9 @@ namespace go
                         {
                             dst = append(dst, src[match[2L * num]..match[2L * num + 1L]]);
                         }
+
                     }
+
                 }
                 else
                 {
@@ -1048,28 +1400,38 @@ namespace go
                                 {
                                     dst = append(dst, src[match[2L * i]..match[2L * i + 1L]]);
                                 }
+
                                 break;
+
                             }
+
                         }
 
                         i = i__prev2;
                     }
-
                 }
+
             }
 
             dst = append(dst, template);
             return dst;
+
         }
 
         // extract returns the name from a leading "$name" or "${name}" in str.
         // If it is a number, extract returns num set to that number; otherwise num = -1.
         private static (@string, long, @string, bool) extract(@string str)
         {
+            @string name = default;
+            long num = default;
+            @string rest = default;
+            bool ok = default;
+
             if (len(str) < 2L || str[0L] != '$')
             {
-                return;
+                return ;
             }
+
             var brace = false;
             if (str[1L] == '{')
             {
@@ -1080,6 +1442,7 @@ namespace go
             {
                 str = str[1L..];
             }
+
             long i = 0L;
             while (i < len(str))
             {
@@ -1088,23 +1451,30 @@ namespace go
                 {
                     break;
                 }
+
                 i += size;
+
             }
 
             if (i == 0L)
             { 
                 // empty name is not okay
-                return;
+                return ;
+
             }
+
             name = str[..i];
             if (brace)
             {
                 if (i >= len(str) || str[i] != '}')
                 { 
                     // missing closing brace
-                    return;
+                    return ;
+
                 }
+
                 i++;
+
             } 
 
             // Parse number.
@@ -1119,7 +1489,9 @@ namespace go
                         num = -1L;
                         break;
                     }
+
                     num = num * 10L + int(name[i]) - '0';
+
                 } 
                 // Disallow leading zeros.
 
@@ -1131,9 +1503,11 @@ namespace go
             {
                 num = -1L;
             }
+
             rest = str[i..];
             ok = true;
-            return;
+            return ;
+
         }
 
         // FindSubmatchIndex returns a slice holding the index pairs identifying the
@@ -1141,8 +1515,10 @@ namespace go
         // its subexpressions, as defined by the 'Submatch' and 'Index' descriptions
         // in the package comment.
         // A return value of nil indicates no match.
-        private static slice<long> FindSubmatchIndex(this ref Regexp re, slice<byte> b)
+        private static slice<long> FindSubmatchIndex(this ptr<Regexp> _addr_re, slice<byte> b)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.pad(re.doExecute(null, b, "", 0L, re.prog.NumCap, null));
         }
 
@@ -1151,14 +1527,17 @@ namespace go
         // its subexpressions, as defined by the 'Submatch' description in the
         // package comment.
         // A return value of nil indicates no match.
-        private static slice<@string> FindStringSubmatch(this ref Regexp re, @string s)
+        private static slice<@string> FindStringSubmatch(this ptr<Regexp> _addr_re, @string s)
         {
+            ref Regexp re = ref _addr_re.val;
+
             array<long> dstCap = new array<long>(4L);
             var a = re.doExecute(null, null, s, 0L, re.prog.NumCap, dstCap[..0L]);
             if (a == null)
             {
                 return null;
             }
+
             var ret = make_slice<@string>(1L + re.numSubexp);
             foreach (var (i) in ret)
             {
@@ -1166,8 +1545,10 @@ namespace go
                 {
                     ret[i] = s[a[2L * i]..a[2L * i + 1L]];
                 }
+
             }
             return ret;
+
         }
 
         // FindStringSubmatchIndex returns a slice holding the index pairs
@@ -1175,8 +1556,10 @@ namespace go
         // matches, if any, of its subexpressions, as defined by the 'Submatch' and
         // 'Index' descriptions in the package comment.
         // A return value of nil indicates no match.
-        private static slice<long> FindStringSubmatchIndex(this ref Regexp re, @string s)
+        private static slice<long> FindStringSubmatchIndex(this ptr<Regexp> _addr_re, @string s)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.pad(re.doExecute(null, null, s, 0L, re.prog.NumCap, null));
         }
 
@@ -1185,12 +1568,14 @@ namespace go
         // the RuneReader, and the matches, if any, of its subexpressions, as defined
         // by the 'Submatch' and 'Index' descriptions in the package comment. A
         // return value of nil indicates no match.
-        private static slice<long> FindReaderSubmatchIndex(this ref Regexp re, io.RuneReader r)
+        private static slice<long> FindReaderSubmatchIndex(this ptr<Regexp> _addr_re, io.RuneReader r)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.pad(re.doExecute(r, null, "", 0L, re.prog.NumCap, null));
         }
 
-        private static readonly long startSize = 10L; // The size at which to start a slice in the 'All' routines.
+        private static readonly long startSize = (long)10L; // The size at which to start a slice in the 'All' routines.
 
         // FindAll is the 'All' version of Find; it returns a slice of all successive
         // matches of the expression, as defined by the 'All' description in the
@@ -1202,155 +1587,200 @@ namespace go
         // matches of the expression, as defined by the 'All' description in the
         // package comment.
         // A return value of nil indicates no match.
-        private static slice<slice<byte>> FindAll(this ref Regexp re, slice<byte> b, long n)
+        private static slice<slice<byte>> FindAll(this ptr<Regexp> _addr_re, slice<byte> b, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n < 0L)
             {
                 n = len(b) + 1L;
             }
-            var result = make_slice<slice<byte>>(0L, startSize);
+
+            slice<slice<byte>> result = default;
             re.allMatches("", b, n, match =>
             {
-                result = append(result, b[match[0L]..match[1L]]);
+                if (result == null)
+                {
+                    result = make_slice<slice<byte>>(0L, startSize);
+                }
+
+                result = append(result, b.slice(match[0L], match[1L], match[1L]));
+
             });
-            if (len(result) == 0L)
-            {
-                return null;
-            }
             return result;
+
         }
 
         // FindAllIndex is the 'All' version of FindIndex; it returns a slice of all
         // successive matches of the expression, as defined by the 'All' description
         // in the package comment.
         // A return value of nil indicates no match.
-        private static slice<slice<long>> FindAllIndex(this ref Regexp re, slice<byte> b, long n)
+        private static slice<slice<long>> FindAllIndex(this ptr<Regexp> _addr_re, slice<byte> b, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n < 0L)
             {
                 n = len(b) + 1L;
             }
-            var result = make_slice<slice<long>>(0L, startSize);
+
+            slice<slice<long>> result = default;
             re.allMatches("", b, n, match =>
             {
+                if (result == null)
+                {
+                    result = make_slice<slice<long>>(0L, startSize);
+                }
+
                 result = append(result, match[0L..2L]);
+
             });
-            if (len(result) == 0L)
-            {
-                return null;
-            }
             return result;
+
         }
 
         // FindAllString is the 'All' version of FindString; it returns a slice of all
         // successive matches of the expression, as defined by the 'All' description
         // in the package comment.
         // A return value of nil indicates no match.
-        private static slice<@string> FindAllString(this ref Regexp re, @string s, long n)
+        private static slice<@string> FindAllString(this ptr<Regexp> _addr_re, @string s, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n < 0L)
             {
                 n = len(s) + 1L;
             }
-            var result = make_slice<@string>(0L, startSize);
+
+            slice<@string> result = default;
             re.allMatches(s, null, n, match =>
             {
+                if (result == null)
+                {
+                    result = make_slice<@string>(0L, startSize);
+                }
+
                 result = append(result, s[match[0L]..match[1L]]);
+
             });
-            if (len(result) == 0L)
-            {
-                return null;
-            }
             return result;
+
         }
 
         // FindAllStringIndex is the 'All' version of FindStringIndex; it returns a
         // slice of all successive matches of the expression, as defined by the 'All'
         // description in the package comment.
         // A return value of nil indicates no match.
-        private static slice<slice<long>> FindAllStringIndex(this ref Regexp re, @string s, long n)
+        private static slice<slice<long>> FindAllStringIndex(this ptr<Regexp> _addr_re, @string s, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n < 0L)
             {
                 n = len(s) + 1L;
             }
-            var result = make_slice<slice<long>>(0L, startSize);
+
+            slice<slice<long>> result = default;
             re.allMatches(s, null, n, match =>
             {
+                if (result == null)
+                {
+                    result = make_slice<slice<long>>(0L, startSize);
+                }
+
                 result = append(result, match[0L..2L]);
+
             });
-            if (len(result) == 0L)
-            {
-                return null;
-            }
             return result;
+
         }
 
         // FindAllSubmatch is the 'All' version of FindSubmatch; it returns a slice
         // of all successive matches of the expression, as defined by the 'All'
         // description in the package comment.
         // A return value of nil indicates no match.
-        private static slice<slice<slice<byte>>> FindAllSubmatch(this ref Regexp re, slice<byte> b, long n)
+        private static slice<slice<slice<byte>>> FindAllSubmatch(this ptr<Regexp> _addr_re, slice<byte> b, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n < 0L)
             {
                 n = len(b) + 1L;
             }
-            var result = make_slice<slice<slice<byte>>>(0L, startSize);
+
+            slice<slice<slice<byte>>> result = default;
             re.allMatches("", b, n, match =>
             {
+                if (result == null)
+                {
+                    result = make_slice<slice<slice<byte>>>(0L, startSize);
+                }
+
                 var slice = make_slice<slice<byte>>(len(match) / 2L);
                 foreach (var (j) in slice)
                 {
                     if (match[2L * j] >= 0L)
                     {
-                        slice[j] = b[match[2L * j]..match[2L * j + 1L]];
+                        slice[j] = b.slice(match[2L * j], match[2L * j + 1L], match[2L * j + 1L]);
                     }
+
                 }
                 result = append(result, slice);
+
             });
-            if (len(result) == 0L)
-            {
-                return null;
-            }
             return result;
+
         }
 
         // FindAllSubmatchIndex is the 'All' version of FindSubmatchIndex; it returns
         // a slice of all successive matches of the expression, as defined by the
         // 'All' description in the package comment.
         // A return value of nil indicates no match.
-        private static slice<slice<long>> FindAllSubmatchIndex(this ref Regexp re, slice<byte> b, long n)
+        private static slice<slice<long>> FindAllSubmatchIndex(this ptr<Regexp> _addr_re, slice<byte> b, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n < 0L)
             {
                 n = len(b) + 1L;
             }
-            var result = make_slice<slice<long>>(0L, startSize);
+
+            slice<slice<long>> result = default;
             re.allMatches("", b, n, match =>
             {
+                if (result == null)
+                {
+                    result = make_slice<slice<long>>(0L, startSize);
+                }
+
                 result = append(result, match);
+
             });
-            if (len(result) == 0L)
-            {
-                return null;
-            }
             return result;
+
         }
 
         // FindAllStringSubmatch is the 'All' version of FindStringSubmatch; it
         // returns a slice of all successive matches of the expression, as defined by
         // the 'All' description in the package comment.
         // A return value of nil indicates no match.
-        private static slice<slice<@string>> FindAllStringSubmatch(this ref Regexp re, @string s, long n)
+        private static slice<slice<@string>> FindAllStringSubmatch(this ptr<Regexp> _addr_re, @string s, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n < 0L)
             {
                 n = len(s) + 1L;
             }
-            var result = make_slice<slice<@string>>(0L, startSize);
+
+            slice<slice<@string>> result = default;
             re.allMatches(s, null, n, match =>
             {
+                if (result == null)
+                {
+                    result = make_slice<slice<@string>>(0L, startSize);
+                }
+
                 var slice = make_slice<@string>(len(match) / 2L);
                 foreach (var (j) in slice)
                 {
@@ -1358,14 +1788,13 @@ namespace go
                     {
                         slice[j] = s[match[2L * j]..match[2L * j + 1L]];
                     }
+
                 }
                 result = append(result, slice);
+
             });
-            if (len(result) == 0L)
-            {
-                return null;
-            }
             return result;
+
         }
 
         // FindAllStringSubmatchIndex is the 'All' version of
@@ -1373,22 +1802,28 @@ namespace go
         // the expression, as defined by the 'All' description in the package
         // comment.
         // A return value of nil indicates no match.
-        private static slice<slice<long>> FindAllStringSubmatchIndex(this ref Regexp re, @string s, long n)
+        private static slice<slice<long>> FindAllStringSubmatchIndex(this ptr<Regexp> _addr_re, @string s, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n < 0L)
             {
                 n = len(s) + 1L;
             }
-            var result = make_slice<slice<long>>(0L, startSize);
+
+            slice<slice<long>> result = default;
             re.allMatches(s, null, n, match =>
             {
+                if (result == null)
+                {
+                    result = make_slice<slice<long>>(0L, startSize);
+                }
+
                 result = append(result, match);
+
             });
-            if (len(result) == 0L)
-            {
-                return null;
-            }
             return result;
+
         }
 
         // Split slices s into substrings separated by the expression and returns a slice of
@@ -1406,16 +1841,20 @@ namespace go
         //   n > 0: at most n substrings; the last substring will be the unsplit remainder.
         //   n == 0: the result is nil (zero substrings)
         //   n < 0: all substrings
-        private static slice<@string> Split(this ref Regexp re, @string s, long n)
+        private static slice<@string> Split(this ptr<Regexp> _addr_re, @string s, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (n == 0L)
             {
                 return null;
             }
+
             if (len(re.expr) > 0L && len(s) == 0L)
             {
                 return new slice<@string>(new @string[] { "" });
             }
+
             var matches = re.FindAllStringIndex(s, n);
             var strings = make_slice<@string>(0L, len(matches));
 
@@ -1427,18 +1866,23 @@ namespace go
                 {
                     break;
                 }
+
                 end = match[0L];
                 if (match[1L] != 0L)
                 {
                     strings = append(strings, s[beg..end]);
                 }
+
                 beg = match[1L];
+
             }
             if (end != len(s))
             {
                 strings = append(strings, s[beg..]);
             }
+
             return strings;
+
         }
     }
 }

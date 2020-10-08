@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:26:50 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:46 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\ipsock.go
 using context = go.context_package;
+using bytealg = go.@internal.bytealg_package;
 using sync = go.sync_package;
 using static go.builtin;
 using System;
@@ -65,17 +66,18 @@ namespace go
         {
             switch (addr.type())
             {
-                case ref TCPAddr addr:
+                case ptr<TCPAddr> addr:
                     return addr.IP.To4() != null;
                     break;
-                case ref UDPAddr addr:
+                case ptr<UDPAddr> addr:
                     return addr.IP.To4() != null;
                     break;
-                case ref IPAddr addr:
+                case ptr<IPAddr> addr:
                     return addr.IP.To4() != null;
                     break;
             }
             return false;
+
         }
 
         // isNotIPv4 reports whether addr does not contain an IPv4 address.
@@ -108,7 +110,9 @@ namespace go
             {
                 return addrs.first(isNotIPv4);
             }
+
             return addrs.first(isIPv4);
+
         }
 
         // first returns the first address which satisfies strategy, or if
@@ -121,8 +125,10 @@ namespace go
                 {
                     return addr;
                 }
+
             }
             return addrs[0L];
+
         }
 
         // partition divides an address list into two categories, using a
@@ -133,6 +139,9 @@ namespace go
         // non-empty.
         private static (addrList, addrList) partition(this addrList addrs, Func<Addr, bool> strategy)
         {
+            addrList primaries = default;
+            addrList fallbacks = default;
+
             bool primaryLabel = default;
             foreach (var (i, addr) in addrs)
             {
@@ -146,8 +155,10 @@ namespace go
                 {
                     fallbacks = append(fallbacks, addr);
                 }
+
             }
-            return;
+            return ;
+
         }
 
         // filterAddrList applies a filter to a list of IP addresses,
@@ -156,6 +167,9 @@ namespace go
         // The result contains at least one address when error is nil.
         private static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slice<IPAddr> ips, Func<IPAddr, Addr> inetaddr, @string originalAddr)
         {
+            addrList _p0 = default;
+            error _p0 = default!;
+
             addrList addrs = default;
             foreach (var (_, ip) in ips)
             {
@@ -163,12 +177,15 @@ namespace go
                 {
                     addrs = append(addrs, inetaddr(ip));
                 }
+
             }
             if (len(addrs) == 0L)
             {
-                return (null, ref new AddrError(Err:errNoSuitableAddress.Error(),Addr:originalAddr));
+                return (null, error.As(addr(new AddrError(Err:errNoSuitableAddress.Error(),Addr:originalAddr))!)!);
             }
-            return (addrs, null);
+
+            return (addrs, error.As(null!)!);
+
         }
 
         // ipv4only reports whether addr is an IPv4 address.
@@ -194,11 +211,15 @@ namespace go
         // and port results.
         public static (@string, @string, error) SplitHostPort(@string hostport)
         {
-            const @string missingPort = "missing port in address";
-            const @string tooManyColons = "too many colons in address";
+            @string host = default;
+            @string port = default;
+            error err = default!;
+
+            const @string missingPort = (@string)"missing port in address";
+            const @string tooManyColons = (@string)"too many colons in address";
             Func<@string, @string, (@string, @string, error)> addrErr = (addr, why) =>
             {
-                return ("", "", ref new AddrError(Err:why,Addr:addr));
+                return ("", "", error.As(addr(new AddrError(Err:why,Addr:addr))!)!);
             }
 ;
             long j = 0L;
@@ -210,14 +231,16 @@ namespace go
             {
                 return addrErr(hostport, missingPort);
             }
+
             if (hostport[0L] == '[')
             { 
                 // Expect the first ']' just before the last ':'.
-                var end = byteIndex(hostport, ']');
+                var end = bytealg.IndexByteString(hostport, ']');
                 if (end < 0L)
                 {
                     return addrErr(hostport, "missing ']' in address");
                 }
+
 
                 if (end + 1L == len(hostport)) 
                     // There can't be a ':' behind the ']' now.
@@ -229,6 +252,7 @@ namespace go
                     {
                         return addrErr(hostport, tooManyColons);
                     }
+
                     return addrErr(hostport, missingPort);
                                 host = hostport[1L..end];
                 j = 1L;
@@ -237,25 +261,33 @@ namespace go
             else
             {
                 host = hostport[..i];
-                if (byteIndex(host, ':') >= 0L)
+                if (bytealg.IndexByteString(host, ':') >= 0L)
                 {
                     return addrErr(hostport, tooManyColons);
                 }
+
             }
-            if (byteIndex(hostport[j..], '[') >= 0L)
+
+            if (bytealg.IndexByteString(hostport[j..], '[') >= 0L)
             {
                 return addrErr(hostport, "unexpected '[' in address");
             }
-            if (byteIndex(hostport[k..], ']') >= 0L)
+
+            if (bytealg.IndexByteString(hostport[k..], ']') >= 0L)
             {
                 return addrErr(hostport, "unexpected ']' in address");
             }
+
             port = hostport[i + 1L..];
-            return (host, port, null);
+            return (host, port, error.As(null!)!);
+
         }
 
         private static (@string, @string) splitHostZone(@string s)
-        { 
+        {
+            @string host = default;
+            @string zone = default;
+ 
             // The IPv6 scoped addressing zone identifier starts after the
             // last percent sign.
             {
@@ -265,6 +297,7 @@ namespace go
                 {
                     host = s[..i];
                     zone = s[i + 1L..];
+
                 }
                 else
                 {
@@ -272,7 +305,9 @@ namespace go
                 }
 
             }
-            return;
+
+            return ;
+
         }
 
         // JoinHostPort combines host and port into a network address of the
@@ -284,20 +319,26 @@ namespace go
         { 
             // We assume that host is a literal IPv6 address if host has
             // colons.
-            if (byteIndex(host, ':') >= 0L)
+            if (bytealg.IndexByteString(host, ':') >= 0L)
             {
                 return "[" + host + "]:" + port;
             }
+
             return host + ":" + port;
+
         }
 
         // internetAddrList resolves addr, which may be a literal IP
         // address or a DNS name, and returns a list of internet protocol
         // family addresses. The result contains at least one address when
         // error is nil.
-        private static (addrList, error) internetAddrList(this ref Resolver _r, context.Context ctx, @string net, @string addr) => func(_r, (ref Resolver r, Defer _, Panic panic, Recover __) =>
+        private static (addrList, error) internetAddrList(this ptr<Resolver> _addr_r, context.Context ctx, @string net, @string addr) => func((_, panic, __) =>
         {
-            error err = default;            @string host = default;            @string port = default;
+            addrList _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            error err = default!;            @string host = default;            @string port = default;
             long portnum = default;
             switch (net)
             {
@@ -318,15 +359,18 @@ namespace go
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (null, error.As(err)!);
                         }
+
                         portnum, err = r.LookupPort(ctx, net, port);
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (null, error.As(err)!);
                         }
+
                     }
+
                     break;
                 case "ip": 
 
@@ -337,9 +381,10 @@ namespace go
                     {
                         host = addr;
                     }
+
                     break;
                 default: 
-                    return (null, UnknownNetworkError(net));
+                    return (null, error.As(UnknownNetworkError(net))!);
                     break;
             }
             Func<IPAddr, Addr> inetaddr = ip =>
@@ -351,78 +396,47 @@ namespace go
                     case "tcp4": 
 
                     case "tcp6": 
-                        return ref new TCPAddr(IP:ip.IP,Port:portnum,Zone:ip.Zone);
+                        return addr(new TCPAddr(IP:ip.IP,Port:portnum,Zone:ip.Zone));
                         break;
                     case "udp": 
 
                     case "udp4": 
 
                     case "udp6": 
-                        return ref new UDPAddr(IP:ip.IP,Port:portnum,Zone:ip.Zone);
+                        return addr(new UDPAddr(IP:ip.IP,Port:portnum,Zone:ip.Zone));
                         break;
                     case "ip": 
 
                     case "ip4": 
 
                     case "ip6": 
-                        return ref new IPAddr(IP:ip.IP,Zone:ip.Zone);
+                        return addr(new IPAddr(IP:ip.IP,Zone:ip.Zone));
                         break;
                     default: 
                         panic("unexpected network: " + net);
                         break;
                 }
+
             }
 ;
             if (host == "")
             {
-                return (new addrList(inetaddr(IPAddr{})), null);
+                return (new addrList(inetaddr(IPAddr{})), error.As(null!)!);
             } 
 
             // Try as a literal IP address, then as a DNS name.
-            slice<IPAddr> ips = default;
+            var (ips, err) = r.lookupIPAddr(ctx, net, host);
+            if (err != null)
             {
-                var ip__prev1 = ip;
-
-                var ip = parseIPv4(host);
-
-                if (ip != null)
-                {
-                    ips = new slice<IPAddr>(new IPAddr[] { {IP:ip} });
-                }                {
-                    var ip__prev2 = ip;
-
-                    var (ip, zone) = parseIPv6(host, true);
-
-
-                    else if (ip != null)
-                    {
-                        ips = new slice<IPAddr>(new IPAddr[] { {IP:ip,Zone:zone} }); 
-                        // Issue 18806: if the machine has halfway configured
-                        // IPv6 such that it can bind on "::" (IPv6unspecified)
-                        // but not connect back to that same address, fall
-                        // back to dialing 0.0.0.0.
-                        if (ip.Equal(IPv6unspecified))
-                        {
-                            ips = append(ips, new IPAddr(IP:IPv4zero));
-                        }
-                    }
-                    else
-                    { 
-                        // Try as a DNS name.
-                        ips, err = r.LookupIPAddr(ctx, host);
-                        if (err != null)
-                        {
-                            return (null, err);
-                        }
-                    }
-
-                    ip = ip__prev2;
-
-                }
-
-
-                ip = ip__prev1;
-
+                return (null, error.As(err)!);
+            } 
+            // Issue 18806: if the machine has halfway configured
+            // IPv6 such that it can bind on "::" (IPv6unspecified)
+            // but not connect back to that same address, fall
+            // back to dialing 0.0.0.0.
+            if (len(ips) == 1L && ips[0L].IP.Equal(IPv6unspecified))
+            {
+                ips = append(ips, new IPAddr(IP:IPv4zero));
             }
 
             Func<IPAddr, bool> filter = default;
@@ -430,11 +444,14 @@ namespace go
             {
                 filter = ipv4only;
             }
+
             if (net != "" && net[len(net) - 1L] == '6')
             {
                 filter = ipv6only;
             }
+
             return filterAddrList(filter, ips, inetaddr, host);
+
         });
 
         private static IP loopbackIP(@string net)
@@ -443,7 +460,9 @@ namespace go
             {
                 return IPv6loopback;
             }
+
             return new IP(127,0,0,1);
+
         }
     }
 }

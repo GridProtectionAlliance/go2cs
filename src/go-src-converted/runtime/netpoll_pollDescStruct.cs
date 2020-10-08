@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:18:35 UTC
+//     Generated on 2020 October 08 03:21:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,30 +30,34 @@ namespace go
                 this.@lock = default;
                 this.fd = default;
                 this.closing = default;
-                this.seq = default;
+                this.everr = default;
+                this.user = default;
+                this.rseq = default;
                 this.rg = default;
                 this.rt = default;
                 this.rd = default;
+                this.wseq = default;
                 this.wg = default;
                 this.wt = default;
                 this.wd = default;
-                this.user = default;
             }
 
-            public pollDesc(ref ptr<pollDesc> link = default, mutex @lock = default, System.UIntPtr fd = default, bool closing = default, System.UIntPtr seq = default, System.UIntPtr rg = default, timer rt = default, long rd = default, System.UIntPtr wg = default, timer wt = default, long wd = default, uint user = default)
+            public pollDesc(ref ptr<pollDesc> link = default, mutex @lock = default, System.UIntPtr fd = default, bool closing = default, bool everr = default, uint user = default, System.UIntPtr rseq = default, System.UIntPtr rg = default, timer rt = default, long rd = default, System.UIntPtr wseq = default, System.UIntPtr wg = default, timer wt = default, long wd = default)
             {
                 this.link = link;
                 this.@lock = @lock;
                 this.fd = fd;
                 this.closing = closing;
-                this.seq = seq;
+                this.everr = everr;
+                this.user = user;
+                this.rseq = rseq;
                 this.rg = rg;
                 this.rt = rt;
                 this.rd = rd;
+                this.wseq = wseq;
                 this.wg = wg;
                 this.wt = wt;
                 this.wd = wd;
-                this.user = user;
             }
 
             // Enable comparisons between nil and pollDesc struct
@@ -76,7 +80,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static pollDesc pollDesc_cast(dynamic value)
         {
-            return new pollDesc(ref value.link, value.@lock, value.fd, value.closing, value.seq, value.rg, value.rt, value.rd, value.wg, value.wt, value.wd, value.user);
+            return new pollDesc(ref value.link, value.@lock, value.fd, value.closing, value.everr, value.user, value.rseq, value.rg, value.rt, value.rd, value.wseq, value.wg, value.wt, value.wd);
         }
     }
 }

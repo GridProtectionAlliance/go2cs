@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 August 29 08:31:55 UTC
+// package x509 -- go2cs converted at 2020 October 08 03:36:58 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\root_solaris.go
 

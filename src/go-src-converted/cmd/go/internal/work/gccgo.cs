@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2020 August 29 10:01:36 UTC
+// package work -- go2cs converted at 2020 October 08 04:35:02 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\gccgo.go
 using fmt = go.fmt_package;
@@ -33,16 +33,18 @@ namespace @internal
 
         public static @string GccgoName = default;        public static @string GccgoBin = default;
 
-        private static error gccgoErr = default;
+        private static error gccgoErr = default!;
 
         private static void init()
         {
-            GccgoName = os.Getenv("GCCGO");
+            GccgoName = cfg.Getenv("GCCGO");
             if (GccgoName == "")
             {
                 GccgoName = "gccgo";
             }
+
             GccgoBin, gccgoErr = exec.LookPath(GccgoName);
+
         }
 
         private static @string compiler(this gccgoToolchain _p0)
@@ -57,26 +59,49 @@ namespace @internal
             return GccgoBin;
         }
 
+        private static @string ar(this gccgoToolchain _p0)
+        {
+            var ar = cfg.Getenv("AR");
+            if (ar == "")
+            {
+                ar = "ar";
+            }
+
+            return ar;
+
+        }
+
         private static void checkGccgoBin()
         {
             if (gccgoErr == null)
             {
-                return;
+                return ;
             }
+
             fmt.Fprintf(os.Stderr, "cmd/go: gccgo: %s\n", gccgoErr);
-            os.Exit(2L);
+            @base.SetExitStatus(2L);
+            @base.Exit();
+
         }
 
-        private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ref Builder b, ref Action a, @string archive, slice<byte> importcfg, bool asmhdr, slice<@string> gofiles)
+        private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles)
         {
+            @string ofile = default;
+            slice<byte> output = default;
+            error err = default!;
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+
             var p = a.Package;
             var objdir = a.Objdir;
             @string @out = "_go_.o";
             ofile = objdir + out;
             @string gcargs = new slice<@string>(new @string[] { "-g" });
             gcargs = append(gcargs, b.gccArchArgs());
+            gcargs = append(gcargs, "-fdebug-prefix-map=" + b.WorkDir + "=/tmp/go-build");
+            gcargs = append(gcargs, "-gno-record-gcc-switches");
             {
-                var pkgpath = gccgoPkgpath(p);
+                var pkgpath = gccgoPkgpath(_addr_p);
 
                 if (pkgpath != "")
                 {
@@ -84,10 +109,12 @@ namespace @internal
                 }
 
             }
+
             if (p.Internal.LocalPrefix != "")
             {
                 gcargs = append(gcargs, "-fgo-relative-import-path=" + p.Internal.LocalPrefix);
             }
+
             var args = str.StringList(tools.compiler(), "-c", gcargs, "-o", ofile, forcedGccgoflags);
             if (importcfg != null)
             {
@@ -100,13 +127,15 @@ namespace @internal
 
                         if (err != null)
                         {
-                            return ("", null, err);
+                            return ("", null, error.As(err)!);
                         }
 
                         err = err__prev3;
 
                     }
+
                     args = append(args, "-fgo-importcfg=" + objdir + "importcfg");
+
                 }
                 else
                 {
@@ -114,26 +143,37 @@ namespace @internal
                     {
                         var err__prev3 = err;
 
-                        err = buildImportcfgSymlinks(b, root, importcfg);
+                        err = buildImportcfgSymlinks(_addr_b, root, importcfg);
 
                         if (err != null)
                         {
-                            return ("", null, err);
+                            return ("", null, error.As(err)!);
                         }
 
                         err = err__prev3;
 
                     }
+
                     args = append(args, "-I", root);
+
                 }
+
             }
+
+            if (cfg.BuildTrimpath && b.gccSupportsFlag(args[..1L], "-ffile-prefix-map=a=b"))
+            {
+                args = append(args, "-ffile-prefix-map=" + @base.Cwd + "=.");
+                args = append(args, "-ffile-prefix-map=" + b.WorkDir + "=/tmp/go-build");
+            }
+
             args = append(args, a.Package.Internal.Gccgoflags);
             foreach (var (_, f) in gofiles)
             {
                 args = append(args, mkAbs(p.Dir, f));
             }
-            output, err = b.runOut(p.Dir, p.ImportPath, null, args);
-            return (ofile, output, err);
+            output, err = b.runOut(a, p.Dir, null, args);
+            return (ofile, output, error.As(err)!);
+
         }
 
         // buildImportcfgSymlinks builds in root a tree of symlinks
@@ -141,8 +181,10 @@ namespace @internal
         // This serves as a temporary transition mechanism until
         // we can depend on gccgo reading an importcfg directly.
         // (The Go 1.9 and later gc compilers already do.)
-        private static error buildImportcfgSymlinks(ref Builder b, @string root, slice<byte> importcfg)
+        private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, slice<byte> importcfg)
         {
+            ref Builder b = ref _addr_b.val;
+
             foreach (var (lineNum, line) in strings.Split(string(importcfg), "\n"))
             {
                 lineNum++; // 1-based
@@ -151,10 +193,12 @@ namespace @internal
                 {
                     continue;
                 }
+
                 if (line == "" || strings.HasPrefix(line, "#"))
                 {
                     continue;
                 }
+
                 @string verb = default;                @string args = default;
 
                 {
@@ -170,11 +214,13 @@ namespace @internal
                     {
                         verb = line[..i];
                         args = strings.TrimSpace(line[i + 1L..]);
+
                     }
 
                     i = i__prev1;
 
                 }
+
                 @string before = default;                @string after = default;
 
                 {
@@ -186,18 +232,21 @@ namespace @internal
                     {
                         before = args[..i];
                         after = args[i + 1L..];
+
                     }
 
                     i = i__prev1;
 
                 }
+
                 switch (verb)
                 {
                     case "packagefile": 
                         if (before == "" || after == "")
                         {
-                            return error.As(fmt.Errorf("importcfg:%d: invalid packagefile: syntax is \"packagefile path=filename\": %s", lineNum, line));
+                            return error.As(fmt.Errorf("importcfg:%d: invalid packagefile: syntax is \"packagefile path=filename\": %s", lineNum, line))!;
                         }
+
                         var archive = gccgoArchive(root, before);
                         {
                             var err__prev1 = err;
@@ -206,12 +255,13 @@ namespace @internal
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                         {
                             var err__prev1 = err;
 
@@ -219,18 +269,20 @@ namespace @internal
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                         break;
                     case "importmap": 
                         if (before == "" || after == "")
                         {
-                            return error.As(fmt.Errorf("importcfg:%d: invalid importmap: syntax is \"importmap old=new\": %s", lineNum, line));
+                            return error.As(fmt.Errorf("importcfg:%d: invalid importmap: syntax is \"importmap old=new\": %s", lineNum, line))!;
                         }
+
                         var beforeA = gccgoArchive(root, before);
                         var afterA = gccgoArchive(root, after);
                         {
@@ -240,12 +292,13 @@ namespace @internal
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                         {
                             var err__prev1 = err;
 
@@ -253,12 +306,13 @@ namespace @internal
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                         {
                             var err__prev1 = err;
 
@@ -266,26 +320,34 @@ namespace @internal
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                         break;
                     case "packageshlib": 
-                        return error.As(fmt.Errorf("gccgo -importcfg does not support shared libraries"));
+                        return error.As(fmt.Errorf("gccgo -importcfg does not support shared libraries"))!;
                         break;
                     default: 
                         @base.Fatalf("importcfg:%d: unknown directive %q", lineNum, verb);
                         break;
                 }
+
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static (slice<@string>, error) asm(this gccgoToolchain tools, ref Builder b, ref Action a, slice<@string> sfiles)
+        private static (slice<@string>, error) asm(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_a, slice<@string> sfiles)
         {
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+
             var p = a.Package;
             slice<@string> ofiles = default;
             foreach (var (_, sfile) in sfiles)
@@ -296,7 +358,7 @@ namespace @internal
                 sfile = mkAbs(p.Dir, sfile);
                 @string defs = new slice<@string>(new @string[] { "-D", "GOOS_"+cfg.Goos, "-D", "GOARCH_"+cfg.Goarch });
                 {
-                    var pkgpath = gccgoCleanPkgpath(p);
+                    var pkgpath = gccgoCleanPkgpath(_addr_p);
 
                     if (pkgpath != "")
                     {
@@ -304,15 +366,28 @@ namespace @internal
                     }
 
                 }
+
                 defs = tools.maybePIC(defs);
                 defs = append(defs, b.gccArchArgs());
                 var err = b.run(a, p.Dir, p.ImportPath, null, tools.compiler(), "-xassembler-with-cpp", "-I", a.Objdir, "-c", "-o", ofile, defs, sfile);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
             }
-            return (ofiles, null);
+            return (ofiles, error.As(null!)!);
+
+        }
+
+        private static (@string, error) symabis(this gccgoToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_a, slice<@string> sfiles)
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+
+            return ("", error.As(null!)!);
         }
 
         private static @string gccgoArchive(@string basedir, @string imp)
@@ -321,10 +396,14 @@ namespace @internal
             var afile = filepath.Join(basedir, end); 
             // add "lib" to the final element
             return filepath.Join(filepath.Dir(afile), "lib" + filepath.Base(afile));
+
         }
 
-        private static error pack(this gccgoToolchain _p0, ref Builder b, ref Action a, @string afile, slice<@string> ofiles)
+        private static error pack(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_a, @string afile, slice<@string> ofiles)
         {
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+
             var p = a.Package;
             var objdir = a.Objdir;
             slice<@string> absOfiles = default;
@@ -332,11 +411,39 @@ namespace @internal
             {
                 absOfiles = append(absOfiles, mkAbs(objdir, f));
             }
-            return error.As(b.run(a, p.Dir, p.ImportPath, null, "ar", "rc", mkAbs(objdir, afile), absOfiles));
+            slice<@string> arArgs = default;
+            if (cfg.Goos == "aix" && cfg.Goarch == "ppc64")
+            { 
+                // AIX puts both 32-bit and 64-bit objects in the same archive.
+                // Tell the AIX "ar" command to only care about 64-bit objects.
+                arArgs = new slice<@string>(new @string[] { "-X64" });
+
+            }
+
+            var absAfile = mkAbs(objdir, afile); 
+            // Try with D modifier first, then without if that fails.
+            var (output, err) = b.runOut(a, p.Dir, null, tools.ar(), arArgs, "rcD", absAfile, absOfiles);
+            if (err != null)
+            {
+                return error.As(b.run(a, p.Dir, p.ImportPath, null, tools.ar(), arArgs, "rc", absAfile, absOfiles))!;
+            }
+
+            if (len(output) > 0L)
+            { 
+                // Show the output if there is any even without errors.
+                b.showOutput(a, p.Dir, p.ImportPath, b.processOutput(output));
+
+            }
+
+            return error.As(null!)!;
+
         }
 
-        private static error link(this gccgoToolchain tools, ref Builder b, ref Action root, @string @out, @string importcfg, slice<ref Action> allactions, @string buildmode, @string desc)
-        { 
+        private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_root, @string @out, @string importcfg, slice<ptr<Action>> allactions, @string buildmode, @string desc)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref Action root = ref _addr_root.val;
+ 
             // gccgo needs explicit linking with all package dependencies,
             // and all LDFLAGS from cgo dependencies.
             @string afiles = new slice<@string>(new @string[] {  });
@@ -353,14 +460,16 @@ namespace @internal
                 objc = len(root.Package.MFiles) > 0L;
                 fortran = len(root.Package.FFiles) > 0L;
             }
+
             Func<@string, error> readCgoFlags = flagsFile =>
             {
                 var (flags, err) = ioutil.ReadFile(flagsFile);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
-                const @string ldflagsPrefix = "_CGO_LDFLAGS=";
+
+                const @string ldflagsPrefix = (@string)"_CGO_LDFLAGS=";
 
                 foreach (var (_, line) in strings.Split(string(flags), "\n"))
                 {
@@ -376,12 +485,25 @@ namespace @internal
                             {
                                 cgoldflags = append(cgoldflags, flag);
                             }
+
                         }
+
                     }
+
                 }
-                return error.As(null);
+                return error.As(null!)!;
+
             }
 ;
+
+            slice<@string> arArgs = default;
+            if (cfg.Goos == "aix" && cfg.Goarch == "ppc64")
+            { 
+                // AIX puts both 32-bit and 64-bit objects in the same archive.
+                // Tell the AIX "ar" command to only care about 64-bit objects.
+                arArgs = new slice<@string>(new @string[] { "-X64" });
+
+            }
 
             long newID = 0L;
             Func<@string, (@string, error)> readAndRemoveCgoFlags = archive =>
@@ -391,16 +513,17 @@ namespace @internal
                 {
                     var err__prev1 = err;
 
-                    var err = b.copyFile(root, newArchive, archive, 0666L, false);
+                    var err = b.copyFile(newArchive, archive, 0666L, false);
 
                     if (err != null)
                     {
-                        return ("", err);
+                        return (error.As("")!, err);
                     }
 
                     err = err__prev1;
 
                 }
+
                 if (cfg.BuildN || cfg.BuildX)
                 {
                     b.Showcmd("", "ar d %s _cgo_flags", newArchive);
@@ -410,25 +533,32 @@ namespace @internal
                         // Either the archive is already built and we can read them out,
                         // or we're printing commands to build the archive and can
                         // forward the _cgo_flags directly to this step.
-                        return ("", null);
+                        return (error.As("")!, null);
+
                     }
+
                 }
-                err = b.run(root, root.Objdir, desc, null, "ar", "x", newArchive, "_cgo_flags");
+
+                err = b.run(root, root.Objdir, desc, null, tools.ar(), arArgs, "x", newArchive, "_cgo_flags");
                 if (err != null)
                 {
-                    return ("", err);
+                    return (error.As("")!, err);
                 }
-                err = b.run(root, ".", desc, null, "ar", "d", newArchive, "_cgo_flags");
+
+                err = b.run(root, ".", desc, null, tools.ar(), arArgs, "d", newArchive, "_cgo_flags");
                 if (err != null)
                 {
-                    return ("", err);
+                    return (error.As("")!, err);
                 }
+
                 err = readCgoFlags(filepath.Join(root.Objdir, "_cgo_flags"));
                 if (err != null)
                 {
-                    return ("", err);
+                    return (error.As("")!, err);
                 }
-                return (newArchive, null);
+
+                return (error.As(newArchive)!, null);
+
             } 
 
             // If using -linkshared, find the shared library deps.
@@ -460,11 +590,11 @@ namespace @internal
                         {
                             haveShlib[base] = true;
                         }
+
                     }
 
                     a = a__prev1;
                 }
-
             } 
 
             // Arrange the deps into afiles and shlibs.
@@ -481,31 +611,40 @@ namespace @internal
                         // This is a package linked into a shared
                         // library that we will put into shlibs.
                         continue;
+
                     }
+
                     if (haveShlib[filepath.Base(a.Target)])
                     { 
-                        // This is a shared library we want to link againt.
+                        // This is a shared library we want to link against.
                         if (!addedShlib[a.Target])
                         {
                             shlibs = append(shlibs, a.Target);
                             addedShlib[a.Target] = true;
                         }
+
                         continue;
+
                     }
+
                     if (p != null)
                     {
                         var target = a.built;
                         if (p.UsesCgo() || p.UsesSwig())
                         {
-                            err = default;
+                            err = default!;
                             target, err = readAndRemoveCgoFlags(target);
                             if (err != null)
                             {
                                 continue;
                             }
+
                         }
+
                         afiles = append(afiles, target);
+
                     }
+
                 }
 
                 a = a__prev1;
@@ -525,38 +664,53 @@ namespace @internal
                     {
                         continue;
                     }
+
                     if (!a.Package.Standard)
                     {
                         cgoldflags = append(cgoldflags, a.Package.CgoLDFLAGS);
                     }
+
                     if (len(a.Package.CgoFiles) > 0L)
                     {
                         usesCgo = true;
                     }
+
                     if (a.Package.UsesSwig())
                     {
                         usesCgo = true;
                     }
+
                     if (len(a.Package.CXXFiles) > 0L || len(a.Package.SwigCXXFiles) > 0L)
                     {
                         cxx = true;
                     }
+
                     if (len(a.Package.MFiles) > 0L)
                     {
                         objc = true;
                     }
+
                     if (len(a.Package.FFiles) > 0L)
                     {
                         fortran = true;
                     }
+
                 }
 
                 a = a__prev1;
             }
 
-            ldflags = append(ldflags, "-Wl,--whole-archive");
+            @string wholeArchive = new slice<@string>(new @string[] { "-Wl,--whole-archive" });
+            @string noWholeArchive = new slice<@string>(new @string[] { "-Wl,--no-whole-archive" });
+            if (cfg.Goos == "aix")
+            {
+                wholeArchive = null;
+                noWholeArchive = null;
+            }
+
+            ldflags = append(ldflags, wholeArchive);
             ldflags = append(ldflags, afiles);
-            ldflags = append(ldflags, "-Wl,--no-whole-archive");
+            ldflags = append(ldflags, noWholeArchive);
 
             ldflags = append(ldflags, cgoldflags);
             ldflags = append(ldflags, envList("CGO_LDFLAGS", ""));
@@ -564,7 +718,11 @@ namespace @internal
             {
                 ldflags = append(ldflags, root.Package.CgoLDFLAGS);
             }
-            ldflags = str.StringList("-Wl,-(", ldflags, "-Wl,-)");
+
+            if (cfg.Goos != "aix")
+            {
+                ldflags = str.StringList("-Wl,-(", ldflags, "-Wl,-)");
+            }
 
             if (root.buildID != "")
             { 
@@ -582,12 +740,25 @@ namespace @internal
                         ldflags = append(ldflags, fmt.Sprintf("-Wl,--build-id=0x%x", root.buildID));
                         break;
                 }
+
             }
+
+            @string rLibPath = default;
+            if (cfg.Goos == "aix")
+            {
+                rLibPath = "-Wl,-blibpath=";
+            }
+            else
+            {
+                rLibPath = "-Wl,-rpath=";
+            }
+
             foreach (var (_, shlib) in shlibs)
             {
-                ldflags = append(ldflags, "-L" + filepath.Dir(shlib), "-Wl,-rpath=" + filepath.Dir(shlib), "-l" + strings.TrimSuffix(strings.TrimPrefix(filepath.Base(shlib), "lib"), ".so"));
+                ldflags = append(ldflags, "-L" + filepath.Dir(shlib), rLibPath + filepath.Dir(shlib), "-l" + strings.TrimSuffix(strings.TrimPrefix(filepath.Base(shlib), "lib"), ".so"));
             }
             @string realOut = default;
+            var goLibBegin = str.StringList(wholeArchive, "-lgolibbegin", noWholeArchive);
             switch (buildmode)
             {
                 case "exe": 
@@ -595,6 +766,7 @@ namespace @internal
                     {
                         ldflags = append(ldflags, "-Wl,-E");
                     }
+
                     break;
                 case "c-archive": 
                     // Link the Go files into a single .o, and also link
@@ -611,7 +783,8 @@ namespace @internal
                     // split-stack and non-split-stack code in a single -r
                     // link, and libgo picks up non-split-stack code from
                     // libffi.
-                    ldflags = append(ldflags, "-Wl,-r", "-nostdlib", "-Wl,--whole-archive", "-lgolibbegin", "-Wl,--no-whole-archive");
+                    ldflags = append(ldflags, "-Wl,-r", "-nostdlib");
+                    ldflags = append(ldflags, goLibBegin);
 
                     {
                         var nopie = b.gccNoPie(new slice<@string>(new @string[] { tools.linker() }));
@@ -630,14 +803,22 @@ namespace @internal
                     {
                         ldflags = b.disableBuildID(ldflags);
                     }
+
                     realOut = out;
                     out = out + ".o";
                     break;
                 case "c-shared": 
-                    ldflags = append(ldflags, "-shared", "-nostdlib", "-Wl,--whole-archive", "-lgolibbegin", "-Wl,--no-whole-archive", "-lgo", "-lgcc_s", "-lgcc", "-lc", "-lgcc");
+                    ldflags = append(ldflags, "-shared", "-nostdlib");
+                    ldflags = append(ldflags, goLibBegin);
+                    ldflags = append(ldflags, "-lgo", "-lgcc_s", "-lgcc", "-lc", "-lgcc");
                     break;
                 case "shared": 
-                    ldflags = append(ldflags, "-zdefs", "-shared", "-nostdlib", "-lgo", "-lgcc_s", "-lgcc", "-lc");
+                    if (cfg.Goos != "aix")
+                    {
+                        ldflags = append(ldflags, "-zdefs");
+                    }
+
+                    ldflags = append(ldflags, "-shared", "-nostdlib", "-lgo", "-lgcc_s", "-lgcc", "-lc");
                     break;
                 default: 
                     @base.Fatalf("-buildmode=%s not supported for gccgo", buildmode);
@@ -653,13 +834,15 @@ namespace @internal
                     {
                         ldflags = append(ldflags, "-lstdc++");
                     }
+
                     if (objc)
                     {
                         ldflags = append(ldflags, "-lobjc");
                     }
+
                     if (fortran)
                     {
-                        var fc = os.Getenv("FC");
+                        var fc = cfg.Getenv("FC");
                         if (fc == "")
                         {
                             fc = "gfortran";
@@ -670,7 +853,9 @@ namespace @internal
                         {
                             ldflags = append(ldflags, "-lgfortran");
                         }
+
                     }
+
                     break;
             }
 
@@ -681,12 +866,13 @@ namespace @internal
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
 
             switch (buildmode)
             {
@@ -694,40 +880,51 @@ namespace @internal
                     {
                         var err__prev1 = err;
 
-                        err = b.run(root, ".", desc, null, "ar", "rc", realOut, out);
+                        err = b.run(root, ".", desc, null, tools.ar(), arArgs, "rc", realOut, out);
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                         err = err__prev1;
 
                     }
+
                     break;
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error ld(this gccgoToolchain tools, ref Builder b, ref Action root, @string @out, @string importcfg, @string mainpkg)
+        private static error ld(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_root, @string @out, @string importcfg, @string mainpkg)
         {
-            return error.As(tools.link(b, root, out, importcfg, root.Deps, ldBuildmode, root.Package.ImportPath));
+            ref Builder b = ref _addr_b.val;
+            ref Action root = ref _addr_root.val;
+
+            return error.As(tools.link(b, root, out, importcfg, root.Deps, ldBuildmode, root.Package.ImportPath))!;
         }
 
-        private static error ldShared(this gccgoToolchain tools, ref Builder b, ref Action root, slice<ref Action> toplevelactions, @string @out, @string importcfg, slice<ref Action> allactions)
+        private static error ldShared(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions)
         {
-            return error.As(tools.link(b, root, out, importcfg, allactions, "shared", out));
+            ref Builder b = ref _addr_b.val;
+            ref Action root = ref _addr_root.val;
+
+            return error.As(tools.link(b, root, out, importcfg, allactions, "shared", out))!;
         }
 
-        private static error cc(this gccgoToolchain tools, ref Builder b, ref Action a, @string ofile, @string cfile)
+        private static error cc(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_a, @string ofile, @string cfile)
         {
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+
             var p = a.Package;
             var inc = filepath.Join(cfg.GOROOT, "pkg", "include");
             cfile = mkAbs(p.Dir, cfile);
             @string defs = new slice<@string>(new @string[] { "-D", "GOOS_"+cfg.Goos, "-D", "GOARCH_"+cfg.Goarch });
             defs = append(defs, b.gccArchArgs());
             {
-                var pkgpath = gccgoCleanPkgpath(p);
+                var pkgpath = gccgoCleanPkgpath(_addr_p);
 
                 if (pkgpath != "")
                 {
@@ -735,16 +932,31 @@ namespace @internal
                 }
 
             }
-            switch (cfg.Goarch)
-            {
-                case "386": 
 
-                case "amd64": 
-                    defs = append(defs, "-fsplit-stack");
-                    break;
+            var compiler = envList("CC", cfg.DefaultCC(cfg.Goos, cfg.Goarch));
+            if (b.gccSupportsFlag(compiler, "-fsplit-stack"))
+            {
+                defs = append(defs, "-fsplit-stack");
             }
+
             defs = tools.maybePIC(defs);
-            return error.As(b.run(a, p.Dir, p.ImportPath, null, envList("CC", cfg.DefaultCC(cfg.Goos, cfg.Goarch)), "-Wall", "-g", "-I", a.Objdir, "-I", inc, "-o", ofile, defs, "-c", cfile));
+            if (b.gccSupportsFlag(compiler, "-ffile-prefix-map=a=b"))
+            {
+                defs = append(defs, "-ffile-prefix-map=" + @base.Cwd + "=.");
+                defs = append(defs, "-ffile-prefix-map=" + b.WorkDir + "=/tmp/go-build");
+            }
+            else if (b.gccSupportsFlag(compiler, "-fdebug-prefix-map=a=b"))
+            {
+                defs = append(defs, "-fdebug-prefix-map=" + b.WorkDir + "=/tmp/go-build");
+            }
+
+            if (b.gccSupportsFlag(compiler, "-gno-record-gcc-switches"))
+            {
+                defs = append(defs, "-gno-record-gcc-switches");
+            }
+
+            return error.As(b.run(a, p.Dir, p.ImportPath, null, compiler, "-Wall", "-g", "-I", a.Objdir, "-I", inc, "-o", ofile, defs, "-c", cfile))!;
+
         }
 
         // maybePIC adds -fPIC to the list of arguments if needed.
@@ -761,28 +973,37 @@ namespace @internal
                     break;
             }
             return args;
+
         }
 
-        private static @string gccgoPkgpath(ref load.Package p)
+        private static @string gccgoPkgpath(ptr<load.Package> _addr_p)
         {
+            ref load.Package p = ref _addr_p.val;
+
             if (p.Internal.Build.IsCommand() && !p.Internal.ForceLibrary)
             {
                 return "";
             }
+
             return p.ImportPath;
+
         }
 
-        private static @string gccgoCleanPkgpath(ref load.Package p)
+        private static @string gccgoCleanPkgpath(ptr<load.Package> _addr_p)
         {
+            ref load.Package p = ref _addr_p.val;
+
             Func<int, int> clean = r =>
             {
 
                 if ('A' <= r && r <= 'Z' || 'a' <= r && r <= 'z' || '0' <= r && r <= '9') 
                     return r;
                                 return '_';
+
             }
 ;
-            return strings.Map(clean, gccgoPkgpath(p));
+            return strings.Map(clean, gccgoPkgpath(_addr_p));
+
         }
     }
 }}}}

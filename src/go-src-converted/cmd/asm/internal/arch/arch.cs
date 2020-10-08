@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arch -- go2cs converted at 2020 August 29 08:48:42 UTC
+// Package arch defines architecture-specific information and support functions.
+// package arch -- go2cs converted at 2020 October 08 04:04:30 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
 // Original source: C:\Go\src\cmd\asm\internal\arch\arch.go
 using obj = go.cmd.@internal.obj_package;
@@ -10,7 +11,9 @@ using arm = go.cmd.@internal.obj.arm_package;
 using arm64 = go.cmd.@internal.obj.arm64_package;
 using mips = go.cmd.@internal.obj.mips_package;
 using ppc64 = go.cmd.@internal.obj.ppc64_package;
+using riscv = go.cmd.@internal.obj.riscv_package;
 using s390x = go.cmd.@internal.obj.s390x_package;
+using wasm = go.cmd.@internal.obj.wasm_package;
 using x86 = go.cmd.@internal.obj.x86_package;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
@@ -25,15 +28,16 @@ namespace @internal
     public static partial class arch_package
     {
         // Pseudo-registers whose names are the constant name without the leading R.
-        public static readonly var RFP = -(iota + 1L);
-        public static readonly var RSB = 0;
-        public static readonly var RSP = 1;
-        public static readonly var RPC = 2;
+        public static readonly var RFP = (var)-(iota + 1L);
+        public static readonly var RSB = (var)0;
+        public static readonly var RSP = (var)1;
+        public static readonly var RPC = (var)2;
+
 
         // Arch wraps the link architecture object with more architecture-specific information.
         public partial struct Arch
         {
-            public ref obj.LinkArch LinkArch => ref LinkArch_ptr; // Map of instruction names to enumeration.
+            public ref ptr<obj.LinkArch> LinkArch> => ref LinkArch>_ptr; // Map of instruction names to enumeration.
             public map<@string, obj.As> Instructions; // Map of register names to enumeration.
             public map<@string, short> Register; // Table of register prefix names. These are things like R for R(0) and SPR for SPR(268).
             public map<@string, bool> RegisterPrefix; // RegisterNumber converts R(10) into arm.REG_R10.
@@ -45,67 +49,60 @@ namespace @internal
         // that do not accept the R(N) notation. It always returns failure.
         private static (short, bool) nilRegisterNumber(@string name, short n)
         {
+            short _p0 = default;
+            bool _p0 = default;
+
             return (0L, false);
         }
 
         // Set configures the architecture specified by GOARCH and returns its representation.
         // It returns nil if GOARCH is not recognized.
-        public static ref Arch Set(@string GOARCH)
+        public static ptr<Arch> Set(@string GOARCH)
         {
             switch (GOARCH)
             {
                 case "386": 
-                    return archX86(ref x86.Link386);
+                    return _addr_archX86(_addr_x86.Link386)!;
                     break;
                 case "amd64": 
-                    return archX86(ref x86.Linkamd64);
-                    break;
-                case "amd64p32": 
-                    return archX86(ref x86.Linkamd64p32);
+                    return _addr_archX86(_addr_x86.Linkamd64)!;
                     break;
                 case "arm": 
-                    return archArm();
+                    return _addr_archArm()!;
                     break;
                 case "arm64": 
-                    return archArm64();
+                    return _addr_archArm64()!;
                     break;
                 case "mips": 
-                    var a = archMips();
-                    a.LinkArch = ref mips.Linkmips;
-                    return a;
+                    return _addr_archMips(_addr_mips.Linkmips)!;
                     break;
                 case "mipsle": 
-                    a = archMips();
-                    a.LinkArch = ref mips.Linkmipsle;
-                    return a;
+                    return _addr_archMips(_addr_mips.Linkmipsle)!;
                     break;
                 case "mips64": 
-                    a = archMips64();
-                    a.LinkArch = ref mips.Linkmips64;
-                    return a;
+                    return _addr_archMips64(_addr_mips.Linkmips64)!;
                     break;
                 case "mips64le": 
-                    a = archMips64();
-                    a.LinkArch = ref mips.Linkmips64le;
-                    return a;
+                    return _addr_archMips64(_addr_mips.Linkmips64le)!;
                     break;
                 case "ppc64": 
-                    a = archPPC64();
-                    a.LinkArch = ref ppc64.Linkppc64;
-                    return a;
+                    return _addr_archPPC64(_addr_ppc64.Linkppc64)!;
                     break;
                 case "ppc64le": 
-                    a = archPPC64();
-                    a.LinkArch = ref ppc64.Linkppc64le;
-                    return a;
+                    return _addr_archPPC64(_addr_ppc64.Linkppc64le)!;
+                    break;
+                case "riscv64": 
+                    return _addr_archRISCV64()!;
                     break;
                 case "s390x": 
-                    a = archS390x();
-                    a.LinkArch = ref s390x.Links390x;
-                    return a;
+                    return _addr_archS390x()!;
+                    break;
+                case "wasm": 
+                    return _addr_archWasm()!;
                     break;
             }
-            return null;
+            return _addr_null!;
+
         }
 
         private static bool jumpX86(@string word)
@@ -113,8 +110,65 @@ namespace @internal
             return word[0L] == 'J' || word == "CALL" || strings.HasPrefix(word, "LOOP") || word == "XBEGIN";
         }
 
-        private static ref Arch archX86(ref obj.LinkArch linkArch)
+        private static bool jumpRISCV(@string word)
         {
+            switch (word)
+            {
+                case "BEQ": 
+
+                case "BEQZ": 
+
+                case "BGE": 
+
+                case "BGEU": 
+
+                case "BGEZ": 
+
+                case "BGT": 
+
+                case "BGTU": 
+
+                case "BGTZ": 
+
+                case "BLE": 
+
+                case "BLEU": 
+
+                case "BLEZ": 
+
+                case "BLT": 
+
+                case "BLTU": 
+
+                case "BLTZ": 
+
+                case "BNE": 
+
+                case "BNEZ": 
+
+                case "CALL": 
+
+                case "JAL": 
+
+                case "JALR": 
+
+                case "JMP": 
+                    return true;
+                    break;
+            }
+            return false;
+
+        }
+
+        private static bool jumpWasm(@string word)
+        {
+            return word == "JMP" || word == "CALL" || word == "Call" || word == "Br" || word == "BrIf";
+        }
+
+        private static ptr<Arch> archX86(ptr<obj.LinkArch> _addr_linkArch)
+        {
+            ref obj.LinkArch linkArch = ref _addr_linkArch.val;
+
             var register = make_map<@string, short>(); 
             // Create maps for easy lookup of instruction names etc.
             {
@@ -166,6 +220,7 @@ namespace @internal
                     {
                         instructions[s] = obj.As(i) + obj.ABaseAMD64;
                     }
+
                 } 
                 // Annoying aliases.
 
@@ -227,10 +282,11 @@ namespace @internal
             instructions["PSRLDQ"] = x86.APSRLO;
             instructions["PADDD"] = x86.APADDL;
 
-            return ref new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:nil,RegisterNumber:nilRegisterNumber,IsJump:jumpX86,);
+            return addr(new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:nil,RegisterNumber:nilRegisterNumber,IsJump:jumpX86,));
+
         }
 
-        private static ref Arch archArm()
+        private static ptr<Arch> archArm()
         {
             var register = make_map<@string, short>(); 
             // Create maps for easy lookup of instruction names etc.
@@ -269,7 +325,17 @@ namespace @internal
             register["FP"] = RFP;
             register["PC"] = RPC;
             register["SP"] = RSP;
-            map registerPrefix = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"F":true,"R":true,};
+            map registerPrefix = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"F":true,"R":true,}; 
+
+            // special operands for DMB/DSB instructions
+            register["MB_SY"] = arm.REG_MB_SY;
+            register["MB_ST"] = arm.REG_MB_ST;
+            register["MB_ISH"] = arm.REG_MB_ISH;
+            register["MB_ISHST"] = arm.REG_MB_ISHST;
+            register["MB_NSH"] = arm.REG_MB_NSH;
+            register["MB_NSHST"] = arm.REG_MB_NSHST;
+            register["MB_OSH"] = arm.REG_MB_OSH;
+            register["MB_OSHST"] = arm.REG_MB_OSHST;
 
             var instructions = make_map<@string, obj.As>();
             {
@@ -299,6 +365,7 @@ namespace @internal
                     {
                         instructions[s] = obj.As(i) + obj.ABaseARM;
                     }
+
                 } 
                 // Annoying aliases.
 
@@ -313,10 +380,11 @@ namespace @internal
             // it, but give it an opcode number known only to us.
             instructions["MCR"] = aMCR;
 
-            return ref new Arch(LinkArch:&arm.Linkarm,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:armRegisterNumber,IsJump:jumpArm,);
+            return addr(new Arch(LinkArch:&arm.Linkarm,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:armRegisterNumber,IsJump:jumpArm,));
+
         }
 
-        private static ref Arch archArm64()
+        private static ptr<Arch> archArm64()
         {
             var register = make_map<@string, short>(); 
             // Create maps for easy lookup of instruction names etc.
@@ -328,11 +396,15 @@ namespace @internal
                 for (var i = arm64.REG_R0; i <= arm64.REG_R31; i++)
                 {
                     register[obj.Rconv(i)] = int16(i);
-                }
+                } 
+                // Rename R18 to R18_PLATFORM to avoid accidental use.
 
 
                 i = i__prev1;
-            }
+            } 
+            // Rename R18 to R18_PLATFORM to avoid accidental use.
+            register["R18_PLATFORM"] = register["R18"];
+            delete(register, "R18");
             {
                 var i__prev1 = i;
 
@@ -350,25 +422,49 @@ namespace @internal
                 for (i = arm64.REG_V0; i <= arm64.REG_V31; i++)
                 {
                     register[obj.Rconv(i)] = int16(i);
+                } 
+
+                // System registers.
+
+
+                i = i__prev1;
+            } 
+
+            // System registers.
+            {
+                var i__prev1 = i;
+
+                for (i = 0L; i < len(arm64.SystemReg); i++)
+                {
+                    register[arm64.SystemReg[i].Name] = arm64.SystemReg[i].Reg;
                 }
 
 
                 i = i__prev1;
             }
+
             register["LR"] = arm64.REGLINK;
-            register["DAIF"] = arm64.REG_DAIF;
-            register["NZCV"] = arm64.REG_NZCV;
-            register["FPSR"] = arm64.REG_FPSR;
-            register["FPCR"] = arm64.REG_FPCR;
-            register["SPSR_EL1"] = arm64.REG_SPSR_EL1;
-            register["ELR_EL1"] = arm64.REG_ELR_EL1;
-            register["SPSR_EL2"] = arm64.REG_SPSR_EL2;
-            register["ELR_EL2"] = arm64.REG_ELR_EL2;
-            register["CurrentEL"] = arm64.REG_CurrentEL;
-            register["SP_EL0"] = arm64.REG_SP_EL0;
-            register["SPSel"] = arm64.REG_SPSel;
             register["DAIFSet"] = arm64.REG_DAIFSet;
-            register["DAIFClr"] = arm64.REG_DAIFClr; 
+            register["DAIFClr"] = arm64.REG_DAIFClr;
+            register["PLDL1KEEP"] = arm64.REG_PLDL1KEEP;
+            register["PLDL1STRM"] = arm64.REG_PLDL1STRM;
+            register["PLDL2KEEP"] = arm64.REG_PLDL2KEEP;
+            register["PLDL2STRM"] = arm64.REG_PLDL2STRM;
+            register["PLDL3KEEP"] = arm64.REG_PLDL3KEEP;
+            register["PLDL3STRM"] = arm64.REG_PLDL3STRM;
+            register["PLIL1KEEP"] = arm64.REG_PLIL1KEEP;
+            register["PLIL1STRM"] = arm64.REG_PLIL1STRM;
+            register["PLIL2KEEP"] = arm64.REG_PLIL2KEEP;
+            register["PLIL2STRM"] = arm64.REG_PLIL2STRM;
+            register["PLIL3KEEP"] = arm64.REG_PLIL3KEEP;
+            register["PLIL3STRM"] = arm64.REG_PLIL3STRM;
+            register["PSTL1KEEP"] = arm64.REG_PSTL1KEEP;
+            register["PSTL1STRM"] = arm64.REG_PSTL1STRM;
+            register["PSTL2KEEP"] = arm64.REG_PSTL2KEEP;
+            register["PSTL2STRM"] = arm64.REG_PSTL2STRM;
+            register["PSTL3KEEP"] = arm64.REG_PSTL3KEEP;
+            register["PSTL3STRM"] = arm64.REG_PSTL3STRM; 
+
             // Conditional operators, like EQ, NE, etc.
             register["EQ"] = arm64.COND_EQ;
             register["NE"] = arm64.COND_NE;
@@ -426,6 +522,7 @@ namespace @internal
                     {
                         instructions[s] = obj.As(i) + obj.ABaseARM64;
                     }
+
                 } 
                 // Annoying aliases.
 
@@ -436,12 +533,15 @@ namespace @internal
             instructions["B"] = arm64.AB;
             instructions["BL"] = arm64.ABL;
 
-            return ref new Arch(LinkArch:&arm64.Linkarm64,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:arm64RegisterNumber,IsJump:jumpArm64,);
+            return addr(new Arch(LinkArch:&arm64.Linkarm64,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:arm64RegisterNumber,IsJump:jumpArm64,));
+
 
         }
 
-        private static ref Arch archPPC64()
+        private static ptr<Arch> archPPC64(ptr<obj.LinkArch> _addr_linkArch)
         {
+            ref obj.LinkArch linkArch = ref _addr_linkArch.val;
+
             var register = make_map<@string, short>(); 
             // Create maps for easy lookup of instruction names etc.
             // Note that there is no list of names as there is for x86.
@@ -554,6 +654,7 @@ namespace @internal
                     {
                         instructions[s] = obj.As(i) + obj.ABasePPC64;
                     }
+
                 } 
                 // Annoying aliases.
 
@@ -564,11 +665,14 @@ namespace @internal
             instructions["BR"] = ppc64.ABR;
             instructions["BL"] = ppc64.ABL;
 
-            return ref new Arch(LinkArch:&ppc64.Linkppc64,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:ppc64RegisterNumber,IsJump:jumpPPC64,);
+            return addr(new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:ppc64RegisterNumber,IsJump:jumpPPC64,));
+
         }
 
-        private static ref Arch archMips()
+        private static ptr<Arch> archMips(ptr<obj.LinkArch> _addr_linkArch)
         {
+            ref obj.LinkArch linkArch = ref _addr_linkArch.val;
+
             var register = make_map<@string, short>(); 
             // Create maps for easy lookup of instruction names etc.
             // Note that there is no list of names as there is for x86.
@@ -657,6 +761,7 @@ namespace @internal
                     {
                         instructions[s] = obj.As(i) + obj.ABaseMIPS;
                     }
+
                 } 
                 // Annoying alias.
 
@@ -666,11 +771,14 @@ namespace @internal
 
             instructions["JAL"] = mips.AJAL;
 
-            return ref new Arch(LinkArch:&mips.Linkmipsle,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:mipsRegisterNumber,IsJump:jumpMIPS,);
+            return addr(new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:mipsRegisterNumber,IsJump:jumpMIPS,));
+
         }
 
-        private static ref Arch archMips64()
+        private static ptr<Arch> archMips64(ptr<obj.LinkArch> _addr_linkArch)
         {
+            ref obj.LinkArch linkArch = ref _addr_linkArch.val;
+
             var register = make_map<@string, short>(); 
             // Create maps for easy lookup of instruction names etc.
             // Note that there is no list of names as there is for x86.
@@ -718,6 +826,17 @@ namespace @internal
 
                 i = i__prev1;
             }
+            {
+                var i__prev1 = i;
+
+                for (i = mips.REG_W0; i <= mips.REG_W31; i++)
+                {
+                    register[obj.Rconv(i)] = int16(i);
+                }
+
+
+                i = i__prev1;
+            }
             register["HI"] = mips.REG_HI;
             register["LO"] = mips.REG_LO; 
             // Pseudo-registers.
@@ -730,7 +849,7 @@ namespace @internal
             // Avoid unintentionally clobbering RSB using R28.
             delete(register, "R28");
             register["RSB"] = mips.REG_R28;
-            map registerPrefix = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"F":true,"FCR":true,"M":true,"R":true,};
+            map registerPrefix = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"F":true,"FCR":true,"M":true,"R":true,"W":true,};
 
             var instructions = make_map<@string, obj.As>();
             {
@@ -760,6 +879,7 @@ namespace @internal
                     {
                         instructions[s] = obj.As(i) + obj.ABaseMIPS;
                     }
+
                 } 
                 // Annoying alias.
 
@@ -769,10 +889,160 @@ namespace @internal
 
             instructions["JAL"] = mips.AJAL;
 
-            return ref new Arch(LinkArch:&mips.Linkmips64,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:mipsRegisterNumber,IsJump:jumpMIPS,);
+            return addr(new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:mipsRegisterNumber,IsJump:jumpMIPS,));
+
         }
 
-        private static ref Arch archS390x()
+        private static ptr<Arch> archRISCV64()
+        {
+            var register = make_map<@string, short>(); 
+
+            // Standard register names.
+            {
+                var i__prev1 = i;
+
+                for (var i = riscv.REG_X0; i <= riscv.REG_X31; i++)
+                {
+                    var name = fmt.Sprintf("X%d", i - riscv.REG_X0);
+                    register[name] = int16(i);
+                }
+
+
+                i = i__prev1;
+            }
+            {
+                var i__prev1 = i;
+
+                for (i = riscv.REG_F0; i <= riscv.REG_F31; i++)
+                {
+                    name = fmt.Sprintf("F%d", i - riscv.REG_F0);
+                    register[name] = int16(i);
+                } 
+
+                // General registers with ABI names.
+
+
+                i = i__prev1;
+            } 
+
+            // General registers with ABI names.
+            register["ZERO"] = riscv.REG_ZERO;
+            register["RA"] = riscv.REG_RA;
+            register["SP"] = riscv.REG_SP;
+            register["GP"] = riscv.REG_GP;
+            register["TP"] = riscv.REG_TP;
+            register["T0"] = riscv.REG_T0;
+            register["T1"] = riscv.REG_T1;
+            register["T2"] = riscv.REG_T2;
+            register["S0"] = riscv.REG_S0;
+            register["S1"] = riscv.REG_S1;
+            register["A0"] = riscv.REG_A0;
+            register["A1"] = riscv.REG_A1;
+            register["A2"] = riscv.REG_A2;
+            register["A3"] = riscv.REG_A3;
+            register["A4"] = riscv.REG_A4;
+            register["A5"] = riscv.REG_A5;
+            register["A6"] = riscv.REG_A6;
+            register["A7"] = riscv.REG_A7;
+            register["S2"] = riscv.REG_S2;
+            register["S3"] = riscv.REG_S3;
+            register["S4"] = riscv.REG_S4;
+            register["S5"] = riscv.REG_S5;
+            register["S6"] = riscv.REG_S6;
+            register["S7"] = riscv.REG_S7;
+            register["S8"] = riscv.REG_S8;
+            register["S9"] = riscv.REG_S9;
+            register["S10"] = riscv.REG_S10;
+            register["S11"] = riscv.REG_S11;
+            register["T3"] = riscv.REG_T3;
+            register["T4"] = riscv.REG_T4;
+            register["T5"] = riscv.REG_T5;
+            register["T6"] = riscv.REG_T6; 
+
+            // Go runtime register names.
+            register["g"] = riscv.REG_G;
+            register["CTXT"] = riscv.REG_CTXT;
+            register["TMP"] = riscv.REG_TMP; 
+
+            // ABI names for floating point register.
+            register["FT0"] = riscv.REG_FT0;
+            register["FT1"] = riscv.REG_FT1;
+            register["FT2"] = riscv.REG_FT2;
+            register["FT3"] = riscv.REG_FT3;
+            register["FT4"] = riscv.REG_FT4;
+            register["FT5"] = riscv.REG_FT5;
+            register["FT6"] = riscv.REG_FT6;
+            register["FT7"] = riscv.REG_FT7;
+            register["FS0"] = riscv.REG_FS0;
+            register["FS1"] = riscv.REG_FS1;
+            register["FA0"] = riscv.REG_FA0;
+            register["FA1"] = riscv.REG_FA1;
+            register["FA2"] = riscv.REG_FA2;
+            register["FA3"] = riscv.REG_FA3;
+            register["FA4"] = riscv.REG_FA4;
+            register["FA5"] = riscv.REG_FA5;
+            register["FA6"] = riscv.REG_FA6;
+            register["FA7"] = riscv.REG_FA7;
+            register["FS2"] = riscv.REG_FS2;
+            register["FS3"] = riscv.REG_FS3;
+            register["FS4"] = riscv.REG_FS4;
+            register["FS5"] = riscv.REG_FS5;
+            register["FS6"] = riscv.REG_FS6;
+            register["FS7"] = riscv.REG_FS7;
+            register["FS8"] = riscv.REG_FS8;
+            register["FS9"] = riscv.REG_FS9;
+            register["FS10"] = riscv.REG_FS10;
+            register["FS11"] = riscv.REG_FS11;
+            register["FT8"] = riscv.REG_FT8;
+            register["FT9"] = riscv.REG_FT9;
+            register["FT10"] = riscv.REG_FT10;
+            register["FT11"] = riscv.REG_FT11; 
+
+            // Pseudo-registers.
+            register["SB"] = RSB;
+            register["FP"] = RFP;
+            register["PC"] = RPC;
+
+            var instructions = make_map<@string, obj.As>();
+            {
+                var i__prev1 = i;
+                var s__prev1 = s;
+
+                foreach (var (__i, __s) in obj.Anames)
+                {
+                    i = __i;
+                    s = __s;
+                    instructions[s] = obj.As(i);
+                }
+
+                i = i__prev1;
+                s = s__prev1;
+            }
+
+            {
+                var i__prev1 = i;
+                var s__prev1 = s;
+
+                foreach (var (__i, __s) in riscv.Anames)
+                {
+                    i = __i;
+                    s = __s;
+                    if (obj.As(i) >= obj.A_ARCHSPECIFIC)
+                    {
+                        instructions[s] = obj.As(i) + obj.ABaseRISCV;
+                    }
+
+                }
+
+                i = i__prev1;
+                s = s__prev1;
+            }
+
+            return addr(new Arch(LinkArch:&riscv.LinkRISCV64,Instructions:instructions,Register:register,RegisterPrefix:nil,RegisterNumber:nilRegisterNumber,IsJump:jumpRISCV,));
+
+        }
+
+        private static ptr<Arch> archS390x()
         {
             var register = make_map<@string, short>(); 
             // Create maps for easy lookup of instruction names etc.
@@ -859,6 +1129,7 @@ namespace @internal
                     {
                         instructions[s] = obj.As(i) + obj.ABaseS390X;
                     }
+
                 } 
                 // Annoying aliases.
 
@@ -869,7 +1140,49 @@ namespace @internal
             instructions["BR"] = s390x.ABR;
             instructions["BL"] = s390x.ABL;
 
-            return ref new Arch(LinkArch:&s390x.Links390x,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:s390xRegisterNumber,IsJump:jumpS390x,);
+            return addr(new Arch(LinkArch:&s390x.Links390x,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:s390xRegisterNumber,IsJump:jumpS390x,));
+
+        }
+
+        private static ptr<Arch> archWasm()
+        {
+            var instructions = make_map<@string, obj.As>();
+            {
+                var i__prev1 = i;
+                var s__prev1 = s;
+
+                foreach (var (__i, __s) in obj.Anames)
+                {
+                    i = __i;
+                    s = __s;
+                    instructions[s] = obj.As(i);
+                }
+
+                i = i__prev1;
+                s = s__prev1;
+            }
+
+            {
+                var i__prev1 = i;
+                var s__prev1 = s;
+
+                foreach (var (__i, __s) in wasm.Anames)
+                {
+                    i = __i;
+                    s = __s;
+                    if (obj.As(i) >= obj.A_ARCHSPECIFIC)
+                    {
+                        instructions[s] = obj.As(i) + obj.ABaseWasm;
+                    }
+
+                }
+
+                i = i__prev1;
+                s = s__prev1;
+            }
+
+            return addr(new Arch(LinkArch:&wasm.Linkwasm,Instructions:instructions,Register:wasm.Register,RegisterPrefix:nil,RegisterNumber:nilRegisterNumber,IsJump:jumpWasm,));
+
         }
     }
 }}}}

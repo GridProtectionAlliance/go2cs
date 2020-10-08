@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:29 UTC
+//     Generated on 2020 October 08 04:43:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,14 +36,14 @@ namespace pprof
             {
                 this.size = default;
                 this.offset = default;
-                this.buildidIDOrFile = default;
+                this.buildIDOrFile = default;
             }
 
-            public mappingKey(ulong size = default, ulong offset = default, @string buildidIDOrFile = default)
+            public mappingKey(ulong size = default, ulong offset = default, @string buildIDOrFile = default)
             {
                 this.size = size;
                 this.offset = offset;
-                this.buildidIDOrFile = buildidIDOrFile;
+                this.buildIDOrFile = buildIDOrFile;
             }
 
             // Enable comparisons between nil and mappingKey struct
@@ -66,7 +66,7 @@ namespace pprof
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mappingKey mappingKey_cast(dynamic value)
         {
-            return new mappingKey(value.size, value.offset, value.buildidIDOrFile);
+            return new mappingKey(value.size, value.offset, value.buildIDOrFile);
         }
     }
 }}}}}}

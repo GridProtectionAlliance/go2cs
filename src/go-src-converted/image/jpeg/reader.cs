@@ -4,8 +4,8 @@
 
 // Package jpeg implements a JPEG image decoder and encoder.
 //
-// JPEG is defined in ITU-T T.81: http://www.w3.org/Graphics/JPEG/itu-t81.pdf.
-// package jpeg -- go2cs converted at 2020 August 29 10:10:14 UTC
+// JPEG is defined in ITU-T T.81: https://www.w3.org/Graphics/JPEG/itu-t81.pdf.
+// package jpeg -- go2cs converted at 2020 October 08 04:59:28 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\reader.go
 using image = go.image_package;
@@ -53,44 +53,48 @@ namespace image
             public byte tq; // Quantization table destination selector.
         }
 
-        private static readonly long dcTable = 0L;
-        private static readonly long acTable = 1L;
-        private static readonly long maxTc = 1L;
-        private static readonly long maxTh = 3L;
-        private static readonly long maxTq = 3L;
+        private static readonly long dcTable = (long)0L;
+        private static readonly long acTable = (long)1L;
+        private static readonly long maxTc = (long)1L;
+        private static readonly long maxTh = (long)3L;
+        private static readonly long maxTq = (long)3L;
 
-        private static readonly long maxComponents = 4L;
+        private static readonly long maxComponents = (long)4L;
 
-        private static readonly ulong sof0Marker = 0xc0UL; // Start Of Frame (Baseline Sequential).
-        private static readonly ulong sof1Marker = 0xc1UL; // Start Of Frame (Extended Sequential).
-        private static readonly ulong sof2Marker = 0xc2UL; // Start Of Frame (Progressive).
-        private static readonly ulong dhtMarker = 0xc4UL; // Define Huffman Table.
-        private static readonly ulong rst0Marker = 0xd0UL; // ReSTart (0).
-        private static readonly ulong rst7Marker = 0xd7UL; // ReSTart (7).
-        private static readonly ulong soiMarker = 0xd8UL; // Start Of Image.
-        private static readonly ulong eoiMarker = 0xd9UL; // End Of Image.
-        private static readonly ulong sosMarker = 0xdaUL; // Start Of Scan.
-        private static readonly ulong dqtMarker = 0xdbUL; // Define Quantization Table.
-        private static readonly ulong driMarker = 0xddUL; // Define Restart Interval.
-        private static readonly ulong comMarker = 0xfeUL; // COMment.
+
+        private static readonly ulong sof0Marker = (ulong)0xc0UL; // Start Of Frame (Baseline Sequential).
+        private static readonly ulong sof1Marker = (ulong)0xc1UL; // Start Of Frame (Extended Sequential).
+        private static readonly ulong sof2Marker = (ulong)0xc2UL; // Start Of Frame (Progressive).
+        private static readonly ulong dhtMarker = (ulong)0xc4UL; // Define Huffman Table.
+        private static readonly ulong rst0Marker = (ulong)0xd0UL; // ReSTart (0).
+        private static readonly ulong rst7Marker = (ulong)0xd7UL; // ReSTart (7).
+        private static readonly ulong soiMarker = (ulong)0xd8UL; // Start Of Image.
+        private static readonly ulong eoiMarker = (ulong)0xd9UL; // End Of Image.
+        private static readonly ulong sosMarker = (ulong)0xdaUL; // Start Of Scan.
+        private static readonly ulong dqtMarker = (ulong)0xdbUL; // Define Quantization Table.
+        private static readonly ulong driMarker = (ulong)0xddUL; // Define Restart Interval.
+        private static readonly ulong comMarker = (ulong)0xfeUL; // COMment.
         // "APPlication specific" markers aren't part of the JPEG spec per se,
         // but in practice, their use is described at
-        // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html
-        private static readonly ulong app0Marker = 0xe0UL;
-        private static readonly ulong app14Marker = 0xeeUL;
-        private static readonly ulong app15Marker = 0xefUL;
+        // https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html
+        private static readonly ulong app0Marker = (ulong)0xe0UL;
+        private static readonly ulong app14Marker = (ulong)0xeeUL;
+        private static readonly ulong app15Marker = (ulong)0xefUL;
 
-        // See http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
-        private static readonly long adobeTransformUnknown = 0L;
-        private static readonly long adobeTransformYCbCr = 1L;
-        private static readonly long adobeTransformYCbCrK = 2L;
+
+        // See https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
+        private static readonly long adobeTransformUnknown = (long)0L;
+        private static readonly long adobeTransformYCbCr = (long)1L;
+        private static readonly long adobeTransformYCbCrK = (long)2L;
+
 
         // unzig maps from the zig-zag ordering to the natural ordering. For example,
         // unzig[3] is the column and row of the fourth element in zig-zag order. The
         // value is 16, which means first column (16%8 == 0) and third row (16/8 == 2).
         private static array<long> unzig = new array<long>(new long[] { 0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63 });
 
-        // Deprecated: Reader is deprecated.
+        // Deprecated: Reader is not used by the image/jpeg package and should
+        // not be used by others. It is kept for compatibility.
         public partial interface Reader : io.ByteReader, io.Reader
         {
         }
@@ -139,8 +143,10 @@ namespace image
 
         // fill fills up the d.bytes.buf buffer from the underlying io.Reader. It
         // should only be called when there are no unread bytes in d.bytes.
-        private static error fill(this ref decoder _d) => func(_d, (ref decoder d, Defer _, Panic panic, Recover __) =>
+        private static error fill(this ptr<decoder> _addr_d) => func((_, panic, __) =>
         {
+            ref decoder d = ref _addr_d.val;
+
             if (d.bytes.i != d.bytes.j)
             {
                 panic("jpeg: fill called when unread bytes exist");
@@ -153,6 +159,7 @@ namespace image
                 d.bytes.buf[1L] = d.bytes.buf[d.bytes.j - 1L];
                 d.bytes.i = 2L;
                 d.bytes.j = 2L;
+
             } 
             // Fill in the rest of the buffer.
             var (n, err) = d.r.Read(d.bytes.buf[d.bytes.j..]);
@@ -161,7 +168,9 @@ namespace image
             {
                 err = null;
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         });
 
         // unreadByteStuffedByte undoes the most recent readByteStuffedByte call,
@@ -169,8 +178,10 @@ namespace image
         // requires at least 8 bits for look-up, which means that Huffman decoding can
         // sometimes overshoot and read one or two too many bytes. Two-byte overshoot
         // can happen when expecting to read a 0xff 0x00 byte-stuffed byte.
-        private static void unreadByteStuffedByte(this ref decoder d)
+        private static void unreadByteStuffedByte(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             d.bytes.i -= d.bytes.nUnreadable;
             d.bytes.nUnreadable = 0L;
             if (d.bits.n >= 8L)
@@ -179,26 +190,33 @@ namespace image
                 d.bits.n -= 8L;
                 d.bits.m >>= 8L;
             }
+
         }
 
         // readByte returns the next byte, whether buffered or not buffered. It does
         // not care about byte stuffing.
-        private static (byte, error) readByte(this ref decoder d)
+        private static (byte, error) readByte(this ptr<decoder> _addr_d)
         {
+            byte x = default;
+            error err = default!;
+            ref decoder d = ref _addr_d.val;
+
             while (d.bytes.i == d.bytes.j)
             {
                 err = d.fill();
 
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
+
             }
 
             x = d.bytes.buf[d.bytes.i];
             d.bytes.i++;
             d.bytes.nUnreadable = 0L;
-            return (x, null);
+            return (x, error.As(null!)!);
+
         }
 
         // errMissingFF00 means that readByteStuffedByte encountered an 0xff byte (a
@@ -206,8 +224,12 @@ namespace image
         private static var errMissingFF00 = FormatError("missing 0xff00 sequence");
 
         // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
-        private static (byte, error) readByteStuffedByte(this ref decoder d)
-        { 
+        private static (byte, error) readByteStuffedByte(this ptr<decoder> _addr_d)
+        {
+            byte x = default;
+            error err = default!;
+            ref decoder d = ref _addr_d.val;
+ 
             // Take the fast path if d.bytes.buf contains at least two bytes.
             if (d.bytes.i + 2L <= d.bytes.j)
             {
@@ -216,45 +238,56 @@ namespace image
                 d.bytes.nUnreadable = 1L;
                 if (x != 0xffUL)
                 {
-                    return (x, err);
+                    return (x, error.As(err)!);
                 }
+
                 if (d.bytes.buf[d.bytes.i] != 0x00UL)
                 {
-                    return (0L, errMissingFF00);
+                    return (0L, error.As(errMissingFF00)!);
                 }
+
                 d.bytes.i++;
                 d.bytes.nUnreadable = 2L;
-                return (0xffUL, null);
+                return (0xffUL, error.As(null!)!);
+
             }
+
             d.bytes.nUnreadable = 0L;
 
             x, err = d.readByte();
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             d.bytes.nUnreadable = 1L;
             if (x != 0xffUL)
             {
-                return (x, null);
+                return (x, error.As(null!)!);
             }
+
             x, err = d.readByte();
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             d.bytes.nUnreadable = 2L;
             if (x != 0x00UL)
             {
-                return (0L, errMissingFF00);
+                return (0L, error.As(errMissingFF00)!);
             }
-            return (0xffUL, null);
+
+            return (0xffUL, error.As(null!)!);
+
         }
 
         // readFull reads exactly len(p) bytes into p. It does not care about byte
         // stuffing.
-        private static error readFull(this ref decoder d, slice<byte> p)
-        { 
+        private static error readFull(this ptr<decoder> _addr_d, slice<byte> p)
+        {
+            ref decoder d = ref _addr_d.val;
+ 
             // Unread the overshot bytes, if any.
             if (d.bytes.nUnreadable != 0L)
             {
@@ -262,8 +295,11 @@ namespace image
                 {
                     d.unreadByteStuffedByte();
                 }
+
                 d.bytes.nUnreadable = 0L;
+
             }
+
             while (true)
             {
                 var n = copy(p, d.bytes.buf[d.bytes.i..d.bytes.j]);
@@ -273,6 +309,7 @@ namespace image
                 {
                     break;
                 }
+
                 {
                     var err = d.fill();
 
@@ -282,18 +319,24 @@ namespace image
                         {
                             err = io.ErrUnexpectedEOF;
                         }
-                        return error.As(err);
+
+                        return error.As(err)!;
+
                     }
 
                 }
+
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // ignore ignores the next n bytes.
-        private static error ignore(this ref decoder d, long n)
-        { 
+        private static error ignore(this ptr<decoder> _addr_d, long n)
+        {
+            ref decoder d = ref _addr_d.val;
+ 
             // Unread the overshot bytes, if any.
             if (d.bytes.nUnreadable != 0L)
             {
@@ -301,8 +344,11 @@ namespace image
                 {
                     d.unreadByteStuffedByte();
                 }
+
                 d.bytes.nUnreadable = 0L;
+
             }
+
             while (true)
             {
                 var m = d.bytes.j - d.bytes.i;
@@ -310,12 +356,14 @@ namespace image
                 {
                     m = n;
                 }
+
                 d.bytes.i += m;
                 n -= m;
                 if (n == 0L)
                 {
                     break;
                 }
+
                 {
                     var err = d.fill();
 
@@ -325,22 +373,29 @@ namespace image
                         {
                             err = io.ErrUnexpectedEOF;
                         }
-                        return error.As(err);
+
+                        return error.As(err)!;
+
                     }
 
                 }
+
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Specified in section B.2.2.
-        private static error processSOF(this ref decoder d, long n)
+        private static error processSOF(this ptr<decoder> _addr_d, long n)
         {
+            ref decoder d = ref _addr_d.val;
+
             if (d.nComp != 0L)
             {
-                return error.As(FormatError("multiple SOF markers"));
+                return error.As(FormatError("multiple SOF markers"))!;
             }
+
             switch (n)
             {
                 case 6L + 3L * 1L: // Grayscale image.
@@ -353,7 +408,7 @@ namespace image
                     d.nComp = 4L;
                     break;
                 default: 
-                    return error.As(UnsupportedError("number of components"));
+                    return error.As(UnsupportedError("number of components"))!;
                     break;
             }
             {
@@ -361,7 +416,7 @@ namespace image
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
                 // We only support 8-bit precision.
 
@@ -369,14 +424,16 @@ namespace image
             // We only support 8-bit precision.
             if (d.tmp[0L] != 8L)
             {
-                return error.As(UnsupportedError("precision"));
+                return error.As(UnsupportedError("precision"))!;
             }
+
             d.height = int(d.tmp[1L]) << (int)(8L) + int(d.tmp[2L]);
             d.width = int(d.tmp[3L]) << (int)(8L) + int(d.tmp[4L]);
             if (int(d.tmp[5L]) != d.nComp)
             {
-                return error.As(FormatError("SOF has wrong length"));
+                return error.As(FormatError("SOF has wrong length"))!;
             }
+
             for (long i = 0L; i < d.nComp; i++)
             {
                 d.comp[i].c = d.tmp[6L + 3L * i]; 
@@ -386,27 +443,31 @@ namespace image
                 {
                     if (d.comp[i].c == d.comp[j].c)
                     {
-                        return error.As(FormatError("repeated component identifier"));
+                        return error.As(FormatError("repeated component identifier"))!;
                     }
+
                 }
 
 
                 d.comp[i].tq = d.tmp[8L + 3L * i];
                 if (d.comp[i].tq > maxTq)
                 {
-                    return error.As(FormatError("bad Tq value"));
+                    return error.As(FormatError("bad Tq value"))!;
                 }
+
                 var hv = d.tmp[7L + 3L * i];
                 var h = int(hv >> (int)(4L));
                 var v = int(hv & 0x0fUL);
                 if (h < 1L || 4L < h || v < 1L || 4L < v)
                 {
-                    return error.As(FormatError("luma/chroma subsampling ratio"));
+                    return error.As(FormatError("luma/chroma subsampling ratio"))!;
                 }
+
                 if (h == 3L || v == 3L)
                 {
-                    return error.As(errUnsupportedSubsamplingRatio);
+                    return error.As(errUnsupportedSubsamplingRatio)!;
                 }
+
                 switch (d.nComp)
                 {
                     case 1L: 
@@ -440,20 +501,23 @@ namespace image
                                 // with v == 4.
                                 if (v == 4L)
                                 {
-                                    return error.As(errUnsupportedSubsamplingRatio);
+                                    return error.As(errUnsupportedSubsamplingRatio)!;
                                 }
+
                                 break;
                             case 1L: // Cb.
                                 if (d.comp[0L].h % h != 0L || d.comp[0L].v % v != 0L)
                                 {
-                                    return error.As(errUnsupportedSubsamplingRatio);
+                                    return error.As(errUnsupportedSubsamplingRatio)!;
                                 }
+
                                 break;
                             case 2L: // Cr.
                                 if (d.comp[1L].h != h || d.comp[1L].v != v)
                                 {
-                                    return error.As(errUnsupportedSubsamplingRatio);
+                                    return error.As(errUnsupportedSubsamplingRatio)!;
                                 }
+
                                 break;
                         }
                         break;
@@ -472,22 +536,25 @@ namespace image
                             case 0L: 
                                 if (hv != 0x11UL && hv != 0x22UL)
                                 {
-                                    return error.As(errUnsupportedSubsamplingRatio);
+                                    return error.As(errUnsupportedSubsamplingRatio)!;
                                 }
+
                                 break;
                             case 1L: 
 
                             case 2L: 
                                 if (hv != 0x11UL)
                                 {
-                                    return error.As(errUnsupportedSubsamplingRatio);
+                                    return error.As(errUnsupportedSubsamplingRatio)!;
                                 }
+
                                 break;
                             case 3L: 
                                 if (d.comp[0L].h != h || d.comp[0L].v != v)
                                 {
-                                    return error.As(errUnsupportedSubsamplingRatio);
+                                    return error.As(errUnsupportedSubsamplingRatio)!;
                                 }
+
                                 break;
                         }
                         break;
@@ -495,14 +562,18 @@ namespace image
 
                 d.comp[i].h = h;
                 d.comp[i].v = v;
+
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Specified in section B.2.4.1.
-        private static error processDQT(this ref decoder d, long n)
+        private static error processDQT(this ptr<decoder> _addr_d, long n)
         {
+            ref decoder d = ref _addr_d.val;
+
 loop:
             while (n > 0L)
             {
@@ -510,13 +581,15 @@ loop:
                 var (x, err) = d.readByte();
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 var tq = x & 0x0fUL;
                 if (tq > maxTq)
                 {
-                    return error.As(FormatError("bad Tq value"));
+                    return error.As(FormatError("bad Tq value"))!;
                 }
+
                 switch (x >> (int)(4L))
                 {
                     case 0L: 
@@ -525,6 +598,7 @@ loop:
                             _breakloop = true;
                             break;
                         }
+
                         n -= blockSize;
                         {
                             var err__prev1 = err;
@@ -533,12 +607,13 @@ loop:
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                         {
                             var i__prev2 = i;
 
@@ -557,6 +632,7 @@ loop:
                             _breakloop = true;
                             break;
                         }
+
                         n -= 2L * blockSize;
                         {
                             var err__prev1 = err;
@@ -565,12 +641,13 @@ loop:
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                         {
                             var i__prev2 = i;
 
@@ -584,78 +661,96 @@ loop:
                         }
                         break;
                     default: 
-                        return error.As(FormatError("bad Pq value"));
+                        return error.As(FormatError("bad Pq value"))!;
                         break;
                 }
+
             }
             if (n != 0L)
             {
-                return error.As(FormatError("DQT has wrong length"));
+                return error.As(FormatError("DQT has wrong length"))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Specified in section B.2.4.4.
-        private static error processDRI(this ref decoder d, long n)
+        private static error processDRI(this ptr<decoder> _addr_d, long n)
         {
+            ref decoder d = ref _addr_d.val;
+
             if (n != 2L)
             {
-                return error.As(FormatError("DRI has wrong length"));
+                return error.As(FormatError("DRI has wrong length"))!;
             }
+
             {
                 var err = d.readFull(d.tmp[..2L]);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             d.ri = int(d.tmp[0L]) << (int)(8L) + int(d.tmp[1L]);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error processApp0Marker(this ref decoder d, long n)
+        private static error processApp0Marker(this ptr<decoder> _addr_d, long n)
         {
+            ref decoder d = ref _addr_d.val;
+
             if (n < 5L)
             {
-                return error.As(d.ignore(n));
+                return error.As(d.ignore(n))!;
             }
+
             {
                 var err = d.readFull(d.tmp[..5L]);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             n -= 5L;
 
             d.jfif = d.tmp[0L] == 'J' && d.tmp[1L] == 'F' && d.tmp[2L] == 'I' && d.tmp[3L] == 'F' && d.tmp[4L] == '\x00';
 
             if (n > 0L)
             {
-                return error.As(d.ignore(n));
+                return error.As(d.ignore(n))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static error processApp14Marker(this ref decoder d, long n)
+        private static error processApp14Marker(this ptr<decoder> _addr_d, long n)
         {
+            ref decoder d = ref _addr_d.val;
+
             if (n < 12L)
             {
-                return error.As(d.ignore(n));
+                return error.As(d.ignore(n))!;
             }
+
             {
                 var err = d.readFull(d.tmp[..12L]);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             n -= 12L;
 
             if (d.tmp[0L] == 'A' && d.tmp[1L] == 'd' && d.tmp[2L] == 'o' && d.tmp[3L] == 'b' && d.tmp[4L] == 'e')
@@ -663,16 +758,23 @@ loop:
                 d.adobeTransformValid = true;
                 d.adobeTransform = d.tmp[11L];
             }
+
             if (n > 0L)
             {
-                return error.As(d.ignore(n));
+                return error.As(d.ignore(n))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // decode reads a JPEG image from r and returns it as an image.Image.
-        private static (image.Image, error) decode(this ref decoder d, io.Reader r, bool configOnly)
+        private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader r, bool configOnly)
         {
+            image.Image _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             d.r = r; 
 
             // Check for the Start Of Image marker.
@@ -683,15 +785,16 @@ loop:
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
             if (d.tmp[0L] != 0xffUL || d.tmp[1L] != soiMarker)
             {
-                return (null, FormatError("missing SOI marker"));
+                return (null, error.As(FormatError("missing SOI marker"))!);
             } 
 
             // Process the remaining segments until the End Of Image marker.
@@ -700,8 +803,9 @@ loop:
                 err = d.readFull(d.tmp[..2L]);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
                 while (d.tmp[0L] != 0xffUL)
                 { 
                     // Strictly speaking, this is a format error. However, libjpeg is
@@ -728,8 +832,9 @@ loop:
                     d.tmp[1L], err = d.readByte();
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                 }
 
                 var marker = d.tmp[1L];
@@ -737,7 +842,9 @@ loop:
                 { 
                     // Treat "\xff\x00" as extraneous data.
                     continue;
+
                 }
+
                 while (marker == 0xffUL)
                 { 
                     // Section B.1.1.2 says, "Any marker may optionally be preceded by any
@@ -745,14 +852,17 @@ loop:
                     marker, err = d.readByte();
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                 }
 
                 if (marker == eoiMarker)
                 { // End Of Image.
                     break;
+
                 }
+
                 if (rst0Marker <= marker && marker <= rst7Marker)
                 { 
                     // Figures B.2 and B.16 of the specification suggest that restart markers should
@@ -762,6 +872,7 @@ loop:
                     // method, and is ignored as a harmless error. Restart markers have no extra data,
                     // so we check for this before we read the 16-bit length of the segment.
                     continue;
+
                 } 
 
                 // Read the 16-bit length of the segment. The value includes the 2 bytes for the
@@ -770,13 +881,15 @@ loop:
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
                 var n = int(d.tmp[0L]) << (int)(8L) + int(d.tmp[1L]) - 2L;
                 if (n < 0L)
                 {
-                    return (null, FormatError("short segment length"));
+                    return (null, error.As(FormatError("short segment length"))!);
                 }
+
 
                 if (marker == sof0Marker || marker == sof1Marker || marker == sof2Marker) 
                     d.baseline = marker == sof0Marker;
@@ -784,8 +897,9 @@ loop:
                     err = d.processSOF(n);
                     if (configOnly && d.jfif)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                 else if (marker == dhtMarker) 
                     if (configOnly)
                     {
@@ -795,6 +909,7 @@ loop:
                     {
                         err = d.processDHT(n);
                     }
+
                 else if (marker == dqtMarker) 
                     if (configOnly)
                     {
@@ -804,11 +919,13 @@ loop:
                     {
                         err = d.processDQT(n);
                     }
+
                 else if (marker == sosMarker) 
                     if (configOnly)
                     {
-                        return (null, null);
+                        return (null, error.As(null!)!);
                     }
+
                     err = d.processSOS(n);
                 else if (marker == driMarker) 
                     if (configOnly)
@@ -819,6 +936,7 @@ loop:
                     {
                         err = d.processDRI(n);
                     }
+
                 else if (marker == app0Marker) 
                     err = d.processApp0Marker(n);
                 else if (marker == app14Marker) 
@@ -831,15 +949,18 @@ loop:
                     else if (marker < 0xc0UL)
                     { // See Table B.1 "Marker code assignments".
                         err = FormatError("unknown marker");
+
                     }
                     else
                     {
                         err = UnsupportedError("unknown marker");
                     }
+
                                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
             }
 
 
@@ -852,17 +973,20 @@ loop:
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
 
                     err = err__prev2;
 
                 }
+
             }
+
             if (d.img1 != null)
             {
-                return (d.img1, null);
+                return (d.img1, error.As(null!)!);
             }
+
             if (d.img3 != null)
             {
                 if (d.blackPix != null)
@@ -873,9 +997,13 @@ loop:
                 {
                     return d.convertToRGB();
                 }
-                return (d.img3, null);
+
+                return (d.img3, error.As(null!)!);
+
             }
-            return (null, FormatError("missing SOS marker"));
+
+            return (null, error.As(FormatError("missing SOS marker"))!);
+
         }
 
         // applyBlack combines d.img3 and d.blackPix into a CMYK image. The formula
@@ -885,16 +1013,20 @@ loop:
         // Adobe CMYK JPEG images are inverted, where 255 means no ink instead of full
         // ink, so we apply "v = 255 - v" at various points. Note that a double
         // inversion is a no-op, so inversions might be implicit in the code below.
-        private static (image.Image, error) applyBlack(this ref decoder d)
+        private static (image.Image, error) applyBlack(this ptr<decoder> _addr_d)
         {
+            image.Image _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             if (!d.adobeTransformValid)
             {
-                return (null, UnsupportedError("unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"));
+                return (null, error.As(UnsupportedError("unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"))!);
             } 
 
             // If the 4-component JPEG image isn't explicitly marked as "Unknown (RGB
             // or CMYK)" as per
-            // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
+            // https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
             // we assume that it is YCbCrK. This matches libjpeg's jdapimin.c.
             if (d.adobeTransform != adobeTransformUnknown)
             { 
@@ -940,7 +1072,8 @@ loop:
                     iBase = iBase__prev1;
                     y = y__prev1;
                 }
-                return (ref new image.CMYK(Pix:img.Pix,Stride:img.Stride,Rect:img.Rect,), null);
+                return (addr(new image.CMYK(Pix:img.Pix,Stride:img.Stride,Rect:img.Rect,)), error.As(null!)!);
+
             } 
 
             // The first three channels (cyan, magenta, yellow) of the CMYK
@@ -970,6 +1103,7 @@ loop:
                         iBase = iBase + img.Stride;
                     y = y + 1L;
                         }
+
                         {
                             var i__prev3 = i;
                             var x__prev3 = x;
@@ -986,40 +1120,55 @@ loop:
                                 i = i + 4L;
                             x = x + 1L;
                                 }
+
                                 img.Pix[i] = 255L - translation.src[sy * translation.stride + sx];
+
                             }
 
 
                             i = i__prev3;
                             x = x__prev3;
                         }
+
                     }
 
 
                     iBase = iBase__prev2;
                     y = y__prev2;
                 }
+
             }
-            return (img, null);
+            return (img, error.As(null!)!);
+
         }
 
-        private static bool isRGB(this ref decoder d)
+        private static bool isRGB(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             if (d.jfif)
             {
                 return false;
             }
+
             if (d.adobeTransformValid && d.adobeTransform == adobeTransformUnknown)
             { 
-                // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
+                // https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
                 // says that 0 means Unknown (and in practice RGB) and 1 means YCbCr.
                 return true;
+
             }
+
             return d.comp[0L].c == 'R' && d.comp[1L].c == 'G' && d.comp[2L].c == 'B';
+
         }
 
-        private static (image.Image, error) convertToRGB(this ref decoder d)
+        private static (image.Image, error) convertToRGB(this ptr<decoder> _addr_d)
         {
+            image.Image _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             var cScale = d.comp[0L].h / d.comp[1L].h;
             var bounds = d.img3.Bounds();
             var img = image.NewRGBA(bounds);
@@ -1037,14 +1186,19 @@ loop:
                     img.Pix[po + 4L * i + 3L] = 255L;
                 }
 
+
             }
 
-            return (img, null);
+            return (img, error.As(null!)!);
+
         }
 
         // Decode reads a JPEG image from r and returns it as an image.Image.
         public static (image.Image, error) Decode(io.Reader r)
         {
+            image.Image _p0 = default;
+            error _p0 = default!;
+
             decoder d = default;
             return d.decode(r, false);
         }
@@ -1053,20 +1207,24 @@ loop:
         // decoding the entire image.
         public static (image.Config, error) DecodeConfig(io.Reader r)
         {
+            image.Config _p0 = default;
+            error _p0 = default!;
+
             decoder d = default;
             {
                 var (_, err) = d.decode(r, true);
 
                 if (err != null)
                 {
-                    return (new image.Config(), err);
+                    return (new image.Config(), error.As(err)!);
                 }
 
             }
+
             switch (d.nComp)
             {
                 case 1L: 
-                    return (new image.Config(ColorModel:color.GrayModel,Width:d.width,Height:d.height,), null);
+                    return (new image.Config(ColorModel:color.GrayModel,Width:d.width,Height:d.height,), error.As(null!)!);
                     break;
                 case 3L: 
                     var cm = color.YCbCrModel;
@@ -1074,13 +1232,15 @@ loop:
                     {
                         cm = color.RGBAModel;
                     }
-                    return (new image.Config(ColorModel:cm,Width:d.width,Height:d.height,), null);
+
+                    return (new image.Config(ColorModel:cm,Width:d.width,Height:d.height,), error.As(null!)!);
                     break;
                 case 4L: 
-                    return (new image.Config(ColorModel:color.CMYKModel,Width:d.width,Height:d.height,), null);
+                    return (new image.Config(ColorModel:color.CMYKModel,Width:d.width,Height:d.height,), error.As(null!)!);
                     break;
             }
-            return (new image.Config(), FormatError("missing SOF marker"));
+            return (new image.Config(), error.As(FormatError("missing SOF marker"))!);
+
         }
 
         private static void init()

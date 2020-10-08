@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:18 UTC
+//     Generated on 2020 October 08 03:38:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace net
                 this.pw = default;
             }
 
-            public populateResponse(ref ptr<Response> res = default, channel<ref Response> ch = default, bool wroteHeader = default, bool hasContent = default, bool sentResponse = default, ref ptr<io.PipeWriter> pw = default)
+            public populateResponse(ref ptr<Response> res = default, channel<ptr<Response>> ch = default, bool wroteHeader = default, bool hasContent = default, bool sentResponse = default, ref ptr<io.PipeWriter> pw = default)
             {
                 this.res = res;
                 this.ch = ch;

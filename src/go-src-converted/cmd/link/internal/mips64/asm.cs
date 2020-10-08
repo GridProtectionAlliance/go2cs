@@ -1,5 +1,5 @@
 // Inferno utils/5l/asm.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/5l/asm.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/5l/asm.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,16 +28,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips64 -- go2cs converted at 2020 August 29 10:02:35 UTC
+// package mips64 -- go2cs converted at 2020 October 08 04:37:24 UTC
 // import "cmd/link/internal/mips64" ==> using mips64 = go.cmd.link.@internal.mips64_package
 // Original source: C:\Go\src\cmd\link\internal\mips64\asm.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using ld = go.cmd.link.@internal.ld_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using elf = go.debug.elf_package;
 using fmt = go.fmt_package;
 using log = go.log_package;
+using sync = go.sync_package;
 using static go.builtin;
 
 namespace go {
@@ -47,18 +49,30 @@ namespace @internal
 {
     public static partial class mips64_package
     {
-        private static void gentext(ref ld.Link ctxt)
+        private static void gentext2(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr)
         {
+            ref ld.Link ctxt = ref _addr_ctxt.val;
+            ref loader.Loader ldr = ref _addr_ldr.val;
+
         }
 
-        private static bool adddynrel(ref ld.Link ctxt, ref sym.Symbol s, ref sym.Reloc r)
+        private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, ptr<sym.Symbol> _addr_s, ptr<sym.Reloc> _addr_r)
         {
+            ref ld.Target target = ref _addr_target.val;
+            ref loader.Loader ldr = ref _addr_ldr.val;
+            ref ld.ArchSyms syms = ref _addr_syms.val;
+            ref sym.Symbol s = ref _addr_s.val;
+            ref sym.Reloc r = ref _addr_r.val;
+
             log.Fatalf("adddynrel not implemented");
             return false;
         }
 
-        private static bool elfreloc1(ref ld.Link ctxt, ref sym.Reloc r, long sectoff)
-        { 
+        private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<sym.Reloc> _addr_r, long sectoff)
+        {
+            ref ld.Link ctxt = ref _addr_ctxt.val;
+            ref sym.Reloc r = ref _addr_r.val;
+ 
             // mips64 ELF relocation (endian neutral)
             //        offset    uint64
             //        sym        uint32
@@ -70,13 +84,13 @@ namespace @internal
 
             ctxt.Out.Write64(uint64(sectoff));
 
-            var elfsym = r.Xsym.ElfsymForReloc();
+            var elfsym = ld.ElfSymForReloc(ctxt, r.Xsym);
             ctxt.Out.Write32(uint32(elfsym));
             ctxt.Out.Write8(0L);
             ctxt.Out.Write8(0L);
             ctxt.Out.Write8(0L);
 
-            if (r.Type == objabi.R_ADDR) 
+            if (r.Type == objabi.R_ADDR || r.Type == objabi.R_DWARFSECREF) 
                 switch (r.Siz)
                 {
                     case 4L: 
@@ -102,21 +116,38 @@ namespace @internal
                         ctxt.Out.Write64(uint64(r.Xadd));
 
             return true;
+
         }
 
-        private static void elfsetupplt(ref ld.Link ctxt)
+        private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_gotplt, loader.Sym dynamic)
         {
-            return;
+            ref ld.Link ctxt = ref _addr_ctxt.val;
+            ref loader.SymbolBuilder plt = ref _addr_plt.val;
+            ref loader.SymbolBuilder gotplt = ref _addr_gotplt.val;
+
+            return ;
         }
 
-        private static bool machoreloc1(ref sys.Arch arch, ref ld.OutBuf @out, ref sym.Symbol s, ref sym.Reloc r, long sectoff)
+        private static bool machoreloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out, ptr<sym.Symbol> _addr_s, ptr<sym.Reloc> _addr_r, long sectoff)
         {
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref ld.OutBuf @out = ref _addr_@out.val;
+            ref sym.Symbol s = ref _addr_s.val;
+            ref sym.Reloc r = ref _addr_r.val;
+
             return false;
         }
 
-        private static bool archreloc(ref ld.Link ctxt, ref sym.Reloc r, ref sym.Symbol s, ref long val)
+        private static (long, bool) archreloc(ptr<ld.Target> _addr_target, ptr<ld.ArchSyms> _addr_syms, ptr<sym.Reloc> _addr_r, ptr<sym.Symbol> _addr_s, long val)
         {
-            if (ctxt.LinkMode == ld.LinkExternal)
+            long _p0 = default;
+            bool _p0 = default;
+            ref ld.Target target = ref _addr_target.val;
+            ref ld.ArchSyms syms = ref _addr_syms.val;
+            ref sym.Reloc r = ref _addr_r.val;
+            ref sym.Symbol s = ref _addr_s.val;
+
+            if (target.IsExternal())
             {
 
                 if (r.Type == objabi.R_ADDRMIPS || r.Type == objabi.R_ADDRMIPSU) 
@@ -136,36 +167,34 @@ namespace @internal
                     {
                         ld.Errorf(s, "missing section for %s", rs.Name);
                     }
+
                     r.Xsym = rs;
 
-                    return true;
+                    return (val, true);
                 else if (r.Type == objabi.R_ADDRMIPSTLS || r.Type == objabi.R_CALLMIPS || r.Type == objabi.R_JMPMIPS) 
                     r.Done = false;
                     r.Xsym = r.Sym;
                     r.Xadd = r.Add;
-                    return true;
+                    return (val, true);
                 else 
-                    return false;
-                            }
+                    return (val, false);
+                
+            }
+
 
             if (r.Type == objabi.R_CONST) 
-                val.Value = r.Add;
-                return true;
+                return (r.Add, true);
             else if (r.Type == objabi.R_GOTOFF) 
-                val.Value = ld.Symaddr(r.Sym) + r.Add - ld.Symaddr(ctxt.Syms.Lookup(".got", 0L));
-                return true;
+                return (ld.Symaddr(r.Sym) + r.Add - ld.Symaddr(syms.GOT), true);
             else if (r.Type == objabi.R_ADDRMIPS || r.Type == objabi.R_ADDRMIPSU) 
                 var t = ld.Symaddr(r.Sym) + r.Add;
-                var o1 = ctxt.Arch.ByteOrder.Uint32(s.P[r.Off..]);
+                var o1 = target.Arch.ByteOrder.Uint32(s.P[r.Off..]);
                 if (r.Type == objabi.R_ADDRMIPS)
                 {
-                    val.Value = int64(o1 & 0xffff0000UL | uint32(t) & 0xffffUL);
+                    return (int64(o1 & 0xffff0000UL | uint32(t) & 0xffffUL), true);
                 }
-                else
-                {
-                    val.Value = int64(o1 & 0xffff0000UL | uint32((t + 1L << (int)(15L)) >> (int)(16L)) & 0xffffUL);
-                }
-                return true;
+
+                return (int64(o1 & 0xffff0000UL | uint32((t + 1L << (int)(15L)) >> (int)(16L)) & 0xffffUL), true);
             else if (r.Type == objabi.R_ADDRMIPSTLS) 
                 // thread pointer is at 0x7000 offset from the start of TLS data area
                 t = ld.Symaddr(r.Sym) + r.Add - 0x7000UL;
@@ -173,83 +202,85 @@ namespace @internal
                 {
                     ld.Errorf(s, "TLS offset out of range %d", t);
                 }
-                o1 = ctxt.Arch.ByteOrder.Uint32(s.P[r.Off..]);
-                val.Value = int64(o1 & 0xffff0000UL | uint32(t) & 0xffffUL);
-                return true;
+
+                o1 = target.Arch.ByteOrder.Uint32(s.P[r.Off..]);
+                return (int64(o1 & 0xffff0000UL | uint32(t) & 0xffffUL), true);
             else if (r.Type == objabi.R_CALLMIPS || r.Type == objabi.R_JMPMIPS) 
                 // Low 26 bits = (S + A) >> 2
                 t = ld.Symaddr(r.Sym) + r.Add;
-                o1 = ctxt.Arch.ByteOrder.Uint32(s.P[r.Off..]);
-                val.Value = int64(o1 & 0xfc000000UL | uint32(t >> (int)(2L)) & ~0xfc000000UL);
-                return true;
-                        return false;
+                o1 = target.Arch.ByteOrder.Uint32(s.P[r.Off..]);
+                return (int64(o1 & 0xfc000000UL | uint32(t >> (int)(2L)) & ~0xfc000000UL), true);
+                        return (val, false);
+
         }
 
-        private static long archrelocvariant(ref ld.Link ctxt, ref sym.Reloc r, ref sym.Symbol s, long t)
+        private static long archrelocvariant(ptr<ld.Target> _addr_target, ptr<ld.ArchSyms> _addr_syms, ptr<sym.Reloc> _addr_r, ptr<sym.Symbol> _addr_s, long t)
         {
+            ref ld.Target target = ref _addr_target.val;
+            ref ld.ArchSyms syms = ref _addr_syms.val;
+            ref sym.Reloc r = ref _addr_r.val;
+            ref sym.Symbol s = ref _addr_s.val;
+
             return -1L;
         }
 
-        private static void asmb(ref ld.Link ctxt)
+        private static void asmb(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr__)
         {
-            if (ctxt.Debugvlog != 0L)
-            {
-                ctxt.Logf("%5.2f asmb\n", ld.Cputime());
-            }
+            ref ld.Link ctxt = ref _addr_ctxt.val;
+            ref loader.Loader _ = ref _addr__.val;
+
             if (ctxt.IsELF)
             {
                 ld.Asmbelfsetup();
             }
+
+            ref sync.WaitGroup wg = ref heap(out ptr<sync.WaitGroup> _addr_wg);
             var sect = ld.Segtext.Sections[0L];
-            ctxt.Out.SeekSet(int64(sect.Vaddr - ld.Segtext.Vaddr + ld.Segtext.Fileoff));
-            ld.Codeblk(ctxt, int64(sect.Vaddr), int64(sect.Length));
-            foreach (var (_, __sect) in ld.Segtext.Sections[1L..])
+            var offset = sect.Vaddr - ld.Segtext.Vaddr + ld.Segtext.Fileoff;
+            ld.WriteParallel(_addr_wg, ld.Codeblk, ctxt, offset, sect.Vaddr, sect.Length);
+
             {
-                sect = __sect;
-                ctxt.Out.SeekSet(int64(sect.Vaddr - ld.Segtext.Vaddr + ld.Segtext.Fileoff));
-                ld.Datblk(ctxt, int64(sect.Vaddr), int64(sect.Length));
+                var sect__prev1 = sect;
+
+                foreach (var (_, __sect) in ld.Segtext.Sections[1L..])
+                {
+                    sect = __sect;
+                    offset = sect.Vaddr - ld.Segtext.Vaddr + ld.Segtext.Fileoff;
+                    ld.WriteParallel(_addr_wg, ld.Datblk, ctxt, offset, sect.Vaddr, sect.Length);
+                }
+
+                sect = sect__prev1;
             }
 
             if (ld.Segrodata.Filelen > 0L)
             {
-                if (ctxt.Debugvlog != 0L)
-                {
-                    ctxt.Logf("%5.2f rodatblk\n", ld.Cputime());
-                }
-                ctxt.Out.SeekSet(int64(ld.Segrodata.Fileoff));
-                ld.Datblk(ctxt, int64(ld.Segrodata.Vaddr), int64(ld.Segrodata.Filelen));
+                ld.WriteParallel(_addr_wg, ld.Datblk, ctxt, ld.Segrodata.Fileoff, ld.Segrodata.Vaddr, ld.Segrodata.Filelen);
             }
+
             if (ld.Segrelrodata.Filelen > 0L)
             {
-                if (ctxt.Debugvlog != 0L)
-                {
-                    ctxt.Logf("%5.2f rodatblk\n", ld.Cputime());
-                }
-                ctxt.Out.SeekSet(int64(ld.Segrelrodata.Fileoff));
-                ld.Datblk(ctxt, int64(ld.Segrelrodata.Vaddr), int64(ld.Segrelrodata.Filelen));
+                ld.WriteParallel(_addr_wg, ld.Datblk, ctxt, ld.Segrelrodata.Fileoff, ld.Segrelrodata.Vaddr, ld.Segrelrodata.Filelen);
             }
-            if (ctxt.Debugvlog != 0L)
-            {
-                ctxt.Logf("%5.2f datblk\n", ld.Cputime());
-            }
-            ctxt.Out.SeekSet(int64(ld.Segdata.Fileoff));
-            ld.Datblk(ctxt, int64(ld.Segdata.Vaddr), int64(ld.Segdata.Filelen));
 
-            ctxt.Out.SeekSet(int64(ld.Segdwarf.Fileoff));
-            ld.Dwarfblk(ctxt, int64(ld.Segdwarf.Vaddr), int64(ld.Segdwarf.Filelen)); 
+            ld.WriteParallel(_addr_wg, ld.Datblk, ctxt, ld.Segdata.Fileoff, ld.Segdata.Vaddr, ld.Segdata.Filelen);
 
+            ld.WriteParallel(_addr_wg, ld.Dwarfblk, ctxt, ld.Segdwarf.Fileoff, ld.Segdwarf.Vaddr, ld.Segdwarf.Filelen);
+            wg.Wait();
+
+        }
+
+        private static void asmb2(ptr<ld.Link> _addr_ctxt)
+        {
+            ref ld.Link ctxt = ref _addr_ctxt.val;
+ 
             /* output symbol table */
             ld.Symsize = 0L;
 
             ld.Lcsize = 0L;
             var symo = uint32(0L);
-            if (!ld.FlagS.Value)
+            if (!ld.FlagS.val)
             { 
                 // TODO: rationalize
-                if (ctxt.Debugvlog != 0L)
-                {
-                    ctxt.Logf("%5.2f sym\n", ld.Cputime());
-                }
 
                 if (ctxt.HeadType == objabi.Hplan9) 
                     symo = uint32(ld.Segdata.Fileoff + ld.Segdata.Filelen);
@@ -257,42 +288,36 @@ namespace @internal
                     if (ctxt.IsELF)
                     {
                         symo = uint32(ld.Segdwarf.Fileoff + ld.Segdwarf.Filelen);
-                        symo = uint32(ld.Rnd(int64(symo), int64(ld.FlagRound.Value)));
+                        symo = uint32(ld.Rnd(int64(symo), int64(ld.FlagRound.val)));
                     }
+
                                 ctxt.Out.SeekSet(int64(symo));
 
                 if (ctxt.HeadType == objabi.Hplan9) 
                     ld.Asmplan9sym(ctxt);
-                    ctxt.Out.Flush();
 
                     var sym = ctxt.Syms.Lookup("pclntab", 0L);
                     if (sym != null)
                     {
                         ld.Lcsize = int32(len(sym.P));
                         ctxt.Out.Write(sym.P);
-                        ctxt.Out.Flush();
                     }
+
                 else 
                     if (ctxt.IsELF)
                     {
-                        if (ctxt.Debugvlog != 0L)
-                        {
-                            ctxt.Logf("%5.2f elfsym\n", ld.Cputime());
-                        }
                         ld.Asmelfsym(ctxt);
-                        ctxt.Out.Flush();
                         ctxt.Out.Write(ld.Elfstrdat);
 
                         if (ctxt.LinkMode == ld.LinkExternal)
                         {
                             ld.Elfemitreloc(ctxt);
                         }
+
                     }
+
                             }
-            if (ctxt.Debugvlog != 0L)
-            {
-                ctxt.Logf("%5.2f header\n", ld.Cputime());
-            }
+
             ctxt.Out.SeekSet(0L);
 
             if (ctxt.HeadType == objabi.Hplan9) /* plan 9 */
@@ -301,6 +326,7 @@ namespace @internal
                 {
                     magic = uint32(4L * 26L * 26L + 7L);
                 }
+
                 ctxt.Out.Write32(magic); /* magic */
                 ctxt.Out.Write32(uint32(ld.Segtext.Filelen)); /* sizes */
                 ctxt.Out.Write32(uint32(ld.Segdata.Filelen));
@@ -309,10 +335,9 @@ namespace @internal
                 ctxt.Out.Write32(uint32(ld.Entryvalue(ctxt))); /* va of entry */
                 ctxt.Out.Write32(0L);
                 ctxt.Out.Write32(uint32(ld.Lcsize));
-            else if (ctxt.HeadType == objabi.Hlinux || ctxt.HeadType == objabi.Hfreebsd || ctxt.HeadType == objabi.Hnetbsd || ctxt.HeadType == objabi.Hopenbsd || ctxt.HeadType == objabi.Hnacl) 
+            else if (ctxt.HeadType == objabi.Hlinux || ctxt.HeadType == objabi.Hfreebsd || ctxt.HeadType == objabi.Hnetbsd || ctxt.HeadType == objabi.Hopenbsd) 
                 ld.Asmbelf(ctxt, int64(symo));
-            else                         ctxt.Out.Flush();
-            if (ld.FlagC.Value)
+            else                         if (ld.FlagC.val)
             {
                 fmt.Printf("textsize=%d\n", ld.Segtext.Filelen);
                 fmt.Printf("datsize=%d\n", ld.Segdata.Filelen);
@@ -321,6 +346,7 @@ namespace @internal
                 fmt.Printf("lcsize=%d\n", ld.Lcsize);
                 fmt.Printf("total=%d\n", ld.Segtext.Filelen + ld.Segdata.Length + uint64(ld.Symsize) + uint64(ld.Lcsize));
             }
+
         }
     }
 }}}}

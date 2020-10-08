@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:27 UTC
+//     Generated on 2020 October 08 03:38:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,31 +27,17 @@ namespace mime
     public static partial class multipart_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(io.SectionReader))]
         private partial struct sectionReadCloser
         {
-            // SectionReader structure promotion - sourced from pointer
-            private readonly ptr<SectionReader> m_SectionReaderRef;
-
-            private ref SectionReader SectionReader_ptr => ref m_SectionReaderRef.Value;
-
-            public ref ReaderAt r => ref m_SectionReaderRef.Value.r;
-
-            public ref long @base => ref m_SectionReaderRef.Value.@base;
-
-            public ref long off => ref m_SectionReaderRef.Value.off;
-
-            public ref long limit => ref m_SectionReaderRef.Value.limit;
-
             // Constructors
             public sectionReadCloser(NilType _)
             {
-                this.m_SectionReaderRef = new ptr<io.SectionReader>(new io.SectionReader(nil));
+                this.SectionReader> = default;
             }
 
-            public sectionReadCloser(ref io.SectionReader SectionReader = default)
+            public sectionReadCloser(ref ptr<io.SectionReader> SectionReader> = default)
             {
-                this.m_SectionReaderRef = new ptr<io.SectionReader>(ref SectionReader);
+                this.SectionReader> = SectionReader>;
             }
 
             // Enable comparisons between nil and sectionReadCloser struct
@@ -74,7 +60,7 @@ namespace mime
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static sectionReadCloser sectionReadCloser_cast(dynamic value)
         {
-            return new sectionReadCloser(ref value.SectionReader);
+            return new sectionReadCloser(ref value.SectionReader>);
         }
     }
 }}

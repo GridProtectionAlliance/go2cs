@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:10 UTC
+//     Generated on 2020 October 08 04:42:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -62,7 +62,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -76,10 +76,10 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate (@string, error) writeByRef(ref T value, @string _p0);
+            private delegate (@string, error) writeByPtr(ptr<T> value, @string _p0);
             private delegate (@string, error) writeByVal(T value, @string _p0);
 
-            private static readonly writeByRef s_writeByRef;
+            private static readonly writeByPtr s_writeByPtr;
             private static readonly writeByVal s_writeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,17 +88,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_writeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_writeByPtr is null || !m_target_is_ptr)
                     return s_writeByVal!(target, _p0);
 
-                return s_writeByRef(ref target, _p0);
+                return s_writeByPtr(m_target_ptr, _p0);
             }
 
-            private delegate (@string, error) readLineByRef(ref T value);
+            private delegate (@string, error) readLineByPtr(ptr<T> value);
             private delegate (@string, error) readLineByVal(T value);
 
-            private static readonly readLineByRef s_readLineByRef;
+            private static readonly readLineByPtr s_readLineByPtr;
             private static readonly readLineByVal s_readLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,17 +108,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_readLineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_readLineByPtr is null || !m_target_is_ptr)
                     return s_readLineByVal!(target);
 
-                return s_readLineByRef(ref target);
+                return s_readLineByPtr(m_target_ptr);
             }
 
-            private delegate (@string, error) closeByRef(ref T value);
+            private delegate (@string, error) closeByPtr(ptr<T> value);
             private delegate (@string, error) closeByVal(T value);
 
-            private static readonly closeByRef s_closeByRef;
+            private static readonly closeByPtr s_closeByPtr;
             private static readonly closeByVal s_closeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,11 +128,12 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_closeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_closeByPtr is null || !m_target_is_ptr)
                     return s_closeByVal!(target);
 
-                return s_closeByRef(ref target);
+                return s_closeByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -139,55 +142,46 @@ namespace @internal
             static lineReaderWriter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("write");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("write");
 
                 if (!(extensionMethod is null))
-                    s_writeByRef = extensionMethod.CreateStaticDelegate(typeof(writeByRef)) as writeByRef;
+                    s_writeByPtr = extensionMethod.CreateStaticDelegate(typeof(writeByPtr)) as writeByPtr;
 
-                if (s_writeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("write");
+                extensionMethod = targetType.GetExtensionMethod("write");
 
-                    if (!(extensionMethod is null))
-                        s_writeByVal = extensionMethod.CreateStaticDelegate(typeof(writeByVal)) as writeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_writeByVal = extensionMethod.CreateStaticDelegate(typeof(writeByVal)) as writeByVal;
 
-                if (s_writeByRef is null && s_writeByVal is null)
+                if (s_writeByPtr is null && s_writeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement lineReaderWriter.write method", new Exception("write"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("readLine");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("readLine");
 
                 if (!(extensionMethod is null))
-                    s_readLineByRef = extensionMethod.CreateStaticDelegate(typeof(readLineByRef)) as readLineByRef;
+                    s_readLineByPtr = extensionMethod.CreateStaticDelegate(typeof(readLineByPtr)) as readLineByPtr;
 
-                if (s_readLineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("readLine");
+                extensionMethod = targetType.GetExtensionMethod("readLine");
 
-                    if (!(extensionMethod is null))
-                        s_readLineByVal = extensionMethod.CreateStaticDelegate(typeof(readLineByVal)) as readLineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_readLineByVal = extensionMethod.CreateStaticDelegate(typeof(readLineByVal)) as readLineByVal;
 
-                if (s_readLineByRef is null && s_readLineByVal is null)
+                if (s_readLineByPtr is null && s_readLineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement lineReaderWriter.readLine method", new Exception("readLine"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("close");
 
                 if (!(extensionMethod is null))
-                    s_closeByRef = extensionMethod.CreateStaticDelegate(typeof(closeByRef)) as closeByRef;
+                    s_closeByPtr = extensionMethod.CreateStaticDelegate(typeof(closeByPtr)) as closeByPtr;
 
-                if (s_closeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("close");
+                extensionMethod = targetType.GetExtensionMethod("close");
 
-                    if (!(extensionMethod is null))
-                        s_closeByVal = extensionMethod.CreateStaticDelegate(typeof(closeByVal)) as closeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_closeByVal = extensionMethod.CreateStaticDelegate(typeof(closeByVal)) as closeByVal;
 
-                if (s_closeByRef is null && s_closeByVal is null)
+                if (s_closeByPtr is null && s_closeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement lineReaderWriter.close method", new Exception("close"));
             }
 

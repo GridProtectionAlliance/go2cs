@@ -4,7 +4,7 @@
 
 // +build plan9
 
-// package os -- go2cs converted at 2020 August 29 08:43:43 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:26 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\executable_plan9.go
 using syscall = go.syscall_package;
@@ -16,14 +16,18 @@ namespace go
     {
         private static (@string, error) executable() => func((defer, _, __) =>
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             @string fn = "/proc/" + itoa(Getpid()) + "/text";
             var (f, err) = Open(fn);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
             defer(f.Close());
             return syscall.Fd2path(int(f.Fd()));
+
         });
     }
 }

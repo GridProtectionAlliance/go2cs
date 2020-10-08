@@ -4,7 +4,7 @@
 
 // +build gccgo
 
-// package main -- go2cs converted at 2020 August 29 10:00:01 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:01 UTC
 // Original source: C:\Go\src\cmd\dist\util_gccgo.go
 /*
 int supports_sse2() {

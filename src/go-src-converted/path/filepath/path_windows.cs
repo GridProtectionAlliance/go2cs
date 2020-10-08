@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package filepath -- go2cs converted at 2020 August 29 08:22:27 UTC
+// package filepath -- go2cs converted at 2020 October 08 03:37:02 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Go\src\path\filepath\path_windows.go
 using strings = go.strings_package;
@@ -19,20 +19,56 @@ namespace path
             return c == '\\' || c == '/';
         }
 
+        // reservedNames lists reserved Windows names. Search for PRN in
+        // https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file
+        // for details.
+        private static @string reservedNames = new slice<@string>(new @string[] { "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9" });
+
+        // isReservedName returns true, if path is Windows reserved name.
+        // See reservedNames for the full list.
+        private static bool isReservedName(@string path)
+        {
+            if (len(path) == 0L)
+            {
+                return false;
+            }
+
+            foreach (var (_, reserved) in reservedNames)
+            {
+                if (strings.EqualFold(path, reserved))
+                {
+                    return true;
+                }
+
+            }
+            return false;
+
+        }
+
         // IsAbs reports whether the path is absolute.
         public static bool IsAbs(@string path)
         {
+            bool b = default;
+
+            if (isReservedName(path))
+            {
+                return true;
+            }
+
             var l = volumeNameLen(path);
             if (l == 0L)
             {
                 return false;
             }
+
             path = path[l..];
             if (path == "")
             {
                 return false;
             }
+
             return isSlash(path[0L]);
+
         }
 
         // volumeNameLen returns length of the leading volume name on Windows.
@@ -69,6 +105,7 @@ namespace path
                                 {
                                     break;
                                 }
+
                                 while (n < l)
                                 {
                                     if (isSlash(path[n]))
@@ -76,18 +113,26 @@ namespace path
                                         break;
                                     n++;
                                     }
+
                                 }
 
                                 return n;
+
                             }
+
                             break;
+
                         }
+
                     }
+
 
                 }
 
             }
+
             return 0L;
+
         }
 
         // HasPrefix exists for historical compatibility and should not be used.
@@ -100,7 +145,9 @@ namespace path
             {
                 return true;
             }
+
             return strings.HasPrefix(strings.ToLower(p), strings.ToLower(prefix));
+
         }
 
         private static slice<@string> splitList(@string path)
@@ -133,6 +180,7 @@ namespace path
                             start = i + 1L;
 
                     }
+
                 }
 
 
@@ -148,23 +196,38 @@ namespace path
                 {
                     i = __i;
                     s = __s;
-                    list[i] = strings.Replace(s, "\"", "", -1L);
+                    list[i] = strings.ReplaceAll(s, "\"", "");
                 }
 
                 i = i__prev1;
             }
 
             return list;
+
         }
 
         private static (@string, error) abs(@string path)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
+            if (path == "")
+            { 
+                // syscall.FullPath returns an error on empty path, because it's not a valid path.
+                // To implement Abs behavior of returning working directory on empty string input,
+                // special-case empty path by changing it to "." path. See golang.org/issue/24441.
+                path = ".";
+
+            }
+
             var (fullPath, err) = syscall.FullPath(path);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
-            return (Clean(fullPath), null);
+
+            return (Clean(fullPath), error.As(null!)!);
+
         }
 
         private static @string join(slice<@string> elem)
@@ -175,8 +238,10 @@ namespace path
                 {
                     return joinNonEmpty(elem[i..]);
                 }
+
             }
             return "";
+
         }
 
         // joinNonEmpty is like join, but it assumes that the first element is non-empty.
@@ -186,7 +251,20 @@ namespace path
             { 
                 // First element is drive letter without terminating slash.
                 // Keep path relative to current directory on that drive.
-                return Clean(elem[0L] + strings.Join(elem[1L..], string(Separator)));
+                // Skip empty elements.
+                long i = 1L;
+                while (i < len(elem))
+                {
+                    if (elem[i] != "")
+                    {
+                        break;
+                    i++;
+                    }
+
+                }
+
+                return Clean(elem[0L] + strings.Join(elem[i..], string(Separator)));
+
             } 
             // The following logic prevents Join from inadvertently creating a
             // UNC path on Windows. Unless the first element is a UNC path, Join
@@ -209,7 +287,9 @@ namespace path
             {
                 return head + tail;
             }
+
             return head + string(Separator) + tail;
+
         }
 
         // isUNC reports whether path is a UNC path.

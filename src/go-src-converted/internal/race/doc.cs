@@ -8,7 +8,7 @@ Package race contains helper functions for manually instrumenting code for the r
 The runtime package intentionally exports these functions only in the race build;
 this package exports them unconditionally but without the "race" build tag they are no-ops.
 */
-// package race -- go2cs converted at 2020 August 29 08:16:24 UTC
+// package race -- go2cs converted at 2020 October 08 00:34:03 UTC
 // import "internal/race" ==> using race = go.@internal.race_package
 // Original source: C:\Go\src\internal\race\doc.go
     }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:57 UTC
+//     Generated on 2020 October 08 04:36:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
+using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -62,7 +63,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -76,10 +77,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error ImportPathByRef(ref T value);
+            private delegate error ImportPathByPtr(ptr<T> value);
             private delegate error ImportPathByVal(T value);
 
-            private static readonly ImportPathByRef s_ImportPathByRef;
+            private static readonly ImportPathByPtr s_ImportPathByPtr;
             private static readonly ImportPathByVal s_ImportPathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,17 +89,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ImportPathByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ImportPathByPtr is null || !m_target_is_ptr)
                     return s_ImportPathByVal!(target);
 
-                return s_ImportPathByRef(ref target);
+                return s_ImportPathByPtr(m_target_ptr);
             }
 
-            private delegate error MatchStringByRef(ref T value, @string pat, @string str);
+            private delegate error MatchStringByPtr(ptr<T> value, @string pat, @string str);
             private delegate error MatchStringByVal(T value, @string pat, @string str);
 
-            private static readonly MatchStringByRef s_MatchStringByRef;
+            private static readonly MatchStringByPtr s_MatchStringByPtr;
             private static readonly MatchStringByVal s_MatchStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,17 +109,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MatchStringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MatchStringByPtr is null || !m_target_is_ptr)
                     return s_MatchStringByVal!(target, pat, str);
 
-                return s_MatchStringByRef(ref target, pat, str);
+                return s_MatchStringByPtr(m_target_ptr, pat, str);
             }
 
-            private delegate error StartCPUProfileByRef(ref T value, io.Writer _p0);
+            private delegate error StartCPUProfileByPtr(ptr<T> value, io.Writer _p0);
             private delegate error StartCPUProfileByVal(T value, io.Writer _p0);
 
-            private static readonly StartCPUProfileByRef s_StartCPUProfileByRef;
+            private static readonly StartCPUProfileByPtr s_StartCPUProfileByPtr;
             private static readonly StartCPUProfileByVal s_StartCPUProfileByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,17 +129,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StartCPUProfileByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StartCPUProfileByPtr is null || !m_target_is_ptr)
                     return s_StartCPUProfileByVal!(target, _p0);
 
-                return s_StartCPUProfileByRef(ref target, _p0);
+                return s_StartCPUProfileByPtr(m_target_ptr, _p0);
             }
 
-            private delegate error StopCPUProfileByRef(ref T value);
+            private delegate error StopCPUProfileByPtr(ptr<T> value);
             private delegate error StopCPUProfileByVal(T value);
 
-            private static readonly StopCPUProfileByRef s_StopCPUProfileByRef;
+            private static readonly StopCPUProfileByPtr s_StopCPUProfileByPtr;
             private static readonly StopCPUProfileByVal s_StopCPUProfileByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -145,17 +149,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StopCPUProfileByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StopCPUProfileByPtr is null || !m_target_is_ptr)
                     return s_StopCPUProfileByVal!(target);
 
-                return s_StopCPUProfileByRef(ref target);
+                return s_StopCPUProfileByPtr(m_target_ptr);
             }
 
-            private delegate error StartTestLogByRef(ref T value, io.Writer _p0);
+            private delegate error StartTestLogByPtr(ptr<T> value, io.Writer _p0);
             private delegate error StartTestLogByVal(T value, io.Writer _p0);
 
-            private static readonly StartTestLogByRef s_StartTestLogByRef;
+            private static readonly StartTestLogByPtr s_StartTestLogByPtr;
             private static readonly StartTestLogByVal s_StartTestLogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -164,17 +169,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StartTestLogByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StartTestLogByPtr is null || !m_target_is_ptr)
                     return s_StartTestLogByVal!(target, _p0);
 
-                return s_StartTestLogByRef(ref target, _p0);
+                return s_StartTestLogByPtr(m_target_ptr, _p0);
             }
 
-            private delegate error StopTestLogByRef(ref T value);
+            private delegate error StopTestLogByPtr(ptr<T> value);
             private delegate error StopTestLogByVal(T value);
 
-            private static readonly StopTestLogByRef s_StopTestLogByRef;
+            private static readonly StopTestLogByPtr s_StopTestLogByPtr;
             private static readonly StopTestLogByVal s_StopTestLogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -183,36 +189,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StopTestLogByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StopTestLogByPtr is null || !m_target_is_ptr)
                     return s_StopTestLogByVal!(target);
 
-                return s_StopTestLogByRef(ref target);
+                return s_StopTestLogByPtr(m_target_ptr);
             }
 
-            private delegate error WriteHeapProfileByRef(ref T value, io.Writer _p0);
-            private delegate error WriteHeapProfileByVal(T value, io.Writer _p0);
-
-            private static readonly WriteHeapProfileByRef s_WriteHeapProfileByRef;
-            private static readonly WriteHeapProfileByVal s_WriteHeapProfileByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error WriteHeapProfile(io.Writer _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteHeapProfileByRef is null)
-                    return s_WriteHeapProfileByVal!(target, _p0);
-
-                return s_WriteHeapProfileByRef(ref target, _p0);
-            }
-
-            private delegate error WriteProfileToByRef(ref T value, @string _p0, io.Writer _p0, long _p0);
+            private delegate error WriteProfileToByPtr(ptr<T> value, @string _p0, io.Writer _p0, long _p0);
             private delegate error WriteProfileToByVal(T value, @string _p0, io.Writer _p0, long _p0);
 
-            private static readonly WriteProfileToByRef s_WriteProfileToByRef;
+            private static readonly WriteProfileToByPtr s_WriteProfileToByPtr;
             private static readonly WriteProfileToByVal s_WriteProfileToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -221,11 +209,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteProfileToByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteProfileToByPtr is null || !m_target_is_ptr)
                     return s_WriteProfileToByVal!(target, _p0, _p0, _p0);
 
-                return s_WriteProfileToByRef(ref target, _p0, _p0, _p0);
+                return s_WriteProfileToByPtr(m_target_ptr, _p0, _p0, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -234,135 +223,98 @@ namespace go
             static testDeps()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ImportPath");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ImportPath");
 
                 if (!(extensionMethod is null))
-                    s_ImportPathByRef = extensionMethod.CreateStaticDelegate(typeof(ImportPathByRef)) as ImportPathByRef;
+                    s_ImportPathByPtr = extensionMethod.CreateStaticDelegate(typeof(ImportPathByPtr)) as ImportPathByPtr;
 
-                if (s_ImportPathByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ImportPath");
+                extensionMethod = targetType.GetExtensionMethod("ImportPath");
 
-                    if (!(extensionMethod is null))
-                        s_ImportPathByVal = extensionMethod.CreateStaticDelegate(typeof(ImportPathByVal)) as ImportPathByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ImportPathByVal = extensionMethod.CreateStaticDelegate(typeof(ImportPathByVal)) as ImportPathByVal;
 
-                if (s_ImportPathByRef is null && s_ImportPathByVal is null)
+                if (s_ImportPathByPtr is null && s_ImportPathByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.ImportPath method", new Exception("ImportPath"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("MatchString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MatchString");
 
                 if (!(extensionMethod is null))
-                    s_MatchStringByRef = extensionMethod.CreateStaticDelegate(typeof(MatchStringByRef)) as MatchStringByRef;
+                    s_MatchStringByPtr = extensionMethod.CreateStaticDelegate(typeof(MatchStringByPtr)) as MatchStringByPtr;
 
-                if (s_MatchStringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("MatchString");
+                extensionMethod = targetType.GetExtensionMethod("MatchString");
 
-                    if (!(extensionMethod is null))
-                        s_MatchStringByVal = extensionMethod.CreateStaticDelegate(typeof(MatchStringByVal)) as MatchStringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MatchStringByVal = extensionMethod.CreateStaticDelegate(typeof(MatchStringByVal)) as MatchStringByVal;
 
-                if (s_MatchStringByRef is null && s_MatchStringByVal is null)
+                if (s_MatchStringByPtr is null && s_MatchStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.MatchString method", new Exception("MatchString"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StartCPUProfile");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("StartCPUProfile");
 
                 if (!(extensionMethod is null))
-                    s_StartCPUProfileByRef = extensionMethod.CreateStaticDelegate(typeof(StartCPUProfileByRef)) as StartCPUProfileByRef;
+                    s_StartCPUProfileByPtr = extensionMethod.CreateStaticDelegate(typeof(StartCPUProfileByPtr)) as StartCPUProfileByPtr;
 
-                if (s_StartCPUProfileByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StartCPUProfile");
+                extensionMethod = targetType.GetExtensionMethod("StartCPUProfile");
 
-                    if (!(extensionMethod is null))
-                        s_StartCPUProfileByVal = extensionMethod.CreateStaticDelegate(typeof(StartCPUProfileByVal)) as StartCPUProfileByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StartCPUProfileByVal = extensionMethod.CreateStaticDelegate(typeof(StartCPUProfileByVal)) as StartCPUProfileByVal;
 
-                if (s_StartCPUProfileByRef is null && s_StartCPUProfileByVal is null)
+                if (s_StartCPUProfileByPtr is null && s_StartCPUProfileByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.StartCPUProfile method", new Exception("StartCPUProfile"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StopCPUProfile");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("StopCPUProfile");
 
                 if (!(extensionMethod is null))
-                    s_StopCPUProfileByRef = extensionMethod.CreateStaticDelegate(typeof(StopCPUProfileByRef)) as StopCPUProfileByRef;
+                    s_StopCPUProfileByPtr = extensionMethod.CreateStaticDelegate(typeof(StopCPUProfileByPtr)) as StopCPUProfileByPtr;
 
-                if (s_StopCPUProfileByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StopCPUProfile");
+                extensionMethod = targetType.GetExtensionMethod("StopCPUProfile");
 
-                    if (!(extensionMethod is null))
-                        s_StopCPUProfileByVal = extensionMethod.CreateStaticDelegate(typeof(StopCPUProfileByVal)) as StopCPUProfileByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StopCPUProfileByVal = extensionMethod.CreateStaticDelegate(typeof(StopCPUProfileByVal)) as StopCPUProfileByVal;
 
-                if (s_StopCPUProfileByRef is null && s_StopCPUProfileByVal is null)
+                if (s_StopCPUProfileByPtr is null && s_StopCPUProfileByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.StopCPUProfile method", new Exception("StopCPUProfile"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StartTestLog");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("StartTestLog");
 
                 if (!(extensionMethod is null))
-                    s_StartTestLogByRef = extensionMethod.CreateStaticDelegate(typeof(StartTestLogByRef)) as StartTestLogByRef;
+                    s_StartTestLogByPtr = extensionMethod.CreateStaticDelegate(typeof(StartTestLogByPtr)) as StartTestLogByPtr;
 
-                if (s_StartTestLogByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StartTestLog");
+                extensionMethod = targetType.GetExtensionMethod("StartTestLog");
 
-                    if (!(extensionMethod is null))
-                        s_StartTestLogByVal = extensionMethod.CreateStaticDelegate(typeof(StartTestLogByVal)) as StartTestLogByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StartTestLogByVal = extensionMethod.CreateStaticDelegate(typeof(StartTestLogByVal)) as StartTestLogByVal;
 
-                if (s_StartTestLogByRef is null && s_StartTestLogByVal is null)
+                if (s_StartTestLogByPtr is null && s_StartTestLogByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.StartTestLog method", new Exception("StartTestLog"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StopTestLog");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("StopTestLog");
 
                 if (!(extensionMethod is null))
-                    s_StopTestLogByRef = extensionMethod.CreateStaticDelegate(typeof(StopTestLogByRef)) as StopTestLogByRef;
+                    s_StopTestLogByPtr = extensionMethod.CreateStaticDelegate(typeof(StopTestLogByPtr)) as StopTestLogByPtr;
 
-                if (s_StopTestLogByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StopTestLog");
+                extensionMethod = targetType.GetExtensionMethod("StopTestLog");
 
-                    if (!(extensionMethod is null))
-                        s_StopTestLogByVal = extensionMethod.CreateStaticDelegate(typeof(StopTestLogByVal)) as StopTestLogByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StopTestLogByVal = extensionMethod.CreateStaticDelegate(typeof(StopTestLogByVal)) as StopTestLogByVal;
 
-                if (s_StopTestLogByRef is null && s_StopTestLogByVal is null)
+                if (s_StopTestLogByPtr is null && s_StopTestLogByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.StopTestLog method", new Exception("StopTestLog"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteHeapProfile");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteProfileTo");
 
                 if (!(extensionMethod is null))
-                    s_WriteHeapProfileByRef = extensionMethod.CreateStaticDelegate(typeof(WriteHeapProfileByRef)) as WriteHeapProfileByRef;
+                    s_WriteProfileToByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteProfileToByPtr)) as WriteProfileToByPtr;
 
-                if (s_WriteHeapProfileByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteHeapProfile");
-
-                    if (!(extensionMethod is null))
-                        s_WriteHeapProfileByVal = extensionMethod.CreateStaticDelegate(typeof(WriteHeapProfileByVal)) as WriteHeapProfileByVal;
-                }
-
-                if (s_WriteHeapProfileByRef is null && s_WriteHeapProfileByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.WriteHeapProfile method", new Exception("WriteHeapProfile"));
-
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteProfileTo");
+                extensionMethod = targetType.GetExtensionMethod("WriteProfileTo");
 
                 if (!(extensionMethod is null))
-                    s_WriteProfileToByRef = extensionMethod.CreateStaticDelegate(typeof(WriteProfileToByRef)) as WriteProfileToByRef;
+                    s_WriteProfileToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteProfileToByVal)) as WriteProfileToByVal;
 
-                if (s_WriteProfileToByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteProfileTo");
-
-                    if (!(extensionMethod is null))
-                        s_WriteProfileToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteProfileToByVal)) as WriteProfileToByVal;
-                }
-
-                if (s_WriteProfileToByRef is null && s_WriteProfileToByVal is null)
+                if (s_WriteProfileToByPtr is null && s_WriteProfileToByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.WriteProfileTo method", new Exception("WriteProfileTo"));
             }
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:01 UTC
+//     Generated on 2020 October 08 04:36:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -56,7 +56,7 @@ namespace testing
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -70,23 +70,24 @@ namespace testing
                 m_target_is_ptr = true;
             }
 
-            private delegate reflect.Value GenerateByRef(ref T value, ref rand.Rand rand, long size);
-            private delegate reflect.Value GenerateByVal(T value, ref rand.Rand rand, long size);
+            private delegate reflect.Value GenerateByPtr(ptr<T> value, ptr<rand.Rand> rand, long size);
+            private delegate reflect.Value GenerateByVal(T value, ptr<rand.Rand> rand, long size);
 
-            private static readonly GenerateByRef s_GenerateByRef;
+            private static readonly GenerateByPtr s_GenerateByPtr;
             private static readonly GenerateByVal s_GenerateByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public reflect.Value Generate(ref rand.Rand rand, long size)
+            public reflect.Value Generate(ptr<rand.Rand> rand, long size)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GenerateByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GenerateByPtr is null || !m_target_is_ptr)
                     return s_GenerateByVal!(target, rand, size);
 
-                return s_GenerateByRef(ref target, rand, size);
+                return s_GenerateByPtr(m_target_ptr, rand, size);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -95,23 +96,20 @@ namespace testing
             static Generator()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Generate");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Generate");
 
                 if (!(extensionMethod is null))
-                    s_GenerateByRef = extensionMethod.CreateStaticDelegate(typeof(GenerateByRef)) as GenerateByRef;
+                    s_GenerateByPtr = extensionMethod.CreateStaticDelegate(typeof(GenerateByPtr)) as GenerateByPtr;
 
-                if (s_GenerateByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Generate");
+                extensionMethod = targetType.GetExtensionMethod("Generate");
 
-                    if (!(extensionMethod is null))
-                        s_GenerateByVal = extensionMethod.CreateStaticDelegate(typeof(GenerateByVal)) as GenerateByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GenerateByVal = extensionMethod.CreateStaticDelegate(typeof(GenerateByVal)) as GenerateByVal;
 
-                if (s_GenerateByRef is null && s_GenerateByVal is null)
+                if (s_GenerateByPtr is null && s_GenerateByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Generator.Generate method", new Exception("Generate"));
             }
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:55 UTC
+//     Generated on 2020 October 08 03:19:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using _@unsafe_ = go.@unsafe_package;
+using bytealg = go.@internal.bytealg_package;
 
 namespace go
 {
@@ -25,17 +25,17 @@ namespace go
             // Constructors
             public TypeAssertionError(NilType _)
             {
-                this.interfaceString = default;
-                this.concreteString = default;
-                this.assertedString = default;
+                this._interface = default;
+                this.concrete = default;
+                this.asserted = default;
                 this.missingMethod = default;
             }
 
-            public TypeAssertionError(@string interfaceString = default, @string concreteString = default, @string assertedString = default, @string missingMethod = default)
+            public TypeAssertionError(ref ptr<_type> _interface = default, ref ptr<_type> concrete = default, ref ptr<_type> asserted = default, @string missingMethod = default)
             {
-                this.interfaceString = interfaceString;
-                this.concreteString = concreteString;
-                this.assertedString = assertedString;
+                this._interface = _interface;
+                this.concrete = concrete;
+                this.asserted = asserted;
                 this.missingMethod = missingMethod;
             }
 
@@ -59,7 +59,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static TypeAssertionError TypeAssertionError_cast(dynamic value)
         {
-            return new TypeAssertionError(value.interfaceString, value.concreteString, value.assertedString, value.missingMethod);
+            return new TypeAssertionError(ref value._interface, ref value.concrete, ref value.asserted, value.missingMethod);
         }
     }
 }

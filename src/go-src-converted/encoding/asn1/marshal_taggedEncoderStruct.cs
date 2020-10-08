@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:29:49 UTC
+//     Generated on 2020 October 08 03:36:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,10 +13,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using big = go.math.big_package;
 using reflect = go.reflect_package;
+using sort = go.sort_package;
 using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
 using go;

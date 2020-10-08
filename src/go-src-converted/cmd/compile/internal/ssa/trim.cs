@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 09:24:26 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:26:45 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\trim.go
-
+using src = go.cmd.@internal.src_package;
 using static go.builtin;
 
 namespace go {
@@ -17,17 +17,24 @@ namespace @internal
     {
         // trim removes blocks with no code in them.
         // These blocks were inserted to remove critical edges.
-        private static void trim(ref Func f)
+        private static void trim(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             long n = 0L;
             foreach (var (_, b) in f.Blocks)
             {
-                if (!trimmableBlock(b))
+                if (!trimmableBlock(_addr_b))
                 {
                     f.Blocks[n] = b;
                     n++;
                     continue;
                 }
+                var bPos = b.Pos;
+                var bIsStmt = bPos.IsStmt() == src.PosIsStmt; 
+
+                // Splice b out of the graph. NOTE: `mergePhi` depends on the
+                // order, in which the predecessors edges are merged here.
                 var p = b.Preds[0L].b;
                 var i = b.Preds[0L].i;
                 var s = b.Succs[0L].b;
@@ -42,7 +49,37 @@ namespace @internal
                     i = e.i;
                     p.Succs[i] = new Edge(s,len(s.Preds));
                     s.Preds = append(s.Preds, new Edge(p,i));
-                }                if (ns > 1L)
+
+                }                if (bIsStmt)
+                {
+                    var sawStmt = false;
+                    {
+                        var v__prev2 = v;
+
+                        foreach (var (_, __v) in s.Values)
+                        {
+                            v = __v;
+                            if (isPoorStatementOp(v.Op))
+                            {
+                                continue;
+                            }
+                            if (v.Pos.SameFileAndLine(bPos))
+                            {
+                                v.Pos = v.Pos.WithIsStmt();
+                            }
+                            sawStmt = true;
+                            break;
+
+                        }
+                        v = v__prev2;
+                    }
+
+                    if (!sawStmt && s.Pos.SameFileAndLine(bPos))
+                    {
+                        s.Pos = s.Pos.WithIsStmt();
+                    }
+                }
+                if (ns > 1L)
                 {
                     {
                         var v__prev2 = v;
@@ -52,7 +89,7 @@ namespace @internal
                             v = __v;
                             if (v.Op == OpPhi)
                             {
-                                mergePhi(v, j, b);
+                                mergePhi(_addr_v, j, _addr_b);
                             }
                         }
                         v = v__prev2;
@@ -72,7 +109,7 @@ namespace @internal
                                     v.resetArgs();
                                     continue;
                                 }
-                                var args = make_slice<ref Value>(len(v.Args));
+                                var args = make_slice<ptr<Value>>(len(v.Args));
                                 copy(args, v.Args);
                                 v.resetArgs();
                                 {
@@ -103,11 +140,13 @@ namespace @internal
                             }
                             b.Values[k] = v;
                             k++;
+
                         }
                         v = v__prev2;
                     }
 
                     b.Values = b.Values[..k];
+
                 }
                 {
                     var v__prev2 = v;
@@ -134,6 +173,7 @@ namespace @internal
                 }
                 copy(s.Values[k..], s.Values[..m]);
                 copy(s.Values, b.Values);
+
             }            if (n < len(f.Blocks))
             {
                 f.invalidateCFG();
@@ -150,44 +190,56 @@ namespace @internal
                 }
 
                 f.Blocks = f.Blocks[..n];
+
             }
         }
 
-        // emptyBlock returns true if the block does not contain actual
+        // emptyBlock reports whether the block does not contain actual
         // instructions
-        private static bool emptyBlock(ref Block b)
+        private static bool emptyBlock(ptr<Block> _addr_b)
         {
+            ref Block b = ref _addr_b.val;
+
             foreach (var (_, v) in b.Values)
             {
                 if (v.Op != OpPhi)
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
-        // trimmableBlock returns true if the block can be trimmed from the CFG,
+        // trimmableBlock reports whether the block can be trimmed from the CFG,
         // subject to the following criteria:
         //  - it should not be the first block
         //  - it should be BlockPlain
         //  - it should not loop back to itself
         //  - it either is the single predecessor of the successor block or
         //    contains no actual instructions
-        private static bool trimmableBlock(ref Block b)
+        private static bool trimmableBlock(ptr<Block> _addr_b)
         {
+            ref Block b = ref _addr_b.val;
+
             if (b.Kind != BlockPlain || b == b.Func.Entry)
             {
                 return false;
             }
+
             var s = b.Succs[0L].b;
-            return s != b && (len(s.Preds) == 1L || emptyBlock(b));
+            return s != b && (len(s.Preds) == 1L || emptyBlock(_addr_b));
+
         }
 
         // mergePhi adjusts the number of `v`s arguments to account for merge
         // of `b`, which was `i`th predecessor of the `v`s block.
-        private static void mergePhi(ref Value v, long i, ref Block b)
+        private static void mergePhi(ptr<Value> _addr_v, long i, ptr<Block> _addr_b)
         {
+            ref Value v = ref _addr_v.val;
+            ref Block b = ref _addr_b.val;
+
             var u = v.Args[i];
             if (u.Block == b)
             {
@@ -202,6 +254,7 @@ namespace @internal
                 //    v = φ(v0, v1, ..., u0, ..., vk, u1, ..., un)
                 v.SetArg(i, u.Args[0L]);
                 v.AddArgs(u.Args[1L..]);
+
             }
             else
             { 
@@ -216,7 +269,9 @@ namespace @internal
                     v.AddArg(v.Args[i]);
                 }
 
+
             }
+
         }
     }
 }}}}

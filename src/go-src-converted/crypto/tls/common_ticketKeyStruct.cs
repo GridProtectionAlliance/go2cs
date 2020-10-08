@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:04 UTC
+//     Generated on 2020 October 08 03:37:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,16 +13,20 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
 using list = go.container.list_package;
 using crypto = go.crypto_package;
-using cipherhw = go.crypto.@internal.cipherhw_package;
+using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
+using elliptic = go.crypto.elliptic_package;
 using rand = go.crypto.rand_package;
+using rsa = go.crypto.rsa_package;
 using sha512 = go.crypto.sha512_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using cpu = go.@internal.cpu_package;
 using io = go.io_package;
-using big = go.math.big_package;
 using net = go.net_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -43,13 +47,15 @@ namespace crypto
                 this.keyName = default;
                 this.aesKey = default;
                 this.hmacKey = default;
+                this.created = default;
             }
 
-            public ticketKey(array<byte> keyName = default, array<byte> aesKey = default, array<byte> hmacKey = default)
+            public ticketKey(array<byte> keyName = default, array<byte> aesKey = default, array<byte> hmacKey = default, time.Time created = default)
             {
                 this.keyName = keyName;
                 this.aesKey = aesKey;
                 this.hmacKey = hmacKey;
+                this.created = created;
             }
 
             // Enable comparisons between nil and ticketKey struct
@@ -72,7 +78,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static ticketKey ticketKey_cast(dynamic value)
         {
-            return new ticketKey(value.keyName, value.aesKey, value.hmacKey);
+            return new ticketKey(value.keyName, value.aesKey, value.hmacKey, value.created);
         }
     }
 }}

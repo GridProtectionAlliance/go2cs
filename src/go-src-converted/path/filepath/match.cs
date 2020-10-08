@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package filepath -- go2cs converted at 2020 August 29 08:22:24 UTC
+// package filepath -- go2cs converted at 2020 October 08 03:36:59 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Go\src\path\filepath\match.go
 using errors = go.errors_package;
@@ -18,7 +18,7 @@ namespace path
 {
     public static partial class filepath_package
     {
-        // ErrBadPattern indicates a globbing pattern was malformed.
+        // ErrBadPattern indicates a pattern was malformed.
         public static var ErrBadPattern = errors.New("syntax error in pattern");
 
         // Match reports whether name matches the shell file name pattern.
@@ -48,6 +48,9 @@ namespace path
         //
         public static (bool, error) Match(@string pattern, @string name)
         {
+            bool matched = default;
+            error err = default!;
+
 Pattern:
             while (len(pattern) > 0L)
             {
@@ -57,7 +60,8 @@ Pattern:
                 if (star && chunk == "")
                 { 
                     // Trailing * matches rest of string unless it has a /.
-                    return (!strings.Contains(name, string(Separator)), null);
+                    return (!strings.Contains(name, string(Separator)), error.As(null!)!);
+
                 } 
                 // Look for match at current position.
                 var (t, ok, err) = matchChunk(chunk, name); 
@@ -69,10 +73,12 @@ Pattern:
                     name = t;
                     continue;
                 }
+
                 if (err != null)
                 {
-                    return (false, err);
+                    return (false, error.As(err)!);
                 }
+
                 if (star)
                 { 
                     // Look for match skipping i+1 bytes.
@@ -87,26 +93,37 @@ Pattern:
                             {
                                 continue;
                             }
+
                             name = t;
                             _continuePattern = true;
                             break;
                         }
+
                         if (err != null)
                         {
-                            return (false, err);
+                            return (false, error.As(err)!);
                         }
+
                     }
 
+
                 }
-                return (false, null);
+
+                return (false, error.As(null!)!);
+
             }
-            return (len(name) == 0L, null);
+            return (len(name) == 0L, error.As(null!)!);
+
         }
 
         // scanChunk gets the next segment of pattern, which is a non-star string
         // possibly preceded by a star.
         private static (bool, @string, @string) scanChunk(@string pattern)
         {
+            bool star = default;
+            @string chunk = default;
+            @string rest = default;
+
             while (len(pattern) > 0L && pattern[0L] == '*')
             {
                 pattern = pattern[1L..];
@@ -128,7 +145,9 @@ Scan:
                             {
                                 i++;
                             }
+
                         }
+
                         break;
                     case '[': 
                         inrange = true;
@@ -142,10 +161,13 @@ Scan:
                             _breakScan = true;
                             break;
                         }
+
                         break;
                 }
+
             }
             return (star, pattern[0L..i], pattern[i..]);
+
         }
 
         // matchChunk checks whether chunk matches the beginning of s.
@@ -153,12 +175,17 @@ Scan:
         // Chunk is all single-character operators: literals, char classes, and ?.
         private static (@string, bool, error) matchChunk(@string chunk, @string s)
         {
+            @string rest = default;
+            bool ok = default;
+            error err = default!;
+
             while (len(chunk) > 0L)
             {
                 if (len(s) == 0L)
                 {
-                    return;
+                    return ;
                 }
+
 
                 if (chunk[0L] == '[') 
                 {
@@ -171,7 +198,7 @@ Scan:
                     if (len(chunk) == 0L)
                     {
                         err = ErrBadPattern;
-                        return;
+                        return ;
                     } 
                     // possibly negated
                     var negated = chunk[0L] == '^';
@@ -189,14 +216,16 @@ Scan:
                             chunk = chunk[1L..];
                             break;
                         }
+
                         int lo = default;                        int hi = default;
 
                         lo, chunk, err = getEsc(chunk);
 
                         if (err != null)
                         {
-                            return;
+                            return ;
                         }
+
                         hi = lo;
                         if (chunk[0L] == '-')
                         {
@@ -204,28 +233,34 @@ Scan:
 
                             if (err != null)
                             {
-                                return;
+                                return ;
                             }
+
                         }
+
                         if (lo <= r && r <= hi)
                         {
                             match = true;
                         }
+
                         nrange++;
+
                     }
 
                     if (match == negated)
                     {
-                        return;
+                        return ;
                     }
+
                     goto __switch_break0;
                 }
                 if (chunk[0L] == '?')
                 {
                     if (s[0L] == Separator)
                     {
-                        return;
+                        return ;
                     }
+
                     var (_, n) = utf8.DecodeRuneInString(s);
                     s = s[n..];
                     chunk = chunk[1L..];
@@ -239,52 +274,67 @@ Scan:
                         if (len(chunk) == 0L)
                         {
                             err = ErrBadPattern;
-                            return;
+                            return ;
                         }
+
                     }
+
                 }
                 // default: 
                     if (chunk[0L] != s[0L])
                     {
-                        return;
+                        return ;
                     }
+
                     s = s[1L..];
                     chunk = chunk[1L..];
 
                 __switch_break0:;
+
             }
 
-            return (s, true, null);
+            return (s, true, error.As(null!)!);
+
         }
 
         // getEsc gets a possibly-escaped character from chunk, for a character class.
         private static (int, @string, error) getEsc(@string chunk)
         {
+            int r = default;
+            @string nchunk = default;
+            error err = default!;
+
             if (len(chunk) == 0L || chunk[0L] == '-' || chunk[0L] == ']')
             {
                 err = ErrBadPattern;
-                return;
+                return ;
             }
+
             if (chunk[0L] == '\\' && runtime.GOOS != "windows")
             {
                 chunk = chunk[1L..];
                 if (len(chunk) == 0L)
                 {
                     err = ErrBadPattern;
-                    return;
+                    return ;
                 }
+
             }
+
             var (r, n) = utf8.DecodeRuneInString(chunk);
             if (r == utf8.RuneError && n == 1L)
             {
                 err = ErrBadPattern;
             }
+
             nchunk = chunk[n..];
             if (len(nchunk) == 0L)
             {
                 err = ErrBadPattern;
             }
-            return;
+
+            return ;
+
         }
 
         // Glob returns the names of all files matching pattern or nil
@@ -297,16 +347,22 @@ Scan:
         // is malformed.
         public static (slice<@string>, error) Glob(@string pattern)
         {
+            slice<@string> matches = default;
+            error err = default!;
+
             if (!hasMeta(pattern))
             {
                 _, err = os.Lstat(pattern);
 
                 if (err != null)
                 {
-                    return (null, null);
+                    return (null, error.As(null!)!);
                 }
-                return (new slice<@string>(new @string[] { pattern }), null);
+
+                return (new slice<@string>(new @string[] { pattern }), error.As(null!)!);
+
             }
+
             var (dir, file) = Split(pattern);
             long volumeLen = 0L;
             if (runtime.GOOS == "windows")
@@ -317,6 +373,7 @@ Scan:
             {
                 dir = cleanGlobPath(dir);
             }
+
             if (!hasMeta(dir[volumeLen..]))
             {
                 return glob(dir, file, null);
@@ -325,23 +382,27 @@ Scan:
             // Prevent infinite recursion. See issue 15879.
             if (dir == pattern)
             {
-                return (null, ErrBadPattern);
+                return (null, error.As(ErrBadPattern)!);
             }
+
             slice<@string> m = default;
             m, err = Glob(dir);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             foreach (var (_, d) in m)
             {
                 matches, err = glob(d, file, matches);
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
             }
-            return;
+            return ;
+
         }
 
         // cleanGlobPath prepares path for glob matching.
@@ -360,6 +421,9 @@ Scan:
         // cleanGlobPathWindows is windows version of cleanGlobPath.
         private static (long, @string) cleanGlobPathWindows(@string path)
         {
+            long prefixLen = default;
+            @string cleaned = default;
+
             var vollen = volumeNameLen(path);
 
             if (path == "") 
@@ -374,6 +438,7 @@ Scan:
                 {
                     vollen = len(path) - 1L;
                 }
+
                 return (vollen, path[0L..len(path) - 1L]); // chop off trailing separator
                     }
 
@@ -383,21 +448,27 @@ Scan:
         // added in lexicographical order.
         private static (slice<@string>, error) glob(@string dir, @string pattern, slice<@string> matches) => func((defer, _, __) =>
         {
+            slice<@string> m = default;
+            error e = default!;
+
             m = matches;
             var (fi, err) = os.Stat(dir);
             if (err != null)
             {
-                return;
+                return ; // ignore I/O error
             }
+
             if (!fi.IsDir())
             {
-                return;
+                return ; // ignore I/O error
             }
+
             var (d, err) = os.Open(dir);
             if (err != null)
             {
-                return;
+                return ; // ignore I/O error
             }
+
             defer(d.Close());
 
             var (names, _) = d.Readdirnames(-1L);
@@ -408,22 +479,31 @@ Scan:
                 var (matched, err) = Match(pattern, n);
                 if (err != null)
                 {
-                    return (m, err);
+                    return (m, error.As(err)!);
                 }
+
                 if (matched)
                 {
                     m = append(m, Join(dir, n));
                 }
+
             }
-            return;
+            return ;
+
         });
 
         // hasMeta reports whether path contains any of the magic characters
         // recognized by Match.
         private static bool hasMeta(@string path)
-        { 
-            // TODO(niemeyer): Should other magic characters be added here?
-            return strings.ContainsAny(path, "*?[");
+        {
+            @string magicChars = "*?[";
+            if (runtime.GOOS != "windows")
+            {
+                magicChars = "*?[\\";
+            }
+
+            return strings.ContainsAny(path, magicChars);
+
         }
     }
 }}

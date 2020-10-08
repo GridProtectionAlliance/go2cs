@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:43 UTC
+//     Generated on 2020 October 08 03:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,12 +28,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {
@@ -53,7 +54,7 @@ namespace net
                 this.sawEOF = default;
             }
 
-            public expectContinueReader(ref ptr<response> resp = default, io.ReadCloser readCloser = default, bool closed = default, bool sawEOF = default)
+            public expectContinueReader(ref ptr<response> resp = default, io.ReadCloser readCloser = default, bool closed = default, atomicBool sawEOF = default)
             {
                 this.resp = resp;
                 this.readCloser = readCloser;

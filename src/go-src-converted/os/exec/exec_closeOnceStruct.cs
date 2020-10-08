@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:24:37 UTC
+//     Generated on 2020 October 08 03:40:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using static go.builtin;
 using bytes = go.bytes_package;
 using context = go.context_package;
 using errors = go.errors_package;
+using execenv = go.@internal.syscall.execenv_package;
 using io = go.io_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -32,25 +33,19 @@ namespace os
     public static partial class exec_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(os.File))]
         private partial struct closeOnce
         {
-            // File structure promotion - sourced from pointer
-            private readonly ptr<File> m_FileRef;
-
-            private ref File File_ptr => ref m_FileRef.Value;
-
             // Constructors
             public closeOnce(NilType _)
             {
-                this.m_FileRef = new ptr<os.File>(new os.File(nil));
+                this.File> = default;
                 this.once = default;
                 this.err = default;
             }
 
-            public closeOnce(ref os.File File = default, sync.Once once = default, error err = default)
+            public closeOnce(ref ptr<os.File> File> = default, sync.Once once = default, error err = default)
             {
-                this.m_FileRef = new ptr<os.File>(ref File);
+                this.File> = File>;
                 this.once = once;
                 this.err = err;
             }
@@ -75,7 +70,7 @@ namespace os
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static closeOnce closeOnce_cast(dynamic value)
         {
-            return new closeOnce(ref value.File, value.once, value.err);
+            return new closeOnce(ref value.File>, value.once, value.err);
         }
     }
 }}

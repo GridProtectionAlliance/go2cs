@@ -5,10 +5,9 @@
 // Declarations for operating systems implementing time.now
 // indirectly, in terms of walltime and nanotime assembly.
 
-// +build !darwin !amd64,!386
 // +build !windows
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:17 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:24:06 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\timestub.go
 using _@unsafe_ = go.@unsafe_package;
@@ -18,14 +17,16 @@ namespace go
 {
     public static partial class runtime_package
     { // for go:linkname
-        private static (long, int) walltime()
-;
 
         //go:linkname time_now time.now
         private static (long, int, long) time_now()
         {
+            long sec = default;
+            int nsec = default;
+            long mono = default;
+
             sec, nsec = walltime();
-            return (sec, nsec, nanotime() - startNano);
+            return (sec, nsec, nanotime());
         }
     }
 }

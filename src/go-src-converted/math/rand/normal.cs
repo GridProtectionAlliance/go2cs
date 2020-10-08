@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2020 August 29 08:25:52 UTC
+// package rand -- go2cs converted at 2020 October 08 03:25:38 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Go\src\math\rand\normal.go
 using math = go.math_package;
@@ -20,7 +20,8 @@ namespace math
          * (Marsaglia & Tsang, 2000)
          * http://www.jstatsoft.org/v05/i08/paper [pdf]
          */
-        private static readonly float rn = 3.442619855899F;
+        private static readonly float rn = (float)3.442619855899F;
+
 
         private static uint absInt32(int i)
         {
@@ -28,19 +29,23 @@ namespace math
             {
                 return uint32(-i);
             }
+
             return uint32(i);
+
         }
 
-        // NormFloat64 returns a normally distributed float64 in the range
-        // [-math.MaxFloat64, +math.MaxFloat64] with
-        // standard normal distribution (mean = 0, stddev = 1).
+        // NormFloat64 returns a normally distributed float64 in
+        // the range -math.MaxFloat64 through +math.MaxFloat64 inclusive,
+        // with standard normal distribution (mean = 0, stddev = 1).
         // To produce a different normal distribution, callers can
         // adjust the output using:
         //
         //  sample = NormFloat64() * desiredStdDev + desiredMean
         //
-        private static double NormFloat64(this ref Rand r)
+        private static double NormFloat64(this ptr<Rand> _addr_r)
         {
+            ref Rand r = ref _addr_r.val;
+
             while (true)
             {
                 var j = int32(r.Uint32()); // Possibly negative
@@ -50,7 +55,9 @@ namespace math
                 { 
                     // This case should be hit better than 99% of the time.
                     return x;
+
                 }
+
                 if (i == 0L)
                 { 
                     // This extra work is only required for the base strip.
@@ -62,19 +69,25 @@ namespace math
                         {
                             break;
                         }
+
                     }
 
                     if (j > 0L)
                     {
                         return rn + x;
                     }
+
                     return -rn - x;
+
                 }
+
                 if (fn[i] + float32(r.Float64()) * (fn[i - 1L] - fn[i]) < float32(math.Exp(-.5F * x * x)))
                 {
                     return x;
                 }
+
             }
+
 
         }
 

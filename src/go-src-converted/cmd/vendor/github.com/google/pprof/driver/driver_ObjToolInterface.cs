@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:09 UTC
+//     Generated on 2020 October 08 04:42:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using http = go.net.http_package;
 using regexp = go.regexp_package;
 using time = go.time_package;
 using internaldriver = go.github.com.google.pprof.@internal.driver_package;
@@ -59,7 +60,7 @@ namespace pprof
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,10 +74,10 @@ namespace pprof
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<Inst>, error) OpenByRef(ref T value, @string file, ulong start, ulong limit, ulong offset);
+            private delegate (slice<Inst>, error) OpenByPtr(ptr<T> value, @string file, ulong start, ulong limit, ulong offset);
             private delegate (slice<Inst>, error) OpenByVal(T value, @string file, ulong start, ulong limit, ulong offset);
 
-            private static readonly OpenByRef s_OpenByRef;
+            private static readonly OpenByPtr s_OpenByPtr;
             private static readonly OpenByVal s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,17 +86,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OpenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OpenByPtr is null || !m_target_is_ptr)
                     return s_OpenByVal!(target, file, start, limit, offset);
 
-                return s_OpenByRef(ref target, file, start, limit, offset);
+                return s_OpenByPtr(m_target_ptr, file, start, limit, offset);
             }
 
-            private delegate (slice<Inst>, error) DisasmByRef(ref T value, @string file, ulong start, ulong end);
+            private delegate (slice<Inst>, error) DisasmByPtr(ptr<T> value, @string file, ulong start, ulong end);
             private delegate (slice<Inst>, error) DisasmByVal(T value, @string file, ulong start, ulong end);
 
-            private static readonly DisasmByRef s_DisasmByRef;
+            private static readonly DisasmByPtr s_DisasmByPtr;
             private static readonly DisasmByVal s_DisasmByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,11 +106,12 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DisasmByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DisasmByPtr is null || !m_target_is_ptr)
                     return s_DisasmByVal!(target, file, start, end);
 
-                return s_DisasmByRef(ref target, file, start, end);
+                return s_DisasmByPtr(m_target_ptr, file, start, end);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -117,39 +120,33 @@ namespace pprof
             static ObjTool()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Open");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
                 if (!(extensionMethod is null))
-                    s_OpenByRef = extensionMethod.CreateStaticDelegate(typeof(OpenByRef)) as OpenByRef;
+                    s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
-                if (s_OpenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Open");
+                extensionMethod = targetType.GetExtensionMethod("Open");
 
-                    if (!(extensionMethod is null))
-                        s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
-                if (s_OpenByRef is null && s_OpenByVal is null)
+                if (s_OpenByPtr is null && s_OpenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjTool.Open method", new Exception("Open"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Disasm");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Disasm");
 
                 if (!(extensionMethod is null))
-                    s_DisasmByRef = extensionMethod.CreateStaticDelegate(typeof(DisasmByRef)) as DisasmByRef;
+                    s_DisasmByPtr = extensionMethod.CreateStaticDelegate(typeof(DisasmByPtr)) as DisasmByPtr;
 
-                if (s_DisasmByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Disasm");
+                extensionMethod = targetType.GetExtensionMethod("Disasm");
 
-                    if (!(extensionMethod is null))
-                        s_DisasmByVal = extensionMethod.CreateStaticDelegate(typeof(DisasmByVal)) as DisasmByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DisasmByVal = extensionMethod.CreateStaticDelegate(typeof(DisasmByVal)) as DisasmByVal;
 
-                if (s_DisasmByRef is null && s_DisasmByVal is null)
+                if (s_DisasmByPtr is null && s_DisasmByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjTool.Disasm method", new Exception("Disasm"));
             }
 

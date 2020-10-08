@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:15 UTC
+//     Generated on 2020 October 08 03:41:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using tls = go.crypto.tls_package;
 using x509 = go.crypto.x509_package;
 using flag = go.flag_package;
@@ -23,6 +22,7 @@ using net = go.net_package;
 using http = go.net.http_package;
 using @internal = go.net.http.@internal_package;
 using os = go.os_package;
+using strings = go.strings_package;
 using sync = go.sync_package;
 using time = go.time_package;
 using go;
@@ -41,6 +41,7 @@ namespace http
             {
                 this.URL = default;
                 this.Listener = default;
+                this.EnableHTTP2 = default;
                 this.TLS = default;
                 this.Config = default;
                 this.certificate = default;
@@ -51,10 +52,11 @@ namespace http
                 this.client = default;
             }
 
-            public Server(@string URL = default, net.Listener Listener = default, ref ptr<tls.Config> TLS = default, ref ptr<http.Server> Config = default, ref ptr<x509.Certificate> certificate = default, sync.WaitGroup wg = default, sync.Mutex mu = default, bool closed = default, map<net.Conn, http.ConnState> conns = default, ref ptr<http.Client> client = default)
+            public Server(@string URL = default, net.Listener Listener = default, bool EnableHTTP2 = default, ref ptr<tls.Config> TLS = default, ref ptr<http.Server> Config = default, ref ptr<x509.Certificate> certificate = default, sync.WaitGroup wg = default, sync.Mutex mu = default, bool closed = default, map<net.Conn, http.ConnState> conns = default, ref ptr<http.Client> client = default)
             {
                 this.URL = URL;
                 this.Listener = Listener;
+                this.EnableHTTP2 = EnableHTTP2;
                 this.TLS = TLS;
                 this.Config = Config;
                 this.certificate = certificate;
@@ -85,7 +87,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Server Server_cast(dynamic value)
         {
-            return new Server(value.URL, value.Listener, ref value.TLS, ref value.Config, ref value.certificate, value.wg, value.mu, value.closed, value.conns, ref value.client);
+            return new Server(value.URL, value.Listener, value.EnableHTTP2, ref value.TLS, ref value.Config, ref value.certificate, value.wg, value.mu, value.closed, value.conns, ref value.client);
         }
     }
 }}}

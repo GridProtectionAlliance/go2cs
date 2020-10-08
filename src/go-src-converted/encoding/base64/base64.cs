@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package base64 implements base64 encoding as specified by RFC 4648.
-// package base64 -- go2cs converted at 2020 August 29 08:28:22 UTC
+// package base64 -- go2cs converted at 2020 October 08 03:35:10 UTC
 // import "encoding/base64" ==> using base64 = go.encoding.base64_package
 // Original source: C:\Go\src\encoding\base64\base64.go
 using binary = go.encoding.binary_package;
@@ -33,31 +33,32 @@ namespace encoding
             public bool strict;
         }
 
-        public static readonly int StdPadding = '='; // Standard padding character
-        public static readonly int NoPadding = -1L; // No padding
+        public static readonly int StdPadding = (int)'='; // Standard padding character
+        public static readonly int NoPadding = (int)-1L; // No padding
 
-        private static readonly @string encodeStd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        private static readonly @string encodeStd = (@string)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-        private static readonly @string encodeURL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-
-        // NewEncoding returns a new padded Encoding defined by the given alphabet,
-        // which must be a 64-byte string that does not contain the padding character
-        // or CR / LF ('\r', '\n').
-        // The resulting Encoding uses the default padding character ('='),
-        // which may be changed or disabled via WithPadding.
-
+        private static readonly @string encodeURL = (@string)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
         // NewEncoding returns a new padded Encoding defined by the given alphabet,
         // which must be a 64-byte string that does not contain the padding character
         // or CR / LF ('\r', '\n').
         // The resulting Encoding uses the default padding character ('='),
         // which may be changed or disabled via WithPadding.
-        public static ref Encoding NewEncoding(@string encoder) => func((_, panic, __) =>
+
+
+        // NewEncoding returns a new padded Encoding defined by the given alphabet,
+        // which must be a 64-byte string that does not contain the padding character
+        // or CR / LF ('\r', '\n').
+        // The resulting Encoding uses the default padding character ('='),
+        // which may be changed or disabled via WithPadding.
+        public static ptr<Encoding> NewEncoding(@string encoder) => func((_, panic, __) =>
         {
             if (len(encoder) != 64L)
             {
                 panic("encoding alphabet is not 64-bytes long");
             }
+
             {
                 long i__prev1 = i;
 
@@ -67,6 +68,7 @@ namespace encoding
                     {
                         panic("encoding alphabet contains newline character");
                     }
+
                 }
 
 
@@ -99,7 +101,8 @@ namespace encoding
 
                 i = i__prev1;
             }
-            return e;
+            return _addr_e!;
+
         });
 
         // WithPadding creates a new encoding identical to enc except
@@ -107,32 +110,38 @@ namespace encoding
         // The padding character must not be '\r' or '\n', must not
         // be contained in the encoding's alphabet and must be a rune equal or
         // below '\xff'.
-        public static ref Encoding WithPadding(this Encoding enc, int padding) => func((_, panic, __) =>
+        public static ptr<Encoding> WithPadding(this Encoding enc, int padding) => func((_, panic, __) =>
         {
             if (padding == '\r' || padding == '\n' || padding > 0xffUL)
             {
                 panic("invalid padding");
             }
+
             for (long i = 0L; i < len(enc.encode); i++)
             {
                 if (rune(enc.encode[i]) == padding)
                 {
                     panic("padding contained in alphabet");
                 }
+
             }
 
 
             enc.padChar = padding;
-            return ref enc;
+            return _addr__addr_enc!;
+
         });
 
         // Strict creates a new encoding identical to enc except with
         // strict decoding enabled. In this mode, the decoder requires that
         // trailing padding bits are zero, as described in RFC 4648 section 3.5.
-        public static ref Encoding Strict(this Encoding enc)
+        //
+        // Note that the input is still malleable, as new line characters
+        // (CR and LF) are still ignored.
+        public static ptr<Encoding> Strict(this Encoding enc)
         {
             enc.strict = true;
-            return ref enc;
+            return _addr__addr_enc!;
         }
 
         // StdEncoding is the standard base64 encoding, as defined in
@@ -163,12 +172,19 @@ namespace encoding
         // The encoding pads the output to a multiple of 4 bytes,
         // so Encode is not appropriate for use on individual blocks
         // of a large data stream. Use NewEncoder() instead.
-        private static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src)
+        private static void Encode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<byte> src)
         {
+            ref Encoding enc = ref _addr_enc.val;
+
             if (len(src) == 0L)
             {
-                return;
-            }
+                return ;
+            } 
+            // enc is a pointer receiver, so the use of enc.encode within the hot
+            // loop below means a nil check at every operation. Lift that nil check
+            // outside of the loop to speed up the encoder.
+            _ = enc.encode;
+
             long di = 0L;
             long si = 0L;
             var n = (len(src) / 3L) * 3L;
@@ -184,13 +200,14 @@ namespace encoding
 
                 si += 3L;
                 di += 4L;
+
             }
 
 
             var remain = len(src) - si;
             if (remain == 0L)
             {
-                return;
+                return ;
             } 
             // Add the remaining small block
             val = uint(src[si + 0L]) << (int)(16L);
@@ -198,6 +215,7 @@ namespace encoding
             {
                 val |= uint(src[si + 1L]) << (int)(8L);
             }
+
             dst[di + 0L] = enc.encode[val >> (int)(18L) & 0x3FUL];
             dst[di + 1L] = enc.encode[val >> (int)(12L) & 0x3FUL];
 
@@ -209,6 +227,7 @@ namespace encoding
                     {
                         dst[di + 3L] = byte(enc.padChar);
                     }
+
                     break;
                 case 1L: 
                     if (enc.padChar != NoPadding)
@@ -216,13 +235,17 @@ namespace encoding
                         dst[di + 2L] = byte(enc.padChar);
                         dst[di + 3L] = byte(enc.padChar);
                     }
+
                     break;
             }
+
         }
 
         // EncodeToString returns the base64 encoding of src.
-        private static @string EncodeToString(this ref Encoding enc, slice<byte> src)
+        private static @string EncodeToString(this ptr<Encoding> _addr_enc, slice<byte> src)
         {
+            ref Encoding enc = ref _addr_enc.val;
+
             var buf = make_slice<byte>(enc.EncodedLen(len(src)));
             enc.Encode(buf, src);
             return string(buf);
@@ -238,11 +261,15 @@ namespace encoding
             public array<byte> @out; // output buffer
         }
 
-        private static (long, error) Write(this ref encoder e, slice<byte> p)
+        private static (long, error) Write(this ptr<encoder> _addr_e, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return (0L, e.err);
+                return (0L, error.As(e.err)!);
             } 
 
             // Leading fringe.
@@ -259,16 +286,19 @@ namespace encoding
                 p = p[i..];
                 if (e.nbuf < 3L)
                 {
-                    return;
+                    return ;
                 }
+
                 e.enc.Encode(e.@out[..], e.buf[..]);
                 _, e.err = e.w.Write(e.@out[..4L]);
 
                 if (e.err != null)
                 {
-                    return (n, e.err);
+                    return (n, error.As(e.err)!);
                 }
+
                 e.nbuf = 0L;
+
             } 
 
             // Large interior chunks.
@@ -280,15 +310,18 @@ namespace encoding
                     nn = len(p);
                     nn -= nn % 3L;
                 }
+
                 e.enc.Encode(e.@out[..], p[..nn]);
                 _, e.err = e.w.Write(e.@out[0L..nn / 3L * 4L]);
 
                 if (e.err != null)
                 {
-                    return (n, e.err);
+                    return (n, error.As(e.err)!);
                 }
+
                 n += nn;
                 p = p[nn..];
+
             } 
 
             // Trailing fringe.
@@ -308,13 +341,16 @@ namespace encoding
             }
             e.nbuf = len(p);
             n += len(p);
-            return;
+            return ;
+
         }
 
         // Close flushes any pending output from the encoder.
         // It is an error to call Write after calling Close.
-        private static error Close(this ref encoder e)
-        { 
+        private static error Close(this ptr<encoder> _addr_e)
+        {
+            ref encoder e = ref _addr_e.val;
+ 
             // If there's anything left in the buffer, flush it out
             if (e.err == null && e.nbuf > 0L)
             {
@@ -322,7 +358,9 @@ namespace encoding
                 _, e.err = e.w.Write(e.@out[..e.enc.EncodedLen(e.nbuf)]);
                 e.nbuf = 0L;
             }
-            return error.As(e.err);
+
+            return error.As(e.err)!;
+
         }
 
         // NewEncoder returns a new base64 stream encoder. Data written to
@@ -330,19 +368,24 @@ namespace encoding
         // Base64 encodings operate in 4-byte blocks; when finished
         // writing, the caller must Close the returned encoder to flush any
         // partially written blocks.
-        public static io.WriteCloser NewEncoder(ref Encoding enc, io.Writer w)
+        public static io.WriteCloser NewEncoder(ptr<Encoding> _addr_enc, io.Writer w)
         {
-            return ref new encoder(enc:enc,w:w);
+            ref Encoding enc = ref _addr_enc.val;
+
+            return addr(new encoder(enc:enc,w:w));
         }
 
         // EncodedLen returns the length in bytes of the base64 encoding
         // of an input buffer of length n.
-        private static long EncodedLen(this ref Encoding enc, long n)
+        private static long EncodedLen(this ptr<Encoding> _addr_enc, long n)
         {
+            ref Encoding enc = ref _addr_enc.val;
+
             if (enc.padChar == NoPadding)
             {
                 return (n * 8L + 5L) / 6L; // minimum # chars at 6 bits per char
             }
+
             return (n + 2L) / 3L * 4L; // minimum # 4-char quanta, 3 bytes each
         }
 
@@ -359,17 +402,24 @@ namespace encoding
             return "illegal base64 data at input byte " + strconv.FormatInt(int64(e), 10L);
         }
 
-        // decodeQuantum decodes up to 4 base64 bytes. It takes for parameters
+        // decodeQuantum decodes up to 4 base64 bytes. The received parameters are
         // the destination buffer dst, the source buffer src and an index in the
         // source buffer si.
         // It returns the number of bytes read from src, the number of bytes written
         // to dst, and an error, if any.
-        private static (long, long, error) decodeQuantum(this ref Encoding enc, slice<byte> dst, slice<byte> src, long si)
-        { 
+        private static (long, long, error) decodeQuantum(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<byte> src, long si)
+        {
+            long nsi = default;
+            long n = default;
+            error err = default!;
+            ref Encoding enc = ref _addr_enc.val;
+ 
             // Decode quantum using the base64 alphabet
             array<byte> dbuf = new array<byte>(4L);
-            long dinc = 3L;
-            long dlen = 4L;
+            long dlen = 4L; 
+
+            // Lift the nil check outside of the loop.
+            _ = enc.decodeMap;
 
             for (long j = 0L; j < len(dbuf); j++)
             {
@@ -377,13 +427,14 @@ namespace encoding
                 {
 
                     if (j == 0L) 
-                        return (si, 0L, null);
+                        return (si, 0L, error.As(null!)!);
                     else if (j == 1L || enc.padChar != NoPadding) 
-                        return (si, 0L, CorruptInputError(si - j));
-                                        dinc = j - 1L;
-                    dlen = j;
+                        return (si, 0L, error.As(CorruptInputError(si - j))!);
+                                        dlen = j;
                     break;
+
                 }
+
                 var @in = src[si];
                 si++;
 
@@ -393,14 +444,16 @@ namespace encoding
                     dbuf[j] = out;
                     continue;
                 }
+
                 if (in == '\n' || in == '\r')
                 {
                     j--;
                     continue;
                 }
+
                 if (rune(in) != enc.padChar)
                 {
-                    return (si, 0L, CorruptInputError(si - 1L));
+                    return (si, 0L, error.As(CorruptInputError(si - 1L))!);
                 } 
 
                 // We've reached the end and there's padding
@@ -411,7 +464,7 @@ namespace encoding
 
                     case 1L: 
                         // incorrect padding
-                        return (si, 0L, CorruptInputError(si - 1L));
+                        return (si, 0L, error.As(CorruptInputError(si - 1L))!);
                         break;
                     case 2L: 
                         // "==" is expected, the first "=" is already consumed.
@@ -424,13 +477,17 @@ namespace encoding
                         if (si == len(src))
                         { 
                             // not enough padding
-                            return (si, 0L, CorruptInputError(len(src)));
+                            return (si, 0L, error.As(CorruptInputError(len(src)))!);
+
                         }
+
                         if (rune(src[si]) != enc.padChar)
                         { 
                             // incorrect padding
-                            return (si, 0L, CorruptInputError(si - 1L));
+                            return (si, 0L, error.As(CorruptInputError(si - 1L))!);
+
                         }
+
                         si++;
                         break;
                 } 
@@ -445,10 +502,12 @@ namespace encoding
                 { 
                     // trailing garbage
                     err = CorruptInputError(si);
+
                 }
-                dinc = 3L;
+
                 dlen = j;
                 break;
+
             } 
 
             // Convert 4x 6bit source bytes into 3 bytes
@@ -471,8 +530,9 @@ namespace encoding
                 dst[1L] = dbuf[1L];
                 if (enc.strict && dbuf[2L] != 0L)
                 {
-                    return (si, 0L, CorruptInputError(si - 1L));
+                    return (si, 0L, error.As(CorruptInputError(si - 1L))!);
                 }
+
                 dbuf[1L] = 0L;
                 fallthrough = true;
             }
@@ -481,23 +541,28 @@ namespace encoding
                 dst[0L] = dbuf[0L];
                 if (enc.strict && (dbuf[1L] != 0L || dbuf[2L] != 0L))
                 {
-                    return (si, 0L, CorruptInputError(si - 2L));
+                    return (si, 0L, error.As(CorruptInputError(si - 2L))!);
                 }
+
                 goto __switch_break0;
             }
 
             __switch_break0:;
-            dst = dst[dinc..];
 
-            return (si, dlen - 1L, err);
+            return (si, dlen - 1L, error.As(err)!);
+
         }
 
         // DecodeString returns the bytes represented by the base64 string s.
-        private static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s)
+        private static (slice<byte>, error) DecodeString(this ptr<Encoding> _addr_enc, @string s)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Encoding enc = ref _addr_enc.val;
+
             var dbuf = make_slice<byte>(enc.DecodedLen(len(s)));
             var (n, err) = enc.Decode(dbuf, (slice<byte>)s);
-            return (dbuf[..n], err);
+            return (dbuf[..n], error.As(err)!);
         }
 
         private partial struct decoder
@@ -512,18 +577,23 @@ namespace encoding
             public array<byte> outbuf;
         }
 
-        private static (long, error) Read(this ref decoder d, slice<byte> p)
-        { 
+        private static (long, error) Read(this ptr<decoder> _addr_d, slice<byte> p)
+        {
+            long n = default;
+            error err = default!;
+            ref decoder d = ref _addr_d.val;
+ 
             // Use leftover decoded output from last read.
             if (len(d.@out) > 0L)
             {
                 n = copy(p, d.@out);
                 d.@out = d.@out[n..];
-                return (n, null);
+                return (n, error.As(null!)!);
             }
+
             if (d.err != null)
             {
-                return (0L, d.err);
+                return (0L, error.As(d.err)!);
             } 
 
             // This code assumes that d.r strips supported whitespace ('\r' and '\n').
@@ -536,12 +606,15 @@ namespace encoding
                 {
                     nn = 4L;
                 }
+
                 if (nn > len(d.buf))
                 {
                     nn = len(d.buf);
                 }
+
                 nn, d.readErr = d.r.Read(d.buf[d.nbuf..nn]);
                 d.nbuf += nn;
+
             }
 
 
@@ -558,19 +631,24 @@ namespace encoding
                     d.@out = d.@out[n..];
                     if (n > 0L || len(p) == 0L && len(d.@out) > 0L)
                     {
-                        return (n, null);
+                        return (n, error.As(null!)!);
                     }
+
                     if (d.err != null)
                     {
-                        return (0L, d.err);
+                        return (0L, error.As(d.err)!);
                     }
+
                 }
+
                 d.err = d.readErr;
                 if (d.err == io.EOF && d.nbuf > 0L)
                 {
                     d.err = io.ErrUnexpectedEOF;
                 }
-                return (0L, d.err);
+
+                return (0L, error.As(d.err)!);
+
             } 
 
             // Decode chunk into p, or d.out and then p if p is too small.
@@ -587,9 +665,11 @@ namespace encoding
             {
                 n, d.err = d.enc.Decode(p, d.buf[..nr]);
             }
+
             d.nbuf -= nr;
             copy(d.buf[..d.nbuf], d.buf[nr..]);
-            return (n, d.err);
+            return (n, error.As(d.err)!);
+
         }
 
         // Decode decodes src using the encoding enc. It writes at most
@@ -597,24 +677,34 @@ namespace encoding
         // written. If src contains invalid base64 data, it will return the
         // number of bytes successfully written and CorruptInputError.
         // New line characters (\r and \n) are ignored.
-        private static (long, error) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src)
+        private static (long, error) Decode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<byte> src)
         {
+            long n = default;
+            error err = default!;
+            ref Encoding enc = ref _addr_enc.val;
+
             if (len(src) == 0L)
             {
-                return (0L, null);
-            }
-            long si = 0L;
-            var ilen = len(src);
-            var olen = len(dst);
-            while (strconv.IntSize >= 64L && ilen - si >= 8L && olen - n >= 8L)
-            {
-                {
-                    var ok__prev1 = ok;
+                return (0L, error.As(null!)!);
+            } 
 
-                    var ok = enc.decode64(dst[n..], src[si..]);
+            // Lift the nil check outside of the loop. enc.decodeMap is directly
+            // used later in this function, to let the compiler know that the
+            // receiver can't be nil.
+            _ = enc.decodeMap;
+
+            long si = 0L;
+            while (strconv.IntSize >= 64L && len(src) - si >= 8L && len(dst) - n >= 8L)
+            {
+                var src2 = src[si..si + 8L];
+                {
+                    var dn__prev1 = dn;
+
+                    var (dn, ok) = assemble64(enc.decodeMap[src2[0L]], enc.decodeMap[src2[1L]], enc.decodeMap[src2[2L]], enc.decodeMap[src2[3L]], enc.decodeMap[src2[4L]], enc.decodeMap[src2[5L]], enc.decodeMap[src2[6L]], enc.decodeMap[src2[7L]]);
 
                     if (ok)
                     {
+                        binary.BigEndian.PutUint64(dst[n..], dn);
                         n += 6L;
                         si += 8L;
                     }
@@ -625,25 +715,29 @@ namespace encoding
                         n += ninc;
                         if (err != null)
                         {
-                            return (n, err);
+                            return (n, error.As(err)!);
                         }
+
                     }
 
-                    ok = ok__prev1;
+                    dn = dn__prev1;
 
                 }
+
             }
 
 
-            while (ilen - si >= 4L && olen - n >= 4L)
+            while (len(src) - si >= 4L && len(dst) - n >= 4L)
             {
+                src2 = src[si..si + 4L];
                 {
-                    var ok__prev1 = ok;
+                    var dn__prev1 = dn;
 
-                    ok = enc.decode32(dst[n..], src[si..]);
+                    (dn, ok) = assemble32(enc.decodeMap[src2[0L]], enc.decodeMap[src2[1L]], enc.decodeMap[src2[2L]], enc.decodeMap[src2[3L]]);
 
                     if (ok)
                     {
+                        binary.BigEndian.PutUint32(dst[n..], dn);
                         n += 3L;
                         si += 4L;
                     }
@@ -654,13 +748,15 @@ namespace encoding
                         n += ninc;
                         if (err != null)
                         {
-                            return (n, err);
+                            return (n, error.As(err)!);
                         }
+
                     }
 
-                    ok = ok__prev1;
+                    dn = dn__prev1;
 
                 }
+
             }
 
 
@@ -671,119 +767,51 @@ namespace encoding
                 n += ninc;
                 if (err != null)
                 {
-                    return (n, err);
+                    return (n, error.As(err)!);
                 }
+
             }
 
-            return (n, err);
+            return (n, error.As(err)!);
+
         }
 
-        // decode32 tries to decode 4 base64 char into 3 bytes.
-        // len(dst) and len(src) must both be >= 4.
-        // Returns true if decode succeeded.
-        private static bool decode32(this ref Encoding enc, slice<byte> dst, slice<byte> src)
+        // assemble32 assembles 4 base64 digits into 3 bytes.
+        // Each digit comes from the decode map, and will be 0xff
+        // if it came from an invalid character.
+        private static (uint, bool) assemble32(byte n1, byte n2, byte n3, byte n4)
         {
-            uint dn = default;            uint n = default;
-
-            n = uint32(enc.decodeMap[src[0L]]);
-
-            if (n == 0xffUL)
+            uint dn = default;
+            bool ok = default;
+ 
+            // Check that all the digits are valid. If any of them was 0xff, their
+            // bitwise OR will be 0xff.
+            if (n1 | n2 | n3 | n4 == 0xffUL)
             {
-                return false;
+                return (0L, false);
             }
-            dn |= n << (int)(26L);
-            n = uint32(enc.decodeMap[src[1L]]);
 
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(20L);
-            n = uint32(enc.decodeMap[src[2L]]);
+            return (uint32(n1) << (int)(26L) | uint32(n2) << (int)(20L) | uint32(n3) << (int)(14L) | uint32(n4) << (int)(8L), true);
 
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(14L);
-            n = uint32(enc.decodeMap[src[3L]]);
-
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(8L);
-
-            binary.BigEndian.PutUint32(dst, dn);
-            return true;
         }
 
-        // decode64 tries to decode 8 base64 char into 6 bytes.
-        // len(dst) and len(src) must both be >= 8.
-        // Returns true if decode succeeded.
-        private static bool decode64(this ref Encoding enc, slice<byte> dst, slice<byte> src)
+        // assemble64 assembles 8 base64 digits into 6 bytes.
+        // Each digit comes from the decode map, and will be 0xff
+        // if it came from an invalid character.
+        private static (ulong, bool) assemble64(byte n1, byte n2, byte n3, byte n4, byte n5, byte n6, byte n7, byte n8)
         {
-            ulong dn = default;            ulong n = default;
-
-            n = uint64(enc.decodeMap[src[0L]]);
-
-            if (n == 0xffUL)
+            ulong dn = default;
+            bool ok = default;
+ 
+            // Check that all the digits are valid. If any of them was 0xff, their
+            // bitwise OR will be 0xff.
+            if (n1 | n2 | n3 | n4 | n5 | n6 | n7 | n8 == 0xffUL)
             {
-                return false;
+                return (0L, false);
             }
-            dn |= n << (int)(58L);
-            n = uint64(enc.decodeMap[src[1L]]);
 
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(52L);
-            n = uint64(enc.decodeMap[src[2L]]);
+            return (uint64(n1) << (int)(58L) | uint64(n2) << (int)(52L) | uint64(n3) << (int)(46L) | uint64(n4) << (int)(40L) | uint64(n5) << (int)(34L) | uint64(n6) << (int)(28L) | uint64(n7) << (int)(22L) | uint64(n8) << (int)(16L), true);
 
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(46L);
-            n = uint64(enc.decodeMap[src[3L]]);
-
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(40L);
-            n = uint64(enc.decodeMap[src[4L]]);
-
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(34L);
-            n = uint64(enc.decodeMap[src[5L]]);
-
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(28L);
-            n = uint64(enc.decodeMap[src[6L]]);
-
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(22L);
-            n = uint64(enc.decodeMap[src[7L]]);
-
-            if (n == 0xffUL)
-            {
-                return false;
-            }
-            dn |= n << (int)(16L);
-
-            binary.BigEndian.PutUint64(dst, dn);
-            return true;
         }
 
         private partial struct newlineFilteringReader
@@ -791,8 +819,12 @@ namespace encoding
             public io.Reader wrapped;
         }
 
-        private static (long, error) Read(this ref newlineFilteringReader r, slice<byte> p)
+        private static (long, error) Read(this ptr<newlineFilteringReader> _addr_r, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref newlineFilteringReader r = ref _addr_r.val;
+
             var (n, err) = r.wrapped.Read(p);
             while (n > 0L)
             {
@@ -805,37 +837,48 @@ namespace encoding
                         {
                             p[offset] = b;
                         }
+
                         offset++;
+
                     }
+
                 }
                 if (offset > 0L)
                 {
-                    return (offset, err);
+                    return (offset, error.As(err)!);
                 } 
                 // Previous buffer entirely whitespace, read again
                 n, err = r.wrapped.Read(p);
+
             }
 
-            return (n, err);
+            return (n, error.As(err)!);
+
         }
 
         // NewDecoder constructs a new base64 stream decoder.
-        public static io.Reader NewDecoder(ref Encoding enc, io.Reader r)
+        public static io.Reader NewDecoder(ptr<Encoding> _addr_enc, io.Reader r)
         {
-            return ref new decoder(enc:enc,r:&newlineFilteringReader{r});
+            ref Encoding enc = ref _addr_enc.val;
+
+            return addr(new decoder(enc:enc,r:&newlineFilteringReader{r}));
         }
 
         // DecodedLen returns the maximum length in bytes of the decoded data
         // corresponding to n bytes of base64-encoded data.
-        private static long DecodedLen(this ref Encoding enc, long n)
+        private static long DecodedLen(this ptr<Encoding> _addr_enc, long n)
         {
+            ref Encoding enc = ref _addr_enc.val;
+
             if (enc.padChar == NoPadding)
             { 
                 // Unpadded data may end with partial block of 2-3 characters.
                 return n * 6L / 8L;
+
             } 
             // Padded base64 should always be a multiple of 4 characters in length.
             return n / 4L * 3L;
+
         }
     }
 }}

@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd plan9 solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd plan9 solaris
 
 // Unix cryptographically secure pseudorandom number
 // generator.
 
-// package rand -- go2cs converted at 2020 August 29 08:30:52 UTC
+// package rand -- go2cs converted at 2020 October 08 03:35:32 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\rand_unix.go
 using bufio = go.bufio_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
+using binary = go.encoding.binary_package;
 using io = go.io_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
 using static go.builtin;
 using System;
@@ -26,7 +28,7 @@ namespace crypto
 {
     public static partial class rand_package
     {
-        private static readonly @string urandomDevice = "/dev/urandom";
+        private static readonly @string urandomDevice = (@string)"/dev/urandom";
 
         // Easy implementation: read from /dev/urandom.
         // This is sufficient on Linux, OS X, and FreeBSD.
@@ -44,8 +46,9 @@ namespace crypto
             }
             else
             {
-                Reader = ref new devReader(name:urandomDevice);
+                Reader = addr(new devReader(name:urandomDevice));
             }
+
         }
 
         // A devReader satisfies reads by reading the file named name.
@@ -54,18 +57,33 @@ namespace crypto
             public @string name;
             public io.Reader f;
             public sync.Mutex mu;
+            public int used; // atomic; whether this devReader has been used
         }
 
         // altGetRandom if non-nil specifies an OS-specific function to get
         // urandom-style randomness.
         private static Func<slice<byte>, bool> altGetRandom = default;
 
-        private static (long, error) Read(this ref devReader _r, slice<byte> b) => func(_r, (ref devReader r, Defer defer, Panic _, Recover __) =>
+        private static (long, error) Read(this ptr<devReader> _addr_r, slice<byte> b) => func((defer, _, __) =>
         {
+            long n = default;
+            error err = default!;
+            ref devReader r = ref _addr_r.val;
+
+            if (atomic.CompareAndSwapInt32(_addr_r.used, 0L, 1L))
+            { 
+                // First use of randomness. Start timer to warn about
+                // being blocked on entropy not being available.
+                var t = time.AfterFunc(60L * time.Second, warnBlocked);
+                defer(t.Stop());
+
+            }
+
             if (altGetRandom != null && r.name == urandomDevice && altGetRandom(b))
             {
-                return (len(b), null);
+                return (len(b), error.As(null!)!);
             }
+
             r.mu.Lock();
             defer(r.mu.Unlock());
             if (r.f == null)
@@ -73,8 +91,9 @@ namespace crypto
                 var (f, err) = os.Open(r.name);
                 if (f == null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
+
                 if (runtime.GOOS == "plan9")
                 {
                     r.f = f;
@@ -83,8 +102,11 @@ namespace crypto
                 {
                     r.f = bufio.NewReader(new hideAgainReader(f));
                 }
+
             }
+
             return r.f.Read(b);
+
         });
 
         private static Func<error, bool> isEAGAIN = default; // set by eagain.go on unix systems
@@ -98,12 +120,17 @@ namespace crypto
 
         private static (long, error) Read(this hideAgainReader hr, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+
             n, err = hr.r.Read(p);
             if (err != null && isEAGAIN != null && isEAGAIN(err))
             {
                 err = null;
             }
-            return;
+
+            return ;
+
         }
 
         // Alternate pseudo-random implementation for use on
@@ -122,9 +149,11 @@ namespace crypto
         {
             if (entropy == null)
             {
-                entropy = ref new devReader(name:"/dev/random");
+                entropy = addr(new devReader(name:"/dev/random"));
             }
-            return ref new reader(entropy:entropy);
+
+            return addr(new reader(entropy:entropy));
+
         }
 
         private partial struct reader
@@ -139,8 +168,12 @@ namespace crypto
             public array<byte> key;
         }
 
-        private static (long, error) Read(this ref reader _r, slice<byte> b) => func(_r, (ref reader r, Defer defer, Panic _, Recover __) =>
+        private static (long, error) Read(this ptr<reader> _addr_r, slice<byte> b) => func((defer, _, __) =>
         {
+            long n = default;
+            error err = default!;
+            ref reader r = ref _addr_r.val;
+
             r.mu.Lock();
             defer(r.mu.Unlock());
             n = len(b);
@@ -152,20 +185,24 @@ namespace crypto
                     var (_, err) = io.ReadFull(r.entropy, r.seed[0L..]);
                     if (err != null)
                     {
-                        return (n - len(b), err);
+                        return (n - len(b), error.As(err)!);
                     }
+
                     _, err = io.ReadFull(r.entropy, r.key[0L..]);
                     if (err != null)
                     {
-                        return (n - len(b), err);
+                        return (n - len(b), error.As(err)!);
                     }
+
                     r.cipher, err = aes.NewCipher(r.key[0L..]);
                     if (err != null)
                     {
-                        return (n - len(b), err);
+                        return (n - len(b), error.As(err)!);
                     }
+
                     r.budget = 1L << (int)(20L); // reseed after generating 1MB
                 }
+
                 r.budget -= aes.BlockSize; 
 
                 // ANSI X9.31 (== X9.17) algorithm, but using AES in place of 3DES.
@@ -175,14 +212,7 @@ namespace crypto
                 // dst = encrypt(t^seed)
                 // seed = encrypt(t^dst)
                 var ns = time.Now().UnixNano();
-                r.time[0L] = byte(ns >> (int)(56L));
-                r.time[1L] = byte(ns >> (int)(48L));
-                r.time[2L] = byte(ns >> (int)(40L));
-                r.time[3L] = byte(ns >> (int)(32L));
-                r.time[4L] = byte(ns >> (int)(24L));
-                r.time[5L] = byte(ns >> (int)(16L));
-                r.time[6L] = byte(ns >> (int)(8L));
-                r.time[7L] = byte(ns);
+                binary.BigEndian.PutUint64(r.time[..], uint64(ns));
                 r.cipher.Encrypt(r.time[0L..], r.time[0L..]);
                 {
                     long i__prev2 = i;
@@ -211,10 +241,12 @@ namespace crypto
 
                 var m = copy(b, r.dst[0L..]);
                 b = b[m..];
+
             }
 
 
-            return (n, null);
+            return (n, error.As(null!)!);
+
         });
     }
 }}

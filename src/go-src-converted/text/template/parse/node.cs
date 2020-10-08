@@ -4,10 +4,9 @@
 
 // Parse nodes.
 
-// package parse -- go2cs converted at 2020 August 29 08:34:38 UTC
+// package parse -- go2cs converted at 2020 October 08 03:41:58 UTC
 // import "text/template/parse" ==> using parse = go.text.template.parse_package
 // Original source: C:\Go\src\text\template\parse\node.go
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -26,15 +25,16 @@ namespace template
         // types local to this package can satisfy it.
         public partial interface Node
         {
-            ref Tree Type();
-            ref Tree String(); // Copy does a deep copy of the Node and all its components.
+            ptr<Tree> Type();
+            ptr<Tree> String(); // Copy does a deep copy of the Node and all its components.
 // To avoid type assertions, some XxxNodes also have specialized
 // CopyXxx methods that return *XxxNode.
-            ref Tree Copy();
-            ref Tree Position(); // byte position of start of node in full original input string
+            ptr<Tree> Copy();
+            ptr<Tree> Position(); // byte position of start of node in full original input string
 // tree returns the containing *Tree.
 // It is unexported so all implementations of Node are in this package.
-            ref Tree tree();
+            ptr<Tree> tree(); // writeTo writes the String output to the builder.
+            ptr<Tree> writeTo(ptr<strings.Builder> _p0);
         }
 
         // NodeType identifies the type of a parse tree node.
@@ -60,26 +60,26 @@ namespace template
             return t;
         }
 
-        public static readonly NodeType NodeText = iota; // Plain text.
-        public static readonly var NodeAction = 0; // A non-control action such as a field evaluation.
-        public static readonly var NodeBool = 1; // A boolean constant.
-        public static readonly var NodeChain = 2; // A sequence of field accesses.
-        public static readonly var NodeCommand = 3; // An element of a pipeline.
-        public static readonly var NodeDot = 4; // The cursor, dot.
-        private static readonly var nodeElse = 5; // An else action. Not added to tree.
-        private static readonly var nodeEnd = 6; // An end action. Not added to tree.
-        public static readonly var NodeField = 7; // A field or method name.
-        public static readonly var NodeIdentifier = 8; // An identifier; always a function name.
-        public static readonly var NodeIf = 9; // An if action.
-        public static readonly var NodeList = 10; // A list of Nodes.
-        public static readonly var NodeNil = 11; // An untyped nil constant.
-        public static readonly var NodeNumber = 12; // A numerical constant.
-        public static readonly var NodePipe = 13; // A pipeline of commands.
-        public static readonly var NodeRange = 14; // A range action.
-        public static readonly var NodeString = 15; // A string constant.
-        public static readonly var NodeTemplate = 16; // A template invocation action.
-        public static readonly var NodeVariable = 17; // A $ variable.
-        public static readonly var NodeWith = 18; // A with action.
+        public static readonly NodeType NodeText = (NodeType)iota; // Plain text.
+        public static readonly var NodeAction = (var)0; // A non-control action such as a field evaluation.
+        public static readonly var NodeBool = (var)1; // A boolean constant.
+        public static readonly var NodeChain = (var)2; // A sequence of field accesses.
+        public static readonly var NodeCommand = (var)3; // An element of a pipeline.
+        public static readonly var NodeDot = (var)4; // The cursor, dot.
+        private static readonly var nodeElse = (var)5; // An else action. Not added to tree.
+        private static readonly var nodeEnd = (var)6; // An end action. Not added to tree.
+        public static readonly var NodeField = (var)7; // A field or method name.
+        public static readonly var NodeIdentifier = (var)8; // An identifier; always a function name.
+        public static readonly var NodeIf = (var)9; // An if action.
+        public static readonly var NodeList = (var)10; // A list of Nodes.
+        public static readonly var NodeNil = (var)11; // An untyped nil constant.
+        public static readonly var NodeNumber = (var)12; // A numerical constant.
+        public static readonly var NodePipe = (var)13; // A pipeline of commands.
+        public static readonly var NodeRange = (var)14; // A range action.
+        public static readonly var NodeString = (var)15; // A string constant.
+        public static readonly var NodeTemplate = (var)16; // A template invocation action.
+        public static readonly var NodeVariable = (var)17; // A $ variable.
+        public static readonly var NodeWith = (var)18; // A with action.
 
         // Nodes.
 
@@ -92,47 +92,70 @@ namespace template
             public slice<Node> Nodes; // The element nodes in lexical order.
         }
 
-        private static ref ListNode newList(this ref Tree t, Pos pos)
+        private static ptr<ListNode> newList(this ptr<Tree> _addr_t, Pos pos)
         {
-            return ref new ListNode(tr:t,NodeType:NodeList,Pos:pos);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new ListNode(tr:t,NodeType:NodeList,Pos:pos));
         }
 
-        private static void append(this ref ListNode l, Node n)
+        private static void append(this ptr<ListNode> _addr_l, Node n)
         {
+            ref ListNode l = ref _addr_l.val;
+
             l.Nodes = append(l.Nodes, n);
         }
 
-        private static ref Tree tree(this ref ListNode l)
+        private static ptr<Tree> tree(this ptr<ListNode> _addr_l)
         {
-            return l.tr;
+            ref ListNode l = ref _addr_l.val;
+
+            return _addr_l.tr!;
         }
 
-        private static @string String(this ref ListNode l)
+        private static @string String(this ptr<ListNode> _addr_l)
         {
-            ptr<object> b = @new<bytes.Buffer>();
+            ref ListNode l = ref _addr_l.val;
+
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            l.writeTo(_addr_sb);
+            return sb.String();
+        }
+
+        private static void writeTo(this ptr<ListNode> _addr_l, ptr<strings.Builder> _addr_sb)
+        {
+            ref ListNode l = ref _addr_l.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
             foreach (var (_, n) in l.Nodes)
             {
-                fmt.Fprint(b, n);
+                n.writeTo(sb);
             }
-            return b.String();
+
         }
 
-        private static ref ListNode CopyList(this ref ListNode l)
+        private static ptr<ListNode> CopyList(this ptr<ListNode> _addr_l)
         {
+            ref ListNode l = ref _addr_l.val;
+
             if (l == null)
             {
-                return l;
+                return _addr_l!;
             }
+
             var n = l.tr.newList(l.Pos);
             foreach (var (_, elem) in l.Nodes)
             {
                 n.append(elem.Copy());
             }
-            return n;
+            return _addr_n!;
+
         }
 
-        private static Node Copy(this ref ListNode l)
+        private static Node Copy(this ptr<ListNode> _addr_l)
         {
+            ref ListNode l = ref _addr_l.val;
+
             return l.CopyList();
         }
 
@@ -145,24 +168,40 @@ namespace template
             public slice<byte> Text; // The text; may span newlines.
         }
 
-        private static ref TextNode newText(this ref Tree t, Pos pos, @string text)
+        private static ptr<TextNode> newText(this ptr<Tree> _addr_t, Pos pos, @string text)
         {
-            return ref new TextNode(tr:t,NodeType:NodeText,Pos:pos,Text:[]byte(text));
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new TextNode(tr:t,NodeType:NodeText,Pos:pos,Text:[]byte(text)));
         }
 
-        private static @string String(this ref TextNode t)
+        private static @string String(this ptr<TextNode> _addr_t)
         {
+            ref TextNode t = ref _addr_t.val;
+
             return fmt.Sprintf(textFormat, t.Text);
         }
 
-        private static ref Tree tree(this ref TextNode t)
+        private static void writeTo(this ptr<TextNode> _addr_t, ptr<strings.Builder> _addr_sb)
         {
-            return t.tr;
+            ref TextNode t = ref _addr_t.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(t.String());
         }
 
-        private static Node Copy(this ref TextNode t)
+        private static ptr<Tree> tree(this ptr<TextNode> _addr_t)
         {
-            return ref new TextNode(tr:t.tr,NodeType:NodeText,Pos:t.Pos,Text:append([]byte{},t.Text...));
+            ref TextNode t = ref _addr_t.val;
+
+            return _addr_t.tr!;
+        }
+
+        private static Node Copy(this ptr<TextNode> _addr_t)
+        {
+            ref TextNode t = ref _addr_t.val;
+
+            return addr(new TextNode(tr:t.tr,NodeType:NodeText,Pos:t.Pos,Text:append([]byte{},t.Text...)));
         }
 
         // PipeNode holds a pipeline with optional declaration
@@ -172,23 +211,40 @@ namespace template
             public ref Pos Pos => ref Pos_val;
             public ptr<Tree> tr;
             public long Line; // The line number in the input. Deprecated: Kept for compatibility.
-            public slice<ref VariableNode> Decl; // Variable declarations in lexical order.
-            public slice<ref CommandNode> Cmds; // The commands in lexical order.
+            public bool IsAssign; // The variables are being assigned, not declared.
+            public slice<ptr<VariableNode>> Decl; // Variables in lexical order.
+            public slice<ptr<CommandNode>> Cmds; // The commands in lexical order.
         }
 
-        private static ref PipeNode newPipeline(this ref Tree t, Pos pos, long line, slice<ref VariableNode> decl)
+        private static ptr<PipeNode> newPipeline(this ptr<Tree> _addr_t, Pos pos, long line, slice<ptr<VariableNode>> vars)
         {
-            return ref new PipeNode(tr:t,NodeType:NodePipe,Pos:pos,Line:line,Decl:decl);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new PipeNode(tr:t,NodeType:NodePipe,Pos:pos,Line:line,Decl:vars));
         }
 
-        private static void append(this ref PipeNode p, ref CommandNode command)
+        private static void append(this ptr<PipeNode> _addr_p, ptr<CommandNode> _addr_command)
         {
+            ref PipeNode p = ref _addr_p.val;
+            ref CommandNode command = ref _addr_command.val;
+
             p.Cmds = append(p.Cmds, command);
         }
 
-        private static @string String(this ref PipeNode p)
+        private static @string String(this ptr<PipeNode> _addr_p)
         {
-            @string s = "";
+            ref PipeNode p = ref _addr_p.val;
+
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            p.writeTo(_addr_sb);
+            return sb.String();
+        }
+
+        private static void writeTo(this ptr<PipeNode> _addr_p, ptr<strings.Builder> _addr_sb)
+        {
+            ref PipeNode p = ref _addr_p.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
             if (len(p.Decl) > 0L)
             {
                 {
@@ -200,16 +256,20 @@ namespace template
                         v = __v;
                         if (i > 0L)
                         {
-                            s += ", ";
+                            sb.WriteString(", ");
                         }
-                        s += v.String();
+
+                        v.writeTo(sb);
+
                     }
 
                     i = i__prev1;
                 }
 
-                s += " := ";
+                sb.WriteString(" := ");
+
             }
+
             {
                 var i__prev1 = i;
 
@@ -219,43 +279,52 @@ namespace template
                     c = __c;
                     if (i > 0L)
                     {
-                        s += " | ";
+                        sb.WriteString(" | ");
                     }
-                    s += c.String();
+
+                    c.writeTo(sb);
+
                 }
 
                 i = i__prev1;
             }
-
-            return s;
         }
 
-        private static ref Tree tree(this ref PipeNode p)
+        private static ptr<Tree> tree(this ptr<PipeNode> _addr_p)
         {
-            return p.tr;
+            ref PipeNode p = ref _addr_p.val;
+
+            return _addr_p.tr!;
         }
 
-        private static ref PipeNode CopyPipe(this ref PipeNode p)
+        private static ptr<PipeNode> CopyPipe(this ptr<PipeNode> _addr_p)
         {
+            ref PipeNode p = ref _addr_p.val;
+
             if (p == null)
             {
-                return p;
+                return _addr_p!;
             }
-            slice<ref VariableNode> decl = default;
-            foreach (var (_, d) in p.Decl)
+
+            var vars = make_slice<ptr<VariableNode>>(len(p.Decl));
+            foreach (var (i, d) in p.Decl)
             {
-                decl = append(decl, d.Copy()._<ref VariableNode>());
+                vars[i] = d.Copy()._<ptr<VariableNode>>();
             }
-            var n = p.tr.newPipeline(p.Pos, p.Line, decl);
+            var n = p.tr.newPipeline(p.Pos, p.Line, vars);
+            n.IsAssign = p.IsAssign;
             foreach (var (_, c) in p.Cmds)
             {
-                n.append(c.Copy()._<ref CommandNode>());
+                n.append(c.Copy()._<ptr<CommandNode>>());
             }
-            return n;
+            return _addr_n!;
+
         }
 
-        private static Node Copy(this ref PipeNode p)
+        private static Node Copy(this ptr<PipeNode> _addr_p)
         {
+            ref PipeNode p = ref _addr_p.val;
+
             return p.CopyPipe();
         }
 
@@ -271,26 +340,45 @@ namespace template
             public ptr<PipeNode> Pipe; // The pipeline in the action.
         }
 
-        private static ref ActionNode newAction(this ref Tree t, Pos pos, long line, ref PipeNode pipe)
+        private static ptr<ActionNode> newAction(this ptr<Tree> _addr_t, Pos pos, long line, ptr<PipeNode> _addr_pipe)
         {
-            return ref new ActionNode(tr:t,NodeType:NodeAction,Pos:pos,Line:line,Pipe:pipe);
+            ref Tree t = ref _addr_t.val;
+            ref PipeNode pipe = ref _addr_pipe.val;
+
+            return addr(new ActionNode(tr:t,NodeType:NodeAction,Pos:pos,Line:line,Pipe:pipe));
         }
 
-        private static @string String(this ref ActionNode a)
+        private static @string String(this ptr<ActionNode> _addr_a)
         {
-            return fmt.Sprintf("{{%s}}", a.Pipe);
+            ref ActionNode a = ref _addr_a.val;
 
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            a.writeTo(_addr_sb);
+            return sb.String();
         }
 
-        private static ref Tree tree(this ref ActionNode a)
+        private static void writeTo(this ptr<ActionNode> _addr_a, ptr<strings.Builder> _addr_sb)
         {
-            return a.tr;
+            ref ActionNode a = ref _addr_a.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString("{{");
+            a.Pipe.writeTo(sb);
+            sb.WriteString("}}");
         }
 
-        private static Node Copy(this ref ActionNode a)
+        private static ptr<Tree> tree(this ptr<ActionNode> _addr_a)
         {
+            ref ActionNode a = ref _addr_a.val;
+
+            return _addr_a.tr!;
+        }
+
+        private static Node Copy(this ptr<ActionNode> _addr_a)
+        {
+            ref ActionNode a = ref _addr_a.val;
+
             return a.tr.newAction(a.Pos, a.Line, a.Pipe.CopyPipe());
-
         }
 
         // CommandNode holds a command (a pipeline inside an evaluating action).
@@ -302,19 +390,34 @@ namespace template
             public slice<Node> Args; // Arguments in lexical order: Identifier, field, or constant.
         }
 
-        private static ref CommandNode newCommand(this ref Tree t, Pos pos)
+        private static ptr<CommandNode> newCommand(this ptr<Tree> _addr_t, Pos pos)
         {
-            return ref new CommandNode(tr:t,NodeType:NodeCommand,Pos:pos);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new CommandNode(tr:t,NodeType:NodeCommand,Pos:pos));
         }
 
-        private static void append(this ref CommandNode c, Node arg)
+        private static void append(this ptr<CommandNode> _addr_c, Node arg)
         {
+            ref CommandNode c = ref _addr_c.val;
+
             c.Args = append(c.Args, arg);
         }
 
-        private static @string String(this ref CommandNode c)
+        private static @string String(this ptr<CommandNode> _addr_c)
         {
-            @string s = "";
+            ref CommandNode c = ref _addr_c.val;
+
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            c.writeTo(_addr_sb);
+            return sb.String();
+        }
+
+        private static void writeTo(this ptr<CommandNode> _addr_c, ptr<strings.Builder> _addr_sb)
+        {
+            ref CommandNode c = ref _addr_c.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
             {
                 var arg__prev1 = arg;
 
@@ -324,48 +427,57 @@ namespace template
                     arg = __arg;
                     if (i > 0L)
                     {
-                        s += " ";
+                        sb.WriteByte(' ');
                     }
+
                     {
                         var arg__prev1 = arg;
 
-                        ref PipeNode (arg, ok) = arg._<ref PipeNode>();
+                        ptr<PipeNode> (arg, ok) = arg._<ptr<PipeNode>>();
 
                         if (ok)
                         {
-                            s += "(" + arg.String() + ")";
+                            sb.WriteByte('(');
+                            arg.writeTo(sb);
+                            sb.WriteByte(')');
                             continue;
                         }
 
                         arg = arg__prev1;
 
                     }
-                    s += arg.String();
+
+                    arg.writeTo(sb);
+
                 }
 
                 arg = arg__prev1;
             }
-
-            return s;
         }
 
-        private static ref Tree tree(this ref CommandNode c)
+        private static ptr<Tree> tree(this ptr<CommandNode> _addr_c)
         {
-            return c.tr;
+            ref CommandNode c = ref _addr_c.val;
+
+            return _addr_c.tr!;
         }
 
-        private static Node Copy(this ref CommandNode c)
+        private static Node Copy(this ptr<CommandNode> _addr_c)
         {
+            ref CommandNode c = ref _addr_c.val;
+
             if (c == null)
             {
                 return c;
             }
+
             var n = c.tr.newCommand(c.Pos);
             foreach (var (_, c) in c.Args)
             {
                 n.append(c.Copy());
             }
             return n;
+
         }
 
         // IdentifierNode holds an identifier.
@@ -378,41 +490,60 @@ namespace template
         }
 
         // NewIdentifier returns a new IdentifierNode with the given identifier name.
-        public static ref IdentifierNode NewIdentifier(@string ident)
+        public static ptr<IdentifierNode> NewIdentifier(@string ident)
         {
-            return ref new IdentifierNode(NodeType:NodeIdentifier,Ident:ident);
+            return addr(new IdentifierNode(NodeType:NodeIdentifier,Ident:ident));
         }
 
         // SetPos sets the position. NewIdentifier is a public method so we can't modify its signature.
         // Chained for convenience.
         // TODO: fix one day?
-        private static ref IdentifierNode SetPos(this ref IdentifierNode i, Pos pos)
+        private static ptr<IdentifierNode> SetPos(this ptr<IdentifierNode> _addr_i, Pos pos)
         {
+            ref IdentifierNode i = ref _addr_i.val;
+
             i.Pos = pos;
-            return i;
+            return _addr_i!;
         }
 
         // SetTree sets the parent tree for the node. NewIdentifier is a public method so we can't modify its signature.
         // Chained for convenience.
         // TODO: fix one day?
-        private static ref IdentifierNode SetTree(this ref IdentifierNode i, ref Tree t)
+        private static ptr<IdentifierNode> SetTree(this ptr<IdentifierNode> _addr_i, ptr<Tree> _addr_t)
         {
+            ref IdentifierNode i = ref _addr_i.val;
+            ref Tree t = ref _addr_t.val;
+
             i.tr = t;
-            return i;
+            return _addr_i!;
         }
 
-        private static @string String(this ref IdentifierNode i)
+        private static @string String(this ptr<IdentifierNode> _addr_i)
         {
+            ref IdentifierNode i = ref _addr_i.val;
+
             return i.Ident;
         }
 
-        private static ref Tree tree(this ref IdentifierNode i)
+        private static void writeTo(this ptr<IdentifierNode> _addr_i, ptr<strings.Builder> _addr_sb)
         {
-            return i.tr;
+            ref IdentifierNode i = ref _addr_i.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(i.String());
         }
 
-        private static Node Copy(this ref IdentifierNode i)
+        private static ptr<Tree> tree(this ptr<IdentifierNode> _addr_i)
         {
+            ref IdentifierNode i = ref _addr_i.val;
+
+            return _addr_i.tr!;
+        }
+
+        private static Node Copy(this ptr<IdentifierNode> _addr_i)
+        {
+            ref IdentifierNode i = ref _addr_i.val;
+
             return NewIdentifier(i.Ident).SetTree(i.tr).SetPos(i.Pos);
         }
 
@@ -426,33 +557,52 @@ namespace template
             public slice<@string> Ident; // Variable name and fields in lexical order.
         }
 
-        private static ref VariableNode newVariable(this ref Tree t, Pos pos, @string ident)
+        private static ptr<VariableNode> newVariable(this ptr<Tree> _addr_t, Pos pos, @string ident)
         {
-            return ref new VariableNode(tr:t,NodeType:NodeVariable,Pos:pos,Ident:strings.Split(ident,"."));
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new VariableNode(tr:t,NodeType:NodeVariable,Pos:pos,Ident:strings.Split(ident,".")));
         }
 
-        private static @string String(this ref VariableNode v)
+        private static @string String(this ptr<VariableNode> _addr_v)
         {
-            @string s = "";
+            ref VariableNode v = ref _addr_v.val;
+
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            v.writeTo(_addr_sb);
+            return sb.String();
+        }
+
+        private static void writeTo(this ptr<VariableNode> _addr_v, ptr<strings.Builder> _addr_sb)
+        {
+            ref VariableNode v = ref _addr_v.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
             foreach (var (i, id) in v.Ident)
             {
                 if (i > 0L)
                 {
-                    s += ".";
+                    sb.WriteByte('.');
                 }
-                s += id;
+
+                sb.WriteString(id);
+
             }
-            return s;
+
         }
 
-        private static ref Tree tree(this ref VariableNode v)
+        private static ptr<Tree> tree(this ptr<VariableNode> _addr_v)
         {
-            return v.tr;
+            ref VariableNode v = ref _addr_v.val;
+
+            return _addr_v.tr!;
         }
 
-        private static Node Copy(this ref VariableNode v)
+        private static Node Copy(this ptr<VariableNode> _addr_v)
         {
-            return ref new VariableNode(tr:v.tr,NodeType:NodeVariable,Pos:v.Pos,Ident:append([]string{},v.Ident...));
+            ref VariableNode v = ref _addr_v.val;
+
+            return addr(new VariableNode(tr:v.tr,NodeType:NodeVariable,Pos:v.Pos,Ident:append([]string{},v.Ident...)));
         }
 
         // DotNode holds the special identifier '.'.
@@ -463,31 +613,50 @@ namespace template
             public ptr<Tree> tr;
         }
 
-        private static ref DotNode newDot(this ref Tree t, Pos pos)
+        private static ptr<DotNode> newDot(this ptr<Tree> _addr_t, Pos pos)
         {
-            return ref new DotNode(tr:t,NodeType:NodeDot,Pos:pos);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new DotNode(tr:t,NodeType:NodeDot,Pos:pos));
         }
 
-        private static NodeType Type(this ref DotNode d)
-        { 
+        private static NodeType Type(this ptr<DotNode> _addr_d)
+        {
+            ref DotNode d = ref _addr_d.val;
+ 
             // Override method on embedded NodeType for API compatibility.
             // TODO: Not really a problem; could change API without effect but
             // api tool complains.
             return NodeDot;
+
         }
 
-        private static @string String(this ref DotNode d)
+        private static @string String(this ptr<DotNode> _addr_d)
         {
+            ref DotNode d = ref _addr_d.val;
+
             return ".";
         }
 
-        private static ref Tree tree(this ref DotNode d)
+        private static void writeTo(this ptr<DotNode> _addr_d, ptr<strings.Builder> _addr_sb)
         {
-            return d.tr;
+            ref DotNode d = ref _addr_d.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(d.String());
         }
 
-        private static Node Copy(this ref DotNode d)
+        private static ptr<Tree> tree(this ptr<DotNode> _addr_d)
         {
+            ref DotNode d = ref _addr_d.val;
+
+            return _addr_d.tr!;
+        }
+
+        private static Node Copy(this ptr<DotNode> _addr_d)
+        {
+            ref DotNode d = ref _addr_d.val;
+
             return d.tr.newDot(d.Pos);
         }
 
@@ -499,31 +668,50 @@ namespace template
             public ptr<Tree> tr;
         }
 
-        private static ref NilNode newNil(this ref Tree t, Pos pos)
+        private static ptr<NilNode> newNil(this ptr<Tree> _addr_t, Pos pos)
         {
-            return ref new NilNode(tr:t,NodeType:NodeNil,Pos:pos);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new NilNode(tr:t,NodeType:NodeNil,Pos:pos));
         }
 
-        private static NodeType Type(this ref NilNode n)
-        { 
+        private static NodeType Type(this ptr<NilNode> _addr_n)
+        {
+            ref NilNode n = ref _addr_n.val;
+ 
             // Override method on embedded NodeType for API compatibility.
             // TODO: Not really a problem; could change API without effect but
             // api tool complains.
             return NodeNil;
+
         }
 
-        private static @string String(this ref NilNode n)
+        private static @string String(this ptr<NilNode> _addr_n)
         {
+            ref NilNode n = ref _addr_n.val;
+
             return "nil";
         }
 
-        private static ref Tree tree(this ref NilNode n)
+        private static void writeTo(this ptr<NilNode> _addr_n, ptr<strings.Builder> _addr_sb)
         {
-            return n.tr;
+            ref NilNode n = ref _addr_n.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(n.String());
         }
 
-        private static Node Copy(this ref NilNode n)
+        private static ptr<Tree> tree(this ptr<NilNode> _addr_n)
         {
+            ref NilNode n = ref _addr_n.val;
+
+            return _addr_n.tr!;
+        }
+
+        private static Node Copy(this ptr<NilNode> _addr_n)
+        {
+            ref NilNode n = ref _addr_n.val;
+
             return n.tr.newNil(n.Pos);
         }
 
@@ -538,29 +726,47 @@ namespace template
             public slice<@string> Ident; // The identifiers in lexical order.
         }
 
-        private static ref FieldNode newField(this ref Tree t, Pos pos, @string ident)
+        private static ptr<FieldNode> newField(this ptr<Tree> _addr_t, Pos pos, @string ident)
         {
-            return ref new FieldNode(tr:t,NodeType:NodeField,Pos:pos,Ident:strings.Split(ident[1:],".")); // [1:] to drop leading period
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new FieldNode(tr:t,NodeType:NodeField,Pos:pos,Ident:strings.Split(ident[1:],"."))); // [1:] to drop leading period
         }
 
-        private static @string String(this ref FieldNode f)
+        private static @string String(this ptr<FieldNode> _addr_f)
         {
-            @string s = "";
+            ref FieldNode f = ref _addr_f.val;
+
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            f.writeTo(_addr_sb);
+            return sb.String();
+        }
+
+        private static void writeTo(this ptr<FieldNode> _addr_f, ptr<strings.Builder> _addr_sb)
+        {
+            ref FieldNode f = ref _addr_f.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
             foreach (var (_, id) in f.Ident)
             {
-                s += "." + id;
+                sb.WriteByte('.');
+                sb.WriteString(id);
             }
-            return s;
+
         }
 
-        private static ref Tree tree(this ref FieldNode f)
+        private static ptr<Tree> tree(this ptr<FieldNode> _addr_f)
         {
-            return f.tr;
+            ref FieldNode f = ref _addr_f.val;
+
+            return _addr_f.tr!;
         }
 
-        private static Node Copy(this ref FieldNode f)
+        private static Node Copy(this ptr<FieldNode> _addr_f)
         {
-            return ref new FieldNode(tr:f.tr,NodeType:NodeField,Pos:f.Pos,Ident:append([]string{},f.Ident...));
+            ref FieldNode f = ref _addr_f.val;
+
+            return addr(new FieldNode(tr:f.tr,NodeType:NodeField,Pos:f.Pos,Ident:append([]string{},f.Ident...)));
         }
 
         // ChainNode holds a term followed by a chain of field accesses (identifier starting with '.').
@@ -575,53 +781,83 @@ namespace template
             public slice<@string> Field; // The identifiers in lexical order.
         }
 
-        private static ref ChainNode newChain(this ref Tree t, Pos pos, Node node)
+        private static ptr<ChainNode> newChain(this ptr<Tree> _addr_t, Pos pos, Node node)
         {
-            return ref new ChainNode(tr:t,NodeType:NodeChain,Pos:pos,Node:node);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new ChainNode(tr:t,NodeType:NodeChain,Pos:pos,Node:node));
         }
 
         // Add adds the named field (which should start with a period) to the end of the chain.
-        private static void Add(this ref ChainNode _c, @string field) => func(_c, (ref ChainNode c, Defer _, Panic panic, Recover __) =>
+        private static void Add(this ptr<ChainNode> _addr_c, @string field) => func((_, panic, __) =>
         {
+            ref ChainNode c = ref _addr_c.val;
+
             if (len(field) == 0L || field[0L] != '.')
             {
                 panic("no dot in field");
             }
+
             field = field[1L..]; // Remove leading dot.
             if (field == "")
             {
                 panic("empty field");
             }
+
             c.Field = append(c.Field, field);
+
         });
 
-        private static @string String(this ref ChainNode c)
+        private static @string String(this ptr<ChainNode> _addr_c)
         {
-            var s = c.Node.String();
+            ref ChainNode c = ref _addr_c.val;
+
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            c.writeTo(_addr_sb);
+            return sb.String();
+        }
+
+        private static void writeTo(this ptr<ChainNode> _addr_c, ptr<strings.Builder> _addr_sb)
+        {
+            ref ChainNode c = ref _addr_c.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
             {
-                ref PipeNode (_, ok) = c.Node._<ref PipeNode>();
+                ptr<PipeNode> (_, ok) = c.Node._<ptr<PipeNode>>();
 
                 if (ok)
                 {
-                    s = "(" + s + ")";
+                    sb.WriteByte('(');
+                    c.Node.writeTo(sb);
+                    sb.WriteByte(')');
+                }
+                else
+                {
+                    c.Node.writeTo(sb);
                 }
 
             }
+
             foreach (var (_, field) in c.Field)
             {
-                s += "." + field;
+                sb.WriteByte('.');
+                sb.WriteString(field);
             }
-            return s;
+
         }
 
-        private static ref Tree tree(this ref ChainNode c)
+        private static ptr<Tree> tree(this ptr<ChainNode> _addr_c)
         {
-            return c.tr;
+            ref ChainNode c = ref _addr_c.val;
+
+            return _addr_c.tr!;
         }
 
-        private static Node Copy(this ref ChainNode c)
+        private static Node Copy(this ptr<ChainNode> _addr_c)
         {
-            return ref new ChainNode(tr:c.tr,NodeType:NodeChain,Pos:c.Pos,Node:c.Node,Field:append([]string{},c.Field...));
+            ref ChainNode c = ref _addr_c.val;
+
+            return addr(new ChainNode(tr:c.tr,NodeType:NodeChain,Pos:c.Pos,Node:c.Node,Field:append([]string{},c.Field...)));
         }
 
         // BoolNode holds a boolean constant.
@@ -633,27 +869,45 @@ namespace template
             public bool True; // The value of the boolean constant.
         }
 
-        private static ref BoolNode newBool(this ref Tree t, Pos pos, bool @true)
+        private static ptr<BoolNode> newBool(this ptr<Tree> _addr_t, Pos pos, bool @true)
         {
-            return ref new BoolNode(tr:t,NodeType:NodeBool,Pos:pos,True:true);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new BoolNode(tr:t,NodeType:NodeBool,Pos:pos,True:true));
         }
 
-        private static @string String(this ref BoolNode b)
+        private static @string String(this ptr<BoolNode> _addr_b)
         {
+            ref BoolNode b = ref _addr_b.val;
+
             if (b.True)
             {
                 return "true";
             }
+
             return "false";
+
         }
 
-        private static ref Tree tree(this ref BoolNode b)
+        private static void writeTo(this ptr<BoolNode> _addr_b, ptr<strings.Builder> _addr_sb)
         {
-            return b.tr;
+            ref BoolNode b = ref _addr_b.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(b.String());
         }
 
-        private static Node Copy(this ref BoolNode b)
+        private static ptr<Tree> tree(this ptr<BoolNode> _addr_b)
         {
+            ref BoolNode b = ref _addr_b.val;
+
+            return _addr_b.tr!;
+        }
+
+        private static Node Copy(this ptr<BoolNode> _addr_b)
+        {
+            ref BoolNode b = ref _addr_b.val;
+
             return b.tr.newBool(b.Pos, b.True);
         }
 
@@ -676,41 +930,48 @@ namespace template
             public @string Text; // The original textual representation from the input.
         }
 
-        private static (ref NumberNode, error) newNumber(this ref Tree t, Pos pos, @string text, itemType typ)
+        private static (ptr<NumberNode>, error) newNumber(this ptr<Tree> _addr_t, Pos pos, @string text, itemType typ)
         {
-            NumberNode n = ref new NumberNode(tr:t,NodeType:NodeNumber,Pos:pos,Text:text);
+            ptr<NumberNode> _p0 = default!;
+            error _p0 = default!;
+            ref Tree t = ref _addr_t.val;
+
+            ptr<NumberNode> n = addr(new NumberNode(tr:t,NodeType:NodeNumber,Pos:pos,Text:text));
 
             if (typ == itemCharConstant) 
                 var (rune, _, tail, err) = strconv.UnquoteChar(text[1L..], text[0L]);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
                 if (tail != "'")
                 {
-                    return (null, fmt.Errorf("malformed character constant: %s", text));
+                    return (_addr_null!, error.As(fmt.Errorf("malformed character constant: %s", text))!);
                 }
+
                 n.Int64 = int64(rune);
                 n.IsInt = true;
                 n.Uint64 = uint64(rune);
                 n.IsUint = true;
                 n.Float64 = float64(rune); // odd but those are the rules.
                 n.IsFloat = true;
-                return (n, null);
+                return (_addr_n!, error.As(null!)!);
             else if (typ == itemComplex) 
                 // fmt.Sscan can parse the pair, so let it do the work.
                 {
-                    var (_, err) = fmt.Sscan(text, ref n.Complex128);
+                    var (_, err) = fmt.Sscan(text, _addr_n.Complex128);
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                 }
+
                 n.IsComplex = true;
                 n.simplifyComplex();
-                return (n, null);
+                return (_addr_n!, error.As(null!)!);
             // Imaginary constants can only be complex unless they are zero.
             if (len(text) > 0L && text[len(text) - 1L] == 'i')
             {
@@ -720,8 +981,9 @@ namespace template
                     n.IsComplex = true;
                     n.Complex128 = complex(0L, f);
                     n.simplifyComplex();
-                    return (n, null);
+                    return (_addr_n!, error.As(null!)!);
                 }
+
             } 
             // Do integer test first so we get 0x123 etc.
             var (u, err) = strconv.ParseUint(text, 0L, 64L); // will fail for -0; fixed below.
@@ -730,6 +992,7 @@ namespace template
                 n.IsUint = true;
                 n.Uint64 = u;
             }
+
             var (i, err) = strconv.ParseInt(text, 0L, 64L);
             if (err == null)
             {
@@ -739,7 +1002,9 @@ namespace template
                 {
                     n.IsUint = true; // in case of -0.
                     n.Uint64 = u;
+
                 }
+
             } 
             // If an integer extraction succeeded, promote the float.
             if (n.IsInt)
@@ -759,10 +1024,11 @@ namespace template
                 { 
                     // If we parsed it as a float but it looks like an integer,
                     // it's a huge number too large to fit in an int. Reject it.
-                    if (!strings.ContainsAny(text, ".eE"))
+                    if (!strings.ContainsAny(text, ".eEpP"))
                     {
-                        return (null, fmt.Errorf("integer overflow: %q", text));
+                        return (_addr_null!, error.As(fmt.Errorf("integer overflow: %q", text))!);
                     }
+
                     n.IsFloat = true;
                     n.Float64 = f; 
                     // If a floating-point extraction succeeded, extract the int if needed.
@@ -771,24 +1037,32 @@ namespace template
                         n.IsInt = true;
                         n.Int64 = int64(f);
                     }
+
                     if (!n.IsUint && float64(uint64(f)) == f)
                     {
                         n.IsUint = true;
                         n.Uint64 = uint64(f);
                     }
+
                 }
+
             }
+
             if (!n.IsInt && !n.IsUint && !n.IsFloat)
             {
-                return (null, fmt.Errorf("illegal number syntax: %q", text));
+                return (_addr_null!, error.As(fmt.Errorf("illegal number syntax: %q", text))!);
             }
-            return (n, null);
+
+            return (_addr_n!, error.As(null!)!);
+
         }
 
         // simplifyComplex pulls out any other types that are represented by the complex number.
         // These all require that the imaginary part be zero.
-        private static void simplifyComplex(this ref NumberNode n)
+        private static void simplifyComplex(this ptr<NumberNode> _addr_n)
         {
+            ref NumberNode n = ref _addr_n.val;
+
             n.IsFloat = imag(n.Complex128) == 0L;
             if (n.IsFloat)
             {
@@ -798,29 +1072,47 @@ namespace template
                 {
                     n.Int64 = int64(n.Float64);
                 }
+
                 n.IsUint = float64(uint64(n.Float64)) == n.Float64;
                 if (n.IsUint)
                 {
                     n.Uint64 = uint64(n.Float64);
                 }
+
             }
+
         }
 
-        private static @string String(this ref NumberNode n)
+        private static @string String(this ptr<NumberNode> _addr_n)
         {
+            ref NumberNode n = ref _addr_n.val;
+
             return n.Text;
         }
 
-        private static ref Tree tree(this ref NumberNode n)
+        private static void writeTo(this ptr<NumberNode> _addr_n, ptr<strings.Builder> _addr_sb)
         {
-            return n.tr;
+            ref NumberNode n = ref _addr_n.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(n.String());
         }
 
-        private static Node Copy(this ref NumberNode n)
+        private static ptr<Tree> tree(this ptr<NumberNode> _addr_n)
         {
+            ref NumberNode n = ref _addr_n.val;
+
+            return _addr_n.tr!;
+        }
+
+        private static Node Copy(this ptr<NumberNode> _addr_n)
+        {
+            ref NumberNode n = ref _addr_n.val;
+
             ptr<NumberNode> nn = @new<NumberNode>();
-            nn.Value = n.Value; // Easy, fast, correct.
+            nn.val = n.val; // Easy, fast, correct.
             return nn;
+
         }
 
         // StringNode holds a string constant. The value has been "unquoted".
@@ -833,23 +1125,39 @@ namespace template
             public @string Text; // The string, after quote processing.
         }
 
-        private static ref StringNode newString(this ref Tree t, Pos pos, @string orig, @string text)
+        private static ptr<StringNode> newString(this ptr<Tree> _addr_t, Pos pos, @string orig, @string text)
         {
-            return ref new StringNode(tr:t,NodeType:NodeString,Pos:pos,Quoted:orig,Text:text);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new StringNode(tr:t,NodeType:NodeString,Pos:pos,Quoted:orig,Text:text));
         }
 
-        private static @string String(this ref StringNode s)
+        private static @string String(this ptr<StringNode> _addr_s)
         {
+            ref StringNode s = ref _addr_s.val;
+
             return s.Quoted;
         }
 
-        private static ref Tree tree(this ref StringNode s)
+        private static void writeTo(this ptr<StringNode> _addr_s, ptr<strings.Builder> _addr_sb)
         {
-            return s.tr;
+            ref StringNode s = ref _addr_s.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(s.String());
         }
 
-        private static Node Copy(this ref StringNode s)
+        private static ptr<Tree> tree(this ptr<StringNode> _addr_s)
         {
+            ref StringNode s = ref _addr_s.val;
+
+            return _addr_s.tr!;
+        }
+
+        private static Node Copy(this ptr<StringNode> _addr_s)
+        {
+            ref StringNode s = ref _addr_s.val;
+
             return s.tr.newString(s.Pos, s.Quoted, s.Text);
         }
 
@@ -862,23 +1170,39 @@ namespace template
             public ptr<Tree> tr;
         }
 
-        private static ref endNode newEnd(this ref Tree t, Pos pos)
+        private static ptr<endNode> newEnd(this ptr<Tree> _addr_t, Pos pos)
         {
-            return ref new endNode(tr:t,NodeType:nodeEnd,Pos:pos);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new endNode(tr:t,NodeType:nodeEnd,Pos:pos));
         }
 
-        private static @string String(this ref endNode e)
+        private static @string String(this ptr<endNode> _addr_e)
         {
+            ref endNode e = ref _addr_e.val;
+
             return "{{end}}";
         }
 
-        private static ref Tree tree(this ref endNode e)
+        private static void writeTo(this ptr<endNode> _addr_e, ptr<strings.Builder> _addr_sb)
         {
-            return e.tr;
+            ref endNode e = ref _addr_e.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(e.String());
         }
 
-        private static Node Copy(this ref endNode e)
+        private static ptr<Tree> tree(this ptr<endNode> _addr_e)
         {
+            ref endNode e = ref _addr_e.val;
+
+            return _addr_e.tr!;
+        }
+
+        private static Node Copy(this ptr<endNode> _addr_e)
+        {
+            ref endNode e = ref _addr_e.val;
+
             return e.tr.newEnd(e.Pos);
         }
 
@@ -891,28 +1215,46 @@ namespace template
             public long Line; // The line number in the input. Deprecated: Kept for compatibility.
         }
 
-        private static ref elseNode newElse(this ref Tree t, Pos pos, long line)
+        private static ptr<elseNode> newElse(this ptr<Tree> _addr_t, Pos pos, long line)
         {
-            return ref new elseNode(tr:t,NodeType:nodeElse,Pos:pos,Line:line);
+            ref Tree t = ref _addr_t.val;
+
+            return addr(new elseNode(tr:t,NodeType:nodeElse,Pos:pos,Line:line));
         }
 
-        private static NodeType Type(this ref elseNode e)
+        private static NodeType Type(this ptr<elseNode> _addr_e)
         {
+            ref elseNode e = ref _addr_e.val;
+
             return nodeElse;
         }
 
-        private static @string String(this ref elseNode e)
+        private static @string String(this ptr<elseNode> _addr_e)
         {
+            ref elseNode e = ref _addr_e.val;
+
             return "{{else}}";
         }
 
-        private static ref Tree tree(this ref elseNode e)
+        private static void writeTo(this ptr<elseNode> _addr_e, ptr<strings.Builder> _addr_sb)
         {
-            return e.tr;
+            ref elseNode e = ref _addr_e.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString(e.String());
         }
 
-        private static Node Copy(this ref elseNode e)
+        private static ptr<Tree> tree(this ptr<elseNode> _addr_e)
         {
+            ref elseNode e = ref _addr_e.val;
+
+            return _addr_e.tr!;
+        }
+
+        private static Node Copy(this ptr<elseNode> _addr_e)
+        {
+            ref elseNode e = ref _addr_e.val;
+
             return e.tr.newElse(e.Pos, e.Line);
         }
 
@@ -928,8 +1270,20 @@ namespace template
             public ptr<ListNode> ElseList; // What to execute if the value is empty (nil if absent).
         }
 
-        private static @string String(this ref BranchNode _b) => func(_b, (ref BranchNode b, Defer _, Panic panic, Recover __) =>
+        private static @string String(this ptr<BranchNode> _addr_b)
         {
+            ref BranchNode b = ref _addr_b.val;
+
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            b.writeTo(_addr_sb);
+            return sb.String();
+        }
+
+        private static void writeTo(this ptr<BranchNode> _addr_b, ptr<strings.Builder> _addr_sb) => func((_, panic, __) =>
+        {
+            ref BranchNode b = ref _addr_b.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
             @string name = "";
 
             if (b.NodeType == NodeIf) 
@@ -940,20 +1294,33 @@ namespace template
                 name = "with";
             else 
                 panic("unknown branch type");
-                        if (b.ElseList != null)
+                        sb.WriteString("{{");
+            sb.WriteString(name);
+            sb.WriteByte(' ');
+            b.Pipe.writeTo(sb);
+            sb.WriteString("}}");
+            b.List.writeTo(sb);
+            if (b.ElseList != null)
             {
-                return fmt.Sprintf("{{%s %s}}%s{{else}}%s{{end}}", name, b.Pipe, b.List, b.ElseList);
+                sb.WriteString("{{else}}");
+                b.ElseList.writeTo(sb);
             }
-            return fmt.Sprintf("{{%s %s}}%s{{end}}", name, b.Pipe, b.List);
+
+            sb.WriteString("{{end}}");
+
         });
 
-        private static ref Tree tree(this ref BranchNode b)
+        private static ptr<Tree> tree(this ptr<BranchNode> _addr_b)
         {
-            return b.tr;
+            ref BranchNode b = ref _addr_b.val;
+
+            return _addr_b.tr!;
         }
 
-        private static Node Copy(this ref BranchNode _b) => func(_b, (ref BranchNode b, Defer _, Panic panic, Recover __) =>
+        private static Node Copy(this ptr<BranchNode> _addr_b) => func((_, panic, __) =>
         {
+            ref BranchNode b = ref _addr_b.val;
+
 
             if (b.NodeType == NodeIf) 
                 return b.tr.newIf(b.Pos, b.Line, b.Pipe, b.List, b.ElseList);
@@ -963,7 +1330,8 @@ namespace template
                 return b.tr.newWith(b.Pos, b.Line, b.Pipe, b.List, b.ElseList);
             else 
                 panic("unknown branch type");
-                    });
+            
+        });
 
         // IfNode represents an {{if}} action and its commands.
         public partial struct IfNode
@@ -971,13 +1339,20 @@ namespace template
             public ref BranchNode BranchNode => ref BranchNode_val;
         }
 
-        private static ref IfNode newIf(this ref Tree t, Pos pos, long line, ref PipeNode pipe, ref ListNode list, ref ListNode elseList)
+        private static ptr<IfNode> newIf(this ptr<Tree> _addr_t, Pos pos, long line, ptr<PipeNode> _addr_pipe, ptr<ListNode> _addr_list, ptr<ListNode> _addr_elseList)
         {
-            return ref new IfNode(BranchNode{tr:t,NodeType:NodeIf,Pos:pos,Line:line,Pipe:pipe,List:list,ElseList:elseList});
+            ref Tree t = ref _addr_t.val;
+            ref PipeNode pipe = ref _addr_pipe.val;
+            ref ListNode list = ref _addr_list.val;
+            ref ListNode elseList = ref _addr_elseList.val;
+
+            return addr(new IfNode(BranchNode{tr:t,NodeType:NodeIf,Pos:pos,Line:line,Pipe:pipe,List:list,ElseList:elseList}));
         }
 
-        private static Node Copy(this ref IfNode i)
+        private static Node Copy(this ptr<IfNode> _addr_i)
         {
+            ref IfNode i = ref _addr_i.val;
+
             return i.tr.newIf(i.Pos, i.Line, i.Pipe.CopyPipe(), i.List.CopyList(), i.ElseList.CopyList());
         }
 
@@ -987,13 +1362,20 @@ namespace template
             public ref BranchNode BranchNode => ref BranchNode_val;
         }
 
-        private static ref RangeNode newRange(this ref Tree t, Pos pos, long line, ref PipeNode pipe, ref ListNode list, ref ListNode elseList)
+        private static ptr<RangeNode> newRange(this ptr<Tree> _addr_t, Pos pos, long line, ptr<PipeNode> _addr_pipe, ptr<ListNode> _addr_list, ptr<ListNode> _addr_elseList)
         {
-            return ref new RangeNode(BranchNode{tr:t,NodeType:NodeRange,Pos:pos,Line:line,Pipe:pipe,List:list,ElseList:elseList});
+            ref Tree t = ref _addr_t.val;
+            ref PipeNode pipe = ref _addr_pipe.val;
+            ref ListNode list = ref _addr_list.val;
+            ref ListNode elseList = ref _addr_elseList.val;
+
+            return addr(new RangeNode(BranchNode{tr:t,NodeType:NodeRange,Pos:pos,Line:line,Pipe:pipe,List:list,ElseList:elseList}));
         }
 
-        private static Node Copy(this ref RangeNode r)
+        private static Node Copy(this ptr<RangeNode> _addr_r)
         {
+            ref RangeNode r = ref _addr_r.val;
+
             return r.tr.newRange(r.Pos, r.Line, r.Pipe.CopyPipe(), r.List.CopyList(), r.ElseList.CopyList());
         }
 
@@ -1003,13 +1385,20 @@ namespace template
             public ref BranchNode BranchNode => ref BranchNode_val;
         }
 
-        private static ref WithNode newWith(this ref Tree t, Pos pos, long line, ref PipeNode pipe, ref ListNode list, ref ListNode elseList)
+        private static ptr<WithNode> newWith(this ptr<Tree> _addr_t, Pos pos, long line, ptr<PipeNode> _addr_pipe, ptr<ListNode> _addr_list, ptr<ListNode> _addr_elseList)
         {
-            return ref new WithNode(BranchNode{tr:t,NodeType:NodeWith,Pos:pos,Line:line,Pipe:pipe,List:list,ElseList:elseList});
+            ref Tree t = ref _addr_t.val;
+            ref PipeNode pipe = ref _addr_pipe.val;
+            ref ListNode list = ref _addr_list.val;
+            ref ListNode elseList = ref _addr_elseList.val;
+
+            return addr(new WithNode(BranchNode{tr:t,NodeType:NodeWith,Pos:pos,Line:line,Pipe:pipe,List:list,ElseList:elseList}));
         }
 
-        private static Node Copy(this ref WithNode w)
+        private static Node Copy(this ptr<WithNode> _addr_w)
         {
+            ref WithNode w = ref _addr_w.val;
+
             return w.tr.newWith(w.Pos, w.Line, w.Pipe.CopyPipe(), w.List.CopyList(), w.ElseList.CopyList());
         }
 
@@ -1024,27 +1413,51 @@ namespace template
             public ptr<PipeNode> Pipe; // The command to evaluate as dot for the template.
         }
 
-        private static ref TemplateNode newTemplate(this ref Tree t, Pos pos, long line, @string name, ref PipeNode pipe)
+        private static ptr<TemplateNode> newTemplate(this ptr<Tree> _addr_t, Pos pos, long line, @string name, ptr<PipeNode> _addr_pipe)
         {
-            return ref new TemplateNode(tr:t,NodeType:NodeTemplate,Pos:pos,Line:line,Name:name,Pipe:pipe);
+            ref Tree t = ref _addr_t.val;
+            ref PipeNode pipe = ref _addr_pipe.val;
+
+            return addr(new TemplateNode(tr:t,NodeType:NodeTemplate,Pos:pos,Line:line,Name:name,Pipe:pipe));
         }
 
-        private static @string String(this ref TemplateNode t)
+        private static @string String(this ptr<TemplateNode> _addr_t)
         {
-            if (t.Pipe == null)
+            ref TemplateNode t = ref _addr_t.val;
+
+            ref strings.Builder sb = ref heap(out ptr<strings.Builder> _addr_sb);
+            t.writeTo(_addr_sb);
+            return sb.String();
+        }
+
+        private static void writeTo(this ptr<TemplateNode> _addr_t, ptr<strings.Builder> _addr_sb)
+        {
+            ref TemplateNode t = ref _addr_t.val;
+            ref strings.Builder sb = ref _addr_sb.val;
+
+            sb.WriteString("{{template ");
+            sb.WriteString(strconv.Quote(t.Name));
+            if (t.Pipe != null)
             {
-                return fmt.Sprintf("{{template %q}}", t.Name);
+                sb.WriteByte(' ');
+                t.Pipe.writeTo(sb);
             }
-            return fmt.Sprintf("{{template %q %s}}", t.Name, t.Pipe);
+
+            sb.WriteString("}}");
+
         }
 
-        private static ref Tree tree(this ref TemplateNode t)
+        private static ptr<Tree> tree(this ptr<TemplateNode> _addr_t)
         {
-            return t.tr;
+            ref TemplateNode t = ref _addr_t.val;
+
+            return _addr_t.tr!;
         }
 
-        private static Node Copy(this ref TemplateNode t)
+        private static Node Copy(this ptr<TemplateNode> _addr_t)
         {
+            ref TemplateNode t = ref _addr_t.val;
+
             return t.tr.newTemplate(t.Pos, t.Line, t.Name, t.Pipe.CopyPipe());
         }
     }

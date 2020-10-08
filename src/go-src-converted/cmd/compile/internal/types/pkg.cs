@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:53:13 UTC
+// package types -- go2cs converted at 2020 October 08 04:09:47 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Go\src\cmd\compile\internal\types\pkg.go
 using obj = go.cmd.@internal.obj_package;
@@ -21,23 +21,32 @@ namespace @internal
     public static partial class types_package
     {
         // pkgMap maps a package path to a package.
-        private static var pkgMap = make_map<@string, ref Pkg>();
+        private static var pkgMap = make_map<@string, ptr<Pkg>>();
+
+        // MaxPkgHeight is a height greater than any likely package height.
+        public static readonly float MaxPkgHeight = (float)1e9F;
+
+
 
         public partial struct Pkg
         {
             public @string Path; // string literal used in import statement, e.g. "runtime/internal/sys"
             public @string Name; // package name, e.g. "sys"
-            public ptr<obj.LSym> Pathsym;
             public @string Prefix; // escaped path for use in symbol table
+            public map<@string, ptr<Sym>> Syms;
+            public ptr<obj.LSym> Pathsym; // Height is the package's height in the import graph. Leaf
+// packages (i.e., packages with no imports) have height 0,
+// and all other packages have height 1 plus the maximum
+// height of their imported packages.
+            public long Height;
             public bool Imported; // export data of this package was parsed
             public bool Direct; // imported directly
-            public map<@string, ref Sym> Syms;
         }
 
         // NewPkg returns a new Pkg for the given package path and name.
         // Unless name is the empty string, if the package exists already,
         // the existing package name and the provided name must match.
-        public static ref Pkg NewPkg(@string path, @string name) => func((_, panic, __) =>
+        public static ptr<Pkg> NewPkg(@string path, @string name) => func((_, panic, __) =>
         {
             {
                 var p__prev1 = p;
@@ -50,40 +59,46 @@ namespace @internal
                     {
                         panic(fmt.Sprintf("conflicting package names %s and %s for path %q", p.Name, name, path));
                     }
-                    return p;
+
+                    return _addr_p!;
+
                 }
 
                 p = p__prev1;
 
             }
 
+
             p = @new<Pkg>();
             p.Path = path;
             p.Name = name;
             p.Prefix = objabi.PathToPrefix(path);
-            p.Syms = make_map<@string, ref Sym>();
+            p.Syms = make_map<@string, ptr<Sym>>();
             pkgMap[path] = p;
 
-            return p;
+            return _addr_p!;
+
         });
 
         // ImportedPkgList returns the list of directly imported packages.
         // The list is sorted by package path.
-        public static slice<ref Pkg> ImportedPkgList()
+        public static slice<ptr<Pkg>> ImportedPkgList()
         {
-            slice<ref Pkg> list = default;
+            slice<ptr<Pkg>> list = default;
             foreach (var (_, p) in pkgMap)
             {
                 if (p.Direct)
                 {
                     list = append(list, p);
                 }
+
             }
             sort.Sort(byPath(list));
             return list;
+
         }
 
-        private partial struct byPath // : slice<ref Pkg>
+        private partial struct byPath // : slice<ptr<Pkg>>
         {
         }
 
@@ -99,64 +114,79 @@ namespace @internal
         {
             a[i] = a[j];
             a[j] = a[i];
-
         }
 
-        private static Pkg nopkg = ref new Pkg(Syms:make(map[string]*Sym),);
+        private static ptr<Pkg> nopkg = addr(new Pkg(Syms:make(map[string]*Sym),));
 
-        private static ref Sym Lookup(this ref Pkg pkg, @string name)
+        private static ptr<Sym> Lookup(this ptr<Pkg> _addr_pkg, @string name)
         {
+            ref Pkg pkg = ref _addr_pkg.val;
+
             var (s, _) = pkg.LookupOK(name);
-            return s;
+            return _addr_s!;
         }
 
-        public static slice<ref Sym> InitSyms = default;
+        // List of .inittask entries in imported packages, in source code order.
+        public static slice<ptr<Sym>> InitSyms = default;
 
         // LookupOK looks up name in pkg and reports whether it previously existed.
-        private static (ref Sym, bool) LookupOK(this ref Pkg pkg, @string name)
-        { 
+        private static (ptr<Sym>, bool) LookupOK(this ptr<Pkg> _addr_pkg, @string name)
+        {
+            ptr<Sym> s = default!;
+            bool existed = default;
+            ref Pkg pkg = ref _addr_pkg.val;
+ 
             // TODO(gri) remove this check in favor of specialized lookup
             if (pkg == null)
             {
                 pkg = nopkg;
             }
+
             {
                 var s = pkg.Syms[name];
 
                 if (s != null)
                 {
-                    return (s, true);
+                    return (_addr_s!, true);
                 }
 
             }
 
-            s = ref new Sym(Name:name,Pkg:pkg,);
-            if (name == "init")
+
+            s = addr(new Sym(Name:name,Pkg:pkg,));
+            if (name == ".inittask")
             {
                 InitSyms = append(InitSyms, s);
             }
+
             pkg.Syms[name] = s;
-            return (s, false);
+            return (_addr_s!, false);
+
         }
 
-        private static ref Sym LookupBytes(this ref Pkg pkg, slice<byte> name)
-        { 
+        private static ptr<Sym> LookupBytes(this ptr<Pkg> _addr_pkg, slice<byte> name)
+        {
+            ref Pkg pkg = ref _addr_pkg.val;
+ 
             // TODO(gri) remove this check in favor of specialized lookup
             if (pkg == null)
             {
                 pkg = nopkg;
             }
+
             {
                 var s = pkg.Syms[string(name)];
 
                 if (s != null)
                 {
-                    return s;
+                    return _addr_s!;
                 }
 
             }
+
             var str = InternString(name);
-            return pkg.Lookup(str);
+            return _addr_pkg.Lookup(str)!;
+
         }
 
         private static sync.Mutex internedStringsmu = default;        private static map internedStrings = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{};
@@ -170,16 +200,18 @@ namespace @internal
                 s = string(b);
                 internedStrings[s] = s;
             }
+
             internedStringsmu.Unlock();
             return s;
+
         }
 
-        // CleanroomDo invokes f in an environment with with no preexisting packages.
+        // CleanroomDo invokes f in an environment with no preexisting packages.
         // For testing of import/export only.
         public static void CleanroomDo(Action f)
         {
             var saved = pkgMap;
-            pkgMap = make_map<@string, ref Pkg>();
+            pkgMap = make_map<@string, ptr<Pkg>>();
             f();
             pkgMap = saved;
         }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xml -- go2cs converted at 2020 August 29 08:36:00 UTC
+// package xml -- go2cs converted at 2020 October 08 03:42:59 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Go\src\encoding\xml\marshal.go
 using bufio = go.bufio_package;
@@ -24,7 +24,8 @@ namespace encoding
         // Header is a generic XML header suitable for use with the output of Marshal.
         // This is not automatically added to any output of this package,
         // it is provided as a convenience.
-        public static readonly @string Header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n";
+        public static readonly @string Header = (@string)"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n";
+
 
         // Marshal returns the XML encoding of v.
         //
@@ -65,6 +66,10 @@ namespace encoding
         //       string of length zero.
         //     - an anonymous struct field is handled as if the fields of its
         //       value were part of the outer struct.
+        //     - a field implementing Marshaler is written by calling its MarshalXML
+        //       method.
+        //     - a field implementing encoding.TextMarshaler is written by encoding the
+        //       result of its MarshalText method as text.
         //
         // If a field uses a tag "a>b>c", then the element c will be nested inside
         // parent elements a and b. Fields that appear next to each other that name
@@ -78,17 +83,22 @@ namespace encoding
         // Marshal will return an error if asked to marshal a channel, function, or map.
         public static (slice<byte>, error) Marshal(object v)
         {
-            bytes.Buffer b = default;
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
             {
-                var err = NewEncoder(ref b).Encode(v);
+                var err = NewEncoder(_addr_b).Encode(v);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
             }
-            return (b.Bytes(), null);
+
+            return (b.Bytes(), error.As(null!)!);
+
         }
 
         // Marshaler is the interface implemented by objects that can marshal
@@ -109,7 +119,7 @@ namespace encoding
         // XML elements.
         public partial interface Marshaler
         {
-            error MarshalXML(ref Encoder e, StartElement start);
+            error MarshalXML(ptr<Encoder> e, StartElement start);
         }
 
         // MarshalerAttr is the interface implemented by objects that can marshal
@@ -133,19 +143,24 @@ namespace encoding
         // copies of indent according to the nesting depth.
         public static (slice<byte>, error) MarshalIndent(object v, @string prefix, @string indent)
         {
-            bytes.Buffer b = default;
-            var enc = NewEncoder(ref b);
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
+            var enc = NewEncoder(_addr_b);
             enc.Indent(prefix, indent);
             {
                 var err = enc.Encode(v);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
             }
-            return (b.Bytes(), null);
+
+            return (b.Bytes(), error.As(null!)!);
+
         }
 
         // An Encoder writes XML data to an output stream.
@@ -155,18 +170,20 @@ namespace encoding
         }
 
         // NewEncoder returns a new encoder that writes to w.
-        public static ref Encoder NewEncoder(io.Writer w)
+        public static ptr<Encoder> NewEncoder(io.Writer w)
         {
-            Encoder e = ref new Encoder(printer{Writer:bufio.NewWriter(w)});
+            ptr<Encoder> e = addr(new Encoder(printer{Writer:bufio.NewWriter(w)}));
             e.p.encoder = e;
-            return e;
+            return _addr_e!;
         }
 
         // Indent sets the encoder to generate XML in which each element
         // begins on a new indented line that starts with prefix and is followed by
         // one or more copies of indent according to the nesting depth.
-        private static void Indent(this ref Encoder enc, @string prefix, @string indent)
+        private static void Indent(this ptr<Encoder> _addr_enc, @string prefix, @string indent)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             enc.p.prefix = prefix;
             enc.p.indent = indent;
         }
@@ -177,14 +194,18 @@ namespace encoding
         // of Go values to XML.
         //
         // Encode calls Flush before returning.
-        private static error Encode(this ref Encoder enc, object v)
+        private static error Encode(this ptr<Encoder> _addr_enc, object v)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             var err = enc.p.marshalValue(reflect.ValueOf(v), null, null);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(enc.p.Flush());
+
+            return error.As(enc.p.Flush())!;
+
         }
 
         // EncodeElement writes the XML encoding of v to the stream,
@@ -194,14 +215,18 @@ namespace encoding
         // of Go values to XML.
         //
         // EncodeElement calls Flush before returning.
-        private static error EncodeElement(this ref Encoder enc, object v, StartElement start)
+        private static error EncodeElement(this ptr<Encoder> _addr_enc, object v, StartElement start)
         {
-            var err = enc.p.marshalValue(reflect.ValueOf(v), null, ref start);
+            ref Encoder enc = ref _addr_enc.val;
+
+            var err = enc.p.marshalValue(reflect.ValueOf(v), null, _addr_start);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(enc.p.Flush());
+
+            return error.As(enc.p.Flush())!;
+
         }
 
         private static slice<byte> begComment = (slice<byte>)"<!--";        private static slice<byte> endComment = (slice<byte>)"-->";        private static slice<byte> endProcInst = (slice<byte>)"?>";
@@ -218,25 +243,28 @@ namespace encoding
         //
         // EncodeToken allows writing a ProcInst with Target set to "xml" only as the first token
         // in the stream.
-        private static error EncodeToken(this ref Encoder enc, Token t)
+        private static error EncodeToken(this ptr<Encoder> _addr_enc, Token t)
         {
-            var p = ref enc.p;
+            ref Encoder enc = ref _addr_enc.val;
+
+            var p = _addr_enc.p;
             switch (t.type())
             {
                 case StartElement t:
                     {
                         var err__prev1 = err;
 
-                        var err = p.writeStart(ref t);
+                        var err = p.writeStart(_addr_t);
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                         err = err__prev1;
 
                     }
+
                     break;
                 case EndElement t:
                     {
@@ -246,12 +274,13 @@ namespace encoding
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                         err = err__prev1;
 
                     }
+
                     break;
                 case CharData t:
                     escapeText(p, t, false);
@@ -259,26 +288,30 @@ namespace encoding
                 case Comment t:
                     if (bytes.Contains(t, endComment))
                     {
-                        return error.As(fmt.Errorf("xml: EncodeToken of Comment containing --> marker"));
+                        return error.As(fmt.Errorf("xml: EncodeToken of Comment containing --> marker"))!;
                     }
+
                     p.WriteString("<!--");
                     p.Write(t);
                     p.WriteString("-->");
-                    return error.As(p.cachedWriteError());
+                    return error.As(p.cachedWriteError())!;
                     break;
                 case ProcInst t:
                     if (t.Target == "xml" && p.Buffered() != 0L)
                     {
-                        return error.As(fmt.Errorf("xml: EncodeToken of ProcInst xml target only valid for xml declaration, first token encoded"));
+                        return error.As(fmt.Errorf("xml: EncodeToken of ProcInst xml target only valid for xml declaration, first token encoded"))!;
                     }
+
                     if (!isNameString(t.Target))
                     {
-                        return error.As(fmt.Errorf("xml: EncodeToken of ProcInst with invalid Target"));
+                        return error.As(fmt.Errorf("xml: EncodeToken of ProcInst with invalid Target"))!;
                     }
+
                     if (bytes.Contains(t.Inst, endProcInst))
                     {
-                        return error.As(fmt.Errorf("xml: EncodeToken of ProcInst containing ?> marker"));
+                        return error.As(fmt.Errorf("xml: EncodeToken of ProcInst containing ?> marker"))!;
                     }
+
                     p.WriteString("<?");
                     p.WriteString(t.Target);
                     if (len(t.Inst) > 0L)
@@ -286,13 +319,15 @@ namespace encoding
                         p.WriteByte(' ');
                         p.Write(t.Inst);
                     }
+
                     p.WriteString("?>");
                     break;
                 case Directive t:
                     if (!isValidDirective(t))
                     {
-                        return error.As(fmt.Errorf("xml: EncodeToken of Directive containing wrong < or > markers"));
+                        return error.As(fmt.Errorf("xml: EncodeToken of Directive containing wrong < or > markers"))!;
                     }
+
                     p.WriteString("<!");
                     p.Write(t);
                     p.WriteString(">");
@@ -300,11 +335,12 @@ namespace encoding
                 default:
                 {
                     var t = t.type();
-                    return error.As(fmt.Errorf("xml: EncodeToken of invalid token type"));
+                    return error.As(fmt.Errorf("xml: EncodeToken of invalid token type"))!;
                     break;
                 }
             }
-            return error.As(p.cachedWriteError());
+            return error.As(p.cachedWriteError())!;
+
         }
 
         // isValidDirective reports whether dir is a valid directive text,
@@ -327,6 +363,7 @@ namespace encoding
                             }
 
                         }
+
                     } 
                     // Just ignore anything in comment
                 else if (inquote != 0L) 
@@ -346,26 +383,32 @@ namespace encoding
                     {
                         depth++;
                     }
+
                 else if (c == '>') 
                     if (depth == 0L)
                     {
                         return false;
                     }
+
                     depth--;
-                            }
+                
+            }
             return depth == 0L && inquote == 0L && !incomment;
+
         }
 
         // Flush flushes any buffered XML to the underlying writer.
         // See the EncodeToken documentation for details about when it is necessary.
-        private static error Flush(this ref Encoder enc)
+        private static error Flush(this ptr<Encoder> _addr_enc)
         {
-            return error.As(enc.p.Flush());
+            ref Encoder enc = ref _addr_enc.val;
+
+            return error.As(enc.p.Flush())!;
         }
 
         private partial struct printer
         {
-            public ref bufio.Writer Writer => ref Writer_ptr;
+            public ref ptr<bufio.Writer> Writer> => ref Writer>_ptr;
             public ptr<Encoder> encoder;
             public long seq;
             public @string indent;
@@ -381,8 +424,10 @@ namespace encoding
 
         // createAttrPrefix finds the name space prefix attribute to use for the given name space,
         // defining a new prefix if necessary. It returns the prefix.
-        private static @string createAttrPrefix(this ref printer p, @string url)
+        private static @string createAttrPrefix(this ptr<printer> _addr_p, @string url)
         {
+            ref printer p = ref _addr_p.val;
+
             {
                 var prefix__prev1 = prefix;
 
@@ -430,15 +475,19 @@ namespace encoding
                 }
 
             }
+
             if (prefix == "" || !isName((slice<byte>)prefix) || strings.Contains(prefix, ":"))
             {
                 prefix = "_";
             }
+
             if (strings.HasPrefix(prefix, "xml"))
             { 
                 // xmlanything is reserved.
                 prefix = "_" + prefix;
+
             }
+
             if (p.attrNS[prefix] != "")
             { 
                 // Name is taken. Find a better one.
@@ -457,9 +506,12 @@ namespace encoding
                         }
 
                     }
+
                 }
 
+
             }
+
             p.attrPrefix[url] = prefix;
             p.attrNS[prefix] = url;
 
@@ -472,22 +524,29 @@ namespace encoding
             p.prefixes = append(p.prefixes, prefix);
 
             return prefix;
+
         }
 
         // deleteAttrPrefix removes an attribute name space prefix.
-        private static void deleteAttrPrefix(this ref printer p, @string prefix)
+        private static void deleteAttrPrefix(this ptr<printer> _addr_p, @string prefix)
         {
+            ref printer p = ref _addr_p.val;
+
             delete(p.attrPrefix, p.attrNS[prefix]);
             delete(p.attrNS, prefix);
         }
 
-        private static void markPrefix(this ref printer p)
+        private static void markPrefix(this ptr<printer> _addr_p)
         {
+            ref printer p = ref _addr_p.val;
+
             p.prefixes = append(p.prefixes, "");
         }
 
-        private static void popPrefix(this ref printer p)
+        private static void popPrefix(this ptr<printer> _addr_p)
         {
+            ref printer p = ref _addr_p.val;
+
             while (len(p.prefixes) > 0L)
             {
                 var prefix = p.prefixes[len(p.prefixes) - 1L];
@@ -496,28 +555,37 @@ namespace encoding
                 {
                     break;
                 }
+
                 p.deleteAttrPrefix(prefix);
+
             }
+
 
         }
 
-        private static var marshalerType = reflect.TypeOf((Marshaler.Value)(null)).Elem();        private static var marshalerAttrType = reflect.TypeOf((MarshalerAttr.Value)(null)).Elem();        private static var textMarshalerType = reflect.TypeOf((encoding.TextMarshaler.Value)(null)).Elem();
+        private static var marshalerType = reflect.TypeOf((Marshaler.val)(null)).Elem();        private static var marshalerAttrType = reflect.TypeOf((MarshalerAttr.val)(null)).Elem();        private static var textMarshalerType = reflect.TypeOf((encoding.TextMarshaler.val)(null)).Elem();
 
         // marshalValue writes one or more XML elements representing val.
         // If val was obtained from a struct field, finfo must have its details.
-        private static error marshalValue(this ref printer p, reflect.Value val, ref fieldInfo finfo, ref StartElement startTemplate)
+        private static error marshalValue(this ptr<printer> _addr_p, reflect.Value val, ptr<fieldInfo> _addr_finfo, ptr<StartElement> _addr_startTemplate)
         {
+            ref printer p = ref _addr_p.val;
+            ref fieldInfo finfo = ref _addr_finfo.val;
+            ref StartElement startTemplate = ref _addr_startTemplate.val;
+
             if (startTemplate != null && startTemplate.Name.Local == "")
             {
-                return error.As(fmt.Errorf("xml: EncodeElement of StartElement with missing name"));
+                return error.As(fmt.Errorf("xml: EncodeElement of StartElement with missing name"))!;
             }
+
             if (!val.IsValid())
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             if (finfo != null && finfo.flags & fOmitEmpty != 0L && isEmptyValue(val))
             {
-                return error.As(null);
+                return error.As(null!)!;
             } 
 
             // Drill into interfaces and pointers.
@@ -527,9 +595,11 @@ namespace encoding
             {
                 if (val.IsNil())
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
                 val = val.Elem();
+
             }
 
 
@@ -539,29 +609,33 @@ namespace encoding
             // Check for marshaler.
             if (val.CanInterface() && typ.Implements(marshalerType))
             {
-                return error.As(p.marshalInterface(val.Interface()._<Marshaler>(), defaultStart(typ, finfo, startTemplate)));
+                return error.As(p.marshalInterface(val.Interface()._<Marshaler>(), defaultStart(typ, _addr_finfo, _addr_startTemplate)))!;
             }
+
             if (val.CanAddr())
             {
                 var pv = val.Addr();
                 if (pv.CanInterface() && pv.Type().Implements(marshalerType))
                 {
-                    return error.As(p.marshalInterface(pv.Interface()._<Marshaler>(), defaultStart(pv.Type(), finfo, startTemplate)));
+                    return error.As(p.marshalInterface(pv.Interface()._<Marshaler>(), defaultStart(pv.Type(), _addr_finfo, _addr_startTemplate)))!;
                 }
+
             } 
 
             // Check for text marshaler.
             if (val.CanInterface() && typ.Implements(textMarshalerType))
             {
-                return error.As(p.marshalTextInterface(val.Interface()._<encoding.TextMarshaler>(), defaultStart(typ, finfo, startTemplate)));
+                return error.As(p.marshalTextInterface(val.Interface()._<encoding.TextMarshaler>(), defaultStart(typ, _addr_finfo, _addr_startTemplate)))!;
             }
+
             if (val.CanAddr())
             {
                 pv = val.Addr();
                 if (pv.CanInterface() && pv.Type().Implements(textMarshalerType))
                 {
-                    return error.As(p.marshalTextInterface(pv.Interface()._<encoding.TextMarshaler>(), defaultStart(pv.Type(), finfo, startTemplate)));
+                    return error.As(p.marshalTextInterface(pv.Interface()._<encoding.TextMarshaler>(), defaultStart(pv.Type(), _addr_finfo, _addr_startTemplate)))!;
                 }
+
             } 
 
             // Slices and arrays iterate over the elements. They do not have an enclosing tag.
@@ -580,23 +654,26 @@ namespace encoding
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev2;
 
                         }
+
                     }
 
 
                     i = i__prev1;
                 }
-                return error.As(null);
+                return error.As(null!)!;
+
             }
+
             var (tinfo, err) = getTypeInfo(typ);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             } 
 
             // Create start element.
@@ -605,7 +682,7 @@ namespace encoding
             // 1. XMLName field in underlying struct;
             // 2. field name/tag in the struct field; and
             // 3. type name
-            StartElement start = default;
+            ref StartElement start = ref heap(out ptr<StartElement> _addr_start);
 
             if (startTemplate != null)
             {
@@ -619,30 +696,42 @@ namespace encoding
                 {
                     start.Name.Space = xmlname.xmlns;
                     start.Name.Local = xmlname.name;
-                }                {
-                    Name (v, ok) = xmlname.value(val).Interface()._<Name>();
 
-
-                    else if (ok && v.Local != "")
+                }
+                else
+                {
+                    var fv = xmlname.value(val, dontInitNilPointers);
                     {
-                        start.Name = v;
+                        Name (v, ok) = fv.Interface()._<Name>();
+
+                        if (ok && v.Local != "")
+                        {
+                            start.Name = v;
+                        }
+
                     }
 
                 }
+
             }
+
             if (start.Name.Local == "" && finfo != null)
             {
                 start.Name.Space = finfo.xmlns;
                 start.Name.Local = finfo.name;
+
             }
+
             if (start.Name.Local == "")
             {
                 var name = typ.Name();
                 if (name == "")
                 {
-                    return error.As(ref new UnsupportedTypeError(typ));
+                    return error.As(addr(new UnsupportedTypeError(typ))!)!;
                 }
+
                 start.Name.Local = name;
+
             } 
 
             // Attributes
@@ -652,35 +741,39 @@ namespace encoding
                 foreach (var (__i) in tinfo.fields)
                 {
                     i = __i;
-                    var finfo = ref tinfo.fields[i];
+                    var finfo = _addr_tinfo.fields[i];
                     if (finfo.flags & fAttr == 0L)
                     {
                         continue;
                     }
-                    var fv = finfo.value(val);
+
+                    fv = finfo.value(val, dontInitNilPointers);
 
                     if (finfo.flags & fOmitEmpty != 0L && isEmptyValue(fv))
                     {
                         continue;
                     }
+
                     if (fv.Kind() == reflect.Interface && fv.IsNil())
                     {
                         continue;
                     }
+
                     name = new Name(Space:finfo.xmlns,Local:finfo.name);
                     {
                         var err__prev1 = err;
 
-                        err = p.marshalAttr(ref start, name, fv);
+                        err = p.marshalAttr(_addr_start, name, fv);
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                         err = err__prev1;
 
                     }
+
                 }
 
                 i = i__prev1;
@@ -689,16 +782,17 @@ namespace encoding
             {
                 var err__prev1 = err;
 
-                err = p.writeStart(ref start);
+                err = p.writeStart(_addr_start);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
 
             if (val.Kind() == reflect.Struct)
             {
@@ -719,11 +813,14 @@ namespace encoding
                 {
                     p.EscapeString(s);
                 }
+
             }
+
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             {
                 var err__prev1 = err;
 
@@ -731,59 +828,76 @@ namespace encoding
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
 
-            return error.As(p.cachedWriteError());
+
+            return error.As(p.cachedWriteError())!;
+
         }
 
         // marshalAttr marshals an attribute with the given name and value, adding to start.Attr.
-        private static error marshalAttr(this ref printer p, ref StartElement start, Name name, reflect.Value val)
+        private static error marshalAttr(this ptr<printer> _addr_p, ptr<StartElement> _addr_start, Name name, reflect.Value val)
         {
+            ref printer p = ref _addr_p.val;
+            ref StartElement start = ref _addr_start.val;
+
             if (val.CanInterface() && val.Type().Implements(marshalerAttrType))
             {
-                MarshalerAttr (attr, err) = val.Interface()._<MarshalerAttr>().MarshalXMLAttr(name);
+                MarshalerAttr (attr, err) = MarshalerAttr.As(val.Interface()._<MarshalerAttr>().MarshalXMLAttr(name))!;
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 if (attr.Name.Local != "")
                 {
                     start.Attr = append(start.Attr, attr);
                 }
-                return error.As(null);
+
+                return error.As(null!)!;
+
             }
+
             if (val.CanAddr())
             {
                 var pv = val.Addr();
                 if (pv.CanInterface() && pv.Type().Implements(marshalerAttrType))
                 {
-                    (attr, err) = pv.Interface()._<MarshalerAttr>().MarshalXMLAttr(name);
+                    (attr, err) = MarshalerAttr.As(pv.Interface()._<MarshalerAttr>().MarshalXMLAttr(name))!;
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                     if (attr.Name.Local != "")
                     {
                         start.Attr = append(start.Attr, attr);
                     }
-                    return error.As(null);
+
+                    return error.As(null!)!;
+
                 }
+
             }
+
             if (val.CanInterface() && val.Type().Implements(textMarshalerType))
             {
                 encoding.TextMarshaler (text, err) = val.Interface()._<encoding.TextMarshaler>().MarshalText();
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 start.Attr = append(start.Attr, new Attr(name,string(text)));
-                return error.As(null);
+                return error.As(null!)!;
+
             }
+
             if (val.CanAddr())
             {
                 pv = val.Addr();
@@ -792,11 +906,14 @@ namespace encoding
                     (text, err) = pv.Interface()._<encoding.TextMarshaler>().MarshalText();
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                     start.Attr = append(start.Attr, new Attr(name,string(text)));
-                    return error.As(null);
+                    return error.As(null!)!;
+
                 }
+
             } 
 
             // Dereference or skip nil pointer, interface values.
@@ -804,8 +921,9 @@ namespace encoding
             if (val.Kind() == reflect.Ptr || val.Kind() == reflect.Interface) 
                 if (val.IsNil())
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
                 val = val.Elem();
             // Walk slices.
             if (val.Kind() == reflect.Slice && val.Type().Elem().Kind() != reflect.Uint8)
@@ -818,36 +936,46 @@ namespace encoding
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                     }
+
                 }
 
-                return error.As(null);
+                return error.As(null!)!;
+
             }
+
             if (val.Type() == attrType)
             {
                 start.Attr = append(start.Attr, val.Interface()._<Attr>());
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             var (s, b, err) = p.marshalSimple(val.Type(), val);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (b != null)
             {
                 s = string(b);
             }
+
             start.Attr = append(start.Attr, new Attr(name,s));
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // defaultStart returns the default start element to use,
         // given the reflect type, field info, and start template.
-        private static StartElement defaultStart(reflect.Type typ, ref fieldInfo finfo, ref StartElement startTemplate)
+        private static StartElement defaultStart(reflect.Type typ, ptr<fieldInfo> _addr_finfo, ptr<StartElement> _addr_startTemplate)
         {
+            ref fieldInfo finfo = ref _addr_finfo.val;
+            ref StartElement startTemplate = ref _addr_startTemplate.val;
+
             StartElement start = default; 
             // Precedence for the XML element name is as above,
             // except that we do not look inside structs for the first field.
@@ -870,13 +998,18 @@ namespace encoding
                 // Must be a pointer to a named type,
                 // since it has the Marshaler methods.
                 start.Name.Local = typ.Elem().Name();
+
             }
+
             return start;
+
         }
 
         // marshalInterface marshals a Marshaler interface value.
-        private static error marshalInterface(this ref printer p, Marshaler val, StartElement start)
-        { 
+        private static error marshalInterface(this ptr<printer> _addr_p, Marshaler val, StartElement start)
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // Push a marker onto the tag stack so that MarshalXML
             // cannot close the XML tags that it did not open.
             p.tags = append(p.tags, new Name());
@@ -885,46 +1018,57 @@ namespace encoding
             var err = val.MarshalXML(p.encoder, start);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             } 
 
             // Make sure MarshalXML closed all its tags. p.tags[n-1] is the mark.
             if (len(p.tags) > n)
             {
-                return error.As(fmt.Errorf("xml: %s.MarshalXML wrote invalid XML: <%s> not closed", receiverType(val), p.tags[len(p.tags) - 1L].Local));
+                return error.As(fmt.Errorf("xml: %s.MarshalXML wrote invalid XML: <%s> not closed", receiverType(val), p.tags[len(p.tags) - 1L].Local))!;
             }
+
             p.tags = p.tags[..n - 1L];
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // marshalTextInterface marshals a TextMarshaler interface value.
-        private static error marshalTextInterface(this ref printer p, encoding.TextMarshaler val, StartElement start)
+        private static error marshalTextInterface(this ptr<printer> _addr_p, encoding.TextMarshaler val, StartElement start)
         {
+            ref printer p = ref _addr_p.val;
+
             {
-                var err = p.writeStart(ref start);
+                var err = p.writeStart(_addr_start);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var (text, err) = val.MarshalText();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             EscapeText(p, text);
-            return error.As(p.writeEnd(start.Name));
+            return error.As(p.writeEnd(start.Name))!;
+
         }
 
         // writeStart writes the given start element.
-        private static error writeStart(this ref printer p, ref StartElement start)
+        private static error writeStart(this ptr<printer> _addr_p, ptr<StartElement> _addr_start)
         {
+            ref printer p = ref _addr_p.val;
+            ref StartElement start = ref _addr_start.val;
+
             if (start.Name.Local == "")
             {
-                return error.As(fmt.Errorf("xml: start tag with no name"));
+                return error.As(fmt.Errorf("xml: start tag with no name"))!;
             }
+
             p.tags = append(p.tags, start.Name);
             p.markPrefix();
 
@@ -947,31 +1091,39 @@ namespace encoding
                 {
                     continue;
                 }
+
                 p.WriteByte(' ');
                 if (name.Space != "")
                 {
                     p.WriteString(p.createAttrPrefix(name.Space));
                     p.WriteByte(':');
                 }
+
                 p.WriteString(name.Local);
                 p.WriteString("=\"");
                 p.EscapeString(attr.Value);
                 p.WriteByte('"');
+
             }
             p.WriteByte('>');
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error writeEnd(this ref printer p, Name name)
+        private static error writeEnd(this ptr<printer> _addr_p, Name name)
         {
+            ref printer p = ref _addr_p.val;
+
             if (name.Local == "")
             {
-                return error.As(fmt.Errorf("xml: end tag with no name"));
+                return error.As(fmt.Errorf("xml: end tag with no name"))!;
             }
+
             if (len(p.tags) == 0L || p.tags[len(p.tags) - 1L].Local == "")
             {
-                return error.As(fmt.Errorf("xml: end tag </%s> without start tag", name.Local));
+                return error.As(fmt.Errorf("xml: end tag </%s> without start tag", name.Local))!;
             }
+
             {
                 var top = p.tags[len(p.tags) - 1L];
 
@@ -979,12 +1131,15 @@ namespace encoding
                 {
                     if (top.Local != name.Local)
                     {
-                        return error.As(fmt.Errorf("xml: end tag </%s> does not match start tag <%s>", name.Local, top.Local));
+                        return error.As(fmt.Errorf("xml: end tag </%s> does not match start tag <%s>", name.Local, top.Local))!;
                     }
-                    return error.As(fmt.Errorf("xml: end tag </%s> in namespace %s does not match start tag <%s> in namespace %s", name.Local, name.Space, top.Local, top.Space));
+
+                    return error.As(fmt.Errorf("xml: end tag </%s> in namespace %s does not match start tag <%s> in namespace %s", name.Local, name.Space, top.Local, top.Space))!;
+
                 }
 
             }
+
             p.tags = p.tags[..len(p.tags) - 1L];
 
             p.writeIndent(-1L);
@@ -993,22 +1148,28 @@ namespace encoding
             p.WriteString(name.Local);
             p.WriteByte('>');
             p.popPrefix();
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflect.Type typ, reflect.Value val)
+        private static (@string, slice<byte>, error) marshalSimple(this ptr<printer> _addr_p, reflect.Type typ, reflect.Value val)
         {
+            @string _p0 = default;
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref printer p = ref _addr_p.val;
+
 
             if (val.Kind() == reflect.Int || val.Kind() == reflect.Int8 || val.Kind() == reflect.Int16 || val.Kind() == reflect.Int32 || val.Kind() == reflect.Int64) 
-                return (strconv.FormatInt(val.Int(), 10L), null, null);
+                return (strconv.FormatInt(val.Int(), 10L), null, error.As(null!)!);
             else if (val.Kind() == reflect.Uint || val.Kind() == reflect.Uint8 || val.Kind() == reflect.Uint16 || val.Kind() == reflect.Uint32 || val.Kind() == reflect.Uint64 || val.Kind() == reflect.Uintptr) 
-                return (strconv.FormatUint(val.Uint(), 10L), null, null);
+                return (strconv.FormatUint(val.Uint(), 10L), null, error.As(null!)!);
             else if (val.Kind() == reflect.Float32 || val.Kind() == reflect.Float64) 
-                return (strconv.FormatFloat(val.Float(), 'g', -1L, val.Type().Bits()), null, null);
+                return (strconv.FormatFloat(val.Float(), 'g', -1L, val.Type().Bits()), null, error.As(null!)!);
             else if (val.Kind() == reflect.String) 
-                return (val.String(), null, null);
+                return (val.String(), null, error.As(null!)!);
             else if (val.Kind() == reflect.Bool) 
-                return (strconv.FormatBool(val.Bool()), null, null);
+                return (strconv.FormatBool(val.Bool()), null, error.As(null!)!);
             else if (val.Kind() == reflect.Array) 
                 if (typ.Elem().Kind() != reflect.Uint8)
                 {
@@ -1025,15 +1186,17 @@ namespace encoding
                     bytes = make_slice<byte>(val.Len());
                     reflect.Copy(reflect.ValueOf(bytes), val);
                 }
-                return ("", bytes, null);
+
+                return ("", bytes, error.As(null!)!);
             else if (val.Kind() == reflect.Slice) 
                 if (typ.Elem().Kind() != reflect.Uint8)
                 {
                     break;
                 } 
                 // []byte
-                return ("", val.Bytes(), null);
-                        return ("", null, ref new UnsupportedTypeError(typ));
+                return ("", val.Bytes(), error.As(null!)!);
+                        return ("", null, error.As(addr(new UnsupportedTypeError(typ))!)!);
+
         }
 
         private static slice<byte> ddBytes = (slice<byte>)"--";
@@ -1050,23 +1213,37 @@ namespace encoding
                 {
                     return vf;
                 }
+
                 vf = vf.Elem();
+
             }
 
             return vf;
+
         }
 
-        private static error marshalStruct(this ref printer _p, ref typeInfo _tinfo, reflect.Value val) => func(_p, _tinfo, (ref printer p, ref typeInfo tinfo, Defer _, Panic panic, Recover __) =>
+        private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _addr_tinfo, reflect.Value val) => func((_, panic, __) =>
         {
+            ref printer p = ref _addr_p.val;
+            ref typeInfo tinfo = ref _addr_tinfo.val;
+
             parentStack s = new parentStack(p:p);
             foreach (var (i) in tinfo.fields)
             {
-                var finfo = ref tinfo.fields[i];
+                var finfo = _addr_tinfo.fields[i];
                 if (finfo.flags & fAttr != 0L)
                 {
                     continue;
                 }
-                var vf = finfo.value(val);
+
+                var vf = finfo.value(val, dontInitNilPointers);
+                if (!vf.IsValid())
+                { 
+                    // The field is behind an anonymous struct field that's
+                    // nil. Skip it.
+                    continue;
+
+                }
 
 
                 if (finfo.flags & fMode == fCDATA || finfo.flags & fMode == fCharData) 
@@ -1075,6 +1252,7 @@ namespace encoding
                     {
                         emit = emitCDATA;
                     }
+
                     {
                         var err__prev1 = err;
 
@@ -1082,19 +1260,21 @@ namespace encoding
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                         err = err__prev1;
 
                     }
+
                     if (vf.CanInterface() && vf.Type().Implements(textMarshalerType))
                     {
                         encoding.TextMarshaler (data, err) = vf.Interface()._<encoding.TextMarshaler>().MarshalText();
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
+
                         {
                             var err__prev2 = err;
 
@@ -1102,14 +1282,17 @@ namespace encoding
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev2;
 
                         }
+
                         continue;
+
                     }
+
                     if (vf.CanAddr())
                     {
                         var pv = vf.Addr();
@@ -1118,8 +1301,9 @@ namespace encoding
                             (data, err) = pv.Interface()._<encoding.TextMarshaler>().MarshalText();
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
+
                             {
                                 var err__prev3 = err;
 
@@ -1127,15 +1311,19 @@ namespace encoding
 
                                 if (err != null)
                                 {
-                                    return error.As(err);
+                                    return error.As(err)!;
                                 }
 
                                 err = err__prev3;
 
                             }
+
                             continue;
+
                         }
+
                     }
+
                     array<byte> scratch = new array<byte>(64L);
                     vf = indirect(vf);
 
@@ -1147,12 +1335,13 @@ namespace encoding
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                     else if (vf.Kind() == reflect.Uint || vf.Kind() == reflect.Uint8 || vf.Kind() == reflect.Uint16 || vf.Kind() == reflect.Uint32 || vf.Kind() == reflect.Uint64 || vf.Kind() == reflect.Uintptr) 
                         {
                             var err__prev1 = err;
@@ -1161,12 +1350,13 @@ namespace encoding
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                     else if (vf.Kind() == reflect.Float32 || vf.Kind() == reflect.Float64) 
                         {
                             var err__prev1 = err;
@@ -1175,12 +1365,13 @@ namespace encoding
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                     else if (vf.Kind() == reflect.Bool) 
                         {
                             var err__prev1 = err;
@@ -1189,12 +1380,13 @@ namespace encoding
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                     else if (vf.Kind() == reflect.String) 
                         {
                             var err__prev1 = err;
@@ -1203,12 +1395,13 @@ namespace encoding
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                     else if (vf.Kind() == reflect.Slice) 
                         {
                             slice<byte> (elem, ok) = vf.Interface()._<slice<byte>>();
@@ -1222,15 +1415,17 @@ namespace encoding
 
                                     if (err != null)
                                     {
-                                        return error.As(err);
+                                        return error.As(err)!;
                                     }
 
                                     err = err__prev2;
 
                                 }
+
                             }
 
                         }
+
                                         continue;
                 else if (finfo.flags & fMode == fComment) 
                     {
@@ -1240,22 +1435,25 @@ namespace encoding
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                         err = err__prev1;
 
                     }
+
                     vf = indirect(vf);
                     var k = vf.Kind();
                     if (!(k == reflect.String || k == reflect.Slice && vf.Type().Elem().Kind() == reflect.Uint8))
                     {
-                        return error.As(fmt.Errorf("xml: bad type for comment field of %s", val.Type()));
+                        return error.As(fmt.Errorf("xml: bad type for comment field of %s", val.Type()))!;
                     }
+
                     if (vf.Len() == 0L)
                     {
                         continue;
                     }
+
                     p.writeIndent(0L);
                     p.WriteString("<!--");
                     var dashDash = false;
@@ -1269,6 +1467,7 @@ namespace encoding
                         {
                             p.WriteString(s);
                         }
+
                     else if (k == reflect.Slice) 
                         var b = vf.Bytes();
                         dashDash = bytes.Contains(b, ddBytes);
@@ -1277,20 +1476,24 @@ namespace encoding
                         {
                             p.Write(b);
                         }
+
                     else 
                         panic("can't happen");
                                         if (dashDash)
                     {
-                        return error.As(fmt.Errorf("xml: comments must not contain \"--\""));
+                        return error.As(fmt.Errorf("xml: comments must not contain \"--\""))!;
                     }
+
                     if (dashLast)
                     { 
                         // "--->" is invalid grammar. Make it "- -->"
                         p.WriteByte(' ');
+
                     }
+
                     p.WriteString("-->");
                     continue;
-                else if (finfo.flags & fMode == fInnerXml) 
+                else if (finfo.flags & fMode == fInnerXML) 
                     vf = indirect(vf);
                     var iface = vf.Interface();
                     switch (iface.type())
@@ -1313,12 +1516,13 @@ namespace encoding
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                         err = err__prev1;
 
                     }
+
                     if (len(finfo.parents) > len(s.stack))
                     {
                         if (vf.Kind() != reflect.Ptr && vf.Kind() != reflect.Interface || !vf.IsNil())
@@ -1330,14 +1534,17 @@ namespace encoding
 
                                 if (err != null)
                                 {
-                                    return error.As(err);
+                                    return error.As(err)!;
                                 }
 
                                 err = err__prev3;
 
                             }
+
                         }
+
                     }
+
                                 {
                     var err__prev1 = err;
 
@@ -1345,40 +1552,50 @@ namespace encoding
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev1;
 
                 }
+
             }
             s.trim(null);
-            return error.As(p.cachedWriteError());
+            return error.As(p.cachedWriteError())!;
+
         });
 
         // return the bufio Writer's cached write error
-        private static error cachedWriteError(this ref printer p)
+        private static error cachedWriteError(this ptr<printer> _addr_p)
         {
+            ref printer p = ref _addr_p.val;
+
             var (_, err) = p.Write(null);
-            return error.As(err);
+            return error.As(err)!;
         }
 
-        private static void writeIndent(this ref printer p, long depthDelta)
+        private static void writeIndent(this ptr<printer> _addr_p, long depthDelta)
         {
+            ref printer p = ref _addr_p.val;
+
             if (len(p.prefix) == 0L && len(p.indent) == 0L)
             {
-                return;
+                return ;
             }
+
             if (depthDelta < 0L)
             {
                 p.depth--;
                 if (p.indentedIn)
                 {
                     p.indentedIn = false;
-                    return;
+                    return ;
                 }
+
                 p.indentedIn = false;
+
             }
+
             if (p.putNewline)
             {
                 p.WriteByte('\n');
@@ -1387,10 +1604,12 @@ namespace encoding
             {
                 p.putNewline = true;
             }
+
             if (len(p.prefix) > 0L)
             {
                 p.WriteString(p.prefix);
             }
+
             if (len(p.indent) > 0L)
             {
                 for (long i = 0L; i < p.depth; i++)
@@ -1398,12 +1617,15 @@ namespace encoding
                     p.WriteString(p.indent);
                 }
 
+
             }
+
             if (depthDelta > 0L)
             {
                 p.depth++;
                 p.indentedIn = true;
             }
+
         }
 
         private partial struct parentStack
@@ -1415,8 +1637,10 @@ namespace encoding
         // trim updates the XML context to match the longest common prefix of the stack
         // and the given parents. A closing tag will be written for every parent
         // popped. Passing a zero slice or nil will close all the elements.
-        private static error trim(this ref parentStack s, slice<@string> parents)
+        private static error trim(this ptr<parentStack> _addr_s, slice<@string> parents)
         {
+            ref parentStack s = ref _addr_s.val;
+
             long split = 0L;
             while (split < len(parents) && split < len(s.stack))
             {
@@ -1425,6 +1649,7 @@ namespace encoding
                     break;
                 split++;
                 }
+
             }
 
             for (var i = len(s.stack) - 1L; i >= split; i--)
@@ -1434,34 +1659,40 @@ namespace encoding
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             }
 
             s.stack = s.stack[..split];
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // push adds parent elements to the stack and writes open tags.
-        private static error push(this ref parentStack s, slice<@string> parents)
+        private static error push(this ptr<parentStack> _addr_s, slice<@string> parents)
         {
+            ref parentStack s = ref _addr_s.val;
+
             for (long i = 0L; i < len(parents); i++)
             {
                 {
-                    var err = s.p.writeStart(ref new StartElement(Name:Name{Local:parents[i]}));
+                    var err = s.p.writeStart(addr(new StartElement(Name:Name{Local:parents[i]})));
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             }
 
             s.stack = append(s.stack, parents);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // UnsupportedTypeError is returned when Marshal encounters a type
@@ -1471,8 +1702,10 @@ namespace encoding
             public reflect.Type Type;
         }
 
-        private static @string Error(this ref UnsupportedTypeError e)
+        private static @string Error(this ptr<UnsupportedTypeError> _addr_e)
         {
+            ref UnsupportedTypeError e = ref _addr_e.val;
+
             return "xml: unsupported type: " + e.Type.String();
         }
 
@@ -1492,6 +1725,7 @@ namespace encoding
             else if (v.Kind() == reflect.Interface || v.Kind() == reflect.Ptr) 
                 return v.IsNil();
                         return false;
+
         }
     }
 }}

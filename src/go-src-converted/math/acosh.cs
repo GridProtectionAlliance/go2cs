@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:43 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:09 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\acosh.go
 
@@ -52,8 +52,8 @@ namespace go
 
         private static double acosh(double x)
         {
-            const float Ln2 = 6.93147180559945286227e-01F; // 0x3FE62E42FEFA39EF
-            const long Large = 1L << (int)(28L); // 2**28 
+            const float Ln2 = (float)6.93147180559945286227e-01F; // 0x3FE62E42FEFA39EF
+            const long Large = (long)1L << (int)(28L); // 2**28 
             // first case is special case
 
             if (x < 1L || IsNaN(x)) 

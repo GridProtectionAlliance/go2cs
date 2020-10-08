@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:34 UTC
+//     Generated on 2020 October 08 04:39:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using pe = go.debug.pe_package;
 using binary = go.encoding.binary_package;
@@ -43,7 +44,7 @@ namespace @internal
                 this.argsize = default;
             }
 
-            public Imp(ref ptr<sym.Symbol> s = default, ulong off = default, ref ptr<Imp> next = default, long argsize = default)
+            public Imp(loader.Sym s = default, ulong off = default, ref ptr<Imp> next = default, long argsize = default)
             {
                 this.s = s;
                 this.off = off;
@@ -71,7 +72,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Imp Imp_cast(dynamic value)
         {
-            return new Imp(ref value.s, value.off, ref value.next, value.argsize);
+            return new Imp(value.s, value.off, ref value.next, value.argsize);
         }
     }
 }}}}

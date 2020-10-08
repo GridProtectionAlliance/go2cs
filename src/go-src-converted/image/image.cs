@@ -19,7 +19,7 @@
 //
 // See "The Go image package" for more details:
 // https://golang.org/doc/articles/image_package.html
-// package image -- go2cs converted at 2020 August 29 10:09:50 UTC
+// package image -- go2cs converted at 2020 October 08 04:59:12 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Go\src\image\image.go
 using color = go.image.color_package;
@@ -59,6 +59,25 @@ namespace go
             byte ColorIndexAt(long x, long y);
         }
 
+        // pixelBufferLength returns the length of the []uint8 typed Pix slice field
+        // for the NewXxx functions. Conceptually, this is just (bpp * width * height),
+        // but this function panics if at least one of those is negative or if the
+        // computation would overflow the int type.
+        //
+        // This panics instead of returning an error because of backwards
+        // compatibility. The NewXxx functions do not return an error.
+        private static long pixelBufferLength(long bytesPerPixel, Rectangle r, @string imageTypeName) => func((_, panic, __) =>
+        {
+            var totalLength = mul3NonNeg(bytesPerPixel, r.Dx(), r.Dy());
+            if (totalLength < 0L)
+            {
+                panic("image: New" + imageTypeName + " Rectangle has huge or negative dimensions");
+            }
+
+            return totalLength;
+
+        });
+
         // RGBA is an in-memory image whose At method returns color.RGBA values.
         public partial struct RGBA
         {
@@ -67,88 +86,118 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref RGBA p)
+        private static color.Model ColorModel(this ptr<RGBA> _addr_p)
         {
+            ref RGBA p = ref _addr_p.val;
+
             return color.RGBAModel;
         }
 
-        private static Rectangle Bounds(this ref RGBA p)
+        private static Rectangle Bounds(this ptr<RGBA> _addr_p)
         {
+            ref RGBA p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref RGBA p, long x, long y)
+        private static color.Color At(this ptr<RGBA> _addr_p, long x, long y)
         {
+            ref RGBA p = ref _addr_p.val;
+
             return p.RGBAAt(x, y);
         }
 
-        private static color.RGBA RGBAAt(this ref RGBA p, long x, long y)
+        private static color.RGBA RGBAAt(this ptr<RGBA> _addr_p, long x, long y)
         {
+            ref RGBA p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.RGBA();
             }
+
             var i = p.PixOffset(x, y);
-            return new color.RGBA(p.Pix[i+0],p.Pix[i+1],p.Pix[i+2],p.Pix[i+3]);
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            return new color.RGBA(s[0],s[1],s[2],s[3]);
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref RGBA p, long x, long y)
+        private static long PixOffset(this ptr<RGBA> _addr_p, long x, long y)
         {
+            ref RGBA p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4L;
         }
 
-        private static void Set(this ref RGBA p, long x, long y, color.Color c)
+        private static void Set(this ptr<RGBA> _addr_p, long x, long y, color.Color c)
         {
+            ref RGBA p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             color.RGBA c1 = color.RGBAModel.Convert(c)._<color.RGBA>();
-            p.Pix[i + 0L] = c1.R;
-            p.Pix[i + 1L] = c1.G;
-            p.Pix[i + 2L] = c1.B;
-            p.Pix[i + 3L] = c1.A;
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = c1.R;
+            s[1L] = c1.G;
+            s[2L] = c1.B;
+            s[3L] = c1.A;
+
         }
 
-        private static void SetRGBA(this ref RGBA p, long x, long y, color.RGBA c)
+        private static void SetRGBA(this ptr<RGBA> _addr_p, long x, long y, color.RGBA c)
         {
+            ref RGBA p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
-            p.Pix[i + 0L] = c.R;
-            p.Pix[i + 1L] = c.G;
-            p.Pix[i + 2L] = c.B;
-            p.Pix[i + 3L] = c.A;
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = c.R;
+            s[1L] = c.G;
+            s[2L] = c.B;
+            s[3L] = c.A;
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref RGBA p, Rectangle r)
+        private static Image SubImage(this ptr<RGBA> _addr_p, Rectangle r)
         {
+            ref RGBA p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new RGBA();
+                return addr(new RGBA());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new RGBA(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new RGBA(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref RGBA p)
+        private static bool Opaque(this ptr<RGBA> _addr_p)
         {
+            ref RGBA p = ref _addr_p.val;
+
             if (p.Rect.Empty())
             {
                 return true;
             }
+
             long i0 = 3L;
             var i1 = p.Rect.Dx() * 4L;
             for (var y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++)
@@ -163,23 +212,23 @@ namespace go
                             return false;
                         i += 4L;
                         }
+
                     }
 
                 }
                 i0 += p.Stride;
                 i1 += p.Stride;
+
             }
 
             return true;
+
         }
 
         // NewRGBA returns a new RGBA image with the given bounds.
-        public static ref RGBA NewRGBA(Rectangle r)
+        public static ptr<RGBA> NewRGBA(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var buf = make_slice<byte>(4L * w * h);
-            return ref new RGBA(buf,4*w,r);
+            return addr(new RGBA(Pix:make([]uint8,pixelBufferLength(4,r,"RGBA")),Stride:4*r.Dx(),Rect:r,));
         }
 
         // RGBA64 is an in-memory image whose At method returns color.RGBA64 values.
@@ -190,96 +239,126 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref RGBA64 p)
+        private static color.Model ColorModel(this ptr<RGBA64> _addr_p)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             return color.RGBA64Model;
         }
 
-        private static Rectangle Bounds(this ref RGBA64 p)
+        private static Rectangle Bounds(this ptr<RGBA64> _addr_p)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref RGBA64 p, long x, long y)
+        private static color.Color At(this ptr<RGBA64> _addr_p, long x, long y)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             return p.RGBA64At(x, y);
         }
 
-        private static color.RGBA64 RGBA64At(this ref RGBA64 p, long x, long y)
+        private static color.RGBA64 RGBA64At(this ptr<RGBA64> _addr_p, long x, long y)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.RGBA64();
             }
+
             var i = p.PixOffset(x, y);
-            return new color.RGBA64(uint16(p.Pix[i+0])<<8|uint16(p.Pix[i+1]),uint16(p.Pix[i+2])<<8|uint16(p.Pix[i+3]),uint16(p.Pix[i+4])<<8|uint16(p.Pix[i+5]),uint16(p.Pix[i+6])<<8|uint16(p.Pix[i+7]),);
+            var s = p.Pix.slice(i, i + 8L, i + 8L); // Small cap improves performance, see https://golang.org/issue/27857
+            return new color.RGBA64(uint16(s[0])<<8|uint16(s[1]),uint16(s[2])<<8|uint16(s[3]),uint16(s[4])<<8|uint16(s[5]),uint16(s[6])<<8|uint16(s[7]),);
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref RGBA64 p, long x, long y)
+        private static long PixOffset(this ptr<RGBA64> _addr_p, long x, long y)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 8L;
         }
 
-        private static void Set(this ref RGBA64 p, long x, long y, color.Color c)
+        private static void Set(this ptr<RGBA64> _addr_p, long x, long y, color.Color c)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             color.RGBA64 c1 = color.RGBA64Model.Convert(c)._<color.RGBA64>();
-            p.Pix[i + 0L] = uint8(c1.R >> (int)(8L));
-            p.Pix[i + 1L] = uint8(c1.R);
-            p.Pix[i + 2L] = uint8(c1.G >> (int)(8L));
-            p.Pix[i + 3L] = uint8(c1.G);
-            p.Pix[i + 4L] = uint8(c1.B >> (int)(8L));
-            p.Pix[i + 5L] = uint8(c1.B);
-            p.Pix[i + 6L] = uint8(c1.A >> (int)(8L));
-            p.Pix[i + 7L] = uint8(c1.A);
+            var s = p.Pix.slice(i, i + 8L, i + 8L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = uint8(c1.R >> (int)(8L));
+            s[1L] = uint8(c1.R);
+            s[2L] = uint8(c1.G >> (int)(8L));
+            s[3L] = uint8(c1.G);
+            s[4L] = uint8(c1.B >> (int)(8L));
+            s[5L] = uint8(c1.B);
+            s[6L] = uint8(c1.A >> (int)(8L));
+            s[7L] = uint8(c1.A);
+
         }
 
-        private static void SetRGBA64(this ref RGBA64 p, long x, long y, color.RGBA64 c)
+        private static void SetRGBA64(this ptr<RGBA64> _addr_p, long x, long y, color.RGBA64 c)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
-            p.Pix[i + 0L] = uint8(c.R >> (int)(8L));
-            p.Pix[i + 1L] = uint8(c.R);
-            p.Pix[i + 2L] = uint8(c.G >> (int)(8L));
-            p.Pix[i + 3L] = uint8(c.G);
-            p.Pix[i + 4L] = uint8(c.B >> (int)(8L));
-            p.Pix[i + 5L] = uint8(c.B);
-            p.Pix[i + 6L] = uint8(c.A >> (int)(8L));
-            p.Pix[i + 7L] = uint8(c.A);
+            var s = p.Pix.slice(i, i + 8L, i + 8L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = uint8(c.R >> (int)(8L));
+            s[1L] = uint8(c.R);
+            s[2L] = uint8(c.G >> (int)(8L));
+            s[3L] = uint8(c.G);
+            s[4L] = uint8(c.B >> (int)(8L));
+            s[5L] = uint8(c.B);
+            s[6L] = uint8(c.A >> (int)(8L));
+            s[7L] = uint8(c.A);
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref RGBA64 p, Rectangle r)
+        private static Image SubImage(this ptr<RGBA64> _addr_p, Rectangle r)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new RGBA64();
+                return addr(new RGBA64());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new RGBA64(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new RGBA64(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref RGBA64 p)
+        private static bool Opaque(this ptr<RGBA64> _addr_p)
         {
+            ref RGBA64 p = ref _addr_p.val;
+
             if (p.Rect.Empty())
             {
                 return true;
             }
+
             long i0 = 6L;
             var i1 = p.Rect.Dx() * 8L;
             for (var y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++)
@@ -294,23 +373,23 @@ namespace go
                             return false;
                         i += 8L;
                         }
+
                     }
 
                 }
                 i0 += p.Stride;
                 i1 += p.Stride;
+
             }
 
             return true;
+
         }
 
         // NewRGBA64 returns a new RGBA64 image with the given bounds.
-        public static ref RGBA64 NewRGBA64(Rectangle r)
+        public static ptr<RGBA64> NewRGBA64(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var pix = make_slice<byte>(8L * w * h);
-            return ref new RGBA64(pix,8*w,r);
+            return addr(new RGBA64(Pix:make([]uint8,pixelBufferLength(8,r,"RGBA64")),Stride:8*r.Dx(),Rect:r,));
         }
 
         // NRGBA is an in-memory image whose At method returns color.NRGBA values.
@@ -321,88 +400,118 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref NRGBA p)
+        private static color.Model ColorModel(this ptr<NRGBA> _addr_p)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             return color.NRGBAModel;
         }
 
-        private static Rectangle Bounds(this ref NRGBA p)
+        private static Rectangle Bounds(this ptr<NRGBA> _addr_p)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref NRGBA p, long x, long y)
+        private static color.Color At(this ptr<NRGBA> _addr_p, long x, long y)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             return p.NRGBAAt(x, y);
         }
 
-        private static color.NRGBA NRGBAAt(this ref NRGBA p, long x, long y)
+        private static color.NRGBA NRGBAAt(this ptr<NRGBA> _addr_p, long x, long y)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.NRGBA();
             }
+
             var i = p.PixOffset(x, y);
-            return new color.NRGBA(p.Pix[i+0],p.Pix[i+1],p.Pix[i+2],p.Pix[i+3]);
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            return new color.NRGBA(s[0],s[1],s[2],s[3]);
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref NRGBA p, long x, long y)
+        private static long PixOffset(this ptr<NRGBA> _addr_p, long x, long y)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4L;
         }
 
-        private static void Set(this ref NRGBA p, long x, long y, color.Color c)
+        private static void Set(this ptr<NRGBA> _addr_p, long x, long y, color.Color c)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             color.NRGBA c1 = color.NRGBAModel.Convert(c)._<color.NRGBA>();
-            p.Pix[i + 0L] = c1.R;
-            p.Pix[i + 1L] = c1.G;
-            p.Pix[i + 2L] = c1.B;
-            p.Pix[i + 3L] = c1.A;
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = c1.R;
+            s[1L] = c1.G;
+            s[2L] = c1.B;
+            s[3L] = c1.A;
+
         }
 
-        private static void SetNRGBA(this ref NRGBA p, long x, long y, color.NRGBA c)
+        private static void SetNRGBA(this ptr<NRGBA> _addr_p, long x, long y, color.NRGBA c)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
-            p.Pix[i + 0L] = c.R;
-            p.Pix[i + 1L] = c.G;
-            p.Pix[i + 2L] = c.B;
-            p.Pix[i + 3L] = c.A;
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = c.R;
+            s[1L] = c.G;
+            s[2L] = c.B;
+            s[3L] = c.A;
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref NRGBA p, Rectangle r)
+        private static Image SubImage(this ptr<NRGBA> _addr_p, Rectangle r)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new NRGBA();
+                return addr(new NRGBA());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new NRGBA(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new NRGBA(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref NRGBA p)
+        private static bool Opaque(this ptr<NRGBA> _addr_p)
         {
+            ref NRGBA p = ref _addr_p.val;
+
             if (p.Rect.Empty())
             {
                 return true;
             }
+
             long i0 = 3L;
             var i1 = p.Rect.Dx() * 4L;
             for (var y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++)
@@ -417,23 +526,23 @@ namespace go
                             return false;
                         i += 4L;
                         }
+
                     }
 
                 }
                 i0 += p.Stride;
                 i1 += p.Stride;
+
             }
 
             return true;
+
         }
 
         // NewNRGBA returns a new NRGBA image with the given bounds.
-        public static ref NRGBA NewNRGBA(Rectangle r)
+        public static ptr<NRGBA> NewNRGBA(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var pix = make_slice<byte>(4L * w * h);
-            return ref new NRGBA(pix,4*w,r);
+            return addr(new NRGBA(Pix:make([]uint8,pixelBufferLength(4,r,"NRGBA")),Stride:4*r.Dx(),Rect:r,));
         }
 
         // NRGBA64 is an in-memory image whose At method returns color.NRGBA64 values.
@@ -444,96 +553,126 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref NRGBA64 p)
+        private static color.Model ColorModel(this ptr<NRGBA64> _addr_p)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             return color.NRGBA64Model;
         }
 
-        private static Rectangle Bounds(this ref NRGBA64 p)
+        private static Rectangle Bounds(this ptr<NRGBA64> _addr_p)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref NRGBA64 p, long x, long y)
+        private static color.Color At(this ptr<NRGBA64> _addr_p, long x, long y)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             return p.NRGBA64At(x, y);
         }
 
-        private static color.NRGBA64 NRGBA64At(this ref NRGBA64 p, long x, long y)
+        private static color.NRGBA64 NRGBA64At(this ptr<NRGBA64> _addr_p, long x, long y)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.NRGBA64();
             }
+
             var i = p.PixOffset(x, y);
-            return new color.NRGBA64(uint16(p.Pix[i+0])<<8|uint16(p.Pix[i+1]),uint16(p.Pix[i+2])<<8|uint16(p.Pix[i+3]),uint16(p.Pix[i+4])<<8|uint16(p.Pix[i+5]),uint16(p.Pix[i+6])<<8|uint16(p.Pix[i+7]),);
+            var s = p.Pix.slice(i, i + 8L, i + 8L); // Small cap improves performance, see https://golang.org/issue/27857
+            return new color.NRGBA64(uint16(s[0])<<8|uint16(s[1]),uint16(s[2])<<8|uint16(s[3]),uint16(s[4])<<8|uint16(s[5]),uint16(s[6])<<8|uint16(s[7]),);
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref NRGBA64 p, long x, long y)
+        private static long PixOffset(this ptr<NRGBA64> _addr_p, long x, long y)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 8L;
         }
 
-        private static void Set(this ref NRGBA64 p, long x, long y, color.Color c)
+        private static void Set(this ptr<NRGBA64> _addr_p, long x, long y, color.Color c)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             color.NRGBA64 c1 = color.NRGBA64Model.Convert(c)._<color.NRGBA64>();
-            p.Pix[i + 0L] = uint8(c1.R >> (int)(8L));
-            p.Pix[i + 1L] = uint8(c1.R);
-            p.Pix[i + 2L] = uint8(c1.G >> (int)(8L));
-            p.Pix[i + 3L] = uint8(c1.G);
-            p.Pix[i + 4L] = uint8(c1.B >> (int)(8L));
-            p.Pix[i + 5L] = uint8(c1.B);
-            p.Pix[i + 6L] = uint8(c1.A >> (int)(8L));
-            p.Pix[i + 7L] = uint8(c1.A);
+            var s = p.Pix.slice(i, i + 8L, i + 8L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = uint8(c1.R >> (int)(8L));
+            s[1L] = uint8(c1.R);
+            s[2L] = uint8(c1.G >> (int)(8L));
+            s[3L] = uint8(c1.G);
+            s[4L] = uint8(c1.B >> (int)(8L));
+            s[5L] = uint8(c1.B);
+            s[6L] = uint8(c1.A >> (int)(8L));
+            s[7L] = uint8(c1.A);
+
         }
 
-        private static void SetNRGBA64(this ref NRGBA64 p, long x, long y, color.NRGBA64 c)
+        private static void SetNRGBA64(this ptr<NRGBA64> _addr_p, long x, long y, color.NRGBA64 c)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
-            p.Pix[i + 0L] = uint8(c.R >> (int)(8L));
-            p.Pix[i + 1L] = uint8(c.R);
-            p.Pix[i + 2L] = uint8(c.G >> (int)(8L));
-            p.Pix[i + 3L] = uint8(c.G);
-            p.Pix[i + 4L] = uint8(c.B >> (int)(8L));
-            p.Pix[i + 5L] = uint8(c.B);
-            p.Pix[i + 6L] = uint8(c.A >> (int)(8L));
-            p.Pix[i + 7L] = uint8(c.A);
+            var s = p.Pix.slice(i, i + 8L, i + 8L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = uint8(c.R >> (int)(8L));
+            s[1L] = uint8(c.R);
+            s[2L] = uint8(c.G >> (int)(8L));
+            s[3L] = uint8(c.G);
+            s[4L] = uint8(c.B >> (int)(8L));
+            s[5L] = uint8(c.B);
+            s[6L] = uint8(c.A >> (int)(8L));
+            s[7L] = uint8(c.A);
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref NRGBA64 p, Rectangle r)
+        private static Image SubImage(this ptr<NRGBA64> _addr_p, Rectangle r)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new NRGBA64();
+                return addr(new NRGBA64());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new NRGBA64(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new NRGBA64(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref NRGBA64 p)
+        private static bool Opaque(this ptr<NRGBA64> _addr_p)
         {
+            ref NRGBA64 p = ref _addr_p.val;
+
             if (p.Rect.Empty())
             {
                 return true;
             }
+
             long i0 = 6L;
             var i1 = p.Rect.Dx() * 8L;
             for (var y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++)
@@ -548,23 +687,23 @@ namespace go
                             return false;
                         i += 8L;
                         }
+
                     }
 
                 }
                 i0 += p.Stride;
                 i1 += p.Stride;
+
             }
 
             return true;
+
         }
 
         // NewNRGBA64 returns a new NRGBA64 image with the given bounds.
-        public static ref NRGBA64 NewNRGBA64(Rectangle r)
+        public static ptr<NRGBA64> NewNRGBA64(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var pix = make_slice<byte>(8L * w * h);
-            return ref new NRGBA64(pix,8*w,r);
+            return addr(new NRGBA64(Pix:make([]uint8,pixelBufferLength(8,r,"NRGBA64")),Stride:8*r.Dx(),Rect:r,));
         }
 
         // Alpha is an in-memory image whose At method returns color.Alpha values.
@@ -575,81 +714,108 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref Alpha p)
+        private static color.Model ColorModel(this ptr<Alpha> _addr_p)
         {
+            ref Alpha p = ref _addr_p.val;
+
             return color.AlphaModel;
         }
 
-        private static Rectangle Bounds(this ref Alpha p)
+        private static Rectangle Bounds(this ptr<Alpha> _addr_p)
         {
+            ref Alpha p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref Alpha p, long x, long y)
+        private static color.Color At(this ptr<Alpha> _addr_p, long x, long y)
         {
+            ref Alpha p = ref _addr_p.val;
+
             return p.AlphaAt(x, y);
         }
 
-        private static color.Alpha AlphaAt(this ref Alpha p, long x, long y)
+        private static color.Alpha AlphaAt(this ptr<Alpha> _addr_p, long x, long y)
         {
+            ref Alpha p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.Alpha();
             }
+
             var i = p.PixOffset(x, y);
             return new color.Alpha(p.Pix[i]);
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref Alpha p, long x, long y)
+        private static long PixOffset(this ptr<Alpha> _addr_p, long x, long y)
         {
+            ref Alpha p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 1L;
         }
 
-        private static void Set(this ref Alpha p, long x, long y, color.Color c)
+        private static void Set(this ptr<Alpha> _addr_p, long x, long y, color.Color c)
         {
+            ref Alpha p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             p.Pix[i] = color.AlphaModel.Convert(c)._<color.Alpha>().A;
+
         }
 
-        private static void SetAlpha(this ref Alpha p, long x, long y, color.Alpha c)
+        private static void SetAlpha(this ptr<Alpha> _addr_p, long x, long y, color.Alpha c)
         {
+            ref Alpha p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             p.Pix[i] = c.A;
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref Alpha p, Rectangle r)
+        private static Image SubImage(this ptr<Alpha> _addr_p, Rectangle r)
         {
+            ref Alpha p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new Alpha();
+                return addr(new Alpha());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new Alpha(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new Alpha(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref Alpha p)
+        private static bool Opaque(this ptr<Alpha> _addr_p)
         {
+            ref Alpha p = ref _addr_p.val;
+
             if (p.Rect.Empty())
             {
                 return true;
             }
+
             long i0 = 0L;
             var i1 = p.Rect.Dx();
             for (var y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++)
@@ -660,22 +826,22 @@ namespace go
                     {
                         return false;
                     }
+
                 }
 
                 i0 += p.Stride;
                 i1 += p.Stride;
+
             }
 
             return true;
+
         }
 
         // NewAlpha returns a new Alpha image with the given bounds.
-        public static ref Alpha NewAlpha(Rectangle r)
+        public static ptr<Alpha> NewAlpha(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var pix = make_slice<byte>(1L * w * h);
-            return ref new Alpha(pix,1*w,r);
+            return addr(new Alpha(Pix:make([]uint8,pixelBufferLength(1,r,"Alpha")),Stride:1*r.Dx(),Rect:r,));
         }
 
         // Alpha16 is an in-memory image whose At method returns color.Alpha16 values.
@@ -686,84 +852,111 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref Alpha16 p)
+        private static color.Model ColorModel(this ptr<Alpha16> _addr_p)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             return color.Alpha16Model;
         }
 
-        private static Rectangle Bounds(this ref Alpha16 p)
+        private static Rectangle Bounds(this ptr<Alpha16> _addr_p)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref Alpha16 p, long x, long y)
+        private static color.Color At(this ptr<Alpha16> _addr_p, long x, long y)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             return p.Alpha16At(x, y);
         }
 
-        private static color.Alpha16 Alpha16At(this ref Alpha16 p, long x, long y)
+        private static color.Alpha16 Alpha16At(this ptr<Alpha16> _addr_p, long x, long y)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.Alpha16();
             }
+
             var i = p.PixOffset(x, y);
             return new color.Alpha16(uint16(p.Pix[i+0])<<8|uint16(p.Pix[i+1]));
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref Alpha16 p, long x, long y)
+        private static long PixOffset(this ptr<Alpha16> _addr_p, long x, long y)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 2L;
         }
 
-        private static void Set(this ref Alpha16 p, long x, long y, color.Color c)
+        private static void Set(this ptr<Alpha16> _addr_p, long x, long y, color.Color c)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             color.Alpha16 c1 = color.Alpha16Model.Convert(c)._<color.Alpha16>();
             p.Pix[i + 0L] = uint8(c1.A >> (int)(8L));
             p.Pix[i + 1L] = uint8(c1.A);
+
         }
 
-        private static void SetAlpha16(this ref Alpha16 p, long x, long y, color.Alpha16 c)
+        private static void SetAlpha16(this ptr<Alpha16> _addr_p, long x, long y, color.Alpha16 c)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             p.Pix[i + 0L] = uint8(c.A >> (int)(8L));
             p.Pix[i + 1L] = uint8(c.A);
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref Alpha16 p, Rectangle r)
+        private static Image SubImage(this ptr<Alpha16> _addr_p, Rectangle r)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new Alpha16();
+                return addr(new Alpha16());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new Alpha16(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new Alpha16(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref Alpha16 p)
+        private static bool Opaque(this ptr<Alpha16> _addr_p)
         {
+            ref Alpha16 p = ref _addr_p.val;
+
             if (p.Rect.Empty())
             {
                 return true;
             }
+
             long i0 = 0L;
             var i1 = p.Rect.Dx() * 2L;
             for (var y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++)
@@ -778,23 +971,23 @@ namespace go
                             return false;
                         i += 2L;
                         }
+
                     }
 
                 }
                 i0 += p.Stride;
                 i1 += p.Stride;
+
             }
 
             return true;
+
         }
 
         // NewAlpha16 returns a new Alpha16 image with the given bounds.
-        public static ref Alpha16 NewAlpha16(Rectangle r)
+        public static ptr<Alpha16> NewAlpha16(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var pix = make_slice<byte>(2L * w * h);
-            return ref new Alpha16(pix,2*w,r);
+            return addr(new Alpha16(Pix:make([]uint8,pixelBufferLength(2,r,"Alpha16")),Stride:2*r.Dx(),Rect:r,));
         }
 
         // Gray is an in-memory image whose At method returns color.Gray values.
@@ -805,87 +998,110 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref Gray p)
+        private static color.Model ColorModel(this ptr<Gray> _addr_p)
         {
+            ref Gray p = ref _addr_p.val;
+
             return color.GrayModel;
         }
 
-        private static Rectangle Bounds(this ref Gray p)
+        private static Rectangle Bounds(this ptr<Gray> _addr_p)
         {
+            ref Gray p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref Gray p, long x, long y)
+        private static color.Color At(this ptr<Gray> _addr_p, long x, long y)
         {
+            ref Gray p = ref _addr_p.val;
+
             return p.GrayAt(x, y);
         }
 
-        private static color.Gray GrayAt(this ref Gray p, long x, long y)
+        private static color.Gray GrayAt(this ptr<Gray> _addr_p, long x, long y)
         {
+            ref Gray p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.Gray();
             }
+
             var i = p.PixOffset(x, y);
             return new color.Gray(p.Pix[i]);
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref Gray p, long x, long y)
+        private static long PixOffset(this ptr<Gray> _addr_p, long x, long y)
         {
+            ref Gray p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 1L;
         }
 
-        private static void Set(this ref Gray p, long x, long y, color.Color c)
+        private static void Set(this ptr<Gray> _addr_p, long x, long y, color.Color c)
         {
+            ref Gray p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             p.Pix[i] = color.GrayModel.Convert(c)._<color.Gray>().Y;
+
         }
 
-        private static void SetGray(this ref Gray p, long x, long y, color.Gray c)
+        private static void SetGray(this ptr<Gray> _addr_p, long x, long y, color.Gray c)
         {
+            ref Gray p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             p.Pix[i] = c.Y;
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref Gray p, Rectangle r)
+        private static Image SubImage(this ptr<Gray> _addr_p, Rectangle r)
         {
+            ref Gray p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new Gray();
+                return addr(new Gray());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new Gray(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new Gray(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref Gray p)
+        private static bool Opaque(this ptr<Gray> _addr_p)
         {
+            ref Gray p = ref _addr_p.val;
+
             return true;
         }
 
         // NewGray returns a new Gray image with the given bounds.
-        public static ref Gray NewGray(Rectangle r)
+        public static ptr<Gray> NewGray(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var pix = make_slice<byte>(1L * w * h);
-            return ref new Gray(pix,1*w,r);
+            return addr(new Gray(Pix:make([]uint8,pixelBufferLength(1,r,"Gray")),Stride:1*r.Dx(),Rect:r,));
         }
 
         // Gray16 is an in-memory image whose At method returns color.Gray16 values.
@@ -896,90 +1112,113 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref Gray16 p)
+        private static color.Model ColorModel(this ptr<Gray16> _addr_p)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             return color.Gray16Model;
         }
 
-        private static Rectangle Bounds(this ref Gray16 p)
+        private static Rectangle Bounds(this ptr<Gray16> _addr_p)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref Gray16 p, long x, long y)
+        private static color.Color At(this ptr<Gray16> _addr_p, long x, long y)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             return p.Gray16At(x, y);
         }
 
-        private static color.Gray16 Gray16At(this ref Gray16 p, long x, long y)
+        private static color.Gray16 Gray16At(this ptr<Gray16> _addr_p, long x, long y)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.Gray16();
             }
+
             var i = p.PixOffset(x, y);
             return new color.Gray16(uint16(p.Pix[i+0])<<8|uint16(p.Pix[i+1]));
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref Gray16 p, long x, long y)
+        private static long PixOffset(this ptr<Gray16> _addr_p, long x, long y)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 2L;
         }
 
-        private static void Set(this ref Gray16 p, long x, long y, color.Color c)
+        private static void Set(this ptr<Gray16> _addr_p, long x, long y, color.Color c)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             color.Gray16 c1 = color.Gray16Model.Convert(c)._<color.Gray16>();
             p.Pix[i + 0L] = uint8(c1.Y >> (int)(8L));
             p.Pix[i + 1L] = uint8(c1.Y);
+
         }
 
-        private static void SetGray16(this ref Gray16 p, long x, long y, color.Gray16 c)
+        private static void SetGray16(this ptr<Gray16> _addr_p, long x, long y, color.Gray16 c)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             p.Pix[i + 0L] = uint8(c.Y >> (int)(8L));
             p.Pix[i + 1L] = uint8(c.Y);
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref Gray16 p, Rectangle r)
+        private static Image SubImage(this ptr<Gray16> _addr_p, Rectangle r)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new Gray16();
+                return addr(new Gray16());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new Gray16(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new Gray16(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref Gray16 p)
+        private static bool Opaque(this ptr<Gray16> _addr_p)
         {
+            ref Gray16 p = ref _addr_p.val;
+
             return true;
         }
 
         // NewGray16 returns a new Gray16 image with the given bounds.
-        public static ref Gray16 NewGray16(Rectangle r)
+        public static ptr<Gray16> NewGray16(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var pix = make_slice<byte>(2L * w * h);
-            return ref new Gray16(pix,2*w,r);
+            return addr(new Gray16(Pix:make([]uint8,pixelBufferLength(2,r,"Gray16")),Stride:2*r.Dx(),Rect:r,));
         }
 
         // CMYK is an in-memory image whose At method returns color.CMYK values.
@@ -990,94 +1229,120 @@ namespace go
             public Rectangle Rect;
         }
 
-        private static color.Model ColorModel(this ref CMYK p)
+        private static color.Model ColorModel(this ptr<CMYK> _addr_p)
         {
+            ref CMYK p = ref _addr_p.val;
+
             return color.CMYKModel;
         }
 
-        private static Rectangle Bounds(this ref CMYK p)
+        private static Rectangle Bounds(this ptr<CMYK> _addr_p)
         {
+            ref CMYK p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref CMYK p, long x, long y)
+        private static color.Color At(this ptr<CMYK> _addr_p, long x, long y)
         {
+            ref CMYK p = ref _addr_p.val;
+
             return p.CMYKAt(x, y);
         }
 
-        private static color.CMYK CMYKAt(this ref CMYK p, long x, long y)
+        private static color.CMYK CMYKAt(this ptr<CMYK> _addr_p, long x, long y)
         {
+            ref CMYK p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return new color.CMYK();
             }
+
             var i = p.PixOffset(x, y);
-            return new color.CMYK(p.Pix[i+0],p.Pix[i+1],p.Pix[i+2],p.Pix[i+3]);
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            return new color.CMYK(s[0],s[1],s[2],s[3]);
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref CMYK p, long x, long y)
+        private static long PixOffset(this ptr<CMYK> _addr_p, long x, long y)
         {
+            ref CMYK p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4L;
         }
 
-        private static void Set(this ref CMYK p, long x, long y, color.Color c)
+        private static void Set(this ptr<CMYK> _addr_p, long x, long y, color.Color c)
         {
+            ref CMYK p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             color.CMYK c1 = color.CMYKModel.Convert(c)._<color.CMYK>();
-            p.Pix[i + 0L] = c1.C;
-            p.Pix[i + 1L] = c1.M;
-            p.Pix[i + 2L] = c1.Y;
-            p.Pix[i + 3L] = c1.K;
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = c1.C;
+            s[1L] = c1.M;
+            s[2L] = c1.Y;
+            s[3L] = c1.K;
+
         }
 
-        private static void SetCMYK(this ref CMYK p, long x, long y, color.CMYK c)
+        private static void SetCMYK(this ptr<CMYK> _addr_p, long x, long y, color.CMYK c)
         {
+            ref CMYK p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
-            p.Pix[i + 0L] = c.C;
-            p.Pix[i + 1L] = c.M;
-            p.Pix[i + 2L] = c.Y;
-            p.Pix[i + 3L] = c.K;
+            var s = p.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+            s[0L] = c.C;
+            s[1L] = c.M;
+            s[2L] = c.Y;
+            s[3L] = c.K;
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref CMYK p, Rectangle r)
+        private static Image SubImage(this ptr<CMYK> _addr_p, Rectangle r)
         {
+            ref CMYK p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new CMYK();
+                return addr(new CMYK());
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new CMYK(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,);
+            return addr(new CMYK(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref CMYK p)
+        private static bool Opaque(this ptr<CMYK> _addr_p)
         {
+            ref CMYK p = ref _addr_p.val;
+
             return true;
         }
 
         // NewCMYK returns a new CMYK image with the given bounds.
-        public static ref CMYK NewCMYK(Rectangle r)
+        public static ptr<CMYK> NewCMYK(Rectangle r)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var buf = make_slice<byte>(4L * w * h);
-            return ref new CMYK(buf,4*w,r);
+            return addr(new CMYK(Pix:make([]uint8,pixelBufferLength(4,r,"CMYK")),Stride:4*r.Dx(),Rect:r,));
         }
 
         // Paletted is an in-memory image of uint8 indices into a given palette.
@@ -1089,86 +1354,115 @@ namespace go
             public color.Palette Palette;
         }
 
-        private static color.Model ColorModel(this ref Paletted p)
+        private static color.Model ColorModel(this ptr<Paletted> _addr_p)
         {
+            ref Paletted p = ref _addr_p.val;
+
             return p.Palette;
         }
 
-        private static Rectangle Bounds(this ref Paletted p)
+        private static Rectangle Bounds(this ptr<Paletted> _addr_p)
         {
+            ref Paletted p = ref _addr_p.val;
+
             return p.Rect;
         }
 
-        private static color.Color At(this ref Paletted p, long x, long y)
+        private static color.Color At(this ptr<Paletted> _addr_p, long x, long y)
         {
+            ref Paletted p = ref _addr_p.val;
+
             if (len(p.Palette) == 0L)
             {
                 return null;
             }
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return p.Palette[0L];
             }
+
             var i = p.PixOffset(x, y);
             return p.Palette[p.Pix[i]];
+
         }
 
         // PixOffset returns the index of the first element of Pix that corresponds to
         // the pixel at (x, y).
-        private static long PixOffset(this ref Paletted p, long x, long y)
+        private static long PixOffset(this ptr<Paletted> _addr_p, long x, long y)
         {
+            ref Paletted p = ref _addr_p.val;
+
             return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 1L;
         }
 
-        private static void Set(this ref Paletted p, long x, long y, color.Color c)
+        private static void Set(this ptr<Paletted> _addr_p, long x, long y, color.Color c)
         {
+            ref Paletted p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             p.Pix[i] = uint8(p.Palette.Index(c));
+
         }
 
-        private static byte ColorIndexAt(this ref Paletted p, long x, long y)
+        private static byte ColorIndexAt(this ptr<Paletted> _addr_p, long x, long y)
         {
+            ref Paletted p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
                 return 0L;
             }
+
             var i = p.PixOffset(x, y);
             return p.Pix[i];
+
         }
 
-        private static void SetColorIndex(this ref Paletted p, long x, long y, byte index)
+        private static void SetColorIndex(this ptr<Paletted> _addr_p, long x, long y, byte index)
         {
+            ref Paletted p = ref _addr_p.val;
+
             if (!(new Point(x,y).In(p.Rect)))
             {
-                return;
+                return ;
             }
+
             var i = p.PixOffset(x, y);
             p.Pix[i] = index;
+
         }
 
         // SubImage returns an image representing the portion of the image p visible
         // through r. The returned value shares pixels with the original image.
-        private static Image SubImage(this ref Paletted p, Rectangle r)
+        private static Image SubImage(this ptr<Paletted> _addr_p, Rectangle r)
         {
+            ref Paletted p = ref _addr_p.val;
+
             r = r.Intersect(p.Rect); 
             // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
             // either r1 or r2 if the intersection is empty. Without explicitly checking for
             // this, the Pix[i:] expression below can panic.
             if (r.Empty())
             {
-                return ref new Paletted(Palette:p.Palette,);
+                return addr(new Paletted(Palette:p.Palette,));
             }
+
             var i = p.PixOffset(r.Min.X, r.Min.Y);
-            return ref new Paletted(Pix:p.Pix[i:],Stride:p.Stride,Rect:p.Rect.Intersect(r),Palette:p.Palette,);
+            return addr(new Paletted(Pix:p.Pix[i:],Stride:p.Stride,Rect:p.Rect.Intersect(r),Palette:p.Palette,));
+
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref Paletted p)
+        private static bool Opaque(this ptr<Paletted> _addr_p)
         {
+            ref Paletted p = ref _addr_p.val;
+
             array<bool> present = new array<bool>(256L);
             long i0 = 0L;
             var i1 = p.Rect.Dx();
@@ -1188,6 +1482,7 @@ namespace go
 
                 i0 += p.Stride;
                 i1 += p.Stride;
+
             }
 
             {
@@ -1201,27 +1496,27 @@ namespace go
                     {
                         continue;
                     }
+
                     var (_, _, _, a) = c.RGBA();
                     if (a != 0xffffUL)
                     {
                         return false;
                     }
+
                 }
 
                 c = c__prev1;
             }
 
             return true;
+
         }
 
         // NewPaletted returns a new Paletted image with the given width, height and
         // palette.
-        public static ref Paletted NewPaletted(Rectangle r, color.Palette p)
+        public static ptr<Paletted> NewPaletted(Rectangle r, color.Palette p)
         {
-            var w = r.Dx();
-            var h = r.Dy();
-            var pix = make_slice<byte>(1L * w * h);
-            return ref new Paletted(pix,1*w,r,p);
+            return addr(new Paletted(Pix:make([]uint8,pixelBufferLength(1,r,"Paletted")),Stride:1*r.Dx(),Rect:r,Palette:p,));
         }
     }
 }

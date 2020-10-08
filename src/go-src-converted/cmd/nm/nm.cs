@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:04:44 UTC
+// package main -- go2cs converted at 2020 October 08 04:39:55 UTC
 // Original source: C:\Go\src\cmd\nm\nm.go
 using bufio = go.bufio_package;
 using flag = go.flag_package;
@@ -19,7 +19,7 @@ namespace go
 {
     public static partial class main_package
     {
-        private static readonly @string helpText = @"usage: go tool nm [options] file...
+        private static readonly @string helpText = (@string)@"usage: go tool nm [options] file...
   -n
       an alias for -sort address (numeric),
       for compatibility with other nm commands
@@ -60,18 +60,22 @@ namespace go
         {
             if (value == "true")
             {
-                sortOrder.Value = "address";
+                sortOrder.val = "address";
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         private static @string String(this nflag _p0)
         {
-            if (sortOrder == "address".Value)
+            if (sortOrder == "address".val)
             {
                 return "true";
             }
+
             return "false";
+
         }
 
         private static void Main()
@@ -80,7 +84,7 @@ namespace go
             flag.Usage = usage;
             flag.Parse();
 
-            switch (sortOrder.Value)
+            switch (sortOrder.val)
             {
                 case "address": 
 
@@ -91,7 +95,7 @@ namespace go
                 case "size": 
                     break;
                 default: 
-                    fmt.Fprintf(os.Stderr, "nm: unknown sort order %q\n", sortOrder.Value);
+                    fmt.Fprintf(os.Stderr, "nm: unknown sort order %q\n", sortOrder.val);
                     os.Exit(2L);
                     break;
             }
@@ -102,11 +106,13 @@ namespace go
             {
                 flag.Usage();
             }
+
             foreach (var (_, file) in args)
             {
                 nm(file);
             }
             os.Exit(exitCode);
+
         }
 
         private static long exitCode = 0L;
@@ -125,8 +131,9 @@ namespace go
             if (err != null)
             {
                 errorf("%v", err);
-                return;
+                return ;
             }
+
             defer(f.Close());
 
             var w = bufio.NewWriter(os.Stdout);
@@ -142,13 +149,15 @@ namespace go
                 {
                     errorf("reading %s: %v", file, err);
                 }
+
                 if (len(syms) == 0L)
                 {
                     continue;
                 }
+
                 found = true;
 
-                switch (sortOrder.Value)
+                switch (sortOrder.val)
                 {
                     case "address": 
                         sort.Slice(syms, (i, j) => syms[i].Addr < syms[j].Addr);
@@ -174,11 +183,13 @@ namespace go
                         {
                             fmt.Fprintf(w, "%s(%s):\t", file, name);
                         }
+
                     }
                     else if (filePrefix)
                     {
                         fmt.Fprintf(w, "%s:\t", file);
                     }
+
                     if (sym.Code == 'U')
                     {
                         fmt.Fprintf(w, "%8s", "");
@@ -187,23 +198,30 @@ namespace go
                     {
                         fmt.Fprintf(w, "%8x", sym.Addr);
                     }
-                    if (printSize.Value)
+
+                    if (printSize.val)
                     {
                         fmt.Fprintf(w, " %10d", sym.Size);
                     }
+
                     fmt.Fprintf(w, " %c %s", sym.Code, sym.Name);
-                    if (printType && sym.Type != "".Value)
+                    if (printType && sym.Type != "".val)
                     {
                         fmt.Fprintf(w, " %s", sym.Type);
                     }
+
                     fmt.Fprintf(w, "\n");
+
                 }
+
             }
             if (!found)
             {
                 errorf("reading %s: no symbols", file);
             }
+
             w.Flush();
+
         });
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:45 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:10 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\dim.go
 
@@ -30,8 +30,10 @@ namespace go
             { 
                 // v is negative or 0
                 return 0L;
+
             }
             return v;
+
         }
 
         // Max returns the larger of x or y.
@@ -57,12 +59,15 @@ namespace go
                 {>>MARKER:FUNCTION_Max_BLOCK_PREFIX<<
                     return y;
                 }
+
                 return x;
                         if (x > y)
             {
                 return x;
             }
+
             return y;
+
         }
 
         // Min returns the smaller of x or y.
@@ -87,12 +92,15 @@ namespace go
                 {>>MARKER:FUNCTION_Min_BLOCK_PREFIX<<
                     return x;
                 }
+
                 return y;
                         if (x < y)
             {
                 return x;
             }
+
             return y;
+
         }
     }
 }

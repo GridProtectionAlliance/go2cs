@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:31 UTC
+//     Generated on 2020 October 08 04:10:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,8 +18,6 @@ using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -57,7 +55,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -71,10 +69,10 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate bool LogfByRef(ref T value, @string _p0, params object _p0);
+            private delegate bool LogfByPtr(ptr<T> value, @string _p0, params object _p0);
             private delegate bool LogfByVal(T value, @string _p0, params object _p0);
 
-            private static readonly LogfByRef s_LogfByRef;
+            private static readonly LogfByPtr s_LogfByPtr;
             private static readonly LogfByVal s_LogfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,17 +81,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LogfByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LogfByPtr is null || !m_target_is_ptr)
                     return s_LogfByVal!(target, _p0, _p0);
 
-                return s_LogfByRef(ref target, _p0, _p0);
+                return s_LogfByPtr(m_target_ptr, _p0, _p0);
             }
 
-            private delegate bool LogByRef(ref T value);
+            private delegate bool LogByPtr(ptr<T> value);
             private delegate bool LogByVal(T value);
 
-            private static readonly LogByRef s_LogByRef;
+            private static readonly LogByPtr s_LogByPtr;
             private static readonly LogByVal s_LogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,17 +101,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LogByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LogByPtr is null || !m_target_is_ptr)
                     return s_LogByVal!(target);
 
-                return s_LogByRef(ref target);
+                return s_LogByPtr(m_target_ptr);
             }
 
-            private delegate bool FatalfByRef(ref T value, src.XPos pos, @string msg, params object[] args);
+            private delegate bool FatalfByPtr(ptr<T> value, src.XPos pos, @string msg, params object[] args);
             private delegate bool FatalfByVal(T value, src.XPos pos, @string msg, params object[] args);
 
-            private static readonly FatalfByRef s_FatalfByRef;
+            private static readonly FatalfByPtr s_FatalfByPtr;
             private static readonly FatalfByVal s_FatalfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,17 +121,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FatalfByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FatalfByPtr is null || !m_target_is_ptr)
                     return s_FatalfByVal!(target, pos, msg, args);
 
-                return s_FatalfByRef(ref target, pos, msg, args);
+                return s_FatalfByPtr(m_target_ptr, pos, msg, args);
             }
 
-            private delegate bool WarnlByRef(ref T value, src.XPos pos, @string fmt_, params object[] args);
+            private delegate bool WarnlByPtr(ptr<T> value, src.XPos pos, @string fmt_, params object[] args);
             private delegate bool WarnlByVal(T value, src.XPos pos, @string fmt_, params object[] args);
 
-            private static readonly WarnlByRef s_WarnlByRef;
+            private static readonly WarnlByPtr s_WarnlByPtr;
             private static readonly WarnlByVal s_WarnlByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,17 +141,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WarnlByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WarnlByPtr is null || !m_target_is_ptr)
                     return s_WarnlByVal!(target, pos, fmt_, args);
 
-                return s_WarnlByRef(ref target, pos, fmt_, args);
+                return s_WarnlByPtr(m_target_ptr, pos, fmt_, args);
             }
 
-            private delegate bool Debug_checknilByRef(ref T value);
+            private delegate bool Debug_checknilByPtr(ptr<T> value);
             private delegate bool Debug_checknilByVal(T value);
 
-            private static readonly Debug_checknilByRef s_Debug_checknilByRef;
+            private static readonly Debug_checknilByPtr s_Debug_checknilByPtr;
             private static readonly Debug_checknilByVal s_Debug_checknilByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -159,30 +161,12 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Debug_checknilByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_Debug_checknilByPtr is null || !m_target_is_ptr)
                     return s_Debug_checknilByVal!(target);
 
-                return s_Debug_checknilByRef(ref target);
-            }
-
-            private delegate bool Debug_eagerwbByRef(ref T value);
-            private delegate bool Debug_eagerwbByVal(T value);
-
-            private static readonly Debug_eagerwbByRef s_Debug_eagerwbByRef;
-            private static readonly Debug_eagerwbByVal s_Debug_eagerwbByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Debug_eagerwb()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Debug_eagerwbByRef is null)
-                    return s_Debug_eagerwbByVal!(target);
-
-                return s_Debug_eagerwbByRef(ref target);
+                return s_Debug_checknilByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -191,104 +175,73 @@ namespace @internal
             static Logger()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Logf");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Logf");
 
                 if (!(extensionMethod is null))
-                    s_LogfByRef = extensionMethod.CreateStaticDelegate(typeof(LogfByRef)) as LogfByRef;
+                    s_LogfByPtr = extensionMethod.CreateStaticDelegate(typeof(LogfByPtr)) as LogfByPtr;
 
-                if (s_LogfByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Logf");
+                extensionMethod = targetType.GetExtensionMethod("Logf");
 
-                    if (!(extensionMethod is null))
-                        s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
 
-                if (s_LogfByRef is null && s_LogfByVal is null)
+                if (s_LogfByPtr is null && s_LogfByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Logger.Logf method", new Exception("Logf"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Log");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Log");
 
                 if (!(extensionMethod is null))
-                    s_LogByRef = extensionMethod.CreateStaticDelegate(typeof(LogByRef)) as LogByRef;
+                    s_LogByPtr = extensionMethod.CreateStaticDelegate(typeof(LogByPtr)) as LogByPtr;
 
-                if (s_LogByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Log");
+                extensionMethod = targetType.GetExtensionMethod("Log");
 
-                    if (!(extensionMethod is null))
-                        s_LogByVal = extensionMethod.CreateStaticDelegate(typeof(LogByVal)) as LogByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LogByVal = extensionMethod.CreateStaticDelegate(typeof(LogByVal)) as LogByVal;
 
-                if (s_LogByRef is null && s_LogByVal is null)
+                if (s_LogByPtr is null && s_LogByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Logger.Log method", new Exception("Log"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Fatalf");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Fatalf");
 
                 if (!(extensionMethod is null))
-                    s_FatalfByRef = extensionMethod.CreateStaticDelegate(typeof(FatalfByRef)) as FatalfByRef;
+                    s_FatalfByPtr = extensionMethod.CreateStaticDelegate(typeof(FatalfByPtr)) as FatalfByPtr;
 
-                if (s_FatalfByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Fatalf");
+                extensionMethod = targetType.GetExtensionMethod("Fatalf");
 
-                    if (!(extensionMethod is null))
-                        s_FatalfByVal = extensionMethod.CreateStaticDelegate(typeof(FatalfByVal)) as FatalfByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FatalfByVal = extensionMethod.CreateStaticDelegate(typeof(FatalfByVal)) as FatalfByVal;
 
-                if (s_FatalfByRef is null && s_FatalfByVal is null)
+                if (s_FatalfByPtr is null && s_FatalfByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Logger.Fatalf method", new Exception("Fatalf"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Warnl");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Warnl");
 
                 if (!(extensionMethod is null))
-                    s_WarnlByRef = extensionMethod.CreateStaticDelegate(typeof(WarnlByRef)) as WarnlByRef;
+                    s_WarnlByPtr = extensionMethod.CreateStaticDelegate(typeof(WarnlByPtr)) as WarnlByPtr;
 
-                if (s_WarnlByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Warnl");
+                extensionMethod = targetType.GetExtensionMethod("Warnl");
 
-                    if (!(extensionMethod is null))
-                        s_WarnlByVal = extensionMethod.CreateStaticDelegate(typeof(WarnlByVal)) as WarnlByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WarnlByVal = extensionMethod.CreateStaticDelegate(typeof(WarnlByVal)) as WarnlByVal;
 
-                if (s_WarnlByRef is null && s_WarnlByVal is null)
+                if (s_WarnlByPtr is null && s_WarnlByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Logger.Warnl method", new Exception("Warnl"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Debug_checknil");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Debug_checknil");
 
                 if (!(extensionMethod is null))
-                    s_Debug_checknilByRef = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByRef)) as Debug_checknilByRef;
+                    s_Debug_checknilByPtr = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByPtr)) as Debug_checknilByPtr;
 
-                if (s_Debug_checknilByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Debug_checknil");
+                extensionMethod = targetType.GetExtensionMethod("Debug_checknil");
 
-                    if (!(extensionMethod is null))
-                        s_Debug_checknilByVal = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByVal)) as Debug_checknilByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_Debug_checknilByVal = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByVal)) as Debug_checknilByVal;
 
-                if (s_Debug_checknilByRef is null && s_Debug_checknilByVal is null)
+                if (s_Debug_checknilByPtr is null && s_Debug_checknilByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Logger.Debug_checknil method", new Exception("Debug_checknil"));
-
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Debug_eagerwb");
-
-                if (!(extensionMethod is null))
-                    s_Debug_eagerwbByRef = extensionMethod.CreateStaticDelegate(typeof(Debug_eagerwbByRef)) as Debug_eagerwbByRef;
-
-                if (s_Debug_eagerwbByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Debug_eagerwb");
-
-                    if (!(extensionMethod is null))
-                        s_Debug_eagerwbByVal = extensionMethod.CreateStaticDelegate(typeof(Debug_eagerwbByVal)) as Debug_eagerwbByVal;
-                }
-
-                if (s_Debug_eagerwbByRef is null && s_Debug_eagerwbByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Logger.Debug_eagerwb method", new Exception("Debug_eagerwb"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

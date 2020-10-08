@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:48:01 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:51 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\type.go
 using sort = go.sort_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace go
@@ -26,37 +27,38 @@ namespace go
         {
         }
 
-        public static readonly BasicKind Invalid = iota; // type is invalid
+        public static readonly BasicKind Invalid = (BasicKind)iota; // type is invalid
 
         // predeclared types
-        public static readonly var Bool = 0;
-        public static readonly var Int = 1;
-        public static readonly var Int8 = 2;
-        public static readonly var Int16 = 3;
-        public static readonly var Int32 = 4;
-        public static readonly var Int64 = 5;
-        public static readonly var Uint = 6;
-        public static readonly var Uint8 = 7;
-        public static readonly var Uint16 = 8;
-        public static readonly var Uint32 = 9;
-        public static readonly var Uint64 = 10;
-        public static readonly var Uintptr = 11;
-        public static readonly var Float32 = 12;
-        public static readonly var Float64 = 13;
-        public static readonly var Complex64 = 14;
-        public static readonly var Complex128 = 15;
-        public static readonly var String = 16;
-        public static readonly var UnsafePointer = 17; 
+        public static readonly var Bool = (var)0;
+        public static readonly var Int = (var)1;
+        public static readonly var Int8 = (var)2;
+        public static readonly var Int16 = (var)3;
+        public static readonly var Int32 = (var)4;
+        public static readonly var Int64 = (var)5;
+        public static readonly var Uint = (var)6;
+        public static readonly var Uint8 = (var)7;
+        public static readonly var Uint16 = (var)8;
+        public static readonly var Uint32 = (var)9;
+        public static readonly var Uint64 = (var)10;
+        public static readonly var Uintptr = (var)11;
+        public static readonly var Float32 = (var)12;
+        public static readonly var Float64 = (var)13;
+        public static readonly var Complex64 = (var)14;
+        public static readonly var Complex128 = (var)15;
+        public static readonly var String = (var)16;
+        public static readonly var UnsafePointer = (var)17; 
 
         // types for untyped values
-        public static readonly var UntypedBool = 18;
-        public static readonly var UntypedInt = 19;
-        public static readonly var UntypedRune = 20;
-        public static readonly var UntypedFloat = 21;
-        public static readonly var UntypedComplex = 22;
-        public static readonly var UntypedString = 23;
-        public static readonly Byte UntypedNil = Uint8;
-        public static readonly var Rune = Int32;
+        public static readonly var UntypedBool = (var)18;
+        public static readonly var UntypedInt = (var)19;
+        public static readonly var UntypedRune = (var)20;
+        public static readonly var UntypedFloat = (var)21;
+        public static readonly var UntypedComplex = (var)22;
+        public static readonly var UntypedString = (var)23;
+        public static readonly Byte UntypedNil = (Byte)Uint8;
+        public static readonly var Rune = (var)Int32;
+
 
         // BasicInfo is a set of flags describing properties of a basic type.
         public partial struct BasicInfo // : long
@@ -64,15 +66,16 @@ namespace go
         }
 
         // Properties of basic types.
-        public static readonly BasicInfo IsBoolean = 1L << (int)(iota);
-        public static readonly var IsInteger = 0;
-        public static readonly var IsUnsigned = 1;
-        public static readonly var IsFloat = 2;
-        public static readonly var IsComplex = 3;
-        public static readonly var IsString = 4;
-        public static readonly IsOrdered IsUntyped = IsInteger | IsFloat | IsString;
-        public static readonly var IsNumeric = IsInteger | IsFloat | IsComplex;
-        public static readonly var IsConstType = IsBoolean | IsNumeric | IsString;
+        public static readonly BasicInfo IsBoolean = (BasicInfo)1L << (int)(iota);
+        public static readonly var IsInteger = (var)0;
+        public static readonly var IsUnsigned = (var)1;
+        public static readonly var IsFloat = (var)2;
+        public static readonly var IsComplex = (var)3;
+        public static readonly var IsString = (var)4;
+        public static readonly IsOrdered IsUntyped = (IsOrdered)IsInteger | IsFloat | IsString;
+        public static readonly var IsNumeric = (var)IsInteger | IsFloat | IsComplex;
+        public static readonly var IsConstType = (var)IsBoolean | IsNumeric | IsString;
+
 
         // A Basic represents a basic type.
         public partial struct Basic
@@ -83,20 +86,26 @@ namespace go
         }
 
         // Kind returns the kind of basic type b.
-        private static BasicKind Kind(this ref Basic b)
+        private static BasicKind Kind(this ptr<Basic> _addr_b)
         {
+            ref Basic b = ref _addr_b.val;
+
             return b.kind;
         }
 
         // Info returns information about properties of basic type b.
-        private static BasicInfo Info(this ref Basic b)
+        private static BasicInfo Info(this ptr<Basic> _addr_b)
         {
+            ref Basic b = ref _addr_b.val;
+
             return b.info;
         }
 
         // Name returns the name of basic type b.
-        private static @string Name(this ref Basic b)
+        private static @string Name(this ptr<Basic> _addr_b)
         {
+            ref Basic b = ref _addr_b.val;
+
             return b.name;
         }
 
@@ -108,20 +117,26 @@ namespace go
         }
 
         // NewArray returns a new array type for the given element type and length.
-        public static ref Array NewArray(Type elem, long len)
+        // A negative length indicates an unknown length.
+        public static ptr<Array> NewArray(Type elem, long len)
         {
-            return ref new Array(len,elem);
+            return addr(new Array(len,elem));
         }
 
         // Len returns the length of array a.
-        private static long Len(this ref Array a)
+        // A negative result indicates an unknown length.
+        private static long Len(this ptr<Array> _addr_a)
         {
+            ref Array a = ref _addr_a.val;
+
             return a.len;
         }
 
         // Elem returns element type of array a.
-        private static Type Elem(this ref Array a)
+        private static Type Elem(this ptr<Array> _addr_a)
         {
+            ref Array a = ref _addr_a.val;
+
             return a.elem;
         }
 
@@ -132,21 +147,23 @@ namespace go
         }
 
         // NewSlice returns a new slice type for the given element type.
-        public static ref Slice NewSlice(Type elem)
+        public static ptr<Slice> NewSlice(Type elem)
         {
-            return ref new Slice(elem);
+            return addr(new Slice(elem));
         }
 
         // Elem returns the element type of slice s.
-        private static Type Elem(this ref Slice s)
+        private static Type Elem(this ptr<Slice> _addr_s)
         {
+            ref Slice s = ref _addr_s.val;
+
             return s.elem;
         }
 
         // A Struct represents a struct type.
         public partial struct Struct
         {
-            public slice<ref Var> fields;
+            public slice<ptr<Var>> fields;
             public slice<@string> tags; // field tags; nil if there are no tags
         }
 
@@ -154,7 +171,7 @@ namespace go
         // If a field with index i has a tag, tags[i] must be that tag, but len(tags) may be
         // only as long as required to hold the tag with the largest index i. Consequently,
         // if no field has a tag, tags may be nil.
-        public static ref Struct NewStruct(slice<ref Var> fields, slice<@string> tags) => func((_, panic, __) =>
+        public static ptr<Struct> NewStruct(slice<ptr<Var>> fields, slice<@string> tags) => func((_, panic, __) =>
         {
             objset fset = default;
             foreach (var (_, f) in fields)
@@ -163,34 +180,45 @@ namespace go
                 {
                     panic("multiple fields with the same name");
                 }
+
             }
             if (len(tags) > len(fields))
             {
                 panic("more tags than fields");
             }
-            return ref new Struct(fields:fields,tags:tags);
+
+            return addr(new Struct(fields:fields,tags:tags));
+
         });
 
-        // NumFields returns the number of fields in the struct (including blank and anonymous fields).
-        private static long NumFields(this ref Struct s)
+        // NumFields returns the number of fields in the struct (including blank and embedded fields).
+        private static long NumFields(this ptr<Struct> _addr_s)
         {
+            ref Struct s = ref _addr_s.val;
+
             return len(s.fields);
         }
 
         // Field returns the i'th field for 0 <= i < NumFields().
-        private static ref Var Field(this ref Struct s, long i)
+        private static ptr<Var> Field(this ptr<Struct> _addr_s, long i)
         {
-            return s.fields[i];
+            ref Struct s = ref _addr_s.val;
+
+            return _addr_s.fields[i]!;
         }
 
         // Tag returns the i'th field tag for 0 <= i < NumFields().
-        private static @string Tag(this ref Struct s, long i)
+        private static @string Tag(this ptr<Struct> _addr_s, long i)
         {
+            ref Struct s = ref _addr_s.val;
+
             if (i < len(s.tags))
             {
                 return s.tags[i];
             }
+
             return "";
+
         }
 
         // A Pointer represents a pointer type.
@@ -200,14 +228,16 @@ namespace go
         }
 
         // NewPointer returns a new pointer type for the given element (base) type.
-        public static ref Pointer NewPointer(Type elem)
+        public static ptr<Pointer> NewPointer(Type elem)
         {
-            return ref new Pointer(base:elem);
+            return addr(new Pointer(base:elem));
         }
 
         // Elem returns the element type for the given pointer p.
-        private static Type Elem(this ref Pointer p)
+        private static Type Elem(this ptr<Pointer> _addr_p)
         {
+            ref Pointer p = ref _addr_p.val;
+
             return p.@base;
         }
 
@@ -216,35 +246,44 @@ namespace go
         // assignments; they are not first class types of Go.
         public partial struct Tuple
         {
-            public slice<ref Var> vars;
+            public slice<ptr<Var>> vars;
         }
 
         // NewTuple returns a new tuple for the given variables.
-        public static ref Tuple NewTuple(params ptr<Var>[] x)
+        public static ptr<Tuple> NewTuple(params ptr<ptr<Var>>[] _addr_x)
         {
             x = x.Clone();
+            ref Var x = ref _addr_x.val;
 
             if (len(x) > 0L)
             {
-                return ref new Tuple(x);
+                return addr(new Tuple(x));
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
         // Len returns the number variables of tuple t.
-        private static long Len(this ref Tuple t)
+        private static long Len(this ptr<Tuple> _addr_t)
         {
+            ref Tuple t = ref _addr_t.val;
+
             if (t != null)
             {
                 return len(t.vars);
             }
+
             return 0L;
+
         }
 
         // At returns the i'th variable of tuple t.
-        private static ref Var At(this ref Tuple t, long i)
+        private static ptr<Var> At(this ptr<Tuple> _addr_t, long i)
         {
-            return t.vars[i];
+            ref Tuple t = ref _addr_t.val;
+
+            return _addr_t.vars[i]!;
         }
 
         // A Signature represents a (non-builtin) function or method type.
@@ -262,8 +301,12 @@ namespace go
         // and results, either of which may be nil. If variadic is set, the function
         // is variadic, it must have at least one parameter, and the last parameter
         // must be of unnamed slice type.
-        public static ref Signature NewSignature(ref Var _recv, ref Tuple _@params, ref Tuple _results, bool variadic) => func(_recv, _@params, _results, (ref Var recv, ref Tuple @params, ref Tuple results, Defer _, Panic panic, Recover __) =>
+        public static ptr<Signature> NewSignature(ptr<Var> _addr_recv, ptr<Tuple> _addr_@params, ptr<Tuple> _addr_results, bool variadic) => func((_, panic, __) =>
         {
+            ref Var recv = ref _addr_recv.val;
+            ref Tuple @params = ref _addr_@params.val;
+            ref Tuple results = ref _addr_results.val;
+
             if (variadic)
             {
                 var n = @params.Len();
@@ -271,8 +314,9 @@ namespace go
                 {
                     panic("types.NewSignature: variadic function must have at least one parameter");
                 }
+
                 {
-                    ref Slice (_, ok) = @params.At(n - 1L).typ._<ref Slice>();
+                    ptr<Slice> (_, ok) = @params.At(n - 1L).typ._<ptr<Slice>>();
 
                     if (!ok)
                     {
@@ -280,8 +324,11 @@ namespace go
                     }
 
                 }
+
             }
-            return ref new Signature(nil,recv,params,results,variadic);
+
+            return addr(new Signature(nil,recv,params,results,variadic));
+
         });
 
         // Recv returns the receiver of signature s (if a method), or nil if a
@@ -290,36 +337,44 @@ namespace go
         // For an abstract method, Recv returns the enclosing interface either
         // as a *Named or an *Interface. Due to embedding, an interface may
         // contain methods whose receiver type is a different interface.
-        private static ref Var Recv(this ref Signature s)
+        private static ptr<Var> Recv(this ptr<Signature> _addr_s)
         {
-            return s.recv;
+            ref Signature s = ref _addr_s.val;
+
+            return _addr_s.recv!;
         }
 
         // Params returns the parameters of signature s, or nil.
-        private static ref Tuple Params(this ref Signature s)
+        private static ptr<Tuple> Params(this ptr<Signature> _addr_s)
         {
-            return s.@params;
+            ref Signature s = ref _addr_s.val;
+
+            return _addr_s.@params!;
         }
 
         // Results returns the results of signature s, or nil.
-        private static ref Tuple Results(this ref Signature s)
+        private static ptr<Tuple> Results(this ptr<Signature> _addr_s)
         {
-            return s.results;
+            ref Signature s = ref _addr_s.val;
+
+            return _addr_s.results!;
         }
 
         // Variadic reports whether the signature s is variadic.
-        private static bool Variadic(this ref Signature s)
+        private static bool Variadic(this ptr<Signature> _addr_s)
         {
+            ref Signature s = ref _addr_s.val;
+
             return s.variadic;
         }
 
         // An Interface represents an interface type.
         public partial struct Interface
         {
-            public slice<ref Func> methods; // ordered list of explicitly declared methods
-            public slice<ref Named> embeddeds; // ordered list of explicitly embedded types
+            public slice<ptr<Func>> methods; // ordered list of explicitly declared methods
+            public slice<Type> embeddeds; // ordered list of explicitly embedded types
 
-            public slice<ref Func> allMethods; // ordered list of methods declared with or embedded in this interface (TODO(gri): replace with mset)
+            public slice<ptr<Func>> allMethods; // ordered list of methods declared with or embedded in this interface (TODO(gri): replace with mset)
         }
 
         // emptyInterface represents the empty (completed) interface
@@ -327,131 +382,280 @@ namespace go
 
         // markComplete is used to mark an empty interface as completely
         // set up by setting the allMethods field to a non-nil empty slice.
-        private static var markComplete = make_slice<ref Func>(0L);
+        private static var markComplete = make_slice<ptr<Func>>(0L);
 
         // NewInterface returns a new (incomplete) interface for the given methods and embedded types.
-        // To compute the method set of the interface, Complete must be called.
-        public static ref Interface NewInterface(slice<ref Func> methods, slice<ref Named> embeddeds) => func((_, panic, __) =>
+        // Each embedded type must have an underlying type of interface type.
+        // NewInterface takes ownership of the provided methods and may modify their types by setting
+        // missing receivers. To compute the method set of the interface, Complete must be called.
+        //
+        // Deprecated: Use NewInterfaceType instead which allows any (even non-defined) interface types
+        // to be embedded. This is necessary for interfaces that embed alias type names referring to
+        // non-defined (literal) interface types.
+        public static ptr<Interface> NewInterface(slice<ptr<Func>> methods, slice<ptr<Named>> embeddeds)
         {
-            ptr<Interface> typ = @new<Interface>();
+            var tnames = make_slice<Type>(len(embeddeds));
+            foreach (var (i, t) in embeddeds)
+            {
+                tnames[i] = t;
+            }
+            return _addr_NewInterfaceType(methods, tnames)!;
 
+        }
+
+        // NewInterfaceType returns a new (incomplete) interface for the given methods and embedded types.
+        // Each embedded type must have an underlying type of interface type (this property is not
+        // verified for defined types, which may be in the process of being set up and which don't
+        // have a valid underlying type yet).
+        // NewInterfaceType takes ownership of the provided methods and may modify their types by setting
+        // missing receivers. To compute the method set of the interface, Complete must be called.
+        public static ptr<Interface> NewInterfaceType(slice<ptr<Func>> methods, slice<Type> embeddeds) => func((_, panic, __) =>
+        {
             if (len(methods) == 0L && len(embeddeds) == 0L)
             {
-                return typ;
-            }
-            objset mset = default;
+                return _addr__addr_emptyInterface!;
+            } 
+
+            // set method receivers if necessary
+            ptr<Interface> typ = @new<Interface>();
             foreach (var (_, m) in methods)
             {
-                if (mset.insert(m) != null)
                 {
-                    panic("multiple methods with the same name");
-                } 
-                // set receiver
-                // TODO(gri) Ideally, we should use a named type here instead of
-                // typ, for less verbose printing of interface method signatures.
-                m.typ._<ref Signature>().recv = NewVar(m.pos, m.pkg, "", typ);
-            }
-            sort.Sort(byUniqueMethodName(methods));
+                    ptr<Signature> sig = m.typ._<ptr<Signature>>();
 
-            if (embeddeds != null)
+                    if (sig.recv == null)
+                    {
+                        sig.recv = NewVar(m.pos, m.pkg, "", typ);
+                    }
+
+                }
+
+            } 
+
+            // All embedded types should be interfaces; however, defined types
+            // may not yet be fully resolved. Only verify that non-defined types
+            // are interfaces. This matches the behavior of the code before the
+            // fix for #25301 (issue #25596).
+            foreach (var (_, t) in embeddeds)
             {
-                sort.Sort(byUniqueTypeName(embeddeds));
-            }
+                {
+                    ptr<Named> (_, ok) = t._<ptr<Named>>();
+
+                    if (!ok && !IsInterface(t))
+                    {
+                        panic("embedded type is not an interface");
+                    }
+
+                }
+
+            } 
+
+            // sort for API stability
+            sort.Sort(byUniqueMethodName(methods));
+            sort.Stable(byUniqueTypeName(embeddeds));
+
             typ.methods = methods;
             typ.embeddeds = embeddeds;
-            return typ;
+            return _addr_typ!;
+
         });
 
         // NumExplicitMethods returns the number of explicitly declared methods of interface t.
-        private static long NumExplicitMethods(this ref Interface t)
+        private static long NumExplicitMethods(this ptr<Interface> _addr_t)
         {
+            ref Interface t = ref _addr_t.val;
+
             return len(t.methods);
         }
 
         // ExplicitMethod returns the i'th explicitly declared method of interface t for 0 <= i < t.NumExplicitMethods().
         // The methods are ordered by their unique Id.
-        private static ref Func ExplicitMethod(this ref Interface t, long i)
+        private static ptr<Func> ExplicitMethod(this ptr<Interface> _addr_t, long i)
         {
-            return t.methods[i];
+            ref Interface t = ref _addr_t.val;
+
+            return _addr_t.methods[i]!;
         }
 
         // NumEmbeddeds returns the number of embedded types in interface t.
-        private static long NumEmbeddeds(this ref Interface t)
+        private static long NumEmbeddeds(this ptr<Interface> _addr_t)
         {
+            ref Interface t = ref _addr_t.val;
+
             return len(t.embeddeds);
         }
 
-        // Embedded returns the i'th embedded type of interface t for 0 <= i < t.NumEmbeddeds().
-        // The types are ordered by the corresponding TypeName's unique Id.
-        private static ref Named Embedded(this ref Interface t, long i)
+        // Embedded returns the i'th embedded defined (*Named) type of interface t for 0 <= i < t.NumEmbeddeds().
+        // The result is nil if the i'th embedded type is not a defined type.
+        //
+        // Deprecated: Use EmbeddedType which is not restricted to defined (*Named) types.
+        private static ptr<Named> Embedded(this ptr<Interface> _addr_t, long i)
         {
+            ref Interface t = ref _addr_t.val;
+
+            ptr<Named> (tname, _) = t.embeddeds[i]._<ptr<Named>>();
+
+            return _addr_tname!;
+        }
+
+        // EmbeddedType returns the i'th embedded type of interface t for 0 <= i < t.NumEmbeddeds().
+        private static Type EmbeddedType(this ptr<Interface> _addr_t, long i)
+        {
+            ref Interface t = ref _addr_t.val;
+
             return t.embeddeds[i];
         }
 
         // NumMethods returns the total number of methods of interface t.
-        private static long NumMethods(this ref Interface t)
+        // The interface must have been completed.
+        private static long NumMethods(this ptr<Interface> _addr_t)
         {
+            ref Interface t = ref _addr_t.val;
+
+            t.assertCompleteness();
+
             return len(t.allMethods);
         }
 
+        private static void assertCompleteness(this ptr<Interface> _addr_t) => func((_, panic, __) =>
+        {
+            ref Interface t = ref _addr_t.val;
+
+            if (t.allMethods == null)
+            {
+                panic("interface is incomplete");
+            }
+
+        });
+
         // Method returns the i'th method of interface t for 0 <= i < t.NumMethods().
         // The methods are ordered by their unique Id.
-        private static ref Func Method(this ref Interface t, long i)
+        // The interface must have been completed.
+        private static ptr<Func> Method(this ptr<Interface> _addr_t, long i)
         {
-            return t.allMethods[i];
+            ref Interface t = ref _addr_t.val;
+
+            t.assertCompleteness();
+
+            return _addr_t.allMethods[i]!;
         }
 
-        // Empty returns true if t is the empty interface.
-        private static bool Empty(this ref Interface t)
+        // Empty reports whether t is the empty interface.
+        // The interface must have been completed.
+        private static bool Empty(this ptr<Interface> _addr_t)
         {
+            ref Interface t = ref _addr_t.val;
+
+            t.assertCompleteness();
+
             return len(t.allMethods) == 0L;
         }
 
         // Complete computes the interface's method set. It must be called by users of
-        // NewInterface after the interface's embedded types are fully defined and
-        // before using the interface type in any way other than to form other types.
-        // Complete returns the receiver.
-        private static ref Interface Complete(this ref Interface t)
+        // NewInterfaceType and NewInterface after the interface's embedded types are
+        // fully defined and before using the interface type in any way other than to
+        // form other types. The interface must not contain duplicate methods or a
+        // panic occurs. Complete returns the receiver.
+        private static ptr<Interface> Complete(this ptr<Interface> _addr_t) => func((_, panic, __) =>
         {
+            ref Interface t = ref _addr_t.val;
+ 
+            // TODO(gri) consolidate this method with Checker.completeInterface
             if (t.allMethods != null)
             {
-                return t;
+                return _addr_t!;
             }
-            slice<ref Func> allMethods = default;
-            if (t.embeddeds == null)
+
+            t.allMethods = markComplete; // avoid infinite recursion
+
+            slice<ptr<Func>> todo = default;
+            slice<ptr<Func>> methods = default;
+            objset seen = default;
+            Action<ptr<Func>, bool> addMethod = (m, @explicit) =>
             {
-                if (t.methods == null)
                 {
-                    allMethods = make_slice<ref Func>(0L, 1L);
+                    var other__prev1 = other;
+
+                    var other = seen.insert(m);
+
+
+                    if (other == null) 
+                        methods = append(methods, m);
+                    else if (explicit) 
+                        panic("duplicate method " + m.name);
+                    else 
+                        // check method signatures after all locally embedded interfaces are computed
+                        todo = append(todo, m, other._<ptr<Func>>());
+
+
+                    other = other__prev1;
                 }
-                else
-                {
-                    allMethods = t.methods;
-                }
+
             }
-            else
+;
+
             {
-                allMethods = append(allMethods, t.methods);
-                foreach (var (_, et) in t.embeddeds)
+                var m__prev1 = m;
+
+                foreach (var (_, __m) in t.methods)
                 {
-                    ref Interface it = et.Underlying()._<ref Interface>();
-                    it.Complete();
-                    foreach (var (_, tm) in it.allMethods)
-                    { 
-                        // Make a copy of the method and adjust its receiver type.
-                        var newm = tm.Value;
-                        ref Signature newmtyp = tm.typ._<ref Signature>().Value;
-                        newm.typ = ref newmtyp;
-                        newmtyp.recv = NewVar(newm.pos, newm.pkg, "", t);
-                        allMethods = append(allMethods, ref newm);
+                    m = __m;
+                    addMethod(m, true);
+                }
+
+                m = m__prev1;
+            }
+
+            {
+                var typ__prev1 = typ;
+
+                foreach (var (_, __typ) in t.embeddeds)
+                {
+                    typ = __typ;
+                    ptr<Interface> typ = typ.Underlying()._<ptr<Interface>>();
+                    typ.Complete();
+                    {
+                        var m__prev2 = m;
+
+                        foreach (var (_, __m) in typ.allMethods)
+                        {
+                            m = __m;
+                            addMethod(m, false);
+                        }
+
+                        m = m__prev2;
                     }
                 }
-                sort.Sort(byUniqueMethodName(allMethods));
-            }
-            t.allMethods = allMethods;
 
-            return t;
-        }
+                typ = typ__prev1;
+            }
+
+            {
+                long i = 0L;
+
+                while (i < len(todo))
+                {
+                    var m = todo[i];
+                    other = todo[i + 1L];
+                    if (!Identical(m.typ, other.typ))
+                    {
+                        panic("duplicate method " + m.name);
+                    i += 2L;
+                    }
+
+                }
+
+            }
+
+            if (methods != null)
+            {
+                sort.Sort(byUniqueMethodName(methods));
+                t.allMethods = methods;
+            }
+
+            return _addr_t!;
+
+        });
 
         // A Map represents a map type.
         public partial struct Map
@@ -461,20 +665,24 @@ namespace go
         }
 
         // NewMap returns a new map for the given key and element types.
-        public static ref Map NewMap(Type key, Type elem)
+        public static ptr<Map> NewMap(Type key, Type elem)
         {
-            return ref new Map(key,elem);
+            return addr(new Map(key,elem));
         }
 
         // Key returns the key type of map m.
-        private static Type Key(this ref Map m)
+        private static Type Key(this ptr<Map> _addr_m)
         {
+            ref Map m = ref _addr_m.val;
+
             return m.key;
         }
 
         // Elem returns the element type of map m.
-        private static Type Elem(this ref Map m)
+        private static Type Elem(this ptr<Map> _addr_m)
         {
+            ref Map m = ref _addr_m.val;
+
             return m.elem;
         }
 
@@ -491,43 +699,52 @@ namespace go
         }
 
         // The direction of a channel is indicated by one of these constants.
-        public static readonly ChanDir SendRecv = iota;
-        public static readonly var SendOnly = 0;
-        public static readonly var RecvOnly = 1;
+        public static readonly ChanDir SendRecv = (ChanDir)iota;
+        public static readonly var SendOnly = (var)0;
+        public static readonly var RecvOnly = (var)1;
+
 
         // NewChan returns a new channel type for the given direction and element type.
-        public static ref Chan NewChan(ChanDir dir, Type elem)
+        public static ptr<Chan> NewChan(ChanDir dir, Type elem)
         {
-            return ref new Chan(dir,elem);
+            return addr(new Chan(dir,elem));
         }
 
         // Dir returns the direction of channel c.
-        private static ChanDir Dir(this ref Chan c)
+        private static ChanDir Dir(this ptr<Chan> _addr_c)
         {
+            ref Chan c = ref _addr_c.val;
+
             return c.dir;
         }
 
         // Elem returns the element type of channel c.
-        private static Type Elem(this ref Chan c)
+        private static Type Elem(this ptr<Chan> _addr_c)
         {
+            ref Chan c = ref _addr_c.val;
+
             return c.elem;
         }
 
         // A Named represents a named type.
         public partial struct Named
         {
+            public typeInfo info; // for cycle detection
             public ptr<TypeName> obj; // corresponding declared object
+            public Type orig; // type (on RHS of declaration) this *Named type is derived of (for cycle reporting)
             public Type underlying; // possibly a *Named during setup; never a *Named once set up completely
-            public slice<ref Func> methods; // methods declared for this type (not the method set of this type)
+            public slice<ptr<Func>> methods; // methods declared for this type (not the method set of this type); signatures are type-checked lazily
         }
 
         // NewNamed returns a new named type for the given type name, underlying type, and associated methods.
         // If the given type name obj doesn't have a type yet, its type is set to the returned named type.
         // The underlying type must not be a *Named.
-        public static ref Named NewNamed(ref TypeName _obj, Type underlying, slice<ref Func> methods) => func(_obj, (ref TypeName obj, Defer _, Panic panic, Recover __) =>
+        public static ptr<Named> NewNamed(ptr<TypeName> _addr_obj, Type underlying, slice<ptr<Func>> methods) => func((_, panic, __) =>
         {
+            ref TypeName obj = ref _addr_obj.val;
+
             {
-                ref Named (_, ok) = underlying._<ref Named>();
+                ptr<Named> (_, ok) = underlying._<ptr<Named>>();
 
                 if (ok)
                 {
@@ -535,41 +752,53 @@ namespace go
                 }
 
             }
-            Named typ = ref new Named(obj:obj,underlying:underlying,methods:methods);
+
+            ptr<Named> typ = addr(new Named(obj:obj,orig:underlying,underlying:underlying,methods:methods));
             if (obj.typ == null)
             {
                 obj.typ = typ;
             }
-            return typ;
+
+            return _addr_typ!;
+
         });
 
         // Obj returns the type name for the named type t.
-        private static ref TypeName Obj(this ref Named t)
+        private static ptr<TypeName> Obj(this ptr<Named> _addr_t)
         {
-            return t.obj;
+            ref Named t = ref _addr_t.val;
+
+            return _addr_t.obj!;
         }
 
         // NumMethods returns the number of explicit methods whose receiver is named type t.
-        private static long NumMethods(this ref Named t)
+        private static long NumMethods(this ptr<Named> _addr_t)
         {
+            ref Named t = ref _addr_t.val;
+
             return len(t.methods);
         }
 
         // Method returns the i'th method of named type t for 0 <= i < t.NumMethods().
-        private static ref Func Method(this ref Named t, long i)
+        private static ptr<Func> Method(this ptr<Named> _addr_t, long i)
         {
-            return t.methods[i];
+            ref Named t = ref _addr_t.val;
+
+            return _addr_t.methods[i]!;
         }
 
         // SetUnderlying sets the underlying type and marks t as complete.
-        private static void SetUnderlying(this ref Named _t, Type underlying) => func(_t, (ref Named t, Defer _, Panic panic, Recover __) =>
+        private static void SetUnderlying(this ptr<Named> _addr_t, Type underlying) => func((_, panic, __) =>
         {
+            ref Named t = ref _addr_t.val;
+
             if (underlying == null)
             {
                 panic("types.Named.SetUnderlying: underlying type must not be nil");
             }
+
             {
-                ref Named (_, ok) = underlying._<ref Named>();
+                ptr<Named> (_, ok) = underlying._<ptr<Named>>();
 
                 if (ok)
                 {
@@ -577,12 +806,17 @@ namespace go
                 }
 
             }
+
             t.underlying = underlying;
+
         });
 
         // AddMethod adds method m unless it is already in the method list.
-        private static void AddMethod(this ref Named t, ref Func m)
+        private static void AddMethod(this ptr<Named> _addr_t, ptr<Func> _addr_m)
         {
+            ref Named t = ref _addr_t.val;
+            ref Func m = ref _addr_m.val;
+
             {
                 var (i, _) = lookupMethod(t.methods, m.pkg, m.name);
 
@@ -592,97 +826,142 @@ namespace go
                 }
 
             }
+
         }
 
         // Implementations for Type methods.
 
-        private static Type Underlying(this ref Basic t)
+        private static Type Underlying(this ptr<Basic> _addr_b)
         {
+            ref Basic b = ref _addr_b.val;
+
+            return b;
+        }
+        private static Type Underlying(this ptr<Array> _addr_a)
+        {
+            ref Array a = ref _addr_a.val;
+
+            return a;
+        }
+        private static Type Underlying(this ptr<Slice> _addr_s)
+        {
+            ref Slice s = ref _addr_s.val;
+
+            return s;
+        }
+        private static Type Underlying(this ptr<Struct> _addr_s)
+        {
+            ref Struct s = ref _addr_s.val;
+
+            return s;
+        }
+        private static Type Underlying(this ptr<Pointer> _addr_p)
+        {
+            ref Pointer p = ref _addr_p.val;
+
+            return p;
+        }
+        private static Type Underlying(this ptr<Tuple> _addr_t)
+        {
+            ref Tuple t = ref _addr_t.val;
+
             return t;
         }
-        private static Type Underlying(this ref Array t)
+        private static Type Underlying(this ptr<Signature> _addr_s)
         {
+            ref Signature s = ref _addr_s.val;
+
+            return s;
+        }
+        private static Type Underlying(this ptr<Interface> _addr_t)
+        {
+            ref Interface t = ref _addr_t.val;
+
             return t;
         }
-        private static Type Underlying(this ref Slice t)
+        private static Type Underlying(this ptr<Map> _addr_m)
         {
-            return t;
+            ref Map m = ref _addr_m.val;
+
+            return m;
         }
-        private static Type Underlying(this ref Struct t)
+        private static Type Underlying(this ptr<Chan> _addr_c)
         {
-            return t;
+            ref Chan c = ref _addr_c.val;
+
+            return c;
         }
-        private static Type Underlying(this ref Pointer t)
+        private static Type Underlying(this ptr<Named> _addr_t)
         {
-            return t;
-        }
-        private static Type Underlying(this ref Tuple t)
-        {
-            return t;
-        }
-        private static Type Underlying(this ref Signature t)
-        {
-            return t;
-        }
-        private static Type Underlying(this ref Interface t)
-        {
-            return t;
-        }
-        private static Type Underlying(this ref Map t)
-        {
-            return t;
-        }
-        private static Type Underlying(this ref Chan t)
-        {
-            return t;
-        }
-        private static Type Underlying(this ref Named t)
-        {
+            ref Named t = ref _addr_t.val;
+
             return t.underlying;
         }
 
-        private static @string String(this ref Basic t)
+        private static @string String(this ptr<Basic> _addr_b)
         {
+            ref Basic b = ref _addr_b.val;
+
+            return TypeString(b, null);
+        }
+        private static @string String(this ptr<Array> _addr_a)
+        {
+            ref Array a = ref _addr_a.val;
+
+            return TypeString(a, null);
+        }
+        private static @string String(this ptr<Slice> _addr_s)
+        {
+            ref Slice s = ref _addr_s.val;
+
+            return TypeString(s, null);
+        }
+        private static @string String(this ptr<Struct> _addr_s)
+        {
+            ref Struct s = ref _addr_s.val;
+
+            return TypeString(s, null);
+        }
+        private static @string String(this ptr<Pointer> _addr_p)
+        {
+            ref Pointer p = ref _addr_p.val;
+
+            return TypeString(p, null);
+        }
+        private static @string String(this ptr<Tuple> _addr_t)
+        {
+            ref Tuple t = ref _addr_t.val;
+
             return TypeString(t, null);
         }
-        private static @string String(this ref Array t)
+        private static @string String(this ptr<Signature> _addr_s)
         {
+            ref Signature s = ref _addr_s.val;
+
+            return TypeString(s, null);
+        }
+        private static @string String(this ptr<Interface> _addr_t)
+        {
+            ref Interface t = ref _addr_t.val;
+
             return TypeString(t, null);
         }
-        private static @string String(this ref Slice t)
+        private static @string String(this ptr<Map> _addr_m)
         {
-            return TypeString(t, null);
+            ref Map m = ref _addr_m.val;
+
+            return TypeString(m, null);
         }
-        private static @string String(this ref Struct t)
+        private static @string String(this ptr<Chan> _addr_c)
         {
-            return TypeString(t, null);
+            ref Chan c = ref _addr_c.val;
+
+            return TypeString(c, null);
         }
-        private static @string String(this ref Pointer t)
+        private static @string String(this ptr<Named> _addr_t)
         {
-            return TypeString(t, null);
-        }
-        private static @string String(this ref Tuple t)
-        {
-            return TypeString(t, null);
-        }
-        private static @string String(this ref Signature t)
-        {
-            return TypeString(t, null);
-        }
-        private static @string String(this ref Interface t)
-        {
-            return TypeString(t, null);
-        }
-        private static @string String(this ref Map t)
-        {
-            return TypeString(t, null);
-        }
-        private static @string String(this ref Chan t)
-        {
-            return TypeString(t, null);
-        }
-        private static @string String(this ref Named t)
-        {
+            ref Named t = ref _addr_t.val;
+
             return TypeString(t, null);
         }
     }

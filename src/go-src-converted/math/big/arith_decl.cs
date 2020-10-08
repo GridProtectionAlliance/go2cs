@@ -4,7 +4,7 @@
 
 // +build !math_big_pure_go
 
-// package big -- go2cs converted at 2020 August 29 08:28:58 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:23 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\arith_decl.go
 

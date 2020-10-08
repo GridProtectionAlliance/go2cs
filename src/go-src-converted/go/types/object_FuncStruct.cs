@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:45 UTC
+//     Generated on 2020 October 08 04:03:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,6 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
-using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
 using go;
@@ -46,17 +45,21 @@ namespace go
 
             public ref uint order_ => ref m_@objectRef.Value.order_;
 
+            public ref color color_ => ref m_@objectRef.Value.color_;
+
             public ref token.Pos scopePos_ => ref m_@objectRef.Value.scopePos_;
 
             // Constructors
             public Func(NilType _)
             {
                 this.@object = default;
+                this.hasPtrRecv = default;
             }
 
-            public Func(object @object = default)
+            public Func(object @object = default, bool hasPtrRecv = default)
             {
                 this.@object = @object;
+                this.hasPtrRecv = hasPtrRecv;
             }
 
             // Enable comparisons between nil and Func struct
@@ -79,7 +82,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Func Func_cast(dynamic value)
         {
-            return new Func(value.@object);
+            return new Func(value.@object, value.hasPtrRecv);
         }
     }
 }}

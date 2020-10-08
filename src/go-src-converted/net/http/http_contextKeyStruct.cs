@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:24 UTC
+//     Generated on 2020 October 08 03:40:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,7 +18,7 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {

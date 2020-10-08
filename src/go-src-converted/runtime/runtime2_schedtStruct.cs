@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:19:50 UTC
+//     Generated on 2020 October 08 03:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -29,6 +30,7 @@ namespace go
             {
                 this.goidgen = default;
                 this.lastpoll = default;
+                this.pollUntil = default;
                 this.@lock = default;
                 this.midle = default;
                 this.nmidle = default;
@@ -41,13 +43,8 @@ namespace go
                 this.pidle = default;
                 this.npidle = default;
                 this.nmspinning = default;
-                this.runqhead = default;
-                this.runqtail = default;
+                this.runq = default;
                 this.runqsize = default;
-                this.gflock = default;
-                this.gfreeStack = default;
-                this.gfreeNoStack = default;
-                this.ngfree = default;
                 this.sudoglock = default;
                 this.sudogcache = default;
                 this.deferlock = default;
@@ -64,12 +61,14 @@ namespace go
                 this.profilehz = default;
                 this.procresizetime = default;
                 this.totaltime = default;
+                this.sysmonlock = default;
             }
 
-            public schedt(ulong goidgen = default, ulong lastpoll = default, mutex @lock = default, muintptr midle = default, int nmidle = default, int nmidlelocked = default, long mnext = default, int maxmcount = default, int nmsys = default, long nmfreed = default, uint ngsys = default, puintptr pidle = default, uint npidle = default, uint nmspinning = default, guintptr runqhead = default, guintptr runqtail = default, int runqsize = default, mutex gflock = default, ref ptr<g> gfreeStack = default, ref ptr<g> gfreeNoStack = default, int ngfree = default, mutex sudoglock = default, ref ptr<sudog> sudogcache = default, mutex deferlock = default, array<ref _defer> deferpool = default, ref ptr<m> freem = default, uint gcwaiting = default, int stopwait = default, note stopnote = default, uint sysmonwait = default, note sysmonnote = default, Action<ref p> safePointFn = default, int safePointWait = default, note safePointNote = default, int profilehz = default, long procresizetime = default, long totaltime = default)
+            public schedt(ulong goidgen = default, ulong lastpoll = default, ulong pollUntil = default, mutex @lock = default, muintptr midle = default, int nmidle = default, int nmidlelocked = default, long mnext = default, int maxmcount = default, int nmsys = default, long nmfreed = default, uint ngsys = default, puintptr pidle = default, uint npidle = default, uint nmspinning = default, gQueue runq = default, int runqsize = default, mutex sudoglock = default, ref ptr<sudog> sudogcache = default, mutex deferlock = default, array<ptr<_defer>> deferpool = default, ref ptr<m> freem = default, uint gcwaiting = default, int stopwait = default, note stopnote = default, uint sysmonwait = default, note sysmonnote = default, Action<ptr<p>> safePointFn = default, int safePointWait = default, note safePointNote = default, int profilehz = default, long procresizetime = default, long totaltime = default, mutex sysmonlock = default)
             {
                 this.goidgen = goidgen;
                 this.lastpoll = lastpoll;
+                this.pollUntil = pollUntil;
                 this.@lock = @lock;
                 this.midle = midle;
                 this.nmidle = nmidle;
@@ -82,13 +81,8 @@ namespace go
                 this.pidle = pidle;
                 this.npidle = npidle;
                 this.nmspinning = nmspinning;
-                this.runqhead = runqhead;
-                this.runqtail = runqtail;
+                this.runq = runq;
                 this.runqsize = runqsize;
-                this.gflock = gflock;
-                this.gfreeStack = gfreeStack;
-                this.gfreeNoStack = gfreeNoStack;
-                this.ngfree = ngfree;
                 this.sudoglock = sudoglock;
                 this.sudogcache = sudogcache;
                 this.deferlock = deferlock;
@@ -105,6 +99,7 @@ namespace go
                 this.profilehz = profilehz;
                 this.procresizetime = procresizetime;
                 this.totaltime = totaltime;
+                this.sysmonlock = sysmonlock;
             }
 
             // Enable comparisons between nil and schedt struct
@@ -127,7 +122,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static schedt schedt_cast(dynamic value)
         {
-            return new schedt(value.goidgen, value.lastpoll, value.@lock, value.midle, value.nmidle, value.nmidlelocked, value.mnext, value.maxmcount, value.nmsys, value.nmfreed, value.ngsys, value.pidle, value.npidle, value.nmspinning, value.runqhead, value.runqtail, value.runqsize, value.gflock, ref value.gfreeStack, ref value.gfreeNoStack, value.ngfree, value.sudoglock, ref value.sudogcache, value.deferlock, value.deferpool, ref value.freem, value.gcwaiting, value.stopwait, value.stopnote, value.sysmonwait, value.sysmonnote, value.safePointFn, value.safePointWait, value.safePointNote, value.profilehz, value.procresizetime, value.totaltime);
+            return new schedt(value.goidgen, value.lastpoll, value.pollUntil, value.@lock, value.midle, value.nmidle, value.nmidlelocked, value.mnext, value.maxmcount, value.nmsys, value.nmfreed, value.ngsys, value.pidle, value.npidle, value.nmspinning, value.runq, value.runqsize, value.sudoglock, ref value.sudogcache, value.deferlock, value.deferpool, ref value.freem, value.gcwaiting, value.stopwait, value.stopnote, value.sysmonwait, value.sysmonnote, value.safePointFn, value.safePointWait, value.safePointNote, value.profilehz, value.procresizetime, value.totaltime, value.sysmonlock);
         }
     }
 }

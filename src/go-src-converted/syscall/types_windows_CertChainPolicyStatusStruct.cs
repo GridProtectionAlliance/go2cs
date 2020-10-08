@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:33 UTC
+//     Generated on 2020 October 08 03:27:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace go
                 this.ExtraPolicyStatus = default;
             }
 
-            public CertChainPolicyStatus(uint Size = default, uint Error = default, uint ChainIndex = default, uint ElementIndex = default, System.UIntPtr ExtraPolicyStatus = default)
+            public CertChainPolicyStatus(uint Size = default, uint Error = default, uint ChainIndex = default, uint ElementIndex = default, Pointer ExtraPolicyStatus = default)
             {
                 this.Size = Size;
                 this.Error = Error;

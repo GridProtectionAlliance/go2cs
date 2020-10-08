@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 August 29 08:24:54 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:00 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\lockosthread.go
 using os = go.os_package;
 using runtime = go.runtime_package;
@@ -28,6 +28,7 @@ namespace go
             { 
                 // init is guaranteed to run on the main thread.
                 mainThread = C.pthread_self();
+
             });
             register("LockOSThreadMain", LockOSThreadMain);
 
@@ -35,8 +36,10 @@ namespace go
             { 
                 // Lock the OS thread now so main runs on the main thread.
                 runtime.LockOSThread();
+
             });
             register("LockOSThreadAlt", LockOSThreadAlt);
+
         }
 
         public static void LockOSThreadMain()
@@ -48,6 +51,7 @@ namespace go
                 println("requires GOMAXPROCS=1");
                 os.Exit(1L);
             }
+
             var ready = make_channel<bool>(1L);
             go_(() => () =>
             { 
@@ -63,6 +67,7 @@ namespace go
                 // Exit with the thread locked, which should exit the
                 // main thread.
                 ready.Send(true);
+
             }());
             ready.Receive();
             time.Sleep(1L * time.Millisecond); 
@@ -74,7 +79,9 @@ namespace go
                 println("goroutine migrated to locked thread");
                 os.Exit(1L);
             }
+
             println("OK");
+
         }
 
         public static void LockOSThreadAlt()
@@ -91,8 +98,8 @@ namespace go
                 subThread = C.pthread_self(); 
                 // Register a pthread destructor so we can tell this
                 // thread has exited.
-                C.pthread_key_t key = default;
-                C.pthread_key_create(ref key, new ptr<ref array<byte>>(@unsafe.Pointer(C.setExited)));
+                ref C.pthread_key_t key = ref heap(out ptr<C.pthread_key_t> _addr_key);
+                C.pthread_key_create(_addr_key, new ptr<ptr<array<byte>>>(@unsafe.Pointer(C.setExited)));
                 C.pthread_setspecific(key, @unsafe.Pointer(@new<int>()));
                 ready.Send(true); 
                 // Exit with the thread locked.
@@ -108,15 +115,18 @@ namespace go
                     println("locked thread reused");
                     os.Exit(1L);
                 }
-                if (atomic.LoadUint32((uint32.Value)(ref C.threadExited)) != 0L)
+
+                if (atomic.LoadUint32((uint32.val)(_addr_C.threadExited)) != 0L)
                 {
                     println("OK");
-                    return;
+                    return ;
                 }
+
             }
 
             println("sub thread still running");
             os.Exit(1L);
+
         }
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:48:38 UTC
+// package main -- go2cs converted at 2020 October 08 04:04:27 UTC
 // Original source: C:\Go\src\cmd\asm\main.go
 using bufio = go.bufio_package;
 using flag = go.flag_package;
@@ -40,29 +40,49 @@ namespace go
             flags.Parse();
 
             var ctxt = obj.Linknew(architecture.LinkArch);
-            if (flags.PrintOut.Value)
+            if (flags.PrintOut.val)
             {
-                ctxt.Debugasm = true;
+                ctxt.Debugasm = 1L;
             }
-            ctxt.Flag_dynlink = flags.Dynlink.Value;
-            ctxt.Flag_shared = flags.Shared || flags.Dynlink.Value.Value;
+            ctxt.Flag_dynlink = flags.Dynlink.val;
+            ctxt.Flag_shared = flags.Shared || flags.Dynlink.val;
+            ctxt.Flag_go115newobj = flags.Go115Newobj.val;
+            ctxt.IsAsm = true;
+            switch (flags.Spectre.val)
+            {
+                case "": 
+                    break;
+                case "index": 
+                    break;
+                case "all": 
+
+                case "ret": 
+                    ctxt.Retpoline = true;
+                    break;
+                default: 
+                    log.Printf("unknown setting -spectre=%s", flags.Spectre.val);
+                    os.Exit(2L);
+                    break;
+            }
+
             ctxt.Bso = bufio.NewWriter(os.Stdout);
             defer(ctxt.Bso.Flush());
 
             architecture.Init(ctxt); 
 
             // Create object file, write header.
-            var (out, err) = os.Create(flags.OutputFile.Value);
+            var (buf, err) = bio.Create(flags.OutputFile.val);
             if (err != null)
             {
                 log.Fatal(err);
             }
-            defer(bio.MustClose(out));
-            var buf = bufio.NewWriter(bio.MustWriter(out));
+            defer(buf.Close());
 
-            fmt.Fprintf(buf, "go object %s %s %s\n", objabi.GOOS, objabi.GOARCH, objabi.Version);
-            fmt.Fprintf(buf, "!\n");
-
+            if (!flags.SymABIs.val)
+            {
+                fmt.Fprintf(buf, "go object %s %s %s\n", objabi.GOOS, objabi.GOARCH, objabi.Version);
+                fmt.Fprintf(buf, "!\n");
+            }
             bool ok = default;            bool diag = default;
 
             @string failedFile = default;
@@ -75,17 +95,29 @@ namespace go
                     diag = true;
                     log.Printf(format, args);
                 };
-                ptr<object> pList = @new<obj.Plist>();
-                pList.Firstpc, ok = parser.Parse();
+                if (flags.SymABIs.val)
+                {
+                    ok = parser.ParseSymABIs(buf);
+                }
+                else
+                {
+                    ptr<object> pList = @new<obj.Plist>();
+                    pList.Firstpc, ok = parser.Parse(); 
+                    // reports errors to parser.Errorf
+                    if (ok)
+                    {
+                        obj.Flushplist(ctxt, pList, null, flags.Importpath.val);
+                    }
+                }
                 if (!ok)
                 {
                     failedFile = f;
                     break;
                 }
-                obj.Flushplist(ctxt, pList, null, "");
-            }            if (ok)
+            }            if (ok && !flags.SymABIs.val)
             {
-                obj.WriteObjFile(ctxt, buf);
+                ctxt.NumberSyms(true);
+                obj.WriteObjFile(ctxt, buf, "");
             }
             if (!ok || diag)
             {
@@ -97,11 +129,11 @@ namespace go
                 {
                     log.Print("assembly failed");
                 }
-                @out.Close();
-                os.Remove(flags.OutputFile.Value);
+                buf.Close();
+                os.Remove(flags.OutputFile.val);
                 os.Exit(1L);
+
             }
-            buf.Flush();
         });
     }
 }

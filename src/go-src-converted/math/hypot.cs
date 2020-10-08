@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:49 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:16 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\hypot.go
 
@@ -35,25 +35,23 @@ namespace go
                 return Inf(1L);
             else if (IsNaN(p) || IsNaN(q)) 
                 return NaN();
-                        if (p < 0L)
-            {>>MARKER:FUNCTION_Hypot_BLOCK_PREFIX<<
-                p = -p;
-            }
-            if (q < 0L)
-            {
-                q = -q;
-            }
+                        p = Abs(p);
+            q = Abs(q);
             if (p < q)
-            {
+            {>>MARKER:FUNCTION_Hypot_BLOCK_PREFIX<<
                 p = q;
                 q = p;
+
             }
+
             if (p == 0L)
             {
                 return 0L;
             }
+
             q = q / p;
             return p * Sqrt(1L + q * q);
+
         }
     }
 }

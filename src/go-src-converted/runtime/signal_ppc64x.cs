@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build linux
+// +build aix linux
 // +build ppc64 ppc64le
 
-// package runtime -- go2cs converted at 2020 August 29 08:20:34 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:23:26 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\signal_ppc64x.go
 using sys = go.runtime.@internal.sys_package;
@@ -16,8 +16,10 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static void dumpregs(ref sigctxt c)
+        private static void dumpregs(ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             print("r0   ", hex(c.r0()), "\t");
             print("r1   ", hex(c.r1()), "\n");
             print("r2   ", hex(c.r2()), "\t");
@@ -60,23 +62,32 @@ namespace go
 
         //go:nosplit
         //go:nowritebarrierrec
-        private static System.UIntPtr sigpc(this ref sigctxt c)
+        private static System.UIntPtr sigpc(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.pc());
         }
 
-        private static System.UIntPtr sigsp(this ref sigctxt c)
+        private static System.UIntPtr sigsp(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.sp());
         }
-        private static System.UIntPtr siglr(this ref sigctxt c)
+        private static System.UIntPtr siglr(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.link());
         }
 
         // preparePanic sets up the stack to look like a call to sigpanic.
-        private static void preparePanic(this ref sigctxt c, uint sig, ref g gp)
-        { 
+        private static void preparePanic(this ptr<sigctxt> _addr_c, uint sig, ptr<g> _addr_gp)
+        {
+            ref sigctxt c = ref _addr_c.val;
+            ref g gp = ref _addr_gp.val;
+ 
             // We arrange link, and pc to pretend the panicking
             // function calls sigpanic directly.
             // Always save LINK to stack so that panics in leaf
@@ -84,27 +95,17 @@ namespace go
             // the stack frame but we're not going back there
             // anyway.
             var sp = c.sp() - sys.MinFrameSize;
-            c.set_sp(sp) * (uint64.Value)(@unsafe.Pointer(uintptr(sp)));
+            c.set_sp(sp) * (uint64.val)(@unsafe.Pointer(uintptr(sp)));
 
             c.link();
 
-            var pc = gp.sigpc; 
+            var pc = gp.sigpc;
 
-            // If we don't recognize the PC as code
-            // but we do recognize the link register as code,
-            // then assume this was a call to non-code and treat like
-            // pc == 0, to make unwinding show the context.
-            if (pc != 0L && !findfunc(pc).valid() && findfunc(uintptr(c.link())).valid())
-            {
-                pc = 0L;
-            } 
-
-            // Don't bother saving PC if it's zero, which is
-            // probably a call to a nil func: the old link register
-            // is more useful in the stack trace.
-            if (pc != 0L)
-            {
+            if (shouldPushSigpanic(gp, pc, uintptr(c.link())))
+            { 
+                // Make it look the like faulting PC called sigpanic.
                 c.set_link(uint64(pc));
+
             } 
 
             // In case we are panicking from external C code
@@ -112,6 +113,31 @@ namespace go
             c.set_r30(uint64(uintptr(@unsafe.Pointer(gp))));
             c.set_r12(uint64(funcPC(sigpanic)));
             c.set_pc(uint64(funcPC(sigpanic)));
+
+        }
+
+        private static void pushCall(this ptr<sigctxt> _addr_c, System.UIntPtr targetPC, System.UIntPtr resumePC)
+        {
+            ref sigctxt c = ref _addr_c.val;
+ 
+            // Push the LR to stack, as we'll clobber it in order to
+            // push the call. The function being pushed is responsible
+            // for restoring the LR and setting the SP back.
+            // This extra space is known to gentraceback.
+            var sp = c.sp() - sys.MinFrameSize;
+            c.set_sp(sp) * (uint64.val)(@unsafe.Pointer(uintptr(sp)));
+
+            c.link() * (uint64.val)(@unsafe.Pointer(uintptr(sp) + 8L));
+
+            c.r2() * (uint64.val)(@unsafe.Pointer(uintptr(sp) + 16L));
+
+            c.r12(); 
+            // Set up PC and LR to pretend the function being signaled
+            // calls targetPC at resumePC.
+            c.set_link(uint64(resumePC));
+            c.set_r12(uint64(targetPC));
+            c.set_pc(uint64(targetPC));
+
         }
     }
 }

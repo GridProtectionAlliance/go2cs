@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:19 UTC
+//     Generated on 2020 October 08 03:39:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -55,12 +56,14 @@ namespace net
             // Constructors
             public http2frameWriteResult(NilType _)
             {
+                this._ = default;
                 this.wr = default;
                 this.err = default;
             }
 
-            public http2frameWriteResult(http2FrameWriteRequest wr = default, error err = default)
+            public http2frameWriteResult(http2incomparable _ = default, http2FrameWriteRequest wr = default, error err = default)
             {
+                this._ = _;
                 this.wr = wr;
                 this.err = err;
             }
@@ -85,7 +88,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2frameWriteResult http2frameWriteResult_cast(dynamic value)
         {
-            return new http2frameWriteResult(value.wr, value.err);
+            return new http2frameWriteResult(value._, value.wr, value.err);
         }
     }
 }}

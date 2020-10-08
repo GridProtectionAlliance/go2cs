@@ -4,7 +4,7 @@
 
 // This file implements string-to-Float conversion functions.
 
-// package big -- go2cs converted at 2020 August 29 08:29:08 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:30 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\floatconv.go
 using fmt = go.fmt_package;
@@ -24,26 +24,37 @@ namespace math
         // by Parse, with base argument 0. The entire string (not just a prefix) must
         // be valid for success. If the operation failed, the value of z is undefined
         // but the returned value is nil.
-        private static (ref Float, bool) SetString(this ref Float z, @string s)
+        private static (ptr<Float>, bool) SetString(this ptr<Float> _addr_z, @string s)
         {
+            ptr<Float> _p0 = default!;
+            bool _p0 = default;
+            ref Float z = ref _addr_z.val;
+
             {
                 var (f, _, err) = z.Parse(s, 0L);
 
                 if (err == null)
                 {
-                    return (f, true);
+                    return (_addr_f!, true);
                 }
 
             }
-            return (null, false);
+
+            return (_addr_null!, false);
+
         }
 
         // scan is like Parse but reads the longest possible prefix representing a valid
         // floating point number from an io.ByteScanner rather than a string. It serves
         // as the implementation of Parse. It does not recognize ±Inf and does not expect
         // EOF at the end.
-        private static (ref Float, long, error) scan(this ref Float _z, io.ByteScanner r, long @base) => func(_z, (ref Float z, Defer _, Panic panic, Recover __) =>
+        private static (ptr<Float>, long, error) scan(this ptr<Float> _addr_z, io.ByteScanner r, long @base) => func((_, panic, __) =>
         {
+            ptr<Float> f = default!;
+            long b = default;
+            error err = default!;
+            ref Float z = ref _addr_z.val;
+
             var prec = z.prec;
             if (prec == 0L)
             {
@@ -57,7 +68,7 @@ namespace math
             z.neg, err = scanSign(r);
             if (err != null)
             {
-                return;
+                return ;
             } 
 
             // mantissa
@@ -65,16 +76,16 @@ namespace math
             z.mant, b, fcount, err = z.mant.scan(r, base, true);
             if (err != null)
             {
-                return;
+                return ;
             } 
 
             // exponent
             long exp = default;
             long ebase = default;
-            exp, ebase, err = scanExponent(r, true);
+            exp, ebase, err = scanExponent(r, true, base == 0L);
             if (err != null)
             {
-                return;
+                return ;
             } 
 
             // special-case 0
@@ -84,12 +95,12 @@ namespace math
                 z.acc = Exact;
                 z.form = zero;
                 f = z;
-                return;
+                return ;
             } 
             // len(z.mant) > 0
 
-            // The mantissa may have a decimal point (fcount <= 0) and there
-            // may be a nonzero exponent exp. The decimal point amounts to a
+            // The mantissa may have a radix point (fcount <= 0) and there
+            // may be a nonzero exponent exp. The radix point amounts to a
             // division by b**(-fcount). An exponent means multiplication by
             // ebase**exp. Finally, mantissa normalization (shift left) requires
             // a correcting multiplication by 2**(-shiftcount). Multiplications
@@ -103,12 +114,12 @@ namespace math
             var exp2 = int64(len(z.mant)) * _W - fnorm(z.mant);
             var exp5 = int64(0L); 
 
-            // determine binary or decimal exponent contribution of decimal point
+            // determine binary or decimal exponent contribution of radix point
             if (fcount < 0L)
             { 
-                // The mantissa has a "decimal" point ddd.dddd; and
-                // -fcount is the number of digits to the right of '.'.
-                // Adjust relevant exponent accordingly.
+                // The mantissa has a radix point ddd.dddd; and
+                // -fcount is the number of digits to the right
+                // of '.'. Adjust relevant exponent accordingly.
                 var d = int64(fcount);
 
                 if (b == 10L)
@@ -119,6 +130,11 @@ namespace math
                 if (fallthrough || b == 2L)
                 {
                     exp2 += d;
+                    goto __switch_break0;
+                }
+                if (b == 8L)
+                {
+                    exp2 += d * 3L; // octal digits are 3 bits each
                     goto __switch_break0;
                 }
                 if (b == 16L)
@@ -138,7 +154,7 @@ namespace math
             if (ebase == 10L)
             {
                 exp5 += exp;
-                fallthrough = true;
+                fallthrough = true; // see fallthrough above
             }
             if (fallthrough || ebase == 2L)
             {
@@ -162,13 +178,15 @@ namespace math
             else
             {
                 err = fmt.Errorf("exponent overflow");
-                return;
+                return ;
             }
+
             if (exp5 == 0L)
             { 
                 // no decimal exponent contribution
                 z.round(0L);
-                return;
+                return ;
+
             } 
             // exp5 != 0
 
@@ -182,7 +200,9 @@ namespace math
             {
                 z.Mul(z, p.pow5(uint64(exp5)));
             }
-            return;
+
+            return ;
+
         });
 
         // These powers of 5 fit into a uint64.
@@ -195,13 +215,15 @@ namespace math
 
         // pow5 sets z to 5**n and returns z.
         // n must not be negative.
-        private static ref Float pow5(this ref Float z, ulong n)
+        private static ptr<Float> pow5(this ptr<Float> _addr_z, ulong n)
         {
-            const var m = uint64(len(pow5tab) - 1L);
+            ref Float z = ref _addr_z.val;
+
+            const var m = (var)uint64(len(pow5tab) - 1L);
 
             if (n <= m)
             {
-                return z.SetUint64(pow5tab[n]);
+                return _addr_z.SetUint64(pow5tab[n])!;
             } 
             // n > m
             z.SetUint64(pow5tab[m]);
@@ -217,17 +239,28 @@ namespace math
                 {
                     z.Mul(z, f);
                 }
+
                 f.Mul(f, f);
                 n >>= 1L;
+
             }
 
 
-            return z;
+            return _addr_z!;
+
         }
 
         // Parse parses s which must contain a text representation of a floating-
         // point number with a mantissa in the given conversion base (the exponent
         // is always a decimal number), or a string representing an infinite value.
+        //
+        // For base 0, an underscore character ``_'' may appear between a base
+        // prefix and an adjacent digit, and between successive digits; such
+        // underscores do not change the value of the number, or the returned
+        // digit count. Incorrect placement of underscores is reported as an
+        // error if there are no other errors. If base != 0, underscores are
+        // not recognized and thus terminate scanning like any other character
+        // that is not a valid radix point or digit.
         //
         // It sets z to the (possibly rounded) value of the corresponding floating-
         // point value, and returns z, the actual base b, and an error err, if any.
@@ -235,52 +268,60 @@ namespace math
         // If z's precision is 0, it is changed to 64 before rounding takes effect.
         // The number must be of the form:
         //
-        //    number   = [ sign ] [ prefix ] mantissa [ exponent ] | infinity .
-        //    sign     = "+" | "-" .
-        //    prefix   = "0" ( "x" | "X" | "b" | "B" ) .
-        //    mantissa = digits | digits "." [ digits ] | "." digits .
-        //    exponent = ( "E" | "e" | "p" ) [ sign ] digits .
-        //    digits   = digit { digit } .
-        //    digit    = "0" ... "9" | "a" ... "z" | "A" ... "Z" .
-        //    infinity = [ sign ] ( "inf" | "Inf" ) .
+        //     number    = [ sign ] ( float | "inf" | "Inf" ) .
+        //     sign      = "+" | "-" .
+        //     float     = ( mantissa | prefix pmantissa ) [ exponent ] .
+        //     prefix    = "0" [ "b" | "B" | "o" | "O" | "x" | "X" ] .
+        //     mantissa  = digits "." [ digits ] | digits | "." digits .
+        //     pmantissa = [ "_" ] digits "." [ digits ] | [ "_" ] digits | "." digits .
+        //     exponent  = ( "e" | "E" | "p" | "P" ) [ sign ] digits .
+        //     digits    = digit { [ "_" ] digit } .
+        //     digit     = "0" ... "9" | "a" ... "z" | "A" ... "Z" .
         //
-        // The base argument must be 0, 2, 10, or 16. Providing an invalid base
+        // The base argument must be 0, 2, 8, 10, or 16. Providing an invalid base
         // argument will lead to a run-time panic.
         //
         // For base 0, the number prefix determines the actual base: A prefix of
-        // "0x" or "0X" selects base 16, and a "0b" or "0B" prefix selects
-        // base 2; otherwise, the actual base is 10 and no prefix is accepted.
-        // The octal prefix "0" is not supported (a leading "0" is simply
-        // considered a "0").
+        // ``0b'' or ``0B'' selects base 2, ``0o'' or ``0O'' selects base 8, and
+        // ``0x'' or ``0X'' selects base 16. Otherwise, the actual base is 10 and
+        // no prefix is accepted. The octal prefix "0" is not supported (a leading
+        // "0" is simply considered a "0").
         //
-        // A "p" exponent indicates a binary (rather then decimal) exponent;
-        // for instance "0x1.fffffffffffffp1023" (using base 0) represents the
-        // maximum float64 value. For hexadecimal mantissae, the exponent must
-        // be binary, if present (an "e" or "E" exponent indicator cannot be
-        // distinguished from a mantissa digit).
+        // A "p" or "P" exponent indicates a base 2 (rather then base 10) exponent;
+        // for instance, "0x1.fffffffffffffp1023" (using base 0) represents the
+        // maximum float64 value. For hexadecimal mantissae, the exponent character
+        // must be one of 'p' or 'P', if present (an "e" or "E" exponent indicator
+        // cannot be distinguished from a mantissa digit).
         //
         // The returned *Float f is nil and the value of z is valid but not
         // defined if an error is reported.
         //
-        private static (ref Float, long, error) Parse(this ref Float z, @string s, long @base)
-        { 
+        private static (ptr<Float>, long, error) Parse(this ptr<Float> _addr_z, @string s, long @base)
+        {
+            ptr<Float> f = default!;
+            long b = default;
+            error err = default!;
+            ref Float z = ref _addr_z.val;
+ 
             // scan doesn't handle ±Inf
             if (len(s) == 3L && (s == "Inf" || s == "inf"))
             {
                 f = z.SetInf(false);
-                return;
+                return ;
             }
+
             if (len(s) == 4L && (s[0L] == '+' || s[0L] == '-') && (s[1L..] == "Inf" || s[1L..] == "inf"))
             {
                 f = z.SetInf(s[0L] == '-');
-                return;
+                return ;
             }
+
             var r = strings.NewReader(s);
             f, b, err = z.scan(r, base);
 
             if (err != null)
             {
-                return;
+                return ;
             } 
 
             // entire string must have been consumed
@@ -296,30 +337,39 @@ namespace math
                     err = err2;
                 }
 
+
             }
 
-            return;
+
+            return ;
+
         }
 
         // ParseFloat is like f.Parse(s, base) with f set to the given precision
         // and rounding mode.
-        public static (ref Float, long, error) ParseFloat(@string s, long @base, ulong prec, RoundingMode mode)
+        public static (ptr<Float>, long, error) ParseFloat(@string s, long @base, ulong prec, RoundingMode mode)
         {
+            ptr<Float> f = default!;
+            long b = default;
+            error err = default!;
+
             return @new<Float>().SetPrec(prec).SetMode(mode).Parse(s, base);
         }
 
-        private static fmt.Scanner _ = ref floatZero; // *Float must implement fmt.Scanner
+        private static fmt.Scanner _ = (Float.val)(null); // *Float must implement fmt.Scanner
 
         // Scan is a support routine for fmt.Scanner; it sets z to the value of
         // the scanned number. It accepts formats whose verbs are supported by
         // fmt.Scan for floating point values, which are:
         // 'b' (binary), 'e', 'E', 'f', 'F', 'g' and 'G'.
         // Scan doesn't handle ±Inf.
-        private static error Scan(this ref Float z, fmt.ScanState s, int ch)
+        private static error Scan(this ptr<Float> _addr_z, fmt.ScanState s, int ch)
         {
+            ref Float z = ref _addr_z.val;
+
             s.SkipSpace();
             var (_, _, err) = z.scan(new byteReader(s), 0L);
-            return error.As(err);
+            return error.As(err)!;
         }
     }
 }}

@@ -12,10 +12,11 @@
 // backtrack is a fast replacement for the NFA code on small
 // regexps when onepass cannot be used.
 
-// package regexp -- go2cs converted at 2020 August 29 08:23:45 UTC
+// package regexp -- go2cs converted at 2020 October 08 03:40:57 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Go\src\regexp\backtrack.go
 using syntax = go.regexp.syntax_package;
+using sync = go.sync_package;
 using static go.builtin;
 
 namespace go
@@ -31,57 +32,75 @@ namespace go
             public long pos;
         }
 
-        private static readonly long visitedBits = 32L;
-        private static readonly long maxBacktrackProg = 500L; // len(prog.Inst) <= max
-        private static readonly long maxBacktrackVector = 256L * 1024L; // bit vector size <= max (bits)
+        private static readonly long visitedBits = (long)32L;
+        private static readonly long maxBacktrackProg = (long)500L; // len(prog.Inst) <= max
+        private static readonly long maxBacktrackVector = (long)256L * 1024L; // bit vector size <= max (bits)
 
         // bitState holds state for the backtracker.
         private partial struct bitState
         {
-            public ptr<syntax.Prog> prog;
             public long end;
             public slice<long> cap;
+            public slice<long> matchcap;
             public slice<job> jobs;
             public slice<uint> visited;
+            public inputs inputs;
         }
 
-        private static ref bitState notBacktrack = null;
+        private static sync.Pool bitStatePool = default;
+
+        private static ptr<bitState> newBitState()
+        {
+            ptr<bitState> (b, ok) = bitStatePool.Get()._<ptr<bitState>>();
+            if (!ok)
+            {
+                b = @new<bitState>();
+            }
+
+            return _addr_b!;
+
+        }
+
+        private static void freeBitState(ptr<bitState> _addr_b)
+        {
+            ref bitState b = ref _addr_b.val;
+
+            b.inputs.clear();
+            bitStatePool.Put(b);
+        }
 
         // maxBitStateLen returns the maximum length of a string to search with
         // the backtracker using prog.
-        private static long maxBitStateLen(ref syntax.Prog prog)
+        private static long maxBitStateLen(ptr<syntax.Prog> _addr_prog)
         {
-            if (!shouldBacktrack(prog))
+            ref syntax.Prog prog = ref _addr_prog.val;
+
+            if (!shouldBacktrack(_addr_prog))
             {
                 return 0L;
             }
-            return maxBacktrackVector / len(prog.Inst);
-        }
 
-        // newBitState returns a new bitState for the given prog,
-        // or notBacktrack if the size of the prog exceeds the maximum size that
-        // the backtracker will be run for.
-        private static ref bitState newBitState(ref syntax.Prog prog)
-        {
-            if (!shouldBacktrack(prog))
-            {
-                return notBacktrack;
-            }
-            return ref new bitState(prog:prog,);
+            return maxBacktrackVector / len(prog.Inst);
+
         }
 
         // shouldBacktrack reports whether the program is too
         // long for the backtracker to run.
-        private static bool shouldBacktrack(ref syntax.Prog prog)
+        private static bool shouldBacktrack(ptr<syntax.Prog> _addr_prog)
         {
+            ref syntax.Prog prog = ref _addr_prog.val;
+
             return len(prog.Inst) <= maxBacktrackProg;
         }
 
         // reset resets the state of the backtracker.
         // end is the end position in the input.
         // ncap is the number of captures.
-        private static void reset(this ref bitState b, long end, long ncap)
+        private static void reset(this ptr<bitState> _addr_b, ptr<syntax.Prog> _addr_prog, long end, long ncap)
         {
+            ref bitState b = ref _addr_b.val;
+            ref syntax.Prog prog = ref _addr_prog.val;
+
             b.end = end;
 
             if (cap(b.jobs) == 0L)
@@ -92,7 +111,8 @@ namespace go
             {
                 b.jobs = b.jobs[..0L];
             }
-            var visitedSize = (len(b.prog.Inst) * (end + 1L) + visitedBits - 1L) / visitedBits;
+
+            var visitedSize = (len(prog.Inst) * (end + 1L) + visitedBits - 1L) / visitedBits;
             if (cap(b.visited) < visitedSize)
             {
                 b.visited = make_slice<uint>(visitedSize, maxBacktrackVector / visitedBits);
@@ -111,8 +131,8 @@ namespace go
 
                     i = i__prev1;
                 }
-
             }
+
             if (cap(b.cap) < ncap)
             {
                 b.cap = make_slice<long>(ncap);
@@ -121,6 +141,7 @@ namespace go
             {
                 b.cap = b.cap[..ncap];
             }
+
             {
                 var i__prev1 = i;
 
@@ -133,40 +154,70 @@ namespace go
                 i = i__prev1;
             }
 
+            if (cap(b.matchcap) < ncap)
+            {
+                b.matchcap = make_slice<long>(ncap);
+            }
+            else
+            {
+                b.matchcap = b.matchcap[..ncap];
+            }
+
+            {
+                var i__prev1 = i;
+
+                foreach (var (__i) in b.matchcap)
+                {
+                    i = __i;
+                    b.matchcap[i] = -1L;
+                }
+
+                i = i__prev1;
+            }
         }
 
         // shouldVisit reports whether the combination of (pc, pos) has not
         // been visited yet.
-        private static bool shouldVisit(this ref bitState b, uint pc, long pos)
+        private static bool shouldVisit(this ptr<bitState> _addr_b, uint pc, long pos)
         {
+            ref bitState b = ref _addr_b.val;
+
             var n = uint(int(pc) * (b.end + 1L) + pos);
             if (b.visited[n / visitedBits] & (1L << (int)((n & (visitedBits - 1L)))) != 0L)
             {
                 return false;
             }
+
             b.visited[n / visitedBits] |= 1L << (int)((n & (visitedBits - 1L)));
             return true;
+
         }
 
         // push pushes (pc, pos, arg) onto the job stack if it should be
         // visited.
-        private static void push(this ref bitState b, uint pc, long pos, bool arg)
-        { 
+        private static void push(this ptr<bitState> _addr_b, ptr<Regexp> _addr_re, uint pc, long pos, bool arg)
+        {
+            ref bitState b = ref _addr_b.val;
+            ref Regexp re = ref _addr_re.val;
+ 
             // Only check shouldVisit when arg is false.
             // When arg is true, we are continuing a previous visit.
-            if (b.prog.Inst[pc].Op != syntax.InstFail && (arg || b.shouldVisit(pc, pos)))
+            if (re.prog.Inst[pc].Op != syntax.InstFail && (arg || b.shouldVisit(pc, pos)))
             {
                 b.jobs = append(b.jobs, new job(pc:pc,arg:arg,pos:pos));
             }
+
         }
 
         // tryBacktrack runs a backtracking search starting at pos.
-        private static bool tryBacktrack(this ref machine _m, ref bitState _b, input i, uint pc, long pos) => func(_m, _b, (ref machine m, ref bitState b, Defer _, Panic panic, Recover __) =>
+        private static bool tryBacktrack(this ptr<Regexp> _addr_re, ptr<bitState> _addr_b, input i, uint pc, long pos) => func((_, panic, __) =>
         {
-            var longest = m.re.longest;
-            m.matched = false;
+            ref Regexp re = ref _addr_re.val;
+            ref bitState b = ref _addr_b.val;
 
-            b.push(pc, pos, false);
+            var longest = re.longest;
+
+            b.push(re, pc, pos, false);
             while (len(b.jobs) > 0L)
             {
                 var l = len(b.jobs) - 1L; 
@@ -189,9 +240,10 @@ CheckAndLoop:
                 {
                     continue;
                 }
+
 Skip:
 
-                var inst = b.prog.Inst[pc];
+                var inst = re.prog.Inst[pc];
 
                 if (inst.Op == syntax.InstFail) 
                     panic("unexpected InstFail");
@@ -210,24 +262,26 @@ Skip:
                         arg = false;
                         pc = inst.Arg;
                         goto CheckAndLoop;
+
                     }
                     else
                     {
-                        b.push(pc, pos, true);
+                        b.push(re, pc, pos, true);
                         pc = inst.Out;
                         goto CheckAndLoop;
                     }
+
                 else if (inst.Op == syntax.InstAltMatch) 
                     // One opcode consumes runes; the other leads to match.
 
-                    if (b.prog.Inst[inst.Out].Op == syntax.InstRune || b.prog.Inst[inst.Out].Op == syntax.InstRune1 || b.prog.Inst[inst.Out].Op == syntax.InstRuneAny || b.prog.Inst[inst.Out].Op == syntax.InstRuneAnyNotNL) 
+                    if (re.prog.Inst[inst.Out].Op == syntax.InstRune || re.prog.Inst[inst.Out].Op == syntax.InstRune1 || re.prog.Inst[inst.Out].Op == syntax.InstRuneAny || re.prog.Inst[inst.Out].Op == syntax.InstRuneAnyNotNL) 
                         // inst.Arg is the match.
-                        b.push(inst.Arg, pos, false);
+                        b.push(re, inst.Arg, pos, false);
                         pc = inst.Arg;
                         pos = b.end;
                         goto CheckAndLoop;
                     // inst.Out is the match - non-greedy
-                    b.push(inst.Out, b.end, false);
+                    b.push(re, inst.Out, b.end, false);
                     pc = inst.Out;
                     goto CheckAndLoop;
                 else if (inst.Op == syntax.InstRune) 
@@ -236,6 +290,7 @@ Skip:
                     {
                         continue;
                     }
+
                     pos += width;
                     pc = inst.Out;
                     goto CheckAndLoop;
@@ -245,6 +300,7 @@ Skip:
                     {
                         continue;
                     }
+
                     pos += width;
                     pc = inst.Out;
                     goto CheckAndLoop;
@@ -254,6 +310,7 @@ Skip:
                     {
                         continue;
                     }
+
                     pos += width;
                     pc = inst.Out;
                     goto CheckAndLoop;
@@ -263,6 +320,7 @@ Skip:
                     {
                         continue;
                     }
+
                     pos += width;
                     pc = inst.Out;
                     goto CheckAndLoop;
@@ -272,23 +330,30 @@ Skip:
                         // Finished inst.Out; restore the old value.
                         b.cap[inst.Arg] = pos;
                         continue;
+
                     }
                     else
                     {
-                        if (0L <= inst.Arg && inst.Arg < uint32(len(b.cap)))
+                        if (inst.Arg < uint32(len(b.cap)))
                         { 
                             // Capture pos to register, but save old value.
-                            b.push(pc, b.cap[inst.Arg], true); // come back when we're done.
+                            b.push(re, pc, b.cap[inst.Arg], true); // come back when we're done.
                             b.cap[inst.Arg] = pos;
+
                         }
+
                         pc = inst.Out;
                         goto CheckAndLoop;
+
                     }
+
                 else if (inst.Op == syntax.InstEmptyWidth) 
-                    if (syntax.EmptyOp(inst.Arg) & ~i.context(pos) != 0L)
+                    var flag = i.context(pos);
+                    if (!flag.match(syntax.EmptyOp(inst.Arg)))
                     {
                         continue;
                     }
+
                     pc = inst.Out;
                     goto CheckAndLoop;
                 else if (inst.Op == syntax.InstNop) 
@@ -299,8 +364,7 @@ Skip:
                     // where the match is, no point going further.
                     if (len(b.cap) == 0L)
                     {
-                        m.matched = true;
-                        return m.matched;
+                        return true;
                     } 
 
                     // Record best match so far.
@@ -310,59 +374,65 @@ Skip:
                     {
                         b.cap[1L] = pos;
                     }
-                    if (!m.matched || (longest && pos > 0L && pos > m.matchcap[1L]))
+
                     {
-                        copy(m.matchcap, b.cap);
-                    }
-                    m.matched = true; 
+                        var old = b.matchcap[1L];
+
+                        if (old == -1L || (longest && pos > 0L && pos > old))
+                        {
+                            copy(b.matchcap, b.cap);
+                        } 
+
+                        // If going for first match, we're done.
+
+                    } 
 
                     // If going for first match, we're done.
                     if (!longest)
                     {
-                        return m.matched;
+                        return true;
                     } 
 
                     // If we used the entire text, no longer match is possible.
                     if (pos == b.end)
                     {
-                        return m.matched;
+                        return true;
                     } 
 
                     // Otherwise, continue on in hope of a longer match.
                     continue;
                 else 
                     panic("bad inst");
-                            }
+                
+            }
 
 
-            return m.matched;
+            return longest && len(b.matchcap) > 1L && b.matchcap[1L] >= 0L;
+
         });
 
         // backtrack runs a backtracking search of prog on the input starting at pos.
-        private static bool backtrack(this ref machine _m, input i, long pos, long end, long ncap) => func(_m, (ref machine m, Defer _, Panic panic, Recover __) =>
+        private static slice<long> backtrack(this ptr<Regexp> _addr_re, slice<byte> ib, @string @is, long pos, long ncap, slice<long> dstCap)
         {
-            if (!i.canCheckPrefix())
-            {
-                panic("backtrack called for a RuneReader");
-            }
-            var startCond = m.re.cond;
+            ref Regexp re = ref _addr_re.val;
+
+            var startCond = re.cond;
             if (startCond == ~syntax.EmptyOp(0L))
             { // impossible
-                return false;
+                return null;
+
             }
+
             if (startCond & syntax.EmptyBeginText != 0L && pos != 0L)
             { 
                 // Anchored match, past beginning of text.
-                return false;
-            }
-            var b = m.b;
-            b.reset(end, ncap);
+                return null;
 
-            m.matchcap = m.matchcap[..ncap];
-            foreach (var (i) in m.matchcap)
-            {
-                m.matchcap[i] = -1L;
-            } 
+            }
+
+            var b = newBitState();
+            var (i, end) = b.inputs.init(null, ib, is);
+            b.reset(re.prog, end, ncap); 
 
             // Anchored search must start at the beginning of the input
             if (startCond & syntax.EmptyBeginText != 0L)
@@ -371,42 +441,66 @@ Skip:
                 {
                     b.cap[0L] = pos;
                 }
-                return m.tryBacktrack(b, i, uint32(m.p.Start), pos);
-            } 
 
-            // Unanchored search, starting from each possible text position.
-            // Notice that we have to try the empty string at the end of
-            // the text, so the loop condition is pos <= end, not pos < end.
-            // This looks like it's quadratic in the size of the text,
-            // but we are not clearing visited between calls to TrySearch,
-            // so no work is duplicated and it ends up still being linear.
-            long width = -1L;
-            while (pos <= end && width != 0L)
-            {
-                if (len(m.re.prefix) > 0L)
-                { 
-                    // Match requires literal prefix; fast search for it.
-                    var advance = i.index(m.re, pos);
-                    if (advance < 0L)
-                    {
-                        return false;
-                pos += width;
-                    }
-                    pos += advance;
-                }
-                if (len(b.cap) > 0L)
+                if (!re.tryBacktrack(b, i, uint32(re.prog.Start), pos))
                 {
-                    b.cap[0L] = pos;
+                    freeBitState(_addr_b);
+                    return null;
                 }
-                if (m.tryBacktrack(b, i, uint32(m.p.Start), pos))
-                { 
-                    // Match must be leftmost; done.
-                    return true;
+
+            }
+            else
+            {
+                // Unanchored search, starting from each possible text position.
+                // Notice that we have to try the empty string at the end of
+                // the text, so the loop condition is pos <= end, not pos < end.
+                // This looks like it's quadratic in the size of the text,
+                // but we are not clearing visited between calls to TrySearch,
+                // so no work is duplicated and it ends up still being linear.
+                long width = -1L;
+                while (pos <= end && width != 0L)
+                {
+                    if (len(re.prefix) > 0L)
+                    { 
+                        // Match requires literal prefix; fast search for it.
+                        var advance = i.index(re, pos);
+                        if (advance < 0L)
+                        {
+                            freeBitState(_addr_b);
+                            return null;
+                    pos += width;
+                        }
+
+                        pos += advance;
+
+                    }
+
+                    if (len(b.cap) > 0L)
+                    {
+                        b.cap[0L] = pos;
+                    }
+
+                    if (re.tryBacktrack(b, i, uint32(re.prog.Start), pos))
+                    { 
+                        // Match must be leftmost; done.
+                        goto Match;
+
+                    }
+
+                    _, width = i.step(pos);
+
                 }
-                _, width = i.step(pos);
+
+                freeBitState(_addr_b);
+                return null;
+
             }
 
-            return false;
-        });
+Match:
+            dstCap = append(dstCap, b.matchcap);
+            freeBitState(_addr_b);
+            return dstCap;
+
+        }
     }
 }

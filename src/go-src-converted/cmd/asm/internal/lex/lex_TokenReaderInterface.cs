@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:51:45 UTC
+//     Generated on 2020 October 08 04:08:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -57,7 +57,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -71,10 +71,10 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate long NextByRef(ref T value);
+            private delegate long NextByPtr(ptr<T> value);
             private delegate long NextByVal(T value);
 
-            private static readonly NextByRef s_NextByRef;
+            private static readonly NextByPtr s_NextByPtr;
             private static readonly NextByVal s_NextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,17 +83,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NextByPtr is null || !m_target_is_ptr)
                     return s_NextByVal!(target);
 
-                return s_NextByRef(ref target);
+                return s_NextByPtr(m_target_ptr);
             }
 
-            private delegate long TextByRef(ref T value);
+            private delegate long TextByPtr(ptr<T> value);
             private delegate long TextByVal(T value);
 
-            private static readonly TextByRef s_TextByRef;
+            private static readonly TextByPtr s_TextByPtr;
             private static readonly TextByVal s_TextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,17 +103,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TextByPtr is null || !m_target_is_ptr)
                     return s_TextByVal!(target);
 
-                return s_TextByRef(ref target);
+                return s_TextByPtr(m_target_ptr);
             }
 
-            private delegate long FileByRef(ref T value);
+            private delegate long FileByPtr(ptr<T> value);
             private delegate long FileByVal(T value);
 
-            private static readonly FileByRef s_FileByRef;
+            private static readonly FileByPtr s_FileByPtr;
             private static readonly FileByVal s_FileByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,17 +123,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FileByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FileByPtr is null || !m_target_is_ptr)
                     return s_FileByVal!(target);
 
-                return s_FileByRef(ref target);
+                return s_FileByPtr(m_target_ptr);
             }
 
-            private delegate long BaseByRef(ref T value);
+            private delegate long BaseByPtr(ptr<T> value);
             private delegate long BaseByVal(T value);
 
-            private static readonly BaseByRef s_BaseByRef;
+            private static readonly BaseByPtr s_BaseByPtr;
             private static readonly BaseByVal s_BaseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,36 +143,38 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BaseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BaseByPtr is null || !m_target_is_ptr)
                     return s_BaseByVal!(target);
 
-                return s_BaseByRef(ref target);
+                return s_BaseByPtr(m_target_ptr);
             }
 
-            private delegate long SetBaseByRef(ref T value, ref src.PosBase _p0);
-            private delegate long SetBaseByVal(T value, ref src.PosBase _p0);
+            private delegate long SetBaseByPtr(ptr<T> value, ptr<src.PosBase> _p0);
+            private delegate long SetBaseByVal(T value, ptr<src.PosBase> _p0);
 
-            private static readonly SetBaseByRef s_SetBaseByRef;
+            private static readonly SetBaseByPtr s_SetBaseByPtr;
             private static readonly SetBaseByVal s_SetBaseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long SetBase(ref src.PosBase _p0)
+            public long SetBase(ptr<src.PosBase> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetBaseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetBaseByPtr is null || !m_target_is_ptr)
                     return s_SetBaseByVal!(target, _p0);
 
-                return s_SetBaseByRef(ref target, _p0);
+                return s_SetBaseByPtr(m_target_ptr, _p0);
             }
 
-            private delegate long LineByRef(ref T value);
+            private delegate long LineByPtr(ptr<T> value);
             private delegate long LineByVal(T value);
 
-            private static readonly LineByRef s_LineByRef;
+            private static readonly LineByPtr s_LineByPtr;
             private static readonly LineByVal s_LineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -178,17 +183,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LineByPtr is null || !m_target_is_ptr)
                     return s_LineByVal!(target);
 
-                return s_LineByRef(ref target);
+                return s_LineByPtr(m_target_ptr);
             }
 
-            private delegate long ColByRef(ref T value);
+            private delegate long ColByPtr(ptr<T> value);
             private delegate long ColByVal(T value);
 
-            private static readonly ColByRef s_ColByRef;
+            private static readonly ColByPtr s_ColByPtr;
             private static readonly ColByVal s_ColByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -197,17 +203,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ColByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ColByPtr is null || !m_target_is_ptr)
                     return s_ColByVal!(target);
 
-                return s_ColByRef(ref target);
+                return s_ColByPtr(m_target_ptr);
             }
 
-            private delegate long CloseByRef(ref T value);
+            private delegate long CloseByPtr(ptr<T> value);
             private delegate long CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -216,11 +223,12 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -229,135 +237,111 @@ namespace @internal
             static TokenReader()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Next");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Next");
 
                 if (!(extensionMethod is null))
-                    s_NextByRef = extensionMethod.CreateStaticDelegate(typeof(NextByRef)) as NextByRef;
+                    s_NextByPtr = extensionMethod.CreateStaticDelegate(typeof(NextByPtr)) as NextByPtr;
 
-                if (s_NextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Next");
+                extensionMethod = targetType.GetExtensionMethod("Next");
 
-                    if (!(extensionMethod is null))
-                        s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
 
-                if (s_NextByRef is null && s_NextByVal is null)
+                if (s_NextByPtr is null && s_NextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.Next method", new Exception("Next"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Text");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Text");
 
                 if (!(extensionMethod is null))
-                    s_TextByRef = extensionMethod.CreateStaticDelegate(typeof(TextByRef)) as TextByRef;
+                    s_TextByPtr = extensionMethod.CreateStaticDelegate(typeof(TextByPtr)) as TextByPtr;
 
-                if (s_TextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Text");
+                extensionMethod = targetType.GetExtensionMethod("Text");
 
-                    if (!(extensionMethod is null))
-                        s_TextByVal = extensionMethod.CreateStaticDelegate(typeof(TextByVal)) as TextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TextByVal = extensionMethod.CreateStaticDelegate(typeof(TextByVal)) as TextByVal;
 
-                if (s_TextByRef is null && s_TextByVal is null)
+                if (s_TextByPtr is null && s_TextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.Text method", new Exception("Text"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("File");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("File");
 
                 if (!(extensionMethod is null))
-                    s_FileByRef = extensionMethod.CreateStaticDelegate(typeof(FileByRef)) as FileByRef;
+                    s_FileByPtr = extensionMethod.CreateStaticDelegate(typeof(FileByPtr)) as FileByPtr;
 
-                if (s_FileByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("File");
+                extensionMethod = targetType.GetExtensionMethod("File");
 
-                    if (!(extensionMethod is null))
-                        s_FileByVal = extensionMethod.CreateStaticDelegate(typeof(FileByVal)) as FileByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FileByVal = extensionMethod.CreateStaticDelegate(typeof(FileByVal)) as FileByVal;
 
-                if (s_FileByRef is null && s_FileByVal is null)
+                if (s_FileByPtr is null && s_FileByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.File method", new Exception("File"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Base");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Base");
 
                 if (!(extensionMethod is null))
-                    s_BaseByRef = extensionMethod.CreateStaticDelegate(typeof(BaseByRef)) as BaseByRef;
+                    s_BaseByPtr = extensionMethod.CreateStaticDelegate(typeof(BaseByPtr)) as BaseByPtr;
 
-                if (s_BaseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Base");
+                extensionMethod = targetType.GetExtensionMethod("Base");
 
-                    if (!(extensionMethod is null))
-                        s_BaseByVal = extensionMethod.CreateStaticDelegate(typeof(BaseByVal)) as BaseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BaseByVal = extensionMethod.CreateStaticDelegate(typeof(BaseByVal)) as BaseByVal;
 
-                if (s_BaseByRef is null && s_BaseByVal is null)
+                if (s_BaseByPtr is null && s_BaseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.Base method", new Exception("Base"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SetBase");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SetBase");
 
                 if (!(extensionMethod is null))
-                    s_SetBaseByRef = extensionMethod.CreateStaticDelegate(typeof(SetBaseByRef)) as SetBaseByRef;
+                    s_SetBaseByPtr = extensionMethod.CreateStaticDelegate(typeof(SetBaseByPtr)) as SetBaseByPtr;
 
-                if (s_SetBaseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SetBase");
+                extensionMethod = targetType.GetExtensionMethod("SetBase");
 
-                    if (!(extensionMethod is null))
-                        s_SetBaseByVal = extensionMethod.CreateStaticDelegate(typeof(SetBaseByVal)) as SetBaseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetBaseByVal = extensionMethod.CreateStaticDelegate(typeof(SetBaseByVal)) as SetBaseByVal;
 
-                if (s_SetBaseByRef is null && s_SetBaseByVal is null)
+                if (s_SetBaseByPtr is null && s_SetBaseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.SetBase method", new Exception("SetBase"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Line");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Line");
 
                 if (!(extensionMethod is null))
-                    s_LineByRef = extensionMethod.CreateStaticDelegate(typeof(LineByRef)) as LineByRef;
+                    s_LineByPtr = extensionMethod.CreateStaticDelegate(typeof(LineByPtr)) as LineByPtr;
 
-                if (s_LineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Line");
+                extensionMethod = targetType.GetExtensionMethod("Line");
 
-                    if (!(extensionMethod is null))
-                        s_LineByVal = extensionMethod.CreateStaticDelegate(typeof(LineByVal)) as LineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LineByVal = extensionMethod.CreateStaticDelegate(typeof(LineByVal)) as LineByVal;
 
-                if (s_LineByRef is null && s_LineByVal is null)
+                if (s_LineByPtr is null && s_LineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.Line method", new Exception("Line"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Col");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Col");
 
                 if (!(extensionMethod is null))
-                    s_ColByRef = extensionMethod.CreateStaticDelegate(typeof(ColByRef)) as ColByRef;
+                    s_ColByPtr = extensionMethod.CreateStaticDelegate(typeof(ColByPtr)) as ColByPtr;
 
-                if (s_ColByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Col");
+                extensionMethod = targetType.GetExtensionMethod("Col");
 
-                    if (!(extensionMethod is null))
-                        s_ColByVal = extensionMethod.CreateStaticDelegate(typeof(ColByVal)) as ColByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ColByVal = extensionMethod.CreateStaticDelegate(typeof(ColByVal)) as ColByVal;
 
-                if (s_ColByRef is null && s_ColByVal is null)
+                if (s_ColByPtr is null && s_ColByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.Col method", new Exception("Col"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.Close method", new Exception("Close"));
             }
 

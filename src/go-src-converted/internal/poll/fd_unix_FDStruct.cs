@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:27 UTC
+//     Generated on 2020 October 08 03:32:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
-using runtime = go.runtime_package;
+using atomic = go.sync.atomic_package;
 using syscall = go.syscall_package;
 using go;
 
@@ -34,23 +34,23 @@ namespace @internal
                 this.pd = default;
                 this.iovecs = default;
                 this.csema = default;
+                this.isBlocking = default;
                 this.IsStream = default;
                 this.ZeroReadIsEOF = default;
                 this.isFile = default;
-                this.isBlocking = default;
             }
 
-            public FD(fdMutex fdmu = default, long Sysfd = default, pollDesc pd = default, ref ptr<slice<syscall.Iovec>> iovecs = default, uint csema = default, bool IsStream = default, bool ZeroReadIsEOF = default, bool isFile = default, bool isBlocking = default)
+            public FD(fdMutex fdmu = default, long Sysfd = default, pollDesc pd = default, ref ptr<slice<syscall.Iovec>> iovecs = default, uint csema = default, uint isBlocking = default, bool IsStream = default, bool ZeroReadIsEOF = default, bool isFile = default)
             {
                 this.fdmu = fdmu;
                 this.Sysfd = Sysfd;
                 this.pd = pd;
                 this.iovecs = iovecs;
                 this.csema = csema;
+                this.isBlocking = isBlocking;
                 this.IsStream = IsStream;
                 this.ZeroReadIsEOF = ZeroReadIsEOF;
                 this.isFile = isFile;
-                this.isBlocking = isBlocking;
             }
 
             // Enable comparisons between nil and FD struct
@@ -73,7 +73,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static FD FD_cast(dynamic value)
         {
-            return new FD(value.fdmu, value.Sysfd, value.pd, ref value.iovecs, value.csema, value.IsStream, value.ZeroReadIsEOF, value.isFile, value.isBlocking);
+            return new FD(value.fdmu, value.Sysfd, value.pd, ref value.iovecs, value.csema, value.isBlocking, value.IsStream, value.ZeroReadIsEOF, value.isFile);
         }
     }
 }}

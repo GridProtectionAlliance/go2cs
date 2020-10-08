@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:44:18 UTC
+// package os -- go2cs converted at 2020 October 08 03:45:05 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\stat_freebsd.go
 using syscall = go.syscall_package;
@@ -13,8 +13,10 @@ namespace go
 {
     public static partial class os_package
     {
-        private static void fillFileStatFromSys(ref fileStat fs, @string name)
+        private static void fillFileStatFromSys(ptr<fileStat> _addr_fs, @string name)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             fs.name = basename(name);
             fs.size = fs.sys.Size;
             fs.modTime = timespecToTime(fs.sys.Mtimespec);
@@ -54,7 +56,7 @@ namespace go
         // For testing.
         private static time.Time atime(FileInfo fi)
         {
-            return timespecToTime(fi.Sys()._<ref syscall.Stat_t>().Atimespec);
+            return timespecToTime(fi.Sys()._<ptr<syscall.Stat_t>>().Atimespec);
         }
     }
 }

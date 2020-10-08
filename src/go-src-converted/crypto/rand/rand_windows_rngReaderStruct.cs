@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:30:53 UTC
+//     Generated on 2020 October 08 03:35:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,9 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using os = go.os_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using syscall = go.syscall_package;
+using time = go.time_package;
 using go;
 
 namespace go {
@@ -29,12 +31,14 @@ namespace crypto
             // Constructors
             public rngReader(NilType _)
             {
+                this.used = default;
                 this.prov = default;
                 this.mu = default;
             }
 
-            public rngReader(syscall.Handle prov = default, sync.Mutex mu = default)
+            public rngReader(int used = default, syscall.Handle prov = default, sync.Mutex mu = default)
             {
+                this.used = used;
                 this.prov = prov;
                 this.mu = mu;
             }
@@ -59,7 +63,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static rngReader rngReader_cast(dynamic value)
         {
-            return new rngReader(value.prov, value.mu);
+            return new rngReader(value.used, value.prov, value.mu);
         }
     }
 }}

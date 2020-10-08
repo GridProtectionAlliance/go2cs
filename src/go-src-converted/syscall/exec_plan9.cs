@@ -4,7 +4,7 @@
 
 // Fork, exec, wait, etc.
 
-// package syscall -- go2cs converted at 2020 August 29 08:36:58 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:26:31 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\exec_plan9.go
 using runtime = go.runtime_package;
@@ -31,16 +31,19 @@ namespace go
             {
                 return null;
             }
+
             var (n, b) = gbit16(b);
             if (int(n) > len(b))
             {
                 return null;
             }
+
             return b[..n];
+
         }
 
         // Offset of the name field in a 9P directory entry - see UnmarshalDir() in dir_plan9.go
-        private static readonly long nameOffset = 39L;
+        private static readonly long nameOffset = (long)39L;
 
         // gdirname returns the first filename from a buffer of directory entries,
         // and a slice containing the remaining directory entries.
@@ -54,18 +57,24 @@ namespace go
         //go:nosplit
         private static (slice<byte>, slice<byte>) gdirname(slice<byte> buf)
         {
+            slice<byte> name = default;
+            slice<byte> rest = default;
+
             if (len(buf) < 2L)
             {
-                return;
+                return ;
             }
+
             var (size, buf) = gbit16(buf);
             if (size < STATFIXLEN || int(size) > len(buf))
             {
-                return;
+                return ;
             }
+
             name = gstringb(buf[nameOffset..size]);
             rest = buf[size..];
-            return;
+            return ;
+
         }
 
         // StringSlicePtr converts a slice of strings to a slice of pointers
@@ -73,9 +82,9 @@ namespace go
         // this function panics instead of returning an error.
         //
         // Deprecated: Use SlicePtrFromStrings instead.
-        public static slice<ref byte> StringSlicePtr(slice<@string> ss)
+        public static slice<ptr<byte>> StringSlicePtr(slice<@string> ss)
         {
-            var bb = make_slice<ref byte>(len(ss) + 1L);
+            var bb = make_slice<ptr<byte>>(len(ss) + 1L);
             for (long i = 0L; i < len(ss); i++)
             {
                 bb[i] = StringBytePtr(ss[i]);
@@ -83,31 +92,40 @@ namespace go
 
             bb[len(ss)] = null;
             return bb;
+
         }
 
         // SlicePtrFromStrings converts a slice of strings to a slice of
         // pointers to NUL-terminated byte arrays. If any string contains
         // a NUL byte, it returns (nil, EINVAL).
-        public static (slice<ref byte>, error) SlicePtrFromStrings(slice<@string> ss)
+        public static (slice<ptr<byte>>, error) SlicePtrFromStrings(slice<@string> ss)
         {
-            error err = default;
-            var bb = make_slice<ref byte>(len(ss) + 1L);
+            slice<ptr<byte>> _p0 = default;
+            error _p0 = default!;
+
+            error err = default!;
+            var bb = make_slice<ptr<byte>>(len(ss) + 1L);
             for (long i = 0L; i < len(ss); i++)
             {
                 bb[i], err = BytePtrFromString(ss[i]);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
             }
 
             bb[len(ss)] = null;
-            return (bb, null);
+            return (bb, error.As(null!)!);
+
         }
 
         // readdirnames returns the names of files inside the directory represented by dirfd.
         private static (slice<@string>, error) readdirnames(long dirfd)
         {
+            slice<@string> names = default;
+            error err = default!;
+
             names = make_slice<@string>(0L, 100L);
             array<byte> buf = new array<byte>(STATMAX);
 
@@ -116,12 +134,14 @@ namespace go
                 var (n, e) = Read(dirfd, buf[..]);
                 if (e != null)
                 {
-                    return (null, e);
+                    return (null, error.As(e)!);
                 }
+
                 if (n == 0L)
                 {
                     break;
                 }
+
                 {
                     var b = buf[..n];
 
@@ -131,15 +151,19 @@ namespace go
                         s, b = gdirname(b);
                         if (s == null)
                         {
-                            return (null, ErrBadStat);
+                            return (null, error.As(ErrBadStat)!);
                         }
+
                         names = append(names, string(s));
+
                     }
 
                 }
+
             }
 
-            return;
+            return ;
+
         }
 
         // name of the directory containing names and control files for all open file descriptors
@@ -156,8 +180,14 @@ namespace go
         // The calls to RawSyscall are okay because they are assembly
         // functions that do not grow the stack.
         //go:norace
-        private static (long, error) forkAndExecInChild(ref byte argv0, slice<ref byte> argv, slice<envItem> envv, ref byte dir, ref ProcAttr attr, long pipe, long rflag)
-        { 
+        private static (long, error) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr<byte>> argv, slice<envItem> envv, ptr<byte> _addr_dir, ptr<ProcAttr> _addr_attr, long pipe, long rflag)
+        {
+            long pid = default;
+            error err = default!;
+            ref byte argv0 = ref _addr_argv0.val;
+            ref byte dir = ref _addr_dir.val;
+            ref ProcAttr attr = ref _addr_attr.val;
+ 
             // Declare all variables at top in case any
             // declarations require heap allocation (e.g., errbuf).
             System.UIntPtr r1 = default;            long nextfd = default;            long i = default;            long clearenv = default;            long envfd = default;            array<byte> errbuf = new array<byte>(ERRMAX);            array<byte> statbuf = new array<byte>(STATMAX);            long dupdevfd = default; 
@@ -178,7 +208,9 @@ namespace go
                     {
                         nextfd = int(ufd);
                     }
+
                     fd[i] = int(ufd);
+
                 }
 
                 i = i__prev1;
@@ -199,10 +231,11 @@ namespace go
             {
                 if (int32(r1) == -1L)
                 {
-                    return (0L, NewError(errstr()));
+                    return (0L, error.As(NewError(errstr()))!);
                 } 
                 // parent; return PID
-                return (int(r1), null);
+                return (int(r1), error.As(null!)!);
+
             } 
 
             // Fork succeeded, now in child.
@@ -214,10 +247,11 @@ namespace go
             {
                 goto childerror;
             }
+
 dirloop:
             while (true)
             {
-                r1, _, _ = RawSyscall6(SYS_PREAD, uintptr(dupdevfd), uintptr(@unsafe.Pointer(ref statbuf[0L])), uintptr(len(statbuf)), ~uintptr(0L), ~uintptr(0L), 0L);
+                r1, _, _ = RawSyscall6(SYS_PREAD, uintptr(dupdevfd), uintptr(@unsafe.Pointer(_addr_statbuf[0L])), uintptr(len(statbuf)), ~uintptr(0L), ~uintptr(0L), 0L);
                 var n = int(r1);
                 switch (n)
                 {
@@ -241,15 +275,20 @@ dirloop:
                             copy(errbuf[..], ErrBadStat.Error());
                             goto childerror1;
                         }
+
                         if (s[len(s) - 1L] == 'l')
                         { 
                             // control file for descriptor <N> is named <N>ctl
                             continue;
+
                         }
+
                         closeFdExcept(int(atoi(s)), pipe, dupdevfd, fd);
+
                     }
 
                 }
+
             }
             RawSyscall(SYS_CLOSE, uintptr(dupdevfd), 0L, 0L); 
 
@@ -264,6 +303,7 @@ dirloop:
                     {
                         goto childerror;
                     }
+
                     envfd = int(r1);
 
                     r1, _, _ = RawSyscall6(SYS_PWRITE, uintptr(envfd), uintptr(@unsafe.Pointer(envv[i].value)), uintptr(envv[i].nvalue), ~uintptr(0L), ~uintptr(0L), 0L);
@@ -272,13 +312,16 @@ dirloop:
                     {
                         goto childerror;
                     }
+
                     r1, _, _ = RawSyscall(SYS_CLOSE, uintptr(envfd), 0L, 0L);
 
                     if (int32(r1) == -1L)
                     {
                         goto childerror;
                     }
+
                 }
+
 
             } 
 
@@ -290,6 +333,7 @@ dirloop:
                 {
                     goto childerror;
                 }
+
             } 
 
             // Pass 1: look for fd[i] < i and move those up above len(fd)
@@ -301,9 +345,12 @@ dirloop:
                 {
                     goto childerror;
                 }
+
                 pipe = nextfd;
                 nextfd++;
+
             }
+
             for (i = 0L; i < len(fd); i++)
             {
                 if (fd[i] >= 0L && fd[i] < int(i))
@@ -311,15 +358,20 @@ dirloop:
                     if (nextfd == pipe)
                     { // don't stomp on pipe
                         nextfd++;
+
                     }
+
                     r1, _, _ = RawSyscall(SYS_DUP, uintptr(fd[i]), uintptr(nextfd), 0L);
                     if (int32(r1) == -1L)
                     {
                         goto childerror;
                     }
+
                     fd[i] = nextfd;
                     nextfd++;
+
                 }
+
             } 
 
             // Pass 2: dup fd[i] down onto i.
@@ -333,15 +385,18 @@ dirloop:
                     RawSyscall(SYS_CLOSE, uintptr(i), 0L, 0L);
                     continue;
                 }
+
                 if (fd[i] == int(i))
                 {
                     continue;
                 }
+
                 r1, _, _ = RawSyscall(SYS_DUP, uintptr(fd[i]), uintptr(i), 0L);
                 if (int32(r1) == -1L)
                 {
                     goto childerror;
                 }
+
             } 
 
             // Pass 3: close fd[i] if it was moved in the previous pass.
@@ -354,16 +409,17 @@ dirloop:
                 {
                     RawSyscall(SYS_CLOSE, uintptr(fd[i]), 0L, 0L);
                 }
+
             } 
 
             // Time to exec.
  
 
             // Time to exec.
-            r1, _, _ = RawSyscall(SYS_EXEC, uintptr(@unsafe.Pointer(argv0)), uintptr(@unsafe.Pointer(ref argv[0L])), 0L);
+            r1, _, _ = RawSyscall(SYS_EXEC, uintptr(@unsafe.Pointer(argv0)), uintptr(@unsafe.Pointer(_addr_argv[0L])), 0L);
 
 childerror:
-            RawSyscall(SYS_ERRSTR, uintptr(@unsafe.Pointer(ref errbuf[0L])), uintptr(len(errbuf)), 0L);
+            RawSyscall(SYS_ERRSTR, uintptr(@unsafe.Pointer(_addr_errbuf[0L])), uintptr(len(errbuf)), 0L);
 childerror1:
             errbuf[len(errbuf) - 1L] = 0L;
             i = 0L;
@@ -373,12 +429,13 @@ childerror1:
             }
 
 
-            RawSyscall6(SYS_PWRITE, uintptr(pipe), uintptr(@unsafe.Pointer(ref errbuf[0L])), uintptr(i), ~uintptr(0L), ~uintptr(0L), 0L);
+            RawSyscall6(SYS_PWRITE, uintptr(pipe), uintptr(@unsafe.Pointer(_addr_errbuf[0L])), uintptr(i), ~uintptr(0L), ~uintptr(0L), 0L);
 
             while (true)
             {
                 RawSyscall(SYS_EXITS, 0L, 0L, 0L);
             }
+
 
         }
 
@@ -388,16 +445,19 @@ childerror1:
         {
             if (n == fd1 || n == fd2)
             {
-                return;
+                return ;
             }
+
             foreach (var (_, fd) in fds)
             {
                 if (n == fd)
                 {
-                    return;
+                    return ;
                 }
+
             }
             RawSyscall(SYS_CLOSE, uintptr(n), 0L, 0L);
+
         }
 
         private static error cexecPipe(slice<long> p)
@@ -405,17 +465,20 @@ childerror1:
             var e = Pipe(p);
             if (e != null)
             {
-                return error.As(e);
+                return error.As(e)!;
             }
+
             var (fd, e) = Open("#d/" + itoa(p[1L]), O_CLOEXEC);
             if (e != null)
             {
                 Close(p[0L]);
                 Close(p[1L]);
-                return error.As(e);
+                return error.As(e)!;
             }
+
             Close(fd);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         private partial struct envItem
@@ -441,19 +504,25 @@ childerror1:
         private static ProcAttr zeroProcAttr = default;
         private static SysProcAttr zeroSysProcAttr = default;
 
-        private static (long, error) forkExec(@string argv0, slice<@string> argv, ref ProcAttr attr)
+        private static (long, error) forkExec(@string argv0, slice<@string> argv, ptr<ProcAttr> _addr_attr)
         {
-            array<long> p = new array<long>(2L);            long n = default;            array<byte> errbuf = new array<byte>(ERRMAX);            Waitmsg wmsg = default;
+            long pid = default;
+            error err = default!;
+            ref ProcAttr attr = ref _addr_attr.val;
+
+            array<long> p = new array<long>(2L);            long n = default;            array<byte> errbuf = new array<byte>(ERRMAX);            ref Waitmsg wmsg = ref heap(out ptr<Waitmsg> _addr_wmsg);
 
             if (attr == null)
             {
-                attr = ref zeroProcAttr;
+                attr = _addr_zeroProcAttr;
             }
+
             var sys = attr.Sys;
             if (sys == null)
             {
-                sys = ref zeroSysProcAttr;
+                sys = _addr_zeroSysProcAttr;
             }
+
             p[0L] = -1L;
             p[1L] = -1L; 
 
@@ -461,13 +530,15 @@ childerror1:
             var (argv0p, err) = BytePtrFromString(argv0);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             var (argvp, err) = SlicePtrFromStrings(argv);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             var destDir = attr.Dir;
             if (destDir == "")
             {
@@ -475,15 +546,18 @@ childerror1:
                 destDir = wdStr;
                 wdmu.Unlock();
             }
-            ref byte dir = default;
+
+            ptr<byte> dir;
             if (destDir != "")
             {
                 dir, err = BytePtrFromString(destDir);
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
+
             }
+
             slice<envItem> envvParsed = default;
             if (attr.Env != null)
             {
@@ -500,12 +574,15 @@ childerror1:
                     var (envname, err) = BytePtrFromString("/env/" + v[..i]);
                     if (err != null)
                     {
-                        return (0L, err);
+                        return (0L, error.As(err)!);
                     }
+
                     var envvalue = make_slice<byte>(len(v) - i);
                     copy(envvalue, v[i + 1L..]);
                     envvParsed = append(envvParsed, new envItem(envname,&envvalue[0],len(v)-i));
+
                 }
+
             } 
 
             // Allocate child status pipe close on exec.
@@ -513,11 +590,11 @@ childerror1:
 
             if (e != null)
             {
-                return (0L, e);
+                return (0L, error.As(e)!);
             } 
 
             // Kick off child.
-            pid, err = forkAndExecInChild(argv0p, argvp, envvParsed, dir, attr, p[1L], sys.Rfork);
+            pid, err = forkAndExecInChild(_addr_argv0p, argvp, envvParsed, dir, _addr_attr, p[1L], sys.Rfork);
 
             if (err != null)
             {
@@ -526,7 +603,9 @@ childerror1:
                     Close(p[0L]);
                     Close(p[1L]);
                 }
-                return (0L, err);
+
+                return (0L, error.As(err)!);
+
             } 
 
             // Read child error status from pipe.
@@ -549,14 +628,16 @@ childerror1:
                 // the zombies don't accumulate.
                 while (wmsg.Pid != pid)
                 {
-                    Await(ref wmsg);
+                    Await(_addr_wmsg);
                 }
 
-                return (0L, err);
+                return (0L, error.As(err)!);
+
             } 
 
             // Read got EOF, so pipe closed on exec, so exec succeeded.
-            return (pid, null);
+            return (pid, error.As(null!)!);
+
         }
 
         private partial struct waitErr
@@ -577,8 +658,12 @@ childerror1:
         // whereas goroutines tend to jump OS threads (e.g.,
         // between starting a process and running Wait(), the
         // goroutine may have been rescheduled).
-        private static (long, error) startProcess(@string argv0, slice<@string> argv, ref ProcAttr attr)
+        private static (long, error) startProcess(@string argv0, slice<@string> argv, ptr<ProcAttr> _addr_attr)
         {
+            long pid = default;
+            error err = default!;
+            ref ProcAttr attr = ref _addr_attr.val;
+
             private partial struct forkRet
             {
                 public long pid;
@@ -591,62 +676,78 @@ childerror1:
                 runtime.LockOSThread();
                 forkRet ret = default;
 
-                ret.pid, ret.err = forkExec(argv0, argv, attr); 
+                ret.pid, ret.err = forkExec(argv0, argv, _addr_attr); 
                 // If fork fails there is nothing to wait for.
                 if (ret.err != null || ret.pid == 0L)
                 {
                     forkc.Send(ret);
-                    return;
+                    return ;
                 }
-                var waitc = make_channel<ref waitErr>(1L); 
+
+                var waitc = make_channel<ptr<waitErr>>(1L); 
 
                 // Mark that the process is running.
                 procs.Lock();
                 if (procs.waits == null)
                 {
-                    procs.waits = make_map<long, channel<ref waitErr>>();
+                    procs.waits = make_map<long, channel<ptr<waitErr>>>();
                 }
+
                 procs.waits[ret.pid] = waitc;
                 procs.Unlock();
 
                 forkc.Send(ret);
 
-                waitErr w = default;
+                ref waitErr w = ref heap(out ptr<waitErr> _addr_w);
                 while (w.err == null && w.Pid != ret.pid)
                 {
-                    w.err = Await(ref w.Waitmsg);
+                    w.err = Await(_addr_w.Waitmsg);
                 }
 
-                waitc.Send(ref w);
+                waitc.Send(_addr_w);
                 close(waitc);
+
             }());
             ret = forkc.Receive();
-            return (ret.pid, ret.err);
+            return (ret.pid, error.As(ret.err)!);
+
         }
 
         // Combination of fork and exec, careful to be thread safe.
-        public static (long, error) ForkExec(@string argv0, slice<@string> argv, ref ProcAttr attr)
+        public static (long, error) ForkExec(@string argv0, slice<@string> argv, ptr<ProcAttr> _addr_attr)
         {
-            return startProcess(argv0, argv, attr);
+            long pid = default;
+            error err = default!;
+            ref ProcAttr attr = ref _addr_attr.val;
+
+            return startProcess(argv0, argv, _addr_attr);
         }
 
         // StartProcess wraps ForkExec for package os.
-        public static (long, System.UIntPtr, error) StartProcess(@string argv0, slice<@string> argv, ref ProcAttr attr)
+        public static (long, System.UIntPtr, error) StartProcess(@string argv0, slice<@string> argv, ptr<ProcAttr> _addr_attr)
         {
-            pid, err = startProcess(argv0, argv, attr);
-            return (pid, 0L, err);
+            long pid = default;
+            System.UIntPtr handle = default;
+            error err = default!;
+            ref ProcAttr attr = ref _addr_attr.val;
+
+            pid, err = startProcess(argv0, argv, _addr_attr);
+            return (pid, 0L, error.As(err)!);
         }
 
         // Ordinary exec.
         public static error Exec(@string argv0, slice<@string> argv, slice<@string> envv)
         {
+            error err = default!;
+
             if (envv != null)
             {
                 var (r1, _, _) = RawSyscall(SYS_RFORK, RFCENVG, 0L, 0L);
                 if (int32(r1) == -1L)
                 {
-                    return error.As(NewError(errstr()));
+                    return error.As(NewError(errstr()))!;
                 }
+
                 foreach (var (_, v) in envv)
                 {
                     long i = 0L;
@@ -659,30 +760,38 @@ childerror1:
                     var (fd, e) = Create("/env/" + v[..i], O_WRONLY, 0666L);
                     if (e != null)
                     {
-                        return error.As(e);
+                        return error.As(e)!;
                     }
+
                     _, e = Write(fd, (slice<byte>)v[i + 1L..]);
                     if (e != null)
                     {
                         Close(fd);
-                        return error.As(e);
+                        return error.As(e)!;
                     }
+
                     Close(fd);
+
                 }
+
             }
+
             var (argv0p, err) = BytePtrFromString(argv0);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var (argvp, err) = SlicePtrFromStrings(argv);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            var (_, _, e1) = Syscall(SYS_EXEC, uintptr(@unsafe.Pointer(argv0p)), uintptr(@unsafe.Pointer(ref argvp[0L])), 0L);
 
-            return error.As(e1);
+            var (_, _, e1) = Syscall(SYS_EXEC, uintptr(@unsafe.Pointer(argv0p)), uintptr(@unsafe.Pointer(_addr_argvp[0L])), 0L);
+
+            return error.As(e1)!;
+
         }
 
         // WaitProcess waits until the pid of a
@@ -690,13 +799,16 @@ childerror1:
         // wait messages. It is used in conjunction
         // with ForkExec/StartProcess to wait for a
         // running process to exit.
-        public static error WaitProcess(long pid, ref Waitmsg w)
+        public static error WaitProcess(long pid, ptr<Waitmsg> _addr_w)
         {
+            error err = default!;
+            ref Waitmsg w = ref _addr_w.val;
+
             procs.Lock();
             var ch = procs.waits[pid];
             procs.Unlock();
 
-            ref waitErr wmsg = default;
+            ptr<waitErr> wmsg;
             if (ch != null)
             {
                 wmsg = ch.Receive();
@@ -705,22 +817,30 @@ childerror1:
                 {
                     delete(procs.waits, pid);
                 }
+
                 procs.Unlock();
+
             }
+
             if (wmsg == null)
             { 
                 // ch was missing or ch is closed
-                return error.As(NewError("process not found"));
+                return error.As(NewError("process not found"))!;
+
             }
+
             if (wmsg.err != null)
             {
-                return error.As(wmsg.err);
+                return error.As(wmsg.err)!;
             }
+
             if (w != null)
             {
-                w.Value = wmsg.Waitmsg;
+                w = wmsg.Waitmsg;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:57 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:21 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\remainder.go
 
@@ -47,8 +47,9 @@ namespace go
 
         private static double remainder(double x, double y)
         {
-            const float Tiny = 4.45014771701440276618e-308F; // 0x0020000000000000
-            const var HalfMax = MaxFloat64 / 2L; 
+            const float Tiny = (float)4.45014771701440276618e-308F; // 0x0020000000000000
+            const var HalfMax = (var)MaxFloat64 / 2L;
+ 
             // special cases
 
             if (IsNaN(x) || IsNaN(y) || IsInf(x, 0L) || y == 0L) 
@@ -61,18 +62,29 @@ namespace go
                 x = -x;
                 sign = true;
             }
+
             if (y < 0L)
             {
                 y = -y;
             }
+
             if (x == y)
             {
+                if (sign)
+                {
+                    float zero = 0.0F;
+                    return -zero;
+                }
+
                 return 0L;
+
             }
+
             if (y <= HalfMax)
             {
                 x = Mod(x, y + y); // now x < 2y
             }
+
             if (y < Tiny)
             {
                 if (x + x > y)
@@ -82,7 +94,9 @@ namespace go
                     {
                         x -= y;
                     }
+
                 }
+
             }
             else
             {
@@ -94,13 +108,18 @@ namespace go
                     {
                         x -= y;
                     }
+
                 }
+
             }
+
             if (sign)
             {
                 x = -x;
             }
+
             return x;
+
         }
     }
 }

@@ -4,7 +4,7 @@
 
 // +build !android
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:39 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:24:25 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\write_err.go
 using @unsafe = go.@unsafe_package;
@@ -16,7 +16,7 @@ namespace go
     {
         private static void writeErr(slice<byte> b)
         {
-            write(2L, @unsafe.Pointer(ref b[0L]), int32(len(b)));
+            write(2L, @unsafe.Pointer(_addr_b[0L]), int32(len(b)));
         }
     }
 }

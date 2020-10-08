@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:39 UTC
+//     Generated on 2020 October 08 03:38:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,11 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using context = go.context_package;
 using crypto = go.crypto_package;
 using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
 using rsa = go.crypto.rsa_package;
 using x509 = go.crypto.x509_package;
 using pem = go.encoding.pem_package;

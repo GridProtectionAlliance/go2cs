@@ -5,7 +5,7 @@
 // +build !windows
 // +build !plan9
 
-// package os -- go2cs converted at 2020 August 29 08:44:38 UTC
+// package os -- go2cs converted at 2020 October 08 03:45:24 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\types_unix.go
 using syscall = go.syscall_package;
@@ -26,25 +26,36 @@ namespace go
             public syscall.Stat_t sys;
         }
 
-        private static long Size(this ref fileStat fs)
+        private static long Size(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.size;
         }
-        private static FileMode Mode(this ref fileStat fs)
+        private static FileMode Mode(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.mode;
         }
-        private static time.Time ModTime(this ref fileStat fs)
+        private static time.Time ModTime(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.modTime;
         }
-        private static void Sys(this ref fileStat fs)
+        private static void Sys(this ptr<fileStat> _addr_fs)
         {
-            return ref fs.sys;
+            ref fileStat fs = ref _addr_fs.val;
+
+            return _addr_fs.sys;
         }
 
-        private static bool sameFile(ref fileStat fs1, ref fileStat fs2)
+        private static bool sameFile(ptr<fileStat> _addr_fs1, ptr<fileStat> _addr_fs2)
         {
+            ref fileStat fs1 = ref _addr_fs1.val;
+            ref fileStat fs2 = ref _addr_fs2.val;
+
             return fs1.sys.Dev == fs2.sys.Dev && fs1.sys.Ino == fs2.sys.Ino;
         }
     }

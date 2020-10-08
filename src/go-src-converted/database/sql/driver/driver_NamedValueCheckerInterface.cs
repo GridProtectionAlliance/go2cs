@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,23 +67,24 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate error CheckNamedValueByRef(ref T value, ref NamedValue _p0);
-            private delegate error CheckNamedValueByVal(T value, ref NamedValue _p0);
+            private delegate error CheckNamedValueByPtr(ptr<T> value, ptr<NamedValue> _p0);
+            private delegate error CheckNamedValueByVal(T value, ptr<NamedValue> _p0);
 
-            private static readonly CheckNamedValueByRef s_CheckNamedValueByRef;
+            private static readonly CheckNamedValueByPtr s_CheckNamedValueByPtr;
             private static readonly CheckNamedValueByVal s_CheckNamedValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error CheckNamedValue(ref NamedValue _p0)
+            public error CheckNamedValue(ptr<NamedValue> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CheckNamedValueByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CheckNamedValueByPtr is null || !m_target_is_ptr)
                     return s_CheckNamedValueByVal!(target, _p0);
 
-                return s_CheckNamedValueByRef(ref target, _p0);
+                return s_CheckNamedValueByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static NamedValueChecker()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CheckNamedValue");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CheckNamedValue");
 
                 if (!(extensionMethod is null))
-                    s_CheckNamedValueByRef = extensionMethod.CreateStaticDelegate(typeof(CheckNamedValueByRef)) as CheckNamedValueByRef;
+                    s_CheckNamedValueByPtr = extensionMethod.CreateStaticDelegate(typeof(CheckNamedValueByPtr)) as CheckNamedValueByPtr;
 
-                if (s_CheckNamedValueByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CheckNamedValue");
+                extensionMethod = targetType.GetExtensionMethod("CheckNamedValue");
 
-                    if (!(extensionMethod is null))
-                        s_CheckNamedValueByVal = extensionMethod.CreateStaticDelegate(typeof(CheckNamedValueByVal)) as CheckNamedValueByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CheckNamedValueByVal = extensionMethod.CreateStaticDelegate(typeof(CheckNamedValueByVal)) as CheckNamedValueByVal;
 
-                if (s_CheckNamedValueByRef is null && s_CheckNamedValueByVal is null)
+                if (s_CheckNamedValueByPtr is null && s_CheckNamedValueByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement NamedValueChecker.CheckNamedValue method", new Exception("CheckNamedValue"));
             }
 

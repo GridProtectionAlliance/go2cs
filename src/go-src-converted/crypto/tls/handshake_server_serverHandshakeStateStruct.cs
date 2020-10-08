@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:30 UTC
+//     Generated on 2020 October 08 03:38:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,13 +15,15 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using crypto = go.crypto_package;
 using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
 using rsa = go.crypto.rsa_package;
 using subtle = go.crypto.subtle_package;
 using x509 = go.crypto.x509_package;
-using asn1 = go.encoding.asn1_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using atomic = go.sync.atomic_package;
+using time = go.time_package;
 using go;
 
 namespace go {
@@ -39,34 +41,30 @@ namespace crypto
                 this.clientHello = default;
                 this.hello = default;
                 this.suite = default;
-                this.ellipticOk = default;
-                this.ecdsaOk = default;
+                this.ecdheOk = default;
+                this.ecSignOk = default;
                 this.rsaDecryptOk = default;
                 this.rsaSignOk = default;
                 this.sessionState = default;
                 this.finishedHash = default;
                 this.masterSecret = default;
-                this.certsFromClient = default;
                 this.cert = default;
-                this.cachedClientHelloInfo = default;
             }
 
-            public serverHandshakeState(ref ptr<Conn> c = default, ref ptr<clientHelloMsg> clientHello = default, ref ptr<serverHelloMsg> hello = default, ref ptr<cipherSuite> suite = default, bool ellipticOk = default, bool ecdsaOk = default, bool rsaDecryptOk = default, bool rsaSignOk = default, ref ptr<sessionState> sessionState = default, finishedHash finishedHash = default, slice<byte> masterSecret = default, slice<slice<byte>> certsFromClient = default, ref ptr<Certificate> cert = default, ref ptr<ClientHelloInfo> cachedClientHelloInfo = default)
+            public serverHandshakeState(ref ptr<Conn> c = default, ref ptr<clientHelloMsg> clientHello = default, ref ptr<serverHelloMsg> hello = default, ref ptr<cipherSuite> suite = default, bool ecdheOk = default, bool ecSignOk = default, bool rsaDecryptOk = default, bool rsaSignOk = default, ref ptr<sessionState> sessionState = default, finishedHash finishedHash = default, slice<byte> masterSecret = default, ref ptr<Certificate> cert = default)
             {
                 this.c = c;
                 this.clientHello = clientHello;
                 this.hello = hello;
                 this.suite = suite;
-                this.ellipticOk = ellipticOk;
-                this.ecdsaOk = ecdsaOk;
+                this.ecdheOk = ecdheOk;
+                this.ecSignOk = ecSignOk;
                 this.rsaDecryptOk = rsaDecryptOk;
                 this.rsaSignOk = rsaSignOk;
                 this.sessionState = sessionState;
                 this.finishedHash = finishedHash;
                 this.masterSecret = masterSecret;
-                this.certsFromClient = certsFromClient;
                 this.cert = cert;
-                this.cachedClientHelloInfo = cachedClientHelloInfo;
             }
 
             // Enable comparisons between nil and serverHandshakeState struct
@@ -89,7 +87,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static serverHandshakeState serverHandshakeState_cast(dynamic value)
         {
-            return new serverHandshakeState(ref value.c, ref value.clientHello, ref value.hello, ref value.suite, value.ellipticOk, value.ecdsaOk, value.rsaDecryptOk, value.rsaSignOk, ref value.sessionState, value.finishedHash, value.masterSecret, value.certsFromClient, ref value.cert, ref value.cachedClientHelloInfo);
+            return new serverHandshakeState(ref value.c, ref value.clientHello, ref value.hello, ref value.suite, value.ecdheOk, value.ecSignOk, value.rsaDecryptOk, value.rsaSignOk, ref value.sessionState, value.finishedHash, value.masterSecret, ref value.cert);
         }
     }
 }}

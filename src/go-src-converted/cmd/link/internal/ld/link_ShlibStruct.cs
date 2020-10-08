@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:10 UTC
+//     Generated on 2020 October 08 04:39:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using static go.builtin;
 using bufio = go.bufio_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using elf = go.debug.elf_package;
 using fmt = go.fmt_package;
@@ -38,16 +39,14 @@ namespace @internal
                 this.Hash = default;
                 this.Deps = default;
                 this.File = default;
-                this.gcdataAddresses = default;
             }
 
-            public Shlib(@string Path = default, slice<byte> Hash = default, slice<@string> Deps = default, ref ptr<elf.File> File = default, map<ref sym.Symbol, ulong> gcdataAddresses = default)
+            public Shlib(@string Path = default, slice<byte> Hash = default, slice<@string> Deps = default, ref ptr<elf.File> File = default)
             {
                 this.Path = Path;
                 this.Hash = Hash;
                 this.Deps = Deps;
                 this.File = File;
-                this.gcdataAddresses = gcdataAddresses;
             }
 
             // Enable comparisons between nil and Shlib struct
@@ -70,7 +69,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Shlib Shlib_cast(dynamic value)
         {
-            return new Shlib(value.Path, value.Hash, value.Deps, ref value.File, value.gcdataAddresses);
+            return new Shlib(value.Path, value.Hash, value.Deps, ref value.File);
         }
     }
 }}}}

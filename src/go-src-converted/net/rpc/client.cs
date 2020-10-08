@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rpc -- go2cs converted at 2020 August 29 08:36:32 UTC
+// package rpc -- go2cs converted at 2020 October 08 03:43:22 UTC
 // import "net/rpc" ==> using rpc = go.net.rpc_package
 // Original source: C:\Go\src\net\rpc\client.go
 using bufio = go.bufio_package;
@@ -39,7 +39,7 @@ namespace net
         {
             public @string ServiceMethod; // The name of the service and method to call.
             public error Error; // After completion, the error status.
-            public channel<ref Call> Done; // Strobes when call is complete.
+            public channel<ptr<Call>> Done; // Receives *Call when Go is complete.
         }
 
         // Client represents an RPC Client.
@@ -53,7 +53,7 @@ namespace net
             public Request request;
             public sync.Mutex mutex; // protects following
             public ulong seq;
-            public map<ulong, ref Call> pending;
+            public map<ulong, ptr<Call>> pending;
             public bool closing; // user has called Close
             public bool shutdown; // server has told us to stop
         }
@@ -66,16 +66,20 @@ namespace net
         // connection. ReadResponseBody may be called with a nil
         // argument to force the body of the response to be read and then
         // discarded.
+        // See NewClient's comment for information about concurrent access.
         public partial interface ClientCodec
         {
-            error WriteRequest(ref Request _p0, object _p0);
-            error ReadResponseHeader(ref Response _p0);
+            error WriteRequest(ptr<Request> _p0, object _p0);
+            error ReadResponseHeader(ptr<Response> _p0);
             error ReadResponseBody(object _p0);
             error Close();
         }
 
-        private static void send(this ref Client _client, ref Call _call) => func(_client, _call, (ref Client client, ref Call call, Defer defer, Panic _, Recover __) =>
+        private static void send(this ptr<Client> _addr_client, ptr<Call> _addr_call) => func((defer, _, __) =>
         {
+            ref Client client = ref _addr_client.val;
+            ref Call call = ref _addr_call.val;
+
             client.reqMutex.Lock();
             defer(client.reqMutex.Unlock()); 
 
@@ -83,11 +87,12 @@ namespace net
             client.mutex.Lock();
             if (client.shutdown || client.closing)
             {
-                call.Error = ErrShutdown;
                 client.mutex.Unlock();
+                call.Error = ErrShutdown;
                 call.done();
-                return;
+                return ;
             }
+
             var seq = client.seq;
             client.seq++;
             client.pending[seq] = call;
@@ -96,7 +101,7 @@ namespace net
             // Encode and send the request.
             client.request.Seq = seq;
             client.request.ServiceMethod = call.ServiceMethod;
-            var err = client.codec.WriteRequest(ref client.request, call.Args);
+            var err = client.codec.WriteRequest(_addr_client.request, call.Args);
             if (err != null)
             {
                 client.mutex.Lock();
@@ -108,21 +113,26 @@ namespace net
                     call.Error = err;
                     call.done();
                 }
+
             }
+
         });
 
-        private static void input(this ref Client client)
+        private static void input(this ptr<Client> _addr_client)
         {
-            error err = default;
-            Response response = default;
+            ref Client client = ref _addr_client.val;
+
+            error err = default!;
+            ref Response response = ref heap(out ptr<Response> _addr_response);
             while (err == null)
             {
                 response = new Response();
-                err = error.As(client.codec.ReadResponseHeader(ref response));
+                err = error.As(client.codec.ReadResponseHeader(_addr_response))!;
                 if (err != null)
                 {
                     break;
                 }
+
                 var seq = response.Seq;
                 client.mutex.Lock();
                 var call = client.pending[seq];
@@ -136,30 +146,34 @@ namespace net
                     // removed; response is a server telling us about an
                     // error reading request body. We should still attempt
                     // to read error body, but there's no one to give it to.
-                    err = error.As(client.codec.ReadResponseBody(null));
+                    err = error.As(client.codec.ReadResponseBody(null))!;
                     if (err != null)
                     {
-                        err = error.As(errors.New("reading error body: " + err.Error()));
+                        err = error.As(errors.New("reading error body: " + err.Error()))!;
                     }
+
                 else if (response.Error != "") 
                     // We've got an error response. Give this to the request;
                     // any subsequent requests will get the ReadResponseBody
                     // error if there is one.
                     call.Error = ServerError(response.Error);
-                    err = error.As(client.codec.ReadResponseBody(null));
+                    err = error.As(client.codec.ReadResponseBody(null))!;
                     if (err != null)
                     {
-                        err = error.As(errors.New("reading error body: " + err.Error()));
+                        err = error.As(errors.New("reading error body: " + err.Error()))!;
                     }
+
                     call.done();
                 else 
-                    err = error.As(client.codec.ReadResponseBody(call.Reply));
+                    err = error.As(client.codec.ReadResponseBody(call.Reply))!;
                     if (err != null)
                     {
                         call.Error = errors.New("reading body " + err.Error());
                     }
+
                     call.done();
-                            } 
+                
+            } 
             // Terminate pending calls.
  
             // Terminate pending calls.
@@ -171,13 +185,15 @@ namespace net
             {
                 if (closing)
                 {
-                    err = error.As(ErrShutdown);
+                    err = error.As(ErrShutdown)!;
                 }
                 else
                 {
-                    err = error.As(io.ErrUnexpectedEOF);
+                    err = error.As(io.ErrUnexpectedEOF)!;
                 }
+
             }
+
             {
                 var call__prev1 = call;
 
@@ -197,34 +213,43 @@ namespace net
             {
                 log.Println("rpc: client protocol error:", err);
             }
+
         }
 
-        private static void done(this ref Call call)
+        private static void done(this ptr<Call> _addr_call)
         {
+            ref Call call = ref _addr_call.val;
+
             if (debugLog)
             {
                 log.Println("rpc: discarding Call reply due to insufficient Done chan capacity");
             }
+
         }
 
         // NewClient returns a new Client to handle requests to the
         // set of services at the other end of the connection.
         // It adds a buffer to the write side of the connection so
         // the header and payload are sent as a unit.
-        public static ref Client NewClient(io.ReadWriteCloser conn)
+        //
+        // The read and write halves of the connection are serialized independently,
+        // so no interlocking is required. However each half may be accessed
+        // concurrently so the implementation of conn should protect against
+        // concurrent reads or concurrent writes.
+        public static ptr<Client> NewClient(io.ReadWriteCloser conn)
         {
             var encBuf = bufio.NewWriter(conn);
-            gobClientCodec client = ref new gobClientCodec(conn,gob.NewDecoder(conn),gob.NewEncoder(encBuf),encBuf);
-            return NewClientWithCodec(client);
+            ptr<gobClientCodec> client = addr(new gobClientCodec(conn,gob.NewDecoder(conn),gob.NewEncoder(encBuf),encBuf));
+            return _addr_NewClientWithCodec(client)!;
         }
 
         // NewClientWithCodec is like NewClient but uses the specified
         // codec to encode requests and decode responses.
-        public static ref Client NewClientWithCodec(ClientCodec codec)
+        public static ptr<Client> NewClientWithCodec(ClientCodec codec)
         {
-            Client client = ref new Client(codec:codec,pending:make(map[uint64]*Call),);
+            ptr<Client> client = addr(new Client(codec:codec,pending:make(map[uint64]*Call),));
             go_(() => client.input());
-            return client;
+            return _addr_client!;
         }
 
         private partial struct gobClientCodec
@@ -235,111 +260,146 @@ namespace net
             public ptr<bufio.Writer> encBuf;
         }
 
-        private static error WriteRequest(this ref gobClientCodec c, ref Request r, object body)
+        private static error WriteRequest(this ptr<gobClientCodec> _addr_c, ptr<Request> _addr_r, object body)
         {
+            error err = default!;
+            ref gobClientCodec c = ref _addr_c.val;
+            ref Request r = ref _addr_r.val;
+
             err = c.enc.Encode(r);
 
             if (err != null)
             {
-                return;
+                return ;
             }
+
             err = c.enc.Encode(body);
 
             if (err != null)
             {
-                return;
+                return ;
             }
-            return error.As(c.encBuf.Flush());
+
+            return error.As(c.encBuf.Flush())!;
+
         }
 
-        private static error ReadResponseHeader(this ref gobClientCodec c, ref Response r)
+        private static error ReadResponseHeader(this ptr<gobClientCodec> _addr_c, ptr<Response> _addr_r)
         {
-            return error.As(c.dec.Decode(r));
+            ref gobClientCodec c = ref _addr_c.val;
+            ref Response r = ref _addr_r.val;
+
+            return error.As(c.dec.Decode(r))!;
         }
 
-        private static error ReadResponseBody(this ref gobClientCodec c, object body)
+        private static error ReadResponseBody(this ptr<gobClientCodec> _addr_c, object body)
         {
-            return error.As(c.dec.Decode(body));
+            ref gobClientCodec c = ref _addr_c.val;
+
+            return error.As(c.dec.Decode(body))!;
         }
 
-        private static error Close(this ref gobClientCodec c)
+        private static error Close(this ptr<gobClientCodec> _addr_c)
         {
-            return error.As(c.rwc.Close());
+            ref gobClientCodec c = ref _addr_c.val;
+
+            return error.As(c.rwc.Close())!;
         }
 
         // DialHTTP connects to an HTTP RPC server at the specified network address
         // listening on the default HTTP RPC path.
-        public static (ref Client, error) DialHTTP(@string network, @string address)
+        public static (ptr<Client>, error) DialHTTP(@string network, @string address)
         {
-            return DialHTTPPath(network, address, DefaultRPCPath);
+            ptr<Client> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_DialHTTPPath(network, address, DefaultRPCPath)!;
         }
 
         // DialHTTPPath connects to an HTTP RPC server
         // at the specified network address and path.
-        public static (ref Client, error) DialHTTPPath(@string network, @string address, @string path)
+        public static (ptr<Client>, error) DialHTTPPath(@string network, @string address, @string path)
         {
-            error err = default;
+            ptr<Client> _p0 = default!;
+            error _p0 = default!;
+
+            error err = default!;
             var (conn, err) = net.Dial(network, address);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             io.WriteString(conn, "CONNECT " + path + " HTTP/1.0\n\n"); 
 
             // Require successful HTTP response
             // before switching to RPC protocol.
-            var (resp, err) = http.ReadResponse(bufio.NewReader(conn), ref new http.Request(Method:"CONNECT"));
+            var (resp, err) = http.ReadResponse(bufio.NewReader(conn), addr(new http.Request(Method:"CONNECT")));
             if (err == null && resp.Status == connected)
             {
-                return (NewClient(conn), null);
+                return (_addr_NewClient(conn)!, error.As(null!)!);
             }
+
             if (err == null)
             {
-                err = error.As(errors.New("unexpected HTTP response: " + resp.Status));
+                err = error.As(errors.New("unexpected HTTP response: " + resp.Status))!;
             }
+
             conn.Close();
-            return (null, ref new net.OpError(Op:"dial-http",Net:network+" "+address,Addr:nil,Err:err,));
+            return (_addr_null!, error.As(addr(new net.OpError(Op:"dial-http",Net:network+" "+address,Addr:nil,Err:err,))!)!);
+
         }
 
         // Dial connects to an RPC server at the specified network address.
-        public static (ref Client, error) Dial(@string network, @string address)
+        public static (ptr<Client>, error) Dial(@string network, @string address)
         {
+            ptr<Client> _p0 = default!;
+            error _p0 = default!;
+
             var (conn, err) = net.Dial(network, address);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (NewClient(conn), null);
+
+            return (_addr_NewClient(conn)!, error.As(null!)!);
+
         }
 
         // Close calls the underlying codec's Close method. If the connection is already
         // shutting down, ErrShutdown is returned.
-        private static error Close(this ref Client client)
+        private static error Close(this ptr<Client> _addr_client)
         {
+            ref Client client = ref _addr_client.val;
+
             client.mutex.Lock();
             if (client.closing)
             {
                 client.mutex.Unlock();
-                return error.As(ErrShutdown);
+                return error.As(ErrShutdown)!;
             }
+
             client.closing = true;
             client.mutex.Unlock();
-            return error.As(client.codec.Close());
+            return error.As(client.codec.Close())!;
+
         }
 
         // Go invokes the function asynchronously. It returns the Call structure representing
         // the invocation. The done channel will signal when the call is complete by returning
         // the same Call object. If done is nil, Go will allocate a new channel.
         // If non-nil, done must be buffered or Go will deliberately crash.
-        private static ref Call Go(this ref Client client, @string serviceMethod, object args, object reply, channel<ref Call> done)
+        private static ptr<Call> Go(this ptr<Client> _addr_client, @string serviceMethod, object args, object reply, channel<ptr<Call>> done)
         {
+            ref Client client = ref _addr_client.val;
+
             ptr<Call> call = @new<Call>();
             call.ServiceMethod = serviceMethod;
             call.Args = args;
             call.Reply = reply;
             if (done == null)
             {
-                done = make_channel<ref Call>(10L); // buffered.
+                done = make_channel<ptr<Call>>(10L); // buffered.
             }
             else
             { 
@@ -351,17 +411,22 @@ namespace net
                 {
                     log.Panic("rpc: done channel is unbuffered");
                 }
+
             }
+
             call.Done = done;
             client.send(call);
-            return call;
+            return _addr_call!;
+
         }
 
         // Call invokes the named function, waits for it to complete, and returns its error status.
-        private static error Call(this ref Client client, @string serviceMethod, object args, object reply)
+        private static error Call(this ptr<Client> _addr_client, @string serviceMethod, object args, object reply)
         {
-            var call = client.Go(serviceMethod, args, reply, make_channel<ref Call>(1L)).Done.Receive();
-            return error.As(call.Error);
+            ref Client client = ref _addr_client.val;
+
+            var call = client.Go(serviceMethod, args, reply, make_channel<ptr<Call>>(1L)).Done.Receive();
+            return error.As(call.Error)!;
         }
     }
 }}

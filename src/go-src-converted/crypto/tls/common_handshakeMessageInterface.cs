@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:04 UTC
+//     Generated on 2020 October 08 03:37:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,16 +14,20 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
 using list = go.container.list_package;
 using crypto = go.crypto_package;
-using cipherhw = go.crypto.@internal.cipherhw_package;
+using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
+using elliptic = go.crypto.elliptic_package;
 using rand = go.crypto.rand_package;
+using rsa = go.crypto.rsa_package;
 using sha512 = go.crypto.sha512_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using cpu = go.@internal.cpu_package;
 using io = go.io_package;
-using big = go.math.big_package;
 using net = go.net_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -63,7 +67,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -77,10 +81,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate bool marshalByRef(ref T value);
+            private delegate bool marshalByPtr(ptr<T> value);
             private delegate bool marshalByVal(T value);
 
-            private static readonly marshalByRef s_marshalByRef;
+            private static readonly marshalByPtr s_marshalByPtr;
             private static readonly marshalByVal s_marshalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -89,17 +93,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_marshalByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_marshalByPtr is null || !m_target_is_ptr)
                     return s_marshalByVal!(target);
 
-                return s_marshalByRef(ref target);
+                return s_marshalByPtr(m_target_ptr);
             }
 
-            private delegate bool unmarshalByRef(ref T value, slice<byte> _p0);
+            private delegate bool unmarshalByPtr(ptr<T> value, slice<byte> _p0);
             private delegate bool unmarshalByVal(T value, slice<byte> _p0);
 
-            private static readonly unmarshalByRef s_unmarshalByRef;
+            private static readonly unmarshalByPtr s_unmarshalByPtr;
             private static readonly unmarshalByVal s_unmarshalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -108,11 +113,12 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_unmarshalByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_unmarshalByPtr is null || !m_target_is_ptr)
                     return s_unmarshalByVal!(target, _p0);
 
-                return s_unmarshalByRef(ref target, _p0);
+                return s_unmarshalByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -121,39 +127,33 @@ namespace crypto
             static handshakeMessage()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("marshal");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("marshal");
 
                 if (!(extensionMethod is null))
-                    s_marshalByRef = extensionMethod.CreateStaticDelegate(typeof(marshalByRef)) as marshalByRef;
+                    s_marshalByPtr = extensionMethod.CreateStaticDelegate(typeof(marshalByPtr)) as marshalByPtr;
 
-                if (s_marshalByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("marshal");
+                extensionMethod = targetType.GetExtensionMethod("marshal");
 
-                    if (!(extensionMethod is null))
-                        s_marshalByVal = extensionMethod.CreateStaticDelegate(typeof(marshalByVal)) as marshalByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_marshalByVal = extensionMethod.CreateStaticDelegate(typeof(marshalByVal)) as marshalByVal;
 
-                if (s_marshalByRef is null && s_marshalByVal is null)
+                if (s_marshalByPtr is null && s_marshalByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement handshakeMessage.marshal method", new Exception("marshal"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("unmarshal");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("unmarshal");
 
                 if (!(extensionMethod is null))
-                    s_unmarshalByRef = extensionMethod.CreateStaticDelegate(typeof(unmarshalByRef)) as unmarshalByRef;
+                    s_unmarshalByPtr = extensionMethod.CreateStaticDelegate(typeof(unmarshalByPtr)) as unmarshalByPtr;
 
-                if (s_unmarshalByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("unmarshal");
+                extensionMethod = targetType.GetExtensionMethod("unmarshal");
 
-                    if (!(extensionMethod is null))
-                        s_unmarshalByVal = extensionMethod.CreateStaticDelegate(typeof(unmarshalByVal)) as unmarshalByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_unmarshalByVal = extensionMethod.CreateStaticDelegate(typeof(unmarshalByVal)) as unmarshalByVal;
 
-                if (s_unmarshalByRef is null && s_unmarshalByVal is null)
+                if (s_unmarshalByPtr is null && s_unmarshalByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement handshakeMessage.unmarshal method", new Exception("unmarshal"));
             }
 

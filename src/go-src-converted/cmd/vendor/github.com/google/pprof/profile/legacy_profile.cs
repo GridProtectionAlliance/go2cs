@@ -15,7 +15,7 @@
 // This file implements parsers to convert legacy profiles into the
 // profile.proto format.
 
-// package profile -- go2cs converted at 2020 August 29 10:06:26 UTC
+// package profile -- go2cs converted at 2020 October 08 04:43:36 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\legacy_profile.go
 using bufio = go.bufio_package;
@@ -48,8 +48,11 @@ namespace pprof
 
         // parseGoCount parses a Go count profile (e.g., threadcreate or
         // goroutine) and returns a new Profile.
-        private static (ref Profile, error) parseGoCount(slice<byte> b)
+        private static (ptr<Profile>, error) parseGoCount(slice<byte> b)
         {
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
             var s = bufio.NewScanner(bytes.NewBuffer(b)); 
             // Skip comments at the beginning of the file.
             while (s.Scan() && isSpaceOrComment(s.Text()))
@@ -63,20 +66,22 @@ namespace pprof
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
             var m = countStartRE.FindStringSubmatch(s.Text());
             if (m == null)
             {
-                return (null, errUnrecognized);
+                return (_addr_null!, error.As(errUnrecognized)!);
             }
+
             var profileType = m[1L];
-            Profile p = ref new Profile(PeriodType:&ValueType{Type:profileType,Unit:"count"},Period:1,SampleType:[]*ValueType{{Type:profileType,Unit:"count"}},);
-            var locations = make_map<ulong, ref Location>();
+            ptr<Profile> p = addr(new Profile(PeriodType:&ValueType{Type:profileType,Unit:"count"},Period:1,SampleType:[]*ValueType{{Type:profileType,Unit:"count"}},));
+            var locations = make_map<ulong, ptr<Location>>();
             while (s.Scan())
             {
                 var line = s.Text();
@@ -84,41 +89,48 @@ namespace pprof
                 {
                     continue;
                 }
+
                 if (strings.HasPrefix(line, "---"))
                 {
                     break;
                 }
+
                 m = countRE.FindStringSubmatch(line);
                 if (m == null)
                 {
-                    return (null, errMalformed);
+                    return (_addr_null!, error.As(errMalformed)!);
                 }
+
                 var (n, err) = strconv.ParseInt(m[1L], 0L, 64L);
                 if (err != null)
                 {
-                    return (null, errMalformed);
+                    return (_addr_null!, error.As(errMalformed)!);
                 }
+
                 var fields = strings.Fields(m[2L]);
-                var locs = make_slice<ref Location>(0L, len(fields));
+                var locs = make_slice<ptr<Location>>(0L, len(fields));
                 foreach (var (_, stk) in fields)
                 {
                     var (addr, err) = strconv.ParseUint(stk, 0L, 64L);
                     if (err != null)
                     {
-                        return (null, errMalformed);
+                        return (_addr_null!, error.As(errMalformed)!);
                     } 
                     // Adjust all frames by -1 to land on top of the call instruction.
                     addr--;
                     var loc = locations[addr];
                     if (loc == null)
                     {
-                        loc = ref new Location(Address:addr,);
+                        loc = addr(new Location(Address:addr,));
                         locations[addr] = loc;
                         p.Location = append(p.Location, loc);
                     }
+
                     locs = append(locs, loc);
+
                 }
-                p.Sample = append(p.Sample, ref new Sample(Location:locs,Value:[]int64{n},));
+                p.Sample = append(p.Sample, addr(new Sample(Location:locs,Value:[]int64{n},)));
+
             }
 
             {
@@ -128,36 +140,41 @@ namespace pprof
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
 
             {
                 var err__prev1 = err;
 
-                err = parseAdditionalSections(s, p);
+                err = parseAdditionalSections(_addr_s, _addr_p);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
-            return (p, null);
+
+            return (_addr_p!, error.As(null!)!);
+
         }
 
         // remapLocationIDs ensures there is a location for each address
         // referenced by a sample, and remaps the samples to point to the new
         // location ids.
-        private static void remapLocationIDs(this ref Profile p)
+        private static void remapLocationIDs(this ptr<Profile> _addr_p)
         {
-            var seen = make_map<ref Location, bool>(len(p.Location));
-            slice<ref Location> locs = default;
+            ref Profile p = ref _addr_p.val;
+
+            var seen = make_map<ptr<Location>, bool>(len(p.Location));
+            slice<ptr<Location>> locs = default;
 
             foreach (var (_, s) in p.Sample)
             {
@@ -167,18 +184,24 @@ namespace pprof
                     {
                         continue;
                     }
+
                     l.ID = uint64(len(locs) + 1L);
                     locs = append(locs, l);
                     seen[l] = true;
+
                 }
+
             }
             p.Location = locs;
+
         }
 
-        private static void remapFunctionIDs(this ref Profile p)
+        private static void remapFunctionIDs(this ptr<Profile> _addr_p)
         {
-            var seen = make_map<ref Function, bool>(len(p.Function));
-            slice<ref Function> fns = default;
+            ref Profile p = ref _addr_p.val;
+
+            var seen = make_map<ptr<Function>, bool>(len(p.Function));
+            slice<ptr<Function>> fns = default;
 
             foreach (var (_, l) in p.Location)
             {
@@ -189,20 +212,26 @@ namespace pprof
                     {
                         continue;
                     }
+
                     fn.ID = uint64(len(fns) + 1L);
                     fns = append(fns, fn);
                     seen[fn] = true;
+
                 }
+
             }
             p.Function = fns;
+
         }
 
         // remapMappingIDs matches location addresses with existing mappings
         // and updates them appropriately. This is O(N*M), if this ever shows
         // up as a bottleneck, evaluate sorting the mappings and doing a
         // binary search, which would make it O(N*log(M)).
-        private static void remapMappingIDs(this ref Profile p)
-        { 
+        private static void remapMappingIDs(this ptr<Profile> _addr_p)
+        {
+            ref Profile p = ref _addr_p.val;
+ 
             // Some profile handlers will incorrectly set regions for the main
             // executable if its section is remapped. Fix them through heuristics.
 
@@ -221,18 +250,20 @@ namespace pprof
                         {
                             p.Mapping = p.Mapping[1L..];
                         }
+
                     }
 
                     m = m__prev2;
 
                 }
+
             } 
 
             // Subtract the offset from the start of the main mapping if it
             // ends up at a recognizable start address.
             if (len(p.Mapping) > 0L)
             {
-                const ulong expectedStart = 0x400000UL;
+                const ulong expectedStart = (ulong)0x400000UL;
 
                 {
                     var m__prev2 = m;
@@ -248,11 +279,12 @@ namespace pprof
                     m = m__prev2;
 
                 }
+
             } 
 
             // Associate each location with an address to the corresponding
             // mapping. Create fake mapping if a suitable one isn't found.
-            ref Mapping fake = default;
+            ptr<Mapping> fake;
 nextLocation: 
 
             // Reset all mapping IDs.
@@ -263,6 +295,7 @@ nextLocation:
                 {
                     continue;
                 }
+
                 {
                     var m__prev2 = m;
 
@@ -275,6 +308,7 @@ nextLocation:
                             _continuenextLocation = true;
                             break;
                         }
+
                     } 
                     // Work around legacy handlers failing to encode the first
                     // part of mappings split into adjacent ranges.
@@ -296,6 +330,7 @@ nextLocation:
                             _continuenextLocation = true;
                             break;
                         }
+
                     } 
                     // If there is still no mapping, create a fake one.
                     // This is important for the Go legacy handler, which produced
@@ -306,10 +341,12 @@ nextLocation:
 
                 if (fake == null)
                 {
-                    fake = ref new Mapping(ID:1,Limit:^uint64(0),);
+                    fake = addr(new Mapping(ID:1,Limit:^uint64(0),));
                     p.Mapping = append(p.Mapping, fake);
                 }
+
                 l.Mapping = fake;
+
             } 
 
             // Reset all mapping IDs.
@@ -325,45 +362,64 @@ nextLocation:
 
                 m = m__prev1;
             }
-
         }
 
         private static Func<slice<byte>, (ulong, slice<byte>)> cpuInts = new slice<Func<slice<byte>, (ulong, slice<byte>)>>(new Func<slice<byte>, (ulong, slice<byte>)>[] { get32l, get32b, get64l, get64b });
 
         private static (ulong, slice<byte>) get32l(slice<byte> b)
         {
+            ulong _p0 = default;
+            slice<byte> _p0 = default;
+
             if (len(b) < 4L)
             {
                 return (0L, null);
             }
+
             return (uint64(b[0L]) | uint64(b[1L]) << (int)(8L) | uint64(b[2L]) << (int)(16L) | uint64(b[3L]) << (int)(24L), b[4L..]);
+
         }
 
         private static (ulong, slice<byte>) get32b(slice<byte> b)
         {
+            ulong _p0 = default;
+            slice<byte> _p0 = default;
+
             if (len(b) < 4L)
             {
                 return (0L, null);
             }
+
             return (uint64(b[3L]) | uint64(b[2L]) << (int)(8L) | uint64(b[1L]) << (int)(16L) | uint64(b[0L]) << (int)(24L), b[4L..]);
+
         }
 
         private static (ulong, slice<byte>) get64l(slice<byte> b)
         {
+            ulong _p0 = default;
+            slice<byte> _p0 = default;
+
             if (len(b) < 8L)
             {
                 return (0L, null);
             }
+
             return (uint64(b[0L]) | uint64(b[1L]) << (int)(8L) | uint64(b[2L]) << (int)(16L) | uint64(b[3L]) << (int)(24L) | uint64(b[4L]) << (int)(32L) | uint64(b[5L]) << (int)(40L) | uint64(b[6L]) << (int)(48L) | uint64(b[7L]) << (int)(56L), b[8L..]);
+
         }
 
         private static (ulong, slice<byte>) get64b(slice<byte> b)
         {
+            ulong _p0 = default;
+            slice<byte> _p0 = default;
+
             if (len(b) < 8L)
             {
                 return (0L, null);
             }
+
             return (uint64(b[7L]) | uint64(b[6L]) << (int)(8L) | uint64(b[5L]) << (int)(16L) | uint64(b[4L]) << (int)(24L) | uint64(b[3L]) << (int)(32L) | uint64(b[2L]) << (int)(40L) | uint64(b[1L]) << (int)(48L) | uint64(b[0L]) << (int)(56L), b[8L..]);
+
         }
 
         // parseCPU parses a profilez legacy profile and returns a newly
@@ -376,8 +432,11 @@ nextLocation:
         //   3rd word -- 0 if a c++ application, 1 if a java application.
         //   4th word -- Sampling period (in microseconds).
         //   5th word -- Padding.
-        private static (ref Profile, error) parseCPU(slice<byte> b)
+        private static (ptr<Profile>, error) parseCPU(slice<byte> b)
         {
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
             Func<slice<byte>, (ulong, slice<byte>)> parse = default;
             ulong n1 = default;            ulong n2 = default;            ulong n3 = default;            ulong n4 = default;            ulong n5 = default;
 
@@ -394,31 +453,37 @@ nextLocation:
                 if (tmp != null && n1 == 0L && n2 == 3L && n3 == 0L && n4 > 0L && n5 == 0L)
                 {
                     b = tmp;
-                    return cpuProfile(b, int64(n4), parse);
+                    return _addr_cpuProfile(b, int64(n4), parse)!;
                 }
+
                 if (tmp != null && n1 == 0L && n2 == 3L && n3 == 1L && n4 > 0L && n5 == 0L)
                 {
                     b = tmp;
-                    return javaCPUProfile(b, int64(n4), parse);
+                    return _addr_javaCPUProfile(b, int64(n4), parse)!;
                 }
+
             }
 
-            return (null, errUnrecognized);
+            return (_addr_null!, error.As(errUnrecognized)!);
+
         }
 
         // cpuProfile returns a new Profile from C++ profilez data.
         // b is the profile bytes after the header, period is the profiling
         // period, and parse is a function to parse 8-byte chunks from the
         // profile in its native endianness.
-        private static (ref Profile, error) cpuProfile(slice<byte> b, long period, Func<slice<byte>, (ulong, slice<byte>)> parse)
+        private static (ptr<Profile>, error) cpuProfile(slice<byte> b, long period, Func<slice<byte>, (ulong, slice<byte>)> parse)
         {
-            Profile p = ref new Profile(Period:period*1000,PeriodType:&ValueType{Type:"cpu",Unit:"nanoseconds"},SampleType:[]*ValueType{{Type:"samples",Unit:"count"},{Type:"cpu",Unit:"nanoseconds"},},);
-            error err = default;
-            b, _, err = parseCPUSamples(b, parse, true, p);
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
+            ptr<Profile> p = addr(new Profile(Period:period*1000,PeriodType:&ValueType{Type:"cpu",Unit:"nanoseconds"},SampleType:[]*ValueType{{Type:"samples",Unit:"count"},{Type:"cpu",Unit:"nanoseconds"},},));
+            error err = default!;
+            b, _, err = parseCPUSamples(b, parse, true, _addr_p);
 
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             } 
 
             // If *most* samples have the same second-to-the-bottom frame, it
@@ -449,6 +514,7 @@ nextLocation:
                             var a = s.Location[1L].Address;
                             addr1[a] = addr1[a] + 1L;
                         }
+
                     }
 
                     s = s__prev2;
@@ -469,14 +535,18 @@ nextLocation:
                                 {
                                     s.Location = append(s.Location[..1L], s.Location[2L..]);
                                 }
+
                             }
 
                             s = s__prev3;
                         }
 
                         break;
+
                     }
+
                 }
+
             }
 
 
@@ -487,19 +557,23 @@ nextLocation:
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
 
-            cleanupDuplicateLocations(p);
-            return (p, null);
+
+            cleanupDuplicateLocations(_addr_p);
+            return (_addr_p!, error.As(null!)!);
+
         }
 
-        private static void cleanupDuplicateLocations(ref Profile p)
-        { 
+        private static void cleanupDuplicateLocations(ptr<Profile> _addr_p)
+        {
+            ref Profile p = ref _addr_p.val;
+ 
             // The profile handler may duplicate the leaf frame, because it gets
             // its address both from stack unwinding and from the signal
             // context. Detect this and delete the duplicate, which has been
@@ -511,7 +585,9 @@ nextLocation:
                 {
                     s.Location = append(s.Location[..1L], s.Location[2L..]);
                 }
+
             }
+
         }
 
         // parseCPUSamples parses a collection of profilez samples from a
@@ -532,9 +608,14 @@ nextLocation:
         // Addresses from stack traces may point to the next instruction after
         // each call. Optionally adjust by -1 to land somewhere on the actual
         // call (except for the leaf, which is not a call).
-        private static (slice<byte>, map<ulong, ref Location>, error) parseCPUSamples(slice<byte> b, Func<slice<byte>, (ulong, slice<byte>)> parse, bool adjust, ref Profile p)
+        private static (slice<byte>, map<ulong, ptr<Location>>, error) parseCPUSamples(slice<byte> b, Func<slice<byte>, (ulong, slice<byte>)> parse, bool adjust, ptr<Profile> _addr_p)
         {
-            var locs = make_map<ulong, ref Location>();
+            slice<byte> _p0 = default;
+            map<ulong, ptr<Location>> _p0 = default;
+            error _p0 = default!;
+            ref Profile p = ref _addr_p.val;
+
+            var locs = make_map<ulong, ptr<Location>>();
             while (len(b) > 0L)
             {
                 ulong count = default;                ulong nstk = default;
@@ -543,9 +624,10 @@ nextLocation:
                 nstk, b = parse(b);
                 if (b == null || nstk > uint64(len(b) / 4L))
                 {
-                    return (null, null, errUnrecognized);
+                    return (null, null, error.As(errUnrecognized)!);
                 }
-                slice<ref Location> sloc = default;
+
+                slice<ptr<Location>> sloc = default;
                 var addrs = make_slice<ulong>(nstk);
                 {
                     long i__prev2 = i;
@@ -563,7 +645,9 @@ nextLocation:
                 { 
                     // End of data marker
                     break;
+
                 }
+
                 {
                     long i__prev2 = i;
 
@@ -575,31 +659,39 @@ nextLocation:
                         {
                             addr--;
                         }
+
                         var loc = locs[addr];
                         if (loc == null)
                         {
-                            loc = ref new Location(Address:addr,);
+                            loc = addr(new Location(Address:addr,));
                             locs[addr] = loc;
                             p.Location = append(p.Location, loc);
                         }
+
                         sloc = append(sloc, loc);
+
                     }
 
                     i = i__prev2;
                 }
 
-                p.Sample = append(p.Sample, ref new Sample(Value:[]int64{int64(count),int64(count)*p.Period},Location:sloc,));
+                p.Sample = append(p.Sample, addr(new Sample(Value:[]int64{int64(count),int64(count)*p.Period},Location:sloc,)));
+
             } 
             // Reached the end without finding the EOD marker.
  
             // Reached the end without finding the EOD marker.
-            return (b, locs, null);
+            return (b, locs, error.As(null!)!);
+
         }
 
         // parseHeap parses a heapz legacy or a growthz profile and
         // returns a newly populated Profile.
-        private static (ref Profile, error) parseHeap(slice<byte> b)
+        private static (ptr<Profile>, error) parseHeap(slice<byte> b)
         {
+            ptr<Profile> p = default!;
+            error err = default!;
+
             var s = bufio.NewScanner(bytes.NewBuffer(b));
             if (!s.Scan())
             {
@@ -610,21 +702,24 @@ nextLocation:
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                     err = err__prev2;
 
                 }
-                return (null, errUnrecognized);
+
+                return (_addr_null!, error.As(errUnrecognized)!);
+
             }
-            p = ref new Profile();
+
+            p = addr(new Profile());
 
             @string sampling = "";
             var hasAlloc = false;
 
             var line = s.Text();
-            p.PeriodType = ref new ValueType(Type:"space",Unit:"bytes");
+            p.PeriodType = addr(new ValueType(Type:"space",Unit:"bytes"));
             {
                 var header = heapHeaderRE.FindStringSubmatch(line);
 
@@ -633,8 +728,9 @@ nextLocation:
                     sampling, p.Period, hasAlloc, err = parseHeapHeader(line);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
+
                 }                header = growthHeaderRE.FindStringSubmatch(line);
 
 
@@ -650,22 +746,26 @@ nextLocation:
                 }
                 else
                 {
-                    return (null, errUnrecognized);
+                    return (_addr_null!, error.As(errUnrecognized)!);
                 }
 
+
             }
+
 
             if (hasAlloc)
             { 
                 // Put alloc before inuse so that default pprof selection
                 // will prefer inuse_space.
-                p.SampleType = new slice<ref ValueType>(new ref ValueType[] { {Type:"alloc_objects",Unit:"count"}, {Type:"alloc_space",Unit:"bytes"}, {Type:"inuse_objects",Unit:"count"}, {Type:"inuse_space",Unit:"bytes"} });
+                p.SampleType = new slice<ptr<ValueType>>(new ptr<ValueType>[] { {Type:"alloc_objects",Unit:"count"}, {Type:"alloc_space",Unit:"bytes"}, {Type:"inuse_objects",Unit:"count"}, {Type:"inuse_space",Unit:"bytes"} });
+
             }
             else
             {
-                p.SampleType = new slice<ref ValueType>(new ref ValueType[] { {Type:"objects",Unit:"count"}, {Type:"space",Unit:"bytes"} });
+                p.SampleType = new slice<ptr<ValueType>>(new ptr<ValueType>[] { {Type:"objects",Unit:"count"}, {Type:"space",Unit:"bytes"} });
             }
-            var locs = make_map<ulong, ref Location>();
+
+            var locs = make_map<ulong, ptr<Location>>();
             while (s.Scan())
             {
                 line = strings.TrimSpace(s.Text());
@@ -674,16 +774,19 @@ nextLocation:
                 {
                     continue;
                 }
+
                 if (isMemoryMapSentinel(line))
                 {
                     break;
                 }
+
                 var (value, blocksize, addrs, err) = parseHeapSample(line, p.Period, sampling, hasAlloc);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
-                slice<ref Location> sloc = default;
+
+                slice<ptr<Location>> sloc = default;
                 foreach (var (_, addr) in addrs)
                 { 
                     // Addresses from stack traces point to the next instruction after
@@ -692,13 +795,16 @@ nextLocation:
                     var loc = locs[addr];
                     if (locs[addr] == null)
                     {
-                        loc = ref new Location(Address:addr,);
+                        loc = addr(new Location(Address:addr,));
                         p.Location = append(p.Location, loc);
                         locs[addr] = loc;
                     }
+
                     sloc = append(sloc, loc);
+
                 }
-                p.Sample = append(p.Sample, ref new Sample(Value:value,Location:sloc,NumLabel:map[string][]int64{"bytes":{blocksize}},));
+                p.Sample = append(p.Sample, addr(new Sample(Value:value,Location:sloc,NumLabel:map[string][]int64{"bytes":{blocksize}},)));
+
             }
 
             {
@@ -708,74 +814,92 @@ nextLocation:
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
             {
                 var err__prev1 = err;
 
-                err = parseAdditionalSections(s, p);
+                err = parseAdditionalSections(_addr_s, _addr_p);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
-            return (p, null);
+
+            return (_addr_p!, error.As(null!)!);
+
         }
 
         private static (@string, long, bool, error) parseHeapHeader(@string line)
         {
+            @string sampling = default;
+            long period = default;
+            bool hasAlloc = default;
+            error err = default!;
+
             var header = heapHeaderRE.FindStringSubmatch(line);
             if (header == null)
             {
-                return ("", 0L, false, errUnrecognized);
+                return ("", 0L, false, error.As(errUnrecognized)!);
             }
+
             if (len(header[6L]) > 0L)
             {
                 period, err = strconv.ParseInt(header[6L], 10L, 64L);
 
                 if (err != null)
                 {
-                    return ("", 0L, false, errUnrecognized);
+                    return ("", 0L, false, error.As(errUnrecognized)!);
                 }
+
             }
+
             if ((header[3L] != header[1L] && header[3L] != "0") || (header[4L] != header[2L] && header[4L] != "0"))
             {
                 hasAlloc = true;
             }
+
             switch (header[5L])
             {
                 case "heapz_v2": 
 
                 case "heap_v2": 
-                    return ("v2", period, hasAlloc, null);
+                    return ("v2", period, hasAlloc, error.As(null!)!);
                     break;
                 case "heapprofile": 
-                    return ("", 1L, hasAlloc, null);
+                    return ("", 1L, hasAlloc, error.As(null!)!);
                     break;
                 case "heap": 
-                    return ("v2", period / 2L, hasAlloc, null);
+                    return ("v2", period / 2L, hasAlloc, error.As(null!)!);
                     break;
                 default: 
-                    return ("", 0L, false, errUnrecognized);
+                    return ("", 0L, false, error.As(errUnrecognized)!);
                     break;
             }
+
         }
 
         // parseHeapSample parses a single row from a heap profile into a new Sample.
         private static (slice<long>, long, slice<ulong>, error) parseHeapSample(@string line, long rate, @string sampling, bool includeAlloc)
         {
+            slice<long> value = default;
+            long blocksize = default;
+            slice<ulong> addrs = default;
+            error err = default!;
+
             var sampleData = heapSampleRE.FindStringSubmatch(line);
             if (len(sampleData) != 6L)
             {
-                return (null, 0L, null, fmt.Errorf("unexpected number of sample values: got %d, want 6", len(sampleData)));
+                return (null, 0L, null, error.As(fmt.Errorf("unexpected number of sample values: got %d, want 6", len(sampleData)))!);
             } 
 
             // This is a local-scoped helper function to avoid needing to pass
@@ -787,15 +911,18 @@ nextLocation:
                 {
                     return fmt.Errorf("malformed sample: %s: %v", line, err);
                 }
+
                 var (size, err) = strconv.ParseInt(sizeString, 10L, 64L);
                 if (err != null)
                 {
                     return fmt.Errorf("malformed sample: %s: %v", line, err);
                 }
+
                 if (count == 0L && size != 0L)
                 {
                     return fmt.Errorf("%s count was 0 but %s bytes was %d", label, label, size);
                 }
+
                 if (count != 0L)
                 {
                     blocksize = size / count;
@@ -803,9 +930,12 @@ nextLocation:
                     {
                         count, size = scaleHeapSample(count, size, rate);
                     }
+
                 }
+
                 value = append(value, count, size);
                 return null;
+
             }
 ;
 
@@ -818,13 +948,15 @@ nextLocation:
 
                     if (err != null)
                     {
-                        return (null, 0L, null, err);
+                        return (null, 0L, null, error.As(err)!);
                     }
 
                     err = err__prev2;
 
                 }
+
             }
+
             {
                 var err__prev1 = err;
 
@@ -832,19 +964,22 @@ nextLocation:
 
                 if (err != null)
                 {
-                    return (null, 0L, null, err);
+                    return (null, 0L, null, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
 
+
             addrs, err = parseHexAddresses(sampleData[5L]);
             if (err != null)
             {
-                return (null, 0L, null, fmt.Errorf("malformed sample: %s: %v", line, err));
+                return (null, 0L, null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
             }
-            return (value, blocksize, addrs, null);
+
+            return (value, blocksize, addrs, error.As(null!)!);
+
         }
 
         // parseHexAddresses extracts hex numbers from a string, attempts to convert
@@ -853,6 +988,9 @@ nextLocation:
         // handle (which means a malformed profile).
         private static (slice<ulong>, error) parseHexAddresses(@string s)
         {
+            slice<ulong> _p0 = default;
+            error _p0 = default!;
+
             var hexStrings = hexNumberRE.FindAllString(s, -1L);
             slice<ulong> addrs = default;
             foreach (var (_, s) in hexStrings)
@@ -866,12 +1004,14 @@ nextLocation:
                     }
                     else
                     {
-                        return (null, fmt.Errorf("failed to parse as hex 64-bit number: %s", s));
+                        return (null, error.As(fmt.Errorf("failed to parse as hex 64-bit number: %s", s))!);
                     }
 
                 }
+
             }
-            return (addrs, null);
+            return (addrs, error.As(null!)!);
+
         }
 
         // scaleHeapSample adjusts the data from a heapz Sample to
@@ -885,27 +1025,37 @@ nextLocation:
         // profile is 1-exp(-S/R).
         private static (long, long) scaleHeapSample(long count, long size, long rate)
         {
+            long _p0 = default;
+            long _p0 = default;
+
             if (count == 0L || size == 0L)
             {
                 return (0L, 0L);
             }
+
             if (rate <= 1L)
             { 
                 // if rate==1 all samples were collected so no adjustment is needed.
                 // if rate<1 treat as unknown and skip scaling.
                 return (count, size);
+
             }
+
             var avgSize = float64(size) / float64(count);
             long scale = 1L / (1L - math.Exp(-avgSize / float64(rate)));
 
             return (int64(float64(count) * scale), int64(float64(size) * scale));
+
         }
 
         // parseContention parses a mutex or contention profile. There are 2 cases:
         // "--- contentionz " for legacy C++ profiles (and backwards compatibility)
         // "--- mutex:" or "--- contention:" for profiles generated by the Go runtime.
-        private static (ref Profile, error) parseContention(slice<byte> b)
+        private static (ptr<Profile>, error) parseContention(slice<byte> b)
         {
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
             var s = bufio.NewScanner(bytes.NewBuffer(b));
             if (!s.Scan())
             {
@@ -916,28 +1066,31 @@ nextLocation:
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                     err = err__prev2;
 
                 }
-                return (null, errUnrecognized);
+
+                return (_addr_null!, error.As(errUnrecognized)!);
+
             }
+
             {
                 var l = s.Text();
 
 
                 if (strings.HasPrefix(l, "--- contentionz "))                 else if (strings.HasPrefix(l, "--- mutex:"))                 else if (strings.HasPrefix(l, "--- contention:"))                 else 
-                    return (null, errUnrecognized);
+                    return (_addr_null!, error.As(errUnrecognized)!);
 
             }
 
-            Profile p = ref new Profile(PeriodType:&ValueType{Type:"contentions",Unit:"count"},Period:1,SampleType:[]*ValueType{{Type:"contentions",Unit:"count"},{Type:"delay",Unit:"nanoseconds"},},);
+            ptr<Profile> p = addr(new Profile(PeriodType:&ValueType{Type:"contentions",Unit:"count"},Period:1,SampleType:[]*ValueType{{Type:"contentions",Unit:"count"},{Type:"delay",Unit:"nanoseconds"},},));
 
             long cpuHz = default; 
             // Parse text of the form "attribute = value" before the samples.
-            const @string delimiter = "=";
+            const @string delimiter = (@string)"=";
 
             while (s.Scan())
             {
@@ -948,18 +1101,21 @@ nextLocation:
                 {
                     continue;
                 }
+
                 if (strings.HasPrefix(line, "---"))
                 {
                     break;
                 }
+
                 var attr = strings.SplitN(line, delimiter, 2L);
                 if (len(attr) != 2L)
                 {
                     break;
                 }
+
                 var key = strings.TrimSpace(attr[0L]);
                 var val = strings.TrimSpace(attr[1L]);
-                err = default;
+                err = default!;
                 switch (key)
                 {
                     case "cycles/second": 
@@ -967,39 +1123,43 @@ nextLocation:
 
                         if (err != null)
                         {
-                            return (null, errUnrecognized);
+                            return (_addr_null!, error.As(errUnrecognized)!);
                         }
+
                         break;
                     case "sampling period": 
                         p.Period, err = strconv.ParseInt(val, 0L, 64L);
 
                         if (err != null)
                         {
-                            return (null, errUnrecognized);
+                            return (_addr_null!, error.As(errUnrecognized)!);
                         }
+
                         break;
                     case "ms since reset": 
                         var (ms, err) = strconv.ParseInt(val, 0L, 64L);
                         if (err != null)
                         {
-                            return (null, errUnrecognized);
+                            return (_addr_null!, error.As(errUnrecognized)!);
                         }
+
                         p.DurationNanos = ms * 1000L * 1000L;
                         break;
                     case "format": 
                         // CPP contentionz profiles don't have format.
-                        return (null, errUnrecognized);
+                        return (_addr_null!, error.As(errUnrecognized)!);
                         break;
                     case "resolution": 
                         // CPP contentionz profiles don't have resolution.
-                        return (null, errUnrecognized);
+                        return (_addr_null!, error.As(errUnrecognized)!);
                         break;
                     case "discarded samples": 
                         break;
                     default: 
-                        return (null, errUnrecognized);
+                        return (_addr_null!, error.As(errUnrecognized)!);
                         break;
                 }
+
             }
 
             {
@@ -1009,14 +1169,15 @@ nextLocation:
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
 
-            var locs = make_map<ulong, ref Location>();
+
+            var locs = make_map<ulong, ptr<Location>>();
             while (true)
             {
                 line = strings.TrimSpace(s.Text());
@@ -1024,14 +1185,16 @@ nextLocation:
                 {
                     break;
                 }
+
                 if (!isSpaceOrComment(line))
                 {
                     var (value, addrs, err) = parseContentionSample(line, p.Period, cpuHz);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
-                    slice<ref Location> sloc = default;
+
+                    slice<ptr<Location>> sloc = default;
                     foreach (var (_, addr) in addrs)
                     { 
                         // Addresses from stack traces point to the next instruction after
@@ -1040,18 +1203,23 @@ nextLocation:
                         var loc = locs[addr];
                         if (locs[addr] == null)
                         {
-                            loc = ref new Location(Address:addr,);
+                            loc = addr(new Location(Address:addr,));
                             p.Location = append(p.Location, loc);
                             locs[addr] = loc;
                         }
+
                         sloc = append(sloc, loc);
+
                     }
-                    p.Sample = append(p.Sample, ref new Sample(Value:value,Location:sloc,));
+                    p.Sample = append(p.Sample, addr(new Sample(Value:value,Location:sloc,)));
+
                 }
+
                 if (!s.Scan())
                 {
                     break;
                 }
+
             }
 
             {
@@ -1061,48 +1229,57 @@ nextLocation:
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
 
             {
                 var err__prev1 = err;
 
-                err = parseAdditionalSections(s, p);
+                err = parseAdditionalSections(_addr_s, _addr_p);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
 
-            return (p, null);
+
+            return (_addr_p!, error.As(null!)!);
+
         }
 
         // parseContentionSample parses a single row from a contention profile
         // into a new Sample.
         private static (slice<long>, slice<ulong>, error) parseContentionSample(@string line, long period, long cpuHz)
         {
+            slice<long> value = default;
+            slice<ulong> addrs = default;
+            error err = default!;
+
             var sampleData = contentionSampleRE.FindStringSubmatch(line);
             if (sampleData == null)
             {
-                return (null, null, errUnrecognized);
+                return (null, null, error.As(errUnrecognized)!);
             }
+
             var (v1, err) = strconv.ParseInt(sampleData[1L], 10L, 64L);
             if (err != null)
             {
-                return (null, null, fmt.Errorf("malformed sample: %s: %v", line, err));
+                return (null, null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
             }
+
             var (v2, err) = strconv.ParseInt(sampleData[2L], 10L, 64L);
             if (err != null)
             {
-                return (null, null, fmt.Errorf("malformed sample: %s: %v", line, err));
+                return (null, null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
             } 
 
             // Unsample values if period and cpuHz are available.
@@ -1115,20 +1292,28 @@ nextLocation:
                     var cpuGHz = float64(cpuHz) / 1e9F;
                     v1 = int64(float64(v1) * float64(period) / cpuGHz);
                 }
+
                 v2 = v2 * period;
+
             }
+
             value = new slice<long>(new long[] { v2, v1 });
             addrs, err = parseHexAddresses(sampleData[3L]);
             if (err != null)
             {
-                return (null, null, fmt.Errorf("malformed sample: %s: %v", line, err));
+                return (null, null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
             }
-            return (value, addrs, null);
+
+            return (value, addrs, error.As(null!)!);
+
         }
 
         // parseThread parses a Threadz profile and returns a new Profile.
-        private static (ref Profile, error) parseThread(slice<byte> b)
+        private static (ptr<Profile>, error) parseThread(slice<byte> b)
         {
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
             var s = bufio.NewScanner(bytes.NewBuffer(b)); 
             // Skip past comments and empty lines seeking a real header.
             while (s.Scan() && isSpaceOrComment(s.Text()))
@@ -1151,7 +1336,9 @@ nextLocation:
                         {
                             break;
                         }
+
                     }
+
 
                 }                {
                     var t__prev2 = t;
@@ -1161,7 +1348,7 @@ nextLocation:
 
                     else if (len(t) != 4L)
                     {
-                        return (null, errUnrecognized);
+                        return (_addr_null!, error.As(errUnrecognized)!);
                     }
 
                     t = t__prev2;
@@ -1169,11 +1356,13 @@ nextLocation:
                 }
 
 
+
             }
 
-            Profile p = ref new Profile(SampleType:[]*ValueType{{Type:"thread",Unit:"count"}},PeriodType:&ValueType{Type:"thread",Unit:"count"},Period:1,);
 
-            var locs = make_map<ulong, ref Location>(); 
+            ptr<Profile> p = addr(new Profile(SampleType:[]*ValueType{{Type:"thread",Unit:"count"}},PeriodType:&ValueType{Type:"thread",Unit:"count"},Period:1,));
+
+            var locs = make_map<ulong, ptr<Location>>(); 
             // Recognize each thread and populate profile samples.
             while (!isMemoryMapSentinel(line))
             {
@@ -1182,6 +1371,7 @@ nextLocation:
                     line = "";
                     break;
                 }
+
                 {
                     var t__prev1 = t;
 
@@ -1189,20 +1379,22 @@ nextLocation:
 
                     if (len(t) != 4L)
                     {
-                        return (null, errUnrecognized);
+                        return (_addr_null!, error.As(errUnrecognized)!);
                     }
 
                     t = t__prev1;
 
                 }
 
+
                 slice<ulong> addrs = default;
-                error err = default;
-                line, addrs, err = parseThreadSample(s);
+                error err = default!;
+                line, addrs, err = parseThreadSample(_addr_s);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
                 if (len(addrs) == 0L)
                 { 
                     // We got a --same as previous threads--. Bump counters.
@@ -1211,9 +1403,12 @@ nextLocation:
                         s = p.Sample[len(p.Sample) - 1L];
                         s.Value[0L]++;
                     }
+
                     continue;
+
                 }
-                slice<ref Location> sloc = default;
+
+                slice<ptr<Location>> sloc = default;
                 foreach (var (i, addr) in addrs)
                 { 
                     // Addresses from stack traces point to the next instruction after
@@ -1223,42 +1418,53 @@ nextLocation:
                     {
                         addr--;
                     }
+
                     var loc = locs[addr];
                     if (locs[addr] == null)
                     {
-                        loc = ref new Location(Address:addr,);
+                        loc = addr(new Location(Address:addr,));
                         p.Location = append(p.Location, loc);
                         locs[addr] = loc;
                     }
+
                     sloc = append(sloc, loc);
+
                 }
-                p.Sample = append(p.Sample, ref new Sample(Value:[]int64{1},Location:sloc,));
+                p.Sample = append(p.Sample, addr(new Sample(Value:[]int64{1},Location:sloc,)));
+
             }
 
 
             {
                 error err__prev1 = err;
 
-                err = parseAdditionalSections(s, p);
+                err = parseAdditionalSections(_addr_s, _addr_p);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
 
-            cleanupDuplicateLocations(p);
-            return (p, null);
+
+            cleanupDuplicateLocations(_addr_p);
+            return (_addr_p!, error.As(null!)!);
+
         }
 
         // parseThreadSample parses a symbolized or unsymbolized stack trace.
         // Returns the first line after the traceback, the sample (or nil if
         // it hits a 'same-as-previous' marker) and an error.
-        private static (@string, slice<ulong>, error) parseThreadSample(ref bufio.Scanner s)
+        private static (@string, slice<ulong>, error) parseThreadSample(ptr<bufio.Scanner> _addr_s)
         {
+            @string nextl = default;
+            slice<ulong> addrs = default;
+            error err = default!;
+            ref bufio.Scanner s = ref _addr_s.val;
+
             @string line = default;
             var sameAsPrevious = false;
             while (s.Scan())
@@ -1268,21 +1474,26 @@ nextLocation:
                 {
                     continue;
                 }
+
                 if (strings.HasPrefix(line, "---"))
                 {
                     break;
                 }
+
                 if (strings.Contains(line, "same as previous thread"))
                 {
                     sameAsPrevious = true;
                     continue;
                 }
+
                 var (curAddrs, err) = parseHexAddresses(line);
                 if (err != null)
                 {
-                    return ("", null, fmt.Errorf("malformed sample: %s: %v", line, err));
+                    return ("", null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
                 }
+
                 addrs = append(addrs, curAddrs);
+
             }
 
             {
@@ -1290,21 +1501,27 @@ nextLocation:
 
                 if (err != null)
                 {
-                    return ("", null, err);
+                    return ("", null, error.As(err)!);
                 }
 
             }
+
             if (sameAsPrevious)
             {
-                return (line, null, null);
+                return (line, null, error.As(null!)!);
             }
-            return (line, addrs, null);
+
+            return (line, addrs, error.As(null!)!);
+
         }
 
         // parseAdditionalSections parses any additional sections in the
         // profile, ignoring any unrecognized sections.
-        private static error parseAdditionalSections(ref bufio.Scanner s, ref Profile p)
+        private static error parseAdditionalSections(ptr<bufio.Scanner> _addr_s, ptr<Profile> _addr_p)
         {
+            ref bufio.Scanner s = ref _addr_s.val;
+            ref Profile p = ref _addr_p.val;
+
             while (!isMemoryMapSentinel(s.Text()) && s.Scan())
             {
             }
@@ -1314,29 +1531,38 @@ nextLocation:
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
-            return error.As(p.ParseMemoryMapFromScanner(s));
+
+            return error.As(p.ParseMemoryMapFromScanner(s))!;
+
         }
 
         // ParseProcMaps parses a memory map in the format of /proc/self/maps.
         // ParseMemoryMap should be called after setting on a profile to
         // associate locations to the corresponding mapping based on their
         // address.
-        public static (slice<ref Mapping>, error) ParseProcMaps(io.Reader rd)
+        public static (slice<ptr<Mapping>>, error) ParseProcMaps(io.Reader rd)
         {
+            slice<ptr<Mapping>> _p0 = default;
+            error _p0 = default!;
+
             var s = bufio.NewScanner(rd);
-            return parseProcMapsFromScanner(s);
+            return parseProcMapsFromScanner(_addr_s);
         }
 
-        private static (slice<ref Mapping>, error) parseProcMapsFromScanner(ref bufio.Scanner s)
+        private static (slice<ptr<Mapping>>, error) parseProcMapsFromScanner(ptr<bufio.Scanner> _addr_s)
         {
-            slice<ref Mapping> mapping = default;
+            slice<ptr<Mapping>> _p0 = default;
+            error _p0 = default!;
+            ref bufio.Scanner s = ref _addr_s.val;
+
+            slice<ptr<Mapping>> mapping = default;
 
             slice<@string> attrs = default;
-            const @string delimiter = "=";
+            const @string delimiter = (@string)"=";
 
             var r = strings.NewReplacer();
             while (s.Scan())
@@ -1362,14 +1588,20 @@ nextLocation:
                         } 
                         // Ignore any unrecognized entries
                         continue;
+
                     }
-                    return (null, err);
+
+                    return (null, error.As(err)!);
+
                 }
+
                 if (m == null)
                 {
                     continue;
                 }
+
                 mapping = append(mapping, m);
+
             }
 
             {
@@ -1377,11 +1609,13 @@ nextLocation:
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
             }
-            return (mapping, null);
+
+            return (mapping, error.As(null!)!);
+
         }
 
         // removeLoggingInfo detects and removes log prefix entries generated
@@ -1398,38 +1632,50 @@ nextLocation:
                 }
 
             }
+
             return line;
+
         }
 
         // ParseMemoryMap parses a memory map in the format of
         // /proc/self/maps, and overrides the mappings in the current profile.
         // It renumbers the samples and locations in the profile correspondingly.
-        private static error ParseMemoryMap(this ref Profile p, io.Reader rd)
+        private static error ParseMemoryMap(this ptr<Profile> _addr_p, io.Reader rd)
         {
-            return error.As(p.ParseMemoryMapFromScanner(bufio.NewScanner(rd)));
+            ref Profile p = ref _addr_p.val;
+
+            return error.As(p.ParseMemoryMapFromScanner(bufio.NewScanner(rd)))!;
         }
 
         // ParseMemoryMapFromScanner parses a memory map in the format of
         // /proc/self/maps or a variety of legacy format, and overrides the
         // mappings in the current profile.  It renumbers the samples and
         // locations in the profile correspondingly.
-        private static error ParseMemoryMapFromScanner(this ref Profile p, ref bufio.Scanner s)
+        private static error ParseMemoryMapFromScanner(this ptr<Profile> _addr_p, ptr<bufio.Scanner> _addr_s)
         {
-            var (mapping, err) = parseProcMapsFromScanner(s);
+            ref Profile p = ref _addr_p.val;
+            ref bufio.Scanner s = ref _addr_s.val;
+
+            var (mapping, err) = parseProcMapsFromScanner(_addr_s);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             p.Mapping = append(p.Mapping, mapping);
             p.massageMappings();
             p.remapLocationIDs();
             p.remapFunctionIDs();
             p.remapMappingIDs();
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static (ref Mapping, error) parseMappingEntry(@string l)
+        private static (ptr<Mapping>, error) parseMappingEntry(@string l)
         {
+            ptr<Mapping> _p0 = default!;
+            error _p0 = default!;
+
             @string start = default;            @string end = default;            @string perm = default;            @string file = default;            @string offset = default;            @string buildID = default;
 
             {
@@ -1444,6 +1690,7 @@ nextLocation:
                     perm = me[3L];
                     offset = me[4L];
                     file = me[5L];
+
                 }                {
                     var me__prev2 = me;
 
@@ -1458,10 +1705,11 @@ nextLocation:
                         file = me[4L];
                         offset = me[5L];
                         buildID = me[6L];
+
                     }
                     else
                     {
-                        return (null, errUnrecognized);
+                        return (_addr_null!, error.As(errUnrecognized)!);
                     }
 
                     me = me__prev2;
@@ -1469,39 +1717,48 @@ nextLocation:
                 }
 
 
+
                 me = me__prev1;
 
             }
 
-            error err = default;
-            Mapping mapping = ref new Mapping(File:file,BuildID:buildID,);
+
+            error err = default!;
+            ptr<Mapping> mapping = addr(new Mapping(File:file,BuildID:buildID,));
             if (perm != "" && !strings.Contains(perm, "x"))
             { 
                 // Skip non-executable entries.
-                return (null, null);
+                return (_addr_null!, error.As(null!)!);
+
             }
+
             mapping.Start, err = strconv.ParseUint(start, 16L, 64L);
 
             if (err != null)
             {
-                return (null, errUnrecognized);
+                return (_addr_null!, error.As(errUnrecognized)!);
             }
+
             mapping.Limit, err = strconv.ParseUint(end, 16L, 64L);
 
             if (err != null)
             {
-                return (null, errUnrecognized);
+                return (_addr_null!, error.As(errUnrecognized)!);
             }
+
             if (offset != "")
             {
                 mapping.Offset, err = strconv.ParseUint(offset, 16L, 64L);
 
                 if (err != null)
                 {
-                    return (null, errUnrecognized);
+                    return (_addr_null!, error.As(errUnrecognized)!);
                 }
+
             }
-            return (mapping, null);
+
+            return (_addr_mapping!, error.As(null!)!);
+
         }
 
         private static @string memoryMapSentinels = new slice<@string>(new @string[] { "--- Memory map: ---", "MAPPED_LIBRARIES:" });
@@ -1516,29 +1773,36 @@ nextLocation:
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
-        private static void addLegacyFrameInfo(this ref Profile p)
+        private static void addLegacyFrameInfo(this ptr<Profile> _addr_p)
         {
+            ref Profile p = ref _addr_p.val;
 
-            if (isProfileType(p, heapzSampleTypes)) 
+
+            if (isProfileType(_addr_p, heapzSampleTypes)) 
                 p.DropFrames = allocRxStr;
                 p.KeepFrames = allocSkipRxStr;
-            else if (isProfileType(p, contentionzSampleTypes)) 
+            else if (isProfileType(_addr_p, contentionzSampleTypes)) 
                 p.DropFrames = lockRxStr;
                 p.KeepFrames = "";
             else 
                 p.DropFrames = cpuProfilerRxStr;
                 p.KeepFrames = "";
-                    }
+            
+        }
 
-        private static slice<@string> heapzSampleTypes = new slice<slice<@string>>(new slice<@string>[] { {"allocations","size"}, {"objects","space"}, {"inuse_objects","inuse_space"}, {"alloc_objects","alloc_space"} });
+        private static slice<@string> heapzSampleTypes = new slice<slice<@string>>(new slice<@string>[] { {"allocations","size"}, {"objects","space"}, {"inuse_objects","inuse_space"}, {"alloc_objects","alloc_space"}, {"alloc_objects","alloc_space","inuse_objects","inuse_space"} });
         private static slice<@string> contentionzSampleTypes = new slice<slice<@string>>(new slice<@string>[] { {"contentions","delay"} });
 
-        private static bool isProfileType(ref Profile p, slice<slice<@string>> types)
+        private static bool isProfileType(ptr<Profile> _addr_p, slice<slice<@string>> types)
         {
+            ref Profile p = ref _addr_p.val;
+
             var st = p.SampleType;
 nextType:
             foreach (var (_, t) in types)
@@ -1547,6 +1811,7 @@ nextType:
                 {
                     continue;
                 }
+
                 foreach (var (i) in st)
                 {
                     if (st[i].Type != t[i])
@@ -1554,10 +1819,13 @@ nextType:
                         _continuenextType = true;
                         break;
                     }
+
                 }
                 return true;
+
             }
             return false;
+
         }
 
         private static var allocRxStr = strings.Join(new slice<@string>(new @string[] { `calloc`, `cfree`, `malloc`, `free`, `memalign`, `do_memalign`, `(__)?posix_memalign`, `pvalloc`, `valloc`, `realloc`, `tcmalloc::.*`, `tc_calloc`, `tc_cfree`, `tc_malloc`, `tc_free`, `tc_memalign`, `tc_posix_memalign`, `tc_pvalloc`, `tc_valloc`, `tc_realloc`, `tc_new`, `tc_delete`, `tc_newarray`, `tc_deletearray`, `tc_new_nothrow`, `tc_newarray_nothrow`, `malloc_zone_malloc`, `malloc_zone_calloc`, `malloc_zone_valloc`, `malloc_zone_realloc`, `malloc_zone_memalign`, `malloc_zone_free`, `runtime\..*`, `BaseArena::.*`, `(::)?do_malloc_no_errno`, `(::)?do_malloc_pages`, `(::)?do_malloc`, `DoSampledAllocation`, `MallocedMemBlock::MallocedMemBlock`, `_M_allocate`, `__builtin_(vec_)?delete`, `__builtin_(vec_)?new`, `__gnu_cxx::new_allocator::allocate`, `__libc_malloc`, `__malloc_alloc_template::allocate`, `allocate`, `cpp_alloc`, `operator new(\[\])?`, `simple_alloc::allocate` }), "|");

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2020 August 29 10:05:10 UTC
+// package binutils -- go2cs converted at 2020 October 08 04:42:49 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\addr2liner_llvm.go
 using bufio = go.bufio_package;
@@ -36,7 +36,8 @@ namespace @internal
 {
     public static partial class binutils_package
     {
-        private static readonly @string defaultLLVMSymbolizer = "llvm-symbolizer";
+        private static readonly @string defaultLLVMSymbolizer = (@string)"llvm-symbolizer";
+
 
         // llvmSymbolizer is a connection to an llvm-symbolizer command for
         // obtaining address and line number information from a binary.
@@ -55,20 +56,28 @@ namespace @internal
             public ptr<bufio.Reader> @out;
         }
 
-        private static error write(this ref llvmSymbolizerJob a, @string s)
+        private static error write(this ptr<llvmSymbolizerJob> _addr_a, @string s)
         {
+            ref llvmSymbolizerJob a = ref _addr_a.val;
+
             var (_, err) = fmt.Fprint(a.@in, s + "\n");
-            return error.As(err);
+            return error.As(err)!;
         }
 
-        private static (@string, error) readLine(this ref llvmSymbolizerJob a)
+        private static (@string, error) readLine(this ptr<llvmSymbolizerJob> _addr_a)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref llvmSymbolizerJob a = ref _addr_a.val;
+
             return a.@out.ReadString('\n');
         }
 
         // close releases any resources used by the llvmSymbolizer object.
-        private static void close(this ref llvmSymbolizerJob a)
+        private static void close(this ptr<llvmSymbolizerJob> _addr_a)
         {
+            ref llvmSymbolizerJob a = ref _addr_a.val;
+
             a.@in.Close();
             a.cmd.Wait();
         }
@@ -77,26 +86,32 @@ namespace @internal
         // information about the given executable file. If file is a shared
         // library, base should be the address at which it was mapped in the
         // program under consideration.
-        private static (ref llvmSymbolizer, error) newLLVMSymbolizer(@string cmd, @string file, ulong @base)
+        private static (ptr<llvmSymbolizer>, error) newLLVMSymbolizer(@string cmd, @string file, ulong @base)
         {
+            ptr<llvmSymbolizer> _p0 = default!;
+            error _p0 = default!;
+
             if (cmd == "")
             {
                 cmd = defaultLLVMSymbolizer;
             }
-            llvmSymbolizerJob j = ref new llvmSymbolizerJob(cmd:exec.Command(cmd,"-inlining","-demangle=false"),);
 
-            error err = default;
+            ptr<llvmSymbolizerJob> j = addr(new llvmSymbolizerJob(cmd:exec.Command(cmd,"-inlining","-demangle=false"),));
+
+            error err = default!;
             j.@in, err = j.cmd.StdinPipe();
 
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var (outPipe, err) = j.cmd.StdoutPipe();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             j.@out = bufio.NewReader(outPipe);
             {
                 error err__prev1 = err;
@@ -105,38 +120,51 @@ namespace @internal
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
 
-            llvmSymbolizer a = ref new llvmSymbolizer(filename:file,rw:j,base:base,);
 
-            return (a, null);
+            ptr<llvmSymbolizer> a = addr(new llvmSymbolizer(filename:file,rw:j,base:base,));
+
+            return (_addr_a!, error.As(null!)!);
+
         }
 
-        private static (@string, error) readString(this ref llvmSymbolizer d)
+        private static (@string, error) readString(this ptr<llvmSymbolizer> _addr_d)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref llvmSymbolizer d = ref _addr_d.val;
+
             var (s, err) = d.rw.readLine();
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
-            return (strings.TrimSpace(s), null);
+
+            return (strings.TrimSpace(s), error.As(null!)!);
+
         }
 
         // readFrame parses the llvm-symbolizer output for a single address. It
         // returns a populated plugin.Frame and whether it has reached the end of the
         // data.
-        private static (plugin.Frame, bool) readFrame(this ref llvmSymbolizer d)
+        private static (plugin.Frame, bool) readFrame(this ptr<llvmSymbolizer> _addr_d)
         {
+            plugin.Frame _p0 = default;
+            bool _p0 = default;
+            ref llvmSymbolizer d = ref _addr_d.val;
+
             var (funcname, err) = d.readString();
             if (err != null)
             {
                 return (new plugin.Frame(), true);
             }
+
             switch (funcname)
             {
                 case "": 
@@ -152,6 +180,7 @@ namespace @internal
             {
                 return (new plugin.Frame(Func:funcname), true);
             }
+
             long linenumber = 0L;
             if (fileline == "??:0")
             {
@@ -185,19 +214,27 @@ namespace @internal
                                 }
 
                             }
+
                             break;
                         default: 
                             break;
                     }
                 }
+
             }
+
             return (new plugin.Frame(Func:funcname,File:fileline,Line:linenumber), false);
+
         }
 
         // addrInfo returns the stack frame information for a specific program
         // address. It returns nil if the address could not be identified.
-        private static (slice<plugin.Frame>, error) addrInfo(this ref llvmSymbolizer _d, ulong addr) => func(_d, (ref llvmSymbolizer d, Defer defer, Panic _, Recover __) =>
+        private static (slice<plugin.Frame>, error) addrInfo(this ptr<llvmSymbolizer> _addr_d, ulong addr) => func((defer, _, __) =>
         {
+            slice<plugin.Frame> _p0 = default;
+            error _p0 = default!;
+            ref llvmSymbolizer d = ref _addr_d.val;
+
             d.Lock();
             defer(d.Unlock());
 
@@ -206,10 +243,11 @@ namespace @internal
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
             }
+
 
             slice<plugin.Frame> stack = default;
             while (true)
@@ -219,14 +257,17 @@ namespace @internal
                 {
                     break;
                 }
+
                 if (frame != (new plugin.Frame()))
                 {
                     stack = append(stack, frame);
                 }
+
             }
 
 
-            return (stack, null);
+            return (stack, error.As(null!)!);
+
         });
     }
 }}}}}}}

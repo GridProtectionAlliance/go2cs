@@ -4,7 +4,7 @@
 
 // +build ppc64 ppc64le
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:35 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:13 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\cgo_ppc64x.go
     }

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package printer implements printing of AST nodes.
-// package printer -- go2cs converted at 2020 August 29 08:52:29 UTC
+// package printer -- go2cs converted at 2020 October 08 04:08:59 UTC
 // import "go/printer" ==> using printer = go.go.printer_package
 // Original source: C:\Go\src\go\printer\printer.go
 using fmt = go.fmt_package;
@@ -11,7 +11,6 @@ using ast = go.go.ast_package;
 using token = go.go.token_package;
 using io = go.io_package;
 using os = go.os_package;
-using strconv = go.strconv_package;
 using strings = go.strings_package;
 using tabwriter = go.text.tabwriter_package;
 using unicode = go.unicode_package;
@@ -23,29 +22,31 @@ namespace go
 {
     public static partial class printer_package
     {
-        private static readonly long maxNewlines = 2L; // max. number of newlines between source text
-        private static readonly var debug = false; // enable for debugging
-        private static readonly long infinity = 1L << (int)(30L);
+        private static readonly long maxNewlines = (long)2L; // max. number of newlines between source text
+        private static readonly var debug = (var)false; // enable for debugging
+        private static readonly long infinity = (long)1L << (int)(30L);
+
 
         private partial struct whiteSpace // : byte
         {
         }
 
-        private static readonly var ignore = whiteSpace(0L);
-        private static readonly var blank = whiteSpace(' ');
-        private static readonly var vtab = whiteSpace('\v');
-        private static readonly var newline = whiteSpace('\n');
-        private static readonly var formfeed = whiteSpace('\f');
-        private static readonly var indent = whiteSpace('>');
-        private static readonly var unindent = whiteSpace('<');
+        private static readonly var ignore = (var)whiteSpace(0L);
+        private static readonly var blank = (var)whiteSpace(' ');
+        private static readonly var vtab = (var)whiteSpace('\v');
+        private static readonly var newline = (var)whiteSpace('\n');
+        private static readonly var formfeed = (var)whiteSpace('\f');
+        private static readonly var indent = (var)whiteSpace('>');
+        private static readonly var unindent = (var)whiteSpace('<');
+
 
         // A pmode value represents the current printer mode.
         private partial struct pmode // : long
         {
         }
 
-        private static readonly pmode noExtraBlank = 1L << (int)(iota); // disables extra blank after /*-style comment
-        private static readonly var noExtraLinebreak = 0; // disables extra line break after /*-style comment
+        private static readonly pmode noExtraBlank = (pmode)1L << (int)(iota); // disables extra blank after /*-style comment
+        private static readonly var noExtraLinebreak = (var)0; // disables extra line break after /*-style comment
 
         private partial struct commentInfo
         {
@@ -63,6 +64,7 @@ namespace go
             public long indent; // current indentation
             public long level; // level == 0: outside composite literal; level > 0: inside composite literal
             public pmode mode; // current printer mode
+            public bool endAlignment; // if set, terminate alignment immediately
             public bool impliedSemi; // if set, a linebreak implies a semicolon
             public token.Token lastTok; // last token printed (token.ILLEGAL if it's whitespace)
             public token.Token prevOpen; // previous non-brace "open" token (, [, or token.ILLEGAL
@@ -80,7 +82,7 @@ namespace go
             public ptr<long> linePtr; // if set, record out.Line for the next token in *linePtr
 
 // The list of all source comments, in order of appearance.
-            public slice<ref ast.CommentGroup> comments; // may be nil
+            public slice<ptr<ast.CommentGroup>> comments; // may be nil
             public bool useNodeComments; // if not set, ignore lead and line comments of nodes
 
 // Information about p.comments[p.cindex]; set up by nextComment.
@@ -90,32 +92,43 @@ namespace go
             public long cachedLine; // line corresponding to cachedPos
         }
 
-        private static void init(this ref printer p, ref Config cfg, ref token.FileSet fset, map<ast.Node, long> nodeSizes)
+        private static void init(this ptr<printer> _addr_p, ptr<Config> _addr_cfg, ptr<token.FileSet> _addr_fset, map<ast.Node, long> nodeSizes)
         {
-            p.Config = cfg.Value;
+            ref printer p = ref _addr_p.val;
+            ref Config cfg = ref _addr_cfg.val;
+            ref token.FileSet fset = ref _addr_fset.val;
+
+            p.Config = cfg;
             p.fset = fset;
             p.pos = new token.Position(Line:1,Column:1);
             p.@out = new token.Position(Line:1,Column:1);
             p.wsbuf = make_slice<whiteSpace>(0L, 16L); // whitespace sequences are short
             p.nodeSizes = nodeSizes;
             p.cachedPos = -1L;
+
         }
 
-        private static void internalError(this ref printer _p, params object[] msg) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
+        private static void internalError(this ptr<printer> _addr_p, params object[] msg) => func((_, panic, __) =>
         {
+            msg = msg.Clone();
+            ref printer p = ref _addr_p.val;
+
             if (debug)
             {
                 fmt.Print(p.pos.String() + ": ");
                 fmt.Println(msg);
                 panic("go/printer");
             }
+
         });
 
         // commentsHaveNewline reports whether a list of comments belonging to
         // an *ast.CommentGroup contains newlines. Because the position information
         // may only be partially correct, we also have to read the comment text.
-        private static bool commentsHaveNewline(this ref printer p, slice<ref ast.Comment> list)
-        { 
+        private static bool commentsHaveNewline(this ptr<printer> _addr_p, slice<ptr<ast.Comment>> list)
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // len(list) > 0
             var line = p.lineFor(list[0L].Pos());
             foreach (var (i, c) in list)
@@ -124,7 +137,9 @@ namespace go
                 { 
                     // not all comments on the same line
                     return true;
+
                 }
+
                 {
                     var t = c.Text;
 
@@ -134,13 +149,17 @@ namespace go
                     }
 
                 }
+
             }
             _ = line;
             return false;
+
         }
 
-        private static void nextComment(this ref printer p)
+        private static void nextComment(this ptr<printer> _addr_p)
         {
+            ref printer p = ref _addr_p.val;
+
             while (p.cindex < len(p.comments))
             {
                 var c = p.comments[p.cindex];
@@ -153,7 +172,7 @@ namespace go
                         p.comment = c;
                         p.commentOffset = p.posFor(list[0L].Pos()).Offset;
                         p.commentNewline = p.commentsHaveNewline(list);
-                        return;
+                        return ;
                     } 
                     // we should not reach here (correct ASTs don't have empty
                     // ast.CommentGroup nodes), but be conservative and try again
@@ -166,22 +185,27 @@ namespace go
  
             // no more comments
             p.commentOffset = infinity;
+
         }
 
         // commentBefore reports whether the current comment group occurs
         // before the next position in the source code and printing it does
         // not introduce implicit semicolons.
         //
-        private static bool commentBefore(this ref printer p, token.Position next)
+        private static bool commentBefore(this ptr<printer> _addr_p, token.Position next)
         {
+            ref printer p = ref _addr_p.val;
+
             return p.commentOffset < next.Offset && (!p.impliedSemi || !p.commentNewline);
         }
 
         // commentSizeBefore returns the estimated size of the
         // comments on the same line before the next position.
         //
-        private static long commentSizeBefore(this ref printer _p, token.Position next) => func(_p, (ref printer p, Defer defer, Panic _, Recover __) =>
-        { 
+        private static long commentSizeBefore(this ptr<printer> _addr_p, token.Position next) => func((defer, _, __) =>
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // save/restore current p.commentInfo (p.nextComment() modifies it)
             defer(info =>
             {
@@ -196,9 +220,11 @@ namespace go
                     size += len(c.Text);
                 }
                 p.nextComment();
+
             }
 
             return size;
+
         });
 
         // recordLine records the output line number for the next non-whitespace
@@ -206,8 +232,11 @@ namespace go
         // formatted construct, independent of pending (not yet emitted) whitespace
         // or comments.
         //
-        private static void recordLine(this ref printer p, ref long linePtr)
+        private static void recordLine(this ptr<printer> _addr_p, ptr<long> _addr_linePtr)
         {
+            ref printer p = ref _addr_p.val;
+            ref long linePtr = ref _addr_linePtr.val;
+
             p.linePtr = linePtr;
         }
 
@@ -216,30 +245,41 @@ namespace go
         // emitted) whitespace or comments. It is used to compute an accurate
         // size (in number of lines) for a formatted construct.
         //
-        private static long linesFrom(this ref printer p, long line)
+        private static long linesFrom(this ptr<printer> _addr_p, long line)
         {
+            ref printer p = ref _addr_p.val;
+
             return p.@out.Line - line;
         }
 
-        private static token.Position posFor(this ref printer p, token.Pos pos)
-        { 
+        private static token.Position posFor(this ptr<printer> _addr_p, token.Pos pos)
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // not used frequently enough to cache entire token.Position
-            return p.fset.Position(pos);
+            return p.fset.PositionFor(pos, false);
+
         }
 
-        private static long lineFor(this ref printer p, token.Pos pos)
+        private static long lineFor(this ptr<printer> _addr_p, token.Pos pos)
         {
+            ref printer p = ref _addr_p.val;
+
             if (pos != p.cachedPos)
             {
                 p.cachedPos = pos;
-                p.cachedLine = p.fset.Position(pos).Line;
+                p.cachedLine = p.fset.PositionFor(pos, false).Line;
             }
+
             return p.cachedLine;
+
         }
 
         // writeLineDirective writes a //line directive if necessary.
-        private static void writeLineDirective(this ref printer p, token.Position pos)
+        private static void writeLineDirective(this ptr<printer> _addr_p, token.Position pos)
         {
+            ref printer p = ref _addr_p.val;
+
             if (pos.IsValid() && (p.@out.Line != pos.Line || p.@out.Filename != pos.Filename))
             {
                 p.output = append(p.output, tabwriter.Escape); // protect '\n' in //line from tabwriter interpretation
@@ -248,12 +288,16 @@ namespace go
                 // p.out must match the //line directive
                 p.@out.Filename = pos.Filename;
                 p.@out.Line = pos.Line;
+
             }
+
         }
 
         // writeIndent writes indentation.
-        private static void writeIndent(this ref printer p)
-        { 
+        private static void writeIndent(this ptr<printer> _addr_p)
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // use "hard" htabs - indentation columns
             // must not be discarded by the tabwriter
             var n = p.Config.Indent + p.indent; // include base indentation
@@ -269,17 +313,45 @@ namespace go
             p.pos.Offset += n;
             p.pos.Column += n;
             p.@out.Column += n;
+
         }
 
         // writeByte writes ch n times to p.output and updates p.pos.
         // Only used to write formatting (white space) characters.
-        private static void writeByte(this ref printer p, byte ch, long n)
+        private static void writeByte(this ptr<printer> _addr_p, byte ch, long n)
         {
+            ref printer p = ref _addr_p.val;
+
+            if (p.endAlignment)
+            { 
+                // Ignore any alignment control character;
+                // and at the end of the line, break with
+                // a formfeed to indicate termination of
+                // existing columns.
+                switch (ch)
+                {
+                    case '\t': 
+
+                    case '\v': 
+                        ch = ' ';
+                        break;
+                    case '\n': 
+
+                    case '\f': 
+                        ch = '\f';
+                        p.endAlignment = false;
+                        break;
+                }
+
+            }
+
             if (p.@out.Column == 1L)
             { 
                 // no need to write line directives before white space
                 p.writeIndent();
+
             }
+
             for (long i = 0L; i < n; i++)
             {
                 p.output = append(p.output, ch);
@@ -296,10 +368,12 @@ namespace go
                 p.@out.Line += n;
                 p.pos.Column = 1L;
                 p.@out.Column = 1L;
-                return;
+                return ;
             }
+
             p.pos.Column += n;
             p.@out.Column += n;
+
         }
 
         // writeString writes the string s to p.output and updates p.pos, p.out,
@@ -313,16 +387,21 @@ namespace go
         // avoids processing extra escape characters and reduces run time of the
         // printer benchmark by up to 10%.
         //
-        private static void writeString(this ref printer p, token.Position pos, @string s, bool isLit)
+        private static void writeString(this ptr<printer> _addr_p, token.Position pos, @string s, bool isLit)
         {
+            ref printer p = ref _addr_p.val;
+
             if (p.@out.Column == 1L)
             {
                 if (p.Config.Mode & SourcePos != 0L)
                 {
                     p.writeLineDirective(pos);
                 }
+
                 p.writeIndent();
+
             }
+
             if (pos.IsValid())
             { 
                 // update p.pos (if pos is invalid, continue with existing p.pos)
@@ -330,7 +409,9 @@ namespace go
                 // writeIndent updates p.pos if there's indentation, but p.pos
                 // is the position of s.
                 p.pos = pos;
+
             }
+
             if (isLit)
             { 
                 // Protect s such that is passes through the tabwriter
@@ -338,11 +419,14 @@ namespace go
                 // tabwriter.Escape bytes since they do not appear in legal
                 // UTF-8 sequences.
                 p.output = append(p.output, tabwriter.Escape);
+
             }
+
             if (debug)
             {
                 p.output = append(p.output, fmt.Sprintf("/*%s*/", pos)); // do not update p.pos!
             }
+
             p.output = append(p.output, s); 
 
             // update positions
@@ -350,12 +434,24 @@ namespace go
             long li = default; // index of last newline; valid if nlines > 0
             for (long i = 0L; i < len(s); i++)
             { 
-                // Go tokens cannot contain '\f' - no need to look for it
-                if (s[i] == '\n')
+                // Raw string literals may contain any character except back quote (`).
                 {
-                    nlines++;
-                    li = i;
+                    var ch = s[i];
+
+                    if (ch == '\n' || ch == '\f')
+                    { 
+                        // account for line break
+                        nlines++;
+                        li = i; 
+                        // A line break inside a literal will break whatever column
+                        // formatting is in place; ignore any further alignment through
+                        // the end of the line.
+                        p.endAlignment = true;
+
+                    }
+
                 }
+
             }
 
             p.pos.Offset += len(s);
@@ -372,11 +468,14 @@ namespace go
                 p.pos.Column += len(s);
                 p.@out.Column += len(s);
             }
+
             if (isLit)
             {
                 p.output = append(p.output, tabwriter.Escape);
             }
+
             p.last = p.pos;
+
         }
 
         // writeCommentPrefix writes the whitespace before a comment.
@@ -386,19 +485,26 @@ namespace go
         // after all pending comments, prev is the previous comment in
         // a group of comments (or nil), and tok is the next token.
         //
-        private static void writeCommentPrefix(this ref printer p, token.Position pos, token.Position next, ref ast.Comment prev, token.Token tok)
+        private static void writeCommentPrefix(this ptr<printer> _addr_p, token.Position pos, token.Position next, ptr<ast.Comment> _addr_prev, token.Token tok)
         {
+            ref printer p = ref _addr_p.val;
+            ref ast.Comment prev = ref _addr_prev.val;
+
             if (len(p.output) == 0L)
             { 
                 // the comment is the first item to be printed - don't write any whitespace
-                return;
+                return ;
+
             }
+
             if (pos.IsValid() && pos.Filename != p.last.Filename)
             { 
                 // comment in a different file - separate with newlines
                 p.writeByte('\f', maxNewlines);
-                return;
+                return ;
+
             }
+
             if (pos.Line == p.last.Line && (prev == null || prev.Text[1L] != '/'))
             { 
                 // comment on the same line as last item:
@@ -431,6 +537,7 @@ namespace go
                                 continue;
                                                         j = i;
                             break;
+
                         }
 
                         i = i__prev1;
@@ -438,6 +545,7 @@ namespace go
                     }
 
                     p.writeWhitespace(j);
+
                 }
             else
  
@@ -451,9 +559,13 @@ namespace go
                         // (which must be a /*-style comment): separate
                         // with a blank instead of a tab
                         sep = ' ';
+
                     }
+
                     p.writeByte(sep, 1L);
+
                 }
+
             }            { 
                 // comment on a different line:
                 // separate with at least one line break
@@ -494,11 +606,13 @@ namespace go
                             {
                                 continue;
                             }
+
                         else if (ch == newline || ch == formfeed) 
                             p.wsbuf[i] = ignore;
                             droppedLinebreak = prev == null; // record only if first comment of a group
                                                 j = i;
                         break;
+
                     }
 
                     i = i__prev1;
@@ -515,7 +629,9 @@ namespace go
                     if (n < 0L)
                     { // should never happen
                         n = 0L;
+
                     }
+
                 } 
 
                 // at the package scope level only (p.indent == 0),
@@ -533,14 +649,18 @@ namespace go
                 {
                     n = 1L;
                 }
+
                 if (n > 0L)
                 { 
                     // use formfeeds to break columns before a comment;
                     // this is analogous to using formfeeds to separate
                     // individual lines of /*-style comments
                     p.writeByte('\f', nlimit(n));
+
                 }
+
             }
+
         }
 
         // Returns true if s contains only white space
@@ -554,9 +674,11 @@ namespace go
                 {
                     return false;
                 }
+
             }
 
             return true;
+
         }
 
         // commonPrefix returns the common prefix of a and b.
@@ -569,6 +691,7 @@ namespace go
             }
 
             return a[0L..i];
+
         }
 
         // trimRight returns s with trailing whitespace removed.
@@ -587,7 +710,7 @@ namespace go
         {
             if (len(lines) <= 1L)
             {
-                return; // at most one line - nothing to do
+                return ; // at most one line - nothing to do
             } 
             // len(lines) > 1
 
@@ -633,14 +756,16 @@ namespace go
                                 prefix = line;
                                 prefixSet = true;
                             }
+
                             prefix = commonPrefix(prefix, line);
+
                         }
+
                     }
 
                     i = i__prev1;
                     line = line__prev1;
                 }
-
             } 
             // If we don't have a prefix yet, consider the last line.
             if (!prefixSet)
@@ -665,8 +790,10 @@ namespace go
                     {
                         i--; // remove trailing blank from prefix so stars remain aligned
                     }
+
                     prefix = prefix[0L..i];
                     lineOfStars = true;
+
                 }
                 else
                 { 
@@ -702,7 +829,9 @@ namespace go
                         {
                             i--;
                         }
+
                         prefix = prefix[0L..i];
+
                     }                    { 
                         // comment text on the first line
                         var suffix = make_slice<byte>(len(first));
@@ -717,6 +846,7 @@ namespace go
                         { 
                             // assume the '\t' compensates for the /*
                             suffix = suffix[2L..n];
+
                         }
                         else
                         { 
@@ -724,11 +854,14 @@ namespace go
                             suffix[0L] = ' ';
                             suffix[1L] = ' ';
                             suffix = suffix[0L..n];
+
                         } 
                         // Shorten the computed common prefix by the length of
                         // suffix, if it is found as suffix of the prefix.
                         prefix = strings.TrimSuffix(prefix, string(suffix));
+
                     }
+
                 } 
 
                 // Handle last line: If it only contains a closing */, align it
@@ -752,7 +885,9 @@ namespace go
                 {
                     closing = " */"; // add blank to align final star
                 }
+
                 lines[len(lines) - 1L] = prefix + closing;
+
             }
             else
             { 
@@ -760,6 +895,7 @@ namespace go
                 // it is aligned like the other lines and include
                 // in prefix computation
                 prefix = commonPrefix(prefix, last);
+
             } 
 
             // Remove the common prefix from all but the first and empty lines.
@@ -775,69 +911,41 @@ namespace go
                     {
                         lines[i] = line[len(prefix)..];
                     }
+
                 }
 
                 i = i__prev1;
                 line = line__prev1;
             }
-
         }
 
-        private static void writeComment(this ref printer _p, ref ast.Comment _comment) => func(_p, _comment, (ref printer p, ref ast.Comment comment, Defer defer, Panic _, Recover __) =>
+        private static void writeComment(this ptr<printer> _addr_p, ptr<ast.Comment> _addr_comment) => func((defer, _, __) =>
         {
+            ref printer p = ref _addr_p.val;
+            ref ast.Comment comment = ref _addr_comment.val;
+
             var text = comment.Text;
             var pos = p.posFor(comment.Pos());
 
-            const @string linePrefix = "//line ";
+            const @string linePrefix = (@string)"//line ";
 
             if (strings.HasPrefix(text, linePrefix) && (!pos.IsValid() || pos.Column == 1L))
             { 
-                // possibly a line directive
-                var ldir = strings.TrimSpace(text[len(linePrefix)..]);
+                // Possibly a //-style line directive.
+                // Suspend indentation temporarily to keep line directive valid.
+                defer(indent =>
                 {
-                    var i__prev2 = i;
+                    p.indent = indent;
+                }(p.indent));
+                p.indent = 0L;
 
-                    var i = strings.LastIndex(ldir, ":");
-
-                    if (i >= 0L)
-                    {
-                        {
-                            var line__prev3 = line;
-
-                            var (line, err) = strconv.Atoi(ldir[i + 1L..]);
-
-                            if (err == null && line > 0L)
-                            { 
-                                // The line directive we are about to print changed
-                                // the Filename and Line number used for subsequent
-                                // tokens. We have to update our AST-space position
-                                // accordingly and suspend indentation temporarily.
-                                var indent = p.indent;
-                                p.indent = 0L;
-                                defer(() =>
-                                {
-                                    p.pos.Filename = ldir[..i];
-                                    p.pos.Line = line;
-                                    p.pos.Column = 1L;
-                                    p.indent = indent;
-                                }());
-                            }
-
-                            line = line__prev3;
-
-                        }
-                    }
-
-                    i = i__prev2;
-
-                }
             } 
 
             // shortcut common case of //-style comments
             if (text[1L] == '/')
             {
                 p.writeString(pos, trimRight(text), true);
-                return;
+                return ;
             } 
 
             // for /*-style comments, print line by line and let the
@@ -866,8 +974,8 @@ namespace go
                     i = i__prev1;
                     line = line__prev1;
                 }
-
             }
+
             stripCommonPrefix(lines); 
 
             // write comment lines, separated by formfeed,
@@ -885,16 +993,17 @@ namespace go
                         p.writeByte('\f', 1L);
                         pos = p.pos;
                     }
+
                     if (len(line) > 0L)
                     {
                         p.writeString(pos, trimRight(line), true);
                     }
+
                 }
 
                 i = i__prev1;
                 line = line__prev1;
             }
-
         });
 
         // writeCommentSuffix writes a line break after a comment if indicated
@@ -904,8 +1013,12 @@ namespace go
         // newline was written or if a formfeed was dropped from the whitespace
         // buffer.
         //
-        private static (bool, bool) writeCommentSuffix(this ref printer p, bool needsLinebreak)
+        private static (bool, bool) writeCommentSuffix(this ptr<printer> _addr_p, bool needsLinebreak)
         {
+            bool wroteNewline = default;
+            bool droppedFF = default;
+            ref printer p = ref _addr_p.val;
+
             foreach (var (i, ch) in p.wsbuf)
             {
 
@@ -926,8 +1039,11 @@ namespace go
                         {
                             droppedFF = true;
                         }
+
                         p.wsbuf[i] = ignore;
+
                     }
+
                             }
             p.writeWhitespace(len(p.wsbuf)); 
 
@@ -937,20 +1053,26 @@ namespace go
                 p.writeByte('\n', 1L);
                 wroteNewline = true;
             }
-            return;
+
+            return ;
+
         }
 
         // containsLinebreak reports whether the whitespace buffer contains any line breaks.
-        private static bool containsLinebreak(this ref printer p)
+        private static bool containsLinebreak(this ptr<printer> _addr_p)
         {
+            ref printer p = ref _addr_p.val;
+
             foreach (var (_, ch) in p.wsbuf)
             {
                 if (ch == newline || ch == formfeed)
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
         // intersperseComments consumes all comments that appear before the next token
@@ -959,9 +1081,13 @@ namespace go
         // the comments and whitespace. The intersperseComments result indicates if a
         // newline was written or if a formfeed was dropped from the whitespace buffer.
         //
-        private static (bool, bool) intersperseComments(this ref printer p, token.Position next, token.Token tok)
+        private static (bool, bool) intersperseComments(this ptr<printer> _addr_p, token.Position next, token.Token tok)
         {
-            ref ast.Comment last = default;
+            bool wroteNewline = default;
+            bool droppedFF = default;
+            ref printer p = ref _addr_p.val;
+
+            ptr<ast.Comment> last;
             while (p.commentBefore(next))
             {
                 foreach (var (_, c) in p.comment.List)
@@ -971,6 +1097,7 @@ namespace go
                     last = c;
                 }
                 p.nextComment();
+
             }
 
 
@@ -997,6 +1124,7 @@ namespace go
                     {
                         p.writeByte(' ', 1L);
                     }
+
                 } 
                 // Ensure that there is a line break after a //-style comment,
                 // before EOF, and before a closing '}' unless explicitly disabled.
@@ -1004,18 +1132,23 @@ namespace go
                 {
                     needsLinebreak = true;
                 }
+
                 return p.writeCommentSuffix(needsLinebreak);
+
             } 
 
             // no comment was written - we should never reach here since
             // intersperseComments should not be called in that case
             p.internalError("intersperseComments called without pending comments");
-            return;
+            return ;
+
         }
 
         // whiteWhitespace writes the first n whitespace entries.
-        private static void writeWhitespace(this ref printer p, long n)
-        { 
+        private static void writeWhitespace(this ptr<printer> _addr_p, long n)
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // write entries
             for (long i = 0L; i < n; i++)
             {
@@ -1040,6 +1173,7 @@ namespace go
                             p.internalError("negative indentation:", p.indent);
                             p.indent = 0L;
                         }
+
                         goto __switch_break0;
                     }
                     if (ch == newline || ch == formfeed) 
@@ -1061,13 +1195,16 @@ namespace go
                             p.wsbuf[i + 1L] = formfeed;
                             i--; // do it again
                             continue;
+
                         }
+
                     }
                     // default: 
                         p.writeByte(byte(ch), 1L);
 
                     __switch_break0:;
                 }
+
             } 
 
             // shift remaining entries down
@@ -1076,6 +1213,7 @@ namespace go
             // shift remaining entries down
             var l = copy(p.wsbuf, p.wsbuf[n..]);
             p.wsbuf = p.wsbuf[..l];
+
         }
 
         // ----------------------------------------------------------------------------
@@ -1088,11 +1226,15 @@ namespace go
             {
                 n = maxNewlines;
             }
+
             return n;
+
         }
 
         private static bool mayCombine(token.Token prev, byte next)
         {
+            bool b = default;
+
 
             if (prev == token.INT) 
                 b = next == '.'; // 1.
@@ -1106,7 +1248,8 @@ namespace go
                 b = next == '-' || next == '<'; // <- or <<
             else if (prev == token.AND) 
                 b = next == '&' || next == '^'; // && or &^
-                        return;
+                        return ;
+
         }
 
         // print prints a list of "items" (roughly corresponding to syntactic
@@ -1120,8 +1263,11 @@ namespace go
         // space for best comment placement. Then, any leftover whitespace is
         // printed, followed by the actual token.
         //
-        private static void print(this ref printer _p, params object[] args) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
+        private static void print(this ptr<printer> _addr_p, params object[] args) => func((_, panic, __) =>
         {
+            args = args.Clone();
+            ref printer p = ref _addr_p.val;
+
             foreach (var (_, arg) in args)
             { 
                 // information about the current arg
@@ -1149,7 +1295,9 @@ namespace go
                             // may screw up "correcting" unindents (see
                             // LabeledStmt)
                             continue;
+
                         }
+
                         var i = len(p.wsbuf);
                         if (i == cap(p.wsbuf))
                         { 
@@ -1158,7 +1306,9 @@ namespace go
                             // bad comment placement) if it does happen.
                             p.writeWhitespace(i);
                             i = 0L;
+
                         }
+
                         p.wsbuf = p.wsbuf[0L..i + 1L];
                         p.wsbuf[i] = x;
                         if (x == newline || x == formfeed)
@@ -1168,16 +1318,18 @@ namespace go
                             // because comments can be interspersed before the arg
                             // in this case
                             p.impliedSemi = false;
+
                         }
+
                         p.lastTok = token.ILLEGAL;
                         continue;
                         break;
-                    case ref ast.Ident x:
+                    case ptr<ast.Ident> x:
                         data = x.Name;
                         impliedSemi = true;
                         p.lastTok = token.IDENT;
                         break;
-                    case ref ast.BasicLit x:
+                    case ptr<ast.BasicLit> x:
                         data = x.Value;
                         isLit = true;
                         impliedSemi = true;
@@ -1197,9 +1349,12 @@ namespace go
                             {
                                 p.internalError("whitespace buffer not empty");
                             }
+
                             p.wsbuf = p.wsbuf[0L..1L];
                             p.wsbuf[0L] = ' ';
+
                         }
+
                         data = s; 
                         // some keywords followed by a newline imply a semicolon
 
@@ -1212,6 +1367,7 @@ namespace go
                         {
                             p.pos = p.posFor(x); // accurate position of next item
                         }
+
                         continue;
                         break;
                     case @string x:
@@ -1246,6 +1402,7 @@ namespace go
                     {
                         n = maxNewlines - 1L;
                     }
+
                     if (n > 0L)
                     {
                         var ch = byte('\n');
@@ -1253,20 +1410,26 @@ namespace go
                         {
                             ch = '\f'; // use formfeed since we dropped one before
                         }
+
                         p.writeByte(ch, n);
                         impliedSemi = false;
+
                     }
+
                 } 
 
                 // the next token starts now - record its line number if requested
                 if (p.linePtr != null)
                 {
-                    p.linePtr.Value = p.@out.Line;
+                    p.linePtr.val = p.@out.Line;
                     p.linePtr = null;
                 }
+
                 p.writeString(next, data, isLit);
                 p.impliedSemi = impliedSemi;
+
             }
+
         });
 
         // flush prints any pending comments and whitespace occurring textually
@@ -1274,89 +1437,103 @@ namespace go
         // if a newline was written or if a formfeed was dropped from the whitespace
         // buffer.
         //
-        private static (bool, bool) flush(this ref printer p, token.Position next, token.Token tok)
+        private static (bool, bool) flush(this ptr<printer> _addr_p, token.Position next, token.Token tok)
         {
+            bool wroteNewline = default;
+            bool droppedFF = default;
+            ref printer p = ref _addr_p.val;
+
             if (p.commentBefore(next))
             { 
                 // if there are comments before the next item, intersperse them
                 wroteNewline, droppedFF = p.intersperseComments(next, tok);
+
             }
             else
             { 
                 // otherwise, write any leftover whitespace
                 p.writeWhitespace(len(p.wsbuf));
+
             }
-            return;
+
+            return ;
+
         }
 
         // getNode returns the ast.CommentGroup associated with n, if any.
-        private static ref ast.CommentGroup getDoc(ast.Node n)
+        private static ptr<ast.CommentGroup> getDoc(ast.Node n)
         {
             switch (n.type())
             {
-                case ref ast.Field n:
-                    return n.Doc;
+                case ptr<ast.Field> n:
+                    return _addr_n.Doc!;
                     break;
-                case ref ast.ImportSpec n:
-                    return n.Doc;
+                case ptr<ast.ImportSpec> n:
+                    return _addr_n.Doc!;
                     break;
-                case ref ast.ValueSpec n:
-                    return n.Doc;
+                case ptr<ast.ValueSpec> n:
+                    return _addr_n.Doc!;
                     break;
-                case ref ast.TypeSpec n:
-                    return n.Doc;
+                case ptr<ast.TypeSpec> n:
+                    return _addr_n.Doc!;
                     break;
-                case ref ast.GenDecl n:
-                    return n.Doc;
+                case ptr<ast.GenDecl> n:
+                    return _addr_n.Doc!;
                     break;
-                case ref ast.FuncDecl n:
-                    return n.Doc;
+                case ptr<ast.FuncDecl> n:
+                    return _addr_n.Doc!;
                     break;
-                case ref ast.File n:
-                    return n.Doc;
+                case ptr<ast.File> n:
+                    return _addr_n.Doc!;
                     break;
             }
-            return null;
+            return _addr_null!;
+
         }
 
-        private static ref ast.CommentGroup getLastComment(ast.Node n)
+        private static ptr<ast.CommentGroup> getLastComment(ast.Node n)
         {
             switch (n.type())
             {
-                case ref ast.Field n:
-                    return n.Comment;
+                case ptr<ast.Field> n:
+                    return _addr_n.Comment!;
                     break;
-                case ref ast.ImportSpec n:
-                    return n.Comment;
+                case ptr<ast.ImportSpec> n:
+                    return _addr_n.Comment!;
                     break;
-                case ref ast.ValueSpec n:
-                    return n.Comment;
+                case ptr<ast.ValueSpec> n:
+                    return _addr_n.Comment!;
                     break;
-                case ref ast.TypeSpec n:
-                    return n.Comment;
+                case ptr<ast.TypeSpec> n:
+                    return _addr_n.Comment!;
                     break;
-                case ref ast.GenDecl n:
+                case ptr<ast.GenDecl> n:
                     if (len(n.Specs) > 0L)
                     {
-                        return getLastComment(n.Specs[len(n.Specs) - 1L]);
+                        return _addr_getLastComment(n.Specs[len(n.Specs) - 1L])!;
                     }
+
                     break;
-                case ref ast.File n:
+                case ptr<ast.File> n:
                     if (len(n.Comments) > 0L)
                     {
-                        return n.Comments[len(n.Comments) - 1L];
+                        return _addr_n.Comments[len(n.Comments) - 1L]!;
                     }
+
                     break;
             }
-            return null;
+            return _addr_null!;
+
         }
 
-        private static error printNode(this ref printer p, object node)
-        { 
+        private static error printNode(this ptr<printer> _addr_p, object node)
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // unpack *CommentedNode, if any
-            slice<ref ast.CommentGroup> comments = default;
+            slice<ptr<ast.CommentGroup>> comments = default;
             {
-                ref CommentedNode (cnode, ok) = node._<ref CommentedNode>();
+                ptr<CommentedNode> (cnode, ok) = node._<ptr<CommentedNode>>();
 
                 if (ok)
                 {
@@ -1366,6 +1543,7 @@ namespace go
 
             }
 
+
             if (comments != null)
             { 
                 // commented node - restrict comment list to relevant range
@@ -1374,6 +1552,7 @@ namespace go
                 {
                     goto unsupported;
                 }
+
                 var beg = n.Pos();
                 var end = n.End(); 
                 // if the node has associated documentation,
@@ -1389,6 +1568,7 @@ namespace go
                     }
 
                 }
+
                 {
                     var com = getLastComment(n);
 
@@ -1403,6 +1583,7 @@ namespace go
                             }
 
                         }
+
                     } 
                     // token.Pos values are global offsets, we can
                     // compare them directly
@@ -1426,16 +1607,18 @@ namespace go
                 {
                     p.comments = comments[i..j];
                 }
+
             }            {
                 ast.Node n__prev2 = n;
 
-                (n, ok) = node._<ref ast.File>();
+                (n, ok) = node._<ptr<ast.File>>();
 
 
                 else if (ok)
                 { 
                     // use ast.File comments, if any
                     p.comments = n.Comments;
+
                 } 
 
                 // if there are no comments, use node comments
@@ -1458,7 +1641,7 @@ namespace go
                     break;
                 case ast.Stmt n:
                     {
-                        ref ast.LabeledStmt (_, ok) = n._<ref ast.LabeledStmt>();
+                        ptr<ast.LabeledStmt> (_, ok) = n._<ptr<ast.LabeledStmt>>();
 
                         if (ok)
                         {
@@ -1466,6 +1649,7 @@ namespace go
                         }
 
                     }
+
                     p.stmt(n, false);
                     break;
                 case ast.Decl n:
@@ -1478,7 +1662,7 @@ namespace go
                     foreach (var (_, s) in n)
                     {
                         {
-                            (_, ok) = s._<ref ast.LabeledStmt>();
+                            (_, ok) = s._<ptr<ast.LabeledStmt>>();
 
                             if (ok)
                             {
@@ -1486,13 +1670,14 @@ namespace go
                             }
 
                         }
+
                     }
                     p.stmtList(n, 0L, false);
                     break;
                 case slice<ast.Decl> n:
                     p.declList(n);
                     break;
-                case ref ast.File n:
+                case ptr<ast.File> n:
                     p.file(n);
                     break;
                 default:
@@ -1504,10 +1689,11 @@ namespace go
 
             }
 
-            return error.As(null);
+            return error.As(null!)!;
 
 unsupported:
-            return error.As(fmt.Errorf("go/printer: unsupported node type %T", node));
+            return error.As(fmt.Errorf("go/printer: unsupported node type %T", node))!;
+
         }
 
         // ----------------------------------------------------------------------------
@@ -1528,12 +1714,14 @@ unsupported:
 
         // trimmer is implemented as a state machine.
         // It can be in one of the following states:
-        private static readonly var inSpace = iota; // inside space
-        private static readonly var inEscape = 0; // inside text bracketed by tabwriter.Escapes
-        private static readonly var inText = 1; // inside text
+        private static readonly var inSpace = (var)iota; // inside space
+        private static readonly var inEscape = (var)0; // inside text bracketed by tabwriter.Escapes
+        private static readonly var inText = (var)1; // inside text
 
-        private static void resetSpace(this ref trimmer p)
+        private static void resetSpace(this ptr<trimmer> _addr_p)
         {
+            ref trimmer p = ref _addr_p.val;
+
             p.state = inSpace;
             p.space = p.space[0L..0L];
         }
@@ -1546,8 +1734,12 @@ unsupported:
 
         private static slice<byte> aNewline = (slice<byte>)"\n";
 
-        private static (long, error) Write(this ref trimmer _p, slice<byte> data) => func(_p, (ref trimmer p, Defer _, Panic panic, Recover __) =>
-        { 
+        private static (long, error) Write(this ptr<trimmer> _addr_p, slice<byte> data) => func((_, panic, __) =>
+        {
+            long n = default;
+            error err = default!;
+            ref trimmer p = ref _addr_p.val;
+ 
             // invariants:
             // p.state == inSpace:
             //    p.space is unwritten
@@ -1563,6 +1755,7 @@ unsupported:
                 {
                     b = '\t'; // convert to htab
                 }
+
 
                 if (p.state == inSpace) 
 
@@ -1585,6 +1778,7 @@ unsupported:
                         _, err = p.output.Write(data[m..n]);
                         p.resetSpace();
                     }
+
                 else if (p.state == inText) 
 
                     if (b == '\t' || b == ' ') 
@@ -1598,6 +1792,7 @@ unsupported:
                         {
                             _, err = p.output.Write(aNewline);
                         }
+
                     else if (b == tabwriter.Escape) 
                         _, err = p.output.Write(data[m..n]);
                         p.state = inEscape;
@@ -1606,8 +1801,9 @@ unsupported:
                     panic("unreachable");
                                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
             }
 
             n = len(data);
@@ -1616,7 +1812,8 @@ unsupported:
             if (p.state == inEscape || p.state == inText) 
                 _, err = p.output.Write(data[m..n]);
                 p.resetSpace();
-                        return;
+                        return ;
+
         });
 
         // ----------------------------------------------------------------------------
@@ -1627,10 +1824,26 @@ unsupported:
         {
         }
 
-        public static readonly Mode RawFormat = 1L << (int)(iota); // do not use a tabwriter; if set, UseSpaces is ignored
-        public static readonly var TabIndent = 0; // use tabs for indentation independent of UseSpaces
-        public static readonly var UseSpaces = 1; // use spaces instead of tabs for alignment
-        public static readonly var SourcePos = 2; // emit //line directives to preserve original source positions
+        public static readonly Mode RawFormat = (Mode)1L << (int)(iota); // do not use a tabwriter; if set, UseSpaces is ignored
+        public static readonly var TabIndent = (var)0; // use tabs for indentation independent of UseSpaces
+        public static readonly var UseSpaces = (var)1; // use spaces instead of tabs for alignment
+        public static readonly var SourcePos = (var)2; // emit //line directives to preserve original source positions
+
+        // The mode below is not included in printer's public API because
+        // editing code text is deemed out of scope. Because this mode is
+        // unexported, it's also possible to modify or remove it based on
+        // the evolving needs of go/format and cmd/gofmt without breaking
+        // users. See discussion in CL 240683.
+ 
+        // normalizeNumbers means to canonicalize number
+        // literal prefixes and exponents while printing.
+        //
+        // This value is known in and used by go/format and cmd/gofmt.
+        // It is currently more convenient and performant for those
+        // packages to apply number normalization during printing,
+        // rather than by modifying the AST in advance.
+        private static readonly Mode normalizeNumbers = (Mode)1L << (int)(30L);
+
 
         // A Config node controls the output of Fprint.
         public partial struct Config
@@ -1641,8 +1854,12 @@ unsupported:
         }
 
         // fprint implements Fprint and takes a nodesSizes map for setting up the printer state.
-        private static error fprint(this ref Config cfg, io.Writer output, ref token.FileSet fset, object node, map<ast.Node, long> nodeSizes)
-        { 
+        private static error fprint(this ptr<Config> _addr_cfg, io.Writer output, ptr<token.FileSet> _addr_fset, object node, map<ast.Node, long> nodeSizes)
+        {
+            error err = default!;
+            ref Config cfg = ref _addr_cfg.val;
+            ref token.FileSet fset = ref _addr_fset.val;
+ 
             // print node
             printer p = default;
             p.init(cfg, fset, nodeSizes);
@@ -1650,7 +1867,7 @@ unsupported:
 
             if (err != null)
             {
-                return;
+                return ;
             } 
             // print outstanding comments
             p.impliedSemi = false; // EOF acts like a newline
@@ -1660,7 +1877,7 @@ unsupported:
             // (Input to a tabwriter must be untrimmed since trailing tabs provide
             // formatting information. The tabwriter could provide trimming
             // functionality but no tabwriter is used when RawFormat is set.)
-            output = ref new trimmer(output:output); 
+            output = addr(new trimmer(output:output)); 
 
             // redirect output through a tabwriter if necessary
             if (cfg.Mode & RawFormat == 0L)
@@ -1672,13 +1889,16 @@ unsupported:
                 {
                     padchar = ' ';
                 }
+
                 var twmode = tabwriter.DiscardEmptyColumns;
                 if (cfg.Mode & TabIndent != 0L)
                 {
                     minwidth = 0L;
                     twmode |= tabwriter.TabIndent;
                 }
+
                 output = tabwriter.NewWriter(output, minwidth, cfg.Tabwidth, 1L, padchar, twmode);
+
             } 
 
             // write printer result via tabwriter/trimmer to output
@@ -1686,12 +1906,12 @@ unsupported:
 
             if (err != null)
             {
-                return;
+                return ;
             } 
 
             // flush tabwriter, if any
             {
-                ref tabwriter.Writer (tw, _) = output._<ref tabwriter.Writer>();
+                ptr<tabwriter.Writer> (tw, _) = output._<ptr<tabwriter.Writer>>();
 
                 if (tw != null)
                 {
@@ -1700,7 +1920,9 @@ unsupported:
 
             }
 
-            return;
+
+            return ;
+
         }
 
         // A CommentedNode bundles an AST node and corresponding comments.
@@ -1708,7 +1930,7 @@ unsupported:
         //
         public partial struct CommentedNode
         {
-            public slice<ref ast.CommentGroup> Comments;
+            public slice<ptr<ast.CommentGroup>> Comments;
         }
 
         // Fprint "pretty-prints" an AST node to output for a given configuration cfg.
@@ -1716,9 +1938,12 @@ unsupported:
         // The node type must be *ast.File, *CommentedNode, []ast.Decl, []ast.Stmt,
         // or assignment-compatible to ast.Expr, ast.Decl, ast.Spec, or ast.Stmt.
         //
-        private static error Fprint(this ref Config cfg, io.Writer output, ref token.FileSet fset, object node)
+        private static error Fprint(this ptr<Config> _addr_cfg, io.Writer output, ptr<token.FileSet> _addr_fset, object node)
         {
-            return error.As(cfg.fprint(output, fset, node, make_map<ast.Node, long>()));
+            ref Config cfg = ref _addr_cfg.val;
+            ref token.FileSet fset = ref _addr_fset.val;
+
+            return error.As(cfg.fprint(output, fset, node, make_map<ast.Node, long>()))!;
         }
 
         // Fprint "pretty-prints" an AST node to output.
@@ -1726,9 +1951,11 @@ unsupported:
         // Note that gofmt uses tabs for indentation but spaces for alignment;
         // use format.Node (package go/format) for output that matches gofmt.
         //
-        public static error Fprint(io.Writer output, ref token.FileSet fset, object node)
+        public static error Fprint(io.Writer output, ptr<token.FileSet> _addr_fset, object node)
         {
-            return error.As((ref new Config(Tabwidth:8)).Fprint(output, fset, node));
+            ref token.FileSet fset = ref _addr_fset.val;
+
+            return error.As((addr(new Config(Tabwidth:8))).Fprint(output, fset, node)!)!;
         }
     }
 }}

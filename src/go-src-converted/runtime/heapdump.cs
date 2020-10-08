@@ -9,7 +9,7 @@
 // The format of the dumped file is described at
 // https://golang.org/s/go15heapdump.
 
-// package runtime -- go2cs converted at 2020 August 29 08:17:18 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:51 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\heapdump.go
 using sys = go.runtime.@internal.sys_package;
@@ -19,7 +19,7 @@ using System;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         //go:linkname runtime_debug_WriteHeapDump runtime/debug.WriteHeapDump
         private static void runtime_debug_WriteHeapDump(System.UIntPtr fd)
@@ -32,36 +32,39 @@ namespace go
             });
 
             startTheWorld();
+
         }
 
-        private static readonly long fieldKindEol = 0L;
-        private static readonly long fieldKindPtr = 1L;
-        private static readonly long fieldKindIface = 2L;
-        private static readonly long fieldKindEface = 3L;
-        private static readonly long tagEOF = 0L;
-        private static readonly long tagObject = 1L;
-        private static readonly long tagOtherRoot = 2L;
-        private static readonly long tagType = 3L;
-        private static readonly long tagGoroutine = 4L;
-        private static readonly long tagStackFrame = 5L;
-        private static readonly long tagParams = 6L;
-        private static readonly long tagFinalizer = 7L;
-        private static readonly long tagItab = 8L;
-        private static readonly long tagOSThread = 9L;
-        private static readonly long tagMemStats = 10L;
-        private static readonly long tagQueuedFinalizer = 11L;
-        private static readonly long tagData = 12L;
-        private static readonly long tagBSS = 13L;
-        private static readonly long tagDefer = 14L;
-        private static readonly long tagPanic = 15L;
-        private static readonly long tagMemProf = 16L;
-        private static readonly long tagAllocSample = 17L;
+        private static readonly long fieldKindEol = (long)0L;
+        private static readonly long fieldKindPtr = (long)1L;
+        private static readonly long fieldKindIface = (long)2L;
+        private static readonly long fieldKindEface = (long)3L;
+        private static readonly long tagEOF = (long)0L;
+        private static readonly long tagObject = (long)1L;
+        private static readonly long tagOtherRoot = (long)2L;
+        private static readonly long tagType = (long)3L;
+        private static readonly long tagGoroutine = (long)4L;
+        private static readonly long tagStackFrame = (long)5L;
+        private static readonly long tagParams = (long)6L;
+        private static readonly long tagFinalizer = (long)7L;
+        private static readonly long tagItab = (long)8L;
+        private static readonly long tagOSThread = (long)9L;
+        private static readonly long tagMemStats = (long)10L;
+        private static readonly long tagQueuedFinalizer = (long)11L;
+        private static readonly long tagData = (long)12L;
+        private static readonly long tagBSS = (long)13L;
+        private static readonly long tagDefer = (long)14L;
+        private static readonly long tagPanic = (long)15L;
+        private static readonly long tagMemProf = (long)16L;
+        private static readonly long tagAllocSample = (long)17L;
+
 
         private static System.UIntPtr dumpfd = default; // fd to write the dump to.
         private static slice<byte> tmpbuf = default;
 
         // buffer of pending write data
-        private static readonly long bufSize = 4096L;
+        private static readonly long bufSize = (long)4096L;
+
 
         private static array<byte> buf = new array<byte>(bufSize);
         private static System.UIntPtr nbuf = default;
@@ -70,15 +73,17 @@ namespace go
         {
             if (len == 0L)
             {
-                return;
+                return ;
             }
+
             if (nbuf + len <= bufSize)
             {
-                copy(buf[nbuf..], new ptr<ref array<byte>>(data)[..len]);
+                copy(buf[nbuf..], new ptr<ptr<array<byte>>>(data)[..len]);
                 nbuf += len;
-                return;
+                return ;
             }
-            write(dumpfd, @unsafe.Pointer(ref buf), int32(nbuf));
+
+            write(dumpfd, @unsafe.Pointer(_addr_buf), int32(nbuf));
             if (len >= bufSize)
             {
                 write(dumpfd, data, int32(len));
@@ -86,19 +91,20 @@ namespace go
             }
             else
             {
-                copy(buf[..], new ptr<ref array<byte>>(data)[..len]);
+                copy(buf[..], new ptr<ptr<array<byte>>>(data)[..len]);
                 nbuf = len;
             }
+
         }
 
         private static void dwritebyte(byte b)
         {
-            dwrite(@unsafe.Pointer(ref b), 1L);
+            dwrite(@unsafe.Pointer(_addr_b), 1L);
         }
 
         private static void flush()
         {
-            write(dumpfd, @unsafe.Pointer(ref buf), int32(nbuf));
+            write(dumpfd, @unsafe.Pointer(_addr_buf), int32(nbuf));
             nbuf = 0L;
         }
 
@@ -108,12 +114,13 @@ namespace go
         // have been serialized so far, most recently used first.
         // Note: when a bucket overflows we may end up
         // serializing a type more than once. That's ok.
-        private static readonly long typeCacheBuckets = 256L;
-        private static readonly long typeCacheAssoc = 4L;
+        private static readonly long typeCacheBuckets = (long)256L;
+        private static readonly long typeCacheAssoc = (long)4L;
+
 
         private partial struct typeCacheBucket
         {
-            public array<ref _type> t;
+            public array<ptr<_type>> t;
         }
 
         private static array<typeCacheBucket> typecache = new array<typeCacheBucket>(typeCacheBuckets);
@@ -121,7 +128,7 @@ namespace go
         // dump a uint64 in a varint format parseable by encoding/binary
         private static void dumpint(ulong v)
         {
-            array<byte> buf = new array<byte>(10L);
+            ref array<byte> buf = ref heap(new array<byte>(10L), out ptr<array<byte>> _addr_buf);
             long n = default;
             while (v >= 0x80UL)
             {
@@ -132,7 +139,8 @@ namespace go
 
             buf[n] = byte(v);
             n++;
-            dwrite(@unsafe.Pointer(ref buf), uintptr(n));
+            dwrite(@unsafe.Pointer(_addr_buf), uintptr(n));
+
         }
 
         private static void dumpbool(bool b)
@@ -145,6 +153,7 @@ namespace go
             {
                 dumpint(0L);
             }
+
         }
 
         // dump varint uint64 length followed by memory contents
@@ -159,31 +168,35 @@ namespace go
             dumpint(uint64(len(b)));
             if (len(b) > 0L)
             {
-                dwrite(@unsafe.Pointer(ref b[0L]), uintptr(len(b)));
+                dwrite(@unsafe.Pointer(_addr_b[0L]), uintptr(len(b)));
             }
+
         }
 
         private static void dumpstr(@string s)
         {
-            var sp = stringStructOf(ref s);
+            var sp = stringStructOf(_addr_s);
             dumpmemrange(sp.str, uintptr(sp.len));
         }
 
         // dump information for a type
-        private static void dumptype(ref _type t)
+        private static void dumptype(ptr<_type> _addr_t)
         {
+            ref _type t = ref _addr_t.val;
+
             if (t == null)
             {
-                return;
+                return ;
             } 
 
             // If we've definitely serialized the type before,
             // no need to do it again.
-            var b = ref typecache[t.hash & (typeCacheBuckets - 1L)];
+            var b = _addr_typecache[t.hash & (typeCacheBuckets - 1L)];
             if (t == b.t[0L])
             {
-                return;
+                return ;
             }
+
             for (long i = 1L; i < typeCacheAssoc; i++)
             {
                 if (t == b.t[i])
@@ -201,8 +214,10 @@ namespace go
                         j = j__prev2;
                     }
                     b.t[0L] = t;
-                    return;
+                    return ;
+
                 }
+
             } 
 
             // Might not have been dumped yet. Dump it and
@@ -237,10 +252,10 @@ namespace go
                 }
                 else
                 {
-                    var pkgpathstr = t.nameOff(x.pkgpath).name();
-                    var pkgpath = stringStructOf(ref pkgpathstr);
-                    var namestr = t.name();
-                    var name = stringStructOf(ref namestr);
+                    ref var pkgpathstr = ref heap(t.nameOff(x.pkgpath).name(), out ptr<var> _addr_pkgpathstr);
+                    var pkgpath = stringStructOf(_addr_pkgpathstr);
+                    ref var namestr = ref heap(t.name(), out ptr<var> _addr_namestr);
+                    var name = stringStructOf(_addr_namestr);
                     dumpint(uint64(uintptr(pkgpath.len) + 1L + uintptr(name.len)));
                     dwrite(pkgpath.str, uintptr(pkgpath.len));
                     dwritebyte('.');
@@ -248,7 +263,9 @@ namespace go
                 }
 
             }
-            dumpbool(t.kind & kindDirectIface == 0L || t.kind & kindNoPointers == 0L);
+
+            dumpbool(t.kind & kindDirectIface == 0L || t.ptrdata != 0L);
+
         }
 
         // dump an object
@@ -267,8 +284,12 @@ namespace go
             dumpint(uint64(uintptr(to)));
         }
 
-        private static void dumpfinalizer(unsafe.Pointer obj, ref funcval fn, ref _type fint, ref ptrtype ot)
+        private static void dumpfinalizer(unsafe.Pointer obj, ptr<funcval> _addr_fn, ptr<_type> _addr_fint, ptr<ptrtype> _addr_ot)
         {
+            ref funcval fn = ref _addr_fn.val;
+            ref _type fint = ref _addr_fint.val;
+            ref ptrtype ot = ref _addr_ot.val;
+
             dumpint(tagFinalizer);
             dumpint(uint64(uintptr(obj)));
             dumpint(uint64(uintptr(@unsafe.Pointer(fn))));
@@ -287,42 +308,51 @@ namespace go
         }
 
         // dump kinds & offsets of interesting fields in bv
-        private static void dumpbv(ref bitvector cbv, System.UIntPtr offset)
+        private static void dumpbv(ptr<bitvector> _addr_cbv, System.UIntPtr offset)
         {
-            var bv = gobv(cbv.Value);
-            for (var i = uintptr(0L); i < bv.n; i++)
+            ref bitvector cbv = ref _addr_cbv.val;
+
+            for (var i = uintptr(0L); i < uintptr(cbv.n); i++)
             {
-                if (bv.bytedata[i / 8L] >> (int)((i % 8L)) & 1L == 1L)
+                if (cbv.ptrbit(i) == 1L)
                 {
                     dumpint(fieldKindPtr);
                     dumpint(uint64(offset + i * sys.PtrSize));
                 }
+
             }
+
 
         }
 
-        private static bool dumpframe(ref stkframe s, unsafe.Pointer arg)
+        private static bool dumpframe(ptr<stkframe> _addr_s, unsafe.Pointer arg)
         {
-            var child = (childInfo.Value)(arg);
+            ref stkframe s = ref _addr_s.val;
+
+            var child = (childInfo.val)(arg);
             var f = s.fn; 
 
             // Figure out what we can about our stack map
             var pc = s.pc;
+            var pcdata = int32(-1L); // Use the entry map at function entry
             if (pc != f.entry)
             {
                 pc--;
+                pcdata = pcdatavalue(f, _PCDATA_StackMapIndex, pc, null);
             }
-            var pcdata = pcdatavalue(f, _PCDATA_StackMapIndex, pc, null);
+
             if (pcdata == -1L)
             { 
                 // We do not have a valid pcdata value but there might be a
                 // stackmap for this function. It is likely that we are looking
                 // at the function prologue, assume so and hope for the best.
                 pcdata = 0L;
-            }
-            var stkmap = (stackmap.Value)(funcdata(f, _FUNCDATA_LocalsPointerMaps));
 
-            bitvector bv = default;
+            }
+
+            var stkmap = (stackmap.val)(funcdata(f, _FUNCDATA_LocalsPointerMaps));
+
+            ref bitvector bv = ref heap(out ptr<bitvector> _addr_bv);
             if (stkmap != null && stkmap.n > 0L)
             {
                 bv = stackmapdata(stkmap, pcdata);
@@ -346,12 +376,13 @@ namespace go
             {
                 name = "unknown function";
             }
+
             dumpstr(name); 
 
             // Dump fields in the outargs section
             if (child.args.n >= 0L)
             {
-                dumpbv(ref child.args, child.argoff);
+                dumpbv(_addr_child.args, child.argoff);
             }
             else
             { 
@@ -371,6 +402,7 @@ namespace go
 
                     off = off__prev1;
                 }
+
             } 
 
             // Dump fields in the local vars section
@@ -392,6 +424,7 @@ namespace go
 
                     off = off__prev1;
                 }
+
             }
             else if (stkmap.n < 0L)
             { 
@@ -412,21 +445,24 @@ namespace go
 
                     off = off__prev1;
                 }
+
             }
             else if (stkmap.n > 0L)
             { 
                 // Locals bitmap information, scan just the pointers in
                 // locals.
-                dumpbv(ref bv, s.varp - uintptr(bv.n) * sys.PtrSize - s.sp);
+                dumpbv(_addr_bv, s.varp - uintptr(bv.n) * sys.PtrSize - s.sp);
+
             }
+
             dumpint(fieldKindEol); 
 
             // Record arg info for parent.
             child.argoff = s.argp - s.fp;
             child.arglen = s.arglen;
-            child.sp = (uint8.Value)(@unsafe.Pointer(s.sp));
+            child.sp = (uint8.val)(@unsafe.Pointer(s.sp));
             child.depth++;
-            stkmap = (stackmap.Value)(funcdata(f, _FUNCDATA_ArgsPointerMaps));
+            stkmap = (stackmap.val)(funcdata(f, _FUNCDATA_ArgsPointerMaps));
             if (stkmap != null)
             {
                 child.args = stackmapdata(stkmap, pcdata);
@@ -435,11 +471,15 @@ namespace go
             {
                 child.args.n = -1L;
             }
+
             return true;
+
         }
 
-        private static void dumpgoroutine(ref g gp)
+        private static void dumpgoroutine(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             System.UIntPtr sp = default;            System.UIntPtr pc = default;            System.UIntPtr lr = default;
 
             if (gp.syscallsp != 0L)
@@ -454,28 +494,29 @@ namespace go
                 pc = gp.sched.pc;
                 lr = gp.sched.lr;
             }
+
             dumpint(tagGoroutine);
             dumpint(uint64(uintptr(@unsafe.Pointer(gp))));
             dumpint(uint64(sp));
             dumpint(uint64(gp.goid));
             dumpint(uint64(gp.gopc));
             dumpint(uint64(readgstatus(gp)));
-            dumpbool(isSystemGoroutine(gp));
+            dumpbool(isSystemGoroutine(gp, false));
             dumpbool(false); // isbackground
             dumpint(uint64(gp.waitsince));
-            dumpstr(gp.waitreason);
+            dumpstr(gp.waitreason.String());
             dumpint(uint64(uintptr(gp.sched.ctxt)));
             dumpint(uint64(uintptr(@unsafe.Pointer(gp.m))));
             dumpint(uint64(uintptr(@unsafe.Pointer(gp._defer))));
             dumpint(uint64(uintptr(@unsafe.Pointer(gp._panic)))); 
 
             // dump stack
-            childInfo child = default;
+            ref childInfo child = ref heap(out ptr<childInfo> _addr_child);
             child.args.n = -1L;
             child.arglen = 0L;
             child.sp = null;
             child.depth = 0L;
-            gentraceback(pc, sp, lr, gp, 0L, null, 0x7fffffffUL, dumpframe, noescape(@unsafe.Pointer(ref child)), 0L); 
+            gentraceback(pc, sp, lr, gp, 0L, null, 0x7fffffffUL, dumpframe, noescape(@unsafe.Pointer(_addr_child)), 0L); 
 
             // dump defer & panic records
             {
@@ -489,9 +530,19 @@ namespace go
                     dumpint(uint64(d.sp));
                     dumpint(uint64(d.pc));
                     dumpint(uint64(uintptr(@unsafe.Pointer(d.fn))));
-                    dumpint(uint64(uintptr(@unsafe.Pointer(d.fn.fn))));
-                    dumpint(uint64(uintptr(@unsafe.Pointer(d.link))));
+                    if (d.fn == null)
+                    { 
+                        // d.fn can be nil for open-coded defers
+                        dumpint(uint64(0L));
                     d = d.link;
+                    }
+                    else
+                    {
+                        dumpint(uint64(uintptr(@unsafe.Pointer(d.fn.fn))));
+                    }
+
+                    dumpint(uint64(uintptr(@unsafe.Pointer(d.link))));
+
                 }
 
             }
@@ -503,7 +554,7 @@ namespace go
                     dumpint(tagPanic);
                     dumpint(uint64(uintptr(@unsafe.Pointer(p))));
                     dumpint(uint64(uintptr(@unsafe.Pointer(gp))));
-                    var eface = efaceOf(ref p.arg);
+                    var eface = efaceOf(_addr_p.arg);
                     dumpint(uint64(uintptr(@unsafe.Pointer(eface._type))));
                     dumpint(uint64(uintptr(@unsafe.Pointer(eface.data))));
                     dumpint(0L); // was p->defer, no longer recorded
@@ -512,6 +563,7 @@ namespace go
                 }
 
             }
+
         }
 
         private static void dumpgs()
@@ -523,16 +575,22 @@ namespace go
                 var status = readgstatus(gp); // The world is stopped so gp will not be in a scan state.
 
                 if (status == _Gdead)                 else if (status == _Grunnable || status == _Gsyscall || status == _Gwaiting) 
-                    dumpgoroutine(gp);
+                    dumpgoroutine(_addr_gp);
                 else 
                     print("runtime: unexpected G.status ", hex(status), "\n");
                     throw("dumpgs in STW - bad status");
-                            }
+                
+            }
+
 
         }
 
-        private static void finq_callback(ref funcval fn, unsafe.Pointer obj, System.UIntPtr nret, ref _type fint, ref ptrtype ot)
+        private static void finq_callback(ptr<funcval> _addr_fn, unsafe.Pointer obj, System.UIntPtr nret, ptr<_type> _addr_fint, ptr<ptrtype> _addr_ot)
         {
+            ref funcval fn = ref _addr_fn.val;
+            ref _type fint = ref _addr_fint.val;
+            ref ptrtype ot = ref _addr_ot.val;
+
             dumpint(tagQueuedFinalizer);
             dumpint(uint64(uintptr(obj)));
             dumpint(uint64(uintptr(@unsafe.Pointer(fn))));
@@ -556,10 +614,10 @@ namespace go
             dumpmemrange(@unsafe.Pointer(firstmoduledata.bss), firstmoduledata.ebss - firstmoduledata.bss);
             dumpfields(firstmoduledata.gcbssmask); 
 
-            // MSpan.types
+            // mspan.types
             foreach (var (_, s) in mheap_.allspans)
             {
-                if (s.state == _MSpanInUse)
+                if (s.state.get() == mSpanInUse)
                 { 
                     // Finalizers
                     {
@@ -572,17 +630,22 @@ namespace go
                                 continue;
                             sp = sp.next;
                             }
-                            var spf = (specialfinalizer.Value)(@unsafe.Pointer(sp));
+
+                            var spf = (specialfinalizer.val)(@unsafe.Pointer(sp));
                             var p = @unsafe.Pointer(s.@base() + uintptr(spf.special.offset));
-                            dumpfinalizer(p, spf.fn, spf.fint, spf.ot);
+                            dumpfinalizer(p, _addr_spf.fn, _addr_spf.fint, _addr_spf.ot);
+
                         }
 
                     }
+
                 }
+
             } 
 
             // Finalizer queue
             iterate_finq(finq_callback);
+
         }
 
         // Bit vector of free marks.
@@ -593,10 +656,11 @@ namespace go
         {
             foreach (var (_, s) in mheap_.allspans)
             {
-                if (s.state != _MSpanInUse)
+                if (s.state.get() != mSpanInUse)
                 {
                     continue;
                 }
+
                 var p = s.@base();
                 var size = s.elemsize;
                 var n = (s.npages << (int)(_PageShift)) / size;
@@ -604,12 +668,14 @@ namespace go
                 {
                     throw("freemark array doesn't have enough entries");
                 }
+
                 for (var freeIndex = uintptr(0L); freeIndex < s.nelems; freeIndex++)
                 {
                     if (s.isFree(freeIndex))
                     {
                         freemark[freeIndex] = true;
                     }
+
                 }
 
 
@@ -625,18 +691,22 @@ namespace go
                         j = j + 1L;
                     p = p + size;
                         }
+
                         dumpobj(@unsafe.Pointer(p), size, makeheapobjbv(p, size));
+
                     }
 
                 }
+
             }
+
         }
 
         private static void dumpparams()
         {
             dumpint(tagParams);
-            var x = uintptr(1L);
-            if (@unsafe.Pointer(ref x).Value == 1L)
+            ref var x = ref heap(uintptr(1L), out ptr<var> _addr_x);
+            if (new ptr<ptr<ptr<byte>>>(@unsafe.Pointer(_addr_x)) == 1L)
             {
                 dumpbool(false); // little-endian ptrs
             }
@@ -644,18 +714,52 @@ namespace go
             {
                 dumpbool(true); // big-endian ptrs
             }
+
             dumpint(sys.PtrSize);
-            dumpint(uint64(mheap_.arena_start));
-            dumpint(uint64(mheap_.arena_used));
+            System.UIntPtr arenaStart = default;            System.UIntPtr arenaEnd = default;
+
+            foreach (var (i1) in mheap_.arenas)
+            {
+                if (mheap_.arenas[i1] == null)
+                {
+                    continue;
+                }
+
+                foreach (var (i, ha) in mheap_.arenas[i1])
+                {
+                    if (ha == null)
+                    {
+                        continue;
+                    }
+
+                    var @base = arenaBase(arenaIdx(i1) << (int)(arenaL1Shift) | arenaIdx(i));
+                    if (arenaStart == 0L || base < arenaStart)
+                    {
+                        arenaStart = base;
+                    }
+
+                    if (base + heapArenaBytes > arenaEnd)
+                    {
+                        arenaEnd = base + heapArenaBytes;
+                    }
+
+                }
+
+            }
+            dumpint(uint64(arenaStart));
+            dumpint(uint64(arenaEnd));
             dumpstr(sys.GOARCH);
             dumpstr(sys.Goexperiment);
             dumpint(uint64(ncpu));
+
         }
 
-        private static void itab_callback(ref itab tab)
+        private static void itab_callback(ptr<itab> _addr_tab)
         {
+            ref itab tab = ref _addr_tab.val;
+
             var t = tab._type;
-            dumptype(t);
+            dumptype(_addr_t);
             dumpint(tagItab);
             dumpint(uint64(uintptr(@unsafe.Pointer(tab))));
             dumpint(uint64(uintptr(@unsafe.Pointer(t))));
@@ -681,6 +785,7 @@ namespace go
                 }
 
             }
+
         }
 
         private static void dumpmemstats()
@@ -716,11 +821,15 @@ namespace go
             }
 
             dumpint(uint64(memstats.numgc));
+
         }
 
-        private static void dumpmemprof_callback(ref bucket b, System.UIntPtr nstk, ref System.UIntPtr pstk, System.UIntPtr size, System.UIntPtr allocs, System.UIntPtr frees)
+        private static void dumpmemprof_callback(ptr<bucket> _addr_b, System.UIntPtr nstk, ptr<System.UIntPtr> _addr_pstk, System.UIntPtr size, System.UIntPtr allocs, System.UIntPtr frees)
         {
-            ref array<System.UIntPtr> stk = new ptr<ref array<System.UIntPtr>>(@unsafe.Pointer(pstk));
+            ref bucket b = ref _addr_b.val;
+            ref System.UIntPtr pstk = ref _addr_pstk.val;
+
+            ptr<array<System.UIntPtr>> stk = new ptr<ptr<array<System.UIntPtr>>>(@unsafe.Pointer(pstk));
             dumpint(tagMemProf);
             dumpint(uint64(uintptr(@unsafe.Pointer(b))));
             dumpint(uint64(size));
@@ -749,6 +858,7 @@ namespace go
                             pc >>= 4L;
                         }
 
+
                     }
                 else
                     n--;
@@ -760,20 +870,25 @@ namespace go
                     dumpslice(buf[n..]);
                     dumpstr("?");
                     dumpint(0L);
+
                 }                {
                     dumpstr(funcname(f));
                     if (i > 0L && pc > f.entry)
                     {
                         pc--;
                     }
+
                     var (file, line) = funcline(f, pc);
                     dumpstr(file);
                     dumpint(uint64(line));
+
                 }
+
             }
 
             dumpint(uint64(allocs));
             dumpint(uint64(frees));
+
         }
 
         private static void dumpmemprof()
@@ -781,10 +896,11 @@ namespace go
             iterate_memprof(dumpmemprof_callback);
             foreach (var (_, s) in mheap_.allspans)
             {
-                if (s.state != _MSpanInUse)
+                if (s.state.get() != mSpanInUse)
                 {
                     continue;
                 }
+
                 {
                     var sp = s.specials;
 
@@ -795,15 +911,19 @@ namespace go
                             continue;
                         sp = sp.next;
                         }
-                        var spp = (specialprofile.Value)(@unsafe.Pointer(sp));
+
+                        var spp = (specialprofile.val)(@unsafe.Pointer(sp));
                         var p = s.@base() + uintptr(spp.special.offset);
                         dumpint(tagAllocSample);
                         dumpint(uint64(p));
                         dumpint(uint64(uintptr(@unsafe.Pointer(spp.b))));
+
                     }
 
                 }
+
             }
+
         }
 
         private static slice<byte> dumphdr = (slice<byte>)"go1.7 heap dump\n";
@@ -813,13 +933,14 @@ namespace go
             // make sure we're done sweeping
             foreach (var (_, s) in mheap_.allspans)
             {
-                if (s.state == _MSpanInUse)
+                if (s.state.get() == mSpanInUse)
                 {
                     s.ensureSwept();
                 }
+
             }
-            memclrNoHeapPointers(@unsafe.Pointer(ref typecache), @unsafe.Sizeof(typecache));
-            dwrite(@unsafe.Pointer(ref dumphdr[0L]), uintptr(len(dumphdr)));
+            memclrNoHeapPointers(@unsafe.Pointer(_addr_typecache), @unsafe.Sizeof(typecache));
+            dwrite(@unsafe.Pointer(_addr_dumphdr[0L]), uintptr(len(dumphdr)));
             dumpparams();
             dumpitabs();
             dumpobjs();
@@ -830,16 +951,17 @@ namespace go
             dumpmemprof();
             dumpint(tagEOF);
             flush();
+
         }
 
         private static void writeheapdump_m(System.UIntPtr fd)
         {
             var _g_ = getg();
             casgstatus(_g_.m.curg, _Grunning, _Gwaiting);
-            _g_.waitreason = "dumping heap"; 
+            _g_.waitreason = waitReasonDumpingHeap; 
 
             // Update stats so we can dump them.
-            // As a side effect, flushes all the MCaches so the MSpan.freelist
+            // As a side effect, flushes all the mcaches so the mspan.freelist
             // lists contain all the free objects.
             updatememstats(); 
 
@@ -853,16 +975,18 @@ namespace go
             dumpfd = 0L;
             if (tmpbuf != null)
             {
-                sysFree(@unsafe.Pointer(ref tmpbuf[0L]), uintptr(len(tmpbuf)), ref memstats.other_sys);
+                sysFree(@unsafe.Pointer(_addr_tmpbuf[0L]), uintptr(len(tmpbuf)), _addr_memstats.other_sys);
                 tmpbuf = null;
             }
+
             casgstatus(_g_.m.curg, _Gwaiting, _Grunning);
+
         }
 
         // dumpint() the kind & offset of each field in an object.
         private static void dumpfields(bitvector bv)
         {
-            dumpbv(ref bv, 0L);
+            dumpbv(_addr_bv, 0L);
             dumpint(fieldKindEol);
         }
 
@@ -874,15 +998,18 @@ namespace go
             {
                 if (tmpbuf != null)
                 {
-                    sysFree(@unsafe.Pointer(ref tmpbuf[0L]), uintptr(len(tmpbuf)), ref memstats.other_sys);
+                    sysFree(@unsafe.Pointer(_addr_tmpbuf[0L]), uintptr(len(tmpbuf)), _addr_memstats.other_sys);
                 }
+
                 var n = nptr / 8L + 1L;
-                var p = sysAlloc(n, ref memstats.other_sys);
+                var p = sysAlloc(n, _addr_memstats.other_sys);
                 if (p == null)
                 {
                     throw("heapdump: out of memory");
                 }
-                tmpbuf = new ptr<ref array<byte>>(p)[..n];
+
+                tmpbuf = new ptr<ptr<array<byte>>>(p)[..n];
+
             } 
             // Convert heap bitmap to pointer bitmap.
             {
@@ -905,14 +1032,18 @@ namespace go
                     break; // end of object
                 i++;
                 }
+
                 if (hbits.isPointer())
                 {
                     tmpbuf[i / 8L] |= 1L << (int)((i % 8L));
                 }
+
                 hbits = hbits.next();
+
             }
 
             return new bitvector(int32(i),&tmpbuf[0]);
+
         }
     }
 }

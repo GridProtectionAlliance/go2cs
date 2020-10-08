@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:07:52 UTC
+//     Generated on 2020 October 08 04:44:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace ppc64
                 this.Args = default;
             }
 
-            public instFormat(Op Op = default, uint Mask = default, uint Value = default, uint DontCare = default, array<ref argField> Args = default)
+            public instFormat(Op Op = default, uint Mask = default, uint Value = default, uint DontCare = default, array<ptr<argField>> Args = default)
             {
                 this.Op = Op;
                 this.Mask = Mask;

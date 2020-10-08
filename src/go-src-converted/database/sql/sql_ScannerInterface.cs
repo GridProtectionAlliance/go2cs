@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:11:00 UTC
+//     Generated on 2020 October 08 04:58:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using io = go.io_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -60,7 +61,7 @@ namespace database
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -74,10 +75,10 @@ namespace database
                 m_target_is_ptr = true;
             }
 
-            private delegate error ScanByRef(ref T value, object src);
+            private delegate error ScanByPtr(ptr<T> value, object src);
             private delegate error ScanByVal(T value, object src);
 
-            private static readonly ScanByRef s_ScanByRef;
+            private static readonly ScanByPtr s_ScanByPtr;
             private static readonly ScanByVal s_ScanByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,11 +87,12 @@ namespace database
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ScanByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ScanByPtr is null || !m_target_is_ptr)
                     return s_ScanByVal!(target, src);
 
-                return s_ScanByRef(ref target, src);
+                return s_ScanByPtr(m_target_ptr, src);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -99,23 +101,20 @@ namespace database
             static Scanner()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Scan");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Scan");
 
                 if (!(extensionMethod is null))
-                    s_ScanByRef = extensionMethod.CreateStaticDelegate(typeof(ScanByRef)) as ScanByRef;
+                    s_ScanByPtr = extensionMethod.CreateStaticDelegate(typeof(ScanByPtr)) as ScanByPtr;
 
-                if (s_ScanByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Scan");
+                extensionMethod = targetType.GetExtensionMethod("Scan");
 
-                    if (!(extensionMethod is null))
-                        s_ScanByVal = extensionMethod.CreateStaticDelegate(typeof(ScanByVal)) as ScanByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ScanByVal = extensionMethod.CreateStaticDelegate(typeof(ScanByVal)) as ScanByVal;
 
-                if (s_ScanByRef is null && s_ScanByVal is null)
+                if (s_ScanByPtr is null && s_ScanByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Scanner.Scan method", new Exception("Scan"));
             }
 

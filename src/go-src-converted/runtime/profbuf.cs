@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:41 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:45 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\profbuf.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -114,22 +114,28 @@ namespace go
         {
         }
 
-        private static readonly profIndex profReaderSleeping = 1L << (int)(32L); // reader is sleeping and must be woken up
-        private static readonly profIndex profWriteExtra = 1L << (int)(33L); // overflow or eof waiting
+        private static readonly profIndex profReaderSleeping = (profIndex)1L << (int)(32L); // reader is sleeping and must be woken up
+        private static readonly profIndex profWriteExtra = (profIndex)1L << (int)(33L); // overflow or eof waiting
 
-        private static profIndex load(this ref profAtomic x)
+        private static profIndex load(this ptr<profAtomic> _addr_x)
         {
-            return profIndex(atomic.Load64((uint64.Value)(x)));
+            ref profAtomic x = ref _addr_x.val;
+
+            return profIndex(atomic.Load64((uint64.val)(x)));
         }
 
-        private static void store(this ref profAtomic x, profIndex @new)
+        private static void store(this ptr<profAtomic> _addr_x, profIndex @new)
         {
-            atomic.Store64((uint64.Value)(x), uint64(new));
+            ref profAtomic x = ref _addr_x.val;
+
+            atomic.Store64((uint64.val)(x), uint64(new));
         }
 
-        private static bool cas(this ref profAtomic x, profIndex old, profIndex @new)
+        private static bool cas(this ptr<profAtomic> _addr_x, profIndex old, profIndex @new)
         {
-            return atomic.Cas64((uint64.Value)(x), uint64(old), uint64(new));
+            ref profAtomic x = ref _addr_x.val;
+
+            return atomic.Cas64((uint64.val)(x), uint64(old), uint64(new));
         }
 
         private static uint dataCount(this profIndex x)
@@ -151,6 +157,7 @@ namespace go
         { 
             // x-y is 32-bit signed or 30-bit signed; sign-extend to 32 bits and convert to int.
             return int(int32(x - y) << (int)(2L) >> (int)(2L));
+
         }
 
         // addCountsAndClearFlags returns the packed form of "x + (data, tag) - all flags".
@@ -160,18 +167,24 @@ namespace go
         }
 
         // hasOverflow reports whether b has any overflow records pending.
-        private static bool hasOverflow(this ref profBuf b)
+        private static bool hasOverflow(this ptr<profBuf> _addr_b)
         {
-            return uint32(atomic.Load64(ref b.overflow)) > 0L;
+            ref profBuf b = ref _addr_b.val;
+
+            return uint32(atomic.Load64(_addr_b.overflow)) > 0L;
         }
 
         // takeOverflow consumes the pending overflow records, returning the overflow count
         // and the time of the first overflow.
         // When called by the reader, it is racing against incrementOverflow.
-        private static (uint, ulong) takeOverflow(this ref profBuf b)
+        private static (uint, ulong) takeOverflow(this ptr<profBuf> _addr_b)
         {
-            var overflow = atomic.Load64(ref b.overflow);
-            time = atomic.Load64(ref b.overflowTime);
+            uint count = default;
+            ulong time = default;
+            ref profBuf b = ref _addr_b.val;
+
+            var overflow = atomic.Load64(_addr_b.overflow);
+            time = atomic.Load64(_addr_b.overflowTime);
             while (true)
             {
                 count = uint32(overflow);
@@ -181,33 +194,39 @@ namespace go
                     break;
                 } 
                 // Increment generation, clear overflow count in low bits.
-                if (atomic.Cas64(ref b.overflow, overflow, ((overflow >> (int)(32L)) + 1L) << (int)(32L)))
+                if (atomic.Cas64(_addr_b.overflow, overflow, ((overflow >> (int)(32L)) + 1L) << (int)(32L)))
                 {
                     break;
                 }
-                overflow = atomic.Load64(ref b.overflow);
-                time = atomic.Load64(ref b.overflowTime);
+
+                overflow = atomic.Load64(_addr_b.overflow);
+                time = atomic.Load64(_addr_b.overflowTime);
+
             }
 
             return (uint32(overflow), time);
+
         }
 
         // incrementOverflow records a single overflow at time now.
         // It is racing against a possible takeOverflow in the reader.
-        private static void incrementOverflow(this ref profBuf b, long now)
+        private static void incrementOverflow(this ptr<profBuf> _addr_b, long now)
         {
+            ref profBuf b = ref _addr_b.val;
+
             while (true)
             {
-                var overflow = atomic.Load64(ref b.overflow); 
+                var overflow = atomic.Load64(_addr_b.overflow); 
 
                 // Once we see b.overflow reach 0, it's stable: no one else is changing it underfoot.
                 // We need to set overflowTime if we're incrementing b.overflow from 0.
                 if (uint32(overflow) == 0L)
                 { 
                     // Store overflowTime first so it's always available when overflow != 0.
-                    atomic.Store64(ref b.overflowTime, uint64(now));
-                    atomic.Store64(ref b.overflow, (((overflow >> (int)(32L)) + 1L) << (int)(32L)) + 1L);
+                    atomic.Store64(_addr_b.overflowTime, uint64(now));
+                    atomic.Store64(_addr_b.overflow, (((overflow >> (int)(32L)) + 1L) << (int)(32L)) + 1L);
                     break;
+
                 } 
                 // Otherwise we're racing to increment against reader
                 // who wants to set b.overflow to 0.
@@ -217,17 +236,20 @@ namespace go
                 {
                     break;
                 }
-                if (atomic.Cas64(ref b.overflow, overflow, overflow + 1L))
+
+                if (atomic.Cas64(_addr_b.overflow, overflow, overflow + 1L))
                 {
                     break;
                 }
+
             }
+
 
         }
 
         // newProfBuf returns a new profiling buffer with room for
         // a header of hdrsize words and a buffer of at least bufwords words.
-        private static ref profBuf newProfBuf(long hdrsize, long bufwords, long tags)
+        private static ptr<profBuf> newProfBuf(long hdrsize, long bufwords, long tags)
         {
             {
                 long min = 2L + hdrsize + 1L;
@@ -252,6 +274,7 @@ namespace go
             {
                 throw("newProfBuf: buffer too large");
             }
+
             long i = default;
             i = 1L;
 
@@ -275,13 +298,16 @@ namespace go
             b.data = make_slice<ulong>(bufwords);
             b.tags = make_slice<unsafe.Pointer>(tags);
             b.overflowBuf = make_slice<ulong>(2L + b.hdrsize + 1L);
-            return b;
+            return _addr_b!;
+
         }
 
         // canWriteRecord reports whether the buffer has room
         // for a single contiguous record with a stack of length nstk.
-        private static bool canWriteRecord(this ref profBuf b, long nstk)
+        private static bool canWriteRecord(this ptr<profBuf> _addr_b, long nstk)
         {
+            ref profBuf b = ref _addr_b.val;
+
             var br = b.r.load();
             var bw = b.w.load(); 
 
@@ -300,8 +326,11 @@ namespace go
                 // Can't fit in trailing fragment of slice.
                 // Skip over that and start over at beginning of slice.
                 nd -= len(b.data) - i;
+
             }
+
             return nd >= want;
+
         }
 
         // canWriteTwoRecords reports whether the buffer has room
@@ -309,8 +338,10 @@ namespace go
         // Each record must be contiguous on its own, but the two
         // records need not be contiguous (one can be at the end of the buffer
         // and the other can wrap around and start at the beginning of the buffer).
-        private static bool canWriteTwoRecords(this ref profBuf b, long nstk1, long nstk2)
+        private static bool canWriteTwoRecords(this ptr<profBuf> _addr_b, long nstk1, long nstk2)
         {
+            ref profBuf b = ref _addr_b.val;
+
             var br = b.r.load();
             var bw = b.w.load(); 
 
@@ -332,7 +363,9 @@ namespace go
                 // Skip over that and start over at beginning of slice.
                 nd -= len(b.data) - i;
                 i = 0L;
+
             }
+
             i += want;
             nd -= want; 
 
@@ -344,8 +377,11 @@ namespace go
                 // Skip over that and start over at beginning of slice.
                 nd -= len(b.data) - i;
                 i = 0L;
+
             }
+
             return nd >= want;
+
         }
 
         // write writes an entry to the profiling buffer b.
@@ -353,16 +389,21 @@ namespace go
         // length b.hdrsize, followed by a variable-sized stack
         // and a single tag pointer *tagPtr (or nil if tagPtr is nil).
         // No write barriers allowed because this might be called from a signal handler.
-        private static void write(this ref profBuf b, ref unsafe.Pointer tagPtr, long now, slice<ulong> hdr, slice<System.UIntPtr> stk)
+        private static void write(this ptr<profBuf> _addr_b, ptr<unsafe.Pointer> _addr_tagPtr, long now, slice<ulong> hdr, slice<System.UIntPtr> stk)
         {
+            ref profBuf b = ref _addr_b.val;
+            ref unsafe.Pointer tagPtr = ref _addr_tagPtr.val;
+
             if (b == null)
             {
-                return;
+                return ;
             }
+
             if (len(hdr) > int(b.hdrsize))
             {
                 throw("misuse of profBuf.write");
             }
+
             {
                 var hasOverflow = b.hasOverflow();
 
@@ -378,6 +419,7 @@ namespace go
                         stk[0L] = uintptr(count);
                         b.write(null, int64(time), null, stk[..]);
                     }
+
                 }
                 else if (hasOverflow || !b.canWriteRecord(len(stk)))
                 { 
@@ -385,7 +427,8 @@ namespace go
                     // or no overflow but also no room for new record.
                     b.incrementOverflow(now);
                     b.wakeupExtra();
-                    return;
+                    return ;
+
                 } 
 
                 // There's room: write the record.
@@ -415,9 +458,10 @@ namespace go
             var wt = int(bw.tagCount() % uint32(len(b.tags)));
             if (tagPtr != null)
             {
-                (uintptr.Value)(@unsafe.Pointer(ref b.tags[wt])).Value;
+                (uintptr.val)(@unsafe.Pointer(_addr_b.tags[wt])).val;
 
-                uintptr(@unsafe.Pointer(tagPtr.Value));
+                uintptr(@unsafe.Pointer(tagPtr));
+
             } 
 
             // Main record.
@@ -433,6 +477,7 @@ namespace go
                 nd -= skip;
                 wd = 0L;
             }
+
             var data = b.data[wd..];
             data[0L] = uint64(2L + b.hdrsize + uintptr(len(stk))); // length
             data[1L] = uint64(now); // time stamp
@@ -470,30 +515,39 @@ namespace go
                 // If there was a reader, wake it up.
                 if (old & profReaderSleeping != 0L)
                 {
-                    notewakeup(ref b.wait);
+                    notewakeup(_addr_b.wait);
                 }
+
                 break;
+
             }
+
 
         }
 
         // close signals that there will be no more writes on the buffer.
         // Once all the data has been read from the buffer, reads will return eof=true.
-        private static void close(this ref profBuf b)
+        private static void close(this ptr<profBuf> _addr_b)
         {
-            if (atomic.Load(ref b.eof) > 0L)
+            ref profBuf b = ref _addr_b.val;
+
+            if (atomic.Load(_addr_b.eof) > 0L)
             {
                 throw("runtime: profBuf already closed");
             }
-            atomic.Store(ref b.eof, 1L);
+
+            atomic.Store(_addr_b.eof, 1L);
             b.wakeupExtra();
+
         }
 
         // wakeupExtra must be called after setting one of the "extra"
         // atomic fields b.overflow or b.eof.
         // It records the change in b.w and wakes up the reader if needed.
-        private static void wakeupExtra(this ref profBuf b)
+        private static void wakeupExtra(this ptr<profBuf> _addr_b)
         {
+            ref profBuf b = ref _addr_b.val;
+
             while (true)
             {
                 var old = b.w.load();
@@ -502,12 +556,16 @@ namespace go
                 {
                     continue;
                 }
+
                 if (old & profReaderSleeping != 0L)
                 {
-                    notewakeup(ref b.wait);
+                    notewakeup(_addr_b.wait);
                 }
+
                 break;
+
             }
+
 
         }
 
@@ -516,17 +574,24 @@ namespace go
         {
         }
 
-        private static readonly profBufReadMode profBufBlocking = iota;
-        private static readonly var profBufNonBlocking = 0;
+        private static readonly profBufReadMode profBufBlocking = (profBufReadMode)iota;
+        private static readonly var profBufNonBlocking = (var)0;
+
 
         private static array<unsafe.Pointer> overflowTag = new array<unsafe.Pointer>(1L); // always nil
 
-        private static (slice<ulong>, slice<unsafe.Pointer>, bool) read(this ref profBuf b, profBufReadMode mode)
+        private static (slice<ulong>, slice<unsafe.Pointer>, bool) read(this ptr<profBuf> _addr_b, profBufReadMode mode)
         {
+            slice<ulong> data = default;
+            slice<unsafe.Pointer> tags = default;
+            bool eof = default;
+            ref profBuf b = ref _addr_b.val;
+
             if (b == null)
             {
                 return (null, null, true);
             }
+
             var br = b.rNext; 
 
             // Commit previous read, returning that part of the ring to the writer.
@@ -551,13 +616,16 @@ namespace go
                         {
                             ti = 0L;
                         }
+
                     }
 
 
                     i = i__prev1;
                 }
                 b.r.store(br);
+
             }
+
 Read:
             var bw = b.w.load();
             var numData = countSub(bw.dataCount(), br.dataCount());
@@ -572,6 +640,7 @@ Read:
                     { 
                         // Lost the race, go around again.
                         goto Read;
+
                     } 
                     // Won the race, report overflow.
                     var dst = b.overflowBuf;
@@ -590,12 +659,16 @@ Read:
                     }
                     dst[2L + b.hdrsize] = uint64(count);
                     return (dst[..2L + b.hdrsize + 1L], overflowTag[..1L], false);
+
                 }
-                if (atomic.Load(ref b.eof) > 0L)
+
+                if (atomic.Load(_addr_b.eof) > 0L)
                 { 
                     // No data, no overflow, EOF set: done.
                     return (null, null, true);
+
                 }
+
                 if (bw & profWriteExtra != 0L)
                 { 
                     // Writer claims to have published extra information (overflow or eof).
@@ -604,6 +677,7 @@ Read:
                     // so we still need to check again.
                     b.w.cas(bw, bw & ~profWriteExtra);
                     goto Read;
+
                 } 
 
                 // Nothing to read right now.
@@ -612,15 +686,18 @@ Read:
                 {
                     return (null, null, false);
                 }
+
                 if (!b.w.cas(bw, bw | profReaderSleeping))
                 {
                     goto Read;
                 } 
                 // Committed to sleeping.
-                notetsleepg(ref b.wait, -1L);
-                noteclear(ref b.wait);
+                notetsleepg(_addr_b.wait, -1L);
+                noteclear(_addr_b.wait);
                 goto Read;
+
             }
+
             data = b.data[br.dataCount() % uint32(len(b.data))..];
             if (len(data) > numData)
             {
@@ -630,6 +707,7 @@ Read:
             {
                 numData -= len(data); // available in case of wraparound
             }
+
             long skip = 0L;
             if (data[0L] == 0L)
             { 
@@ -640,12 +718,15 @@ Read:
                 {
                     data = data[..numData];
                 }
+
             }
+
             ntag = countSub(bw.tagCount(), br.tagCount());
             if (ntag == 0L)
             {
                 throw("runtime: malformed profBuf buffer - tag and data out of sync");
             }
+
             tags = b.tags[br.tagCount() % uint32(len(b.tags))..];
             if (len(tags) > ntag)
             {
@@ -664,8 +745,10 @@ Read:
                 {
                     throw("runtime: malformed profBuf buffer - invalid size");
                 }
+
                 di += int(data[di]);
                 ti++;
+
             } 
 
             // Remember how much we returned, to commit read on next call.
@@ -685,9 +768,12 @@ Read:
                 // goroutine and uses atomics to write the updated queue indices,
                 // and then the read-out from the signal handler buffer uses
                 // atomics to read those queue indices.
-                raceacquire(@unsafe.Pointer(ref labelSync));
+                raceacquire(@unsafe.Pointer(_addr_labelSync));
+
             }
+
             return (data[..di], tags[..ti], false);
+
         }
     }
 }

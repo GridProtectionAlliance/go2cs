@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:25:56 UTC
+//     Generated on 2020 October 08 04:28:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using static go.builtin;
+using bits = go.math.bits_package;
 using go;
 
 namespace go {

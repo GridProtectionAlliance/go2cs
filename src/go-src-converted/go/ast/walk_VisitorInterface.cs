@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:37 UTC
+//     Generated on 2020 October 08 04:04:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +64,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate Visitor VisitByRef(ref T value, Node node);
+            private delegate Visitor VisitByPtr(ptr<T> value, Node node);
             private delegate Visitor VisitByVal(T value, Node node);
 
-            private static readonly VisitByRef s_VisitByRef;
+            private static readonly VisitByPtr s_VisitByPtr;
             private static readonly VisitByVal s_VisitByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,11 +76,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_VisitByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_VisitByPtr is null || !m_target_is_ptr)
                     return s_VisitByVal!(target, node);
 
-                return s_VisitByRef(ref target, node);
+                return s_VisitByPtr(m_target_ptr, node);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -89,23 +90,20 @@ namespace go
             static Visitor()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Visit");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Visit");
 
                 if (!(extensionMethod is null))
-                    s_VisitByRef = extensionMethod.CreateStaticDelegate(typeof(VisitByRef)) as VisitByRef;
+                    s_VisitByPtr = extensionMethod.CreateStaticDelegate(typeof(VisitByPtr)) as VisitByPtr;
 
-                if (s_VisitByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Visit");
+                extensionMethod = targetType.GetExtensionMethod("Visit");
 
-                    if (!(extensionMethod is null))
-                        s_VisitByVal = extensionMethod.CreateStaticDelegate(typeof(VisitByVal)) as VisitByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_VisitByVal = extensionMethod.CreateStaticDelegate(typeof(VisitByVal)) as VisitByVal;
 
-                if (s_VisitByRef is null && s_VisitByVal is null)
+                if (s_VisitByPtr is null && s_VisitByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Visitor.Visit method", new Exception("Visit"));
             }
 

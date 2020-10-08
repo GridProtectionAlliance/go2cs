@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:35 UTC
+//     Generated on 2020 October 08 03:44:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +64,10 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate void GetenvByRef(ref T value, @string key);
+            private delegate void GetenvByPtr(ptr<T> value, @string key);
             private delegate void GetenvByVal(T value, @string key);
 
-            private static readonly GetenvByRef s_GetenvByRef;
+            private static readonly GetenvByPtr s_GetenvByPtr;
             private static readonly GetenvByVal s_GetenvByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,22 +76,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GetenvByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GetenvByPtr is null || !m_target_is_ptr)
                 {
                     s_GetenvByVal!(target, key);
                     return;
                 }
 
-                s_GetenvByRef(ref target, key);
+                s_GetenvByPtr(m_target_ptr, key);
                 return;
                 
             }
 
-            private delegate void StatByRef(ref T value, @string file);
+            private delegate void StatByPtr(ptr<T> value, @string file);
             private delegate void StatByVal(T value, @string file);
 
-            private static readonly StatByRef s_StatByRef;
+            private static readonly StatByPtr s_StatByPtr;
             private static readonly StatByVal s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,22 +101,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StatByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StatByPtr is null || !m_target_is_ptr)
                 {
                     s_StatByVal!(target, file);
                     return;
                 }
 
-                s_StatByRef(ref target, file);
+                s_StatByPtr(m_target_ptr, file);
                 return;
                 
             }
 
-            private delegate void OpenByRef(ref T value, @string file);
+            private delegate void OpenByPtr(ptr<T> value, @string file);
             private delegate void OpenByVal(T value, @string file);
 
-            private static readonly OpenByRef s_OpenByRef;
+            private static readonly OpenByPtr s_OpenByPtr;
             private static readonly OpenByVal s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -124,22 +126,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OpenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OpenByPtr is null || !m_target_is_ptr)
                 {
                     s_OpenByVal!(target, file);
                     return;
                 }
 
-                s_OpenByRef(ref target, file);
+                s_OpenByPtr(m_target_ptr, file);
                 return;
                 
             }
 
-            private delegate void ChdirByRef(ref T value, @string dir);
+            private delegate void ChdirByPtr(ptr<T> value, @string dir);
             private delegate void ChdirByVal(T value, @string dir);
 
-            private static readonly ChdirByRef s_ChdirByRef;
+            private static readonly ChdirByPtr s_ChdirByPtr;
             private static readonly ChdirByVal s_ChdirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -148,14 +151,15 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ChdirByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ChdirByPtr is null || !m_target_is_ptr)
                 {
                     s_ChdirByVal!(target, dir);
                     return;
                 }
 
-                s_ChdirByRef(ref target, dir);
+                s_ChdirByPtr(m_target_ptr, dir);
                 return;
                 
             }
@@ -166,71 +170,59 @@ namespace @internal
             static Interface()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Getenv");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Getenv");
 
                 if (!(extensionMethod is null))
-                    s_GetenvByRef = extensionMethod.CreateStaticDelegate(typeof(GetenvByRef)) as GetenvByRef;
+                    s_GetenvByPtr = extensionMethod.CreateStaticDelegate(typeof(GetenvByPtr)) as GetenvByPtr;
 
-                if (s_GetenvByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Getenv");
+                extensionMethod = targetType.GetExtensionMethod("Getenv");
 
-                    if (!(extensionMethod is null))
-                        s_GetenvByVal = extensionMethod.CreateStaticDelegate(typeof(GetenvByVal)) as GetenvByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GetenvByVal = extensionMethod.CreateStaticDelegate(typeof(GetenvByVal)) as GetenvByVal;
 
-                if (s_GetenvByRef is null && s_GetenvByVal is null)
+                if (s_GetenvByPtr is null && s_GetenvByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Getenv method", new Exception("Getenv"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Stat");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
                 if (!(extensionMethod is null))
-                    s_StatByRef = extensionMethod.CreateStaticDelegate(typeof(StatByRef)) as StatByRef;
+                    s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
-                if (s_StatByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Stat");
+                extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                    if (!(extensionMethod is null))
-                        s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
-                if (s_StatByRef is null && s_StatByVal is null)
+                if (s_StatByPtr is null && s_StatByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Stat method", new Exception("Stat"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Open");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
                 if (!(extensionMethod is null))
-                    s_OpenByRef = extensionMethod.CreateStaticDelegate(typeof(OpenByRef)) as OpenByRef;
+                    s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
-                if (s_OpenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Open");
+                extensionMethod = targetType.GetExtensionMethod("Open");
 
-                    if (!(extensionMethod is null))
-                        s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
-                if (s_OpenByRef is null && s_OpenByVal is null)
+                if (s_OpenByPtr is null && s_OpenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Open method", new Exception("Open"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Chdir");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Chdir");
 
                 if (!(extensionMethod is null))
-                    s_ChdirByRef = extensionMethod.CreateStaticDelegate(typeof(ChdirByRef)) as ChdirByRef;
+                    s_ChdirByPtr = extensionMethod.CreateStaticDelegate(typeof(ChdirByPtr)) as ChdirByPtr;
 
-                if (s_ChdirByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Chdir");
+                extensionMethod = targetType.GetExtensionMethod("Chdir");
 
-                    if (!(extensionMethod is null))
-                        s_ChdirByVal = extensionMethod.CreateStaticDelegate(typeof(ChdirByVal)) as ChdirByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ChdirByVal = extensionMethod.CreateStaticDelegate(typeof(ChdirByVal)) as ChdirByVal;
 
-                if (s_ChdirByRef is null && s_ChdirByVal is null)
+                if (s_ChdirByPtr is null && s_ChdirByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Chdir method", new Exception("Chdir"));
             }
 

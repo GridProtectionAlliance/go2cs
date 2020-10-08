@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:01 UTC
+//     Generated on 2020 October 08 04:34:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,19 +13,28 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using json = go.encoding.json_package;
+using errors = go.errors_package;
 using fmt = go.fmt_package;
 using build = go.go.build_package;
+using scanner = go.go.scanner_package;
 using token = go.go.token_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using pathpkg = go.path_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using modinfo = go.cmd.go.@internal.modinfo_package;
+using par = go.cmd.go.@internal.par_package;
+using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
 using go;
 
@@ -59,15 +68,27 @@ namespace @internal
 
             public ref @string Shlib => ref m_PackagePublicRef.Value.Shlib;
 
-            public ref bool Goroot => ref m_PackagePublicRef.Value.Goroot;
-
-            public ref bool Standard => ref m_PackagePublicRef.Value.Standard;
-
             public ref @string Root => ref m_PackagePublicRef.Value.Root;
 
             public ref @string ConflictDir => ref m_PackagePublicRef.Value.ConflictDir;
 
+            public ref @string ForTest => ref m_PackagePublicRef.Value.ForTest;
+
+            public ref @string Export => ref m_PackagePublicRef.Value.Export;
+
+            public ref ptr<modinfo.ModulePublic> Module => ref m_PackagePublicRef.Value.Module;
+
+            public ref slice<@string> Match => ref m_PackagePublicRef.Value.Match;
+
+            public ref bool Goroot => ref m_PackagePublicRef.Value.Goroot;
+
+            public ref bool Standard => ref m_PackagePublicRef.Value.Standard;
+
+            public ref bool DepOnly => ref m_PackagePublicRef.Value.DepOnly;
+
             public ref bool BinaryOnly => ref m_PackagePublicRef.Value.BinaryOnly;
+
+            public ref bool Incomplete => ref m_PackagePublicRef.Value.Incomplete;
 
             public ref bool Stale => ref m_PackagePublicRef.Value.Stale;
 
@@ -76,6 +97,8 @@ namespace @internal
             public ref slice<@string> GoFiles => ref m_PackagePublicRef.Value.GoFiles;
 
             public ref slice<@string> CgoFiles => ref m_PackagePublicRef.Value.CgoFiles;
+
+            public ref slice<@string> CompiledGoFiles => ref m_PackagePublicRef.Value.CompiledGoFiles;
 
             public ref slice<@string> IgnoredGoFiles => ref m_PackagePublicRef.Value.IgnoredGoFiles;
 
@@ -111,13 +134,13 @@ namespace @internal
 
             public ref slice<@string> Imports => ref m_PackagePublicRef.Value.Imports;
 
-            public ref slice<@string> Deps => ref m_PackagePublicRef.Value.Deps;
+            public ref map<@string, @string> ImportMap => ref m_PackagePublicRef.Value.ImportMap;
 
-            public ref bool Incomplete => ref m_PackagePublicRef.Value.Incomplete;
+            public ref slice<@string> Deps => ref m_PackagePublicRef.Value.Deps;
 
             public ref ptr<PackageError> Error => ref m_PackagePublicRef.Value.Error;
 
-            public ref slice<ref PackageError> DepsErrors => ref m_PackagePublicRef.Value.DepsErrors;
+            public ref slice<ptr<PackageError>> DepsErrors => ref m_PackagePublicRef.Value.DepsErrors;
 
             public ref slice<@string> TestGoFiles => ref m_PackagePublicRef.Value.TestGoFiles;
 

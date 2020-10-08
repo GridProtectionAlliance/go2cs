@@ -4,9 +4,10 @@
 
 // This file implements the Check function, which drives type-checking.
 
-// package types -- go2cs converted at 2020 August 29 08:47:24 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:04 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\check.go
+using errors = go.errors_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
@@ -19,8 +20,8 @@ namespace go
     public static partial class types_package
     {
         // debugging/development support
-        private static readonly var debug = false; // leave on during development
-        private static readonly var trace = false; // turn on for detailed type resolution traces
+        private static readonly var debug = (var)false; // leave on during development
+        private static readonly var trace = (var)false; // turn on for detailed type resolution traces
 
         // If Strict is set, the type-checker enforces additional
         // rules not specified by the Go 1 spec, but which will
@@ -33,7 +34,7 @@ namespace go
         //   is invalid if any (statically known) method that exists
         //   for both x and T have different signatures.
         //
-        private static readonly var strict = false;
+        private static readonly var strict = (var)false;
 
         // exprInfo stores information about an untyped expression.
 
@@ -47,24 +48,26 @@ namespace go
             public constant.Value val; // constant value; or nil (if not a constant)
         }
 
-        // funcInfo stores the information required for type-checking a function.
-        private partial struct funcInfo
-        {
-            public @string name; // for debugging/tracing only
-            public ptr<declInfo> decl; // for cycle detection
-            public ptr<Signature> sig;
-            public ptr<ast.BlockStmt> body;
-        }
-
         // A context represents the context within which an object is type-checked.
         private partial struct context
         {
             public ptr<declInfo> decl; // package-level declaration whose init expression/function body is checked
             public ptr<Scope> scope; // top-most scope for lookups
+            public token.Pos pos; // if valid, identifiers are looked up as if at position pos (used by Eval)
             public constant.Value iota; // value of iota in a constant declaration; nil otherwise
             public ptr<Signature> sig; // function signature if inside a function; nil otherwise
+            public map<ptr<ast.CallExpr>, bool> isPanic; // set of panic call expressions (used for termination check)
             public bool hasLabel; // set if a function makes use of labels (only ~1% of functions); unused outside functions
             public bool hasCallOrRecv; // set if an expression contains a function call or channel receive operation
+        }
+
+        // lookup looks up name in the current context and returns the matching object, or nil.
+        private static Object lookup(this ptr<context> _addr_ctxt, @string name)
+        {
+            ref context ctxt = ref _addr_ctxt.val;
+
+            var (_, obj) = ctxt.scope.LookupParent(name, ctxt.pos);
+            return obj;
         }
 
         // An importKey identifies an imported package by import path and source directory
@@ -86,106 +89,150 @@ namespace go
             public ptr<Config> conf;
             public ptr<token.FileSet> fset;
             public ptr<Package> pkg;
-            public ref Info Info => ref Info_ptr;
-            public map<Object, ref declInfo> objMap; // maps package-level object to declaration info
-            public map<importKey, ref Package> impMap; // maps (import path, source directory) to (complete or fake) package
+            public ref ptr<Info> ptr<Info> => ref ptr<Info>_ptr;
+            public map<Object, ptr<declInfo>> objMap; // maps package-level objects and (non-interface) methods to declaration info
+            public map<importKey, ptr<Package>> impMap; // maps (import path, source directory) to (complete or fake) package
+            public map<ptr<Interface>, slice<token.Pos>> posMap; // maps interface types to lists of embedded interface positions
+            public map<@string, long> pkgCnt; // counts number of imported packages with a given name (for better error messages)
 
 // information collected during type-checking of a set of package files
 // (initialized by Files, valid only for the duration of check.Files;
 // maps and lists are allocated on demand)
-            public slice<ref ast.File> files; // package files
-            public map<ref Scope, map<ref Package, token.Pos>> unusedDotImports; // positions of unused dot-imported packages for each file scope
+            public slice<ptr<ast.File>> files; // package files
+            public map<ptr<Scope>, map<ptr<Package>, token.Pos>> unusedDotImports; // positions of unused dot-imported packages for each file scope
 
             public error firstErr; // first error encountered
-            public map<@string, slice<ref Func>> methods; // maps type names to associated methods
+            public map<ptr<TypeName>, slice<ptr<Func>>> methods; // maps package scope type names to associated non-blank (non-interface) methods
             public map<ast.Expr, exprInfo> untyped; // map of expressions without final type
-            public slice<funcInfo> funcs; // list of functions to type-check
-            public slice<Action> delayed; // delayed checks requiring fully setup types
+            public slice<Action> delayed; // stack of delayed action segments; segments are processed in FIFO order
+            public slice<Action> finals; // list of final actions; processed at the end of type-checking the current set of files
+            public slice<Object> objPath; // path of object dependencies during type inference (for cycle reporting)
 
 // context within which the current object is type-checked
 // (valid only for the duration of type-checking a specific object)
-            public ref context context => ref context_val;
-            public token.Pos pos; // if valid, identifiers are looked up as if at position pos (used by Eval)
-
-// debugging
+            public ref context context => ref context_val; // debugging
             public long indent; // indentation for tracing
         }
 
         // addUnusedImport adds the position of a dot-imported package
         // pkg to the map of dot imports for the given file scope.
-        private static void addUnusedDotImport(this ref Checker check, ref Scope scope, ref Package pkg, token.Pos pos)
+        private static void addUnusedDotImport(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope, ptr<Package> _addr_pkg, token.Pos pos)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Scope scope = ref _addr_scope.val;
+            ref Package pkg = ref _addr_pkg.val;
+
             var mm = check.unusedDotImports;
             if (mm == null)
             {
-                mm = make_map<ref Scope, map<ref Package, token.Pos>>();
+                mm = make_map<ptr<Scope>, map<ptr<Package>, token.Pos>>();
                 check.unusedDotImports = mm;
             }
+
             var m = mm[scope];
             if (m == null)
             {
-                m = make_map<ref Package, token.Pos>();
+                m = make_map<ptr<Package>, token.Pos>();
                 mm[scope] = m;
             }
+
             m[pkg] = pos;
+
         }
 
         // addDeclDep adds the dependency edge (check.decl -> to) if check.decl exists
-        private static void addDeclDep(this ref Checker check, Object to)
+        private static void addDeclDep(this ptr<Checker> _addr_check, Object to)
         {
+            ref Checker check = ref _addr_check.val;
+
             var from = check.decl;
             if (from == null)
             {
-                return; // not in a package-level init expression
+                return ; // not in a package-level init expression
             }
+
             {
                 var (_, found) = check.objMap[to];
 
                 if (!found)
                 {
-                    return; // to is not a package-level object
+                    return ; // to is not a package-level object
                 }
 
             }
+
             from.addDep(to);
+
         }
 
-        private static void assocMethod(this ref Checker check, @string tname, ref Func meth)
+        private static void rememberUntyped(this ptr<Checker> _addr_check, ast.Expr e, bool lhs, operandMode mode, ptr<Basic> _addr_typ, constant.Value val)
         {
-            var m = check.methods;
-            if (m == null)
-            {
-                m = make_map<@string, slice<ref Func>>();
-                check.methods = m;
-            }
-            m[tname] = append(m[tname], meth);
-        }
+            ref Checker check = ref _addr_check.val;
+            ref Basic typ = ref _addr_typ.val;
 
-        private static void rememberUntyped(this ref Checker check, ast.Expr e, bool lhs, operandMode mode, ref Basic typ, constant.Value val)
-        {
             var m = check.untyped;
             if (m == null)
             {
                 m = make_map<ast.Expr, exprInfo>();
                 check.untyped = m;
             }
+
             m[e] = new exprInfo(lhs,mode,typ,val);
+
         }
 
-        private static void later(this ref Checker check, @string name, ref declInfo decl, ref Signature sig, ref ast.BlockStmt body)
+        // later pushes f on to the stack of actions that will be processed later;
+        // either at the end of the current statement, or in case of a local constant
+        // or variable declaration, before the constant or variable is in scope
+        // (so that f still sees the scope before any new declarations).
+        private static void later(this ptr<Checker> _addr_check, Action f)
         {
-            check.funcs = append(check.funcs, new funcInfo(name,decl,sig,body));
-        }
+            ref Checker check = ref _addr_check.val;
 
-        private static void delay(this ref Checker check, Action f)
-        {
             check.delayed = append(check.delayed, f);
+        }
+
+        // atEnd adds f to the list of actions processed at the end
+        // of type-checking, before initialization order computation.
+        // Actions added by atEnd are processed after any actions
+        // added by later.
+        private static void atEnd(this ptr<Checker> _addr_check, Action f)
+        {
+            ref Checker check = ref _addr_check.val;
+
+            check.finals = append(check.finals, f);
+        }
+
+        // push pushes obj onto the object path and returns its index in the path.
+        private static long push(this ptr<Checker> _addr_check, Object obj)
+        {
+            ref Checker check = ref _addr_check.val;
+
+            check.objPath = append(check.objPath, obj);
+            return len(check.objPath) - 1L;
+        }
+
+        // pop pops and returns the topmost object from the object path.
+        private static Object pop(this ptr<Checker> _addr_check)
+        {
+            ref Checker check = ref _addr_check.val;
+
+            var i = len(check.objPath) - 1L;
+            var obj = check.objPath[i];
+            check.objPath[i] = null;
+            check.objPath = check.objPath[..i];
+            return obj;
         }
 
         // NewChecker returns a new Checker instance for a given package.
         // Package files may be added incrementally via checker.Files.
-        public static ref Checker NewChecker(ref Config conf, ref token.FileSet fset, ref Package pkg, ref Info info)
-        { 
+        public static ptr<Checker> NewChecker(ptr<Config> _addr_conf, ptr<token.FileSet> _addr_fset, ptr<Package> _addr_pkg, ptr<Info> _addr_info)
+        {
+            ref Config conf = ref _addr_conf.val;
+            ref token.FileSet fset = ref _addr_fset.val;
+            ref Package pkg = ref _addr_pkg.val;
+            ref Info info = ref _addr_info.val;
+ 
             // make sure we have a configuration
             if (conf == null)
             {
@@ -197,13 +244,17 @@ namespace go
             {
                 info = @new<Info>();
             }
-            return ref new Checker(conf:conf,fset:fset,pkg:pkg,Info:info,objMap:make(map[Object]*declInfo),impMap:make(map[importKey]*Package),);
+
+            return addr(new Checker(conf:conf,fset:fset,pkg:pkg,Info:info,objMap:make(map[Object]*declInfo),impMap:make(map[importKey]*Package),posMap:make(map[*Interface][]token.Pos),pkgCnt:make(map[string]int),));
+
         }
 
         // initFiles initializes the files-specific portion of checker.
         // The provided files must all belong to the same package.
-        private static void initFiles(this ref Checker check, slice<ref ast.File> files)
-        { 
+        private static void initFiles(this ptr<Checker> _addr_check, slice<ptr<ast.File>> files)
+        {
+            ref Checker check = ref _addr_check.val;
+ 
             // start with a clean slate (check.Files may be called multiple times)
             check.files = null;
             check.unusedDotImports = null;
@@ -211,8 +262,8 @@ namespace go
             check.firstErr = null;
             check.methods = null;
             check.untyped = null;
-            check.funcs = null;
-            check.delayed = null; 
+            check.delayed = null;
+            check.finals = null; 
 
             // determine package name and collect valid files
             var pkg = check.pkg;
@@ -232,6 +283,7 @@ namespace go
                         {
                             check.errorf(file.Name.Pos(), "invalid package name _");
                         }
+
                         fallthrough = true;
 
                     }
@@ -246,7 +298,9 @@ namespace go
 
                     __switch_break0:;
                 }
+
             }
+
         }
 
         // A bailout panic is used for early termination.
@@ -254,12 +308,15 @@ namespace go
         {
         }
 
-        private static void handleBailout(this ref Checker _check, ref error _err) => func(_check, _err, (ref Checker check, ref error err, Defer _, Panic panic, Recover __) =>
+        private static void handleBailout(this ptr<Checker> _addr_check, ptr<error> _addr_err) => func((_, panic, __) =>
         {
+            ref Checker check = ref _addr_check.val;
+            ref error err = ref _addr_err.val;
+
             switch (recover().type())
             {
                 case bailout p:
-                    err.Value = check.firstErr;
+                    err = error.As(check.firstErr)!;
                     break;
                 default:
                 {
@@ -268,75 +325,131 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // Files checks the provided files as part of the checker's package.
-        private static error Files(this ref Checker check, slice<ref ast.File> files)
+        private static error Files(this ptr<Checker> _addr_check, slice<ptr<ast.File>> files)
         {
-            return error.As(check.checkFiles(files));
+            ref Checker check = ref _addr_check.val;
+
+            return error.As(check.checkFiles(files))!;
         }
 
-        private static error checkFiles(this ref Checker _check, slice<ref ast.File> files) => func(_check, (ref Checker check, Defer defer, Panic _, Recover __) =>
+        private static var errBadCgo = errors.New("cannot use FakeImportC and go115UsesCgo together");
+
+        private static error checkFiles(this ptr<Checker> _addr_check, slice<ptr<ast.File>> files) => func((defer, _, __) =>
         {
-            defer(check.handleBailout(ref err));
+            error err = default!;
+            ref Checker check = ref _addr_check.val;
+
+            if (check.conf.FakeImportC && check.conf.go115UsesCgo)
+            {
+                return error.As(errBadCgo)!;
+            }
+
+            defer(check.handleBailout(_addr_err));
 
             check.initFiles(files);
 
             check.collectObjects();
 
-            check.packageObjects(check.resolveOrder());
+            check.packageObjects();
 
-            check.functionBodies();
+            check.processDelayed(0L); // incl. all functions
+            check.processFinals();
 
             check.initOrder();
 
             if (!check.conf.DisableUnusedImportCheck)
             {
                 check.unusedImports();
-            } 
-
-            // perform delayed checks
-            foreach (var (_, f) in check.delayed)
-            {
-                f();
             }
+
             check.recordUntyped();
 
             check.pkg.complete = true;
-            return;
+            return ;
+
         });
 
-        private static void recordUntyped(this ref Checker check)
+        // processDelayed processes all delayed actions pushed after top.
+        private static void processDelayed(this ptr<Checker> _addr_check, long top)
         {
+            ref Checker check = ref _addr_check.val;
+ 
+            // If each delayed action pushes a new action, the
+            // stack will continue to grow during this loop.
+            // However, it is only processing functions (which
+            // are processed in a delayed fashion) that may
+            // add more actions (such as nested functions), so
+            // this is a sufficiently bounded process.
+            for (var i = top; i < len(check.delayed); i++)
+            {
+                check.delayed[i](); // may append to check.delayed
+            }
+
+            assert(top <= len(check.delayed)); // stack must not have shrunk
+            check.delayed = check.delayed[..top];
+
+        }
+
+        private static void processFinals(this ptr<Checker> _addr_check) => func((_, panic, __) =>
+        {
+            ref Checker check = ref _addr_check.val;
+
+            var n = len(check.finals);
+            foreach (var (_, f) in check.finals)
+            {
+                f(); // must not append to check.finals
+            }
+            if (len(check.finals) != n)
+            {
+                panic("internal error: final action list grew");
+            }
+
+        });
+
+        private static void recordUntyped(this ptr<Checker> _addr_check)
+        {
+            ref Checker check = ref _addr_check.val;
+
             if (!debug && check.Types == null)
             {
-                return; // nothing to do
+                return ; // nothing to do
             }
+
             foreach (var (x, info) in check.untyped)
             {
                 if (debug && isTyped(info.typ))
                 {
-                    check.dump("%s: %s (type %s) is typed", x.Pos(), x, info.typ);
+                    check.dump("%v: %s (type %s) is typed", x.Pos(), x, info.typ);
                     unreachable();
                 }
+
                 check.recordTypeAndValue(x, info.mode, info.typ, info.val);
+
             }
+
         }
 
-        private static void recordTypeAndValue(this ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val)
+        private static void recordTypeAndValue(this ptr<Checker> _addr_check, ast.Expr x, operandMode mode, Type typ, constant.Value val)
         {
+            ref Checker check = ref _addr_check.val;
+
             assert(x != null);
             assert(typ != null);
             if (mode == invalid)
             {
-                return; // omit
+                return ; // omit
             }
-            assert(typ != null);
+
             if (mode == constant_)
             {
                 assert(val != null);
                 assert(typ == Typ[Invalid] || isConstType(typ));
             }
+
             {
                 var m = check.Types;
 
@@ -346,10 +459,14 @@ namespace go
                 }
 
             }
+
         }
 
-        private static void recordBuiltinType(this ref Checker check, ast.Expr f, ref Signature sig)
-        { 
+        private static void recordBuiltinType(this ptr<Checker> _addr_check, ast.Expr f, ptr<Signature> _addr_sig)
+        {
+            ref Checker check = ref _addr_check.val;
+            ref Signature sig = ref _addr_sig.val;
+ 
             // f must be a (possibly parenthesized) identifier denoting a built-in
             // (built-ins in package unsafe always produce a constant result and
             // we don't record their signatures, so we don't see qualified idents
@@ -359,10 +476,10 @@ namespace go
                 check.recordTypeAndValue(f, builtin, sig, null);
                 switch (f.type())
                 {
-                    case ref ast.Ident p:
-                        return; // we're done
+                    case ptr<ast.Ident> p:
+                        return ; // we're done
                         break;
-                    case ref ast.ParenExpr p:
+                    case ptr<ast.ParenExpr> p:
                         f = p.X;
                         break;
                     default:
@@ -372,18 +489,24 @@ namespace go
                         break;
                     }
                 }
+
             }
+
 
         }
 
-        private static void recordCommaOkTypes(this ref Checker check, ast.Expr x, array<Type> a)
+        private static void recordCommaOkTypes(this ptr<Checker> _addr_check, ast.Expr x, array<Type> a)
         {
+            a = a.Clone();
+            ref Checker check = ref _addr_check.val;
+
             assert(x != null);
             if (a[0L] == null || a[1L] == null)
             {
-                return;
+                return ;
             }
-            assert(isTyped(a[0L]) && isTyped(a[1L]) && isBoolean(a[1L]));
+
+            assert(isTyped(a[0L]) && isTyped(a[1L]) && (isBoolean(a[1L]) || a[1L] == universeError));
             {
                 var m = check.Types;
 
@@ -397,21 +520,28 @@ namespace go
                         tv.Type = NewTuple(NewVar(pos, check.pkg, "", a[0L]), NewVar(pos, check.pkg, "", a[1L]));
                         m[x] = tv; 
                         // if x is a parenthesized expression (p.X), update p.X
-                        ref ast.ParenExpr (p, _) = x._<ref ast.ParenExpr>();
+                        ptr<ast.ParenExpr> (p, _) = x._<ptr<ast.ParenExpr>>();
                         if (p == null)
                         {
                             break;
                         }
+
                         x = p.X;
+
                     }
+
 
                 }
 
             }
+
         }
 
-        private static void recordDef(this ref Checker check, ref ast.Ident id, Object obj)
+        private static void recordDef(this ptr<Checker> _addr_check, ptr<ast.Ident> _addr_id, Object obj)
         {
+            ref Checker check = ref _addr_check.val;
+            ref ast.Ident id = ref _addr_id.val;
+
             assert(id != null);
             {
                 var m = check.Defs;
@@ -422,10 +552,14 @@ namespace go
                 }
 
             }
+
         }
 
-        private static void recordUse(this ref Checker check, ref ast.Ident id, Object obj)
+        private static void recordUse(this ptr<Checker> _addr_check, ptr<ast.Ident> _addr_id, Object obj)
         {
+            ref Checker check = ref _addr_check.val;
+            ref ast.Ident id = ref _addr_id.val;
+
             assert(id != null);
             assert(obj != null);
             {
@@ -437,10 +571,13 @@ namespace go
                 }
 
             }
+
         }
 
-        private static void recordImplicit(this ref Checker check, ast.Node node, Object obj)
+        private static void recordImplicit(this ptr<Checker> _addr_check, ast.Node node, Object obj)
         {
+            ref Checker check = ref _addr_check.val;
+
             assert(node != null);
             assert(obj != null);
             {
@@ -452,10 +589,14 @@ namespace go
                 }
 
             }
+
         }
 
-        private static void recordSelection(this ref Checker check, ref ast.SelectorExpr x, SelectionKind kind, Type recv, Object obj, slice<long> index, bool indirect)
+        private static void recordSelection(this ptr<Checker> _addr_check, ptr<ast.SelectorExpr> _addr_x, SelectionKind kind, Type recv, Object obj, slice<long> index, bool indirect)
         {
+            ref Checker check = ref _addr_check.val;
+            ref ast.SelectorExpr x = ref _addr_x.val;
+
             assert(obj != null && (recv == null || len(index) > 0L));
             check.recordUse(x.Sel, obj);
             {
@@ -463,14 +604,18 @@ namespace go
 
                 if (m != null)
                 {
-                    m[x] = ref new Selection(kind,recv,obj,index,indirect);
+                    m[x] = addr(new Selection(kind,recv,obj,index,indirect));
                 }
 
             }
+
         }
 
-        private static void recordScope(this ref Checker check, ast.Node node, ref Scope scope)
+        private static void recordScope(this ptr<Checker> _addr_check, ast.Node node, ptr<Scope> _addr_scope)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Scope scope = ref _addr_scope.val;
+
             assert(node != null);
             assert(scope != null);
             {
@@ -482,6 +627,7 @@ namespace go
                 }
 
             }
+
         }
     }
 }}

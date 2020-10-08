@@ -4,7 +4,7 @@
 
 // Input for TestIssue13566
 
-// package a -- go2cs converted at 2020 August 29 10:09:12 UTC
+// package a -- go2cs converted at 2020 October 08 04:56:12 UTC
 // import "go/internal/gcimporter.a" ==> using a = go.go.@internal.gcimporter.a_package
 // Original source: C:\Go\src\go\internal\gcimporter\testdata\a.go
 using json = go.encoding.json_package;

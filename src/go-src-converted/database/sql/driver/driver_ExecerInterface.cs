@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Result, error) ExecByRef(ref T value, @string query, slice<Value> args);
+            private delegate (Result, error) ExecByPtr(ptr<T> value, @string query, slice<Value> args);
             private delegate (Result, error) ExecByVal(T value, @string query, slice<Value> args);
 
-            private static readonly ExecByRef s_ExecByRef;
+            private static readonly ExecByPtr s_ExecByPtr;
             private static readonly ExecByVal s_ExecByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ExecByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ExecByPtr is null || !m_target_is_ptr)
                     return s_ExecByVal!(target, query, args);
 
-                return s_ExecByRef(ref target, query, args);
+                return s_ExecByPtr(m_target_ptr, query, args);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static Execer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Exec");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Exec");
 
                 if (!(extensionMethod is null))
-                    s_ExecByRef = extensionMethod.CreateStaticDelegate(typeof(ExecByRef)) as ExecByRef;
+                    s_ExecByPtr = extensionMethod.CreateStaticDelegate(typeof(ExecByPtr)) as ExecByPtr;
 
-                if (s_ExecByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Exec");
+                extensionMethod = targetType.GetExtensionMethod("Exec");
 
-                    if (!(extensionMethod is null))
-                        s_ExecByVal = extensionMethod.CreateStaticDelegate(typeof(ExecByVal)) as ExecByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ExecByVal = extensionMethod.CreateStaticDelegate(typeof(ExecByVal)) as ExecByVal;
 
-                if (s_ExecByRef is null && s_ExecByVal is null)
+                if (s_ExecByPtr is null && s_ExecByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Execer.Exec method", new Exception("Exec"));
             }
 

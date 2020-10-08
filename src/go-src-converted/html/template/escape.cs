@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:34:46 UTC
+// package template -- go2cs converted at 2020 October 08 03:42:05 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\escape.go
 using bytes = go.bytes_package;
@@ -24,18 +24,21 @@ namespace html
         // templates is properly escaped. If no error is returned, then the named templates have
         // been modified. Otherwise the named templates have been rendered
         // unusable.
-        private static error escapeTemplate(ref Template tmpl, parse.Node node, @string name)
+        private static error escapeTemplate(ptr<Template> _addr_tmpl, parse.Node node, @string name)
         {
+            ref Template tmpl = ref _addr_tmpl.val;
+
             var (c, _) = tmpl.esc.escapeTree(new context(), node, name, 0L);
-            error err = default;
+            error err = default!;
             if (c.err != null)
             {
-                err = error.As(c.err);
+                err = error.As(c.err)!;
                 c.err.Name = name;
+
             }
             else if (c.state != stateText)
             {
-                err = error.As(ref new Error(ErrEndContext,nil,name,0,fmt.Sprintf("ends in a non-text context: %v",c)));
+                err = error.As(addr(new Error(ErrEndContext,nil,name,0,fmt.Sprintf("ends in a non-text context: %v",c))))!;
             }
             if (err != null)
             { 
@@ -54,7 +57,9 @@ namespace html
                     t = t__prev2;
 
                 }
-                return error.As(err);
+
+                return error.As(err)!;
+
             }
             tmpl.esc.commit();
             {
@@ -70,7 +75,9 @@ namespace html
                 t = t__prev1;
 
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // evalArgs formats the list of arguments into a string. It is equivalent to
@@ -91,12 +98,15 @@ namespace html
                     }
 
                 }
+
             }
+
             foreach (var (i, arg) in args)
             {
                 args[i] = indirectToStringerOrError(arg);
             }
             return fmt.Sprint(args);
+
         }
 
         // funcMap maps command names to functions that render their inputs safe.
@@ -110,18 +120,20 @@ namespace html
 // has been mangled to include its input context.
             public map<@string, context> output; // derived[c.mangle(name)] maps to a template derived from the template
 // named name templateName for the start context c.
-            public map<@string, ref template.Template> derived; // called[templateName] is a set of called mangled template names.
+            public map<@string, ptr<template.Template>> derived; // called[templateName] is a set of called mangled template names.
             public map<@string, bool> called; // xxxNodeEdits are the accumulated edits to apply during commit.
 // Such edits are not applied immediately in case a template set
 // executes a given template in different escaping contexts.
-            public map<ref parse.ActionNode, slice<@string>> actionNodeEdits;
-            public map<ref parse.TemplateNode, @string> templateNodeEdits;
-            public map<ref parse.TextNode, slice<byte>> textNodeEdits;
+            public map<ptr<parse.ActionNode>, slice<@string>> actionNodeEdits;
+            public map<ptr<parse.TemplateNode>, @string> templateNodeEdits;
+            public map<ptr<parse.TextNode>, slice<byte>> textNodeEdits;
         }
 
         // makeEscaper creates a blank escaper for the given set.
-        private static escaper makeEscaper(ref nameSpace n)
+        private static escaper makeEscaper(ptr<nameSpace> _addr_n)
         {
+            ref nameSpace n = ref _addr_n.val;
+
             return new escaper(n,map[string]context{},map[string]*template.Template{},map[string]bool{},map[*parse.ActionNode][]string{},map[*parse.TemplateNode]string{},map[*parse.TextNode][]byte{},);
         }
 
@@ -130,54 +142,62 @@ namespace html
         // contains no special characters, is not empty, and when it appears in output
         // it is distinct enough that a developer can find the source of the problem
         // via a search engine.
-        private static readonly @string filterFailsafe = "ZgotmplZ";
+        private static readonly @string filterFailsafe = (@string)"ZgotmplZ";
 
         // escape escapes a template node.
 
 
         // escape escapes a template node.
-        private static context escape(this ref escaper _e, context c, parse.Node n) => func(_e, (ref escaper e, Defer _, Panic panic, Recover __) =>
+        private static context escape(this ptr<escaper> _addr_e, context c, parse.Node n) => func((_, panic, __) =>
         {
+            ref escaper e = ref _addr_e.val;
+
             switch (n.type())
             {
-                case ref parse.ActionNode n:
+                case ptr<parse.ActionNode> n:
                     return e.escapeAction(c, n);
                     break;
-                case ref parse.IfNode n:
-                    return e.escapeBranch(c, ref n.BranchNode, "if");
+                case ptr<parse.IfNode> n:
+                    return e.escapeBranch(c, _addr_n.BranchNode, "if");
                     break;
-                case ref parse.ListNode n:
+                case ptr<parse.ListNode> n:
                     return e.escapeList(c, n);
                     break;
-                case ref parse.RangeNode n:
-                    return e.escapeBranch(c, ref n.BranchNode, "range");
+                case ptr<parse.RangeNode> n:
+                    return e.escapeBranch(c, _addr_n.BranchNode, "range");
                     break;
-                case ref parse.TemplateNode n:
+                case ptr<parse.TemplateNode> n:
                     return e.escapeTemplate(c, n);
                     break;
-                case ref parse.TextNode n:
+                case ptr<parse.TextNode> n:
                     return e.escapeText(c, n);
                     break;
-                case ref parse.WithNode n:
-                    return e.escapeBranch(c, ref n.BranchNode, "with");
+                case ptr<parse.WithNode> n:
+                    return e.escapeBranch(c, _addr_n.BranchNode, "with");
                     break;
             }
             panic("escaping " + n.String() + " is unimplemented");
+
         });
 
         // escapeAction escapes an action template node.
-        private static context escapeAction(this ref escaper _e, context c, ref parse.ActionNode _n) => func(_e, _n, (ref escaper e, ref parse.ActionNode n, Defer _, Panic panic, Recover __) =>
+        private static context escapeAction(this ptr<escaper> _addr_e, context c, ptr<parse.ActionNode> _addr_n) => func((_, panic, __) =>
         {
+            ref escaper e = ref _addr_e.val;
+            ref parse.ActionNode n = ref _addr_n.val;
+
             if (len(n.Pipe.Decl) != 0L)
             { 
                 // A local variable assignment, not an interpolation.
                 return c;
+
             }
+
             c = nudge(c); 
             // Check for disallowed use of predefined escapers in the pipeline.
             foreach (var (pos, idNode) in n.Pipe.Cmds)
             {
-                ref parse.IdentifierNode (node, ok) = idNode.Args[0L]._<ref parse.IdentifierNode>();
+                ptr<parse.IdentifierNode> (node, ok) = idNode.Args[0L]._<ptr<parse.IdentifierNode>>();
                 if (!ok)
                 { 
                     // A predefined escaper "esc" will never be found as an identifier in a
@@ -188,7 +208,9 @@ namespace html
                     //   not methods or fields of any types.
                     // Therefore, it is safe to ignore these two node types.
                     continue;
+
                 }
+
                 var ident = node.Ident;
                 {
                     var (_, ok) = predefinedEscapers[ident];
@@ -199,9 +221,11 @@ namespace html
                         {
                             return new context(state:stateError,err:errorf(ErrPredefinedEscaper,n,n.Line,"predefined escaper %q disallowed in template",ident),);
                         }
+
                     }
 
                 }
+
             }
             var s = make_slice<@string>(0L, 3L);
 
@@ -265,6 +289,7 @@ namespace html
                 {
                     panic("unexpected state " + c.state.String());
                 }
+
             
             if (c.delim == delimNone)             else if (c.delim == delimSpaceOrTagEnd) 
                 s = append(s, "_html_template_nospaceescaper");
@@ -272,17 +297,21 @@ namespace html
                 s = append(s, "_html_template_attrescaper");
                         e.editActionNode(n, s);
             return c;
+
         });
 
         // ensurePipelineContains ensures that the pipeline ends with the commands with
         // the identifiers in s in order. If the pipeline ends with a predefined escaper
         // (i.e. "html" or "urlquery"), merge it with the identifiers in s.
-        private static void ensurePipelineContains(ref parse.PipeNode p, slice<@string> s)
+        private static void ensurePipelineContains(ptr<parse.PipeNode> _addr_p, slice<@string> s)
         {
+            ref parse.PipeNode p = ref _addr_p.val;
+
             if (len(s) == 0L)
             { 
                 // Do not rewrite pipeline if we have no escapers to insert.
-                return;
+                return ;
+
             } 
             // Precondition: p.Cmds contains at most one predefined escaper and the
             // escaper will be present at p.Cmds[len(p.Cmds)-1]. This precondition is
@@ -292,9 +321,9 @@ namespace html
             {
                 var lastCmd = p.Cmds[pipelineLen - 1L];
                 {
-                    ref parse.IdentifierNode idNode__prev2 = idNode;
+                    ptr<parse.IdentifierNode> idNode__prev2 = idNode;
 
-                    ref parse.IdentifierNode (idNode, ok) = lastCmd.Args[0L]._<ref parse.IdentifierNode>();
+                    ptr<parse.IdentifierNode> (idNode, ok) = lastCmd.Args[0L]._<ptr<parse.IdentifierNode>>();
 
                     if (ok)
                     {
@@ -312,8 +341,9 @@ namespace html
                                     // {{ _eval_args_ arg1 arg2 ... argN | esc }}, so that esc can be easily
                                     // merged with the escapers in s.
                                     lastCmd.Args[0L] = parse.NewIdentifier("_eval_args_").SetTree(null).SetPos(lastCmd.Args[0L].Position());
-                                    p.Cmds = appendCmd(p.Cmds, newIdentCmd(esc, p.Position()));
+                                    p.Cmds = appendCmd(p.Cmds, _addr_newIdentCmd(esc, p.Position()));
                                     pipelineLen++;
+
                                 } 
                                 // If any of the commands in s that we are about to insert is equivalent
                                 // to the predefined escaper, use the predefined escaper instead.
@@ -330,6 +360,7 @@ namespace html
                                             s[i] = idNode.Ident;
                                             dup = true;
                                         }
+
                                     }
 
                                     i = i__prev1;
@@ -340,18 +371,22 @@ namespace html
                                     // The predefined escaper will already be inserted along with the
                                     // escapers in s, so do not copy it to the rewritten pipeline.
                                     pipelineLen--;
+
                                 }
+
                             }
 
                         }
+
                     }
 
                     idNode = idNode__prev2;
 
                 }
+
             } 
             // Rewrite the pipeline, creating the escapers in s at the end of the pipeline.
-            var newCmds = make_slice<ref parse.CommandNode>(pipelineLen, pipelineLen + len(s));
+            var newCmds = make_slice<ptr<parse.CommandNode>>(pipelineLen, pipelineLen + len(s));
             var insertedIdents = make_map<@string, bool>();
             {
                 var i__prev1 = i;
@@ -361,9 +396,9 @@ namespace html
                     var cmd = p.Cmds[i];
                     newCmds[i] = cmd;
                     {
-                        ref parse.IdentifierNode idNode__prev1 = idNode;
+                        ptr<parse.IdentifierNode> idNode__prev1 = idNode;
 
-                        (idNode, ok) = cmd.Args[0L]._<ref parse.IdentifierNode>();
+                        (idNode, ok) = cmd.Args[0L]._<ptr<parse.IdentifierNode>>();
 
                         if (ok)
                         {
@@ -373,6 +408,7 @@ namespace html
                         idNode = idNode__prev1;
 
                     }
+
                 }
 
 
@@ -386,10 +422,13 @@ namespace html
                     // AddParseTree and one template is executed after the other, this check
                     // ensures that escapers that were already inserted into the pipeline on
                     // the first escaping pass do not get inserted again.
-                    newCmds = appendCmd(newCmds, newIdentCmd(name, p.Position()));
+                    newCmds = appendCmd(newCmds, _addr_newIdentCmd(name, p.Position()));
+
                 }
+
             }
             p.Cmds = newCmds;
+
         }
 
         // predefinedEscapers contains template predefined escapers that are equivalent
@@ -419,7 +458,9 @@ namespace html
                 }
 
             }
+
             return e;
+
         }
 
         // redundantFuncs[a][b] implies that funcMap[b](funcMap[a](x)) == funcMap[a](x)
@@ -428,42 +469,34 @@ namespace html
 
         // appendCmd appends the given command to the end of the command pipeline
         // unless it is redundant with the last command.
-        private static slice<ref parse.CommandNode> appendCmd(slice<ref parse.CommandNode> cmds, ref parse.CommandNode cmd)
+        private static slice<ptr<parse.CommandNode>> appendCmd(slice<ptr<parse.CommandNode>> cmds, ptr<parse.CommandNode> _addr_cmd)
         {
+            ref parse.CommandNode cmd = ref _addr_cmd.val;
+
             {
                 var n = len(cmds);
 
                 if (n != 0L)
                 {
-                    ref parse.IdentifierNode (last, okLast) = cmds[n - 1L].Args[0L]._<ref parse.IdentifierNode>();
-                    ref parse.IdentifierNode (next, okNext) = cmd.Args[0L]._<ref parse.IdentifierNode>();
+                    ptr<parse.IdentifierNode> (last, okLast) = cmds[n - 1L].Args[0L]._<ptr<parse.IdentifierNode>>();
+                    ptr<parse.IdentifierNode> (next, okNext) = cmd.Args[0L]._<ptr<parse.IdentifierNode>>();
                     if (okLast && okNext && redundantFuncs[last.Ident][next.Ident])
                     {
                         return cmds;
                     }
+
                 }
 
             }
+
             return append(cmds, cmd);
-        }
 
-        // indexOfStr is the first i such that eq(s, strs[i]) or -1 if s was not found.
-        private static long indexOfStr(@string s, slice<@string> strs, Func<@string, @string, bool> eq)
-        {
-            foreach (var (i, t) in strs)
-            {
-                if (eq(s, t))
-                {
-                    return i;
-                }
-            }
-            return -1L;
         }
 
         // newIdentCmd produces a command containing a single identifier node.
-        private static ref parse.CommandNode newIdentCmd(@string identifier, parse.Pos pos)
+        private static ptr<parse.CommandNode> newIdentCmd(@string identifier, parse.Pos pos)
         {
-            return ref new parse.CommandNode(NodeType:parse.NodeCommand,Args:[]parse.Node{parse.NewIdentifier(identifier).SetTree(nil).SetPos(pos)},);
+            return addr(new parse.CommandNode(NodeType:parse.NodeCommand,Args:[]parse.Node{parse.NewIdentifier(identifier).SetTree(nil).SetPos(pos)},));
         }
 
         // nudge returns the context that would result from following empty string
@@ -494,25 +527,29 @@ namespace html
                 c.state = stateAttrName;
                 c.attr = attrNone;
                         return c;
+
         }
 
         // join joins the two contexts of a branch template node. The result is an
         // error context if either of the input contexts are error contexts, or if the
-        // the input contexts differ.
+        // input contexts differ.
         private static context join(context a, context b, parse.Node node, @string nodeName)
         {
             if (a.state == stateError)
             {
                 return a;
             }
+
             if (b.state == stateError)
             {
                 return b;
             }
+
             if (a.eq(b))
             {
                 return a;
             }
+
             var c = a;
             c.urlPart = b.urlPart;
             if (c.eq(b))
@@ -520,7 +557,9 @@ namespace html
                 // The contexts differ only by urlPart.
                 c.urlPart = urlPartUnknown;
                 return c;
+
             }
+
             c = a;
             c.jsCtx = b.jsCtx;
             if (c.eq(b))
@@ -528,6 +567,7 @@ namespace html
                 // The contexts differ only by jsCtx.
                 c.jsCtx = jsCtxUnknown;
                 return c;
+
             } 
 
             // Allow a nudged context to join with an unnudged one.
@@ -552,18 +592,24 @@ namespace html
                         }
 
                     }
+
                 }
 
                 c = c__prev1;
 
             }
 
+
             return new context(state:stateError,err:errorf(ErrBranchEnd,node,0,"{{%s}} branches end in different contexts: %v, %v",nodeName,a,b),);
+
         }
 
         // escapeBranch escapes a branch template node: "if", "range" and "with".
-        private static context escapeBranch(this ref escaper e, context c, ref parse.BranchNode n, @string nodeName)
+        private static context escapeBranch(this ptr<escaper> _addr_e, context c, ptr<parse.BranchNode> _addr_n, @string nodeName)
         {
+            ref escaper e = ref _addr_e.val;
+            ref parse.BranchNode n = ref _addr_n.val;
+
             var c0 = e.escapeList(c, n.List);
             if (nodeName == "range" && c0.state != stateError)
             { 
@@ -580,33 +626,47 @@ namespace html
                     c0.err.Line = n.Line;
                     c0.err.Description = "on range loop re-entry: " + c0.err.Description;
                     return c0;
+
                 }
+
             }
+
             var c1 = e.escapeList(c, n.ElseList);
             return join(c0, c1, n, nodeName);
+
         }
 
         // escapeList escapes a list template node.
-        private static context escapeList(this ref escaper e, context c, ref parse.ListNode n)
+        private static context escapeList(this ptr<escaper> _addr_e, context c, ptr<parse.ListNode> _addr_n)
         {
+            ref escaper e = ref _addr_e.val;
+            ref parse.ListNode n = ref _addr_n.val;
+
             if (n == null)
             {
                 return c;
             }
+
             foreach (var (_, m) in n.Nodes)
             {
                 c = e.escape(c, m);
             }
             return c;
+
         }
 
         // escapeListConditionally escapes a list node but only preserves edits and
         // inferences in e if the inferences and output context satisfy filter.
         // It returns the best guess at an output context, and the result of the filter
         // which is the same as whether e was updated.
-        private static (context, bool) escapeListConditionally(this ref escaper e, context c, ref parse.ListNode n, Func<ref escaper, context, bool> filter)
+        private static (context, bool) escapeListConditionally(this ptr<escaper> _addr_e, context c, ptr<parse.ListNode> _addr_n, Func<ptr<escaper>, context, bool> filter)
         {
-            var e1 = makeEscaper(e.ns); 
+            context _p0 = default;
+            bool _p0 = default;
+            ref escaper e = ref _addr_e.val;
+            ref parse.ListNode n = ref _addr_n.val;
+
+            ref var e1 = ref heap(makeEscaper(_addr_e.ns), out ptr<var> _addr_e1); 
             // Make type inferences available to f.
             {
                 var k__prev1 = k;
@@ -624,7 +684,7 @@ namespace html
             }
 
             c = e1.escapeList(c, n);
-            var ok = filter != null && filter(ref e1, c);
+            var ok = filter != null && filter(_addr_e1, c);
             if (ok)
             { 
                 // Copy inferences and edits from e1 back into e.
@@ -717,26 +777,36 @@ namespace html
                     k = k__prev1;
                     v = v__prev1;
                 }
-
             }
+
             return (c, ok);
+
         }
 
         // escapeTemplate escapes a {{template}} call node.
-        private static context escapeTemplate(this ref escaper e, context c, ref parse.TemplateNode n)
+        private static context escapeTemplate(this ptr<escaper> _addr_e, context c, ptr<parse.TemplateNode> _addr_n)
         {
+            ref escaper e = ref _addr_e.val;
+            ref parse.TemplateNode n = ref _addr_n.val;
+
             var (c, name) = e.escapeTree(c, n, n.Name, n.Line);
             if (name != n.Name)
             {
                 e.editTemplateNode(n, name);
             }
+
             return c;
+
         }
 
         // escapeTree escapes the named template starting in the given context as
         // necessary and returns its output context.
-        private static (context, @string) escapeTree(this ref escaper e, context c, parse.Node node, @string name, long line)
-        { 
+        private static (context, @string) escapeTree(this ptr<escaper> _addr_e, context c, parse.Node node, @string name, long line)
+        {
+            context _p0 = default;
+            @string _p0 = default;
+            ref escaper e = ref _addr_e.val;
+ 
             // Mangle the template name with the input context to produce a reliable
             // identifier.
             var dname = c.mangle(name);
@@ -748,9 +818,11 @@ namespace html
                 { 
                     // Already escaped.
                     return (out, dname);
+
                 }
 
             }
+
             var t = e.template(name);
             if (t == null)
             { 
@@ -760,8 +832,11 @@ namespace html
                 {
                     return (new context(state:stateError,err:errorf(ErrNoSuchTemplate,node,line,"%q is an incomplete or empty template",name),), dname);
                 }
+
                 return (new context(state:stateError,err:errorf(ErrNoSuchTemplate,node,line,"no such template %q",name),), dname);
+
             }
+
             if (dname != name)
             { 
                 // Use any template derived during an earlier call to escapeTemplate
@@ -770,18 +845,25 @@ namespace html
                 if (dt == null)
                 {
                     dt = template.New(dname);
-                    dt.Tree = ref new parse.Tree(Name:dname,Root:t.Root.CopyList());
+                    dt.Tree = addr(new parse.Tree(Name:dname,Root:t.Root.CopyList()));
                     e.derived[dname] = dt;
                 }
+
                 t = dt;
+
             }
+
             return (e.computeOutCtx(c, t), dname);
+
         }
 
         // computeOutCtx takes a template and its start context and computes the output
         // context while storing any inferences in e.
-        private static context computeOutCtx(this ref escaper e, context c, ref template.Template t)
-        { 
+        private static context computeOutCtx(this ptr<escaper> _addr_e, context c, ptr<template.Template> _addr_t)
+        {
+            ref escaper e = ref _addr_e.val;
+            ref template.Template t = ref _addr_t.val;
+ 
             // Propagate context over the body.
             var (c1, ok) = e.escapeTemplateBody(c, t);
             if (!ok)
@@ -794,39 +876,52 @@ namespace html
                     {
                         c1 = c2;
                         ok = true;
+
                     } 
                     // Use c1 as the error context if neither assumption worked.
 
                 } 
                 // Use c1 as the error context if neither assumption worked.
             }
+
             if (!ok && c1.state != stateError)
             {
                 return new context(state:stateError,err:errorf(ErrOutputContext,t.Tree.Root,0,"cannot compute output context for template %s",t.Name()),);
             }
+
             return c1;
+
         }
 
         // escapeTemplateBody escapes the given template assuming the given output
         // context, and returns the best guess at the output context and whether the
         // assumption was correct.
-        private static (context, bool) escapeTemplateBody(this ref escaper e, context c, ref template.Template t)
+        private static (context, bool) escapeTemplateBody(this ptr<escaper> _addr_e, context c, ptr<template.Template> _addr_t)
         {
-            Func<ref escaper, context, bool> filter = (e1, c1) =>
+            context _p0 = default;
+            bool _p0 = default;
+            ref escaper e = ref _addr_e.val;
+            ref template.Template t = ref _addr_t.val;
+
+            Func<ptr<escaper>, context, bool> filter = (e1, c1) =>
             {
                 if (c1.state == stateError)
                 { 
                     // Do not update the input escaper, e.
                     return false;
+
                 }
+
                 if (!e1.called[t.Name()])
                 { 
                     // If t is not recursively called, then c1 is an
                     // accurate output context.
                     return true;
+
                 } 
                 // c1 is accurate if it matches our assumed output context.
                 return c.eq(c1);
+
             } 
             // We need to assume an output context so that recursive template calls
             // take the fast path out of escapeTree instead of infinitely recursing.
@@ -839,6 +934,7 @@ namespace html
             // works >90% of the time.
             e.output[t.Name()] = c;
             return e.escapeListConditionally(c, t.Tree.Root, filter);
+
         }
 
         // delimEnds maps each delim to a string of characters that terminate it.
@@ -847,8 +943,11 @@ namespace html
         private static slice<byte> doctypeBytes = (slice<byte>)"<!DOCTYPE";
 
         // escapeText escapes a text template node.
-        private static context escapeText(this ref escaper _e, context c, ref parse.TextNode _n) => func(_e, _n, (ref escaper e, ref parse.TextNode n, Defer _, Panic panic, Recover __) =>
+        private static context escapeText(this ptr<escaper> _addr_e, context c, ptr<parse.TextNode> _addr_n) => func((_, panic, __) =>
         {
+            ref escaper e = ref _addr_e.val;
+            ref parse.TextNode n = ref _addr_n.val;
+
             var s = n.Text;
             long written = 0L;
             long i = 0L;
@@ -872,12 +971,15 @@ namespace html
                                     end = j;
                                     break;
                                 }
+
                             }
 
 
                             j = j__prev2;
                         }
+
                     }
+
                     {
                         var j__prev2 = j;
 
@@ -889,17 +991,19 @@ namespace html
                                 b.WriteString("&lt;");
                                 written = j + 1L;
                             }
+
                         }
 
 
                         j = j__prev2;
                     }
+
                 }
                 else if (isComment(c.state) && c.delim == delimNone)
                 {
 
                     if (c.state == stateJSBlockCmt) 
-                        // http://es5.github.com/#x7.4:
+                        // https://es5.github.com/#x7.4:
                         // "Comments behave like white space and are
                         // discarded except that, if a MultiLineComment
                         // contains a line terminator character, then
@@ -914,10 +1018,13 @@ namespace html
                         {
                             b.WriteByte(' ');
                         }
+
                     else if (c.state == stateCSSBlockCmt) 
                         b.WriteByte(' ');
                                         written = i1;
+
                 }
+
                 if (c.state != c1.state && isComment(c1.state) && c1.delim == delimNone)
                 { 
                     // Preserve the portion between written and the comment start.
@@ -926,16 +1033,22 @@ namespace html
                     { 
                         // "<!--" instead of "/*" or "//"
                         cs -= 2L;
+
                     }
+
                     b.Write(s[written..cs]);
                     written = i1;
+
                 }
+
                 if (i == i1 && c.state == c1.state)
                 {
                     panic(fmt.Sprintf("infinite loop from %v to %v on %q..%q", c, c1, s[..i], s[i..]));
                 }
+
                 c = c1;
                 i = i1;
+
             }
 
 
@@ -945,15 +1058,22 @@ namespace html
                 {
                     b.Write(n.Text[written..]);
                 }
+
                 e.editTextNode(n, b.Bytes());
+
             }
+
             return c;
+
         });
 
         // contextAfterText starts in context c, consumes some tokens from the front of
         // s, then returns the context after those tokens and the unprocessed suffix.
         private static (context, long) contextAfterText(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             if (c.delim == delimNone)
             {
                 var (c1, i) = tSpecialTagEnd(c, s);
@@ -962,9 +1082,11 @@ namespace html
                     // A special end tag (`</script>`) has been seen and
                     // all content preceding it has been consumed.
                     return (c1, 0L);
+
                 } 
                 // Consider all content up to any end tag.
                 return transitionFunc[c.state](c, s[..i]);
+
             } 
 
             // We are at the beginning of an attribute value.
@@ -973,9 +1095,10 @@ namespace html
             {
                 i = len(s);
             }
+
             if (c.delim == delimSpaceOrTagEnd)
             { 
-                // http://www.w3.org/TR/html5/syntax.html#attribute-value-(unquoted)-state
+                // https://www.w3.org/TR/html5/syntax.html#attribute-value-(unquoted)-state
                 // lists the runes below as error characters.
                 // Error out because HTML parsers may differ on whether
                 // "<a id= onclick=f("     ends inside id's or onclick's value,
@@ -991,7 +1114,9 @@ namespace html
                     }
 
                 }
+
             }
+
             if (i == len(s))
             { 
                 // Remain inside the attribute.
@@ -1006,11 +1131,14 @@ namespace html
                         var (c1, i1) = transitionFunc[c.state](c, u);
                         c = c1;
                         u = u[i1..];
+
                     }
 
                 }
                 return (c, len(s));
+
             }
+
             var element = c.element; 
 
             // If this is a non-JS "type" attribute inside "script" tag, do not treat the contents as JS.
@@ -1018,19 +1146,25 @@ namespace html
             {
                 element = elementNone;
             }
+
             if (c.delim != delimSpaceOrTagEnd)
             { 
                 // Consume any quote.
                 i++;
+
             } 
             // On exiting an attribute, we discard all state information
             // except the state and element.
             return (new context(state:stateTag,element:element), i);
+
         }
 
         // editActionNode records a change to an action pipeline for later commit.
-        private static void editActionNode(this ref escaper _e, ref parse.ActionNode _n, slice<@string> cmds) => func(_e, _n, (ref escaper e, ref parse.ActionNode n, Defer _, Panic panic, Recover __) =>
+        private static void editActionNode(this ptr<escaper> _addr_e, ptr<parse.ActionNode> _addr_n, slice<@string> cmds) => func((_, panic, __) =>
         {
+            ref escaper e = ref _addr_e.val;
+            ref parse.ActionNode n = ref _addr_n.val;
+
             {
                 var (_, ok) = e.actionNodeEdits[n];
 
@@ -1040,12 +1174,17 @@ namespace html
                 }
 
             }
+
             e.actionNodeEdits[n] = cmds;
+
         });
 
         // editTemplateNode records a change to a {{template}} callee for later commit.
-        private static void editTemplateNode(this ref escaper _e, ref parse.TemplateNode _n, @string callee) => func(_e, _n, (ref escaper e, ref parse.TemplateNode n, Defer _, Panic panic, Recover __) =>
+        private static void editTemplateNode(this ptr<escaper> _addr_e, ptr<parse.TemplateNode> _addr_n, @string callee) => func((_, panic, __) =>
         {
+            ref escaper e = ref _addr_e.val;
+            ref parse.TemplateNode n = ref _addr_n.val;
+
             {
                 var (_, ok) = e.templateNodeEdits[n];
 
@@ -1055,12 +1194,17 @@ namespace html
                 }
 
             }
+
             e.templateNodeEdits[n] = callee;
+
         });
 
         // editTextNode records a change to a text node for later commit.
-        private static void editTextNode(this ref escaper _e, ref parse.TextNode _n, slice<byte> text) => func(_e, _n, (ref escaper e, ref parse.TextNode n, Defer _, Panic panic, Recover __) =>
+        private static void editTextNode(this ptr<escaper> _addr_e, ptr<parse.TextNode> _addr_n, slice<byte> text) => func((_, panic, __) =>
         {
+            ref escaper e = ref _addr_e.val;
+            ref parse.TextNode n = ref _addr_n.val;
+
             {
                 var (_, ok) = e.textNodeEdits[n];
 
@@ -1070,13 +1214,17 @@ namespace html
                 }
 
             }
+
             e.textNodeEdits[n] = text;
+
         });
 
         // commit applies changes to actions and template calls needed to contextually
         // autoescape content and adds any derived templates to the set.
-        private static void commit(this ref escaper _e) => func(_e, (ref escaper e, Defer _, Panic panic, Recover __) =>
+        private static void commit(this ptr<escaper> _addr_e) => func((_, panic, __) =>
         {
+            ref escaper e = ref _addr_e.val;
+
             {
                 var name__prev1 = name;
 
@@ -1103,6 +1251,7 @@ namespace html
                     }
 
                 }
+
             }
             {
                 var n__prev1 = n;
@@ -1112,7 +1261,7 @@ namespace html
                 {
                     n = __n;
                     s = __s;
-                    ensurePipelineContains(n.Pipe, s);
+                    ensurePipelineContains(_addr_n.Pipe, s);
                 }
 
                 n = n__prev1;
@@ -1152,14 +1301,17 @@ namespace html
             }
 
             e.called = make_map<@string, bool>();
-            e.actionNodeEdits = make_map<ref parse.ActionNode, slice<@string>>();
-            e.templateNodeEdits = make_map<ref parse.TemplateNode, @string>();
-            e.textNodeEdits = make_map<ref parse.TextNode, slice<byte>>();
+            e.actionNodeEdits = make_map<ptr<parse.ActionNode>, slice<@string>>();
+            e.templateNodeEdits = make_map<ptr<parse.TemplateNode>, @string>();
+            e.textNodeEdits = make_map<ptr<parse.TextNode>, slice<byte>>();
+
         });
 
         // template returns the named template given a mangled template name.
-        private static ref template.Template template(this ref escaper e, @string name)
-        { 
+        private static ptr<template.Template> template(this ptr<escaper> _addr_e, @string name)
+        {
+            ref escaper e = ref _addr_e.val;
+ 
             // Any template from the name space associated with this escaper can be used
             // to look up templates in the underlying text/template name space.
             var t = e.arbitraryTemplate().text.Lookup(name);
@@ -1167,18 +1319,23 @@ namespace html
             {
                 t = e.derived[name];
             }
-            return t;
+
+            return _addr_t!;
+
         }
 
         // arbitraryTemplate returns an arbitrary template from the name space
         // associated with e and panics if no templates are found.
-        private static ref Template arbitraryTemplate(this ref escaper _e) => func(_e, (ref escaper e, Defer _, Panic panic, Recover __) =>
+        private static ptr<Template> arbitraryTemplate(this ptr<escaper> _addr_e) => func((_, panic, __) =>
         {
+            ref escaper e = ref _addr_e.val;
+
             foreach (var (_, t) in e.ns.set)
             {
-                return t;
+                return _addr_t!;
             }
             panic("no templates in name space");
+
         });
 
         // Forwarding functions so that clients need only import this package

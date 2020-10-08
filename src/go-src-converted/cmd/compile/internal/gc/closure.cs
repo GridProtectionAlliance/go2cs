@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:26:00 UTC
+// package gc -- go2cs converted at 2020 October 08 04:28:05 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\closure.go
 using syntax = go.cmd.compile.@internal.syntax_package;
@@ -17,66 +17,33 @@ namespace @internal
 {
     public static partial class gc_package
     {
-        private static ref Node funcLit(this ref noder p, ref syntax.FuncLit expr)
+        private static ptr<Node> funcLit(this ptr<noder> _addr_p, ptr<syntax.FuncLit> _addr_expr)
         {
+            ref noder p = ref _addr_p.val;
+            ref syntax.FuncLit expr = ref _addr_expr.val;
+
+            var xtype = p.typeExpr(expr.Type);
             var ntype = p.typeExpr(expr.Type);
 
-            var n = p.nod(expr, OCLOSURE, null, null);
-            n.Func.SetIsHiddenClosure(Curfn != null);
-            n.Func.Ntype = ntype;
-            n.Func.Depth = funcdepth;
-            n.Func.Outerfunc = Curfn;
+            var xfunc = p.nod(expr, ODCLFUNC, null, null);
+            xfunc.Func.SetIsHiddenClosure(Curfn != null);
+            xfunc.Func.Nname = newfuncnamel(p.pos(expr), nblank.Sym); // filled in by typecheckclosure
+            xfunc.Func.Nname.Name.Param.Ntype = xtype;
+            xfunc.Func.Nname.Name.Defn = xfunc;
 
-            var old = p.funchdr(n); 
+            var clo = p.nod(expr, OCLOSURE, null, null);
+            clo.Func.Ntype = ntype;
 
-            // steal ntype's argument names and
-            // leave a fresh copy in their place.
-            // references to these variables need to
-            // refer to the variables in the external
-            // function declared below; see walkclosure.
-            n.List.Set(ntype.List.Slice());
-            n.Rlist.Set(ntype.Rlist.Slice());
+            xfunc.Func.Closure = clo;
+            clo.Func.Closure = xfunc;
 
-            ntype.List.Set(null);
-            ntype.Rlist.Set(null);
-            foreach (var (_, n1) in n.List.Slice())
-            {
-                var name = n1.Left;
-                if (name != null)
-                {
-                    name = newname(name.Sym);
-                }
-                var a = nod(ODCLFIELD, name, n1.Right);
-                a.SetIsddd(n1.Isddd());
-                if (name != null)
-                {
-                    name.SetIsddd(a.Isddd());
-                }
-                ntype.List.Append(a);
-            }            foreach (var (_, n2) in n.Rlist.Slice())
-            {
-                name = n2.Left;
-                if (name != null)
-                {
-                    name = newname(name.Sym);
-                }
-                ntype.Rlist.Append(nod(ODCLFIELD, name, n2.Right));
-            }            var body = p.stmts(expr.Body.List);
-
-            lineno = Ctxt.PosTable.XPos(expr.Body.Rbrace);
-            if (len(body) == 0L)
-            {
-                body = new slice<ref Node>(new ref Node[] { nod(OEMPTY,nil,nil) });
-            }
-            n.Nbody.Set(body);
-            n.Func.Endlineno = lineno;
-            p.funcbody(old); 
+            p.funcBody(xfunc, expr.Body); 
 
             // closure-specific variables are hanging off the
             // ordinary ones in the symbol table; see oldname.
             // unhook them.
             // make the list of pointers for the closure call.
-            foreach (var (_, v) in n.Func.Cvars.Slice())
+            foreach (var (_, v) in xfunc.Func.Cvars.Slice())
             { 
                 // Unlink from v1; see comment in syntax.go type Param for these fields.
                 var v1 = v.Name.Defn;
@@ -111,179 +78,121 @@ namespace @internal
                 //
                 // capturevars will decide whether to use v directly or &v.
                 v.Name.Param.Outer = oldname(v.Sym);
-            }            return n;
+
+            }            return _addr_clo!;
+
         }
 
-        private static void typecheckclosure(ref Node func_, long top)
+        private static void typecheckclosure(ptr<Node> _addr_clo, long top)
         {
+            ref Node clo = ref _addr_clo.val;
+
+            var xfunc = clo.Func.Closure; 
+            // Set current associated iota value, so iota can be used inside
+            // function in ConstSpec, see issue #22344
             {
-                var ln__prev1 = ln;
+                var x = getIotaValue();
 
-                foreach (var (_, __ln) in func_.Func.Cvars.Slice())
+                if (x >= 0L)
                 {
-                    ln = __ln;
-                    var n = ln.Name.Defn;
-                    if (!n.Name.Captured())
-                    {
-                        n.Name.SetCaptured(true);
-                        if (n.Name.Decldepth == 0L)
-                        {
-                            Fatalf("typecheckclosure: var %S does not have decldepth assigned", n);
-                        } 
-
-                        // Ignore assignments to the variable in straightline code
-                        // preceding the first capturing by a closure.
-                        if (n.Name.Decldepth == decldepth)
-                        {
-                            n.SetAssigned(false);
-                        }
-                    }
+                    xfunc.SetIota(x);
                 }
 
-                ln = ln__prev1;
             }
 
-            {
-                var ln__prev1 = ln;
 
-                foreach (var (_, __ln) in func_.Func.Dcl)
+            clo.Func.Ntype = typecheck(clo.Func.Ntype, ctxType);
+            clo.Type = clo.Func.Ntype.Type;
+            clo.Func.Top = top; 
+
+            // Do not typecheck xfunc twice, otherwise, we will end up pushing
+            // xfunc to xtop multiple times, causing initLSym called twice.
+            // See #30709
+            if (xfunc.Typecheck() == 1L)
+            {
+                return ;
+            }
+
+            foreach (var (_, ln) in xfunc.Func.Cvars.Slice())
+            {
+                var n = ln.Name.Defn;
+                if (!n.Name.Captured())
                 {
-                    ln = __ln;
-                    if (ln.Op == ONAME && (ln.Class() == PPARAM || ln.Class() == PPARAMOUT))
+                    n.Name.SetCaptured(true);
+                    if (n.Name.Decldepth == 0L)
                     {
-                        ln.Name.Decldepth = 1L;
+                        Fatalf("typecheckclosure: var %S does not have decldepth assigned", n);
+                    } 
+
+                    // Ignore assignments to the variable in straightline code
+                    // preceding the first capturing by a closure.
+                    if (n.Name.Decldepth == decldepth)
+                    {
+                        n.Name.SetAssigned(false);
                     }
+
                 }
 
-                ln = ln__prev1;
             }
-
-            var oldfn = Curfn;
-            func_.Func.Ntype = typecheck(func_.Func.Ntype, Etype);
-            func_.Type = func_.Func.Ntype.Type;
-            func_.Func.Top = top; 
+            xfunc.Func.Nname.Sym = closurename(_addr_Curfn);
+            disableExport(xfunc.Func.Nname.Sym);
+            declare(xfunc.Func.Nname, PFUNC);
+            xfunc = typecheck(xfunc, ctxStmt); 
 
             // Type check the body now, but only if we're inside a function.
             // At top level (in a variable initialization: curfn==nil) we're not
             // ready to type check code yet; we'll check it later, because the
             // underlying closure function we create is added to xtop.
-            if (Curfn != null && func_.Type != null)
+            if (Curfn != null && clo.Type != null)
             {
-                Curfn = func_;
+                var oldfn = Curfn;
+                Curfn = xfunc;
                 var olddd = decldepth;
                 decldepth = 1L;
-                typecheckslice(func_.Nbody.Slice(), Etop);
+                typecheckslice(xfunc.Nbody.Slice(), ctxStmt);
                 decldepth = olddd;
                 Curfn = oldfn;
-            } 
+            }
 
-            // Create top-level function
-            xtop = append(xtop, makeclosure(func_));
+            xtop = append(xtop, xfunc);
+
         }
 
-        // closurename returns name for OCLOSURE n.
-        // It is not as simple as it ought to be, because we typecheck nested closures
-        // starting from the innermost one. So when we check the inner closure,
-        // we don't yet have name for the outer closure. This function uses recursion
-        // to generate names all the way up if necessary.
+        // globClosgen is like Func.Closgen, but for the global scope.
+        private static long globClosgen = default;
 
-        private static long closurename_closgen = default;
-
-        private static ref types.Sym closurename(ref Node n)
+        // closurename generates a new unique name for a closure within
+        // outerfunc.
+        private static ptr<types.Sym> closurename(ptr<Node> _addr_outerfunc)
         {
-            if (n.Sym != null)
+            ref Node outerfunc = ref _addr_outerfunc.val;
+
+            @string outer = "glob.";
+            @string prefix = "func";
+            var gen = _addr_globClosgen;
+
+            if (outerfunc != null)
             {
-                return n.Sym;
-            }
-            long gen = 0L;
-            @string outer = "";
-            @string prefix = "";
-
-            if (n.Func.Outerfunc == null) 
-                // Global closure.
-                outer = "glob.";
-
-                prefix = "func";
-                closurename_closgen++;
-                gen = closurename_closgen;
-            else if (n.Func.Outerfunc.Op == ODCLFUNC) 
-                // The outermost closure inside of a named function.
-                outer = n.Func.Outerfunc.funcname();
-
-                prefix = "func"; 
-
-                // Yes, functions can be named _.
-                // Can't use function closgen in such case,
-                // because it would lead to name clashes.
-                if (!isblank(n.Func.Outerfunc.Func.Nname))
+                if (outerfunc.Func.Closure != null)
                 {
-                    n.Func.Outerfunc.Func.Closgen++;
-                    gen = n.Func.Outerfunc.Func.Closgen;
+                    prefix = "";
                 }
-                else
+
+                outer = outerfunc.funcname(); 
+
+                // There may be multiple functions named "_". In those
+                // cases, we can't use their individual Closgens as it
+                // would lead to name clashes.
+                if (!outerfunc.Func.Nname.isBlank())
                 {
-                    closurename_closgen++;
-                    gen = closurename_closgen;
+                    gen = _addr_outerfunc.Func.Closgen;
                 }
-            else if (n.Func.Outerfunc.Op == OCLOSURE) 
-                // Nested closure, recurse.
-                outer = closurename(n.Func.Outerfunc).Name;
 
-                prefix = "";
-                n.Func.Outerfunc.Func.Closgen++;
-                gen = n.Func.Outerfunc.Func.Closgen;
-            else 
-                Fatalf("closurename called for %S", n);
-                        n.Sym = lookup(fmt.Sprintf("%s.%s%d", outer, prefix, gen));
-            return n.Sym;
-        }
-
-        private static ref Node makeclosure(ref Node func_)
-        { 
-            // wrap body in external function
-            // that begins by reading closure parameters.
-            var xtype = nod(OTFUNC, null, null);
-
-            xtype.List.Set(func_.List.Slice());
-            xtype.Rlist.Set(func_.Rlist.Slice()); 
-
-            // create the function
-            var xfunc = nod(ODCLFUNC, null, null);
-            xfunc.Func.SetIsHiddenClosure(Curfn != null);
-
-            xfunc.Func.Nname = newfuncname(closurename(func_));
-            xfunc.Func.Nname.Sym.SetExported(true); // disable export
-            xfunc.Func.Nname.Name.Param.Ntype = xtype;
-            xfunc.Func.Nname.Name.Defn = xfunc;
-            declare(xfunc.Func.Nname, PFUNC);
-            xfunc.Func.Nname.Name.Funcdepth = func_.Func.Depth;
-            xfunc.Func.Depth = func_.Func.Depth;
-            xfunc.Func.Endlineno = func_.Func.Endlineno;
-            if (Ctxt.Flag_dynlink)
-            {
-                makefuncsym(xfunc.Func.Nname.Sym);
             }
-            xfunc.Nbody.Set(func_.Nbody.Slice());
-            xfunc.Func.Dcl = append(func_.Func.Dcl, xfunc.Func.Dcl);
-            xfunc.Func.Parents = func_.Func.Parents;
-            xfunc.Func.Marks = func_.Func.Marks;
-            func_.Func.Dcl = null;
-            func_.Func.Parents = null;
-            func_.Func.Marks = null;
-            if (xfunc.Nbody.Len() == 0L)
-            {
-                Fatalf("empty body - won't generate any code");
-            }
-            xfunc = typecheck(xfunc, Etop);
 
-            xfunc.Func.Closure = func_;
-            func_.Func.Closure = xfunc;
+            gen.val++;
+            return _addr_lookup(fmt.Sprintf("%s.%s%d", outer, prefix, gen.val))!;
 
-            func_.Nbody.Set(null);
-            func_.List.Set(null);
-            func_.Rlist.Set(null);
-
-            return xfunc;
         }
 
         // capturevarscomplete is set to true when the capturevars phase is done.
@@ -294,27 +203,31 @@ namespace @internal
         // by value or by reference.
         // We use value capturing for values <= 128 bytes that are never reassigned
         // after capturing (effectively constant).
-        private static void capturevars(ref Node xfunc)
+        private static void capturevars(ptr<Node> _addr_xfunc)
         {
+            ref Node xfunc = ref _addr_xfunc.val;
+
             var lno = lineno;
             lineno = xfunc.Pos;
 
-            var func_ = xfunc.Func.Closure;
-            func_.Func.Enter.Set(null);
-            foreach (var (_, v) in func_.Func.Cvars.Slice())
+            var clo = xfunc.Func.Closure;
+            var cvars = xfunc.Func.Cvars.Slice();
+            var @out = cvars[..0L];
+            foreach (var (_, v) in cvars)
             {
                 if (v.Type == null)
                 { 
-                    // if v->type is nil, it means v looked like it was
-                    // going to be used in the closure but wasn't.
-                    // this happens because when parsing a, b, c := f()
-                    // the a, b, c gets parsed as references to older
-                    // a, b, c before the parser figures out this is a
-                    // declaration.
-                    v.Op = OXXX;
-
+                    // If v.Type is nil, it means v looked like it
+                    // was going to be used in the closure, but
+                    // isn't. This happens in struct literals like
+                    // s{f: x} where we can't distinguish whether
+                    // f is a field identifier or expression until
+                    // resolving s.
                     continue;
-                } 
+
+                }
+
+                out = append(out, v); 
 
                 // type check the & of closed variables outside the closure,
                 // so that the outer frame also grabs them and knows they escape.
@@ -324,44 +237,54 @@ namespace @internal
                 var outermost = v.Name.Defn; 
 
                 // out parameters will be assigned to implicitly upon return.
-                if (outer.Class() != PPARAMOUT && !outermost.Addrtaken() && !outermost.Assigned() && v.Type.Width <= 128L)
+                if (outermost.Class() != PPARAMOUT && !outermost.Name.Addrtaken() && !outermost.Name.Assigned() && v.Type.Width <= 128L)
                 {
                     v.Name.SetByval(true);
                 }
                 else
                 {
-                    outermost.SetAddrtaken(true);
+                    outermost.Name.SetAddrtaken(true);
                     outer = nod(OADDR, outer, null);
                 }
+
                 if (Debug['m'] > 1L)
                 {
-                    ref types.Sym name = default;
+                    ptr<types.Sym> name;
                     if (v.Name.Curfn != null && v.Name.Curfn.Func.Nname != null)
                     {
                         name = v.Name.Curfn.Func.Nname.Sym;
                     }
+
                     @string how = "ref";
                     if (v.Name.Byval())
                     {
                         how = "value";
                     }
-                    Warnl(v.Pos, "%v capturing by %s: %v (addr=%v assign=%v width=%d)", name, how, v.Sym, outermost.Addrtaken(), outermost.Assigned(), int32(v.Type.Width));
+
+                    Warnl(v.Pos, "%v capturing by %s: %v (addr=%v assign=%v width=%d)", name, how, v.Sym, outermost.Name.Addrtaken(), outermost.Name.Assigned(), int32(v.Type.Width));
+
                 }
-                outer = typecheck(outer, Erv);
-                func_.Func.Enter.Append(outer);
+
+                outer = typecheck(outer, ctxExpr);
+                clo.Func.Enter.Append(outer);
+
             }
+            xfunc.Func.Cvars.Set(out);
             lineno = lno;
+
         }
 
         // transformclosure is called in a separate phase after escape analysis.
         // It transform closure bodies to properly reference captured variables.
-        private static void transformclosure(ref Node xfunc)
+        private static void transformclosure(ptr<Node> _addr_xfunc)
         {
+            ref Node xfunc = ref _addr_xfunc.val;
+
             var lno = lineno;
             lineno = xfunc.Pos;
-            var func_ = xfunc.Func.Closure;
+            var clo = xfunc.Func.Closure;
 
-            if (func_.Func.Top & Ecall != 0L)
+            if (clo.Func.Top & ctxCallee != 0L)
             { 
                 // If the closure is directly called, we transform it to a plain function call
                 // with variables passed as args. This avoids allocation of a closure object.
@@ -382,27 +305,15 @@ namespace @internal
                 var f = xfunc.Func.Nname; 
 
                 // We are going to insert captured variables before input args.
-                slice<ref types.Field> @params = default;
-                slice<ref Node> decls = default;
+                slice<ptr<types.Field>> @params = default;
+                slice<ptr<Node>> decls = default;
                 {
                     var v__prev1 = v;
 
-                    foreach (var (_, __v) in func_.Func.Cvars.Slice())
+                    foreach (var (_, __v) in xfunc.Func.Cvars.Slice())
                     {
                         v = __v;
-                        if (v.Op == OXXX)
-                        {
-                            continue;
-                        }
-                        var fld = types.NewField();
-                        fld.Funarg = types.FunargParams;
-                        if (v.Name.Byval())
-                        { 
-                            // If v is captured by value, we merely downgrade it to PPARAM.
-                            v.SetClass(PPARAM);
-                            fld.Nname = asTypesNode(v);
-                        }
-                        else
+                        if (!v.Name.Byval())
                         { 
                             // If v of type T is captured by reference,
                             // we introduce function param &v *T
@@ -410,15 +321,20 @@ namespace @internal
                             // (accesses will implicitly deref &v).
                             var addr = newname(lookup("&" + v.Sym.Name));
                             addr.Type = types.NewPtr(v.Type);
-                            addr.SetClass(PPARAM);
                             v.Name.Param.Heapaddr = addr;
-                            fld.Nname = asTypesNode(addr);
-                        }
-                        fld.Type = asNode(fld.Nname).Type;
-                        fld.Sym = asNode(fld.Nname).Sym;
+                            v = addr;
 
+                        }
+
+                        v.SetClass(PPARAM);
+                        decls = append(decls, v);
+
+                        var fld = types.NewField();
+                        fld.Nname = asTypesNode(v);
+                        fld.Type = v.Type;
+                        fld.Sym = v.Sym;
                         params = append(params, fld);
-                        decls = append(decls, asNode(fld.Nname));
+
                     }
             else
 
@@ -431,24 +347,21 @@ namespace @internal
                     // Prepend params and decls.
                     f.Type.Params().SetFields(append(params, f.Type.Params().FieldSlice()));
                     xfunc.Func.Dcl = append(decls, xfunc.Func.Dcl);
+
                 }
+
                 dowidth(f.Type);
                 xfunc.Type = f.Type; // update type of ODCLFUNC
             }            { 
                 // The closure is not called, so it is going to stay as closure.
-                slice<ref Node> body = default;
+                slice<ptr<Node>> body = default;
                 var offset = int64(Widthptr);
                 {
                     var v__prev1 = v;
 
-                    foreach (var (_, __v) in func_.Func.Cvars.Slice())
+                    foreach (var (_, __v) in xfunc.Func.Cvars.Slice())
                     {
-                        v = __v;
-                        if (v.Op == OXXX)
-                        {
-                            continue;
-                        } 
-
+                        v = __v; 
                         // cv refers to the field inside of closure OSTRUCTLIT.
                         var cv = nod(OCLOSUREVAR, null, null);
 
@@ -457,6 +370,7 @@ namespace @internal
                         {
                             cv.Type = types.NewPtr(v.Type);
                         }
+
                         offset = Rnd(offset, int64(cv.Type.Align));
                         cv.Xoffset = offset;
                         offset += cv.Type.Width;
@@ -467,6 +381,7 @@ namespace @internal
                             v.SetClass(PAUTO);
                             xfunc.Func.Dcl = append(xfunc.Func.Dcl, v);
                             body = append(body, nod(OAS, v, cv));
+
                         }
                         else
                         { 
@@ -483,8 +398,11 @@ namespace @internal
                             {
                                 cv = nod(OADDR, cv, null);
                             }
+
                             body = append(body, nod(OAS, addr, cv));
+
                         }
+
                     }
 
                     v = v__prev1;
@@ -492,64 +410,61 @@ namespace @internal
 
                 if (len(body) > 0L)
                 {
-                    typecheckslice(body, Etop);
-                    walkstmtlist(body);
+                    typecheckslice(body, ctxStmt);
                     xfunc.Func.Enter.Set(body);
                     xfunc.Func.SetNeedctxt(true);
                 }
+
             }
+
             lineno = lno;
+
         }
 
-        // hasemptycvars returns true iff closure func_ has an
-        // empty list of captured vars. OXXX nodes don't count.
-        private static bool hasemptycvars(ref Node func_)
+        // hasemptycvars reports whether closure clo has an
+        // empty list of captured vars.
+        private static bool hasemptycvars(ptr<Node> _addr_clo)
         {
-            foreach (var (_, v) in func_.Func.Cvars.Slice())
-            {
-                if (v.Op == OXXX)
-                {
-                    continue;
-                }
-                return false;
-            }
-            return true;
+            ref Node clo = ref _addr_clo.val;
+
+            var xfunc = clo.Func.Closure;
+            return xfunc.Func.Cvars.Len() == 0L;
         }
 
         // closuredebugruntimecheck applies boilerplate checks for debug flags
         // and compiling runtime
-        private static void closuredebugruntimecheck(ref Node r)
+        private static void closuredebugruntimecheck(ptr<Node> _addr_clo)
         {
+            ref Node clo = ref _addr_clo.val;
+
             if (Debug_closure > 0L)
             {
-                if (r.Esc == EscHeap)
+                var xfunc = clo.Func.Closure;
+                if (clo.Esc == EscHeap)
                 {
-                    Warnl(r.Pos, "heap closure, captured vars = %v", r.Func.Cvars);
+                    Warnl(clo.Pos, "heap closure, captured vars = %v", xfunc.Func.Cvars);
                 }
                 else
                 {
-                    Warnl(r.Pos, "stack closure, captured vars = %v", r.Func.Cvars);
+                    Warnl(clo.Pos, "stack closure, captured vars = %v", xfunc.Func.Cvars);
                 }
+
             }
-            if (compiling_runtime && r.Esc == EscHeap)
+
+            if (compiling_runtime && clo.Esc == EscHeap)
             {
-                yyerrorl(r.Pos, "heap-allocated closure, not allowed in runtime.");
+                yyerrorl(clo.Pos, "heap-allocated closure, not allowed in runtime");
             }
+
         }
 
-        private static ref Node walkclosure(ref Node func_, ref Nodes init)
-        { 
-            // If no closure vars, don't bother wrapping.
-            if (hasemptycvars(func_))
-            {
-                if (Debug_closure > 0L)
-                {
-                    Warnl(func_.Pos, "closure converted to global");
-                }
-                return func_.Func.Closure.Func.Nname;
-            }
-            closuredebugruntimecheck(func_); 
-
+        // closureType returns the struct type used to hold all the information
+        // needed in the closure for clo (clo must be a OCLOSURE node).
+        // The address of a variable of the returned type can be cast to a func.
+        private static ptr<types.Type> closureType(ptr<Node> _addr_clo)
+        {
+            ref Node clo = ref _addr_clo.val;
+ 
             // Create closure in the form of a composite literal.
             // supposing the closure captures an int i and a string s
             // and has one float64 argument and no results,
@@ -563,198 +478,151 @@ namespace @internal
             // The information appears in the binary in the form of type descriptors;
             // the struct is unnamed so that closures in multiple packages with the
             // same struct type can share the descriptor.
-
-            ref Node fields = new slice<ref Node>(new ref Node[] { namedfield(".F",types.Types[TUINTPTR]) });
-            foreach (var (_, v) in func_.Func.Cvars.Slice())
+            ptr<Node> fields = new slice<ptr<Node>>(new ptr<Node>[] { namedfield(".F",types.Types[TUINTPTR]) });
+            foreach (var (_, v) in clo.Func.Closure.Func.Cvars.Slice())
             {
-                if (v.Op == OXXX)
-                {
-                    continue;
-                }
                 var typ = v.Type;
                 if (!v.Name.Byval())
                 {
                     typ = types.NewPtr(typ);
                 }
+
                 fields = append(fields, symfield(v.Sym, typ));
+
             }
             typ = tostruct(fields);
             typ.SetNoalg(true);
+            return _addr_typ!;
 
-            var clos = nod(OCOMPLIT, null, nod(OIND, typenod(typ), null));
-            clos.Esc = func_.Esc;
-            clos.Right.SetImplicit(true);
-            clos.List.Set(append(new slice<ref Node>(new ref Node[] { nod(OCFUNC,func_.Func.Closure.Func.Nname,nil) }), func_.Func.Enter.Slice())); 
+        }
+
+        private static ptr<Node> walkclosure(ptr<Node> _addr_clo, ptr<Nodes> _addr_init) => func((_, panic, __) =>
+        {
+            ref Node clo = ref _addr_clo.val;
+            ref Nodes init = ref _addr_init.val;
+
+            var xfunc = clo.Func.Closure; 
+
+            // If no closure vars, don't bother wrapping.
+            if (hasemptycvars(_addr_clo))
+            {
+                if (Debug_closure > 0L)
+                {
+                    Warnl(clo.Pos, "closure converted to global");
+                }
+
+                return _addr_xfunc.Func.Nname!;
+
+            }
+
+            closuredebugruntimecheck(_addr_clo);
+
+            var typ = closureType(_addr_clo);
+
+            var clos = nod(OCOMPLIT, null, typenod(typ));
+            clos.Esc = clo.Esc;
+            clos.List.Set(append(new slice<ptr<Node>>(new ptr<Node>[] { nod(OCFUNC,xfunc.Func.Nname,nil) }), clo.Func.Enter.Slice()));
+
+            clos = nod(OADDR, clos, null);
+            clos.Esc = clo.Esc; 
 
             // Force type conversion from *struct to the func type.
-            clos = nod(OCONVNOP, clos, null);
-            clos.Type = func_.Type;
-
-            clos = typecheck(clos, Erv); 
-
-            // typecheck will insert a PTRLIT node under CONVNOP,
-            // tag it with escape analysis result.
-            clos.Left.Esc = func_.Esc; 
+            clos = convnop(clos, clo.Type); 
 
             // non-escaping temp to use, if any.
-            // orderexpr did not compute the type; fill it in now.
             {
-                var x = prealloc[func_];
+                var x = prealloc[clo];
 
                 if (x != null)
                 {
-                    x.Type = clos.Left.Left.Type;
-                    x.Orig.Type = x.Type;
+                    if (!types.Identical(typ, x.Type))
+                    {
+                        panic("closure type does not match order's assigned type");
+                    }
+
                     clos.Left.Right = x;
-                    delete(prealloc, func_);
+                    delete(prealloc, clo);
+
                 }
 
             }
 
-            return walkexpr(clos, init);
-        }
 
-        private static void typecheckpartialcall(ref Node fn, ref types.Sym sym)
+            return _addr_walkexpr(clos, init)!;
+
+        });
+
+        private static void typecheckpartialcall(ptr<Node> _addr_fn, ptr<types.Sym> _addr_sym)
         {
+            ref Node fn = ref _addr_fn.val;
+            ref types.Sym sym = ref _addr_sym.val;
+
 
             if (fn.Op == ODOTINTER || fn.Op == ODOTMETH) 
                 break;
             else 
                 Fatalf("invalid typecheckpartialcall");
             // Create top-level function.
-            var xfunc = makepartialcall(fn, fn.Type, sym);
+            var xfunc = makepartialcall(_addr_fn, _addr_fn.Type, _addr_sym);
             fn.Func = xfunc.Func;
             fn.Right = newname(sym);
             fn.Op = OCALLPART;
             fn.Type = xfunc.Type;
+
         }
 
-        private static ref types.Pkg makepartialcall_gopkg = default;
-
-        private static ref Node makepartialcall(ref Node fn, ref types.Type t0, ref types.Sym meth)
+        private static ptr<Node> makepartialcall(ptr<Node> _addr_fn, ptr<types.Type> _addr_t0, ptr<types.Sym> _addr_meth)
         {
-            @string p = default;
+            ref Node fn = ref _addr_fn.val;
+            ref types.Type t0 = ref _addr_t0.val;
+            ref types.Sym meth = ref _addr_meth.val;
 
             var rcvrtype = fn.Left.Type;
-            if (exportname(meth.Name))
-            {
-                p = fmt.Sprintf("(%-S).%s-fm", rcvrtype, meth.Name);
-            }
-            else
-            {
-                p = fmt.Sprintf("(%-S).(%-v)-fm", rcvrtype, meth);
-            }
-            var basetype = rcvrtype;
-            if (rcvrtype.IsPtr())
-            {
-                basetype = basetype.Elem();
-            }
-            if (!basetype.IsInterface() && basetype.Sym == null)
-            {
-                Fatalf("missing base type for %v", rcvrtype);
-            }
-            ref types.Pkg spkg = default;
-            if (basetype.Sym != null)
-            {
-                spkg = basetype.Sym.Pkg;
-            }
-            if (spkg == null)
-            {
-                if (makepartialcall_gopkg == null)
-                {
-                    makepartialcall_gopkg = types.NewPkg("go", "");
-                }
-                spkg = makepartialcall_gopkg;
-            }
-            var sym = spkg.Lookup(p);
+            var sym = methodSymSuffix(rcvrtype, meth, "-fm");
 
             if (sym.Uniq())
             {
-                return asNode(sym.Def);
+                return _addr_asNode(sym.Def)!;
             }
+
             sym.SetUniq(true);
 
             var savecurfn = Curfn;
-            Curfn = null;
+            var saveLineNo = lineno;
+            Curfn = null; 
 
-            var xtype = nod(OTFUNC, null, null);
-            slice<ref Node> l = default;
-            slice<ref Node> callargs = default;
-            var ddd = false;
-            var xfunc = nod(ODCLFUNC, null, null);
-            Curfn = xfunc;
+            // Set line number equal to the line number where the method is declared.
+            ptr<types.Field> m;
+            if (lookdot0(meth, rcvrtype, _addr_m, false) == 1L && m.Pos.IsKnown())
             {
-                var i__prev1 = i;
-                var t__prev1 = t;
+                lineno = m.Pos;
+            } 
+            // Note: !m.Pos.IsKnown() happens for method expressions where
+            // the method is implicitly declared. The Error method of the
+            // built-in error type is one such method.  We leave the line
+            // number at the use of the method expression in this
+            // case. See issue 29389.
+            var tfn = nod(OTFUNC, null, null);
+            tfn.List.Set(structargs(t0.Params(), true));
+            tfn.Rlist.Set(structargs(t0.Results(), false));
 
-                foreach (var (__i, __t) in t0.Params().Fields().Slice())
-                {
-                    i = __i;
-                    t = __t;
-                    var n = newname(lookupN("a", i));
-                    n.SetClass(PPARAM);
-                    xfunc.Func.Dcl = append(xfunc.Func.Dcl, n);
-                    callargs = append(callargs, n);
-                    var fld = nod(ODCLFIELD, n, typenod(t.Type));
-                    if (t.Isddd())
-                    {
-                        fld.SetIsddd(true);
-                        ddd = true;
-                    }
-                    l = append(l, fld);
-                }
-
-                i = i__prev1;
-                t = t__prev1;
-            }
-
-            xtype.List.Set(l);
-            l = null;
-            slice<ref Node> retargs = default;
-            {
-                var i__prev1 = i;
-                var t__prev1 = t;
-
-                foreach (var (__i, __t) in t0.Results().Fields().Slice())
-                {
-                    i = __i;
-                    t = __t;
-                    n = newname(lookupN("r", i));
-                    n.SetClass(PPARAMOUT);
-                    xfunc.Func.Dcl = append(xfunc.Func.Dcl, n);
-                    retargs = append(retargs, n);
-                    l = append(l, nod(ODCLFIELD, n, typenod(t.Type)));
-                }
-
-                i = i__prev1;
-                t = t__prev1;
-            }
-
-            xtype.Rlist.Set(l);
-
+            disableExport(sym);
+            var xfunc = dclfunc(sym, tfn);
             xfunc.Func.SetDupok(true);
-            xfunc.Func.Nname = newfuncname(sym);
-            xfunc.Func.Nname.Sym.SetExported(true); // disable export
-            xfunc.Func.Nname.Name.Param.Ntype = xtype;
-            xfunc.Func.Nname.Name.Defn = xfunc;
-            declare(xfunc.Func.Nname, PFUNC); 
+            xfunc.Func.SetNeedctxt(true);
+
+            tfn.Type.SetPkg(t0.Pkg()); 
 
             // Declare and initialize variable holding receiver.
 
-            xfunc.Func.SetNeedctxt(true);
             var cv = nod(OCLOSUREVAR, null, null);
-            cv.Xoffset = int64(Widthptr);
             cv.Type = rcvrtype;
-            if (int(cv.Type.Align) > Widthptr)
-            {
-                cv.Xoffset = int64(cv.Type.Align);
-            }
-            var ptr = newname(lookup("rcvr"));
-            ptr.SetClass(PAUTO);
+            cv.Xoffset = Rnd(int64(Widthptr), int64(cv.Type.Align));
+
+            var ptr = newname(lookup(".this"));
+            declare(ptr, PAUTO);
             ptr.Name.SetUsed(true);
-            ptr.Name.Curfn = xfunc;
-            xfunc.Func.Dcl = append(xfunc.Func.Dcl, ptr);
-            slice<ref Node> body = default;
+            slice<ptr<Node>> body = default;
             if (rcvrtype.IsPtr() || rcvrtype.IsInterface())
             {
                 ptr.Type = rcvrtype;
@@ -765,34 +633,49 @@ namespace @internal
                 ptr.Type = types.NewPtr(rcvrtype);
                 body = append(body, nod(OAS, ptr, nod(OADDR, cv, null)));
             }
-            var call = nod(OCALL, nodSym(OXDOT, ptr, meth), null);
-            call.List.Set(callargs);
-            call.SetIsddd(ddd);
-            if (t0.NumResults() == 0L)
-            {
-                body = append(body, call);
-            }
-            else
-            {
-                n = nod(OAS2, null, null);
-                n.List.Set(retargs);
-                n.Rlist.Set1(call);
-                body = append(body, n);
-                n = nod(ORETURN, null, null);
-                body = append(body, n);
-            }
-            xfunc.Nbody.Set(body);
 
-            xfunc = typecheck(xfunc, Etop);
+            var call = nod(OCALL, nodSym(OXDOT, ptr, meth), null);
+            call.List.Set(paramNnames(tfn.Type));
+            call.SetIsDDD(tfn.Type.IsVariadic());
+            if (t0.NumResults() != 0L)
+            {
+                var n = nod(ORETURN, null, null);
+                n.List.Set1(call);
+                call = n;
+            }
+
+            body = append(body, call);
+
+            xfunc.Nbody.Set(body);
+            funcbody();
+
+            xfunc = typecheck(xfunc, ctxStmt);
             sym.Def = asTypesNode(xfunc);
             xtop = append(xtop, xfunc);
             Curfn = savecurfn;
+            lineno = saveLineNo;
 
-            return xfunc;
+            return _addr_xfunc!;
+
         }
 
-        private static ref Node walkpartialcall(ref Node n, ref Nodes init)
-        { 
+        // partialCallType returns the struct type used to hold all the information
+        // needed in the closure for n (n must be a OCALLPART node).
+        // The address of a variable of the returned type can be cast to a func.
+        private static ptr<types.Type> partialCallType(ptr<Node> _addr_n)
+        {
+            ref Node n = ref _addr_n.val;
+
+            var t = tostruct(new slice<ptr<Node>>(new ptr<Node>[] { namedfield("F",types.Types[TUINTPTR]), namedfield("R",n.Left.Type) }));
+            t.SetNoalg(true);
+            return _addr_t!;
+        }
+
+        private static ptr<Node> walkpartialcall(ptr<Node> _addr_n, ptr<Nodes> _addr_init) => func((_, panic, __) =>
+        {
+            ref Node n = ref _addr_n.val;
+            ref Nodes init = ref _addr_init.val;
+ 
             // Create closure in the form of a composite literal.
             // For x.M with receiver (x) type T, the generated code looks like:
             //
@@ -805,44 +688,73 @@ namespace @internal
                 // Trigger panic for method on nil interface now.
                 // Otherwise it happens in the wrapper and is confusing.
                 n.Left = cheapexpr(n.Left, init);
+                n.Left = walkexpr(n.Left, null);
 
-                checknil(n.Left, init);
+                var tab = nod(OITAB, n.Left, null);
+                tab = typecheck(tab, ctxExpr);
+
+                var c = nod(OCHECKNIL, tab, null);
+                c.SetTypecheck(1L);
+                init.Append(c);
+
             }
-            var typ = tostruct(new slice<ref Node>(new ref Node[] { namedfield("F",types.Types[TUINTPTR]), namedfield("R",n.Left.Type) }));
-            typ.SetNoalg(true);
 
-            var clos = nod(OCOMPLIT, null, nod(OIND, typenod(typ), null));
+            var typ = partialCallType(_addr_n);
+
+            var clos = nod(OCOMPLIT, null, typenod(typ));
             clos.Esc = n.Esc;
-            clos.Right.SetImplicit(true);
-            clos.List.Set1(nod(OCFUNC, n.Func.Nname, null));
-            clos.List.Append(n.Left); 
+            clos.List.Set2(nod(OCFUNC, n.Func.Nname, null), n.Left);
+
+            clos = nod(OADDR, clos, null);
+            clos.Esc = n.Esc; 
 
             // Force type conversion from *struct to the func type.
-            clos = nod(OCONVNOP, clos, null);
-            clos.Type = n.Type;
-
-            clos = typecheck(clos, Erv); 
-
-            // typecheck will insert a PTRLIT node under CONVNOP,
-            // tag it with escape analysis result.
-            clos.Left.Esc = n.Esc; 
+            clos = convnop(clos, n.Type); 
 
             // non-escaping temp to use, if any.
-            // orderexpr did not compute the type; fill it in now.
             {
                 var x = prealloc[n];
 
                 if (x != null)
                 {
-                    x.Type = clos.Left.Left.Type;
-                    x.Orig.Type = x.Type;
+                    if (!types.Identical(typ, x.Type))
+                    {
+                        panic("partial call type does not match order's assigned type");
+                    }
+
                     clos.Left.Right = x;
                     delete(prealloc, n);
+
                 }
 
             }
 
-            return walkexpr(clos, init);
+
+            return _addr_walkexpr(clos, init)!;
+
+        });
+
+        // callpartMethod returns the *types.Field representing the method
+        // referenced by method value n.
+        private static ptr<types.Field> callpartMethod(ptr<Node> _addr_n)
+        {
+            ref Node n = ref _addr_n.val;
+
+            if (n.Op != OCALLPART)
+            {
+                Fatalf("expected OCALLPART, got %v", n);
+            } 
+
+            // TODO(mdempsky): Optimize this. If necessary,
+            // makepartialcall could save m for us somewhere.
+            ptr<types.Field> m;
+            if (lookdot0(n.Right.Sym, n.Left.Type, _addr_m, false) != 1L)
+            {
+                Fatalf("failed to find field for OCALLPART");
+            }
+
+            return _addr_m!;
+
         }
     }
 }}}}

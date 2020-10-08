@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package user -- go2cs converted at 2020 August 29 08:31:50 UTC
+// package user -- go2cs converted at 2020 October 08 03:45:32 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\lookup_plan9.go
 using fmt = go.fmt_package;
@@ -19,50 +19,72 @@ namespace os
         // Partial os/user support on Plan 9.
         // Supports Current(), but not Lookup()/LookupId().
         // The latter two would require parsing /adm/users.
-        private static readonly @string userFile = "/dev/user";
+        private static readonly @string userFile = (@string)"/dev/user";
+
 
         private static void init()
         {
             groupImplemented = false;
         }
 
-        private static (ref User, error) current()
+        private static (ptr<User>, error) current()
         {
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
             var (ubytes, err) = ioutil.ReadFile(userFile);
             if (err != null)
             {
-                return (null, fmt.Errorf("user: %s", err));
+                return (_addr_null!, error.As(fmt.Errorf("user: %s", err))!);
             }
+
             var uname = string(ubytes);
 
-            User u = ref new User(Uid:uname,Gid:uname,Username:uname,Name:uname,HomeDir:os.Getenv("home"),);
+            ptr<User> u = addr(new User(Uid:uname,Gid:uname,Username:uname,Name:uname,HomeDir:os.Getenv("home"),));
 
-            return (u, null);
+            return (_addr_u!, error.As(null!)!);
+
         }
 
-        private static (ref User, error) lookupUser(@string username)
+        private static (ptr<User>, error) lookupUser(@string username)
         {
-            return (null, syscall.EPLAN9);
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref User, error) lookupUserId(@string uid)
+        private static (ptr<User>, error) lookupUserId(@string uid)
         {
-            return (null, syscall.EPLAN9);
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref Group, error) lookupGroup(@string groupname)
+        private static (ptr<Group>, error) lookupGroup(@string groupname)
         {
-            return (null, syscall.EPLAN9);
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref Group, error) lookupGroupId(@string _p0)
+        private static (ptr<Group>, error) lookupGroupId(@string _p0)
         {
-            return (null, syscall.EPLAN9);
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (slice<@string>, error) listGroups(ref User _p0)
+        private static (slice<@string>, error) listGroups(ptr<User> _addr__p0)
         {
-            return (null, syscall.EPLAN9);
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref User _p0 = ref _addr__p0.val;
+
+            return (null, error.As(syscall.EPLAN9)!);
         }
     }
 }}

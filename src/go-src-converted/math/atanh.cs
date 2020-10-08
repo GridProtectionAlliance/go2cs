@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:44 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:10 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\atanh.go
 
@@ -57,7 +57,7 @@ namespace go
 
         private static double atanh(double x)
         {
-            const float NearZero = 1.0F / (1L << (int)(28L)); // 2**-28
+            const float NearZero = (float)1.0F / (1L << (int)(28L)); // 2**-28
             // special cases
  // 2**-28
             // special cases
@@ -74,6 +74,7 @@ namespace go
                 x = -x;
                 sign = true;
             }
+
             double temp = default;
 
             if (x < NearZero) 
@@ -87,7 +88,9 @@ namespace go
             {
                 temp = -temp;
             }
+
             return temp;
+
         }
     }
 }

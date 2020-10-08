@@ -9,10 +9,10 @@
 
 // See NIST SP 800-38A, pp 10-11
 
-// package cipher -- go2cs converted at 2020 August 29 08:28:32 UTC
+// package cipher -- go2cs converted at 2020 October 08 03:35:22 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\cbc.go
-
+using subtle = go.crypto.@internal.subtle_package;
 using static go.builtin;
 
 namespace go {
@@ -28,9 +28,9 @@ namespace crypto
             public slice<byte> tmp;
         }
 
-        private static ref cbc newCBC(Block b, slice<byte> iv)
+        private static ptr<cbc> newCBC(Block b, slice<byte> iv)
         {
-            return ref new cbc(b:b,blockSize:b.BlockSize(),iv:dup(iv),tmp:make([]byte,b.BlockSize()),);
+            return addr(new cbc(b:b,blockSize:b.BlockSize(),iv:dup(iv),tmp:make([]byte,b.BlockSize()),));
         }
 
         private partial struct cbcEncrypter // : cbc
@@ -55,8 +55,9 @@ namespace crypto
             {
                 panic("cipher.NewCBCEncrypter: IV length must equal block size");
             }
+
             {
-                cbcEncAble (cbc, ok) = b._<cbcEncAble>();
+                cbcEncAble (cbc, ok) = cbcEncAble.As(b._<cbcEncAble>())!;
 
                 if (ok)
                 {
@@ -64,24 +65,37 @@ namespace crypto
                 }
 
             }
-            return (cbcEncrypter.Value)(newCBC(b, iv));
+
+            return (cbcEncrypter.val)(newCBC(b, iv));
+
         });
 
-        private static long BlockSize(this ref cbcEncrypter x)
+        private static long BlockSize(this ptr<cbcEncrypter> _addr_x)
         {
+            ref cbcEncrypter x = ref _addr_x.val;
+
             return x.blockSize;
         }
 
-        private static void CryptBlocks(this ref cbcEncrypter _x, slice<byte> dst, slice<byte> src) => func(_x, (ref cbcEncrypter x, Defer _, Panic panic, Recover __) =>
+        private static void CryptBlocks(this ptr<cbcEncrypter> _addr_x, slice<byte> dst, slice<byte> src) => func((_, panic, __) =>
         {
+            ref cbcEncrypter x = ref _addr_x.val;
+
             if (len(src) % x.blockSize != 0L)
             {
                 panic("crypto/cipher: input not full blocks");
             }
+
             if (len(dst) < len(src))
             {
                 panic("crypto/cipher: output smaller than input");
             }
+
+            if (subtle.InexactOverlap(dst[..len(src)], src))
+            {
+                panic("crypto/cipher: invalid buffer overlap");
+            }
+
             var iv = x.iv;
 
             while (len(src) > 0L)
@@ -94,6 +108,7 @@ namespace crypto
                 iv = dst[..x.blockSize];
                 src = src[x.blockSize..];
                 dst = dst[x.blockSize..];
+
             } 
 
             // Save the iv for the next CryptBlocks call.
@@ -101,15 +116,20 @@ namespace crypto
 
             // Save the iv for the next CryptBlocks call.
             copy(x.iv, iv);
+
         });
 
-        private static void SetIV(this ref cbcEncrypter _x, slice<byte> iv) => func(_x, (ref cbcEncrypter x, Defer _, Panic panic, Recover __) =>
+        private static void SetIV(this ptr<cbcEncrypter> _addr_x, slice<byte> iv) => func((_, panic, __) =>
         {
+            ref cbcEncrypter x = ref _addr_x.val;
+
             if (len(iv) != len(x.iv))
             {
                 panic("cipher: incorrect length IV");
             }
+
             copy(x.iv, iv);
+
         });
 
         private partial struct cbcDecrypter // : cbc
@@ -134,8 +154,9 @@ namespace crypto
             {
                 panic("cipher.NewCBCDecrypter: IV length must equal block size");
             }
+
             {
-                cbcDecAble (cbc, ok) = b._<cbcDecAble>();
+                cbcDecAble (cbc, ok) = cbcDecAble.As(b._<cbcDecAble>())!;
 
                 if (ok)
                 {
@@ -143,27 +164,40 @@ namespace crypto
                 }
 
             }
-            return (cbcDecrypter.Value)(newCBC(b, iv));
+
+            return (cbcDecrypter.val)(newCBC(b, iv));
+
         });
 
-        private static long BlockSize(this ref cbcDecrypter x)
+        private static long BlockSize(this ptr<cbcDecrypter> _addr_x)
         {
+            ref cbcDecrypter x = ref _addr_x.val;
+
             return x.blockSize;
         }
 
-        private static void CryptBlocks(this ref cbcDecrypter _x, slice<byte> dst, slice<byte> src) => func(_x, (ref cbcDecrypter x, Defer _, Panic panic, Recover __) =>
+        private static void CryptBlocks(this ptr<cbcDecrypter> _addr_x, slice<byte> dst, slice<byte> src) => func((_, panic, __) =>
         {
+            ref cbcDecrypter x = ref _addr_x.val;
+
             if (len(src) % x.blockSize != 0L)
             {
                 panic("crypto/cipher: input not full blocks");
             }
+
             if (len(dst) < len(src))
             {
                 panic("crypto/cipher: output smaller than input");
             }
+
+            if (subtle.InexactOverlap(dst[..len(src)], src))
+            {
+                panic("crypto/cipher: invalid buffer overlap");
+            }
+
             if (len(src) == 0L)
             {
-                return;
+                return ;
             } 
 
             // For each block, we need to xor the decrypted data with the previous block's ciphertext (the iv).
@@ -196,15 +230,20 @@ namespace crypto
             // Set the new iv to the first block we copied earlier.
             x.iv = x.tmp;
             x.tmp = x.iv;
+
         });
 
-        private static void SetIV(this ref cbcDecrypter _x, slice<byte> iv) => func(_x, (ref cbcDecrypter x, Defer _, Panic panic, Recover __) =>
+        private static void SetIV(this ptr<cbcDecrypter> _addr_x, slice<byte> iv) => func((_, panic, __) =>
         {
+            ref cbcDecrypter x = ref _addr_x.val;
+
             if (len(iv) != len(x.iv))
             {
                 panic("cipher: incorrect length IV");
             }
+
             copy(x.iv, iv);
+
         });
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:32 UTC
+//     Generated on 2020 October 08 03:27:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace go
                 this.CrlInfo = default;
             }
 
-            public CertRevocationInfo(uint Size = default, uint RevocationResult = default, ref ptr<byte> RevocationOid = default, System.UIntPtr OidSpecificInfo = default, uint HasFreshnessTime = default, uint FreshnessTime = default, System.UIntPtr CrlInfo = default)
+            public CertRevocationInfo(uint Size = default, uint RevocationResult = default, ref ptr<byte> RevocationOid = default, Pointer OidSpecificInfo = default, uint HasFreshnessTime = default, uint FreshnessTime = default, ref ptr<CertRevocationCrlInfo> CrlInfo = default)
             {
                 this.Size = Size;
                 this.RevocationResult = RevocationResult;
@@ -64,7 +64,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static CertRevocationInfo CertRevocationInfo_cast(dynamic value)
         {
-            return new CertRevocationInfo(value.Size, value.RevocationResult, ref value.RevocationOid, value.OidSpecificInfo, value.HasFreshnessTime, value.FreshnessTime, value.CrlInfo);
+            return new CertRevocationInfo(value.Size, value.RevocationResult, ref value.RevocationOid, value.OidSpecificInfo, value.HasFreshnessTime, value.FreshnessTime, ref value.CrlInfo);
         }
     }
 }

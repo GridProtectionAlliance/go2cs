@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:48 UTC
+//     Generated on 2020 October 08 04:33:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,8 +22,10 @@ using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using time = go.time_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;
@@ -56,9 +58,21 @@ namespace @internal
                 this.Priority = default;
                 this.Failed = default;
                 this.Built = default;
+                this.VetxOnly = default;
+                this.NeedVet = default;
+                this.NeedBuild = default;
+                this.ActionID = default;
+                this.BuildID = default;
+                this.TimeReady = default;
+                this.TimeStart = default;
+                this.TimeDone = default;
+                this.Cmd = default;
+                this.CmdReal = default;
+                this.CmdUser = default;
+                this.CmdSys = default;
             }
 
-            public actionJSON(long ID = default, @string Mode = default, @string Package = default, slice<long> Deps = default, bool IgnoreFail = default, slice<@string> Args = default, bool Link = default, @string Objdir = default, @string Target = default, long Priority = default, bool Failed = default, @string Built = default)
+            public actionJSON(long ID = default, @string Mode = default, @string Package = default, slice<long> Deps = default, bool IgnoreFail = default, slice<@string> Args = default, bool Link = default, @string Objdir = default, @string Target = default, long Priority = default, bool Failed = default, @string Built = default, bool VetxOnly = default, bool NeedVet = default, bool NeedBuild = default, @string ActionID = default, @string BuildID = default, time.Time TimeReady = default, time.Time TimeStart = default, time.Time TimeDone = default, slice<@string> Cmd = default, time.Duration CmdReal = default, time.Duration CmdUser = default, time.Duration CmdSys = default)
             {
                 this.ID = ID;
                 this.Mode = Mode;
@@ -72,6 +86,18 @@ namespace @internal
                 this.Priority = Priority;
                 this.Failed = Failed;
                 this.Built = Built;
+                this.VetxOnly = VetxOnly;
+                this.NeedVet = NeedVet;
+                this.NeedBuild = NeedBuild;
+                this.ActionID = ActionID;
+                this.BuildID = BuildID;
+                this.TimeReady = TimeReady;
+                this.TimeStart = TimeStart;
+                this.TimeDone = TimeDone;
+                this.Cmd = Cmd;
+                this.CmdReal = CmdReal;
+                this.CmdUser = CmdUser;
+                this.CmdSys = CmdSys;
             }
 
             // Enable comparisons between nil and actionJSON struct
@@ -94,7 +120,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static actionJSON actionJSON_cast(dynamic value)
         {
-            return new actionJSON(value.ID, value.Mode, value.Package, value.Deps, value.IgnoreFail, value.Args, value.Link, value.Objdir, value.Target, value.Priority, value.Failed, value.Built);
+            return new actionJSON(value.ID, value.Mode, value.Package, value.Deps, value.IgnoreFail, value.Args, value.Link, value.Objdir, value.Target, value.Priority, value.Failed, value.Built, value.VetxOnly, value.NeedVet, value.NeedBuild, value.ActionID, value.BuildID, value.TimeReady, value.TimeStart, value.TimeDone, value.Cmd, value.CmdReal, value.CmdUser, value.CmdSys);
         }
     }
 }}}}

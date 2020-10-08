@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fcgi -- go2cs converted at 2020 August 29 08:34:09 UTC
+// package fcgi -- go2cs converted at 2020 October 08 03:41:23 UTC
 // import "net/http/fcgi" ==> using fcgi = go.net.http.fcgi_package
 // Original source: C:\Go\src\net\http\fcgi\child.go
 // This file implements FastCGI from the perspective of a child process.
@@ -46,16 +46,18 @@ namespace http
         {
         }
 
-        private static ref request newRequest(ushort reqId, byte flags)
+        private static ptr<request> newRequest(ushort reqId, byte flags)
         {
-            request r = ref new request(reqId:reqId,params:map[string]string{},keepConn:flags&flagKeepConn!=0,);
+            ptr<request> r = addr(new request(reqId:reqId,params:map[string]string{},keepConn:flags&flagKeepConn!=0,));
             r.rawParams = r.buf[..0L];
-            return r;
+            return _addr_r!;
         }
 
         // parseParams reads an encoded []byte into Params.
-        private static void parseParams(this ref request r)
+        private static void parseParams(this ptr<request> _addr_r)
         {
+            ref request r = ref _addr_r.val;
+
             var text = r.rawParams;
             r.rawParams = null;
             while (len(text) > 0L)
@@ -63,25 +65,30 @@ namespace http
                 var (keyLen, n) = readSize(text);
                 if (n == 0L)
                 {
-                    return;
+                    return ;
                 }
+
                 text = text[n..];
                 var (valLen, n) = readSize(text);
                 if (n == 0L)
                 {
-                    return;
+                    return ;
                 }
+
                 text = text[n..];
                 if (int(keyLen) + int(valLen) > len(text))
                 {
-                    return;
+                    return ;
                 }
+
                 var key = readString(text, keyLen);
                 text = text[keyLen..];
                 var val = readString(text, valLen);
                 text = text[valLen..];
                 r.@params[key] = val;
+
             }
+
 
         }
 
@@ -90,69 +97,124 @@ namespace http
         {
             public ptr<request> req;
             public http.Header header;
-            public ptr<bufWriter> w;
+            public long code;
             public bool wroteHeader;
+            public bool wroteCGIHeader;
+            public ptr<bufWriter> w;
         }
 
-        private static ref response newResponse(ref child c, ref request req)
+        private static ptr<response> newResponse(ptr<child> _addr_c, ptr<request> _addr_req)
         {
-            return ref new response(req:req,header:http.Header{},w:newWriter(c.conn,typeStdout,req.reqId),);
+            ref child c = ref _addr_c.val;
+            ref request req = ref _addr_req.val;
+
+            return addr(new response(req:req,header:http.Header{},w:newWriter(c.conn,typeStdout,req.reqId),));
         }
 
-        private static http.Header Header(this ref response r)
+        private static http.Header Header(this ptr<response> _addr_r)
         {
+            ref response r = ref _addr_r.val;
+
             return r.header;
         }
 
-        private static (long, error) Write(this ref response r, slice<byte> data)
+        private static (long, error) Write(this ptr<response> _addr_r, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref response r = ref _addr_r.val;
+
             if (!r.wroteHeader)
             {
                 r.WriteHeader(http.StatusOK);
             }
-            return r.w.Write(data);
+
+            if (!r.wroteCGIHeader)
+            {
+                r.writeCGIHeader(p);
+            }
+
+            return r.w.Write(p);
+
         }
 
-        private static void WriteHeader(this ref response r, long code)
+        private static void WriteHeader(this ptr<response> _addr_r, long code)
         {
+            ref response r = ref _addr_r.val;
+
             if (r.wroteHeader)
             {
-                return;
+                return ;
             }
+
             r.wroteHeader = true;
+            r.code = code;
             if (code == http.StatusNotModified)
             { 
                 // Must not have body.
                 r.header.Del("Content-Type");
                 r.header.Del("Content-Length");
                 r.header.Del("Transfer-Encoding");
+
             }
-            else if (r.header.Get("Content-Type") == "")
-            {
-                r.header.Set("Content-Type", "text/html; charset=utf-8");
-            }
+
             if (r.header.Get("Date") == "")
             {
                 r.header.Set("Date", time.Now().UTC().Format(http.TimeFormat));
             }
-            fmt.Fprintf(r.w, "Status: %d %s\r\n", code, http.StatusText(code));
-            r.header.Write(r.w);
-            r.w.WriteString("\r\n");
+
         }
 
-        private static void Flush(this ref response r)
+        // writeCGIHeader finalizes the header sent to the client and writes it to the output.
+        // p is not written by writeHeader, but is the first chunk of the body
+        // that will be written. It is sniffed for a Content-Type if none is
+        // set explicitly.
+        private static void writeCGIHeader(this ptr<response> _addr_r, slice<byte> p)
         {
+            ref response r = ref _addr_r.val;
+
+            if (r.wroteCGIHeader)
+            {
+                return ;
+            }
+
+            r.wroteCGIHeader = true;
+            fmt.Fprintf(r.w, "Status: %d %s\r\n", r.code, http.StatusText(r.code));
+            {
+                var (_, hasType) = r.header["Content-Type"];
+
+                if (r.code != http.StatusNotModified && !hasType)
+                {
+                    r.header.Set("Content-Type", http.DetectContentType(p));
+                }
+
+            }
+
+            r.header.Write(r.w);
+            r.w.WriteString("\r\n");
+            r.w.Flush();
+
+        }
+
+        private static void Flush(this ptr<response> _addr_r)
+        {
+            ref response r = ref _addr_r.val;
+
             if (!r.wroteHeader)
             {
                 r.WriteHeader(http.StatusOK);
             }
+
             r.w.Flush();
+
         }
 
-        private static error Close(this ref response r)
+        private static error Close(this ptr<response> _addr_r)
         {
+            ref response r = ref _addr_r.val;
+
             r.Flush();
-            return error.As(r.w.Close());
+            return error.As(r.w.Close())!;
         }
 
         private partial struct child
@@ -160,19 +222,21 @@ namespace http
             public ptr<conn> conn;
             public http.Handler handler;
             public sync.Mutex mu; // protects requests:
-            public map<ushort, ref request> requests; // keyed by request ID
+            public map<ushort, ptr<request>> requests; // keyed by request ID
         }
 
-        private static ref child newChild(io.ReadWriteCloser rwc, http.Handler handler)
+        private static ptr<child> newChild(io.ReadWriteCloser rwc, http.Handler handler)
         {
-            return ref new child(conn:newConn(rwc),handler:handler,requests:make(map[uint16]*request),);
+            return addr(new child(conn:newConn(rwc),handler:handler,requests:make(map[uint16]*request),));
         }
 
-        private static void serve(this ref child _c) => func(_c, (ref child c, Defer defer, Panic _, Recover __) =>
+        private static void serve(this ptr<child> _addr_c) => func((defer, _, __) =>
         {
+            ref child c = ref _addr_c.val;
+
             defer(c.conn.Close());
             defer(c.cleanUp());
-            record rec = default;
+            ref record rec = ref heap(out ptr<record> _addr_rec);
             while (true)
             {
                 {
@@ -182,26 +246,29 @@ namespace http
 
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
 
                     err = err__prev1;
 
                 }
+
                 {
                     var err__prev1 = err;
 
-                    err = c.handleRecord(ref rec);
+                    err = c.handleRecord(_addr_rec);
 
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
 
                     err = err__prev1;
 
                 }
+
             }
+
 
         });
 
@@ -217,54 +284,64 @@ namespace http
         // a request after the connection to the web server has been closed.
         public static var ErrConnClosed = errors.New("fcgi: connection to web server closed");
 
-        private static error handleRecord(this ref child c, ref record rec)
+        private static error handleRecord(this ptr<child> _addr_c, ptr<record> _addr_rec)
         {
+            ref child c = ref _addr_c.val;
+            ref record rec = ref _addr_rec.val;
+
             c.mu.Lock();
             var (req, ok) = c.requests[rec.h.Id];
             c.mu.Unlock();
             if (!ok && rec.h.Type != typeBeginRequest && rec.h.Type != typeGetValues)
             { 
                 // The spec says to ignore unknown request IDs.
-                return error.As(null);
+                return error.As(null!)!;
+
             }
+
 
             if (rec.h.Type == typeBeginRequest) 
                 if (req != null)
                 { 
                     // The server is trying to begin a request with the same ID
                     // as an in-progress request. This is an error.
-                    return error.As(errors.New("fcgi: received ID that is already in-flight"));
+                    return error.As(errors.New("fcgi: received ID that is already in-flight"))!;
+
                 }
+
                 beginRequest br = default;
                 {
                     var err = br.read(rec.content());
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
                 if (br.role != roleResponder)
                 {
                     c.conn.writeEndRequest(rec.h.Id, 0L, statusUnknownRole);
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
                 req = newRequest(rec.h.Id, br.flags);
                 c.mu.Lock();
                 c.requests[rec.h.Id] = req;
                 c.mu.Unlock();
-                return error.As(null);
+                return error.As(null!)!;
             else if (rec.h.Type == typeParams) 
                 // NOTE(eds): Technically a key-value pair can straddle the boundary
                 // between two packets. We buffer until we've received all parameters.
                 if (len(rec.content()) > 0L)
                 {
                     req.rawParams = append(req.rawParams, rec.content());
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
                 req.parseParams();
-                return error.As(null);
+                return error.As(null!)!;
             else if (rec.h.Type == typeStdin) 
                 var content = rec.content();
                 if (req.pw == null)
@@ -275,31 +352,37 @@ namespace http
                         // body could be an io.LimitReader, but it shouldn't matter
                         // as long as both sides are behaving.
                         body, req.pw = io.Pipe();
+
                     }
                     else
                     {
                         body = emptyBody;
                     }
+
                     go_(() => c.serveRequest(req, body));
+
                 }
+
                 if (len(content) > 0L)
                 { 
                     // TODO(eds): This blocks until the handler reads from the pipe.
                     // If the handler takes a long time, it might be a problem.
                     req.pw.Write(content);
+
                 }
                 else if (req.pw != null)
                 {
                     req.pw.Close();
                 }
-                return error.As(null);
+
+                return error.As(null!)!;
             else if (rec.h.Type == typeGetValues) 
                 map values = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{"FCGI_MPXS_CONNS":"1"};
                 c.conn.writePairs(typeGetValuesResult, 0L, values);
-                return error.As(null);
+                return error.As(null!)!;
             else if (rec.h.Type == typeData) 
                 // If the filter role is implemented, read the data stream here.
-                return error.As(null);
+                return error.As(null!)!;
             else if (rec.h.Type == typeAbortRequest) 
                 c.mu.Lock();
                 delete(c.requests, rec.h.Id);
@@ -309,18 +392,22 @@ namespace http
                 {
                     req.pw.CloseWithError(ErrRequestAborted);
                 }
+
                 if (!req.keepConn)
                 { 
                     // connection will close upon return
-                    return error.As(errCloseConn);
+                    return error.As(errCloseConn)!;
+
                 }
-                return error.As(null);
+
+                return error.As(null!)!;
             else 
                 var b = make_slice<byte>(8L);
                 b[0L] = byte(rec.h.Type);
                 c.conn.writeRecord(typeUnknownType, 0L, b);
-                return error.As(null);
-                    }
+                return error.As(null!)!;
+            
+        }
 
         // filterOutUsedEnvVars returns a new map of env vars without the
         // variables in the given envVars map that are read for creating each http.Request
@@ -333,19 +420,25 @@ namespace http
                 {
                     withoutUsedEnvVars[k] = v;
                 }
+
             }
             return withoutUsedEnvVars;
+
         }
 
-        private static void serveRequest(this ref child c, ref request req, io.ReadCloser body)
+        private static void serveRequest(this ptr<child> _addr_c, ptr<request> _addr_req, io.ReadCloser body)
         {
-            var r = newResponse(c, req);
+            ref child c = ref _addr_c.val;
+            ref request req = ref _addr_req.val;
+
+            var r = newResponse(_addr_c, _addr_req);
             var (httpReq, err) = cgi.RequestFromMap(req.@params);
             if (err != null)
             { 
                 // there was an error reading the request
                 r.WriteHeader(http.StatusInternalServerError);
                 c.conn.writeRecord(typeStderr, req.reqId, (slice<byte>)err.Error());
+
             }
             else
             {
@@ -354,7 +447,9 @@ namespace http
                 var envVarCtx = context.WithValue(httpReq.Context(), new envVarsContextKey(), withoutUsedEnvVars);
                 httpReq = httpReq.WithContext(envVarCtx);
                 c.handler.ServeHTTP(r, httpReq);
-            }
+            } 
+            // Make sure we serve something even if nothing was written to r
+            r.Write(null);
             r.Close();
             c.mu.Lock();
             delete(c.requests, req.reqId);
@@ -375,10 +470,13 @@ namespace http
             {
                 c.conn.Close();
             }
+
         }
 
-        private static void cleanUp(this ref child _c) => func(_c, (ref child c, Defer defer, Panic _, Recover __) =>
+        private static void cleanUp(this ptr<child> _addr_c) => func((defer, _, __) =>
         {
+            ref child c = ref _addr_c.val;
+
             c.mu.Lock();
             defer(c.mu.Unlock());
             foreach (var (_, req) in c.requests)
@@ -388,8 +486,11 @@ namespace http
                     // race with call to Close in c.serveRequest doesn't matter because
                     // Pipe(Reader|Writer).Close are idempotent
                     req.pw.CloseWithError(ErrConnClosed);
+
                 }
+
             }
+
         });
 
         // Serve accepts incoming FastCGI connections on the listener l, creating a new
@@ -401,28 +502,35 @@ namespace http
         {
             if (l == null)
             {
-                error err = default;
+                error err = default!;
                 l, err = net.FileListener(os.Stdin);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 defer(l.Close());
+
             }
+
             if (handler == null)
             {
                 handler = http.DefaultServeMux;
             }
+
             while (true)
             {
                 var (rw, err) = l.Accept();
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 var c = newChild(rw, handler);
                 go_(() => c.serve());
+
             }
+
 
         });
 
@@ -431,8 +539,10 @@ namespace http
         // is hidden in the request's context. As an example, if REMOTE_USER is set for a
         // request, it will not be found anywhere in r, but it will be included in
         // ProcessEnv's response (via r's context).
-        public static map<@string, @string> ProcessEnv(ref http.Request r)
+        public static map<@string, @string> ProcessEnv(ptr<http.Request> _addr_r)
         {
+            ref http.Request r = ref _addr_r.val;
+
             map<@string, @string> (env, _) = r.Context().Value(new envVarsContextKey())._<map<@string, @string>>();
             return env;
         }
@@ -486,6 +596,7 @@ namespace http
             } 
             // Unknown, so include it to be safe.
             return true;
+
         }
     }
 }}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:44:13 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:55 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\pipe_linux.go
 using syscall = go.syscall_package;
@@ -14,8 +14,12 @@ namespace go
     {
         // Pipe returns a connected pair of Files; reads from r return bytes written to w.
         // It returns the files and an error, if any.
-        public static (ref File, ref File, error) Pipe()
+        public static (ptr<File>, ptr<File>, error) Pipe()
         {
+            ptr<File> r = default!;
+            ptr<File> w = default!;
+            error err = default!;
+
             array<long> p = new array<long>(2L);
 
             var e = syscall.Pipe2(p[0L..], syscall.O_CLOEXEC); 
@@ -29,17 +33,19 @@ namespace go
                 if (e != null)
                 {
                     syscall.ForkLock.RUnlock();
-                    return (null, null, NewSyscallError("pipe", e));
+                    return (_addr_null!, _addr_null!, error.As(NewSyscallError("pipe", e))!);
                 }
                 syscall.CloseOnExec(p[0L]);
                 syscall.CloseOnExec(p[1L]);
                 syscall.ForkLock.RUnlock();
+
             }
             else if (e != null)
             {
-                return (null, null, NewSyscallError("pipe2", e));
+                return (_addr_null!, _addr_null!, error.As(NewSyscallError("pipe2", e))!);
             }
-            return (newFile(uintptr(p[0L]), "|0", kindPipe), newFile(uintptr(p[1L]), "|1", kindPipe), null);
+            return (_addr_newFile(uintptr(p[0L]), "|0", kindPipe)!, _addr_newFile(uintptr(p[1L]), "|1", kindPipe)!, error.As(null!)!);
+
         }
     }
 }

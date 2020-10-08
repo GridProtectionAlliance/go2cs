@@ -4,7 +4,7 @@
 //
 // +build ppc64 s390x mips mips64
 
-// package syscall -- go2cs converted at 2020 August 29 08:36:46 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:26:21 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\endian_big.go
 
@@ -14,7 +14,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly var isBigEndian = true;
+        private static readonly var isBigEndian = (var)true;
 
     }
 }

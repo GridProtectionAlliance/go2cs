@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2020 August 29 08:48:30 UTC
+// package ast -- go2cs converted at 2020 October 08 04:04:19 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\commentmap.go
 using bytes = go.bytes_package;
@@ -17,7 +17,7 @@ namespace go
 {
     public static partial class ast_package
     {
-        private partial struct byPos // : slice<ref CommentGroup>
+        private partial struct byPos // : slice<ptr<CommentGroup>>
         {
         }
 
@@ -33,12 +33,11 @@ namespace go
         {
             a[i] = a[j];
             a[j] = a[i];
-
         }
 
         // sortComments sorts the list of comment groups in source order.
         //
-        private static void sortComments(slice<ref CommentGroup> list)
+        private static void sortComments(slice<ptr<CommentGroup>> list)
         { 
             // TODO(gri): Does it make sense to check for sorted-ness
             //            first (because we know that sorted-ness is
@@ -52,28 +51,33 @@ namespace go
                 }
 
             }
+
         }
 
         // A CommentMap maps an AST node to a list of comment groups
         // associated with it. See NewCommentMap for a description of
         // the association.
         //
-        public partial struct CommentMap // : map<Node, slice<ref CommentGroup>>
+        public partial struct CommentMap // : map<Node, slice<ptr<CommentGroup>>>
         {
         }
 
-        public static void addComment(this CommentMap cmap, Node n, ref CommentGroup c)
+        public static void addComment(this CommentMap cmap, Node n, ptr<CommentGroup> _addr_c)
         {
+            ref CommentGroup c = ref _addr_c.val;
+
             var list = cmap[n];
             if (len(list) == 0L)
             {
-                list = new slice<ref CommentGroup>(new ref CommentGroup[] { c });
+                list = new slice<ptr<CommentGroup>>(new ptr<CommentGroup>[] { c });
             }
             else
             {
                 list = append(list, c);
             }
+
             cmap[n] = list;
+
         }
 
         private partial struct byInterval // : slice<Node>
@@ -89,12 +93,12 @@ namespace go
             var pi = a[i].Pos();
             var pj = a[j].Pos();
             return pi < pj || pi == pj && a[i].End() > a[j].End();
+
         }
         private static void Swap(this byInterval a, long i, long j)
         {
             a[i] = a[j];
             a[j] = a[i];
-
         }
 
         // nodeList returns the list of nodes of the AST n in source order.
@@ -107,15 +111,16 @@ namespace go
                 // don't collect comments
                 switch (n.type())
                 {
-                    case ref CommentGroup _:
+                    case ptr<CommentGroup> _:
                         return false;
                         break;
-                    case ref Comment _:
+                    case ptr<Comment> _:
                         return false;
                         break;
                 }
                 list = append(list, n);
                 return true;
+
             }); 
             // Note: The current implementation assumes that Inspect traverses the
             //       AST in depth-first and thus _source_ order. If AST traversal
@@ -123,6 +128,7 @@ namespace go
             //       required.
             // sort.Sort(byInterval(list))
             return list;
+
         }
 
         // A commentListReader helps iterating through a list of comment groups.
@@ -130,20 +136,24 @@ namespace go
         private partial struct commentListReader
         {
             public ptr<token.FileSet> fset;
-            public slice<ref CommentGroup> list;
+            public slice<ptr<CommentGroup>> list;
             public long index;
             public ptr<CommentGroup> comment; // comment group at current index
             public token.Position pos; // source interval of comment group at current index
             public token.Position end; // source interval of comment group at current index
         }
 
-        private static bool eol(this ref commentListReader r)
+        private static bool eol(this ptr<commentListReader> _addr_r)
         {
+            ref commentListReader r = ref _addr_r.val;
+
             return r.index >= len(r.list);
         }
 
-        private static void next(this ref commentListReader r)
+        private static void next(this ptr<commentListReader> _addr_r)
         {
+            ref commentListReader r = ref _addr_r.val;
+
             if (!r.eol())
             {
                 r.comment = r.list[r.index];
@@ -151,6 +161,7 @@ namespace go
                 r.end = r.fset.Position(r.comment.End());
                 r.index++;
             }
+
         }
 
         // A nodeStack keeps track of nested nodes.
@@ -163,27 +174,33 @@ namespace go
         // push pops all nodes that appear lexically before n
         // and then pushes n on the stack.
         //
-        private static void push(this ref nodeStack s, Node n)
+        private static void push(this ptr<nodeStack> _addr_s, Node n)
         {
+            ref nodeStack s = ref _addr_s.val;
+
             s.pop(n.Pos());
-            s.Value = append((s.Value), n);
+            s.val = append((s.val), n);
         }
 
         // pop pops all nodes that appear lexically before pos
         // (i.e., whose lexical extent has ended before or at pos).
         // It returns the last node popped.
         //
-        private static Node pop(this ref nodeStack s, token.Pos pos)
+        private static Node pop(this ptr<nodeStack> _addr_s, token.Pos pos)
         {
-            var i = len(s.Value);
-            while (i > 0L && (s.Value)[i - 1L].End() <= pos)
+            Node top = default;
+            ref nodeStack s = ref _addr_s.val;
+
+            var i = len(s.val);
+            while (i > 0L && (s.val)[i - 1L].End() <= pos)
             {
-                top = (s.Value)[i - 1L];
+                top = (s.val)[i - 1L];
                 i--;
             }
 
-            s.Value = (s.Value)[0L..i];
+            s.val = (s.val)[0L..i];
             return top;
+
         }
 
         // NewCommentMap creates a new comment map by associating comment groups
@@ -202,16 +219,19 @@ namespace go
         // trailing an assignment, the comment is associated with the entire
         // assignment rather than just the last operand in the assignment.
         //
-        public static CommentMap NewCommentMap(ref token.FileSet _fset, Node node, slice<ref CommentGroup> comments) => func(_fset, (ref token.FileSet fset, Defer _, Panic panic, Recover __) =>
+        public static CommentMap NewCommentMap(ptr<token.FileSet> _addr_fset, Node node, slice<ptr<CommentGroup>> comments) => func((_, panic, __) =>
         {
+            ref token.FileSet fset = ref _addr_fset.val;
+
             if (len(comments) == 0L)
             {
                 return null; // no comments to map
             }
+
             var cmap = make(CommentMap); 
 
             // set up comment reader r
-            var tmp = make_slice<ref CommentGroup>(len(comments));
+            var tmp = make_slice<ptr<CommentGroup>>(len(comments));
             copy(tmp, comments); // don't change incoming comments
             sortComments(tmp);
             commentListReader r = new commentListReader(fset:fset,list:tmp); // !r.eol() because len(comments) > 0
@@ -235,10 +255,11 @@ namespace go
                 { 
                     // set fake sentinel position to infinity so that
                     // all comments get processed before the sentinel
-                    const long infinity = 1L << (int)(30L);
+                    const long infinity = (long)1L << (int)(30L);
 
                     qpos.Offset = infinity;
                     qpos.Line = infinity;
+
                 } 
 
                 // process comments before current node
@@ -285,14 +306,18 @@ namespace go
                             // we can only reach here if there was no p
                             // which would imply that there were no nodes
                             panic("internal error: no comments should be associated with sentinel");
+
                         }
+
                         assoc = q;
                                         cmap.addComment(assoc, r.comment);
                     if (r.eol())
                     {
                         return cmap;
                     }
+
                     r.next();
+
                 } 
 
                 // update previous node
@@ -305,10 +330,10 @@ namespace go
                 // update previous node group if we see an "important" node
                 switch (q.type())
                 {
-                    case ref File _:
+                    case ptr<File> _:
                         stack.push(q);
                         break;
-                    case ref Field _:
+                    case ptr<Field> _:
                         stack.push(q);
                         break;
                     case Decl _:
@@ -321,8 +346,10 @@ namespace go
                         stack.push(q);
                         break;
                 }
+
             }
             return cmap;
+
         });
 
         // Update replaces an old node in the comment map with the new node
@@ -341,7 +368,9 @@ namespace go
                 }
 
             }
+
             return new;
+
         }
 
         // Filter returns a new comment map consisting of only those
@@ -362,28 +391,32 @@ namespace go
                     }
 
                 }
+
                 return true;
+
             });
             return umap;
+
         }
 
         // Comments returns the list of comment groups in the comment map.
         // The result is sorted in source order.
         //
-        public static slice<ref CommentGroup> Comments(this CommentMap cmap)
+        public static slice<ptr<CommentGroup>> Comments(this CommentMap cmap)
         {
-            var list = make_slice<ref CommentGroup>(0L, len(cmap));
+            var list = make_slice<ptr<CommentGroup>>(0L, len(cmap));
             foreach (var (_, e) in cmap)
             {
                 list = append(list, e);
             }
             sortComments(list);
             return list;
+
         }
 
-        private static @string summary(slice<ref CommentGroup> list)
+        private static @string summary(slice<ptr<CommentGroup>> list)
         {
-            const long maxLen = 40L;
+            const long maxLen = (long)40L;
 
             bytes.Buffer buf = default; 
 
@@ -403,8 +436,11 @@ loop:
                         _breakloop = true;
                         break;
                     }
+
                     buf.WriteString(comment.Text);
+
                 }
+
             } 
 
             // truncate if too long
@@ -428,20 +464,22 @@ loop:
                         bytes[i] = ' ';
                         break;
                 }
+
             }
             return string(bytes);
+
         }
 
         public static @string String(this CommentMap cmap)
         {
-            bytes.Buffer buf = default;
-            fmt.Fprintln(ref buf, "CommentMap {");
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            fmt.Fprintln(_addr_buf, "CommentMap {");
             foreach (var (node, comment) in cmap)
             { 
                 // print name of identifiers; print node type for other nodes
                 @string s = default;
                 {
-                    ref Ident (ident, ok) = node._<ref Ident>();
+                    ptr<Ident> (ident, ok) = node._<ptr<Ident>>();
 
                     if (ok)
                     {
@@ -453,10 +491,13 @@ loop:
                     }
 
                 }
-                fmt.Fprintf(ref buf, "\t%p  %20s:  %s\n", node, s, summary(comment));
+
+                fmt.Fprintf(_addr_buf, "\t%p  %20s:  %s\n", node, s, summary(comment));
+
             }
-            fmt.Fprintln(ref buf, "}");
+            fmt.Fprintln(_addr_buf, "}");
             return buf.String();
+
         }
     }
 }}

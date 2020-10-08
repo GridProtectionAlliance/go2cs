@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2020 August 29 08:35:37 UTC
+// package gob -- go2cs converted at 2020 October 08 03:42:43 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\error.go
 using fmt = go.fmt_package;
@@ -43,8 +43,10 @@ namespace encoding
 
         // catchError is meant to be used as a deferred function to turn a panic(gobError) into a
         // plain error. It overwrites the error return of the function that deferred its call.
-        private static void catchError(ref error _err) => func(_err, (ref error err, Defer _, Panic panic, Recover __) =>
+        private static void catchError(ptr<error> _addr_err) => func((_, panic, __) =>
         {
+            ref error err = ref _addr_err.val;
+
             {
                 var e = recover();
 
@@ -55,10 +57,13 @@ namespace encoding
                     {
                         panic(e);
                     }
-                    err.Value = ge.err;
+
+                    err = error.As(ge.err)!;
+
                 }
 
             }
+
         });
     }
 }}

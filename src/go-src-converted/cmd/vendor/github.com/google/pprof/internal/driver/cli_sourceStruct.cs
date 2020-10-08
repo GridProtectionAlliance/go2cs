@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:15 UTC
+//     Generated on 2020 October 08 04:42:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using errors = go.errors_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
 using strings = go.strings_package;
@@ -40,25 +41,29 @@ namespace @internal
                 this.ExecName = default;
                 this.BuildID = default;
                 this.Base = default;
+                this.DiffBase = default;
                 this.Normalize = default;
                 this.Seconds = default;
                 this.Timeout = default;
                 this.Symbolize = default;
                 this.HTTPHostport = default;
+                this.HTTPDisableBrowser = default;
                 this.Comment = default;
             }
 
-            public source(slice<@string> Sources = default, @string ExecName = default, @string BuildID = default, slice<@string> Base = default, bool Normalize = default, long Seconds = default, long Timeout = default, @string Symbolize = default, @string HTTPHostport = default, @string Comment = default)
+            public source(slice<@string> Sources = default, @string ExecName = default, @string BuildID = default, slice<@string> Base = default, bool DiffBase = default, bool Normalize = default, long Seconds = default, long Timeout = default, @string Symbolize = default, @string HTTPHostport = default, bool HTTPDisableBrowser = default, @string Comment = default)
             {
                 this.Sources = Sources;
                 this.ExecName = ExecName;
                 this.BuildID = BuildID;
                 this.Base = Base;
+                this.DiffBase = DiffBase;
                 this.Normalize = Normalize;
                 this.Seconds = Seconds;
                 this.Timeout = Timeout;
                 this.Symbolize = Symbolize;
                 this.HTTPHostport = HTTPHostport;
+                this.HTTPDisableBrowser = HTTPDisableBrowser;
                 this.Comment = Comment;
             }
 
@@ -82,7 +87,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static source source_cast(dynamic value)
         {
-            return new source(value.Sources, value.ExecName, value.BuildID, value.Base, value.Normalize, value.Seconds, value.Timeout, value.Symbolize, value.HTTPHostport, value.Comment);
+            return new source(value.Sources, value.ExecName, value.BuildID, value.Base, value.DiffBase, value.Normalize, value.Seconds, value.Timeout, value.Symbolize, value.HTTPHostport, value.HTTPDisableBrowser, value.Comment);
         }
     }
 }}}}}}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 09:24:17 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:26:39 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\sparsetree.go
 using fmt = go.fmt_package;
@@ -32,18 +32,24 @@ namespace @internal
             public int exit;
         }
 
-        private static @string String(this ref SparseTreeNode s)
+        private static @string String(this ptr<SparseTreeNode> _addr_s)
         {
+            ref SparseTreeNode s = ref _addr_s.val;
+
             return fmt.Sprintf("[%d,%d]", s.entry, s.exit);
         }
 
-        private static int Entry(this ref SparseTreeNode s)
+        private static int Entry(this ptr<SparseTreeNode> _addr_s)
         {
+            ref SparseTreeNode s = ref _addr_s.val;
+
             return s.entry;
         }
 
-        private static int Exit(this ref SparseTreeNode s)
+        private static int Exit(this ptr<SparseTreeNode> _addr_s)
         {
+            ref SparseTreeNode s = ref _addr_s.val;
+
             return s.exit;
         }
 
@@ -55,9 +61,9 @@ namespace @internal
         // conditionals) occurring "before" the block (e.g., as inputs
         // to the block and its phi functions), "within" the block,
         // and "after" the block.
-        public static readonly long AdjustBefore = -1L; // defined before phi
-        public static readonly long AdjustWithin = 0L; // defined by phi
-        public static readonly long AdjustAfter = 1L; // defined within block
+        public static readonly long AdjustBefore = (long)-1L; // defined before phi
+        public static readonly long AdjustWithin = (long)0L; // defined by phi
+        public static readonly long AdjustAfter = (long)1L; // defined within block
 
         // A SparseTree is a tree of Blocks.
         // It allows rapid ancestor queries,
@@ -67,12 +73,14 @@ namespace @internal
         }
 
         // newSparseTree creates a SparseTree from a block-to-parent map (array indexed by Block.ID)
-        private static SparseTree newSparseTree(ref Func f, slice<ref Block> parentOf)
+        private static SparseTree newSparseTree(ptr<Func> _addr_f, slice<ptr<Block>> parentOf)
         {
+            ref Func f = ref _addr_f.val;
+
             var t = make(SparseTree, f.NumBlocks());
             foreach (var (_, b) in f.Blocks)
             {
-                var n = ref t[b.ID];
+                var n = _addr_t[b.ID];
                 {
                     var p = parentOf[b.ID];
 
@@ -84,21 +92,25 @@ namespace @internal
                     }
 
                 }
+
             }
             t.numberBlock(f.Entry, 1L);
             return t;
+
         }
 
         // newSparseOrderedTree creates a SparseTree from a block-to-parent map (array indexed by Block.ID)
         // children will appear in the reverse of their order in reverseOrder
         // in particular, if reverseOrder is a dfs-reversePostOrder, then the root-to-children
         // walk of the tree will yield a pre-order.
-        private static SparseTree newSparseOrderedTree(ref Func f, slice<ref Block> parentOf, slice<ref Block> reverseOrder)
+        private static SparseTree newSparseOrderedTree(ptr<Func> _addr_f, slice<ptr<Block>> parentOf, slice<ptr<Block>> reverseOrder)
         {
+            ref Func f = ref _addr_f.val;
+
             var t = make(SparseTree, f.NumBlocks());
             foreach (var (_, b) in reverseOrder)
             {
-                var n = ref t[b.ID];
+                var n = _addr_t[b.ID];
                 {
                     var p = parentOf[b.ID];
 
@@ -110,28 +122,36 @@ namespace @internal
                     }
 
                 }
+
             }
             t.numberBlock(f.Entry, 1L);
             return t;
+
         }
 
         // treestructure provides a string description of the dominator
         // tree and flow structure of block b and all blocks that it
         // dominates.
-        public static @string treestructure(this SparseTree t, ref Block b)
+        public static @string treestructure(this SparseTree t, ptr<Block> _addr_b)
         {
+            ref Block b = ref _addr_b.val;
+
             return t.treestructure1(b, 0L);
         }
-        public static @string treestructure1(this SparseTree t, ref Block b, long i)
+        public static @string treestructure1(this SparseTree t, ptr<Block> _addr_b, long i)
         {
+            ref Block b = ref _addr_b.val;
+
             @string s = "\n" + strings.Repeat("\t", i) + b.String() + "->[";
             foreach (var (i, e) in b.Succs)
             {
                 if (i > 0L)
                 {
-                    s = s + ",";
+                    s += ",";
                 }
-                s = s + e.b.String();
+
+                s += e.b.String();
+
             }
             s += "]";
             {
@@ -150,15 +170,20 @@ namespace @internal
                                 s += " ";
                             c = t[c.ID].sibling;
                             }
+
                             s += t.treestructure1(c, i + 1L);
+
                         }
 
                     }
                     s += ")";
+
                 }
 
             }
+
             return s;
+
         }
 
         // numberBlock assigns entry and exit numbers for b and b's
@@ -189,8 +214,10 @@ namespace @internal
         //   root     left     left      right       right       root
         //  1 2e 3 | 4 5e 6 | 7 8x 9 | 10 11e 12 | 13 14x 15 | 16 17x 18
 
-        public static int numberBlock(this SparseTree t, ref Block b, int n)
-        { 
+        public static int numberBlock(this SparseTree t, ptr<Block> _addr_b, int n)
+        {
+            ref Block b = ref _addr_b.val;
+ 
             // reserve n for entry-1, assign n+1 to entry
             n++;
             t[b.ID].entry = n; 
@@ -212,6 +239,7 @@ namespace @internal
             t[b.ID].exit = n; 
             // reserve n+1 for exit+1, n+2 is next free number, returned.
             return n + 2L;
+
         }
 
         // Sibling returns a sibling of x in the dominator tree (i.e.,
@@ -221,41 +249,55 @@ namespace @internal
         // to assign entry and exit numbers in the treewalk, those
         // numbers are also consistent with this order (i.e.,
         // Sibling(x) has entry number larger than x's exit number).
-        public static ref Block Sibling(this SparseTree t, ref Block x)
+        public static ptr<Block> Sibling(this SparseTree t, ptr<Block> _addr_x)
         {
-            return t[x.ID].sibling;
+            ref Block x = ref _addr_x.val;
+
+            return _addr_t[x.ID].sibling!;
         }
 
         // Child returns a child of x in the dominator tree, or
         // nil if there are none. The choice of first child is
         // arbitrary but repeatable.
-        public static ref Block Child(this SparseTree t, ref Block x)
+        public static ptr<Block> Child(this SparseTree t, ptr<Block> _addr_x)
         {
-            return t[x.ID].child;
+            ref Block x = ref _addr_x.val;
+
+            return _addr_t[x.ID].child!;
         }
 
         // isAncestorEq reports whether x is an ancestor of or equal to y.
-        public static bool isAncestorEq(this SparseTree t, ref Block x, ref Block y)
+        public static bool IsAncestorEq(this SparseTree t, ptr<Block> _addr_x, ptr<Block> _addr_y)
         {
+            ref Block x = ref _addr_x.val;
+            ref Block y = ref _addr_y.val;
+
             if (x == y)
             {
                 return true;
             }
-            var xx = ref t[x.ID];
-            var yy = ref t[y.ID];
+
+            var xx = _addr_t[x.ID];
+            var yy = _addr_t[y.ID];
             return xx.entry <= yy.entry && yy.exit <= xx.exit;
+
         }
 
         // isAncestor reports whether x is a strict ancestor of y.
-        public static bool isAncestor(this SparseTree t, ref Block x, ref Block y)
+        public static bool isAncestor(this SparseTree t, ptr<Block> _addr_x, ptr<Block> _addr_y)
         {
+            ref Block x = ref _addr_x.val;
+            ref Block y = ref _addr_y.val;
+
             if (x == y)
             {
                 return false;
             }
-            var xx = ref t[x.ID];
-            var yy = ref t[y.ID];
+
+            var xx = _addr_t[x.ID];
+            var yy = _addr_t[y.ID];
             return xx.entry < yy.entry && yy.exit < xx.exit;
+
         }
 
         // domorder returns a value for dominator-oriented sorting.
@@ -266,8 +308,10 @@ namespace @internal
         //     then x does not dominate z.
         // Property (1) means that blocks sorted by domorder always have a maximal dominant block first.
         // Property (2) allows searches for dominated blocks to exit early.
-        public static int domorder(this SparseTree t, ref Block x)
-        { 
+        public static int domorder(this SparseTree t, ptr<Block> _addr_x)
+        {
+            ref Block x = ref _addr_x.val;
+ 
             // Here is an argument that entry(x) provides the properties documented above.
             //
             // Entry and exit values are assigned in a depth-first dominator tree walk.
@@ -284,7 +328,7 @@ namespace @internal
             // entry(x) < entry(y) allows cases x-dom-y and x-then-y.
             // But by supposition, x does not dominate y. So we have x-then-y.
             //
-            // For contractidion, assume x dominates z.
+            // For contradiction, assume x dominates z.
             // Then entry(x) < entry(z) < exit(z) < exit(x).
             // But we know x-then-y, so entry(x) < exit(x) < entry(y) < exit(y).
             // Combining those, entry(x) < entry(z) < exit(z) < exit(x) < entry(y) < exit(y).
@@ -293,6 +337,7 @@ namespace @internal
             // y-then-z requires exit(y) < entry(z), but we have entry(z) < exit(y).
             // We have a contradiction, so x does not dominate z, as required.
             return t[x.ID].entry;
+
         }
     }
 }}}}

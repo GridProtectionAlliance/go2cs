@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zip -- go2cs converted at 2020 August 29 08:45:40 UTC
+// package zip -- go2cs converted at 2020 October 08 03:49:31 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Go\src\archive\zip\writer.go
 using bufio = go.bufio_package;
@@ -11,6 +11,7 @@ using errors = go.errors_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
+using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 using static go.builtin;
 using System;
@@ -26,7 +27,7 @@ namespace archive
         public partial struct Writer
         {
             public ptr<countWriter> cw;
-            public slice<ref header> dir;
+            public slice<ptr<header>> dir;
             public ptr<fileWriter> last;
             public bool closed;
             public map<ushort, Compressor> compressors;
@@ -37,52 +38,64 @@ namespace archive
 
         private partial struct header
         {
-            public ref FileHeader FileHeader => ref FileHeader_ptr;
+            public ref ptr<FileHeader> ptr<FileHeader> => ref ptr<FileHeader>_ptr;
             public ulong offset;
         }
 
         // NewWriter returns a new Writer writing a zip file to w.
-        public static ref Writer NewWriter(io.Writer w)
+        public static ptr<Writer> NewWriter(io.Writer w)
         {
-            return ref new Writer(cw:&countWriter{w:bufio.NewWriter(w)});
+            return addr(new Writer(cw:&countWriter{w:bufio.NewWriter(w)}));
         }
 
         // SetOffset sets the offset of the beginning of the zip data within the
         // underlying writer. It should be used when the zip data is appended to an
         // existing file, such as a binary executable.
         // It must be called before any data is written.
-        private static void SetOffset(this ref Writer _w, long n) => func(_w, (ref Writer w, Defer _, Panic panic, Recover __) =>
+        private static void SetOffset(this ptr<Writer> _addr_w, long n) => func((_, panic, __) =>
         {
+            ref Writer w = ref _addr_w.val;
+
             if (w.cw.count != 0L)
             {
                 panic("zip: SetOffset called after data was written");
             }
+
             w.cw.count = n;
+
         });
 
         // Flush flushes any buffered data to the underlying writer.
         // Calling Flush is not normally necessary; calling Close is sufficient.
-        private static error Flush(this ref Writer w)
+        private static error Flush(this ptr<Writer> _addr_w)
         {
-            return error.As(w.cw.w._<ref bufio.Writer>().Flush());
+            ref Writer w = ref _addr_w.val;
+
+            return error.As(w.cw.w._<ptr<bufio.Writer>>().Flush()!)!;
         }
 
         // SetComment sets the end-of-central-directory comment field.
         // It can only be called before Close.
-        private static error SetComment(this ref Writer w, @string comment)
+        private static error SetComment(this ptr<Writer> _addr_w, @string comment)
         {
+            ref Writer w = ref _addr_w.val;
+
             if (len(comment) > uint16max)
             {
-                return error.As(errors.New("zip: Writer.Comment too long"));
+                return error.As(errors.New("zip: Writer.Comment too long"))!;
             }
+
             w.comment = comment;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Close finishes writing the zip file by writing the central directory.
-        // It does not (and cannot) close the underlying writer.
-        private static error Close(this ref Writer w)
+        // It does not close the underlying writer.
+        private static error Close(this ptr<Writer> _addr_w)
         {
+            ref Writer w = ref _addr_w.val;
+
             if (w.last != null && !w.last.closed)
             {
                 {
@@ -90,16 +103,20 @@ namespace archive
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
                 w.last = null;
+
             }
+
             if (w.closed)
             {
-                return error.As(errors.New("zip: writer closed twice"));
+                return error.As(errors.New("zip: writer closed twice"))!;
             }
+
             w.closed = true; 
 
             // write central directory
@@ -133,12 +150,14 @@ namespace archive
                     eb.uint64(h.CompressedSize64);
                     eb.uint64(h.offset);
                     h.Extra = append(h.Extra, buf[..]);
+
                 }
                 else
                 {
                     b.uint32(h.CompressedSize);
                     b.uint32(h.UncompressedSize);
                 }
+
                 b.uint16(uint16(len(h.Name)));
                 b.uint16(uint16(len(h.Extra)));
                 b.uint16(uint16(len(h.Comment)));
@@ -152,42 +171,47 @@ namespace archive
                 {
                     b.uint32(uint32(h.offset));
                 }
+
                 {
                     var (_, err) = w.cw.Write(buf[..]);
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
                 {
                     (_, err) = io.WriteString(w.cw, h.Name);
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
                 {
                     (_, err) = w.cw.Write(h.Extra);
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
                 {
                     (_, err) = io.WriteString(w.cw, h.Comment);
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             }
             var end = w.cw.count;
 
@@ -204,6 +228,7 @@ namespace archive
                 }
 
             }
+
 
             if (records >= uint16max || size >= uint32max || offset >= uint32max)
             {
@@ -233,19 +258,20 @@ namespace archive
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     } 
 
-                    // store max values in the regular end record to signal that
+                    // store max values in the regular end record to signal
                     // that the zip64 values should be used instead
 
                 } 
 
-                // store max values in the regular end record to signal that
+                // store max values in the regular end record to signal
                 // that the zip64 values should be used instead
                 records = uint16max;
                 size = uint32max;
                 offset = uint32max;
+
             } 
 
             // write end record
@@ -263,21 +289,24 @@ namespace archive
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             {
                 (_, err) = io.WriteString(w.cw, w.comment);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
 
-            return error.As(w.cw.w._<ref bufio.Writer>().Flush());
+
+            return error.As(w.cw.w._<ptr<bufio.Writer>>().Flush()!)!;
+
         }
 
         // Create adds a file to the zip file using the provided name.
@@ -285,12 +314,17 @@ namespace archive
         // The file contents will be compressed using the Deflate method.
         // The name must be a relative path: it must not start with a drive
         // letter (e.g. C:) or leading slash, and only forward slashes are
-        // allowed.
+        // allowed. To create a directory instead of a file, add a trailing
+        // slash to the name.
         // The file's contents must be written to the io.Writer before the next
         // call to Create, CreateHeader, or Close.
-        private static (io.Writer, error) Create(this ref Writer w, @string name)
+        private static (io.Writer, error) Create(this ptr<Writer> _addr_w, @string name)
         {
-            FileHeader header = ref new FileHeader(Name:name,Method:Deflate,);
+            io.Writer _p0 = default;
+            error _p0 = default!;
+            ref Writer w = ref _addr_w.val;
+
+            ptr<FileHeader> header = addr(new FileHeader(Name:name,Method:Deflate,));
             return w.CreateHeader(header);
         }
 
@@ -299,6 +333,9 @@ namespace archive
         // or any other common encoding).
         private static (bool, bool) detectUTF8(@string s)
         {
+            bool valid = default;
+            bool require = default;
+
             {
                 long i = 0L;
 
@@ -318,12 +355,16 @@ namespace archive
                         {
                             return (false, false);
                         }
+
                         require = true;
+
                     }
+
                 }
 
             }
             return (true, require);
+
         }
 
         // CreateHeader adds a file to the zip archive using the provided FileHeader
@@ -333,8 +374,13 @@ namespace archive
         // This returns a Writer to which the file contents should be written.
         // The file's contents must be written to the io.Writer before the next
         // call to Create, CreateHeader, or Close.
-        private static (io.Writer, error) CreateHeader(this ref Writer w, ref FileHeader fh)
+        private static (io.Writer, error) CreateHeader(this ptr<Writer> _addr_w, ptr<FileHeader> _addr_fh)
         {
+            io.Writer _p0 = default;
+            error _p0 = default!;
+            ref Writer w = ref _addr_w.val;
+            ref FileHeader fh = ref _addr_fh.val;
+
             if (w.last != null && !w.last.closed)
             {
                 {
@@ -344,19 +390,21 @@ namespace archive
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
 
                     err = err__prev2;
 
                 }
+
             }
+
             if (len(w.dir) > 0L && w.dir[len(w.dir) - 1L].FileHeader == fh)
             { 
                 // See https://golang.org/issue/11144 confusion.
-                return (null, errors.New("archive/zip: invalid duplicate FileHeader"));
-            }
-            fh.Flags |= 0x8UL; // we will write a data descriptor
+                return (null, error.As(errors.New("archive/zip: invalid duplicate FileHeader"))!);
+
+            } 
 
             // The ZIP format has a sad state of affairs regarding character encoding.
             // Officially, the name and comment fields are supposed to be encoded
@@ -411,55 +459,91 @@ namespace archive
                 eb.uint8(1L); // Flags: ModTime
                 eb.uint32(mt); // ModTime
                 fh.Extra = append(fh.Extra, mbuf[..]);
-            }
-            fileWriter fw = ref new fileWriter(zipw:w.cw,compCount:&countWriter{w:w.cw},crc32:crc32.NewIEEE(),);
-            var comp = w.compressor(fh.Method);
-            if (comp == null)
-            {
-                return (null, ErrAlgorithm);
-            }
-            err = default;
-            fw.comp, err = comp(fw.compCount);
-            if (err != null)
-            {
-                return (null, err);
-            }
-            fw.rawCount = ref new countWriter(w:fw.comp);
 
-            header h = ref new header(FileHeader:fh,offset:uint64(w.cw.count),);
+            }
+
+            io.Writer ow = default;            ptr<fileWriter> fw;
+            ptr<header> h = addr(new header(FileHeader:fh,offset:uint64(w.cw.count),));
+
+            if (strings.HasSuffix(fh.Name, "/"))
+            { 
+                // Set the compression method to Store to ensure data length is truly zero,
+                // which the writeHeader method always encodes for the size fields.
+                // This is necessary as most compression formats have non-zero lengths
+                // even when compressing an empty string.
+                fh.Method = Store;
+                fh.Flags &= 0x8UL; // we will not write a data descriptor
+
+                // Explicitly clear sizes as they have no meaning for directories.
+                fh.CompressedSize = 0L;
+                fh.CompressedSize64 = 0L;
+                fh.UncompressedSize = 0L;
+                fh.UncompressedSize64 = 0L;
+
+                ow = new dirWriter();
+
+            }
+            else
+            {
+                fh.Flags |= 0x8UL; // we will write a data descriptor
+
+                fw = addr(new fileWriter(zipw:w.cw,compCount:&countWriter{w:w.cw},crc32:crc32.NewIEEE(),));
+                var comp = w.compressor(fh.Method);
+                if (comp == null)
+                {
+                    return (null, error.As(ErrAlgorithm)!);
+                }
+
+                err = default!;
+                fw.comp, err = comp(fw.compCount);
+                if (err != null)
+                {
+                    return (null, error.As(err)!);
+                }
+
+                fw.rawCount = addr(new countWriter(w:fw.comp));
+                fw.header = h;
+                ow = fw;
+
+            }
+
             w.dir = append(w.dir, h);
-            fw.header = h;
-
             {
                 var err__prev1 = err;
 
-                err = writeHeader(w.cw, fh);
+                err = writeHeader(w.cw, _addr_fh);
 
                 if (err != null)
                 {
-                    return (null, err);
-                }
+                    return (null, error.As(err)!);
+                } 
+                // If we're creating a directory, fw is nil.
 
                 err = err__prev1;
 
-            }
-
+            } 
+            // If we're creating a directory, fw is nil.
             w.last = fw;
-            return (fw, null);
+            return (ow, error.As(null!)!);
+
         }
 
-        private static error writeHeader(io.Writer w, ref FileHeader h)
+        private static error writeHeader(io.Writer w, ptr<FileHeader> _addr_h)
         {
-            const long maxUint16 = 1L << (int)(16L) - 1L;
+            ref FileHeader h = ref _addr_h.val;
+
+            const long maxUint16 = (long)1L << (int)(16L) - 1L;
 
             if (len(h.Name) > maxUint16)
             {
-                return error.As(errLongName);
+                return error.As(errLongName)!;
             }
+
             if (len(h.Extra) > maxUint16)
             {
-                return error.As(errLongExtra);
+                return error.As(errLongExtra)!;
             }
+
             array<byte> buf = new array<byte>(fileHeaderLen);
             var b = writeBuf(buf[..]);
             b.uint32(uint32(fileHeaderSignature));
@@ -478,48 +562,77 @@ namespace archive
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             {
                 (_, err) = io.WriteString(w, h.Name);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             (_, err) = w.Write(h.Extra);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // RegisterCompressor registers or overrides a custom compressor for a specific
         // method ID. If a compressor for a given method is not found, Writer will
         // default to looking up the compressor at the package level.
-        private static void RegisterCompressor(this ref Writer w, ushort method, Compressor comp)
+        private static void RegisterCompressor(this ptr<Writer> _addr_w, ushort method, Compressor comp)
         {
+            ref Writer w = ref _addr_w.val;
+
             if (w.compressors == null)
             {
                 w.compressors = make_map<ushort, Compressor>();
             }
+
             w.compressors[method] = comp;
+
         }
 
-        private static Compressor compressor(this ref Writer w, ushort method)
+        private static Compressor compressor(this ptr<Writer> _addr_w, ushort method)
         {
+            ref Writer w = ref _addr_w.val;
+
             var comp = w.compressors[method];
             if (comp == null)
             {
                 comp = compressor(method);
             }
+
             return comp;
+
+        }
+
+        private partial struct dirWriter
+        {
+        }
+
+        private static (long, error) Write(this dirWriter _p0, slice<byte> b)
+        {
+            long _p0 = default;
+            error _p0 = default!;
+
+            if (len(b) == 0L)
+            {
+                return (0L, error.As(null!)!);
+            }
+
+            return (0L, error.As(errors.New("zip: write to directory"))!);
+
         }
 
         private partial struct fileWriter
         {
-            public ref header header => ref header_ptr;
+            public ref ptr<header> ptr<header> => ref ptr<header>_ptr;
             public io.Writer zipw;
             public ptr<countWriter> rawCount;
             public io.WriteCloser comp;
@@ -528,29 +641,38 @@ namespace archive
             public bool closed;
         }
 
-        private static (long, error) Write(this ref fileWriter w, slice<byte> p)
+        private static (long, error) Write(this ptr<fileWriter> _addr_w, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref fileWriter w = ref _addr_w.val;
+
             if (w.closed)
             {
-                return (0L, errors.New("zip: write to closed file"));
+                return (0L, error.As(errors.New("zip: write to closed file"))!);
             }
+
             w.crc32.Write(p);
             return w.rawCount.Write(p);
+
         }
 
-        private static error close(this ref fileWriter w)
+        private static error close(this ptr<fileWriter> _addr_w)
         {
+            ref fileWriter w = ref _addr_w.val;
+
             if (w.closed)
             {
-                return error.As(errors.New("zip: file closed twice"));
+                return error.As(errors.New("zip: file closed twice"))!;
             }
+
             w.closed = true;
             {
                 var err = w.comp.Close();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // update FileHeader
@@ -589,6 +711,7 @@ namespace archive
             {
                 buf = make_slice<byte>(dataDescriptorLen);
             }
+
             var b = writeBuf(buf);
             b.uint32(dataDescriptorSignature); // de-facto standard, required by OS X
             b.uint32(fh.CRC32);
@@ -602,8 +725,10 @@ namespace archive
                 b.uint32(fh.CompressedSize);
                 b.uint32(fh.UncompressedSize);
             }
+
             var (_, err) = w.zipw.Write(buf);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         private partial struct countWriter
@@ -612,11 +737,15 @@ namespace archive
             public long count;
         }
 
-        private static (long, error) Write(this ref countWriter w, slice<byte> p)
+        private static (long, error) Write(this ptr<countWriter> _addr_w, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref countWriter w = ref _addr_w.val;
+
             var (n, err) = w.w.Write(p);
             w.count += int64(n);
-            return (n, err);
+            return (n, error.As(err)!);
         }
 
         private partial struct nopCloser : io.Writer
@@ -626,35 +755,43 @@ namespace archive
 
         private static error Close(this nopCloser w)
         {
-            return error.As(null);
+            return error.As(null!)!;
         }
 
         private partial struct writeBuf // : slice<byte>
         {
         }
 
-        private static void uint8(this ref writeBuf b, byte v)
+        private static void uint8(this ptr<writeBuf> _addr_b, byte v)
         {
-            (b.Value)[0L] = v;
-            b.Value = (b.Value)[1L..];
+            ref writeBuf b = ref _addr_b.val;
+
+            (b.val)[0L] = v;
+            b.val = (b.val)[1L..];
         }
 
-        private static void uint16(this ref writeBuf b, ushort v)
+        private static void uint16(this ptr<writeBuf> _addr_b, ushort v)
         {
-            binary.LittleEndian.PutUint16(b.Value, v);
-            b.Value = (b.Value)[2L..];
+            ref writeBuf b = ref _addr_b.val;
+
+            binary.LittleEndian.PutUint16(b.val, v);
+            b.val = (b.val)[2L..];
         }
 
-        private static void uint32(this ref writeBuf b, uint v)
+        private static void uint32(this ptr<writeBuf> _addr_b, uint v)
         {
-            binary.LittleEndian.PutUint32(b.Value, v);
-            b.Value = (b.Value)[4L..];
+            ref writeBuf b = ref _addr_b.val;
+
+            binary.LittleEndian.PutUint32(b.val, v);
+            b.val = (b.val)[4L..];
         }
 
-        private static void uint64(this ref writeBuf b, ulong v)
+        private static void uint64(this ptr<writeBuf> _addr_b, ulong v)
         {
-            binary.LittleEndian.PutUint64(b.Value, v);
-            b.Value = (b.Value)[8L..];
+            ref writeBuf b = ref _addr_b.val;
+
+            binary.LittleEndian.PutUint64(b.val, v);
+            b.val = (b.val)[8L..];
         }
     }
 }}

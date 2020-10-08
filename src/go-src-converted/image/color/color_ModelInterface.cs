@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:40 UTC
+//     Generated on 2020 October 08 04:59:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace image
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +63,10 @@ namespace image
                 m_target_is_ptr = true;
             }
 
-            private delegate Color ConvertByRef(ref T value, Color c);
+            private delegate Color ConvertByPtr(ptr<T> value, Color c);
             private delegate Color ConvertByVal(T value, Color c);
 
-            private static readonly ConvertByRef s_ConvertByRef;
+            private static readonly ConvertByPtr s_ConvertByPtr;
             private static readonly ConvertByVal s_ConvertByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,11 +75,12 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ConvertByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ConvertByPtr is null || !m_target_is_ptr)
                     return s_ConvertByVal!(target, c);
 
-                return s_ConvertByRef(ref target, c);
+                return s_ConvertByPtr(m_target_ptr, c);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -88,23 +89,20 @@ namespace image
             static Model()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Convert");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Convert");
 
                 if (!(extensionMethod is null))
-                    s_ConvertByRef = extensionMethod.CreateStaticDelegate(typeof(ConvertByRef)) as ConvertByRef;
+                    s_ConvertByPtr = extensionMethod.CreateStaticDelegate(typeof(ConvertByPtr)) as ConvertByPtr;
 
-                if (s_ConvertByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Convert");
+                extensionMethod = targetType.GetExtensionMethod("Convert");
 
-                    if (!(extensionMethod is null))
-                        s_ConvertByVal = extensionMethod.CreateStaticDelegate(typeof(ConvertByVal)) as ConvertByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ConvertByVal = extensionMethod.CreateStaticDelegate(typeof(ConvertByVal)) as ConvertByVal;
 
-                if (s_ConvertByRef is null && s_ConvertByVal is null)
+                if (s_ConvertByPtr is null && s_ConvertByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Model.Convert method", new Exception("Convert"));
             }
 

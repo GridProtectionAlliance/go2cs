@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:37 UTC
+//     Generated on 2020 October 08 03:38:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using sha256 = go.crypto.sha256_package;
 using subtle = go.crypto.subtle_package;
 using errors = go.errors_package;
 using io = go.io_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using go;
 
 namespace go {
@@ -36,15 +37,17 @@ namespace crypto
             {
                 this.vers = default;
                 this.cipherSuite = default;
+                this.createdAt = default;
                 this.masterSecret = default;
                 this.certificates = default;
                 this.usedOldKey = default;
             }
 
-            public sessionState(ushort vers = default, ushort cipherSuite = default, slice<byte> masterSecret = default, slice<slice<byte>> certificates = default, bool usedOldKey = default)
+            public sessionState(ushort vers = default, ushort cipherSuite = default, ulong createdAt = default, slice<byte> masterSecret = default, slice<slice<byte>> certificates = default, bool usedOldKey = default)
             {
                 this.vers = vers;
                 this.cipherSuite = cipherSuite;
+                this.createdAt = createdAt;
                 this.masterSecret = masterSecret;
                 this.certificates = certificates;
                 this.usedOldKey = usedOldKey;
@@ -70,7 +73,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static sessionState sessionState_cast(dynamic value)
         {
-            return new sessionState(value.vers, value.cipherSuite, value.masterSecret, value.certificates, value.usedOldKey);
+            return new sessionState(value.vers, value.cipherSuite, value.createdAt, value.masterSecret, value.certificates, value.usedOldKey);
         }
     }
 }}

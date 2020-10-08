@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:27 UTC
+//     Generated on 2020 October 08 04:43:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
-using flag = go.flag_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -22,6 +21,7 @@ using strings = go.strings_package;
 using binutils = go.github.com.google.pprof.@internal.binutils_package;
 using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using symbolizer = go.github.com.google.pprof.@internal.symbolizer_package;
+using transport = go.github.com.google.pprof.@internal.transport_package;
 using go;
 
 namespace go {

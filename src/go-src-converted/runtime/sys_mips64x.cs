@@ -4,7 +4,7 @@
 
 // +build mips64 mips64le
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:11 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:23:58 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\sys_mips64x.go
 using @unsafe = go.@unsafe_package;
@@ -16,8 +16,10 @@ namespace go
     {
         // adjust Gobuf as if it executed a call to fn with context ctxt
         // and then did an immediate Gosave.
-        private static void gostartcall(ref gobuf buf, unsafe.Pointer fn, unsafe.Pointer ctxt)
+        private static void gostartcall(ptr<gobuf> _addr_buf, unsafe.Pointer fn, unsafe.Pointer ctxt)
         {
+            ref gobuf buf = ref _addr_buf.val;
+
             if (buf.lr != 0L)
             {
                 throw("invalid use of gostartcall");
@@ -25,6 +27,7 @@ namespace go
             buf.lr = buf.pc;
             buf.pc = uintptr(fn);
             buf.ctxt = ctxt;
+
         }
     }
 }

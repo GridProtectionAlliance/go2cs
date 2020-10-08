@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:30 UTC
+//     Generated on 2020 October 08 03:24:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,30 +29,24 @@ namespace go
                 this.key = default;
                 this.elem = default;
                 this.bucket = default;
-                this.hmap = default;
+                this.hasher = default;
                 this.keysize = default;
-                this.indirectkey = default;
-                this.valuesize = default;
-                this.indirectvalue = default;
+                this.elemsize = default;
                 this.bucketsize = default;
-                this.reflexivekey = default;
-                this.needkeyupdate = default;
+                this.flags = default;
             }
 
-            public maptype(_type typ = default, ref ptr<_type> key = default, ref ptr<_type> elem = default, ref ptr<_type> bucket = default, ref ptr<_type> hmap = default, byte keysize = default, bool indirectkey = default, byte valuesize = default, bool indirectvalue = default, ushort bucketsize = default, bool reflexivekey = default, bool needkeyupdate = default)
+            public maptype(_type typ = default, ref ptr<_type> key = default, ref ptr<_type> elem = default, ref ptr<_type> bucket = default, Func<unsafe.Pointer, System.UIntPtr, System.UIntPtr> hasher = default, byte keysize = default, byte elemsize = default, ushort bucketsize = default, uint flags = default)
             {
                 this.typ = typ;
                 this.key = key;
                 this.elem = elem;
                 this.bucket = bucket;
-                this.hmap = hmap;
+                this.hasher = hasher;
                 this.keysize = keysize;
-                this.indirectkey = indirectkey;
-                this.valuesize = valuesize;
-                this.indirectvalue = indirectvalue;
+                this.elemsize = elemsize;
                 this.bucketsize = bucketsize;
-                this.reflexivekey = reflexivekey;
-                this.needkeyupdate = needkeyupdate;
+                this.flags = flags;
             }
 
             // Enable comparisons between nil and maptype struct
@@ -75,7 +69,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static maptype maptype_cast(dynamic value)
         {
-            return new maptype(value.typ, ref value.key, ref value.elem, ref value.bucket, ref value.hmap, value.keysize, value.indirectkey, value.valuesize, value.indirectvalue, value.bucketsize, value.reflexivekey, value.needkeyupdate);
+            return new maptype(value.typ, ref value.key, ref value.elem, ref value.bucket, value.hasher, value.keysize, value.elemsize, value.bucketsize, value.flags);
         }
     }
 }

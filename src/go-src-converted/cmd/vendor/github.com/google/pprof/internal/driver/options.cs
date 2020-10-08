@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2020 August 29 10:05:27 UTC
+// package driver -- go2cs converted at 2020 October 08 04:43:05 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\options.go
 using bufio = go.bufio_package;
-using flag = go.flag_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -25,6 +24,7 @@ using strings = go.strings_package;
 using binutils = go.github.com.google.pprof.@internal.binutils_package;
 using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using symbolizer = go.github.com.google.pprof.@internal.symbolizer_package;
+using transport = go.github.com.google.pprof.@internal.transport_package;
 using static go.builtin;
 using System;
 
@@ -40,12 +40,14 @@ namespace @internal
     {
         // setDefaults returns a new plugin.Options with zero fields sets to
         // sensible defaults.
-        private static ref plugin.Options setDefaults(ref plugin.Options o)
+        private static ptr<plugin.Options> setDefaults(ptr<plugin.Options> _addr_o)
         {
-            plugin.Options d = ref new plugin.Options();
+            ref plugin.Options o = ref _addr_o.val;
+
+            ptr<plugin.Options> d = addr(new plugin.Options());
             if (o != null)
             {
-                d.Value = o.Value;
+                d.val = o;
             }
             if (d.Writer == null)
             {
@@ -53,90 +55,26 @@ namespace @internal
             }
             if (d.Flagset == null)
             {
-                d.Flagset = new goFlags();
+                d.Flagset = addr(new GoFlags());
             }
             if (d.Obj == null)
             {
-                d.Obj = ref new binutils.Binutils();
+                d.Obj = addr(new binutils.Binutils());
             }
             if (d.UI == null)
             {
-                d.UI = ref new stdUI(r:bufio.NewReader(os.Stdin));
+                d.UI = addr(new stdUI(r:bufio.NewReader(os.Stdin)));
+            }
+            if (d.HTTPTransport == null)
+            {
+                d.HTTPTransport = transport.New(d.Flagset);
             }
             if (d.Sym == null)
             {
-                d.Sym = ref new symbolizer.Symbolizer(Obj:d.Obj,UI:d.UI);
+                d.Sym = addr(new symbolizer.Symbolizer(Obj:d.Obj,UI:d.UI,Transport:d.HTTPTransport));
             }
-            return d;
-        }
+            return _addr_d!;
 
-        // goFlags returns a flagset implementation based on the standard flag
-        // package from the Go distribution. It implements the plugin.FlagSet
-        // interface.
-        private partial struct goFlags
-        {
-        }
-
-        private static ref bool Bool(this goFlags _p0, @string o, bool d, @string c)
-        {
-            return flag.Bool(o, d, c);
-        }
-
-        private static ref long Int(this goFlags _p0, @string o, long d, @string c)
-        {
-            return flag.Int(o, d, c);
-        }
-
-        private static ref double Float64(this goFlags _p0, @string o, double d, @string c)
-        {
-            return flag.Float64(o, d, c);
-        }
-
-        private static ref @string String(this goFlags _p0, @string o, @string d, @string c)
-        {
-            return flag.String(o, d, c);
-        }
-
-        private static void BoolVar(this goFlags _p0, ref bool b, @string o, bool d, @string c)
-        {
-            flag.BoolVar(b, o, d, c);
-        }
-
-        private static void IntVar(this goFlags _p0, ref long i, @string o, long d, @string c)
-        {
-            flag.IntVar(i, o, d, c);
-        }
-
-        private static void Float64Var(this goFlags _p0, ref double f, @string o, double d, @string c)
-        {
-            flag.Float64Var(f, o, d, c);
-        }
-
-        private static void StringVar(this goFlags _p0, ref @string s, @string o, @string d, @string c)
-        {
-            flag.StringVar(s, o, d, c);
-        }
-
-        private static ref slice<ref @string> StringList(this goFlags _p0, @string o, @string d, @string c)
-        {
-            return ref new slice<ref @string>(new ref @string[] { flag.String(o,d,c) });
-        }
-
-        private static @string ExtraUsage(this goFlags _p0)
-        {
-            return "";
-        }
-
-        private static slice<@string> Parse(this goFlags _p0, Action usage)
-        {
-            flag.Usage = usage;
-            flag.Parse();
-            var args = flag.Args();
-            if (len(args) == 0L)
-            {
-                usage();
-            }
-            return args;
         }
 
         private partial struct stdUI
@@ -144,39 +82,65 @@ namespace @internal
             public ptr<bufio.Reader> r;
         }
 
-        private static (@string, error) ReadLine(this ref stdUI ui, @string prompt)
+        private static (@string, error) ReadLine(this ptr<stdUI> _addr_ui, @string prompt)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref stdUI ui = ref _addr_ui.val;
+
             os.Stdout.WriteString(prompt);
             return ui.r.ReadString('\n');
         }
 
-        private static void Print(this ref stdUI ui, params object[] args)
+        private static void Print(this ptr<stdUI> _addr_ui, params object[] args)
         {
+            args = args.Clone();
+            ref stdUI ui = ref _addr_ui.val;
+
             ui.fprint(os.Stderr, args);
         }
 
-        private static void PrintErr(this ref stdUI ui, params object[] args)
+        private static void PrintErr(this ptr<stdUI> _addr_ui, params object[] args)
         {
+            args = args.Clone();
+            ref stdUI ui = ref _addr_ui.val;
+
             ui.fprint(os.Stderr, args);
         }
 
-        private static bool IsTerminal(this ref stdUI ui)
+        private static bool IsTerminal(this ptr<stdUI> _addr_ui)
         {
+            ref stdUI ui = ref _addr_ui.val;
+
             return false;
         }
 
-        private static @string SetAutoComplete(this ref stdUI ui, Func<@string, @string> _p0)
+        private static bool WantBrowser(this ptr<stdUI> _addr_ui)
         {
+            ref stdUI ui = ref _addr_ui.val;
+
+            return true;
         }
 
-        private static void fprint(this ref stdUI ui, ref os.File f, slice<object> args)
+        private static @string SetAutoComplete(this ptr<stdUI> _addr_ui, Func<@string, @string> _p0)
         {
+            ref stdUI ui = ref _addr_ui.val;
+
+        }
+
+        private static void fprint(this ptr<stdUI> _addr_ui, ptr<os.File> _addr_f, slice<object> args)
+        {
+            ref stdUI ui = ref _addr_ui.val;
+            ref os.File f = ref _addr_f.val;
+
             var text = fmt.Sprint(args);
             if (!strings.HasSuffix(text, "\n"))
             {
                 text += "\n";
             }
+
             f.WriteString(text);
+
         }
 
         // oswriter implements the Writer interface using a regular file.
@@ -186,8 +150,11 @@ namespace @internal
 
         private static (io.WriteCloser, error) Open(this oswriter _p0, @string name)
         {
+            io.WriteCloser _p0 = default;
+            error _p0 = default!;
+
             var (f, err) = os.Create(name);
-            return (f, err);
+            return (f, error.As(err)!);
         }
     }
 }}}}}}}

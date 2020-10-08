@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:49 UTC
+//     Generated on 2020 October 08 04:02:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,10 +20,12 @@ using ast = go.go.ast_package;
 using doc = go.go.doc_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
+using goroot = go.@internal.goroot_package;
+using goversion = go.@internal.goversion_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
-using log = go.log_package;
 using os = go.os_package;
+using exec = go.os.exec_package;
 using pathpkg = go.path_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;

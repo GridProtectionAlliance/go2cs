@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build linux,cgo darwin,cgo
+// +build linux,cgo darwin,cgo freebsd,cgo
 
-// package plugin -- go2cs converted at 2020 August 29 10:11:11 UTC
+// package plugin -- go2cs converted at 2020 October 08 04:59:51 UTC
 // import "plugin" ==> using plugin = go.plugin_package
 // Original source: C:\Go\src\plugin\plugin_dlopen.go
 /*
@@ -63,99 +63,81 @@ using errors = go.errors_package;
 using sync = go.sync_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
-using System;
 
 namespace go
 {
-    public static unsafe partial class plugin_package
+    public static partial class plugin_package
     {
-        // avoid a dependency on strings
-        private static long lastIndexByte(@string s, byte c)
+        private static (ptr<Plugin>, error) open(@string name)
         {
-            for (var i = len(s) - 1L; i >= 0L; i--)
-            {
-                if (s[i] == c)
-                {
-                    return i;
-                }
-            }
-            return -1L;
-        }
+            ptr<Plugin> _p0 = default!;
+            error _p0 = default!;
 
-        private static (ref Plugin, error) open(@string name)
-        {
             var cPath = make_slice<byte>(C.PATH_MAX + 1L);
             var cRelName = make_slice<byte>(len(name) + 1L);
             copy(cRelName, name);
-            if (C.realpath((C.@char.Value)(@unsafe.Pointer(ref cRelName[0L])), (C.@char.Value)(@unsafe.Pointer(ref cPath[0L]))) == null)
+            if (C.realpath((C.@char.val)(@unsafe.Pointer(_addr_cRelName[0L])), (C.@char.val)(@unsafe.Pointer(_addr_cPath[0L]))) == null)
             {
-                return (null, errors.New("plugin.Open(\"" + name + "\"): realpath failed"));
+                return (_addr_null!, error.As(errors.New("plugin.Open(\"" + name + "\"): realpath failed"))!);
             }
-            var filepath = C.GoString((C.@char.Value)(@unsafe.Pointer(ref cPath[0L])));
+            var filepath = C.GoString((C.@char.val)(@unsafe.Pointer(_addr_cPath[0L])));
 
             pluginsMu.Lock();
             {
                 var p__prev1 = p;
 
-                var p = plugins[filepath];
+                ref var p = ref heap(plugins[filepath], out ptr<var> _addr_p);
 
                 if (p != null)
                 {
                     pluginsMu.Unlock();
                     if (p.err != "")
                     {
-                        return (null, errors.New("plugin.Open(\"" + name + "\"): " + p.err + " (previous failure)"));
+                        return (_addr_null!, error.As(errors.New("plugin.Open(\"" + name + "\"): " + p.err + " (previous failure)"))!);
                     }
                     p.loaded.Receive();
-                    return (p, null);
-                }
+                    return (_addr_p!, error.As(null!)!);
 
+                }
                 p = p__prev1;
 
             }
-            ref C.char cErr = default;
-            var h = C.pluginOpen((C.@char.Value)(@unsafe.Pointer(ref cPath[0L])), ref cErr);
+
+            ptr<C.char> cErr;
+            var h = C.pluginOpen((C.@char.val)(@unsafe.Pointer(_addr_cPath[0L])), _addr_cErr);
             if (h == 0L)
             {
                 pluginsMu.Unlock();
-                return (null, errors.New("plugin.Open(\"" + name + "\"): " + C.GoString(cErr)));
-            } 
-            // TODO(crawshaw): look for plugin note, confirm it is a Go plugin
-            // and it was built with the correct toolchain.
+                return (_addr_null!, error.As(errors.New("plugin.Open(\"" + name + "\"): " + C.GoString(cErr)))!);
+            }
             if (len(name) > 3L && name[len(name) - 3L..] == ".so")
             {
                 name = name[..len(name) - 3L];
             }
             if (plugins == null)
             {
-                plugins = make_map<@string, ref Plugin>();
+                plugins = make_map<@string, ptr<Plugin>>();
             }
             var (pluginpath, syms, errstr) = lastmoduleinit();
             if (errstr != "")
             {
-                plugins[filepath] = ref new Plugin(pluginpath:pluginpath,err:errstr,);
+                plugins[filepath] = addr(new Plugin(pluginpath:pluginpath,err:errstr,));
                 pluginsMu.Unlock();
-                return (null, errors.New("plugin.Open(\"" + name + "\"): " + errstr));
-            } 
-            // This function can be called from the init function of a plugin.
-            // Drop a placeholder in the map so subsequent opens can wait on it.
-            p = ref new Plugin(pluginpath:pluginpath,loaded:make(chanstruct{}),);
+                return (_addr_null!, error.As(errors.New("plugin.Open(\"" + name + "\"): " + errstr))!);
+            }
+            p = addr(new Plugin(pluginpath:pluginpath,loaded:make(chanstruct{}),));
             plugins[filepath] = p;
             pluginsMu.Unlock();
 
-            var initStr = make_slice<byte>(len(pluginpath) + 6L);
+            var initStr = make_slice<byte>(len(pluginpath) + len("..inittask") + 1L); // +1 for terminating NUL
             copy(initStr, pluginpath);
-            copy(initStr[len(pluginpath)..], ".init");
+            copy(initStr[len(pluginpath)..], "..inittask");
 
-            var initFuncPC = C.pluginLookup(h, (C.@char.Value)(@unsafe.Pointer(ref initStr[0L])), ref cErr);
-            if (initFuncPC != null)
+            var initTask = C.pluginLookup(h, (C.@char.val)(@unsafe.Pointer(_addr_initStr[0L])), _addr_cErr);
+            if (initTask != null)
             {
-                var initFuncP = ref initFuncPC;
-                *(*Action) initFunc = @unsafe.Pointer(ref initFuncP).Value;
-                initFunc();
-            } 
-
-            // Fill out the value of each plugin symbol.
+                doInit(initTask);
+            }
             foreach (var (symName, sym) in syms)
             {
                 var isFunc = symName[0L] == '.';
@@ -168,48 +150,58 @@ namespace go
                 var cname = make_slice<byte>(len(fullName) + 1L);
                 copy(cname, fullName);
 
-                p = C.pluginLookup(h, (C.@char.Value)(@unsafe.Pointer(ref cname[0L])), ref cErr);
+                p = C.pluginLookup(h, (C.@char.val)(@unsafe.Pointer(_addr_cname[0L])), _addr_cErr);
                 if (p == null)
                 {
-                    return (null, errors.New("plugin.Open(\"" + name + "\"): could not find symbol " + symName + ": " + C.GoString(cErr)));
+                    return (_addr_null!, error.As(errors.New("plugin.Open(\"" + name + "\"): could not find symbol " + symName + ": " + C.GoString(cErr)))!);
                 }
-                ref array<unsafe.Pointer> valp = new ptr<ref array<unsafe.Pointer>>(@unsafe.Pointer(ref sym));
+                ptr<array<unsafe.Pointer>> valp = new ptr<ptr<array<unsafe.Pointer>>>(@unsafe.Pointer(_addr_sym));
                 if (isFunc)
                 {
-                    (valp.Value)[1L] = @unsafe.Pointer(ref p);
+                    (valp.val)[1L] = @unsafe.Pointer(_addr_p);
                 }
                 else
                 {
-                    (valp.Value)[1L] = p;
-                } 
-                // we can't add to syms during iteration as we'll end up processing
-                // some symbols twice with the inability to tell if the symbol is a function
+                    (valp.val)[1L] = p;
+                }
                 updatedSyms[symName] = sym;
-            }
-            p.syms = updatedSyms;
+
+            }            p.syms = updatedSyms;
 
             close(p.loaded);
-            return (p, null);
+            return (_addr_p!, error.As(null!)!);
+
         }
 
-        private static (Symbol, error) lookup(ref Plugin p, @string symName)
+        private static (Symbol, error) lookup(ptr<Plugin> _addr_p, @string symName)
         {
+            Symbol _p0 = default;
+            error _p0 = default!;
+            ref Plugin p = ref _addr_p.val;
+
             {
                 var s = p.syms[symName];
 
                 if (s != null)
                 {
-                    return (s, null);
+                    return (s, error.As(null!)!);
                 }
 
             }
-            return (null, errors.New("plugin: symbol " + symName + " not found in plugin " + p.pluginpath));
+
+            return (null, error.As(errors.New("plugin: symbol " + symName + " not found in plugin " + p.pluginpath))!);
+
         }
 
-        private static sync.Mutex pluginsMu = default;        private static map<@string, ref Plugin> plugins = default;
+        private static sync.Mutex pluginsMu = default;        private static map<@string, ptr<Plugin>> plugins = default;
 
         // lastmoduleinit is defined in package runtime
         private static (@string, object, @string) lastmoduleinit()
 ;
+
+        // doInit is defined in package runtime
+        //go:linkname doInit runtime.doInit
+        private static void doInit(unsafe.Pointer t)
+; // t should be a *runtime.initTask
     }
 }

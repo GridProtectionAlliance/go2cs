@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:00:20 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:21 UTC
 // Original source: C:\Go\src\cmd\fix\printerconfig.go
 using ast = go.go.ast_package;
 using static go.builtin;
@@ -19,29 +19,35 @@ namespace go
 
         private static fix printerconfigFix = new fix(name:"printerconfig",date:"2012-12-11",f:printerconfig,desc:`Add element keys to Config composite literals.`,);
 
-        private static bool printerconfig(ref ast.File f)
+        private static bool printerconfig(ptr<ast.File> _addr_f)
         {
+            ref ast.File f = ref _addr_f.val;
+
             if (!imports(f, "go/printer"))
             {
                 return false;
             }
+
             var @fixed = false;
             walk(f, n =>
             {
-                ref ast.CompositeLit (cl, ok) = n._<ref ast.CompositeLit>();
+                ptr<ast.CompositeLit> (cl, ok) = n._<ptr<ast.CompositeLit>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
-                ref ast.SelectorExpr (se, ok) = cl.Type._<ref ast.SelectorExpr>();
+
+                ptr<ast.SelectorExpr> (se, ok) = cl.Type._<ptr<ast.SelectorExpr>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
+
                 if (!isTopName(se.X, "printer") || se.Sel == null)
                 {
-                    return;
+                    return ;
                 }
+
                 {
                     var ss = se.Sel.String();
 
@@ -50,7 +56,7 @@ namespace go
                         foreach (var (i, e) in cl.Elts)
                         {
                             {
-                                ref ast.KeyValueExpr (_, ok) = e._<ref ast.KeyValueExpr>();
+                                ptr<ast.KeyValueExpr> (_, ok) = e._<ptr<ast.KeyValueExpr>>();
 
                                 if (ok)
                                 {
@@ -58,22 +64,27 @@ namespace go
                                 }
 
                             }
+
                             switch (i)
                             {
                                 case 0L: 
-                                    cl.Elts[i] = ref new ast.KeyValueExpr(Key:ast.NewIdent("Mode"),Value:e,);
+                                    cl.Elts[i] = addr(new ast.KeyValueExpr(Key:ast.NewIdent("Mode"),Value:e,));
                                     break;
                                 case 1L: 
-                                    cl.Elts[i] = ref new ast.KeyValueExpr(Key:ast.NewIdent("Tabwidth"),Value:e,);
+                                    cl.Elts[i] = addr(new ast.KeyValueExpr(Key:ast.NewIdent("Tabwidth"),Value:e,));
                                     break;
                             }
                             fixed = true;
+
                         }
+
                     }
 
                 }
+
             });
             return fixed;
+
         }
     }
 }

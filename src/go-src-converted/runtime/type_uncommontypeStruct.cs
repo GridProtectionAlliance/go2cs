@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:30 UTC
+//     Generated on 2020 October 08 03:24:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,16 +27,16 @@ namespace go
             {
                 this.pkgpath = default;
                 this.mcount = default;
-                this._ = default;
+                this.xcount = default;
                 this.moff = default;
                 this._ = default;
             }
 
-            public uncommontype(nameOff pkgpath = default, ushort mcount = default, ushort _ = default, uint moff = default, uint _ = default)
+            public uncommontype(nameOff pkgpath = default, ushort mcount = default, ushort xcount = default, uint moff = default, uint _ = default)
             {
                 this.pkgpath = pkgpath;
                 this.mcount = mcount;
-                this._ = _;
+                this.xcount = xcount;
                 this.moff = moff;
                 this._ = _;
             }
@@ -61,7 +61,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static uncommontype uncommontype_cast(dynamic value)
         {
-            return new uncommontype(value.pkgpath, value.mcount, value._, value.moff, value._);
+            return new uncommontype(value.pkgpath, value.mcount, value.xcount, value.moff, value._);
         }
     }
 }

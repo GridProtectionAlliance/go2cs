@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:32 UTC
+//     Generated on 2020 October 08 03:43:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,59 +25,17 @@ namespace net
     public static partial class rpc_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(Server))]
         private partial struct debugHTTP
         {
-            // Server structure promotion - sourced from pointer
-            private readonly ptr<Server> m_ServerRef;
-
-            private ref Server Server_ptr => ref m_ServerRef.Value;
-
-            public ref @string Addr => ref m_ServerRef.Value.Addr;
-
-            public ref Handler Handler => ref m_ServerRef.Value.Handler;
-
-            public ref ptr<tls.Config> TLSConfig => ref m_ServerRef.Value.TLSConfig;
-
-            public ref time.Duration ReadTimeout => ref m_ServerRef.Value.ReadTimeout;
-
-            public ref time.Duration ReadHeaderTimeout => ref m_ServerRef.Value.ReadHeaderTimeout;
-
-            public ref time.Duration WriteTimeout => ref m_ServerRef.Value.WriteTimeout;
-
-            public ref time.Duration IdleTimeout => ref m_ServerRef.Value.IdleTimeout;
-
-            public ref long MaxHeaderBytes => ref m_ServerRef.Value.MaxHeaderBytes;
-
-            public ref map<@string, Action<ref Server, ref tls.Conn, Handler>> TLSNextProto => ref m_ServerRef.Value.TLSNextProto;
-
-            public ref Action<net.Conn, ConnState> ConnState => ref m_ServerRef.Value.ConnState;
-
-            public ref ptr<log.Logger> ErrorLog => ref m_ServerRef.Value.ErrorLog;
-
-            public ref int disableKeepAlives => ref m_ServerRef.Value.disableKeepAlives;
-
-            public ref int inShutdown => ref m_ServerRef.Value.inShutdown;
-
-            public ref sync.Once nextProtoOnce => ref m_ServerRef.Value.nextProtoOnce;
-
-            public ref error nextProtoErr => ref m_ServerRef.Value.nextProtoErr;
-
-            public ref sync.Mutex mu => ref m_ServerRef.Value.mu;
-
-            public ref channel<object> doneChan => ref m_ServerRef.Value.doneChan;
-
-            public ref slice<Action> onShutdown => ref m_ServerRef.Value.onShutdown;
-
             // Constructors
             public debugHTTP(NilType _)
             {
-                this.m_ServerRef = new ptr<Server>(new Server(nil));
+                this.ptr<Server> = default;
             }
 
-            public debugHTTP(ref Server Server = default)
+            public debugHTTP(ref ptr<Server> ptr<Server> = default)
             {
-                this.m_ServerRef = new ptr<Server>(ref Server);
+                this.ptr<Server> = ptr<Server>;
             }
 
             // Enable comparisons between nil and debugHTTP struct
@@ -100,7 +58,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static debugHTTP debugHTTP_cast(dynamic value)
         {
-            return new debugHTTP(ref value.Server);
+            return new debugHTTP(ref value.ptr<Server>);
         }
     }
 }}

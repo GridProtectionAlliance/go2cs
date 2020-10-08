@@ -1,5 +1,5 @@
 // Inferno utils/8l/asm.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/8l/asm.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/8l/asm.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package sym -- go2cs converted at 2020 August 29 10:02:54 UTC
+// package sym -- go2cs converted at 2020 October 08 04:37:53 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Go\src\cmd\link\internal\sym\segment.go
 
@@ -52,7 +52,7 @@ namespace @internal
             public ulong Length; // length in memory
             public ulong Fileoff; // file offset
             public ulong Filelen; // length on disk
-            public slice<ref Section> Sections;
+            public slice<ptr<Section>> Sections;
         }
 
         public partial struct Section
@@ -66,6 +66,9 @@ namespace @internal
             public ptr<Segment> Seg;
             public ulong Reloff;
             public ulong Rellen;
+            public ptr<Symbol> Sym; // symbol for the section, if any
+            public LoaderSym Sym2; // symbol for the section, if any
+            public ushort Index; // each section has a unique index, used internally
         }
     }
 }}}}

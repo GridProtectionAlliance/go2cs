@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2020 August 29 10:07:38 UTC
+// package arm64asm -- go2cs converted at 2020 October 08 04:44:31 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\decode.go
 using binary = go.encoding.binary_package;
@@ -51,20 +51,25 @@ namespace arm64
         // Decode decodes the 4 bytes in src as a single instruction.
         public static (Inst, error) Decode(slice<byte> src)
         {
+            Inst inst = default;
+            error err = default!;
+
             if (len(src) < 4L)
             {
-                return (new Inst(), errShort);
+                return (new Inst(), error.As(errShort)!);
             }
+
             var x = binary.LittleEndian.Uint32(src);
 
 Search:
             foreach (var (i) in instFormats)
             {
-                var f = ref instFormats[i];
+                var f = _addr_instFormats[i];
                 if (x & f.mask != f.value)
                 {
                     continue;
                 }
+
                 if (f.canDecode != null && !f.canDecode(x))
                 {
                     continue;
@@ -77,19 +82,24 @@ Search:
                     {
                         break;
                     }
+
                     var arg = decodeArg(aop, x);
                     if (arg == null)
                     { // Cannot decode argument
                         _continueSearch = true;
                         break;
                     }
+
                     args[j] = arg;
+
                 }
                 decoderCover[i] = true;
                 inst = new Inst(Op:f.op,Args:args,Enc:x,);
-                return (inst, null);
+                return (inst, error.As(null!)!);
+
             }
-            return (new Inst(), errUnknown);
+            return (new Inst(), error.As(errUnknown)!);
+
         }
 
         // decodeArg decodes the arg described by aop from the instruction bits x.
@@ -135,6 +145,7 @@ Search:
                 {
                     return null;
                 }
+
                 shift = shift * 12L;
                 return new ImmShift(uint16(imm12),uint8(shift));
                 goto __switch_break0;
@@ -461,6 +472,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(immr,false);
                 goto __switch_break0;
             }
@@ -471,6 +483,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(imms,true);
                 goto __switch_break0;
             }
@@ -518,6 +531,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(immr,true);
                 goto __switch_break0;
             }
@@ -534,6 +548,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(32-immr,true);
                 goto __switch_break0;
             }
@@ -544,6 +559,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(imms+1,true);
                 goto __switch_break0;
             }
@@ -566,6 +582,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(immr,true);
                 goto __switch_break0;
             }
@@ -578,6 +595,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(width,true);
                 goto __switch_break0;
             }
@@ -596,6 +614,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(width,true);
                 goto __switch_break0;
             }
@@ -617,6 +636,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(shift,true);
                 goto __switch_break0;
             }
@@ -628,6 +648,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(shift,true);
                 goto __switch_break0;
             }
@@ -638,6 +659,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(immr,true);
                 goto __switch_break0;
             }
@@ -668,6 +690,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new ImmShift(uint16(imm16),uint8(shift));
                 goto __switch_break0;
             }
@@ -686,6 +709,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(32-immr,true);
                 goto __switch_break0;
             }
@@ -696,6 +720,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(imms+1,true);
                 goto __switch_break0;
             }
@@ -718,6 +743,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(immr,true);
                 goto __switch_break0;
             }
@@ -730,6 +756,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(width,true);
                 goto __switch_break0;
             }
@@ -748,6 +775,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(width,true);
                 goto __switch_break0;
             }
@@ -760,6 +788,7 @@ Search:
                 {
                     return null;
                 }
+
                 var result = uint32(imm16) << (int)(shift);
                 return new Imm(result,false);
                 goto __switch_break0;
@@ -773,6 +802,7 @@ Search:
                 {
                     return null;
                 }
+
                 result = uint32(imm16) << (int)(shift);
                 return new Imm(^result,false);
                 goto __switch_break0;
@@ -802,6 +832,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(32-immr,true);
                 goto __switch_break0;
             }
@@ -812,6 +843,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(imms+1,true);
                 goto __switch_break0;
             }
@@ -834,6 +866,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(immr,true);
                 goto __switch_break0;
             }
@@ -846,6 +879,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(width,true);
                 goto __switch_break0;
             }
@@ -864,6 +898,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(width,true);
                 goto __switch_break0;
             }
@@ -879,6 +914,7 @@ Search:
                 {
                     return X0 + Reg(Rt);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_cond_AllowALNV_Normal)
@@ -900,6 +936,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Cond(uint8(cond),true);
                 goto __switch_break0;
             }
@@ -934,6 +971,7 @@ Search:
                 {
                     return Imm_option(CRm);
                 }
+
                 return new Imm(CRm,false);
                 goto __switch_break0;
             }
@@ -959,6 +997,7 @@ Search:
                 {
                     return DAIFClr;
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -1023,6 +1062,7 @@ Search:
                 {
                     return null;
                 }
+
                 var immb = (x >> (int)(16L)) & (1L << (int)(3L) - 1L);
                 return new Imm((immh<<3)+immb-64,true);
                 goto __switch_break0;
@@ -1047,6 +1087,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_immediate_0_width_immh_immb__SEEAdvancedSIMDmodifiedimmediate_0__UIntimmhimmb8_1__UIntimmhimmb16_2__UIntimmhimmb32_4__UIntimmhimmb64_8)
@@ -1078,6 +1119,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_immediate_0_width_size__8_0__16_1__32_2)
@@ -1107,6 +1149,7 @@ Search:
                 {
                     return null;
                 }
+
                 immb = (x >> (int)(16L)) & (1L << (int)(3L) - 1L);
                 return new Imm(128-((immh<<3)+immb),true);
                 goto __switch_break0;
@@ -1136,6 +1179,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_immediate_1_width_immh_immb__SEEAdvancedSIMDmodifiedimmediate_0__16UIntimmhimmb_1__32UIntimmhimmb_2__64UIntimmhimmb_4__128UIntimmhimmb_8)
@@ -1162,6 +1206,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_immediate_8x8_a_b_c_d_e_f_g_h)
@@ -1175,34 +1220,42 @@ Search:
                 {
                     imm = 0L;
                 }
+
                 if (x & (1L << (int)(6L)) != 0L)
                 {
                     imm += ((1L << (int)(8L)) - 1L) << (int)(8L);
                 }
+
                 if (x & (1L << (int)(7L)) != 0L)
                 {
                     imm += ((1L << (int)(8L)) - 1L) << (int)(16L);
                 }
+
                 if (x & (1L << (int)(8L)) != 0L)
                 {
                     imm += ((1L << (int)(8L)) - 1L) << (int)(24L);
                 }
+
                 if (x & (1L << (int)(9L)) != 0L)
                 {
                     imm += ((1L << (int)(8L)) - 1L) << (int)(32L);
                 }
+
                 if (x & (1L << (int)(16L)) != 0L)
                 {
                     imm += ((1L << (int)(8L)) - 1L) << (int)(40L);
                 }
+
                 if (x & (1L << (int)(17L)) != 0L)
                 {
                     imm += ((1L << (int)(8L)) - 1L) << (int)(48L);
                 }
+
                 if (x & (1L << (int)(18L)) != 0L)
                 {
                     imm += ((1L << (int)(8L)) - 1L) << (int)(56L);
                 }
+
                 return new Imm64(imm,false);
                 goto __switch_break0;
             }
@@ -1245,6 +1298,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_immediate_fbits_min_1_max_32_sub_64_scale)
@@ -1255,6 +1309,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new Imm(fbits,true);
                 goto __switch_break0;
             }
@@ -1282,6 +1337,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_immediate_MSL__a_b_c_d_e_f_g_h_cmode__8_0__16_1)
@@ -1297,6 +1353,7 @@ Search:
                 {
                     shift = 16L + 128L;
                 }
+
                 return new ImmShift(uint16(imm8),shift);
                 goto __switch_break0;
             }
@@ -1365,6 +1422,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_St)
@@ -1401,6 +1459,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_19_4__B_1__H_2__S_4)
@@ -1423,6 +1482,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_19_4__B_1__H_2__S_4__D_8)
@@ -1449,6 +1509,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_19_4__D_8)
@@ -1463,6 +1524,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_19_4__S_4__D_8)
@@ -1481,6 +1543,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_1__S_0)
@@ -1495,6 +1558,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_1__S_0__D_1)
@@ -1509,6 +1573,7 @@ Search:
                 {
                     return D0 + Reg(Rd);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_1__S_1)
@@ -1523,6 +1588,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_2__B_0__H_1__S_2)
@@ -1545,6 +1611,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_2__B_0__H_1__S_2__D_3)
@@ -1567,6 +1634,7 @@ Search:
                 {
                     return D0 + Reg(Rd);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_2__D_3)
@@ -1581,6 +1649,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_2__H_0__S_1__D_2)
@@ -1603,6 +1672,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_2__H_1__S_2)
@@ -1621,6 +1691,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_22_2__S_1__D_2)
@@ -1639,6 +1710,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_arrangement_16B)
@@ -1695,6 +1767,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new RegisterWithArrangementAndIndex(V0+Reg(Rd),a,uint8(index),0);
                 goto __switch_break0;
             }
@@ -1713,6 +1786,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement16B,0);
                     }
+
                 }
                 else if (imm5 & 2L == 2L)
                 {
@@ -1724,6 +1798,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement8H,0);
                     }
+
                 }
                 else if (imm5 & 4L == 4L)
                 {
@@ -1735,6 +1810,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                     }
+
                 }
                 else if ((imm5 & 8L == 8L) && (Q == 1L))
                 {
@@ -1744,6 +1820,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_arrangement_immh_Q___SEEAdvancedSIMDmodifiedimmediate_00__2S_40__4S_41__2D_81)
@@ -1761,6 +1838,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                     }
+
                 }
                 else if (immh >> (int)(3L) == 1L)
                 {
@@ -1768,7 +1846,9 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                     }
+
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -1787,6 +1867,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement16B,0);
                     }
+
                 }
                 else if (immh >> (int)(1L) == 1L)
                 {
@@ -1798,6 +1879,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement8H,0);
                     }
+
                 }
                 else if (immh >> (int)(2L) == 1L)
                 {
@@ -1809,7 +1891,9 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                     }
+
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -1828,6 +1912,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement16B,0);
                     }
+
                 }
                 else if (immh >> (int)(1L) == 1L)
                 {
@@ -1839,6 +1924,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement8H,0);
                     }
+
                 }
                 else if (immh >> (int)(2L) == 1L)
                 {
@@ -1850,6 +1936,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                     }
+
                 }
                 else if (immh >> (int)(3L) == 1L)
                 {
@@ -1857,7 +1944,9 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                     }
+
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -1877,6 +1966,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -1892,6 +1982,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_arrangement_Q___4H_0__8H_1)
@@ -1906,6 +1997,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement8H,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_arrangement_Q___8B_0__16B_1)
@@ -1920,6 +2012,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement16B,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_arrangement_Q_sz___2S_00__4S_10__2D_11)
@@ -1939,6 +2032,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -1954,6 +2048,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -1969,6 +2064,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement1Q,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -1988,6 +2084,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2020,6 +2117,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2044,6 +2142,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2060,6 +2159,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement16B,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2084,6 +2184,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement8H,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2116,6 +2217,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2152,6 +2254,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2167,6 +2270,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vd_arrangement_sz_Q___2S_00__4S_01)
@@ -2182,6 +2286,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2202,6 +2307,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2218,6 +2324,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2242,6 +2349,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vm_22_1__S_0__D_1)
@@ -2256,6 +2364,7 @@ Search:
                 {
                     return D0 + Reg(Rm);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vm_22_2__B_0__H_1__S_2__D_3)
@@ -2278,6 +2387,7 @@ Search:
                 {
                     return D0 + Reg(Rm);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vm_22_2__D_3)
@@ -2292,6 +2402,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vm_22_2__H_1__S_2)
@@ -2310,6 +2421,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vm_arrangement_4S)
@@ -2330,6 +2442,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rm),Arrangement16B,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vm_arrangement_size___8H_0__4S_1__2D_2)
@@ -2348,6 +2461,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rm),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2377,6 +2491,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new RegisterWithArrangementAndIndex(V0+Reg(vm),a,uint8(index),0);
                 goto __switch_break0;
             }
@@ -2401,6 +2516,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rm),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2417,6 +2533,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rm),Arrangement16B,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2441,6 +2558,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rm),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2473,6 +2591,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rm),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2509,6 +2628,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rm),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2529,6 +2649,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rm),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2554,6 +2675,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new RegisterWithArrangementAndIndex(V0+Reg(Rm),a,uint8(index),0);
                 goto __switch_break0;
             }
@@ -2581,6 +2703,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_19_4__D_8)
@@ -2595,6 +2718,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_19_4__H_1__S_2__D_4)
@@ -2617,6 +2741,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_19_4__S_4__D_8)
@@ -2635,6 +2760,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_1_arrangement_16B)
@@ -2651,6 +2777,7 @@ Search:
                 {
                     return D0 + Reg(Rn);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2666,6 +2793,7 @@ Search:
                 {
                     return D0 + Reg(Rn);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_22_2__B_0__H_1__S_2__D_3)
@@ -2688,6 +2816,7 @@ Search:
                 {
                     return D0 + Reg(Rn);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_22_2__D_3)
@@ -2702,6 +2831,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_22_2__H_0__S_1__D_2)
@@ -2724,6 +2854,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_22_2__H_1__S_2)
@@ -2742,6 +2873,7 @@ Search:
                 {
                     return null;
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_2_arrangement_16B)
@@ -2807,6 +2939,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new RegisterWithArrangementAndIndex(V0+Reg(Rn),a,uint8(index),0);
                 goto __switch_break0;
             }
@@ -2841,6 +2974,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new RegisterWithArrangementAndIndex(V0+Reg(Rn),a,uint8(index),0);
                 goto __switch_break0;
             }
@@ -2874,6 +3008,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new RegisterWithArrangementAndIndex(V0+Reg(Rn),a,uint8(index),0);
                 goto __switch_break0;
             }
@@ -2902,6 +3037,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new RegisterWithArrangementAndIndex(V0+Reg(Rn),a,uint8(index),0);
                 goto __switch_break0;
             }
@@ -2920,6 +3056,7 @@ Search:
                 {
                     return null;
                 }
+
                 return new RegisterWithArrangementAndIndex(V0+Reg(Rn),a,uint8(index),0);
                 goto __switch_break0;
             }
@@ -2938,6 +3075,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                     }
+
                 }
                 else if (immh >> (int)(3L) == 1L)
                 {
@@ -2945,7 +3083,9 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                     }
+
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -2964,6 +3104,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement16B,0);
                     }
+
                 }
                 else if (immh >> (int)(1L) == 1L)
                 {
@@ -2975,6 +3116,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement8H,0);
                     }
+
                 }
                 else if (immh >> (int)(2L) == 1L)
                 {
@@ -2986,7 +3128,9 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                     }
+
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3005,6 +3149,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement16B,0);
                     }
+
                 }
                 else if (immh >> (int)(1L) == 1L)
                 {
@@ -3016,6 +3161,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement8H,0);
                     }
+
                 }
                 else if (immh >> (int)(2L) == 1L)
                 {
@@ -3027,6 +3173,7 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                     }
+
                 }
                 else if (immh >> (int)(3L) == 1L)
                 {
@@ -3034,7 +3181,9 @@ Search:
                     {
                         return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                     }
+
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3054,6 +3203,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3069,6 +3219,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement16B,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_arrangement_Q_sz___2S_00__4S_10__2D_11)
@@ -3088,6 +3239,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3100,6 +3252,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3120,6 +3273,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3139,6 +3293,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3163,6 +3318,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3179,6 +3335,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement16B,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3203,6 +3360,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3227,6 +3385,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement8H,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3259,6 +3418,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3295,6 +3455,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3323,6 +3484,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3334,6 +3496,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3349,6 +3512,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_arrangement_sz___4S_0__2D_1)
@@ -3363,6 +3527,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vn_arrangement_sz_Q___2S_00__4S_01)
@@ -3378,6 +3543,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3398,6 +3564,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement2D,0);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3422,6 +3589,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vt_1_arrangement_B_index__Q_S_size_1)
@@ -3497,6 +3665,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rt),Arrangement2D,1);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vt_2_arrangement_B_index__Q_S_size_1)
@@ -3572,6 +3741,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rt),Arrangement2D,2);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vt_2_arrangement_size_Q___8B_00__16B_01__4H_10__8H_11__2S_20__4S_21__2D_31)
@@ -3607,6 +3777,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rt),Arrangement2D,2);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3683,6 +3854,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rt),Arrangement2D,3);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vt_3_arrangement_size_Q___8B_00__16B_01__4H_10__8H_11__2S_20__4S_21__2D_31)
@@ -3718,6 +3890,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rt),Arrangement2D,3);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3794,6 +3967,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rt),Arrangement2D,4);
                 }
+
                 goto __switch_break0;
             }
             if (aop == arg_Vt_4_arrangement_size_Q___8B_00__16B_01__4H_10__8H_11__2S_20__4S_21__2D_31)
@@ -3829,6 +4003,7 @@ Search:
                 {
                     return new RegisterWithArrangement(V0+Reg(Rt),Arrangement2D,4);
                 }
+
                 return null;
                 goto __switch_break0;
             }
@@ -3998,6 +4173,7 @@ Search:
                 return null;
 
             __switch_break0:;
+
         }
 
         private static Arg handle_ExtendedRegister(uint x, bool has_width)
@@ -4020,11 +4196,13 @@ Search:
                 {
                     rea.reg = X0 + Reg(rm);
                 }
+
             }
             else
             {
                 rea.reg = W0 + Reg(rm);
             }
+
             switch (option)
             {
                 case 0L: 
@@ -4044,11 +4222,13 @@ Search:
                         {
                             rea.extShift = ExtShift(0L);
                         }
+
                     }
                     else
                     {
                         rea.extShift = uxtw;
                     }
+
                     break;
                 case 3L: 
                     if (!is_32bit && (rn == 31L || (s == 0L && rd == 31L)))
@@ -4061,11 +4241,13 @@ Search:
                         {
                             rea.extShift = ExtShift(0L);
                         }
+
                     }
                     else
                     {
                         rea.extShift = uxtx;
                     }
+
                     break;
                 case 4L: 
                     rea.extShift = sxtb;
@@ -4083,6 +4265,7 @@ Search:
             rea.show_zero = false;
             rea.amount = uint8(imm3);
             return rea;
+
         }
 
         private static Arg handle_ImmediateShiftedRegister(uint x, byte max, bool is_w, bool has_ror)
@@ -4096,6 +4279,7 @@ Search:
             {
                 rsa.reg = X0 + Reg((x >> (int)(16L)) & (1L << (int)(5L) - 1L));
             }
+
             switch ((x >> (int)(22L)) & 0x3UL)
             {
                 case 0L: 
@@ -4116,6 +4300,7 @@ Search:
                     {
                         return null;
                     }
+
                     break;
             }
             rsa.show_zero = true;
@@ -4128,7 +4313,9 @@ Search:
             {
                 return null;
             }
+
             return rsa;
+
         }
 
         private static Arg handle_MemExtend(uint x, byte mult, bool absent)
@@ -4145,6 +4332,7 @@ Search:
             {
                 Rm = Reg(W0) + Reg(x >> (int)(16L) & (1L << (int)(5L) - 1L));
             }
+
             switch (option)
             {
                 case 2L: 
@@ -4165,6 +4353,7 @@ Search:
             }
             var amount = (uint8((x >> (int)(12L)) & 1L)) * mult;
             return new MemExtend(Rn,Rm,extend,amount,absent);
+
         }
 
         private static Arg handle_bitmasks(uint x, byte datasize)
@@ -4204,6 +4393,7 @@ Search:
             {
                 return null;
             }
+
             levels = 1L << (int)(length) - 1L;
             var s = imms & levels;
             var r = immr & levels;
@@ -4212,6 +4402,7 @@ Search:
             {
                 return null;
             }
+
             welem = 1L << (int)((s + 1L)) - 1L;
             var ror = (welem >> (int)(r)) | (welem << (int)((esize - r)));
             ror &= ((1L << (int)(esize)) - 1L);
@@ -4225,6 +4416,7 @@ Search:
             }
 
             return new Imm64(wmask,false);
+
         }
     }
 }}}}}}}

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2020 August 29 08:22:43 UTC
+// package pprof -- go2cs converted at 2020 October 08 03:26:08 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Go\src\runtime\pprof\label.go
 using context = go.context_package;
+using fmt = go.fmt_package;
+using sort = go.sort_package;
+using strings = go.strings_package;
 using static go.builtin;
 using System;
 
@@ -33,12 +36,14 @@ namespace runtime
 
         private static labelMap labelValue(context.Context ctx)
         {
-            ref labelMap (labels, _) = ctx.Value(new labelContextKey())._<ref labelMap>();
+            ptr<labelMap> (labels, _) = ctx.Value(new labelContextKey())._<ptr<labelMap>>();
             if (labels == null)
             {
                 return labelMap(null);
             }
-            return labels.Value;
+
+            return labels.val;
+
         }
 
         // labelMap is the representation of the label set held in the context type.
@@ -48,11 +53,34 @@ namespace runtime
         {
         }
 
+        // String statisfies Stringer and returns key, value pairs in a consistent
+        // order.
+        private static @string String(this ptr<labelMap> _addr_l)
+        {
+            ref labelMap l = ref _addr_l.val;
+
+            if (l == null)
+            {
+                return "";
+            }
+
+            var keyVals = make_slice<@string>(0L, len(l.val));
+
+            foreach (var (k, v) in l.val)
+            {
+                keyVals = append(keyVals, fmt.Sprintf("%q:%q", k, v));
+            }
+            sort.Strings(keyVals);
+
+            return "{" + strings.Join(keyVals, ", ") + "}";
+
+        }
+
         // WithLabels returns a new context.Context with the given labels added.
         // A label overwrites a prior label with the same key.
         public static context.Context WithLabels(context.Context ctx, LabelSet labels)
         {
-            var childLabels = make(labelMap);
+            ref var childLabels = ref heap(make(labelMap), out ptr<var> _addr_childLabels);
             var parentLabels = labelValue(ctx); 
             // TODO(matloob): replace the map implementation with something
             // more efficient so creating a child context WithLabels doesn't need
@@ -65,12 +93,16 @@ namespace runtime
             {
                 childLabels[label.key] = label.value;
             }
-            return context.WithValue(ctx, new labelContextKey(), ref childLabels);
+            return context.WithValue(ctx, new labelContextKey(), _addr_childLabels);
+
         }
 
         // Labels takes an even number of strings representing key-value pairs
         // and makes a LabelSet containing them.
         // A label overwrites a prior label with the same key.
+        // Currently only the CPU and goroutine profiles utilize any labels
+        // information.
+        // See https://golang.org/issue/23458 for details.
         public static LabelSet Labels(params @string[] args) => func((_, panic, __) =>
         {
             args = args.Clone();
@@ -79,24 +111,29 @@ namespace runtime
             {
                 panic("uneven number of arguments to pprof.Labels");
             }
-            LabelSet labels = new LabelSet();
+
+            var list = make_slice<label>(0L, len(args) / 2L);
             {
                 long i = 0L;
 
                 while (i + 1L < len(args))
                 {
-                    labels.list = append(labels.list, new label(key:args[i],value:args[i+1]));
+                    list = append(list, new label(key:args[i],value:args[i+1]));
                     i += 2L;
                 }
 
             }
-            return labels;
+            return new LabelSet(list:list);
+
         });
 
         // Label returns the value of the label with the given key on ctx, and a boolean indicating
         // whether that label exists.
         public static (@string, bool) Label(context.Context ctx, @string key)
         {
+            @string _p0 = default;
+            bool _p0 = default;
+
             var ctxLabels = labelValue(ctx);
             var (v, ok) = ctxLabels[key];
             return (v, ok);
@@ -113,7 +150,9 @@ namespace runtime
                 {
                     break;
                 }
+
             }
+
         }
     }
 }}

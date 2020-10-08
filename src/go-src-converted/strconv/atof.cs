@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2020 August 29 08:42:48 UTC
+// package strconv -- go2cs converted at 2020 October 08 03:48:45 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\atof.go
 // decimal to binary floating point conversion.
@@ -18,80 +18,105 @@ namespace go
 {
     public static partial class strconv_package
     {
-        private static var optimize = true; // can change for testing
+        private static var optimize = true; // set to false to force slow-path conversions for testing
 
-        private static bool equalIgnoreCase(@string s1, @string s2)
+        // commonPrefixLenIgnoreCase returns the length of the common
+        // prefix of s and prefix, with the character case of s ignored.
+        // The prefix argument must be all lower-case.
+        private static long commonPrefixLenIgnoreCase(@string s, @string prefix)
         {
-            if (len(s1) != len(s2))
+            var n = len(prefix);
+            if (n > len(s))
             {
-                return false;
-            }
-            for (long i = 0L; i < len(s1); i++)
-            {
-                var c1 = s1[i];
-                if ('A' <= c1 && c1 <= 'Z')
-                {
-                    c1 += 'a' - 'A';
-                }
-                var c2 = s2[i];
-                if ('A' <= c2 && c2 <= 'Z')
-                {
-                    c2 += 'a' - 'A';
-                }
-                if (c1 != c2)
-                {
-                    return false;
-                }
+                n = len(s);
             }
 
-            return true;
+            for (long i = 0L; i < n; i++)
+            {
+                var c = s[i];
+                if ('A' <= c && c <= 'Z')
+                {
+                    c += 'a' - 'A';
+                }
+
+                if (c != prefix[i])
+                {
+                    return i;
+                }
+
+            }
+
+            return n;
+
         }
 
-        private static (double, bool) special(@string s)
+        // special returns the floating-point value for the special,
+        // possibly signed floating-point representations inf, infinity,
+        // and NaN. The result is ok if a prefix of s contains one
+        // of these representations and n is the length of that prefix.
+        // The character case is ignored.
+        private static (double, long, bool) special(@string s)
         {
+            double f = default;
+            long n = default;
+            bool ok = default;
+
             if (len(s) == 0L)
             {
-                return;
+                return (0L, 0L, false);
             }
-            switch (s[0L])
+
+            long sign = 1L;
+            long nsign = 0L;
+
+            if (s[0L] == '+' || s[0L] == '-')
             {
-                case '+': 
-                    if (equalIgnoreCase(s, "+inf") || equalIgnoreCase(s, "+infinity"))
-                    {
-                        return (math.Inf(1L), true);
-                    }
-                    break;
-                case '-': 
-                    if (equalIgnoreCase(s, "-inf") || equalIgnoreCase(s, "-infinity"))
-                    {
-                        return (math.Inf(-1L), true);
-                    }
-                    break;
-                case 'n': 
+                if (s[0L] == '-')
+                {
+                    sign = -1L;
+                }
 
-                case 'N': 
-                    if (equalIgnoreCase(s, "nan"))
-                    {
-                        return (math.NaN(), true);
-                    }
-                    break;
-                case 'i': 
-
-                case 'I': 
-                    if (equalIgnoreCase(s, "inf") || equalIgnoreCase(s, "infinity"))
-                    {
-                        return (math.Inf(1L), true);
-                    }
-                    break;
-                default: 
-                    return;
-                    break;
+                nsign = 1L;
+                s = s[1L..];
+                fallthrough = true;
             }
-            return;
+            if (fallthrough || s[0L] == 'i' || s[0L] == 'I')
+            {
+                var n = commonPrefixLenIgnoreCase(s, "infinity"); 
+                // Anything longer than "inf" is ok, but if we
+                // don't have "infinity", only consume "inf".
+                if (3L < n && n < 8L)
+                {
+                    n = 3L;
+                }
+
+                if (n == 3L || n == 8L)
+                {
+                    return (math.Inf(sign), nsign + n, true);
+                }
+
+                goto __switch_break0;
+            }
+            if (s[0L] == 'n' || s[0L] == 'N')
+            {
+                if (commonPrefixLenIgnoreCase(s, "nan") == 3L)
+                {
+                    return (math.NaN(), 3L, true);
+                }
+
+                goto __switch_break0;
+            }
+
+            __switch_break0:;
+            return (0L, 0L, false);
+
         }
 
-        private static bool set(this ref decimal b, @string s)
+        private static bool set(this ptr<decimal> _addr_b, @string s)
         {
+            bool ok = default;
+            ref decimal b = ref _addr_b.val;
+
             long i = 0L;
             b.neg = false;
             b.trunc = false; 
@@ -99,8 +124,9 @@ namespace go
             // optional sign
             if (i >= len(s))
             {
-                return;
+                return ;
             }
+
 
             if (s[i] == '+') 
                 i++;
@@ -113,12 +139,16 @@ namespace go
             while (i < len(s))
             {
 
-                if (s[i] == '.') 
+                if (s[i] == '_') 
+                    // readFloat already checked underscores
+                    continue;
+                else if (s[i] == '.') 
                     if (sawdot)
                     {
-                        return;
+                        return ;
                 i++;
                     }
+
                     sawdot = true;
                     b.dp = b.nd;
                     continue;
@@ -128,7 +158,9 @@ namespace go
                     { // ignore leading zeros
                         b.dp--;
                         continue;
+
                     }
+
                     if (b.nd < len(b.d))
                     {
                         b.d[b.nd] = s[i];
@@ -138,14 +170,17 @@ namespace go
                     {
                         b.trunc = true;
                     }
+
                     continue;
                                 break;
+
             }
 
             if (!sawdigits)
             {
-                return;
+                return ;
             }
+
             if (!sawdot)
             {
                 b.dp = b.nd;
@@ -156,13 +191,14 @@ namespace go
             // just be sure to move the decimal point by
             // a lot (say, 100000).  it doesn't matter if it's
             // not the exact number.
-            if (i < len(s) && (s[i] == 'e' || s[i] == 'E'))
+            if (i < len(s) && lower(s[i]) == 'e')
             {
                 i++;
                 if (i >= len(s))
                 {
-                    return;
+                    return ;
                 }
+
                 long esign = 1L;
                 if (s[i] == '+')
                 {
@@ -173,44 +209,65 @@ namespace go
                     i++;
                     esign = -1L;
                 }
+
                 if (i >= len(s) || s[i] < '0' || s[i] > '9')
                 {
-                    return;
+                    return ;
                 }
+
                 long e = 0L;
-                while (i < len(s) && '0' <= s[i] && s[i] <= '9')
+                while (i < len(s) && ('0' <= s[i] && s[i] <= '9' || s[i] == '_'))
                 {
+                    if (s[i] == '_')
+                    { 
+                        // readFloat already checked underscores
+                        continue;
+                    i++;
+                    }
+
                     if (e < 10000L)
                     {
                         e = e * 10L + int(s[i]) - '0';
-                    i++;
                     }
+
                 }
 
                 b.dp += e * esign;
+
             }
+
             if (i != len(s))
             {
-                return;
+                return ;
             }
+
             ok = true;
-            return;
+            return ;
+
         }
 
-        // readFloat reads a decimal mantissa and exponent from a float
-        // string representation. It sets ok to false if the number could
-        // not fit return types or is invalid.
-        private static (ulong, long, bool, bool, bool) readFloat(@string s)
+        // readFloat reads a decimal or hexadecimal mantissa and exponent from a float
+        // string representation in s; the number may be followed by other characters.
+        // readFloat reports the number of bytes consumed (i), and whether the number
+        // is valid (ok).
+        private static (ulong, long, bool, bool, bool, long, bool) readFloat(@string s)
         {
-            const long uint64digits = 19L;
+            ulong mantissa = default;
+            long exp = default;
+            bool neg = default;
+            bool trunc = default;
+            bool hex = default;
+            long i = default;
+            bool ok = default;
 
-            long i = 0L; 
+            var underscores = false; 
 
             // optional sign
             if (i >= len(s))
             {
-                return;
+                return ;
             }
+
 
             if (s[i] == '+') 
                 i++;
@@ -218,23 +275,42 @@ namespace go
                 neg = true;
                 i++;
             // digits
+            var @base = uint64(10L);
+            long maxMantDigits = 19L; // 10^19 fits in uint64
+            var expChar = byte('e');
+            if (i + 2L < len(s) && s[i] == '0' && lower(s[i + 1L]) == 'x')
+            {
+                base = 16L;
+                maxMantDigits = 16L; // 16^16 fits in uint64
+                i += 2L;
+                expChar = 'p';
+                hex = true;
+
+            }
+
             var sawdot = false;
             var sawdigits = false;
             long nd = 0L;
             long ndMant = 0L;
             long dp = 0L;
+loop:
             while (i < len(s))
             {
                 {
                     var c = s[i];
 
 
-                    if (true == c == '.') 
+                    if (true == c == '_') 
+                        underscores = true;
+                        continue;
+                    else if (true == c == '.') 
                         if (sawdot)
                         {
-                            return;
+                            _breakloop = true;
+                            break;
                 i++;
                         }
+
                         sawdot = true;
                         dp = nd;
                         continue;
@@ -244,31 +320,56 @@ namespace go
                         { // ignore leading zeros
                             dp--;
                             continue;
+
                         }
+
                         nd++;
-                        if (ndMant < uint64digits)
+                        if (ndMant < maxMantDigits)
                         {
-                            mantissa *= 10L;
+                            mantissa *= base;
                             mantissa += uint64(c - '0');
                             ndMant++;
                         }
-                        else if (s[i] != '0')
+                        else if (c != '0')
                         {
                             trunc = true;
                         }
+
+                        continue;
+                    else if (true == base == 16L && 'a' <= lower(c) && lower(c) <= 'f') 
+                        sawdigits = true;
+                        nd++;
+                        if (ndMant < maxMantDigits)
+                        {
+                            mantissa *= 16L;
+                            mantissa += uint64(lower(c) - 'a' + 10L);
+                            ndMant++;
+                        }
+                        else
+                        {
+                            trunc = true;
+                        }
+
                         continue;
 
                 }
                 break;
-            }
 
+            }
             if (!sawdigits)
             {
-                return;
+                return ;
             }
+
             if (!sawdot)
             {
                 dp = nd;
+            }
+
+            if (base == 16L)
+            {
+                dp *= 4L;
+                ndMant *= 4L;
             } 
 
             // optional exponent moves decimal point.
@@ -276,13 +377,14 @@ namespace go
             // just be sure to move the decimal point by
             // a lot (say, 100000).  it doesn't matter if it's
             // not the exact number.
-            if (i < len(s) && (s[i] == 'e' || s[i] == 'E'))
+            if (i < len(s) && lower(s[i]) == expChar)
             {
                 i++;
                 if (i >= len(s))
                 {
-                    return;
+                    return ;
                 }
+
                 long esign = 1L;
                 if (s[i] == '+')
                 {
@@ -293,40 +395,64 @@ namespace go
                     i++;
                     esign = -1L;
                 }
+
                 if (i >= len(s) || s[i] < '0' || s[i] > '9')
                 {
-                    return;
+                    return ;
                 }
+
                 long e = 0L;
-                while (i < len(s) && '0' <= s[i] && s[i] <= '9')
+                while (i < len(s) && ('0' <= s[i] && s[i] <= '9' || s[i] == '_'))
                 {
+                    if (s[i] == '_')
+                    {
+                        underscores = true;
+                        continue;
+                    i++;
+                    }
+
                     if (e < 10000L)
                     {
                         e = e * 10L + int(s[i]) - '0';
-                    i++;
                     }
+
                 }
 
                 dp += e * esign;
+
             }
-            if (i != len(s))
-            {
-                return;
+            else if (base == 16L)
+            { 
+                // Must have exponent.
+                return ;
+
             }
+
             if (mantissa != 0L)
             {
                 exp = dp - ndMant;
             }
+
+            if (underscores && !underscoreOK(s[..i]))
+            {
+                return ;
+            }
+
             ok = true;
-            return;
+            return ;
 
         }
 
         // decimal power of ten to binary power of two.
         private static long powtab = new slice<long>(new long[] { 1, 3, 6, 9, 13, 16, 19, 23, 26 });
 
-        private static (ulong, bool) floatBits(this ref decimal d, ref floatInfo flt)
+        private static (ulong, bool) floatBits(this ptr<decimal> _addr_d, ptr<floatInfo> _addr_flt)
         {
+            ulong b = default;
+            bool overflow = default;
+            ref decimal d = ref _addr_d.val;
+            ref floatInfo flt = ref _addr_flt.val;
+
             long exp = default;
             ulong mant = default; 
 
@@ -345,12 +471,14 @@ namespace go
             {
                 goto overflow;
             }
+
             if (d.dp < -330L)
             { 
                 // zero
                 mant = 0L;
                 exp = flt.bias;
                 goto @out;
+
             } 
 
             // Scale by powers of two until in range [0.5, 1.0)
@@ -366,8 +494,10 @@ namespace go
                 {
                     n = powtab[d.dp];
                 }
+
                 d.Shift(-n);
                 exp += n;
+
             }
 
             while (d.dp < 0L || d.dp == 0L && d.d[0L] < '5')
@@ -381,8 +511,10 @@ namespace go
                 {
                     n = powtab[-d.dp];
                 }
+
                 d.Shift(n);
                 exp -= n;
+
             } 
 
             // Our range is [0.5,1) but floating point range is [1,2).
@@ -400,6 +532,7 @@ namespace go
                 d.Shift(-n);
                 exp += n;
             }
+
             if (exp - flt.bias >= 1L << (int)(flt.expbits) - 1L)
             {
                 goto overflow;
@@ -418,6 +551,7 @@ namespace go
                 {
                     goto overflow;
                 }
+
             } 
 
             // Denormalized?
@@ -425,6 +559,7 @@ namespace go
             {
                 exp = flt.bias;
             }
+
             goto @out;
 
 overflow:
@@ -439,7 +574,9 @@ overflow:
             {
                 bits |= 1L << (int)(flt.mantbits) << (int)(flt.expbits);
             }
+
             return (bits, overflow);
+
         }
 
         // Exact powers of 10.
@@ -455,15 +592,20 @@ overflow:
         // These all produce potentially inexact but correctly rounded answers.
         private static (double, bool) atof64exact(ulong mantissa, long exp, bool neg)
         {
+            double f = default;
+            bool ok = default;
+
             if (mantissa >> (int)(float64info.mantbits) != 0L)
             {
-                return;
+                return ;
             }
+
             f = float64(mantissa);
             if (neg)
             {
                 f = -f;
             }
+
 
             if (exp == 0L) 
                 // an integer.
@@ -478,30 +620,39 @@ overflow:
                     f *= float64pow10[exp - 22L];
                     exp = 22L;
                 }
+
                 if (f > 1e15F || f < -1e15F)
                 { 
                     // the exponent was really too large.
-                    return;
+                    return ;
+
                 }
+
                 return (f * float64pow10[exp], true);
             else if (exp < 0L && exp >= -22L) // int / 10^k
                 return (f / float64pow10[-exp], true);
-                        return;
+                        return ;
+
         }
 
         // If possible to compute mantissa*10^exp to 32-bit float f exactly,
         // entirely in floating-point math, do so, avoiding the machinery above.
         private static (float, bool) atof32exact(ulong mantissa, long exp, bool neg)
         {
+            float f = default;
+            bool ok = default;
+
             if (mantissa >> (int)(float32info.mantbits) != 0L)
             {
-                return;
+                return ;
             }
+
             f = float32(mantissa);
             if (neg)
             {
                 f = -f;
             }
+
 
             if (exp == 0L) 
                 return (f, true); 
@@ -515,147 +666,303 @@ overflow:
                     f *= float32pow10[exp - 10L];
                     exp = 10L;
                 }
+
                 if (f > 1e7F || f < -1e7F)
                 { 
                     // the exponent was really too large.
-                    return;
+                    return ;
+
                 }
+
                 return (f * float32pow10[exp], true);
             else if (exp < 0L && exp >= -10L) // int / 10^k
                 return (f / float32pow10[-exp], true);
-                        return;
+                        return ;
+
         }
 
-        private static readonly @string fnParseFloat = "ParseFloat";
-
-
-
-        private static (float, error) atof32(@string s)
+        // atofHex converts the hex floating-point string s
+        // to a rounded float32 or float64 value (depending on flt==&float32info or flt==&float64info)
+        // and returns it as a float64.
+        // The string s has already been parsed into a mantissa, exponent, and sign (neg==true for negative).
+        // If trunc is true, trailing non-zero bits have been omitted from the mantissa.
+        private static (double, error) atofHex(@string s, ptr<floatInfo> _addr_flt, ulong mantissa, long exp, bool neg, bool trunc)
         {
+            double _p0 = default;
+            error _p0 = default!;
+            ref floatInfo flt = ref _addr_flt.val;
+
+            long maxExp = 1L << (int)(flt.expbits) + flt.bias - 2L;
+            var minExp = flt.bias + 1L;
+            exp += int(flt.mantbits); // mantissa now implicitly divided by 2^mantbits.
+
+            // Shift mantissa and exponent to bring representation into float range.
+            // Eventually we want a mantissa with a leading 1-bit followed by mantbits other bits.
+            // For rounding, we need two more, where the bottom bit represents
+            // whether that bit or any later bit was non-zero.
+            // (If the mantissa has already lost non-zero bits, trunc is true,
+            // and we OR in a 1 below after shifting left appropriately.)
+            while (mantissa != 0L && mantissa >> (int)((flt.mantbits + 2L)) == 0L)
             {
-                var (val, ok) = special(s);
+                mantissa <<= 1L;
+                exp--;
+            }
+
+            if (trunc)
+            {
+                mantissa |= 1L;
+            }
+
+            while (mantissa >> (int)((1L + flt.mantbits + 2L)) != 0L)
+            {
+                mantissa = mantissa >> (int)(1L) | mantissa & 1L;
+                exp++;
+            } 
+
+            // If exponent is too negative,
+            // denormalize in hopes of making it representable.
+            // (The -2 is for the rounding bits.)
+ 
+
+            // If exponent is too negative,
+            // denormalize in hopes of making it representable.
+            // (The -2 is for the rounding bits.)
+            while (mantissa > 1L && exp < minExp - 2L)
+            {
+                mantissa = mantissa >> (int)(1L) | mantissa & 1L;
+                exp++;
+            } 
+
+            // Round using two bottom bits.
+ 
+
+            // Round using two bottom bits.
+            var round = mantissa & 3L;
+            mantissa >>= 2L;
+            round |= mantissa & 1L; // round to even (round up if mantissa is odd)
+            exp += 2L;
+            if (round == 3L)
+            {
+                mantissa++;
+                if (mantissa == 1L << (int)((1L + flt.mantbits)))
+                {
+                    mantissa >>= 1L;
+                    exp++;
+                }
+
+            }
+
+            if (mantissa >> (int)(flt.mantbits) == 0L)
+            { // Denormal or zero.
+                exp = flt.bias;
+
+            }
+
+            error err = default!;
+            if (exp > maxExp)
+            { // infinity and range error
+                mantissa = 1L << (int)(flt.mantbits);
+                exp = maxExp + 1L;
+                err = error.As(rangeError(fnParseFloat, s))!;
+
+            }
+
+            var bits = mantissa & (1L << (int)(flt.mantbits) - 1L);
+            bits |= uint64((exp - flt.bias) & (1L << (int)(flt.expbits) - 1L)) << (int)(flt.mantbits);
+            if (neg)
+            {
+                bits |= 1L << (int)(flt.mantbits) << (int)(flt.expbits);
+            }
+
+            if (flt == _addr_float32info)
+            {
+                return (float64(math.Float32frombits(uint32(bits))), error.As(err)!);
+            }
+
+            return (math.Float64frombits(bits), error.As(err)!);
+
+        }
+
+        private static readonly @string fnParseFloat = (@string)"ParseFloat";
+
+
+
+        private static (float, long, error) atof32(@string s)
+        {
+            float f = default;
+            long n = default;
+            error err = default!;
+
+            {
+                var (val, n, ok) = special(s);
 
                 if (ok)
                 {
-                    return (float32(val), null);
+                    return (float32(val), n, error.As(null!)!);
                 }
 
+            }
+
+
+            var (mantissa, exp, neg, trunc, hex, n, ok) = readFloat(s);
+            if (!ok)
+            {
+                return (0L, n, error.As(syntaxError(fnParseFloat, s))!);
+            }
+
+            if (hex)
+            {
+                var (f, err) = atofHex(s[..n], _addr_float32info, mantissa, exp, neg, trunc);
+                return (float32(f), n, error.As(err)!);
             }
 
             if (optimize)
             { 
-                // Parse mantissa and exponent.
-                var (mantissa, exp, neg, trunc, ok) = readFloat(s);
-                if (ok)
-                { 
-                    // Try pure floating-point arithmetic conversion.
-                    if (!trunc)
+                // Try pure floating-point arithmetic conversion.
+                if (!trunc)
+                {
                     {
-                        {
-                            var (f, ok) = atof32exact(mantissa, exp, neg);
+                        var f__prev3 = f;
 
-                            if (ok)
-                            {
-                                return (f, null);
-                            }
-
-                        }
-                    } 
-                    // Try another fast path.
-                    ptr<object> ext = @new<extFloat>();
-                    {
-                        var ok = ext.AssignDecimal(mantissa, exp, neg, trunc, ref float32info);
+                        var (f, ok) = atof32exact(mantissa, exp, neg);
 
                         if (ok)
                         {
-                            var (b, ovf) = ext.floatBits(ref float32info);
-                            f = math.Float32frombits(uint32(b));
-                            if (ovf)
-                            {
-                                err = rangeError(fnParseFloat, s);
-                            }
-                            return (f, err);
+                            return (f, n, error.As(null!)!);
                         }
 
+                        f = f__prev3;
+
                     }
+
+                } 
+                // Try another fast path.
+                ptr<object> ext = @new<extFloat>();
+                {
+                    var ok = ext.AssignDecimal(mantissa, exp, neg, trunc, _addr_float32info);
+
+                    if (ok)
+                    {
+                        var (b, ovf) = ext.floatBits(_addr_float32info);
+                        f = math.Float32frombits(uint32(b));
+                        if (ovf)
+                        {
+                            err = rangeError(fnParseFloat, s);
+                        }
+
+                        return (f, n, error.As(err)!);
+
+                    }
+
                 }
-            }
+
+            } 
+
+            // Slow fallback.
             decimal d = default;
-            if (!d.set(s))
+            if (!d.set(s[..n]))
             {
-                return (0L, syntaxError(fnParseFloat, s));
+                return (0L, n, error.As(syntaxError(fnParseFloat, s))!);
             }
-            (b, ovf) = d.floatBits(ref float32info);
+
+            (b, ovf) = d.floatBits(_addr_float32info);
             f = math.Float32frombits(uint32(b));
             if (ovf)
             {
                 err = rangeError(fnParseFloat, s);
             }
-            return (f, err);
+
+            return (f, n, error.As(err)!);
+
         }
 
-        private static (double, error) atof64(@string s)
+        private static (double, long, error) atof64(@string s)
         {
+            double f = default;
+            long n = default;
+            error err = default!;
+
             {
-                var (val, ok) = special(s);
+                var (val, n, ok) = special(s);
 
                 if (ok)
                 {
-                    return (val, null);
+                    return (val, n, error.As(null!)!);
                 }
 
+            }
+
+
+            var (mantissa, exp, neg, trunc, hex, n, ok) = readFloat(s);
+            if (!ok)
+            {
+                return (0L, n, error.As(syntaxError(fnParseFloat, s))!);
+            }
+
+            if (hex)
+            {
+                var (f, err) = atofHex(s[..n], _addr_float64info, mantissa, exp, neg, trunc);
+                return (f, n, error.As(err)!);
             }
 
             if (optimize)
             { 
-                // Parse mantissa and exponent.
-                var (mantissa, exp, neg, trunc, ok) = readFloat(s);
-                if (ok)
-                { 
-                    // Try pure floating-point arithmetic conversion.
-                    if (!trunc)
+                // Try pure floating-point arithmetic conversion.
+                if (!trunc)
+                {
                     {
-                        {
-                            var (f, ok) = atof64exact(mantissa, exp, neg);
+                        var f__prev3 = f;
 
-                            if (ok)
-                            {
-                                return (f, null);
-                            }
-
-                        }
-                    } 
-                    // Try another fast path.
-                    ptr<object> ext = @new<extFloat>();
-                    {
-                        var ok = ext.AssignDecimal(mantissa, exp, neg, trunc, ref float64info);
+                        var (f, ok) = atof64exact(mantissa, exp, neg);
 
                         if (ok)
                         {
-                            var (b, ovf) = ext.floatBits(ref float64info);
-                            f = math.Float64frombits(b);
-                            if (ovf)
-                            {
-                                err = rangeError(fnParseFloat, s);
-                            }
-                            return (f, err);
+                            return (f, n, error.As(null!)!);
                         }
 
+                        f = f__prev3;
+
                     }
+
+                } 
+                // Try another fast path.
+                ptr<object> ext = @new<extFloat>();
+                {
+                    var ok = ext.AssignDecimal(mantissa, exp, neg, trunc, _addr_float64info);
+
+                    if (ok)
+                    {
+                        var (b, ovf) = ext.floatBits(_addr_float64info);
+                        f = math.Float64frombits(b);
+                        if (ovf)
+                        {
+                            err = rangeError(fnParseFloat, s);
+                        }
+
+                        return (f, n, error.As(err)!);
+
+                    }
+
                 }
-            }
+
+            } 
+
+            // Slow fallback.
             decimal d = default;
-            if (!d.set(s))
+            if (!d.set(s[..n]))
             {
-                return (0L, syntaxError(fnParseFloat, s));
+                return (0L, n, error.As(syntaxError(fnParseFloat, s))!);
             }
-            (b, ovf) = d.floatBits(ref float64info);
+
+            (b, ovf) = d.floatBits(_addr_float64info);
             f = math.Float64frombits(b);
             if (ovf)
             {
                 err = rangeError(fnParseFloat, s);
             }
-            return (f, err);
+
+            return (f, n, error.As(err)!);
+
         }
 
         // ParseFloat converts the string s to a floating-point number
@@ -663,9 +970,13 @@ overflow:
         // When bitSize=32, the result still has type float64, but it will be
         // convertible to float32 without changing its value.
         //
-        // If s is well-formed and near a valid floating point number,
-        // ParseFloat returns the nearest floating point number rounded
+        // ParseFloat accepts decimal and hexadecimal floating-point number syntax.
+        // If s is well-formed and near a valid floating-point number,
+        // ParseFloat returns the nearest floating-point number rounded
         // using IEEE754 unbiased rounding.
+        // (Parsing a hexadecimal floating-point value only rounds when
+        // there are more bits in the hexadecimal representation than
+        // will fit in the mantissa.)
         //
         // The errors that ParseFloat returns have concrete type *NumError
         // and include err.Num = s.
@@ -675,14 +986,38 @@ overflow:
         // If s is syntactically well-formed but is more than 1/2 ULP
         // away from the largest floating point number of the given size,
         // ParseFloat returns f = ±Inf, err.Err = ErrRange.
+        //
+        // ParseFloat recognizes the strings "NaN", and the (possibly signed) strings "Inf" and "Infinity"
+        // as their respective special floating point values. It ignores case when matching.
         public static (double, error) ParseFloat(@string s, long bitSize)
         {
+            double _p0 = default;
+            error _p0 = default!;
+
+            var (f, n, err) = parseFloatPrefix(s, bitSize);
+            if (err == null && n != len(s))
+            {
+                return (0L, error.As(syntaxError(fnParseFloat, s))!);
+            }
+
+            return (f, error.As(err)!);
+
+        }
+
+        private static (double, long, error) parseFloatPrefix(@string s, long bitSize)
+        {
+            double _p0 = default;
+            long _p0 = default;
+            error _p0 = default!;
+
             if (bitSize == 32L)
             {
-                var (f, err) = atof32(s);
-                return (float64(f), err);
+                var (f, n, err) = atof32(s);
+                return (float64(f), n, error.As(err)!);
             }
+
             return atof64(s);
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:09 UTC
+//     Generated on 2020 October 08 04:42:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using http = go.net.http_package;
 using regexp = go.regexp_package;
 using time = go.time_package;
 using internaldriver = go.github.com.google.pprof.@internal.driver_package;
@@ -59,7 +60,7 @@ namespace pprof
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,10 +74,10 @@ namespace pprof
                 m_target_is_ptr = true;
             }
 
-            private delegate @string ReadLineByRef(ref T value, @string prompt);
+            private delegate @string ReadLineByPtr(ptr<T> value, @string prompt);
             private delegate @string ReadLineByVal(T value, @string prompt);
 
-            private static readonly ReadLineByRef s_ReadLineByRef;
+            private static readonly ReadLineByPtr s_ReadLineByPtr;
             private static readonly ReadLineByVal s_ReadLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,17 +86,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadLineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadLineByPtr is null || !m_target_is_ptr)
                     return s_ReadLineByVal!(target, prompt);
 
-                return s_ReadLineByRef(ref target, prompt);
+                return s_ReadLineByPtr(m_target_ptr, prompt);
             }
 
-            private delegate @string PrintByRef(ref T value, params object _p0);
+            private delegate @string PrintByPtr(ptr<T> value, params object _p0);
             private delegate @string PrintByVal(T value, params object _p0);
 
-            private static readonly PrintByRef s_PrintByRef;
+            private static readonly PrintByPtr s_PrintByPtr;
             private static readonly PrintByVal s_PrintByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,17 +106,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PrintByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PrintByPtr is null || !m_target_is_ptr)
                     return s_PrintByVal!(target, _p0);
 
-                return s_PrintByRef(ref target, _p0);
+                return s_PrintByPtr(m_target_ptr, _p0);
             }
 
-            private delegate @string PrintErrByRef(ref T value, params object _p0);
+            private delegate @string PrintErrByPtr(ptr<T> value, params object _p0);
             private delegate @string PrintErrByVal(T value, params object _p0);
 
-            private static readonly PrintErrByRef s_PrintErrByRef;
+            private static readonly PrintErrByPtr s_PrintErrByPtr;
             private static readonly PrintErrByVal s_PrintErrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,17 +126,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PrintErrByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PrintErrByPtr is null || !m_target_is_ptr)
                     return s_PrintErrByVal!(target, _p0);
 
-                return s_PrintErrByRef(ref target, _p0);
+                return s_PrintErrByPtr(m_target_ptr, _p0);
             }
 
-            private delegate @string IsTerminalByRef(ref T value);
+            private delegate @string IsTerminalByPtr(ptr<T> value);
             private delegate @string IsTerminalByVal(T value);
 
-            private static readonly IsTerminalByRef s_IsTerminalByRef;
+            private static readonly IsTerminalByPtr s_IsTerminalByPtr;
             private static readonly IsTerminalByVal s_IsTerminalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,17 +146,38 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_IsTerminalByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_IsTerminalByPtr is null || !m_target_is_ptr)
                     return s_IsTerminalByVal!(target);
 
-                return s_IsTerminalByRef(ref target);
+                return s_IsTerminalByPtr(m_target_ptr);
             }
 
-            private delegate @string SetAutoCompleteByRef(ref T value, Func<@string, @string> complete);
+            private delegate @string WantBrowserByPtr(ptr<T> value);
+            private delegate @string WantBrowserByVal(T value);
+
+            private static readonly WantBrowserByPtr s_WantBrowserByPtr;
+            private static readonly WantBrowserByVal s_WantBrowserByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public @string WantBrowser()
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_WantBrowserByPtr is null || !m_target_is_ptr)
+                    return s_WantBrowserByVal!(target);
+
+                return s_WantBrowserByPtr(m_target_ptr);
+            }
+
+            private delegate @string SetAutoCompleteByPtr(ptr<T> value, Func<@string, @string> complete);
             private delegate @string SetAutoCompleteByVal(T value, Func<@string, @string> complete);
 
-            private static readonly SetAutoCompleteByRef s_SetAutoCompleteByRef;
+            private static readonly SetAutoCompleteByPtr s_SetAutoCompleteByPtr;
             private static readonly SetAutoCompleteByVal s_SetAutoCompleteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,11 +186,12 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetAutoCompleteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetAutoCompleteByPtr is null || !m_target_is_ptr)
                     return s_SetAutoCompleteByVal!(target, complete);
 
-                return s_SetAutoCompleteByRef(ref target, complete);
+                return s_SetAutoCompleteByPtr(m_target_ptr, complete);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -174,87 +200,85 @@ namespace pprof
             static UI()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadLine");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadLine");
 
                 if (!(extensionMethod is null))
-                    s_ReadLineByRef = extensionMethod.CreateStaticDelegate(typeof(ReadLineByRef)) as ReadLineByRef;
+                    s_ReadLineByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadLineByPtr)) as ReadLineByPtr;
 
-                if (s_ReadLineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadLine");
+                extensionMethod = targetType.GetExtensionMethod("ReadLine");
 
-                    if (!(extensionMethod is null))
-                        s_ReadLineByVal = extensionMethod.CreateStaticDelegate(typeof(ReadLineByVal)) as ReadLineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadLineByVal = extensionMethod.CreateStaticDelegate(typeof(ReadLineByVal)) as ReadLineByVal;
 
-                if (s_ReadLineByRef is null && s_ReadLineByVal is null)
+                if (s_ReadLineByPtr is null && s_ReadLineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement UI.ReadLine method", new Exception("ReadLine"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Print");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Print");
 
                 if (!(extensionMethod is null))
-                    s_PrintByRef = extensionMethod.CreateStaticDelegate(typeof(PrintByRef)) as PrintByRef;
+                    s_PrintByPtr = extensionMethod.CreateStaticDelegate(typeof(PrintByPtr)) as PrintByPtr;
 
-                if (s_PrintByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Print");
+                extensionMethod = targetType.GetExtensionMethod("Print");
 
-                    if (!(extensionMethod is null))
-                        s_PrintByVal = extensionMethod.CreateStaticDelegate(typeof(PrintByVal)) as PrintByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PrintByVal = extensionMethod.CreateStaticDelegate(typeof(PrintByVal)) as PrintByVal;
 
-                if (s_PrintByRef is null && s_PrintByVal is null)
+                if (s_PrintByPtr is null && s_PrintByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement UI.Print method", new Exception("Print"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PrintErr");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PrintErr");
 
                 if (!(extensionMethod is null))
-                    s_PrintErrByRef = extensionMethod.CreateStaticDelegate(typeof(PrintErrByRef)) as PrintErrByRef;
+                    s_PrintErrByPtr = extensionMethod.CreateStaticDelegate(typeof(PrintErrByPtr)) as PrintErrByPtr;
 
-                if (s_PrintErrByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PrintErr");
+                extensionMethod = targetType.GetExtensionMethod("PrintErr");
 
-                    if (!(extensionMethod is null))
-                        s_PrintErrByVal = extensionMethod.CreateStaticDelegate(typeof(PrintErrByVal)) as PrintErrByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PrintErrByVal = extensionMethod.CreateStaticDelegate(typeof(PrintErrByVal)) as PrintErrByVal;
 
-                if (s_PrintErrByRef is null && s_PrintErrByVal is null)
+                if (s_PrintErrByPtr is null && s_PrintErrByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement UI.PrintErr method", new Exception("PrintErr"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("IsTerminal");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("IsTerminal");
 
                 if (!(extensionMethod is null))
-                    s_IsTerminalByRef = extensionMethod.CreateStaticDelegate(typeof(IsTerminalByRef)) as IsTerminalByRef;
+                    s_IsTerminalByPtr = extensionMethod.CreateStaticDelegate(typeof(IsTerminalByPtr)) as IsTerminalByPtr;
 
-                if (s_IsTerminalByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("IsTerminal");
+                extensionMethod = targetType.GetExtensionMethod("IsTerminal");
 
-                    if (!(extensionMethod is null))
-                        s_IsTerminalByVal = extensionMethod.CreateStaticDelegate(typeof(IsTerminalByVal)) as IsTerminalByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_IsTerminalByVal = extensionMethod.CreateStaticDelegate(typeof(IsTerminalByVal)) as IsTerminalByVal;
 
-                if (s_IsTerminalByRef is null && s_IsTerminalByVal is null)
+                if (s_IsTerminalByPtr is null && s_IsTerminalByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement UI.IsTerminal method", new Exception("IsTerminal"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SetAutoComplete");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WantBrowser");
 
                 if (!(extensionMethod is null))
-                    s_SetAutoCompleteByRef = extensionMethod.CreateStaticDelegate(typeof(SetAutoCompleteByRef)) as SetAutoCompleteByRef;
+                    s_WantBrowserByPtr = extensionMethod.CreateStaticDelegate(typeof(WantBrowserByPtr)) as WantBrowserByPtr;
 
-                if (s_SetAutoCompleteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SetAutoComplete");
+                extensionMethod = targetType.GetExtensionMethod("WantBrowser");
 
-                    if (!(extensionMethod is null))
-                        s_SetAutoCompleteByVal = extensionMethod.CreateStaticDelegate(typeof(SetAutoCompleteByVal)) as SetAutoCompleteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WantBrowserByVal = extensionMethod.CreateStaticDelegate(typeof(WantBrowserByVal)) as WantBrowserByVal;
 
-                if (s_SetAutoCompleteByRef is null && s_SetAutoCompleteByVal is null)
+                if (s_WantBrowserByPtr is null && s_WantBrowserByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement UI.WantBrowser method", new Exception("WantBrowser"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SetAutoComplete");
+
+                if (!(extensionMethod is null))
+                    s_SetAutoCompleteByPtr = extensionMethod.CreateStaticDelegate(typeof(SetAutoCompleteByPtr)) as SetAutoCompleteByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("SetAutoComplete");
+
+                if (!(extensionMethod is null))
+                    s_SetAutoCompleteByVal = extensionMethod.CreateStaticDelegate(typeof(SetAutoCompleteByVal)) as SetAutoCompleteByVal;
+
+                if (s_SetAutoCompleteByPtr is null && s_SetAutoCompleteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement UI.SetAutoComplete method", new Exception("SetAutoComplete"));
             }
 

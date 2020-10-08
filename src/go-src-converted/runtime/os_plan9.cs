@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:05 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:07 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_plan9.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -25,7 +25,7 @@ namespace go
 ;
 
         //go:noescape
-        private static int open(ref byte name, int mode, int perm)
+        private static int open(ptr<byte> name, int mode, int perm)
 ;
 
         //go:noescape
@@ -40,7 +40,7 @@ namespace go
 ;
 
         //go:noescape
-        private static void exits(ref byte msg)
+        private static void exits(ptr<byte> msg)
 ;
 
         //go:noescape
@@ -54,15 +54,15 @@ namespace go
 ;
 
         //go:noescape
-        private static int plan9_semacquire(ref uint addr, int block)
+        private static int plan9_semacquire(ptr<uint> addr, int block)
 ;
 
         //go:noescape
-        private static int plan9_tsemacquire(ref uint addr, int ms)
+        private static int plan9_tsemacquire(ptr<uint> addr, int ms)
 ;
 
         //go:noescape
-        private static int plan9_semrelease(ref uint addr, int count)
+        private static int plan9_semrelease(ptr<uint> addr, int count)
 ;
 
         //go:noescape
@@ -73,7 +73,7 @@ namespace go
 ;
 
         //go:noescape
-        private static long nsec(ref long _p0)
+        private static long nsec(ptr<long> _p0)
 ;
 
         //go:noescape
@@ -84,7 +84,7 @@ namespace go
 ;
 
         //go:noescape
-        private static void tstart_plan9(ref m newm)
+        private static void tstart_plan9(ptr<m> newm)
 ;
 
         private static @string errstr()
@@ -107,7 +107,8 @@ namespace go
             {>>MARKER:FUNCTION_errstr_BLOCK_PREFIX<<
                 throw("unexpected signal during runtime execution");
             }
-            var note = gostringnocopy((byte.Value)(@unsafe.Pointer(g.m.notesig)));
+
+            var note = gostringnocopy((byte.val)(@unsafe.Pointer(g.m.notesig)));
 
             if (g.sig == _SIGRFAULT || g.sig == _SIGWFAULT) 
                 var i = index(note, "addr=");
@@ -125,12 +126,14 @@ namespace go
                 {>>MARKER:FUNCTION_sigtramp_BLOCK_PREFIX<<
                     panicmem();
                 }
+
                 var addr = note[i..];
                 g.sigcode1 = uintptr(atolwhex(addr));
                 if (g.sigcode1 < 0x1000UL || g.paniconfault)
                 {>>MARKER:FUNCTION_nsec_BLOCK_PREFIX<<
                     panicmem();
                 }
+
                 print("unexpected fault address ", hex(g.sigcode1), "\n");
                 throw("fault");
             else if (g.sig == _SIGTRAP) 
@@ -138,6 +141,7 @@ namespace go
                 {>>MARKER:FUNCTION_noted_BLOCK_PREFIX<<
                     panicmem();
                 }
+
                 throw(note);
             else if (g.sig == _SIGINTDIV) 
                 panicdivide();
@@ -145,29 +149,32 @@ namespace go
                 panicfloat();
             else 
                 panic(errorString(note));
-                    });
+            
+        });
 
         private static long atolwhex(@string p)
         {
-            while (hasprefix(p, " ") || hasprefix(p, "\t"))
+            while (hasPrefix(p, " ") || hasPrefix(p, "\t"))
             {>>MARKER:FUNCTION_notify_BLOCK_PREFIX<<
                 p = p[1L..];
             }
 
             var neg = false;
-            if (hasprefix(p, "-") || hasprefix(p, "+"))
+            if (hasPrefix(p, "-") || hasPrefix(p, "+"))
             {>>MARKER:FUNCTION_plan9_semrelease_BLOCK_PREFIX<<
                 neg = p[0L] == '-';
                 p = p[1L..];
-                while (hasprefix(p, " ") || hasprefix(p, "\t"))
+                while (hasPrefix(p, " ") || hasPrefix(p, "\t"))
                 {>>MARKER:FUNCTION_plan9_tsemacquire_BLOCK_PREFIX<<
                     p = p[1L..];
                 }
 
+
             }
+
             long n = default;
 
-            if (hasprefix(p, "0x") || hasprefix(p, "0X")) 
+            if (hasPrefix(p, "0x") || hasPrefix(p, "0X")) 
                 p = p[2L..];
                 while (len(p) > 0L)
                 {>>MARKER:FUNCTION_plan9_semacquire_BLOCK_PREFIX<<
@@ -188,8 +195,9 @@ namespace go
                     {>>MARKER:FUNCTION_exits_BLOCK_PREFIX<<
                         break;
                     }
+
                 }
-            else if (hasprefix(p, "0")) 
+            else if (hasPrefix(p, "0")) 
                 while (len(p) > 0L && '0' <= p[0L] && p[0L] <= '7')
                 {>>MARKER:FUNCTION_seek_BLOCK_PREFIX<<
                     n = n * 8L + int64(p[0L] - '0');
@@ -205,7 +213,9 @@ namespace go
             {>>MARKER:FUNCTION_pread_BLOCK_PREFIX<<
                 n = -n;
             }
+
             return n;
+
         }
 
         private partial struct sigset
@@ -214,19 +224,24 @@ namespace go
 
         // Called to initialize a new m (including the bootstrap m).
         // Called on the parent thread (main thread in case of bootstrap), can allocate memory.
-        private static void mpreinit(ref m mp)
-        { 
+        private static void mpreinit(ptr<m> _addr_mp)
+        {
+            ref m mp = ref _addr_mp.val;
+ 
             // Initialize stack and goroutine for note handling.
             mp.gsignal = malg(32L * 1024L);
             mp.gsignal.m = mp;
-            mp.notesig = (int8.Value)(mallocgc(_ERRMAX, null, true)); 
+            mp.notesig = (int8.val)(mallocgc(_ERRMAX, null, true)); 
             // Initialize stack for handling strings from the
             // errstr system call, as used in package syscall.
-            mp.errstr = (byte.Value)(mallocgc(_ERRMAX, null, true));
+            mp.errstr = (byte.val)(mallocgc(_ERRMAX, null, true));
+
         }
 
-        private static void msigsave(ref m mp)
+        private static void msigsave(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
         }
 
         private static void msigrestore(sigset sigmask)
@@ -247,13 +262,14 @@ namespace go
         // Called on the new thread, cannot allocate memory.
         private static void minit()
         {
-            if (atomic.Load(ref exiting) != 0L)
+            if (atomic.Load(_addr_exiting) != 0L)
             {>>MARKER:FUNCTION_open_BLOCK_PREFIX<<
-                exits(ref emptystatus[0L]);
+                exits(_addr_emptystatus[0L]);
             } 
             // Mask all SSE floating-point exceptions
             // when running on the 64-bit kernel.
             setfpmasks();
+
         }
 
         // Called from dropm to undo the effect of an minit.
@@ -265,27 +281,31 @@ namespace go
 
         private static int getproccount()
         {
-            array<byte> buf = new array<byte>(2048L);
-            var fd = open(ref sysstat[0L], _OREAD, 0L);
+            ref array<byte> buf = ref heap(new array<byte>(2048L), out ptr<array<byte>> _addr_buf);
+            var fd = open(_addr_sysstat[0L], _OREAD, 0L);
             if (fd < 0L)
             {>>MARKER:FUNCTION_closefd_BLOCK_PREFIX<<
                 return 1L;
             }
+
             var ncpu = int32(0L);
             while (true)
             {
-                var n = read(fd, @unsafe.Pointer(ref buf), int32(len(buf)));
+                var n = read(fd, @unsafe.Pointer(_addr_buf), int32(len(buf)));
                 if (n <= 0L)
                 {
                     break;
                 }
+
                 for (var i = int32(0L); i < n; i++)
                 {
                     if (buf[i] == '\n')
                     {
                         ncpu++;
                     }
+
                 }
+
 
             }
 
@@ -294,7 +314,9 @@ namespace go
             {
                 ncpu = 1L;
             }
+
             return ncpu;
+
         }
 
         private static slice<byte> devswap = (slice<byte>)"/dev/swap\x00";
@@ -304,22 +326,26 @@ namespace go
         {
             array<byte> buf = new array<byte>(2048L);
             long pos = default;
-            var fd = open(ref devswap[0L], _OREAD, 0L);
+            var fd = open(_addr_devswap[0L], _OREAD, 0L);
             if (fd < 0L)
             { 
                 // There's not much we can do if /dev/swap doesn't
                 // exist. However, nothing in the memory manager uses
                 // this on Plan 9, so it also doesn't really matter.
                 return minPhysPageSize;
+
             }
+
             while (pos < len(buf))
             {
-                var n = read(fd, @unsafe.Pointer(ref buf[pos]), int32(len(buf) - pos));
+                var n = read(fd, @unsafe.Pointer(_addr_buf[pos]), int32(len(buf) - pos));
                 if (n <= 0L)
                 {
                     break;
                 }
+
                 pos += int(n);
+
             }
 
             closefd(fd);
@@ -332,14 +358,18 @@ namespace go
                 {
                     bol = i + 1L;
                 }
+
                 if (bytesHasPrefix(text[i..], pagesize))
                 { 
                     // Parse number at the beginning of this line.
                     return uintptr(_atoi(text[bol..]));
+
                 }
+
             } 
             // Again, the page size doesn't really matter, so use a fallback.
             return minPhysPageSize;
+
         }
 
         private static bool bytesHasPrefix(slice<byte> s, slice<byte> prefix)
@@ -348,27 +378,31 @@ namespace go
             {
                 return false;
             }
+
             foreach (var (i, p) in prefix)
             {
                 if (s[i] != p)
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         private static slice<byte> pid = (slice<byte>)"#c/pid\x00";
 
         private static ulong getpid()
         {
-            array<byte> b = new array<byte>(20L);
-            var fd = open(ref pid[0L], 0L, 0L);
+            ref array<byte> b = ref heap(new array<byte>(20L), out ptr<array<byte>> _addr_b);
+            var fd = open(_addr_pid[0L], 0L, 0L);
             if (fd >= 0L)
             {
-                read(fd, @unsafe.Pointer(ref b), int32(len(b)));
+                read(fd, @unsafe.Pointer(_addr_b), int32(len(b)));
                 closefd(fd);
             }
+
             var c = b[..];
             while (c[0L] == ' ' || c[0L] == '\t')
             {
@@ -376,6 +410,7 @@ namespace go
             }
 
             return uint64(_atoi(c));
+
         }
 
         private static void osinit()
@@ -384,14 +419,15 @@ namespace go
             ncpu = getproccount();
             physPageSize = getPageSize();
             getg().m.procid = getpid();
-            notify(@unsafe.Pointer(funcPC(sigtramp)));
         }
 
+        //go:nosplit
         private static void crash()
         {
-            notify(null) * (int.Value)(null);
+            notify(null) * (int.val)(null);
 
             0L;
+
         }
 
         //go:nosplit
@@ -400,12 +436,13 @@ namespace go
             extendRandom(r, 0L);
         }
 
-        private static void goenvs()
-        {
-        }
-
         private static void initsig(bool preinit)
         {
+            if (!preinit)
+            {
+                notify(@unsafe.Pointer(funcPC(sigtramp)));
+            }
+
         }
 
         //go:nosplit
@@ -422,54 +459,46 @@ namespace go
             {
                 ms = 1L;
             }
+
             sleep(ms);
+
         }
 
         //go:nosplit
-        private static long nanotime()
+        private static long nanotime1()
         {
-            long scratch = default;
-            var ns = nsec(ref scratch); 
+            ref long scratch = ref heap(out ptr<long> _addr_scratch);
+            var ns = nsec(_addr_scratch); 
             // TODO(aram): remove hack after I fix _nsec in the pc64 kernel.
             if (ns == 0L)
             {
                 return scratch;
             }
+
             return ns;
-        }
 
-        //go:nosplit
-        private static slice<byte> itoa(slice<byte> buf, ulong val)
-        {
-            var i = len(buf) - 1L;
-            while (val >= 10L)
-            {
-                buf[i] = byte(val % 10L + '0');
-                i--;
-                val /= 10L;
-            }
-
-            buf[i] = byte(val + '0');
-            return buf[i..];
         }
 
         private static slice<byte> goexits = (slice<byte>)"go: exit ";
         private static slice<byte> emptystatus = (slice<byte>)"\x00";
         private static uint exiting = default;
 
-        private static void goexitsall(ref byte status)
+        private static void goexitsall(ptr<byte> _addr_status)
         {
+            ref byte status = ref _addr_status.val;
+
             array<byte> buf = new array<byte>(_ERRMAX);
-            if (!atomic.Cas(ref exiting, 0L, 1L))
+            if (!atomic.Cas(_addr_exiting, 0L, 1L))
             {
-                return;
+                return ;
             }
+
             getg().m.locks++;
             var n = copy(buf[..], goexits);
             n = copy(buf[n..], gostringnocopy(status));
             var pid = getpid();
             {
-                var mp = (m.Value)(atomic.Loadp(@unsafe.Pointer(ref allm)));
+                var mp = (m.val)(atomic.Loadp(@unsafe.Pointer(_addr_allm)));
 
                 while (mp != null)
                 {
@@ -478,10 +507,12 @@ namespace go
                         postnote(mp.procid, buf[..]);
                     mp = mp.alllink;
                     }
+
                 }
 
             }
             getg().m.locks--;
+
         }
 
         private static slice<byte> procdir = (slice<byte>)"/proc/";
@@ -494,19 +525,22 @@ namespace go
             var n = copy(buf[..], procdir);
             n += copy(buf[n..], itoa(tmp[..], pid));
             copy(buf[n..], notefile);
-            var fd = open(ref buf[0L], _OWRITE, 0L);
+            var fd = open(_addr_buf[0L], _OWRITE, 0L);
             if (fd < 0L)
             {
                 return -1L;
             }
-            var len = findnull(ref msg[0L]);
-            if (write(uintptr(fd), @unsafe.Pointer(ref msg[0L]), int32(len)) != int64(len))
+
+            var len = findnull(_addr_msg[0L]);
+            if (write1(uintptr(fd), @unsafe.Pointer(_addr_msg[0L]), int32(len)) != int32(len))
             {
                 closefd(fd);
                 return -1L;
             }
+
             closefd(fd);
             return 0L;
+
         }
 
         //go:nosplit
@@ -522,40 +556,53 @@ namespace go
                 // build error string
                 array<byte> tmp = new array<byte>(32L);
                 status = append(itoa(tmp[..len(tmp) - 1L], uint64(e)), 0L);
+
             }
-            goexitsall(ref status[0L]);
-            exits(ref status[0L]);
+
+            goexitsall(_addr_status[0L]);
+            exits(_addr_status[0L]);
+
         }
 
         // May run with m.p==nil, so write barriers are not allowed.
         //go:nowritebarrier
-        private static void newosproc(ref m mp, unsafe.Pointer stk)
+        private static void newosproc(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
             if (false)
             {
-                print("newosproc mp=", mp, " ostk=", ref mp, "\n");
+                print("newosproc mp=", mp, " ostk=", _addr_mp, "\n");
             }
+
             var pid = rfork(_RFPROC | _RFMEM | _RFNOWAIT);
             if (pid < 0L)
             {
                 throw("newosproc: rfork failed");
             }
+
             if (pid == 0L)
             {
-                tstart_plan9(mp);
+                tstart_plan9(_addr_mp);
             }
+
         }
 
-        private static void exitThread(ref uint wait)
-        { 
+        private static void exitThread(ptr<uint> _addr_wait)
+        {
+            ref uint wait = ref _addr_wait.val;
+ 
             // We should never reach exitThread on Plan 9 because we let
             // the OS clean up threads.
             throw("exitThread");
+
         }
 
         //go:nosplit
-        private static void semacreate(ref m mp)
+        private static void semacreate(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
         }
 
         //go:nosplit
@@ -569,14 +616,17 @@ namespace go
                 {
                     ms = 1L;
                 }
-                var ret = plan9_tsemacquire(ref _g_.m.waitsemacount, ms);
+
+                var ret = plan9_tsemacquire(_addr__g_.m.waitsemacount, ms);
                 if (ret == 1L)
                 {
                     return 0L; // success
                 }
+
                 return -1L; // timeout or interrupted
             }
-            while (plan9_semacquire(ref _g_.m.waitsemacount, 1L) < 0L)
+
+            while (plan9_semacquire(_addr__g_.m.waitsemacount, 1L) < 0L)
             { 
                 // interrupted; try again (c.f. lock_sema.go)
             }
@@ -585,9 +635,11 @@ namespace go
         }
 
         //go:nosplit
-        private static void semawakeup(ref m mp)
+        private static void semawakeup(ptr<m> _addr_mp)
         {
-            plan9_semrelease(ref mp.waitsemacount, 1L);
+            ref m mp = ref _addr_mp.val;
+
+            plan9_semrelease(_addr_mp.waitsemacount, 1L);
         }
 
         //go:nosplit
@@ -597,14 +649,9 @@ namespace go
         }
 
         //go:nosplit
-        private static long write(System.UIntPtr fd, unsafe.Pointer buf, int n)
+        private static int write1(System.UIntPtr fd, unsafe.Pointer buf, int n)
         {
-            return int64(pwrite(int32(fd), buf, n, -1L));
-        }
-
-        private static ulong memlimit()
-        {
-            return 0L;
+            return pwrite(int32(fd), buf, n, -1L);
         }
 
         private static slice<byte> _badsignal = (slice<byte>)"runtime: signal received on thread not created by Go.\n";
@@ -613,8 +660,8 @@ namespace go
         //go:nosplit
         private static void badsignal2()
         {
-            pwrite(2L, @unsafe.Pointer(ref _badsignal[0L]), int32(len(_badsignal)), -1L);
-            exits(ref _badsignal[0L]);
+            pwrite(2L, @unsafe.Pointer(_addr__badsignal[0L]), int32(len(_badsignal)), -1L);
+            exits(_addr__badsignal[0L]);
         }
 
         private static void raisebadsignal(uint sig)
@@ -632,6 +679,7 @@ namespace go
             }
 
             return n;
+
         }
 
         private static @string signame(uint sig)
@@ -640,7 +688,22 @@ namespace go
             {
                 return "";
             }
+
             return sigtable[sig].name;
+
+        }
+
+        private static readonly var preemptMSupported = (var)false;
+
+
+
+        private static void preemptM(ptr<m> _addr_mp)
+        {
+            ref m mp = ref _addr_mp.val;
+ 
+            // Not currently supported.
+            //
+            // TODO: Use a note like we use signals on POSIX OSes
         }
     }
 }

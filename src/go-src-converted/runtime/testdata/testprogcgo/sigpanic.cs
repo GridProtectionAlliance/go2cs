@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:59 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:04 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\sigpanic.go
 // This program will crash.
 // We want to test unwinding from sigpanic into C code (without a C symbolizer).

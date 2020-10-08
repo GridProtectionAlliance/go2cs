@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 August 29 08:45:00 UTC
+// package cmplx -- go2cs converted at 2020 October 08 03:25:54 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\exp.go
 using math = go.math_package;
@@ -57,9 +57,35 @@ namespace math
         // Exp returns e**x, the base-e exponential of x.
         public static System.Numerics.Complex128 Exp(System.Numerics.Complex128 x)
         {
+            {
+                var re = real(x);
+                var im = imag(x);
+
+
+                if (math.IsInf(re, 0L)) 
+
+                    if (re > 0L && im == 0L) 
+                        return x;
+                    else if (math.IsInf(im, 0L) || math.IsNaN(im)) 
+                        if (re < 0L)
+                        {
+                            return complex(0L, math.Copysign(0L, im));
+                        }
+                        else
+                        {
+                            return complex(math.Inf(1.0F), math.NaN());
+                        }
+                                    else if (math.IsNaN(re)) 
+                    if (im == 0L)
+                    {
+                        return complex(math.NaN(), im);
+                    }
+
+            }
             var r = math.Exp(real(x));
             var (s, c) = math.Sincos(imag(x));
             return complex(r * c, r * s);
+
         }
     }
 }}

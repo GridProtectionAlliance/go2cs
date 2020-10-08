@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:25:04 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:09 UTC
 // Original source: C:\Go\src\runtime\testdata\testprognet\net.go
 using fmt = go.fmt_package;
 using net = go.net_package;
@@ -30,6 +30,7 @@ namespace go
             {
                 fmt.Println("error: ", err);
             }
+
         }
 
         public static void NetpollDeadlock()

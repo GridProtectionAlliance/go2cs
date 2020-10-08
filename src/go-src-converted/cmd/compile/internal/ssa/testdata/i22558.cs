@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2020 August 29 09:24:39 UTC
+// package main -- go2cs converted at 2020 October 08 04:27:09 UTC
 // Original source: C:\Go\src\cmd\compile\internal\ssa\testdata\i22558.go
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -21,36 +21,54 @@ namespace go
             public slice<big> stuff;
         }
 
-        private static void test(ref thing t, ref thing u)
+        private static void test(ptr<thing> _addr_t, ptr<thing> _addr_u)
         {
+            ref thing t = ref _addr_t.val;
+            ref thing u = ref _addr_u.val;
+
             if (t.next != null)
             {
-                return;
+                return ;
             }
+
             fmt.Fprintf(os.Stderr, "%s\n", t.name);
             u.self = u;
             t.self = t;
             t.next = u;
             foreach (var (_, p) in t.stuff)
             {
-                if (isFoo(t, p))
+                if (isFoo(_addr_t, p))
                 {
-                    return;
+                    return ;
                 }
+
             }
+
         }
 
         //go:noinline
-        private static bool isFoo(ref thing t, big b)
+        private static bool isFoo(ptr<thing> _addr_t, big b)
         {
+            ref thing t = ref _addr_t.val;
+
             return true;
         }
 
         private static void Main()
         {
-            thing t = ref new thing(name:"t",self:nil,next:nil,stuff:make([]big,1));
-            thing u = new thing(name:"u",self:t,next:t,stuff:make([]big,1));
-            test(t, ref u);
+            growstack(); // Use stack early to prevent growth during test, which confuses gdb
+            ptr<thing> t = addr(new thing(name:"t",self:nil,next:nil,stuff:make([]big,1)));
+            ref thing u = ref heap(new thing(name:"u",self:t,next:t,stuff:make([]big,1)), out ptr<thing> _addr_u);
+            test(_addr_t, _addr_u);
+
+        }
+
+        private static @string snk = default;
+
+        //go:noinline
+        private static void growstack()
+        {
+            snk = fmt.Sprintf("%#v,%#v,%#v", 1L, true, "cat");
         }
     }
 }

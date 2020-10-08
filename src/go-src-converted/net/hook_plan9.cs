@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:26:24 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:07 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\hook_plan9.go
 using time = go.time_package;
@@ -16,7 +16,6 @@ namespace go
         private static Action testHookDialChannel = () =>
         {
             time.Sleep(time.Millisecond);
-
         }; // see golang.org/issue/5349
     }
 }

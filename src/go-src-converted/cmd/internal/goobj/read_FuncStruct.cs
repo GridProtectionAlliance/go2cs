@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:18 UTC
+//     Generated on 2020 October 08 03:50:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -38,8 +39,10 @@ namespace @internal
             {
                 this.Args = default;
                 this.Frame = default;
+                this.Align = default;
                 this.Leaf = default;
                 this.NoSplit = default;
+                this.TopFrame = default;
                 this.Var = default;
                 this.PCSP = default;
                 this.PCFile = default;
@@ -51,12 +54,14 @@ namespace @internal
                 this.InlTree = default;
             }
 
-            public Func(long Args = default, long Frame = default, bool Leaf = default, bool NoSplit = default, slice<Var> Var = default, Data PCSP = default, Data PCFile = default, Data PCLine = default, Data PCInline = default, slice<Data> PCData = default, slice<FuncData> FuncData = default, slice<@string> File = default, slice<InlinedCall> InlTree = default)
+            public Func(long Args = default, long Frame = default, uint Align = default, bool Leaf = default, bool NoSplit = default, bool TopFrame = default, slice<Var> Var = default, Data PCSP = default, Data PCFile = default, Data PCLine = default, Data PCInline = default, slice<Data> PCData = default, slice<FuncData> FuncData = default, slice<@string> File = default, slice<InlinedCall> InlTree = default)
             {
                 this.Args = Args;
                 this.Frame = Frame;
+                this.Align = Align;
                 this.Leaf = Leaf;
                 this.NoSplit = NoSplit;
+                this.TopFrame = TopFrame;
                 this.Var = Var;
                 this.PCSP = PCSP;
                 this.PCFile = PCFile;
@@ -88,7 +93,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Func Func_cast(dynamic value)
         {
-            return new Func(value.Args, value.Frame, value.Leaf, value.NoSplit, value.Var, value.PCSP, value.PCFile, value.PCLine, value.PCInline, value.PCData, value.FuncData, value.File, value.InlTree);
+            return new Func(value.Args, value.Frame, value.Align, value.Leaf, value.NoSplit, value.TopFrame, value.Var, value.PCSP, value.PCFile, value.PCLine, value.PCInline, value.PCData, value.FuncData, value.File, value.InlTree);
         }
     }
 }}}

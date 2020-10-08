@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:41 UTC
+//     Generated on 2020 October 08 03:42:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -58,7 +58,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -72,10 +72,10 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate @string idByRef(ref T value);
+            private delegate @string idByPtr(ptr<T> value);
             private delegate @string idByVal(T value);
 
-            private static readonly idByRef s_idByRef;
+            private static readonly idByPtr s_idByPtr;
             private static readonly idByVal s_idByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,17 +84,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_idByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_idByPtr is null || !m_target_is_ptr)
                     return s_idByVal!(target);
 
-                return s_idByRef(ref target);
+                return s_idByPtr(m_target_ptr);
             }
 
-            private delegate @string setIdByRef(ref T value, typeId id);
+            private delegate @string setIdByPtr(ptr<T> value, typeId id);
             private delegate @string setIdByVal(T value, typeId id);
 
-            private static readonly setIdByRef s_setIdByRef;
+            private static readonly setIdByPtr s_setIdByPtr;
             private static readonly setIdByVal s_setIdByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,17 +104,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_setIdByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_setIdByPtr is null || !m_target_is_ptr)
                     return s_setIdByVal!(target, id);
 
-                return s_setIdByRef(ref target, id);
+                return s_setIdByPtr(m_target_ptr, id);
             }
 
-            private delegate @string nameByRef(ref T value);
+            private delegate @string nameByPtr(ptr<T> value);
             private delegate @string nameByVal(T value);
 
-            private static readonly nameByRef s_nameByRef;
+            private static readonly nameByPtr s_nameByPtr;
             private static readonly nameByVal s_nameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -122,17 +124,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_nameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_nameByPtr is null || !m_target_is_ptr)
                     return s_nameByVal!(target);
 
-                return s_nameByRef(ref target);
+                return s_nameByPtr(m_target_ptr);
             }
 
-            private delegate @string stringByRef(ref T value);
+            private delegate @string stringByPtr(ptr<T> value);
             private delegate @string stringByVal(T value);
 
-            private static readonly stringByRef s_stringByRef;
+            private static readonly stringByPtr s_stringByPtr;
             private static readonly stringByVal s_stringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,17 +144,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_stringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_stringByPtr is null || !m_target_is_ptr)
                     return s_stringByVal!(target);
 
-                return s_stringByRef(ref target);
+                return s_stringByPtr(m_target_ptr);
             }
 
-            private delegate @string safeStringByRef(ref T value, map<typeId, bool> seen);
+            private delegate @string safeStringByPtr(ptr<T> value, map<typeId, bool> seen);
             private delegate @string safeStringByVal(T value, map<typeId, bool> seen);
 
-            private static readonly safeStringByRef s_safeStringByRef;
+            private static readonly safeStringByPtr s_safeStringByPtr;
             private static readonly safeStringByVal s_safeStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -160,11 +164,12 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_safeStringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_safeStringByPtr is null || !m_target_is_ptr)
                     return s_safeStringByVal!(target, seen);
 
-                return s_safeStringByRef(ref target, seen);
+                return s_safeStringByPtr(m_target_ptr, seen);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -173,87 +178,72 @@ namespace encoding
             static gobType()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("id");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("id");
 
                 if (!(extensionMethod is null))
-                    s_idByRef = extensionMethod.CreateStaticDelegate(typeof(idByRef)) as idByRef;
+                    s_idByPtr = extensionMethod.CreateStaticDelegate(typeof(idByPtr)) as idByPtr;
 
-                if (s_idByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("id");
+                extensionMethod = targetType.GetExtensionMethod("id");
 
-                    if (!(extensionMethod is null))
-                        s_idByVal = extensionMethod.CreateStaticDelegate(typeof(idByVal)) as idByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_idByVal = extensionMethod.CreateStaticDelegate(typeof(idByVal)) as idByVal;
 
-                if (s_idByRef is null && s_idByVal is null)
+                if (s_idByPtr is null && s_idByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement gobType.id method", new Exception("id"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("setId");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("setId");
 
                 if (!(extensionMethod is null))
-                    s_setIdByRef = extensionMethod.CreateStaticDelegate(typeof(setIdByRef)) as setIdByRef;
+                    s_setIdByPtr = extensionMethod.CreateStaticDelegate(typeof(setIdByPtr)) as setIdByPtr;
 
-                if (s_setIdByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("setId");
+                extensionMethod = targetType.GetExtensionMethod("setId");
 
-                    if (!(extensionMethod is null))
-                        s_setIdByVal = extensionMethod.CreateStaticDelegate(typeof(setIdByVal)) as setIdByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_setIdByVal = extensionMethod.CreateStaticDelegate(typeof(setIdByVal)) as setIdByVal;
 
-                if (s_setIdByRef is null && s_setIdByVal is null)
+                if (s_setIdByPtr is null && s_setIdByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement gobType.setId method", new Exception("setId"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("name");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("name");
 
                 if (!(extensionMethod is null))
-                    s_nameByRef = extensionMethod.CreateStaticDelegate(typeof(nameByRef)) as nameByRef;
+                    s_nameByPtr = extensionMethod.CreateStaticDelegate(typeof(nameByPtr)) as nameByPtr;
 
-                if (s_nameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("name");
+                extensionMethod = targetType.GetExtensionMethod("name");
 
-                    if (!(extensionMethod is null))
-                        s_nameByVal = extensionMethod.CreateStaticDelegate(typeof(nameByVal)) as nameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_nameByVal = extensionMethod.CreateStaticDelegate(typeof(nameByVal)) as nameByVal;
 
-                if (s_nameByRef is null && s_nameByVal is null)
+                if (s_nameByPtr is null && s_nameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement gobType.name method", new Exception("name"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("string");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("string");
 
                 if (!(extensionMethod is null))
-                    s_stringByRef = extensionMethod.CreateStaticDelegate(typeof(stringByRef)) as stringByRef;
+                    s_stringByPtr = extensionMethod.CreateStaticDelegate(typeof(stringByPtr)) as stringByPtr;
 
-                if (s_stringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("string");
+                extensionMethod = targetType.GetExtensionMethod("string");
 
-                    if (!(extensionMethod is null))
-                        s_stringByVal = extensionMethod.CreateStaticDelegate(typeof(stringByVal)) as stringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_stringByVal = extensionMethod.CreateStaticDelegate(typeof(stringByVal)) as stringByVal;
 
-                if (s_stringByRef is null && s_stringByVal is null)
+                if (s_stringByPtr is null && s_stringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement gobType.string method", new Exception("string"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("safeString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("safeString");
 
                 if (!(extensionMethod is null))
-                    s_safeStringByRef = extensionMethod.CreateStaticDelegate(typeof(safeStringByRef)) as safeStringByRef;
+                    s_safeStringByPtr = extensionMethod.CreateStaticDelegate(typeof(safeStringByPtr)) as safeStringByPtr;
 
-                if (s_safeStringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("safeString");
+                extensionMethod = targetType.GetExtensionMethod("safeString");
 
-                    if (!(extensionMethod is null))
-                        s_safeStringByVal = extensionMethod.CreateStaticDelegate(typeof(safeStringByVal)) as safeStringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_safeStringByVal = extensionMethod.CreateStaticDelegate(typeof(safeStringByVal)) as safeStringByVal;
 
-                if (s_safeStringByRef is null && s_safeStringByVal is null)
+                if (s_safeStringByPtr is null && s_safeStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement gobType.safeString method", new Exception("safeString"));
             }
 

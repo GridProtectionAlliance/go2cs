@@ -5,10 +5,16 @@
 // This file implements unsigned multi-precision integers (natural
 // numbers). They are the building blocks for the implementation
 // of signed integers, rationals, and floating-point numbers.
+//
+// Caution: This implementation relies on the function "alias"
+//          which assumes that (nat) slice capacities are never
+//          changed (no 3-operand slice expressions). If that
+//          changes, alias needs to be updated for correctness.
 
-// package big -- go2cs converted at 2020 August 29 08:29:24 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:47 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\nat.go
+using binary = go.encoding.binary_package;
 using bits = go.math.bits_package;
 using rand = go.math.rand_package;
 using sync = go.sync_package;
@@ -35,7 +41,7 @@ namespace math
         {
         }
 
-        private static nat natOne = new nat(1);        private static nat natTwo = new nat(2);        private static nat natTen = new nat(10);
+        private static nat natOne = new nat(1);        private static nat natTwo = new nat(2);        private static nat natFive = new nat(5);        private static nat natTen = new nat(10);
 
         private static void clear(this nat z)
         {
@@ -43,6 +49,7 @@ namespace math
             {
                 z[i] = 0L;
             }
+
         }
 
         private static nat norm(this nat z)
@@ -54,6 +61,7 @@ namespace math
             }
 
             return z[0L..i];
+
         }
 
         private static nat make(this nat z, long n)
@@ -61,12 +69,20 @@ namespace math
             if (n <= cap(z))
             {
                 return z[..n]; // reuse z
+            }
+
+            if (n == 1L)
+            { 
+                // Most nats start small and stay that way; don't over-allocate.
+                return make(nat, 1L);
+
             } 
             // Choosing a good value for e has significant performance impact
             // because it increases the chance that a value can be reused.
-            const long e = 4L; // extra capacity
+            const long e = (long)4L; // extra capacity
  // extra capacity
             return make(nat, n, n + e);
+
         }
 
         private static nat setWord(this nat z, Word x)
@@ -75,9 +91,11 @@ namespace math
             {
                 return z[..0L];
             }
+
             z = z.make(1L);
             z[0L] = x;
             return z;
+
         }
 
         private static nat setUint64(this nat z, ulong x)
@@ -98,6 +116,7 @@ namespace math
             z[1L] = Word(x >> (int)(32L));
             z[0L] = Word(x);
             return z;
+
         }
 
         private static nat set(this nat z, nat x)
@@ -129,9 +148,11 @@ namespace math
             {
                 c = addVW(z[n..m], x[n..], c);
             }
+
             z[m] = c;
 
             return z.norm();
+
         }
 
         private static nat sub(this nat z, nat x, nat y) => func((_, panic, __) =>
@@ -156,15 +177,20 @@ namespace math
             {
                 c = subVW(z[n..], x[n..], c);
             }
+
             if (c != 0L)
             {
                 panic("underflow");
             }
+
             return z.norm();
+
         });
 
         private static long cmp(this nat x, nat y)
         {
+            long r = default;
+
             var m = len(x);
             var n = len(y);
             if (m != n || m == 0L)
@@ -174,8 +200,10 @@ namespace math
                     r = -1L;
                 else if (m > n) 
                     r = 1L;
-                                return;
+                                return ;
+
             }
+
             var i = m - 1L;
             while (i > 0L && x[i] == y[i])
             {
@@ -188,7 +216,8 @@ namespace math
                 r = -1L;
             else if (x[i] > y[i]) 
                 r = 1L;
-                        return;
+                        return ;
+
         }
 
         private static nat mulAddWW(this nat z, nat x, Word y, Word r)
@@ -203,6 +232,7 @@ namespace math
             z[m] = mulAddVWW(z[0L..m], x, y, r);
 
             return z.norm();
+
         }
 
         // basicMul multiplies x and y and leaves the result in z.
@@ -216,7 +246,9 @@ namespace math
                 {
                     z[len(x) + i] = addMulVVW(z[i..i + len(x)], x, d);
                 }
+
             }
+
         }
 
         // montgomery computes z mod m = x*y*2**(-n*_W) mod m,
@@ -238,19 +270,19 @@ namespace math
             {
                 panic("math/big: mismatched montgomery number lengths");
             }
-            z = z.make(n);
+
+            z = z.make(n * 2L);
             z.clear();
             Word c = default;
             for (long i = 0L; i < n; i++)
             {
                 var d = y[i];
-                var c2 = addMulVVW(z, x, d);
-                var t = z[0L] * k;
-                var c3 = addMulVVW(z, m, t);
-                copy(z, z[1L..]);
+                var c2 = addMulVVW(z[i..n + i], x, d);
+                var t = z[i] * k;
+                var c3 = addMulVVW(z[i..n + i], m, t);
                 var cx = c + c2;
                 var cy = cx + c3;
-                z[n - 1L] = cy;
+                z[n + i] = cy;
                 if (cx < c2 || cy < c3)
                 {
                     c = 1L;
@@ -259,13 +291,20 @@ namespace math
                 {
                     c = 0L;
                 }
+
             }
 
             if (c != 0L)
             {
-                subVV(z, z, m);
+                subVV(z[..n], z[n..], m);
             }
-            return z;
+            else
+            {
+                copy(z[..n], z[n..]);
+            }
+
+            return z[..n];
+
         });
 
         // Fast version of z[0:n+n>>1].add(z[0:n+n>>1], x[0:n]) w/o bounds checks.
@@ -281,6 +320,7 @@ namespace math
                 }
 
             }
+
         }
 
         // Like karatsubaAdd, but does subtract.
@@ -295,6 +335,7 @@ namespace math
                 }
 
             }
+
         }
 
         // Operands that are shorter than karatsubaThreshold are multiplied using
@@ -316,7 +357,7 @@ namespace math
             if (n & 1L != 0L || n < karatsubaThreshold || n < 2L)
             {
                 basicMul(z, x, y);
-                return;
+                return ;
             } 
             // n&1 == 0 && n >= karatsubaThreshold && n >= 2
 
@@ -408,12 +449,17 @@ namespace math
             {
                 karatsubaSub(z[n2..], p, n);
             }
+
         }
 
         // alias reports whether x and y share the same base array.
+        // Note: alias assumes that the capacity of underlying arrays
+        //       is never changed for nat values; i.e. that there are
+        //       no 3-operand slice expressions in this code (or worse,
+        //       reflect-based operations to the same effect).
         private static bool alias(nat x, nat y)
         {
-            return cap(x) > 0L && cap(y) > 0L && ref x[0L..cap(x)][cap(x) - 1L] == ref y[0L..cap(y)][cap(y) - 1L];
+            return cap(x) > 0L && cap(y) > 0L && _addr_x[0L..cap(x)][cap(x) - 1L] == _addr_y[0L..cap(y)][cap(y) - 1L];
         }
 
         // addAt implements z += x<<(_W*i); z must be long enough.
@@ -436,12 +482,15 @@ namespace math
                             {
                                 addVW(z[j..], z[j..], c);
                             }
+
                         }
 
                     }
+
                 }
 
             }
+
         }
 
         private static long max(long x, long y)
@@ -450,23 +499,26 @@ namespace math
             {
                 return x;
             }
+
             return y;
+
         }
 
         // karatsubaLen computes an approximation to the maximum k <= n such that
-        // k = p<<i for a number p <= karatsubaThreshold and an i >= 0. Thus, the
+        // k = p<<i for a number p <= threshold and an i >= 0. Thus, the
         // result is the largest number that can be divided repeatedly by 2 before
-        // becoming about the value of karatsubaThreshold.
-        private static long karatsubaLen(long n)
+        // becoming about the value of threshold.
+        private static long karatsubaLen(long n, long threshold)
         {
             var i = uint(0L);
-            while (n > karatsubaThreshold)
+            while (n > threshold)
             {
                 n >>= 1L;
                 i++;
             }
 
             return n << (int)(i);
+
         }
 
         private static nat mul(this nat z, nat x, nat y)
@@ -504,7 +556,7 @@ namespace math
             //   y = yh*b + y0  (0 <= y0 < b)
             //   b = 1<<(_W*k)  ("base" of digits xi, yi)
             //
-            var k = karatsubaLen(n); 
+            var k = karatsubaLen(n, karatsubaThreshold); 
             // k <= n
 
             // multiply x0 and y0 via Karatsuba
@@ -530,7 +582,8 @@ namespace math
             //
             if (k < n || m != n)
             {
-                nat t = default; 
+                var tp = getNat(3L * k);
+                var t = tp.val; 
 
                 // add x0*y1*b
                 x0 = x0.norm();
@@ -551,26 +604,35 @@ namespace math
                             xi = xi[..k];
                         i += k;
                         }
+
                         xi = xi.norm();
                         t = t.mul(xi, y0);
                         addAt(z, t, i);
                         t = t.mul(xi, y1);
                         addAt(z, t, i + k);
+
                     }
 
                 }
+
+                putNat(_addr_tp);
+
             }
+
             return z.norm();
+
         }
 
         // basicSqr sets z = x*x and is asymptotically faster than basicMul
         // by about a factor of 2, but slower for small arguments due to overhead.
-        // Requirements: len(x) > 0, len(z) >= 2*len(x)
-        // The (non-normalized) result is placed in z[0 : 2 * len(x)].
+        // Requirements: len(x) > 0, len(z) == 2*len(x)
+        // The (non-normalized) result is placed in z.
         private static void basicSqr(nat z, nat x)
         {
             var n = len(x);
-            var t = make(nat, 2L * n); // temporary variable to hold the products
+            var tp = getNat(2L * n);
+            var t = tp.val; // temporary variable to hold the products
+            t.clear();
             z[1L], z[0L] = mulWW(x[0L], x[0L]); // the initial square
             for (long i = 1L; i < n; i++)
             {
@@ -579,17 +641,60 @@ namespace math
                 z[2L * i + 1L], z[2L * i] = mulWW(d, d); 
                 // t collects the products x[i] * x[j] where j < i
                 t[2L * i] = addMulVVW(t[i..2L * i], x[0L..i], d);
+
             }
 
             t[2L * n - 1L] = shlVU(t[1L..2L * n - 1L], t[1L..2L * n - 1L], 1L); // double the j < i products
             addVV(z, z, t); // combine the result
+            putNat(_addr_tp);
+
+        }
+
+        // karatsubaSqr squares x and leaves the result in z.
+        // len(x) must be a power of 2 and len(z) >= 6*len(x).
+        // The (non-normalized) result is placed in z[0 : 2*len(x)].
+        //
+        // The algorithm and the layout of z are the same as for karatsuba.
+        private static void karatsubaSqr(nat z, nat x)
+        {
+            var n = len(x);
+
+            if (n & 1L != 0L || n < karatsubaSqrThreshold || n < 2L)
+            {
+                basicSqr(z[..2L * n], x);
+                return ;
+            }
+
+            var n2 = n >> (int)(1L);
+            var x1 = x[n2..];
+            var x0 = x[0L..n2];
+
+            karatsubaSqr(z, x0);
+            karatsubaSqr(z[n..], x1); 
+
+            // s = sign(xd*yd) == -1 for xd != 0; s == 1 for xd == 0
+            var xd = z[2L * n..2L * n + n2];
+            if (subVV(xd, x1, x0) != 0L)
+            {
+                subVV(xd, x0, x1);
+            }
+
+            var p = z[n * 3L..];
+            karatsubaSqr(p, xd);
+
+            var r = z[n * 4L..];
+            copy(r, z[..n * 2L]);
+
+            karatsubaAdd(z[n2..], r, n);
+            karatsubaAdd(z[n2..], r[n..], n);
+            karatsubaSub(z[n2..], p, n); // s == -1 for p != 0; s == 1 for p == 0
         }
 
         // Operands that are shorter than basicSqrThreshold are squared using
         // "grade school" multiplication; for operands longer than karatsubaSqrThreshold
-        // the Karatsuba algorithm is used.
+        // we use the Karatsuba algorithm optimized for x == y.
         private static long basicSqrThreshold = 20L; // computed by calibrate_test.go
-        private static long karatsubaSqrThreshold = 400L; // computed by calibrate_test.go
+        private static long karatsubaSqrThreshold = 260L; // computed by calibrate_test.go
 
         // z = x*x
         private static nat sqr(this nat z, nat x)
@@ -607,19 +712,50 @@ namespace math
             {
                 z = null; // z is an alias for x - cannot reuse
             }
-            z = z.make(2L * n);
 
             if (n < basicSqrThreshold)
             {
+                z = z.make(2L * n);
                 basicMul(z, x, x);
                 return z.norm();
             }
+
             if (n < karatsubaSqrThreshold)
             {
+                z = z.make(2L * n);
                 basicSqr(z, x);
                 return z.norm();
+            } 
+
+            // Use Karatsuba multiplication optimized for x == y.
+            // The algorithm and layout of z are the same as for mul.
+
+            // z = (x1*b + x0)^2 = x1^2*b^2 + 2*x1*x0*b + x0^2
+            var k = karatsubaLen(n, karatsubaSqrThreshold);
+
+            var x0 = x[0L..k];
+            z = z.make(max(6L * k, 2L * n));
+            karatsubaSqr(z, x0); // z = x0^2
+            z = z[0L..2L * n];
+            z[2L * k..].clear();
+
+            if (k < n)
+            {
+                var tp = getNat(2L * k);
+                var t = tp.val;
+                x0 = x0.norm();
+                var x1 = x[k..];
+                t = t.mul(x0, x1);
+                addAt(z, t, k);
+                addAt(z, t, k); // z = 2*x1*x0*b + x0^2
+                t = t.sqr(x1);
+                addAt(z, t, 2L * k); // z = x1^2*b^2 + 2*x1*x0*b + x0^2
+                putNat(_addr_tp);
+
             }
-            return z.mul(x, x);
+
+            return z.norm();
+
         }
 
         // mulRange computes the product of all the unsigned integers in the
@@ -638,121 +774,164 @@ namespace math
                 return z.mul(nat(null).setUint64(a), nat(null).setUint64(b));
                         var m = (a + b) / 2L;
             return z.mul(nat(null).mulRange(a, m), nat(null).mulRange(m + 1L, b));
+
         }
 
         // q = (x-r)/y, with 0 <= r < y
         private static (nat, Word) divW(this nat z, nat x, Word y) => func((_, panic, __) =>
         {
+            nat q = default;
+            Word r = default;
+
             var m = len(x);
 
             if (y == 0L) 
                 panic("division by zero");
             else if (y == 1L) 
                 q = z.set(x); // result is x
-                return;
+                return ;
             else if (m == 0L) 
                 q = z[..0L]; // result is 0
-                return;
+                return ;
             // m > 0
             z = z.make(m);
             r = divWVW(z, 0L, x, y);
             q = z.norm();
-            return;
+            return ;
+
         });
 
         private static (nat, nat) div(this nat z, nat z2, nat u, nat v) => func((_, panic, __) =>
         {
+            nat q = default;
+            nat r = default;
+
             if (len(v) == 0L)
             {
                 panic("division by zero");
             }
+
             if (u.cmp(v) < 0L)
             {
                 q = z[..0L];
                 r = z2.set(u);
-                return;
+                return ;
             }
+
             if (len(v) == 1L)
             {
                 Word r2 = default;
                 q, r2 = z.divW(u, v[0L]);
                 r = z2.setWord(r2);
-                return;
+                return ;
             }
+
             q, r = z.divLarge(z2, u, v);
-            return;
+            return ;
+
         });
 
         // getNat returns a *nat of len n. The contents may not be zero.
         // The pool holds *nat to avoid allocation when converting to interface{}.
-        private static ref nat getNat(long n)
+        private static ptr<nat> getNat(long n)
         {
-            ref nat z = default;
+            ptr<nat> z;
             {
                 var v = natPool.Get();
 
                 if (v != null)
                 {
-                    z = v._<ref nat>();
+                    z = v._<ptr<nat>>();
                 }
 
             }
+
             if (z == null)
             {
                 z = @new<nat>();
             }
-            z.Value = z.make(n);
-            return z;
+
+            z.val = z.make(n);
+            return _addr_z!;
+
         }
 
-        private static void putNat(ref nat x)
+        private static void putNat(ptr<nat> _addr_x)
         {
+            ref nat x = ref _addr_x.val;
+
             natPool.Put(x);
         }
 
         private static sync.Pool natPool = default;
 
-        // q = (uIn-r)/v, with 0 <= r < y
+        // q = (uIn-r)/vIn, with 0 <= r < vIn
         // Uses z as storage for q, and u as storage for r if possible.
         // See Knuth, Volume 2, section 4.3.1, Algorithm D.
         // Preconditions:
-        //    len(v) >= 2
-        //    len(uIn) >= len(v)
-        private static (nat, nat) divLarge(this nat z, nat u, nat uIn, nat v)
+        //    len(vIn) >= 2
+        //    len(uIn) >= len(vIn)
+        //    u must not alias z
+        private static (nat, nat) divLarge(this nat z, nat u, nat uIn, nat vIn)
         {
-            var n = len(v);
+            nat q = default;
+            nat r = default;
+
+            var n = len(vIn);
             var m = len(uIn) - n; 
 
-            // determine if z can be reused
-            // TODO(gri) should find a better solution - this if statement
-            //           is very costly (see e.g. time pidigits -s -n 10000)
-            if (alias(z, u) || alias(z, uIn) || alias(z, v))
+            // D1.
+            var shift = nlz(vIn[n - 1L]); 
+            // do not modify vIn, it may be used by another goroutine simultaneously
+            var vp = getNat(n);
+            var v = vp.val;
+            shlVU(v, vIn, shift); 
+
+            // u may safely alias uIn or vIn, the value of uIn is used to set u and vIn was already used
+            u = u.make(len(uIn) + 1L);
+            u[len(uIn)] = shlVU(u[0L..len(uIn)], uIn, shift); 
+
+            // z may safely alias uIn or vIn, both values were used already
+            if (alias(z, u))
             {
-                z = null; // z is an alias for u or uIn or v - cannot reuse
+                z = null; // z is an alias for u - cannot reuse
             }
+
             q = z.make(m + 1L);
 
-            var qhatvp = getNat(n + 1L);
-            var qhatv = qhatvp.Value;
-            if (alias(u, uIn) || alias(u, v))
+            if (n < divRecursiveThreshold)
             {
-                u = null; // u is an alias for uIn or v - cannot reuse
+                q.divBasic(u, v);
             }
-            u = u.make(len(uIn) + 1L);
-            u.clear(); // TODO(gri) no need to clear if we allocated a new u
+            else
+            {
+                q.divRecursive(u, v);
+            }
 
-            // D1.
-            ref nat v1p = default;
-            var shift = nlz(v[n - 1L]);
-            if (shift > 0L)
-            { 
-                // do not modify v, it may be used by another goroutine simultaneously
-                v1p = getNat(n);
-                var v1 = v1p.Value;
-                shlVU(v1, v, shift);
-                v = v1;
-            }
-            u[len(uIn)] = shlVU(u[0L..len(uIn)], uIn, shift); 
+            putNat(_addr_vp);
+
+            q = q.norm();
+            shrVU(u, u, shift);
+            r = u.norm();
+
+            return (q, r);
+
+        }
+
+        // divBasic performs word-by-word division of u by v.
+        // The quotient is written in pre-allocated q.
+        // The remainder overwrites input u.
+        //
+        // Precondition:
+        // - q is large enough to hold the quotient u / v
+        //   which has a maximum length of len(u)-len(v)+1.
+        private static void divBasic(this nat q, nat u, nat v)
+        {
+            var n = len(v);
+            var m = len(u) - n;
+
+            var qhatvp = getNat(n + 1L);
+            var qhatv = qhatvp.val; 
 
             // D2.
             var vn1 = v[n - 1L];
@@ -760,63 +939,310 @@ namespace math
             { 
                 // D3.
                 var qhat = Word(_M);
+                Word ujn = default;
+                if (j + n < len(u))
                 {
-                    var ujn = u[j + n];
+                    ujn = u[j + n];
+                }
 
-                    if (ujn != vn1)
+                if (ujn != vn1)
+                {
+                    Word rhat = default;
+                    qhat, rhat = divWW(ujn, u[j + n - 1L], vn1); 
+
+                    // x1 | x2 = q̂v_{n-2}
+                    var vn2 = v[n - 2L];
+                    var (x1, x2) = mulWW(qhat, vn2); 
+                    // test if q̂v_{n-2} > br̂ + u_{j+n-2}
+                    var ujn2 = u[j + n - 2L];
+                    while (greaterThan(x1, x2, rhat, ujn2))
                     {
-                        Word rhat = default;
-                        qhat, rhat = divWW(ujn, u[j + n - 1L], vn1); 
-
-                        // x1 | x2 = q̂v_{n-2}
-                        var vn2 = v[n - 2L];
-                        var (x1, x2) = mulWW(qhat, vn2); 
-                        // test if q̂v_{n-2} > br̂ + u_{j+n-2}
-                        var ujn2 = u[j + n - 2L];
-                        while (greaterThan(x1, x2, rhat, ujn2))
+                        qhat--;
+                        var prevRhat = rhat;
+                        rhat += vn1; 
+                        // v[n-1] >= 0, so this tests for overflow.
+                        if (rhat < prevRhat)
                         {
-                            qhat--;
-                            var prevRhat = rhat;
-                            rhat += vn1; 
-                            // v[n-1] >= 0, so this tests for overflow.
-                            if (rhat < prevRhat)
-                            {
-                                break;
-                            }
-                            x1, x2 = mulWW(qhat, vn2);
+                            break;
                         }
 
-                    } 
+                        x1, x2 = mulWW(qhat, vn2);
 
-                    // D4.
+                    }
+
 
                 } 
 
                 // D4.
+                // Compute the remainder u - (q̂*v) << (_W*j).
+                // The subtraction may overflow if q̂ estimate was off by one.
                 qhatv[n] = mulAddVWW(qhatv[0L..n], v, qhat, 0L);
+                var qhl = len(qhatv);
+                if (j + qhl > len(u) && qhatv[n] == 0L)
+                {
+                    qhl--;
+                }
 
-                var c = subVV(u[j..j + len(qhatv)], u[j..], qhatv);
+                var c = subVV(u[j..j + qhl], u[j..], qhatv);
                 if (c != 0L)
                 {
-                    c = addVV(u[j..j + n], u[j..], v);
-                    u[j + n] += c;
+                    c = addVV(u[j..j + n], u[j..], v); 
+                    // If n == qhl, the carry from subVV and the carry from addVV
+                    // cancel out and don't affect u[j+n].
+                    if (n < qhl)
+                    {
+                        u[j + n] += c;
+                    }
+
                     qhat--;
+
                 }
+
+                if (j == m && m == len(q) && qhat == 0L)
+                {
+                    continue;
+                }
+
                 q[j] = qhat;
+
             }
 
-            if (v1p != null)
-            {
-                putNat(v1p);
-            }
-            putNat(qhatvp);
 
-            q = q.norm();
-            shrVU(u, u, shift);
-            r = u.norm();
+            putNat(_addr_qhatvp);
 
-            return (q, r);
         }
+
+        private static readonly long divRecursiveThreshold = (long)100L;
+
+        // divRecursive performs word-by-word division of u by v.
+        // The quotient is written in pre-allocated z.
+        // The remainder overwrites input u.
+        //
+        // Precondition:
+        // - len(z) >= len(u)-len(v)
+        //
+        // See Burnikel, Ziegler, "Fast Recursive Division", Algorithm 1 and 2.
+
+
+        // divRecursive performs word-by-word division of u by v.
+        // The quotient is written in pre-allocated z.
+        // The remainder overwrites input u.
+        //
+        // Precondition:
+        // - len(z) >= len(u)-len(v)
+        //
+        // See Burnikel, Ziegler, "Fast Recursive Division", Algorithm 1 and 2.
+        private static void divRecursive(this nat z, nat u, nat v)
+        { 
+            // Recursion depth is less than 2 log2(len(v))
+            // Allocate a slice of temporaries to be reused across recursion.
+            long recDepth = 2L * bits.Len(uint(len(v))); 
+            // large enough to perform Karatsuba on operands as large as v
+            var tmp = getNat(3L * len(v));
+            var temps = make_slice<ptr<nat>>(recDepth);
+            z.clear();
+            z.divRecursiveStep(u, v, 0L, tmp, temps);
+            foreach (var (_, n) in temps)
+            {
+                if (n != null)
+                {
+                    putNat(_addr_n);
+                }
+
+            }
+            putNat(_addr_tmp);
+
+        }
+
+        // divRecursiveStep computes the division of u by v.
+        // - z must be large enough to hold the quotient
+        // - the quotient will overwrite z
+        // - the remainder will overwrite u
+        private static void divRecursiveStep(this nat z, nat u, nat v, long depth, ptr<nat> _addr_tmp, slice<ptr<nat>> temps) => func((_, panic, __) =>
+        {
+            ref nat tmp = ref _addr_tmp.val;
+
+            u = u.norm();
+            v = v.norm();
+
+            if (len(u) == 0L)
+            {
+                z.clear();
+                return ;
+            }
+
+            var n = len(v);
+            if (n < divRecursiveThreshold)
+            {
+                z.divBasic(u, v);
+                return ;
+            }
+
+            var m = len(u) - n;
+            if (m < 0L)
+            {
+                return ;
+            } 
+
+            // Produce the quotient by blocks of B words.
+            // Division by v (length n) is done using a length n/2 division
+            // and a length n/2 multiplication for each block. The final
+            // complexity is driven by multiplication complexity.
+            var B = n / 2L; 
+
+            // Allocate a nat for qhat below.
+            if (temps[depth] == null)
+            {
+                temps[depth] = getNat(n);
+            }
+            else
+            {
+                temps[depth].val = temps[depth].make(B + 1L);
+            }
+
+            var j = m;
+            while (j > B)
+            { 
+                // Divide u[j-B:j+n] by vIn. Keep remainder in u
+                // for next block.
+                //
+                // The following property will be used (Lemma 2):
+                // if u = u1 << s + u0
+                //    v = v1 << s + v0
+                // then floor(u1/v1) >= floor(u/v)
+                //
+                // Moreover, the difference is at most 2 if len(v1) >= len(u/v)
+                // We choose s = B-1 since len(v)-B >= B+1 >= len(u/v)
+                var s = (B - 1L); 
+                // Except for the first step, the top bits are always
+                // a division remainder, so the quotient length is <= n.
+                var uu = u[j - B..];
+
+                var qhat = temps[depth].val;
+                qhat.clear();
+                qhat.divRecursiveStep(uu[s..B + n], v[s..], depth + 1L, tmp, temps);
+                qhat = qhat.norm(); 
+                // Adjust the quotient:
+                //    u = u_h << s + u_l
+                //    v = v_h << s + v_l
+                //  u_h = q̂ v_h + rh
+                //    u = q̂ (v - v_l) + rh << s + u_l
+                // After the above step, u contains a remainder:
+                //    u = rh << s + u_l
+                // and we need to subtract q̂ v_l
+                //
+                // But it may be a bit too large, in which case q̂ needs to be smaller.
+                var qhatv = tmp.make(3L * n);
+                qhatv.clear();
+                qhatv = qhatv.mul(qhat, v[..s]);
+                {
+                    long i__prev2 = i;
+
+                    for (long i = 0L; i < 2L; i++)
+                    {
+                        var e = qhatv.cmp(uu.norm());
+                        if (e <= 0L)
+                        {
+                            break;
+                        }
+
+                        subVW(qhat, qhat, 1L);
+                        var c = subVV(qhatv[..s], qhatv[..s], v[..s]);
+                        if (len(qhatv) > s)
+                        {
+                            subVW(qhatv[s..], qhatv[s..], c);
+                        }
+
+                        addAt(uu[s..], v[s..], 0L);
+
+                    }
+
+
+                    i = i__prev2;
+                }
+                if (qhatv.cmp(uu.norm()) > 0L)
+                {
+                    panic("impossible");
+                }
+
+                c = subVV(uu[..len(qhatv)], uu[..len(qhatv)], qhatv);
+                if (c > 0L)
+                {
+                    subVW(uu[len(qhatv)..], uu[len(qhatv)..], c);
+                }
+
+                addAt(z, qhat, j - B);
+                j -= B;
+
+            } 
+
+            // Now u < (v<<B), compute lower bits in the same way.
+            // Choose shift = B-1 again.
+ 
+
+            // Now u < (v<<B), compute lower bits in the same way.
+            // Choose shift = B-1 again.
+            s = B;
+            qhat = temps[depth].val;
+            qhat.clear();
+            qhat.divRecursiveStep(u[s..].norm(), v[s..], depth + 1L, tmp, temps);
+            qhat = qhat.norm();
+            qhatv = tmp.make(3L * n);
+            qhatv.clear();
+            qhatv = qhatv.mul(qhat, v[..s]); 
+            // Set the correct remainder as before.
+            {
+                long i__prev1 = i;
+
+                for (i = 0L; i < 2L; i++)
+                {
+                    {
+                        var e__prev1 = e;
+
+                        e = qhatv.cmp(u.norm());
+
+                        if (e > 0L)
+                        {
+                            subVW(qhat, qhat, 1L);
+                            c = subVV(qhatv[..s], qhatv[..s], v[..s]);
+                            if (len(qhatv) > s)
+                            {
+                                subVW(qhatv[s..], qhatv[s..], c);
+                            }
+
+                            addAt(u[s..], v[s..], 0L);
+
+                        }
+
+                        e = e__prev1;
+
+                    }
+
+                }
+
+
+                i = i__prev1;
+            }
+            if (qhatv.cmp(u.norm()) > 0L)
+            {
+                panic("impossible");
+            }
+
+            c = subVV(u[0L..len(qhatv)], u[0L..len(qhatv)], qhatv);
+            if (c > 0L)
+            {
+                c = subVW(u[len(qhatv)..], u[len(qhatv)..], c);
+            }
+
+            if (c > 0L)
+            {
+                panic("impossible");
+            } 
+
+            // Done!
+            addAt(z, qhat.norm(), 0L);
+
+        });
 
         // Length of x in bits. x must be normalized.
         private static long bitLen(this nat x)
@@ -830,7 +1256,9 @@ namespace math
                 }
 
             }
+
             return 0L;
+
         }
 
         // trailingZeroBits returns the number of consecutive least significant zero
@@ -841,6 +1269,7 @@ namespace math
             {
                 return 0L;
             }
+
             ulong i = default;
             while (x[i] == 0L)
             {
@@ -850,11 +1279,31 @@ namespace math
  
             // x[i] != 0
             return i * _W + uint(bits.TrailingZeros(uint(x[i])));
+
+        }
+
+        private static bool same(nat x, nat y)
+        {
+            return len(x) == len(y) && len(x) > 0L && _addr_x[0L] == _addr_y[0L];
         }
 
         // z = x << s
         private static nat shl(this nat z, nat x, ulong s)
         {
+            if (s == 0L)
+            {
+                if (same(z, x))
+                {
+                    return z;
+                }
+
+                if (!alias(z, x))
+                {
+                    return z.set(x);
+                }
+
+            }
+
             var m = len(x);
             if (m == 0L)
             {
@@ -867,11 +1316,26 @@ namespace math
             z[0L..n - m].clear();
 
             return z.norm();
+
         }
 
         // z = x >> s
         private static nat shr(this nat z, nat x, ulong s)
         {
+            if (s == 0L)
+            {
+                if (same(z, x))
+                {
+                    return z;
+                }
+
+                if (!alias(z, x))
+                {
+                    return z.set(x);
+                }
+
+            }
+
             var m = len(x);
             var n = m - int(s / _W);
             if (n <= 0L)
@@ -883,6 +1347,7 @@ namespace math
             shrVU(z, x[m - n..], s % _W);
 
             return z.norm();
+
         }
 
         private static nat setBit(this nat z, nat x, ulong i, ulong b) => func((_, panic, __) =>
@@ -899,7 +1364,9 @@ namespace math
                     { 
                         // no need to grow
                         return z;
+
                     }
+
                     z[j] &= m;
                     return z.norm();
                     break;
@@ -913,6 +1380,7 @@ namespace math
                     {
                         z = z.make(n);
                     }
+
                     copy(z, x);
                     z[j] |= m; 
                     // no need to normalize
@@ -920,6 +1388,7 @@ namespace math
                     break;
             }
             panic("set bit is not 0 or 1");
+
         });
 
         // bit returns the value of the i'th bit, with lsb == bit 0.
@@ -932,6 +1401,7 @@ namespace math
             } 
             // 0 <= j < len(x)
             return uint(x[j] >> (int)((i % _W)) & 1L);
+
         }
 
         // sticky returns 1 if there's a 1 bit within the
@@ -945,7 +1415,9 @@ namespace math
                 {
                     return 0L;
                 }
+
                 return 1L;
+
             } 
             // 0 <= j < len(x)
             foreach (var (_, x) in x[..j])
@@ -954,12 +1426,15 @@ namespace math
                 {
                     return 1L;
                 }
+
             }
             if (x[j] << (int)((_W - i % _W)) != 0L)
             {
                 return 1L;
             }
+
             return 0L;
+
         }
 
         private static nat and(this nat z, nat x, nat y)
@@ -979,6 +1454,7 @@ namespace math
 
 
             return z.norm();
+
         }
 
         private static nat andNot(this nat z, nat x, nat y)
@@ -999,6 +1475,7 @@ namespace math
             copy(z[n..m], x[n..m]);
 
             return z.norm();
+
         }
 
         private static nat or(this nat z, nat x, nat y)
@@ -1011,6 +1488,7 @@ namespace math
                 n = m;
                 m = n;
                 s = y;
+
             } 
             // m >= n
             z = z.make(m);
@@ -1022,6 +1500,7 @@ namespace math
             copy(z[n..m], s[n..m]);
 
             return z.norm();
+
         }
 
         private static nat xor(this nat z, nat x, nat y)
@@ -1034,6 +1513,7 @@ namespace math
                 n = m;
                 m = n;
                 s = y;
+
             } 
             // m >= n
             z = z.make(m);
@@ -1045,6 +1525,7 @@ namespace math
             copy(z[n..m], s[n..m]);
 
             return z.norm();
+
         }
 
         // greaterThan reports whether (x1<<_W + x2) > (y1<<_W + y2)
@@ -1055,21 +1536,27 @@ namespace math
 
         // modW returns x % d.
         private static Word modW(this nat x, Word d)
-        { 
+        {
+            Word r = default;
+ 
             // TODO(agl): we don't actually need to store the q value.
             nat q = default;
             q = q.make(len(x));
             return divWVW(q, 0L, x, d);
+
         }
 
         // random creates a random integer in [0..limit), using the space in z if
         // possible. n is the bit length of limit.
-        private static nat random(this nat z, ref rand.Rand _rand, nat limit, long n) => func(_rand, (ref rand.Rand rand, Defer _, Panic panic, Recover __) =>
+        private static nat random(this nat z, ptr<rand.Rand> _addr_rand, nat limit, long n) => func((_, panic, __) =>
         {
+            ref rand.Rand rand = ref _addr_rand.val;
+
             if (alias(z, limit))
             {
                 z = null; // z is an alias for limit - cannot reuse
             }
+
             z = z.make(len(limit));
 
             var bitLengthOfMSW = uint(n % _W);
@@ -1077,6 +1564,7 @@ namespace math
             {
                 bitLengthOfMSW = _W;
             }
+
             var mask = Word((1L << (int)(bitLengthOfMSW)) - 1L);
 
             while (true)
@@ -1118,10 +1606,12 @@ namespace math
                 {
                     break;
                 }
+
             }
 
 
             return z.norm();
+
         });
 
         // If m != 0 (i.e., len(m) != 0), expNN sets z to x**y mod m;
@@ -1132,6 +1622,7 @@ namespace math
             { 
                 // We cannot allow in-place modification of x or y.
                 z = null;
+
             } 
 
             // x**y mod 1 == 0
@@ -1151,7 +1642,7 @@ namespace math
             // x**1 mod m == x mod m
             if (len(y) == 1L && y[0L] == 1L && len(m) != 0L)
             {
-                _, z = z.div(z, x, m);
+                _, z = nat(null).div(z, x, m);
                 return z;
             } 
             // y > 1
@@ -1159,7 +1650,9 @@ namespace math
             { 
                 // We likely end up being as long as the modulus.
                 z = z.make(len(m));
+
             }
+
             z = z.set(x); 
 
             // If the base is non-trivial and the exponent is large, we use
@@ -1173,14 +1666,17 @@ namespace math
                 {
                     return z.expNNMontgomery(x, y, m);
                 }
+
                 return z.expNNWindowed(x, y, m);
+
             }
+
             var v = y[len(y) - 1L]; // v > 0 because y is normalized and y > 0
             var shift = nlz(v) + 1L;
             v <<= shift;
             nat q = default;
 
-            const long mask = 1L << (int)((_W - 1L)); 
+            const long mask = (long)1L << (int)((_W - 1L)); 
 
             // We walk through the bits of the exponent one by one. Each time we
             // see a bit, we square, thus doubling the power. If the bit is a one,
@@ -1211,7 +1707,9 @@ namespace math
                         zz = zz.mul(z, x);
                         zz = z;
                         z = zz;
+
                     }
+
                     if (len(m) != 0L)
                     {
                         zz, r = zz.div(r, z, m);
@@ -1219,8 +1717,11 @@ namespace math
                         r = z;
                         q = zz;
                         z = r;
+
                     }
+
                     v <<= 1L;
+
                 }
 
 
@@ -1245,7 +1746,9 @@ namespace math
                             zz = zz.mul(z, x);
                             zz = z;
                             z = zz;
+
                         }
+
                         if (len(m) != 0L)
                         {
                             zz, r = zz.div(r, z, m);
@@ -1253,17 +1756,22 @@ namespace math
                             r = z;
                             q = zz;
                             z = r;
+
                         }
+
                         v <<= 1L;
+
                     }
 
 
                     j = j__prev2;
                 }
+
             }
 
 
             return z.norm();
+
         }
 
         // expNNWindowed calculates x**y mod m using a fixed, 4-bit window.
@@ -1275,7 +1783,7 @@ namespace math
 
 
 
-            const long n = 4L; 
+            const long n = (long)4L; 
             // powers[i] contains x^i.
  
             // powers[i] contains x^i.
@@ -1289,17 +1797,17 @@ namespace math
 
                 while (i < 1L << (int)(n))
                 {
-                    var p2 = ref powers[i / 2L];
-                    var p = ref powers[i];
-                    var p1 = ref powers[i + 1L];
-                    p.Value = p.sqr(p2.Value);
-                    zz, r = zz.div(r, p.Value, m);
-                    p.Value = r;
-                    r = p.Value;
-                    p1.Value = p1.mul(p.Value, x);
-                    zz, r = zz.div(r, p1.Value, m);
-                    p1.Value = r;
-                    r = p1.Value;
+                    var p2 = _addr_powers[i / 2L];
+                    var p = _addr_powers[i];
+                    var p1 = _addr_powers[i + 1L];
+                    p.val = p.sqr(p2.val);
+                    zz, r = zz.div(r, p.val, m);
+                    p.val = r;
+                    r = p.val;
+                    p1.val = p1.mul(p.val, x);
+                    zz, r = zz.div(r, p1.val, m);
+                    p1.val = r;
+                    r = p1.val;
                     i += 2L;
                 }
 
@@ -1354,6 +1862,7 @@ namespace math
                                 r = z;
                             j += n;
                             }
+
                             zz = zz.mul(z, powers[yi >> (int)((_W - n))]);
                             zz = z;
                             z = zz;
@@ -1362,9 +1871,11 @@ namespace math
                             r = z;
 
                             yi <<= n;
+
                         }
 
                     }
+
                 }
 
 
@@ -1372,6 +1883,7 @@ namespace math
             }
 
             return z.norm();
+
         }
 
         // expNNMontgomery calculates x**y mod m using a fixed, 4-bit window.
@@ -1387,6 +1899,7 @@ namespace math
                 _, x = nat(null).div(null, x, m); 
                 // Note: now len(x) <= numWords, not guaranteed ==.
             }
+
             if (len(x) < numWords)
             {
                 var rr = make(nat, numWords);
@@ -1419,7 +1932,7 @@ namespace math
             // RR = 2**(2*_W*len(m)) mod m
             var RR = nat(null).setWord(1L);
             var zz = nat(null).shl(RR, uint(2L * numWords * _W));
-            _, RR = RR.div(RR, zz, m);
+            _, RR = nat(null).div(RR, zz, m);
             if (len(RR) < numWords)
             {
                 zz = zz.make(numWords);
@@ -1430,7 +1943,7 @@ namespace math
             var one = make(nat, numWords);
             one[0L] = 1L;
 
-            const long n = 4L; 
+            const long n = (long)4L; 
             // powers[i] contains x^i
  
             // powers[i] contains x^i
@@ -1477,13 +1990,16 @@ namespace math
                                 z = z.montgomery(zz, zz, m, k0, numWords);
                             j += n;
                             }
+
                             zz = zz.montgomery(z, powers[yi >> (int)((_W - n))], m, k0, numWords);
                             z = zz;
                             zz = z;
                             yi <<= n;
+
                         }
 
                     }
+
                 } 
                 // convert to regular number
 
@@ -1509,34 +2025,67 @@ namespace math
                 {
                     _, zz = nat(null).div(null, zz, m);
                 }
+
             }
+
             return zz.norm();
+
         }
 
         // bytes writes the value of z into buf using big-endian encoding.
-        // len(buf) must be >= len(z)*_S. The value of z is encoded in the
-        // slice buf[i:]. The number i of unused bytes at the beginning of
-        // buf is returned as result.
-        private static long bytes(this nat z, slice<byte> buf)
+        // The value of z is encoded in the slice buf[i:]. If the value of z
+        // cannot be represented in buf, bytes panics. The number i of unused
+        // bytes at the beginning of buf is returned as result.
+        private static long bytes(this nat z, slice<byte> buf) => func((_, panic, __) =>
         {
+            long i = default;
+
             i = len(buf);
             foreach (var (_, d) in z)
             {
                 for (long j = 0L; j < _S; j++)
                 {
                     i--;
-                    buf[i] = byte(d);
+                    if (i >= 0L)
+                    {
+                        buf[i] = byte(d);
+                    }
+                    else if (byte(d) != 0L)
+                    {
+                        panic("math/big: buffer too small to fit value");
+                    }
+
                     d >>= 8L;
+
                 }
 
+
             }
+            if (i < 0L)
+            {
+                i = 0L;
+            }
+
             while (i < len(buf) && buf[i] == 0L)
             {
                 i++;
             }
 
 
-            return;
+            return ;
+
+        });
+
+        // bigEndianWord returns the contents of buf interpreted as a big-endian encoded Word value.
+        private static Word bigEndianWord(slice<byte> buf)
+        {
+            if (_W == 64L)
+            {
+                return Word(binary.BigEndian.Uint64(buf));
+            }
+
+            return Word(binary.BigEndian.Uint32(buf));
+
         }
 
         // setBytes interprets buf as the bytes of a big-endian unsigned
@@ -1545,28 +2094,33 @@ namespace math
         {
             z = z.make((len(buf) + _S - 1L) / _S);
 
-            long k = 0L;
-            var s = uint(0L);
-            Word d = default;
-            for (var i = len(buf); i > 0L; i--)
+            var i = len(buf);
+            for (long k = 0L; i >= _S; k++)
             {
-                d |= Word(buf[i - 1L]) << (int)(s);
-                s += 8L;
+                z[k] = bigEndianWord(buf[i - _S..i]);
+                i -= _S;
+            }
 
-                if (s == _S * 8L)
+            if (i > 0L)
+            {
+                Word d = default;
                 {
-                    z[k] = d;
-                    k++;
-                    s = 0L;
-                    d = 0L;
+                    var s = uint(0L);
+
+                    while (i > 0L)
+                    {
+                        d |= Word(buf[i - 1L]) << (int)(s);
+                        i--;
+                        s += 8L;
+                    }
+
                 }
+                z[len(z) - 1L] = d;
+
             }
 
-            if (k < len(z))
-            {
-                z[k] = d;
-            }
             return z.norm();
+
         }
 
         // sqrt sets z = ⌊√x⌋
@@ -1576,6 +2130,7 @@ namespace math
             {
                 return z.set(x);
             }
+
             if (alias(z, x))
             {
                 z = null;
@@ -1590,7 +2145,7 @@ namespace math
 
             z1 = z;
             z1 = z1.setUint64(1L);
-            z1 = z1.shl(z1, uint(x.bitLen() / 2L + 1L)); // must be ≥ √x
+            z1 = z1.shl(z1, uint(x.bitLen() + 1L) / 2L); // must be ≥ √x
             for (long n = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; n++)
             {
                 z2, _ = z2.div(null, x, z1);
@@ -1604,11 +2159,16 @@ namespace math
                     {
                         return z1;
                     }
+
                     return z.set(z1);
+
                 }
+
                 z1 = z2;
                 z2 = z1;
+
             }
+
 
         }
     }

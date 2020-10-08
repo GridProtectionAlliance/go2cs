@@ -13,12 +13,13 @@
 // limitations under the License.
 
 // Package graph collects a set of samples into a directed graph.
-// package graph -- go2cs converted at 2020 August 29 10:05:40 UTC
+// package graph -- go2cs converted at 2020 October 08 04:43:15 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/graph" ==> using graph = go.cmd.vendor.github.com.google.pprof.@internal.graph_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\graph\graph.go
 using fmt = go.fmt_package;
 using math = go.math_package;
 using filepath = go.path.filepath_package;
+using regexp = go.regexp_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -37,6 +38,11 @@ namespace @internal
 {
     public static partial class graph_package
     {
+ 
+        // Removes package name and method arugments for Java method names.
+        // See tests for examples.
+        private static var javaRegExp = regexp.MustCompile("^(?:[a-z]\\w*\\.)*([A-Z][\\w\\$]*\\.(?:<init>|[a-z][\\w\\$]*(?:\\$\\d+)?))(?:(?:\\()|$)");        private static var goRegExp = regexp.MustCompile("^(?:[\\w\\-\\.]+\\/)+(.+)");        private static var cppRegExp = regexp.MustCompile("^(?:[_a-zA-Z]\\w*::)+(_*[A-Z]\\w*::~?[_a-zA-Z]\\w*(?:<.*>)?)");        private static var cppAnonymousPrefixRegExp = regexp.MustCompile("^\\(anonymous namespace\\)::");
+
         // Graph summarizes a performance profile into a format that is
         // suitable for visualization.
         public partial struct Graph
@@ -60,7 +66,7 @@ namespace @internal
         }
 
         // Nodes is an ordered collection of graph nodes.
-        public partial struct Nodes // : slice<ref Node>
+        public partial struct Nodes // : slice<ptr<Node>>
         {
         }
 
@@ -94,41 +100,56 @@ namespace @internal
 
         // FlatValue returns the exclusive value for this node, computing the
         // mean if a divisor is available.
-        private static long FlatValue(this ref Node n)
+        private static long FlatValue(this ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
             if (n.FlatDiv == 0L)
             {
                 return n.Flat;
             }
+
             return n.Flat / n.FlatDiv;
+
         }
 
         // CumValue returns the inclusive value for this node, computing the
         // mean if a divisor is available.
-        private static long CumValue(this ref Node n)
+        private static long CumValue(this ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
             if (n.CumDiv == 0L)
             {
                 return n.Cum;
             }
+
             return n.Cum / n.CumDiv;
+
         }
 
         // AddToEdge increases the weight of an edge between two nodes. If
         // there isn't such an edge one is created.
-        private static void AddToEdge(this ref Node n, ref Node to, long v, bool residual, bool inline)
+        private static void AddToEdge(this ptr<Node> _addr_n, ptr<Node> _addr_to, long v, bool residual, bool inline)
         {
+            ref Node n = ref _addr_n.val;
+            ref Node to = ref _addr_to.val;
+
             n.AddToEdgeDiv(to, 0L, v, residual, inline);
         }
 
         // AddToEdgeDiv increases the weight of an edge between two nodes. If
         // there isn't such an edge one is created.
-        private static void AddToEdgeDiv(this ref Node _n, ref Node _to, long dv, long v, bool residual, bool inline) => func(_n, _to, (ref Node n, ref Node to, Defer _, Panic panic, Recover __) =>
+        private static void AddToEdgeDiv(this ptr<Node> _addr_n, ptr<Node> _addr_to, long dv, long v, bool residual, bool inline) => func((_, panic, __) =>
         {
+            ref Node n = ref _addr_n.val;
+            ref Node to = ref _addr_to.val;
+
             if (n.Out[to] != to.In[n])
             {
-                panic(fmt.Errorf("asymmetric edges %v %v", n.Value, to.Value));
+                panic(fmt.Errorf("asymmetric edges %v %v", n.val, to));
             }
+
             {
                 var e = n.Out[to];
 
@@ -140,18 +161,23 @@ namespace @internal
                     {
                         e.Residual = true;
                     }
+
                     if (!inline)
                     {
                         e.Inline = false;
                     }
-                    return;
+
+                    return ;
+
                 }
 
             }
 
-            Edge info = ref new Edge(Src:n,Dest:to,WeightDiv:dv,Weight:v,Residual:residual,Inline:inline);
+
+            ptr<Edge> info = addr(new Edge(Src:n,Dest:to,WeightDiv:dv,Weight:v,Residual:residual,Inline:inline));
             n.Out[to] = info;
             to.In[n] = info;
+
         });
 
         // NodeInfo contains the attributes for a node.
@@ -167,19 +193,24 @@ namespace @internal
         }
 
         // PrintableName calls the Node's Formatter function with a single space separator.
-        private static @string PrintableName(this ref NodeInfo i)
+        private static @string PrintableName(this ptr<NodeInfo> _addr_i)
         {
+            ref NodeInfo i = ref _addr_i.val;
+
             return strings.Join(i.NameComponents(), " ");
         }
 
         // NameComponents returns the components of the printable name to be used for a node.
-        private static slice<@string> NameComponents(this ref NodeInfo i)
+        private static slice<@string> NameComponents(this ptr<NodeInfo> _addr_i)
         {
+            ref NodeInfo i = ref _addr_i.val;
+
             slice<@string> name = default;
             if (i.Address != 0L)
             {
                 name = append(name, fmt.Sprintf("%016x", i.Address));
             }
+
             {
                 var fun = i.Name;
 
@@ -189,6 +220,7 @@ namespace @internal
                 }
 
             }
+
 
 
             if (i.Lineno != 0L) 
@@ -204,11 +236,12 @@ namespace @internal
                 // Do not leave it empty if there is no information at all.
                 name = append(name, "<unknown>");
                         return name;
+
         }
 
         // NodeMap maps from a node info struct to a node. It is used to merge
         // report entries with the same info.
-        public partial struct NodeMap // : map<NodeInfo, ref Node>
+        public partial struct NodeMap // : map<NodeInfo, ptr<Node>>
         {
         }
 
@@ -222,17 +255,17 @@ namespace @internal
         // works as a unique identifier; however, in a tree multiple nodes may share
         // identical NodeInfos. A *Node does uniquely identify a node so we can use that
         // instead. Though a *Node also uniquely identifies a node in a graph,
-        // currently, during trimming, graphs are rebult from scratch using only the
+        // currently, during trimming, graphs are rebuilt from scratch using only the
         // NodeSet, so there would not be the required context of the initial graph to
         // allow for the use of *Node.
-        public partial struct NodePtrSet // : map<ref Node, bool>
+        public partial struct NodePtrSet // : map<ptr<Node>, bool>
         {
         }
 
         // FindOrInsertNode takes the info for a node and either returns a matching node
         // from the node map if one exists, or adds one to the map if one does not.
         // If kept is non-nil, nodes are only added if they can be located on it.
-        public static ref Node FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet kept)
+        public static ptr<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet kept)
         {
             if (kept != null)
             {
@@ -241,11 +274,13 @@ namespace @internal
 
                     if (!ok)
                     {
-                        return null;
+                        return _addr_null!;
                     }
 
                 }
+
             }
+
             {
                 var n__prev1 = n;
 
@@ -253,31 +288,34 @@ namespace @internal
 
                 if (ok)
                 {
-                    return n;
+                    return _addr_n!;
                 }
 
                 n = n__prev1;
 
             }
 
-            Node n = ref new Node(Info:info,In:make(EdgeMap),Out:make(EdgeMap),LabelTags:make(TagMap),NumericTags:make(map[string]TagMap),);
+
+            ptr<Node> n = addr(new Node(Info:info,In:make(EdgeMap),Out:make(EdgeMap),LabelTags:make(TagMap),NumericTags:make(map[string]TagMap),));
             nm[info] = n;
             if (info.Address == 0L && info.Lineno == 0L)
             { 
                 // This node represents the whole function, so point Function
                 // back to itself.
                 n.Function = n;
-                return n;
+                return _addr_n!;
+
             } 
             // Find a node that represents the whole function.
             info.Address = 0L;
             info.Lineno = 0L;
             n.Function = nm.FindOrInsertNode(info, null);
-            return n;
+            return _addr_n!;
+
         }
 
         // EdgeMap is used to represent the incoming/outgoing edges from a node.
-        public partial struct EdgeMap // : map<ref Node, ref Edge>
+        public partial struct EdgeMap // : map<ptr<Node>, ptr<Edge>>
         {
         }
 
@@ -296,13 +334,17 @@ namespace @internal
 
         // WeightValue returns the weight value for this edge, normalizing if a
         // divisor is available.
-        private static long WeightValue(this ref Edge e)
+        private static long WeightValue(this ptr<Edge> _addr_e)
         {
+            ref Edge e = ref _addr_e.val;
+
             if (e.WeightDiv == 0L)
             {
                 return e.Weight;
             }
+
             return e.Weight / e.WeightDiv;
+
         }
 
         // Tag represent sample annotations
@@ -319,33 +361,41 @@ namespace @internal
 
         // FlatValue returns the exclusive value for this tag, computing the
         // mean if a divisor is available.
-        private static long FlatValue(this ref Tag t)
+        private static long FlatValue(this ptr<Tag> _addr_t)
         {
+            ref Tag t = ref _addr_t.val;
+
             if (t.FlatDiv == 0L)
             {
                 return t.Flat;
             }
+
             return t.Flat / t.FlatDiv;
+
         }
 
         // CumValue returns the inclusive value for this tag, computing the
         // mean if a divisor is available.
-        private static long CumValue(this ref Tag t)
+        private static long CumValue(this ptr<Tag> _addr_t)
         {
+            ref Tag t = ref _addr_t.val;
+
             if (t.CumDiv == 0L)
             {
                 return t.Cum;
             }
+
             return t.Cum / t.CumDiv;
+
         }
 
         // TagMap is a collection of tags, classified by their name.
-        public partial struct TagMap // : map<@string, ref Tag>
+        public partial struct TagMap // : map<@string, ptr<Tag>>
         {
         }
 
         // SortTags sorts a slice of tags based on their weight.
-        public static slice<ref Tag> SortTags(slice<ref Tag> t, bool flat)
+        public static slice<ptr<Tag>> SortTags(slice<ptr<Tag>> t, bool flat)
         {
             tags ts = new tags(t,flat);
             sort.Sort(ts);
@@ -353,22 +403,32 @@ namespace @internal
         }
 
         // New summarizes performance data from a profile into a graph.
-        public static ref Graph New(ref profile.Profile prof, ref Options o)
+        public static ptr<Graph> New(ptr<profile.Profile> _addr_prof, ptr<Options> _addr_o)
         {
+            ref profile.Profile prof = ref _addr_prof.val;
+            ref Options o = ref _addr_o.val;
+
             if (o.CallTree)
             {
-                return newTree(prof, o);
+                return _addr_newTree(_addr_prof, _addr_o)!;
             }
-            var (g, _) = newGraph(prof, o);
-            return g;
+
+            var (g, _) = newGraph(_addr_prof, _addr_o);
+            return _addr_g!;
+
         }
 
         // newGraph computes a graph from a profile. It returns the graph, and
         // a map from the profile location indices to the corresponding graph
         // nodes.
-        private static (ref Graph, map<ulong, Nodes>) newGraph(ref profile.Profile prof, ref Options o)
+        private static (ptr<Graph>, map<ulong, Nodes>) newGraph(ptr<profile.Profile> _addr_prof, ptr<Options> _addr_o)
         {
-            var (nodes, locationMap) = CreateNodes(prof, o);
+            ptr<Graph> _p0 = default!;
+            map<ulong, Nodes> _p0 = default;
+            ref profile.Profile prof = ref _addr_prof.val;
+            ref Options o = ref _addr_o.val;
+
+            var (nodes, locationMap) = CreateNodes(_addr_prof, _addr_o);
             foreach (var (_, sample) in prof.Sample)
             {
                 long w = default;                long dw = default;
@@ -378,17 +438,19 @@ namespace @internal
                 {
                     dw = o.SampleMeanDivisor(sample.Value);
                 }
+
                 if (dw == 0L && w == 0L)
                 {
                     continue;
                 }
-                var seenNode = make_map<ref Node, bool>(len(sample.Location));
+
+                var seenNode = make_map<ptr<Node>, bool>(len(sample.Location));
                 var seenEdge = make_map<nodePair, bool>(len(sample.Location));
-                ref Node parent = default; 
+                ptr<Node> parent; 
                 // A residual edge goes over one or more nodes that were not kept.
                 var residual = false;
 
-                var labels = joinLabels(sample); 
+                var labels = joinLabels(_addr_sample); 
                 // Group the sample frames, based on a global map.
                 for (var i = len(sample.Location) - 1L; i >= 0L; i--)
                 {
@@ -425,9 +487,12 @@ namespace @internal
                             }
 
                         }
+
                         parent = n;
                         residual = false;
+
                     }
+
 
                 }
 
@@ -435,12 +500,15 @@ namespace @internal
                 { 
                     // Add flat weight to leaf node.
                     parent.addSample(dw, w, labels, sample.NumLabel, sample.NumUnit, o.FormatTag, true);
+
                 }
+
             }
-            return (selectNodesForGraph(nodes, o.DropNegative), locationMap);
+            return (_addr_selectNodesForGraph(nodes, o.DropNegative)!, locationMap);
+
         }
 
-        private static ref Graph selectNodesForGraph(Nodes nodes, bool dropNegative)
+        private static ptr<Graph> selectNodesForGraph(Nodes nodes, bool dropNegative)
         { 
             // Collect nodes into a graph.
             var gNodes = make(Nodes, 0L, len(nodes));
@@ -450,17 +518,22 @@ namespace @internal
                 {
                     continue;
                 }
+
                 if (n.Cum == 0L && n.Flat == 0L)
                 {
                     continue;
                 }
-                if (dropNegative && isNegative(n))
+
+                if (dropNegative && isNegative(_addr_n))
                 {
                     continue;
                 }
+
                 gNodes = append(gNodes, n);
+
             }
-            return ref new Graph(gNodes);
+            return addr(new Graph(gNodes));
+
         }
 
         private partial struct nodePair
@@ -469,9 +542,13 @@ namespace @internal
             public ptr<Node> dest;
         }
 
-        private static ref Graph newTree(ref profile.Profile prof, ref Options o)
+        private static ptr<Graph> newTree(ptr<profile.Profile> _addr_prof, ptr<Options> _addr_o)
         {
-            var parentNodeMap = make_map<ref Node, NodeMap>(len(prof.Sample));
+            ptr<Graph> g = default!;
+            ref profile.Profile prof = ref _addr_prof.val;
+            ref Options o = ref _addr_o.val;
+
+            var parentNodeMap = make_map<ptr<Node>, NodeMap>(len(prof.Sample));
             foreach (var (_, sample) in prof.Sample)
             {
                 long w = default;                long dw = default;
@@ -481,12 +558,14 @@ namespace @internal
                 {
                     dw = o.SampleMeanDivisor(sample.Value);
                 }
+
                 if (dw == 0L && w == 0L)
                 {
                     continue;
                 }
-                ref Node parent = default;
-                var labels = joinLabels(sample); 
+
+                ptr<Node> parent;
+                var labels = joinLabels(_addr_sample); 
                 // Group the sample frames, based on a per-node map.
                 for (var i = len(sample.Location) - 1L; i >= 0L; i--)
                 {
@@ -496,6 +575,7 @@ namespace @internal
                     {
                         lines = new slice<profile.Line>(new profile.Line[] { {} }); // Create empty line to include location info.
                     }
+
                     for (var lidx = len(lines) - 1L; lidx >= 0L; lidx--)
                     {
                         var nodeMap = parentNodeMap[parent];
@@ -504,18 +584,23 @@ namespace @internal
                             nodeMap = make(NodeMap);
                             parentNodeMap[parent] = nodeMap;
                         }
+
                         var n = nodeMap.findOrInsertLine(l, lines[lidx], o);
                         if (n == null)
                         {
                             continue;
                         }
+
                         n.addSample(dw, w, labels, sample.NumLabel, sample.NumUnit, o.FormatTag, false);
                         if (parent != null)
                         {
                             parent.AddToEdgeDiv(n, dw, w, false, lidx != len(lines) - 1L);
                         }
+
                         parent = n;
+
                     }
+
 
                 }
 
@@ -523,19 +608,44 @@ namespace @internal
                 {
                     parent.addSample(dw, w, labels, sample.NumLabel, sample.NumUnit, o.FormatTag, true);
                 }
+
             }
             var nodes = make(Nodes, len(prof.Location));
             foreach (var (_, nm) in parentNodeMap)
             {
                 nodes = append(nodes, nm.nodes());
             }
-            return selectNodesForGraph(nodes, o.DropNegative);
+            return _addr_selectNodesForGraph(nodes, o.DropNegative)!;
+
+        }
+
+        // ShortenFunctionName returns a shortened version of a function's name.
+        public static @string ShortenFunctionName(@string f)
+        {
+            f = cppAnonymousPrefixRegExp.ReplaceAllString(f, "");
+            foreach (var (_, re) in new slice<ptr<regexp.Regexp>>(new ptr<regexp.Regexp>[] { goRegExp, javaRegExp, cppRegExp }))
+            {
+                {
+                    var matches = re.FindStringSubmatch(f);
+
+                    if (len(matches) >= 2L)
+                    {
+                        return strings.Join(matches[1L..], "");
+                    }
+
+                }
+
+            }
+            return f;
+
         }
 
         // TrimTree trims a Graph in forest form, keeping only the nodes in kept. This
         // will not work correctly if even a single node has multiple parents.
-        private static void TrimTree(this ref Graph _g, NodePtrSet kept) => func(_g, (ref Graph g, Defer _, Panic panic, Recover __) =>
-        { 
+        private static void TrimTree(this ptr<Graph> _addr_g, NodePtrSet kept) => func((_, panic, __) =>
+        {
+            ref Graph g = ref _addr_g.val;
+ 
             // Creates a new list of nodes
             var oldNodes = g.Nodes;
             g.Nodes = make(Nodes, 0L, len(kept));
@@ -580,6 +690,7 @@ namespace @internal
                     }
 
                     continue;
+
                 } 
 
                 // Get the parent. This works since at this point cur.In must contain only
@@ -588,7 +699,8 @@ namespace @internal
                 {
                     panic("Get parent assertion failed. cur.In expected to be of length 1.");
                 }
-                ref Node parent = default;
+
+                ptr<Node> parent;
                 foreach (var (_, edge) in cur.In)
                 {
                     parent = edge.Src;
@@ -617,21 +729,25 @@ namespace @internal
                         // current node to the child are both inline, then this resulting residual
                         // edge should also be inline
                         outEdge.Inline = parentEdgeInline && outEdge.Inline;
+
                     }
 
                     outEdge = outEdge__prev2;
                 }
-
             }
             g.RemoveRedundantEdges();
+
         });
 
-        private static @string joinLabels(ref profile.Sample s)
+        private static @string joinLabels(ptr<profile.Sample> _addr_s)
         {
+            ref profile.Sample s = ref _addr_s.val;
+
             if (len(s.Label) == 0L)
             {
                 return "";
             }
+
             slice<@string> labels = default;
             foreach (var (key, vals) in s.Label)
             {
@@ -639,15 +755,19 @@ namespace @internal
                 {
                     labels = append(labels, key + ":" + v);
                 }
+
             }
             sort.Strings(labels);
             return strings.Join(labels, "\\n");
+
         }
 
         // isNegative returns true if the node is considered as "negative" for the
         // purposes of drop_negative.
-        private static bool isNegative(ref Node n)
+        private static bool isNegative(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
 
             if (n.Flat < 0L) 
                 return true;
@@ -655,15 +775,19 @@ namespace @internal
                 return true;
             else 
                 return false;
-                    }
+            
+        }
 
         // CreateNodes creates graph nodes for all locations in a profile. It
         // returns set of all nodes, plus a mapping of each location to the
-        // set of corresponding nodes (one per location.Line). If kept is
-        // non-nil, only nodes in that set are included; nodes that do not
-        // match are represented as a nil.
-        public static (Nodes, map<ulong, Nodes>) CreateNodes(ref profile.Profile prof, ref Options o)
+        // set of corresponding nodes (one per location.Line).
+        public static (Nodes, map<ulong, Nodes>) CreateNodes(ptr<profile.Profile> _addr_prof, ptr<Options> _addr_o)
         {
+            Nodes _p0 = default;
+            map<ulong, Nodes> _p0 = default;
+            ref profile.Profile prof = ref _addr_prof.val;
+            ref Options o = ref _addr_o.val;
+
             var locations = make_map<ulong, Nodes>(len(prof.Location));
             var nm = make(NodeMap, len(prof.Location));
             foreach (var (_, l) in prof.Location)
@@ -673,14 +797,17 @@ namespace @internal
                 {
                     lines = new slice<profile.Line>(new profile.Line[] { {} }); // Create empty line to include location info.
                 }
+
                 var nodes = make(Nodes, len(lines));
                 foreach (var (ln) in lines)
                 {
                     nodes[ln] = nm.findOrInsertLine(l, lines[ln], o);
                 }
                 locations[l.ID] = nodes;
+
             }
             return (nm.nodes(), locations);
+
         }
 
         public static Nodes nodes(this NodeMap nm)
@@ -691,10 +818,14 @@ namespace @internal
                 nodes = append(nodes, n);
             }
             return nodes;
+
         }
 
-        public static ref Node findOrInsertLine(this NodeMap nm, ref profile.Location l, profile.Line li, ref Options o)
+        public static ptr<Node> findOrInsertLine(this NodeMap nm, ptr<profile.Location> _addr_l, profile.Line li, ptr<Options> _addr_o)
         {
+            ref profile.Location l = ref _addr_l.val;
+            ref Options o = ref _addr_o.val;
+
             @string objfile = default;
             {
                 var m = l.Mapping;
@@ -706,25 +837,32 @@ namespace @internal
 
             }
 
+
             {
-                var ni = nodeInfo(l, li, objfile, o);
+                var ni = nodeInfo(_addr_l, li, objfile, _addr_o);
 
                 if (ni != null)
                 {
-                    return nm.FindOrInsertNode(ni.Value, o.KeptNodes);
+                    return _addr_nm.FindOrInsertNode(ni.val, o.KeptNodes)!;
                 }
 
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
-        private static ref NodeInfo nodeInfo(ref profile.Location l, profile.Line line, @string objfile, ref Options o)
+        private static ptr<NodeInfo> nodeInfo(ptr<profile.Location> _addr_l, profile.Line line, @string objfile, ptr<Options> _addr_o)
         {
+            ref profile.Location l = ref _addr_l.val;
+            ref Options o = ref _addr_o.val;
+
             if (line.Function == null)
             {
-                return ref new NodeInfo(Address:l.Address,Objfile:objfile);
+                return addr(new NodeInfo(Address:l.Address,Objfile:objfile));
             }
-            NodeInfo ni = ref new NodeInfo(Address:l.Address,Lineno:int(line.Line),Name:line.Function.Name,);
+
+            ptr<NodeInfo> ni = addr(new NodeInfo(Address:l.Address,Lineno:int(line.Line),Name:line.Function.Name,));
             {
                 var fname = line.Function.Filename;
 
@@ -734,21 +872,25 @@ namespace @internal
                 }
 
             }
-            if (o.ObjNames)
-            {
-                ni.Objfile = objfile;
-                ni.StartLine = int(line.Function.StartLine);
-            }
+
             if (o.OrigFnNames)
             {
                 ni.OrigName = line.Function.SystemName;
             }
-            return ni;
+
+            if (o.ObjNames || (ni.Name == "" && ni.OrigName == ""))
+            {
+                ni.Objfile = objfile;
+                ni.StartLine = int(line.Function.StartLine);
+            }
+
+            return _addr_ni!;
+
         }
 
         private partial struct tags
         {
-            public slice<ref Tag> t;
+            public slice<ptr<Tag>> t;
             public bool flat;
         }
 
@@ -760,7 +902,6 @@ namespace @internal
         {
             t.t[i] = t.t[j];
             t.t[j] = t.t[i];
-
         }
         private static bool Less(this tags t, long i, long j)
         {
@@ -770,27 +911,37 @@ namespace @internal
                 {
                     return abs64(t.t[i].Cum) > abs64(t.t[j].Cum);
                 }
+
             }
+
             if (t.t[i].Flat != t.t[j].Flat)
             {
                 return abs64(t.t[i].Flat) > abs64(t.t[j].Flat);
             }
+
             return t.t[i].Name < t.t[j].Name;
+
         }
 
         // Sum adds the flat and cum values of a set of nodes.
         public static (long, long) Sum(this Nodes ns)
         {
+            long flat = default;
+            long cum = default;
+
             foreach (var (_, n) in ns)
             {
                 flat += n.Flat;
                 cum += n.Cum;
             }
-            return;
+            return ;
+
         }
 
-        private static @string addSample(this ref Node n, long dw, long w, @string labels, map<@string, slice<long>> numLabel, map<@string, slice<@string>> numUnit, Func<long, @string, @string> format, bool flat)
-        { 
+        private static @string addSample(this ptr<Node> _addr_n, long dw, long w, @string labels, map<@string, slice<long>> numLabel, map<@string, slice<@string>> numUnit, Func<long, @string, @string> format, bool flat)
+        {
+            ref Node n = ref _addr_n.val;
+ 
             // Update sample value
             if (flat)
             {
@@ -817,7 +968,9 @@ namespace @internal
                     t.CumDiv += dw;
                     t.Cum += w;
                 }
+
             }
+
             var numericTags = n.NumericTags[labels];
             if (numericTags == null)
             {
@@ -829,12 +982,13 @@ namespace @internal
             {
                 format = defaultLabelFormat;
             }
+
             foreach (var (k, nvals) in numLabel)
             {
                 var units = numUnit[k];
                 foreach (var (i, v) in nvals)
                 {
-                    t = default;
+                    t = ;
                     if (len(units) > 0L)
                     {
                         t = numericTags.findOrAddTag(format(v, units[i]), units[i], v);
@@ -843,6 +997,7 @@ namespace @internal
                     {
                         t = numericTags.findOrAddTag(format(v, k), k, v);
                     }
+
                     if (flat)
                     {
                         t.FlatDiv += dw;
@@ -853,8 +1008,11 @@ namespace @internal
                         t.CumDiv += dw;
                         t.Cum += w;
                     }
+
                 }
+
             }
+
         }
 
         private static @string defaultLabelFormat(long v, @string key)
@@ -862,23 +1020,27 @@ namespace @internal
             return strconv.FormatInt(v, 10L);
         }
 
-        public static ref Tag findOrAddTag(this TagMap m, @string label, @string unit, long value)
+        public static ptr<Tag> findOrAddTag(this TagMap m, @string label, @string unit, long value)
         {
             var l = m[label];
             if (l == null)
             {
-                l = ref new Tag(Name:label,Unit:unit,Value:value,);
+                l = addr(new Tag(Name:label,Unit:unit,Value:value,));
                 m[label] = l;
             }
-            return l;
+
+            return _addr_l!;
+
         }
 
         // String returns a text representation of a graph, for debugging purposes.
-        private static @string String(this ref Graph g)
+        private static @string String(this ptr<Graph> _addr_g)
         {
+            ref Graph g = ref _addr_g.val;
+
             slice<@string> s = default;
 
-            var nodeIndex = make_map<ref Node, long>(len(g.Nodes));
+            var nodeIndex = make_map<ptr<Node>, long>(len(g.Nodes));
 
             {
                 var i__prev1 = i;
@@ -917,6 +1079,7 @@ namespace @internal
                         out = append(out, nodeIndex[to.Dest]);
                     }
                     s = append(s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v ", i + 1L, name, n.Flat, n.Cum, in, out));
+
                 }
 
                 i = i__prev1;
@@ -924,19 +1087,24 @@ namespace @internal
             }
 
             return strings.Join(s, "\n");
+
         }
 
         // DiscardLowFrequencyNodes returns a set of the nodes at or over a
         // specific cum value cutoff.
-        private static NodeSet DiscardLowFrequencyNodes(this ref Graph g, long nodeCutoff)
+        private static NodeSet DiscardLowFrequencyNodes(this ptr<Graph> _addr_g, long nodeCutoff)
         {
+            ref Graph g = ref _addr_g.val;
+
             return makeNodeSet(g.Nodes, nodeCutoff);
         }
 
         // DiscardLowFrequencyNodePtrs returns a NodePtrSet of nodes at or over a
         // specific cum value cutoff.
-        private static NodePtrSet DiscardLowFrequencyNodePtrs(this ref Graph g, long nodeCutoff)
+        private static NodePtrSet DiscardLowFrequencyNodePtrs(this ptr<Graph> _addr_g, long nodeCutoff)
         {
+            ref Graph g = ref _addr_g.val;
+
             var cutNodes = getNodesAboveCumCutoff(g.Nodes, nodeCutoff);
             var kept = make(NodePtrSet, len(cutNodes));
             foreach (var (_, n) in cutNodes)
@@ -944,6 +1112,7 @@ namespace @internal
                 kept[n] = true;
             }
             return kept;
+
         }
 
         private static NodeSet makeNodeSet(Nodes nodes, long nodeCutoff)
@@ -955,6 +1124,7 @@ namespace @internal
                 kept[n.Info] = true;
             }
             return kept;
+
         }
 
         // getNodesAboveCumCutoff returns all the nodes which have a Cum value greater
@@ -968,15 +1138,20 @@ namespace @internal
                 {
                     continue;
                 }
+
                 cutoffNodes = append(cutoffNodes, n);
+
             }
             return cutoffNodes;
+
         }
 
         // TrimLowFrequencyTags removes tags that have less than
         // the specified weight.
-        private static void TrimLowFrequencyTags(this ref Graph g, long tagCutoff)
-        { 
+        private static void TrimLowFrequencyTags(this ptr<Graph> _addr_g, long tagCutoff)
+        {
+            ref Graph g = ref _addr_g.val;
+ 
             // Remove nodes with value <= total*nodeFraction
             foreach (var (_, n) in g.Nodes)
             {
@@ -985,7 +1160,9 @@ namespace @internal
                 {
                     n.NumericTags[s] = trimLowFreqTags(nt, tagCutoff);
                 }
+
             }
+
         }
 
         private static TagMap trimLowFreqTags(TagMap tags, long minValue)
@@ -997,14 +1174,18 @@ namespace @internal
                 {
                     kept[s] = t;
                 }
+
             }
             return kept;
+
         }
 
         // TrimLowFrequencyEdges removes edges that have less than
         // the specified weight. Returns the number of edges removed
-        private static long TrimLowFrequencyEdges(this ref Graph g, long edgeCutoff)
+        private static long TrimLowFrequencyEdges(this ptr<Graph> _addr_g, long edgeCutoff)
         {
+            ref Graph g = ref _addr_g.val;
+
             long droppedEdges = default;
             foreach (var (_, n) in g.Nodes)
             {
@@ -1016,14 +1197,19 @@ namespace @internal
                         delete(src.Out, n);
                         droppedEdges++;
                     }
+
                 }
+
             }
             return droppedEdges;
+
         }
 
         // SortNodes sorts the nodes in a graph based on a specific heuristic.
-        private static void SortNodes(this ref Graph g, bool cum, bool visualMode)
-        { 
+        private static void SortNodes(this ptr<Graph> _addr_g, bool cum, bool visualMode)
+        {
+            ref Graph g = ref _addr_g.val;
+ 
             // Sort nodes based on requested mode
 
             if (visualMode) 
@@ -1033,28 +1219,36 @@ namespace @internal
                 g.Nodes.Sort(CumNameOrder);
             else 
                 g.Nodes.Sort(FlatNameOrder);
-                    }
+            
+        }
 
         // SelectTopNodePtrs returns a set of the top maxNodes *Node in a graph.
-        private static NodePtrSet SelectTopNodePtrs(this ref Graph g, long maxNodes, bool visualMode)
+        private static NodePtrSet SelectTopNodePtrs(this ptr<Graph> _addr_g, long maxNodes, bool visualMode)
         {
+            ref Graph g = ref _addr_g.val;
+
             var set = make(NodePtrSet);
             foreach (var (_, node) in g.selectTopNodes(maxNodes, visualMode))
             {
                 set[node] = true;
             }
             return set;
+
         }
 
         // SelectTopNodes returns a set of the top maxNodes nodes in a graph.
-        private static NodeSet SelectTopNodes(this ref Graph g, long maxNodes, bool visualMode)
+        private static NodeSet SelectTopNodes(this ptr<Graph> _addr_g, long maxNodes, bool visualMode)
         {
+            ref Graph g = ref _addr_g.val;
+
             return makeNodeSet(g.selectTopNodes(maxNodes, visualMode), 0L);
         }
 
         // selectTopNodes returns a slice of the top maxNodes nodes in a graph.
-        private static Nodes selectTopNodes(this ref Graph g, long maxNodes, bool visualMode)
+        private static Nodes selectTopNodes(this ptr<Graph> _addr_g, long maxNodes, bool visualMode)
         {
+            ref Graph g = ref _addr_g.val;
+
             if (maxNodes > 0L)
             {
                 if (visualMode)
@@ -1064,11 +1258,12 @@ namespace @internal
                     // maxNodes to account for them.
                     foreach (var (i, n) in g.Nodes)
                     {
-                        var tags = countTags(n);
+                        var tags = countTags(_addr_n);
                         if (tags > maxNodelets)
                         {
                             tags = maxNodelets;
                         }
+
                         count += tags + 1L;
 
                         if (count >= maxNodes)
@@ -1076,20 +1271,28 @@ namespace @internal
                             maxNodes = i + 1L;
                             break;
                         }
+
                     }
+
                 }
+
             }
+
             if (maxNodes > len(g.Nodes))
             {
                 maxNodes = len(g.Nodes);
             }
+
             return g.Nodes[..maxNodes];
+
         }
 
         // countTags counts the tags with flat count. This underestimates the
         // number of tags being displayed, but in practice is close enough.
-        private static long countTags(ref Node n)
+        private static long countTags(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
             long count = 0L;
             {
                 var e__prev1 = e;
@@ -1101,6 +1304,7 @@ namespace @internal
                     {
                         count++;
                     }
+
                 }
 
                 e = e__prev1;
@@ -1118,20 +1322,23 @@ namespace @internal
                         {
                             count++;
                         }
+
                     }
 
                     e = e__prev2;
                 }
-
             }
             return count;
+
         }
 
         // RemoveRedundantEdges removes residual edges if the destination can
         // be reached through another path. This is done to simplify the graph
         // while preserving connectivity.
-        private static void RemoveRedundantEdges(this ref Graph g)
-        { 
+        private static void RemoveRedundantEdges(this ptr<Graph> _addr_g)
+        {
+            ref Graph g = ref _addr_g.val;
+ 
             // Walk the nodes and outgoing edges in reverse order to prefer
             // removing edges with the lowest weight.
             for (var i = len(g.Nodes); i > 0L; i--)
@@ -1146,25 +1353,32 @@ namespace @internal
                         // Do not remove edges heavier than a non-residual edge, to
                         // avoid potential confusion.
                         break;
+
                     }
-                    if (isRedundantEdge(e))
+
+                    if (isRedundantEdge(_addr_e))
                     {
                         delete(e.Src.Out, e.Dest);
                         delete(e.Dest.In, e.Src);
                     }
+
                 }
 
+
             }
+
 
         }
 
         // isRedundantEdge determines if there is a path that allows e.Src
         // to reach e.Dest after removing e.
-        private static bool isRedundantEdge(ref Edge e)
+        private static bool isRedundantEdge(ptr<Edge> _addr_e)
         {
+            ref Edge e = ref _addr_e.val;
+
             var src = e.Src;
             var n = e.Dest;
-            map seen = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref Node, bool>{n:true};
+            map seen = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<Node>, bool>{n:true};
             Nodes queue = new Nodes(n);
             while (len(queue) > 0L)
             {
@@ -1176,16 +1390,21 @@ namespace @internal
                     {
                         continue;
                     }
+
                     if (ie.Src == src)
                     {
                         return true;
                     }
+
                     seen[ie.Src] = true;
                     queue = append(queue, ie.Src);
+
                 }
+
             }
 
             return false;
+
         }
 
         // nodeSorter is a mechanism used to allow a report to be sorted
@@ -1193,7 +1412,7 @@ namespace @internal
         private partial struct nodeSorter
         {
             public Nodes rs;
-            public Func<ref Node, ref Node, bool> less;
+            public Func<ptr<Node>, ptr<Node>, bool> less;
         }
 
         private static long Len(this nodeSorter s)
@@ -1204,7 +1423,6 @@ namespace @internal
         {
             s.rs[i] = s.rs[j];
             s.rs[j] = s.rs[i];
-
         }
         private static bool Less(this nodeSorter s, long i, long j)
         {
@@ -1232,8 +1450,8 @@ namespace @internal
                 s = new nodeSorter(ns,func(l,r*Node)bool{ifiv,jv:=l.Info.Address,r.Info.Address;iv!=jv{returniv<jv}returncompareNodes(l,r)},);
             else if (o == CumNameOrder || o == EntropyOrder) 
                 // Hold scoring for score-based ordering
-                map<ref Node, long> score = default;
-                Func<ref Node, ref Node, bool> scoreOrder = (l, r) =>
+                map<ptr<Node>, long> score = default;
+                Func<ptr<Node>, ptr<Node>, bool> scoreOrder = (l, r) =>
                 {
                     {
                         var iv__prev1 = iv;
@@ -1244,13 +1462,14 @@ namespace @internal
 
                         if (iv != jv)
                         {
-                            return error.As(iv > jv);
+                            return error.As(iv > jv)!;
                         }
 
                         iv = iv__prev1;
                         jv = jv__prev1;
 
                     }
+
                     {
                         var iv__prev1 = iv;
                         var jv__prev1 = jv;
@@ -1260,13 +1479,14 @@ namespace @internal
 
                         if (iv != jv)
                         {
-                            return error.As(iv < jv);
+                            return error.As(iv < jv)!;
                         }
 
                         iv = iv__prev1;
                         jv = jv__prev1;
 
                     }
+
                     {
                         var iv__prev1 = iv;
                         var jv__prev1 = jv;
@@ -1276,20 +1496,22 @@ namespace @internal
 
                         if (iv != jv)
                         {
-                            return error.As(iv > jv);
+                            return error.As(iv > jv)!;
                         }
 
                         iv = iv__prev1;
                         jv = jv__prev1;
 
                     }
-                    return error.As(compareNodes(l, r));
+
+                    return error.As(compareNodes(_addr_l, _addr_r))!;
+
                 }
 ;
 
 
                 if (o == CumNameOrder) 
-                    score = make_map<ref Node, long>(len(ns));
+                    score = make_map<ptr<Node>, long>(len(ns));
                     {
                         var n__prev1 = n;
 
@@ -1304,14 +1526,14 @@ namespace @internal
 
                     s = new nodeSorter(ns,scoreOrder);
                 else if (o == EntropyOrder) 
-                    score = make_map<ref Node, long>(len(ns));
+                    score = make_map<ptr<Node>, long>(len(ns));
                     {
                         var n__prev1 = n;
 
                         foreach (var (_, __n) in ns)
                         {
                             n = __n;
-                            score[n] = entropyScore(n);
+                            score[n] = entropyScore(_addr_n);
                         }
 
                         n = n__prev1;
@@ -1319,15 +1541,19 @@ namespace @internal
 
                     s = new nodeSorter(ns,scoreOrder);
                             else 
-                return error.As(fmt.Errorf("report: unrecognized sort ordering: %d", o));
+                return error.As(fmt.Errorf("report: unrecognized sort ordering: %d", o))!;
                         sort.Sort(s);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // compareNodes compares two nodes to provide a deterministic ordering
         // between them. Two nodes cannot have the same Node.Info value.
-        private static bool compareNodes(ref Node l, ref Node r)
+        private static bool compareNodes(ptr<Node> _addr_l, ptr<Node> _addr_r)
         {
+            ref Node l = ref _addr_l.val;
+            ref Node r = ref _addr_r.val;
+
             return fmt.Sprint(l.Info) < fmt.Sprint(r.Info);
         }
 
@@ -1338,8 +1564,10 @@ namespace @internal
         // at the flat and cum weights of the node and the incoming/outgoing
         // edges. The fundamental idea is to penalize nodes that have a simple
         // fallthrough from their incoming to the outgoing edge.
-        private static long entropyScore(ref Node n)
+        private static long entropyScore(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
             var score = float64(0L);
 
             if (len(n.In) == 0L)
@@ -1348,17 +1576,20 @@ namespace @internal
             }
             else
             {
-                score += edgeEntropyScore(n, n.In, 0L);
+                score += edgeEntropyScore(_addr_n, n.In, 0L);
             }
+
             if (len(n.Out) == 0L)
             {
                 score++; // Favor leaf nodes
             }
             else
             {
-                score += edgeEntropyScore(n, n.Out, n.Flat);
+                score += edgeEntropyScore(_addr_n, n.Out, n.Flat);
             }
+
             return int64(score * float64(n.Cum)) + n.Flat;
+
         }
 
         // edgeEntropyScore computes the entropy value for a set of edges
@@ -1366,8 +1597,10 @@ namespace @internal
         // theory) refers to the amount of information encoded by the set of
         // edges. A set of edges that have a more interesting distribution of
         // samples gets a higher score.
-        private static double edgeEntropyScore(ref Node n, EdgeMap edges, long self)
+        private static double edgeEntropyScore(ptr<Node> _addr_n, EdgeMap edges, long self)
         {
+            ref Node n = ref _addr_n.val;
+
             var score = float64(0L);
             var total = self;
             {
@@ -1380,6 +1613,7 @@ namespace @internal
                     {
                         total += abs64(e.Weight);
                     }
+
                 }
 
                 e = e__prev1;
@@ -1405,8 +1639,11 @@ namespace @internal
                     frac = float64(abs64(self)) / float64(total);
                     score += -frac * math.Log2(frac);
                 }
+
             }
+
             return score;
+
         }
 
         // NodeOrder sets the ordering for a Sort operation
@@ -1415,18 +1652,19 @@ namespace @internal
         }
 
         // Sorting options for node sort.
-        public static readonly NodeOrder FlatNameOrder = iota;
-        public static readonly var FlatCumNameOrder = 0;
-        public static readonly var CumNameOrder = 1;
-        public static readonly var NameOrder = 2;
-        public static readonly var FileOrder = 3;
-        public static readonly var AddressOrder = 4;
-        public static readonly var EntropyOrder = 5;
+        public static readonly NodeOrder FlatNameOrder = (NodeOrder)iota;
+        public static readonly var FlatCumNameOrder = (var)0;
+        public static readonly var CumNameOrder = (var)1;
+        public static readonly var NameOrder = (var)2;
+        public static readonly var FileOrder = (var)3;
+        public static readonly var AddressOrder = (var)4;
+        public static readonly var EntropyOrder = (var)5;
+
 
         // Sort returns a slice of the edges in the map, in a consistent
         // order. The sort order is first based on the edge weight
         // (higher-to-lower) and then by the node names to avoid flakiness.
-        public static slice<ref Edge> Sort(this EdgeMap e)
+        public static slice<ptr<Edge>> Sort(this EdgeMap e)
         {
             var el = make(edgeList, 0L, len(e));
             foreach (var (_, w) in e)
@@ -1435,6 +1673,7 @@ namespace @internal
             }
             sort.Sort(el);
             return el;
+
         }
 
         // Sum returns the total weight for a set of nodes.
@@ -1446,9 +1685,10 @@ namespace @internal
                 ret += edge.Weight;
             }
             return ret;
+
         }
 
-        private partial struct edgeList // : slice<ref Edge>
+        private partial struct edgeList // : slice<ptr<Edge>>
         {
         }
 
@@ -1463,22 +1703,26 @@ namespace @internal
             {
                 return abs64(el[i].Weight) > abs64(el[j].Weight);
             }
+
             var from1 = el[i].Src.Info.PrintableName();
             var from2 = el[j].Src.Info.PrintableName();
             if (from1 != from2)
             {
                 return from1 < from2;
             }
+
             var to1 = el[i].Dest.Info.PrintableName();
             var to2 = el[j].Dest.Info.PrintableName();
 
             return to1 < to2;
+
         }
 
         private static void Swap(this edgeList el, long i, long j)
         {
             el[i] = el[j];
             el[j] = el[i];
+
         }
 
         private static long abs64(long i)
@@ -1487,7 +1731,9 @@ namespace @internal
             {
                 return -i;
             }
+
             return i;
+
         }
     }
 }}}}}}}

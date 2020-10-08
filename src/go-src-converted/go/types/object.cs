@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:47:45 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:34 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\object.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
-using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
 using static go.builtin;
@@ -36,19 +35,23 @@ namespace go
 // a is before object b in the source, then a.order() < b.order().
 // order returns a value > 0 for package-level objects; it returns
 // 0 for all other objects (including objects in file scopes).
-            token.Pos order(); // setOrder sets the order number of the object. It must be > 0.
-            token.Pos setOrder(uint _p0); // setParent sets the parent scope of the object.
-            token.Pos setParent(ref Scope _p0); // sameId reports whether obj.Id() and Id(pkg, name) are the same.
-            token.Pos sameId(ref Package pkg, @string name); // scopePos returns the start position of the scope of this Object
+            token.Pos order(); // color returns the object's color.
+            token.Pos color(); // setOrder sets the order number of the object. It must be > 0.
+            token.Pos setOrder(uint _p0); // setColor sets the object's color. It must not be white.
+            token.Pos setColor(color color); // setParent sets the parent scope of the object.
+            token.Pos setParent(ptr<Scope> _p0); // sameId reports whether obj.Id() and Id(pkg, name) are the same.
+            token.Pos sameId(ptr<Package> pkg, @string name); // scopePos returns the start position of the scope of this Object
             token.Pos scopePos(); // setScopePos sets the start position of the scope for this Object.
             token.Pos setScopePos(token.Pos pos);
         }
 
         // Id returns name if it is exported, otherwise it
         // returns the name qualified with the package path.
-        public static @string Id(ref Package pkg, @string name)
+        public static @string Id(ptr<Package> _addr_pkg, @string name)
         {
-            if (ast.IsExported(name))
+            ref Package pkg = ref _addr_pkg.val;
+
+            if (token.IsExported(name))
             {
                 return name;
             } 
@@ -64,7 +67,9 @@ namespace go
             {
                 path = pkg.path;
             }
+
             return path + "." + name;
+
         }
 
         // An object implements the common parts of an Object.
@@ -76,71 +81,166 @@ namespace go
             public @string name;
             public Type typ;
             public uint order_;
+            public color color_;
             public token.Pos scopePos_;
         }
 
-        private static ref Scope Parent(this ref object obj)
+        // color encodes the color of an object (see Checker.objDecl for details).
+        private partial struct color // : uint
         {
-            return obj.parent;
         }
-        private static token.Pos Pos(this ref object obj)
+
+        // An object may be painted in one of three colors.
+        // Color values other than white or black are considered grey.
+        private static readonly color white = (color)iota;
+        private static readonly var black = (var)0;
+        private static readonly var grey = (var)1; // must be > white and black
+
+        private static @string String(this color c)
         {
+
+            if (c == white) 
+                return "white";
+            else if (c == black) 
+                return "black";
+            else 
+                return "grey";
+            
+        }
+
+        // colorFor returns the (initial) color for an object depending on
+        // whether its type t is known or not.
+        private static color colorFor(Type t)
+        {
+            if (t != null)
+            {
+                return black;
+            }
+
+            return white;
+
+        }
+
+        // Parent returns the scope in which the object is declared.
+        // The result is nil for methods and struct fields.
+        private static ptr<Scope> Parent(this ptr<object> _addr_obj)
+        {
+            ref object obj = ref _addr_obj.val;
+
+            return _addr_obj.parent!;
+        }
+
+        // Pos returns the declaration position of the object's identifier.
+        private static token.Pos Pos(this ptr<object> _addr_obj)
+        {
+            ref object obj = ref _addr_obj.val;
+
             return obj.pos;
         }
-        private static ref Package Pkg(this ref object obj)
+
+        // Pkg returns the package to which the object belongs.
+        // The result is nil for labels and objects in the Universe scope.
+        private static ptr<Package> Pkg(this ptr<object> _addr_obj)
         {
-            return obj.pkg;
+            ref object obj = ref _addr_obj.val;
+
+            return _addr_obj.pkg!;
         }
-        private static @string Name(this ref object obj)
+
+        // Name returns the object's (package-local, unqualified) name.
+        private static @string Name(this ptr<object> _addr_obj)
         {
+            ref object obj = ref _addr_obj.val;
+
             return obj.name;
         }
-        private static Type Type(this ref object obj)
+
+        // Type returns the object's type.
+        private static Type Type(this ptr<object> _addr_obj)
         {
+            ref object obj = ref _addr_obj.val;
+
             return obj.typ;
         }
-        private static bool Exported(this ref object obj)
-        {
-            return ast.IsExported(obj.name);
-        }
-        private static @string Id(this ref object obj)
-        {
-            return Id(obj.pkg, obj.name);
-        }
-        private static @string String(this ref object _obj) => func(_obj, (ref object obj, Defer _, Panic panic, Recover __) =>
-        {
-            panic("abstract");
 
-        });
-        private static uint order(this ref object obj)
+        // Exported reports whether the object is exported (starts with a capital letter).
+        // It doesn't take into account whether the object is in a local (function) scope
+        // or not.
+        private static bool Exported(this ptr<object> _addr_obj)
         {
+            ref object obj = ref _addr_obj.val;
+
+            return token.IsExported(obj.name);
+        }
+
+        // Id is a wrapper for Id(obj.Pkg(), obj.Name()).
+        private static @string Id(this ptr<object> _addr_obj)
+        {
+            ref object obj = ref _addr_obj.val;
+
+            return Id(_addr_obj.pkg, obj.name);
+        }
+
+        private static @string String(this ptr<object> _addr_obj) => func((_, panic, __) =>
+        {
+            ref object obj = ref _addr_obj.val;
+
+            panic("abstract");
+        });
+        private static uint order(this ptr<object> _addr_obj)
+        {
+            ref object obj = ref _addr_obj.val;
+
             return obj.order_;
         }
-        private static token.Pos scopePos(this ref object obj)
+        private static color color(this ptr<object> _addr_obj)
         {
+            ref object obj = ref _addr_obj.val;
+
+            return obj.color_;
+        }
+        private static token.Pos scopePos(this ptr<object> _addr_obj)
+        {
+            ref object obj = ref _addr_obj.val;
+
             return obj.scopePos_;
         }
 
-        private static void setParent(this ref object obj, ref Scope parent)
+        private static void setParent(this ptr<object> _addr_obj, ptr<Scope> _addr_parent)
         {
-            obj.parent = parent;
+            ref object obj = ref _addr_obj.val;
+            ref Scope parent = ref _addr_parent.val;
 
+            obj.parent = parent;
         }
-        private static void setOrder(this ref object obj, uint order)
+        private static void setOrder(this ptr<object> _addr_obj, uint order)
         {
+            ref object obj = ref _addr_obj.val;
+
             assert(order > 0L);
 
             obj.order_ = order;
-
         }
-        private static void setScopePos(this ref object obj, token.Pos pos)
+        private static void setColor(this ptr<object> _addr_obj, color color)
         {
-            obj.scopePos_ = pos;
+            ref object obj = ref _addr_obj.val;
 
+            assert(color != white);
+
+            obj.color_ = color;
+        }
+        private static void setScopePos(this ptr<object> _addr_obj, token.Pos pos)
+        {
+            ref object obj = ref _addr_obj.val;
+
+            obj.scopePos_ = pos;
         }
 
-        private static bool sameId(this ref object obj, ref Package pkg, @string name)
-        { 
+        private static bool sameId(this ptr<object> _addr_obj, ptr<Package> _addr_pkg, @string name)
+        {
+            ref object obj = ref _addr_obj.val;
+            ref Package pkg = ref _addr_pkg.val;
+ 
             // spec:
             // "Two identifiers are different if they are spelled differently,
             // or if they appear in different packages and are not exported.
@@ -163,6 +263,7 @@ namespace go
             } 
             // pkg != nil && obj.pkg != nil
             return pkg.path == obj.pkg.path;
+
         }
 
         // A PkgName represents an imported Go package.
@@ -176,16 +277,21 @@ namespace go
 
         // NewPkgName returns a new PkgName object representing an imported package.
         // The remaining arguments set the attributes found with all Objects.
-        public static ref PkgName NewPkgName(token.Pos pos, ref Package pkg, @string name, ref Package imported)
+        public static ptr<PkgName> NewPkgName(token.Pos pos, ptr<Package> _addr_pkg, @string name, ptr<Package> _addr_imported)
         {
-            return ref new PkgName(object{nil,pos,pkg,name,Typ[Invalid],0,token.NoPos},imported,false);
+            ref Package pkg = ref _addr_pkg.val;
+            ref Package imported = ref _addr_imported.val;
+
+            return addr(new PkgName(object{nil,pos,pkg,name,Typ[Invalid],0,black,token.NoPos},imported,false));
         }
 
         // Imported returns the package that was imported.
         // It is distinct from Pkg(), which is the package containing the import statement.
-        private static ref Package Imported(this ref PkgName obj)
+        private static ptr<Package> Imported(this ptr<PkgName> _addr_obj)
         {
-            return obj.imported;
+            ref PkgName obj = ref _addr_obj.val;
+
+            return _addr_obj.imported!;
         }
 
         // A Const represents a declared constant.
@@ -193,25 +299,32 @@ namespace go
         {
             public ref object @object => ref @object_val;
             public constant.Value val;
-            public bool visited; // for initialization cycle detection
         }
 
         // NewConst returns a new constant with value val.
         // The remaining arguments set the attributes found with all Objects.
-        public static ref Const NewConst(token.Pos pos, ref Package pkg, @string name, Type typ, constant.Value val)
+        public static ptr<Const> NewConst(token.Pos pos, ptr<Package> _addr_pkg, @string name, Type typ, constant.Value val)
         {
-            return ref new Const(object{nil,pos,pkg,name,typ,0,token.NoPos},val,false);
+            ref Package pkg = ref _addr_pkg.val;
+
+            return addr(new Const(object{nil,pos,pkg,name,typ,0,colorFor(typ),token.NoPos},val));
         }
 
-        private static constant.Value Val(this ref Const obj)
+        // Val returns the constant's value.
+        private static constant.Value Val(this ptr<Const> _addr_obj)
         {
+            ref Const obj = ref _addr_obj.val;
+
             return obj.val;
         }
-        private static void isDependency(this ref Const _p0)
+
+        private static void isDependency(this ptr<Const> _addr__p0)
         {
+            ref Const _p0 = ref _addr__p0.val;
+
         } // a constant may be a dependency of an initialization expression
 
-        // A TypeName represents a name for a (named or alias) type.
+        // A TypeName represents a name for a (defined or alias) type.
         public partial struct TypeName
         {
             public ref object @object => ref @object_val;
@@ -224,20 +337,24 @@ namespace go
         // It may also be nil such that the returned TypeName can be used as
         // argument for NewNamed, which will set the TypeName's type as a side-
         // effect.
-        public static ref TypeName NewTypeName(token.Pos pos, ref Package pkg, @string name, Type typ)
+        public static ptr<TypeName> NewTypeName(token.Pos pos, ptr<Package> _addr_pkg, @string name, Type typ)
         {
-            return ref new TypeName(object{nil,pos,pkg,name,typ,0,token.NoPos});
+            ref Package pkg = ref _addr_pkg.val;
+
+            return addr(new TypeName(object{nil,pos,pkg,name,typ,0,colorFor(typ),token.NoPos}));
         }
 
         // IsAlias reports whether obj is an alias name for a type.
-        private static bool IsAlias(this ref TypeName obj)
+        private static bool IsAlias(this ptr<TypeName> _addr_obj)
         {
+            ref TypeName obj = ref _addr_obj.val;
+
             switch (obj.typ.type())
             {
                 case 
                     return false;
                     break;
-                case ref Basic t:
+                case ptr<Basic> t:
                     if (obj.pkg == Unsafe)
                     {
                         return false;
@@ -250,7 +367,7 @@ namespace go
                     // are aliases but have the same names (for better error messages).
                     return obj.pkg != null || t.name != obj.name || t == universeByte || t == universeRune;
                     break;
-                case ref Named t:
+                case ptr<Named> t:
                     return obj != t.obj;
                     break;
                 default:
@@ -260,53 +377,74 @@ namespace go
                     break;
                 }
             }
+
         }
 
         // A Variable represents a declared variable (including function parameters and results, and struct fields).
         public partial struct Var
         {
             public ref object @object => ref @object_val;
-            public bool anonymous; // if set, the variable is an anonymous struct field, and name is the type name
-            public bool visited; // for initialization cycle detection
+            public bool embedded; // if set, the variable is an embedded struct field, and name is the type name
             public bool isField; // var is struct field
             public bool used; // set if the variable was used
         }
 
         // NewVar returns a new variable.
         // The arguments set the attributes found with all Objects.
-        public static ref Var NewVar(token.Pos pos, ref Package pkg, @string name, Type typ)
+        public static ptr<Var> NewVar(token.Pos pos, ptr<Package> _addr_pkg, @string name, Type typ)
         {
-            return ref new Var(object:object{nil,pos,pkg,name,typ,0,token.NoPos});
+            ref Package pkg = ref _addr_pkg.val;
+
+            return addr(new Var(object:object{nil,pos,pkg,name,typ,0,colorFor(typ),token.NoPos}));
         }
 
         // NewParam returns a new variable representing a function parameter.
-        public static ref Var NewParam(token.Pos pos, ref Package pkg, @string name, Type typ)
+        public static ptr<Var> NewParam(token.Pos pos, ptr<Package> _addr_pkg, @string name, Type typ)
         {
-            return ref new Var(object:object{nil,pos,pkg,name,typ,0,token.NoPos},used:true); // parameters are always 'used'
+            ref Package pkg = ref _addr_pkg.val;
+
+            return addr(new Var(object:object{nil,pos,pkg,name,typ,0,colorFor(typ),token.NoPos},used:true)); // parameters are always 'used'
         }
 
         // NewField returns a new variable representing a struct field.
-        // For anonymous (embedded) fields, the name is the unqualified
-        // type name under which the field is accessible.
-        public static ref Var NewField(token.Pos pos, ref Package pkg, @string name, Type typ, bool anonymous)
+        // For embedded fields, the name is the unqualified type name
+        /// under which the field is accessible.
+        public static ptr<Var> NewField(token.Pos pos, ptr<Package> _addr_pkg, @string name, Type typ, bool embedded)
         {
-            return ref new Var(object:object{nil,pos,pkg,name,typ,0,token.NoPos},anonymous:anonymous,isField:true);
+            ref Package pkg = ref _addr_pkg.val;
+
+            return addr(new Var(object:object{nil,pos,pkg,name,typ,0,colorFor(typ),token.NoPos},embedded:embedded,isField:true));
         }
 
-        // Anonymous reports whether the variable is an anonymous field.
-        private static bool Anonymous(this ref Var obj)
+        // Anonymous reports whether the variable is an embedded field.
+        // Same as Embedded; only present for backward-compatibility.
+        private static bool Anonymous(this ptr<Var> _addr_obj)
         {
-            return obj.anonymous;
+            ref Var obj = ref _addr_obj.val;
+
+            return obj.embedded;
+        }
+
+        // Embedded reports whether the variable is an embedded field.
+        private static bool Embedded(this ptr<Var> _addr_obj)
+        {
+            ref Var obj = ref _addr_obj.val;
+
+            return obj.embedded;
         }
 
         // IsField reports whether the variable is a struct field.
-        private static bool IsField(this ref Var obj)
+        private static bool IsField(this ptr<Var> _addr_obj)
         {
+            ref Var obj = ref _addr_obj.val;
+
             return obj.isField;
         }
 
-        private static void isDependency(this ref Var _p0)
+        private static void isDependency(this ptr<Var> _addr__p0)
         {
+            ref Var _p0 = ref _addr__p0.val;
+
         } // a variable may be a dependency of an initialization expression
 
         // A Func represents a declared function, concrete method, or abstract
@@ -315,38 +453,50 @@ namespace go
         public partial struct Func
         {
             public ref object @object => ref @object_val;
+            public bool hasPtrRecv; // only valid for methods that don't have a type yet
         }
 
         // NewFunc returns a new function with the given signature, representing
         // the function's type.
-        public static ref Func NewFunc(token.Pos pos, ref Package pkg, @string name, ref Signature sig)
-        { 
+        public static ptr<Func> NewFunc(token.Pos pos, ptr<Package> _addr_pkg, @string name, ptr<Signature> _addr_sig)
+        {
+            ref Package pkg = ref _addr_pkg.val;
+            ref Signature sig = ref _addr_sig.val;
+ 
             // don't store a nil signature
             Type typ = default;
             if (sig != null)
             {
                 typ = sig;
             }
-            return ref new Func(object{nil,pos,pkg,name,typ,0,token.NoPos});
+
+            return addr(new Func(object{nil,pos,pkg,name,typ,0,colorFor(typ),token.NoPos},false));
+
         }
 
         // FullName returns the package- or receiver-type-qualified name of
         // function or method obj.
-        private static @string FullName(this ref Func obj)
+        private static @string FullName(this ptr<Func> _addr_obj)
         {
-            bytes.Buffer buf = default;
-            writeFuncName(ref buf, obj, null);
+            ref Func obj = ref _addr_obj.val;
+
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            writeFuncName(_addr_buf, _addr_obj, null);
             return buf.String();
         }
 
         // Scope returns the scope of the function's body block.
-        private static ref Scope Scope(this ref Func obj)
+        private static ptr<Scope> Scope(this ptr<Func> _addr_obj)
         {
-            return obj.typ._<ref Signature>().scope;
+            ref Func obj = ref _addr_obj.val;
+
+            return obj.typ._<ptr<Signature>>().scope;
         }
 
-        private static void isDependency(this ref Func _p0)
+        private static void isDependency(this ptr<Func> _addr__p0)
         {
+            ref Func _p0 = ref _addr__p0.val;
+
         } // a function may be a dependency of an initialization expression
 
         // A Label represents a declared label.
@@ -358,9 +508,11 @@ namespace go
         }
 
         // NewLabel returns a new label.
-        public static ref Label NewLabel(token.Pos pos, ref Package pkg, @string name)
+        public static ptr<Label> NewLabel(token.Pos pos, ptr<Package> _addr_pkg, @string name)
         {
-            return ref new Label(object{pos:pos,pkg:pkg,name:name,typ:Typ[Invalid]},false);
+            ref Package pkg = ref _addr_pkg.val;
+
+            return addr(new Label(object{pos:pos,pkg:pkg,name:name,typ:Typ[Invalid],color_:black},false));
         }
 
         // A Builtin represents a built-in function.
@@ -371,9 +523,9 @@ namespace go
             public builtinId id;
         }
 
-        private static ref Builtin newBuiltin(builtinId id)
+        private static ptr<Builtin> newBuiltin(builtinId id)
         {
-            return ref new Builtin(object{name:predeclaredFuncs[id].name,typ:Typ[Invalid]},id);
+            return addr(new Builtin(object{name:predeclaredFuncs[id].name,typ:Typ[Invalid],color_:black},id));
         }
 
         // Nil represents the predeclared value nil.
@@ -382,14 +534,16 @@ namespace go
             public ref object @object => ref @object_val;
         }
 
-        private static void writeObject(ref bytes.Buffer _buf, Object obj, Qualifier qf) => func(_buf, (ref bytes.Buffer buf, Defer _, Panic panic, Recover __) =>
+        private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifier qf) => func((_, panic, __) =>
         {
-            ref TypeName tname = default;
+            ref bytes.Buffer buf = ref _addr_buf.val;
+
+            ptr<TypeName> tname;
             var typ = obj.Type();
 
             switch (obj.type())
             {
-                case ref PkgName obj:
+                case ptr<PkgName> obj:
                     fmt.Fprintf(buf, "package %s", obj.Name());
                     {
                         var path = obj.imported.path;
@@ -400,16 +554,17 @@ namespace go
                         }
 
                     }
-                    return;
+
+                    return ;
                     break;
-                case ref Const obj:
+                case ptr<Const> obj:
                     buf.WriteString("const");
                     break;
-                case ref TypeName obj:
+                case ptr<TypeName> obj:
                     tname = obj;
                     buf.WriteString("type");
                     break;
-                case ref Var obj:
+                case ptr<Var> obj:
                     if (obj.isField)
                     {
                         buf.WriteString("field");
@@ -418,27 +573,29 @@ namespace go
                     {
                         buf.WriteString("var");
                     }
+
                     break;
-                case ref Func obj:
+                case ptr<Func> obj:
                     buf.WriteString("func ");
-                    writeFuncName(buf, obj, qf);
+                    writeFuncName(_addr_buf, _addr_obj, qf);
                     if (typ != null)
                     {
-                        WriteSignature(buf, typ._<ref Signature>(), qf);
+                        WriteSignature(buf, typ._<ptr<Signature>>(), qf);
                     }
-                    return;
+
+                    return ;
                     break;
-                case ref Label obj:
+                case ptr<Label> obj:
                     buf.WriteString("label");
                     typ = null;
                     break;
-                case ref Builtin obj:
+                case ptr<Builtin> obj:
                     buf.WriteString("builtin");
                     typ = null;
                     break;
-                case ref Nil obj:
+                case ptr<Nil> obj:
                     buf.WriteString("nil");
-                    return;
+                    return ;
                     break;
                 default:
                 {
@@ -454,28 +611,31 @@ namespace go
             // For package-level objects, qualify the name.
             if (obj.Pkg() != null && obj.Pkg().scope.Lookup(obj.Name()) == obj)
             {
-                writePackage(buf, obj.Pkg(), qf);
+                writePackage(_addr_buf, _addr_obj.Pkg(), qf);
             }
+
             buf.WriteString(obj.Name());
 
             if (typ == null)
             {
-                return;
+                return ;
             }
+
             if (tname != null)
             { 
                 // We have a type object: Don't print anything more for
                 // basic types since there's no more information (names
                 // are the same; see also comment in TypeName.IsAlias).
                 {
-                    ref Basic (_, ok) = typ._<ref Basic>();
+                    ptr<Basic> (_, ok) = typ._<ptr<Basic>>();
 
                     if (ok)
                     {
-                        return;
+                        return ;
                     }
 
                 }
+
                 if (tname.IsAlias())
                 {
                     buf.WriteString(" =");
@@ -484,17 +644,24 @@ namespace go
                 {
                     typ = typ.Underlying();
                 }
+
             }
+
             buf.WriteByte(' ');
             WriteType(buf, typ, qf);
+
         });
 
-        private static void writePackage(ref bytes.Buffer buf, ref Package pkg, Qualifier qf)
+        private static void writePackage(ptr<bytes.Buffer> _addr_buf, ptr<Package> _addr_pkg, Qualifier qf)
         {
+            ref bytes.Buffer buf = ref _addr_buf.val;
+            ref Package pkg = ref _addr_pkg.val;
+
             if (pkg == null)
             {
-                return;
+                return ;
             }
+
             @string s = default;
             if (qf != null)
             {
@@ -504,11 +671,13 @@ namespace go
             {
                 s = pkg.Path();
             }
+
             if (s != "")
             {
                 buf.WriteString(s);
                 buf.WriteByte('.');
             }
+
         }
 
         // ObjectString returns the string form of obj.
@@ -516,49 +685,68 @@ namespace go
         // package-level objects, and may be nil.
         public static @string ObjectString(Object obj, Qualifier qf)
         {
-            bytes.Buffer buf = default;
-            writeObject(ref buf, obj, qf);
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            writeObject(_addr_buf, obj, qf);
             return buf.String();
         }
 
-        private static @string String(this ref PkgName obj)
+        private static @string String(this ptr<PkgName> _addr_obj)
         {
+            ref PkgName obj = ref _addr_obj.val;
+
             return ObjectString(obj, null);
         }
-        private static @string String(this ref Const obj)
+        private static @string String(this ptr<Const> _addr_obj)
         {
+            ref Const obj = ref _addr_obj.val;
+
             return ObjectString(obj, null);
         }
-        private static @string String(this ref TypeName obj)
+        private static @string String(this ptr<TypeName> _addr_obj)
         {
+            ref TypeName obj = ref _addr_obj.val;
+
             return ObjectString(obj, null);
         }
-        private static @string String(this ref Var obj)
+        private static @string String(this ptr<Var> _addr_obj)
         {
+            ref Var obj = ref _addr_obj.val;
+
             return ObjectString(obj, null);
         }
-        private static @string String(this ref Func obj)
+        private static @string String(this ptr<Func> _addr_obj)
         {
+            ref Func obj = ref _addr_obj.val;
+
             return ObjectString(obj, null);
         }
-        private static @string String(this ref Label obj)
+        private static @string String(this ptr<Label> _addr_obj)
         {
+            ref Label obj = ref _addr_obj.val;
+
             return ObjectString(obj, null);
         }
-        private static @string String(this ref Builtin obj)
+        private static @string String(this ptr<Builtin> _addr_obj)
         {
+            ref Builtin obj = ref _addr_obj.val;
+
             return ObjectString(obj, null);
         }
-        private static @string String(this ref Nil obj)
+        private static @string String(this ptr<Nil> _addr_obj)
         {
+            ref Nil obj = ref _addr_obj.val;
+
             return ObjectString(obj, null);
         }
 
-        private static void writeFuncName(ref bytes.Buffer buf, ref Func f, Qualifier qf)
+        private static void writeFuncName(ptr<bytes.Buffer> _addr_buf, ptr<Func> _addr_f, Qualifier qf)
         {
+            ref bytes.Buffer buf = ref _addr_buf.val;
+            ref Func f = ref _addr_f.val;
+
             if (f.typ != null)
             {
-                ref Signature sig = f.typ._<ref Signature>();
+                ptr<Signature> sig = f.typ._<ptr<Signature>>();
                 {
                     var recv = sig.Recv();
 
@@ -566,7 +754,7 @@ namespace go
                     {
                         buf.WriteByte('(');
                         {
-                            ref Interface (_, ok) = recv.Type()._<ref Interface>();
+                            ptr<Interface> (_, ok) = recv.Type()._<ptr<Interface>>();
 
                             if (ok)
                             { 
@@ -575,6 +763,7 @@ namespace go
                                 // (not the named type) as the receiver.
                                 // Don't print it in full.
                                 buf.WriteString("interface");
+
                             }
                             else
                             {
@@ -582,17 +771,23 @@ namespace go
                             }
 
                         }
+
                         buf.WriteByte(')');
                         buf.WriteByte('.');
+
                     }
                     else if (f.pkg != null)
                     {
-                        writePackage(buf, f.pkg, qf);
+                        writePackage(_addr_buf, _addr_f.pkg, qf);
                     }
 
+
                 }
+
             }
+
             buf.WriteString(f.name);
+
         }
     }
 }}

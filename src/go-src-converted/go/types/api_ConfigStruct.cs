@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:54 UTC
+//     Generated on 2020 October 08 04:02:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,16 +33,18 @@ namespace go
             {
                 this.IgnoreFuncBodies = default;
                 this.FakeImportC = default;
+                this.go115UsesCgo = default;
                 this.Error = default;
                 this.Importer = default;
                 this.Sizes = default;
                 this.DisableUnusedImportCheck = default;
             }
 
-            public Config(bool IgnoreFuncBodies = default, bool FakeImportC = default, Action<error> Error = default, Importer Importer = default, Sizes Sizes = default, bool DisableUnusedImportCheck = default)
+            public Config(bool IgnoreFuncBodies = default, bool FakeImportC = default, bool go115UsesCgo = default, Action<error> Error = default, Importer Importer = default, Sizes Sizes = default, bool DisableUnusedImportCheck = default)
             {
                 this.IgnoreFuncBodies = IgnoreFuncBodies;
                 this.FakeImportC = FakeImportC;
+                this.go115UsesCgo = go115UsesCgo;
                 this.Error = Error;
                 this.Importer = Importer;
                 this.Sizes = Sizes;
@@ -69,7 +71,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Config Config_cast(dynamic value)
         {
-            return new Config(value.IgnoreFuncBodies, value.FakeImportC, value.Error, value.Importer, value.Sizes, value.DisableUnusedImportCheck);
+            return new Config(value.IgnoreFuncBodies, value.FakeImportC, value.go115UsesCgo, value.Error, value.Importer, value.Sizes, value.DisableUnusedImportCheck);
         }
     }
 }}

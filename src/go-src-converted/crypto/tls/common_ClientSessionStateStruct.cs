@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:03 UTC
+//     Generated on 2020 October 08 03:37:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,16 +13,20 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
 using list = go.container.list_package;
 using crypto = go.crypto_package;
-using cipherhw = go.crypto.@internal.cipherhw_package;
+using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
+using elliptic = go.crypto.elliptic_package;
 using rand = go.crypto.rand_package;
+using rsa = go.crypto.rsa_package;
 using sha512 = go.crypto.sha512_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using cpu = go.@internal.cpu_package;
 using io = go.io_package;
-using big = go.math.big_package;
 using net = go.net_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -46,9 +50,15 @@ namespace crypto
                 this.masterSecret = default;
                 this.serverCertificates = default;
                 this.verifiedChains = default;
+                this.receivedAt = default;
+                this.ocspResponse = default;
+                this.scts = default;
+                this.nonce = default;
+                this.useBy = default;
+                this.ageAdd = default;
             }
 
-            public ClientSessionState(slice<byte> sessionTicket = default, ushort vers = default, ushort cipherSuite = default, slice<byte> masterSecret = default, slice<ref x509.Certificate> serverCertificates = default, slice<slice<ref x509.Certificate>> verifiedChains = default)
+            public ClientSessionState(slice<byte> sessionTicket = default, ushort vers = default, ushort cipherSuite = default, slice<byte> masterSecret = default, slice<ptr<x509.Certificate>> serverCertificates = default, slice<slice<ptr<x509.Certificate>>> verifiedChains = default, time.Time receivedAt = default, slice<byte> ocspResponse = default, slice<slice<byte>> scts = default, slice<byte> nonce = default, time.Time useBy = default, uint ageAdd = default)
             {
                 this.sessionTicket = sessionTicket;
                 this.vers = vers;
@@ -56,6 +66,12 @@ namespace crypto
                 this.masterSecret = masterSecret;
                 this.serverCertificates = serverCertificates;
                 this.verifiedChains = verifiedChains;
+                this.receivedAt = receivedAt;
+                this.ocspResponse = ocspResponse;
+                this.scts = scts;
+                this.nonce = nonce;
+                this.useBy = useBy;
+                this.ageAdd = ageAdd;
             }
 
             // Enable comparisons between nil and ClientSessionState struct
@@ -78,7 +94,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ClientSessionState ClientSessionState_cast(dynamic value)
         {
-            return new ClientSessionState(value.sessionTicket, value.vers, value.cipherSuite, value.masterSecret, value.serverCertificates, value.verifiedChains);
+            return new ClientSessionState(value.sessionTicket, value.vers, value.cipherSuite, value.masterSecret, value.serverCertificates, value.verifiedChains, value.receivedAt, value.ocspResponse, value.scts, value.nonce, value.useBy, value.ageAdd);
         }
     }
 }}

@@ -4,7 +4,7 @@
 
 // Package ascii85 implements the ascii85 data encoding
 // as used in the btoa tool and Adobe's PostScript and PDF document formats.
-// package ascii85 -- go2cs converted at 2020 August 29 08:35:13 UTC
+// package ascii85 -- go2cs converted at 2020 October 08 03:42:26 UTC
 // import "encoding/ascii85" ==> using ascii85 = go.encoding.ascii85_package
 // Original source: C:\Go\src\encoding\ascii85\ascii85.go
 using io = go.io_package;
@@ -95,8 +95,10 @@ namespace encoding
                 }
                 dst = dst[m..];
                 n += m;
+
             }
             return n;
+
         }
 
         // MaxEncodedLen returns the maximum length of an encoding of n source bytes.
@@ -112,7 +114,7 @@ namespace encoding
         // trailing partial block.
         public static io.WriteCloser NewEncoder(io.Writer w)
         {
-            return ref new encoder(w:w);
+            return addr(new encoder(w:w));
         }
 
         private partial struct encoder
@@ -124,11 +126,15 @@ namespace encoding
             public array<byte> @out; // output buffer
         }
 
-        private static (long, error) Write(this ref encoder e, slice<byte> p)
+        private static (long, error) Write(this ptr<encoder> _addr_e, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return (0L, e.err);
+                return (0L, error.As(e.err)!);
             } 
 
             // Leading fringe.
@@ -145,16 +151,19 @@ namespace encoding
                 p = p[i..];
                 if (e.nbuf < 4L)
                 {
-                    return;
+                    return ;
                 }
+
                 var nout = Encode(e.@out[0L..], e.buf[0L..]);
                 _, e.err = e.w.Write(e.@out[0L..nout]);
 
                 if (e.err != null)
                 {
-                    return (n, e.err);
+                    return (n, error.As(e.err)!);
                 }
+
                 e.nbuf = 0L;
+
             } 
 
             // Large interior chunks.
@@ -165,6 +174,7 @@ namespace encoding
                 {
                     nn = len(p);
                 }
+
                 nn -= nn % 4L;
                 if (nn > 0L)
                 {
@@ -173,11 +183,14 @@ namespace encoding
 
                     if (e.err != null)
                     {
-                        return (n, e.err);
+                        return (n, error.As(e.err)!);
                     }
+
                 }
+
                 n += nn;
                 p = p[nn..];
+
             } 
 
             // Trailing fringe.
@@ -197,13 +210,16 @@ namespace encoding
             }
             e.nbuf = len(p);
             n += len(p);
-            return;
+            return ;
+
         }
 
         // Close flushes any pending output from the encoder.
         // It is an error to call Write after calling Close.
-        private static error Close(this ref encoder e)
-        { 
+        private static error Close(this ptr<encoder> _addr_e)
+        {
+            ref encoder e = ref _addr_e.val;
+ 
             // If there's anything left in the buffer, flush it out
             if (e.err == null && e.nbuf > 0L)
             {
@@ -211,7 +227,9 @@ namespace encoding
                 e.nbuf = 0L;
                 _, e.err = e.w.Write(e.@out[0L..nout]);
             }
-            return error.As(e.err);
+
+            return error.As(e.err)!;
+
         }
 
         /*
@@ -243,6 +261,10 @@ namespace encoding
         //
         public static (long, long, error) Decode(slice<byte> dst, slice<byte> src, bool flush)
         {
+            long ndst = default;
+            long nsrc = default;
+            error err = default!;
+
             uint v = default;
             long nb = default;
             {
@@ -254,8 +276,9 @@ namespace encoding
                     b = __b;
                     if (len(dst) - ndst < 4L)
                     {
-                        return;
+                        return ;
                     }
+
 
                     if (b <= ' ') 
                         continue;
@@ -266,7 +289,7 @@ namespace encoding
                         v = v * 85L + uint32(b - '!');
                         nb++;
                     else 
-                        return (0L, 0L, CorruptInputError(i));
+                        return (0L, 0L, error.As(CorruptInputError(i))!);
                                         if (nb == 5L)
                     {
                         nsrc = i + 1L;
@@ -278,6 +301,7 @@ namespace encoding
                         nb = 0L;
                         v = 0L;
                     }
+
                 }
 
                 i = i__prev1;
@@ -294,8 +318,9 @@ namespace encoding
                     // the inefficiency of the encoding for the block.
                     if (nb == 1L)
                     {
-                        return (0L, 0L, CorruptInputError(len(src)));
+                        return (0L, 0L, error.As(CorruptInputError(len(src)))!);
                     }
+
                     {
                         var i__prev1 = i;
 
@@ -305,6 +330,7 @@ namespace encoding
                             // We have to assume the worst case values (digit 84)
                             // in order to ensure that the top bits are correct.
                             v = v * 85L + 84L;
+
                         }
 
 
@@ -323,15 +349,19 @@ namespace encoding
 
                         i = i__prev1;
                     }
+
                 }
+
             }
-            return;
+
+            return ;
+
         }
 
         // NewDecoder constructs a new ascii85 stream decoder.
         public static io.Reader NewDecoder(io.Reader r)
         {
-            return ref new decoder(r:r);
+            return addr(new decoder(r:r));
         }
 
         private partial struct decoder
@@ -345,16 +375,22 @@ namespace encoding
             public array<byte> outbuf;
         }
 
-        private static (long, error) Read(this ref decoder d, slice<byte> p)
+        private static (long, error) Read(this ptr<decoder> _addr_d, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref decoder d = ref _addr_d.val;
+
             if (len(p) == 0L)
             {
-                return (0L, null);
+                return (0L, error.As(null!)!);
             }
+
             if (d.err != null)
             {
-                return (0L, d.err);
+                return (0L, error.As(d.err)!);
             }
+
             while (true)
             { 
                 // Copy leftover output from last decode.
@@ -362,7 +398,7 @@ namespace encoding
                 {
                     n = copy(p, d.@out);
                     d.@out = d.@out[n..];
-                    return;
+                    return ;
                 } 
 
                 // Decode leftover input from last read.
@@ -377,6 +413,7 @@ namespace encoding
                         d.nbuf = copy(d.buf[0L..], d.buf[nsrc..d.nbuf]);
                         continue; // copy out and return
                     }
+
                     if (ndst == 0L && d.err == null)
                     { 
                         // Special case: input buffer is mostly filled with non-data bytes.
@@ -389,27 +426,33 @@ namespace encoding
                                 d.buf[off] = d.buf[i];
                                 off++;
                             }
+
                         }
 
                         d.nbuf = off;
+
                     }
+
                 } 
 
                 // Out of input, out of decoded output. Check errors.
                 if (d.err != null)
                 {
-                    return (0L, d.err);
+                    return (0L, error.As(d.err)!);
                 }
+
                 if (d.readErr != null)
                 {
                     d.err = d.readErr;
-                    return (0L, d.err);
+                    return (0L, error.As(d.err)!);
                 } 
 
                 // Read more data.
                 nn, d.readErr = d.r.Read(d.buf[d.nbuf..]);
                 d.nbuf += nn;
+
             }
+
 
         }
     }

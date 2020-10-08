@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package lex implements lexical analysis for the assembler.
-// package lex -- go2cs converted at 2020 August 29 08:51:45 UTC
+// package lex -- go2cs converted at 2020 October 08 04:08:09 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Go\src\cmd\asm\internal\lex\lex.go
 using fmt = go.fmt_package;
@@ -31,11 +31,11 @@ namespace @internal
  
         // Asm defines some two-character lexemes. We make up
         // a rune/ScanToken value for them - ugly but simple.
-        public static readonly ScanToken LSH = -1000L - iota; // << Left shift.
-        public static readonly var RSH = 0; // >> Logical right shift.
-        public static readonly var ARR = 1; // -> Used on ARM for shift type 3, arithmetic right shift.
-        public static readonly var ROT = 2; // @> Used on ARM for shift type 4, rotate right.
-        private static readonly var macroName = 3; // name of macro that should not be expanded
+        public static readonly ScanToken LSH = (ScanToken)-1000L - iota; // << Left shift.
+        public static readonly var RSH = (var)0; // >> Logical right shift.
+        public static readonly var ARR = (var)1; // -> Used on ARM for shift type 3, arithmetic right shift.
+        public static readonly var ROT = (var)2; // @> Used on ARM for shift type 4, rotate right.
+        private static readonly var macroName = (var)3; // name of macro that should not be expanded
 
         // IsRegisterShift reports whether the token is one of the ARM register shift operators.
         public static bool IsRegisterShift(ScanToken r)
@@ -64,7 +64,8 @@ namespace @internal
                 return "comment";
             else 
                 return fmt.Sprintf("%q", rune(t));
-                    }
+            
+        }
 
         // NewLexer returns a lexer for the named file and the given link context.
         public static TokenReader NewLexer(@string name)
@@ -75,8 +76,10 @@ namespace @internal
             {
                 log.Fatalf("%s\n", err);
             }
+
             input.Push(NewTokenizer(name, fd, fd));
             return input;
+
         }
 
         // The other files in this directory each contain an implementation of TokenReader.
@@ -92,7 +95,7 @@ namespace @internal
             long Text(); // File reports the source file name of the token.
             long File(); // Base reports the position base of the token.
             long Base(); // SetBase sets the position base.
-            long SetBase(ref src.PosBase _p0); // Line reports the source line number of the token.
+            long SetBase(ptr<src.PosBase> _p0); // Line reports the source line number of the token.
             long Line(); // Col reports the source column number of the token.
             long Col(); // Close does any teardown required.
             long Close();
@@ -118,6 +121,7 @@ namespace @internal
             text = strings.Replace(text, "\u00B7", ".", -1L);
             text = strings.Replace(text, "\u2215", "/", -1L);
             return new Token(ScanToken:token,text:text);
+
         }
 
         public static @string String(this Token l)
@@ -145,10 +149,13 @@ namespace @internal
                 {
                     break;
                 }
+
                 tokens = append(tokens, Make(tok, t.Text()));
+
             }
 
             return tokens;
+
         }
     }
 }}}}

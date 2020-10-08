@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:50 UTC
+//     Generated on 2020 October 08 03:35:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +63,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate long BlockSizeByRef(ref T value);
+            private delegate long BlockSizeByPtr(ptr<T> value);
             private delegate long BlockSizeByVal(T value);
 
-            private static readonly BlockSizeByRef s_BlockSizeByRef;
+            private static readonly BlockSizeByPtr s_BlockSizeByPtr;
             private static readonly BlockSizeByVal s_BlockSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,17 +75,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BlockSizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BlockSizeByPtr is null || !m_target_is_ptr)
                     return s_BlockSizeByVal!(target);
 
-                return s_BlockSizeByRef(ref target);
+                return s_BlockSizeByPtr(m_target_ptr);
             }
 
-            private delegate long EncryptByRef(ref T value, slice<byte> dst, slice<byte> src);
+            private delegate long EncryptByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
             private delegate long EncryptByVal(T value, slice<byte> dst, slice<byte> src);
 
-            private static readonly EncryptByRef s_EncryptByRef;
+            private static readonly EncryptByPtr s_EncryptByPtr;
             private static readonly EncryptByVal s_EncryptByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -94,17 +95,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_EncryptByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_EncryptByPtr is null || !m_target_is_ptr)
                     return s_EncryptByVal!(target, dst, src);
 
-                return s_EncryptByRef(ref target, dst, src);
+                return s_EncryptByPtr(m_target_ptr, dst, src);
             }
 
-            private delegate long DecryptByRef(ref T value, slice<byte> dst, slice<byte> src);
+            private delegate long DecryptByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
             private delegate long DecryptByVal(T value, slice<byte> dst, slice<byte> src);
 
-            private static readonly DecryptByRef s_DecryptByRef;
+            private static readonly DecryptByPtr s_DecryptByPtr;
             private static readonly DecryptByVal s_DecryptByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -113,11 +115,12 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DecryptByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DecryptByPtr is null || !m_target_is_ptr)
                     return s_DecryptByVal!(target, dst, src);
 
-                return s_DecryptByRef(ref target, dst, src);
+                return s_DecryptByPtr(m_target_ptr, dst, src);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -126,55 +129,46 @@ namespace crypto
             static Block()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("BlockSize");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("BlockSize");
 
                 if (!(extensionMethod is null))
-                    s_BlockSizeByRef = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByRef)) as BlockSizeByRef;
+                    s_BlockSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByPtr)) as BlockSizeByPtr;
 
-                if (s_BlockSizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("BlockSize");
+                extensionMethod = targetType.GetExtensionMethod("BlockSize");
 
-                    if (!(extensionMethod is null))
-                        s_BlockSizeByVal = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByVal)) as BlockSizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BlockSizeByVal = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByVal)) as BlockSizeByVal;
 
-                if (s_BlockSizeByRef is null && s_BlockSizeByVal is null)
+                if (s_BlockSizeByPtr is null && s_BlockSizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Block.BlockSize method", new Exception("BlockSize"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Encrypt");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Encrypt");
 
                 if (!(extensionMethod is null))
-                    s_EncryptByRef = extensionMethod.CreateStaticDelegate(typeof(EncryptByRef)) as EncryptByRef;
+                    s_EncryptByPtr = extensionMethod.CreateStaticDelegate(typeof(EncryptByPtr)) as EncryptByPtr;
 
-                if (s_EncryptByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Encrypt");
+                extensionMethod = targetType.GetExtensionMethod("Encrypt");
 
-                    if (!(extensionMethod is null))
-                        s_EncryptByVal = extensionMethod.CreateStaticDelegate(typeof(EncryptByVal)) as EncryptByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_EncryptByVal = extensionMethod.CreateStaticDelegate(typeof(EncryptByVal)) as EncryptByVal;
 
-                if (s_EncryptByRef is null && s_EncryptByVal is null)
+                if (s_EncryptByPtr is null && s_EncryptByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Block.Encrypt method", new Exception("Encrypt"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Decrypt");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Decrypt");
 
                 if (!(extensionMethod is null))
-                    s_DecryptByRef = extensionMethod.CreateStaticDelegate(typeof(DecryptByRef)) as DecryptByRef;
+                    s_DecryptByPtr = extensionMethod.CreateStaticDelegate(typeof(DecryptByPtr)) as DecryptByPtr;
 
-                if (s_DecryptByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Decrypt");
+                extensionMethod = targetType.GetExtensionMethod("Decrypt");
 
-                    if (!(extensionMethod is null))
-                        s_DecryptByVal = extensionMethod.CreateStaticDelegate(typeof(DecryptByVal)) as DecryptByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DecryptByVal = extensionMethod.CreateStaticDelegate(typeof(DecryptByVal)) as DecryptByVal;
 
-                if (s_DecryptByRef is null && s_DecryptByVal is null)
+                if (s_DecryptByPtr is null && s_DecryptByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Block.Decrypt method", new Exception("Decrypt"));
             }
 

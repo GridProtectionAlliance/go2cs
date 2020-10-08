@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:28:20 UTC
+//     Generated on 2020 October 08 04:30:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace @internal
                 this.entries = default;
             }
 
-            public itabEntry(ref ptr<types.Type> t = default, ref ptr<types.Type> itype = default, ref ptr<obj.LSym> lsym = default, slice<ref obj.LSym> entries = default)
+            public itabEntry(ref ptr<types.Type> t = default, ref ptr<types.Type> itype = default, ref ptr<obj.LSym> lsym = default, slice<ptr<obj.LSym>> entries = default)
             {
                 this.t = t;
                 this.itype = itype;

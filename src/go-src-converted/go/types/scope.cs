@@ -4,7 +4,7 @@
 
 // This file implements Scopes.
 
-// package types -- go2cs converted at 2020 August 29 08:47:53 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:42 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\scope.go
 using bytes = go.bytes_package;
@@ -20,9 +20,6 @@ namespace go
 {
     public static partial class types_package
     {
-        // TODO(gri) Provide scopes with a name or other mechanism so that
-        //           objects can use that information for better printing.
-
         // A Scope maintains a set of objects and links to its containing
         // (parent) and contained (children) scopes. Objects may be inserted
         // and looked up by name. The zero value for Scope is a ready-to-use
@@ -30,7 +27,7 @@ namespace go
         public partial struct Scope
         {
             public ptr<Scope> parent;
-            public slice<ref Scope> children;
+            public slice<ptr<Scope>> children;
             public map<@string, Object> elems; // lazily allocated
             public token.Pos pos; // scope extent; may be invalid
             public token.Pos end; // scope extent; may be invalid
@@ -40,32 +37,42 @@ namespace go
 
         // NewScope returns a new, empty scope contained in the given parent
         // scope, if any. The comment is for debugging only.
-        public static ref Scope NewScope(ref Scope parent, token.Pos pos, token.Pos end, @string comment)
+        public static ptr<Scope> NewScope(ptr<Scope> _addr_parent, token.Pos pos, token.Pos end, @string comment)
         {
-            Scope s = ref new Scope(parent,nil,nil,pos,end,comment,false); 
+            ref Scope parent = ref _addr_parent.val;
+
+            ptr<Scope> s = addr(new Scope(parent,nil,nil,pos,end,comment,false)); 
             // don't add children to Universe scope!
             if (parent != null && parent != Universe)
             {
                 parent.children = append(parent.children, s);
             }
-            return s;
+
+            return _addr_s!;
+
         }
 
         // Parent returns the scope's containing (parent) scope.
-        private static ref Scope Parent(this ref Scope s)
+        private static ptr<Scope> Parent(this ptr<Scope> _addr_s)
         {
-            return s.parent;
+            ref Scope s = ref _addr_s.val;
+
+            return _addr_s.parent!;
         }
 
-        // Len() returns the number of scope elements.
-        private static long Len(this ref Scope s)
+        // Len returns the number of scope elements.
+        private static long Len(this ptr<Scope> _addr_s)
         {
+            ref Scope s = ref _addr_s.val;
+
             return len(s.elems);
         }
 
         // Names returns the scope's element names in sorted order.
-        private static slice<@string> Names(this ref Scope s)
+        private static slice<@string> Names(this ptr<Scope> _addr_s)
         {
+            ref Scope s = ref _addr_s.val;
+
             var names = make_slice<@string>(len(s.elems));
             long i = 0L;
             foreach (var (name) in s.elems)
@@ -75,24 +82,31 @@ namespace go
             }
             sort.Strings(names);
             return names;
+
         }
 
-        // NumChildren() returns the number of scopes nested in s.
-        private static long NumChildren(this ref Scope s)
+        // NumChildren returns the number of scopes nested in s.
+        private static long NumChildren(this ptr<Scope> _addr_s)
         {
+            ref Scope s = ref _addr_s.val;
+
             return len(s.children);
         }
 
         // Child returns the i'th child scope for 0 <= i < NumChildren().
-        private static ref Scope Child(this ref Scope s, long i)
+        private static ptr<Scope> Child(this ptr<Scope> _addr_s, long i)
         {
-            return s.children[i];
+            ref Scope s = ref _addr_s.val;
+
+            return _addr_s.children[i]!;
         }
 
         // Lookup returns the object in scope s with the given name if such an
         // object exists; otherwise the result is nil.
-        private static Object Lookup(this ref Scope s, @string name)
+        private static Object Lookup(this ptr<Scope> _addr_s, @string name)
         {
+            ref Scope s = ref _addr_s.val;
+
             return s.elems[name];
         }
 
@@ -104,10 +118,14 @@ namespace go
         //
         // Note that obj.Parent() may be different from the returned scope if the
         // object was inserted into the scope and already had a parent at that
-        // time (see Insert, below). This can only happen for dot-imported objects
+        // time (see Insert). This can only happen for dot-imported objects
         // whose scope is the scope of the package that exported them.
-        private static (ref Scope, Object) LookupParent(this ref Scope s, @string name, token.Pos pos)
+        private static (ptr<Scope>, Object) LookupParent(this ptr<Scope> _addr_s, @string name, token.Pos pos)
         {
+            ptr<Scope> _p0 = default!;
+            Object _p0 = default;
+            ref Scope s = ref _addr_s.val;
+
             while (s != null)
             {
                 {
@@ -115,14 +133,16 @@ namespace go
 
                     if (obj != null && (!pos.IsValid() || obj.scopePos() <= pos))
                     {
-                        return (s, obj);
+                        return (_addr_s!, obj);
                 s = s.parent;
                     }
 
                 }
+
             }
 
-            return (null, null);
+            return (_addr_null!, null);
+
         }
 
         // Insert attempts to insert an object obj into scope s.
@@ -130,8 +150,10 @@ namespace go
         // the same name, Insert leaves s unchanged and returns alt.
         // Otherwise it inserts obj, sets the object's parent scope
         // if not already set, and returns nil.
-        private static Object Insert(this ref Scope s, Object obj)
+        private static Object Insert(this ptr<Scope> _addr_s, Object obj)
         {
+            ref Scope s = ref _addr_s.val;
+
             var name = obj.Name();
             {
                 var alt = s.elems[name];
@@ -142,36 +164,46 @@ namespace go
                 }
 
             }
+
             if (s.elems == null)
             {
                 s.elems = make_map<@string, Object>();
             }
+
             s.elems[name] = obj;
             if (obj.Parent() == null)
             {
                 obj.setParent(s);
             }
+
             return null;
+
         }
 
         // Pos and End describe the scope's source code extent [pos, end).
         // The results are guaranteed to be valid only if the type-checked
         // AST has complete position information. The extent is undefined
         // for Universe and package scopes.
-        private static token.Pos Pos(this ref Scope s)
+        private static token.Pos Pos(this ptr<Scope> _addr_s)
         {
+            ref Scope s = ref _addr_s.val;
+
             return s.pos;
         }
-        private static token.Pos End(this ref Scope s)
+        private static token.Pos End(this ptr<Scope> _addr_s)
         {
+            ref Scope s = ref _addr_s.val;
+
             return s.end;
         }
 
-        // Contains returns true if pos is within the scope's extent.
+        // Contains reports whether pos is within the scope's extent.
         // The result is guaranteed to be valid only if the type-checked
         // AST has complete position information.
-        private static bool Contains(this ref Scope s, token.Pos pos)
+        private static bool Contains(this ptr<Scope> _addr_s, token.Pos pos)
         {
+            ref Scope s = ref _addr_s.val;
+
             return s.pos <= pos && pos < s.end;
         }
 
@@ -180,8 +212,10 @@ namespace go
         // The result is also nil for the Universe scope.
         // The result is guaranteed to be valid only if the type-checked
         // AST has complete position information.
-        private static ref Scope Innermost(this ref Scope s, token.Pos pos)
-        { 
+        private static ptr<Scope> Innermost(this ptr<Scope> _addr_s, token.Pos pos)
+        {
+            ref Scope s = ref _addr_s.val;
+ 
             // Package scopes do not have extents since they may be
             // discontiguous, so iterate over the package's files.
             if (s.parent == Universe)
@@ -197,16 +231,17 @@ namespace go
 
                             if (inner != null)
                             {
-                                return inner;
+                                return _addr_inner!;
                             }
 
                         }
+
                     }
 
                     s = s__prev1;
                 }
-
             }
+
             if (s.Contains(pos))
             {
                 {
@@ -217,16 +252,20 @@ namespace go
                         s = __s;
                         if (s.Contains(pos))
                         {
-                            return s.Innermost(pos);
+                            return _addr_s.Innermost(pos)!;
                         }
+
                     }
 
                     s = s__prev1;
                 }
 
-                return s;
+                return _addr_s!;
+
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
         // WriteTo writes a string representation of the scope to w,
@@ -234,19 +273,16 @@ namespace go
         // The level of indentation is controlled by n >= 0, with
         // n == 0 for no indentation.
         // If recurse is set, it also writes nested (children) scopes.
-        private static void WriteTo(this ref Scope s, io.Writer w, long n, bool recurse)
+        private static void WriteTo(this ptr<Scope> _addr_s, io.Writer w, long n, bool recurse)
         {
-            const @string ind = ".  ";
+            ref Scope s = ref _addr_s.val;
+
+            const @string ind = (@string)".  ";
 
             var indn = strings.Repeat(ind, n);
 
-            fmt.Fprintf(w, "%s%s scope %p {", indn, s.comment, s);
-            if (len(s.elems) == 0L)
-            {
-                fmt.Fprintf(w, "}\n");
-                return;
-            }
-            fmt.Fprintln(w);
+            fmt.Fprintf(w, "%s%s scope %p {\n", indn, s.comment, s);
+
             var indn1 = indn + ind;
             foreach (var (_, name) in s.Names())
             {
@@ -256,18 +292,22 @@ namespace go
             {
                 foreach (var (_, s) in s.children)
                 {
-                    fmt.Fprintln(w);
                     s.WriteTo(w, n + 1L, recurse);
                 }
+
             }
-            fmt.Fprintf(w, "%s}", indn);
+
+            fmt.Fprintf(w, "%s}\n", indn);
+
         }
 
         // String returns a string representation of the scope, for debugging.
-        private static @string String(this ref Scope s)
+        private static @string String(this ptr<Scope> _addr_s)
         {
-            bytes.Buffer buf = default;
-            s.WriteTo(ref buf, 0L, false);
+            ref Scope s = ref _addr_s.val;
+
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            s.WriteTo(_addr_buf, 0L, false);
             return buf.String();
         }
     }

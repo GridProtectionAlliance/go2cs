@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package str provides string manipulation utilities.
-// package str -- go2cs converted at 2020 August 29 10:01:09 UTC
+// package str -- go2cs converted at 2020 October 08 04:34:39 UTC
 // import "cmd/go/internal/str" ==> using str = go.cmd.go.@internal.str_package
 // Original source: C:\Go\src\cmd\go\internal\str\str.go
 using bytes = go.bytes_package;
@@ -47,11 +47,13 @@ namespace @internal
                             break;
                         }
                     }
+
                 }
                 arg = arg__prev1;
             }
 
             return x;
+
         });
 
         // ToFold returns a string with the property that
@@ -71,6 +73,7 @@ namespace @internal
                 {
                     goto Slow;
                 }
+
             }
 
             return s;
@@ -90,6 +93,7 @@ Slow:
                     {
                         break;
                     }
+
                 } 
                 // Exception to allow fast path above: A-Z => a-z
  
@@ -98,9 +102,12 @@ Slow:
                 {
                     r += 'a' - 'A';
                 }
+
                 buf.WriteRune(r);
+
             }
             return buf.String();
+
         }
 
         // FoldDup reports a pair of strings from the list that are
@@ -108,6 +115,9 @@ Slow:
         // It returns "", "" if there are no such strings.
         public static (@string, @string) FoldDup(slice<@string> list)
         {
+            @string _p0 = default;
+            @string _p0 = default;
+
             map clash = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{};
             foreach (var (_, s) in list)
             {
@@ -121,14 +131,20 @@ Slow:
                         {
                             s = t;
                             t = s;
+
                         }
+
                         return (s, t);
+
                     }
 
                 }
+
                 clash[fold] = s;
+
             }
             return ("", "");
+
         }
 
         // Contains reports whether x contains s.
@@ -140,8 +156,10 @@ Slow:
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
         private static bool isSpaceByte(byte c)
@@ -154,7 +172,10 @@ Slow:
         // There is no unescaping or other processing within
         // quoted fields.
         public static (slice<@string>, error) SplitQuotedFields(@string s)
-        { 
+        {
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+ 
             // Split fields allowing '' or "" around elements.
             // Quotes further inside the string do not count.
             slice<@string> f = default;
@@ -182,12 +203,15 @@ Slow:
 
                     if (i >= len(s))
                     {
-                        return (null, fmt.Errorf("unterminated %c string", quote));
+                        return (null, error.As(fmt.Errorf("unterminated %c string", quote))!);
                     }
+
                     f = append(f, s[..i]);
                     s = s[i + 1L..];
                     continue;
+
                 }
+
                 i = 0L;
                 while (i < len(s) && !isSpaceByte(s[i]))
                 {
@@ -196,9 +220,11 @@ Slow:
 
                 f = append(f, s[..i]);
                 s = s[i..];
+
             }
 
-            return (f, null);
+            return (f, error.As(null!)!);
+
         }
     }
 }}}}

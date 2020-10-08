@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:42 UTC
+//     Generated on 2020 October 08 04:10:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using dwarf = go.cmd.@internal.dwarf_package;
 using obj = go.cmd.@internal.obj_package;
+using hex = go.encoding.hex_package;
 using fmt = go.fmt_package;
+using bits = go.math.bits_package;
+using sort = go.sort_package;
 using strings = go.strings_package;
 using go;
 
@@ -31,28 +35,14 @@ namespace @internal
             // Constructors
             public VarLoc(NilType _)
             {
-                this.Start = default;
-                this.End = default;
-                this.StartProg = default;
-                this.EndProg = default;
-                this.StartPC = default;
-                this.EndPC = default;
                 this.Registers = default;
-                this.OnStack = default;
-                this.StackLocation = default;
+                this.StackOffset = default;
             }
 
-            public VarLoc(ref ptr<Value> Start = default, ref ptr<Value> End = default, ref ptr<obj.Prog> StartProg = default, ref ptr<obj.Prog> EndProg = default, long StartPC = default, long EndPC = default, RegisterSet Registers = default, bool OnStack = default, SlotID StackLocation = default)
+            public VarLoc(RegisterSet Registers = default, StackOffset StackOffset = default)
             {
-                this.Start = Start;
-                this.End = End;
-                this.StartProg = StartProg;
-                this.EndProg = EndProg;
-                this.StartPC = StartPC;
-                this.EndPC = EndPC;
                 this.Registers = Registers;
-                this.OnStack = OnStack;
-                this.StackLocation = StackLocation;
+                this.StackOffset = StackOffset;
             }
 
             // Enable comparisons between nil and VarLoc struct
@@ -75,7 +65,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static VarLoc VarLoc_cast(dynamic value)
         {
-            return new VarLoc(ref value.Start, ref value.End, ref value.StartProg, ref value.EndProg, value.StartPC, value.EndPC, value.Registers, value.OnStack, value.StackLocation);
+            return new VarLoc(value.Registers, value.StackOffset);
         }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:11 UTC
+//     Generated on 2020 October 08 03:26:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using errors = go.errors_package;
+using fmtsort = go.@internal.fmtsort_package;
 using io = go.io_package;
 using os = go.os_package;
 using reflect = go.reflect_package;
@@ -53,7 +53,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace go
             static Stringer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stringer.String method", new Exception("String"));
             }
 

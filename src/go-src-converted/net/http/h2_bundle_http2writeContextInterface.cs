@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:20 UTC
+//     Generated on 2020 October 08 03:39:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -78,7 +79,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -92,80 +93,84 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (ref hpack.Encoder, ref bytes.Buffer) FramerByRef(ref T value);
-            private delegate (ref hpack.Encoder, ref bytes.Buffer) FramerByVal(T value);
+            private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FramerByPtr(ptr<T> value);
+            private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FramerByVal(T value);
 
-            private static readonly FramerByRef s_FramerByRef;
+            private static readonly FramerByPtr s_FramerByPtr;
             private static readonly FramerByVal s_FramerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref hpack.Encoder, ref bytes.Buffer) Framer()
+            public (ptr<hpack.Encoder>, ptr<bytes.Buffer>) Framer()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FramerByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FramerByPtr is null || !m_target_is_ptr)
                     return s_FramerByVal!(target);
 
-                return s_FramerByRef(ref target);
+                return s_FramerByPtr(m_target_ptr);
             }
 
-            private delegate (ref hpack.Encoder, ref bytes.Buffer) FlushByRef(ref T value);
-            private delegate (ref hpack.Encoder, ref bytes.Buffer) FlushByVal(T value);
+            private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FlushByPtr(ptr<T> value);
+            private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FlushByVal(T value);
 
-            private static readonly FlushByRef s_FlushByRef;
+            private static readonly FlushByPtr s_FlushByPtr;
             private static readonly FlushByVal s_FlushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref hpack.Encoder, ref bytes.Buffer) Flush()
+            public (ptr<hpack.Encoder>, ptr<bytes.Buffer>) Flush()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FlushByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FlushByPtr is null || !m_target_is_ptr)
                     return s_FlushByVal!(target);
 
-                return s_FlushByRef(ref target);
+                return s_FlushByPtr(m_target_ptr);
             }
 
-            private delegate (ref hpack.Encoder, ref bytes.Buffer) CloseConnByRef(ref T value);
-            private delegate (ref hpack.Encoder, ref bytes.Buffer) CloseConnByVal(T value);
+            private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) CloseConnByPtr(ptr<T> value);
+            private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) CloseConnByVal(T value);
 
-            private static readonly CloseConnByRef s_CloseConnByRef;
+            private static readonly CloseConnByPtr s_CloseConnByPtr;
             private static readonly CloseConnByVal s_CloseConnByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref hpack.Encoder, ref bytes.Buffer) CloseConn()
+            public (ptr<hpack.Encoder>, ptr<bytes.Buffer>) CloseConn()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseConnByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseConnByPtr is null || !m_target_is_ptr)
                     return s_CloseConnByVal!(target);
 
-                return s_CloseConnByRef(ref target);
+                return s_CloseConnByPtr(m_target_ptr);
             }
 
-            private delegate (ref hpack.Encoder, ref bytes.Buffer) HeaderEncoderByRef(ref T value);
-            private delegate (ref hpack.Encoder, ref bytes.Buffer) HeaderEncoderByVal(T value);
+            private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) HeaderEncoderByPtr(ptr<T> value);
+            private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) HeaderEncoderByVal(T value);
 
-            private static readonly HeaderEncoderByRef s_HeaderEncoderByRef;
+            private static readonly HeaderEncoderByPtr s_HeaderEncoderByPtr;
             private static readonly HeaderEncoderByVal s_HeaderEncoderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref hpack.Encoder, ref bytes.Buffer) HeaderEncoder()
+            public (ptr<hpack.Encoder>, ptr<bytes.Buffer>) HeaderEncoder()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_HeaderEncoderByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_HeaderEncoderByPtr is null || !m_target_is_ptr)
                     return s_HeaderEncoderByVal!(target);
 
-                return s_HeaderEncoderByRef(ref target);
+                return s_HeaderEncoderByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -174,71 +179,59 @@ namespace net
             static http2writeContext()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Framer");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Framer");
 
                 if (!(extensionMethod is null))
-                    s_FramerByRef = extensionMethod.CreateStaticDelegate(typeof(FramerByRef)) as FramerByRef;
+                    s_FramerByPtr = extensionMethod.CreateStaticDelegate(typeof(FramerByPtr)) as FramerByPtr;
 
-                if (s_FramerByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Framer");
+                extensionMethod = targetType.GetExtensionMethod("Framer");
 
-                    if (!(extensionMethod is null))
-                        s_FramerByVal = extensionMethod.CreateStaticDelegate(typeof(FramerByVal)) as FramerByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FramerByVal = extensionMethod.CreateStaticDelegate(typeof(FramerByVal)) as FramerByVal;
 
-                if (s_FramerByRef is null && s_FramerByVal is null)
+                if (s_FramerByPtr is null && s_FramerByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2writeContext.Framer method", new Exception("Framer"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Flush");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Flush");
 
                 if (!(extensionMethod is null))
-                    s_FlushByRef = extensionMethod.CreateStaticDelegate(typeof(FlushByRef)) as FlushByRef;
+                    s_FlushByPtr = extensionMethod.CreateStaticDelegate(typeof(FlushByPtr)) as FlushByPtr;
 
-                if (s_FlushByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Flush");
+                extensionMethod = targetType.GetExtensionMethod("Flush");
 
-                    if (!(extensionMethod is null))
-                        s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
 
-                if (s_FlushByRef is null && s_FlushByVal is null)
+                if (s_FlushByPtr is null && s_FlushByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2writeContext.Flush method", new Exception("Flush"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CloseConn");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CloseConn");
 
                 if (!(extensionMethod is null))
-                    s_CloseConnByRef = extensionMethod.CreateStaticDelegate(typeof(CloseConnByRef)) as CloseConnByRef;
+                    s_CloseConnByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseConnByPtr)) as CloseConnByPtr;
 
-                if (s_CloseConnByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CloseConn");
+                extensionMethod = targetType.GetExtensionMethod("CloseConn");
 
-                    if (!(extensionMethod is null))
-                        s_CloseConnByVal = extensionMethod.CreateStaticDelegate(typeof(CloseConnByVal)) as CloseConnByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseConnByVal = extensionMethod.CreateStaticDelegate(typeof(CloseConnByVal)) as CloseConnByVal;
 
-                if (s_CloseConnByRef is null && s_CloseConnByVal is null)
+                if (s_CloseConnByPtr is null && s_CloseConnByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2writeContext.CloseConn method", new Exception("CloseConn"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("HeaderEncoder");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("HeaderEncoder");
 
                 if (!(extensionMethod is null))
-                    s_HeaderEncoderByRef = extensionMethod.CreateStaticDelegate(typeof(HeaderEncoderByRef)) as HeaderEncoderByRef;
+                    s_HeaderEncoderByPtr = extensionMethod.CreateStaticDelegate(typeof(HeaderEncoderByPtr)) as HeaderEncoderByPtr;
 
-                if (s_HeaderEncoderByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("HeaderEncoder");
+                extensionMethod = targetType.GetExtensionMethod("HeaderEncoder");
 
-                    if (!(extensionMethod is null))
-                        s_HeaderEncoderByVal = extensionMethod.CreateStaticDelegate(typeof(HeaderEncoderByVal)) as HeaderEncoderByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_HeaderEncoderByVal = extensionMethod.CreateStaticDelegate(typeof(HeaderEncoderByVal)) as HeaderEncoderByVal;
 
-                if (s_HeaderEncoderByRef is null && s_HeaderEncoderByVal is null)
+                if (s_HeaderEncoderByPtr is null && s_HeaderEncoderByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2writeContext.HeaderEncoder method", new Exception("HeaderEncoder"));
             }
 

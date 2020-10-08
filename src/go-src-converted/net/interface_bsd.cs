@@ -4,12 +4,12 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package net -- go2cs converted at 2020 August 29 08:26:29 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:13 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\interface_bsd.go
 using syscall = go.syscall_package;
 
-using route = go.golang_org.x.net.route_package;
+using route = go.golang.org.x.net.route_package;
 using static go.builtin;
 
 namespace go
@@ -21,10 +21,13 @@ namespace go
         // interface.
         private static (slice<Interface>, error) interfaceTable(long ifindex)
         {
+            slice<Interface> _p0 = default;
+            error _p0 = default!;
+
             var (msgs, err) = interfaceMessages(ifindex);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
             var n = len(msgs);
             if (ifindex != 0L)
@@ -41,7 +44,7 @@ namespace go
                     m = __m;
                     switch (m.type())
                     {
-                        case ref route.InterfaceMessage m:
+                        case ptr<route.InterfaceMessage> m:
                             if (ifindex != 0L && ifindex != m.Index)
                             {
                                 continue;
@@ -50,7 +53,7 @@ namespace go
                             ift[n].Name = m.Name;
                             ift[n].Flags = linkFlags(m.Flags);
                             {
-                                ref route.LinkAddr (sa, ok) = m.Addrs[syscall.RTAX_IFP]._<ref route.LinkAddr>();
+                                ptr<route.LinkAddr> (sa, ok) = m.Addrs[syscall.RTAX_IFP]._<ptr<route.LinkAddr>>();
 
                                 if (ok && len(sa.Addr) > 0L)
                                 {
@@ -58,10 +61,11 @@ namespace go
                                     copy(ift[n].HardwareAddr, sa.Addr);
                                 }
                             }
+
                             foreach (var (_, sys) in m.Sys())
                             {
                                 {
-                                    ref route.InterfaceMetrics (imx, ok) = sys._<ref route.InterfaceMetrics>();
+                                    ptr<route.InterfaceMetrics> (imx, ok) = sys._<ptr<route.InterfaceMetrics>>();
 
                                     if (ok)
                                     {
@@ -69,18 +73,21 @@ namespace go
                                         break;
                                     }
                                 }
+
                             }                            n++;
                             if (ifindex == m.Index)
                             {
-                                return (ift[..n], null);
+                                return (ift[..n], error.As(null!)!);
                             }
                             break;
                     }
+
                 }
                 m = m__prev1;
             }
 
-            return (ift[..n], null);
+            return (ift[..n], error.As(null!)!);
+
         }
 
         private static Flags linkFlags(long rawFlags)
@@ -90,40 +97,52 @@ namespace go
             {
                 f |= FlagUp;
             }
+
             if (rawFlags & syscall.IFF_BROADCAST != 0L)
             {
                 f |= FlagBroadcast;
             }
+
             if (rawFlags & syscall.IFF_LOOPBACK != 0L)
             {
                 f |= FlagLoopback;
             }
+
             if (rawFlags & syscall.IFF_POINTOPOINT != 0L)
             {
                 f |= FlagPointToPoint;
             }
+
             if (rawFlags & syscall.IFF_MULTICAST != 0L)
             {
                 f |= FlagMulticast;
             }
+
             return f;
+
         }
 
         // If the ifi is nil, interfaceAddrTable returns addresses for all
         // network interfaces. Otherwise it returns addresses for a specific
         // interface.
-        private static (slice<Addr>, error) interfaceAddrTable(ref Interface ifi)
+        private static (slice<Addr>, error) interfaceAddrTable(ptr<Interface> _addr_ifi)
         {
+            slice<Addr> _p0 = default;
+            error _p0 = default!;
+            ref Interface ifi = ref _addr_ifi.val;
+
             long index = 0L;
             if (ifi != null)
             {
                 index = ifi.Index;
             }
+
             var (msgs, err) = interfaceMessages(index);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             var ifat = make_slice<Addr>(0L, len(msgs));
             {
                 var m__prev1 = m;
@@ -133,18 +152,19 @@ namespace go
                     m = __m;
                     switch (m.type())
                     {
-                        case ref route.InterfaceAddrMessage m:
+                        case ptr<route.InterfaceAddrMessage> m:
                             if (index != 0L && index != m.Index)
                             {
                                 continue;
                             }
+
                             IPMask mask = default;
                             switch (m.Addrs[syscall.RTAX_NETMASK].type())
                             {
-                                case ref route.Inet4Addr sa:
+                                case ptr<route.Inet4Addr> sa:
                                     mask = IPv4Mask(sa.IP[0L], sa.IP[1L], sa.IP[2L], sa.IP[3L]);
                                     break;
-                                case ref route.Inet6Addr sa:
+                                case ptr<route.Inet6Addr> sa:
                                     mask = make(IPMask, IPv6len);
                                     copy(mask, sa.IP[..]);
                                     break;
@@ -152,26 +172,30 @@ namespace go
                             IP ip = default;
                             switch (m.Addrs[syscall.RTAX_IFA].type())
                             {
-                                case ref route.Inet4Addr sa:
+                                case ptr<route.Inet4Addr> sa:
                                     ip = IPv4(sa.IP[0L], sa.IP[1L], sa.IP[2L], sa.IP[3L]);
                                     break;
-                                case ref route.Inet6Addr sa:
+                                case ptr<route.Inet6Addr> sa:
                                     ip = make(IP, IPv6len);
                                     copy(ip, sa.IP[..]);
                                     break;
                             }
                             if (ip != null && mask != null)
                             { // NetBSD may contain route.LinkAddr
-                                ifat = append(ifat, ref new IPNet(IP:ip,Mask:mask));
+                                ifat = append(ifat, addr(new IPNet(IP:ip,Mask:mask)));
+
                             }
+
                             break;
                     }
+
                 }
 
                 m = m__prev1;
             }
 
-            return (ifat, null);
+            return (ifat, error.As(null!)!);
+
         }
     }
 }

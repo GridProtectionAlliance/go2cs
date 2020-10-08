@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:52 UTC
+//     Generated on 2020 October 08 03:24:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using errors = go.errors_package;
 using io = go.io_package;
 using math = go.math_package;
 using reflect = go.reflect_package;
+using sync = go.sync_package;
 using go;
 
 namespace go {

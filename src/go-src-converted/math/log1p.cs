@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:55 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:20 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\log1p.go
 
@@ -105,20 +105,20 @@ namespace go
 
         private static double log1p(double x)
         {
-            const float Sqrt2M1 = 4.142135623730950488017e-01F; // Sqrt(2)-1 = 0x3fda827999fcef34
-            const float Sqrt2HalfM1 = -2.928932188134524755992e-01F; // Sqrt(2)/2-1 = 0xbfd2bec333018866
-            const float Small = 1.0F / (1L << (int)(29L)); // 2**-29 = 0x3e20000000000000
-            const float Tiny = 1.0F / (1L << (int)(54L)); // 2**-54
-            const long Two53 = 1L << (int)(53L); // 2**53
-            const float Ln2Hi = 6.93147180369123816490e-01F; // 3fe62e42fee00000
-            const float Ln2Lo = 1.90821492927058770002e-10F; // 3dea39ef35793c76
-            const float Lp1 = 6.666666666666735130e-01F; // 3FE5555555555593
-            const float Lp2 = 3.999999999940941908e-01F; // 3FD999999997FA04
-            const float Lp3 = 2.857142874366239149e-01F; // 3FD2492494229359
-            const float Lp4 = 2.222219843214978396e-01F; // 3FCC71C51D8E78AF
-            const float Lp5 = 1.818357216161805012e-01F; // 3FC7466496CB03DE
-            const float Lp6 = 1.531383769920937332e-01F; // 3FC39A09D078C69F
-            const float Lp7 = 1.479819860511658591e-01F; // 3FC2F112DF3E5244 
+            const float Sqrt2M1 = (float)4.142135623730950488017e-01F; // Sqrt(2)-1 = 0x3fda827999fcef34
+            const float Sqrt2HalfM1 = (float)-2.928932188134524755992e-01F; // Sqrt(2)/2-1 = 0xbfd2bec333018866
+            const float Small = (float)1.0F / (1L << (int)(29L)); // 2**-29 = 0x3e20000000000000
+            const float Tiny = (float)1.0F / (1L << (int)(54L)); // 2**-54
+            const long Two53 = (long)1L << (int)(53L); // 2**53
+            const float Ln2Hi = (float)6.93147180369123816490e-01F; // 3fe62e42fee00000
+            const float Ln2Lo = (float)1.90821492927058770002e-10F; // 3dea39ef35793c76
+            const float Lp1 = (float)6.666666666666735130e-01F; // 3FE5555555555593
+            const float Lp2 = (float)3.999999999940941908e-01F; // 3FD999999997FA04
+            const float Lp3 = (float)2.857142874366239149e-01F; // 3FD2492494229359
+            const float Lp4 = (float)2.222219843214978396e-01F; // 3FCC71C51D8E78AF
+            const float Lp5 = (float)1.818357216161805012e-01F; // 3FC7466496CB03DE
+            const float Lp6 = (float)1.531383769920937332e-01F; // 3FC39A09D078C69F
+            const float Lp7 = (float)1.479819860511658591e-01F; // 3FC2F112DF3E5244 
 
             // special cases
 
@@ -133,6 +133,7 @@ namespace go
             {>>MARKER:FUNCTION_Log1p_BLOCK_PREFIX<<
                 absx = -absx;
             }
+
             double f = default;
             ulong iu = default;
             long k = 1L;
@@ -143,17 +144,24 @@ namespace go
                     if (absx < Tiny)
                     { // |x| < 2**-54
                         return x;
+
                     }
+
                     return x - x * x * 0.5F;
+
                 }
+
                 if (x > Sqrt2HalfM1)
                 { // Sqrt(2)/2-1 < x
                     // (Sqrt(2)/2-1) < x < (Sqrt(2)-1)
                     k = 0L;
                     f = x;
                     iu = 1L;
+
                 }
+
             }
+
             double c = default;
             if (k != 0L)
             {
@@ -162,16 +170,19 @@ namespace go
                 { // 1<<53
                     u = 1.0F + x;
                     iu = Float64bits(u);
-                    k = int((iu >> (int)(52L)) - 1023L);
+                    k = int((iu >> (int)(52L)) - 1023L); 
+                    // correction term
                     if (k > 0L)
                     {
                         c = 1.0F - (u - x);
                     }
                     else
                     {
-                        c = x - (u - 1.0F); // correction term
-                        c /= u;
+                        c = x - (u - 1.0F);
                     }
+
+                    c /= u;
+
                 }
                 else
                 {
@@ -180,6 +191,7 @@ namespace go
                     k = int((iu >> (int)(52L)) - 1023L);
                     c = 0L;
                 }
+
                 iu &= 0x000fffffffffffffUL;
                 if (iu < 0x0006a09e667f3bcdUL)
                 { // mantissa of Sqrt(2)
@@ -190,9 +202,12 @@ namespace go
                     k++;
                     u = Float64frombits(iu | 0x3fe0000000000000UL); // normalize u/2
                     iu = (0x0010000000000000UL - iu) >> (int)(2L);
+
                 }
+
                 f = u - 1.0F; // Sqrt(2)/2 < u < Sqrt(2)
             }
+
             float hfsq = 0.5F * f * f;
             double s = default;            double R = default;            double z = default;
 
@@ -204,16 +219,22 @@ namespace go
                     {
                         return 0L;
                     }
+
                     c += float64(k) * Ln2Lo;
                     return float64(k) * Ln2Hi + c;
+
                 }
+
                 R = hfsq * (1.0F - 0.66666666666666666F * f); // avoid division
                 if (k == 0L)
                 {
                     return f - R;
                 }
+
                 return float64(k) * Ln2Hi - ((R - (float64(k) * Ln2Lo + c)) - f);
+
             }
+
             s = f / (2.0F + f);
             z = s * s;
             R = z * (Lp1 + z * (Lp2 + z * (Lp3 + z * (Lp4 + z * (Lp5 + z * (Lp6 + z * Lp7))))));
@@ -221,7 +242,9 @@ namespace go
             {
                 return f - (hfsq - s * (hfsq + R));
             }
+
             return float64(k) * Ln2Hi - ((hfsq - (s * (hfsq + R) + (float64(k) * Ln2Lo + c))) - f);
+
         }
     }
 }

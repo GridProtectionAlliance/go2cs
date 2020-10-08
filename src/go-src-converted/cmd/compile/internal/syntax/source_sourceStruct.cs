@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:27 UTC
+//     Generated on 2020 October 08 04:28:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,38 +30,32 @@ namespace @internal
             // Constructors
             public source(NilType _)
             {
-                this.src = default;
+                this.@in = default;
                 this.errh = default;
                 this.buf = default;
-                this.offs = default;
-                this.r0 = default;
-                this.r = default;
-                this.w = default;
-                this.line0 = default;
-                this.line = default;
-                this.col0 = default;
-                this.col = default;
                 this.ioerr = default;
-                this.lit = default;
-                this.suf = default;
+                this.b = default;
+                this.r = default;
+                this.e = default;
+                this.line = default;
+                this.col = default;
+                this.ch = default;
+                this.chw = default;
             }
 
-            public source(io.Reader src = default, Action<ulong, ulong, @string> errh = default, array<byte> buf = default, long offs = default, long r0 = default, long r = default, long w = default, ulong line0 = default, ulong line = default, ulong col0 = default, ulong col = default, error ioerr = default, slice<byte> lit = default, long suf = default)
+            public source(io.Reader @in = default, Action<ulong, ulong, @string> errh = default, slice<byte> buf = default, error ioerr = default, long b = default, long r = default, long e = default, ulong line = default, ulong col = default, int ch = default, long chw = default)
             {
-                this.src = src;
+                this.@in = @in;
                 this.errh = errh;
                 this.buf = buf;
-                this.offs = offs;
-                this.r0 = r0;
-                this.r = r;
-                this.w = w;
-                this.line0 = line0;
-                this.line = line;
-                this.col0 = col0;
-                this.col = col;
                 this.ioerr = ioerr;
-                this.lit = lit;
-                this.suf = suf;
+                this.b = b;
+                this.r = r;
+                this.e = e;
+                this.line = line;
+                this.col = col;
+                this.ch = ch;
+                this.chw = chw;
             }
 
             // Enable comparisons between nil and source struct
@@ -84,7 +78,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static source source_cast(dynamic value)
         {
-            return new source(value.src, value.errh, value.buf, value.offs, value.r0, value.r, value.w, value.line0, value.line, value.col0, value.col, value.ioerr, value.lit, value.suf);
+            return new source(value.@in, value.errh, value.buf, value.ioerr, value.b, value.r, value.e, value.line, value.col, value.ch, value.chw);
         }
     }
 }}}}

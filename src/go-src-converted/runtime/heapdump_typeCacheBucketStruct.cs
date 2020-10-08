@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:17:18 UTC
+//     Generated on 2020 October 08 03:19:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace go
                 this.t = default;
             }
 
-            public typeCacheBucket(array<ref _type> t = default)
+            public typeCacheBucket(array<ptr<_type>> t = default)
             {
                 this.t = t;
             }

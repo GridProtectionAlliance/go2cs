@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package net -- go2cs converted at 2020 August 29 08:27:27 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:22 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sockopt_bsd.go
 using os = go.os_package;
@@ -29,21 +29,31 @@ namespace go
                     syscall.SetsockoptInt(s, syscall.IPPROTO_IP, syscall.IP_PORTRANGE, syscall.IP_PORTRANGE_HIGH);
                 else if (family == syscall.AF_INET6) 
                     syscall.SetsockoptInt(s, syscall.IPPROTO_IPV6, syscall.IPV6_PORTRANGE, syscall.IPV6_PORTRANGE_HIGH);
-                            }
+                
+            }
             if (supportsIPv4map() && family == syscall.AF_INET6 && sotype != syscall.SOCK_RAW)
             { 
                 // Allow both IP versions even if the OS default
                 // is otherwise. Note that some operating systems
                 // never admit this option.
                 syscall.SetsockoptInt(s, syscall.IPPROTO_IPV6, syscall.IPV6_V6ONLY, boolint(ipv6only));
+
             }
-            return error.As(os.NewSyscallError("setsockopt", syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_BROADCAST, 1L)));
+            if ((sotype == syscall.SOCK_DGRAM || sotype == syscall.SOCK_RAW) && family != syscall.AF_UNIX)
+            { 
+                // Allow broadcast.
+                return error.As(os.NewSyscallError("setsockopt", syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_BROADCAST, 1L)))!;
+
+            }
+            return error.As(null!)!;
+
         }
 
         private static error setDefaultListenerSockopts(long s)
         { 
             // Allow reuse of recently-used addresses.
-            return error.As(os.NewSyscallError("setsockopt", syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1L)));
+            return error.As(os.NewSyscallError("setsockopt", syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1L)))!;
+
         }
 
         private static error setDefaultMulticastSockopts(long s)
@@ -55,7 +65,7 @@ namespace go
 
                 if (err != null)
                 {
-                    return error.As(os.NewSyscallError("setsockopt", err));
+                    return error.As(os.NewSyscallError("setsockopt", err))!;
                 } 
                 // Allow reuse of recently-used ports.
                 // This option is supported only in descendants of 4.4BSD,
@@ -67,7 +77,8 @@ namespace go
             // This option is supported only in descendants of 4.4BSD,
             // to make an effective multicast application that requires
             // quick draw possible.
-            return error.As(os.NewSyscallError("setsockopt", syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEPORT, 1L)));
+            return error.As(os.NewSyscallError("setsockopt", syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEPORT, 1L)))!;
+
         }
     }
 }

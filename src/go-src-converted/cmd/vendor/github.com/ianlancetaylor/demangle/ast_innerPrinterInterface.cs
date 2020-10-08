@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:50 UTC
+//     Generated on 2020 October 08 04:43:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace ianlancetaylor
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,26 +69,27 @@ namespace ianlancetaylor
                 m_target_is_ptr = true;
             }
 
-            private delegate void printInnerByRef(ref T value, ref printState _p0);
-            private delegate void printInnerByVal(T value, ref printState _p0);
+            private delegate void printInnerByPtr(ptr<T> value, ptr<printState> _p0);
+            private delegate void printInnerByVal(T value, ptr<printState> _p0);
 
-            private static readonly printInnerByRef s_printInnerByRef;
+            private static readonly printInnerByPtr s_printInnerByPtr;
             private static readonly printInnerByVal s_printInnerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void printInner(ref printState _p0)
+            public void printInner(ptr<printState> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_printInnerByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_printInnerByPtr is null || !m_target_is_ptr)
                 {
                     s_printInnerByVal!(target, _p0);
                     return;
                 }
 
-                s_printInnerByRef(ref target, _p0);
+                s_printInnerByPtr(m_target_ptr, _p0);
                 return;
                 
             }
@@ -99,23 +100,20 @@ namespace ianlancetaylor
             static innerPrinter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("printInner");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("printInner");
 
                 if (!(extensionMethod is null))
-                    s_printInnerByRef = extensionMethod.CreateStaticDelegate(typeof(printInnerByRef)) as printInnerByRef;
+                    s_printInnerByPtr = extensionMethod.CreateStaticDelegate(typeof(printInnerByPtr)) as printInnerByPtr;
 
-                if (s_printInnerByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("printInner");
+                extensionMethod = targetType.GetExtensionMethod("printInner");
 
-                    if (!(extensionMethod is null))
-                        s_printInnerByVal = extensionMethod.CreateStaticDelegate(typeof(printInnerByVal)) as printInnerByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_printInnerByVal = extensionMethod.CreateStaticDelegate(typeof(printInnerByVal)) as printInnerByVal;
 
-                if (s_printInnerByRef is null && s_printInnerByVal is null)
+                if (s_printInnerByPtr is null && s_printInnerByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement innerPrinter.printInner method", new Exception("printInner"));
             }
 

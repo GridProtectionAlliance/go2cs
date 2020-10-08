@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:36:14 UTC
+// package template -- go2cs converted at 2020 October 08 03:43:10 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\template.go
 using fmt = go.fmt_package;
@@ -28,7 +28,7 @@ namespace html
 // template's in sync.
             public ptr<template.Template> text; // The underlying template's parse tree, updated to be HTML-safe.
             public ptr<parse.Tree> Tree;
-            public ref nameSpace nameSpace => ref nameSpace_ptr; // common to all associated templates
+            public ref ptr<nameSpace> ptr<nameSpace> => ref ptr<nameSpace>_ptr; // common to all associated templates
         }
 
         // escapeOK is a sentinel value used to indicate valid escaping.
@@ -38,25 +38,28 @@ namespace html
         private partial struct nameSpace
         {
             public sync.Mutex mu;
-            public map<@string, ref Template> set;
+            public map<@string, ptr<Template>> set;
             public bool escaped;
             public escaper esc;
         }
 
         // Templates returns a slice of the templates associated with t, including t
         // itself.
-        private static slice<ref Template> Templates(this ref Template _t) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static slice<ptr<Template>> Templates(this ptr<Template> _addr_t) => func((defer, _, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             var ns = t.nameSpace;
             ns.mu.Lock();
             defer(ns.mu.Unlock()); 
             // Return a slice so we don't expose the map.
-            var m = make_slice<ref Template>(0L, len(ns.set));
+            var m = make_slice<ptr<Template>>(0L, len(ns.set));
             foreach (var (_, v) in ns.set)
             {
                 m = append(m, v);
             }
             return m;
+
         });
 
         // Option sets options for the template. Options are described by
@@ -77,32 +80,42 @@ namespace html
         //    "missingkey=error"
         //        Execution stops immediately with an error.
         //
-        private static ref Template Option(this ref Template t, params @string[] opt)
+        private static ptr<Template> Option(this ptr<Template> _addr_t, params @string[] opt)
         {
+            opt = opt.Clone();
+            ref Template t = ref _addr_t.val;
+
             t.text.Option(opt);
-            return t;
+            return _addr_t!;
         }
 
         // checkCanParse checks whether it is OK to parse templates.
         // If not, it returns an error.
-        private static error checkCanParse(this ref Template _t) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static error checkCanParse(this ptr<Template> _addr_t) => func((defer, _, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             if (t == null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             t.nameSpace.mu.Lock();
             defer(t.nameSpace.mu.Unlock());
             if (t.nameSpace.escaped)
             {
-                return error.As(fmt.Errorf("html/template: cannot Parse after Execute"));
+                return error.As(fmt.Errorf("html/template: cannot Parse after Execute"))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         });
 
         // escape escapes all associated templates.
-        private static error escape(this ref Template _t) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static error escape(this ptr<Template> _addr_t) => func((defer, _, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             t.nameSpace.mu.Lock();
             defer(t.nameSpace.mu.Unlock());
             t.nameSpace.escaped = true;
@@ -110,23 +123,27 @@ namespace html
             {
                 if (t.Tree == null)
                 {
-                    return error.As(fmt.Errorf("template: %q is an incomplete or empty template", t.Name()));
+                    return error.As(fmt.Errorf("template: %q is an incomplete or empty template", t.Name()))!;
                 }
+
                 {
                     var err = escapeTemplate(t, t.text.Root, t.Name());
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             }
             else if (t.escapeErr != escapeOK)
             {
-                return error.As(t.escapeErr);
+                return error.As(t.escapeErr)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         });
 
         // Execute applies a parsed template to the specified data object,
@@ -136,18 +153,22 @@ namespace html
         // the output writer.
         // A template may be executed safely in parallel, although if parallel
         // executions share a Writer the output may be interleaved.
-        private static error Execute(this ref Template t, io.Writer wr, object data)
+        private static error Execute(this ptr<Template> _addr_t, io.Writer wr, object data)
         {
+            ref Template t = ref _addr_t.val;
+
             {
                 var err = t.escape();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
-            return error.As(t.text.Execute(wr, data));
+
+            return error.As(t.text.Execute(wr, data))!;
+
         }
 
         // ExecuteTemplate applies the template associated with t that has the given
@@ -157,53 +178,69 @@ namespace html
         // the output writer.
         // A template may be executed safely in parallel, although if parallel
         // executions share a Writer the output may be interleaved.
-        private static error ExecuteTemplate(this ref Template t, io.Writer wr, @string name, object data)
+        private static error ExecuteTemplate(this ptr<Template> _addr_t, io.Writer wr, @string name, object data)
         {
+            ref Template t = ref _addr_t.val;
+
             var (tmpl, err) = t.lookupAndEscapeTemplate(name);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(tmpl.text.Execute(wr, data));
+
+            return error.As(tmpl.text.Execute(wr, data))!;
+
         }
 
         // lookupAndEscapeTemplate guarantees that the template with the given name
         // is escaped, or returns an error if it cannot be. It returns the named
         // template.
-        private static (ref Template, error) lookupAndEscapeTemplate(this ref Template _t, @string name) => func(_t, (ref Template t, Defer defer, Panic panic, Recover _) =>
+        private static (ptr<Template>, error) lookupAndEscapeTemplate(this ptr<Template> _addr_t, @string name) => func((defer, panic, _) =>
         {
+            ptr<Template> tmpl = default!;
+            error err = default!;
+            ref Template t = ref _addr_t.val;
+
             t.nameSpace.mu.Lock();
             defer(t.nameSpace.mu.Unlock());
             t.nameSpace.escaped = true;
             tmpl = t.set[name];
             if (tmpl == null)
             {
-                return (null, fmt.Errorf("html/template: %q is undefined", name));
+                return (_addr_null!, error.As(fmt.Errorf("html/template: %q is undefined", name))!);
             }
+
             if (tmpl.escapeErr != null && tmpl.escapeErr != escapeOK)
             {
-                return (null, tmpl.escapeErr);
+                return (_addr_null!, error.As(tmpl.escapeErr)!);
             }
+
             if (tmpl.text.Tree == null || tmpl.text.Root == null)
             {
-                return (null, fmt.Errorf("html/template: %q is an incomplete template", name));
+                return (_addr_null!, error.As(fmt.Errorf("html/template: %q is an incomplete template", name))!);
             }
+
             if (t.text.Lookup(name) == null)
             {
                 panic("html/template internal error: template escaping out of sync");
             }
+
             if (tmpl.escapeErr == null)
             {
                 err = escapeTemplate(tmpl, tmpl.text.Root, name);
             }
-            return (tmpl, err);
+
+            return (_addr_tmpl!, error.As(err)!);
+
         });
 
         // DefinedTemplates returns a string listing the defined templates,
         // prefixed by the string "; defined templates are: ". If there are none,
         // it returns the empty string. Used to generate an error message.
-        private static @string DefinedTemplates(this ref Template t)
+        private static @string DefinedTemplates(this ptr<Template> _addr_t)
         {
+            ref Template t = ref _addr_t.val;
+
             return t.text.DefinedTemplates();
         }
 
@@ -218,22 +255,27 @@ namespace html
         // is considered empty and will not replace an existing template's body.
         // This allows using Parse to add new named template definitions without
         // overwriting the main template body.
-        private static (ref Template, error) Parse(this ref Template _t, @string text) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static (ptr<Template>, error) Parse(this ptr<Template> _addr_t, @string text) => func((defer, _, __) =>
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+
             {
                 var err = t.checkCanParse();
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
 
+
             var (ret, err) = t.text.Parse(text);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             } 
 
             // In general, all the named templates might have changed underfoot.
@@ -249,38 +291,49 @@ namespace html
                 {
                     tmpl = t.@new(name);
                 }
+
                 tmpl.text = v;
                 tmpl.Tree = v.Tree;
+
             }
-            return (t, null);
+            return (_addr_t!, error.As(null!)!);
+
         });
 
         // AddParseTree creates a new template with the name and parse tree
         // and associates it with t.
         //
         // It returns an error if t or any associated template has already been executed.
-        private static (ref Template, error) AddParseTree(this ref Template _t, @string name, ref parse.Tree _tree) => func(_t, _tree, (ref Template t, ref parse.Tree tree, Defer defer, Panic _, Recover __) =>
+        private static (ptr<Template>, error) AddParseTree(this ptr<Template> _addr_t, @string name, ptr<parse.Tree> _addr_tree) => func((defer, _, __) =>
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+            ref parse.Tree tree = ref _addr_tree.val;
+
             {
                 var err = t.checkCanParse();
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
+
 
             t.nameSpace.mu.Lock();
             defer(t.nameSpace.mu.Unlock());
             var (text, err) = t.text.AddParseTree(name, tree);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            Template ret = ref new Template(nil,text,text.Tree,t.nameSpace,);
+
+            ptr<Template> ret = addr(new Template(nil,text,text.Tree,t.nameSpace,));
             t.set[name] = ret;
-            return (ret, null);
+            return (_addr_ret!, error.As(null!)!);
+
         });
 
         // Clone returns a duplicate of the template, including all associated
@@ -291,22 +344,28 @@ namespace html
         // by adding the variants after the clone is made.
         //
         // It returns an error if t has already been executed.
-        private static (ref Template, error) Clone(this ref Template _t) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static (ptr<Template>, error) Clone(this ptr<Template> _addr_t) => func((defer, _, __) =>
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+
             t.nameSpace.mu.Lock();
             defer(t.nameSpace.mu.Unlock());
             if (t.escapeErr != null)
             {
-                return (null, fmt.Errorf("html/template: cannot Clone %q after it has executed", t.Name()));
+                return (_addr_null!, error.As(fmt.Errorf("html/template: cannot Clone %q after it has executed", t.Name()))!);
             }
+
             var (textClone, err) = t.text.Clone();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            nameSpace ns = ref new nameSpace(set:make(map[string]*Template));
+
+            ptr<nameSpace> ns = addr(new nameSpace(set:make(map[string]*Template)));
             ns.esc = makeEscaper(ns);
-            Template ret = ref new Template(nil,textClone,textClone.Tree,ns,);
+            ptr<Template> ret = addr(new Template(nil,textClone,textClone.Tree,ns,));
             ret.set[ret.Name()] = ret;
             foreach (var (_, x) in textClone.Templates())
             {
@@ -314,23 +373,26 @@ namespace html
                 var src = t.set[name];
                 if (src == null || src.escapeErr != null)
                 {
-                    return (null, fmt.Errorf("html/template: cannot Clone %q after it has executed", t.Name()));
+                    return (_addr_null!, error.As(fmt.Errorf("html/template: cannot Clone %q after it has executed", t.Name()))!);
                 }
+
                 x.Tree = x.Tree.Copy();
-                ret.set[name] = ref new Template(nil,x,x.Tree,ret.nameSpace,);
+                ret.set[name] = addr(new Template(nil,x,x.Tree,ret.nameSpace,));
+
             } 
             // Return the template associated with the name of this template.
-            return (ret.set[ret.Name()], null);
+            return (_addr_ret.set[ret.Name()]!, error.As(null!)!);
+
         });
 
         // New allocates a new HTML template with the given name.
-        public static ref Template New(@string name)
+        public static ptr<Template> New(@string name)
         {
-            nameSpace ns = ref new nameSpace(set:make(map[string]*Template));
+            ptr<nameSpace> ns = addr(new nameSpace(set:make(map[string]*Template)));
             ns.esc = makeEscaper(ns);
-            Template tmpl = ref new Template(nil,template.New(name),nil,ns,);
+            ptr<Template> tmpl = addr(new Template(nil,template.New(name),nil,ns,));
             tmpl.set[name] = tmpl;
-            return tmpl;
+            return _addr_tmpl!;
         }
 
         // New allocates a new HTML template associated with the given one
@@ -340,34 +402,42 @@ namespace html
         // If a template with the given name already exists, the new HTML template
         // will replace it. The existing template will be reset and disassociated with
         // t.
-        private static ref Template New(this ref Template _t, @string name) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static ptr<Template> New(this ptr<Template> _addr_t, @string name) => func((defer, _, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             t.nameSpace.mu.Lock();
             defer(t.nameSpace.mu.Unlock());
-            return t.@new(name);
+            return _addr_t.@new(name)!;
         });
 
         // new is the implementation of New, without the lock.
-        private static ref Template @new(this ref Template t, @string name)
+        private static ptr<Template> @new(this ptr<Template> _addr_t, @string name)
         {
-            Template tmpl = ref new Template(nil,t.text.New(name),nil,t.nameSpace,);
+            ref Template t = ref _addr_t.val;
+
+            ptr<Template> tmpl = addr(new Template(nil,t.text.New(name),nil,t.nameSpace,));
             {
                 var (existing, ok) = tmpl.set[name];
 
                 if (ok)
                 {
                     var emptyTmpl = New(existing.Name());
-                    existing.Value = emptyTmpl.Value;
+                    existing.val = emptyTmpl.val;
                 }
 
             }
+
             tmpl.set[name] = tmpl;
-            return tmpl;
+            return _addr_tmpl!;
+
         }
 
         // Name returns the name of the template.
-        private static @string Name(this ref Template t)
+        private static @string Name(this ptr<Template> _addr_t)
         {
+            ref Template t = ref _addr_t.val;
+
             return t.text.Name();
         }
 
@@ -378,10 +448,12 @@ namespace html
         // terminates and Execute returns that error. FuncMap has the same base type
         // as FuncMap in "text/template", copied here so clients need not import
         // "text/template".
-        private static ref Template Funcs(this ref Template t, FuncMap funcMap)
+        private static ptr<Template> Funcs(this ptr<Template> _addr_t, FuncMap funcMap)
         {
+            ref Template t = ref _addr_t.val;
+
             t.text.Funcs(template.FuncMap(funcMap));
-            return t;
+            return _addr_t!;
         }
 
         // Delims sets the action delimiters to the specified strings, to be used in
@@ -389,32 +461,40 @@ namespace html
         // definitions will inherit the settings. An empty delimiter stands for the
         // corresponding default: {{ or }}.
         // The return value is the template, so calls can be chained.
-        private static ref Template Delims(this ref Template t, @string left, @string right)
+        private static ptr<Template> Delims(this ptr<Template> _addr_t, @string left, @string right)
         {
+            ref Template t = ref _addr_t.val;
+
             t.text.Delims(left, right);
-            return t;
+            return _addr_t!;
         }
 
         // Lookup returns the template with the given name that is associated with t,
         // or nil if there is no such template.
-        private static ref Template Lookup(this ref Template _t, @string name) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static ptr<Template> Lookup(this ptr<Template> _addr_t, @string name) => func((defer, _, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             t.nameSpace.mu.Lock();
             defer(t.nameSpace.mu.Unlock());
-            return t.set[name];
+            return _addr_t.set[name]!;
         });
 
         // Must is a helper that wraps a call to a function returning (*Template, error)
         // and panics if the error is non-nil. It is intended for use in variable initializations
         // such as
         //    var t = template.Must(template.New("name").Parse("html"))
-        public static ref Template Must(ref Template _t, error err) => func(_t, (ref Template t, Defer _, Panic panic, Recover __) =>
+        public static ptr<Template> Must(ptr<Template> _addr_t, error err) => func((_, panic, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             if (err != null)
             {
                 panic(err);
             }
-            return t;
+
+            return _addr_t!;
+
         });
 
         // ParseFiles creates a new Template and parses the template definitions from
@@ -426,11 +506,13 @@ namespace html
         // the last one mentioned will be the one that results.
         // For instance, ParseFiles("a/foo", "b/foo") stores "b/foo" as the template
         // named "foo", while "a/foo" is unavailable.
-        public static (ref Template, error) ParseFiles(params @string[] filenames)
+        public static (ptr<Template>, error) ParseFiles(params @string[] filenames)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
             filenames = filenames.Clone();
 
-            return parseFiles(null, filenames);
+            return _addr_parseFiles(_addr_null, filenames)!;
         }
 
         // ParseFiles parses the named files and associates the resulting templates with
@@ -441,39 +523,51 @@ namespace html
         // the last one mentioned will be the one that results.
         //
         // ParseFiles returns an error if t or any associated template has already been executed.
-        private static (ref Template, error) ParseFiles(this ref Template t, params @string[] filenames)
+        private static (ptr<Template>, error) ParseFiles(this ptr<Template> _addr_t, params @string[] filenames)
         {
-            return parseFiles(t, filenames);
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            filenames = filenames.Clone();
+            ref Template t = ref _addr_t.val;
+
+            return _addr_parseFiles(_addr_t, filenames)!;
         }
 
         // parseFiles is the helper for the method and function. If the argument
         // template is nil, it is created from the first file.
-        private static (ref Template, error) parseFiles(ref Template t, params @string[] filenames)
+        private static (ptr<Template>, error) parseFiles(ptr<Template> _addr_t, params @string[] filenames)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
             filenames = filenames.Clone();
+            ref Template t = ref _addr_t.val;
 
             {
                 var err = t.checkCanParse();
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
 
+
             if (len(filenames) == 0L)
             { 
                 // Not really a problem, but be consistent.
-                return (null, fmt.Errorf("html/template: no files named in call to ParseFiles"));
+                return (_addr_null!, error.As(fmt.Errorf("html/template: no files named in call to ParseFiles"))!);
+
             }
+
             foreach (var (_, filename) in filenames)
             {
                 var (b, err) = ioutil.ReadFile(filename);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
                 var s = string(b);
                 var name = filepath.Base(filename); 
                 // First template becomes return value if not already defined,
@@ -482,11 +576,12 @@ namespace html
                 // as t, this file becomes the contents of t, so
                 //  t, err := New(name).Funcs(xxx).ParseFiles(name)
                 // works. Otherwise we create a new template associated with t.
-                ref Template tmpl = default;
+                ptr<Template> tmpl;
                 if (t == null)
                 {
                     t = New(name);
                 }
+
                 if (name == t.Name())
                 {
                     tmpl = t;
@@ -495,65 +590,84 @@ namespace html
                 {
                     tmpl = t.New(name);
                 }
+
                 _, err = tmpl.Parse(s);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
             }
-            return (t, null);
+            return (_addr_t!, error.As(null!)!);
+
         }
 
-        // ParseGlob creates a new Template and parses the template definitions from the
-        // files identified by the pattern, which must match at least one file. The
-        // returned template will have the (base) name and (parsed) contents of the
+        // ParseGlob creates a new Template and parses the template definitions from
+        // the files identified by the pattern. The files are matched according to the
+        // semantics of filepath.Match, and the pattern must match at least one file.
+        // The returned template will have the (base) name and (parsed) contents of the
         // first file matched by the pattern. ParseGlob is equivalent to calling
         // ParseFiles with the list of files matched by the pattern.
         //
         // When parsing multiple files with the same name in different directories,
         // the last one mentioned will be the one that results.
-        public static (ref Template, error) ParseGlob(@string pattern)
+        public static (ptr<Template>, error) ParseGlob(@string pattern)
         {
-            return parseGlob(null, pattern);
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_parseGlob(_addr_null, pattern)!;
         }
 
         // ParseGlob parses the template definitions in the files identified by the
-        // pattern and associates the resulting templates with t. The pattern is
-        // processed by filepath.Glob and must match at least one file. ParseGlob is
-        // equivalent to calling t.ParseFiles with the list of files matched by the
-        // pattern.
+        // pattern and associates the resulting templates with t. The files are matched
+        // according to the semantics of filepath.Match, and the pattern must match at
+        // least one file. ParseGlob is equivalent to calling t.ParseFiles with the
+        // list of files matched by the pattern.
         //
         // When parsing multiple files with the same name in different directories,
         // the last one mentioned will be the one that results.
         //
         // ParseGlob returns an error if t or any associated template has already been executed.
-        private static (ref Template, error) ParseGlob(this ref Template t, @string pattern)
+        private static (ptr<Template>, error) ParseGlob(this ptr<Template> _addr_t, @string pattern)
         {
-            return parseGlob(t, pattern);
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+
+            return _addr_parseGlob(_addr_t, pattern)!;
         }
 
         // parseGlob is the implementation of the function and method ParseGlob.
-        private static (ref Template, error) parseGlob(ref Template t, @string pattern)
+        private static (ptr<Template>, error) parseGlob(ptr<Template> _addr_t, @string pattern)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+
             {
                 var err = t.checkCanParse();
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
+
             var (filenames, err) = filepath.Glob(pattern);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             if (len(filenames) == 0L)
             {
-                return (null, fmt.Errorf("html/template: pattern matches no files: %#q", pattern));
+                return (_addr_null!, error.As(fmt.Errorf("html/template: pattern matches no files: %#q", pattern))!);
             }
-            return parseFiles(t, filenames);
+
+            return _addr_parseFiles(_addr_t, filenames)!;
+
         }
 
         // IsTrue reports whether the value is 'true', in the sense of not the zero of its type,
@@ -561,6 +675,9 @@ namespace html
         // truth used by if and other such actions.
         public static (bool, bool) IsTrue(object val)
         {
+            bool truth = default;
+            bool ok = default;
+
             return template.IsTrue(val);
         }
     }

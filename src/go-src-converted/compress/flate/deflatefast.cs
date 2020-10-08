@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 August 29 08:23:24 UTC
+// package flate -- go2cs converted at 2020 October 08 03:30:56 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\deflatefast.go
-
+using math = go.math_package;
 using static go.builtin;
 
 namespace go {
@@ -15,21 +15,31 @@ namespace compress
     {
         // This encoding algorithm, which prioritizes speed over output size, is
         // based on Snappy's LZ77-style encoder: github.com/golang/snappy
-        private static readonly long tableBits = 14L; // Bits used in the table.
-        private static readonly long tableSize = 1L << (int)(tableBits); // Size of the table.
-        private static readonly var tableMask = tableSize - 1L; // Mask for table indices. Redundant, but can eliminate bounds checks.
-        private static readonly long tableShift = 32L - tableBits; // Right-shift to get the tableBits most significant bits of a uint32.
+        private static readonly long tableBits = (long)14L; // Bits used in the table.
+        private static readonly long tableSize = (long)1L << (int)(tableBits); // Size of the table.
+        private static readonly var tableMask = (var)tableSize - 1L; // Mask for table indices. Redundant, but can eliminate bounds checks.
+        private static readonly long tableShift = (long)32L - tableBits; // Right-shift to get the tableBits most significant bits of a uint32.
+
+        // Reset the buffer offset when reaching this.
+        // Offsets are stored between blocks as int32 values.
+        // Since the offset we are checking against is at the beginning
+        // of the buffer, we need to subtract the current and input
+        // buffer to not risk overflowing the int32.
+        private static readonly var bufferReset = (var)math.MaxInt32 - maxStoreBlockSize * 2L;
+
 
         private static uint load32(slice<byte> b, int i)
         {
             b = b.slice(i, i + 4L, len(b)); // Help the compiler eliminate bounds checks on the next line.
             return uint32(b[0L]) | uint32(b[1L]) << (int)(8L) | uint32(b[2L]) << (int)(16L) | uint32(b[3L]) << (int)(24L);
+
         }
 
         private static ulong load64(slice<byte> b, int i)
         {
             b = b.slice(i, i + 8L, len(b)); // Help the compiler eliminate bounds checks on the next line.
             return uint64(b[0L]) | uint64(b[1L]) << (int)(8L) | uint64(b[2L]) << (int)(16L) | uint64(b[3L]) << (int)(24L) | uint64(b[4L]) << (int)(32L) | uint64(b[5L]) << (int)(40L) | uint64(b[6L]) << (int)(48L) | uint64(b[7L]) << (int)(56L);
+
         }
 
         private static uint hash(uint u)
@@ -41,8 +51,9 @@ namespace compress
         // assembly implementation can fast-path some 16-bytes-at-a-time copies. They
         // aren't necessary in the pure Go implementation, as we don't use those same
         // optimizations, but using the same thresholds doesn't really hurt.
-        private static readonly long inputMargin = 16L - 1L;
-        private static readonly long minNonLiteralBlockSize = 1L + 1L + inputMargin;
+        private static readonly long inputMargin = (long)16L - 1L;
+        private static readonly long minNonLiteralBlockSize = (long)1L + 1L + inputMargin;
+
 
         private partial struct tableEntry
         {
@@ -59,19 +70,21 @@ namespace compress
             public int cur; // Current match offset.
         }
 
-        private static ref deflateFast newDeflateFast()
+        private static ptr<deflateFast> newDeflateFast()
         {
-            return ref new deflateFast(cur:maxStoreBlockSize,prev:make([]byte,0,maxStoreBlockSize));
+            return addr(new deflateFast(cur:maxStoreBlockSize,prev:make([]byte,0,maxStoreBlockSize)));
         }
 
         // encode encodes a block given in src and appends tokens
         // to dst and returns the result.
-        private static slice<token> encode(this ref deflateFast e, slice<token> dst, slice<byte> src)
-        { 
+        private static slice<token> encode(this ptr<deflateFast> _addr_e, slice<token> dst, slice<byte> src)
+        {
+            ref deflateFast e = ref _addr_e.val;
+ 
             // Ensure that e.cur doesn't wrap.
-            if (e.cur > 1L << (int)(30L))
+            if (e.cur >= bufferReset)
             {
-                e.resetAll();
+                e.shiftOffsets();
             } 
 
             // This check isn't in the Snappy implementation, but there, the caller
@@ -125,6 +138,7 @@ namespace compress
                     {
                         goto emitRemainder;
                     }
+
                     candidate = e.table[nextHash & tableMask];
                     var now = load32(src, nextS);
                     e.table[nextHash & tableMask] = new tableEntry(offset:s+e.cur,val:cv);
@@ -136,8 +150,11 @@ namespace compress
                         // Out of range or not matched.
                         cv = now;
                         continue;
+
                     }
+
                     break;
+
                 } 
 
                 // A 4-byte match has been found. We'll later see if more than 4 bytes
@@ -200,7 +217,9 @@ namespace compress
                         s++;
                         break;
                     }
+
                 }
+
 
             }
 
@@ -210,10 +229,12 @@ emitRemainder:
             {
                 dst = emitLiteral(dst, src[nextEmit..]);
             }
+
             e.cur += int32(len(src));
             e.prev = e.prev[..len(src)];
             copy(e.prev, src);
             return dst;
+
         }
 
         private static slice<token> emitLiteral(slice<token> dst, slice<byte> lit)
@@ -223,13 +244,16 @@ emitRemainder:
                 dst = append(dst, literalToken(uint32(v)));
             }
             return dst;
+
         }
 
         // matchLen returns the match length between src[s:] and src[t:].
         // t can be negative to indicate the match is starting in e.prev.
         // We assume that src[s-4:s] and src[t-4:t] already match.
-        private static int matchLen(this ref deflateFast e, int s, int t, slice<byte> src)
+        private static int matchLen(this ptr<deflateFast> _addr_e, int s, int t, slice<byte> src)
         {
+            ref deflateFast e = ref _addr_e.val;
+
             var s1 = int(s) + maxMatchLength - 4L;
             if (s1 > len(src))
             {
@@ -253,12 +277,14 @@ emitRemainder:
                         {
                             return int32(i);
                         }
+
                     }
 
                     i = i__prev1;
                 }
 
                 return int32(len(a));
+
             } 
 
             // We found a match in the previous block.
@@ -275,6 +301,7 @@ emitRemainder:
             {
                 b = b[..len(a)];
             }
+
             a = a[..len(b)];
             {
                 var i__prev1 = i;
@@ -286,6 +313,7 @@ emitRemainder:
                     {
                         return int32(i);
                     }
+
                 } 
 
                 // If we reached our limit, we matched everything we are
@@ -313,44 +341,84 @@ emitRemainder:
                     {
                         return int32(i) + n;
                     }
+
                 }
 
                 i = i__prev1;
             }
 
             return int32(len(a)) + n;
+
         }
 
         // Reset resets the encoding history.
         // This ensures that no matches are made to the previous block.
-        private static void reset(this ref deflateFast e)
+        private static void reset(this ptr<deflateFast> _addr_e)
         {
+            ref deflateFast e = ref _addr_e.val;
+
             e.prev = e.prev[..0L]; 
             // Bump the offset, so all matches will fail distance check.
             e.cur += maxMatchOffset; 
 
             // Protect against e.cur wraparound.
-            if (e.cur > 1L << (int)(30L))
+            if (e.cur >= bufferReset)
             {
-                e.resetAll();
+                e.shiftOffsets();
             }
+
         }
 
-        // resetAll resets the deflateFast struct and is only called in rare
-        // situations to prevent integer overflow. It manually resets each field
-        // to avoid causing large stack growth.
+        // shiftOffsets will shift down all match offset.
+        // This is only called in rare situations to prevent integer overflow.
         //
-        // See https://golang.org/issue/18636.
-        private static void resetAll(this ref deflateFast e)
-        { 
-            // This is equivalent to:
-            //    *e = deflateFast{cur: maxStoreBlockSize, prev: e.prev[:0]}
-            e.cur = maxStoreBlockSize;
-            e.prev = e.prev[..0L];
-            foreach (var (i) in e.table)
+        // See https://golang.org/issue/18636 and https://github.com/golang/go/issues/34121.
+        private static void shiftOffsets(this ptr<deflateFast> _addr_e)
+        {
+            ref deflateFast e = ref _addr_e.val;
+
+            if (len(e.prev) == 0L)
+            { 
+                // We have no history; just clear the table.
+                {
+                    var i__prev1 = i;
+
+                    foreach (var (__i) in e.table[..])
+                    {
+                        i = __i;
+                        e.table[i] = new tableEntry();
+                    }
+
+                    i = i__prev1;
+                }
+
+                e.cur = maxMatchOffset;
+                return ;
+
+            } 
+
+            // Shift down everything in the table that isn't already too far away.
             {
-                e.table[i] = new tableEntry();
+                var i__prev1 = i;
+
+                foreach (var (__i) in e.table[..])
+                {
+                    i = __i;
+                    var v = e.table[i].offset - e.cur + maxMatchOffset;
+                    if (v < 0L)
+                    {
+                        v = 0L;
+                    }
+
+                    e.table[i].offset = v;
+
+                }
+
+                i = i__prev1;
             }
+
+            e.cur = maxMatchOffset;
+
         }
     }
 }}

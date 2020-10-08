@@ -4,7 +4,7 @@
 
 // +build msan
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:29 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:28 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\msan.go
 using @unsafe = go.@unsafe_package;
@@ -26,7 +26,7 @@ namespace go
         }
 
         // Private interface for the runtime.
-        private static readonly var msanenabled = true;
+        private static readonly var msanenabled = (var)true;
 
         // If we are running on the system stack, the C program may have
         // marked part of that stack as uninitialized. We don't instrument
@@ -49,9 +49,11 @@ namespace go
             var g = getg();
             if (g == null || g.m == null || g == g.m.g0 || g == g.m.gsignal)
             {
-                return;
+                return ;
             }
+
             domsanread(addr, sz);
+
         }
 
         //go:noescape

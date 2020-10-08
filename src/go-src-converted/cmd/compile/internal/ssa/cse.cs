@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:34 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:09 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\cse.go
 using types = go.cmd.compile.@internal.types_package;
+using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
 using static go.builtin;
@@ -20,8 +21,10 @@ namespace @internal
         // cse does common-subexpression elimination on the Function.
         // Values are just relinked, nothing is deleted. A subsequent deadcode
         // pass is required to actually remove duplicate expressions.
-        private static void cse(ref Func f)
-        { 
+        private static void cse(ptr<Func> _addr_f)
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // Two values are equivalent if they satisfy the following definition:
             // equivalent(v, w):
             //   v.op == w.op
@@ -38,7 +41,7 @@ namespace @internal
             // until it reaches a fixed point.
 
             // Make initial coarse partitions by using a subset of the conditions above.
-            var a = make_slice<ref Value>(0L, f.NumValues());
+            var a = make_slice<ptr<Value>>(0L, f.NumValues());
             if (f.auxmap == null)
             {
                 f.auxmap = new auxmap();
@@ -64,10 +67,10 @@ namespace @internal
                                 f.auxmap[v.Aux] = int32(len(f.auxmap)) + 1L;
                             }
                             a = append(a, v);
+
                         }
                         v = v__prev2;
                     }
-
                 }
                 b = b__prev1;
             }
@@ -90,10 +93,10 @@ namespace @internal
                             v = __v; 
                             // Use negative equivalence class #s for unique values.
                             valueEqClass[v.ID] = -v.ID;
+
                         }
                         v = v__prev2;
                     }
-
                 }
                 b = b__prev1;
             }
@@ -119,6 +122,7 @@ namespace @internal
                             j = j__prev2;
                         }
                         fmt.Println();
+
                     }
                     {
                         var v__prev2 = v;
@@ -146,8 +150,10 @@ namespace @internal
                         }
 
                         fmt.Printf("\n");
+
                     }
                     pNum++;
+
                 }
                 e = e__prev1;
             }
@@ -180,11 +186,11 @@ namespace @internal
                                     {
                                         v.Args[0L] = v.Args[1L];
                                         v.Args[1L] = v.Args[0L];
+
                                     }
                                 }
                                 v = v__prev3;
                             }
-
                         }
                         byArgClass.a = e;
                         byArgClass.eqClass = valueEqClass;
@@ -247,6 +253,7 @@ namespace @internal
                                     // Don't add singletons.
                                     valueEqClass[f[0L].ID] = -f[0L].ID;
                                     continue;
+
                                 }
                                 {
                                     var v__prev4 = v;
@@ -261,11 +268,13 @@ namespace @internal
 
                                 pNum++;
                                 partition = append(partition, f);
+
                             }
 
                             j = j__prev3;
                         }
                         changed = true;
+
                     }
 
                     i = i__prev2;
@@ -277,11 +286,11 @@ namespace @internal
                 }
             }
 
-            var sdom = f.sdom(); 
+            var sdom = f.Sdom(); 
 
             // Compute substitutions we would like to do. We substitute v for w
             // if v and w are in the same equivalence class and v dominates w.
-            var rewrite = make_slice<ref Value>(f.NumValues());
+            var rewrite = make_slice<ptr<Value>>(f.NumValues());
             ptr<object> byDom = @new<partitionByDom>(); // reusable partitionByDom to reduce allocs
             {
                 var e__prev1 = e;
@@ -315,7 +324,7 @@ namespace @internal
                                     {
                                         continue;
                                     }
-                                    if (sdom.isAncestorEq(v.Block, w.Block))
+                                    if (sdom.IsAncestorEq(v.Block, w.Block))
                                     {
                                         rewrite[w.ID] = v;
                                         e[j] = null;
@@ -324,78 +333,20 @@ namespace @internal
                                     { 
                                         // e is sorted by domorder, so v.Block doesn't dominate any subsequent blocks in e
                                         break;
+
                                     }
                                 }
 
                                 j = j__prev3;
                             }
+
                         }
 
                         i = i__prev2;
                     }
+
                 }
                 e = e__prev1;
-            }
-
-            var copiedSelects = make_map<ID, slice<ref Value>>();
-            {
-                var b__prev1 = b;
-
-                foreach (var (_, __b) in f.Blocks)
-                {
-                    b = __b;
-@out:
-                    {
-                        var v__prev2 = v;
-
-                        foreach (var (_, __v) in b.Values)
-                        {
-                            v = __v; 
-                            // New values are created when selectors are copied to
-                            // a new block. We can safely ignore those new values,
-                            // since they have already been copied (issue 17918).
-                            if (int(v.ID) >= len(rewrite) || rewrite[v.ID] != null)
-                            {
-                                continue;
-                            }
-                            if (v.Op != OpSelect0 && v.Op != OpSelect1)
-                            {
-                                continue;
-                            }
-                            if (!v.Args[0L].Type.IsTuple())
-                            {
-                                f.Fatalf("arg of tuple selector %s is not a tuple: %s", v.String(), v.Args[0L].LongString());
-                            }
-                            var t = rewrite[v.Args[0L].ID];
-                            if (t != null && t.Block != b)
-                            { 
-                                // v.Args[0] is tuple generator, CSE'd into a different block as t, v is left behind
-                                {
-                                    var c__prev3 = c;
-
-                                    foreach (var (_, __c) in copiedSelects[t.ID])
-                                    {
-                                        c = __c;
-                                        if (v.Op == c.Op)
-                                        { 
-                                            // an equivalent selector is already copied
-                                            rewrite[v.ID] = c;
-                                            _continue@out = true;
-                                            break;
-                                        }
-                                    }
-                                    c = c__prev3;
-                                }
-
-                                var c = v.copyInto(t.Block);
-                                rewrite[v.ID] = c;
-                                copiedSelects[t.ID] = append(copiedSelects[t.ID], c);
-                            }
-                        }
-                        v = v__prev2;
-                    }
-                }
-                b = b__prev1;
             }
 
             var rewrites = int64(0L); 
@@ -428,30 +379,43 @@ namespace @internal
 
                                         if (x != null)
                                         {
+                                            if (w.Pos.IsStmt() == src.PosIsStmt)
+                                            { 
+                                                // about to lose a statement marker, w
+                                                // w is an input to v; if they're in the same block
+                                                // and the same line, v is a good-enough new statement boundary.
+                                                if (w.Block == v.Block && w.Pos.Line() == v.Pos.Line())
+                                                {
+                                                    v.Pos = v.Pos.WithIsStmt();
+                                                    w.Pos = w.Pos.WithNotStmt();
+                                                }
+                                            }
                                             v.SetArg(i, x);
                                             rewrites++;
+
                                         }
                                         x = x__prev1;
 
                                     }
+
                                 }
                                 i = i__prev3;
                                 w = w__prev3;
                             }
-
                         }
                         v = v__prev2;
                     }
 
                     {
-                        var v__prev1 = v;
+                        long i__prev2 = i;
+                        var v__prev2 = v;
 
-                        v = b.Control;
-
-                        if (v != null)
+                        foreach (var (__i, __v) in b.ControlValues())
                         {
+                            i = __i;
+                            v = __v;
                             {
-                                var x__prev2 = x;
+                                var x__prev1 = x;
 
                                 x = rewrite[v.ID];
 
@@ -462,15 +426,18 @@ namespace @internal
                                         // nilcheck pass will remove the nil checks and log
                                         // them appropriately, so don't mess with them here.
                                         continue;
+
                                     }
-                                    b.SetControl(x);
+                                    b.ReplaceControl(i, x);
+
                                 }
-                                x = x__prev2;
+                                x = x__prev1;
 
                             }
-                        }
-                        v = v__prev1;
 
+                        }
+                        i = i__prev2;
+                        v = v__prev2;
                     }
                 }
                 b = b__prev1;
@@ -485,7 +452,7 @@ namespace @internal
         // An eqclass approximates an equivalence class. During the
         // algorithm it may represent the union of several of the
         // final equivalence classes.
-        private partial struct eqclass // : slice<ref Value>
+        private partial struct eqclass // : slice<ptr<Value>>
         {
         }
 
@@ -503,7 +470,7 @@ namespace @internal
         // being a sorted by ID list of *Values. The eqclass slices are
         // backed by the same storage as the input slice.
         // Equivalence classes of size 1 are ignored.
-        private static slice<eqclass> partitionValues(slice<ref Value> a, auxmap auxIDs)
+        private static slice<eqclass> partitionValues(slice<ptr<Value>> a, auxmap auxIDs)
         {
             sort.Sort(new sortvalues(a,auxIDs));
 
@@ -515,22 +482,26 @@ namespace @internal
                 while (j < len(a))
                 {
                     var w = a[j];
-                    if (cmpVal(v, w, auxIDs) != types.CMPeq)
+                    if (cmpVal(_addr_v, _addr_w, auxIDs) != types.CMPeq)
                     {
                         break;
                     j++;
                     }
+
                 }
 
                 if (j > 1L)
                 {
                     partition = append(partition, a[..j]);
                 }
+
                 a = a[j..];
+
             }
 
 
             return partition;
+
         }
         private static types.Cmp lt2Cmp(bool isLt)
         {
@@ -538,33 +509,43 @@ namespace @internal
             {
                 return types.CMPlt;
             }
+
             return types.CMPgt;
+
         }
 
-        private static types.Cmp cmpVal(ref Value v, ref Value w, auxmap auxIDs)
-        { 
+        private static types.Cmp cmpVal(ptr<Value> _addr_v, ptr<Value> _addr_w, auxmap auxIDs)
+        {
+            ref Value v = ref _addr_v.val;
+            ref Value w = ref _addr_w.val;
+ 
             // Try to order these comparison by cost (cheaper first)
             if (v.Op != w.Op)
             {
                 return lt2Cmp(v.Op < w.Op);
             }
+
             if (v.AuxInt != w.AuxInt)
             {
                 return lt2Cmp(v.AuxInt < w.AuxInt);
             }
+
             if (len(v.Args) != len(w.Args))
             {
                 return lt2Cmp(len(v.Args) < len(w.Args));
             }
+
             if (v.Op == OpPhi && v.Block != w.Block)
             {
                 return lt2Cmp(v.Block.ID < w.Block.ID);
             }
+
             if (v.Type.IsMemory())
             { 
                 // We will never be able to CSE two values
                 // that generate memory.
                 return lt2Cmp(v.ID < w.ID);
+
             } 
             // OpSelect is a pseudo-op. We need to be more aggressive
             // regarding CSE to keep multiple OpSelect's of the same
@@ -580,26 +561,33 @@ namespace @internal
                     }
 
                 }
+
             }
+
             if (v.Aux != w.Aux)
             {
                 if (v.Aux == null)
                 {
                     return types.CMPlt;
                 }
+
                 if (w.Aux == null)
                 {
                     return types.CMPgt;
                 }
+
                 return lt2Cmp(auxIDs[v.Aux] < auxIDs[w.Aux]);
+
             }
+
             return types.CMPeq;
+
         }
 
         // Sort values to make the initial partition.
         private partial struct sortvalues
         {
-            public slice<ref Value> a; // array of values
+            public slice<ptr<Value>> a; // array of values
             public auxmap auxIDs; // aux -> aux ID map
         }
 
@@ -611,14 +599,13 @@ namespace @internal
         {
             sv.a[i] = sv.a[j];
             sv.a[j] = sv.a[i];
-
         }
         private static bool Less(this sortvalues sv, long i, long j)
         {
             var v = sv.a[i];
             var w = sv.a[j];
             {
-                var cmp = cmpVal(v, w, sv.auxIDs);
+                var cmp = cmpVal(_addr_v, _addr_w, sv.auxIDs);
 
                 if (cmp != types.CMPeq)
                 {
@@ -631,11 +618,12 @@ namespace @internal
 
             // Sort by value ID last to keep the sort result deterministic.
             return v.ID < w.ID;
+
         }
 
         private partial struct partitionByDom
         {
-            public slice<ref Value> a; // array of values
+            public slice<ptr<Value>> a; // array of values
             public SparseTree sdom;
         }
 
@@ -647,7 +635,6 @@ namespace @internal
         {
             sv.a[i] = sv.a[j];
             sv.a[j] = sv.a[i];
-
         }
         private static bool Less(this partitionByDom sv, long i, long j)
         {
@@ -658,7 +645,7 @@ namespace @internal
 
         private partial struct partitionByArgClass
         {
-            public slice<ref Value> a; // array of values
+            public slice<ptr<Value>> a; // array of values
             public slice<ID> eqClass; // equivalence class IDs of values
         }
 
@@ -670,7 +657,6 @@ namespace @internal
         {
             sv.a[i] = sv.a[j];
             sv.a[j] = sv.a[i];
-
         }
         private static bool Less(this partitionByArgClass sv, long i, long j)
         {
@@ -683,12 +669,15 @@ namespace @internal
                 {
                     return true;
                 }
+
                 if (sv.eqClass[a.ID] > sv.eqClass[b.ID])
                 {
                     return false;
                 }
+
             }
             return false;
+
         }
     }
 }}}}

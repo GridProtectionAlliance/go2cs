@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate reflect.Type ColumnTypeScanTypeByRef(ref T value, long index);
+            private delegate reflect.Type ColumnTypeScanTypeByPtr(ptr<T> value, long index);
             private delegate reflect.Type ColumnTypeScanTypeByVal(T value, long index);
 
-            private static readonly ColumnTypeScanTypeByRef s_ColumnTypeScanTypeByRef;
+            private static readonly ColumnTypeScanTypeByPtr s_ColumnTypeScanTypeByPtr;
             private static readonly ColumnTypeScanTypeByVal s_ColumnTypeScanTypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +79,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ColumnTypeScanTypeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ColumnTypeScanTypeByPtr is null || !m_target_is_ptr)
                     return s_ColumnTypeScanTypeByVal!(target, index);
 
-                return s_ColumnTypeScanTypeByRef(ref target, index);
+                return s_ColumnTypeScanTypeByPtr(m_target_ptr, index);
             }
 
-            private delegate error ColumnsByRef(ref T value);
+            private delegate error ColumnsByPtr(ptr<T> value);
             private delegate error ColumnsByVal(T value);
 
-            private static readonly ColumnsByRef s_ColumnsByRef;
+            private static readonly ColumnsByPtr s_ColumnsByPtr;
             private static readonly ColumnsByVal s_ColumnsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,17 +99,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ColumnsByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ColumnsByPtr is null || !m_target_is_ptr)
                     return s_ColumnsByVal!(target);
 
-                return s_ColumnsByRef(ref target);
+                return s_ColumnsByPtr(m_target_ptr);
             }
 
-            private delegate error CloseByRef(ref T value);
+            private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -117,17 +119,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
 
-            private delegate error NextByRef(ref T value, slice<Value> dest);
+            private delegate error NextByPtr(ptr<T> value, slice<Value> dest);
             private delegate error NextByVal(T value, slice<Value> dest);
 
-            private static readonly NextByRef s_NextByRef;
+            private static readonly NextByPtr s_NextByPtr;
             private static readonly NextByVal s_NextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,11 +139,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NextByPtr is null || !m_target_is_ptr)
                     return s_NextByVal!(target, dest);
 
-                return s_NextByRef(ref target, dest);
+                return s_NextByPtr(m_target_ptr, dest);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -149,71 +153,59 @@ namespace sql
             static RowsColumnTypeScanType()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ColumnTypeScanType");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ColumnTypeScanType");
 
                 if (!(extensionMethod is null))
-                    s_ColumnTypeScanTypeByRef = extensionMethod.CreateStaticDelegate(typeof(ColumnTypeScanTypeByRef)) as ColumnTypeScanTypeByRef;
+                    s_ColumnTypeScanTypeByPtr = extensionMethod.CreateStaticDelegate(typeof(ColumnTypeScanTypeByPtr)) as ColumnTypeScanTypeByPtr;
 
-                if (s_ColumnTypeScanTypeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ColumnTypeScanType");
+                extensionMethod = targetType.GetExtensionMethod("ColumnTypeScanType");
 
-                    if (!(extensionMethod is null))
-                        s_ColumnTypeScanTypeByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnTypeScanTypeByVal)) as ColumnTypeScanTypeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ColumnTypeScanTypeByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnTypeScanTypeByVal)) as ColumnTypeScanTypeByVal;
 
-                if (s_ColumnTypeScanTypeByRef is null && s_ColumnTypeScanTypeByVal is null)
+                if (s_ColumnTypeScanTypeByPtr is null && s_ColumnTypeScanTypeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RowsColumnTypeScanType.ColumnTypeScanType method", new Exception("ColumnTypeScanType"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Columns");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Columns");
 
                 if (!(extensionMethod is null))
-                    s_ColumnsByRef = extensionMethod.CreateStaticDelegate(typeof(ColumnsByRef)) as ColumnsByRef;
+                    s_ColumnsByPtr = extensionMethod.CreateStaticDelegate(typeof(ColumnsByPtr)) as ColumnsByPtr;
 
-                if (s_ColumnsByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Columns");
+                extensionMethod = targetType.GetExtensionMethod("Columns");
 
-                    if (!(extensionMethod is null))
-                        s_ColumnsByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnsByVal)) as ColumnsByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ColumnsByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnsByVal)) as ColumnsByVal;
 
-                if (s_ColumnsByRef is null && s_ColumnsByVal is null)
+                if (s_ColumnsByPtr is null && s_ColumnsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RowsColumnTypeScanType.Columns method", new Exception("Columns"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RowsColumnTypeScanType.Close method", new Exception("Close"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Next");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Next");
 
                 if (!(extensionMethod is null))
-                    s_NextByRef = extensionMethod.CreateStaticDelegate(typeof(NextByRef)) as NextByRef;
+                    s_NextByPtr = extensionMethod.CreateStaticDelegate(typeof(NextByPtr)) as NextByPtr;
 
-                if (s_NextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Next");
+                extensionMethod = targetType.GetExtensionMethod("Next");
 
-                    if (!(extensionMethod is null))
-                        s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
 
-                if (s_NextByRef is null && s_NextByVal is null)
+                if (s_NextByPtr is null && s_NextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RowsColumnTypeScanType.Next method", new Exception("Next"));
             }
 

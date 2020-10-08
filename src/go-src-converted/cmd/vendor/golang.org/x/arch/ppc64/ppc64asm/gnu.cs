@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2020 August 29 10:07:53 UTC
+// package ppc64asm -- go2cs converted at 2020 October 08 04:44:44 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\gnu.go
 using bytes = go.bytes_package;
@@ -20,39 +20,257 @@ namespace ppc64
 {
     public static partial class ppc64asm_package
     {
+        private static array<@string> condBit = new array<@string>(new @string[] { "lt", "gt", "eq", "so" });        private static array<@string> condBitNeg = new array<@string>(new @string[] { "ge", "le", "ne", "so" });
+
         // GNUSyntax returns the GNU assembler syntax for the instruction, as defined by GNU binutils.
         // This form typically matches the syntax defined in the Power ISA Reference Manual.
-        public static @string GNUSyntax(Inst inst)
+        public static @string GNUSyntax(Inst inst, ulong pc)
         {
-            bytes.Buffer buf = default;
-            if (inst.Op == 0L)
+            bytes.Buffer buf = default; 
+            // When there are all 0s, identify them as the disassembler
+            // in binutils would.
+            if (inst.Enc == 0L)
             {
-                return "error: unkown instruction";
+                return ".long 0x0";
             }
-            buf.WriteString(inst.Op.String());
-            @string sep = " ";
-            foreach (var (i, arg) in inst.Args[..])
+            else if (inst.Op == 0L)
             {
-                if (arg == null)
-                {
+                return "error: unknown instruction";
+            }
+
+            var PC = pc; 
+            // Special handling for some ops
+            long startArg = 0L;
+            @string sep = " ";
+            switch (inst.Op.String())
+            {
+                case "bc": 
+                    var bo = gnuArg(_addr_inst, 0L, inst.Args[0L], PC);
+                    var bi = inst.Args[1L];
+                    switch (bi.type())
+                    {
+                        case CondReg bi:
+                            if (bi >= CR0)
+                            {
+                                if (bi == CR0 && bo == "16")
+                                {
+                                    buf.WriteString("bdnz");
+                                }
+
+                                buf.WriteString(fmt.Sprintf("bc cr%d", bi - CR0));
+
+                            }
+
+                            var cr = bi / 4L;
+                            switch (bo)
+                            {
+                                case "4": 
+                                    var bit = condBitNeg[(bi - Cond0LT) % 4L];
+                                    if (cr == 0L)
+                                    {
+                                        buf.WriteString(fmt.Sprintf("b%s", bit));
+                                    }
+                                    else
+                                    {
+                                        buf.WriteString(fmt.Sprintf("b%s cr%d,", bit, cr));
+                                        sep = "";
+                                    }
+
+                                    break;
+                                case "12": 
+                                    bit = condBit[(bi - Cond0LT) % 4L];
+                                    if (cr == 0L)
+                                    {
+                                        buf.WriteString(fmt.Sprintf("b%s", bit));
+                                    }
+                                    else
+                                    {
+                                        buf.WriteString(fmt.Sprintf("b%s cr%d,", bit, cr));
+                                        sep = "";
+                                    }
+
+                                    break;
+                                case "8": 
+                                    bit = condBit[(bi - Cond0LT) % 4L];
+                                    sep = "";
+                                    if (cr == 0L)
+                                    {
+                                        buf.WriteString(fmt.Sprintf("bdnzt %s,", bit));
+                                    }
+                                    else
+                                    {
+                                        buf.WriteString(fmt.Sprintf("bdnzt cr%d,%s,", cr, bit));
+                                    }
+
+                                    break;
+                                case "16": 
+                                    if (cr == 0L && bi == Cond0LT)
+                                    {
+                                        buf.WriteString("bdnz");
+                                    }
+                                    else
+                                    {
+                                        buf.WriteString(fmt.Sprintf("bdnz cr%d,", cr));
+                                        sep = "";
+                                    }
+
+                                    break;
+                            }
+                            startArg = 2L;
+                            break;
+                        default:
+                        {
+                            var bi = bi.type();
+                            fmt.Printf("Unexpected bi: %d for bc with bo: %s\n", bi, bo);
+                            break;
+                        }
+                    }
+                    startArg = 2L;
                     break;
-                }
-                var text = gnuArg(ref inst, i, arg);
-                if (text == "")
+                case "mtspr": 
+                    var opcode = inst.Op.String();
+                    buf.WriteString(opcode[0L..2L]);
+                    switch (inst.Args[0L].type())
+                    {
+                        case SpReg spr:
+                            switch (spr)
+                            {
+                                case 1L: 
+                                    buf.WriteString("xer");
+                                    startArg = 1L;
+                                    break;
+                                case 8L: 
+                                    buf.WriteString("lr");
+                                    startArg = 1L;
+                                    break;
+                                case 9L: 
+                                    buf.WriteString("ctr");
+                                    startArg = 1L;
+                                    break;
+                                default: 
+                                    buf.WriteString("spr");
+                                    break;
+                            }
+                            break;
+                        default:
+                        {
+                            var spr = inst.Args[0L].type();
+                            buf.WriteString("spr");
+                            break;
+                        }
+
+                    }
+                    break;
+                case "mfspr": 
+                    opcode = inst.Op.String();
+                    buf.WriteString(opcode[0L..2L]);
+                    var arg = inst.Args[0L];
+                    switch (inst.Args[1L].type())
+                    {
+                        case SpReg spr:
+                            switch (spr)
+                            {
+                                case 1L: 
+                                    buf.WriteString("xer ");
+                                    buf.WriteString(gnuArg(_addr_inst, 0L, arg, PC));
+                                    startArg = 2L;
+                                    break;
+                                case 8L: 
+                                    buf.WriteString("lr ");
+                                    buf.WriteString(gnuArg(_addr_inst, 0L, arg, PC));
+                                    startArg = 2L;
+                                    break;
+                                case 9L: 
+                                    buf.WriteString("ctr ");
+                                    buf.WriteString(gnuArg(_addr_inst, 0L, arg, PC));
+                                    startArg = 2L;
+                                    break;
+                                case 268L: 
+                                    buf.WriteString("tb ");
+                                    buf.WriteString(gnuArg(_addr_inst, 0L, arg, PC));
+                                    startArg = 2L;
+                                    break;
+                                default: 
+                                    buf.WriteString("spr");
+                                    break;
+                            }
+                            break;
+                        default:
+                        {
+                            var spr = inst.Args[1L].type();
+                            buf.WriteString("spr");
+                            break;
+                        }
+
+                    }
+                    break;
+                case "sync": 
+                    switch (inst.Args[0L].type())
+                    {
+                        case Imm arg:
+                            switch (arg)
+                            {
+                                case 0L: 
+                                    buf.WriteString("hwsync");
+                                    break;
+                                case 1L: 
+                                    buf.WriteString("lwsync");
+                                    break;
+                                case 2L: 
+                                    buf.WriteString("ptesync");
+                                    break;
+                            }
+                            break;
+                    }
+                    startArg = 2L;
+                    break;
+                default: 
+                    buf.WriteString(inst.Op.String());
+                    break;
+            }
+            {
+                var arg__prev1 = arg;
+
+                foreach (var (__i, __arg) in inst.Args[..])
                 {
-                    continue;
+                    i = __i;
+                    arg = __arg;
+                    if (arg == null)
+                    {
+                        break;
+                    }
+
+                    if (i < startArg)
+                    {
+                        continue;
+                    }
+
+                    var text = gnuArg(_addr_inst, i, arg, PC);
+                    if (text == "")
+                    {
+                        continue;
+                    }
+
+                    buf.WriteString(sep);
+                    sep = ",";
+                    buf.WriteString(text);
+
                 }
-                buf.WriteString(sep);
-                sep = ",";
-                buf.WriteString(text);
-            }            return buf.String();
+
+                arg = arg__prev1;
+            }
+
+            return buf.String();
+
         }
 
         // gnuArg formats arg (which is the argIndex's arg in inst) according to GNU rules.
         // NOTE: because GNUSyntax is the only caller of this func, and it receives a copy
         //       of inst, it's ok to modify inst.Args here.
-        private static @string gnuArg(ref Inst _inst, long argIndex, Arg arg) => func(_inst, (ref Inst inst, Defer _, Panic panic, Recover __) =>
-        { 
+        private static @string gnuArg(ptr<Inst> _addr_inst, long argIndex, Arg arg, ulong pc) => func((_, panic, __) =>
+        {
+            ref Inst inst = ref _addr_inst.val;
+ 
             // special cases for load/store instructions
             {
                 Offset (_, ok) = arg._<Offset>();
@@ -63,9 +281,11 @@ namespace ppc64
                     {
                         panic(fmt.Errorf("wrong table: offset not followed by register"));
                     }
+
                 }
 
             }
+
             switch (arg.type())
             {
                 case Reg arg:
@@ -73,6 +293,7 @@ namespace ppc64
                     {
                         return "0";
                     }
+
                     return arg.String();
                     break;
                 case CondReg arg:
@@ -84,41 +305,70 @@ namespace ppc64
                     {
                         return fmt.Sprintf("cr%d", int(arg - CR0));
                     }
-                    array<@string> bit = new array<@string>(new @string[] { "lt", "gt", "eq", "so" })[(arg - Cond0LT) % 4L];
+
+                    var bit = condBit[(arg - Cond0LT) % 4L];
                     if (arg <= Cond0SO)
                     {
                         return bit;
                     }
-                    return fmt.Sprintf("4*cr%d+%s", int(arg - Cond0LT) / 4L, bit);
+
+                    return fmt.Sprintf("%s cr%d", bit, int(arg - Cond0LT) / 4L);
                     break;
                 case Imm arg:
                     return fmt.Sprintf("%d", arg);
                     break;
                 case SpReg arg:
-                    return fmt.Sprintf("%d", int(arg));
+                    switch (int(arg))
+                    {
+                        case 1L: 
+                            return "xer";
+                            break;
+                        case 8L: 
+                            return "lr";
+                            break;
+                        case 9L: 
+                            return "ctr";
+                            break;
+                        case 268L: 
+                            return "tb";
+                            break;
+                        default: 
+                            return fmt.Sprintf("%d", int(arg));
+                            break;
+                    }
                     break;
                 case PCRel arg:
-                    return fmt.Sprintf(".%+#x", int(arg));
+                    if (int(arg) == 0L)
+                    {
+                        return fmt.Sprintf(".%+#x", int(arg));
+                    }
+
+                    var addr = pc + uint64(int64(arg));
+                    return fmt.Sprintf("%#x", addr);
                     break;
                 case Label arg:
                     return fmt.Sprintf("%#x", uint32(arg));
                     break;
                 case Offset arg:
                     Reg reg = inst.Args[argIndex + 1L]._<Reg>();
-                    removeArg(inst, argIndex + 1L);
+                    removeArg(_addr_inst, argIndex + 1L);
                     if (reg == R0)
                     {
                         return fmt.Sprintf("%d(0)", int(arg));
                     }
+
                     return fmt.Sprintf("%d(r%d)", int(arg), reg - R0);
                     break;
             }
             return fmt.Sprintf("???(%v)", arg);
+
         });
 
         // removeArg removes the arg in inst.Args[index].
-        private static void removeArg(ref Inst inst, long index)
+        private static void removeArg(ptr<Inst> _addr_inst, long index)
         {
+            ref Inst inst = ref _addr_inst.val;
+
             for (var i = index; i < len(inst.Args); i++)
             {
                 if (i + 1L < len(inst.Args))
@@ -129,7 +379,9 @@ namespace ppc64
                 {
                     inst.Args[i] = null;
                 }
+
             }
+
 
         }
 
@@ -163,7 +415,10 @@ namespace ppc64
                 return true;
             else if (op == LHBRX || op == LWBRX || op == STHBRX || op == STWBRX) 
                 return true;
+            else if (op == LBARX || op == LWARX || op == LHARX || op == LDARX) 
+                return true;
                         return false;
+
         }
     }
 }}}}}}}

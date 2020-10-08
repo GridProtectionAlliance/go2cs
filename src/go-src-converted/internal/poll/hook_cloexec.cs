@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build dragonfly freebsd linux
+// +build dragonfly freebsd linux netbsd openbsd
 
-// package poll -- go2cs converted at 2020 August 29 08:25:34 UTC
+// package poll -- go2cs converted at 2020 October 08 03:32:39 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\hook_cloexec.go
 using syscall = go.syscall_package;

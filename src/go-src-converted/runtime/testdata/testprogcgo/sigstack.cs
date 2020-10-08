@@ -8,7 +8,7 @@
 // C-created threads with and without signal stacks. (See issue
 // #22930.)
 
-// package main -- go2cs converted at 2020 August 29 08:24:59 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:04 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\sigstack.go
 /*
 #include <pthread.h>
@@ -17,11 +17,18 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 
+#ifdef _AIX
+// On AIX, SIGSTKSZ is too small to handle Go sighandler.
+#define CSIGSTKSZ 0x4000
+#else
+#define CSIGSTKSZ SIGSTKSZ
+#endif
+
 extern void SigStackCallback();
 
 static void* WithSigStack(void* arg __attribute__((unused))) {
     // Set up an alternate system stack.
-    void* base = mmap(0, SIGSTKSZ, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
+    void* base = mmap(0, CSIGSTKSZ, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
     if (base == MAP_FAILED) {
         perror("mmap failed");
         abort();
@@ -29,7 +36,7 @@ static void* WithSigStack(void* arg __attribute__((unused))) {
     stack_t st = {}, ost = {};
     st.ss_sp = (char*)base;
     st.ss_flags = 0;
-    st.ss_size = SIGSTKSZ;
+    st.ss_size = CSIGSTKSZ;
     if (sigaltstack(&st, &ost) < 0) {
         perror("sigaltstack failed");
         abort();
@@ -42,13 +49,13 @@ static void* WithSigStack(void* arg __attribute__((unused))) {
     if (ost.ss_flags & SS_DISABLE) {
         // Darwin libsystem has a bug where it checks ss_size
         // even if SS_DISABLE is set. (The kernel gets it right.)
-        ost.ss_size = SIGSTKSZ;
+        ost.ss_size = CSIGSTKSZ;
     }
     if (sigaltstack(&ost, NULL) < 0) {
         perror("sigaltstack restore failed");
         abort();
     }
-    mprotect(base, SIGSTKSZ, PROT_NONE);
+    mprotect(base, CSIGSTKSZ, PROT_NONE);
     return NULL;
 }
 
@@ -89,7 +96,7 @@ namespace go
             println("OK");
         }
 
-        public static ref long BadPtr = default;
+        public static ptr<long> BadPtr;
 
         //export SigStackCallback
         public static void SigStackCallback() => func((defer, _, recover) =>
@@ -98,9 +105,9 @@ namespace go
             defer(() =>
             {
                 recover();
-
             }());
-            BadPtr.Value = 42L;
+            BadPtr.val = 42L;
+
         });
     }
 }

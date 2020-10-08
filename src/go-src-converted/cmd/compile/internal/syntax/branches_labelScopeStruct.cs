@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:01 UTC
+//     Generated on 2020 October 08 04:28:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using go;
 
@@ -34,7 +33,7 @@ namespace @internal
                 this.labels = default;
             }
 
-            public labelScope(ErrorHandler errh = default, map<@string, ref label> labels = default)
+            public labelScope(ErrorHandler errh = default, map<@string, ptr<label>> labels = default)
             {
                 this.errh = errh;
                 this.labels = labels;

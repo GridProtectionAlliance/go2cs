@@ -19,13 +19,14 @@
 // high-performance serialization, especially for large data structures,
 // should look at more advanced solutions such as the encoding/gob
 // package or protocol buffers.
-// package binary -- go2cs converted at 2020 August 29 08:21:52 UTC
+// package binary -- go2cs converted at 2020 October 08 03:24:33 UTC
 // import "encoding/binary" ==> using binary = go.encoding.binary_package
 // Original source: C:\Go\src\encoding\binary\binary.go
 using errors = go.errors_package;
 using io = go.io_package;
 using math = go.math_package;
 using reflect = go.reflect_package;
+using sync = go.sync_package;
 using static go.builtin;
 
 namespace go {
@@ -60,6 +61,7 @@ namespace encoding
         {
             _ = b[1L]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint16(b[0L]) | uint16(b[1L]) << (int)(8L);
+
         }
 
         private static void PutUint16(this littleEndian _p0, slice<byte> b, ushort v)
@@ -67,12 +69,14 @@ namespace encoding
             _ = b[1L]; // early bounds check to guarantee safety of writes below
             b[0L] = byte(v);
             b[1L] = byte(v >> (int)(8L));
+
         }
 
         private static uint Uint32(this littleEndian _p0, slice<byte> b)
         {
             _ = b[3L]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint32(b[0L]) | uint32(b[1L]) << (int)(8L) | uint32(b[2L]) << (int)(16L) | uint32(b[3L]) << (int)(24L);
+
         }
 
         private static void PutUint32(this littleEndian _p0, slice<byte> b, uint v)
@@ -82,12 +86,14 @@ namespace encoding
             b[1L] = byte(v >> (int)(8L));
             b[2L] = byte(v >> (int)(16L));
             b[3L] = byte(v >> (int)(24L));
+
         }
 
         private static ulong Uint64(this littleEndian _p0, slice<byte> b)
         {
             _ = b[7L]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint64(b[0L]) | uint64(b[1L]) << (int)(8L) | uint64(b[2L]) << (int)(16L) | uint64(b[3L]) << (int)(24L) | uint64(b[4L]) << (int)(32L) | uint64(b[5L]) << (int)(40L) | uint64(b[6L]) << (int)(48L) | uint64(b[7L]) << (int)(56L);
+
         }
 
         private static void PutUint64(this littleEndian _p0, slice<byte> b, ulong v)
@@ -101,6 +107,7 @@ namespace encoding
             b[5L] = byte(v >> (int)(40L));
             b[6L] = byte(v >> (int)(48L));
             b[7L] = byte(v >> (int)(56L));
+
         }
 
         private static @string String(this littleEndian _p0)
@@ -121,6 +128,7 @@ namespace encoding
         {
             _ = b[1L]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint16(b[1L]) | uint16(b[0L]) << (int)(8L);
+
         }
 
         private static void PutUint16(this bigEndian _p0, slice<byte> b, ushort v)
@@ -128,12 +136,14 @@ namespace encoding
             _ = b[1L]; // early bounds check to guarantee safety of writes below
             b[0L] = byte(v >> (int)(8L));
             b[1L] = byte(v);
+
         }
 
         private static uint Uint32(this bigEndian _p0, slice<byte> b)
         {
             _ = b[3L]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint32(b[3L]) | uint32(b[2L]) << (int)(8L) | uint32(b[1L]) << (int)(16L) | uint32(b[0L]) << (int)(24L);
+
         }
 
         private static void PutUint32(this bigEndian _p0, slice<byte> b, uint v)
@@ -143,12 +153,14 @@ namespace encoding
             b[1L] = byte(v >> (int)(16L));
             b[2L] = byte(v >> (int)(8L));
             b[3L] = byte(v);
+
         }
 
         private static ulong Uint64(this bigEndian _p0, slice<byte> b)
         {
             _ = b[7L]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint64(b[7L]) | uint64(b[6L]) << (int)(8L) | uint64(b[5L]) << (int)(16L) | uint64(b[4L]) << (int)(24L) | uint64(b[3L]) << (int)(32L) | uint64(b[2L]) << (int)(40L) | uint64(b[1L]) << (int)(48L) | uint64(b[0L]) << (int)(56L);
+
         }
 
         private static void PutUint64(this bigEndian _p0, slice<byte> b, ulong v)
@@ -162,6 +174,7 @@ namespace encoding
             b[5L] = byte(v >> (int)(16L));
             b[6L] = byte(v >> (int)(8L));
             b[7L] = byte(v);
+
         }
 
         private static @string String(this bigEndian _p0)
@@ -198,53 +211,51 @@ namespace encoding
 
                 if (n != 0L)
                 {
-                    array<byte> b = new array<byte>(8L);
-                    slice<byte> bs = default;
-                    if (n > len(b))
-                    {
-                        bs = make_slice<byte>(n);
-                    }
-                    else
-                    {
-                        bs = b[..n];
-                    }
+                    var bs = make_slice<byte>(n);
                     {
                         var (_, err) = io.ReadFull(r, bs);
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                     }
+
                     switch (data.type())
                     {
-                        case ref bool data:
-                            data.Value = b[0L] != 0L;
+                        case ptr<bool> data:
+                            data.val = bs[0L] != 0L;
                             break;
-                        case ref sbyte data:
-                            data.Value = int8(b[0L]);
+                        case ptr<sbyte> data:
+                            data.val = int8(bs[0L]);
                             break;
-                        case ref byte data:
-                            data.Value = b[0L];
+                        case ptr<byte> data:
+                            data.val = bs[0L];
                             break;
-                        case ref short data:
-                            data.Value = int16(order.Uint16(bs));
+                        case ptr<short> data:
+                            data.val = int16(order.Uint16(bs));
                             break;
-                        case ref ushort data:
-                            data.Value = order.Uint16(bs);
+                        case ptr<ushort> data:
+                            data.val = order.Uint16(bs);
                             break;
-                        case ref int data:
-                            data.Value = int32(order.Uint32(bs));
+                        case ptr<int> data:
+                            data.val = int32(order.Uint32(bs));
                             break;
-                        case ref uint data:
-                            data.Value = order.Uint32(bs);
+                        case ptr<uint> data:
+                            data.val = order.Uint32(bs);
                             break;
-                        case ref long data:
-                            data.Value = int64(order.Uint64(bs));
+                        case ptr<long> data:
+                            data.val = int64(order.Uint64(bs));
                             break;
-                        case ref ulong data:
-                            data.Value = order.Uint64(bs);
+                        case ptr<ulong> data:
+                            data.val = order.Uint64(bs);
+                            break;
+                        case ptr<float> data:
+                            data.val = math.Float32frombits(order.Uint32(bs));
+                            break;
+                        case ptr<double> data:
+                            data.val = math.Float64frombits(order.Uint64(bs));
                             break;
                         case slice<bool> data:
                             {
@@ -256,6 +267,7 @@ namespace encoding
                                     i = __i;
                                     x = __x; // Easier to loop over the input for 8-bit values.
                                     data[i] = x != 0L;
+
                                 }
 
                                 i = i__prev1;
@@ -359,8 +371,44 @@ namespace encoding
                                 i = i__prev1;
                             }
                             break;
+                        case slice<float> data:
+                            {
+                                var i__prev1 = i;
+
+                                foreach (var (__i) in data)
+                                {
+                                    i = __i;
+                                    data[i] = math.Float32frombits(order.Uint32(bs[4L * i..]));
+                                }
+
+                                i = i__prev1;
+                            }
+                            break;
+                        case slice<double> data:
+                            {
+                                var i__prev1 = i;
+
+                                foreach (var (__i) in data)
+                                {
+                                    i = __i;
+                                    data[i] = math.Float64frombits(order.Uint64(bs[8L * i..]));
+                                }
+
+                                i = i__prev1;
+                            }
+                            break;
+                        default:
+                        {
+                            var data = data.type();
+                            n = 0L; // fast path doesn't apply
+                            break;
+                        }
                     }
-                    return error.As(null);
+                    if (n != 0L)
+                    {
+                        return error.As(null!)!;
+                    }
+
                 } 
 
                 // Fallback to reflect-based decoding.
@@ -378,20 +426,23 @@ namespace encoding
                 size = dataSize(v);
                         if (size < 0L)
             {
-                return error.As(errors.New("binary.Read: invalid type " + reflect.TypeOf(data).String()));
+                return error.As(errors.New("binary.Read: invalid type " + reflect.TypeOf(data).String()))!;
             }
-            decoder d = ref new decoder(order:order,buf:make([]byte,size));
+
+            ptr<decoder> d = addr(new decoder(order:order,buf:make([]byte,size)));
             {
                 (_, err) = io.ReadFull(r, d.buf);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             d.value(v);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Write writes the binary representation of data into w.
@@ -410,37 +461,30 @@ namespace encoding
 
                 if (n != 0L)
                 {
-                    array<byte> b = new array<byte>(8L);
-                    slice<byte> bs = default;
-                    if (n > len(b))
-                    {
-                        bs = make_slice<byte>(n);
-                    }
-                    else
-                    {
-                        bs = b[..n];
-                    }
+                    var bs = make_slice<byte>(n);
                     switch (data.type())
                     {
-                        case ref bool v:
-                            if (v.Value)
+                        case ptr<bool> v:
+                            if (v.val)
                             {
-                                b[0L] = 1L;
+                                bs[0L] = 1L;
                             }
                             else
                             {
-                                b[0L] = 0L;
+                                bs[0L] = 0L;
                             }
+
                             break;
                         case bool v:
                             if (v)
                             {
-                                b[0L] = 1L;
+                                bs[0L] = 1L;
                             }
                             else
                             {
-                                b[0L] = 0L;
+                                bs[0L] = 0L;
                             }
+
                             break;
                         case slice<bool> v:
                             {
@@ -459,17 +503,18 @@ namespace encoding
                                     {
                                         bs[i] = 0L;
                                     }
+
                                 }
 
                                 i = i__prev1;
                                 x = x__prev1;
                             }
                             break;
-                        case ref sbyte v:
-                            b[0L] = byte(v.Value);
+                        case ptr<sbyte> v:
+                            bs[0L] = byte(v.val);
                             break;
                         case sbyte v:
-                            b[0L] = byte(v);
+                            bs[0L] = byte(v);
                             break;
                         case slice<sbyte> v:
                             {
@@ -487,17 +532,17 @@ namespace encoding
                                 x = x__prev1;
                             }
                             break;
-                        case ref byte v:
-                            b[0L] = v.Value;
+                        case ptr<byte> v:
+                            bs[0L] = v.val;
                             break;
                         case byte v:
-                            b[0L] = v;
+                            bs[0L] = v;
                             break;
                         case slice<byte> v:
-                            bs = v;
+                            bs = v; // TODO(josharian): avoid allocating bs in this case?
                             break;
-                        case ref short v:
-                            order.PutUint16(bs, uint16(v.Value));
+                        case ptr<short> v:
+                            order.PutUint16(bs, uint16(v.val));
                             break;
                         case short v:
                             order.PutUint16(bs, uint16(v));
@@ -518,8 +563,8 @@ namespace encoding
                                 x = x__prev1;
                             }
                             break;
-                        case ref ushort v:
-                            order.PutUint16(bs, v.Value);
+                        case ptr<ushort> v:
+                            order.PutUint16(bs, v.val);
                             break;
                         case ushort v:
                             order.PutUint16(bs, v);
@@ -540,8 +585,8 @@ namespace encoding
                                 x = x__prev1;
                             }
                             break;
-                        case ref int v:
-                            order.PutUint32(bs, uint32(v.Value));
+                        case ptr<int> v:
+                            order.PutUint32(bs, uint32(v.val));
                             break;
                         case int v:
                             order.PutUint32(bs, uint32(v));
@@ -562,8 +607,8 @@ namespace encoding
                                 x = x__prev1;
                             }
                             break;
-                        case ref uint v:
-                            order.PutUint32(bs, v.Value);
+                        case ptr<uint> v:
+                            order.PutUint32(bs, v.val);
                             break;
                         case uint v:
                             order.PutUint32(bs, v);
@@ -584,8 +629,8 @@ namespace encoding
                                 x = x__prev1;
                             }
                             break;
-                        case ref long v:
-                            order.PutUint64(bs, uint64(v.Value));
+                        case ptr<long> v:
+                            order.PutUint64(bs, uint64(v.val));
                             break;
                         case long v:
                             order.PutUint64(bs, uint64(v));
@@ -606,8 +651,8 @@ namespace encoding
                                 x = x__prev1;
                             }
                             break;
-                        case ref ulong v:
-                            order.PutUint64(bs, v.Value);
+                        case ptr<ulong> v:
+                            order.PutUint64(bs, v.val);
                             break;
                         case ulong v:
                             order.PutUint64(bs, v);
@@ -628,9 +673,54 @@ namespace encoding
                                 x = x__prev1;
                             }
                             break;
+                        case ptr<float> v:
+                            order.PutUint32(bs, math.Float32bits(v.val));
+                            break;
+                        case float v:
+                            order.PutUint32(bs, math.Float32bits(v));
+                            break;
+                        case slice<float> v:
+                            {
+                                var i__prev1 = i;
+                                var x__prev1 = x;
+
+                                foreach (var (__i, __x) in v)
+                                {
+                                    i = __i;
+                                    x = __x;
+                                    order.PutUint32(bs[4L * i..], math.Float32bits(x));
+                                }
+
+                                i = i__prev1;
+                                x = x__prev1;
+                            }
+                            break;
+                        case ptr<double> v:
+                            order.PutUint64(bs, math.Float64bits(v.val));
+                            break;
+                        case double v:
+                            order.PutUint64(bs, math.Float64bits(v));
+                            break;
+                        case slice<double> v:
+                            {
+                                var i__prev1 = i;
+                                var x__prev1 = x;
+
+                                foreach (var (__i, __x) in v)
+                                {
+                                    i = __i;
+                                    x = __x;
+                                    order.PutUint64(bs[8L * i..], math.Float64bits(x));
+                                }
+
+                                i = i__prev1;
+                                x = x__prev1;
+                            }
+                            break;
                     }
                     var (_, err) = w.Write(bs);
-                    return error.As(err);
+                    return error.As(err)!;
+
                 } 
 
                 // Fallback to reflect-based encoding.
@@ -642,13 +732,15 @@ namespace encoding
             var size = dataSize(v);
             if (size < 0L)
             {
-                return error.As(errors.New("binary.Write: invalid type " + reflect.TypeOf(data).String()));
+                return error.As(errors.New("binary.Write: invalid type " + reflect.TypeOf(data).String()))!;
             }
+
             var buf = make_slice<byte>(size);
-            encoder e = ref new encoder(order:order,buf:buf);
+            ptr<encoder> e = addr(new encoder(order:order,buf:buf));
             e.value(v);
             (_, err) = w.Write(buf);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Size returns how many bytes Write would generate to encode the value v, which
@@ -659,14 +751,16 @@ namespace encoding
             return dataSize(reflect.Indirect(reflect.ValueOf(v)));
         }
 
+        private static sync.Map structSize = default; // map[reflect.Type]int
+
         // dataSize returns the number of bytes the actual data represented by v occupies in memory.
         // For compound structures, it sums the sizes of the elements. Thus, for instance, for a slice
         // it returns the length of the slice times the element size and does not count the memory
         // occupied by the header. If the type of v is not acceptable, dataSize returns -1.
         private static long dataSize(reflect.Value v)
         {
-            if (v.Kind() == reflect.Slice)
-            {
+
+            if (v.Kind() == reflect.Slice) 
                 {
                     var s = sizeof(v.Type().Elem());
 
@@ -676,9 +770,30 @@ namespace encoding
                     }
 
                 }
+
                 return -1L;
-            }
-            return sizeof(v.Type());
+            else if (v.Kind() == reflect.Struct) 
+                var t = v.Type();
+                {
+                    var size__prev1 = size;
+
+                    var (size, ok) = structSize.Load(t);
+
+                    if (ok)
+                    {
+                        return size._<long>();
+                    }
+
+                    size = size__prev1;
+
+                }
+
+                var size = sizeof(t);
+                structSize.Store(t, size);
+                return size;
+            else 
+                return sizeof(v.Type());
+            
         }
 
         // sizeof returns the size >= 0 of variables for the given type or -1 if the type is not acceptable.
@@ -699,6 +814,8 @@ namespace encoding
                     s = s__prev1;
 
                 }
+
+
             else if (t.Kind() == reflect.Struct) 
                 long sum = 0L;
                 for (long i = 0L;
@@ -709,19 +826,23 @@ namespace encoding
                     {
                         return -1L;
                     }
+
                     sum += s;
+
                 }
 
                 return sum;
             else if (t.Kind() == reflect.Bool || t.Kind() == reflect.Uint8 || t.Kind() == reflect.Uint16 || t.Kind() == reflect.Uint32 || t.Kind() == reflect.Uint64 || t.Kind() == reflect.Int8 || t.Kind() == reflect.Int16 || t.Kind() == reflect.Int32 || t.Kind() == reflect.Int64 || t.Kind() == reflect.Float32 || t.Kind() == reflect.Float64 || t.Kind() == reflect.Complex64 || t.Kind() == reflect.Complex128) 
                 return int(t.Size());
                         return -1L;
+
         }
 
         private partial struct coder
         {
             public ByteOrder order;
             public slice<byte> buf;
+            public long offset;
         }
 
         private partial struct decoder // : coder
@@ -731,124 +852,160 @@ namespace encoding
         {
         }
 
-        private static bool @bool(this ref decoder d)
+        private static bool @bool(this ptr<decoder> _addr_d)
         {
-            var x = d.buf[0L];
-            d.buf = d.buf[1L..];
+            ref decoder d = ref _addr_d.val;
+
+            var x = d.buf[d.offset];
+            d.offset++;
             return x != 0L;
         }
 
-        private static void @bool(this ref encoder e, bool x)
+        private static void @bool(this ptr<encoder> _addr_e, bool x)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (x)
             {
-                e.buf[0L] = 1L;
+                e.buf[e.offset] = 1L;
             }
             else
             {
-                e.buf[0L] = 0L;
+                e.buf[e.offset] = 0L;
             }
-            e.buf = e.buf[1L..];
+
+            e.offset++;
+
         }
 
-        private static byte uint8(this ref decoder d)
+        private static byte uint8(this ptr<decoder> _addr_d)
         {
-            var x = d.buf[0L];
-            d.buf = d.buf[1L..];
+            ref decoder d = ref _addr_d.val;
+
+            var x = d.buf[d.offset];
+            d.offset++;
             return x;
         }
 
-        private static void uint8(this ref encoder e, byte x)
+        private static void uint8(this ptr<encoder> _addr_e, byte x)
         {
-            e.buf[0L] = x;
-            e.buf = e.buf[1L..];
+            ref encoder e = ref _addr_e.val;
+
+            e.buf[e.offset] = x;
+            e.offset++;
         }
 
-        private static ushort uint16(this ref decoder d)
+        private static ushort uint16(this ptr<decoder> _addr_d)
         {
-            var x = d.order.Uint16(d.buf[0L..2L]);
-            d.buf = d.buf[2L..];
+            ref decoder d = ref _addr_d.val;
+
+            var x = d.order.Uint16(d.buf[d.offset..d.offset + 2L]);
+            d.offset += 2L;
             return x;
         }
 
-        private static void uint16(this ref encoder e, ushort x)
+        private static void uint16(this ptr<encoder> _addr_e, ushort x)
         {
-            e.order.PutUint16(e.buf[0L..2L], x);
-            e.buf = e.buf[2L..];
+            ref encoder e = ref _addr_e.val;
+
+            e.order.PutUint16(e.buf[e.offset..e.offset + 2L], x);
+            e.offset += 2L;
         }
 
-        private static uint uint32(this ref decoder d)
+        private static uint uint32(this ptr<decoder> _addr_d)
         {
-            var x = d.order.Uint32(d.buf[0L..4L]);
-            d.buf = d.buf[4L..];
+            ref decoder d = ref _addr_d.val;
+
+            var x = d.order.Uint32(d.buf[d.offset..d.offset + 4L]);
+            d.offset += 4L;
             return x;
         }
 
-        private static void uint32(this ref encoder e, uint x)
+        private static void uint32(this ptr<encoder> _addr_e, uint x)
         {
-            e.order.PutUint32(e.buf[0L..4L], x);
-            e.buf = e.buf[4L..];
+            ref encoder e = ref _addr_e.val;
+
+            e.order.PutUint32(e.buf[e.offset..e.offset + 4L], x);
+            e.offset += 4L;
         }
 
-        private static ulong uint64(this ref decoder d)
+        private static ulong uint64(this ptr<decoder> _addr_d)
         {
-            var x = d.order.Uint64(d.buf[0L..8L]);
-            d.buf = d.buf[8L..];
+            ref decoder d = ref _addr_d.val;
+
+            var x = d.order.Uint64(d.buf[d.offset..d.offset + 8L]);
+            d.offset += 8L;
             return x;
         }
 
-        private static void uint64(this ref encoder e, ulong x)
+        private static void uint64(this ptr<encoder> _addr_e, ulong x)
         {
-            e.order.PutUint64(e.buf[0L..8L], x);
-            e.buf = e.buf[8L..];
+            ref encoder e = ref _addr_e.val;
+
+            e.order.PutUint64(e.buf[e.offset..e.offset + 8L], x);
+            e.offset += 8L;
         }
 
-        private static sbyte int8(this ref decoder d)
+        private static sbyte int8(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             return int8(d.uint8());
         }
 
-        private static void int8(this ref encoder e, sbyte x)
+        private static void int8(this ptr<encoder> _addr_e, sbyte x)
         {
-            e.uint8(uint8(x));
+            ref encoder e = ref _addr_e.val;
 
+            e.uint8(uint8(x));
         }
 
-        private static short int16(this ref decoder d)
+        private static short int16(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             return int16(d.uint16());
         }
 
-        private static void int16(this ref encoder e, short x)
+        private static void int16(this ptr<encoder> _addr_e, short x)
         {
-            e.uint16(uint16(x));
+            ref encoder e = ref _addr_e.val;
 
+            e.uint16(uint16(x));
         }
 
-        private static int int32(this ref decoder d)
+        private static int int32(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             return int32(d.uint32());
         }
 
-        private static void int32(this ref encoder e, int x)
+        private static void int32(this ptr<encoder> _addr_e, int x)
         {
-            e.uint32(uint32(x));
+            ref encoder e = ref _addr_e.val;
 
+            e.uint32(uint32(x));
         }
 
-        private static long int64(this ref decoder d)
+        private static long int64(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             return int64(d.uint64());
         }
 
-        private static void int64(this ref encoder e, long x)
+        private static void int64(this ptr<encoder> _addr_e, long x)
         {
-            e.uint64(uint64(x));
+            ref encoder e = ref _addr_e.val;
 
+            e.uint64(uint64(x));
         }
 
-        private static void value(this ref decoder d, reflect.Value v)
+        private static void value(this ptr<decoder> _addr_d, reflect.Value v)
         {
+            ref decoder d = ref _addr_d.val;
+
 
             if (v.Kind() == reflect.Array) 
                 var l = v.Len();
@@ -889,6 +1046,7 @@ namespace encoding
                             }
 
                         }
+
                     }
 
 
@@ -933,10 +1091,13 @@ namespace encoding
                 v.SetComplex(complex(float64(math.Float32frombits(d.uint32())), float64(math.Float32frombits(d.uint32()))));
             else if (v.Kind() == reflect.Complex128) 
                 v.SetComplex(complex(math.Float64frombits(d.uint64()), math.Float64frombits(d.uint64())));
-                    }
+            
+        }
 
-        private static void value(this ref encoder e, reflect.Value v)
+        private static void value(this ptr<encoder> _addr_e, reflect.Value v)
         {
+            ref encoder e = ref _addr_e.val;
+
 
             if (v.Kind() == reflect.Array) 
                 var l = v.Len();
@@ -973,6 +1134,7 @@ namespace encoding
                             }
 
                         }
+
                     }
 
 
@@ -1029,21 +1191,28 @@ namespace encoding
                     x = v.Complex();
                     e.uint64(math.Float64bits(real(x)));
                     e.uint64(math.Float64bits(imag(x)));
-                                    }
-
-        private static void skip(this ref decoder d, reflect.Value v)
-        {
-            d.buf = d.buf[dataSize(v)..];
+                            
         }
 
-        private static void skip(this ref encoder e, reflect.Value v)
+        private static void skip(this ptr<decoder> _addr_d, reflect.Value v)
         {
+            ref decoder d = ref _addr_d.val;
+
+            d.offset += dataSize(v);
+        }
+
+        private static void skip(this ptr<encoder> _addr_e, reflect.Value v)
+        {
+            ref encoder e = ref _addr_e.val;
+
             var n = dataSize(v);
-            foreach (var (i) in e.buf[0L..n])
+            var zero = e.buf[e.offset..e.offset + n];
+            foreach (var (i) in zero)
             {
-                e.buf[i] = 0L;
+                zero[i] = 0L;
             }
-            e.buf = e.buf[n..];
+            e.offset += n;
+
         }
 
         // intDataSize returns the size of the data required to represent the data when encoded.
@@ -1061,14 +1230,17 @@ namespace encoding
                 case byte data:
                     return 1L;
                     break;
-                case ref bool data:
+                case ptr<bool> data:
                     return 1L;
                     break;
-                case ref sbyte data:
+                case ptr<sbyte> data:
                     return 1L;
                     break;
-                case ref byte data:
+                case ptr<byte> data:
                     return 1L;
+                    break;
+                case slice<bool> data:
+                    return len(data);
                     break;
                 case slice<sbyte> data:
                     return len(data);
@@ -1082,10 +1254,10 @@ namespace encoding
                 case ushort data:
                     return 2L;
                     break;
-                case ref short data:
+                case ptr<short> data:
                     return 2L;
                     break;
-                case ref ushort data:
+                case ptr<ushort> data:
                     return 2L;
                     break;
                 case slice<short> data:
@@ -1100,10 +1272,10 @@ namespace encoding
                 case uint data:
                     return 4L;
                     break;
-                case ref int data:
+                case ptr<int> data:
                     return 4L;
                     break;
-                case ref uint data:
+                case ptr<uint> data:
                     return 4L;
                     break;
                 case slice<int> data:
@@ -1118,10 +1290,10 @@ namespace encoding
                 case ulong data:
                     return 8L;
                     break;
-                case ref long data:
+                case ptr<long> data:
                     return 8L;
                     break;
-                case ref ulong data:
+                case ptr<ulong> data:
                     return 8L;
                     break;
                 case slice<long> data:
@@ -1130,8 +1302,27 @@ namespace encoding
                 case slice<ulong> data:
                     return 8L * len(data);
                     break;
+                case float data:
+                    return 4L;
+                    break;
+                case ptr<float> data:
+                    return 4L;
+                    break;
+                case double data:
+                    return 8L;
+                    break;
+                case ptr<double> data:
+                    return 8L;
+                    break;
+                case slice<float> data:
+                    return 4L * len(data);
+                    break;
+                case slice<double> data:
+                    return 8L * len(data);
+                    break;
             }
             return 0L;
+
         }
     }
 }}

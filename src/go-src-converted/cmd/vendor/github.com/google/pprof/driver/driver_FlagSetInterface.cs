@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:09 UTC
+//     Generated on 2020 October 08 04:42:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using http = go.net.http_package;
 using regexp = go.regexp_package;
 using time = go.time_package;
 using internaldriver = go.github.com.google.pprof.@internal.driver_package;
@@ -59,7 +60,7 @@ namespace pprof
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,10 +74,10 @@ namespace pprof
                 m_target_is_ptr = true;
             }
 
-            private delegate slice<@string> BoolByRef(ref T value, @string name, bool def, @string usage);
+            private delegate slice<@string> BoolByPtr(ptr<T> value, @string name, bool def, @string usage);
             private delegate slice<@string> BoolByVal(T value, @string name, bool def, @string usage);
 
-            private static readonly BoolByRef s_BoolByRef;
+            private static readonly BoolByPtr s_BoolByPtr;
             private static readonly BoolByVal s_BoolByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,17 +86,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BoolByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BoolByPtr is null || !m_target_is_ptr)
                     return s_BoolByVal!(target, name, def, usage);
 
-                return s_BoolByRef(ref target, name, def, usage);
+                return s_BoolByPtr(m_target_ptr, name, def, usage);
             }
 
-            private delegate slice<@string> IntByRef(ref T value, @string name, long def, @string usage);
+            private delegate slice<@string> IntByPtr(ptr<T> value, @string name, long def, @string usage);
             private delegate slice<@string> IntByVal(T value, @string name, long def, @string usage);
 
-            private static readonly IntByRef s_IntByRef;
+            private static readonly IntByPtr s_IntByPtr;
             private static readonly IntByVal s_IntByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,17 +106,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_IntByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_IntByPtr is null || !m_target_is_ptr)
                     return s_IntByVal!(target, name, def, usage);
 
-                return s_IntByRef(ref target, name, def, usage);
+                return s_IntByPtr(m_target_ptr, name, def, usage);
             }
 
-            private delegate slice<@string> Float64ByRef(ref T value, @string name, double def, @string usage);
+            private delegate slice<@string> Float64ByPtr(ptr<T> value, @string name, double def, @string usage);
             private delegate slice<@string> Float64ByVal(T value, @string name, double def, @string usage);
 
-            private static readonly Float64ByRef s_Float64ByRef;
+            private static readonly Float64ByPtr s_Float64ByPtr;
             private static readonly Float64ByVal s_Float64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,17 +126,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Float64ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_Float64ByPtr is null || !m_target_is_ptr)
                     return s_Float64ByVal!(target, name, def, usage);
 
-                return s_Float64ByRef(ref target, name, def, usage);
+                return s_Float64ByPtr(m_target_ptr, name, def, usage);
             }
 
-            private delegate slice<@string> StringByRef(ref T value, @string name, @string def, @string usage);
+            private delegate slice<@string> StringByPtr(ptr<T> value, @string name, @string def, @string usage);
             private delegate slice<@string> StringByVal(T value, @string name, @string def, @string usage);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,93 +146,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target, name, def, usage);
 
-                return s_StringByRef(ref target, name, def, usage);
+                return s_StringByPtr(m_target_ptr, name, def, usage);
             }
 
-            private delegate slice<@string> BoolVarByRef(ref T value, ref bool pointer, @string name, bool def, @string usage);
-            private delegate slice<@string> BoolVarByVal(T value, ref bool pointer, @string name, bool def, @string usage);
-
-            private static readonly BoolVarByRef s_BoolVarByRef;
-            private static readonly BoolVarByVal s_BoolVarByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<@string> BoolVar(ref bool pointer, @string name, bool def, @string usage)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BoolVarByRef is null)
-                    return s_BoolVarByVal!(target, pointer, name, def, usage);
-
-                return s_BoolVarByRef(ref target, pointer, name, def, usage);
-            }
-
-            private delegate slice<@string> IntVarByRef(ref T value, ref long pointer, @string name, long def, @string usage);
-            private delegate slice<@string> IntVarByVal(T value, ref long pointer, @string name, long def, @string usage);
-
-            private static readonly IntVarByRef s_IntVarByRef;
-            private static readonly IntVarByVal s_IntVarByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<@string> IntVar(ref long pointer, @string name, long def, @string usage)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_IntVarByRef is null)
-                    return s_IntVarByVal!(target, pointer, name, def, usage);
-
-                return s_IntVarByRef(ref target, pointer, name, def, usage);
-            }
-
-            private delegate slice<@string> Float64VarByRef(ref T value, ref double pointer, @string name, double def, @string usage);
-            private delegate slice<@string> Float64VarByVal(T value, ref double pointer, @string name, double def, @string usage);
-
-            private static readonly Float64VarByRef s_Float64VarByRef;
-            private static readonly Float64VarByVal s_Float64VarByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<@string> Float64Var(ref double pointer, @string name, double def, @string usage)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Float64VarByRef is null)
-                    return s_Float64VarByVal!(target, pointer, name, def, usage);
-
-                return s_Float64VarByRef(ref target, pointer, name, def, usage);
-            }
-
-            private delegate slice<@string> StringVarByRef(ref T value, ref @string pointer, @string name, @string def, @string usage);
-            private delegate slice<@string> StringVarByVal(T value, ref @string pointer, @string name, @string def, @string usage);
-
-            private static readonly StringVarByRef s_StringVarByRef;
-            private static readonly StringVarByVal s_StringVarByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<@string> StringVar(ref @string pointer, @string name, @string def, @string usage)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringVarByRef is null)
-                    return s_StringVarByVal!(target, pointer, name, def, usage);
-
-                return s_StringVarByRef(ref target, pointer, name, def, usage);
-            }
-
-            private delegate slice<@string> StringListByRef(ref T value, @string name, @string def, @string usage);
+            private delegate slice<@string> StringListByPtr(ptr<T> value, @string name, @string def, @string usage);
             private delegate slice<@string> StringListByVal(T value, @string name, @string def, @string usage);
 
-            private static readonly StringListByRef s_StringListByRef;
+            private static readonly StringListByPtr s_StringListByPtr;
             private static readonly StringListByVal s_StringListByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -237,17 +166,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringListByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringListByPtr is null || !m_target_is_ptr)
                     return s_StringListByVal!(target, name, def, usage);
 
-                return s_StringListByRef(ref target, name, def, usage);
+                return s_StringListByPtr(m_target_ptr, name, def, usage);
             }
 
-            private delegate slice<@string> ExtraUsageByRef(ref T value);
+            private delegate slice<@string> ExtraUsageByPtr(ptr<T> value);
             private delegate slice<@string> ExtraUsageByVal(T value);
 
-            private static readonly ExtraUsageByRef s_ExtraUsageByRef;
+            private static readonly ExtraUsageByPtr s_ExtraUsageByPtr;
             private static readonly ExtraUsageByVal s_ExtraUsageByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -256,17 +186,38 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ExtraUsageByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ExtraUsageByPtr is null || !m_target_is_ptr)
                     return s_ExtraUsageByVal!(target);
 
-                return s_ExtraUsageByRef(ref target);
+                return s_ExtraUsageByPtr(m_target_ptr);
             }
 
-            private delegate slice<@string> ParseByRef(ref T value, Action usage);
+            private delegate slice<@string> AddExtraUsageByPtr(ptr<T> value, @string eu);
+            private delegate slice<@string> AddExtraUsageByVal(T value, @string eu);
+
+            private static readonly AddExtraUsageByPtr s_AddExtraUsageByPtr;
+            private static readonly AddExtraUsageByVal s_AddExtraUsageByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public slice<@string> AddExtraUsage(@string eu)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_AddExtraUsageByPtr is null || !m_target_is_ptr)
+                    return s_AddExtraUsageByVal!(target, eu);
+
+                return s_AddExtraUsageByPtr(m_target_ptr, eu);
+            }
+
+            private delegate slice<@string> ParseByPtr(ptr<T> value, Action usage);
             private delegate slice<@string> ParseByVal(T value, Action usage);
 
-            private static readonly ParseByRef s_ParseByRef;
+            private static readonly ParseByPtr s_ParseByPtr;
             private static readonly ParseByVal s_ParseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -275,11 +226,12 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ParseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ParseByPtr is null || !m_target_is_ptr)
                     return s_ParseByVal!(target, usage);
 
-                return s_ParseByRef(ref target, usage);
+                return s_ParseByPtr(m_target_ptr, usage);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -288,183 +240,111 @@ namespace pprof
             static FlagSet()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Bool");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Bool");
 
                 if (!(extensionMethod is null))
-                    s_BoolByRef = extensionMethod.CreateStaticDelegate(typeof(BoolByRef)) as BoolByRef;
+                    s_BoolByPtr = extensionMethod.CreateStaticDelegate(typeof(BoolByPtr)) as BoolByPtr;
 
-                if (s_BoolByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Bool");
+                extensionMethod = targetType.GetExtensionMethod("Bool");
 
-                    if (!(extensionMethod is null))
-                        s_BoolByVal = extensionMethod.CreateStaticDelegate(typeof(BoolByVal)) as BoolByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BoolByVal = extensionMethod.CreateStaticDelegate(typeof(BoolByVal)) as BoolByVal;
 
-                if (s_BoolByRef is null && s_BoolByVal is null)
+                if (s_BoolByPtr is null && s_BoolByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.Bool method", new Exception("Bool"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Int");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Int");
 
                 if (!(extensionMethod is null))
-                    s_IntByRef = extensionMethod.CreateStaticDelegate(typeof(IntByRef)) as IntByRef;
+                    s_IntByPtr = extensionMethod.CreateStaticDelegate(typeof(IntByPtr)) as IntByPtr;
 
-                if (s_IntByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Int");
+                extensionMethod = targetType.GetExtensionMethod("Int");
 
-                    if (!(extensionMethod is null))
-                        s_IntByVal = extensionMethod.CreateStaticDelegate(typeof(IntByVal)) as IntByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_IntByVal = extensionMethod.CreateStaticDelegate(typeof(IntByVal)) as IntByVal;
 
-                if (s_IntByRef is null && s_IntByVal is null)
+                if (s_IntByPtr is null && s_IntByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.Int method", new Exception("Int"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Float64");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Float64");
 
                 if (!(extensionMethod is null))
-                    s_Float64ByRef = extensionMethod.CreateStaticDelegate(typeof(Float64ByRef)) as Float64ByRef;
+                    s_Float64ByPtr = extensionMethod.CreateStaticDelegate(typeof(Float64ByPtr)) as Float64ByPtr;
 
-                if (s_Float64ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Float64");
+                extensionMethod = targetType.GetExtensionMethod("Float64");
 
-                    if (!(extensionMethod is null))
-                        s_Float64ByVal = extensionMethod.CreateStaticDelegate(typeof(Float64ByVal)) as Float64ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_Float64ByVal = extensionMethod.CreateStaticDelegate(typeof(Float64ByVal)) as Float64ByVal;
 
-                if (s_Float64ByRef is null && s_Float64ByVal is null)
+                if (s_Float64ByPtr is null && s_Float64ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.Float64 method", new Exception("Float64"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("BoolVar");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("StringList");
 
                 if (!(extensionMethod is null))
-                    s_BoolVarByRef = extensionMethod.CreateStaticDelegate(typeof(BoolVarByRef)) as BoolVarByRef;
+                    s_StringListByPtr = extensionMethod.CreateStaticDelegate(typeof(StringListByPtr)) as StringListByPtr;
 
-                if (s_BoolVarByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("BoolVar");
-
-                    if (!(extensionMethod is null))
-                        s_BoolVarByVal = extensionMethod.CreateStaticDelegate(typeof(BoolVarByVal)) as BoolVarByVal;
-                }
-
-                if (s_BoolVarByRef is null && s_BoolVarByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.BoolVar method", new Exception("BoolVar"));
-
-               extensionMethod = targetTypeByRef.GetExtensionMethod("IntVar");
+                extensionMethod = targetType.GetExtensionMethod("StringList");
 
                 if (!(extensionMethod is null))
-                    s_IntVarByRef = extensionMethod.CreateStaticDelegate(typeof(IntVarByRef)) as IntVarByRef;
+                    s_StringListByVal = extensionMethod.CreateStaticDelegate(typeof(StringListByVal)) as StringListByVal;
 
-                if (s_IntVarByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("IntVar");
-
-                    if (!(extensionMethod is null))
-                        s_IntVarByVal = extensionMethod.CreateStaticDelegate(typeof(IntVarByVal)) as IntVarByVal;
-                }
-
-                if (s_IntVarByRef is null && s_IntVarByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.IntVar method", new Exception("IntVar"));
-
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Float64Var");
-
-                if (!(extensionMethod is null))
-                    s_Float64VarByRef = extensionMethod.CreateStaticDelegate(typeof(Float64VarByRef)) as Float64VarByRef;
-
-                if (s_Float64VarByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Float64Var");
-
-                    if (!(extensionMethod is null))
-                        s_Float64VarByVal = extensionMethod.CreateStaticDelegate(typeof(Float64VarByVal)) as Float64VarByVal;
-                }
-
-                if (s_Float64VarByRef is null && s_Float64VarByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.Float64Var method", new Exception("Float64Var"));
-
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StringVar");
-
-                if (!(extensionMethod is null))
-                    s_StringVarByRef = extensionMethod.CreateStaticDelegate(typeof(StringVarByRef)) as StringVarByRef;
-
-                if (s_StringVarByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StringVar");
-
-                    if (!(extensionMethod is null))
-                        s_StringVarByVal = extensionMethod.CreateStaticDelegate(typeof(StringVarByVal)) as StringVarByVal;
-                }
-
-                if (s_StringVarByRef is null && s_StringVarByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.StringVar method", new Exception("StringVar"));
-
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StringList");
-
-                if (!(extensionMethod is null))
-                    s_StringListByRef = extensionMethod.CreateStaticDelegate(typeof(StringListByRef)) as StringListByRef;
-
-                if (s_StringListByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StringList");
-
-                    if (!(extensionMethod is null))
-                        s_StringListByVal = extensionMethod.CreateStaticDelegate(typeof(StringListByVal)) as StringListByVal;
-                }
-
-                if (s_StringListByRef is null && s_StringListByVal is null)
+                if (s_StringListByPtr is null && s_StringListByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.StringList method", new Exception("StringList"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ExtraUsage");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ExtraUsage");
 
                 if (!(extensionMethod is null))
-                    s_ExtraUsageByRef = extensionMethod.CreateStaticDelegate(typeof(ExtraUsageByRef)) as ExtraUsageByRef;
+                    s_ExtraUsageByPtr = extensionMethod.CreateStaticDelegate(typeof(ExtraUsageByPtr)) as ExtraUsageByPtr;
 
-                if (s_ExtraUsageByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ExtraUsage");
+                extensionMethod = targetType.GetExtensionMethod("ExtraUsage");
 
-                    if (!(extensionMethod is null))
-                        s_ExtraUsageByVal = extensionMethod.CreateStaticDelegate(typeof(ExtraUsageByVal)) as ExtraUsageByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ExtraUsageByVal = extensionMethod.CreateStaticDelegate(typeof(ExtraUsageByVal)) as ExtraUsageByVal;
 
-                if (s_ExtraUsageByRef is null && s_ExtraUsageByVal is null)
+                if (s_ExtraUsageByPtr is null && s_ExtraUsageByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.ExtraUsage method", new Exception("ExtraUsage"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Parse");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddExtraUsage");
 
                 if (!(extensionMethod is null))
-                    s_ParseByRef = extensionMethod.CreateStaticDelegate(typeof(ParseByRef)) as ParseByRef;
+                    s_AddExtraUsageByPtr = extensionMethod.CreateStaticDelegate(typeof(AddExtraUsageByPtr)) as AddExtraUsageByPtr;
 
-                if (s_ParseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Parse");
+                extensionMethod = targetType.GetExtensionMethod("AddExtraUsage");
 
-                    if (!(extensionMethod is null))
-                        s_ParseByVal = extensionMethod.CreateStaticDelegate(typeof(ParseByVal)) as ParseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddExtraUsageByVal = extensionMethod.CreateStaticDelegate(typeof(AddExtraUsageByVal)) as AddExtraUsageByVal;
 
-                if (s_ParseByRef is null && s_ParseByVal is null)
+                if (s_AddExtraUsageByPtr is null && s_AddExtraUsageByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.AddExtraUsage method", new Exception("AddExtraUsage"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Parse");
+
+                if (!(extensionMethod is null))
+                    s_ParseByPtr = extensionMethod.CreateStaticDelegate(typeof(ParseByPtr)) as ParseByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("Parse");
+
+                if (!(extensionMethod is null))
+                    s_ParseByVal = extensionMethod.CreateStaticDelegate(typeof(ParseByVal)) as ParseByVal;
+
+                if (s_ParseByPtr is null && s_ParseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FlagSet.Parse method", new Exception("Parse"));
             }
 

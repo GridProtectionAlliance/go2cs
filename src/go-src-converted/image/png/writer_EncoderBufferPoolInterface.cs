@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:30 UTC
+//     Generated on 2020 October 08 04:59:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using zlib = go.compress.zlib_package;
+using binary = go.encoding.binary_package;
 using crc32 = go.hash.crc32_package;
 using image = go.image_package;
 using color = go.image.color_package;
@@ -56,7 +57,7 @@ namespace image
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -70,42 +71,44 @@ namespace image
                 m_target_is_ptr = true;
             }
 
-            private delegate ref EncoderBuffer GetByRef(ref T value);
-            private delegate ref EncoderBuffer GetByVal(T value);
+            private delegate ptr<EncoderBuffer> GetByPtr(ptr<T> value);
+            private delegate ptr<EncoderBuffer> GetByVal(T value);
 
-            private static readonly GetByRef s_GetByRef;
+            private static readonly GetByPtr s_GetByPtr;
             private static readonly GetByVal s_GetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EncoderBuffer Get()
+            public ptr<EncoderBuffer> Get()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GetByPtr is null || !m_target_is_ptr)
                     return s_GetByVal!(target);
 
-                return s_GetByRef(ref target);
+                return s_GetByPtr(m_target_ptr);
             }
 
-            private delegate ref EncoderBuffer PutByRef(ref T value, ref EncoderBuffer _p0);
-            private delegate ref EncoderBuffer PutByVal(T value, ref EncoderBuffer _p0);
+            private delegate ptr<EncoderBuffer> PutByPtr(ptr<T> value, ptr<EncoderBuffer> _p0);
+            private delegate ptr<EncoderBuffer> PutByVal(T value, ptr<EncoderBuffer> _p0);
 
-            private static readonly PutByRef s_PutByRef;
+            private static readonly PutByPtr s_PutByPtr;
             private static readonly PutByVal s_PutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EncoderBuffer Put(ref EncoderBuffer _p0)
+            public ptr<EncoderBuffer> Put(ptr<EncoderBuffer> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PutByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PutByPtr is null || !m_target_is_ptr)
                     return s_PutByVal!(target, _p0);
 
-                return s_PutByRef(ref target, _p0);
+                return s_PutByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -114,39 +117,33 @@ namespace image
             static EncoderBufferPool()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Get");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Get");
 
                 if (!(extensionMethod is null))
-                    s_GetByRef = extensionMethod.CreateStaticDelegate(typeof(GetByRef)) as GetByRef;
+                    s_GetByPtr = extensionMethod.CreateStaticDelegate(typeof(GetByPtr)) as GetByPtr;
 
-                if (s_GetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Get");
+                extensionMethod = targetType.GetExtensionMethod("Get");
 
-                    if (!(extensionMethod is null))
-                        s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
 
-                if (s_GetByRef is null && s_GetByVal is null)
+                if (s_GetByPtr is null && s_GetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement EncoderBufferPool.Get method", new Exception("Get"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Put");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Put");
 
                 if (!(extensionMethod is null))
-                    s_PutByRef = extensionMethod.CreateStaticDelegate(typeof(PutByRef)) as PutByRef;
+                    s_PutByPtr = extensionMethod.CreateStaticDelegate(typeof(PutByPtr)) as PutByPtr;
 
-                if (s_PutByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Put");
+                extensionMethod = targetType.GetExtensionMethod("Put");
 
-                    if (!(extensionMethod is null))
-                        s_PutByVal = extensionMethod.CreateStaticDelegate(typeof(PutByVal)) as PutByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PutByVal = extensionMethod.CreateStaticDelegate(typeof(PutByVal)) as PutByVal;
 
-                if (s_PutByRef is null && s_PutByVal is null)
+                if (s_PutByPtr is null && s_PutByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement EncoderBufferPool.Put method", new Exception("Put"));
             }
 

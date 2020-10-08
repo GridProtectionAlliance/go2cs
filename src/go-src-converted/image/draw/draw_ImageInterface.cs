@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:57 UTC
+//     Generated on 2020 October 08 04:59:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -52,7 +52,7 @@ namespace image
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -66,10 +66,10 @@ namespace image
                 m_target_is_ptr = true;
             }
 
-            private delegate void SetByRef(ref T value, long x, long y, color.Color c);
+            private delegate void SetByPtr(ptr<T> value, long x, long y, color.Color c);
             private delegate void SetByVal(T value, long x, long y, color.Color c);
 
-            private static readonly SetByRef s_SetByRef;
+            private static readonly SetByPtr s_SetByPtr;
             private static readonly SetByVal s_SetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,22 +78,23 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetByPtr is null || !m_target_is_ptr)
                 {
                     s_SetByVal!(target, x, y, c);
                     return;
                 }
 
-                s_SetByRef(ref target, x, y, c);
+                s_SetByPtr(m_target_ptr, x, y, c);
                 return;
                 
             }
 
-            private delegate color.Color ColorModelByRef(ref T value);
+            private delegate color.Color ColorModelByPtr(ptr<T> value);
             private delegate color.Color ColorModelByVal(T value);
 
-            private static readonly ColorModelByRef s_ColorModelByRef;
+            private static readonly ColorModelByPtr s_ColorModelByPtr;
             private static readonly ColorModelByVal s_ColorModelByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,17 +103,18 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ColorModelByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ColorModelByPtr is null || !m_target_is_ptr)
                     return s_ColorModelByVal!(target);
 
-                return s_ColorModelByRef(ref target);
+                return s_ColorModelByPtr(m_target_ptr);
             }
 
-            private delegate color.Color BoundsByRef(ref T value);
+            private delegate color.Color BoundsByPtr(ptr<T> value);
             private delegate color.Color BoundsByVal(T value);
 
-            private static readonly BoundsByRef s_BoundsByRef;
+            private static readonly BoundsByPtr s_BoundsByPtr;
             private static readonly BoundsByVal s_BoundsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,17 +123,18 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BoundsByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BoundsByPtr is null || !m_target_is_ptr)
                     return s_BoundsByVal!(target);
 
-                return s_BoundsByRef(ref target);
+                return s_BoundsByPtr(m_target_ptr);
             }
 
-            private delegate color.Color AtByRef(ref T value, long x, long y);
+            private delegate color.Color AtByPtr(ptr<T> value, long x, long y);
             private delegate color.Color AtByVal(T value, long x, long y);
 
-            private static readonly AtByRef s_AtByRef;
+            private static readonly AtByPtr s_AtByPtr;
             private static readonly AtByVal s_AtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,11 +143,12 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AtByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AtByPtr is null || !m_target_is_ptr)
                     return s_AtByVal!(target, x, y);
 
-                return s_AtByRef(ref target, x, y);
+                return s_AtByPtr(m_target_ptr, x, y);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -153,71 +157,59 @@ namespace image
             static Image()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Set");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Set");
 
                 if (!(extensionMethod is null))
-                    s_SetByRef = extensionMethod.CreateStaticDelegate(typeof(SetByRef)) as SetByRef;
+                    s_SetByPtr = extensionMethod.CreateStaticDelegate(typeof(SetByPtr)) as SetByPtr;
 
-                if (s_SetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Set");
+                extensionMethod = targetType.GetExtensionMethod("Set");
 
-                    if (!(extensionMethod is null))
-                        s_SetByVal = extensionMethod.CreateStaticDelegate(typeof(SetByVal)) as SetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetByVal = extensionMethod.CreateStaticDelegate(typeof(SetByVal)) as SetByVal;
 
-                if (s_SetByRef is null && s_SetByVal is null)
+                if (s_SetByPtr is null && s_SetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Image.Set method", new Exception("Set"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ColorModel");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ColorModel");
 
                 if (!(extensionMethod is null))
-                    s_ColorModelByRef = extensionMethod.CreateStaticDelegate(typeof(ColorModelByRef)) as ColorModelByRef;
+                    s_ColorModelByPtr = extensionMethod.CreateStaticDelegate(typeof(ColorModelByPtr)) as ColorModelByPtr;
 
-                if (s_ColorModelByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ColorModel");
+                extensionMethod = targetType.GetExtensionMethod("ColorModel");
 
-                    if (!(extensionMethod is null))
-                        s_ColorModelByVal = extensionMethod.CreateStaticDelegate(typeof(ColorModelByVal)) as ColorModelByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ColorModelByVal = extensionMethod.CreateStaticDelegate(typeof(ColorModelByVal)) as ColorModelByVal;
 
-                if (s_ColorModelByRef is null && s_ColorModelByVal is null)
+                if (s_ColorModelByPtr is null && s_ColorModelByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Image.ColorModel method", new Exception("ColorModel"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Bounds");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Bounds");
 
                 if (!(extensionMethod is null))
-                    s_BoundsByRef = extensionMethod.CreateStaticDelegate(typeof(BoundsByRef)) as BoundsByRef;
+                    s_BoundsByPtr = extensionMethod.CreateStaticDelegate(typeof(BoundsByPtr)) as BoundsByPtr;
 
-                if (s_BoundsByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Bounds");
+                extensionMethod = targetType.GetExtensionMethod("Bounds");
 
-                    if (!(extensionMethod is null))
-                        s_BoundsByVal = extensionMethod.CreateStaticDelegate(typeof(BoundsByVal)) as BoundsByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BoundsByVal = extensionMethod.CreateStaticDelegate(typeof(BoundsByVal)) as BoundsByVal;
 
-                if (s_BoundsByRef is null && s_BoundsByVal is null)
+                if (s_BoundsByPtr is null && s_BoundsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Image.Bounds method", new Exception("Bounds"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("At");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("At");
 
                 if (!(extensionMethod is null))
-                    s_AtByRef = extensionMethod.CreateStaticDelegate(typeof(AtByRef)) as AtByRef;
+                    s_AtByPtr = extensionMethod.CreateStaticDelegate(typeof(AtByPtr)) as AtByPtr;
 
-                if (s_AtByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("At");
+                extensionMethod = targetType.GetExtensionMethod("At");
 
-                    if (!(extensionMethod is null))
-                        s_AtByVal = extensionMethod.CreateStaticDelegate(typeof(AtByVal)) as AtByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AtByVal = extensionMethod.CreateStaticDelegate(typeof(AtByVal)) as AtByVal;
 
-                if (s_AtByRef is null && s_AtByVal is null)
+                if (s_AtByPtr is null && s_AtByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Image.At method", new Exception("At"));
             }
 

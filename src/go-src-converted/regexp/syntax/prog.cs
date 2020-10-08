@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 August 29 08:23:57 UTC
+// package syntax -- go2cs converted at 2020 October 08 03:41:05 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\prog.go
-using bytes = go.bytes_package;
 using strconv = go.strconv_package;
+using strings = go.strings_package;
 using unicode = go.unicode_package;
 using static go.builtin;
 
@@ -31,17 +31,18 @@ namespace regexp
         {
         }
 
-        public static readonly InstOp InstAlt = iota;
-        public static readonly var InstAltMatch = 0;
-        public static readonly var InstCapture = 1;
-        public static readonly var InstEmptyWidth = 2;
-        public static readonly var InstMatch = 3;
-        public static readonly var InstFail = 4;
-        public static readonly var InstNop = 5;
-        public static readonly var InstRune = 6;
-        public static readonly var InstRune1 = 7;
-        public static readonly var InstRuneAny = 8;
-        public static readonly var InstRuneAnyNotNL = 9;
+        public static readonly InstOp InstAlt = (InstOp)iota;
+        public static readonly var InstAltMatch = (var)0;
+        public static readonly var InstCapture = (var)1;
+        public static readonly var InstEmptyWidth = (var)2;
+        public static readonly var InstMatch = (var)3;
+        public static readonly var InstFail = (var)4;
+        public static readonly var InstNop = (var)5;
+        public static readonly var InstRune = (var)6;
+        public static readonly var InstRune1 = (var)7;
+        public static readonly var InstRuneAny = (var)8;
+        public static readonly var InstRuneAnyNotNL = (var)9;
+
 
         private static @string instOpNames = new slice<@string>(new @string[] { "InstAlt", "InstAltMatch", "InstCapture", "InstEmptyWidth", "InstMatch", "InstFail", "InstNop", "InstRune", "InstRune1", "InstRuneAny", "InstRuneAnyNotNL" });
 
@@ -51,7 +52,9 @@ namespace regexp
             {
                 return "";
             }
+
             return instOpNames[i];
+
         }
 
         // An EmptyOp specifies a kind or mixture of zero-width assertions.
@@ -59,12 +62,13 @@ namespace regexp
         {
         }
 
-        public static readonly EmptyOp EmptyBeginLine = 1L << (int)(iota);
-        public static readonly var EmptyEndLine = 0;
-        public static readonly var EmptyBeginText = 1;
-        public static readonly var EmptyEndText = 2;
-        public static readonly var EmptyWordBoundary = 3;
-        public static readonly var EmptyNoWordBoundary = 4;
+        public static readonly EmptyOp EmptyBeginLine = (EmptyOp)1L << (int)(iota);
+        public static readonly var EmptyEndLine = (var)0;
+        public static readonly var EmptyBeginText = (var)1;
+        public static readonly var EmptyEndText = (var)2;
+        public static readonly var EmptyWordBoundary = (var)3;
+        public static readonly var EmptyNoWordBoundary = (var)4;
+
 
         // EmptyOpContext returns the zero-width assertions
         // satisfied at the position between the runes r1 and r2.
@@ -93,8 +97,11 @@ namespace regexp
                         if (boundary != 0L)
             { // IsWordChar(r1) != IsWordChar(r2)
                 op ^= (EmptyWordBoundary | EmptyNoWordBoundary);
+
             }
+
             return op;
+
         }
 
         // IsWordChar reports whether r is consider a ``word character''
@@ -114,43 +121,53 @@ namespace regexp
             public slice<int> Rune;
         }
 
-        private static @string String(this ref Prog p)
+        private static @string String(this ptr<Prog> _addr_p)
         {
-            bytes.Buffer b = default;
-            dumpProg(ref b, p);
+            ref Prog p = ref _addr_p.val;
+
+            ref strings.Builder b = ref heap(out ptr<strings.Builder> _addr_b);
+            dumpProg(_addr_b, _addr_p);
             return b.String();
         }
 
-        // skipNop follows any no-op or capturing instructions
-        // and returns the resulting pc.
-        private static (ref Inst, uint) skipNop(this ref Prog p, uint pc)
+        // skipNop follows any no-op or capturing instructions.
+        private static ptr<Inst> skipNop(this ptr<Prog> _addr_p, uint pc)
         {
-            var i = ref p.Inst[pc];
+            ref Prog p = ref _addr_p.val;
+
+            var i = _addr_p.Inst[pc];
             while (i.Op == InstNop || i.Op == InstCapture)
             {
-                pc = i.Out;
-                i = ref p.Inst[pc];
+                i = _addr_p.Inst[i.Out];
             }
 
-            return (i, pc);
+            return _addr_i!;
+
         }
 
         // op returns i.Op but merges all the Rune special cases into InstRune
-        private static InstOp op(this ref Inst i)
+        private static InstOp op(this ptr<Inst> _addr_i)
         {
+            ref Inst i = ref _addr_i.val;
+
             var op = i.Op;
 
             if (op == InstRune1 || op == InstRuneAny || op == InstRuneAnyNotNL) 
                 op = InstRune;
                         return op;
+
         }
 
         // Prefix returns a literal string that all matches for the
         // regexp must start with. Complete is true if the prefix
         // is the entire match.
-        private static (@string, bool) Prefix(this ref Prog p)
+        private static (@string, bool) Prefix(this ptr<Prog> _addr_p)
         {
-            var (i, _) = p.skipNop(uint32(p.Start)); 
+            @string prefix = default;
+            bool complete = default;
+            ref Prog p = ref _addr_p.val;
+
+            var i = p.skipNop(uint32(p.Start)); 
 
             // Avoid allocation of buffer if prefix is empty.
             if (i.op() != InstRune || len(i.Rune) != 1L)
@@ -159,23 +176,26 @@ namespace regexp
             } 
 
             // Have prefix; gather characters.
-            bytes.Buffer buf = default;
+            strings.Builder buf = default;
             while (i.op() == InstRune && len(i.Rune) == 1L && Flags(i.Arg) & FoldCase == 0L)
             {
                 buf.WriteRune(i.Rune[0L]);
-                i, _ = p.skipNop(i.Out);
+                i = p.skipNop(i.Out);
             }
 
             return (buf.String(), i.Op == InstMatch);
+
         }
 
         // StartCond returns the leading empty-width conditions that must
         // be true in any match. It returns ^EmptyOp(0) if no matches are possible.
-        private static EmptyOp StartCond(this ref Prog p)
+        private static EmptyOp StartCond(this ptr<Prog> _addr_p)
         {
+            ref Prog p = ref _addr_p.val;
+
             EmptyOp flag = default;
             var pc = uint32(p.Start);
-            var i = ref p.Inst[pc];
+            var i = _addr_p.Inst[pc];
 Loop:
             while (true)
             {
@@ -188,12 +208,14 @@ Loop:
                     _breakLoop = true;
                     break;
                                 pc = i.Out;
-                i = ref p.Inst[pc];
+                i = _addr_p.Inst[pc];
+
             }
             return flag;
+
         }
 
-        private static readonly long noMatch = -1L;
+        private static readonly long noMatch = (long)-1L;
 
         // MatchRune reports whether the instruction matches (and consumes) r.
         // It should only be called when i.Op == InstRune.
@@ -201,8 +223,10 @@ Loop:
 
         // MatchRune reports whether the instruction matches (and consumes) r.
         // It should only be called when i.Op == InstRune.
-        private static bool MatchRune(this ref Inst i, int r)
+        private static bool MatchRune(this ptr<Inst> _addr_i, int r)
         {
+            ref Inst i = ref _addr_i.val;
+
             return i.MatchRunePos(r) != noMatch;
         }
 
@@ -211,57 +235,86 @@ Loop:
         // (or, when len(i.Rune) == 1, rune singleton).
         // If not, MatchRunePos returns -1.
         // MatchRunePos should only be called when i.Op == InstRune.
-        private static long MatchRunePos(this ref Inst i, int r)
+        private static long MatchRunePos(this ptr<Inst> _addr_i, int r)
         {
-            var rune = i.Rune; 
+            ref Inst i = ref _addr_i.val;
 
-            // Special case: single-rune slice is from literal string, not char class.
-            if (len(rune) == 1L)
+            var rune = i.Rune;
+
+            switch (len(rune))
             {
-                var r0 = rune[0L];
-                if (r == r0)
-                {
-                    return 0L;
-                }
-                if (Flags(i.Arg) & FoldCase != 0L)
-                {
+                case 0L: 
+                    return noMatch;
+                    break;
+                case 1L: 
+                    // Special case: single-rune slice is from literal string, not char class.
+                    var r0 = rune[0L];
+                    if (r == r0)
                     {
-                        var r1 = unicode.SimpleFold(r0);
+                        return 0L;
+                    }
 
-                        while (r1 != r0)
+                    if (Flags(i.Arg) & FoldCase != 0L)
+                    {
                         {
-                            if (r == r1)
+                            var r1 = unicode.SimpleFold(r0);
+
+                            while (r1 != r0)
                             {
-                                return 0L;
-                            r1 = unicode.SimpleFold(r1);
+                                if (r == r1)
+                                {
+                                    return 0L;
+                                r1 = unicode.SimpleFold(r1);
+                                }
+
                             }
+
                         }
 
                     }
-                }
-                return noMatch;
-            } 
 
-            // Peek at the first few pairs.
-            // Should handle ASCII well.
-            {
-                long j = 0L;
-
-                while (j < len(rune) && j <= 8L)
-                {
-                    if (r < rune[j])
+                    return noMatch;
+                    break;
+                case 2L: 
+                    if (r >= rune[0L] && r <= rune[1L])
                     {
-                        return noMatch;
-                    j += 2L;
+                        return 0L;
                     }
-                    if (r <= rune[j + 1L])
+
+                    return noMatch;
+                    break;
+                case 4L: 
+                    // Linear search for a few pairs.
+                    // Should handle ASCII well.
+
+                case 6L: 
+                    // Linear search for a few pairs.
+                    // Should handle ASCII well.
+
+                case 8L: 
+                    // Linear search for a few pairs.
+                    // Should handle ASCII well.
                     {
-                        return j / 2L;
+                        long j = 0L;
+
+                        while (j < len(rune))
+                        {
+                            if (r < rune[j])
+                            {
+                                return noMatch;
+                            j += 2L;
+                            }
+
+                            if (r <= rune[j + 1L])
+                            {
+                                return j / 2L;
+                            }
+
+                        }
+
                     }
-                } 
-
-                // Otherwise binary search.
-
+                    return noMatch;
+                    break;
             } 
 
             // Otherwise binary search.
@@ -279,7 +332,9 @@ Loop:
                         {
                             return m;
                         }
+
                         lo = m + 1L;
+
                     }
                     else
                     {
@@ -287,16 +342,20 @@ Loop:
                     }
 
                 }
+
             }
 
             return noMatch;
+
         }
 
         // MatchEmptyWidth reports whether the instruction matches
         // an empty string between the runes before and after.
         // It should only be called when i.Op == InstEmptyWidth.
-        private static bool MatchEmptyWidth(this ref Inst _i, int before, int after) => func(_i, (ref Inst i, Defer _, Panic panic, Recover __) =>
+        private static bool MatchEmptyWidth(this ptr<Inst> _addr_i, int before, int after) => func((_, panic, __) =>
         {
+            ref Inst i = ref _addr_i.val;
+
 
             if (EmptyOp(i.Arg) == EmptyBeginLine) 
                 return before == '\n' || before == -1L;
@@ -311,43 +370,55 @@ Loop:
             else if (EmptyOp(i.Arg) == EmptyNoWordBoundary) 
                 return IsWordChar(before) == IsWordChar(after);
                         panic("unknown empty width arg");
+
         });
 
-        private static @string String(this ref Inst i)
+        private static @string String(this ptr<Inst> _addr_i)
         {
-            bytes.Buffer b = default;
-            dumpInst(ref b, i);
+            ref Inst i = ref _addr_i.val;
+
+            ref strings.Builder b = ref heap(out ptr<strings.Builder> _addr_b);
+            dumpInst(_addr_b, _addr_i);
             return b.String();
         }
 
-        private static void bw(ref bytes.Buffer b, params @string[] args)
+        private static void bw(ptr<strings.Builder> _addr_b, params @string[] args)
         {
             args = args.Clone();
+            ref strings.Builder b = ref _addr_b.val;
 
             foreach (var (_, s) in args)
             {
                 b.WriteString(s);
             }
+
         }
 
-        private static void dumpProg(ref bytes.Buffer b, ref Prog p)
+        private static void dumpProg(ptr<strings.Builder> _addr_b, ptr<Prog> _addr_p)
         {
+            ref strings.Builder b = ref _addr_b.val;
+            ref Prog p = ref _addr_p.val;
+
             foreach (var (j) in p.Inst)
             {
-                var i = ref p.Inst[j];
+                var i = _addr_p.Inst[j];
                 var pc = strconv.Itoa(j);
                 if (len(pc) < 3L)
                 {
                     b.WriteString("   "[len(pc)..]);
                 }
+
                 if (j == p.Start)
                 {
                     pc += "*";
                 }
-                bw(b, pc, "\t");
-                dumpInst(b, i);
-                bw(b, "\n");
+
+                bw(_addr_b, pc, "\t");
+                dumpInst(_addr_b, _addr_i);
+                bw(_addr_b, "\n");
+
             }
+
         }
 
         private static @string u32(uint i)
@@ -355,41 +426,48 @@ Loop:
             return strconv.FormatUint(uint64(i), 10L);
         }
 
-        private static void dumpInst(ref bytes.Buffer b, ref Inst i)
+        private static void dumpInst(ptr<strings.Builder> _addr_b, ptr<Inst> _addr_i)
         {
+            ref strings.Builder b = ref _addr_b.val;
+            ref Inst i = ref _addr_i.val;
+
 
             if (i.Op == InstAlt) 
-                bw(b, "alt -> ", u32(i.Out), ", ", u32(i.Arg));
+                bw(_addr_b, "alt -> ", u32(i.Out), ", ", u32(i.Arg));
             else if (i.Op == InstAltMatch) 
-                bw(b, "altmatch -> ", u32(i.Out), ", ", u32(i.Arg));
+                bw(_addr_b, "altmatch -> ", u32(i.Out), ", ", u32(i.Arg));
             else if (i.Op == InstCapture) 
-                bw(b, "cap ", u32(i.Arg), " -> ", u32(i.Out));
+                bw(_addr_b, "cap ", u32(i.Arg), " -> ", u32(i.Out));
             else if (i.Op == InstEmptyWidth) 
-                bw(b, "empty ", u32(i.Arg), " -> ", u32(i.Out));
+                bw(_addr_b, "empty ", u32(i.Arg), " -> ", u32(i.Out));
             else if (i.Op == InstMatch) 
-                bw(b, "match");
+                bw(_addr_b, "match");
             else if (i.Op == InstFail) 
-                bw(b, "fail");
+                bw(_addr_b, "fail");
             else if (i.Op == InstNop) 
-                bw(b, "nop -> ", u32(i.Out));
+                bw(_addr_b, "nop -> ", u32(i.Out));
             else if (i.Op == InstRune) 
                 if (i.Rune == null)
                 { 
                     // shouldn't happen
-                    bw(b, "rune <nil>");
+                    bw(_addr_b, "rune <nil>");
+
                 }
-                bw(b, "rune ", strconv.QuoteToASCII(string(i.Rune)));
+
+                bw(_addr_b, "rune ", strconv.QuoteToASCII(string(i.Rune)));
                 if (Flags(i.Arg) & FoldCase != 0L)
                 {
-                    bw(b, "/i");
+                    bw(_addr_b, "/i");
                 }
-                bw(b, " -> ", u32(i.Out));
+
+                bw(_addr_b, " -> ", u32(i.Out));
             else if (i.Op == InstRune1) 
-                bw(b, "rune1 ", strconv.QuoteToASCII(string(i.Rune)), " -> ", u32(i.Out));
+                bw(_addr_b, "rune1 ", strconv.QuoteToASCII(string(i.Rune)), " -> ", u32(i.Out));
             else if (i.Op == InstRuneAny) 
-                bw(b, "any -> ", u32(i.Out));
+                bw(_addr_b, "any -> ", u32(i.Out));
             else if (i.Op == InstRuneAnyNotNL) 
-                bw(b, "anynotnl -> ", u32(i.Out));
-                    }
+                bw(_addr_b, "anynotnl -> ", u32(i.Out));
+            
+        }
     }
 }}

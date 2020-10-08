@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mime -- go2cs converted at 2020 August 29 08:32:39 UTC
+// package mime -- go2cs converted at 2020 October 08 03:38:35 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Go\src\mime\type_plan9.go
 using bufio = go.bufio_package;
@@ -25,6 +25,7 @@ namespace go
             {
                 loadMimeFile(filename);
             }
+
         }
 
         private static @string typeFiles = new slice<@string>(new @string[] { "/sys/lib/mimetype" });
@@ -40,8 +41,9 @@ namespace go
             var (f, err) = os.Open(filename);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             defer(f.Close());
 
             var scanner = bufio.NewScanner(f);
@@ -52,11 +54,14 @@ namespace go
                 {
                     continue;
                 }
+
                 if (fields[1L] == "-" || fields[2L] == "-")
                 {
                     continue;
                 }
+
                 setExtensionType(fields[0L], fields[1L] + "/" + fields[2L]);
+
             }
 
             {
@@ -68,6 +73,7 @@ namespace go
                 }
 
             }
+
         });
     }
 }

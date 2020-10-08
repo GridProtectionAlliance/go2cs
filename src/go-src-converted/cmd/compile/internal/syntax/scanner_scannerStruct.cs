@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:26 UTC
+//     Generated on 2020 October 08 04:28:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,26 +33,30 @@ namespace @internal
             public scanner(NilType _)
             {
                 this.source = default;
-                this.pragh = default;
+                this.mode = default;
                 this.nlsemi = default;
                 this.line = default;
                 this.col = default;
+                this.blank = default;
                 this.tok = default;
                 this.lit = default;
+                this.bad = default;
                 this.kind = default;
                 this.op = default;
                 this.prec = default;
             }
 
-            public scanner(source source = default, Action<ulong, ulong, @string> pragh = default, bool nlsemi = default, ulong line = default, ulong col = default, token tok = default, @string lit = default, LitKind kind = default, Operator op = default, long prec = default)
+            public scanner(source source = default, ulong mode = default, bool nlsemi = default, ulong line = default, ulong col = default, bool blank = default, token tok = default, @string lit = default, bool bad = default, LitKind kind = default, Operator op = default, long prec = default)
             {
                 this.source = source;
-                this.pragh = pragh;
+                this.mode = mode;
                 this.nlsemi = nlsemi;
                 this.line = line;
                 this.col = col;
+                this.blank = blank;
                 this.tok = tok;
                 this.lit = lit;
+                this.bad = bad;
                 this.kind = kind;
                 this.op = op;
                 this.prec = prec;
@@ -78,7 +82,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static scanner scanner_cast(dynamic value)
         {
-            return new scanner(value.source, value.pragh, value.nlsemi, value.line, value.col, value.tok, value.lit, value.kind, value.op, value.prec);
+            return new scanner(value.source, value.mode, value.nlsemi, value.line, value.col, value.blank, value.tok, value.lit, value.bad, value.kind, value.op, value.prec);
         }
     }
 }}}}

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 August 29 08:28:12 UTC
+// package net -- go2cs converted at 2020 October 08 03:35:03 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\unixsock_posix.go
 using context = go.context_package;
@@ -18,8 +18,11 @@ namespace go
 {
     public static partial class net_package
     {
-        private static (ref netFD, error) unixSocket(context.Context ctx, @string net, sockaddr laddr, sockaddr raddr, @string mode)
+        private static (ptr<netFD>, error) unixSocket(context.Context ctx, @string net, sockaddr laddr, sockaddr raddr, @string mode, Func<@string, @string, syscall.RawConn, error> ctrlFn)
         {
+            ptr<netFD> _p0 = default!;
+            error _p0 = default!;
+
             long sotype = default;
             switch (net)
             {
@@ -33,7 +36,7 @@ namespace go
                     sotype = syscall.SOCK_SEQPACKET;
                     break;
                 default: 
-                    return (null, UnknownNetworkError(net));
+                    return (_addr_null!, error.As(UnknownNetworkError(net))!);
                     break;
             }
 
@@ -50,64 +53,71 @@ namespace go
                     }
                     if (raddr == null && (sotype != syscall.SOCK_DGRAM || laddr == null))
                     {
-                        return (null, errMissingAddress);
+                        return (_addr_null!, error.As(errMissingAddress)!);
                     }
                     break;
                 case "listen": 
                     break;
                 default: 
-                    return (null, errors.New("unknown mode: " + mode));
+                    return (_addr_null!, error.As(errors.New("unknown mode: " + mode))!);
                     break;
             }
 
-            var (fd, err) = socket(ctx, net, syscall.AF_UNIX, sotype, 0L, false, laddr, raddr);
+            var (fd, err) = socket(ctx, net, syscall.AF_UNIX, sotype, 0L, false, laddr, raddr, ctrlFn);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (fd, null);
+            return (_addr_fd!, error.As(null!)!);
+
         }
 
         private static Addr sockaddrToUnix(syscall.Sockaddr sa)
         {
             {
-                ref syscall.SockaddrUnix (s, ok) = sa._<ref syscall.SockaddrUnix>();
+                ptr<syscall.SockaddrUnix> (s, ok) = sa._<ptr<syscall.SockaddrUnix>>();
 
                 if (ok)
                 {
-                    return ref new UnixAddr(Name:s.Name,Net:"unix");
+                    return addr(new UnixAddr(Name:s.Name,Net:"unix"));
                 }
 
             }
+
             return null;
+
         }
 
         private static Addr sockaddrToUnixgram(syscall.Sockaddr sa)
         {
             {
-                ref syscall.SockaddrUnix (s, ok) = sa._<ref syscall.SockaddrUnix>();
+                ptr<syscall.SockaddrUnix> (s, ok) = sa._<ptr<syscall.SockaddrUnix>>();
 
                 if (ok)
                 {
-                    return ref new UnixAddr(Name:s.Name,Net:"unixgram");
+                    return addr(new UnixAddr(Name:s.Name,Net:"unixgram"));
                 }
 
             }
+
             return null;
+
         }
 
         private static Addr sockaddrToUnixpacket(syscall.Sockaddr sa)
         {
             {
-                ref syscall.SockaddrUnix (s, ok) = sa._<ref syscall.SockaddrUnix>();
+                ptr<syscall.SockaddrUnix> (s, ok) = sa._<ptr<syscall.SockaddrUnix>>();
 
                 if (ok)
                 {
-                    return ref new UnixAddr(Name:s.Name,Net:"unixpacket");
+                    return addr(new UnixAddr(Name:s.Name,Net:"unixpacket"));
                 }
 
             }
+
             return null;
+
         }
 
         private static @string sotypeToNet(long sotype) => func((_, panic, __) =>
@@ -121,117 +131,180 @@ namespace go
                 return "unixpacket";
             else 
                 panic("sotypeToNet unknown socket type");
-                    });
+            
+        });
 
-        private static long family(this ref UnixAddr a)
+        private static long family(this ptr<UnixAddr> _addr_a)
         {
+            ref UnixAddr a = ref _addr_a.val;
+
             return syscall.AF_UNIX;
         }
 
-        private static (syscall.Sockaddr, error) sockaddr(this ref UnixAddr a, long family)
+        private static (syscall.Sockaddr, error) sockaddr(this ptr<UnixAddr> _addr_a, long family)
         {
+            syscall.Sockaddr _p0 = default;
+            error _p0 = default!;
+            ref UnixAddr a = ref _addr_a.val;
+
             if (a == null)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
-            return (ref new syscall.SockaddrUnix(Name:a.Name), null);
+
+            return (addr(new syscall.SockaddrUnix(Name:a.Name)), error.As(null!)!);
+
         }
 
-        private static sockaddr toLocal(this ref UnixAddr a, @string net)
+        private static sockaddr toLocal(this ptr<UnixAddr> _addr_a, @string net)
         {
+            ref UnixAddr a = ref _addr_a.val;
+
             return a;
         }
 
-        private static (long, ref UnixAddr, error) readFrom(this ref UnixConn c, slice<byte> b)
+        private static (long, ptr<UnixAddr>, error) readFrom(this ptr<UnixConn> _addr_c, slice<byte> b)
         {
-            ref UnixAddr addr = default;
+            long _p0 = default;
+            ptr<UnixAddr> _p0 = default!;
+            error _p0 = default!;
+            ref UnixConn c = ref _addr_c.val;
+
+            ptr<UnixAddr> addr;
             var (n, sa, err) = c.fd.readFrom(b);
             switch (sa.type())
             {
-                case ref syscall.SockaddrUnix sa:
+                case ptr<syscall.SockaddrUnix> sa:
                     if (sa.Name != "")
                     {
-                        addr = ref new UnixAddr(Name:sa.Name,Net:sotypeToNet(c.fd.sotype));
+                        addr = addr(new UnixAddr(Name:sa.Name,Net:sotypeToNet(c.fd.sotype)));
                     }
+
                     break;
             }
-            return (n, addr, err);
+            return (n, _addr_addr!, error.As(err)!);
+
         }
 
-        private static (long, long, long, ref UnixAddr, error) readMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob)
+        private static (long, long, long, ptr<UnixAddr>, error) readMsg(this ptr<UnixConn> _addr_c, slice<byte> b, slice<byte> oob)
         {
+            long n = default;
+            long oobn = default;
+            long flags = default;
+            ptr<UnixAddr> addr = default!;
+            error err = default!;
+            ref UnixConn c = ref _addr_c.val;
+
             syscall.Sockaddr sa = default;
             n, oobn, flags, sa, err = c.fd.readMsg(b, oob);
             switch (sa.type())
             {
-                case ref syscall.SockaddrUnix sa:
+                case ptr<syscall.SockaddrUnix> sa:
                     if (sa.Name != "")
                     {
-                        addr = ref new UnixAddr(Name:sa.Name,Net:sotypeToNet(c.fd.sotype));
+                        addr = addr(new UnixAddr(Name:sa.Name,Net:sotypeToNet(c.fd.sotype)));
                     }
+
                     break;
             }
-            return;
+            return ;
+
         }
 
-        private static (long, error) writeTo(this ref UnixConn c, slice<byte> b, ref UnixAddr addr)
+        private static (long, error) writeTo(this ptr<UnixConn> _addr_c, slice<byte> b, ptr<UnixAddr> _addr_addr)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref UnixConn c = ref _addr_c.val;
+            ref UnixAddr addr = ref _addr_addr.val;
+
             if (c.fd.isConnected)
             {
-                return (0L, ErrWriteToConnected);
+                return (0L, error.As(ErrWriteToConnected)!);
             }
+
             if (addr == null)
             {
-                return (0L, errMissingAddress);
+                return (0L, error.As(errMissingAddress)!);
             }
+
             if (addr.Net != sotypeToNet(c.fd.sotype))
             {
-                return (0L, syscall.EAFNOSUPPORT);
+                return (0L, error.As(syscall.EAFNOSUPPORT)!);
             }
-            syscall.SockaddrUnix sa = ref new syscall.SockaddrUnix(Name:addr.Name);
+
+            ptr<syscall.SockaddrUnix> sa = addr(new syscall.SockaddrUnix(Name:addr.Name));
             return c.fd.writeTo(b, sa);
+
         }
 
-        private static (long, long, error) writeMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob, ref UnixAddr addr)
+        private static (long, long, error) writeMsg(this ptr<UnixConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<UnixAddr> _addr_addr)
         {
+            long n = default;
+            long oobn = default;
+            error err = default!;
+            ref UnixConn c = ref _addr_c.val;
+            ref UnixAddr addr = ref _addr_addr.val;
+
             if (c.fd.sotype == syscall.SOCK_DGRAM && c.fd.isConnected)
             {
-                return (0L, 0L, ErrWriteToConnected);
+                return (0L, 0L, error.As(ErrWriteToConnected)!);
             }
+
             syscall.Sockaddr sa = default;
             if (addr != null)
             {
                 if (addr.Net != sotypeToNet(c.fd.sotype))
                 {
-                    return (0L, 0L, syscall.EAFNOSUPPORT);
+                    return (0L, 0L, error.As(syscall.EAFNOSUPPORT)!);
                 }
-                sa = ref new syscall.SockaddrUnix(Name:addr.Name);
+
+                sa = addr(new syscall.SockaddrUnix(Name:addr.Name));
+
             }
+
             return c.fd.writeMsg(b, oob, sa);
+
         }
 
-        private static (ref UnixConn, error) dialUnix(context.Context ctx, @string net, ref UnixAddr laddr, ref UnixAddr raddr)
+        private static (ptr<UnixConn>, error) dialUnix(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<UnixAddr> _addr_laddr, ptr<UnixAddr> _addr_raddr)
         {
-            var (fd, err) = unixSocket(ctx, net, laddr, raddr, "dial");
+            ptr<UnixConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysDialer sd = ref _addr_sd.val;
+            ref UnixAddr laddr = ref _addr_laddr.val;
+            ref UnixAddr raddr = ref _addr_raddr.val;
+
+            var (fd, err) = unixSocket(ctx, sd.network, laddr, raddr, "dial", sd.Dialer.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newUnixConn(fd), null);
+
+            return (_addr_newUnixConn(fd)!, error.As(null!)!);
+
         }
 
-        private static (ref UnixConn, error) accept(this ref UnixListener ln)
+        private static (ptr<UnixConn>, error) accept(this ptr<UnixListener> _addr_ln)
         {
+            ptr<UnixConn> _p0 = default!;
+            error _p0 = default!;
+            ref UnixListener ln = ref _addr_ln.val;
+
             var (fd, err) = ln.fd.accept();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newUnixConn(fd), null);
+
+            return (_addr_newUnixConn(fd)!, error.As(null!)!);
+
         }
 
-        private static error close(this ref UnixListener ln)
-        { 
+        private static error close(this ptr<UnixListener> _addr_ln)
+        {
+            ref UnixListener ln = ref _addr_ln.val;
+ 
             // The operating system doesn't clean up
             // the file that announcing created, so
             // we have to clean it up ourselves.
@@ -249,18 +322,26 @@ namespace go
                 {
                     syscall.Unlink(ln.path);
                 }
+
             });
-            return error.As(ln.fd.Close());
+            return error.As(ln.fd.Close())!;
+
         }
 
-        private static (ref os.File, error) file(this ref UnixListener ln)
+        private static (ptr<os.File>, error) file(this ptr<UnixListener> _addr_ln)
         {
+            ptr<os.File> _p0 = default!;
+            error _p0 = default!;
+            ref UnixListener ln = ref _addr_ln.val;
+
             var (f, err) = ln.fd.dup();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (f, null);
+
+            return (_addr_f!, error.As(null!)!);
+
         }
 
         // SetUnlinkOnClose sets whether the underlying socket file should be removed
@@ -271,29 +352,45 @@ namespace go
         // Listen or ListenUnix, then by default closing the listener will remove the socket file.
         // but if the listener was created by a call to FileListener to use an already existing
         // socket file, then by default closing the listener will not remove the socket file.
-        private static void SetUnlinkOnClose(this ref UnixListener l, bool unlink)
+        private static void SetUnlinkOnClose(this ptr<UnixListener> _addr_l, bool unlink)
         {
+            ref UnixListener l = ref _addr_l.val;
+
             l.unlink = unlink;
         }
 
-        private static (ref UnixListener, error) listenUnix(context.Context ctx, @string network, ref UnixAddr laddr)
+        private static (ptr<UnixListener>, error) listenUnix(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<UnixAddr> _addr_laddr)
         {
-            var (fd, err) = unixSocket(ctx, network, laddr, null, "listen");
+            ptr<UnixListener> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref UnixAddr laddr = ref _addr_laddr.val;
+
+            var (fd, err) = unixSocket(ctx, sl.network, laddr, null, "listen", sl.ListenConfig.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (ref new UnixListener(fd:fd,path:fd.laddr.String(),unlink:true), null);
+
+            return (addr(new UnixListener(fd:fd,path:fd.laddr.String(),unlink:true)), error.As(null!)!);
+
         }
 
-        private static (ref UnixConn, error) listenUnixgram(context.Context ctx, @string network, ref UnixAddr laddr)
+        private static (ptr<UnixConn>, error) listenUnixgram(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<UnixAddr> _addr_laddr)
         {
-            var (fd, err) = unixSocket(ctx, network, laddr, null, "listen");
+            ptr<UnixConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref UnixAddr laddr = ref _addr_laddr.val;
+
+            var (fd, err) = unixSocket(ctx, sl.network, laddr, null, "listen", sl.ListenConfig.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newUnixConn(fd), null);
+
+            return (_addr_newUnixConn(fd)!, error.As(null!)!);
+
         }
     }
 }

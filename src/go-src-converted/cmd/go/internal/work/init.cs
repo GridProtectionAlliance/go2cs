@@ -4,15 +4,20 @@
 
 // Build initialization (after flag parsing).
 
-// package work -- go2cs converted at 2020 August 29 10:01:37 UTC
+// package work -- go2cs converted at 2020 October 08 04:35:03 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\init.go
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using load = go.cmd.go.@internal.load_package;
+using objabi = go.cmd.@internal.objabi_package;
+using sys = go.cmd.@internal.sys_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
+using strings = go.strings_package;
 using static go.builtin;
 
 namespace go {
@@ -24,6 +29,7 @@ namespace @internal
     {
         public static void BuildInit()
         {
+            load.ModInit();
             instrumentInit();
             buildModeInit(); 
 
@@ -35,9 +41,20 @@ namespace @internal
                 if (err != null)
                 {
                     fmt.Fprintf(os.Stderr, "go %s: evaluating -pkgdir: %v\n", flag.Args()[0L], err);
-                    os.Exit(2L);
+                    @base.SetExitStatus(2L);
+                    @base.Exit();
                 }
                 cfg.BuildPkgdir = p;
+
+            }
+            var exp = objabi.Expstring()[2L..];
+            if (exp != "none")
+            {
+                var experiments = strings.Split(exp, ",");
+                foreach (var (_, expt) in experiments)
+                {
+                    cfg.BuildContext.BuildTags = append(cfg.BuildContext.BuildTags, "goexperiment." + expt);
+                }
             }
         }
 
@@ -45,35 +62,65 @@ namespace @internal
         {
             if (!cfg.BuildRace && !cfg.BuildMSan)
             {
-                return;
+                return ;
             }
+
             if (cfg.BuildRace && cfg.BuildMSan)
             {
                 fmt.Fprintf(os.Stderr, "go %s: may not use -race and -msan simultaneously\n", flag.Args()[0L]);
-                os.Exit(2L);
+                @base.SetExitStatus(2L);
+                @base.Exit();
             }
-            if (cfg.BuildMSan && (cfg.Goos != "linux" || cfg.Goarch != "amd64"))
+
+            if (cfg.BuildMSan && !sys.MSanSupported(cfg.Goos, cfg.Goarch))
             {
                 fmt.Fprintf(os.Stderr, "-msan is not supported on %s/%s\n", cfg.Goos, cfg.Goarch);
-                os.Exit(2L);
+                @base.SetExitStatus(2L);
+                @base.Exit();
             }
-            if (cfg.Goarch != "amd64" || cfg.Goos != "linux" && cfg.Goos != "freebsd" && cfg.Goos != "darwin" && cfg.Goos != "windows")
+
+            if (cfg.BuildRace)
             {
-                fmt.Fprintf(os.Stderr, "go %s: -race and -msan are only supported on linux/amd64, freebsd/amd64, darwin/amd64 and windows/amd64\n", flag.Args()[0L]);
-                os.Exit(2L);
+                if (!sys.RaceDetectorSupported(cfg.Goos, cfg.Goarch))
+                {
+                    fmt.Fprintf(os.Stderr, "go %s: -race is only supported on linux/amd64, linux/ppc64le, linux/arm64, freebsd/amd64, netbsd/amd64, darwin/amd64 and windows/amd64\n", flag.Args()[0L]);
+                    @base.SetExitStatus(2L);
+                    @base.Exit();
+                }
+
             }
+
             @string mode = "race";
             if (cfg.BuildMSan)
             {
-                mode = "msan";
+                mode = "msan"; 
+                // MSAN does not support non-PIE binaries on ARM64.
+                // See issue #33712 for details.
+                if (cfg.Goos == "linux" && cfg.Goarch == "arm64" && cfg.BuildBuildmode == "default")
+                {
+                    cfg.BuildBuildmode = "pie";
+                }
+
             }
+
             @string modeFlag = "-" + mode;
 
             if (!cfg.BuildContext.CgoEnabled)
             {
-                fmt.Fprintf(os.Stderr, "go %s: %s requires cgo; enable cgo by setting CGO_ENABLED=1\n", flag.Args()[0L], modeFlag);
-                os.Exit(2L);
+                if (runtime.GOOS != cfg.Goos || runtime.GOARCH != cfg.Goarch)
+                {
+                    fmt.Fprintf(os.Stderr, "go %s: %s requires cgo\n", flag.Args()[0L], modeFlag);
+                }
+                else
+                {
+                    fmt.Fprintf(os.Stderr, "go %s: %s requires cgo; enable cgo by setting CGO_ENABLED=1\n", flag.Args()[0L], modeFlag);
+                }
+
+                @base.SetExitStatus(2L);
+                @base.Exit();
+
             }
+
             forcedGcflags = append(forcedGcflags, modeFlag);
             forcedLdflags = append(forcedLdflags, modeFlag);
 
@@ -81,15 +128,21 @@ namespace @internal
             {
                 cfg.BuildContext.InstallSuffix += "_";
             }
+
             cfg.BuildContext.InstallSuffix += mode;
             cfg.BuildContext.BuildTags = append(cfg.BuildContext.BuildTags, mode);
+
         }
 
         private static void buildModeInit()
         {
             var gccgo = cfg.BuildToolchainName == "gccgo";
-            @string codegenArg = default;
-            var platform = cfg.Goos + "/" + cfg.Goarch;
+            @string codegenArg = default; 
+
+            // Configure the build mode first, then verify that it is supported.
+            // That way, if the flag is completely bogus we will prefer to error out with
+            // "-buildmode=%s not supported" instead of naming the specific platform.
+
             switch (cfg.BuildBuildmode)
             {
                 case "archive": 
@@ -97,50 +150,62 @@ namespace @internal
                     break;
                 case "c-archive": 
                     pkgsFilter = oneMainPkg;
-                    switch (platform)
+                    if (gccgo)
                     {
-                        case "darwin/arm": 
-
-                        case "darwin/arm64": 
-                            codegenArg = "-shared";
-                            break;
-                        default: 
-                            switch (cfg.Goos)
-                            {
-                                case "dragonfly": 
-                                    // Use -shared so that the result is
-                                    // suitable for inclusion in a PIE or
-                                    // shared library.
-
-                                case "freebsd": 
-                                    // Use -shared so that the result is
-                                    // suitable for inclusion in a PIE or
-                                    // shared library.
-
-                                case "linux": 
-                                    // Use -shared so that the result is
-                                    // suitable for inclusion in a PIE or
-                                    // shared library.
-
-                                case "netbsd": 
-                                    // Use -shared so that the result is
-                                    // suitable for inclusion in a PIE or
-                                    // shared library.
-
-                                case "openbsd": 
-                                    // Use -shared so that the result is
-                                    // suitable for inclusion in a PIE or
-                                    // shared library.
-
-                                case "solaris": 
-                                    // Use -shared so that the result is
-                                    // suitable for inclusion in a PIE or
-                                    // shared library.
-                                    codegenArg = "-shared";
-                                    break;
-                            }
-                            break;
+                        codegenArg = "-fPIC";
                     }
+                    else
+                    {
+                        switch (cfg.Goos)
+                        {
+                            case "darwin": 
+                                switch (cfg.Goarch)
+                                {
+                                    case "arm64": 
+                                        codegenArg = "-shared";
+                                        break;
+                                }
+                                break;
+                            case "dragonfly": 
+                                // Use -shared so that the result is
+                                // suitable for inclusion in a PIE or
+                                // shared library.
+
+                            case "freebsd": 
+                                // Use -shared so that the result is
+                                // suitable for inclusion in a PIE or
+                                // shared library.
+
+                            case "illumos": 
+                                // Use -shared so that the result is
+                                // suitable for inclusion in a PIE or
+                                // shared library.
+
+                            case "linux": 
+                                // Use -shared so that the result is
+                                // suitable for inclusion in a PIE or
+                                // shared library.
+
+                            case "netbsd": 
+                                // Use -shared so that the result is
+                                // suitable for inclusion in a PIE or
+                                // shared library.
+
+                            case "openbsd": 
+                                // Use -shared so that the result is
+                                // suitable for inclusion in a PIE or
+                                // shared library.
+
+                            case "solaris": 
+                                // Use -shared so that the result is
+                                // suitable for inclusion in a PIE or
+                                // shared library.
+                                codegenArg = "-shared";
+                                break;
+                        }
+
+                    }
+
                     cfg.ExeSuffix = ".a";
                     ldBuildmode = "c-archive";
                     break;
@@ -152,63 +217,56 @@ namespace @internal
                     }
                     else
                     {
-                        switch (platform)
+                        switch (cfg.Goos)
                         {
-                            case "linux/amd64": 
+                            case "linux": 
 
-                            case "linux/arm": 
+                            case "android": 
 
-                            case "linux/arm64": 
-
-                            case "linux/386": 
-
-                            case "linux/ppc64le": 
-
-                            case "linux/s390x": 
-
-                            case "android/amd64": 
-
-                            case "android/arm": 
-
-                            case "android/arm64": 
-
-                            case "android/386": 
+                            case "freebsd": 
                                 codegenArg = "-shared";
                                 break;
-                            case "darwin/amd64": 
-
-                            case "darwin/386": 
-                                break;
-                            case "windows/amd64": 
-                                // Do not add usual .exe suffix to the .dll file.
-
-                            case "windows/386": 
+                            case "windows": 
                                 // Do not add usual .exe suffix to the .dll file.
                                 cfg.ExeSuffix = "";
                                 break;
-                            default: 
-                                @base.Fatalf("-buildmode=c-shared not supported on %s\n", platform);
-                                break;
                         }
+
                     }
+
                     ldBuildmode = "c-shared";
                     break;
                 case "default": 
 
-                    if (platform == "android/arm" || platform == "android/arm64" || platform == "android/amd64" || platform == "android/386")
+                    if (cfg.Goos == "android")
                     {
                         codegenArg = "-shared";
                         ldBuildmode = "pie";
                         goto __switch_break0;
                     }
-                    if (platform == "darwin/arm" || platform == "darwin/arm64")
+                    if (cfg.Goos == "windows")
                     {
-                        codegenArg = "-shared";
+                        ldBuildmode = "pie";
+                        goto __switch_break0;
+                    }
+                    if (cfg.Goos == "darwin")
+                    {
+                        switch (cfg.Goarch)
+                        {
+                            case "arm64": 
+                                codegenArg = "-shared";
+                                break;
+                        }
                     }
                     // default: 
                         ldBuildmode = "exe";
 
                     __switch_break0:;
+                    if (gccgo)
+                    {
+                        codegenArg = "";
+                    }
+
                     break;
                 case "exe": 
                     pkgsFilter = pkgsMain;
@@ -220,49 +278,33 @@ namespace @internal
                     {
                         pkgsFilter = oneMainPkg;
                     }
+
                     break;
                 case "pie": 
                     if (cfg.BuildRace)
                     {
                         @base.Fatalf("-buildmode=pie not supported when -race is enabled");
                     }
+
                     if (gccgo)
                     {
-                        @base.Fatalf("-buildmode=pie not supported by gccgo");
+                        codegenArg = "-fPIE";
                     }
                     else
                     {
-                        switch (platform)
+                        switch (cfg.Goos)
                         {
-                            case "linux/386": 
+                            case "aix": 
 
-                            case "linux/amd64": 
-
-                            case "linux/arm": 
-
-                            case "linux/arm64": 
-
-                            case "linux/ppc64le": 
-
-                            case "linux/s390x": 
-
-                            case "android/amd64": 
-
-                            case "android/arm": 
-
-                            case "android/arm64": 
-
-                            case "android/386": 
-                                codegenArg = "-shared";
-                                break;
-                            case "darwin/amd64": 
-                                codegenArg = "-shared";
+                            case "windows": 
                                 break;
                             default: 
-                                @base.Fatalf("-buildmode=pie not supported on %s\n", platform);
+                                codegenArg = "-shared";
                                 break;
                         }
+
                     }
+
                     ldBuildmode = "pie";
                     break;
                 case "shared": 
@@ -273,30 +315,14 @@ namespace @internal
                     }
                     else
                     {
-                        switch (platform)
-                        {
-                            case "linux/386": 
-
-                            case "linux/amd64": 
-
-                            case "linux/arm": 
-
-                            case "linux/arm64": 
-
-                            case "linux/ppc64le": 
-
-                            case "linux/s390x": 
-                                break;
-                            default: 
-                                @base.Fatalf("-buildmode=shared not supported on %s\n", platform);
-                                break;
-                        }
                         codegenArg = "-dynlink";
                     }
+
                     if (cfg.BuildO != "")
                     {
                         @base.Fatalf("-buildmode=shared and -o not supported together");
                     }
+
                     ldBuildmode = "shared";
                     break;
                 case "plugin": 
@@ -307,38 +333,9 @@ namespace @internal
                     }
                     else
                     {
-                        switch (platform)
-                        {
-                            case "linux/amd64": 
-
-                            case "linux/arm": 
-
-                            case "linux/arm64": 
-
-                            case "linux/386": 
-
-                            case "linux/s390x": 
-
-                            case "linux/ppc64le": 
-
-                            case "android/amd64": 
-
-                            case "android/arm": 
-
-                            case "android/arm64": 
-
-                            case "android/386": 
-                                break;
-                            case "darwin/amd64": 
-                                // Skip DWARF generation due to #21647
-                                forcedLdflags = append(forcedLdflags, "-w");
-                                break;
-                            default: 
-                                @base.Fatalf("-buildmode=plugin not supported on %s\n", platform);
-                                break;
-                        }
                         codegenArg = "-dynlink";
                     }
+
                     cfg.ExeSuffix = ".so";
                     ldBuildmode = "plugin";
                     break;
@@ -346,38 +343,35 @@ namespace @internal
                     @base.Fatalf("buildmode=%s not supported", cfg.BuildBuildmode);
                     break;
             }
+
+            if (!sys.BuildModeSupported(cfg.BuildToolchainName, cfg.BuildBuildmode, cfg.Goos, cfg.Goarch))
+            {
+                @base.Fatalf("-buildmode=%s not supported on %s/%s\n", cfg.BuildBuildmode, cfg.Goos, cfg.Goarch);
+            }
+
             if (cfg.BuildLinkshared)
             {
+                if (!sys.BuildModeSupported(cfg.BuildToolchainName, "shared", cfg.Goos, cfg.Goarch))
+                {
+                    @base.Fatalf("-linkshared not supported on %s/%s\n", cfg.Goos, cfg.Goarch);
+                }
+
                 if (gccgo)
                 {
                     codegenArg = "-fPIC";
                 }
                 else
                 {
-                    switch (platform)
-                    {
-                        case "linux/386": 
-
-                        case "linux/amd64": 
-
-                        case "linux/arm": 
-
-                        case "linux/arm64": 
-
-                        case "linux/ppc64le": 
-
-                        case "linux/s390x": 
-                            forcedAsmflags = append(forcedAsmflags, "-D=GOBUILDMODE_shared=1");
-                            break;
-                        default: 
-                            @base.Fatalf("-linkshared not supported on %s\n", platform);
-                            break;
-                    }
-                    codegenArg = "-dynlink"; 
+                    forcedAsmflags = append(forcedAsmflags, "-D=GOBUILDMODE_shared=1");
+                    codegenArg = "-dynlink";
+                    forcedGcflags = append(forcedGcflags, "-linkshared"); 
                     // TODO(mwhudson): remove -w when that gets fixed in linker.
                     forcedLdflags = append(forcedLdflags, "-linkshared", "-w");
+
                 }
+
             }
+
             if (codegenArg != "")
             {
                 if (gccgo)
@@ -396,9 +390,76 @@ namespace @internal
                     {
                         cfg.BuildContext.InstallSuffix += "_";
                     }
+
                     cfg.BuildContext.InstallSuffix += codegenArg[1L..];
+
                 }
+
             }
+
+            switch (cfg.BuildMod)
+            {
+                case "": 
+                    break;
+                case "readonly": 
+
+                case "vendor": 
+
+                case "mod": 
+                    if (!cfg.ModulesEnabled && !inGOFLAGS("-mod"))
+                    {
+                        @base.Fatalf("build flag -mod=%s only valid when using modules", cfg.BuildMod);
+                    }
+
+                    break;
+                default: 
+                    @base.Fatalf("-mod=%s not supported (can be '', 'mod', 'readonly', or 'vendor')", cfg.BuildMod);
+                    break;
+            }
+            if (!cfg.ModulesEnabled)
+            {
+                if (cfg.ModCacheRW && !inGOFLAGS("-modcacherw"))
+                {
+                    @base.Fatalf("build flag -modcacherw only valid when using modules");
+                }
+
+                if (cfg.ModFile != "" && !inGOFLAGS("-mod"))
+                {
+                    @base.Fatalf("build flag -modfile only valid when using modules");
+                }
+
+            }
+
+        }
+
+        private static bool inGOFLAGS(@string flag)
+        {
+            foreach (var (_, goflag) in @base.GOFLAGS())
+            {
+                var name = goflag;
+                if (strings.HasPrefix(name, "--"))
+                {
+                    name = name[1L..];
+                }
+
+                {
+                    var i = strings.Index(name, "=");
+
+                    if (i >= 0L)
+                    {
+                        name = name[..i];
+                    }
+
+                }
+
+                if (name == flag)
+                {
+                    return true;
+                }
+
+            }
+            return false;
+
         }
     }
 }}}}

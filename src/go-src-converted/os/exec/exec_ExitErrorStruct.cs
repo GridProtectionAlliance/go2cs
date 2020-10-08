@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:24:37 UTC
+//     Generated on 2020 October 08 03:40:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using static go.builtin;
 using bytes = go.bytes_package;
 using context = go.context_package;
 using errors = go.errors_package;
+using execenv = go.@internal.syscall.execenv_package;
 using io = go.io_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -32,28 +33,18 @@ namespace os
     public static partial class exec_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(os.ProcessState))]
         public partial struct ExitError
         {
-            // ProcessState structure promotion - sourced from pointer
-            private readonly ptr<ProcessState> m_ProcessStateRef;
-
-            private ref ProcessState ProcessState_ptr => ref m_ProcessStateRef.Value;
-
-            public ref long pid => ref m_ProcessStateRef.Value.pid;
-
-            public ref ptr<syscall.Waitmsg> status => ref m_ProcessStateRef.Value.status;
-
             // Constructors
             public ExitError(NilType _)
             {
-                this.m_ProcessStateRef = new ptr<os.ProcessState>(new os.ProcessState(nil));
+                this.ProcessState> = default;
                 this.Stderr = default;
             }
 
-            public ExitError(ref os.ProcessState ProcessState = default, slice<byte> Stderr = default)
+            public ExitError(ref ptr<os.ProcessState> ProcessState> = default, slice<byte> Stderr = default)
             {
-                this.m_ProcessStateRef = new ptr<os.ProcessState>(ref ProcessState);
+                this.ProcessState> = ProcessState>;
                 this.Stderr = Stderr;
             }
 
@@ -77,7 +68,7 @@ namespace os
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ExitError ExitError_cast(dynamic value)
         {
-            return new ExitError(ref value.ProcessState, value.Stderr);
+            return new ExitError(ref value.ProcessState>, value.Stderr);
         }
     }
 }}

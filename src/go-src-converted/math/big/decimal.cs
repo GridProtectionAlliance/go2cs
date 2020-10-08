@@ -17,7 +17,7 @@
 // In contrast to strconv/decimal.go, only right shift is implemented in
 // decimal format - left shift can be done precisely in binary format.
 
-// package big -- go2cs converted at 2020 August 29 08:29:00 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:25 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\decimal.go
 
@@ -40,18 +40,22 @@ namespace math
         }
 
         // at returns the i'th mantissa digit, starting with the most significant digit at 0.
-        private static byte at(this ref decimal d, long i)
+        private static byte at(this ptr<decimal> _addr_d, long i)
         {
+            ref decimal d = ref _addr_d.val;
+
             if (0L <= i && i < len(d.mant))
             {
                 return d.mant[i];
             }
+
             return '0';
+
         }
 
         // Maximum shift amount that can be done in one pass without overflow.
         // A Word has _W bits and (1<<maxShift - 1)*10 + 9 must fit into Word.
-        private static readonly var maxShift = _W - 4L;
+        private static readonly var maxShift = (var)_W - 4L;
 
         // TODO(gri) Since we know the desired decimal precision when converting
         // a floating-point number, we may be able to limit the number of decimal
@@ -77,14 +81,16 @@ namespace math
 
         // Init initializes x to the decimal representation of m << shift (for
         // shift >= 0), or m >> -shift (for shift < 0).
-        private static void init(this ref decimal x, nat m, long shift)
-        { 
+        private static void init(this ptr<decimal> _addr_x, nat m, long shift)
+        {
+            ref decimal x = ref _addr_x.val;
+ 
             // special case 0
             if (len(m) == 0L)
             {
                 x.mant = x.mant[..0L];
                 x.exp = 0L;
-                return;
+                return ;
             } 
 
             // Optimization: If we need to shift right, first remove any trailing
@@ -98,8 +104,10 @@ namespace math
                 {
                     s = ntz; // shift at most ntz bits
                 }
+
                 m = nat(null).shr(m, s);
                 shift += int(s);
+
             } 
 
             // Do any shift left in binary representation.
@@ -127,17 +135,21 @@ namespace math
             {
                 while (shift < -maxShift)
                 {
-                    shr(x, maxShift);
+                    shr(_addr_x, maxShift);
                     shift += maxShift;
                 }
 
-                shr(x, uint(-shift));
+                shr(_addr_x, uint(-shift));
+
             }
+
         }
 
         // shr implements x >> s, for s <= maxShift.
-        private static void shr(ref decimal x, ulong s)
-        { 
+        private static void shr(ptr<decimal> _addr_x, ulong s)
+        {
+            ref decimal x = ref _addr_x.val;
+ 
             // Division by 1<<s using shift-and-subtract algorithm.
 
             // pick up enough leading digits to cover first shift
@@ -154,8 +166,10 @@ namespace math
             { 
                 // x == 0; shouldn't get here, but handle anyway
                 x.mant = x.mant[..0L];
-                return;
+                return ;
+
             }
+
             while (n >> (int)(s) == 0L)
             {
                 r++;
@@ -176,6 +190,7 @@ namespace math
                 x.mant[w] = byte(d + '0');
                 w++;
                 n = n * 10L + ch - '0';
+
             } 
 
             // write extra digits that still fit
@@ -203,15 +218,19 @@ namespace math
             }
 
 
-            trim(x);
+            trim(_addr_x);
+
         }
 
-        private static @string String(this ref decimal x)
+        private static @string String(this ptr<decimal> _addr_x)
         {
+            ref decimal x = ref _addr_x.val;
+
             if (len(x.mant) == 0L)
             {
                 return "0";
             }
+
             slice<byte> buf = default;
 
             if (x.exp <= 0L) 
@@ -229,6 +248,7 @@ namespace math
                 buf = append(buf, x.mant);
                 buf = appendZeros(buf, x.exp - len(x.mant));
                         return string(buf);
+
         }
 
         // appendZeros appends n 0 digits to buf and returns buf.
@@ -241,32 +261,40 @@ namespace math
             }
 
             return buf;
+
         }
 
         // shouldRoundUp reports if x should be rounded up
         // if shortened to n digits. n must be a valid index
         // for x.mant.
-        private static bool shouldRoundUp(ref decimal x, long n)
+        private static bool shouldRoundUp(ptr<decimal> _addr_x, long n)
         {
+            ref decimal x = ref _addr_x.val;
+
             if (x.mant[n] == '5' && n + 1L == len(x.mant))
             { 
                 // exactly halfway - round to even
                 return n > 0L && (x.mant[n - 1L] - '0') & 1L != 0L;
+
             } 
             // not halfway - digit tells all (x.mant has no trailing zeros)
             return x.mant[n] >= '5';
+
         }
 
         // round sets x to (at most) n mantissa digits by rounding it
         // to the nearest even value with n (or fever) mantissa digits.
         // If n < 0, x remains unchanged.
-        private static void round(this ref decimal x, long n)
+        private static void round(this ptr<decimal> _addr_x, long n)
         {
+            ref decimal x = ref _addr_x.val;
+
             if (n < 0L || n >= len(x.mant))
             {
-                return; // nothing to do
+                return ; // nothing to do
             }
-            if (shouldRoundUp(x, n))
+
+            if (shouldRoundUp(_addr_x, n))
             {
                 x.roundUp(n);
             }
@@ -274,13 +302,16 @@ namespace math
             {
                 x.roundDown(n);
             }
+
         }
 
-        private static void roundUp(this ref decimal x, long n)
+        private static void roundUp(this ptr<decimal> _addr_x, long n)
         {
+            ref decimal x = ref _addr_x.val;
+
             if (n < 0L || n >= len(x.mant))
             {
-                return; // nothing to do
+                return ; // nothing to do
             } 
             // 0 <= n < len(x.mant)
 
@@ -297,7 +328,8 @@ namespace math
                 x.mant[0L] = '1'; // ok since len(x.mant) > n
                 x.mant = x.mant[..1L];
                 x.exp++;
-                return;
+                return ;
+
             } 
 
             // n > 0 && x.mant[n-1] < '9'
@@ -306,20 +338,26 @@ namespace math
             // x already trimmed
         }
 
-        private static void roundDown(this ref decimal x, long n)
+        private static void roundDown(this ptr<decimal> _addr_x, long n)
         {
+            ref decimal x = ref _addr_x.val;
+
             if (n < 0L || n >= len(x.mant))
             {
-                return; // nothing to do
+                return ; // nothing to do
             }
+
             x.mant = x.mant[..n];
-            trim(x);
+            trim(_addr_x);
+
         }
 
         // trim cuts off any trailing zeros from x's mantissa;
         // they are meaningless for the value of x.
-        private static void trim(ref decimal x)
+        private static void trim(ptr<decimal> _addr_x)
         {
+            ref decimal x = ref _addr_x.val;
+
             var i = len(x.mant);
             while (i > 0L && x.mant[i - 1L] == '0')
             {
@@ -331,6 +369,7 @@ namespace math
             {
                 x.exp = 0L;
             }
+
         }
     }
 }}

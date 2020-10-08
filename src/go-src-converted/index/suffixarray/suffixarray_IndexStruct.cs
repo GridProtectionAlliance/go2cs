@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:11:06 UTC
+//     Generated on 2020 October 08 04:59:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,9 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
+using errors = go.errors_package;
 using io = go.io_package;
+using math = go.math_package;
 using regexp = go.regexp_package;
 using sort = go.sort_package;
 using go;
@@ -35,7 +37,7 @@ namespace index
                 this.sa = default;
             }
 
-            public Index(slice<byte> data = default, slice<long> sa = default)
+            public Index(slice<byte> data = default, ints sa = default)
             {
                 this.data = data;
                 this.sa = sa;

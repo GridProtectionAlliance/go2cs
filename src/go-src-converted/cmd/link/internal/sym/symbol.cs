@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sym -- go2cs converted at 2020 August 29 10:02:56 UTC
+// package sym -- go2cs converted at 2020 October 08 04:37:54 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Go\src\cmd\link\internal\sym\symbol.go
+using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using elf = go.debug.elf_package;
@@ -23,151 +24,232 @@ namespace @internal
         public partial struct Symbol
         {
             public @string Name;
-            public @string Extname;
             public SymKind Type;
             public short Version;
             public Attribute Attr;
-            public byte Localentry;
             public int Dynid;
-            public int Plt;
-            public int Got;
             public int Align;
-            public int Elfsym;
-            public int LocalElfsym;
             public long Value;
-            public long Size; // ElfType is set for symbols read from shared libraries by ldshlibsyms. It
-// is not set for symbols defined by the packages being linked or by symbols
-// read by ldelf (and so is left as elf.STT_NOTYPE).
-            public elf.SymType ElfType;
-            public ptr<Symbol> Sub;
+            public long Size;
             public ptr<Symbol> Outer;
-            public ptr<Symbol> Gotype;
-            public ptr<Symbol> Reachparent;
-            public @string File;
-            public @string Dynimplib;
-            public @string Dynimpvers;
-            public ptr<Section> Sect;
-            public ptr<FuncInfo> FuncInfo;
-            public ptr<Library> Lib; // Package defining this symbol
-// P contains the raw symbol data.
+            public LoaderSym SymIdx;
+            public ptr<AuxSymbol> auxinfo;
+            public ptr<Section> Sect; // P contains the raw symbol data.
             public slice<byte> P;
             public slice<Reloc> R;
         }
 
-        private static @string String(this ref Symbol s)
+        // AuxSymbol contains less-frequently used sym.Symbol fields.
+        public partial struct AuxSymbol
         {
+            public @string extname;
+            public @string dynimplib;
+            public @string dynimpvers;
+            public byte localentry;
+            public int plt;
+            public int got; // ElfType is set for symbols read from shared libraries by ldshlibsyms. It
+// is not set for symbols defined by the packages being linked or by symbols
+// read by ldelf (and so is left as elf.STT_NOTYPE).
+            public elf.SymType elftype;
+        }
+
+        public static readonly long SymVerABI0 = (long)0L;
+        public static readonly long SymVerABIInternal = (long)1L;
+        public static readonly long SymVerStatic = (long)10L; // Minimum version used by static (file-local) syms
+
+        public static long ABIToVersion(obj.ABI abi)
+        {
+
+            if (abi == obj.ABI0) 
+                return SymVerABI0;
+            else if (abi == obj.ABIInternal) 
+                return SymVerABIInternal;
+                        return -1L;
+
+        }
+
+        public static (obj.ABI, bool) VersionToABI(long v)
+        {
+            obj.ABI _p0 = default;
+            bool _p0 = default;
+
+
+            if (v == SymVerABI0) 
+                return (obj.ABI0, true);
+            else if (v == SymVerABIInternal) 
+                return (obj.ABIInternal, true);
+                        return (~obj.ABI(0L), false);
+
+        }
+
+        private static @string String(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
             if (s.Version == 0L)
             {
                 return s.Name;
             }
+
             return fmt.Sprintf("%s<%d>", s.Name, s.Version);
+
         }
 
-        private static int ElfsymForReloc(this ref Symbol s)
-        { 
-            // If putelfsym created a local version of this symbol, use that in all
-            // relocations.
-            if (s.LocalElfsym != 0L)
-            {
-                return s.LocalElfsym;
-            }
-            else
-            {
-                return s.Elfsym;
-            }
-        }
-
-        private static long Len(this ref Symbol s)
+        private static bool IsFileLocal(this ptr<Symbol> _addr_s)
         {
+            ref Symbol s = ref _addr_s.val;
+
+            return s.Version >= SymVerStatic;
+        }
+
+        private static long Len(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
             return s.Size;
         }
 
-        private static void Grow(this ref Symbol s, long siz)
+        private static long Length(this ptr<Symbol> _addr_s, object dwarfContext)
         {
+            ref Symbol s = ref _addr_s.val;
+
+            return s.Size;
+        }
+
+        private static void Grow(this ptr<Symbol> _addr_s, long siz)
+        {
+            ref Symbol s = ref _addr_s.val;
+
             if (int64(int(siz)) != siz)
             {
                 log.Fatalf("symgrow size %d too long", siz);
             }
+
             if (int64(len(s.P)) >= siz)
             {
-                return;
+                return ;
             }
+
             if (cap(s.P) < int(siz))
             {
                 var p = make_slice<byte>(2L * (siz + 1L));
                 s.P = append(p[..0L], s.P);
             }
+
             s.P = s.P[..siz];
+
         }
 
-        private static long AddBytes(this ref Symbol s, slice<byte> bytes)
+        private static long AddBytes(this ptr<Symbol> _addr_s, slice<byte> bytes)
         {
+            ref Symbol s = ref _addr_s.val;
+
             if (s.Type == 0L)
             {
                 s.Type = SDATA;
             }
+
             s.Attr |= AttrReachable;
             s.P = append(s.P, bytes);
             s.Size = int64(len(s.P));
 
             return s.Size;
+
         }
 
-        private static long AddUint8(this ref Symbol s, byte v)
+        private static long AddUint8(this ptr<Symbol> _addr_s, byte v)
         {
+            ref Symbol s = ref _addr_s.val;
+
             var off = s.Size;
             if (s.Type == 0L)
             {
                 s.Type = SDATA;
             }
+
             s.Attr |= AttrReachable;
             s.Size++;
             s.P = append(s.P, v);
 
             return off;
+
         }
 
-        private static long AddUint16(this ref Symbol s, ref sys.Arch arch, ushort v)
+        private static long AddUint16(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ushort v)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             return s.AddUintXX(arch, uint64(v), 2L);
         }
 
-        private static long AddUint32(this ref Symbol s, ref sys.Arch arch, uint v)
+        private static long AddUint32(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, uint v)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             return s.AddUintXX(arch, uint64(v), 4L);
         }
 
-        private static long AddUint64(this ref Symbol s, ref sys.Arch arch, ulong v)
+        private static long AddUint64(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ulong v)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             return s.AddUintXX(arch, v, 8L);
         }
 
-        private static long AddUint(this ref Symbol s, ref sys.Arch arch, ulong v)
+        private static long AddUint(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ulong v)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             return s.AddUintXX(arch, v, arch.PtrSize);
         }
 
-        private static long SetUint8(this ref Symbol s, ref sys.Arch arch, long r, byte v)
+        private static long SetUint8(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, long r, byte v)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             return s.setUintXX(arch, r, uint64(v), 1L);
         }
 
-        private static long SetUint32(this ref Symbol s, ref sys.Arch arch, long r, uint v)
+        private static long SetUint16(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, long r, ushort v)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
+            return s.setUintXX(arch, r, uint64(v), 2L);
+        }
+
+        private static long SetUint32(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, long r, uint v)
+        {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             return s.setUintXX(arch, r, uint64(v), 4L);
         }
 
-        private static long SetUint(this ref Symbol s, ref sys.Arch arch, long r, ulong v)
+        private static long SetUint(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, long r, ulong v)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             return s.setUintXX(arch, r, v, int64(arch.PtrSize));
         }
 
-        private static long addAddrPlus(this ref Symbol s, ref sys.Arch arch, ref Symbol t, long add, objabi.RelocType typ)
+        private static long addAddrPlus(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ptr<Symbol> _addr_t, long add, objabi.RelocType typ)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref Symbol t = ref _addr_t.val;
+
             if (s.Type == 0L)
             {
                 s.Type = SDATA;
             }
+
             s.Attr |= AttrReachable;
             var i = s.Size;
             s.Size += int64(arch.PtrSize);
@@ -179,24 +261,38 @@ namespace @internal
             r.Type = typ;
             r.Add = add;
             return i + int64(r.Siz);
+
         }
 
-        private static long AddAddrPlus(this ref Symbol s, ref sys.Arch arch, ref Symbol t, long add)
+        private static long AddAddrPlus(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ptr<Symbol> _addr_t, long add)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref Symbol t = ref _addr_t.val;
+
             return s.addAddrPlus(arch, t, add, objabi.R_ADDR);
         }
 
-        private static long AddCURelativeAddrPlus(this ref Symbol s, ref sys.Arch arch, ref Symbol t, long add)
+        private static long AddCURelativeAddrPlus(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ptr<Symbol> _addr_t, long add)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref Symbol t = ref _addr_t.val;
+
             return s.addAddrPlus(arch, t, add, objabi.R_ADDRCUOFF);
         }
 
-        private static long AddPCRelPlus(this ref Symbol s, ref sys.Arch arch, ref Symbol t, long add)
+        private static long AddPCRelPlus(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ptr<Symbol> _addr_t, long add)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref Symbol t = ref _addr_t.val;
+
             if (s.Type == 0L)
             {
                 s.Type = SDATA;
             }
+
             s.Attr |= AttrReachable;
             var i = s.Size;
             s.Size += 4L;
@@ -207,30 +303,47 @@ namespace @internal
             r.Add = add;
             r.Type = objabi.R_PCREL;
             r.Siz = 4L;
+            if (arch.Family == sys.S390X || arch.Family == sys.PPC64)
+            {
+                r.InitExt();
+            }
+
             if (arch.Family == sys.S390X)
             {
                 r.Variant = RV_390_DBL;
             }
+
             return i + int64(r.Siz);
+
         }
 
-        private static long AddAddr(this ref Symbol s, ref sys.Arch arch, ref Symbol t)
+        private static long AddAddr(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ptr<Symbol> _addr_t)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref Symbol t = ref _addr_t.val;
+
             return s.AddAddrPlus(arch, t, 0L);
         }
 
-        private static long SetAddrPlus(this ref Symbol s, ref sys.Arch arch, long off, ref Symbol t, long add)
+        private static long SetAddrPlus(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, long off, ptr<Symbol> _addr_t, long add)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref Symbol t = ref _addr_t.val;
+
             if (s.Type == 0L)
             {
                 s.Type = SDATA;
             }
+
             s.Attr |= AttrReachable;
             if (off + int64(arch.PtrSize) > s.Size)
             {
                 s.Size = off + int64(arch.PtrSize);
                 s.Grow(s.Size);
             }
+
             var r = s.AddRel();
             r.Sym = t;
             r.Off = int32(off);
@@ -238,19 +351,29 @@ namespace @internal
             r.Type = objabi.R_ADDR;
             r.Add = add;
             return off + int64(r.Siz);
+
         }
 
-        private static long SetAddr(this ref Symbol s, ref sys.Arch arch, long off, ref Symbol t)
+        private static long SetAddr(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, long off, ptr<Symbol> _addr_t)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref Symbol t = ref _addr_t.val;
+
             return s.SetAddrPlus(arch, off, t, 0L);
         }
 
-        private static long AddSize(this ref Symbol s, ref sys.Arch arch, ref Symbol t)
+        private static long AddSize(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ptr<Symbol> _addr_t)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref Symbol t = ref _addr_t.val;
+
             if (s.Type == 0L)
             {
                 s.Type = SDATA;
             }
+
             s.Attr |= AttrReachable;
             var i = s.Size;
             s.Size += int64(arch.PtrSize);
@@ -261,14 +384,19 @@ namespace @internal
             r.Siz = uint8(arch.PtrSize);
             r.Type = objabi.R_SIZE;
             return i + int64(r.Siz);
+
         }
 
-        private static long AddAddrPlus4(this ref Symbol s, ref Symbol t, long add)
+        private static long AddAddrPlus4(this ptr<Symbol> _addr_s, ptr<Symbol> _addr_t, long add)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref Symbol t = ref _addr_t.val;
+
             if (s.Type == 0L)
             {
                 s.Type = SDATA;
             }
+
             s.Attr |= AttrReachable;
             var i = s.Size;
             s.Size += 4L;
@@ -280,33 +408,44 @@ namespace @internal
             r.Type = objabi.R_ADDR;
             r.Add = add;
             return i + int64(r.Siz);
+
         }
 
-        private static ref Reloc AddRel(this ref Symbol s)
+        private static ptr<Reloc> AddRel(this ptr<Symbol> _addr_s)
         {
+            ref Symbol s = ref _addr_s.val;
+
             s.R = append(s.R, new Reloc());
-            return ref s.R[len(s.R) - 1L];
+            return _addr__addr_s.R[len(s.R) - 1L]!;
         }
 
-        private static long AddUintXX(this ref Symbol s, ref sys.Arch arch, ulong v, long wid)
+        private static long AddUintXX(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, ulong v, long wid)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             var off = s.Size;
             s.setUintXX(arch, off, v, int64(wid));
             return off;
         }
 
-        private static long setUintXX(this ref Symbol s, ref sys.Arch arch, long off, ulong v, long wid)
+        private static long setUintXX(this ptr<Symbol> _addr_s, ptr<sys.Arch> _addr_arch, long off, ulong v, long wid)
         {
+            ref Symbol s = ref _addr_s.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
             if (s.Type == 0L)
             {
                 s.Type = SDATA;
             }
+
             s.Attr |= AttrReachable;
             if (s.Size < off + wid)
             {
                 s.Size = off + wid;
                 s.Grow(s.Size);
             }
+
             switch (wid)
             {
                 case 1L: 
@@ -324,134 +463,247 @@ namespace @internal
             }
 
             return off + wid;
+
         }
 
-        // SortSub sorts a linked-list (by Sub) of *Symbol by Value.
-        // Used for sub-symbols when loading host objects (see e.g. ldelf.go).
-        public static ref Symbol SortSub(ref Symbol l)
+        private static void makeAuxInfo(this ptr<Symbol> _addr_s)
         {
-            if (l == null || l.Sub == null)
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
             {
-                return l;
-            }
-            var l1 = l;
-            var l2 = l;
-            while (true)
-            {
-                l2 = l2.Sub;
-                if (l2 == null)
-                {
-                    break;
-                }
-                l2 = l2.Sub;
-                if (l2 == null)
-                {
-                    break;
-                }
-                l1 = l1.Sub;
+                s.auxinfo = addr(new AuxSymbol(extname:s.Name,plt:-1,got:-1));
             }
 
-
-            l2 = l1.Sub;
-            l1.Sub = null;
-            l1 = SortSub(l);
-            l2 = SortSub(l2); 
-
-            /* set up lead element */
-            if (l1.Value < l2.Value)
-            {
-                l = l1;
-                l1 = l1.Sub;
-            }
-            else
-            {
-                l = l2;
-                l2 = l2.Sub;
-            }
-            var le = l;
-
-            while (true)
-            {
-                if (l1 == null)
-                {
-                    while (l2 != null)
-                    {
-                        le.Sub = l2;
-                        le = l2;
-                        l2 = l2.Sub;
-                    }
-
-
-                    le.Sub = null;
-                    break;
-                }
-                if (l2 == null)
-                {
-                    while (l1 != null)
-                    {
-                        le.Sub = l1;
-                        le = l1;
-                        l1 = l1.Sub;
-                    }
-
-
-                    break;
-                }
-                if (l1.Value < l2.Value)
-                {
-                    le.Sub = l1;
-                    le = l1;
-                    l1 = l1.Sub;
-                }
-                else
-                {
-                    le.Sub = l2;
-                    le = l2;
-                    l2 = l2.Sub;
-                }
-            }
-
-
-            le.Sub = null;
-            return l;
         }
 
-        public partial struct FuncInfo
+        private static @string Extname(this ptr<Symbol> _addr_s)
         {
-            public int Args;
-            public int Locals;
-            public slice<Auto> Autom;
-            public Pcdata Pcsp;
-            public Pcdata Pcfile;
-            public Pcdata Pcline;
-            public Pcdata Pcinline;
-            public slice<Pcdata> Pcdata;
-            public slice<ref Symbol> Funcdata;
-            public slice<long> Funcdataoff;
-            public slice<ref Symbol> File;
-            public slice<InlinedCall> InlTree;
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                return s.Name;
+            }
+
+            return s.auxinfo.extname;
+
         }
 
-        // InlinedCall is a node in a local inlining tree (FuncInfo.InlTree).
-        public partial struct InlinedCall
+        private static void SetExtname(this ptr<Symbol> _addr_s, @string n)
         {
-            public int Parent; // index of parent in InlTree
-            public ptr<Symbol> File; // file of the inlined call
-            public int Line; // line number of the inlined call
-            public ptr<Symbol> Func; // function that was inlined
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                if (s.Name == n)
+                {
+                    return ;
+                }
+
+                s.makeAuxInfo();
+
+            }
+
+            s.auxinfo.extname = n;
+
+        }
+
+        private static @string Dynimplib(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                return "";
+            }
+
+            return s.auxinfo.dynimplib;
+
+        }
+
+        private static @string Dynimpvers(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                return "";
+            }
+
+            return s.auxinfo.dynimpvers;
+
+        }
+
+        private static void SetDynimplib(this ptr<Symbol> _addr_s, @string lib)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                s.makeAuxInfo();
+            }
+
+            s.auxinfo.dynimplib = lib;
+
+        }
+
+        private static void SetDynimpvers(this ptr<Symbol> _addr_s, @string vers)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                s.makeAuxInfo();
+            }
+
+            s.auxinfo.dynimpvers = vers;
+
+        }
+
+        private static void ResetDyninfo(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo != null)
+            {
+                s.auxinfo.dynimplib = "";
+                s.auxinfo.dynimpvers = "";
+            }
+
+        }
+
+        private static byte Localentry(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                return 0L;
+            }
+
+            return s.auxinfo.localentry;
+
+        }
+
+        private static void SetLocalentry(this ptr<Symbol> _addr_s, byte val)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                if (val != 0L)
+                {
+                    return ;
+                }
+
+                s.makeAuxInfo();
+
+            }
+
+            s.auxinfo.localentry = val;
+
+        }
+
+        private static int Plt(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                return -1L;
+            }
+
+            return s.auxinfo.plt;
+
+        }
+
+        private static void SetPlt(this ptr<Symbol> _addr_s, int val)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                if (val == -1L)
+                {
+                    return ;
+                }
+
+                s.makeAuxInfo();
+
+            }
+
+            s.auxinfo.plt = val;
+
+        }
+
+        private static int Got(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                return -1L;
+            }
+
+            return s.auxinfo.got;
+
+        }
+
+        private static void SetGot(this ptr<Symbol> _addr_s, int val)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                if (val == -1L)
+                {
+                    return ;
+                }
+
+                s.makeAuxInfo();
+
+            }
+
+            s.auxinfo.got = val;
+
+        }
+
+        private static elf.SymType ElfType(this ptr<Symbol> _addr_s)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                return elf.STT_NOTYPE;
+            }
+
+            return s.auxinfo.elftype;
+
+        }
+
+        private static void SetElfType(this ptr<Symbol> _addr_s, elf.SymType val)
+        {
+            ref Symbol s = ref _addr_s.val;
+
+            if (s.auxinfo == null)
+            {
+                if (val == elf.STT_NOTYPE)
+                {
+                    return ;
+                }
+
+                s.makeAuxInfo();
+
+            }
+
+            s.auxinfo.elftype = val;
+
         }
 
         public partial struct Pcdata
         {
             public slice<byte> P;
-        }
-
-        public partial struct Auto
-        {
-            public ptr<Symbol> Asym;
-            public ptr<Symbol> Gotype;
-            public int Aoffset;
-            public short Name;
         }
     }
 }}}}

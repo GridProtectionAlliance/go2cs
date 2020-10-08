@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:55:01 UTC
+//     Generated on 2020 October 08 04:11:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,9 @@ using static go.builtin;
 using types = go.cmd.compile.@internal.types_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using sys = go.cmd.@internal.sys_package;
 using fmt = go.fmt_package;
+using bits = go.math.bits_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
@@ -45,7 +47,6 @@ namespace @internal
                 this.live = default;
                 this.desired = default;
                 this.values = default;
-                this.valueNames = default;
                 this.sp = default;
                 this.sb = default;
                 this.orig = default;
@@ -60,9 +61,10 @@ namespace @internal
                 this.spillLive = default;
                 this.copies = default;
                 this.loopnest = default;
+                this.visitOrder = default;
             }
 
-            public regAllocState(ref ptr<Func> f = default, SparseTree sdom = default, slice<Register> registers = default, register numRegs = default, register SPReg = default, register SBReg = default, register GReg = default, regMask allocatable = default, slice<int> primary = default, slice<slice<liveInfo>> live = default, slice<desiredState> desired = default, slice<valState> values = default, slice<slice<LocalSlot>> valueNames = default, ID sp = default, ID sb = default, slice<ref Value> orig = default, slice<regState> regs = default, regMask nospill = default, regMask used = default, regMask tmpused = default, ref ptr<Block> curBlock = default, ref ptr<use> freeUseRecords = default, slice<slice<endReg>> endRegs = default, slice<slice<startReg>> startRegs = default, slice<slice<ID>> spillLive = default, map<ref Value, bool> copies = default, ref ptr<loopnest> loopnest = default)
+            public regAllocState(ref ptr<Func> f = default, SparseTree sdom = default, slice<Register> registers = default, register numRegs = default, register SPReg = default, register SBReg = default, register GReg = default, regMask allocatable = default, slice<int> primary = default, slice<slice<liveInfo>> live = default, slice<desiredState> desired = default, slice<valState> values = default, ID sp = default, ID sb = default, slice<ptr<Value>> orig = default, slice<regState> regs = default, regMask nospill = default, regMask used = default, regMask tmpused = default, ref ptr<Block> curBlock = default, ref ptr<use> freeUseRecords = default, slice<slice<endReg>> endRegs = default, slice<slice<startReg>> startRegs = default, slice<slice<ID>> spillLive = default, map<ptr<Value>, bool> copies = default, ref ptr<loopnest> loopnest = default, slice<ptr<Block>> visitOrder = default)
             {
                 this.f = f;
                 this.sdom = sdom;
@@ -76,7 +78,6 @@ namespace @internal
                 this.live = live;
                 this.desired = desired;
                 this.values = values;
-                this.valueNames = valueNames;
                 this.sp = sp;
                 this.sb = sb;
                 this.orig = orig;
@@ -91,6 +92,7 @@ namespace @internal
                 this.spillLive = spillLive;
                 this.copies = copies;
                 this.loopnest = loopnest;
+                this.visitOrder = visitOrder;
             }
 
             // Enable comparisons between nil and regAllocState struct
@@ -113,7 +115,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static regAllocState regAllocState_cast(dynamic value)
         {
-            return new regAllocState(ref value.f, value.sdom, value.registers, value.numRegs, value.SPReg, value.SBReg, value.GReg, value.allocatable, value.primary, value.live, value.desired, value.values, value.valueNames, value.sp, value.sb, value.orig, value.regs, value.nospill, value.used, value.tmpused, ref value.curBlock, ref value.freeUseRecords, value.endRegs, value.startRegs, value.spillLive, value.copies, ref value.loopnest);
+            return new regAllocState(ref value.f, value.sdom, value.registers, value.numRegs, value.SPReg, value.SBReg, value.GReg, value.allocatable, value.primary, value.live, value.desired, value.values, value.sp, value.sb, value.orig, value.regs, value.nospill, value.used, value.tmpused, ref value.curBlock, ref value.freeUseRecords, value.endRegs, value.startRegs, value.spillLive, value.copies, ref value.loopnest, value.visitOrder);
         }
     }
 }}}}

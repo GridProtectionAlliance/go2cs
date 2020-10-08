@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:30 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:39 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\misc.go
 using runtime = go.runtime_package;
 using static go.builtin;

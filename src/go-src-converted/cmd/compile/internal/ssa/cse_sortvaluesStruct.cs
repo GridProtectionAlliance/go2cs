@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:35 UTC
+//     Generated on 2020 October 08 04:10:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using types = go.cmd.compile.@internal.types_package;
+using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
 using go;
@@ -35,7 +36,7 @@ namespace @internal
                 this.auxIDs = default;
             }
 
-            public sortvalues(slice<ref Value> a = default, auxmap auxIDs = default)
+            public sortvalues(slice<ptr<Value>> a = default, auxmap auxIDs = default)
             {
                 this.a = a;
                 this.auxIDs = auxIDs;

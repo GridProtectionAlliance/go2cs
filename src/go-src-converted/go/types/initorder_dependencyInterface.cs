@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:39 UTC
+//     Generated on 2020 October 08 04:03:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -65,10 +65,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void isDependencyByRef(ref T value);
+            private delegate void isDependencyByPtr(ptr<T> value);
             private delegate void isDependencyByVal(T value);
 
-            private static readonly isDependencyByRef s_isDependencyByRef;
+            private static readonly isDependencyByPtr s_isDependencyByPtr;
             private static readonly isDependencyByVal s_isDependencyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,14 +77,15 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_isDependencyByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_isDependencyByPtr is null || !m_target_is_ptr)
                 {
                     s_isDependencyByVal!(target);
                     return;
                 }
 
-                s_isDependencyByRef(ref target);
+                s_isDependencyByPtr(m_target_ptr);
                 return;
                 
             }
@@ -95,23 +96,20 @@ namespace go
             static dependency()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("isDependency");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("isDependency");
 
                 if (!(extensionMethod is null))
-                    s_isDependencyByRef = extensionMethod.CreateStaticDelegate(typeof(isDependencyByRef)) as isDependencyByRef;
+                    s_isDependencyByPtr = extensionMethod.CreateStaticDelegate(typeof(isDependencyByPtr)) as isDependencyByPtr;
 
-                if (s_isDependencyByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("isDependency");
+                extensionMethod = targetType.GetExtensionMethod("isDependency");
 
-                    if (!(extensionMethod is null))
-                        s_isDependencyByVal = extensionMethod.CreateStaticDelegate(typeof(isDependencyByVal)) as isDependencyByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_isDependencyByVal = extensionMethod.CreateStaticDelegate(typeof(isDependencyByVal)) as isDependencyByVal;
 
-                if (s_isDependencyByRef is null && s_isDependencyByVal is null)
+                if (s_isDependencyByPtr is null && s_isDependencyByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement dependency.isDependency method", new Exception("isDependency"));
             }
 

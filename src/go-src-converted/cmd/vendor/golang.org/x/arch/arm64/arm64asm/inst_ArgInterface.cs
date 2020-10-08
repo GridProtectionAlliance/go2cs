@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:07:41 UTC
+//     Generated on 2020 October 08 04:44:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -56,7 +56,7 @@ namespace arm64
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -70,10 +70,10 @@ namespace arm64
                 m_target_is_ptr = true;
             }
 
-            private delegate @string isArgByRef(ref T value);
+            private delegate @string isArgByPtr(ptr<T> value);
             private delegate @string isArgByVal(T value);
 
-            private static readonly isArgByRef s_isArgByRef;
+            private static readonly isArgByPtr s_isArgByPtr;
             private static readonly isArgByVal s_isArgByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -82,17 +82,18 @@ namespace arm64
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_isArgByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_isArgByPtr is null || !m_target_is_ptr)
                     return s_isArgByVal!(target);
 
-                return s_isArgByRef(ref target);
+                return s_isArgByPtr(m_target_ptr);
             }
 
-            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -101,11 +102,12 @@ namespace arm64
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -114,39 +116,33 @@ namespace arm64
             static Arg()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("isArg");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("isArg");
 
                 if (!(extensionMethod is null))
-                    s_isArgByRef = extensionMethod.CreateStaticDelegate(typeof(isArgByRef)) as isArgByRef;
+                    s_isArgByPtr = extensionMethod.CreateStaticDelegate(typeof(isArgByPtr)) as isArgByPtr;
 
-                if (s_isArgByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("isArg");
+                extensionMethod = targetType.GetExtensionMethod("isArg");
 
-                    if (!(extensionMethod is null))
-                        s_isArgByVal = extensionMethod.CreateStaticDelegate(typeof(isArgByVal)) as isArgByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_isArgByVal = extensionMethod.CreateStaticDelegate(typeof(isArgByVal)) as isArgByVal;
 
-                if (s_isArgByRef is null && s_isArgByVal is null)
+                if (s_isArgByPtr is null && s_isArgByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Arg.isArg method", new Exception("isArg"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Arg.String method", new Exception("String"));
             }
 

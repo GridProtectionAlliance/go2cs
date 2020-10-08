@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:26:45 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:42 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\iprawsock.go
 using context = go.context_package;
@@ -25,8 +25,8 @@ namespace go
         // change the behavior of these methods; use Read or ReadMsgIP
         // instead.
 
-        // BUG(mikio): On NaCl and Plan 9, the ReadMsgIP and
-        // WriteMsgIP methods of IPConn are not implemented.
+        // BUG(mikio): On JS and Plan 9, methods and functions related
+        // to IPConn are not implemented.
 
         // BUG(mikio): On Windows, the File method of IPConn is not
         // implemented.
@@ -39,41 +39,56 @@ namespace go
         }
 
         // Network returns the address's network name, "ip".
-        private static @string Network(this ref IPAddr a)
+        private static @string Network(this ptr<IPAddr> _addr_a)
         {
+            ref IPAddr a = ref _addr_a.val;
+
             return "ip";
         }
 
-        private static @string String(this ref IPAddr a)
+        private static @string String(this ptr<IPAddr> _addr_a)
         {
+            ref IPAddr a = ref _addr_a.val;
+
             if (a == null)
             {
                 return "<nil>";
             }
+
             var ip = ipEmptyString(a.IP);
             if (a.Zone != "")
             {
                 return ip + "%" + a.Zone;
             }
+
             return ip;
+
         }
 
-        private static bool isWildcard(this ref IPAddr a)
+        private static bool isWildcard(this ptr<IPAddr> _addr_a)
         {
+            ref IPAddr a = ref _addr_a.val;
+
             if (a == null || a.IP == null)
             {
                 return true;
             }
+
             return a.IP.IsUnspecified();
+
         }
 
-        private static Addr opAddr(this ref IPAddr a)
+        private static Addr opAddr(this ptr<IPAddr> _addr_a)
         {
+            ref IPAddr a = ref _addr_a.val;
+
             if (a == null)
             {
                 return null;
             }
+
             return a;
+
         }
 
         // ResolveIPAddr returns an address of IP end point.
@@ -89,17 +104,23 @@ namespace go
         //
         // See func Dial for a description of the network and address
         // parameters.
-        public static (ref IPAddr, error) ResolveIPAddr(@string network, @string address)
+        public static (ptr<IPAddr>, error) ResolveIPAddr(@string network, @string address)
         {
+            ptr<IPAddr> _p0 = default!;
+            error _p0 = default!;
+
             if (network == "")
             { // a hint wildcard for Go 1.0 undocumented behavior
                 network = "ip";
+
             }
+
             var (afnet, _, err) = parseNetwork(context.Background(), network, false);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             switch (afnet)
             {
                 case "ip": 
@@ -109,15 +130,17 @@ namespace go
                 case "ip6": 
                     break;
                 default: 
-                    return (null, UnknownNetworkError(network));
+                    return (_addr_null!, error.As(UnknownNetworkError(network))!);
                     break;
             }
             var (addrs, err) = DefaultResolver.internetAddrList(context.Background(), afnet, address);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (addrs.forResolve(network, address)._<ref IPAddr>(), null);
+
+            return (addrs.forResolve(network, address)._<ptr<IPAddr>>(), error.As(null!)!);
+
         }
 
         // IPConn is the implementation of the Conn and PacketConn interfaces
@@ -129,47 +152,70 @@ namespace go
 
         // SyscallConn returns a raw network connection.
         // This implements the syscall.Conn interface.
-        private static (syscall.RawConn, error) SyscallConn(this ref IPConn c)
+        private static (syscall.RawConn, error) SyscallConn(this ptr<IPConn> _addr_c)
         {
+            syscall.RawConn _p0 = default;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+
             if (!c.ok())
             {
-                return (null, syscall.EINVAL);
+                return (null, error.As(syscall.EINVAL)!);
             }
+
             return newRawConn(c.fd);
+
         }
 
         // ReadFromIP acts like ReadFrom but returns an IPAddr.
-        private static (long, ref IPAddr, error) ReadFromIP(this ref IPConn c, slice<byte> b)
+        private static (long, ptr<IPAddr>, error) ReadFromIP(this ptr<IPConn> _addr_c, slice<byte> b)
         {
+            long _p0 = default;
+            ptr<IPAddr> _p0 = default!;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+
             if (!c.ok())
             {
-                return (0L, null, syscall.EINVAL);
+                return (0L, _addr_null!, error.As(syscall.EINVAL)!);
             }
+
             var (n, addr, err) = c.readFrom(b);
             if (err != null)
             {
-                err = ref new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err);
+                err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
             }
-            return (n, addr, err);
+
+            return (n, _addr_addr!, error.As(err)!);
+
         }
 
         // ReadFrom implements the PacketConn ReadFrom method.
-        private static (long, Addr, error) ReadFrom(this ref IPConn c, slice<byte> b)
+        private static (long, Addr, error) ReadFrom(this ptr<IPConn> _addr_c, slice<byte> b)
         {
+            long _p0 = default;
+            Addr _p0 = default;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+
             if (!c.ok())
             {
-                return (0L, null, syscall.EINVAL);
+                return (0L, null, error.As(syscall.EINVAL)!);
             }
+
             var (n, addr, err) = c.readFrom(b);
             if (err != null)
             {
-                err = ref new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err);
+                err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
             }
+
             if (addr == null)
             {
-                return (n, null, err);
+                return (n, null, error.As(err)!);
             }
-            return (n, addr, err);
+
+            return (n, addr, error.As(err)!);
+
         }
 
         // ReadMsgIP reads a message from c, copying the payload into b and
@@ -179,53 +225,79 @@ namespace go
         //
         // The packages golang.org/x/net/ipv4 and golang.org/x/net/ipv6 can be
         // used to manipulate IP-level socket options in oob.
-        private static (long, long, long, ref IPAddr, error) ReadMsgIP(this ref IPConn c, slice<byte> b, slice<byte> oob)
+        private static (long, long, long, ptr<IPAddr>, error) ReadMsgIP(this ptr<IPConn> _addr_c, slice<byte> b, slice<byte> oob)
         {
+            long n = default;
+            long oobn = default;
+            long flags = default;
+            ptr<IPAddr> addr = default!;
+            error err = default!;
+            ref IPConn c = ref _addr_c.val;
+
             if (!c.ok())
             {
-                return (0L, 0L, 0L, null, syscall.EINVAL);
+                return (0L, 0L, 0L, _addr_null!, error.As(syscall.EINVAL)!);
             }
+
             n, oobn, flags, addr, err = c.readMsg(b, oob);
             if (err != null)
             {
-                err = ref new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err);
+                err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
             }
-            return;
+
+            return ;
+
         }
 
         // WriteToIP acts like WriteTo but takes an IPAddr.
-        private static (long, error) WriteToIP(this ref IPConn c, slice<byte> b, ref IPAddr addr)
+        private static (long, error) WriteToIP(this ptr<IPConn> _addr_c, slice<byte> b, ptr<IPAddr> _addr_addr)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+            ref IPAddr addr = ref _addr_addr.val;
+
             if (!c.ok())
             {
-                return (0L, syscall.EINVAL);
+                return (0L, error.As(syscall.EINVAL)!);
             }
+
             var (n, err) = c.writeTo(b, addr);
             if (err != null)
             {
-                err = ref new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err);
+                err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err));
             }
-            return (n, err);
+
+            return (n, error.As(err)!);
+
         }
 
         // WriteTo implements the PacketConn WriteTo method.
-        private static (long, error) WriteTo(this ref IPConn c, slice<byte> b, Addr addr)
+        private static (long, error) WriteTo(this ptr<IPConn> _addr_c, slice<byte> b, Addr addr)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+
             if (!c.ok())
             {
-                return (0L, syscall.EINVAL);
+                return (0L, error.As(syscall.EINVAL)!);
             }
-            ref IPAddr (a, ok) = addr._<ref IPAddr>();
+
+            ptr<IPAddr> (a, ok) = addr._<ptr<IPAddr>>();
             if (!ok)
             {
-                return (0L, ref new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr,Err:syscall.EINVAL));
+                return (0L, error.As(addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr,Err:syscall.EINVAL))!)!);
             }
+
             var (n, err) = c.writeTo(b, a);
             if (err != null)
             {
-                err = ref new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:a.opAddr(),Err:err);
+                err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:a.opAddr(),Err:err));
             }
-            return (n, err);
+
+            return (n, error.As(err)!);
+
         }
 
         // WriteMsgIP writes a message to addr via c, copying the payload from
@@ -234,23 +306,34 @@ namespace go
         //
         // The packages golang.org/x/net/ipv4 and golang.org/x/net/ipv6 can be
         // used to manipulate IP-level socket options in oob.
-        private static (long, long, error) WriteMsgIP(this ref IPConn c, slice<byte> b, slice<byte> oob, ref IPAddr addr)
+        private static (long, long, error) WriteMsgIP(this ptr<IPConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<IPAddr> _addr_addr)
         {
+            long n = default;
+            long oobn = default;
+            error err = default!;
+            ref IPConn c = ref _addr_c.val;
+            ref IPAddr addr = ref _addr_addr.val;
+
             if (!c.ok())
             {
-                return (0L, 0L, syscall.EINVAL);
+                return (0L, 0L, error.As(syscall.EINVAL)!);
             }
+
             n, oobn, err = c.writeMsg(b, oob, addr);
             if (err != null)
             {
-                err = ref new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err);
+                err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err));
             }
-            return;
+
+            return ;
+
         }
 
-        private static ref IPConn newIPConn(ref netFD fd)
+        private static ptr<IPConn> newIPConn(ptr<netFD> _addr_fd)
         {
-            return ref new IPConn(conn{fd});
+            ref netFD fd = ref _addr_fd.val;
+
+            return addr(new IPConn(conn{fd}));
         }
 
         // DialIP acts like Dial for IP networks.
@@ -260,14 +343,27 @@ namespace go
         // If laddr is nil, a local address is automatically chosen.
         // If the IP field of raddr is nil or an unspecified IP address, the
         // local system is assumed.
-        public static (ref IPConn, error) DialIP(@string network, ref IPAddr laddr, ref IPAddr raddr)
+        public static (ptr<IPConn>, error) DialIP(@string network, ptr<IPAddr> _addr_laddr, ptr<IPAddr> _addr_raddr)
         {
-            var (c, err) = dialIP(context.Background(), network, laddr, raddr);
+            ptr<IPConn> _p0 = default!;
+            error _p0 = default!;
+            ref IPAddr laddr = ref _addr_laddr.val;
+            ref IPAddr raddr = ref _addr_raddr.val;
+
+            if (raddr == null)
+            {
+                return (_addr_null!, error.As(addr(new OpError(Op:"dial",Net:network,Source:laddr.opAddr(),Addr:nil,Err:errMissingAddress))!)!);
+            }
+
+            ptr<sysDialer> sd = addr(new sysDialer(network:network,address:raddr.String()));
+            var (c, err) = sd.dialIP(context.Background(), laddr, raddr);
             if (err != null)
             {
-                return (null, ref new OpError(Op:"dial",Net:network,Source:laddr.opAddr(),Addr:raddr.opAddr(),Err:err));
+                return (_addr_null!, error.As(addr(new OpError(Op:"dial",Net:network,Source:laddr.opAddr(),Addr:raddr.opAddr(),Err:err))!)!);
             }
-            return (c, null);
+
+            return (_addr_c!, error.As(null!)!);
+
         }
 
         // ListenIP acts like ListenPacket for IP networks.
@@ -277,14 +373,26 @@ namespace go
         // If the IP field of laddr is nil or an unspecified IP address,
         // ListenIP listens on all available IP addresses of the local system
         // except multicast IP addresses.
-        public static (ref IPConn, error) ListenIP(@string network, ref IPAddr laddr)
+        public static (ptr<IPConn>, error) ListenIP(@string network, ptr<IPAddr> _addr_laddr)
         {
-            var (c, err) = listenIP(context.Background(), network, laddr);
+            ptr<IPConn> _p0 = default!;
+            error _p0 = default!;
+            ref IPAddr laddr = ref _addr_laddr.val;
+
+            if (laddr == null)
+            {
+                laddr = addr(new IPAddr());
+            }
+
+            ptr<sysListener> sl = addr(new sysListener(network:network,address:laddr.String()));
+            var (c, err) = sl.listenIP(context.Background(), laddr);
             if (err != null)
             {
-                return (null, ref new OpError(Op:"listen",Net:network,Source:nil,Addr:laddr.opAddr(),Err:err));
+                return (_addr_null!, error.As(addr(new OpError(Op:"listen",Net:network,Source:nil,Addr:laddr.opAddr(),Err:err))!)!);
             }
-            return (c, null);
+
+            return (_addr_c!, error.As(null!)!);
+
         }
     }
 }

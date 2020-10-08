@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !compiler_bootstrap go1.8
-
-// package sort -- go2cs converted at 2020 August 29 08:21:43 UTC
+// package sort -- go2cs converted at 2020 October 08 03:18:58 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Go\src\sort\slice.go
-using reflect = go.reflect_package;
+
 using static go.builtin;
 using System;
 
@@ -23,8 +21,8 @@ namespace go
         // The function panics if the provided interface is not a slice.
         public static bool Slice(object slice, Func<long, long, bool> less)
         {
-            var rv = reflect.ValueOf(slice);
-            var swap = reflect.Swapper(slice);
+            var rv = reflectValueOf(slice);
+            var swap = reflectSwapper(slice);
             var length = rv.Len();
             quickSort_func(new lessSwap(less,swap), 0L, length, maxDepth(length));
         }
@@ -35,8 +33,8 @@ namespace go
         // The function panics if the provided interface is not a slice.
         public static bool SliceStable(object slice, Func<long, long, bool> less)
         {
-            var rv = reflect.ValueOf(slice);
-            var swap = reflect.Swapper(slice);
+            var rv = reflectValueOf(slice);
+            var swap = reflectSwapper(slice);
             stable_func(new lessSwap(less,swap), rv.Len());
         }
 
@@ -45,7 +43,7 @@ namespace go
         // The function panics if the provided interface is not a slice.
         public static bool SliceIsSorted(object slice, Func<long, long, bool> less)
         {
-            var rv = reflect.ValueOf(slice);
+            var rv = reflectValueOf(slice);
             var n = rv.Len();
             for (var i = n - 1L; i > 0L; i--)
             {
@@ -53,9 +51,11 @@ namespace go
                 {
                     return false;
                 }
+
             }
 
             return true;
+
         }
     }
 }

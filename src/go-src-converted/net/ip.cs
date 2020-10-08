@@ -10,20 +10,20 @@
 // This library accepts either size of byte slice but always
 // returns 16-byte addresses.
 
-// package net -- go2cs converted at 2020 August 29 08:26:44 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:41 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\ip.go
-using _@unsafe_ = go.@unsafe_package;
+using bytealg = go.@internal.bytealg_package;
 using static go.builtin;
 
 namespace go
 {
     public static partial class net_package
-    { // for go:linkname
-
+    {
         // IP address lengths (bytes).
-        public static readonly long IPv4len = 4L;
-        public static readonly long IPv6len = 16L;
+        public static readonly long IPv4len = (long)4L;
+        public static readonly long IPv6len = (long)16L;
+
 
         // An IP is a single IP address, a slice of bytes.
         // Functions in this package accept either 4-byte (IPv4)
@@ -38,7 +38,10 @@ namespace go
         {
         }
 
-        // An IP mask is an IP address.
+        // An IPMask is a bitmask that can be used to manipulate
+        // IP addresses for IP addressing and routing.
+        //
+        // See type IPNet and func ParseCIDR for details.
         public partial struct IPMask // : slice<byte>
         {
         }
@@ -77,8 +80,8 @@ namespace go
             return p;
         }
 
-        // CIDRMask returns an IPMask consisting of `ones' 1 bits
-        // followed by 0s up to a total length of `bits' bits.
+        // CIDRMask returns an IPMask consisting of 'ones' 1 bits
+        // followed by 0s up to a total length of 'bits' bits.
         // For a mask of this form, CIDRMask is the inverse of IPMask.Size.
         public static IPMask CIDRMask(long ones, long bits)
         {
@@ -86,10 +89,12 @@ namespace go
             {
                 return null;
             }
+
             if (ones < 0L || ones > bits)
             {
                 return null;
             }
+
             var l = bits / 8L;
             var m = make(IPMask, l);
             var n = uint(ones);
@@ -101,11 +106,14 @@ namespace go
                     n -= 8L;
                     continue;
                 }
+
                 m[i] = ~byte(0xffUL >> (int)(n));
                 n = 0L;
+
             }
 
             return m;
+
         }
 
         // Well-known IPv4 addresses
@@ -133,7 +141,9 @@ namespace go
                 }
 
             }
+
             return ip.Equal(IPv6loopback);
+
         }
 
         // IsMulticast reports whether ip is a multicast address.
@@ -148,7 +158,9 @@ namespace go
                 }
 
             }
+
             return len(ip) == IPv6len && ip[0L] == 0xffUL;
+
         }
 
         // IsInterfaceLocalMulticast reports whether ip is
@@ -171,7 +183,9 @@ namespace go
                 }
 
             }
+
             return len(ip) == IPv6len && ip[0L] == 0xffUL && ip[1L] & 0x0fUL == 0x02UL;
+
         }
 
         // IsLinkLocalUnicast reports whether ip is a link-local
@@ -187,7 +201,9 @@ namespace go
                 }
 
             }
+
             return len(ip) == IPv6len && ip[0L] == 0xfeUL && ip[1L] & 0xc0UL == 0x80UL;
+
         }
 
         // IsGlobalUnicast reports whether ip is a global unicast
@@ -212,9 +228,11 @@ namespace go
                 {
                     return false;
                 }
+
             }
 
             return true;
+
         }
 
         // To4 converts the IPv4 address ip to a 4-byte representation.
@@ -225,11 +243,14 @@ namespace go
             {
                 return ip;
             }
+
             if (len(ip) == IPv6len && isZeros(ip[0L..10L]) && ip[10L] == 0xffUL && ip[11L] == 0xffUL)
             {
                 return ip[12L..16L];
             }
+
             return null;
+
         }
 
         // To16 converts the IP address ip to a 16-byte representation.
@@ -240,11 +261,14 @@ namespace go
             {
                 return IPv4(ip[0L], ip[1L], ip[2L], ip[3L]);
             }
+
             if (len(ip) == IPv6len)
             {
                 return ip;
             }
+
             return null;
+
         }
 
         // Default route masks for IPv4.
@@ -262,13 +286,15 @@ namespace go
                 return null;
             }
 
-            if (true == ip[0L] < 0x80UL) 
+
+            if (ip[0L] < 0x80UL) 
                 return classAMask;
-            else if (true == ip[0L] < 0xC0UL) 
+            else if (ip[0L] < 0xC0UL) 
                 return classBMask;
             else 
                 return classCMask;
-                    }
+            
+        }
 
         private static bool allFF(slice<byte> b)
         {
@@ -278,8 +304,10 @@ namespace go
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         // Mask returns the result of masking the IP address ip with mask.
@@ -289,15 +317,18 @@ namespace go
             {
                 mask = mask[12L..];
             }
-            if (len(mask) == IPv4len && len(ip) == IPv6len && bytesEqual(ip[..12L], v4InV6Prefix))
+
+            if (len(mask) == IPv4len && len(ip) == IPv6len && bytealg.Equal(ip[..12L], v4InV6Prefix))
             {
                 ip = ip[12L..];
             }
+
             var n = len(ip);
             if (n != len(mask))
             {
                 return null;
             }
+
             var @out = make(IP, n);
             for (long i = 0L; i < n; i++)
             {
@@ -305,6 +336,31 @@ namespace go
             }
 
             return out;
+
+        }
+
+        // ubtoa encodes the string form of the integer v to dst[start:] and
+        // returns the number of bytes written to dst. The caller must ensure
+        // that dst has sufficient length.
+        private static long ubtoa(slice<byte> dst, long start, byte v)
+        {
+            if (v < 10L)
+            {
+                dst[start] = v + '0';
+                return 1L;
+            }
+            else if (v < 100L)
+            {
+                dst[start + 1L] = v % 10L + '0';
+                dst[start] = v / 10L + '0';
+                return 2L;
+            }
+
+            dst[start + 2L] = v % 10L + '0';
+            dst[start + 1L] = (v / 10L) % 10L + '0';
+            dst[start] = v / 100L + '0';
+            return 3L;
+
         }
 
         // String returns the string form of the IP address ip.
@@ -328,10 +384,28 @@ namespace go
 
                 if (len(p4) == IPv4len)
                 {
-                    return uitoa(uint(p4[0L])) + "." + uitoa(uint(p4[1L])) + "." + uitoa(uint(p4[2L])) + "." + uitoa(uint(p4[3L]));
+                    const var maxIPv4StringLen = (var)len("255.255.255.255");
+
+                    var b = make_slice<byte>(maxIPv4StringLen);
+
+                    var n = ubtoa(b, 0L, p4[0L]);
+                    b[n] = '.';
+                    n++;
+
+                    n += ubtoa(b, n, p4[1L]);
+                    b[n] = '.';
+                    n++;
+
+                    n += ubtoa(b, n, p4[2L]);
+                    b[n] = '.';
+                    n++;
+
+                    n += ubtoa(b, n, p4[3L]);
+                    return string(b[..n]);
                 }
 
             }
+
             if (len(p) != IPv6len)
             {
                 return "?" + hexString(ip);
@@ -360,6 +434,7 @@ namespace go
                         e1 = j;
                         i = j;
                     }
+
                 } 
                 // The symbol "::" MUST NOT be used to shorten just one 16 bit 0 field.
 
@@ -372,9 +447,10 @@ namespace go
                 e0 = -1L;
                 e1 = -1L;
             }
-            const var maxLen = len("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
 
-            var b = make_slice<byte>(0L, maxLen); 
+            const var maxLen = (var)len("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
+
+            b = make_slice<byte>(0L, maxLen); 
 
             // Print with possible :: in place of run of zeros
             {
@@ -393,18 +469,22 @@ namespace go
                             break;
                     i += 2L;
                         }
+
                     }
                     else if (i > 0L)
                     {
                         b = append(b, ':');
                     }
+
                     b = appendHex(b, (uint32(p[i]) << (int)(8L)) | uint32(p[i + 1L]));
+
                 }
 
 
                 i = i__prev1;
             }
             return string(b);
+
         }
 
         private static @string hexString(slice<byte> b)
@@ -414,8 +494,10 @@ namespace go
             {
                 s[i * 2L] = hexDigit[tn >> (int)(4L)];
                 s[i * 2L + 1L] = hexDigit[tn & 0xfUL];
+
             }
             return string(s);
+
         }
 
         // ipEmptyString is like ip.String except that it returns
@@ -426,7 +508,9 @@ namespace go
             {
                 return "";
             }
+
             return ip.String();
+
         }
 
         // MarshalText implements the encoding.TextMarshaler interface.
@@ -434,34 +518,45 @@ namespace go
         // When len(ip) is zero, it returns an empty slice.
         public static (slice<byte>, error) MarshalText(this IP ip)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             if (len(ip) == 0L)
             {
-                return ((slice<byte>)"", null);
+                return ((slice<byte>)"", error.As(null!)!);
             }
+
             if (len(ip) != IPv4len && len(ip) != IPv6len)
             {
-                return (null, ref new AddrError(Err:"invalid IP address",Addr:hexString(ip)));
+                return (null, error.As(addr(new AddrError(Err:"invalid IP address",Addr:hexString(ip)))!)!);
             }
-            return ((slice<byte>)ip.String(), null);
+
+            return ((slice<byte>)ip.String(), error.As(null!)!);
+
         }
 
         // UnmarshalText implements the encoding.TextUnmarshaler interface.
         // The IP address is expected in a form accepted by ParseIP.
-        private static error UnmarshalText(this ref IP ip, slice<byte> text)
+        private static error UnmarshalText(this ptr<IP> _addr_ip, slice<byte> text)
         {
+            ref IP ip = ref _addr_ip.val;
+
             if (len(text) == 0L)
             {
-                ip.Value = null;
-                return error.As(null);
+                ip.val = null;
+                return error.As(null!)!;
             }
+
             var s = string(text);
             var x = ParseIP(s);
             if (x == null)
             {
-                return error.As(ref new ParseError(Type:"IP address",Text:s));
+                return error.As(addr(new ParseError(Type:"IP address",Text:s))!)!;
             }
-            ip.Value = x;
-            return error.As(null);
+
+            ip.val = x;
+            return error.As(null!)!;
+
         }
 
         // Equal reports whether ip and x are the same IP address.
@@ -471,26 +566,25 @@ namespace go
         {
             if (len(ip) == len(x))
             {
-                return bytesEqual(ip, x);
+                return bytealg.Equal(ip, x);
             }
+
             if (len(ip) == IPv4len && len(x) == IPv6len)
             {
-                return bytesEqual(x[0L..12L], v4InV6Prefix) && bytesEqual(ip, x[12L..]);
+                return bytealg.Equal(x[0L..12L], v4InV6Prefix) && bytealg.Equal(ip, x[12L..]);
             }
+
             if (len(ip) == IPv6len && len(x) == IPv4len)
             {
-                return bytesEqual(ip[0L..12L], v4InV6Prefix) && bytesEqual(ip[12L..], x);
+                return bytealg.Equal(ip[0L..12L], v4InV6Prefix) && bytealg.Equal(ip[12L..], x);
             }
+
             return false;
+
         }
 
-        // bytes.Equal is implemented in runtime/asm_$goarch.s
-        //go:linkname bytesEqual bytes.Equal
-        private static bool bytesEqual(slice<byte> x, slice<byte> y)
-;
-
         public static bool matchAddrFamily(this IP ip, IP x)
-        {>>MARKER:FUNCTION_bytesEqual_BLOCK_PREFIX<<
+        {
             return ip.To4() != null && x.To4() != null || ip.To16() != null && ip.To4() == null && x.To16() != null && x.To4() == null;
         }
 
@@ -520,6 +614,7 @@ namespace go
                 {
                     return -1L;
                 }
+
                 i++;
 
                 while (i < len(mask))
@@ -529,11 +624,14 @@ namespace go
                         return -1L;
                     i++;
                     }
+
                 }
 
                 break;
+
             }
             return n;
+
         }
 
         // Size returns the number of leading ones and total bits in the mask.
@@ -541,13 +639,18 @@ namespace go
         // Size returns 0, 0.
         public static (long, long) Size(this IPMask m)
         {
+            long ones = default;
+            long bits = default;
+
             ones = simpleMaskLength(m);
             bits = len(m) * 8L;
             if (ones == -1L)
             {
                 return (0L, 0L);
             }
-            return;
+
+            return ;
+
         }
 
         // String returns the hexadecimal form of m, with no punctuation.
@@ -557,11 +660,17 @@ namespace go
             {
                 return "<nil>";
             }
+
             return hexString(m);
+
         }
 
-        private static (IP, IPMask) networkNumberAndMask(ref IPNet n)
+        private static (IP, IPMask) networkNumberAndMask(ptr<IPNet> _addr_n)
         {
+            IP ip = default;
+            IPMask m = default;
+            ref IPNet n = ref _addr_n.val;
+
             ip = n.IP.To4();
 
             if (ip == null)
@@ -571,7 +680,9 @@ namespace go
                 {
                     return (null, null);
                 }
+
             }
+
             m = n.Mask;
 
             if (len(m) == IPv4len) 
@@ -579,20 +690,25 @@ namespace go
                 {
                     return (null, null);
                 }
+
             else if (len(m) == IPv6len) 
                 if (len(ip) == IPv4len)
                 {
                     m = m[12L..];
                 }
+
             else 
                 return (null, null);
-                        return;
+                        return ;
+
         }
 
         // Contains reports whether the network includes ip.
-        private static bool Contains(this ref IPNet n, IP ip)
+        private static bool Contains(this ptr<IPNet> _addr_n, IP ip)
         {
-            var (nn, m) = networkNumberAndMask(n);
+            ref IPNet n = ref _addr_n.val;
+
+            var (nn, m) = networkNumberAndMask(_addr_n);
             {
                 var x = ip.To4();
 
@@ -602,47 +718,58 @@ namespace go
                 }
 
             }
+
             var l = len(ip);
             if (l != len(nn))
             {
                 return false;
             }
+
             for (long i = 0L; i < l; i++)
             {
                 if (nn[i] & m[i] != ip[i] & m[i])
                 {
                     return false;
                 }
+
             }
 
             return true;
+
         }
 
         // Network returns the address's network name, "ip+net".
-        private static @string Network(this ref IPNet n)
+        private static @string Network(this ptr<IPNet> _addr_n)
         {
+            ref IPNet n = ref _addr_n.val;
+
             return "ip+net";
         }
 
-        // String returns the CIDR notation of n like "192.0.2.1/24"
+        // String returns the CIDR notation of n like "192.0.2.0/24"
         // or "2001:db8::/48" as defined in RFC 4632 and RFC 4291.
         // If the mask is not in the canonical form, it returns the
         // string which consists of an IP address, followed by a slash
         // character and a mask expressed as hexadecimal form with no
-        // punctuation like "198.51.100.1/c000ff00".
-        private static @string String(this ref IPNet n)
+        // punctuation like "198.51.100.0/c000ff00".
+        private static @string String(this ptr<IPNet> _addr_n)
         {
-            var (nn, m) = networkNumberAndMask(n);
+            ref IPNet n = ref _addr_n.val;
+
+            var (nn, m) = networkNumberAndMask(_addr_n);
             if (nn == null || m == null)
             {
                 return "<nil>";
             }
+
             var l = simpleMaskLength(m);
             if (l == -1L)
             {
                 return nn.String() + "/" + m.String();
             }
+
             return nn.String() + "/" + uitoa(uint(l));
+
         }
 
         // Parse IPv4 address (d.d.d.d).
@@ -655,44 +782,59 @@ namespace go
                 { 
                     // Missing octets.
                     return null;
+
                 }
+
                 if (i > 0L)
                 {
                     if (s[0L] != '.')
                     {
                         return null;
                     }
+
                     s = s[1L..];
+
                 }
+
                 var (n, c, ok) = dtoi(s);
                 if (!ok || n > 0xFFUL)
                 {
                     return null;
                 }
+
                 s = s[c..];
                 p[i] = byte(n);
+
             }
 
             if (len(s) != 0L)
             {
                 return null;
             }
+
             return IPv4(p[0L], p[1L], p[2L], p[3L]);
+
+        }
+
+        // parseIPv6Zone parses s as a literal IPv6 address and its associated zone
+        // identifier which is described in RFC 4007.
+        private static (IP, @string) parseIPv6Zone(@string s)
+        {
+            IP _p0 = default;
+            @string _p0 = default;
+
+            var (s, zone) = splitHostZone(s);
+            return (parseIPv6(s), zone);
         }
 
         // parseIPv6 parses s as a literal IPv6 address described in RFC 4291
-        // and RFC 5952.  It can also parse a literal scoped IPv6 address with
-        // zone identifier which is described in RFC 4007 when zoneAllowed is
-        // true.
-        private static (IP, @string) parseIPv6(@string s, bool zoneAllowed)
+        // and RFC 5952.
+        private static IP parseIPv6(@string s)
         {
+            IP ip = default;
+
             ip = make(IP, IPv6len);
             long ellipsis = -1L; // position of ellipsis in ip
-
-            if (zoneAllowed)
-            {
-                s, zone = splitHostZone(s);
-            } 
 
             // Might have leading ellipsis
             if (len(s) >= 2L && s[0L] == ':' && s[1L] == ':')
@@ -702,8 +844,9 @@ namespace go
                 // Might be only ellipsis
                 if (len(s) == 0L)
                 {
-                    return (ip, zone);
+                    return ip;
                 }
+
             } 
 
             // Loop, parsing hex numbers followed by colon.
@@ -714,7 +857,7 @@ namespace go
                 var (n, c, ok) = xtoi(s);
                 if (!ok || n > 0xFFFFUL)
                 {
-                    return (null, zone);
+                    return null;
                 } 
 
                 // If followed by dot, might be in trailing IPv4.
@@ -723,18 +866,23 @@ namespace go
                     if (ellipsis < 0L && i != IPv6len - IPv4len)
                     { 
                         // Not the right place.
-                        return (null, zone);
+                        return null;
+
                     }
+
                     if (i + IPv4len > IPv6len)
                     { 
                         // Not enough room.
-                        return (null, zone);
+                        return null;
+
                     }
+
                     var ip4 = parseIPv4(s);
                     if (ip4 == null)
                     {
-                        return (null, zone);
+                        return null;
                     }
+
                     ip[i] = ip4[12L];
                     ip[i + 1L] = ip4[13L];
                     ip[i + 2L] = ip4[14L];
@@ -742,6 +890,7 @@ namespace go
                     s = "";
                     i += IPv4len;
                     break;
+
                 } 
 
                 // Save this 16-bit chunk.
@@ -759,8 +908,9 @@ namespace go
                 // Otherwise must be followed by colon and more.
                 if (s[0L] != ':' || len(s) == 1L)
                 {
-                    return (null, zone);
+                    return null;
                 }
+
                 s = s[1L..]; 
 
                 // Look for ellipsis.
@@ -768,15 +918,20 @@ namespace go
                 {
                     if (ellipsis >= 0L)
                     { // already have one
-                        return (null, zone);
+                        return null;
+
                     }
+
                     ellipsis = i;
                     s = s[1L..];
                     if (len(s) == 0L)
                     { // can be at end
                         break;
+
                     }
+
                 }
+
             } 
 
             // Must have used entire string.
@@ -785,7 +940,7 @@ namespace go
             // Must have used entire string.
             if (len(s) != 0L)
             {
-                return (null, zone);
+                return null;
             } 
 
             // If didn't parse enough, expand ellipsis.
@@ -793,8 +948,9 @@ namespace go
             {
                 if (ellipsis < 0L)
                 {
-                    return (null, zone);
+                    return null;
                 }
+
                 var n = IPv6len - i;
                 {
                     var j__prev1 = j;
@@ -818,18 +974,22 @@ namespace go
 
                     j = j__prev1;
                 }
+
             }
             else if (ellipsis >= 0L)
             { 
                 // Ellipsis must represent at least one 0 group.
-                return (null, zone);
+                return null;
+
             }
-            return (ip, zone);
+
+            return ip;
+
         }
 
         // ParseIP parses s as an IP address, returning the result.
-        // The string s can be in dotted decimal ("192.0.2.1")
-        // or IPv6 ("2001:db8::68") form.
+        // The string s can be in IPv4 dotted decimal ("192.0.2.1"), IPv6
+        // ("2001:db8::68"), or IPv4-mapped IPv6 ("::ffff:192.0.2.1") form.
         // If s is not a valid textual representation of an IP address,
         // ParseIP returns nil.
         public static IP ParseIP(@string s)
@@ -842,13 +1002,39 @@ namespace go
                         return parseIPv4(s);
                         break;
                     case ':': 
-                        var (ip, _) = parseIPv6(s, false);
-                        return ip;
+                        return parseIPv6(s);
                         break;
                 }
+
             }
 
             return null;
+
+        }
+
+        // parseIPZone parses s as an IP address, return it and its associated zone
+        // identifier (IPv6 only).
+        private static (IP, @string) parseIPZone(@string s)
+        {
+            IP _p0 = default;
+            @string _p0 = default;
+
+            for (long i = 0L; i < len(s); i++)
+            {
+                switch (s[i])
+                {
+                    case '.': 
+                        return (parseIPv4(s), "");
+                        break;
+                    case ':': 
+                        return parseIPv6Zone(s);
+                        break;
+                }
+
+            }
+
+            return (null, "");
+
         }
 
         // ParseCIDR parses s as a CIDR notation IP address and prefix length,
@@ -859,13 +1045,18 @@ namespace go
         // prefix length.
         // For example, ParseCIDR("192.0.2.1/24") returns the IP address
         // 192.0.2.1 and the network 192.0.2.0/24.
-        public static (IP, ref IPNet, error) ParseCIDR(@string s)
+        public static (IP, ptr<IPNet>, error) ParseCIDR(@string s)
         {
-            var i = byteIndex(s, '/');
+            IP _p0 = default;
+            ptr<IPNet> _p0 = default!;
+            error _p0 = default!;
+
+            var i = bytealg.IndexByteString(s, '/');
             if (i < 0L)
             {
-                return (null, null, ref new ParseError(Type:"CIDR address",Text:s));
+                return (null, _addr_null!, error.As(addr(new ParseError(Type:"CIDR address",Text:s))!)!);
             }
+
             var addr = s[..i];
             var mask = s[i + 1L..];
             var iplen = IPv4len;
@@ -873,15 +1064,18 @@ namespace go
             if (ip == null)
             {
                 iplen = IPv6len;
-                ip, _ = parseIPv6(addr, false);
+                ip = parseIPv6(addr);
             }
+
             var (n, i, ok) = dtoi(mask);
             if (ip == null || !ok || i != len(mask) || n < 0L || n > 8L * iplen)
             {
-                return (null, null, ref new ParseError(Type:"CIDR address",Text:s));
+                return (null, _addr_null!, error.As(addr(new ParseError(Type:"CIDR address",Text:s))!)!);
             }
+
             var m = CIDRMask(n, 8L * iplen);
-            return (ip, ref new IPNet(IP:ip.Mask(m),Mask:m), null);
+            return (ip, addr(new IPNet(IP:ip.Mask(m),Mask:m)), error.As(null!)!);
+
         }
     }
 }

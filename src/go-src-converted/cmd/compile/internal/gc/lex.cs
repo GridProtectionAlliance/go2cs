@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:27:19 UTC
+// package gc -- go2cs converted at 2020 October 08 04:29:20 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\lex.go
 using syntax = go.cmd.compile.@internal.syntax_package;
@@ -23,8 +23,10 @@ namespace @internal
         // TODO(gri) rename and eventually remove
         private static src.XPos lineno = default;
 
-        private static src.XPos makePos(ref src.PosBase @base, ulong line, ulong col)
+        private static src.XPos makePos(ptr<src.PosBase> _addr_@base, ulong line, ulong col)
         {
+            ref src.PosBase @base = ref _addr_@base.val;
+
             return Ctxt.PosTable.XPos(src.MakePos(base, line, col));
         }
 
@@ -38,43 +40,37 @@ namespace @internal
             return len(s) >= 2L && s[0L] == '"' && s[len(s) - 1L] == '"';
         }
 
-        private static @string plan9quote(@string s)
+        public partial struct PragmaFlag // : short
         {
-            if (s == "")
-            {
-                return "''";
-            }
-            foreach (var (_, c) in s)
-            {
-                if (c <= ' ' || c == '\'')
-                {
-                    return "'" + strings.Replace(s, "'", "''", -1L) + "'";
-                }
-            }
-            return s;
         }
 
  
         // Func pragmas.
-        public static readonly syntax.Pragma Nointerface = 1L << (int)(iota);
-        public static readonly var Noescape = 0; // func parameters don't escape
-        public static readonly var Norace = 1; // func must not have race detector annotations
-        public static readonly var Nosplit = 2; // func should not execute on separate stack
-        public static readonly var Noinline = 3; // func should not be inlined
-        public static readonly var CgoUnsafeArgs = 4; // treat a pointer to one arg as a pointer to them all
-        public static readonly var UintptrEscapes = 5; // pointers converted to uintptr escape
+        public static readonly PragmaFlag Nointerface = (PragmaFlag)1L << (int)(iota);
+        public static readonly var Noescape = (var)0; // func parameters don't escape
+        public static readonly var Norace = (var)1; // func must not have race detector annotations
+        public static readonly var Nosplit = (var)2; // func should not execute on separate stack
+        public static readonly var Noinline = (var)3; // func should not be inlined
+        public static readonly var NoCheckPtr = (var)4; // func should not be instrumented by checkptr
+        public static readonly var CgoUnsafeArgs = (var)5; // treat a pointer to one arg as a pointer to them all
+        public static readonly var UintptrEscapes = (var)6; // pointers converted to uintptr escape
 
         // Runtime-only func pragmas.
         // See ../../../../runtime/README.md for detailed descriptions.
-        public static readonly var Systemstack = 6; // func must run on system stack
-        public static readonly var Nowritebarrier = 7; // emit compiler error instead of write barrier
-        public static readonly var Nowritebarrierrec = 8; // error on write barrier in this or recursive callees
-        public static readonly var Yeswritebarrierrec = 9; // cancels Nowritebarrierrec in this function and callees
+        public static readonly var Systemstack = (var)7; // func must run on system stack
+        public static readonly var Nowritebarrier = (var)8; // emit compiler error instead of write barrier
+        public static readonly var Nowritebarrierrec = (var)9; // error on write barrier in this or recursive callees
+        public static readonly var Yeswritebarrierrec = (var)10; // cancels Nowritebarrierrec in this function and callees
 
         // Runtime-only type pragmas
-        public static readonly var NotInHeap = 10; // values of this type must not be heap allocated
+        public static readonly var NotInHeap = (var)11; // values of this type must not be heap allocated
 
-        private static syntax.Pragma pragmaValue(@string verb)
+        public static readonly var FuncPragmas = (var)Nointerface | Noescape | Norace | Nosplit | Noinline | NoCheckPtr | CgoUnsafeArgs | UintptrEscapes | Systemstack | Nowritebarrier | Nowritebarrierrec | Yeswritebarrierrec;
+
+        public static readonly var TypePragmas = (var)NotInHeap;
+
+
+        private static PragmaFlag pragmaFlag(@string verb)
         {
             switch (verb)
             {
@@ -83,6 +79,7 @@ namespace @internal
                     {
                         return Nointerface;
                     }
+
                     break;
                 case "go:noescape": 
                     return Noescape;
@@ -91,10 +88,13 @@ namespace @internal
                     return Norace;
                     break;
                 case "go:nosplit": 
-                    return Nosplit;
+                    return Nosplit | NoCheckPtr; // implies NoCheckPtr (see #34972)
                     break;
                 case "go:noinline": 
                     return Noinline;
+                    break;
+                case "go:nocheckptr": 
+                    return NoCheckPtr;
                     break;
                 case "go:systemstack": 
                     return Systemstack;
@@ -109,7 +109,7 @@ namespace @internal
                     return Yeswritebarrierrec;
                     break;
                 case "go:cgo_unsafe_args": 
-                    return CgoUnsafeArgs;
+                    return CgoUnsafeArgs | NoCheckPtr; // implies NoCheckPtr (see #34968)
                     break;
                 case "go:uintptrescapes": 
                     // For the next function declared in the file
@@ -130,73 +130,78 @@ namespace @internal
                     break;
             }
             return 0L;
+
         }
 
         // pragcgo is called concurrently if files are parsed concurrently.
-        private static @string pragcgo(this ref noder p, src.Pos pos, @string text)
+        private static void pragcgo(this ptr<noder> _addr_p, syntax.Pos pos, @string text)
         {
+            ref noder p = ref _addr_p.val;
+
             var f = pragmaFields(text);
 
-            var verb = f[0L][3L..]; // skip "go:"
+            var verb = strings.TrimPrefix(f[0L], "go:");
+            f[0L] = verb;
+
             switch (verb)
             {
                 case "cgo_export_static": 
 
                 case "cgo_export_dynamic": 
 
-                    if (len(f) == 2L && !isQuoted(f[1L])) 
-                        var local = plan9quote(f[1L]);
-                        return fmt.Sprintln(verb, local);
-                    else if (len(f) == 3L && !isQuoted(f[1L]) && !isQuoted(f[2L])) 
-                        local = plan9quote(f[1L]);
-                        var remote = plan9quote(f[2L]);
-                        return fmt.Sprintln(verb, local, remote);
-                    else 
+                    if (len(f) == 2L && !isQuoted(f[1L]))                 else if (len(f) == 3L && !isQuoted(f[1L]) && !isQuoted(f[2L]))                 else 
                         p.error(new syntax.Error(Pos:pos,Msg:fmt.Sprintf(`usage: //go:%s local [remote]`,verb)));
+                        return ;
                     break;
                 case "cgo_import_dynamic": 
 
-                    if (len(f) == 2L && !isQuoted(f[1L])) 
-                        local = plan9quote(f[1L]);
-                        return fmt.Sprintln(verb, local);
-                    else if (len(f) == 3L && !isQuoted(f[1L]) && !isQuoted(f[2L])) 
-                        local = plan9quote(f[1L]);
-                        remote = plan9quote(f[2L]);
-                        return fmt.Sprintln(verb, local, remote);
-                    else if (len(f) == 4L && !isQuoted(f[1L]) && !isQuoted(f[2L]) && isQuoted(f[3L])) 
-                        local = plan9quote(f[1L]);
-                        remote = plan9quote(f[2L]);
-                        var library = plan9quote(strings.Trim(f[3L], "\""));
-                        return fmt.Sprintln(verb, local, remote, library);
+                    if (len(f) == 2L && !isQuoted(f[1L]))                 else if (len(f) == 3L && !isQuoted(f[1L]) && !isQuoted(f[2L]))                 else if (len(f) == 4L && !isQuoted(f[1L]) && !isQuoted(f[2L]) && isQuoted(f[3L])) 
+                        f[3L] = strings.Trim(f[3L], "\"");
+                        if (objabi.GOOS == "aix" && f[3L] != "")
+                        { 
+                            // On Aix, library pattern must be "lib.a/object.o"
+                            // or "lib.a/libname.so.X"
+                            var n = strings.Split(f[3L], "/");
+                            if (len(n) != 2L || !strings.HasSuffix(n[0L], ".a") || (!strings.HasSuffix(n[1L], ".o") && !strings.Contains(n[1L], ".so.")))
+                            {
+                                p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_import_dynamic local [remote ["lib.a/object.o"]]`));
+                                return ;
+                            }
+
+                        }
+
                     else 
                         p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_import_dynamic local [remote ["library"]]`));
+                        return ;
                     break;
                 case "cgo_import_static": 
 
-                    if (len(f) == 2L && !isQuoted(f[1L])) 
-                        local = plan9quote(f[1L]);
-                        return fmt.Sprintln(verb, local);
-                    else 
+                    if (len(f) == 2L && !isQuoted(f[1L]))                 else 
                         p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_import_static local`));
+                        return ;
                     break;
                 case "cgo_dynamic_linker": 
 
                     if (len(f) == 2L && isQuoted(f[1L])) 
-                        var path = plan9quote(strings.Trim(f[1L], "\""));
-                        return fmt.Sprintln(verb, path);
+                        f[1L] = strings.Trim(f[1L], "\"");
                     else 
                         p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_dynamic_linker "path"`));
+                        return ;
                     break;
                 case "cgo_ldflag": 
 
                     if (len(f) == 2L && isQuoted(f[1L])) 
-                        var arg = plan9quote(strings.Trim(f[1L], "\""));
-                        return fmt.Sprintln(verb, arg);
+                        f[1L] = strings.Trim(f[1L], "\"");
                     else 
                         p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_ldflag "arg"`));
+                        return ;
+                    break;
+                default: 
+                    return ;
                     break;
             }
-            return "";
+            p.pragcgobuf = append(p.pragcgobuf, f);
+
         }
 
         // pragmaFields is similar to strings.FieldsFunc(s, isSpace)
@@ -226,25 +231,33 @@ namespace @internal
                         {
                             a = append(a, s[fieldStart..i]);
                         }
+
                         fieldStart = i;
+
                     }
+
                 else if (!inQuote && isSpace(c)) 
                     if (fieldStart >= 0L)
                     {
                         a = append(a, s[fieldStart..i]);
                         fieldStart = -1L;
                     }
+
                 else 
                     if (fieldStart == -1L)
                     {
                         fieldStart = i;
                     }
+
                             }
             if (!inQuote && fieldStart >= 0L)
             { // Last field might end at the end of the string.
                 a = append(a, s[fieldStart..]);
+
             }
+
             return a;
+
         }
     }
 }}}}

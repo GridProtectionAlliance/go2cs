@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:23:55 UTC
+//     Generated on 2020 October 08 03:41:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace regexp
                 this.tmpClass = default;
             }
 
-            public parser(Flags flags = default, slice<ref Regexp> stack = default, ref ptr<Regexp> free = default, long numCap = default, @string wholeRegexp = default, slice<int> tmpClass = default)
+            public parser(Flags flags = default, slice<ptr<Regexp>> stack = default, ref ptr<Regexp> free = default, long numCap = default, @string wholeRegexp = default, slice<int> tmpClass = default)
             {
                 this.flags = flags;
                 this.stack = stack;

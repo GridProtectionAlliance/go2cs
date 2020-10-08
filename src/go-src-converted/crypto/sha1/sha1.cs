@@ -6,10 +6,11 @@
 //
 // SHA-1 is cryptographically broken and should not be used for secure
 // applications.
-// package sha1 -- go2cs converted at 2020 August 29 08:28:36 UTC
+// package sha1 -- go2cs converted at 2020 October 08 03:36:41 UTC
 // import "crypto/sha1" ==> using sha1 = go.crypto.sha1_package
 // Original source: C:\Go\src\crypto\sha1\sha1.go
 using crypto = go.crypto_package;
+using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using hash = go.hash_package;
 using static go.builtin;
@@ -25,22 +26,23 @@ namespace crypto
         }
 
         // The size of a SHA-1 checksum in bytes.
-        public static readonly long Size = 20L;
+        public static readonly long Size = (long)20L;
 
         // The blocksize of SHA-1 in bytes.
 
 
         // The blocksize of SHA-1 in bytes.
-        public static readonly long BlockSize = 64L;
+        public static readonly long BlockSize = (long)64L;
 
 
 
-        private static readonly long chunk = 64L;
-        private static readonly ulong init0 = 0x67452301UL;
-        private static readonly ulong init1 = 0xEFCDAB89UL;
-        private static readonly ulong init2 = 0x98BADCFEUL;
-        private static readonly ulong init3 = 0x10325476UL;
-        private static readonly ulong init4 = 0xC3D2E1F0UL;
+        private static readonly long chunk = (long)64L;
+        private static readonly ulong init0 = (ulong)0x67452301UL;
+        private static readonly ulong init1 = (ulong)0xEFCDAB89UL;
+        private static readonly ulong init2 = (ulong)0x98BADCFEUL;
+        private static readonly ulong init3 = (ulong)0x10325476UL;
+        private static readonly ulong init4 = (ulong)0xC3D2E1F0UL;
+
 
         // digest represents the partial evaluation of a checksum.
         private partial struct digest
@@ -51,11 +53,16 @@ namespace crypto
             public ulong len;
         }
 
-        private static readonly @string magic = "sha\x01";
-        private static readonly var marshaledSize = len(magic) + 5L * 4L + chunk + 8L;
+        private static readonly @string magic = (@string)"sha\x01";
+        private static readonly var marshaledSize = (var)len(magic) + 5L * 4L + chunk + 8L;
 
-        private static (slice<byte>, error) MarshalBinary(this ref digest d)
+
+        private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref digest d = ref _addr_d.val;
+
             var b = make_slice<byte>(0L, marshaledSize);
             b = append(b, magic);
             b = appendUint32(b, d.h[0L]);
@@ -66,19 +73,24 @@ namespace crypto
             b = append(b, d.x[..d.nx]);
             b = b[..len(b) + len(d.x) - int(d.nx)]; // already zero
             b = appendUint64(b, d.len);
-            return (b, null);
+            return (b, error.As(null!)!);
+
         }
 
-        private static error UnmarshalBinary(this ref digest d, slice<byte> b)
+        private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b)
         {
+            ref digest d = ref _addr_d.val;
+
             if (len(b) < len(magic) || string(b[..len(magic)]) != magic)
             {
-                return error.As(errors.New("crypto/sha1: invalid hash state identifier"));
+                return error.As(errors.New("crypto/sha1: invalid hash state identifier"))!;
             }
+
             if (len(b) != marshaledSize)
             {
-                return error.As(errors.New("crypto/sha1: invalid hash state size"));
+                return error.As(errors.New("crypto/sha1: invalid hash state size"))!;
             }
+
             b = b[len(magic)..];
             b, d.h[0L] = consumeUint32(b);
             b, d.h[1L] = consumeUint32(b);
@@ -87,26 +99,30 @@ namespace crypto
             b, d.h[4L] = consumeUint32(b);
             b = b[copy(d.x[..], b)..];
             b, d.len = consumeUint64(b);
-            d.nx = int(d.len) % chunk;
-            return error.As(null);
+            d.nx = int(d.len % chunk);
+            return error.As(null!)!;
+
         }
 
         private static slice<byte> appendUint64(slice<byte> b, ulong x)
         {
             array<byte> a = new array<byte>(8L);
-            putUint64(a[..], x);
+            binary.BigEndian.PutUint64(a[..], x);
             return append(b, a[..]);
         }
 
         private static slice<byte> appendUint32(slice<byte> b, uint x)
         {
             array<byte> a = new array<byte>(4L);
-            putUint32(a[..], x);
+            binary.BigEndian.PutUint32(a[..], x);
             return append(b, a[..]);
         }
 
         private static (slice<byte>, ulong) consumeUint64(slice<byte> b)
         {
+            slice<byte> _p0 = default;
+            ulong _p0 = default;
+
             _ = b[7L];
             var x = uint64(b[7L]) | uint64(b[6L]) << (int)(8L) | uint64(b[5L]) << (int)(16L) | uint64(b[4L]) << (int)(24L) | uint64(b[3L]) << (int)(32L) | uint64(b[2L]) << (int)(40L) | uint64(b[1L]) << (int)(48L) | uint64(b[0L]) << (int)(56L);
             return (b[8L..], x);
@@ -114,13 +130,18 @@ namespace crypto
 
         private static (slice<byte>, uint) consumeUint32(slice<byte> b)
         {
+            slice<byte> _p0 = default;
+            uint _p0 = default;
+
             _ = b[3L];
             var x = uint32(b[3L]) | uint32(b[2L]) << (int)(8L) | uint32(b[1L]) << (int)(16L) | uint32(b[0L]) << (int)(24L);
             return (b[4L..], x);
         }
 
-        private static void Reset(this ref digest d)
+        private static void Reset(this ptr<digest> _addr_d)
         {
+            ref digest d = ref _addr_d.val;
+
             d.h[0L] = init0;
             d.h[1L] = init1;
             d.h[2L] = init2;
@@ -140,18 +161,26 @@ namespace crypto
             return d;
         }
 
-        private static long Size(this ref digest d)
+        private static long Size(this ptr<digest> _addr_d)
         {
+            ref digest d = ref _addr_d.val;
+
             return Size;
         }
 
-        private static long BlockSize(this ref digest d)
+        private static long BlockSize(this ptr<digest> _addr_d)
         {
+            ref digest d = ref _addr_d.val;
+
             return BlockSize;
         }
 
-        private static (long, error) Write(this ref digest d, slice<byte> p)
+        private static (long, error) Write(this ptr<digest> _addr_d, slice<byte> p)
         {
+            long nn = default;
+            error err = default!;
+            ref digest d = ref _addr_d.val;
+
             nn = len(p);
             d.len += uint64(nn);
             if (d.nx > 0L)
@@ -163,31 +192,42 @@ namespace crypto
                     block(d, d.x[..]);
                     d.nx = 0L;
                 }
+
                 p = p[n..];
+
             }
+
             if (len(p) >= chunk)
             {
                 n = len(p) & ~(chunk - 1L);
                 block(d, p[..n]);
                 p = p[n..];
             }
+
             if (len(p) > 0L)
             {
                 d.nx = copy(d.x[..], p);
             }
-            return;
+
+            return ;
+
         }
 
-        private static slice<byte> Sum(this ref digest d0, slice<byte> @in)
-        { 
-            // Make a copy of d0 so that caller can keep writing and summing.
-            var d = d0.Value;
-            var hash = d.checkSum();
-            return append(in, hash[..]);
-        }
-
-        private static array<byte> checkSum(this ref digest _d) => func(_d, (ref digest d, Defer _, Panic panic, Recover __) =>
+        private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in)
         {
+            ref digest d = ref _addr_d.val;
+ 
+            // Make a copy of d so that caller can keep writing and summing.
+            var d0 = d.val;
+            var hash = d0.checkSum();
+            return append(in, hash[..]);
+
+        }
+
+        private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic, __) =>
+        {
+            ref digest d = ref _addr_d.val;
+
             var len = d.len; 
             // Padding.  Add a 1 bit and 0 bits until 56 bytes mod 64.
             array<byte> tmp = new array<byte>(64L);
@@ -203,34 +243,40 @@ namespace crypto
 
             // Length in bits.
             len <<= 3L;
-            putUint64(tmp[..], len);
+            binary.BigEndian.PutUint64(tmp[..], len);
             d.Write(tmp[0L..8L]);
 
             if (d.nx != 0L)
             {
                 panic("d.nx != 0");
             }
+
             array<byte> digest = new array<byte>(Size);
 
-            putUint32(digest[0L..], d.h[0L]);
-            putUint32(digest[4L..], d.h[1L]);
-            putUint32(digest[8L..], d.h[2L]);
-            putUint32(digest[12L..], d.h[3L]);
-            putUint32(digest[16L..], d.h[4L]);
+            binary.BigEndian.PutUint32(digest[0L..], d.h[0L]);
+            binary.BigEndian.PutUint32(digest[4L..], d.h[1L]);
+            binary.BigEndian.PutUint32(digest[8L..], d.h[2L]);
+            binary.BigEndian.PutUint32(digest[12L..], d.h[3L]);
+            binary.BigEndian.PutUint32(digest[16L..], d.h[4L]);
 
             return digest;
+
         });
 
         // ConstantTimeSum computes the same result of Sum() but in constant time
-        private static slice<byte> ConstantTimeSum(this ref digest d0, slice<byte> @in)
+        private static slice<byte> ConstantTimeSum(this ptr<digest> _addr_d, slice<byte> @in)
         {
-            var d = d0.Value;
-            var hash = d.constSum();
+            ref digest d = ref _addr_d.val;
+
+            var d0 = d.val;
+            var hash = d0.constSum();
             return append(in, hash[..]);
         }
 
-        private static array<byte> constSum(this ref digest d)
+        private static array<byte> constSum(this ptr<digest> _addr_d)
         {
+            ref digest d = ref _addr_d.val;
+
             array<byte> length = new array<byte>(8L);
             var l = d.len << (int)(3L);
             {
@@ -267,7 +313,9 @@ namespace crypto
                     { 
                         // we might have to write the length here if all fit in one block
                         d.x[i] |= mask1b & length[i - 56L];
+
                     }
+
                 } 
 
                 // compress, and only keep the digest if all fit in one block
@@ -313,6 +361,7 @@ namespace crypto
                     {
                         d.x[i] = length[i - 56L];
                     }
+
                 } 
 
                 // compress, and only keep the digest if we actually needed the second block
@@ -343,6 +392,7 @@ namespace crypto
             }
 
             return digest;
+
         }
 
         // Sum returns the SHA-1 checksum of the data.
@@ -352,28 +402,6 @@ namespace crypto
             d.Reset();
             d.Write(data);
             return d.checkSum();
-        }
-
-        private static void putUint64(slice<byte> x, ulong s)
-        {
-            _ = x[7L];
-            x[0L] = byte(s >> (int)(56L));
-            x[1L] = byte(s >> (int)(48L));
-            x[2L] = byte(s >> (int)(40L));
-            x[3L] = byte(s >> (int)(32L));
-            x[4L] = byte(s >> (int)(24L));
-            x[5L] = byte(s >> (int)(16L));
-            x[6L] = byte(s >> (int)(8L));
-            x[7L] = byte(s);
-        }
-
-        private static void putUint32(slice<byte> x, uint s)
-        {
-            _ = x[3L];
-            x[0L] = byte(s >> (int)(24L));
-            x[1L] = byte(s >> (int)(16L));
-            x[2L] = byte(s >> (int)(8L));
-            x[3L] = byte(s);
         }
     }
 }}

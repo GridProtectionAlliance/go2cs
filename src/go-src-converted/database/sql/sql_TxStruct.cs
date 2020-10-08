@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:11:01 UTC
+//     Generated on 2020 October 08 04:58:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using io = go.io_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -43,11 +44,12 @@ namespace database
                 this.txi = default;
                 this.releaseConn = default;
                 this.done = default;
+                this.keepConnOnRollback = default;
                 this.cancel = default;
                 this.ctx = default;
             }
 
-            public Tx(ref ptr<DB> db = default, sync.RWMutex closemu = default, ref ptr<driverConn> dc = default, driver.Tx txi = default, Action<error> releaseConn = default, int done = default, Action cancel = default, context.Context ctx = default)
+            public Tx(ref ptr<DB> db = default, sync.RWMutex closemu = default, ref ptr<driverConn> dc = default, driver.Tx txi = default, Action<error> releaseConn = default, int done = default, bool keepConnOnRollback = default, Action cancel = default, context.Context ctx = default)
             {
                 this.db = db;
                 this.closemu = closemu;
@@ -55,6 +57,7 @@ namespace database
                 this.txi = txi;
                 this.releaseConn = releaseConn;
                 this.done = done;
+                this.keepConnOnRollback = keepConnOnRollback;
                 this.cancel = cancel;
                 this.ctx = ctx;
             }
@@ -79,7 +82,7 @@ namespace database
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Tx Tx_cast(dynamic value)
         {
-            return new Tx(ref value.db, value.closemu, ref value.dc, value.txi, value.releaseConn, value.done, value.cancel, value.ctx);
+            return new Tx(ref value.db, value.closemu, ref value.dc, value.txi, value.releaseConn, value.done, value.keepConnOnRollback, value.cancel, value.ctx);
         }
     }
 }}

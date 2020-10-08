@@ -2,7 +2,7 @@
 
 // +build netbsd
 
-// package sys -- go2cs converted at 2020 August 29 08:16:27 UTC
+// package sys -- go2cs converted at 2020 October 08 03:19:08 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Go\src\runtime\internal\sys\zgoos_netbsd.go
 
@@ -14,33 +14,41 @@ namespace @internal
 {
     public static partial class sys_package
     {
-        public static readonly @string GOOS = "netbsd";
+        public static readonly @string GOOS = (@string)"netbsd";
 
 
 
-        public static readonly long GoosAndroid = 0L;
+        public static readonly long GoosAix = (long)0L;
 
-        public static readonly long GoosDarwin = 0L;
+        public static readonly long GoosAndroid = (long)0L;
 
-        public static readonly long GoosDragonfly = 0L;
+        public static readonly long GoosDarwin = (long)0L;
 
-        public static readonly long GoosFreebsd = 0L;
+        public static readonly long GoosDragonfly = (long)0L;
 
-        public static readonly long GoosLinux = 0L;
+        public static readonly long GoosFreebsd = (long)0L;
 
-        public static readonly long GoosNacl = 0L;
+        public static readonly long GoosHurd = (long)0L;
 
-        public static readonly long GoosNetbsd = 1L;
+        public static readonly long GoosIllumos = (long)0L;
 
-        public static readonly long GoosOpenbsd = 0L;
+        public static readonly long GoosJs = (long)0L;
 
-        public static readonly long GoosPlan9 = 0L;
+        public static readonly long GoosLinux = (long)0L;
 
-        public static readonly long GoosSolaris = 0L;
+        public static readonly long GoosNacl = (long)0L;
 
-        public static readonly long GoosWindows = 0L;
+        public static readonly long GoosNetbsd = (long)1L;
 
-        public static readonly long GoosZos = 0L;
+        public static readonly long GoosOpenbsd = (long)0L;
+
+        public static readonly long GoosPlan9 = (long)0L;
+
+        public static readonly long GoosSolaris = (long)0L;
+
+        public static readonly long GoosWindows = (long)0L;
+
+        public static readonly long GoosZos = (long)0L;
 
     }
 }}}

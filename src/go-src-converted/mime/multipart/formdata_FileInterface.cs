@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:27 UTC
+//     Generated on 2020 October 08 03:38:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace mime
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,10 +69,10 @@ namespace mime
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -81,17 +81,18 @@ namespace mime
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, p);
 
-                return s_ReadByRef(ref target, p);
+                return s_ReadByPtr(m_target_ptr, p);
             }
 
-            private delegate (long, error) ReadAtByRef(ref T value, slice<byte> p, long off);
+            private delegate (long, error) ReadAtByPtr(ptr<T> value, slice<byte> p, long off);
             private delegate (long, error) ReadAtByVal(T value, slice<byte> p, long off);
 
-            private static readonly ReadAtByRef s_ReadAtByRef;
+            private static readonly ReadAtByPtr s_ReadAtByPtr;
             private static readonly ReadAtByVal s_ReadAtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,17 +101,18 @@ namespace mime
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadAtByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadAtByPtr is null || !m_target_is_ptr)
                     return s_ReadAtByVal!(target, p, off);
 
-                return s_ReadAtByRef(ref target, p, off);
+                return s_ReadAtByPtr(m_target_ptr, p, off);
             }
 
-            private delegate (long, error) SeekByRef(ref T value, long offset, long whence);
+            private delegate (long, error) SeekByPtr(ptr<T> value, long offset, long whence);
             private delegate (long, error) SeekByVal(T value, long offset, long whence);
 
-            private static readonly SeekByRef s_SeekByRef;
+            private static readonly SeekByPtr s_SeekByPtr;
             private static readonly SeekByVal s_SeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -119,17 +121,18 @@ namespace mime
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SeekByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SeekByPtr is null || !m_target_is_ptr)
                     return s_SeekByVal!(target, offset, whence);
 
-                return s_SeekByRef(ref target, offset, whence);
+                return s_SeekByPtr(m_target_ptr, offset, whence);
             }
 
-            private delegate error CloseByRef(ref T value);
+            private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -138,11 +141,12 @@ namespace mime
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -151,71 +155,59 @@ namespace mime
             static File()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Read method", new Exception("Read"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadAt");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadAt");
 
                 if (!(extensionMethod is null))
-                    s_ReadAtByRef = extensionMethod.CreateStaticDelegate(typeof(ReadAtByRef)) as ReadAtByRef;
+                    s_ReadAtByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadAtByPtr)) as ReadAtByPtr;
 
-                if (s_ReadAtByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadAt");
+                extensionMethod = targetType.GetExtensionMethod("ReadAt");
 
-                    if (!(extensionMethod is null))
-                        s_ReadAtByVal = extensionMethod.CreateStaticDelegate(typeof(ReadAtByVal)) as ReadAtByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadAtByVal = extensionMethod.CreateStaticDelegate(typeof(ReadAtByVal)) as ReadAtByVal;
 
-                if (s_ReadAtByRef is null && s_ReadAtByVal is null)
+                if (s_ReadAtByPtr is null && s_ReadAtByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.ReadAt method", new Exception("ReadAt"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Seek");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Seek");
 
                 if (!(extensionMethod is null))
-                    s_SeekByRef = extensionMethod.CreateStaticDelegate(typeof(SeekByRef)) as SeekByRef;
+                    s_SeekByPtr = extensionMethod.CreateStaticDelegate(typeof(SeekByPtr)) as SeekByPtr;
 
-                if (s_SeekByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Seek");
+                extensionMethod = targetType.GetExtensionMethod("Seek");
 
-                    if (!(extensionMethod is null))
-                        s_SeekByVal = extensionMethod.CreateStaticDelegate(typeof(SeekByVal)) as SeekByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SeekByVal = extensionMethod.CreateStaticDelegate(typeof(SeekByVal)) as SeekByVal;
 
-                if (s_SeekByRef is null && s_SeekByVal is null)
+                if (s_SeekByPtr is null && s_SeekByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Seek method", new Exception("Seek"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Close method", new Exception("Close"));
             }
 

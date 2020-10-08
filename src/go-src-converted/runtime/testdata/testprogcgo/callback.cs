@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 August 29 08:24:44 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:49 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\callback.go
 /*
 #include <pthread.h>
@@ -74,23 +74,29 @@ namespace go
 
         private static void grow() => func((_, panic, __) =>
         {
-            long x = 10000L;
-            long sum = 0L;
-            if (grow1(ref x, ref sum) == 0L)
+            ref long x = ref heap(10000L, out ptr<long> _addr_x);
+            ref long sum = ref heap(0L, out ptr<long> _addr_sum);
+            if (grow1(_addr_x, _addr_sum) == 0L)
             {
                 panic("bad");
             }
+
         });
 
-        private static long grow1(ref long x, ref long sum)
+        private static long grow1(ptr<long> _addr_x, ptr<long> _addr_sum)
         {
-            if (x == 0L.Value)
+            ref long x = ref _addr_x.val;
+            ref long sum = ref _addr_sum.val;
+
+            if (x == 0L.val)
             {
-                return sum + 1L.Value;
+                return sum + 1L.val;
             }
-            x.Value--;
-            var sum1 = sum + x.Value.Value;
-            return grow1(x, ref sum1);
+
+            x--;
+            ref var sum1 = ref heap(sum + x.val, out ptr<var> _addr_sum1);
+            return grow1(_addr_x, _addr_sum1);
+
         }
 
         public static void CgoCallbackGC()
@@ -100,6 +106,7 @@ namespace go
             {
                 P = 10L;
             }
+
             var done = make_channel<bool>(); 
             // allocate a bunch of stack frames and spray them with pointers
             {
@@ -112,6 +119,7 @@ namespace go
                         grow();
                         done.Send(true);
                     }());
+
                 }
 
 
@@ -140,6 +148,7 @@ namespace go
                         C.foo();
                         done.Send(true);
                     }());
+
                 }
 
 
@@ -157,6 +166,7 @@ namespace go
                 i = i__prev1;
             }
             fmt.Printf("OK\n");
+
         }
     }
 }

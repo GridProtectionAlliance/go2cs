@@ -5,13 +5,13 @@
 // Simple file i/o and string manipulation, to avoid
 // depending on strconv and bufio and strings.
 
-// package net -- go2cs converted at 2020 August 29 08:27:12 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:07 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\parse.go
+using bytealg = go.@internal.bytealg_package;
 using io = go.io_package;
 using os = go.os_package;
 using time = go.time_package;
-using _@unsafe_ = go.@unsafe_package;
 using static go.builtin;
 using System;
 
@@ -26,14 +26,19 @@ namespace go
             public bool atEOF;
         }
 
-        private static void close(this ref file f)
+        private static void close(this ptr<file> _addr_f)
         {
-            f.file.Close();
+            ref file f = ref _addr_f.val;
 
+            f.file.Close();
         }
 
-        private static (@string, bool) getLineFromData(this ref file f)
+        private static (@string, bool) getLineFromData(this ptr<file> _addr_f)
         {
+            @string s = default;
+            bool ok = default;
+            ref file f = ref _addr_f.val;
+
             var data = f.data;
             long i = 0L;
             for (i = 0L; i < len(data); i++)
@@ -47,8 +52,10 @@ namespace go
                     var n = len(data) - i;
                     copy(data[0L..], data[i..]);
                     f.data = data[0L..n];
-                    return;
+                    return ;
+
                 }
+
             }
 
             if (f.atEOF && len(f.data) > 0L)
@@ -57,18 +64,26 @@ namespace go
                 s = string(data);
                 f.data = f.data[0L..0L];
                 ok = true;
+
             }
-            return;
+
+            return ;
+
         }
 
-        private static (@string, bool) readLine(this ref file f)
+        private static (@string, bool) readLine(this ptr<file> _addr_f)
         {
+            @string s = default;
+            bool ok = default;
+            ref file f = ref _addr_f.val;
+
             s, ok = f.getLineFromData();
 
             if (ok)
             {
-                return;
+                return ;
             }
+
             if (len(f.data) < cap(f.data))
             {
                 var ln = len(f.data);
@@ -77,55 +92,65 @@ namespace go
                 {
                     f.data = f.data[0L..ln + n];
                 }
+
                 if (err == io.EOF || err == io.ErrUnexpectedEOF)
                 {
                     f.atEOF = true;
                 }
+
             }
+
             s, ok = f.getLineFromData();
-            return;
+            return ;
+
         }
 
-        private static (ref file, error) open(@string name)
+        private static (ptr<file>, error) open(@string name)
         {
+            ptr<file> _p0 = default!;
+            error _p0 = default!;
+
             var (fd, err) = os.Open(name);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (ref new file(fd,make([]byte,0,64*1024),false), null);
+
+            return (addr(new file(fd,make([]byte,0,64*1024),false)), error.As(null!)!);
+
         }
 
         private static (time.Time, long, error) stat(@string name)
         {
+            time.Time mtime = default;
+            long size = default;
+            error err = default!;
+
             var (st, err) = os.Stat(name);
             if (err != null)
             {
-                return (new time.Time(), 0L, err);
+                return (new time.Time(), 0L, error.As(err)!);
             }
-            return (st.ModTime(), st.Size(), null);
-        }
 
-        // byteIndex is strings.IndexByte. It returns the index of the
-        // first instance of c in s, or -1 if c is not present in s.
-        // strings.IndexByte is implemented in  runtime/asm_$GOARCH.s
-        //go:linkname byteIndex strings.IndexByte
-        private static long byteIndex(@string s, byte c)
-;
+            return (st.ModTime(), st.Size(), error.As(null!)!);
+
+        }
 
         // Count occurrences in s of any bytes in t.
         private static long countAnyByte(@string s, @string t)
         {
             long n = 0L;
             for (long i = 0L; i < len(s); i++)
-            {>>MARKER:FUNCTION_byteIndex_BLOCK_PREFIX<<
-                if (byteIndex(t, s[i]) >= 0L)
+            {
+                if (bytealg.IndexByteString(t, s[i]) >= 0L)
                 {
                     n++;
                 }
+
             }
 
             return n;
+
         }
 
         // Split s at any bytes in t.
@@ -136,15 +161,18 @@ namespace go
             long last = 0L;
             for (long i = 0L; i < len(s); i++)
             {
-                if (byteIndex(t, s[i]) >= 0L)
+                if (bytealg.IndexByteString(t, s[i]) >= 0L)
                 {
                     if (last < i)
                     {
                         a[n] = s[last..i];
                         n++;
                     }
+
                     last = i + 1L;
+
                 }
+
             }
 
             if (last < len(s))
@@ -152,7 +180,9 @@ namespace go
                 a[n] = s[last..];
                 n++;
             }
+
             return a[0L..n];
+
         }
 
         private static slice<@string> getFields(@string s)
@@ -161,7 +191,7 @@ namespace go
         }
 
         // Bigger than we need, not too big to worry about overflow
-        private static readonly ulong big = 0xFFFFFFUL;
+        private static readonly ulong big = (ulong)0xFFFFFFUL;
 
         // Decimal to integer.
         // Returns number, characters consumed, success.
@@ -171,6 +201,10 @@ namespace go
         // Returns number, characters consumed, success.
         private static (long, long, bool) dtoi(@string s)
         {
+            long n = default;
+            long i = default;
+            bool ok = default;
+
             n = 0L;
             for (i = 0L; i < len(s) && '0' <= s[i] && s[i] <= '9'; i++)
             {
@@ -179,19 +213,26 @@ namespace go
                 {
                     return (big, i, false);
                 }
+
             }
 
             if (i == 0L)
             {
                 return (0L, 0L, false);
             }
+
             return (n, i, true);
+
         }
 
         // Hexadecimal to integer.
         // Returns number, characters consumed, success.
         private static (long, long, bool) xtoi(@string s)
         {
+            long n = default;
+            long i = default;
+            bool ok = default;
+
             n = 0L;
             for (i = 0L; i < len(s); i++)
             {
@@ -214,17 +255,21 @@ namespace go
                 {
                     break;
                 }
+
                 if (n >= big)
                 {
                     return (0L, i, false);
                 }
+
             }
 
             if (i == 0L)
             {
                 return (0L, i, false);
             }
+
             return (n, i, true);
+
         }
 
         // xtoi2 converts the next two hex digits of s into a byte.
@@ -233,12 +278,17 @@ namespace go
         // does not match e, false is returned.
         private static (byte, bool) xtoi2(@string s, byte e)
         {
+            byte _p0 = default;
+            bool _p0 = default;
+
             if (len(s) > 2L && s[2L] != e)
             {
                 return (0L, false);
             }
+
             var (n, ei, ok) = xtoi(s[..2L]);
             return (byte(n), ok && ei == 2L);
+
         }
 
         // Convert integer to decimal string.
@@ -248,7 +298,9 @@ namespace go
             {
                 return "-" + uitoa(uint(-val));
             }
+
             return uitoa(uint(val));
+
         }
 
         // Convert unsigned integer to decimal string.
@@ -257,7 +309,9 @@ namespace go
             if (val == 0L)
             { // avoid string allocation
                 return "0";
+
             }
+
             array<byte> buf = new array<byte>(20L); // big enough for 64bit value base 10
             var i = len(buf) - 1L;
             while (val >= 10L)
@@ -272,6 +326,7 @@ namespace go
             // val < 10
             buf[i] = byte('0' + val);
             return string(buf[i..]);
+
         }
 
         // Convert i to a hexadecimal string. Leading zeros are not printed.
@@ -281,6 +336,7 @@ namespace go
             {
                 return append(dst, '0');
             }
+
             for (long j = 7L; j >= 0L; j--)
             {
                 var v = i >> (int)(uint(j * 4L));
@@ -288,9 +344,11 @@ namespace go
                 {
                     dst = append(dst, hexDigit[v & 0xfUL]);
                 }
+
             }
 
             return dst;
+
         }
 
         // Number of occurrences of b in s.
@@ -303,9 +361,11 @@ namespace go
                 {
                     n++;
                 }
+
             }
 
             return n;
+
         }
 
         // Index of rightmost occurrence of b in s.
@@ -321,9 +381,11 @@ namespace go
                     break;
                 i--;
                 }
+
             }
 
             return i;
+
         }
 
         // lowerASCIIBytes makes x ASCII lowercase in-place.
@@ -335,7 +397,9 @@ namespace go
                 {
                     x[i] += 'a' - 'A';
                 }
+
             }
+
         }
 
         // lowerASCII returns the ASCII lowercase version of b.
@@ -345,7 +409,9 @@ namespace go
             {
                 return b + ('a' - 'A');
             }
+
             return b;
+
         }
 
         // trimSpace returns x without any leading or trailing ASCII whitespace.
@@ -362,6 +428,7 @@ namespace go
             }
 
             return x;
+
         }
 
         // isSpace reports whether b is an ASCII space character.
@@ -375,7 +442,7 @@ namespace go
         private static slice<byte> removeComment(slice<byte> line)
         {
             {
-                var i = bytesIndexByte(line, '#');
+                var i = bytealg.IndexByte(line, '#');
 
                 if (i != -1L)
                 {
@@ -383,7 +450,9 @@ namespace go
                 }
 
             }
+
             return line;
+
         }
 
         // foreachLine runs fn on each line of x.
@@ -393,11 +462,12 @@ namespace go
         {
             while (len(x) > 0L)
             {
-                var nl = bytesIndexByte(x, '\n');
+                var nl = bytealg.IndexByte(x, '\n');
                 if (nl == -1L)
                 {
-                    return error.As(fn(x));
+                    return error.As(fn(x))!;
                 }
+
                 var line = x[..nl + 1L];
                 x = x[nl + 1L..];
                 {
@@ -405,13 +475,15 @@ namespace go
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // foreachField runs fn on each non-empty run of non-space bytes in x.
@@ -421,11 +493,12 @@ namespace go
             x = trimSpace(x);
             while (len(x) > 0L)
             {
-                var sp = bytesIndexByte(x, ' ');
+                var sp = bytealg.IndexByte(x, ' ');
                 if (sp == -1L)
                 {
-                    return error.As(fn(x));
+                    return error.As(fn(x))!;
                 }
+
                 {
                     var field = trimSpace(x[..sp]);
 
@@ -436,25 +509,22 @@ namespace go
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                         }
+
                     }
 
                 }
+
                 x = trimSpace(x[sp + 1L..]);
+
             }
 
-            return error.As(null);
-        }
+            return error.As(null!)!;
 
-        // bytesIndexByte is bytes.IndexByte. It returns the index of the
-        // first instance of c in s, or -1 if c is not present in s.
-        // bytes.IndexByte is implemented in  runtime/asm_$GOARCH.s
-        //go:linkname bytesIndexByte bytes.IndexByte
-        private static long bytesIndexByte(slice<byte> s, byte c)
-;
+        }
 
         // stringsHasSuffix is strings.HasSuffix. It reports whether s ends in
         // suffix.
@@ -481,22 +551,28 @@ namespace go
         private static bool stringsEqualFold(@string s, @string t)
         {
             if (len(s) != len(t))
-            {>>MARKER:FUNCTION_bytesIndexByte_BLOCK_PREFIX<<
+            {
                 return false;
             }
+
             for (long i = 0L; i < len(s); i++)
             {
                 if (lowerASCII(s[i]) != lowerASCII(t[i]))
                 {
                     return false;
                 }
+
             }
 
             return true;
+
         }
 
         private static (slice<byte>, error) readFull(io.Reader r)
         {
+            slice<byte> all = default;
+            error err = default!;
+
             var buf = make_slice<byte>(1024L);
             while (true)
             {
@@ -504,13 +580,16 @@ namespace go
                 all = append(all, buf[..n]);
                 if (err == io.EOF)
                 {
-                    return (all, null);
+                    return (all, error.As(null!)!);
                 }
+
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
             }
+
 
         }
 
@@ -528,11 +607,13 @@ namespace go
                     {
                         continue;
                     }
+
                     var afterKey = s[i + len(key)..];
                     if (afterKey[0L] != '=' || s[i..i + len(key)] != key)
                     {
                         continue;
                     }
+
                     var val = afterKey[1L..];
                     {
                         long i__prev2 = i;
@@ -545,18 +626,21 @@ namespace go
                             {
                                 return val[..i];
                             }
+
                         }
 
                         i = i__prev2;
                     }
 
                     return val;
+
                 }
 
 
                 i = i__prev1;
             }
             return "";
+
         }
     }
 }

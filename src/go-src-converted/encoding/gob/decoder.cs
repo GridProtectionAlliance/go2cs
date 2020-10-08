@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2020 August 29 08:35:26 UTC
+// package gob -- go2cs converted at 2020 October 08 03:42:36 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\decoder.go
 using bufio = go.bufio_package;
@@ -18,13 +18,14 @@ namespace encoding
 {
     public static partial class gob_package
     {
-        // tooBig provides a sanity check for sizes; used in several places.
-        // Upper limit of 1GB, allowing room to grow a little without overflow.
-        // TODO: make this adjustable?
-        private static readonly long tooBig = 1L << (int)(30L);
+        // tooBig provides a sanity check for sizes; used in several places. Upper limit
+        // of is 1GB on 32-bit systems, 8GB on 64-bit, allowing room to grow a little
+        // without overflow.
+        private static readonly long tooBig = (long)(1L << (int)(30L)) << (int)((~uint(0L) >> (int)(62L)));
 
         // A Decoder manages the receipt of type and data information read from the
-        // remote side of a connection.
+        // remote side of a connection.  It is safe for concurrent use by multiple
+        // goroutines.
         //
         // The Decoder does only basic sanity checking on decoded input sizes,
         // and its limits are not configurable. Take caution when decoding gob data
@@ -32,7 +33,8 @@ namespace encoding
 
 
         // A Decoder manages the receipt of type and data information read from the
-        // remote side of a connection.
+        // remote side of a connection.  It is safe for concurrent use by multiple
+        // goroutines.
         //
         // The Decoder does only basic sanity checking on decoded input sizes,
         // and its limits are not configurable. Take caution when decoding gob data
@@ -42,7 +44,7 @@ namespace encoding
             public sync.Mutex mutex; // each item must be received atomically
             public io.Reader r; // source of the data
             public decBuffer buf; // buffer for more efficient i/o from r
-            public map<typeId, ref wireType> wireType; // map from remote ID to local description
+            public map<typeId, ptr<wireType>> wireType; // map from remote ID to local description
             public map<reflect.Type, map<typeId, ptr<ptr<decEngine>>>> decoderCache; // cache of compiled engines
             public map<typeId, ptr<ptr<decEngine>>> ignorerCache; // ditto for ignored objects
             public ptr<decoderState> freeList; // list of free decoderStates; avoids reallocation
@@ -53,7 +55,7 @@ namespace encoding
         // NewDecoder returns a new decoder that reads from the io.Reader.
         // If r does not also implement io.ByteReader, it will be wrapped in a
         // bufio.Reader.
-        public static ref Decoder NewDecoder(io.Reader r)
+        public static ptr<Decoder> NewDecoder(io.Reader r)
         {
             ptr<Decoder> dec = @new<Decoder>(); 
             // We use the ability to read bytes as a plausible surrogate for buffering.
@@ -66,23 +68,27 @@ namespace encoding
                 }
 
             }
+
             dec.r = r;
-            dec.wireType = make_map<typeId, ref wireType>();
+            dec.wireType = make_map<typeId, ptr<wireType>>();
             dec.decoderCache = make_map<reflect.Type, map<typeId, ptr<ptr<decEngine>>>>();
             dec.ignorerCache = make_map<typeId, ptr<ptr<decEngine>>>();
             dec.countBuf = make_slice<byte>(9L); // counts may be uint64s (unlikely!), require 9 bytes
 
-            return dec;
+            return _addr_dec!;
+
         }
 
         // recvType loads the definition of a type.
-        private static void recvType(this ref Decoder dec, typeId id)
-        { 
+        private static void recvType(this ptr<Decoder> _addr_dec, typeId id)
+        {
+            ref Decoder dec = ref _addr_dec.val;
+ 
             // Have we already seen this type? That's an error
             if (id < firstUserId || dec.wireType[id] != null)
             {
                 dec.err = errors.New("gob: duplicate type received");
-                return;
+                return ;
             } 
 
             // Type:
@@ -90,18 +96,21 @@ namespace encoding
             dec.decodeValue(tWireType, reflect.ValueOf(wire));
             if (dec.err != null)
             {
-                return;
+                return ;
             } 
             // Remember we've seen this type.
             dec.wireType[id] = wire;
+
         }
 
         private static var errBadCount = errors.New("invalid message length");
 
         // recvMessage reads the next count-delimited item from the input. It is the converse
         // of Encoder.writeMessage. It returns false on EOF or other error reading the message.
-        private static bool recvMessage(this ref Decoder dec)
-        { 
+        private static bool recvMessage(this ptr<Decoder> _addr_dec)
+        {
+            ref Decoder dec = ref _addr_dec.val;
+ 
             // Read a count.
             var (nbytes, _, err) = decodeUintReader(dec.r, dec.countBuf);
             if (err != null)
@@ -109,22 +118,28 @@ namespace encoding
                 dec.err = err;
                 return false;
             }
+
             if (nbytes >= tooBig)
             {
                 dec.err = errBadCount;
                 return false;
             }
+
             dec.readMessage(int(nbytes));
             return dec.err == null;
+
         }
 
         // readMessage reads the next nbytes bytes from the input.
-        private static void readMessage(this ref Decoder _dec, long nbytes) => func(_dec, (ref Decoder dec, Defer _, Panic panic, Recover __) =>
+        private static void readMessage(this ptr<Decoder> _addr_dec, long nbytes) => func((_, panic, __) =>
         {
+            ref Decoder dec = ref _addr_dec.val;
+
             if (dec.buf.Len() != 0L)
             { 
                 // The buffer should always be empty now.
                 panic("non-empty decoder buffer");
+
             } 
             // Read the data
             dec.buf.Size(nbytes);
@@ -133,6 +148,7 @@ namespace encoding
             {
                 dec.err = io.ErrUnexpectedEOF;
             }
+
         });
 
         // toInt turns an encoded uint64 into an int, according to the marshaling rules.
@@ -143,27 +159,37 @@ namespace encoding
             {
                 i = ~i;
             }
+
             return i;
+
         }
 
-        private static long nextInt(this ref Decoder dec)
+        private static long nextInt(this ptr<Decoder> _addr_dec)
         {
-            var (n, _, err) = decodeUintReader(ref dec.buf, dec.countBuf);
+            ref Decoder dec = ref _addr_dec.val;
+
+            var (n, _, err) = decodeUintReader(_addr_dec.buf, dec.countBuf);
             if (err != null)
             {
                 dec.err = err;
             }
+
             return toInt(n);
+
         }
 
-        private static ulong nextUint(this ref Decoder dec)
+        private static ulong nextUint(this ptr<Decoder> _addr_dec)
         {
-            var (n, _, err) = decodeUintReader(ref dec.buf, dec.countBuf);
+            ref Decoder dec = ref _addr_dec.val;
+
+            var (n, _, err) = decodeUintReader(_addr_dec.buf, dec.countBuf);
             if (err != null)
             {
                 dec.err = err;
             }
+
             return n;
+
         }
 
         // decodeTypeSequence parses:
@@ -173,8 +199,10 @@ namespace encoding
         // EOF.  Upon return, the remainder of dec.buf is the value to be
         // decoded. If this is an interface value, it can be ignored by
         // resetting that buffer.
-        private static typeId decodeTypeSequence(this ref Decoder dec, bool isInterface)
+        private static typeId decodeTypeSequence(this ptr<Decoder> _addr_dec, bool isInterface)
         {
+            ref Decoder dec = ref _addr_dec.val;
+
             while (dec.err == null)
             {
                 if (dec.buf.Len() == 0L)
@@ -183,6 +211,7 @@ namespace encoding
                     {
                         break;
                     }
+
                 } 
                 // Receive a type id.
                 var id = typeId(dec.nextInt());
@@ -190,6 +219,7 @@ namespace encoding
                 { 
                     // Value follows.
                     return id;
+
                 } 
                 // Type definition for (-id) follows.
                 dec.recvType(-id); 
@@ -204,11 +234,15 @@ namespace encoding
                         dec.err = errors.New("extra data in buffer");
                         break;
                     }
+
                     dec.nextUint();
+
                 }
+
             }
 
             return -1L;
+
         }
 
         // Decode reads the next value from the input stream and stores
@@ -218,21 +252,26 @@ namespace encoding
         // correct type for the next data item received.
         // If the input is at EOF, Decode returns io.EOF and
         // does not modify e.
-        private static error Decode(this ref Decoder dec, object e)
+        private static error Decode(this ptr<Decoder> _addr_dec, object e)
         {
+            ref Decoder dec = ref _addr_dec.val;
+
             if (e == null)
             {
-                return error.As(dec.DecodeValue(new reflect.Value()));
+                return error.As(dec.DecodeValue(new reflect.Value()))!;
             }
+
             var value = reflect.ValueOf(e); 
             // If e represents a value as opposed to a pointer, the answer won't
             // get back to the caller. Make sure it's a pointer.
             if (value.Type().Kind() != reflect.Ptr)
             {
                 dec.err = errors.New("gob: attempt to decode into a non-pointer");
-                return error.As(dec.err);
+                return error.As(dec.err)!;
             }
-            return error.As(dec.DecodeValue(value));
+
+            return error.As(dec.DecodeValue(value))!;
+
         }
 
         // DecodeValue reads the next value from the input stream.
@@ -241,8 +280,10 @@ namespace encoding
         // a non-nil pointer to data or be an assignable reflect.Value (v.CanSet())
         // If the input is at EOF, DecodeValue returns io.EOF and
         // does not modify v.
-        private static error DecodeValue(this ref Decoder _dec, reflect.Value v) => func(_dec, (ref Decoder dec, Defer defer, Panic _, Recover __) =>
+        private static error DecodeValue(this ptr<Decoder> _addr_dec, reflect.Value v) => func((defer, _, __) =>
         {
+            ref Decoder dec = ref _addr_dec.val;
+
             if (v.IsValid())
             {
                 if (v.Kind() == reflect.Ptr && !v.IsNil())
@@ -251,8 +292,9 @@ namespace encoding
                 }
                 else if (!v.CanSet())
                 {
-                    return error.As(errors.New("gob: DecodeValue of unassignable value"));
+                    return error.As(errors.New("gob: DecodeValue of unassignable value"))!;
                 }
+
             } 
             // Make sure we're single-threaded through here.
             dec.mutex.Lock();
@@ -265,7 +307,9 @@ namespace encoding
             {
                 dec.decodeValue(id, v);
             }
-            return error.As(dec.err);
+
+            return error.As(dec.err)!;
+
         });
 
         // If debug.go is compiled into the program , debugFunc prints a human-readable

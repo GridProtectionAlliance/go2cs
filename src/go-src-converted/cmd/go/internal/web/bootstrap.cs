@@ -6,13 +6,14 @@
 
 // This code is compiled only into the bootstrap 'go' binary.
 // These stubs avoid importing packages with large dependency
-// trees, like the use of "net/http" in vcs.go.
+// trees that potentially require C linking,
+// like the use of "net/http" in vcs.go.
 
-// package web -- go2cs converted at 2020 August 29 10:00:48 UTC
+// package web -- go2cs converted at 2020 October 08 04:34:36 UTC
 // import "cmd/go/internal/web" ==> using web = go.cmd.go.@internal.web_package
 // Original source: C:\Go\src\cmd\go\internal\web\bootstrap.go
 using errors = go.errors_package;
-using io = go.io_package;
+using urlpkg = go.net.url_package;
 using static go.builtin;
 
 namespace go {
@@ -22,37 +23,18 @@ namespace @internal
 {
     public static partial class web_package
     {
-        private static var errHTTP = errors.New("no http in bootstrap go command");
-
-        public partial struct HTTPError
+        private static (ptr<Response>, error) get(SecurityMode security, ptr<urlpkg.URL> _addr_url)
         {
-            public long StatusCode;
+            ptr<Response> _p0 = default!;
+            error _p0 = default!;
+            ref urlpkg.URL url = ref _addr_url.val;
+
+            return (_addr_null!, error.As(errors.New("no http in bootstrap go command"))!);
         }
 
-        private static @string Error(this ref HTTPError _e) => func(_e, (ref HTTPError e, Defer _, Panic panic, Recover __) =>
+        private static bool openBrowser(@string url)
         {
-            panic("unreachable");
-        });
-
-        public static (slice<byte>, error) Get(@string url)
-        {
-            return (null, errHTTP);
+            return false;
         }
-
-        public static (@string, io.ReadCloser, error) GetMaybeInsecure(@string importPath, SecurityMode security)
-        {
-            return ("", null, errHTTP);
-        }
-
-        public static @string QueryEscape(@string s) => func((_, panic, __) =>
-        {
-            panic("unreachable");
-
-        });
-        public static bool OpenBrowser(@string url) => func((_, panic, __) =>
-        {
-            panic("unreachable");
-
-        });
     }
 }}}}

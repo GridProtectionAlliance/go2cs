@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:28 UTC
+//     Generated on 2020 October 08 04:31:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,10 +14,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using ssa = go.cmd.compile.@internal.ssa_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -40,12 +41,10 @@ namespace @internal
                 this.Param = default;
                 this.Decldepth = default;
                 this.Vargen = default;
-                this.Funcdepth = default;
-                this.used = default;
                 this.flags = default;
             }
 
-            public Name(ref ptr<Node> Pack = default, ref ptr<types.Pkg> Pkg = default, ref ptr<Node> Defn = default, ref ptr<Node> Curfn = default, ref ptr<Param> Param = default, int Decldepth = default, int Vargen = default, int Funcdepth = default, bool used = default, bitset8 flags = default)
+            public Name(ref ptr<Node> Pack = default, ref ptr<types.Pkg> Pkg = default, ref ptr<Node> Defn = default, ref ptr<Node> Curfn = default, ref ptr<Param> Param = default, int Decldepth = default, int Vargen = default, bitset16 flags = default)
             {
                 this.Pack = Pack;
                 this.Pkg = Pkg;
@@ -54,8 +53,6 @@ namespace @internal
                 this.Param = Param;
                 this.Decldepth = Decldepth;
                 this.Vargen = Vargen;
-                this.Funcdepth = Funcdepth;
-                this.used = used;
                 this.flags = flags;
             }
 
@@ -79,7 +76,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Name Name_cast(dynamic value)
         {
-            return new Name(ref value.Pack, ref value.Pkg, ref value.Defn, ref value.Curfn, ref value.Param, value.Decldepth, value.Vargen, value.Funcdepth, value.used, value.flags);
+            return new Name(ref value.Pack, ref value.Pkg, ref value.Defn, ref value.Curfn, ref value.Param, value.Decldepth, value.Vargen, value.flags);
         }
     }
 }}}}

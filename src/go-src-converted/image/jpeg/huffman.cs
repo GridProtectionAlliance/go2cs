@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2020 August 29 10:10:10 UTC
+// package jpeg -- go2cs converted at 2020 October 08 04:59:25 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\huffman.go
 using io = go.io_package;
@@ -14,19 +14,19 @@ namespace image
     public static partial class jpeg_package
     {
         // maxCodeLength is the maximum (inclusive) number of bits in a Huffman code.
-        private static readonly long maxCodeLength = 16L;
+        private static readonly long maxCodeLength = (long)16L;
 
         // maxNCodes is the maximum (inclusive) number of codes in a Huffman tree.
 
 
         // maxNCodes is the maximum (inclusive) number of codes in a Huffman tree.
-        private static readonly long maxNCodes = 256L;
+        private static readonly long maxNCodes = (long)256L;
 
         // lutSize is the log-2 size of the Huffman decoder's look-up table.
 
 
         // lutSize is the log-2 size of the Huffman decoder's look-up table.
-        private static readonly long lutSize = 8L;
+        private static readonly long lutSize = (long)8L;
 
         // huffman is a Huffman decoder, specified in section C.
 
@@ -54,8 +54,10 @@ namespace image
         // ensureNBits reads bytes from the byte buffer to ensure that d.bits.n is at
         // least n. For best performance (avoiding function calls inside hot loops),
         // the caller is the one responsible for first checking that d.bits.n < n.
-        private static error ensureNBits(this ref decoder d, int n)
+        private static error ensureNBits(this ptr<decoder> _addr_d, int n)
         {
+            ref decoder d = ref _addr_d.val;
+
             while (true)
             {
                 var (c, err) = d.readByteStuffedByte();
@@ -63,10 +65,13 @@ namespace image
                 {
                     if (err == io.EOF)
                     {
-                        return error.As(errShortHuffmanData);
+                        return error.As(errShortHuffmanData)!;
                     }
-                    return error.As(err);
+
+                    return error.As(err)!;
+
                 }
+
                 d.bits.a = d.bits.a << (int)(8L) | uint32(c);
                 d.bits.n += 8L;
                 if (d.bits.m == 0L)
@@ -77,19 +82,26 @@ namespace image
                 {
                     d.bits.m <<= 8L;
                 }
+
                 if (d.bits.n >= n)
                 {
                     break;
                 }
+
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // receiveExtend is the composition of RECEIVE and EXTEND, specified in section
         // F.2.2.1.
-        private static (int, error) receiveExtend(this ref decoder d, byte t)
+        private static (int, error) receiveExtend(this ptr<decoder> _addr_d, byte t)
         {
+            int _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             if (d.bits.n < int32(t))
             {
                 {
@@ -97,11 +109,13 @@ namespace image
 
                     if (err != null)
                     {
-                        return (0L, err);
+                        return (0L, error.As(err)!);
                     }
 
                 }
+
             }
+
             d.bits.n -= int32(t);
             d.bits.m >>= t;
             var s = int32(1L) << (int)(t);
@@ -110,19 +124,24 @@ namespace image
             {
                 x += ((-1L) << (int)(t)) + 1L;
             }
-            return (x, null);
+
+            return (x, error.As(null!)!);
+
         }
 
         // processDHT processes a Define Huffman Table marker, and initializes a huffman
         // struct from its contents. Specified in section B.2.4.2.
-        private static error processDHT(this ref decoder d, long n)
+        private static error processDHT(this ptr<decoder> _addr_d, long n)
         {
+            ref decoder d = ref _addr_d.val;
+
             while (n > 0L)
             {
                 if (n < 17L)
                 {
-                    return error.As(FormatError("DHT has wrong length"));
+                    return error.As(FormatError("DHT has wrong length"))!;
                 }
+
                 {
                     var err__prev1 = err;
 
@@ -130,24 +149,27 @@ namespace image
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev1;
 
                 }
+
                 var tc = d.tmp[0L] >> (int)(4L);
                 if (tc > maxTc)
                 {
-                    return error.As(FormatError("bad Tc value"));
+                    return error.As(FormatError("bad Tc value"))!;
                 }
+
                 var th = d.tmp[0L] & 0x0fUL; 
                 // The baseline th <= 1 restriction is specified in table B.5.
                 if (th > maxTh || (d.baseline && th > 1L))
                 {
-                    return error.As(FormatError("bad Th value"));
+                    return error.As(FormatError("bad Th value"))!;
                 }
-                var h = ref d.huff[tc][th]; 
+
+                var h = _addr_d.huff[tc][th]; 
 
                 // Read nCodes and h.vals (and derive h.nCodes).
                 // nCodes[i] is the number of codes with code length i.
@@ -169,17 +191,20 @@ namespace image
 
                 if (h.nCodes == 0L)
                 {
-                    return error.As(FormatError("Huffman table has zero length"));
+                    return error.As(FormatError("Huffman table has zero length"))!;
                 }
+
                 if (h.nCodes > maxNCodes)
                 {
-                    return error.As(FormatError("Huffman table has excessive length"));
+                    return error.As(FormatError("Huffman table has excessive length"))!;
                 }
+
                 n -= int(h.nCodes) + 17L;
                 if (n < 0L)
                 {
-                    return error.As(FormatError("DHT has wrong length"));
+                    return error.As(FormatError("DHT has wrong length"))!;
                 }
+
                 {
                     var err__prev1 = err;
 
@@ -187,7 +212,7 @@ namespace image
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     } 
 
                     // Derive the look-up table.
@@ -233,7 +258,9 @@ namespace image
 
                             code++;
                             x++;
+
                         }
+
 
                     } 
 
@@ -267,25 +294,33 @@ namespace image
                             c += n;
                             index += n;
                         }
+
                         c <<= 1L;
+
                     }
 
                     i = i__prev2;
                 }
-
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // decodeHuffman returns the next Huffman-coded value from the bit-stream,
         // decoded according to h.
-        private static (byte, error) decodeHuffman(this ref decoder d, ref huffman h)
+        private static (byte, error) decodeHuffman(this ptr<decoder> _addr_d, ptr<huffman> _addr_h)
         {
+            byte _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+            ref huffman h = ref _addr_h.val;
+
             if (h.nCodes == 0L)
             {
-                return (0L, FormatError("uninitialized Huffman table"));
+                return (0L, error.As(FormatError("uninitialized Huffman table"))!);
             }
+
             if (d.bits.n < 8L)
             {
                 {
@@ -297,7 +332,7 @@ namespace image
                     {
                         if (err != errMissingFF00 && err != errShortHuffmanData)
                         {
-                            return (0L, err);
+                            return (0L, error.As(err)!);
                         } 
                         // There are no more bytes of data in this segment, but we may still
                         // be able to read the next symbol out of the previously read bits.
@@ -306,13 +341,17 @@ namespace image
                         {
                             d.unreadByteStuffedByte();
                         }
+
                         goto slowPath;
+
                     }
 
                     err = err__prev2;
 
                 }
+
             }
+
             {
                 var v = h.lut[(d.bits.a >> (int)(uint32(d.bits.n - lutSize))) & 0xffUL];
 
@@ -321,10 +360,11 @@ namespace image
                     var n = (v & 0xffUL) - 1L;
                     d.bits.n -= int32(n);
                     d.bits.m >>= n;
-                    return (uint8(v >> (int)(8L)), null);
+                    return (uint8(v >> (int)(8L)), error.As(null!)!);
                 }
 
             }
+
 
 slowPath:
             for (long i = 0L;
@@ -339,30 +379,40 @@ slowPath:
 
                         if (err != null)
                         {
-                            return (0L, err);
+                            return (0L, error.As(err)!);
                         }
 
                         err = err__prev2;
 
                     }
+
                 }
+
                 if (d.bits.a & d.bits.m != 0L)
                 {
                     code |= 1L;
                 }
+
                 d.bits.n--;
                 d.bits.m >>= 1L;
                 if (code <= h.maxCodes[i])
                 {
-                    return (h.vals[h.valsIndices[i] + code - h.minCodes[i]], null);
+                    return (h.vals[h.valsIndices[i] + code - h.minCodes[i]], error.As(null!)!);
                 }
+
                 code <<= 1L;
+
             }
-            return (0L, FormatError("bad Huffman code"));
+            return (0L, error.As(FormatError("bad Huffman code"))!);
+
         }
 
-        private static (bool, error) decodeBit(this ref decoder d)
+        private static (bool, error) decodeBit(this ptr<decoder> _addr_d)
         {
+            bool _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             if (d.bits.n == 0L)
             {
                 {
@@ -370,19 +420,26 @@ slowPath:
 
                     if (err != null)
                     {
-                        return (false, err);
+                        return (false, error.As(err)!);
                     }
 
                 }
+
             }
+
             var ret = d.bits.a & d.bits.m != 0L;
             d.bits.n--;
             d.bits.m >>= 1L;
-            return (ret, null);
+            return (ret, error.As(null!)!);
+
         }
 
-        private static (uint, error) decodeBits(this ref decoder d, int n)
+        private static (uint, error) decodeBits(this ptr<decoder> _addr_d, int n)
         {
+            uint _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             if (d.bits.n < n)
             {
                 {
@@ -390,16 +447,19 @@ slowPath:
 
                     if (err != null)
                     {
-                        return (0L, err);
+                        return (0L, error.As(err)!);
                     }
 
                 }
+
             }
+
             var ret = d.bits.a >> (int)(uint32(d.bits.n - n));
             ret &= (1L << (int)(uint32(n))) - 1L;
             d.bits.n -= n;
             d.bits.m >>= uint32(n);
-            return (ret, null);
+            return (ret, error.As(null!)!);
+
         }
     }
 }}

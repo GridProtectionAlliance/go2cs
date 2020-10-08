@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:19:55 UTC
+//     Generated on 2020 October 08 03:22:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 
 namespace go
@@ -26,21 +25,19 @@ namespace go
             // Constructors
             public scase(NilType _)
             {
-                this.elem = default;
                 this.c = default;
-                this.pc = default;
+                this.elem = default;
                 this.kind = default;
-                this.receivedp = default;
+                this.pc = default;
                 this.releasetime = default;
             }
 
-            public scase(unsafe.Pointer elem = default, ref ptr<hchan> c = default, System.UIntPtr pc = default, ushort kind = default, ref ptr<bool> receivedp = default, long releasetime = default)
+            public scase(ref ptr<hchan> c = default, unsafe.Pointer elem = default, ushort kind = default, System.UIntPtr pc = default, long releasetime = default)
             {
-                this.elem = elem;
                 this.c = c;
-                this.pc = pc;
+                this.elem = elem;
                 this.kind = kind;
-                this.receivedp = receivedp;
+                this.pc = pc;
                 this.releasetime = releasetime;
             }
 
@@ -64,7 +61,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static scase scase_cast(dynamic value)
         {
-            return new scase(value.elem, ref value.c, value.pc, value.kind, ref value.receivedp, value.releasetime);
+            return new scase(ref value.c, value.elem, value.kind, value.pc, value.releasetime);
         }
     }
 }

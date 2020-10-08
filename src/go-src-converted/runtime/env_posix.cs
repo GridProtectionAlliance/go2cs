@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows plan9
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:54 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:40 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\env_posix.go
 using @unsafe = go.@unsafe_package;
@@ -23,11 +23,50 @@ namespace go
             }
             foreach (var (_, s) in env)
             {
-                if (len(s) > len(key) && s[len(key)] == '=' && s[..len(key)] == key)
+                if (len(s) > len(key) && s[len(key)] == '=' && envKeyEqual(s[..len(key)], key))
                 {
                     return s[len(key) + 1L..];
                 }
             }            return "";
+
+        }
+
+        // envKeyEqual reports whether a == b, with ASCII-only case insensitivity
+        // on Windows. The two strings must have the same length.
+        private static bool envKeyEqual(@string a, @string b)
+        {
+            if (GOOS == "windows")
+            { // case insensitive
+                for (long i = 0L; i < len(a); i++)
+                {
+                    var ca = a[i];
+                    var cb = b[i];
+                    if (ca == cb || lowerASCII(ca) == lowerASCII(cb))
+                    {
+                        continue;
+                    }
+
+                    return false;
+
+                }
+
+                return true;
+
+            }
+
+            return a == b;
+
+        }
+
+        private static byte lowerASCII(byte c)
+        {
+            if ('A' <= c && c <= 'Z')
+            {
+                return c + ('a' - 'A');
+            }
+
+            return c;
+
         }
 
         private static unsafe.Pointer _cgo_setenv = default; // pointer to C function
@@ -40,10 +79,12 @@ namespace go
         {
             if (_cgo_setenv == null)
             {
-                return;
+                return ;
             }
-            array<unsafe.Pointer> arg = new array<unsafe.Pointer>(new unsafe.Pointer[] { cstring(k), cstring(v) });
-            asmcgocall(_cgo_setenv, @unsafe.Pointer(ref arg));
+
+            ref array<unsafe.Pointer> arg = ref heap(new array<unsafe.Pointer>(new unsafe.Pointer[] { cstring(k), cstring(v) }), out ptr<array<unsafe.Pointer>> _addr_arg);
+            asmcgocall(_cgo_setenv, @unsafe.Pointer(_addr_arg));
+
         }
 
         // Update the C environment if cgo is loaded.
@@ -53,17 +94,19 @@ namespace go
         {
             if (_cgo_unsetenv == null)
             {
-                return;
+                return ;
             }
-            array<unsafe.Pointer> arg = new array<unsafe.Pointer>(new unsafe.Pointer[] { cstring(k) });
-            asmcgocall(_cgo_unsetenv, @unsafe.Pointer(ref arg));
+
+            ref array<unsafe.Pointer> arg = ref heap(new array<unsafe.Pointer>(new unsafe.Pointer[] { cstring(k) }), out ptr<array<unsafe.Pointer>> _addr_arg);
+            asmcgocall(_cgo_unsetenv, @unsafe.Pointer(_addr_arg));
+
         }
 
         private static unsafe.Pointer cstring(@string s)
         {
             var p = make_slice<byte>(len(s) + 1L);
             copy(p, s);
-            return @unsafe.Pointer(ref p[0L]);
+            return @unsafe.Pointer(_addr_p[0L]);
         }
     }
 }

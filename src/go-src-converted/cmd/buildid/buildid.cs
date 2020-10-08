@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:51:56 UTC
+// package main -- go2cs converted at 2020 October 08 04:08:22 UTC
 // Original source: C:\Go\src\cmd\buildid\buildid.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;
@@ -31,9 +31,9 @@ namespace go
         {
             h = h.Clone();
 
-            const @string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+            const @string b64 = (@string)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-            const long chunks = 5L;
+            const long chunks = (long)5L;
 
             array<byte> dst = new array<byte>(chunks * 4L);
             for (long i = 0L; i < chunks; i++)
@@ -46,6 +46,7 @@ namespace go
             }
 
             return string(dst[..]);
+
         }
 
         private static void Main()
@@ -58,16 +59,18 @@ namespace go
             {
                 usage();
             }
+
             var file = flag.Arg(0L);
             var (id, err) = buildid.ReadFile(file);
             if (err != null)
             {
                 log.Fatal(err);
             }
-            if (!wflag.Value)
+
+            if (!wflag.val)
             {
                 fmt.Printf("%s\n", id);
-                return;
+                return ;
             } 
 
             // Keep in sync with src/cmd/go/internal/work/buildid.go:updateBuildID
@@ -76,11 +79,13 @@ namespace go
             {
                 log.Fatal(err);
             }
+
             var (matches, hash, err) = buildid.FindAndHash(f, id, 0L);
             if (err != null)
             {
                 log.Fatal(err);
             }
+
             f.Close();
 
             var newID = id[..strings.LastIndex(id, "/")] + "/" + hashToString(hash);
@@ -88,15 +93,18 @@ namespace go
             {
                 log.Fatalf("%s: build ID length mismatch %q vs %q", file, id, newID);
             }
+
             if (len(matches) == 0L)
             {
-                return;
+                return ;
             }
+
             f, err = os.OpenFile(file, os.O_WRONLY, 0L);
             if (err != null)
             {
                 log.Fatal(err);
             }
+
             {
                 var err__prev1 = err;
 
@@ -110,6 +118,7 @@ namespace go
                 err = err__prev1;
 
             }
+
             {
                 var err__prev1 = err;
 
@@ -123,6 +132,7 @@ namespace go
                 err = err__prev1;
 
             }
+
         }
     }
 }

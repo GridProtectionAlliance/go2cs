@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:45 UTC
+//     Generated on 2020 October 08 03:18:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,14 +29,12 @@ namespace go
             {
                 this.noCopy = default;
                 this.state1 = default;
-                this.sema = default;
             }
 
-            public WaitGroup(noCopy noCopy = default, array<byte> state1 = default, uint sema = default)
+            public WaitGroup(noCopy noCopy = default, array<uint> state1 = default)
             {
                 this.noCopy = noCopy;
                 this.state1 = state1;
-                this.sema = sema;
             }
 
             // Enable comparisons between nil and WaitGroup struct
@@ -59,7 +57,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static WaitGroup WaitGroup_cast(dynamic value)
         {
-            return new WaitGroup(value.noCopy, value.state1, value.sema);
+            return new WaitGroup(value.noCopy, value.state1);
         }
     }
 }

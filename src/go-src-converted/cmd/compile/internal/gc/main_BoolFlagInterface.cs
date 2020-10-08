@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:27 UTC
+//     Generated on 2020 October 08 04:29:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,21 +16,27 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
+using logopt = go.cmd.compile.@internal.logopt_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
+using bio = go.cmd.@internal.bio_package;
 using dwarf = go.cmd.@internal.dwarf_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
+using goversion = go.@internal.goversion_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
 using path = go.path_package;
+using regexp = go.regexp_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
@@ -70,7 +76,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -84,10 +90,10 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate bool IsBoolFlagByRef(ref T value);
+            private delegate bool IsBoolFlagByPtr(ptr<T> value);
             private delegate bool IsBoolFlagByVal(T value);
 
-            private static readonly IsBoolFlagByRef s_IsBoolFlagByRef;
+            private static readonly IsBoolFlagByPtr s_IsBoolFlagByPtr;
             private static readonly IsBoolFlagByVal s_IsBoolFlagByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,11 +102,12 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_IsBoolFlagByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_IsBoolFlagByPtr is null || !m_target_is_ptr)
                     return s_IsBoolFlagByVal!(target);
 
-                return s_IsBoolFlagByRef(ref target);
+                return s_IsBoolFlagByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -109,23 +116,20 @@ namespace @internal
             static BoolFlag()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("IsBoolFlag");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("IsBoolFlag");
 
                 if (!(extensionMethod is null))
-                    s_IsBoolFlagByRef = extensionMethod.CreateStaticDelegate(typeof(IsBoolFlagByRef)) as IsBoolFlagByRef;
+                    s_IsBoolFlagByPtr = extensionMethod.CreateStaticDelegate(typeof(IsBoolFlagByPtr)) as IsBoolFlagByPtr;
 
-                if (s_IsBoolFlagByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("IsBoolFlag");
+                extensionMethod = targetType.GetExtensionMethod("IsBoolFlag");
 
-                    if (!(extensionMethod is null))
-                        s_IsBoolFlagByVal = extensionMethod.CreateStaticDelegate(typeof(IsBoolFlagByVal)) as IsBoolFlagByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_IsBoolFlagByVal = extensionMethod.CreateStaticDelegate(typeof(IsBoolFlagByVal)) as IsBoolFlagByVal;
 
-                if (s_IsBoolFlagByRef is null && s_IsBoolFlagByVal is null)
+                if (s_IsBoolFlagByPtr is null && s_IsBoolFlagByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement BoolFlag.IsBoolFlag method", new Exception("IsBoolFlag"));
             }
 

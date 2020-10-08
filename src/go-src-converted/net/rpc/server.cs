@@ -124,12 +124,13 @@
 
     The net/rpc package is frozen and is not accepting new features.
 */
-// package rpc -- go2cs converted at 2020 August 29 08:36:36 UTC
+// package rpc -- go2cs converted at 2020 October 08 03:43:25 UTC
 // import "net/rpc" ==> using rpc = go.net.rpc_package
 // Original source: C:\Go\src\net\rpc\server.go
 using bufio = go.bufio_package;
 using gob = go.encoding.gob_package;
 using errors = go.errors_package;
+using token = go.go.token_package;
 using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
@@ -137,8 +138,6 @@ using http = go.net.http_package;
 using reflect = go.reflect_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 using static go.builtin;
 using System.Threading;
 
@@ -149,12 +148,13 @@ namespace net
     {
  
         // Defaults used by HandleHTTP
-        public static readonly @string DefaultRPCPath = "/_goRPC_";
-        public static readonly @string DefaultDebugPath = "/debug/rpc";
+        public static readonly @string DefaultRPCPath = (@string)"/_goRPC_";
+        public static readonly @string DefaultDebugPath = (@string)"/debug/rpc";
+
 
         // Precompute the reflect type for error. Can't use error directly
         // because Typeof takes an empty interface value. This is annoying.
-        private static var typeOfError = reflect.TypeOf((error.Value)(null)).Elem();
+        private static var typeOfError = reflect.TypeOf((error.val)(null)).Elem();
 
         private partial struct methodType
         {
@@ -170,7 +170,7 @@ namespace net
             public @string name; // name of service
             public reflect.Value rcvr; // receiver of methods for the service
             public reflect.Type typ; // type of the receiver
-            public map<@string, ref methodType> method; // registered methods
+            public map<@string, ptr<methodType>> method; // registered methods
         }
 
         // Request is a header written before every RPC call. It is used internally
@@ -205,20 +205,13 @@ namespace net
         }
 
         // NewServer returns a new Server.
-        public static ref Server NewServer()
+        public static ptr<Server> NewServer()
         {
-            return ref new Server();
+            return addr(new Server());
         }
 
         // DefaultServer is the default instance of *Server.
         public static var DefaultServer = NewServer();
-
-        // Is this an exported - upper case - name?
-        private static bool isExported(@string name)
-        {
-            var (rune, _) = utf8.DecodeRuneInString(name);
-            return unicode.IsUpper(rune);
-        }
 
         // Is this type exported or a builtin?
         private static bool isExportedOrBuiltinType(reflect.Type t)
@@ -232,7 +225,8 @@ namespace net
  
             // PkgPath will be non-empty even for an exported type,
             // so we need to check the type name as well.
-            return isExported(t.Name()) || t.PkgPath() == "";
+            return token.IsExported(t.Name()) || t.PkgPath() == "";
+
         }
 
         // Register publishes in the server the set of methods of the
@@ -245,21 +239,27 @@ namespace net
         // no suitable methods. It also logs the error using package log.
         // The client accesses each method using a string of the form "Type.Method",
         // where Type is the receiver's concrete type.
-        private static error Register(this ref Server server, object rcvr)
+        private static error Register(this ptr<Server> _addr_server, object rcvr)
         {
-            return error.As(server.register(rcvr, "", false));
+            ref Server server = ref _addr_server.val;
+
+            return error.As(server.register(rcvr, "", false))!;
         }
 
         // RegisterName is like Register but uses the provided name for the type
         // instead of the receiver's concrete type.
-        private static error RegisterName(this ref Server server, @string name, object rcvr)
+        private static error RegisterName(this ptr<Server> _addr_server, @string name, object rcvr)
         {
-            return error.As(server.register(rcvr, name, true));
+            ref Server server = ref _addr_server.val;
+
+            return error.As(server.register(rcvr, name, true))!;
         }
 
-        private static error register(this ref Server server, object rcvr, @string name, bool useName)
+        private static error register(this ptr<Server> _addr_server, object rcvr, @string name, bool useName)
         {
-            ptr<object> s = @new<service>();
+            ref Server server = ref _addr_server.val;
+
+            ptr<service> s = @new<service>();
             s.typ = reflect.TypeOf(rcvr);
             s.rcvr = reflect.ValueOf(rcvr);
             var sname = reflect.Indirect(s.rcvr).Type().Name();
@@ -267,18 +267,21 @@ namespace net
             {
                 sname = name;
             }
+
             if (sname == "")
             {
                 s = "rpc.Register: no service name for type " + s.typ.String();
                 log.Print(s);
-                return error.As(errors.New(s));
+                return error.As(errors.New(s))!;
             }
-            if (!isExported(sname) && !useName)
+
+            if (!token.IsExported(sname) && !useName)
             {
                 s = "rpc.Register: type " + sname + " is not exported";
                 log.Print(s);
-                return error.As(errors.New(s));
+                return error.As(errors.New(s))!;
             }
+
             s.name = sname; 
 
             // Install the methods
@@ -298,26 +301,31 @@ namespace net
                 {
                     str = "rpc.Register: type " + sname + " has no exported methods of suitable type";
                 }
+
                 log.Print(str);
-                return error.As(errors.New(str));
+                return error.As(errors.New(str))!;
+
             }
+
             {
                 var (_, dup) = server.serviceMap.LoadOrStore(sname, s);
 
                 if (dup)
                 {
-                    return error.As(errors.New("rpc: service already defined: " + sname));
+                    return error.As(errors.New("rpc: service already defined: " + sname))!;
                 }
 
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // suitableMethods returns suitable Rpc methods of typ, it will report
         // error using log if reportErr is true.
-        private static map<@string, ref methodType> suitableMethods(reflect.Type typ, bool reportErr)
+        private static map<@string, ptr<methodType>> suitableMethods(reflect.Type typ, bool reportErr)
         {
-            var methods = make_map<@string, ref methodType>();
+            var methods = make_map<@string, ptr<methodType>>();
             for (long m = 0L; m < typ.NumMethod(); m++)
             {
                 var method = typ.Method(m);
@@ -335,7 +343,9 @@ namespace net
                     {
                         log.Printf("rpc.Register: method %q has %d input parameters; needs exactly three\n", mname, mtype.NumIn());
                     }
+
                     continue;
+
                 } 
                 // First arg need not be a pointer.
                 var argType = mtype.In(1L);
@@ -345,7 +355,9 @@ namespace net
                     {
                         log.Printf("rpc.Register: argument type of method %q is not exported: %q\n", mname, argType);
                     }
+
                     continue;
+
                 } 
                 // Second arg must be a pointer.
                 var replyType = mtype.In(2L);
@@ -355,7 +367,9 @@ namespace net
                     {
                         log.Printf("rpc.Register: reply type of method %q is not a pointer: %q\n", mname, replyType);
                     }
+
                     continue;
+
                 } 
                 // Reply type must be exported.
                 if (!isExportedOrBuiltinType(replyType))
@@ -364,7 +378,9 @@ namespace net
                     {
                         log.Printf("rpc.Register: reply type of method %q is not exported: %q\n", mname, replyType);
                     }
+
                     continue;
+
                 } 
                 // Method needs one out.
                 if (mtype.NumOut() != 1L)
@@ -373,7 +389,9 @@ namespace net
                     {
                         log.Printf("rpc.Register: method %q has %d output parameters; needs exactly one\n", mname, mtype.NumOut());
                     }
+
                     continue;
+
                 } 
                 // The return type of the method must be error.
                 {
@@ -385,14 +403,19 @@ namespace net
                         {
                             log.Printf("rpc.Register: return type of method %q is %q, must be error\n", mname, returnType);
                         }
+
                         continue;
+
                     }
 
                 }
-                methods[mname] = ref new methodType(method:method,ArgType:argType,ReplyType:replyType);
+
+                methods[mname] = addr(new methodType(method:method,ArgType:argType,ReplyType:replyType));
+
             }
 
             return methods;
+
         }
 
         // A value sent as a placeholder for the server's response value when the server
@@ -400,8 +423,12 @@ namespace net
         // contains an error when it is used.
         private static struct{} invalidRequest = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
 
-        private static void sendResponse(this ref Server server, ref sync.Mutex sending, ref Request req, object reply, ServerCodec codec, @string errmsg)
+        private static void sendResponse(this ptr<Server> _addr_server, ptr<sync.Mutex> _addr_sending, ptr<Request> _addr_req, object reply, ServerCodec codec, @string errmsg)
         {
+            ref Server server = ref _addr_server.val;
+            ref sync.Mutex sending = ref _addr_sending.val;
+            ref Request req = ref _addr_req.val;
+
             var resp = server.getResponse(); 
             // Encode the response header
             resp.ServiceMethod = req.ServiceMethod;
@@ -410,6 +437,7 @@ namespace net
                 resp.Error = errmsg;
                 reply = invalidRequest;
             }
+
             resp.Seq = req.Seq;
             sending.Lock();
             var err = codec.WriteResponse(resp, reply);
@@ -417,24 +445,37 @@ namespace net
             {
                 log.Println("rpc: writing response:", err);
             }
+
             sending.Unlock();
             server.freeResponse(resp);
+
         }
 
-        private static ulong NumCalls(this ref methodType m)
+        private static ulong NumCalls(this ptr<methodType> _addr_m)
         {
+            ulong n = default;
+            ref methodType m = ref _addr_m.val;
+
             m.Lock();
             n = m.numCalls;
             m.Unlock();
             return n;
         }
 
-        private static void call(this ref service _s, ref Server _server, ref sync.Mutex _sending, ref sync.WaitGroup _wg, ref methodType _mtype, ref Request _req, reflect.Value argv, reflect.Value replyv, ServerCodec codec) => func(_s, _server, _sending, _wg, _mtype, _req, (ref service s, ref Server server, ref sync.Mutex sending, ref sync.WaitGroup wg, ref methodType mtype, ref Request req, Defer defer, Panic _, Recover __) =>
+        private static void call(this ptr<service> _addr_s, ptr<Server> _addr_server, ptr<sync.Mutex> _addr_sending, ptr<sync.WaitGroup> _addr_wg, ptr<methodType> _addr_mtype, ptr<Request> _addr_req, reflect.Value argv, reflect.Value replyv, ServerCodec codec) => func((defer, _, __) =>
         {
+            ref service s = ref _addr_s.val;
+            ref Server server = ref _addr_server.val;
+            ref sync.Mutex sending = ref _addr_sending.val;
+            ref sync.WaitGroup wg = ref _addr_wg.val;
+            ref methodType mtype = ref _addr_mtype.val;
+            ref Request req = ref _addr_req.val;
+
             if (wg != null)
             {
                 defer(wg.Done());
             }
+
             mtype.Lock();
             mtype.numCalls++;
             mtype.Unlock();
@@ -448,8 +489,10 @@ namespace net
             {
                 errmsg = errInter._<error>().Error();
             }
+
             server.sendResponse(sending, req, replyv.Interface(), codec, errmsg);
             server.freeRequest(req);
+
         });
 
         private partial struct gobServerCodec
@@ -461,18 +504,27 @@ namespace net
             public bool closed;
         }
 
-        private static error ReadRequestHeader(this ref gobServerCodec c, ref Request r)
+        private static error ReadRequestHeader(this ptr<gobServerCodec> _addr_c, ptr<Request> _addr_r)
         {
-            return error.As(c.dec.Decode(r));
+            ref gobServerCodec c = ref _addr_c.val;
+            ref Request r = ref _addr_r.val;
+
+            return error.As(c.dec.Decode(r))!;
         }
 
-        private static error ReadRequestBody(this ref gobServerCodec c, object body)
+        private static error ReadRequestBody(this ptr<gobServerCodec> _addr_c, object body)
         {
-            return error.As(c.dec.Decode(body));
+            ref gobServerCodec c = ref _addr_c.val;
+
+            return error.As(c.dec.Decode(body))!;
         }
 
-        private static error WriteResponse(this ref gobServerCodec c, ref Response r, object body)
+        private static error WriteResponse(this ptr<gobServerCodec> _addr_c, ptr<Response> _addr_r, object body)
         {
+            error err = default!;
+            ref gobServerCodec c = ref _addr_c.val;
+            ref Response r = ref _addr_r.val;
+
             err = c.enc.Encode(r);
 
             if (err != null)
@@ -483,9 +535,13 @@ namespace net
                     // shut down the connection to signal that the connection is broken.
                     log.Println("rpc: gob error encoding response:", err);
                     c.Close();
+
                 }
-                return;
+
+                return ;
+
             }
+
             err = c.enc.Encode(body);
 
             if (err != null)
@@ -496,21 +552,31 @@ namespace net
                     // Shut down the connection to signal that the connection is broken.
                     log.Println("rpc: gob error encoding body:", err);
                     c.Close();
+
                 }
-                return;
+
+                return ;
+
             }
-            return error.As(c.encBuf.Flush());
+
+            return error.As(c.encBuf.Flush())!;
+
         }
 
-        private static error Close(this ref gobServerCodec c)
+        private static error Close(this ptr<gobServerCodec> _addr_c)
         {
+            ref gobServerCodec c = ref _addr_c.val;
+
             if (c.closed)
             { 
                 // Only call c.rwc.Close once; otherwise the semantics are undefined.
-                return error.As(null);
+                return error.As(null!)!;
+
             }
+
             c.closed = true;
-            return error.As(c.rwc.Close());
+            return error.As(c.rwc.Close())!;
+
         }
 
         // ServeConn runs the server on a single connection.
@@ -518,17 +584,22 @@ namespace net
         // The caller typically invokes ServeConn in a go statement.
         // ServeConn uses the gob wire format (see package gob) on the
         // connection. To use an alternate codec, use ServeCodec.
-        private static void ServeConn(this ref Server server, io.ReadWriteCloser conn)
+        // See NewClient's comment for information about concurrent access.
+        private static void ServeConn(this ptr<Server> _addr_server, io.ReadWriteCloser conn)
         {
+            ref Server server = ref _addr_server.val;
+
             var buf = bufio.NewWriter(conn);
-            gobServerCodec srv = ref new gobServerCodec(rwc:conn,dec:gob.NewDecoder(conn),enc:gob.NewEncoder(buf),encBuf:buf,);
+            ptr<gobServerCodec> srv = addr(new gobServerCodec(rwc:conn,dec:gob.NewDecoder(conn),enc:gob.NewEncoder(buf),encBuf:buf,));
             server.ServeCodec(srv);
         }
 
         // ServeCodec is like ServeConn but uses the specified codec to
         // decode requests and encode responses.
-        private static void ServeCodec(this ref Server server, ServerCodec codec)
+        private static void ServeCodec(this ptr<Server> _addr_server, ServerCodec codec)
         {
+            ref Server server = ref _addr_server.val;
+
             ptr<sync.Mutex> sending = @new<sync.Mutex>();
             ptr<sync.WaitGroup> wg = @new<sync.WaitGroup>();
             while (true)
@@ -540,6 +611,7 @@ namespace net
                     {
                         log.Println("rpc:", err);
                     }
+
                     if (!keepReading)
                     {
                         break;
@@ -550,10 +622,14 @@ namespace net
                         server.sendResponse(sending, req, invalidRequest, codec, err.Error());
                         server.freeRequest(req);
                     }
+
                     continue;
+
                 }
+
                 wg.Add(1L);
                 go_(() => service.call(server, sending, wg, mtype, req, argv, replyv, codec));
+
             } 
             // We've seen that there are no more requests.
             // Wait for responses to be sent before closing codec.
@@ -562,19 +638,22 @@ namespace net
             // Wait for responses to be sent before closing codec.
             wg.Wait();
             codec.Close();
+
         }
 
         // ServeRequest is like ServeCodec but synchronously serves a single request.
         // It does not close the codec upon completion.
-        private static error ServeRequest(this ref Server server, ServerCodec codec)
+        private static error ServeRequest(this ptr<Server> _addr_server, ServerCodec codec)
         {
+            ref Server server = ref _addr_server.val;
+
             ptr<sync.Mutex> sending = @new<sync.Mutex>();
             var (service, mtype, req, argv, replyv, keepReading, err) = server.readRequest(codec);
             if (err != null)
             {
                 if (!keepReading)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
                 // send a response if we actually managed to read a header.
                 if (req != null)
@@ -582,14 +661,20 @@ namespace net
                     server.sendResponse(sending, req, invalidRequest, codec, err.Error());
                     server.freeRequest(req);
                 }
-                return error.As(err);
+
+                return error.As(err)!;
+
             }
+
             service.call(server, sending, null, mtype, req, argv, replyv, codec);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static ref Request getRequest(this ref Server server)
+        private static ptr<Request> getRequest(this ptr<Server> _addr_server)
         {
+            ref Server server = ref _addr_server.val;
+
             server.reqLock.Lock();
             var req = server.freeReq;
             if (req == null)
@@ -599,22 +684,29 @@ namespace net
             else
             {
                 server.freeReq = req.next;
-                req.Value = new Request();
+                req.val = new Request();
             }
+
             server.reqLock.Unlock();
-            return req;
+            return _addr_req!;
+
         }
 
-        private static void freeRequest(this ref Server server, ref Request req)
+        private static void freeRequest(this ptr<Server> _addr_server, ptr<Request> _addr_req)
         {
+            ref Server server = ref _addr_server.val;
+            ref Request req = ref _addr_req.val;
+
             server.reqLock.Lock();
             req.next = server.freeReq;
             server.freeReq = req;
             server.reqLock.Unlock();
         }
 
-        private static ref Response getResponse(this ref Server server)
+        private static ptr<Response> getResponse(this ptr<Server> _addr_server)
         {
+            ref Server server = ref _addr_server.val;
+
             server.respLock.Lock();
             var resp = server.freeResp;
             if (resp == null)
@@ -624,32 +716,47 @@ namespace net
             else
             {
                 server.freeResp = resp.next;
-                resp.Value = new Response();
+                resp.val = new Response();
             }
+
             server.respLock.Unlock();
-            return resp;
+            return _addr_resp!;
+
         }
 
-        private static void freeResponse(this ref Server server, ref Response resp)
+        private static void freeResponse(this ptr<Server> _addr_server, ptr<Response> _addr_resp)
         {
+            ref Server server = ref _addr_server.val;
+            ref Response resp = ref _addr_resp.val;
+
             server.respLock.Lock();
             resp.next = server.freeResp;
             server.freeResp = resp;
             server.respLock.Unlock();
         }
 
-        private static (ref service, ref methodType, ref Request, reflect.Value, reflect.Value, bool, error) readRequest(this ref Server server, ServerCodec codec)
+        private static (ptr<service>, ptr<methodType>, ptr<Request>, reflect.Value, reflect.Value, bool, error) readRequest(this ptr<Server> _addr_server, ServerCodec codec)
         {
+            ptr<service> service = default!;
+            ptr<methodType> mtype = default!;
+            ptr<Request> req = default!;
+            reflect.Value argv = default;
+            reflect.Value replyv = default;
+            bool keepReading = default;
+            error err = default!;
+            ref Server server = ref _addr_server.val;
+
             service, mtype, req, keepReading, err = server.readRequestHeader(codec);
             if (err != null)
             {
                 if (!keepReading)
                 {
-                    return;
+                    return ;
                 } 
                 // discard body
                 codec.ReadRequestBody(null);
-                return;
+                return ;
+
             } 
 
             // Decode the argument value.
@@ -668,12 +775,14 @@ namespace net
 
             if (err != null)
             {
-                return;
+                return ;
             }
+
             if (argIsValue)
             {
                 argv = argv.Elem();
             }
+
             replyv = reflect.New(mtype.ReplyType.Elem());
 
 
@@ -681,11 +790,19 @@ namespace net
                 replyv.Elem().Set(reflect.MakeMap(mtype.ReplyType.Elem()));
             else if (mtype.ReplyType.Elem().Kind() == reflect.Slice) 
                 replyv.Elem().Set(reflect.MakeSlice(mtype.ReplyType.Elem(), 0L, 0L));
-                        return;
+                        return ;
+
         }
 
-        private static (ref service, ref methodType, ref Request, bool, error) readRequestHeader(this ref Server server, ServerCodec codec)
-        { 
+        private static (ptr<service>, ptr<methodType>, ptr<Request>, bool, error) readRequestHeader(this ptr<Server> _addr_server, ServerCodec codec)
+        {
+            ptr<service> svc = default!;
+            ptr<methodType> mtype = default!;
+            ptr<Request> req = default!;
+            bool keepReading = default;
+            error err = default!;
+            ref Server server = ref _addr_server.val;
+ 
             // Grab the request header.
             req = server.getRequest();
             err = codec.ReadRequestHeader(req);
@@ -694,10 +811,12 @@ namespace net
                 req = null;
                 if (err == io.EOF || err == io.ErrUnexpectedEOF)
                 {
-                    return;
+                    return ;
                 }
+
                 err = errors.New("rpc: server cannot decode request: " + err.Error());
-                return;
+                return ;
+
             } 
 
             // We read the header successfully. If we see an error now,
@@ -708,8 +827,9 @@ namespace net
             if (dot < 0L)
             {
                 err = errors.New("rpc: service/method request ill-formed: " + req.ServiceMethod);
-                return;
+                return ;
             }
+
             var serviceName = req.ServiceMethod[..dot];
             var methodName = req.ServiceMethod[dot + 1L..]; 
 
@@ -718,47 +838,55 @@ namespace net
             if (!ok)
             {
                 err = errors.New("rpc: can't find service " + req.ServiceMethod);
-                return;
+                return ;
             }
-            svc = svci._<ref service>();
+
+            svc = svci._<ptr<service>>();
             mtype = svc.method[methodName];
             if (mtype == null)
             {
                 err = errors.New("rpc: can't find method " + req.ServiceMethod);
             }
-            return;
+
+            return ;
+
         }
 
         // Accept accepts connections on the listener and serves requests
         // for each incoming connection. Accept blocks until the listener
         // returns a non-nil error. The caller typically invokes Accept in a
         // go statement.
-        private static void Accept(this ref Server server, net.Listener lis)
+        private static void Accept(this ptr<Server> _addr_server, net.Listener lis)
         {
+            ref Server server = ref _addr_server.val;
+
             while (true)
             {
                 var (conn, err) = lis.Accept();
                 if (err != null)
                 {
                     log.Print("rpc.Serve: accept:", err.Error());
-                    return;
+                    return ;
                 }
+
                 go_(() => server.ServeConn(conn));
+
             }
+
 
         }
 
         // Register publishes the receiver's methods in the DefaultServer.
         public static error Register(object rcvr)
         {
-            return error.As(DefaultServer.Register(rcvr));
+            return error.As(DefaultServer.Register(rcvr))!;
         }
 
         // RegisterName is like Register but uses the provided name for the type
         // instead of the receiver's concrete type.
         public static error RegisterName(@string name, object rcvr)
         {
-            return error.As(DefaultServer.RegisterName(name, rcvr));
+            return error.As(DefaultServer.RegisterName(name, rcvr))!;
         }
 
         // A ServerCodec implements reading of RPC requests and writing of
@@ -768,11 +896,12 @@ namespace net
         // write a response back. The server calls Close when finished with the
         // connection. ReadRequestBody may be called with a nil
         // argument to force the body of the request to be read and discarded.
+        // See NewClient's comment for information about concurrent access.
         public partial interface ServerCodec
         {
-            error ReadRequestHeader(ref Request _p0);
-            error ReadRequestBody(object _p0); // WriteResponse must be safe for concurrent use by multiple goroutines.
-            error WriteResponse(ref Response _p0, object _p0);
+            error ReadRequestHeader(ptr<Request> _p0);
+            error ReadRequestBody(object _p0);
+            error WriteResponse(ptr<Response> _p0, object _p0); // Close can be called multiple times and must be idempotent.
             error Close();
         }
 
@@ -781,6 +910,7 @@ namespace net
         // The caller typically invokes ServeConn in a go statement.
         // ServeConn uses the gob wire format (see package gob) on the
         // connection. To use an alternate codec, use ServeCodec.
+        // See NewClient's comment for information about concurrent access.
         public static void ServeConn(io.ReadWriteCloser conn)
         {
             DefaultServer.ServeConn(conn);
@@ -797,7 +927,7 @@ namespace net
         // It does not close the codec upon completion.
         public static error ServeRequest(ServerCodec codec)
         {
-            return error.As(DefaultServer.ServeRequest(codec));
+            return error.As(DefaultServer.ServeRequest(codec))!;
         }
 
         // Accept accepts connections on the listener and serves requests
@@ -806,37 +936,44 @@ namespace net
         public static void Accept(net.Listener lis)
         {
             DefaultServer.Accept(lis);
-
         }
 
         // Can connect to RPC service using HTTP CONNECT to rpcPath.
         private static @string connected = "200 Connected to Go RPC";
 
         // ServeHTTP implements an http.Handler that answers RPC requests.
-        private static void ServeHTTP(this ref Server server, http.ResponseWriter w, ref http.Request req)
+        private static void ServeHTTP(this ptr<Server> _addr_server, http.ResponseWriter w, ptr<http.Request> _addr_req)
         {
+            ref Server server = ref _addr_server.val;
+            ref http.Request req = ref _addr_req.val;
+
             if (req.Method != "CONNECT")
             {
                 w.Header().Set("Content-Type", "text/plain; charset=utf-8");
                 w.WriteHeader(http.StatusMethodNotAllowed);
                 io.WriteString(w, "405 must CONNECT\n");
-                return;
+                return ;
             }
+
             http.Hijacker (conn, _, err) = w._<http.Hijacker>().Hijack();
             if (err != null)
             {
                 log.Print("rpc hijacking ", req.RemoteAddr, ": ", err.Error());
-                return;
+                return ;
             }
+
             io.WriteString(conn, "HTTP/1.0 " + connected + "\n\n");
             server.ServeConn(conn);
+
         }
 
         // HandleHTTP registers an HTTP handler for RPC messages on rpcPath,
         // and a debugging handler on debugPath.
         // It is still necessary to invoke http.Serve(), typically in a go statement.
-        private static void HandleHTTP(this ref Server server, @string rpcPath, @string debugPath)
+        private static void HandleHTTP(this ptr<Server> _addr_server, @string rpcPath, @string debugPath)
         {
+            ref Server server = ref _addr_server.val;
+
             http.Handle(rpcPath, server);
             http.Handle(debugPath, new debugHTTP(server));
         }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:47 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:12 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\exp.go
 
@@ -100,13 +100,13 @@ namespace go
 
         private static double exp(double x)
         {
-            const float Ln2Hi = 6.93147180369123816490e-01F;
-            const float Ln2Lo = 1.90821492927058770002e-10F;
-            const float Log2e = 1.44269504088896338700e+00F;
+            const float Ln2Hi = (float)6.93147180369123816490e-01F;
+            const float Ln2Lo = (float)1.90821492927058770002e-10F;
+            const float Log2e = (float)1.44269504088896338700e+00F;
 
-            const float Overflow = 7.09782712893383973096e+02F;
-            const float Underflow = -7.45133219101941108420e+02F;
-            const float NearZero = 1.0F / (1L << (int)(28L)); // 2**-28 
+            const float Overflow = (float)7.09782712893383973096e+02F;
+            const float Underflow = (float)-7.45133219101941108420e+02F;
+            const float NearZero = (float)1.0F / (1L << (int)(28L)); // 2**-28 
 
             // special cases
 
@@ -132,6 +132,7 @@ namespace go
 
             // compute
             return expmulti(hi, lo, k);
+
         }
 
         // Exp2 returns 2**x, the base-2 exponential of x.
@@ -142,11 +143,11 @@ namespace go
 
         private static double exp2(double x)
         {
-            const float Ln2Hi = 6.93147180369123816490e-01F;
-            const float Ln2Lo = 1.90821492927058770002e-10F;
+            const float Ln2Hi = (float)6.93147180369123816490e-01F;
+            const float Ln2Lo = (float)1.90821492927058770002e-10F;
 
-            const float Overflow = 1.0239999999999999e+03F;
-            const float Underflow = -1.0740e+03F; 
+            const float Overflow = (float)1.0239999999999999e+03F;
+            const float Underflow = (float)-1.0740e+03F; 
 
             // special cases
 
@@ -172,16 +173,17 @@ namespace go
 
             // compute
             return expmulti(hi, lo, k);
+
         }
 
         // exp1 returns e**r × 2**k where r = hi - lo and |r| ≤ ln(2)/2.
         private static double expmulti(double hi, double lo, long k)
         {
-            const float P1 = 1.66666666666666657415e-01F; /* 0x3FC55555; 0x55555555 */
-            const float P2 = -2.77777777770155933842e-03F; /* 0xBF66C16C; 0x16BEBD93 */
-            const float P3 = 6.61375632143793436117e-05F; /* 0x3F11566A; 0xAF25DE2C */
-            const float P4 = -1.65339022054652515390e-06F; /* 0xBEBBBD41; 0xC5D26BF1 */
-            const float P5 = 4.13813679705723846039e-08F; /* 0x3E663769; 0x72BEA4D0 */
+            const float P1 = (float)1.66666666666666657415e-01F; /* 0x3FC55555; 0x55555555 */
+            const float P2 = (float)-2.77777777770155933842e-03F; /* 0xBF66C16C; 0x16BEBD93 */
+            const float P3 = (float)6.61375632143793436117e-05F; /* 0x3F11566A; 0xAF25DE2C */
+            const float P4 = (float)-1.65339022054652515390e-06F; /* 0xBEBBBD41; 0xC5D26BF1 */
+            const float P5 = (float)4.13813679705723846039e-08F; /* 0x3E663769; 0x72BEA4D0 */
 
             var r = hi - lo;
             var t = r * r;
@@ -189,6 +191,7 @@ namespace go
             long y = 1L - ((lo - (r * c) / (2L - c)) - hi); 
             // TODO(rsc): make sure Ldexp can handle boundary k
             return Ldexp(y, k);
+
         }
     }
 }

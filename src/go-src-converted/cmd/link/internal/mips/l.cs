@@ -1,5 +1,5 @@
 // Inferno utils/5l/asm.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/5l/asm.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/5l/asm.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips -- go2cs converted at 2020 August 29 10:02:58 UTC
+// package mips -- go2cs converted at 2020 October 08 04:37:59 UTC
 // import "cmd/link/internal/mips" ==> using mips = go.cmd.link.@internal.mips_package
 // Original source: C:\Go\src\cmd\link\internal\mips\l.go
 
@@ -71,12 +71,14 @@ namespace @internal
         // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
         // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         // THE SOFTWARE.
-        public static readonly long MaxAlign = 32L; // max data alignment
-        public static readonly long MinAlign = 1L; // min data alignment
-        public static readonly long FuncAlign = 4L;
+        public static readonly long MaxAlign = (long)32L; // max data alignment
+        public static readonly long MinAlign = (long)1L; // min data alignment
+        public static readonly long FuncAlign = (long)4L;
+
 
         /* Used by ../internal/ld/dwarf.go */
-        public static readonly long DWARFREGSP = 29L;
-        public static readonly long DWARFREGLR = 31L;
+        public static readonly long DWARFREGSP = (long)29L;
+        public static readonly long DWARFREGLR = (long)31L;
+
     }
 }}}}

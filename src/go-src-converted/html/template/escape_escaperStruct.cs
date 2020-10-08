@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:46 UTC
+//     Generated on 2020 October 08 03:42:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace html
                 this.textNodeEdits = default;
             }
 
-            public escaper(ref ptr<nameSpace> ns = default, map<@string, context> output = default, map<@string, ref template.Template> derived = default, map<@string, bool> called = default, map<ref parse.ActionNode, slice<@string>> actionNodeEdits = default, map<ref parse.TemplateNode, @string> templateNodeEdits = default, map<ref parse.TextNode, slice<byte>> textNodeEdits = default)
+            public escaper(ref ptr<nameSpace> ns = default, map<@string, context> output = default, map<@string, ptr<template.Template>> derived = default, map<@string, bool> called = default, map<ptr<parse.ActionNode>, slice<@string>> actionNodeEdits = default, map<ptr<parse.TemplateNode>, @string> templateNodeEdits = default, map<ptr<parse.TextNode>, slice<byte>> textNodeEdits = default)
             {
                 this.ns = ns;
                 this.output = output;

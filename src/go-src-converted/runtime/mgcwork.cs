@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:15 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:08 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mgcwork.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -15,7 +15,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly long _WorkbufSize = 2048L; // in bytes; larger values result in less contention
+        private static readonly long _WorkbufSize = (long)2048L; // in bytes; larger values result in less contention
 
         // workbufAlloc is the number of bytes to allocate at a time
         // for new workbufs. This must be a multiple of pageSize and
@@ -23,7 +23,15 @@ namespace go
         //
         // Larger values reduce workbuf allocation overhead. Smaller
         // values reduce heap fragmentation.
-        private static readonly long workbufAlloc = 32L << (int)(10L);
+        private static readonly long workbufAlloc = (long)32L << (int)(10L);
+
+
+        // throwOnGCWork causes any operations that add pointers to a gcWork
+        // buffer to throw.
+        //
+        // TODO(austin): This is a temporary debugging measure for issue
+        // #27993. To be removed before release.
+        private static bool throwOnGCWork = default;
 
         private static void init()
         {
@@ -31,6 +39,7 @@ namespace go
             {
                 throw("bad workbufAlloc");
             }
+
         }
 
         // Garbage collector work pool abstraction.
@@ -51,10 +60,7 @@ namespace go
         //
         //     (preemption must be disabled)
         //     gcw := &getg().m.p.ptr().gcw
-        //     .. call gcw.put() to produce and gcw.get() to consume ..
-        //     if gcBlackenPromptly {
-        //         gcw.dispose()
-        //     }
+        //     .. call gcw.put() to produce and gcw.tryGet() to consume ..
         //
         // It's important that any use of gcWork during the mark phase prevent
         // the garbage collector from transitioning to mark termination since
@@ -68,7 +74,16 @@ namespace go
 // into work.bytesMarked by dispose.
             public ulong bytesMarked; // Scan work performed on this gcWork. This is aggregated into
 // gcController by dispose and may also be flushed by callers.
-            public long scanWork;
+            public long scanWork; // flushedWork indicates that a non-empty work buffer was
+// flushed to the global work list since the last gcMarkDone
+// termination check. Specifically, this indicates that this
+// gcWork may have communicated work to another gcWork.
+            public bool flushedWork; // pauseGen causes put operations to spin while pauseGen ==
+// gcWorkPauseGen if debugCachedWork is true.
+            public uint pauseGen; // putGen is the pauseGen of the last putGen.
+            public uint putGen; // pauseStack is the stack at which this P was paused if
+// debugCachedWork is true.
+            public array<System.UIntPtr> pauseStack;
         }
 
         // Most of the methods of gcWork are go:nowritebarrierrec because the
@@ -78,24 +93,110 @@ namespace go
         // the write barrier in turn invoked a gcWork method, it could
         // permanently corrupt the gcWork.
 
-        private static void init(this ref gcWork w)
+        private static void init(this ptr<gcWork> _addr_w)
         {
+            ref gcWork w = ref _addr_w.val;
+
             w.wbuf1 = getempty();
             var wbuf2 = trygetfull();
             if (wbuf2 == null)
             {
                 wbuf2 = getempty();
             }
+
             w.wbuf2 = wbuf2;
+
+        }
+
+        private static void checkPut(this ptr<gcWork> _addr_w, System.UIntPtr ptr, slice<System.UIntPtr> ptrs)
+        {
+            ref gcWork w = ref _addr_w.val;
+
+            if (debugCachedWork)
+            {
+                var alreadyFailed = w.putGen == w.pauseGen;
+                w.putGen = w.pauseGen;
+                if (!canPreemptM(getg().m))
+                { 
+                    // If we were to spin, the runtime may
+                    // deadlock. Since we can't be preempted, the
+                    // spin could prevent gcMarkDone from
+                    // finishing the ragged barrier, which is what
+                    // releases us from the spin.
+                    return ;
+
+                }
+
+                while (atomic.Load(_addr_gcWorkPauseGen) == w.pauseGen)
+                {
+                }
+
+                if (throwOnGCWork)
+                {
+                    printlock();
+                    if (alreadyFailed)
+                    {
+                        println("runtime: checkPut already failed at this generation");
+                    }
+
+                    println("runtime: late gcWork put");
+                    if (ptr != 0L)
+                    {
+                        gcDumpObject("ptr", ptr, ~uintptr(0L));
+                    }
+
+                    foreach (var (_, ptr) in ptrs)
+                    {
+                        gcDumpObject("ptrs", ptr, ~uintptr(0L));
+                    }
+                    println("runtime: paused at");
+                    foreach (var (_, pc) in w.pauseStack)
+                    {
+                        if (pc == 0L)
+                        {
+                            break;
+                        }
+
+                        var f = findfunc(pc);
+                        if (f.valid())
+                        { 
+                            // Obviously this doesn't
+                            // relate to ancestor
+                            // tracebacks, but this
+                            // function prints what we
+                            // want.
+                            printAncestorTracebackFuncInfo(f, pc);
+
+                        }
+                        else
+                        {
+                            println("\tunknown PC ", hex(pc), "\n");
+                        }
+
+                    }
+                    throw("throwOnGCWork");
+
+                }
+
+            }
+
         }
 
         // put enqueues a pointer for the garbage collector to trace.
         // obj must point to the beginning of a heap object or an oblet.
         //go:nowritebarrierrec
-        private static void put(this ref gcWork w, System.UIntPtr obj)
+        private static void put(this ptr<gcWork> _addr_w, System.UIntPtr obj)
         {
+            ref gcWork w = ref _addr_w.val;
+
+            w.checkPut(obj, null);
+
             var flushed = false;
-            var wbuf = w.wbuf1;
+            var wbuf = w.wbuf1; 
+            // Record that this may acquire the wbufSpans or heap lock to
+            // allocate a workbuf.
+            lockWithRankMayAcquire(_addr_work.wbufSpans.@lock, lockRankWbufSpans);
+            lockWithRankMayAcquire(_addr_mheap_.@lock, lockRankMheap);
             if (wbuf == null)
             {
                 w.init();
@@ -109,12 +210,15 @@ namespace go
                 wbuf = w.wbuf1;
                 if (wbuf.nobj == len(wbuf.obj))
                 {
-                    putfull(wbuf);
+                    putfull(_addr_wbuf);
+                    w.flushedWork = true;
                     wbuf = getempty();
                     w.wbuf1 = wbuf;
                     flushed = true;
                 }
+
             }
+
             wbuf.obj[wbuf.nobj] = obj;
             wbuf.nobj++; 
 
@@ -126,13 +230,18 @@ namespace go
             {
                 gcController.enlistWorker();
             }
+
         }
 
-        // putFast does a put and returns true if it can be done quickly
+        // putFast does a put and reports whether it can be done quickly
         // otherwise it returns false and the caller needs to call put.
         //go:nowritebarrierrec
-        private static bool putFast(this ref gcWork w, System.UIntPtr obj)
+        private static bool putFast(this ptr<gcWork> _addr_w, System.UIntPtr obj)
         {
+            ref gcWork w = ref _addr_w.val;
+
+            w.checkPut(obj, null);
+
             var wbuf = w.wbuf1;
             if (wbuf == null)
             {
@@ -142,21 +251,28 @@ namespace go
             {
                 return false;
             }
+
             wbuf.obj[wbuf.nobj] = obj;
             wbuf.nobj++;
             return true;
+
         }
 
         // putBatch performs a put on every pointer in obj. See put for
         // constraints on these pointers.
         //
         //go:nowritebarrierrec
-        private static void putBatch(this ref gcWork w, slice<System.UIntPtr> obj)
+        private static void putBatch(this ptr<gcWork> _addr_w, slice<System.UIntPtr> obj)
         {
+            ref gcWork w = ref _addr_w.val;
+
             if (len(obj) == 0L)
             {
-                return;
+                return ;
             }
+
+            w.checkPut(0L, obj);
+
             var flushed = false;
             var wbuf = w.wbuf1;
             if (wbuf == null)
@@ -164,20 +280,24 @@ namespace go
                 w.init();
                 wbuf = w.wbuf1;
             }
+
             while (len(obj) > 0L)
             {
                 while (wbuf.nobj == len(wbuf.obj))
                 {
-                    putfull(wbuf);
+                    putfull(_addr_wbuf);
+                    w.flushedWork = true;
                     w.wbuf1 = w.wbuf2;
                     w.wbuf2 = getempty();
                     wbuf = w.wbuf1;
                     flushed = true;
+
                 }
 
                 var n = copy(wbuf.obj[wbuf.nobj..], obj);
                 wbuf.nobj += n;
                 obj = obj[n..];
+
             }
 
 
@@ -185,6 +305,7 @@ namespace go
             {
                 gcController.enlistWorker();
             }
+
         }
 
         // tryGet dequeues a pointer for the garbage collector to trace.
@@ -193,8 +314,10 @@ namespace go
         // queue, tryGet returns 0.  Note that there may still be pointers in
         // other gcWork instances or other caches.
         //go:nowritebarrierrec
-        private static System.UIntPtr tryGet(this ref gcWork w)
+        private static System.UIntPtr tryGet(this ptr<gcWork> _addr_w)
         {
+            ref gcWork w = ref _addr_w.val;
+
             var wbuf = w.wbuf1;
             if (wbuf == null)
             {
@@ -202,6 +325,7 @@ namespace go
                 wbuf = w.wbuf1; 
                 // wbuf is empty at this point.
             }
+
             if (wbuf.nobj == 0L)
             {
                 w.wbuf1 = w.wbuf2;
@@ -215,67 +339,41 @@ namespace go
                     {
                         return 0L;
                     }
-                    putempty(owbuf);
+
+                    putempty(_addr_owbuf);
                     w.wbuf1 = wbuf;
+
                 }
+
             }
+
             wbuf.nobj--;
             return wbuf.obj[wbuf.nobj];
+
         }
 
         // tryGetFast dequeues a pointer for the garbage collector to trace
         // if one is readily available. Otherwise it returns 0 and
         // the caller is expected to call tryGet().
         //go:nowritebarrierrec
-        private static System.UIntPtr tryGetFast(this ref gcWork w)
+        private static System.UIntPtr tryGetFast(this ptr<gcWork> _addr_w)
         {
+            ref gcWork w = ref _addr_w.val;
+
             var wbuf = w.wbuf1;
             if (wbuf == null)
             {
                 return 0L;
             }
+
             if (wbuf.nobj == 0L)
             {
                 return 0L;
             }
+
             wbuf.nobj--;
             return wbuf.obj[wbuf.nobj];
-        }
 
-        // get dequeues a pointer for the garbage collector to trace, blocking
-        // if necessary to ensure all pointers from all queues and caches have
-        // been retrieved.  get returns 0 if there are no pointers remaining.
-        //go:nowritebarrierrec
-        private static System.UIntPtr get(this ref gcWork w)
-        {
-            var wbuf = w.wbuf1;
-            if (wbuf == null)
-            {
-                w.init();
-                wbuf = w.wbuf1; 
-                // wbuf is empty at this point.
-            }
-            if (wbuf.nobj == 0L)
-            {
-                w.wbuf1 = w.wbuf2;
-                w.wbuf2 = w.wbuf1;
-                wbuf = w.wbuf1;
-                if (wbuf.nobj == 0L)
-                {
-                    var owbuf = wbuf;
-                    wbuf = getfull();
-                    if (wbuf == null)
-                    {
-                        return 0L;
-                    }
-                    putempty(owbuf);
-                    w.wbuf1 = wbuf;
-                }
-            } 
-
-            // TODO: This might be a good place to add prefetch code
-            wbuf.nobj--;
-            return wbuf.obj[wbuf.nobj];
         }
 
         // dispose returns any cached pointers to the global queue.
@@ -285,8 +383,10 @@ namespace go
         // ability to hide pointers during the concurrent mark phase.
         //
         //go:nowritebarrierrec
-        private static void dispose(this ref gcWork w)
+        private static void dispose(this ptr<gcWork> _addr_w)
         {
+            ref gcWork w = ref _addr_w.val;
+
             {
                 var wbuf = w.wbuf1;
 
@@ -294,52 +394,64 @@ namespace go
                 {
                     if (wbuf.nobj == 0L)
                     {
-                        putempty(wbuf);
+                        putempty(_addr_wbuf);
                     }
                     else
                     {
-                        putfull(wbuf);
+                        putfull(_addr_wbuf);
+                        w.flushedWork = true;
                     }
+
                     w.wbuf1 = null;
 
                     wbuf = w.wbuf2;
                     if (wbuf.nobj == 0L)
                     {
-                        putempty(wbuf);
+                        putempty(_addr_wbuf);
                     }
                     else
                     {
-                        putfull(wbuf);
+                        putfull(_addr_wbuf);
+                        w.flushedWork = true;
                     }
+
                     w.wbuf2 = null;
+
                 }
 
             }
+
             if (w.bytesMarked != 0L)
             { 
                 // dispose happens relatively infrequently. If this
                 // atomic becomes a problem, we should first try to
                 // dispose less and if necessary aggregate in a per-P
                 // counter.
-                atomic.Xadd64(ref work.bytesMarked, int64(w.bytesMarked));
+                atomic.Xadd64(_addr_work.bytesMarked, int64(w.bytesMarked));
                 w.bytesMarked = 0L;
+
             }
+
             if (w.scanWork != 0L)
             {
-                atomic.Xaddint64(ref gcController.scanWork, w.scanWork);
+                atomic.Xaddint64(_addr_gcController.scanWork, w.scanWork);
                 w.scanWork = 0L;
             }
+
         }
 
         // balance moves some work that's cached in this gcWork back on the
         // global queue.
         //go:nowritebarrierrec
-        private static void balance(this ref gcWork w)
+        private static void balance(this ptr<gcWork> _addr_w)
         {
+            ref gcWork w = ref _addr_w.val;
+
             if (w.wbuf1 == null)
             {
-                return;
+                return ;
             }
+
             {
                 var wbuf__prev1 = wbuf;
 
@@ -347,7 +459,9 @@ namespace go
 
                 if (wbuf.nobj != 0L)
                 {
-                    putfull(wbuf);
+                    w.checkPut(0L, wbuf.obj[..wbuf.nobj]);
+                    putfull(_addr_wbuf);
+                    w.flushedWork = true;
                     w.wbuf2 = getempty();
                 }                {
                     var wbuf__prev2 = wbuf;
@@ -357,11 +471,13 @@ namespace go
 
                     else if (wbuf.nobj > 4L)
                     {
-                        w.wbuf1 = handoff(wbuf);
+                        w.checkPut(0L, wbuf.obj[..wbuf.nobj]);
+                        w.wbuf1 = handoff(_addr_wbuf);
+                        w.flushedWork = true; // handoff did putfull
                     }
                     else
                     {
-                        return;
+                        return ;
                     } 
                     // We flushed a buffer to the full list, so wake a worker.
 
@@ -378,12 +494,15 @@ namespace go
             {
                 gcController.enlistWorker();
             }
+
         }
 
-        // empty returns true if w has no mark work available.
+        // empty reports whether w has no mark work available.
         //go:nowritebarrierrec
-        private static bool empty(this ref gcWork w)
+        private static bool empty(this ptr<gcWork> _addr_w)
         {
+            ref gcWork w = ref _addr_w.val;
+
             return w.wbuf1 == null || (w.wbuf1.nobj == 0L && w.wbuf2.nobj == 0L);
         }
 
@@ -409,65 +528,80 @@ namespace go
         // If the GC asks for some work these are the only routines that
         // make wbufs available to the GC.
 
-        private static void checknonempty(this ref workbuf b)
+        private static void checknonempty(this ptr<workbuf> _addr_b)
         {
+            ref workbuf b = ref _addr_b.val;
+
             if (b.nobj == 0L)
             {
                 throw("workbuf is empty");
             }
+
         }
 
-        private static void checkempty(this ref workbuf b)
+        private static void checkempty(this ptr<workbuf> _addr_b)
         {
+            ref workbuf b = ref _addr_b.val;
+
             if (b.nobj != 0L)
             {
                 throw("workbuf is not empty");
             }
+
         }
 
         // getempty pops an empty work buffer off the work.empty list,
         // allocating new buffers if none are available.
         //go:nowritebarrier
-        private static ref workbuf getempty()
+        private static ptr<workbuf> getempty()
         {
-            ref workbuf b = default;
+            ptr<workbuf> b;
             if (work.empty != 0L)
             {
-                b = (workbuf.Value)(work.empty.pop());
+                b = (workbuf.val)(work.empty.pop());
                 if (b != null)
                 {
                     b.checkempty();
                 }
-            }
+
+            } 
+            // Record that this may acquire the wbufSpans or heap lock to
+            // allocate a workbuf.
+            lockWithRankMayAcquire(_addr_work.wbufSpans.@lock, lockRankWbufSpans);
+            lockWithRankMayAcquire(_addr_mheap_.@lock, lockRankMheap);
             if (b == null)
             { 
                 // Allocate more workbufs.
-                ref mspan s = default;
+                ptr<mspan> s;
                 if (work.wbufSpans.free.first != null)
                 {
-                    lock(ref work.wbufSpans.@lock);
+                    lock(_addr_work.wbufSpans.@lock);
                     s = work.wbufSpans.free.first;
                     if (s != null)
                     {
                         work.wbufSpans.free.remove(s);
                         work.wbufSpans.busy.insert(s);
                     }
-                    unlock(ref work.wbufSpans.@lock);
+
+                    unlock(_addr_work.wbufSpans.@lock);
+
                 }
+
                 if (s == null)
                 {
                     systemstack(() =>
                     {
-                        s = mheap_.allocManual(workbufAlloc / pageSize, ref memstats.gc_sys);
+                        s = mheap_.allocManual(workbufAlloc / pageSize, _addr_memstats.gc_sys);
                     });
                     if (s == null)
                     {
                         throw("out of memory");
                     } 
                     // Record the new span in the busy list.
-                    lock(ref work.wbufSpans.@lock);
+                    lock(_addr_work.wbufSpans.@lock);
                     work.wbufSpans.busy.insert(s);
-                    unlock(ref work.wbufSpans.@lock);
+                    unlock(_addr_work.wbufSpans.@lock);
+
                 } 
                 // Slice up the span into new workbufs. Return one and
                 // put the rest on the empty list.
@@ -476,8 +610,9 @@ namespace go
 
                     while (i + _WorkbufSize <= workbufAlloc)
                     {
-                        var newb = (workbuf.Value)(@unsafe.Pointer(s.@base() + i));
+                        var newb = (workbuf.val)(@unsafe.Pointer(s.@base() + i));
                         newb.nobj = 0L;
+                        lfnodeValidate(_addr_newb.node);
                         if (i == 0L)
                         {
                             b = newb;
@@ -485,130 +620,74 @@ namespace go
                         }
                         else
                         {
-                            putempty(newb);
+                            putempty(_addr_newb);
                         }
+
                     }
 
                 }
+
             }
-            return b;
+
+            return _addr_b!;
+
         }
 
         // putempty puts a workbuf onto the work.empty list.
         // Upon entry this go routine owns b. The lfstack.push relinquishes ownership.
         //go:nowritebarrier
-        private static void putempty(ref workbuf b)
+        private static void putempty(ptr<workbuf> _addr_b)
         {
+            ref workbuf b = ref _addr_b.val;
+
             b.checkempty();
-            work.empty.push(ref b.node);
+            work.empty.push(_addr_b.node);
         }
 
         // putfull puts the workbuf on the work.full list for the GC.
         // putfull accepts partially full buffers so the GC can avoid competing
         // with the mutators for ownership of partially full buffers.
         //go:nowritebarrier
-        private static void putfull(ref workbuf b)
+        private static void putfull(ptr<workbuf> _addr_b)
         {
+            ref workbuf b = ref _addr_b.val;
+
             b.checknonempty();
-            work.full.push(ref b.node);
+            work.full.push(_addr_b.node);
         }
 
         // trygetfull tries to get a full or partially empty workbuffer.
         // If one is not immediately available return nil
         //go:nowritebarrier
-        private static ref workbuf trygetfull()
+        private static ptr<workbuf> trygetfull()
         {
-            var b = (workbuf.Value)(work.full.pop());
+            var b = (workbuf.val)(work.full.pop());
             if (b != null)
             {
                 b.checknonempty();
-                return b;
+                return _addr_b!;
             }
-            return b;
-        }
 
-        // Get a full work buffer off the work.full list.
-        // If nothing is available wait until all the other gc helpers have
-        // finished and then return nil.
-        // getfull acts as a barrier for work.nproc helpers. As long as one
-        // gchelper is actively marking objects it
-        // may create a workbuffer that the other helpers can work on.
-        // The for loop either exits when a work buffer is found
-        // or when _all_ of the work.nproc GC helpers are in the loop
-        // looking for work and thus not capable of creating new work.
-        // This is in fact the termination condition for the STW mark
-        // phase.
-        //go:nowritebarrier
-        private static ref workbuf getfull()
-        {
-            var b = (workbuf.Value)(work.full.pop());
-            if (b != null)
-            {
-                b.checknonempty();
-                return b;
-            }
-            var incnwait = atomic.Xadd(ref work.nwait, +1L);
-            if (incnwait > work.nproc)
-            {
-                println("runtime: work.nwait=", incnwait, "work.nproc=", work.nproc);
-                throw("work.nwait > work.nproc");
-            }
-            for (long i = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
-            {
-                if (work.full != 0L)
-                {
-                    var decnwait = atomic.Xadd(ref work.nwait, -1L);
-                    if (decnwait == work.nproc)
-                    {
-                        println("runtime: work.nwait=", decnwait, "work.nproc=", work.nproc);
-                        throw("work.nwait > work.nproc");
-                    }
-                    b = (workbuf.Value)(work.full.pop());
-                    if (b != null)
-                    {
-                        b.checknonempty();
-                        return b;
-                    }
-                    incnwait = atomic.Xadd(ref work.nwait, +1L);
-                    if (incnwait > work.nproc)
-                    {
-                        println("runtime: work.nwait=", incnwait, "work.nproc=", work.nproc);
-                        throw("work.nwait > work.nproc");
-                    }
-                }
-                if (work.nwait == work.nproc && work.markrootNext >= work.markrootJobs)
-                {
-                    return null;
-                }
-                if (i < 10L)
-                {
-                    procyield(20L);
-                }
-                else if (i < 20L)
-                {
-                    osyield();
-                }
-                else
-                {
-                    usleep(100L);
-                }
-            }
+            return _addr_b!;
 
         }
 
         //go:nowritebarrier
-        private static ref workbuf handoff(ref workbuf b)
-        { 
+        private static ptr<workbuf> handoff(ptr<workbuf> _addr_b)
+        {
+            ref workbuf b = ref _addr_b.val;
+ 
             // Make new buffer with half of b's pointers.
             var b1 = getempty();
             var n = b.nobj / 2L;
             b.nobj -= n;
             b1.nobj = n;
-            memmove(@unsafe.Pointer(ref b1.obj[0L]), @unsafe.Pointer(ref b.obj[b.nobj]), uintptr(n) * @unsafe.Sizeof(b1.obj[0L])); 
+            memmove(@unsafe.Pointer(_addr_b1.obj[0L]), @unsafe.Pointer(_addr_b.obj[b.nobj]), uintptr(n) * @unsafe.Sizeof(b1.obj[0L])); 
 
             // Put b on full list - let first half of b get stolen.
-            putfull(b);
-            return b1;
+            putfull(_addr_b);
+            return _addr_b1!;
+
         }
 
         // prepareFreeWorkbufs moves busy workbuf spans to free list so they
@@ -616,7 +695,7 @@ namespace go
         // workbufs are on the empty list.
         private static void prepareFreeWorkbufs()
         {
-            lock(ref work.wbufSpans.@lock);
+            lock(_addr_work.wbufSpans.@lock);
             if (work.full != 0L)
             {
                 throw("cannot free workbufs when work.full != 0");
@@ -625,22 +704,24 @@ namespace go
             // which ones are in which spans. We can wipe the entire empty
             // list and move all workbuf spans to the free list.
             work.empty = 0L;
-            work.wbufSpans.free.takeAll(ref work.wbufSpans.busy);
-            unlock(ref work.wbufSpans.@lock);
+            work.wbufSpans.free.takeAll(_addr_work.wbufSpans.busy);
+            unlock(_addr_work.wbufSpans.@lock);
+
         }
 
         // freeSomeWbufs frees some workbufs back to the heap and returns
         // true if it should be called again to free more.
         private static bool freeSomeWbufs(bool preemptible)
         {
-            const long batchSize = 64L; // ~1–2 µs per span.
+            const long batchSize = (long)64L; // ~1–2 µs per span.
  // ~1–2 µs per span.
-            lock(ref work.wbufSpans.@lock);
+            lock(_addr_work.wbufSpans.@lock);
             if (gcphase != _GCoff || work.wbufSpans.free.isEmpty())
             {
-                unlock(ref work.wbufSpans.@lock);
+                unlock(_addr_work.wbufSpans.@lock);
                 return false;
             }
+
             systemstack(() =>
             {
                 var gp = getg().m.curg;
@@ -651,14 +732,18 @@ namespace go
                     {
                         break;
                     }
+
                     work.wbufSpans.free.remove(span);
-                    mheap_.freeManual(span, ref memstats.gc_sys);
+                    mheap_.freeManual(span, _addr_memstats.gc_sys);
+
                 }
+
 
             });
             var more = !work.wbufSpans.free.isEmpty();
-            unlock(ref work.wbufSpans.@lock);
+            unlock(_addr_work.wbufSpans.@lock);
             return more;
+
         }
     }
 }

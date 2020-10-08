@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:49 UTC
+//     Generated on 2020 October 08 04:43:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace ianlancetaylor
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,29 +69,30 @@ namespace ianlancetaylor
                 m_target_is_ptr = true;
             }
 
-            private delegate @string printByRef(ref T value, ref printState _p0);
-            private delegate @string printByVal(T value, ref printState _p0);
+            private delegate @string printByPtr(ptr<T> value, ptr<printState> _p0);
+            private delegate @string printByVal(T value, ptr<printState> _p0);
 
-            private static readonly printByRef s_printByRef;
+            private static readonly printByPtr s_printByPtr;
             private static readonly printByVal s_printByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string print(ref printState _p0)
+            public @string print(ptr<printState> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_printByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_printByPtr is null || !m_target_is_ptr)
                     return s_printByVal!(target, _p0);
 
-                return s_printByRef(ref target, _p0);
+                return s_printByPtr(m_target_ptr, _p0);
             }
 
-            private delegate @string TraverseByRef(ref T value, Func<AST, bool> _p0);
+            private delegate @string TraverseByPtr(ptr<T> value, Func<AST, bool> _p0);
             private delegate @string TraverseByVal(T value, Func<AST, bool> _p0);
 
-            private static readonly TraverseByRef s_TraverseByRef;
+            private static readonly TraverseByPtr s_TraverseByPtr;
             private static readonly TraverseByVal s_TraverseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,17 +101,18 @@ namespace ianlancetaylor
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TraverseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TraverseByPtr is null || !m_target_is_ptr)
                     return s_TraverseByVal!(target, _p0);
 
-                return s_TraverseByRef(ref target, _p0);
+                return s_TraverseByPtr(m_target_ptr, _p0);
             }
 
-            private delegate @string CopyByRef(ref T value, Func<AST, AST> copy, Func<AST, bool> skip);
+            private delegate @string CopyByPtr(ptr<T> value, Func<AST, AST> copy, Func<AST, bool> skip);
             private delegate @string CopyByVal(T value, Func<AST, AST> copy, Func<AST, bool> skip);
 
-            private static readonly CopyByRef s_CopyByRef;
+            private static readonly CopyByPtr s_CopyByPtr;
             private static readonly CopyByVal s_CopyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -119,17 +121,18 @@ namespace ianlancetaylor
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CopyByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CopyByPtr is null || !m_target_is_ptr)
                     return s_CopyByVal!(target, copy, skip);
 
-                return s_CopyByRef(ref target, copy, skip);
+                return s_CopyByPtr(m_target_ptr, copy, skip);
             }
 
-            private delegate @string GoStringByRef(ref T value);
+            private delegate @string GoStringByPtr(ptr<T> value);
             private delegate @string GoStringByVal(T value);
 
-            private static readonly GoStringByRef s_GoStringByRef;
+            private static readonly GoStringByPtr s_GoStringByPtr;
             private static readonly GoStringByVal s_GoStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -138,17 +141,18 @@ namespace ianlancetaylor
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GoStringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GoStringByPtr is null || !m_target_is_ptr)
                     return s_GoStringByVal!(target);
 
-                return s_GoStringByRef(ref target);
+                return s_GoStringByPtr(m_target_ptr);
             }
 
-            private delegate @string goStringByRef(ref T value, long indent, @string field);
+            private delegate @string goStringByPtr(ptr<T> value, long indent, @string field);
             private delegate @string goStringByVal(T value, long indent, @string field);
 
-            private static readonly goStringByRef s_goStringByRef;
+            private static readonly goStringByPtr s_goStringByPtr;
             private static readonly goStringByVal s_goStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -157,11 +161,12 @@ namespace ianlancetaylor
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_goStringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_goStringByPtr is null || !m_target_is_ptr)
                     return s_goStringByVal!(target, indent, field);
 
-                return s_goStringByRef(ref target, indent, field);
+                return s_goStringByPtr(m_target_ptr, indent, field);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -170,87 +175,72 @@ namespace ianlancetaylor
             static AST()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("print");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("print");
 
                 if (!(extensionMethod is null))
-                    s_printByRef = extensionMethod.CreateStaticDelegate(typeof(printByRef)) as printByRef;
+                    s_printByPtr = extensionMethod.CreateStaticDelegate(typeof(printByPtr)) as printByPtr;
 
-                if (s_printByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("print");
+                extensionMethod = targetType.GetExtensionMethod("print");
 
-                    if (!(extensionMethod is null))
-                        s_printByVal = extensionMethod.CreateStaticDelegate(typeof(printByVal)) as printByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_printByVal = extensionMethod.CreateStaticDelegate(typeof(printByVal)) as printByVal;
 
-                if (s_printByRef is null && s_printByVal is null)
+                if (s_printByPtr is null && s_printByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AST.print method", new Exception("print"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Traverse");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Traverse");
 
                 if (!(extensionMethod is null))
-                    s_TraverseByRef = extensionMethod.CreateStaticDelegate(typeof(TraverseByRef)) as TraverseByRef;
+                    s_TraverseByPtr = extensionMethod.CreateStaticDelegate(typeof(TraverseByPtr)) as TraverseByPtr;
 
-                if (s_TraverseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Traverse");
+                extensionMethod = targetType.GetExtensionMethod("Traverse");
 
-                    if (!(extensionMethod is null))
-                        s_TraverseByVal = extensionMethod.CreateStaticDelegate(typeof(TraverseByVal)) as TraverseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TraverseByVal = extensionMethod.CreateStaticDelegate(typeof(TraverseByVal)) as TraverseByVal;
 
-                if (s_TraverseByRef is null && s_TraverseByVal is null)
+                if (s_TraverseByPtr is null && s_TraverseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AST.Traverse method", new Exception("Traverse"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Copy");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Copy");
 
                 if (!(extensionMethod is null))
-                    s_CopyByRef = extensionMethod.CreateStaticDelegate(typeof(CopyByRef)) as CopyByRef;
+                    s_CopyByPtr = extensionMethod.CreateStaticDelegate(typeof(CopyByPtr)) as CopyByPtr;
 
-                if (s_CopyByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Copy");
+                extensionMethod = targetType.GetExtensionMethod("Copy");
 
-                    if (!(extensionMethod is null))
-                        s_CopyByVal = extensionMethod.CreateStaticDelegate(typeof(CopyByVal)) as CopyByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CopyByVal = extensionMethod.CreateStaticDelegate(typeof(CopyByVal)) as CopyByVal;
 
-                if (s_CopyByRef is null && s_CopyByVal is null)
+                if (s_CopyByPtr is null && s_CopyByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AST.Copy method", new Exception("Copy"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("GoString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("GoString");
 
                 if (!(extensionMethod is null))
-                    s_GoStringByRef = extensionMethod.CreateStaticDelegate(typeof(GoStringByRef)) as GoStringByRef;
+                    s_GoStringByPtr = extensionMethod.CreateStaticDelegate(typeof(GoStringByPtr)) as GoStringByPtr;
 
-                if (s_GoStringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("GoString");
+                extensionMethod = targetType.GetExtensionMethod("GoString");
 
-                    if (!(extensionMethod is null))
-                        s_GoStringByVal = extensionMethod.CreateStaticDelegate(typeof(GoStringByVal)) as GoStringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GoStringByVal = extensionMethod.CreateStaticDelegate(typeof(GoStringByVal)) as GoStringByVal;
 
-                if (s_GoStringByRef is null && s_GoStringByVal is null)
+                if (s_GoStringByPtr is null && s_GoStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AST.GoString method", new Exception("GoString"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("goString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("goString");
 
                 if (!(extensionMethod is null))
-                    s_goStringByRef = extensionMethod.CreateStaticDelegate(typeof(goStringByRef)) as goStringByRef;
+                    s_goStringByPtr = extensionMethod.CreateStaticDelegate(typeof(goStringByPtr)) as goStringByPtr;
 
-                if (s_goStringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("goString");
+                extensionMethod = targetType.GetExtensionMethod("goString");
 
-                    if (!(extensionMethod is null))
-                        s_goStringByVal = extensionMethod.CreateStaticDelegate(typeof(goStringByVal)) as goStringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_goStringByVal = extensionMethod.CreateStaticDelegate(typeof(goStringByVal)) as goStringByVal;
 
-                if (s_goStringByRef is null && s_goStringByVal is null)
+                if (s_goStringByPtr is null && s_goStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AST.goString method", new Exception("goString"));
             }
 

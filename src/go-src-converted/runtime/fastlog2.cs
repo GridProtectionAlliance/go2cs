@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:56 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:44 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\fastlog2.go
 
@@ -21,9 +21,9 @@ namespace go
         // to scale linearly between them.
         private static double fastlog2(double x)
         {
-            const long fastlogScaleBits = 20L;
+            const long fastlogScaleBits = (long)20L;
 
-            const float fastlogScaleRatio = 1.0F / (1L << (int)(fastlogScaleBits));
+            const float fastlogScaleRatio = (float)1.0F / (1L << (int)(fastlogScaleBits));
 
 
 
@@ -37,6 +37,7 @@ namespace go
             var low = fastlog2Table[xManIndex];
             var high = fastlog2Table[xManIndex + 1L];
             return float64(xExp) + low + (high - low) * float64(xManScale) * fastlogScaleRatio;
+
         }
     }
 }

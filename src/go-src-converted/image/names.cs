@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package image -- go2cs converted at 2020 August 29 10:09:50 UTC
+// package image -- go2cs converted at 2020 October 08 04:59:12 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Go\src\image\names.go
 using color = go.image.color_package;
@@ -23,41 +23,58 @@ namespace go
             public color.Color C;
         }
 
-        private static (uint, uint, uint, uint) RGBA(this ref Uniform c)
+        private static (uint, uint, uint, uint) RGBA(this ptr<Uniform> _addr_c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+            ref Uniform c = ref _addr_c.val;
+
             return c.C.RGBA();
         }
 
-        private static color.Model ColorModel(this ref Uniform c)
+        private static color.Model ColorModel(this ptr<Uniform> _addr_c)
         {
+            ref Uniform c = ref _addr_c.val;
+
             return c;
         }
 
-        private static color.Color Convert(this ref Uniform c, color.Color _p0)
+        private static color.Color Convert(this ptr<Uniform> _addr_c, color.Color _p0)
         {
+            ref Uniform c = ref _addr_c.val;
+
             return c.C;
         }
 
-        private static Rectangle Bounds(this ref Uniform c)
+        private static Rectangle Bounds(this ptr<Uniform> _addr_c)
         {
+            ref Uniform c = ref _addr_c.val;
+
             return new Rectangle(Point{-1e9,-1e9},Point{1e9,1e9});
         }
 
-        private static color.Color At(this ref Uniform c, long x, long y)
+        private static color.Color At(this ptr<Uniform> _addr_c, long x, long y)
         {
+            ref Uniform c = ref _addr_c.val;
+
             return c.C;
         }
 
         // Opaque scans the entire image and reports whether it is fully opaque.
-        private static bool Opaque(this ref Uniform c)
+        private static bool Opaque(this ptr<Uniform> _addr_c)
         {
+            ref Uniform c = ref _addr_c.val;
+
             var (_, _, _, a) = c.C.RGBA();
             return a == 0xffffUL;
         }
 
-        public static ref Uniform NewUniform(color.Color c)
+        // NewUniform returns a new Uniform image of the given color.
+        public static ptr<Uniform> NewUniform(color.Color c)
         {
-            return ref new Uniform(c);
+            return addr(new Uniform(c));
         }
     }
 }

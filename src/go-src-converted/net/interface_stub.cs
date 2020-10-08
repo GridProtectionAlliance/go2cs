@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build nacl
+// +build js,wasm
 
-// package net -- go2cs converted at 2020 August 29 08:26:38 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:37 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\interface_stub.go
 
@@ -19,22 +19,33 @@ namespace go
         // interface.
         private static (slice<Interface>, error) interfaceTable(long ifindex)
         {
-            return (null, null);
+            slice<Interface> _p0 = default;
+            error _p0 = default!;
+
+            return (null, error.As(null!)!);
         }
 
         // If the ifi is nil, interfaceAddrTable returns addresses for all
         // network interfaces. Otherwise it returns addresses for a specific
         // interface.
-        private static (slice<Addr>, error) interfaceAddrTable(ref Interface ifi)
+        private static (slice<Addr>, error) interfaceAddrTable(ptr<Interface> _addr_ifi)
         {
-            return (null, null);
+            slice<Addr> _p0 = default;
+            error _p0 = default!;
+            ref Interface ifi = ref _addr_ifi.val;
+
+            return (null, error.As(null!)!);
         }
 
         // interfaceMulticastAddrTable returns addresses for a specific
         // interface.
-        private static (slice<Addr>, error) interfaceMulticastAddrTable(ref Interface ifi)
+        private static (slice<Addr>, error) interfaceMulticastAddrTable(ptr<Interface> _addr_ifi)
         {
-            return (null, null);
+            slice<Addr> _p0 = default;
+            error _p0 = default!;
+            ref Interface ifi = ref _addr_ifi.val;
+
+            return (null, error.As(null!)!);
         }
     }
 }

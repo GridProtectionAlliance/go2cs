@@ -10,10 +10,10 @@
 
 // See NIST SP 800-38A, pp 13-15
 
-// package cipher -- go2cs converted at 2020 August 29 08:28:51 UTC
+// package cipher -- go2cs converted at 2020 October 08 03:35:44 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\ctr.go
-
+using subtle = go.crypto.@internal.subtle_package;
 using static go.builtin;
 
 namespace go {
@@ -29,7 +29,7 @@ namespace crypto
             public long outUsed;
         }
 
-        private static readonly long streamBufferSize = 512L;
+        private static readonly long streamBufferSize = (long)512L;
 
         // ctrAble is an interface implemented by ciphers that have a specific optimized
         // implementation of CTR, like crypto/aes. NewCTR will check for this interface
@@ -49,7 +49,7 @@ namespace crypto
         public static Stream NewCTR(Block block, slice<byte> iv) => func((_, panic, __) =>
         {
             {
-                ctrAble (ctr, ok) = block._<ctrAble>();
+                ctrAble (ctr, ok) = ctrAble.As(block._<ctrAble>())!;
 
                 if (ok)
                 {
@@ -57,20 +57,26 @@ namespace crypto
                 }
 
             }
+
             if (len(iv) != block.BlockSize())
             {
                 panic("cipher.NewCTR: IV length must equal block size");
             }
+
             var bufSize = streamBufferSize;
             if (bufSize < block.BlockSize())
             {
                 bufSize = block.BlockSize();
             }
-            return ref new ctr(b:block,ctr:dup(iv),out:make([]byte,0,bufSize),outUsed:0,);
+
+            return addr(new ctr(b:block,ctr:dup(iv),out:make([]byte,0,bufSize),outUsed:0,));
+
         });
 
-        private static void refill(this ref ctr x)
+        private static void refill(this ptr<ctr> _addr_x)
         {
+            ref ctr x = ref _addr_x.val;
+
             var remain = len(x.@out) - x.outUsed;
             copy(x.@out, x.@out[x.outUsed..]);
             x.@out = x.@out[..cap(x.@out)];
@@ -88,28 +94,46 @@ namespace crypto
                     {
                         break;
                     }
+
                 }
+
 
             }
 
             x.@out = x.@out[..remain];
             x.outUsed = 0L;
+
         }
 
-        private static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> src)
+        private static void XORKeyStream(this ptr<ctr> _addr_x, slice<byte> dst, slice<byte> src) => func((_, panic, __) =>
         {
+            ref ctr x = ref _addr_x.val;
+
+            if (len(dst) < len(src))
+            {
+                panic("crypto/cipher: output smaller than input");
+            }
+
+            if (subtle.InexactOverlap(dst[..len(src)], src))
+            {
+                panic("crypto/cipher: invalid buffer overlap");
+            }
+
             while (len(src) > 0L)
             {
                 if (x.outUsed >= len(x.@out) - x.b.BlockSize())
                 {
                     x.refill();
                 }
+
                 var n = xorBytes(dst, src, x.@out[x.outUsed..]);
                 dst = dst[n..];
                 src = src[n..];
                 x.outUsed += n;
+
             }
 
-        }
+
+        });
     }
 }}

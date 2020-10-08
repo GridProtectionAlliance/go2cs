@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:09 UTC
+//     Generated on 2020 October 08 04:42:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using http = go.net.http_package;
 using regexp = go.regexp_package;
 using time = go.time_package;
 using internaldriver = go.github.com.google.pprof.@internal.driver_package;
@@ -59,7 +60,7 @@ namespace pprof
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,23 +74,24 @@ namespace pprof
                 m_target_is_ptr = true;
             }
 
-            private delegate (ref profile.Profile, @string, error) FetchByRef(ref T value, @string src, time.Duration duration, time.Duration timeout);
-            private delegate (ref profile.Profile, @string, error) FetchByVal(T value, @string src, time.Duration duration, time.Duration timeout);
+            private delegate (ptr<profile.Profile>, @string, error) FetchByPtr(ptr<T> value, @string src, time.Duration duration, time.Duration timeout);
+            private delegate (ptr<profile.Profile>, @string, error) FetchByVal(T value, @string src, time.Duration duration, time.Duration timeout);
 
-            private static readonly FetchByRef s_FetchByRef;
+            private static readonly FetchByPtr s_FetchByPtr;
             private static readonly FetchByVal s_FetchByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref profile.Profile, @string, error) Fetch(@string src, time.Duration duration, time.Duration timeout)
+            public (ptr<profile.Profile>, @string, error) Fetch(@string src, time.Duration duration, time.Duration timeout)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FetchByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FetchByPtr is null || !m_target_is_ptr)
                     return s_FetchByVal!(target, src, duration, timeout);
 
-                return s_FetchByRef(ref target, src, duration, timeout);
+                return s_FetchByPtr(m_target_ptr, src, duration, timeout);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -98,23 +100,20 @@ namespace pprof
             static Fetcher()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Fetch");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Fetch");
 
                 if (!(extensionMethod is null))
-                    s_FetchByRef = extensionMethod.CreateStaticDelegate(typeof(FetchByRef)) as FetchByRef;
+                    s_FetchByPtr = extensionMethod.CreateStaticDelegate(typeof(FetchByPtr)) as FetchByPtr;
 
-                if (s_FetchByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Fetch");
+                extensionMethod = targetType.GetExtensionMethod("Fetch");
 
-                    if (!(extensionMethod is null))
-                        s_FetchByVal = extensionMethod.CreateStaticDelegate(typeof(FetchByVal)) as FetchByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FetchByVal = extensionMethod.CreateStaticDelegate(typeof(FetchByVal)) as FetchByVal;
 
-                if (s_FetchByRef is null && s_FetchByVal is null)
+                if (s_FetchByPtr is null && s_FetchByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Fetcher.Fetch method", new Exception("Fetch"));
             }
 

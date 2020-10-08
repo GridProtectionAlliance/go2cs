@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:39 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:41 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\netpoll_windows.go
+using atomic = go.runtime.@internal.atomic_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 
@@ -12,11 +13,11 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly ulong _DWORD_MAX = 0xffffffffUL;
+        private static readonly ulong _DWORD_MAX = (ulong)0xffffffffUL;
 
 
 
-        private static readonly var _INVALID_HANDLE_VALUE = ~uintptr(0L);
+        private static readonly var _INVALID_HANDLE_VALUE = (var)~uintptr(0L);
 
         // net_op must be the same as beginning of internal/poll.operation.
         // Keep these in sync.
@@ -41,7 +42,7 @@ namespace go
             public uint qty;
         }
 
-        private static System.UIntPtr iocphandle = _INVALID_HANDLE_VALUE; // completion port io handle
+        private static System.UIntPtr iocphandle = _INVALID_HANDLE_VALUE;        private static uint netpollWakeSig = default;
 
         private static void netpollinit()
         {
@@ -51,141 +52,176 @@ namespace go
                 println("runtime: CreateIoCompletionPort failed (errno=", getlasterror(), ")");
                 throw("runtime: netpollinit failed");
             }
+
         }
 
-        private static System.UIntPtr netpolldescriptor()
+        private static bool netpollIsPollDescriptor(System.UIntPtr fd)
         {
-            return iocphandle;
+            return fd == iocphandle;
         }
 
-        private static int netpollopen(System.UIntPtr fd, ref pollDesc pd)
+        private static int netpollopen(System.UIntPtr fd, ptr<pollDesc> _addr_pd)
         {
+            ref pollDesc pd = ref _addr_pd.val;
+
             if (stdcall4(_CreateIoCompletionPort, fd, iocphandle, 0L, 0L) == 0L)
             {
                 return int32(getlasterror());
             }
+
             return 0L;
+
         }
 
         private static int netpollclose(System.UIntPtr fd)
         { 
             // nothing to do
             return 0L;
+
         }
 
-        private static void netpollarm(ref pollDesc pd, long mode)
+        private static void netpollarm(ptr<pollDesc> _addr_pd, long mode)
         {
+            ref pollDesc pd = ref _addr_pd.val;
+
             throw("runtime: unused");
         }
 
-        // Polls for completed network IO.
+        private static void netpollBreak()
+        {
+            if (atomic.Cas(_addr_netpollWakeSig, 0L, 1L))
+            {
+                if (stdcall4(_PostQueuedCompletionStatus, iocphandle, 0L, 0L, 0L) == 0L)
+                {
+                    println("runtime: netpoll: PostQueuedCompletionStatus failed (errno=", getlasterror(), ")");
+                    throw("runtime: netpoll: PostQueuedCompletionStatus failed");
+                }
+
+            }
+
+        }
+
+        // netpoll checks for ready network connections.
         // Returns list of goroutines that become runnable.
-        private static ref g netpoll(bool block)
+        // delay < 0: blocks indefinitely
+        // delay == 0: does not block, just polls
+        // delay > 0: block for up to that many nanoseconds
+        private static gList netpoll(long delay)
         {
             array<overlappedEntry> entries = new array<overlappedEntry>(64L);
-            uint wait = default;            uint qty = default;            uint key = default;            uint flags = default;            uint n = default;            uint i = default;
+            uint wait = default;            ref uint qty = ref heap(out ptr<uint> _addr_qty);            ref uint flags = ref heap(out ptr<uint> _addr_flags);            ref uint n = ref heap(out ptr<uint> _addr_n);            uint i = default;
 
             int errno = default;
-            ref net_op op = default;
-            guintptr gp = default;
+            ptr<net_op> op;
+            ref gList toRun = ref heap(out ptr<gList> _addr_toRun);
 
             var mp = getg().m;
 
             if (iocphandle == _INVALID_HANDLE_VALUE)
             {
-                return null;
+                return new gList();
             }
-            wait = 0L;
-            if (block)
+
+            if (delay < 0L)
             {
                 wait = _INFINITE;
             }
-retry:
-            if (_GetQueuedCompletionStatusEx != null)
+            else if (delay == 0L)
             {
-                n = uint32(len(entries) / int(gomaxprocs));
-                if (n < 8L)
-                {
-                    n = 8L;
-                }
-                if (block)
-                {
-                    mp.blocked = true;
-                }
-                if (stdcall6(_GetQueuedCompletionStatusEx, iocphandle, uintptr(@unsafe.Pointer(ref entries[0L])), uintptr(n), uintptr(@unsafe.Pointer(ref n)), uintptr(wait), 0L) == 0L)
-                {
-                    mp.blocked = false;
-                    errno = int32(getlasterror());
-                    if (!block && errno == _WAIT_TIMEOUT)
-                    {
-                        return null;
-                    }
-                    println("runtime: GetQueuedCompletionStatusEx failed (errno=", errno, ")");
-                    throw("runtime: netpoll failed");
-                }
+                wait = 0L;
+            }
+            else if (delay < 1e6F)
+            {
+                wait = 1L;
+            }
+            else if (delay < 1e15F)
+            {
+                wait = uint32(delay / 1e6F);
+            }
+            else
+            { 
+                // An arbitrary cap on how long to wait for a timer.
+                // 1e9 ms == ~11.5 days.
+                wait = 1e9F;
+
+            }
+
+            n = uint32(len(entries) / int(gomaxprocs));
+            if (n < 8L)
+            {
+                n = 8L;
+            }
+
+            if (delay != 0L)
+            {
+                mp.blocked = true;
+            }
+
+            if (stdcall6(_GetQueuedCompletionStatusEx, iocphandle, uintptr(@unsafe.Pointer(_addr_entries[0L])), uintptr(n), uintptr(@unsafe.Pointer(_addr_n)), uintptr(wait), 0L) == 0L)
+            {
                 mp.blocked = false;
-                for (i = 0L; i < n; i++)
+                errno = int32(getlasterror());
+                if (errno == _WAIT_TIMEOUT)
                 {
-                    op = entries[i].op;
+                    return new gList();
+                }
+
+                println("runtime: GetQueuedCompletionStatusEx failed (errno=", errno, ")");
+                throw("runtime: netpoll failed");
+
+            }
+
+            mp.blocked = false;
+            for (i = 0L; i < n; i++)
+            {
+                op = entries[i].op;
+                if (op != null)
+                {
                     errno = 0L;
                     qty = 0L;
-                    if (stdcall5(_WSAGetOverlappedResult, op.pd.fd, uintptr(@unsafe.Pointer(op)), uintptr(@unsafe.Pointer(ref qty)), 0L, uintptr(@unsafe.Pointer(ref flags))) == 0L)
+                    if (stdcall5(_WSAGetOverlappedResult, op.pd.fd, uintptr(@unsafe.Pointer(op)), uintptr(@unsafe.Pointer(_addr_qty)), 0L, uintptr(@unsafe.Pointer(_addr_flags))) == 0L)
                     {
                         errno = int32(getlasterror());
                     }
-                    handlecompletion(ref gp, op, errno, qty);
-                }
-            else
 
-            }            {
-                op = null;
-                errno = 0L;
-                qty = 0L;
-                if (block)
-                {
-                    mp.blocked = true;
+                    handlecompletion(_addr_toRun, op, errno, qty);
+
                 }
-                if (stdcall5(_GetQueuedCompletionStatus, iocphandle, uintptr(@unsafe.Pointer(ref qty)), uintptr(@unsafe.Pointer(ref key)), uintptr(@unsafe.Pointer(ref op)), uintptr(wait)) == 0L)
+                else
                 {
-                    mp.blocked = false;
-                    errno = int32(getlasterror());
-                    if (!block && errno == _WAIT_TIMEOUT)
-                    {
-                        return null;
+                    atomic.Store(_addr_netpollWakeSig, 0L);
+                    if (delay == 0L)
+                    { 
+                        // Forward the notification to the
+                        // blocked poller.
+                        netpollBreak();
+
                     }
-                    if (op == null)
-                    {
-                        println("runtime: GetQueuedCompletionStatus failed (errno=", errno, ")");
-                        throw("runtime: netpoll failed");
-                    } 
-                    // dequeued failed IO packet, so report that
+
                 }
-                mp.blocked = false;
-                handlecompletion(ref gp, op, errno, qty);
+
             }
-            if (block && gp == 0L)
-            {
-                goto retry;
-            }
-            return gp.ptr();
+
+            return toRun;
+
         }
 
-        private static void handlecompletion(ref guintptr gpp, ref net_op op, int errno, uint qty)
+        private static void handlecompletion(ptr<gList> _addr_toRun, ptr<net_op> _addr_op, int errno, uint qty)
         {
-            if (op == null)
-            {
-                println("runtime: GetQueuedCompletionStatus returned op == nil");
-                throw("runtime: netpoll failed");
-            }
+            ref gList toRun = ref _addr_toRun.val;
+            ref net_op op = ref _addr_op.val;
+
             var mode = op.mode;
             if (mode != 'r' && mode != 'w')
             {
-                println("runtime: GetQueuedCompletionStatus returned invalid mode=", mode);
+                println("runtime: GetQueuedCompletionStatusEx returned invalid mode=", mode);
                 throw("runtime: netpoll failed");
             }
+
             op.errno = errno;
             op.qty = qty;
-            netpollready(gpp, op.pd, mode);
+            netpollready(toRun, op.pd, mode);
+
         }
     }
 }

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2020 August 29 08:38:32 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:27:52 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\timestruct.go
 
@@ -18,7 +18,7 @@ namespace go
         // nanoseconds since the Unix epoch.
         public static long TimespecToNsec(Timespec ts)
         {
-            return int64(ts.Sec) * 1e9F + int64(ts.Nsec);
+            return ts.Nano();
         }
 
         // NsecToTimespec takes a number of nanoseconds since the Unix epoch
@@ -32,14 +32,16 @@ namespace go
                 nsec += 1e9F;
                 sec--;
             }
+
             return setTimespec(sec, nsec);
+
         }
 
         // TimevalToNsec converts a Timeval value into a number of nanoseconds
         // since the Unix epoch.
         public static long TimevalToNsec(Timeval tv)
         {
-            return int64(tv.Sec) * 1e9F + int64(tv.Usec) * 1e3F;
+            return tv.Nano();
         }
 
         // NsecToTimeval takes a number of nanoseconds since the Unix epoch
@@ -54,7 +56,9 @@ namespace go
                 usec += 1e6F;
                 sec--;
             }
+
             return setTimeval(sec, usec);
+
         }
     }
 }

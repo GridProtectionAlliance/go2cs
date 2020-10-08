@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:00:25 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:26 UTC
 // Original source: C:\Go\src\cmd\fix\typecheck.go
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -69,7 +69,9 @@ namespace go
             {
                 return "";
             }
+
             return t[len("type ")..];
+
         }
 
         private static bool isType(@string t)
@@ -84,7 +86,7 @@ namespace go
 
         public partial struct TypeConfig
         {
-            public map<@string, ref Type> Type;
+            public map<@string, ptr<Type>> Type;
             public map<@string, @string> Var;
             public map<@string, @string> Func; // External maps from a name to its type.
 // It provides additional typings not present in the Go source itself.
@@ -94,8 +96,10 @@ namespace go
 
         // typeof returns the type of the given name, which may be of
         // the form "x" or "p.X".
-        private static @string @typeof(this ref TypeConfig cfg, @string name)
+        private static @string @typeof(this ptr<TypeConfig> _addr_cfg, @string name)
         {
+            ref TypeConfig cfg = ref _addr_cfg.val;
+
             if (cfg.Var != null)
             {
                 {
@@ -111,7 +115,9 @@ namespace go
                     t = t__prev2;
 
                 }
+
             }
+
             if (cfg.Func != null)
             {
                 {
@@ -127,8 +133,11 @@ namespace go
                     t = t__prev2;
 
                 }
+
             }
+
             return "";
+
         }
 
         // Type describes the Fields and Methods of a type.
@@ -144,8 +153,11 @@ namespace go
 
         // dot returns the type of "typ.name", making its decision
         // using the type information in cfg.
-        private static @string dot(this ref Type typ, ref TypeConfig cfg, @string name)
+        private static @string dot(this ptr<Type> _addr_typ, ptr<TypeConfig> _addr_cfg, @string name)
         {
+            ref Type typ = ref _addr_typ.val;
+            ref TypeConfig cfg = ref _addr_cfg.val;
+
             if (typ.Field != null)
             {
                 {
@@ -161,7 +173,9 @@ namespace go
                     t = t__prev2;
 
                 }
+
             }
+
             if (typ.Method != null)
             {
                 {
@@ -177,7 +191,9 @@ namespace go
                     t = t__prev2;
 
                 }
+
             }
+
             foreach (var (_, e) in typ.Embed)
             {
                 var etyp = cfg.Type[e];
@@ -196,9 +212,12 @@ namespace go
                         t = t__prev2;
 
                     }
+
                 }
+
             }
             return "";
+
         }
 
         // typecheck type checks the AST f assuming the information in cfg.
@@ -206,12 +225,17 @@ namespace go
         // typeof maps AST nodes to type information in gofmt string form.
         // assign maps type strings to lists of expressions that were assigned
         // to values of another type that were assigned to that type.
-        private static (object, map<@string, slice<object>>) typecheck(ref TypeConfig _cfg, ref ast.File _f) => func(_cfg, _f, (ref TypeConfig cfg, ref ast.File f, Defer defer, Panic _, Recover __) =>
+        private static (object, map<@string, slice<object>>) typecheck(ptr<TypeConfig> _addr_cfg, ptr<ast.File> _addr_f) => func((defer, _, __) =>
         {
+            object @typeof = default;
+            map<@string, slice<object>> assign = default;
+            ref TypeConfig cfg = ref _addr_cfg.val;
+            ref ast.File f = ref _addr_f.val;
+
             typeof = make();
             assign = make_map<@string, slice<object>>();
-            TypeConfig cfg1 = ref new TypeConfig();
-            cfg1.Value = cfg.Value; // make copy so we can add locally
+            ptr<TypeConfig> cfg1 = addr(new TypeConfig());
+            cfg1.val = cfg; // make copy so we can add locally
             var copied = false; 
 
             // If we import "C", add types of cgo objects.
@@ -229,44 +253,51 @@ namespace go
                     {
                         return err;
                     }
+
                     var (dir, err) = ioutil.TempDir(os.TempDir(), "fix_cgo_typecheck");
                     if (err != null)
                     {
                         return err;
                     }
+
                     defer(os.RemoveAll(dir));
                     err = ioutil.WriteFile(filepath.Join(dir, "in.go"), txt, 0600L);
                     if (err != null)
                     {
                         return err;
                     }
+
                     var cmd = exec.Command(filepath.Join(runtime.GOROOT(), "bin", "go"), "tool", "cgo", "-objdir", dir, "-srcdir", dir, "in.go");
                     err = cmd.Run();
                     if (err != null)
                     {
                         return err;
                     }
+
                     var (out, err) = ioutil.ReadFile(filepath.Join(dir, "_cgo_gotypes.go"));
                     if (err != null)
                     {
                         return err;
                     }
+
                     var (cgo, err) = parser.ParseFile(token.NewFileSet(), "cgo.go", out, 0L);
                     if (err != null)
                     {
                         return err;
                     }
+
                     {
                         var decl__prev1 = decl;
 
                         foreach (var (_, __decl) in cgo.Decls)
                         {
                             decl = __decl;
-                            ref ast.FuncDecl (fn, ok) = decl._<ref ast.FuncDecl>();
+                            ptr<ast.FuncDecl> (fn, ok) = decl._<ptr<ast.FuncDecl>>();
                             if (!ok)
                             {
                                 continue;
                             }
+
                             if (strings.HasPrefix(fn.Name.Name, "_Cfunc_"))
                             {
                                 slice<@string> @params = default;                                slice<@string> results = default;
@@ -274,28 +305,32 @@ namespace go
                                 foreach (var (_, p) in fn.Type.Params.List)
                                 {
                                     var t = gofmt(p.Type);
-                                    t = strings.Replace(t, "_Ctype_", "C.", -1L);
+                                    t = strings.ReplaceAll(t, "_Ctype_", "C.");
                                     params = append(params, t);
                                 }
                                 foreach (var (_, r) in fn.Type.Results.List)
                                 {
                                     t = gofmt(r.Type);
-                                    t = strings.Replace(t, "_Ctype_", "C.", -1L);
+                                    t = strings.ReplaceAll(t, "_Ctype_", "C.");
                                     results = append(results, t);
                                 }
                                 cfg.External["C." + fn.Name.Name[7L..]] = joinFunc(params, results);
+
                             }
+
                         }
 
                         decl = decl__prev1;
                     }
 
                     return null;
+
                 }();
                 if (err != null)
                 {
                     fmt.Printf("warning: no cgo types: %s\n", err);
                 }
+
             } 
 
             // gather function declarations
@@ -305,12 +340,13 @@ namespace go
                 foreach (var (_, __decl) in f.Decls)
                 {
                     decl = __decl;
-                    (fn, ok) = decl._<ref ast.FuncDecl>();
+                    (fn, ok) = decl._<ptr<ast.FuncDecl>>();
                     if (!ok)
                     {
                         continue;
                     }
-                    typecheck1(cfg, fn.Type, typeof, assign);
+
+                    typecheck1(_addr_cfg, fn.Type, typeof, assign);
                     t = typeof[fn.Type];
                     if (fn.Recv != null)
                     { 
@@ -322,15 +358,20 @@ namespace go
                             {
                                 continue;
                             }
+
                             rcvr = mkType(gofmt(fn.Recv.List[0L].Type));
                             typeof[fn.Recv.List[0L].Type] = rcvr;
+
                         }
+
                         rcvr = getType(rcvr);
                         if (rcvr != "" && rcvr[0L] == '*')
                         {
                             rcvr = rcvr[1L..];
                         }
+
                         typeof[rcvr + "." + fn.Name.Name] = t;
+
                     }
                     else
                     {
@@ -342,11 +383,14 @@ namespace go
                         {
                             t = gofmt(fn.Type);
                         }
+
                         typeof[fn.Name] = t; 
 
                         // Record typeof[fn.Name.Obj] for future references to fn.Name.
                         typeof[fn.Name.Obj] = t;
+
                     }
+
                 } 
 
                 // gather struct declarations
@@ -360,7 +404,7 @@ namespace go
                 foreach (var (_, __decl) in f.Decls)
                 {
                     decl = __decl;
-                    ref ast.GenDecl (d, ok) = decl._<ref ast.GenDecl>();
+                    ptr<ast.GenDecl> (d, ok) = decl._<ptr<ast.GenDecl>>();
                     if (ok)
                     {
                         {
@@ -371,62 +415,68 @@ namespace go
                                 s = __s;
                                 switch (s.type())
                                 {
-                                    case ref ast.TypeSpec s:
+                                    case ptr<ast.TypeSpec> s:
                                         if (cfg1.Type[s.Name.Name] != null)
                                         {
                                             break;
                                         }
+
                                         if (!copied)
                                         {
                                             copied = true; 
                                             // Copy map lazily: it's time.
-                                            cfg1.Type = make_map<@string, ref Type>();
+                                            cfg1.Type = make_map<@string, ptr<Type>>();
                                             foreach (var (k, v) in cfg.Type)
                                             {
                                                 cfg1.Type[k] = v;
                                             }
+
                                         }
-                                        t = ref new Type(Field:map[string]string{});
+
+                                        t = addr(new Type(Field:map[string]string{}));
                                         cfg1.Type[s.Name.Name] = t;
                                         switch (s.Type.type())
                                         {
-                                            case ref ast.StructType st:
+                                            case ptr<ast.StructType> st:
                                                 foreach (var (_, f) in st.Fields.List)
                                                 {
                                                     foreach (var (_, n) in f.Names)
                                                     {
                                                         t.Field[n.Name] = gofmt(f.Type);
                                                     }
+
                                                 }
                                                 break;
-                                            case ref ast.ArrayType st:
+                                            case ptr<ast.ArrayType> st:
                                                 t.Def = gofmt(st);
                                                 break;
-                                            case ref ast.StarExpr st:
+                                            case ptr<ast.StarExpr> st:
                                                 t.Def = gofmt(st);
                                                 break;
-                                            case ref ast.MapType st:
+                                            case ptr<ast.MapType> st:
                                                 t.Def = gofmt(st);
                                                 break;
                                         }
                                         break;
                                 }
+
                             }
 
                             s = s__prev2;
                         }
-
                     }
+
                 }
 
                 decl = decl__prev1;
             }
 
-            typecheck1(cfg1, f, typeof, assign);
+            typecheck1(_addr_cfg1, f, typeof, assign);
             return (typeof, assign);
+
         });
 
-        private static slice<ast.Expr> makeExprList(slice<ref ast.Ident> a)
+        private static slice<ast.Expr> makeExprList(slice<ptr<ast.Ident>> a)
         {
             slice<ast.Expr> b = default;
             foreach (var (_, x) in a)
@@ -434,13 +484,16 @@ namespace go
                 b = append(b, x);
             }
             return b;
+
         }
 
         // Typecheck1 is the recursive form of typecheck.
         // It is like typecheck but adds to the information in typeof
         // instead of allocating a new map.
-        private static void typecheck1(ref TypeConfig _cfg, object f, object @typeof, map<@string, slice<object>> assign) => func(_cfg, (ref TypeConfig cfg, Defer defer, Panic _, Recover __) =>
-        { 
+        private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @typeof, map<@string, slice<object>> assign) => func((defer, _, __) =>
+        {
+            ref TypeConfig cfg = ref _addr_cfg.val;
+ 
             // set sets the type of n to typ.
             // If isDecl is true, n is being declared.
             Action<ast.Expr, @string, bool> set = (n, typ, isDecl) =>
@@ -451,8 +504,11 @@ namespace go
                     {
                         assign[typ] = append(assign[typ], n);
                     }
-                    return;
+
+                    return ;
+
                 }
+
                 typeof[n] = typ; 
 
                 // If we obtained typ from the declaration of x
@@ -462,9 +518,9 @@ namespace go
                 // struct fields. The real type checker will be
                 // more accurate so we won't need the cheat.
                 {
-                    ref ast.Ident id__prev1 = id;
+                    ptr<ast.Ident> id__prev1 = id;
 
-                    ref ast.Ident (id, ok) = n._<ref ast.Ident>();
+                    ptr<ast.Ident> (id, ok) = n._<ptr<ast.Ident>>();
 
                     if (ok && id.Obj != null && (isDecl || typeof[id.Obj] == ""))
                     {
@@ -474,6 +530,7 @@ namespace go
                     id = id__prev1;
 
                 }
+
             } 
 
             // Type-check an assignment lhs = rhs.
@@ -489,7 +546,7 @@ namespace go
                 if (len(lhs) > 1L && len(rhs) == 1L)
                 {
                     {
-                        ref ast.CallExpr (_, ok) = rhs[0L]._<ref ast.CallExpr>();
+                        ptr<ast.CallExpr> (_, ok) = rhs[0L]._<ptr<ast.CallExpr>>();
 
                         if (ok)
                         {
@@ -506,20 +563,25 @@ namespace go
 
                                 i = i__prev1;
                             }
-                            return;
+                            return ;
+
                         }
 
                     }
+
                 }
+
                 if (len(lhs) == 1L && len(rhs) == 2L)
                 { 
                     // x = y, ok
                     rhs = rhs[..1L];
+
                 }
                 else if (len(lhs) == 2L && len(rhs) == 1L)
                 { 
                     // x, ok = y
                     lhs = lhs[..1L];
+
                 } 
 
                 // Match as much as we can.
@@ -538,11 +600,13 @@ namespace go
                         {
                             set(y, typeof[x], false);
                         }
+
                     }
 
 
                     i = i__prev1;
                 }
+
             }
 ;
 
@@ -553,7 +617,9 @@ namespace go
                 {
                     return typ.Def;
                 }
+
                 return s;
+
             } 
 
             // The main type check is a recursive algorithm implemented
@@ -570,20 +636,21 @@ namespace go
             // to know the type of the function we are checking.
             // The before function records that information on
             // the curfn stack.
-            slice<ref ast.FuncType> curfn = default;
+            slice<ptr<ast.FuncType>> curfn = default;
 
             Action<object> before = n =>
             { 
                 // push function type on stack
                 switch (n.type())
                 {
-                    case ref ast.FuncDecl n:
+                    case ptr<ast.FuncDecl> n:
                         curfn = append(curfn, n.Type);
                         break;
-                    case ref ast.FuncLit n:
+                    case ptr<ast.FuncLit> n:
                         curfn = append(curfn, n.Type);
                         break;
                 }
+
             } 
 
             // After is the real type checker.
@@ -594,8 +661,9 @@ namespace go
             {
                 if (n == null)
                 {
-                    return;
+                    return ;
                 }
+
                 if (false && reflect.TypeOf(n).Kind() == reflect.Ptr)
                 { // debugging trace
                     defer(() =>
@@ -614,20 +682,23 @@ namespace go
                             t = t__prev2;
 
                         }
+
                     }());
+
                 }
+
                 switch (n.type())
                 {
-                    case ref ast.FuncDecl n:
+                    case ptr<ast.FuncDecl> n:
                         curfn = curfn[..len(curfn) - 1L];
                         break;
-                    case ref ast.FuncLit n:
+                    case ptr<ast.FuncLit> n:
                         curfn = curfn[..len(curfn) - 1L];
                         break;
-                    case ref ast.FuncType n:
+                    case ptr<ast.FuncType> n:
                         typeof[n] = mkType(joinFunc(split(typeof[n.Params]), split(typeof[n.Results])));
                         break;
-                    case ref ast.FieldList n:
+                    case ptr<ast.FieldList> n:
                         t = "";
                         foreach (var (_, field) in n.List)
                         {
@@ -635,11 +706,13 @@ namespace go
                             {
                                 t += ", ";
                             }
+
                             t += typeof[field];
+
                         }
                         typeof[n] = t;
                         break;
-                    case ref ast.Field n:
+                    case ptr<ast.Field> n:
                         @string all = "";
                         t = typeof[n.Type];
                         if (!isType(t))
@@ -648,7 +721,9 @@ namespace go
                             // and we might care about that type.
                             t = mkType(gofmt(n.Type));
                             typeof[n.Type] = t;
+
                         }
+
                         t = getType(t);
                         if (len(n.Names) == 0L)
                         {
@@ -657,7 +732,7 @@ namespace go
                         else
                         {
                             {
-                                ref ast.Ident id__prev1 = id;
+                                ptr<ast.Ident> id__prev1 = id;
 
                                 foreach (var (_, __id) in n.Names)
                                 {
@@ -666,18 +741,20 @@ namespace go
                                     {
                                         all += ", ";
                                     }
+
                                     all += t;
                                     typeof[id.Obj] = t;
                                     typeof[id] = t;
+
                                 }
 
                                 id = id__prev1;
                             }
-
                         }
+
                         typeof[n] = all;
                         break;
-                    case ref ast.ValueSpec n:
+                    case ptr<ast.ValueSpec> n:
                         if (n.Type != null)
                         {
                             t = typeof[n.Type];
@@ -686,9 +763,10 @@ namespace go
                                 t = mkType(gofmt(n.Type));
                                 typeof[n.Type] = t;
                             }
+
                             t = getType(t);
                             {
-                                ref ast.Ident id__prev1 = id;
+                                ptr<ast.Ident> id__prev1 = id;
 
                                 foreach (var (_, __id) in n.Names)
                                 {
@@ -698,15 +776,14 @@ namespace go
 
                                 id = id__prev1;
                             }
-
                         } 
                         // Now treat same as assignment.
                         typecheckAssign(makeExprList(n.Names), n.Values, true);
                         break;
-                    case ref ast.AssignStmt n:
+                    case ptr<ast.AssignStmt> n:
                         typecheckAssign(n.Lhs, n.Rhs, n.Tok == token.DEFINE);
                         break;
-                    case ref ast.Ident n:
+                    case ptr<ast.Ident> n:
                         {
                             var t__prev1 = t;
 
@@ -720,8 +797,10 @@ namespace go
                             t = t__prev1;
 
                         }
+
+
                         break;
-                    case ref ast.SelectorExpr n:
+                    case ptr<ast.SelectorExpr> n:
                         var name = n.Sel.Name;
                         {
                             var t__prev1 = t;
@@ -746,23 +825,26 @@ namespace go
                                             if (t != "")
                                             {
                                                 typeof[n] = t;
-                                                return;
+                                                return ;
                                             }
 
                                             t = t__prev3;
 
                                         }
+
                                     }
 
                                     typ = typ__prev2;
 
                                 }
+
                                 var tt = typeof[t + "." + name];
                                 if (isType(tt))
                                 {
                                     typeof[n] = getType(tt);
-                                    return;
+                                    return ;
                                 }
+
                             } 
                             // Package selector.
 
@@ -773,7 +855,7 @@ namespace go
                         {
                             var x__prev1 = x;
 
-                            ref ast.Ident (x, ok) = n.X._<ref ast.Ident>();
+                            ptr<ast.Ident> (x, ok) = n.X._<ptr<ast.Ident>>();
 
                             if (ok && x.Obj == null)
                             {
@@ -781,8 +863,9 @@ namespace go
                                 if (cfg.Type[str] != null)
                                 {
                                     typeof[n] = mkType(str);
-                                    return;
+                                    return ;
                                 }
+
                                 {
                                     var t__prev2 = t;
 
@@ -791,29 +874,32 @@ namespace go
                                     if (t != "")
                                     {
                                         typeof[n] = t;
-                                        return;
+                                        return ;
                                     }
 
                                     t = t__prev2;
 
                                 }
+
                             }
 
                             x = x__prev1;
 
                         }
+
+
                         break;
-                    case ref ast.CallExpr n:
+                    case ptr<ast.CallExpr> n:
                         if (isTopName(n.Fun, "make") && len(n.Args) >= 1L)
                         {
                             typeof[n] = gofmt(n.Args[0L]);
-                            return;
+                            return ;
                         } 
                         // new(T) has type *T
                         if (isTopName(n.Fun, "new") && len(n.Args) == 1L)
                         {
                             typeof[n] = "*" + gofmt(n.Args[0L]);
-                            return;
+                            return ;
                         } 
                         // Otherwise, use type of function to determine arguments.
                         t = typeof[n.Fun];
@@ -821,11 +907,13 @@ namespace go
                         {
                             t = cfg.External[gofmt(n.Fun)];
                         }
+
                         var (in, out) = splitFunc(t);
                         if (in == null && out == null)
                         {
-                            return;
+                            return ;
                         }
+
                         typeof[n] = join(out);
                         {
                             long i__prev1 = i;
@@ -838,20 +926,22 @@ namespace go
                                 {
                                     break;
                                 }
+
                                 if (typeof[arg] == "")
                                 {
                                     typeof[arg] = in[i];
                                 }
+
                             }
 
                             i = i__prev1;
                         }
                         break;
-                    case ref ast.TypeAssertExpr n:
+                    case ptr<ast.TypeAssertExpr> n:
                         if (n.Type == null)
                         {
                             typeof[n] = typeof[n.X];
-                            return;
+                            return ;
                         } 
                         // x.(T) has type T.
                         {
@@ -871,11 +961,13 @@ namespace go
                             t = t__prev1;
 
                         }
+
+
                         break;
-                    case ref ast.SliceExpr n:
+                    case ptr<ast.SliceExpr> n:
                         typeof[n] = typeof[n.X];
                         break;
-                    case ref ast.IndexExpr n:
+                    case ptr<ast.IndexExpr> n:
                         t = expand(typeof[n.X]);
                         if (strings.HasPrefix(t, "[") || strings.HasPrefix(t, "map["))
                         { 
@@ -894,9 +986,11 @@ namespace go
                                 i = i__prev2;
 
                             }
+
                         }
+
                         break;
-                    case ref ast.StarExpr n:
+                    case ptr<ast.StarExpr> n:
                         t = expand(typeof[n.X]);
                         if (isType(t))
                         {
@@ -906,15 +1000,17 @@ namespace go
                         {
                             typeof[n] = t[len("*")..];
                         }
+
                         break;
-                    case ref ast.UnaryExpr n:
+                    case ptr<ast.UnaryExpr> n:
                         t = typeof[n.X];
                         if (t != "" && n.Op == token.AND)
                         {
                             typeof[n] = "*" + t;
                         }
+
                         break;
-                    case ref ast.CompositeLit n:
+                    case ptr<ast.CompositeLit> n:
                         typeof[n] = gofmt(n.Type); 
 
                         // Propagate types down to values used in the composite literal.
@@ -937,9 +1033,9 @@ namespace go
                                         {
                                             e = __e;
                                             {
-                                                ref ast.KeyValueExpr kv__prev3 = kv;
+                                                ptr<ast.KeyValueExpr> kv__prev3 = kv;
 
-                                                ref ast.KeyValueExpr (kv, ok) = e._<ref ast.KeyValueExpr>();
+                                                ptr<ast.KeyValueExpr> (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
 
                                                 if (ok)
                                                 {
@@ -949,21 +1045,24 @@ namespace go
                                                 kv = kv__prev3;
 
                                             }
+
                                             if (typeof[e] == "")
                                             {
                                                 typeof[e] = et;
                                             }
+
                                         }
 
                                         e = e__prev1;
                                     }
-
                                 }
 
                                 i = i__prev2;
 
                             }
+
                         }
+
                         if (strings.HasPrefix(t, "map["))
                         { // map
                             // Lazy: assume there are no nested [] in the map key type.
@@ -983,9 +1082,9 @@ namespace go
                                         {
                                             e = __e;
                                             {
-                                                ref ast.KeyValueExpr kv__prev3 = kv;
+                                                ptr<ast.KeyValueExpr> kv__prev3 = kv;
 
-                                                (kv, ok) = e._<ref ast.KeyValueExpr>();
+                                                (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
 
                                                 if (ok)
                                                 {
@@ -993,26 +1092,30 @@ namespace go
                                                     {
                                                         typeof[kv.Key] = kt;
                                                     }
+
                                                     if (typeof[kv.Value] == "")
                                                     {
                                                         typeof[kv.Value] = vt;
                                                     }
+
                                                 }
 
                                                 kv = kv__prev3;
 
                                             }
+
                                         }
 
                                         e = e__prev1;
                                     }
-
                                 }
 
                                 i = i__prev2;
 
                             }
+
                         }
+
                         {
                             var typ__prev1 = typ;
 
@@ -1027,9 +1130,9 @@ namespace go
                                     {
                                         e = __e;
                                         {
-                                            ref ast.KeyValueExpr kv__prev2 = kv;
+                                            ptr<ast.KeyValueExpr> kv__prev2 = kv;
 
-                                            (kv, ok) = e._<ref ast.KeyValueExpr>();
+                                            (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
 
                                             if (ok)
                                             {
@@ -1042,40 +1145,46 @@ namespace go
                                                         {
                                                             typeof[kv.Value] = ft;
                                                         }
+
                                                     }
 
                                                 }
+
                                             }
 
                                             kv = kv__prev2;
 
                                         }
+
                                     }
 
                                     e = e__prev1;
                                 }
-
                             }
 
                             typ = typ__prev1;
 
                         }
+
+
                         break;
-                    case ref ast.ParenExpr n:
+                    case ptr<ast.ParenExpr> n:
                         typeof[n] = typeof[n.X];
                         break;
-                    case ref ast.RangeStmt n:
+                    case ptr<ast.RangeStmt> n:
                         t = expand(typeof[n.X]);
                         if (t == "")
                         {
-                            return;
+                            return ;
                         }
+
                         @string key = default;                        @string value = default;
 
                         if (t == "string")
                         {
                             key = "int";
                             value = "rune";
+
                         }
                         else if (strings.HasPrefix(t, "["))
                         {
@@ -1093,6 +1202,7 @@ namespace go
                                 i = i__prev3;
 
                             }
+
                         }
                         else if (strings.HasPrefix(t, "map["))
                         {
@@ -1105,18 +1215,22 @@ namespace go
                                 {
                                     key = t[4L..i];
                                     value = t[i + 1L..];
+
                                 }
 
                                 i = i__prev4;
 
                             }
+
                         }
+
                         var changed = false;
                         if (n.Key != null && key != "")
                         {
                             changed = true;
                             set(n.Key, key, n.Tok == token.DEFINE);
                         }
+
                         if (n.Value != null && value != "")
                         {
                             changed = true;
@@ -1126,20 +1240,23 @@ namespace go
                         // Do it again now that we have that type info.
                         if (changed)
                         {
-                            typecheck1(cfg, n.Body, typeof, assign);
+                            typecheck1(_addr_cfg, n.Body, typeof, assign);
                         }
+
                         break;
-                    case ref ast.TypeSwitchStmt n:
-                        ref ast.AssignStmt (as, ok) = n.Assign._<ref ast.AssignStmt>();
+                    case ptr<ast.TypeSwitchStmt> n:
+                        ptr<ast.AssignStmt> (as, ok) = n.Assign._<ptr<ast.AssignStmt>>();
                         if (!ok)
                         {
-                            return;
+                            return ;
                         }
-                        ref ast.Ident (varx, ok) = @as.Lhs[0L]._<ref ast.Ident>();
+
+                        ptr<ast.Ident> (varx, ok) = @as.Lhs[0L]._<ptr<ast.Ident>>();
                         if (!ok)
                         {
-                            return;
+                            return ;
                         }
+
                         t = typeof[varx];
                         {
                             var cas__prev1 = cas;
@@ -1147,7 +1264,7 @@ namespace go
                             foreach (var (_, __cas) in n.Body.List)
                             {
                                 cas = __cas;
-                                ref ast.CaseClause cas = cas._<ref ast.CaseClause>();
+                                ptr<ast.CaseClause> cas = cas._<ptr<ast.CaseClause>>();
                                 if (len(cas.List) == 1L)
                                 { 
                                     // Variable has specific type only when there is
@@ -1162,13 +1279,15 @@ namespace go
                                             tt = getType(tt);
                                             typeof[varx] = tt;
                                             typeof[varx.Obj] = tt;
-                                            typecheck1(cfg, cas.Body, typeof, assign);
+                                            typecheck1(_addr_cfg, cas.Body, typeof, assign);
                                         }
 
                                         tt = tt__prev2;
 
                                     }
+
                                 }
+
                             } 
                             // Restore t.
 
@@ -1178,12 +1297,14 @@ namespace go
                         typeof[varx] = t;
                         typeof[varx.Obj] = t;
                         break;
-                    case ref ast.ReturnStmt n:
+                    case ptr<ast.ReturnStmt> n:
                         if (len(curfn) == 0L)
                         { 
                             // Probably can't happen.
-                            return;
+                            return ;
+
                         }
+
                         var f = curfn[len(curfn) - 1L];
                         var res = n.Results;
                         if (f.Results != null)
@@ -1200,24 +1321,30 @@ namespace go
 
                                 i = i__prev1;
                             }
+
                         }
+
                         break;
-                    case ref ast.BinaryExpr n:
+                    case ptr<ast.BinaryExpr> n:
 
                         if (n.Op == token.EQL || n.Op == token.NEQ) // TODO: more cases. This is enough for the cftype fix.
                             if (typeof[n.X] != "" && typeof[n.Y] == "")
                             {
                                 typeof[n.Y] = typeof[n.X];
                             }
+
                             if (typeof[n.X] == "" && typeof[n.Y] != "")
                             {
                                 typeof[n.X] = typeof[n.Y];
                             }
+
                                                 break;
                 }
+
             }
 ;
             walkBeforeAfter(f, before, after);
+
         });
 
         // Convert between function type strings and lists of types.
@@ -1228,10 +1355,14 @@ namespace go
         // splitFunc splits "func(x,y,z) (a,b,c)" into ["x", "y", "z"] and ["a", "b", "c"].
         private static (slice<@string>, slice<@string>) splitFunc(@string s)
         {
+            slice<@string> @in = default;
+            slice<@string> @out = default;
+
             if (!strings.HasPrefix(s, "func("))
             {
                 return (null, null);
             }
+
             var i = len("func("); // index of beginning of 'in' arguments
             long nparen = 0L;
             for (var j = i; j < len(s); j++)
@@ -1251,13 +1382,18 @@ namespace go
                             {
                                 out = out[1L..len(out) - 1L];
                             }
+
                             return (split(s[i..j]), split(out));
+
                         }
+
                         break;
                 }
+
             }
 
             return (null, null);
+
         }
 
         // joinFunc is the inverse of splitFunc.
@@ -1272,7 +1408,9 @@ namespace go
             {
                 outs = " (" + join(out) + ")";
             }
+
             return "func(" + join(in) + ")" + outs;
+
         }
 
         // split splits "int, float" into ["int", "float"] and splits "" into [].
@@ -1290,6 +1428,7 @@ namespace go
                         {
                             i++;
                         }
+
                         break;
                     case '(': 
                         nparen++;
@@ -1300,7 +1439,9 @@ namespace go
                         { 
                             // probably can't happen
                             return null;
+
                         }
+
                         break;
                     case ',': 
                         if (nparen == 0L)
@@ -1309,22 +1450,30 @@ namespace go
                             {
                                 out = append(out, s[i..j]);
                             }
+
                             i = j + 1L;
+
                         }
+
                         break;
                 }
+
             }
 
             if (nparen != 0L)
             { 
                 // probably can't happen
                 return null;
+
             }
+
             if (i < len(s))
             {
                 out = append(out, s[i..]);
             }
+
             return out;
+
         }
 
         // join is the inverse of split.

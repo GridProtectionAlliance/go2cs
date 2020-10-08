@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2020 August 29 08:48:37 UTC
+// package ast -- go2cs converted at 2020 October 08 04:04:25 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\walk.go
 using fmt = go.fmt_package;
@@ -24,12 +24,13 @@ namespace go
 
         // Helper functions for common node lists. They may be empty.
 
-        private static void walkIdentList(Visitor v, slice<ref Ident> list)
+        private static void walkIdentList(Visitor v, slice<ptr<Ident>> list)
         {
             foreach (var (_, x) in list)
             {
                 Walk(v, x);
             }
+
         }
 
         private static void walkExprList(Visitor v, slice<Expr> list)
@@ -38,6 +39,7 @@ namespace go
             {
                 Walk(v, x);
             }
+
         }
 
         private static void walkStmtList(Visitor v, slice<Stmt> list)
@@ -46,6 +48,7 @@ namespace go
             {
                 Walk(v, x);
             }
+
         }
 
         private static void walkDeclList(Visitor v, slice<Decl> list)
@@ -54,6 +57,7 @@ namespace go
             {
                 Walk(v, x);
             }
+
         }
 
         // TODO(gri): Investigate if providing a closure to Walk leads to
@@ -71,7 +75,7 @@ namespace go
 
             if (v == null)
             {
-                return;
+                return ;
             } 
 
             // walk children
@@ -79,31 +83,34 @@ namespace go
             // of the corresponding node types in ast.go)
             switch (node.type())
             {
-                case ref Comment n:
+                case ptr<Comment> n:
                     break;
-                case ref CommentGroup n:
+                case ptr<CommentGroup> n:
                     foreach (var (_, c) in n.List)
                     {
                         Walk(v, c);
                     }
                     break;
-                case ref Field n:
+                case ptr<Field> n:
                     if (n.Doc != null)
                     {
                         Walk(v, n.Doc);
                     }
+
                     walkIdentList(v, n.Names);
                     Walk(v, n.Type);
                     if (n.Tag != null)
                     {
                         Walk(v, n.Tag);
                     }
+
                     if (n.Comment != null)
                     {
                         Walk(v, n.Comment);
                     }
+
                     break;
-                case ref FieldList n:
+                case ptr<FieldList> n:
                     {
                         var f__prev1 = f;
 
@@ -118,295 +125,327 @@ namespace go
                         f = f__prev1;
                     }
                     break;
-                case ref BadExpr n:
+                case ptr<BadExpr> n:
                     break;
-                case ref Ident n:
+                case ptr<Ident> n:
                     break;
-                case ref BasicLit n:
+                case ptr<BasicLit> n:
                     break;
-                case ref Ellipsis n:
+                case ptr<Ellipsis> n:
                     if (n.Elt != null)
                     {
                         Walk(v, n.Elt);
                     }
+
                     break;
-                case ref FuncLit n:
+                case ptr<FuncLit> n:
                     Walk(v, n.Type);
                     Walk(v, n.Body);
                     break;
-                case ref CompositeLit n:
+                case ptr<CompositeLit> n:
                     if (n.Type != null)
                     {
                         Walk(v, n.Type);
                     }
+
                     walkExprList(v, n.Elts);
                     break;
-                case ref ParenExpr n:
+                case ptr<ParenExpr> n:
                     Walk(v, n.X);
                     break;
-                case ref SelectorExpr n:
+                case ptr<SelectorExpr> n:
                     Walk(v, n.X);
                     Walk(v, n.Sel);
                     break;
-                case ref IndexExpr n:
+                case ptr<IndexExpr> n:
                     Walk(v, n.X);
                     Walk(v, n.Index);
                     break;
-                case ref SliceExpr n:
+                case ptr<SliceExpr> n:
                     Walk(v, n.X);
                     if (n.Low != null)
                     {
                         Walk(v, n.Low);
                     }
+
                     if (n.High != null)
                     {
                         Walk(v, n.High);
                     }
+
                     if (n.Max != null)
                     {
                         Walk(v, n.Max);
                     }
+
                     break;
-                case ref TypeAssertExpr n:
+                case ptr<TypeAssertExpr> n:
                     Walk(v, n.X);
                     if (n.Type != null)
                     {
                         Walk(v, n.Type);
                     }
+
                     break;
-                case ref CallExpr n:
+                case ptr<CallExpr> n:
                     Walk(v, n.Fun);
                     walkExprList(v, n.Args);
                     break;
-                case ref StarExpr n:
+                case ptr<StarExpr> n:
                     Walk(v, n.X);
                     break;
-                case ref UnaryExpr n:
+                case ptr<UnaryExpr> n:
                     Walk(v, n.X);
                     break;
-                case ref BinaryExpr n:
+                case ptr<BinaryExpr> n:
                     Walk(v, n.X);
                     Walk(v, n.Y);
                     break;
-                case ref KeyValueExpr n:
+                case ptr<KeyValueExpr> n:
                     Walk(v, n.Key);
                     Walk(v, n.Value); 
 
                     // Types
                     break;
-                case ref ArrayType n:
+                case ptr<ArrayType> n:
                     if (n.Len != null)
                     {
                         Walk(v, n.Len);
                     }
+
                     Walk(v, n.Elt);
                     break;
-                case ref StructType n:
+                case ptr<StructType> n:
                     Walk(v, n.Fields);
                     break;
-                case ref FuncType n:
+                case ptr<FuncType> n:
                     if (n.Params != null)
                     {
                         Walk(v, n.Params);
                     }
+
                     if (n.Results != null)
                     {
                         Walk(v, n.Results);
                     }
+
                     break;
-                case ref InterfaceType n:
+                case ptr<InterfaceType> n:
                     Walk(v, n.Methods);
                     break;
-                case ref MapType n:
+                case ptr<MapType> n:
                     Walk(v, n.Key);
                     Walk(v, n.Value);
                     break;
-                case ref ChanType n:
+                case ptr<ChanType> n:
                     Walk(v, n.Value); 
 
                     // Statements
                     break;
-                case ref BadStmt n:
+                case ptr<BadStmt> n:
                     break;
-                case ref DeclStmt n:
+                case ptr<DeclStmt> n:
                     Walk(v, n.Decl);
                     break;
-                case ref EmptyStmt n:
+                case ptr<EmptyStmt> n:
                     break;
-                case ref LabeledStmt n:
+                case ptr<LabeledStmt> n:
                     Walk(v, n.Label);
                     Walk(v, n.Stmt);
                     break;
-                case ref ExprStmt n:
+                case ptr<ExprStmt> n:
                     Walk(v, n.X);
                     break;
-                case ref SendStmt n:
+                case ptr<SendStmt> n:
                     Walk(v, n.Chan);
                     Walk(v, n.Value);
                     break;
-                case ref IncDecStmt n:
+                case ptr<IncDecStmt> n:
                     Walk(v, n.X);
                     break;
-                case ref AssignStmt n:
+                case ptr<AssignStmt> n:
                     walkExprList(v, n.Lhs);
                     walkExprList(v, n.Rhs);
                     break;
-                case ref GoStmt n:
+                case ptr<GoStmt> n:
                     Walk(v, n.Call);
                     break;
-                case ref DeferStmt n:
+                case ptr<DeferStmt> n:
                     Walk(v, n.Call);
                     break;
-                case ref ReturnStmt n:
+                case ptr<ReturnStmt> n:
                     walkExprList(v, n.Results);
                     break;
-                case ref BranchStmt n:
+                case ptr<BranchStmt> n:
                     if (n.Label != null)
                     {
                         Walk(v, n.Label);
                     }
+
                     break;
-                case ref BlockStmt n:
+                case ptr<BlockStmt> n:
                     walkStmtList(v, n.List);
                     break;
-                case ref IfStmt n:
+                case ptr<IfStmt> n:
                     if (n.Init != null)
                     {
                         Walk(v, n.Init);
                     }
+
                     Walk(v, n.Cond);
                     Walk(v, n.Body);
                     if (n.Else != null)
                     {
                         Walk(v, n.Else);
                     }
+
                     break;
-                case ref CaseClause n:
+                case ptr<CaseClause> n:
                     walkExprList(v, n.List);
                     walkStmtList(v, n.Body);
                     break;
-                case ref SwitchStmt n:
+                case ptr<SwitchStmt> n:
                     if (n.Init != null)
                     {
                         Walk(v, n.Init);
                     }
+
                     if (n.Tag != null)
                     {
                         Walk(v, n.Tag);
                     }
+
                     Walk(v, n.Body);
                     break;
-                case ref TypeSwitchStmt n:
+                case ptr<TypeSwitchStmt> n:
                     if (n.Init != null)
                     {
                         Walk(v, n.Init);
                     }
+
                     Walk(v, n.Assign);
                     Walk(v, n.Body);
                     break;
-                case ref CommClause n:
+                case ptr<CommClause> n:
                     if (n.Comm != null)
                     {
                         Walk(v, n.Comm);
                     }
+
                     walkStmtList(v, n.Body);
                     break;
-                case ref SelectStmt n:
+                case ptr<SelectStmt> n:
                     Walk(v, n.Body);
                     break;
-                case ref ForStmt n:
+                case ptr<ForStmt> n:
                     if (n.Init != null)
                     {
                         Walk(v, n.Init);
                     }
+
                     if (n.Cond != null)
                     {
                         Walk(v, n.Cond);
                     }
+
                     if (n.Post != null)
                     {
                         Walk(v, n.Post);
                     }
+
                     Walk(v, n.Body);
                     break;
-                case ref RangeStmt n:
+                case ptr<RangeStmt> n:
                     if (n.Key != null)
                     {
                         Walk(v, n.Key);
                     }
+
                     if (n.Value != null)
                     {
                         Walk(v, n.Value);
                     }
+
                     Walk(v, n.X);
                     Walk(v, n.Body); 
 
                     // Declarations
                     break;
-                case ref ImportSpec n:
+                case ptr<ImportSpec> n:
                     if (n.Doc != null)
                     {
                         Walk(v, n.Doc);
                     }
+
                     if (n.Name != null)
                     {
                         Walk(v, n.Name);
                     }
+
                     Walk(v, n.Path);
                     if (n.Comment != null)
                     {
                         Walk(v, n.Comment);
                     }
+
                     break;
-                case ref ValueSpec n:
+                case ptr<ValueSpec> n:
                     if (n.Doc != null)
                     {
                         Walk(v, n.Doc);
                     }
+
                     walkIdentList(v, n.Names);
                     if (n.Type != null)
                     {
                         Walk(v, n.Type);
                     }
+
                     walkExprList(v, n.Values);
                     if (n.Comment != null)
                     {
                         Walk(v, n.Comment);
                     }
+
                     break;
-                case ref TypeSpec n:
+                case ptr<TypeSpec> n:
                     if (n.Doc != null)
                     {
                         Walk(v, n.Doc);
                     }
+
                     Walk(v, n.Name);
                     Walk(v, n.Type);
                     if (n.Comment != null)
                     {
                         Walk(v, n.Comment);
                     }
+
                     break;
-                case ref BadDecl n:
+                case ptr<BadDecl> n:
                     break;
-                case ref GenDecl n:
+                case ptr<GenDecl> n:
                     if (n.Doc != null)
                     {
                         Walk(v, n.Doc);
                     }
+
                     foreach (var (_, s) in n.Specs)
                     {
                         Walk(v, s);
                     }
                     break;
-                case ref FuncDecl n:
+                case ptr<FuncDecl> n:
                     if (n.Doc != null)
                     {
                         Walk(v, n.Doc);
                     }
+
                     if (n.Recv != null)
                     {
                         Walk(v, n.Recv);
                     }
+
                     Walk(v, n.Name);
                     Walk(v, n.Type);
                     if (n.Body != null)
@@ -416,18 +455,19 @@ namespace go
 
                     // Files and packages
                     break;
-                case ref File n:
+                case ptr<File> n:
                     if (n.Doc != null)
                     {
                         Walk(v, n.Doc);
                     }
+
                     Walk(v, n.Name);
                     walkDeclList(v, n.Decls); 
                     // don't walk n.Comments - they have been
                     // visited already through the individual
                     // nodes
                     break;
-                case ref Package n:
+                case ptr<Package> n:
                     {
                         var f__prev1 = f;
 
@@ -450,6 +490,7 @@ namespace go
             }
 
             v.Visit(null);
+
         });
 
         public delegate  bool inspector(Node);
@@ -460,7 +501,9 @@ namespace go
             {
                 return f;
             }
+
             return null;
+
         }
 
         // Inspect traverses an AST in depth-first order: It starts by calling

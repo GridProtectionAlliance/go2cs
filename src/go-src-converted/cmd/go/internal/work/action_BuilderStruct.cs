@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:48 UTC
+//     Generated on 2020 October 08 04:33:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,8 +22,10 @@ using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using time = go.time_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;
@@ -49,7 +51,10 @@ namespace @internal
                 this.mkdirCache = default;
                 this.flagCache = default;
                 this.Print = default;
-                this.ComputeStaleOnly = default;
+                this.IsCmdList = default;
+                this.NeedError = default;
+                this.NeedExport = default;
+                this.NeedCompiledGoFiles = default;
                 this.objdirSeq = default;
                 this.pkgSeq = default;
                 this.output = default;
@@ -62,14 +67,17 @@ namespace @internal
                 this.buildIDCache = default;
             }
 
-            public Builder(@string WorkDir = default, map<cacheKey, ref Action> actionCache = default, map<@string, bool> mkdirCache = default, map<array<@string>, bool> flagCache = default, Func<object[], (long, error)> Print = default, bool ComputeStaleOnly = default, long objdirSeq = default, long pkgSeq = default, sync.Mutex output = default, @string scriptDir = default, sync.Mutex exec = default, channel<bool> readySema = default, actionQueue ready = default, sync.Mutex id = default, map<@string, @string> toolIDCache = default, map<@string, @string> buildIDCache = default)
+            public Builder(@string WorkDir = default, map<cacheKey, ptr<Action>> actionCache = default, map<@string, bool> mkdirCache = default, map<array<@string>, bool> flagCache = default, Func<object[], (long, error)> Print = default, bool IsCmdList = default, bool NeedError = default, bool NeedExport = default, bool NeedCompiledGoFiles = default, long objdirSeq = default, long pkgSeq = default, sync.Mutex output = default, @string scriptDir = default, sync.Mutex exec = default, channel<bool> readySema = default, actionQueue ready = default, sync.Mutex id = default, map<@string, @string> toolIDCache = default, map<@string, @string> buildIDCache = default)
             {
                 this.WorkDir = WorkDir;
                 this.actionCache = actionCache;
                 this.mkdirCache = mkdirCache;
                 this.flagCache = flagCache;
                 this.Print = Print;
-                this.ComputeStaleOnly = ComputeStaleOnly;
+                this.IsCmdList = IsCmdList;
+                this.NeedError = NeedError;
+                this.NeedExport = NeedExport;
+                this.NeedCompiledGoFiles = NeedCompiledGoFiles;
                 this.objdirSeq = objdirSeq;
                 this.pkgSeq = pkgSeq;
                 this.output = output;
@@ -102,7 +110,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Builder Builder_cast(dynamic value)
         {
-            return new Builder(value.WorkDir, value.actionCache, value.mkdirCache, value.flagCache, value.Print, value.ComputeStaleOnly, value.objdirSeq, value.pkgSeq, value.output, value.scriptDir, value.exec, value.readySema, value.ready, value.id, value.toolIDCache, value.buildIDCache);
+            return new Builder(value.WorkDir, value.actionCache, value.mkdirCache, value.flagCache, value.Print, value.IsCmdList, value.NeedError, value.NeedExport, value.NeedCompiledGoFiles, value.objdirSeq, value.pkgSeq, value.output, value.scriptDir, value.exec, value.readySema, value.ready, value.id, value.toolIDCache, value.buildIDCache);
         }
     }
 }}}}

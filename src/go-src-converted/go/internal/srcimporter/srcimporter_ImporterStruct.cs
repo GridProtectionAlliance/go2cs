@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:10 UTC
+//     Generated on 2020 October 08 04:56:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,8 +19,14 @@ using build = go.go.build_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
 using types = go.go.types_package;
+using io = go.io_package;
+using ioutil = go.io.ioutil_package;
+using os = go.os_package;
+using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
+using strings = go.strings_package;
 using sync = go.sync_package;
+using _@unsafe_ = go.@unsafe_package;
 using go;
 
 namespace go {
@@ -41,7 +47,7 @@ namespace @internal
                 this.packages = default;
             }
 
-            public Importer(ref ptr<build.Context> ctxt = default, ref ptr<token.FileSet> fset = default, types.Sizes sizes = default, map<@string, ref types.Package> packages = default)
+            public Importer(ref ptr<build.Context> ctxt = default, ref ptr<token.FileSet> fset = default, types.Sizes sizes = default, map<@string, ptr<types.Package>> packages = default)
             {
                 this.ctxt = ctxt;
                 this.fset = fset;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:40 UTC
+//     Generated on 2020 October 08 03:49:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using errors = go.errors_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
+using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
@@ -42,7 +43,7 @@ namespace archive
                 this.testHookCloseSizeOffset = default;
             }
 
-            public Writer(ref ptr<countWriter> cw = default, slice<ref header> dir = default, ref ptr<fileWriter> last = default, bool closed = default, map<ushort, Compressor> compressors = default, @string comment = default, Action<ulong, ulong> testHookCloseSizeOffset = default)
+            public Writer(ref ptr<countWriter> cw = default, slice<ptr<header>> dir = default, ref ptr<fileWriter> last = default, bool closed = default, map<ushort, Compressor> compressors = default, @string comment = default, Action<ulong, ulong> testHookCloseSizeOffset = default)
             {
                 this.cw = cw;
                 this.dir = dir;

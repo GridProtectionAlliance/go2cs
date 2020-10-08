@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:03 UTC
+//     Generated on 2020 October 08 04:56:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,12 +34,14 @@ namespace go
             // Constructors
             public gcimports(NilType _)
             {
+                this.fset = default;
                 this.packages = default;
                 this.lookup = default;
             }
 
-            public gcimports(map<@string, ref types.Package> packages = default, Lookup lookup = default)
+            public gcimports(ref ptr<token.FileSet> fset = default, map<@string, ptr<types.Package>> packages = default, Lookup lookup = default)
             {
+                this.fset = fset;
                 this.packages = packages;
                 this.lookup = lookup;
             }
@@ -64,7 +66,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static gcimports gcimports_cast(dynamic value)
         {
-            return new gcimports(value.packages, value.lookup);
+            return new gcimports(ref value.fset, value.packages, value.lookup);
         }
     }
 }}

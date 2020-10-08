@@ -6,7 +6,7 @@
 // the net package. This package is purely internal for use by the
 // net/http/httptrace package and has no stable API exposed to end
 // users.
-// package nettrace -- go2cs converted at 2020 August 29 08:25:16 UTC
+// package nettrace -- go2cs converted at 2020 October 08 03:31:19 UTC
 // import "internal/nettrace" ==> using nettrace = go.@internal.nettrace_package
 // Original source: C:\Go\src\internal\nettrace\nettrace.go
 

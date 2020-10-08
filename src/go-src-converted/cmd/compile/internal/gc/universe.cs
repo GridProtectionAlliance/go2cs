@@ -4,7 +4,7 @@
 
 // TODO(gri) This file should probably become part of package types.
 
-// package gc -- go2cs converted at 2020 August 29 09:29:51 UTC
+// package gc -- go2cs converted at 2020 October 08 04:31:40 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\universe.go
 using types = go.cmd.compile.@internal.types_package;
@@ -18,15 +18,29 @@ namespace @internal
     public static partial class gc_package
     {
         // builtinpkg is a fake package that declares the universe block.
-        private static ref types.Pkg builtinpkg = default;
-
-        private static ref types.Type itable = default; // distinguished *byte
+        private static ptr<types.Pkg> builtinpkg;
 
 
 
 
 
 
+
+        // isBuiltinFuncName reports whether name matches a builtin function
+        // name.
+        private static bool isBuiltinFuncName(@string name)
+        {
+            foreach (var (_, fn) in _addr_builtinFuncs)
+            {
+                if (fn.name == name)
+                {
+                    return true;
+                }
+
+            }
+            return false;
+
+        }
 
 
 
@@ -44,7 +58,7 @@ namespace @internal
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in basicTypes)
+                foreach (var (_, __s) in _addr_basicTypes)
                 {
                     s = __s;
                     var etype = s.etype;
@@ -52,6 +66,7 @@ namespace @internal
                     {
                         Fatalf("lexinit: %s bad etype", s.name);
                     }
+
                     var s2 = builtinpkg.Lookup(s.name);
                     var t = types.Types[etype];
                     if (t == null)
@@ -62,12 +77,16 @@ namespace @internal
                         {
                             dowidth(t);
                         }
+
                         types.Types[etype] = t;
+
                     }
+
                     s2.Def = asTypesNode(typenod(t));
                     asNode(s2.Def).Name;
 
                     @new<Name>();
+
                 }
 
                 s = s__prev1;
@@ -76,15 +95,12 @@ namespace @internal
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in builtinFuncs)
+                foreach (var (_, __s) in _addr_builtinFuncs)
                 {
-                    s = __s; 
-                    // TODO(marvin): Fix Node.EType type union.
+                    s = __s;
                     s2 = builtinpkg.Lookup(s.name);
                     s2.Def = asTypesNode(newname(s2));
-                    asNode(s2.Def).Etype;
-
-                    types.EType(s.op);
+                    asNode(s2.Def).SetSubOp(s.op);
                 }
 
                 s = s__prev1;
@@ -93,14 +109,12 @@ namespace @internal
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in unsafeFuncs)
+                foreach (var (_, __s) in _addr_unsafeFuncs)
                 {
                     s = __s;
                     s2 = unsafepkg.Lookup(s.name);
                     s2.Def = asTypesNode(newname(s2));
-                    asNode(s2.Def).Etype;
-
-                    types.EType(s.op);
+                    asNode(s2.Def).SetSubOp(s.op);
                 }
 
                 s = s__prev1;
@@ -171,6 +185,7 @@ namespace @internal
             asNode(s.Def).Name;
 
             @new<Name>();
+
         }
 
         private static void typeinit()
@@ -179,6 +194,7 @@ namespace @internal
             {
                 Fatalf("typeinit before betypeinit");
             }
+
             {
                 var et__prev1 = et;
 
@@ -191,11 +207,8 @@ namespace @internal
                 et = et__prev1;
             }
 
-            types.Types[TPTR32] = types.New(TPTR32);
-            dowidth(types.Types[TPTR32]);
-
-            types.Types[TPTR64] = types.New(TPTR64);
-            dowidth(types.Types[TPTR64]);
+            types.Types[TPTR] = types.New(TPTR);
+            dowidth(types.Types[TPTR]);
 
             var t = types.New(TUNSAFEPTR);
             types.Types[TUNSAFEPTR] = t;
@@ -206,11 +219,6 @@ namespace @internal
             @new<Name>();
             dowidth(types.Types[TUNSAFEPTR]);
 
-            types.Tptr = TPTR32;
-            if (Widthptr == 8L)
-            {
-                types.Tptr = TPTR64;
-            }
             {
                 var et__prev1 = et;
 
@@ -230,9 +238,7 @@ namespace @internal
             isFloat[TFLOAT64] = true;
 
             isComplex[TCOMPLEX64] = true;
-            isComplex[TCOMPLEX128] = true;
-
-            isforw[TFORW] = true; 
+            isComplex[TCOMPLEX128] = true; 
 
             // initialize okfor
             {
@@ -252,6 +258,7 @@ namespace @internal
                         minintval[et] = @new<Mpint>();
                         maxintval[et] = @new<Mpint>();
                     }
+
                     if (isFloat[et])
                     {
                         okforeq[et] = true;
@@ -263,6 +270,7 @@ namespace @internal
                         minfltval[et] = newMpflt();
                         maxfltval[et] = newMpflt();
                     }
+
                     if (isComplex[et])
                     {
                         okforeq[et] = true;
@@ -271,6 +279,7 @@ namespace @internal
                         okforconst[et] = true;
                         issimple[et] = true;
                     }
+
                 }
 
 
@@ -296,8 +305,7 @@ namespace @internal
             okforlen[TSLICE] = true;
             okforlen[TSTRING] = true;
 
-            okforeq[TPTR32] = true;
-            okforeq[TPTR64] = true;
+            okforeq[TPTR] = true;
             okforeq[TUNSAFEPTR] = true;
             okforeq[TINTER] = true;
             okforeq[TCHAN] = true;
@@ -342,8 +350,8 @@ namespace @internal
             okfor[ORSH] = okforand[..]; 
 
             // unary
-            okfor[OCOM] = okforand[..];
-            okfor[OMINUS] = okforarith[..];
+            okfor[OBITNOT] = okforand[..];
+            okfor[ONEG] = okforarith[..];
             okfor[ONOT] = okforbool[..];
             okfor[OPLUS] = okforarith[..]; 
 
@@ -382,50 +390,42 @@ namespace @internal
             maxfltval[TCOMPLEX64] = maxfltval[TFLOAT32];
             minfltval[TCOMPLEX64] = minfltval[TFLOAT32];
             maxfltval[TCOMPLEX128] = maxfltval[TFLOAT64];
-            minfltval[TCOMPLEX128] = minfltval[TFLOAT64]; 
+            minfltval[TCOMPLEX128] = minfltval[TFLOAT64];
 
-            // for walk to use in error messages
-            types.Types[TFUNC] = functype(null, null, null); 
-
-            // types used in front end
-            // types.Types[TNIL] got set early in lexinit
-            types.Types[TIDEAL] = types.New(TIDEAL);
-
-            types.Types[TINTER] = types.New(TINTER); 
+            types.Types[TINTER] = types.New(TINTER); // empty interface
 
             // simple aliases
-            simtype[TMAP] = types.Tptr;
-            simtype[TCHAN] = types.Tptr;
-            simtype[TFUNC] = types.Tptr;
-            simtype[TUNSAFEPTR] = types.Tptr;
+            simtype[TMAP] = TPTR;
+            simtype[TCHAN] = TPTR;
+            simtype[TFUNC] = TPTR;
+            simtype[TUNSAFEPTR] = TPTR;
 
-            array_array = int(Rnd(0L, int64(Widthptr)));
-            array_nel = int(Rnd(int64(array_array) + int64(Widthptr), int64(Widthptr)));
-            array_cap = int(Rnd(int64(array_nel) + int64(Widthptr), int64(Widthptr)));
-            sizeof_Array = int(Rnd(int64(array_cap) + int64(Widthptr), int64(Widthptr))); 
+            slicePtrOffset = 0L;
+            sliceLenOffset = Rnd(slicePtrOffset + int64(Widthptr), int64(Widthptr));
+            sliceCapOffset = Rnd(sliceLenOffset + int64(Widthptr), int64(Widthptr));
+            sizeofSlice = Rnd(sliceCapOffset + int64(Widthptr), int64(Widthptr)); 
 
             // string is same as slice wo the cap
-            sizeof_String = int(Rnd(int64(array_nel) + int64(Widthptr), int64(Widthptr)));
+            sizeofString = Rnd(sliceLenOffset + int64(Widthptr), int64(Widthptr));
 
             dowidth(types.Types[TSTRING]);
             dowidth(types.Idealstring);
 
-            itable = types.NewPtr(types.Types[TUINT8]);
         }
 
-        private static ref types.Type makeErrorInterface()
+        private static ptr<types.Type> makeErrorInterface()
         {
             var field = types.NewField();
             field.Type = types.Types[TSTRING];
-            var f = functypefield(fakeRecvField(), null, new slice<ref types.Field>(new ref types.Field[] { field }));
+            var f = functypefield(fakeRecvField(), null, new slice<ptr<types.Field>>(new ptr<types.Field>[] { field }));
 
             field = types.NewField();
             field.Sym = lookup("Error");
             field.Type = f;
 
             var t = types.New(TINTER);
-            t.SetInterface(new slice<ref types.Field>(new ref types.Field[] { field }));
-            return t;
+            t.SetInterface(new slice<ptr<types.Field>>(new ptr<types.Field>[] { field }));
+            return _addr_t!;
         }
 
         private static void lexinit1()
@@ -435,7 +435,8 @@ namespace @internal
             types.Errortype = makeErrorInterface();
             types.Errortype.Sym = s;
             types.Errortype.Orig = makeErrorInterface();
-            s.Def = asTypesNode(typenod(types.Errortype)); 
+            s.Def = asTypesNode(typenod(types.Errortype));
+            dowidth(types.Errortype); 
 
             // We create separate byte and rune types for better error messages
             // rather than just creating type alias *types.Sym's for the uint8 and
@@ -452,7 +453,8 @@ namespace @internal
             s.Def = asTypesNode(typenod(types.Bytetype));
             asNode(s.Def).Name;
 
-            @new<Name>(); 
+            @new<Name>();
+            dowidth(types.Bytetype); 
 
             // rune alias
             s = builtinpkg.Lookup("rune");
@@ -461,13 +463,14 @@ namespace @internal
             s.Def = asTypesNode(typenod(types.Runetype));
             asNode(s.Def).Name;
 
-            @new<Name>(); 
+            @new<Name>();
+            dowidth(types.Runetype); 
 
             // backend-dependent builtin types (e.g. int).
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in typedefs)
+                foreach (var (_, __s) in _addr_typedefs)
                 {
                     s = __s;
                     var s1 = builtinpkg.Lookup(s.name);
@@ -477,6 +480,7 @@ namespace @internal
                     {
                         sameas = s.sameas64;
                     }
+
                     simtype[s.etype] = sameas;
                     minfltval[s.etype] = minfltval[sameas];
                     maxfltval[s.etype] = maxfltval[sameas];
@@ -493,11 +497,11 @@ namespace @internal
                     s1.Origpkg = builtinpkg;
 
                     dowidth(t);
+
                 }
 
                 s = s__prev1;
             }
-
         }
 
         // finishUniverse makes the universe block visible within the current package.
@@ -513,18 +517,22 @@ namespace @internal
                 {
                     continue;
                 }
+
                 var s1 = lookup(s.Name);
                 if (s1.Def != null)
                 {
                     continue;
                 }
+
                 s1.Def = s.Def;
                 s1.Block = s.Block;
+
             }
             nodfp = newname(lookup(".fp"));
             nodfp.Type = types.Types[TINT32];
             nodfp.SetClass(PPARAM);
             nodfp.Name.SetUsed(true);
+
         }
     }
 }}}}

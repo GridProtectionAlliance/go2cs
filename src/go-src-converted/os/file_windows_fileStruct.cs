@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:44:06 UTC
+//     Generated on 2020 October 08 03:44:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using errors = go.errors_package;
 using poll = go.@internal.poll_package;
 using windows = go.@internal.syscall.windows_package;
 using runtime = go.runtime_package;
@@ -33,13 +34,15 @@ namespace go
                 this.pfd = default;
                 this.name = default;
                 this.dirinfo = default;
+                this.appendMode = default;
             }
 
-            public file(poll.FD pfd = default, @string name = default, ref ptr<dirInfo> dirinfo = default)
+            public file(poll.FD pfd = default, @string name = default, ref ptr<dirInfo> dirinfo = default, bool appendMode = default)
             {
                 this.pfd = pfd;
                 this.name = name;
                 this.dirinfo = dirinfo;
+                this.appendMode = appendMode;
             }
 
             // Enable comparisons between nil and file struct
@@ -62,7 +65,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static file file_cast(dynamic value)
         {
-            return new file(value.pfd, value.name, ref value.dirinfo);
+            return new file(value.pfd, value.name, ref value.dirinfo, value.appendMode);
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:18 UTC
+//     Generated on 2020 October 08 03:39:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -55,12 +56,14 @@ namespace net
             // Constructors
             public http2httpError(NilType _)
             {
+                this._ = default;
                 this.msg = default;
                 this.timeout = default;
             }
 
-            public http2httpError(@string msg = default, bool timeout = default)
+            public http2httpError(http2incomparable _ = default, @string msg = default, bool timeout = default)
             {
+                this._ = _;
                 this.msg = msg;
                 this.timeout = timeout;
             }
@@ -85,7 +88,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2httpError http2httpError_cast(dynamic value)
         {
-            return new http2httpError(value.msg, value.timeout);
+            return new http2httpError(value._, value.msg, value.timeout);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:54:46 UTC
+//     Generated on 2020 October 08 04:11:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
 using go;

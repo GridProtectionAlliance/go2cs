@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package aes -- go2cs converted at 2020 August 29 08:28:45 UTC
+// package aes -- go2cs converted at 2020 October 08 03:35:48 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\cipher.go
 using cipher = go.crypto.cipher_package;
+using subtle = go.crypto.@internal.subtle_package;
 using strconv = go.strconv_package;
 using static go.builtin;
 
@@ -15,7 +16,7 @@ namespace crypto
     public static partial class aes_package
     {
         // The AES block size in bytes.
-        public static readonly long BlockSize = 16L;
+        public static readonly long BlockSize = (long)16L;
 
         // A cipher is an instance of AES encryption using a particular key.
 
@@ -42,6 +43,9 @@ namespace crypto
         // AES-128, AES-192, or AES-256.
         public static (cipher.Block, error) NewCipher(slice<byte> key)
         {
+            cipher.Block _p0 = default;
+            error _p0 = default!;
+
             var k = len(key);
             switch (k)
             {
@@ -53,51 +57,77 @@ namespace crypto
                     break;
                     break;
                 default: 
-                    return (null, KeySizeError(k));
+                    return (null, error.As(KeySizeError(k))!);
                     break;
             }
             return newCipher(key);
+
         }
 
         // newCipherGeneric creates and returns a new cipher.Block
         // implemented in pure Go.
         private static (cipher.Block, error) newCipherGeneric(slice<byte> key)
         {
+            cipher.Block _p0 = default;
+            error _p0 = default!;
+
             var n = len(key) + 28L;
-            aesCipher c = new aesCipher(make([]uint32,n),make([]uint32,n));
+            ref aesCipher c = ref heap(new aesCipher(make([]uint32,n),make([]uint32,n)), out ptr<aesCipher> _addr_c);
             expandKeyGo(key, c.enc, c.dec);
-            return (ref c, null);
+            return (_addr_c, error.As(null!)!);
         }
 
-        private static long BlockSize(this ref aesCipher c)
+        private static long BlockSize(this ptr<aesCipher> _addr_c)
         {
+            ref aesCipher c = ref _addr_c.val;
+
             return BlockSize;
         }
 
-        private static void Encrypt(this ref aesCipher _c, slice<byte> dst, slice<byte> src) => func(_c, (ref aesCipher c, Defer _, Panic panic, Recover __) =>
+        private static void Encrypt(this ptr<aesCipher> _addr_c, slice<byte> dst, slice<byte> src) => func((_, panic, __) =>
         {
+            ref aesCipher c = ref _addr_c.val;
+
             if (len(src) < BlockSize)
             {
                 panic("crypto/aes: input not full block");
             }
+
             if (len(dst) < BlockSize)
             {
                 panic("crypto/aes: output not full block");
             }
+
+            if (subtle.InexactOverlap(dst[..BlockSize], src[..BlockSize]))
+            {
+                panic("crypto/aes: invalid buffer overlap");
+            }
+
             encryptBlockGo(c.enc, dst, src);
+
         });
 
-        private static void Decrypt(this ref aesCipher _c, slice<byte> dst, slice<byte> src) => func(_c, (ref aesCipher c, Defer _, Panic panic, Recover __) =>
+        private static void Decrypt(this ptr<aesCipher> _addr_c, slice<byte> dst, slice<byte> src) => func((_, panic, __) =>
         {
+            ref aesCipher c = ref _addr_c.val;
+
             if (len(src) < BlockSize)
             {
                 panic("crypto/aes: input not full block");
             }
+
             if (len(dst) < BlockSize)
             {
                 panic("crypto/aes: output not full block");
             }
+
+            if (subtle.InexactOverlap(dst[..BlockSize], src[..BlockSize]))
+            {
+                panic("crypto/aes: invalid buffer overlap");
+            }
+
             decryptBlockGo(c.dec, dst, src);
+
         });
     }
 }}

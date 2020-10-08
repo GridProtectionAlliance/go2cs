@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:02:53 UTC
+//     Generated on 2020 October 08 04:37:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using static go.builtin;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using go;
 
 namespace go {
@@ -34,13 +35,17 @@ namespace @internal
                 this.Pkg = default;
                 this.Shlib = default;
                 this.Hash = default;
-                this.ImportStrings = default;
+                this.Fingerprint = default;
+                this.Autolib = default;
                 this.Imports = default;
-                this.Textp = default;
-                this.DupTextSyms = default;
+                this.Main = default;
+                this.Safe = default;
+                this.Units = default;
+                this.Textp2 = default;
+                this.DupTextSyms2 = default;
             }
 
-            public Library(@string Objref = default, @string Srcref = default, @string File = default, @string Pkg = default, @string Shlib = default, @string Hash = default, slice<@string> ImportStrings = default, slice<ref Library> Imports = default, slice<ref Symbol> Textp = default, slice<ref Symbol> DupTextSyms = default)
+            public Library(@string Objref = default, @string Srcref = default, @string File = default, @string Pkg = default, @string Shlib = default, @string Hash = default, goobj2.FingerprintType Fingerprint = default, slice<goobj2.ImportedPkg> Autolib = default, slice<ptr<Library>> Imports = default, bool Main = default, bool Safe = default, slice<ptr<CompilationUnit>> Units = default, slice<LoaderSym> Textp2 = default, slice<LoaderSym> DupTextSyms2 = default)
             {
                 this.Objref = Objref;
                 this.Srcref = Srcref;
@@ -48,10 +53,14 @@ namespace @internal
                 this.Pkg = Pkg;
                 this.Shlib = Shlib;
                 this.Hash = Hash;
-                this.ImportStrings = ImportStrings;
+                this.Fingerprint = Fingerprint;
+                this.Autolib = Autolib;
                 this.Imports = Imports;
-                this.Textp = Textp;
-                this.DupTextSyms = DupTextSyms;
+                this.Main = Main;
+                this.Safe = Safe;
+                this.Units = Units;
+                this.Textp2 = Textp2;
+                this.DupTextSyms2 = DupTextSyms2;
             }
 
             // Enable comparisons between nil and Library struct
@@ -74,7 +83,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Library Library_cast(dynamic value)
         {
-            return new Library(value.Objref, value.Srcref, value.File, value.Pkg, value.Shlib, value.Hash, value.ImportStrings, value.Imports, value.Textp, value.DupTextSyms);
+            return new Library(value.Objref, value.Srcref, value.File, value.Pkg, value.Shlib, value.Hash, value.Fingerprint, value.Autolib, value.Imports, value.Main, value.Safe, value.Units, value.Textp2, value.DupTextSyms2);
         }
     }
 }}}}

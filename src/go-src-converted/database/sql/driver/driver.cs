@@ -6,7 +6,36 @@
 // drivers as used by package sql.
 //
 // Most code should use package sql.
-// package driver -- go2cs converted at 2020 August 29 10:10:47 UTC
+//
+// The driver interface has evolved over time. Drivers should implement
+// Connector and DriverContext interfaces.
+// The Connector.Connect and Driver.Open methods should never return ErrBadConn.
+// ErrBadConn should only be returned from Validator, SessionResetter, or
+// a query method if the connection is already in an invalid (e.g. closed) state.
+//
+// All Conn implementations should implement the following interfaces:
+// Pinger, SessionResetter, and Validator.
+//
+// If named parameters or context are supported, the driver's Conn should implement:
+// ExecerContext, QueryerContext, ConnPrepareContext, and ConnBeginTx.
+//
+// To support custom data types, implement NamedValueChecker. NamedValueChecker
+// also allows queries to accept per-query options as a parameter by returning
+// ErrRemoveArgument from CheckNamedValue.
+//
+// If multiple result sets are supported, Rows should implement RowsNextResultSet.
+// If the driver knows how to describe the types present in the returned result
+// it should implement the following interfaces: RowsColumnTypeScanType,
+// RowsColumnTypeDatabaseTypeName, RowsColumnTypeLength, RowsColumnTypeNullable,
+// and RowsColumnTypePrecisionScale. A given row value may also return a Rows
+// type, which may represent a database cursor value.
+//
+// Before a connection is returned to the connection pool after use, IsValid is
+// called if implemented. Before a connection is reused for another query,
+// ResetSession is called if implemented. If a connection is never returned to the
+// connection pool but immediately reused, then ResetSession is called prior to
+// reuse but IsValid is not called.
+// package driver -- go2cs converted at 2020 October 08 04:58:46 UTC
 // import "database/sql/driver" ==> using driver = go.database.sql.driver_package
 // Original source: C:\Go\src\database\sql\driver\driver.go
 using context = go.context_package;
@@ -30,6 +59,11 @@ namespace sql
         //   []byte
         //   string
         //   time.Time
+        //
+        // If the driver supports cursors, a returned Value may also implement the Rows interface
+        // in this package. This is used, for example, when a user selects a cursor
+        // such as "select cursor(select * from my_table) from dual". If the Rows
+        // from the select is closed, the cursor Rows will also be closed.
         public partial interface Value
         {
         }
@@ -55,7 +89,7 @@ namespace sql
 
         // If a Driver implements DriverContext, then sql.DB will call
         // OpenConnector to obtain a Connector and then invoke
-        // that Connector's Conn method to obtain each needed connection,
+        // that Connector's Connect method to obtain each needed connection,
         // instead of invoking the Driver's Open method for each connection.
         // The two-step sequence allows drivers to parse the name just once
         // and also provides access to per-Conn contexts.
@@ -113,7 +147,7 @@ namespace sql
 
         // Execer is an optional interface that may be implemented by a Conn.
         //
-        // If a Conn implements neither ExecerContext nor Execer Execer,
+        // If a Conn implements neither ExecerContext nor Execer,
         // the sql package's DB.Exec will first prepare a query, execute the statement,
         // and then close the statement.
         //
@@ -183,6 +217,9 @@ namespace sql
 // connections and only calls Close when there's a surplus of
 // idle connections, it shouldn't be necessary for drivers to
 // do their own connection caching.
+//
+// Drivers must ensure all network calls made by Close
+// do not block indefinitely (e.g. apply a timeout).
             (Tx, error) Close(); // Begin starts and returns a new transaction.
 //
 // Deprecated: Drivers should implement ConnBeginTx instead (or additionally).
@@ -223,6 +260,16 @@ namespace sql
         public partial interface SessionResetter
         {
             error ResetSession(context.Context ctx);
+        }
+
+        // Validator may be implemented by Conn to allow drivers to
+        // signal if a connection is valid or if it should be discarded.
+        //
+        // If implemented, drivers may return the underlying error from queries,
+        // even if the connection should be discarded by the connection pool.
+        public partial interface Validator
+        {
+            bool IsValid();
         }
 
         // Result is the result of a query execution.
@@ -292,7 +339,7 @@ namespace sql
         // they have exhausted their own special cases.
         public partial interface NamedValueChecker
         {
-            error CheckNamedValue(ref NamedValue _p0);
+            error CheckNamedValue(ptr<NamedValue> _p0);
         }
 
         // ColumnConverter may be optionally implemented by Stmt if the
@@ -399,16 +446,22 @@ namespace sql
         {
         }
 
-        private static Result _ = Result.As(RowsAffected(0L));
+        private static Result _ = Result.As(RowsAffected(0L))!;
 
         public static (long, error) LastInsertId(this RowsAffected _p0)
         {
-            return (0L, errors.New("no LastInsertId available"));
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (0L, error.As(errors.New("LastInsertId is not supported by this driver"))!);
         }
 
         public static (long, error) RowsAffected(this RowsAffected v)
         {
-            return (int64(v), null);
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (int64(v), error.As(null!)!);
         }
 
         // ResultNoRows is a pre-defined Result for drivers to return when a DDL
@@ -420,16 +473,22 @@ namespace sql
         {
         }
 
-        private static Result _ = Result.As(new noRows());
+        private static Result _ = Result.As(new noRows())!;
 
         private static (long, error) LastInsertId(this noRows _p0)
         {
-            return (0L, errors.New("no LastInsertId available after DDL statement"));
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (0L, error.As(errors.New("no LastInsertId available after DDL statement"))!);
         }
 
         private static (long, error) RowsAffected(this noRows _p0)
         {
-            return (0L, errors.New("no RowsAffected available after DDL statement"));
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (0L, error.As(errors.New("no RowsAffected available after DDL statement"))!);
         }
     }
 }}}

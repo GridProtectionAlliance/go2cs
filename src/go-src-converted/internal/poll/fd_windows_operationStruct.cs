@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:34 UTC
+//     Generated on 2020 October 08 03:32:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,7 +17,6 @@ using errors = go.errors_package;
 using race = go.@internal.race_package;
 using windows = go.@internal.syscall.windows_package;
 using io = go.io_package;
-using runtime = go.runtime_package;
 using sync = go.sync_package;
 using syscall = go.syscall_package;
 using utf16 = go.unicode.utf16_package;
@@ -42,7 +41,6 @@ namespace @internal
                 this.errno = default;
                 this.qty = default;
                 this.fd = default;
-                this.errc = default;
                 this.buf = default;
                 this.msg = default;
                 this.sa = default;
@@ -53,7 +51,7 @@ namespace @internal
                 this.bufs = default;
             }
 
-            public operation(syscall.Overlapped o = default, System.UIntPtr runtimeCtx = default, int mode = default, int errno = default, uint qty = default, ref ptr<FD> fd = default, channel<error> errc = default, syscall.WSABuf buf = default, windows.WSAMsg msg = default, syscall.Sockaddr sa = default, ref ptr<syscall.RawSockaddrAny> rsa = default, int rsan = default, syscall.Handle handle = default, uint flags = default, slice<syscall.WSABuf> bufs = default)
+            public operation(syscall.Overlapped o = default, System.UIntPtr runtimeCtx = default, int mode = default, int errno = default, uint qty = default, ref ptr<FD> fd = default, syscall.WSABuf buf = default, windows.WSAMsg msg = default, syscall.Sockaddr sa = default, ref ptr<syscall.RawSockaddrAny> rsa = default, int rsan = default, syscall.Handle handle = default, uint flags = default, slice<syscall.WSABuf> bufs = default)
             {
                 this.o = o;
                 this.runtimeCtx = runtimeCtx;
@@ -61,7 +59,6 @@ namespace @internal
                 this.errno = errno;
                 this.qty = qty;
                 this.fd = fd;
-                this.errc = errc;
                 this.buf = buf;
                 this.msg = msg;
                 this.sa = sa;
@@ -92,7 +89,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static operation operation_cast(dynamic value)
         {
-            return new operation(value.o, value.runtimeCtx, value.mode, value.errno, value.qty, ref value.fd, value.errc, value.buf, value.msg, value.sa, ref value.rsa, value.rsan, value.handle, value.flags, value.bufs);
+            return new operation(value.o, value.runtimeCtx, value.mode, value.errno, value.qty, ref value.fd, value.buf, value.msg, value.sa, ref value.rsa, value.rsan, value.handle, value.flags, value.bufs);
         }
     }
 }}

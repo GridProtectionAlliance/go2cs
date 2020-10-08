@@ -4,7 +4,7 @@
 
 // This file implements encoding/decoding of Floats.
 
-// package big -- go2cs converted at 2020 August 29 08:29:09 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:31 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\floatmarsh.go
 using binary = go.encoding.binary_package;
@@ -17,7 +17,7 @@ namespace math
     public static partial class big_package
     {
         // Gob codec version. Permits backward-compatible changes to the encoding.
-        private static readonly byte floatGobVersion = 1L;
+        private static readonly byte floatGobVersion = (byte)1L;
 
         // GobEncode implements the gob.GobEncoder interface.
         // The Float value and all its attributes (precision,
@@ -27,11 +27,15 @@ namespace math
         // GobEncode implements the gob.GobEncoder interface.
         // The Float value and all its attributes (precision,
         // rounding mode, accuracy) are marshaled.
-        private static (slice<byte>, error) GobEncode(this ref Float x)
+        private static (slice<byte>, error) GobEncode(this ptr<Float> _addr_x)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Float x = ref _addr_x.val;
+
             if (x == null)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             } 
 
             // determine max. space (bytes) required for encoding
@@ -53,6 +57,7 @@ namespace math
                 // len(x.mant) >= n
                 sz += 4L + n * _S; // exp + mant
             }
+
             var buf = make_slice<byte>(sz);
 
             buf[0L] = floatGobVersion;
@@ -61,6 +66,7 @@ namespace math
             {
                 b |= 1L;
             }
+
             buf[1L] = b;
             binary.BigEndian.PutUint32(buf[2L..], x.prec);
 
@@ -69,25 +75,32 @@ namespace math
                 binary.BigEndian.PutUint32(buf[6L..], uint32(x.exp));
                 x.mant[len(x.mant) - n..].bytes(buf[10L..]); // cut off unused trailing words
             }
-            return (buf, null);
+
+            return (buf, error.As(null!)!);
+
         }
 
         // GobDecode implements the gob.GobDecoder interface.
         // The result is rounded per the precision and rounding mode of
         // z unless z's precision is 0, in which case z is set exactly
         // to the decoded value.
-        private static error GobDecode(this ref Float z, slice<byte> buf)
+        private static error GobDecode(this ptr<Float> _addr_z, slice<byte> buf)
         {
+            ref Float z = ref _addr_z.val;
+
             if (len(buf) == 0L)
             { 
                 // Other side sent a nil or default value.
-                z.Value = new Float();
-                return error.As(null);
+                z.val = new Float();
+                return error.As(null!)!;
+
             }
+
             if (buf[0L] != floatGobVersion)
             {
-                return error.As(fmt.Errorf("Float.GobDecode: encoding version %d not supported", buf[0L]));
+                return error.As(fmt.Errorf("Float.GobDecode: encoding version %d not supported", buf[0L]))!;
             }
+
             var oldPrec = z.prec;
             var oldMode = z.mode;
 
@@ -103,40 +116,53 @@ namespace math
                 z.exp = int32(binary.BigEndian.Uint32(buf[6L..]));
                 z.mant = z.mant.setBytes(buf[10L..]);
             }
+
             if (oldPrec != 0L)
             {
                 z.mode = oldMode;
                 z.SetPrec(uint(oldPrec));
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // MarshalText implements the encoding.TextMarshaler interface.
         // Only the Float value is marshaled (in full precision), other
         // attributes such as precision or accuracy are ignored.
-        private static (slice<byte>, error) MarshalText(this ref Float x)
+        private static (slice<byte>, error) MarshalText(this ptr<Float> _addr_x)
         {
+            slice<byte> text = default;
+            error err = default!;
+            ref Float x = ref _addr_x.val;
+
             if (x == null)
             {
-                return ((slice<byte>)"<nil>", null);
+                return ((slice<byte>)"<nil>", error.As(null!)!);
             }
+
             slice<byte> buf = default;
-            return (x.Append(buf, 'g', -1L), null);
+            return (x.Append(buf, 'g', -1L), error.As(null!)!);
+
         }
 
         // UnmarshalText implements the encoding.TextUnmarshaler interface.
         // The result is rounded per the precision and rounding mode of z.
         // If z's precision is 0, it is changed to 64 before rounding takes
         // effect.
-        private static error UnmarshalText(this ref Float z, slice<byte> text)
-        { 
+        private static error UnmarshalText(this ptr<Float> _addr_z, slice<byte> text)
+        {
+            ref Float z = ref _addr_z.val;
+ 
             // TODO(gri): get rid of the []byte/string conversion
             var (_, _, err) = z.Parse(string(text), 0L);
             if (err != null)
             {
                 err = fmt.Errorf("math/big: cannot unmarshal %q into a *big.Float (%v)", text, err);
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
     }
 }}

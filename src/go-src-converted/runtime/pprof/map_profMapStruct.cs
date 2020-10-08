@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:22:45 UTC
+//     Generated on 2020 October 08 03:26:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace runtime
                 this.freeStk = default;
             }
 
-            public profMap(map<System.UIntPtr, ref profMapEntry> hash = default, ref ptr<profMapEntry> all = default, ref ptr<profMapEntry> last = default, slice<profMapEntry> free = default, slice<System.UIntPtr> freeStk = default)
+            public profMap(map<System.UIntPtr, ptr<profMapEntry>> hash = default, ref ptr<profMapEntry> all = default, ref ptr<profMapEntry> last = default, slice<profMapEntry> free = default, slice<System.UIntPtr> freeStk = default)
             {
                 this.hash = hash;
                 this.all = all;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:15 UTC
+//     Generated on 2020 October 08 03:41:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using tls = go.crypto.tls_package;
 using x509 = go.crypto.x509_package;
 using flag = go.flag_package;
@@ -24,6 +23,7 @@ using net = go.net_package;
 using http = go.net.http_package;
 using @internal = go.net.http.@internal_package;
 using os = go.os_package;
+using strings = go.strings_package;
 using sync = go.sync_package;
 using time = go.time_package;
 using go;
@@ -62,7 +62,7 @@ namespace http
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -76,10 +76,10 @@ namespace http
                 m_target_is_ptr = true;
             }
 
-            private delegate void CloseIdleConnectionsByRef(ref T value);
+            private delegate void CloseIdleConnectionsByPtr(ptr<T> value);
             private delegate void CloseIdleConnectionsByVal(T value);
 
-            private static readonly CloseIdleConnectionsByRef s_CloseIdleConnectionsByRef;
+            private static readonly CloseIdleConnectionsByPtr s_CloseIdleConnectionsByPtr;
             private static readonly CloseIdleConnectionsByVal s_CloseIdleConnectionsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,14 +88,15 @@ namespace http
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseIdleConnectionsByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseIdleConnectionsByPtr is null || !m_target_is_ptr)
                 {
                     s_CloseIdleConnectionsByVal!(target);
                     return;
                 }
 
-                s_CloseIdleConnectionsByRef(ref target);
+                s_CloseIdleConnectionsByPtr(m_target_ptr);
                 return;
                 
             }
@@ -106,23 +107,20 @@ namespace http
             static closeIdleTransport()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CloseIdleConnections");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CloseIdleConnections");
 
                 if (!(extensionMethod is null))
-                    s_CloseIdleConnectionsByRef = extensionMethod.CreateStaticDelegate(typeof(CloseIdleConnectionsByRef)) as CloseIdleConnectionsByRef;
+                    s_CloseIdleConnectionsByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseIdleConnectionsByPtr)) as CloseIdleConnectionsByPtr;
 
-                if (s_CloseIdleConnectionsByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CloseIdleConnections");
+                extensionMethod = targetType.GetExtensionMethod("CloseIdleConnections");
 
-                    if (!(extensionMethod is null))
-                        s_CloseIdleConnectionsByVal = extensionMethod.CreateStaticDelegate(typeof(CloseIdleConnectionsByVal)) as CloseIdleConnectionsByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseIdleConnectionsByVal = extensionMethod.CreateStaticDelegate(typeof(CloseIdleConnectionsByVal)) as CloseIdleConnectionsByVal;
 
-                if (s_CloseIdleConnectionsByRef is null && s_CloseIdleConnectionsByVal is null)
+                if (s_CloseIdleConnectionsByPtr is null && s_CloseIdleConnectionsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement closeIdleTransport.CloseIdleConnections method", new Exception("CloseIdleConnections"));
             }
 

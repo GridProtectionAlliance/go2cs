@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !windows,!plan9,!nacl
+// +build !windows,!plan9
 
-// package main -- go2cs converted at 2020 August 29 08:24:41 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:43 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\signal.go
 using syscall = go.syscall_package;
 using time = go.time_package;
@@ -31,6 +31,7 @@ namespace go
             // before we return and exit the program. The time here
             // shouldn't matter--we'll never really sleep this long.
             time.Sleep(time.Second);
+
         }
     }
 }

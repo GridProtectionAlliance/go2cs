@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:41 UTC
+//     Generated on 2020 October 08 03:48:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using sync = go.sync_package;
 
 namespace go
 {
@@ -25,12 +26,16 @@ namespace go
             // Constructors
             public Replacer(NilType _)
             {
+                this.once = default;
                 this.r = default;
+                this.oldnew = default;
             }
 
-            public Replacer(replacer r = default)
+            public Replacer(sync.Once once = default, replacer r = default, slice<@string> oldnew = default)
             {
+                this.once = once;
                 this.r = r;
+                this.oldnew = oldnew;
             }
 
             // Enable comparisons between nil and Replacer struct
@@ -53,7 +58,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Replacer Replacer_cast(dynamic value)
         {
-            return new Replacer(value.r);
+            return new Replacer(value.once, value.r, value.oldnew);
         }
     }
 }

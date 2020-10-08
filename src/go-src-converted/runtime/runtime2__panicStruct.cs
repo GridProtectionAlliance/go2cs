@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:19:50 UTC
+//     Generated on 2020 October 08 03:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -29,16 +30,22 @@ namespace go
             {
                 this.argp = default;
                 this.link = default;
+                this.pc = default;
+                this.sp = default;
                 this.recovered = default;
                 this.aborted = default;
+                this.goexit = default;
             }
 
-            public _panic(unsafe.Pointer argp = default, ref ptr<_panic> link = default, bool recovered = default, bool aborted = default)
+            public _panic(unsafe.Pointer argp = default, ref ptr<_panic> link = default, System.UIntPtr pc = default, unsafe.Pointer sp = default, bool recovered = default, bool aborted = default, bool goexit = default)
             {
                 this.argp = argp;
                 this.link = link;
+                this.pc = pc;
+                this.sp = sp;
                 this.recovered = recovered;
                 this.aborted = aborted;
+                this.goexit = goexit;
             }
 
             // Enable comparisons between nil and _panic struct
@@ -61,7 +68,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static _panic _panic_cast(dynamic value)
         {
-            return new _panic(value.argp, ref value.link, value.recovered, value.aborted);
+            return new _panic(value.argp, ref value.link, value.pc, value.sp, value.recovered, value.aborted, value.goexit);
         }
     }
 }

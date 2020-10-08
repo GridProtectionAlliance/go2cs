@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:32 UTC
+//     Generated on 2020 October 08 03:43:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace net
                 this.Done = default;
             }
 
-            public Call(@string ServiceMethod = default, error Error = default, channel<ref Call> Done = default)
+            public Call(@string ServiceMethod = default, error Error = default, channel<ptr<Call>> Done = default)
             {
                 this.ServiceMethod = ServiceMethod;
                 this.Error = Error;

@@ -19,10 +19,9 @@
 // this way, link this package into your program:
 //    import _ "expvar"
 //
-// package expvar -- go2cs converted at 2020 August 29 10:11:03 UTC
+// package expvar -- go2cs converted at 2020 October 08 04:59:00 UTC
 // import "expvar" ==> using expvar = go.expvar_package
 // Original source: C:\Go\src\expvar\expvar.go
-using bytes = go.bytes_package;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using log = go.log_package;
@@ -32,6 +31,7 @@ using os = go.os_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
+using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using static go.builtin;
@@ -53,24 +53,32 @@ namespace go
             public long i;
         }
 
-        private static long Value(this ref Int v)
+        private static long Value(this ptr<Int> _addr_v)
         {
-            return atomic.LoadInt64(ref v.i);
+            ref Int v = ref _addr_v.val;
+
+            return atomic.LoadInt64(_addr_v.i);
         }
 
-        private static @string String(this ref Int v)
+        private static @string String(this ptr<Int> _addr_v)
         {
-            return strconv.FormatInt(atomic.LoadInt64(ref v.i), 10L);
+            ref Int v = ref _addr_v.val;
+
+            return strconv.FormatInt(atomic.LoadInt64(_addr_v.i), 10L);
         }
 
-        private static void Add(this ref Int v, long delta)
+        private static void Add(this ptr<Int> _addr_v, long delta)
         {
-            atomic.AddInt64(ref v.i, delta);
+            ref Int v = ref _addr_v.val;
+
+            atomic.AddInt64(_addr_v.i, delta);
         }
 
-        private static void Set(this ref Int v, long value)
+        private static void Set(this ptr<Int> _addr_v, long value)
         {
-            atomic.StoreInt64(ref v.i, value);
+            ref Int v = ref _addr_v.val;
+
+            atomic.StoreInt64(_addr_v.i, value);
         }
 
         // Float is a 64-bit float variable that satisfies the Var interface.
@@ -79,37 +87,47 @@ namespace go
             public ulong f;
         }
 
-        private static double Value(this ref Float v)
+        private static double Value(this ptr<Float> _addr_v)
         {
-            return math.Float64frombits(atomic.LoadUint64(ref v.f));
+            ref Float v = ref _addr_v.val;
+
+            return math.Float64frombits(atomic.LoadUint64(_addr_v.f));
         }
 
-        private static @string String(this ref Float v)
+        private static @string String(this ptr<Float> _addr_v)
         {
-            return strconv.FormatFloat(math.Float64frombits(atomic.LoadUint64(ref v.f)), 'g', -1L, 64L);
+            ref Float v = ref _addr_v.val;
+
+            return strconv.FormatFloat(math.Float64frombits(atomic.LoadUint64(_addr_v.f)), 'g', -1L, 64L);
         }
 
         // Add adds delta to v.
-        private static void Add(this ref Float v, double delta)
+        private static void Add(this ptr<Float> _addr_v, double delta)
         {
+            ref Float v = ref _addr_v.val;
+
             while (true)
             {
-                var cur = atomic.LoadUint64(ref v.f);
+                var cur = atomic.LoadUint64(_addr_v.f);
                 var curVal = math.Float64frombits(cur);
                 var nxtVal = curVal + delta;
                 var nxt = math.Float64bits(nxtVal);
-                if (atomic.CompareAndSwapUint64(ref v.f, cur, nxt))
+                if (atomic.CompareAndSwapUint64(_addr_v.f, cur, nxt))
                 {
-                    return;
+                    return ;
                 }
+
             }
+
 
         }
 
         // Set sets v to value.
-        private static void Set(this ref Float v, double value)
+        private static void Set(this ptr<Float> _addr_v, double value)
         {
-            atomic.StoreUint64(ref v.f, math.Float64bits(value));
+            ref Float v = ref _addr_v.val;
+
+            atomic.StoreUint64(_addr_v.f, math.Float64bits(value));
         }
 
         // Map is a string-to-Var map variable that satisfies the Var interface.
@@ -127,56 +145,86 @@ namespace go
             public Var Value;
         }
 
-        private static @string String(this ref Map v)
+        private static @string String(this ptr<Map> _addr_v)
         {
-            bytes.Buffer b = default;
-            fmt.Fprintf(ref b, "{");
+            ref Map v = ref _addr_v.val;
+
+            ref strings.Builder b = ref heap(out ptr<strings.Builder> _addr_b);
+            fmt.Fprintf(_addr_b, "{");
             var first = true;
             v.Do(kv =>
             {
                 if (!first)
                 {
-                    fmt.Fprintf(ref b, ", ");
+                    fmt.Fprintf(_addr_b, ", ");
                 }
-                fmt.Fprintf(ref b, "%q: %v", kv.Key, kv.Value);
+
+                fmt.Fprintf(_addr_b, "%q: %v", kv.Key, kv.Value);
                 first = false;
+
             });
-            fmt.Fprintf(ref b, "}");
+            fmt.Fprintf(_addr_b, "}");
             return b.String();
+
         }
 
         // Init removes all keys from the map.
-        private static ref Map Init(this ref Map _v) => func(_v, (ref Map v, Defer defer, Panic _, Recover __) =>
+        private static ptr<Map> Init(this ptr<Map> _addr_v) => func((defer, _, __) =>
         {
+            ref Map v = ref _addr_v.val;
+
             v.keysMu.Lock();
             defer(v.keysMu.Unlock());
             v.keys = v.keys[..0L];
             v.m.Range((k, _) =>
             {
                 v.m.Delete(k);
-                return true;
+                return _addr_true!;
             });
-            return v;
+            return _addr_v!;
+
         });
 
-        // updateKeys updates the sorted list of keys in v.keys.
-        private static void addKey(this ref Map _v, @string key) => func(_v, (ref Map v, Defer defer, Panic _, Recover __) =>
+        // addKey updates the sorted list of keys in v.keys.
+        private static void addKey(this ptr<Map> _addr_v, @string key) => func((defer, _, __) =>
         {
+            ref Map v = ref _addr_v.val;
+
             v.keysMu.Lock();
-            defer(v.keysMu.Unlock());
-            v.keys = append(v.keys, key);
-            sort.Strings(v.keys);
+            defer(v.keysMu.Unlock()); 
+            // Using insertion sort to place key into the already-sorted v.keys.
+            {
+                var i = sort.SearchStrings(v.keys, key);
+
+                if (i >= len(v.keys))
+                {
+                    v.keys = append(v.keys, key);
+                }
+                else if (v.keys[i] != key)
+                {
+                    v.keys = append(v.keys, "");
+                    copy(v.keys[i + 1L..], v.keys[i..]);
+                    v.keys[i] = key;
+                }
+
+
+            }
+
         });
 
-        private static Var Get(this ref Map v, @string key)
+        private static Var Get(this ptr<Map> _addr_v, @string key)
         {
+            ref Map v = ref _addr_v.val;
+
             var (i, _) = v.m.Load(key);
-            Var (av, _) = i._<Var>();
+            Var (av, _) = Var.As(i._<Var>())!;
             return av;
         }
 
-        private static void Set(this ref Map v, @string key, Var av)
-        { 
+        private static void Set(this ptr<Map> _addr_v, @string key, Var av)
+        {
+            ref Map v = ref _addr_v.val;
+ 
             // Before we store the value, check to see whether the key is new. Try a Load
             // before LoadOrStore: LoadOrStore causes the key interface to escape even on
             // the Load path.
@@ -191,20 +239,25 @@ namespace go
                         if (!dup)
                         {
                             v.addKey(key);
-                            return;
+                            return ;
                         }
 
                     }
+
                 }
 
             }
 
+
             v.m.Store(key, av);
+
         }
 
         // Add adds delta to the *Int value stored under the given map key.
-        private static void Add(this ref Map v, @string key, long delta)
+        private static void Add(this ptr<Map> _addr_v, @string key, long delta)
         {
+            ref Map v = ref _addr_v.val;
+
             var (i, ok) = v.m.Load(key);
             if (!ok)
             {
@@ -214,11 +267,12 @@ namespace go
                 {
                     v.addKey(key);
                 }
+
             } 
 
             // Add to Int; ignore otherwise.
             {
-                ref Int (iv, ok) = i._<ref Int>();
+                ptr<Int> (iv, ok) = i._<ptr<Int>>();
 
                 if (ok)
                 {
@@ -226,11 +280,14 @@ namespace go
                 }
 
             }
+
         }
 
         // AddFloat adds delta to the *Float value stored under the given map key.
-        private static void AddFloat(this ref Map v, @string key, double delta)
+        private static void AddFloat(this ptr<Map> _addr_v, @string key, double delta)
         {
+            ref Map v = ref _addr_v.val;
+
             var (i, ok) = v.m.Load(key);
             if (!ok)
             {
@@ -240,11 +297,12 @@ namespace go
                 {
                     v.addKey(key);
                 }
+
             } 
 
             // Add to Float; ignore otherwise.
             {
-                ref Float (iv, ok) = i._<ref Float>();
+                ptr<Float> (iv, ok) = i._<ptr<Float>>();
 
                 if (ok)
                 {
@@ -252,13 +310,32 @@ namespace go
                 }
 
             }
+
         }
+
+        // Delete deletes the given key from the map.
+        private static void Delete(this ptr<Map> _addr_v, @string key) => func((defer, _, __) =>
+        {
+            ref Map v = ref _addr_v.val;
+
+            v.keysMu.Lock();
+            defer(v.keysMu.Unlock());
+            var i = sort.SearchStrings(v.keys, key);
+            if (i < len(v.keys) && key == v.keys[i])
+            {
+                v.keys = append(v.keys[..i], v.keys[i + 1L..]);
+                v.m.Delete(key);
+            }
+
+        });
 
         // Do calls f for each entry in the map.
         // The map is locked during the iteration,
         // but existing entries may be concurrently updated.
-        private static void Do(this ref Map _v, Action<KeyValue> f) => func(_v, (ref Map v, Defer defer, Panic _, Recover __) =>
+        private static void Do(this ptr<Map> _addr_v, Action<KeyValue> f) => func((defer, _, __) =>
         {
+            ref Map v = ref _addr_v.val;
+
             v.keysMu.RLock();
             defer(v.keysMu.RUnlock());
             foreach (var (_, k) in v.keys)
@@ -266,6 +343,7 @@ namespace go
                 var (i, _) = v.m.Load(k);
                 f(new KeyValue(k,i.(Var)));
             }
+
         });
 
         // String is a string variable, and satisfies the Var interface.
@@ -274,23 +352,29 @@ namespace go
             public atomic.Value s; // string
         }
 
-        private static @string Value(this ref String v)
+        private static @string Value(this ptr<String> _addr_v)
         {
+            ref String v = ref _addr_v.val;
+
             @string (p, _) = v.s.Load()._<@string>();
             return p;
         }
 
-        // String implements the Val interface. To get the unquoted string
+        // String implements the Var interface. To get the unquoted string
         // use Value.
-        private static @string String(this ref String v)
+        private static @string String(this ptr<String> _addr_v)
         {
+            ref String v = ref _addr_v.val;
+
             var s = v.Value();
             var (b, _) = json.Marshal(s);
             return string(b);
         }
 
-        private static void Set(this ref String v, @string value)
+        private static void Set(this ptr<String> _addr_v, @string value)
         {
+            ref String v = ref _addr_v.val;
+
             v.s.Store(value);
         }
 
@@ -326,10 +410,12 @@ namespace go
                 }
 
             }
+
             varKeysMu.Lock();
             defer(varKeysMu.Unlock());
             varKeys = append(varKeys, name);
             sort.Strings(varKeys);
+
         });
 
         // Get retrieves a named exported variable. It returns nil if the name has
@@ -337,38 +423,38 @@ namespace go
         public static Var Get(@string name)
         {
             var (i, _) = vars.Load(name);
-            Var (v, _) = i._<Var>();
+            Var (v, _) = Var.As(i._<Var>())!;
             return v;
         }
 
         // Convenience functions for creating new exported variables.
 
-        public static ref Int NewInt(@string name)
+        public static ptr<Int> NewInt(@string name)
         {
             ptr<Int> v = @new<Int>();
             Publish(name, v);
-            return v;
+            return _addr_v!;
         }
 
-        public static ref Float NewFloat(@string name)
+        public static ptr<Float> NewFloat(@string name)
         {
             ptr<Float> v = @new<Float>();
             Publish(name, v);
-            return v;
+            return _addr_v!;
         }
 
-        public static ref Map NewMap(@string name)
+        public static ptr<Map> NewMap(@string name)
         {
             ptr<Map> v = @new<Map>().Init();
             Publish(name, v);
-            return v;
+            return _addr_v!;
         }
 
-        public static ref String NewString(@string name)
+        public static ptr<String> NewString(@string name)
         {
             ptr<String> v = @new<String>();
             Publish(name, v);
-            return v;
+            return _addr_v!;
         }
 
         // Do calls f for each exported variable.
@@ -383,10 +469,13 @@ namespace go
                 var (val, _) = vars.Load(k);
                 f(new KeyValue(k,val.(Var)));
             }
+
         });
 
-        private static void expvarHandler(http.ResponseWriter w, ref http.Request r)
+        private static void expvarHandler(http.ResponseWriter w, ptr<http.Request> _addr_r)
         {
+            ref http.Request r = ref _addr_r.val;
+
             w.Header().Set("Content-Type", "application/json; charset=utf-8");
             fmt.Fprintf(w, "{\n");
             var first = true;
@@ -396,10 +485,13 @@ namespace go
                 {
                     fmt.Fprintf(w, ",\n");
                 }
+
                 first = false;
                 fmt.Fprintf(w, "%q: %s", kv.Key, kv.Value);
+
             });
             fmt.Fprintf(w, "\n}\n");
+
         }
 
         // Handler returns the expvar HTTP Handler.
@@ -419,7 +511,7 @@ namespace go
         {
             ptr<object> stats = @new<runtime.MemStats>();
             runtime.ReadMemStats(stats);
-            return stats.Value;
+            return stats.val;
         }
 
         private static void init()

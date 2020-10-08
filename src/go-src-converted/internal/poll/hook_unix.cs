@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package poll -- go2cs converted at 2020 August 29 08:25:35 UTC
+// package poll -- go2cs converted at 2020 October 08 03:32:40 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\hook_unix.go
 using syscall = go.syscall_package;

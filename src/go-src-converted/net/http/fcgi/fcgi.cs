@@ -4,12 +4,11 @@
 
 // Package fcgi implements the FastCGI protocol.
 //
-// The protocol is not an official standard and the original
-// documentation is no longer online. See the Internet Archive's
-// mirror at: https://web.archive.org/web/20150420080736/http://www.fastcgi.com/drupal/node/6?q=node/22
+// See https://fast-cgi.github.io/ for an unofficial mirror of the
+// original documentation.
 //
 // Currently only the responder role is supported.
-// package fcgi -- go2cs converted at 2020 August 29 08:34:11 UTC
+// package fcgi -- go2cs converted at 2020 October 08 03:41:24 UTC
 // import "net/http/fcgi" ==> using fcgi = go.net.http.fcgi_package
 // Original source: C:\Go\src\net\http\fcgi\fcgi.go
 // This file defines the raw protocol and some utilities used by the child and
@@ -35,34 +34,38 @@ namespace http
         {
         }
 
-        private static readonly recType typeBeginRequest = 1L;
-        private static readonly recType typeAbortRequest = 2L;
-        private static readonly recType typeEndRequest = 3L;
-        private static readonly recType typeParams = 4L;
-        private static readonly recType typeStdin = 5L;
-        private static readonly recType typeStdout = 6L;
-        private static readonly recType typeStderr = 7L;
-        private static readonly recType typeData = 8L;
-        private static readonly recType typeGetValues = 9L;
-        private static readonly recType typeGetValuesResult = 10L;
-        private static readonly recType typeUnknownType = 11L;
+        private static readonly recType typeBeginRequest = (recType)1L;
+        private static readonly recType typeAbortRequest = (recType)2L;
+        private static readonly recType typeEndRequest = (recType)3L;
+        private static readonly recType typeParams = (recType)4L;
+        private static readonly recType typeStdin = (recType)5L;
+        private static readonly recType typeStdout = (recType)6L;
+        private static readonly recType typeStderr = (recType)7L;
+        private static readonly recType typeData = (recType)8L;
+        private static readonly recType typeGetValues = (recType)9L;
+        private static readonly recType typeGetValuesResult = (recType)10L;
+        private static readonly recType typeUnknownType = (recType)11L;
+
 
         // keep the connection between web-server and responder open after request
-        private static readonly long flagKeepConn = 1L;
+        private static readonly long flagKeepConn = (long)1L;
 
 
 
-        private static readonly long maxWrite = 65535L; // maximum record body
-        private static readonly long maxPad = 255L;
+        private static readonly long maxWrite = (long)65535L; // maximum record body
+        private static readonly long maxPad = (long)255L;
 
-        private static readonly var roleResponder = iota + 1L; // only Responders are implemented.
-        private static readonly var roleAuthorizer = 0;
-        private static readonly var roleFilter = 1;
 
-        private static readonly var statusRequestComplete = iota;
-        private static readonly var statusCantMultiplex = 0;
-        private static readonly var statusOverloaded = 1;
-        private static readonly var statusUnknownRole = 2;
+        private static readonly var roleResponder = (var)iota + 1L; // only Responders are implemented.
+        private static readonly var roleAuthorizer = (var)0;
+        private static readonly var roleFilter = (var)1;
+
+
+        private static readonly var statusRequestComplete = (var)iota;
+        private static readonly var statusCantMultiplex = (var)0;
+        private static readonly var statusOverloaded = (var)1;
+        private static readonly var statusUnknownRole = (var)2;
+
 
         private partial struct header
         {
@@ -81,23 +84,29 @@ namespace http
             public array<byte> reserved;
         }
 
-        private static error read(this ref beginRequest br, slice<byte> content)
+        private static error read(this ptr<beginRequest> _addr_br, slice<byte> content)
         {
+            ref beginRequest br = ref _addr_br.val;
+
             if (len(content) != 8L)
             {
-                return error.As(errors.New("fcgi: invalid begin request record"));
+                return error.As(errors.New("fcgi: invalid begin request record"))!;
             }
+
             br.role = binary.BigEndian.Uint16(content);
             br.flags = content[2L];
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // for padding so we don't have to allocate all the time
         // not synchronized because we don't care what the contents are
         private static array<byte> pad = new array<byte>(maxPad);
 
-        private static void init(this ref header h, recType recType, ushort reqId, long contentLength)
+        private static void init(this ptr<header> _addr_h, recType recType, ushort reqId, long contentLength)
         {
+            ref header h = ref _addr_h.val;
+
             h.Version = 1L;
             h.Type = recType;
             h.Id = reqId;
@@ -114,16 +123,18 @@ namespace http
             public header h;
         }
 
-        private static ref conn newConn(io.ReadWriteCloser rwc)
+        private static ptr<conn> newConn(io.ReadWriteCloser rwc)
         {
-            return ref new conn(rwc:rwc);
+            return addr(new conn(rwc:rwc));
         }
 
-        private static error Close(this ref conn _c) => func(_c, (ref conn c, Defer defer, Panic _, Recover __) =>
+        private static error Close(this ptr<conn> _addr_c) => func((defer, _, __) =>
         {
+            ref conn c = ref _addr_c.val;
+
             c.mutex.Lock();
             defer(c.mutex.Unlock());
-            return error.As(c.rwc.Close());
+            return error.As(c.rwc.Close())!;
         });
 
         private partial struct record
@@ -132,82 +143,101 @@ namespace http
             public array<byte> buf;
         }
 
-        private static error read(this ref record rec, io.Reader r)
+        private static error read(this ptr<record> _addr_rec, io.Reader r)
         {
-            err = binary.Read(r, binary.BigEndian, ref rec.h);
+            error err = default!;
+            ref record rec = ref _addr_rec.val;
+
+            err = binary.Read(r, binary.BigEndian, _addr_rec.h);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (rec.h.Version != 1L)
             {
-                return error.As(errors.New("fcgi: invalid header version"));
+                return error.As(errors.New("fcgi: invalid header version"))!;
             }
+
             var n = int(rec.h.ContentLength) + int(rec.h.PaddingLength);
             _, err = io.ReadFull(r, rec.buf[..n]);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static slice<byte> content(this ref record r)
+        private static slice<byte> content(this ptr<record> _addr_r)
         {
+            ref record r = ref _addr_r.val;
+
             return r.buf[..r.h.ContentLength];
         }
 
         // writeRecord writes and sends a single record.
-        private static error writeRecord(this ref conn _c, recType recType, ushort reqId, slice<byte> b) => func(_c, (ref conn c, Defer defer, Panic _, Recover __) =>
+        private static error writeRecord(this ptr<conn> _addr_c, recType recType, ushort reqId, slice<byte> b) => func((defer, _, __) =>
         {
+            ref conn c = ref _addr_c.val;
+
             c.mutex.Lock();
             defer(c.mutex.Unlock());
             c.buf.Reset();
             c.h.init(recType, reqId, len(b));
             {
-                var err = binary.Write(ref c.buf, binary.BigEndian, c.h);
+                var err = binary.Write(_addr_c.buf, binary.BigEndian, c.h);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             {
                 var (_, err) = c.buf.Write(b);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             {
                 (_, err) = c.buf.Write(pad[..c.h.PaddingLength]);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             (_, err) = c.rwc.Write(c.buf.Bytes());
-            return error.As(err);
+            return error.As(err)!;
+
         });
 
-        private static error writeEndRequest(this ref conn c, ushort reqId, long appStatus, byte protocolStatus)
+        private static error writeEndRequest(this ptr<conn> _addr_c, ushort reqId, long appStatus, byte protocolStatus)
         {
+            ref conn c = ref _addr_c.val;
+
             var b = make_slice<byte>(8L);
             binary.BigEndian.PutUint32(b, uint32(appStatus));
             b[4L] = protocolStatus;
-            return error.As(c.writeRecord(typeEndRequest, reqId, b));
+            return error.As(c.writeRecord(typeEndRequest, reqId, b))!;
         }
 
-        private static error writePairs(this ref conn c, recType recType, ushort reqId, map<@string, @string> pairs)
+        private static error writePairs(this ptr<conn> _addr_c, recType recType, ushort reqId, map<@string, @string> pairs)
         {
-            var w = newWriter(c, recType, reqId);
+            ref conn c = ref _addr_c.val;
+
+            var w = newWriter(_addr_c, recType, reqId);
             var b = make_slice<byte>(8L);
             foreach (var (k, v) in pairs)
             {
@@ -218,39 +248,47 @@ namespace http
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
                 {
                     (_, err) = w.WriteString(k);
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
                 {
                     (_, err) = w.WriteString(v);
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             }
             w.Close();
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         private static (uint, long) readSize(slice<byte> s)
         {
+            uint _p0 = default;
+            long _p0 = default;
+
             if (len(s) == 0L)
             {
                 return (0L, 0L);
             }
+
             var size = uint32(s[0L]);
             long n = 1L;
             if (size & (1L << (int)(7L)) != 0L)
@@ -259,11 +297,15 @@ namespace http
                 {
                     return (0L, 0L);
                 }
+
                 n = 4L;
                 size = binary.BigEndian.Uint32(s);
                 size &= 1L << (int)(31L);
+
             }
+
             return (size, n);
+
         }
 
         private static @string readString(slice<byte> s, uint size)
@@ -272,7 +314,9 @@ namespace http
             {
                 return "";
             }
+
             return string(s[..size]);
+
         }
 
         private static long encodeSize(slice<byte> b, uint size)
@@ -283,8 +327,10 @@ namespace http
                 binary.BigEndian.PutUint32(b, size);
                 return 4L;
             }
+
             b[0L] = byte(size);
             return 1L;
+
         }
 
         // bufWriter encapsulates bufio.Writer but also closes the underlying stream when
@@ -292,29 +338,35 @@ namespace http
         private partial struct bufWriter
         {
             public io.Closer closer;
-            public ref bufio.Writer Writer => ref Writer_ptr;
+            public ref ptr<bufio.Writer> Writer> => ref Writer>_ptr;
         }
 
-        private static error Close(this ref bufWriter w)
+        private static error Close(this ptr<bufWriter> _addr_w)
         {
+            ref bufWriter w = ref _addr_w.val;
+
             {
                 var err = w.Writer.Flush();
 
                 if (err != null)
                 {
                     w.closer.Close();
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
-            return error.As(w.closer.Close());
+
+            return error.As(w.closer.Close())!;
+
         }
 
-        private static ref bufWriter newWriter(ref conn c, recType recType, ushort reqId)
+        private static ptr<bufWriter> newWriter(ptr<conn> _addr_c, recType recType, ushort reqId)
         {
-            streamWriter s = ref new streamWriter(c:c,recType:recType,reqId:reqId);
+            ref conn c = ref _addr_c.val;
+
+            ptr<streamWriter> s = addr(new streamWriter(c:c,recType:recType,reqId:reqId));
             var w = bufio.NewWriterSize(s, maxWrite);
-            return ref new bufWriter(s,w);
+            return addr(new bufWriter(s,w));
         }
 
         // streamWriter abstracts out the separation of a stream into discrete records.
@@ -326,8 +378,12 @@ namespace http
             public ushort reqId;
         }
 
-        private static (long, error) Write(this ref streamWriter w, slice<byte> p)
+        private static (long, error) Write(this ptr<streamWriter> _addr_w, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref streamWriter w = ref _addr_w.val;
+
             long nn = 0L;
             while (len(p) > 0L)
             {
@@ -336,26 +392,33 @@ namespace http
                 {
                     n = maxWrite;
                 }
+
                 {
                     var err = w.c.writeRecord(w.recType, w.reqId, p[..n]);
 
                     if (err != null)
                     {
-                        return (nn, err);
+                        return (nn, error.As(err)!);
                     }
 
                 }
+
                 nn += n;
                 p = p[n..];
+
             }
 
-            return (nn, null);
+            return (nn, error.As(null!)!);
+
         }
 
-        private static error Close(this ref streamWriter w)
-        { 
+        private static error Close(this ptr<streamWriter> _addr_w)
+        {
+            ref streamWriter w = ref _addr_w.val;
+ 
             // send empty record to close the stream
-            return error.As(w.c.writeRecord(w.recType, w.reqId, null));
+            return error.As(w.c.writeRecord(w.recType, w.reqId, null))!;
+
         }
     }
 }}}

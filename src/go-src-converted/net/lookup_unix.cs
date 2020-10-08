@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 August 29 08:27:00 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:55 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\lookup_unix.go
 using context = go.context_package;
+using bytealg = go.@internal.bytealg_package;
 using sync = go.sync_package;
+using syscall = go.syscall_package;
+
+using dnsmessage = go.golang.org.x.net.dns.dnsmessage_package;
 using static go.builtin;
 
 namespace go
@@ -24,8 +28,9 @@ namespace go
             var (file, err) = open("/etc/protocols");
             if (err != null)
             {
-                return;
+                return ;
             }
+
             defer(file.close());
 
             {
@@ -35,7 +40,7 @@ namespace go
                 { 
                     // tcp    6   TCP    # transmission control protocol
                     {
-                        var i = byteIndex(line, '#');
+                        var i = bytealg.IndexByteString(line, '#');
 
                         if (i >= 0L)
                         {
@@ -44,11 +49,13 @@ namespace go
                         }
 
                     }
+
                     var f = getFields(line);
                     if (len(f) < 2L)
                     {
                         continue;
                     }
+
                     {
                         var (proto, _, ok) = dtoi(f[1L]);
 
@@ -63,6 +70,7 @@ namespace go
                                 }
 
                             }
+
                             foreach (var (_, alias) in f[2L..])
                             {
                                 {
@@ -74,33 +82,44 @@ namespace go
                                     }
 
                                 }
+
                             }
+
                         }
 
                     }
+
                 }
 
             }
+
         });
 
         // lookupProtocol looks up IP protocol name in /etc/protocols and
         // returns correspondent protocol number.
         private static (long, error) lookupProtocol(context.Context _, @string name)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             onceReadProtocols.Do(readProtocols);
             return lookupProtocolMap(name);
         }
 
-        private static (dnsConn, error) dial(this ref Resolver r, context.Context ctx, @string network, @string server)
-        { 
+        private static (Conn, error) dial(this ptr<Resolver> _addr_r, context.Context ctx, @string network, @string server)
+        {
+            Conn _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+ 
             // Calling Dial here is scary -- we have to be sure not to
             // dial a name that will require a DNS lookup, or Dial will
             // call back here to translate it. The DNS config parser has
             // already checked that all the cfg.servers are IP
             // addresses, which Dial will use without a DNS lookup.
             Conn c = default;
-            error err = default;
-            if (r.Dial != null)
+            error err = default!;
+            if (r != null && r.Dial != null)
             {
                 c, err = r.Dial(ctx, network, server);
             }
@@ -109,72 +128,85 @@ namespace go
                 Dialer d = default;
                 c, err = d.DialContext(ctx, network, server);
             }
+
             if (err != null)
             {
-                return (null, mapErr(err));
+                return (null, error.As(mapErr(err))!);
             }
-            {
-                PacketConn (_, ok) = c._<PacketConn>();
 
-                if (ok)
-                {
-                    return (ref new dnsPacketConn(c), null);
-                }
+            return (c, error.As(null!)!);
 
-            }
-            return (ref new dnsStreamConn(c), null);
         }
 
-        private static (slice<@string>, error) lookupHost(this ref Resolver r, context.Context ctx, @string host)
+        private static (slice<@string>, error) lookupHost(this ptr<Resolver> _addr_r, context.Context ctx, @string host)
         {
-            var order = systemConf().hostLookupOrder(host);
-            if (!r.PreferGo && order == hostLookupCgo)
+            slice<@string> addrs = default;
+            error err = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            var order = systemConf().hostLookupOrder(r, host);
+            if (!r.preferGo() && order == hostLookupCgo)
             {
                 {
                     var (addrs, err, ok) = cgoLookupHost(ctx, host);
 
                     if (ok)
                     {
-                        return (addrs, err);
+                        return (addrs, error.As(err)!);
                     } 
                     // cgo not available (or netgo); fall back to Go's DNS resolver
 
                 } 
                 // cgo not available (or netgo); fall back to Go's DNS resolver
                 order = hostLookupFilesDNS;
+
             }
+
             return r.goLookupHostOrder(ctx, host, order);
+
         }
 
-        private static (slice<IPAddr>, error) lookupIP(this ref Resolver r, context.Context ctx, @string host)
+        private static (slice<IPAddr>, error) lookupIP(this ptr<Resolver> _addr_r, context.Context ctx, @string network, @string host)
         {
-            if (r.PreferGo)
+            slice<IPAddr> addrs = default;
+            error err = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            if (r.preferGo())
             {
                 return r.goLookupIP(ctx, host);
             }
-            var order = systemConf().hostLookupOrder(host);
+
+            var order = systemConf().hostLookupOrder(r, host);
             if (order == hostLookupCgo)
             {
                 {
-                    var (addrs, err, ok) = cgoLookupIP(ctx, host);
+                    var (addrs, err, ok) = cgoLookupIP(ctx, network, host);
 
                     if (ok)
                     {
-                        return (addrs, err);
+                        return (addrs, error.As(err)!);
                     } 
                     // cgo not available (or netgo); fall back to Go's DNS resolver
 
                 } 
                 // cgo not available (or netgo); fall back to Go's DNS resolver
                 order = hostLookupFilesDNS;
+
             }
-            addrs, _, err = r.goLookupIPCNAMEOrder(ctx, host, order);
-            return;
+
+            var (ips, _, err) = r.goLookupIPCNAMEOrder(ctx, host, order);
+            return (ips, error.As(err)!);
+
         }
 
-        private static (long, error) lookupPort(this ref Resolver r, context.Context ctx, @string network, @string service)
+        private static (long, error) lookupPort(this ptr<Resolver> _addr_r, context.Context ctx, @string network, @string service)
         {
-            if (!r.PreferGo && systemConf().canUseCgo())
+            long _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            if (!r.preferGo() && systemConf().canUseCgo())
             {
                 {
                     var port__prev2 = port;
@@ -194,42 +226,60 @@ namespace go
 
                                 if (err == null)
                                 {
-                                    return (port, null);
+                                    return (port, error.As(null!)!);
                                 }
 
                                 port = port__prev4;
 
                             }
+
                         }
-                        return (port, err);
+
+                        return (port, error.As(err)!);
+
                     }
 
                     port = port__prev2;
 
                 }
+
             }
+
             return goLookupPort(network, service);
+
         }
 
-        private static (@string, error) lookupCNAME(this ref Resolver r, context.Context ctx, @string name)
+        private static (@string, error) lookupCNAME(this ptr<Resolver> _addr_r, context.Context ctx, @string name)
         {
-            if (!r.PreferGo && systemConf().canUseCgo())
+            @string _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            if (!r.preferGo() && systemConf().canUseCgo())
             {
                 {
                     var (cname, err, ok) = cgoLookupCNAME(ctx, name);
 
                     if (ok)
                     {
-                        return (cname, err);
+                        return (cname, error.As(err)!);
                     }
 
                 }
+
             }
+
             return r.goLookupCNAME(ctx, name);
+
         }
 
-        private static (@string, slice<ref SRV>, error) lookupSRV(this ref Resolver r, context.Context ctx, @string service, @string proto, @string name)
+        private static (@string, slice<ptr<SRV>>, error) lookupSRV(this ptr<Resolver> _addr_r, context.Context ctx, @string service, @string proto, @string name)
         {
+            @string _p0 = default;
+            slice<ptr<SRV>> _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+
             @string target = default;
             if (service == "" && proto == "")
             {
@@ -239,101 +289,326 @@ namespace go
             {
                 target = "_" + service + "._" + proto + "." + name;
             }
-            var (cname, rrs, err) = r.lookup(ctx, target, dnsTypeSRV);
+
+            var (p, server, err) = r.lookup(ctx, target, dnsmessage.TypeSRV);
             if (err != null)
             {
-                return ("", null, err);
+                return ("", null, error.As(err)!);
             }
-            var srvs = make_slice<ref SRV>(len(rrs));
-            {
-                var rr__prev1 = rr;
 
-                foreach (var (__i, __rr) in rrs)
+            slice<ptr<SRV>> srvs = default;
+            dnsmessage.Name cname = default;
+            while (true)
+            {
+                var (h, err) = p.AnswerHeader();
+                if (err == dnsmessage.ErrSectionDone)
                 {
-                    i = __i;
-                    rr = __rr;
-                    ref dnsRR_SRV rr = rr._<ref dnsRR_SRV>();
-                    srvs[i] = ref new SRV(Target:rr.Target,Port:rr.Port,Priority:rr.Priority,Weight:rr.Weight);
+                    break;
                 }
 
-                rr = rr__prev1;
+                if (err != null)
+                {
+                    return ("", null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                }
+
+                if (h.Type != dnsmessage.TypeSRV)
+                {
+                    {
+                        var err = p.SkipAnswer();
+
+                        if (err != null)
+                        {
+                            return ("", null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                        }
+
+                    }
+
+                    continue;
+
+                }
+
+                if (cname.Length == 0L && h.Name.Length != 0L)
+                {
+                    cname = h.Name;
+                }
+
+                var (srv, err) = p.SRVResource();
+                if (err != null)
+                {
+                    return ("", null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                }
+
+                srvs = append(srvs, addr(new SRV(Target:srv.Target.String(),Port:srv.Port,Priority:srv.Priority,Weight:srv.Weight)));
+
             }
 
             byPriorityWeight(srvs).sort();
-            return (cname, srvs, null);
+            return (cname.String(), srvs, error.As(null!)!);
+
         }
 
-        private static (slice<ref MX>, error) lookupMX(this ref Resolver r, context.Context ctx, @string name)
+        private static (slice<ptr<MX>>, error) lookupMX(this ptr<Resolver> _addr_r, context.Context ctx, @string name)
         {
-            var (_, rrs, err) = r.lookup(ctx, name, dnsTypeMX);
+            slice<ptr<MX>> _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            var (p, server, err) = r.lookup(ctx, name, dnsmessage.TypeMX);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            var mxs = make_slice<ref MX>(len(rrs));
-            {
-                var rr__prev1 = rr;
 
-                foreach (var (__i, __rr) in rrs)
+            slice<ptr<MX>> mxs = default;
+            while (true)
+            {
+                var (h, err) = p.AnswerHeader();
+                if (err == dnsmessage.ErrSectionDone)
                 {
-                    i = __i;
-                    rr = __rr;
-                    ref dnsRR_MX rr = rr._<ref dnsRR_MX>();
-                    mxs[i] = ref new MX(Host:rr.Mx,Pref:rr.Pref);
+                    break;
                 }
 
-                rr = rr__prev1;
+                if (err != null)
+                {
+                    return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                }
+
+                if (h.Type != dnsmessage.TypeMX)
+                {
+                    {
+                        var err = p.SkipAnswer();
+
+                        if (err != null)
+                        {
+                            return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                        }
+
+                    }
+
+                    continue;
+
+                }
+
+                var (mx, err) = p.MXResource();
+                if (err != null)
+                {
+                    return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                }
+
+                mxs = append(mxs, addr(new MX(Host:mx.MX.String(),Pref:mx.Pref)));
+
+
             }
 
             byPref(mxs).sort();
-            return (mxs, null);
+            return (mxs, error.As(null!)!);
+
         }
 
-        private static (slice<ref NS>, error) lookupNS(this ref Resolver r, context.Context ctx, @string name)
+        private static (slice<ptr<NS>>, error) lookupNS(this ptr<Resolver> _addr_r, context.Context ctx, @string name)
         {
-            var (_, rrs, err) = r.lookup(ctx, name, dnsTypeNS);
+            slice<ptr<NS>> _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            var (p, server, err) = r.lookup(ctx, name, dnsmessage.TypeNS);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            var nss = make_slice<ref NS>(len(rrs));
-            foreach (var (i, rr) in rrs)
+
+            slice<ptr<NS>> nss = default;
+            while (true)
             {
-                nss[i] = ref new NS(Host:rr.(*dnsRR_NS).Ns);
+                var (h, err) = p.AnswerHeader();
+                if (err == dnsmessage.ErrSectionDone)
+                {
+                    break;
+                }
+
+                if (err != null)
+                {
+                    return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                }
+
+                if (h.Type != dnsmessage.TypeNS)
+                {
+                    {
+                        var err = p.SkipAnswer();
+
+                        if (err != null)
+                        {
+                            return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                        }
+
+                    }
+
+                    continue;
+
+                }
+
+                var (ns, err) = p.NSResource();
+                if (err != null)
+                {
+                    return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                }
+
+                nss = append(nss, addr(new NS(Host:ns.NS.String())));
+
             }
-            return (nss, null);
+
+            return (nss, error.As(null!)!);
+
         }
 
-        private static (slice<@string>, error) lookupTXT(this ref Resolver r, context.Context ctx, @string name)
+        private static (slice<@string>, error) lookupTXT(this ptr<Resolver> _addr_r, context.Context ctx, @string name)
         {
-            var (_, rrs, err) = r.lookup(ctx, name, dnsTypeTXT);
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            var (p, server, err) = r.lookup(ctx, name, dnsmessage.TypeTXT);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            var txts = make_slice<@string>(len(rrs));
-            foreach (var (i, rr) in rrs)
+
+            slice<@string> txts = default;
+            while (true)
             {
-                txts[i] = rr._<ref dnsRR_TXT>().Txt;
+                var (h, err) = p.AnswerHeader();
+                if (err == dnsmessage.ErrSectionDone)
+                {
+                    break;
+                }
+
+                if (err != null)
+                {
+                    return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                }
+
+                if (h.Type != dnsmessage.TypeTXT)
+                {
+                    {
+                        var err = p.SkipAnswer();
+
+                        if (err != null)
+                        {
+                            return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                        }
+
+                    }
+
+                    continue;
+
+                }
+
+                var (txt, err) = p.TXTResource();
+                if (err != null)
+                {
+                    return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
+                } 
+                // Multiple strings in one TXT record need to be
+                // concatenated without separator to be consistent
+                // with previous Go resolver.
+                long n = 0L;
+                {
+                    var s__prev2 = s;
+
+                    foreach (var (_, __s) in txt.TXT)
+                    {
+                        s = __s;
+                        n += len(s);
+                    }
+
+                    s = s__prev2;
+                }
+
+                var txtJoin = make_slice<byte>(0L, n);
+                {
+                    var s__prev2 = s;
+
+                    foreach (var (_, __s) in txt.TXT)
+                    {
+                        s = __s;
+                        txtJoin = append(txtJoin, s);
+                    }
+
+                    s = s__prev2;
+                }
+
+                if (len(txts) == 0L)
+                {
+                    txts = make_slice<@string>(0L, 1L);
+                }
+
+                txts = append(txts, string(txtJoin));
+
             }
-            return (txts, null);
+
+            return (txts, error.As(null!)!);
+
         }
 
-        private static (slice<@string>, error) lookupAddr(this ref Resolver r, context.Context ctx, @string addr)
+        private static (slice<@string>, error) lookupAddr(this ptr<Resolver> _addr_r, context.Context ctx, @string addr)
         {
-            if (!r.PreferGo && systemConf().canUseCgo())
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref Resolver r = ref _addr_r.val;
+
+            if (!r.preferGo() && systemConf().canUseCgo())
             {
                 {
                     var (ptrs, err, ok) = cgoLookupPTR(ctx, addr);
 
                     if (ok)
                     {
-                        return (ptrs, err);
+                        return (ptrs, error.As(err)!);
                     }
 
                 }
+
             }
+
             return r.goLookupPTR(ctx, addr);
+
+        }
+
+        // concurrentThreadsLimit returns the number of threads we permit to
+        // run concurrently doing DNS lookups via cgo. A DNS lookup may use a
+        // file descriptor so we limit this to less than the number of
+        // permitted open files. On some systems, notably Darwin, if
+        // getaddrinfo is unable to open a file descriptor it simply returns
+        // EAI_NONAME rather than a useful error. Limiting the number of
+        // concurrent getaddrinfo calls to less than the permitted number of
+        // file descriptors makes that error less likely. We don't bother to
+        // apply the same limit to DNS lookups run directly from Go, because
+        // there we will return a meaningful "too many open files" error.
+        private static long concurrentThreadsLimit()
+        {
+            ref syscall.Rlimit rlim = ref heap(out ptr<syscall.Rlimit> _addr_rlim);
+            {
+                var err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, _addr_rlim);
+
+                if (err != null)
+                {
+                    return 500L;
+                }
+
+            }
+
+            var r = int(rlim.Cur);
+            if (r > 500L)
+            {
+                r = 500L;
+            }
+            else if (r > 30L)
+            {
+                r -= 30L;
+            }
+
+            return r;
+
         }
     }
 }

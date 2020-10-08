@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:56 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:20 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\nextafter.go
 
@@ -20,6 +20,8 @@ namespace go
         //    Nextafter32(x, NaN) = NaN
         public static float Nextafter32(float x, float y)
         {
+            float r = default;
+
 
             if (IsNaN(float64(x)) || IsNaN(float64(y))) // special case
                 r = float32(NaN());
@@ -31,7 +33,8 @@ namespace go
                 r = Float32frombits(Float32bits(x) + 1L);
             else 
                 r = Float32frombits(Float32bits(x) - 1L);
-                        return;
+                        return ;
+
         }
 
         // Nextafter returns the next representable float64 value after x towards y.
@@ -42,6 +45,8 @@ namespace go
         //    Nextafter(x, NaN) = NaN
         public static double Nextafter(double x, double y)
         {
+            double r = default;
+
 
             if (IsNaN(x) || IsNaN(y)) // special case
                 r = NaN();
@@ -53,7 +58,8 @@ namespace go
                 r = Float64frombits(Float64bits(x) + 1L);
             else 
                 r = Float64frombits(Float64bits(x) - 1L);
-                        return;
+                        return ;
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:04 UTC
+//     Generated on 2020 October 08 04:39:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,11 +17,10 @@ using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
-using io = go.io_package;
-using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -52,7 +51,7 @@ namespace @internal
                 this.rel = default;
             }
 
-            public ldMachoSect(@string name = default, @string segname = default, ulong addr = default, ulong size = default, uint off = default, uint align = default, uint reloff = default, uint nreloc = default, uint flags = default, uint res1 = default, uint res2 = default, ref ptr<sym.Symbol> sym = default, slice<ldMachoRel> rel = default)
+            public ldMachoSect(@string name = default, @string segname = default, ulong addr = default, ulong size = default, uint off = default, uint align = default, uint reloff = default, uint nreloc = default, uint flags = default, uint res1 = default, uint res2 = default, loader.Sym sym = default, slice<ldMachoRel> rel = default)
             {
                 this.name = name;
                 this.segname = segname;
@@ -89,7 +88,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static ldMachoSect ldMachoSect_cast(dynamic value)
         {
-            return new ldMachoSect(value.name, value.segname, value.addr, value.size, value.off, value.align, value.reloff, value.nreloc, value.flags, value.res1, value.res2, ref value.sym, value.rel);
+            return new ldMachoSect(value.name, value.segname, value.addr, value.size, value.off, value.align, value.reloff, value.nreloc, value.flags, value.res1, value.res2, value.sym, value.rel);
         }
     }
 }}}}

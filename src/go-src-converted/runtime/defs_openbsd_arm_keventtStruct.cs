@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:50 UTC
+//     Generated on 2020 October 08 03:19:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,18 +29,22 @@ namespace go
                 this.filter = default;
                 this.flags = default;
                 this.fflags = default;
+                this.pad_cgo_0 = default;
                 this.data = default;
                 this.udata = default;
+                this.pad_cgo_1 = default;
             }
 
-            public keventt(uint ident = default, short filter = default, ushort flags = default, uint fflags = default, long data = default, ref ptr<byte> udata = default)
+            public keventt(uint ident = default, short filter = default, ushort flags = default, uint fflags = default, array<byte> pad_cgo_0 = default, long data = default, ref ptr<byte> udata = default, array<byte> pad_cgo_1 = default)
             {
                 this.ident = ident;
                 this.filter = filter;
                 this.flags = flags;
                 this.fflags = fflags;
+                this.pad_cgo_0 = pad_cgo_0;
                 this.data = data;
                 this.udata = udata;
+                this.pad_cgo_1 = pad_cgo_1;
             }
 
             // Enable comparisons between nil and keventt struct
@@ -63,7 +67,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static keventt keventt_cast(dynamic value)
         {
-            return new keventt(value.ident, value.filter, value.flags, value.fflags, value.data, ref value.udata);
+            return new keventt(value.ident, value.filter, value.flags, value.fflags, value.pad_cgo_0, value.data, ref value.udata, value.pad_cgo_1);
         }
     }
 }

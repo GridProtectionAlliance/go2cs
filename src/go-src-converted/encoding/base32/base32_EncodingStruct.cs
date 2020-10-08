@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:16 UTC
+//     Generated on 2020 October 08 03:42:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,10 +13,8 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
-using strings = go.strings_package;
 using go;
 
 namespace go {
@@ -35,7 +33,7 @@ namespace encoding
                 this.padChar = default;
             }
 
-            public Encoding(@string encode = default, array<byte> decodeMap = default, int padChar = default)
+            public Encoding(array<byte> encode = default, array<byte> decodeMap = default, int padChar = default)
             {
                 this.encode = encode;
                 this.decodeMap = decodeMap;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package doc -- go2cs converted at 2020 August 29 08:47:10 UTC
+// package doc -- go2cs converted at 2020 October 08 04:02:50 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Go\src\go\doc\synopsis.go
 using strings = go.strings_package;
@@ -39,10 +39,13 @@ namespace go
                 ppp = pp;
                 pp = p;
                 p = q;
+
             }            return len(s);
+
         }
 
-        private static readonly long keepNL = 1L << (int)(iota);
+        private static readonly long keepNL = (long)1L << (int)(iota);
+
 
         // clean replaces each sequence of space, \n, \r, or \t characters
         // with a single space and removes any trailing and leading spaces.
@@ -59,11 +62,13 @@ namespace go
                 {
                     q = ' ';
                 }
+
                 if (q != ' ' || p != ' ')
                 {
                     b = append(b, q);
                     p = q;
                 }
+
             } 
             // remove trailing blank, if any
  
@@ -77,7 +82,9 @@ namespace go
                 }
 
             }
+
             return string(b);
+
         }
 
         // Synopsis returns a cleaned version of the first sentence in s.
@@ -96,8 +103,11 @@ namespace go
                 {
                     return "";
                 }
+
             }
+            s = convertQuotes(s);
             return s;
+
         }
 
         public static @string IllegalPrefixes = new slice<@string>(new @string[] { "copyright", "all rights", "author" });

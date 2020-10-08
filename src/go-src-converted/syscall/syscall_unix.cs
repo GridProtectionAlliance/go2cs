@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2020 August 29 08:38:22 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:27:44 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_unix.go
+using oserror = go.@internal.oserror_package;
 using race = go.@internal.race_package;
+using unsafeheader = go.@internal.unsafeheader_package;
 using runtime = go.runtime_package;
 using sync = go.sync_package;
 using @unsafe = go.@unsafe_package;
@@ -16,14 +18,13 @@ using System;
 
 namespace go
 {
-    public static unsafe partial class syscall_package
+    public static partial class syscall_package
     {
         public static long Stdin = 0L;        public static long Stdout = 1L;        public static long Stderr = 2L;
 
-        private static readonly var darwin64Bit = runtime.GOOS == "darwin" && sizeofPtr == 8L;
-        private static readonly var dragonfly64Bit = runtime.GOOS == "dragonfly" && sizeofPtr == 8L;
-        private static readonly var netbsd32Bit = runtime.GOOS == "netbsd" && sizeofPtr == 4L;
-        private static readonly var solaris64Bit = runtime.GOOS == "solaris" && sizeofPtr == 8L;
+        private static readonly var darwin64Bit = (var)runtime.GOOS == "darwin" && sizeofPtr == 8L;
+        private static readonly var netbsd32Bit = (var)runtime.GOOS == "netbsd" && sizeofPtr == 4L;
+
 
         public static (System.UIntPtr, System.UIntPtr, Errno) Syscall(System.UIntPtr trap, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3)
 ;
@@ -34,73 +35,100 @@ namespace go
         public static (System.UIntPtr, System.UIntPtr, Errno) RawSyscall6(System.UIntPtr trap, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3, System.UIntPtr a4, System.UIntPtr a5, System.UIntPtr a6)
 ;
 
+        // clen returns the index of the first NULL byte in n or len(n) if n contains no NULL byte.
+        private static long clen(slice<byte> n)
+        {
+            for (long i = 0L; i < len(n); i++)
+            {>>MARKER:FUNCTION_RawSyscall6_BLOCK_PREFIX<<
+                if (n[i] == 0L)
+                {>>MARKER:FUNCTION_RawSyscall_BLOCK_PREFIX<<
+                    return i;
+                }
+
+            }
+
+            return len(n);
+
+        }
+
         // Mmap manager, for use by operating system-specific implementations.
 
         private partial struct mmapper
         {
             public ref sync.Mutex Mutex => ref Mutex_val;
-            public map<ref byte, slice<byte>> active; // active mappings; key is last byte in mapping
+            public map<ptr<byte>, slice<byte>> active; // active mappings; key is last byte in mapping
             public Func<System.UIntPtr, System.UIntPtr, long, long, long, long, (System.UIntPtr, error)> mmap;
             public Func<System.UIntPtr, System.UIntPtr, error> munmap;
         }
 
-        private static (slice<byte>, error) Mmap(this ref mmapper _m, long fd, long offset, long length, long prot, long flags) => func(_m, (ref mmapper m, Defer defer, Panic _, Recover __) =>
-        {>>MARKER:FUNCTION_RawSyscall6_BLOCK_PREFIX<<
+        private static (slice<byte>, error) Mmap(this ptr<mmapper> _addr_m, long fd, long offset, long length, long prot, long flags) => func((defer, _, __) =>
+        {
+            slice<byte> data = default;
+            error err = default!;
+            ref mmapper m = ref _addr_m.val;
+
             if (length <= 0L)
-            {>>MARKER:FUNCTION_RawSyscall_BLOCK_PREFIX<<
-                return (null, EINVAL);
+            {>>MARKER:FUNCTION_Syscall6_BLOCK_PREFIX<<
+                return (null, error.As(EINVAL)!);
             } 
 
             // Map the requested memory.
             var (addr, errno) = m.mmap(0L, uintptr(length), prot, flags, fd, offset);
             if (errno != null)
-            {>>MARKER:FUNCTION_Syscall6_BLOCK_PREFIX<<
-                return (null, errno);
+            {>>MARKER:FUNCTION_Syscall_BLOCK_PREFIX<<
+                return (null, error.As(errno)!);
             } 
 
-            // Slice memory layout
-            struct{addruintptrlenintcapint} sl = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{addruintptrlenintcapint}{addr,length,length}; 
-
-            // Use unsafe to turn sl into a []byte.
-            *(*slice<byte>) b = @unsafe.Pointer(ref sl).Value; 
+            // Use unsafe to turn addr into a []byte.
+            ref slice<byte> b = ref heap(out ptr<slice<byte>> _addr_b);
+            var hdr = (unsafeheader.Slice.val)(@unsafe.Pointer(_addr_b));
+            hdr.Data = @unsafe.Pointer(addr);
+            hdr.Cap = length;
+            hdr.Len = length; 
 
             // Register mapping in m and return it.
-            var p = ref b[cap(b) - 1L];
+            var p = _addr_b[cap(b) - 1L];
             m.Lock();
             defer(m.Unlock());
             m.active[p] = b;
-            return (b, null);
+            return (b, error.As(null!)!);
+
         });
 
-        private static error Munmap(this ref mmapper _m, slice<byte> data) => func(_m, (ref mmapper m, Defer defer, Panic _, Recover __) =>
-        {>>MARKER:FUNCTION_Syscall_BLOCK_PREFIX<<
+        private static error Munmap(this ptr<mmapper> _addr_m, slice<byte> data) => func((defer, _, __) =>
+        {
+            error err = default!;
+            ref mmapper m = ref _addr_m.val;
+
             if (len(data) == 0L || len(data) != cap(data))
             {
-                return error.As(EINVAL);
+                return error.As(EINVAL)!;
             } 
 
             // Find the base of the mapping.
-            var p = ref data[cap(data) - 1L];
+            var p = _addr_data[cap(data) - 1L];
             m.Lock();
             defer(m.Unlock());
             var b = m.active[p];
-            if (b == null || ref b[0L] != ref data[0L])
+            if (b == null || _addr_b[0L] != _addr_data[0L])
             {
-                return error.As(EINVAL);
+                return error.As(EINVAL)!;
             } 
 
             // Unmap the memory and update m.
             {
-                var errno = m.munmap(uintptr(@unsafe.Pointer(ref b[0L])), uintptr(len(b)));
+                var errno = m.munmap(uintptr(@unsafe.Pointer(_addr_b[0L])), uintptr(len(b)));
 
                 if (errno != null)
                 {
-                    return error.As(errno);
+                    return error.As(errno)!;
                 }
 
             }
+
             delete(m.active, p);
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // An Errno is an unsigned number describing an error condition.
@@ -110,6 +138,12 @@ namespace go
         //    if errno != 0 {
         //        err = errno
         //    }
+        //
+        // Errno values can be tested against error values from the os package
+        // using errors.Is. For example:
+        //
+        //    _, _, err := syscall.Syscall(...)
+        //    if errors.Is(err, os.ErrNotExist) ...
         public partial struct Errno // : System.UIntPtr
         {
         }
@@ -123,13 +157,29 @@ namespace go
                 {
                     return s;
                 }
+
             }
+
             return "errno " + itoa(int(e));
+
+        }
+
+        public static bool Is(this Errno e, error target)
+        {
+
+            if (target == oserror.ErrPermission) 
+                return e == EACCES || e == EPERM;
+            else if (target == oserror.ErrExist) 
+                return e == EEXIST || e == ENOTEMPTY;
+            else if (target == oserror.ErrNotExist) 
+                return e == ENOENT;
+                        return false;
+
         }
 
         public static bool Temporary(this Errno e)
         {
-            return e == EINTR || e == EMFILE || e == ECONNRESET || e == ECONNABORTED || e.Timeout();
+            return e == EINTR || e == EMFILE || e == ENFILE || e.Timeout();
         }
 
         public static bool Timeout(this Errno e)
@@ -139,7 +189,7 @@ namespace go
 
         // Do the interface allocations only once for common
         // Errno values.
-        private static error errEAGAIN = error.As(EAGAIN);        private static error errEINVAL = error.As(EINVAL);        private static error errENOENT = error.As(ENOENT);
+        private static error errEAGAIN = error.As(EAGAIN)!;        private static error errEINVAL = error.As(EINVAL)!;        private static error errENOENT = error.As(ENOENT)!;
 
         // errnoErr returns common boxed Errno values, to prevent
         // allocations at runtime.
@@ -147,14 +197,15 @@ namespace go
         {
 
             if (e == 0L) 
-                return error.As(null);
+                return error.As(null!)!;
             else if (e == EAGAIN) 
-                return error.As(errEAGAIN);
+                return error.As(errEAGAIN)!;
             else if (e == EINVAL) 
-                return error.As(errEINVAL);
+                return error.As(errEINVAL)!;
             else if (e == ENOENT) 
-                return error.As(errENOENT);
-                        return error.As(e);
+                return error.As(errENOENT)!;
+                        return error.As(e)!;
+
         }
 
         // A Signal is a number describing a process signal.
@@ -176,47 +227,80 @@ namespace go
                 {
                     return str;
                 }
+
             }
+
             return "signal " + itoa(int(s));
+
         }
 
         public static (long, error) Read(long fd, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+
             n, err = read(fd, p);
             if (race.Enabled)
             {
                 if (n > 0L)
                 {
-                    race.WriteRange(@unsafe.Pointer(ref p[0L]), n);
+                    race.WriteRange(@unsafe.Pointer(_addr_p[0L]), n);
                 }
+
                 if (err == null)
                 {
-                    race.Acquire(@unsafe.Pointer(ref ioSync));
+                    race.Acquire(@unsafe.Pointer(_addr_ioSync));
                 }
+
             }
+
             if (msanenabled && n > 0L)
             {
-                msanWrite(@unsafe.Pointer(ref p[0L]), n);
+                msanWrite(@unsafe.Pointer(_addr_p[0L]), n);
             }
-            return;
+
+            return ;
+
         }
 
         public static (long, error) Write(long fd, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+
             if (race.Enabled)
             {
-                race.ReleaseMerge(@unsafe.Pointer(ref ioSync));
+                race.ReleaseMerge(@unsafe.Pointer(_addr_ioSync));
             }
-            n, err = write(fd, p);
+
+            if (faketime && (fd == 1L || fd == 2L))
+            {
+                n = faketimeWrite(fd, p);
+                if (n < 0L)
+                {
+                    n = 0L;
+                    err = errnoErr(Errno(-n));
+
+                }
+
+            }
+            else
+            {
+                n, err = write(fd, p);
+            }
+
             if (race.Enabled && n > 0L)
             {
-                race.ReadRange(@unsafe.Pointer(ref p[0L]), n);
+                race.ReadRange(@unsafe.Pointer(_addr_p[0L]), n);
             }
+
             if (msanenabled && n > 0L)
             {
-                msanRead(@unsafe.Pointer(ref p[0L]), n);
+                msanRead(@unsafe.Pointer(_addr_p[0L]), n);
             }
-            return;
+
+            return ;
+
         }
 
         // For testing: clients can set this flag to force
@@ -251,149 +335,220 @@ namespace go
 
         public static error Bind(long fd, Sockaddr sa)
         {
+            error err = default!;
+
             var (ptr, n, err) = sa.sockaddr();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(bind(fd, ptr, n));
+
+            return error.As(bind(fd, ptr, n))!;
+
         }
 
         public static error Connect(long fd, Sockaddr sa)
         {
+            error err = default!;
+
             var (ptr, n, err) = sa.sockaddr();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(connect(fd, ptr, n));
+
+            return error.As(connect(fd, ptr, n))!;
+
         }
 
         public static (Sockaddr, error) Getpeername(long fd)
         {
-            RawSockaddrAny rsa = default;
-            _Socklen len = SizeofSockaddrAny;
-            err = getpeername(fd, ref rsa, ref len);
+            Sockaddr sa = default;
+            error err = default!;
+
+            ref RawSockaddrAny rsa = ref heap(out ptr<RawSockaddrAny> _addr_rsa);
+            ref _Socklen len = ref heap(SizeofSockaddrAny, out ptr<_Socklen> _addr_len);
+            err = getpeername(fd, _addr_rsa, _addr_len);
 
             if (err != null)
             {
-                return;
+                return ;
             }
-            return anyToSockaddr(ref rsa);
+
+            return anyToSockaddr(_addr_rsa);
+
         }
 
         public static (long, error) GetsockoptInt(long fd, long level, long opt)
         {
-            int n = default;
-            var vallen = _Socklen(4L);
-            err = getsockopt(fd, level, opt, @unsafe.Pointer(ref n), ref vallen);
-            return (int(n), err);
+            long value = default;
+            error err = default!;
+
+            ref int n = ref heap(out ptr<int> _addr_n);
+            ref var vallen = ref heap(_Socklen(4L), out ptr<var> _addr_vallen);
+            err = getsockopt(fd, level, opt, @unsafe.Pointer(_addr_n), _addr_vallen);
+            return (int(n), error.As(err)!);
         }
 
         public static (long, Sockaddr, error) Recvfrom(long fd, slice<byte> p, long flags)
         {
-            RawSockaddrAny rsa = default;
-            _Socklen len = SizeofSockaddrAny;
-            n, err = recvfrom(fd, p, flags, ref rsa, ref len);
+            long n = default;
+            Sockaddr from = default;
+            error err = default!;
+
+            ref RawSockaddrAny rsa = ref heap(out ptr<RawSockaddrAny> _addr_rsa);
+            ref _Socklen len = ref heap(SizeofSockaddrAny, out ptr<_Socklen> _addr_len);
+            n, err = recvfrom(fd, p, flags, _addr_rsa, _addr_len);
 
             if (err != null)
             {
-                return;
+                return ;
             }
+
             if (rsa.Addr.Family != AF_UNSPEC)
             {
-                from, err = anyToSockaddr(ref rsa);
+                from, err = anyToSockaddr(_addr_rsa);
             }
-            return;
+
+            return ;
+
         }
 
         public static error Sendto(long fd, slice<byte> p, long flags, Sockaddr to)
         {
+            error err = default!;
+
             var (ptr, n, err) = to.sockaddr();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(sendto(fd, p, flags, ptr, n));
+
+            return error.As(sendto(fd, p, flags, ptr, n))!;
+
         }
 
         public static error SetsockoptByte(long fd, long level, long opt, byte value)
         {
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(ref value), 1L));
+            error err = default!;
+
+            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(_addr_value), 1L))!;
         }
 
         public static error SetsockoptInt(long fd, long level, long opt, long value)
         {
-            var n = int32(value);
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(ref n), 4L));
+            error err = default!;
+
+            ref var n = ref heap(int32(value), out ptr<var> _addr_n);
+            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(_addr_n), 4L))!;
         }
 
         public static error SetsockoptInet4Addr(long fd, long level, long opt, array<byte> value)
         {
+            error err = default!;
             value = value.Clone();
 
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(ref value[0L]), 4L));
+            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(_addr_value[0L]), 4L))!;
         }
 
-        public static error SetsockoptIPMreq(long fd, long level, long opt, ref IPMreq mreq)
+        public static error SetsockoptIPMreq(long fd, long level, long opt, ptr<IPMreq> _addr_mreq)
         {
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(mreq), SizeofIPMreq));
+            error err = default!;
+            ref IPMreq mreq = ref _addr_mreq.val;
+
+            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(mreq), SizeofIPMreq))!;
         }
 
-        public static error SetsockoptIPv6Mreq(long fd, long level, long opt, ref IPv6Mreq mreq)
+        public static error SetsockoptIPv6Mreq(long fd, long level, long opt, ptr<IPv6Mreq> _addr_mreq)
         {
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(mreq), SizeofIPv6Mreq));
+            error err = default!;
+            ref IPv6Mreq mreq = ref _addr_mreq.val;
+
+            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(mreq), SizeofIPv6Mreq))!;
         }
 
-        public static error SetsockoptICMPv6Filter(long fd, long level, long opt, ref ICMPv6Filter filter)
+        public static error SetsockoptICMPv6Filter(long fd, long level, long opt, ptr<ICMPv6Filter> _addr_filter)
         {
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(filter), SizeofICMPv6Filter));
+            ref ICMPv6Filter filter = ref _addr_filter.val;
+
+            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(filter), SizeofICMPv6Filter))!;
         }
 
-        public static error SetsockoptLinger(long fd, long level, long opt, ref Linger l)
+        public static error SetsockoptLinger(long fd, long level, long opt, ptr<Linger> _addr_l)
         {
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(l), SizeofLinger));
+            error err = default!;
+            ref Linger l = ref _addr_l.val;
+
+            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(l), SizeofLinger))!;
         }
 
         public static error SetsockoptString(long fd, long level, long opt, @string s)
         {
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(ref (slice<byte>)s[0L]), uintptr(len(s))));
+            error err = default!;
+
+            unsafe.Pointer p = default;
+            if (len(s) > 0L)
+            {
+                p = @unsafe.Pointer(_addr_(slice<byte>)s[0L]);
+            }
+
+            return error.As(setsockopt(fd, level, opt, p, uintptr(len(s))))!;
+
         }
 
-        public static error SetsockoptTimeval(long fd, long level, long opt, ref Timeval tv)
+        public static error SetsockoptTimeval(long fd, long level, long opt, ptr<Timeval> _addr_tv)
         {
-            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(tv), @unsafe.Sizeof(tv.Value)));
+            error err = default!;
+            ref Timeval tv = ref _addr_tv.val;
+
+            return error.As(setsockopt(fd, level, opt, @unsafe.Pointer(tv), @unsafe.Sizeof(tv)))!;
         }
 
         public static (long, error) Socket(long domain, long typ, long proto)
         {
+            long fd = default;
+            error err = default!;
+
             if (domain == AF_INET6 && SocketDisableIPv6)
             {
-                return (-1L, EAFNOSUPPORT);
+                return (-1L, error.As(EAFNOSUPPORT)!);
             }
+
             fd, err = socket(domain, typ, proto);
-            return;
+            return ;
+
         }
 
         public static (array<long>, error) Socketpair(long domain, long typ, long proto)
         {
-            array<int> fdx = new array<int>(2L);
-            err = socketpair(domain, typ, proto, ref fdx);
+            array<long> fd = default;
+            error err = default!;
+
+            ref array<int> fdx = ref heap(new array<int>(2L), out ptr<array<int>> _addr_fdx);
+            err = socketpair(domain, typ, proto, _addr_fdx);
             if (err == null)
             {
                 fd[0L] = int(fdx[0L]);
                 fd[1L] = int(fdx[1L]);
             }
-            return;
+
+            return ;
+
         }
 
-        public static (long, error) Sendfile(long outfd, long infd, ref long offset, long count)
+        public static (long, error) Sendfile(long outfd, long infd, ptr<long> _addr_offset, long count)
         {
+            long written = default;
+            error err = default!;
+            ref long offset = ref _addr_offset.val;
+
             if (race.Enabled)
             {
-                race.ReleaseMerge(@unsafe.Pointer(ref ioSync));
+                race.ReleaseMerge(@unsafe.Pointer(_addr_ioSync));
             }
+
             return sendfile(outfd, infd, offset, count);
+
         }
 
         private static long ioSync = default;

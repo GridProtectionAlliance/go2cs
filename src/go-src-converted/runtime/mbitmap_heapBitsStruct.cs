@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:17:41 UTC
+//     Generated on 2020 October 08 03:20:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,12 +29,16 @@ namespace go
             {
                 this.bitp = default;
                 this.shift = default;
+                this.arena = default;
+                this.last = default;
             }
 
-            public heapBits(ref ptr<byte> bitp = default, uint shift = default)
+            public heapBits(ref ptr<byte> bitp = default, uint shift = default, uint arena = default, ref ptr<byte> last = default)
             {
                 this.bitp = bitp;
                 this.shift = shift;
+                this.arena = arena;
+                this.last = last;
             }
 
             // Enable comparisons between nil and heapBits struct
@@ -57,7 +61,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static heapBits heapBits_cast(dynamic value)
         {
-            return new heapBits(ref value.bitp, value.shift);
+            return new heapBits(ref value.bitp, value.shift, value.arena, ref value.last);
         }
     }
 }

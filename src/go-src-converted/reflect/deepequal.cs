@@ -4,7 +4,7 @@
 
 // Deep equality test via reflection
 
-// package reflect -- go2cs converted at 2020 August 29 08:16:04 UTC
+// package reflect -- go2cs converted at 2020 October 08 00:33:49 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\deepequal.go
 using @unsafe = go.@unsafe_package;
@@ -35,6 +35,7 @@ namespace go
             {
                 return v1.IsValid() == v2.IsValid();
             }
+
             if (v1.Type() != v2.Type())
             {
                 return false;
@@ -44,26 +45,44 @@ namespace go
 
             // We want to avoid putting more in the visited map than we need to.
             // For any possible reference cycle that might be encountered,
-            // hard(t) needs to return true for at least one of the types in the cycle.
-            Func<Kind, bool> hard = k =>
+            // hard(v1, v2) needs to return true for at least one of the types in the cycle,
+            // and it's safe and valid to get Value's internal pointer.
+            Func<Value, Value, bool> hard = (v1, v2) =>
             {
 
-                if (k == Map || k == Slice || k == Ptr || k == Interface) 
-                    return true;
+                if (v1.Kind() == Map || v1.Kind() == Slice || v1.Kind() == Ptr || v1.Kind() == Interface) 
+                    // Nil pointers cannot be cyclic. Avoid putting them in the visited map.
+                    return !v1.IsNil() && !v2.IsNil();
                                 return false;
+
             }
 ;
 
-            if (v1.CanAddr() && v2.CanAddr() && hard(v1.Kind()))
-            {
-                var addr1 = @unsafe.Pointer(v1.UnsafeAddr());
-                var addr2 = @unsafe.Pointer(v2.UnsafeAddr());
+            if (hard(v1, v2))
+            { 
+                // For a Ptr or Map value, we need to check flagIndir,
+                // which we do by calling the pointer method.
+                // For Slice or Interface, flagIndir is always set,
+                // and using v.ptr suffices.
+                Func<Value, unsafe.Pointer> ptrval = v =>
+                {
+
+                    if (v.Kind() == Ptr || v.Kind() == Map) 
+                        return v.pointer();
+                    else 
+                        return v.ptr;
+                    
+                }
+;
+                var addr1 = ptrval(v1);
+                var addr2 = ptrval(v2);
                 if (uintptr(addr1) > uintptr(addr2))
                 { 
                     // Canonicalize order to reduce number of entries in visited.
                     // Assumes non-moving garbage collector.
                     addr1 = addr2;
                     addr2 = addr1;
+
                 } 
 
                 // Short circuit if references are already seen.
@@ -76,7 +95,9 @@ namespace go
 
                 // Remember for later.
                 visited[v] = true;
+
             }
+
 
             if (v1.Kind() == Array) 
                 {
@@ -88,6 +109,7 @@ namespace go
                         {
                             return false;
                         }
+
                     }
 
 
@@ -99,14 +121,17 @@ namespace go
                 {
                     return false;
                 }
+
                 if (v1.Len() != v2.Len())
                 {
                     return false;
                 }
+
                 if (v1.Pointer() == v2.Pointer())
                 {
                     return true;
                 }
+
                 {
                     long i__prev1 = i;
 
@@ -116,6 +141,7 @@ namespace go
                         {
                             return false;
                         }
+
                     }
 
 
@@ -127,12 +153,14 @@ namespace go
                 {
                     return v1.IsNil() == v2.IsNil();
                 }
+
                 return deepValueEqual(v1.Elem(), v2.Elem(), visited, depth + 1L);
             else if (v1.Kind() == Ptr) 
                 if (v1.Pointer() == v2.Pointer())
                 {
                     return true;
                 }
+
                 return deepValueEqual(v1.Elem(), v2.Elem(), visited, depth + 1L);
             else if (v1.Kind() == Struct) 
                 {
@@ -145,6 +173,7 @@ namespace go
                         {
                             return false;
                         }
+
                     }
 
 
@@ -156,22 +185,26 @@ namespace go
                 {
                     return false;
                 }
+
                 if (v1.Len() != v2.Len())
                 {
                     return false;
                 }
+
                 if (v1.Pointer() == v2.Pointer())
                 {
                     return true;
                 }
+
                 foreach (var (_, k) in v1.MapKeys())
                 {
                     var val1 = v1.MapIndex(k);
                     var val2 = v2.MapIndex(k);
-                    if (!val1.IsValid() || !val2.IsValid() || !deepValueEqual(v1.MapIndex(k), v2.MapIndex(k), visited, depth + 1L))
+                    if (!val1.IsValid() || !val2.IsValid() || !deepValueEqual(val1, val2, visited, depth + 1L))
                     {
                         return false;
                     }
+
                 }
                 return true;
             else if (v1.Kind() == Func) 
@@ -184,7 +217,8 @@ namespace go
             else 
                 // Normal equality suffices
                 return valueInterface(v1, false) == valueInterface(v2, false);
-                    }
+            
+        }
 
         // DeepEqual reports whether x and y are ``deeply equal,'' defined as follows.
         // Two values of identical type are deeply equal if one of the following cases applies.
@@ -243,13 +277,16 @@ namespace go
             {
                 return x == y;
             }
+
             var v1 = ValueOf(x);
             var v2 = ValueOf(y);
             if (v1.Type() != v2.Type())
             {
                 return false;
             }
+
             return deepValueEqual(v1, v2, make_map<visit, bool>(), 0L);
+
         }
     }
 }

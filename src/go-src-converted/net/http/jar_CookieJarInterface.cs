@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:24 UTC
+//     Generated on 2020 October 08 03:40:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,42 +64,44 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate slice<ref Cookie> SetCookiesByRef(ref T value, ref url.URL u, slice<ref Cookie> cookies);
-            private delegate slice<ref Cookie> SetCookiesByVal(T value, ref url.URL u, slice<ref Cookie> cookies);
+            private delegate slice<ptr<Cookie>> SetCookiesByPtr(ptr<T> value, ptr<url.URL> u, slice<ptr<Cookie>> cookies);
+            private delegate slice<ptr<Cookie>> SetCookiesByVal(T value, ptr<url.URL> u, slice<ptr<Cookie>> cookies);
 
-            private static readonly SetCookiesByRef s_SetCookiesByRef;
+            private static readonly SetCookiesByPtr s_SetCookiesByPtr;
             private static readonly SetCookiesByVal s_SetCookiesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<ref Cookie> SetCookies(ref url.URL u, slice<ref Cookie> cookies)
+            public slice<ptr<Cookie>> SetCookies(ptr<url.URL> u, slice<ptr<Cookie>> cookies)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetCookiesByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetCookiesByPtr is null || !m_target_is_ptr)
                     return s_SetCookiesByVal!(target, u, cookies);
 
-                return s_SetCookiesByRef(ref target, u, cookies);
+                return s_SetCookiesByPtr(m_target_ptr, u, cookies);
             }
 
-            private delegate slice<ref Cookie> CookiesByRef(ref T value, ref url.URL u);
-            private delegate slice<ref Cookie> CookiesByVal(T value, ref url.URL u);
+            private delegate slice<ptr<Cookie>> CookiesByPtr(ptr<T> value, ptr<url.URL> u);
+            private delegate slice<ptr<Cookie>> CookiesByVal(T value, ptr<url.URL> u);
 
-            private static readonly CookiesByRef s_CookiesByRef;
+            private static readonly CookiesByPtr s_CookiesByPtr;
             private static readonly CookiesByVal s_CookiesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<ref Cookie> Cookies(ref url.URL u)
+            public slice<ptr<Cookie>> Cookies(ptr<url.URL> u)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CookiesByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CookiesByPtr is null || !m_target_is_ptr)
                     return s_CookiesByVal!(target, u);
 
-                return s_CookiesByRef(ref target, u);
+                return s_CookiesByPtr(m_target_ptr, u);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -108,39 +110,33 @@ namespace net
             static CookieJar()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SetCookies");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SetCookies");
 
                 if (!(extensionMethod is null))
-                    s_SetCookiesByRef = extensionMethod.CreateStaticDelegate(typeof(SetCookiesByRef)) as SetCookiesByRef;
+                    s_SetCookiesByPtr = extensionMethod.CreateStaticDelegate(typeof(SetCookiesByPtr)) as SetCookiesByPtr;
 
-                if (s_SetCookiesByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SetCookies");
+                extensionMethod = targetType.GetExtensionMethod("SetCookies");
 
-                    if (!(extensionMethod is null))
-                        s_SetCookiesByVal = extensionMethod.CreateStaticDelegate(typeof(SetCookiesByVal)) as SetCookiesByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetCookiesByVal = extensionMethod.CreateStaticDelegate(typeof(SetCookiesByVal)) as SetCookiesByVal;
 
-                if (s_SetCookiesByRef is null && s_SetCookiesByVal is null)
+                if (s_SetCookiesByPtr is null && s_SetCookiesByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement CookieJar.SetCookies method", new Exception("SetCookies"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Cookies");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Cookies");
 
                 if (!(extensionMethod is null))
-                    s_CookiesByRef = extensionMethod.CreateStaticDelegate(typeof(CookiesByRef)) as CookiesByRef;
+                    s_CookiesByPtr = extensionMethod.CreateStaticDelegate(typeof(CookiesByPtr)) as CookiesByPtr;
 
-                if (s_CookiesByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Cookies");
+                extensionMethod = targetType.GetExtensionMethod("Cookies");
 
-                    if (!(extensionMethod is null))
-                        s_CookiesByVal = extensionMethod.CreateStaticDelegate(typeof(CookiesByVal)) as CookiesByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CookiesByVal = extensionMethod.CreateStaticDelegate(typeof(CookiesByVal)) as CookiesByVal;
 
-                if (s_CookiesByRef is null && s_CookiesByVal is null)
+                if (s_CookiesByPtr is null && s_CookiesByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement CookieJar.Cookies method", new Exception("Cookies"));
             }
 

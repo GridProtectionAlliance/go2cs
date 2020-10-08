@@ -1,5 +1,5 @@
 // Inferno utils/5l/obj.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/5l/obj.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/5l/obj.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,13 +28,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ppc64 -- go2cs converted at 2020 August 29 10:02:58 UTC
+// package ppc64 -- go2cs converted at 2020 October 08 04:37:58 UTC
 // import "cmd/link/internal/ppc64" ==> using ppc64 = go.cmd.link.@internal.ppc64_package
 // Original source: C:\Go\src\cmd\link\internal\ppc64\obj.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using ld = go.cmd.link.@internal.ld_package;
-using fmt = go.fmt_package;
 using static go.builtin;
 
 namespace go {
@@ -44,77 +43,58 @@ namespace @internal
 {
     public static partial class ppc64_package
     {
-        public static (ref sys.Arch, ld.Arch) Init()
+        public static (ptr<sys.Arch>, ld.Arch) Init()
         {
+            ptr<sys.Arch> _p0 = default!;
+            ld.Arch _p0 = default;
+
             var arch = sys.ArchPPC64;
             if (objabi.GOARCH == "ppc64le")
             {
                 arch = sys.ArchPPC64LE;
             }
-            ld.Arch theArch = new ld.Arch(Funcalign:funcAlign,Maxalign:maxAlign,Minalign:minAlign,Dwarfregsp:dwarfRegSP,Dwarfreglr:dwarfRegLR,Adddynrel:adddynrel,Archinit:archinit,Archreloc:archreloc,Archrelocvariant:archrelocvariant,Asmb:asmb,Elfreloc1:elfreloc1,Elfsetupplt:elfsetupplt,Gentext:gentext,Trampoline:trampoline,Machoreloc1:machoreloc1,Linuxdynld:"/lib64/ld64.so.1",Freebsddynld:"XXX",Openbsddynld:"XXX",Netbsddynld:"XXX",Dragonflydynld:"XXX",Solarisdynld:"XXX",);
+            ld.Arch theArch = new ld.Arch(Funcalign:funcAlign,Maxalign:maxAlign,Minalign:minAlign,Dwarfregsp:dwarfRegSP,Dwarfreglr:dwarfRegLR,Adddynrel2:adddynrel2,Archinit:archinit,Archreloc:archreloc,Archrelocvariant:archrelocvariant,Asmb:asmb,Asmb2:asmb2,Elfreloc1:elfreloc1,Elfsetupplt:elfsetupplt,Gentext2:gentext2,Trampoline:trampoline,Machoreloc1:machoreloc1,Xcoffreloc1:xcoffreloc1,Linuxdynld:"/lib64/ld64.so.1",Freebsddynld:"XXX",Openbsddynld:"XXX",Netbsddynld:"XXX",Dragonflydynld:"XXX",Solarisdynld:"XXX",);
 
-            return (arch, theArch);
+            return (_addr_arch!, theArch);
+
         }
 
-        private static void archinit(ref ld.Link ctxt)
+        private static void archinit(ptr<ld.Link> _addr_ctxt)
         {
+            ref ld.Link ctxt = ref _addr_ctxt.val;
+
 
             if (ctxt.HeadType == objabi.Hplan9) /* plan 9 */
                 ld.HEADR = 32L;
 
-                if (ld.FlagTextAddr == -1L.Value)
+                if (ld.FlagTextAddr == -1L.val)
                 {
-                    ld.FlagTextAddr.Value = 4128L;
+                    ld.FlagTextAddr.val = 4128L;
                 }
-                if (ld.FlagDataAddr == -1L.Value)
+
+                if (ld.FlagRound == -1L.val)
                 {
-                    ld.FlagDataAddr.Value = 0L;
+                    ld.FlagRound.val = 4096L;
                 }
-                if (ld.FlagRound == -1L.Value)
-                {
-                    ld.FlagRound.Value = 4096L;
-                }
+
             else if (ctxt.HeadType == objabi.Hlinux) /* ppc64 elf */
-                if (ctxt.Arch == sys.ArchPPC64)
-                {
-                    ld.FlagD.Value = true; // TODO(austin): ELF ABI v1 not supported yet
-                }
                 ld.Elfinit(ctxt);
                 ld.HEADR = ld.ELFRESERVE;
-                if (ld.FlagTextAddr == -1L.Value)
+                if (ld.FlagTextAddr == -1L.val)
                 {
-                    ld.FlagTextAddr.Value = 0x10000UL + int64(ld.HEADR);
+                    ld.FlagTextAddr.val = 0x10000UL + int64(ld.HEADR);
                 }
-                if (ld.FlagDataAddr == -1L.Value)
+
+                if (ld.FlagRound == -1L.val)
                 {
-                    ld.FlagDataAddr.Value = 0L;
+                    ld.FlagRound.val = 0x10000UL;
                 }
-                if (ld.FlagRound == -1L.Value)
-                {
-                    ld.FlagRound.Value = 0x10000UL;
-                }
-            else if (ctxt.HeadType == objabi.Hnacl) 
-                ld.Elfinit(ctxt);
-                ld.HEADR = 0x10000UL;
-                ld.Funcalign = 16L;
-                if (ld.FlagTextAddr == -1L.Value)
-                {
-                    ld.FlagTextAddr.Value = 0x20000UL;
-                }
-                if (ld.FlagDataAddr == -1L.Value)
-                {
-                    ld.FlagDataAddr.Value = 0L;
-                }
-                if (ld.FlagRound == -1L.Value)
-                {
-                    ld.FlagRound.Value = 0x10000UL;
-                }
+
+            else if (ctxt.HeadType == objabi.Haix) 
+                ld.Xcoffinit(ctxt);
             else 
                 ld.Exitf("unknown -H option: %v", ctxt.HeadType);
-                        if (ld.FlagDataAddr != 0L && ld.FlagRound != 0L.Value.Value)
-            {
-                fmt.Printf("warning: -D0x%x is ignored because of -R0x%x\n", uint64(ld.FlagDataAddr.Value), uint32(ld.FlagRound.Value));
-            }
+            
         }
     }
 }}}}

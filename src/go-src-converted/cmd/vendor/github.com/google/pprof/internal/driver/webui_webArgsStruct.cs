@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:31 UTC
+//     Generated on 2020 October 08 04:43:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,30 +46,32 @@ namespace @internal
             // Constructors
             public webArgs(NilType _)
             {
-                this.BaseURL = default;
                 this.Title = default;
                 this.Errors = default;
                 this.Total = default;
+                this.SampleTypes = default;
                 this.Legend = default;
                 this.Help = default;
                 this.Nodes = default;
                 this.HTMLBody = default;
                 this.TextBody = default;
                 this.Top = default;
+                this.FlameGraph = default;
             }
 
-            public webArgs(@string BaseURL = default, @string Title = default, slice<@string> Errors = default, long Total = default, slice<@string> Legend = default, map<@string, @string> Help = default, slice<@string> Nodes = default, template.HTML HTMLBody = default, @string TextBody = default, slice<report.TextItem> Top = default)
+            public webArgs(@string Title = default, slice<@string> Errors = default, long Total = default, slice<@string> SampleTypes = default, slice<@string> Legend = default, map<@string, @string> Help = default, slice<@string> Nodes = default, template.HTML HTMLBody = default, @string TextBody = default, slice<report.TextItem> Top = default, template.JS FlameGraph = default)
             {
-                this.BaseURL = BaseURL;
                 this.Title = Title;
                 this.Errors = Errors;
                 this.Total = Total;
+                this.SampleTypes = SampleTypes;
                 this.Legend = Legend;
                 this.Help = Help;
                 this.Nodes = Nodes;
                 this.HTMLBody = HTMLBody;
                 this.TextBody = TextBody;
                 this.Top = Top;
+                this.FlameGraph = FlameGraph;
             }
 
             // Enable comparisons between nil and webArgs struct
@@ -92,7 +94,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static webArgs webArgs_cast(dynamic value)
         {
-            return new webArgs(value.BaseURL, value.Title, value.Errors, value.Total, value.Legend, value.Help, value.Nodes, value.HTMLBody, value.TextBody, value.Top);
+            return new webArgs(value.Title, value.Errors, value.Total, value.SampleTypes, value.Legend, value.Help, value.Nodes, value.HTMLBody, value.TextBody, value.Top, value.FlameGraph);
         }
     }
 }}}}}}}

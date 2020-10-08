@@ -5,22 +5,19 @@
 // Represents JSON data structure using native Go types: booleans, floats,
 // strings, arrays, and maps.
 
-// package json -- go2cs converted at 2020 August 29 08:35:12 UTC
+// package json -- go2cs converted at 2020 October 08 03:42:25 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\decode.go
-using bytes = go.bytes_package;
 using encoding = go.encoding_package;
 using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
 using fmt = go.fmt_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using strconv = go.strconv_package;
+using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf16 = go.unicode.utf16_package;
 using utf8 = go.unicode.utf8_package;
 using static go.builtin;
-using System;
 
 namespace go {
 namespace encoding
@@ -80,7 +77,8 @@ namespace encoding
         // use. If the map is nil, Unmarshal allocates a new map. Otherwise Unmarshal
         // reuses the existing map, keeping existing entries. Unmarshal then stores
         // key-value pairs from the JSON object into the map. The map's key type must
-        // either be a string, an integer, or implement encoding.TextUnmarshaler.
+        // either be any string type, an integer, implement json.Unmarshaler, or
+        // implement encoding.TextUnmarshaler.
         //
         // If a JSON value is not appropriate for a given target type,
         // or if a JSON number overflows the target type, Unmarshal
@@ -106,13 +104,14 @@ namespace encoding
             // Avoids filling out half a data structure
             // before discovering a JSON syntax error.
             decodeState d = default;
-            var err = checkValid(data, ref d.scan);
+            var err = checkValid(data, _addr_d.scan);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
             d.init(data);
-            return error.As(d.unmarshal(v));
+            return error.As(d.unmarshal(v))!;
+
         }
 
         // Unmarshaler is the interface implemented by types
@@ -136,16 +135,20 @@ namespace encoding
             public reflect.Type Type; // type of Go value it could not be assigned to
             public long Offset; // error occurred after reading Offset bytes
             public @string Struct; // name of the struct type containing the field
-            public @string Field; // name of the field holding the Go value
+            public @string Field; // the full path from root node to the field
         }
 
-        private static @string Error(this ref UnmarshalTypeError e)
+        private static @string Error(this ptr<UnmarshalTypeError> _addr_e)
         {
+            ref UnmarshalTypeError e = ref _addr_e.val;
+
             if (e.Struct != "" || e.Field != "")
             {
                 return "json: cannot unmarshal " + e.Value + " into Go struct field " + e.Struct + "." + e.Field + " of type " + e.Type.String();
             }
+
             return "json: cannot unmarshal " + e.Value + " into Go value of type " + e.Type.String();
+
         }
 
         // An UnmarshalFieldError describes a JSON object key that
@@ -159,8 +162,10 @@ namespace encoding
             public reflect.StructField Field;
         }
 
-        private static @string Error(this ref UnmarshalFieldError e)
+        private static @string Error(this ptr<UnmarshalFieldError> _addr_e)
         {
+            ref UnmarshalFieldError e = ref _addr_e.val;
+
             return "json: cannot unmarshal object key " + strconv.Quote(e.Key) + " into unexported field " + e.Field.Name + " of type " + e.Type.String();
         }
 
@@ -171,54 +176,47 @@ namespace encoding
             public reflect.Type Type;
         }
 
-        private static @string Error(this ref InvalidUnmarshalError e)
+        private static @string Error(this ptr<InvalidUnmarshalError> _addr_e)
         {
+            ref InvalidUnmarshalError e = ref _addr_e.val;
+
             if (e.Type == null)
             {
                 return "json: Unmarshal(nil)";
             }
+
             if (e.Type.Kind() != reflect.Ptr)
             {
                 return "json: Unmarshal(non-pointer " + e.Type.String() + ")";
             }
+
             return "json: Unmarshal(nil " + e.Type.String() + ")";
+
         }
 
-        private static error unmarshal(this ref decodeState _d, object v) => func(_d, (ref decodeState d, Defer defer, Panic panic, Recover _) =>
+        private static error unmarshal(this ptr<decodeState> _addr_d, object v)
         {
-            defer(() =>
-            {
-                {
-                    var r = recover();
-
-                    if (r != null)
-                    {
-                        {
-                            runtime.Error (_, ok) = r._<runtime.Error>();
-
-                            if (ok)
-                            {
-                                panic(r);
-                            }
-
-                        }
-                        err = r._<error>();
-                    }
-
-                }
-            }());
+            ref decodeState d = ref _addr_d.val;
 
             var rv = reflect.ValueOf(v);
             if (rv.Kind() != reflect.Ptr || rv.IsNil())
             {
-                return error.As(ref new InvalidUnmarshalError(reflect.TypeOf(v)));
+                return error.As(addr(new InvalidUnmarshalError(reflect.TypeOf(v)))!)!;
             }
-            d.scan.reset(); 
+
+            d.scan.reset();
+            d.scanWhile(scanSkipSpace); 
             // We decode rv not rv.Elem because the Unmarshaler interface
             // test must be applied at the top level of the value.
-            d.value(rv);
-            return error.As(d.savedError);
-        });
+            var err = d.value(rv);
+            if (err != null)
+            {
+                return error.As(d.addErrorContext(err))!;
+            }
+
+            return error.As(d.savedError)!;
+
+        }
 
         // A Number represents a JSON number literal.
         public partial struct Number // : @string
@@ -234,249 +232,373 @@ namespace encoding
         // Float64 returns the number as a float64.
         public static (double, error) Float64(this Number n)
         {
+            double _p0 = default;
+            error _p0 = default!;
+
             return strconv.ParseFloat(string(n), 64L);
         }
 
         // Int64 returns the number as an int64.
         public static (long, error) Int64(this Number n)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             return strconv.ParseInt(string(n), 10L, 64L);
-        }
-
-        // isValidNumber reports whether s is a valid JSON number literal.
-        private static bool isValidNumber(@string s)
-        { 
-            // This function implements the JSON numbers grammar.
-            // See https://tools.ietf.org/html/rfc7159#section-6
-            // and http://json.org/number.gif
-
-            if (s == "")
-            {
-                return false;
-            } 
-
-            // Optional -
-            if (s[0L] == '-')
-            {
-                s = s[1L..];
-                if (s == "")
-                {
-                    return false;
-                }
-            } 
-
-            // Digits
-
-            if (s[0L] == '0') 
-                s = s[1L..];
-            else if ('1' <= s[0L] && s[0L] <= '9') 
-                s = s[1L..];
-                while (len(s) > 0L && '0' <= s[0L] && s[0L] <= '9')
-                {
-                    s = s[1L..];
-                }
-            else 
-                return false;
-            // . followed by 1 or more digits.
-            if (len(s) >= 2L && s[0L] == '.' && '0' <= s[1L] && s[1L] <= '9')
-            {
-                s = s[2L..];
-                while (len(s) > 0L && '0' <= s[0L] && s[0L] <= '9')
-                {
-                    s = s[1L..];
-                }
-
-            } 
-
-            // e or E followed by an optional - or + and
-            // 1 or more digits.
-            if (len(s) >= 2L && (s[0L] == 'e' || s[0L] == 'E'))
-            {
-                s = s[1L..];
-                if (s[0L] == '+' || s[0L] == '-')
-                {
-                    s = s[1L..];
-                    if (s == "")
-                    {
-                        return false;
-                    }
-                }
-                while (len(s) > 0L && '0' <= s[0L] && s[0L] <= '9')
-                {
-                    s = s[1L..];
-                }
-
-            } 
-
-            // Make sure we are at the end.
-            return s == "";
         }
 
         // decodeState represents the state while decoding a JSON value.
         private partial struct decodeState
         {
             public slice<byte> data;
-            public long off; // read offset in data
+            public long off; // next read offset in data
+            public long opcode; // last read result
             public scanner scan;
-            public scanner nextscan; // for calls to nextValue
             public error savedError;
             public bool useNumber;
             public bool disallowUnknownFields;
         }
 
-        // errPhase is used for errors that should not happen unless
-        // there is a bug in the JSON decoder or something is editing
-        // the data slice while the decoder executes.
-        private static var errPhase = errors.New("JSON decoder out of sync - data changing underfoot?");
-
-        private static ref decodeState init(this ref decodeState d, slice<byte> data)
+        // readIndex returns the position of the last byte read.
+        private static long readIndex(this ptr<decodeState> _addr_d)
         {
+            ref decodeState d = ref _addr_d.val;
+
+            return d.off - 1L;
+        }
+
+        // phasePanicMsg is used as a panic message when we end up with something that
+        // shouldn't happen. It can indicate a bug in the JSON decoder, or that
+        // something is editing the data slice while the decoder executes.
+        private static readonly @string phasePanicMsg = (@string)"JSON decoder out of sync - data changing underfoot?";
+
+
+
+        private static ptr<decodeState> init(this ptr<decodeState> _addr_d, slice<byte> data)
+        {
+            ref decodeState d = ref _addr_d.val;
+
             d.data = data;
             d.off = 0L;
             d.savedError = null;
-            d.errorContext.Struct = "";
-            d.errorContext.Field = "";
-            return d;
-        }
+            d.errorContext.Struct = null; 
 
-        // error aborts the decoding by panicking with err.
-        private static void error(this ref decodeState _d, error err) => func(_d, (ref decodeState d, Defer _, Panic panic, Recover __) =>
-        {
-            panic(d.addErrorContext(err));
-        });
+            // Reuse the allocated space for the FieldStack slice.
+            d.errorContext.FieldStack = d.errorContext.FieldStack[..0L];
+            return _addr_d!;
+
+        }
 
         // saveError saves the first err it is called with,
         // for reporting at the end of the unmarshal.
-        private static void saveError(this ref decodeState d, error err)
+        private static void saveError(this ptr<decodeState> _addr_d, error err)
         {
+            ref decodeState d = ref _addr_d.val;
+
             if (d.savedError == null)
             {
                 d.savedError = d.addErrorContext(err);
             }
+
         }
 
         // addErrorContext returns a new error enhanced with information from d.errorContext
-        private static error addErrorContext(this ref decodeState d, error err)
+        private static error addErrorContext(this ptr<decodeState> _addr_d, error err)
         {
-            if (d.errorContext.Struct != "" || d.errorContext.Field != "")
+            ref decodeState d = ref _addr_d.val;
+
+            if (d.errorContext.Struct != null || len(d.errorContext.FieldStack) > 0L)
             {
                 switch (err.type())
                 {
-                    case ref UnmarshalTypeError err:
-                        err.Struct = d.errorContext.Struct;
-                        err.Field = d.errorContext.Field;
-                        return error.As(err);
+                    case ptr<UnmarshalTypeError> err:
+                        err.Struct = d.errorContext.Struct.Name();
+                        err.Field = strings.Join(d.errorContext.FieldStack, ".");
+                        return error.As(err)!;
                         break;
                 }
+
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
 
-        // next cuts off and returns the next full JSON value in d.data[d.off:].
-        // The next value is known to be an object or array, not a literal.
-        private static slice<byte> next(this ref decodeState d)
+        // skip scans to the end of what was started.
+        private static void skip(this ptr<decodeState> _addr_d)
         {
-            var c = d.data[d.off];
-            var (item, rest, err) = nextValue(d.data[d.off..], ref d.nextscan);
-            if (err != null)
-            {
-                d.error(err);
-            }
-            d.off = len(d.data) - len(rest); 
+            ref decodeState d = ref _addr_d.val;
 
-            // Our scanner has seen the opening brace/bracket
-            // and thinks we're still in the middle of the object.
-            // invent a closing brace/bracket to get it out.
-            if (c == '{')
+            var s = _addr_d.scan;
+            var data = d.data;
+            var i = d.off;
+            var depth = len(s.parseState);
+            while (true)
             {
-                d.scan.step(ref d.scan, '}');
+                var op = s.step(s, data[i]);
+                i++;
+                if (len(s.parseState) < depth)
+                {
+                    d.off = i;
+                    d.opcode = op;
+                    return ;
+                }
+
+            }
+
+
+        }
+
+        // scanNext processes the byte at d.data[d.off].
+        private static void scanNext(this ptr<decodeState> _addr_d)
+        {
+            ref decodeState d = ref _addr_d.val;
+
+            if (d.off < len(d.data))
+            {
+                d.opcode = d.scan.step(_addr_d.scan, d.data[d.off]);
+                d.off++;
             }
             else
             {
-                d.scan.step(ref d.scan, ']');
+                d.opcode = d.scan.eof();
+                d.off = len(d.data) + 1L; // mark processed EOF with len+1
             }
-            return item;
+
         }
 
         // scanWhile processes bytes in d.data[d.off:] until it
         // receives a scan code not equal to op.
-        // It updates d.off and returns the new scan code.
-        private static long scanWhile(this ref decodeState d, long op)
+        private static void scanWhile(this ptr<decodeState> _addr_d, long op)
         {
-            long newOp = default;
-            while (true)
+            ref decodeState d = ref _addr_d.val;
+
+            var s = _addr_d.scan;
+            var data = d.data;
+            var i = d.off;
+            while (i < len(data))
             {
-                if (d.off >= len(d.data))
+                var newOp = s.step(s, data[i]);
+                i++;
+                if (newOp != op)
                 {
-                    newOp = d.scan.eof();
-                    d.off = len(d.data) + 1L; // mark processed EOF with len+1
+                    d.opcode = newOp;
+                    d.off = i;
+                    return ;
+                }
+
+            }
+
+
+            d.off = len(data) + 1L; // mark processed EOF with len+1
+            d.opcode = d.scan.eof();
+
+        }
+
+        // rescanLiteral is similar to scanWhile(scanContinue), but it specialises the
+        // common case where we're decoding a literal. The decoder scans the input
+        // twice, once for syntax errors and to check the length of the value, and the
+        // second to perform the decoding.
+        //
+        // Only in the second step do we use decodeState to tokenize literals, so we
+        // know there aren't any syntax errors. We can take advantage of that knowledge,
+        // and scan a literal's bytes much more quickly.
+        private static void rescanLiteral(this ptr<decodeState> _addr_d)
+        {
+            ref decodeState d = ref _addr_d.val;
+
+            var data = d.data;
+            var i = d.off;
+Switch:
+            switch (data[i - 1L])
+            {
+                case '"': // string
+                    while (i < len(data))
+                    {
+                        switch (data[i])
+                        {
+                            case '\\': 
+                                i++; // escaped char
+                                break;
+                            case '"': 
+                                i++; // tokenize the closing quote too
+                                _breakSwitch = true;
+                                break;
+                                break;
+                        }
+                        i++;
+                    }
+                    break;
+                case '0': // number
+
+                case '1': // number
+
+                case '2': // number
+
+                case '3': // number
+
+                case '4': // number
+
+                case '5': // number
+
+                case '6': // number
+
+                case '7': // number
+
+                case '8': // number
+
+                case '9': // number
+
+                case '-': // number
+                    while (i < len(data))
+                    {
+                        switch (data[i])
+                        {
+                            case '0': 
+
+                            case '1': 
+
+                            case '2': 
+
+                            case '3': 
+
+                            case '4': 
+
+                            case '5': 
+
+                            case '6': 
+
+                            case '7': 
+
+                            case '8': 
+
+                            case '9': 
+
+                            case '.': 
+
+                            case 'e': 
+
+                            case 'E': 
+
+                            case '+': 
+
+                            case '-': 
+                                break;
+                            default: 
+                                _breakSwitch = true;
+                                break;
+                                break;
+                        }
+                        i++;
+                    }
+                    break;
+                case 't': // true
+                    i += len("rue");
+                    break;
+                case 'f': // false
+                    i += len("alse");
+                    break;
+                case 'n': // null
+                    i += len("ull");
+                    break;
+            }
+            if (i < len(data))
+            {
+                d.opcode = stateEndValue(_addr_d.scan, data[i]);
+            }
+            else
+            {
+                d.opcode = scanEnd;
+            }
+
+            d.off = i + 1L;
+
+        }
+
+        // value consumes a JSON value from d.data[d.off-1:], decoding into v, and
+        // reads the following byte ahead. If v is invalid, the value is discarded.
+        // The first byte of the value has been read already.
+        private static error value(this ptr<decodeState> _addr_d, reflect.Value v) => func((_, panic, __) =>
+        {
+            ref decodeState d = ref _addr_d.val;
+
+
+            if (d.opcode == scanBeginArray) 
+                if (v.IsValid())
+                {
+                    {
+                        var err__prev2 = err;
+
+                        var err = d.array(v);
+
+                        if (err != null)
+                        {
+                            return error.As(err)!;
+                        }
+
+                        err = err__prev2;
+
+                    }
+
                 }
                 else
                 {
-                    var c = d.data[d.off];
-                    d.off++;
-                    newOp = d.scan.step(ref d.scan, c);
+                    d.skip();
                 }
-                if (newOp != op)
+
+                d.scanNext();
+            else if (d.opcode == scanBeginObject) 
+                if (v.IsValid())
                 {
-                    break;
+                    {
+                        var err__prev2 = err;
+
+                        err = d.@object(v);
+
+                        if (err != null)
+                        {
+                            return error.As(err)!;
+                        }
+
+                        err = err__prev2;
+
+                    }
+
                 }
-            }
-
-            return newOp;
-        }
-
-        // value decodes a JSON value from d.data[d.off:] into the value.
-        // it updates d.off to point past the decoded value.
-        private static void value(this ref decodeState d, reflect.Value v)
-        {
-            if (!v.IsValid())
-            {
-                var (_, rest, err) = nextValue(d.data[d.off..], ref d.nextscan);
-                if (err != null)
+                else
                 {
-                    d.error(err);
+                    d.skip();
                 }
-                d.off = len(d.data) - len(rest); 
 
-                // d.scan thinks we're still at the beginning of the item.
-                // Feed in an empty string - the shortest, simplest value -
-                // so that it knows we got to the end of the value.
-                if (d.scan.redo)
-                { 
-                    // rewind.
-                    d.scan.redo = false;
-                    d.scan.step = stateBeginValue;
+                d.scanNext();
+            else if (d.opcode == scanBeginLiteral) 
+                // All bytes inside literal return scanContinue op code.
+                var start = d.readIndex();
+                d.rescanLiteral();
+
+                if (v.IsValid())
+                {
+                    {
+                        var err__prev2 = err;
+
+                        err = d.literalStore(d.data[start..d.readIndex()], v, false);
+
+                        if (err != null)
+                        {
+                            return error.As(err)!;
+                        }
+
+                        err = err__prev2;
+
+                    }
+
                 }
-                d.scan.step(ref d.scan, '"');
-                d.scan.step(ref d.scan, '"');
 
-                var n = len(d.scan.parseState);
-                if (n > 0L && d.scan.parseState[n - 1L] == parseObjectKey)
-                { 
-                    // d.scan thinks we just read an object key; finish the object
-                    d.scan.step(ref d.scan, ':');
-                    d.scan.step(ref d.scan, '"');
-                    d.scan.step(ref d.scan, '"');
-                    d.scan.step(ref d.scan, '}');
-                }
-                return;
-            }
-            {
-                var op = d.scanWhile(scanSkipSpace);
+            else 
+                panic(phasePanicMsg);
+                        return error.As(null!)!;
 
-
-                if (op == scanBeginArray) 
-                    d.array(v);
-                else if (op == scanBeginObject) 
-                    d.@object(v);
-                else if (op == scanBeginLiteral) 
-                    d.literal(v);
-                else 
-                    d.error(errPhase);
-
-            }
-        }
+        });
 
         private partial struct unquotedValue
         {
@@ -486,36 +608,39 @@ namespace encoding
         // quoted string literal or literal null into an interface value.
         // If it finds anything other than a quoted string literal or null,
         // valueQuoted returns unquotedValue{}.
-        private static void valueQuoted(this ref decodeState d)
+        private static void valueQuoted(this ptr<decodeState> _addr_d) => func((_, panic, __) =>
         {
-            {
-                var op = d.scanWhile(scanSkipSpace);
+            ref decodeState d = ref _addr_d.val;
 
 
-                if (op == scanBeginArray) 
-                    d.array(new reflect.Value());
-                else if (op == scanBeginObject) 
-                    d.@object(new reflect.Value());
-                else if (op == scanBeginLiteral) 
-                    switch (d.literalInterface().type())
-                    {
-                        case @string v:
-                            return v;
-                            break;
-                    }
-                else 
-                    d.error(errPhase);
+            if (d.opcode == scanBeginArray || d.opcode == scanBeginObject) 
+                d.skip();
+                d.scanNext();
+            else if (d.opcode == scanBeginLiteral) 
+                var v = d.literalInterface();
+                switch (v.type())
+                {
+                    case @string _:
+                        return v;
+                        break;
+                }
+            else 
+                panic(phasePanicMsg);
+                        return new unquotedValue();
 
-            }
-            return new unquotedValue();
-        }
+        });
 
         // indirect walks down v allocating pointers as needed,
         // until it gets to a non-pointer.
-        // if it encounters an Unmarshaler, indirect stops and returns that.
-        // if decodingNull is true, indirect stops at the last pointer so it can be set to nil.
-        private static (Unmarshaler, encoding.TextUnmarshaler, reflect.Value) indirect(this ref decodeState d, reflect.Value v, bool decodingNull)
-        { 
+        // If it encounters an Unmarshaler, indirect stops and returns that.
+        // If decodingNull is true, indirect stops at the first settable pointer so it
+        // can be set to nil.
+        private static (Unmarshaler, encoding.TextUnmarshaler, reflect.Value) indirect(reflect.Value v, bool decodingNull)
+        {
+            Unmarshaler _p0 = default;
+            encoding.TextUnmarshaler _p0 = default;
+            reflect.Value _p0 = default;
+ 
             // Issue #24153 indicates that it is generally not a guaranteed property
             // that you may round-trip a reflect.Value by calling Value.Addr().Elem()
             // and expect the value to still be settable for values derived from
@@ -538,6 +663,7 @@ namespace encoding
                 haveAddr = true;
                 v = v.Addr();
             }
+
             while (true)
             { 
                 // Load value from interface, but only if the result will be
@@ -551,25 +677,39 @@ namespace encoding
                         v = e;
                         continue;
                     }
+
                 }
+
                 if (v.Kind() != reflect.Ptr)
                 {
                     break;
                 }
-                if (v.Elem().Kind() != reflect.Ptr && decodingNull && v.CanSet())
+
+                if (decodingNull && v.CanSet())
                 {
                     break;
+                } 
+
+                // Prevent infinite loop if v is an interface pointing to its own address:
+                //     var v interface{}
+                //     v = &v
+                if (v.Elem().Kind() == reflect.Interface && v.Elem().Elem() == v)
+                {
+                    v = v.Elem();
+                    break;
                 }
+
                 if (v.IsNil())
                 {
                     v.Set(reflect.New(v.Type().Elem()));
                 }
-                if (v.Type().NumMethod() > 0L)
+
+                if (v.Type().NumMethod() > 0L && v.CanInterface())
                 {
                     {
                         Unmarshaler u__prev2 = u;
 
-                        Unmarshaler (u, ok) = v.Interface()._<Unmarshaler>();
+                        Unmarshaler (u, ok) = Unmarshaler.As(v.Interface()._<Unmarshaler>())!;
 
                         if (ok)
                         {
@@ -579,6 +719,7 @@ namespace encoding
                         u = u__prev2;
 
                     }
+
                     if (!decodingNull)
                     {
                         {
@@ -594,45 +735,50 @@ namespace encoding
                             u = u__prev3;
 
                         }
+
                     }
+
                 }
+
                 if (haveAddr)
                 {
                     v = v0; // restore original value after round-trip Value.Addr().Elem()
                     haveAddr = false;
+
                 }
                 else
                 {
                     v = v.Elem();
                 }
+
             }
 
             return (null, null, v);
+
         }
 
-        // array consumes an array from d.data[d.off-1:], decoding into the value v.
-        // the first byte of the array ('[') has been read already.
-        private static void array(this ref decodeState d, reflect.Value v)
-        { 
+        // array consumes an array from d.data[d.off-1:], decoding into v.
+        // The first byte of the array ('[') has been read already.
+        private static error array(this ptr<decodeState> _addr_d, reflect.Value v) => func((_, panic, __) =>
+        {
+            ref decodeState d = ref _addr_d.val;
+ 
             // Check for unmarshaler.
-            var (u, ut, pv) = d.indirect(v, false);
+            var (u, ut, pv) = indirect(v, false);
             if (u != null)
             {
-                d.off--;
-                var err = u.UnmarshalJSON(d.next());
-                if (err != null)
-                {
-                    d.error(err);
-                }
-                return;
+                var start = d.readIndex();
+                d.skip();
+                return error.As(u.UnmarshalJSON(d.data[start..d.off]))!;
             }
+
             if (ut != null)
             {
-                d.saveError(ref new UnmarshalTypeError(Value:"array",Type:v.Type(),Offset:int64(d.off)));
-                d.off--;
-                d.next();
-                return;
+                d.saveError(addr(new UnmarshalTypeError(Value:"array",Type:v.Type(),Offset:int64(d.off))));
+                d.skip();
+                return error.As(null!)!;
             }
+
             v = pv; 
 
             // Check type of target.
@@ -642,26 +788,23 @@ namespace encoding
                 if (v.NumMethod() == 0L)
                 { 
                     // Decoding into nil interface? Switch to non-reflect code.
-                    v.Set(reflect.ValueOf(d.arrayInterface()));
-                    return;
+                    var ai = d.arrayInterface();
+                    v.Set(reflect.ValueOf(ai));
+                    return error.As(null!)!;
+
                 } 
                 // Otherwise it's invalid.
                 fallthrough = true;
             }
-            if (fallthrough || v.Kind() == reflect.Array)
-            {
-                goto __switch_break0;
-            }
-            if (v.Kind() == reflect.Slice)
+            if (fallthrough || v.Kind() == reflect.Array || v.Kind() == reflect.Slice)
             {
                 break;
                 goto __switch_break0;
             }
             // default: 
-                d.saveError(ref new UnmarshalTypeError(Value:"array",Type:v.Type(),Offset:int64(d.off)));
-                d.off--;
-                d.next();
-                return;
+                d.saveError(addr(new UnmarshalTypeError(Value:"array",Type:v.Type(),Offset:int64(d.off))));
+                d.skip();
+                return error.As(null!)!;
 
             __switch_break0:;
 
@@ -669,15 +812,11 @@ namespace encoding
             while (true)
             { 
                 // Look ahead for ] - can only happen on first iteration.
-                var op = d.scanWhile(scanSkipSpace);
-                if (op == scanEndArray)
+                d.scanWhile(scanSkipSpace);
+                if (d.opcode == scanEndArray)
                 {
                     break;
                 } 
-
-                // Back up so d.value can have the byte we just read.
-                d.off--;
-                d.scan.undo(op); 
 
                 // Get element of array, growing if necessary.
                 if (v.Kind() == reflect.Slice)
@@ -690,37 +829,75 @@ namespace encoding
                         {
                             newcap = 4L;
                         }
+
                         var newv = reflect.MakeSlice(v.Type(), v.Len(), newcap);
                         reflect.Copy(newv, v);
                         v.Set(newv);
+
                     }
+
                     if (i >= v.Len())
                     {
                         v.SetLen(i + 1L);
                     }
+
                 }
+
                 if (i < v.Len())
                 { 
                     // Decode into element.
-                    d.value(v.Index(i));
+                    {
+                        var err__prev2 = err;
+
+                        var err = d.value(v.Index(i));
+
+                        if (err != null)
+                        {
+                            return error.As(err)!;
+                        }
+
+                        err = err__prev2;
+
+                    }
+
                 }
                 else
                 { 
                     // Ran out of fixed array: skip.
-                    d.value(new reflect.Value());
+                    {
+                        var err__prev2 = err;
+
+                        err = d.value(new reflect.Value());
+
+                        if (err != null)
+                        {
+                            return error.As(err)!;
+                        }
+
+                        err = err__prev2;
+
+                    }
+
                 }
+
                 i++; 
 
                 // Next token must be , or ].
-                op = d.scanWhile(scanSkipSpace);
-                if (op == scanEndArray)
+                if (d.opcode == scanSkipSpace)
+                {
+                    d.scanWhile(scanSkipSpace);
+                }
+
+                if (d.opcode == scanEndArray)
                 {
                     break;
                 }
-                if (op != scanArrayValue)
+
+                if (d.opcode != scanArrayValue)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 }
+
             }
 
 
@@ -737,50 +914,59 @@ namespace encoding
                     }
                 else
 
+
                 }                {
                     v.SetLen(i);
                 }
+
             }
+
             if (i == 0L && v.Kind() == reflect.Slice)
             {
                 v.Set(reflect.MakeSlice(v.Type(), 0L, 0L));
             }
-        }
+
+            return error.As(null!)!;
+
+        });
 
         private static slice<byte> nullLiteral = (slice<byte>)"null";
-        private static var textUnmarshalerType = reflect.TypeOf(@new<encoding.TextUnmarshaler>()).Elem();
+        private static var textUnmarshalerType = reflect.TypeOf((encoding.TextUnmarshaler.val)(null)).Elem();
 
-        // object consumes an object from d.data[d.off-1:], decoding into the value v.
-        // the first byte ('{') of the object has been read already.
-        private static void @object(this ref decodeState _d, reflect.Value v) => func(_d, (ref decodeState d, Defer _, Panic panic, Recover __) =>
-        { 
+        // object consumes an object from d.data[d.off-1:], decoding into v.
+        // The first byte ('{') of the object has been read already.
+        private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => func((_, panic, __) =>
+        {
+            ref decodeState d = ref _addr_d.val;
+ 
             // Check for unmarshaler.
-            var (u, ut, pv) = d.indirect(v, false);
+            var (u, ut, pv) = indirect(v, false);
             if (u != null)
             {
-                d.off--;
-                var err = u.UnmarshalJSON(d.next());
-                if (err != null)
-                {
-                    d.error(err);
-                }
-                return;
+                var start = d.readIndex();
+                d.skip();
+                return error.As(u.UnmarshalJSON(d.data[start..d.off]))!;
             }
+
             if (ut != null)
             {
-                d.saveError(ref new UnmarshalTypeError(Value:"object",Type:v.Type(),Offset:int64(d.off)));
-                d.off--;
-                d.next(); // skip over { } in input
-                return;
+                d.saveError(addr(new UnmarshalTypeError(Value:"object",Type:v.Type(),Offset:int64(d.off))));
+                d.skip();
+                return error.As(null!)!;
             }
-            v = pv; 
+
+            v = pv;
+            var t = v.Type(); 
 
             // Decoding into nil interface? Switch to non-reflect code.
             if (v.Kind() == reflect.Interface && v.NumMethod() == 0L)
             {
-                v.Set(reflect.ValueOf(d.objectInterface()));
-                return;
-            } 
+                var oi = d.objectInterface();
+                v.Set(reflect.ValueOf(oi));
+                return error.As(null!)!;
+            }
+
+            structFields fields = default; 
 
             // Check type of target:
             //   struct or
@@ -790,49 +976,54 @@ namespace encoding
             if (v.Kind() == reflect.Map) 
                 // Map key must either have string kind, have an integer kind,
                 // or be an encoding.TextUnmarshaler.
-                var t = v.Type();
 
                 if (t.Key().Kind() == reflect.String || t.Key().Kind() == reflect.Int || t.Key().Kind() == reflect.Int8 || t.Key().Kind() == reflect.Int16 || t.Key().Kind() == reflect.Int32 || t.Key().Kind() == reflect.Int64 || t.Key().Kind() == reflect.Uint || t.Key().Kind() == reflect.Uint8 || t.Key().Kind() == reflect.Uint16 || t.Key().Kind() == reflect.Uint32 || t.Key().Kind() == reflect.Uint64 || t.Key().Kind() == reflect.Uintptr)                 else 
                     if (!reflect.PtrTo(t.Key()).Implements(textUnmarshalerType))
                     {
-                        d.saveError(ref new UnmarshalTypeError(Value:"object",Type:v.Type(),Offset:int64(d.off)));
-                        d.off--;
-                        d.next(); // skip over { } in input
-                        return;
+                        d.saveError(addr(new UnmarshalTypeError(Value:"object",Type:t,Offset:int64(d.off))));
+                        d.skip();
+                        return error.As(null!)!;
                     }
+
                                 if (v.IsNil())
                 {
                     v.Set(reflect.MakeMap(t));
                 }
-            else if (v.Kind() == reflect.Struct)             else 
-                d.saveError(ref new UnmarshalTypeError(Value:"object",Type:v.Type(),Offset:int64(d.off)));
-                d.off--;
-                d.next(); // skip over { } in input
-                return;
+
+            else if (v.Kind() == reflect.Struct) 
+                fields = cachedTypeFields(t); 
+                // ok
+            else 
+                d.saveError(addr(new UnmarshalTypeError(Value:"object",Type:t,Offset:int64(d.off))));
+                d.skip();
+                return error.As(null!)!;
                         reflect.Value mapElem = default;
+            var origErrorContext = d.errorContext;
 
             while (true)
             { 
                 // Read opening " of string key or closing }.
-                var op = d.scanWhile(scanSkipSpace);
-                if (op == scanEndObject)
+                d.scanWhile(scanSkipSpace);
+                if (d.opcode == scanEndObject)
                 { 
                     // closing } - can only happen on first iteration.
                     break;
+
                 }
-                if (op != scanBeginLiteral)
+
+                if (d.opcode != scanBeginLiteral)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 } 
 
                 // Read key.
-                var start = d.off - 1L;
-                op = d.scanWhile(scanContinue);
-                var item = d.data[start..d.off - 1L];
+                start = d.readIndex();
+                d.rescanLiteral();
+                var item = d.data[start..d.readIndex()];
                 var (key, ok) = unquoteBytes(item);
                 if (!ok)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 } 
 
                 // Figure out field corresponding to key.
@@ -841,7 +1032,7 @@ namespace encoding
 
                 if (v.Kind() == reflect.Map)
                 {
-                    var elemType = v.Type().Elem();
+                    var elemType = t.Elem();
                     if (!mapElem.IsValid())
                     {
                         mapElem = reflect.New(elemType).Elem();
@@ -850,31 +1041,49 @@ namespace encoding
                     {
                         mapElem.Set(reflect.Zero(elemType));
                     }
+
                     subv = mapElem;
+
                 }
                 else
                 {
-                    ref field f = default;
-                    var fields = cachedTypeFields(v.Type());
+                    ptr<field> f;
                     {
                         var i__prev2 = i;
 
-                        foreach (var (__i) in fields)
-                        {
-                            i = __i;
-                            var ff = ref fields[i];
-                            if (bytes.Equal(ff.nameBytes, key))
+                        var (i, ok) = fields.nameIndex[string(key)];
+
+                        if (ok)
+                        { 
+                            // Found an exact name match.
+                            f = _addr_fields.list[i];
+
+                        }
+                        else
+                        { 
+                            // Fall back to the expensive case-insensitive
+                            // linear search.
                             {
-                                f = ff;
-                                break;
-                            }
-                            if (f == null && ff.equalFold(ff.nameBytes, key))
-                            {
-                                f = ff;
+                                var i__prev2 = i;
+
+                                foreach (var (__i) in fields.list)
+                                {
+                                    i = __i;
+                                    var ff = _addr_fields.list[i];
+                                    if (ff.equalFold(ff.nameBytes, key))
+                                    {
+                                        f = ff;
+                                        break;
+                                    }
+
+                                }
+
+                                i = i__prev2;
                             }
                         }
 
                         i = i__prev2;
+
                     }
 
                     if (f != null)
@@ -904,44 +1113,83 @@ namespace encoding
                                             subv = new reflect.Value();
                                             destring = false;
                                             break;
+
                                         }
+
                                         subv.Set(reflect.New(subv.Type().Elem()));
+
                                     }
+
                                     subv = subv.Elem();
+
                                 }
+
                                 subv = subv.Field(i);
+
                             }
 
                             i = i__prev2;
                         }
 
-                        d.errorContext.Field = f.name;
-                        d.errorContext.Struct = v.Type().Name();
+                        d.errorContext.FieldStack = append(d.errorContext.FieldStack, f.name);
+                        d.errorContext.Struct = t;
+
                     }
                     else if (d.disallowUnknownFields)
                     {
                         d.saveError(fmt.Errorf("json: unknown field %q", key));
                     }
+
                 } 
 
                 // Read : before value.
-                if (op == scanSkipSpace)
+                if (d.opcode == scanSkipSpace)
                 {
-                    op = d.scanWhile(scanSkipSpace);
+                    d.scanWhile(scanSkipSpace);
                 }
-                if (op != scanObjectKey)
+
+                if (d.opcode != scanObjectKey)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 }
+
+                d.scanWhile(scanSkipSpace);
+
                 if (destring)
                 {
                     switch (d.valueQuoted().type())
                     {
                         case 
-                            d.literalStore(nullLiteral, subv, false);
+                            {
+                                var err__prev2 = err;
+
+                                var err = d.literalStore(nullLiteral, subv, false);
+
+                                if (err != null)
+                                {
+                                    return error.As(err)!;
+                                }
+
+                                err = err__prev2;
+
+                            }
+
                             break;
                         case @string qv:
-                            d.literalStore((slice<byte>)qv, subv, true);
+                            {
+                                var err__prev2 = err;
+
+                                err = d.literalStore((slice<byte>)qv, subv, true);
+
+                                if (err != null)
+                                {
+                                    return error.As(err)!;
+                                }
+
+                                err = err__prev2;
+
+                            }
+
                             break;
                         default:
                         {
@@ -950,25 +1198,52 @@ namespace encoding
                             break;
                         }
                     }
+
                 }
                 else
                 {
-                    d.value(subv);
+                    {
+                        var err__prev2 = err;
+
+                        err = d.value(subv);
+
+                        if (err != null)
+                        {
+                            return error.As(err)!;
+                        }
+
+                        err = err__prev2;
+
+                    }
+
                 } 
 
                 // Write value back to map;
                 // if using struct, subv points into struct already.
                 if (v.Kind() == reflect.Map)
                 {
-                    var kt = v.Type().Key();
+                    var kt = t.Key();
                     reflect.Value kv = default;
 
-                    if (kt.Kind() == reflect.String) 
-                        kv = reflect.ValueOf(key).Convert(kt);
-                    else if (reflect.PtrTo(kt).Implements(textUnmarshalerType)) 
-                        kv = reflect.New(v.Type().Key());
-                        d.literalStore(item, kv, true);
+                    if (reflect.PtrTo(kt).Implements(textUnmarshalerType)) 
+                        kv = reflect.New(kt);
+                        {
+                            var err__prev2 = err;
+
+                            err = d.literalStore(item, kv, true);
+
+                            if (err != null)
+                            {
+                                return error.As(err)!;
+                            }
+
+                            err = err__prev2;
+
+                        }
+
                         kv = kv.Elem();
+                    else if (kt.Kind() == reflect.String) 
+                        kv = reflect.ValueOf(key).Convert(kt);
                     else 
 
                         if (kt.Kind() == reflect.Int || kt.Kind() == reflect.Int8 || kt.Kind() == reflect.Int16 || kt.Kind() == reflect.Int32 || kt.Kind() == reflect.Int64) 
@@ -976,70 +1251,77 @@ namespace encoding
                             var (n, err) = strconv.ParseInt(s, 10L, 64L);
                             if (err != null || reflect.Zero(kt).OverflowInt(n))
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"number "+s,Type:kt,Offset:int64(start+1)));
-                                return;
+                                d.saveError(addr(new UnmarshalTypeError(Value:"number "+s,Type:kt,Offset:int64(start+1))));
+                                break;
                             }
+
                             kv = reflect.ValueOf(n).Convert(kt);
                         else if (kt.Kind() == reflect.Uint || kt.Kind() == reflect.Uint8 || kt.Kind() == reflect.Uint16 || kt.Kind() == reflect.Uint32 || kt.Kind() == reflect.Uint64 || kt.Kind() == reflect.Uintptr) 
                             s = string(key);
                             (n, err) = strconv.ParseUint(s, 10L, 64L);
                             if (err != null || reflect.Zero(kt).OverflowUint(n))
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"number "+s,Type:kt,Offset:int64(start+1)));
-                                return;
+                                d.saveError(addr(new UnmarshalTypeError(Value:"number "+s,Type:kt,Offset:int64(start+1))));
+                                break;
                             }
+
                             kv = reflect.ValueOf(n).Convert(kt);
                         else 
                             panic("json: Unexpected key type"); // should never occur
-                                                                v.SetMapIndex(kv, subv);
+                                                                if (kv.IsValid())
+                    {
+                        v.SetMapIndex(kv, subv);
+                    }
+
                 } 
 
                 // Next token must be , or }.
-                op = d.scanWhile(scanSkipSpace);
-                if (op == scanEndObject)
+                if (d.opcode == scanSkipSpace)
+                {
+                    d.scanWhile(scanSkipSpace);
+                } 
+                // Reset errorContext to its original state.
+                // Keep the same underlying array for FieldStack, to reuse the
+                // space and avoid unnecessary allocs.
+                d.errorContext.FieldStack = d.errorContext.FieldStack[..len(origErrorContext.FieldStack)];
+                d.errorContext.Struct = origErrorContext.Struct;
+                if (d.opcode == scanEndObject)
                 {
                     break;
                 }
-                if (op != scanObjectValue)
+
+                if (d.opcode != scanObjectValue)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 }
-                d.errorContext.Struct = "";
-                d.errorContext.Field = "";
+
             }
+
+            return error.As(null!)!;
 
         });
 
-        // literal consumes a literal from d.data[d.off-1:], decoding into the value v.
-        // The first byte of the literal has been read already
-        // (that's how the caller knows it's a literal).
-        private static void literal(this ref decodeState d, reflect.Value v)
-        { 
-            // All bytes inside literal return scanContinue op code.
-            var start = d.off - 1L;
-            var op = d.scanWhile(scanContinue); 
-
-            // Scan read one byte too far; back up.
-            d.off--;
-            d.scan.undo(op);
-
-            d.literalStore(d.data[start..d.off], v, false);
-        }
-
         // convertNumber converts the number literal s to a float64 or a Number
         // depending on the setting of d.useNumber.
-        private static (object, error) convertNumber(this ref decodeState d, @string s)
+        private static (object, error) convertNumber(this ptr<decodeState> _addr_d, @string s)
         {
+            object _p0 = default;
+            error _p0 = default!;
+            ref decodeState d = ref _addr_d.val;
+
             if (d.useNumber)
             {
-                return (Number(s), null);
+                return (Number(s), error.As(null!)!);
             }
+
             var (f, err) = strconv.ParseFloat(s, 64L);
             if (err != null)
             {
-                return (null, ref new UnmarshalTypeError(Value:"number "+s,Type:reflect.TypeOf(0.0),Offset:int64(d.off)));
+                return (null, error.As(addr(new UnmarshalTypeError(Value:"number "+s,Type:reflect.TypeOf(0.0),Offset:int64(d.off)))!)!);
             }
-            return (f, null);
+
+            return (f, error.As(null!)!);
+
         }
 
         private static var numberType = reflect.TypeOf(Number(""));
@@ -1049,26 +1331,26 @@ namespace encoding
         // fromQuoted indicates whether this literal came from unwrapping a
         // string from the ",string" struct tag option. this is used only to
         // produce more helpful error messages.
-        private static void literalStore(this ref decodeState d, slice<byte> item, reflect.Value v, bool fromQuoted)
-        { 
+        private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> item, reflect.Value v, bool fromQuoted) => func((_, panic, __) =>
+        {
+            ref decodeState d = ref _addr_d.val;
+ 
             // Check for unmarshaler.
             if (len(item) == 0L)
             { 
                 //Empty string given
                 d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
-                return;
+                return error.As(null!)!;
+
             }
+
             var isNull = item[0L] == 'n'; // null
-            var (u, ut, pv) = d.indirect(v, isNull);
+            var (u, ut, pv) = indirect(v, isNull);
             if (u != null)
             {
-                var err = u.UnmarshalJSON(item);
-                if (err != null)
-                {
-                    d.error(err);
-                }
-                return;
+                return error.As(u.UnmarshalJSON(item))!;
             }
+
             if (ut != null)
             {
                 if (item[0L] != '"')
@@ -1076,47 +1358,42 @@ namespace encoding
                     if (fromQuoted)
                     {
                         d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
+                        return error.As(null!)!;
                     }
-                    else
-                    {
-                        @string val = default;
-                        switch (item[0L])
-                        {
-                            case 'n': 
-                                val = "null";
-                                break;
-                            case 't': 
 
-                            case 'f': 
-                                val = "bool";
-                                break;
-                            default: 
-                                val = "number";
-                                break;
-                        }
-                        d.saveError(ref new UnmarshalTypeError(Value:val,Type:v.Type(),Offset:int64(d.off)));
+                    @string val = "number";
+                    switch (item[0L])
+                    {
+                        case 'n': 
+                            val = "null";
+                            break;
+                        case 't': 
+
+                        case 'f': 
+                            val = "bool";
+                            break;
                     }
-                    return;
+                    d.saveError(addr(new UnmarshalTypeError(Value:val,Type:v.Type(),Offset:int64(d.readIndex()))));
+                    return error.As(null!)!;
+
                 }
+
                 var (s, ok) = unquoteBytes(item);
                 if (!ok)
                 {
                     if (fromQuoted)
                     {
-                        d.error(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
+                        return error.As(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()))!;
                     }
-                    else
-                    {
-                        d.error(errPhase);
-                    }
+
+                    panic(phasePanicMsg);
+
                 }
-                err = ut.UnmarshalText(s);
-                if (err != null)
-                {
-                    d.error(err);
-                }
-                return;
+
+                return error.As(ut.UnmarshalText(s))!;
+
             }
+
             v = pv;
 
             {
@@ -1132,6 +1409,7 @@ namespace encoding
                             d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
                             break;
                         }
+
 
                         if (v.Kind() == reflect.Interface || v.Kind() == reflect.Ptr || v.Kind() == reflect.Map || v.Kind() == reflect.Slice) 
                             v.Set(reflect.Zero(v.Type())); 
@@ -1149,6 +1427,7 @@ namespace encoding
                             break;
                         }
 
+
                         if (v.Kind() == reflect.Bool) 
                             v.SetBool(value);
                         else if (v.Kind() == reflect.Interface) 
@@ -1158,8 +1437,9 @@ namespace encoding
                             }
                             else
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"bool",Type:v.Type(),Offset:int64(d.off)));
+                                d.saveError(addr(new UnmarshalTypeError(Value:"bool",Type:v.Type(),Offset:int64(d.readIndex()))));
                             }
+
                         else 
                             if (fromQuoted)
                             {
@@ -1167,8 +1447,9 @@ namespace encoding
                             }
                             else
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"bool",Type:v.Type(),Offset:int64(d.off)));
+                                d.saveError(addr(new UnmarshalTypeError(Value:"bool",Type:v.Type(),Offset:int64(d.readIndex()))));
                             }
+
                         break;
                     case '"': // string
                         (s, ok) = unquoteBytes(item);
@@ -1176,20 +1457,21 @@ namespace encoding
                         {
                             if (fromQuoted)
                             {
-                                d.error(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
+                                return error.As(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()))!;
                             }
-                            else
-                            {
-                                d.error(errPhase);
-                            }
+
+                            panic(phasePanicMsg);
+
                         }
+
 
                         if (v.Kind() == reflect.Slice) 
                             if (v.Type().Elem().Kind() != reflect.Uint8)
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"string",Type:v.Type(),Offset:int64(d.off)));
+                                d.saveError(addr(new UnmarshalTypeError(Value:"string",Type:v.Type(),Offset:int64(d.readIndex()))));
                                 break;
                             }
+
                             var b = make_slice<byte>(base64.StdEncoding.DecodedLen(len(s)));
                             var (n, err) = base64.StdEncoding.Decode(b, s);
                             if (err != null)
@@ -1197,8 +1479,14 @@ namespace encoding
                                 d.saveError(err);
                                 break;
                             }
+
                             v.SetBytes(b[..n]);
                         else if (v.Kind() == reflect.String) 
+                            if (v.Type() == numberType && !isValidNumber(string(s)))
+                            {
+                                return error.As(fmt.Errorf("json: invalid number literal, trying to unmarshal %q into Number", item))!;
+                            }
+
                             v.SetString(string(s));
                         else if (v.Kind() == reflect.Interface) 
                             if (v.NumMethod() == 0L)
@@ -1207,23 +1495,24 @@ namespace encoding
                             }
                             else
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"string",Type:v.Type(),Offset:int64(d.off)));
+                                d.saveError(addr(new UnmarshalTypeError(Value:"string",Type:v.Type(),Offset:int64(d.readIndex()))));
                             }
+
                         else 
-                            d.saveError(ref new UnmarshalTypeError(Value:"string",Type:v.Type(),Offset:int64(d.off)));
+                            d.saveError(addr(new UnmarshalTypeError(Value:"string",Type:v.Type(),Offset:int64(d.readIndex()))));
                         break;
                     default: // number
                         if (c != '-' && (c < '0' || c > '9'))
                         {
                             if (fromQuoted)
                             {
-                                d.error(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
+                                return error.As(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()))!;
                             }
-                            else
-                            {
-                                d.error(errPhase);
-                            }
+
+                            panic(phasePanicMsg);
+
                         }
+
                         var s = string(item);
 
                         if (v.Kind() == reflect.Interface) 
@@ -1233,179 +1522,210 @@ namespace encoding
                                 d.saveError(err);
                                 break;
                             }
+
                             if (v.NumMethod() != 0L)
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"number",Type:v.Type(),Offset:int64(d.off)));
+                                d.saveError(addr(new UnmarshalTypeError(Value:"number",Type:v.Type(),Offset:int64(d.readIndex()))));
                                 break;
                             }
+
                             v.Set(reflect.ValueOf(n));
                         else if (v.Kind() == reflect.Int || v.Kind() == reflect.Int8 || v.Kind() == reflect.Int16 || v.Kind() == reflect.Int32 || v.Kind() == reflect.Int64) 
                             (n, err) = strconv.ParseInt(s, 10L, 64L);
                             if (err != null || v.OverflowInt(n))
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"number "+s,Type:v.Type(),Offset:int64(d.off)));
+                                d.saveError(addr(new UnmarshalTypeError(Value:"number "+s,Type:v.Type(),Offset:int64(d.readIndex()))));
                                 break;
                             }
+
                             v.SetInt(n);
                         else if (v.Kind() == reflect.Uint || v.Kind() == reflect.Uint8 || v.Kind() == reflect.Uint16 || v.Kind() == reflect.Uint32 || v.Kind() == reflect.Uint64 || v.Kind() == reflect.Uintptr) 
                             (n, err) = strconv.ParseUint(s, 10L, 64L);
                             if (err != null || v.OverflowUint(n))
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"number "+s,Type:v.Type(),Offset:int64(d.off)));
+                                d.saveError(addr(new UnmarshalTypeError(Value:"number "+s,Type:v.Type(),Offset:int64(d.readIndex()))));
                                 break;
                             }
+
                             v.SetUint(n);
                         else if (v.Kind() == reflect.Float32 || v.Kind() == reflect.Float64) 
                             (n, err) = strconv.ParseFloat(s, v.Type().Bits());
                             if (err != null || v.OverflowFloat(n))
                             {
-                                d.saveError(ref new UnmarshalTypeError(Value:"number "+s,Type:v.Type(),Offset:int64(d.off)));
+                                d.saveError(addr(new UnmarshalTypeError(Value:"number "+s,Type:v.Type(),Offset:int64(d.readIndex()))));
                                 break;
                             }
+
                             v.SetFloat(n);
                         else 
                             if (v.Kind() == reflect.String && v.Type() == numberType)
-                            {
+                            { 
+                                // s must be a valid number, because it's
+                                // already been tokenized.
                                 v.SetString(s);
-                                if (!isValidNumber(s))
-                                {
-                                    d.error(fmt.Errorf("json: invalid number literal, trying to unmarshal %q into Number", item));
-                                }
                                 break;
+
                             }
+
                             if (fromQuoted)
                             {
-                                d.error(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
+                                return error.As(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()))!;
                             }
-                            else
-                            {
-                                d.error(ref new UnmarshalTypeError(Value:"number",Type:v.Type(),Offset:int64(d.off)));
-                            }
+
+                            d.saveError(addr(new UnmarshalTypeError(Value:"number",Type:v.Type(),Offset:int64(d.readIndex()))));
                         break;
                 }
             }
-        }
+            return error.As(null!)!;
+
+        });
 
         // The xxxInterface routines build up a value to be stored
         // in an empty interface. They are not strictly necessary,
         // but they avoid the weight of reflection in this common case.
 
         // valueInterface is like value but returns interface{}
-        private static void valueInterface(this ref decodeState _d) => func(_d, (ref decodeState d, Defer _, Panic panic, Recover __) =>
+        private static object valueInterface(this ptr<decodeState> _addr_d) => func((_, panic, __) =>
         {
+            object val = default;
+            ref decodeState d = ref _addr_d.val;
 
-            if (d.scanWhile(scanSkipSpace) == scanBeginArray) 
-                return d.arrayInterface();
-            else if (d.scanWhile(scanSkipSpace) == scanBeginObject) 
-                return d.objectInterface();
-            else if (d.scanWhile(scanSkipSpace) == scanBeginLiteral) 
-                return d.literalInterface();
+
+            if (d.opcode == scanBeginArray) 
+                val = d.arrayInterface();
+                d.scanNext();
+            else if (d.opcode == scanBeginObject) 
+                val = d.objectInterface();
+                d.scanNext();
+            else if (d.opcode == scanBeginLiteral) 
+                val = d.literalInterface();
             else 
-                d.error(errPhase);
-                panic("unreachable");
-                    });
+                panic(phasePanicMsg);
+                        return ;
+
+        });
 
         // arrayInterface is like array but returns []interface{}.
-        private static slice<object> arrayInterface(this ref decodeState d)
+        private static slice<object> arrayInterface(this ptr<decodeState> _addr_d) => func((_, panic, __) =>
         {
+            ref decodeState d = ref _addr_d.val;
+
             var v = make_slice<object>(0L);
             while (true)
             { 
                 // Look ahead for ] - can only happen on first iteration.
-                var op = d.scanWhile(scanSkipSpace);
-                if (op == scanEndArray)
+                d.scanWhile(scanSkipSpace);
+                if (d.opcode == scanEndArray)
                 {
                     break;
-                } 
-
-                // Back up so d.value can have the byte we just read.
-                d.off--;
-                d.scan.undo(op);
+                }
 
                 v = append(v, d.valueInterface()); 
 
                 // Next token must be , or ].
-                op = d.scanWhile(scanSkipSpace);
-                if (op == scanEndArray)
+                if (d.opcode == scanSkipSpace)
+                {
+                    d.scanWhile(scanSkipSpace);
+                }
+
+                if (d.opcode == scanEndArray)
                 {
                     break;
                 }
-                if (op != scanArrayValue)
+
+                if (d.opcode != scanArrayValue)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 }
+
             }
 
             return v;
-        }
+
+        });
 
         // objectInterface is like object but returns map[string]interface{}.
-        private static void objectInterface(this ref decodeState d)
+        private static void objectInterface(this ptr<decodeState> _addr_d) => func((_, panic, __) =>
         {
+            ref decodeState d = ref _addr_d.val;
+
             var m = make();
             while (true)
             { 
                 // Read opening " of string key or closing }.
-                var op = d.scanWhile(scanSkipSpace);
-                if (op == scanEndObject)
+                d.scanWhile(scanSkipSpace);
+                if (d.opcode == scanEndObject)
                 { 
                     // closing } - can only happen on first iteration.
                     break;
+
                 }
-                if (op != scanBeginLiteral)
+
+                if (d.opcode != scanBeginLiteral)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 } 
 
                 // Read string key.
-                var start = d.off - 1L;
-                op = d.scanWhile(scanContinue);
-                var item = d.data[start..d.off - 1L];
+                var start = d.readIndex();
+                d.rescanLiteral();
+                var item = d.data[start..d.readIndex()];
                 var (key, ok) = unquote(item);
                 if (!ok)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 } 
 
                 // Read : before value.
-                if (op == scanSkipSpace)
+                if (d.opcode == scanSkipSpace)
                 {
-                    op = d.scanWhile(scanSkipSpace);
+                    d.scanWhile(scanSkipSpace);
                 }
-                if (op != scanObjectKey)
+
+                if (d.opcode != scanObjectKey)
                 {
-                    d.error(errPhase);
-                } 
+                    panic(phasePanicMsg);
+                }
+
+                d.scanWhile(scanSkipSpace); 
 
                 // Read value.
                 m[key] = d.valueInterface(); 
 
                 // Next token must be , or }.
-                op = d.scanWhile(scanSkipSpace);
-                if (op == scanEndObject)
+                if (d.opcode == scanSkipSpace)
+                {
+                    d.scanWhile(scanSkipSpace);
+                }
+
+                if (d.opcode == scanEndObject)
                 {
                     break;
                 }
-                if (op != scanObjectValue)
+
+                if (d.opcode != scanObjectValue)
                 {
-                    d.error(errPhase);
+                    panic(phasePanicMsg);
                 }
+
             }
 
             return m;
-        }
 
-        // literalInterface is like literal but returns an interface value.
-        private static void literalInterface(this ref decodeState d)
-        { 
+        });
+
+        // literalInterface consumes and returns a literal from d.data[d.off-1:] and
+        // it reads the following byte ahead. The first byte of the literal has been
+        // read already (that's how the caller knows it's a literal).
+        private static void literalInterface(this ptr<decodeState> _addr_d) => func((_, panic, __) =>
+        {
+            ref decodeState d = ref _addr_d.val;
+ 
             // All bytes inside literal return scanContinue op code.
-            var start = d.off - 1L;
-            var op = d.scanWhile(scanContinue); 
+            var start = d.readIndex();
+            d.rescanLiteral();
 
-            // Scan read one byte too far; back up.
-            d.off--;
-            d.scan.undo(op);
-            var item = d.data[start..d.off];
+            var item = d.data[start..d.readIndex()];
 
             {
                 var c = item[0L];
@@ -1424,25 +1744,29 @@ namespace encoding
                         var (s, ok) = unquote(item);
                         if (!ok)
                         {
-                            d.error(errPhase);
+                            panic(phasePanicMsg);
                         }
+
                         return s;
                         break;
                     default: // number
                         if (c != '-' && (c < '0' || c > '9'))
                         {
-                            d.error(errPhase);
+                            panic(phasePanicMsg);
                         }
+
                         var (n, err) = d.convertNumber(string(item));
                         if (err != null)
                         {
                             d.saveError(err);
                         }
+
                         return n;
                         break;
                 }
             }
-        }
+
+        });
 
         // getu4 decodes \uXXXX from the beginning of s, returning the hex value,
         // or it returns -1.
@@ -1452,6 +1776,7 @@ namespace encoding
             {
                 return -1L;
             }
+
             int r = default;
             foreach (var (_, c) in s[2L..6L])
             {
@@ -1465,25 +1790,34 @@ namespace encoding
                 else 
                     return -1L;
                                 r = r * 16L + rune(c);
+
             }
             return r;
+
         }
 
         // unquote converts a quoted JSON string literal s into an actual string t.
         // The rules are different than for Go, so cannot use strconv.Unquote.
         private static (@string, bool) unquote(slice<byte> s)
         {
+            @string t = default;
+            bool ok = default;
+
             s, ok = unquoteBytes(s);
             t = string(s);
-            return;
+            return ;
         }
 
         private static (slice<byte>, bool) unquoteBytes(slice<byte> s)
         {
+            slice<byte> t = default;
+            bool ok = default;
+
             if (len(s) < 2L || s[0L] != '"' || s[len(s) - 1L] != '"')
             {
-                return;
+                return ;
             }
+
             s = s[1L..len(s) - 1L]; 
 
             // Check for unusual characters. If there are none,
@@ -1497,23 +1831,28 @@ namespace encoding
                 {
                     break;
                 }
+
                 if (c < utf8.RuneSelf)
                 {
                     r++;
                     continue;
                 }
+
                 var (rr, size) = utf8.DecodeRune(s[r..]);
                 if (rr == utf8.RuneError && size == 1L)
                 {
                     break;
                 }
+
                 r += size;
+
             }
 
             if (r == len(s))
             {
                 return (s, true);
             }
+
             var b = make_slice<byte>(len(s) + 2L * utf8.UTFMax);
             var w = copy(b, s[0L..r]);
             while (r < len(s))
@@ -1527,6 +1866,7 @@ namespace encoding
                     copy(nb, b[0L..w]);
                     b = nb;
                 }
+
                 {
                     var c__prev1 = c;
 
@@ -1537,8 +1877,9 @@ namespace encoding
                         r++;
                         if (r >= len(s))
                         {
-                            return;
+                            return ;
                         }
+
                         switch (s[r])
                         {
                             case '"': 
@@ -1582,8 +1923,9 @@ namespace encoding
                                 var rr = getu4(s[r..]);
                                 if (rr < 0L)
                                 {
-                                    return;
+                                    return ;
                                 }
+
                                 r += 6L;
                                 if (utf16.IsSurrogate(rr))
                                 {
@@ -1597,23 +1939,26 @@ namespace encoding
                                             r += 6L;
                                             w += utf8.EncodeRune(b[w..], dec);
                                             break;
+
                                         } 
                                         // Invalid surrogate; fall back to replacement rune.
 
                                     } 
                                     // Invalid surrogate; fall back to replacement rune.
                                     rr = unicode.ReplacementChar;
+
                                 }
+
                                 w += utf8.EncodeRune(b[w..], rr);
                                 break;
                             default: 
-                                return;
+                                return ;
                                 break;
                         } 
 
                         // Quote, control characters are invalid.
                     else if (c == '"' || c < ' ') 
-                        return; 
+                        return ; 
 
                         // ASCII
                     else if (c < utf8.RuneSelf) 
@@ -1630,9 +1975,11 @@ namespace encoding
 
                     c = c__prev1;
                 }
+
             }
 
             return (b[0L..w], true);
+
         }
     }
 }}

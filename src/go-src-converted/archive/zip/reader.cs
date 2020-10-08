@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zip -- go2cs converted at 2020 August 29 08:45:35 UTC
+// package zip -- go2cs converted at 2020 October 08 03:49:26 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Go\src\archive\zip\reader.go
 using bufio = go.bufio_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
-using fmt = go.fmt_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
@@ -26,7 +25,7 @@ namespace archive
         public partial struct Reader
         {
             public io.ReaderAt r;
-            public slice<ref File> File;
+            public slice<ptr<File>> File;
             public @string Comment;
             public map<ushort, Decompressor> decompressors;
         }
@@ -46,25 +45,32 @@ namespace archive
             public long headerOffset;
         }
 
-        private static bool hasDataDescriptor(this ref File f)
+        private static bool hasDataDescriptor(this ptr<File> _addr_f)
         {
+            ref File f = ref _addr_f.val;
+
             return f.Flags & 0x8UL != 0L;
         }
 
         // OpenReader will open the Zip file specified by name and return a ReadCloser.
-        public static (ref ReadCloser, error) OpenReader(@string name)
+        public static (ptr<ReadCloser>, error) OpenReader(@string name)
         {
+            ptr<ReadCloser> _p0 = default!;
+            error _p0 = default!;
+
             var (f, err) = os.Open(name);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var (fi, err) = f.Stat();
             if (err != null)
             {
                 f.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             ptr<ReadCloser> r = @new<ReadCloser>();
             {
                 var err = r.init(f, fi.Size());
@@ -72,52 +78,64 @@ namespace archive
                 if (err != null)
                 {
                     f.Close();
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
+
             r.f = f;
-            return (r, null);
+            return (_addr_r!, error.As(null!)!);
+
         }
 
         // NewReader returns a new Reader reading from r, which is assumed to
         // have the given size in bytes.
-        public static (ref Reader, error) NewReader(io.ReaderAt r, long size)
+        public static (ptr<Reader>, error) NewReader(io.ReaderAt r, long size)
         {
+            ptr<Reader> _p0 = default!;
+            error _p0 = default!;
+
+            if (size < 0L)
+            {
+                return (_addr_null!, error.As(errors.New("zip: size cannot be negative"))!);
+            }
+
             ptr<Reader> zr = @new<Reader>();
             {
                 var err = zr.init(r, size);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
-            return (zr, null);
+
+            return (_addr_zr!, error.As(null!)!);
+
         }
 
-        private static error init(this ref Reader z, io.ReaderAt r, long size)
+        private static error init(this ptr<Reader> _addr_z, io.ReaderAt r, long size)
         {
+            ref Reader z = ref _addr_z.val;
+
             var (end, err) = readDirectoryEnd(r, size);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            if (end.directoryRecords > uint64(size) / fileHeaderLen)
-            {
-                return error.As(fmt.Errorf("archive/zip: TOC declares impossible %d files in %d byte zip", end.directoryRecords, size));
-            }
+
             z.r = r;
-            z.File = make_slice<ref File>(0L, end.directoryRecords);
+            z.File = make_slice<ptr<File>>(0L, end.directoryRecords);
             z.Comment = end.comment;
             var rs = io.NewSectionReader(r, 0L, size);
             _, err = rs.Seek(int64(end.directoryOffset), io.SeekStart);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var buf = bufio.NewReader(rs); 
 
             // The count of files inside a zip is truncated to fit in a uint16.
@@ -126,54 +144,70 @@ namespace archive
             // the file count modulo 65536 is incorrect.
             while (true)
             {
-                File f = ref new File(zip:z,zipr:r,zipsize:size);
-                err = readDirectoryHeader(f, buf);
+                ptr<File> f = addr(new File(zip:z,zipr:r,zipsize:size));
+                err = readDirectoryHeader(_addr_f, buf);
                 if (err == ErrFormat || err == io.ErrUnexpectedEOF)
                 {
                     break;
                 }
+
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 z.File = append(z.File, f);
+
             }
 
             if (uint16(len(z.File)) != uint16(end.directoryRecords))
             { // only compare 16 bits here
                 // Return the readDirectoryHeader error if we read
                 // the wrong number of directory entries.
-                return error.As(err);
+                return error.As(err)!;
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // RegisterDecompressor registers or overrides a custom decompressor for a
         // specific method ID. If a decompressor for a given method is not found,
         // Reader will default to looking up the decompressor at the package level.
-        private static void RegisterDecompressor(this ref Reader z, ushort method, Decompressor dcomp)
+        private static void RegisterDecompressor(this ptr<Reader> _addr_z, ushort method, Decompressor dcomp)
         {
+            ref Reader z = ref _addr_z.val;
+
             if (z.decompressors == null)
             {
                 z.decompressors = make_map<ushort, Decompressor>();
             }
+
             z.decompressors[method] = dcomp;
+
         }
 
-        private static Decompressor decompressor(this ref Reader z, ushort method)
+        private static Decompressor decompressor(this ptr<Reader> _addr_z, ushort method)
         {
+            ref Reader z = ref _addr_z.val;
+
             var dcomp = z.decompressors[method];
             if (dcomp == null)
             {
                 dcomp = decompressor(method);
             }
+
             return dcomp;
+
         }
 
         // Close closes the Zip file, rendering it unusable for I/O.
-        private static error Close(this ref ReadCloser rc)
+        private static error Close(this ptr<ReadCloser> _addr_rc)
         {
-            return error.As(rc.f.Close());
+            ref ReadCloser rc = ref _addr_rc.val;
+
+            return error.As(rc.f.Close())!;
         }
 
         // DataOffset returns the offset of the file's possibly-compressed
@@ -181,40 +215,54 @@ namespace archive
         //
         // Most callers should instead use Open, which transparently
         // decompresses data and verifies checksums.
-        private static (long, error) DataOffset(this ref File f)
+        private static (long, error) DataOffset(this ptr<File> _addr_f)
         {
+            long offset = default;
+            error err = default!;
+            ref File f = ref _addr_f.val;
+
             var (bodyOffset, err) = f.findBodyOffset();
             if (err != null)
             {
-                return;
+                return ;
             }
-            return (f.headerOffset + bodyOffset, null);
+
+            return (f.headerOffset + bodyOffset, error.As(null!)!);
+
         }
 
         // Open returns a ReadCloser that provides access to the File's contents.
         // Multiple files may be read concurrently.
-        private static (io.ReadCloser, error) Open(this ref File f)
+        private static (io.ReadCloser, error) Open(this ptr<File> _addr_f)
         {
+            io.ReadCloser _p0 = default;
+            error _p0 = default!;
+            ref File f = ref _addr_f.val;
+
             var (bodyOffset, err) = f.findBodyOffset();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             var size = int64(f.CompressedSize64);
             var r = io.NewSectionReader(f.zipr, f.headerOffset + bodyOffset, size);
             var dcomp = f.zip.decompressor(f.Method);
             if (dcomp == null)
             {
-                return (null, ErrAlgorithm);
+                return (null, error.As(ErrAlgorithm)!);
             }
+
             io.ReadCloser rc = dcomp(r);
             io.Reader desr = default;
             if (f.hasDataDescriptor())
             {
                 desr = io.NewSectionReader(f.zipr, f.headerOffset + bodyOffset + size, dataDescriptorLen);
             }
-            rc = ref new checksumReader(rc:rc,hash:crc32.NewIEEE(),f:f,desr:desr,);
-            return (rc, null);
+
+            rc = addr(new checksumReader(rc:rc,hash:crc32.NewIEEE(),f:f,desr:desr,));
+            return (rc, error.As(null!)!);
+
         }
 
         private partial struct checksumReader
@@ -227,29 +275,36 @@ namespace archive
             public error err; // sticky error
         }
 
-        private static (long, error) Read(this ref checksumReader r, slice<byte> b)
+        private static (long, error) Read(this ptr<checksumReader> _addr_r, slice<byte> b)
         {
+            long n = default;
+            error err = default!;
+            ref checksumReader r = ref _addr_r.val;
+
             if (r.err != null)
             {
-                return (0L, r.err);
+                return (0L, error.As(r.err)!);
             }
+
             n, err = r.rc.Read(b);
             r.hash.Write(b[..n]);
             r.nread += uint64(n);
             if (err == null)
             {
-                return;
+                return ;
             }
+
             if (err == io.EOF)
             {
                 if (r.nread != r.f.UncompressedSize64)
                 {
-                    return (0L, io.ErrUnexpectedEOF);
+                    return (0L, error.As(io.ErrUnexpectedEOF)!);
                 }
+
                 if (r.desr != null)
                 {
                     {
-                        var err1 = readDataDescriptor(r.desr, r.f);
+                        var err1 = readDataDescriptor(r.desr, _addr_r.f);
 
                         if (err1 != null)
                         {
@@ -261,13 +316,16 @@ namespace archive
                             {
                                 err = err1;
                             }
+
                         }
                         else if (r.hash.Sum32() != r.f.CRC32)
                         {
                             err = ErrChecksum;
                         }
 
+
                     }
+
                 }
                 else
                 { 
@@ -278,72 +336,89 @@ namespace archive
                     {
                         err = ErrChecksum;
                     }
+
                 }
+
             }
+
             r.err = err;
-            return;
+            return ;
+
         }
 
-        private static error Close(this ref checksumReader r)
+        private static error Close(this ptr<checksumReader> _addr_r)
         {
-            return error.As(r.rc.Close());
+            ref checksumReader r = ref _addr_r.val;
+
+            return error.As(r.rc.Close())!;
         }
 
         // findBodyOffset does the minimum work to verify the file has a header
         // and returns the file body offset.
-        private static (long, error) findBodyOffset(this ref File f)
+        private static (long, error) findBodyOffset(this ptr<File> _addr_f)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref File f = ref _addr_f.val;
+
             array<byte> buf = new array<byte>(fileHeaderLen);
             {
                 var (_, err) = f.zipr.ReadAt(buf[..], f.headerOffset);
 
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
 
             }
+
             var b = readBuf(buf[..]);
             {
                 var sig = b.uint32();
 
                 if (sig != fileHeaderSignature)
                 {
-                    return (0L, ErrFormat);
+                    return (0L, error.As(ErrFormat)!);
                 }
 
             }
+
             b = b[22L..]; // skip over most of the header
             var filenameLen = int(b.uint16());
             var extraLen = int(b.uint16());
-            return (int64(fileHeaderLen + filenameLen + extraLen), null);
+            return (int64(fileHeaderLen + filenameLen + extraLen), error.As(null!)!);
+
         }
 
         // readDirectoryHeader attempts to read a directory header from r.
         // It returns io.ErrUnexpectedEOF if it cannot read a complete header,
         // and ErrFormat if it doesn't find a valid header signature.
-        private static error readDirectoryHeader(ref File f, io.Reader r)
+        private static error readDirectoryHeader(ptr<File> _addr_f, io.Reader r)
         {
+            ref File f = ref _addr_f.val;
+
             array<byte> buf = new array<byte>(directoryHeaderLen);
             {
                 var (_, err) = io.ReadFull(r, buf[..]);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var b = readBuf(buf[..]);
             {
                 var sig = b.uint32();
 
                 if (sig != directoryHeaderSignature)
                 {
-                    return error.As(ErrFormat);
+                    return error.As(ErrFormat)!;
                 }
 
             }
+
             f.CreatorVersion = b.uint16();
             f.ReaderVersion = b.uint16();
             f.Flags = b.uint16();
@@ -367,10 +442,11 @@ namespace archive
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             f.Name = string(d[..filenameLen]);
             f.Extra = d[filenameLen..filenameLen + extraLen];
             f.Comment = string(d[filenameLen + extraLen..]); 
@@ -412,6 +488,7 @@ parseExtras:
                     {
                         break;
                     }
+
                     var fieldBuf = extra.sub(fieldSize);
 
 
@@ -425,34 +502,44 @@ parseExtras:
                             needUSize = false;
                             if (len(fieldBuf) < 8L)
                             {
-                                return error.As(ErrFormat);
+                                return error.As(ErrFormat)!;
                             }
+
                             f.UncompressedSize64 = fieldBuf.uint64();
+
                         }
+
                         if (needCSize)
                         {
                             needCSize = false;
                             if (len(fieldBuf) < 8L)
                             {
-                                return error.As(ErrFormat);
+                                return error.As(ErrFormat)!;
                             }
+
                             f.CompressedSize64 = fieldBuf.uint64();
+
                         }
+
                         if (needHeaderOffset)
                         {
                             needHeaderOffset = false;
                             if (len(fieldBuf) < 8L)
                             {
-                                return error.As(ErrFormat);
+                                return error.As(ErrFormat)!;
                             }
+
                             f.headerOffset = int64(fieldBuf.uint64());
+
                         }
+
                     else if (fieldTag == ntfsExtraID) 
                         if (len(fieldBuf) < 4L)
                         {
                             _continueparseExtras = true;
                             break;
                         }
+
                         fieldBuf.uint32(); // reserved (ignored)
                         while (len(fieldBuf) >= 4L)
                         { // need at least tag and size
@@ -463,18 +550,21 @@ parseExtras:
                                 _continueparseExtras = true;
                                 break;
                             }
+
                             var attrBuf = fieldBuf.sub(attrSize);
                             if (attrTag != 1L || attrSize != 24L)
                             {
                                 continue; // Ignore irrelevant attributes
                             }
-                            const float ticksPerSecond = 1e7F; // Windows timestamp resolution
+
+                            const float ticksPerSecond = (float)1e7F; // Windows timestamp resolution
  // Windows timestamp resolution
                             var ts = int64(attrBuf.uint64()); // ModTime since Windows epoch
                             var secs = int64(ts / ticksPerSecond);
                             float nsecs = (1e9F / ticksPerSecond) * int64(ts % ticksPerSecond);
                             var epoch = time.Date(1601L, time.January, 1L, 0L, 0L, 0L, 0L, time.UTC);
                             modified = time.Unix(epoch.Unix() + secs, nsecs);
+
                         }
                     else if (fieldTag == unixExtraID || fieldTag == infoZipUnixExtraID) 
                         if (len(fieldBuf) < 8L)
@@ -482,6 +572,7 @@ parseExtras:
                             _continueparseExtras = true;
                             break;
                         }
+
                         fieldBuf.uint32(); // AcTime (ignored)
                         ts = int64(fieldBuf.uint32()); // ModTime since Unix epoch
                         modified = time.Unix(ts, 0L);
@@ -491,9 +582,11 @@ parseExtras:
                             _continueparseExtras = true;
                             break;
                         }
+
                         ts = int64(fieldBuf.uint32()); // ModTime since Unix epoch
                         modified = time.Unix(ts, 0L);
-                                    }
+                    
+                }
 
             }
             var msdosModified = msDosTimeToTime(f.ModifiedDate, f.ModifiedTime);
@@ -514,6 +607,7 @@ parseExtras:
                 {
                     f.Modified = modified.In(timeZone(msdosModified.Sub(modified)));
                 }
+
             } 
 
             // Assume that uncompressed size 2³²-1 could plausibly happen in
@@ -528,13 +622,17 @@ parseExtras:
 
             if (needCSize || needHeaderOffset)
             {
-                return error.As(ErrFormat);
+                return error.As(ErrFormat)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static error readDataDescriptor(io.Reader r, ref File f)
+        private static error readDataDescriptor(io.Reader r, ptr<File> _addr_f)
         {
+            ref File f = ref _addr_f.val;
+
             array<byte> buf = new array<byte>(dataDescriptorLen); 
 
             // The spec says: "Although not originally assigned a
@@ -552,10 +650,11 @@ parseExtras:
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             long off = 0L;
             var maybeSig = readBuf(buf[..4L]);
             if (maybeSig.uint32() != dataDescriptorSignature)
@@ -563,20 +662,23 @@ parseExtras:
                 // No data descriptor signature. Keep these four
                 // bytes.
                 off += 4L;
+
             }
+
             {
                 (_, err) = io.ReadFull(r, buf[off..12L]);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var b = readBuf(buf[..12L]);
             if (b.uint32() != f.CRC32)
             {
-                return error.As(ErrChecksum);
+                return error.As(ErrChecksum)!;
             } 
 
             // The two sizes that follow here can be either 32 bits or 64 bits
@@ -584,11 +686,15 @@ parseExtras:
             // interpretations has been made causing incompatibilities. We
             // already have the sizes from the central directory so we can
             // just ignore these.
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static (ref directoryEnd, error) readDirectoryEnd(io.ReaderAt r, long size)
-        { 
+        private static (ptr<directoryEnd>, error) readDirectoryEnd(io.ReaderAt r, long size)
+        {
+            ptr<directoryEnd> dir = default!;
+            error err = default!;
+ 
             // look for directoryEndSignature in the last 1k, then in the last 65k
             slice<byte> buf = default;
             long directoryEndOffset = default;
@@ -598,16 +704,18 @@ parseExtras:
                 {
                     bLen = size;
                 }
+
                 buf = make_slice<byte>(int(bLen));
                 {
                     var (_, err) = r.ReadAt(buf, size - bLen);
 
                     if (err != null && err != io.EOF)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                 }
+
                 {
                     var p__prev1 = p;
 
@@ -623,20 +731,23 @@ parseExtras:
                     p = p__prev1;
 
                 }
+
                 if (i == 1L || bLen == size)
                 {
-                    return (null, ErrFormat);
+                    return (_addr_null!, error.As(ErrFormat)!);
                 }
+
             } 
 
             // read header into struct
             var b = readBuf(buf[4L..]); // skip signature
-            directoryEnd d = ref new directoryEnd(diskNbr:uint32(b.uint16()),dirDiskNbr:uint32(b.uint16()),dirRecordsThisDisk:uint64(b.uint16()),directoryRecords:uint64(b.uint16()),directorySize:uint64(b.uint32()),directoryOffset:uint64(b.uint32()),commentLen:b.uint16(),);
+            ptr<directoryEnd> d = addr(new directoryEnd(diskNbr:uint32(b.uint16()),dirDiskNbr:uint32(b.uint16()),dirRecordsThisDisk:uint64(b.uint16()),directoryRecords:uint64(b.uint16()),directorySize:uint64(b.uint32()),directoryOffset:uint64(b.uint32()),commentLen:b.uint16(),));
             var l = int(d.commentLen);
             if (l > len(b))
             {
-                return (null, errors.New("zip: invalid comment length"));
+                return (_addr_null!, error.As(errors.New("zip: invalid comment length"))!);
             }
+
             d.comment = string(b[..l]); 
 
             // These values mean that the file can be a zip64 file
@@ -645,12 +756,14 @@ parseExtras:
                 var (p, err) = findDirectory64End(r, directoryEndOffset);
                 if (err == null && p >= 0L)
                 {
-                    err = readDirectory64End(r, p, d);
+                    err = readDirectory64End(r, p, _addr_d);
                 }
+
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
             } 
             // Make sure directoryOffset points to somewhere in our file.
             {
@@ -658,11 +771,13 @@ parseExtras:
 
                 if (o < 0L || o >= size)
                 {
-                    return (null, ErrFormat);
+                    return (_addr_null!, error.As(ErrFormat)!);
                 }
 
             }
-            return (d, null);
+
+            return (_addr_d!, error.As(null!)!);
+
         }
 
         // findDirectory64End tries to read the zip64 locator just before the
@@ -670,57 +785,70 @@ parseExtras:
         // found.
         private static (long, error) findDirectory64End(io.ReaderAt r, long directoryEndOffset)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             var locOffset = directoryEndOffset - directory64LocLen;
             if (locOffset < 0L)
             {
-                return (-1L, null); // no need to look for a header outside the file
+                return (-1L, error.As(null!)!); // no need to look for a header outside the file
             }
+
             var buf = make_slice<byte>(directory64LocLen);
             {
                 var (_, err) = r.ReadAt(buf, locOffset);
 
                 if (err != null)
                 {
-                    return (-1L, err);
+                    return (-1L, error.As(err)!);
                 }
 
             }
+
             var b = readBuf(buf);
             {
                 var sig = b.uint32();
 
                 if (sig != directory64LocSignature)
                 {
-                    return (-1L, null);
+                    return (-1L, error.As(null!)!);
                 }
 
             }
+
             if (b.uint32() != 0L)
             { // number of the disk with the start of the zip64 end of central directory
-                return (-1L, null); // the file is not a valid zip64-file
+                return (-1L, error.As(null!)!); // the file is not a valid zip64-file
             }
+
             var p = b.uint64(); // relative offset of the zip64 end of central directory record
             if (b.uint32() != 1L)
             { // total number of disks
-                return (-1L, null); // the file is not a valid zip64-file
+                return (-1L, error.As(null!)!); // the file is not a valid zip64-file
             }
-            return (int64(p), null);
+
+            return (int64(p), error.As(null!)!);
+
         }
 
         // readDirectory64End reads the zip64 directory end and updates the
         // directory end with the zip64 directory end values.
-        private static error readDirectory64End(io.ReaderAt r, long offset, ref directoryEnd d)
+        private static error readDirectory64End(io.ReaderAt r, long offset, ptr<directoryEnd> _addr_d)
         {
+            error err = default!;
+            ref directoryEnd d = ref _addr_d.val;
+
             var buf = make_slice<byte>(directory64EndLen);
             {
                 var (_, err) = r.ReadAt(buf, offset);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
 
             var b = readBuf(buf);
             {
@@ -728,10 +856,11 @@ parseExtras:
 
                 if (sig != directory64EndSignature)
                 {
-                    return error.As(ErrFormat);
+                    return error.As(ErrFormat)!;
                 }
 
             }
+
 
             b = b[12L..]; // skip dir size, version and version needed (uint64 + 2x uint16)
             d.diskNbr = b.uint32(); // number of this disk
@@ -741,7 +870,8 @@ parseExtras:
             d.directorySize = b.uint64(); // size of the central directory
             d.directoryOffset = b.uint64(); // offset of start of central directory with respect to the starting disk number
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         private static long findSignatureInBlock(slice<byte> b)
@@ -757,48 +887,61 @@ parseExtras:
                     {
                         return i;
                     }
+
                 }
+
             }
 
             return -1L;
+
         }
 
         private partial struct readBuf // : slice<byte>
         {
         }
 
-        private static byte uint8(this ref readBuf b)
+        private static byte uint8(this ptr<readBuf> _addr_b)
         {
-            var v = (b.Value)[0L];
-            b.Value = (b.Value)[1L..];
+            ref readBuf b = ref _addr_b.val;
+
+            var v = (b.val)[0L];
+            b.val = (b.val)[1L..];
             return v;
         }
 
-        private static ushort uint16(this ref readBuf b)
+        private static ushort uint16(this ptr<readBuf> _addr_b)
         {
-            var v = binary.LittleEndian.Uint16(b.Value);
-            b.Value = (b.Value)[2L..];
+            ref readBuf b = ref _addr_b.val;
+
+            var v = binary.LittleEndian.Uint16(b.val);
+            b.val = (b.val)[2L..];
             return v;
         }
 
-        private static uint uint32(this ref readBuf b)
+        private static uint uint32(this ptr<readBuf> _addr_b)
         {
-            var v = binary.LittleEndian.Uint32(b.Value);
-            b.Value = (b.Value)[4L..];
+            ref readBuf b = ref _addr_b.val;
+
+            var v = binary.LittleEndian.Uint32(b.val);
+            b.val = (b.val)[4L..];
             return v;
         }
 
-        private static ulong uint64(this ref readBuf b)
+        private static ulong uint64(this ptr<readBuf> _addr_b)
         {
-            var v = binary.LittleEndian.Uint64(b.Value);
-            b.Value = (b.Value)[8L..];
+            ref readBuf b = ref _addr_b.val;
+
+            var v = binary.LittleEndian.Uint64(b.val);
+            b.val = (b.val)[8L..];
             return v;
         }
 
-        private static readBuf sub(this ref readBuf b, long n)
+        private static readBuf sub(this ptr<readBuf> _addr_b, long n)
         {
-            var b2 = (b.Value)[..n];
-            b.Value = (b.Value)[n..];
+            ref readBuf b = ref _addr_b.val;
+
+            var b2 = (b.val)[..n];
+            b.val = (b.val)[n..];
             return b2;
         }
     }

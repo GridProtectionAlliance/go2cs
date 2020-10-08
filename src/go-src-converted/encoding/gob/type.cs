@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2020 August 29 08:35:41 UTC
+// package gob -- go2cs converted at 2020 October 08 03:42:45 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\type.go
 using encoding = go.encoding_package;
@@ -37,17 +37,20 @@ namespace encoding
         }
 
         // externalEncoding bits
-        private static readonly long xGob = 1L + iota; // GobEncoder or GobDecoder
-        private static readonly var xBinary = 0; // encoding.BinaryMarshaler or encoding.BinaryUnmarshaler
-        private static readonly var xText = 1; // encoding.TextMarshaler or encoding.TextUnmarshaler
+        private static readonly long xGob = (long)1L + iota; // GobEncoder or GobDecoder
+        private static readonly var xBinary = (var)0; // encoding.BinaryMarshaler or encoding.BinaryUnmarshaler
+        private static readonly var xText = (var)1; // encoding.TextMarshaler or encoding.TextUnmarshaler
 
         private static sync.Map userTypeCache = default; // map[reflect.Type]*userTypeInfo
 
         // validType returns, and saves, the information associated with user-provided type rt.
         // If the user type is not valid, err will be non-nil. To be used when the error handler
         // is not set up.
-        private static (ref userTypeInfo, error) validUserType(reflect.Type rt)
+        private static (ptr<userTypeInfo>, error) validUserType(reflect.Type rt)
         {
+            ptr<userTypeInfo> _p0 = default!;
+            error _p0 = default!;
+
             {
                 var ui__prev1 = ui;
                 var ok__prev1 = ok;
@@ -56,7 +59,7 @@ namespace encoding
 
                 if (ok)
                 {
-                    return (ui._<ref userTypeInfo>(), null);
+                    return (ui._<ptr<userTypeInfo>>(), error.As(null!)!);
                 } 
 
                 // Construct a new userTypeInfo and atomically add it to the userTypeCache.
@@ -88,17 +91,22 @@ namespace encoding
                 {
                     break;
                 }
+
                 ut.@base = pt.Elem();
                 if (ut.@base == slowpoke)
                 { // ut.base lapped slowpoke
                     // recursive pointer type.
-                    return (null, errors.New("can't represent recursive pointer type " + ut.@base.String()));
+                    return (_addr_null!, error.As(errors.New("can't represent recursive pointer type " + ut.@base.String()))!);
+
                 }
+
                 if (ut.indir % 2L == 0L)
                 {
                     slowpoke = slowpoke.Elem();
                 }
+
                 ut.indir++;
+
             }
 
 
@@ -111,6 +119,7 @@ namespace encoding
                 {
                     ut.externalEnc = xGob;
                     ut.encIndir = indir;
+
                 }                {
                     var ok__prev2 = ok;
 
@@ -121,6 +130,7 @@ namespace encoding
                     {
                         ut.externalEnc = xBinary;
                         ut.encIndir = indir;
+
                     } 
 
                     // NOTE(rsc): Would like to allow MarshalText here, but results in incompatibility
@@ -159,6 +169,7 @@ namespace encoding
                 {
                     ut.externalDec = xGob;
                     ut.decIndir = indir;
+
                 }                {
                     var ok__prev2 = ok;
 
@@ -169,6 +180,7 @@ namespace encoding
                     {
                         ut.externalDec = xBinary;
                         ut.decIndir = indir;
+
                     } 
 
                     // See note above.
@@ -196,10 +208,11 @@ namespace encoding
             // }
 
             var (ui, _) = userTypeCache.LoadOrStore(rt, ut);
-            return (ui._<ref userTypeInfo>(), null);
+            return (ui._<ptr<userTypeInfo>>(), error.As(null!)!);
+
         }
 
-        private static var gobEncoderInterfaceType = reflect.TypeOf((GobEncoder.Value)(null)).Elem();        private static var gobDecoderInterfaceType = reflect.TypeOf((GobDecoder.Value)(null)).Elem();        private static var binaryMarshalerInterfaceType = reflect.TypeOf((encoding.BinaryMarshaler.Value)(null)).Elem();        private static var binaryUnmarshalerInterfaceType = reflect.TypeOf((encoding.BinaryUnmarshaler.Value)(null)).Elem();        private static var textMarshalerInterfaceType = reflect.TypeOf((encoding.TextMarshaler.Value)(null)).Elem();        private static var textUnmarshalerInterfaceType = reflect.TypeOf((encoding.TextUnmarshaler.Value)(null)).Elem();
+        private static var gobEncoderInterfaceType = reflect.TypeOf((GobEncoder.val)(null)).Elem();        private static var gobDecoderInterfaceType = reflect.TypeOf((GobDecoder.val)(null)).Elem();        private static var binaryMarshalerInterfaceType = reflect.TypeOf((encoding.BinaryMarshaler.val)(null)).Elem();        private static var binaryUnmarshalerInterfaceType = reflect.TypeOf((encoding.BinaryUnmarshaler.val)(null)).Elem();        private static var textMarshalerInterfaceType = reflect.TypeOf((encoding.TextMarshaler.val)(null)).Elem();        private static var textUnmarshalerInterfaceType = reflect.TypeOf((encoding.TextUnmarshaler.val)(null)).Elem();
 
         // implementsInterface reports whether the type implements the
         // gobEncoder/gobDecoder interface.
@@ -207,10 +220,14 @@ namespace encoding
         // implementation.
         private static (bool, sbyte) implementsInterface(reflect.Type typ, reflect.Type gobEncDecType)
         {
+            bool success = default;
+            sbyte indir = default;
+
             if (typ == null)
             {
-                return;
+                return ;
             }
+
             var rt = typ; 
             // The type might be a pointer and we need to keep
             // dereferencing to the base type until we find an implementation.
@@ -220,6 +237,7 @@ namespace encoding
                 {
                     return (true, indir);
                 }
+
                 {
                     var p = rt;
 
@@ -229,13 +247,18 @@ namespace encoding
                         if (indir > 100L)
                         { // insane number of indirections
                             return (false, 0L);
+
                         }
+
                         rt = p.Elem();
                         continue;
+
                     }
 
                 }
+
                 break;
+
             } 
             // No luck yet, but if this is a base type (non-pointer), the pointer might satisfy.
  
@@ -247,20 +270,25 @@ namespace encoding
                 {
                     return (true, -1L);
                 }
+
             }
+
             return (false, 0L);
+
         }
 
         // userType returns, and saves, the information associated with user-provided type rt.
         // If the user type is not valid, it calls error.
-        private static ref userTypeInfo userType(reflect.Type rt)
+        private static ptr<userTypeInfo> userType(reflect.Type rt)
         {
             var (ut, err) = validUserType(rt);
             if (err != null)
             {
                 error_(err);
             }
-            return ut;
+
+            return _addr_ut!;
+
         }
 
         // A typeId represents a gob Type as an integer that can be passed on the wire.
@@ -271,7 +299,7 @@ namespace encoding
 
         private static typeId nextId = default; // incremented for each new type we build
         private static sync.Mutex typeLock = default; // set while building a type
-        private static readonly long firstUserId = 64L; // lowest id number granted to user
+        private static readonly long firstUserId = (long)64L; // lowest id number granted to user
 
  // lowest id number granted to user
 
@@ -293,11 +321,13 @@ namespace encoding
             // When building recursive types, someone may get there before us.
             if (typ.id() != 0L)
             {
-                return;
+                return ;
             }
+
             nextId++;
             typ.setId(nextId);
             idToType[nextId] = typ;
+
         }
 
         private static gobType gobType(this typeId t)
@@ -306,7 +336,9 @@ namespace encoding
             {
                 return null;
             }
+
             return idToType[t];
+
         }
 
         // string returns the string representation of the type associated with the typeId.
@@ -316,7 +348,9 @@ namespace encoding
             {
                 return "<nil>";
             }
+
             return t.gobType().@string();
+
         }
 
         // Name returns the name of the type associated with the typeId.
@@ -326,7 +360,9 @@ namespace encoding
             {
                 return "<nil>";
             }
+
             return t.gobType().name();
+
         }
 
         // CommonType holds elements of all types.
@@ -339,29 +375,38 @@ namespace encoding
             public typeId Id;
         }
 
-        private static typeId id(this ref CommonType t)
+        private static typeId id(this ptr<CommonType> _addr_t)
         {
+            ref CommonType t = ref _addr_t.val;
+
             return t.Id;
         }
 
-        private static void setId(this ref CommonType t, typeId id)
+        private static void setId(this ptr<CommonType> _addr_t, typeId id)
         {
+            ref CommonType t = ref _addr_t.val;
+
             t.Id = id;
-
         }
 
-        private static @string @string(this ref CommonType t)
+        private static @string @string(this ptr<CommonType> _addr_t)
         {
+            ref CommonType t = ref _addr_t.val;
+
             return t.Name;
         }
 
-        private static @string safeString(this ref CommonType t, map<typeId, bool> seen)
+        private static @string safeString(this ptr<CommonType> _addr_t, map<typeId, bool> seen)
         {
+            ref CommonType t = ref _addr_t.val;
+
             return t.Name;
         }
 
-        private static @string name(this ref CommonType t)
+        private static @string name(this ptr<CommonType> _addr_t)
         {
+            ref CommonType t = ref _addr_t.val;
+
             return t.Name;
         }
 
@@ -372,11 +417,11 @@ namespace encoding
         // Primordial types, needed during initialization.
         // Always passed as pointers so the interface{} type
         // goes through without losing its interfaceness.
-        private static var tBool = bootstrapType("bool", (bool.Value)(null), 1L);        private static var tInt = bootstrapType("int", (int.Value)(null), 2L);        private static var tUint = bootstrapType("uint", (uint.Value)(null), 3L);        private static var tFloat = bootstrapType("float", (float64.Value)(null), 4L);        private static var tBytes = bootstrapType("bytes", new ptr<ref slice<byte>>(null), 5L);        private static var tString = bootstrapType("string", (string.Value)(null), 6L);        private static var tComplex = bootstrapType("complex", (complex128.Value)(null), 7L);        private static var tInterface = bootstrapType("interface", 8L);        private static var tReserved7 = bootstrapType("_reserved1", 9L);        private static var tReserved6 = bootstrapType("_reserved1", 10L);        private static var tReserved5 = bootstrapType("_reserved1", 11L);        private static var tReserved4 = bootstrapType("_reserved1", 12L);        private static var tReserved3 = bootstrapType("_reserved1", 13L);        private static var tReserved2 = bootstrapType("_reserved1", 14L);        private static var tReserved1 = bootstrapType("_reserved1", 15L);
+        private static var tBool = bootstrapType("bool", (bool.val)(null), 1L);        private static var tInt = bootstrapType("int", (int.val)(null), 2L);        private static var tUint = bootstrapType("uint", (uint.val)(null), 3L);        private static var tFloat = bootstrapType("float", (float64.val)(null), 4L);        private static var tBytes = bootstrapType("bytes", new ptr<ptr<slice<byte>>>(null), 5L);        private static var tString = bootstrapType("string", (string.val)(null), 6L);        private static var tComplex = bootstrapType("complex", (complex128.val)(null), 7L);        private static var tInterface = bootstrapType("interface", 8L);        private static var tReserved7 = bootstrapType("_reserved1", 9L);        private static var tReserved6 = bootstrapType("_reserved1", 10L);        private static var tReserved5 = bootstrapType("_reserved1", 11L);        private static var tReserved4 = bootstrapType("_reserved1", 12L);        private static var tReserved3 = bootstrapType("_reserved1", 13L);        private static var tReserved2 = bootstrapType("_reserved1", 14L);        private static var tReserved1 = bootstrapType("_reserved1", 15L);
 
         // Predefined because it's needed by the Decoder
         private static var tWireType = mustGetTypeInfo(reflect.TypeOf(new wireType())).id;
-        private static ref userTypeInfo wireTypeUserInfo = default; // userTypeInfo of (*wireType)
+        private static ptr<userTypeInfo> wireTypeUserInfo; // userTypeInfo of (*wireType)
 
         private static void init() => func((_, panic, __) =>
         { 
@@ -401,9 +446,11 @@ namespace encoding
             {
                 panic(fmt.Sprintln("nextId too large:", nextId));
             }
+
             nextId = firstUserId;
             registerBasics();
-            wireTypeUserInfo = userType(reflect.TypeOf((wireType.Value)(null)));
+            wireTypeUserInfo = userType(reflect.TypeOf((wireType.val)(null)));
+
         });
 
         // Array type
@@ -414,32 +461,41 @@ namespace encoding
             public long Len;
         }
 
-        private static ref arrayType newArrayType(@string name)
+        private static ptr<arrayType> newArrayType(@string name)
         {
-            arrayType a = ref new arrayType(CommonType{Name:name},0,0);
-            return a;
+            ptr<arrayType> a = addr(new arrayType(CommonType{Name:name},0,0));
+            return _addr_a!;
         }
 
-        private static void init(this ref arrayType a, gobType elem, long len)
-        { 
+        private static void init(this ptr<arrayType> _addr_a, gobType elem, long len)
+        {
+            ref arrayType a = ref _addr_a.val;
+ 
             // Set our type id before evaluating the element's, in case it's our own.
             setTypeId(a);
             a.Elem = elem.id();
             a.Len = len;
+
         }
 
-        private static @string safeString(this ref arrayType a, map<typeId, bool> seen)
+        private static @string safeString(this ptr<arrayType> _addr_a, map<typeId, bool> seen)
         {
+            ref arrayType a = ref _addr_a.val;
+
             if (seen[a.Id])
             {
                 return a.Name;
             }
+
             seen[a.Id] = true;
             return fmt.Sprintf("[%d]%s", a.Len, a.Elem.gobType().safeString(seen));
+
         }
 
-        private static @string @string(this ref arrayType a)
+        private static @string @string(this ptr<arrayType> _addr_a)
         {
+            ref arrayType a = ref _addr_a.val;
+
             return a.safeString(make_map<typeId, bool>());
         }
 
@@ -449,20 +505,24 @@ namespace encoding
             public ref CommonType CommonType => ref CommonType_val;
         }
 
-        private static ref gobEncoderType newGobEncoderType(@string name)
+        private static ptr<gobEncoderType> newGobEncoderType(@string name)
         {
-            gobEncoderType g = ref new gobEncoderType(CommonType{Name:name});
+            ptr<gobEncoderType> g = addr(new gobEncoderType(CommonType{Name:name}));
             setTypeId(g);
-            return g;
+            return _addr_g!;
         }
 
-        private static @string safeString(this ref gobEncoderType g, map<typeId, bool> seen)
+        private static @string safeString(this ptr<gobEncoderType> _addr_g, map<typeId, bool> seen)
         {
+            ref gobEncoderType g = ref _addr_g.val;
+
             return g.Name;
         }
 
-        private static @string @string(this ref gobEncoderType g)
+        private static @string @string(this ptr<gobEncoderType> _addr_g)
         {
+            ref gobEncoderType g = ref _addr_g.val;
+
             return g.Name;
         }
 
@@ -474,34 +534,43 @@ namespace encoding
             public typeId Elem;
         }
 
-        private static ref mapType newMapType(@string name)
+        private static ptr<mapType> newMapType(@string name)
         {
-            mapType m = ref new mapType(CommonType{Name:name},0,0);
-            return m;
+            ptr<mapType> m = addr(new mapType(CommonType{Name:name},0,0));
+            return _addr_m!;
         }
 
-        private static void init(this ref mapType m, gobType key, gobType elem)
-        { 
+        private static void init(this ptr<mapType> _addr_m, gobType key, gobType elem)
+        {
+            ref mapType m = ref _addr_m.val;
+ 
             // Set our type id before evaluating the element's, in case it's our own.
             setTypeId(m);
             m.Key = key.id();
             m.Elem = elem.id();
+
         }
 
-        private static @string safeString(this ref mapType m, map<typeId, bool> seen)
+        private static @string safeString(this ptr<mapType> _addr_m, map<typeId, bool> seen)
         {
+            ref mapType m = ref _addr_m.val;
+
             if (seen[m.Id])
             {
                 return m.Name;
             }
+
             seen[m.Id] = true;
             var key = m.Key.gobType().safeString(seen);
             var elem = m.Elem.gobType().safeString(seen);
             return fmt.Sprintf("map[%s]%s", key, elem);
+
         }
 
-        private static @string @string(this ref mapType m)
+        private static @string @string(this ptr<mapType> _addr_m)
         {
+            ref mapType m = ref _addr_m.val;
+
             return m.safeString(make_map<typeId, bool>());
         }
 
@@ -512,14 +581,16 @@ namespace encoding
             public typeId Elem;
         }
 
-        private static ref sliceType newSliceType(@string name)
+        private static ptr<sliceType> newSliceType(@string name)
         {
-            sliceType s = ref new sliceType(CommonType{Name:name},0);
-            return s;
+            ptr<sliceType> s = addr(new sliceType(CommonType{Name:name},0));
+            return _addr_s!;
         }
 
-        private static void init(this ref sliceType s, gobType elem)
-        { 
+        private static void init(this ptr<sliceType> _addr_s, gobType elem)
+        {
+            ref sliceType s = ref _addr_s.val;
+ 
             // Set our type id before evaluating the element's, in case it's our own.
             setTypeId(s); 
             // See the comments about ids in newTypeObject. Only slices and
@@ -528,21 +599,29 @@ namespace encoding
             {
                 setTypeId(elem);
             }
+
             s.Elem = elem.id();
+
         }
 
-        private static @string safeString(this ref sliceType s, map<typeId, bool> seen)
+        private static @string safeString(this ptr<sliceType> _addr_s, map<typeId, bool> seen)
         {
+            ref sliceType s = ref _addr_s.val;
+
             if (seen[s.Id])
             {
                 return s.Name;
             }
+
             seen[s.Id] = true;
             return fmt.Sprintf("[]%s", s.Elem.gobType().safeString(seen));
+
         }
 
-        private static @string @string(this ref sliceType s)
+        private static @string @string(this ptr<sliceType> _addr_s)
         {
+            ref sliceType s = ref _addr_s.val;
+
             return s.safeString(make_map<typeId, bool>());
         }
 
@@ -556,15 +635,18 @@ namespace encoding
         private partial struct structType
         {
             public ref CommonType CommonType => ref CommonType_val;
-            public slice<ref fieldType> Field;
+            public slice<ptr<fieldType>> Field;
         }
 
-        private static @string safeString(this ref structType s, map<typeId, bool> seen)
+        private static @string safeString(this ptr<structType> _addr_s, map<typeId, bool> seen)
         {
+            ref structType s = ref _addr_s.val;
+
             if (s == null)
             {
                 return "<nil>";
             }
+
             {
                 var (_, ok) = seen[s.Id];
 
@@ -574,6 +656,7 @@ namespace encoding
                 }
 
             }
+
             seen[s.Id] = true;
             var str = s.Name + " = struct { ";
             foreach (var (_, f) in s.Field)
@@ -582,20 +665,24 @@ namespace encoding
             }
             str += "}";
             return str;
+
         }
 
-        private static @string @string(this ref structType s)
+        private static @string @string(this ptr<structType> _addr_s)
         {
+            ref structType s = ref _addr_s.val;
+
             return s.safeString(make_map<typeId, bool>());
         }
 
-        private static ref structType newStructType(@string name)
+        private static ptr<structType> newStructType(@string name)
         {
-            structType s = ref new structType(CommonType{Name:name},nil); 
+            ptr<structType> s = addr(new structType(CommonType{Name:name},nil)); 
             // For historical reasons we set the id here rather than init.
             // See the comment in newTypeObject for details.
             setTypeId(s);
-            return s;
+            return _addr_s!;
+
         }
 
         // newTypeObject allocates a gobType for the reflection type rt.
@@ -603,15 +690,20 @@ namespace encoding
         // of ut.
         // This is only called from the encoding side. The decoding side
         // works through typeIds and userTypeInfos alone.
-        private static (gobType, error) newTypeObject(@string name, ref userTypeInfo _ut, reflect.Type rt) => func(_ut, (ref userTypeInfo ut, Defer defer, Panic _, Recover __) =>
-        { 
+        private static (gobType, error) newTypeObject(@string name, ptr<userTypeInfo> _addr_ut, reflect.Type rt) => func((defer, _, __) =>
+        {
+            gobType _p0 = default;
+            error _p0 = default!;
+            ref userTypeInfo ut = ref _addr_ut.val;
+ 
             // Does this type implement GobEncoder?
             if (ut.externalEnc != 0L)
             {
-                return (newGobEncoderType(name), null);
+                return (newGobEncoderType(name), error.As(null!)!);
             }
-            error err = default;
-            gobType type0 = default;            gobType type1 = default;
+
+            error err = default!;
+            gobType type0 = default!;            gobType type1 = default!;
 
             defer(() =>
             {
@@ -619,6 +711,7 @@ namespace encoding
                 {
                     delete(types, rt);
                 }
+
             }()); 
             // Install the top-level type before the subtypes (e.g. struct before
             // fields) so recursive types can be constructed safely.
@@ -630,26 +723,26 @@ namespace encoding
 
                 // All basic types are easy: they are predefined.
                 if (t.Kind() == reflect.Bool) 
-                    return (tBool.gobType(), null);
+                    return (tBool.gobType(), error.As(null!)!);
                 else if (t.Kind() == reflect.Int || t.Kind() == reflect.Int8 || t.Kind() == reflect.Int16 || t.Kind() == reflect.Int32 || t.Kind() == reflect.Int64) 
-                    return (tInt.gobType(), null);
+                    return (tInt.gobType(), error.As(null!)!);
                 else if (t.Kind() == reflect.Uint || t.Kind() == reflect.Uint8 || t.Kind() == reflect.Uint16 || t.Kind() == reflect.Uint32 || t.Kind() == reflect.Uint64 || t.Kind() == reflect.Uintptr) 
-                    return (tUint.gobType(), null);
+                    return (tUint.gobType(), error.As(null!)!);
                 else if (t.Kind() == reflect.Float32 || t.Kind() == reflect.Float64) 
-                    return (tFloat.gobType(), null);
+                    return (tFloat.gobType(), error.As(null!)!);
                 else if (t.Kind() == reflect.Complex64 || t.Kind() == reflect.Complex128) 
-                    return (tComplex.gobType(), null);
+                    return (tComplex.gobType(), error.As(null!)!);
                 else if (t.Kind() == reflect.String) 
-                    return (tString.gobType(), null);
+                    return (tString.gobType(), error.As(null!)!);
                 else if (t.Kind() == reflect.Interface) 
-                    return (tInterface.gobType(), null);
+                    return (tInterface.gobType(), error.As(null!)!);
                 else if (t.Kind() == reflect.Array) 
                     var at = newArrayType(name);
                     types[rt] = at;
                     type0, err = getBaseType("", t.Elem());
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     } 
                     // Historical aside:
                     // For arrays, maps, and slices, we set the type id after the elements
@@ -660,48 +753,53 @@ namespace encoding
                     // done below, were already handling recursion correctly so they
                     // assign the top-level id before those of the field.
                     at.init(type0, t.Len());
-                    return (at, null);
+                    return (at, error.As(null!)!);
                 else if (t.Kind() == reflect.Map) 
                     var mt = newMapType(name);
                     types[rt] = mt;
                     type0, err = getBaseType("", t.Key());
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     type1, err = getBaseType("", t.Elem());
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     mt.init(type0, type1);
-                    return (mt, null);
+                    return (mt, error.As(null!)!);
                 else if (t.Kind() == reflect.Slice) 
                     // []byte == []uint8 is a special case
                     if (t.Elem().Kind() == reflect.Uint8)
                     {
-                        return (tBytes.gobType(), null);
+                        return (tBytes.gobType(), error.As(null!)!);
                     }
+
                     var st = newSliceType(name);
                     types[rt] = st;
                     type0, err = getBaseType(t.Elem().Name(), t.Elem());
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     st.init(type0);
-                    return (st, null);
+                    return (st, error.As(null!)!);
                 else if (t.Kind() == reflect.Struct) 
                     st = newStructType(name);
                     types[rt] = st;
                     idToType[st.id()] = st;
                     for (long i = 0L; i < t.NumField(); i++)
                     {
-                        var f = t.Field(i);
-                        if (!isSent(ref f))
+                        ref var f = ref heap(t.Field(i), out ptr<var> _addr_f);
+                        if (!isSent(_addr_f))
                         {
                             continue;
                         }
+
                         var typ = userType(f.Type).@base;
                         var tname = typ.Name();
                         if (tname == "")
@@ -709,10 +807,11 @@ namespace encoding
                             t = userType(f.Type).@base;
                             tname = t.String();
                         }
+
                         var (gt, err) = getBaseType(tname, f.Type);
                         if (err != null)
                         {
-                            return (null, err);
+                            return (null, error.As(err)!);
                         } 
                         // Some mutually recursive types can cause us to be here while
                         // still defining the element. Fix the element type id here.
@@ -722,16 +821,19 @@ namespace encoding
                         {
                             setTypeId(gt);
                         }
-                        st.Field = append(st.Field, ref new fieldType(f.Name,gt.id()));
+
+                        st.Field = append(st.Field, addr(new fieldType(f.Name,gt.id())));
+
                     }
 
-                    return (st, null);
+                    return (st, error.As(null!)!);
                 else 
-                    return (null, errors.New("gob NewTypeObject can't handle type: " + rt.String()));
+                    return (null, error.As(errors.New("gob NewTypeObject can't handle type: " + rt.String()))!);
 
 
                 t = t__prev1;
             }
+
         });
 
         // isExported reports whether this is an exported - upper case - name.
@@ -744,8 +846,10 @@ namespace encoding
         // isSent reports whether this struct field is to be transmitted.
         // It will be transmitted only if it is exported and not a chan or func field
         // or pointer to chan or func.
-        private static bool isSent(ref reflect.StructField field)
+        private static bool isSent(ptr<reflect.StructField> _addr_field)
         {
+            ref reflect.StructField field = ref _addr_field.val;
+
             if (!isExported(field.Name))
             {
                 return false;
@@ -762,15 +866,20 @@ namespace encoding
             {
                 return false;
             }
+
             return true;
+
         }
 
         // getBaseType returns the Gob type describing the given reflect.Type's base type.
         // typeLock must be held.
         private static (gobType, error) getBaseType(@string name, reflect.Type rt)
         {
+            gobType _p0 = default;
+            error _p0 = default!;
+
             var ut = userType(rt);
-            return getType(name, ut, ut.@base);
+            return getType(name, _addr_ut, ut.@base);
         }
 
         // getType returns the Gob type describing the given reflect.Type.
@@ -778,19 +887,26 @@ namespace encoding
         // which may be pointers. All other types are handled through the
         // base type, never a pointer.
         // typeLock must be held.
-        private static (gobType, error) getType(@string name, ref userTypeInfo ut, reflect.Type rt)
+        private static (gobType, error) getType(@string name, ptr<userTypeInfo> _addr_ut, reflect.Type rt)
         {
+            gobType _p0 = default;
+            error _p0 = default!;
+            ref userTypeInfo ut = ref _addr_ut.val;
+
             var (typ, present) = types[rt];
             if (present)
             {
-                return (typ, null);
+                return (typ, error.As(null!)!);
             }
-            var (typ, err) = newTypeObject(name, ut, rt);
+
+            var (typ, err) = newTypeObject(name, _addr_ut, rt);
             if (err == null)
             {
                 types[rt] = typ;
             }
-            return (typ, err);
+
+            return (typ, error.As(err)!);
+
         }
 
         private static void checkId(typeId want, typeId got) => func((_, panic, __) =>
@@ -800,6 +916,7 @@ namespace encoding
                 fmt.Fprintf(os.Stderr, "checkId: %d should be %d\n", int(got), int(want));
                 panic("bootstrap type wrong id: " + got.name() + " " + got.@string() + " not " + want.@string());
             }
+
         });
 
         // used for building the basic types; called only from init().  the incoming
@@ -812,12 +929,14 @@ namespace encoding
             {
                 panic("bootstrap type already present: " + name + ", " + rt.String());
             }
-            CommonType typ = ref new CommonType(Name:name);
+
+            ptr<CommonType> typ = addr(new CommonType(Name:name));
             types[rt] = typ;
             setTypeId(typ);
             checkId(expect, nextId);
             userType(rt); // might as well cache it now
             return nextId;
+
         });
 
         // Representation of the information we send and receive about this type.
@@ -842,14 +961,17 @@ namespace encoding
             public ptr<gobEncoderType> TextMarshalerT;
         }
 
-        private static @string @string(this ref wireType w)
+        private static @string @string(this ptr<wireType> _addr_w)
         {
-            const @string unknown = "unknown type";
+            ref wireType w = ref _addr_w.val;
+
+            const @string unknown = (@string)"unknown type";
 
             if (w == null)
             {
                 return unknown;
             }
+
 
             if (w.ArrayT != null) 
                 return w.ArrayT.Name;
@@ -866,6 +988,7 @@ namespace encoding
             else if (w.TextMarshalerT != null) 
                 return w.TextMarshalerT.Name;
                         return unknown;
+
         }
 
         private partial struct typeInfo
@@ -884,36 +1007,48 @@ namespace encoding
         // protected by a mutex.
         private static atomic.Value typeInfoMap = default;
 
-        private static ref typeInfo lookupTypeInfo(reflect.Type rt)
+        private static ptr<typeInfo> lookupTypeInfo(reflect.Type rt)
         {
-            map<reflect.Type, ref typeInfo> (m, _) = typeInfoMap.Load()._<map<reflect.Type, ref typeInfo>>();
-            return m[rt];
+            map<reflect.Type, ptr<typeInfo>> (m, _) = typeInfoMap.Load()._<map<reflect.Type, ptr<typeInfo>>>();
+            return _addr_m[rt]!;
         }
 
-        private static (ref typeInfo, error) getTypeInfo(ref userTypeInfo ut)
+        private static (ptr<typeInfo>, error) getTypeInfo(ptr<userTypeInfo> _addr_ut)
         {
+            ptr<typeInfo> _p0 = default!;
+            error _p0 = default!;
+            ref userTypeInfo ut = ref _addr_ut.val;
+
             var rt = ut.@base;
             if (ut.externalEnc != 0L)
             { 
                 // We want the user type, not the base type.
                 rt = ut.user;
+
             }
+
             {
                 var info = lookupTypeInfo(rt);
 
                 if (info != null)
                 {
-                    return (info, null);
+                    return (_addr_info!, error.As(null!)!);
                 }
 
             }
-            return buildTypeInfo(ut, rt);
+
+            return _addr_buildTypeInfo(_addr_ut, rt)!;
+
         }
 
         // buildTypeInfo constructs the type information for the type
         // and stores it in the type info map.
-        private static (ref typeInfo, error) buildTypeInfo(ref userTypeInfo _ut, reflect.Type rt) => func(_ut, (ref userTypeInfo ut, Defer defer, Panic _, Recover __) =>
+        private static (ptr<typeInfo>, error) buildTypeInfo(ptr<userTypeInfo> _addr_ut, reflect.Type rt) => func((defer, _, __) =>
         {
+            ptr<typeInfo> _p0 = default!;
+            error _p0 = default!;
+            ref userTypeInfo ut = ref _addr_ut.val;
+
             typeLock.Lock();
             defer(typeLock.Unlock());
 
@@ -924,36 +1059,40 @@ namespace encoding
 
                 if (info != null)
                 {
-                    return (info, null);
+                    return (_addr_info!, error.As(null!)!);
                 }
 
                 info = info__prev1;
 
             }
 
+
             var (gt, err) = getBaseType(rt.Name(), rt);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            info = ref new typeInfo(id:gt.id());
+
+            info = addr(new typeInfo(id:gt.id()));
 
             if (ut.externalEnc != 0L)
             {
-                var (userType, err) = getType(rt.Name(), ut, rt);
+                var (userType, err) = getType(rt.Name(), _addr_ut, rt);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
-                ref gobEncoderType gt = userType.id().gobType()._<ref gobEncoderType>();
+
+                ptr<gobEncoderType> gt = userType.id().gobType()._<ptr<gobEncoderType>>();
 
                 if (ut.externalEnc == xGob) 
-                    info.wire = ref new wireType(GobEncoderT:gt);
+                    info.wire = addr(new wireType(GobEncoderT:gt));
                 else if (ut.externalEnc == xBinary) 
-                    info.wire = ref new wireType(BinaryMarshalerT:gt);
+                    info.wire = addr(new wireType(BinaryMarshalerT:gt));
                 else if (ut.externalEnc == xText) 
-                    info.wire = ref new wireType(TextMarshalerT:gt);
+                    info.wire = addr(new wireType(TextMarshalerT:gt));
                                 rt = ut.user;
+
             }
             else
             {
@@ -963,42 +1102,47 @@ namespace encoding
 
 
                     if (typ.Kind() == reflect.Array) 
-                        info.wire = ref new wireType(ArrayT:t.(*arrayType));
+                        info.wire = addr(new wireType(ArrayT:t.(*arrayType)));
                     else if (typ.Kind() == reflect.Map) 
-                        info.wire = ref new wireType(MapT:t.(*mapType));
+                        info.wire = addr(new wireType(MapT:t.(*mapType)));
                     else if (typ.Kind() == reflect.Slice) 
                         // []byte == []uint8 is a special case handled separately
                         if (typ.Elem().Kind() != reflect.Uint8)
                         {
-                            info.wire = ref new wireType(SliceT:t.(*sliceType));
+                            info.wire = addr(new wireType(SliceT:t.(*sliceType)));
                         }
+
                     else if (typ.Kind() == reflect.Struct) 
-                        info.wire = ref new wireType(StructT:t.(*structType));
+                        info.wire = addr(new wireType(StructT:t.(*structType)));
 
                 }
+
             } 
 
             // Create new map with old contents plus new entry.
-            var newm = make_map<reflect.Type, ref typeInfo>();
-            map<reflect.Type, ref typeInfo> (m, _) = typeInfoMap.Load()._<map<reflect.Type, ref typeInfo>>();
+            var newm = make_map<reflect.Type, ptr<typeInfo>>();
+            map<reflect.Type, ptr<typeInfo>> (m, _) = typeInfoMap.Load()._<map<reflect.Type, ptr<typeInfo>>>();
             foreach (var (k, v) in m)
             {
                 newm[k] = v;
             }
             newm[rt] = info;
             typeInfoMap.Store(newm);
-            return (info, null);
+            return (_addr_info!, error.As(null!)!);
+
         });
 
         // Called only when a panic is acceptable and unexpected.
-        private static ref typeInfo mustGetTypeInfo(reflect.Type rt) => func((_, panic, __) =>
+        private static ptr<typeInfo> mustGetTypeInfo(reflect.Type rt) => func((_, panic, __) =>
         {
-            var (t, err) = getTypeInfo(userType(rt));
+            var (t, err) = getTypeInfo(_addr_userType(rt));
             if (err != null)
             {
                 panic("getTypeInfo: " + err.Error());
             }
-            return t;
+
+            return _addr_t!;
+
         });
 
         // GobEncoder is the interface describing data that provides its own
@@ -1034,7 +1178,9 @@ namespace encoding
             { 
                 // reserved for nil
                 panic("attempt to register empty name");
+
             }
+
             var ut = userType(reflect.TypeOf(value)); 
 
             // Check for incompatible duplicates. The name must refer to the
@@ -1064,6 +1210,7 @@ namespace encoding
                 }
 
             }
+
         });
 
         // Register records a type, identified by a value for that type, under its
@@ -1106,10 +1253,13 @@ namespace encoding
                         //
                         // The missing full path cannot be fixed without breaking existing gob decoders.
                         rt = pt;
+
                     }
 
                 }
+
             }
+
             if (rt.Name() != "")
             {
                 if (rt.PkgPath() == "")
@@ -1120,8 +1270,11 @@ namespace encoding
                 {
                     name = star + rt.PkgPath() + "." + rt.Name();
                 }
+
             }
+
             RegisterName(name, value);
+
         }
 
         private static void registerBasics()

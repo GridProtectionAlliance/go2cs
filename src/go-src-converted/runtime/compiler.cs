@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:39 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:17 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\compiler.go
 
@@ -18,7 +18,7 @@ namespace go
         //    gc      Also known as cmd/compile.
         //    gccgo   The gccgo front end, part of the GCC compiler suite.
         //
-        public static readonly @string Compiler = "gc";
+        public static readonly @string Compiler = (@string)"gc";
 
     }
 }

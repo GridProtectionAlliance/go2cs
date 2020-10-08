@@ -1,6 +1,6 @@
 // Test data - not compiled.
 
-// package file -- go2cs converted at 2020 August 29 08:48:28 UTC
+// package file -- go2cs converted at 2020 October 08 04:04:17 UTC
 // import "go/build/testdata/other/file" ==> using file = go.go.build.testdata.other.file_package
 // Original source: C:\Go\src\go\build\testdata\other\file\file.go
 

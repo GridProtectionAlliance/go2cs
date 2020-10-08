@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:41 UTC
+//     Generated on 2020 October 08 03:44:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +79,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
 
-            private delegate @string SignalByRef(ref T value);
+            private delegate @string SignalByPtr(ptr<T> value);
             private delegate @string SignalByVal(T value);
 
-            private static readonly SignalByRef s_SignalByRef;
+            private static readonly SignalByPtr s_SignalByPtr;
             private static readonly SignalByVal s_SignalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,11 +99,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SignalByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SignalByPtr is null || !m_target_is_ptr)
                     return s_SignalByVal!(target);
 
-                return s_SignalByRef(ref target);
+                return s_SignalByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -111,39 +113,33 @@ namespace go
             static Signal()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Signal.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Signal");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Signal");
 
                 if (!(extensionMethod is null))
-                    s_SignalByRef = extensionMethod.CreateStaticDelegate(typeof(SignalByRef)) as SignalByRef;
+                    s_SignalByPtr = extensionMethod.CreateStaticDelegate(typeof(SignalByPtr)) as SignalByPtr;
 
-                if (s_SignalByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Signal");
+                extensionMethod = targetType.GetExtensionMethod("Signal");
 
-                    if (!(extensionMethod is null))
-                        s_SignalByVal = extensionMethod.CreateStaticDelegate(typeof(SignalByVal)) as SignalByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SignalByVal = extensionMethod.CreateStaticDelegate(typeof(SignalByVal)) as SignalByVal;
 
-                if (s_SignalByRef is null && s_SignalByVal is null)
+                if (s_SignalByPtr is null && s_SignalByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Signal.Signal method", new Exception("Signal"));
             }
 

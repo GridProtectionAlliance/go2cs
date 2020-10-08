@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:26:51 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:48 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\ipsock_plan9.go
 using context = go.context_package;
+using bytealg = go.@internal.bytealg_package;
 using os = go.os_package;
 using syscall = go.syscall_package;
 using static go.builtin;
@@ -20,8 +21,10 @@ namespace go
         // capabilities.
         //
         // Plan 9 uses IPv6 natively, see ip(3).
-        private static void probe(this ref ipStackCapabilities p)
+        private static void probe(this ptr<ipStackCapabilities> _addr_p)
         {
+            ref ipStackCapabilities p = ref _addr_p.val;
+
             p.ipv4Enabled = probe(netdir + "/iproute", "4i");
             p.ipv6Enabled = probe(netdir + "/iproute", "6i");
             if (p.ipv4Enabled && p.ipv6Enabled)
@@ -32,14 +35,15 @@ namespace go
 
         private static bool probe(@string filename, @string query) => func((defer, _, __) =>
         {
-            ref file file = default;
-            error err = default;
+            ptr<file> file;
+            error err = default!;
             file, err = open(filename);
 
             if (err != null)
             {
                 return false;
             }
+
             defer(file.close());
 
             var r = false;
@@ -54,6 +58,7 @@ namespace go
                         continue;
                     line, ok = file.readLine();
                     }
+
                     for (long i = 0L; i < len(f); i++)
                     {
                         if (query == f[i])
@@ -61,85 +66,130 @@ namespace go
                             r = true;
                             break;
                         }
+
                     }
+
 
                 }
 
             }
             return r;
+
         });
 
         // parsePlan9Addr parses address of the form [ip!]port (e.g. 127.0.0.1!80).
         private static (IP, long, error) parsePlan9Addr(@string s)
         {
+            IP ip = default;
+            long iport = default;
+            error err = default!;
+
             var addr = IPv4zero; // address contains port only
-            var i = byteIndex(s, '!');
+            var i = bytealg.IndexByteString(s, '!');
             if (i >= 0L)
             {
                 addr = ParseIP(s[..i]);
                 if (addr == null)
                 {
-                    return (null, 0L, ref new ParseError(Type:"IP address",Text:s));
+                    return (null, 0L, error.As(addr(new ParseError(Type:"IP address",Text:s))!)!);
                 }
+
             }
-            var (p, _, ok) = dtoi(s[i + 1L..]);
+
+            var (p, plen, ok) = dtoi(s[i + 1L..]);
             if (!ok)
             {
-                return (null, 0L, ref new ParseError(Type:"port",Text:s));
+                return (null, 0L, error.As(addr(new ParseError(Type:"port",Text:s))!)!);
             }
+
             if (p < 0L || p > 0xFFFFUL)
             {
-                return (null, 0L, ref new AddrError(Err:"invalid port",Addr:string(p)));
+                return (null, 0L, error.As(addr(new AddrError(Err:"invalid port",Addr:s[i+1:i+1+plen]))!)!);
             }
-            return (addr, p, null);
+
+            return (addr, p, error.As(null!)!);
+
         }
 
-        private static (Addr, error) readPlan9Addr(@string proto, @string filename) => func((defer, _, __) =>
+        private static (Addr, error) readPlan9Addr(@string net, @string filename) => func((defer, _, __) =>
         {
+            Addr addr = default;
+            error err = default!;
+
             array<byte> buf = new array<byte>(128L);
 
             var (f, err) = os.Open(filename);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             defer(f.Close());
             var (n, err) = f.Read(buf[..]);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             var (ip, port, err) = parsePlan9Addr(string(buf[..n]));
             if (err != null)
             {
-                return;
+                return ;
             }
-            switch (proto)
+
+            switch (net)
+            {
+                case "tcp4": 
+
+                case "udp4": 
+                    if (ip.Equal(IPv6zero))
+                    {
+                        ip = ip[..IPv4len];
+                    }
+
+                    break;
+            }
+            switch (net)
             {
                 case "tcp": 
-                    addr = ref new TCPAddr(IP:ip,Port:port);
+
+                case "tcp4": 
+
+                case "tcp6": 
+                    addr = addr(new TCPAddr(IP:ip,Port:port));
                     break;
                 case "udp": 
-                    addr = ref new UDPAddr(IP:ip,Port:port);
+
+                case "udp4": 
+
+                case "udp6": 
+                    addr = addr(new UDPAddr(IP:ip,Port:port));
                     break;
                 default: 
-                    return (null, UnknownNetworkError(proto));
+                    return (null, error.As(UnknownNetworkError(net))!);
                     break;
             }
-            return (addr, null);
+            return (addr, error.As(null!)!);
+
         });
 
-        private static (ref os.File, @string, @string, @string, error) startPlan9(context.Context ctx, @string net, Addr addr)
+        private static (ptr<os.File>, @string, @string, @string, error) startPlan9(context.Context ctx, @string net, Addr addr)
         {
+            ptr<os.File> ctl = default!;
+            @string dest = default;
+            @string proto = default;
+            @string name = default;
+            error err = default!;
+
             IP ip = default;            long port = default;
             switch (addr.type())
             {
-                case ref TCPAddr a:
+                case ptr<TCPAddr> a:
                     proto = "tcp";
                     ip = a.IP;
                     port = a.Port;
                     break;
-                case ref UDPAddr a:
+                case ptr<UDPAddr> a:
                     proto = "udp";
                     ip = a.IP;
                     port = a.Port;
@@ -148,7 +198,7 @@ namespace go
                 {
                     var a = addr.type();
                     err = UnknownNetworkError(net);
-                    return;
+                    return ;
                     break;
                 }
 
@@ -157,46 +207,52 @@ namespace go
             if (port > 65535L)
             {
                 err = InvalidAddrError("port should be < 65536");
-                return;
+                return ;
             }
+
             var (clone, dest, err) = queryCS1(ctx, proto, ip, port);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             var (f, err) = os.OpenFile(clone, os.O_RDWR, 0L);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             array<byte> buf = new array<byte>(16L);
             var (n, err) = f.Read(buf[..]);
             if (err != null)
             {
                 f.Close();
-                return;
+                return ;
             }
-            return (f, dest, proto, string(buf[..n]), null);
+
+            return (_addr_f!, dest, proto, string(buf[..n]), error.As(null!)!);
+
         }
 
         private static void fixErr(error err)
         {
-            ref OpError (oe, ok) = err._<ref OpError>();
+            ptr<OpError> (oe, ok) = err._<ptr<OpError>>();
             if (!ok)
             {
-                return;
+                return ;
             }
+
             Func<Addr, bool> nonNilInterface = a =>
             {
                 switch (a.type())
                 {
-                    case ref TCPAddr a:
+                    case ptr<TCPAddr> a:
                         return a == null;
                         break;
-                    case ref UDPAddr a:
+                    case ptr<UDPAddr> a:
                         return a == null;
                         break;
-                    case ref IPAddr a:
+                    case ptr<IPAddr> a:
                         return a == null;
                         break;
                     default:
@@ -206,18 +262,21 @@ namespace go
                         break;
                     }
                 }
+
             }
 ;
             if (nonNilInterface(oe.Source))
             {
                 oe.Source = null;
             }
+
             if (nonNilInterface(oe.Addr))
             {
                 oe.Addr = null;
             }
+
             {
-                ref os.PathError (pe, ok) = oe.Err._<ref os.PathError>();
+                ptr<os.PathError> (pe, ok) = oe.Err._<ptr<os.PathError>>();
 
                 if (ok)
                 {
@@ -227,17 +286,21 @@ namespace go
                     {
                         oe.Err = pe.Err;
                     }
+
                 }
 
             }
+
         }
 
-        private static (ref netFD, error) dialPlan9(context.Context ctx, @string net, Addr laddr, Addr raddr) => func((defer, _, __) =>
+        private static (ptr<netFD>, error) dialPlan9(context.Context ctx, @string net, Addr laddr, Addr raddr) => func((defer, _, __) =>
         {
+            ptr<netFD> fd = default!;
+            error err = default!;
+
             defer(() =>
             {
                 fixErr(err);
-
             }());
             private partial struct res
             {
@@ -253,128 +316,172 @@ namespace go
                 {
                     fd.Close();
                 }
+
             }());
-            return (res.fd, res.err);
-            return (null, mapErr(ctx.Err()));
+            return (_addr_res.fd!, error.As(res.err)!);
+            return (_addr_null!, error.As(mapErr(ctx.Err()))!);
+
         });
 
-        private static (ref netFD, error) dialPlan9Blocking(context.Context ctx, @string net, Addr laddr, Addr raddr)
+        private static (ptr<netFD>, error) dialPlan9Blocking(context.Context ctx, @string net, Addr laddr, Addr raddr)
         {
+            ptr<netFD> fd = default!;
+            error err = default!;
+
             if (isWildcard(raddr))
             {
                 raddr = toLocal(raddr, net);
             }
+
             var (f, dest, proto, name, err) = startPlan9(ctx, net, raddr);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            _, err = f.WriteString("connect " + dest);
+
+            {
+                var la = plan9LocalAddr(laddr);
+
+                if (la == "")
+                {
+                    err = hangupCtlWrite(ctx, proto, _addr_f, "connect " + dest);
+                }
+                else
+                {
+                    err = hangupCtlWrite(ctx, proto, _addr_f, "connect " + dest + " " + la);
+                }
+
+            }
+
             if (err != null)
             {
                 f.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var (data, err) = os.OpenFile(netdir + "/" + proto + "/" + name + "/data", os.O_RDWR, 0L);
             if (err != null)
             {
                 f.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            laddr, err = readPlan9Addr(proto, netdir + "/" + proto + "/" + name + "/local");
+
+            laddr, err = readPlan9Addr(net, netdir + "/" + proto + "/" + name + "/local");
             if (err != null)
             {
                 data.Close();
                 f.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return newFD(proto, name, null, f, data, laddr, raddr);
+
+            return _addr_newFD(proto, name, null, f, data, laddr, raddr)!;
+
         }
 
-        private static (ref netFD, error) listenPlan9(context.Context ctx, @string net, Addr laddr) => func((defer, _, __) =>
+        private static (ptr<netFD>, error) listenPlan9(context.Context ctx, @string net, Addr laddr) => func((defer, _, __) =>
         {
+            ptr<netFD> fd = default!;
+            error err = default!;
+
             defer(() =>
             {
                 fixErr(err);
-
             }());
             var (f, dest, proto, name, err) = startPlan9(ctx, net, laddr);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             _, err = f.WriteString("announce " + dest);
             if (err != null)
             {
                 f.Close();
-                return (null, err);
+                return (_addr_null!, error.As(addr(new OpError(Op:"announce",Net:net,Source:laddr,Addr:nil,Err:err))!)!);
             }
-            laddr, err = readPlan9Addr(proto, netdir + "/" + proto + "/" + name + "/local");
+
+            laddr, err = readPlan9Addr(net, netdir + "/" + proto + "/" + name + "/local");
             if (err != null)
             {
                 f.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return newFD(proto, name, null, f, null, laddr, null);
+
+            return _addr_newFD(proto, name, null, f, null, laddr, null)!;
+
         });
 
-        private static (ref netFD, error) netFD(this ref netFD fd)
+        private static (ptr<netFD>, error) netFD(this ptr<netFD> _addr_fd)
         {
-            return newFD(fd.net, fd.n, fd.listen, fd.ctl, fd.data, fd.laddr, fd.raddr);
+            ptr<netFD> _p0 = default!;
+            error _p0 = default!;
+            ref netFD fd = ref _addr_fd.val;
+
+            return _addr_newFD(fd.net, fd.n, fd.listen, fd.ctl, fd.data, fd.laddr, fd.raddr)!;
         }
 
-        private static (ref netFD, error) acceptPlan9(this ref netFD _fd) => func(_fd, (ref netFD fd, Defer defer, Panic _, Recover __) =>
+        private static (ptr<netFD>, error) acceptPlan9(this ptr<netFD> _addr_fd) => func((defer, _, __) =>
         {
+            ptr<netFD> nfd = default!;
+            error err = default!;
+            ref netFD fd = ref _addr_fd.val;
+
             defer(() =>
             {
                 fixErr(err);
-
             }());
             {
                 var err = fd.pfd.ReadLock();
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
+
             defer(fd.pfd.ReadUnlock());
             var (listen, err) = os.Open(fd.dir + "/listen");
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             array<byte> buf = new array<byte>(16L);
             var (n, err) = listen.Read(buf[..]);
             if (err != null)
             {
                 listen.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var name = string(buf[..n]);
             var (ctl, err) = os.OpenFile(netdir + "/" + fd.net + "/" + name + "/ctl", os.O_RDWR, 0L);
             if (err != null)
             {
                 listen.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var (data, err) = os.OpenFile(netdir + "/" + fd.net + "/" + name + "/data", os.O_RDWR, 0L);
             if (err != null)
             {
                 listen.Close();
                 ctl.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var (raddr, err) = readPlan9Addr(fd.net, netdir + "/" + fd.net + "/" + name + "/remote");
             if (err != null)
             {
                 listen.Close();
                 ctl.Close();
                 data.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return newFD(fd.net, name, listen, ctl, data, fd.laddr, raddr);
+
+            return _addr_newFD(fd.net, name, listen, ctl, data, fd.laddr, raddr)!;
+
         });
 
         private static bool isWildcard(Addr a)
@@ -382,34 +489,111 @@ namespace go
             bool wildcard = default;
             switch (a.type())
             {
-                case ref TCPAddr a:
+                case ptr<TCPAddr> a:
                     wildcard = a.isWildcard();
                     break;
-                case ref UDPAddr a:
+                case ptr<UDPAddr> a:
                     wildcard = a.isWildcard();
                     break;
-                case ref IPAddr a:
+                case ptr<IPAddr> a:
                     wildcard = a.isWildcard();
                     break;
             }
             return wildcard;
+
         }
 
         private static Addr toLocal(Addr a, @string net)
         {
             switch (a.type())
             {
-                case ref TCPAddr a:
+                case ptr<TCPAddr> a:
                     a.IP = loopbackIP(net);
                     break;
-                case ref UDPAddr a:
+                case ptr<UDPAddr> a:
                     a.IP = loopbackIP(net);
                     break;
-                case ref IPAddr a:
+                case ptr<IPAddr> a:
                     a.IP = loopbackIP(net);
                     break;
             }
             return a;
+
+        }
+
+        // plan9LocalAddr returns a Plan 9 local address string.
+        // See setladdrport at https://9p.io/sources/plan9/sys/src/9/ip/devip.c.
+        private static @string plan9LocalAddr(Addr addr)
+        {
+            IP ip = default;
+            long port = 0L;
+            switch (addr.type())
+            {
+                case ptr<TCPAddr> a:
+                    if (a != null)
+                    {
+                        ip = a.IP;
+                        port = a.Port;
+                    }
+
+                    break;
+                case ptr<UDPAddr> a:
+                    if (a != null)
+                    {
+                        ip = a.IP;
+                        port = a.Port;
+                    }
+
+                    break;
+            }
+            if (len(ip) == 0L || ip.IsUnspecified())
+            {
+                if (port == 0L)
+                {
+                    return "";
+                }
+
+                return itoa(port);
+
+            }
+
+            return ip.String() + "!" + itoa(port);
+
+        }
+
+        private static error hangupCtlWrite(context.Context ctx, @string proto, ptr<os.File> _addr_ctl, @string msg)
+        {
+            ref os.File ctl = ref _addr_ctl.val;
+
+            if (proto != "tcp")
+            {
+                var (_, err) = ctl.WriteString(msg);
+                return error.As(err)!;
+            }
+
+            var written = make_channel<object>();
+            var errc = make_channel<error>();
+            go_(() => () =>
+            {
+                ctl.WriteString("hangup");
+                errc.Send(mapErr(ctx.Err()));
+                errc.Send(null);
+            }());
+            (_, err) = ctl.WriteString(msg);
+            close(written);
+            {
+                var e = errc.Receive();
+
+                if (err == null && e != null)
+                { // we hung up
+                    return error.As(e)!;
+
+                }
+
+            }
+
+            return error.As(err)!;
+
         }
     }
 }

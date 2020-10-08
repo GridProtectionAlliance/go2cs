@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:29 UTC
+//     Generated on 2020 October 08 03:27:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using errorspkg = go.errors_package;
+using oserror = go.@internal.oserror_package;
 using race = go.@internal.race_package;
+using unsafeheader = go.@internal.unsafeheader_package;
+using runtime = go.runtime_package;
 using sync = go.sync_package;
 using utf16 = go.unicode.utf16_package;
 using @unsafe = go.@unsafe_package;
@@ -30,11 +33,13 @@ namespace go
             public SockaddrUnix(NilType _)
             {
                 this.Name = default;
+                this.raw = default;
             }
 
-            public SockaddrUnix(@string Name = default)
+            public SockaddrUnix(@string Name = default, RawSockaddrUnix raw = default)
             {
                 this.Name = Name;
+                this.raw = raw;
             }
 
             // Enable comparisons between nil and SockaddrUnix struct
@@ -57,7 +62,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static SockaddrUnix SockaddrUnix_cast(dynamic value)
         {
-            return new SockaddrUnix(value.Name);
+            return new SockaddrUnix(value.Name, value.raw);
         }
     }
 }

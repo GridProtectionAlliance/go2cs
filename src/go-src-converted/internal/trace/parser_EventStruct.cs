@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:58 UTC
+//     Generated on 2020 October 08 04:42:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace @internal
                 this.Link = default;
             }
 
-            public Event(long Off = default, byte Type = default, long seq = default, long Ts = default, long P = default, ulong G = default, ulong StkID = default, slice<ref Frame> Stk = default, array<ulong> Args = default, slice<@string> SArgs = default, ref ptr<Event> Link = default)
+            public Event(long Off = default, byte Type = default, long seq = default, long Ts = default, long P = default, ulong G = default, ulong StkID = default, slice<ptr<Frame>> Stk = default, array<ulong> Args = default, slice<@string> SArgs = default, ref ptr<Event> Link = default)
             {
                 this.Off = Off;
                 this.Type = Type;

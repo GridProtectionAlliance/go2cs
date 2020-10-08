@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:30 UTC
+//     Generated on 2020 October 08 03:36:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
 using des = go.crypto.des_package;
@@ -22,8 +23,9 @@ using rc4 = go.crypto.rc4_package;
 using sha1 = go.crypto.sha1_package;
 using sha256 = go.crypto.sha256_package;
 using x509 = go.crypto.x509_package;
+using fmt = go.fmt_package;
 using hash = go.hash_package;
-using chacha20poly1305 = go.golang_org.x.crypto.chacha20poly1305_package;
+using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -59,7 +61,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,80 +75,84 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, ref clientKeyExchangeMsg, error) generateServerKeyExchangeByRef(ref T value, ref Config _p0, ref Certificate _p0, ref clientHelloMsg _p0, ref serverHelloMsg _p0);
-            private delegate (slice<byte>, ref clientKeyExchangeMsg, error) generateServerKeyExchangeByVal(T value, ref Config _p0, ref Certificate _p0, ref clientHelloMsg _p0, ref serverHelloMsg _p0);
+            private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateServerKeyExchangeByPtr(ptr<T> value, ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0);
+            private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateServerKeyExchangeByVal(T value, ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0);
 
-            private static readonly generateServerKeyExchangeByRef s_generateServerKeyExchangeByRef;
+            private static readonly generateServerKeyExchangeByPtr s_generateServerKeyExchangeByPtr;
             private static readonly generateServerKeyExchangeByVal s_generateServerKeyExchangeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (slice<byte>, ref clientKeyExchangeMsg, error) generateServerKeyExchange(ref Config _p0, ref Certificate _p0, ref clientHelloMsg _p0, ref serverHelloMsg _p0)
+            public (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateServerKeyExchange(ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_generateServerKeyExchangeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_generateServerKeyExchangeByPtr is null || !m_target_is_ptr)
                     return s_generateServerKeyExchangeByVal!(target, _p0, _p0, _p0, _p0);
 
-                return s_generateServerKeyExchangeByRef(ref target, _p0, _p0, _p0, _p0);
+                return s_generateServerKeyExchangeByPtr(m_target_ptr, _p0, _p0, _p0, _p0);
             }
 
-            private delegate (slice<byte>, ref clientKeyExchangeMsg, error) processClientKeyExchangeByRef(ref T value, ref Config _p0, ref Certificate _p0, ref clientKeyExchangeMsg _p0, ushort _p0);
-            private delegate (slice<byte>, ref clientKeyExchangeMsg, error) processClientKeyExchangeByVal(T value, ref Config _p0, ref Certificate _p0, ref clientKeyExchangeMsg _p0, ushort _p0);
+            private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) processClientKeyExchangeByPtr(ptr<T> value, ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientKeyExchangeMsg> _p0, ushort _p0);
+            private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) processClientKeyExchangeByVal(T value, ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientKeyExchangeMsg> _p0, ushort _p0);
 
-            private static readonly processClientKeyExchangeByRef s_processClientKeyExchangeByRef;
+            private static readonly processClientKeyExchangeByPtr s_processClientKeyExchangeByPtr;
             private static readonly processClientKeyExchangeByVal s_processClientKeyExchangeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (slice<byte>, ref clientKeyExchangeMsg, error) processClientKeyExchange(ref Config _p0, ref Certificate _p0, ref clientKeyExchangeMsg _p0, ushort _p0)
+            public (slice<byte>, ptr<clientKeyExchangeMsg>, error) processClientKeyExchange(ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientKeyExchangeMsg> _p0, ushort _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_processClientKeyExchangeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_processClientKeyExchangeByPtr is null || !m_target_is_ptr)
                     return s_processClientKeyExchangeByVal!(target, _p0, _p0, _p0, _p0);
 
-                return s_processClientKeyExchangeByRef(ref target, _p0, _p0, _p0, _p0);
+                return s_processClientKeyExchangeByPtr(m_target_ptr, _p0, _p0, _p0, _p0);
             }
 
-            private delegate (slice<byte>, ref clientKeyExchangeMsg, error) processServerKeyExchangeByRef(ref T value, ref Config _p0, ref clientHelloMsg _p0, ref serverHelloMsg _p0, ref x509.Certificate _p0, ref serverKeyExchangeMsg _p0);
-            private delegate (slice<byte>, ref clientKeyExchangeMsg, error) processServerKeyExchangeByVal(T value, ref Config _p0, ref clientHelloMsg _p0, ref serverHelloMsg _p0, ref x509.Certificate _p0, ref serverKeyExchangeMsg _p0);
+            private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) processServerKeyExchangeByPtr(ptr<T> value, ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0, ptr<x509.Certificate> _p0, ptr<serverKeyExchangeMsg> _p0);
+            private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) processServerKeyExchangeByVal(T value, ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0, ptr<x509.Certificate> _p0, ptr<serverKeyExchangeMsg> _p0);
 
-            private static readonly processServerKeyExchangeByRef s_processServerKeyExchangeByRef;
+            private static readonly processServerKeyExchangeByPtr s_processServerKeyExchangeByPtr;
             private static readonly processServerKeyExchangeByVal s_processServerKeyExchangeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (slice<byte>, ref clientKeyExchangeMsg, error) processServerKeyExchange(ref Config _p0, ref clientHelloMsg _p0, ref serverHelloMsg _p0, ref x509.Certificate _p0, ref serverKeyExchangeMsg _p0)
+            public (slice<byte>, ptr<clientKeyExchangeMsg>, error) processServerKeyExchange(ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0, ptr<x509.Certificate> _p0, ptr<serverKeyExchangeMsg> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_processServerKeyExchangeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_processServerKeyExchangeByPtr is null || !m_target_is_ptr)
                     return s_processServerKeyExchangeByVal!(target, _p0, _p0, _p0, _p0, _p0);
 
-                return s_processServerKeyExchangeByRef(ref target, _p0, _p0, _p0, _p0, _p0);
+                return s_processServerKeyExchangeByPtr(m_target_ptr, _p0, _p0, _p0, _p0, _p0);
             }
 
-            private delegate (slice<byte>, ref clientKeyExchangeMsg, error) generateClientKeyExchangeByRef(ref T value, ref Config _p0, ref clientHelloMsg _p0, ref x509.Certificate _p0);
-            private delegate (slice<byte>, ref clientKeyExchangeMsg, error) generateClientKeyExchangeByVal(T value, ref Config _p0, ref clientHelloMsg _p0, ref x509.Certificate _p0);
+            private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKeyExchangeByPtr(ptr<T> value, ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<x509.Certificate> _p0);
+            private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKeyExchangeByVal(T value, ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<x509.Certificate> _p0);
 
-            private static readonly generateClientKeyExchangeByRef s_generateClientKeyExchangeByRef;
+            private static readonly generateClientKeyExchangeByPtr s_generateClientKeyExchangeByPtr;
             private static readonly generateClientKeyExchangeByVal s_generateClientKeyExchangeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (slice<byte>, ref clientKeyExchangeMsg, error) generateClientKeyExchange(ref Config _p0, ref clientHelloMsg _p0, ref x509.Certificate _p0)
+            public (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKeyExchange(ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<x509.Certificate> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_generateClientKeyExchangeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_generateClientKeyExchangeByPtr is null || !m_target_is_ptr)
                     return s_generateClientKeyExchangeByVal!(target, _p0, _p0, _p0);
 
-                return s_generateClientKeyExchangeByRef(ref target, _p0, _p0, _p0);
+                return s_generateClientKeyExchangeByPtr(m_target_ptr, _p0, _p0, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -155,71 +161,59 @@ namespace crypto
             static keyAgreement()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("generateServerKeyExchange");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("generateServerKeyExchange");
 
                 if (!(extensionMethod is null))
-                    s_generateServerKeyExchangeByRef = extensionMethod.CreateStaticDelegate(typeof(generateServerKeyExchangeByRef)) as generateServerKeyExchangeByRef;
+                    s_generateServerKeyExchangeByPtr = extensionMethod.CreateStaticDelegate(typeof(generateServerKeyExchangeByPtr)) as generateServerKeyExchangeByPtr;
 
-                if (s_generateServerKeyExchangeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("generateServerKeyExchange");
+                extensionMethod = targetType.GetExtensionMethod("generateServerKeyExchange");
 
-                    if (!(extensionMethod is null))
-                        s_generateServerKeyExchangeByVal = extensionMethod.CreateStaticDelegate(typeof(generateServerKeyExchangeByVal)) as generateServerKeyExchangeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_generateServerKeyExchangeByVal = extensionMethod.CreateStaticDelegate(typeof(generateServerKeyExchangeByVal)) as generateServerKeyExchangeByVal;
 
-                if (s_generateServerKeyExchangeByRef is null && s_generateServerKeyExchangeByVal is null)
+                if (s_generateServerKeyExchangeByPtr is null && s_generateServerKeyExchangeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement keyAgreement.generateServerKeyExchange method", new Exception("generateServerKeyExchange"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("processClientKeyExchange");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("processClientKeyExchange");
 
                 if (!(extensionMethod is null))
-                    s_processClientKeyExchangeByRef = extensionMethod.CreateStaticDelegate(typeof(processClientKeyExchangeByRef)) as processClientKeyExchangeByRef;
+                    s_processClientKeyExchangeByPtr = extensionMethod.CreateStaticDelegate(typeof(processClientKeyExchangeByPtr)) as processClientKeyExchangeByPtr;
 
-                if (s_processClientKeyExchangeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("processClientKeyExchange");
+                extensionMethod = targetType.GetExtensionMethod("processClientKeyExchange");
 
-                    if (!(extensionMethod is null))
-                        s_processClientKeyExchangeByVal = extensionMethod.CreateStaticDelegate(typeof(processClientKeyExchangeByVal)) as processClientKeyExchangeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_processClientKeyExchangeByVal = extensionMethod.CreateStaticDelegate(typeof(processClientKeyExchangeByVal)) as processClientKeyExchangeByVal;
 
-                if (s_processClientKeyExchangeByRef is null && s_processClientKeyExchangeByVal is null)
+                if (s_processClientKeyExchangeByPtr is null && s_processClientKeyExchangeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement keyAgreement.processClientKeyExchange method", new Exception("processClientKeyExchange"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("processServerKeyExchange");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("processServerKeyExchange");
 
                 if (!(extensionMethod is null))
-                    s_processServerKeyExchangeByRef = extensionMethod.CreateStaticDelegate(typeof(processServerKeyExchangeByRef)) as processServerKeyExchangeByRef;
+                    s_processServerKeyExchangeByPtr = extensionMethod.CreateStaticDelegate(typeof(processServerKeyExchangeByPtr)) as processServerKeyExchangeByPtr;
 
-                if (s_processServerKeyExchangeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("processServerKeyExchange");
+                extensionMethod = targetType.GetExtensionMethod("processServerKeyExchange");
 
-                    if (!(extensionMethod is null))
-                        s_processServerKeyExchangeByVal = extensionMethod.CreateStaticDelegate(typeof(processServerKeyExchangeByVal)) as processServerKeyExchangeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_processServerKeyExchangeByVal = extensionMethod.CreateStaticDelegate(typeof(processServerKeyExchangeByVal)) as processServerKeyExchangeByVal;
 
-                if (s_processServerKeyExchangeByRef is null && s_processServerKeyExchangeByVal is null)
+                if (s_processServerKeyExchangeByPtr is null && s_processServerKeyExchangeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement keyAgreement.processServerKeyExchange method", new Exception("processServerKeyExchange"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("generateClientKeyExchange");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("generateClientKeyExchange");
 
                 if (!(extensionMethod is null))
-                    s_generateClientKeyExchangeByRef = extensionMethod.CreateStaticDelegate(typeof(generateClientKeyExchangeByRef)) as generateClientKeyExchangeByRef;
+                    s_generateClientKeyExchangeByPtr = extensionMethod.CreateStaticDelegate(typeof(generateClientKeyExchangeByPtr)) as generateClientKeyExchangeByPtr;
 
-                if (s_generateClientKeyExchangeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("generateClientKeyExchange");
+                extensionMethod = targetType.GetExtensionMethod("generateClientKeyExchange");
 
-                    if (!(extensionMethod is null))
-                        s_generateClientKeyExchangeByVal = extensionMethod.CreateStaticDelegate(typeof(generateClientKeyExchangeByVal)) as generateClientKeyExchangeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_generateClientKeyExchangeByVal = extensionMethod.CreateStaticDelegate(typeof(generateClientKeyExchangeByVal)) as generateClientKeyExchangeByVal;
 
-                if (s_generateClientKeyExchangeByRef is null && s_generateClientKeyExchangeByVal is null)
+                if (s_generateClientKeyExchangeByPtr is null && s_generateClientKeyExchangeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement keyAgreement.generateClientKeyExchange method", new Exception("generateClientKeyExchange"));
             }
 

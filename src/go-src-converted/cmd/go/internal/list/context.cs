@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package list -- go2cs converted at 2020 August 29 10:00:39 UTC
+// package list -- go2cs converted at 2020 October 08 04:33:40 UTC
 // import "cmd/go/internal/list" ==> using list = go.cmd.go.@internal.list_package
 // Original source: C:\Go\src\cmd\go\internal\list\context.go
 using build = go.go.build_package;
@@ -40,9 +40,11 @@ namespace @internal
             public @string InstallSuffix; // suffix to use in the name of the install dir
         }
 
-        private static ref Context newContext(ref build.Context c)
+        private static ptr<Context> newContext(ptr<build.Context> _addr_c)
         {
-            return ref new Context(GOARCH:c.GOARCH,GOOS:c.GOOS,GOROOT:c.GOROOT,GOPATH:c.GOPATH,CgoEnabled:c.CgoEnabled,UseAllFiles:c.UseAllFiles,Compiler:c.Compiler,BuildTags:c.BuildTags,ReleaseTags:c.ReleaseTags,InstallSuffix:c.InstallSuffix,);
+            ref build.Context c = ref _addr_c.val;
+
+            return addr(new Context(GOARCH:c.GOARCH,GOOS:c.GOOS,GOROOT:c.GOROOT,GOPATH:c.GOPATH,CgoEnabled:c.CgoEnabled,UseAllFiles:c.UseAllFiles,Compiler:c.Compiler,BuildTags:c.BuildTags,ReleaseTags:c.ReleaseTags,InstallSuffix:c.InstallSuffix,));
         }
     }
 }}}}

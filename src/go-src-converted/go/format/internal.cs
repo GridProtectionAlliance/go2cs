@@ -7,7 +7,7 @@
 // one without the other. Determine if we can factor out functionality
 // in a public API. See also #11844 for context.
 
-// package format -- go2cs converted at 2020 August 29 09:24:38 UTC
+// package format -- go2cs converted at 2020 October 08 04:27:08 UTC
 // import "go/format" ==> using format = go.go.format_package
 // Original source: C:\Go\src\go\format\internal.go
 using bytes = go.bytes_package;
@@ -26,8 +26,14 @@ namespace go
     {
         // parse parses src, which was read from the named file,
         // as a Go source file, declaration, or statement list.
-        private static (ref ast.File, Func<slice<byte>, long, slice<byte>>, long, error) parse(ref token.FileSet fset, @string filename, slice<byte> src, bool fragmentOk)
-        { 
+        private static (ptr<ast.File>, Func<slice<byte>, long, slice<byte>>, long, error) parse(ptr<token.FileSet> _addr_fset, @string filename, slice<byte> src, bool fragmentOk)
+        {
+            ptr<ast.File> file = default!;
+            Func<slice<byte>, long, slice<byte>> sourceAdj = default;
+            long indentAdj = default;
+            error err = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
+ 
             // Try as whole source file.
             file, err = parser.ParseFile(fset, filename, src, parserMode); 
             // If there's no error, return. If the error is that the source file didn't begin with a
@@ -35,7 +41,7 @@ namespace go
             // try as a source fragment. Stop and return on any other error.
             if (err == null || !fragmentOk || !strings.Contains(err.Error(), "expected 'package'"))
             {
-                return;
+                return ;
             }
             var psrc = append((slice<byte>)"package p;", src);
             file, err = parser.ParseFile(fset, filename, psrc, parserMode);
@@ -46,13 +52,15 @@ namespace go
                     // Remove the package clause.
                     // Gofmt has turned the ';' into a '\n'.
                     src = src[indent + len("package p\n")..];
-                    return bytes.TrimSpace(src);
+                    return _addr_bytes.TrimSpace(src)!;
+
                 };
-                return;
+                return ;
+
             }
             if (!strings.Contains(err.Error(), "expected declaration"))
             {
-                return;
+                return ;
             }
             var fsrc = append(append((slice<byte>)"package p; func _() {", src), '\n', '\n', '}');
             file, err = parser.ParseFile(fset, filename, fsrc, parserMode);
@@ -68,30 +76,40 @@ namespace go
                     src = src[2L * indent + len("package p\n\nfunc _() {")..]; 
                     // Remove only the "}\n" suffix: remaining whitespaces will be trimmed anyway
                     src = src[..len(src) - len("}\n")];
-                    return bytes.TrimSpace(src);
+                    return _addr_bytes.TrimSpace(src)!;
+
                 }; 
                 // Gofmt has also indented the function body one level.
                 // Adjust that with indentAdj.
                 indentAdj = -1L;
+
             }
-            return;
+            return ;
+
         }
 
         // format formats the given package file originally obtained from src
         // and adjusts the result based on the original source via sourceAdj
         // and indentAdj.
-        private static (slice<byte>, error) format(ref token.FileSet fset, ref ast.File file, Func<slice<byte>, long, slice<byte>> sourceAdj, long indentAdj, slice<byte> src, printer.Config cfg)
+        private static (slice<byte>, error) format(ptr<token.FileSet> _addr_fset, ptr<ast.File> _addr_file, Func<slice<byte>, long, slice<byte>> sourceAdj, long indentAdj, slice<byte> src, printer.Config cfg)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
+            ref ast.File file = ref _addr_file.val;
+
             if (sourceAdj == null)
             { 
                 // Complete source file.
-                bytes.Buffer buf = default;
-                var err = cfg.Fprint(ref buf, fset, file);
+                ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+                var err = cfg.Fprint(_addr_buf, fset, file);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
-                return (buf.Bytes(), null);
+
+                return (buf.Bytes(), error.As(null!)!);
+
             } 
 
             // Partial source file.
@@ -104,7 +122,9 @@ namespace go
                 {
                     i = j + 1L; // byte offset of last line in leading space
                 }
+
                 j++;
+
             }
 
             slice<byte> res = default;
@@ -126,11 +146,13 @@ namespace go
                         indent++;
                         break;
                 }
+
             }
             if (indent == 0L && hasSpace)
             {
                 indent = 1L;
             }
+
             {
                 long i__prev1 = i;
 
@@ -150,11 +172,12 @@ namespace go
             // Write it without any leading and trailing space.
             cfg.Indent = indent + indentAdj;
             buf = default;
-            err = cfg.Fprint(ref buf, fset, file);
+            err = cfg.Fprint(_addr_buf, fset, file);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             var @out = sourceAdj(buf.Bytes(), cfg.Indent); 
 
             // If the adjusted output is empty, the source
@@ -162,7 +185,7 @@ namespace go
             // The result is the incoming source.
             if (len(out) == 0L)
             {
-                return (src, null);
+                return (src, error.As(null!)!);
             } 
 
             // Otherwise, append output to leading space.
@@ -175,7 +198,8 @@ namespace go
                 i--;
             }
 
-            return (append(res, src[i..]), null);
+            return (append(res, src[i..]), error.As(null!)!);
+
         }
 
         // isSpace reports whether the byte is a space character.

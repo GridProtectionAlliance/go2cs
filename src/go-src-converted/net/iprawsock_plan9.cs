@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:26:46 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:43 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\iprawsock_plan9.go
 using context = go.context_package;
@@ -13,34 +13,68 @@ namespace go
 {
     public static partial class net_package
     {
-        private static (long, ref IPAddr, error) readFrom(this ref IPConn c, slice<byte> b)
+        private static (long, ptr<IPAddr>, error) readFrom(this ptr<IPConn> _addr_c, slice<byte> b)
         {
-            return (0L, null, syscall.EPLAN9);
+            long _p0 = default;
+            ptr<IPAddr> _p0 = default!;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+
+            return (0L, _addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (long, long, long, ref IPAddr, error) readMsg(this ref IPConn c, slice<byte> b, slice<byte> oob)
+        private static (long, long, long, ptr<IPAddr>, error) readMsg(this ptr<IPConn> _addr_c, slice<byte> b, slice<byte> oob)
         {
-            return (0L, 0L, 0L, null, syscall.EPLAN9);
+            long n = default;
+            long oobn = default;
+            long flags = default;
+            ptr<IPAddr> addr = default!;
+            error err = default!;
+            ref IPConn c = ref _addr_c.val;
+
+            return (0L, 0L, 0L, _addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (long, error) writeTo(this ref IPConn c, slice<byte> b, ref IPAddr addr)
+        private static (long, error) writeTo(this ptr<IPConn> _addr_c, slice<byte> b, ptr<IPAddr> _addr_addr)
         {
-            return (0L, syscall.EPLAN9);
+            long _p0 = default;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+            ref IPAddr addr = ref _addr_addr.val;
+
+            return (0L, error.As(syscall.EPLAN9)!);
         }
 
-        private static (long, long, error) writeMsg(this ref IPConn c, slice<byte> b, slice<byte> oob, ref IPAddr addr)
+        private static (long, long, error) writeMsg(this ptr<IPConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<IPAddr> _addr_addr)
         {
-            return (0L, 0L, syscall.EPLAN9);
+            long n = default;
+            long oobn = default;
+            error err = default!;
+            ref IPConn c = ref _addr_c.val;
+            ref IPAddr addr = ref _addr_addr.val;
+
+            return (0L, 0L, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref IPConn, error) dialIP(context.Context ctx, @string netProto, ref IPAddr laddr, ref IPAddr raddr)
+        private static (ptr<IPConn>, error) dialIP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<IPAddr> _addr_laddr, ptr<IPAddr> _addr_raddr)
         {
-            return (null, syscall.EPLAN9);
+            ptr<IPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysDialer sd = ref _addr_sd.val;
+            ref IPAddr laddr = ref _addr_laddr.val;
+            ref IPAddr raddr = ref _addr_raddr.val;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref IPConn, error) listenIP(context.Context ctx, @string netProto, ref IPAddr laddr)
+        private static (ptr<IPConn>, error) listenIP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<IPAddr> _addr_laddr)
         {
-            return (null, syscall.EPLAN9);
+            ptr<IPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref IPAddr laddr = ref _addr_laddr.val;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
     }
 }

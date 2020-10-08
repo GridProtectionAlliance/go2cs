@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:53 UTC
+//     Generated on 2020 October 08 01:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ReadAtByRef(ref T value, slice<byte> p, long off);
+            private delegate (long, error) ReadAtByPtr(ptr<T> value, slice<byte> p, long off);
             private delegate (long, error) ReadAtByVal(T value, slice<byte> p, long off);
 
-            private static readonly ReadAtByRef s_ReadAtByRef;
+            private static readonly ReadAtByPtr s_ReadAtByPtr;
             private static readonly ReadAtByVal s_ReadAtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,11 +74,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadAtByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadAtByPtr is null || !m_target_is_ptr)
                     return s_ReadAtByVal!(target, p, off);
 
-                return s_ReadAtByRef(ref target, p, off);
+                return s_ReadAtByPtr(m_target_ptr, p, off);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -87,23 +88,20 @@ namespace go
             static ReaderAt()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadAt");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadAt");
 
                 if (!(extensionMethod is null))
-                    s_ReadAtByRef = extensionMethod.CreateStaticDelegate(typeof(ReadAtByRef)) as ReadAtByRef;
+                    s_ReadAtByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadAtByPtr)) as ReadAtByPtr;
 
-                if (s_ReadAtByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadAt");
+                extensionMethod = targetType.GetExtensionMethod("ReadAt");
 
-                    if (!(extensionMethod is null))
-                        s_ReadAtByVal = extensionMethod.CreateStaticDelegate(typeof(ReadAtByVal)) as ReadAtByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadAtByVal = extensionMethod.CreateStaticDelegate(typeof(ReadAtByVal)) as ReadAtByVal;
 
-                if (s_ReadAtByRef is null && s_ReadAtByVal is null)
+                if (s_ReadAtByPtr is null && s_ReadAtByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ReaderAt.ReadAt method", new Exception("ReadAt"));
             }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tar -- go2cs converted at 2020 August 29 08:45:29 UTC
+// package tar -- go2cs converted at 2020 October 08 03:49:21 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\strconv.go
 using bytes = go.bytes_package;
@@ -32,8 +32,10 @@ namespace archive
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         // toASCII converts the input to an ASCII C-style string.
@@ -44,6 +46,7 @@ namespace archive
             {
                 return s;
             }
+
             var b = make_slice<byte>(0L, len(s));
             foreach (var (_, c) in s)
             {
@@ -51,8 +54,10 @@ namespace archive
                 {
                     b = append(b, byte(c));
                 }
+
             }
             return string(b);
+
         }
 
         private partial struct parser
@@ -67,8 +72,10 @@ namespace archive
 
         // parseString parses bytes as a NUL-terminated C-style string.
         // If a NUL byte is not found then the whole slice is returned as a string.
-        private static @string parseString(this ref parser _p0, slice<byte> b)
+        private static @string parseString(this ptr<parser> _addr__p0, slice<byte> b)
         {
+            ref parser _p0 = ref _addr__p0.val;
+
             {
                 var i = bytes.IndexByte(b, 0L);
 
@@ -78,16 +85,21 @@ namespace archive
                 }
 
             }
+
             return string(b);
+
         }
 
         // formatString copies s into b, NUL-terminating if possible.
-        private static void formatString(this ref formatter f, slice<byte> b, @string s)
+        private static void formatString(this ptr<formatter> _addr_f, slice<byte> b, @string s)
         {
+            ref formatter f = ref _addr_f.val;
+
             if (len(s) > len(b))
             {
                 f.err = ErrFieldTooLong;
             }
+
             copy(b, s);
             if (len(s) < len(b))
             {
@@ -102,6 +114,7 @@ namespace archive
                 var n = len(strings.TrimRight(s[..len(b)], "/"));
                 b[n] = 0L; // Replace trailing slash with NUL terminator
             }
+
         }
 
         // fitsInBase256 reports whether x can be encoded into n bytes using base-256
@@ -120,8 +133,10 @@ namespace archive
         // parseNumeric parses the input as being encoded in either base-256 or octal.
         // This function may return negative numbers.
         // If parsing fails or an integer overflow occurs, err will be set.
-        private static long parseNumeric(this ref parser p, slice<byte> b)
-        { 
+        private static long parseNumeric(this ptr<parser> _addr_p, slice<byte> b)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // Check for base-256 (binary) format first.
             // If the first bit is set, then all following bits constitute a two's
             // complement encoded number in big-endian byte order.
@@ -137,6 +152,7 @@ namespace archive
                 {
                     inv = 0xffUL;
                 }
+
                 ulong x = default;
                 foreach (var (i, c) in b)
                 {
@@ -145,38 +161,50 @@ namespace archive
                     {
                         c &= 0x7fUL; // Ignore signal bit in first byte
                     }
+
                     if ((x >> (int)(56L)) > 0L)
                     {
                         p.err = ErrHeader; // Integer overflow
                         return 0L;
+
                     }
+
                     x = x << (int)(8L) | uint64(c);
+
                 }
                 if ((x >> (int)(63L)) > 0L)
                 {
                     p.err = ErrHeader; // Integer overflow
                     return 0L;
+
                 }
+
                 if (inv == 0xffUL)
                 {
                     return ~int64(x);
                 }
+
                 return int64(x);
+
             } 
 
             // Normal case is base-8 (octal) format.
             return p.parseOctal(b);
+
         }
 
         // formatNumeric encodes x into b using base-8 (octal) encoding if possible.
         // Otherwise it will attempt to use base-256 (binary) encoding.
-        private static void formatNumeric(this ref formatter f, slice<byte> b, long x)
+        private static void formatNumeric(this ptr<formatter> _addr_f, slice<byte> b, long x)
         {
+            ref formatter f = ref _addr_f.val;
+
             if (fitsInOctal(len(b), x))
             {
                 f.formatOctal(b, x);
-                return;
+                return ;
             }
+
             if (fitsInBase256(len(b), x))
             {
                 for (var i = len(b) - 1L; i >= 0L; i--)
@@ -186,14 +214,19 @@ namespace archive
                 }
 
                 b[0L] |= 0x80UL; // Highest bit indicates binary format
-                return;
+                return ;
+
             }
+
             f.formatOctal(b, 0L); // Last resort, just write zero
             f.err = ErrFieldTooLong;
+
         }
 
-        private static long parseOctal(this ref parser p, slice<byte> b)
-        { 
+        private static long parseOctal(this ptr<parser> _addr_p, slice<byte> b)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // Because unused fields are filled with NULs, we need
             // to skip leading NULs. Fields may also be padded with
             // spaces or NULs.
@@ -205,21 +238,28 @@ namespace archive
             {
                 return 0L;
             }
+
             var (x, perr) = strconv.ParseUint(p.parseString(b), 8L, 64L);
             if (perr != null)
             {
                 p.err = ErrHeader;
             }
+
             return int64(x);
+
         }
 
-        private static void formatOctal(this ref formatter f, slice<byte> b, long x)
+        private static void formatOctal(this ptr<formatter> _addr_f, slice<byte> b, long x)
         {
+            ref formatter f = ref _addr_f.val;
+
             if (!fitsInOctal(len(b), x))
             {
                 x = 0L; // Last resort, just write zero
                 f.err = ErrFieldTooLong;
+
             }
+
             var s = strconv.FormatInt(x, 8L); 
             // Add leading zeros, but leave room for a NUL.
             {
@@ -231,7 +271,9 @@ namespace archive
                 }
 
             }
+
             f.formatString(b, s);
+
         }
 
         // fitsInOctal reports whether the integer x fits in a field n-bytes long
@@ -247,7 +289,10 @@ namespace archive
         // which is allowed for by the PAX specification, but not always portable.
         private static (time.Time, error) parsePAXTime(@string s)
         {
-            const long maxNanoSecondDigits = 9L; 
+            time.Time _p0 = default;
+            error _p0 = default!;
+
+            const long maxNanoSecondDigits = (long)9L; 
 
             // Split string into seconds and sub-seconds parts.
  
@@ -262,6 +307,7 @@ namespace archive
                 {
                     ss = s[..pos];
                     sn = s[pos + 1L..];
+
                 } 
 
                 // Parse the seconds.
@@ -272,18 +318,20 @@ namespace archive
             var (secs, err) = strconv.ParseInt(ss, 10L, 64L);
             if (err != null)
             {
-                return (new time.Time(), ErrHeader);
+                return (new time.Time(), error.As(ErrHeader)!);
             }
+
             if (len(sn) == 0L)
             {
-                return (time.Unix(secs, 0L), null); // No sub-second values
+                return (time.Unix(secs, 0L), error.As(null!)!); // No sub-second values
             } 
 
             // Parse the nanoseconds.
             if (strings.Trim(sn, "0123456789") != "")
             {
-                return (new time.Time(), ErrHeader);
+                return (new time.Time(), error.As(ErrHeader)!);
             }
+
             if (len(sn) < maxNanoSecondDigits)
             {
                 sn += strings.Repeat("0", maxNanoSecondDigits - len(sn)); // Right pad
@@ -292,18 +340,23 @@ namespace archive
             {
                 sn = sn[..maxNanoSecondDigits]; // Right truncate
             }
+
             var (nsecs, _) = strconv.ParseInt(sn, 10L, 64L); // Must succeed
             if (len(ss) > 0L && ss[0L] == '-')
             {
-                return (time.Unix(secs, -1L * nsecs), null); // Negative correction
+                return (time.Unix(secs, -1L * nsecs), error.As(null!)!); // Negative correction
             }
-            return (time.Unix(secs, nsecs), null);
+
+            return (time.Unix(secs, nsecs), error.As(null!)!);
+
         }
 
         // formatPAXTime converts ts into a time of the form %d.%d as described in the
         // PAX specification. This function is capable of negative timestamps.
         private static @string formatPAXTime(time.Time ts)
         {
+            @string s = default;
+
             var secs = ts.Unix();
             var nsecs = ts.Nanosecond();
             if (nsecs == 0L)
@@ -317,28 +370,35 @@ namespace archive
             {
                 sign = "-"; // Remember sign
                 secs = -(secs + 1L); // Add a second to secs
-                nsecs = -(nsecs - 1E9F); // Take that second away from nsecs
+                nsecs = -(nsecs - 1e9F); // Take that second away from nsecs
             }
+
             return strings.TrimRight(fmt.Sprintf("%s%d.%09d", sign, secs, nsecs), "0");
+
         }
 
         // parsePAXRecord parses the input PAX record string into a key-value pair.
         // If parsing is successful, it will slice off the currently read record and
         // return the remainder as r.
         private static (@string, @string, @string, error) parsePAXRecord(@string s)
-        { 
+        {
+            @string k = default;
+            @string v = default;
+            @string r = default;
+            error err = default!;
+ 
             // The size field ends at the first space.
             var sp = strings.IndexByte(s, ' ');
             if (sp == -1L)
             {
-                return ("", "", s, ErrHeader);
+                return ("", "", s, error.As(ErrHeader)!);
             } 
 
             // Parse the first token as a decimal integer.
             var (n, perr) = strconv.ParseInt(s[..sp], 10L, 0L); // Intentionally parse as native int
             if (perr != null || n < 5L || int64(len(s)) < n)
             {
-                return ("", "", s, ErrHeader);
+                return ("", "", s, error.As(ErrHeader)!);
             } 
 
             // Extract everything between the space and the final newline.
@@ -347,34 +407,41 @@ namespace archive
             var rem = s[n..];
             if (nl != "\n")
             {
-                return ("", "", s, ErrHeader);
+                return ("", "", s, error.As(ErrHeader)!);
             } 
 
             // The first equals separates the key from the value.
             var eq = strings.IndexByte(rec, '=');
             if (eq == -1L)
             {
-                return ("", "", s, ErrHeader);
+                return ("", "", s, error.As(ErrHeader)!);
             }
+
             k = rec[..eq];
             v = rec[eq + 1L..];
 
             if (!validPAXRecord(k, v))
             {
-                return ("", "", s, ErrHeader);
+                return ("", "", s, error.As(ErrHeader)!);
             }
-            return (k, v, rem, null);
+
+            return (k, v, rem, error.As(null!)!);
+
         }
 
         // formatPAXRecord formats a single PAX record, prefixing it with the
         // appropriate length.
         private static (@string, error) formatPAXRecord(@string k, @string v)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             if (!validPAXRecord(k, v))
             {
-                return ("", ErrHeader);
+                return ("", error.As(ErrHeader)!);
             }
-            const long padding = 3L; // Extra padding for ' ', '=', and '\n'
+
+            const long padding = (long)3L; // Extra padding for ' ', '=', and '\n'
  // Extra padding for ' ', '=', and '\n'
             var size = len(k) + len(v) + padding;
             size += len(strconv.Itoa(size));
@@ -386,7 +453,9 @@ namespace archive
                 size = len(record);
                 record = strconv.Itoa(size) + " " + k + "=" + v + "\n";
             }
-            return (record, null);
+
+            return (record, error.As(null!)!);
+
         }
 
         // validPAXRecord reports whether the key-value pair is valid where each
@@ -405,10 +474,12 @@ namespace archive
                 return false;
             }
 
+
             if (k == paxPath || k == paxLinkpath || k == paxUname || k == paxGname) 
                 return !hasNUL(v);
             else 
                 return !hasNUL(k);
-                    }
+            
+        }
     }
 }}

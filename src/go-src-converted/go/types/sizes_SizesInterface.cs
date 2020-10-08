@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:55 UTC
+//     Generated on 2020 October 08 04:03:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +63,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate long AlignofByRef(ref T value, Type T);
+            private delegate long AlignofByPtr(ptr<T> value, Type T);
             private delegate long AlignofByVal(T value, Type T);
 
-            private static readonly AlignofByRef s_AlignofByRef;
+            private static readonly AlignofByPtr s_AlignofByPtr;
             private static readonly AlignofByVal s_AlignofByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,36 +75,38 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AlignofByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AlignofByPtr is null || !m_target_is_ptr)
                     return s_AlignofByVal!(target, T);
 
-                return s_AlignofByRef(ref target, T);
+                return s_AlignofByPtr(m_target_ptr, T);
             }
 
-            private delegate long OffsetsofByRef(ref T value, slice<ref Var> fields);
-            private delegate long OffsetsofByVal(T value, slice<ref Var> fields);
+            private delegate long OffsetsofByPtr(ptr<T> value, slice<ptr<Var>> fields);
+            private delegate long OffsetsofByVal(T value, slice<ptr<Var>> fields);
 
-            private static readonly OffsetsofByRef s_OffsetsofByRef;
+            private static readonly OffsetsofByPtr s_OffsetsofByPtr;
             private static readonly OffsetsofByVal s_OffsetsofByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Offsetsof(slice<ref Var> fields)
+            public long Offsetsof(slice<ptr<Var>> fields)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OffsetsofByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OffsetsofByPtr is null || !m_target_is_ptr)
                     return s_OffsetsofByVal!(target, fields);
 
-                return s_OffsetsofByRef(ref target, fields);
+                return s_OffsetsofByPtr(m_target_ptr, fields);
             }
 
-            private delegate long SizeofByRef(ref T value, Type T);
+            private delegate long SizeofByPtr(ptr<T> value, Type T);
             private delegate long SizeofByVal(T value, Type T);
 
-            private static readonly SizeofByRef s_SizeofByRef;
+            private static readonly SizeofByPtr s_SizeofByPtr;
             private static readonly SizeofByVal s_SizeofByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -113,11 +115,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SizeofByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SizeofByPtr is null || !m_target_is_ptr)
                     return s_SizeofByVal!(target, T);
 
-                return s_SizeofByRef(ref target, T);
+                return s_SizeofByPtr(m_target_ptr, T);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -126,55 +129,46 @@ namespace go
             static Sizes()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Alignof");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Alignof");
 
                 if (!(extensionMethod is null))
-                    s_AlignofByRef = extensionMethod.CreateStaticDelegate(typeof(AlignofByRef)) as AlignofByRef;
+                    s_AlignofByPtr = extensionMethod.CreateStaticDelegate(typeof(AlignofByPtr)) as AlignofByPtr;
 
-                if (s_AlignofByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Alignof");
+                extensionMethod = targetType.GetExtensionMethod("Alignof");
 
-                    if (!(extensionMethod is null))
-                        s_AlignofByVal = extensionMethod.CreateStaticDelegate(typeof(AlignofByVal)) as AlignofByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AlignofByVal = extensionMethod.CreateStaticDelegate(typeof(AlignofByVal)) as AlignofByVal;
 
-                if (s_AlignofByRef is null && s_AlignofByVal is null)
+                if (s_AlignofByPtr is null && s_AlignofByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Sizes.Alignof method", new Exception("Alignof"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Offsetsof");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Offsetsof");
 
                 if (!(extensionMethod is null))
-                    s_OffsetsofByRef = extensionMethod.CreateStaticDelegate(typeof(OffsetsofByRef)) as OffsetsofByRef;
+                    s_OffsetsofByPtr = extensionMethod.CreateStaticDelegate(typeof(OffsetsofByPtr)) as OffsetsofByPtr;
 
-                if (s_OffsetsofByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Offsetsof");
+                extensionMethod = targetType.GetExtensionMethod("Offsetsof");
 
-                    if (!(extensionMethod is null))
-                        s_OffsetsofByVal = extensionMethod.CreateStaticDelegate(typeof(OffsetsofByVal)) as OffsetsofByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OffsetsofByVal = extensionMethod.CreateStaticDelegate(typeof(OffsetsofByVal)) as OffsetsofByVal;
 
-                if (s_OffsetsofByRef is null && s_OffsetsofByVal is null)
+                if (s_OffsetsofByPtr is null && s_OffsetsofByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Sizes.Offsetsof method", new Exception("Offsetsof"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Sizeof");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Sizeof");
 
                 if (!(extensionMethod is null))
-                    s_SizeofByRef = extensionMethod.CreateStaticDelegate(typeof(SizeofByRef)) as SizeofByRef;
+                    s_SizeofByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeofByPtr)) as SizeofByPtr;
 
-                if (s_SizeofByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Sizeof");
+                extensionMethod = targetType.GetExtensionMethod("Sizeof");
 
-                    if (!(extensionMethod is null))
-                        s_SizeofByVal = extensionMethod.CreateStaticDelegate(typeof(SizeofByVal)) as SizeofByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SizeofByVal = extensionMethod.CreateStaticDelegate(typeof(SizeofByVal)) as SizeofByVal;
 
-                if (s_SizeofByRef is null && s_SizeofByVal is null)
+                if (s_SizeofByPtr is null && s_SizeofByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Sizes.Sizeof method", new Exception("Sizeof"));
             }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2020 August 29 10:01:59 UTC
+// package @base -- go2cs converted at 2020 October 08 04:36:58 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Go\src\cmd\go\internal\base\path.go
 using os = go.os_package;
@@ -25,6 +25,7 @@ namespace @internal
                 Fatalf("cannot determine current directory: %v", err);
             }
             return wd;
+
         }
 
         public static var Cwd = getwd();
@@ -41,7 +42,9 @@ namespace @internal
                 }
 
             }
+
             return path;
+
         }
 
         // RelPaths returns a copy of paths with absolute paths
@@ -58,9 +61,12 @@ namespace @internal
                 {
                     p = rel;
                 }
+
                 out = append(out, p);
+
             }
             return out;
+
         }
 
         // IsTestFile reports whether the source file is a set of tests and should therefore
@@ -69,6 +75,7 @@ namespace @internal
         { 
             // We don't cover tests, only the code they test.
             return strings.HasSuffix(file, "_test.go");
+
         }
     }
 }}}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2020 August 29 08:23:39 UTC
+// package pprof -- go2cs converted at 2020 October 08 03:31:04 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Go\src\runtime\pprof\protomem.go
 using io = go.io_package;
@@ -18,7 +18,7 @@ namespace runtime
     public static partial class pprof_package
     {
         // writeHeapProto writes the current heap profile in protobuf format to w.
-        private static error writeHeapProto(io.Writer w, slice<runtime.MemProfileRecord> p, long rate)
+        private static error writeHeapProto(io.Writer w, slice<runtime.MemProfileRecord> p, long rate, @string defaultSampleType)
         {
             var b = newProfileBuilder(w);
             b.pbValueType(tagProfile_PeriodType, "space", "bytes");
@@ -27,21 +27,24 @@ namespace runtime
             b.pbValueType(tagProfile_SampleType, "alloc_space", "bytes");
             b.pbValueType(tagProfile_SampleType, "inuse_objects", "count");
             b.pbValueType(tagProfile_SampleType, "inuse_space", "bytes");
-
+            if (defaultSampleType != "")
+            {
+                b.pb.int64Opt(tagProfile_DefaultSampleType, b.stringIndex(defaultSampleType));
+            }
             long values = new slice<long>(new long[] { 0, 0, 0, 0 });
             slice<ulong> locs = default;
             foreach (var (_, r) in p)
             {
-                locs = locs[..0L];
                 var hideRuntime = true;
                 for (long tries = 0L; tries < 2L; tries++)
                 {
-                    foreach (var (_, addr) in r.Stack())
-                    { 
-                        // For heap profiles, all stack
-                        // addresses are return PCs, which is
-                        // what locForPC expects.
-                        if (hideRuntime)
+                    var stk = r.Stack(); 
+                    // For heap profiles, all stack
+                    // addresses are return PCs, which is
+                    // what appendLocsForStack expects.
+                    if (hideRuntime)
+                    {
+                        foreach (var (i, addr) in stk)
                         {
                             {
                                 var f = runtime.FuncForPC(addr);
@@ -52,27 +55,25 @@ namespace runtime
                                 }
                             } 
                             // Found non-runtime. Show any runtime uses above it.
-                            hideRuntime = false;
+                            stk = stk[i..];
+                            break;
+
                         }
-                        var l = b.locForPC(addr);
-                        if (l == 0L)
-                        { // runtime.goexit
-                            continue;
-                        }
-                        locs = append(locs, l);
-                    }                    if (len(locs) > 0L)
+                    }
+                    locs = b.appendLocsForStack(locs[..0L], stk);
+                    if (len(locs) > 0L)
                     {
                         break;
                     }
-                    hideRuntime = false; // try again, and show all frames
+                    hideRuntime = false; // try again, and show all frames next time.
                 }
 
                 values[0L], values[1L] = scaleHeapSample(r.AllocObjects, r.AllocBytes, rate);
                 values[2L], values[3L] = scaleHeapSample(r.InUseObjects(), r.InUseBytes(), rate);
                 long blockSize = default;
-                if (values[0L] > 0L)
+                if (r.AllocObjects > 0L)
                 {
-                    blockSize = values[1L] / values[0L];
+                    blockSize = r.AllocBytes / r.AllocObjects;
                 }
                 b.pbSample(values, locs, () =>
                 {
@@ -81,8 +82,10 @@ namespace runtime
                         b.pbLabel(tagSample_Label, "bytes", "", blockSize);
                     }
                 });
+
             }            b.build();
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // scaleHeapSample adjusts the data from a heap Sample to
@@ -96,20 +99,27 @@ namespace runtime
         // profile is 1-exp(-S/R).
         private static (long, long) scaleHeapSample(long count, long size, long rate)
         {
+            long _p0 = default;
+            long _p0 = default;
+
             if (count == 0L || size == 0L)
             {
                 return (0L, 0L);
             }
+
             if (rate <= 1L)
             { 
                 // if rate==1 all samples were collected so no adjustment is needed.
                 // if rate<1 treat as unknown and skip scaling.
                 return (count, size);
+
             }
+
             var avgSize = float64(size) / float64(count);
             long scale = 1L / (1L - math.Exp(-avgSize / float64(rate)));
 
             return (int64(float64(count) * scale), int64(float64(size) * scale));
+
         }
     }
 }}

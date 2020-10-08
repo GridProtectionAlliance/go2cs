@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:12 UTC
+//     Generated on 2020 October 08 04:02:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,23 +21,17 @@ namespace go
     public static partial class e_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(U1))]
         public partial struct U1
         {
-            // U1 structure promotion - sourced from pointer
-            private readonly ptr<U1> m_U1Ref;
-
-            private ref U1 U1_ptr => ref m_U1Ref.Value;
-
             // Constructors
             public U1(NilType _)
             {
-                this.m_U1Ref = new ptr<U1>(new U1(nil));
+                this.ptr<U1> = default;
             }
 
-            public U1(ref U1 U1 = default)
+            public U1(ref ptr<U1> ptr<U1> = default)
             {
-                this.m_U1Ref = new ptr<U1>(ref U1);
+                this.ptr<U1> = ptr<U1>;
             }
 
             // Enable comparisons between nil and U1 struct
@@ -60,7 +54,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static U1 U1_cast(dynamic value)
         {
-            return new U1(ref value.U1);
+            return new U1(ref value.ptr<U1>);
         }
     }
 }}

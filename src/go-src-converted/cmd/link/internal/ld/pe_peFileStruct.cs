@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:34 UTC
+//     Generated on 2020 October 08 04:39:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using pe = go.debug.pe_package;
 using binary = go.encoding.binary_package;
@@ -40,6 +41,7 @@ namespace @internal
                 this.sections = default;
                 this.stringTable = default;
                 this.textSect = default;
+                this.rdataSect = default;
                 this.dataSect = default;
                 this.bssSect = default;
                 this.ctorsSect = default;
@@ -50,11 +52,12 @@ namespace @internal
                 this.dataDirectory = default;
             }
 
-            public peFile(slice<ref peSection> sections = default, peStringTable stringTable = default, ref ptr<peSection> textSect = default, ref ptr<peSection> dataSect = default, ref ptr<peSection> bssSect = default, ref ptr<peSection> ctorsSect = default, uint nextSectOffset = default, uint nextFileOffset = default, long symtabOffset = default, long symbolCount = default, array<pe.DataDirectory> dataDirectory = default)
+            public peFile(slice<ptr<peSection>> sections = default, peStringTable stringTable = default, ref ptr<peSection> textSect = default, ref ptr<peSection> rdataSect = default, ref ptr<peSection> dataSect = default, ref ptr<peSection> bssSect = default, ref ptr<peSection> ctorsSect = default, uint nextSectOffset = default, uint nextFileOffset = default, long symtabOffset = default, long symbolCount = default, array<pe.DataDirectory> dataDirectory = default)
             {
                 this.sections = sections;
                 this.stringTable = stringTable;
                 this.textSect = textSect;
+                this.rdataSect = rdataSect;
                 this.dataSect = dataSect;
                 this.bssSect = bssSect;
                 this.ctorsSect = ctorsSect;
@@ -85,7 +88,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static peFile peFile_cast(dynamic value)
         {
-            return new peFile(value.sections, value.stringTable, ref value.textSect, ref value.dataSect, ref value.bssSect, ref value.ctorsSect, value.nextSectOffset, value.nextFileOffset, value.symtabOffset, value.symbolCount, value.dataDirectory);
+            return new peFile(value.sections, value.stringTable, ref value.textSect, ref value.rdataSect, ref value.dataSect, ref value.bssSect, ref value.ctorsSect, value.nextSectOffset, value.nextFileOffset, value.symtabOffset, value.symbolCount, value.dataDirectory);
         }
     }
 }}}}

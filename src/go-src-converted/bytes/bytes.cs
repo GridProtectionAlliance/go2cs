@@ -4,9 +4,10 @@
 
 // Package bytes implements functions for the manipulation of byte slices.
 // It is analogous to the facilities of the strings package.
-// package bytes -- go2cs converted at 2020 August 29 08:22:01 UTC
+// package bytes -- go2cs converted at 2020 October 08 03:49:09 UTC
 // import "bytes" ==> using bytes = go.bytes_package
 // Original source: C:\Go\src\bytes\bytes.go
+using bytealg = go.@internal.bytealg_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using static go.builtin;
@@ -16,19 +17,22 @@ namespace go
 {
     public static partial class bytes_package
     {
-        private static bool equalPortable(slice<byte> a, slice<byte> b)
+        // Equal reports whether a and b
+        // are the same length and contain the same bytes.
+        // A nil argument is equivalent to an empty slice.
+        public static bool Equal(slice<byte> a, slice<byte> b)
+        { 
+            // Neither cmd/compile nor gccgo allocates for these string conversions.
+            return string(a) == string(b);
+
+        }
+
+        // Compare returns an integer comparing two byte slices lexicographically.
+        // The result will be 0 if a==b, -1 if a < b, and +1 if a > b.
+        // A nil argument is equivalent to an empty slice.
+        public static long Compare(slice<byte> a, slice<byte> b)
         {
-            if (len(a) != len(b))
-            {
-                return false;
-            }
-            foreach (var (i, c) in a)
-            {
-                if (c != b[i])
-                {
-                    return false;
-                }
-            }            return true;
+            return bytealg.Compare(a, b);
         }
 
         // explode splits s into a slice of UTF-8 sequences, one per Unicode code point (still slices of bytes),
@@ -39,6 +43,7 @@ namespace go
             {
                 n = len(s);
             }
+
             var a = make_slice<slice<byte>>(n);
             long size = default;
             long na = 0L;
@@ -50,23 +55,33 @@ namespace go
                     na++;
                     break;
                 }
+
                 _, size = utf8.DecodeRune(s);
                 a[na] = s.slice(0L, size, size);
                 s = s[size..];
                 na++;
+
             }
 
             return a[0L..na];
+
         }
 
-        // countGeneric actually implements Count
-        private static long countGeneric(slice<byte> s, slice<byte> sep)
+        // Count counts the number of non-overlapping instances of sep in s.
+        // If sep is an empty slice, Count returns 1 + the number of UTF-8-encoded code points in s.
+        public static long Count(slice<byte> s, slice<byte> sep)
         { 
             // special case
             if (len(sep) == 0L)
             {
                 return utf8.RuneCount(s) + 1L;
             }
+
+            if (len(sep) == 1L)
+            {
+                return bytealg.Count(s, sep[0L]);
+            }
+
             long n = 0L;
             while (true)
             {
@@ -75,9 +90,12 @@ namespace go
                 {
                     return n;
                 }
+
                 n++;
                 s = s[i + len(sep)..];
+
             }
+
 
         }
 
@@ -99,6 +117,12 @@ namespace go
             return IndexRune(b, r) >= 0L;
         }
 
+        // IndexByte returns the index of the first instance of c in b, or -1 if c is not present in b.
+        public static long IndexByte(slice<byte> b, byte c)
+        {
+            return bytealg.IndexByte(b, c);
+        }
+
         private static long indexBytePortable(slice<byte> s, byte c)
         {
             foreach (var (i, b) in s)
@@ -107,28 +131,70 @@ namespace go
                 {
                     return i;
                 }
+
             }
             return -1L;
+
         }
 
         // LastIndex returns the index of the last instance of sep in s, or -1 if sep is not present in s.
         public static long LastIndex(slice<byte> s, slice<byte> sep)
         {
             var n = len(sep);
-            if (n == 0L)
-            {
+
+            if (n == 0L) 
                 return len(s);
-            }
-            var c = sep[0L];
-            for (var i = len(s) - n; i >= 0L; i--)
-            {
-                if (s[i] == c && (n == 1L || Equal(s[i..i + n], sep)))
+            else if (n == 1L) 
+                return LastIndexByte(s, sep[0L]);
+            else if (n == len(s)) 
+                if (Equal(s, sep))
                 {
-                    return i;
+                    return 0L;
                 }
+
+                return -1L;
+            else if (n > len(s)) 
+                return -1L;
+            // Rabin-Karp search from the end of the string
+            var (hashss, pow) = bytealg.HashStrRevBytes(sep);
+            var last = len(s) - n;
+            uint h = default;
+            {
+                var i__prev1 = i;
+
+                for (var i = len(s) - 1L; i >= last; i--)
+                {
+                    h = h * bytealg.PrimeRK + uint32(s[i]);
+                }
+
+
+                i = i__prev1;
+            }
+            if (h == hashss && Equal(s[last..], sep))
+            {
+                return last;
             }
 
+            {
+                var i__prev1 = i;
+
+                for (i = last - 1L; i >= 0L; i--)
+                {
+                    h *= bytealg.PrimeRK;
+                    h += uint32(s[i]);
+                    h -= pow * uint32(s[i + n]);
+                    if (h == hashss && Equal(s[i..i + n], sep))
+                    {
+                        return i;
+                    }
+
+                }
+
+
+                i = i__prev1;
+            }
             return -1L;
+
         }
 
         // LastIndexByte returns the index of the last instance of c in s, or -1 if c is not present in s.
@@ -140,9 +206,11 @@ namespace go
                 {
                     return i;
                 }
+
             }
 
             return -1L;
+
         }
 
         // IndexRune interprets s as a sequence of UTF-8-encoded code points.
@@ -166,7 +234,9 @@ namespace go
                         {
                             return i;
                         }
+
                         i += n;
+
                     }
 
                 }
@@ -177,7 +247,8 @@ namespace go
                 array<byte> b = new array<byte>(utf8.UTFMax);
                 var n = utf8.EncodeRune(b[..], r);
                 return Index(s, b[..n]);
-                    }
+            
+        }
 
         // IndexAny interprets s as a sequence of UTF-8-encoded Unicode code points.
         // It returns the byte index of the first occurrence in s of any of the Unicode
@@ -189,7 +260,50 @@ namespace go
             { 
                 // Avoid scanning all of s.
                 return -1L;
+
             }
+
+            if (len(s) == 1L)
+            {
+                var r = rune(s[0L]);
+                if (r >= utf8.RuneSelf)
+                { 
+                    // search utf8.RuneError.
+                    foreach (var (_, __r) in chars)
+                    {
+                        r = __r;
+                        if (r == utf8.RuneError)
+                        {
+                            return 0L;
+                        }
+
+                    }
+
+                    return -1L;
+
+                }
+
+                if (bytealg.IndexByteString(chars, s[0L]) >= 0L)
+                {
+                    return 0L;
+                }
+
+                return -1L;
+
+            }
+
+            if (len(chars) == 1L)
+            {
+                r = rune(chars[0L]);
+                if (r >= utf8.RuneSelf)
+                {
+                    r = utf8.RuneError;
+                }
+
+                return IndexRune(s, r);
+
+            }
+
             if (len(s) > 8L)
             {
                 {
@@ -208,16 +322,20 @@ namespace go
                                 {
                                     return i;
                                 }
+
                             }
 
                             i = i__prev1;
                         }
 
                         return -1L;
+
                     }
 
                 }
+
             }
+
             long width = default;
             {
                 var i__prev1 = i;
@@ -226,29 +344,51 @@ namespace go
 
                 while (i < len(s))
                 {
-                    var r = rune(s[i]);
+                    r = rune(s[i]);
                     if (r < utf8.RuneSelf)
                     {
-                        width = 1L;
-                    i += width;
-                    }
-                    else
-                    {
-                        r, width = utf8.DecodeRune(s[i..]);
-                    }
-                    foreach (var (_, ch) in chars)
-                    {
-                        if (r == ch)
+                        if (bytealg.IndexByteString(chars, s[i]) >= 0L)
                         {
                             return i;
+                    i += width;
                         }
+
+                        width = 1L;
+                        continue;
+
                     }
+
+                    r, width = utf8.DecodeRune(s[i..]);
+                    if (r == utf8.RuneError)
+                    {
+                        foreach (var (_, __r) in chars)
+                        {
+                            r = __r;
+                            if (r == utf8.RuneError)
+                            {
+                                return i;
+                            }
+
+                        }
+
+                        continue;
+
+                    } 
+                    // r is 2 to 4 bytes. Using strings.Index is more reasonable, but as the bytes
+                    // package should not import the strings package, use bytealg.IndexString
+                    // instead. And this does not seem to lose much performance.
+                    if (chars == string(r) || bytealg.IndexString(chars, string(r)) >= 0L)
+                    {
+                        return i;
+                    }
+
                 }
 
 
                 i = i__prev1;
             }
             return -1L;
+
         }
 
         // LastIndexAny interprets s as a sequence of UTF-8-encoded Unicode code
@@ -261,7 +401,9 @@ namespace go
             { 
                 // Avoid scanning all of s.
                 return -1L;
+
             }
+
             if (len(s) > 8L)
             {
                 {
@@ -278,16 +420,79 @@ namespace go
                                 {
                                     return i;
                                 }
+
                             }
 
 
                             i = i__prev1;
                         }
                         return -1L;
+
                     }
 
                 }
+
             }
+
+            if (len(s) == 1L)
+            {
+                var r = rune(s[0L]);
+                if (r >= utf8.RuneSelf)
+                {
+                    foreach (var (_, __r) in chars)
+                    {
+                        r = __r;
+                        if (r == utf8.RuneError)
+                        {
+                            return 0L;
+                        }
+
+                    }
+
+                    return -1L;
+
+                }
+
+                if (bytealg.IndexByteString(chars, s[0L]) >= 0L)
+                {
+                    return 0L;
+                }
+
+                return -1L;
+
+            }
+
+            if (len(chars) == 1L)
+            {
+                var cr = rune(chars[0L]);
+                if (cr >= utf8.RuneSelf)
+                {
+                    cr = utf8.RuneError;
+                }
+
+                {
+                    var i__prev1 = i;
+
+                    i = len(s);
+
+                    while (i > 0L)
+                    {
+                        var (r, size) = utf8.DecodeLastRune(s[..i]);
+                        i -= size;
+                        if (r == cr)
+                        {
+                            return i;
+                        }
+
+                    }
+
+
+                    i = i__prev1;
+                }
+                return -1L;
+
+            }
+
             {
                 var i__prev1 = i;
 
@@ -295,21 +500,51 @@ namespace go
 
                 while (i > 0L)
                 {
-                    var (r, size) = utf8.DecodeLastRune(s[..i]);
-                    i -= size;
-                    foreach (var (_, c) in chars)
+                    r = rune(s[i - 1L]);
+                    if (r < utf8.RuneSelf)
                     {
-                        if (r == c)
+                        if (bytealg.IndexByteString(chars, s[i - 1L]) >= 0L)
                         {
-                            return i;
+                            return i - 1L;
                         }
+
+                        i--;
+                        continue;
+
                     }
+
+                    (r, size) = utf8.DecodeLastRune(s[..i]);
+                    i -= size;
+                    if (r == utf8.RuneError)
+                    {
+                        foreach (var (_, __r) in chars)
+                        {
+                            r = __r;
+                            if (r == utf8.RuneError)
+                            {
+                                return i;
+                            }
+
+                        }
+
+                        continue;
+
+                    } 
+                    // r is 2 to 4 bytes. Using strings.Index is more reasonable, but as the bytes
+                    // package should not import the strings package, use bytealg.IndexString
+                    // instead. And this does not seem to lose much performance.
+                    if (chars == string(r) || bytealg.IndexString(chars, string(r)) >= 0L)
+                    {
+                        return i;
+                    }
+
                 }
 
 
                 i = i__prev1;
             }
             return -1L;
+
         }
 
         // Generic split: splits after each instance of sep,
@@ -320,14 +555,17 @@ namespace go
             {
                 return null;
             }
+
             if (len(sep) == 0L)
             {
                 return explode(s, n);
             }
+
             if (n < 0L)
             {
                 n = Count(s, sep) + 1L;
             }
+
             var a = make_slice<slice<byte>>(n);
             n--;
             long i = 0L;
@@ -338,13 +576,16 @@ namespace go
                 {
                     break;
                 }
+
                 a[i] = s.slice(-1, m + sepSave, m + sepSave);
                 s = s[m + len(sep)..];
                 i++;
+
             }
 
             a[i] = s;
             return a[..i + 1L];
+
         }
 
         // SplitN slices s into subslices separated by sep and returns a slice of
@@ -423,6 +664,7 @@ namespace go
             { 
                 // Some runes in the input slice are not ASCII.
                 return FieldsFunc(s, unicode.IsSpace);
+
             } 
 
             // ASCII fast path
@@ -444,6 +686,7 @@ namespace go
                     i++;
                     continue;
                 }
+
                 a[na] = s.slice(fieldStart, i, i);
                 na++;
                 i++; 
@@ -454,21 +697,26 @@ namespace go
                 }
 
                 fieldStart = i;
+
             }
 
             if (fieldStart < len(s))
             { // Last field might end at EOF.
                 a[na] = s.slice(fieldStart, len(s), len(s));
+
             }
+
             return a;
+
         }
 
         // FieldsFunc interprets s as a sequence of UTF-8-encoded code points.
         // It splits the slice s at each run of code points c satisfying f(c) and
         // returns a slice of subslices of s. If all code points in s satisfy f(c), or
         // len(s) == 0, an empty slice is returned.
-        // FieldsFunc makes no guarantees about the order in which it calls f(c).
-        // If f does not return consistent results for a given c, FieldsFunc may crash.
+        //
+        // FieldsFunc makes no guarantees about the order in which it calls f(c)
+        // and assumes that f always returns the same value for a given c.
         public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<int, bool> f)
         { 
             // A span is used to record a slice of s of the form s[start:end].
@@ -481,8 +729,10 @@ namespace go
             var spans = make_slice<span>(0L, 32L); 
 
             // Find the field start and end indices.
-            var wasField = false;
-            long fromIndex = 0L;
+            // Doing this in a separate pass (rather than slicing the string s
+            // and collecting the result substrings right away) is significantly
+            // more efficient, possibly due to cache effects.
+            long start = -1L; // valid span start if >= 0
             {
                 long i__prev1 = i;
 
@@ -496,23 +746,27 @@ namespace go
                     {
                         r, size = utf8.DecodeRune(s[i..]);
                     }
+
                     if (f(r))
                     {
-                        if (wasField)
+                        if (start >= 0L)
                         {
-                            spans = append(spans, new span(start:fromIndex,end:i));
-                            wasField = false;
+                            spans = append(spans, new span(start,i));
+                            start = -1L;
                         }
+
                     }
                     else
                     {
-                        if (!wasField)
+                        if (start < 0L)
                         {
-                            fromIndex = i;
-                            wasField = true;
+                            start = i;
                         }
+
                     }
+
                     i += size;
+
                 } 
 
                 // Last field might end at EOF.
@@ -522,9 +776,9 @@ namespace go
             } 
 
             // Last field might end at EOF.
-            if (wasField)
+            if (start >= 0L)
             {
-                spans = append(spans, new span(fromIndex,len(s)));
+                spans = append(spans, new span(start,len(s)));
             } 
 
             // Create subslices from recorded field indices.
@@ -543,6 +797,7 @@ namespace go
             }
 
             return a;
+
         }
 
         // Join concatenates the elements of s to create a new byte slice. The separator
@@ -553,11 +808,14 @@ namespace go
             {
                 return new slice<byte>(new byte[] {  });
             }
+
             if (len(s) == 1L)
             { 
                 // Just return a copy.
                 return append((slice<byte>)null, s[0L]);
+
             }
+
             var n = len(sep) * (len(s) - 1L);
             {
                 var v__prev1 = v;
@@ -587,6 +845,7 @@ namespace go
             }
 
             return b;
+
         }
 
         // HasPrefix tests whether the byte slice s begins with prefix.
@@ -624,6 +883,7 @@ namespace go
                     {
                         r, wid = utf8.DecodeRune(s[i..]);
                     }
+
                     r = mapping(r);
                     if (r >= 0L)
                     {
@@ -632,6 +892,7 @@ namespace go
                         {
                             rl = len(string(utf8.RuneError));
                         }
+
                         if (nbytes + rl > maxbytes)
                         { 
                             // Grow the buffer.
@@ -639,14 +900,20 @@ namespace go
                             var nb = make_slice<byte>(maxbytes);
                             copy(nb, b[0L..nbytes]);
                             b = nb;
+
                         }
+
                         nbytes += utf8.EncodeRune(b[nbytes..maxbytes], r);
+
                     }
+
                     i += wid;
+
                 }
 
             }
             return b[0L..nbytes];
+
         }
 
         // Repeat returns a new byte slice consisting of count copies of b.
@@ -654,7 +921,11 @@ namespace go
         // It panics if count is negative or if
         // the result of (len(b) * count) overflows.
         public static slice<byte> Repeat(slice<byte> b, long count) => func((_, panic, __) =>
-        { 
+        {
+            if (count == 0L)
+            {
+                return new slice<byte>(new byte[] {  });
+            } 
             // Since we cannot return an error on overflow,
             // we should panic if the repeat will generate
             // an overflow.
@@ -663,10 +934,11 @@ namespace go
             {
                 panic("bytes: negative Repeat count");
             }
-            else if (count > 0L && len(b) * count / count != len(b))
+            else if (len(b) * count / count != len(b))
             {
                 panic("bytes: Repeat count causes overflow");
             }
+
             var nb = make_slice<byte>(len(b) * count);
             var bp = copy(nb, b);
             while (bp < len(nb))
@@ -676,18 +948,129 @@ namespace go
             }
 
             return nb;
+
         });
 
-        // ToUpper treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters within it mapped to their upper case.
+        // ToUpper returns a copy of the byte slice s with all Unicode letters mapped to
+        // their upper case.
         public static slice<byte> ToUpper(slice<byte> s)
         {
+            var isASCII = true;
+            var hasLower = false;
+            {
+                long i__prev1 = i;
+
+                for (long i = 0L; i < len(s); i++)
+                {
+                    var c = s[i];
+                    if (c >= utf8.RuneSelf)
+                    {
+                        isASCII = false;
+                        break;
+                    }
+
+                    hasLower = hasLower || ('a' <= c && c <= 'z');
+
+                }
+
+
+                i = i__prev1;
+            }
+
+            if (isASCII)
+            { // optimize for ASCII-only byte slices.
+                if (!hasLower)
+                { 
+                    // Just return a copy.
+                    return append((slice<byte>)"", s);
+
+                }
+
+                var b = make_slice<byte>(len(s));
+                {
+                    long i__prev1 = i;
+
+                    for (i = 0L; i < len(s); i++)
+                    {
+                        c = s[i];
+                        if ('a' <= c && c <= 'z')
+                        {
+                            c -= 'a' - 'A';
+                        }
+
+                        b[i] = c;
+
+                    }
+
+
+                    i = i__prev1;
+                }
+                return b;
+
+            }
+
             return Map(unicode.ToUpper, s);
+
         }
 
-        // ToLower treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their lower case.
+        // ToLower returns a copy of the byte slice s with all Unicode letters mapped to
+        // their lower case.
         public static slice<byte> ToLower(slice<byte> s)
         {
+            var isASCII = true;
+            var hasUpper = false;
+            {
+                long i__prev1 = i;
+
+                for (long i = 0L; i < len(s); i++)
+                {
+                    var c = s[i];
+                    if (c >= utf8.RuneSelf)
+                    {
+                        isASCII = false;
+                        break;
+                    }
+
+                    hasUpper = hasUpper || ('A' <= c && c <= 'Z');
+
+                }
+
+
+                i = i__prev1;
+            }
+
+            if (isASCII)
+            { // optimize for ASCII-only byte slices.
+                if (!hasUpper)
+                {
+                    return append((slice<byte>)"", s);
+                }
+
+                var b = make_slice<byte>(len(s));
+                {
+                    long i__prev1 = i;
+
+                    for (i = 0L; i < len(s); i++)
+                    {
+                        c = s[i];
+                        if ('A' <= c && c <= 'Z')
+                        {
+                            c += 'a' - 'A';
+                        }
+
+                        b[i] = c;
+
+                    }
+
+
+                    i = i__prev1;
+                }
+                return b;
+
+            }
+
             return Map(unicode.ToLower, s);
+
         }
 
         // ToTitle treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their title case.
@@ -700,21 +1083,66 @@ namespace go
         // upper case, giving priority to the special casing rules.
         public static slice<byte> ToUpperSpecial(unicode.SpecialCase c, slice<byte> s)
         {
-            return Map(r => c.ToUpper(r), s);
+            return Map(c.ToUpper, s);
         }
 
         // ToLowerSpecial treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their
         // lower case, giving priority to the special casing rules.
         public static slice<byte> ToLowerSpecial(unicode.SpecialCase c, slice<byte> s)
         {
-            return Map(r => c.ToLower(r), s);
+            return Map(c.ToLower, s);
         }
 
         // ToTitleSpecial treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their
         // title case, giving priority to the special casing rules.
         public static slice<byte> ToTitleSpecial(unicode.SpecialCase c, slice<byte> s)
         {
-            return Map(r => c.ToTitle(r), s);
+            return Map(c.ToTitle, s);
+        }
+
+        // ToValidUTF8 treats s as UTF-8-encoded bytes and returns a copy with each run of bytes
+        // representing invalid UTF-8 replaced with the bytes in replacement, which may be empty.
+        public static slice<byte> ToValidUTF8(slice<byte> s, slice<byte> replacement)
+        {
+            var b = make_slice<byte>(0L, len(s) + len(replacement));
+            var invalid = false; // previous byte was from an invalid UTF-8 sequence
+            {
+                long i = 0L;
+
+                while (i < len(s))
+                {
+                    var c = s[i];
+                    if (c < utf8.RuneSelf)
+                    {
+                        i++;
+                        invalid = false;
+                        b = append(b, byte(c));
+                        continue;
+                    }
+
+                    var (_, wid) = utf8.DecodeRune(s[i..]);
+                    if (wid == 1L)
+                    {
+                        i++;
+                        if (!invalid)
+                        {
+                            invalid = true;
+                            b = append(b, replacement);
+                        }
+
+                        continue;
+
+                    }
+
+                    invalid = false;
+                    b = append(b, s[i..i + wid]);
+                    i += wid;
+
+                }
+
+            }
+            return b;
+
         }
 
         // isSeparator reports whether the rune could mark a word boundary.
@@ -734,6 +1162,7 @@ namespace go
                 else if (r == '_') 
                     return false;
                                 return true;
+
             } 
             // Letters and digits are not separators
             if (unicode.IsLetter(r) || unicode.IsDigit(r))
@@ -742,6 +1171,7 @@ namespace go
             } 
             // Otherwise, all we can do for now is treat spaces as separators.
             return unicode.IsSpace(r);
+
         }
 
         // Title treats s as UTF-8-encoded bytes and returns a copy with all Unicode letters that begin
@@ -761,9 +1191,12 @@ namespace go
                     prev = r;
                     return unicode.ToTitle(r);
                 }
+
                 prev = r;
                 return r;
+
             }, s);
+
         }
 
         // TrimLeftFunc treats s as UTF-8-encoded bytes and returns a subslice of s by slicing off
@@ -775,7 +1208,9 @@ namespace go
             {
                 return null;
             }
+
             return s[i..];
+
         }
 
         // TrimRightFunc returns a subslice of s by slicing off all trailing
@@ -792,7 +1227,9 @@ namespace go
             {
                 i++;
             }
+
             return s[0L..i];
+
         }
 
         // TrimFunc returns a subslice of s by slicing off all leading and trailing
@@ -810,7 +1247,9 @@ namespace go
             {
                 return s[len(prefix)..];
             }
+
             return s;
+
         }
 
         // TrimSuffix returns s without the provided trailing suffix string.
@@ -821,7 +1260,9 @@ namespace go
             {
                 return s[..len(s) - len(suffix)];
             }
+
             return s;
+
         }
 
         // IndexFunc interprets s as a sequence of UTF-8-encoded code points.
@@ -854,14 +1295,18 @@ namespace go
                 {
                     r, wid = utf8.DecodeRune(s[start..]);
                 }
+
                 if (f(r) == truth)
                 {
                     return start;
                 }
+
                 start += wid;
+
             }
 
             return -1L;
+
         }
 
         // lastIndexFunc is the same as LastIndexFunc except that if
@@ -880,15 +1325,18 @@ namespace go
                     {
                         r, size = utf8.DecodeLastRune(s[0L..i]);
                     }
+
                     i -= size;
                     if (f(r) == truth)
                     {
                         return i;
                     }
+
                 }
 
             }
             return -1L;
+
         }
 
         // asciiSet is a 32-byte value, where each bit represents the presence of a
@@ -905,6 +1353,9 @@ namespace go
         // characters in chars are ASCII.
         private static (asciiSet, bool) makeASCIISet(@string chars)
         {
+            asciiSet @as = default;
+            bool ok = default;
+
             for (long i = 0L; i < len(chars); i++)
             {
                 var c = chars[i];
@@ -912,15 +1363,20 @@ namespace go
                 {
                     return (as, false);
                 }
+
                 as[c >> (int)(5L)] |= 1L << (int)(uint(c & 31L));
+
             }
 
             return (as, true);
+
         }
 
         // contains reports whether c is inside the set.
-        private static bool contains(this ref asciiSet @as, byte c)
+        private static bool contains(this ptr<asciiSet> _addr_@as, byte c)
         {
+            ref asciiSet @as = ref _addr_@as.val;
+
             return (as[c >> (int)(5L)] & (1L << (int)(uint(c & 31L)))) != 0L;
         }
 
@@ -931,9 +1387,10 @@ namespace go
                 return r =>
                 {
                     return r == rune(cutset[0L]);
-                }
-;
+                };
+
             }
+
             {
                 var (as, isASCII) = makeASCIISet(cutset);
 
@@ -942,11 +1399,12 @@ namespace go
                     return r =>
                     {
                         return r < utf8.RuneSelf && @as.contains(byte(r));
-                    }
-;
+                    };
+
                 }
 
             }
+
             return r =>
             {
                 foreach (var (_, c) in cutset)
@@ -955,10 +1413,12 @@ namespace go
                     {
                         return true;
                     }
+
                 }
                 return false;
-            }
-;
+
+            };
+
         }
 
         // Trim returns a subslice of s by slicing off all leading and
@@ -985,8 +1445,66 @@ namespace go
         // TrimSpace returns a subslice of s by slicing off all leading and
         // trailing white space, as defined by Unicode.
         public static slice<byte> TrimSpace(slice<byte> s)
-        {
-            return TrimFunc(s, unicode.IsSpace);
+        { 
+            // Fast path for ASCII: look for the first ASCII non-space byte
+            long start = 0L;
+            while (start < len(s))
+            {
+                var c = s[start];
+                if (c >= utf8.RuneSelf)
+                { 
+                    // If we run into a non-ASCII byte, fall back to the
+                    // slower unicode-aware method on the remaining bytes
+                    return TrimFunc(s[start..], unicode.IsSpace);
+                start++;
+                }
+
+                if (asciiSpace[c] == 0L)
+                {
+                    break;
+                }
+
+            } 
+
+            // Now look for the first ASCII non-space byte from the end
+ 
+
+            // Now look for the first ASCII non-space byte from the end
+            var stop = len(s);
+            while (stop > start)
+            {
+                c = s[stop - 1L];
+                if (c >= utf8.RuneSelf)
+                {
+                    return TrimFunc(s[start..stop], unicode.IsSpace);
+                stop--;
+                }
+
+                if (asciiSpace[c] == 0L)
+                {
+                    break;
+                }
+
+            } 
+
+            // At this point s[start:stop] starts and ends with an ASCII
+            // non-space bytes, so we're done. Non-ASCII cases have already
+            // been handled above.
+ 
+
+            // At this point s[start:stop] starts and ends with an ASCII
+            // non-space bytes, so we're done. Non-ASCII cases have already
+            // been handled above.
+            if (start == stop)
+            { 
+                // Special case to preserve previous TrimLeftFunc behavior,
+                // returning nil instead of empty slice if all spaces.
+                return null;
+
+            }
+
+            return s[start..stop];
+
         }
 
         // Runes interprets s as a sequence of UTF-8-encoded code points.
@@ -1004,6 +1522,7 @@ namespace go
             }
 
             return t;
+
         }
 
         // Replace returns a copy of the slice s with the first n
@@ -1019,12 +1538,16 @@ namespace go
             { 
                 // Compute number of replacements.
                 m = Count(s, old);
+
             }
+
             if (m == 0L)
             { 
                 // Just return a copy.
                 return append((slice<byte>)null, s);
+
             }
+
             if (n < 0L || m < n)
             {
                 n = m;
@@ -1044,22 +1567,37 @@ namespace go
                         var (_, wid) = utf8.DecodeRune(s[start..]);
                         j += wid;
                     }
+
                 }
                 else
                 {
                     j += Index(s[start..], old);
                 }
+
                 w += copy(t[w..], s[start..j]);
                 w += copy(t[w..], new);
                 start = j + len(old);
+
             }
 
             w += copy(t[w..], s[start..]);
             return t[0L..w];
+
+        }
+
+        // ReplaceAll returns a copy of the slice s with all
+        // non-overlapping instances of old replaced by new.
+        // If old is empty, it matches at the beginning of the slice
+        // and after each UTF-8 sequence, yielding up to k+1 replacements
+        // for a k-rune slice.
+        public static slice<byte> ReplaceAll(slice<byte> s, slice<byte> old, slice<byte> @new)
+        {
+            return Replace(s, old, new, -1L);
         }
 
         // EqualFold reports whether s and t, interpreted as UTF-8 strings,
-        // are equal under Unicode case-folding.
+        // are equal under Unicode case-folding, which is a more general
+        // form of case-insensitivity.
         public static bool EqualFold(slice<byte> s, slice<byte> t)
         {
             while (len(s) != 0L && len(t) != 0L)
@@ -1071,23 +1609,28 @@ namespace go
                 {
                     sr = rune(s[0L]);
                     s = s[1L..];
+
                 }
                 else
                 {
                     var (r, size) = utf8.DecodeRune(s);
                     sr = r;
                     s = s[size..];
+
                 }
+
                 if (t[0L] < utf8.RuneSelf)
                 {
                     tr = rune(t[0L]);
                     t = t[1L..];
+
                 }
                 else
                 {
                     (r, size) = utf8.DecodeRune(t);
                     tr = r;
                     t = t[size..];
+
                 } 
 
                 // If they match, keep going; if not, return false.
@@ -1103,16 +1646,19 @@ namespace go
                 {
                     tr = sr;
                     sr = tr;
+
                 } 
                 // Fast check for ASCII.
-                if (tr < utf8.RuneSelf && 'A' <= sr && sr <= 'Z')
+                if (tr < utf8.RuneSelf)
                 { 
-                    // ASCII, and sr is upper case.  tr must be lower case.
-                    if (tr == sr + 'a' - 'A')
+                    // ASCII only, sr/tr must be upper/lower case
+                    if ('A' <= sr && sr <= 'Z' && tr == sr + 'a' - 'A')
                     {
                         continue;
                     }
+
                     return false;
+
                 } 
 
                 // General case. SimpleFold(x) returns the next equivalent rune > x
@@ -1127,7 +1673,9 @@ namespace go
                 {
                     continue;
                 }
+
                 return false;
+
             } 
 
             // One string is empty. Are both?
@@ -1135,96 +1683,128 @@ namespace go
 
             // One string is empty. Are both?
             return len(s) == len(t);
+
         }
 
-        private static long indexRabinKarp(slice<byte> s, slice<byte> sep)
-        { 
-            // Rabin-Karp search
-            var (hashsep, pow) = hashStr(sep);
-            var n = len(sep);
-            uint h = default;
-            {
-                long i__prev1 = i;
-
-                for (long i = 0L; i < n; i++)
-                {
-                    h = h * primeRK + uint32(s[i]);
-                }
-
-
-                i = i__prev1;
-            }
-            if (h == hashsep && Equal(s[..n], sep))
-            {
-                return 0L;
-            }
-            {
-                long i__prev1 = i;
-
-                i = n;
-
-                while (i < len(s))
-                {
-                    h *= primeRK;
-                    h += uint32(s[i]);
-                    h -= pow * uint32(s[i - n]);
-                    i++;
-                    if (h == hashsep && Equal(s[i - n..i], sep))
-                    {
-                        return i - n;
-                    }
-                }
-
-
-                i = i__prev1;
-            }
-            return -1L;
-        }
-
-        // primeRK is the prime base used in Rabin-Karp algorithm.
-        private static readonly long primeRK = 16777619L;
-
-        // hashStr returns the hash and the appropriate multiplicative
-        // factor for use in Rabin-Karp algorithm.
-
-
-        // hashStr returns the hash and the appropriate multiplicative
-        // factor for use in Rabin-Karp algorithm.
-        private static (uint, uint) hashStr(slice<byte> sep)
+        // Index returns the index of the first instance of sep in s, or -1 if sep is not present in s.
+        public static long Index(slice<byte> s, slice<byte> sep)
         {
-            var hash = uint32(0L);
-            {
-                long i__prev1 = i;
+            var n = len(sep);
 
-                for (long i = 0L; i < len(sep); i++)
+            if (n == 0L) 
+                return 0L;
+            else if (n == 1L) 
+                return IndexByte(s, sep[0L]);
+            else if (n == len(s)) 
+                if (Equal(sep, s))
                 {
-                    hash = hash * primeRK + uint32(sep[i]);
+                    return 0L;
                 }
 
-
-                i = i__prev1;
-            }
-            uint pow = 1L;            uint sq = primeRK;
-
-            {
-                long i__prev1 = i;
-
-                i = len(sep);
-
-                while (i > 0L)
+                return -1L;
+            else if (n > len(s)) 
+                return -1L;
+            else if (n <= bytealg.MaxLen) 
+                // Use brute force when s and sep both are small
+                if (len(s) <= bytealg.MaxBruteForce)
                 {
-                    if (i & 1L != 0L)
-                    {
-                        pow *= sq;
-                    i >>= 1L;
+                    return bytealg.Index(s, sep);
+                }
+
+                var c0 = sep[0L];
+                var c1 = sep[1L];
+                long i = 0L;
+                var t = len(s) - n + 1L;
+                long fails = 0L;
+                while (i < t)
+                {
+                    if (s[i] != c0)
+                    { 
+                        // IndexByte is faster than bytealg.Index, so use it as long as
+                        // we're not getting lots of false positives.
+                        var o = IndexByte(s[i + 1L..t], c0);
+                        if (o < 0L)
+                        {
+                            return -1L;
+                        }
+
+                        i += o + 1L;
+
                     }
-                    sq *= sq;
+
+                    if (s[i + 1L] == c1 && Equal(s[i..i + n], sep))
+                    {
+                        return i;
+                    }
+
+                    fails++;
+                    i++; 
+                    // Switch to bytealg.Index when IndexByte produces too many false positives.
+                    if (fails > bytealg.Cutover(i))
+                    {
+                        var r = bytealg.Index(s[i..], sep);
+                        if (r >= 0L)
+                        {
+                            return r + i;
+                        }
+
+                        return -1L;
+
+                    }
+
                 }
 
+                return -1L;
+                        c0 = sep[0L];
+            c1 = sep[1L];
+            i = 0L;
+            fails = 0L;
+            t = len(s) - n + 1L;
+            while (i < t)
+            {
+                if (s[i] != c0)
+                {
+                    o = IndexByte(s[i + 1L..t], c0);
+                    if (o < 0L)
+                    {
+                        break;
+                    }
 
-                i = i__prev1;
+                    i += o + 1L;
+
+                }
+
+                if (s[i + 1L] == c1 && Equal(s[i..i + n], sep))
+                {
+                    return i;
+                }
+
+                i++;
+                fails++;
+                if (fails >= 4L + i >> (int)(4L) && i < t)
+                { 
+                    // Give up on IndexByte, it isn't skipping ahead
+                    // far enough to be better than Rabin-Karp.
+                    // Experiments (using IndexPeriodic) suggest
+                    // the cutover is about 16 byte skips.
+                    // TODO: if large prefixes of sep are matching
+                    // we should cutover at even larger average skips,
+                    // because Equal becomes that much more expensive.
+                    // This code does not take that effect into account.
+                    var j = bytealg.IndexRabinKarpBytes(s[i..], sep);
+                    if (j < 0L)
+                    {
+                        return -1L;
+                    }
+
+                    return i + j;
+
+                }
+
             }
-            return (hash, pow);
+
+            return -1L;
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:11 UTC
+//     Generated on 2020 October 08 04:02:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace go
                 this.F = default;
             }
 
-            public InternalBenchmark(@string Name = default, Action<ref B> F = default)
+            public InternalBenchmark(@string Name = default, Action<ptr<B>> F = default)
             {
                 this.Name = Name;
                 this.F = F;

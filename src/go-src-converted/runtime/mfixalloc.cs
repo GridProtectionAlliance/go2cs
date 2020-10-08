@@ -6,7 +6,7 @@
 //
 // See malloc.go for overview.
 
-// package runtime -- go2cs converted at 2020 August 29 08:17:53 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:20:42 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mfixalloc.go
 using @unsafe = go.@unsafe_package;
@@ -18,8 +18,8 @@ namespace go
     public static partial class runtime_package
     {
         // FixAlloc is a simple free-list allocator for fixed size objects.
-        // Malloc uses a FixAlloc wrapped around sysAlloc to manages its
-        // MCache and MSpan objects.
+        // Malloc uses a FixAlloc wrapped around sysAlloc to manage its
+        // mcache and mspan objects.
         //
         // Memory returned by fixalloc.alloc is zeroed by default, but the
         // caller may take responsibility for zeroing allocations by setting
@@ -58,8 +58,11 @@ namespace go
 
         // Initialize f to allocate objects of the given size,
         // using the allocator to obtain chunks of memory.
-        private static void init(this ref fixalloc f, System.UIntPtr size, Action<unsafe.Pointer, unsafe.Pointer> first, unsafe.Pointer arg, ref ulong stat)
+        private static void init(this ptr<fixalloc> _addr_f, System.UIntPtr size, Action<unsafe.Pointer, unsafe.Pointer> first, unsafe.Pointer arg, ptr<ulong> _addr_stat)
         {
+            ref fixalloc f = ref _addr_f.val;
+            ref ulong stat = ref _addr_stat.val;
+
             f.size = size;
             f.first = first;
             f.arg = arg;
@@ -71,13 +74,16 @@ namespace go
             f.zero = true;
         }
 
-        private static unsafe.Pointer alloc(this ref fixalloc f)
+        private static unsafe.Pointer alloc(this ptr<fixalloc> _addr_f)
         {
+            ref fixalloc f = ref _addr_f.val;
+
             if (f.size == 0L)
             {
                 print("runtime: use of FixAlloc_Alloc before FixAlloc_Init\n");
                 throw("runtime: internal error");
             }
+
             if (f.list != null)
             {
                 var v = @unsafe.Pointer(f.list);
@@ -87,28 +93,36 @@ namespace go
                 {
                     memclrNoHeapPointers(v, f.size);
                 }
+
                 return v;
+
             }
+
             if (uintptr(f.nchunk) < f.size)
             {
                 f.chunk = uintptr(persistentalloc(_FixAllocChunk, 0L, f.stat));
                 f.nchunk = _FixAllocChunk;
             }
+
             v = @unsafe.Pointer(f.chunk);
             if (f.first != null)
             {
                 f.first(f.arg, v);
             }
+
             f.chunk = f.chunk + f.size;
             f.nchunk -= uint32(f.size);
             f.inuse += f.size;
             return v;
+
         }
 
-        private static void free(this ref fixalloc f, unsafe.Pointer p)
+        private static void free(this ptr<fixalloc> _addr_f, unsafe.Pointer p)
         {
+            ref fixalloc f = ref _addr_f.val;
+
             f.inuse -= f.size;
-            var v = (mlink.Value)(p);
+            var v = (mlink.val)(p);
             v.next = f.list;
             f.list = v;
         }

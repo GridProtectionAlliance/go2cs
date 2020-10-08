@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:51 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:17 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\j1.go
 
@@ -47,7 +47,7 @@ namespace go
         //                      =  1/sqrt(2) * (sin(x) - cos(x))
         //              sin(x1) =  sin(x)cos(3pi/4)-cos(x)sin(3pi/4)
         //                      = -1/sqrt(2) * (sin(x) + cos(x))
-        //         (To avoid cancelation, use
+        //         (To avoid cancellation, use
         //              sin(x) +- cos(x) = -cos(2x)/(sin(x) -+ cos(x))
         //         to compute the worse one.)
         //
@@ -81,18 +81,18 @@ namespace go
         //    J1(NaN) = NaN
         public static double J1(double x)
         {
-            const float TwoM27 = 1.0F / (1L << (int)(27L)); // 2**-27 0x3e40000000000000
-            const long Two129 = 1L << (int)(129L); // 2**129 0x4800000000000000
+            const float TwoM27 = (float)1.0F / (1L << (int)(27L)); // 2**-27 0x3e40000000000000
+            const long Two129 = (long)1L << (int)(129L); // 2**129 0x4800000000000000
             // R0/S0 on [0, 2]
-            const float R00 = -6.25000000000000000000e-02F; // 0xBFB0000000000000
-            const float R01 = 1.40705666955189706048e-03F; // 0x3F570D9F98472C61
-            const float R02 = -1.59955631084035597520e-05F; // 0xBEF0C5C6BA169668
-            const float R03 = 4.96727999609584448412e-08F; // 0x3E6AAAFA46CA0BD9
-            const float S01 = 1.91537599538363460805e-02F; // 0x3F939D0B12637E53
-            const float S02 = 1.85946785588630915560e-04F; // 0x3F285F56B9CDF664
-            const float S03 = 1.17718464042623683263e-06F; // 0x3EB3BFF8333F8498
-            const float S04 = 5.04636257076217042715e-09F; // 0x3E35AC88C97DFF2C
-            const float S05 = 1.23542274426137913908e-11F; // 0x3DAB2ACFCFB97ED8 
+            const float R00 = (float)-6.25000000000000000000e-02F; // 0xBFB0000000000000
+            const float R01 = (float)1.40705666955189706048e-03F; // 0x3F570D9F98472C61
+            const float R02 = (float)-1.59955631084035597520e-05F; // 0xBEF0C5C6BA169668
+            const float R03 = (float)4.96727999609584448412e-08F; // 0x3E6AAAFA46CA0BD9
+            const float S01 = (float)1.91537599538363460805e-02F; // 0x3F939D0B12637E53
+            const float S02 = (float)1.85946785588630915560e-04F; // 0x3F285F56B9CDF664
+            const float S03 = (float)1.17718464042623683263e-06F; // 0x3EB3BFF8333F8498
+            const float S04 = (float)5.04636257076217042715e-09F; // 0x3E35AC88C97DFF2C
+            const float S05 = (float)1.23542274426137913908e-11F; // 0x3DAB2ACFCFB97ED8 
             // special cases
 
             if (IsNaN(x)) 
@@ -140,6 +140,7 @@ namespace go
                     return -z;
                 }
                 return z;
+
             }
             if (x < TwoM27)
             { // |x|<2**-27
@@ -155,6 +156,7 @@ namespace go
                 return -z;
             }
             return z;
+
         }
 
         // Y1 returns the order-one Bessel function of the second kind.
@@ -166,18 +168,18 @@ namespace go
         //    Y1(NaN) = NaN
         public static double Y1(double x)
         {
-            const float TwoM54 = 1.0F / (1L << (int)(54L)); // 2**-54 0x3c90000000000000
-            const long Two129 = 1L << (int)(129L); // 2**129 0x4800000000000000
-            const float U00 = -1.96057090646238940668e-01F; // 0xBFC91866143CBC8A
-            const float U01 = 5.04438716639811282616e-02F; // 0x3FA9D3C776292CD1
-            const float U02 = -1.91256895875763547298e-03F; // 0xBF5F55E54844F50F
-            const float U03 = 2.35252600561610495928e-05F; // 0x3EF8AB038FA6B88E
-            const float U04 = -9.19099158039878874504e-08F; // 0xBE78AC00569105B8
-            const float V00 = 1.99167318236649903973e-02F; // 0x3F94650D3F4DA9F0
-            const float V01 = 2.02552581025135171496e-04F; // 0x3F2A8C896C257764
-            const float V02 = 1.35608801097516229404e-06F; // 0x3EB6C05A894E8CA6
-            const float V03 = 6.22741452364621501295e-09F; // 0x3E3ABF1D5BA69A86
-            const float V04 = 1.66559246207992079114e-11F; // 0x3DB25039DACA772A 
+            const float TwoM54 = (float)1.0F / (1L << (int)(54L)); // 2**-54 0x3c90000000000000
+            const long Two129 = (long)1L << (int)(129L); // 2**129 0x4800000000000000
+            const float U00 = (float)-1.96057090646238940668e-01F; // 0xBFC91866143CBC8A
+            const float U01 = (float)5.04438716639811282616e-02F; // 0x3FA9D3C776292CD1
+            const float U02 = (float)-1.91256895875763547298e-03F; // 0xBF5F55E54844F50F
+            const float U03 = (float)2.35252600561610495928e-05F; // 0x3EF8AB038FA6B88E
+            const float U04 = (float)-9.19099158039878874504e-08F; // 0xBE78AC00569105B8
+            const float V00 = (float)1.99167318236649903973e-02F; // 0x3F94650D3F4DA9F0
+            const float V01 = (float)2.02552581025135171496e-04F; // 0x3F2A8C896C257764
+            const float V02 = (float)1.35608801097516229404e-06F; // 0x3EB6C05A894E8CA6
+            const float V03 = (float)6.22741452364621501295e-09F; // 0x3E3ABF1D5BA69A86
+            const float V04 = (float)1.66559246207992079114e-11F; // 0x3DB25039DACA772A 
             // special cases
 
             if (x < 0L || IsNaN(x)) 
@@ -204,6 +206,7 @@ namespace go
                     {
                         ss = z / cc;
                     }
+
                 } 
                 // y1(x) = sqrt(2/(pi*x))*(p1(x)*sin(x0)+q1(x)*cos(x0))
                 // where x0 = x-3pi/4
@@ -212,7 +215,7 @@ namespace go
                 //                 =  1/sqrt(2) * (sin(x) - cos(x))
                 //         sin(x0) = sin(x)cos(3pi/4)-cos(x)sin(3pi/4)
                 //                 = -1/sqrt(2) * (cos(x) + sin(x))
-                // To avoid cancelation, use
+                // To avoid cancellation, use
                 //     sin(x) +- cos(x) = -cos(2x)/(sin(x) -+ cos(x))
                 // to compute the worse one.
                 z = default;
@@ -226,16 +229,22 @@ namespace go
                     var v = qone(x);
                     z = (1L / SqrtPi) * (u * ss + v * cc) / Sqrt(x);
                 }
+
                 return z;
+
             }
+
             if (x <= TwoM54)
             { // x < 2**-54
                 return -(2L / Pi) / x;
+
             }
+
             z = x * x;
             u = U00 + z * (U01 + z * (U02 + z * (U03 + z * U04)));
             v = 1L + z * (V00 + z * (V01 + z * (V02 + z * (V03 + z * V04))));
             return x * (u / v) + (2L / Pi) * (J1(x) * Log(x) - 1L / x);
+
         }
 
         // For x >= 8, the asymptotic expansions of pone is
@@ -265,32 +274,34 @@ namespace go
 
         private static double pone(double x)
         {
-            ref array<double> p = default;
-            ref array<double> q = default;
+            ptr<array<double>> p;
+            ptr<array<double>> q;
             if (x >= 8L)
             {
-                p = ref p1R8;
-                q = ref p1S8;
+                p = _addr_p1R8;
+                q = _addr_p1S8;
             }
             else if (x >= 4.5454F)
             {
-                p = ref p1R5;
-                q = ref p1S5;
+                p = _addr_p1R5;
+                q = _addr_p1S5;
             }
             else if (x >= 2.8571F)
             {
-                p = ref p1R3;
-                q = ref p1S3;
+                p = _addr_p1R3;
+                q = _addr_p1S3;
             }
             else if (x >= 2L)
             {
-                p = ref p1R2;
-                q = ref p1S2;
+                p = _addr_p1R2;
+                q = _addr_p1S2;
             }
+
             long z = 1L / (x * x);
             var r = p[0L] + z * (p[1L] + z * (p[2L] + z * (p[3L] + z * (p[4L] + z * p[5L]))));
             float s = 1.0F + z * (q[0L] + z * (q[1L] + z * (q[2L] + z * (q[3L] + z * q[4L]))));
             return 1L + r / s;
+
         }
 
         // For x >= 8, the asymptotic expansions of qone is
@@ -320,32 +331,34 @@ namespace go
 
         private static double qone(double x)
         {
-            ref array<double> p = default;            ref array<double> q = default;
+            ptr<array<double>> p;            ptr<array<double>> q;
 
             if (x >= 8L)
             {
-                p = ref q1R8;
-                q = ref q1S8;
+                p = _addr_q1R8;
+                q = _addr_q1S8;
             }
             else if (x >= 4.5454F)
             {
-                p = ref q1R5;
-                q = ref q1S5;
+                p = _addr_q1R5;
+                q = _addr_q1S5;
             }
             else if (x >= 2.8571F)
             {
-                p = ref q1R3;
-                q = ref q1S3;
+                p = _addr_q1R3;
+                q = _addr_q1S3;
             }
             else if (x >= 2L)
             {
-                p = ref q1R2;
-                q = ref q1S2;
+                p = _addr_q1R2;
+                q = _addr_q1S2;
             }
+
             long z = 1L / (x * x);
             var r = p[0L] + z * (p[1L] + z * (p[2L] + z * (p[3L] + z * (p[4L] + z * p[5L]))));
             long s = 1L + z * (q[0L] + z * (q[1L] + z * (q[2L] + z * (q[3L] + z * (q[4L] + z * q[5L])))));
             return (0.375F + r / s) / x;
+
         }
     }
 }

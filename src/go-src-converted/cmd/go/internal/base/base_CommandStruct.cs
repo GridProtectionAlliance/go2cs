@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:28 UTC
+//     Generated on 2020 October 08 04:33:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,11 +13,8 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
-using scanner = go.go.scanner_package;
 using log = go.log_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
@@ -46,9 +43,10 @@ namespace @internal
                 this.Long = default;
                 this.Flag = default;
                 this.CustomFlags = default;
+                this.Commands = default;
             }
 
-            public Command(Action<ref Command, slice<@string>> Run = default, @string UsageLine = default, @string Short = default, @string Long = default, flag.FlagSet Flag = default, bool CustomFlags = default)
+            public Command(Action<ptr<Command>, slice<@string>> Run = default, @string UsageLine = default, @string Short = default, @string Long = default, flag.FlagSet Flag = default, bool CustomFlags = default, slice<ptr<Command>> Commands = default)
             {
                 this.Run = Run;
                 this.UsageLine = UsageLine;
@@ -56,6 +54,7 @@ namespace @internal
                 this.Long = Long;
                 this.Flag = Flag;
                 this.CustomFlags = CustomFlags;
+                this.Commands = Commands;
             }
 
             // Enable comparisons between nil and Command struct
@@ -78,7 +77,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Command Command_cast(dynamic value)
         {
-            return new Command(value.Run, value.UsageLine, value.Short, value.Long, value.Flag, value.CustomFlags);
+            return new Command(value.Run, value.UsageLine, value.Short, value.Long, value.Flag, value.CustomFlags, value.Commands);
         }
     }
 }}}}

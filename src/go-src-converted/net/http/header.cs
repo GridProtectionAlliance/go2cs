@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2020 August 29 08:33:24 UTC
+// package http -- go2cs converted at 2020 October 08 03:40:12 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\header.go
 using io = go.io_package;
+using httptrace = go.net.http.httptrace_package;
 using textproto = go.net.textproto_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
@@ -19,37 +20,51 @@ namespace net
 {
     public static partial class http_package
     {
-        private static var raceEnabled = false; // set by race.go
-
         // A Header represents the key-value pairs in an HTTP header.
+        //
+        // The keys should be in canonical form, as returned by
+        // CanonicalHeaderKey.
         public partial struct Header // : map<@string, slice<@string>>
         {
         }
 
         // Add adds the key, value pair to the header.
         // It appends to any existing values associated with key.
+        // The key is case insensitive; it is canonicalized by
+        // CanonicalHeaderKey.
         public static void Add(this Header h, @string key, @string value)
         {
             textproto.MIMEHeader(h).Add(key, value);
         }
 
-        // Set sets the header entries associated with key to
-        // the single element value. It replaces any existing
-        // values associated with key.
+        // Set sets the header entries associated with key to the
+        // single element value. It replaces any existing values
+        // associated with key. The key is case insensitive; it is
+        // canonicalized by textproto.CanonicalMIMEHeaderKey.
+        // To use non-canonical keys, assign to the map directly.
         public static void Set(this Header h, @string key, @string value)
         {
             textproto.MIMEHeader(h).Set(key, value);
         }
 
-        // Get gets the first value associated with the given key.
-        // It is case insensitive; textproto.CanonicalMIMEHeaderKey is used
-        // to canonicalize the provided key.
-        // If there are no values associated with the key, Get returns "".
-        // To access multiple values of a key, or to use non-canonical keys,
+        // Get gets the first value associated with the given key. If
+        // there are no values associated with the key, Get returns "".
+        // It is case insensitive; textproto.CanonicalMIMEHeaderKey is
+        // used to canonicalize the provided key. To use non-canonical keys,
         // access the map directly.
         public static @string Get(this Header h, @string key)
         {
             return textproto.MIMEHeader(h).Get(key);
+        }
+
+        // Values returns all values associated with the given key.
+        // It is case insensitive; textproto.CanonicalMIMEHeaderKey is
+        // used to canonicalize the provided key. To use non-canonical
+        // keys, access the map directly.
+        // The returned slice is not a copy.
+        public static slice<@string> Values(this Header h, @string key)
+        {
+            return textproto.MIMEHeader(h).Values(key);
         }
 
         // get is like Get, but key must already be in CanonicalHeaderKey form.
@@ -64,10 +79,22 @@ namespace net
                 }
 
             }
+
             return "";
+
+        }
+
+        // has reports whether h has the provided key defined, even if it's
+        // set to 0-length slice.
+        public static bool has(this Header h, @string key)
+        {
+            var (_, ok) = h[key];
+            return ok;
         }
 
         // Del deletes the values associated with key.
+        // The key is case insensitive; it is canonicalized by
+        // CanonicalHeaderKey.
         public static void Del(this Header h, @string key)
         {
             textproto.MIMEHeader(h).Del(key);
@@ -76,19 +103,57 @@ namespace net
         // Write writes a header in wire format.
         public static error Write(this Header h, io.Writer w)
         {
-            return error.As(h.WriteSubset(w, null));
+            return error.As(h.write(w, null))!;
         }
 
-        public static Header clone(this Header h)
+        public static error write(this Header h, io.Writer w, ptr<httptrace.ClientTrace> _addr_trace)
         {
-            var h2 = make(Header, len(h));
-            foreach (var (k, vv) in h)
+            ref httptrace.ClientTrace trace = ref _addr_trace.val;
+
+            return error.As(h.writeSubset(w, null, trace))!;
+        }
+
+        // Clone returns a copy of h or nil if h is nil.
+        public static Header Clone(this Header h)
+        {
+            if (h == null)
             {
-                var vv2 = make_slice<@string>(len(vv));
-                copy(vv2, vv);
-                h2[k] = vv2;
+                return null;
+            } 
+
+            // Find total number of values.
+            long nv = 0L;
+            {
+                var vv__prev1 = vv;
+
+                foreach (var (_, __vv) in h)
+                {
+                    vv = __vv;
+                    nv += len(vv);
+                }
+
+                vv = vv__prev1;
             }
+
+            var sv = make_slice<@string>(nv); // shared backing array for headers' values
+            var h2 = make(Header, len(h));
+            {
+                var vv__prev1 = vv;
+
+                foreach (var (__k, __vv) in h)
+                {
+                    k = __k;
+                    vv = __vv;
+                    var n = copy(sv, vv);
+                    h2[k] = sv.slice(-1, n, n);
+                    sv = sv[n..];
+                }
+
+                vv = vv__prev1;
+            }
+
             return h2;
+
         }
 
         private static @string timeFormats = new slice<@string>(new @string[] { TimeFormat, time.RFC850, time.ANSIC });
@@ -98,23 +163,23 @@ namespace net
         // TimeFormat, time.RFC850, and time.ANSIC.
         public static (time.Time, error) ParseTime(@string text)
         {
+            time.Time t = default;
+            error err = default!;
+
             foreach (var (_, layout) in timeFormats)
             {
                 t, err = time.Parse(layout, text);
                 if (err == null)
                 {
-                    return;
+                    return ;
                 }
+
             }
-            return;
+            return ;
+
         }
 
         private static var headerNewlineToSpace = strings.NewReplacer("\n", " ", "\r", " ");
-
-        private partial interface writeStringer
-        {
-            (long, error) WriteString(@string _p0);
-        }
 
         // stringWriter implements WriteString on a Writer.
         private partial struct stringWriter
@@ -124,6 +189,9 @@ namespace net
 
         private static (long, error) WriteString(this stringWriter w, @string s)
         {
+            long n = default;
+            error err = default!;
+
             return w.w.Write((slice<byte>)s);
         }
 
@@ -141,18 +209,23 @@ namespace net
             public slice<keyValues> kvs;
         }
 
-        private static long Len(this ref headerSorter s)
+        private static long Len(this ptr<headerSorter> _addr_s)
         {
+            ref headerSorter s = ref _addr_s.val;
+
             return len(s.kvs);
         }
-        private static void Swap(this ref headerSorter s, long i, long j)
+        private static void Swap(this ptr<headerSorter> _addr_s, long i, long j)
         {
+            ref headerSorter s = ref _addr_s.val;
+
             s.kvs[i] = s.kvs[j];
             s.kvs[j] = s.kvs[i];
-
         }
-        private static bool Less(this ref headerSorter s, long i, long j)
+        private static bool Less(this ptr<headerSorter> _addr_s, long i, long j)
         {
+            ref headerSorter s = ref _addr_s.val;
+
             return s.kvs[i].key < s.kvs[j].key;
         }
 
@@ -161,13 +234,17 @@ namespace net
         // sortedKeyValues returns h's keys sorted in the returned kvs
         // slice. The headerSorter used to sort is also returned, for possible
         // return to headerSorterCache.
-        public static (slice<keyValues>, ref headerSorter) sortedKeyValues(this Header h, map<@string, bool> exclude)
+        public static (slice<keyValues>, ptr<headerSorter>) sortedKeyValues(this Header h, map<@string, bool> exclude)
         {
-            hs = headerSorterPool.Get()._<ref headerSorter>();
+            slice<keyValues> kvs = default;
+            ptr<headerSorter> hs = default!;
+
+            hs = headerSorterPool.Get()._<ptr<headerSorter>>();
             if (cap(hs.kvs) < len(h))
             {
                 hs.kvs = make_slice<keyValues>(0L, len(h));
             }
+
             kvs = hs.kvs[..0L];
             foreach (var (k, vv) in h)
             {
@@ -175,22 +252,34 @@ namespace net
                 {
                     kvs = append(kvs, new keyValues(k,vv));
                 }
+
             }
             hs.kvs = kvs;
             sort.Sort(hs);
-            return (kvs, hs);
+            return (kvs, _addr_hs!);
+
         }
 
         // WriteSubset writes a header in wire format.
         // If exclude is not nil, keys where exclude[key] == true are not written.
+        // Keys are not canonicalized before checking the exclude map.
         public static error WriteSubset(this Header h, io.Writer w, map<@string, bool> exclude)
         {
-            writeStringer (ws, ok) = w._<writeStringer>();
+            return error.As(h.writeSubset(w, exclude, null))!;
+        }
+
+        public static error writeSubset(this Header h, io.Writer w, map<@string, bool> exclude, ptr<httptrace.ClientTrace> _addr_trace)
+        {
+            ref httptrace.ClientTrace trace = ref _addr_trace.val;
+
+            io.StringWriter (ws, ok) = w._<io.StringWriter>();
             if (!ok)
             {
                 ws = new stringWriter(w);
             }
+
             var (kvs, sorter) = h.sortedKeyValues(exclude);
+            slice<@string> formattedVals = default;
             foreach (var (_, kv) in kvs)
             {
                 foreach (var (_, v) in kv.values)
@@ -205,15 +294,28 @@ namespace net
                             if (err != null)
                             {
                                 headerSorterPool.Put(sorter);
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                         }
+
                     }
+                    if (trace != null && trace.WroteHeaderField != null)
+                    {
+                        formattedVals = append(formattedVals, v);
+                    }
+
                 }
+                if (trace != null && trace.WroteHeaderField != null)
+                {
+                    trace.WroteHeaderField(kv.key, formattedVals);
+                    formattedVals = null;
+                }
+
             }
             headerSorterPool.Put(sorter);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // CanonicalHeaderKey returns the canonical format of the
@@ -238,10 +340,12 @@ namespace net
             {
                 return false;
             }
+
             if (v == token)
             {
                 return true;
             }
+
             for (long sp = 0L; sp <= len(v) - len(token); sp++)
             { 
                 // Check that first character is good.
@@ -275,30 +379,21 @@ namespace net
                     }
 
                 }
+
                 if (strings.EqualFold(v[sp..sp + len(token)], token))
                 {
                     return true;
                 }
+
             }
 
             return false;
+
         }
 
         private static bool isTokenBoundary(byte b)
         {
             return b == ' ' || b == ',' || b == '\t';
-        }
-
-        private static Header cloneHeader(Header h)
-        {
-            var h2 = make(Header, len(h));
-            foreach (var (k, vv) in h)
-            {
-                var vv2 = make_slice<@string>(len(vv));
-                copy(vv2, vv);
-                h2[k] = vv2;
-            }
-            return h2;
         }
     }
 }}

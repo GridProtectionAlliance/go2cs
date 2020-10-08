@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:23 UTC
+//     Generated on 2020 October 08 04:56:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using io = go.io_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using scanner = go.text.scanner_package;
+using utf8 = go.unicode.utf8_package;
 using go;
 
 namespace go {
@@ -45,11 +46,14 @@ namespace @internal
                 this.pkgname = default;
                 this.pkg = default;
                 this.imports = default;
-                this.typeMap = default;
+                this.typeList = default;
+                this.typeData = default;
+                this.fixups = default;
                 this.initdata = default;
+                this.aliases = default;
             }
 
-            public parser(scanner.Scanner scanner = default, @string version = default, int tok = default, @string lit = default, @string pkgpath = default, @string pkgname = default, ref ptr<types.Package> pkg = default, map<@string, ref types.Package> imports = default, map<long, types.Type> typeMap = default, InitData initdata = default)
+            public parser(ref ptr<scanner.Scanner> scanner = default, @string version = default, int tok = default, @string lit = default, @string pkgpath = default, @string pkgname = default, ref ptr<types.Package> pkg = default, map<@string, ptr<types.Package>> imports = default, slice<types.Type> typeList = default, slice<@string> typeData = default, slice<fixupRecord> fixups = default, InitData initdata = default, map<long, @string> aliases = default)
             {
                 this.scanner = scanner;
                 this.version = version;
@@ -59,8 +63,11 @@ namespace @internal
                 this.pkgname = pkgname;
                 this.pkg = pkg;
                 this.imports = imports;
-                this.typeMap = typeMap;
+                this.typeList = typeList;
+                this.typeData = typeData;
+                this.fixups = fixups;
                 this.initdata = initdata;
+                this.aliases = aliases;
             }
 
             // Enable comparisons between nil and parser struct
@@ -83,7 +90,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static parser parser_cast(dynamic value)
         {
-            return new parser(value.scanner, value.version, value.tok, value.lit, value.pkgpath, value.pkgname, ref value.pkg, value.imports, value.typeMap, value.initdata);
+            return new parser(ref value.scanner, value.version, value.tok, value.lit, value.pkgpath, value.pkgname, ref value.pkg, value.imports, value.typeList, value.typeData, value.fixups, value.initdata, value.aliases);
         }
     }
 }}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2020 August 29 08:22:45 UTC
+// package pprof -- go2cs converted at 2020 October 08 03:26:11 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Go\src\runtime\pprof\map.go
 using @unsafe = go.@unsafe_package;
@@ -17,7 +17,7 @@ namespace runtime
         // It grows without bound, but that's assumed to be OK.
         private partial struct profMap
         {
-            public map<System.UIntPtr, ref profMapEntry> hash;
+            public map<System.UIntPtr, ptr<profMapEntry>> hash;
             public ptr<profMapEntry> all;
             public ptr<profMapEntry> last;
             public slice<profMapEntry> free;
@@ -34,8 +34,10 @@ namespace runtime
             public long count;
         }
 
-        private static ref profMapEntry lookup(this ref profMap m, slice<ulong> stk, unsafe.Pointer tag)
-        { 
+        private static ptr<profMapEntry> lookup(this ptr<profMap> _addr_m, slice<ulong> stk, unsafe.Pointer tag)
+        {
+            ref profMap m = ref _addr_m.val;
+ 
             // Compute hash of (stk, tag).
             var h = uintptr(0L);
             foreach (var (_, x) in stk)
@@ -47,7 +49,7 @@ namespace runtime
             h += uintptr(tag) * 41L; 
 
             // Find entry if present.
-            ref profMapEntry last = default;
+            ptr<profMapEntry> last;
 Search: 
 
             // Add new entry.
@@ -64,6 +66,7 @@ Search:
                     last = e;
                 e = e.nextHash;
                     }
+
                     {
                         var j__prev2 = j;
 
@@ -75,6 +78,7 @@ Search:
                                 _continueSearch = true;
                                 break;
                             }
+
                         } 
                         // Move to front.
 
@@ -87,7 +91,9 @@ Search:
                         e.nextHash = m.hash[h];
                         m.hash[h] = e;
                     }
-                    return e;
+
+                    return _addr_e!;
+
                 } 
 
                 // Add new entry.
@@ -101,7 +107,8 @@ Search:
             {
                 m.free = make_slice<profMapEntry>(128L);
             }
-            e = ref m.free[0L];
+
+            e = _addr_m.free[0L];
             m.free = m.free[1L..];
             e.nextHash = m.hash[h];
             e.tag = tag;
@@ -109,8 +116,9 @@ Search:
             if (len(m.freeStk) < len(stk))
             {
                 m.freeStk = make_slice<System.UIntPtr>(1024L);
-            }
-            e.stk = m.freeStk[..len(stk)];
+            } 
+            // Limit cap to prevent append from clobbering freeStk.
+            e.stk = m.freeStk.slice(-1, len(stk), len(stk));
             m.freeStk = m.freeStk[len(stk)..];
 
             {
@@ -127,8 +135,9 @@ Search:
 
             if (m.hash == null)
             {
-                m.hash = make_map<System.UIntPtr, ref profMapEntry>();
+                m.hash = make_map<System.UIntPtr, ptr<profMapEntry>>();
             }
+
             m.hash[h] = e;
             if (m.all == null)
             {
@@ -140,7 +149,9 @@ Search:
                 m.last.nextAll = e;
                 m.last = e;
             }
-            return e;
+
+            return _addr_e!;
+
         }
     }
 }}

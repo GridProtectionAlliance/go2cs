@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:08 UTC
+//     Generated on 2020 October 08 04:33:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -20,6 +21,7 @@ using build = go.go.build_package;
 using doc = go.go.doc_package;
 using format = go.go.format_package;
 using parser = go.go.parser_package;
+using printer = go.go.printer_package;
 using token = go.go.token_package;
 using io = go.io_package;
 using log = go.log_package;
@@ -46,11 +48,13 @@ namespace go
                 this.file = default;
                 this.doc = default;
                 this.build = default;
+                this.typedValue = default;
+                this.constructor = default;
                 this.fs = default;
                 this.buf = default;
             }
 
-            public Package(io.Writer writer = default, @string name = default, @string userPath = default, ref ptr<ast.Package> pkg = default, ref ptr<ast.File> file = default, ref ptr<doc.Package> doc = default, ref ptr<build.Package> build = default, ref ptr<token.FileSet> fs = default, bytes.Buffer buf = default)
+            public Package(io.Writer writer = default, @string name = default, @string userPath = default, ref ptr<ast.Package> pkg = default, ref ptr<ast.File> file = default, ref ptr<doc.Package> doc = default, ref ptr<build.Package> build = default, map<ptr<doc.Value>, bool> typedValue = default, map<ptr<doc.Func>, bool> constructor = default, ref ptr<token.FileSet> fs = default, pkgBuffer buf = default)
             {
                 this.writer = writer;
                 this.name = name;
@@ -59,6 +63,8 @@ namespace go
                 this.file = file;
                 this.doc = doc;
                 this.build = build;
+                this.typedValue = typedValue;
+                this.constructor = constructor;
                 this.fs = fs;
                 this.buf = buf;
             }
@@ -83,7 +89,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Package Package_cast(dynamic value)
         {
-            return new Package(value.writer, value.name, value.userPath, ref value.pkg, ref value.file, ref value.doc, ref value.build, ref value.fs, value.buf);
+            return new Package(value.writer, value.name, value.userPath, ref value.pkg, ref value.file, ref value.doc, ref value.build, value.typedValue, value.constructor, ref value.fs, value.buf);
         }
     }
 }

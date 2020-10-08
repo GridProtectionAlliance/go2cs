@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:34 UTC
+//     Generated on 2020 October 08 04:43:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using errors = go.errors_package;
+using fmt = go.fmt_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -54,7 +55,7 @@ namespace pprof
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +69,10 @@ namespace pprof
                 m_target_is_ptr = true;
             }
 
-            private delegate slice<decoder> decoderByRef(ref T value);
+            private delegate slice<decoder> decoderByPtr(ptr<T> value);
             private delegate slice<decoder> decoderByVal(T value);
 
-            private static readonly decoderByRef s_decoderByRef;
+            private static readonly decoderByPtr s_decoderByPtr;
             private static readonly decoderByVal s_decoderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,30 +81,32 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_decoderByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_decoderByPtr is null || !m_target_is_ptr)
                     return s_decoderByVal!(target);
 
-                return s_decoderByRef(ref target);
+                return s_decoderByPtr(m_target_ptr);
             }
 
-            private delegate slice<decoder> encodeByRef(ref T value, ref buffer _p0);
-            private delegate slice<decoder> encodeByVal(T value, ref buffer _p0);
+            private delegate slice<decoder> encodeByPtr(ptr<T> value, ptr<buffer> _p0);
+            private delegate slice<decoder> encodeByVal(T value, ptr<buffer> _p0);
 
-            private static readonly encodeByRef s_encodeByRef;
+            private static readonly encodeByPtr s_encodeByPtr;
             private static readonly encodeByVal s_encodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<decoder> encode(ref buffer _p0)
+            public slice<decoder> encode(ptr<buffer> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_encodeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_encodeByPtr is null || !m_target_is_ptr)
                     return s_encodeByVal!(target, _p0);
 
-                return s_encodeByRef(ref target, _p0);
+                return s_encodeByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -112,39 +115,33 @@ namespace pprof
             static message()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("decoder");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("decoder");
 
                 if (!(extensionMethod is null))
-                    s_decoderByRef = extensionMethod.CreateStaticDelegate(typeof(decoderByRef)) as decoderByRef;
+                    s_decoderByPtr = extensionMethod.CreateStaticDelegate(typeof(decoderByPtr)) as decoderByPtr;
 
-                if (s_decoderByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("decoder");
+                extensionMethod = targetType.GetExtensionMethod("decoder");
 
-                    if (!(extensionMethod is null))
-                        s_decoderByVal = extensionMethod.CreateStaticDelegate(typeof(decoderByVal)) as decoderByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_decoderByVal = extensionMethod.CreateStaticDelegate(typeof(decoderByVal)) as decoderByVal;
 
-                if (s_decoderByRef is null && s_decoderByVal is null)
+                if (s_decoderByPtr is null && s_decoderByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement message.decoder method", new Exception("decoder"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("encode");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("encode");
 
                 if (!(extensionMethod is null))
-                    s_encodeByRef = extensionMethod.CreateStaticDelegate(typeof(encodeByRef)) as encodeByRef;
+                    s_encodeByPtr = extensionMethod.CreateStaticDelegate(typeof(encodeByPtr)) as encodeByPtr;
 
-                if (s_encodeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("encode");
+                extensionMethod = targetType.GetExtensionMethod("encode");
 
-                    if (!(extensionMethod is null))
-                        s_encodeByVal = extensionMethod.CreateStaticDelegate(typeof(encodeByVal)) as encodeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_encodeByVal = extensionMethod.CreateStaticDelegate(typeof(encodeByVal)) as encodeByVal;
 
-                if (s_encodeByRef is null && s_encodeByVal is null)
+                if (s_encodeByPtr is null && s_encodeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement message.encode method", new Exception("encode"));
             }
 

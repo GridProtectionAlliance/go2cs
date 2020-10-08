@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build linux darwin dragonfly freebsd openbsd netbsd solaris
+// +build aix linux darwin dragonfly freebsd openbsd netbsd solaris
 
-// package tar -- go2cs converted at 2020 August 29 08:45:26 UTC
+// package tar -- go2cs converted at 2020 October 08 03:49:16 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\stat_unix.go
 using os = go.os_package;
@@ -31,13 +31,16 @@ namespace archive
 
  // map[int]string
 
-        private static error statUnix(os.FileInfo fi, ref Header h)
+        private static error statUnix(os.FileInfo fi, ptr<Header> _addr_h)
         {
-            ref syscall.Stat_t (sys, ok) = fi.Sys()._<ref syscall.Stat_t>();
+            ref Header h = ref _addr_h.val;
+
+            ptr<syscall.Stat_t> (sys, ok) = fi.Sys()._<ptr<syscall.Stat_t>>();
             if (!ok)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             h.Uid = int(sys.Uid);
             h.Gid = int(sys.Gid); 
 
@@ -68,9 +71,11 @@ namespace archive
 
                 }
 
+
                 u = u__prev1;
 
             }
+
             {
                 var g__prev1 = g;
 
@@ -96,9 +101,11 @@ namespace archive
                 }
 
 
+
                 g = g__prev1;
 
             }
+
 
             h.AccessTime = statAtime(sys);
             h.ChangeTime = statCtime(sys); 
@@ -109,11 +116,19 @@ namespace archive
                 var dev = uint64(sys.Rdev); // May be int32 or uint32
                 switch (runtime.GOOS)
                 {
+                    case "aix": 
+                        uint major = default;                    uint minor = default;
+
+                        major = uint32((dev & 0x3fffffff00000000UL) >> (int)(32L));
+                        minor = uint32((dev & 0x00000000ffffffffUL) >> (int)(0L));
+                        h.Devmajor = int64(major);
+                        h.Devminor = int64(minor);
+                        break;
                     case "linux": 
                         // Copied from golang.org/x/sys/unix/dev_linux.go.
-                        var major = uint32((dev & 0x00000000000fff00UL) >> (int)(8L));
+                        major = uint32((dev & 0x00000000000fff00UL) >> (int)(8L));
                         major |= uint32((dev & 0xfffff00000000000UL) >> (int)(32L));
-                        var minor = uint32((dev & 0x00000000000000ffUL) >> (int)(0L));
+                        minor = uint32((dev & 0x00000000000000ffUL) >> (int)(0L));
                         minor |= uint32((dev & 0x00000ffffff00000UL) >> (int)(12L));
                         h.Devmajor = int64(major);
                         h.Devminor = int64(minor);
@@ -158,8 +173,11 @@ namespace archive
                     default: 
                         break;
                 }
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
     }
 }}

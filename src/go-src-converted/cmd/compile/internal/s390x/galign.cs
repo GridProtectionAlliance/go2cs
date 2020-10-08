@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package s390x -- go2cs converted at 2020 August 29 08:53:07 UTC
+// package s390x -- go2cs converted at 2020 October 08 04:09:36 UTC
 // import "cmd/compile/internal/s390x" ==> using s390x = go.cmd.compile.@internal.s390x_package
 // Original source: C:\Go\src\cmd\compile\internal\s390x\galign.go
 using gc = go.cmd.compile.@internal.gc_package;
@@ -16,15 +16,17 @@ namespace @internal
 {
     public static partial class s390x_package
     {
-        public static void Init(ref gc.Arch arch)
+        public static void Init(ptr<gc.Arch> _addr_arch)
         {
-            arch.LinkArch = ref s390x.Links390x;
+            ref gc.Arch arch = ref _addr_arch.val;
+
+            arch.LinkArch = _addr_s390x.Links390x;
             arch.REGSP = s390x.REGSP;
             arch.MAXWIDTH = 1L << (int)(50L);
 
             arch.ZeroRange = zerorange;
-            arch.ZeroAuto = zeroAuto;
             arch.Ginsnop = ginsnop;
+            arch.Ginsnopdefer = ginsnop;
 
             arch.SSAMarkMoves = ssaMarkMoves;
             arch.SSAGenValue = ssaGenValue;

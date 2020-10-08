@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:39 UTC
+//     Generated on 2020 October 08 03:35:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +64,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate Hash HashFuncByRef(ref T value);
+            private delegate Hash HashFuncByPtr(ptr<T> value);
             private delegate Hash HashFuncByVal(T value);
 
-            private static readonly HashFuncByRef s_HashFuncByRef;
+            private static readonly HashFuncByPtr s_HashFuncByPtr;
             private static readonly HashFuncByVal s_HashFuncByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,11 +76,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_HashFuncByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_HashFuncByPtr is null || !m_target_is_ptr)
                     return s_HashFuncByVal!(target);
 
-                return s_HashFuncByRef(ref target);
+                return s_HashFuncByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -89,23 +90,20 @@ namespace go
             static SignerOpts()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("HashFunc");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("HashFunc");
 
                 if (!(extensionMethod is null))
-                    s_HashFuncByRef = extensionMethod.CreateStaticDelegate(typeof(HashFuncByRef)) as HashFuncByRef;
+                    s_HashFuncByPtr = extensionMethod.CreateStaticDelegate(typeof(HashFuncByPtr)) as HashFuncByPtr;
 
-                if (s_HashFuncByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("HashFunc");
+                extensionMethod = targetType.GetExtensionMethod("HashFunc");
 
-                    if (!(extensionMethod is null))
-                        s_HashFuncByVal = extensionMethod.CreateStaticDelegate(typeof(HashFuncByVal)) as HashFuncByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_HashFuncByVal = extensionMethod.CreateStaticDelegate(typeof(HashFuncByVal)) as HashFuncByVal;
 
-                if (s_HashFuncByRef is null && s_HashFuncByVal is null)
+                if (s_HashFuncByPtr is null && s_HashFuncByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement SignerOpts.HashFunc method", new Exception("HashFunc"));
             }
 

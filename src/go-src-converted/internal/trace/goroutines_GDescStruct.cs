@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:52 UTC
+//     Generated on 2020 October 08 04:42:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using static go.builtin;
+using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -33,9 +34,10 @@ namespace @internal
                 this.blockSweepTime = default;
                 this.blockGCTime = default;
                 this.blockSchedTime = default;
+                this.activeRegions = default;
             }
 
-            public gdesc(long lastStartTime = default, long blockNetTime = default, long blockSyncTime = default, long blockSyscallTime = default, long blockSweepTime = default, long blockGCTime = default, long blockSchedTime = default)
+            public gdesc(long lastStartTime = default, long blockNetTime = default, long blockSyncTime = default, long blockSyscallTime = default, long blockSweepTime = default, long blockGCTime = default, long blockSchedTime = default, slice<ptr<UserRegionDesc>> activeRegions = default)
             {
                 this.lastStartTime = lastStartTime;
                 this.blockNetTime = blockNetTime;
@@ -44,6 +46,7 @@ namespace @internal
                 this.blockSweepTime = blockSweepTime;
                 this.blockGCTime = blockGCTime;
                 this.blockSchedTime = blockSchedTime;
+                this.activeRegions = activeRegions;
             }
 
             // Enable comparisons between nil and gdesc struct
@@ -66,7 +69,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static gdesc gdesc_cast(dynamic value)
         {
-            return new gdesc(value.lastStartTime, value.blockNetTime, value.blockSyncTime, value.blockSyscallTime, value.blockSweepTime, value.blockGCTime, value.blockSchedTime);
+            return new gdesc(value.lastStartTime, value.blockNetTime, value.blockSyncTime, value.blockSyscallTime, value.blockSweepTime, value.blockGCTime, value.blockSchedTime, value.activeRegions);
         }
     }
 }}

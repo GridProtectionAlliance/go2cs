@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:17:48 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:20:38 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mem_plan9.go
 using @unsafe = go.@unsafe_package;
@@ -10,13 +10,14 @@ using static go.builtin;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
-        private static readonly var memDebug = false;
+        private static readonly var memDebug = (var)false;
 
 
 
         private static System.UIntPtr bloc = default;
+        private static System.UIntPtr blocMax = default;
         private static mutex memlock = default;
 
         private partial struct memHdr
@@ -31,20 +32,22 @@ namespace go
         {
         }
 
-        private static ref memHdr ptr(this memHdrPtr p)
+        private static ptr<memHdr> ptr(this memHdrPtr p)
         {
-            return (memHdr.Value)(@unsafe.Pointer(p));
+            return _addr_(memHdr.val)(@unsafe.Pointer(p))!;
         }
-        private static void set(this ref memHdrPtr p, ref memHdr x)
+        private static void set(this ptr<memHdrPtr> _addr_p, ptr<memHdr> _addr_x)
         {
-            p.Value = memHdrPtr(@unsafe.Pointer(x));
+            ref memHdrPtr p = ref _addr_p.val;
+            ref memHdr x = ref _addr_x.val;
 
+            p.val = memHdrPtr(@unsafe.Pointer(x));
         }
 
         private static unsafe.Pointer memAlloc(System.UIntPtr n)
         {
             n = memRound(n);
-            ref memHdr prevp = default;
+            ptr<memHdr> prevp;
             {
                 var p = memFreelist.ptr();
 
@@ -63,35 +66,42 @@ namespace go
                             {
                                 memFreelist = p.next;
                             }
+
                         }
                         else
                         {
                             p.size -= n;
-                            p = (memHdr.Value)(add(@unsafe.Pointer(p), p.size));
+                            p = (memHdr.val)(add(@unsafe.Pointer(p), p.size));
                         }
-                        p.Value = new memHdr();
+
+                        p.val = new memHdr();
                         return @unsafe.Pointer(p);
+
                     }
+
                     prevp = p;
+
                 }
 
             }
             return sbrk(n);
+
         }
 
         private static void memFree(unsafe.Pointer ap, System.UIntPtr n)
         {
             n = memRound(n);
             memclrNoHeapPointers(ap, n);
-            var bp = (memHdr.Value)(ap);
+            var bp = (memHdr.val)(ap);
             bp.size = n;
             var bpn = uintptr(ap);
             if (memFreelist == 0L)
             {
                 bp.next = 0L;
                 memFreelist.set(bp);
-                return;
+                return ;
             }
+
             var p = memFreelist.ptr();
             if (bpn < uintptr(@unsafe.Pointer(p)))
             {
@@ -100,14 +110,17 @@ namespace go
                 {
                     bp.size += p.size;
                     bp.next = p.next;
-                    p.Value = new memHdr();
+                    p.val = new memHdr();
                 }
                 else
                 {
                     bp.next.set(p);
                 }
-                return;
+
+                return ;
+
             }
+
             while (p.next != 0L)
             {
                 if (bpn > uintptr(@unsafe.Pointer(p)) && bpn < uintptr(@unsafe.Pointer(p.next)))
@@ -115,36 +128,40 @@ namespace go
                     break;
                 p = p.next.ptr();
                 }
+
             }
 
             if (bpn + bp.size == uintptr(@unsafe.Pointer(p.next)))
             {
                 bp.size += p.next.ptr().size;
                 bp.next = p.next.ptr().next;
-                p.next.ptr().Value = new memHdr();
+                p.next.ptr().val = new memHdr();
             }
             else
             {
                 bp.next = p.next;
             }
+
             if (uintptr(@unsafe.Pointer(p)) + p.size == bpn)
             {
                 p.size += bp.size;
                 p.next = bp.next;
-                bp.Value = new memHdr();
+                bp.val = new memHdr();
             }
             else
             {
                 p.next.set(bp);
             }
+
         }
 
         private static void memCheck()
         {
             if (memDebug == false)
             {
-                return;
+                return ;
             }
+
             {
                 var p = memFreelist.ptr();
 
@@ -156,33 +173,39 @@ namespace go
                         throw("mem: infinite loop");
                     p = p.next.ptr();
                     }
+
                     if (uintptr(@unsafe.Pointer(p)) > uintptr(@unsafe.Pointer(p.next)))
                     {
                         print("runtime: ", @unsafe.Pointer(p), " > ", @unsafe.Pointer(p.next), "\n");
                         throw("mem: unordered list");
                     }
+
                     if (uintptr(@unsafe.Pointer(p)) + p.size > uintptr(@unsafe.Pointer(p.next)))
                     {
                         print("runtime: ", @unsafe.Pointer(p), "+", p.size, " > ", @unsafe.Pointer(p.next), "\n");
                         throw("mem: overlapping blocks");
                     }
+
                     {
                         var b = add(@unsafe.Pointer(p), @unsafe.Sizeof(new memHdr()));
 
                         while (uintptr(b) < uintptr(@unsafe.Pointer(p)) + p.size)
                         {
-                            if (b.Value != 0L)
+                            if (new ptr<ptr<ptr<byte>>>(b) != 0L)
                             {
                                 print("runtime: value at addr ", b, " with offset ", uintptr(b) - uintptr(@unsafe.Pointer(p)), " in block ", p, " of size ", p.size, " is not zero\n");
                                 throw("mem: uninitialised memory");
                             b = add(b, 1L);
                             }
+
                         }
 
                     }
+
                 }
 
             }
+
         }
 
         private static System.UIntPtr memRound(System.UIntPtr p)
@@ -193,6 +216,7 @@ namespace go
         private static void initBloc()
         {
             bloc = memRound(firstmoduledata.end);
+            blocMax = bloc;
         }
 
         private static unsafe.Pointer sbrk(System.UIntPtr n)
@@ -200,34 +224,62 @@ namespace go
             // Plan 9 sbrk from /sys/src/libc/9sys/sbrk.c
             var bl = bloc;
             n = memRound(n);
-            if (brk_(@unsafe.Pointer(bl + n)) < 0L)
+            if (bl + n > blocMax)
             {
-                return null;
+                if (brk_(@unsafe.Pointer(bl + n)) < 0L)
+                {
+                    return null;
+                }
+
+                blocMax = bl + n;
+
             }
+
             bloc += n;
             return @unsafe.Pointer(bl);
+
         }
 
-        private static unsafe.Pointer sysAlloc(System.UIntPtr n, ref ulong sysStat)
+        private static unsafe.Pointer sysAlloc(System.UIntPtr n, ptr<ulong> _addr_sysStat)
         {
-            lock(ref memlock);
+            ref ulong sysStat = ref _addr_sysStat.val;
+
+            lock(_addr_memlock);
             var p = memAlloc(n);
             memCheck();
-            unlock(ref memlock);
+            unlock(_addr_memlock);
             if (p != null)
             {
                 mSysStatInc(sysStat, n);
             }
+
             return p;
+
         }
 
-        private static void sysFree(unsafe.Pointer v, System.UIntPtr n, ref ulong sysStat)
+        private static void sysFree(unsafe.Pointer v, System.UIntPtr n, ptr<ulong> _addr_sysStat)
         {
+            ref ulong sysStat = ref _addr_sysStat.val;
+
             mSysStatDec(sysStat, n);
-            lock(ref memlock);
-            memFree(v, n);
-            memCheck();
-            unlock(ref memlock);
+            lock(_addr_memlock);
+            if (uintptr(v) + n == bloc)
+            { 
+                // Address range being freed is at the end of memory,
+                // so record a new lower value for end of memory.
+                // Can't actually shrink address space because segment is shared.
+                memclrNoHeapPointers(v, n);
+                bloc -= n;
+
+            }
+            else
+            {
+                memFree(v, n);
+                memCheck();
+            }
+
+            unlock(_addr_memlock);
+
         }
 
         private static void sysUnused(unsafe.Pointer v, System.UIntPtr n)
@@ -238,25 +290,45 @@ namespace go
         {
         }
 
-        private static void sysMap(unsafe.Pointer v, System.UIntPtr n, bool reserved, ref ulong sysStat)
-        { 
+        private static void sysHugePage(unsafe.Pointer v, System.UIntPtr n)
+        {
+        }
+
+        private static void sysMap(unsafe.Pointer v, System.UIntPtr n, ptr<ulong> _addr_sysStat)
+        {
+            ref ulong sysStat = ref _addr_sysStat.val;
+ 
             // sysReserve has already allocated all heap memory,
             // but has not adjusted stats.
             mSysStatInc(sysStat, n);
+
         }
 
         private static void sysFault(unsafe.Pointer v, System.UIntPtr n)
         {
         }
 
-        private static unsafe.Pointer sysReserve(unsafe.Pointer v, System.UIntPtr n, ref bool reserved)
+        private static unsafe.Pointer sysReserve(unsafe.Pointer v, System.UIntPtr n)
         {
-            reserved.Value = true;
-            lock(ref memlock);
-            var p = memAlloc(n);
-            memCheck();
-            unlock(ref memlock);
+            lock(_addr_memlock);
+            unsafe.Pointer p = default;
+            if (uintptr(v) == bloc)
+            { 
+                // Address hint is the current end of memory,
+                // so try to extend the address space.
+                p = sbrk(n);
+
+            }
+
+            if (p == null && v == null)
+            {
+                p = memAlloc(n);
+                memCheck();
+            }
+
+            unlock(_addr_memlock);
             return p;
+
         }
     }
 }

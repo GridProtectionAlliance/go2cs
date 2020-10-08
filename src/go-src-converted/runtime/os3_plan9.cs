@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:42 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:44 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os3_plan9.go
 using sys = go.runtime.@internal.sys_package;
@@ -11,13 +11,17 @@ using static go.builtin;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         // May run during STW, so write barriers are not allowed.
         //
         //go:nowritebarrierrec
-        private static long sighandler(ref ureg _ureg, ref byte note, ref g gp)
+        private static long sighandler(ptr<ureg> _addr__ureg, ptr<byte> _addr_note, ptr<g> _addr_gp)
         {
+            ref ureg _ureg = ref _addr__ureg.val;
+            ref byte note = ref _addr_note.val;
+            ref g gp = ref _addr_gp.val;
+
             var _g_ = getg();
             sigTabT t = default;
             bool docrash = default;
@@ -25,7 +29,7 @@ namespace go
             long flags = default;
             int level = default;
 
-            sigctxt c = ref new sigctxt(_ureg);
+            ptr<sigctxt> c = addr(new sigctxt(_ureg));
             var notestr = gostringnocopy(note); 
 
             // The kernel will never pass us a nil note or ureg so we probably
@@ -40,12 +44,18 @@ namespace go
                 print("sighandler: note is longer than ERRMAX\n");
                 goto Throw;
             }
+            if (isAbortPC(c.pc()))
+            { 
+                // Never turn abort into a panic.
+                goto Throw;
+
+            }
             flags = _SigNotify;
             foreach (var (__sig, __t) in sigtable)
             {
                 sig = __sig;
                 t = __t;
-                if (hasprefix(notestr, t.name))
+                if (hasPrefix(notestr, t.name))
                 {
                     flags = t.flags;
                     break;
@@ -56,10 +66,11 @@ namespace go
                 // We can't safely sigpanic because it may grow the
                 // stack. Abort in the signal handler instead.
                 flags = (flags & ~_SigPanic) | _SigThrow;
+
             }
             if (flags & _SigGoExit != 0L)
             {
-                exits((byte.Value)(add(@unsafe.Pointer(note), 9L))); // Strip "go: exit " prefix.
+                exits((byte.val)(add(@unsafe.Pointer(note), 9L))); // Strip "go: exit " prefix.
             }
             if (flags & _SigPanic != 0L)
             { 
@@ -76,7 +87,7 @@ namespace go
                 // but we do recognize the top pointer on the stack as code,
                 // then assume this was a call to non-code and treat like
                 // pc == 0, to make unwinding show the context.
-                if (pc != 0L && !findfunc(pc).valid() && findfunc(@unsafe.Pointer(sp).Value).valid())
+                if (pc != 0L && !findfunc(pc).valid() && findfunc(new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(sp))).valid())
                 {
                     pc = 0L;
                 }
@@ -94,14 +105,16 @@ namespace go
                     {
                         if (sys.RegSize > sys.PtrSize)
                         {
-                            sp -= sys.PtrSize * (uintptr.Value)(@unsafe.Pointer(sp));
+                            sp -= sys.PtrSize * (uintptr.val)(@unsafe.Pointer(sp));
 
                             0L;
+
                         }
-                        sp -= sys.PtrSize * (uintptr.Value)(@unsafe.Pointer(sp));
+                        sp -= sys.PtrSize * (uintptr.val)(@unsafe.Pointer(sp));
 
                         pc;
                         c.setsp(sp);
+
                     }
                 }
                 if (usesLR)
@@ -113,6 +126,7 @@ namespace go
                     c.setpc(funcPC(sigpanic));
                 }
                 return _NCONT;
+
             }
             if (flags & _SigNotify != 0L)
             {
@@ -136,7 +150,7 @@ namespace go
 Throw:
             _g_.m.throwing = 1L;
             _g_.m.caughtsig.set(gp);
-            startpanic();
+            startpanic_m();
             print(notestr, "\n");
             print("PC=", hex(c.pc()), "\n");
             print("\n");
@@ -179,6 +193,7 @@ Exit:
         { 
             // TODO: Enable profiling interrupts.
             getg().m.profilehz = hz;
+
         }
 
         // gsignalStack is unused on Plan 9.

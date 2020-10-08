@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate ValueConverter ColumnConverterByRef(ref T value, long idx);
+            private delegate ValueConverter ColumnConverterByPtr(ptr<T> value, long idx);
             private delegate ValueConverter ColumnConverterByVal(T value, long idx);
 
-            private static readonly ColumnConverterByRef s_ColumnConverterByRef;
+            private static readonly ColumnConverterByPtr s_ColumnConverterByPtr;
             private static readonly ColumnConverterByVal s_ColumnConverterByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ColumnConverterByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ColumnConverterByPtr is null || !m_target_is_ptr)
                     return s_ColumnConverterByVal!(target, idx);
 
-                return s_ColumnConverterByRef(ref target, idx);
+                return s_ColumnConverterByPtr(m_target_ptr, idx);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static ColumnConverter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ColumnConverter");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ColumnConverter");
 
                 if (!(extensionMethod is null))
-                    s_ColumnConverterByRef = extensionMethod.CreateStaticDelegate(typeof(ColumnConverterByRef)) as ColumnConverterByRef;
+                    s_ColumnConverterByPtr = extensionMethod.CreateStaticDelegate(typeof(ColumnConverterByPtr)) as ColumnConverterByPtr;
 
-                if (s_ColumnConverterByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ColumnConverter");
+                extensionMethod = targetType.GetExtensionMethod("ColumnConverter");
 
-                    if (!(extensionMethod is null))
-                        s_ColumnConverterByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnConverterByVal)) as ColumnConverterByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ColumnConverterByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnConverterByVal)) as ColumnConverterByVal;
 
-                if (s_ColumnConverterByRef is null && s_ColumnConverterByVal is null)
+                if (s_ColumnConverterByPtr is null && s_ColumnConverterByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ColumnConverter.ColumnConverter method", new Exception("ColumnConverter"));
             }
 

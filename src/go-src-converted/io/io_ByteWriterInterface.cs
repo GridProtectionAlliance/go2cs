@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:53 UTC
+//     Generated on 2020 October 08 01:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error WriteByteByRef(ref T value, byte c);
+            private delegate error WriteByteByPtr(ptr<T> value, byte c);
             private delegate error WriteByteByVal(T value, byte c);
 
-            private static readonly WriteByteByRef s_WriteByteByRef;
+            private static readonly WriteByteByPtr s_WriteByteByPtr;
             private static readonly WriteByteByVal s_WriteByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,11 +74,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteByteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteByteByPtr is null || !m_target_is_ptr)
                     return s_WriteByteByVal!(target, c);
 
-                return s_WriteByteByRef(ref target, c);
+                return s_WriteByteByPtr(m_target_ptr, c);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -87,23 +88,20 @@ namespace go
             static ByteWriter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteByte");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteByte");
 
                 if (!(extensionMethod is null))
-                    s_WriteByteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByteByRef)) as WriteByteByRef;
+                    s_WriteByteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByteByPtr)) as WriteByteByPtr;
 
-                if (s_WriteByteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteByte");
+                extensionMethod = targetType.GetExtensionMethod("WriteByte");
 
-                    if (!(extensionMethod is null))
-                        s_WriteByteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByteByVal)) as WriteByteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteByteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByteByVal)) as WriteByteByVal;
 
-                if (s_WriteByteByRef is null && s_WriteByteByVal is null)
+                if (s_WriteByteByPtr is null && s_WriteByteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteWriter.WriteByte method", new Exception("WriteByte"));
             }
 

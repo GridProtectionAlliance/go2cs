@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:22:34 UTC
+//     Generated on 2020 October 08 03:32:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using unsafeheader = go.@internal.unsafeheader_package;
 using sync = go.sync_package;
 using syscall = go.syscall_package;
+using utf16 = go.unicode.utf16_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
@@ -38,7 +40,7 @@ namespace syscall
                 this.Flags = default;
             }
 
-            public WSAMsg(ref ptr<syscall.RawSockaddrAny> Name = default, int Namelen = default, ref ptr<syscall.WSABuf> Buffers = default, uint BufferCount = default, syscall.WSABuf Control = default, uint Flags = default)
+            public WSAMsg(syscall.Pointer Name = default, int Namelen = default, ref ptr<syscall.WSABuf> Buffers = default, uint BufferCount = default, syscall.WSABuf Control = default, uint Flags = default)
             {
                 this.Name = Name;
                 this.Namelen = Namelen;
@@ -68,7 +70,7 @@ namespace syscall
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static WSAMsg WSAMsg_cast(dynamic value)
         {
-            return new WSAMsg(ref value.Name, value.Namelen, ref value.Buffers, value.BufferCount, value.Control, value.Flags);
+            return new WSAMsg(value.Name, value.Namelen, ref value.Buffers, value.BufferCount, value.Control, value.Flags);
         }
     }
 }}}

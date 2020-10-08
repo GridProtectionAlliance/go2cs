@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2020 August 29 10:05:27 UTC
+// package driver -- go2cs converted at 2020 October 08 04:43:05 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\interactive.go
 using fmt = go.fmt_package;
@@ -42,19 +42,25 @@ namespace @internal
         private static var tailDigitsRE = regexp.MustCompile("[0-9]+$");
 
         // interactive starts a shell to read pprof commands.
-        private static error interactive(ref profile.Profile p, ref plugin.Options o)
-        { 
+        private static error interactive(ptr<profile.Profile> _addr_p, ptr<plugin.Options> _addr_o)
+        {
+            ref profile.Profile p = ref _addr_p.val;
+            ref plugin.Options o = ref _addr_o.val;
+ 
             // Enter command processing loop.
-            o.UI.SetAutoComplete(newCompleter(functionNames(p)));
+            o.UI.SetAutoComplete(newCompleter(functionNames(_addr_p)));
             pprofVariables.set("compact_labels", "true");
-            pprofVariables["sample_index"].help += fmt.Sprintf("Or use sample_index=name, with name in %v.\n", sampleTypes(p)); 
+            pprofVariables["sample_index"].help += fmt.Sprintf("Or use sample_index=name, with name in %v.\n", sampleTypes(_addr_p)); 
 
             // Do not wait for the visualizer to complete, to allow multiple
             // graphs to be visualized simultaneously.
             interactiveMode = true;
-            var shortcuts = profileShortcuts(p);
+            var shortcuts = profileShortcuts(_addr_p); 
 
-            greetings(p, o.UI);
+            // Get all groups in pprofVariables to allow for clearer error messages.
+            var groups = groupOptions(pprofVariables);
+
+            greetings(_addr_p, o.UI);
             while (true)
             {
                 var (input, err) = o.UI.ReadLine("(pprof) ");
@@ -62,13 +68,16 @@ namespace @internal
                 {
                     if (err != io.EOF)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                     if (input == "")
                     {
-                        return error.As(null);
+                        return error.As(null!)!;
                     }
+
                 }
+
                 {
                     var input__prev2 = input;
 
@@ -95,8 +104,11 @@ namespace @internal
                                         }
 
                                     }
+
                                     value = strings.TrimSpace(value);
+
                                 }
+
                                 {
                                     var v__prev2 = v;
 
@@ -113,8 +125,11 @@ namespace @internal
                                                 o.UI.PrintErr(err);
                                                 continue;
                                             }
+
                                             value = p.SampleType[index].Type;
+
                                         }
+
                                         {
                                             var err__prev3 = err;
 
@@ -128,7 +143,9 @@ namespace @internal
                                             err = err__prev3;
 
                                         }
+
                                         continue;
+
                                     } 
                                     // Allow group=variable syntax by converting into variable="".
 
@@ -156,33 +173,49 @@ namespace @internal
                                             err = err__prev3;
 
                                         }
+
                                         continue;
+
+                                    }                                    {
+                                        var okValues = groups[name];
+
+
+                                        else if (okValues != null)
+                                        {
+                                            o.UI.PrintErr(fmt.Errorf("unrecognized value for %s: %q. Use one of %s", name, value, strings.Join(okValues, ", ")));
+                                            continue;
+                                        }
+
                                     }
+
 
                                     v = v__prev2;
 
                                 }
+
                             }
 
                         }
+
 
                         var tokens = strings.Fields(input);
                         if (len(tokens) == 0L)
                         {
                             continue;
                         }
+
                         switch (tokens[0L])
                         {
                             case "o": 
 
                             case "options": 
-                                printCurrentOptions(p, o.UI);
+                                printCurrentOptions(_addr_p, o.UI);
                                 continue;
                                 break;
                             case "exit": 
 
                             case "quit": 
-                                return error.As(null);
+                                return error.As(null!)!;
                                 break;
                             case "help": 
                                 commandHelp(strings.Join(tokens[1L..], " "), o.UI);
@@ -195,16 +228,41 @@ namespace @internal
                         {
                             err = generateReportWrapper(p, args, vars, o);
                         }
+
                         if (err != null)
                         {
                             o.UI.PrintErr(err);
                         }
+
                     }
 
                     input = input__prev2;
                 }
+            }
+
+
+        }
+
+        // groupOptions returns a map containing all non-empty groups
+        // mapped to an array of the option names in that group in
+        // sorted order.
+        private static map<@string, slice<@string>> groupOptions(variables vars)
+        {
+            var groups = make_map<@string, slice<@string>>();
+            foreach (var (name, option) in vars)
+            {
+                var group = option.group;
+                if (group != "")
+                {
+                    groups[group] = append(groups[group], name);
+                }
 
             }
+            foreach (var (_, names) in groups)
+            {
+                sort.Strings(names);
+            }
+            return groups;
 
         }
 
@@ -212,15 +270,26 @@ namespace @internal
 
         // greetings prints a brief welcome and some overall profile
         // information before accepting interactive commands.
-        private static void greetings(ref profile.Profile p, plugin.UI ui)
+        private static void greetings(ptr<profile.Profile> _addr_p, plugin.UI ui)
         {
+            ref profile.Profile p = ref _addr_p.val;
+
             var numLabelUnits = identifyNumLabelUnits(p, ui);
             var (ropt, err) = reportOptions(p, numLabelUnits, pprofVariables);
             if (err == null)
             {
-                ui.Print(strings.Join(report.ProfileLabels(report.New(p, ropt)), "\n"));
+                var rpt = report.New(p, ropt);
+                ui.Print(strings.Join(report.ProfileLabels(rpt), "\n"));
+                if (rpt.Total() == 0L && len(p.SampleType) > 1L)
+                {
+                    ui.Print("No samples were found with the default sample value type.");
+                    ui.Print("Try \"sample_index\" command to analyze different sample values.", "\n");
+                }
+
             }
+
             ui.Print("Entering interactive mode (type \"help\" for commands, \"o\" for options)");
+
         }
 
         // shortcuts represents composite commands that expand into a sequence
@@ -243,15 +312,20 @@ namespace @internal
                     }
 
                 }
+
             }
+
             return new slice<@string>(new @string[] { input });
+
         }
 
         private static shortcuts pprofShortcuts = new shortcuts(":":[]string{"focus=","ignore=","hide=","tagfocus=","tagignore="},);
 
         // profileShortcuts creates macros for convenience and backward compatibility.
-        private static shortcuts profileShortcuts(ref profile.Profile p)
+        private static shortcuts profileShortcuts(ptr<profile.Profile> _addr_p)
         {
+            ref profile.Profile p = ref _addr_p.val;
+
             var s = pprofShortcuts; 
             // Add shortcuts for sample types
             foreach (var (_, st) in p.SampleType)
@@ -262,27 +336,33 @@ namespace @internal
                 s["mean_" + st.Type] = new slice<@string>(new @string[] { "mean=1", command });
             }
             return s;
+
         }
 
-        private static slice<@string> sampleTypes(ref profile.Profile p)
+        private static slice<@string> sampleTypes(ptr<profile.Profile> _addr_p)
         {
+            ref profile.Profile p = ref _addr_p.val;
+
             var types = make_slice<@string>(len(p.SampleType));
             foreach (var (i, t) in p.SampleType)
             {
                 types[i] = t.Type;
             }
             return types;
+
         }
 
-        private static void printCurrentOptions(ref profile.Profile p, plugin.UI ui)
+        private static void printCurrentOptions(ptr<profile.Profile> _addr_p, plugin.UI ui)
         {
+            ref profile.Profile p = ref _addr_p.val;
+
             slice<@string> args = default;
             private partial struct groupInfo
             {
                 public @string set;
                 public slice<@string> values;
             }
-            var groups = make_map<@string, ref groupInfo>();
+            var groups = make_map<@string, ptr<groupInfo>>();
             foreach (var (n, o) in pprofVariables)
             {
                 var v = o.stringValue();
@@ -297,27 +377,32 @@ namespace @internal
                         var (gi, ok) = groups[g];
                         if (!ok)
                         {
-                            gi = ref new groupInfo();
+                            gi = addr(new groupInfo());
                             groups[g] = gi;
                         }
+
                         if (o.boolValue())
                         {
                             gi.set = n;
                         }
+
                         gi.values = append(gi.values, n);
                         continue;
+
                     }
 
                     g = g__prev1;
 
                 }
 
+
                 if (n == "sample_index") 
-                    var st = sampleTypes(p);
+                    var st = sampleTypes(_addr_p);
                     if (v == "")
                     { 
                         // Apply default (last sample index).
                         v = st[len(st) - 1L];
+
                     } 
                     // Add comments for all sample types in profile.
                     comment = "[" + strings.Join(st, " | ") + "]";
@@ -332,7 +417,9 @@ namespace @internal
                 {
                     comment = commentStart + " " + comment;
                 }
+
                 args = append(args, fmt.Sprintf("  %-25s = %-20s %s", n, v, comment));
+
             }
             {
                 var g__prev1 = g;
@@ -351,12 +438,17 @@ namespace @internal
 
             sort.Strings(args);
             ui.Print(strings.Join(args, "\n"));
+
         }
 
         // parseCommandLine parses a command and returns the pprof command to
         // execute and a set of variables for the report.
         private static (slice<@string>, variables, error) parseCommandLine(slice<@string> input)
         {
+            slice<@string> _p0 = default;
+            variables _p0 = default;
+            error _p0 = default!;
+
             var cmd = input[..1L];
             var args = input[1L..];
             var name = cmd[0L];
@@ -374,22 +466,28 @@ namespace @internal
                         cmd[0L] = name;
                         args = append(new slice<@string>(new @string[] { d }), args);
                         c = pprofCommands[name];
+
                     }
 
                 }
+
             }
+
             if (c == null)
             {
-                return (null, null, fmt.Errorf("Unrecognized command: %q", name));
+                return (null, null, error.As(fmt.Errorf("unrecognized command: %q", name))!);
             }
+
             if (c.hasParam)
             {
                 if (len(args) == 0L)
                 {
-                    return (null, null, fmt.Errorf("command %s requires an argument", name));
+                    return (null, null, error.As(fmt.Errorf("command %s requires an argument", name))!);
                 }
+
                 cmd = append(cmd, args[0L]);
                 args = args[1L..];
+
             } 
 
             // Copy the variables as options set in the command line are not persistent.
@@ -410,6 +508,7 @@ namespace @internal
                     }
 
                 }
+
                 switch (t[0L])
                 {
                     case '>': 
@@ -419,10 +518,13 @@ namespace @internal
                             i++;
                             if (i >= len(args))
                             {
-                                return (null, null, fmt.Errorf("Unexpected end of line after >"));
+                                return (null, null, error.As(fmt.Errorf("unexpected end of line after >"))!);
                             }
+
                             outputFile = args[i];
+
                         }
+
                         vcopy.set("output", outputFile);
                         break;
                     case '-': 
@@ -431,12 +533,14 @@ namespace @internal
                             vcopy.set("cum", "t");
                             continue;
                         }
+
                         ignore = catRegex(ignore, t[1L..]);
                         break;
                     default: 
                         focus = catRegex(focus, t);
                         break;
                 }
+
             }
 
 
@@ -448,11 +552,14 @@ namespace @internal
             {
                 updateFocusIgnore(vcopy, "", focus, ignore);
             }
+
             if (vcopy["nodecount"].intValue() == -1L && (name == "text" || name == "top"))
             {
                 vcopy.set("nodecount", "10");
             }
-            return (cmd, vcopy, null);
+
+            return (cmd, vcopy, error.As(null!)!);
+
         }
 
         private static void updateFocusIgnore(variables v, @string prefix, @string f, @string i)
@@ -462,11 +569,13 @@ namespace @internal
                 var focus = prefix + "focus";
                 v.set(focus, catRegex(v[focus].value, f));
             }
+
             if (i != "")
             {
                 var ignore = prefix + "ignore";
                 v.set(ignore, catRegex(v[ignore].value, i));
             }
+
         }
 
         private static @string catRegex(@string a, @string b)
@@ -475,7 +584,9 @@ namespace @internal
             {
                 return a + "|" + b;
             }
+
             return a + b;
+
         }
 
         // commandHelp displays help and usage information for all Commands
@@ -489,18 +600,21 @@ namespace @internal
     " more information\n";
 
                 ui.Print(help);
-                return;
+                return ;
+
             }
+
             {
                 var c = pprofCommands[args];
 
                 if (c != null)
                 {
                     ui.Print(c.help(args));
-                    return;
+                    return ;
                 }
 
             }
+
 
             {
                 var v = pprofVariables[args];
@@ -508,12 +622,14 @@ namespace @internal
                 if (v != null)
                 {
                     ui.Print(v.help + "\n");
-                    return;
+                    return ;
                 }
 
             }
 
+
             ui.PrintErr("Unknown command: " + args);
+
         }
 
         // newCompleter creates an autocompletion function for a set of commands.
@@ -546,6 +662,7 @@ namespace @internal
                             match = match__prev1;
 
                         }
+
                         goto __switch_break0;
                     }
                     if (len(tokens) == 2L)
@@ -565,8 +682,11 @@ namespace @internal
                                 match = match__prev2;
 
                             }
+
                             return line;
+
                         }
+
                     }
                     // default: 
                         // Multiple tokens -- complete using functions, except for tags
@@ -585,19 +705,23 @@ namespace @internal
                                 {
                                     lastToken = functionCompleter(lastToken, fns);
                                 }
+
                                 return strings.Join(append(tokens[..lastTokenIdx], lastToken), " ");
+
                             }
 
                         }
 
+
                     __switch_break0:;
                 }
                 return line;
-            }
-;
+
+            };
+
         }
 
-        // matchCommand attempts to match a string token to the prefix of a Command.
+        // matchVariableOrCommand attempts to match a string token to the prefix of a Command.
         private static @string matchVariableOrCommand(variables v, @string token)
         {
             token = strings.ToLower(token);
@@ -610,8 +734,11 @@ namespace @internal
                     {
                         return "";
                     }
+
                     found = cmd;
+
                 }
+
             }
             foreach (var (variable) in v)
             {
@@ -621,10 +748,14 @@ namespace @internal
                     {
                         return "";
                     }
+
                     found = variable;
+
                 }
+
             }
             return found;
+
         }
 
         // functionCompleter replaces provided substring with a function
@@ -642,24 +773,32 @@ namespace @internal
                     {
                         return substring;
                     }
+
                     found = fName;
+
                 }
+
             }
             if (found != "")
             {
                 return found;
             }
+
             return substring;
+
         }
 
-        private static slice<@string> functionNames(ref profile.Profile p)
+        private static slice<@string> functionNames(ptr<profile.Profile> _addr_p)
         {
+            ref profile.Profile p = ref _addr_p.val;
+
             slice<@string> fns = default;
             foreach (var (_, fn) in p.Function)
             {
                 fns = append(fns, fn.Name);
             }
             return fns;
+
         }
     }
 }}}}}}}

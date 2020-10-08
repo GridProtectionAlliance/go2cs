@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:55 UTC
+//     Generated on 2020 October 08 04:10:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,9 @@ using fmt = go.fmt_package;
 using html = go.html_package;
 using io = go.io_package;
 using os = go.os_package;
+using exec = go.os.exec_package;
+using filepath = go.path.filepath_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 

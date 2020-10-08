@@ -13,10 +13,10 @@
 //
 // See "The Laws of Reflection" for an introduction to reflection in Go:
 // https://golang.org/doc/articles/laws_of_reflection.html
-// package reflect -- go2cs converted at 2020 August 29 08:43:13 UTC
+// package reflect -- go2cs converted at 2020 October 08 03:24:45 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\type.go
-using runtime = go.runtime_package;
+using unsafeheader = go.@internal.unsafeheader_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using unicode = go.unicode_package;
@@ -24,11 +24,10 @@ using utf8 = go.unicode.utf8_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 using System;
-using System.ComponentModel;
 
 namespace go
 {
-    public static unsafe partial class reflect_package
+    public static partial class reflect_package
     {
         // Type is the representation of a Go type.
         //
@@ -43,9 +42,9 @@ namespace go
         // Two Type values are equal if they represent identical types.
         public partial interface Type
         {
-            ref uncommonType Align(); // FieldAlign returns the alignment in bytes of a value of
+            ptr<uncommonType> Align(); // FieldAlign returns the alignment in bytes of a value of
 // this type when used as a field in a struct.
-            ref uncommonType FieldAlign(); // Method returns the i'th method in the type's method set.
+            ptr<uncommonType> FieldAlign(); // Method returns the i'th method in the type's method set.
 // It panics if i is not in the range [0, NumMethod()).
 //
 // For a non-interface type T or *T, the returned Method's Type and Func
@@ -53,7 +52,10 @@ namespace go
 //
 // For an interface type, the returned Method's Type field gives the
 // method signature, without a receiver, and the Func field is nil.
-            ref uncommonType Method(long _p0); // MethodByName returns the method with that name in the type's
+//
+// Only exported methods are accessible and they are sorted in
+// lexicographic order.
+            ptr<uncommonType> Method(long _p0); // MethodByName returns the method with that name in the type's
 // method set and a boolean indicating if the method was found.
 //
 // For a non-interface type T or *T, the returned Method's Type and Func
@@ -61,26 +63,27 @@ namespace go
 //
 // For an interface type, the returned Method's Type field gives the
 // method signature, without a receiver, and the Func field is nil.
-            ref uncommonType MethodByName(@string _p0); // NumMethod returns the number of exported methods in the type's method set.
-            ref uncommonType NumMethod(); // Name returns the type's name within its package.
-// It returns an empty string for unnamed types.
-            ref uncommonType Name(); // PkgPath returns a named type's package path, that is, the import path
+            ptr<uncommonType> MethodByName(@string _p0); // NumMethod returns the number of exported methods in the type's method set.
+            ptr<uncommonType> NumMethod(); // Name returns the type's name within its package for a defined type.
+// For other (non-defined) types it returns the empty string.
+            ptr<uncommonType> Name(); // PkgPath returns a defined type's package path, that is, the import path
 // that uniquely identifies the package, such as "encoding/base64".
-// If the type was predeclared (string, error) or unnamed (*T, struct{}, []int),
-// the package path will be the empty string.
-            ref uncommonType PkgPath(); // Size returns the number of bytes needed to store
+// If the type was predeclared (string, error) or not defined (*T, struct{},
+// []int, or A where A is an alias for a non-defined type), the package path
+// will be the empty string.
+            ptr<uncommonType> PkgPath(); // Size returns the number of bytes needed to store
 // a value of the given type; it is analogous to unsafe.Sizeof.
-            ref uncommonType Size(); // String returns a string representation of the type.
+            ptr<uncommonType> Size(); // String returns a string representation of the type.
 // The string representation may use shortened package names
 // (e.g., base64 instead of "encoding/base64") and is not
 // guaranteed to be unique among types. To test for type identity,
 // compare the Types directly.
-            ref uncommonType String(); // Kind returns the specific kind of this type.
-            ref uncommonType Kind(); // Implements reports whether the type implements the interface type u.
-            ref uncommonType Implements(Type u); // AssignableTo reports whether a value of the type is assignable to type u.
-            ref uncommonType AssignableTo(Type u); // ConvertibleTo reports whether a value of the type is convertible to type u.
-            ref uncommonType ConvertibleTo(Type u); // Comparable reports whether values of this type are comparable.
-            ref uncommonType Comparable(); // Methods applicable only to some types, depending on Kind.
+            ptr<uncommonType> String(); // Kind returns the specific kind of this type.
+            ptr<uncommonType> Kind(); // Implements reports whether the type implements the interface type u.
+            ptr<uncommonType> Implements(Type u); // AssignableTo reports whether a value of the type is assignable to type u.
+            ptr<uncommonType> AssignableTo(Type u); // ConvertibleTo reports whether a value of the type is convertible to type u.
+            ptr<uncommonType> ConvertibleTo(Type u); // Comparable reports whether values of this type are comparable.
+            ptr<uncommonType> Comparable(); // Methods applicable only to some types, depending on Kind.
 // The methods allowed for each kind are:
 //
 //    Int*, Uint*, Float*, Complex*: Bits
@@ -95,9 +98,9 @@ namespace go
 // Bits returns the size of the type in bits.
 // It panics if the type's Kind is not one of the
 // sized or unsized Int, Uint, Float, or Complex kinds.
-            ref uncommonType Bits(); // ChanDir returns a channel type's direction.
+            ptr<uncommonType> Bits(); // ChanDir returns a channel type's direction.
 // It panics if the type's Kind is not Chan.
-            ref uncommonType ChanDir(); // IsVariadic reports whether a function type's final input parameter
+            ptr<uncommonType> ChanDir(); // IsVariadic reports whether a function type's final input parameter
 // is a "..." parameter. If so, t.In(t.NumIn() - 1) returns the parameter's
 // implicit actual type []T.
 //
@@ -109,48 +112,48 @@ namespace go
 //    t.IsVariadic() == true
 //
 // IsVariadic panics if the type's Kind is not Func.
-            ref uncommonType IsVariadic(); // Elem returns a type's element type.
+            ptr<uncommonType> IsVariadic(); // Elem returns a type's element type.
 // It panics if the type's Kind is not Array, Chan, Map, Ptr, or Slice.
-            ref uncommonType Elem(); // Field returns a struct type's i'th field.
+            ptr<uncommonType> Elem(); // Field returns a struct type's i'th field.
 // It panics if the type's Kind is not Struct.
 // It panics if i is not in the range [0, NumField()).
-            ref uncommonType Field(long i); // FieldByIndex returns the nested field corresponding
+            ptr<uncommonType> Field(long i); // FieldByIndex returns the nested field corresponding
 // to the index sequence. It is equivalent to calling Field
 // successively for each index i.
 // It panics if the type's Kind is not Struct.
-            ref uncommonType FieldByIndex(slice<long> index); // FieldByName returns the struct field with the given name
+            ptr<uncommonType> FieldByIndex(slice<long> index); // FieldByName returns the struct field with the given name
 // and a boolean indicating if the field was found.
-            ref uncommonType FieldByName(@string name); // FieldByNameFunc returns the struct field with a name
+            ptr<uncommonType> FieldByName(@string name); // FieldByNameFunc returns the struct field with a name
 // that satisfies the match function and a boolean indicating if
 // the field was found.
 //
 // FieldByNameFunc considers the fields in the struct itself
-// and then the fields in any anonymous structs, in breadth first order,
+// and then the fields in any embedded structs, in breadth first order,
 // stopping at the shallowest nesting depth containing one or more
 // fields satisfying the match function. If multiple fields at that depth
 // satisfy the match function, they cancel each other
 // and FieldByNameFunc returns no match.
 // This behavior mirrors Go's handling of name lookup in
-// structs containing anonymous fields.
-            ref uncommonType FieldByNameFunc(Func<@string, bool> match); // In returns the type of a function type's i'th input parameter.
+// structs containing embedded fields.
+            ptr<uncommonType> FieldByNameFunc(Func<@string, bool> match); // In returns the type of a function type's i'th input parameter.
 // It panics if the type's Kind is not Func.
 // It panics if i is not in the range [0, NumIn()).
-            ref uncommonType In(long i); // Key returns a map type's key type.
+            ptr<uncommonType> In(long i); // Key returns a map type's key type.
 // It panics if the type's Kind is not Map.
-            ref uncommonType Key(); // Len returns an array type's length.
+            ptr<uncommonType> Key(); // Len returns an array type's length.
 // It panics if the type's Kind is not Array.
-            ref uncommonType Len(); // NumField returns a struct type's field count.
+            ptr<uncommonType> Len(); // NumField returns a struct type's field count.
 // It panics if the type's Kind is not Struct.
-            ref uncommonType NumField(); // NumIn returns a function type's input parameter count.
+            ptr<uncommonType> NumField(); // NumIn returns a function type's input parameter count.
 // It panics if the type's Kind is not Func.
-            ref uncommonType NumIn(); // NumOut returns a function type's output parameter count.
+            ptr<uncommonType> NumIn(); // NumOut returns a function type's output parameter count.
 // It panics if the type's Kind is not Func.
-            ref uncommonType NumOut(); // Out returns the type of a function type's i'th output parameter.
+            ptr<uncommonType> NumOut(); // Out returns the type of a function type's i'th output parameter.
 // It panics if the type's Kind is not Func.
 // It panics if i is not in the range [0, NumOut()).
-            ref uncommonType Out(long i);
-            ref uncommonType common();
-            ref uncommonType uncommon();
+            ptr<uncommonType> Out(long i);
+            ptr<uncommonType> common();
+            ptr<uncommonType> uncommon();
         }
 
         // BUG(rsc): FieldByName and related functions consider struct field names to be equal
@@ -173,33 +176,34 @@ namespace go
         {
         }
 
-        public static readonly Kind Invalid = iota;
-        public static readonly var Bool = 0;
-        public static readonly var Int = 1;
-        public static readonly var Int8 = 2;
-        public static readonly var Int16 = 3;
-        public static readonly var Int32 = 4;
-        public static readonly var Int64 = 5;
-        public static readonly var Uint = 6;
-        public static readonly var Uint8 = 7;
-        public static readonly var Uint16 = 8;
-        public static readonly var Uint32 = 9;
-        public static readonly var Uint64 = 10;
-        public static readonly var Uintptr = 11;
-        public static readonly var Float32 = 12;
-        public static readonly var Float64 = 13;
-        public static readonly var Complex64 = 14;
-        public static readonly var Complex128 = 15;
-        public static readonly var Array = 16;
-        public static readonly var Chan = 17;
-        public static readonly var Func = 18;
-        public static readonly var Interface = 19;
-        public static readonly var Map = 20;
-        public static readonly var Ptr = 21;
-        public static readonly var Slice = 22;
-        public static readonly var String = 23;
-        public static readonly var Struct = 24;
-        public static readonly var UnsafePointer = 25;
+        public static readonly Kind Invalid = (Kind)iota;
+        public static readonly var Bool = (var)0;
+        public static readonly var Int = (var)1;
+        public static readonly var Int8 = (var)2;
+        public static readonly var Int16 = (var)3;
+        public static readonly var Int32 = (var)4;
+        public static readonly var Int64 = (var)5;
+        public static readonly var Uint = (var)6;
+        public static readonly var Uint8 = (var)7;
+        public static readonly var Uint16 = (var)8;
+        public static readonly var Uint32 = (var)9;
+        public static readonly var Uint64 = (var)10;
+        public static readonly var Uintptr = (var)11;
+        public static readonly var Float32 = (var)12;
+        public static readonly var Float64 = (var)13;
+        public static readonly var Complex64 = (var)14;
+        public static readonly var Complex128 = (var)15;
+        public static readonly var Array = (var)16;
+        public static readonly var Chan = (var)17;
+        public static readonly var Func = (var)18;
+        public static readonly var Interface = (var)19;
+        public static readonly var Map = (var)20;
+        public static readonly var Ptr = (var)21;
+        public static readonly var Slice = (var)22;
+        public static readonly var String = (var)23;
+        public static readonly var Struct = (var)24;
+        public static readonly var UnsafePointer = (var)25;
+
 
         // tflag is used by an rtype to signal what extra type information is
         // available in the memory directly following the rtype value.
@@ -224,21 +228,24 @@ namespace go
         //        u uncommonType
         //    }
         //    u := &(*tUncommon)(unsafe.Pointer(t)).u
-        private static readonly tflag tflagUncommon = 1L << (int)(0L); 
+        private static readonly tflag tflagUncommon = (tflag)1L << (int)(0L); 
 
         // tflagExtraStar means the name in the str field has an
         // extraneous '*' prefix. This is because for most types T in
         // a program, the type *T also exists and reusing the str data
         // saves binary size.
-        private static readonly tflag tflagExtraStar = 1L << (int)(1L); 
+        private static readonly tflag tflagExtraStar = (tflag)1L << (int)(1L); 
 
         // tflagNamed means the type has a name.
-        private static readonly tflag tflagNamed = 1L << (int)(2L);
+        private static readonly tflag tflagNamed = (tflag)1L << (int)(2L); 
+
+        // tflagRegularMemory means that equal and hash functions can treat
+        // this type as a single region of t.size bytes.
+        private static readonly tflag tflagRegularMemory = (tflag)1L << (int)(3L);
+
 
         // rtype is the common implementation of most values.
-        // It is embedded in other, public struct types, but always
-        // with a unique tag like `reflect:"array"` or `reflect:"ptr"`
-        // so that code cannot convert from, say, *arrayType to *ptrType.
+        // It is embedded in other struct types.
         //
         // rtype must be kept in sync with ../runtime/type.go:/^type._type.
         private partial struct rtype
@@ -250,18 +257,12 @@ namespace go
             public byte align; // alignment of variable with this type
             public byte fieldAlign; // alignment of struct field with this type
             public byte kind; // enumeration for C
-            public ptr<typeAlg> alg; // algorithm table
+// function for comparing objects of this type
+// (ptr to object A, ptr to object B) -> ==?
+            public Func<unsafe.Pointer, unsafe.Pointer, bool> equal;
             public ptr<byte> gcdata; // garbage collection data
             public nameOff str; // string form
             public typeOff ptrToThis; // type for pointer to this type, may be zero
-        }
-
-        // a copy of runtime.typeAlg
-        private partial struct typeAlg
-        {
-            public Func<unsafe.Pointer, System.UIntPtr, System.UIntPtr> hash; // function for comparing objects of this type
-// (ptr to object A, ptr to object B) -> ==?
-            public Func<unsafe.Pointer, unsafe.Pointer, bool> equal;
         }
 
         // Method on non-interface type
@@ -273,15 +274,15 @@ namespace go
             public textOff tfn; // fn used for normal method call
         }
 
-        // uncommonType is present only for types with names or methods
-        // (if T is a named type, the uncommonTypes for T and *T have methods).
+        // uncommonType is present only for defined types or types with methods
+        // (if T is a defined type, the uncommonTypes for T and *T have methods).
         // Using a pointer to this struct reduces the overall size required
-        // to describe an unnamed type with no methods.
+        // to describe a non-defined type with no methods.
         private partial struct uncommonType
         {
             public nameOff pkgPath; // import path; empty for built-in types like int, string
             public ushort mcount; // number of methods
-            public ushort _; // unused
+            public ushort xcount; // number of exported methods
             public uint moff; // offset from this uncommontype to [mcount]method
             public uint _; // unused
         }
@@ -291,13 +292,12 @@ namespace go
         {
         }
 
-        public static readonly ChanDir RecvDir = 1L << (int)(iota); // <-chan
-        public static readonly BothDir SendDir = RecvDir | SendDir; // chan
+        public static readonly ChanDir RecvDir = (ChanDir)1L << (int)(iota); // <-chan
+        public static readonly BothDir SendDir = (BothDir)RecvDir | SendDir; // chan
 
         // arrayType represents a fixed array type.
         private partial struct arrayType
         {
-            [Description("reflect:\"array\"")]
             public ref rtype rtype => ref rtype_val;
             public ptr<rtype> elem; // array element type
             public ptr<rtype> slice; // slice type
@@ -307,7 +307,6 @@ namespace go
         // chanType represents a channel type.
         private partial struct chanType
         {
-            [Description("reflect:\"chan\"")]
             public ref rtype rtype => ref rtype_val;
             public ptr<rtype> elem; // channel element type
             public System.UIntPtr dir; // channel direction (ChanDir)
@@ -326,7 +325,6 @@ namespace go
         //    }
         private partial struct funcType
         {
-            [Description("reflect:\"func\"")]
             public ref rtype rtype => ref rtype_val;
             public ushort inCount;
             public ushort outCount; // top bit is set if last input parameter is ...
@@ -342,7 +340,6 @@ namespace go
         // interfaceType represents an interface type.
         private partial struct interfaceType
         {
-            [Description("reflect:\"interface\"")]
             public ref rtype rtype => ref rtype_val;
             public name pkgPath; // import path
             public slice<imethod> methods; // sorted by hash
@@ -351,25 +348,21 @@ namespace go
         // mapType represents a map type.
         private partial struct mapType
         {
-            [Description("reflect:\"map\"")]
             public ref rtype rtype => ref rtype_val;
             public ptr<rtype> key; // map key type
             public ptr<rtype> elem; // map element (value) type
             public ptr<rtype> bucket; // internal bucket structure
-            public ptr<rtype> hmap; // internal map header
+// function for hashing keys (ptr to key, seed) -> hash
+            public Func<unsafe.Pointer, System.UIntPtr, System.UIntPtr> hasher;
             public byte keysize; // size of key slot
-            public byte indirectkey; // store ptr to key instead of key itself
             public byte valuesize; // size of value slot
-            public byte indirectvalue; // store ptr to value instead of value itself
             public ushort bucketsize; // size of bucket
-            public bool reflexivekey; // true if k==k for all keys
-            public bool needkeyupdate; // true if we need to update key on an overwrite
+            public uint flags;
         }
 
         // ptrType represents a pointer type.
         private partial struct ptrType
         {
-            [Description("reflect:\"ptr\"")]
             public ref rtype rtype => ref rtype_val;
             public ptr<rtype> elem; // pointer element (pointed at) type
         }
@@ -377,7 +370,6 @@ namespace go
         // sliceType represents a slice type.
         private partial struct sliceType
         {
-            [Description("reflect:\"slice\"")]
             public ref rtype rtype => ref rtype_val;
             public ptr<rtype> elem; // slice element type
         }
@@ -387,23 +379,26 @@ namespace go
         {
             public name name; // name is always non-empty
             public ptr<rtype> typ; // type of field
-            public System.UIntPtr offsetAnon; // byte offset of field<<1 | isAnonymous
+            public System.UIntPtr offsetEmbed; // byte offset of field<<1 | isEmbedded
         }
 
-        private static System.UIntPtr offset(this ref structField f)
+        private static System.UIntPtr offset(this ptr<structField> _addr_f)
         {
-            return f.offsetAnon >> (int)(1L);
+            ref structField f = ref _addr_f.val;
+
+            return f.offsetEmbed >> (int)(1L);
         }
 
-        private static bool anon(this ref structField f)
+        private static bool embedded(this ptr<structField> _addr_f)
         {
-            return f.offsetAnon & 1L != 0L;
+            ref structField f = ref _addr_f.val;
+
+            return f.offsetEmbed & 1L != 0L;
         }
 
         // structType represents a struct type.
         private partial struct structType
         {
-            [Description("reflect:\"struct\"")]
             public ref rtype rtype => ref rtype_val;
             public name pkgPath;
             public slice<structField> fields; // sorted by offset
@@ -437,65 +432,76 @@ namespace go
             public ptr<byte> bytes;
         }
 
-        private static ref byte data(this name n, long off, @string whySafe)
+        private static ptr<byte> data(this name n, long off, @string whySafe)
         {
-            return (byte.Value)(add(@unsafe.Pointer(n.bytes), uintptr(off), whySafe));
+            return _addr_(byte.val)(add(@unsafe.Pointer(n.bytes), uintptr(off), whySafe))!;
         }
 
         private static bool isExported(this name n)
         {
-            return (n.bytes.Value) & (1L << (int)(0L)) != 0L;
+            return (n.bytes.val) & (1L << (int)(0L)) != 0L;
         }
 
         private static long nameLen(this name n)
         {
-            return int(uint16(n.data(1L, "name len field").Value) << (int)(8L) | uint16(n.data(2L, "name len field").Value));
+            return int(uint16(n.data(1L, "name len field").val) << (int)(8L) | uint16(n.data(2L, "name len field").val));
         }
 
         private static long tagLen(this name n)
         {
-            if (n.data(0L, "name flag field") & (1L << (int)(1L)) == 0L.Value)
+            if (n.data(0L, "name flag field") & (1L << (int)(1L)) == 0L.val)
             {
                 return 0L;
             }
+
             long off = 3L + n.nameLen();
-            return int(uint16(n.data(off, "name taglen field").Value) << (int)(8L) | uint16(n.data(off + 1L, "name taglen field").Value));
+            return int(uint16(n.data(off, "name taglen field").val) << (int)(8L) | uint16(n.data(off + 1L, "name taglen field").val));
+
         }
 
         private static @string name(this name n)
         {
+            @string s = default;
+
             if (n.bytes == null)
             {
-                return;
+                return ;
             }
-            ref array<byte> b = new ptr<ref array<byte>>(@unsafe.Pointer(n.bytes));
 
-            var hdr = (stringHeader.Value)(@unsafe.Pointer(ref s));
-            hdr.Data = @unsafe.Pointer(ref b[3L]);
+            ptr<array<byte>> b = new ptr<ptr<array<byte>>>(@unsafe.Pointer(n.bytes));
+
+            var hdr = (unsafeheader.String.val)(@unsafe.Pointer(_addr_s));
+            hdr.Data = @unsafe.Pointer(_addr_b[3L]);
             hdr.Len = int(b[1L]) << (int)(8L) | int(b[2L]);
             return s;
+
         }
 
         private static @string tag(this name n)
         {
+            @string s = default;
+
             var tl = n.tagLen();
             if (tl == 0L)
             {
                 return "";
             }
+
             var nl = n.nameLen();
-            var hdr = (stringHeader.Value)(@unsafe.Pointer(ref s));
+            var hdr = (unsafeheader.String.val)(@unsafe.Pointer(_addr_s));
             hdr.Data = @unsafe.Pointer(n.data(3L + nl + 2L, "non-empty string"));
             hdr.Len = tl;
             return s;
+
         }
 
         private static @string pkgPath(this name n)
         {
-            if (n.bytes == null || n.data(0L, "name flag field") & (1L << (int)(2L)) == 0L.Value)
+            if (n.bytes == null || n.data(0L, "name flag field") & (1L << (int)(2L)) == 0L.val)
             {
                 return "";
             }
+
             long off = 3L + n.nameLen();
             {
                 var tl = n.tagLen();
@@ -506,18 +512,14 @@ namespace go
                 }
 
             }
-            int nameOff = default; 
+
+            ref int nameOff = ref heap(out ptr<int> _addr_nameOff); 
             // Note that this field may not be aligned in memory,
             // so we cannot use a direct int32 assignment here.
-            copy(new ptr<ref array<byte>>(@unsafe.Pointer(ref nameOff))[..], new ptr<ref array<byte>>(@unsafe.Pointer(n.data(off, "name offset field")))[..]);
+            copy(new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_nameOff))[..], new ptr<ptr<array<byte>>>(@unsafe.Pointer(n.data(off, "name offset field")))[..]);
             name pkgPathName = new name((*byte)(resolveTypeOff(unsafe.Pointer(n.bytes),nameOff)));
             return pkgPathName.name();
-        }
 
-        // round n up to a multiple of a.  a must be a power of 2.
-        private static System.UIntPtr round(System.UIntPtr n, System.UIntPtr a)
-        {
-            return (n + a - 1L) & ~(a - 1L);
         }
 
         private static name newName(@string n, @string tag, bool exported) => func((_, panic, __) =>
@@ -526,21 +528,25 @@ namespace go
             {
                 panic("reflect.nameFrom: name too long: " + n);
             }
+
             if (len(tag) > 1L << (int)(16L) - 1L)
             {
                 panic("reflect.nameFrom: tag too long: " + tag);
             }
+
             byte bits = default;
             long l = 1L + 2L + len(n);
             if (exported)
             {
                 bits |= 1L << (int)(0L);
             }
+
             if (len(tag) > 0L)
             {
                 l += 2L + len(tag);
                 bits |= 1L << (int)(1L);
             }
+
             var b = make_slice<byte>(l);
             b[0L] = bits;
             b[1L] = uint8(len(n) >> (int)(8L));
@@ -553,7 +559,9 @@ namespace go
                 tb[1L] = uint8(len(tag));
                 copy(tb[2L..], tag);
             }
+
             return new name(bytes:&b[0]);
+
         });
 
         /*
@@ -571,29 +579,49 @@ namespace go
             public long Index; // index for Type.Method
         }
 
-        private static readonly long kindDirectIface = 1L << (int)(5L);
-        private static readonly long kindGCProg = 1L << (int)(6L); // Type.gc points to GC program
-        private static readonly long kindNoPointers = 1L << (int)(7L);
-        private static readonly long kindMask = (1L << (int)(5L)) - 1L;
+        private static readonly long kindDirectIface = (long)1L << (int)(5L);
+        private static readonly long kindGCProg = (long)1L << (int)(6L); // Type.gc points to GC program
+        private static readonly long kindMask = (long)(1L << (int)(5L)) - 1L;
 
+
+        // String returns the name of k.
         public static @string String(this Kind k)
         {
             if (int(k) < len(kindNames))
             {
                 return kindNames[k];
             }
+
             return "kind" + strconv.Itoa(int(k));
+
         }
 
         private static @string kindNames = new slice<@string>(InitKeyedValues<@string>((Invalid, "invalid"), (Bool, "bool"), (Int, "int"), (Int8, "int8"), (Int16, "int16"), (Int32, "int32"), (Int64, "int64"), (Uint, "uint"), (Uint8, "uint8"), (Uint16, "uint16"), (Uint32, "uint32"), (Uint64, "uint64"), (Uintptr, "uintptr"), (Float32, "float32"), (Float64, "float64"), (Complex64, "complex64"), (Complex128, "complex128"), (Array, "array"), (Chan, "chan"), (Func, "func"), (Interface, "interface"), (Map, "map"), (Ptr, "ptr"), (Slice, "slice"), (String, "string"), (Struct, "struct"), (UnsafePointer, "unsafe.Pointer")));
 
-        private static slice<method> methods(this ref uncommonType t)
+        private static slice<method> methods(this ptr<uncommonType> _addr_t)
         {
+            ref uncommonType t = ref _addr_t.val;
+
             if (t.mcount == 0L)
             {
                 return null;
             }
-            return new ptr<ref array<method>>(add(@unsafe.Pointer(t), uintptr(t.moff), "t.mcount > 0")).slice(-1, t.mcount, t.mcount);
+
+            return new ptr<ptr<array<method>>>(add(@unsafe.Pointer(t), uintptr(t.moff), "t.mcount > 0")).slice(-1, t.mcount, t.mcount);
+
+        }
+
+        private static slice<method> exportedMethods(this ptr<uncommonType> _addr_t)
+        {
+            ref uncommonType t = ref _addr_t.val;
+
+            if (t.xcount == 0L)
+            {
+                return null;
+            }
+
+            return new ptr<ptr<array<method>>>(add(@unsafe.Pointer(t), uintptr(t.moff), "t.xcount > 0")).slice(-1, t.xcount, t.xcount);
+
         }
 
         // resolveNameOff resolves a name offset from a base pointer.
@@ -608,7 +636,7 @@ namespace go
         private static unsafe.Pointer resolveTypeOff(unsafe.Pointer rtype, int off)
 ;
 
-        // resolveTextOff resolves an function pointer offset from a base type.
+        // resolveTextOff resolves a function pointer offset from a base type.
         // The (*rtype).textOff method is a convenience wrapper for this function.
         // Implemented in the runtime package.
         private static unsafe.Pointer resolveTextOff(unsafe.Pointer rtype, int off)
@@ -620,7 +648,7 @@ namespace go
         private static int addReflectOff(unsafe.Pointer ptr)
 ;
 
-        // resolveReflectType adds a name to the reflection lookup map in the runtime.
+        // resolveReflectName adds a name to the reflection lookup map in the runtime.
         // It returns a new nameOff that can be used to refer to the pointer.
         private static nameOff resolveReflectName(name n)
         {
@@ -629,8 +657,10 @@ namespace go
 
         // resolveReflectType adds a *rtype to the reflection lookup map in the runtime.
         // It returns a new typeOff that can be used to refer to the pointer.
-        private static typeOff resolveReflectType(ref rtype t)
+        private static typeOff resolveReflectType(ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             return typeOff(addReflectOff(@unsafe.Pointer(t)));
         }
 
@@ -652,237 +682,224 @@ namespace go
         {
         } // offset from top of text section
 
-        private static name nameOff(this ref rtype t, nameOff off)
-        {>>MARKER:FUNCTION_addReflectOff_BLOCK_PREFIX<<
+        private static name nameOff(this ptr<rtype> _addr_t, nameOff off)
+        {
+            ref rtype t = ref _addr_t.val;
+
             return new name((*byte)(resolveNameOff(unsafe.Pointer(t),int32(off))));
         }
 
-        private static ref rtype typeOff(this ref rtype t, typeOff off)
-        {>>MARKER:FUNCTION_resolveTextOff_BLOCK_PREFIX<<
-            return (rtype.Value)(resolveTypeOff(@unsafe.Pointer(t), int32(off)));
+        private static ptr<rtype> typeOff(this ptr<rtype> _addr_t, typeOff off)
+        {
+            ref rtype t = ref _addr_t.val;
+
+            return _addr_(rtype.val)(resolveTypeOff(@unsafe.Pointer(t), int32(off)))!;
         }
 
-        private static unsafe.Pointer textOff(this ref rtype t, textOff off)
-        {>>MARKER:FUNCTION_resolveTypeOff_BLOCK_PREFIX<<
+        private static unsafe.Pointer textOff(this ptr<rtype> _addr_t, textOff off)
+        {
+            ref rtype t = ref _addr_t.val;
+
             return resolveTextOff(@unsafe.Pointer(t), int32(off));
         }
 
-        private static ref uncommonType uncommon(this ref rtype t)
-        {>>MARKER:FUNCTION_resolveNameOff_BLOCK_PREFIX<<
+        private static ptr<uncommonType> uncommon(this ptr<rtype> _addr_t)
+        {
+            ref rtype t = ref _addr_t.val;
+
             if (t.tflag & tflagUncommon == 0L)
-            {
-                return null;
+            {>>MARKER:FUNCTION_addReflectOff_BLOCK_PREFIX<<
+                return _addr_null!;
             }
 
+
             if (t.Kind() == Struct) 
-                return ref (structTypeUncommon.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(structTypeUncommon.val)(@unsafe.Pointer(t)).u!;
             else if (t.Kind() == Ptr) 
                 private partial struct u
                 {
                     public ref ptrType ptrType => ref ptrType_val;
                     public uncommonType u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.Kind() == Func) 
                 private partial struct u
                 {
                     public ref ptrType ptrType => ref ptrType_val;
                     public uncommonType u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.Kind() == Slice) 
                 private partial struct u
                 {
                     public ref ptrType ptrType => ref ptrType_val;
                     public uncommonType u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.Kind() == Array) 
                 private partial struct u
                 {
                     public ref ptrType ptrType => ref ptrType_val;
                     public uncommonType u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.Kind() == Chan) 
                 private partial struct u
                 {
                     public ref ptrType ptrType => ref ptrType_val;
                     public uncommonType u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.Kind() == Map) 
                 private partial struct u
                 {
                     public ref ptrType ptrType => ref ptrType_val;
                     public uncommonType u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.Kind() == Interface) 
                 private partial struct u
                 {
                     public ref ptrType ptrType => ref ptrType_val;
                     public uncommonType u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else 
                 private partial struct u
                 {
                     public ref ptrType ptrType => ref ptrType_val;
                     public uncommonType u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
-                    }
-
-        private static @string String(this ref rtype t)
-        {
-            var s = t.nameOff(t.str).name();
-            if (t.tflag & tflagExtraStar != 0L)
-            {
-                return s[1L..];
-            }
-            return s;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
+            
         }
 
-        private static System.UIntPtr Size(this ref rtype t)
+        private static @string String(this ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
+            var s = t.nameOff(t.str).name();
+            if (t.tflag & tflagExtraStar != 0L)
+            {>>MARKER:FUNCTION_resolveTextOff_BLOCK_PREFIX<<
+                return s[1L..];
+            }
+
+            return s;
+
+        }
+
+        private static System.UIntPtr Size(this ptr<rtype> _addr_t)
+        {
+            ref rtype t = ref _addr_t.val;
+
             return t.size;
         }
 
-        private static long Bits(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static long Bits(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t == null)
-            {
+            {>>MARKER:FUNCTION_resolveTypeOff_BLOCK_PREFIX<<
                 panic("reflect: Bits of nil Type");
             }
+
             var k = t.Kind();
             if (k < Int || k > Complex128)
-            {
+            {>>MARKER:FUNCTION_resolveNameOff_BLOCK_PREFIX<<
                 panic("reflect: Bits of non-arithmetic Type " + t.String());
             }
+
             return int(t.size) * 8L;
+
         });
 
-        private static long Align(this ref rtype t)
+        private static long Align(this ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             return int(t.align);
         }
 
-        private static long FieldAlign(this ref rtype t)
+        private static long FieldAlign(this ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             return int(t.fieldAlign);
         }
 
-        private static Kind Kind(this ref rtype t)
+        private static Kind Kind(this ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             return Kind(t.kind & kindMask);
         }
 
-        private static bool pointers(this ref rtype t)
+        private static bool pointers(this ptr<rtype> _addr_t)
         {
-            return t.kind & kindNoPointers == 0L;
+            ref rtype t = ref _addr_t.val;
+
+            return t.ptrdata != 0L;
         }
 
-        private static ref rtype common(this ref rtype t)
+        private static ptr<rtype> common(this ptr<rtype> _addr_t)
         {
-            return t;
+            ref rtype t = ref _addr_t.val;
+
+            return _addr_t!;
         }
 
-        private static sync.Map methodCache = default; // map[*rtype][]method
-
-        private static slice<method> exportedMethods(this ref rtype t)
+        private static slice<method> exportedMethods(this ptr<rtype> _addr_t)
         {
-            var (methodsi, found) = methodCache.Load(t);
-            if (found)
-            {
-                return methodsi._<slice<method>>();
-            }
+            ref rtype t = ref _addr_t.val;
+
             var ut = t.uncommon();
             if (ut == null)
             {
                 return null;
             }
-            var allm = ut.methods();
-            var allExported = true;
-            {
-                var m__prev1 = m;
 
-                foreach (var (_, __m) in allm)
-                {
-                    m = __m;
-                    var name = t.nameOff(m.name);
-                    if (!name.isExported())
-                    {
-                        allExported = false;
-                        break;
-                    }
-                }
+            return ut.exportedMethods();
 
-                m = m__prev1;
-            }
-
-            slice<method> methods = default;
-            if (allExported)
-            {
-                methods = allm;
-            }
-            else
-            {
-                methods = make_slice<method>(0L, len(allm));
-                {
-                    var m__prev1 = m;
-
-                    foreach (var (_, __m) in allm)
-                    {
-                        m = __m;
-                        name = t.nameOff(m.name);
-                        if (name.isExported())
-                        {
-                            methods = append(methods, m);
-                        }
-                    }
-
-                    m = m__prev1;
-                }
-
-                methods = methods.slice(-1, len(methods), len(methods));
-            }
-            methodsi, _ = methodCache.LoadOrStore(t, methods);
-            return methodsi._<slice<method>>();
         }
 
-        private static long NumMethod(this ref rtype t)
+        private static long NumMethod(this ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() == Interface)
             {
-                var tt = (interfaceType.Value)(@unsafe.Pointer(t));
+                var tt = (interfaceType.val)(@unsafe.Pointer(t));
                 return tt.NumMethod();
             }
-            if (t.tflag & tflagUncommon == 0L)
-            {
-                return 0L; // avoid methodCache synchronization
-            }
+
             return len(t.exportedMethods());
+
         }
 
-        private static Method Method(this ref rtype _t, long i) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static Method Method(this ptr<rtype> _addr_t, long i) => func((_, panic, __) =>
         {
+            Method m = default;
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() == Interface)
             {
-                var tt = (interfaceType.Value)(@unsafe.Pointer(t));
+                var tt = (interfaceType.val)(@unsafe.Pointer(t));
                 return tt.Method(i);
             }
+
             var methods = t.exportedMethods();
             if (i < 0L || i >= len(methods))
             {
                 panic("reflect: Method index out of range");
             }
+
             var p = methods[i];
             var pname = t.nameOff(p.name);
             m.Name = pname.name();
             var fl = flag(Func);
             var mtyp = t.typeOff(p.mtyp);
-            var ft = (funcType.Value)(@unsafe.Pointer(mtyp));
+            var ft = (funcType.val)(@unsafe.Pointer(mtyp));
             var @in = make_slice<Type>(0L, 1L + len(ft.@in()));
             in = append(in, t);
             foreach (var (_, arg) in ft.@in())
@@ -896,262 +913,338 @@ namespace go
             }
             var mt = FuncOf(in, out, ft.IsVariadic());
             m.Type = mt;
-            var tfn = t.textOff(p.tfn);
-            var fn = @unsafe.Pointer(ref tfn);
+            ref var tfn = ref heap(t.textOff(p.tfn), out ptr<var> _addr_tfn);
+            var fn = @unsafe.Pointer(_addr_tfn);
             m.Func = new Value(mt.(*rtype),fn,fl);
 
             m.Index = i;
             return m;
+
         });
 
-        private static (Method, bool) MethodByName(this ref rtype t, @string name)
+        private static (Method, bool) MethodByName(this ptr<rtype> _addr_t, @string name)
         {
+            Method m = default;
+            bool ok = default;
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() == Interface)
             {
-                var tt = (interfaceType.Value)(@unsafe.Pointer(t));
+                var tt = (interfaceType.val)(@unsafe.Pointer(t));
                 return tt.MethodByName(name);
             }
+
             var ut = t.uncommon();
             if (ut == null)
             {
                 return (new Method(), false);
-            }
-            var utmethods = ut.methods();
-            long eidx = default;
-            for (long i = 0L; i < int(ut.mcount); i++)
+            } 
+            // TODO(mdempsky): Binary search.
+            foreach (var (i, p) in ut.exportedMethods())
             {
-                var p = utmethods[i];
-                var pname = t.nameOff(p.name);
-                if (pname.isExported())
+                if (t.nameOff(p.name).name() == name)
                 {
-                    if (pname.name() == name)
-                    {
-                        return (t.Method(eidx), true);
-                    }
-                    eidx++;
+                    return (t.Method(i), true);
                 }
-            }
 
+            }
             return (new Method(), false);
+
         }
 
-        private static @string PkgPath(this ref rtype t)
+        private static @string PkgPath(this ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.tflag & tflagNamed == 0L)
             {
                 return "";
             }
+
             var ut = t.uncommon();
             if (ut == null)
             {
                 return "";
             }
+
             return t.nameOff(ut.pkgPath).name();
+
         }
 
-        private static bool hasPrefix(@string s, @string prefix)
+        private static bool hasName(this ptr<rtype> _addr_t)
         {
-            return len(s) >= len(prefix) && s[..len(prefix)] == prefix;
+            ref rtype t = ref _addr_t.val;
+
+            return t.tflag & tflagNamed != 0L;
         }
 
-        private static @string Name(this ref rtype t)
+        private static @string Name(this ptr<rtype> _addr_t)
         {
-            if (t.tflag & tflagNamed == 0L)
+            ref rtype t = ref _addr_t.val;
+
+            if (!t.hasName())
             {
                 return "";
             }
+
             var s = t.String();
             var i = len(s) - 1L;
-            while (i >= 0L)
+            while (i >= 0L && s[i] != '.')
             {
-                if (s[i] == '.')
-                {
-                    break;
-                }
                 i--;
             }
 
             return s[i + 1L..];
+
         }
 
-        private static ChanDir ChanDir(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static ChanDir ChanDir(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Chan)
             {
-                panic("reflect: ChanDir of non-chan type");
+                panic("reflect: ChanDir of non-chan type " + t.String());
             }
-            var tt = (chanType.Value)(@unsafe.Pointer(t));
+
+            var tt = (chanType.val)(@unsafe.Pointer(t));
             return ChanDir(tt.dir);
+
         });
 
-        private static bool IsVariadic(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static bool IsVariadic(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Func)
             {
-                panic("reflect: IsVariadic of non-func type");
+                panic("reflect: IsVariadic of non-func type " + t.String());
             }
-            var tt = (funcType.Value)(@unsafe.Pointer(t));
+
+            var tt = (funcType.val)(@unsafe.Pointer(t));
             return tt.outCount & (1L << (int)(15L)) != 0L;
+
         });
 
-        private static Type Elem(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static Type Elem(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
 
             if (t.Kind() == Array) 
-                var tt = (arrayType.Value)(@unsafe.Pointer(t));
-                return toType(tt.elem);
+                var tt = (arrayType.val)(@unsafe.Pointer(t));
+                return toType(_addr_tt.elem);
             else if (t.Kind() == Chan) 
-                tt = (chanType.Value)(@unsafe.Pointer(t));
-                return toType(tt.elem);
+                tt = (chanType.val)(@unsafe.Pointer(t));
+                return toType(_addr_tt.elem);
             else if (t.Kind() == Map) 
-                tt = (mapType.Value)(@unsafe.Pointer(t));
-                return toType(tt.elem);
+                tt = (mapType.val)(@unsafe.Pointer(t));
+                return toType(_addr_tt.elem);
             else if (t.Kind() == Ptr) 
-                tt = (ptrType.Value)(@unsafe.Pointer(t));
-                return toType(tt.elem);
+                tt = (ptrType.val)(@unsafe.Pointer(t));
+                return toType(_addr_tt.elem);
             else if (t.Kind() == Slice) 
-                tt = (sliceType.Value)(@unsafe.Pointer(t));
-                return toType(tt.elem);
-                        panic("reflect: Elem of invalid type");
+                tt = (sliceType.val)(@unsafe.Pointer(t));
+                return toType(_addr_tt.elem);
+                        panic("reflect: Elem of invalid type " + t.String());
+
         });
 
-        private static StructField Field(this ref rtype _t, long i) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static StructField Field(this ptr<rtype> _addr_t, long i) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Struct)
             {
-                panic("reflect: Field of non-struct type");
+                panic("reflect: Field of non-struct type " + t.String());
             }
-            var tt = (structType.Value)(@unsafe.Pointer(t));
+
+            var tt = (structType.val)(@unsafe.Pointer(t));
             return tt.Field(i);
+
         });
 
-        private static StructField FieldByIndex(this ref rtype _t, slice<long> index) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static StructField FieldByIndex(this ptr<rtype> _addr_t, slice<long> index) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Struct)
             {
-                panic("reflect: FieldByIndex of non-struct type");
+                panic("reflect: FieldByIndex of non-struct type " + t.String());
             }
-            var tt = (structType.Value)(@unsafe.Pointer(t));
+
+            var tt = (structType.val)(@unsafe.Pointer(t));
             return tt.FieldByIndex(index);
+
         });
 
-        private static (StructField, bool) FieldByName(this ref rtype _t, @string name) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static (StructField, bool) FieldByName(this ptr<rtype> _addr_t, @string name) => func((_, panic, __) =>
         {
+            StructField _p0 = default;
+            bool _p0 = default;
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Struct)
             {
-                panic("reflect: FieldByName of non-struct type");
+                panic("reflect: FieldByName of non-struct type " + t.String());
             }
-            var tt = (structType.Value)(@unsafe.Pointer(t));
+
+            var tt = (structType.val)(@unsafe.Pointer(t));
             return tt.FieldByName(name);
+
         });
 
-        private static (StructField, bool) FieldByNameFunc(this ref rtype _t, Func<@string, bool> match) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static (StructField, bool) FieldByNameFunc(this ptr<rtype> _addr_t, Func<@string, bool> match) => func((_, panic, __) =>
         {
+            StructField _p0 = default;
+            bool _p0 = default;
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Struct)
             {
-                panic("reflect: FieldByNameFunc of non-struct type");
+                panic("reflect: FieldByNameFunc of non-struct type " + t.String());
             }
-            var tt = (structType.Value)(@unsafe.Pointer(t));
+
+            var tt = (structType.val)(@unsafe.Pointer(t));
             return tt.FieldByNameFunc(match);
+
         });
 
-        private static Type In(this ref rtype _t, long i) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static Type In(this ptr<rtype> _addr_t, long i) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Func)
             {
-                panic("reflect: In of non-func type");
+                panic("reflect: In of non-func type " + t.String());
             }
-            var tt = (funcType.Value)(@unsafe.Pointer(t));
-            return toType(tt.@in()[i]);
+
+            var tt = (funcType.val)(@unsafe.Pointer(t));
+            return toType(_addr_tt.@in()[i]);
+
         });
 
-        private static Type Key(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static Type Key(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Map)
             {
-                panic("reflect: Key of non-map type");
+                panic("reflect: Key of non-map type " + t.String());
             }
-            var tt = (mapType.Value)(@unsafe.Pointer(t));
-            return toType(tt.key);
+
+            var tt = (mapType.val)(@unsafe.Pointer(t));
+            return toType(_addr_tt.key);
+
         });
 
-        private static long Len(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static long Len(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Array)
             {
-                panic("reflect: Len of non-array type");
+                panic("reflect: Len of non-array type " + t.String());
             }
-            var tt = (arrayType.Value)(@unsafe.Pointer(t));
+
+            var tt = (arrayType.val)(@unsafe.Pointer(t));
             return int(tt.len);
+
         });
 
-        private static long NumField(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static long NumField(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Struct)
             {
-                panic("reflect: NumField of non-struct type");
+                panic("reflect: NumField of non-struct type " + t.String());
             }
-            var tt = (structType.Value)(@unsafe.Pointer(t));
+
+            var tt = (structType.val)(@unsafe.Pointer(t));
             return len(tt.fields);
+
         });
 
-        private static long NumIn(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static long NumIn(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Func)
             {
-                panic("reflect: NumIn of non-func type");
+                panic("reflect: NumIn of non-func type " + t.String());
             }
-            var tt = (funcType.Value)(@unsafe.Pointer(t));
+
+            var tt = (funcType.val)(@unsafe.Pointer(t));
             return int(tt.inCount);
+
         });
 
-        private static long NumOut(this ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static long NumOut(this ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Func)
             {
-                panic("reflect: NumOut of non-func type");
+                panic("reflect: NumOut of non-func type " + t.String());
             }
-            var tt = (funcType.Value)(@unsafe.Pointer(t));
+
+            var tt = (funcType.val)(@unsafe.Pointer(t));
             return len(tt.@out());
+
         });
 
-        private static Type Out(this ref rtype _t, long i) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static Type Out(this ptr<rtype> _addr_t, long i) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.Kind() != Func)
             {
-                panic("reflect: Out of non-func type");
+                panic("reflect: Out of non-func type " + t.String());
             }
-            var tt = (funcType.Value)(@unsafe.Pointer(t));
-            return toType(tt.@out()[i]);
+
+            var tt = (funcType.val)(@unsafe.Pointer(t));
+            return toType(_addr_tt.@out()[i]);
+
         });
 
-        private static slice<ref rtype> @in(this ref funcType t)
+        private static slice<ptr<rtype>> @in(this ptr<funcType> _addr_t)
         {
-            var uadd = @unsafe.Sizeof(t.Value);
+            ref funcType t = ref _addr_t.val;
+
+            var uadd = @unsafe.Sizeof(t.val);
             if (t.tflag & tflagUncommon != 0L)
             {
                 uadd += @unsafe.Sizeof(new uncommonType());
             }
+
             if (t.inCount == 0L)
             {
                 return null;
             }
-            return new ptr<ref array<ref rtype>>(add(@unsafe.Pointer(t), uadd, "t.inCount > 0"))[..t.inCount];
+
+            return new ptr<ptr<array<ptr<rtype>>>>(add(@unsafe.Pointer(t), uadd, "t.inCount > 0")).slice(-1, t.inCount, t.inCount);
+
         }
 
-        private static slice<ref rtype> @out(this ref funcType t)
+        private static slice<ptr<rtype>> @out(this ptr<funcType> _addr_t)
         {
-            var uadd = @unsafe.Sizeof(t.Value);
+            ref funcType t = ref _addr_t.val;
+
+            var uadd = @unsafe.Sizeof(t.val);
             if (t.tflag & tflagUncommon != 0L)
             {
                 uadd += @unsafe.Sizeof(new uncommonType());
             }
+
             var outCount = t.outCount & (1L << (int)(15L) - 1L);
             if (outCount == 0L)
             {
                 return null;
             }
-            return new ptr<ref array<ref rtype>>(add(@unsafe.Pointer(t), uadd, "outCount > 0"))[t.inCount..t.inCount + outCount];
+
+            return new ptr<ptr<array<ptr<rtype>>>>(add(@unsafe.Pointer(t), uadd, "outCount > 0")).slice(t.inCount, t.inCount + outCount, t.inCount + outCount);
+
         }
 
         // add returns p+x.
@@ -1176,16 +1269,21 @@ namespace go
             else if (d == BothDir) 
                 return "chan";
                         return "ChanDir" + strconv.Itoa(int(d));
+
         }
 
         // Method returns the i'th method in the type's method set.
-        private static Method Method(this ref interfaceType t, long i)
+        private static Method Method(this ptr<interfaceType> _addr_t, long i)
         {
+            Method m = default;
+            ref interfaceType t = ref _addr_t.val;
+
             if (i < 0L || i >= len(t.methods))
             {
-                return;
+                return ;
             }
-            var p = ref t.methods[i];
+
+            var p = _addr_t.methods[i];
             var pname = t.nameOff(p.name);
             m.Name = pname.name();
             if (!pname.isExported())
@@ -1195,35 +1293,47 @@ namespace go
                 {
                     m.PkgPath = t.pkgPath.name();
                 }
+
             }
-            m.Type = toType(t.typeOff(p.typ));
+
+            m.Type = toType(_addr_t.typeOff(p.typ));
             m.Index = i;
-            return;
+            return ;
+
         }
 
         // NumMethod returns the number of interface methods in the type's method set.
-        private static long NumMethod(this ref interfaceType t)
+        private static long NumMethod(this ptr<interfaceType> _addr_t)
         {
+            ref interfaceType t = ref _addr_t.val;
+
             return len(t.methods);
         }
 
         // MethodByName method with the given name in the type's method set.
-        private static (Method, bool) MethodByName(this ref interfaceType t, @string name)
+        private static (Method, bool) MethodByName(this ptr<interfaceType> _addr_t, @string name)
         {
+            Method m = default;
+            bool ok = default;
+            ref interfaceType t = ref _addr_t.val;
+
             if (t == null)
             {
-                return;
+                return ;
             }
-            ref imethod p = default;
+
+            ptr<imethod> p;
             foreach (var (i) in t.methods)
             {
-                p = ref t.methods[i];
+                p = _addr_t.methods[i];
                 if (t.nameOff(p.name).name() == name)
                 {
                     return (t.Method(i), true);
                 }
+
             }
-            return;
+            return ;
+
         }
 
         // A StructField describes a single field in a struct.
@@ -1270,7 +1380,10 @@ namespace go
         // the tag string. If the tag does not have the conventional format,
         // the value returned by Lookup is unspecified.
         public static (@string, bool) Lookup(this StructTag tag, @string key)
-        { 
+        {
+            @string value = default;
+            bool ok = default;
+ 
             // When modifying this code, also update the validateStructTag code
             // in cmd/vet/structtag.go.
 
@@ -1303,6 +1416,7 @@ namespace go
                 {
                     break;
                 }
+
                 var name = string(tag[..i]);
                 tag = tag[i + 1L..]; 
 
@@ -1314,13 +1428,16 @@ namespace go
                     {
                         i++;
                     }
+
                     i++;
+
                 }
 
                 if (i >= len(tag))
                 {
                     break;
                 }
+
                 var qvalue = string(tag[..i + 1L]);
                 tag = tag[i + 1L..];
 
@@ -1331,28 +1448,37 @@ namespace go
                     {
                         break;
                     }
+
                     return (value, true);
+
                 }
+
             }
 
             return ("", false);
+
         }
 
         // Field returns the i'th struct field.
-        private static StructField Field(this ref structType _t, long i) => func(_t, (ref structType t, Defer _, Panic panic, Recover __) =>
+        private static StructField Field(this ptr<structType> _addr_t, long i) => func((_, panic, __) =>
         {
+            StructField f = default;
+            ref structType t = ref _addr_t.val;
+
             if (i < 0L || i >= len(t.fields))
             {
                 panic("reflect: Field index out of bounds");
             }
-            var p = ref t.fields[i];
-            f.Type = toType(p.typ);
+
+            var p = _addr_t.fields[i];
+            f.Type = toType(_addr_p.typ);
             f.Name = p.name.name();
-            f.Anonymous = p.anon();
+            f.Anonymous = p.embedded();
             if (!p.name.isExported())
             {
                 f.PkgPath = t.pkgPath.name();
             }
+
             {
                 var tag = p.name.tag();
 
@@ -1362,6 +1488,7 @@ namespace go
                 }
 
             }
+
             f.Offset = p.offset(); 
 
             // NOTE(rsc): This is the only allocation in the interface
@@ -1372,16 +1499,20 @@ namespace go
             // postponed that ugliness until there is a demonstrated
             // need for the performance. This is issue 2320.
             f.Index = new slice<long>(new long[] { i });
-            return;
+            return ;
+
         });
 
         // TODO(gri): Should there be an error/bool indicator if the index
         //            is wrong for FieldByIndex?
 
         // FieldByIndex returns the nested field corresponding to index.
-        private static StructField FieldByIndex(this ref structType t, slice<long> index)
+        private static StructField FieldByIndex(this ptr<structType> _addr_t, slice<long> index)
         {
-            f.Type = toType(ref t.rtype);
+            StructField f = default;
+            ref structType t = ref _addr_t.val;
+
+            f.Type = toType(_addr_t.rtype);
             foreach (var (i, x) in index)
             {
                 if (i > 0L)
@@ -1391,11 +1522,16 @@ namespace go
                     {
                         ft = ft.Elem();
                     }
+
                     f.Type = ft;
+
                 }
+
                 f = f.Type.Field(x);
+
             }
-            return;
+            return ;
+
         }
 
         // A fieldScan represents an item on the fieldByNameFunc scan work list.
@@ -1407,8 +1543,12 @@ namespace go
 
         // FieldByNameFunc returns the struct field with a name that satisfies the
         // match function and a boolean to indicate if the field was found.
-        private static (StructField, bool) FieldByNameFunc(this ref structType t, Func<@string, bool> match)
-        { 
+        private static (StructField, bool) FieldByNameFunc(this ptr<structType> _addr_t, Func<@string, bool> match)
+        {
+            StructField result = default;
+            bool ok = default;
+            ref structType t = ref _addr_t.val;
+ 
             // This uses the same condition that the Go language does: there must be a unique instance
             // of the match at a given depth level. If there are multiple instances of a match at the
             // same depth, they annihilate each other and inhibit any possible match at a lower level.
@@ -1426,14 +1566,14 @@ namespace go
             // If a struct type T can be reached more than once at a given depth level,
             // then it annihilates itself and need not be considered at all when we
             // process that next depth level.
-            map<ref structType, long> nextCount = default; 
+            map<ptr<structType>, long> nextCount = default; 
 
             // visited records the structs that have been considered already.
             // Embedded pointer fields can create cycles in the graph of
             // reachable embedded types; visited avoids following those cycles.
             // It also avoids duplicated effort: if we didn't find the field in an
             // embedded type T at level 2, we won't find it in one at level 4 either.
-            map visited = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref structType, bool>{};
+            map visited = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<structType>, bool>{};
 
             while (len(next) > 0L)
             {
@@ -1455,22 +1595,25 @@ namespace go
                         // That higher level would shadow the lower level we're now at,
                         // so this one can't be useful to us. Ignore it.
                         continue;
+
                     }
+
                     visited[t] = true;
                     foreach (var (i) in t.fields)
                     {
-                        var f = ref t.fields[i]; 
-                        // Find name and (for anonymous field) type for field f.
+                        var f = _addr_t.fields[i]; 
+                        // Find name and (for embedded field) type for field f.
                         var fname = f.name.name();
-                        ref rtype ntyp = default;
-                        if (f.anon())
+                        ptr<rtype> ntyp;
+                        if (f.embedded())
                         { 
-                            // Anonymous field of type T or *T.
+                            // Embedded field of type T or *T.
                             ntyp = f.typ;
                             if (ntyp.Kind() == Ptr)
                             {
                                 ntyp = ntyp.Elem().common();
                             }
+
                         } 
 
                         // Does it match?
@@ -1481,13 +1624,16 @@ namespace go
                             { 
                                 // Name appeared multiple times at this level: annihilate.
                                 return (new StructField(), false);
+
                             }
+
                             result = t.Field(i);
                             result.Index = null;
                             result.Index = append(result.Index, scan.index);
                             result.Index = append(result.Index, i);
                             ok = true;
                             continue;
+
                         } 
 
                         // Queue embedded struct fields for processing with next level,
@@ -1497,70 +1643,89 @@ namespace go
                         {
                             continue;
                         }
-                        var styp = (structType.Value)(@unsafe.Pointer(ntyp));
+
+                        var styp = (structType.val)(@unsafe.Pointer(ntyp));
                         if (nextCount[styp] > 0L)
                         {
                             nextCount[styp] = 2L; // exact multiple doesn't matter
                             continue;
+
                         }
+
                         if (nextCount == null)
                         {
-                            nextCount = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref structType, long>{};
+                            nextCount = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<structType>, long>{};
                         }
+
                         nextCount[styp] = 1L;
                         if (count[t] > 1L)
                         {
                             nextCount[styp] = 2L; // exact multiple doesn't matter
                         }
+
                         slice<long> index = default;
                         index = append(index, scan.index);
                         index = append(index, i);
                         next = append(next, new fieldScan(styp,index));
+
                     }
+
                 }
                 if (ok)
                 {
                     break;
                 }
+
             }
 
-            return;
+            return ;
+
         }
 
         // FieldByName returns the struct field with the given name
         // and a boolean to indicate if the field was found.
-        private static (StructField, bool) FieldByName(this ref structType t, @string name)
-        { 
-            // Quick check for top-level name, or struct without anonymous fields.
-            var hasAnon = false;
+        private static (StructField, bool) FieldByName(this ptr<structType> _addr_t, @string name)
+        {
+            StructField f = default;
+            bool present = default;
+            ref structType t = ref _addr_t.val;
+ 
+            // Quick check for top-level name, or struct without embedded fields.
+            var hasEmbeds = false;
             if (name != "")
             {
                 foreach (var (i) in t.fields)
                 {
-                    var tf = ref t.fields[i];
+                    var tf = _addr_t.fields[i];
                     if (tf.name.name() == name)
                     {
                         return (t.Field(i), true);
                     }
-                    if (tf.anon())
+
+                    if (tf.embedded())
                     {
-                        hasAnon = true;
+                        hasEmbeds = true;
                     }
+
                 }
+
             }
-            if (!hasAnon)
+
+            if (!hasEmbeds)
             {
-                return;
+                return ;
             }
+
             return t.FieldByNameFunc(s => s == name);
+
         }
 
         // TypeOf returns the reflection Type that represents the dynamic type of i.
         // If i is a nil interface value, TypeOf returns nil.
         public static Type TypeOf(object i)
         {
-            *(*emptyInterface) eface = @unsafe.Pointer(ref i).Value;
-            return toType(eface.typ);
+            ptr<ptr<emptyInterface>> eface = new ptr<ptr<ptr<emptyInterface>>>(@unsafe.Pointer(_addr_i));
+            return toType(_addr_eface.typ);
         }
 
         // ptrMap is the cache for PtrTo.
@@ -1570,14 +1735,16 @@ namespace go
         // For example, if t represents type Foo, PtrTo(t) represents *Foo.
         public static Type PtrTo(Type t)
         {
-            return t._<ref rtype>().ptrTo();
+            return t._<ptr<rtype>>().ptrTo();
         }
 
-        private static ref rtype ptrTo(this ref rtype t)
+        private static ptr<rtype> ptrTo(this ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t.ptrToThis != 0L)
             {
-                return t.typeOff(t.ptrToThis);
+                return _addr_t.typeOff(t.ptrToThis)!;
             } 
 
             // Check the cache.
@@ -1588,7 +1755,7 @@ namespace go
 
                 if (ok)
                 {
-                    return ref pi._<ref ptrType>().rtype;
+                    return _addr_pi._<ptr<ptrType>>().rtype;
                 } 
 
                 // Look in known types.
@@ -1601,20 +1768,22 @@ namespace go
             @string s = "*" + t.String();
             foreach (var (_, tt) in typesByString(s))
             {
-                var p = (ptrType.Value)(@unsafe.Pointer(tt));
+                var p = (ptrType.val)(@unsafe.Pointer(tt));
                 if (p.elem != t)
                 {
                     continue;
                 }
+
                 var (pi, _) = ptrMap.LoadOrStore(t, p);
-                return ref pi._<ref ptrType>().rtype;
+                return _addr_pi._<ptr<ptrType>>().rtype;
+
             } 
 
             // Create a new ptrType starting with the description
             // of an *unsafe.Pointer.
-            var iptr = (@unsafe.Pointer.Value)(null);
-            *(ptr<ptr<ptrType>>) prototype = new ptr<*(ptr<ptr<ptrType>>)>(@unsafe.Pointer(ref iptr));
-            var pp = prototype.Value;
+            ref var iptr = ref heap((@unsafe.Pointer.val)(null), out ptr<var> _addr_iptr);
+            ptr<ptr<ptr<ptrType>>> prototype = new ptr<ptr<ptr<ptr<ptrType>>>>(@unsafe.Pointer(_addr_iptr));
+            ref var pp = ref heap(prototype.val, out ptr<var> _addr_pp);
 
             pp.str = resolveReflectName(newName(s, "", false));
             pp.ptrToThis = 0L; 
@@ -1628,8 +1797,9 @@ namespace go
 
             pp.elem = t;
 
-            (pi, _) = ptrMap.LoadOrStore(t, ref pp);
-            return ref pi._<ref ptrType>().rtype;
+            (pi, _) = ptrMap.LoadOrStore(t, _addr_pp);
+            return _addr_pi._<ptr<ptrType>>().rtype;
+
         }
 
         // fnv1 incorporates the list of bytes into the hash x using the FNV-1 hash function.
@@ -1642,54 +1812,74 @@ namespace go
                 x = x * 16777619L ^ uint32(b);
             }
             return x;
+
         }
 
-        private static bool Implements(this ref rtype _t, Type u) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static bool Implements(this ptr<rtype> _addr_t, Type u) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (u == null)
             {
                 panic("reflect: nil type passed to Type.Implements");
             }
+
             if (u.Kind() != Interface)
             {
                 panic("reflect: non-interface type passed to Type.Implements");
             }
-            return implements(u._<ref rtype>(), t);
+
+            return implements(u._<ptr<rtype>>(), _addr_t);
+
         });
 
-        private static bool AssignableTo(this ref rtype _t, Type u) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static bool AssignableTo(this ptr<rtype> _addr_t, Type u) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (u == null)
             {
                 panic("reflect: nil type passed to Type.AssignableTo");
             }
-            ref rtype uu = u._<ref rtype>();
-            return directlyAssignable(uu, t) || implements(uu, t);
+
+            ptr<rtype> uu = u._<ptr<rtype>>();
+            return directlyAssignable(uu, _addr_t) || implements(uu, _addr_t);
+
         });
 
-        private static bool ConvertibleTo(this ref rtype _t, Type u) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static bool ConvertibleTo(this ptr<rtype> _addr_t, Type u) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
             if (u == null)
             {
                 panic("reflect: nil type passed to Type.ConvertibleTo");
             }
-            ref rtype uu = u._<ref rtype>();
+
+            ptr<rtype> uu = u._<ptr<rtype>>();
             return convertOp(uu, t) != null;
+
         });
 
-        private static bool Comparable(this ref rtype t)
+        private static bool Comparable(this ptr<rtype> _addr_t)
         {
-            return t.alg != null && t.alg.equal != null;
+            ref rtype t = ref _addr_t.val;
+
+            return t.equal != null;
         }
 
         // implements reports whether the type V implements the interface type T.
-        private static bool implements(ref rtype T, ref rtype V)
+        private static bool implements(ptr<rtype> _addr_T, ptr<rtype> _addr_V)
         {
+            ref rtype T = ref _addr_T.val;
+            ref rtype V = ref _addr_V.val;
+
             if (T.Kind() != Interface)
             {
                 return false;
             }
-            var t = (interfaceType.Value)(@unsafe.Pointer(T));
+
+            var t = (interfaceType.val)(@unsafe.Pointer(T));
             if (len(t.methods) == 0L)
             {
                 return true;
@@ -1709,16 +1899,16 @@ namespace go
             // See also ../runtime/iface.go.
             if (V.Kind() == Interface)
             {
-                var v = (interfaceType.Value)(@unsafe.Pointer(V));
+                var v = (interfaceType.val)(@unsafe.Pointer(V));
                 long i = 0L;
                 {
                     long j__prev1 = j;
 
                     for (long j = 0L; j < len(v.methods); j++)
                     {
-                        var tm = ref t.methods[i];
+                        var tm = _addr_t.methods[i];
                         var tmName = t.nameOff(tm.name);
-                        var vm = ref v.methods[j];
+                        var vm = _addr_v.methods[j];
                         var vmName = V.nameOff(vm.name);
                         if (vmName.name() == tmName.name() && V.typeOff(vm.typ) == t.typeOff(tm.typ))
                         {
@@ -1729,35 +1919,44 @@ namespace go
                                 {
                                     tmPkgPath = t.pkgPath.name();
                                 }
+
                                 var vmPkgPath = vmName.pkgPath();
                                 if (vmPkgPath == "")
                                 {
                                     vmPkgPath = v.pkgPath.name();
                                 }
+
                                 if (tmPkgPath != vmPkgPath)
                                 {
                                     continue;
                                 }
+
                             }
+
                             i++;
 
                             if (i >= len(t.methods))
                             {
                                 return true;
                             }
+
                         }
+
                     }
 
 
                     j = j__prev1;
                 }
                 return false;
+
             }
+
             v = V.uncommon();
             if (v == null)
             {
                 return false;
             }
+
             i = 0L;
             var vmethods = v.methods();
             {
@@ -1765,7 +1964,7 @@ namespace go
 
                 for (j = 0L; j < int(v.mcount); j++)
                 {
-                    tm = ref t.methods[i];
+                    tm = _addr_t.methods[i];
                     tmName = t.nameOff(tm.name);
                     vm = vmethods[j];
                     vmName = V.nameOff(vm.name);
@@ -1778,29 +1977,53 @@ namespace go
                             {
                                 tmPkgPath = t.pkgPath.name();
                             }
+
                             vmPkgPath = vmName.pkgPath();
                             if (vmPkgPath == "")
                             {
                                 vmPkgPath = V.nameOff(v.pkgPath).name();
                             }
+
                             if (tmPkgPath != vmPkgPath)
                             {
                                 continue;
                             }
+
                         }
+
                         i++;
 
                         if (i >= len(t.methods))
                         {
                             return true;
                         }
+
                     }
+
                 }
 
 
                 j = j__prev1;
             }
             return false;
+
+        }
+
+        // specialChannelAssignability reports whether a value x of channel type V
+        // can be directly assigned (using memmove) to another channel type T.
+        // https://golang.org/doc/go_spec.html#Assignability
+        // T and V must be both of Chan kind.
+        private static bool specialChannelAssignability(ptr<rtype> _addr_T, ptr<rtype> _addr_V)
+        {
+            ref rtype T = ref _addr_T.val;
+            ref rtype V = ref _addr_V.val;
+ 
+            // Special case:
+            // x is a bidirectional channel value, T is a channel type,
+            // x's type V and T have identical element types,
+            // and at least one of V or T is not a defined type.
+            return V.ChanDir() == BothDir && (T.Name() == "" || V.Name() == "") && haveIdenticalType(T.Elem(), V.Elem(), true);
+
         }
 
         // directlyAssignable reports whether a value x of type V can be directly
@@ -1808,23 +2031,32 @@ namespace go
         // https://golang.org/doc/go_spec.html#Assignability
         // Ignoring the interface rules (implemented elsewhere)
         // and the ideal constant rules (no ideal constants at run time).
-        private static bool directlyAssignable(ref rtype T, ref rtype V)
-        { 
+        private static bool directlyAssignable(ptr<rtype> _addr_T, ptr<rtype> _addr_V)
+        {
+            ref rtype T = ref _addr_T.val;
+            ref rtype V = ref _addr_V.val;
+ 
             // x's type V is identical to T?
             if (T == V)
             {
                 return true;
             } 
 
-            // Otherwise at least one of T and V must be unnamed
+            // Otherwise at least one of T and V must not be defined
             // and they must have the same kind.
-            if (T.Name() != "" && V.Name() != "" || T.Kind() != V.Kind())
+            if (T.hasName() && V.hasName() || T.Kind() != V.Kind())
             {
                 return false;
+            }
+
+            if (T.Kind() == Chan && specialChannelAssignability(_addr_T, _addr_V))
+            {
+                return true;
             } 
 
-            // x's type T and V must  have identical underlying types.
-            return haveIdenticalUnderlyingType(T, V, true);
+            // x's type T and V must have identical underlying types.
+            return haveIdenticalUnderlyingType(_addr_T, _addr_V, true);
+
         }
 
         private static bool haveIdenticalType(Type T, Type V, bool cmpTags)
@@ -1833,19 +2065,26 @@ namespace go
             {
                 return T == V;
             }
+
             if (T.Name() != V.Name() || T.Kind() != V.Kind())
             {
                 return false;
             }
-            return haveIdenticalUnderlyingType(T.common(), V.common(), false);
+
+            return haveIdenticalUnderlyingType(_addr_T.common(), _addr_V.common(), false);
+
         }
 
-        private static bool haveIdenticalUnderlyingType(ref rtype T, ref rtype V, bool cmpTags)
+        private static bool haveIdenticalUnderlyingType(ptr<rtype> _addr_T, ptr<rtype> _addr_V, bool cmpTags)
         {
+            ref rtype T = ref _addr_T.val;
+            ref rtype V = ref _addr_V.val;
+
             if (T == V)
             {
                 return true;
             }
+
             var kind = T.Kind();
             if (kind != V.Kind())
             {
@@ -1864,23 +2103,15 @@ namespace go
             if (kind == Array) 
                 return T.Len() == V.Len() && haveIdenticalType(T.Elem(), V.Elem(), cmpTags);
             else if (kind == Chan) 
-                // Special case:
-                // x is a bidirectional channel value, T is a channel type,
-                // and x's type V and T have identical element types.
-                if (V.ChanDir() == BothDir && haveIdenticalType(T.Elem(), V.Elem(), cmpTags))
-                {
-                    return true;
-                } 
-
-                // Otherwise continue test for identical underlying type.
                 return V.ChanDir() == T.ChanDir() && haveIdenticalType(T.Elem(), V.Elem(), cmpTags);
             else if (kind == Func) 
-                var t = (funcType.Value)(@unsafe.Pointer(T));
-                var v = (funcType.Value)(@unsafe.Pointer(V));
+                var t = (funcType.val)(@unsafe.Pointer(T));
+                var v = (funcType.val)(@unsafe.Pointer(V));
                 if (t.outCount != v.outCount || t.inCount != v.inCount)
                 {
                     return false;
                 }
+
                 {
                     long i__prev1 = i;
 
@@ -1890,6 +2121,7 @@ namespace go
                         {
                             return false;
                         }
+
                     }
 
 
@@ -1904,6 +2136,7 @@ namespace go
                         {
                             return false;
                         }
+
                     }
 
 
@@ -1911,8 +2144,8 @@ namespace go
                 }
                 return true;
             else if (kind == Interface) 
-                t = (interfaceType.Value)(@unsafe.Pointer(T));
-                v = (interfaceType.Value)(@unsafe.Pointer(V));
+                t = (interfaceType.val)(@unsafe.Pointer(T));
+                v = (interfaceType.val)(@unsafe.Pointer(V));
                 if (len(t.methods) == 0L && len(v.methods) == 0L)
                 {
                     return true;
@@ -1925,40 +2158,46 @@ namespace go
             else if (kind == Ptr || kind == Slice) 
                 return haveIdenticalType(T.Elem(), V.Elem(), cmpTags);
             else if (kind == Struct) 
-                t = (structType.Value)(@unsafe.Pointer(T));
-                v = (structType.Value)(@unsafe.Pointer(V));
+                t = (structType.val)(@unsafe.Pointer(T));
+                v = (structType.val)(@unsafe.Pointer(V));
                 if (len(t.fields) != len(v.fields))
                 {
                     return false;
                 }
+
                 if (t.pkgPath.name() != v.pkgPath.name())
                 {
                     return false;
                 }
+
                 {
                     long i__prev1 = i;
 
                     foreach (var (__i) in t.fields)
                     {
                         i = __i;
-                        var tf = ref t.fields[i];
-                        var vf = ref v.fields[i];
+                        var tf = _addr_t.fields[i];
+                        var vf = _addr_v.fields[i];
                         if (tf.name.name() != vf.name.name())
                         {
                             return false;
                         }
+
                         if (!haveIdenticalType(tf.typ, vf.typ, cmpTags))
                         {
                             return false;
                         }
+
                         if (cmpTags && tf.name.tag() != vf.name.tag())
                         {
                             return false;
                         }
-                        if (tf.offsetAnon != vf.offsetAnon)
+
+                        if (tf.offsetEmbed != vf.offsetEmbed)
                         {
                             return false;
                         }
+
                     }
 
                     i = i__prev1;
@@ -1966,6 +2205,7 @@ namespace go
 
                 return true;
                         return false;
+
         }
 
         // typelinks is implemented in package runtime.
@@ -1990,19 +2230,19 @@ namespace go
         private static (slice<unsafe.Pointer>, slice<slice<int>>) typelinks()
 ;
 
-        private static ref rtype rtypeOff(unsafe.Pointer section, int off)
+        private static ptr<rtype> rtypeOff(unsafe.Pointer section, int off)
         {
-            return (rtype.Value)(add(section, uintptr(off), "sizeof(rtype) > 0"));
+            return _addr_(rtype.val)(add(section, uintptr(off), "sizeof(rtype) > 0"))!;
         }
 
         // typesByString returns the subslice of typelinks() whose elements have
         // the given string representation.
         // It may be empty (no known types with that string) or may have
         // multiple elements (multiple types with that string).
-        private static slice<ref rtype> typesByString(@string s)
+        private static slice<ptr<rtype>> typesByString(@string s)
         {
             var (sections, offset) = typelinks();
-            slice<ref rtype> ret = default;
+            slice<ptr<rtype>> ret = default;
 
             foreach (var (offsI, offs) in offset)
             {
@@ -2024,6 +2264,7 @@ namespace go
                     {
                         j = h; // preserves f(j) == true
                     }
+
                 } 
                 // i == j, f(i-1) == false, and f(j) (= f(i)) == true  =>  answer is i.
 
@@ -2046,14 +2287,18 @@ namespace go
                         {
                             break;
                         }
+
                         ret = append(ret, typ);
+
                     }
 
 
                     j = j__prev2;
                 }
+
             }
             return ret;
+
         }
 
         // The lookupCache caches ArrayOf, ChanOf, MapOf and SliceOf lookups.
@@ -2082,7 +2327,7 @@ namespace go
         // If t's size is equal to or exceeds this limit, ChanOf panics.
         public static Type ChanOf(ChanDir dir, Type t) => func((_, panic, __) =>
         {
-            ref rtype typ = t._<ref rtype>(); 
+            ptr<rtype> typ = t._<ptr<rtype>>(); 
 
             // Look in cache.
             cacheKey ckey = new cacheKey(Chan,typ,nil,uintptr(dir));
@@ -2093,7 +2338,7 @@ namespace go
 
                 if (ok)
                 {
-                    return ch._<ref rtype>();
+                    return ch._<ptr<rtype>>();
                 } 
 
                 // This restriction is imposed by the gc compiler and the runtime.
@@ -2122,30 +2367,29 @@ namespace go
                 panic("reflect.ChanOf: invalid dir");
                         foreach (var (_, tt) in typesByString(s))
             {
-                var ch = (chanType.Value)(@unsafe.Pointer(tt));
+                var ch = (chanType.val)(@unsafe.Pointer(tt));
                 if (ch.elem == typ && ch.dir == uintptr(dir))
                 {
                     var (ti, _) = lookupCache.LoadOrStore(ckey, tt);
                     return ti._<Type>();
                 }
+
             } 
 
             // Make a channel type.
-            channel<unsafe.Pointer> ichan = (channel<unsafe.Pointer>)null;
-            *(ptr<ptr<chanType>>) prototype = new ptr<*(ptr<ptr<chanType>>)>(@unsafe.Pointer(ref ichan));
-            ch = prototype.Value;
-            ch.tflag = 0L;
+            ref channel<unsafe.Pointer> ichan = ref heap((channel<unsafe.Pointer>)null, out ptr<channel<unsafe.Pointer>> _addr_ichan);
+            ptr<ptr<ptr<chanType>>> prototype = new ptr<ptr<ptr<ptr<chanType>>>>(@unsafe.Pointer(_addr_ichan));
+            ch = prototype.val;
+            ch.tflag = tflagRegularMemory;
             ch.dir = uintptr(dir);
             ch.str = resolveReflectName(newName(s, "", false));
             ch.hash = fnv1(typ.hash, 'c', byte(dir));
             ch.elem = typ;
 
-            (ti, _) = lookupCache.LoadOrStore(ckey, ref ch.rtype);
+            (ti, _) = lookupCache.LoadOrStore(ckey, _addr_ch.rtype);
             return ti._<Type>();
-        });
 
-        private static bool ismapkey(ref rtype _p0)
-; // implemented in runtime
+        });
 
         // MapOf returns the map type with the given key and element types.
         // For example, if k represents int and e represents string,
@@ -2155,11 +2399,11 @@ namespace go
         // not implement Go's == operator), MapOf panics.
         public static Type MapOf(Type key, Type elem) => func((_, panic, __) =>
         {
-            ref rtype ktyp = key._<ref rtype>();
-            ref rtype etyp = elem._<ref rtype>();
+            ptr<rtype> ktyp = key._<ptr<rtype>>();
+            ptr<rtype> etyp = elem._<ptr<rtype>>();
 
-            if (!ismapkey(ktyp))
-            {>>MARKER:FUNCTION_ismapkey_BLOCK_PREFIX<<
+            if (ktyp.equal == null)
+            {
                 panic("reflect.MapOf: invalid key type " + ktyp.String());
             } 
 
@@ -2185,81 +2429,106 @@ namespace go
             @string s = "map[" + ktyp.String() + "]" + etyp.String();
             foreach (var (_, tt) in typesByString(s))
             {
-                var mt = (mapType.Value)(@unsafe.Pointer(tt));
+                var mt = (mapType.val)(@unsafe.Pointer(tt));
                 if (mt.key == ktyp && mt.elem == etyp)
                 {
                     var (ti, _) = lookupCache.LoadOrStore(ckey, tt);
                     return ti._<Type>();
                 }
+
             } 
 
             // Make a map type.
-            map<unsafe.Pointer, unsafe.Pointer> imap = (map<unsafe.Pointer, unsafe.Pointer>)null;
-            mt = new ptr<ptr<ptr<*(ptr<ptr<mapType>>)>>>(@unsafe.Pointer(ref imap));
+            // Note: flag values must match those used in the TMAP case
+            // in ../cmd/compile/internal/gc/reflect.go:dtypesym.
+            ref map<unsafe.Pointer, unsafe.Pointer> imap = ref heap((map<unsafe.Pointer, unsafe.Pointer>)null, out ptr<map<unsafe.Pointer, unsafe.Pointer>> _addr_imap);
+            mt = new ptr<ptr<ptr<ptr<ptr<mapType>>>>>(@unsafe.Pointer(_addr_imap));
             mt.str = resolveReflectName(newName(s, "", false));
             mt.tflag = 0L;
             mt.hash = fnv1(etyp.hash, 'm', byte(ktyp.hash >> (int)(24L)), byte(ktyp.hash >> (int)(16L)), byte(ktyp.hash >> (int)(8L)), byte(ktyp.hash));
             mt.key = ktyp;
             mt.elem = etyp;
             mt.bucket = bucketOf(ktyp, etyp);
+            mt.hasher = (p, seed) =>
+            {
+                return typehash(ktyp, p, seed);
+            }
+;
+            mt.flags = 0L;
             if (ktyp.size > maxKeySize)
             {
                 mt.keysize = uint8(ptrSize);
-                mt.indirectkey = 1L;
+                mt.flags |= 1L; // indirect key
             }
             else
             {
                 mt.keysize = uint8(ktyp.size);
-                mt.indirectkey = 0L;
             }
+
             if (etyp.size > maxValSize)
             {
                 mt.valuesize = uint8(ptrSize);
-                mt.indirectvalue = 1L;
+                mt.flags |= 2L; // indirect value
             }
             else
             {
                 mt.valuesize = uint8(etyp.size);
-                mt.indirectvalue = 0L;
             }
+
             mt.bucketsize = uint16(mt.bucket.size);
-            mt.reflexivekey = isReflexive(ktyp);
-            mt.needkeyupdate = needKeyUpdate(ktyp);
+            if (isReflexive(ktyp))
+            {
+                mt.flags |= 4L;
+            }
+
+            if (needKeyUpdate(ktyp))
+            {
+                mt.flags |= 8L;
+            }
+
+            if (hashMightPanic(ktyp))
+            {
+                mt.flags |= 16L;
+            }
+
             mt.ptrToThis = 0L;
 
-            (ti, _) = lookupCache.LoadOrStore(ckey, ref mt.rtype);
+            (ti, _) = lookupCache.LoadOrStore(ckey, _addr_mt.rtype);
             return ti._<Type>();
+
         });
 
+        // TODO(crawshaw): as these funcTypeFixedN structs have no methods,
+        // they could be defined at runtime using the StructOf function.
         private partial struct funcTypeFixed4
         {
             public ref funcType funcType => ref funcType_val;
-            public array<ref rtype> args;
+            public array<ptr<rtype>> args;
         }
         private partial struct funcTypeFixed8
         {
             public ref funcType funcType => ref funcType_val;
-            public array<ref rtype> args;
+            public array<ptr<rtype>> args;
         }
         private partial struct funcTypeFixed16
         {
             public ref funcType funcType => ref funcType_val;
-            public array<ref rtype> args;
+            public array<ptr<rtype>> args;
         }
         private partial struct funcTypeFixed32
         {
             public ref funcType funcType => ref funcType_val;
-            public array<ref rtype> args;
+            public array<ptr<rtype>> args;
         }
         private partial struct funcTypeFixed64
         {
             public ref funcType funcType => ref funcType_val;
-            public array<ref rtype> args;
+            public array<ptr<rtype>> args;
         }
         private partial struct funcTypeFixed128
         {
             public ref funcType funcType => ref funcType_val;
-            public array<ref rtype> args;
+            public array<ptr<rtype>> args;
         }
 
         // FuncOf returns the function type with the given argument and result types.
@@ -2277,46 +2546,46 @@ namespace go
             } 
 
             // Make a func type.
-            Action ifunc = (Action)null;
-            *(ptr<ptr<funcType>>) prototype = new ptr<*(ptr<ptr<funcType>>)>(@unsafe.Pointer(ref ifunc));
+            ref Action ifunc = ref heap((Action)null, out ptr<Action> _addr_ifunc);
+            ptr<ptr<ptr<funcType>>> prototype = new ptr<ptr<ptr<ptr<funcType>>>>(@unsafe.Pointer(_addr_ifunc));
             var n = len(in) + len(out);
 
-            ref funcType ft = default;
-            slice<ref rtype> args = default;
+            ptr<funcType> ft;
+            slice<ptr<rtype>> args = default;
 
             if (n <= 4L) 
-                ptr<object> @fixed = @new<funcTypeFixed4>();
+                ptr<funcTypeFixed4> @fixed = @new<funcTypeFixed4>();
                 args = @fixed.args.slice(-1, 0L, len(@fixed.args));
-                ft = ref @fixed.funcType;
+                ft = _addr_@fixed.funcType;
             else if (n <= 8L) 
                 @fixed = @new<funcTypeFixed8>();
                 args = @fixed.args.slice(-1, 0L, len(@fixed.args));
-                ft = ref @fixed.funcType;
+                ft = _addr_@fixed.funcType;
             else if (n <= 16L) 
                 @fixed = @new<funcTypeFixed16>();
                 args = @fixed.args.slice(-1, 0L, len(@fixed.args));
-                ft = ref @fixed.funcType;
+                ft = _addr_@fixed.funcType;
             else if (n <= 32L) 
                 @fixed = @new<funcTypeFixed32>();
                 args = @fixed.args.slice(-1, 0L, len(@fixed.args));
-                ft = ref @fixed.funcType;
+                ft = _addr_@fixed.funcType;
             else if (n <= 64L) 
                 @fixed = @new<funcTypeFixed64>();
                 args = @fixed.args.slice(-1, 0L, len(@fixed.args));
-                ft = ref @fixed.funcType;
+                ft = _addr_@fixed.funcType;
             else if (n <= 128L) 
                 @fixed = @new<funcTypeFixed128>();
                 args = @fixed.args.slice(-1, 0L, len(@fixed.args));
-                ft = ref @fixed.funcType;
+                ft = _addr_@fixed.funcType;
             else 
                 panic("reflect.FuncOf: too many arguments");
-                        ft.Value = prototype.Value; 
+                        ft.val = prototype.val; 
 
             // Build a hash and minimally populate ft.
             uint hash = default;
             foreach (var (_, in) in in)
             {
-                ref rtype t = in._<ref rtype>();
+                ptr<rtype> t = in._<ptr<rtype>>();
                 args = append(args, t);
                 hash = fnv1(hash, byte(t.hash >> (int)(24L)), byte(t.hash >> (int)(16L)), byte(t.hash >> (int)(8L)), byte(t.hash));
             }
@@ -2324,10 +2593,11 @@ namespace go
             {
                 hash = fnv1(hash, 'v');
             }
+
             hash = fnv1(hash, '.');
             foreach (var (_, out) in out)
             {
-                t = out._<ref rtype>();
+                t = out._<ptr<rtype>>();
                 args = append(args, t);
                 hash = fnv1(hash, byte(t.hash >> (int)(24L)), byte(t.hash >> (int)(16L)), byte(t.hash >> (int)(8L)), byte(t.hash));
             }
@@ -2335,6 +2605,7 @@ namespace go
             {
                 panic("reflect.FuncOf does not support more than 50 arguments");
             }
+
             ft.tflag = 0L;
             ft.hash = hash;
             ft.inCount = uint16(len(in));
@@ -2353,20 +2624,20 @@ namespace go
                 if (ok)
                 {
                     {
-                        ref rtype t__prev1 = t;
+                        ptr<rtype> t__prev1 = t;
 
-                        foreach (var (_, __t) in ts._<slice<ref rtype>>())
+                        foreach (var (_, __t) in ts._<slice<ptr<rtype>>>())
                         {
                             t = __t;
-                            if (haveIdenticalUnderlyingType(ref ft.rtype, t, true))
+                            if (haveIdenticalUnderlyingType(_addr_ft.rtype, t, true))
                             {
                                 return t;
                             }
+
                         }
 
                         t = t__prev1;
                     }
-
                 } 
 
                 // Not in cache, lock and retry.
@@ -2386,40 +2657,43 @@ namespace go
                 if (ok)
                 {
                     {
-                        ref rtype t__prev1 = t;
+                        ptr<rtype> t__prev1 = t;
 
-                        foreach (var (_, __t) in ts._<slice<ref rtype>>())
+                        foreach (var (_, __t) in ts._<slice<ptr<rtype>>>())
                         {
                             t = __t;
-                            if (haveIdenticalUnderlyingType(ref ft.rtype, t, true))
+                            if (haveIdenticalUnderlyingType(_addr_ft.rtype, t, true))
                             {
                                 return t;
                             }
+
                         }
 
                         t = t__prev1;
                     }
-
                 }
 
                 ts = ts__prev1;
 
             }
 
-            Func<ref rtype, Type> addToCache = tt =>
+
+            Func<ptr<rtype>, Type> addToCache = tt =>
             {
-                slice<ref rtype> rts = default;
+                slice<ptr<rtype>> rts = default;
                 {
                     var (rti, ok) = funcLookupCache.m.Load(hash);
 
                     if (ok)
                     {
-                        rts = rti._<slice<ref rtype>>();
+                        rts = rti._<slice<ptr<rtype>>>();
                     }
 
                 }
+
                 funcLookupCache.m.Store(hash, append(rts, tt));
                 return tt;
+
             } 
 
             // Look in known types for the same string representation.
@@ -2429,21 +2703,25 @@ namespace go
             var str = funcStr(ft);
             foreach (var (_, tt) in typesByString(str))
             {
-                if (haveIdenticalUnderlyingType(ref ft.rtype, tt, true))
+                if (haveIdenticalUnderlyingType(_addr_ft.rtype, _addr_tt, true))
                 {
                     return addToCache(tt);
                 }
+
             } 
 
             // Populate the remaining fields of ft and store in cache.
             ft.str = resolveReflectName(newName(str, "", false));
             ft.ptrToThis = 0L;
-            return addToCache(ref ft.rtype);
+            return addToCache(_addr_ft.rtype);
+
         });
 
         // funcStr builds a string representation of a funcType.
-        private static @string funcStr(ref funcType ft)
+        private static @string funcStr(ptr<funcType> _addr_ft)
         {
+            ref funcType ft = ref _addr_ft.val;
+
             var repr = make_slice<byte>(0L, 64L);
             repr = append(repr, "func(");
             {
@@ -2458,15 +2736,17 @@ namespace go
                     {
                         repr = append(repr, ", ");
                     }
+
                     if (ft.IsVariadic() && i == int(ft.inCount) - 1L)
                     {
                         repr = append(repr, "...");
-                        repr = append(repr, (sliceType.Value)(@unsafe.Pointer(t)).elem.String());
+                        repr = append(repr, (sliceType.val)(@unsafe.Pointer(t)).elem.String());
                     }
                     else
                     {
                         repr = append(repr, t.String());
                     }
+
                 }
 
                 i = i__prev1;
@@ -2483,6 +2763,7 @@ namespace go
             {
                 repr = append(repr, " (");
             }
+
             {
                 var i__prev1 = i;
                 var t__prev1 = t;
@@ -2495,7 +2776,9 @@ namespace go
                     {
                         repr = append(repr, ", ");
                     }
+
                     repr = append(repr, t.String());
+
                 }
 
                 i = i__prev1;
@@ -2506,39 +2789,47 @@ namespace go
             {
                 repr = append(repr, ')');
             }
+
             return string(repr);
+
         }
 
         // isReflexive reports whether the == operation on the type is reflexive.
         // That is, x == x for all values x of type t.
-        private static bool isReflexive(ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static bool isReflexive(ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
 
             if (t.Kind() == Bool || t.Kind() == Int || t.Kind() == Int8 || t.Kind() == Int16 || t.Kind() == Int32 || t.Kind() == Int64 || t.Kind() == Uint || t.Kind() == Uint8 || t.Kind() == Uint16 || t.Kind() == Uint32 || t.Kind() == Uint64 || t.Kind() == Uintptr || t.Kind() == Chan || t.Kind() == Ptr || t.Kind() == String || t.Kind() == UnsafePointer) 
                 return true;
             else if (t.Kind() == Float32 || t.Kind() == Float64 || t.Kind() == Complex64 || t.Kind() == Complex128 || t.Kind() == Interface) 
                 return false;
             else if (t.Kind() == Array) 
-                var tt = (arrayType.Value)(@unsafe.Pointer(t));
-                return isReflexive(tt.elem);
+                var tt = (arrayType.val)(@unsafe.Pointer(t));
+                return isReflexive(_addr_tt.elem);
             else if (t.Kind() == Struct) 
-                tt = (structType.Value)(@unsafe.Pointer(t));
+                tt = (structType.val)(@unsafe.Pointer(t));
                 foreach (var (_, f) in tt.fields)
                 {
-                    if (!isReflexive(f.typ))
+                    if (!isReflexive(_addr_f.typ))
                     {
                         return false;
                     }
+
                 }
                 return true;
             else 
                 // Func, Map, Slice, Invalid
                 panic("isReflexive called on non-key type " + t.String());
-                    });
+            
+        });
 
         // needKeyUpdate reports whether map overwrites require the key to be copied.
-        private static bool needKeyUpdate(ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static bool needKeyUpdate(ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
+            ref rtype t = ref _addr_t.val;
+
 
             if (t.Kind() == Bool || t.Kind() == Int || t.Kind() == Int8 || t.Kind() == Int16 || t.Kind() == Int32 || t.Kind() == Int64 || t.Kind() == Uint || t.Kind() == Uint8 || t.Kind() == Uint16 || t.Kind() == Uint32 || t.Kind() == Uint64 || t.Kind() == Uintptr || t.Kind() == Chan || t.Kind() == Ptr || t.Kind() == UnsafePointer) 
                 return false;
@@ -2548,46 +2839,74 @@ namespace go
                 // Interfaces might have floats of strings in them.
                 return true;
             else if (t.Kind() == Array) 
-                var tt = (arrayType.Value)(@unsafe.Pointer(t));
-                return needKeyUpdate(tt.elem);
+                var tt = (arrayType.val)(@unsafe.Pointer(t));
+                return needKeyUpdate(_addr_tt.elem);
             else if (t.Kind() == Struct) 
-                tt = (structType.Value)(@unsafe.Pointer(t));
+                tt = (structType.val)(@unsafe.Pointer(t));
                 foreach (var (_, f) in tt.fields)
                 {
-                    if (needKeyUpdate(f.typ))
+                    if (needKeyUpdate(_addr_f.typ))
                     {
                         return true;
                     }
+
                 }
                 return false;
             else 
                 // Func, Map, Slice, Invalid
                 panic("needKeyUpdate called on non-key type " + t.String());
-                    });
+            
+        });
 
-        // Make sure these routines stay in sync with ../../runtime/hashmap.go!
+        // hashMightPanic reports whether the hash of a map key of type t might panic.
+        private static bool hashMightPanic(ptr<rtype> _addr_t)
+        {
+            ref rtype t = ref _addr_t.val;
+
+
+            if (t.Kind() == Interface) 
+                return true;
+            else if (t.Kind() == Array) 
+                var tt = (arrayType.val)(@unsafe.Pointer(t));
+                return hashMightPanic(_addr_tt.elem);
+            else if (t.Kind() == Struct) 
+                tt = (structType.val)(@unsafe.Pointer(t));
+                foreach (var (_, f) in tt.fields)
+                {
+                    if (hashMightPanic(_addr_f.typ))
+                    {
+                        return true;
+                    }
+
+                }
+                return false;
+            else 
+                return false;
+            
+        }
+
+        // Make sure these routines stay in sync with ../../runtime/map.go!
         // These types exist only for GC, so we only fill out GC relevant info.
         // Currently, that's just size and the GC program. We also fill in string
         // for possible debugging use.
-        private static readonly System.UIntPtr bucketSize = 8L;
-        private static readonly System.UIntPtr maxKeySize = 128L;
-        private static readonly System.UIntPtr maxValSize = 128L;
+        private static readonly System.UIntPtr bucketSize = (System.UIntPtr)8L;
+        private static readonly System.UIntPtr maxKeySize = (System.UIntPtr)128L;
+        private static readonly System.UIntPtr maxValSize = (System.UIntPtr)128L;
 
-        private static ref rtype bucketOf(ref rtype _ktyp, ref rtype _etyp) => func(_ktyp, _etyp, (ref rtype ktyp, ref rtype etyp, Defer _, Panic panic, Recover __) =>
-        { 
-            // See comment on hmap.overflow in ../runtime/hashmap.go.
-            byte kind = default;
-            if (ktyp.kind & kindNoPointers != 0L && etyp.kind & kindNoPointers != 0L && ktyp.size <= maxKeySize && etyp.size <= maxValSize)
-            {
-                kind = kindNoPointers;
-            }
+
+        private static ptr<rtype> bucketOf(ptr<rtype> _addr_ktyp, ptr<rtype> _addr_etyp) => func((_, panic, __) =>
+        {
+            ref rtype ktyp = ref _addr_ktyp.val;
+            ref rtype etyp = ref _addr_etyp.val;
+
             if (ktyp.size > maxKeySize)
             {
-                ktyp = PtrTo(ktyp)._<ref rtype>();
+                ktyp = PtrTo(ktyp)._<ptr<rtype>>();
             }
+
             if (etyp.size > maxValSize)
             {
-                etyp = PtrTo(etyp)._<ref rtype>();
+                etyp = PtrTo(etyp)._<ptr<rtype>>();
             } 
 
             // Prepare GC data if any.
@@ -2595,101 +2914,40 @@ namespace go
             // or 2072 bytes, or 259 pointer-size words, or 33 bytes of pointer bitmap.
             // Note that since the key and value are known to be <= 128 bytes,
             // they're guaranteed to have bitmaps instead of GC programs.
-            ref byte gcdata = default;
+            ptr<byte> gcdata;
             System.UIntPtr ptrdata = default;
-            System.UIntPtr overflowPad = default; 
+            System.UIntPtr overflowPad = default;
 
-            // On NaCl, pad if needed to make overflow end at the proper struct alignment.
-            // On other systems, align > ptrSize is not possible.
-            if (runtime.GOARCH == "amd64p32" && (ktyp.align > ptrSize || etyp.align > ptrSize))
-            {
-                overflowPad = ptrSize;
-            }
             var size = bucketSize * (1L + ktyp.size + etyp.size) + overflowPad + ptrSize;
             if (size & uintptr(ktyp.align - 1L) != 0L || size & uintptr(etyp.align - 1L) != 0L)
             {
                 panic("reflect: bad size computation in MapOf");
             }
-            if (kind != kindNoPointers)
+
+            if (ktyp.ptrdata != 0L || etyp.ptrdata != 0L)
             {
                 var nptr = (bucketSize * (1L + ktyp.size + etyp.size) + ptrSize) / ptrSize;
                 var mask = make_slice<byte>((nptr + 7L) / 8L);
                 var @base = bucketSize / ptrSize;
 
-                if (ktyp.kind & kindNoPointers == 0L)
+                if (ktyp.ptrdata != 0L)
                 {
-                    if (ktyp.kind & kindGCProg != 0L)
-                    {
-                        panic("reflect: unexpected GC program in MapOf");
-                    }
-                    ref array<byte> kmask = new ptr<ref array<byte>>(@unsafe.Pointer(ktyp.gcdata));
-                    {
-                        var i__prev1 = i;
-
-                        for (var i = uintptr(0L); i < ktyp.ptrdata / ptrSize; i++)
-                        {
-                            if ((kmask[i / 8L] >> (int)((i % 8L))) & 1L != 0L)
-                            {
-                                {
-                                    var j__prev2 = j;
-
-                                    for (var j = uintptr(0L); j < bucketSize; j++)
-                                    {
-                                        var word = base + j * ktyp.size / ptrSize + i;
-                                        mask[word / 8L] |= 1L << (int)((word % 8L));
-                                    }
-
-
-                                    j = j__prev2;
-                                }
-                            }
-                        }
-
-
-                        i = i__prev1;
-                    }
+                    emitGCMask(mask, base, _addr_ktyp, bucketSize);
                 }
+
                 base += bucketSize * ktyp.size / ptrSize;
 
-                if (etyp.kind & kindNoPointers == 0L)
+                if (etyp.ptrdata != 0L)
                 {
-                    if (etyp.kind & kindGCProg != 0L)
-                    {
-                        panic("reflect: unexpected GC program in MapOf");
-                    }
-                    ref array<byte> emask = new ptr<ref array<byte>>(@unsafe.Pointer(etyp.gcdata));
-                    {
-                        var i__prev1 = i;
-
-                        for (i = uintptr(0L); i < etyp.ptrdata / ptrSize; i++)
-                        {
-                            if ((emask[i / 8L] >> (int)((i % 8L))) & 1L != 0L)
-                            {
-                                {
-                                    var j__prev2 = j;
-
-                                    for (j = uintptr(0L); j < bucketSize; j++)
-                                    {
-                                        word = base + j * etyp.size / ptrSize + i;
-                                        mask[word / 8L] |= 1L << (int)((word % 8L));
-                                    }
-
-
-                                    j = j__prev2;
-                                }
-                            }
-                        }
-
-
-                        i = i__prev1;
-                    }
+                    emitGCMask(mask, base, _addr_etyp, bucketSize);
                 }
+
                 base += bucketSize * etyp.size / ptrSize;
                 base += overflowPad / ptrSize;
 
-                word = base;
+                var word = base;
                 mask[word / 8L] |= 1L << (int)((word % 8L));
-                gcdata = ref mask[0L];
+                gcdata = _addr_mask[0L];
                 ptrdata = (word + 1L) * ptrSize; 
 
                 // overflow word must be last
@@ -2697,22 +2955,100 @@ namespace go
                 {
                     panic("reflect: bad layout computation in MapOf");
                 }
+
             }
-            rtype b = ref new rtype(align:ptrSize,size:size,kind:kind,ptrdata:ptrdata,gcdata:gcdata,);
+
+            ptr<rtype> b = addr(new rtype(align:ptrSize,size:size,kind:uint8(Struct),ptrdata:ptrdata,gcdata:gcdata,));
             if (overflowPad > 0L)
             {
                 b.align = 8L;
             }
+
             @string s = "bucket(" + ktyp.String() + "," + etyp.String() + ")";
             b.str = resolveReflectName(newName(s, "", false));
-            return b;
+            return _addr_b!;
+
         });
+
+        private static slice<byte> gcSlice(this ptr<rtype> _addr_t, System.UIntPtr begin, System.UIntPtr end)
+        {
+            ref rtype t = ref _addr_t.val;
+
+            return new ptr<ptr<array<byte>>>(@unsafe.Pointer(t.gcdata)).slice(begin, end, end);
+        }
+
+        // emitGCMask writes the GC mask for [n]typ into out, starting at bit
+        // offset base.
+        private static void emitGCMask(slice<byte> @out, System.UIntPtr @base, ptr<rtype> _addr_typ, System.UIntPtr n) => func((_, panic, __) =>
+        {
+            ref rtype typ = ref _addr_typ.val;
+
+            if (typ.kind & kindGCProg != 0L)
+            {
+                panic("reflect: unexpected GC program");
+            }
+
+            var ptrs = typ.ptrdata / ptrSize;
+            var words = typ.size / ptrSize;
+            var mask = typ.gcSlice(0L, (ptrs + 7L) / 8L);
+            for (var j = uintptr(0L); j < ptrs; j++)
+            {
+                if ((mask[j / 8L] >> (int)((j % 8L))) & 1L != 0L)
+                {
+                    for (var i = uintptr(0L); i < n; i++)
+                    {
+                        var k = base + i * words + j;
+                        out[k / 8L] |= 1L << (int)((k % 8L));
+                    }
+
+
+                }
+
+            }
+
+
+        });
+
+        // appendGCProg appends the GC program for the first ptrdata bytes of
+        // typ to dst and returns the extended slice.
+        private static slice<byte> appendGCProg(slice<byte> dst, ptr<rtype> _addr_typ)
+        {
+            ref rtype typ = ref _addr_typ.val;
+
+            if (typ.kind & kindGCProg != 0L)
+            { 
+                // Element has GC program; emit one element.
+                var n = uintptr(new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(typ.gcdata)));
+                var prog = typ.gcSlice(4L, 4L + n - 1L);
+                return append(dst, prog);
+
+            } 
+
+            // Element is small with pointer mask; use as literal bits.
+            var ptrs = typ.ptrdata / ptrSize;
+            var mask = typ.gcSlice(0L, (ptrs + 7L) / 8L); 
+
+            // Emit 120-bit chunks of full bytes (max is 127 but we avoid using partial bytes).
+            while (ptrs > 120L)
+            {
+                dst = append(dst, 120L);
+                dst = append(dst, mask[..15L]);
+                mask = mask[15L..];
+                ptrs -= 120L;
+            }
+
+
+            dst = append(dst, byte(ptrs));
+            dst = append(dst, mask);
+            return dst;
+
+        }
 
         // SliceOf returns the slice type with element type t.
         // For example, if t represents int, SliceOf(t) represents []int.
         public static Type SliceOf(Type t)
         {
-            ref rtype typ = t._<ref rtype>(); 
+            ptr<rtype> typ = t._<ptr<rtype>>(); 
 
             // Look in cache.
             cacheKey ckey = new cacheKey(Slice,typ,nil,0);
@@ -2736,26 +3072,28 @@ namespace go
             @string s = "[]" + typ.String();
             foreach (var (_, tt) in typesByString(s))
             {
-                var slice = (sliceType.Value)(@unsafe.Pointer(tt));
+                var slice = (sliceType.val)(@unsafe.Pointer(tt));
                 if (slice.elem == typ)
                 {
                     var (ti, _) = lookupCache.LoadOrStore(ckey, tt);
                     return ti._<Type>();
                 }
+
             } 
 
             // Make a slice type.
-            slice<unsafe.Pointer> islice = (slice<unsafe.Pointer>)null;
-            *(ptr<ptr<sliceType>>) prototype = new ptr<*(ptr<ptr<sliceType>>)>(@unsafe.Pointer(ref islice));
-            slice = prototype.Value;
+            ref slice<unsafe.Pointer> islice = ref heap((slice<unsafe.Pointer>)null, out ptr<slice<unsafe.Pointer>> _addr_islice);
+            ptr<ptr<ptr<sliceType>>> prototype = new ptr<ptr<ptr<ptr<sliceType>>>>(@unsafe.Pointer(_addr_islice));
+            slice = prototype.val;
             slice.tflag = 0L;
             slice.str = resolveReflectName(newName(s, "", false));
             slice.hash = fnv1(typ.hash, '[');
             slice.elem = typ;
             slice.ptrToThis = 0L;
 
-            (ti, _) = lookupCache.LoadOrStore(ckey, ref slice.rtype);
+            (ti, _) = lookupCache.LoadOrStore(ckey, _addr_slice.rtype);
             return ti._<Type>();
+
         }
 
         // The structLookupCache caches StructOf lookups.
@@ -2769,47 +3107,7 @@ namespace go
             public uncommonType u;
         }
 
-        // A *rtype representing a struct is followed directly in memory by an
-        // array of method objects representing the methods attached to the
-        // struct. To get the same layout for a run time generated type, we
-        // need an array directly following the uncommonType memory. The types
-        // structTypeFixed4, ...structTypeFixedN are used to do this.
-        //
-        // A similar strategy is used for funcTypeFixed4, ...funcTypeFixedN.
-
-        // TODO(crawshaw): as these structTypeFixedN and funcTypeFixedN structs
-        // have no methods, they could be defined at runtime using the StructOf
-        // function.
-
-        private partial struct structTypeFixed4
-        {
-            public ref structType structType => ref structType_val;
-            public uncommonType u;
-            public array<method> m;
-        }
-
-        private partial struct structTypeFixed8
-        {
-            public ref structType structType => ref structType_val;
-            public uncommonType u;
-            public array<method> m;
-        }
-
-        private partial struct structTypeFixed16
-        {
-            public ref structType structType => ref structType_val;
-            public uncommonType u;
-            public array<method> m;
-        }
-
-        private partial struct structTypeFixed32
-        {
-            public ref structType structType => ref structType_val;
-            public uncommonType u;
-            public array<method> m;
-        }
-
-        // isLetter returns true if a given 'rune' is classified as a Letter.
+        // isLetter reports whether a given 'rune' is classified as a Letter.
         private static bool isLetter(int ch)
         {
             return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch >= utf8.RuneSelf && unicode.IsLetter(ch);
@@ -2829,26 +3127,31 @@ namespace go
                 {
                     return false;
                 }
+
                 if (!(isLetter(c) || unicode.IsDigit(c)))
                 {
                     return false;
                 }
+
             }
             return len(fieldName) > 0L;
+
         }
 
         // StructOf returns the struct type containing fields.
         // The Offset and Index fields are ignored and computed as they would be
         // by the compiler.
         //
-        // StructOf currently does not generate wrapper methods for embedded fields.
-        // This limitation may be lifted in a future version.
+        // StructOf currently does not generate wrapper methods for embedded
+        // fields and panics if passed unexported StructFields.
+        // These limitations may be lifted in a future version.
         public static Type StructOf(slice<StructField> fields) => func((defer, panic, _) =>
         {
-            var hash = fnv1(0L, (slice<byte>)"struct {");            System.UIntPtr size = default;            byte typalign = default;            var comparable = true;            var hashable = true;            slice<method> methods = default;            var fs = make_slice<structField>(len(fields));            var repr = make_slice<byte>(0L, 64L);            var hasPtr = false;            var hasGCProg = false;
+            var hash = fnv1(0L, (slice<byte>)"struct {");            System.UIntPtr size = default;            byte typalign = default;            var comparable = true;            slice<method> methods = default;            var fs = make_slice<structField>(len(fields));            var repr = make_slice<byte>(0L, 64L);            var hasGCProg = false;
 
             var lastzero = uintptr(0L);
             repr = append(repr, "struct {");
+            @string pkgpath = "";
             {
                 var i__prev1 = i;
 
@@ -2860,30 +3163,42 @@ namespace go
                     {
                         panic("reflect.StructOf: field " + strconv.Itoa(i) + " has no name");
                     }
+
                     if (!isValidFieldName(field.Name))
                     {
                         panic("reflect.StructOf: field " + strconv.Itoa(i) + " has invalid name");
                     }
+
                     if (field.Type == null)
                     {
                         panic("reflect.StructOf: field " + strconv.Itoa(i) + " has no type");
                     }
-                    var f = runtimeStructField(field);
+
+                    var (f, fpkgpath) = runtimeStructField(field);
                     var ft = f.typ;
                     if (ft.kind & kindGCProg != 0L)
                     {
                         hasGCProg = true;
                     }
-                    if (ft.pointers())
+
+                    if (fpkgpath != "")
                     {
-                        hasPtr = true;
+                        if (pkgpath == "")
+                        {
+                            pkgpath = fpkgpath;
+                        }
+                        else if (pkgpath != fpkgpath)
+                        {
+                            panic("reflect.Struct: fields with different PkgPath " + pkgpath + " and " + fpkgpath);
+                        }
+
                     } 
 
                     // Update string and hash
                     var name = f.name.name();
                     hash = fnv1(hash, (slice<byte>)name);
                     repr = append(repr, (" " + name));
-                    if (f.anon())
+                    if (f.embedded())
                     { 
                         // Embedded field
                         if (f.typ.Kind() == Ptr)
@@ -2895,14 +3210,16 @@ namespace go
 
                                 if (k == Ptr || k == Interface)
                                 {
-                                    panic("reflect.StructOf: illegal anonymous field type " + ft.String());
+                                    panic("reflect.StructOf: illegal embedded field type " + ft.String());
                                 }
 
                             }
+
                         }
 
+
                         if (f.typ.Kind() == Interface) 
-                            var ift = (interfaceType.Value)(@unsafe.Pointer(ft));
+                            var ift = (interfaceType.val)(@unsafe.Pointer(ft));
                             {
                                 var m__prev2 = m;
 
@@ -2914,8 +3231,10 @@ namespace go
                                     { 
                                         // TODO(sbinet).  Issue 15924.
                                         panic("reflect: embedded interface with unexported method(s) not implemented");
+
                                     }
-                                    var mtyp = ift.typeOff(m.typ);                                    var ifield = i;                                    var imethod = im;                                    Value ifn = default;                                    Value tfn = default;
+
+                                    var mtyp = ift.typeOff(m.typ);                                    var ifield = i;                                    var imethod = im;                                    ref Value ifn = ref heap(out ptr<Value> _addr_ifn);                                    ref Value tfn = ref heap(out ptr<Value> _addr_tfn);
 
                                     if (ft.kind & kindDirectIface != 0L)
                                     {
@@ -2927,7 +3246,9 @@ namespace go
                                             {
                                                 args = in[1L..];
                                             }
+
                                             return recv.Field(ifield).Method(imethod).Call(args);
+
                                         }
                                     else
 );
@@ -2939,8 +3260,11 @@ namespace go
                                             {
                                                 args = in[1L..];
                                             }
+
                                             return recv.Field(ifield).Method(imethod).Call(args);
+
                                         });
+
                                     }                                    {
                                         tfn = MakeFunc(mtyp, @in =>
                                         {
@@ -2950,7 +3274,9 @@ namespace go
                                             {
                                                 args = in[1L..];
                                             }
+
                                             return recv.Field(ifield).Method(imethod).Call(args);
+
                                         });
                                         ifn = MakeFunc(mtyp, @in =>
                                         {
@@ -2960,16 +3286,21 @@ namespace go
                                             {
                                                 args = in[1L..];
                                             }
+
                                             return recv.Field(ifield).Method(imethod).Call(args);
+
                                         });
+
                                     }
+
                                     methods = append(methods, new method(name:resolveReflectName(ift.nameOff(m.name)),mtyp:resolveReflectType(mtyp),ifn:resolveReflectText(unsafe.Pointer(&ifn)),tfn:resolveReflectText(unsafe.Pointer(&tfn)),));
+
                                 }
 
                                 m = m__prev2;
                             }
                         else if (f.typ.Kind() == Ptr) 
-                            var ptr = (ptrType.Value)(@unsafe.Pointer(ft));
+                            var ptr = (ptrType.val)(@unsafe.Pointer(ft));
                             {
                                 var unt__prev2 = unt;
 
@@ -2981,7 +3312,14 @@ namespace go
                                     { 
                                         // Issue 15924.
                                         panic("reflect: embedded type with methods not implemented if type is not first field");
+
                                     }
+
+                                    if (len(fields) > 1L)
+                                    {
+                                        panic("reflect: embedded type with methods not implemented if there is more than one field");
+                                    }
+
                                     {
                                         var m__prev2 = m;
 
@@ -2994,18 +3332,21 @@ namespace go
                                                 // TODO(sbinet).
                                                 // Issue 15924.
                                                 panic("reflect: embedded interface with unexported method(s) not implemented");
+
                                             }
+
                                             methods = append(methods, new method(name:resolveReflectName(mname),mtyp:resolveReflectType(ptr.typeOff(m.mtyp)),ifn:resolveReflectText(ptr.textOff(m.ifn)),tfn:resolveReflectText(ptr.textOff(m.tfn)),));
+
                                         }
 
                                         m = m__prev2;
                                     }
-
                                 }
 
                                 unt = unt__prev2;
 
                             }
+
                             {
                                 var unt__prev2 = unt;
 
@@ -3025,18 +3366,21 @@ namespace go
                                                 // TODO(sbinet)
                                                 // Issue 15924.
                                                 panic("reflect: embedded interface with unexported method(s) not implemented");
+
                                             }
+
                                             methods = append(methods, new method(name:resolveReflectName(mname),mtyp:resolveReflectType(ptr.elem.typeOff(m.mtyp)),ifn:resolveReflectText(ptr.elem.textOff(m.ifn)),tfn:resolveReflectText(ptr.elem.textOff(m.tfn)),));
+
                                         }
 
                                         m = m__prev2;
                                     }
-
                                 }
 
                                 unt = unt__prev2;
 
                             }
+
                         else 
                             {
                                 var unt__prev2 = unt;
@@ -3049,7 +3393,14 @@ namespace go
                                     { 
                                         // Issue 15924.
                                         panic("reflect: embedded type with methods not implemented if type is not first field");
+
                                     }
+
+                                    if (len(fields) > 1L && ft.kind & kindDirectIface != 0L)
+                                    {
+                                        panic("reflect: embedded type with methods not implemented for non-pointer type");
+                                    }
+
                                     {
                                         var m__prev2 = m;
 
@@ -3062,20 +3413,24 @@ namespace go
                                                 // TODO(sbinet)
                                                 // Issue 15924.
                                                 panic("reflect: embedded interface with unexported method(s) not implemented");
+
                                             }
+
                                             methods = append(methods, new method(name:resolveReflectName(mname),mtyp:resolveReflectType(ft.typeOff(m.mtyp)),ifn:resolveReflectText(ft.textOff(m.ifn)),tfn:resolveReflectText(ft.textOff(m.tfn)),));
+
 
                                         }
 
                                         m = m__prev2;
                                     }
-
                                 }
 
                                 unt = unt__prev2;
 
                             }
+
                                             }
+
                     {
                         var (_, dup) = fset[name];
 
@@ -3085,6 +3440,7 @@ namespace go
                         }
 
                     }
+
                     fset[name] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
 
                     hash = fnv1(hash, byte(ft.hash >> (int)(24L)), byte(ft.hash >> (int)(16L)), byte(ft.hash >> (int)(8L)), byte(ft.hash));
@@ -3095,26 +3451,30 @@ namespace go
                         hash = fnv1(hash, (slice<byte>)f.name.tag());
                         repr = append(repr, (" " + strconv.Quote(f.name.tag())));
                     }
+
                     if (i < len(fields) - 1L)
                     {
                         repr = append(repr, ';');
                     }
-                    comparable = comparable && (ft.alg.equal != null);
-                    hashable = hashable && (ft.alg.hash != null);
+
+                    comparable = comparable && (ft.equal != null);
 
                     var offset = align(size, uintptr(ft.align));
                     if (ft.align > typalign)
                     {
                         typalign = ft.align;
                     }
+
                     size = offset + ft.size;
-                    f.offsetAnon |= offset << (int)(1L);
+                    f.offsetEmbed |= offset << (int)(1L);
 
                     if (ft.size == 0L)
                     {
                         lastzero = size;
                     }
+
                     fs[i] = f;
+
                 }
 
                 i = i__prev1;
@@ -3128,44 +3488,46 @@ namespace go
                 // zero-sized field can't manufacture a pointer to the
                 // next object in the heap. See issue 9401.
                 size++;
+
             }
-            ref structType typ = default;
-            ref uncommonType ut = default;
 
+            ptr<structType> typ;
+            ptr<uncommonType> ut;
 
-            if (len(methods) == 0L) 
-                ptr<object> t = @new<structTypeUncommon>();
-                typ = ref t.structType;
-                ut = ref t.u;
-            else if (len(methods) <= 4L) 
-                t = @new<structTypeFixed4>();
-                typ = ref t.structType;
-                ut = ref t.u;
-                copy(t.m[..], methods);
-            else if (len(methods) <= 8L) 
-                t = @new<structTypeFixed8>();
-                typ = ref t.structType;
-                ut = ref t.u;
-                copy(t.m[..], methods);
-            else if (len(methods) <= 16L) 
-                t = @new<structTypeFixed16>();
-                typ = ref t.structType;
-                ut = ref t.u;
-                copy(t.m[..], methods);
-            else if (len(methods) <= 32L) 
-                t = @new<structTypeFixed32>();
-                typ = ref t.structType;
-                ut = ref t.u;
-                copy(t.m[..], methods);
-            else 
-                panic("reflect.StructOf: too many methods");
-                        ut.mcount = uint16(len(methods));
+            if (len(methods) == 0L)
+            {
+                ptr<structTypeUncommon> t = @new<structTypeUncommon>();
+                typ = _addr_t.structType;
+                ut = _addr_t.u;
+            }
+            else
+            { 
+                // A *rtype representing a struct is followed directly in memory by an
+                // array of method objects representing the methods attached to the
+                // struct. To get the same layout for a run time generated type, we
+                // need an array directly following the uncommonType memory.
+                // A similar strategy is used for funcTypeFixed4, ...funcTypeFixedN.
+                var tt = New(StructOf(new slice<StructField>(new StructField[] { {Name:"S",Type:TypeOf(structType{})}, {Name:"U",Type:TypeOf(uncommonType{})}, {Name:"M",Type:ArrayOf(len(methods),TypeOf(methods[0]))} })));
+
+                typ = (structType.val)(@unsafe.Pointer(tt.Elem().Field(0L).UnsafeAddr()));
+                ut = (uncommonType.val)(@unsafe.Pointer(tt.Elem().Field(1L).UnsafeAddr()));
+
+                copy(tt.Elem().Field(2L).Slice(0L, len(methods)).Interface()._<slice<method>>(), methods);
+
+            } 
+            // TODO(sbinet): Once we allow embedding multiple types,
+            // methods will need to be sorted like the compiler does.
+            // TODO(sbinet): Once we allow non-exported methods, we will
+            // need to compute xcount as the number of exported methods.
+            ut.mcount = uint16(len(methods));
+            ut.xcount = ut.mcount;
             ut.moff = uint32(@unsafe.Sizeof(new uncommonType()));
 
             if (len(fs) > 0L)
             {
                 repr = append(repr, ' ');
             }
+
             repr = append(repr, '}');
             hash = fnv1(hash, '}');
             var str = string(repr); 
@@ -3174,10 +3536,14 @@ namespace go
             size = align(size, uintptr(typalign)); 
 
             // Make the struct type.
-            struct{} istruct = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
-            *(ptr<ptr<structType>>) prototype = new ptr<*(ptr<ptr<structType>>)>(@unsafe.Pointer(ref istruct));
-            typ.Value = prototype.Value;
-            typ.fields = fs; 
+            ref struct{} istruct = ref heap(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{}, out ptr<struct{}> _addr_istruct);
+            ptr<ptr<ptr<structType>>> prototype = new ptr<ptr<ptr<ptr<structType>>>>(@unsafe.Pointer(_addr_istruct));
+            typ.val = prototype.val;
+            typ.fields = fs;
+            if (pkgpath != "")
+            {
+                typ.pkgPath = newName(pkgpath, "", false);
+            } 
 
             // Look in cache.
             {
@@ -3194,15 +3560,15 @@ namespace go
                         {
                             st = __st;
                             t = st.common();
-                            if (haveIdenticalUnderlyingType(ref typ.rtype, t, true))
+                            if (haveIdenticalUnderlyingType(_addr_typ.rtype, t, true))
                             {
                                 return t;
                             }
+
                         }
 
                         st = st__prev1;
                     }
-
                 } 
 
                 // Not in cache, lock and retry.
@@ -3228,20 +3594,21 @@ namespace go
                         {
                             st = __st;
                             t = st.common();
-                            if (haveIdenticalUnderlyingType(ref typ.rtype, t, true))
+                            if (haveIdenticalUnderlyingType(_addr_typ.rtype, t, true))
                             {
                                 return t;
                             }
+
                         }
 
                         st = st__prev1;
                     }
-
                 }
 
                 ts = ts__prev1;
 
             }
+
 
             Func<Type, Type> addToCache = t =>
             {
@@ -3255,8 +3622,10 @@ namespace go
                     }
 
                 }
+
                 structLookupCache.m.Store(hash, append(ts, t));
                 return t;
+
             } 
 
             // Look in known types.
@@ -3264,27 +3633,30 @@ namespace go
 
             // Look in known types.
             {
-                ptr<object> t__prev1 = t;
+                ptr<structTypeUncommon> t__prev1 = t;
 
                 foreach (var (_, __t) in typesByString(str))
                 {
                     t = __t;
-                    if (haveIdenticalUnderlyingType(ref typ.rtype, t, true))
+                    if (haveIdenticalUnderlyingType(_addr_typ.rtype, t, true))
                     { 
                         // even if 't' wasn't a structType with methods, we should be ok
                         // as the 'u uncommonType' field won't be accessed except when
                         // tflag&tflagUncommon is set.
                         return addToCache(t);
+
                     }
+
                 }
 
                 t = t__prev1;
             }
 
             typ.str = resolveReflectName(newName(str, "", false));
-            typ.tflag = 0L;
+            typ.tflag = 0L; // TODO: set tflagRegularMemory
             typ.hash = hash;
             typ.size = size;
+            typ.ptrdata = typeptrdata(_addr_typ.common());
             typ.align = typalign;
             typ.fieldAlign = typalign;
             typ.ptrToThis = 0L;
@@ -3292,14 +3664,7 @@ namespace go
             {
                 typ.tflag |= tflagUncommon;
             }
-            if (!hasPtr)
-            {
-                typ.kind |= kindNoPointers;
-            }
-            else
-            {
-                typ.kind &= kindNoPointers;
-            }
+
             if (hasGCProg)
             {
                 long lastPtrField = 0L;
@@ -3315,6 +3680,7 @@ namespace go
                         {
                             lastPtrField = i;
                         }
+
                     }
             else
 
@@ -3323,6 +3689,7 @@ namespace go
                 }
 
                 byte prog = new slice<byte>(new byte[] { 0, 0, 0, 0 }); // will be length of prog
+                System.UIntPtr off = default;
                 {
                     var i__prev1 = i;
                     var ft__prev1 = ft;
@@ -3336,77 +3703,61 @@ namespace go
                             // gcprog should not include anything for any field after
                             // the last field that contains pointer data
                             break;
-                        } 
-                        // FIXME(sbinet) handle padding, fields smaller than a word
-                        ref array<byte> elemGC = new ptr<ref array<byte>>(@unsafe.Pointer(ft.typ.gcdata))[..];
-                        var elemPtrs = ft.typ.ptrdata / ptrSize;
 
-                        if (ft.typ.kind & kindGCProg == 0L && ft.typ.ptrdata != 0L) 
-                            // Element is small with pointer mask; use as literal bits.
-                            var mask = elemGC; 
-                            // Emit 120-bit chunks of full bytes (max is 127 but we avoid using partial bytes).
-                            System.UIntPtr n = default;
-                            {
-                                System.UIntPtr n__prev2 = n;
-
-                                n = elemPtrs;
-
-                                while (n > 120L)
-                                {
-                                    prog = append(prog, 120L);
-                                    prog = append(prog, mask[..15L]);
-                                    mask = mask[15L..];
-                                    n -= 120L;
-                                }
-
-
-                                n = n__prev2;
-                            }
-                            prog = append(prog, byte(n));
-                            prog = append(prog, mask[..(n + 7L) / 8L]);
-                        else if (ft.typ.kind & kindGCProg != 0L) 
-                            // Element has GC program; emit one element.
-                            var elemProg = elemGC[4L..4L + @unsafe.Pointer(ref elemGC[0L]).Value - 1L];
-                            prog = append(prog, elemProg);
-                        // Pad from ptrdata to size.
-                        var elemWords = ft.typ.size / ptrSize;
-                        if (elemPtrs < elemWords)
-                        { 
-                            // Emit literal 0 bit, then repeat as needed.
-                            prog = append(prog, 0x01UL, 0x00UL);
-                            if (elemPtrs + 1L < elemWords)
-                            {
-                                prog = append(prog, 0x81UL);
-                                prog = appendVarint(prog, elemWords - elemPtrs - 1L);
-                            }
                         }
+
+                        if (!ft.typ.pointers())
+                        { 
+                            // Ignore pointerless fields.
+                            continue;
+
+                        } 
+                        // Pad to start of this field with zeros.
+                        if (ft.offset() > off)
+                        {
+                            var n = (ft.offset() - off) / ptrSize;
+                            prog = append(prog, 0x01UL, 0x00UL); // emit a 0 bit
+                            if (n > 1L)
+                            {
+                                prog = append(prog, 0x81UL); // repeat previous bit
+                                prog = appendVarint(prog, n - 1L); // n-1 times
+                            }
+
+                            off = ft.offset();
+
+                        }
+
+                        prog = appendGCProg(prog, _addr_ft.typ);
+                        off += ft.typ.ptrdata;
+
                     }
 
                     i = i__prev1;
                     ft = ft__prev1;
                 }
 
-                (uint32.Value)(@unsafe.Pointer(ref prog[0L])).Value;
+                prog = append(prog, 0L) * (uint32.val)(@unsafe.Pointer(_addr_prog[0L]));
 
                 uint32(len(prog) - 4L);
                 typ.kind |= kindGCProg;
-                typ.gcdata = ref prog[0L];
+                typ.gcdata = _addr_prog[0L];
+
             }            {
                 typ.kind &= kindGCProg;
                 ptr<object> bv = @new<bitVector>();
-                addTypeBits(bv, 0L, typ.common());
+                addTypeBits(bv, 0L, _addr_typ.common());
                 if (len(bv.data) > 0L)
                 {
-                    typ.gcdata = ref bv.data[0L];
+                    typ.gcdata = _addr_bv.data[0L];
                 }
+
             }
-            typ.ptrdata = typeptrdata(typ.common());
-            typ.alg = @new<typeAlg>();
-            if (hashable)
+
+            typ.equal = null;
+            if (comparable)
             {
-                typ.alg.hash = (p, seed) =>
+                typ.equal = (p, q) =>
                 {
-                    var o = seed;
                     {
                         var ft__prev1 = ft;
 
@@ -3414,87 +3765,84 @@ namespace go
                         {
                             ft = __ft;
                             var pi = add(p, ft.offset(), "&x.field safe");
-                            o = ft.typ.alg.hash(pi, o);
-                        }
-
-                        ft = ft__prev1;
-                    }
-
-                    return o;
-                }
-;
-            }
-            if (comparable)
-            {
-                typ.alg.equal = (p, q) =>
-                {
-                    {
-                        var ft__prev1 = ft;
-
-                        foreach (var (_, __ft) in typ.fields)
-                        {
-                            ft = __ft;
-                            pi = add(p, ft.offset(), "&x.field safe");
                             var qi = add(q, ft.offset(), "&x.field safe");
-                            if (!ft.typ.alg.equal(pi, qi))
+                            if (!ft.typ.equal(pi, qi))
                             {
                                 return false;
                             }
+
                         }
 
                         ft = ft__prev1;
                     }
 
                     return true;
+
                 }
 ;
+
             }
 
-            if (len(fs) == 1L && !ifaceIndir(fs[0L].typ)) 
+
+            if (len(fs) == 1L && !ifaceIndir(_addr_fs[0L].typ)) 
                 // structs of 1 direct iface type can be direct
                 typ.kind |= kindDirectIface;
             else 
                 typ.kind &= kindDirectIface;
-                        return addToCache(ref typ.rtype);
+                        return addToCache(_addr_typ.rtype);
+
         });
 
-        private static structField runtimeStructField(StructField field) => func((_, panic, __) =>
+        // runtimeStructField takes a StructField value passed to StructOf and
+        // returns both the corresponding internal representation, of type
+        // structField, and the pkgpath value to use for this field.
+        private static (structField, @string) runtimeStructField(StructField field) => func((_, panic, __) =>
         {
-            if (field.PkgPath != "")
-            {
-                panic("reflect.StructOf: StructOf does not allow unexported fields");
-            } 
+            structField _p0 = default;
+            @string _p0 = default;
 
-            // Best-effort check for misuse.
-            // Since PkgPath is empty, not much harm done if Unicode lowercase slips through.
-            var c = field.Name[0L];
-            if ('a' <= c && c <= 'z' || c == '_')
+            if (field.Anonymous && field.PkgPath != "")
             {
-                panic("reflect.StructOf: field \"" + field.Name + "\" is unexported but missing PkgPath");
+                panic("reflect.StructOf: field \"" + field.Name + "\" is anonymous but has PkgPath set");
             }
-            var offsetAnon = uintptr(0L);
+
+            var exported = field.PkgPath == "";
+            if (exported)
+            { 
+                // Best-effort check for misuse.
+                // Since this field will be treated as exported, not much harm done if Unicode lowercase slips through.
+                var c = field.Name[0L];
+                if ('a' <= c && c <= 'z' || c == '_')
+                {
+                    panic("reflect.StructOf: field \"" + field.Name + "\" is unexported but missing PkgPath");
+                }
+
+            }
+
+            var offsetEmbed = uintptr(0L);
             if (field.Anonymous)
             {
-                offsetAnon |= 1L;
+                offsetEmbed |= 1L;
             }
-            resolveReflectType(field.Type.common()); // install in runtime
-            return new structField(name:newName(field.Name,string(field.Tag),true),typ:field.Type.common(),offsetAnon:offsetAnon,);
+
+            resolveReflectType(_addr_field.Type.common()); // install in runtime
+            structField f = new structField(name:newName(field.Name,string(field.Tag),exported),typ:field.Type.common(),offsetEmbed:offsetEmbed,);
+            return (f, field.PkgPath);
+
         });
 
         // typeptrdata returns the length in bytes of the prefix of t
         // containing pointer data. Anything after this offset is scalar data.
         // keep in sync with ../cmd/compile/internal/gc/reflect.go
-        private static System.UIntPtr typeptrdata(ref rtype _t) => func(_t, (ref rtype t, Defer _, Panic panic, Recover __) =>
+        private static System.UIntPtr typeptrdata(ptr<rtype> _addr_t) => func((_, panic, __) =>
         {
-            if (!t.pointers())
-            {
-                return 0L;
-            }
+            ref rtype t = ref _addr_t.val;
+
 
             if (t.Kind() == Struct) 
-                var st = (structType.Value)(@unsafe.Pointer(t)); 
+                var st = (structType.val)(@unsafe.Pointer(t)); 
                 // find the last field that has pointers.
-                long field = 0L;
+                long field = -1L;
                 foreach (var (i) in st.fields)
                 {
                     var ft = st.fields[i].typ;
@@ -3502,15 +3850,22 @@ namespace go
                     {
                         field = i;
                     }
+
                 }
+                if (field == -1L)
+                {
+                    return 0L;
+                }
+
                 var f = st.fields[field];
                 return f.offset() + f.typ.ptrdata;
             else 
                 panic("reflect.typeptrdata: unexpected type, " + t.String());
-                    });
+            
+        });
 
         // See cmd/compile/internal/gc/reflect.go for derivation of constant.
-        private static readonly long maxPtrmaskBytes = 2048L;
+        private static readonly long maxPtrmaskBytes = (long)2048L;
 
         // ArrayOf returns the array type with the given count and element type.
         // For example, if t represents int, ArrayOf(5, t) represents [5]int.
@@ -3526,7 +3881,7 @@ namespace go
         // ArrayOf panics.
         public static Type ArrayOf(long count, Type elem) => func((_, panic, __) =>
         {
-            ref rtype typ = elem._<ref rtype>(); 
+            ptr<rtype> typ = elem._<ptr<rtype>>(); 
 
             // Look in cache.
             cacheKey ckey = new cacheKey(Array,typ,nil,uintptr(count));
@@ -3550,24 +3905,23 @@ namespace go
             @string s = "[" + strconv.Itoa(count) + "]" + typ.String();
             foreach (var (_, tt) in typesByString(s))
             {
-                var array = (arrayType.Value)(@unsafe.Pointer(tt));
+                var array = (arrayType.val)(@unsafe.Pointer(tt));
                 if (array.elem == typ)
                 {
                     var (ti, _) = lookupCache.LoadOrStore(ckey, tt);
                     return ti._<Type>();
                 }
+
             } 
 
             // Make an array type.
-            array<unsafe.Pointer> iarray = new array<unsafe.Pointer>(new unsafe.Pointer[] {  });
-            *(ptr<ptr<arrayType>>) prototype = new ptr<*(ptr<ptr<arrayType>>)>(@unsafe.Pointer(ref iarray));
-            array = prototype.Value;
-            array.tflag = 0L;
+            ref array<unsafe.Pointer> iarray = ref heap(new array<unsafe.Pointer>(new unsafe.Pointer[] {  }), out ptr<array<unsafe.Pointer>> _addr_iarray);
+            ptr<ptr<ptr<arrayType>>> prototype = new ptr<ptr<ptr<ptr<arrayType>>>>(@unsafe.Pointer(_addr_iarray));
+            array = prototype.val;
+            array.tflag = typ.tflag & tflagRegularMemory;
             array.str = resolveReflectName(newName(s, "", false));
             array.hash = fnv1(typ.hash, '[');
             {
-                var n__prev1 = n;
-
                 var n = uint32(count);
 
                 while (n > 0L)
@@ -3576,8 +3930,6 @@ namespace go
                     n >>= 8L;
                 }
 
-
-                n = n__prev1;
             }
             array.hash = fnv1(array.hash, ']');
             array.elem = typ;
@@ -3589,22 +3941,23 @@ namespace go
                 {
                     panic("reflect.ArrayOf: array size would exceed virtual address space");
                 }
+
             }
+
             array.size = typ.size * uintptr(count);
             if (count > 0L && typ.ptrdata != 0L)
             {
                 array.ptrdata = typ.size * uintptr(count - 1L) + typ.ptrdata;
             }
+
             array.align = typ.align;
             array.fieldAlign = typ.fieldAlign;
             array.len = uintptr(count);
-            array.slice = SliceOf(elem)._<ref rtype>();
+            array.slice = SliceOf(elem)._<ptr<rtype>>();
 
-            array.kind &= kindNoPointers;
 
-            if (typ.kind & kindNoPointers != 0L || array.size == 0L) 
+            if (typ.ptrdata == 0L || array.size == 0L) 
                 // No pointers.
-                array.kind |= kindNoPointers;
                 array.gcdata = null;
                 array.ptrdata = 0L;
             else if (count == 1L) 
@@ -3617,60 +3970,16 @@ namespace go
                 // Create direct pointer mask by turning each 1 bit in elem
                 // into count 1 bits in larger mask.
                 var mask = make_slice<byte>((array.ptrdata / ptrSize + 7L) / 8L);
-                ref array<byte> elemMask = new ptr<ref array<byte>>(@unsafe.Pointer(typ.gcdata))[..];
-                var elemWords = typ.size / ptrSize;
-                for (var j = uintptr(0L); j < typ.ptrdata / ptrSize; j++)
-                {
-                    if ((elemMask[j / 8L] >> (int)((j % 8L))) & 1L != 0L)
-                    {
-                        {
-                            var i__prev2 = i;
-
-                            for (var i = uintptr(0L); i < array.len; i++)
-                            {
-                                var k = i * elemWords + j;
-                                mask[k / 8L] |= 1L << (int)((k % 8L));
-                            }
-
-
-                            i = i__prev2;
-                        }
-                    }
-                }
-
-                array.gcdata = ref mask[0L];
+                emitGCMask(mask, 0L, typ, array.len);
+                array.gcdata = _addr_mask[0L];
             else 
                 // Create program that emits one element
                 // and then repeats to make the array.
                 byte prog = new slice<byte>(new byte[] { 0, 0, 0, 0 }); // will be length of prog
-                ref array<byte> elemGC = new ptr<ref array<byte>>(@unsafe.Pointer(typ.gcdata))[..];
-                var elemPtrs = typ.ptrdata / ptrSize;
-                if (typ.kind & kindGCProg == 0L)
-                { 
-                    // Element is small with pointer mask; use as literal bits.
-                    mask = elemGC; 
-                    // Emit 120-bit chunks of full bytes (max is 127 but we avoid using partial bytes).
-                    n = default;
-                    n = elemPtrs;
-
-                    while (n > 120L)
-                    {
-                        prog = append(prog, 120L);
-                        prog = append(prog, mask[..15L]);
-                        mask = mask[15L..];
-                        n -= 120L;
-                    }
-                else
-
-                    prog = append(prog, byte(n));
-                    prog = append(prog, mask[..(n + 7L) / 8L]);
-                }                { 
-                    // Element has GC program; emit one element.
-                    var elemProg = elemGC[4L..4L + @unsafe.Pointer(ref elemGC[0L]).Value - 1L];
-                    prog = append(prog, elemProg);
-                } 
+                prog = appendGCProg(prog, typ); 
                 // Pad from ptrdata to size.
-                elemWords = typ.size / ptrSize;
+                var elemPtrs = typ.ptrdata / ptrSize;
+                var elemWords = typ.size / ptrSize;
                 if (elemPtrs < elemWords)
                 { 
                     // Emit literal 0 bit, then repeat as needed.
@@ -3680,6 +3989,7 @@ namespace go
                         prog = append(prog, 0x81UL);
                         prog = appendVarint(prog, elemWords - elemPtrs - 1L);
                     }
+
                 } 
                 // Repeat count-1 times.
                 if (elemWords < 0x80UL)
@@ -3691,27 +4001,26 @@ namespace go
                     prog = append(prog, 0x80UL);
                     prog = appendVarint(prog, elemWords);
                 }
+
                 prog = appendVarint(prog, uintptr(count) - 1L);
-                prog = append(prog, 0L) * (uint32.Value)(@unsafe.Pointer(ref prog[0L]));
+                prog = append(prog, 0L) * (uint32.val)(@unsafe.Pointer(_addr_prog[0L]));
 
                 uint32(len(prog) - 4L);
                 array.kind |= kindGCProg;
-                array.gcdata = ref prog[0L];
+                array.gcdata = _addr_prog[0L];
                 array.ptrdata = array.size; // overestimate but ok; must match program
                         var etyp = typ.common();
             var esize = etyp.Size();
-            var ealg = etyp.alg;
 
-            array.alg = @new<typeAlg>();
-            if (ealg.equal != null)
+            array.equal = null;
             {
-                var eequal = ealg.equal;
-                array.alg.equal = (p, q) =>
-                {
-                    {
-                        var i__prev1 = i;
+                var eequal = etyp.equal;
 
-                        for (i = 0L; i < count; i++)
+                if (eequal != null)
+                {
+                    array.equal = (p, q) =>
+                    {
+                        for (long i = 0L; i < count; i++)
                         {
                             var pi = arrayAt(p, i, esize, "i < count");
                             var qi = arrayAt(q, i, esize, "i < count");
@@ -3719,44 +4028,28 @@ namespace go
                             {
                                 return false;
                             }
+
                         }
 
+                        return true;
 
-                        i = i__prev1;
                     }
-                    return true;
-                }
 ;
-            }
-            if (ealg.hash != null)
-            {
-                var ehash = ealg.hash;
-                array.alg.hash = (ptr, seed) =>
-                {
-                    var o = seed;
-                    {
-                        var i__prev1 = i;
 
-                        for (i = 0L; i < count; i++)
-                        {
-                            o = ehash(arrayAt(ptr, i, esize, "i < count"), o);
-                        }
-
-
-                        i = i__prev1;
-                    }
-                    return o;
                 }
-;
+
             }
+
+
 
             if (count == 1L && !ifaceIndir(typ)) 
                 // array of 1 direct iface type can be direct
                 array.kind |= kindDirectIface;
             else 
                 array.kind &= kindDirectIface;
-                        (ti, _) = lookupCache.LoadOrStore(ckey, ref array.rtype);
+                        (ti, _) = lookupCache.LoadOrStore(ckey, _addr_array.rtype);
             return ti._<Type>();
+
         });
 
         private static slice<byte> appendVarint(slice<byte> x, System.UIntPtr v)
@@ -3769,6 +4062,7 @@ namespace go
 
             x = append(x, byte(v));
             return x;
+
         }
 
         // toType converts from a *rtype to a Type that can be returned
@@ -3776,18 +4070,22 @@ namespace go
         // a nil *rtype must be replaced by a nil Type, but in gccgo this
         // function takes care of ensuring that multiple *rtype for the same
         // type are coalesced into a single Type.
-        private static Type toType(ref rtype t)
+        private static Type toType(ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             if (t == null)
             {
                 return null;
             }
+
             return t;
+
         }
 
         private partial struct layoutKey
         {
-            public ptr<rtype> t; // function signature
+            public ptr<funcType> ftyp; // function signature
             public ptr<rtype> rcvr; // receiver type, or nil if none
         }
 
@@ -3808,16 +4106,26 @@ namespace go
         // The returned type exists only for GC, so we only fill out GC relevant info.
         // Currently, that's just size and the GC program. We also fill in
         // the name for possible debugging use.
-        private static (ref rtype, System.UIntPtr, System.UIntPtr, ref bitVector, ref sync.Pool) funcLayout(ref rtype _t, ref rtype _rcvr) => func(_t, _rcvr, (ref rtype t, ref rtype rcvr, Defer _, Panic panic, Recover __) =>
+        private static (ptr<rtype>, System.UIntPtr, System.UIntPtr, ptr<bitVector>, ptr<sync.Pool>) funcLayout(ptr<funcType> _addr_t, ptr<rtype> _addr_rcvr) => func((_, panic, __) =>
         {
+            ptr<rtype> frametype = default!;
+            System.UIntPtr argSize = default;
+            System.UIntPtr retOffset = default;
+            ptr<bitVector> stk = default!;
+            ptr<sync.Pool> framePool = default!;
+            ref funcType t = ref _addr_t.val;
+            ref rtype rcvr = ref _addr_rcvr.val;
+
             if (t.Kind() != Func)
             {
-                panic("reflect: funcLayout of non-func type");
+                panic("reflect: funcLayout of non-func type " + t.String());
             }
+
             if (rcvr != null && rcvr.Kind() == Interface)
             {
                 panic("reflect: funcLayout with interface receiver " + rcvr.String());
             }
+
             layoutKey k = new layoutKey(t,rcvr);
             {
                 var lti__prev1 = lti;
@@ -3827,14 +4135,14 @@ namespace go
                 if (ok)
                 {
                     layoutType lt = lti._<layoutType>();
-                    return (lt.t, lt.argSize, lt.retOffset, lt.stack, lt.framePool);
-                }
+                    return (_addr_lt.t!, lt.argSize, lt.retOffset, _addr_lt.stack!, _addr_lt.framePool!);
+                } 
+
+                // compute gc program & stack bitmap for arguments
 
                 lti = lti__prev1;
 
-            }
-
-            var tt = (funcType.Value)(@unsafe.Pointer(t)); 
+            } 
 
             // compute gc program & stack bitmap for arguments
             ptr<bitVector> ptrmap = @new<bitVector>();
@@ -3844,49 +4152,42 @@ namespace go
                 // Reflect uses the "interface" calling convention for
                 // methods, where receivers take one word of argument
                 // space no matter how big they actually are.
-                if (ifaceIndir(rcvr) || rcvr.pointers())
+                if (ifaceIndir(_addr_rcvr) || rcvr.pointers())
                 {
                     ptrmap.append(1L);
                 }
+                else
+                {
+                    ptrmap.append(0L);
+                }
+
                 offset += ptrSize;
+
             }
-            foreach (var (_, arg) in tt.@in())
+
+            foreach (var (_, arg) in t.@in())
             {
                 offset += -offset & uintptr(arg.align - 1L);
-                addTypeBits(ptrmap, offset, arg);
+                addTypeBits(ptrmap, offset, _addr_arg);
                 offset += arg.size;
             }
-            var argN = ptrmap.n;
             argSize = offset;
-            if (runtime.GOARCH == "amd64p32")
-            {
-                offset += -offset & (8L - 1L);
-            }
             offset += -offset & (ptrSize - 1L);
             retOffset = offset;
-            foreach (var (_, res) in tt.@out())
+            foreach (var (_, res) in t.@out())
             {
                 offset += -offset & uintptr(res.align - 1L);
-                addTypeBits(ptrmap, offset, res);
+                addTypeBits(ptrmap, offset, _addr_res);
                 offset += res.size;
             }
             offset += -offset & (ptrSize - 1L); 
 
             // build dummy rtype holding gc program
-            rtype x = ref new rtype(align:ptrSize,size:offset,ptrdata:uintptr(ptrmap.n)*ptrSize,);
-            if (runtime.GOARCH == "amd64p32")
-            {
-                x.align = 8L;
-            }
+            ptr<rtype> x = addr(new rtype(align:ptrSize,size:offset,ptrdata:uintptr(ptrmap.n)*ptrSize,));
             if (ptrmap.n > 0L)
             {
-                x.gcdata = ref ptrmap.data[0L];
+                x.gcdata = _addr_ptrmap.data[0L];
             }
-            else
-            {
-                x.kind |= kindNoPointers;
-            }
-            ptrmap.n = argN;
 
             @string s = default;
             if (rcvr != null)
@@ -3897,22 +4198,26 @@ namespace go
             {
                 s = "funcargs(" + t.String() + ")";
             }
+
             x.str = resolveReflectName(newName(s, "", false)); 
 
             // cache result for future callers
-            framePool = ref new sync.Pool(New:func()interface{}{returnunsafe_New(x)});
+            framePool = addr(new sync.Pool(New:func()interface{}{returnunsafe_New(x)}));
             var (lti, _) = layoutCache.LoadOrStore(k, new layoutType(t:x,argSize:argSize,retOffset:retOffset,stack:ptrmap,framePool:framePool,));
             lt = lti._<layoutType>();
-            return (lt.t, lt.argSize, lt.retOffset, lt.stack, lt.framePool);
+            return (_addr_lt.t!, lt.argSize, lt.retOffset, _addr_lt.stack!, _addr_lt.framePool!);
+
         });
 
         // ifaceIndir reports whether t is stored indirectly in an interface value.
-        private static bool ifaceIndir(ref rtype t)
+        private static bool ifaceIndir(ptr<rtype> _addr_t)
         {
+            ref rtype t = ref _addr_t.val;
+
             return t.kind & kindDirectIface == 0L;
         }
 
-        // Layout matches runtime.gobitvector (well enough).
+        // Note: this type must agree with runtime.bitvector.
         private partial struct bitVector
         {
             public uint n; // number of bits
@@ -3920,22 +4225,30 @@ namespace go
         }
 
         // append a bit to the bitmap.
-        private static void append(this ref bitVector bv, byte bit)
+        private static void append(this ptr<bitVector> _addr_bv, byte bit)
         {
+            ref bitVector bv = ref _addr_bv.val;
+
             if (bv.n % 8L == 0L)
             {
                 bv.data = append(bv.data, 0L);
             }
+
             bv.data[bv.n / 8L] |= bit << (int)((bv.n % 8L));
             bv.n++;
+
         }
 
-        private static void addTypeBits(ref bitVector bv, System.UIntPtr offset, ref rtype t)
+        private static void addTypeBits(ptr<bitVector> _addr_bv, System.UIntPtr offset, ptr<rtype> _addr_t)
         {
-            if (t.kind & kindNoPointers != 0L)
+            ref bitVector bv = ref _addr_bv.val;
+            ref rtype t = ref _addr_t.val;
+
+            if (t.ptrdata == 0L)
             {
-                return;
+                return ;
             }
+
 
             if (Kind(t.kind & kindMask) == Chan || Kind(t.kind & kindMask) == Func || Kind(t.kind & kindMask) == Map || Kind(t.kind & kindMask) == Ptr || Kind(t.kind & kindMask) == Slice || Kind(t.kind & kindMask) == String || Kind(t.kind & kindMask) == UnsafePointer) 
                 // 1 pointer at start of representation
@@ -3956,13 +4269,13 @@ namespace go
                 bv.append(1L);
             else if (Kind(t.kind & kindMask) == Array) 
                 // repeat inner type
-                var tt = (arrayType.Value)(@unsafe.Pointer(t));
+                var tt = (arrayType.val)(@unsafe.Pointer(t));
                 {
                     long i__prev1 = i;
 
                     for (long i = 0L; i < int(tt.len); i++)
                     {
-                        addTypeBits(bv, offset + uintptr(i) * tt.elem.size, tt.elem);
+                        addTypeBits(_addr_bv, offset + uintptr(i) * tt.elem.size, _addr_tt.elem);
                     }
 
 
@@ -3970,15 +4283,15 @@ namespace go
                 }
             else if (Kind(t.kind & kindMask) == Struct) 
                 // apply fields
-                tt = (structType.Value)(@unsafe.Pointer(t));
+                tt = (structType.val)(@unsafe.Pointer(t));
                 {
                     long i__prev1 = i;
 
                     foreach (var (__i) in tt.fields)
                     {
                         i = __i;
-                        var f = ref tt.fields[i];
-                        addTypeBits(bv, offset + f.offset(), f.typ);
+                        var f = _addr_tt.fields[i];
+                        addTypeBits(_addr_bv, offset + f.offset(), _addr_f.typ);
                     }
 
                     i = i__prev1;

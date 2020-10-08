@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package report -- go2cs converted at 2020 August 29 10:06:11 UTC
+// package report -- go2cs converted at 2020 October 08 04:43:25 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/report" ==> using report = go.cmd.vendor.github.com.google.pprof.@internal.report_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\report\source_html.go
 using template = go.html.template_package;
@@ -29,13 +29,15 @@ namespace @internal
     public static partial class report_package
     {
         // AddSourceTemplates adds templates used by PrintWebList to t.
-        public static void AddSourceTemplates(ref template.Template t)
+        public static void AddSourceTemplates(ptr<template.Template> _addr_t)
         {
+            ref template.Template t = ref _addr_t.val;
+
             template.Must(t.Parse("{{define \"weblistcss\"}}" + weblistPageCSS + "{{end}}"));
             template.Must(t.Parse("{{define \"weblistjs\"}}" + weblistPageScript + "{{end}}"));
         }
 
-        private static readonly @string weblistPageCSS = @"<style type=""text/css"">
+        private static readonly @string weblistPageCSS = (@string)@"<style type=""text/css"">
 body {
 font-family: sans-serif;
 }
@@ -73,7 +75,7 @@ display: none;
 
 
 
-        private static readonly @string weblistPageScript = @"<script type=""text/javascript"">
+        private static readonly @string weblistPageScript = (@string)@"<script type=""text/javascript"">
 function pprof_toggle_asm(e) {
   var target;
   if (!e) e = window.event;
@@ -93,7 +95,7 @@ function pprof_toggle_asm(e) {
 
 
 
-        private static readonly @string weblistPageClosing = "\n</body>\n</html>\n";
+        private static readonly @string weblistPageClosing = (@string)"\n</body>\n</html>\n";
 
     }
 }}}}}}}

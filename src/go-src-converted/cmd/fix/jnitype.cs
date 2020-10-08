@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:00:17 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:17 UTC
 // Original source: C:\Go\src\cmd\fix\jnitype.go
 using ast = go.go.ast_package;
 using static go.builtin;
@@ -25,8 +25,10 @@ namespace go
         //   type jobject uintptr
         // and similar for subtypes of jobject.
         // This fix finds nils initializing these types and replaces the nils with 0s.
-        private static bool jnifix(ref ast.File f)
+        private static bool jnifix(ptr<ast.File> _addr_f)
         {
+            ref ast.File f = ref _addr_f.val;
+
             return typefix(f, s =>
             {
                 switch (s)
@@ -78,7 +80,9 @@ namespace go
                         break;
                 }
                 return false;
+
             });
+
         }
     }
 }

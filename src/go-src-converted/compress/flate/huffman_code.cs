@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 August 29 08:23:30 UTC
+// package flate -- go2cs converted at 2020 October 08 03:31:00 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\huffman_code.go
 using math = go.math_package;
@@ -50,8 +50,10 @@ namespace compress
         }
 
         // set sets the code and length of an hcode.
-        private static void set(this ref hcode h, ushort code, ushort length)
+        private static void set(this ptr<hcode> _addr_h, ushort code, ushort length)
         {
+            ref hcode h = ref _addr_h.val;
+
             h.len = length;
             h.code = code;
         }
@@ -61,13 +63,13 @@ namespace compress
             return new literalNode(math.MaxUint16,math.MaxInt32);
         }
 
-        private static ref huffmanEncoder newHuffmanEncoder(long size)
+        private static ptr<huffmanEncoder> newHuffmanEncoder(long size)
         {
-            return ref new huffmanEncoder(codes:make([]hcode,size));
+            return addr(new huffmanEncoder(codes:make([]hcode,size)));
         }
 
         // Generates a HuffmanCode corresponding to the fixed literal table
-        private static ref huffmanEncoder generateFixedLiteralEncoding()
+        private static ptr<huffmanEncoder> generateFixedLiteralEncoding()
         {
             var h = newHuffmanEncoder(maxNumLit);
             var codes = h.codes;
@@ -97,12 +99,14 @@ namespace compress
                     bits = ch + 192L - 280L;
                     size = 8L;
                                 codes[ch] = new hcode(code:reverseBits(bits,byte(size)),len:size);
+
             }
 
-            return h;
+            return _addr_h!;
+
         }
 
-        private static ref huffmanEncoder generateFixedOffsetEncoding()
+        private static ptr<huffmanEncoder> generateFixedOffsetEncoding()
         {
             var h = newHuffmanEncoder(30L);
             var codes = h.codes;
@@ -110,14 +114,17 @@ namespace compress
             {
                 codes[ch] = new hcode(code:reverseBits(uint16(ch),5),len:5);
             }
-            return h;
+            return _addr_h!;
+
         }
 
-        private static ref huffmanEncoder fixedLiteralEncoding = generateFixedLiteralEncoding();
-        private static ref huffmanEncoder fixedOffsetEncoding = generateFixedOffsetEncoding();
+        private static ptr<huffmanEncoder> fixedLiteralEncodinggenerateFixedLiteralEncoding();
+        private static ptr<huffmanEncoder> fixedOffsetEncodinggenerateFixedOffsetEncoding();
 
-        private static long bitLength(this ref huffmanEncoder h, slice<int> freq)
+        private static long bitLength(this ptr<huffmanEncoder> _addr_h, slice<int> freq)
         {
+            ref huffmanEncoder h = ref _addr_h.val;
+
             long total = default;
             foreach (var (i, f) in freq)
             {
@@ -125,11 +132,13 @@ namespace compress
                 {
                     total += int(f) * int(h.codes[i].len);
                 }
+
             }
             return total;
+
         }
 
-        private static readonly long maxBitsLimit = 16L;
+        private static readonly long maxBitsLimit = (long)16L;
 
         // Return the number of literals assigned to each bit size in the Huffman encoding
         //
@@ -159,12 +168,15 @@ namespace compress
         //             Must be less than 16.
         // return      An integer array in which array[i] indicates the number of literals
         //             that should be encoded in i bits.
-        private static slice<int> bitCounts(this ref huffmanEncoder _h, slice<literalNode> list, int maxBits) => func(_h, (ref huffmanEncoder h, Defer _, Panic panic, Recover __) =>
+        private static slice<int> bitCounts(this ptr<huffmanEncoder> _addr_h, slice<literalNode> list, int maxBits) => func((_, panic, __) =>
         {
+            ref huffmanEncoder h = ref _addr_h.val;
+
             if (maxBits >= maxBitsLimit)
             {
                 panic("flate: maxBits too large");
             }
+
             var n = int32(len(list));
             list = list[0L..n + 1L];
             list[n] = maxNode(); 
@@ -200,6 +212,7 @@ namespace compress
                     {
                         levels[level].nextPairFreq = math.MaxInt32;
                     }
+
                 } 
 
                 // We need a total of 2*n - 2 items at top level and have already generated 2.
@@ -214,7 +227,7 @@ namespace compress
             level = maxBits;
             while (true)
             {
-                var l = ref levels[level];
+                var l = _addr_levels[level];
                 if (l.nextPairFreq == math.MaxInt32 && l.nextCharFreq == math.MaxInt32)
                 { 
                     // We've run out of both leafs and pairs.
@@ -225,7 +238,9 @@ namespace compress
                     levels[level + 1L].nextPairFreq = math.MaxInt32;
                     level++;
                     continue;
+
                 }
+
                 var prevFreq = l.lastFreq;
                 if (l.nextCharFreq < l.nextPairFreq)
                 { 
@@ -235,6 +250,7 @@ namespace compress
                     // Lower leafCounts are the same of the previous node.
                     leafCounts[level][level] = n;
                     l.nextCharFreq = list[n].freq;
+
                 }
                 else
                 { 
@@ -245,7 +261,9 @@ namespace compress
                     // Take leaf counts from the lower level, except counts[level] remains the same.
                     copy(leafCounts[level][..level], leafCounts[level - 1L][..level]);
                     levels[l.level - 1L].needed = 2L;
+
                 }
+
                 l.needed--;
 
                 if (l.needed == 0L)
@@ -258,9 +276,12 @@ namespace compress
                     { 
                         // All done!
                         break;
+
                     }
+
                     levels[l.level + 1L].nextPairFreq = prevFreq + l.lastFreq;
                     level++;
+
                 }
                 else
                 { 
@@ -270,7 +291,9 @@ namespace compress
                         level--;
                     }
 
+
                 }
+
             } 
 
             // Somethings is wrong if at the end, the top level is null or hasn't used
@@ -283,9 +306,10 @@ namespace compress
             {
                 panic("leafCounts[maxBits][maxBits] != n");
             }
+
             var bitCount = h.bitCount[..maxBits + 1L];
             long bits = 1L;
-            var counts = ref leafCounts[maxBits];
+            var counts = _addr_leafCounts[maxBits];
             {
                 var level__prev1 = level;
 
@@ -295,18 +319,22 @@ namespace compress
                     // bits to encode.
                     bitCount[bits] = counts[level] - counts[level - 1L];
                     bits++;
+
                 }
 
 
                 level = level__prev1;
             }
             return bitCount;
+
         });
 
         // Look at the leaves and assign them a bit count and an encoding as specified
         // in RFC 1951 3.2.2
-        private static void assignEncodingAndSize(this ref huffmanEncoder h, slice<int> bitCount, slice<literalNode> list)
+        private static void assignEncodingAndSize(this ptr<huffmanEncoder> _addr_h, slice<int> bitCount, slice<literalNode> list)
         {
+            ref huffmanEncoder h = ref _addr_h.val;
+
             var code = uint16(0L);
             foreach (var (n, bits) in bitCount)
             {
@@ -328,22 +356,28 @@ namespace compress
                     code++;
                 }
                 list = list[0L..len(list) - int(bits)];
+
             }
+
         }
 
         // Update this Huffman Code object to be the minimum code for the specified frequency count.
         //
         // freq  An array of frequencies, in which frequency[i] gives the frequency of literal i.
         // maxBits  The maximum number of bits to use for any literal.
-        private static void generate(this ref huffmanEncoder h, slice<int> freq, int maxBits)
+        private static void generate(this ptr<huffmanEncoder> _addr_h, slice<int> freq, int maxBits)
         {
+            ref huffmanEncoder h = ref _addr_h.val;
+
             if (h.freqcache == null)
             { 
                 // Allocate a reusable buffer with the longest possible frequency table.
                 // Possible lengths are codegenCodeCount, offsetCodeCount and maxNumLit.
                 // The largest of these is maxNumLit, so we allocate for that case.
                 h.freqcache = make_slice<literalNode>(maxNumLit + 1L);
+
             }
+
             var list = h.freqcache[..len(freq) + 1L]; 
             // Number of non-zero literals
             long count = 0L; 
@@ -365,6 +399,7 @@ namespace compress
                         list[count] = new literalNode();
                         h.codes[i].len = 0L;
                     }
+
                 }
 
                 i = i__prev1;
@@ -386,28 +421,34 @@ namespace compress
                         node = __node; 
                         // "list" is in order of increasing literal value.
                         h.codes[node.literal].set(uint16(i), 1L);
+
                     }
 
                     i = i__prev1;
                 }
 
-                return;
+                return ;
+
             }
+
             h.lfs.sort(list); 
 
             // Get the number of literals for each bit count
             var bitCount = h.bitCounts(list, maxBits); 
             // And do the assignment
             h.assignEncodingAndSize(bitCount, list);
+
         }
 
         private partial struct byLiteral // : slice<literalNode>
         {
         }
 
-        private static void sort(this ref byLiteral s, slice<literalNode> a)
+        private static void sort(this ptr<byLiteral> _addr_s, slice<literalNode> a)
         {
-            s.Value = byLiteral(a);
+            ref byLiteral s = ref _addr_s.val;
+
+            s.val = byLiteral(a);
             sort.Sort(s);
         }
 
@@ -425,16 +466,17 @@ namespace compress
         {
             s[i] = s[j];
             s[j] = s[i];
-
         }
 
         private partial struct byFreq // : slice<literalNode>
         {
         }
 
-        private static void sort(this ref byFreq s, slice<literalNode> a)
+        private static void sort(this ptr<byFreq> _addr_s, slice<literalNode> a)
         {
-            s.Value = byFreq(a);
+            ref byFreq s = ref _addr_s.val;
+
+            s.val = byFreq(a);
             sort.Sort(s);
         }
 
@@ -449,14 +491,15 @@ namespace compress
             {
                 return s[i].literal < s[j].literal;
             }
+
             return s[i].freq < s[j].freq;
+
         }
 
         private static void Swap(this byFreq s, long i, long j)
         {
             s[i] = s[j];
             s[j] = s[i];
-
         }
 
         private static ushort reverseBits(ushort number, byte bitLength)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:51 UTC
+//     Generated on 2020 October 08 03:35:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using static go.builtin;
+using subtle = go.crypto.@internal.subtle_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -49,7 +50,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +64,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate Stream NewCTRByRef(ref T value, slice<byte> iv);
+            private delegate Stream NewCTRByPtr(ptr<T> value, slice<byte> iv);
             private delegate Stream NewCTRByVal(T value, slice<byte> iv);
 
-            private static readonly NewCTRByRef s_NewCTRByRef;
+            private static readonly NewCTRByPtr s_NewCTRByPtr;
             private static readonly NewCTRByVal s_NewCTRByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,11 +76,12 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NewCTRByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NewCTRByPtr is null || !m_target_is_ptr)
                     return s_NewCTRByVal!(target, iv);
 
-                return s_NewCTRByRef(ref target, iv);
+                return s_NewCTRByPtr(m_target_ptr, iv);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -88,23 +90,20 @@ namespace crypto
             static ctrAble()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NewCTR");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NewCTR");
 
                 if (!(extensionMethod is null))
-                    s_NewCTRByRef = extensionMethod.CreateStaticDelegate(typeof(NewCTRByRef)) as NewCTRByRef;
+                    s_NewCTRByPtr = extensionMethod.CreateStaticDelegate(typeof(NewCTRByPtr)) as NewCTRByPtr;
 
-                if (s_NewCTRByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NewCTR");
+                extensionMethod = targetType.GetExtensionMethod("NewCTR");
 
-                    if (!(extensionMethod is null))
-                        s_NewCTRByVal = extensionMethod.CreateStaticDelegate(typeof(NewCTRByVal)) as NewCTRByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NewCTRByVal = extensionMethod.CreateStaticDelegate(typeof(NewCTRByVal)) as NewCTRByVal;
 
-                if (s_NewCTRByRef is null && s_NewCTRByVal is null)
+                if (s_NewCTRByPtr is null && s_NewCTRByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ctrAble.NewCTR method", new Exception("NewCTR"));
             }
 

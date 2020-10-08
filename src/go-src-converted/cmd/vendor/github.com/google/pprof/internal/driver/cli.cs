@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2020 August 29 10:05:15 UTC
+// package driver -- go2cs converted at 2020 October 08 04:42:54 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\cli.go
+using errors = go.errors_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
 using strings = go.strings_package;
@@ -40,22 +41,30 @@ namespace @internal
             public @string ExecName;
             public @string BuildID;
             public slice<@string> Base;
+            public bool DiffBase;
             public bool Normalize;
             public long Seconds;
             public long Timeout;
             public @string Symbolize;
             public @string HTTPHostport;
+            public bool HTTPDisableBrowser;
             public @string Comment;
         }
 
-        // Parse parses the command lines through the specified flags package
+        // parseFlags parses the command lines through the specified flags package
         // and returns the source of the profile and optionally the command
         // for the kind of report to generate (nil for interactive use).
-        private static (ref source, slice<@string>, error) parseFlags(ref plugin.Options o)
+        private static (ptr<source>, slice<@string>, error) parseFlags(ptr<plugin.Options> _addr_o)
         {
+            ptr<source> _p0 = default!;
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref plugin.Options o = ref _addr_o.val;
+
             var flag = o.Flagset; 
             // Comparisons.
-            var flagBase = flag.StringList("base", "", "Source for base profile for comparison"); 
+            var flagDiffBase = flag.StringList("diff_base", "", "Source of base profile for comparison");
+            var flagBase = flag.StringList("base", "", "Source of base profile for profile subtraction"); 
             // Source options.
             var flagSymbolize = flag.String("symbolize", "", "Options for profile symbolization");
             var flagBuildID = flag.String("buildid", "", "Override build id for first mapping");
@@ -74,13 +83,14 @@ namespace @internal
             var flagMeanDelay = flag.Bool("mean_delay", false, "Display mean delay at each region");
             var flagTools = flag.String("tools", os.Getenv("PPROF_TOOLS"), "Path for object tool pathnames");
 
-            var flagHTTP = flag.String("http", "", "Present interactive web based UI at the specified http host:port"); 
+            var flagHTTP = flag.String("http", "", "Present interactive web UI at the specified http host:port");
+            var flagNoBrowser = flag.Bool("no_browser", false, "Skip opening a browswer for the interactive web UI"); 
 
             // Flags used during command processing
             var installedFlags = installFlags(flag);
 
-            var flagCommands = make_map<@string, ref bool>();
-            var flagParamCommands = make_map<@string, ref @string>();
+            var flagCommands = make_map<@string, ptr<bool>>();
+            var flagParamCommands = make_map<@string, ptr<@string>>();
             {
                 var cmd__prev1 = cmd;
 
@@ -96,6 +106,7 @@ namespace @internal
                     {
                         flagCommands[name] = flag.Bool(name, false, "Generate a report in " + name + " format");
                     }
+
                 }
 
                 cmd = cmd__prev1;
@@ -107,14 +118,17 @@ namespace @internal
             });
             if (len(args) == 0L)
             {
-                return (null, null, fmt.Errorf("no profile source specified"));
+                return (_addr_null!, null, error.As(errors.New("no profile source specified"))!);
             }
+
             @string execName = default; 
             // Recognize first argument as an executable or buildid override.
             if (len(args) > 1L)
             {
                 var arg0 = args[0L];
                 {
+                    var err__prev2 = err;
+
                     var (file, err) = o.Obj.Open(arg0, 0L, ~uint64(0L), 0L);
 
                     if (err == null)
@@ -123,75 +137,146 @@ namespace @internal
                         execName = arg0;
                         args = args[1L..];
                     }
-                    else if (flagBuildID == "" && isBuildID(arg0).Value)
+                    else if (flagBuildID == "" && isBuildID(arg0).val)
                     {
-                        flagBuildID.Value = arg0;
+                        flagBuildID.val = arg0;
                         args = args[1L..];
                     }
 
+
+                    err = err__prev2;
+
                 }
+
             } 
 
             // Report conflicting options
             {
+                var err__prev1 = err;
+
                 var err = updateFlags(installedFlags);
 
                 if (err != null)
                 {
-                    return (null, null, err);
+                    return (_addr_null!, null, error.As(err)!);
                 }
 
+                err = err__prev1;
+
             }
+
 
             var (cmd, err) = outputFormat(flagCommands, flagParamCommands);
             if (err != null)
             {
-                return (null, null, err);
+                return (_addr_null!, null, error.As(err)!);
             }
-            if (cmd != null && flagHTTP != "".Value)
+
+            if (cmd != null && flagHTTP != "".val)
             {
-                return (null, null, fmt.Errorf("-http is not compatible with an output format on the command line"));
+                return (_addr_null!, null, error.As(errors.New("-http is not compatible with an output format on the command line"))!);
             }
+
+            if (flagNoBrowser && flagHTTP == "".val)
+            {
+                return (_addr_null!, null, error.As(errors.New("-no_browser only makes sense with -http"))!);
+            }
+
             var si = pprofVariables["sample_index"].value;
-            si = sampleIndex(flagTotalDelay, si, "delay", "-total_delay", o.UI);
-            si = sampleIndex(flagMeanDelay, si, "delay", "-mean_delay", o.UI);
-            si = sampleIndex(flagContentions, si, "contentions", "-contentions", o.UI);
-            si = sampleIndex(flagInUseSpace, si, "inuse_space", "-inuse_space", o.UI);
-            si = sampleIndex(flagInUseObjects, si, "inuse_objects", "-inuse_objects", o.UI);
-            si = sampleIndex(flagAllocSpace, si, "alloc_space", "-alloc_space", o.UI);
-            si = sampleIndex(flagAllocObjects, si, "alloc_objects", "-alloc_objects", o.UI);
+            si = sampleIndex(_addr_flagTotalDelay, si, "delay", "-total_delay", o.UI);
+            si = sampleIndex(_addr_flagMeanDelay, si, "delay", "-mean_delay", o.UI);
+            si = sampleIndex(_addr_flagContentions, si, "contentions", "-contentions", o.UI);
+            si = sampleIndex(_addr_flagInUseSpace, si, "inuse_space", "-inuse_space", o.UI);
+            si = sampleIndex(_addr_flagInUseObjects, si, "inuse_objects", "-inuse_objects", o.UI);
+            si = sampleIndex(_addr_flagAllocSpace, si, "alloc_space", "-alloc_space", o.UI);
+            si = sampleIndex(_addr_flagAllocObjects, si, "alloc_objects", "-alloc_objects", o.UI);
             pprofVariables.set("sample_index", si);
 
-            if (flagMeanDelay.Value)
+            if (flagMeanDelay.val)
             {
                 pprofVariables.set("mean", "true");
             }
-            source source = ref new source(Sources:args,ExecName:execName,BuildID:*flagBuildID,Seconds:*flagSeconds,Timeout:*flagTimeout,Symbolize:*flagSymbolize,HTTPHostport:*flagHTTP,Comment:*flagAddComment,);
 
-            foreach (var (_, s) in flagBase.Value)
+            ptr<source> source = addr(new source(Sources:args,ExecName:execName,BuildID:*flagBuildID,Seconds:*flagSeconds,Timeout:*flagTimeout,Symbolize:*flagSymbolize,HTTPHostport:*flagHTTP,HTTPDisableBrowser:*flagNoBrowser,Comment:*flagAddComment,));
+
             {
-                if (s != "".Value)
+                var err__prev1 = err;
+
+                err = source.addBaseProfiles(flagBase.val, flagDiffBase.val);
+
+                if (err != null)
                 {
-                    source.Base = append(source.Base, s.Value);
+                    return (_addr_null!, null, error.As(err)!);
                 }
+
+                err = err__prev1;
+
             }
+
+
             var normalize = pprofVariables["normalize"].boolValue();
             if (normalize && len(source.Base) == 0L)
             {
-                return (null, null, fmt.Errorf("Must have base profile to normalize by"));
+                return (_addr_null!, null, error.As(errors.New("must have base profile to normalize by"))!);
             }
+
             source.Normalize = normalize;
 
             {
-                ref binutils.Binutils (bu, ok) = o.Obj._<ref binutils.Binutils>();
+                ptr<binutils.Binutils> (bu, ok) = o.Obj._<ptr<binutils.Binutils>>();
 
                 if (ok)
                 {
-                    bu.SetTools(flagTools.Value);
+                    bu.SetTools(flagTools.val);
                 }
 
             }
-            return (source, cmd, null);
+
+            return (_addr_source!, cmd, error.As(null!)!);
+
+        }
+
+        // addBaseProfiles adds the list of base profiles or diff base profiles to
+        // the source. This function will return an error if both base and diff base
+        // profiles are specified.
+        private static error addBaseProfiles(this ptr<source> _addr_source, slice<ptr<@string>> flagBase, slice<ptr<@string>> flagDiffBase)
+        {
+            ref source source = ref _addr_source.val;
+
+            var @base = dropEmpty(flagBase);
+            var diffBase = dropEmpty(flagDiffBase);
+            if (len(base) > 0L && len(diffBase) > 0L)
+            {
+                return error.As(errors.New("-base and -diff_base flags cannot both be specified"))!;
+            }
+
+            source.Base = base;
+            if (len(diffBase) > 0L)
+            {
+                source.Base = diffBase;
+                source.DiffBase = true;
+
+            }
+
+            return error.As(null!)!;
+
+        }
+
+        // dropEmpty list takes a slice of string pointers, and outputs a slice of
+        // non-empty strings associated with the flag.
+        private static slice<@string> dropEmpty(slice<ptr<@string>> list)
+        {
+            slice<@string> l = default;
+            foreach (var (_, s) in list)
+            {
+                if (s != "".val)
+                {
+                    l = append(l, s.val);
+                }
+
+            }
+            return l;
+
         }
 
         // installFlags creates command line flags for pprof variables.
@@ -206,19 +291,23 @@ namespace @internal
                     { 
                         // Set all radio variables to false to identify conflicts.
                         f.bools[n] = flag.Bool(n, false, v.help);
+
                     }
                     else
                     {
                         f.bools[n] = flag.Bool(n, v.boolValue(), v.help);
                     }
+
                 else if (v.kind == intKind) 
                     f.ints[n] = flag.Int(n, v.intValue(), v.help);
                 else if (v.kind == floatKind) 
                     f.floats[n] = flag.Float64(n, v.floatValue(), v.help);
                 else if (v.kind == stringKind) 
                     f.strings[n] = flag.String(n, v.value, v.help);
-                            }
+                
+            }
             return f;
+
         }
 
         // updateFlags updates the pprof variables according to the flags
@@ -235,16 +324,19 @@ namespace @internal
                 {
                     n = __n;
                     v = __v;
-                    vars.set(n, fmt.Sprint(v.Value));
-                    if (v.Value)
+                    vars.set(n, fmt.Sprint(v.val));
+                    if (v.val)
                     {
                         var g = vars[n].group;
                         if (g != "" && groups[g] != "")
                         {
-                            return error.As(fmt.Errorf("conflicting options %q and %q set", n, groups[g]));
+                            return error.As(fmt.Errorf("conflicting options %q and %q set", n, groups[g]))!;
                         }
+
                         groups[g] = n;
+
                     }
+
                 }
 
                 n = n__prev1;
@@ -259,7 +351,7 @@ namespace @internal
                 {
                     n = __n;
                     v = __v;
-                    vars.set(n, fmt.Sprint(v.Value));
+                    vars.set(n, fmt.Sprint(v.val));
                 }
 
                 n = n__prev1;
@@ -274,7 +366,7 @@ namespace @internal
                 {
                     n = __n;
                     v = __v;
-                    vars.set(n, fmt.Sprint(v.Value));
+                    vars.set(n, fmt.Sprint(v.val));
                 }
 
                 n = n__prev1;
@@ -289,22 +381,23 @@ namespace @internal
                 {
                     n = __n;
                     v = __v;
-                    vars.set(n, v.Value);
+                    vars.set(n, v.val);
                 }
 
                 n = n__prev1;
                 v = v__prev1;
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         private partial struct flagsInstalled
         {
-            public map<@string, ref long> ints;
-            public map<@string, ref bool> bools;
-            public map<@string, ref double> floats;
-            public map<@string, ref @string> strings;
+            public map<@string, ptr<long>> ints;
+            public map<@string, ptr<bool>> bools;
+            public map<@string, ptr<double>> floats;
+            public map<@string, ptr<@string>> strings;
         }
 
         // isBuildID determines if the profile may contain a build ID, by
@@ -314,21 +407,30 @@ namespace @internal
             return strings.Trim(id, "0123456789abcdefABCDEF") == "";
         }
 
-        private static @string sampleIndex(ref bool flag, @string si, @string sampleType, @string option, plugin.UI ui)
+        private static @string sampleIndex(ptr<bool> _addr_flag, @string si, @string sampleType, @string option, plugin.UI ui)
         {
-            if (flag.Value)
+            ref bool flag = ref _addr_flag.val;
+
+            if (flag)
             {
                 if (si == "")
                 {
                     return sampleType;
                 }
+
                 ui.PrintErr("Multiple value selections, ignoring ", option);
+
             }
+
             return si;
+
         }
 
-        private static (slice<@string>, error) outputFormat(map<@string, ref bool> bcmd, map<@string, ref @string> acmd)
+        private static (slice<@string>, error) outputFormat(map<@string, ptr<bool>> bcmd, map<@string, ptr<@string>> acmd)
         {
+            slice<@string> cmd = default;
+            error err = default!;
+
             {
                 var n__prev1 = n;
 
@@ -336,14 +438,17 @@ namespace @internal
                 {
                     n = __n;
                     b = __b;
-                    if (b.Value)
+                    if (b.val)
                     {
                         if (cmd != null)
                         {
-                            return (null, fmt.Errorf("must set at most one output format"));
+                            return (null, error.As(errors.New("must set at most one output format"))!);
                         }
+
                         cmd = new slice<@string>(new @string[] { n });
+
                     }
+
                 }
 
                 n = n__prev1;
@@ -356,20 +461,24 @@ namespace @internal
                 {
                     n = __n;
                     s = __s;
-                    if (s != "".Value)
+                    if (s != "".val)
                     {
                         if (cmd != null)
                         {
-                            return (null, fmt.Errorf("must set at most one output format"));
+                            return (null, error.As(errors.New("must set at most one output format"))!);
                         }
+
                         cmd = new slice<@string>(new @string[] { n, *s });
+
                     }
+
                 }
 
                 n = n__prev1;
             }
 
-            return (cmd, null);
+            return (cmd, error.As(null!)!);
+
         }
 
         private static @string usageMsgHdr = @"usage:
@@ -392,8 +501,8 @@ various views of a profile.
 Details:
 ";
 
-        private static @string usageMsgSrc = "\n\n" + "  Source options:\n" + "    -seconds              Duration for time-based profile collection\n" + "    -timeout              Timeout in seconds for profile collection\n" + "    -buildid              Override build id for main binary\n" + "    -add_comment          Free-form annotation to add to the profile\n" + "                          Displayed on some reports or with pprof -comments\n" + "    -base source          Source of profile to use as baseline\n" + "    profile.pb.gz         Profile in compressed protobuf format\n" + "    legacy_profile        Profile in legacy pprof format\n" + "    http://host/profile   URL for profile handler to retrieve\n" + "    -symbolize=           Controls source of symbol information\n" + "      none                  Do not attempt symbolization\n" + "      local                 Examine only local binaries\n" + "      fastlocal             Only get function names from local binaries\n" + "      remote                Do not examine local binaries\n" + "      force                 Force re-symbolization\n" + "    Binary                  Local path or build id of binary for symbolization\n";
+        private static @string usageMsgSrc = "\n\n" + "  Source options:\n" + "    -seconds              Duration for time-based profile collection\n" + "    -timeout              Timeout in seconds for profile collection\n" + "    -buildid              Override build id for main binary\n" + "    -add_comment          Free-form annotation to add to the profile\n" + "                          Displayed on some reports or with pprof -comments\n" + "    -diff_base source     Source of base profile for comparison\n" + "    -base source          Source of base profile for profile subtraction\n" + "    profile.pb.gz         Profile in compressed protobuf format\n" + "    legacy_profile        Profile in legacy pprof format\n" + "    http://host/profile   URL for profile handler to retrieve\n" + "    -symbolize=           Controls source of symbol information\n" + "      none                  Do not attempt symbolization\n" + "      local                 Examine only local binaries\n" + "      fastlocal             Only get function names from local binaries\n" + "      remote                Do not examine local binaries\n" + "      force                 Force re-symbolization\n" + "    Binary                  Local path or build id of binary for symbolization\n";
 
-        private static @string usageMsgVars = "\n\n" + "  Misc options:\n" + "   -http              Provide web based interface at host:port.\n" + "                      Host is optional and 'localhost' by default.\n" + "                      Port is optional and a randomly available port by default.\n" + "   -tools             Search path for object tools\n" + "\n" + "  Legacy convenience options:\n" + "   -inuse_space           Same as -sample_index=inuse_space\n" + "   -inuse_objects         Same as -sample_index=inuse_objects\n" + "   -alloc_space           Same as -sample_index=alloc_space\n" + "   -alloc_objects         Same as -sample_index=alloc_objects\n" + "   -total_delay           Same as -sample_index=delay\n" + "   -contentions           Same as -sample_index=contentions\n" + "   -mean_delay            Same as -mean -sample_index=delay\n" + "\n" + "  Environment Variables:\n" + "   PPROF_TMPDIR       Location for saved profiles (default $HOME/pprof)\n" + "   PPROF_TOOLS        Search path for object-level tools\n" + "   PPROF_BINARY_PATH  Search path for local binary files\n" + "                      default: $HOME/pprof/binaries\n" + "                      finds binaries by $name and $buildid/$name\n" + "   * On Windows, %USERPROFILE% is used instead of $HOME";
+        private static @string usageMsgVars = "\n\n" + "  Misc options:\n" + "   -http              Provide web interface at host:port.\n" + "                      Host is optional and 'localhost' by default.\n" + "                      Port is optional and a randomly available port by default.\n" + "   -no_browser        Skip opening a browser for the interactive web UI.\n" + "   -tools             Search path for object tools\n" + "\n" + "  Legacy convenience options:\n" + "   -inuse_space           Same as -sample_index=inuse_space\n" + "   -inuse_objects         Same as -sample_index=inuse_objects\n" + "   -alloc_space           Same as -sample_index=alloc_space\n" + "   -alloc_objects         Same as -sample_index=alloc_objects\n" + "   -total_delay           Same as -sample_index=delay\n" + "   -contentions           Same as -sample_index=contentions\n" + "   -mean_delay            Same as -mean -sample_index=delay\n" + "\n" + "  Environment Variables:\n" + "   PPROF_TMPDIR       Location for saved profiles (default $HOME/pprof)\n" + "   PPROF_TOOLS        Search path for object-level tools\n" + "   PPROF_BINARY_PATH  Search path for local binary files\n" + "                      default: $HOME/pprof/binaries\n" + "                      searches $name, $path, $buildid/$name, $path/$buildid\n" + "   * On Windows, %USERPROFILE% is used instead of $HOME";
     }
 }}}}}}}

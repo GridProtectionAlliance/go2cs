@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate error CommitByRef(ref T value);
+            private delegate error CommitByPtr(ptr<T> value);
             private delegate error CommitByVal(T value);
 
-            private static readonly CommitByRef s_CommitByRef;
+            private static readonly CommitByPtr s_CommitByPtr;
             private static readonly CommitByVal s_CommitByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +79,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CommitByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CommitByPtr is null || !m_target_is_ptr)
                     return s_CommitByVal!(target);
 
-                return s_CommitByRef(ref target);
+                return s_CommitByPtr(m_target_ptr);
             }
 
-            private delegate error RollbackByRef(ref T value);
+            private delegate error RollbackByPtr(ptr<T> value);
             private delegate error RollbackByVal(T value);
 
-            private static readonly RollbackByRef s_RollbackByRef;
+            private static readonly RollbackByPtr s_RollbackByPtr;
             private static readonly RollbackByVal s_RollbackByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,11 +99,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_RollbackByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_RollbackByPtr is null || !m_target_is_ptr)
                     return s_RollbackByVal!(target);
 
-                return s_RollbackByRef(ref target);
+                return s_RollbackByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -111,39 +113,33 @@ namespace sql
             static Tx()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Commit");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Commit");
 
                 if (!(extensionMethod is null))
-                    s_CommitByRef = extensionMethod.CreateStaticDelegate(typeof(CommitByRef)) as CommitByRef;
+                    s_CommitByPtr = extensionMethod.CreateStaticDelegate(typeof(CommitByPtr)) as CommitByPtr;
 
-                if (s_CommitByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Commit");
+                extensionMethod = targetType.GetExtensionMethod("Commit");
 
-                    if (!(extensionMethod is null))
-                        s_CommitByVal = extensionMethod.CreateStaticDelegate(typeof(CommitByVal)) as CommitByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CommitByVal = extensionMethod.CreateStaticDelegate(typeof(CommitByVal)) as CommitByVal;
 
-                if (s_CommitByRef is null && s_CommitByVal is null)
+                if (s_CommitByPtr is null && s_CommitByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Tx.Commit method", new Exception("Commit"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Rollback");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Rollback");
 
                 if (!(extensionMethod is null))
-                    s_RollbackByRef = extensionMethod.CreateStaticDelegate(typeof(RollbackByRef)) as RollbackByRef;
+                    s_RollbackByPtr = extensionMethod.CreateStaticDelegate(typeof(RollbackByPtr)) as RollbackByPtr;
 
-                if (s_RollbackByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Rollback");
+                extensionMethod = targetType.GetExtensionMethod("Rollback");
 
-                    if (!(extensionMethod is null))
-                        s_RollbackByVal = extensionMethod.CreateStaticDelegate(typeof(RollbackByVal)) as RollbackByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_RollbackByVal = extensionMethod.CreateStaticDelegate(typeof(RollbackByVal)) as RollbackByVal;
 
-                if (s_RollbackByRef is null && s_RollbackByVal is null)
+                if (s_RollbackByPtr is null && s_RollbackByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Tx.Rollback method", new Exception("Rollback"));
             }
 

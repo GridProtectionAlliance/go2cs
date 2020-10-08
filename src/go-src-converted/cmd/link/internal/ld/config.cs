@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2020 August 29 10:02:59 UTC
+// package ld -- go2cs converted at 2020 October 08 04:37:59 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\config.go
 using objabi = go.cmd.@internal.objabi_package;
@@ -27,55 +27,76 @@ namespace @internal
         {
         }
 
-        public static readonly BuildMode BuildModeUnset = iota;
-        public static readonly var BuildModeExe = 0;
-        public static readonly var BuildModePIE = 1;
-        public static readonly var BuildModeCArchive = 2;
-        public static readonly var BuildModeCShared = 3;
-        public static readonly var BuildModeShared = 4;
-        public static readonly var BuildModePlugin = 5;
+        public static readonly BuildMode BuildModeUnset = (BuildMode)iota;
+        public static readonly var BuildModeExe = (var)0;
+        public static readonly var BuildModePIE = (var)1;
+        public static readonly var BuildModeCArchive = (var)2;
+        public static readonly var BuildModeCShared = (var)3;
+        public static readonly var BuildModeShared = (var)4;
+        public static readonly var BuildModePlugin = (var)5;
 
-        private static error Set(this ref BuildMode mode, @string s)
+
+        private static error Set(this ptr<BuildMode> _addr_mode, @string s)
         {
+            ref BuildMode mode = ref _addr_mode.val;
+
             Func<error> badmode = () =>
             {
-                return error.As(fmt.Errorf("buildmode %s not supported on %s/%s", s, objabi.GOOS, objabi.GOARCH));
+                return error.As(fmt.Errorf("buildmode %s not supported on %s/%s", s, objabi.GOOS, objabi.GOARCH))!;
             }
 ;
             switch (s)
             {
                 case "exe": 
-                    mode.Value = BuildModeExe;
+                    mode.val = BuildModeExe;
                     break;
                 case "pie": 
                     switch (objabi.GOOS)
                     {
+                        case "aix": 
+
                         case "android": 
 
                         case "linux": 
+
+                        case "windows": 
                             break;
                         case "darwin": 
+
+                        case "freebsd": 
                             switch (objabi.GOARCH)
                             {
                                 case "amd64": 
                                     break;
                                 default: 
-                                    return error.As(badmode());
+                                    return error.As(badmode())!;
                                     break;
                             }
                             break;
                         default: 
-                            return error.As(badmode());
+                            return error.As(badmode())!;
                             break;
                     }
-                    mode.Value = BuildModePIE;
+                    mode.val = BuildModePIE;
                     break;
                 case "c-archive": 
                     switch (objabi.GOOS)
                     {
+                        case "aix": 
+
                         case "darwin": 
 
                         case "linux": 
+                            break;
+                        case "freebsd": 
+                            switch (objabi.GOARCH)
+                            {
+                                case "amd64": 
+                                    break;
+                                default: 
+                                    return error.As(badmode())!;
+                                    break;
+                            }
                             break;
                         case "windows": 
                             switch (objabi.GOARCH)
@@ -83,17 +104,19 @@ namespace @internal
                                 case "amd64": 
 
                                 case "386": 
+
+                                case "arm": 
                                     break;
                                 default: 
-                                    return error.As(badmode());
+                                    return error.As(badmode())!;
                                     break;
                             }
                             break;
                         default: 
-                            return error.As(badmode());
+                            return error.As(badmode())!;
                             break;
                     }
-                    mode.Value = BuildModeCArchive;
+                    mode.val = BuildModeCArchive;
                     break;
                 case "c-shared": 
                     switch (objabi.GOARCH)
@@ -111,10 +134,10 @@ namespace @internal
                         case "s390x": 
                             break;
                         default: 
-                            return error.As(badmode());
+                            return error.As(badmode())!;
                             break;
                     }
-                    mode.Value = BuildModeCShared;
+                    mode.val = BuildModeCShared;
                     break;
                 case "shared": 
                     switch (objabi.GOOS)
@@ -135,15 +158,15 @@ namespace @internal
                                 case "s390x": 
                                     break;
                                 default: 
-                                    return error.As(badmode());
+                                    return error.As(badmode())!;
                                     break;
                             }
                             break;
                         default: 
-                            return error.As(badmode());
+                            return error.As(badmode())!;
                             break;
                     }
-                    mode.Value = BuildModeShared;
+                    mode.val = BuildModeShared;
                     break;
                 case "plugin": 
                     switch (objabi.GOOS)
@@ -164,51 +187,57 @@ namespace @internal
                                 case "ppc64le": 
                                     break;
                                 default: 
-                                    return error.As(badmode());
+                                    return error.As(badmode())!;
                                     break;
                             }
                             break;
                         case "darwin": 
+
+                        case "freebsd": 
                             switch (objabi.GOARCH)
                             {
                                 case "amd64": 
                                     break;
                                 default: 
-                                    return error.As(badmode());
+                                    return error.As(badmode())!;
                                     break;
                             }
                             break;
                         default: 
-                            return error.As(badmode());
+                            return error.As(badmode())!;
                             break;
                     }
-                    mode.Value = BuildModePlugin;
+                    mode.val = BuildModePlugin;
                     break;
                 default: 
-                    return error.As(fmt.Errorf("invalid buildmode: %q", s));
+                    return error.As(fmt.Errorf("invalid buildmode: %q", s))!;
                     break;
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static @string String(this ref BuildMode mode)
+        private static @string String(this ptr<BuildMode> _addr_mode)
         {
+            ref BuildMode mode = ref _addr_mode.val;
 
-            if (mode.Value == BuildModeUnset) 
+
+            if (mode.val == BuildModeUnset) 
                 return ""; // avoid showing a default in usage message
-            else if (mode.Value == BuildModeExe) 
+            else if (mode.val == BuildModeExe) 
                 return "exe";
-            else if (mode.Value == BuildModePIE) 
+            else if (mode.val == BuildModePIE) 
                 return "pie";
-            else if (mode.Value == BuildModeCArchive) 
+            else if (mode.val == BuildModeCArchive) 
                 return "c-archive";
-            else if (mode.Value == BuildModeCShared) 
+            else if (mode.val == BuildModeCShared) 
                 return "c-shared";
-            else if (mode.Value == BuildModeShared) 
+            else if (mode.val == BuildModeShared) 
                 return "shared";
-            else if (mode.Value == BuildModePlugin) 
+            else if (mode.val == BuildModePlugin) 
                 return "plugin";
-                        return fmt.Sprintf("BuildMode(%d)", uint8(mode.Value));
+                        return fmt.Sprintf("BuildMode(%d)", uint8(mode.val));
+
         }
 
         // LinkMode indicates whether an external linker is used for the final link.
@@ -216,46 +245,57 @@ namespace @internal
         {
         }
 
-        public static readonly LinkMode LinkAuto = iota;
-        public static readonly var LinkInternal = 0;
-        public static readonly var LinkExternal = 1;
+        public static readonly LinkMode LinkAuto = (LinkMode)iota;
+        public static readonly var LinkInternal = (var)0;
+        public static readonly var LinkExternal = (var)1;
 
-        private static error Set(this ref LinkMode mode, @string s)
+
+        private static error Set(this ptr<LinkMode> _addr_mode, @string s)
         {
+            ref LinkMode mode = ref _addr_mode.val;
+
             switch (s)
             {
                 case "auto": 
-                    mode.Value = LinkAuto;
+                    mode.val = LinkAuto;
                     break;
                 case "internal": 
-                    mode.Value = LinkInternal;
+                    mode.val = LinkInternal;
                     break;
                 case "external": 
-                    mode.Value = LinkExternal;
+                    mode.val = LinkExternal;
                     break;
                 default: 
-                    return error.As(fmt.Errorf("invalid linkmode: %q", s));
+                    return error.As(fmt.Errorf("invalid linkmode: %q", s))!;
                     break;
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static @string String(this ref LinkMode mode)
+        private static @string String(this ptr<LinkMode> _addr_mode)
         {
+            ref LinkMode mode = ref _addr_mode.val;
 
-            if (mode.Value == LinkAuto) 
+
+            if (mode.val == LinkAuto) 
                 return "auto";
-            else if (mode.Value == LinkInternal) 
+            else if (mode.val == LinkInternal) 
                 return "internal";
-            else if (mode.Value == LinkExternal) 
+            else if (mode.val == LinkExternal) 
                 return "external";
-                        return fmt.Sprintf("LinkMode(%d)", uint8(mode.Value));
+                        return fmt.Sprintf("LinkMode(%d)", uint8(mode.val));
+
         }
 
         // mustLinkExternal reports whether the program being linked requires
         // the external linker be used to complete the link.
-        private static (bool, @string) mustLinkExternal(ref Link _ctxt) => func(_ctxt, (ref Link ctxt, Defer defer, Panic _, Recover __) =>
+        private static (bool, @string) mustLinkExternal(ptr<Link> _addr_ctxt) => func((defer, _, __) =>
         {
+            bool res = default;
+            @string reason = default;
+            ref Link ctxt = ref _addr_ctxt.val;
+
             if (ctxt.Debugvlog > 1L)
             {
                 defer(() =>
@@ -264,33 +304,40 @@ namespace @internal
                     {
                         log.Printf("external linking is forced by: %s\n", reason);
                     }
+
                 }());
-            }
-            switch (objabi.GOOS)
-            {
-                case "android": 
-                    return (true, "android");
-                    break;
-                case "darwin": 
-                    if (ctxt.Arch.InFamily(sys.ARM, sys.ARM64))
-                    {
-                        return (true, "iOS");
-                    }
-                    break;
+
             }
 
-            if (flagMsan.Value)
+            if (sys.MustLinkExternal(objabi.GOOS, objabi.GOARCH))
+            {
+                return (true, fmt.Sprintf("%s/%s requires external linking", objabi.GOOS, objabi.GOARCH));
+            }
+
+            if (flagMsan.val)
             {
                 return (true, "msan");
             } 
 
             // Internally linking cgo is incomplete on some architectures.
-            // https://golang.org/issue/10373
             // https://golang.org/issue/14449
             // https://golang.org/issue/21961
-            if (iscgo && ctxt.Arch.InFamily(sys.ARM64, sys.MIPS64, sys.MIPS, sys.PPC64))
+            if (iscgo && ctxt.Arch.InFamily(sys.MIPS64, sys.MIPS, sys.PPC64))
             {
                 return (true, objabi.GOARCH + " does not support internal cgo");
+            }
+
+            if (iscgo && objabi.GOOS == "android")
+            {
+                return (true, objabi.GOOS + " does not support internal cgo");
+            } 
+
+            // When the race flag is set, the LLVM tsan relocatable file is linked
+            // into the final binary, which means external linking is required because
+            // internal linking does not support it.
+            if (flagRace && ctxt.Arch.InFamily(sys.PPC64).val)
+            {
+                return (true, "race on " + objabi.GOARCH);
             } 
 
             // Some build modes require work the internal linker cannot do (yet).
@@ -303,6 +350,16 @@ namespace @internal
                 switch (objabi.GOOS + "/" + objabi.GOARCH)
                 {
                     case "linux/amd64": 
+
+                    case "linux/arm64": 
+
+                    case "android/arm64": 
+                        break;
+                    case "windows/386": 
+
+                    case "windows/amd64": 
+
+                    case "windows/arm": 
                         break;
                     default: 
                         // Internal linking does not support TLS_IE.
@@ -317,7 +374,9 @@ namespace @internal
             {
                 return (true, "dynamically linking with a shared library");
             }
+
             return (false, "");
+
         });
 
         // determineLinkMode sets ctxt.LinkMode.
@@ -325,10 +384,15 @@ namespace @internal
         // It is called after flags are processed and inputs are processed,
         // so the ctxt.LinkMode variable has an initial value from the -linkmode
         // flag and the iscgo externalobj variables are set.
-        private static void determineLinkMode(ref Link ctxt)
+        private static void determineLinkMode(ptr<Link> _addr_ctxt)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
 
-            if (ctxt.LinkMode == LinkAuto) 
+            var (extNeeded, extReason) = mustLinkExternal(_addr_ctxt);
+            @string via = "";
+
+            if (ctxt.LinkMode == LinkAuto)
+            { 
                 // The environment variable GO_EXTLINK_ENABLED controls the
                 // default value of -linkmode. If it is not set when the
                 // linker is called we take the value it was set to when
@@ -336,66 +400,42 @@ namespace @internal
                 switch (objabi.Getgoextlinkenabled())
                 {
                     case "0": 
-                        {
-                            var needed__prev1 = needed;
-
-                            var (needed, reason) = mustLinkExternal(ctxt);
-
-                            if (needed)
-                            {
-                                Exitf("internal linking requested via GO_EXTLINK_ENABLED, but external linking required: %s", reason);
-                            }
-
-                            needed = needed__prev1;
-
-                        }
                         ctxt.LinkMode = LinkInternal;
+                        via = "via GO_EXTLINK_ENABLED ";
                         break;
                     case "1": 
                         ctxt.LinkMode = LinkExternal;
+                        via = "via GO_EXTLINK_ENABLED ";
                         break;
                     default: 
+                        if (extNeeded || (iscgo && externalobj))
                         {
-                            var needed__prev1 = needed;
-
-                            var (needed, _) = mustLinkExternal(ctxt);
-
-                            if (needed)
-                            {
-                                ctxt.LinkMode = LinkExternal;
-                            }
-                            else if (iscgo && externalobj)
-                            {
-                                ctxt.LinkMode = LinkExternal;
-                            }
-                            else if (ctxt.BuildMode == BuildModePIE)
-                            {
-                                ctxt.LinkMode = LinkExternal; // https://golang.org/issue/18968
-                            }
-                            else
-                            {
-                                ctxt.LinkMode = LinkInternal;
-                            }
-
-                            needed = needed__prev1;
-
+                            ctxt.LinkMode = LinkExternal;
                         }
+                        else
+                        {
+                            ctxt.LinkMode = LinkInternal;
+                        }
+
                         break;
                 }
-            else if (ctxt.LinkMode == LinkInternal) 
+
+            }
+
+
+            if (ctxt.LinkMode == LinkInternal) 
+                if (extNeeded)
                 {
-                    var needed__prev1 = needed;
-
-                    (needed, reason) = mustLinkExternal(ctxt);
-
-                    if (needed)
-                    {
-                        Exitf("internal linking requested but external linking required: %s", reason);
-                    }
-
-                    needed = needed__prev1;
-
+                    Exitf("internal linking requested %sbut external linking required: %s", via, extReason);
                 }
-                    }
+
+            else if (ctxt.LinkMode == LinkExternal) 
+
+                if (objabi.GOARCH == "riscv64") 
+                    Exitf("external linking not supported for %s/riscv64", objabi.GOOS);
+                else if (objabi.GOARCH == "ppc64" && objabi.GOOS != "aix") 
+                    Exitf("external linking not supported for %s/ppc64", objabi.GOOS);
+                            
+        }
     }
 }}}}

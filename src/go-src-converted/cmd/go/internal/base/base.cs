@@ -4,14 +4,11 @@
 
 // Package base defines shared basic pieces of the go command,
 // in particular logging and the Command structure.
-// package @base -- go2cs converted at 2020 August 29 10:00:28 UTC
+// package @base -- go2cs converted at 2020 October 08 04:33:29 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Go\src\cmd\go\internal\base\base.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
-using scanner = go.go.scanner_package;
 using log = go.log_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
@@ -34,43 +31,82 @@ namespace @internal
         // like go build or go fix.
         public partial struct Command
         {
-            public Action<ref Command, slice<@string>> Run; // UsageLine is the one-line usage message.
-// The first word in the line is taken to be the command name.
+            public Action<ptr<Command>, slice<@string>> Run; // UsageLine is the one-line usage message.
+// The words between "go" and the first flag or argument in the line are taken to be the command name.
             public @string UsageLine; // Short is the short description shown in the 'go help' output.
             public @string Short; // Long is the long message shown in the 'go help <this-command>' output.
             public @string Long; // Flag is a set of flags specific to this command.
             public flag.FlagSet Flag; // CustomFlags indicates that the command will do its own
 // flag parsing.
-            public bool CustomFlags;
+            public bool CustomFlags; // Commands lists the available commands and help topics.
+// The order here is the order in which they are printed by 'go help'.
+// Note that subcommands are in general best avoided.
+            public slice<ptr<Command>> Commands;
         }
 
-        // Commands lists the available commands and help topics.
-        // The order here is the order in which they are printed by 'go help'.
-        public static slice<ref Command> Commands = default;
+        public static ptr<Command> Go = addr(new Command(UsageLine:"go",Long:`Go is a tool for managing Go source code.`,));
 
-        // Name returns the command's name: the first word in the usage line.
-        private static @string Name(this ref Command c)
+        // LongName returns the command's long name: all the words in the usage line between "go" and a flag or argument,
+        private static @string LongName(this ptr<Command> _addr_c)
         {
+            ref Command c = ref _addr_c.val;
+
             var name = c.UsageLine;
-            var i = strings.Index(name, " ");
-            if (i >= 0L)
             {
-                name = name[..i];
+                var i = strings.Index(name, " [");
+
+                if (i >= 0L)
+                {
+                    name = name[..i];
+                }
+
             }
-            return name;
+
+            if (name == "go")
+            {
+                return "";
+            }
+
+            return strings.TrimPrefix(name, "go ");
+
         }
 
-        private static void Usage(this ref Command c)
+        // Name returns the command's short name: the last word in the usage line before a flag or argument.
+        private static @string Name(this ptr<Command> _addr_c)
         {
+            ref Command c = ref _addr_c.val;
+
+            var name = c.LongName();
+            {
+                var i = strings.LastIndex(name, " ");
+
+                if (i >= 0L)
+                {
+                    name = name[i + 1L..];
+                }
+
+            }
+
+            return name;
+
+        }
+
+        private static void Usage(this ptr<Command> _addr_c)
+        {
+            ref Command c = ref _addr_c.val;
+
             fmt.Fprintf(os.Stderr, "usage: %s\n", c.UsageLine);
-            fmt.Fprintf(os.Stderr, "Run 'go help %s' for details.\n", c.Name());
-            os.Exit(2L);
+            fmt.Fprintf(os.Stderr, "Run 'go help %s' for details.\n", c.LongName());
+            SetExitStatus(2L);
+            Exit();
         }
 
         // Runnable reports whether the command can be run; otherwise
         // it is a documentation pseudo-command such as importpath.
-        private static bool Runnable(this ref Command c)
+        private static bool Runnable(this ptr<Command> _addr_c)
         {
+            ref Command c = ref _addr_c.val;
+
             return c.Run != null;
         }
 
@@ -88,6 +124,7 @@ namespace @internal
                 f();
             }
             os.Exit(exitStatus);
+
         }
 
         public static void Fatalf(@string format, params object[] args)
@@ -112,6 +149,7 @@ namespace @internal
             {
                 Exit();
             }
+
         }
 
         private static long exitStatus = 0L;
@@ -124,7 +162,14 @@ namespace @internal
             {
                 exitStatus = n;
             }
+
             exitMu.Unlock();
+
+        }
+
+        public static long GetExitStatus()
+        {
+            return exitStatus;
         }
 
         // Run runs the command, with stdout and stderr
@@ -140,9 +185,11 @@ namespace @internal
                 fmt.Printf("%s\n", strings.Join(cmdline, " "));
                 if (cfg.BuildN)
                 {
-                    return;
+                    return ;
                 }
+
             }
+
             var cmd = exec.Command(cmdline[0L], cmdline[1L..]);
             cmd.Stdout = os.Stdout;
             cmd.Stderr = os.Stderr;
@@ -155,6 +202,7 @@ namespace @internal
                 }
 
             }
+
         }
 
         // RunStdin is like run but connects Stdin.
@@ -175,40 +223,11 @@ namespace @internal
                 }
 
             }
+
         }
 
         // Usage is the usage-reporting function, filled in by package main
         // but here for reference by other packages.
         public static Action Usage = default;
-
-        // ExpandScanner expands a scanner.List error into all the errors in the list.
-        // The default Error method only shows the first error
-        // and does not shorten paths.
-        public static error ExpandScanner(error err)
-        { 
-            // Look for parser errors.
-            {
-                scanner.ErrorList (err, ok) = err._<scanner.ErrorList>();
-
-                if (ok)
-                { 
-                    // Prepare error with \n before each message.
-                    // When printed in something like context: %v
-                    // this will put the leading file positions each on
-                    // its own line. It will also show all the errors
-                    // instead of just the first, as err.Error does.
-                    bytes.Buffer buf = default;
-                    foreach (var (_, e) in err)
-                    {
-                        e.Pos.Filename = ShortPath(e.Pos.Filename);
-                        buf.WriteString("\n");
-                        buf.WriteString(e.Error());
-                    }
-                    return error.As(errors.New(buf.String()));
-                }
-
-            }
-            return error.As(err);
-        }
     }
 }}}}

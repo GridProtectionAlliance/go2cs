@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd !android,linux netbsd openbsd solaris
-// +build cgo
+// +build aix darwin dragonfly freebsd !android,linux netbsd openbsd solaris
+// +build cgo,!osusergo
 
-// package user -- go2cs converted at 2020 August 29 08:31:48 UTC
+// package user -- go2cs converted at 2020 October 08 03:45:30 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\cgo_lookup_unix.go
 using fmt = go.fmt_package;
@@ -22,79 +22,102 @@ namespace os
 {
     public static partial class user_package
     {
-        private static (ref User, error) current()
+        private static (ptr<User>, error) current()
         {
-            return lookupUnixUid(syscall.Getuid());
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_lookupUnixUid(syscall.Getuid())!;
         }
 
-        private static (ref User, error) lookupUser(@string username) => func((defer, _, __) =>
+        private static (ptr<User>, error) lookupUser(@string username) => func((defer, _, __) =>
         {
-            C.struct_passwd pwd = default;
-            ref C.struct_passwd result = default;
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
+            ref C.struct_passwd pwd = ref heap(out ptr<C.struct_passwd> _addr_pwd);
+            ptr<C.struct_passwd> result;
             var nameC = make_slice<byte>(len(username) + 1L);
             copy(nameC, username);
 
             var buf = alloc(userBuffer);
             defer(buf.free());
 
-            var err = retryWithBuffer(buf, () =>
+            var err = retryWithBuffer(_addr_buf, () =>
             { 
                 // mygetpwnam_r is a wrapper around getpwnam_r to avoid
                 // passing a size_t to getpwnam_r, because for unknown
                 // reasons passing a size_t to getpwnam_r doesn't work on
                 // Solaris.
-                return syscall.Errno(C.mygetpwnam_r((C.@char.Value)(@unsafe.Pointer(ref nameC[0L])), ref pwd, (C.@char.Value)(buf.ptr), C.size_t(buf.size), ref result));
+                return _addr_syscall.Errno(C.mygetpwnam_r((C.@char.val)(@unsafe.Pointer(_addr_nameC[0L])), _addr_pwd, (C.@char.val)(buf.ptr), C.size_t(buf.size), _addr_result))!;
+
             });
             if (err != null)
             {
-                return (null, fmt.Errorf("user: lookup username %s: %v", username, err));
+                return (_addr_null!, error.As(fmt.Errorf("user: lookup username %s: %v", username, err))!);
             }
+
             if (result == null)
             {
-                return (null, UnknownUserError(username));
+                return (_addr_null!, error.As(UnknownUserError(username))!);
             }
-            return (buildUser(ref pwd), err);
+
+            return (_addr_buildUser(_addr_pwd)!, error.As(err)!);
+
         });
 
-        private static (ref User, error) lookupUserId(@string uid)
+        private static (ptr<User>, error) lookupUserId(@string uid)
         {
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
             var (i, e) = strconv.Atoi(uid);
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
-            return lookupUnixUid(i);
+
+            return _addr_lookupUnixUid(i)!;
+
         }
 
-        private static (ref User, error) lookupUnixUid(long uid) => func((defer, _, __) =>
+        private static (ptr<User>, error) lookupUnixUid(long uid) => func((defer, _, __) =>
         {
-            C.struct_passwd pwd = default;
-            ref C.struct_passwd result = default;
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
+            ref C.struct_passwd pwd = ref heap(out ptr<C.struct_passwd> _addr_pwd);
+            ptr<C.struct_passwd> result;
 
             var buf = alloc(userBuffer);
             defer(buf.free());
 
-            var err = retryWithBuffer(buf, () =>
+            var err = retryWithBuffer(_addr_buf, () =>
             { 
-                // mygetpwuid_r is a wrapper around getpwuid_r to
-                // to avoid using uid_t because C.uid_t(uid) for
-                // unknown reasons doesn't work on linux.
-                return syscall.Errno(C.mygetpwuid_r(C.@int(uid), ref pwd, (C.@char.Value)(buf.ptr), C.size_t(buf.size), ref result));
+                // mygetpwuid_r is a wrapper around getpwuid_r to avoid using uid_t
+                // because C.uid_t(uid) for unknown reasons doesn't work on linux.
+                return _addr_syscall.Errno(C.mygetpwuid_r(C.@int(uid), _addr_pwd, (C.@char.val)(buf.ptr), C.size_t(buf.size), _addr_result))!;
+
             });
             if (err != null)
             {
-                return (null, fmt.Errorf("user: lookup userid %d: %v", uid, err));
+                return (_addr_null!, error.As(fmt.Errorf("user: lookup userid %d: %v", uid, err))!);
             }
+
             if (result == null)
             {
-                return (null, UnknownUserIdError(uid));
+                return (_addr_null!, error.As(UnknownUserIdError(uid))!);
             }
-            return (buildUser(ref pwd), null);
+
+            return (_addr_buildUser(_addr_pwd)!, error.As(null!)!);
+
         });
 
-        private static ref User buildUser(ref C.struct_passwd pwd)
+        private static ptr<User> buildUser(ptr<C.struct_passwd> _addr_pwd)
         {
-            User u = ref new User(Uid:strconv.FormatUint(uint64(pwd.pw_uid),10),Gid:strconv.FormatUint(uint64(pwd.pw_gid),10),Username:C.GoString(pwd.pw_name),Name:C.GoString(pwd.pw_gecos),HomeDir:C.GoString(pwd.pw_dir),); 
+            ref C.struct_passwd pwd = ref _addr_pwd.val;
+
+            ptr<User> u = addr(new User(Uid:strconv.FormatUint(uint64(pwd.pw_uid),10),Gid:strconv.FormatUint(uint64(pwd.pw_gid),10),Username:C.GoString(pwd.pw_name),Name:C.GoString(pwd.pw_gecos),HomeDir:C.GoString(pwd.pw_dir),)); 
             // The pw_gecos field isn't quite standardized. Some docs
             // say: "It is expected to be a comma separated list of
             // personal data where the first item is the full name of the
@@ -108,87 +131,104 @@ namespace os
                 }
 
             }
-            return u;
+
+            return _addr_u!;
+
         }
 
-        private static (ref Group, error) currentGroup()
+        private static (ptr<Group>, error) lookupGroup(@string groupname) => func((defer, _, __) =>
         {
-            return lookupUnixGid(syscall.Getgid());
-        }
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
 
-        private static (ref Group, error) lookupGroup(@string groupname) => func((defer, _, __) =>
-        {
-            C.struct_group grp = default;
-            ref C.struct_group result = default;
+            ref C.struct_group grp = ref heap(out ptr<C.struct_group> _addr_grp);
+            ptr<C.struct_group> result;
 
             var buf = alloc(groupBuffer);
             defer(buf.free());
             var cname = make_slice<byte>(len(groupname) + 1L);
             copy(cname, groupname);
 
-            var err = retryWithBuffer(buf, () =>
+            var err = retryWithBuffer(_addr_buf, () =>
             {
-                return syscall.Errno(C.mygetgrnam_r((C.@char.Value)(@unsafe.Pointer(ref cname[0L])), ref grp, (C.@char.Value)(buf.ptr), C.size_t(buf.size), ref result));
+                return _addr_syscall.Errno(C.mygetgrnam_r((C.@char.val)(@unsafe.Pointer(_addr_cname[0L])), _addr_grp, (C.@char.val)(buf.ptr), C.size_t(buf.size), _addr_result))!;
             });
             if (err != null)
             {
-                return (null, fmt.Errorf("user: lookup groupname %s: %v", groupname, err));
+                return (_addr_null!, error.As(fmt.Errorf("user: lookup groupname %s: %v", groupname, err))!);
             }
+
             if (result == null)
             {
-                return (null, UnknownGroupError(groupname));
+                return (_addr_null!, error.As(UnknownGroupError(groupname))!);
             }
-            return (buildGroup(ref grp), null);
+
+            return (_addr_buildGroup(_addr_grp)!, error.As(null!)!);
+
         });
 
-        private static (ref Group, error) lookupGroupId(@string gid)
+        private static (ptr<Group>, error) lookupGroupId(@string gid)
         {
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
+
             var (i, e) = strconv.Atoi(gid);
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
-            return lookupUnixGid(i);
+
+            return _addr_lookupUnixGid(i)!;
+
         }
 
-        private static (ref Group, error) lookupUnixGid(long gid) => func((defer, _, __) =>
+        private static (ptr<Group>, error) lookupUnixGid(long gid) => func((defer, _, __) =>
         {
-            C.struct_group grp = default;
-            ref C.struct_group result = default;
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
+
+            ref C.struct_group grp = ref heap(out ptr<C.struct_group> _addr_grp);
+            ptr<C.struct_group> result;
 
             var buf = alloc(groupBuffer);
             defer(buf.free());
 
-            var err = retryWithBuffer(buf, () =>
+            var err = retryWithBuffer(_addr_buf, () =>
             { 
-                // mygetgrgid_r is a wrapper around getgrgid_r to
-                // to avoid using gid_t because C.gid_t(gid) for
-                // unknown reasons doesn't work on linux.
-                return syscall.Errno(C.mygetgrgid_r(C.@int(gid), ref grp, (C.@char.Value)(buf.ptr), C.size_t(buf.size), ref result));
+                // mygetgrgid_r is a wrapper around getgrgid_r to avoid using gid_t
+                // because C.gid_t(gid) for unknown reasons doesn't work on linux.
+                return _addr_syscall.Errno(C.mygetgrgid_r(C.@int(gid), _addr_grp, (C.@char.val)(buf.ptr), C.size_t(buf.size), _addr_result))!;
+
             });
             if (err != null)
             {
-                return (null, fmt.Errorf("user: lookup groupid %d: %v", gid, err));
+                return (_addr_null!, error.As(fmt.Errorf("user: lookup groupid %d: %v", gid, err))!);
             }
+
             if (result == null)
             {
-                return (null, UnknownGroupIdError(strconv.Itoa(gid)));
+                return (_addr_null!, error.As(UnknownGroupIdError(strconv.Itoa(gid)))!);
             }
-            return (buildGroup(ref grp), null);
+
+            return (_addr_buildGroup(_addr_grp)!, error.As(null!)!);
+
         });
 
-        private static ref Group buildGroup(ref C.struct_group grp)
+        private static ptr<Group> buildGroup(ptr<C.struct_group> _addr_grp)
         {
-            Group g = ref new Group(Gid:strconv.Itoa(int(grp.gr_gid)),Name:C.GoString(grp.gr_name),);
-            return g;
+            ref C.struct_group grp = ref _addr_grp.val;
+
+            ptr<Group> g = addr(new Group(Gid:strconv.Itoa(int(grp.gr_gid)),Name:C.GoString(grp.gr_name),));
+            return _addr_g!;
         }
 
         private partial struct bufferKind // : C.int
         {
         }
 
-        private static readonly var userBuffer = bufferKind(C._SC_GETPW_R_SIZE_MAX);
-        private static readonly var groupBuffer = bufferKind(C._SC_GETGR_R_SIZE_MAX);
+        private static readonly var userBuffer = (var)bufferKind(C._SC_GETPW_R_SIZE_MAX);
+        private static readonly var groupBuffer = (var)bufferKind(C._SC_GETGR_R_SIZE_MAX);
+
 
         private static C.size_t initialSize(this bufferKind k)
         {
@@ -199,13 +239,18 @@ namespace os
                 // Additionally, not all Linux systems have it, either. For
                 // example, the musl libc returns -1.
                 return 1024L;
+
             }
+
             if (!isSizeReasonable(int64(sz)))
             { 
                 // Truncate.  If this truly isn't enough, retryWithBuffer will error on the first run.
                 return maxBufferSize;
+
             }
+
             return C.size_t(sz);
+
         }
 
         private partial struct memBuffer
@@ -214,50 +259,60 @@ namespace os
             public C.size_t size;
         }
 
-        private static ref memBuffer alloc(bufferKind kind)
+        private static ptr<memBuffer> alloc(bufferKind kind)
         {
             var sz = kind.initialSize();
-            return ref new memBuffer(ptr:C.malloc(sz),size:sz,);
+            return addr(new memBuffer(ptr:C.malloc(sz),size:sz,));
         }
 
-        private static void resize(this ref memBuffer mb, C.size_t newSize)
+        private static void resize(this ptr<memBuffer> _addr_mb, C.size_t newSize)
         {
+            ref memBuffer mb = ref _addr_mb.val;
+
             mb.ptr = C.realloc(mb.ptr, newSize);
             mb.size = newSize;
         }
 
-        private static void free(this ref memBuffer mb)
+        private static void free(this ptr<memBuffer> _addr_mb)
         {
+            ref memBuffer mb = ref _addr_mb.val;
+
             C.free(mb.ptr);
         }
 
         // retryWithBuffer repeatedly calls f(), increasing the size of the
         // buffer each time, until f succeeds, fails with a non-ERANGE error,
         // or the buffer exceeds a reasonable limit.
-        private static error retryWithBuffer(ref memBuffer buf, Func<syscall.Errno> f)
+        private static error retryWithBuffer(ptr<memBuffer> _addr_buf, Func<syscall.Errno> f)
         {
+            ref memBuffer buf = ref _addr_buf.val;
+
             while (true)
             {
                 var errno = f();
                 if (errno == 0L)
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
                 else if (errno != syscall.ERANGE)
                 {
-                    return error.As(errno);
+                    return error.As(errno)!;
                 }
+
                 var newSize = buf.size * 2L;
                 if (!isSizeReasonable(int64(newSize)))
                 {
-                    return error.As(fmt.Errorf("internal buffer exceeds %d bytes", maxBufferSize));
+                    return error.As(fmt.Errorf("internal buffer exceeds %d bytes", maxBufferSize))!;
                 }
+
                 buf.resize(newSize);
+
             }
+
 
         }
 
-        private static readonly long maxBufferSize = 1L << (int)(20L);
+        private static readonly long maxBufferSize = (long)1L << (int)(20L);
 
 
 

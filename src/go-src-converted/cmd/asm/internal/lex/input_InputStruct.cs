@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:51 UTC
+//     Generated on 2020 October 08 04:04:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace @internal
                 this.peekText = default;
             }
 
-            public Input(Stack Stack = default, slice<@string> includes = default, bool beginningOfLine = default, slice<bool> ifdefStack = default, map<@string, ref Macro> macros = default, @string text = default, bool peek = default, ScanToken peekToken = default, @string peekText = default)
+            public Input(Stack Stack = default, slice<@string> includes = default, bool beginningOfLine = default, slice<bool> ifdefStack = default, map<@string, ptr<Macro>> macros = default, @string text = default, bool peek = default, ScanToken peekToken = default, @string peekText = default)
             {
                 this.Stack = Stack;
                 this.includes = includes;

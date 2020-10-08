@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:27 UTC
+//     Generated on 2020 October 08 03:35:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
@@ -41,9 +40,10 @@ namespace net
                 this.ForceQuery = default;
                 this.RawQuery = default;
                 this.Fragment = default;
+                this.RawFragment = default;
             }
 
-            public URL(@string Scheme = default, @string Opaque = default, ref ptr<Userinfo> User = default, @string Host = default, @string Path = default, @string RawPath = default, bool ForceQuery = default, @string RawQuery = default, @string Fragment = default)
+            public URL(@string Scheme = default, @string Opaque = default, ref ptr<Userinfo> User = default, @string Host = default, @string Path = default, @string RawPath = default, bool ForceQuery = default, @string RawQuery = default, @string Fragment = default, @string RawFragment = default)
             {
                 this.Scheme = Scheme;
                 this.Opaque = Opaque;
@@ -54,6 +54,7 @@ namespace net
                 this.ForceQuery = ForceQuery;
                 this.RawQuery = RawQuery;
                 this.Fragment = Fragment;
+                this.RawFragment = RawFragment;
             }
 
             // Enable comparisons between nil and URL struct
@@ -76,7 +77,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static URL URL_cast(dynamic value)
         {
-            return new URL(value.Scheme, value.Opaque, ref value.User, value.Host, value.Path, value.RawPath, value.ForceQuery, value.RawQuery, value.Fragment);
+            return new URL(value.Scheme, value.Opaque, ref value.User, value.Host, value.Path, value.RawPath, value.ForceQuery, value.RawQuery, value.Fragment, value.RawFragment);
         }
     }
 }}

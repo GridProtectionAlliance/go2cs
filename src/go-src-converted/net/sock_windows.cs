@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:27:43 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:37 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sock_windows.go
 using windows = go.@internal.syscall.windows_package;
@@ -19,14 +19,18 @@ namespace go
             // TODO: Implement this
             // NOTE: Never return a number bigger than 1<<16 - 1. See issue 5030.
             return syscall.SOMAXCONN;
+
         }
 
         private static (syscall.Handle, error) sysSocket(long family, long sotype, long proto)
         {
+            syscall.Handle _p0 = default;
+            error _p0 = default!;
+
             var (s, err) = wsaSocketFunc(int32(family), int32(sotype), int32(proto), null, 0L, windows.WSA_FLAG_OVERLAPPED | windows.WSA_FLAG_NO_HANDLE_INHERIT);
             if (err == null)
             {
-                return (s, null);
+                return (s, error.As(null!)!);
             } 
             // WSA_FLAG_NO_HANDLE_INHERIT flag is not supported on some
             // old versions of Windows, see
@@ -40,12 +44,15 @@ namespace go
             {
                 syscall.CloseOnExec(s);
             }
+
             syscall.ForkLock.RUnlock();
             if (err != null)
             {
-                return (syscall.InvalidHandle, os.NewSyscallError("socket", err));
+                return (syscall.InvalidHandle, error.As(os.NewSyscallError("socket", err))!);
             }
-            return (s, null);
+
+            return (s, error.As(null!)!);
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:45 UTC
+//     Generated on 2020 October 08 03:49:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using strconv = go.strconv_package;
+using bytes = go.bytes_package;
+using fmt = go.fmt_package;
+using io = go.io_package;
 using go;
 
 namespace go {
@@ -33,16 +35,18 @@ namespace @internal
                 this.absFilename = default;
                 this.symFilename = default;
                 this.line = default;
+                this.col = default;
                 this.inl = default;
             }
 
-            public PosBase(Pos pos = default, @string filename = default, @string absFilename = default, @string symFilename = default, ulong line = default, long inl = default)
+            public PosBase(Pos pos = default, @string filename = default, @string absFilename = default, @string symFilename = default, ulong line = default, ulong col = default, long inl = default)
             {
                 this.pos = pos;
                 this.filename = filename;
                 this.absFilename = absFilename;
                 this.symFilename = symFilename;
                 this.line = line;
+                this.col = col;
                 this.inl = inl;
             }
 
@@ -66,7 +70,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static PosBase PosBase_cast(dynamic value)
         {
-            return new PosBase(value.pos, value.filename, value.absFilename, value.symFilename, value.line, value.inl);
+            return new PosBase(value.pos, value.filename, value.absFilename, value.symFilename, value.line, value.col, value.inl);
         }
     }
 }}}

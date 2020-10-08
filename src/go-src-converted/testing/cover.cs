@@ -4,7 +4,7 @@
 
 // Support for test coverage.
 
-// package testing -- go2cs converted at 2020 August 29 10:05:49 UTC
+// package testing -- go2cs converted at 2020 October 08 04:36:29 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Go\src\testing\cover.go
 using fmt = go.fmt_package;
@@ -18,15 +18,18 @@ namespace go
     public static partial class testing_package
     {
         // CoverBlock records the coverage data for a single basic block.
+        // The fields are 1-indexed, as in an editor: The opening line of
+        // the file is number 1, for example. Columns are measured
+        // in bytes.
         // NOTE: This struct is internal to the testing infrastructure and may change.
         // It is not covered (yet) by the Go 1 compatibility guidelines.
         public partial struct CoverBlock
         {
-            public uint Line0;
-            public ushort Col0;
-            public uint Line1;
-            public ushort Col1;
-            public ushort Stmts;
+            public uint Line0; // Line number for block start.
+            public ushort Col0; // Column number for block start.
+            public uint Line1; // Line number for block end.
+            public ushort Col1; // Column number for block end.
+            public ushort Stmts; // Number of statements included in this block.
         }
 
         private static Cover cover = default;
@@ -57,18 +60,23 @@ namespace go
             {
                 foreach (var (i) in counters)
                 {
-                    if (atomic.LoadUint32(ref counters[i]) > 0L)
+                    if (atomic.LoadUint32(_addr_counters[i]) > 0L)
                     {
                         n++;
                     }
+
                     d++;
+
                 }
+
             }
             if (d == 0L)
             {
                 return 0L;
             }
+
             return float64(n) / float64(d);
+
         }
 
         // RegisterCover records the coverage data accumulators for the tests.
@@ -87,24 +95,26 @@ namespace go
                 fmt.Fprintf(os.Stderr, "testing: %s\n", err);
                 os.Exit(2L);
             }
+
         }
 
         // coverReport reports the coverage percentage and writes a coverage profile if requested.
         private static void coverReport() => func((defer, _, __) =>
         {
-            ref os.File f = default;
-            error err = default;
-            if (coverProfile != "".Value)
+            ptr<os.File> f;
+            error err = default!;
+            if (coverProfile != "".val)
             {
-                f, err = os.Create(toOutputDir(coverProfile.Value));
+                f, err = os.Create(toOutputDir(coverProfile.val));
                 mustBeNil(err);
                 fmt.Fprintf(f, "mode: %s\n", cover.Mode);
                 defer(() =>
                 {
                     mustBeNil(f.Close());
-
                 }());
+
             }
+
             long active = default;            long total = default;
 
             uint count = default;
@@ -115,23 +125,29 @@ namespace go
                 {
                     var stmts = int64(blocks[i].Stmts);
                     total += stmts;
-                    count = atomic.LoadUint32(ref counts[i]); // For -mode=atomic.
+                    count = atomic.LoadUint32(_addr_counts[i]); // For -mode=atomic.
                     if (count > 0L)
                     {
                         active += stmts;
                     }
+
                     if (f != null)
                     {
                         var (_, err) = fmt.Fprintf(f, "%s:%d.%d,%d.%d %d %d\n", name, blocks[i].Line0, blocks[i].Col0, blocks[i].Line1, blocks[i].Col1, stmts, count);
                         mustBeNil(err);
                     }
+
                 }
+
             }
             if (total == 0L)
             {
-                total = 1L;
+                fmt.Println("coverage: [no statements]");
+                return ;
             }
+
             fmt.Printf("coverage: %.1f%% of statements%s\n", 100L * float64(active) / float64(total), cover.CoveredPackages);
+
         });
     }
 }

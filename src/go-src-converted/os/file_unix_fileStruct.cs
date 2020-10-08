@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:44:03 UTC
+//     Generated on 2020 October 08 03:44:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using poll = go.@internal.poll_package;
+using unix = go.@internal.syscall.unix_package;
+using io = go.io_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
 
@@ -32,15 +34,17 @@ namespace go
                 this.dirinfo = default;
                 this.nonblock = default;
                 this.stdoutOrErr = default;
+                this.appendMode = default;
             }
 
-            public file(poll.FD pfd = default, @string name = default, ref ptr<dirInfo> dirinfo = default, bool nonblock = default, bool stdoutOrErr = default)
+            public file(poll.FD pfd = default, @string name = default, ref ptr<dirInfo> dirinfo = default, bool nonblock = default, bool stdoutOrErr = default, bool appendMode = default)
             {
                 this.pfd = pfd;
                 this.name = name;
                 this.dirinfo = dirinfo;
                 this.nonblock = nonblock;
                 this.stdoutOrErr = stdoutOrErr;
+                this.appendMode = appendMode;
             }
 
             // Enable comparisons between nil and file struct
@@ -63,7 +67,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static file file_cast(dynamic value)
         {
-            return new file(value.pfd, value.name, ref value.dirinfo, value.nonblock, value.stdoutOrErr);
+            return new file(value.pfd, value.name, ref value.dirinfo, value.nonblock, value.stdoutOrErr, value.appendMode);
         }
     }
 }

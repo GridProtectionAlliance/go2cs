@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:29 UTC
+//     Generated on 2020 October 08 04:43:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace pprof
                 this.mappings = default;
             }
 
-            public profileMerger(ref ptr<Profile> p = default, map<ulong, ref Location> locationsByID = default, map<ulong, ref Function> functionsByID = default, map<ulong, mapInfo> mappingsByID = default, map<sampleKey, ref Sample> samples = default, map<locationKey, ref Location> locations = default, map<functionKey, ref Function> functions = default, map<mappingKey, ref Mapping> mappings = default)
+            public profileMerger(ref ptr<Profile> p = default, map<ulong, ptr<Location>> locationsByID = default, map<ulong, ptr<Function>> functionsByID = default, map<ulong, mapInfo> mappingsByID = default, map<sampleKey, ptr<Sample>> samples = default, map<locationKey, ptr<Location>> locations = default, map<functionKey, ptr<Function>> functions = default, map<mappingKey, ptr<Mapping>> mappings = default)
             {
                 this.p = p;
                 this.locationsByID = locationsByID;

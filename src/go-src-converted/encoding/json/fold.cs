@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2020 August 29 08:35:49 UTC
+// package json -- go2cs converted at 2020 October 08 03:42:52 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\fold.go
 using bytes = go.bytes_package;
@@ -15,9 +15,10 @@ namespace encoding
 {
     public static partial class json_package
     {
-        private static readonly var caseMask = ~byte(0x20UL); // Mask to ignore case in ASCII.
-        private static readonly char kelvin = '\u212a';
-        private static readonly char smallLongEss = '\u017f';
+        private static readonly var caseMask = (var)~byte(0x20UL); // Mask to ignore case in ASCII.
+        private static readonly char kelvin = (char)'\u212a';
+        private static readonly char smallLongEss = (char)'\u017f';
+
 
         // foldFunc returns one of four different case folding equivalence
         // functions, from most general (and slow) to fastest:
@@ -44,6 +45,7 @@ namespace encoding
                 {
                     return bytes.EqualFold;
                 }
+
                 var upper = b & caseMask;
                 if (upper < 'A' || upper > 'Z')
                 {
@@ -53,17 +55,22 @@ namespace encoding
                 { 
                     // See above for why these letters are special.
                     special = true;
+
                 }
+
             }
             if (special)
             {
                 return equalFoldRight;
             }
+
             if (nonLetter)
             {
                 return asciiEqualFold;
             }
+
             return simpleLetterEqualFold;
+
         }
 
         // equalFoldRight is a specialization of bytes.EqualFold when s is
@@ -78,6 +85,7 @@ namespace encoding
                 {
                     return false;
                 }
+
                 var tb = t[0L];
                 if (tb < utf8.RuneSelf)
                 {
@@ -90,14 +98,18 @@ namespace encoding
                             {
                                 return false;
                             }
+
                         }
                         else
                         {
                             return false;
                         }
+
                     }
+
                     t = t[1L..];
                     continue;
+
                 } 
                 // sb is ASCII and t is not. t must be either kelvin
                 // sign or long s; sb must be s, S, k, or K.
@@ -111,6 +123,7 @@ namespace encoding
                         {
                             return false;
                         }
+
                         break;
                     case 'k': 
 
@@ -119,6 +132,7 @@ namespace encoding
                         {
                             return false;
                         }
+
                         break;
                     default: 
                         return false;
@@ -126,12 +140,15 @@ namespace encoding
                 }
                 t = t[size..];
 
+
             }
             if (len(t) > 0L)
             {
                 return false;
             }
+
             return true;
+
         }
 
         // asciiEqualFold is a specialization of bytes.EqualFold for use when
@@ -144,6 +161,7 @@ namespace encoding
             {
                 return false;
             }
+
             foreach (var (i, sb) in s)
             {
                 var tb = t[i];
@@ -151,19 +169,23 @@ namespace encoding
                 {
                     continue;
                 }
+
                 if (('a' <= sb && sb <= 'z') || ('A' <= sb && sb <= 'Z'))
                 {
                     if (sb & caseMask != tb & caseMask)
                     {
                         return false;
                     }
+
                 }
                 else
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         // simpleLetterEqualFold is a specialization of bytes.EqualFold for
@@ -176,14 +198,17 @@ namespace encoding
             {
                 return false;
             }
+
             foreach (var (i, b) in s)
             {
                 if (b & caseMask != t[i] & caseMask)
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:51 UTC
+//     Generated on 2020 October 08 04:10:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,27 +44,33 @@ namespace @internal
                 this.Type = default;
                 this.Blocks = default;
                 this.Entry = default;
+                this.LastDeferExit = default;
                 this.bid = default;
                 this.vid = default;
                 this.logfiles = default;
                 this.HTMLWriter = default;
                 this.DebugTest = default;
+                this.PrintOrHtmlSSA = default;
+                this.ruleMatches = default;
                 this.scheduled = default;
+                this.laidout = default;
                 this.NoSplit = default;
                 this.RegAlloc = default;
                 this.NamedValues = default;
                 this.Names = default;
+                this.WBLoads = default;
                 this.freeValues = default;
                 this.freeBlocks = default;
                 this.cachedPostorder = default;
                 this.cachedIdom = default;
                 this.cachedSdom = default;
                 this.cachedLoopnest = default;
+                this.cachedLineStarts = default;
                 this.auxmap = default;
                 this.constants = default;
             }
 
-            public Func(ref ptr<Config> Config = default, ref ptr<Cache> Cache = default, Frontend fe = default, ref ptr<pass> pass = default, @string Name = default, ref ptr<types.Type> Type = default, slice<ref Block> Blocks = default, ref ptr<Block> Entry = default, idAlloc bid = default, idAlloc vid = default, map<@string, writeSyncer> logfiles = default, ref ptr<HTMLWriter> HTMLWriter = default, bool DebugTest = default, bool scheduled = default, bool NoSplit = default, slice<Location> RegAlloc = default, map<LocalSlot, slice<ref Value>> NamedValues = default, slice<LocalSlot> Names = default, ref ptr<Value> freeValues = default, ref ptr<Block> freeBlocks = default, slice<ref Block> cachedPostorder = default, slice<ref Block> cachedIdom = default, SparseTree cachedSdom = default, ref ptr<loopnest> cachedLoopnest = default, auxmap auxmap = default, map<long, slice<ref Value>> constants = default)
+            public Func(ref ptr<Config> Config = default, ref ptr<Cache> Cache = default, Frontend fe = default, ref ptr<pass> pass = default, @string Name = default, ref ptr<types.Type> Type = default, slice<ptr<Block>> Blocks = default, ref ptr<Block> Entry = default, ref ptr<Value> LastDeferExit = default, idAlloc bid = default, idAlloc vid = default, map<@string, writeSyncer> logfiles = default, ref ptr<HTMLWriter> HTMLWriter = default, bool DebugTest = default, bool PrintOrHtmlSSA = default, map<@string, long> ruleMatches = default, bool scheduled = default, bool laidout = default, bool NoSplit = default, slice<Location> RegAlloc = default, map<LocalSlot, slice<ptr<Value>>> NamedValues = default, slice<LocalSlot> Names = default, slice<ptr<Block>> WBLoads = default, ref ptr<Value> freeValues = default, ref ptr<Block> freeBlocks = default, slice<ptr<Block>> cachedPostorder = default, slice<ptr<Block>> cachedIdom = default, SparseTree cachedSdom = default, ref ptr<loopnest> cachedLoopnest = default, ref ptr<xposmap> cachedLineStarts = default, auxmap auxmap = default, map<long, slice<ptr<Value>>> constants = default)
             {
                 this.Config = Config;
                 this.Cache = Cache;
@@ -74,22 +80,28 @@ namespace @internal
                 this.Type = Type;
                 this.Blocks = Blocks;
                 this.Entry = Entry;
+                this.LastDeferExit = LastDeferExit;
                 this.bid = bid;
                 this.vid = vid;
                 this.logfiles = logfiles;
                 this.HTMLWriter = HTMLWriter;
                 this.DebugTest = DebugTest;
+                this.PrintOrHtmlSSA = PrintOrHtmlSSA;
+                this.ruleMatches = ruleMatches;
                 this.scheduled = scheduled;
+                this.laidout = laidout;
                 this.NoSplit = NoSplit;
                 this.RegAlloc = RegAlloc;
                 this.NamedValues = NamedValues;
                 this.Names = Names;
+                this.WBLoads = WBLoads;
                 this.freeValues = freeValues;
                 this.freeBlocks = freeBlocks;
                 this.cachedPostorder = cachedPostorder;
                 this.cachedIdom = cachedIdom;
                 this.cachedSdom = cachedSdom;
                 this.cachedLoopnest = cachedLoopnest;
+                this.cachedLineStarts = cachedLineStarts;
                 this.auxmap = auxmap;
                 this.constants = constants;
             }
@@ -114,7 +126,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Func Func_cast(dynamic value)
         {
-            return new Func(ref value.Config, ref value.Cache, value.fe, ref value.pass, value.Name, ref value.Type, value.Blocks, ref value.Entry, value.bid, value.vid, value.logfiles, ref value.HTMLWriter, value.DebugTest, value.scheduled, value.NoSplit, value.RegAlloc, value.NamedValues, value.Names, ref value.freeValues, ref value.freeBlocks, value.cachedPostorder, value.cachedIdom, value.cachedSdom, ref value.cachedLoopnest, value.auxmap, value.constants);
+            return new Func(ref value.Config, ref value.Cache, value.fe, ref value.pass, value.Name, ref value.Type, value.Blocks, ref value.Entry, ref value.LastDeferExit, value.bid, value.vid, value.logfiles, ref value.HTMLWriter, value.DebugTest, value.PrintOrHtmlSSA, value.ruleMatches, value.scheduled, value.laidout, value.NoSplit, value.RegAlloc, value.NamedValues, value.Names, value.WBLoads, ref value.freeValues, ref value.freeBlocks, value.cachedPostorder, value.cachedIdom, value.cachedSdom, ref value.cachedLoopnest, ref value.cachedLineStarts, value.auxmap, value.constants);
         }
     }
 }}}}

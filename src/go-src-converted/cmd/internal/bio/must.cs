@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bio -- go2cs converted at 2020 August 29 08:51:45 UTC
+// package bio -- go2cs converted at 2020 October 08 03:50:13 UTC
 // import "cmd/internal/bio" ==> using bio = go.cmd.@internal.bio_package
 // Original source: C:\Go\src\cmd\internal\bio\must.go
 using io = go.io_package;
@@ -26,6 +26,7 @@ namespace @internal
                     log.Fatal(err);
                 }
             }
+
         }
 
         // MustWriter returns a Writer that wraps the provided Writer,
@@ -42,22 +43,32 @@ namespace @internal
 
         private static (long, error) Write(this mustWriter w, slice<byte> b)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             var (n, err) = w.w.Write(b);
             if (err != null)
             {
                 log.Fatal(err);
             }
-            return (n, null);
+
+            return (n, error.As(null!)!);
+
         }
 
         private static (long, error) WriteString(this mustWriter w, @string s)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             var (n, err) = io.WriteString(w.w, s);
             if (err != null)
             {
                 log.Fatal(err);
             }
-            return (n, null);
+
+            return (n, error.As(null!)!);
+
         }
     }
 }}}

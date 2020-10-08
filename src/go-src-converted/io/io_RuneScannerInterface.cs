@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:53 UTC
+//     Generated on 2020 October 08 01:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error UnreadRuneByRef(ref T value);
+            private delegate error UnreadRuneByPtr(ptr<T> value);
             private delegate error UnreadRuneByVal(T value);
 
-            private static readonly UnreadRuneByRef s_UnreadRuneByRef;
+            private static readonly UnreadRuneByPtr s_UnreadRuneByPtr;
             private static readonly UnreadRuneByVal s_UnreadRuneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,17 +74,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnreadRuneByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnreadRuneByPtr is null || !m_target_is_ptr)
                     return s_UnreadRuneByVal!(target);
 
-                return s_UnreadRuneByRef(ref target);
+                return s_UnreadRuneByPtr(m_target_ptr);
             }
 
-            private delegate (int, long, error) ReadRuneByRef(ref T value);
+            private delegate (int, long, error) ReadRuneByPtr(ptr<T> value);
             private delegate (int, long, error) ReadRuneByVal(T value);
 
-            private static readonly ReadRuneByRef s_ReadRuneByRef;
+            private static readonly ReadRuneByPtr s_ReadRuneByPtr;
             private static readonly ReadRuneByVal s_ReadRuneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,11 +94,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadRuneByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadRuneByPtr is null || !m_target_is_ptr)
                     return s_ReadRuneByVal!(target);
 
-                return s_ReadRuneByRef(ref target);
+                return s_ReadRuneByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -106,39 +108,33 @@ namespace go
             static RuneScanner()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UnreadRune");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UnreadRune");
 
                 if (!(extensionMethod is null))
-                    s_UnreadRuneByRef = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByRef)) as UnreadRuneByRef;
+                    s_UnreadRuneByPtr = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByPtr)) as UnreadRuneByPtr;
 
-                if (s_UnreadRuneByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UnreadRune");
+                extensionMethod = targetType.GetExtensionMethod("UnreadRune");
 
-                    if (!(extensionMethod is null))
-                        s_UnreadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByVal)) as UnreadRuneByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnreadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByVal)) as UnreadRuneByVal;
 
-                if (s_UnreadRuneByRef is null && s_UnreadRuneByVal is null)
+                if (s_UnreadRuneByPtr is null && s_UnreadRuneByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RuneScanner.UnreadRune method", new Exception("UnreadRune"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadRune");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadRune");
 
                 if (!(extensionMethod is null))
-                    s_ReadRuneByRef = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByRef)) as ReadRuneByRef;
+                    s_ReadRuneByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByPtr)) as ReadRuneByPtr;
 
-                if (s_ReadRuneByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadRune");
+                extensionMethod = targetType.GetExtensionMethod("ReadRune");
 
-                    if (!(extensionMethod is null))
-                        s_ReadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByVal)) as ReadRuneByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByVal)) as ReadRuneByVal;
 
-                if (s_ReadRuneByRef is null && s_ReadRuneByVal is null)
+                if (s_ReadRuneByPtr is null && s_ReadRuneByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RuneScanner.ReadRune method", new Exception("ReadRune"));
             }
 

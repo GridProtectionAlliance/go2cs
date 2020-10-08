@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package s390x -- go2cs converted at 2020 August 29 09:24:51 UTC
+// package s390x -- go2cs converted at 2020 October 08 04:27:17 UTC
 // import "cmd/compile/internal/s390x" ==> using s390x = go.cmd.compile.@internal.s390x_package
 // Original source: C:\Go\src\cmd\compile\internal\s390x\ggen.go
 using gc = go.cmd.compile.@internal.gc_package;
@@ -21,17 +21,21 @@ namespace @internal
         // to have a loop of clear instructions (e.g. XCs) rather than just generating
         // multiple instructions (i.e. loop unrolling).
         // Must be between 256 and 4096.
-        private static readonly long clearLoopCutoff = 1024L;
+        private static readonly long clearLoopCutoff = (long)1024L;
 
         // zerorange clears the stack in the given range.
 
 
         // zerorange clears the stack in the given range.
-        private static ref obj.Prog zerorange(ref gc.Progs pp, ref obj.Prog p, long off, long cnt, ref uint _)
+        private static ptr<obj.Prog> zerorange(ptr<gc.Progs> _addr_pp, ptr<obj.Prog> _addr_p, long off, long cnt, ptr<uint> _addr__)
         {
+            ref gc.Progs pp = ref _addr_pp.val;
+            ref obj.Prog p = ref _addr_p.val;
+            ref uint _ = ref _addr__.val;
+
             if (cnt == 0L)
             {
-                return p;
+                return _addr_p!;
             } 
 
             // Adjust the frame to account for LR.
@@ -52,30 +56,28 @@ namespace @internal
             // Generate a loop of large clears.
             if (cnt > clearLoopCutoff)
             {
-                var n = cnt - (cnt % 256L);
-                var end = int16(s390x.REGRT2);
-                p = pp.Appendpp(p, s390x.AADD, obj.TYPE_CONST, 0L, off + n, obj.TYPE_REG, end, 0L);
-                p.Reg = reg;
+                var ireg = int16(s390x.REGRT2); // register holds number of remaining loop iterations
+                p = pp.Appendpp(p, s390x.AMOVD, obj.TYPE_CONST, 0L, cnt / 256L, obj.TYPE_REG, ireg, 0L);
                 p = pp.Appendpp(p, s390x.ACLEAR, obj.TYPE_CONST, 0L, 256L, obj.TYPE_MEM, reg, off);
                 var pl = p;
                 p = pp.Appendpp(p, s390x.AADD, obj.TYPE_CONST, 0L, 256L, obj.TYPE_REG, reg, 0L);
-                p = pp.Appendpp(p, s390x.ACMP, obj.TYPE_REG, reg, 0L, obj.TYPE_REG, end, 0L);
-                p = pp.Appendpp(p, s390x.ABNE, obj.TYPE_NONE, 0L, 0L, obj.TYPE_BRANCH, 0L, 0L);
+                p = pp.Appendpp(p, s390x.ABRCTG, obj.TYPE_REG, ireg, 0L, obj.TYPE_BRANCH, 0L, 0L);
                 gc.Patch(p, pl);
+                cnt = cnt % 256L;
 
-                cnt -= n;
             } 
 
             // Generate remaining clear instructions without a loop.
             while (cnt > 0L)
             {
-                n = cnt; 
+                var n = cnt; 
 
                 // Can clear at most 256 bytes per instruction.
                 if (n > 256L)
                 {
                     n = 256L;
                 }
+
                 switch (n)
                 { 
                 // Handle very small clears with move instructions.
@@ -110,44 +112,19 @@ namespace @internal
 
                 cnt -= n;
                 off += n;
-            }
-
-
-            return p;
-        }
-
-        private static void zeroAuto(ref gc.Progs pp, ref gc.Node n)
-        { 
-            // Note: this code must not clobber any registers or the
-            // condition code.
-            var sym = n.Sym.Linksym();
-            var size = n.Type.Size();
-            {
-                var i = int64(0L);
-
-                while (i < size)
-                {
-                    var p = pp.Prog(s390x.AMOVD);
-                    p.From.Type = obj.TYPE_CONST;
-                    p.From.Offset = 0L;
-                    p.To.Type = obj.TYPE_MEM;
-                    p.To.Name = obj.NAME_AUTO;
-                    p.To.Reg = s390x.REGSP;
-                    p.To.Offset = n.Xoffset + i;
-                    p.To.Sym = sym;
-                    i += int64(gc.Widthptr);
-                }
 
             }
+
+
+            return _addr_p!;
+
         }
 
-        private static void ginsnop(ref gc.Progs pp)
+        private static ptr<obj.Prog> ginsnop(ptr<gc.Progs> _addr_pp)
         {
-            var p = pp.Prog(s390x.AOR);
-            p.From.Type = obj.TYPE_REG;
-            p.From.Reg = int16(s390x.REG_R0);
-            p.To.Type = obj.TYPE_REG;
-            p.To.Reg = int16(s390x.REG_R0);
+            ref gc.Progs pp = ref _addr_pp.val;
+
+            return _addr_pp.Prog(s390x.ANOPH)!;
         }
     }
 }}}}

@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflect -- go2cs converted at 2020 August 29 08:43:00 UTC
+// package reflect -- go2cs converted at 2020 October 08 03:24:34 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\swapper.go
+using unsafeheader = go.@internal.unsafeheader_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 using System;
 
 namespace go
 {
-    public static unsafe partial class reflect_package
+    public static partial class reflect_package
     {
         // Swapper returns a function that swaps the elements in the provided
         // slice.
@@ -22,7 +23,7 @@ namespace go
             var v = ValueOf(slice);
             if (v.Kind() != Slice)
             {
-                panic(ref new ValueError(Method:"Swapper",Kind:v.Kind()));
+                panic(addr(new ValueError(Method:"Swapper",Kind:v.Kind())));
             }
             switch (v.Len())
             {
@@ -30,7 +31,6 @@ namespace go
                     return (i, j) =>
                     {
                         panic("reflect: slice index out of range");
-
                     };
                     break;
                 case 1L: 
@@ -44,76 +44,73 @@ namespace go
                     break;
             }
 
-            ref rtype typ = v.Type().Elem()._<ref rtype>();
+            ptr<rtype> typ = v.Type().Elem()._<ptr<rtype>>();
             var size = typ.Size();
-            var hasPtr = typ.kind & kindNoPointers == 0L; 
+            var hasPtr = typ.ptrdata != 0L; 
 
             // Some common & small cases, without using memmove:
             if (hasPtr)
             {
                 if (size == ptrSize)
                 {
-                    *(*slice<unsafe.Pointer>) ps = v.ptr.Value;
+                    ptr<ptr<slice<unsafe.Pointer>>> ps = new ptr<ptr<ptr<slice<unsafe.Pointer>>>>(v.ptr);
                     return (i, j) =>
                     {
                         ps[i] = ps[j];
                         ps[j] = ps[i];
-
                     };
+
                 }
             else
                 if (typ.Kind() == String)
                 {
-                    *(*slice<@string>) ss = v.ptr.Value;
+                    ptr<ptr<slice<@string>>> ss = new ptr<ptr<ptr<slice<@string>>>>(v.ptr);
                     return (i, j) =>
                     {
                         ss[i] = ss[j];
                         ss[j] = ss[i];
-
                     };
+
                 }
             }            {
                 switch (size)
                 {
                     case 8L: 
-                        *(*slice<long>) @is = v.ptr.Value;
+                        ptr<ptr<slice<long>>> @is = new ptr<ptr<ptr<slice<long>>>>(v.ptr);
                         return (i, j) =>
                         {
                             is[i] = is[j];
                             is[j] = is[i];
-
                         };
                         break;
                     case 4L: 
-                        @is = v.ptr.Value;
+                        @is = new ptr<ptr<ptr<slice<int>>>>(v.ptr);
                         return (i, j) =>
                         {
                             is[i] = is[j];
                             is[j] = is[i];
-
                         };
                         break;
                     case 2L: 
-                        @is = v.ptr.Value;
+                        @is = new ptr<ptr<ptr<slice<short>>>>(v.ptr);
                         return (i, j) =>
                         {
                             is[i] = is[j];
                             is[j] = is[i];
-
                         };
                         break;
                     case 1L: 
-                        @is = v.ptr.Value;
+                        @is = new ptr<ptr<ptr<slice<sbyte>>>>(v.ptr);
                         return (i, j) =>
                         {
                             is[i] = is[j];
                             is[j] = is[i];
-
                         };
                         break;
                 }
+
             }
-            var s = (sliceHeader.Value)(v.ptr);
+            var s = (unsafeheader.Slice.val)(v.ptr);
             var tmp = unsafe_New(typ); // swap scratch space
 
             return (i, j) =>
@@ -127,7 +124,9 @@ namespace go
                 typedmemmove(typ, tmp, val1);
                 typedmemmove(typ, val1, val2);
                 typedmemmove(typ, val2, tmp);
+
             };
+
         });
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:48 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:24 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\dom.go
 
@@ -16,24 +16,16 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        // mark values
-        private partial struct markKind // : byte
-        {
-        }
-
-        private static readonly markKind notFound = 0L; // block has not been discovered yet
-        private static readonly markKind notExplored = 1L; // discovered and in queue, outedges not processed yet
-        private static readonly markKind explored = 2L; // discovered and in queue, outedges processed
-        private static readonly markKind done = 3L; // all done, in output ordering
-
         // This file contains code to compute the dominator tree
         // of a control-flow graph.
 
         // postorder computes a postorder traversal ordering for the
         // basic blocks in f. Unreachable blocks will not appear.
-        private static slice<ref Block> postorder(ref Func f)
+        private static slice<ptr<Block>> postorder(ptr<Func> _addr_f)
         {
-            return postorderWithNumbering(f, new slice<int>(new int[] {  }));
+            ref Func f = ref _addr_f.val;
+
+            return postorderWithNumbering(_addr_f, null);
         }
 
         private partial struct blockAndIndex
@@ -44,65 +36,86 @@ namespace @internal
 
         // postorderWithNumbering provides a DFS postordering.
         // This seems to make loop-finding more robust.
-        private static slice<ref Block> postorderWithNumbering(ref Func f, slice<int> ponums)
+        private static slice<ptr<Block>> postorderWithNumbering(ptr<Func> _addr_f, slice<int> ponums)
         {
-            var mark = make_slice<markKind>(f.NumBlocks()); 
+            ref Func f = ref _addr_f.val;
+
+            var seen = make_slice<bool>(f.NumBlocks()); 
 
             // result ordering
-            slice<ref Block> order = default; 
+            var order = make_slice<ptr<Block>>(0L, len(f.Blocks)); 
 
             // stack of blocks and next child to visit
-            slice<blockAndIndex> s = default;
+            // A constant bound allows this to be stack-allocated. 32 is
+            // enough to cover almost every postorderWithNumbering call.
+            var s = make_slice<blockAndIndex>(0L, 32L);
             s = append(s, new blockAndIndex(b:f.Entry));
-            mark[f.Entry.ID] = explored;
+            seen[f.Entry.ID] = true;
             while (len(s) > 0L)
             {
                 var tos = len(s) - 1L;
                 var x = s[tos];
                 var b = x.b;
-                var i = x.index;
-                if (i < len(b.Succs))
                 {
-                    s[tos].index++;
-                    var bb = b.Succs[i].Block();
-                    if (mark[bb.ID] == notFound)
+                    var i = x.index;
+
+                    if (i < len(b.Succs))
                     {
-                        mark[bb.ID] = explored;
-                        s = append(s, new blockAndIndex(b:bb));
+                        s[tos].index++;
+                        var bb = b.Succs[i].Block();
+                        if (!seen[bb.ID])
+                        {
+                            seen[bb.ID] = true;
+                            s = append(s, new blockAndIndex(b:bb));
+                        }
+
+                        continue;
+
                     }
+
                 }
-                else
+
+                s = s[..tos];
+                if (ponums != null)
                 {
-                    s = s[..tos];
-                    if (len(ponums) > 0L)
-                    {
-                        ponums[b.ID] = int32(len(order));
-                    }
-                    order = append(order, b);
+                    ponums[b.ID] = int32(len(order));
                 }
+
+                order = append(order, b);
+
             }
 
             return order;
+
         }
 
-        public delegate  slice<Edge> linkedBlocks(ref Block);
+        public delegate  slice<Edge> linkedBlocks(ptr<Block>);
 
-        private static readonly long nscratchslices = 7L;
-
-        // experimentally, functions with 512 or fewer blocks account
-        // for 75% of memory (size) allocation for dominator computation
-        // in make.bash.
-
+        private static readonly long nscratchslices = (long)7L;
 
         // experimentally, functions with 512 or fewer blocks account
         // for 75% of memory (size) allocation for dominator computation
         // in make.bash.
-        private static readonly long minscratchblocks = 512L;
+
+
+        // experimentally, functions with 512 or fewer blocks account
+        // for 75% of memory (size) allocation for dominator computation
+        // in make.bash.
+        private static readonly long minscratchblocks = (long)512L;
 
 
 
-        private static (slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>) scratchBlocksForDom(this ref Cache cache, long maxBlockID)
+        private static (slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>) scratchBlocksForDom(this ptr<Cache> _addr_cache, long maxBlockID)
         {
+            slice<ID> a = default;
+            slice<ID> b = default;
+            slice<ID> c = default;
+            slice<ID> d = default;
+            slice<ID> e = default;
+            slice<ID> f = default;
+            slice<ID> g = default;
+            ref Cache cache = ref _addr_cache.val;
+
             var tot = maxBlockID * nscratchslices;
             var scratch = cache.domblockstore;
             if (len(scratch) < tot)
@@ -114,8 +127,10 @@ namespace @internal
                 {
                     req = nscratchslices * minscratchblocks;
                 }
+
                 scratch = make_slice<ID>(req);
                 cache.domblockstore = scratch;
+
             }
             else
             { 
@@ -125,7 +140,9 @@ namespace @internal
                 {
                     scratch[i] = 0L;
                 }
+
             }
+
             a = scratch[0L * maxBlockID..1L * maxBlockID];
             b = scratch[1L * maxBlockID..2L * maxBlockID];
             c = scratch[2L * maxBlockID..3L * maxBlockID];
@@ -134,13 +151,16 @@ namespace @internal
             f = scratch[5L * maxBlockID..6L * maxBlockID];
             g = scratch[6L * maxBlockID..7L * maxBlockID];
 
-            return;
+            return ;
+
         }
 
-        private static slice<ref Block> dominators(ref Func f)
+        private static slice<ptr<Block>> dominators(ptr<Func> _addr_f)
         {
-            Func<ref Block, slice<Edge>> preds = b => b.Preds;
-            Func<ref Block, slice<Edge>> succs = b => b.Succs;
+            ref Func f = ref _addr_f.val;
+
+            Func<ptr<Block>, slice<Edge>> preds = b => b.Preds;
+            Func<ptr<Block>, slice<Edge>> succs = b => b.Succs;
             } 
 
             //TODO: benchmark and try to find criteria for swapping between
@@ -149,13 +169,17 @@ namespace @internal
             //TODO: benchmark and try to find criteria for swapping between
             // dominatorsSimple and dominatorsLT
             return f.dominatorsLTOrig(f.Entry, preds, succs);
+
         }
 
         // dominatorsLTOrig runs Lengauer-Tarjan to compute a dominator tree starting at
         // entry and using predFn/succFn to find predecessors/successors to allow
         // computing both dominator and post-dominator trees.
-        private static slice<ref Block> dominatorsLTOrig(this ref Func f, ref Block entry, linkedBlocks predFn, linkedBlocks succFn)
-        { 
+        private static slice<ptr<Block>> dominatorsLTOrig(this ptr<Func> _addr_f, ptr<Block> _addr_entry, linkedBlocks predFn, linkedBlocks succFn)
+        {
+            ref Func f = ref _addr_f.val;
+            ref Block entry = ref _addr_entry.val;
+ 
             // Adapted directly from the original TOPLAS article's "simple" algorithm
 
             var maxBlockID = entry.Func.NumBlocks();
@@ -164,7 +188,7 @@ namespace @internal
             // This version uses integers for most of the computation,
             // to make the work arrays smaller and pointer-free.
             // fromID translates from ID to *Block where that is needed.
-            var fromID = make_slice<ref Block>(maxBlockID);
+            var fromID = make_slice<ptr<Block>>(maxBlockID);
             {
                 var v__prev1 = v;
 
@@ -177,7 +201,7 @@ namespace @internal
                 v = v__prev1;
             }
 
-            var idom = make_slice<ref Block>(maxBlockID); 
+            var idom = make_slice<ptr<Block>>(maxBlockID); 
 
             // Step 1. Carry out a depth first search of the problem graph. Number
             // the vertices from 1 to n as they are reached during the search.
@@ -199,12 +223,15 @@ namespace @internal
                             // skip unreachable predecessor
                             // not in original, but we're using existing pred instead of building one.
                             continue;
+
                         }
+
                         var u = evalOrig(v.ID, ancestor, semi, label);
                         if (semi[u] < semi[w])
                         {
                             semi[w] = semi[u];
                         }
+
                     } 
 
                     // add w to bucket[vertex[semi[w]]]
@@ -234,11 +261,13 @@ namespace @internal
                             {
                                 idom[v] = fromID[parent[w]];
                             }
+
                         }
 
 
                         v = v__prev2;
                     }
+
                 } 
                 // step 4 in toplas paper
 
@@ -256,6 +285,7 @@ namespace @internal
                     {
                         idom[w] = idom[idom[w].ID];
                     }
+
                 }
 
 
@@ -263,16 +293,20 @@ namespace @internal
             }
 
             return idom;
+
         }
 
         // dfs performs a depth first search over the blocks starting at entry block
         // (in arbitrary order).  This is a de-recursed version of dfs from the
         // original Tarjan-Lengauer TOPLAS article.  It's important to return the
         // same values for parent as the original algorithm.
-        private static ID dfsOrig(this ref Func f, ref Block entry, linkedBlocks succFn, slice<ID> semi, slice<ID> vertex, slice<ID> label, slice<ID> parent)
+        private static ID dfsOrig(this ptr<Func> _addr_f, ptr<Block> _addr_entry, linkedBlocks succFn, slice<ID> semi, slice<ID> vertex, slice<ID> label, slice<ID> parent)
         {
+            ref Func f = ref _addr_f.val;
+            ref Block entry = ref _addr_entry.val;
+
             var n = ID(0L);
-            var s = make_slice<ref Block>(0L, 256L);
+            var s = make_slice<ptr<Block>>(0L, 256L);
             s = append(s, entry);
 
             while (len(s) > 0L)
@@ -285,6 +319,7 @@ namespace @internal
                 {
                     continue; // already visited
                 }
+
                 n++;
                 semi[v.ID] = n;
                 vertex[n] = v.ID;
@@ -300,10 +335,13 @@ namespace @internal
                         s = append(s, w);
                         parent[w.ID] = v.ID; // keep overwriting this till it is visited.
                     }
+
                 }
+
             }
 
             return n;
+
         }
 
         // compressOrig is the "simple" compress function from LT paper
@@ -316,8 +354,11 @@ namespace @internal
                 {
                     label[v] = label[ancestor[v]];
                 }
+
                 ancestor[v] = ancestor[ancestor[v]];
+
             }
+
         }
 
         // evalOrig is the "simple" eval function from LT paper
@@ -327,8 +368,10 @@ namespace @internal
             {
                 return v;
             }
+
             compressOrig(v, ancestor, semi, label);
             return label[v];
+
         }
 
         private static void linkOrig(ID v, ID w, slice<ID> ancestor)
@@ -339,11 +382,13 @@ namespace @internal
         // dominators computes the dominator tree for f. It returns a slice
         // which maps block ID to the immediate dominator of that block.
         // Unreachable blocks map to nil. The entry block maps to nil.
-        private static slice<ref Block> dominatorsSimple(ref Func f)
-        { 
+        private static slice<ptr<Block>> dominatorsSimple(ptr<Func> _addr_f)
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // A simple algorithm for now
             // Cooper, Harvey, Kennedy
-            var idom = make_slice<ref Block>(f.NumBlocks()); 
+            var idom = make_slice<ptr<Block>>(f.NumBlocks()); 
 
             // Compute postorder walk
             var post = f.postorder(); 
@@ -384,7 +429,7 @@ namespace @internal
                     for (var i = len(post) - 2L; i >= 0L; i--)
                     {
                         var b = post[i];
-                        ref Block d = default;
+                        ptr<Block> d;
                         foreach (var (_, e) in b.Preds)
                         {
                             var p = e.b;
@@ -392,18 +437,22 @@ namespace @internal
                             {
                                 continue;
                             }
+
                             if (d == null)
                             {
                                 d = p;
                                 continue;
                             }
-                            d = intersect(d, p, postnum, idom);
+
+                            d = intersect(d, _addr_p, postnum, idom);
+
                         }
                         if (d != idom[b.ID])
                         {
                             idom[b.ID] = d;
                             changed = true;
                         }
+
                     }
 
 
@@ -413,18 +462,23 @@ namespace @internal
                 {
                     break;
                 }
+
             } 
             // Set idom of entry block to nil instead of itself.
  
             // Set idom of entry block to nil instead of itself.
             idom[f.Entry.ID] = null;
             return idom;
+
         }
 
         // intersect finds the closest dominator of both b and c.
         // It requires a postorder numbering of all the blocks.
-        private static ref Block intersect(ref Block b, ref Block c, slice<long> postnum, slice<ref Block> idom)
-        { 
+        private static ptr<Block> intersect(ptr<Block> _addr_b, ptr<Block> _addr_c, slice<long> postnum, slice<ptr<Block>> idom)
+        {
+            ref Block b = ref _addr_b.val;
+            ref Block c = ref _addr_c.val;
+ 
             // TODO: This loop is O(n^2). It used to be used in nilcheck,
             // see BenchmarkNilCheckDeep*.
             while (b != c)
@@ -437,9 +491,11 @@ namespace @internal
                 {
                     c = idom[c.ID];
                 }
+
             }
 
-            return b;
+            return _addr_b!;
+
         }
     }
 }}}}

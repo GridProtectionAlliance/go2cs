@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:54:11 UTC
+//     Generated on 2020 October 08 04:10:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,10 +47,13 @@ namespace @internal
                 this.faultOnNilArg1 = default;
                 this.usesScratch = default;
                 this.hasSideEffects = default;
+                this.zeroWidth = default;
+                this.unsafePoint = default;
                 this.symEffect = default;
+                this.scale = default;
             }
 
-            public opInfo(@string name = default, regInfo reg = default, auxType auxType = default, int argLen = default, obj.As asm = default, bool generic = default, bool rematerializeable = default, bool commutative = default, bool resultInArg0 = default, bool resultNotInArgs = default, bool clobberFlags = default, bool call = default, bool nilCheck = default, bool faultOnNilArg0 = default, bool faultOnNilArg1 = default, bool usesScratch = default, bool hasSideEffects = default, SymEffect symEffect = default)
+            public opInfo(@string name = default, regInfo reg = default, auxType auxType = default, int argLen = default, obj.As asm = default, bool generic = default, bool rematerializeable = default, bool commutative = default, bool resultInArg0 = default, bool resultNotInArgs = default, bool clobberFlags = default, bool call = default, bool nilCheck = default, bool faultOnNilArg0 = default, bool faultOnNilArg1 = default, bool usesScratch = default, bool hasSideEffects = default, bool zeroWidth = default, bool unsafePoint = default, SymEffect symEffect = default, byte scale = default)
             {
                 this.name = name;
                 this.reg = reg;
@@ -69,7 +72,10 @@ namespace @internal
                 this.faultOnNilArg1 = faultOnNilArg1;
                 this.usesScratch = usesScratch;
                 this.hasSideEffects = hasSideEffects;
+                this.zeroWidth = zeroWidth;
+                this.unsafePoint = unsafePoint;
                 this.symEffect = symEffect;
+                this.scale = scale;
             }
 
             // Enable comparisons between nil and opInfo struct
@@ -92,7 +98,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static opInfo opInfo_cast(dynamic value)
         {
-            return new opInfo(value.name, value.reg, value.auxType, value.argLen, value.asm, value.generic, value.rematerializeable, value.commutative, value.resultInArg0, value.resultNotInArgs, value.clobberFlags, value.call, value.nilCheck, value.faultOnNilArg0, value.faultOnNilArg1, value.usesScratch, value.hasSideEffects, value.symEffect);
+            return new opInfo(value.name, value.reg, value.auxType, value.argLen, value.asm, value.generic, value.rematerializeable, value.commutative, value.resultInArg0, value.resultNotInArgs, value.clobberFlags, value.call, value.nilCheck, value.faultOnNilArg0, value.faultOnNilArg1, value.usesScratch, value.hasSideEffects, value.zeroWidth, value.unsafePoint, value.symEffect, value.scale);
         }
     }
 }}}}

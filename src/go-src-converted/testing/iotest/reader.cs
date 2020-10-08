@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package iotest implements Readers and Writers useful mainly for testing.
-// package iotest -- go2cs converted at 2020 August 29 10:05:58 UTC
+// package iotest -- go2cs converted at 2020 October 08 04:36:39 UTC
 // import "testing/iotest" ==> using iotest = go.testing.iotest_package
 // Original source: C:\Go\src\testing\iotest\reader.go
 using errors = go.errors_package;
@@ -19,7 +19,7 @@ namespace testing
         // each non-empty Read by reading one byte from r.
         public static io.Reader OneByteReader(io.Reader r)
         {
-            return ref new oneByteReader(r);
+            return addr(new oneByteReader(r));
         }
 
         private partial struct oneByteReader
@@ -27,20 +27,26 @@ namespace testing
             public io.Reader r;
         }
 
-        private static (long, error) Read(this ref oneByteReader r, slice<byte> p)
+        private static (long, error) Read(this ptr<oneByteReader> _addr_r, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref oneByteReader r = ref _addr_r.val;
+
             if (len(p) == 0L)
             {
-                return (0L, null);
+                return (0L, error.As(null!)!);
             }
+
             return r.r.Read(p[0L..1L]);
+
         }
 
         // HalfReader returns a Reader that implements Read
         // by reading half as many requested bytes from r.
         public static io.Reader HalfReader(io.Reader r)
         {
-            return ref new halfReader(r);
+            return addr(new halfReader(r));
         }
 
         private partial struct halfReader
@@ -48,8 +54,12 @@ namespace testing
             public io.Reader r;
         }
 
-        private static (long, error) Read(this ref halfReader r, slice<byte> p)
+        private static (long, error) Read(this ptr<halfReader> _addr_r, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref halfReader r = ref _addr_r.val;
+
             return r.r.Read(p[0L..(len(p) + 1L) / 2L]);
         }
 
@@ -60,7 +70,7 @@ namespace testing
         // of in the first call after the final data.
         public static io.Reader DataErrReader(io.Reader r)
         {
-            return ref new dataErrReader(r,nil,make([]byte,1024));
+            return addr(new dataErrReader(r,nil,make([]byte,1024)));
         }
 
         private partial struct dataErrReader
@@ -70,8 +80,12 @@ namespace testing
             public slice<byte> data;
         }
 
-        private static (long, error) Read(this ref dataErrReader r, slice<byte> p)
-        { 
+        private static (long, error) Read(this ptr<dataErrReader> _addr_r, slice<byte> p)
+        {
+            long n = default;
+            error err = default!;
+            ref dataErrReader r = ref _addr_r.val;
+ 
             // loop because first call needs two reads:
             // one to get data and a second to look for an error.
             while (true)
@@ -82,15 +96,19 @@ namespace testing
                     r.unread = r.data[0L..n1];
                     err = err1;
                 }
+
                 if (n > 0L || err != null)
                 {
                     break;
                 }
+
                 n = copy(p, r.unread);
                 r.unread = r.unread[n..];
+
             }
 
-            return;
+            return ;
+
         }
 
         public static var ErrTimeout = errors.New("timeout");
@@ -99,7 +117,7 @@ namespace testing
         // with no data. Subsequent calls to read succeed.
         public static io.Reader TimeoutReader(io.Reader r)
         {
-            return ref new timeoutReader(r,0);
+            return addr(new timeoutReader(r,0));
         }
 
         private partial struct timeoutReader
@@ -108,14 +126,20 @@ namespace testing
             public long count;
         }
 
-        private static (long, error) Read(this ref timeoutReader r, slice<byte> p)
+        private static (long, error) Read(this ptr<timeoutReader> _addr_r, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref timeoutReader r = ref _addr_r.val;
+
             r.count++;
             if (r.count == 2L)
             {
-                return (0L, ErrTimeout);
+                return (0L, error.As(ErrTimeout)!);
             }
+
             return r.r.Read(p);
+
         }
     }
 }}

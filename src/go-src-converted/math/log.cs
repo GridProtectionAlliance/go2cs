@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:55 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:20 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\log.go
 
@@ -90,15 +90,15 @@ namespace go
 
         private static double log(double x)
         {
-            const float Ln2Hi = 6.93147180369123816490e-01F; /* 3fe62e42 fee00000 */
-            const float Ln2Lo = 1.90821492927058770002e-10F; /* 3dea39ef 35793c76 */
-            const float L1 = 6.666666666666735130e-01F; /* 3FE55555 55555593 */
-            const float L2 = 3.999999999940941908e-01F; /* 3FD99999 9997FA04 */
-            const float L3 = 2.857142874366239149e-01F; /* 3FD24924 94229359 */
-            const float L4 = 2.222219843214978396e-01F; /* 3FCC71C5 1D8E78AF */
-            const float L5 = 1.818357216161805012e-01F; /* 3FC74664 96CB03DE */
-            const float L6 = 1.531383769920937332e-01F; /* 3FC39A09 D078C69F */
-            const float L7 = 1.479819860511658591e-01F; /* 3FC2F112 DF3E5244 */ 
+            const float Ln2Hi = (float)6.93147180369123816490e-01F; /* 3fe62e42 fee00000 */
+            const float Ln2Lo = (float)1.90821492927058770002e-10F; /* 3dea39ef 35793c76 */
+            const float L1 = (float)6.666666666666735130e-01F; /* 3FE55555 55555593 */
+            const float L2 = (float)3.999999999940941908e-01F; /* 3FD99999 9997FA04 */
+            const float L3 = (float)2.857142874366239149e-01F; /* 3FD24924 94229359 */
+            const float L4 = (float)2.222219843214978396e-01F; /* 3FCC71C5 1D8E78AF */
+            const float L5 = (float)1.818357216161805012e-01F; /* 3FC74664 96CB03DE */
+            const float L6 = (float)1.531383769920937332e-01F; /* 3FC39A09 D078C69F */
+            const float L7 = (float)1.479819860511658591e-01F; /* 3FC2F112 DF3E5244 */ 
 
             // special cases
 
@@ -115,6 +115,7 @@ namespace go
                 f1 *= 2L;
                 ki--;
             }
+
             var f = f1 - 1L;
             var k = float64(ki); 
 
@@ -127,6 +128,7 @@ namespace go
             var R = t1 + t2;
             float hfsq = 0.5F * f * f;
             return k * Ln2Hi - ((hfsq - (s * (hfsq + R) + k * Ln2Lo)) - f);
+
         }
     }
 }

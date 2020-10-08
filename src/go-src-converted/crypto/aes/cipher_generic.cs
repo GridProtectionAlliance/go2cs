@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !amd64,!s390x,!ppc64le
+// +build !amd64,!s390x,!ppc64le,!arm64
 
-// package aes -- go2cs converted at 2020 August 29 08:28:45 UTC
+// package aes -- go2cs converted at 2020 October 08 03:35:48 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\cipher_generic.go
 using cipher = go.crypto.cipher_package;
@@ -22,6 +22,9 @@ namespace crypto
         // newCipherGeneric if needed).
         private static (cipher.Block, error) newCipher(slice<byte> key)
         {
+            cipher.Block _p0 = default;
+            error _p0 = default!;
+
             return newCipherGeneric(key);
         }
 

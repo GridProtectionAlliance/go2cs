@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 August 29 08:36:44 UTC
+// package sync -- go2cs converted at 2020 October 08 03:18:57 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\runtime.go
 using @unsafe = go.@unsafe_package;
@@ -17,12 +17,14 @@ namespace go
         // Semacquire waits until *s > 0 and then atomically decrements it.
         // It is intended as a simple sleep primitive for use by the synchronization
         // library and should not be used directly.
-        private static void runtime_Semacquire(ref uint s)
+        private static void runtime_Semacquire(ptr<uint> s)
 ;
 
         // SemacquireMutex is like Semacquire, but for profiling contended Mutexes.
         // If lifo is true, queue waiter at the head of wait queue.
-        private static void runtime_SemacquireMutex(ref uint s, bool lifo)
+        // skipframes is the number of frames to omit during tracing, counting from
+        // runtime_SemacquireMutex's caller.
+        private static void runtime_SemacquireMutex(ptr<uint> s, bool lifo, long skipframes)
 ;
 
         // Semrelease atomically increments *s and notifies a waiting goroutine
@@ -30,34 +32,25 @@ namespace go
         // It is intended as a simple wakeup primitive for use by the synchronization
         // library and should not be used directly.
         // If handoff is true, pass count directly to the first waiter.
-        private static void runtime_Semrelease(ref uint s, bool handoff)
-;
-
-        // Approximation of notifyList in runtime/sema.go. Size and alignment must
-        // agree.
-        private partial struct notifyList
-        {
-            public uint wait;
-            public uint notify;
-            public System.UIntPtr @lock;
-            public unsafe.Pointer head;
-            public unsafe.Pointer tail;
-        }
-
-        // See runtime/sema.go for documentation.
-        private static uint runtime_notifyListAdd(ref notifyList l)
+        // skipframes is the number of frames to omit during tracing, counting from
+        // runtime_Semrelease's caller.
+        private static void runtime_Semrelease(ptr<uint> s, bool handoff, long skipframes)
 ;
 
         // See runtime/sema.go for documentation.
-        private static void runtime_notifyListWait(ref notifyList l, uint t)
+        private static uint runtime_notifyListAdd(ptr<notifyList> l)
 ;
 
         // See runtime/sema.go for documentation.
-        private static void runtime_notifyListNotifyAll(ref notifyList l)
+        private static void runtime_notifyListWait(ptr<notifyList> l, uint t)
 ;
 
         // See runtime/sema.go for documentation.
-        private static void runtime_notifyListNotifyOne(ref notifyList l)
+        private static void runtime_notifyListNotifyAll(ptr<notifyList> l)
+;
+
+        // See runtime/sema.go for documentation.
+        private static void runtime_notifyListNotifyOne(ptr<notifyList> l)
 ;
 
         // Ensure that sync and runtime agree on size of notifyList.
@@ -70,7 +63,7 @@ namespace go
         }
 
         // Active spinning runtime support.
-        // runtime_canSpin returns true is spinning makes sense at the moment.
+        // runtime_canSpin reports whether spinning makes sense at the moment.
         private static bool runtime_canSpin(long i)
 ;
 

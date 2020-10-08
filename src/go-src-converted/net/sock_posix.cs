@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 August 29 08:27:41 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:34 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sock_posix.go
 using context = go.context_package;
@@ -18,65 +18,32 @@ namespace go
 {
     public static partial class net_package
     {
-        // A sockaddr represents a TCP, UDP, IP or Unix network endpoint
-        // address that can be converted into a syscall.Sockaddr.
-        private partial interface sockaddr : Addr
-        {
-            sockaddr family(); // isWildcard reports whether the address is a wildcard
-// address.
-            sockaddr isWildcard(); // sockaddr returns the address converted into a syscall
-// sockaddr type that implements syscall.Sockaddr
-// interface. It returns a nil interface when the address is
-// nil.
-            sockaddr sockaddr(long family); // toLocal maps the zero address to a local system address (127.0.0.1 or ::1)
-            sockaddr toLocal(@string net);
-        }
-
         // socket returns a network file descriptor that is ready for
         // asynchronous I/O using the network poller.
-        private static (ref netFD, error) socket(context.Context ctx, @string net, long family, long sotype, long proto, bool ipv6only, sockaddr laddr, sockaddr raddr)
+        private static (ptr<netFD>, error) socket(context.Context ctx, @string net, long family, long sotype, long proto, bool ipv6only, sockaddr laddr, sockaddr raddr, Func<@string, @string, syscall.RawConn, error> ctrlFn)
         {
+            ptr<netFD> fd = default!;
+            error err = default!;
+
             var (s, err) = sysSocket(family, sotype, proto);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
             err = setDefaultSockopts(s, family, sotype, ipv6only);
 
             if (err != null)
             {
                 poll.CloseFunc(s);
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
             fd, err = newFD(s, family, sotype, net);
 
             if (err != null)
             {
                 poll.CloseFunc(s);
-                return (null, err);
-            } 
-
-            // This function makes a network file descriptor for the
-            // following applications:
-            //
-            // - An endpoint holder that opens a passive stream
-            //   connection, known as a stream listener
-            //
-            // - An endpoint holder that opens a destination-unspecific
-            //   datagram connection, known as a datagram listener
-            //
-            // - An endpoint holder that opens an active stream or a
-            //   destination-specific datagram connection, known as a
-            //   dialer
-            //
-            // - An endpoint holder that opens the other connection, such
-            //   as talking to the protocol stack inside the kernel
-            //
-            // For stream and datagram listeners, they will only require
-            // named sockets, so we can assume that it's just a request
-            // from stream or datagram listeners when laddr is not nil but
-            // raddr is nil. Otherwise we assume it's just for dialers or
-            // the other connection holders.
+                return (_addr_null!, error.As(err)!);
+            }
             if (laddr != null && raddr == null)
             {
 
@@ -84,54 +51,89 @@ namespace go
                     {
                         var err__prev2 = err;
 
-                        var err = fd.listenStream(laddr, listenerBacklog);
+                        var err = fd.listenStream(laddr, listenerBacklog(), ctrlFn);
 
                         if (err != null)
                         {
                             fd.Close();
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
-
                         err = err__prev2;
 
                     }
-                    return (fd, null);
+
+                    return (_addr_fd!, error.As(null!)!);
                 else if (sotype == syscall.SOCK_DGRAM) 
                     {
                         var err__prev2 = err;
 
-                        err = fd.listenDatagram(laddr);
+                        err = fd.listenDatagram(laddr, ctrlFn);
 
                         if (err != null)
                         {
                             fd.Close();
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
-
                         err = err__prev2;
 
                     }
-                    return (fd, null);
-                            }
+
+                    return (_addr_fd!, error.As(null!)!);
+                
+            }
             {
                 var err__prev1 = err;
 
-                err = fd.dial(ctx, laddr, raddr);
+                err = fd.dial(ctx, laddr, raddr, ctrlFn);
 
                 if (err != null)
                 {
                     fd.Close();
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
-
                 err = err__prev1;
 
             }
-            return (fd, null);
+
+            return (_addr_fd!, error.As(null!)!);
+
         }
 
-        private static Func<syscall.Sockaddr, Addr> addrFunc(this ref netFD fd)
+        private static @string ctrlNetwork(this ptr<netFD> _addr_fd)
         {
+            ref netFD fd = ref _addr_fd.val;
+
+            switch (fd.net)
+            {
+                case "unix": 
+
+                case "unixgram": 
+
+                case "unixpacket": 
+                    return fd.net;
+                    break;
+            }
+            switch (fd.net[len(fd.net) - 1L])
+            {
+                case '4': 
+
+                case '6': 
+                    return fd.net;
+                    break;
+            }
+            if (fd.family == syscall.AF_INET)
+            {
+                return fd.net + "4";
+            }
+
+            return fd.net + "6";
+
+        }
+
+        private static Func<syscall.Sockaddr, Addr> addrFunc(this ptr<netFD> _addr_fd)
+        {
+            ref netFD fd = ref _addr_fd.val;
+
 
             if (fd.family == syscall.AF_INET || fd.family == syscall.AF_INET6) 
 
@@ -150,11 +152,48 @@ namespace go
                 else if (fd.sotype == syscall.SOCK_SEQPACKET) 
                     return sockaddrToUnixpacket;
                                         return _p0 => null;
+
         }
 
-        private static error dial(this ref netFD fd, context.Context ctx, sockaddr laddr, sockaddr raddr)
+        private static error dial(this ptr<netFD> _addr_fd, context.Context ctx, sockaddr laddr, sockaddr raddr, Func<@string, @string, syscall.RawConn, error> ctrlFn)
         {
-            error err = default;
+            ref netFD fd = ref _addr_fd.val;
+
+            if (ctrlFn != null)
+            {
+                var (c, err) = newRawConn(fd);
+                if (err != null)
+                {
+                    return error.As(err)!;
+                }
+
+                @string ctrlAddr = default;
+                if (raddr != null)
+                {
+                    ctrlAddr = raddr.String();
+                }
+                else if (laddr != null)
+                {
+                    ctrlAddr = laddr.String();
+                }
+
+                {
+                    var err__prev2 = err;
+
+                    var err = ctrlFn(fd.ctrlNetwork(), ctrlAddr, c);
+
+                    if (err != null)
+                    {
+                        return error.As(err)!;
+                    }
+
+                    err = err__prev2;
+
+                }
+
+            }
+
+            err = default!;
             syscall.Sockaddr lsa = default;
             if (laddr != null)
             {
@@ -162,25 +201,21 @@ namespace go
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
                 else if (lsa != null)
                 {
+                    err = syscall.Bind(fd.pfd.Sysfd, lsa);
+
+                    if (err != null)
                     {
-                        error err__prev4 = err;
-
-                        err = syscall.Bind(fd.pfd.Sysfd, lsa);
-
-                        if (err != null)
-                        {
-                            return error.As(os.NewSyscallError("bind", err));
-                        }
-
-                        err = err__prev4;
-
+                        return error.As(os.NewSyscallError("bind", err))!;
                     }
+
                 }
+
             }
+
             syscall.Sockaddr rsa = default; // remote address from the user
             syscall.Sockaddr crsa = default; // remote address we actually connected to
             if (raddr != null)
@@ -189,31 +224,35 @@ namespace go
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 crsa, err = fd.connect(ctx, lsa, rsa);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 fd.isConnected = true;
+
             }
             else
             {
                 {
-                    error err__prev2 = err;
+                    var err__prev2 = err;
 
                     err = fd.init();
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
             } 
             // Record the local and remote addresses from the actual socket.
             // Get the local address by calling Getsockname.
@@ -236,91 +275,89 @@ namespace go
             {
                 fd.setAddr(fd.addrFunc()(lsa), raddr);
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static error listenStream(this ref netFD fd, sockaddr laddr, long backlog)
+        private static error listenStream(this ptr<netFD> _addr_fd, sockaddr laddr, long backlog, Func<@string, @string, syscall.RawConn, error> ctrlFn)
         {
+            ref netFD fd = ref _addr_fd.val;
+
+            error err = default!;
+            err = error.As(setDefaultListenerSockopts(fd.pfd.Sysfd))!;
+
+            if (err != null)
             {
-                var err__prev1 = err;
-
-                var err = setDefaultListenerSockopts(fd.pfd.Sysfd);
-
-                if (err != null)
-                {
-                    return error.As(err);
-                }
-
-                err = err__prev1;
-
+                return error.As(err)!;
             }
+
+            syscall.Sockaddr lsa = default;
+            lsa, err = laddr.sockaddr(fd.family);
+
+            if (err != null)
             {
-                var lsa__prev1 = lsa;
-                var err__prev1 = err;
+                return error.As(err)!;
+            }
 
-                var (lsa, err) = laddr.sockaddr(fd.family);
-
+            if (ctrlFn != null)
+            {
+                var (c, err) = newRawConn(fd);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
-                else if (lsa != null)
+
                 {
+                    error err__prev2 = err;
+
+                    err = ctrlFn(fd.ctrlNetwork(), laddr.String(), c);
+
+                    if (err != null)
                     {
-                        var err__prev3 = err;
-
-                        err = syscall.Bind(fd.pfd.Sysfd, lsa);
-
-                        if (err != null)
-                        {
-                            return error.As(os.NewSyscallError("bind", err));
-                        }
-
-                        err = err__prev3;
-
+                        return error.As(err)!;
                     }
+
+                    err = err__prev2;
+
                 }
 
-                lsa = lsa__prev1;
-                err = err__prev1;
-
             }
+
+            err = error.As(syscall.Bind(fd.pfd.Sysfd, lsa))!;
+
+            if (err != null)
             {
-                var err__prev1 = err;
-
-                err = listenFunc(fd.pfd.Sysfd, backlog);
-
-                if (err != null)
-                {
-                    return error.As(os.NewSyscallError("listen", err));
-                }
-
-                err = err__prev1;
-
+                return error.As(os.NewSyscallError("bind", err))!;
             }
+
+            err = error.As(listenFunc(fd.pfd.Sysfd, backlog))!;
+
+            if (err != null)
             {
-                var err__prev1 = err;
-
-                err = fd.init();
-
-                if (err != null)
-                {
-                    return error.As(err);
-                }
-
-                err = err__prev1;
-
+                return error.As(os.NewSyscallError("listen", err))!;
             }
-            var (lsa, _) = syscall.Getsockname(fd.pfd.Sysfd);
+
+            err = error.As(fd.init())!;
+
+            if (err != null)
+            {
+                return error.As(err)!;
+            }
+
+            lsa, _ = syscall.Getsockname(fd.pfd.Sysfd);
             fd.setAddr(fd.addrFunc()(lsa), null);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error listenDatagram(this ref netFD fd, sockaddr laddr)
+        private static error listenDatagram(this ptr<netFD> _addr_fd, sockaddr laddr, Func<@string, @string, syscall.RawConn, error> ctrlFn)
         {
+            ref netFD fd = ref _addr_fd.val;
+
             switch (laddr.type())
             {
-                case ref UDPAddr addr:
+                case ptr<UDPAddr> addr:
                     if (addr.IP != null && addr.IP.IsMulticast())
                     {
                         {
@@ -330,69 +367,77 @@ namespace go
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev2;
 
                         }
-                        var addr = addr.Value;
+
+                        ref var addr = ref heap(addr.val, out ptr<var> _addr_addr);
 
                         if (fd.family == syscall.AF_INET) 
                             addr.IP = IPv4zero;
                         else if (fd.family == syscall.AF_INET6) 
                             addr.IP = IPv6unspecified;
-                                                laddr = ref addr;
+                                                _addr_laddr = _addr_addr;
+                        laddr = ref _addr_laddr.val;
+
                     }
+
                     break;
             }
+            err = default!;
+            syscall.Sockaddr lsa = default;
+            lsa, err = laddr.sockaddr(fd.family);
+
+            if (err != null)
             {
-                var lsa__prev1 = lsa;
-                var err__prev1 = err;
+                return error.As(err)!;
+            }
 
-                var (lsa, err) = laddr.sockaddr(fd.family);
-
+            if (ctrlFn != null)
+            {
+                var (c, err) = newRawConn(fd);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
-                else if (lsa != null)
+
                 {
+                    var err__prev2 = err;
+
+                    err = ctrlFn(fd.ctrlNetwork(), laddr.String(), c);
+
+                    if (err != null)
                     {
-                        var err__prev3 = err;
-
-                        err = syscall.Bind(fd.pfd.Sysfd, lsa);
-
-                        if (err != null)
-                        {
-                            return error.As(os.NewSyscallError("bind", err));
-                        }
-
-                        err = err__prev3;
-
+                        return error.As(err)!;
                     }
+
+                    err = err__prev2;
+
                 }
 
-                lsa = lsa__prev1;
-                err = err__prev1;
-
             }
+
+            err = syscall.Bind(fd.pfd.Sysfd, lsa);
+
+            if (err != null)
             {
-                var err__prev1 = err;
-
-                err = fd.init();
-
-                if (err != null)
-                {
-                    return error.As(err);
-                }
-
-                err = err__prev1;
-
+                return error.As(os.NewSyscallError("bind", err))!;
             }
-            var (lsa, _) = syscall.Getsockname(fd.pfd.Sysfd);
+
+            err = fd.init();
+
+            if (err != null)
+            {
+                return error.As(err)!;
+            }
+
+            lsa, _ = syscall.Getsockname(fd.pfd.Sysfd);
             fd.setAddr(fd.addrFunc()(lsa), null);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
     }
 }

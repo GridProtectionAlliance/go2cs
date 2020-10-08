@@ -9,7 +9,7 @@
 // depending on the operating system. To process paths such as URLs
 // that always use forward slashes regardless of the operating
 // system, see the path package.
-// package filepath -- go2cs converted at 2020 August 29 08:22:26 UTC
+// package filepath -- go2cs converted at 2020 October 08 03:37:01 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Go\src\path\filepath\path.go
 using errors = go.errors_package;
@@ -36,42 +36,57 @@ namespace path
             public long volLen;
         }
 
-        private static byte index(this ref lazybuf b, long i)
+        private static byte index(this ptr<lazybuf> _addr_b, long i)
         {
+            ref lazybuf b = ref _addr_b.val;
+
             if (b.buf != null)
             {
                 return b.buf[i];
             }
+
             return b.path[i];
+
         }
 
-        private static void append(this ref lazybuf b, byte c)
+        private static void append(this ptr<lazybuf> _addr_b, byte c)
         {
+            ref lazybuf b = ref _addr_b.val;
+
             if (b.buf == null)
             {
                 if (b.w < len(b.path) && b.path[b.w] == c)
                 {
                     b.w++;
-                    return;
+                    return ;
                 }
+
                 b.buf = make_slice<byte>(len(b.path));
                 copy(b.buf, b.path[..b.w]);
+
             }
+
             b.buf[b.w] = c;
             b.w++;
+
         }
 
-        private static @string @string(this ref lazybuf b)
+        private static @string @string(this ptr<lazybuf> _addr_b)
         {
+            ref lazybuf b = ref _addr_b.val;
+
             if (b.buf == null)
             {
                 return b.volAndPath[..b.volLen + b.w];
             }
+
             return b.volAndPath[..b.volLen] + string(b.buf[..b.w]);
+
         }
 
-        public static readonly var Separator = os.PathSeparator;
-        public static readonly var ListSeparator = os.PathListSeparator;
+        public static readonly var Separator = (var)os.PathSeparator;
+        public static readonly var ListSeparator = (var)os.PathListSeparator;
+
 
         // Clean returns the shortest path name equivalent to path
         // by purely lexical processing. It applies the following rules
@@ -107,9 +122,13 @@ namespace path
                 { 
                     // should be UNC
                     return FromSlash(originalPath);
+
                 }
+
                 return originalPath + ".";
+
             }
+
             var rooted = os.IsPathSeparator(path[0L]); 
 
             // Invariants:
@@ -126,7 +145,9 @@ namespace path
                 @out.append(Separator);
                 r = 1L;
                 dotdot = 1L;
+
             }
+
             while (r < n)
             {
 
@@ -153,6 +174,7 @@ namespace path
                         {
                             @out.append(Separator);
                         }
+
                         @out.append('.');
                         @out.append('.');
                         dotdot = @out.w;
@@ -169,7 +191,8 @@ namespace path
                         @out.append(path[r]);
                         r++;
                     }
-                            } 
+                
+            } 
 
             // Turn empty string into "."
  
@@ -179,7 +202,9 @@ namespace path
             {
                 @out.append('.');
             }
+
             return FromSlash(@out.@string());
+
         }
 
         // ToSlash returns the result of replacing each separator character
@@ -191,7 +216,9 @@ namespace path
             {
                 return path;
             }
-            return strings.Replace(path, string(Separator), "/", -1L);
+
+            return strings.ReplaceAll(path, string(Separator), "/");
+
         }
 
         // FromSlash returns the result of replacing each slash ('/') character
@@ -203,7 +230,9 @@ namespace path
             {
                 return path;
             }
-            return strings.Replace(path, "/", string(Separator), -1L);
+
+            return strings.ReplaceAll(path, "/", string(Separator));
+
         }
 
         // SplitList splits a list of paths joined by the OS-specific ListSeparator,
@@ -222,6 +251,9 @@ namespace path
         // The returned values have the property that path = dir+file.
         public static (@string, @string) Split(@string path)
         {
+            @string dir = default;
+            @string file = default;
+
             var vol = VolumeName(path);
             var i = len(path) - 1L;
             while (i >= len(vol) && !os.IsPathSeparator(path[i]))
@@ -230,13 +262,16 @@ namespace path
             }
 
             return (path[..i + 1L], path[i + 1L..]);
+
         }
 
-        // Join joins any number of path elements into a single path, adding
-        // a Separator if necessary. Join calls Clean on the result; in particular,
-        // all empty strings are ignored.
-        // On Windows, the result is a UNC path if and only if the first path
-        // element is a UNC path.
+        // Join joins any number of path elements into a single path,
+        // separating them with an OS specific Separator. Empty elements
+        // are ignored. The result is Cleaned. However, if the argument
+        // list is empty or all its elements are empty, Join returns
+        // an empty string.
+        // On Windows, the result will only be a UNC path if the first
+        // non-empty element is a UNC path.
         public static @string Join(params @string[] elem)
         {
             elem = elem.Clone();
@@ -256,9 +291,11 @@ namespace path
                 {
                     return path[i..];
                 }
+
             }
 
             return "";
+
         }
 
         // EvalSymlinks returns the path name after the evaluation of any symbolic
@@ -268,6 +305,9 @@ namespace path
         // EvalSymlinks calls Clean on the result.
         public static (@string, error) EvalSymlinks(@string path)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             return evalSymlinks(path);
         }
 
@@ -278,21 +318,30 @@ namespace path
         // Abs calls Clean on the result.
         public static (@string, error) Abs(@string path)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             return abs(path);
         }
 
         private static (@string, error) unixAbs(@string path)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             if (IsAbs(path))
             {
-                return (Clean(path), null);
+                return (Clean(path), error.As(null!)!);
             }
+
             var (wd, err) = os.Getwd();
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
-            return (Join(wd, path), null);
+
+            return (Join(wd, path), error.As(null!)!);
+
         }
 
         // Rel returns a relative path that is lexically equivalent to targpath when
@@ -305,14 +354,18 @@ namespace path
         // Rel calls Clean on the result.
         public static (@string, error) Rel(@string basepath, @string targpath)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             var baseVol = VolumeName(basepath);
             var targVol = VolumeName(targpath);
             var @base = Clean(basepath);
             var targ = Clean(targpath);
             if (sameWord(targ, base))
             {
-                return (".", null);
+                return (".", error.As(null!)!);
             }
+
             base = base[len(baseVol)..];
             targ = targ[len(targVol)..];
             if (base == ".")
@@ -324,7 +377,7 @@ namespace path
             var targSlashed = len(targ) > 0L && targ[0L] == Separator;
             if (baseSlashed != targSlashed || !sameWord(baseVol, targVol))
             {
-                return ("", errors.New("Rel: can't make " + targpath + " relative to " + basepath));
+                return ("", error.As(errors.New("Rel: can't make " + targpath + " relative to " + basepath))!);
             } 
             // Position base[b0:bi] and targ[t0:ti] at the first differing elements.
             var bl = len(base);
@@ -347,22 +400,27 @@ namespace path
                 {
                     break;
                 }
+
                 if (bi < bl)
                 {
                     bi++;
                 }
+
                 if (ti < tl)
                 {
                     ti++;
                 }
+
                 b0 = bi;
                 t0 = ti;
+
             }
 
             if (base[b0..bi] == "..")
             {
-                return ("", errors.New("Rel: can't make " + targpath + " relative to " + basepath));
+                return ("", error.As(errors.New("Rel: can't make " + targpath + " relative to " + basepath))!);
             }
+
             if (b0 != bl)
             { 
                 // Base elements left. Must go up before going down.
@@ -372,6 +430,7 @@ namespace path
                 {
                     size += 1L + tl - t0;
                 }
+
                 var buf = make_slice<byte>(size);
                 var n = copy(buf, "..");
                 for (long i = 0L; i < seps; i++)
@@ -386,9 +445,13 @@ namespace path
                     buf[n] = Separator;
                     copy(buf[n + 1L..], targ[t0..]);
                 }
-                return (string(buf), null);
+
+                return (string(buf), error.As(null!)!);
+
             }
-            return (targ[t0..], null);
+
+            return (targ[t0..], error.As(null!)!);
+
         }
 
         // SkipDir is used as a return value from WalkFuncs to indicate that
@@ -404,12 +467,13 @@ namespace path
         //
         // If there was a problem walking to the file or directory named by path, the
         // incoming error will describe the problem and the function can decide how
-        // to handle that error (and Walk will not descend into that directory). If
-        // an error is returned, processing stops. The sole exception is when the function
-        // returns the special value SkipDir. If the function returns SkipDir when invoked
-        // on a directory, Walk skips the directory's contents entirely.
-        // If the function returns SkipDir when invoked on a non-directory file,
-        // Walk skips the remaining files in the containing directory.
+        // to handle that error (and Walk will not descend into that directory). In the
+        // case of an error, the info argument will be nil. If an error is returned,
+        // processing stops. The sole exception is when the function returns the special
+        // value SkipDir. If the function returns SkipDir when invoked on a directory,
+        // Walk skips the directory's contents entirely. If the function returns SkipDir
+        // when invoked on a non-directory file, Walk skips the remaining files in the
+        // containing directory.
         public delegate  error WalkFunc(@string,  os.FileInfo,  error);
 
         private static var lstat = os.Lstat; // for testing
@@ -419,8 +483,9 @@ namespace path
         {
             if (!info.IsDir())
             {
-                return error.As(walkFn(path, info, null));
+                return error.As(walkFn(path, info, null))!;
             }
+
             var (names, err) = readDirNames(path);
             var err1 = walkFn(path, info, err); 
             // If err != nil, walk can't walk into this directory.
@@ -432,8 +497,10 @@ namespace path
                 // by walkFn. walkFn may ignore err and return nil.
                 // If walkFn returns SkipDir, it will be handled by the caller.
                 // So walk should return whatever walkFn returns.
-                return error.As(err1);
+                return error.As(err1)!;
+
             }
+
             foreach (var (_, name) in names)
             {
                 var filename = Join(path, name);
@@ -445,10 +512,11 @@ namespace path
 
                         if (err != null && err != SkipDir)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                     }
+
                 }
                 else
                 {
@@ -457,12 +525,16 @@ namespace path
                     {
                         if (!fileInfo.IsDir() || err != SkipDir)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
+
                     }
+
                 }
+
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Walk walks the file tree rooted at root, calling walkFn for each file or
@@ -482,30 +554,39 @@ namespace path
             {
                 err = walk(root, info, walkFn);
             }
+
             if (err == SkipDir)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
 
         // readDirNames reads the directory named by dirname and returns
         // a sorted list of directory entries.
         private static (slice<@string>, error) readDirNames(@string dirname)
         {
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+
             var (f, err) = os.Open(dirname);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             var (names, err) = f.Readdirnames(-1L);
             f.Close();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             sort.Strings(names);
-            return (names, null);
+            return (names, error.As(null!)!);
+
         }
 
         // Base returns the last element of path.
@@ -543,7 +624,9 @@ namespace path
             {
                 return string(Separator);
             }
+
             return path;
+
         }
 
         // Dir returns all but the last element of path, typically the path's directory.
@@ -566,8 +649,11 @@ namespace path
             { 
                 // must be UNC
                 return vol;
+
             }
+
             return vol + dir;
+
         }
 
         // VolumeName returns leading volume name.

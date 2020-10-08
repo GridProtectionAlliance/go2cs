@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:20 UTC
+//     Generated on 2020 October 08 03:39:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -55,13 +56,15 @@ namespace net
             // Constructors
             public http2gzipReader(NilType _)
             {
+                this._ = default;
                 this.body = default;
                 this.zr = default;
                 this.zerr = default;
             }
 
-            public http2gzipReader(io.ReadCloser body = default, ref ptr<gzip.Reader> zr = default, error zerr = default)
+            public http2gzipReader(http2incomparable _ = default, io.ReadCloser body = default, ref ptr<gzip.Reader> zr = default, error zerr = default)
             {
+                this._ = _;
                 this.body = body;
                 this.zr = zr;
                 this.zerr = zerr;
@@ -87,7 +90,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2gzipReader http2gzipReader_cast(dynamic value)
         {
-            return new http2gzipReader(value.body, ref value.zr, value.zerr);
+            return new http2gzipReader(value._, value.body, ref value.zr, value.zerr);
         }
     }
 }}

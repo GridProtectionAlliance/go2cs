@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:27:39 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:33 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sock_linux.go
 using syscall = go.syscall_package;
@@ -36,6 +36,7 @@ namespace go
                 n = 1L << (int)(16L) - 1L;
             }
             return n;
+
         });
     }
 }

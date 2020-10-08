@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:27 UTC
+//     Generated on 2020 October 08 03:38:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace mime
                 this.File = default;
             }
 
-            public Form(map<@string, slice<@string>> Value = default, map<@string, slice<ref FileHeader>> File = default)
+            public Form(map<@string, slice<@string>> Value = default, map<@string, slice<ptr<FileHeader>>> File = default)
             {
                 this.Value = Value;
                 this.File = File;

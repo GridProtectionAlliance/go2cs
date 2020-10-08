@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2020 August 29 10:07:44 UTC
+// package arm64asm -- go2cs converted at 2020 October 08 04:44:38 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\plan9x.go
 using fmt = go.fmt_package;
@@ -49,7 +49,8 @@ namespace arm64
                     {
                         break;
                     }
-                    args = append(args, plan9Arg(ref inst, pc, symname, a));
+                    args = append(args, plan9Arg(_addr_inst, pc, symname, a));
+
                 }
                 a = a__prev1;
             }
@@ -73,6 +74,7 @@ namespace arm64
                                 break;
                             }
                         }
+
                         {
                             var (s, base) = symname(addr);
 
@@ -81,12 +83,14 @@ namespace arm64
                                 args[1L] = fmt.Sprintf("$%s(SB)", s);
                             }
                         }
+
                     }
                 }
+
             // Move addressing mode into opcode suffix.
             @string suffix = "";
 
-            if (inst.Op == LDR || inst.Op == LDRB || inst.Op == LDRH || inst.Op == LDRSB || inst.Op == LDRSH || inst.Op == LDRSW || inst.Op == STR || inst.Op == STRB || inst.Op == STRH || inst.Op == STUR || inst.Op == STURB || inst.Op == STURH || inst.Op == LD1) 
+            if (inst.Op == LDR || inst.Op == LDRB || inst.Op == LDRH || inst.Op == LDRSB || inst.Op == LDRSH || inst.Op == LDRSW || inst.Op == STR || inst.Op == STRB || inst.Op == STRH || inst.Op == STUR || inst.Op == STURB || inst.Op == STURH || inst.Op == LD1 || inst.Op == ST1) 
                 switch (inst.Args[1L].type())
                 {
                     case MemImmediate mem:
@@ -136,6 +140,8 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
+
                 goto __switch_break0;
             }
             if (inst.Op == B)
@@ -148,6 +154,7 @@ namespace arm64
                         return "B" + cond.String() + " " + args[1L];
                     }
                 }
+
                 return "JMP" + " " + args[0L];
                 goto __switch_break0;
             }
@@ -172,6 +179,9 @@ namespace arm64
                     case RegisterWithArrangementAndIndex a:
                         op = "VMOV";
                         break;
+                    case RegisterWithArrangement a:
+                        op = "VMOV";
+                        break;
                 }
                 if (rno >= 0L && rno <= int(WZR))
                 {
@@ -189,6 +199,8 @@ namespace arm64
                         op = "VMOV";
                     }
                 }
+
+
                 goto __switch_break0;
             }
             if (inst.Op == LDR)
@@ -210,9 +222,20 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 if (rno <= uint16(WZR))
                 {
                     op = "MOVWU" + suffix;
+                }
+                else if (rno >= uint16(S0) && rno <= uint16(S31))
+                {
+                    op = "FMOVS" + suffix;
+                    args[0L] = fmt.Sprintf("F%d", rno & 31L);
+                }
+                else if (rno >= uint16(D0) && rno <= uint16(D31))
+                {
+                    op = "FMOVD" + suffix;
+                    args[0L] = fmt.Sprintf("F%d", rno & 31L);
                 }
                 else
                 {
@@ -257,6 +280,7 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 goto __switch_break0;
             }
             if (inst.Op == LDRSH)
@@ -281,6 +305,7 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 goto __switch_break0;
             }
             if (inst.Op == STR || inst.Op == STUR)
@@ -302,9 +327,20 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 if (rno <= uint16(WZR))
                 {
                     op = "MOVW" + suffix;
+                }
+                else if (rno >= uint16(S0) && rno <= uint16(S31))
+                {
+                    op = "FMOVS" + suffix;
+                    args[0L] = fmt.Sprintf("F%d", rno & 31L);
+                }
+                else if (rno >= uint16(D0) && rno <= uint16(D31))
+                {
+                    op = "FMOVD" + suffix;
+                    args[0L] = fmt.Sprintf("F%d", rno & 31L);
                 }
                 else
                 {
@@ -353,6 +389,7 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 args[2L] = args[3L];
                 args[3L] = args[2L];
                 goto __switch_break0;
@@ -375,6 +412,7 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 args[0L] = args[1L];
                 args[1L] = args[0L];
                 goto __switch_break0;
@@ -403,6 +441,7 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 args[1L] = args[2L];
                 args[2L] = args[1L];
                 goto __switch_break0;
@@ -431,12 +470,35 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 args[1L] = args[3L];
                 args[2L] = args[1L];
                 args[3L] = args[2L];
                 goto __switch_break0;
             }
-            if (inst.Op == STP || inst.Op == LDP)
+            if (inst.Op == LDAXP || inst.Op == LDXP)
+            {
+                {
+                    Reg r__prev1 = r;
+
+                    (r, ok) = inst.Args[0L]._<Reg>();
+
+                    if (ok)
+                    {
+                        rno = uint16(r);
+                        if (rno <= uint16(WZR))
+                        {
+                            op += "W";
+                        }
+                    }
+                    r = r__prev1;
+
+                }
+
+                fallthrough = true;
+
+            }
+            if (fallthrough || inst.Op == STP || inst.Op == LDP)
             {
                 args[0L] = fmt.Sprintf("(%s, %s)", args[0L], args[1L]);
                 args[1L] = args[2L];
@@ -450,6 +512,34 @@ namespace arm64
                     op = op + suffix;
                     return op + " " + args[1L] + ", " + args[0L];
                 }
+                else if (op == "LDAXP" || op == "LDXP" || op == "LDAXPW" || op == "LDXPW")
+                {
+                    return op + " " + args[1L] + ", " + args[0L];
+                }
+                goto __switch_break0;
+            }
+            if (inst.Op == STLXP || inst.Op == STXP)
+            {
+                {
+                    Reg r__prev1 = r;
+
+                    (r, ok) = inst.Args[1L]._<Reg>();
+
+                    if (ok)
+                    {
+                        rno = uint16(r);
+                        if (rno <= uint16(WZR))
+                        {
+                            op += "W";
+                        }
+                    }
+                    r = r__prev1;
+
+                }
+
+                args[1L] = fmt.Sprintf("(%s, %s)", args[1L], args[2L]);
+                args[2L] = args[3L];
+                return op + " " + args[1L] + ", " + args[2L] + ", " + args[0L];
                 goto __switch_break0;
             }
             if (inst.Op == FCCMP || inst.Op == FCCMPE)
@@ -469,11 +559,18 @@ namespace arm64
                         args[1L] = "$(0.0)";
                     }
                 }
+
                 fallthrough = true;
 
             }
-            if (fallthrough || inst.Op == FADD || inst.Op == FSUB || inst.Op == FMUL || inst.Op == FNMUL || inst.Op == FDIV || inst.Op == FMAX || inst.Op == FMIN || inst.Op == FMAXNM || inst.Op == FMINNM || inst.Op == FCSEL)
+            if (fallthrough || inst.Op == FADD || inst.Op == FSUB || inst.Op == FMUL || inst.Op == FNMUL || inst.Op == FDIV || inst.Op == FMAX || inst.Op == FMIN || inst.Op == FMAXNM || inst.Op == FMINNM || inst.Op == FCSEL || inst.Op == FMADD || inst.Op == FMSUB || inst.Op == FNMADD || inst.Op == FNMSUB)
             {
+                if (strings.HasSuffix(op, "MADD") || strings.HasSuffix(op, "MSUB"))
+                {
+                    args[2L] = args[3L];
+                    args[3L] = args[2L];
+
+                }
                 {
                     Reg r__prev1 = r;
 
@@ -494,6 +591,8 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
+
                 goto __switch_break0;
             }
             if (inst.Op == FCVT)
@@ -527,6 +626,7 @@ namespace arm64
                             r = r__prev1;
 
                         }
+
                     }
 
                     i = i__prev1;
@@ -555,6 +655,8 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
+
                 goto __switch_break0;
             }
             if (inst.Op == FCVTZS || inst.Op == FCVTZU || inst.Op == SCVTF || inst.Op == UCVTF)
@@ -593,12 +695,16 @@ namespace arm64
                                     r = r__prev2;
 
                                 }
+
                             }
 
                             i = i__prev1;
                         }
+
                     }
                 }
+
+
                 goto __switch_break0;
             }
             if (inst.Op == FMOV)
@@ -630,6 +736,7 @@ namespace arm64
                             r = r__prev1;
 
                         }
+
                     }
 
                     i = i__prev1;
@@ -665,6 +772,7 @@ namespace arm64
                     r = r__prev1;
 
                 }
+
                 args[0L] = args[1L];
                 args[1L] = args[0L];
                 goto __switch_break0;
@@ -673,6 +781,33 @@ namespace arm64
             {
                 addr = int64(inst.Args[1L]._<PCRel>());
                 args[1L] = fmt.Sprintf("%d(PC)", addr);
+                goto __switch_break0;
+            }
+            if (inst.Op == MSR)
+            {
+                args[0L] = inst.Args[0L].String();
+                goto __switch_break0;
+            }
+            if (inst.Op == ST1)
+            {
+                op = fmt.Sprintf("V%s", op) + suffix;
+                args[0L] = args[1L];
+                args[1L] = args[0L];
+                goto __switch_break0;
+            }
+            if (inst.Op == LD1)
+            {
+                op = fmt.Sprintf("V%s", op) + suffix;
+                goto __switch_break0;
+            }
+            if (inst.Op == UMOV)
+            {
+                op = "VMOV";
+                goto __switch_break0;
+            }
+            if (inst.Op == NOP)
+            {
+                op = "NOOP";
                 goto __switch_break0;
             }
             // default: 
@@ -694,10 +829,15 @@ namespace arm64
 
                     }
 
+                    if (rno >= int(B0) && rno <= int(Q31) && !strings.HasPrefix(op, "F"))
+                    {
+                        op = fmt.Sprintf("V%s", op);
+                    }
                     if (rno >= 0L && rno <= int(WZR))
                     { 
                         // Add "w" to opcode suffix.
                         op += "W";
+
                     }
                 }
                 op = op + suffix;
@@ -717,13 +857,16 @@ namespace arm64
                         {
                             args[1L] = args[2L];
                             args[2L] = args[1L];
+
                         }
                         else
                         {
                             args[0L] = args[2L];
                             args[2L] = args[0L];
+
                         }
                     }
+
                 }
             } 
             // Reverse args, placing dest last.
@@ -749,15 +892,19 @@ namespace arm64
                 op += " " + strings.Join(args, ", ");
             }
             return op;
+
         }
 
         // No need add "W" to opcode suffix.
         // Opcode must be inserted in ascending order.
-        private static var noSuffixOpSet = strings.Fields("\nCRC32B\nCRC32CB\nCRC32CH\nCRC32CW\nCRC32CX\nCRC32H\nCRC32W\nCRC32X\nLDARB\nLDARH\nLDAXRB\nL" +
-    "DAXRH\nLDXRB\nLDXRH\n");
+        private static var noSuffixOpSet = strings.Fields("\nAESD\nAESE\nAESIMC\nAESMC\nCRC32B\nCRC32CB\nCRC32CH\nCRC32CW\nCRC32CX\nCRC32H\nCRC32W\nCRC3" +
+    "2X\nLDARB\nLDARH\nLDAXRB\nLDAXRH\nLDTRH\nLDXRB\nLDXRH\nSHA1C\nSHA1H\nSHA1M\nSHA1P\nSHA1SU0\nS" +
+    "HA1SU1\nSHA256H\nSHA256H2\nSHA256SU0\nSHA256SU1\n");
 
-        private static @string plan9Arg(ref Inst inst, ulong pc, Func<ulong, (@string, ulong)> symname, Arg arg)
+        private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@string, ulong)> symname, Arg arg)
         {
+            ref Inst inst = ref _addr_inst.val;
+
             switch (arg.type())
             {
                 case Imm a:
@@ -771,6 +918,7 @@ namespace arm64
                     {
                         return fmt.Sprintf("$%d", a.imm);
                     }
+
                     return fmt.Sprintf("$(%d<<%d)", a.imm, a.shift);
                     break;
                 case PCRel a:
@@ -790,6 +938,7 @@ namespace arm64
                         base = base__prev1;
 
                     }
+
                     return fmt.Sprintf("%d(PC)", a / 4L);
                     break;
                 case Reg a:
@@ -797,20 +946,32 @@ namespace arm64
                     var regno = uint16(a) & 31L;
 
                     if (regenum >= uint16(B0) && regenum <= uint16(D31))
-                    { 
-                        // FP registers are the same ones as SIMD registers
-                        // Print Fn for scalar variant to align with assembler (e.g., FCVT)
-                        return fmt.Sprintf("F%d", regno);
+                    {
+                        if (strings.HasPrefix(inst.Op.String(), "F") || strings.HasSuffix(inst.Op.String(), "CVTF"))
+                        { 
+                            // FP registers are the same ones as SIMD registers
+                            // Print Fn for scalar variant to align with assembler (e.g., FCVT, SCVTF, UCVTF, etc.)
+                            return fmt.Sprintf("F%d", regno);
+
+                        }
+                        else
+                        {
+                            return fmt.Sprintf("V%d", regno);
+                        }
+
                     }
                     else if (regenum >= uint16(Q0) && regenum <= uint16(Q31))
                     { 
                         // Print Vn to align with assembler (e.g., SHA256H)
                         return fmt.Sprintf("V%d", regno);
+
                     }
+
                     if (regno == 31L)
                     {
                         return "ZR";
                     }
+
                     return fmt.Sprintf("R%d", regno);
                     break;
                 case RegSP a:
@@ -819,6 +980,7 @@ namespace arm64
                     {
                         return "RSP";
                     }
+
                     return fmt.Sprintf("R%d", regno);
                     break;
                 case RegExtshiftAmount a:
@@ -832,6 +994,7 @@ namespace arm64
                     {
                         reg = fmt.Sprintf("R%d", uint16(a.reg) & 31L);
                     }
+
                     @string extshift = "";
                     @string amount = "";
                     if (a.extShift != ExtShift(0L))
@@ -859,7 +1022,9 @@ namespace arm64
                         {
                             amount = fmt.Sprintf("<<%d", a.amount);
                         }
+
                     }
+
                     return reg + extshift + amount;
                     break;
                 case MemImmediate a:
@@ -874,6 +1039,7 @@ namespace arm64
                     {
                         base = fmt.Sprintf("(R%d)", regno);
                     }
+
                     if (a.imm != 0L && a.Mode != AddrPostReg)
                     {
                         off = fmt.Sprintf("%d", a.imm);
@@ -883,12 +1049,12 @@ namespace arm64
                         var postR = fmt.Sprintf("(R%d)", a.imm);
                         return base + postR;
                     }
+
                     return off + base;
                     break;
                 case MemExtend a:
                     @base = "";
                     @string index = "";
-                    @string extend = "";
                     @string indexreg = "";
                     regno = uint16(a.Base) & 31L;
                     if (regno == 31L)
@@ -899,6 +1065,7 @@ namespace arm64
                     {
                         base = fmt.Sprintf("(R%d)", regno);
                     }
+
                     regno = uint16(a.Index) & 31L;
                     if (regno == 31L)
                     {
@@ -908,19 +1075,39 @@ namespace arm64
                     {
                         indexreg = fmt.Sprintf("R%d", regno);
                     }
+
                     if (a.Extend == lsl)
-                    {
-                        if (a.Amount != 0L)
+                    { 
+                        // a.Amount indicates the index shift amount, encoded in "S" field.
+                        // a.ShiftMustBeZero is set true when the index shift amount must be 0,
+                        // even if the a.Amount field is not 0.
+                        // When a.ShiftMustBeZero is ture, GNU syntax prints #0 shift amount if
+                        // "S" equals to 1, or does not print #0 shift amount if "S" equals to 0.
+                        // Go syntax should never print a zero index shift amount.
+                        if (a.Amount != 0L && !a.ShiftMustBeZero)
                         {
-                            extend = fmt.Sprintf("<<%d", a.Amount);
+                            index = fmt.Sprintf("(%s<<%d)", indexreg, a.Amount);
                         }
+                        else
+                        {
+                            index = fmt.Sprintf("(%s)", indexreg);
+                        }
+
                     }
                     else
                     {
-                        extend = "unimplemented!";
+                        if (a.Amount != 0L && !a.ShiftMustBeZero)
+                        {
+                            index = fmt.Sprintf("(%s.%s<<%d)", indexreg, a.Extend.String(), a.Amount);
+                        }
+                        else
+                        {
+                            index = fmt.Sprintf("(%s.%s)", indexreg, a.Extend.String());
+                        }
+
                     }
-                    index = indexreg + extend;
-                    return index + base;
+
+                    return base + index;
                     break;
                 case Cond a:
                     switch (arg.String())
@@ -957,6 +1144,7 @@ namespace arm64
                     {
                         s = -1L;
                     }
+
                     pre = s * int16(16L + a.pre);
                     if (a.exp > 0L)
                     {
@@ -968,6 +1156,7 @@ namespace arm64
                         numerator = pre;
                         denominator = (16L << (int)(uint8(-1L * a.exp)));
                     }
+
                     result = float64(numerator) / float64(denominator);
                     return strings.TrimRight(fmt.Sprintf("$%f", result), "0");
                     break;
@@ -1005,14 +1194,16 @@ namespace arm64
                             i = i__prev1;
                         }
                         result += "]";
+
                     }
+
                     return result;
                     break;
                 case RegisterWithArrangementAndIndex a:
                     result = a.r.String();
                     arrange = a.a.String();
                     result += arrange;
-                    if (a.cnt > 0L)
+                    if (a.cnt > 1L)
                     {
                         result = "[" + result;
                         {
@@ -1028,16 +1219,26 @@ namespace arm64
                             i = i__prev1;
                         }
                         result += "]";
+
                     }
+
                     return fmt.Sprintf("%s[%d]", result, a.index);
                     break;
                 case Systemreg a:
                     return fmt.Sprintf("$%d", uint32(a.op0 & 1L) << (int)(14L) | uint32(a.op1 & 7L) << (int)(11L) | uint32(a.cn & 15L) << (int)(7L) | uint32(a.cm & 15L) << (int)(3L) | uint32(a.op2) & 7L);
                     break;
+                case Imm_prfop a:
+                    if (strings.Contains(a.String(), "#"))
+                    {
+                        return fmt.Sprintf("$%d", a);
+                    }
+
+                    break;
 
             }
 
             return strings.ToUpper(arg.String());
+
         }
     }
 }}}}}}}

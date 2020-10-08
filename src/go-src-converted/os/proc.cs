@@ -4,7 +4,7 @@
 
 // Process etc.
 
-// package os -- go2cs converted at 2020 August 29 08:44:14 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:56 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\proc.go
 using runtime = go.runtime_package;
@@ -23,9 +23,12 @@ namespace go
             if (runtime.GOOS == "windows")
             { 
                 // Initialized in exec_windows.go.
-                return;
+                return ;
+
             }
+
             Args = runtime_args();
+
         }
 
         private static slice<@string> runtime_args()
@@ -69,13 +72,18 @@ namespace go
         // for a possible alternative.
         public static (slice<long>, error) Getgroups()
         {
+            slice<long> _p0 = default;
+            error _p0 = default!;
+
             var (gids, e) = syscall.Getgroups();
-            return (gids, NewSyscallError("getgroups", e));
+            return (gids, error.As(NewSyscallError("getgroups", e))!);
         }
 
         // Exit causes the current program to exit with the given status code.
         // Conventionally, code zero indicates success, non-zero an error.
         // The program terminates immediately; deferred functions are not run.
+        //
+        // For portability, the status code should be in the range [0, 125].
         public static void Exit(long code)
         {
             if (code == 0L)
@@ -83,8 +91,11 @@ namespace go
                 // Give race detector a chance to fail the program.
                 // Racy programs do not have the right to finish successfully.
                 runtime_beforeExit();
+
             }
+
             syscall.Exit(code);
+
         }
 
         private static void runtime_beforeExit()

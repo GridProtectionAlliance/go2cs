@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:19:10 UTC
+//     Generated on 2020 October 08 03:22:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
+using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 
 namespace go
@@ -26,12 +27,20 @@ namespace go
             // Constructors
             public mOS(NilType _)
             {
+                this.threadLock = default;
+                this.thread = default;
                 this.waitsema = default;
+                this.resumesema = default;
+                this.preemptExtLock = default;
             }
 
-            public mOS(System.UIntPtr waitsema = default)
+            public mOS(mutex threadLock = default, System.UIntPtr thread = default, System.UIntPtr waitsema = default, System.UIntPtr resumesema = default, uint preemptExtLock = default)
             {
+                this.threadLock = threadLock;
+                this.thread = thread;
                 this.waitsema = waitsema;
+                this.resumesema = resumesema;
+                this.preemptExtLock = preemptExtLock;
             }
 
             // Enable comparisons between nil and mOS struct
@@ -54,7 +63,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mOS mOS_cast(dynamic value)
         {
-            return new mOS(value.waitsema);
+            return new mOS(value.threadLock, value.thread, value.waitsema, value.resumesema, value.preemptExtLock);
         }
     }
 }

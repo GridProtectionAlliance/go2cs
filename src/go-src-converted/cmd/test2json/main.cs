@@ -48,6 +48,7 @@
 //    bench  - the benchmark printed log output but did not fail
 //    fail   - the test or benchmark failed
 //    output - the test printed output
+//    skip   - the test was skipped or the package contained no tests
 //
 // The Package field, if present, specifies the package being tested.
 // When the go command runs parallel tests in -json mode, events from
@@ -76,7 +77,7 @@
 // by a final event with Action == "bench" or "fail".
 // Benchmarks have no events with Action == "run", "pause", or "cont".
 //
-// package main -- go2cs converted at 2020 August 29 10:04:50 UTC
+// package main -- go2cs converted at 2020 October 08 04:42:12 UTC
 // Original source: C:\Go\src\cmd\test2json\main.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;
@@ -105,11 +106,12 @@ namespace go
             flag.Parse();
 
             test2json.Mode mode = default;
-            if (flagT.Value)
+            if (flagT.val)
             {
                 mode |= test2json.Timestamp;
             }
-            var c = test2json.NewConverter(os.Stdout, flagP.Value, mode);
+
+            var c = test2json.NewConverter(os.Stdout, flagP.val, mode);
             defer(c.Close());
 
             if (flag.NArg() == 0L)
@@ -120,28 +122,32 @@ namespace go
             {
                 var args = flag.Args();
                 var cmd = exec.Command(args[0L], args[1L..]);
-                countWriter w = ref new countWriter(0,c);
+                ptr<countWriter> w = addr(new countWriter(0,c));
                 cmd.Stdout = w;
                 cmd.Stderr = w;
+                var err = cmd.Run();
+                if (err != null)
                 {
-                    var err = cmd.Run();
-
-                    if (err != null)
+                    if (w.n > 0L)
+                    { 
+                        // Assume command printed why it failed.
+                    }
+                    else
                     {
-                        if (w.n > 0L)
-                        { 
-                            // Assume command printed why it failed.
-                        }
-                        else
-                        {
-                            fmt.Fprintf(c, "test2json: %v\n", err);
-                        }
-                        c.Close();
-                        os.Exit(1L);
+                        fmt.Fprintf(c, "test2json: %v\n", err);
                     }
 
                 }
+
+                c.Exited(err);
+                if (err != null)
+                {
+                    c.Close();
+                    os.Exit(1L);
+                }
+
             }
+
         });
 
         private partial struct countWriter
@@ -150,8 +156,12 @@ namespace go
             public io.Writer w;
         }
 
-        private static (long, error) Write(this ref countWriter w, slice<byte> b)
+        private static (long, error) Write(this ptr<countWriter> _addr_w, slice<byte> b)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref countWriter w = ref _addr_w.val;
+
             w.n += int64(len(b));
             return w.w.Write(b);
         }

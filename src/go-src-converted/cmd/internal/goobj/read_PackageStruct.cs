@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:18 UTC
+//     Generated on 2020 October 08 03:50:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -43,9 +44,10 @@ namespace @internal
                 this.MaxVersion = default;
                 this.Arch = default;
                 this.Native = default;
+                this.DWARFFileList = default;
             }
 
-            public Package(@string ImportPath = default, slice<@string> Imports = default, slice<SymID> SymRefs = default, slice<ref Sym> Syms = default, long MaxVersion = default, @string Arch = default, slice<ref NativeReader> Native = default)
+            public Package(@string ImportPath = default, slice<@string> Imports = default, slice<SymID> SymRefs = default, slice<ptr<Sym>> Syms = default, long MaxVersion = default, @string Arch = default, slice<ptr<NativeReader>> Native = default, slice<@string> DWARFFileList = default)
             {
                 this.ImportPath = ImportPath;
                 this.Imports = Imports;
@@ -54,6 +56,7 @@ namespace @internal
                 this.MaxVersion = MaxVersion;
                 this.Arch = Arch;
                 this.Native = Native;
+                this.DWARFFileList = DWARFFileList;
             }
 
             // Enable comparisons between nil and Package struct
@@ -76,7 +79,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Package Package_cast(dynamic value)
         {
-            return new Package(value.ImportPath, value.Imports, value.SymRefs, value.Syms, value.MaxVersion, value.Arch, value.Native);
+            return new Package(value.ImportPath, value.Imports, value.SymRefs, value.Syms, value.MaxVersion, value.Arch, value.Native, value.DWARFFileList);
         }
     }
 }}}

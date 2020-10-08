@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:12 UTC
+//     Generated on 2020 October 08 03:42:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,14 +13,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using encoding = go.encoding_package;
 using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
 using fmt = go.fmt_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using strconv = go.strconv_package;
+using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf16 = go.unicode.utf16_package;
 using utf8 = go.unicode.utf8_package;
@@ -39,19 +37,19 @@ namespace encoding
             {
                 this.data = default;
                 this.off = default;
+                this.opcode = default;
                 this.scan = default;
-                this.nextscan = default;
                 this.savedError = default;
                 this.useNumber = default;
                 this.disallowUnknownFields = default;
             }
 
-            public decodeState(slice<byte> data = default, long off = default, scanner scan = default, scanner nextscan = default, error savedError = default, bool useNumber = default, bool disallowUnknownFields = default)
+            public decodeState(slice<byte> data = default, long off = default, long opcode = default, scanner scan = default, error savedError = default, bool useNumber = default, bool disallowUnknownFields = default)
             {
                 this.data = data;
                 this.off = off;
+                this.opcode = opcode;
                 this.scan = scan;
-                this.nextscan = nextscan;
                 this.savedError = savedError;
                 this.useNumber = useNumber;
                 this.disallowUnknownFields = disallowUnknownFields;
@@ -77,7 +75,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static decodeState decodeState_cast(dynamic value)
         {
-            return new decodeState(value.data, value.off, value.scan, value.nextscan, value.savedError, value.useNumber, value.disallowUnknownFields);
+            return new decodeState(value.data, value.off, value.opcode, value.scan, value.savedError, value.useNumber, value.disallowUnknownFields);
         }
     }
 }}

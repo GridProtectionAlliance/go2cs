@@ -1,4 +1,4 @@
-// package p1 -- go2cs converted at 2020 August 29 08:48:37 UTC
+// package p1 -- go2cs converted at 2020 October 08 04:04:26 UTC
 // import "cmd/api/testdata/src/pkg/p1" ==> using p1 = go.cmd.api.testdata.src.pkg.p1_package
 // Original source: C:\Go\src\cmd\api\testdata\src\pkg\p1\p1.go
 using ptwo = go.p2_package;
@@ -14,16 +14,17 @@ namespace pkg
 {
     public static partial class p1_package
     {
-        public static readonly var ConstChase2 = constChase; // forward declaration to unexported ident
-        private static readonly var constChase = AIsLowerA; // forward declaration to exported ident
+        public static readonly var ConstChase2 = (var)constChase; // forward declaration to unexported ident
+        private static readonly var constChase = (var)AIsLowerA; // forward declaration to exported ident
 
-        public static readonly long A = 1L;
-        private static readonly long a = 11L;
+        public static readonly long A = (long)1L;
+        private static readonly long a = (long)11L;
         public static readonly long A64 = 1L;
 
-        public static readonly var AIsLowerA = a; // previously declared
+        public static readonly var AIsLowerA = (var)a; // previously declared
 
-        public static readonly var ConversionConst = MyInt(5L);
+        public static readonly var ConversionConst = (var)MyInt(5L);
+
 
         // Variables from function calls.
         public static var V = ptwo.F();        public static var VError = BarE();        public static var V1 = Bar1(1L, 2L, 3L);        public static var V2 = ptwo.G();
@@ -33,11 +34,11 @@ namespace pkg
 
         public static var ChecksumError = ptwo.NewError("gzip checksum error");
 
-        public static readonly long B0 = 2L;
+        public static readonly long B0 = (long)2L;
 
-        public static readonly @string StrConst = "foo";
+        public static readonly @string StrConst = (@string)"foo";
 
-        public static readonly float FloatConst = 1.5F;
+        public static readonly float FloatConst = (float)1.5F;
 
 
 
@@ -66,7 +67,7 @@ namespace pkg
 
         public partial struct EmbedURLPtr
         {
-            public ref URL URL => ref URL_ptr;
+            public ref ptr<URL> ptr<URL> => ref ptr<URL>_ptr;
         }
 
         public partial struct S2
@@ -77,7 +78,7 @@ namespace pkg
 
         public static long X0 = default;
 
-        public static long Y = default;        public static I X = default;
+        public static long Y = default;        public static I X = default!;
 
         public partial interface Namer
         {
@@ -116,8 +117,10 @@ namespace pkg
         {
         }
 
-        private static void SMethod(this ref S2 s, sbyte x, short y, long z)
+        private static void SMethod(this ptr<S2> _addr_s, sbyte x, short y, long z)
         {
+            ref S2 s = ref _addr_s.val;
+
         }
 
         private partial struct s
@@ -134,8 +137,10 @@ namespace pkg
         public static void StructValueMethodNamedRecv(this S ignored)
 
 
-        private static void unexported(this ref S2 s, sbyte x, short y, long z)
+        private static void unexported(this ptr<S2> _addr_s, sbyte x, short y, long z)
         {
+            ref S2 s = ref _addr_s.val;
+
         }
 
         public static void Bar(sbyte x, short y, long z)
@@ -146,6 +151,9 @@ namespace pkg
         }
         public static (byte, ulong) Bar2(sbyte x, short y, long z)
         {
+            byte _p0 = default;
+            ulong _p0 = default;
+
         }
         public static Error BarE()
         {
@@ -169,8 +177,8 @@ namespace pkg
         }
 
         public static SI SIVal = new SI();
-        public static SI SIPtr = ref new SI();
-        public static ref SI SIPtr2 = default;
+        public static ptr<SI> SIPtr = addr(new SI());
+        public static ptr<SI> SIPtr2;
 
         public partial struct T
         {
@@ -189,35 +197,43 @@ namespace pkg
 
         public partial struct TPtrUnexported
         {
-            public ref common common => ref common_ptr;
+            public ref ptr<common> ptr<common> => ref ptr<common>_ptr;
         }
 
         public partial struct TPtrExported
         {
-            public ref Embedded Embedded => ref Embedded_ptr;
+            public ref ptr<Embedded> ptr<Embedded> => ref ptr<Embedded>_ptr;
         }
 
-        public delegate  error) FuncType(long,  long,  @string,  (ref B);
+        public delegate  error) FuncType(long,  long,  @string,  (ptr<B>);
 
         public partial struct Embedded
         {
         }
 
-        public static (ref B, error) PlainFunc(long x, long y, @string s)
+        public static (ptr<B>, error) PlainFunc(long x, long y, @string s)
 ;
 
-        private static void OnEmbedded(this ref Embedded _p0)
-        {>>MARKER:FUNCTION_PlainFunc_BLOCK_PREFIX<<
+        private static void OnEmbedded(this ptr<Embedded> _addr__p0)
+        {
+            ref Embedded _p0 = ref _addr__p0.val;
+
         }
 
-        private static void JustOnT(this ref T _p0)
-        {>>MARKER:FUNCTION_TakesFunc_BLOCK_PREFIX<<
-        }
-        private static void JustOnB(this ref B _p0)
+        private static void JustOnT(this ptr<T> _addr__p0)
         {
+            ref T _p0 = ref _addr__p0.val;
+
         }
-        private static void OnBothTandBPtr(this ref common _p0)
+        private static void JustOnB(this ptr<B> _addr__p0)
         {
+            ref B _p0 = ref _addr__p0.val;
+
+        }
+        private static void OnBothTandBPtr(this ptr<common> _addr__p0)
+        {
+            ref common _p0 = ref _addr__p0.val;
+
         }
         private static void OnBothTandBVal(this common _p0)
         {
@@ -228,9 +244,10 @@ namespace pkg
             public ref Time Time => ref Time_val;
         }
 
-        private static readonly @string foo = "foo";
+        private static readonly @string foo = (@string)"foo";
         private static readonly @string foo2 = "foo2";
-        private static readonly var truth = foo == "foo" || foo2 == "foo2";
+        private static readonly var truth = (var)foo == "foo" || foo2 == "foo2";
+
 
         private static void ellipsis(params @string _p0)
         {
@@ -242,12 +259,12 @@ namespace pkg
             return now;
         }
 
-        private static S x = ref new S(Public:nil,private:nil,PublicTime:Now(),);
+        private static ptr<S> x = addr(new S(Public:nil,private:nil,PublicTime:Now(),));
 
         private static long parenExpr = (1L + 5L);
 
         private static Action funcLit = () =>
-        {
+        {>>MARKER:FUNCTION_PlainFunc_BLOCK_PREFIX<<
         };
 
         private static map<@string, long> m = default;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:28 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:38 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\map.go
 using runtime = go.runtime_package;
 using static go.builtin;
@@ -39,6 +39,7 @@ namespace go
                     i = i__prev1;
                 }
                 c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
+
             }());
             go_(() => () =>
             {
@@ -55,8 +56,10 @@ namespace go
                     i = i__prev1;
                 }
                 c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
+
             }());
             c.Receive().Send(c);
+
         }
 
         private static void concurrentMapReadWrite()
@@ -78,6 +81,7 @@ namespace go
                     i = i__prev1;
                 }
                 c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
+
             }());
             go_(() => () =>
             {
@@ -94,8 +98,10 @@ namespace go
                     i = i__prev1;
                 }
                 c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
+
             }());
             c.Receive().Send(c);
+
         }
 
         private static void concurrentMapIterateWrite()
@@ -117,6 +123,7 @@ namespace go
                     i = i__prev1;
                 }
                 c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
+
             }());
             go_(() => () =>
             {
@@ -129,14 +136,17 @@ namespace go
                         {>>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_2<<
                         }
                         runtime.Gosched();
+
                     }
 
 
                     i = i__prev1;
                 }
                 c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
+
             }());
             c.Receive().Send(c);
+
         }
     }
 }

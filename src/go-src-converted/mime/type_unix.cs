@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package mime -- go2cs converted at 2020 August 29 08:32:39 UTC
+// package mime -- go2cs converted at 2020 October 08 03:38:35 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Go\src\mime\type_unix.go
 using bufio = go.bufio_package;
@@ -28,8 +28,9 @@ namespace go
             var (f, err) = os.Open(filename);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             defer(f.Close());
 
             var scanner = bufio.NewScanner(f);
@@ -40,6 +41,7 @@ namespace go
                 {
                     continue;
                 }
+
                 var mimeType = fields[0L];
                 foreach (var (_, ext) in fields[1L..])
                 {
@@ -47,8 +49,11 @@ namespace go
                     {
                         break;
                     }
+
                     setExtensionType("." + ext, mimeType);
+
                 }
+
             }
 
             {
@@ -60,6 +65,7 @@ namespace go
                 }
 
             }
+
         });
 
         private static void initMimeUnix()
@@ -68,6 +74,7 @@ namespace go
             {
                 loadMimeFile(filename);
             }
+
         }
 
         private static map<@string, @string> initMimeForTests()

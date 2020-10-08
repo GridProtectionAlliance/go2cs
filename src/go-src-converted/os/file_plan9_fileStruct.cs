@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:59 UTC
+//     Generated on 2020 October 08 03:44:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,13 +32,15 @@ namespace go
                 this.fd = default;
                 this.name = default;
                 this.dirinfo = default;
+                this.appendMode = default;
             }
 
-            public file(long fd = default, @string name = default, ref ptr<dirInfo> dirinfo = default)
+            public file(long fd = default, @string name = default, ref ptr<dirInfo> dirinfo = default, bool appendMode = default)
             {
                 this.fd = fd;
                 this.name = name;
                 this.dirinfo = dirinfo;
+                this.appendMode = appendMode;
             }
 
             // Enable comparisons between nil and file struct
@@ -61,7 +63,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static file file_cast(dynamic value)
         {
-            return new file(value.fd, value.name, ref value.dirinfo);
+            return new file(value.fd, value.name, ref value.dirinfo, value.appendMode);
         }
     }
 }

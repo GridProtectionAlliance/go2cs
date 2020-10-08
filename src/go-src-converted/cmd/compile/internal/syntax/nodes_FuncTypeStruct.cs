@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:03 UTC
+//     Generated on 2020 October 08 04:28:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using src = go.cmd.@internal.src_package;
+
 using go;
 
 namespace go {
@@ -40,7 +39,7 @@ namespace @internal
                 this.m_exprRef = new ptr<expr>(new expr(nil));
             }
 
-            public FuncType(slice<ref Field> ParamList = default, slice<ref Field> ResultList = default, expr expr = default)
+            public FuncType(slice<ptr<Field>> ParamList = default, slice<ptr<Field>> ResultList = default, expr expr = default)
             {
                 this.ParamList = ParamList;
                 this.ResultList = ResultList;

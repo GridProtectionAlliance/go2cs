@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httputil -- go2cs converted at 2020 August 29 08:34:21 UTC
+// package httputil -- go2cs converted at 2020 October 08 03:41:32 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Go\src\net\http\httputil\dump.go
 using bufio = go.bufio_package;
@@ -33,25 +33,31 @@ namespace http
         // to make the returned ReadClosers have identical error-matching behavior.
         private static (io.ReadCloser, io.ReadCloser, error) drainBody(io.ReadCloser b)
         {
-            if (b == http.NoBody)
+            io.ReadCloser r1 = default;
+            io.ReadCloser r2 = default;
+            error err = default!;
+
+            if (b == null || b == http.NoBody)
             { 
                 // No copying needed. Preserve the magic sentinel meaning of NoBody.
-                return (http.NoBody, http.NoBody, null);
+                return (http.NoBody, http.NoBody, error.As(null!)!);
+
             }
-            bytes.Buffer buf = default;
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
             _, err = buf.ReadFrom(b);
 
             if (err != null)
             {
-                return (null, b, err);
+                return (null, b, error.As(err)!);
             }
             err = b.Close();
 
             if (err != null)
             {
-                return (null, b, err);
+                return (null, b, error.As(err)!);
             }
-            return (ioutil.NopCloser(ref buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), null);
+            return (ioutil.NopCloser(_addr_buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), error.As(null!)!);
+
         }
 
         // dumpConn is a net.Conn which writes to Writer and reads from Reader
@@ -61,29 +67,41 @@ namespace http
             public ref io.Reader Reader => ref Reader_val;
         }
 
-        private static error Close(this ref dumpConn c)
+        private static error Close(this ptr<dumpConn> _addr_c)
         {
-            return error.As(null);
+            ref dumpConn c = ref _addr_c.val;
+
+            return error.As(null!)!;
         }
-        private static net.Addr LocalAddr(this ref dumpConn c)
+        private static net.Addr LocalAddr(this ptr<dumpConn> _addr_c)
         {
+            ref dumpConn c = ref _addr_c.val;
+
             return null;
         }
-        private static net.Addr RemoteAddr(this ref dumpConn c)
+        private static net.Addr RemoteAddr(this ptr<dumpConn> _addr_c)
         {
+            ref dumpConn c = ref _addr_c.val;
+
             return null;
         }
-        private static error SetDeadline(this ref dumpConn c, time.Time t)
+        private static error SetDeadline(this ptr<dumpConn> _addr_c, time.Time t)
         {
-            return error.As(null);
+            ref dumpConn c = ref _addr_c.val;
+
+            return error.As(null!)!;
         }
-        private static error SetReadDeadline(this ref dumpConn c, time.Time t)
+        private static error SetReadDeadline(this ptr<dumpConn> _addr_c, time.Time t)
         {
-            return error.As(null);
+            ref dumpConn c = ref _addr_c.val;
+
+            return error.As(null!)!;
         }
-        private static error SetWriteDeadline(this ref dumpConn c, time.Time t)
+        private static error SetWriteDeadline(this ptr<dumpConn> _addr_c, time.Time t)
         {
-            return error.As(null);
+            ref dumpConn c = ref _addr_c.val;
+
+            return error.As(null!)!;
         }
 
         private partial struct neverEnding // : byte
@@ -92,37 +110,67 @@ namespace http
 
         private static (long, error) Read(this neverEnding b, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+
             foreach (var (i) in p)
             {
                 p[i] = byte(b);
             }
-            return (len(p), null);
+            return (len(p), error.As(null!)!);
+
+        }
+
+        // outGoingLength is a copy of the unexported
+        // (*http.Request).outgoingLength method.
+        private static long outgoingLength(ptr<http.Request> _addr_req)
+        {
+            ref http.Request req = ref _addr_req.val;
+
+            if (req.Body == null || req.Body == http.NoBody)
+            {
+                return 0L;
+            }
+
+            if (req.ContentLength != 0L)
+            {
+                return req.ContentLength;
+            }
+
+            return -1L;
+
         }
 
         // DumpRequestOut is like DumpRequest but for outgoing client requests. It
         // includes any headers that the standard http.Transport adds, such as
         // User-Agent.
-        public static (slice<byte>, error) DumpRequestOut(ref http.Request _req, bool body) => func(_req, (ref http.Request req, Defer defer, Panic _, Recover __) =>
+        public static (slice<byte>, error) DumpRequestOut(ptr<http.Request> _addr_req, bool body) => func((defer, _, __) =>
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref http.Request req = ref _addr_req.val;
+
             var save = req.Body;
             var dummyBody = false;
-            if (!body || req.Body == null)
+            if (!body)
             {
-                req.Body = null;
-                if (req.ContentLength != 0L)
+                var contentLength = outgoingLength(_addr_req);
+                if (contentLength != 0L)
                 {
-                    req.Body = ioutil.NopCloser(io.LimitReader(neverEnding('x'), req.ContentLength));
+                    req.Body = ioutil.NopCloser(io.LimitReader(neverEnding('x'), contentLength));
                     dummyBody = true;
                 }
+
             }
             else
             {
-                error err = default;
+                error err = default!;
                 save, req.Body, err = drainBody(req.Body);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
             } 
 
             // Since we're using the actual Transport code to write the request,
@@ -133,9 +181,9 @@ namespace http
             if (req.URL.Scheme == "https")
             {
                 reqSend = @new<http.Request>();
-                reqSend.Value = req.Value;
+                reqSend.val = req;
                 reqSend.URL = @new<url.URL>();
-                reqSend.URL.Value = req.URL.Value;
+                reqSend.URL.val = req.URL.val;
                 reqSend.URL.Scheme = "http";
             } 
 
@@ -144,15 +192,19 @@ namespace http
             // custom dialer that returns a fake net.Conn that waits
             // for the full input (and recording it), and then responds
             // with a dummy response.
-            bytes.Buffer buf = default; // records the output
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf); // records the output
             var (pr, pw) = io.Pipe();
             defer(pr.Close());
             defer(pw.Close());
-            delegateReader dr = ref new delegateReader(c:make(chanio.Reader));
+            ptr<delegateReader> dr = addr(new delegateReader(c:make(chanio.Reader)));
 
-            http.Transport t = ref new http.Transport(Dial:func(net,addrstring)(net.Conn,error){return&dumpConn{io.MultiWriter(&buf,pw),dr},nil},);
+            ptr<http.Transport> t = addr(new http.Transport(Dial:func(net,addrstring)(net.Conn,error){return&dumpConn{io.MultiWriter(&buf,pw),dr},nil},));
             defer(t.CloseIdleConnections()); 
 
+            // We need this channel to ensure that the reader
+            // goroutine exits if t.RoundTrip returns an error.
+            // See golang.org/issue/32571.
+            var quitReadCh = make_channel<object>(); 
             // Wait for the request before replying with a dummy response:
             go_(() => () =>
             {
@@ -163,8 +215,9 @@ namespace http
                     // we'll get a partial dump.
                     io.Copy(ioutil.Discard, req.Body);
                     req.Body.Close();
+
                 }
-                dr.c.Send(strings.NewReader("HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n"));
+
             }());
 
             var (_, err) = t.RoundTrip(reqSend);
@@ -172,8 +225,11 @@ namespace http
             req.Body = save;
             if (err != null)
             {
-                return (null, err);
+                pw.Close();
+                quitReadCh.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
+                return (null, error.As(err)!);
             }
+
             var dump = buf.Bytes(); 
 
             // If we used a dummy body above, remove it now.
@@ -192,8 +248,11 @@ namespace http
                     }
 
                 }
+
             }
-            return (dump, null);
+
+            return (dump, error.As(null!)!);
+
         });
 
         // delegateReader is a reader that delegates to another reader,
@@ -204,13 +263,19 @@ namespace http
             public io.Reader r; // nil until received from c
         }
 
-        private static (long, error) Read(this ref delegateReader r, slice<byte> p)
+        private static (long, error) Read(this ptr<delegateReader> _addr_r, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref delegateReader r = ref _addr_r.val;
+
             if (r.r == null)
             {
                 r.r = r.c.Receive();
             }
+
             return r.r.Read(p);
+
         }
 
         // Return value if nonempty, def otherwise.
@@ -220,7 +285,9 @@ namespace http
             {
                 return value;
             }
+
             return def;
+
         }
 
         private static map reqWriteExcludeHeaderDump = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"Host":true,"Transfer-Encoding":true,"Trailer":true,};
@@ -241,9 +308,13 @@ namespace http
         //
         // The documentation for http.Request.Write details which fields
         // of req are included in the dump.
-        public static (slice<byte>, error) DumpRequest(ref http.Request req, bool body)
+        public static (slice<byte>, error) DumpRequest(ptr<http.Request> _addr_req, bool body)
         {
-            error err = default;
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref http.Request req = ref _addr_req.val;
+
+            error err = default!;
             var save = req.Body;
             if (!body || req.Body == null)
             {
@@ -254,10 +325,12 @@ namespace http
                 save, req.Body, err = drainBody(req.Body);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
             }
-            bytes.Buffer b = default; 
+
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b); 
 
             // By default, print out the unmodified req.RequestURI, which
             // is always set for incoming server requests. But because we
@@ -270,7 +343,8 @@ namespace http
             {
                 reqURI = req.URL.RequestURI();
             }
-            fmt.Fprintf(ref b, "%s %s HTTP/%d.%d\r\n", valueOrDefault(req.Method, "GET"), reqURI, req.ProtoMajor, req.ProtoMinor);
+
+            fmt.Fprintf(_addr_b, "%s %s HTTP/%d.%d\r\n", valueOrDefault(req.Method, "GET"), reqURI, req.ProtoMajor, req.ProtoMinor);
 
             var absRequestURI = strings.HasPrefix(req.RequestURI, "http://") || strings.HasPrefix(req.RequestURI, "https://");
             if (!absRequestURI)
@@ -280,47 +354,58 @@ namespace http
                 {
                     host = req.URL.Host;
                 }
+
                 if (host != "")
                 {
-                    fmt.Fprintf(ref b, "Host: %s\r\n", host);
+                    fmt.Fprintf(_addr_b, "Host: %s\r\n", host);
                 }
+
             }
+
             var chunked = len(req.TransferEncoding) > 0L && req.TransferEncoding[0L] == "chunked";
             if (len(req.TransferEncoding) > 0L)
             {
-                fmt.Fprintf(ref b, "Transfer-Encoding: %s\r\n", strings.Join(req.TransferEncoding, ","));
+                fmt.Fprintf(_addr_b, "Transfer-Encoding: %s\r\n", strings.Join(req.TransferEncoding, ","));
             }
+
             if (req.Close)
             {
-                fmt.Fprintf(ref b, "Connection: close\r\n");
+                fmt.Fprintf(_addr_b, "Connection: close\r\n");
             }
-            err = error.As(req.Header.WriteSubset(ref b, reqWriteExcludeHeaderDump));
+
+            err = error.As(req.Header.WriteSubset(_addr_b, reqWriteExcludeHeaderDump))!;
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            io.WriteString(ref b, "\r\n");
+
+            io.WriteString(_addr_b, "\r\n");
 
             if (req.Body != null)
             {
-                io.Writer dest = ref b;
+                io.Writer dest = _addr_b;
                 if (chunked)
                 {
                     dest = NewChunkedWriter(dest);
                 }
+
                 _, err = io.Copy(dest, req.Body);
                 if (chunked)
                 {
                     dest._<io.Closer>().Close();
-                    io.WriteString(ref b, "\r\n");
+                    io.WriteString(_addr_b, "\r\n");
                 }
+
             }
+
             req.Body = save;
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (b.Bytes(), null);
+
+            return (b.Bytes(), error.As(null!)!);
+
         }
 
         // errNoBody is a sentinel error value used by failureToReadBody so we
@@ -337,21 +422,28 @@ namespace http
 
         private static (long, error) Read(this failureToReadBody _p0, slice<byte> _p0)
         {
-            return (0L, errNoBody);
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (0L, error.As(errNoBody)!);
         }
         private static error Close(this failureToReadBody _p0)
         {
-            return error.As(null);
+            return error.As(null!)!;
         }
 
         // emptyBody is an instance of empty reader.
         private static var emptyBody = ioutil.NopCloser(strings.NewReader(""));
 
         // DumpResponse is like DumpRequest but dumps a response.
-        public static (slice<byte>, error) DumpResponse(ref http.Response resp, bool body)
+        public static (slice<byte>, error) DumpResponse(ptr<http.Response> _addr_resp, bool body)
         {
-            bytes.Buffer b = default;
-            error err = default;
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref http.Response resp = ref _addr_resp.val;
+
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
+            error err = default!;
             var save = resp.Body;
             var savecl = resp.ContentLength;
 
@@ -367,6 +459,7 @@ namespace http
                 {
                     resp.Body = new failureToReadBody();
                 }
+
             }
             else if (resp.Body == null)
             {
@@ -377,21 +470,26 @@ namespace http
                 save, resp.Body, err = drainBody(resp.Body);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
             }
-            err = error.As(resp.Write(ref b));
+
+            err = error.As(resp.Write(_addr_b))!;
             if (err == errNoBody)
             {
-                err = error.As(null);
+                err = error.As(null)!;
             }
+
             resp.Body = save;
             resp.ContentLength = savecl;
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (b.Bytes(), null);
+
+            return (b.Bytes(), error.As(null!)!);
+
         }
     }
 }}}

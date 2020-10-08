@@ -10,7 +10,7 @@
 // The slicing-by-8 algorithm is a faster implementation that uses a bigger
 // table (8*256*4 bytes).
 
-// package crc32 -- go2cs converted at 2020 August 29 08:23:16 UTC
+// package crc32 -- go2cs converted at 2020 October 08 03:30:51 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
 // Original source: C:\Go\src\hash\crc32\crc32_generic.go
 
@@ -24,17 +24,19 @@ namespace hash
         // simpleMakeTable allocates and constructs a Table for the specified
         // polynomial. The table is suitable for use with the simple algorithm
         // (simpleUpdate).
-        private static ref Table simpleMakeTable(uint poly)
+        private static ptr<Table> simpleMakeTable(uint poly)
         {
             ptr<Table> t = @new<Table>();
             simplePopulateTable(poly, t);
-            return t;
+            return _addr_t!;
         }
 
         // simplePopulateTable constructs a Table for the specified polynomial, suitable
         // for use with simpleUpdate.
-        private static void simplePopulateTable(uint poly, ref Table t)
+        private static void simplePopulateTable(uint poly, ptr<Table> _addr_t)
         {
+            ref Table t = ref _addr_t.val;
+
             for (long i = 0L; i < 256L; i++)
             {
                 var crc = uint32(i);
@@ -48,27 +50,33 @@ namespace hash
                     {
                         crc >>= 1L;
                     }
+
                 }
 
                 t[i] = crc;
+
             }
+
 
         }
 
         // simpleUpdate uses the simple algorithm to update the CRC, given a table that
         // was previously computed using simpleMakeTable.
-        private static uint simpleUpdate(uint crc, ref Table tab, slice<byte> p)
+        private static uint simpleUpdate(uint crc, ptr<Table> _addr_tab, slice<byte> p)
         {
+            ref Table tab = ref _addr_tab.val;
+
             crc = ~crc;
             foreach (var (_, v) in p)
             {
                 crc = tab[byte(crc) ^ v] ^ (crc >> (int)(8L));
             }
             return ~crc;
+
         }
 
         // Use slicing-by-8 when payload >= this value.
-        private static readonly long slicing8Cutoff = 16L;
+        private static readonly long slicing8Cutoff = (long)16L;
 
         // slicing8Table is array of 8 Tables, used by the slicing-by-8 algorithm.
 
@@ -80,10 +88,10 @@ namespace hash
 
         // slicingMakeTable constructs a slicing8Table for the specified polynomial. The
         // table is suitable for use with the slicing-by-8 algorithm (slicingUpdate).
-        private static ref slicing8Table slicingMakeTable(uint poly)
+        private static ptr<slicing8Table> slicingMakeTable(uint poly)
         {
             ptr<slicing8Table> t = @new<slicing8Table>();
-            simplePopulateTable(poly, ref t[0L]);
+            simplePopulateTable(poly, _addr_t[0L]);
             for (long i = 0L; i < 256L; i++)
             {
                 var crc = t[0L][i];
@@ -93,15 +101,19 @@ namespace hash
                     t[j][i] = crc;
                 }
 
+
             }
 
-            return t;
+            return _addr_t!;
+
         }
 
         // slicingUpdate uses the slicing-by-8 algorithm to update the CRC, given a
         // table that was previously computed using slicingMakeTable.
-        private static uint slicingUpdate(uint crc, ref slicing8Table tab, slice<byte> p)
+        private static uint slicingUpdate(uint crc, ptr<slicing8Table> _addr_tab, slice<byte> p)
         {
+            ref slicing8Table tab = ref _addr_tab.val;
+
             if (len(p) >= slicing8Cutoff)
             {
                 crc = ~crc;
@@ -113,12 +125,16 @@ namespace hash
                 }
 
                 crc = ~crc;
+
             }
+
             if (len(p) == 0L)
             {
                 return crc;
             }
-            return simpleUpdate(crc, ref tab[0L], p);
+
+            return simpleUpdate(crc, _addr_tab[0L], p);
+
         }
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package token -- go2cs converted at 2020 August 29 08:48:09 UTC
+// package token -- go2cs converted at 2020 October 08 03:43:27 UTC
 // import "go/token" ==> using token = go.go.token_package
 // Original source: C:\Go\src\go\token\serialize.go
 
@@ -30,38 +30,44 @@ namespace go
         }
 
         // Read calls decode to deserialize a file set into s; s must not be nil.
-        private static error Read(this ref FileSet s, Func<object, error> decode)
+        private static error Read(this ptr<FileSet> _addr_s, Func<object, error> decode)
         {
-            serializedFileSet ss = default;
+            ref FileSet s = ref _addr_s.val;
+
+            ref serializedFileSet ss = ref heap(out ptr<serializedFileSet> _addr_ss);
             {
-                var err = decode(ref ss);
+                var err = decode(_addr_ss);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
 
+
             s.mutex.Lock();
             s.@base = ss.Base;
-            var files = make_slice<ref File>(len(ss.Files));
+            var files = make_slice<ptr<File>>(len(ss.Files));
             for (long i = 0L; i < len(ss.Files); i++)
             {
-                var f = ref ss.Files[i];
-                files[i] = ref new File(set:s,name:f.Name,base:f.Base,size:f.Size,lines:f.Lines,infos:f.Infos,);
+                var f = _addr_ss.Files[i];
+                files[i] = addr(new File(set:s,name:f.Name,base:f.Base,size:f.Size,lines:f.Lines,infos:f.Infos,));
             }
 
             s.files = files;
             s.last = null;
             s.mutex.Unlock();
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Write calls encode to serialize the file set s.
-        private static error Write(this ref FileSet s, Func<object, error> encode)
+        private static error Write(this ptr<FileSet> _addr_s, Func<object, error> encode)
         {
+            ref FileSet s = ref _addr_s.val;
+
             serializedFileSet ss = default;
 
             s.mutex.Lock();
@@ -76,7 +82,8 @@ namespace go
             ss.Files = files;
             s.mutex.Unlock();
 
-            return error.As(encode(ss));
+            return error.As(encode(ss))!;
+
         }
     }
 }}

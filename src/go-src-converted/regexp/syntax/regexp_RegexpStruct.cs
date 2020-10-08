@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:24:00 UTC
+//     Generated on 2020 October 08 03:41:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
@@ -42,7 +41,7 @@ namespace regexp
                 this.Name = default;
             }
 
-            public Regexp(Op Op = default, Flags Flags = default, slice<ref Regexp> Sub = default, array<ref Regexp> Sub0 = default, slice<int> Rune = default, array<int> Rune0 = default, long Min = default, long Max = default, long Cap = default, @string Name = default)
+            public Regexp(Op Op = default, Flags Flags = default, slice<ptr<Regexp>> Sub = default, array<ptr<Regexp>> Sub0 = default, slice<int> Rune = default, array<int> Rune0 = default, long Min = default, long Max = default, long Cap = default, @string Name = default)
             {
                 this.Op = Op;
                 this.Flags = Flags;

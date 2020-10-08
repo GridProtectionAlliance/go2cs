@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:17 UTC
+//     Generated on 2020 October 08 03:38:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using log = go.log_package;
 using net = go.net_package;
+using textproto = go.net.textproto_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
@@ -41,11 +41,12 @@ namespace net
                 this.MaxAge = default;
                 this.Secure = default;
                 this.HttpOnly = default;
+                this.SameSite = default;
                 this.Raw = default;
                 this.Unparsed = default;
             }
 
-            public Cookie(@string Name = default, @string Value = default, @string Path = default, @string Domain = default, time.Time Expires = default, @string RawExpires = default, long MaxAge = default, bool Secure = default, bool HttpOnly = default, @string Raw = default, slice<@string> Unparsed = default)
+            public Cookie(@string Name = default, @string Value = default, @string Path = default, @string Domain = default, time.Time Expires = default, @string RawExpires = default, long MaxAge = default, bool Secure = default, bool HttpOnly = default, SameSite SameSite = default, @string Raw = default, slice<@string> Unparsed = default)
             {
                 this.Name = Name;
                 this.Value = Value;
@@ -56,6 +57,7 @@ namespace net
                 this.MaxAge = MaxAge;
                 this.Secure = Secure;
                 this.HttpOnly = HttpOnly;
+                this.SameSite = SameSite;
                 this.Raw = Raw;
                 this.Unparsed = Unparsed;
             }
@@ -80,7 +82,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Cookie Cookie_cast(dynamic value)
         {
-            return new Cookie(value.Name, value.Value, value.Path, value.Domain, value.Expires, value.RawExpires, value.MaxAge, value.Secure, value.HttpOnly, value.Raw, value.Unparsed);
+            return new Cookie(value.Name, value.Value, value.Path, value.Domain, value.Expires, value.RawExpires, value.MaxAge, value.Secure, value.HttpOnly, value.SameSite, value.Raw, value.Unparsed);
         }
     }
 }}

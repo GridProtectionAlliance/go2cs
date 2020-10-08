@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:48 UTC
+//     Generated on 2020 October 08 04:36:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,11 +16,17 @@ using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
+using io = go.io_package;
+using math = go.math_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
+using strconv = go.strconv_package;
+using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
+using unicode = go.unicode_package;
 
 namespace go
 {

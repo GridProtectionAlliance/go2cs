@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:00 UTC
+//     Generated on 2020 October 08 03:40:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,14 +24,16 @@ using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using httptrace = go.net.http.httptrace_package;
+using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using os = go.os_package;
+using reflect = go.reflect_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
-using proxy = go.golang_org.x.net.proxy_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using httpproxy = go.golang.org.x.net.http.httpproxy_package;
 using go;
 
 namespace go {
@@ -48,13 +50,15 @@ namespace net
                 this.proxy = default;
                 this.scheme = default;
                 this.addr = default;
+                this.onlyH1 = default;
             }
 
-            public connectMethodKey(@string proxy = default, @string scheme = default, @string addr = default)
+            public connectMethodKey(@string proxy = default, @string scheme = default, @string addr = default, bool onlyH1 = default)
             {
                 this.proxy = proxy;
                 this.scheme = scheme;
                 this.addr = addr;
+                this.onlyH1 = onlyH1;
             }
 
             // Enable comparisons between nil and connectMethodKey struct
@@ -77,7 +81,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static connectMethodKey connectMethodKey_cast(dynamic value)
         {
-            return new connectMethodKey(value.proxy, value.scheme, value.addr);
+            return new connectMethodKey(value.proxy, value.scheme, value.addr, value.onlyH1);
         }
     }
 }}

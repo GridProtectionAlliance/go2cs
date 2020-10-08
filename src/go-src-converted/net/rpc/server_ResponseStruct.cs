@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:36 UTC
+//     Generated on 2020 October 08 03:43:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using static go.builtin;
 using bufio = go.bufio_package;
 using gob = go.encoding.gob_package;
 using errors = go.errors_package;
+using token = go.go.token_package;
 using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
@@ -23,8 +24,6 @@ using http = go.net.http_package;
 using reflect = go.reflect_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go;
 
 namespace go {

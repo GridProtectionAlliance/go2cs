@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// HTTP server. See RFC 2616.
+// HTTP server. See RFC 7230 through 7235.
 
-// package http -- go2cs converted at 2020 August 29 08:33:42 UTC
+// package http -- go2cs converted at 2020 October 08 03:40:31 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\server.go
 using bufio = go.bufio_package;
@@ -19,16 +19,18 @@ using log = go.log_package;
 using net = go.net_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
+using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
 
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using static go.builtin;
 using System.Threading;
 using System;
@@ -71,7 +73,7 @@ namespace net
         // an error, panic with the value ErrAbortHandler.
         public partial interface Handler
         {
-            void ServeHTTP(ResponseWriter _p0, ref Request _p0);
+            void ServeHTTP(ResponseWriter _p0, ptr<Request> _p0);
         }
 
         // A ResponseWriter interface is used by an HTTP handler to
@@ -87,7 +89,9 @@ namespace net
 // WriteHeader(http.StatusOK) before writing the data. If the Header
 // does not contain a Content-Type line, Write adds a Content-Type set
 // to the result of passing the initial 512 bytes of written data to
-// DetectContentType.
+// DetectContentType. Additionally, if the total size of all written
+// data is under a few KB and there are no Flush calls, the
+// Content-Length header is added automatically.
 //
 // Depending on the HTTP protocol version and the client, calling
 // Write or WriteHeader may prevent future reads on the
@@ -141,7 +145,7 @@ namespace net
         // should always test for this ability at runtime.
         public partial interface Hijacker
         {
-            (net.Conn, ref bufio.ReadWriter, error) Hijack();
+            (net.Conn, ptr<bufio.ReadWriter>, error) Hijack();
         }
 
         // The CloseNotifier interface is implemented by ResponseWriters which
@@ -149,6 +153,9 @@ namespace net
         //
         // This mechanism can be used to cancel long operations on the server
         // if the client has disconnected before the response is ready.
+        //
+        // Deprecated: the CloseNotifier interface predates Go's context package.
+        // New code should use Request.Context instead.
         public partial interface CloseNotifier
         {
             channel<bool> CloseNotify();
@@ -156,10 +163,10 @@ namespace net
 
  
         // ServerContextKey is a context key. It can be used in HTTP
-        // handlers with context.WithValue to access the server that
+        // handlers with Context.Value to access the server that
         // started the handler. The associated value will be of
         // type *Server.
-        public static contextKey ServerContextKey = ref new contextKey("http-server");        public static contextKey LocalAddrContextKey = ref new contextKey("local-addr");
+        public static ptr<contextKey> ServerContextKey = addr(new contextKey("http-server"));        public static ptr<contextKey> LocalAddrContextKey = addr(new contextKey("local-addr"));
 
         // A conn represents the server side of an HTTP connection.
         private partial struct conn
@@ -187,29 +194,34 @@ namespace net
             public @string lastMethod;
             public atomic.Value curReq; // of *response (which has a Request in it)
 
-            public atomic.Value curState; // of ConnState
-
-// mu guards hijackedv
             public sync.Mutex mu; // hijackedv is whether this connection has been hijacked
 // by a Handler with the Hijacker interface.
 // It is guarded by mu.
             public bool hijackedv;
         }
 
-        private static bool hijacked(this ref conn _c) => func(_c, (ref conn c, Defer defer, Panic _, Recover __) =>
+        private static bool hijacked(this ptr<conn> _addr_c) => func((defer, _, __) =>
         {
+            ref conn c = ref _addr_c.val;
+
             c.mu.Lock();
             defer(c.mu.Unlock());
             return c.hijackedv;
         });
 
         // c.mu must be held.
-        private static (net.Conn, ref bufio.ReadWriter, error) hijackLocked(this ref conn c)
+        private static (net.Conn, ptr<bufio.ReadWriter>, error) hijackLocked(this ptr<conn> _addr_c)
         {
+            net.Conn rwc = default;
+            ptr<bufio.ReadWriter> buf = default!;
+            error err = default!;
+            ref conn c = ref _addr_c.val;
+
             if (c.hijackedv)
             {
-                return (null, null, ErrHijacked);
+                return (null, _addr_null!, error.As(ErrHijacked)!);
             }
+
             c.r.abortPendingRead();
 
             c.hijackedv = true;
@@ -224,18 +236,21 @@ namespace net
 
                     if (err != null)
                     {
-                        return (null, null, fmt.Errorf("unexpected Peek failure reading buffered byte: %v", err));
+                        return (null, _addr_null!, error.As(fmt.Errorf("unexpected Peek failure reading buffered byte: %v", err))!);
                     }
 
                 }
+
             }
+
             c.setState(rwc, StateHijacked);
-            return;
+            return ;
+
         }
 
         // This should be >= 512 bytes for DetectContentType,
         // but otherwise it's somewhat arbitrary.
-        private static readonly long bufferBeforeChunkingSize = 2048L;
+        private static readonly long bufferBeforeChunkingSize = (long)2048L;
 
         // chunkWriter writes to a response's conn buffer, and is the writer
         // wrapped by the response.bufw buffered writer.
@@ -260,7 +275,7 @@ namespace net
         private partial struct chunkWriter
         {
             public ptr<response> res; // header is either nil or a deep clone of res.handlerHeader
-// at the time of res.WriteHeader, if res.WriteHeader is
+// at the time of res.writeHeader, if res.writeHeader is
 // called and extra buffering is being done to calculate
 // Content-Type and/or Content-Length.
             public Header header; // wroteHeader tells whether the header's been written to "the
@@ -273,53 +288,72 @@ namespace net
 
         private static slice<byte> crlf = (slice<byte>)"\r\n";        private static slice<byte> colonSpace = (slice<byte>)": ";
 
-        private static (long, error) Write(this ref chunkWriter cw, slice<byte> p)
+        private static (long, error) Write(this ptr<chunkWriter> _addr_cw, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref chunkWriter cw = ref _addr_cw.val;
+
             if (!cw.wroteHeader)
             {
                 cw.writeHeader(p);
             }
+
             if (cw.res.req.Method == "HEAD")
             { 
                 // Eat writes.
-                return (len(p), null);
+                return (len(p), error.As(null!)!);
+
             }
+
             if (cw.chunking)
             {
                 _, err = fmt.Fprintf(cw.res.conn.bufw, "%x\r\n", len(p));
                 if (err != null)
                 {
                     cw.res.conn.rwc.Close();
-                    return;
+                    return ;
                 }
+
             }
+
             n, err = cw.res.conn.bufw.Write(p);
             if (cw.chunking && err == null)
             {
                 _, err = cw.res.conn.bufw.Write(crlf);
             }
+
             if (err != null)
             {
                 cw.res.conn.rwc.Close();
             }
-            return;
+
+            return ;
+
         }
 
-        private static void flush(this ref chunkWriter cw)
+        private static void flush(this ptr<chunkWriter> _addr_cw)
         {
+            ref chunkWriter cw = ref _addr_cw.val;
+
             if (!cw.wroteHeader)
             {
                 cw.writeHeader(null);
             }
+
             cw.res.conn.bufw.Flush();
+
         }
 
-        private static void close(this ref chunkWriter cw)
+        private static void close(this ptr<chunkWriter> _addr_cw)
         {
+            ref chunkWriter cw = ref _addr_cw.val;
+
             if (!cw.wroteHeader)
             {
                 cw.writeHeader(null);
             }
+
             if (cw.chunking)
             {
                 var bw = cw.res.conn.bufw; // conn's bufio writer
@@ -339,7 +373,9 @@ namespace net
                 // final blank line after the trailers (whether
                 // present or not)
                 bw.WriteString("\r\n");
+
             }
+
         }
 
         // A response represents the server side of an HTTP response.
@@ -354,6 +390,15 @@ namespace net
             public bool wants10KeepAlive; // HTTP/1.0 w/ Connection "keep-alive"
             public bool wantsClose; // HTTP request has Connection "close"
 
+// canWriteContinue is a boolean value accessed as an atomic int32
+// that says whether or not a 100 Continue header can be written
+// to the connection.
+// writeContinueMu must be held while writing the header.
+// These two fields together synchronize the body reader
+// (the expectContinueReader, which wants to write 100 Continue)
+// against the main writer.
+            public atomicBool canWriteContinue;
+            public sync.Mutex writeContinueMu;
             public ptr<bufio.Writer> w; // buffers output in chunks to chunkWriter
             public chunkWriter cw; // handlerHeader is the Header that Handlers get access to,
 // which may be retained and mutated even after WriteHeader.
@@ -406,7 +451,7 @@ namespace net
         // is preferred:
         //    https://golang.org/pkg/net/http/#ResponseWriter
         //    https://golang.org/pkg/net/http/#example_ResponseWriter_trailers
-        public static readonly @string TrailerPrefix = "Trailer:";
+        public static readonly @string TrailerPrefix = (@string)"Trailer:";
 
         // finalTrailers is called after the Handler exits and returns a non-nil
         // value if the Handler set any trailers.
@@ -414,8 +459,10 @@ namespace net
 
         // finalTrailers is called after the Handler exits and returns a non-nil
         // value if the Handler set any trailers.
-        private static Header finalTrailers(this ref response w)
+        private static Header finalTrailers(this ptr<response> _addr_w)
         {
+            ref response w = ref _addr_w.val;
+
             Header t = default;
             {
                 var k__prev1 = k;
@@ -430,8 +477,11 @@ namespace net
                         {
                             t = make(Header);
                         }
+
                         t[strings.TrimPrefix(k, TrailerPrefix)] = vv;
+
                     }
+
                 }
 
                 k = k__prev1;
@@ -447,69 +497,83 @@ namespace net
                     {
                         t = make(Header);
                     }
+
                     foreach (var (_, v) in w.handlerHeader[k])
                     {
                         t.Add(k, v);
                     }
+
                 }
 
                 k = k__prev1;
             }
 
             return t;
+
         }
 
         private partial struct atomicBool // : int
         {
         }
 
-        private static bool isSet(this ref atomicBool b)
+        private static bool isSet(this ptr<atomicBool> _addr_b)
         {
-            return atomic.LoadInt32((int32.Value)(b)) != 0L;
-        }
-        private static void setTrue(this ref atomicBool b)
-        {
-            atomic.StoreInt32((int32.Value)(b), 1L);
+            ref atomicBool b = ref _addr_b.val;
 
+            return atomic.LoadInt32((int32.val)(b)) != 0L;
+        }
+        private static void setTrue(this ptr<atomicBool> _addr_b)
+        {
+            ref atomicBool b = ref _addr_b.val;
+
+            atomic.StoreInt32((int32.val)(b), 1L);
+        }
+        private static void setFalse(this ptr<atomicBool> _addr_b)
+        {
+            ref atomicBool b = ref _addr_b.val;
+
+            atomic.StoreInt32((int32.val)(b), 0L);
         }
 
         // declareTrailer is called for each Trailer header when the
         // response header is written. It notes that a header will need to be
         // written in the trailers at the end of the response.
-        private static void declareTrailer(this ref response w, @string k)
+        private static void declareTrailer(this ptr<response> _addr_w, @string k)
         {
+            ref response w = ref _addr_w.val;
+
             k = CanonicalHeaderKey(k);
-            switch (k)
-            {
-                case "Transfer-Encoding": 
-                    // Forbidden by RFC 2616 14.40.
+            if (!httpguts.ValidTrailerHeader(k))
+            { 
+                // Forbidden by RFC 7230, section 4.1.2
+                return ;
 
-                case "Content-Length": 
-                    // Forbidden by RFC 2616 14.40.
-
-                case "Trailer": 
-                    // Forbidden by RFC 2616 14.40.
-                    return;
-                    break;
             }
+
             w.trailers = append(w.trailers, k);
+
         }
 
         // requestTooLarge is called by maxBytesReader when too much input has
         // been read from the client.
-        private static void requestTooLarge(this ref response w)
+        private static void requestTooLarge(this ptr<response> _addr_w)
         {
+            ref response w = ref _addr_w.val;
+
             w.closeAfterReply = true;
             w.requestBodyLimitHit = true;
             if (!w.wroteHeader)
             {
                 w.Header().Set("Connection", "close");
             }
+
         }
 
         // needsSniff reports whether a Content-Type still needs to be sniffed.
-        private static bool needsSniff(this ref response w)
+        private static bool needsSniff(this ptr<response> _addr_w)
         {
+            ref response w = ref _addr_w.val;
+
             var (_, haveType) = w.handlerHeader["Content-Type"];
             return !w.cw.wroteHeader && !haveType && w.written < sniffLen;
         }
@@ -523,32 +587,41 @@ namespace net
 
         private static (bool, error) srcIsRegularFile(io.Reader src)
         {
+            bool isRegular = default;
+            error err = default!;
+
             switch (src.type())
             {
-                case ref os.File v:
+                case ptr<os.File> v:
                     var (fi, err) = v.Stat();
                     if (err != null)
                     {
-                        return (false, err);
+                        return (false, error.As(err)!);
                     }
-                    return (fi.Mode().IsRegular(), null);
+
+                    return (fi.Mode().IsRegular(), error.As(null!)!);
                     break;
-                case ref io.LimitedReader v:
+                case ptr<io.LimitedReader> v:
                     return srcIsRegularFile(v.R);
                     break;
                 default:
                 {
                     var v = src.type();
-                    return;
+                    return ;
                     break;
                 }
             }
+
         }
 
         // ReadFrom is here to optimize copying from an *os.File regular file
         // to a *net.TCPConn with sendfile.
-        private static (long, error) ReadFrom(this ref response _w, io.Reader src) => func(_w, (ref response w, Defer defer, Panic _, Recover __) =>
-        { 
+        private static (long, error) ReadFrom(this ptr<response> _addr_w, io.Reader src) => func((defer, _, __) =>
+        {
+            long n = default;
+            error err = default!;
+            ref response w = ref _addr_w.val;
+ 
             // Our underlying w.conn.rwc is usually a *TCPConn (with its
             // own ReadFrom method). If not, or if our src isn't a regular
             // file, just fall back to the normal copy method.
@@ -556,13 +629,14 @@ namespace net
             var (regFile, err) = srcIsRegularFile(src);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             if (!ok || !regFile)
             {
-                ref slice<byte> bufp = copyBufPool.Get()._<ref slice<byte>>();
+                ptr<slice<byte>> bufp = copyBufPool.Get()._<ptr<slice<byte>>>();
                 defer(copyBufPool.Put(bufp));
-                return io.CopyBuffer(new writerOnly(w), src, bufp.Value);
+                return io.CopyBuffer(new writerOnly(w), src, bufp.val);
             } 
 
             // sendfile path:
@@ -570,15 +644,18 @@ namespace net
             {
                 w.WriteHeader(StatusOK);
             }
+
             if (w.needsSniff())
             {
                 var (n0, err) = io.Copy(new writerOnly(w), io.LimitReader(src, sniffLen));
                 n += n0;
                 if (err != null)
                 {
-                    return (n, err);
+                    return (n, error.As(err)!);
                 }
+
             }
+
             w.w.Flush(); // get rid of any previous writes
             w.cw.flush(); // make sure Header is written; flush data to rwc
 
@@ -588,33 +665,40 @@ namespace net
                 (n0, err) = rf.ReadFrom(src);
                 n += n0;
                 w.written += n0;
-                return (n, err);
+                return (n, error.As(err)!);
             }
+
             (n0, err) = io.Copy(new writerOnly(w), src);
             n += n0;
-            return (n, err);
+            return (n, error.As(err)!);
+
         });
 
         // debugServerConnections controls whether all server connections are wrapped
         // with a verbose logging wrapper.
-        private static readonly var debugServerConnections = false;
+        private static readonly var debugServerConnections = (var)false;
 
         // Create new connection from rwc.
 
 
         // Create new connection from rwc.
-        private static ref conn newConn(this ref Server srv, net.Conn rwc)
+        private static ptr<conn> newConn(this ptr<Server> _addr_srv, net.Conn rwc)
         {
-            conn c = ref new conn(server:srv,rwc:rwc,);
+            ref Server srv = ref _addr_srv.val;
+
+            ptr<conn> c = addr(new conn(server:srv,rwc:rwc,));
             if (debugServerConnections)
             {
                 c.rwc = newLoggingConn("server", c.rwc);
             }
-            return c;
+
+            return _addr_c!;
+
         }
 
         private partial struct readResult
         {
+            public incomparable _;
             public long n;
             public error err;
             public byte b; // byte read, if n == 1
@@ -637,50 +721,80 @@ namespace net
             public long remain; // bytes remaining
         }
 
-        private static void @lock(this ref connReader cr)
+        private static void @lock(this ptr<connReader> _addr_cr)
         {
+            ref connReader cr = ref _addr_cr.val;
+
             cr.mu.Lock();
             if (cr.cond == null)
             {
-                cr.cond = sync.NewCond(ref cr.mu);
+                cr.cond = sync.NewCond(_addr_cr.mu);
             }
+
         }
 
-        private static void unlock(this ref connReader cr)
+        private static void unlock(this ptr<connReader> _addr_cr)
         {
+            ref connReader cr = ref _addr_cr.val;
+
             cr.mu.Unlock();
-
         }
 
-        private static void startBackgroundRead(this ref connReader _cr) => func(_cr, (ref connReader cr, Defer defer, Panic panic, Recover _) =>
+        private static void startBackgroundRead(this ptr<connReader> _addr_cr) => func((defer, panic, _) =>
         {
+            ref connReader cr = ref _addr_cr.val;
+
             cr.@lock();
             defer(cr.unlock());
             if (cr.inRead)
             {
                 panic("invalid concurrent Body.Read call");
             }
+
             if (cr.hasByte)
             {
-                return;
+                return ;
             }
+
             cr.inRead = true;
             cr.conn.rwc.SetReadDeadline(new time.Time());
             go_(() => cr.backgroundRead());
+
         });
 
-        private static void backgroundRead(this ref connReader cr)
+        private static void backgroundRead(this ptr<connReader> _addr_cr)
         {
+            ref connReader cr = ref _addr_cr.val;
+
             var (n, err) = cr.conn.rwc.Read(cr.byteBuf[..]);
             cr.@lock();
             if (n == 1L)
             {
                 cr.hasByte = true; 
-                // We were at EOF already (since we wouldn't be in a
-                // background read otherwise), so this is a pipelined
-                // HTTP request.
-                cr.closeNotifyFromPipelinedRequest();
+                // We were past the end of the previous request's body already
+                // (since we wouldn't be in a background read otherwise), so
+                // this is a pipelined HTTP request. Prior to Go 1.11 we used to
+                // send on the CloseNotify channel and cancel the context here,
+                // but the behavior was documented as only "may", and we only
+                // did that because that's how CloseNotify accidentally behaved
+                // in very early Go releases prior to context support. Once we
+                // added context support, people used a Handler's
+                // Request.Context() and passed it along. Having that context
+                // cancel on pipelined HTTP requests caused problems.
+                // Fortunately, almost nothing uses HTTP/1.x pipelining.
+                // Unfortunately, apt-get does, or sometimes does.
+                // New Go 1.11 behavior: don't fire CloseNotify or cancel
+                // contexts on pipelined requests. Shouldn't affect people, but
+                // fixes cases like Issue 23921. This does mean that a client
+                // closing their TCP connection after sending a pipelined
+                // request won't cancel the context, but we'll catch that on any
+                // write failure (in checkConnErrorWriter.Write).
+                // If the server never writes, yes, there are still contrived
+                // server & client behaviors where this fails to ever cancel the
+                // context, but that's kinda why HTTP/1.x pipelining died
+                // anyway.
             }
+
             {
                 net.Error (ne, ok) = err._<net.Error>();
 
@@ -694,21 +808,27 @@ namespace net
                     cr.handleReadError(err);
                 }
 
+
             }
+
             cr.aborted = false;
             cr.inRead = false;
             cr.unlock();
             cr.cond.Broadcast();
+
         }
 
-        private static void abortPendingRead(this ref connReader _cr) => func(_cr, (ref connReader cr, Defer defer, Panic _, Recover __) =>
+        private static void abortPendingRead(this ptr<connReader> _addr_cr) => func((defer, _, __) =>
         {
+            ref connReader cr = ref _addr_cr.val;
+
             cr.@lock();
             defer(cr.unlock());
             if (!cr.inRead)
             {
-                return;
+                return ;
             }
+
             cr.aborted = true;
             cr.conn.rwc.SetReadDeadline(aLongTimeAgo);
             while (cr.inRead)
@@ -717,59 +837,65 @@ namespace net
             }
 
             cr.conn.rwc.SetReadDeadline(new time.Time());
+
         });
 
-        private static void setReadLimit(this ref connReader cr, long remain)
+        private static void setReadLimit(this ptr<connReader> _addr_cr, long remain)
         {
+            ref connReader cr = ref _addr_cr.val;
+
             cr.remain = remain;
-
         }
-        private static void setInfiniteReadLimit(this ref connReader cr)
+        private static void setInfiniteReadLimit(this ptr<connReader> _addr_cr)
         {
+            ref connReader cr = ref _addr_cr.val;
+
             cr.remain = maxInt64;
-
         }
-        private static bool hitReadLimit(this ref connReader cr)
+        private static bool hitReadLimit(this ptr<connReader> _addr_cr)
         {
+            ref connReader cr = ref _addr_cr.val;
+
             return cr.remain <= 0L;
         }
 
-        // may be called from multiple goroutines.
-        private static void handleReadError(this ref connReader cr, error err)
+        // handleReadError is called whenever a Read from the client returns a
+        // non-nil error.
+        //
+        // The provided non-nil err is almost always io.EOF or a "use of
+        // closed network connection". In any case, the error is not
+        // particularly interesting, except perhaps for debugging during
+        // development. Any error means the connection is dead and we should
+        // down its context.
+        //
+        // It may be called from multiple goroutines.
+        private static void handleReadError(this ptr<connReader> _addr_cr, error _)
         {
+            ref connReader cr = ref _addr_cr.val;
+
             cr.conn.cancelCtx();
             cr.closeNotify();
         }
 
-        // closeNotifyFromPipelinedRequest simply calls closeNotify.
-        //
-        // This method wrapper is here for documentation. The callers are the
-        // cases where we send on the closenotify channel because of a
-        // pipelined HTTP request, per the previous Go behavior and
-        // documentation (that this "MAY" happen).
-        //
-        // TODO: consider changing this behavior and making context
-        // cancelation and closenotify work the same.
-        private static void closeNotifyFromPipelinedRequest(this ref connReader cr)
-        {
-            cr.closeNotify();
-        }
-
         // may be called from multiple goroutines.
-        private static void closeNotify(this ref connReader cr)
+        private static void closeNotify(this ptr<connReader> _addr_cr)
         {
-            ref response (res, _) = cr.conn.curReq.Load()._<ref response>();
-            if (res != null)
+            ref connReader cr = ref _addr_cr.val;
+
+            ptr<response> (res, _) = cr.conn.curReq.Load()._<ptr<response>>();
+            if (res != null && atomic.CompareAndSwapInt32(_addr_res.didCloseNotify, 0L, 1L))
             {
-                if (atomic.CompareAndSwapInt32(ref res.didCloseNotify, 0L, 1L))
-                {
-                    res.closeNotifyCh.Send(true);
-                }
+                res.closeNotifyCh.Send(true);
             }
+
         }
 
-        private static (long, error) Read(this ref connReader _cr, slice<byte> p) => func(_cr, (ref connReader cr, Defer _, Panic panic, Recover __) =>
+        private static (long, error) Read(this ptr<connReader> _addr_cr, slice<byte> p) => func((_, panic, __) =>
         {
+            long n = default;
+            error err = default!;
+            ref connReader cr = ref _addr_cr.val;
+
             cr.@lock();
             if (cr.inRead)
             {
@@ -778,29 +904,36 @@ namespace net
                 {
                     panic("invalid Body.Read call. After hijacked, the original Request must not be used");
                 }
+
                 panic("invalid concurrent Body.Read call");
+
             }
+
             if (cr.hitReadLimit())
             {
                 cr.unlock();
-                return (0L, io.EOF);
+                return (0L, error.As(io.EOF)!);
             }
+
             if (len(p) == 0L)
             {
                 cr.unlock();
-                return (0L, null);
+                return (0L, error.As(null!)!);
             }
+
             if (int64(len(p)) > cr.remain)
             {
                 p = p[..cr.remain];
             }
+
             if (cr.hasByte)
             {
                 p[0L] = cr.byteBuf[0L];
                 cr.hasByte = false;
                 cr.unlock();
-                return (1L, null);
+                return (1L, error.As(null!)!);
             }
+
             cr.inRead = true;
             cr.unlock();
             n, err = cr.conn.rwc.Read(p);
@@ -811,41 +944,44 @@ namespace net
             {
                 cr.handleReadError(err);
             }
+
             cr.remain -= int64(n);
             cr.unlock();
 
             cr.cond.Broadcast();
-            return (n, err);
+            return (n, error.As(err)!);
+
         });
 
         private static sync.Pool bufioReaderPool = default;        private static sync.Pool bufioWriter2kPool = default;        private static sync.Pool bufioWriter4kPool = default;
 
         private static sync.Pool copyBufPool = new sync.Pool(New:func()interface{}{b:=make([]byte,32*1024)return&b},);
 
-        private static ref sync.Pool bufioWriterPool(long size)
+        private static ptr<sync.Pool> bufioWriterPool(long size)
         {
             switch (size)
             {
                 case 2L << (int)(10L): 
-                    return ref bufioWriter2kPool;
+                    return _addr__addr_bufioWriter2kPool!;
                     break;
                 case 4L << (int)(10L): 
-                    return ref bufioWriter4kPool;
+                    return _addr__addr_bufioWriter4kPool!;
                     break;
             }
-            return null;
+            return _addr_null!;
+
         }
 
-        private static ref bufio.Reader newBufioReader(io.Reader r)
+        private static ptr<bufio.Reader> newBufioReader(io.Reader r)
         {
             {
                 var v = bufioReaderPool.Get();
 
                 if (v != null)
                 {
-                    ref bufio.Reader br = v._<ref bufio.Reader>();
+                    ptr<bufio.Reader> br = v._<ptr<bufio.Reader>>();
                     br.Reset(r);
-                    return br;
+                    return _addr_br!;
                 } 
                 // Note: if this reader size is ever changed, update
                 // TestHandlerBodyClose's assumptions.
@@ -853,16 +989,19 @@ namespace net
             } 
             // Note: if this reader size is ever changed, update
             // TestHandlerBodyClose's assumptions.
-            return bufio.NewReader(r);
+            return _addr_bufio.NewReader(r)!;
+
         }
 
-        private static void putBufioReader(ref bufio.Reader br)
+        private static void putBufioReader(ptr<bufio.Reader> _addr_br)
         {
+            ref bufio.Reader br = ref _addr_br.val;
+
             br.Reset(null);
             bufioReaderPool.Put(br);
         }
 
-        private static ref bufio.Writer newBufioWriterSize(io.Writer w, long size)
+        private static ptr<bufio.Writer> newBufioWriterSize(io.Writer w, long size)
         {
             var pool = bufioWriterPool(size);
             if (pool != null)
@@ -872,18 +1011,23 @@ namespace net
 
                     if (v != null)
                     {
-                        ref bufio.Writer bw = v._<ref bufio.Writer>();
+                        ptr<bufio.Writer> bw = v._<ptr<bufio.Writer>>();
                         bw.Reset(w);
-                        return bw;
+                        return _addr_bw!;
                     }
 
                 }
+
             }
-            return bufio.NewWriterSize(w, size);
+
+            return _addr_bufio.NewWriterSize(w, size)!;
+
         }
 
-        private static void putBufioWriter(ref bufio.Writer bw)
+        private static void putBufioWriter(ptr<bufio.Writer> _addr_bw)
         {
+            ref bufio.Writer bw = ref _addr_bw.val;
+
             bw.Reset(null);
             {
                 var pool = bufioWriterPool(bw.Available());
@@ -894,26 +1038,33 @@ namespace net
                 }
 
             }
+
         }
 
         // DefaultMaxHeaderBytes is the maximum permitted size of the headers
         // in an HTTP request.
         // This can be overridden by setting Server.MaxHeaderBytes.
-        public static readonly long DefaultMaxHeaderBytes = 1L << (int)(20L); // 1 MB
+        public static readonly long DefaultMaxHeaderBytes = (long)1L << (int)(20L); // 1 MB
 
  // 1 MB
 
-        private static long maxHeaderBytes(this ref Server srv)
+        private static long maxHeaderBytes(this ptr<Server> _addr_srv)
         {
+            ref Server srv = ref _addr_srv.val;
+
             if (srv.MaxHeaderBytes > 0L)
             {
                 return srv.MaxHeaderBytes;
             }
+
             return DefaultMaxHeaderBytes;
+
         }
 
-        private static long initialReadLimitSize(this ref Server srv)
+        private static long initialReadLimitSize(this ptr<Server> _addr_srv)
         {
+            ref Server srv = ref _addr_srv.val;
+
             return int64(srv.maxHeaderBytes()) + 4096L; // bufio slop
         }
 
@@ -924,33 +1075,52 @@ namespace net
             public ptr<response> resp;
             public io.ReadCloser readCloser;
             public bool closed;
-            public bool sawEOF;
+            public atomicBool sawEOF;
         }
 
-        private static (long, error) Read(this ref expectContinueReader ecr, slice<byte> p)
+        private static (long, error) Read(this ptr<expectContinueReader> _addr_ecr, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref expectContinueReader ecr = ref _addr_ecr.val;
+
             if (ecr.closed)
             {
-                return (0L, ErrBodyReadAfterClose);
+                return (0L, error.As(ErrBodyReadAfterClose)!);
             }
-            if (!ecr.resp.wroteContinue && !ecr.resp.conn.hijacked())
+
+            var w = ecr.resp;
+            if (!w.wroteContinue && w.canWriteContinue.isSet() && !w.conn.hijacked())
             {
-                ecr.resp.wroteContinue = true;
-                ecr.resp.conn.bufw.WriteString("HTTP/1.1 100 Continue\r\n\r\n");
-                ecr.resp.conn.bufw.Flush();
+                w.wroteContinue = true;
+                w.writeContinueMu.Lock();
+                if (w.canWriteContinue.isSet())
+                {
+                    w.conn.bufw.WriteString("HTTP/1.1 100 Continue\r\n\r\n");
+                    w.conn.bufw.Flush();
+                    w.canWriteContinue.setFalse();
+                }
+
+                w.writeContinueMu.Unlock();
+
             }
+
             n, err = ecr.readCloser.Read(p);
             if (err == io.EOF)
             {
-                ecr.sawEOF = true;
+                ecr.sawEOF.setTrue();
             }
-            return;
+
+            return ;
+
         }
 
-        private static error Close(this ref expectContinueReader ecr)
+        private static error Close(this ptr<expectContinueReader> _addr_ecr)
         {
+            ref expectContinueReader ecr = ref _addr_ecr.val;
+
             ecr.closed = true;
-            return error.As(ecr.readCloser.Close());
+            return error.As(ecr.readCloser.Close())!;
         }
 
         // TimeFormat is the time format to use when generating times in HTTP
@@ -959,7 +1129,7 @@ namespace net
         // generate the correct format.
         //
         // For parsing this time format, see ParseTime.
-        public static readonly @string TimeFormat = "Mon, 02 Jan 2006 15:04:05 GMT";
+        public static readonly @string TimeFormat = (@string)"Mon, 02 Jan 2006 15:04:05 GMT";
 
         // appendTime is a non-allocating version of []byte(t.UTC().Format(TimeFormat))
 
@@ -967,9 +1137,9 @@ namespace net
         // appendTime is a non-allocating version of []byte(t.UTC().Format(TimeFormat))
         private static slice<byte> appendTime(slice<byte> b, time.Time t)
         {
-            const @string days = "SunMonTueWedThuFriSat";
+            const @string days = (@string)"SunMonTueWedThuFriSat";
 
-            const @string months = "JanFebMarAprMayJunJulAugSepOctNovDec";
+            const @string months = (@string)"JanFebMarAprMayJunJulAugSepOctNovDec";
 
 
 
@@ -985,12 +1155,17 @@ namespace net
         private static var errTooLarge = errors.New("http: request too large");
 
         // Read next request from connection.
-        private static (ref response, error) readRequest(this ref conn _c, context.Context ctx) => func(_c, (ref conn c, Defer defer, Panic _, Recover __) =>
+        private static (ptr<response>, error) readRequest(this ptr<conn> _addr_c, context.Context ctx) => func((defer, _, __) =>
         {
+            ptr<response> w = default!;
+            error err = default!;
+            ref conn c = ref _addr_c.val;
+
             if (c.hijacked())
             {
-                return (null, ErrHijacked);
+                return (_addr_null!, error.As(ErrHijacked)!);
             }
+
             time.Time wholeReqDeadline = default;            time.Time hdrDeadline = default;
             var t0 = time.Now();
             {
@@ -1006,6 +1181,7 @@ namespace net
                 d = d__prev1;
 
             }
+
             {
                 var d__prev1 = d;
 
@@ -1019,6 +1195,7 @@ namespace net
                 d = d__prev1;
 
             }
+
             c.rwc.SetReadDeadline(hdrDeadline);
             {
                 var d__prev1 = d;
@@ -1031,32 +1208,40 @@ namespace net
                     {
                         c.rwc.SetWriteDeadline(time.Now().Add(d));
                     }());
+
                 }
 
                 d = d__prev1;
 
             }
 
+
             c.r.setReadLimit(c.server.initialReadLimitSize());
             if (c.lastMethod == "POST")
             { 
-                // RFC 2616 section 4.1 tolerance for old buggy clients.
+                // RFC 7230 section 3 tolerance for old buggy clients.
                 var (peek, _) = c.bufr.Peek(4L); // ReadRequest will get err below
                 c.bufr.Discard(numLeadingCRorLF(peek));
+
             }
+
             var (req, err) = readRequest(c.bufr, keepHostHeader);
             if (err != null)
             {
                 if (c.r.hitReadLimit())
                 {
-                    return (null, errTooLarge);
+                    return (_addr_null!, error.As(errTooLarge)!);
                 }
-                return (null, err);
+
+                return (_addr_null!, error.As(err)!);
+
             }
-            if (!http1ServerSupportsRequest(req))
+
+            if (!http1ServerSupportsRequest(_addr_req))
             {
-                return (null, badRequestError("unsupported protocol version"));
+                return (_addr_null!, error.As(badRequestError("unsupported protocol version"))!);
             }
+
             c.lastMethod = req.Method;
             c.r.setInfiniteReadLimit();
 
@@ -1064,29 +1249,35 @@ namespace net
             var isH2Upgrade = req.isH2Upgrade();
             if (req.ProtoAtLeast(1L, 1L) && (!haveHost || len(hosts) == 0L) && !isH2Upgrade && req.Method != "CONNECT")
             {
-                return (null, badRequestError("missing required Host header"));
+                return (_addr_null!, error.As(badRequestError("missing required Host header"))!);
             }
+
             if (len(hosts) > 1L)
             {
-                return (null, badRequestError("too many Host headers"));
+                return (_addr_null!, error.As(badRequestError("too many Host headers"))!);
             }
-            if (len(hosts) == 1L && !httplex.ValidHostHeader(hosts[0L]))
+
+            if (len(hosts) == 1L && !httpguts.ValidHostHeader(hosts[0L]))
             {
-                return (null, badRequestError("malformed Host header"));
+                return (_addr_null!, error.As(badRequestError("malformed Host header"))!);
             }
+
             foreach (var (k, vv) in req.Header)
             {
-                if (!httplex.ValidHeaderFieldName(k))
+                if (!httpguts.ValidHeaderFieldName(k))
                 {
-                    return (null, badRequestError("invalid header name"));
+                    return (_addr_null!, error.As(badRequestError("invalid header name"))!);
                 }
+
                 foreach (var (_, v) in vv)
                 {
-                    if (!httplex.ValidHeaderFieldValue(v))
+                    if (!httpguts.ValidHeaderFieldValue(v))
                     {
-                        return (null, badRequestError("invalid header value"));
+                        return (_addr_null!, error.As(badRequestError("invalid header value"))!);
                     }
+
                 }
+
             }
             delete(req.Header, "Host");
 
@@ -1095,7 +1286,7 @@ namespace net
             req.RemoteAddr = c.remoteAddr;
             req.TLS = c.tlsState;
             {
-                ref body (body, ok) = req.Body._<ref body>();
+                ptr<body> (body, ok) = req.Body._<ptr<body>>();
 
                 if (ok)
                 {
@@ -1111,20 +1302,25 @@ namespace net
             {
                 c.rwc.SetReadDeadline(wholeReqDeadline);
             }
-            w = ref new response(conn:c,cancelCtx:cancelCtx,req:req,reqBody:req.Body,handlerHeader:make(Header),contentLength:-1,closeNotifyCh:make(chanbool,1),wants10KeepAlive:req.wantsHttp10KeepAlive(),wantsClose:req.wantsClose(),);
+
+            w = addr(new response(conn:c,cancelCtx:cancelCtx,req:req,reqBody:req.Body,handlerHeader:make(Header),contentLength:-1,closeNotifyCh:make(chanbool,1),wants10KeepAlive:req.wantsHttp10KeepAlive(),wantsClose:req.wantsClose(),));
             if (isH2Upgrade)
             {
                 w.closeAfterReply = true;
             }
+
             w.cw.res = w;
-            w.w = newBufioWriterSize(ref w.cw, bufferBeforeChunkingSize);
-            return (w, null);
+            w.w = newBufioWriterSize(_addr_w.cw, bufferBeforeChunkingSize);
+            return (_addr_w!, error.As(null!)!);
+
         });
 
         // http1ServerSupportsRequest reports whether Go's HTTP/1.x server
         // supports the given request.
-        private static bool http1ServerSupportsRequest(ref Request req)
+        private static bool http1ServerSupportsRequest(ptr<Request> _addr_req)
         {
+            ref Request req = ref _addr_req.val;
+
             if (req.ProtoMajor == 1L)
             {
                 return true;
@@ -1138,19 +1334,25 @@ namespace net
             // Reject HTTP/0.x, and all other HTTP/2+ requests (which
             // aren't encoded in ASCII anyway).
             return false;
+
         }
 
-        private static Header Header(this ref response w)
+        private static Header Header(this ptr<response> _addr_w)
         {
+            ref response w = ref _addr_w.val;
+
             if (w.cw.header == null && w.wroteHeader && !w.cw.wroteHeader)
             { 
                 // Accessing the header between logically writing it
                 // and physically writing it means we need to allocate
                 // a clone to snapshot the logically written state.
-                w.cw.header = w.handlerHeader.clone();
+                w.cw.header = w.handlerHeader.Clone();
+
             }
+
             w.calledHeader = true;
             return w.handlerHeader;
+
         }
 
         // maxPostHandlerReadBytes is the max number of Request.Body bytes not
@@ -1162,7 +1364,7 @@ namespace net
         // This number is approximately what a typical machine's TCP buffer
         // size is anyway.  (if we have the bytes on the machine, we might as
         // well read them)
-        private static readonly long maxPostHandlerReadBytes = 256L << (int)(10L);
+        private static readonly long maxPostHandlerReadBytes = (long)256L << (int)(10L);
 
 
 
@@ -1171,7 +1373,7 @@ namespace net
             // Issue 22880: require valid WriteHeader status codes.
             // For now we only enforce that it's three digits.
             // In the future we might block things over 599 (600 and above aren't defined
-            // at http://httpwg.org/specs/rfc7231.html#status.codes)
+            // at https://httpwg.org/specs/rfc7231.html#status.codes)
             // and we might block under 200 (once we have more mature 1xx support).
             // But for now any three digits.
             //
@@ -1183,28 +1385,63 @@ namespace net
             {
                 panic(fmt.Sprintf("invalid WriteHeader code %v", code));
             }
+
         });
 
-        private static void WriteHeader(this ref response w, long code)
+        // relevantCaller searches the call stack for the first function outside of net/http.
+        // The purpose of this function is to provide more helpful error messages.
+        private static runtime.Frame relevantCaller()
         {
+            var pc = make_slice<System.UIntPtr>(16L);
+            var n = runtime.Callers(1L, pc);
+            var frames = runtime.CallersFrames(pc[..n]);
+            runtime.Frame frame = default;
+            while (true)
+            {
+                var (frame, more) = frames.Next();
+                if (!strings.HasPrefix(frame.Function, "net/http."))
+                {
+                    return frame;
+                }
+
+                if (!more)
+                {
+                    break;
+                }
+
+            }
+
+            return frame;
+
+        }
+
+        private static void WriteHeader(this ptr<response> _addr_w, long code)
+        {
+            ref response w = ref _addr_w.val;
+
             if (w.conn.hijacked())
             {
-                w.conn.server.logf("http: response.WriteHeader on hijacked connection");
-                return;
+                var caller = relevantCaller();
+                w.conn.server.logf("http: response.WriteHeader on hijacked connection from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
+                return ;
             }
+
             if (w.wroteHeader)
             {
-                w.conn.server.logf("http: multiple response.WriteHeader calls");
-                return;
+                caller = relevantCaller();
+                w.conn.server.logf("http: superfluous response.WriteHeader call from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
+                return ;
             }
+
             checkWriteHeaderCode(code);
             w.wroteHeader = true;
             w.status = code;
 
             if (w.calledHeader && w.cw.header == null)
             {
-                w.cw.header = w.handlerHeader.clone();
+                w.cw.header = w.handlerHeader.Clone();
             }
+
             {
                 var cl = w.handlerHeader.get("Content-Length");
 
@@ -1220,9 +1457,11 @@ namespace net
                         w.conn.server.logf("http: invalid Content-Length of %q", cl);
                         w.handlerHeader.Del("Content-Length");
                     }
+
                 }
 
             }
+
         }
 
         // extraHeader is the set of headers sometimes added by chunkWriter.writeHeader.
@@ -1247,20 +1486,24 @@ namespace net
         // This method has a value receiver, despite the somewhat large size
         // of h, because it prevents an allocation. The escape analysis isn't
         // smart enough to realize this function doesn't mutate h.
-        private static void Write(this extraHeader h, ref bufio.Writer w)
+        private static void Write(this extraHeader h, ptr<bufio.Writer> _addr_w)
         {
+            ref bufio.Writer w = ref _addr_w.val;
+
             if (h.date != null)
             {
                 w.Write(headerDate);
                 w.Write(h.date);
                 w.Write(crlf);
             }
+
             if (h.contentLength != null)
             {
                 w.Write(headerContentLength);
                 w.Write(h.contentLength);
                 w.Write(crlf);
             }
+
             foreach (var (i, v) in new slice<@string>(new @string[] { h.contentType, h.connection, h.transferEncoding }))
             {
                 if (v != "")
@@ -1270,7 +1513,9 @@ namespace net
                     w.WriteString(v);
                     w.Write(crlf);
                 }
+
             }
+
         }
 
         // writeHeader finalizes the header sent to the client and writes it
@@ -1281,12 +1526,15 @@ namespace net
         // set explicitly. It's also used to set the Content-Length, if the
         // total body size was small and the handler has already finished
         // running.
-        private static void writeHeader(this ref chunkWriter cw, slice<byte> p)
+        private static void writeHeader(this ptr<chunkWriter> _addr_cw, slice<byte> p)
         {
+            ref chunkWriter cw = ref _addr_cw.val;
+
             if (cw.wroteHeader)
             {
-                return;
+                return ;
             }
+
             cw.wroteHeader = true;
 
             var w = cw.res;
@@ -1304,28 +1552,33 @@ namespace net
             {
                 header = w.handlerHeader;
             }
+
             map<@string, bool> excludeHeader = default;
             Action<@string> delHeader = key =>
             {
                 if (owned)
                 {
                     header.Del(key);
-                    return;
+                    return ;
                 }
+
                 {
                     var (_, ok) = header[key];
 
                     if (!ok)
                     {
-                        return;
+                        return ;
                     }
 
                 }
+
                 if (excludeHeader == null)
                 {
                     excludeHeader = make_map<@string, bool>();
                 }
+
                 excludeHeader[key] = true;
+
             }
 ;
             extraHeader setHeader = default; 
@@ -1344,9 +1597,12 @@ namespace net
                         {
                             excludeHeader = make_map<@string, bool>();
                         }
+
                         excludeHeader[k] = true;
                         trailers = true;
+
                     }
+
                 }
 
                 k = k__prev1;
@@ -1389,6 +1645,7 @@ namespace net
                 {
                     w.closeAfterReply = false;
                 }
+
             } 
 
             // Check for an explicit (and valid) Content-Length header.
@@ -1401,11 +1658,13 @@ namespace net
                 {
                     setHeader.connection = "keep-alive";
                 }
+
             }
             else if (!w.req.ProtoAtLeast(1L, 1L) || w.wantsClose)
             {
                 w.closeAfterReply = true;
             }
+
             if (header.get("Connection") == "close" || !keepAlivesEnabled)
             {
                 w.closeAfterReply = true;
@@ -1424,9 +1683,9 @@ namespace net
             // the body-following-the-timer or the subsequent request.
             // See Issue 11549.
             {
-                ref expectContinueReader (ecr, ok) = w.req.Body._<ref expectContinueReader>();
+                ptr<expectContinueReader> (ecr, ok) = w.req.Body._<ptr<expectContinueReader>>();
 
-                if (ok && !ecr.sawEOF)
+                if (ok && !ecr.sawEOF.isSet())
                 {
                     w.closeAfterReply = true;
                 } 
@@ -1456,13 +1715,14 @@ namespace net
 
                 switch (w.req.Body.type())
                 {
-                    case ref expectContinueReader bdy:
+                    case ptr<expectContinueReader> bdy:
                         if (bdy.resp.wroteContinue)
                         {
                             discard = true;
                         }
+
                         break;
-                    case ref body bdy:
+                    case ptr<body> bdy:
                         bdy.mu.Lock();
 
                         if (bdy.closed) 
@@ -1470,7 +1730,9 @@ namespace net
                             { 
                                 // Body was closed in handler with non-EOF error.
                                 w.closeAfterReply = true;
+
                             }
+
                         else if (bdy.unreadDataSizeLocked() >= maxPostHandlerReadBytes) 
                             tooBig = true;
                         else 
@@ -1500,28 +1762,39 @@ namespace net
                         {
                             w.closeAfterReply = true;
                         }
+
                     else 
                         // Some other kind of error occurred, like a read timeout, or
                         // corrupt chunked encoding. In any case, whatever remains
                         // on the wire must not be parsed as another HTTP request.
                         w.closeAfterReply = true;
-                                    }
+                    
+                }
+
                 if (tooBig)
                 {
                     w.requestTooLarge();
                     delHeader("Connection");
                     setHeader.connection = "close";
                 }
+
             }
+
             var code = w.status;
             if (bodyAllowedForStatus(code))
             { 
                 // If no content type, apply sniffing algorithm to body.
-                var (_, haveType) = header["Content-Type"];
-                if (!haveType && !hasTE && len(p) > 0L)
+                var (_, haveType) = header["Content-Type"]; 
+
+                // If the Content-Encoding was set and is non-blank,
+                // we shouldn't sniff the body. See Issue 31753.
+                var ce = header.Get("Content-Encoding");
+                var hasCE = len(ce) > 0L;
+                if (!hasCE && !haveType && !hasTE && len(p) > 0L)
                 {
                     setHeader.contentType = DetectContentType(p);
                 }
+
             }
             else
             {
@@ -1536,16 +1809,11 @@ namespace net
 
                     k = k__prev1;
                 }
-
             }
+
+            if (!header.has("Date"))
             {
-                (_, ok) = header["Date"];
-
-                if (!ok)
-                {
-                    setHeader.date = appendTime(cw.res.dateBuf[..0L], time.Now());
-                }
-
+                setHeader.date = appendTime(cw.res.dateBuf[..0L], time.Now());
             }
 
             if (hasCL && hasTE && te != "identity")
@@ -1555,7 +1823,9 @@ namespace net
                 w.conn.server.logf("http: WriteHeader called with both Transfer-Encoding of %q and a Content-Length of %d", te, w.contentLength);
                 delHeader("Content-Length");
                 hasCL = false;
+
             }
+
             if (w.req.Method == "HEAD" || !bodyAllowedForStatus(code))
             { 
                 // do nothing
@@ -1590,8 +1860,11 @@ namespace net
                     { 
                         // We will send the chunked Transfer-Encoding header later.
                         delHeader("Transfer-Encoding");
+
                     }
+
                 }
+
             }
             else
             { 
@@ -1607,10 +1880,12 @@ namespace net
             {
                 delHeader("Content-Length");
             }
+
             if (!w.req.ProtoAtLeast(1L, 0L))
             {
-                return;
+                return ;
             }
+
             if (w.closeAfterReply && (!keepAlivesEnabled || !hasToken(cw.header.get("Connection"), "close")))
             {
                 delHeader("Connection");
@@ -1618,27 +1893,32 @@ namespace net
                 {
                     setHeader.connection = "close";
                 }
+
             }
-            writeStatusLine(w.conn.bufw, w.req.ProtoAtLeast(1L, 1L), code, w.statusBuf[..]);
+
+            writeStatusLine(_addr_w.conn.bufw, w.req.ProtoAtLeast(1L, 1L), code, w.statusBuf[..]);
             cw.header.WriteSubset(w.conn.bufw, excludeHeader);
             setHeader.Write(w.conn.bufw);
             w.conn.bufw.Write(crlf);
+
         }
 
         // foreachHeaderElement splits v according to the "#rule" construction
-        // in RFC 2616 section 2.1 and calls fn for each non-empty element.
+        // in RFC 7230 section 7 and calls fn for each non-empty element.
         private static void foreachHeaderElement(@string v, Action<@string> fn)
         {
             v = textproto.TrimString(v);
             if (v == "")
             {
-                return;
+                return ;
             }
+
             if (!strings.Contains(v, ","))
             {
                 fn(v);
-                return;
+                return ;
             }
+
             foreach (var (_, f) in strings.Split(v, ","))
             {
                 f = textproto.TrimString(f);
@@ -1647,15 +1927,19 @@ namespace net
                 {
                     fn(f);
                 }
+
             }
+
         }
 
-        // writeStatusLine writes an HTTP/1.x Status-Line (RFC 2616 Section 6.1)
+        // writeStatusLine writes an HTTP/1.x Status-Line (RFC 7230 Section 3.1.2)
         // to bw. is11 is whether the HTTP request is HTTP/1.1. false means HTTP/1.0.
         // code is the response status code.
         // scratch is an optional scratch buffer. If it has at least capacity 3, it's used.
-        private static void writeStatusLine(ref bufio.Writer bw, bool is11, long code, slice<byte> scratch)
+        private static void writeStatusLine(ptr<bufio.Writer> _addr_bw, bool is11, long code, slice<byte> scratch)
         {
+            ref bufio.Writer bw = ref _addr_bw.val;
+
             if (is11)
             {
                 bw.WriteString("HTTP/1.1 ");
@@ -1664,6 +1948,7 @@ namespace net
             {
                 bw.WriteString("HTTP/1.0 ");
             }
+
             {
                 var (text, ok) = statusText[code];
 
@@ -1678,20 +1963,26 @@ namespace net
                 { 
                     // don't worry about performance
                     fmt.Fprintf(bw, "%03d status code %d\r\n", code, code);
+
                 }
 
             }
+
         }
 
         // bodyAllowed reports whether a Write is allowed for this response type.
         // It's illegal to call this before the header has been flushed.
-        private static bool bodyAllowed(this ref response _w) => func(_w, (ref response w, Defer _, Panic panic, Recover __) =>
+        private static bool bodyAllowed(this ptr<response> _addr_w) => func((_, panic, __) =>
         {
+            ref response w = ref _addr_w.val;
+
             if (!w.wroteHeader)
             {
                 panic("");
             }
+
             return bodyAllowedForStatus(w.status);
+
         });
 
         // The Life Of A Write is like this:
@@ -1728,44 +2019,76 @@ namespace net
         // threshold and nothing is in (2).  The answer might be mostly making
         // bufferBeforeChunkingSize smaller and having bufio's fast-paths deal
         // with this instead.
-        private static (long, error) Write(this ref response w, slice<byte> data)
+        private static (long, error) Write(this ptr<response> _addr_w, slice<byte> data)
         {
+            long n = default;
+            error err = default!;
+            ref response w = ref _addr_w.val;
+
             return w.write(len(data), data, "");
         }
 
-        private static (long, error) WriteString(this ref response w, @string data)
+        private static (long, error) WriteString(this ptr<response> _addr_w, @string data)
         {
+            long n = default;
+            error err = default!;
+            ref response w = ref _addr_w.val;
+
             return w.write(len(data), null, data);
         }
 
         // either dataB or dataS is non-zero.
-        private static (long, error) write(this ref response w, long lenData, slice<byte> dataB, @string dataS)
+        private static (long, error) write(this ptr<response> _addr_w, long lenData, slice<byte> dataB, @string dataS)
         {
+            long n = default;
+            error err = default!;
+            ref response w = ref _addr_w.val;
+
             if (w.conn.hijacked())
             {
                 if (lenData > 0L)
                 {
-                    w.conn.server.logf("http: response.Write on hijacked connection");
+                    var caller = relevantCaller();
+                    w.conn.server.logf("http: response.Write on hijacked connection from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
                 }
-                return (0L, ErrHijacked);
+
+                return (0L, error.As(ErrHijacked)!);
+
             }
+
+            if (w.canWriteContinue.isSet())
+            { 
+                // Body reader wants to write 100 Continue but hasn't yet.
+                // Tell it not to. The store must be done while holding the lock
+                // because the lock makes sure that there is not an active write
+                // this very moment.
+                w.writeContinueMu.Lock();
+                w.canWriteContinue.setFalse();
+                w.writeContinueMu.Unlock();
+
+            }
+
             if (!w.wroteHeader)
             {
                 w.WriteHeader(StatusOK);
             }
+
             if (lenData == 0L)
             {
-                return (0L, null);
+                return (0L, error.As(null!)!);
             }
+
             if (!w.bodyAllowed())
             {
-                return (0L, ErrBodyNotAllowed);
+                return (0L, error.As(ErrBodyNotAllowed)!);
             }
+
             w.written += int64(lenData); // ignoring errors, for errorKludge
             if (w.contentLength != -1L && w.written > w.contentLength)
             {
-                return (0L, ErrContentLength);
+                return (0L, error.As(ErrContentLength)!);
             }
+
             if (dataB != null)
             {
                 return w.w.Write(dataB);
@@ -1774,18 +2097,22 @@ namespace net
             {
                 return w.w.WriteString(dataS);
             }
+
         }
 
-        private static void finishRequest(this ref response w)
+        private static void finishRequest(this ptr<response> _addr_w)
         {
+            ref response w = ref _addr_w.val;
+
             w.handlerDone.setTrue();
 
             if (!w.wroteHeader)
             {
                 w.WriteHeader(StatusOK);
             }
+
             w.w.Flush();
-            putBufioWriter(w.w);
+            putBufioWriter(_addr_w.w);
             w.cw.close();
             w.conn.bufw.Flush();
 
@@ -1799,23 +2126,29 @@ namespace net
             {
                 w.req.MultipartForm.RemoveAll();
             }
+
         }
 
         // shouldReuseConnection reports whether the underlying TCP connection can be reused.
         // It must only be called after the handler is done executing.
-        private static bool shouldReuseConnection(this ref response w)
+        private static bool shouldReuseConnection(this ptr<response> _addr_w)
         {
+            ref response w = ref _addr_w.val;
+
             if (w.closeAfterReply)
             { 
                 // The request or something set while executing the
                 // handler indicated we shouldn't reuse this
                 // connection.
                 return false;
+
             }
+
             if (w.req.Method != "HEAD" && w.contentLength != -1L && w.bodyAllowed() && w.contentLength != w.written)
             { 
                 // Did not write enough. Avoid getting out of sync.
                 return false;
+
             } 
 
             // There was some error writing to the underlying connection
@@ -1824,51 +2157,68 @@ namespace net
             {
                 return false;
             }
+
             if (w.closedRequestBodyEarly())
             {
                 return false;
             }
+
             return true;
+
         }
 
-        private static bool closedRequestBodyEarly(this ref response w)
+        private static bool closedRequestBodyEarly(this ptr<response> _addr_w)
         {
-            ref body (body, ok) = w.req.Body._<ref body>();
+            ref response w = ref _addr_w.val;
+
+            ptr<body> (body, ok) = w.req.Body._<ptr<body>>();
             return ok && body.didEarlyClose();
         }
 
-        private static void Flush(this ref response w)
+        private static void Flush(this ptr<response> _addr_w)
         {
+            ref response w = ref _addr_w.val;
+
             if (!w.wroteHeader)
             {
                 w.WriteHeader(StatusOK);
             }
+
             w.w.Flush();
             w.cw.flush();
+
         }
 
-        private static void finalFlush(this ref conn c)
+        private static void finalFlush(this ptr<conn> _addr_c)
         {
+            ref conn c = ref _addr_c.val;
+
             if (c.bufr != null)
             { 
                 // Steal the bufio.Reader (~4KB worth of memory) and its associated
                 // reader for a future connection.
-                putBufioReader(c.bufr);
+                putBufioReader(_addr_c.bufr);
                 c.bufr = null;
+
             }
+
             if (c.bufw != null)
             {
                 c.bufw.Flush(); 
                 // Steal the bufio.Writer (~4KB worth of memory) and its associated
                 // writer for a future connection.
-                putBufioWriter(c.bufw);
+                putBufioWriter(_addr_c.bufw);
                 c.bufw = null;
+
             }
+
         }
 
         // Close the connection.
-        private static void close(this ref conn c)
+        private static void close(this ptr<conn> _addr_c)
         {
+            ref conn c = ref _addr_c.val;
+
             c.finalFlush();
             c.rwc.Close();
         }
@@ -1880,7 +2230,7 @@ namespace net
         // from closing a connection with known unread data.
         // This RST seems to occur mostly on BSD systems. (And Windows?)
         // This timeout is somewhat arbitrary (~latency around the planet).
-        private static readonly long rstAvoidanceDelay = 500L * time.Millisecond;
+        private static readonly long rstAvoidanceDelay = (long)500L * time.Millisecond;
 
 
 
@@ -1889,7 +2239,7 @@ namespace net
             error CloseWrite();
         }
 
-        private static closeWriter _ = closeWriter.As((net.TCPConn.Value)(null));
+        private static closeWriter _ = closeWriter.As((net.TCPConn.val)(null))!;
 
         // closeWrite flushes any outstanding data and sends a FIN packet (if
         // client is connected via TCP), signalling that we're done. We then
@@ -1897,11 +2247,13 @@ namespace net
         // subsequent RST.
         //
         // See https://golang.org/issue/3595
-        private static void closeWriteAndWait(this ref conn c)
+        private static void closeWriteAndWait(this ptr<conn> _addr_c)
         {
+            ref conn c = ref _addr_c.val;
+
             c.finalFlush();
             {
-                closeWriter (tcp, ok) = c.rwc._<closeWriter>();
+                closeWriter (tcp, ok) = closeWriter.As(c.rwc._<closeWriter>())!;
 
                 if (ok)
                 {
@@ -1909,14 +2261,15 @@ namespace net
                 }
 
             }
+
             time.Sleep(rstAvoidanceDelay);
+
         }
 
-        // validNPN reports whether the proto is not a blacklisted Next
-        // Protocol Negotiation protocol. Empty and built-in protocol types
-        // are blacklisted and can't be overridden with alternate
-        // implementations.
-        private static bool validNPN(@string proto)
+        // validNextProto reports whether the proto is a valid ALPN protocol name.
+        // Everything is valid except the empty string and built-in protocol types,
+        // so that those can't be overridden with alternate implementations.
+        private static bool validNextProto(@string proto)
         {
             switch (proto)
             {
@@ -1929,17 +2282,26 @@ namespace net
                     break;
             }
             return true;
+
         }
 
-        private static void setState(this ref conn c, net.Conn nc, ConnState state)
+        private static void setState(this ptr<conn> _addr_c, net.Conn nc, ConnState state) => func((_, panic, __) =>
         {
+            ref conn c = ref _addr_c.val;
+
             var srv = c.server;
 
             if (state == StateNew) 
                 srv.trackConn(c, true);
             else if (state == StateHijacked || state == StateClosed) 
                 srv.trackConn(c, false);
-                        c.curState.Store(connStateInterface[state]);
+                        if (state > 0xffUL || state < 0L)
+            {
+                panic("internal error");
+            }
+
+            var packedState = uint64(time.Now().Unix() << (int)(8L)) | uint64(state);
+            atomic.StoreUint64(_addr_c.curState.atomic, packedState);
             {
                 var hook = srv.ConnState;
 
@@ -1949,12 +2311,18 @@ namespace net
                 }
 
             }
+
+        });
+
+        private static (ConnState, long) getState(this ptr<conn> _addr_c)
+        {
+            ConnState state = default;
+            long unixSec = default;
+            ref conn c = ref _addr_c.val;
+
+            var packedState = atomic.LoadUint64(_addr_c.curState.atomic);
+            return (ConnState(packedState & 0xffUL), int64(packedState >> (int)(8L)));
         }
-
-        // connStateInterface is an array of the interface{} versions of
-        // ConnState values, so we can use them in atomic.Values later without
-        // paying the cost of shoving their integers in an interface{}.
-
 
         // badRequestError is a literal string (used by in the server in HTML,
         // unescaped) to tell the user why their request was bad. It should
@@ -1984,6 +2352,7 @@ namespace net
             {
                 return true;
             }
+
             {
                 net.Error (neterr, ok) = err._<net.Error>();
 
@@ -1993,8 +2362,9 @@ namespace net
                 }
 
             }
+
             {
-                ref net.OpError (oe, ok) = err._<ref net.OpError>();
+                ptr<net.OpError> (oe, ok) = err._<ptr<net.OpError>>();
 
                 if (ok && oe.Op == "read")
                 {
@@ -2002,12 +2372,16 @@ namespace net
                 }
 
             }
+
             return false;
+
         }
 
         // Serve a new connection.
-        private static void serve(this ref conn _c, context.Context ctx) => func(_c, (ref conn c, Defer defer, Panic _, Recover __) =>
+        private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((defer, _, __) =>
         {
+            ref conn c = ref _addr_c.val;
+
             c.remoteAddr = c.rwc.RemoteAddr().String();
             ctx = context.WithValue(ctx, LocalAddrContextKey, c.rwc.LocalAddr());
             defer(() =>
@@ -2019,7 +2393,7 @@ namespace net
 
                     if (err != null && err != ErrAbortHandler)
                     {
-                        const long size = 64L << (int)(10L);
+                        const long size = (long)64L << (int)(10L);
 
                         var buf = make_slice<byte>(size);
                         buf = buf[..runtime.Stack(buf, false)];
@@ -2029,15 +2403,17 @@ namespace net
                     err = err__prev1;
 
                 }
+
                 if (!c.hijacked())
                 {
                     c.close();
                     c.setState(c.rwc, StateClosed);
                 }
+
             }());
 
             {
-                ref tls.Conn (tlsConn, ok) = c.rwc._<ref tls.Conn>();
+                ptr<tls.Conn> (tlsConn, ok) = c.rwc._<ptr<tls.Conn>>();
 
                 if (ok)
                 {
@@ -2054,6 +2430,7 @@ namespace net
                         d = d__prev2;
 
                     }
+
                     {
                         var d__prev2 = d;
 
@@ -2067,41 +2444,62 @@ namespace net
                         d = d__prev2;
 
                     }
+
                     {
                         var err__prev2 = err;
 
                         err = tlsConn.Handshake();
 
                         if (err != null)
-                        {
+                        { 
+                            // If the handshake failed due to the client not speaking
+                            // TLS, assume they're speaking plaintext HTTP and write a
+                            // 400 response on the TLS conn's underlying net.Conn.
+                            {
+                                tls.RecordHeaderError (re, ok) = err._<tls.RecordHeaderError>();
+
+                                if (ok && re.Conn != null && tlsRecordHeaderLooksLikeHTTP(re.RecordHeader))
+                                {
+                                    io.WriteString(re.Conn, "HTTP/1.0 400 Bad Request\r\n\r\nClient sent an HTTP request to an HTTPS server.\n");
+                                    re.Conn.Close();
+                                    return ;
+                                }
+
+                            }
+
                             c.server.logf("http: TLS handshake error from %s: %v", c.rwc.RemoteAddr(), err);
-                            return;
+                            return ;
+
                         }
 
                         err = err__prev2;
 
                     }
+
                     c.tlsState = @new<tls.ConnectionState>();
-                    c.tlsState.Value = tlsConn.ConnectionState();
+                    c.tlsState.val = tlsConn.ConnectionState();
                     {
                         var proto = c.tlsState.NegotiatedProtocol;
 
-                        if (validNPN(proto))
+                        if (validNextProto(proto))
                         {
                             {
                                 var fn = c.server.TLSNextProto[proto];
 
                                 if (fn != null)
                                 {
-                                    initNPNRequest h = new initNPNRequest(tlsConn,serverHandler{c.server});
+                                    initALPNRequest h = new initALPNRequest(ctx,tlsConn,serverHandler{c.server});
                                     fn(c.server, tlsConn, h);
                                 }
 
                             }
-                            return;
+
+                            return ;
+
                         }
 
                     }
+
                 } 
 
                 // HTTP/1.x from here on.
@@ -2114,7 +2512,7 @@ namespace net
             c.cancelCtx = cancelCtx;
             defer(cancelCtx());
 
-            c.r = ref new connReader(conn:c);
+            c.r = addr(new connReader(conn:c));
             c.bufr = newBufioReader(c.r);
             c.bufw = newBufioWriterSize(new checkConnErrorWriter(c), 4L << (int)(10L));
 
@@ -2125,43 +2523,56 @@ namespace net
                 { 
                     // If we read any bytes off the wire, we're active.
                     c.setState(c.rwc, StateActive);
+
                 }
+
                 if (err != null)
                 {
-                    const @string errorHeaders = "\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n";
+                    const @string errorHeaders = (@string)"\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n";
 
 
 
-                    if (err == errTooLarge)
-                    { 
+
+                    if (err == errTooLarge) 
                         // Their HTTP client may or may not be
                         // able to read this if we're
                         // responding to them and hanging up
                         // while they're still writing their
                         // request. Undefined behavior.
-                        const @string publicErr = "431 Request Header Fields Too Large";
+                        const @string publicErr = (@string)"431 Request Header Fields Too Large";
 
                         fmt.Fprintf(c.rwc, "HTTP/1.1 " + publicErr + errorHeaders + publicErr);
                         c.closeWriteAndWait();
-                        return;
-                    }
-                    if (isCommonNetReadError(err))
-                    {
-                        return; // don't reply
-                    }
-                    @string publicErr = "400 Bad Request";
-                    {
-                        badRequestError (v, ok) = err._<badRequestError>();
+                        return ;
+                    else if (isUnsupportedTEError(err)) 
+                        // Respond as per RFC 7230 Section 3.3.1 which says,
+                        //      A server that receives a request message with a
+                        //      transfer coding it does not understand SHOULD
+                        //      respond with 501 (Unimplemented).
+                        var code = StatusNotImplemented; 
 
-                        if (ok)
+                        // We purposefully aren't echoing back the transfer-encoding's value,
+                        // so as to mitigate the risk of cross side scripting by an attacker.
+                        fmt.Fprintf(c.rwc, "HTTP/1.1 %d %s%sUnsupported transfer encoding", code, StatusText(code), errorHeaders);
+                        return ;
+                    else if (isCommonNetReadError(err)) 
+                        return ; // don't reply
+                    else 
+                        @string publicErr = "400 Bad Request";
                         {
-                            publicErr = publicErr + ": " + string(v);
+                            badRequestError (v, ok) = err._<badRequestError>();
+
+                            if (ok)
+                            {
+                                publicErr = publicErr + ": " + string(v);
+                            }
+
                         }
 
-                    }
 
-                    fmt.Fprintf(c.rwc, "HTTP/1.1 " + publicErr + errorHeaders + publicErr);
-                    return;
+                        fmt.Fprintf(c.rwc, "HTTP/1.1 " + publicErr + errorHeaders + publicErr);
+                        return ;
+                    
                 } 
 
                 // Expect 100 Continue support
@@ -2171,14 +2582,18 @@ namespace net
                     if (req.ProtoAtLeast(1L, 1L) && req.ContentLength != 0L)
                     { 
                         // Wrap the Body reader with one that replies on the connection
-                        req.Body = ref new expectContinueReader(readCloser:req.Body,resp:w);
+                        req.Body = addr(new expectContinueReader(readCloser:req.Body,resp:w));
+                        w.canWriteContinue.setTrue();
+
                     }
+
                 }
                 else if (req.Header.get("Expect") != "")
                 {
                     w.sendExpectationFailed();
-                    return;
+                    return ;
                 }
+
                 c.curReq.Store(w);
 
                 if (requestBodyRemains(req.Body))
@@ -2187,10 +2602,6 @@ namespace net
                 }
                 else
                 {
-                    if (w.conn.bufr.Buffered() > 0L)
-                    {
-                        w.conn.r.closeNotifyFromPipelinedRequest();
-                    }
                     w.conn.r.startBackgroundRead();
                 } 
 
@@ -2205,8 +2616,9 @@ namespace net
                 w.cancelCtx();
                 if (c.hijacked())
                 {
-                    return;
+                    return ;
                 }
+
                 w.finishRequest();
                 if (!w.shouldReuseConnection())
                 {
@@ -2214,10 +2626,13 @@ namespace net
                     {
                         c.closeWriteAndWait();
                     }
-                    return;
+
+                    return ;
+
                 }
+
                 c.setState(c.rwc, StateIdle);
-                c.curReq.Store((response.Value)(null));
+                c.curReq.Store((response.val)(null));
 
                 if (!w.conn.server.doKeepAlives())
                 { 
@@ -2225,8 +2640,10 @@ namespace net
                     // to the user without "Connection: close" and
                     // they might think they can send another
                     // request, but such is life with HTTP/1.1.
-                    return;
+                    return ;
+
                 }
+
                 {
                     var d__prev1 = d;
 
@@ -2242,24 +2659,30 @@ namespace net
 
                             if (err != null)
                             {
-                                return;
+                                return ;
                             }
 
                             err = err__prev2;
 
                         }
+
                     }
 
                     d = d__prev1;
 
                 }
+
                 c.rwc.SetReadDeadline(new time.Time());
+
             }
+
 
         });
 
-        private static void sendExpectationFailed(this ref response w)
-        { 
+        private static void sendExpectationFailed(this ptr<response> _addr_w)
+        {
+            ref response w = ref _addr_w.val;
+ 
             // TODO(bradfitz): let ServeHTTP handlers handle
             // requests with non-standard expectation[s]? Seems
             // theoretical at best, and doesn't fit into the
@@ -2267,28 +2690,36 @@ namespace net
             // make the ResponseWriter an optional
             // "ExpectReplier" interface or something.
             //
-            // For now we'll just obey RFC 2616 14.20 which says
-            // "If a server receives a request containing an
-            // Expect field that includes an expectation-
-            // extension that it does not support, it MUST
-            // respond with a 417 (Expectation Failed) status."
+            // For now we'll just obey RFC 7231 5.1.1 which says
+            // "A server that receives an Expect field-value other
+            // than 100-continue MAY respond with a 417 (Expectation
+            // Failed) status code to indicate that the unexpected
+            // expectation cannot be met."
             w.Header().Set("Connection", "close");
             w.WriteHeader(StatusExpectationFailed);
             w.finishRequest();
+
         }
 
         // Hijack implements the Hijacker.Hijack method. Our response is both a ResponseWriter
         // and a Hijacker.
-        private static (net.Conn, ref bufio.ReadWriter, error) Hijack(this ref response _w) => func(_w, (ref response w, Defer defer, Panic panic, Recover _) =>
+        private static (net.Conn, ptr<bufio.ReadWriter>, error) Hijack(this ptr<response> _addr_w) => func((defer, panic, _) =>
         {
+            net.Conn rwc = default;
+            ptr<bufio.ReadWriter> buf = default!;
+            error err = default!;
+            ref response w = ref _addr_w.val;
+
             if (w.handlerDone.isSet())
             {
                 panic("net/http: Hijack called after ServeHTTP finished");
             }
+
             if (w.wroteHeader)
             {
                 w.cw.flush();
             }
+
             var c = w.conn;
             c.mu.Lock();
             defer(c.mu.Unlock()); 
@@ -2298,29 +2729,35 @@ namespace net
             rwc, buf, err = c.hijackLocked();
             if (err == null)
             {
-                putBufioWriter(w.w);
+                putBufioWriter(_addr_w.w);
                 w.w = null;
             }
-            return (rwc, buf, err);
+
+            return (rwc, _addr_buf!, error.As(err)!);
+
         });
 
-        private static channel<bool> CloseNotify(this ref response _w) => func(_w, (ref response w, Defer _, Panic panic, Recover __) =>
+        private static channel<bool> CloseNotify(this ptr<response> _addr_w) => func((_, panic, __) =>
         {
+            ref response w = ref _addr_w.val;
+
             if (w.handlerDone.isSet())
             {
                 panic("net/http: CloseNotify called after ServeHTTP finished");
             }
+
             return w.closeNotifyCh;
+
         });
 
         private static void registerOnHitEOF(io.ReadCloser rc, Action fn) => func((_, panic, __) =>
         {
             switch (rc.type())
             {
-                case ref expectContinueReader v:
+                case ptr<expectContinueReader> v:
                     registerOnHitEOF(v.readCloser, fn);
                     break;
-                case ref body v:
+                case ptr<body> v:
                     v.registerOnHitEOF(fn);
                     break;
                 default:
@@ -2330,6 +2767,7 @@ namespace net
                     break;
                 }
             }
+
         });
 
         // requestBodyRemains reports whether future calls to Read
@@ -2340,12 +2778,13 @@ namespace net
             {
                 return false;
             }
+
             switch (rc.type())
             {
-                case ref expectContinueReader v:
+                case ptr<expectContinueReader> v:
                     return requestBodyRemains(v.readCloser);
                     break;
-                case ref body v:
+                case ptr<body> v:
                     return v.bodyRemains();
                     break;
                 default:
@@ -2355,17 +2794,20 @@ namespace net
                     break;
                 }
             }
+
         });
 
         // The HandlerFunc type is an adapter to allow the use of
         // ordinary functions as HTTP handlers. If f is a function
         // with the appropriate signature, HandlerFunc(f) is a
         // Handler that calls f.
-        public delegate void HandlerFunc(ResponseWriter, ref Request);
+        public delegate void HandlerFunc(ResponseWriter, ptr<Request>);
 
         // ServeHTTP calls f(w, r).
-        public static void ServeHTTP(this HandlerFunc f, ResponseWriter w, ref Request r)
+        public static void ServeHTTP(this HandlerFunc f, ResponseWriter w, ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             f(w, r);
         }
 
@@ -2384,10 +2826,11 @@ namespace net
         }
 
         // NotFound replies to the request with an HTTP 404 not found error.
-        public static void NotFound(ResponseWriter w, ref Request r)
+        public static void NotFound(ResponseWriter w, ptr<Request> _addr_r)
         {
-            Error(w, "404 page not found", StatusNotFound);
+            ref Request r = ref _addr_r.val;
 
+            Error(w, "404 page not found", StatusNotFound);
         }
 
         // NotFoundHandler returns a simple request handler
@@ -2408,6 +2851,7 @@ namespace net
             {
                 return h;
             }
+
             return HandlerFunc((w, r) =>
             {
                 {
@@ -2416,19 +2860,21 @@ namespace net
                     if (len(p) < len(r.URL.Path))
                     {
                         ptr<Request> r2 = @new<Request>();
-                        r2.Value = r.Value;
+                        r2.val = r.val;
                         r2.URL = @new<url.URL>();
-                        r2.URL.Value = r.URL.Value;
+                        r2.URL.val = r.URL.val;
                         r2.URL.Path = p;
                         h.ServeHTTP(w, r2);
                     }
                     else
                     {
-                        NotFound(w, r);
+                        NotFound(w, _addr_r);
                     }
 
                 }
+
             });
+
         }
 
         // Redirect replies to the request with a redirect to url,
@@ -2436,36 +2882,32 @@ namespace net
         //
         // The provided code should be in the 3xx range and is usually
         // StatusMovedPermanently, StatusFound or StatusSeeOther.
-        public static void Redirect(ResponseWriter w, ref Request r, @string url, long code)
-        { 
-            // parseURL is just url.Parse (url is shadowed for godoc).
+        //
+        // If the Content-Type header has not been set, Redirect sets it
+        // to "text/html; charset=utf-8" and writes a small HTML body.
+        // Setting the Content-Type header to any value, including nil,
+        // disables that behavior.
+        public static void Redirect(ResponseWriter w, ptr<Request> _addr_r, @string url, long code)
+        {
+            ref Request r = ref _addr_r.val;
+
             {
-                var (u, err) = parseURL(url);
+                var (u, err) = urlpkg.Parse(url);
 
                 if (err == null)
                 { 
-                    // If url was relative, make absolute by
+                    // If url was relative, make its path absolute by
                     // combining with request path.
-                    // The browser would probably do this for us,
+                    // The client would probably do this for us,
                     // but doing it ourselves is more reliable.
-
-                    // NOTE(rsc): RFC 2616 says that the Location
-                    // line must be an absolute URI, like
-                    // "http://www.google.com/redirect/",
-                    // not a path like "/redirect/".
-                    // Unfortunately, we don't know what to
-                    // put in the host name section to get the
-                    // client to connect to us again, so we can't
-                    // know the right absolute URI to send back.
-                    // Because of this problem, no one pays attention
-                    // to the RFC; they all send back just a new path.
-                    // So do we.
+                    // See RFC 7231, section 7.1.2
                     if (u.Scheme == "" && u.Host == "")
                     {
                         var oldpath = r.URL.Path;
                         if (oldpath == "")
                         { // should not happen, but avoid a crash if it does
                             oldpath = "/";
+
                         } 
 
                         // no leading http://server
@@ -2474,7 +2916,9 @@ namespace net
                             // make relative path absolute
                             var (olddir, _) = path.Split(oldpath);
                             url = olddir + url;
+
                         }
+
                         @string query = default;
                         {
                             var i = strings.Index(url, "?");
@@ -2483,6 +2927,7 @@ namespace net
                             {
                                 url = url[..i];
                                 query = url[i..];
+
                             } 
 
                             // clean up but preserve trailing slash
@@ -2496,32 +2941,39 @@ namespace net
                         {
                             url += "/";
                         }
+
                         url += query;
+
                     }
+
                 }
 
             }
 
-            w.Header().Set("Location", hexEscapeNonASCII(url));
-            if (r.Method == "GET" || r.Method == "HEAD")
+
+            var h = w.Header(); 
+
+            // RFC 7231 notes that a short HTML body is usually included in
+            // the response because older user agents may not understand 301/307.
+            // Do it only if the request didn't already have a Content-Type header.
+            var (_, hadCT) = h["Content-Type"];
+
+            h.Set("Location", hexEscapeNonASCII(url));
+            if (!hadCT && (r.Method == "GET" || r.Method == "HEAD"))
             {
-                w.Header().Set("Content-Type", "text/html; charset=utf-8");
+                h.Set("Content-Type", "text/html; charset=utf-8");
             }
+
             w.WriteHeader(code); 
 
-            // RFC 2616 recommends that a short note "SHOULD" be included in the
-            // response because older user agents may not understand 301/307.
-            // Shouldn't send the response for POST or HEAD; that leaves GET.
-            if (r.Method == "GET")
+            // Shouldn't send the body for POST or HEAD; that leaves GET.
+            if (!hadCT && r.Method == "GET")
             {
-                @string note = "<a href=\"" + htmlEscape(url) + "\">" + statusText[code] + "</a>.\n";
-                fmt.Fprintln(w, note);
+                @string body = "<a href=\"" + htmlEscape(url) + "\">" + statusText[code] + "</a>.\n";
+                fmt.Fprintln(w, body);
             }
-        }
 
-        // parseURL is just url.Parse. It exists only so that url.Parse can be called
-        // in places where url is shadowed for godoc. See https://golang.org/cl/49930.
-        private static var parseURL = url.Parse;
+        }
 
         private static var htmlReplacer = strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", "\"", "&#34;", "'", "&#39;");
 
@@ -2537,9 +2989,12 @@ namespace net
             public long code;
         }
 
-        private static void ServeHTTP(this ref redirectHandler rh, ResponseWriter w, ref Request r)
+        private static void ServeHTTP(this ptr<redirectHandler> _addr_rh, ResponseWriter w, ptr<Request> _addr_r)
         {
-            Redirect(w, r, rh.url, rh.code);
+            ref redirectHandler rh = ref _addr_rh.val;
+            ref Request r = ref _addr_r.val;
+
+            Redirect(w, _addr_r, rh.url, rh.code);
         }
 
         // RedirectHandler returns a request handler that redirects
@@ -2550,7 +3005,7 @@ namespace net
         // StatusMovedPermanently, StatusFound or StatusSeeOther.
         public static Handler RedirectHandler(@string url, long code)
         {
-            return ref new redirectHandler(url,code);
+            return addr(new redirectHandler(url,code));
         }
 
         // ServeMux is an HTTP request multiplexer.
@@ -2585,13 +3040,14 @@ namespace net
         // "/codesearch" and "codesearch.google.com/" without also taking over
         // requests for "http://www.google.com/".
         //
-        // ServeMux also takes care of sanitizing the URL request path,
-        // redirecting any request containing . or .. elements or repeated slashes
-        // to an equivalent, cleaner URL.
+        // ServeMux also takes care of sanitizing the URL request path and the Host
+        // header, stripping the port number and redirecting any request containing . or
+        // .. elements or repeated slashes to an equivalent, cleaner URL.
         public partial struct ServeMux
         {
             public sync.RWMutex mu;
             public map<@string, muxEntry> m;
+            public slice<muxEntry> es; // slice of entries sorted from longest to shortest.
             public bool hosts; // whether any patterns contain hostnames
         }
 
@@ -2602,51 +3058,48 @@ namespace net
         }
 
         // NewServeMux allocates and returns a new ServeMux.
-        public static ref ServeMux NewServeMux()
+        public static ptr<ServeMux> NewServeMux()
         {
             return @new<ServeMux>();
         }
 
         // DefaultServeMux is the default ServeMux used by Serve.
-        public static var DefaultServeMux = ref defaultServeMux;
+        public static var DefaultServeMux = _addr_defaultServeMux;
 
         private static ServeMux defaultServeMux = default;
 
-        // Does path match pattern?
-        private static bool pathMatch(@string pattern, @string path)
-        {
-            if (len(pattern) == 0L)
-            { 
-                // should not happen
-                return false;
-            }
-            var n = len(pattern);
-            if (pattern[n - 1L] != '/')
-            {
-                return pattern == path;
-            }
-            return len(path) >= n && path[0L..n] == pattern;
-        }
-
-        // Return the canonical path for p, eliminating . and .. elements.
+        // cleanPath returns the canonical path for p, eliminating . and .. elements.
         private static @string cleanPath(@string p)
         {
             if (p == "")
             {
                 return "/";
             }
+
             if (p[0L] != '/')
             {
                 p = "/" + p;
             }
+
             var np = path.Clean(p); 
             // path.Clean removes trailing slash except for root;
             // put the trailing slash back if necessary.
             if (p[len(p) - 1L] == '/' && np != "/")
-            {
-                np += "/";
+            { 
+                // Fast path for common case of p being the string we want:
+                if (len(p) == len(np) + 1L && strings.HasPrefix(p, np))
+                {
+                    np = p;
+                }
+                else
+                {
+                    np += "/";
+                }
+
             }
+
             return np;
+
         }
 
         // stripHostPort returns h without any trailing ":<port>".
@@ -2657,18 +3110,25 @@ namespace net
             {
                 return h;
             }
+
             var (host, _, err) = net.SplitHostPort(h);
             if (err != null)
             {
                 return h; // on error, return unchanged
             }
+
             return host;
+
         }
 
         // Find a handler on a handler map given a path string.
         // Most-specific (longest) pattern wins.
-        private static (Handler, @string) match(this ref ServeMux mux, @string path)
-        { 
+        private static (Handler, @string) match(this ptr<ServeMux> _addr_mux, @string path)
+        {
+            Handler h = default;
+            @string pattern = default;
+            ref ServeMux mux = ref _addr_mux.val;
+ 
             // Check for exact match first.
             var (v, ok) = mux.m[path];
             if (ok)
@@ -2676,53 +3136,52 @@ namespace net
                 return (v.h, v.pattern);
             } 
 
-            // Check for longest valid match.
-            long n = 0L;
+            // Check for longest valid match.  mux.es contains all patterns
+            // that end in / sorted from longest to shortest.
+            foreach (var (_, e) in mux.es)
             {
-                var v__prev1 = v;
-
-                foreach (var (__k, __v) in mux.m)
+                if (strings.HasPrefix(path, e.pattern))
                 {
-                    k = __k;
-                    v = __v;
-                    if (!pathMatch(k, path))
-                    {
-                        continue;
-                    }
-                    if (h == null || len(k) > n)
-                    {
-                        n = len(k);
-                        h = v.h;
-                        pattern = v.pattern;
-                    }
+                    return (e.h, e.pattern);
                 }
 
-                v = v__prev1;
             }
+            return (null, "");
 
-            return;
         }
 
         // redirectToPathSlash determines if the given path needs appending "/" to it.
         // This occurs when a handler for path + "/" was already registered, but
         // not for path itself. If the path needs appending to, it creates a new
         // URL, setting the path to u.Path + "/" and returning true to indicate so.
-        private static (ref url.URL, bool) redirectToPathSlash(this ref ServeMux mux, @string host, @string path, ref url.URL u)
+        private static (ptr<url.URL>, bool) redirectToPathSlash(this ptr<ServeMux> _addr_mux, @string host, @string path, ptr<url.URL> _addr_u)
         {
-            if (!mux.shouldRedirect(host, path))
+            ptr<url.URL> _p0 = default!;
+            bool _p0 = default;
+            ref ServeMux mux = ref _addr_mux.val;
+            ref url.URL u = ref _addr_u.val;
+
+            mux.mu.RLock();
+            var shouldRedirect = mux.shouldRedirectRLocked(host, path);
+            mux.mu.RUnlock();
+            if (!shouldRedirect)
             {
-                return (u, false);
+                return (_addr_u!, false);
             }
+
             path = path + "/";
-            u = ref new url.URL(Path:path,RawQuery:u.RawQuery);
-            return (u, true);
+            u = addr(new url.URL(Path:path,RawQuery:u.RawQuery));
+            return (_addr_u!, true);
+
         }
 
-        // shouldRedirect reports whether the given path and host should be redirected to
+        // shouldRedirectRLocked reports whether the given path and host should be redirected to
         // path+"/". This should happen if a handler is registered for path+"/" but
         // not path -- see comments at ServeMux.
-        private static bool shouldRedirect(this ref ServeMux mux, @string host, @string path)
+        private static bool shouldRedirectRLocked(this ptr<ServeMux> _addr_mux, @string host, @string path)
         {
+            ref ServeMux mux = ref _addr_mux.val;
+
             @string p = new slice<@string>(new @string[] { path, host+path });
 
             {
@@ -2740,6 +3199,7 @@ namespace net
                         }
 
                     }
+
                 }
 
                 c = c__prev1;
@@ -2750,6 +3210,7 @@ namespace net
             {
                 return false;
             }
+
             {
                 var c__prev1 = c;
 
@@ -2765,12 +3226,14 @@ namespace net
                         }
 
                     }
+
                 }
 
                 c = c__prev1;
             }
 
             return false;
+
         }
 
         // Handler returns the handler to use for the given request,
@@ -2788,8 +3251,13 @@ namespace net
         //
         // If there is no registered handler that applies to the request,
         // Handler returns a ``page not found'' handler and an empty pattern.
-        private static (Handler, @string) Handler(this ref ServeMux mux, ref Request r)
+        private static (Handler, @string) Handler(this ptr<ServeMux> _addr_mux, ptr<Request> _addr_r)
         {
+            Handler h = default;
+            @string pattern = default;
+            ref ServeMux mux = ref _addr_mux.val;
+            ref Request r = ref _addr_r.val;
+
             // CONNECT requests are not canonicalized.
             if (r.Method == "CONNECT")
             { 
@@ -2810,7 +3278,9 @@ namespace net
 
                 }
 
+
                 return mux.handler(r.Host, r.URL.Path);
+
             } 
 
             // All other requests have any port stripped and path cleaned
@@ -2834,20 +3304,27 @@ namespace net
 
             }
 
+
             if (path != r.URL.Path)
             {
                 _, pattern = mux.handler(host, path);
-                var url = r.URL.Value;
+                var url = r.URL.val;
                 url.Path = path;
                 return (RedirectHandler(url.String(), StatusMovedPermanently), pattern);
             }
+
             return mux.handler(host, r.URL.Path);
+
         }
 
         // handler is the main implementation of Handler.
         // The path is known to be in canonical form, except for CONNECT methods.
-        private static (Handler, @string) handler(this ref ServeMux _mux, @string host, @string path) => func(_mux, (ref ServeMux mux, Defer defer, Panic _, Recover __) =>
+        private static (Handler, @string) handler(this ptr<ServeMux> _addr_mux, @string host, @string path) => func((defer, _, __) =>
         {
+            Handler h = default;
+            @string pattern = default;
+            ref ServeMux mux = ref _addr_mux.val;
+
             mux.mu.RLock();
             defer(mux.mu.RUnlock()); 
 
@@ -2856,39 +3333,53 @@ namespace net
             {
                 h, pattern = mux.match(host + path);
             }
+
             if (h == null)
             {
                 h, pattern = mux.match(path);
             }
+
             if (h == null)
             {
                 h = NotFoundHandler();
                 pattern = "";
+
             }
-            return;
+
+            return ;
+
         });
 
         // ServeHTTP dispatches the request to the handler whose
         // pattern most closely matches the request URL.
-        private static void ServeHTTP(this ref ServeMux mux, ResponseWriter w, ref Request r)
+        private static void ServeHTTP(this ptr<ServeMux> _addr_mux, ResponseWriter w, ptr<Request> _addr_r)
         {
+            ref ServeMux mux = ref _addr_mux.val;
+            ref Request r = ref _addr_r.val;
+
             if (r.RequestURI == "*")
             {
                 if (r.ProtoAtLeast(1L, 1L))
                 {
                     w.Header().Set("Connection", "close");
                 }
+
                 w.WriteHeader(StatusBadRequest);
-                return;
+                return ;
+
             }
+
             var (h, _) = mux.Handler(r);
             h.ServeHTTP(w, r);
+
         }
 
         // Handle registers the handler for the given pattern.
         // If a handler already exists for pattern, Handle panics.
-        private static void Handle(this ref ServeMux _mux, @string pattern, Handler handler) => func(_mux, (ref ServeMux mux, Defer defer, Panic panic, Recover _) =>
+        private static void Handle(this ptr<ServeMux> _addr_mux, @string pattern, Handler handler) => func((defer, panic, _) =>
         {
+            ref ServeMux mux = ref _addr_mux.val;
+
             mux.mu.Lock();
             defer(mux.mu.Unlock());
 
@@ -2896,10 +3387,12 @@ namespace net
             {
                 panic("http: invalid pattern");
             }
+
             if (handler == null)
             {
                 panic("http: nil handler");
             }
+
             {
                 var (_, exist) = mux.m[pattern];
 
@@ -2910,23 +3403,58 @@ namespace net
 
             }
 
+
             if (mux.m == null)
             {
                 mux.m = make_map<@string, muxEntry>();
             }
-            mux.m[pattern] = new muxEntry(h:handler,pattern:pattern);
+
+            muxEntry e = new muxEntry(h:handler,pattern:pattern);
+            mux.m[pattern] = e;
+            if (pattern[len(pattern) - 1L] == '/')
+            {
+                mux.es = appendSorted(mux.es, e);
+            }
 
             if (pattern[0L] != '/')
             {
                 mux.hosts = true;
             }
+
         });
 
-        // HandleFunc registers the handler function for the given pattern.
-        private static void HandleFunc(this ref ServeMux mux, @string pattern, Action<ResponseWriter, ref Request> handler)
+        private static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e)
         {
-            mux.Handle(pattern, HandlerFunc(handler));
+            var n = len(es);
+            var i = sort.Search(n, i =>
+            {
+                return len(es[i].pattern) < len(e.pattern);
+            });
+            if (i == n)
+            {
+                return append(es, e);
+            } 
+            // we now know that i points at where we want to insert
+            es = append(es, new muxEntry()); // try to grow the slice in place, any entry works.
+            copy(es[i + 1L..], es[i..]); // Move shorter entries down
+            es[i] = e;
+            return es;
+
         }
+
+        // HandleFunc registers the handler function for the given pattern.
+        private static void HandleFunc(this ptr<ServeMux> _addr_mux, @string pattern, Action<ResponseWriter, ptr<Request>> handler) => func((_, panic, __) =>
+        {
+            ref ServeMux mux = ref _addr_mux.val;
+
+            if (handler == null)
+            {
+                panic("http: nil handler");
+            }
+
+            mux.Handle(pattern, HandlerFunc(handler));
+
+        });
 
         // Handle registers the handler for the given pattern
         // in the DefaultServeMux.
@@ -2934,13 +3462,12 @@ namespace net
         public static void Handle(@string pattern, Handler handler)
         {
             DefaultServeMux.Handle(pattern, handler);
-
         }
 
         // HandleFunc registers the handler function for the given pattern
         // in the DefaultServeMux.
         // The documentation for ServeMux explains how patterns are matched.
-        public static void HandleFunc(@string pattern, Action<ResponseWriter, ref Request> handler)
+        public static void HandleFunc(@string pattern, Action<ResponseWriter, ptr<Request>> handler)
         {
             DefaultServeMux.HandleFunc(pattern, handler);
         }
@@ -2948,34 +3475,43 @@ namespace net
         // Serve accepts incoming HTTP connections on the listener l,
         // creating a new service goroutine for each. The service goroutines
         // read requests and then call handler to reply to them.
-        // Handler is typically nil, in which case the DefaultServeMux is used.
+        //
+        // The handler is typically nil, in which case the DefaultServeMux is used.
+        //
+        // HTTP/2 support is only enabled if the Listener returns *tls.Conn
+        // connections and they were configured with "h2" in the TLS
+        // Config.NextProtos.
+        //
+        // Serve always returns a non-nil error.
         public static error Serve(net.Listener l, Handler handler)
         {
-            Server srv = ref new Server(Handler:handler);
-            return error.As(srv.Serve(l));
+            ptr<Server> srv = addr(new Server(Handler:handler));
+            return error.As(srv.Serve(l))!;
         }
 
         // ServeTLS accepts incoming HTTPS connections on the listener l,
         // creating a new service goroutine for each. The service goroutines
         // read requests and then call handler to reply to them.
         //
-        // Handler is typically nil, in which case the DefaultServeMux is used.
+        // The handler is typically nil, in which case the DefaultServeMux is used.
         //
         // Additionally, files containing a certificate and matching private key
         // for the server must be provided. If the certificate is signed by a
         // certificate authority, the certFile should be the concatenation
         // of the server's certificate, any intermediates, and the CA's certificate.
+        //
+        // ServeTLS always returns a non-nil error.
         public static error ServeTLS(net.Listener l, Handler handler, @string certFile, @string keyFile)
         {
-            Server srv = ref new Server(Handler:handler);
-            return error.As(srv.ServeTLS(l, certFile, keyFile));
+            ptr<Server> srv = addr(new Server(Handler:handler));
+            return error.As(srv.ServeTLS(l, certFile, keyFile))!;
         }
 
         // A Server defines parameters for running an HTTP server.
         // The zero value for Server is a valid configuration.
         public partial struct Server
         {
-            public @string Addr; // TCP address to listen on, ":http" if empty
+            public @string Addr;
             public Handler Handler; // handler to invoke, http.DefaultServeMux if nil
 
 // TLSConfig optionally provides a TLS configuration for use
@@ -2995,7 +3531,9 @@ namespace net
             public time.Duration ReadTimeout; // ReadHeaderTimeout is the amount of time allowed to read
 // request headers. The connection's read deadline is reset
 // after reading the headers and the Handler can decide what
-// is considered too slow for the body.
+// is considered too slow for the body. If ReadHeaderTimeout
+// is zero, the value of ReadTimeout is used. If both are
+// zero, there is no timeout.
             public time.Duration ReadHeaderTimeout; // WriteTimeout is the maximum duration before timing out
 // writes of the response. It is reset whenever a new
 // request's header is read. Like ReadTimeout, it does not
@@ -3003,14 +3541,14 @@ namespace net
             public time.Duration WriteTimeout; // IdleTimeout is the maximum amount of time to wait for the
 // next request when keep-alives are enabled. If IdleTimeout
 // is zero, the value of ReadTimeout is used. If both are
-// zero, ReadHeaderTimeout is used.
+// zero, there is no timeout.
             public time.Duration IdleTimeout; // MaxHeaderBytes controls the maximum number of bytes the
 // server will read parsing the request header's keys and
 // values, including the request line. It does not limit the
 // size of the request body.
 // If zero, DefaultMaxHeaderBytes is used.
             public long MaxHeaderBytes; // TLSNextProto optionally specifies a function to take over
-// ownership of the provided TLS connection when an NPN/ALPN
+// ownership of the provided TLS connection when an ALPN
 // protocol upgrade has occurred. The map key is the protocol
 // name negotiated. The Handler argument should be used to
 // handle HTTP requests and will initialize the Request's TLS
@@ -3018,16 +3556,27 @@ namespace net
 // automatically closed when the function returns.
 // If TLSNextProto is not nil, HTTP/2 support is not enabled
 // automatically.
-            public map<@string, Action<ref Server, ref tls.Conn, Handler>> TLSNextProto; // ConnState specifies an optional callback function that is
+            public map<@string, Action<ptr<Server>, ptr<tls.Conn>, Handler>> TLSNextProto; // ConnState specifies an optional callback function that is
 // called when a client connection changes state. See the
 // ConnState type and associated constants for details.
             public Action<net.Conn, ConnState> ConnState; // ErrorLog specifies an optional logger for errors accepting
 // connections, unexpected behavior from handlers, and
 // underlying FileSystem errors.
 // If nil, logging is done via the log package's standard logger.
-            public ptr<log.Logger> ErrorLog;
+            public ptr<log.Logger> ErrorLog; // BaseContext optionally specifies a function that returns
+// the base context for incoming requests on this server.
+// The provided Listener is the specific Listener that's
+// about to start accepting requests.
+// If BaseContext is nil, the default is context.Background().
+// If non-nil, it must return a non-nil context.
+            public Func<net.Listener, context.Context> BaseContext; // ConnContext optionally specifies a function that modifies
+// the context used for a new connection c. The provided ctx
+// is derived from the base context and has a ServerContextKey
+// value.
+            public Func<context.Context, net.Conn, context.Context> ConnContext;
+            public atomicBool inShutdown; // true when when server is in shutdown
+
             public int disableKeepAlives; // accessed atomically.
-            public int inShutdown; // accessed atomically (non-zero means we're in Shutdown)
             public sync.Once nextProtoOnce; // guards setupHTTP2_* init
             public error nextProtoErr; // result of http2.ConfigureServer if used
 
@@ -3036,24 +3585,32 @@ namespace net
             public slice<Action> onShutdown;
         }
 
-        private static channel<object> getDoneChan(this ref Server _s) => func(_s, (ref Server s, Defer defer, Panic _, Recover __) =>
+        private static channel<object> getDoneChan(this ptr<Server> _addr_s) => func((defer, _, __) =>
         {
+            ref Server s = ref _addr_s.val;
+
             s.mu.Lock();
             defer(s.mu.Unlock());
             return s.getDoneChanLocked();
         });
 
-        private static channel<object> getDoneChanLocked(this ref Server s)
+        private static channel<object> getDoneChanLocked(this ptr<Server> _addr_s)
         {
+            ref Server s = ref _addr_s.val;
+
             if (s.doneChan == null)
             {
                 s.doneChan = make_channel<object>();
             }
+
             return s.doneChan;
+
         }
 
-        private static void closeDoneChanLocked(this ref Server s)
+        private static void closeDoneChanLocked(this ptr<Server> _addr_s)
         {
+            ref Server s = ref _addr_s.val;
+
             var ch = s.getDoneChanLocked();
             close(ch);
         }
@@ -3067,8 +3624,11 @@ namespace net
         //
         // Close returns any error returned from closing the Server's
         // underlying Listener(s).
-        private static error Close(this ref Server _srv) => func(_srv, (ref Server srv, Defer defer, Panic _, Recover __) =>
+        private static error Close(this ptr<Server> _addr_srv) => func((defer, _, __) =>
         {
+            ref Server srv = ref _addr_srv.val;
+
+            srv.inShutdown.setTrue();
             srv.mu.Lock();
             defer(srv.mu.Unlock());
             srv.closeDoneChanLocked();
@@ -3078,7 +3638,8 @@ namespace net
                 c.rwc.Close();
                 delete(srv.activeConn, c);
             }
-            return error.As(err);
+            return error.As(err)!;
+
         });
 
         // shutdownPollInterval is how often we poll for quiescence
@@ -3107,10 +3668,14 @@ namespace net
         // separately notify such long-lived connections of shutdown and wait
         // for them to close, if desired. See RegisterOnShutdown for a way to
         // register shutdown notification functions.
-        private static error Shutdown(this ref Server _srv, context.Context ctx) => func(_srv, (ref Server srv, Defer defer, Panic _, Recover __) =>
+        //
+        // Once Shutdown has been called on a server, it may not be reused;
+        // future calls to methods such as Serve will return ErrServerClosed.
+        private static error Shutdown(this ptr<Server> _addr_srv, context.Context ctx) => func((defer, _, __) =>
         {
-            atomic.AddInt32(ref srv.inShutdown, 1L);
-            defer(atomic.AddInt32(ref srv.inShutdown, -1L));
+            ref Server srv = ref _addr_srv.val;
+
+            srv.inShutdown.setTrue();
 
             srv.mu.Lock();
             var lnerr = srv.closeListenersLocked();
@@ -3125,65 +3690,98 @@ namespace net
             defer(ticker.Stop());
             while (true)
             {
-                if (srv.closeIdleConns())
+                if (srv.closeIdleConns() && srv.numListeners() == 0L)
                 {
-                    return error.As(lnerr);
+                    return error.As(lnerr)!;
                 }
-                return error.As(ctx.Err());
+
+                return error.As(ctx.Err())!;
+
             }
+
 
         });
 
         // RegisterOnShutdown registers a function to call on Shutdown.
         // This can be used to gracefully shutdown connections that have
-        // undergone NPN/ALPN protocol upgrade or that have been hijacked.
+        // undergone ALPN protocol upgrade or that have been hijacked.
         // This function should start protocol-specific graceful shutdown,
         // but should not wait for shutdown to complete.
-        private static void RegisterOnShutdown(this ref Server srv, Action f)
+        private static void RegisterOnShutdown(this ptr<Server> _addr_srv, Action f)
         {
+            ref Server srv = ref _addr_srv.val;
+
             srv.mu.Lock();
             srv.onShutdown = append(srv.onShutdown, f);
             srv.mu.Unlock();
         }
 
+        private static long numListeners(this ptr<Server> _addr_s) => func((defer, _, __) =>
+        {
+            ref Server s = ref _addr_s.val;
+
+            s.mu.Lock();
+            defer(s.mu.Unlock());
+            return len(s.listeners);
+        });
+
         // closeIdleConns closes all idle connections and reports whether the
         // server is quiescent.
-        private static bool closeIdleConns(this ref Server _s) => func(_s, (ref Server s, Defer defer, Panic _, Recover __) =>
+        private static bool closeIdleConns(this ptr<Server> _addr_s) => func((defer, _, __) =>
         {
+            ref Server s = ref _addr_s.val;
+
             s.mu.Lock();
             defer(s.mu.Unlock());
             var quiescent = true;
             foreach (var (c) in s.activeConn)
             {
-                ConnState (st, ok) = c.curState.Load()._<ConnState>();
-                if (!ok || st != StateIdle)
+                var (st, unixSec) = c.getState(); 
+                // Issue 22682: treat StateNew connections as if
+                // they're idle if we haven't read the first request's
+                // header in over 5 seconds.
+                if (st == StateNew && unixSec < time.Now().Unix() - 5L)
                 {
+                    st = StateIdle;
+                }
+
+                if (st != StateIdle || unixSec == 0L)
+                { 
+                    // Assume unixSec == 0 means it's a very new
+                    // connection, without state set yet.
                     quiescent = false;
                     continue;
+
                 }
+
                 c.rwc.Close();
                 delete(s.activeConn, c);
+
             }
             return quiescent;
+
         });
 
-        private static error closeListenersLocked(this ref Server s)
+        private static error closeListenersLocked(this ptr<Server> _addr_s)
         {
-            error err = default;
+            ref Server s = ref _addr_s.val;
+
+            error err = default!;
             foreach (var (ln) in s.listeners)
             {
                 {
-                    var cerr = ln.Close();
+                    object cerr = ptr<ln>();
 
                     if (cerr != null && err == null)
                     {
-                        err = error.As(cerr);
+                        err = error.As(cerr)!;
                     }
 
                 }
-                delete(s.listeners, ln);
+
             }
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // A ConnState represents the state of a client connection to a server.
@@ -3197,7 +3795,7 @@ namespace net
         // send a request immediately. Connections begin at this
         // state and then transition to either StateActive or
         // StateClosed.
-        public static readonly ConnState StateNew = iota; 
+        public static readonly ConnState StateNew = (ConnState)iota; 
 
         // StateActive represents a connection that has read 1 or more
         // bytes of a request. The Server.ConnState hook for
@@ -3210,22 +3808,23 @@ namespace net
         // active requests are complete. That means that ConnState
         // cannot be used to do per-request work; ConnState only notes
         // the overall state of the connection.
-        public static readonly var StateActive = 0; 
+        public static readonly var StateActive = (var)0; 
 
         // StateIdle represents a connection that has finished
         // handling a request and is in the keep-alive state, waiting
         // for a new request. Connections transition from StateIdle
         // to either StateActive or StateClosed.
-        public static readonly var StateIdle = 1; 
+        public static readonly var StateIdle = (var)1; 
 
         // StateHijacked represents a hijacked connection.
         // This is a terminal state. It does not transition to StateClosed.
-        public static readonly var StateHijacked = 2; 
+        public static readonly var StateHijacked = (var)2; 
 
         // StateClosed represents a closed connection.
         // This is a terminal state. Hijacked connections do not
         // transition to StateClosed.
-        public static readonly var StateClosed = 3;
+        public static readonly var StateClosed = (var)3;
+
 
         private static map stateName = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ConnState, @string>{StateNew:"new",StateActive:"active",StateIdle:"idle",StateHijacked:"hijacked",StateClosed:"closed",};
 
@@ -3241,46 +3840,66 @@ namespace net
             public ptr<Server> srv;
         }
 
-        private static void ServeHTTP(this serverHandler sh, ResponseWriter rw, ref Request req)
+        private static void ServeHTTP(this serverHandler sh, ResponseWriter rw, ptr<Request> _addr_req)
         {
+            ref Request req = ref _addr_req.val;
+
             var handler = sh.srv.Handler;
             if (handler == null)
             {
                 handler = DefaultServeMux;
             }
+
             if (req.RequestURI == "*" && req.Method == "OPTIONS")
             {
                 handler = new globalOptionsHandler();
             }
+
             handler.ServeHTTP(rw, req);
+
         }
 
         // ListenAndServe listens on the TCP network address srv.Addr and then
         // calls Serve to handle requests on incoming connections.
         // Accepted connections are configured to enable TCP keep-alives.
+        //
         // If srv.Addr is blank, ":http" is used.
-        // ListenAndServe always returns a non-nil error.
-        private static error ListenAndServe(this ref Server srv)
+        //
+        // ListenAndServe always returns a non-nil error. After Shutdown or Close,
+        // the returned error is ErrServerClosed.
+        private static error ListenAndServe(this ptr<Server> _addr_srv)
         {
+            ref Server srv = ref _addr_srv.val;
+
+            if (srv.shuttingDown())
+            {
+                return error.As(ErrServerClosed)!;
+            }
+
             var addr = srv.Addr;
             if (addr == "")
             {
                 addr = ":http";
             }
+
             var (ln, err) = net.Listen("tcp", addr);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(srv.Serve(new tcpKeepAliveListener(ln.(*net.TCPListener))));
+
+            return error.As(srv.Serve(ln))!;
+
         }
 
-        private static Action<ref Server, net.Listener> testHookServerServe = default; // used if non-nil
+        private static Action<ptr<Server>, net.Listener> testHookServerServe = default; // used if non-nil
 
         // shouldDoServeHTTP2 reports whether Server.Serve should configure
         // automatic HTTP/2. (which sets up the srv.TLSNextProto map)
-        private static bool shouldConfigureHTTP2ForServe(this ref Server srv)
+        private static bool shouldConfigureHTTP2ForServe(this ptr<Server> _addr_srv)
         {
+            ref Server srv = ref _addr_srv.val;
+
             if (srv.TLSConfig == null)
             { 
                 // Compatibility with Go 1.6:
@@ -3290,6 +3909,7 @@ namespace net
                 // So we should configure HTTP/2 (to set up srv.TLSNextProto)
                 // in case the listener returns an "h2" *tls.Conn.
                 return true;
+
             } 
             // The user specified a TLSConfig on their http.Server.
             // In this, case, only configure HTTP/2 if their tls.Config
@@ -3299,6 +3919,7 @@ namespace net
             // it's too late anyway to fix it. It would only be potentially racy.
             // See Issue 15908.
             return strSliceContains(srv.TLSConfig.NextProtos, http2NextProtoTLS);
+
         }
 
         // ErrServerClosed is returned by the Server's Serve, ServeTLS, ListenAndServe,
@@ -3309,50 +3930,71 @@ namespace net
         // new service goroutine for each. The service goroutines read requests and
         // then call srv.Handler to reply to them.
         //
-        // For HTTP/2 support, srv.TLSConfig should be initialized to the
-        // provided listener's TLS Config before calling Serve. If
-        // srv.TLSConfig is non-nil and doesn't include the string "h2" in
-        // Config.NextProtos, HTTP/2 support is not enabled.
+        // HTTP/2 support is only enabled if the Listener returns *tls.Conn
+        // connections and they were configured with "h2" in the TLS
+        // Config.NextProtos.
         //
-        // Serve always returns a non-nil error. After Shutdown or Close, the
-        // returned error is ErrServerClosed.
-        private static error Serve(this ref Server _srv, net.Listener l) => func(_srv, (ref Server srv, Defer defer, Panic _, Recover __) =>
+        // Serve always returns a non-nil error and closes l.
+        // After Shutdown or Close, the returned error is ErrServerClosed.
+        private static error Serve(this ptr<Server> _addr_srv, net.Listener l) => func((defer, panic, _) =>
         {
-            defer(l.Close());
+            ref Server srv = ref _addr_srv.val;
+
             {
                 var fn = testHookServerServe;
 
                 if (fn != null)
                 {
-                    fn(srv, l);
+                    fn(srv, l); // call hook with unwrapped listener
                 }
 
             }
-            time.Duration tempDelay = default; // how long to sleep on accept failure
+
+
+            var origListener = l;
+            l = addr(new onceCloseListener(Listener:l));
+            defer(l.Close());
 
             {
                 var err = srv.setupHTTP2_Serve();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
 
-            srv.trackListener(l, true);
-            defer(srv.trackListener(l, false));
 
-            var baseCtx = context.Background(); // base is always background, per Issue 16220
+            if (!srv.trackListener(_addr_l, true))
+            {
+                return error.As(ErrServerClosed)!;
+            }
+
+            defer(srv.trackListener(_addr_l, false));
+
+            var baseCtx = context.Background();
+            if (srv.BaseContext != null)
+            {
+                baseCtx = srv.BaseContext(origListener);
+                if (baseCtx == null)
+                {
+                    panic("BaseContext returned a nil context");
+                }
+
+            }
+
+            time.Duration tempDelay = default; // how long to sleep on accept failure
+
             var ctx = context.WithValue(baseCtx, ServerContextKey, srv);
             while (true)
             {
-                var (rw, e) = l.Accept();
-                if (e != null)
+                var (rw, err) = l.Accept();
+                if (err != null)
                 {
-                    return error.As(ErrServerClosed);
+                    return error.As(ErrServerClosed)!;
                     {
-                        net.Error (ne, ok) = e._<net.Error>();
+                        net.Error (ne, ok) = err._<net.Error>();
 
                         if (ok && ne.Temporary())
                         {
@@ -3364,6 +4006,7 @@ namespace net
                             {
                                 tempDelay *= 2L;
                             }
+
                             {
                                 long max = 1L * time.Second;
 
@@ -3373,41 +4016,62 @@ namespace net
                                 }
 
                             }
-                            srv.logf("http: Accept error: %v; retrying in %v", e, tempDelay);
+
+                            srv.logf("http: Accept error: %v; retrying in %v", err, tempDelay);
                             time.Sleep(tempDelay);
                             continue;
+
                         }
 
                     }
-                    return error.As(e);
+
+                    return error.As(err)!;
+
                 }
+
+                var connCtx = ctx;
+                {
+                    var cc = srv.ConnContext;
+
+                    if (cc != null)
+                    {
+                        connCtx = cc(connCtx, rw);
+                        if (connCtx == null)
+                        {
+                            panic("ConnContext returned nil");
+                        }
+
+                    }
+
+                }
+
                 tempDelay = 0L;
                 var c = srv.newConn(rw);
                 c.setState(c.rwc, StateNew); // before Serve can return
-                go_(() => c.serve(ctx));
+                go_(() => c.serve(connCtx));
+
             }
+
 
         });
 
         // ServeTLS accepts incoming connections on the Listener l, creating a
-        // new service goroutine for each. The service goroutines read requests and
-        // then call srv.Handler to reply to them.
+        // new service goroutine for each. The service goroutines perform TLS
+        // setup and then read requests, calling srv.Handler to reply to them.
         //
-        // Additionally, files containing a certificate and matching private key for
-        // the server must be provided if neither the Server's TLSConfig.Certificates
-        // nor TLSConfig.GetCertificate are populated.. If the certificate is signed by
-        // a certificate authority, the certFile should be the concatenation of the
-        // server's certificate, any intermediates, and the CA's certificate.
-        //
-        // For HTTP/2 support, srv.TLSConfig should be initialized to the
-        // provided listener's TLS Config before calling ServeTLS. If
-        // srv.TLSConfig is non-nil and doesn't include the string "h2" in
-        // Config.NextProtos, HTTP/2 support is not enabled.
+        // Files containing a certificate and matching private key for the
+        // server must be provided if neither the Server's
+        // TLSConfig.Certificates nor TLSConfig.GetCertificate are populated.
+        // If the certificate is signed by a certificate authority, the
+        // certFile should be the concatenation of the server's certificate,
+        // any intermediates, and the CA's certificate.
         //
         // ServeTLS always returns a non-nil error. After Shutdown or Close, the
         // returned error is ErrServerClosed.
-        private static error ServeTLS(this ref Server srv, net.Listener l, @string certFile, @string keyFile)
-        { 
+        private static error ServeTLS(this ptr<Server> _addr_srv, net.Listener l, @string certFile, @string keyFile)
+        {
+            ref Server srv = ref _addr_srv.val;
+ 
             // Setup HTTP/2 before srv.Serve, to initialize srv.TLSConfig
             // before we clone it and create the TLS Listener.
             {
@@ -3417,65 +4081,91 @@ namespace net
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
 
+
             var config = cloneTLSConfig(srv.TLSConfig);
             if (!strSliceContains(config.NextProtos, "http/1.1"))
             {
                 config.NextProtos = append(config.NextProtos, "http/1.1");
             }
+
             var configHasCert = len(config.Certificates) > 0L || config.GetCertificate != null;
             if (!configHasCert || certFile != "" || keyFile != "")
             {
-                err = default;
+                err = default!;
                 config.Certificates = make_slice<tls.Certificate>(1L);
                 config.Certificates[0L], err = tls.LoadX509KeyPair(certFile, keyFile);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
+
             var tlsListener = tls.NewListener(l, config);
-            return error.As(srv.Serve(tlsListener));
+            return error.As(srv.Serve(tlsListener))!;
+
         }
 
-        private static void trackListener(this ref Server _s, net.Listener ln, bool add) => func(_s, (ref Server s, Defer defer, Panic _, Recover __) =>
+        // trackListener adds or removes a net.Listener to the set of tracked
+        // listeners.
+        //
+        // We store a pointer to interface in the map set, in case the
+        // net.Listener is not comparable. This is safe because we only call
+        // trackListener via Serve and can track+defer untrack the same
+        // pointer to local variable there. We never need to compare a
+        // Listener from another caller.
+        //
+        // It reports whether the server is still up (not Shutdown or Closed).
+        private static bool trackListener(this ptr<Server> _addr_s, ptr<net.Listener> _addr_ln, bool add) => func((defer, _, __) =>
         {
+            ref Server s = ref _addr_s.val;
+            ref net.Listener ln = ref _addr_ln.val;
+
             s.mu.Lock();
             defer(s.mu.Unlock());
             if (s.listeners == null)
             {
                 s.listeners = make();
             }
+
             if (add)
-            { 
-                // If the *Server is being reused after a previous
-                // Close or Shutdown, reset its doneChan:
-                if (len(s.listeners) == 0L && len(s.activeConn) == 0L)
+            {
+                if (s.shuttingDown())
                 {
-                    s.doneChan = null;
+                    return false;
                 }
+
                 s.listeners[ln] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
+
             }
             else
             {
                 delete(s.listeners, ln);
             }
+
+            return true;
+
         });
 
-        private static void trackConn(this ref Server _s, ref conn _c, bool add) => func(_s, _c, (ref Server s, ref conn c, Defer defer, Panic _, Recover __) =>
+        private static void trackConn(this ptr<Server> _addr_s, ptr<conn> _addr_c, bool add) => func((defer, _, __) =>
         {
+            ref Server s = ref _addr_s.val;
+            ref conn c = ref _addr_c.val;
+
             s.mu.Lock();
             defer(s.mu.Unlock());
             if (s.activeConn == null)
             {
                 s.activeConn = make();
             }
+
             if (add)
             {
                 s.activeConn[c] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
@@ -3484,64 +4174,76 @@ namespace net
             {
                 delete(s.activeConn, c);
             }
+
         });
 
-        private static time.Duration idleTimeout(this ref Server s)
+        private static time.Duration idleTimeout(this ptr<Server> _addr_s)
         {
+            ref Server s = ref _addr_s.val;
+
             if (s.IdleTimeout != 0L)
             {
                 return s.IdleTimeout;
             }
+
             return s.ReadTimeout;
+
         }
 
-        private static time.Duration readHeaderTimeout(this ref Server s)
+        private static time.Duration readHeaderTimeout(this ptr<Server> _addr_s)
         {
+            ref Server s = ref _addr_s.val;
+
             if (s.ReadHeaderTimeout != 0L)
             {
                 return s.ReadHeaderTimeout;
             }
+
             return s.ReadTimeout;
+
         }
 
-        private static bool doKeepAlives(this ref Server s)
+        private static bool doKeepAlives(this ptr<Server> _addr_s)
         {
-            return atomic.LoadInt32(ref s.disableKeepAlives) == 0L && !s.shuttingDown();
+            ref Server s = ref _addr_s.val;
+
+            return atomic.LoadInt32(_addr_s.disableKeepAlives) == 0L && !s.shuttingDown();
         }
 
-        private static bool shuttingDown(this ref Server s)
+        private static bool shuttingDown(this ptr<Server> _addr_s)
         {
-            return atomic.LoadInt32(ref s.inShutdown) != 0L;
+            ref Server s = ref _addr_s.val;
+
+            return s.inShutdown.isSet();
         }
 
         // SetKeepAlivesEnabled controls whether HTTP keep-alives are enabled.
         // By default, keep-alives are always enabled. Only very
         // resource-constrained environments or servers in the process of
         // shutting down should disable them.
-        private static void SetKeepAlivesEnabled(this ref Server _srv, bool v) => func(_srv, (ref Server srv, Defer defer, Panic _, Recover __) =>
+        private static void SetKeepAlivesEnabled(this ptr<Server> _addr_srv, bool v)
         {
+            ref Server srv = ref _addr_srv.val;
+
             if (v)
             {
-                atomic.StoreInt32(ref srv.disableKeepAlives, 0L);
-                return;
+                atomic.StoreInt32(_addr_srv.disableKeepAlives, 0L);
+                return ;
             }
-            atomic.StoreInt32(ref srv.disableKeepAlives, 1L); 
+
+            atomic.StoreInt32(_addr_srv.disableKeepAlives, 1L); 
 
             // Close idle HTTP/1 conns:
             srv.closeIdleConns(); 
 
-            // Close HTTP/2 conns, as soon as they become idle, but reset
-            // the chan so future conns (if the listener is still active)
-            // still work and don't get a GOAWAY immediately, before their
-            // first request:
-            srv.mu.Lock();
-            defer(srv.mu.Unlock());
-            srv.closeDoneChanLocked(); // closes http2 conns
-            srv.doneChan = null;
-        });
+            // TODO: Issue 26303: close HTTP/2 conns as soon as they become idle.
+        }
 
-        private static void logf(this ref Server s, @string format, params object[] args)
+        private static void logf(this ptr<Server> _addr_s, @string format, params object[] args)
         {
+            args = args.Clone();
+            ref Server s = ref _addr_s.val;
+
             if (s.ErrorLog != null)
             {
                 s.ErrorLog.Printf(format, args);
@@ -3550,16 +4252,18 @@ namespace net
             {
                 log.Printf(format, args);
             }
+
         }
 
         // logf prints to the ErrorLog of the *Server associated with request r
         // via ServerContextKey. If there's no associated server, or if ErrorLog
         // is nil, logging is done via the log package's standard logger.
-        private static void logf(ref Request r, @string format, params object[] args)
+        private static void logf(ptr<Request> _addr_r, @string format, params object[] args)
         {
             args = args.Clone();
+            ref Request r = ref _addr_r.val;
 
-            ref Server (s, _) = r.Context().Value(ServerContextKey)._<ref Server>();
+            ptr<Server> (s, _) = r.Context().Value(ServerContextKey)._<ptr<Server>>();
             if (s != null && s.ErrorLog != null)
             {
                 s.ErrorLog.Printf(format, args);
@@ -3568,40 +4272,20 @@ namespace net
             {
                 log.Printf(format, args);
             }
+
         }
 
-        // ListenAndServe listens on the TCP network address addr
-        // and then calls Serve with handler to handle requests
-        // on incoming connections.
+        // ListenAndServe listens on the TCP network address addr and then calls
+        // Serve with handler to handle requests on incoming connections.
         // Accepted connections are configured to enable TCP keep-alives.
-        // Handler is typically nil, in which case the DefaultServeMux is
-        // used.
         //
-        // A trivial example server is:
-        //
-        //    package main
-        //
-        //    import (
-        //        "io"
-        //        "net/http"
-        //        "log"
-        //    )
-        //
-        //    // hello world, the web server
-        //    func HelloServer(w http.ResponseWriter, req *http.Request) {
-        //        io.WriteString(w, "hello, world!\n")
-        //    }
-        //
-        //    func main() {
-        //        http.HandleFunc("/hello", HelloServer)
-        //        log.Fatal(http.ListenAndServe(":12345", nil))
-        //    }
+        // The handler is typically nil, in which case the DefaultServeMux is used.
         //
         // ListenAndServe always returns a non-nil error.
         public static error ListenAndServe(@string addr, Handler handler)
         {
-            Server server = ref new Server(Addr:addr,Handler:handler);
-            return error.As(server.ListenAndServe());
+            ptr<Server> server = addr(new Server(Addr:addr,Handler:handler));
+            return error.As(server.ListenAndServe())!;
         }
 
         // ListenAndServeTLS acts identically to ListenAndServe, except that it
@@ -3609,37 +4293,14 @@ namespace net
         // matching private key for the server must be provided. If the certificate
         // is signed by a certificate authority, the certFile should be the concatenation
         // of the server's certificate, any intermediates, and the CA's certificate.
-        //
-        // A trivial example server is:
-        //
-        //    import (
-        //        "log"
-        //        "net/http"
-        //    )
-        //
-        //    func handler(w http.ResponseWriter, req *http.Request) {
-        //        w.Header().Set("Content-Type", "text/plain")
-        //        w.Write([]byte("This is an example server.\n"))
-        //    }
-        //
-        //    func main() {
-        //        http.HandleFunc("/", handler)
-        //        log.Printf("About to listen on 10443. Go to https://127.0.0.1:10443/")
-        //        err := http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil)
-        //        log.Fatal(err)
-        //    }
-        //
-        // One can use generate_cert.go in crypto/tls to generate cert.pem and key.pem.
-        //
-        // ListenAndServeTLS always returns a non-nil error.
         public static error ListenAndServeTLS(@string addr, @string certFile, @string keyFile, Handler handler)
         {
-            Server server = ref new Server(Addr:addr,Handler:handler);
-            return error.As(server.ListenAndServeTLS(certFile, keyFile));
+            ptr<Server> server = addr(new Server(Addr:addr,Handler:handler));
+            return error.As(server.ListenAndServeTLS(certFile, keyFile))!;
         }
 
         // ListenAndServeTLS listens on the TCP network address srv.Addr and
-        // then calls Serve to handle requests on incoming TLS connections.
+        // then calls ServeTLS to handle requests on incoming TLS connections.
         // Accepted connections are configured to enable TCP keep-alives.
         //
         // Filenames containing a certificate and matching private key for the
@@ -3651,71 +4312,92 @@ namespace net
         //
         // If srv.Addr is blank, ":https" is used.
         //
-        // ListenAndServeTLS always returns a non-nil error.
-        private static error ListenAndServeTLS(this ref Server _srv, @string certFile, @string keyFile) => func(_srv, (ref Server srv, Defer defer, Panic _, Recover __) =>
+        // ListenAndServeTLS always returns a non-nil error. After Shutdown or
+        // Close, the returned error is ErrServerClosed.
+        private static error ListenAndServeTLS(this ptr<Server> _addr_srv, @string certFile, @string keyFile) => func((defer, _, __) =>
         {
+            ref Server srv = ref _addr_srv.val;
+
+            if (srv.shuttingDown())
+            {
+                return error.As(ErrServerClosed)!;
+            }
+
             var addr = srv.Addr;
             if (addr == "")
             {
                 addr = ":https";
             }
+
             var (ln, err) = net.Listen("tcp", addr);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             defer(ln.Close());
 
-            return error.As(srv.ServeTLS(new tcpKeepAliveListener(ln.(*net.TCPListener)), certFile, keyFile));
+            return error.As(srv.ServeTLS(ln, certFile, keyFile))!;
+
         });
 
         // setupHTTP2_ServeTLS conditionally configures HTTP/2 on
-        // srv and returns whether there was an error setting it up. If it is
+        // srv and reports whether there was an error setting it up. If it is
         // not configured for policy reasons, nil is returned.
-        private static error setupHTTP2_ServeTLS(this ref Server srv)
+        private static error setupHTTP2_ServeTLS(this ptr<Server> _addr_srv)
         {
+            ref Server srv = ref _addr_srv.val;
+
             srv.nextProtoOnce.Do(srv.onceSetNextProtoDefaults);
-            return error.As(srv.nextProtoErr);
+            return error.As(srv.nextProtoErr)!;
         }
 
         // setupHTTP2_Serve is called from (*Server).Serve and conditionally
         // configures HTTP/2 on srv using a more conservative policy than
-        // setupHTTP2_ServeTLS because Serve may be called
-        // concurrently.
+        // setupHTTP2_ServeTLS because Serve is called after tls.Listen,
+        // and may be called concurrently. See shouldConfigureHTTP2ForServe.
         //
         // The tests named TestTransportAutomaticHTTP2* and
         // TestConcurrentServerServe in server_test.go demonstrate some
         // of the supported use cases and motivations.
-        private static error setupHTTP2_Serve(this ref Server srv)
+        private static error setupHTTP2_Serve(this ptr<Server> _addr_srv)
         {
+            ref Server srv = ref _addr_srv.val;
+
             srv.nextProtoOnce.Do(srv.onceSetNextProtoDefaults_Serve);
-            return error.As(srv.nextProtoErr);
+            return error.As(srv.nextProtoErr)!;
         }
 
-        private static void onceSetNextProtoDefaults_Serve(this ref Server srv)
+        private static void onceSetNextProtoDefaults_Serve(this ptr<Server> _addr_srv)
         {
+            ref Server srv = ref _addr_srv.val;
+
             if (srv.shouldConfigureHTTP2ForServe())
             {
                 srv.onceSetNextProtoDefaults();
             }
+
         }
 
         // onceSetNextProtoDefaults configures HTTP/2, if the user hasn't
         // configured otherwise. (by setting srv.TLSNextProto non-nil)
         // It must only be called via srv.nextProtoOnce (use srv.setupHTTP2_*).
-        private static void onceSetNextProtoDefaults(this ref Server srv)
+        private static void onceSetNextProtoDefaults(this ptr<Server> _addr_srv)
         {
-            if (strings.Contains(os.Getenv("GODEBUG"), "http2server=0"))
+            ref Server srv = ref _addr_srv.val;
+
+            if (omitBundledHTTP2 || strings.Contains(os.Getenv("GODEBUG"), "http2server=0"))
             {
-                return;
+                return ;
             } 
             // Enable HTTP/2 by default if the user hasn't otherwise
             // configured their TLSNextProto map.
             if (srv.TLSNextProto == null)
             {
-                http2Server conf = ref new http2Server(NewWriteScheduler:func()http2WriteScheduler{returnhttp2NewPriorityWriteScheduler(nil)},);
+                ptr<http2Server> conf = addr(new http2Server(NewWriteScheduler:func()http2WriteScheduler{returnhttp2NewPriorityWriteScheduler(nil)},));
                 srv.nextProtoErr = http2ConfigureServer(srv, conf);
             }
+
         }
 
         // TimeoutHandler returns a Handler that runs h with the given time limit.
@@ -3727,11 +4409,11 @@ namespace net
         // After such a timeout, writes by h to its ResponseWriter will return
         // ErrHandlerTimeout.
         //
-        // TimeoutHandler buffers all Handler writes to memory and does not
-        // support the Hijacker or Flusher interfaces.
+        // TimeoutHandler supports the Pusher interface but does not support
+        // the Hijacker or Flusher interfaces.
         public static Handler TimeoutHandler(Handler h, time.Duration dt, @string msg)
         {
-            return ref new timeoutHandler(handler:h,body:msg,dt:dt,);
+            return addr(new timeoutHandler(handler:h,body:msg,dt:dt,));
         }
 
         // ErrHandlerTimeout is returned on ResponseWriter Write calls
@@ -3747,17 +4429,24 @@ namespace net
             public context.Context testContext;
         }
 
-        private static @string errorBody(this ref timeoutHandler h)
+        private static @string errorBody(this ptr<timeoutHandler> _addr_h)
         {
+            ref timeoutHandler h = ref _addr_h.val;
+
             if (h.body != "")
             {
                 return h.body;
             }
+
             return "<html><head><title>Timeout</title></head><body><h1>Timeout</h1></body></html>";
+
         }
 
-        private static void ServeHTTP(this ref timeoutHandler _h, ResponseWriter w, ref Request _r) => func(_h, _r, (ref timeoutHandler h, ref Request r, Defer defer, Panic panic, Recover _) =>
+        private static void ServeHTTP(this ptr<timeoutHandler> _addr_h, ResponseWriter w, ptr<Request> _addr_r) => func((defer, panic, _) =>
         {
+            ref timeoutHandler h = ref _addr_h.val;
+            ref Request r = ref _addr_r.val;
+
             var ctx = h.testContext;
             if (ctx == null)
             {
@@ -3765,9 +4454,10 @@ namespace net
                 ctx, cancelCtx = context.WithTimeout(r.Context(), h.dt);
                 defer(cancelCtx());
             }
+
             r = r.WithContext(ctx);
             var done = make_channel<object>();
-            timeoutWriter tw = ref new timeoutWriter(w:w,h:make(Header),);
+            ptr<timeoutWriter> tw = addr(new timeoutWriter(w:w,h:make(Header),req:r,));
             var panicChan = make_channel<object>(1L);
             go_(() => () =>
             {
@@ -3786,9 +4476,11 @@ namespace net
                         p = p__prev1;
 
                     }
+
                 }());
                 h.handler.ServeHTTP(tw, r);
                 close(done);
+
             }());
             panic(p);
             tw.mu.Lock();
@@ -3802,6 +4494,7 @@ namespace net
             {
                 tw.code = StatusOK;
             }
+
             w.WriteHeader(tw.code);
             w.Write(tw.wbuf.Bytes());
             tw.mu.Lock();
@@ -3809,7 +4502,7 @@ namespace net
             w.WriteHeader(StatusServiceUnavailable);
             io.WriteString(w, h.errorBody());
             tw.timedOut = true;
-            return;
+
         });
 
         private partial struct timeoutWriter
@@ -3817,69 +4510,117 @@ namespace net
             public ResponseWriter w;
             public Header h;
             public bytes.Buffer wbuf;
+            public ptr<Request> req;
             public sync.Mutex mu;
             public bool timedOut;
             public bool wroteHeader;
             public long code;
         }
 
-        private static Header Header(this ref timeoutWriter tw)
+        private static Pusher _ = (timeoutWriter.val)(null);
+
+        // Push implements the Pusher interface.
+        private static error Push(this ptr<timeoutWriter> _addr_tw, @string target, ptr<PushOptions> _addr_opts)
         {
+            ref timeoutWriter tw = ref _addr_tw.val;
+            ref PushOptions opts = ref _addr_opts.val;
+
+            {
+                Pusher (pusher, ok) = tw.w._<Pusher>();
+
+                if (ok)
+                {
+                    return error.As(pusher.Push(target, opts))!;
+                }
+
+            }
+
+            return error.As(ErrNotSupported)!;
+
+        }
+
+        private static Header Header(this ptr<timeoutWriter> _addr_tw)
+        {
+            ref timeoutWriter tw = ref _addr_tw.val;
+
             return tw.h;
         }
 
-        private static (long, error) Write(this ref timeoutWriter _tw, slice<byte> p) => func(_tw, (ref timeoutWriter tw, Defer defer, Panic _, Recover __) =>
+        private static (long, error) Write(this ptr<timeoutWriter> _addr_tw, slice<byte> p) => func((defer, _, __) =>
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref timeoutWriter tw = ref _addr_tw.val;
+
             tw.mu.Lock();
             defer(tw.mu.Unlock());
             if (tw.timedOut)
             {
-                return (0L, ErrHandlerTimeout);
+                return (0L, error.As(ErrHandlerTimeout)!);
             }
+
             if (!tw.wroteHeader)
             {
-                tw.writeHeader(StatusOK);
+                tw.writeHeaderLocked(StatusOK);
             }
+
             return tw.wbuf.Write(p);
+
         });
 
-        private static void WriteHeader(this ref timeoutWriter _tw, long code) => func(_tw, (ref timeoutWriter tw, Defer defer, Panic _, Recover __) =>
+        private static void writeHeaderLocked(this ptr<timeoutWriter> _addr_tw, long code)
         {
+            ref timeoutWriter tw = ref _addr_tw.val;
+
             checkWriteHeaderCode(code);
+
+
+            if (tw.timedOut) 
+                return ;
+            else if (tw.wroteHeader) 
+                if (tw.req != null)
+                {
+                    var caller = relevantCaller();
+                    logf(_addr_tw.req, "http: superfluous response.WriteHeader call from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
+                }
+
+            else 
+                tw.wroteHeader = true;
+                tw.code = code;
+            
+        }
+
+        private static void WriteHeader(this ptr<timeoutWriter> _addr_tw, long code) => func((defer, _, __) =>
+        {
+            ref timeoutWriter tw = ref _addr_tw.val;
+
             tw.mu.Lock();
             defer(tw.mu.Unlock());
-            if (tw.timedOut || tw.wroteHeader)
-            {
-                return;
-            }
-            tw.writeHeader(code);
+            tw.writeHeaderLocked(code);
         });
 
-        private static void writeHeader(this ref timeoutWriter tw, long code)
+        // onceCloseListener wraps a net.Listener, protecting it from
+        // multiple Close calls.
+        private partial struct onceCloseListener : net.Listener
         {
-            tw.wroteHeader = true;
-            tw.code = code;
+            public ref net.Listener Listener => ref Listener_val;
+            public sync.Once once;
+            public error closeErr;
         }
 
-        // tcpKeepAliveListener sets TCP keep-alive timeouts on accepted
-        // connections. It's used by ListenAndServe and ListenAndServeTLS so
-        // dead TCP connections (e.g. closing laptop mid-download) eventually
-        // go away.
-        private partial struct tcpKeepAliveListener
+        private static error Close(this ptr<onceCloseListener> _addr_oc)
         {
-            public ref net.TCPListener TCPListener => ref TCPListener_ptr;
+            ref onceCloseListener oc = ref _addr_oc.val;
+
+            oc.once.Do(oc.close);
+            return error.As(oc.closeErr)!;
         }
 
-        private static (net.Conn, error) Accept(this tcpKeepAliveListener ln)
+        private static void close(this ptr<onceCloseListener> _addr_oc)
         {
-            var (tc, err) = ln.AcceptTCP();
-            if (err != null)
-            {
-                return (null, err);
-            }
-            tc.SetKeepAlive(true);
-            tc.SetKeepAlivePeriod(3L * time.Minute);
-            return (tc, null);
+            ref onceCloseListener oc = ref _addr_oc.val;
+
+            oc.closeErr = oc.Listener.Close();
         }
 
         // globalOptionsHandler responds to "OPTIONS *" requests.
@@ -3887,8 +4628,10 @@ namespace net
         {
         }
 
-        private static void ServeHTTP(this globalOptionsHandler _p0, ResponseWriter w, ref Request r)
+        private static void ServeHTTP(this globalOptionsHandler _p0, ResponseWriter w, ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             w.Header().Set("Content-Length", "0");
             if (r.ContentLength != 0L)
             { 
@@ -3899,34 +4642,52 @@ namespace net
                 // courtesy of MaxBytesReader's EOF behavior.
                 var mb = MaxBytesReader(w, r.Body, 4L << (int)(10L));
                 io.Copy(ioutil.Discard, mb);
+
             }
+
         }
 
-        // initNPNRequest is an HTTP handler that initializes certain
+        // initALPNRequest is an HTTP handler that initializes certain
         // uninitialized fields in its *Request. Such partially-initialized
-        // Requests come from NPN protocol handlers.
-        private partial struct initNPNRequest
+        // Requests come from ALPN protocol handlers.
+        private partial struct initALPNRequest
         {
+            public context.Context ctx;
             public ptr<tls.Conn> c;
             public serverHandler h;
         }
 
-        private static void ServeHTTP(this initNPNRequest h, ResponseWriter rw, ref Request req)
+        // BaseContext is an exported but unadvertised http.Handler method
+        // recognized by x/net/http2 to pass down a context; the TLSNextProto
+        // API predates context support so we shoehorn through the only
+        // interface we have available.
+        private static context.Context BaseContext(this initALPNRequest h)
         {
+            return h.ctx;
+        }
+
+        private static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ptr<Request> _addr_req)
+        {
+            ref Request req = ref _addr_req.val;
+
             if (req.TLS == null)
             {
-                req.TLS = ref new tls.ConnectionState();
-                req.TLS.Value = h.c.ConnectionState();
+                req.TLS = addr(new tls.ConnectionState());
+                req.TLS.val = h.c.ConnectionState();
             }
+
             if (req.Body == null)
             {
                 req.Body = NoBody;
             }
+
             if (req.RemoteAddr == "")
             {
                 req.RemoteAddr = h.c.RemoteAddr().String();
             }
+
             h.h.ServeHTTP(rw, req);
+
         }
 
         // loggingConn is used for debugging.
@@ -3943,31 +4704,42 @@ namespace net
             uniqNameMu.Lock();
             defer(uniqNameMu.Unlock());
             uniqNameNext[baseName]++;
-            return ref new loggingConn(name:fmt.Sprintf("%s-%d",baseName,uniqNameNext[baseName]),Conn:c,);
+            return addr(new loggingConn(name:fmt.Sprintf("%s-%d",baseName,uniqNameNext[baseName]),Conn:c,));
         });
 
-        private static (long, error) Write(this ref loggingConn c, slice<byte> p)
+        private static (long, error) Write(this ptr<loggingConn> _addr_c, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref loggingConn c = ref _addr_c.val;
+
             log.Printf("%s.Write(%d) = ....", c.name, len(p));
             n, err = c.Conn.Write(p);
             log.Printf("%s.Write(%d) = %d, %v", c.name, len(p), n, err);
-            return;
+            return ;
         }
 
-        private static (long, error) Read(this ref loggingConn c, slice<byte> p)
+        private static (long, error) Read(this ptr<loggingConn> _addr_c, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref loggingConn c = ref _addr_c.val;
+
             log.Printf("%s.Read(%d) = ....", c.name, len(p));
             n, err = c.Conn.Read(p);
             log.Printf("%s.Read(%d) = %d, %v", c.name, len(p), n, err);
-            return;
+            return ;
         }
 
-        private static error Close(this ref loggingConn c)
+        private static error Close(this ptr<loggingConn> _addr_c)
         {
+            error err = default!;
+            ref loggingConn c = ref _addr_c.val;
+
             log.Printf("%s.Close() = ...", c.name);
             err = c.Conn.Close();
             log.Printf("%s.Close() = %v", c.name, err);
-            return;
+            return ;
         }
 
         // checkConnErrorWriter writes to c.rwc and records any write errors to c.werr.
@@ -3980,17 +4752,24 @@ namespace net
 
         private static (long, error) Write(this checkConnErrorWriter w, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+
             n, err = w.c.rwc.Write(p);
             if (err != null && w.c.werr == null)
             {
                 w.c.werr = err;
                 w.c.cancelCtx();
             }
-            return;
+
+            return ;
+
         }
 
         private static long numLeadingCRorLF(slice<byte> v)
         {
+            long n = default;
+
             foreach (var (_, b) in v)
             {
                 if (b == '\r' || b == '\n')
@@ -3998,9 +4777,12 @@ namespace net
                     n++;
                     continue;
                 }
+
                 break;
+
             }
-            return;
+            return ;
+
 
         }
 
@@ -4012,8 +4794,34 @@ namespace net
                 {
                     return true;
                 }
+
             }
             return false;
+
+        }
+
+        // tlsRecordHeaderLooksLikeHTTP reports whether a TLS record header
+        // looks like it might've been a misdirected plaintext HTTP request.
+        private static bool tlsRecordHeaderLooksLikeHTTP(array<byte> hdr)
+        {
+            hdr = hdr.Clone();
+
+            switch (string(hdr[..]))
+            {
+                case "GET /": 
+
+                case "HEAD ": 
+
+                case "POST ": 
+
+                case "PUT /": 
+
+                case "OPTIO": 
+                    return true;
+                    break;
+            }
+            return false;
+
         }
     }
 }}

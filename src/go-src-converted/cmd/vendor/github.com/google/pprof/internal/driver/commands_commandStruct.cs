@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:18 UTC
+//     Generated on 2020 October 08 04:42:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,6 @@ using strings = go.strings_package;
 using time = go.time_package;
 using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using report = go.github.com.google.pprof.@internal.report_package;
-using svg = go.github.com.google.pprof.third_party.svg_package;
 using go;
 
 namespace go {

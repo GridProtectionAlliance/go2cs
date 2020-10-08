@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:43 UTC
+//     Generated on 2020 October 08 03:36:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
 using rsa = go.crypto.rsa_package;
 using pkix = go.crypto.x509.pkix_package;
 using asn1 = go.encoding.asn1_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package asn1 -- go2cs converted at 2020 August 29 08:29:46 UTC
+// package asn1 -- go2cs converted at 2020 October 08 03:36:52 UTC
 // import "encoding/asn1" ==> using asn1 = go.encoding.asn1_package
 // Original source: C:\Go\src\encoding\asn1\common.go
 using reflect = go.reflect_package;
@@ -24,29 +24,32 @@ namespace encoding
         // Here are some standard tags and classes
 
         // ASN.1 tags represent the type of the following object.
-        public static readonly long TagBoolean = 1L;
-        public static readonly long TagInteger = 2L;
-        public static readonly long TagBitString = 3L;
-        public static readonly long TagOctetString = 4L;
-        public static readonly long TagNull = 5L;
-        public static readonly long TagOID = 6L;
-        public static readonly long TagEnum = 10L;
-        public static readonly long TagUTF8String = 12L;
-        public static readonly long TagSequence = 16L;
-        public static readonly long TagSet = 17L;
-        public static readonly long TagNumericString = 18L;
-        public static readonly long TagPrintableString = 19L;
-        public static readonly long TagT61String = 20L;
-        public static readonly long TagIA5String = 22L;
-        public static readonly long TagUTCTime = 23L;
-        public static readonly long TagGeneralizedTime = 24L;
-        public static readonly long TagGeneralString = 27L;
+        public static readonly long TagBoolean = (long)1L;
+        public static readonly long TagInteger = (long)2L;
+        public static readonly long TagBitString = (long)3L;
+        public static readonly long TagOctetString = (long)4L;
+        public static readonly long TagNull = (long)5L;
+        public static readonly long TagOID = (long)6L;
+        public static readonly long TagEnum = (long)10L;
+        public static readonly long TagUTF8String = (long)12L;
+        public static readonly long TagSequence = (long)16L;
+        public static readonly long TagSet = (long)17L;
+        public static readonly long TagNumericString = (long)18L;
+        public static readonly long TagPrintableString = (long)19L;
+        public static readonly long TagT61String = (long)20L;
+        public static readonly long TagIA5String = (long)22L;
+        public static readonly long TagUTCTime = (long)23L;
+        public static readonly long TagGeneralizedTime = (long)24L;
+        public static readonly long TagGeneralString = (long)27L;
+        public static readonly long TagBMPString = (long)30L;
+
 
         // ASN.1 class types represent the namespace of the tag.
-        public static readonly long ClassUniversal = 0L;
-        public static readonly long ClassApplication = 1L;
-        public static readonly long ClassContextSpecific = 2L;
-        public static readonly long ClassPrivate = 3L;
+        public static readonly long ClassUniversal = (long)0L;
+        public static readonly long ClassApplication = (long)1L;
+        public static readonly long ClassContextSpecific = (long)2L;
+        public static readonly long ClassPrivate = (long)3L;
+
 
         private partial struct tagAndLength
         {
@@ -80,6 +83,7 @@ namespace encoding
             public bool optional; // true iff the field is OPTIONAL
             public bool @explicit; // true iff an EXPLICIT tag is in use.
             public bool application; // true iff an APPLICATION tag is in use.
+            public bool @private; // true iff a PRIVATE tag is in use.
             public ptr<long> defaultValue; // a default value for INTEGER typed fields (maybe nil).
             public ptr<long> tag; // the EXPLICIT or IMPLICIT tag (maybe nil).
             public long stringType; // the string tag to use when marshaling.
@@ -96,6 +100,8 @@ namespace encoding
         // ignoring unknown parts of the string.
         private static fieldParameters parseFieldParameters(@string str)
         {
+            fieldParameters ret = default;
+
             foreach (var (_, part) in strings.Split(str, ","))
             {
 
@@ -107,6 +113,7 @@ namespace encoding
                     {
                         ret.tag = @new<int>();
                     }
+
                 else if (part == "generalized") 
                     ret.timeType = TagGeneralizedTime;
                 else if (part == "utc") 
@@ -124,15 +131,17 @@ namespace encoding
                     if (err == null)
                     {
                         ret.defaultValue = @new<int64>();
-                        ret.defaultValue.Value = i;
+                        ret.defaultValue.val = i;
                     }
+
                 else if (strings.HasPrefix(part, "tag:")) 
                     (i, err) = strconv.Atoi(part[4L..]);
                     if (err == null)
                     {
                         ret.tag = @new<int>();
-                        ret.tag.Value = i;
+                        ret.tag.val = i;
                     }
+
                 else if (part == "set") 
                     ret.set = true;
                 else if (part == "application") 
@@ -141,16 +150,31 @@ namespace encoding
                     {
                         ret.tag = @new<int>();
                     }
+
+                else if (part == "private") 
+                    ret.@private = true;
+                    if (ret.tag == null)
+                    {
+                        ret.tag = @new<int>();
+                    }
+
                 else if (part == "omitempty") 
                     ret.omitEmpty = true;
-                            }
-            return;
+                
+            }
+            return ;
+
         }
 
         // Given a reflected Go type, getUniversalType returns the default tag number
         // and expected compound flag.
         private static (bool, long, bool, bool) getUniversalType(reflect.Type t)
         {
+            bool matchAny = default;
+            long tagNumber = default;
+            bool isCompound = default;
+            bool ok = default;
+
 
             if (t == rawValueType) 
                 return (true, -1L, false, true);
@@ -176,14 +200,17 @@ namespace encoding
                 {
                     return (false, TagOctetString, false, true);
                 }
+
                 if (strings.HasSuffix(t.Name(), "SET"))
                 {
                     return (false, TagSet, true, true);
                 }
+
                 return (false, TagSequence, true, true);
             else if (t.Kind() == reflect.String) 
                 return (false, TagPrintableString, false, true);
                         return (false, 0L, false, false);
+
         }
     }
 }}

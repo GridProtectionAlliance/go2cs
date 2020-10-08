@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 August 29 08:23:55 UTC
+// package syntax -- go2cs converted at 2020 October 08 03:41:04 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\parse.go
 using sort = go.sort_package;
@@ -24,8 +24,10 @@ namespace regexp
             public @string Expr;
         }
 
-        private static @string Error(this ref Error e)
+        private static @string Error(this ptr<Error> _addr_e)
         {
+            ref Error e = ref _addr_e.val;
+
             return "error parsing regexp: " + e.Code.String() + ": `" + e.Expr + "`";
         }
 
@@ -36,22 +38,23 @@ namespace regexp
 
  
         // Unexpected error
-        public static readonly ErrorCode ErrInternalError = "regexp/syntax: internal error"; 
+        public static readonly ErrorCode ErrInternalError = (ErrorCode)"regexp/syntax: internal error"; 
 
         // Parse errors
-        public static readonly ErrorCode ErrInvalidCharClass = "invalid character class";
-        public static readonly ErrorCode ErrInvalidCharRange = "invalid character class range";
-        public static readonly ErrorCode ErrInvalidEscape = "invalid escape sequence";
-        public static readonly ErrorCode ErrInvalidNamedCapture = "invalid named capture";
-        public static readonly ErrorCode ErrInvalidPerlOp = "invalid or unsupported Perl syntax";
-        public static readonly ErrorCode ErrInvalidRepeatOp = "invalid nested repetition operator";
-        public static readonly ErrorCode ErrInvalidRepeatSize = "invalid repeat count";
-        public static readonly ErrorCode ErrInvalidUTF8 = "invalid UTF-8";
-        public static readonly ErrorCode ErrMissingBracket = "missing closing ]";
-        public static readonly ErrorCode ErrMissingParen = "missing closing )";
-        public static readonly ErrorCode ErrMissingRepeatArgument = "missing argument to repetition operator";
-        public static readonly ErrorCode ErrTrailingBackslash = "trailing backslash at end of expression";
-        public static readonly ErrorCode ErrUnexpectedParen = "unexpected )";
+        public static readonly ErrorCode ErrInvalidCharClass = (ErrorCode)"invalid character class";
+        public static readonly ErrorCode ErrInvalidCharRange = (ErrorCode)"invalid character class range";
+        public static readonly ErrorCode ErrInvalidEscape = (ErrorCode)"invalid escape sequence";
+        public static readonly ErrorCode ErrInvalidNamedCapture = (ErrorCode)"invalid named capture";
+        public static readonly ErrorCode ErrInvalidPerlOp = (ErrorCode)"invalid or unsupported Perl syntax";
+        public static readonly ErrorCode ErrInvalidRepeatOp = (ErrorCode)"invalid nested repetition operator";
+        public static readonly ErrorCode ErrInvalidRepeatSize = (ErrorCode)"invalid repeat count";
+        public static readonly ErrorCode ErrInvalidUTF8 = (ErrorCode)"invalid UTF-8";
+        public static readonly ErrorCode ErrMissingBracket = (ErrorCode)"missing closing ]";
+        public static readonly ErrorCode ErrMissingParen = (ErrorCode)"missing closing )";
+        public static readonly ErrorCode ErrMissingRepeatArgument = (ErrorCode)"missing argument to repetition operator";
+        public static readonly ErrorCode ErrTrailingBackslash = (ErrorCode)"trailing backslash at end of expression";
+        public static readonly ErrorCode ErrUnexpectedParen = (ErrorCode)"unexpected )";
+
 
         public static @string String(this ErrorCode e)
         {
@@ -63,52 +66,60 @@ namespace regexp
         {
         }
 
-        public static readonly Flags FoldCase = 1L << (int)(iota); // case-insensitive match
-        public static readonly var Literal = 0; // treat pattern as literal string
-        public static readonly var ClassNL = 1; // allow character classes like [^a-z] and [[:space:]] to match newline
-        public static readonly var DotNL = 2; // allow . to match newline
-        public static readonly var OneLine = 3; // treat ^ and $ as only matching at beginning and end of text
-        public static readonly var NonGreedy = 4; // make repetition operators default to non-greedy
-        public static readonly var PerlX = 5; // allow Perl extensions
-        public static readonly var UnicodeGroups = 6; // allow \p{Han}, \P{Han} for Unicode group and negation
-        public static readonly var WasDollar = 7; // regexp OpEndText was $, not \z
-        public static readonly MatchNL Simple = ClassNL | DotNL;
+        public static readonly Flags FoldCase = (Flags)1L << (int)(iota); // case-insensitive match
+        public static readonly var Literal = (var)0; // treat pattern as literal string
+        public static readonly var ClassNL = (var)1; // allow character classes like [^a-z] and [[:space:]] to match newline
+        public static readonly var DotNL = (var)2; // allow . to match newline
+        public static readonly var OneLine = (var)3; // treat ^ and $ as only matching at beginning and end of text
+        public static readonly var NonGreedy = (var)4; // make repetition operators default to non-greedy
+        public static readonly var PerlX = (var)5; // allow Perl extensions
+        public static readonly var UnicodeGroups = (var)6; // allow \p{Han}, \P{Han} for Unicode group and negation
+        public static readonly var WasDollar = (var)7; // regexp OpEndText was $, not \z
+        public static readonly MatchNL Simple = (MatchNL)ClassNL | DotNL;
 
-        public static readonly var Perl = ClassNL | OneLine | PerlX | UnicodeGroups; // as close to Perl as possible
-        public static readonly Flags POSIX = 0L; // POSIX syntax
+        public static readonly var Perl = (var)ClassNL | OneLine | PerlX | UnicodeGroups; // as close to Perl as possible
+        public static readonly Flags POSIX = (Flags)0L; // POSIX syntax
 
         // Pseudo-ops for parsing stack.
-        private static readonly var opLeftParen = opPseudo + iota;
-        private static readonly var opVerticalBar = 0;
+        private static readonly var opLeftParen = (var)opPseudo + iota;
+        private static readonly var opVerticalBar = (var)0;
+
 
         private partial struct parser
         {
             public Flags flags; // parse mode flags
-            public slice<ref Regexp> stack; // stack of parsed expressions
+            public slice<ptr<Regexp>> stack; // stack of parsed expressions
             public ptr<Regexp> free;
             public long numCap; // number of capturing groups seen
             public @string wholeRegexp;
             public slice<int> tmpClass; // temporary char class work space
         }
 
-        private static ref Regexp newRegexp(this ref parser p, Op op)
+        private static ptr<Regexp> newRegexp(this ptr<parser> _addr_p, Op op)
         {
+            ref parser p = ref _addr_p.val;
+
             var re = p.free;
             if (re != null)
             {
                 p.free = re.Sub0[0L];
-                re.Value = new Regexp();
+                re.val = new Regexp();
             }
             else
             {
                 re = @new<Regexp>();
             }
+
             re.Op = op;
-            return re;
+            return _addr_re!;
+
         }
 
-        private static void reuse(this ref parser p, ref Regexp re)
+        private static void reuse(this ptr<parser> _addr_p, ptr<Regexp> _addr_re)
         {
+            ref parser p = ref _addr_p.val;
+            ref Regexp re = ref _addr_re.val;
+
             re.Sub0[0L] = p.free;
             p.free = re;
         }
@@ -116,39 +127,48 @@ namespace regexp
         // Parse stack manipulation.
 
         // push pushes the regexp re onto the parse stack and returns the regexp.
-        private static ref Regexp push(this ref parser p, ref Regexp re)
+        private static ptr<Regexp> push(this ptr<parser> _addr_p, ptr<Regexp> _addr_re)
         {
+            ref parser p = ref _addr_p.val;
+            ref Regexp re = ref _addr_re.val;
+
             if (re.Op == OpCharClass && len(re.Rune) == 2L && re.Rune[0L] == re.Rune[1L])
             { 
                 // Single rune.
                 if (p.maybeConcat(re.Rune[0L], p.flags & ~FoldCase))
                 {
-                    return null;
+                    return _addr_null!;
                 }
+
                 re.Op = OpLiteral;
                 re.Rune = re.Rune[..1L];
                 re.Flags = p.flags & ~FoldCase;
+
             }
             else if (re.Op == OpCharClass && len(re.Rune) == 4L && re.Rune[0L] == re.Rune[1L] && re.Rune[2L] == re.Rune[3L] && unicode.SimpleFold(re.Rune[0L]) == re.Rune[2L] && unicode.SimpleFold(re.Rune[2L]) == re.Rune[0L] || re.Op == OpCharClass && len(re.Rune) == 2L && re.Rune[0L] + 1L == re.Rune[1L] && unicode.SimpleFold(re.Rune[0L]) == re.Rune[1L] && unicode.SimpleFold(re.Rune[1L]) == re.Rune[0L])
             { 
                 // Case-insensitive rune like [Aa] or [Δδ].
                 if (p.maybeConcat(re.Rune[0L], p.flags | FoldCase))
                 {
-                    return null;
+                    return _addr_null!;
                 } 
 
                 // Rewrite as (case-insensitive) literal.
                 re.Op = OpLiteral;
                 re.Rune = re.Rune[..1L];
                 re.Flags = p.flags | FoldCase;
+
             }
             else
             { 
                 // Incremental concatenation.
                 p.maybeConcat(-1L, 0L);
+
             }
+
             p.stack = append(p.stack, re);
-            return re;
+            return _addr_re!;
+
         }
 
         // maybeConcat implements incremental concatenation
@@ -160,13 +180,16 @@ namespace regexp
         // If r >= 0 and there's a node left over, maybeConcat uses it
         // to push r with the given flags.
         // maybeConcat reports whether r was pushed.
-        private static bool maybeConcat(this ref parser p, int r, Flags flags)
+        private static bool maybeConcat(this ptr<parser> _addr_p, int r, Flags flags)
         {
+            ref parser p = ref _addr_p.val;
+
             var n = len(p.stack);
             if (n < 2L)
             {
                 return false;
             }
+
             var re1 = p.stack[n - 1L];
             var re2 = p.stack[n - 2L];
             if (re1.Op != OpLiteral || re2.Op != OpLiteral || re1.Flags & FoldCase != re2.Flags & FoldCase)
@@ -185,23 +208,28 @@ namespace regexp
                 re1.Flags = flags;
                 return true;
             }
+
             p.stack = p.stack[..n - 1L];
             p.reuse(re1);
             return false; // did not push r
         }
 
-        // newLiteral returns a new OpLiteral Regexp with the given flags
-        private static ref Regexp newLiteral(this ref parser p, int r, Flags flags)
+        // literal pushes a literal regexp for the rune r on the stack.
+        private static void literal(this ptr<parser> _addr_p, int r)
         {
+            ref parser p = ref _addr_p.val;
+
             var re = p.newRegexp(OpLiteral);
-            re.Flags = flags;
-            if (flags & FoldCase != 0L)
+            re.Flags = p.flags;
+            if (p.flags & FoldCase != 0L)
             {
                 r = minFoldRune(r);
             }
+
             re.Rune0[0L] = r;
             re.Rune = re.Rune0[..1L];
-            return re;
+            p.push(re);
+
         }
 
         // minFoldRune returns the minimum rune fold-equivalent to r.
@@ -211,6 +239,7 @@ namespace regexp
             {
                 return r;
             }
+
             var min = r;
             var r0 = r;
             r = unicode.SimpleFold(r);
@@ -222,33 +251,34 @@ namespace regexp
                     min = r;
                 r = unicode.SimpleFold(r);
                 }
+
             }
 
             return min;
-        }
 
-        // literal pushes a literal regexp for the rune r on the stack
-        // and returns that regexp.
-        private static void literal(this ref parser p, int r)
-        {
-            p.push(p.newLiteral(r, p.flags));
         }
 
         // op pushes a regexp with the given op onto the stack
         // and returns that regexp.
-        private static ref Regexp op(this ref parser p, Op op)
+        private static ptr<Regexp> op(this ptr<parser> _addr_p, Op op)
         {
+            ref parser p = ref _addr_p.val;
+
             var re = p.newRegexp(op);
             re.Flags = p.flags;
-            return p.push(re);
+            return _addr_p.push(re)!;
         }
 
         // repeat replaces the top stack element with itself repeated according to op, min, max.
         // before is the regexp suffix starting at the repetition operator.
         // after is the regexp suffix following after the repetition operator.
         // repeat returns an updated 'after' and an error, if any.
-        private static (@string, error) repeat(this ref parser p, Op op, long min, long max, @string before, @string after, @string lastRepeat)
+        private static (@string, error) repeat(this ptr<parser> _addr_p, Op op, long min, long max, @string before, @string after, @string lastRepeat)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref parser p = ref _addr_p.val;
+
             var flags = p.flags;
             if (p.flags & PerlX != 0L)
             {
@@ -257,24 +287,30 @@ namespace regexp
                     after = after[1L..];
                     flags ^= NonGreedy;
                 }
+
                 if (lastRepeat != "")
                 { 
                     // In Perl it is not allowed to stack repetition operators:
                     // a** is a syntax error, not a doubled star, and a++ means
                     // something else entirely, which we don't support!
-                    return ("", ref new Error(ErrInvalidRepeatOp,lastRepeat[:len(lastRepeat)-len(after)]));
+                    return ("", error.As(addr(new Error(ErrInvalidRepeatOp,lastRepeat[:len(lastRepeat)-len(after)]))!)!);
+
                 }
+
             }
+
             var n = len(p.stack);
             if (n == 0L)
             {
-                return ("", ref new Error(ErrMissingRepeatArgument,before[:len(before)-len(after)]));
+                return ("", error.As(addr(new Error(ErrMissingRepeatArgument,before[:len(before)-len(after)]))!)!);
             }
+
             var sub = p.stack[n - 1L];
             if (sub.Op >= opPseudo)
             {
-                return ("", ref new Error(ErrMissingRepeatArgument,before[:len(before)-len(after)]));
+                return ("", error.As(addr(new Error(ErrMissingRepeatArgument,before[:len(before)-len(after)]))!)!);
             }
+
             var re = p.newRegexp(op);
             re.Min = min;
             re.Max = max;
@@ -283,11 +319,13 @@ namespace regexp
             re.Sub[0L] = sub;
             p.stack[n - 1L] = re;
 
-            if (op == OpRepeat && (min >= 2L || max >= 2L) && !repeatIsValid(re, 1000L))
+            if (op == OpRepeat && (min >= 2L || max >= 2L) && !repeatIsValid(_addr_re, 1000L))
             {
-                return ("", ref new Error(ErrInvalidRepeatSize,before[:len(before)-len(after)]));
+                return ("", error.As(addr(new Error(ErrInvalidRepeatSize,before[:len(before)-len(after)]))!)!);
             }
-            return (after, null);
+
+            return (after, error.As(null!)!);
+
         }
 
         // repeatIsValid reports whether the repetition re is valid.
@@ -299,8 +337,10 @@ namespace regexp
         // We avoid this by only calling repeatIsValid when min or max >= 2.
         // In that case the depth of any >= 2 nesting can only get to 9 without
         // triggering a parse error, so each subtree can only be rewalked 9 times.
-        private static bool repeatIsValid(ref Regexp re, long n)
+        private static bool repeatIsValid(ptr<Regexp> _addr_re, long n)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (re.Op == OpRepeat)
             {
                 var m = re.Max;
@@ -308,32 +348,41 @@ namespace regexp
                 {
                     return true;
                 }
+
                 if (m < 0L)
                 {
                     m = re.Min;
                 }
+
                 if (m > n)
                 {
                     return false;
                 }
+
                 if (m > 0L)
                 {
                     n /= m;
                 }
+
             }
+
             foreach (var (_, sub) in re.Sub)
             {
-                if (!repeatIsValid(sub, n))
+                if (!repeatIsValid(_addr_sub, n))
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         // concat replaces the top of the stack (above the topmost '|' or '(') with its concatenation.
-        private static ref Regexp concat(this ref parser p)
+        private static ptr<Regexp> concat(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.maybeConcat(-1L, 0L); 
 
             // Scan down to find pseudo-operator | or (.
@@ -349,14 +398,18 @@ namespace regexp
             // Empty concatenation is special case.
             if (len(subs) == 0L)
             {
-                return p.push(p.newRegexp(OpEmptyMatch));
+                return _addr_p.push(p.newRegexp(OpEmptyMatch))!;
             }
-            return p.push(p.collapse(subs, OpConcat));
+
+            return _addr_p.push(p.collapse(subs, OpConcat))!;
+
         }
 
         // alternate replaces the top of the stack (above the topmost '(') with its alternation.
-        private static ref Regexp alternate(this ref parser p)
-        { 
+        private static ptr<Regexp> alternate(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // Scan down to find pseudo-operator (.
             // There are no | above (.
             var i = len(p.stack);
@@ -372,54 +425,65 @@ namespace regexp
             // All the others already are (see swapVerticalBar).
             if (len(subs) > 0L)
             {
-                cleanAlt(subs[len(subs) - 1L]);
+                cleanAlt(_addr_subs[len(subs) - 1L]);
             } 
 
             // Empty alternate is special case
             // (shouldn't happen but easy to handle).
             if (len(subs) == 0L)
             {
-                return p.push(p.newRegexp(OpNoMatch));
+                return _addr_p.push(p.newRegexp(OpNoMatch))!;
             }
-            return p.push(p.collapse(subs, OpAlternate));
+
+            return _addr_p.push(p.collapse(subs, OpAlternate))!;
+
         }
 
         // cleanAlt cleans re for eventual inclusion in an alternation.
-        private static void cleanAlt(ref Regexp re)
+        private static void cleanAlt(ptr<Regexp> _addr_re)
         {
+            ref Regexp re = ref _addr_re.val;
+
 
             if (re.Op == OpCharClass) 
-                re.Rune = cleanClass(ref re.Rune);
+                re.Rune = cleanClass(_addr_re.Rune);
                 if (len(re.Rune) == 2L && re.Rune[0L] == 0L && re.Rune[1L] == unicode.MaxRune)
                 {
                     re.Rune = null;
                     re.Op = OpAnyChar;
-                    return;
+                    return ;
                 }
+
                 if (len(re.Rune) == 4L && re.Rune[0L] == 0L && re.Rune[1L] == '\n' - 1L && re.Rune[2L] == '\n' + 1L && re.Rune[3L] == unicode.MaxRune)
                 {
                     re.Rune = null;
                     re.Op = OpAnyCharNotNL;
-                    return;
+                    return ;
                 }
+
                 if (cap(re.Rune) - len(re.Rune) > 100L)
                 { 
                     // re.Rune will not grow any more.
                     // Make a copy or inline to reclaim storage.
                     re.Rune = append(re.Rune0[..0L], re.Rune);
+
                 }
+
                     }
 
         // collapse returns the result of applying op to sub.
         // If sub contains op nodes, they all get hoisted up
         // so that there is never a concat of a concat or an
         // alternate of an alternate.
-        private static ref Regexp collapse(this ref parser p, slice<ref Regexp> subs, Op op)
+        private static ptr<Regexp> collapse(this ptr<parser> _addr_p, slice<ptr<Regexp>> subs, Op op)
         {
+            ref parser p = ref _addr_p.val;
+
             if (len(subs) == 1L)
             {
-                return subs[0L];
+                return _addr_subs[0L]!;
             }
+
             var re = p.newRegexp(op);
             re.Sub = re.Sub0[..0L];
             foreach (var (_, sub) in subs)
@@ -433,6 +497,7 @@ namespace regexp
                 {
                     re.Sub = append(re.Sub, sub);
                 }
+
             }
             if (op == OpAlternate)
             {
@@ -443,8 +508,11 @@ namespace regexp
                     re = re.Sub[0L];
                     p.reuse(old);
                 }
+
             }
-            return re;
+
+            return _addr_re!;
+
         }
 
         // factor factors common prefixes from the alternation list sub.
@@ -458,8 +526,10 @@ namespace regexp
         // which simplifies by character class introduction to
         //     A(B[CD]|EF)|BC[XY]
         //
-        private static slice<ref Regexp> factor(this ref parser p, slice<ref Regexp> sub)
+        private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Regexp>> sub)
         {
+            ref parser p = ref _addr_p.val;
+
             if (len(sub) < 2L)
             {
                 return sub;
@@ -500,8 +570,11 @@ namespace regexp
                                 // Keep going around.
                                 str = str[..same];
                                 continue;
+
                             }
+
                         }
+
                     } 
 
                     // Found end of a run with common leading literal string:
@@ -517,6 +590,7 @@ namespace regexp
                     { 
                         // Just one: don't bother factoring.
                         out = append(out, sub[start]);
+
                     }
                     else
                     { 
@@ -541,12 +615,14 @@ namespace regexp
                         var re = p.newRegexp(OpConcat);
                         re.Sub = append(re.Sub[..0L], prefix, suffix);
                         out = append(out, re);
+
                     } 
 
                     // Prepare for next iteration.
                     start = i;
                     str = istr;
                     strflags = iflags;
+
                 }
 
 
@@ -564,7 +640,7 @@ namespace regexp
             // correctness in some cases.
             start = 0L;
             out = sub[..0L];
-            ref Regexp first = default;
+            ptr<Regexp> first;
             {
                 long i__prev1 = i;
 
@@ -575,14 +651,15 @@ namespace regexp
                     // for out (len(out) <= start).
                     //
                     // Invariant: sub[start:i] consists of regexps that all begin with ifirst.
-                    ref Regexp ifirst = default;
+                    ptr<Regexp> ifirst;
                     if (i < len(sub))
                     {
                         ifirst = p.leadingRegexp(sub[i]);
-                        if (first != null && first.Equal(ifirst) && (isCharClass(first) || (first.Op == OpRepeat && first.Min == first.Max && isCharClass(first.Sub[0L]))))
+                        if (first != null && first.Equal(ifirst) && (isCharClass(first) || (first.Op == OpRepeat && first.Min == first.Max && isCharClass(_addr_first.Sub[0L]))))
                         {
                             continue;
                         }
+
                     } 
 
                     // Found end of a run with common leading regexp:
@@ -597,6 +674,7 @@ namespace regexp
                     { 
                         // Just one: don't bother factoring.
                         out = append(out, sub[start]);
+
                     }
                     else
                     { 
@@ -609,6 +687,7 @@ namespace regexp
                             {
                                 var reuse = j != start; // prefix came from sub[start]
                                 sub[j] = p.removeLeadingRegexp(sub[j], reuse);
+
                             }
 
 
@@ -619,11 +698,13 @@ namespace regexp
                         re = p.newRegexp(OpConcat);
                         re.Sub = append(re.Sub[..0L], prefix, suffix);
                         out = append(out, re);
+
                     } 
 
                     // Prepare for next iteration.
                     start = i;
-                    first = ifirst;
+                    first = addr(ifirst);
+
                 }
 
 
@@ -645,7 +726,7 @@ namespace regexp
                     //
                     // Invariant: sub[start:i] consists of regexps that are either
                     // literal runes or character classes.
-                    if (i < len(sub) && isCharClass(sub[i]))
+                    if (i < len(sub) && isCharClass(_addr_sub[i]))
                     {
                         continue;
                     } 
@@ -674,6 +755,7 @@ namespace regexp
                                 {
                                     max = j;
                                 }
+
                             }
 
 
@@ -687,15 +769,16 @@ namespace regexp
 
                             for (j = start + 1L; j < i; j++)
                             {
-                                mergeCharClass(sub[start], sub[j]);
+                                mergeCharClass(_addr_sub[start], _addr_sub[j]);
                                 p.reuse(sub[j]);
                             }
 
 
                             j = j__prev2;
                         }
-                        cleanAlt(sub[start]);
+                        cleanAlt(_addr_sub[start]);
                         out = append(out, sub[start]);
+
                     } 
 
                     // ... and then emit sub[i].
@@ -703,7 +786,9 @@ namespace regexp
                     {
                         out = append(out, sub[i]);
                     }
+
                     start = i + 1L;
+
                 }
 
 
@@ -724,7 +809,9 @@ namespace regexp
                     {
                         continue;
                     }
+
                     out = append(out, sub[i]);
+
                 }
 
                 i = i__prev1;
@@ -733,27 +820,39 @@ namespace regexp
             sub = out;
 
             return sub;
+
         }
 
         // leadingString returns the leading literal string that re begins with.
         // The string refers to storage in re or its children.
-        private static (slice<int>, Flags) leadingString(this ref parser p, ref Regexp re)
+        private static (slice<int>, Flags) leadingString(this ptr<parser> _addr_p, ptr<Regexp> _addr_re)
         {
+            slice<int> _p0 = default;
+            Flags _p0 = default;
+            ref parser p = ref _addr_p.val;
+            ref Regexp re = ref _addr_re.val;
+
             if (re.Op == OpConcat && len(re.Sub) > 0L)
             {
                 re = re.Sub[0L];
             }
+
             if (re.Op != OpLiteral)
             {
                 return (null, 0L);
             }
+
             return (re.Rune, re.Flags & FoldCase);
+
         }
 
         // removeLeadingString removes the first n leading runes
         // from the beginning of re. It returns the replacement for re.
-        private static ref Regexp removeLeadingString(this ref parser p, ref Regexp re, long n)
+        private static ptr<Regexp> removeLeadingString(this ptr<parser> _addr_p, ptr<Regexp> _addr_re, long n)
         {
+            ref parser p = ref _addr_p.val;
+            ref Regexp re = ref _addr_re.val;
+
             if (re.Op == OpConcat && len(re.Sub) > 0L)
             { 
                 // Removing a leading string in a concatenation
@@ -784,9 +883,13 @@ namespace regexp
                             re.Sub = re.Sub[..len(re.Sub) - 1L];
                             break;
                     }
+
                 }
-                return re;
+
+                return _addr_re!;
+
             }
+
             if (re.Op == OpLiteral)
             {
                 re.Rune = re.Rune[..copy(re.Rune, re.Rune[n..])];
@@ -794,41 +897,56 @@ namespace regexp
                 {
                     re.Op = OpEmptyMatch;
                 }
+
             }
-            return re;
+
+            return _addr_re!;
+
         }
 
         // leadingRegexp returns the leading regexp that re begins with.
         // The regexp refers to storage in re or its children.
-        private static ref Regexp leadingRegexp(this ref parser p, ref Regexp re)
+        private static ptr<Regexp> leadingRegexp(this ptr<parser> _addr_p, ptr<Regexp> _addr_re)
         {
+            ref parser p = ref _addr_p.val;
+            ref Regexp re = ref _addr_re.val;
+
             if (re.Op == OpEmptyMatch)
             {
-                return null;
+                return _addr_null!;
             }
+
             if (re.Op == OpConcat && len(re.Sub) > 0L)
             {
                 var sub = re.Sub[0L];
                 if (sub.Op == OpEmptyMatch)
                 {
-                    return null;
+                    return _addr_null!;
                 }
-                return sub;
+
+                return _addr_sub!;
+
             }
-            return re;
+
+            return _addr_re!;
+
         }
 
         // removeLeadingRegexp removes the leading regexp in re.
         // It returns the replacement for re.
         // If reuse is true, it passes the removed regexp (if no longer needed) to p.reuse.
-        private static ref Regexp removeLeadingRegexp(this ref parser p, ref Regexp re, bool reuse)
+        private static ptr<Regexp> removeLeadingRegexp(this ptr<parser> _addr_p, ptr<Regexp> _addr_re, bool reuse)
         {
+            ref parser p = ref _addr_p.val;
+            ref Regexp re = ref _addr_re.val;
+
             if (re.Op == OpConcat && len(re.Sub) > 0L)
             {
                 if (reuse)
                 {
                     p.reuse(re.Sub[0L]);
                 }
+
                 re.Sub = re.Sub[..copy(re.Sub, re.Sub[1L..])];
                 switch (len(re.Sub))
                 {
@@ -842,18 +960,22 @@ namespace regexp
                         p.reuse(old);
                         break;
                 }
-                return re;
+                return _addr_re!;
+
             }
+
             if (reuse)
             {
                 p.reuse(re);
             }
-            return p.newRegexp(OpEmptyMatch);
+
+            return _addr_p.newRegexp(OpEmptyMatch)!;
+
         }
 
-        private static ref Regexp literalRegexp(@string s, Flags flags)
+        private static ptr<Regexp> literalRegexp(@string s, Flags flags)
         {
-            Regexp re = ref new Regexp(Op:OpLiteral);
+            ptr<Regexp> re = addr(new Regexp(Op:OpLiteral));
             re.Flags = flags;
             re.Rune = re.Rune0[..0L]; // use local storage for small strings
             foreach (var (_, c) in s)
@@ -863,10 +985,14 @@ namespace regexp
                     // string is too long to fit in Rune0.  let Go handle it
                     re.Rune = (slice<int>)s;
                     break;
+
                 }
+
                 re.Rune = append(re.Rune, c);
+
             }
-            return re;
+            return _addr_re!;
+
         }
 
         // Parsing.
@@ -874,8 +1000,11 @@ namespace regexp
         // Parse parses a regular expression string s, controlled by the specified
         // Flags, and returns a regular expression parse tree. The syntax is
         // described in the top-level comment.
-        public static (ref Regexp, error) Parse(@string s, Flags flags)
+        public static (ptr<Regexp>, error) Parse(@string s, Flags flags)
         {
+            ptr<Regexp> _p0 = default!;
+            error _p0 = default!;
+
             if (flags & Literal != 0L)
             { 
                 // Trivial parser for literal string.
@@ -886,17 +1015,19 @@ namespace regexp
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                     err = err__prev2;
 
                 }
-                return (literalRegexp(s, flags), null);
+
+                return (_addr_literalRegexp(s, flags)!, error.As(null!)!);
+
             } 
 
             // Otherwise, must do real work.
-            parser p = default;            err = default;            int c = default;            Op op = default;            @string lastRepeat = default;
+            parser p = default;            err = default!;            int c = default;            Op op = default;            @string lastRepeat = default;
             p.flags = flags;
             p.wholeRegexp = s;
             var t = s;
@@ -914,10 +1045,13 @@ BigSwitch:
 
                             if (err != null)
                             {
-                                return (null, err);
+                                return (_addr_null!, error.As(err)!);
                             }
+
                             break;
+
                         }
+
                         p.numCap++;
                         p.op(opLeftParen).Cap;
 
@@ -929,8 +1063,9 @@ BigSwitch:
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
+
                         t = t[1L..];
                         break;
                     case ')': 
@@ -938,8 +1073,9 @@ BigSwitch:
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
+
                         t = t[1L..];
                         break;
                     case '^': 
@@ -951,6 +1087,7 @@ BigSwitch:
                         {
                             p.op(OpBeginLine);
                         }
+
                         t = t[1L..];
                         break;
                     case '$': 
@@ -959,11 +1096,13 @@ BigSwitch:
                             p.op(OpEndText).Flags;
 
                             WasDollar;
+
                         }
                         else
                         {
                             p.op(OpEndLine);
                         }
+
                         t = t[1L..];
                         break;
                     case '.': 
@@ -975,6 +1114,7 @@ BigSwitch:
                         {
                             p.op(OpAnyCharNotNL);
                         }
+
                         t = t[1L..];
                         break;
                     case '[': 
@@ -982,8 +1122,9 @@ BigSwitch:
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
+
                         break;
                     case '*': 
 
@@ -1008,8 +1149,9 @@ BigSwitch:
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
+
                         repeat = before;
                         t = after;
                         break;
@@ -1023,18 +1165,23 @@ BigSwitch:
                             p.literal('{');
                             t = t[1L..];
                             break;
+
                         }
+
                         if (min < 0L || min > 1000L || max > 1000L || max >= 0L && min > max)
                         { 
                             // Numbers were too big, or max is present and min > max.
-                            return (null, ref new Error(ErrInvalidRepeatSize,before[:len(before)-len(after)]));
+                            return (_addr_null!, error.As(addr(new Error(ErrInvalidRepeatSize,before[:len(before)-len(after)]))!)!);
+
                         }
+
                         after, err = p.repeat(op, min, max, before, after, lastRepeat);
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
+
                         repeat = before;
                         t = after;
                         break;
@@ -1063,7 +1210,7 @@ BigSwitch:
                                     break;
                                 case 'C': 
                                     // any byte; not supported
-                                    return (null, ref new Error(ErrInvalidEscape,t[:2]));
+                                    return (_addr_null!, error.As(addr(new Error(ErrInvalidEscape,t[:2]))!)!);
                                     break;
                                 case 'Q': 
                                     // \Q ... \E: the ... is always literals
@@ -1083,15 +1230,18 @@ BigSwitch:
                                         }
 
                                     }
+
                                     while (lit != "")
                                     {
                                         var (c, rest, err) = nextRune(lit);
                                         if (err != null)
                                         {
-                                            return (null, err);
+                                            return (_addr_null!, error.As(err)!);
                                         }
+
                                         p.literal(c);
                                         lit = rest;
+
                                     }
 
                                     _breakBigSwitch = true;
@@ -1104,7 +1254,9 @@ BigSwitch:
                                     break;
                                     break;
                             }
+
                         }
+
                         var re = p.newRegexp(OpCharClass);
                         re.Flags = p.flags; 
 
@@ -1114,8 +1266,9 @@ BigSwitch:
                             var (r, rest, err) = p.parseUnicodeClass(t, re.Rune0[..0L]);
                             if (err != null)
                             {
-                                return (null, err);
+                                return (_addr_null!, error.As(err)!);
                             }
+
                             if (r != null)
                             {
                                 re.Rune = r;
@@ -1124,6 +1277,7 @@ BigSwitch:
                                 _breakBigSwitch = true;
                                 break;
                             }
+
                         } 
 
                         // Perl character class escape.
@@ -1144,6 +1298,7 @@ BigSwitch:
                             r = r__prev1;
 
                         }
+
                         p.reuse(re); 
 
                         // Ordinary single-character escape.
@@ -1151,8 +1306,9 @@ BigSwitch:
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
+
                         p.literal(c);
                         break;
                     default: 
@@ -1160,12 +1316,14 @@ BigSwitch:
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
+
                         p.literal(c);
                         break;
                 }
                 lastRepeat = repeat;
+
             }
 
 
@@ -1174,38 +1332,51 @@ BigSwitch:
             { 
                 // pop vertical bar
                 p.stack = p.stack[..len(p.stack) - 1L];
+
             }
+
             p.alternate();
 
             var n = len(p.stack);
             if (n != 1L)
             {
-                return (null, ref new Error(ErrMissingParen,s));
+                return (_addr_null!, error.As(addr(new Error(ErrMissingParen,s))!)!);
             }
-            return (p.stack[0L], null);
+
+            return (_addr_p.stack[0L]!, error.As(null!)!);
+
         }
 
         // parseRepeat parses {min} (max=min) or {min,} (max=-1) or {min,max}.
         // If s is not of that form, it returns ok == false.
         // If s has the right form but the values are too big, it returns min == -1, ok == true.
-        private static (long, long, @string, bool) parseRepeat(this ref parser p, @string s)
+        private static (long, long, @string, bool) parseRepeat(this ptr<parser> _addr_p, @string s)
         {
+            long min = default;
+            long max = default;
+            @string rest = default;
+            bool ok = default;
+            ref parser p = ref _addr_p.val;
+
             if (s == "" || s[0L] != '{')
             {
-                return;
+                return ;
             }
+
             s = s[1L..];
             bool ok1 = default;
             min, s, ok1 = p.parseInt(s);
 
             if (!ok1)
             {
-                return;
+                return ;
             }
+
             if (s == "")
             {
-                return;
+                return ;
             }
+
             if (s[0L] != ',')
             {
                 max = min;
@@ -1215,8 +1386,9 @@ BigSwitch:
                 s = s[1L..];
                 if (s == "")
                 {
-                    return;
+                    return ;
                 }
+
                 if (s[0L] == '}')
                 {
                     max = -1L;
@@ -1225,28 +1397,37 @@ BigSwitch:
 
                 else if (!ok1)
                 {
-                    return;
+                    return ;
                 }
                 else if (max < 0L)
                 { 
                     // parseInt found too big a number
                     min = -1L;
+
                 }
+
             }
+
             if (s == "" || s[0L] != '}')
             {
-                return;
+                return ;
             }
+
             rest = s[1L..];
             ok = true;
-            return;
+            return ;
+
         }
 
         // parsePerlFlags parses a Perl flag setting or non-capturing group or both,
         // like (?i) or (?: or (?i:.  It removes the prefix from s and updates the parse state.
         // The caller must have ensured that s begins with "(?".
-        private static (@string, error) parsePerlFlags(this ref parser p, @string s)
+        private static (@string, error) parsePerlFlags(this ptr<parser> _addr_p, @string s)
         {
+            @string rest = default;
+            error err = default!;
+            ref parser p = ref _addr_p.val;
+
             var t = s; 
 
             // Check for named captures, first introduced in Python's regexp library.
@@ -1274,21 +1455,25 @@ BigSwitch:
 
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     }
-                    return ("", ref new Error(ErrInvalidNamedCapture,s));
+
+                    return ("", error.As(addr(new Error(ErrInvalidNamedCapture,s))!)!);
+
                 }
+
                 var capture = t[..end + 1L]; // "(?P<name>"
                 var name = t[4L..end]; // "name"
                 err = checkUTF8(name);
 
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 }
+
                 if (!isValidCaptureName(name))
                 {
-                    return ("", ref new Error(ErrInvalidNamedCapture,capture));
+                    return ("", error.As(addr(new Error(ErrInvalidNamedCapture,capture))!)!);
                 } 
 
                 // Like ordinary capture, but named.
@@ -1296,7 +1481,8 @@ BigSwitch:
                 var re = p.op(opLeftParen);
                 re.Cap = p.numCap;
                 re.Name = name;
-                return (t[end + 1L..], null);
+                return (t[end + 1L..], error.As(null!)!);
+
             } 
 
             // Non-capturing group. Might also twiddle Perl flags.
@@ -1313,8 +1499,9 @@ Loop:
 
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 }
+
                 switch (c)
                 {
                     case 'i': 
@@ -1341,6 +1528,7 @@ Loop:
                             _breakLoop = true;
                             break;
                         }
+
                         sign = -1L; 
                         // Invert flags so that | above turn into &^ and vice versa.
                         // We'll invert flags again before using it below.
@@ -1359,15 +1547,20 @@ Loop:
                                 _breakLoop = true;
                                 break;
                             }
+
                             flags = ~flags;
+
                         }
+
                         if (c == ':')
                         { 
                             // Open new group
                             p.op(opLeftParen);
+
                         }
+
                         p.flags = flags;
-                        return (t, null);
+                        return (t, error.As(null!)!);
                         break;
                     default: 
                         _breakLoop = true; 
@@ -1376,9 +1569,11 @@ Loop:
                         break;
                         break;
                 }
+
             }
 
-            return ("", ref new Error(ErrInvalidPerlOp,s[:len(s)-len(t)]));
+            return ("", error.As(addr(new Error(ErrInvalidPerlOp,s[:len(s)-len(t)]))!)!);
+
         }
 
         // isValidCaptureName reports whether name
@@ -1392,28 +1587,37 @@ Loop:
             {
                 return false;
             }
+
             foreach (var (_, c) in name)
             {
                 if (c != '_' && !isalnum(c))
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         // parseInt parses a decimal integer.
-        private static (long, @string, bool) parseInt(this ref parser p, @string s)
+        private static (long, @string, bool) parseInt(this ptr<parser> _addr_p, @string s)
         {
+            long n = default;
+            @string rest = default;
+            bool ok = default;
+            ref parser p = ref _addr_p.val;
+
             if (s == "" || s[0L] < '0' || '9' < s[0L])
             {
-                return;
+                return ;
             } 
             // Disallow leading zeros.
             if (len(s) >= 2L && s[0L] == '0' && '0' <= s[1L] && s[1L] <= '9')
             {
-                return;
+                return ;
             }
+
             var t = s;
             while (s != "" && '0' <= s[0L] && s[0L] <= '9')
             {
@@ -1432,22 +1636,29 @@ Loop:
                     n = -1L;
                     break;
                 }
+
                 n = n * 10L + int(t[i]) - '0';
+
             }
 
-            return;
+            return ;
+
         }
 
         // can this be represented as a character class?
         // single-rune literal string, char class, ., and .|\n.
-        private static bool isCharClass(ref Regexp re)
+        private static bool isCharClass(ptr<Regexp> _addr_re)
         {
+            ref Regexp re = ref _addr_re.val;
+
             return re.Op == OpLiteral && len(re.Rune) == 1L || re.Op == OpCharClass || re.Op == OpAnyCharNotNL || re.Op == OpAnyChar;
         }
 
         // does re match r?
-        private static bool matchRune(ref Regexp re, int r)
+        private static bool matchRune(ptr<Regexp> _addr_re, int r)
         {
+            ref Regexp re = ref _addr_re.val;
+
 
             if (re.Op == OpLiteral) 
                 return len(re.Rune) == 1L && re.Rune[0L] == r;
@@ -1462,6 +1673,7 @@ Loop:
                             return true;
                         i += 2L;
                         }
+
                     }
 
                 }
@@ -1471,11 +1683,14 @@ Loop:
             else if (re.Op == OpAnyChar) 
                 return true;
                         return false;
+
         }
 
         // parseVerticalBar handles a | in the input.
-        private static error parseVerticalBar(this ref parser p)
+        private static error parseVerticalBar(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.concat(); 
 
             // The concatenation we just parsed is on top of the stack.
@@ -1486,21 +1701,27 @@ Loop:
             {
                 p.op(opVerticalBar);
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // mergeCharClass makes dst = dst|src.
         // The caller must ensure that dst.Op >= src.Op,
         // to reduce the amount of copying.
-        private static void mergeCharClass(ref Regexp dst, ref Regexp src)
+        private static void mergeCharClass(ptr<Regexp> _addr_dst, ptr<Regexp> _addr_src)
         {
+            ref Regexp dst = ref _addr_dst.val;
+            ref Regexp src = ref _addr_src.val;
+
 
             if (dst.Op == OpAnyChar)             else if (dst.Op == OpAnyCharNotNL) 
                 // src might add \n
-                if (matchRune(src, '\n'))
+                if (matchRune(_addr_src, '\n'))
                 {
                     dst.Op = OpAnyChar;
                 }
+
             else if (dst.Op == OpCharClass) 
                 // src is simpler, so either literal or char class
                 if (src.Op == OpLiteral)
@@ -1511,26 +1732,31 @@ Loop:
                 {
                     dst.Rune = appendClass(dst.Rune, src.Rune);
                 }
+
             else if (dst.Op == OpLiteral) 
                 // both literal
                 if (src.Rune[0L] == dst.Rune[0L] && src.Flags == dst.Flags)
                 {
                     break;
                 }
+
                 dst.Op = OpCharClass;
                 dst.Rune = appendLiteral(dst.Rune[..0L], dst.Rune[0L], dst.Flags);
                 dst.Rune = appendLiteral(dst.Rune, src.Rune[0L], src.Flags);
-                    }
+            
+        }
 
         // If the top of the stack is an element followed by an opVerticalBar
         // swapVerticalBar swaps the two and returns true.
         // Otherwise it returns false.
-        private static bool swapVerticalBar(this ref parser p)
-        { 
+        private static bool swapVerticalBar(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // If above and below vertical bar are literal or char class,
             // can merge into a single char class.
             var n = len(p.stack);
-            if (n >= 3L && p.stack[n - 2L].Op == opVerticalBar && isCharClass(p.stack[n - 1L]) && isCharClass(p.stack[n - 3L]))
+            if (n >= 3L && p.stack[n - 2L].Op == opVerticalBar && isCharClass(_addr_p.stack[n - 1L]) && isCharClass(_addr_p.stack[n - 3L]))
             {
                 var re1 = p.stack[n - 1L];
                 var re3 = p.stack[n - 3L]; 
@@ -1540,12 +1766,16 @@ Loop:
                     re1 = re3;
                     re3 = re1;
                     p.stack[n - 3L] = re3;
+
                 }
-                mergeCharClass(re3, re1);
+
+                mergeCharClass(_addr_re3, _addr_re1);
                 p.reuse(re1);
                 p.stack = p.stack[..n - 1L];
                 return true;
+
             }
+
             if (n >= 2L)
             {
                 re1 = p.stack[n - 1L];
@@ -1556,38 +1786,49 @@ Loop:
                     { 
                         // Now out of reach.
                         // Clean opportunistically.
-                        cleanAlt(p.stack[n - 3L]);
+                        cleanAlt(_addr_p.stack[n - 3L]);
+
                     }
+
                     p.stack[n - 2L] = re1;
                     p.stack[n - 1L] = re2;
                     return true;
+
                 }
+
             }
+
             return false;
+
         }
 
         // parseRightParen handles a ) in the input.
-        private static error parseRightParen(this ref parser p)
+        private static error parseRightParen(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.concat();
             if (p.swapVerticalBar())
             { 
                 // pop vertical bar
                 p.stack = p.stack[..len(p.stack) - 1L];
+
             }
+
             p.alternate();
 
             var n = len(p.stack);
             if (n < 2L)
             {
-                return error.As(ref new Error(ErrUnexpectedParen,p.wholeRegexp));
+                return error.As(addr(new Error(ErrUnexpectedParen,p.wholeRegexp))!)!;
             }
+
             var re1 = p.stack[n - 1L];
             var re2 = p.stack[n - 2L];
             p.stack = p.stack[..n - 2L];
             if (re2.Op != opLeftParen)
             {
-                return error.As(ref new Error(ErrUnexpectedParen,p.wholeRegexp));
+                return error.As(addr(new Error(ErrUnexpectedParen,p.wholeRegexp))!)!;
             } 
             // Restore flags at time of paren.
             p.flags = re2.Flags;
@@ -1595,6 +1836,7 @@ Loop:
             { 
                 // Just for grouping.
                 p.push(re1);
+
             }
             else
             {
@@ -1603,23 +1845,32 @@ Loop:
                 re2.Sub[0L] = re1;
                 p.push(re2);
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // parseEscape parses an escape sequence at the beginning of s
         // and returns the rune.
-        private static (int, @string, error) parseEscape(this ref parser p, @string s)
+        private static (int, @string, error) parseEscape(this ptr<parser> _addr_p, @string s)
         {
+            int r = default;
+            @string rest = default;
+            error err = default!;
+            ref parser p = ref _addr_p.val;
+
             var t = s[1L..];
             if (t == "")
             {
-                return (0L, "", ref new Error(ErrTrailingBackslash,""));
+                return (0L, "", error.As(addr(new Error(ErrTrailingBackslash,""))!)!);
             }
+
             var (c, t, err) = nextRune(t);
             if (err != null)
             {
-                return (0L, "", err);
+                return (0L, "", error.As(err)!);
             }
+
 Switch:
 
             if (c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7') 
@@ -1629,6 +1880,7 @@ Switch:
                 {
                     break;
                 }
+
                 fallthrough = true;
             }
             if (fallthrough || c == '0') 
@@ -1641,11 +1893,13 @@ Switch:
                     {
                         break;
                     }
+
                     r = r * 8L + rune(t[0L]) - '0';
                     t = t[1L..];
+
                 }
 
-                return (r, t, null); 
+                return (r, t, error.As(null!)!); 
 
                 // Hexadecimal escapes.
                 goto __switch_break0;
@@ -1656,12 +1910,14 @@ Switch:
                 {
                     break;
                 }
+
                 c, t, err = nextRune(t);
 
                 if (err != null)
                 {
-                    return (0L, "", err);
+                    return (0L, "", error.As(err)!);
                 }
+
                 if (c == '{')
                 { 
                     // Any number of digits in braces.
@@ -1677,29 +1933,35 @@ Switch:
                             _breakSwitch = true;
                             break;
                         }
+
                         c, t, err = nextRune(t);
 
                         if (err != null)
                         {
-                            return (0L, "", err);
+                            return (0L, "", error.As(err)!);
                         }
+
                         if (c == '}')
                         {
                             break;
                         }
+
                         var v = unhex(c);
                         if (v < 0L)
                         {
                             _breakSwitch = true;
                             break;
                         }
+
                         r = r * 16L + v;
                         if (r > unicode.MaxRune)
                         {
                             _breakSwitch = true;
                             break;
                         }
+
                         nhex++;
+
                     }
 
                     if (nhex == 0L)
@@ -1707,7 +1969,9 @@ Switch:
                         _breakSwitch = true;
                         break;
                     }
-                    return (r, t, null);
+
+                    return (r, t, error.As(null!)!);
+
                 } 
 
                 // Easy case: two hex digits.
@@ -1716,14 +1980,16 @@ Switch:
 
                 if (err != null)
                 {
-                    return (0L, "", err);
+                    return (0L, "", error.As(err)!);
                 }
+
                 var y = unhex(c);
                 if (x < 0L || y < 0L)
                 {
                     break;
                 }
-                return (x * 16L + y, t, null); 
+
+                return (x * 16L + y, t, error.As(null!)!); 
 
                 // C escapes. There is no case 'b', to avoid misparsing
                 // the Perl word-boundary \b as the C backspace \b
@@ -1735,32 +2001,32 @@ Switch:
             }
             if (c == 'a')
             {
-                return ('\a', t, err);
+                return ('\a', t, error.As(err)!);
                 goto __switch_break0;
             }
             if (c == 'f')
             {
-                return ('\f', t, err);
+                return ('\f', t, error.As(err)!);
                 goto __switch_break0;
             }
             if (c == 'n')
             {
-                return ('\n', t, err);
+                return ('\n', t, error.As(err)!);
                 goto __switch_break0;
             }
             if (c == 'r')
             {
-                return ('\r', t, err);
+                return ('\r', t, error.As(err)!);
                 goto __switch_break0;
             }
             if (c == 't')
             {
-                return ('\t', t, err);
+                return ('\t', t, error.As(err)!);
                 goto __switch_break0;
             }
             if (c == 'v')
             {
-                return ('\v', t, err);
+                return ('\v', t, error.As(err)!);
                 goto __switch_break0;
             }
             // default: 
@@ -1770,22 +2036,29 @@ Switch:
                     // PCRE is not quite so rigorous: it accepts things like
                     // \q, but we don't. We once rejected \_, but too many
                     // programs and people insist on using it, so allow \_.
-                    return (c, t, null);
+                    return (c, t, error.As(null!)!);
+
                 } 
 
                 // Octal escapes.
 
             __switch_break0:;
-            return (0L, "", ref new Error(ErrInvalidEscape,s[:len(s)-len(t)]));
+            return (0L, "", error.As(addr(new Error(ErrInvalidEscape,s[:len(s)-len(t)]))!)!);
+
         }
 
         // parseClassChar parses a character class character at the beginning of s
         // and returns it.
-        private static (int, @string, error) parseClassChar(this ref parser p, @string s, @string wholeClass)
+        private static (int, @string, error) parseClassChar(this ptr<parser> _addr_p, @string s, @string wholeClass)
         {
+            int r = default;
+            @string rest = default;
+            error err = default!;
+            ref parser p = ref _addr_p.val;
+
             if (s == "")
             {
-                return (0L, "", ref new Error(Code:ErrMissingBracket,Expr:wholeClass));
+                return (0L, "", error.As(addr(new Error(Code:ErrMissingBracket,Expr:wholeClass))!)!);
             } 
 
             // Allow regular escape sequences even though
@@ -1794,7 +2067,9 @@ Switch:
             {
                 return p.parseEscape(s);
             }
+
             return nextRune(s);
+
         }
 
         private partial struct charGroup
@@ -1806,47 +2081,65 @@ Switch:
         // parsePerlClassEscape parses a leading Perl character class escape like \d
         // from the beginning of s. If one is present, it appends the characters to r
         // and returns the new slice r and the remainder of the string.
-        private static (slice<int>, @string) parsePerlClassEscape(this ref parser p, @string s, slice<int> r)
+        private static (slice<int>, @string) parsePerlClassEscape(this ptr<parser> _addr_p, @string s, slice<int> r)
         {
+            slice<int> @out = default;
+            @string rest = default;
+            ref parser p = ref _addr_p.val;
+
             if (p.flags & PerlX == 0L || len(s) < 2L || s[0L] != '\\')
             {
-                return;
+                return ;
             }
+
             var g = perlGroup[s[0L..2L]];
             if (g.sign == 0L)
             {
-                return;
+                return ;
             }
+
             return (p.appendGroup(r, g), s[2L..]);
+
         }
 
         // parseNamedClass parses a leading POSIX named character class like [:alnum:]
         // from the beginning of s. If one is present, it appends the characters to r
         // and returns the new slice r and the remainder of the string.
-        private static (slice<int>, @string, error) parseNamedClass(this ref parser p, @string s, slice<int> r)
+        private static (slice<int>, @string, error) parseNamedClass(this ptr<parser> _addr_p, @string s, slice<int> r)
         {
+            slice<int> @out = default;
+            @string rest = default;
+            error err = default!;
+            ref parser p = ref _addr_p.val;
+
             if (len(s) < 2L || s[0L] != '[' || s[1L] != ':')
             {
-                return;
+                return ;
             }
+
             var i = strings.Index(s[2L..], ":]");
             if (i < 0L)
             {
-                return;
+                return ;
             }
+
             i += 2L;
             var name = s[0L..i + 2L];
             var s = s[i + 2L..];
             var g = posixGroup[name];
             if (g.sign == 0L)
             {
-                return (null, "", ref new Error(ErrInvalidCharRange,name));
+                return (null, "", error.As(addr(new Error(ErrInvalidCharRange,name))!)!);
             }
-            return (p.appendGroup(r, g), s, null);
+
+            return (p.appendGroup(r, g), s, error.As(null!)!);
+
         }
 
-        private static slice<int> appendGroup(this ref parser p, slice<int> r, charGroup g)
+        private static slice<int> appendGroup(this ptr<parser> _addr_p, slice<int> r, charGroup g)
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.flags & FoldCase == 0L)
             {
                 if (g.sign < 0L)
@@ -1857,13 +2150,14 @@ Switch:
                 {
                     r = appendClass(r, g.@class);
                 }
+
             }
             else
             {
                 var tmp = p.tmpClass[..0L];
                 tmp = appendFoldedClass(tmp, g.@class);
                 p.tmpClass = tmp;
-                tmp = cleanClass(ref p.tmpClass);
+                tmp = cleanClass(_addr_p.tmpClass);
                 if (g.sign < 0L)
                 {
                     r = appendNegatedClass(r, tmp);
@@ -1872,21 +2166,28 @@ Switch:
                 {
                     r = appendClass(r, tmp);
                 }
+
             }
+
             return r;
+
         }
 
-        private static unicode.RangeTable anyTable = ref new unicode.RangeTable(R16:[]unicode.Range16{{Lo:0,Hi:1<<16-1,Stride:1}},R32:[]unicode.Range32{{Lo:1<<16,Hi:unicode.MaxRune,Stride:1}},);
+        private static ptr<unicode.RangeTable> anyTable = addr(new unicode.RangeTable(R16:[]unicode.Range16{{Lo:0,Hi:1<<16-1,Stride:1}},R32:[]unicode.Range32{{Lo:1<<16,Hi:unicode.MaxRune,Stride:1}},));
 
         // unicodeTable returns the unicode.RangeTable identified by name
         // and the table of additional fold-equivalent code points.
-        private static (ref unicode.RangeTable, ref unicode.RangeTable) unicodeTable(@string name)
-        { 
+        private static (ptr<unicode.RangeTable>, ptr<unicode.RangeTable>) unicodeTable(@string name)
+        {
+            ptr<unicode.RangeTable> _p0 = default!;
+            ptr<unicode.RangeTable> _p0 = default!;
+ 
             // Special case: "Any" means any.
             if (name == "Any")
             {
-                return (anyTable, anyTable);
+                return (_addr_anyTable!, _addr_anyTable!);
             }
+
             {
                 var t__prev1 = t;
 
@@ -1894,12 +2195,13 @@ Switch:
 
                 if (t != null)
                 {
-                    return (t, unicode.FoldCategory[name]);
+                    return (_addr_t!, _addr_unicode.FoldCategory[name]!);
                 }
 
                 t = t__prev1;
 
             }
+
             {
                 var t__prev1 = t;
 
@@ -1907,23 +2209,30 @@ Switch:
 
                 if (t != null)
                 {
-                    return (t, unicode.FoldScript[name]);
+                    return (_addr_t!, _addr_unicode.FoldScript[name]!);
                 }
 
                 t = t__prev1;
 
             }
-            return (null, null);
+
+            return (_addr_null!, _addr_null!);
+
         }
 
         // parseUnicodeClass parses a leading Unicode character class like \p{Han}
         // from the beginning of s. If one is present, it appends the characters to r
         // and returns the new slice r and the remainder of the string.
-        private static (slice<int>, @string, error) parseUnicodeClass(this ref parser p, @string s, slice<int> r)
+        private static (slice<int>, @string, error) parseUnicodeClass(this ptr<parser> _addr_p, @string s, slice<int> r)
         {
+            slice<int> @out = default;
+            @string rest = default;
+            error err = default!;
+            ref parser p = ref _addr_p.val;
+
             if (p.flags & UnicodeGroups == 0L || len(s) < 2L || s[0L] != '\\' || s[1L] != 'p' && s[1L] != 'P')
             {
-                return;
+                return ;
             } 
 
             // Committed to parse or return error.
@@ -1932,12 +2241,14 @@ Switch:
             {
                 sign = -1L;
             }
+
             var t = s[2L..];
             var (c, t, err) = nextRune(t);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             @string seq = default;            @string name = default;
 
             if (c != '{')
@@ -1945,6 +2256,7 @@ Switch:
                 // Single-letter name.
                 seq = s[..len(s) - len(t)];
                 name = seq[2L..];
+
             }
             else
             { 
@@ -1956,10 +2268,13 @@ Switch:
 
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
-                    return (null, "", ref new Error(ErrInvalidCharRange,s));
+
+                    return (null, "", error.As(addr(new Error(ErrInvalidCharRange,s))!)!);
+
                 }
+
                 seq = s[..end + 1L];
                 t = s[end + 1L..];
                 name = s[3L..end];
@@ -1967,8 +2282,9 @@ Switch:
 
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
             } 
 
             // Group can have leading negation too.  \p{^Han} == \P{Han}, \P{^Han} == \p{Han}.
@@ -1977,21 +2293,24 @@ Switch:
                 sign = -sign;
                 name = name[1L..];
             }
+
             var (tab, fold) = unicodeTable(name);
             if (tab == null)
             {
-                return (null, "", ref new Error(ErrInvalidCharRange,seq));
+                return (null, "", error.As(addr(new Error(ErrInvalidCharRange,seq))!)!);
             }
+
             if (p.flags & FoldCase == 0L || fold == null)
             {
                 if (sign > 0L)
                 {
-                    r = appendTable(r, tab);
+                    r = appendTable(r, _addr_tab);
                 }
                 else
                 {
-                    r = appendNegatedTable(r, tab);
+                    r = appendNegatedTable(r, _addr_tab);
                 }
+
             }
             else
             { 
@@ -1999,10 +2318,10 @@ Switch:
                 // This is necessary for the negative case and just tidy
                 // for the positive case.
                 var tmp = p.tmpClass[..0L];
-                tmp = appendTable(tmp, tab);
-                tmp = appendTable(tmp, fold);
+                tmp = appendTable(tmp, _addr_tab);
+                tmp = appendTable(tmp, _addr_fold);
                 p.tmpClass = tmp;
-                tmp = cleanClass(ref p.tmpClass);
+                tmp = cleanClass(_addr_p.tmpClass);
                 if (sign > 0L)
                 {
                     r = appendClass(r, tmp);
@@ -2011,14 +2330,21 @@ Switch:
                 {
                     r = appendNegatedClass(r, tmp);
                 }
+
             }
-            return (r, t, null);
+
+            return (r, t, error.As(null!)!);
+
         }
 
         // parseClass parses a character class at the beginning of s
         // and pushes it onto the parse stack.
-        private static (@string, error) parseClass(this ref parser p, @string s)
+        private static (@string, error) parseClass(this ptr<parser> _addr_p, @string s)
         {
+            @string rest = default;
+            error err = default!;
+            ref parser p = ref _addr_p.val;
+
             var t = s[1L..]; // chop [
             var re = p.newRegexp(OpCharClass);
             re.Flags = p.flags;
@@ -2036,7 +2362,9 @@ Switch:
                 {
                     re.Rune = append(re.Rune, '\n', '\n');
                 }
+
             }
+
             var @class = re.Rune;
             var first = true; // ] and - are okay as first char in class
             while (t == "" || t[0L] != ']' || first)
@@ -2046,8 +2374,9 @@ Switch:
                 if (t != "" && t[0L] == '-' && p.flags & PerlX == 0L && !first && (len(t) == 1L || t[1L] != ']'))
                 {
                     var (_, size) = utf8.DecodeRuneInString(t[1L..]);
-                    return ("", ref new Error(Code:ErrInvalidCharRange,Expr:t[:1+size]));
+                    return ("", error.As(addr(new Error(Code:ErrInvalidCharRange,Expr:t[:1+size]))!)!);
                 }
+
                 first = false; 
 
                 // Look for POSIX [:alnum:] etc.
@@ -2056,27 +2385,32 @@ Switch:
                     var (nclass, nt, err) = p.parseNamedClass(t, class);
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     }
+
                     if (nclass != null)
                     {
                         class = nclass;
                         t = nt;
                         continue;
+
                     }
+
                 } 
 
                 // Look for Unicode character group like \p{Han}.
                 (nclass, nt, err) = p.parseUnicodeClass(t, class);
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 }
+
                 if (nclass != null)
                 {
                     class = nclass;
                     t = nt;
                     continue;
+
                 } 
 
                 // Look for Perl character class symbols (extension).
@@ -2090,6 +2424,7 @@ Switch:
                         class = nclass;
                         t = nt;
                         continue;
+
                     } 
 
                     // Single character or simple range.
@@ -2106,8 +2441,9 @@ Switch:
 
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 }
+
                 hi = lo; 
                 // [a-] means (a|-) so check for final ].
                 if (len(t) >= 2L && t[0L] == '-' && t[1L] != ']')
@@ -2117,14 +2453,17 @@ Switch:
 
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     }
+
                     if (hi < lo)
                     {
                         rng = rng[..len(rng) - len(t)];
-                        return ("", ref new Error(Code:ErrInvalidCharRange,Expr:rng));
+                        return ("", error.As(addr(new Error(Code:ErrInvalidCharRange,Expr:rng))!)!);
                     }
+
                 }
+
                 if (p.flags & FoldCase == 0L)
                 {
                     class = appendRange(class, lo, hi);
@@ -2133,30 +2472,35 @@ Switch:
                 {
                     class = appendFoldedRange(class, lo, hi);
                 }
+
             }
 
             t = t[1L..]; // chop ]
 
             // Use &re.Rune instead of &class to avoid allocation.
             re.Rune = class;
-            class = cleanClass(ref re.Rune);
+            class = cleanClass(_addr_re.Rune);
             if (sign < 0L)
             {
                 class = negateClass(class);
             }
+
             re.Rune = class;
             p.push(re);
-            return (t, null);
+            return (t, error.As(null!)!);
+
         }
 
         // cleanClass sorts the ranges (pairs of elements of r),
         // merges them, and eliminates duplicates.
-        private static slice<int> cleanClass(ref slice<int> rp)
+        private static slice<int> cleanClass(ptr<slice<int>> _addr_rp)
         {
+            ref slice<int> rp = ref _addr_rp.val;
+
             // Sort by lo increasing, hi decreasing to break ties.
             sort.Sort(new ranges(rp));
 
-            var r = rp.Value;
+            slice<int> r = rp;
             if (len(r) < 2L)
             {
                 return r;
@@ -2179,17 +2523,21 @@ Switch:
                             r[w - 1L] = hi;
                     i += 2L;
                         }
+
                         continue;
+
                     } 
                     // new disjoint range
                     r[w] = lo;
                     r[w + 1L] = hi;
                     w += 2L;
+
                 }
 
             }
 
             return r[..w];
+
         }
 
         // appendLiteral returns the result of appending the literal x to the class r.
@@ -2199,7 +2547,9 @@ Switch:
             {
                 return appendFoldedRange(r, x, x);
             }
+
             return appendRange(r, x, x);
+
         }
 
         // appendRange returns the result of appending the range lo-hi to the class r.
@@ -2226,25 +2576,32 @@ Switch:
                                 r[n - i] = lo;
                     i += 2L;
                             }
+
                             if (hi > rhi)
                             {
                                 r[n - i + 1L] = hi;
                             }
+
                             return r;
+
                         }
+
                     }
+
                 }
 
             }
 
             return append(r, lo, hi);
+
         }
 
  
         // minimum and maximum runes involved in folding.
         // checked during test.
-        private static readonly ulong minFold = 0x0041UL;
-        private static readonly ulong maxFold = 0x1e943UL;
+        private static readonly ulong minFold = (ulong)0x0041UL;
+        private static readonly ulong maxFold = (ulong)0x1e943UL;
+
 
         // appendFoldedRange returns the result of appending the range lo-hi
         // and its case folding-equivalent runes to the class r.
@@ -2255,23 +2612,30 @@ Switch:
             { 
                 // Range is full: folding can't add more.
                 return appendRange(r, lo, hi);
+
             }
+
             if (hi < minFold || lo > maxFold)
             { 
                 // Range is outside folding possibilities.
                 return appendRange(r, lo, hi);
+
             }
+
             if (lo < minFold)
             { 
                 // [lo, minFold-1] needs no folding.
                 r = appendRange(r, lo, minFold - 1L);
                 lo = minFold;
+
             }
+
             if (hi > maxFold)
             { 
                 // [maxFold+1, hi] needs no folding.
                 r = appendRange(r, maxFold + 1L, hi);
                 hi = maxFold;
+
             } 
 
             // Brute force. Depend on appendRange to coalesce ranges on the fly.
@@ -2285,9 +2649,11 @@ Switch:
                     f = unicode.SimpleFold(f);
                 }
 
+
             }
 
             return r;
+
         }
 
         // appendClass returns the result of appending the class x to the class r.
@@ -2305,6 +2671,7 @@ Switch:
 
             }
             return r;
+
         }
 
         // appendFolded returns the result of appending the case folding of the class x to the class r.
@@ -2321,6 +2688,7 @@ Switch:
 
             }
             return r;
+
         }
 
         // appendNegatedClass returns the result of appending the negation of the class x to the class r.
@@ -2340,7 +2708,9 @@ Switch:
                         r = appendRange(r, nextLo, lo - 1L);
                     i += 2L;
                     }
+
                     nextLo = hi + 1L;
+
                 }
 
             }
@@ -2348,12 +2718,16 @@ Switch:
             {
                 r = appendRange(r, nextLo, unicode.MaxRune);
             }
+
             return r;
+
         }
 
         // appendTable returns the result of appending x to the class r.
-        private static slice<int> appendTable(slice<int> r, ref unicode.RangeTable x)
+        private static slice<int> appendTable(slice<int> r, ptr<unicode.RangeTable> _addr_x)
         {
+            ref unicode.RangeTable x = ref _addr_x.val;
+
             {
                 var xr__prev1 = xr;
 
@@ -2368,6 +2742,7 @@ Switch:
                         r = appendRange(r, lo, hi);
                         continue;
                     }
+
                     {
                         var c__prev2 = c;
 
@@ -2382,6 +2757,7 @@ Switch:
 
                         c = c__prev2;
                     }
+
                 }
 
                 xr = xr__prev1;
@@ -2401,6 +2777,7 @@ Switch:
                         r = appendRange(r, lo, hi);
                         continue;
                     }
+
                     {
                         var c__prev2 = c;
 
@@ -2415,17 +2792,21 @@ Switch:
 
                         c = c__prev2;
                     }
+
                 }
 
                 xr = xr__prev1;
             }
 
             return r;
+
         }
 
         // appendNegatedTable returns the result of appending the negation of x to the class r.
-        private static slice<int> appendNegatedTable(slice<int> r, ref unicode.RangeTable x)
+        private static slice<int> appendNegatedTable(slice<int> r, ptr<unicode.RangeTable> _addr_x)
         {
+            ref unicode.RangeTable x = ref _addr_x.val;
+
             char nextLo = '\u0000'; // lo end of next class to add
             {
                 var xr__prev1 = xr;
@@ -2442,9 +2823,12 @@ Switch:
                         {
                             r = appendRange(r, nextLo, lo - 1L);
                         }
+
                         nextLo = hi + 1L;
                         continue;
+
                     }
+
                     {
                         var c__prev2 = c;
 
@@ -2457,12 +2841,15 @@ Switch:
                                 r = appendRange(r, nextLo, c - 1L);
                             c += stride;
                             }
+
                             nextLo = c + 1L;
+
                         }
 
 
                         c = c__prev2;
                     }
+
                 }
 
                 xr = xr__prev1;
@@ -2483,9 +2870,12 @@ Switch:
                         {
                             r = appendRange(r, nextLo, lo - 1L);
                         }
+
                         nextLo = hi + 1L;
                         continue;
+
                     }
+
                     {
                         var c__prev2 = c;
 
@@ -2498,12 +2888,15 @@ Switch:
                                 r = appendRange(r, nextLo, c - 1L);
                             c += stride;
                             }
+
                             nextLo = c + 1L;
+
                         }
 
 
                         c = c__prev2;
                     }
+
                 }
 
                 xr = xr__prev1;
@@ -2513,7 +2906,9 @@ Switch:
             {
                 r = appendRange(r, nextLo, unicode.MaxRune);
             }
+
             return r;
+
         }
 
         // negateClass overwrites r and returns r's negation.
@@ -2536,7 +2931,9 @@ Switch:
                         w += 2L;
                     i += 2L;
                     }
+
                     nextLo = hi + 1L;
+
                 }
 
             }
@@ -2546,8 +2943,11 @@ Switch:
                 // It's possible for the negation to have one more
                 // range - this one - than the original class, so use append.
                 r = append(r, nextLo, unicode.MaxRune);
+
             }
+
             return r;
+
         }
 
         // ranges implements sort.Interface on a []rune.
@@ -2561,7 +2961,7 @@ Switch:
 
         private static bool Less(this ranges ra, long i, long j)
         {
-            var p = ra.p.Value;
+            var p = ra.p.val;
             i *= 2L;
             j *= 2L;
             return p[i] < p[j] || p[i] == p[j] && p[i + 1L] > p[j + 1L];
@@ -2569,18 +2969,19 @@ Switch:
 
         private static long Len(this ranges ra)
         {
-            return len(ra.p.Value) / 2L;
+            return len(ra.p.val) / 2L;
         }
 
         private static void Swap(this ranges ra, long i, long j)
         {
-            var p = ra.p.Value;
+            var p = ra.p.val;
             i *= 2L;
             j *= 2L;
             p[i] = p[j];
             p[i + 1L] = p[j + 1L];
             p[j] = p[i];
             p[j + 1L] = p[i + 1L];
+
         }
 
         private static error checkUTF8(@string s)
@@ -2590,22 +2991,31 @@ Switch:
                 var (rune, size) = utf8.DecodeRuneInString(s);
                 if (rune == utf8.RuneError && size == 1L)
                 {
-                    return error.As(ref new Error(Code:ErrInvalidUTF8,Expr:s));
+                    return error.As(addr(new Error(Code:ErrInvalidUTF8,Expr:s))!)!;
                 }
+
                 s = s[size..];
+
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         private static (int, @string, error) nextRune(@string s)
         {
+            int c = default;
+            @string t = default;
+            error err = default!;
+
             var (c, size) = utf8.DecodeRuneInString(s);
             if (c == utf8.RuneError && size == 1L)
             {
-                return (0L, "", ref new Error(Code:ErrInvalidUTF8,Expr:s));
+                return (0L, "", error.As(addr(new Error(Code:ErrInvalidUTF8,Expr:s))!)!);
             }
-            return (c, s[size..], null);
+
+            return (c, s[size..], error.As(null!)!);
+
         }
 
         private static bool isalnum(int c)
@@ -2619,15 +3029,19 @@ Switch:
             {
                 return c - '0';
             }
+
             if ('a' <= c && c <= 'f')
             {
                 return c - 'a' + 10L;
             }
+
             if ('A' <= c && c <= 'F')
             {
                 return c - 'A' + 10L;
             }
+
             return -1L;
+
         }
     }
 }}

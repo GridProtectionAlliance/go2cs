@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:45 UTC
+//     Generated on 2020 October 08 04:03:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,6 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
-using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
 using go;
@@ -37,10 +36,11 @@ namespace go
                 this.name = default;
                 this.typ = default;
                 this.order_ = default;
+                this.color_ = default;
                 this.scopePos_ = default;
             }
 
-            public @object(ref ptr<Scope> parent = default, token.Pos pos = default, ref ptr<Package> pkg = default, @string name = default, Type typ = default, uint order_ = default, token.Pos scopePos_ = default)
+            public @object(ref ptr<Scope> parent = default, token.Pos pos = default, ref ptr<Package> pkg = default, @string name = default, Type typ = default, uint order_ = default, color color_ = default, token.Pos scopePos_ = default)
             {
                 this.parent = parent;
                 this.pos = pos;
@@ -48,6 +48,7 @@ namespace go
                 this.name = name;
                 this.typ = typ;
                 this.order_ = order_;
+                this.color_ = color_;
                 this.scopePos_ = scopePos_;
             }
 
@@ -71,7 +72,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static @object @object_cast(dynamic value)
         {
-            return new @object(ref value.parent, value.pos, ref value.pkg, value.name, value.typ, value.order_, value.scopePos_);
+            return new @object(ref value.parent, value.pos, ref value.pkg, value.name, value.typ, value.order_, value.color_, value.scopePos_);
         }
     }
 }}

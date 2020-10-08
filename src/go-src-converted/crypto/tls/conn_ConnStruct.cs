@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:11 UTC
+//     Generated on 2020 October 08 03:37:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,13 +39,13 @@ namespace crypto
             {
                 this.conn = default;
                 this.isClient = default;
+                this.handshakeFn = default;
+                this.handshakeStatus = default;
                 this.handshakeMutex = default;
-                this.handshakeCond = default;
                 this.handshakeErr = default;
                 this.vers = default;
                 this.haveVers = default;
                 this.config = default;
-                this.handshakeComplete = default;
                 this.handshakes = default;
                 this.didResume = default;
                 this.cipherSuite = default;
@@ -55,6 +55,9 @@ namespace crypto
                 this.verifiedChains = default;
                 this.serverName = default;
                 this.secureRenegotiation = default;
+                this.ekm = default;
+                this.resumptionSecret = default;
+                this.ticketKeys = default;
                 this.clientFinishedIsFirst = default;
                 this.closeNotifyErr = default;
                 this.closeNotifySent = default;
@@ -67,26 +70,27 @@ namespace crypto
                 this.rawInput = default;
                 this.input = default;
                 this.hand = default;
+                this.outBuf = default;
                 this.buffering = default;
                 this.sendBuf = default;
                 this.bytesSent = default;
                 this.packetsSent = default;
-                this.warnCount = default;
+                this.retryCount = default;
                 this.activeCall = default;
                 this.tmp = default;
             }
 
-            public Conn(net.Conn conn = default, bool isClient = default, sync.Mutex handshakeMutex = default, ref ptr<sync.Cond> handshakeCond = default, error handshakeErr = default, ushort vers = default, bool haveVers = default, ref ptr<Config> config = default, bool handshakeComplete = default, long handshakes = default, bool didResume = default, ushort cipherSuite = default, slice<byte> ocspResponse = default, slice<slice<byte>> scts = default, slice<ref x509.Certificate> peerCertificates = default, slice<slice<ref x509.Certificate>> verifiedChains = default, @string serverName = default, bool secureRenegotiation = default, bool clientFinishedIsFirst = default, error closeNotifyErr = default, bool closeNotifySent = default, array<byte> clientFinished = default, array<byte> serverFinished = default, @string clientProtocol = default, bool clientProtocolFallback = default, halfConn @in = default, halfConn @out = default, ref ptr<block> rawInput = default, ref ptr<block> input = default, bytes.Buffer hand = default, bool buffering = default, slice<byte> sendBuf = default, long bytesSent = default, long packetsSent = default, long warnCount = default, int activeCall = default, array<byte> tmp = default)
+            public Conn(net.Conn conn = default, bool isClient = default, Func<error> handshakeFn = default, uint handshakeStatus = default, sync.Mutex handshakeMutex = default, error handshakeErr = default, ushort vers = default, bool haveVers = default, ref ptr<Config> config = default, long handshakes = default, bool didResume = default, ushort cipherSuite = default, slice<byte> ocspResponse = default, slice<slice<byte>> scts = default, slice<ptr<x509.Certificate>> peerCertificates = default, slice<slice<ptr<x509.Certificate>>> verifiedChains = default, @string serverName = default, bool secureRenegotiation = default, Func<@string, slice<byte>, long, (slice<byte>, error)> ekm = default, slice<byte> resumptionSecret = default, slice<ticketKey> ticketKeys = default, bool clientFinishedIsFirst = default, error closeNotifyErr = default, bool closeNotifySent = default, array<byte> clientFinished = default, array<byte> serverFinished = default, @string clientProtocol = default, bool clientProtocolFallback = default, halfConn @in = default, halfConn @out = default, bytes.Buffer rawInput = default, bytes.Reader input = default, bytes.Buffer hand = default, slice<byte> outBuf = default, bool buffering = default, slice<byte> sendBuf = default, long bytesSent = default, long packetsSent = default, long retryCount = default, int activeCall = default, array<byte> tmp = default)
             {
                 this.conn = conn;
                 this.isClient = isClient;
+                this.handshakeFn = handshakeFn;
+                this.handshakeStatus = handshakeStatus;
                 this.handshakeMutex = handshakeMutex;
-                this.handshakeCond = handshakeCond;
                 this.handshakeErr = handshakeErr;
                 this.vers = vers;
                 this.haveVers = haveVers;
                 this.config = config;
-                this.handshakeComplete = handshakeComplete;
                 this.handshakes = handshakes;
                 this.didResume = didResume;
                 this.cipherSuite = cipherSuite;
@@ -96,6 +100,9 @@ namespace crypto
                 this.verifiedChains = verifiedChains;
                 this.serverName = serverName;
                 this.secureRenegotiation = secureRenegotiation;
+                this.ekm = ekm;
+                this.resumptionSecret = resumptionSecret;
+                this.ticketKeys = ticketKeys;
                 this.clientFinishedIsFirst = clientFinishedIsFirst;
                 this.closeNotifyErr = closeNotifyErr;
                 this.closeNotifySent = closeNotifySent;
@@ -108,11 +115,12 @@ namespace crypto
                 this.rawInput = rawInput;
                 this.input = input;
                 this.hand = hand;
+                this.outBuf = outBuf;
                 this.buffering = buffering;
                 this.sendBuf = sendBuf;
                 this.bytesSent = bytesSent;
                 this.packetsSent = packetsSent;
-                this.warnCount = warnCount;
+                this.retryCount = retryCount;
                 this.activeCall = activeCall;
                 this.tmp = tmp;
             }
@@ -137,7 +145,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Conn Conn_cast(dynamic value)
         {
-            return new Conn(value.conn, value.isClient, value.handshakeMutex, ref value.handshakeCond, value.handshakeErr, value.vers, value.haveVers, ref value.config, value.handshakeComplete, value.handshakes, value.didResume, value.cipherSuite, value.ocspResponse, value.scts, value.peerCertificates, value.verifiedChains, value.serverName, value.secureRenegotiation, value.clientFinishedIsFirst, value.closeNotifyErr, value.closeNotifySent, value.clientFinished, value.serverFinished, value.clientProtocol, value.clientProtocolFallback, value.@in, value.@out, ref value.rawInput, ref value.input, value.hand, value.buffering, value.sendBuf, value.bytesSent, value.packetsSent, value.warnCount, value.activeCall, value.tmp);
+            return new Conn(value.conn, value.isClient, value.handshakeFn, value.handshakeStatus, value.handshakeMutex, value.handshakeErr, value.vers, value.haveVers, ref value.config, value.handshakes, value.didResume, value.cipherSuite, value.ocspResponse, value.scts, value.peerCertificates, value.verifiedChains, value.serverName, value.secureRenegotiation, value.ekm, value.resumptionSecret, value.ticketKeys, value.clientFinishedIsFirst, value.closeNotifyErr, value.closeNotifySent, value.clientFinished, value.serverFinished, value.clientProtocol, value.clientProtocolFallback, value.@in, value.@out, value.rawInput, value.input, value.hand, value.outBuf, value.buffering, value.sendBuf, value.bytesSent, value.packetsSent, value.retryCount, value.activeCall, value.tmp);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:03:17 UTC
+//     Generated on 2020 October 08 04:38:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,11 +13,14 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using heap = go.container.heap_package;
 using fmt = go.fmt_package;
-using strings = go.strings_package;
 using unicode = go.unicode_package;
 using go;
 
@@ -29,48 +32,50 @@ namespace @internal
     public static partial class ld_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct deadcodepass
+        private partial struct deadcodePass
         {
             // Constructors
-            public deadcodepass(NilType _)
+            public deadcodePass(NilType _)
             {
                 this.ctxt = default;
-                this.markQueue = default;
+                this.ldr = default;
+                this.wq = default;
                 this.ifaceMethod = default;
                 this.markableMethods = default;
-                this.reflectMethod = default;
+                this.reflectSeen = default;
             }
 
-            public deadcodepass(ref ptr<Link> ctxt = default, slice<ref sym.Symbol> markQueue = default, map<methodsig, bool> ifaceMethod = default, slice<methodref> markableMethods = default, bool reflectMethod = default)
+            public deadcodePass(ref ptr<Link> ctxt = default, ref ptr<loader.Loader> ldr = default, workQueue wq = default, map<methodsig, bool> ifaceMethod = default, slice<methodref> markableMethods = default, bool reflectSeen = default)
             {
                 this.ctxt = ctxt;
-                this.markQueue = markQueue;
+                this.ldr = ldr;
+                this.wq = wq;
                 this.ifaceMethod = ifaceMethod;
                 this.markableMethods = markableMethods;
-                this.reflectMethod = reflectMethod;
+                this.reflectSeen = reflectSeen;
             }
 
-            // Enable comparisons between nil and deadcodepass struct
+            // Enable comparisons between nil and deadcodePass struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(deadcodepass value, NilType nil) => value.Equals(default(deadcodepass));
+            public static bool operator ==(deadcodePass value, NilType nil) => value.Equals(default(deadcodePass));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(deadcodepass value, NilType nil) => !(value == nil);
+            public static bool operator !=(deadcodePass value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, deadcodepass value) => value == nil;
+            public static bool operator ==(NilType nil, deadcodePass value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, deadcodepass value) => value != nil;
+            public static bool operator !=(NilType nil, deadcodePass value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator deadcodepass(NilType nil) => default(deadcodepass);
+            public static implicit operator deadcodePass(NilType nil) => default(deadcodePass);
         }
 
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private static deadcodepass deadcodepass_cast(dynamic value)
+        private static deadcodePass deadcodePass_cast(dynamic value)
         {
-            return new deadcodepass(ref value.ctxt, value.markQueue, value.ifaceMethod, value.markableMethods, value.reflectMethod);
+            return new deadcodePass(ref value.ctxt, ref value.ldr, value.wq, value.ifaceMethod, value.markableMethods, value.reflectSeen);
         }
     }
 }}}}

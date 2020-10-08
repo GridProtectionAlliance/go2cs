@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:28 UTC
+//     Generated on 2020 October 08 04:31:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,10 +14,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using ssa = go.cmd.compile.@internal.ssa_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -36,7 +37,7 @@ namespace @internal
                 this.slice = default;
             }
 
-            public Nodes(ref ref slice<ref Node> slice = default)
+            public Nodes(ref ptr<slice<ptr<Node>>> slice = default)
             {
                 this.slice = slice;
             }

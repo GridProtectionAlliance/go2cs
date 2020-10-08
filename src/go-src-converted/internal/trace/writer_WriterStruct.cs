@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:59 UTC
+//     Generated on 2020 October 08 04:42:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,8 +33,6 @@ namespace @internal
             public ref slice<byte> buf => ref m_BufferRef.Value.buf;
 
             public ref long off => ref m_BufferRef.Value.off;
-
-            public ref array<byte> bootstrap => ref m_BufferRef.Value.bootstrap;
 
             public ref readOp lastRead => ref m_BufferRef.Value.lastRead;
 

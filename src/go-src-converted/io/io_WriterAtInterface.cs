@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:53 UTC
+//     Generated on 2020 October 08 01:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) WriteAtByRef(ref T value, slice<byte> p, long off);
+            private delegate (long, error) WriteAtByPtr(ptr<T> value, slice<byte> p, long off);
             private delegate (long, error) WriteAtByVal(T value, slice<byte> p, long off);
 
-            private static readonly WriteAtByRef s_WriteAtByRef;
+            private static readonly WriteAtByPtr s_WriteAtByPtr;
             private static readonly WriteAtByVal s_WriteAtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,11 +74,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteAtByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteAtByPtr is null || !m_target_is_ptr)
                     return s_WriteAtByVal!(target, p, off);
 
-                return s_WriteAtByRef(ref target, p, off);
+                return s_WriteAtByPtr(m_target_ptr, p, off);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -87,23 +88,20 @@ namespace go
             static WriterAt()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteAt");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteAt");
 
                 if (!(extensionMethod is null))
-                    s_WriteAtByRef = extensionMethod.CreateStaticDelegate(typeof(WriteAtByRef)) as WriteAtByRef;
+                    s_WriteAtByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteAtByPtr)) as WriteAtByPtr;
 
-                if (s_WriteAtByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteAt");
+                extensionMethod = targetType.GetExtensionMethod("WriteAt");
 
-                    if (!(extensionMethod is null))
-                        s_WriteAtByVal = extensionMethod.CreateStaticDelegate(typeof(WriteAtByVal)) as WriteAtByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteAtByVal = extensionMethod.CreateStaticDelegate(typeof(WriteAtByVal)) as WriteAtByVal;
 
-                if (s_WriteAtByRef is null && s_WriteAtByVal is null)
+                if (s_WriteAtByPtr is null && s_WriteAtByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement WriterAt.WriteAt method", new Exception("WriteAt"));
             }
 

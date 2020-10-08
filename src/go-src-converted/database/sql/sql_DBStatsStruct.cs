@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:11:00 UTC
+//     Generated on 2020 October 08 04:58:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using io = go.io_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -37,12 +38,28 @@ namespace database
             // Constructors
             public DBStats(NilType _)
             {
+                this.MaxOpenConnections = default;
                 this.OpenConnections = default;
+                this.InUse = default;
+                this.Idle = default;
+                this.WaitCount = default;
+                this.WaitDuration = default;
+                this.MaxIdleClosed = default;
+                this.MaxIdleTimeClosed = default;
+                this.MaxLifetimeClosed = default;
             }
 
-            public DBStats(long OpenConnections = default)
+            public DBStats(long MaxOpenConnections = default, long OpenConnections = default, long InUse = default, long Idle = default, long WaitCount = default, time.Duration WaitDuration = default, long MaxIdleClosed = default, long MaxIdleTimeClosed = default, long MaxLifetimeClosed = default)
             {
+                this.MaxOpenConnections = MaxOpenConnections;
                 this.OpenConnections = OpenConnections;
+                this.InUse = InUse;
+                this.Idle = Idle;
+                this.WaitCount = WaitCount;
+                this.WaitDuration = WaitDuration;
+                this.MaxIdleClosed = MaxIdleClosed;
+                this.MaxIdleTimeClosed = MaxIdleTimeClosed;
+                this.MaxLifetimeClosed = MaxLifetimeClosed;
             }
 
             // Enable comparisons between nil and DBStats struct
@@ -65,7 +82,7 @@ namespace database
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static DBStats DBStats_cast(dynamic value)
         {
-            return new DBStats(value.OpenConnections);
+            return new DBStats(value.MaxOpenConnections, value.OpenConnections, value.InUse, value.Idle, value.WaitCount, value.WaitDuration, value.MaxIdleClosed, value.MaxIdleTimeClosed, value.MaxLifetimeClosed);
         }
     }
 }}

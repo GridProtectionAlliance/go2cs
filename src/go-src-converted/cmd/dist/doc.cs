@@ -16,7 +16,7 @@
 //   list [-json]   list all supported platforms
 //   test [-h]      run Go test(s)
 //   version        print Go version
-// package main -- go2cs converted at 2020 August 29 09:59:42 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:46 UTC
 // Original source: C:\Go\src\cmd\dist\doc.go
     }
 

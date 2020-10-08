@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:27 UTC
+//     Generated on 2020 October 08 03:24:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,12 +29,14 @@ namespace go
             {
                 this.fn = default;
                 this.stack = default;
+                this.argLen = default;
             }
 
-            public reflectMethodValue(System.UIntPtr fn = default, ref ptr<bitvector> stack = default)
+            public reflectMethodValue(System.UIntPtr fn = default, ref ptr<bitvector> stack = default, System.UIntPtr argLen = default)
             {
                 this.fn = fn;
                 this.stack = stack;
+                this.argLen = argLen;
             }
 
             // Enable comparisons between nil and reflectMethodValue struct
@@ -57,7 +59,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static reflectMethodValue reflectMethodValue_cast(dynamic value)
         {
-            return new reflectMethodValue(value.fn, ref value.stack);
+            return new reflectMethodValue(value.fn, ref value.stack, value.argLen);
         }
     }
 }

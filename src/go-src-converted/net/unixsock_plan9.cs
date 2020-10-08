@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:28:10 UTC
+// package net -- go2cs converted at 2020 October 08 03:35:01 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\unixsock_plan9.go
 using context = go.context_package;
@@ -14,54 +14,103 @@ namespace go
 {
     public static partial class net_package
     {
-        private static (long, ref UnixAddr, error) readFrom(this ref UnixConn c, slice<byte> b)
+        private static (long, ptr<UnixAddr>, error) readFrom(this ptr<UnixConn> _addr_c, slice<byte> b)
         {
-            return (0L, null, syscall.EPLAN9);
+            long _p0 = default;
+            ptr<UnixAddr> _p0 = default!;
+            error _p0 = default!;
+            ref UnixConn c = ref _addr_c.val;
+
+            return (0L, _addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (long, long, long, ref UnixAddr, error) readMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob)
+        private static (long, long, long, ptr<UnixAddr>, error) readMsg(this ptr<UnixConn> _addr_c, slice<byte> b, slice<byte> oob)
         {
-            return (0L, 0L, 0L, null, syscall.EPLAN9);
+            long n = default;
+            long oobn = default;
+            long flags = default;
+            ptr<UnixAddr> addr = default!;
+            error err = default!;
+            ref UnixConn c = ref _addr_c.val;
+
+            return (0L, 0L, 0L, _addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (long, error) writeTo(this ref UnixConn c, slice<byte> b, ref UnixAddr addr)
+        private static (long, error) writeTo(this ptr<UnixConn> _addr_c, slice<byte> b, ptr<UnixAddr> _addr_addr)
         {
-            return (0L, syscall.EPLAN9);
+            long _p0 = default;
+            error _p0 = default!;
+            ref UnixConn c = ref _addr_c.val;
+            ref UnixAddr addr = ref _addr_addr.val;
+
+            return (0L, error.As(syscall.EPLAN9)!);
         }
 
-        private static (long, long, error) writeMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob, ref UnixAddr addr)
+        private static (long, long, error) writeMsg(this ptr<UnixConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<UnixAddr> _addr_addr)
         {
-            return (0L, 0L, syscall.EPLAN9);
+            long n = default;
+            long oobn = default;
+            error err = default!;
+            ref UnixConn c = ref _addr_c.val;
+            ref UnixAddr addr = ref _addr_addr.val;
+
+            return (0L, 0L, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref UnixConn, error) dialUnix(context.Context ctx, @string network, ref UnixAddr laddr, ref UnixAddr raddr)
+        private static (ptr<UnixConn>, error) dialUnix(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<UnixAddr> _addr_laddr, ptr<UnixAddr> _addr_raddr)
         {
-            return (null, syscall.EPLAN9);
+            ptr<UnixConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysDialer sd = ref _addr_sd.val;
+            ref UnixAddr laddr = ref _addr_laddr.val;
+            ref UnixAddr raddr = ref _addr_raddr.val;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref UnixConn, error) accept(this ref UnixListener ln)
+        private static (ptr<UnixConn>, error) accept(this ptr<UnixListener> _addr_ln)
         {
-            return (null, syscall.EPLAN9);
+            ptr<UnixConn> _p0 = default!;
+            error _p0 = default!;
+            ref UnixListener ln = ref _addr_ln.val;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static error close(this ref UnixListener ln)
+        private static error close(this ptr<UnixListener> _addr_ln)
         {
-            return error.As(syscall.EPLAN9);
+            ref UnixListener ln = ref _addr_ln.val;
+
+            return error.As(syscall.EPLAN9)!;
         }
 
-        private static (ref os.File, error) file(this ref UnixListener ln)
+        private static (ptr<os.File>, error) file(this ptr<UnixListener> _addr_ln)
         {
-            return (null, syscall.EPLAN9);
+            ptr<os.File> _p0 = default!;
+            error _p0 = default!;
+            ref UnixListener ln = ref _addr_ln.val;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref UnixListener, error) listenUnix(context.Context ctx, @string network, ref UnixAddr laddr)
+        private static (ptr<UnixListener>, error) listenUnix(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<UnixAddr> _addr_laddr)
         {
-            return (null, syscall.EPLAN9);
+            ptr<UnixListener> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref UnixAddr laddr = ref _addr_laddr.val;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
 
-        private static (ref UnixConn, error) listenUnixgram(context.Context ctx, @string network, ref UnixAddr laddr)
+        private static (ptr<UnixConn>, error) listenUnixgram(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<UnixAddr> _addr_laddr)
         {
-            return (null, syscall.EPLAN9);
+            ptr<UnixConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref UnixAddr laddr = ref _addr_laddr.val;
+
+            return (_addr_null!, error.As(syscall.EPLAN9)!);
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Rows, error) CloseByRef(ref T value);
+            private delegate (Rows, error) CloseByPtr(ptr<T> value);
             private delegate (Rows, error) CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +79,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
 
-            private delegate (Rows, error) NumInputByRef(ref T value);
+            private delegate (Rows, error) NumInputByPtr(ptr<T> value);
             private delegate (Rows, error) NumInputByVal(T value);
 
-            private static readonly NumInputByRef s_NumInputByRef;
+            private static readonly NumInputByPtr s_NumInputByPtr;
             private static readonly NumInputByVal s_NumInputByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,17 +99,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NumInputByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NumInputByPtr is null || !m_target_is_ptr)
                     return s_NumInputByVal!(target);
 
-                return s_NumInputByRef(ref target);
+                return s_NumInputByPtr(m_target_ptr);
             }
 
-            private delegate (Rows, error) ExecByRef(ref T value, slice<Value> args);
+            private delegate (Rows, error) ExecByPtr(ptr<T> value, slice<Value> args);
             private delegate (Rows, error) ExecByVal(T value, slice<Value> args);
 
-            private static readonly ExecByRef s_ExecByRef;
+            private static readonly ExecByPtr s_ExecByPtr;
             private static readonly ExecByVal s_ExecByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -117,17 +119,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ExecByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ExecByPtr is null || !m_target_is_ptr)
                     return s_ExecByVal!(target, args);
 
-                return s_ExecByRef(ref target, args);
+                return s_ExecByPtr(m_target_ptr, args);
             }
 
-            private delegate (Rows, error) QueryByRef(ref T value, slice<Value> args);
+            private delegate (Rows, error) QueryByPtr(ptr<T> value, slice<Value> args);
             private delegate (Rows, error) QueryByVal(T value, slice<Value> args);
 
-            private static readonly QueryByRef s_QueryByRef;
+            private static readonly QueryByPtr s_QueryByPtr;
             private static readonly QueryByVal s_QueryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,11 +139,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_QueryByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_QueryByPtr is null || !m_target_is_ptr)
                     return s_QueryByVal!(target, args);
 
-                return s_QueryByRef(ref target, args);
+                return s_QueryByPtr(m_target_ptr, args);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -149,71 +153,59 @@ namespace sql
             static Stmt()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stmt.Close method", new Exception("Close"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NumInput");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NumInput");
 
                 if (!(extensionMethod is null))
-                    s_NumInputByRef = extensionMethod.CreateStaticDelegate(typeof(NumInputByRef)) as NumInputByRef;
+                    s_NumInputByPtr = extensionMethod.CreateStaticDelegate(typeof(NumInputByPtr)) as NumInputByPtr;
 
-                if (s_NumInputByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NumInput");
+                extensionMethod = targetType.GetExtensionMethod("NumInput");
 
-                    if (!(extensionMethod is null))
-                        s_NumInputByVal = extensionMethod.CreateStaticDelegate(typeof(NumInputByVal)) as NumInputByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NumInputByVal = extensionMethod.CreateStaticDelegate(typeof(NumInputByVal)) as NumInputByVal;
 
-                if (s_NumInputByRef is null && s_NumInputByVal is null)
+                if (s_NumInputByPtr is null && s_NumInputByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stmt.NumInput method", new Exception("NumInput"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Exec");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Exec");
 
                 if (!(extensionMethod is null))
-                    s_ExecByRef = extensionMethod.CreateStaticDelegate(typeof(ExecByRef)) as ExecByRef;
+                    s_ExecByPtr = extensionMethod.CreateStaticDelegate(typeof(ExecByPtr)) as ExecByPtr;
 
-                if (s_ExecByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Exec");
+                extensionMethod = targetType.GetExtensionMethod("Exec");
 
-                    if (!(extensionMethod is null))
-                        s_ExecByVal = extensionMethod.CreateStaticDelegate(typeof(ExecByVal)) as ExecByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ExecByVal = extensionMethod.CreateStaticDelegate(typeof(ExecByVal)) as ExecByVal;
 
-                if (s_ExecByRef is null && s_ExecByVal is null)
+                if (s_ExecByPtr is null && s_ExecByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stmt.Exec method", new Exception("Exec"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Query");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Query");
 
                 if (!(extensionMethod is null))
-                    s_QueryByRef = extensionMethod.CreateStaticDelegate(typeof(QueryByRef)) as QueryByRef;
+                    s_QueryByPtr = extensionMethod.CreateStaticDelegate(typeof(QueryByPtr)) as QueryByPtr;
 
-                if (s_QueryByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Query");
+                extensionMethod = targetType.GetExtensionMethod("Query");
 
-                    if (!(extensionMethod is null))
-                        s_QueryByVal = extensionMethod.CreateStaticDelegate(typeof(QueryByVal)) as QueryByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_QueryByVal = extensionMethod.CreateStaticDelegate(typeof(QueryByVal)) as QueryByVal;
 
-                if (s_QueryByRef is null && s_QueryByVal is null)
+                if (s_QueryByPtr is null && s_QueryByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stmt.Query method", new Exception("Query"));
             }
 

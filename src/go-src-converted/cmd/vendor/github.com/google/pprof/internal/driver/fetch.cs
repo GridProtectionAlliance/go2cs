@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2020 August 29 10:05:24 UTC
+// package driver -- go2cs converted at 2020 October 08 04:43:01 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\fetch.go
 using bytes = go.bytes_package;
-using tls = go.crypto.tls_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
@@ -52,8 +51,13 @@ namespace @internal
         // It will merge all the profiles it is able to retrieve, even if
         // there are some failures. It will return an error if it is unable to
         // fetch any profiles.
-        private static (ref profile.Profile, error) fetchProfiles(ref source s, ref plugin.Options o)
+        private static (ptr<profile.Profile>, error) fetchProfiles(ptr<source> _addr_s, ptr<plugin.Options> _addr_o)
         {
+            ptr<profile.Profile> _p0 = default!;
+            error _p0 = default!;
+            ref source s = ref _addr_s.val;
+            ref plugin.Options o = ref _addr_o.val;
+
             var sources = make_slice<profileSource>(0L, len(s.Sources));
             {
                 var src__prev1 = src;
@@ -78,26 +82,30 @@ namespace @internal
                 src = src__prev1;
             }
 
-            var (p, pbase, m, mbase, save, err) = grabSourcesAndBases(sources, bases, o.Fetch, o.Obj, o.UI);
+            var (p, pbase, m, mbase, save, err) = grabSourcesAndBases(sources, bases, o.Fetch, o.Obj, o.UI, o.HTTPTransport);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
             if (pbase != null)
             {
+                if (s.DiffBase)
+                {
+                    pbase.SetLabel("pprof::base", new slice<@string>(new @string[] { "true" }));
+                }
                 if (s.Normalize)
                 {
                     var err = p.Normalize(pbase);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
                 }
                 pbase.Scale(-1L);
-                p, m, err = combineProfiles(new slice<ref profile.Profile>(new ref profile.Profile[] { p, pbase }), new slice<plugin.MappingSources>(new plugin.MappingSources[] { m, mbase }));
+                p, m, err = combineProfiles(new slice<ptr<profile.Profile>>(new ptr<profile.Profile>[] { p, pbase }), new slice<plugin.MappingSources>(new plugin.MappingSources[] { m, mbase }));
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
             }
             {
@@ -107,13 +115,14 @@ namespace @internal
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
                 err = err__prev1;
 
             }
+
             p.RemoveUninteresting();
-            unsourceMappings(p);
+            unsourceMappings(_addr_p);
 
             if (s.Comment != "")
             {
@@ -124,7 +133,7 @@ namespace @internal
                 var (dir, err) = setTmpDir(o.UI);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
                 @string prefix = "pprof.";
                 if (len(p.Mapping) > 0L && p.Mapping[0L].File != "")
@@ -156,58 +165,71 @@ namespace @internal
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
                 err = err__prev1;
 
             }
 
-            return (p, null);
+
+            return (_addr_p!, error.As(null!)!);
+
         }
 
-        private static (ref profile.Profile, ref profile.Profile, plugin.MappingSources, plugin.MappingSources, bool, error) grabSourcesAndBases(slice<profileSource> sources, slice<profileSource> bases, plugin.Fetcher fetch, plugin.ObjTool obj, plugin.UI ui) => func((defer, _, __) =>
+        private static (ptr<profile.Profile>, ptr<profile.Profile>, plugin.MappingSources, plugin.MappingSources, bool, error) grabSourcesAndBases(slice<profileSource> sources, slice<profileSource> bases, plugin.Fetcher fetch, plugin.ObjTool obj, plugin.UI ui, http.RoundTripper tr) => func((defer, _, __) =>
         {
+            ptr<profile.Profile> _p0 = default!;
+            ptr<profile.Profile> _p0 = default!;
+            plugin.MappingSources _p0 = default;
+            plugin.MappingSources _p0 = default;
+            bool _p0 = default;
+            error _p0 = default!;
+
             sync.WaitGroup wg = new sync.WaitGroup();
             wg.Add(2L);
-            ref profile.Profile psrc = default;            ref profile.Profile pbase = default;
+            ptr<profile.Profile> psrc;            ptr<profile.Profile> pbase;
 
             plugin.MappingSources msrc = default;            plugin.MappingSources mbase = default;
 
             bool savesrc = default;            bool savebase = default;
 
-            error errsrc = default;            error errbase = default;
+            error errsrc = default!;            error errbase = default!;
 
             long countsrc = default;            long countbase = default;
 
             go_(() => () =>
             {
                 defer(wg.Done());
-                psrc, msrc, savesrc, countsrc, errsrc = chunkedGrab(sources, fetch, obj, ui);
+                psrc, msrc, savesrc, countsrc, errsrc = chunkedGrab(sources, fetch, obj, ui, tr);
             }());
             go_(() => () =>
             {
                 defer(wg.Done());
-                pbase, mbase, savebase, countbase, errbase = chunkedGrab(bases, fetch, obj, ui);
+                pbase, mbase, savebase, countbase, errbase = chunkedGrab(bases, fetch, obj, ui, tr);
             }());
             wg.Wait();
             var save = savesrc || savebase;
 
             if (errsrc != null)
             {
-                return (null, null, null, null, false, fmt.Errorf("problem fetching source profiles: %v", errsrc));
+                return (_addr_null!, _addr_null!, null, null, false, error.As(fmt.Errorf("problem fetching source profiles: %v", errsrc))!);
             }
+
             if (errbase != null)
             {
-                return (null, null, null, null, false, fmt.Errorf("problem fetching base profiles: %v,", errbase));
+                return (_addr_null!, _addr_null!, null, null, false, error.As(fmt.Errorf("problem fetching base profiles: %v,", errbase))!);
             }
+
             if (countsrc == 0L)
             {
-                return (null, null, null, null, false, fmt.Errorf("failed to fetch any source profiles"));
+                return (_addr_null!, _addr_null!, null, null, false, error.As(fmt.Errorf("failed to fetch any source profiles"))!);
             }
+
             if (countbase == 0L && len(bases) > 0L)
             {
-                return (null, null, null, null, false, fmt.Errorf("failed to fetch any base profiles"));
+                return (_addr_null!, _addr_null!, null, null, false, error.As(fmt.Errorf("failed to fetch any base profiles"))!);
             }
+
             {
                 var want__prev1 = want;
                 var got__prev1 = got;
@@ -224,6 +246,7 @@ namespace @internal
                 got = got__prev1;
 
             }
+
             {
                 var want__prev1 = want;
                 var got__prev1 = got;
@@ -241,19 +264,27 @@ namespace @internal
 
             }
 
-            return (psrc, pbase, msrc, mbase, save, null);
+
+            return (_addr_psrc!, _addr_pbase!, msrc, mbase, save, error.As(null!)!);
+
         });
 
         // chunkedGrab fetches the profiles described in source and merges them into
         // a single profile. It fetches a chunk of profiles concurrently, with a maximum
         // chunk size to limit its memory usage.
-        private static (ref profile.Profile, plugin.MappingSources, bool, long, error) chunkedGrab(slice<profileSource> sources, plugin.Fetcher fetch, plugin.ObjTool obj, plugin.UI ui)
+        private static (ptr<profile.Profile>, plugin.MappingSources, bool, long, error) chunkedGrab(slice<profileSource> sources, plugin.Fetcher fetch, plugin.ObjTool obj, plugin.UI ui, http.RoundTripper tr)
         {
-            const long chunkSize = 64L;
+            ptr<profile.Profile> _p0 = default!;
+            plugin.MappingSources _p0 = default;
+            bool _p0 = default;
+            long _p0 = default;
+            error _p0 = default!;
+
+            const long chunkSize = (long)64L;
 
 
 
-            ref profile.Profile p = default;
+            ptr<profile.Profile> p;
             plugin.MappingSources msrc = default;
             bool save = default;
             long count = default;
@@ -269,10 +300,11 @@ namespace @internal
                         end = len(sources);
                     start += chunkSize;
                     }
-                    var (chunkP, chunkMsrc, chunkSave, chunkCount, chunkErr) = concurrentGrab(sources[start..end], fetch, obj, ui);
+
+                    var (chunkP, chunkMsrc, chunkSave, chunkCount, chunkErr) = concurrentGrab(sources[start..end], fetch, obj, ui, tr);
 
                     if (chunkErr != null) 
-                        return (null, null, false, 0L, chunkErr);
+                        return (_addr_null!, null, false, 0L, error.As(chunkErr)!);
                     else if (chunkP == null) 
                         continue;
                     else if (p == null) 
@@ -281,26 +313,36 @@ namespace @internal
                         save = chunkSave;
                         count = chunkCount;
                     else 
-                        p, msrc, chunkErr = combineProfiles(new slice<ref profile.Profile>(new ref profile.Profile[] { p, chunkP }), new slice<plugin.MappingSources>(new plugin.MappingSources[] { msrc, chunkMsrc }));
+                        p, msrc, chunkErr = combineProfiles(new slice<ptr<profile.Profile>>(new ptr<profile.Profile>[] { p, chunkP }), new slice<plugin.MappingSources>(new plugin.MappingSources[] { msrc, chunkMsrc }));
                         if (chunkErr != null)
                         {
-                            return (null, null, false, 0L, chunkErr);
+                            return (_addr_null!, null, false, 0L, error.As(chunkErr)!);
                         }
+
                         if (chunkSave)
                         {
                             save = true;
                         }
+
                         count += chunkCount;
-                                    }
+                    
+                }
 
             }
 
-            return (p, msrc, save, count, null);
+            return (_addr_p!, msrc, save, count, error.As(null!)!);
+
         }
 
         // concurrentGrab fetches multiple profiles concurrently
-        private static (ref profile.Profile, plugin.MappingSources, bool, long, error) concurrentGrab(slice<profileSource> sources, plugin.Fetcher fetch, plugin.ObjTool obj, plugin.UI ui) => func((defer, _, __) =>
+        private static (ptr<profile.Profile>, plugin.MappingSources, bool, long, error) concurrentGrab(slice<profileSource> sources, plugin.Fetcher fetch, plugin.ObjTool obj, plugin.UI ui, http.RoundTripper tr) => func((defer, _, __) =>
         {
+            ptr<profile.Profile> _p0 = default!;
+            plugin.MappingSources _p0 = default;
+            bool _p0 = default;
+            long _p0 = default;
+            error _p0 = default!;
+
             sync.WaitGroup wg = new sync.WaitGroup();
             wg.Add(len(sources));
             {
@@ -312,8 +354,9 @@ namespace @internal
                     go_(() => s =>
                     {
                         defer(wg.Done());
-                        s.p, s.msrc, s.remote, s.err = grabProfile(s.source, s.addr, fetch, obj, ui);
-                    }(ref sources[i]));
+                        s.p, s.msrc, s.remote, s.err = grabProfile(_addr_s.source, s.addr, fetch, obj, ui, tr);
+                    }(_addr_sources[i]));
+
                 }
 
                 i = i__prev1;
@@ -322,7 +365,7 @@ namespace @internal
             wg.Wait();
 
             bool save = default;
-            var profiles = make_slice<ref profile.Profile>(0L, len(sources));
+            var profiles = make_slice<ptr<profile.Profile>>(0L, len(sources));
             var msrcs = make_slice<plugin.MappingSources>(0L, len(sources));
             {
                 var i__prev1 = i;
@@ -330,7 +373,7 @@ namespace @internal
                 foreach (var (__i) in sources)
                 {
                     i = __i;
-                    var s = ref sources[i];
+                    var s = _addr_sources[i];
                     {
                         var err = s.err;
 
@@ -341,10 +384,12 @@ namespace @internal
                         }
 
                     }
+
                     save = save || s.remote;
                     profiles = append(profiles, s.p);
                     msrcs = append(msrcs, s.msrc);
-                    s.Value = new profileSource();
+                    s.val = new profileSource();
+
                 }
 
                 i = i__prev1;
@@ -352,33 +397,41 @@ namespace @internal
 
             if (len(profiles) == 0L)
             {
-                return (null, null, false, 0L, null);
+                return (_addr_null!, null, false, 0L, error.As(null!)!);
             }
+
             var (p, msrc, err) = combineProfiles(profiles, msrcs);
             if (err != null)
             {
-                return (null, null, false, 0L, err);
+                return (_addr_null!, null, false, 0L, error.As(err)!);
             }
-            return (p, msrc, save, len(profiles), null);
+
+            return (_addr_p!, msrc, save, len(profiles), error.As(null!)!);
+
         });
 
-        private static (ref profile.Profile, plugin.MappingSources, error) combineProfiles(slice<ref profile.Profile> profiles, slice<plugin.MappingSources> msrcs)
-        { 
+        private static (ptr<profile.Profile>, plugin.MappingSources, error) combineProfiles(slice<ptr<profile.Profile>> profiles, slice<plugin.MappingSources> msrcs)
+        {
+            ptr<profile.Profile> _p0 = default!;
+            plugin.MappingSources _p0 = default;
+            error _p0 = default!;
+ 
             // Merge profiles.
             {
                 var err = measurement.ScaleProfiles(profiles);
 
                 if (err != null)
                 {
-                    return (null, null, err);
+                    return (_addr_null!, null, error.As(err)!);
                 }
 
             }
 
+
             var (p, err) = profile.Merge(profiles);
             if (err != null)
             {
-                return (null, null, err);
+                return (_addr_null!, null, error.As(err)!);
             } 
 
             // Combine mapping sources.
@@ -389,8 +442,10 @@ namespace @internal
                 {
                     msrc[m] = append(msrc[m], s);
                 }
+
             }
-            return (p, msrc, null);
+            return (_addr_p!, msrc, error.As(null!)!);
+
         }
 
         private partial struct profileSource
@@ -417,6 +472,7 @@ namespace @internal
                     return "HOME";
                     break;
             }
+
         }
 
         // setTmpDir prepares the directory to use to save profiles retrieved
@@ -424,6 +480,9 @@ namespace @internal
         // $HOME is not set, falls back to os.TempDir().
         private static (@string, error) setTmpDir(plugin.UI ui)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             slice<@string> dirs = default;
             {
                 var profileDir = os.Getenv("PPROF_TMPDIR");
@@ -434,6 +493,7 @@ namespace @internal
                 }
 
             }
+
             {
                 var homeDir = os.Getenv(homeEnv());
 
@@ -443,6 +503,7 @@ namespace @internal
                 }
 
             }
+
             dirs = append(dirs, os.TempDir());
             foreach (var (_, tmpDir) in dirs)
             {
@@ -456,12 +517,15 @@ namespace @internal
                     }
 
                 }
-                return (tmpDir, null);
+
+                return (tmpDir, error.As(null!)!);
+
             }
-            return ("", fmt.Errorf("failed to identify temp dir"));
+            return ("", error.As(fmt.Errorf("failed to identify temp dir"))!);
+
         }
 
-        private static readonly @string testSourceAddress = "pproftest.local";
+        private static readonly @string testSourceAddress = (@string)"pproftest.local";
 
         // grabProfile fetches a profile. Returns the profile, sources for the
         // profile mappings, a bool indicating if the profile was fetched
@@ -471,8 +535,14 @@ namespace @internal
         // grabProfile fetches a profile. Returns the profile, sources for the
         // profile mappings, a bool indicating if the profile was fetched
         // remotely, and an error.
-        private static (ref profile.Profile, plugin.MappingSources, bool, error) grabProfile(ref source s, @string source, plugin.Fetcher fetcher, plugin.ObjTool obj, plugin.UI ui)
+        private static (ptr<profile.Profile>, plugin.MappingSources, bool, error) grabProfile(ptr<source> _addr_s, @string source, plugin.Fetcher fetcher, plugin.ObjTool obj, plugin.UI ui, http.RoundTripper tr)
         {
+            ptr<profile.Profile> p = default!;
+            plugin.MappingSources msrc = default;
+            bool remote = default;
+            error err = default!;
+            ref source s = ref _addr_s.val;
+
             @string src = default;
             var duration = time.Duration(s.Seconds) * time.Second;
             var timeout = time.Duration(s.Timeout) * time.Second;
@@ -481,46 +551,56 @@ namespace @internal
                 p, src, err = fetcher.Fetch(source, duration, timeout);
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
             }
+
             if (err != null || p == null)
             { 
                 // Fetch the profile over HTTP or from a file.
-                p, src, err = fetch(source, duration, timeout, ui);
+                p, src, err = fetch(source, duration, timeout, ui, tr);
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
             }
+
             err = p.CheckValid();
 
             if (err != null)
             {
-                return;
+                return ;
             } 
 
             // Update the binary locations from command line and paths.
-            locateBinaries(p, s, obj, ui); 
+            locateBinaries(_addr_p, _addr_s, obj, ui); 
 
             // Collect the source URL for all mappings.
             if (src != "")
             {
-                msrc = collectMappingSources(p, src);
+                msrc = collectMappingSources(_addr_p, src);
                 remote = true;
                 if (strings.HasPrefix(src, "http://" + testSourceAddress))
                 { 
                     // Treat test inputs as local to avoid saving
                     // testcase profiles during driver testing.
                     remote = false;
+
                 }
+
             }
-            return;
+
+            return ;
+
         }
 
         // collectMappingSources saves the mapping sources of a profile.
-        private static plugin.MappingSources collectMappingSources(ref profile.Profile p, @string source)
+        private static plugin.MappingSources collectMappingSources(ptr<profile.Profile> _addr_p, @string source)
         {
+            ref profile.Profile p = ref _addr_p.val;
+
             plugin.MappingSources ms = new plugin.MappingSources();
             foreach (var (_, m) in p.Mapping)
             {
@@ -530,6 +610,7 @@ namespace @internal
                 {
                     key = m.File;
                 }
+
                 if (key == "")
                 { 
                     // If there is no build id or source file, use the source as the
@@ -539,16 +620,22 @@ namespace @internal
                     // which is called after symbolization is finished.
                     m.File = source;
                     key = source;
+
                 }
+
                 ms[key] = append(ms[key], src);
+
             }
             return ms;
+
         }
 
         // unsourceMappings iterates over the mappings in a profile and replaces file
         // set to the remote source URL by collectMappingSources back to empty string.
-        private static void unsourceMappings(ref profile.Profile p)
+        private static void unsourceMappings(ptr<profile.Profile> _addr_p)
         {
+            ref profile.Profile p = ref _addr_p.val;
+
             foreach (var (_, m) in p.Mapping)
             {
                 if (m.BuildID == "")
@@ -562,21 +649,29 @@ namespace @internal
                         }
 
                     }
+
                 }
+
             }
+
         }
 
         // locateBinaries searches for binary files listed in the profile and, if found,
         // updates the profile accordingly.
-        private static void locateBinaries(ref profile.Profile _p, ref source _s, plugin.ObjTool obj, plugin.UI ui) => func(_p, _s, (ref profile.Profile p, ref source s, Defer defer, Panic _, Recover __) =>
-        { 
+        private static void locateBinaries(ptr<profile.Profile> _addr_p, ptr<source> _addr_s, plugin.ObjTool obj, plugin.UI ui) => func((defer, _, __) =>
+        {
+            ref profile.Profile p = ref _addr_p.val;
+            ref source s = ref _addr_s.val;
+ 
             // Construct search path to examine
             var searchPath = os.Getenv("PPROF_BINARY_PATH");
             if (searchPath == "")
             { 
                 // Use $HOME/pprof/binaries as default directory for local symbolization binaries
                 searchPath = filepath.Join(os.Getenv(homeEnv()), "pprof", "binaries");
+
             }
+
 mapping:
             {
                 var m__prev1 = m;
@@ -589,6 +684,7 @@ mapping:
                     {
                         baseName = filepath.Base(m.File);
                     }
+
                     foreach (var (_, path) in filepath.SplitList(searchPath))
                     {
                         slice<@string> fileNames = default;
@@ -604,7 +700,10 @@ mapping:
                                 }
 
                             }
+
+                            fileNames = append(fileNames, filepath.Join(path, m.File, m.BuildID)); // perf path format
                         }
+
                         if (m.File != "")
                         { 
                             // Try both the basename and the full path, to support the same directory
@@ -613,8 +712,11 @@ mapping:
                             {
                                 fileNames = append(fileNames, filepath.Join(path, baseName));
                             }
+
                             fileNames = append(fileNames, filepath.Join(path, m.File));
+
                         }
+
                         foreach (var (_, name) in fileNames)
                         {
                             {
@@ -634,11 +736,15 @@ mapping:
                                         _continuemapping = true;
                                         break;
                                     }
+
                                 }
 
                             }
+
                         }
+
                     }
+
                 }
 
                 m = m__prev1;
@@ -649,12 +755,13 @@ mapping:
                 // This is useful for some profiles generated by the golang runtime, which
                 // do not include any mappings. Symbolization with a fake mapping will only
                 // be successful against a non-PIE binary.
-                profile.Mapping m = ref new profile.Mapping(ID:1);
-                p.Mapping = new slice<ref profile.Mapping>(new ref profile.Mapping[] { m });
+                ptr<profile.Mapping> m = addr(new profile.Mapping(ID:1));
+                p.Mapping = new slice<ptr<profile.Mapping>>(new ptr<profile.Mapping>[] { m });
                 foreach (var (_, l) in p.Location)
                 {
                     l.Mapping = m;
                 }
+
             } 
             // Replace executable filename/buildID with the overrides from source.
             // Assumes the executable is the first Mapping entry.
@@ -669,20 +776,27 @@ mapping:
                     {
                         m.File = execName;
                     }
+
                     if (buildID != "")
                     {
                         m.BuildID = buildID;
                     }
+
                 }
 
             }
+
         });
 
         // fetch fetches a profile from source, within the timeout specified,
         // producing messages through the ui. It returns the profile and the
         // url of the actual source of the profile for remote profiles.
-        private static (ref profile.Profile, @string, error) fetch(@string source, time.Duration duration, time.Duration timeout, plugin.UI ui) => func((defer, _, __) =>
+        private static (ptr<profile.Profile>, @string, error) fetch(@string source, time.Duration duration, time.Duration timeout, plugin.UI ui, http.RoundTripper tr) => func((defer, _, __) =>
         {
+            ptr<profile.Profile> p = default!;
+            @string src = default;
+            error err = default!;
+
             io.ReadCloser f = default;
 
             {
@@ -695,8 +809,10 @@ mapping:
                     {
                         ui.Print(fmt.Sprintf("Please wait... (%v)", duration));
                     }
-                    f, err = fetchURL(sourceURL, timeout);
+
+                    f, err = fetchURL(sourceURL, timeout, tr);
                     src = sourceURL;
+
                 }
                 else if (isPerfFile(source))
                 {
@@ -707,33 +823,46 @@ mapping:
                     f, err = os.Open(source);
                 }
 
+
             }
+
             if (err == null)
             {
                 defer(f.Close());
                 p, err = profile.Parse(f);
             }
-            return;
+
+            return ;
+
         });
 
         // fetchURL fetches a profile from a URL using HTTP.
-        private static (io.ReadCloser, error) fetchURL(@string source, time.Duration timeout) => func((defer, _, __) =>
+        private static (io.ReadCloser, error) fetchURL(@string source, time.Duration timeout, http.RoundTripper tr) => func((defer, _, __) =>
         {
-            var (resp, err) = httpGet(source, timeout);
+            io.ReadCloser _p0 = default;
+            error _p0 = default!;
+
+            ptr<http.Client> client = addr(new http.Client(Transport:tr,Timeout:timeout+5*time.Second,));
+            var (resp, err) = client.Get(source);
             if (err != null)
             {
-                return (null, fmt.Errorf("http fetch: %v", err));
+                return (null, error.As(fmt.Errorf("http fetch: %v", err))!);
             }
+
             if (resp.StatusCode != http.StatusOK)
             {
                 defer(resp.Body.Close());
-                return (null, statusCodeError(resp));
+                return (null, error.As(statusCodeError(_addr_resp))!);
             }
-            return (resp.Body, null);
+
+            return (resp.Body, error.As(null!)!);
+
         });
 
-        private static error statusCodeError(ref http.Response resp)
+        private static error statusCodeError(ptr<http.Response> _addr_resp)
         {
+            ref http.Response resp = ref _addr_resp.val;
+
             if (resp.Header.Get("X-Go-Pprof") != "" && strings.Contains(resp.Header.Get("Content-Type"), "text/plain"))
             { 
                 // error is from pprof endpoint
@@ -742,12 +871,15 @@ mapping:
 
                     if (err == null)
                     {
-                        return error.As(fmt.Errorf("server response: %s - %s", resp.Status, body));
+                        return error.As(fmt.Errorf("server response: %s - %s", resp.Status, body))!;
                     }
 
                 }
+
             }
-            return error.As(fmt.Errorf("server response: %s", resp.Status));
+
+            return error.As(fmt.Errorf("server response: %s", resp.Status))!;
+
         }
 
         // isPerfFile checks if a file is in perf.data format. It also returns false
@@ -759,6 +891,7 @@ mapping:
             {
                 return false;
             }
+
             defer(sourceFile.Close()); 
 
             // If the file is the output of a perf record command, it should begin
@@ -774,33 +907,43 @@ mapping:
                 }
 
             }
+
             return bytes.Equal(actualHeader, perfHeader);
+
         });
 
         // convertPerfData converts the file at path which should be in perf.data format
         // using the perf_to_profile tool and returns the file containing the
         // profile.proto formatted data.
-        private static (ref os.File, error) convertPerfData(@string perfPath, plugin.UI ui)
+        private static (ptr<os.File>, error) convertPerfData(@string perfPath, plugin.UI ui)
         {
+            ptr<os.File> _p0 = default!;
+            error _p0 = default!;
+
             ui.Print(fmt.Sprintf("Converting %s to a profile.proto... (May take a few minutes)", perfPath));
             var (profile, err) = newTempFile(os.TempDir(), "pprof_", ".pb.gz");
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             deferDeleteTempFile(profile.Name());
-            var cmd = exec.Command("perf_to_profile", perfPath, profile.Name());
+            var cmd = exec.Command("perf_to_profile", "-i", perfPath, "-o", profile.Name(), "-f");
+            cmd.Stdout = os.Stdout;
+            cmd.Stderr = os.Stderr;
             {
                 var err = cmd.Run();
 
                 if (err != null)
                 {
                     profile.Close();
-                    return (null, fmt.Errorf("failed to convert perf.data file. Try github.com/google/perf_data_converter: %v", err));
+                    return (_addr_null!, error.As(fmt.Errorf("failed to convert perf.data file. Try github.com/google/perf_data_converter: %v", err))!);
                 }
 
             }
-            return (profile, null);
+
+            return (_addr_profile!, error.As(null!)!);
+
         }
 
         // adjustURL validates if a profile source is a URL and returns an
@@ -808,13 +951,18 @@ mapping:
         // If the source cannot be recognized as a URL it returns an empty string.
         private static (@string, time.Duration) adjustURL(@string source, time.Duration duration, time.Duration timeout)
         {
+            @string _p0 = default;
+            time.Duration _p0 = default;
+
             var (u, err) = url.Parse(source);
             if (err != null || (u.Host == "" && u.Scheme != "" && u.Scheme != "file"))
             { 
                 // Try adding http:// to catch sources of the form hostname:port/path.
                 // url.Parse treats "hostname" as the scheme.
                 u, err = url.Parse("http://" + source);
+
             }
+
             if (err != null || u.Host == "")
             {
                 return ("", 0L);
@@ -842,10 +990,13 @@ mapping:
                             }
 
                         }
+
                     }
 
                 }
+
             }
+
             if (timeout <= 0L)
             {
                 if (duration > 0L)
@@ -856,29 +1007,12 @@ mapping:
                 {
                     timeout = 60L * time.Second;
                 }
+
             }
+
             u.RawQuery = values.Encode();
             return (u.String(), timeout);
-        }
 
-        // httpGet is a wrapper around http.Get; it is defined as a variable
-        // so it can be redefined during for testing.
-        private static Func<@string, time.Duration, (ref http.Response, error)> httpGet = (source, timeout) =>
-        {
-            var (url, err) = url.Parse(source);
-            if (err != null)
-            {
-                return (null, err);
-            }
-            private static ref tls.Config tlsConfig = default;
-            if (url.Scheme == "https+insecure")
-            {
-                tlsConfig = ref new tls.Config(InsecureSkipVerify:true,);
-                url.Scheme = "https";
-                source = url.String();
-            }
-            http.Client client = ref new http.Client(Transport:&http.Transport{ResponseHeaderTimeout:timeout+5*time.Second,Proxy:http.ProxyFromEnvironment,TLSClientConfig:tlsConfig,},);
-            return client.Get(source);
-        };
+        }
     }
 }}}}}}}

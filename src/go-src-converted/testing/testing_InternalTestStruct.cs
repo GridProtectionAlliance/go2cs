@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:57 UTC
+//     Generated on 2020 October 08 04:36:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
+using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -43,7 +44,7 @@ namespace go
                 this.F = default;
             }
 
-            public InternalTest(@string Name = default, Action<ref T> F = default)
+            public InternalTest(@string Name = default, Action<ptr<T>> F = default)
             {
                 this.Name = Name;
                 this.F = F;

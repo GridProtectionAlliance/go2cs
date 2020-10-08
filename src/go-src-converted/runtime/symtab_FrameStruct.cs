@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:05 UTC
+//     Generated on 2020 October 08 03:23:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,9 +33,10 @@ namespace go
                 this.File = default;
                 this.Line = default;
                 this.Entry = default;
+                this.funcInfo = default;
             }
 
-            public Frame(System.UIntPtr PC = default, ref ptr<Func> Func = default, @string Function = default, @string File = default, long Line = default, System.UIntPtr Entry = default)
+            public Frame(System.UIntPtr PC = default, ref ptr<Func> Func = default, @string Function = default, @string File = default, long Line = default, System.UIntPtr Entry = default, funcInfo funcInfo = default)
             {
                 this.PC = PC;
                 this.Func = Func;
@@ -43,6 +44,7 @@ namespace go
                 this.File = File;
                 this.Line = Line;
                 this.Entry = Entry;
+                this.funcInfo = funcInfo;
             }
 
             // Enable comparisons between nil and Frame struct
@@ -65,7 +67,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Frame Frame_cast(dynamic value)
         {
-            return new Frame(value.PC, ref value.Func, value.Function, value.File, value.Line, value.Entry);
+            return new Frame(value.PC, ref value.Func, value.Function, value.File, value.Line, value.Entry, value.funcInfo);
         }
     }
 }

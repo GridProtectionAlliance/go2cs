@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 August 29 08:25:13 UTC
+// package net -- go2cs converted at 2020 October 08 03:31:15 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\conf.go
+using bytealg = go.@internal.bytealg_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using sync = go.sync_package;
@@ -33,13 +34,13 @@ namespace go
             public ptr<dnsConfig> resolv;
         }
 
-        private static sync.Once confOnce = default;        private static conf confVal = ref new conf(goos:runtime.GOOS);
+        private static sync.Once confOnce = default;        private static ptr<conf> confVal = addr(new conf(goos:runtime.GOOS));
 
         // systemConf returns the machine's network configuration.
-        private static ref conf systemConf()
+        private static ptr<conf> systemConf()
         {
             confOnce.Do(initConfVal);
-            return confVal;
+            return _addr_confVal!;
         }
 
         private static void initConfVal() => func((defer, _, __) =>
@@ -63,11 +64,14 @@ namespace go
                         {
                             println("go package net: GODEBUG setting forcing use of Go's resolver");
                         }
+
                     else if (confVal.forceCgoLookupHost) 
                         println("go package net: using cgo DNS resolver");
                     else 
                         println("go package net: dynamic selection of DNS resolver");
-                                    }());
+                    
+                }());
+
             } 
 
             // Darwin pops up annoying dialog boxes if programs try to do
@@ -76,7 +80,7 @@ namespace go
             if (runtime.GOOS == "darwin")
             {
                 confVal.forceCgoLookupHost = true;
-                return;
+                return ;
             } 
 
             // If any environment-specified resolver options are specified,
@@ -86,7 +90,7 @@ namespace go
             if (os.Getenv("RES_OPTIONS") != "" || os.Getenv("HOSTALIASES") != "" || confVal.netCgo || localDomainDefined)
             {
                 confVal.forceCgoLookupHost = true;
-                return;
+                return ;
             } 
 
             // OpenBSD apparently lets you override the location of resolv.conf
@@ -94,12 +98,14 @@ namespace go
             if (runtime.GOOS == "openbsd" && os.Getenv("ASR_CONFIG") != "")
             {
                 confVal.forceCgoLookupHost = true;
-                return;
+                return ;
             }
+
             if (runtime.GOOS != "openbsd")
             {
                 confVal.nss = parseNSSConfFile("/etc/nsswitch.conf");
             }
+
             confVal.resolv = dnsReadConfig("/etc/resolv.conf");
             if (confVal.resolv.err != null && !os.IsNotExist(confVal.resolv.err) && !os.IsPermission(confVal.resolv.err))
             { 
@@ -108,7 +114,9 @@ namespace go
                 // libc's resolver might then fail too, but at least
                 // it wasn't our fault.
                 confVal.forceCgoLookupHost = true;
+
             }
+
             {
                 var (_, err) = os.Stat("/etc/mdns.allow");
 
@@ -118,39 +126,52 @@ namespace go
                 }
 
             }
+
         });
 
         // canUseCgo reports whether calling cgo functions is allowed
         // for non-hostname lookups.
-        private static bool canUseCgo(this ref conf c)
+        private static bool canUseCgo(this ptr<conf> _addr_c)
         {
-            return c.hostLookupOrder("") == hostLookupCgo;
+            ref conf c = ref _addr_c.val;
+
+            return c.hostLookupOrder(null, "") == hostLookupCgo;
         }
 
         // hostLookupOrder determines which strategy to use to resolve hostname.
-        private static hostLookupOrder hostLookupOrder(this ref conf _c, @string hostname) => func(_c, (ref conf c, Defer defer, Panic _, Recover __) =>
+        // The provided Resolver is optional. nil means to not consider its options.
+        private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resolver> _addr_r, @string hostname) => func((defer, _, __) =>
         {
+            hostLookupOrder ret = default;
+            ref conf c = ref _addr_c.val;
+            ref Resolver r = ref _addr_r.val;
+
             if (c.dnsDebugLevel > 1L)
             {
                 defer(() =>
                 {
                     print("go package net: hostLookupOrder(", hostname, ") = ", ret.String(), "\n");
                 }());
+
             }
+
             var fallbackOrder = hostLookupCgo;
-            if (c.netGo)
+            if (c.netGo || r.preferGo())
             {
                 fallbackOrder = hostLookupFilesDNS;
             }
+
             if (c.forceCgoLookupHost || c.resolv.unknownOpt || c.goos == "android")
             {
                 return fallbackOrder;
             }
-            if (byteIndex(hostname, '\\') != -1L || byteIndex(hostname, '%') != -1L)
+
+            if (bytealg.IndexByteString(hostname, '\\') != -1L || bytealg.IndexByteString(hostname, '%') != -1L)
             { 
                 // Don't deal with special form hostnames with backslashes
                 // or '%'.
                 return fallbackOrder;
+
             } 
 
             // OpenBSD is unique and doesn't use nsswitch.conf.
@@ -164,19 +185,23 @@ namespace go
                 {
                     return hostLookupFiles;
                 }
+
                 var lookup = c.resolv.lookup;
                 if (len(lookup) == 0L)
                 { 
-                    // http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/resolv.conf.5
+                    // https://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/resolv.conf.5
                     // "If the lookup keyword is not used in the
                     // system's resolv.conf file then the assumed
                     // order is 'bind file'"
                     return hostLookupDNSFiles;
+
                 }
+
                 if (len(lookup) < 1L || len(lookup) > 2L)
                 {
                     return fallbackOrder;
                 }
+
                 switch (lookup[0L])
                 {
                     case "bind": 
@@ -186,8 +211,11 @@ namespace go
                             {
                                 return hostLookupDNSFiles;
                             }
+
                             return fallbackOrder;
+
                         }
+
                         return hostLookupDNS;
                         break;
                     case "file": 
@@ -197,14 +225,18 @@ namespace go
                             {
                                 return hostLookupFilesDNS;
                             }
+
                             return fallbackOrder;
+
                         }
+
                         return hostLookupFiles;
                         break;
                     default: 
                         return fallbackOrder;
                         break;
                 }
+
             } 
 
             // Canonicalize the hostname by removing any trailing dot.
@@ -212,6 +244,7 @@ namespace go
             {
                 hostname = hostname[..len(hostname) - 1L];
             }
+
             if (stringsHasSuffixFold(hostname, ".local"))
             { 
                 // Per RFC 6762, the ".local" TLD is special. And
@@ -219,7 +252,9 @@ namespace go
                 // similar local resolution mechanisms, assume that
                 // libc might (via Avahi, etc) and use cgo.
                 return fallbackOrder;
+
             }
+
             var nss = c.nss;
             var srcs = nss.sources["hosts"]; 
             // If /etc/nsswitch.conf doesn't exist or doesn't specify any
@@ -230,22 +265,30 @@ namespace go
                 { 
                     // illumos defaults to "nis [NOTFOUND=return] files"
                     return fallbackOrder;
+
                 }
+
                 if (c.goos == "linux")
                 { 
                     // glibc says the default is "dns [!UNAVAIL=return] files"
-                    // http://www.gnu.org/software/libc/manual/html_node/Notes-on-NSS-Configuration-File.html.
+                    // https://www.gnu.org/software/libc/manual/html_node/Notes-on-NSS-Configuration-File.html.
                     return hostLookupDNSFiles;
+
                 }
+
                 return hostLookupFilesDNS;
+
             }
+
             if (nss.err != null)
             { 
                 // We failed to parse or open nsswitch.conf, so
                 // conservatively assume we should use cgo if it's
                 // available.
                 return fallbackOrder;
+
             }
+
             bool mdnsSource = default;            bool filesSource = default;            bool dnsSource = default;
 
             @string first = default;
@@ -257,19 +300,24 @@ namespace go
                     {
                         return fallbackOrder;
                     }
+
                     var (hn, err) = getHostname();
                     if (err != null || stringsEqualFold(hostname, hn))
                     {
                         return fallbackOrder;
                     }
+
                     continue;
+
                 }
+
                 if (src.source == "files" || src.source == "dns")
                 {
                     if (!src.standardCriteria())
                     {
                         return fallbackOrder; // non-standard; let libc deal with it.
                     }
+
                     if (src.source == "files")
                     {
                         filesSource = true;
@@ -278,12 +326,16 @@ namespace go
                     {
                         dnsSource = true;
                     }
+
                     if (first == "")
                     {
                         first = src.source;
                     }
+
                     continue;
+
                 }
+
                 if (stringsHasPrefix(src.source, "mdns"))
                 { 
                     // e.g. "mdns4", "mdns4_minimal"
@@ -291,9 +343,11 @@ namespace go
                     // libc wouldn't have found a hit on this anyway.
                     mdnsSource = true;
                     continue;
+
                 } 
                 // Some source we don't know how to deal with.
                 return fallbackOrder;
+
             } 
 
             // We don't parse mdns.allow files. They're rare. If one
@@ -316,12 +370,14 @@ namespace go
                 {
                     return hostLookupDNSFiles;
                 }
+
             else if (filesSource) 
                 return hostLookupFiles;
             else if (dnsSource) 
                 return hostLookupDNS;
             // Something weird. Let libc deal with it.
             return fallbackOrder;
+
         });
 
         // goDebugNetDNS parses the value of the GODEBUG "netdns" value.
@@ -336,13 +392,17 @@ namespace go
         // etc.
         private static (@string, long) goDebugNetDNS()
         {
+            @string dnsMode = default;
+            long debugLevel = default;
+
             var goDebug = goDebugString("netdns");
             Action<@string> parsePart = s =>
             {
                 if (s == "")
                 {
-                    return;
+                    return ;
                 }
+
                 if ('0' <= s[0L] && s[0L] <= '9')
                 {
                     debugLevel, _, _ = dtoi(s);
@@ -351,21 +411,24 @@ namespace go
                 {
                     dnsMode = s;
                 }
+
             }
 ;
             {
-                var i = byteIndex(goDebug, '+');
+                var i = bytealg.IndexByteString(goDebug, '+');
 
                 if (i != -1L)
                 {
                     parsePart(goDebug[..i]);
                     parsePart(goDebug[i + 1L..]);
-                    return;
+                    return ;
                 }
 
             }
+
             parsePart(goDebug);
-            return;
+            return ;
+
         }
 
         // isLocalhost reports whether h should be considered a "localhost"

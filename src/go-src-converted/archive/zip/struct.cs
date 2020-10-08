@@ -17,7 +17,7 @@ for normal archives both fields will be the same. For files requiring
 the ZIP64 format the 32 bit fields will be 0xffffffff and the 64 bit
 fields must be used instead.
 */
-// package zip -- go2cs converted at 2020 August 29 08:45:37 UTC
+// package zip -- go2cs converted at 2020 October 08 03:49:28 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Go\src\archive\zip\struct.go
 using os = go.os_package;
@@ -31,37 +31,37 @@ namespace archive
     public static partial class zip_package
     {
         // Compression methods.
-        public static readonly ushort Store = 0L; // no compression
-        public static readonly ushort Deflate = 8L; // DEFLATE compressed
+        public static readonly ushort Store = (ushort)0L; // no compression
+        public static readonly ushort Deflate = (ushort)8L; // DEFLATE compressed
 
-        private static readonly ulong fileHeaderSignature = 0x04034b50UL;
-        private static readonly ulong directoryHeaderSignature = 0x02014b50UL;
-        private static readonly ulong directoryEndSignature = 0x06054b50UL;
-        private static readonly ulong directory64LocSignature = 0x07064b50UL;
-        private static readonly ulong directory64EndSignature = 0x06064b50UL;
-        private static readonly ulong dataDescriptorSignature = 0x08074b50UL; // de-facto standard; required by OS X Finder
-        private static readonly long fileHeaderLen = 30L; // + filename + extra
-        private static readonly long directoryHeaderLen = 46L; // + filename + extra + comment
-        private static readonly long directoryEndLen = 22L; // + comment
-        private static readonly long dataDescriptorLen = 16L; // four uint32: descriptor signature, crc32, compressed size, size
-        private static readonly long dataDescriptor64Len = 24L; // descriptor with 8 byte sizes
-        private static readonly long directory64LocLen = 20L; //
-        private static readonly long directory64EndLen = 56L; // + extra
+        private static readonly ulong fileHeaderSignature = (ulong)0x04034b50UL;
+        private static readonly ulong directoryHeaderSignature = (ulong)0x02014b50UL;
+        private static readonly ulong directoryEndSignature = (ulong)0x06054b50UL;
+        private static readonly ulong directory64LocSignature = (ulong)0x07064b50UL;
+        private static readonly ulong directory64EndSignature = (ulong)0x06064b50UL;
+        private static readonly ulong dataDescriptorSignature = (ulong)0x08074b50UL; // de-facto standard; required by OS X Finder
+        private static readonly long fileHeaderLen = (long)30L; // + filename + extra
+        private static readonly long directoryHeaderLen = (long)46L; // + filename + extra + comment
+        private static readonly long directoryEndLen = (long)22L; // + comment
+        private static readonly long dataDescriptorLen = (long)16L; // four uint32: descriptor signature, crc32, compressed size, size
+        private static readonly long dataDescriptor64Len = (long)24L; // descriptor with 8 byte sizes
+        private static readonly long directory64LocLen = (long)20L; //
+        private static readonly long directory64EndLen = (long)56L; // + extra
 
         // Constants for the first byte in CreatorVersion.
-        private static readonly long creatorFAT = 0L;
-        private static readonly long creatorUnix = 3L;
-        private static readonly long creatorNTFS = 11L;
-        private static readonly long creatorVFAT = 14L;
-        private static readonly long creatorMacOSX = 19L; 
+        private static readonly long creatorFAT = (long)0L;
+        private static readonly long creatorUnix = (long)3L;
+        private static readonly long creatorNTFS = (long)11L;
+        private static readonly long creatorVFAT = (long)14L;
+        private static readonly long creatorMacOSX = (long)19L; 
 
         // Version numbers.
-        private static readonly long zipVersion20 = 20L; // 2.0
-        private static readonly long zipVersion45 = 45L; // 4.5 (reads and writes zip64 archives)
+        private static readonly long zipVersion20 = (long)20L; // 2.0
+        private static readonly long zipVersion45 = (long)45L; // 4.5 (reads and writes zip64 archives)
 
         // Limits for non zip64 files.
-        private static readonly long uint16max = (1L << (int)(16L)) - 1L;
-        private static readonly long uint32max = (1L << (int)(32L)) - 1L; 
+        private static readonly long uint16max = (long)(1L << (int)(16L)) - 1L;
+        private static readonly long uint32max = (long)(1L << (int)(32L)) - 1L; 
 
         // Extra header IDs.
         //
@@ -72,11 +72,11 @@ namespace archive
         // have been invented. Pervasive use effectively makes them "official".
         //
         // See http://mdfs.net/Docs/Comp/Archiving/Zip/ExtraField
-        private static readonly ulong zip64ExtraID = 0x0001UL; // Zip64 extended information
-        private static readonly ulong ntfsExtraID = 0x000aUL; // NTFS
-        private static readonly ulong unixExtraID = 0x000dUL; // UNIX
-        private static readonly ulong extTimeExtraID = 0x5455UL; // Extended timestamp
-        private static readonly ulong infoZipUnixExtraID = 0x5855UL; // Info-ZIP Unix extension
+        private static readonly ulong zip64ExtraID = (ulong)0x0001UL; // Zip64 extended information
+        private static readonly ulong ntfsExtraID = (ulong)0x000aUL; // NTFS
+        private static readonly ulong unixExtraID = (ulong)0x000dUL; // UNIX
+        private static readonly ulong extTimeExtraID = (ulong)0x5455UL; // Extended timestamp
+        private static readonly ulong infoZipUnixExtraID = (ulong)0x5855UL; // Info-ZIP Unix extension
 
         // FileHeader describes a file within a zip file.
         // See the zip spec for details.
@@ -119,8 +119,10 @@ namespace archive
         }
 
         // FileInfo returns an os.FileInfo for the FileHeader.
-        private static os.FileInfo FileInfo(this ref FileHeader h)
+        private static os.FileInfo FileInfo(this ptr<FileHeader> _addr_h)
         {
+            ref FileHeader h = ref _addr_h.val;
+
             return new headerFileInfo(h);
         }
 
@@ -140,7 +142,9 @@ namespace archive
             {
                 return int64(fi.fh.UncompressedSize64);
             }
+
             return int64(fi.fh.UncompressedSize);
+
         }
         private static bool IsDir(this headerFileInfo fi)
         {
@@ -148,7 +152,13 @@ namespace archive
         }
         private static time.Time ModTime(this headerFileInfo fi)
         {
-            return fi.fh.ModTime();
+            if (fi.fh.Modified.IsZero())
+            {
+                return fi.fh.ModTime();
+            }
+
+            return fi.fh.Modified.UTC();
+
         }
         private static os.FileMode Mode(this headerFileInfo fi)
         {
@@ -166,10 +176,13 @@ namespace archive
         // of the returned header to provide the full path name of the file.
         // If compression is desired, callers should set the FileHeader.Method
         // field; it is unset by default.
-        public static (ref FileHeader, error) FileInfoHeader(os.FileInfo fi)
+        public static (ptr<FileHeader>, error) FileInfoHeader(os.FileInfo fi)
         {
+            ptr<FileHeader> _p0 = default!;
+            error _p0 = default!;
+
             var size = fi.Size();
-            FileHeader fh = ref new FileHeader(Name:fi.Name(),UncompressedSize64:uint64(size),);
+            ptr<FileHeader> fh = addr(new FileHeader(Name:fi.Name(),UncompressedSize64:uint64(size),));
             fh.SetModTime(fi.ModTime());
             fh.SetMode(fi.Mode());
             if (fh.UncompressedSize64 > uint32max)
@@ -180,7 +193,9 @@ namespace archive
             {
                 fh.UncompressedSize = uint32(fh.UncompressedSize64);
             }
-            return (fh, null);
+
+            return (_addr_fh!, error.As(null!)!);
+
         }
 
         private partial struct directoryEnd
@@ -197,22 +212,24 @@ namespace archive
 
         // timeZone returns a *time.Location based on the provided offset.
         // If the offset is non-sensible, then this uses an offset of zero.
-        private static ref time.Location timeZone(time.Duration offset)
+        private static ptr<time.Location> timeZone(time.Duration offset)
         {
-            const long minOffset = -12L * time.Hour; // E.g., Baker island at -12:00
-            const long maxOffset = +14L * time.Hour; // E.g., Line island at +14:00
-            const long offsetAlias = 15L * time.Minute; // E.g., Nepal at +5:45
+            const long minOffset = (long)-12L * time.Hour; // E.g., Baker island at -12:00
+            const long maxOffset = (long)+14L * time.Hour; // E.g., Line island at +14:00
+            const long offsetAlias = (long)15L * time.Minute; // E.g., Nepal at +5:45
             offset = offset.Round(offsetAlias);
             if (offset < minOffset || maxOffset < offset)
             {
                 offset = 0L;
             }
-            return time.FixedZone("", int(offset / time.Second));
+
+            return _addr_time.FixedZone("", int(offset / time.Second))!;
+
         }
 
         // msDosTimeToTime converts an MS-DOS date and time into a time.Time.
         // The resolution is 2s.
-        // See: http://msdn.microsoft.com/en-us/library/ms724247(v=VS.85).aspx
+        // See: https://msdn.microsoft.com/en-us/library/ms724247(v=VS.85).aspx
         private static time.Time msDosTimeToTime(ushort dosDate, ushort dosTime)
         {
             return time.Date(int(dosDate >> (int)(9L) + 1980L), time.Month(dosDate >> (int)(5L) & 0xfUL), int(dosDate & 0x1fUL), int(dosTime >> (int)(11L)), int(dosTime >> (int)(5L) & 0x3fUL), int(dosTime & 0x1fUL * 2L), 0L, time.UTC);
@@ -220,20 +237,25 @@ namespace archive
 
         // timeToMsDosTime converts a time.Time to an MS-DOS date and time.
         // The resolution is 2s.
-        // See: http://msdn.microsoft.com/en-us/library/ms724274(v=VS.85).aspx
+        // See: https://msdn.microsoft.com/en-us/library/ms724274(v=VS.85).aspx
         private static (ushort, ushort) timeToMsDosTime(time.Time t)
         {
+            ushort fDate = default;
+            ushort fTime = default;
+
             fDate = uint16(t.Day() + int(t.Month()) << (int)(5L) + (t.Year() - 1980L) << (int)(9L));
             fTime = uint16(t.Second() / 2L + t.Minute() << (int)(5L) + t.Hour() << (int)(11L));
-            return;
+            return ;
         }
 
         // ModTime returns the modification time in UTC using the legacy
         // ModifiedDate and ModifiedTime fields.
         //
         // Deprecated: Use Modified instead.
-        private static time.Time ModTime(this ref FileHeader h)
+        private static time.Time ModTime(this ptr<FileHeader> _addr_h)
         {
+            ref FileHeader h = ref _addr_h.val;
+
             return msDosTimeToTime(h.ModifiedDate, h.ModifiedTime);
         }
 
@@ -241,34 +263,41 @@ namespace archive
         // to the given time in UTC.
         //
         // Deprecated: Use Modified instead.
-        private static void SetModTime(this ref FileHeader h, time.Time t)
+        private static void SetModTime(this ptr<FileHeader> _addr_h, time.Time t)
         {
+            ref FileHeader h = ref _addr_h.val;
+
             t = t.UTC(); // Convert to UTC for compatibility
             h.Modified = t;
             h.ModifiedDate, h.ModifiedTime = timeToMsDosTime(t);
+
         }
 
  
         // Unix constants. The specification doesn't mention them,
         // but these seem to be the values agreed on by tools.
-        private static readonly ulong s_IFMT = 0xf000UL;
-        private static readonly ulong s_IFSOCK = 0xc000UL;
-        private static readonly ulong s_IFLNK = 0xa000UL;
-        private static readonly ulong s_IFREG = 0x8000UL;
-        private static readonly ulong s_IFBLK = 0x6000UL;
-        private static readonly ulong s_IFDIR = 0x4000UL;
-        private static readonly ulong s_IFCHR = 0x2000UL;
-        private static readonly ulong s_IFIFO = 0x1000UL;
-        private static readonly ulong s_ISUID = 0x800UL;
-        private static readonly ulong s_ISGID = 0x400UL;
-        private static readonly ulong s_ISVTX = 0x200UL;
+        private static readonly ulong s_IFMT = (ulong)0xf000UL;
+        private static readonly ulong s_IFSOCK = (ulong)0xc000UL;
+        private static readonly ulong s_IFLNK = (ulong)0xa000UL;
+        private static readonly ulong s_IFREG = (ulong)0x8000UL;
+        private static readonly ulong s_IFBLK = (ulong)0x6000UL;
+        private static readonly ulong s_IFDIR = (ulong)0x4000UL;
+        private static readonly ulong s_IFCHR = (ulong)0x2000UL;
+        private static readonly ulong s_IFIFO = (ulong)0x1000UL;
+        private static readonly ulong s_ISUID = (ulong)0x800UL;
+        private static readonly ulong s_ISGID = (ulong)0x400UL;
+        private static readonly ulong s_ISVTX = (ulong)0x200UL;
 
-        private static readonly ulong msdosDir = 0x10UL;
-        private static readonly ulong msdosReadOnly = 0x01UL;
+        private static readonly ulong msdosDir = (ulong)0x10UL;
+        private static readonly ulong msdosReadOnly = (ulong)0x01UL;
+
 
         // Mode returns the permission and mode bits for the FileHeader.
-        private static os.FileMode Mode(this ref FileHeader h)
+        private static os.FileMode Mode(this ptr<FileHeader> _addr_h)
         {
+            os.FileMode mode = default;
+            ref FileHeader h = ref _addr_h.val;
+
 
             if (h.CreatorVersion >> (int)(8L) == creatorUnix || h.CreatorVersion >> (int)(8L) == creatorMacOSX) 
                 mode = unixModeToFileMode(h.ExternalAttrs >> (int)(16L));
@@ -278,12 +307,16 @@ namespace archive
             {
                 mode |= os.ModeDir;
             }
+
             return mode;
+
         }
 
         // SetMode changes the permission and mode bits for the FileHeader.
-        private static void SetMode(this ref FileHeader h, os.FileMode mode)
+        private static void SetMode(this ptr<FileHeader> _addr_h, os.FileMode mode)
         {
+            ref FileHeader h = ref _addr_h.val;
+
             h.CreatorVersion = h.CreatorVersion & 0xffUL | creatorUnix << (int)(8L);
             h.ExternalAttrs = fileModeToUnixMode(mode) << (int)(16L); 
 
@@ -292,20 +325,26 @@ namespace archive
             {
                 h.ExternalAttrs |= msdosDir;
             }
+
             if (mode & 0200L == 0L)
             {
                 h.ExternalAttrs |= msdosReadOnly;
             }
+
         }
 
         // isZip64 reports whether the file size exceeds the 32 bit limit
-        private static bool isZip64(this ref FileHeader fh)
+        private static bool isZip64(this ptr<FileHeader> _addr_h)
         {
-            return fh.CompressedSize64 >= uint32max || fh.UncompressedSize64 >= uint32max;
+            ref FileHeader h = ref _addr_h.val;
+
+            return h.CompressedSize64 >= uint32max || h.UncompressedSize64 >= uint32max;
         }
 
         private static os.FileMode msdosModeToFileMode(uint m)
         {
+            os.FileMode mode = default;
+
             if (m & msdosDir != 0L)
             {
                 mode = os.ModeDir | 0777L;
@@ -314,11 +353,14 @@ namespace archive
             {
                 mode = 0666L;
             }
+
             if (m & msdosReadOnly != 0L)
             {
                 mode &= 0222L;
             }
+
             return mode;
+
         }
 
         private static uint fileModeToUnixMode(os.FileMode mode)
@@ -342,21 +384,26 @@ namespace archive
                 {
                     m = s_IFBLK;
                 }
+
             else 
                 m = s_IFREG;
                         if (mode & os.ModeSetuid != 0L)
             {
                 m |= s_ISUID;
             }
+
             if (mode & os.ModeSetgid != 0L)
             {
                 m |= s_ISGID;
             }
+
             if (mode & os.ModeSticky != 0L)
             {
                 m |= s_ISVTX;
             }
+
             return m | uint32(mode & 0777L);
+
         }
 
         private static os.FileMode unixModeToFileMode(uint m)
@@ -379,15 +426,19 @@ namespace archive
             {
                 mode |= os.ModeSetgid;
             }
+
             if (m & s_ISUID != 0L)
             {
                 mode |= os.ModeSetuid;
             }
+
             if (m & s_ISVTX != 0L)
             {
                 mode |= os.ModeSticky;
             }
+
             return mode;
+
         }
     }
 }}

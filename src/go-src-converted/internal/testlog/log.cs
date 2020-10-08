@@ -5,7 +5,7 @@
 // Package testlog provides a back-channel communication path
 // between tests and package os, so that cmd/go can see which
 // environment variables and files a test consults.
-// package testlog -- go2cs converted at 2020 August 29 08:43:35 UTC
+// package testlog -- go2cs converted at 2020 October 08 03:44:20 UTC
 // import "internal/testlog" ==> using testlog = go.@internal.testlog_package
 // Original source: C:\Go\src\internal\testlog\log.go
 using atomic = go.sync.atomic_package;
@@ -44,7 +44,9 @@ namespace @internal
             {
                 panic("testlog: SetLogger must be called only once");
             }
-            logger.Store(ref impl);
+
+            logger.Store(_addr_impl);
+
         });
 
         // Logger returns the current test logger implementation.
@@ -56,7 +58,9 @@ namespace @internal
             {
                 return null;
             }
-            return impl._<ref Interface>().Value;
+
+            return impl._<ptr<Interface>>().val;
+
         }
 
         // Getenv calls Logger().Getenv, if a logger has been set.
@@ -71,6 +75,7 @@ namespace @internal
                 }
 
             }
+
         }
 
         // Open calls Logger().Open, if a logger has been set.
@@ -85,6 +90,7 @@ namespace @internal
                 }
 
             }
+
         }
 
         // Stat calls Logger().Stat, if a logger has been set.
@@ -99,6 +105,7 @@ namespace @internal
                 }
 
             }
+
         }
     }
 }}

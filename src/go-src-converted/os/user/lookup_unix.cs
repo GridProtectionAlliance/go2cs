@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd !android,linux nacl netbsd openbsd solaris
-// +build !cgo
+// +build aix darwin dragonfly freebsd js,wasm !android,linux netbsd openbsd solaris
+// +build !cgo osusergo
 
-// package user -- go2cs converted at 2020 August 29 08:31:52 UTC
+// package user -- go2cs converted at 2020 October 08 03:45:34 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\lookup_unix.go
 using bufio = go.bufio_package;
@@ -23,9 +23,9 @@ namespace os
 {
     public static partial class user_package
     {
-        private static readonly @string groupFile = "/etc/group";
+        private static readonly @string groupFile = (@string)"/etc/group";
 
-        private static readonly @string userFile = "/etc/passwd";
+        private static readonly @string userFile = (@string)"/etc/passwd";
 
 
 
@@ -44,6 +44,9 @@ namespace os
         // the end of the file is reached without a match.
         private static (object, error) readColonFile(io.Reader r, lineFunc fn)
         {
+            object v = default;
+            error err = default!;
+
             var bs = bufio.NewScanner(r);
             while (bs.Scan())
             {
@@ -56,14 +59,17 @@ namespace os
                 {
                     continue;
                 }
+
                 v, err = fn(line);
                 if (v != null || err != null)
                 {
-                    return;
+                    return ;
                 }
+
             }
 
-            return (null, bs.Err());
+            return (null, error.As(bs.Err())!);
+
         }
 
         private static lineFunc matchGroupIndexValue(@string value, long idx)
@@ -73,19 +79,21 @@ namespace os
             {
                 leadColon = ":";
             }
+
             slice<byte> substr = (slice<byte>)leadColon + value + ":";
             return line =>
             {
                 if (!bytes.Contains(line, substr) || bytes.Count(line, colon) < 3L)
                 {
-                    return;
+                    return ;
                 } 
                 // wheel:*:0:root
                 var parts = strings.SplitN(string(line), ":", 4L);
                 if (len(parts) < 4L || parts[0L] == "" || parts[idx] != value || parts[0L][0L] == '+' || parts[0L][0L] == '-')
                 {
-                    return;
+                    return ;
                 }
+
                 {
                     var (_, err) = strconv.Atoi(parts[2L]);
 
@@ -95,45 +103,59 @@ namespace os
                     }
 
                 }
-                return (ref new Group(Name:parts[0],Gid:parts[2]), null);
-            }
-;
+
+                return (addr(new Group(Name:parts[0],Gid:parts[2])), null);
+
+            };
+
         }
 
-        private static (ref Group, error) findGroupId(@string id, io.Reader r)
+        private static (ptr<Group>, error) findGroupId(@string id, io.Reader r)
         {
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
+
             {
                 var (v, err) = readColonFile(r, matchGroupIndexValue(id, 2L));
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
                 else if (v != null)
                 {
-                    return (v._<ref Group>(), null);
+                    return (v._<ptr<Group>>(), error.As(null!)!);
                 }
 
+
             }
-            return (null, UnknownGroupIdError(id));
+
+            return (_addr_null!, error.As(UnknownGroupIdError(id))!);
+
         }
 
-        private static (ref Group, error) findGroupName(@string name, io.Reader r)
+        private static (ptr<Group>, error) findGroupName(@string name, io.Reader r)
         {
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
+
             {
                 var (v, err) = readColonFile(r, matchGroupIndexValue(name, 0L));
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
                 else if (v != null)
                 {
-                    return (v._<ref Group>(), null);
+                    return (v._<ptr<Group>>(), error.As(null!)!);
                 }
 
+
             }
-            return (null, UnknownGroupError(name));
+
+            return (_addr_null!, error.As(UnknownGroupError(name))!);
+
         }
 
         // returns a *User for a row if that row's has the given value at the
@@ -145,19 +167,21 @@ namespace os
             {
                 leadColon = ":";
             }
+
             slice<byte> substr = (slice<byte>)leadColon + value + ":";
             return line =>
             {
                 if (!bytes.Contains(line, substr) || bytes.Count(line, colon) < 6L)
                 {
-                    return;
+                    return ;
                 } 
                 // kevin:x:1005:1006::/home/kevin:/usr/bin/zsh
                 var parts = strings.SplitN(string(line), ":", 7L);
                 if (len(parts) < 6L || parts[idx] != value || parts[0L] == "" || parts[0L][0L] == '+' || parts[0L][0L] == '-')
                 {
-                    return;
+                    return ;
                 }
+
                 {
                     var (_, err) = strconv.Atoi(parts[2L]);
 
@@ -167,6 +191,7 @@ namespace os
                     }
 
                 }
+
                 {
                     (_, err) = strconv.Atoi(parts[3L]);
 
@@ -176,7 +201,8 @@ namespace os
                     }
 
                 }
-                User u = ref new User(Username:parts[0],Uid:parts[2],Gid:parts[3],Name:parts[4],HomeDir:parts[5],); 
+
+                ptr<User> u = addr(new User(Username:parts[0],Uid:parts[2],Gid:parts[3],Name:parts[4],HomeDir:parts[5],)); 
                 // The pw_gecos field isn't quite standardized. Some docs
                 // say: "It is expected to be a comma separated list of
                 // personal data where the first item is the full name of the
@@ -190,94 +216,129 @@ namespace os
                     }
 
                 }
+
                 return (u, null);
-            }
-;
+
+            };
+
         }
 
-        private static (ref User, error) findUserId(@string uid, io.Reader r)
+        private static (ptr<User>, error) findUserId(@string uid, io.Reader r)
         {
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
             var (i, e) = strconv.Atoi(uid);
             if (e != null)
             {
-                return (null, errors.New("user: invalid userid " + uid));
+                return (_addr_null!, error.As(errors.New("user: invalid userid " + uid))!);
             }
+
             {
                 var (v, err) = readColonFile(r, matchUserIndexValue(uid, 2L));
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
                 else if (v != null)
                 {
-                    return (v._<ref User>(), null);
+                    return (v._<ptr<User>>(), error.As(null!)!);
                 }
 
+
             }
-            return (null, UnknownUserIdError(i));
+
+            return (_addr_null!, error.As(UnknownUserIdError(i))!);
+
         }
 
-        private static (ref User, error) findUsername(@string name, io.Reader r)
+        private static (ptr<User>, error) findUsername(@string name, io.Reader r)
         {
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
             {
                 var (v, err) = readColonFile(r, matchUserIndexValue(name, 0L));
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
                 else if (v != null)
                 {
-                    return (v._<ref User>(), null);
+                    return (v._<ptr<User>>(), error.As(null!)!);
                 }
 
+
             }
-            return (null, UnknownUserError(name));
+
+            return (_addr_null!, error.As(UnknownUserError(name))!);
+
         }
 
-        private static (ref Group, error) lookupGroup(@string groupname) => func((defer, _, __) =>
+        private static (ptr<Group>, error) lookupGroup(@string groupname) => func((defer, _, __) =>
         {
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
+
             var (f, err) = os.Open(groupFile);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             defer(f.Close());
-            return findGroupName(groupname, f);
+            return _addr_findGroupName(groupname, f)!;
+
         });
 
-        private static (ref Group, error) lookupGroupId(@string id) => func((defer, _, __) =>
+        private static (ptr<Group>, error) lookupGroupId(@string id) => func((defer, _, __) =>
         {
+            ptr<Group> _p0 = default!;
+            error _p0 = default!;
+
             var (f, err) = os.Open(groupFile);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             defer(f.Close());
-            return findGroupId(id, f);
+            return _addr_findGroupId(id, f)!;
+
         });
 
-        private static (ref User, error) lookupUser(@string username) => func((defer, _, __) =>
+        private static (ptr<User>, error) lookupUser(@string username) => func((defer, _, __) =>
         {
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
             var (f, err) = os.Open(userFile);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             defer(f.Close());
-            return findUsername(username, f);
+            return _addr_findUsername(username, f)!;
+
         });
 
-        private static (ref User, error) lookupUserId(@string uid) => func((defer, _, __) =>
+        private static (ptr<User>, error) lookupUserId(@string uid) => func((defer, _, __) =>
         {
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
             var (f, err) = os.Open(userFile);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             defer(f.Close());
-            return findUserId(uid, f);
+            return _addr_findUserId(uid, f)!;
+
         });
     }
 }}

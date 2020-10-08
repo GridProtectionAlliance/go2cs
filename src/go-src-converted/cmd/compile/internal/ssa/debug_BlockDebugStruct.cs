@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:42 UTC
+//     Generated on 2020 October 08 04:10:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using dwarf = go.cmd.@internal.dwarf_package;
 using obj = go.cmd.@internal.obj_package;
+using hex = go.encoding.hex_package;
 using fmt = go.fmt_package;
+using bits = go.math.bits_package;
+using sort = go.sort_package;
 using strings = go.strings_package;
 using go;
 
@@ -31,14 +35,14 @@ namespace @internal
             // Constructors
             public BlockDebug(NilType _)
             {
-                this.Block = default;
-                this.Variables = default;
+                this.relevant = default;
+                this.endState = default;
             }
 
-            public BlockDebug(ref ptr<Block> Block = default, slice<VarLocList> Variables = default)
+            public BlockDebug(bool relevant = default, slice<liveSlot> endState = default)
             {
-                this.Block = Block;
-                this.Variables = Variables;
+                this.relevant = relevant;
+                this.endState = endState;
             }
 
             // Enable comparisons between nil and BlockDebug struct
@@ -61,7 +65,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static BlockDebug BlockDebug_cast(dynamic value)
         {
-            return new BlockDebug(ref value.Block, value.Variables);
+            return new BlockDebug(value.relevant, value.endState);
         }
     }
 }}}}

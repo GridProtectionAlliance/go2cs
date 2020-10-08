@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package path -- go2cs converted at 2020 August 29 08:16:03 UTC
+// package path -- go2cs converted at 2020 October 08 00:33:48 UTC
 // import "path" ==> using path = go.path_package
 // Original source: C:\Go\src\path\match.go
 using errors = go.errors_package;
@@ -14,10 +14,10 @@ namespace go
 {
     public static partial class path_package
     {
-        // ErrBadPattern indicates a globbing pattern was malformed.
+        // ErrBadPattern indicates a pattern was malformed.
         public static var ErrBadPattern = errors.New("syntax error in pattern");
 
-        // Match reports whether name matches the shell file name pattern.
+        // Match reports whether name matches the shell pattern.
         // The pattern syntax is:
         //
         //    pattern:
@@ -41,6 +41,9 @@ namespace go
         //
         public static (bool, error) Match(@string pattern, @string name)
         {
+            bool matched = default;
+            error err = default!;
+
 Pattern:
             while (len(pattern) > 0L)
             {
@@ -50,7 +53,8 @@ Pattern:
                 if (star && chunk == "")
                 { 
                     // Trailing * matches rest of string unless it has a /.
-                    return (!strings.Contains(name, "/"), null);
+                    return (!strings.Contains(name, "/"), error.As(null!)!);
+
                 } 
                 // Look for match at current position.
                 var (t, ok, err) = matchChunk(chunk, name); 
@@ -62,10 +66,12 @@ Pattern:
                     name = t;
                     continue;
                 }
+
                 if (err != null)
                 {
-                    return (false, err);
+                    return (false, error.As(err)!);
                 }
+
                 if (star)
                 { 
                     // Look for match skipping i+1 bytes.
@@ -80,26 +86,37 @@ Pattern:
                             {
                                 continue;
                             }
+
                             name = t;
                             _continuePattern = true;
                             break;
                         }
+
                         if (err != null)
                         {
-                            return (false, err);
+                            return (false, error.As(err)!);
                         }
+
                     }
 
+
                 }
-                return (false, null);
+
+                return (false, error.As(null!)!);
+
             }
-            return (len(name) == 0L, null);
+            return (len(name) == 0L, error.As(null!)!);
+
         }
 
         // scanChunk gets the next segment of pattern, which is a non-star string
         // possibly preceded by a star.
         private static (bool, @string, @string) scanChunk(@string pattern)
         {
+            bool star = default;
+            @string chunk = default;
+            @string rest = default;
+
             while (len(pattern) > 0L && pattern[0L] == '*')
             {
                 pattern = pattern[1L..];
@@ -119,6 +136,7 @@ Scan:
                         {
                             i++;
                         }
+
                         break;
                     case '[': 
                         inrange = true;
@@ -132,10 +150,13 @@ Scan:
                             _breakScan = true;
                             break;
                         }
+
                         break;
                 }
+
             }
             return (star, pattern[0L..i], pattern[i..]);
+
         }
 
         // matchChunk checks whether chunk matches the beginning of s.
@@ -143,12 +164,17 @@ Scan:
         // Chunk is all single-character operators: literals, char classes, and ?.
         private static (@string, bool, error) matchChunk(@string chunk, @string s)
         {
+            @string rest = default;
+            bool ok = default;
+            error err = default!;
+
             while (len(chunk) > 0L)
             {
                 if (len(s) == 0L)
                 {
-                    return;
+                    return ;
                 }
+
 
                 if (chunk[0L] == '[') 
                 {
@@ -173,14 +199,16 @@ Scan:
                             chunk = chunk[1L..];
                             break;
                         }
+
                         int lo = default;                        int hi = default;
 
                         lo, chunk, err = getEsc(chunk);
 
                         if (err != null)
                         {
-                            return;
+                            return ;
                         }
+
                         hi = lo;
                         if (chunk[0L] == '-')
                         {
@@ -188,28 +216,34 @@ Scan:
 
                             if (err != null)
                             {
-                                return;
+                                return ;
                             }
+
                         }
+
                         if (lo <= r && r <= hi)
                         {
                             match = true;
                         }
+
                         nrange++;
+
                     }
 
                     if (match != notNegated)
                     {
-                        return;
+                        return ;
                     }
+
                     goto __switch_break0;
                 }
                 if (chunk[0L] == '?')
                 {
                     if (s[0L] == '/')
                     {
-                        return;
+                        return ;
                     }
+
                     var (_, n) = utf8.DecodeRuneInString(s);
                     s = s[n..];
                     chunk = chunk[1L..];
@@ -221,51 +255,65 @@ Scan:
                     if (len(chunk) == 0L)
                     {
                         err = ErrBadPattern;
-                        return;
+                        return ;
                     }
+
                 }
                 // default: 
                     if (chunk[0L] != s[0L])
                     {
-                        return;
+                        return ;
                     }
+
                     s = s[1L..];
                     chunk = chunk[1L..];
 
                 __switch_break0:;
+
             }
 
-            return (s, true, null);
+            return (s, true, error.As(null!)!);
+
         }
 
         // getEsc gets a possibly-escaped character from chunk, for a character class.
         private static (int, @string, error) getEsc(@string chunk)
         {
+            int r = default;
+            @string nchunk = default;
+            error err = default!;
+
             if (len(chunk) == 0L || chunk[0L] == '-' || chunk[0L] == ']')
             {
                 err = ErrBadPattern;
-                return;
+                return ;
             }
+
             if (chunk[0L] == '\\')
             {
                 chunk = chunk[1L..];
                 if (len(chunk) == 0L)
                 {
                     err = ErrBadPattern;
-                    return;
+                    return ;
                 }
+
             }
+
             var (r, n) = utf8.DecodeRuneInString(chunk);
             if (r == utf8.RuneError && n == 1L)
             {
                 err = ErrBadPattern;
             }
+
             nchunk = chunk[n..];
             if (len(nchunk) == 0L)
             {
                 err = ErrBadPattern;
             }
-            return;
+
+            return ;
+
         }
     }
 }

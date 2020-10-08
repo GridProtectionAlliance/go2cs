@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:12 UTC
+//     Generated on 2020 October 08 03:42:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -61,10 +61,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error UnmarshalTextByRef(ref T value, slice<byte> text);
+            private delegate error UnmarshalTextByPtr(ptr<T> value, slice<byte> text);
             private delegate error UnmarshalTextByVal(T value, slice<byte> text);
 
-            private static readonly UnmarshalTextByRef s_UnmarshalTextByRef;
+            private static readonly UnmarshalTextByPtr s_UnmarshalTextByPtr;
             private static readonly UnmarshalTextByVal s_UnmarshalTextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,11 +73,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnmarshalTextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnmarshalTextByPtr is null || !m_target_is_ptr)
                     return s_UnmarshalTextByVal!(target, text);
 
-                return s_UnmarshalTextByRef(ref target, text);
+                return s_UnmarshalTextByPtr(m_target_ptr, text);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -86,23 +87,20 @@ namespace go
             static TextUnmarshaler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UnmarshalText");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UnmarshalText");
 
                 if (!(extensionMethod is null))
-                    s_UnmarshalTextByRef = extensionMethod.CreateStaticDelegate(typeof(UnmarshalTextByRef)) as UnmarshalTextByRef;
+                    s_UnmarshalTextByPtr = extensionMethod.CreateStaticDelegate(typeof(UnmarshalTextByPtr)) as UnmarshalTextByPtr;
 
-                if (s_UnmarshalTextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UnmarshalText");
+                extensionMethod = targetType.GetExtensionMethod("UnmarshalText");
 
-                    if (!(extensionMethod is null))
-                        s_UnmarshalTextByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalTextByVal)) as UnmarshalTextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnmarshalTextByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalTextByVal)) as UnmarshalTextByVal;
 
-                if (s_UnmarshalTextByRef is null && s_UnmarshalTextByVal is null)
+                if (s_UnmarshalTextByPtr is null && s_UnmarshalTextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TextUnmarshaler.UnmarshalText method", new Exception("UnmarshalText"));
             }
 

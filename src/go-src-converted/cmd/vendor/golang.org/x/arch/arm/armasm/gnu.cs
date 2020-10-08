@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2020 August 29 10:07:10 UTC
+// package armasm -- go2cs converted at 2020 October 08 04:44:09 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\gnu.go
 using bytes = go.bytes_package;
@@ -40,33 +40,43 @@ namespace arm
                 {
                     break;
                 }
-                var text = gnuArg(ref inst, i, arg);
+
+                var text = gnuArg(_addr_inst, i, arg);
                 if (text == "")
                 {
                     continue;
                 }
+
                 buf.WriteString(sep);
                 sep = ", ";
                 buf.WriteString(text);
+
             }
             return buf.String();
+
         }
 
-        private static @string gnuArg(ref Inst inst, long argIndex, Arg arg)
+        private static @string gnuArg(ptr<Inst> _addr_inst, long argIndex, Arg arg)
         {
+            ref Inst inst = ref _addr_inst.val;
+
 
             if (inst.Op & ~15L == LDRD_EQ || inst.Op & ~15L == LDREXD_EQ || inst.Op & ~15L == STRD_EQ) 
                 if (argIndex == 1L)
                 { 
                     // second argument in consecutive pair not printed
                     return "";
+
                 }
+
             else if (inst.Op & ~15L == STREXD_EQ) 
                 if (argIndex == 2L)
                 { 
                     // second argument in consecutive pair not printed
                     return "";
+
                 }
+
                         switch (arg.type())
             {
                 case Imm arg:
@@ -81,7 +91,7 @@ namespace arm
                     return fmt.Sprintf("#%d, %d", arg.Val, arg.Rot);
                     break;
                 case Mem arg:
-                    var R = gnuArg(inst, -1L, arg.Base);
+                    var R = gnuArg(_addr_inst, -1L, arg.Base);
                     @string X = "";
                     if (arg.Sign != 0L)
                     {
@@ -90,7 +100,8 @@ namespace arm
                         {
                             X = "-";
                         }
-                        X += gnuArg(inst, -1L, arg.Index);
+
+                        X += gnuArg(_addr_inst, -1L, arg.Index);
                         if (arg.Shift == ShiftLeft && arg.Count == 0L)
                         { 
                             // nothing
@@ -103,17 +114,20 @@ namespace arm
                         {
                             X += fmt.Sprintf(", %s #%d", strings.ToLower(arg.Shift.String()), arg.Count);
                         }
+
                     }
                     else
                     {
                         X = fmt.Sprintf("#%d", arg.Offset);
                     }
 
+
                     if (arg.Mode == AddrOffset) 
                         if (X == "#0")
                         {
                             return fmt.Sprintf("[%s]", R);
                         }
+
                         return fmt.Sprintf("[%s, %s]", R, X);
                     else if (arg.Mode == AddrPreIndex) 
                         return fmt.Sprintf("[%s, %s]!", R, X);
@@ -124,11 +138,13 @@ namespace arm
                         {
                             return R;
                         }
+
                     else if (arg.Mode == AddrLDM_WB) 
                         if (X == "#0")
                         {
                             return R + "!";
                         }
+
                                         return fmt.Sprintf("[%s Mode(%d) %s]", R, int(arg.Mode), X);
                     break;
                 case PCRel arg:
@@ -141,6 +157,7 @@ namespace arm
                         {
                             return fmt.Sprintf("r%d", int32(arg));
                         }
+
                     
                     if (arg == R10) 
                         return "sl";
@@ -150,37 +167,41 @@ namespace arm
                         return "ip";
                                         break;
                 case RegList arg:
-                    bytes.Buffer buf = default;
-                    fmt.Fprintf(ref buf, "{");
+                    ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+                    fmt.Fprintf(_addr_buf, "{");
                     @string sep = "";
                     for (long i = 0L; i < 16L; i++)
                     {
                         if (arg & (1L << (int)(uint(i))) != 0L)
                         {
-                            fmt.Fprintf(ref buf, "%s%s", sep, gnuArg(inst, -1L, Reg(i)));
+                            fmt.Fprintf(_addr_buf, "%s%s", sep, gnuArg(_addr_inst, -1L, Reg(i)));
                             sep = ", ";
                         }
+
                     }
 
-                    fmt.Fprintf(ref buf, "}");
+                    fmt.Fprintf(_addr_buf, "}");
                     return buf.String();
                     break;
                 case RegShift arg:
                     if (arg.Shift == ShiftLeft && arg.Count == 0L)
                     {
-                        return gnuArg(inst, -1L, arg.Reg);
+                        return gnuArg(_addr_inst, -1L, arg.Reg);
                     }
+
                     if (arg.Shift == RotateRightExt)
                     {
-                        return gnuArg(inst, -1L, arg.Reg) + ", rrx";
+                        return gnuArg(_addr_inst, -1L, arg.Reg) + ", rrx";
                     }
-                    return fmt.Sprintf("%s, %s #%d", gnuArg(inst, -1L, arg.Reg), strings.ToLower(arg.Shift.String()), arg.Count);
+
+                    return fmt.Sprintf("%s, %s #%d", gnuArg(_addr_inst, -1L, arg.Reg), strings.ToLower(arg.Shift.String()), arg.Count);
                     break;
                 case RegShiftReg arg:
-                    return fmt.Sprintf("%s, %s %s", gnuArg(inst, -1L, arg.Reg), strings.ToLower(arg.Shift.String()), gnuArg(inst, -1L, arg.RegCount));
+                    return fmt.Sprintf("%s, %s %s", gnuArg(_addr_inst, -1L, arg.Reg), strings.ToLower(arg.Shift.String()), gnuArg(_addr_inst, -1L, arg.RegCount));
                     break;
             }
             return strings.ToLower(arg.String());
+
         }
     }
 }}}}}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:03 UTC
+//     Generated on 2020 October 08 04:58:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace compress
                 this.toRead = default;
             }
 
-            public decoder(io.ByteReader r = default, uint bits = default, ulong nBits = default, ulong width = default, Func<ref decoder, (ushort, error)> read = default, long litWidth = default, error err = default, ushort clear = default, ushort eof = default, ushort hi = default, ushort overflow = default, ushort last = default, array<byte> suffix = default, array<ushort> prefix = default, array<byte> output = default, long o = default, slice<byte> toRead = default)
+            public decoder(io.ByteReader r = default, uint bits = default, ulong nBits = default, ulong width = default, Func<ptr<decoder>, (ushort, error)> read = default, long litWidth = default, error err = default, ushort clear = default, ushort eof = default, ushort hi = default, ushort overflow = default, ushort last = default, array<byte> suffix = default, array<ushort> prefix = default, array<byte> output = default, long o = default, slice<byte> toRead = default)
             {
                 this.r = r;
                 this.bits = bits;

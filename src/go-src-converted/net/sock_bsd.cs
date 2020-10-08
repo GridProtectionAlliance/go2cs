@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package net -- go2cs converted at 2020 August 29 08:27:37 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:30 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sock_bsd.go
 using runtime = go.runtime_package;
@@ -17,7 +17,7 @@ namespace go
     {
         private static long maxListenerBacklog()
         {
-            uint n = default;            error err = default;
+            uint n = default;            error err = default!;
             switch (runtime.GOOS)
             {
                 case "darwin": 
@@ -41,6 +41,7 @@ namespace go
                 n = 1L << (int)(16L) - 1L;
             }
             return int(n);
+
         }
     }
 }

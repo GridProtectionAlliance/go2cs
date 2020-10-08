@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:03 UTC
+//     Generated on 2020 October 08 04:28:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using src = go.cmd.@internal.src_package;
+
 using go;
 
 namespace go {
@@ -35,19 +34,21 @@ namespace @internal
             // Constructors
             public ConstDecl(NilType _)
             {
+                this.Group = default;
+                this.Pragma = default;
                 this.NameList = default;
                 this.Type = default;
                 this.Values = default;
-                this.Group = default;
                 this.m_declRef = new ptr<decl>(new decl(nil));
             }
 
-            public ConstDecl(slice<ref Name> NameList = default, Expr Type = default, Expr Values = default, ref ptr<Group> Group = default, decl decl = default)
+            public ConstDecl(ref ptr<Group> Group = default, Pragma Pragma = default, slice<ptr<Name>> NameList = default, Expr Type = default, Expr Values = default, decl decl = default)
             {
+                this.Group = Group;
+                this.Pragma = Pragma;
                 this.NameList = NameList;
                 this.Type = Type;
                 this.Values = Values;
-                this.Group = Group;
                 this.m_declRef = new ptr<decl>(decl);
             }
 
@@ -71,7 +72,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ConstDecl ConstDecl_cast(dynamic value)
         {
-            return new ConstDecl(value.NameList, value.Type, value.Values, ref value.Group, value.decl);
+            return new ConstDecl(ref value.Group, value.Pragma, value.NameList, value.Type, value.Values, value.decl);
         }
     }
 }}}}

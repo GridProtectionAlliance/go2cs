@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:12 UTC
+//     Generated on 2020 October 08 03:42:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -61,10 +61,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, error) MarshalTextByRef(ref T value);
+            private delegate (slice<byte>, error) MarshalTextByPtr(ptr<T> value);
             private delegate (slice<byte>, error) MarshalTextByVal(T value);
 
-            private static readonly MarshalTextByRef s_MarshalTextByRef;
+            private static readonly MarshalTextByPtr s_MarshalTextByPtr;
             private static readonly MarshalTextByVal s_MarshalTextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,11 +73,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MarshalTextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MarshalTextByPtr is null || !m_target_is_ptr)
                     return s_MarshalTextByVal!(target);
 
-                return s_MarshalTextByRef(ref target);
+                return s_MarshalTextByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -86,23 +87,20 @@ namespace go
             static TextMarshaler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("MarshalText");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MarshalText");
 
                 if (!(extensionMethod is null))
-                    s_MarshalTextByRef = extensionMethod.CreateStaticDelegate(typeof(MarshalTextByRef)) as MarshalTextByRef;
+                    s_MarshalTextByPtr = extensionMethod.CreateStaticDelegate(typeof(MarshalTextByPtr)) as MarshalTextByPtr;
 
-                if (s_MarshalTextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("MarshalText");
+                extensionMethod = targetType.GetExtensionMethod("MarshalText");
 
-                    if (!(extensionMethod is null))
-                        s_MarshalTextByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalTextByVal)) as MarshalTextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MarshalTextByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalTextByVal)) as MarshalTextByVal;
 
-                if (s_MarshalTextByRef is null && s_MarshalTextByVal is null)
+                if (s_MarshalTextByPtr is null && s_MarshalTextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TextMarshaler.MarshalText method", new Exception("MarshalText"));
             }
 

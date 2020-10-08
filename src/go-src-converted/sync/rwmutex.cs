@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 August 29 08:36:44 UTC
+// package sync -- go2cs converted at 2020 October 08 03:18:57 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\rwmutex.go
 using race = go.@internal.race_package;
@@ -38,7 +38,7 @@ namespace go
             public int readerWait; // number of departing readers
         }
 
-        private static readonly long rwmutexMaxReaders = 1L << (int)(30L);
+        private static readonly long rwmutexMaxReaders = (long)1L << (int)(30L);
 
         // RLock locks rw for reading.
         //
@@ -52,67 +52,91 @@ namespace go
         // It should not be used for recursive read locking; a blocked Lock
         // call excludes new readers from acquiring the lock. See the
         // documentation on the RWMutex type.
-        private static void RLock(this ref RWMutex rw)
+        private static void RLock(this ptr<RWMutex> _addr_rw)
         {
+            ref RWMutex rw = ref _addr_rw.val;
+
             if (race.Enabled)
             {
                 _ = rw.w.state;
                 race.Disable();
             }
-            if (atomic.AddInt32(ref rw.readerCount, 1L) < 0L)
+
+            if (atomic.AddInt32(_addr_rw.readerCount, 1L) < 0L)
             { 
                 // A writer is pending, wait for it.
-                runtime_Semacquire(ref rw.readerSem);
+                runtime_SemacquireMutex(_addr_rw.readerSem, false, 0L);
+
             }
+
             if (race.Enabled)
             {
                 race.Enable();
-                race.Acquire(@unsafe.Pointer(ref rw.readerSem));
+                race.Acquire(@unsafe.Pointer(_addr_rw.readerSem));
             }
+
         }
 
         // RUnlock undoes a single RLock call;
         // it does not affect other simultaneous readers.
         // It is a run-time error if rw is not locked for reading
         // on entry to RUnlock.
-        private static void RUnlock(this ref RWMutex rw)
+        private static void RUnlock(this ptr<RWMutex> _addr_rw)
         {
+            ref RWMutex rw = ref _addr_rw.val;
+
             if (race.Enabled)
             {
                 _ = rw.w.state;
-                race.ReleaseMerge(@unsafe.Pointer(ref rw.writerSem));
+                race.ReleaseMerge(@unsafe.Pointer(_addr_rw.writerSem));
                 race.Disable();
             }
+
             {
-                var r = atomic.AddInt32(ref rw.readerCount, -1L);
+                var r = atomic.AddInt32(_addr_rw.readerCount, -1L);
 
                 if (r < 0L)
-                {
-                    if (r + 1L == 0L || r + 1L == -rwmutexMaxReaders)
-                    {
-                        race.Enable();
-                        throw("sync: RUnlock of unlocked RWMutex");
-                    } 
-                    // A writer is pending.
-                    if (atomic.AddInt32(ref rw.readerWait, -1L) == 0L)
-                    { 
-                        // The last reader unblocks the writer.
-                        runtime_Semrelease(ref rw.writerSem, false);
-                    }
+                { 
+                    // Outlined slow-path to allow the fast-path to be inlined
+                    rw.rUnlockSlow(r);
+
                 }
 
             }
+
             if (race.Enabled)
             {
                 race.Enable();
             }
+
+        }
+
+        private static void rUnlockSlow(this ptr<RWMutex> _addr_rw, int r)
+        {
+            ref RWMutex rw = ref _addr_rw.val;
+
+            if (r + 1L == 0L || r + 1L == -rwmutexMaxReaders)
+            {
+                race.Enable();
+                throw("sync: RUnlock of unlocked RWMutex");
+            } 
+            // A writer is pending.
+            if (atomic.AddInt32(_addr_rw.readerWait, -1L) == 0L)
+            { 
+                // The last reader unblocks the writer.
+                runtime_Semrelease(_addr_rw.writerSem, false, 1L);
+
+            }
+
         }
 
         // Lock locks rw for writing.
         // If the lock is already locked for reading or writing,
         // Lock blocks until the lock is available.
-        private static void Lock(this ref RWMutex rw)
+        private static void Lock(this ptr<RWMutex> _addr_rw)
         {
+            ref RWMutex rw = ref _addr_rw.val;
+
             if (race.Enabled)
             {
                 _ = rw.w.state;
@@ -121,18 +145,20 @@ namespace go
             // First, resolve competition with other writers.
             rw.w.Lock(); 
             // Announce to readers there is a pending writer.
-            var r = atomic.AddInt32(ref rw.readerCount, -rwmutexMaxReaders) + rwmutexMaxReaders; 
+            var r = atomic.AddInt32(_addr_rw.readerCount, -rwmutexMaxReaders) + rwmutexMaxReaders; 
             // Wait for active readers.
-            if (r != 0L && atomic.AddInt32(ref rw.readerWait, r) != 0L)
+            if (r != 0L && atomic.AddInt32(_addr_rw.readerWait, r) != 0L)
             {
-                runtime_Semacquire(ref rw.writerSem);
+                runtime_SemacquireMutex(_addr_rw.writerSem, false, 0L);
             }
+
             if (race.Enabled)
             {
                 race.Enable();
-                race.Acquire(@unsafe.Pointer(ref rw.readerSem));
-                race.Acquire(@unsafe.Pointer(ref rw.writerSem));
+                race.Acquire(@unsafe.Pointer(_addr_rw.readerSem));
+                race.Acquire(@unsafe.Pointer(_addr_rw.writerSem));
             }
+
         }
 
         // Unlock unlocks rw for writing. It is a run-time error if rw is
@@ -141,18 +167,19 @@ namespace go
         // As with Mutexes, a locked RWMutex is not associated with a particular
         // goroutine. One goroutine may RLock (Lock) a RWMutex and then
         // arrange for another goroutine to RUnlock (Unlock) it.
-        private static void Unlock(this ref RWMutex rw)
+        private static void Unlock(this ptr<RWMutex> _addr_rw)
         {
+            ref RWMutex rw = ref _addr_rw.val;
+
             if (race.Enabled)
             {
                 _ = rw.w.state;
-                race.Release(@unsafe.Pointer(ref rw.readerSem));
-                race.Release(@unsafe.Pointer(ref rw.writerSem));
+                race.Release(@unsafe.Pointer(_addr_rw.readerSem));
                 race.Disable();
             } 
 
             // Announce to readers there is no active writer.
-            var r = atomic.AddInt32(ref rw.readerCount, rwmutexMaxReaders);
+            var r = atomic.AddInt32(_addr_rw.readerCount, rwmutexMaxReaders);
             if (r >= rwmutexMaxReaders)
             {
                 race.Enable();
@@ -161,7 +188,7 @@ namespace go
             // Unblock blocked readers, if any.
             for (long i = 0L; i < int(r); i++)
             {
-                runtime_Semrelease(ref rw.readerSem, false);
+                runtime_Semrelease(_addr_rw.readerSem, false, 0L);
             } 
             // Allow other writers to proceed.
  
@@ -171,28 +198,33 @@ namespace go
             {
                 race.Enable();
             }
+
         }
 
         // RLocker returns a Locker interface that implements
         // the Lock and Unlock methods by calling rw.RLock and rw.RUnlock.
-        private static Locker RLocker(this ref RWMutex rw)
+        private static Locker RLocker(this ptr<RWMutex> _addr_rw)
         {
-            return (rlocker.Value)(rw);
+            ref RWMutex rw = ref _addr_rw.val;
+
+            return (rlocker.val)(rw);
         }
 
         private partial struct rlocker // : RWMutex
         {
         }
 
-        private static void Lock(this ref rlocker r)
+        private static void Lock(this ptr<rlocker> _addr_r)
         {
-            (RWMutex.Value)(r).RLock();
+            ref rlocker r = ref _addr_r.val;
 
+            (RWMutex.val)(r).RLock();
         }
-        private static void Unlock(this ref rlocker r)
+        private static void Unlock(this ptr<rlocker> _addr_r)
         {
-            (RWMutex.Value)(r).RUnlock();
+            ref rlocker r = ref _addr_r.val;
 
+            (RWMutex.val)(r).RUnlock();
         }
     }
 }

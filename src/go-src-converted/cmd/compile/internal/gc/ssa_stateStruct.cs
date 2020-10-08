@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:11 UTC
+//     Generated on 2020 October 08 04:31:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,15 +13,17 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using html = go.html_package;
 using os = go.os_package;
 using sort = go.sort_package;
+using bufio = go.bufio_package;
+using bytes = go.bytes_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using x86 = go.cmd.@internal.obj.x86_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
@@ -45,7 +47,6 @@ namespace @internal
                 this.curfn = default;
                 this.labels = default;
                 this.labeledNodes = default;
-                this.exitCode = default;
                 this.breakTo = default;
                 this.continueTo = default;
                 this.curBlock = default;
@@ -56,6 +57,8 @@ namespace @internal
                 this.startmem = default;
                 this.sp = default;
                 this.sb = default;
+                this.deferBitsAddr = default;
+                this.deferBitsTemp = default;
                 this.line = default;
                 this.lastPos = default;
                 this.panics = default;
@@ -63,16 +66,20 @@ namespace @internal
                 this.cgoUnsafeArgs = default;
                 this.hasdefer = default;
                 this.softFloat = default;
+                this.hasOpenDefers = default;
+                this.openDefers = default;
+                this.lastDeferExit = default;
+                this.lastDeferFinalBlock = default;
+                this.lastDeferCount = default;
             }
 
-            public state(ref ptr<ssa.Config> config = default, ref ptr<ssa.Func> f = default, ref ptr<Node> curfn = default, map<@string, ref ssaLabel> labels = default, map<ref Node, ref ssaLabel> labeledNodes = default, Nodes exitCode = default, ref ptr<ssa.Block> breakTo = default, ref ptr<ssa.Block> continueTo = default, ref ptr<ssa.Block> curBlock = default, map<ref Node, ref ssa.Value> vars = default, map<ref Node, ref ssa.Value> fwdVars = default, slice<map<ref Node, ref ssa.Value>> defvars = default, map<ref Node, ref ssa.Value> decladdrs = default, ref ptr<ssa.Value> startmem = default, ref ptr<ssa.Value> sp = default, ref ptr<ssa.Value> sb = default, slice<src.XPos> line = default, src.XPos lastPos = default, map<funcLine, ref ssa.Block> panics = default, slice<ref Node> returns = default, bool cgoUnsafeArgs = default, bool hasdefer = default, bool softFloat = default)
+            public state(ref ptr<ssa.Config> config = default, ref ptr<ssa.Func> f = default, ref ptr<Node> curfn = default, map<@string, ptr<ssaLabel>> labels = default, map<ptr<Node>, ptr<ssaLabel>> labeledNodes = default, ref ptr<ssa.Block> breakTo = default, ref ptr<ssa.Block> continueTo = default, ref ptr<ssa.Block> curBlock = default, map<ptr<Node>, ptr<ssa.Value>> vars = default, map<ptr<Node>, ptr<ssa.Value>> fwdVars = default, slice<map<ptr<Node>, ptr<ssa.Value>>> defvars = default, map<ptr<Node>, ptr<ssa.Value>> decladdrs = default, ref ptr<ssa.Value> startmem = default, ref ptr<ssa.Value> sp = default, ref ptr<ssa.Value> sb = default, ref ptr<ssa.Value> deferBitsAddr = default, ref ptr<Node> deferBitsTemp = default, slice<src.XPos> line = default, src.XPos lastPos = default, map<funcLine, ptr<ssa.Block>> panics = default, slice<ptr<Node>> returns = default, bool cgoUnsafeArgs = default, bool hasdefer = default, bool softFloat = default, bool hasOpenDefers = default, slice<ptr<openDeferInfo>> openDefers = default, ref ptr<ssa.Block> lastDeferExit = default, ref ptr<ssa.Block> lastDeferFinalBlock = default, long lastDeferCount = default)
             {
                 this.config = config;
                 this.f = f;
                 this.curfn = curfn;
                 this.labels = labels;
                 this.labeledNodes = labeledNodes;
-                this.exitCode = exitCode;
                 this.breakTo = breakTo;
                 this.continueTo = continueTo;
                 this.curBlock = curBlock;
@@ -83,6 +90,8 @@ namespace @internal
                 this.startmem = startmem;
                 this.sp = sp;
                 this.sb = sb;
+                this.deferBitsAddr = deferBitsAddr;
+                this.deferBitsTemp = deferBitsTemp;
                 this.line = line;
                 this.lastPos = lastPos;
                 this.panics = panics;
@@ -90,6 +99,11 @@ namespace @internal
                 this.cgoUnsafeArgs = cgoUnsafeArgs;
                 this.hasdefer = hasdefer;
                 this.softFloat = softFloat;
+                this.hasOpenDefers = hasOpenDefers;
+                this.openDefers = openDefers;
+                this.lastDeferExit = lastDeferExit;
+                this.lastDeferFinalBlock = lastDeferFinalBlock;
+                this.lastDeferCount = lastDeferCount;
             }
 
             // Enable comparisons between nil and state struct
@@ -112,7 +126,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static state state_cast(dynamic value)
         {
-            return new state(ref value.config, ref value.f, ref value.curfn, value.labels, value.labeledNodes, value.exitCode, ref value.breakTo, ref value.continueTo, ref value.curBlock, value.vars, value.fwdVars, value.defvars, value.decladdrs, ref value.startmem, ref value.sp, ref value.sb, value.line, value.lastPos, value.panics, value.returns, value.cgoUnsafeArgs, value.hasdefer, value.softFloat);
+            return new state(ref value.config, ref value.f, ref value.curfn, value.labels, value.labeledNodes, ref value.breakTo, ref value.continueTo, ref value.curBlock, value.vars, value.fwdVars, value.defvars, value.decladdrs, ref value.startmem, ref value.sp, ref value.sb, ref value.deferBitsAddr, ref value.deferBitsTemp, value.line, value.lastPos, value.panics, value.returns, value.cgoUnsafeArgs, value.hasdefer, value.softFloat, value.hasOpenDefers, value.openDefers, ref value.lastDeferExit, ref value.lastDeferFinalBlock, value.lastDeferCount);
         }
     }
 }}}}

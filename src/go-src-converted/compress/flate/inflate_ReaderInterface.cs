@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:23:35 UTC
+//     Generated on 2020 October 08 03:31:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using io = go.io_package;
-using mathbits = go.math.bits_package;
+using bits = go.math.bits_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using go;
@@ -54,7 +54,7 @@ namespace compress
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace compress
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,17 +80,18 @@ namespace compress
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, p);
 
-                return s_ReadByRef(ref target, p);
+                return s_ReadByPtr(m_target_ptr, p);
             }
 
-            private delegate (byte, error) ReadByteByRef(ref T value);
+            private delegate (byte, error) ReadByteByPtr(ptr<T> value);
             private delegate (byte, error) ReadByteByVal(T value);
 
-            private static readonly ReadByteByRef s_ReadByteByRef;
+            private static readonly ReadByteByPtr s_ReadByteByPtr;
             private static readonly ReadByteByVal s_ReadByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,11 +100,12 @@ namespace compress
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByteByPtr is null || !m_target_is_ptr)
                     return s_ReadByteByVal!(target);
 
-                return s_ReadByteByRef(ref target);
+                return s_ReadByteByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -112,39 +114,33 @@ namespace compress
             static Reader()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Reader.Read method", new Exception("Read"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadByte");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadByte");
 
                 if (!(extensionMethod is null))
-                    s_ReadByteByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByteByRef)) as ReadByteByRef;
+                    s_ReadByteByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByteByPtr)) as ReadByteByPtr;
 
-                if (s_ReadByteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadByte");
+                extensionMethod = targetType.GetExtensionMethod("ReadByte");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByteByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByteByVal)) as ReadByteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByteByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByteByVal)) as ReadByteByVal;
 
-                if (s_ReadByteByRef is null && s_ReadByteByVal is null)
+                if (s_ReadByteByPtr is null && s_ReadByteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Reader.ReadByte method", new Exception("ReadByte"));
             }
 

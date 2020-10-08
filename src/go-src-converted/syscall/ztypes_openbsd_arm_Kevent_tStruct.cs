@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:17 UTC
+//     Generated on 2020 October 08 03:30:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,18 +28,22 @@ namespace go
                 this.Filter = default;
                 this.Flags = default;
                 this.Fflags = default;
+                this.Pad_cgo_0 = default;
                 this.Data = default;
                 this.Udata = default;
+                this.Pad_cgo_1 = default;
             }
 
-            public Kevent_t(uint Ident = default, short Filter = default, ushort Flags = default, uint Fflags = default, long Data = default, ref ptr<byte> Udata = default)
+            public Kevent_t(uint Ident = default, short Filter = default, ushort Flags = default, uint Fflags = default, array<byte> Pad_cgo_0 = default, long Data = default, ref ptr<byte> Udata = default, array<byte> Pad_cgo_1 = default)
             {
                 this.Ident = Ident;
                 this.Filter = Filter;
                 this.Flags = Flags;
                 this.Fflags = Fflags;
+                this.Pad_cgo_0 = Pad_cgo_0;
                 this.Data = Data;
                 this.Udata = Udata;
+                this.Pad_cgo_1 = Pad_cgo_1;
             }
 
             // Enable comparisons between nil and Kevent_t struct
@@ -62,7 +66,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Kevent_t Kevent_t_cast(dynamic value)
         {
-            return new Kevent_t(value.Ident, value.Filter, value.Flags, value.Fflags, value.Data, ref value.Udata);
+            return new Kevent_t(value.Ident, value.Filter, value.Flags, value.Fflags, value.Pad_cgo_0, value.Data, ref value.Udata, value.Pad_cgo_1);
         }
     }
 }

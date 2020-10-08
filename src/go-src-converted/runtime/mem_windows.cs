@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:17:49 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:20:39 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mem_windows.go
 using @unsafe = go.@unsafe_package;
@@ -12,22 +12,25 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly ulong _MEM_COMMIT = 0x1000UL;
-        private static readonly ulong _MEM_RESERVE = 0x2000UL;
-        private static readonly ulong _MEM_DECOMMIT = 0x4000UL;
-        private static readonly ulong _MEM_RELEASE = 0x8000UL;
+        private static readonly ulong _MEM_COMMIT = (ulong)0x1000UL;
+        private static readonly ulong _MEM_RESERVE = (ulong)0x2000UL;
+        private static readonly ulong _MEM_DECOMMIT = (ulong)0x4000UL;
+        private static readonly ulong _MEM_RELEASE = (ulong)0x8000UL;
 
-        private static readonly ulong _PAGE_READWRITE = 0x0004UL;
-        private static readonly ulong _PAGE_NOACCESS = 0x0001UL;
+        private static readonly ulong _PAGE_READWRITE = (ulong)0x0004UL;
+        private static readonly ulong _PAGE_NOACCESS = (ulong)0x0001UL;
 
-        private static readonly long _ERROR_NOT_ENOUGH_MEMORY = 8L;
-        private static readonly long _ERROR_COMMITMENT_LIMIT = 1455L;
+        private static readonly long _ERROR_NOT_ENOUGH_MEMORY = (long)8L;
+        private static readonly long _ERROR_COMMITMENT_LIMIT = (long)1455L;
+
 
         // Don't split the stack as this function may be invoked without a valid G,
         // which prevents us from allocating more stack.
         //go:nosplit
-        private static unsafe.Pointer sysAlloc(System.UIntPtr n, ref ulong sysStat)
+        private static unsafe.Pointer sysAlloc(System.UIntPtr n, ptr<ulong> _addr_sysStat)
         {
+            ref ulong sysStat = ref _addr_sysStat.val;
+
             mSysStatInc(sysStat, n);
             return @unsafe.Pointer(stdcall4(_VirtualAlloc, 0L, n, _MEM_COMMIT | _MEM_RESERVE, _PAGE_READWRITE));
         }
@@ -37,7 +40,7 @@ namespace go
             var r = stdcall3(_VirtualFree, uintptr(v), n, _MEM_DECOMMIT);
             if (r != 0L)
             {
-                return;
+                return ;
             } 
 
             // Decommit failed. Usual reason is that we've merged memory from two different
@@ -63,24 +66,30 @@ namespace go
                     print("runtime: VirtualFree of ", small, " bytes failed with errno=", getlasterror(), "\n");
                     throw("runtime: failed to decommit pages");
                 }
+
                 v = add(v, small);
                 n -= small;
+
             }
+
 
         }
 
         private static void sysUsed(unsafe.Pointer v, System.UIntPtr n)
         {
-            var r = stdcall4(_VirtualAlloc, uintptr(v), n, _MEM_COMMIT, _PAGE_READWRITE);
-            if (r == uintptr(v))
+            var p = stdcall4(_VirtualAlloc, uintptr(v), n, _MEM_COMMIT, _PAGE_READWRITE);
+            if (p == uintptr(v))
             {
-                return;
+                return ;
             } 
 
             // Commit failed. See SysUnused.
-            while (n > 0L)
+            // Hold on to n here so we can give back a better error message
+            // for certain cases.
+            var k = n;
+            while (k > 0L)
             {
-                var small = n;
+                var small = k;
                 while (small >= 4096L && stdcall4(_VirtualAlloc, uintptr(v), small, _MEM_COMMIT, _PAGE_READWRITE) == 0L)
                 {
                     small /= 2L;
@@ -89,20 +98,36 @@ namespace go
 
                 if (small < 4096L)
                 {
-                    print("runtime: VirtualAlloc of ", small, " bytes failed with errno=", getlasterror(), "\n");
-                    throw("runtime: failed to commit pages");
+                    var errno = getlasterror();
+
+                    if (errno == _ERROR_NOT_ENOUGH_MEMORY || errno == _ERROR_COMMITMENT_LIMIT) 
+                        print("runtime: VirtualAlloc of ", n, " bytes failed with errno=", errno, "\n");
+                        throw("out of memory");
+                    else 
+                        print("runtime: VirtualAlloc of ", small, " bytes failed with errno=", errno, "\n");
+                        throw("runtime: failed to commit pages");
+                    
                 }
+
                 v = add(v, small);
-                n -= small;
+                k -= small;
+
             }
 
+
+        }
+
+        private static void sysHugePage(unsafe.Pointer v, System.UIntPtr n)
+        {
         }
 
         // Don't split the stack as this function may be invoked without a valid G,
         // which prevents us from allocating more stack.
         //go:nosplit
-        private static void sysFree(unsafe.Pointer v, System.UIntPtr n, ref ulong sysStat)
+        private static void sysFree(unsafe.Pointer v, System.UIntPtr n, ptr<ulong> _addr_sysStat)
         {
+            ref ulong sysStat = ref _addr_sysStat.val;
+
             mSysStatDec(sysStat, n);
             var r = stdcall3(_VirtualFree, uintptr(v), 0L, _MEM_RELEASE);
             if (r == 0L)
@@ -110,19 +135,21 @@ namespace go
                 print("runtime: VirtualFree of ", n, " bytes failed with errno=", getlasterror(), "\n");
                 throw("runtime: failed to release pages");
             }
+
         }
 
         private static void sysFault(unsafe.Pointer v, System.UIntPtr n)
         { 
             // SysUnused makes the memory inaccessible and prevents its reuse
             sysUnused(v, n);
+
         }
 
-        private static unsafe.Pointer sysReserve(unsafe.Pointer v, System.UIntPtr n, ref bool reserved)
-        {
-            reserved.Value = true; 
+        private static unsafe.Pointer sysReserve(unsafe.Pointer v, System.UIntPtr n)
+        { 
             // v is just a hint.
             // First try at v.
+            // This will fail if any of [v, v+n) is already reserved.
             v = @unsafe.Pointer(stdcall4(_VirtualAlloc, uintptr(v), n, _MEM_RESERVE, _PAGE_READWRITE));
             if (v != null)
             {
@@ -131,22 +158,14 @@ namespace go
 
             // Next let the kernel choose the address.
             return @unsafe.Pointer(stdcall4(_VirtualAlloc, 0L, n, _MEM_RESERVE, _PAGE_READWRITE));
+
         }
 
-        private static void sysMap(unsafe.Pointer v, System.UIntPtr n, bool reserved, ref ulong sysStat)
+        private static void sysMap(unsafe.Pointer v, System.UIntPtr n, ptr<ulong> _addr_sysStat)
         {
-            mSysStatInc(sysStat, n);
-            var p = stdcall4(_VirtualAlloc, uintptr(v), n, _MEM_COMMIT, _PAGE_READWRITE);
-            if (p != uintptr(v))
-            {
-                var errno = getlasterror();
-                print("runtime: VirtualAlloc of ", n, " bytes failed with errno=", errno, "\n");
+            ref ulong sysStat = ref _addr_sysStat.val;
 
-                if (errno == _ERROR_NOT_ENOUGH_MEMORY || errno == _ERROR_COMMITMENT_LIMIT) 
-                    throw("out of memory");
-                else 
-                    throw("runtime: cannot map pages in arena address space");
-                            }
+            mSysStatInc(sysStat, n);
         }
     }
 }

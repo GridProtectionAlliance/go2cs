@@ -4,7 +4,7 @@
 
 // This file contains printing support for ASTs.
 
-// package ast -- go2cs converted at 2020 August 29 08:48:34 UTC
+// package ast -- go2cs converted at 2020 October 08 04:04:23 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\print.go
 using fmt = go.fmt_package;
@@ -31,6 +31,7 @@ namespace go
             if (v.Kind() == reflect.Chan || v.Kind() == reflect.Func || v.Kind() == reflect.Interface || v.Kind() == reflect.Map || v.Kind() == reflect.Ptr || v.Kind() == reflect.Slice) 
                 return !v.IsNil();
                         return true;
+
         }
 
         // Fprint prints the (sub-)tree starting at AST node x to w.
@@ -42,13 +43,18 @@ namespace go
         // struct fields for which f(fieldname, fieldvalue) is true are
         // printed; all others are filtered from the output. Unexported
         // struct fields are never printed.
-        public static error Fprint(io.Writer w, ref token.FileSet fset, object x, FieldFilter f)
+        public static error Fprint(io.Writer w, ptr<token.FileSet> _addr_fset, object x, FieldFilter f)
         {
-            return error.As(fprint(w, fset, x, f));
+            ref token.FileSet fset = ref _addr_fset.val;
+
+            return error.As(fprint(w, _addr_fset, x, f))!;
         }
 
-        private static error fprint(io.Writer w, ref token.FileSet _fset, object x, FieldFilter f) => func(_fset, (ref token.FileSet fset, Defer defer, Panic _, Recover __) =>
-        { 
+        private static error fprint(io.Writer w, ptr<token.FileSet> _addr_fset, object x, FieldFilter f) => func((defer, _, __) =>
+        {
+            error err = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
+ 
             // setup printer
             printer p = new printer(output:w,fset:fset,filter:f,ptrmap:make(map[interface{}]int),last:'\n',); 
 
@@ -64,25 +70,30 @@ namespace go
                     }
 
                 }
+
             }()); 
 
             // print x
             if (x == null)
             {
                 p.printf("nil\n");
-                return;
+                return ;
             }
+
             p.print(reflect.ValueOf(x));
             p.printf("\n");
 
-            return;
+            return ;
+
         });
 
         // Print prints x to standard output, skipping nil fields.
         // Print(fset, x) is the same as Fprint(os.Stdout, fset, x, NotNilFilter).
-        public static error Print(ref token.FileSet fset, object x)
+        public static error Print(ptr<token.FileSet> _addr_fset, object x)
         {
-            return error.As(Fprint(os.Stdout, fset, x, NotNilFilter));
+            ref token.FileSet fset = ref _addr_fset.val;
+
+            return error.As(Fprint(os.Stdout, _addr_fset, x, NotNilFilter))!;
         }
 
         private partial struct printer
@@ -97,8 +108,12 @@ namespace go
 
         private static slice<byte> indent = (slice<byte>)".  ";
 
-        private static (long, error) Write(this ref printer p, slice<byte> data)
+        private static (long, error) Write(this ptr<printer> _addr_p, slice<byte> data)
         {
+            long n = default;
+            error err = default!;
+            ref printer p = ref _addr_p.val;
+
             long m = default;
             foreach (var (i, b) in data)
             { 
@@ -109,35 +124,44 @@ namespace go
                     n += m;
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
+
                     p.line++;
+
                 }
                 else if (p.last == '\n')
                 {
                     _, err = fmt.Fprintf(p.output, "%6d  ", p.line);
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
+
                     for (var j = p.indent; j > 0L; j--)
                     {
                         _, err = p.output.Write(indent);
                         if (err != null)
                         {
-                            return;
+                            return ;
                         }
+
                     }
 
+
                 }
+
                 p.last = b;
+
             }
             if (len(data) > n)
             {
                 m, err = p.output.Write(data[n..]);
                 n += m;
             }
-            return;
+
+            return ;
+
         }
 
         // localError wraps locally caught errors so we can distinguish
@@ -148,8 +172,11 @@ namespace go
         }
 
         // printf is a convenience wrapper that takes care of print errors.
-        private static void printf(this ref printer _p, @string format, params object[] args) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
+        private static void printf(this ptr<printer> _addr_p, @string format, params object[] args) => func((_, panic, __) =>
         {
+            args = args.Clone();
+            ref printer p = ref _addr_p.val;
+
             {
                 var (_, err) = fmt.Fprintf(p, format, args);
 
@@ -159,6 +186,7 @@ namespace go
                 }
 
             }
+
         });
 
         // Implementation note: Print is written for AST nodes but could be
@@ -170,13 +198,16 @@ namespace go
         // same slice or map. Code for general data structures probably
         // should catch those as well.
 
-        private static void print(this ref printer p, reflect.Value x)
+        private static void print(this ptr<printer> _addr_p, reflect.Value x)
         {
+            ref printer p = ref _addr_p.val;
+
             if (!NotNilFilter("", x))
             {
                 p.printf("nil");
-                return;
+                return ;
             }
+
 
             if (x.Kind() == reflect.Interface) 
                 p.print(x.Elem());
@@ -194,7 +225,9 @@ namespace go
                         p.printf("\n");
                     }
                     p.indent--;
+
                 }
+
                 p.printf("}");
             else if (x.Kind() == reflect.Ptr) 
                 p.printf("*"); 
@@ -216,6 +249,8 @@ namespace go
                     }
 
                 }
+
+
             else if (x.Kind() == reflect.Array) 
                 p.printf("%s {", x.Type());
                 if (x.Len() > 0L)
@@ -239,7 +274,9 @@ namespace go
                         n = n__prev1;
                     }
                     p.indent--;
+
                 }
+
                 p.printf("}");
             else if (x.Kind() == reflect.Slice) 
                 {
@@ -248,10 +285,11 @@ namespace go
                     if (ok)
                     {
                         p.printf("%#q", s);
-                        return;
+                        return ;
                     }
 
                 }
+
                 p.printf("%s (len = %d) {", x.Type(), x.Len());
                 if (x.Len() > 0L)
                 {
@@ -274,7 +312,9 @@ namespace go
                         n = n__prev1;
                     }
                     p.indent--;
+
                 }
+
                 p.printf("}");
             else if (x.Kind() == reflect.Struct) 
                 var t = x.Type();
@@ -303,13 +343,17 @@ namespace go
                                         p.printf("\n");
                                         first = false;
                                     }
+
                                     p.printf("%s: ", name);
                                     p.print(value);
                                     p.printf("\n");
+
                                 }
+
                             }
 
                         }
+
                     }
 
 
@@ -324,19 +368,21 @@ namespace go
                 {
                     case @string v:
                         p.printf("%q", v);
-                        return;
+                        return ;
                         break;
                     case token.Pos v:
                         if (p.fset != null)
                         {
                             p.printf("%s", p.fset.Position(v));
-                            return;
+                            return ;
                         }
+
                         break; 
                     // default
                 } 
                 // default
                 p.printf("%v", v);
-                    }
+            
+        }
     }
 }}

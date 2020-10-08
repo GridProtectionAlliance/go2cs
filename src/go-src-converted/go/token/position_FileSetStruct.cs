@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:53 UTC
+//     Generated on 2020 October 08 03:43:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace go
                 this.last = default;
             }
 
-            public FileSet(sync.RWMutex mutex = default, long @base = default, slice<ref File> files = default, ref ptr<File> last = default)
+            public FileSet(sync.RWMutex mutex = default, long @base = default, slice<ptr<File>> files = default, ref ptr<File> last = default)
             {
                 this.mutex = mutex;
                 this.@base = @base;

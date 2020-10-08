@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:52 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:37 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\defs_plan9_arm.go
 
@@ -12,7 +12,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly ulong _PAGESIZE = 0x1000UL;
+        private static readonly ulong _PAGESIZE = (ulong)0x1000UL;
 
 
 
@@ -45,43 +45,55 @@ namespace go
 
         //go:nosplit
         //go:nowritebarrierrec
-        private static System.UIntPtr pc(this ref sigctxt c)
+        private static System.UIntPtr pc(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.u.pc);
         }
 
-        private static System.UIntPtr sp(this ref sigctxt c)
+        private static System.UIntPtr sp(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.u.sp);
         }
-        private static System.UIntPtr lr(this ref sigctxt c)
+        private static System.UIntPtr lr(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.u.link);
         }
 
-        private static void setpc(this ref sigctxt c, System.UIntPtr x)
+        private static void setpc(this ptr<sigctxt> _addr_c, System.UIntPtr x)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             c.u.pc = uint32(x);
-
         }
-        private static void setsp(this ref sigctxt c, System.UIntPtr x)
+        private static void setsp(this ptr<sigctxt> _addr_c, System.UIntPtr x)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             c.u.sp = uint32(x);
-
         }
-        private static void setlr(this ref sigctxt c, System.UIntPtr x)
+        private static void setlr(this ptr<sigctxt> _addr_c, System.UIntPtr x)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             c.u.link = uint32(x);
-
         }
-        private static void savelr(this ref sigctxt c, System.UIntPtr x)
+        private static void savelr(this ptr<sigctxt> _addr_c, System.UIntPtr x)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             c.u.r0 = uint32(x);
-
         }
 
-        private static void dumpregs(ref ureg u)
+        private static void dumpregs(ptr<ureg> _addr_u)
         {
+            ref ureg u = ref _addr_u.val;
+
             print("r0    ", hex(u.r0), "\n");
             print("r1    ", hex(u.r1), "\n");
             print("r2    ", hex(u.r2), "\n");

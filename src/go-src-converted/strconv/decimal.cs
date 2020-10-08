@@ -9,7 +9,7 @@
 // because 2 divides 10; cannot do decimal floating point
 // in multiprecision binary precisely.
 
-// package strconv -- go2cs converted at 2020 August 29 08:42:51 UTC
+// package strconv -- go2cs converted at 2020 October 08 03:48:51 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\decimal.go
 
@@ -28,17 +28,21 @@ namespace go
             public bool trunc; // discarded nonzero digits beyond d[:nd]
         }
 
-        private static @string String(this ref decimal a)
+        private static @string String(this ptr<decimal> _addr_a)
         {
+            ref decimal a = ref _addr_a.val;
+
             long n = 10L + a.nd;
             if (a.dp > 0L)
             {
                 n += a.dp;
             }
+
             if (a.dp < 0L)
             {
                 n += -a.dp;
             }
+
             var buf = make_slice<byte>(n);
             long w = 0L;
 
@@ -63,6 +67,7 @@ namespace go
                 w += copy(buf[w..], a.d[0L..a.nd]);
                 w += digitZero(buf[w..w + a.dp - a.nd]);
                         return string(buf[0L..w]);
+
         }
 
         private static long digitZero(slice<byte> dst)
@@ -72,13 +77,16 @@ namespace go
                 dst[i] = '0';
             }
             return len(dst);
+
         }
 
         // trim trailing zeros from number.
         // (They are meaningless; the decimal point is tracked
         // independent of the number of digits.)
-        private static void trim(ref decimal a)
+        private static void trim(ptr<decimal> _addr_a)
         {
+            ref decimal a = ref _addr_a.val;
+
             while (a.nd > 0L && a.d[a.nd - 1L] == '0')
             {
                 a.nd--;
@@ -88,11 +96,14 @@ namespace go
             {
                 a.dp = 0L;
             }
+
         }
 
         // Assign v to a.
-        private static void Assign(this ref decimal a, ulong v)
+        private static void Assign(this ptr<decimal> _addr_a, ulong v)
         {
+            ref decimal a = ref _addr_a.val;
+
             array<byte> buf = new array<byte>(24L); 
 
             // Write reversed decimal in buf.
@@ -121,21 +132,24 @@ namespace go
             }
 
             a.dp = a.nd;
-            trim(a);
+            trim(_addr_a);
+
         }
 
         // Maximum shift that we can do in one pass without overflow.
         // A uint has 32 or 64 bits, and we have to be able to accommodate 9<<k.
-        private static readonly long uintSize = 32L << (int)((~uint(0L) >> (int)(63L)));
+        private static readonly long uintSize = (long)32L << (int)((~uint(0L) >> (int)(63L)));
 
-        private static readonly var maxShift = uintSize - 4L;
-
-        // Binary shift right (/ 2) by k bits.  k <= maxShift to avoid overflow.
-
+        private static readonly var maxShift = (var)uintSize - 4L;
 
         // Binary shift right (/ 2) by k bits.  k <= maxShift to avoid overflow.
-        private static void rightShift(ref decimal a, ulong k)
+
+
+        // Binary shift right (/ 2) by k bits.  k <= maxShift to avoid overflow.
+        private static void rightShift(ptr<decimal> _addr_a, ulong k)
         {
+            ref decimal a = ref _addr_a.val;
+
             long r = 0L; // read pointer
             long w = 0L; // write pointer
 
@@ -149,9 +163,10 @@ namespace go
                     { 
                         // a == 0; shouldn't get here, but handle anyway.
                         a.nd = 0L;
-                        return;
+                        return ;
                 r++;
                     }
+
                     while (n >> (int)(k) == 0L)
                     {
                         n = n * 10L;
@@ -159,9 +174,12 @@ namespace go
                     }
 
                     break;
+
                 }
+
                 var c = uint(a.d[r]);
                 n = n * 10L + c - '0';
+
             }
 
             a.dp -= r - 1L;
@@ -197,12 +215,15 @@ namespace go
                 {
                     a.trunc = true;
                 }
+
                 n = n * 10L;
+
             }
 
 
             a.nd = w;
-            trim(a);
+            trim(_addr_a);
+
         }
 
         // Cheat sheet for left shift: table indexed by shift count giving
@@ -232,23 +253,29 @@ namespace go
                 {
                     return true;
                 }
+
                 if (b[i] != s[i])
                 {
                     return b[i] < s[i];
                 }
+
             }
 
             return false;
+
         }
 
         // Binary shift left (* 2) by k bits.  k <= maxShift to avoid overflow.
-        private static void leftShift(ref decimal a, ulong k)
+        private static void leftShift(ptr<decimal> _addr_a, ulong k)
         {
+            ref decimal a = ref _addr_a.val;
+
             var delta = leftcheats[k].delta;
             if (prefixIsLessThan(a.d[0L..a.nd], leftcheats[k].cutoff))
             {
                 delta--;
             }
+
             var r = a.nd; // read index
             var w = a.nd + delta; // write index
 
@@ -271,7 +298,9 @@ namespace go
                 {
                     a.trunc = true;
                 }
+
                 n = quo;
+
             } 
 
             // Put down extra digits.
@@ -291,7 +320,9 @@ namespace go
                 {
                     a.trunc = true;
                 }
+
                 n = quo;
+
             }
 
 
@@ -300,39 +331,47 @@ namespace go
             {
                 a.nd = len(a.d);
             }
+
             a.dp += delta;
-            trim(a);
+            trim(_addr_a);
+
         }
 
         // Binary shift left (k > 0) or right (k < 0).
-        private static void Shift(this ref decimal a, long k)
+        private static void Shift(this ptr<decimal> _addr_a, long k)
         {
+            ref decimal a = ref _addr_a.val;
+
 
             if (a.nd == 0L)             else if (k > 0L) 
                 while (k > maxShift)
                 {
-                    leftShift(a, maxShift);
+                    leftShift(_addr_a, maxShift);
                     k -= maxShift;
                 }
 
-                leftShift(a, uint(k));
+                leftShift(_addr_a, uint(k));
             else if (k < 0L) 
                 while (k < -maxShift)
                 {
-                    rightShift(a, maxShift);
+                    rightShift(_addr_a, maxShift);
                     k += maxShift;
                 }
 
-                rightShift(a, uint(-k));
-                    }
+                rightShift(_addr_a, uint(-k));
+            
+        }
 
         // If we chop a at nd digits, should we round up?
-        private static bool shouldRoundUp(ref decimal a, long nd)
+        private static bool shouldRoundUp(ptr<decimal> _addr_a, long nd)
         {
+            ref decimal a = ref _addr_a.val;
+
             if (nd < 0L || nd >= a.nd)
             {
                 return false;
             }
+
             if (a.d[nd] == '5' && nd + 1L == a.nd)
             { // exactly halfway - round to even
                 // if we truncated, a little higher than what's recorded - always round up
@@ -340,23 +379,29 @@ namespace go
                 {
                     return true;
                 }
+
                 return nd > 0L && (a.d[nd - 1L] - '0') % 2L != 0L;
+
             } 
             // not halfway - digit tells all
             return a.d[nd] >= '5';
+
         }
 
         // Round a to nd digits (or fewer).
         // If nd is zero, it means we're rounding
         // just to the left of the digits, as in
         // 0.09 -> 0.1.
-        private static void Round(this ref decimal a, long nd)
+        private static void Round(this ptr<decimal> _addr_a, long nd)
         {
+            ref decimal a = ref _addr_a.val;
+
             if (nd < 0L || nd >= a.nd)
             {
-                return;
+                return ;
             }
-            if (shouldRoundUp(a, nd))
+
+            if (shouldRoundUp(_addr_a, nd))
             {
                 a.RoundUp(nd);
             }
@@ -364,25 +409,32 @@ namespace go
             {
                 a.RoundDown(nd);
             }
+
         }
 
         // Round a down to nd digits (or fewer).
-        private static void RoundDown(this ref decimal a, long nd)
+        private static void RoundDown(this ptr<decimal> _addr_a, long nd)
         {
+            ref decimal a = ref _addr_a.val;
+
             if (nd < 0L || nd >= a.nd)
             {
-                return;
+                return ;
             }
+
             a.nd = nd;
-            trim(a);
+            trim(_addr_a);
+
         }
 
         // Round a up to nd digits (or fewer).
-        private static void RoundUp(this ref decimal a, long nd)
+        private static void RoundUp(this ptr<decimal> _addr_a, long nd)
         {
+            ref decimal a = ref _addr_a.val;
+
             if (nd < 0L || nd >= a.nd)
             {
-                return;
+                return ;
             } 
 
             // round up
@@ -393,8 +445,10 @@ namespace go
                 { // can stop after this digit
                     a.d[i]++;
                     a.nd = i + 1L;
-                    return;
+                    return ;
+
                 }
+
             } 
 
             // Number is all 9s.
@@ -406,16 +460,20 @@ namespace go
             a.d[0L] = '1';
             a.nd = 1L;
             a.dp++;
+
         }
 
         // Extract integer part, rounded appropriately.
         // No guarantees about overflow.
-        private static ulong RoundedInteger(this ref decimal a)
+        private static ulong RoundedInteger(this ptr<decimal> _addr_a)
         {
+            ref decimal a = ref _addr_a.val;
+
             if (a.dp > 20L)
             {
                 return 0xFFFFFFFFFFFFFFFFUL;
             }
+
             long i = default;
             var n = uint64(0L);
             for (i = 0L; i < a.dp && i < a.nd; i++)
@@ -429,11 +487,13 @@ namespace go
                 i++;
             }
 
-            if (shouldRoundUp(a, a.dp))
+            if (shouldRoundUp(_addr_a, a.dp))
             {
                 n++;
             }
+
             return n;
+
         }
     }
 }

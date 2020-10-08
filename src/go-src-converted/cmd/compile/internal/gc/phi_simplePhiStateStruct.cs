@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:58 UTC
+//     Generated on 2020 October 08 04:29:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,7 +40,7 @@ namespace @internal
                 this.reachable = default;
             }
 
-            public simplePhiState(ref ptr<state> s = default, ref ptr<ssa.Func> f = default, slice<ref ssa.Value> fwdrefs = default, slice<map<ref Node, ref ssa.Value>> defvars = default, slice<bool> reachable = default)
+            public simplePhiState(ref ptr<state> s = default, ref ptr<ssa.Func> f = default, slice<ptr<ssa.Value>> fwdrefs = default, slice<map<ptr<Node>, ptr<ssa.Value>>> defvars = default, slice<bool> reachable = default)
             {
                 this.s = s;
                 this.f = f;

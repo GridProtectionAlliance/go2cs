@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:30 UTC
+//     Generated on 2020 October 08 04:59:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using zlib = go.compress.zlib_package;
+using binary = go.encoding.binary_package;
 using crc32 = go.hash.crc32_package;
 using image = go.image_package;
 using color = go.image.color_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:24:11 UTC
+//     Generated on 2020 October 08 03:41:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,99 +69,104 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate syntax.EmptyOp stepByRef(ref T value, long pos);
-            private delegate syntax.EmptyOp stepByVal(T value, long pos);
+            private delegate lazyFlag stepByPtr(ptr<T> value, long pos);
+            private delegate lazyFlag stepByVal(T value, long pos);
 
-            private static readonly stepByRef s_stepByRef;
+            private static readonly stepByPtr s_stepByPtr;
             private static readonly stepByVal s_stepByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public syntax.EmptyOp step(long pos)
+            public lazyFlag step(long pos)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_stepByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_stepByPtr is null || !m_target_is_ptr)
                     return s_stepByVal!(target, pos);
 
-                return s_stepByRef(ref target, pos);
+                return s_stepByPtr(m_target_ptr, pos);
             }
 
-            private delegate syntax.EmptyOp canCheckPrefixByRef(ref T value);
-            private delegate syntax.EmptyOp canCheckPrefixByVal(T value);
+            private delegate lazyFlag canCheckPrefixByPtr(ptr<T> value);
+            private delegate lazyFlag canCheckPrefixByVal(T value);
 
-            private static readonly canCheckPrefixByRef s_canCheckPrefixByRef;
+            private static readonly canCheckPrefixByPtr s_canCheckPrefixByPtr;
             private static readonly canCheckPrefixByVal s_canCheckPrefixByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public syntax.EmptyOp canCheckPrefix()
+            public lazyFlag canCheckPrefix()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_canCheckPrefixByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_canCheckPrefixByPtr is null || !m_target_is_ptr)
                     return s_canCheckPrefixByVal!(target);
 
-                return s_canCheckPrefixByRef(ref target);
+                return s_canCheckPrefixByPtr(m_target_ptr);
             }
 
-            private delegate syntax.EmptyOp hasPrefixByRef(ref T value, ref Regexp re);
-            private delegate syntax.EmptyOp hasPrefixByVal(T value, ref Regexp re);
+            private delegate lazyFlag hasPrefixByPtr(ptr<T> value, ptr<Regexp> re);
+            private delegate lazyFlag hasPrefixByVal(T value, ptr<Regexp> re);
 
-            private static readonly hasPrefixByRef s_hasPrefixByRef;
+            private static readonly hasPrefixByPtr s_hasPrefixByPtr;
             private static readonly hasPrefixByVal s_hasPrefixByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public syntax.EmptyOp hasPrefix(ref Regexp re)
+            public lazyFlag hasPrefix(ptr<Regexp> re)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_hasPrefixByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_hasPrefixByPtr is null || !m_target_is_ptr)
                     return s_hasPrefixByVal!(target, re);
 
-                return s_hasPrefixByRef(ref target, re);
+                return s_hasPrefixByPtr(m_target_ptr, re);
             }
 
-            private delegate syntax.EmptyOp indexByRef(ref T value, ref Regexp re, long pos);
-            private delegate syntax.EmptyOp indexByVal(T value, ref Regexp re, long pos);
+            private delegate lazyFlag indexByPtr(ptr<T> value, ptr<Regexp> re, long pos);
+            private delegate lazyFlag indexByVal(T value, ptr<Regexp> re, long pos);
 
-            private static readonly indexByRef s_indexByRef;
+            private static readonly indexByPtr s_indexByPtr;
             private static readonly indexByVal s_indexByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public syntax.EmptyOp index(ref Regexp re, long pos)
+            public lazyFlag index(ptr<Regexp> re, long pos)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_indexByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_indexByPtr is null || !m_target_is_ptr)
                     return s_indexByVal!(target, re, pos);
 
-                return s_indexByRef(ref target, re, pos);
+                return s_indexByPtr(m_target_ptr, re, pos);
             }
 
-            private delegate syntax.EmptyOp contextByRef(ref T value, long pos);
-            private delegate syntax.EmptyOp contextByVal(T value, long pos);
+            private delegate lazyFlag contextByPtr(ptr<T> value, long pos);
+            private delegate lazyFlag contextByVal(T value, long pos);
 
-            private static readonly contextByRef s_contextByRef;
+            private static readonly contextByPtr s_contextByPtr;
             private static readonly contextByVal s_contextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public syntax.EmptyOp context(long pos)
+            public lazyFlag context(long pos)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_contextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_contextByPtr is null || !m_target_is_ptr)
                     return s_contextByVal!(target, pos);
 
-                return s_contextByRef(ref target, pos);
+                return s_contextByPtr(m_target_ptr, pos);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -170,87 +175,72 @@ namespace go
             static input()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("step");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("step");
 
                 if (!(extensionMethod is null))
-                    s_stepByRef = extensionMethod.CreateStaticDelegate(typeof(stepByRef)) as stepByRef;
+                    s_stepByPtr = extensionMethod.CreateStaticDelegate(typeof(stepByPtr)) as stepByPtr;
 
-                if (s_stepByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("step");
+                extensionMethod = targetType.GetExtensionMethod("step");
 
-                    if (!(extensionMethod is null))
-                        s_stepByVal = extensionMethod.CreateStaticDelegate(typeof(stepByVal)) as stepByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_stepByVal = extensionMethod.CreateStaticDelegate(typeof(stepByVal)) as stepByVal;
 
-                if (s_stepByRef is null && s_stepByVal is null)
+                if (s_stepByPtr is null && s_stepByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement input.step method", new Exception("step"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("canCheckPrefix");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("canCheckPrefix");
 
                 if (!(extensionMethod is null))
-                    s_canCheckPrefixByRef = extensionMethod.CreateStaticDelegate(typeof(canCheckPrefixByRef)) as canCheckPrefixByRef;
+                    s_canCheckPrefixByPtr = extensionMethod.CreateStaticDelegate(typeof(canCheckPrefixByPtr)) as canCheckPrefixByPtr;
 
-                if (s_canCheckPrefixByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("canCheckPrefix");
+                extensionMethod = targetType.GetExtensionMethod("canCheckPrefix");
 
-                    if (!(extensionMethod is null))
-                        s_canCheckPrefixByVal = extensionMethod.CreateStaticDelegate(typeof(canCheckPrefixByVal)) as canCheckPrefixByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_canCheckPrefixByVal = extensionMethod.CreateStaticDelegate(typeof(canCheckPrefixByVal)) as canCheckPrefixByVal;
 
-                if (s_canCheckPrefixByRef is null && s_canCheckPrefixByVal is null)
+                if (s_canCheckPrefixByPtr is null && s_canCheckPrefixByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement input.canCheckPrefix method", new Exception("canCheckPrefix"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("hasPrefix");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("hasPrefix");
 
                 if (!(extensionMethod is null))
-                    s_hasPrefixByRef = extensionMethod.CreateStaticDelegate(typeof(hasPrefixByRef)) as hasPrefixByRef;
+                    s_hasPrefixByPtr = extensionMethod.CreateStaticDelegate(typeof(hasPrefixByPtr)) as hasPrefixByPtr;
 
-                if (s_hasPrefixByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("hasPrefix");
+                extensionMethod = targetType.GetExtensionMethod("hasPrefix");
 
-                    if (!(extensionMethod is null))
-                        s_hasPrefixByVal = extensionMethod.CreateStaticDelegate(typeof(hasPrefixByVal)) as hasPrefixByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_hasPrefixByVal = extensionMethod.CreateStaticDelegate(typeof(hasPrefixByVal)) as hasPrefixByVal;
 
-                if (s_hasPrefixByRef is null && s_hasPrefixByVal is null)
+                if (s_hasPrefixByPtr is null && s_hasPrefixByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement input.hasPrefix method", new Exception("hasPrefix"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("index");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("index");
 
                 if (!(extensionMethod is null))
-                    s_indexByRef = extensionMethod.CreateStaticDelegate(typeof(indexByRef)) as indexByRef;
+                    s_indexByPtr = extensionMethod.CreateStaticDelegate(typeof(indexByPtr)) as indexByPtr;
 
-                if (s_indexByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("index");
+                extensionMethod = targetType.GetExtensionMethod("index");
 
-                    if (!(extensionMethod is null))
-                        s_indexByVal = extensionMethod.CreateStaticDelegate(typeof(indexByVal)) as indexByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_indexByVal = extensionMethod.CreateStaticDelegate(typeof(indexByVal)) as indexByVal;
 
-                if (s_indexByRef is null && s_indexByVal is null)
+                if (s_indexByPtr is null && s_indexByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement input.index method", new Exception("index"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("context");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("context");
 
                 if (!(extensionMethod is null))
-                    s_contextByRef = extensionMethod.CreateStaticDelegate(typeof(contextByRef)) as contextByRef;
+                    s_contextByPtr = extensionMethod.CreateStaticDelegate(typeof(contextByPtr)) as contextByPtr;
 
-                if (s_contextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("context");
+                extensionMethod = targetType.GetExtensionMethod("context");
 
-                    if (!(extensionMethod is null))
-                        s_contextByVal = extensionMethod.CreateStaticDelegate(typeof(contextByVal)) as contextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_contextByVal = extensionMethod.CreateStaticDelegate(typeof(contextByVal)) as contextByVal;
 
-                if (s_contextByRef is null && s_contextByVal is null)
+                if (s_contextByPtr is null && s_contextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement input.context method", new Exception("context"));
             }
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:44:36 UTC
+//     Generated on 2020 October 08 03:45:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,27 +21,17 @@ namespace go
     public static partial class os_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(file))]
         public partial struct File
         {
-            // file structure promotion - sourced from pointer
-            private readonly ptr<file> m_fileRef;
-
-            private ref file file_ptr => ref m_fileRef.Value;
-
-            public ref long fdref => ref m_fileRef.Value.fdref;
-
-            public ref fileImpl impl => ref m_fileRef.Value.impl;
-
             // Constructors
             public File(NilType _)
             {
-                this.m_fileRef = new ptr<file>(new file(nil));
+                this.ptr<file> = default;
             }
 
-            public File(ref file file = default)
+            public File(ref ptr<file> ptr<file> = default)
             {
-                this.m_fileRef = new ptr<file>(ref file);
+                this.ptr<file> = ptr<file>;
             }
 
             // Enable comparisons between nil and File struct
@@ -64,7 +54,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static File File_cast(dynamic value)
         {
-            return new File(ref value.file);
+            return new File(ref value.ptr<file>);
         }
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cgo -- go2cs converted at 2020 August 29 08:21:41 UTC
+// package cgo -- go2cs converted at 2020 October 08 03:24:26 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Go\src\runtime\cgo\callbacks.go
 using @unsafe = go.@unsafe_package;
@@ -43,7 +43,8 @@ namespace runtime
         //   /* The function call will not return.  */
 
         //go:linkname _runtime_cgo_panic_internal runtime._cgo_panic_internal
-        private static byte _runtime_cgo_panic_internal = default;
+        private static void _runtime_cgo_panic_internal(ptr<byte> p)
+;
 
         //go:linkname _cgo_panic _cgo_panic
         //go:cgo_export_static _cgo_panic
@@ -52,20 +53,27 @@ namespace runtime
         //go:norace
         private static void _cgo_panic(unsafe.Pointer a, int n)
         {
-            _runtime_cgocallback(@unsafe.Pointer(ref _runtime_cgo_panic_internal), a, uintptr(n), 0L);
+            ref var f = ref heap(_runtime_cgo_panic_internal, out ptr<var> _addr_f);
+            private partial struct funcval
+            {
+                public unsafe.Pointer pc;
+            }
+            ptr<ptr<ptr<funcval>>> fv = new ptr<ptr<ptr<ptr<funcval>>>>(@unsafe.Pointer(_addr_f));
+            _runtime_cgocallback(fv.pc, a, uintptr(n), 0L);
+
         }
 
         //go:cgo_import_static x_cgo_init
         //go:linkname x_cgo_init x_cgo_init
         //go:linkname _cgo_init _cgo_init
         private static byte x_cgo_init = default;
-        private static var _cgo_init = ref x_cgo_init;
+        private static var _cgo_init = _addr_x_cgo_init;
 
         //go:cgo_import_static x_cgo_thread_start
         //go:linkname x_cgo_thread_start x_cgo_thread_start
         //go:linkname _cgo_thread_start _cgo_thread_start
         private static byte x_cgo_thread_start = default;
-        private static var _cgo_thread_start = ref x_cgo_thread_start;
+        private static var _cgo_thread_start = _addr_x_cgo_thread_start;
 
         // Creates a new system thread without updating any Go state.
         //
@@ -77,7 +85,7 @@ namespace runtime
         //go:linkname x_cgo_sys_thread_create x_cgo_sys_thread_create
         //go:linkname _cgo_sys_thread_create _cgo_sys_thread_create
         private static byte x_cgo_sys_thread_create = default;
-        private static var _cgo_sys_thread_create = ref x_cgo_sys_thread_create;
+        private static var _cgo_sys_thread_create = _addr_x_cgo_sys_thread_create;
 
         // Notifies that the runtime has been initialized.
         //
@@ -91,7 +99,7 @@ namespace runtime
         //go:linkname x_cgo_notify_runtime_init_done x_cgo_notify_runtime_init_done
         //go:linkname _cgo_notify_runtime_init_done _cgo_notify_runtime_init_done
         private static byte x_cgo_notify_runtime_init_done = default;
-        private static var _cgo_notify_runtime_init_done = ref x_cgo_notify_runtime_init_done;
+        private static var _cgo_notify_runtime_init_done = _addr_x_cgo_notify_runtime_init_done;
 
         // Sets the traceback context function. See runtime.SetCgoTraceback.
 
@@ -99,7 +107,7 @@ namespace runtime
         //go:linkname x_cgo_set_context_function x_cgo_set_context_function
         //go:linkname _cgo_set_context_function _cgo_set_context_function
         private static byte x_cgo_set_context_function = default;
-        private static var _cgo_set_context_function = ref x_cgo_set_context_function;
+        private static var _cgo_set_context_function = _addr_x_cgo_set_context_function;
 
         // Calls a libc function to execute background work injected via libc
         // interceptors, such as processing pending signals under the thread

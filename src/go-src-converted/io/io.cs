@@ -10,7 +10,7 @@
 // Because these interfaces and primitives wrap lower-level operations with
 // various implementations, unless otherwise informed clients should not
 // assume they are safe for parallel execution.
-// package io -- go2cs converted at 2020 August 29 08:21:53 UTC
+// package io -- go2cs converted at 2020 October 08 01:30:43 UTC
 // import "io" ==> using io = go.io_package
 // Original source: C:\Go\src\io\io.go
 using errors = go.errors_package;
@@ -21,9 +21,9 @@ namespace go
     public static partial class io_package
     {
         // Seek whence values.
-        public static readonly long SeekStart = 0L; // seek relative to the origin of the file
-        public static readonly long SeekCurrent = 1L; // seek relative to the current offset
-        public static readonly long SeekEnd = 2L; // seek relative to the end
+        public static readonly long SeekStart = (long)0L; // seek relative to the origin of the file
+        public static readonly long SeekCurrent = (long)1L; // seek relative to the current offset
+        public static readonly long SeekEnd = (long)2L; // seek relative to the end
 
         // ErrShortWrite means that a write accepted fewer bytes than requested
         // but failed to return an explicit error.
@@ -237,6 +237,10 @@ namespace go
         // ReadByte reads and returns the next byte from the input or
         // any error encountered. If ReadByte returns an error, no input
         // byte was consumed, and the returned byte value is undefined.
+        //
+        // ReadByte provides an efficient interface for byte-at-time
+        // processing. A Reader that does not implement  ByteReader
+        // can be wrapped using bufio.NewReader to add this method.
         public partial interface ByteReader
         {
             (byte, error) ReadByte();
@@ -282,19 +286,22 @@ namespace go
             error UnreadRune();
         }
 
-        // stringWriter is the interface that wraps the WriteString method.
-        private partial interface stringWriter
+        // StringWriter is the interface that wraps the WriteString method.
+        public partial interface StringWriter
         {
             (long, error) WriteString(@string s);
         }
 
         // WriteString writes the contents of the string s to w, which accepts a slice of bytes.
-        // If w implements a WriteString method, it is invoked directly.
+        // If w implements StringWriter, its WriteString method is invoked directly.
         // Otherwise, w.Write is called exactly once.
         public static (long, error) WriteString(Writer w, @string s)
         {
+            long n = default;
+            error err = default!;
+
             {
-                stringWriter (sw, ok) = w._<stringWriter>();
+                StringWriter (sw, ok) = StringWriter.As(w._<StringWriter>())!;
 
                 if (ok)
                 {
@@ -302,7 +309,9 @@ namespace go
                 }
 
             }
+
             return w.Write((slice<byte>)s);
+
         }
 
         // ReadAtLeast reads from r into buf until it has read at least min bytes.
@@ -312,12 +321,17 @@ namespace go
         // ReadAtLeast returns ErrUnexpectedEOF.
         // If min is greater than the length of buf, ReadAtLeast returns ErrShortBuffer.
         // On return, n >= min if and only if err == nil.
+        // If r returns an error having read at least min bytes, the error is dropped.
         public static (long, error) ReadAtLeast(Reader r, slice<byte> buf, long min)
         {
+            long n = default;
+            error err = default!;
+
             if (len(buf) < min)
             {
-                return (0L, ErrShortBuffer);
+                return (0L, error.As(ErrShortBuffer)!);
             }
+
             while (n < min && err == null)
             {
                 long nn = default;
@@ -333,7 +347,9 @@ namespace go
             {
                 err = ErrUnexpectedEOF;
             }
-            return;
+
+            return ;
+
         }
 
         // ReadFull reads exactly len(buf) bytes from r into buf.
@@ -342,8 +358,12 @@ namespace go
         // If an EOF happens after reading some but not all the bytes,
         // ReadFull returns ErrUnexpectedEOF.
         // On return, n == len(buf) if and only if err == nil.
+        // If r returns an error having read at least len(buf) bytes, the error is dropped.
         public static (long, error) ReadFull(Reader r, slice<byte> buf)
         {
+            long n = default;
+            error err = default!;
+
             return ReadAtLeast(r, buf, len(buf));
         }
 
@@ -356,17 +376,24 @@ namespace go
         // the copy is implemented using it.
         public static (long, error) CopyN(Writer dst, Reader src, long n)
         {
+            long written = default;
+            error err = default!;
+
             written, err = Copy(dst, LimitReader(src, n));
             if (written == n)
             {
-                return (n, null);
+                return (n, error.As(null!)!);
             }
+
             if (written < n && err == null)
             { 
                 // src stopped early; must have been EOF.
                 err = EOF;
+
             }
-            return;
+
+            return ;
+
         }
 
         // Copy copies from src to dst until either EOF is reached
@@ -383,6 +410,9 @@ namespace go
         // the copy is implemented by calling dst.ReadFrom(src).
         public static (long, error) Copy(Writer dst, Reader src)
         {
+            long written = default;
+            error err = default!;
+
             return copyBuffer(dst, src, null);
         }
 
@@ -390,23 +420,34 @@ namespace go
         // provided buffer (if one is required) rather than allocating a
         // temporary one. If buf is nil, one is allocated; otherwise if it has
         // zero length, CopyBuffer panics.
+        //
+        // If either src implements WriterTo or dst implements ReaderFrom,
+        // buf will not be used to perform the copy.
         public static (long, error) CopyBuffer(Writer dst, Reader src, slice<byte> buf) => func((_, panic, __) =>
         {
+            long written = default;
+            error err = default!;
+
             if (buf != null && len(buf) == 0L)
             {
                 panic("empty buffer in io.CopyBuffer");
             }
+
             return copyBuffer(dst, src, buf);
+
         });
 
         // copyBuffer is the actual implementation of Copy and CopyBuffer.
         // if buf is nil, one is allocated.
         private static (long, error) copyBuffer(Writer dst, Reader src, slice<byte> buf)
-        { 
+        {
+            long written = default;
+            error err = default!;
+ 
             // If the reader has a WriteTo method, use it to do the copy.
             // Avoids an allocation and a copy.
             {
-                WriterTo (wt, ok) = src._<WriterTo>();
+                WriterTo (wt, ok) = WriterTo.As(src._<WriterTo>())!;
 
                 if (ok)
                 {
@@ -417,7 +458,7 @@ namespace go
             } 
             // Similarly, if the writer has a ReadFrom method, use it to do the copy.
             {
-                ReaderFrom (rt, ok) = dst._<ReaderFrom>();
+                ReaderFrom (rt, ok) = ReaderFrom.As(dst._<ReaderFrom>())!;
 
                 if (ok)
                 {
@@ -425,27 +466,32 @@ namespace go
                 }
 
             }
-            long size = 32L * 1024L;
-            {
-                ref LimitedReader (l, ok) = src._<ref LimitedReader>();
 
-                if (ok && int64(size) > l.N)
-                {
-                    if (l.N < 1L)
-                    {
-                        size = 1L;
-                    }
-                    else
-                    {
-                        size = int(l.N);
-                    }
-                }
-
-            }
             if (buf == null)
             {
+                long size = 32L * 1024L;
+                {
+                    ptr<LimitedReader> (l, ok) = src._<ptr<LimitedReader>>();
+
+                    if (ok && int64(size) > l.N)
+                    {
+                        if (l.N < 1L)
+                        {
+                            size = 1L;
+                        }
+                        else
+                        {
+                            size = int(l.N);
+                        }
+
+                    }
+
+                }
+
                 buf = make_slice<byte>(size);
+
             }
+
             while (true)
             {
                 var (nr, er) = src.Read(buf);
@@ -456,28 +502,36 @@ namespace go
                     {
                         written += int64(nw);
                     }
+
                     if (ew != null)
                     {
                         err = ew;
                         break;
                     }
+
                     if (nr != nw)
                     {
                         err = ErrShortWrite;
                         break;
                     }
+
                 }
+
                 if (er != null)
                 {
                     if (er != EOF)
                     {
                         err = er;
                     }
+
                     break;
+
                 }
+
             }
 
-            return (written, err);
+            return (written, error.As(err)!);
+
         }
 
         // LimitReader returns a Reader that reads from r
@@ -485,7 +539,7 @@ namespace go
         // The underlying implementation is a *LimitedReader.
         public static Reader LimitReader(Reader r, long n)
         {
-            return ref new LimitedReader(r,n);
+            return addr(new LimitedReader(r,n));
         }
 
         // A LimitedReader reads from R but limits the amount of
@@ -498,26 +552,33 @@ namespace go
             public long N; // max bytes remaining
         }
 
-        private static (long, error) Read(this ref LimitedReader l, slice<byte> p)
+        private static (long, error) Read(this ptr<LimitedReader> _addr_l, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref LimitedReader l = ref _addr_l.val;
+
             if (l.N <= 0L)
             {
-                return (0L, EOF);
+                return (0L, error.As(EOF)!);
             }
+
             if (int64(len(p)) > l.N)
             {
                 p = p[0L..l.N];
             }
+
             n, err = l.R.Read(p);
             l.N -= int64(n);
-            return;
+            return ;
+
         }
 
         // NewSectionReader returns a SectionReader that reads from r
         // starting at offset off and stops with EOF after n bytes.
-        public static ref SectionReader NewSectionReader(ReaderAt r, long off, long n)
+        public static ptr<SectionReader> NewSectionReader(ReaderAt r, long off, long n)
         {
-            return ref new SectionReader(r,off,off,off+n);
+            return addr(new SectionReader(r,off,off,off+n));
         }
 
         // SectionReader implements Read, Seek, and ReadAt on a section
@@ -530,12 +591,17 @@ namespace go
             public long limit;
         }
 
-        private static (long, error) Read(this ref SectionReader s, slice<byte> p)
+        private static (long, error) Read(this ptr<SectionReader> _addr_s, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref SectionReader s = ref _addr_s.val;
+
             if (s.off >= s.limit)
             {
-                return (0L, EOF);
+                return (0L, error.As(EOF)!);
             }
+
             {
                 var max = s.limit - s.off;
 
@@ -545,16 +611,22 @@ namespace go
                 }
 
             }
+
             n, err = s.r.ReadAt(p, s.off);
             s.off += int64(n);
-            return;
+            return ;
+
         }
 
         private static var errWhence = errors.New("Seek: invalid whence");
         private static var errOffset = errors.New("Seek: invalid offset");
 
-        private static (long, error) Seek(this ref SectionReader s, long offset, long whence)
+        private static (long, error) Seek(this ptr<SectionReader> _addr_s, long offset, long whence)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref SectionReader s = ref _addr_s.val;
+
 
             if (whence == SeekStart) 
                 offset += s.@base;
@@ -563,21 +635,28 @@ namespace go
             else if (whence == SeekEnd) 
                 offset += s.limit;
             else 
-                return (0L, errWhence);
+                return (0L, error.As(errWhence)!);
                         if (offset < s.@base)
             {
-                return (0L, errOffset);
+                return (0L, error.As(errOffset)!);
             }
+
             s.off = offset;
-            return (offset - s.@base, null);
+            return (offset - s.@base, error.As(null!)!);
+
         }
 
-        private static (long, error) ReadAt(this ref SectionReader s, slice<byte> p, long off)
+        private static (long, error) ReadAt(this ptr<SectionReader> _addr_s, slice<byte> p, long off)
         {
+            long n = default;
+            error err = default!;
+            ref SectionReader s = ref _addr_s.val;
+
             if (off < 0L || off >= s.limit - s.@base)
             {
-                return (0L, EOF);
+                return (0L, error.As(EOF)!);
             }
+
             off += s.@base;
             {
                 var max = s.limit - off;
@@ -590,16 +669,22 @@ namespace go
                     {
                         err = EOF;
                     }
-                    return (n, err);
+
+                    return (n, error.As(err)!);
+
                 }
 
             }
+
             return s.r.ReadAt(p, off);
+
         }
 
         // Size returns the size of the section in bytes.
-        private static long Size(this ref SectionReader s)
+        private static long Size(this ptr<SectionReader> _addr_s)
         {
+            ref SectionReader s = ref _addr_s.val;
+
             return s.limit - s.@base;
         }
 
@@ -610,7 +695,7 @@ namespace go
         // Any error encountered while writing is reported as a read error.
         public static Reader TeeReader(Reader r, Writer w)
         {
-            return ref new teeReader(r,w);
+            return addr(new teeReader(r,w));
         }
 
         private partial struct teeReader
@@ -619,8 +704,12 @@ namespace go
             public Writer w;
         }
 
-        private static (long, error) Read(this ref teeReader t, slice<byte> p)
+        private static (long, error) Read(this ptr<teeReader> _addr_t, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref teeReader t = ref _addr_t.val;
+
             n, err = t.r.Read(p);
             if (n > 0L)
             {
@@ -629,12 +718,15 @@ namespace go
 
                     if (err != null)
                     {
-                        return (n, err);
+                        return (n, error.As(err)!);
                     }
 
                 }
+
             }
-            return;
+
+            return ;
+
         }
     }
 }

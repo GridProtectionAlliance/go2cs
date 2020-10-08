@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:30 UTC
+//     Generated on 2020 October 08 03:36:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
 using des = go.crypto.des_package;
@@ -22,8 +23,9 @@ using rc4 = go.crypto.rc4_package;
 using sha1 = go.crypto.sha1_package;
 using sha256 = go.crypto.sha256_package;
 using x509 = go.crypto.x509_package;
+using fmt = go.fmt_package;
 using hash = go.hash_package;
-using chacha20poly1305 = go.golang_org.x.crypto.chacha20poly1305_package;
+using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -59,7 +61,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,10 +75,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate long explicitNonceLenByRef(ref T value);
+            private delegate long explicitNonceLenByPtr(ptr<T> value);
             private delegate long explicitNonceLenByVal(T value);
 
-            private static readonly explicitNonceLenByRef s_explicitNonceLenByRef;
+            private static readonly explicitNonceLenByPtr s_explicitNonceLenByPtr;
             private static readonly explicitNonceLenByVal s_explicitNonceLenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,17 +87,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_explicitNonceLenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_explicitNonceLenByPtr is null || !m_target_is_ptr)
                     return s_explicitNonceLenByVal!(target);
 
-                return s_explicitNonceLenByRef(ref target);
+                return s_explicitNonceLenByPtr(m_target_ptr);
             }
 
-            private delegate (slice<byte>, error) NonceSizeByRef(ref T value);
+            private delegate (slice<byte>, error) NonceSizeByPtr(ptr<T> value);
             private delegate (slice<byte>, error) NonceSizeByVal(T value);
 
-            private static readonly NonceSizeByRef s_NonceSizeByRef;
+            private static readonly NonceSizeByPtr s_NonceSizeByPtr;
             private static readonly NonceSizeByVal s_NonceSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,17 +107,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NonceSizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NonceSizeByPtr is null || !m_target_is_ptr)
                     return s_NonceSizeByVal!(target);
 
-                return s_NonceSizeByRef(ref target);
+                return s_NonceSizeByPtr(m_target_ptr);
             }
 
-            private delegate (slice<byte>, error) OverheadByRef(ref T value);
+            private delegate (slice<byte>, error) OverheadByPtr(ptr<T> value);
             private delegate (slice<byte>, error) OverheadByVal(T value);
 
-            private static readonly OverheadByRef s_OverheadByRef;
+            private static readonly OverheadByPtr s_OverheadByPtr;
             private static readonly OverheadByVal s_OverheadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,17 +127,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OverheadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OverheadByPtr is null || !m_target_is_ptr)
                     return s_OverheadByVal!(target);
 
-                return s_OverheadByRef(ref target);
+                return s_OverheadByPtr(m_target_ptr);
             }
 
-            private delegate (slice<byte>, error) SealByRef(ref T value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
+            private delegate (slice<byte>, error) SealByPtr(ptr<T> value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
             private delegate (slice<byte>, error) SealByVal(T value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
 
-            private static readonly SealByRef s_SealByRef;
+            private static readonly SealByPtr s_SealByPtr;
             private static readonly SealByVal s_SealByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,17 +147,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SealByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SealByPtr is null || !m_target_is_ptr)
                     return s_SealByVal!(target, dst, nonce, plaintext, additionalData);
 
-                return s_SealByRef(ref target, dst, nonce, plaintext, additionalData);
+                return s_SealByPtr(m_target_ptr, dst, nonce, plaintext, additionalData);
             }
 
-            private delegate (slice<byte>, error) OpenByRef(ref T value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
+            private delegate (slice<byte>, error) OpenByPtr(ptr<T> value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
             private delegate (slice<byte>, error) OpenByVal(T value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
 
-            private static readonly OpenByRef s_OpenByRef;
+            private static readonly OpenByPtr s_OpenByPtr;
             private static readonly OpenByVal s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,11 +167,12 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OpenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OpenByPtr is null || !m_target_is_ptr)
                     return s_OpenByVal!(target, dst, nonce, ciphertext, additionalData);
 
-                return s_OpenByRef(ref target, dst, nonce, ciphertext, additionalData);
+                return s_OpenByPtr(m_target_ptr, dst, nonce, ciphertext, additionalData);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -174,87 +181,72 @@ namespace crypto
             static aead()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("explicitNonceLen");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("explicitNonceLen");
 
                 if (!(extensionMethod is null))
-                    s_explicitNonceLenByRef = extensionMethod.CreateStaticDelegate(typeof(explicitNonceLenByRef)) as explicitNonceLenByRef;
+                    s_explicitNonceLenByPtr = extensionMethod.CreateStaticDelegate(typeof(explicitNonceLenByPtr)) as explicitNonceLenByPtr;
 
-                if (s_explicitNonceLenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("explicitNonceLen");
+                extensionMethod = targetType.GetExtensionMethod("explicitNonceLen");
 
-                    if (!(extensionMethod is null))
-                        s_explicitNonceLenByVal = extensionMethod.CreateStaticDelegate(typeof(explicitNonceLenByVal)) as explicitNonceLenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_explicitNonceLenByVal = extensionMethod.CreateStaticDelegate(typeof(explicitNonceLenByVal)) as explicitNonceLenByVal;
 
-                if (s_explicitNonceLenByRef is null && s_explicitNonceLenByVal is null)
+                if (s_explicitNonceLenByPtr is null && s_explicitNonceLenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement aead.explicitNonceLen method", new Exception("explicitNonceLen"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NonceSize");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NonceSize");
 
                 if (!(extensionMethod is null))
-                    s_NonceSizeByRef = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByRef)) as NonceSizeByRef;
+                    s_NonceSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByPtr)) as NonceSizeByPtr;
 
-                if (s_NonceSizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NonceSize");
+                extensionMethod = targetType.GetExtensionMethod("NonceSize");
 
-                    if (!(extensionMethod is null))
-                        s_NonceSizeByVal = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByVal)) as NonceSizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NonceSizeByVal = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByVal)) as NonceSizeByVal;
 
-                if (s_NonceSizeByRef is null && s_NonceSizeByVal is null)
+                if (s_NonceSizeByPtr is null && s_NonceSizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement aead.NonceSize method", new Exception("NonceSize"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Overhead");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Overhead");
 
                 if (!(extensionMethod is null))
-                    s_OverheadByRef = extensionMethod.CreateStaticDelegate(typeof(OverheadByRef)) as OverheadByRef;
+                    s_OverheadByPtr = extensionMethod.CreateStaticDelegate(typeof(OverheadByPtr)) as OverheadByPtr;
 
-                if (s_OverheadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Overhead");
+                extensionMethod = targetType.GetExtensionMethod("Overhead");
 
-                    if (!(extensionMethod is null))
-                        s_OverheadByVal = extensionMethod.CreateStaticDelegate(typeof(OverheadByVal)) as OverheadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OverheadByVal = extensionMethod.CreateStaticDelegate(typeof(OverheadByVal)) as OverheadByVal;
 
-                if (s_OverheadByRef is null && s_OverheadByVal is null)
+                if (s_OverheadByPtr is null && s_OverheadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement aead.Overhead method", new Exception("Overhead"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Seal");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Seal");
 
                 if (!(extensionMethod is null))
-                    s_SealByRef = extensionMethod.CreateStaticDelegate(typeof(SealByRef)) as SealByRef;
+                    s_SealByPtr = extensionMethod.CreateStaticDelegate(typeof(SealByPtr)) as SealByPtr;
 
-                if (s_SealByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Seal");
+                extensionMethod = targetType.GetExtensionMethod("Seal");
 
-                    if (!(extensionMethod is null))
-                        s_SealByVal = extensionMethod.CreateStaticDelegate(typeof(SealByVal)) as SealByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SealByVal = extensionMethod.CreateStaticDelegate(typeof(SealByVal)) as SealByVal;
 
-                if (s_SealByRef is null && s_SealByVal is null)
+                if (s_SealByPtr is null && s_SealByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement aead.Seal method", new Exception("Seal"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Open");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
                 if (!(extensionMethod is null))
-                    s_OpenByRef = extensionMethod.CreateStaticDelegate(typeof(OpenByRef)) as OpenByRef;
+                    s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
-                if (s_OpenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Open");
+                extensionMethod = targetType.GetExtensionMethod("Open");
 
-                    if (!(extensionMethod is null))
-                        s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
-                if (s_OpenByRef is null && s_OpenByVal is null)
+                if (s_OpenByPtr is null && s_OpenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement aead.Open method", new Exception("Open"));
             }
 

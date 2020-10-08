@@ -2,18 +2,110 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2020 August 29 08:31:25 UTC
+// package tls -- go2cs converted at 2020 October 08 03:38:08 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Go\src\crypto\tls\handshake_messages.go
-using bytes = go.bytes_package;
+using fmt = go.fmt_package;
 using strings = go.strings_package;
+
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace crypto
 {
     public static partial class tls_package
     {
+        // The marshalingFunction type is an adapter to allow the use of ordinary
+        // functions as cryptobyte.MarshalingValue.
+        public delegate  error marshalingFunction(ptr<cryptobyte.Builder>);
+
+        private static error Marshal(this marshalingFunction f, ptr<cryptobyte.Builder> _addr_b)
+        {
+            ref cryptobyte.Builder b = ref _addr_b.val;
+
+            return error.As(f(b))!;
+        }
+
+        // addBytesWithLength appends a sequence of bytes to the cryptobyte.Builder. If
+        // the length of the sequence is not the value specified, it produces an error.
+        private static void addBytesWithLength(ptr<cryptobyte.Builder> _addr_b, slice<byte> v, long n)
+        {
+            ref cryptobyte.Builder b = ref _addr_b.val;
+
+            b.AddValue(marshalingFunction(b =>
+            {
+                if (len(v) != n)
+                {
+                    return fmt.Errorf("invalid value length: expected %d, got %d", n, len(v));
+                }
+
+                b.AddBytes(v);
+                return null;
+
+            }));
+
+        }
+
+        // addUint64 appends a big-endian, 64-bit value to the cryptobyte.Builder.
+        private static void addUint64(ptr<cryptobyte.Builder> _addr_b, ulong v)
+        {
+            ref cryptobyte.Builder b = ref _addr_b.val;
+
+            b.AddUint32(uint32(v >> (int)(32L)));
+            b.AddUint32(uint32(v));
+        }
+
+        // readUint64 decodes a big-endian, 64-bit value into out and advances over it.
+        // It reports whether the read was successful.
+        private static bool readUint64(ptr<cryptobyte.String> _addr_s, ptr<ulong> _addr_@out)
+        {
+            ref cryptobyte.String s = ref _addr_s.val;
+            ref ulong @out = ref _addr_@out.val;
+
+            ref uint hi = ref heap(out ptr<uint> _addr_hi);            ref uint lo = ref heap(out ptr<uint> _addr_lo);
+
+            if (!s.ReadUint32(_addr_hi) || !s.ReadUint32(_addr_lo))
+            {
+                return false;
+            }
+
+            out.val = uint64(hi) << (int)(32L) | uint64(lo);
+            return true;
+
+        }
+
+        // readUint8LengthPrefixed acts like s.ReadUint8LengthPrefixed, but targets a
+        // []byte instead of a cryptobyte.String.
+        private static bool readUint8LengthPrefixed(ptr<cryptobyte.String> _addr_s, ptr<slice<byte>> _addr_@out)
+        {
+            ref cryptobyte.String s = ref _addr_s.val;
+            ref slice<byte> @out = ref _addr_@out.val;
+
+            return s.ReadUint8LengthPrefixed((cryptobyte.String.val)(out));
+        }
+
+        // readUint16LengthPrefixed acts like s.ReadUint16LengthPrefixed, but targets a
+        // []byte instead of a cryptobyte.String.
+        private static bool readUint16LengthPrefixed(ptr<cryptobyte.String> _addr_s, ptr<slice<byte>> _addr_@out)
+        {
+            ref cryptobyte.String s = ref _addr_s.val;
+            ref slice<byte> @out = ref _addr_@out.val;
+
+            return s.ReadUint16LengthPrefixed((cryptobyte.String.val)(out));
+        }
+
+        // readUint24LengthPrefixed acts like s.ReadUint24LengthPrefixed, but targets a
+        // []byte instead of a cryptobyte.String.
+        private static bool readUint24LengthPrefixed(ptr<cryptobyte.String> _addr_s, ptr<slice<byte>> _addr_@out)
+        {
+            ref cryptobyte.String s = ref _addr_s.val;
+            ref slice<byte> @out = ref _addr_@out.val;
+
+            return s.ReadUint24LengthPrefixed((cryptobyte.String.val)(out));
+        }
+
         private partial struct clientHelloMsg
         {
             public slice<byte> raw;
@@ -22,582 +114,757 @@ namespace crypto
             public slice<byte> sessionId;
             public slice<ushort> cipherSuites;
             public slice<byte> compressionMethods;
-            public bool nextProtoNeg;
             public @string serverName;
             public bool ocspStapling;
-            public bool scts;
             public slice<CurveID> supportedCurves;
             public slice<byte> supportedPoints;
             public bool ticketSupported;
             public slice<byte> sessionTicket;
             public slice<SignatureScheme> supportedSignatureAlgorithms;
-            public slice<byte> secureRenegotiation;
+            public slice<SignatureScheme> supportedSignatureAlgorithmsCert;
             public bool secureRenegotiationSupported;
+            public slice<byte> secureRenegotiation;
             public slice<@string> alpnProtocols;
+            public bool scts;
+            public slice<ushort> supportedVersions;
+            public slice<byte> cookie;
+            public slice<keyShare> keyShares;
+            public bool earlyData;
+            public slice<byte> pskModes;
+            public slice<pskIdentity> pskIdentities;
+            public slice<slice<byte>> pskBinders;
         }
 
-        private static bool equal(this ref clientHelloMsg m, object i)
+        private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m)
         {
-            ref clientHelloMsg (m1, ok) = i._<ref clientHelloMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && m.vers == m1.vers && bytes.Equal(m.random, m1.random) && bytes.Equal(m.sessionId, m1.sessionId) && eqUint16s(m.cipherSuites, m1.cipherSuites) && bytes.Equal(m.compressionMethods, m1.compressionMethods) && m.nextProtoNeg == m1.nextProtoNeg && m.serverName == m1.serverName && m.ocspStapling == m1.ocspStapling && m.scts == m1.scts && eqCurveIDs(m.supportedCurves, m1.supportedCurves) && bytes.Equal(m.supportedPoints, m1.supportedPoints) && m.ticketSupported == m1.ticketSupported && bytes.Equal(m.sessionTicket, m1.sessionTicket) && eqSignatureAlgorithms(m.supportedSignatureAlgorithms, m1.supportedSignatureAlgorithms) && m.secureRenegotiationSupported == m1.secureRenegotiationSupported && bytes.Equal(m.secureRenegotiation, m1.secureRenegotiation) && eqStrings(m.alpnProtocols, m1.alpnProtocols);
-        }
+            ref clientHelloMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref clientHelloMsg _m) => func(_m, (ref clientHelloMsg m, Defer _, Panic panic, Recover __) =>
-        {
             if (m.raw != null)
             {
                 return m.raw;
             }
-            long length = 2L + 32L + 1L + len(m.sessionId) + 2L + len(m.cipherSuites) * 2L + 1L + len(m.compressionMethods);
-            long numExtensions = 0L;
-            long extensionsLength = 0L;
-            if (m.nextProtoNeg)
-            {
-                numExtensions++;
-            }
-            if (m.ocspStapling)
-            {
-                extensionsLength += 1L + 2L + 2L;
-                numExtensions++;
-            }
-            if (len(m.serverName) > 0L)
-            {
-                extensionsLength += 5L + len(m.serverName);
-                numExtensions++;
-            }
-            if (len(m.supportedCurves) > 0L)
-            {
-                extensionsLength += 2L + 2L * len(m.supportedCurves);
-                numExtensions++;
-            }
-            if (len(m.supportedPoints) > 0L)
-            {
-                extensionsLength += 1L + len(m.supportedPoints);
-                numExtensions++;
-            }
-            if (m.ticketSupported)
-            {
-                extensionsLength += len(m.sessionTicket);
-                numExtensions++;
-            }
-            if (len(m.supportedSignatureAlgorithms) > 0L)
-            {
-                extensionsLength += 2L + 2L * len(m.supportedSignatureAlgorithms);
-                numExtensions++;
-            }
-            if (m.secureRenegotiationSupported)
-            {
-                extensionsLength += 1L + len(m.secureRenegotiation);
-                numExtensions++;
-            }
-            if (len(m.alpnProtocols) > 0L)
-            {
-                extensionsLength += 2L;
-                {
-                    var s__prev1 = s;
 
-                    foreach (var (_, __s) in m.alpnProtocols)
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeClientHello);
+            b.AddUint24LengthPrefixed(b =>
+            {
+                b.AddUint16(m.vers);
+                addBytesWithLength(_addr_b, m.random, 32L);
+                b.AddUint8LengthPrefixed(b =>
+                {
+                    b.AddBytes(m.sessionId);
+                });
+                b.AddUint16LengthPrefixed(b =>
+                {
+                    foreach (var (_, suite) in m.cipherSuites)
                     {
-                        s = __s;
+                        b.AddUint16(suite);
+                    }
+
+                });
+                b.AddUint8LengthPrefixed(b =>
+                {
+                    b.AddBytes(m.compressionMethods);
+                }); 
+
+                // If extensions aren't present, omit them.
+                bool extensionsPresent = default;
+                var bWithoutExtensions = b.val;
+
+                b.AddUint16LengthPrefixed(b =>
+                {
+                    if (len(m.serverName) > 0L)
+                    { 
+                        // RFC 6066, Section 3
+                        b.AddUint16(extensionServerName);
+                        b.AddUint16LengthPrefixed(b =>
                         {
-                            var l__prev2 = l;
-
-                            var l = len(s);
-
-                            if (l == 0L || l > 255L)
+                            b.AddUint16LengthPrefixed(b =>
                             {
-                                panic("invalid ALPN protocol");
-                            }
+                                b.AddUint8(0L); // name_type = host_name
+                                b.AddUint16LengthPrefixed(b =>
+                                {
+                                    b.AddBytes((slice<byte>)m.serverName);
+                                });
 
-                            l = l__prev2;
+                            });
 
-                        }
-                        extensionsLength++;
-                        extensionsLength += len(s);
+                        });
+
                     }
 
-                    s = s__prev1;
+                    if (m.ocspStapling)
+                    { 
+                        // RFC 4366, Section 3.6
+                        b.AddUint16(extensionStatusRequest);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint8(1L); // status_type = ocsp
+                            b.AddUint16(0L); // empty responder_id_list
+                            b.AddUint16(0L); // empty request_extensions
+                        });
+
+                    }
+
+                    if (len(m.supportedCurves) > 0L)
+                    { 
+                        // RFC 4492, sections 5.1.1 and RFC 8446, Section 4.2.7
+                        b.AddUint16(extensionSupportedCurves);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                foreach (var (_, curve) in m.supportedCurves)
+                                {
+                                    b.AddUint16(uint16(curve));
+                                }
+
+                            });
+
+                        });
+
+                    }
+
+                    if (len(m.supportedPoints) > 0L)
+                    { 
+                        // RFC 4492, Section 5.1.2
+                        b.AddUint16(extensionSupportedPoints);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint8LengthPrefixed(b =>
+                            {
+                                b.AddBytes(m.supportedPoints);
+                            });
+
+                        });
+
+                    }
+
+                    if (m.ticketSupported)
+                    { 
+                        // RFC 5077, Section 3.2
+                        b.AddUint16(extensionSessionTicket);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddBytes(m.sessionTicket);
+                        });
+
+                    }
+
+                    if (len(m.supportedSignatureAlgorithms) > 0L)
+                    { 
+                        // RFC 5246, Section 7.4.1.4.1
+                        b.AddUint16(extensionSignatureAlgorithms);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                {
+                                    var sigAlgo__prev1 = sigAlgo;
+
+                                    foreach (var (_, __sigAlgo) in m.supportedSignatureAlgorithms)
+                                    {
+                                        sigAlgo = __sigAlgo;
+                                        b.AddUint16(uint16(sigAlgo));
+                                    }
+
+                                    sigAlgo = sigAlgo__prev1;
+                                }
+                            });
+
+                        });
+
+                    }
+
+                    if (len(m.supportedSignatureAlgorithmsCert) > 0L)
+                    { 
+                        // RFC 8446, Section 4.2.3
+                        b.AddUint16(extensionSignatureAlgorithmsCert);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                {
+                                    var sigAlgo__prev1 = sigAlgo;
+
+                                    foreach (var (_, __sigAlgo) in m.supportedSignatureAlgorithmsCert)
+                                    {
+                                        sigAlgo = __sigAlgo;
+                                        b.AddUint16(uint16(sigAlgo));
+                                    }
+
+                                    sigAlgo = sigAlgo__prev1;
+                                }
+                            });
+
+                        });
+
+                    }
+
+                    if (m.secureRenegotiationSupported)
+                    { 
+                        // RFC 5746, Section 3.2
+                        b.AddUint16(extensionRenegotiationInfo);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint8LengthPrefixed(b =>
+                            {
+                                b.AddBytes(m.secureRenegotiation);
+                            });
+
+                        });
+
+                    }
+
+                    if (len(m.alpnProtocols) > 0L)
+                    { 
+                        // RFC 7301, Section 3.1
+                        b.AddUint16(extensionALPN);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                foreach (var (_, proto) in m.alpnProtocols)
+                                {
+                                    b.AddUint8LengthPrefixed(b =>
+                                    {
+                                        b.AddBytes((slice<byte>)proto);
+                                    });
+
+                                }
+
+                            });
+
+                        });
+
+                    }
+
+                    if (m.scts)
+                    { 
+                        // RFC 6962, Section 3.3.1
+                        b.AddUint16(extensionSCT);
+                        b.AddUint16(0L); // empty extension_data
+                    }
+
+                    if (len(m.supportedVersions) > 0L)
+                    { 
+                        // RFC 8446, Section 4.2.1
+                        b.AddUint16(extensionSupportedVersions);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint8LengthPrefixed(b =>
+                            {
+                                foreach (var (_, vers) in m.supportedVersions)
+                                {
+                                    b.AddUint16(vers);
+                                }
+
+                            });
+
+                        });
+
+                    }
+
+                    if (len(m.cookie) > 0L)
+                    { 
+                        // RFC 8446, Section 4.2.2
+                        b.AddUint16(extensionCookie);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                b.AddBytes(m.cookie);
+                            });
+
+                        });
+
+                    }
+
+                    if (len(m.keyShares) > 0L)
+                    { 
+                        // RFC 8446, Section 4.2.8
+                        b.AddUint16(extensionKeyShare);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                foreach (var (_, ks) in m.keyShares)
+                                {
+                                    b.AddUint16(uint16(ks.group));
+                                    b.AddUint16LengthPrefixed(b =>
+                                    {
+                                        b.AddBytes(ks.data);
+                                    });
+
+                                }
+
+                            });
+
+                        });
+
+                    }
+
+                    if (m.earlyData)
+                    { 
+                        // RFC 8446, Section 4.2.10
+                        b.AddUint16(extensionEarlyData);
+                        b.AddUint16(0L); // empty extension_data
+                    }
+
+                    if (len(m.pskModes) > 0L)
+                    { 
+                        // RFC 8446, Section 4.2.9
+                        b.AddUint16(extensionPSKModes);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint8LengthPrefixed(b =>
+                            {
+                                b.AddBytes(m.pskModes);
+                            });
+
+                        });
+
+                    }
+
+                    if (len(m.pskIdentities) > 0L)
+                    { // pre_shared_key must be the last extension
+                        // RFC 8446, Section 4.2.11
+                        b.AddUint16(extensionPreSharedKey);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                foreach (var (_, psk) in m.pskIdentities)
+                                {
+                                    b.AddUint16LengthPrefixed(b =>
+                                    {
+                                        b.AddBytes(psk.label);
+                                    });
+                                    b.AddUint32(psk.obfuscatedTicketAge);
+
+                                }
+
+                            });
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                foreach (var (_, binder) in m.pskBinders)
+                                {
+                                    b.AddUint8LengthPrefixed(b =>
+                                    {
+                                        b.AddBytes(binder);
+                                    });
+
+                                }
+
+                            });
+
+                        });
+
+                    }
+
+                    extensionsPresent = len(b.BytesOrPanic()) > 2L;
+
+                });
+
+                if (!extensionsPresent)
+                {
+                    b.val = bWithoutExtensions;
                 }
 
-                numExtensions++;
-            }
-            if (m.scts)
-            {
-                numExtensions++;
-            }
-            if (numExtensions > 0L)
-            {
-                extensionsLength += 4L * numExtensions;
-                length += 2L + extensionsLength;
-            }
-            var x = make_slice<byte>(4L + length);
-            x[0L] = typeClientHello;
-            x[1L] = uint8(length >> (int)(16L));
-            x[2L] = uint8(length >> (int)(8L));
-            x[3L] = uint8(length);
-            x[4L] = uint8(m.vers >> (int)(8L));
-            x[5L] = uint8(m.vers);
-            copy(x[6L..38L], m.random);
-            x[38L] = uint8(len(m.sessionId));
-            copy(x[39L..39L + len(m.sessionId)], m.sessionId);
-            var y = x[39L + len(m.sessionId)..];
-            y[0L] = uint8(len(m.cipherSuites) >> (int)(7L));
-            y[1L] = uint8(len(m.cipherSuites) << (int)(1L));
-            foreach (var (i, suite) in m.cipherSuites)
-            {
-                y[2L + i * 2L] = uint8(suite >> (int)(8L));
-                y[3L + i * 2L] = uint8(suite);
-            }
-            var z = y[2L + len(m.cipherSuites) * 2L..];
-            z[0L] = uint8(len(m.compressionMethods));
-            copy(z[1L..], m.compressionMethods);
+            });
 
-            z = z[1L + len(m.compressionMethods)..];
-            if (numExtensions > 0L)
-            {
-                z[0L] = byte(extensionsLength >> (int)(8L));
-                z[1L] = byte(extensionsLength);
-                z = z[2L..];
-            }
-            if (m.nextProtoNeg)
-            {
-                z[0L] = byte(extensionNextProtoNeg >> (int)(8L));
-                z[1L] = byte(extensionNextProtoNeg & 0xffUL); 
-                // The length is always 0
-                z = z[4L..];
-            }
-            if (len(m.serverName) > 0L)
-            {
-                z[0L] = byte(extensionServerName >> (int)(8L));
-                z[1L] = byte(extensionServerName & 0xffUL);
-                l = len(m.serverName) + 5L;
-                z[2L] = byte(l >> (int)(8L));
-                z[3L] = byte(l);
-                z = z[4L..]; 
+            m.raw = b.BytesOrPanic();
+            return m.raw;
 
-                // RFC 3546, section 3.1
-                //
-                // struct {
-                //     NameType name_type;
-                //     select (name_type) {
-                //         case host_name: HostName;
-                //     } name;
-                // } ServerName;
-                //
-                // enum {
-                //     host_name(0), (255)
-                // } NameType;
-                //
-                // opaque HostName<1..2^16-1>;
-                //
-                // struct {
-                //     ServerName server_name_list<1..2^16-1>
-                // } ServerNameList;
+        }
 
-                z[0L] = byte((len(m.serverName) + 3L) >> (int)(8L));
-                z[1L] = byte(len(m.serverName) + 3L);
-                z[3L] = byte(len(m.serverName) >> (int)(8L));
-                z[4L] = byte(len(m.serverName));
-                copy(z[5L..], (slice<byte>)m.serverName);
-                z = z[l..];
+        // marshalWithoutBinders returns the ClientHello through the
+        // PreSharedKeyExtension.identities field, according to RFC 8446, Section
+        // 4.2.11.2. Note that m.pskBinders must be set to slices of the correct length.
+        private static slice<byte> marshalWithoutBinders(this ptr<clientHelloMsg> _addr_m)
+        {
+            ref clientHelloMsg m = ref _addr_m.val;
+
+            long bindersLen = 2L; // uint16 length prefix
+            foreach (var (_, binder) in m.pskBinders)
+            {
+                bindersLen += 1L; // uint8 length prefix
+                bindersLen += len(binder);
+
             }
-            if (m.ocspStapling)
-            { 
-                // RFC 4366, section 3.6
-                z[0L] = byte(extensionStatusRequest >> (int)(8L));
-                z[1L] = byte(extensionStatusRequest);
-                z[2L] = 0L;
-                z[3L] = 5L;
-                z[4L] = 1L; // OCSP type
-                // Two zero valued uint16s for the two lengths.
-                z = z[9L..];
+            var fullMessage = m.marshal();
+            return fullMessage[..len(fullMessage) - bindersLen];
+
+        }
+
+        // updateBinders updates the m.pskBinders field, if necessary updating the
+        // cached marshaled representation. The supplied binders must have the same
+        // length as the current m.pskBinders.
+        private static void updateBinders(this ptr<clientHelloMsg> _addr_m, slice<slice<byte>> pskBinders) => func((_, panic, __) =>
+        {
+            ref clientHelloMsg m = ref _addr_m.val;
+
+            if (len(pskBinders) != len(m.pskBinders))
+            {
+                panic("tls: internal error: pskBinders length mismatch");
             }
-            if (len(m.supportedCurves) > 0L)
-            { 
-                // http://tools.ietf.org/html/rfc4492#section-5.5.1
-                z[0L] = byte(extensionSupportedCurves >> (int)(8L));
-                z[1L] = byte(extensionSupportedCurves);
-                l = 2L + 2L * len(m.supportedCurves);
-                z[2L] = byte(l >> (int)(8L));
-                z[3L] = byte(l);
-                l -= 2L;
-                z[4L] = byte(l >> (int)(8L));
-                z[5L] = byte(l);
-                z = z[6L..];
-                foreach (var (_, curve) in m.supportedCurves)
+
+            foreach (var (i) in m.pskBinders)
+            {
+                if (len(pskBinders[i]) != len(m.pskBinders[i]))
                 {
-                    z[0L] = byte(curve >> (int)(8L));
-                    z[1L] = byte(curve);
-                    z = z[2L..];
+                    panic("tls: internal error: pskBinders length mismatch");
                 }
-            }
-            if (len(m.supportedPoints) > 0L)
-            { 
-                // http://tools.ietf.org/html/rfc4492#section-5.5.2
-                z[0L] = byte(extensionSupportedPoints >> (int)(8L));
-                z[1L] = byte(extensionSupportedPoints);
-                l = 1L + len(m.supportedPoints);
-                z[2L] = byte(l >> (int)(8L));
-                z[3L] = byte(l);
-                l--;
-                z[4L] = byte(l);
-                z = z[5L..];
-                foreach (var (_, pointFormat) in m.supportedPoints)
-                {
-                    z[0L] = pointFormat;
-                    z = z[1L..];
-                }
-            }
-            if (m.ticketSupported)
-            { 
-                // http://tools.ietf.org/html/rfc5077#section-3.2
-                z[0L] = byte(extensionSessionTicket >> (int)(8L));
-                z[1L] = byte(extensionSessionTicket);
-                l = len(m.sessionTicket);
-                z[2L] = byte(l >> (int)(8L));
-                z[3L] = byte(l);
-                z = z[4L..];
-                copy(z, m.sessionTicket);
-                z = z[len(m.sessionTicket)..];
-            }
-            if (len(m.supportedSignatureAlgorithms) > 0L)
-            { 
-                // https://tools.ietf.org/html/rfc5246#section-7.4.1.4.1
-                z[0L] = byte(extensionSignatureAlgorithms >> (int)(8L));
-                z[1L] = byte(extensionSignatureAlgorithms);
-                l = 2L + 2L * len(m.supportedSignatureAlgorithms);
-                z[2L] = byte(l >> (int)(8L));
-                z[3L] = byte(l);
-                z = z[4L..];
 
-                l -= 2L;
-                z[0L] = byte(l >> (int)(8L));
-                z[1L] = byte(l);
-                z = z[2L..];
-                foreach (var (_, sigAlgo) in m.supportedSignatureAlgorithms)
-                {
-                    z[0L] = byte(sigAlgo >> (int)(8L));
-                    z[1L] = byte(sigAlgo);
-                    z = z[2L..];
-                }
             }
-            if (m.secureRenegotiationSupported)
+            m.pskBinders = pskBinders;
+            if (m.raw != null)
             {
-                z[0L] = byte(extensionRenegotiationInfo >> (int)(8L));
-                z[1L] = byte(extensionRenegotiationInfo & 0xffUL);
-                z[2L] = 0L;
-                z[3L] = byte(len(m.secureRenegotiation) + 1L);
-                z[4L] = byte(len(m.secureRenegotiation));
-                z = z[5L..];
-                copy(z, m.secureRenegotiation);
-                z = z[len(m.secureRenegotiation)..];
-            }
-            if (len(m.alpnProtocols) > 0L)
-            {
-                z[0L] = byte(extensionALPN >> (int)(8L));
-                z[1L] = byte(extensionALPN & 0xffUL);
-                var lengths = z[2L..];
-                z = z[6L..];
-
-                long stringsLength = 0L;
+                var lenWithoutBinders = len(m.marshalWithoutBinders()); 
+                // TODO(filippo): replace with NewFixedBuilder once CL 148882 is imported.
+                var b = cryptobyte.NewBuilder(m.raw[..lenWithoutBinders]);
+                b.AddUint16LengthPrefixed(b =>
                 {
-                    var s__prev1 = s;
-
-                    foreach (var (_, __s) in m.alpnProtocols)
+                    foreach (var (_, binder) in m.pskBinders)
                     {
-                        s = __s;
-                        l = len(s);
-                        z[0L] = byte(l);
-                        copy(z[1L..], s);
-                        z = z[1L + l..];
-                        stringsLength += 1L + l;
+                        b.AddUint8LengthPrefixed(b =>
+                        {
+                            b.AddBytes(binder);
+                        });
+
                     }
 
-                    s = s__prev1;
+                });
+                if (len(b.BytesOrPanic()) != len(m.raw))
+                {
+                    panic("tls: internal error: failed to update binders");
                 }
 
-                lengths[2L] = byte(stringsLength >> (int)(8L));
-                lengths[3L] = byte(stringsLength);
-                stringsLength += 2L;
-                lengths[0L] = byte(stringsLength >> (int)(8L));
-                lengths[1L] = byte(stringsLength);
             }
-            if (m.scts)
-            { 
-                // https://tools.ietf.org/html/rfc6962#section-3.3.1
-                z[0L] = byte(extensionSCT >> (int)(8L));
-                z[1L] = byte(extensionSCT); 
-                // zero uint16 for the zero-length extension_data
-                z = z[4L..];
-            }
-            m.raw = x;
 
-            return x;
         });
 
-        private static bool unmarshal(this ref clientHelloMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<clientHelloMsg> _addr_m, slice<byte> data)
         {
-            if (len(data) < 42L)
-            {
-                return false;
-            }
-            m.raw = data;
-            m.vers = uint16(data[4L]) << (int)(8L) | uint16(data[5L]);
-            m.random = data[6L..38L];
-            var sessionIdLen = int(data[38L]);
-            if (sessionIdLen > 32L || len(data) < 39L + sessionIdLen)
-            {
-                return false;
-            }
-            m.sessionId = data[39L..39L + sessionIdLen];
-            data = data[39L + sessionIdLen..];
-            if (len(data) < 2L)
-            {
-                return false;
-            } 
-            // cipherSuiteLen is the number of bytes of cipher suite numbers. Since
-            // they are uint16s, the number must be even.
-            var cipherSuiteLen = int(data[0L]) << (int)(8L) | int(data[1L]);
-            if (cipherSuiteLen % 2L == 1L || len(data) < 2L + cipherSuiteLen)
-            {
-                return false;
-            }
-            var numCipherSuites = cipherSuiteLen / 2L;
-            m.cipherSuites = make_slice<ushort>(numCipherSuites);
-            {
-                long i__prev1 = i;
+            ref clientHelloMsg m = ref _addr_m.val;
 
-                for (long i = 0L; i < numCipherSuites; i++)
+            m.val = new clientHelloMsg(raw:data);
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
+
+            if (!s.Skip(4L) || !s.ReadUint16(_addr_m.vers) || !s.ReadBytes(_addr_m.random, 32L) || !readUint8LengthPrefixed(_addr_s, _addr_m.sessionId))
+            {
+                return false;
+            }
+
+            ref cryptobyte.String cipherSuites = ref heap(out ptr<cryptobyte.String> _addr_cipherSuites);
+            if (!s.ReadUint16LengthPrefixed(_addr_cipherSuites))
+            {
+                return false;
+            }
+
+            m.cipherSuites = new slice<ushort>(new ushort[] {  });
+            m.secureRenegotiationSupported = false;
+            while (!cipherSuites.Empty())
+            {
+                ref ushort suite = ref heap(out ptr<ushort> _addr_suite);
+                if (!cipherSuites.ReadUint16(_addr_suite))
                 {
-                    m.cipherSuites[i] = uint16(data[2L + 2L * i]) << (int)(8L) | uint16(data[3L + 2L * i]);
-                    if (m.cipherSuites[i] == scsvRenegotiation)
-                    {
-                        m.secureRenegotiationSupported = true;
-                    }
+                    return false;
                 }
 
+                if (suite == scsvRenegotiation)
+                {
+                    m.secureRenegotiationSupported = true;
+                }
 
-                i = i__prev1;
+                m.cipherSuites = append(m.cipherSuites, suite);
+
             }
-            data = data[2L + cipherSuiteLen..];
-            if (len(data) < 1L)
+
+
+            if (!readUint8LengthPrefixed(_addr_s, _addr_m.compressionMethods))
             {
                 return false;
             }
-            var compressionMethodsLen = int(data[0L]);
-            if (len(data) < 1L + compressionMethodsLen)
-            {
-                return false;
-            }
-            m.compressionMethods = data[1L..1L + compressionMethodsLen];
 
-            data = data[1L + compressionMethodsLen..];
-
-            m.nextProtoNeg = false;
-            m.serverName = "";
-            m.ocspStapling = false;
-            m.ticketSupported = false;
-            m.sessionTicket = null;
-            m.supportedSignatureAlgorithms = null;
-            m.alpnProtocols = null;
-            m.scts = false;
-
-            if (len(data) == 0L)
+            if (s.Empty())
             { 
                 // ClientHello is optionally followed by extension data
                 return true;
+
             }
-            if (len(data) < 2L)
+
+            ref cryptobyte.String extensions = ref heap(out ptr<cryptobyte.String> _addr_extensions);
+            if (!s.ReadUint16LengthPrefixed(_addr_extensions) || !s.Empty())
             {
                 return false;
             }
-            var extensionsLength = int(data[0L]) << (int)(8L) | int(data[1L]);
-            data = data[2L..];
-            if (extensionsLength != len(data))
+
+            while (!extensions.Empty())
             {
-                return false;
-            }
-            while (len(data) != 0L)
-            {
-                if (len(data) < 4L)
+                ref ushort extension = ref heap(out ptr<ushort> _addr_extension);
+                ref cryptobyte.String extData = ref heap(out ptr<cryptobyte.String> _addr_extData);
+                if (!extensions.ReadUint16(_addr_extension) || !extensions.ReadUint16LengthPrefixed(_addr_extData))
                 {
                     return false;
                 }
-                var extension = uint16(data[0L]) << (int)(8L) | uint16(data[1L]);
-                var length = int(data[2L]) << (int)(8L) | int(data[3L]);
-                data = data[4L..];
-                if (len(data) < length)
-                {
-                    return false;
-                }
+
 
                 if (extension == extensionServerName) 
-                    var d = data[..length];
-                    if (len(d) < 2L)
+                    // RFC 6066, Section 3
+                    ref cryptobyte.String nameList = ref heap(out ptr<cryptobyte.String> _addr_nameList);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_nameList) || nameList.Empty())
                     {
                         return false;
                     }
-                    var namesLen = int(d[0L]) << (int)(8L) | int(d[1L]);
-                    d = d[2L..];
-                    if (len(d) != namesLen)
+
+                    while (!nameList.Empty())
                     {
-                        return false;
-                    }
-                    while (len(d) > 0L)
-                    {
-                        if (len(d) < 3L)
+                        ref byte nameType = ref heap(out ptr<byte> _addr_nameType);
+                        ref cryptobyte.String serverName = ref heap(out ptr<cryptobyte.String> _addr_serverName);
+                        if (!nameList.ReadUint8(_addr_nameType) || !nameList.ReadUint16LengthPrefixed(_addr_serverName) || serverName.Empty())
                         {
                             return false;
                         }
-                        var nameType = d[0L];
-                        var nameLen = int(d[1L]) << (int)(8L) | int(d[2L]);
-                        d = d[3L..];
-                        if (len(d) < nameLen)
+
+                        if (nameType != 0L)
+                        {
+                            continue;
+                        }
+
+                        if (len(m.serverName) != 0L)
+                        { 
+                            // Multiple names of the same name_type are prohibited.
+                            return false;
+
+                        }
+
+                        m.serverName = string(serverName); 
+                        // An SNI value may not include a trailing dot.
+                        if (strings.HasSuffix(m.serverName, "."))
                         {
                             return false;
                         }
-                        if (nameType == 0L)
-                        {
-                            m.serverName = string(d[..nameLen]); 
-                            // An SNI value may not include a
-                            // trailing dot. See
-                            // https://tools.ietf.org/html/rfc6066#section-3.
-                            if (strings.HasSuffix(m.serverName, "."))
-                            {
-                                return false;
-                            }
-                            break;
-                        }
-                        d = d[nameLen..];
+
                     }
-                else if (extension == extensionNextProtoNeg) 
-                    if (length > 0L)
-                    {
-                        return false;
-                    }
-                    m.nextProtoNeg = true;
                 else if (extension == extensionStatusRequest) 
-                    m.ocspStapling = length > 0L && data[0L] == statusTypeOCSP;
-                else if (extension == extensionSupportedCurves) 
-                    // http://tools.ietf.org/html/rfc4492#section-5.5.1
-                    if (length < 2L)
+                    // RFC 4366, Section 3.6
+                    ref byte statusType = ref heap(out ptr<byte> _addr_statusType);
+                    ref cryptobyte.String ignored = ref heap(out ptr<cryptobyte.String> _addr_ignored);
+                    if (!extData.ReadUint8(_addr_statusType) || !extData.ReadUint16LengthPrefixed(_addr_ignored) || !extData.ReadUint16LengthPrefixed(_addr_ignored))
                     {
                         return false;
                     }
-                    var l = int(data[0L]) << (int)(8L) | int(data[1L]);
-                    if (l % 2L == 1L || length != l + 2L)
-                    {
-                        return false;
-                    }
-                    var numCurves = l / 2L;
-                    m.supportedCurves = make_slice<CurveID>(numCurves);
-                    d = data[2L..];
-                    {
-                        long i__prev2 = i;
 
-                        for (i = 0L; i < numCurves; i++)
+                    m.ocspStapling = statusType == statusTypeOCSP;
+                else if (extension == extensionSupportedCurves) 
+                    // RFC 4492, sections 5.1.1 and RFC 8446, Section 4.2.7
+                    ref cryptobyte.String curves = ref heap(out ptr<cryptobyte.String> _addr_curves);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_curves) || curves.Empty())
+                    {
+                        return false;
+                    }
+
+                    while (!curves.Empty())
+                    {
+                        ref ushort curve = ref heap(out ptr<ushort> _addr_curve);
+                        if (!curves.ReadUint16(_addr_curve))
                         {
-                            m.supportedCurves[i] = CurveID(d[0L]) << (int)(8L) | CurveID(d[1L]);
-                            d = d[2L..];
+                            return false;
                         }
 
+                        m.supportedCurves = append(m.supportedCurves, CurveID(curve));
 
-                        i = i__prev2;
                     }
                 else if (extension == extensionSupportedPoints) 
-                    // http://tools.ietf.org/html/rfc4492#section-5.5.2
-                    if (length < 1L)
+                    // RFC 4492, Section 5.1.2
+                    if (!readUint8LengthPrefixed(_addr_extData, _addr_m.supportedPoints) || len(m.supportedPoints) == 0L)
                     {
                         return false;
                     }
-                    l = int(data[0L]);
-                    if (length != l + 1L)
-                    {
-                        return false;
-                    }
-                    m.supportedPoints = make_slice<byte>(l);
-                    copy(m.supportedPoints, data[1L..]);
+
                 else if (extension == extensionSessionTicket) 
-                    // http://tools.ietf.org/html/rfc5077#section-3.2
+                    // RFC 5077, Section 3.2
                     m.ticketSupported = true;
-                    m.sessionTicket = data[..length];
+                    extData.ReadBytes(_addr_m.sessionTicket, len(extData));
                 else if (extension == extensionSignatureAlgorithms) 
-                    // https://tools.ietf.org/html/rfc5246#section-7.4.1.4.1
-                    if (length < 2L || length & 1L != 0L)
+                    // RFC 5246, Section 7.4.1.4.1
+                    ref cryptobyte.String sigAndAlgs = ref heap(out ptr<cryptobyte.String> _addr_sigAndAlgs);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_sigAndAlgs) || sigAndAlgs.Empty())
                     {
                         return false;
                     }
-                    l = int(data[0L]) << (int)(8L) | int(data[1L]);
-                    if (l != length - 2L)
-                    {
-                        return false;
-                    }
-                    var n = l / 2L;
-                    d = data[2L..];
-                    m.supportedSignatureAlgorithms = make_slice<SignatureScheme>(n);
-                    {
-                        long i__prev2 = i;
 
-                        foreach (var (__i) in m.supportedSignatureAlgorithms)
-                        {
-                            i = __i;
-                            m.supportedSignatureAlgorithms[i] = SignatureScheme(d[0L]) << (int)(8L) | SignatureScheme(d[1L]);
-                            d = d[2L..];
-                        }
-
-                        i = i__prev2;
-                    }
-                else if (extension == extensionRenegotiationInfo) 
-                    if (length == 0L)
+                    while (!sigAndAlgs.Empty())
                     {
-                        return false;
-                    }
-                    d = data[..length];
-                    l = int(d[0L]);
-                    d = d[1L..];
-                    if (l != len(d))
-                    {
-                        return false;
-                    }
-                    m.secureRenegotiation = d;
-                    m.secureRenegotiationSupported = true;
-                else if (extension == extensionALPN) 
-                    if (length < 2L)
-                    {
-                        return false;
-                    }
-                    l = int(data[0L]) << (int)(8L) | int(data[1L]);
-                    if (l != length - 2L)
-                    {
-                        return false;
-                    }
-                    d = data[2L..length];
-                    while (len(d) != 0L)
-                    {
-                        var stringLen = int(d[0L]);
-                        d = d[1L..];
-                        if (stringLen == 0L || stringLen > len(d))
+                        ref ushort sigAndAlg = ref heap(out ptr<ushort> _addr_sigAndAlg);
+                        if (!sigAndAlgs.ReadUint16(_addr_sigAndAlg))
                         {
                             return false;
                         }
-                        m.alpnProtocols = append(m.alpnProtocols, string(d[..stringLen]));
-                        d = d[stringLen..];
+
+                        m.supportedSignatureAlgorithms = append(m.supportedSignatureAlgorithms, SignatureScheme(sigAndAlg));
+
                     }
-                else if (extension == extensionSCT) 
-                    m.scts = true;
-                    if (length != 0L)
+                else if (extension == extensionSignatureAlgorithmsCert) 
+                    // RFC 8446, Section 4.2.3
+                    sigAndAlgs = default;
+                    if (!extData.ReadUint16LengthPrefixed(_addr_sigAndAlgs) || sigAndAlgs.Empty())
                     {
                         return false;
                     }
-                                data = data[length..];
+
+                    while (!sigAndAlgs.Empty())
+                    {
+                        sigAndAlg = default;
+                        if (!sigAndAlgs.ReadUint16(_addr_sigAndAlg))
+                        {
+                            return false;
+                        }
+
+                        m.supportedSignatureAlgorithmsCert = append(m.supportedSignatureAlgorithmsCert, SignatureScheme(sigAndAlg));
+
+                    }
+                else if (extension == extensionRenegotiationInfo) 
+                    // RFC 5746, Section 3.2
+                    if (!readUint8LengthPrefixed(_addr_extData, _addr_m.secureRenegotiation))
+                    {
+                        return false;
+                    }
+
+                    m.secureRenegotiationSupported = true;
+                else if (extension == extensionALPN) 
+                    // RFC 7301, Section 3.1
+                    ref cryptobyte.String protoList = ref heap(out ptr<cryptobyte.String> _addr_protoList);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_protoList) || protoList.Empty())
+                    {
+                        return false;
+                    }
+
+                    while (!protoList.Empty())
+                    {
+                        ref cryptobyte.String proto = ref heap(out ptr<cryptobyte.String> _addr_proto);
+                        if (!protoList.ReadUint8LengthPrefixed(_addr_proto) || proto.Empty())
+                        {
+                            return false;
+                        }
+
+                        m.alpnProtocols = append(m.alpnProtocols, string(proto));
+
+                    }
+                else if (extension == extensionSCT) 
+                    // RFC 6962, Section 3.3.1
+                    m.scts = true;
+                else if (extension == extensionSupportedVersions) 
+                    // RFC 8446, Section 4.2.1
+                    ref cryptobyte.String versList = ref heap(out ptr<cryptobyte.String> _addr_versList);
+                    if (!extData.ReadUint8LengthPrefixed(_addr_versList) || versList.Empty())
+                    {
+                        return false;
+                    }
+
+                    while (!versList.Empty())
+                    {
+                        ref ushort vers = ref heap(out ptr<ushort> _addr_vers);
+                        if (!versList.ReadUint16(_addr_vers))
+                        {
+                            return false;
+                        }
+
+                        m.supportedVersions = append(m.supportedVersions, vers);
+
+                    }
+                else if (extension == extensionCookie) 
+                    // RFC 8446, Section 4.2.2
+                    if (!readUint16LengthPrefixed(_addr_extData, _addr_m.cookie) || len(m.cookie) == 0L)
+                    {
+                        return false;
+                    }
+
+                else if (extension == extensionKeyShare) 
+                    // RFC 8446, Section 4.2.8
+                    ref cryptobyte.String clientShares = ref heap(out ptr<cryptobyte.String> _addr_clientShares);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_clientShares))
+                    {
+                        return false;
+                    }
+
+                    while (!clientShares.Empty())
+                    {
+                        keyShare ks = default;
+                        if (!clientShares.ReadUint16((uint16.val)(_addr_ks.group)) || !readUint16LengthPrefixed(_addr_clientShares, _addr_ks.data) || len(ks.data) == 0L)
+                        {
+                            return false;
+                        }
+
+                        m.keyShares = append(m.keyShares, ks);
+
+                    }
+                else if (extension == extensionEarlyData) 
+                    // RFC 8446, Section 4.2.10
+                    m.earlyData = true;
+                else if (extension == extensionPSKModes) 
+                    // RFC 8446, Section 4.2.9
+                    if (!readUint8LengthPrefixed(_addr_extData, _addr_m.pskModes))
+                    {
+                        return false;
+                    }
+
+                else if (extension == extensionPreSharedKey) 
+                    // RFC 8446, Section 4.2.11
+                    if (!extensions.Empty())
+                    {
+                        return false; // pre_shared_key must be the last extension
+                    }
+
+                    ref cryptobyte.String identities = ref heap(out ptr<cryptobyte.String> _addr_identities);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_identities) || identities.Empty())
+                    {
+                        return false;
+                    }
+
+                    while (!identities.Empty())
+                    {
+                        pskIdentity psk = default;
+                        if (!readUint16LengthPrefixed(_addr_identities, _addr_psk.label) || !identities.ReadUint32(_addr_psk.obfuscatedTicketAge) || len(psk.label) == 0L)
+                        {
+                            return false;
+                        }
+
+                        m.pskIdentities = append(m.pskIdentities, psk);
+
+                    }
+
+                    ref cryptobyte.String binders = ref heap(out ptr<cryptobyte.String> _addr_binders);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_binders) || binders.Empty())
+                    {
+                        return false;
+                    }
+
+                    while (!binders.Empty())
+                    {
+                        ref slice<byte> binder = ref heap(out ptr<slice<byte>> _addr_binder);
+                        if (!readUint8LengthPrefixed(_addr_binders, _addr_binder) || len(binder) == 0L)
+                        {
+                            return false;
+                        }
+
+                        m.pskBinders = append(m.pskBinders, binder);
+
+                    }
+                else 
+                    // Ignore unknown extensions.
+                    continue;
+                                if (!extData.Empty())
+                {
+                    return false;
+                }
+
             }
 
 
             return true;
+
         }
 
         private partial struct serverHelloMsg
@@ -608,407 +875,846 @@ namespace crypto
             public slice<byte> sessionId;
             public ushort cipherSuite;
             public byte compressionMethod;
-            public bool nextProtoNeg;
-            public slice<@string> nextProtos;
             public bool ocspStapling;
-            public slice<slice<byte>> scts;
             public bool ticketSupported;
-            public slice<byte> secureRenegotiation;
             public bool secureRenegotiationSupported;
+            public slice<byte> secureRenegotiation;
             public @string alpnProtocol;
+            public slice<slice<byte>> scts;
+            public ushort supportedVersion;
+            public keyShare serverShare;
+            public bool selectedIdentityPresent;
+            public ushort selectedIdentity;
+            public slice<byte> supportedPoints; // HelloRetryRequest extensions
+            public slice<byte> cookie;
+            public CurveID selectedGroup;
         }
 
-        private static bool equal(this ref serverHelloMsg m, object i)
+        private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m)
         {
-            ref serverHelloMsg (m1, ok) = i._<ref serverHelloMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            if (len(m.scts) != len(m1.scts))
-            {
-                return false;
-            }
-            foreach (var (i, sct) in m.scts)
-            {
-                if (!bytes.Equal(sct, m1.scts[i]))
-                {
-                    return false;
-                }
-            }
-            return bytes.Equal(m.raw, m1.raw) && m.vers == m1.vers && bytes.Equal(m.random, m1.random) && bytes.Equal(m.sessionId, m1.sessionId) && m.cipherSuite == m1.cipherSuite && m.compressionMethod == m1.compressionMethod && m.nextProtoNeg == m1.nextProtoNeg && eqStrings(m.nextProtos, m1.nextProtos) && m.ocspStapling == m1.ocspStapling && m.ticketSupported == m1.ticketSupported && m.secureRenegotiationSupported == m1.secureRenegotiationSupported && bytes.Equal(m.secureRenegotiation, m1.secureRenegotiation) && m.alpnProtocol == m1.alpnProtocol;
-        }
+            ref serverHelloMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref serverHelloMsg _m) => func(_m, (ref serverHelloMsg m, Defer _, Panic panic, Recover __) =>
-        {
             if (m.raw != null)
             {
                 return m.raw;
             }
-            long length = 38L + len(m.sessionId);
-            long numExtensions = 0L;
-            long extensionsLength = 0L;
 
-            long nextProtoLen = 0L;
-            if (m.nextProtoNeg)
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeServerHello);
+            b.AddUint24LengthPrefixed(b =>
             {
-                numExtensions++;
+                b.AddUint16(m.vers);
+                addBytesWithLength(_addr_b, m.random, 32L);
+                b.AddUint8LengthPrefixed(b =>
                 {
-                    var v__prev1 = v;
+                    b.AddBytes(m.sessionId);
+                });
+                b.AddUint16(m.cipherSuite);
+                b.AddUint8(m.compressionMethod); 
 
-                    foreach (var (_, __v) in m.nextProtos)
+                // If extensions aren't present, omit them.
+                bool extensionsPresent = default;
+                var bWithoutExtensions = b.val;
+
+                b.AddUint16LengthPrefixed(b =>
+                {
+                    if (m.ocspStapling)
                     {
-                        v = __v;
-                        nextProtoLen += len(v);
+                        b.AddUint16(extensionStatusRequest);
+                        b.AddUint16(0L); // empty extension_data
                     }
 
-                    v = v__prev1;
-                }
-
-                nextProtoLen += len(m.nextProtos);
-                extensionsLength += nextProtoLen;
-            }
-            if (m.ocspStapling)
-            {
-                numExtensions++;
-            }
-            if (m.ticketSupported)
-            {
-                numExtensions++;
-            }
-            if (m.secureRenegotiationSupported)
-            {
-                extensionsLength += 1L + len(m.secureRenegotiation);
-                numExtensions++;
-            }
-            {
-                var alpnLen__prev1 = alpnLen;
-
-                var alpnLen = len(m.alpnProtocol);
-
-                if (alpnLen > 0L)
-                {
-                    if (alpnLen >= 256L)
+                    if (m.ticketSupported)
                     {
-                        panic("invalid ALPN protocol");
-                    }
-                    extensionsLength += 2L + 1L + alpnLen;
-                    numExtensions++;
-                }
-
-                alpnLen = alpnLen__prev1;
-
-            }
-            long sctLen = 0L;
-            if (len(m.scts) > 0L)
-            {
-                {
-                    var sct__prev1 = sct;
-
-                    foreach (var (_, __sct) in m.scts)
-                    {
-                        sct = __sct;
-                        sctLen += len(sct) + 2L;
+                        b.AddUint16(extensionSessionTicket);
+                        b.AddUint16(0L); // empty extension_data
                     }
 
-                    sct = sct__prev1;
-                }
-
-                extensionsLength += 2L + sctLen;
-                numExtensions++;
-            }
-            if (numExtensions > 0L)
-            {
-                extensionsLength += 4L * numExtensions;
-                length += 2L + extensionsLength;
-            }
-            var x = make_slice<byte>(4L + length);
-            x[0L] = typeServerHello;
-            x[1L] = uint8(length >> (int)(16L));
-            x[2L] = uint8(length >> (int)(8L));
-            x[3L] = uint8(length);
-            x[4L] = uint8(m.vers >> (int)(8L));
-            x[5L] = uint8(m.vers);
-            copy(x[6L..38L], m.random);
-            x[38L] = uint8(len(m.sessionId));
-            copy(x[39L..39L + len(m.sessionId)], m.sessionId);
-            var z = x[39L + len(m.sessionId)..];
-            z[0L] = uint8(m.cipherSuite >> (int)(8L));
-            z[1L] = uint8(m.cipherSuite);
-            z[2L] = m.compressionMethod;
-
-            z = z[3L..];
-            if (numExtensions > 0L)
-            {
-                z[0L] = byte(extensionsLength >> (int)(8L));
-                z[1L] = byte(extensionsLength);
-                z = z[2L..];
-            }
-            if (m.nextProtoNeg)
-            {
-                z[0L] = byte(extensionNextProtoNeg >> (int)(8L));
-                z[1L] = byte(extensionNextProtoNeg & 0xffUL);
-                z[2L] = byte(nextProtoLen >> (int)(8L));
-                z[3L] = byte(nextProtoLen);
-                z = z[4L..];
-
-                {
-                    var v__prev1 = v;
-
-                    foreach (var (_, __v) in m.nextProtos)
+                    if (m.secureRenegotiationSupported)
                     {
-                        v = __v;
-                        var l = len(v);
-                        if (l > 255L)
+                        b.AddUint16(extensionRenegotiationInfo);
+                        b.AddUint16LengthPrefixed(b =>
                         {
-                            l = 255L;
-                        }
-                        z[0L] = byte(l);
-                        copy(z[1L..], (slice<byte>)v[0L..l]);
-                        z = z[1L + l..];
+                            b.AddUint8LengthPrefixed(b =>
+                            {
+                                b.AddBytes(m.secureRenegotiation);
+                            });
+
+                        });
+
                     }
 
-                    v = v__prev1;
-                }
-
-            }
-            if (m.ocspStapling)
-            {
-                z[0L] = byte(extensionStatusRequest >> (int)(8L));
-                z[1L] = byte(extensionStatusRequest);
-                z = z[4L..];
-            }
-            if (m.ticketSupported)
-            {
-                z[0L] = byte(extensionSessionTicket >> (int)(8L));
-                z[1L] = byte(extensionSessionTicket);
-                z = z[4L..];
-            }
-            if (m.secureRenegotiationSupported)
-            {
-                z[0L] = byte(extensionRenegotiationInfo >> (int)(8L));
-                z[1L] = byte(extensionRenegotiationInfo & 0xffUL);
-                z[2L] = 0L;
-                z[3L] = byte(len(m.secureRenegotiation) + 1L);
-                z[4L] = byte(len(m.secureRenegotiation));
-                z = z[5L..];
-                copy(z, m.secureRenegotiation);
-                z = z[len(m.secureRenegotiation)..];
-            }
-            {
-                var alpnLen__prev1 = alpnLen;
-
-                alpnLen = len(m.alpnProtocol);
-
-                if (alpnLen > 0L)
-                {
-                    z[0L] = byte(extensionALPN >> (int)(8L));
-                    z[1L] = byte(extensionALPN & 0xffUL);
-                    l = 2L + 1L + alpnLen;
-                    z[2L] = byte(l >> (int)(8L));
-                    z[3L] = byte(l);
-                    l -= 2L;
-                    z[4L] = byte(l >> (int)(8L));
-                    z[5L] = byte(l);
-                    l -= 1L;
-                    z[6L] = byte(l);
-                    copy(z[7L..], (slice<byte>)m.alpnProtocol);
-                    z = z[7L + alpnLen..];
-                }
-
-                alpnLen = alpnLen__prev1;
-
-            }
-            if (sctLen > 0L)
-            {
-                z[0L] = byte(extensionSCT >> (int)(8L));
-                z[1L] = byte(extensionSCT);
-                l = sctLen + 2L;
-                z[2L] = byte(l >> (int)(8L));
-                z[3L] = byte(l);
-                z[4L] = byte(sctLen >> (int)(8L));
-                z[5L] = byte(sctLen);
-
-                z = z[6L..];
-                {
-                    var sct__prev1 = sct;
-
-                    foreach (var (_, __sct) in m.scts)
+                    if (len(m.alpnProtocol) > 0L)
                     {
-                        sct = __sct;
-                        z[0L] = byte(len(sct) >> (int)(8L));
-                        z[1L] = byte(len(sct));
-                        copy(z[2L..], sct);
-                        z = z[len(sct) + 2L..];
+                        b.AddUint16(extensionALPN);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                b.AddUint8LengthPrefixed(b =>
+                                {
+                                    b.AddBytes((slice<byte>)m.alpnProtocol);
+                                });
+
+                            });
+
+                        });
+
                     }
 
-                    sct = sct__prev1;
+                    if (len(m.scts) > 0L)
+                    {
+                        b.AddUint16(extensionSCT);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                foreach (var (_, sct) in m.scts)
+                                {
+                                    b.AddUint16LengthPrefixed(b =>
+                                    {
+                                        b.AddBytes(sct);
+                                    });
+
+                                }
+
+                            });
+
+                        });
+
+                    }
+
+                    if (m.supportedVersion != 0L)
+                    {
+                        b.AddUint16(extensionSupportedVersions);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16(m.supportedVersion);
+                        });
+
+                    }
+
+                    if (m.serverShare.group != 0L)
+                    {
+                        b.AddUint16(extensionKeyShare);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16(uint16(m.serverShare.group));
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                b.AddBytes(m.serverShare.data);
+                            });
+
+                        });
+
+                    }
+
+                    if (m.selectedIdentityPresent)
+                    {
+                        b.AddUint16(extensionPreSharedKey);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16(m.selectedIdentity);
+                        });
+
+                    }
+
+                    if (len(m.cookie) > 0L)
+                    {
+                        b.AddUint16(extensionCookie);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                b.AddBytes(m.cookie);
+                            });
+
+                        });
+
+                    }
+
+                    if (m.selectedGroup != 0L)
+                    {
+                        b.AddUint16(extensionKeyShare);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16(uint16(m.selectedGroup));
+                        });
+
+                    }
+
+                    if (len(m.supportedPoints) > 0L)
+                    {
+                        b.AddUint16(extensionSupportedPoints);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint8LengthPrefixed(b =>
+                            {
+                                b.AddBytes(m.supportedPoints);
+                            });
+
+                        });
+
+                    }
+
+                    extensionsPresent = len(b.BytesOrPanic()) > 2L;
+
+                });
+
+                if (!extensionsPresent)
+                {
+                    b.val = bWithoutExtensions;
                 }
 
-            }
-            m.raw = x;
+            });
 
-            return x;
-        });
+            m.raw = b.BytesOrPanic();
+            return m.raw;
 
-        private static bool unmarshal(this ref serverHelloMsg m, slice<byte> data)
+        }
+
+        private static bool unmarshal(this ptr<serverHelloMsg> _addr_m, slice<byte> data)
         {
-            if (len(data) < 42L)
-            {
-                return false;
-            }
-            m.raw = data;
-            m.vers = uint16(data[4L]) << (int)(8L) | uint16(data[5L]);
-            m.random = data[6L..38L];
-            var sessionIdLen = int(data[38L]);
-            if (sessionIdLen > 32L || len(data) < 39L + sessionIdLen)
-            {
-                return false;
-            }
-            m.sessionId = data[39L..39L + sessionIdLen];
-            data = data[39L + sessionIdLen..];
-            if (len(data) < 3L)
-            {
-                return false;
-            }
-            m.cipherSuite = uint16(data[0L]) << (int)(8L) | uint16(data[1L]);
-            m.compressionMethod = data[2L];
-            data = data[3L..];
+            ref serverHelloMsg m = ref _addr_m.val;
 
-            m.nextProtoNeg = false;
-            m.nextProtos = null;
-            m.ocspStapling = false;
-            m.scts = null;
-            m.ticketSupported = false;
-            m.alpnProtocol = "";
+            m.val = new serverHelloMsg(raw:data);
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
 
-            if (len(data) == 0L)
+            if (!s.Skip(4L) || !s.ReadUint16(_addr_m.vers) || !s.ReadBytes(_addr_m.random, 32L) || !readUint8LengthPrefixed(_addr_s, _addr_m.sessionId) || !s.ReadUint16(_addr_m.cipherSuite) || !s.ReadUint8(_addr_m.compressionMethod))
+            {
+                return false;
+            }
+
+            if (s.Empty())
             { 
                 // ServerHello is optionally followed by extension data
                 return true;
+
             }
-            if (len(data) < 2L)
+
+            ref cryptobyte.String extensions = ref heap(out ptr<cryptobyte.String> _addr_extensions);
+            if (!s.ReadUint16LengthPrefixed(_addr_extensions) || !s.Empty())
             {
                 return false;
             }
-            var extensionsLength = int(data[0L]) << (int)(8L) | int(data[1L]);
-            data = data[2L..];
-            if (len(data) != extensionsLength)
+
+            while (!extensions.Empty())
             {
-                return false;
-            }
-            while (len(data) != 0L)
-            {
-                if (len(data) < 4L)
-                {
-                    return false;
-                }
-                var extension = uint16(data[0L]) << (int)(8L) | uint16(data[1L]);
-                var length = int(data[2L]) << (int)(8L) | int(data[3L]);
-                data = data[4L..];
-                if (len(data) < length)
+                ref ushort extension = ref heap(out ptr<ushort> _addr_extension);
+                ref cryptobyte.String extData = ref heap(out ptr<cryptobyte.String> _addr_extData);
+                if (!extensions.ReadUint16(_addr_extension) || !extensions.ReadUint16LengthPrefixed(_addr_extData))
                 {
                     return false;
                 }
 
-                if (extension == extensionNextProtoNeg) 
-                    m.nextProtoNeg = true;
-                    var d = data[..length];
-                    while (len(d) > 0L)
-                    {
-                        var l = int(d[0L]);
-                        d = d[1L..];
-                        if (l == 0L || l > len(d))
-                        {
-                            return false;
-                        }
-                        m.nextProtos = append(m.nextProtos, string(d[..l]));
-                        d = d[l..];
-                    }
-                else if (extension == extensionStatusRequest) 
-                    if (length > 0L)
-                    {
-                        return false;
-                    }
+
+                if (extension == extensionStatusRequest) 
                     m.ocspStapling = true;
                 else if (extension == extensionSessionTicket) 
-                    if (length > 0L)
-                    {
-                        return false;
-                    }
                     m.ticketSupported = true;
                 else if (extension == extensionRenegotiationInfo) 
-                    if (length == 0L)
+                    if (!readUint8LengthPrefixed(_addr_extData, _addr_m.secureRenegotiation))
                     {
                         return false;
                     }
-                    d = data[..length];
-                    l = int(d[0L]);
-                    d = d[1L..];
-                    if (l != len(d))
-                    {
-                        return false;
-                    }
-                    m.secureRenegotiation = d;
+
                     m.secureRenegotiationSupported = true;
                 else if (extension == extensionALPN) 
-                    d = data[..length];
-                    if (len(d) < 3L)
+                    ref cryptobyte.String protoList = ref heap(out ptr<cryptobyte.String> _addr_protoList);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_protoList) || protoList.Empty())
                     {
                         return false;
                     }
-                    l = int(d[0L]) << (int)(8L) | int(d[1L]);
-                    if (l != len(d) - 2L)
-                    {
-                        return false;
-                    }
-                    d = d[2L..];
-                    l = int(d[0L]);
-                    if (l != len(d) - 1L)
-                    {
-                        return false;
-                    }
-                    d = d[1L..];
-                    if (len(d) == 0L)
-                    { 
-                        // ALPN protocols must not be empty.
-                        return false;
-                    }
-                    m.alpnProtocol = string(d);
-                else if (extension == extensionSCT) 
-                    d = data[..length];
 
-                    if (len(d) < 2L)
+                    ref cryptobyte.String proto = ref heap(out ptr<cryptobyte.String> _addr_proto);
+                    if (!protoList.ReadUint8LengthPrefixed(_addr_proto) || proto.Empty() || !protoList.Empty())
                     {
                         return false;
                     }
-                    l = int(d[0L]) << (int)(8L) | int(d[1L]);
-                    d = d[2L..];
-                    if (len(d) != l || l == 0L)
+
+                    m.alpnProtocol = string(proto);
+                else if (extension == extensionSCT) 
+                    ref cryptobyte.String sctList = ref heap(out ptr<cryptobyte.String> _addr_sctList);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_sctList) || sctList.Empty())
                     {
                         return false;
                     }
-                    m.scts = make_slice<slice<byte>>(0L, 3L);
-                    while (len(d) != 0L)
+
+                    while (!sctList.Empty())
                     {
-                        if (len(d) < 2L)
+                        ref slice<byte> sct = ref heap(out ptr<slice<byte>> _addr_sct);
+                        if (!readUint16LengthPrefixed(_addr_sctList, _addr_sct) || len(sct) == 0L)
                         {
                             return false;
                         }
-                        var sctLen = int(d[0L]) << (int)(8L) | int(d[1L]);
-                        d = d[2L..];
-                        if (sctLen == 0L || len(d) < sctLen)
-                        {
-                            return false;
-                        }
-                        m.scts = append(m.scts, d[..sctLen]);
-                        d = d[sctLen..];
+
+                        m.scts = append(m.scts, sct);
+
                     }
-                                data = data[length..];
+                else if (extension == extensionSupportedVersions) 
+                    if (!extData.ReadUint16(_addr_m.supportedVersion))
+                    {
+                        return false;
+                    }
+
+                else if (extension == extensionCookie) 
+                    if (!readUint16LengthPrefixed(_addr_extData, _addr_m.cookie) || len(m.cookie) == 0L)
+                    {
+                        return false;
+                    }
+
+                else if (extension == extensionKeyShare) 
+                    // This extension has different formats in SH and HRR, accept either
+                    // and let the handshake logic decide. See RFC 8446, Section 4.2.8.
+                    if (len(extData) == 2L)
+                    {
+                        if (!extData.ReadUint16((uint16.val)(_addr_m.selectedGroup)))
+                        {
+                            return false;
+                        }
+
+                    }
+                    else
+                    {
+                        if (!extData.ReadUint16((uint16.val)(_addr_m.serverShare.group)) || !readUint16LengthPrefixed(_addr_extData, _addr_m.serverShare.data))
+                        {
+                            return false;
+                        }
+
+                    }
+
+                else if (extension == extensionPreSharedKey) 
+                    m.selectedIdentityPresent = true;
+                    if (!extData.ReadUint16(_addr_m.selectedIdentity))
+                    {
+                        return false;
+                    }
+
+                else if (extension == extensionSupportedPoints) 
+                    // RFC 4492, Section 5.1.2
+                    if (!readUint8LengthPrefixed(_addr_extData, _addr_m.supportedPoints) || len(m.supportedPoints) == 0L)
+                    {
+                        return false;
+                    }
+
+                else 
+                    // Ignore unknown extensions.
+                    continue;
+                                if (!extData.Empty())
+                {
+                    return false;
+                }
+
             }
 
 
             return true;
+
+        }
+
+        private partial struct encryptedExtensionsMsg
+        {
+            public slice<byte> raw;
+            public @string alpnProtocol;
+        }
+
+        private static slice<byte> marshal(this ptr<encryptedExtensionsMsg> _addr_m)
+        {
+            ref encryptedExtensionsMsg m = ref _addr_m.val;
+
+            if (m.raw != null)
+            {
+                return m.raw;
+            }
+
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeEncryptedExtensions);
+            b.AddUint24LengthPrefixed(b =>
+            {
+                b.AddUint16LengthPrefixed(b =>
+                {
+                    if (len(m.alpnProtocol) > 0L)
+                    {
+                        b.AddUint16(extensionALPN);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                b.AddUint8LengthPrefixed(b =>
+                                {
+                                    b.AddBytes((slice<byte>)m.alpnProtocol);
+                                });
+
+                            });
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+            m.raw = b.BytesOrPanic();
+            return m.raw;
+
+        }
+
+        private static bool unmarshal(this ptr<encryptedExtensionsMsg> _addr_m, slice<byte> data)
+        {
+            ref encryptedExtensionsMsg m = ref _addr_m.val;
+
+            m.val = new encryptedExtensionsMsg(raw:data);
+            var s = cryptobyte.String(data);
+
+            ref cryptobyte.String extensions = ref heap(out ptr<cryptobyte.String> _addr_extensions);
+            if (!s.Skip(4L) || !s.ReadUint16LengthPrefixed(_addr_extensions) || !s.Empty())
+            {
+                return false;
+            }
+
+            while (!extensions.Empty())
+            {
+                ref ushort extension = ref heap(out ptr<ushort> _addr_extension);
+                ref cryptobyte.String extData = ref heap(out ptr<cryptobyte.String> _addr_extData);
+                if (!extensions.ReadUint16(_addr_extension) || !extensions.ReadUint16LengthPrefixed(_addr_extData))
+                {
+                    return false;
+                }
+
+
+                if (extension == extensionALPN) 
+                    ref cryptobyte.String protoList = ref heap(out ptr<cryptobyte.String> _addr_protoList);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_protoList) || protoList.Empty())
+                    {
+                        return false;
+                    }
+
+                    ref cryptobyte.String proto = ref heap(out ptr<cryptobyte.String> _addr_proto);
+                    if (!protoList.ReadUint8LengthPrefixed(_addr_proto) || proto.Empty() || !protoList.Empty())
+                    {
+                        return false;
+                    }
+
+                    m.alpnProtocol = string(proto);
+                else 
+                    // Ignore unknown extensions.
+                    continue;
+                                if (!extData.Empty())
+                {
+                    return false;
+                }
+
+            }
+
+
+            return true;
+
+        }
+
+        private partial struct endOfEarlyDataMsg
+        {
+        }
+
+        private static slice<byte> marshal(this ptr<endOfEarlyDataMsg> _addr_m)
+        {
+            ref endOfEarlyDataMsg m = ref _addr_m.val;
+
+            var x = make_slice<byte>(4L);
+            x[0L] = typeEndOfEarlyData;
+            return x;
+        }
+
+        private static bool unmarshal(this ptr<endOfEarlyDataMsg> _addr_m, slice<byte> data)
+        {
+            ref endOfEarlyDataMsg m = ref _addr_m.val;
+
+            return len(data) == 4L;
+        }
+
+        private partial struct keyUpdateMsg
+        {
+            public slice<byte> raw;
+            public bool updateRequested;
+        }
+
+        private static slice<byte> marshal(this ptr<keyUpdateMsg> _addr_m)
+        {
+            ref keyUpdateMsg m = ref _addr_m.val;
+
+            if (m.raw != null)
+            {
+                return m.raw;
+            }
+
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeKeyUpdate);
+            b.AddUint24LengthPrefixed(b =>
+            {
+                if (m.updateRequested)
+                {
+                    b.AddUint8(1L);
+                }
+                else
+                {
+                    b.AddUint8(0L);
+                }
+
+            });
+
+            m.raw = b.BytesOrPanic();
+            return m.raw;
+
+        }
+
+        private static bool unmarshal(this ptr<keyUpdateMsg> _addr_m, slice<byte> data)
+        {
+            ref keyUpdateMsg m = ref _addr_m.val;
+
+            m.raw = data;
+            var s = cryptobyte.String(data);
+
+            ref byte updateRequested = ref heap(out ptr<byte> _addr_updateRequested);
+            if (!s.Skip(4L) || !s.ReadUint8(_addr_updateRequested) || !s.Empty())
+            {
+                return false;
+            }
+
+            switch (updateRequested)
+            {
+                case 0L: 
+                    m.updateRequested = false;
+                    break;
+                case 1L: 
+                    m.updateRequested = true;
+                    break;
+                default: 
+                    return false;
+                    break;
+            }
+            return true;
+
+        }
+
+        private partial struct newSessionTicketMsgTLS13
+        {
+            public slice<byte> raw;
+            public uint lifetime;
+            public uint ageAdd;
+            public slice<byte> nonce;
+            public slice<byte> label;
+            public uint maxEarlyData;
+        }
+
+        private static slice<byte> marshal(this ptr<newSessionTicketMsgTLS13> _addr_m)
+        {
+            ref newSessionTicketMsgTLS13 m = ref _addr_m.val;
+
+            if (m.raw != null)
+            {
+                return m.raw;
+            }
+
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeNewSessionTicket);
+            b.AddUint24LengthPrefixed(b =>
+            {
+                b.AddUint32(m.lifetime);
+                b.AddUint32(m.ageAdd);
+                b.AddUint8LengthPrefixed(b =>
+                {
+                    b.AddBytes(m.nonce);
+                });
+                b.AddUint16LengthPrefixed(b =>
+                {
+                    b.AddBytes(m.label);
+                });
+
+                b.AddUint16LengthPrefixed(b =>
+                {
+                    if (m.maxEarlyData > 0L)
+                    {
+                        b.AddUint16(extensionEarlyData);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint32(m.maxEarlyData);
+                        });
+
+                    }
+
+                });
+
+            });
+
+            m.raw = b.BytesOrPanic();
+            return m.raw;
+
+        }
+
+        private static bool unmarshal(this ptr<newSessionTicketMsgTLS13> _addr_m, slice<byte> data)
+        {
+            ref newSessionTicketMsgTLS13 m = ref _addr_m.val;
+
+            m.val = new newSessionTicketMsgTLS13(raw:data);
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
+
+            ref cryptobyte.String extensions = ref heap(out ptr<cryptobyte.String> _addr_extensions);
+            if (!s.Skip(4L) || !s.ReadUint32(_addr_m.lifetime) || !s.ReadUint32(_addr_m.ageAdd) || !readUint8LengthPrefixed(_addr_s, _addr_m.nonce) || !readUint16LengthPrefixed(_addr_s, _addr_m.label) || !s.ReadUint16LengthPrefixed(_addr_extensions) || !s.Empty())
+            {
+                return false;
+            }
+
+            while (!extensions.Empty())
+            {
+                ref ushort extension = ref heap(out ptr<ushort> _addr_extension);
+                ref cryptobyte.String extData = ref heap(out ptr<cryptobyte.String> _addr_extData);
+                if (!extensions.ReadUint16(_addr_extension) || !extensions.ReadUint16LengthPrefixed(_addr_extData))
+                {
+                    return false;
+                }
+
+
+                if (extension == extensionEarlyData) 
+                    if (!extData.ReadUint32(_addr_m.maxEarlyData))
+                    {
+                        return false;
+                    }
+
+                else 
+                    // Ignore unknown extensions.
+                    continue;
+                                if (!extData.Empty())
+                {
+                    return false;
+                }
+
+            }
+
+
+            return true;
+
+        }
+
+        private partial struct certificateRequestMsgTLS13
+        {
+            public slice<byte> raw;
+            public bool ocspStapling;
+            public bool scts;
+            public slice<SignatureScheme> supportedSignatureAlgorithms;
+            public slice<SignatureScheme> supportedSignatureAlgorithmsCert;
+            public slice<slice<byte>> certificateAuthorities;
+        }
+
+        private static slice<byte> marshal(this ptr<certificateRequestMsgTLS13> _addr_m)
+        {
+            ref certificateRequestMsgTLS13 m = ref _addr_m.val;
+
+            if (m.raw != null)
+            {
+                return m.raw;
+            }
+
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeCertificateRequest);
+            b.AddUint24LengthPrefixed(b =>
+            { 
+                // certificate_request_context (SHALL be zero length unless used for
+                // post-handshake authentication)
+                b.AddUint8(0L);
+
+                b.AddUint16LengthPrefixed(b =>
+                {
+                    if (m.ocspStapling)
+                    {
+                        b.AddUint16(extensionStatusRequest);
+                        b.AddUint16(0L); // empty extension_data
+                    }
+
+                    if (m.scts)
+                    { 
+                        // RFC 8446, Section 4.4.2.1 makes no mention of
+                        // signed_certificate_timestamp in CertificateRequest, but
+                        // "Extensions in the Certificate message from the client MUST
+                        // correspond to extensions in the CertificateRequest message
+                        // from the server." and it appears in the table in Section 4.2.
+                        b.AddUint16(extensionSCT);
+                        b.AddUint16(0L); // empty extension_data
+                    }
+
+                    if (len(m.supportedSignatureAlgorithms) > 0L)
+                    {
+                        b.AddUint16(extensionSignatureAlgorithms);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                {
+                                    var sigAlgo__prev1 = sigAlgo;
+
+                                    foreach (var (_, __sigAlgo) in m.supportedSignatureAlgorithms)
+                                    {
+                                        sigAlgo = __sigAlgo;
+                                        b.AddUint16(uint16(sigAlgo));
+                                    }
+
+                                    sigAlgo = sigAlgo__prev1;
+                                }
+                            });
+
+                        });
+
+                    }
+
+                    if (len(m.supportedSignatureAlgorithmsCert) > 0L)
+                    {
+                        b.AddUint16(extensionSignatureAlgorithmsCert);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                {
+                                    var sigAlgo__prev1 = sigAlgo;
+
+                                    foreach (var (_, __sigAlgo) in m.supportedSignatureAlgorithmsCert)
+                                    {
+                                        sigAlgo = __sigAlgo;
+                                        b.AddUint16(uint16(sigAlgo));
+                                    }
+
+                                    sigAlgo = sigAlgo__prev1;
+                                }
+                            });
+
+                        });
+
+                    }
+
+                    if (len(m.certificateAuthorities) > 0L)
+                    {
+                        b.AddUint16(extensionCertificateAuthorities);
+                        b.AddUint16LengthPrefixed(b =>
+                        {
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                foreach (var (_, ca) in m.certificateAuthorities)
+                                {
+                                    b.AddUint16LengthPrefixed(b =>
+                                    {
+                                        b.AddBytes(ca);
+                                    });
+
+                                }
+
+                            });
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+            m.raw = b.BytesOrPanic();
+            return m.raw;
+
+        }
+
+        private static bool unmarshal(this ptr<certificateRequestMsgTLS13> _addr_m, slice<byte> data)
+        {
+            ref certificateRequestMsgTLS13 m = ref _addr_m.val;
+
+            m.val = new certificateRequestMsgTLS13(raw:data);
+            var s = cryptobyte.String(data);
+
+            ref cryptobyte.String context = ref heap(out ptr<cryptobyte.String> _addr_context);            ref cryptobyte.String extensions = ref heap(out ptr<cryptobyte.String> _addr_extensions);
+
+            if (!s.Skip(4L) || !s.ReadUint8LengthPrefixed(_addr_context) || !context.Empty() || !s.ReadUint16LengthPrefixed(_addr_extensions) || !s.Empty())
+            {
+                return false;
+            }
+
+            while (!extensions.Empty())
+            {
+                ref ushort extension = ref heap(out ptr<ushort> _addr_extension);
+                ref cryptobyte.String extData = ref heap(out ptr<cryptobyte.String> _addr_extData);
+                if (!extensions.ReadUint16(_addr_extension) || !extensions.ReadUint16LengthPrefixed(_addr_extData))
+                {
+                    return false;
+                }
+
+
+                if (extension == extensionStatusRequest) 
+                    m.ocspStapling = true;
+                else if (extension == extensionSCT) 
+                    m.scts = true;
+                else if (extension == extensionSignatureAlgorithms) 
+                    ref cryptobyte.String sigAndAlgs = ref heap(out ptr<cryptobyte.String> _addr_sigAndAlgs);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_sigAndAlgs) || sigAndAlgs.Empty())
+                    {
+                        return false;
+                    }
+
+                    while (!sigAndAlgs.Empty())
+                    {
+                        ref ushort sigAndAlg = ref heap(out ptr<ushort> _addr_sigAndAlg);
+                        if (!sigAndAlgs.ReadUint16(_addr_sigAndAlg))
+                        {
+                            return false;
+                        }
+
+                        m.supportedSignatureAlgorithms = append(m.supportedSignatureAlgorithms, SignatureScheme(sigAndAlg));
+
+                    }
+                else if (extension == extensionSignatureAlgorithmsCert) 
+                    sigAndAlgs = default;
+                    if (!extData.ReadUint16LengthPrefixed(_addr_sigAndAlgs) || sigAndAlgs.Empty())
+                    {
+                        return false;
+                    }
+
+                    while (!sigAndAlgs.Empty())
+                    {
+                        sigAndAlg = default;
+                        if (!sigAndAlgs.ReadUint16(_addr_sigAndAlg))
+                        {
+                            return false;
+                        }
+
+                        m.supportedSignatureAlgorithmsCert = append(m.supportedSignatureAlgorithmsCert, SignatureScheme(sigAndAlg));
+
+                    }
+                else if (extension == extensionCertificateAuthorities) 
+                    ref cryptobyte.String auths = ref heap(out ptr<cryptobyte.String> _addr_auths);
+                    if (!extData.ReadUint16LengthPrefixed(_addr_auths) || auths.Empty())
+                    {
+                        return false;
+                    }
+
+                    while (!auths.Empty())
+                    {
+                        ref slice<byte> ca = ref heap(out ptr<slice<byte>> _addr_ca);
+                        if (!readUint16LengthPrefixed(_addr_auths, _addr_ca) || len(ca) == 0L)
+                        {
+                            return false;
+                        }
+
+                        m.certificateAuthorities = append(m.certificateAuthorities, ca);
+
+                    }
+                else 
+                    // Ignore unknown extensions.
+                    continue;
+                                if (!extData.Empty())
+                {
+                    return false;
+                }
+
+            }
+
+
+            return true;
+
         }
 
         private partial struct certificateMsg
@@ -1017,22 +1723,16 @@ namespace crypto
             public slice<slice<byte>> certificates;
         }
 
-        private static bool equal(this ref certificateMsg m, object i)
+        private static slice<byte> marshal(this ptr<certificateMsg> _addr_m)
         {
-            ref certificateMsg (m1, ok) = i._<ref certificateMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && eqByteSlices(m.certificates, m1.certificates);
-        }
+            slice<byte> x = default;
+            ref certificateMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref certificateMsg m)
-        {
             if (m.raw != null)
             {
                 return m.raw;
             }
+
             long i = default;
             {
                 var slice__prev1 = slice;
@@ -1076,21 +1776,26 @@ namespace crypto
             }
 
             m.raw = x;
-            return;
+            return ;
+
         }
 
-        private static bool unmarshal(this ref certificateMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<certificateMsg> _addr_m, slice<byte> data)
         {
+            ref certificateMsg m = ref _addr_m.val;
+
             if (len(data) < 7L)
             {
                 return false;
             }
+
             m.raw = data;
             var certsLen = uint32(data[4L]) << (int)(16L) | uint32(data[5L]) << (int)(8L) | uint32(data[6L]);
             if (uint32(len(data)) != certsLen + 7L)
             {
                 return false;
             }
+
             long numCerts = 0L;
             var d = data[7L..];
             while (certsLen > 0L)
@@ -1099,14 +1804,17 @@ namespace crypto
                 {
                     return false;
                 }
+
                 var certLen = uint32(d[0L]) << (int)(16L) | uint32(d[1L]) << (int)(8L) | uint32(d[2L]);
                 if (uint32(len(d)) < 3L + certLen)
                 {
                     return false;
                 }
+
                 d = d[3L + certLen..];
                 certsLen -= 3L + certLen;
                 numCerts++;
+
             }
 
 
@@ -1121,6 +1829,216 @@ namespace crypto
 
 
             return true;
+
+        }
+
+        private partial struct certificateMsgTLS13
+        {
+            public slice<byte> raw;
+            public Certificate certificate;
+            public bool ocspStapling;
+            public bool scts;
+        }
+
+        private static slice<byte> marshal(this ptr<certificateMsgTLS13> _addr_m)
+        {
+            ref certificateMsgTLS13 m = ref _addr_m.val;
+
+            if (m.raw != null)
+            {
+                return m.raw;
+            }
+
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeCertificate);
+            b.AddUint24LengthPrefixed(b =>
+            {
+                b.AddUint8(0L); // certificate_request_context
+
+                var certificate = m.certificate;
+                if (!m.ocspStapling)
+                {
+                    certificate.OCSPStaple = null;
+                }
+
+                if (!m.scts)
+                {
+                    certificate.SignedCertificateTimestamps = null;
+                }
+
+                marshalCertificate(_addr_b, certificate);
+
+            });
+
+            m.raw = b.BytesOrPanic();
+            return m.raw;
+
+        }
+
+        private static void marshalCertificate(ptr<cryptobyte.Builder> _addr_b, Certificate certificate)
+        {
+            ref cryptobyte.Builder b = ref _addr_b.val;
+
+            b.AddUint24LengthPrefixed(b =>
+            {
+                foreach (var (i, cert) in certificate.Certificate)
+                {
+                    b.AddUint24LengthPrefixed(b =>
+                    {
+                        b.AddBytes(cert);
+                    });
+                    b.AddUint16LengthPrefixed(b =>
+                    {
+                        if (i > 0L)
+                        { 
+                            // This library only supports OCSP and SCT for leaf certificates.
+                            return ;
+
+                        }
+
+                        if (certificate.OCSPStaple != null)
+                        {
+                            b.AddUint16(extensionStatusRequest);
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                b.AddUint8(statusTypeOCSP);
+                                b.AddUint24LengthPrefixed(b =>
+                                {
+                                    b.AddBytes(certificate.OCSPStaple);
+                                });
+
+                            });
+
+                        }
+
+                        if (certificate.SignedCertificateTimestamps != null)
+                        {
+                            b.AddUint16(extensionSCT);
+                            b.AddUint16LengthPrefixed(b =>
+                            {
+                                b.AddUint16LengthPrefixed(b =>
+                                {
+                                    foreach (var (_, sct) in certificate.SignedCertificateTimestamps)
+                                    {
+                                        b.AddUint16LengthPrefixed(b =>
+                                        {
+                                            b.AddBytes(sct);
+                                        });
+
+                                    }
+
+                                });
+
+                            });
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        }
+
+        private static bool unmarshal(this ptr<certificateMsgTLS13> _addr_m, slice<byte> data)
+        {
+            ref certificateMsgTLS13 m = ref _addr_m.val;
+
+            m.val = new certificateMsgTLS13(raw:data);
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
+
+            ref cryptobyte.String context = ref heap(out ptr<cryptobyte.String> _addr_context);
+            if (!s.Skip(4L) || !s.ReadUint8LengthPrefixed(_addr_context) || !context.Empty() || !unmarshalCertificate(_addr_s, _addr_m.certificate) || !s.Empty())
+            {
+                return false;
+            }
+
+            m.scts = m.certificate.SignedCertificateTimestamps != null;
+            m.ocspStapling = m.certificate.OCSPStaple != null;
+
+            return true;
+
+        }
+
+        private static bool unmarshalCertificate(ptr<cryptobyte.String> _addr_s, ptr<Certificate> _addr_certificate)
+        {
+            ref cryptobyte.String s = ref _addr_s.val;
+            ref Certificate certificate = ref _addr_certificate.val;
+
+            ref cryptobyte.String certList = ref heap(out ptr<cryptobyte.String> _addr_certList);
+            if (!s.ReadUint24LengthPrefixed(_addr_certList))
+            {
+                return false;
+            }
+
+            while (!certList.Empty())
+            {
+                ref slice<byte> cert = ref heap(out ptr<slice<byte>> _addr_cert);
+                ref cryptobyte.String extensions = ref heap(out ptr<cryptobyte.String> _addr_extensions);
+                if (!readUint24LengthPrefixed(_addr_certList, _addr_cert) || !certList.ReadUint16LengthPrefixed(_addr_extensions))
+                {
+                    return false;
+                }
+
+                certificate.Certificate = append(certificate.Certificate, cert);
+                while (!extensions.Empty())
+                {
+                    ref ushort extension = ref heap(out ptr<ushort> _addr_extension);
+                    ref cryptobyte.String extData = ref heap(out ptr<cryptobyte.String> _addr_extData);
+                    if (!extensions.ReadUint16(_addr_extension) || !extensions.ReadUint16LengthPrefixed(_addr_extData))
+                    {
+                        return false;
+                    }
+
+                    if (len(certificate.Certificate) > 1L)
+                    { 
+                        // This library only supports OCSP and SCT for leaf certificates.
+                        continue;
+
+                    }
+
+
+                    if (extension == extensionStatusRequest) 
+                        ref byte statusType = ref heap(out ptr<byte> _addr_statusType);
+                        if (!extData.ReadUint8(_addr_statusType) || statusType != statusTypeOCSP || !readUint24LengthPrefixed(_addr_extData, _addr_certificate.OCSPStaple) || len(certificate.OCSPStaple) == 0L)
+                        {
+                            return false;
+                        }
+
+                    else if (extension == extensionSCT) 
+                        ref cryptobyte.String sctList = ref heap(out ptr<cryptobyte.String> _addr_sctList);
+                        if (!extData.ReadUint16LengthPrefixed(_addr_sctList) || sctList.Empty())
+                        {
+                            return false;
+                        }
+
+                        while (!sctList.Empty())
+                        {
+                            ref slice<byte> sct = ref heap(out ptr<slice<byte>> _addr_sct);
+                            if (!readUint16LengthPrefixed(_addr_sctList, _addr_sct) || len(sct) == 0L)
+                            {
+                                return false;
+                            }
+
+                            certificate.SignedCertificateTimestamps = append(certificate.SignedCertificateTimestamps, sct);
+
+                        }
+                    else 
+                        // Ignore unknown extensions.
+                        continue;
+                                        if (!extData.Empty())
+                    {
+                        return false;
+                    }
+
+                }
+
+
+            }
+
+            return true;
+
         }
 
         private partial struct serverKeyExchangeMsg
@@ -1129,22 +2047,15 @@ namespace crypto
             public slice<byte> key;
         }
 
-        private static bool equal(this ref serverKeyExchangeMsg m, object i)
+        private static slice<byte> marshal(this ptr<serverKeyExchangeMsg> _addr_m)
         {
-            ref serverKeyExchangeMsg (m1, ok) = i._<ref serverKeyExchangeMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && bytes.Equal(m.key, m1.key);
-        }
+            ref serverKeyExchangeMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref serverKeyExchangeMsg m)
-        {
             if (m.raw != null)
             {
                 return m.raw;
             }
+
             var length = len(m.key);
             var x = make_slice<byte>(length + 4L);
             x[0L] = typeServerKeyExchange;
@@ -1155,112 +2066,90 @@ namespace crypto
 
             m.raw = x;
             return x;
+
         }
 
-        private static bool unmarshal(this ref serverKeyExchangeMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<serverKeyExchangeMsg> _addr_m, slice<byte> data)
         {
+            ref serverKeyExchangeMsg m = ref _addr_m.val;
+
             m.raw = data;
             if (len(data) < 4L)
             {
                 return false;
             }
+
             m.key = data[4L..];
             return true;
+
         }
 
         private partial struct certificateStatusMsg
         {
             public slice<byte> raw;
-            public byte statusType;
             public slice<byte> response;
         }
 
-        private static bool equal(this ref certificateStatusMsg m, object i)
+        private static slice<byte> marshal(this ptr<certificateStatusMsg> _addr_m)
         {
-            ref certificateStatusMsg (m1, ok) = i._<ref certificateStatusMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && m.statusType == m1.statusType && bytes.Equal(m.response, m1.response);
-        }
+            ref certificateStatusMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref certificateStatusMsg m)
-        {
             if (m.raw != null)
             {
                 return m.raw;
             }
-            slice<byte> x = default;
-            if (m.statusType == statusTypeOCSP)
-            {
-                x = make_slice<byte>(4L + 4L + len(m.response));
-                x[0L] = typeCertificateStatus;
-                var l = len(m.response) + 4L;
-                x[1L] = byte(l >> (int)(16L));
-                x[2L] = byte(l >> (int)(8L));
-                x[3L] = byte(l);
-                x[4L] = statusTypeOCSP;
 
-                l -= 4L;
-                x[5L] = byte(l >> (int)(16L));
-                x[6L] = byte(l >> (int)(8L));
-                x[7L] = byte(l);
-                copy(x[8L..], m.response);
-            }
-            else
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeCertificateStatus);
+            b.AddUint24LengthPrefixed(b =>
             {
-                x = new slice<byte>(new byte[] { typeCertificateStatus, 0, 0, 1, m.statusType });
-            }
-            m.raw = x;
-            return x;
+                b.AddUint8(statusTypeOCSP);
+                b.AddUint24LengthPrefixed(b =>
+                {
+                    b.AddBytes(m.response);
+                });
+
+            });
+
+            m.raw = b.BytesOrPanic();
+            return m.raw;
+
         }
 
-        private static bool unmarshal(this ref certificateStatusMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<certificateStatusMsg> _addr_m, slice<byte> data)
         {
+            ref certificateStatusMsg m = ref _addr_m.val;
+
             m.raw = data;
-            if (len(data) < 5L)
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
+
+            ref byte statusType = ref heap(out ptr<byte> _addr_statusType);
+            if (!s.Skip(4L) || !s.ReadUint8(_addr_statusType) || statusType != statusTypeOCSP || !readUint24LengthPrefixed(_addr_s, _addr_m.response) || len(m.response) == 0L || !s.Empty())
             {
                 return false;
             }
-            m.statusType = data[4L];
 
-            m.response = null;
-            if (m.statusType == statusTypeOCSP)
-            {
-                if (len(data) < 8L)
-                {
-                    return false;
-                }
-                var respLen = uint32(data[5L]) << (int)(16L) | uint32(data[6L]) << (int)(8L) | uint32(data[7L]);
-                if (uint32(len(data)) != 4L + 4L + respLen)
-                {
-                    return false;
-                }
-                m.response = data[8L..];
-            }
             return true;
+
         }
 
         private partial struct serverHelloDoneMsg
         {
         }
 
-        private static bool equal(this ref serverHelloDoneMsg m, object i)
+        private static slice<byte> marshal(this ptr<serverHelloDoneMsg> _addr_m)
         {
-            ref serverHelloDoneMsg (_, ok) = i._<ref serverHelloDoneMsg>();
-            return ok;
-        }
+            ref serverHelloDoneMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref serverHelloDoneMsg m)
-        {
             var x = make_slice<byte>(4L);
             x[0L] = typeServerHelloDone;
             return x;
         }
 
-        private static bool unmarshal(this ref serverHelloDoneMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<serverHelloDoneMsg> _addr_m, slice<byte> data)
         {
+            ref serverHelloDoneMsg m = ref _addr_m.val;
+
             return len(data) == 4L;
         }
 
@@ -1270,22 +2159,15 @@ namespace crypto
             public slice<byte> ciphertext;
         }
 
-        private static bool equal(this ref clientKeyExchangeMsg m, object i)
+        private static slice<byte> marshal(this ptr<clientKeyExchangeMsg> _addr_m)
         {
-            ref clientKeyExchangeMsg (m1, ok) = i._<ref clientKeyExchangeMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && bytes.Equal(m.ciphertext, m1.ciphertext);
-        }
+            ref clientKeyExchangeMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref clientKeyExchangeMsg m)
-        {
             if (m.raw != null)
             {
                 return m.raw;
             }
+
             var length = len(m.ciphertext);
             var x = make_slice<byte>(length + 4L);
             x[0L] = typeClientKeyExchange;
@@ -1296,22 +2178,28 @@ namespace crypto
 
             m.raw = x;
             return x;
+
         }
 
-        private static bool unmarshal(this ref clientKeyExchangeMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<clientKeyExchangeMsg> _addr_m, slice<byte> data)
         {
+            ref clientKeyExchangeMsg m = ref _addr_m.val;
+
             m.raw = data;
             if (len(data) < 4L)
             {
                 return false;
             }
+
             var l = int(data[1L]) << (int)(16L) | int(data[2L]) << (int)(8L) | int(data[3L]);
             if (l != len(data) - 4L)
             {
                 return false;
             }
+
             m.ciphertext = data[4L..];
             return true;
+
         }
 
         private partial struct finishedMsg
@@ -1320,147 +2208,57 @@ namespace crypto
             public slice<byte> verifyData;
         }
 
-        private static bool equal(this ref finishedMsg m, object i)
+        private static slice<byte> marshal(this ptr<finishedMsg> _addr_m)
         {
-            ref finishedMsg (m1, ok) = i._<ref finishedMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && bytes.Equal(m.verifyData, m1.verifyData);
-        }
+            ref finishedMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref finishedMsg m)
-        {
             if (m.raw != null)
             {
                 return m.raw;
             }
-            x = make_slice<byte>(4L + len(m.verifyData));
-            x[0L] = typeFinished;
-            x[3L] = byte(len(m.verifyData));
-            copy(x[4L..], m.verifyData);
-            m.raw = x;
-            return;
+
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeFinished);
+            b.AddUint24LengthPrefixed(b =>
+            {
+                b.AddBytes(m.verifyData);
+            });
+
+            m.raw = b.BytesOrPanic();
+            return m.raw;
+
         }
 
-        private static bool unmarshal(this ref finishedMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<finishedMsg> _addr_m, slice<byte> data)
         {
+            ref finishedMsg m = ref _addr_m.val;
+
             m.raw = data;
-            if (len(data) < 4L)
-            {
-                return false;
-            }
-            m.verifyData = data[4L..];
-            return true;
-        }
-
-        private partial struct nextProtoMsg
-        {
-            public slice<byte> raw;
-            public @string proto;
-        }
-
-        private static bool equal(this ref nextProtoMsg m, object i)
-        {
-            ref nextProtoMsg (m1, ok) = i._<ref nextProtoMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && m.proto == m1.proto;
-        }
-
-        private static slice<byte> marshal(this ref nextProtoMsg m)
-        {
-            if (m.raw != null)
-            {
-                return m.raw;
-            }
-            var l = len(m.proto);
-            if (l > 255L)
-            {
-                l = 255L;
-            }
-            long padding = 32L - (l + 2L) % 32L;
-            var length = l + padding + 2L;
-            var x = make_slice<byte>(length + 4L);
-            x[0L] = typeNextProtocol;
-            x[1L] = uint8(length >> (int)(16L));
-            x[2L] = uint8(length >> (int)(8L));
-            x[3L] = uint8(length);
-
-            var y = x[4L..];
-            y[0L] = byte(l);
-            copy(y[1L..], (slice<byte>)m.proto[0L..l]);
-            y = y[1L + l..];
-            y[0L] = byte(padding);
-
-            m.raw = x;
-
-            return x;
-        }
-
-        private static bool unmarshal(this ref nextProtoMsg m, slice<byte> data)
-        {
-            m.raw = data;
-
-            if (len(data) < 5L)
-            {
-                return false;
-            }
-            data = data[4L..];
-            var protoLen = int(data[0L]);
-            data = data[1L..];
-            if (len(data) < protoLen)
-            {
-                return false;
-            }
-            m.proto = string(data[0L..protoLen]);
-            data = data[protoLen..];
-
-            if (len(data) < 1L)
-            {
-                return false;
-            }
-            var paddingLen = int(data[0L]);
-            data = data[1L..];
-            if (len(data) != paddingLen)
-            {
-                return false;
-            }
-            return true;
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
+            return s.Skip(1L) && readUint24LengthPrefixed(_addr_s, _addr_m.verifyData) && s.Empty();
         }
 
         private partial struct certificateRequestMsg
         {
-            public slice<byte> raw; // hasSignatureAndHash indicates whether this message includes a list
-// of signature and hash functions. This change was introduced with TLS
-// 1.2.
-            public bool hasSignatureAndHash;
+            public slice<byte> raw; // hasSignatureAlgorithm indicates whether this message includes a list of
+// supported signature algorithms. This change was introduced with TLS 1.2.
+            public bool hasSignatureAlgorithm;
             public slice<byte> certificateTypes;
             public slice<SignatureScheme> supportedSignatureAlgorithms;
             public slice<slice<byte>> certificateAuthorities;
         }
 
-        private static bool equal(this ref certificateRequestMsg m, object i)
+        private static slice<byte> marshal(this ptr<certificateRequestMsg> _addr_m)
         {
-            ref certificateRequestMsg (m1, ok) = i._<ref certificateRequestMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && bytes.Equal(m.certificateTypes, m1.certificateTypes) && eqByteSlices(m.certificateAuthorities, m1.certificateAuthorities) && eqSignatureAlgorithms(m.supportedSignatureAlgorithms, m1.supportedSignatureAlgorithms);
-        }
+            slice<byte> x = default;
+            ref certificateRequestMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref certificateRequestMsg m)
-        {
             if (m.raw != null)
             {
                 return m.raw;
             } 
 
-            // See http://tools.ietf.org/html/rfc4346#section-7.4.4
+            // See RFC 4346, Section 7.4.4.
             long length = 1L + len(m.certificateTypes) + 2L;
             long casLength = 0L;
             {
@@ -1477,10 +2275,11 @@ namespace crypto
 
             length += casLength;
 
-            if (m.hasSignatureAndHash)
+            if (m.hasSignatureAlgorithm)
             {
                 length += 2L + 2L * len(m.supportedSignatureAlgorithms);
             }
+
             x = make_slice<byte>(4L + length);
             x[0L] = typeCertificateRequest;
             x[1L] = uint8(length >> (int)(16L));
@@ -1492,7 +2291,7 @@ namespace crypto
             copy(x[5L..], m.certificateTypes);
             var y = x[5L + len(m.certificateTypes)..];
 
-            if (m.hasSignatureAndHash)
+            if (m.hasSignatureAlgorithm)
             {
                 var n = len(m.supportedSignatureAlgorithms) * 2L;
                 y[0L] = uint8(n >> (int)(8L));
@@ -1504,7 +2303,9 @@ namespace crypto
                     y[1L] = uint8(sigAlgo);
                     y = y[2L..];
                 }
+
             }
+
             y[0L] = uint8(casLength >> (int)(8L));
             y[1L] = uint8(casLength);
             y = y[2L..];
@@ -1525,51 +2326,61 @@ namespace crypto
             }
 
             m.raw = x;
-            return;
+            return ;
+
         }
 
-        private static bool unmarshal(this ref certificateRequestMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<certificateRequestMsg> _addr_m, slice<byte> data)
         {
+            ref certificateRequestMsg m = ref _addr_m.val;
+
             m.raw = data;
 
             if (len(data) < 5L)
             {
                 return false;
             }
+
             var length = uint32(data[1L]) << (int)(16L) | uint32(data[2L]) << (int)(8L) | uint32(data[3L]);
             if (uint32(len(data)) - 4L != length)
             {
                 return false;
             }
+
             var numCertTypes = int(data[4L]);
             data = data[5L..];
             if (numCertTypes == 0L || len(data) <= numCertTypes)
             {
                 return false;
             }
+
             m.certificateTypes = make_slice<byte>(numCertTypes);
             if (copy(m.certificateTypes, data) != numCertTypes)
             {
                 return false;
             }
+
             data = data[numCertTypes..];
 
-            if (m.hasSignatureAndHash)
+            if (m.hasSignatureAlgorithm)
             {
                 if (len(data) < 2L)
                 {
                     return false;
                 }
+
                 var sigAndHashLen = uint16(data[0L]) << (int)(8L) | uint16(data[1L]);
                 data = data[2L..];
                 if (sigAndHashLen & 1L != 0L)
                 {
                     return false;
                 }
+
                 if (len(data) < int(sigAndHashLen))
                 {
                     return false;
                 }
+
                 var numSigAlgos = sigAndHashLen / 2L;
                 m.supportedSignatureAlgorithms = make_slice<SignatureScheme>(numSigAlgos);
                 foreach (var (i) in m.supportedSignatureAlgorithms)
@@ -1577,17 +2388,21 @@ namespace crypto
                     m.supportedSignatureAlgorithms[i] = SignatureScheme(data[0L]) << (int)(8L) | SignatureScheme(data[1L]);
                     data = data[2L..];
                 }
+
             }
+
             if (len(data) < 2L)
             {
                 return false;
             }
+
             var casLength = uint16(data[0L]) << (int)(8L) | uint16(data[1L]);
             data = data[2L..];
             if (len(data) < int(casLength))
             {
                 return false;
             }
+
             var cas = make_slice<byte>(casLength);
             copy(cas, data);
             data = data[casLength..];
@@ -1599,6 +2414,7 @@ namespace crypto
                 {
                     return false;
                 }
+
                 var caLen = uint16(cas[0L]) << (int)(8L) | uint16(cas[1L]);
                 cas = cas[2L..];
 
@@ -1606,99 +2422,80 @@ namespace crypto
                 {
                     return false;
                 }
+
                 m.certificateAuthorities = append(m.certificateAuthorities, cas[..caLen]);
                 cas = cas[caLen..];
+
             }
 
 
             return len(data) == 0L;
+
         }
 
         private partial struct certificateVerifyMsg
         {
             public slice<byte> raw;
-            public bool hasSignatureAndHash;
+            public bool hasSignatureAlgorithm; // format change introduced in TLS 1.2
             public SignatureScheme signatureAlgorithm;
             public slice<byte> signature;
         }
 
-        private static bool equal(this ref certificateVerifyMsg m, object i)
+        private static slice<byte> marshal(this ptr<certificateVerifyMsg> _addr_m)
         {
-            ref certificateVerifyMsg (m1, ok) = i._<ref certificateVerifyMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && m.hasSignatureAndHash == m1.hasSignatureAndHash && m.signatureAlgorithm == m1.signatureAlgorithm && bytes.Equal(m.signature, m1.signature);
-        }
+            slice<byte> x = default;
+            ref certificateVerifyMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref certificateVerifyMsg m)
-        {
             if (m.raw != null)
             {
                 return m.raw;
-            } 
-
-            // See http://tools.ietf.org/html/rfc4346#section-7.4.8
-            var siglength = len(m.signature);
-            long length = 2L + siglength;
-            if (m.hasSignatureAndHash)
-            {
-                length += 2L;
             }
-            x = make_slice<byte>(4L + length);
-            x[0L] = typeCertificateVerify;
-            x[1L] = uint8(length >> (int)(16L));
-            x[2L] = uint8(length >> (int)(8L));
-            x[3L] = uint8(length);
-            var y = x[4L..];
-            if (m.hasSignatureAndHash)
+
+            cryptobyte.Builder b = default;
+            b.AddUint8(typeCertificateVerify);
+            b.AddUint24LengthPrefixed(b =>
             {
-                y[0L] = uint8(m.signatureAlgorithm >> (int)(8L));
-                y[1L] = uint8(m.signatureAlgorithm);
-                y = y[2L..];
-            }
-            y[0L] = uint8(siglength >> (int)(8L));
-            y[1L] = uint8(siglength);
-            copy(y[2L..], m.signature);
+                if (m.hasSignatureAlgorithm)
+                {
+                    b.AddUint16(uint16(m.signatureAlgorithm));
+                }
 
-            m.raw = x;
+                b.AddUint16LengthPrefixed(b =>
+                {
+                    b.AddBytes(m.signature);
+                });
 
-            return;
+            });
+
+            m.raw = b.BytesOrPanic();
+            return m.raw;
+
         }
 
-        private static bool unmarshal(this ref certificateVerifyMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<certificateVerifyMsg> _addr_m, slice<byte> data)
         {
+            ref certificateVerifyMsg m = ref _addr_m.val;
+
             m.raw = data;
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
 
-            if (len(data) < 6L)
-            {
+            if (!s.Skip(4L))
+            { // message type and uint24 length field
                 return false;
-            }
-            var length = uint32(data[1L]) << (int)(16L) | uint32(data[2L]) << (int)(8L) | uint32(data[3L]);
-            if (uint32(len(data)) - 4L != length)
-            {
-                return false;
-            }
-            data = data[4L..];
-            if (m.hasSignatureAndHash)
-            {
-                m.signatureAlgorithm = SignatureScheme(data[0L]) << (int)(8L) | SignatureScheme(data[1L]);
-                data = data[2L..];
-            }
-            if (len(data) < 2L)
-            {
-                return false;
-            }
-            var siglength = int(data[0L]) << (int)(8L) + int(data[1L]);
-            data = data[2L..];
-            if (len(data) != siglength)
-            {
-                return false;
-            }
-            m.signature = data;
 
-            return true;
+            }
+
+            if (m.hasSignatureAlgorithm)
+            {
+                if (!s.ReadUint16((uint16.val)(_addr_m.signatureAlgorithm)))
+                {
+                    return false;
+                }
+
+            }
+
+            return readUint16LengthPrefixed(_addr_s, _addr_m.signature) && s.Empty();
+
         }
 
         private partial struct newSessionTicketMsg
@@ -1707,24 +2504,17 @@ namespace crypto
             public slice<byte> ticket;
         }
 
-        private static bool equal(this ref newSessionTicketMsg m, object i)
+        private static slice<byte> marshal(this ptr<newSessionTicketMsg> _addr_m)
         {
-            ref newSessionTicketMsg (m1, ok) = i._<ref newSessionTicketMsg>();
-            if (!ok)
-            {
-                return false;
-            }
-            return bytes.Equal(m.raw, m1.raw) && bytes.Equal(m.ticket, m1.ticket);
-        }
+            slice<byte> x = default;
+            ref newSessionTicketMsg m = ref _addr_m.val;
 
-        private static slice<byte> marshal(this ref newSessionTicketMsg m)
-        {
             if (m.raw != null)
             {
                 return m.raw;
             } 
 
-            // See http://tools.ietf.org/html/rfc5077#section-3.3
+            // See RFC 5077, Section 3.3.
             var ticketLen = len(m.ticket);
             long length = 2L + 4L + ticketLen;
             x = make_slice<byte>(4L + length);
@@ -1738,124 +2528,55 @@ namespace crypto
 
             m.raw = x;
 
-            return;
+            return ;
+
         }
 
-        private static bool unmarshal(this ref newSessionTicketMsg m, slice<byte> data)
+        private static bool unmarshal(this ptr<newSessionTicketMsg> _addr_m, slice<byte> data)
         {
+            ref newSessionTicketMsg m = ref _addr_m.val;
+
             m.raw = data;
 
             if (len(data) < 10L)
             {
                 return false;
             }
+
             var length = uint32(data[1L]) << (int)(16L) | uint32(data[2L]) << (int)(8L) | uint32(data[3L]);
             if (uint32(len(data)) - 4L != length)
             {
                 return false;
             }
+
             var ticketLen = int(data[8L]) << (int)(8L) + int(data[9L]);
             if (len(data) - 10L != ticketLen)
             {
                 return false;
             }
+
             m.ticket = data[10L..];
 
             return true;
+
         }
 
         private partial struct helloRequestMsg
         {
         }
 
-        private static slice<byte> marshal(this ref helloRequestMsg _p0)
+        private static slice<byte> marshal(this ptr<helloRequestMsg> _addr__p0)
         {
+            ref helloRequestMsg _p0 = ref _addr__p0.val;
+
             return new slice<byte>(new byte[] { typeHelloRequest, 0, 0, 0 });
         }
 
-        private static bool unmarshal(this ref helloRequestMsg _p0, slice<byte> data)
+        private static bool unmarshal(this ptr<helloRequestMsg> _addr__p0, slice<byte> data)
         {
+            ref helloRequestMsg _p0 = ref _addr__p0.val;
+
             return len(data) == 4L;
-        }
-
-        private static bool eqUint16s(slice<ushort> x, slice<ushort> y)
-        {
-            if (len(x) != len(y))
-            {
-                return false;
-            }
-            foreach (var (i, v) in x)
-            {
-                if (y[i] != v)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static bool eqCurveIDs(slice<CurveID> x, slice<CurveID> y)
-        {
-            if (len(x) != len(y))
-            {
-                return false;
-            }
-            foreach (var (i, v) in x)
-            {
-                if (y[i] != v)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static bool eqStrings(slice<@string> x, slice<@string> y)
-        {
-            if (len(x) != len(y))
-            {
-                return false;
-            }
-            foreach (var (i, v) in x)
-            {
-                if (y[i] != v)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static bool eqByteSlices(slice<slice<byte>> x, slice<slice<byte>> y)
-        {
-            if (len(x) != len(y))
-            {
-                return false;
-            }
-            foreach (var (i, v) in x)
-            {
-                if (!bytes.Equal(v, y[i]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static bool eqSignatureAlgorithms(slice<SignatureScheme> x, slice<SignatureScheme> y)
-        {
-            if (len(x) != len(y))
-            {
-                return false;
-            }
-            foreach (var (i, v) in x)
-            {
-                if (v != y[i])
-                {
-                    return false;
-                }
-            }
-            return true;
         }
     }
 }}

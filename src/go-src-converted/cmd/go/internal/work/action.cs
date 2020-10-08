@@ -4,7 +4,7 @@
 
 // Action graph creation (planning).
 
-// package work -- go2cs converted at 2020 August 29 10:00:48 UTC
+// package work -- go2cs converted at 2020 October 08 04:33:55 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\action.go
 using bufio = go.bufio_package;
@@ -16,8 +16,10 @@ using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using time = go.time_package;
 
 using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
@@ -41,11 +43,14 @@ namespace @internal
         public partial struct Builder
         {
             public @string WorkDir; // the temporary work directory (ends in filepath.Separator)
-            public map<cacheKey, ref Action> actionCache; // a cache of already-constructed actions
+            public map<cacheKey, ptr<Action>> actionCache; // a cache of already-constructed actions
             public map<@string, bool> mkdirCache; // a cache of created directories
             public map<array<@string>, bool> flagCache; // a cache of supported compiler flags
             public Func<object[], (long, error)> Print;
-            public bool ComputeStaleOnly; // compute staleness for go list; no actual build
+            public bool IsCmdList; // running as part of go list; set p.Stale and additional fields below
+            public bool NeedError; // list needs p.Error
+            public bool NeedExport; // list needs p.Export
+            public bool NeedCompiledGoFiles; // list needs p.CompiledGoFiles
 
             public long objdirSeq; // counter for NewObjdir
             public long pkgSeq;
@@ -68,17 +73,17 @@ namespace @internal
         {
             public @string Mode; // description of action operation
             public ptr<load.Package> Package; // the package this action works on
-            public slice<ref Action> Deps; // actions that must happen before this one
-            public Func<ref Builder, ref Action, error> Func; // the action itself (nil = no-op)
+            public slice<ptr<Action>> Deps; // actions that must happen before this one
+            public Func<ptr<Builder>, ptr<Action>, error> Func; // the action itself (nil = no-op)
             public bool IgnoreFail; // whether to run f even if dependencies fail
             public ptr<bytes.Buffer> TestOutput; // test output buffer
             public slice<@string> Args; // additional args for runProgram
 
-            public slice<ref Action> triggers; // inverse of deps
+            public slice<ptr<Action>> triggers; // inverse of deps
 
             public bool buggyInstall; // is this a buggy install (see -linkshared)?
 
-            public Func<ref Builder, ref Action, bool> TryCache; // callback for cache bypass
+            public Func<ptr<Builder>, ptr<Action>, bool> TryCache; // callback for cache bypass
 
 // Generated files, directories.
             public @string Objdir; // directory for intermediate objects
@@ -87,7 +92,9 @@ namespace @internal
             public cache.ActionID actionID; // cache ID of action input
             public @string buildID; // build ID of action output
 
+            public bool VetxOnly; // Mode=="vet": only being called to supply info about dependencies
             public bool needVet; // Mode=="build": need to fill in vet config
+            public bool needBuild; // Mode=="build": need to do actual build (can be false if needVet is true)
             public ptr<vetConfig> vetCfg; // vet config
             public slice<byte> output; // output redirect buffer (nil means use b.Print)
 
@@ -95,74 +102,102 @@ namespace @internal
             public long pending; // number of deps yet to complete
             public long priority; // relative execution priority
             public bool Failed; // whether the action failed
+            public ptr<actionJSON> json; // action graph information
         }
 
         // BuildActionID returns the action ID section of a's build ID.
-        private static @string BuildActionID(this ref Action a)
+        private static @string BuildActionID(this ptr<Action> _addr_a)
         {
+            ref Action a = ref _addr_a.val;
+
             return actionID(a.buildID);
         }
 
         // BuildContentID returns the content ID section of a's build ID.
-        private static @string BuildContentID(this ref Action a)
+        private static @string BuildContentID(this ptr<Action> _addr_a)
         {
+            ref Action a = ref _addr_a.val;
+
             return contentID(a.buildID);
         }
 
         // BuildID returns a's build ID.
-        private static @string BuildID(this ref Action a)
+        private static @string BuildID(this ptr<Action> _addr_a)
         {
+            ref Action a = ref _addr_a.val;
+
             return a.buildID;
         }
 
         // BuiltTarget returns the actual file that was built. This differs
         // from Target when the result was cached.
-        private static @string BuiltTarget(this ref Action a)
+        private static @string BuiltTarget(this ptr<Action> _addr_a)
         {
+            ref Action a = ref _addr_a.val;
+
             return a.built;
         }
 
         // An actionQueue is a priority queue of actions.
-        private partial struct actionQueue // : slice<ref Action>
+        private partial struct actionQueue // : slice<ptr<Action>>
         {
         }
 
         // Implement heap.Interface
-        private static long Len(this ref actionQueue q)
+        private static long Len(this ptr<actionQueue> _addr_q)
         {
-            return len(q.Value);
-        }
-        private static void Swap(this ref actionQueue q, long i, long j)
-        {
-            (q.Value)[i] = (q.Value)[j];
-            (q.Value)[j] = (q.Value)[i];
+            ref actionQueue q = ref _addr_q.val;
 
+            return len(q.val);
         }
-        private static bool Less(this ref actionQueue q, long i, long j)
+        private static void Swap(this ptr<actionQueue> _addr_q, long i, long j)
         {
-            return (q.Value)[i].priority < (q.Value)[j].priority;
-        }
-        private static void Push(this ref actionQueue q, object x)
-        {
-            q.Value = append(q.Value, x._<ref Action>());
+            ref actionQueue q = ref _addr_q.val;
 
+            (q.val)[i] = (q.val)[j];
+            (q.val)[j] = (q.val)[i];
         }
-        private static void Pop(this ref actionQueue q)
+        private static bool Less(this ptr<actionQueue> _addr_q, long i, long j)
         {
-            var n = len(q.Value) - 1L;
-            var x = (q.Value)[n];
-            q.Value = (q.Value)[..n];
+            ref actionQueue q = ref _addr_q.val;
+
+            return (q.val)[i].priority < (q.val)[j].priority;
+        }
+        private static void Push(this ptr<actionQueue> _addr_q, object x)
+        {
+            ref actionQueue q = ref _addr_q.val;
+
+            q.val = append(q.val, x._<ptr<Action>>());
+        }
+        private static void Pop(this ptr<actionQueue> _addr_q)
+        {
+            ref actionQueue q = ref _addr_q.val;
+
+            var n = len(q.val) - 1L;
+            var x = (q.val)[n];
+            q.val = (q.val)[..n];
             return x;
         }
 
-        private static void push(this ref actionQueue q, ref Action a)
+        private static void push(this ptr<actionQueue> _addr_q, ptr<Action> _addr_a)
         {
+            ref actionQueue q = ref _addr_q.val;
+            ref Action a = ref _addr_a.val;
+
+            if (a.json != null)
+            {
+                a.json.TimeReady = time.Now();
+            }
+
             heap.Push(q, a);
+
         }
 
-        private static ref Action pop(this ref actionQueue q)
+        private static ptr<Action> pop(this ptr<actionQueue> _addr_q)
         {
-            return heap.Pop(q)._<ref Action>();
+            ref actionQueue q = ref _addr_q.val;
+
+            return heap.Pop(q)._<ptr<Action>>();
         }
 
         private partial struct actionJSON
@@ -188,6 +223,29 @@ namespace @internal
             public bool Failed;
             [Description("json:\",omitempty\"")]
             public @string Built;
+            [Description("json:\",omitempty\"")]
+            public bool VetxOnly;
+            [Description("json:\",omitempty\"")]
+            public bool NeedVet;
+            [Description("json:\",omitempty\"")]
+            public bool NeedBuild;
+            [Description("json:\",omitempty\"")]
+            public @string ActionID;
+            [Description("json:\",omitempty\"")]
+            public @string BuildID;
+            [Description("json:\",omitempty\"")]
+            public time.Time TimeReady;
+            [Description("json:\",omitempty\"")]
+            public time.Time TimeStart;
+            [Description("json:\",omitempty\"")]
+            public time.Time TimeDone;
+            public slice<@string> Cmd; // `json:",omitempty"`
+            [Description("json:\",omitempty\"")]
+            public time.Duration CmdReal;
+            [Description("json:\",omitempty\"")]
+            public time.Duration CmdUser;
+            [Description("json:\",omitempty\"")]
+            public time.Duration CmdSys;
         }
 
         // cacheKey is the key for the action cache.
@@ -197,24 +255,28 @@ namespace @internal
             public ptr<load.Package> p;
         }
 
-        private static @string actionGraphJSON(ref Action a)
+        private static @string actionGraphJSON(ptr<Action> _addr_a)
         {
-            slice<ref Action> workq = default;
-            var inWorkq = make_map<ref Action, long>();
+            ref Action a = ref _addr_a.val;
 
-            Action<ref Action> add = a =>
+            slice<ptr<Action>> workq = default;
+            var inWorkq = make_map<ptr<Action>, long>();
+
+            Action<ptr<Action>> add = a =>
             {
                 {
                     var (_, ok) = inWorkq[a];
 
                     if (ok)
                     {
-                        return;
+                        return ;
                     }
 
                 }
+
                 inWorkq[a] = len(workq);
                 workq = append(workq, a);
+
             }
 ;
             add(a);
@@ -225,23 +287,32 @@ namespace @internal
                 {
                     add(dep);
                 }
+
             }
 
 
-            slice<ref actionJSON> list = default;
+            slice<ptr<actionJSON>> list = default;
             foreach (var (id, a) in workq)
             {
-                actionJSON aj = ref new actionJSON(Mode:a.Mode,ID:id,IgnoreFail:a.IgnoreFail,Args:a.Args,Objdir:a.Objdir,Target:a.Target,Failed:a.Failed,Priority:a.priority,Built:a.built,);
-                if (a.Package != null)
-                { 
-                    // TODO(rsc): Make this a unique key for a.Package somehow.
-                    aj.Package = a.Package.ImportPath;
-                }
-                foreach (var (_, a1) in a.Deps)
+                if (a.json == null)
                 {
-                    aj.Deps = append(aj.Deps, inWorkq[a1]);
+                    a.json = addr(new actionJSON(Mode:a.Mode,ID:id,IgnoreFail:a.IgnoreFail,Args:a.Args,Objdir:a.Objdir,Target:a.Target,Failed:a.Failed,Priority:a.priority,Built:a.built,VetxOnly:a.VetxOnly,NeedBuild:a.needBuild,NeedVet:a.needVet,));
+                    if (a.Package != null)
+                    { 
+                        // TODO(rsc): Make this a unique key for a.Package somehow.
+                        a.json.Package = a.Package.ImportPath;
+
+                    }
+
+                    foreach (var (_, a1) in a.Deps)
+                    {
+                        a.json.Deps = append(a.json.Deps, inWorkq[a1]);
+                    }
+
                 }
-                list = append(list, aj);
+
+                list = append(list, a.json);
+
             }
             var (js, err) = json.MarshalIndent(list, "", "\t");
             if (err != null)
@@ -249,7 +320,9 @@ namespace @internal
                 fmt.Fprintf(os.Stderr, "go: writing debug action graph: %v\n", err);
                 return "";
             }
+
             return string(js);
+
         }
 
         // BuildMode specifies the build mode:
@@ -258,19 +331,21 @@ namespace @internal
         {
         }
 
-        public static readonly BuildMode ModeBuild = iota;
-        public static readonly var ModeInstall = 0;
-        public static readonly var ModeBuggyInstall = 1;
+        public static readonly BuildMode ModeBuild = (BuildMode)iota;
+        public static readonly var ModeInstall = (var)0;
+        public static readonly ModeVetOnly ModeBuggyInstall = (ModeVetOnly)1L << (int)(8L);
 
-        private static void Init(this ref Builder b)
+
+        private static void Init(this ptr<Builder> _addr_b)
         {
-            error err = default;
+            ref Builder b = ref _addr_b.val;
+
             b.Print = a =>
             {
                 return fmt.Fprint(os.Stderr, a);
             }
 ;
-            b.actionCache = make_map<cacheKey, ref Action>();
+            b.actionCache = make_map<cacheKey, ptr<Action>>();
             b.mkdirCache = make_map<@string, bool>();
             b.toolIDCache = make_map<@string, @string>();
             b.buildIDCache = make_map<@string, @string>();
@@ -281,43 +356,111 @@ namespace @internal
             }
             else
             {
-                b.WorkDir, err = ioutil.TempDir(os.Getenv("GOTMPDIR"), "go-build");
+                var (tmp, err) = ioutil.TempDir(cfg.Getenv("GOTMPDIR"), "go-build");
                 if (err != null)
                 {
-                    @base.Fatalf("%s", err);
+                    @base.Fatalf("go: creating work dir: %v", err);
                 }
+
+                if (!filepath.IsAbs(tmp))
+                {
+                    var (abs, err) = filepath.Abs(tmp);
+                    if (err != null)
+                    {
+                        os.RemoveAll(tmp);
+                        @base.Fatalf("go: creating work dir: %v", err);
+                    }
+
+                    tmp = abs;
+
+                }
+
+                b.WorkDir = tmp;
                 if (cfg.BuildX || cfg.BuildWork)
                 {
                     fmt.Fprintf(os.Stderr, "WORK=%s\n", b.WorkDir);
                 }
+
                 if (!cfg.BuildWork)
                 {
                     var workdir = b.WorkDir;
                     @base.AtExit(() =>
                     {
-                        os.RemoveAll(workdir);
+                        var start = time.Now();
+                        while (true)
+                        {
+                            var err = os.RemoveAll(workdir);
+                            if (err == null)
+                            {
+                                return ;
+                            } 
+
+                            // On some configurations of Windows, directories containing executable
+                            // files may be locked for a while after the executable exits (perhaps
+                            // due to antivirus scans?). It's probably worth a little extra latency
+                            // on exit to avoid filling up the user's temporary directory with leaked
+                            // files. (See golang.org/issue/30789.)
+                            if (runtime.GOOS != "windows" || time.Since(start) >= 500L * time.Millisecond)
+                            {
+                                fmt.Fprintf(os.Stderr, "go: failed to remove work dir: %s\n", err);
+                                return ;
+                            }
+
+                            time.Sleep(5L * time.Millisecond);
+
+                        }
+
 
                     });
+
                 }
+
             }
+
             {
-                var (_, ok) = cfg.OSArchSupportsCgo[cfg.Goos + "/" + cfg.Goarch];
+                var err__prev1 = err;
 
-                if (!ok && cfg.BuildContext.Compiler == "gc")
+                err = CheckGOOSARCHPair(cfg.Goos, cfg.Goarch);
+
+                if (err != null)
                 {
-                    fmt.Fprintf(os.Stderr, "cmd/go: unsupported GOOS/GOARCH pair %s/%s\n", cfg.Goos, cfg.Goarch);
-                    os.Exit(2L);
+                    fmt.Fprintf(os.Stderr, "cmd/go: %v\n", err);
+                    @base.SetExitStatus(2L);
+                    @base.Exit();
                 }
 
+                err = err__prev1;
+
             }
+
+
             foreach (var (_, tag) in cfg.BuildContext.BuildTags)
             {
                 if (strings.Contains(tag, ","))
                 {
                     fmt.Fprintf(os.Stderr, "cmd/go: -tags space-separated list contains comma\n");
-                    os.Exit(2L);
+                    @base.SetExitStatus(2L);
+                    @base.Exit();
                 }
+
             }
+
+        }
+
+        public static error CheckGOOSARCHPair(@string goos, @string goarch)
+        {
+            {
+                var (_, ok) = cfg.OSArchSupportsCgo[goos + "/" + goarch];
+
+                if (!ok && cfg.BuildContext.Compiler == "gc")
+                {
+                    return error.As(fmt.Errorf("unsupported GOOS/GOARCH pair %s/%s", goos, goarch))!;
+                }
+
+            }
+
+            return error.As(null!)!;
+
         }
 
         // NewObjdir returns the name of a fresh object directory under b.WorkDir.
@@ -328,8 +471,10 @@ namespace @internal
         // NewObjdir must be called only from a single goroutine at a time,
         // so it is safe to call during action graph construction, but it must not
         // be called during action graph execution.
-        private static @string NewObjdir(this ref Builder b)
+        private static @string NewObjdir(this ptr<Builder> _addr_b)
         {
+            ref Builder b = ref _addr_b.val;
+
             b.objdirSeq++;
             return filepath.Join(b.WorkDir, fmt.Sprintf("b%03d", b.objdirSeq)) + string(filepath.Separator);
         }
@@ -338,9 +483,11 @@ namespace @internal
         // at shlibpath. For the native toolchain this list is stored, newline separated, in
         // an ELF note with name "Go\x00\x00" and type 1. For GCCGO it is extracted from the
         // .go_export section.
-        private static slice<ref load.Package> readpkglist(@string shlibpath)
+        private static slice<ptr<load.Package>> readpkglist(@string shlibpath)
         {
-            load.ImportStack stk = default;
+            slice<ptr<load.Package>> pkgs = default;
+
+            ref load.ImportStack stk = ref heap(out ptr<load.ImportStack> _addr_stk);
             if (cfg.BuildToolchainName == "gccgo")
             {
                 var (f, _) = elf.Open(shlibpath);
@@ -354,10 +501,12 @@ namespace @internal
                     {
                         t = strings.TrimPrefix(t, "pkgpath ");
                         t = strings.TrimSuffix(t, ";");
-                        pkgs = append(pkgs, load.LoadPackage(t, ref stk));
+                        pkgs = append(pkgs, load.LoadImportWithFlags(t, @base.Cwd, null, _addr_stk, null, 0L));
                     }
+
                 }
             else
+
 
             }            {
                 var (pkglistbytes, err) = buildid.ReadELFNote(shlibpath, "Go\x00\x00", 1L);
@@ -365,40 +514,54 @@ namespace @internal
                 {
                     @base.Fatalf("readELFNote failed: %v", err);
                 }
+
                 scanner = bufio.NewScanner(bytes.NewBuffer(pkglistbytes));
                 while (scanner.Scan())
                 {
                     t = scanner.Text();
-                    pkgs = append(pkgs, load.LoadPackage(t, ref stk));
+                    pkgs = append(pkgs, load.LoadImportWithFlags(t, @base.Cwd, null, _addr_stk, null, 0L));
                 }
 
+
             }
-            return;
+
+            return ;
+
         }
 
         // cacheAction looks up {mode, p} in the cache and returns the resulting action.
         // If the cache has no such action, f() is recorded and returned.
         // TODO(rsc): Change the second key from *load.Package to interface{},
         // to make the caching in linkShared less awkward?
-        private static ref Action cacheAction(this ref Builder b, @string mode, ref load.Package p, Func<ref Action> f)
+        private static ptr<Action> cacheAction(this ptr<Builder> _addr_b, @string mode, ptr<load.Package> _addr_p, Func<ptr<Action>> f)
         {
+            ref Builder b = ref _addr_b.val;
+            ref load.Package p = ref _addr_p.val;
+
             var a = b.actionCache[new cacheKey(mode,p)];
             if (a == null)
             {
                 a = f();
                 b.actionCache[new cacheKey(mode,p)] = a;
             }
-            return a;
+
+            return _addr_a!;
+
         }
 
         // AutoAction returns the "right" action for go build or go install of p.
-        private static ref Action AutoAction(this ref Builder b, BuildMode mode, BuildMode depMode, ref load.Package p)
+        private static ptr<Action> AutoAction(this ptr<Builder> _addr_b, BuildMode mode, BuildMode depMode, ptr<load.Package> _addr_p)
         {
+            ref Builder b = ref _addr_b.val;
+            ref load.Package p = ref _addr_p.val;
+
             if (p.Name == "main")
             {
-                return b.LinkAction(mode, depMode, p);
+                return _addr_b.LinkAction(mode, depMode, p)!;
             }
-            return b.CompileAction(mode, depMode, p);
+
+            return _addr_b.CompileAction(mode, depMode, p)!;
+
         }
 
         // CompileAction returns the action for compiling and possibly installing
@@ -406,28 +569,42 @@ namespace @internal
         // for building packages (archives), never for linking executables.
         // depMode is the action (build or install) to use when building dependencies.
         // To turn package main into an executable, call b.Link instead.
-        private static ref Action CompileAction(this ref Builder b, BuildMode mode, BuildMode depMode, ref load.Package p)
+        private static ptr<Action> CompileAction(this ptr<Builder> _addr_b, BuildMode mode, BuildMode depMode, ptr<load.Package> _addr_p) => func((_, panic, __) =>
         {
-            if (mode != ModeBuild && p.Internal.Local && p.Target == "")
+            ref Builder b = ref _addr_b.val;
+            ref load.Package p = ref _addr_p.val;
+
+            var vetOnly = mode & ModeVetOnly != 0L;
+            mode &= ModeVetOnly;
+
+            if (mode != ModeBuild && (p.Internal.Local || p.Module != null) && p.Target == "")
             { 
-                // Imported via local path. No permanent target.
+                // Imported via local path or using modules. No permanent target.
                 mode = ModeBuild;
+
             }
+
             if (mode != ModeBuild && p.Name == "main")
             { 
                 // We never install the .a file for a main package.
                 mode = ModeBuild;
+
             } 
 
             // Construct package build action.
             a = b.cacheAction("build", p, () =>
             {
-                Action a = ref new Action(Mode:"build",Package:p,Func:(*Builder).build,Objdir:b.NewObjdir(),);
+                ptr<Action> a = addr(new Action(Mode:"build",Package:p,Func:(*Builder).build,Objdir:b.NewObjdir(),));
 
-                foreach (var (_, p1) in p.Internal.Imports)
+                if (p.Error == null || !p.Error.IsImportCycle)
                 {
-                    a.Deps = append(a.Deps, b.CompileAction(depMode, depMode, p1));
+                    foreach (var (_, p1) in p.Internal.Imports)
+                    {
+                        a.Deps = append(a.Deps, b.CompileAction(depMode, depMode, p1));
+                    }
+
                 }
+
                 if (p.Standard)
                 {
                     switch (p.ImportPath)
@@ -439,7 +616,7 @@ namespace @internal
                             // Fake packages - nothing to build.
                             a.Mode = "built-in package";
                             a.Func = null;
-                            return a;
+                            return _addr_a!;
                             break;
                     } 
 
@@ -450,65 +627,137 @@ namespace @internal
                         a.Mode = "gccgo stdlib";
                         a.Target = p.Target;
                         a.Func = null;
-                        return a;
+                        return _addr_a!;
+
                     }
+
                 }
-                return a;
+
+                return _addr_a!;
+
             }); 
+
+            // Find the build action; the cache entry may have been replaced
+            // by the install action during (*Builder).installAction.
+            var buildAction = a;
+            switch (buildAction.Mode)
+            {
+                case "build": 
+
+                case "built-in package": 
+
+                case "gccgo stdlib": 
+                    break;
+                case "build-install": 
+                    buildAction = a.Deps[0L];
+                    break;
+                default: 
+                    panic("lost build action: " + buildAction.Mode);
+                    break;
+            }
+            buildAction.needBuild = buildAction.needBuild || !vetOnly; 
 
             // Construct install action.
             if (mode == ModeInstall || mode == ModeBuggyInstall)
             {
                 a = b.installAction(a, mode);
             }
-            return a;
-        }
+
+            return _addr_a!;
+
+        });
 
         // VetAction returns the action for running go vet on package p.
         // It depends on the action for compiling p.
         // If the caller may be causing p to be installed, it is up to the caller
         // to make sure that the install depends on (runs after) vet.
-        private static ref Action VetAction(this ref Builder b, BuildMode mode, BuildMode depMode, ref load.Package p)
-        { 
+        private static ptr<Action> VetAction(this ptr<Builder> _addr_b, BuildMode mode, BuildMode depMode, ptr<load.Package> _addr_p)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref load.Package p = ref _addr_p.val;
+
+            var a = b.vetAction(mode, depMode, p);
+            a.VetxOnly = false;
+            return _addr_a!;
+        }
+
+        private static ptr<Action> vetAction(this ptr<Builder> _addr_b, BuildMode mode, BuildMode depMode, ptr<load.Package> _addr_p)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref load.Package p = ref _addr_p.val;
+ 
             // Construct vet action.
             a = b.cacheAction("vet", p, () =>
             {
-                var a1 = b.CompileAction(mode, depMode, p); 
+                var a1 = b.CompileAction(mode | ModeVetOnly, depMode, p); 
 
                 // vet expects to be able to import "fmt".
-                load.ImportStack stk = default;
+                ref load.ImportStack stk = ref heap(out ptr<load.ImportStack> _addr_stk);
                 stk.Push("vet");
-                var p1 = load.LoadPackage("fmt", ref stk);
+                var p1 = load.LoadImportWithFlags("fmt", p.Dir, p, _addr_stk, null, 0L);
                 stk.Pop();
                 var aFmt = b.CompileAction(ModeBuild, depMode, p1);
 
-                Action a = ref new Action(Mode:"vet",Package:p,Deps:[]*Action{a1,aFmt},Objdir:a1.Objdir,);
+                slice<ptr<Action>> deps = default;
+                if (a1.buggyInstall)
+                { 
+                    // (*Builder).vet expects deps[0] to be the package
+                    // and deps[1] to be "fmt". If we see buggyInstall
+                    // here then a1 is an install of a shared library,
+                    // and the real package is a1.Deps[0].
+                    deps = new slice<ptr<Action>>(new ptr<Action>[] { a1.Deps[0], aFmt, a1 });
+
+                }
+                else
+                {
+                    deps = new slice<ptr<Action>>(new ptr<Action>[] { a1, aFmt });
+                }
+
+                {
+                    var p1__prev1 = p1;
+
+                    foreach (var (_, __p1) in p.Internal.Imports)
+                    {
+                        p1 = __p1;
+                        deps = append(deps, b.vetAction(mode, depMode, p1));
+                    }
+
+                    p1 = p1__prev1;
+                }
+
+                ptr<Action> a = addr(new Action(Mode:"vet",Package:p,Deps:deps,Objdir:a1.Objdir,VetxOnly:true,IgnoreFail:true,));
                 if (a1.Func == null)
                 { 
                     // Built-in packages like unsafe.
-                    return a;
-                }
-                a1.needVet = true;
-                a.Func = ref Builder;
+                    return _addr_a!;
 
-                return a;
+                }
+
+                deps[0L].needVet = true;
+                a.Func = ptr<Builder>;
+                return _addr_a!;
+
             });
-            return a;
+            return _addr_a!;
+
         }
 
         // LinkAction returns the action for linking p into an executable
         // and possibly installing the result (according to mode).
         // depMode is the action (build or install) to use when compiling dependencies.
-        private static ref Action LinkAction(this ref Builder b, BuildMode mode, BuildMode depMode, ref load.Package p)
-        { 
+        private static ptr<Action> LinkAction(this ptr<Builder> _addr_b, BuildMode mode, BuildMode depMode, ptr<load.Package> _addr_p)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref load.Package p = ref _addr_p.val;
+ 
             // Construct link action.
             a = b.cacheAction("link", p, () =>
             {
-                Action a = ref new Action(Mode:"link",Package:p,);
+                ptr<Action> a = addr(new Action(Mode:"link",Package:p,));
 
                 var a1 = b.CompileAction(ModeBuild, depMode, p);
-                a.Func = ref Builder;
-                a.Deps = new slice<ref Action>(new ref Action[] { a1 });
+                a.Func = ptr<Builder>;
+                a.Deps = new slice<ptr<Action>>(new ptr<Action>[] { a1 });
                 a.Objdir = a1.Objdir; 
 
                 // An executable file. (This is the name of a temporary file.)
@@ -533,7 +782,9 @@ namespace @internal
                     // On Windows, DLL file name is recorded in PE file
                     // export section, so do like on OS X.
                     _, name = filepath.Split(p.Target);
+
                 }
+
                 a.Target = a.Objdir + filepath.Join("exe", name) + cfg.ExeSuffix;
                 a.built = a.Target;
                 b.addTransitiveLinkDeps(a, a1, ""); 
@@ -545,20 +796,26 @@ namespace @internal
                 // In order for that linkActionID call to compute the right action ID, all the
                 // dependencies of a (except a1) must have completed building and have
                 // recorded their build IDs.
-                a1.Deps = append(a1.Deps, ref new Action(Mode:"nop",Deps:a.Deps[1:]));
-                return a;
+                a1.Deps = append(a1.Deps, addr(new Action(Mode:"nop",Deps:a.Deps[1:])));
+                return _addr_a!;
+
             });
 
             if (mode == ModeInstall || mode == ModeBuggyInstall)
             {
                 a = b.installAction(a, mode);
             }
-            return a;
+
+            return _addr_a!;
+
         }
 
         // installAction returns the action for installing the result of a1.
-        private static ref Action installAction(this ref Builder b, ref Action a1, BuildMode mode)
-        { 
+        private static ptr<Action> installAction(this ptr<Builder> _addr_b, ptr<Action> _addr_a1, BuildMode mode)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref Action a1 = ref _addr_a1.val;
+ 
             // Because we overwrite the build action with the install action below,
             // a1 may already be an install action fetched from the "build" cache key,
             // and the caller just doesn't realize.
@@ -568,8 +825,11 @@ namespace @internal
                 { 
                     //  Congratulations! The buggy install is now a proper install.
                     a1.buggyInstall = false;
+
                 }
-                return a1;
+
+                return _addr_a1!;
+
             } 
 
             // If there's no actual action to build a1,
@@ -577,10 +837,11 @@ namespace @internal
             // This happens if a1 corresponds to reusing an already-built object.
             if (a1.Func == null)
             {
-                return a1;
+                return _addr_a1!;
             }
+
             var p = a1.Package;
-            return b.cacheAction(a1.Mode + "-install", p, () =>
+            return _addr_b.cacheAction(a1.Mode + "-install", p, () =>
             { 
                 // The install deletes the temporary build result,
                 // so we need all other actions, both past and future,
@@ -590,7 +851,7 @@ namespace @internal
                 // Make a private copy of a1 (the build action),
                 // no longer accessible to any other rules.
                 ptr<Action> buildAction = @new<Action>();
-                buildAction.Value = a1.Value; 
+                buildAction.val = a1; 
 
                 // Overwrite a1 with the install action.
                 // This takes care of updating past actions that
@@ -600,11 +861,13 @@ namespace @internal
                 // for "build", so that actions not yet created that
                 // try to depend on the build will instead depend
                 // on the install.
-                a1.Value = new Action(Mode:buildAction.Mode+"-install",Func:BuildInstallFunc,Package:p,Objdir:buildAction.Objdir,Deps:[]*Action{buildAction},Target:p.Target,built:p.Target,buggyInstall:mode==ModeBuggyInstall,);
+                a1 = new Action(Mode:buildAction.Mode+"-install",Func:BuildInstallFunc,Package:p,Objdir:buildAction.Objdir,Deps:[]*Action{buildAction},Target:p.Target,built:p.Target,buggyInstall:mode==ModeBuggyInstall,);
 
                 b.addInstallHeaderAction(a1);
-                return a1;
-            });
+                return _addr_a1!;
+
+            })!;
+
         }
 
         // addTransitiveLinkDeps adds to the link action a all packages
@@ -616,19 +879,24 @@ namespace @internal
         // makes sure those are present in a.Deps.
         // If shlib is non-empty, then a corresponds to the build and installation of shlib,
         // so any rebuild of shlib should not be added as a dependency.
-        private static void addTransitiveLinkDeps(this ref Builder b, ref Action a, ref Action a1, @string shlib)
-        { 
+        private static void addTransitiveLinkDeps(this ptr<Builder> _addr_b, ptr<Action> _addr_a, ptr<Action> _addr_a1, @string shlib)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+            ref Action a1 = ref _addr_a1.val;
+ 
             // Expand Deps to include all built packages, for the linker.
             // Use breadth-first search to find rebuilt-for-test packages
             // before the standard ones.
             // TODO(rsc): Eliminate the standard ones from the action graph,
             // which will require doing a little bit more rebuilding.
-            ref Action workq = new slice<ref Action>(new ref Action[] { a1 });
+            ptr<Action> workq = new slice<ptr<Action>>(new ptr<Action>[] { a1 });
             map haveDep = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{};
             if (a1.Package != null)
             {
                 haveDep[a1.Package.ImportPath] = true;
             }
+
             for (long i = 0L; i < len(workq); i++)
             {
                 var a1 = workq[i];
@@ -639,14 +907,18 @@ namespace @internal
                     {
                         continue;
                     }
+
                     haveDep[a2.Package.ImportPath] = true;
                     a.Deps = append(a.Deps, a2);
                     if (a2.Mode == "build-install")
                     {
                         a2 = a2.Deps[0L]; // walk children of "build" action
                     }
+
                     workq = append(workq, a2);
+
                 }
+
             } 
 
             // If this is go build -linkshared, then the link depends on the shared libraries
@@ -669,32 +941,37 @@ namespace @internal
                         {
                             continue;
                         }
+
                         haveShlib[filepath.Base(p1.Shlib)] = true; 
                         // TODO(rsc): The use of ModeInstall here is suspect, but if we only do ModeBuild,
                         // we'll end up building an overall library or executable that depends at runtime
                         // on other libraries that are out-of-date, which is clearly not good either.
                         // We call it ModeBuggyInstall to make clear that this is not right.
                         a.Deps = append(a.Deps, b.linkSharedAction(ModeBuggyInstall, ModeBuggyInstall, p1.Shlib, null));
+
                     }
 
                     a1 = a1__prev1;
                 }
-
             }
+
         }
 
         // addInstallHeaderAction adds an install header action to a, if needed.
         // The action a should be an install action as generated by either
         // b.CompileAction or b.LinkAction with mode=ModeInstall,
         // and so a.Deps[0] is the corresponding build action.
-        private static void addInstallHeaderAction(this ref Builder b, ref Action a)
-        { 
+        private static void addInstallHeaderAction(this ptr<Builder> _addr_b, ptr<Action> _addr_a)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+ 
             // Install header for cgo in c-archive and c-shared modes.
             var p = a.Package;
             if (p.UsesCgo() && (cfg.BuildBuildmode == "c-archive" || cfg.BuildBuildmode == "c-shared"))
             {
                 var hdrTarget = a.Target[..len(a.Target) - len(filepath.Ext(a.Target))] + ".h";
-                if (cfg.BuildContext.Compiler == "gccgo")
+                if (cfg.BuildContext.Compiler == "gccgo" && cfg.BuildO == "")
                 { 
                     // For the header file, remove the "lib"
                     // added by go/build, so we generate pkg.h
@@ -702,30 +979,42 @@ namespace @internal
                     var (dir, file) = filepath.Split(hdrTarget);
                     file = strings.TrimPrefix(file, "lib");
                     hdrTarget = filepath.Join(dir, file);
+
                 }
-                Action ah = ref new Action(Mode:"install header",Package:a.Package,Deps:[]*Action{a.Deps[0]},Func:(*Builder).installHeader,Objdir:a.Deps[0].Objdir,Target:hdrTarget,);
+
+                ptr<Action> ah = addr(new Action(Mode:"install header",Package:a.Package,Deps:[]*Action{a.Deps[0]},Func:(*Builder).installHeader,Objdir:a.Deps[0].Objdir,Target:hdrTarget,));
                 a.Deps = append(a.Deps, ah);
+
             }
+
         }
 
         // buildmodeShared takes the "go build" action a1 into the building of a shared library of a1.Deps.
-        // That is, the input a1 represents "go build pkgs" and the result represents "go build -buidmode=shared pkgs".
-        private static ref Action buildmodeShared(this ref Builder b, BuildMode mode, BuildMode depMode, slice<@string> args, slice<ref load.Package> pkgs, ref Action a1)
+        // That is, the input a1 represents "go build pkgs" and the result represents "go build -buildmode=shared pkgs".
+        private static ptr<Action> buildmodeShared(this ptr<Builder> _addr_b, BuildMode mode, BuildMode depMode, slice<@string> args, slice<ptr<load.Package>> pkgs, ptr<Action> _addr_a1)
         {
+            ref Builder b = ref _addr_b.val;
+            ref Action a1 = ref _addr_a1.val;
+
             var (name, err) = libname(args, pkgs);
             if (err != null)
             {
                 @base.Fatalf("%v", err);
             }
-            return b.linkSharedAction(mode, depMode, name, a1);
+
+            return _addr_b.linkSharedAction(mode, depMode, name, a1)!;
+
         }
 
         // linkSharedAction takes a grouping action a1 corresponding to a list of built packages
         // and returns an action that links them together into a shared library with the name shlib.
         // If a1 is nil, shlib should be an absolute path to an existing shared library,
         // and then linkSharedAction reads that library to find out the package list.
-        private static ref Action linkSharedAction(this ref Builder b, BuildMode mode, BuildMode depMode, @string shlib, ref Action a1)
+        private static ptr<Action> linkSharedAction(this ptr<Builder> _addr_b, BuildMode mode, BuildMode depMode, @string shlib, ptr<Action> _addr_a1)
         {
+            ref Builder b = ref _addr_b.val;
+            ref Action a1 = ref _addr_a1.val;
+
             var fullShlib = shlib;
             shlib = filepath.Base(shlib);
             a = b.cacheAction("build-shlib " + shlib, null, () =>
@@ -735,7 +1024,7 @@ namespace @internal
                     // TODO(rsc): Need to find some other place to store config,
                     // not in pkg directory. See golang.org/issue/22196.
                     var pkgs = readpkglist(fullShlib);
-                    a1 = ref new Action(Mode:"shlib packages",);
+                    a1 = addr(new Action(Mode:"shlib packages",));
                     {
                         var p__prev1 = p;
 
@@ -747,13 +1036,12 @@ namespace @internal
 
                         p = p__prev1;
                     }
-
                 } 
 
                 // Fake package to hold ldflags.
                 // As usual shared libraries are a kludgy, abstraction-violating special case:
                 // we let them use the flags specified for the command-line arguments.
-                load.Package p = ref new load.Package();
+                ptr<load.Package> p = addr(new load.Package());
                 p.Internal.CmdlinePkg = true;
                 p.Internal.Ldflags = load.BuildLdflags.For(p);
                 p.Internal.Gccgoflags = load.BuildGccgoflags.For(p); 
@@ -768,11 +1056,11 @@ namespace @internal
                 // TODO(rsc): We don't add standard library imports for gccgo
                 // because they are all always linked in anyhow.
                 // Maybe load.LinkerDeps should be used and updated.
-                Action a = ref new Action(Mode:"go build -buildmode=shared",Package:p,Objdir:b.NewObjdir(),Func:(*Builder).linkShared,Deps:[]*Action{a1},);
+                ptr<Action> a = addr(new Action(Mode:"go build -buildmode=shared",Package:p,Objdir:b.NewObjdir(),Func:(*Builder).linkShared,Deps:[]*Action{a1},));
                 a.Target = filepath.Join(a.Objdir, shlib);
                 if (cfg.BuildToolchainName != "gccgo")
                 {
-                    Action<ref Action, @string, bool> add = (a1, pkg, force) =>
+                    Action<ptr<Action>, @string, bool> add = (a1, pkg, force) =>
                     {
                         {
                             var a2__prev1 = a2;
@@ -782,15 +1070,16 @@ namespace @internal
                                 a2 = __a2;
                                 if (a2.Package != null && a2.Package.ImportPath == pkg)
                                 {
-                                    return;
+                                    return ;
                                 }
+
                             }
 
                             a2 = a2__prev1;
                         }
 
-                        load.ImportStack stk = default;
-                        p = load.LoadPackage(pkg, ref stk);
+                        ref load.ImportStack stk = ref heap(out ptr<load.ImportStack> _addr_stk);
+                        p = load.LoadImportWithFlags(pkg, @base.Cwd, null, _addr_stk, null, 0L);
                         if (p.Error != null)
                         {
                             @base.Fatalf("load %s: %v", pkg, p.Error);
@@ -804,6 +1093,7 @@ namespace @internal
                         {
                             a1.Deps = append(a1.Deps, b.CompileAction(depMode, depMode, p));
                         }
+
                     }
 ;
                     add(a1, "runtime/cgo", false);
@@ -818,9 +1108,12 @@ namespace @internal
                     {
                         add(a, dep, true);
                     }
+
                 }
+
                 b.addTransitiveLinkDeps(a, a1, shlib);
-                return a;
+                return _addr_a!;
+
             }); 
 
             // Install result.
@@ -852,6 +1145,7 @@ namespace @internal
                                 }
 
                             }
+
                         } 
                         // TODO(rsc): Find out and explain here why gccgo is different.
 
@@ -862,9 +1156,10 @@ namespace @internal
                     {
                         pkgDir = filepath.Join(pkgDir, "shlibs");
                     }
+
                     var target = filepath.Join(pkgDir, shlib);
 
-                    a = ref new Action(Mode:"go install -buildmode=shared",Objdir:buildAction.Objdir,Func:BuildInstallFunc,Deps:[]*Action{buildAction},Target:target,);
+                    a = addr(new Action(Mode:"go install -buildmode=shared",Objdir:buildAction.Objdir,Func:BuildInstallFunc,Deps:[]*Action{buildAction},Target:target,));
                     {
                         var a2__prev1 = a2;
 
@@ -876,16 +1171,22 @@ namespace @internal
                             {
                                 continue;
                             }
-                            a.Deps = append(a.Deps, ref new Action(Mode:"shlibname",Package:p,Func:(*Builder).installShlibname,Target:strings.TrimSuffix(p.Target,".a")+".shlibname",Deps:[]*Action{a.Deps[0]},));
+
+                            a.Deps = append(a.Deps, addr(new Action(Mode:"shlibname",Package:p,Func:(*Builder).installShlibname,Target:strings.TrimSuffix(p.Target,".a")+".shlibname",Deps:[]*Action{a.Deps[0]},)));
+
                         }
 
                         a2 = a2__prev1;
                     }
 
-                    return a;
+                    return _addr_a!;
+
                 });
+
             }
-            return a;
+
+            return _addr_a!;
+
         }
     }
 }}}}

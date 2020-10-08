@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package big -- go2cs converted at 2020 August 29 08:29:28 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:49 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\prime.go
 using rand = go.math.rand_package;
@@ -30,8 +30,10 @@ namespace math
         //
         // As of Go 1.8, ProbablyPrime(0) is allowed and applies only a Baillie-PSW test.
         // Before Go 1.8, ProbablyPrime applied only the Miller-Rabin tests, and ProbablyPrime(0) panicked.
-        private static bool ProbablyPrime(this ref Int _x, long n) => func(_x, (ref Int x, Defer _, Panic panic, Recover __) =>
-        { 
+        private static bool ProbablyPrime(this ptr<Int> _addr_x, long n) => func((_, panic, __) =>
+        {
+            ref Int x = ref _addr_x.val;
+ 
             // Note regarding the doc comment above:
             // It would be more precise to say that the Baillie-PSW test uses the
             // extra strong Lucas test as its Lucas test, but since no one knows
@@ -49,7 +51,7 @@ namespace math
             {
                 return false;
             }
-            const ulong primeBitMask = 1L << (int)(2L) | 1L << (int)(3L) | 1L << (int)(5L) | 1L << (int)(7L) | 1L << (int)(11L) | 1L << (int)(13L) | 1L << (int)(17L) | 1L << (int)(19L) | 1L << (int)(23L) | 1L << (int)(29L) | 1L << (int)(31L) | 1L << (int)(37L) | 1L << (int)(41L) | 1L << (int)(43L) | 1L << (int)(47L) | 1L << (int)(53L) | 1L << (int)(59L) | 1L << (int)(61L);
+            const ulong primeBitMask = (ulong)1L << (int)(2L) | 1L << (int)(3L) | 1L << (int)(5L) | 1L << (int)(7L) | 1L << (int)(11L) | 1L << (int)(13L) | 1L << (int)(17L) | 1L << (int)(19L) | 1L << (int)(23L) | 1L << (int)(29L) | 1L << (int)(31L) | 1L << (int)(37L) | 1L << (int)(41L) | 1L << (int)(43L) | 1L << (int)(47L) | 1L << (int)(53L) | 1L << (int)(59L) | 1L << (int)(61L);
 
 
 
@@ -60,11 +62,11 @@ namespace math
             }
             if (w & 1L == 0L)
             {
-                return false; // n is even
+                return false; // x is even
             }
-            const long primesA = 3L * 5L * 7L * 11L * 13L * 17L * 19L * 23L * 37L;
+            const long primesA = (long)3L * 5L * 7L * 11L * 13L * 17L * 19L * 23L * 37L;
 
-            const long primesB = 29L * 31L * 41L * 43L * 47L * 53L;
+            const long primesB = (long)29L * 31L * 41L * 43L * 47L * 53L;
 
 
 
@@ -91,6 +93,7 @@ namespace math
                 return false;
             }
             return x.abs.probablyPrimeMillerRabin(n + 1L, true) && x.abs.probablyPrimeLucas();
+
         });
 
         // probablyPrimeMillerRabin reports whether n passes reps rounds of the
@@ -125,11 +128,13 @@ NextRandom:
                     x = x.random(rand, nm3, nm3Len);
                     x = x.add(x, natTwo);
                 }
+
                 y = y.expNN(x, q, n);
                 if (y.cmp(natOne) == 0L || y.cmp(nm1) == 0L)
                 {
                     continue;
                 }
+
                 for (var j = uint(1L); j < k; j++)
                 {
                     y = y.sqr(y);
@@ -139,16 +144,20 @@ NextRandom:
                         _continueNextRandom = true;
                         break;
                     }
+
                     if (y.cmp(natOne) == 0L)
                     {
                         return false;
                     }
+
                 }
 
                 return false;
+
             }
 
             return true;
+
         }
 
         // probablyPrimeLucas reports whether n passes the "almost extra strong" Lucas probable prime test,
@@ -159,11 +168,11 @@ NextRandom:
         //
         // Baillie and Wagstaff, "Lucas Pseudoprimes", Mathematics of Computation 35(152),
         // October 1980, pp. 1391-1417, especially page 1401.
-        // http://www.ams.org/journals/mcom/1980-35-152/S0025-5718-1980-0583518-6/S0025-5718-1980-0583518-6.pdf
+        // https://www.ams.org/journals/mcom/1980-35-152/S0025-5718-1980-0583518-6/S0025-5718-1980-0583518-6.pdf
         //
         // Grantham, "Frobenius Pseudoprimes", Mathematics of Computation 70(234),
         // March 2000, pp. 873-891.
-        // http://www.ams.org/journals/mcom/2001-70-234/S0025-5718-00-01197-2/S0025-5718-00-01197-2.pdf
+        // https://www.ams.org/journals/mcom/2001-70-234/S0025-5718-00-01197-2/S0025-5718-00-01197-2.pdf
         //
         // Baillie, "Extra strong Lucas pseudoprimes", OEIS A217719, https://oeis.org/A217719.
         //
@@ -199,8 +208,8 @@ NextRandom:
             var p = Word(3L);
             nat d = new nat(1);
             var t1 = nat(null); // temp
-            Int intD = ref new Int(abs:d);
-            Int intN = ref new Int(abs:n);
+            ptr<Int> intD = addr(new Int(abs:d));
+            ptr<Int> intN = addr(new Int(abs:n));
             while (i >= 0L)
             {
                 if (p > 10000L)
@@ -210,12 +219,14 @@ NextRandom:
                     panic("math/big: internal error: cannot find (D/n) = -1 for " + intN.String());
                 p++;
                 }
+
                 d[0L] = p * p - 4L;
                 var j = Jacobi(intD, intN);
                 if (j == -1L)
                 {
                     break;
                 }
+
                 if (j == 0L)
                 { 
                     // d = p²-4 = (p-2)(p+2).
@@ -224,7 +235,9 @@ NextRandom:
                     // the shared prime factor must be p+2.
                     // If p+2 == n, then n is prime; otherwise p+2 is a proper factor of n.
                     return len(n) == 1L && n[0L] == p + 2L;
+
                 }
+
                 if (p == 40L)
                 { 
                     // We'll never find (d/n) = -1 if n is a square.
@@ -236,7 +249,9 @@ NextRandom:
                     {
                         return false;
                     }
+
                 }
+
             } 
 
             // Grantham definition of "extra strong Lucas pseudoprime", after Thm 2.3 on p. 876
@@ -316,6 +331,7 @@ NextRandom:
                     t1 = t1.sqr(vk1);
                     t1 = t1.add(t1, nm2);
                     t2, vk1 = t2.div(vk1, t1, n);
+
                 }
                 else
                 { 
@@ -329,7 +345,9 @@ NextRandom:
                     t1 = t1.sqr(vk);
                     t1 = t1.add(t1, nm2);
                     t2, vk = t2.div(vk, t1, n);
+
                 }
+
             } 
 
             // Now k=s, so vk = V(s). Check V(s) ≡ ±2 (mod n).
@@ -351,7 +369,9 @@ NextRandom:
                 {
                     t1 = t2;
                     t2 = t1;
+
                 }
+
                 t1 = t1.sub(t1, t2);
                 var t3 = vk1; // steal vk1, no longer needed below
                 vk1 = null;
@@ -361,6 +381,7 @@ NextRandom:
                 {
                     return true;
                 }
+
             } 
 
             // Check V(2^t s) ≡ 0 mod n for some 0 ≤ t < r-1.
@@ -369,21 +390,25 @@ NextRandom:
                 if (len(vk) == 0L)
                 { // vk == 0
                     return true;
+
                 } 
                 // Optimization: V(k) = 2 is a fixed point for V(k') = V(k)² - 2,
                 // so if V(k) = 2, we can stop: we will never find a future V(k) == 0.
                 if (len(vk) == 1L && vk[0L] == 2L)
                 { // vk == 2
                     return false;
+
                 } 
                 // k' = 2k
                 // V(k') = V(2k) = V(k)² - 2
                 t1 = t1.sqr(vk);
                 t1 = t1.sub(t1, natTwo);
                 t2, vk = t2.div(vk, t1, n);
+
             }
 
             return false;
+
         });
     }
 }}

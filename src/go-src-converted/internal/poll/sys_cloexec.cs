@@ -5,9 +5,9 @@
 // This file implements sysSocket and accept for platforms that do not
 // provide a fast path for setting SetNonblock and CloseOnExec.
 
-// +build darwin nacl netbsd openbsd solaris
+// +build aix darwin js,wasm solaris
 
-// package poll -- go2cs converted at 2020 August 29 08:25:47 UTC
+// package poll -- go2cs converted at 2020 October 08 03:32:52 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\sys_cloexec.go
 using syscall = go.syscall_package;
@@ -21,7 +21,12 @@ namespace @internal
         // Wrapper around the accept system call that marks the returned file
         // descriptor as nonblocking and close-on-exec.
         private static (long, syscall.Sockaddr, @string, error) accept(long s)
-        { 
+        {
+            long _p0 = default;
+            syscall.Sockaddr _p0 = default;
+            @string _p0 = default;
+            error _p0 = default!;
+ 
             // See ../syscall/exec_unix.go for description of ForkLock.
             // It is probably okay to hold the lock across syscall.Accept
             // because we have put fd.sysfd into non-blocking mode.
@@ -34,16 +39,17 @@ namespace @internal
             }
             if (err != null)
             {
-                return (-1L, null, "accept", err);
+                return (-1L, null, "accept", error.As(err)!);
             }
             err = syscall.SetNonblock(ns, true);
 
             if (err != null)
             {
                 CloseFunc(ns);
-                return (-1L, null, "setnonblock", err);
+                return (-1L, null, "setnonblock", error.As(err)!);
             }
-            return (ns, sa, "", null);
+            return (ns, sa, "", error.As(null!)!);
+
         }
     }
 }}

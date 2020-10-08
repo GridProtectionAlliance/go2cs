@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:57 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:21 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\pow10.go
 
@@ -32,6 +32,7 @@ namespace go
             {
                 return pow10postab32[uint(n) / 32L] * pow10tab[uint(n) % 32L];
             }
+
             if (-323L <= n && n <= 0L)
             {
                 return pow10negtab32[uint(-n) / 32L] / pow10tab[uint(-n) % 32L];
@@ -45,6 +46,7 @@ namespace go
 
             // n < -323
             return 0L;
+
         }
     }
 }

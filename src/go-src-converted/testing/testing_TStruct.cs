@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:56 UTC
+//     Generated on 2020 October 08 04:36:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
+using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -56,7 +57,15 @@ namespace go
 
             public ref bool done => ref m_commonRef.Value.done;
 
+            public ref Action cleanup => ref m_commonRef.Value.cleanup;
+
+            public ref @string cleanupName => ref m_commonRef.Value.cleanupName;
+
+            public ref slice<System.UIntPtr> cleanupPc => ref m_commonRef.Value.cleanupPc;
+
             public ref bool chatty => ref m_commonRef.Value.chatty;
+
+            public ref bool bench => ref m_commonRef.Value.bench;
 
             public ref bool finished => ref m_commonRef.Value.finished;
 
@@ -70,6 +79,8 @@ namespace go
 
             public ref long level => ref m_commonRef.Value.level;
 
+            public ref slice<System.UIntPtr> creator => ref m_commonRef.Value.creator;
+
             public ref @string name => ref m_commonRef.Value.name;
 
             public ref time.Time start => ref m_commonRef.Value.start;
@@ -80,7 +91,15 @@ namespace go
 
             public ref channel<bool> signal => ref m_commonRef.Value.signal;
 
-            public ref slice<ref T> sub => ref m_commonRef.Value.sub;
+            public ref slice<ptr<T>> sub => ref m_commonRef.Value.sub;
+
+            public ref sync.Once tempDirOnce => ref m_commonRef.Value.tempDirOnce;
+
+            public ref @string tempDir => ref m_commonRef.Value.tempDir;
+
+            public ref error tempDirErr => ref m_commonRef.Value.tempDirErr;
+
+            public ref int tempDirSeq => ref m_commonRef.Value.tempDirSeq;
 
             // Constructors
             public T(NilType _)

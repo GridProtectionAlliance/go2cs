@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:27 UTC
+//     Generated on 2020 October 08 04:28:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -36,7 +35,7 @@ namespace @internal
                 this.Msg = default;
             }
 
-            public Error(src.Pos Pos = default, @string Msg = default)
+            public Error(Pos Pos = default, @string Msg = default)
             {
                 this.Pos = Pos;
                 this.Msg = Msg;

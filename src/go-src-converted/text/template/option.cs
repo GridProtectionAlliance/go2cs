@@ -4,7 +4,7 @@
 
 // This file contains the code to handle template options.
 
-// package template -- go2cs converted at 2020 August 29 08:35:00 UTC
+// package template -- go2cs converted at 2020 October 08 03:42:16 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Go\src\text\template\option.go
 using strings = go.strings_package;
@@ -20,9 +20,9 @@ namespace text
         {
         }
 
-        private static readonly missingKeyAction mapInvalid = iota; // Return an invalid reflect.Value.
-        private static readonly var mapZeroValue = 0; // Return the zero value for the map element.
-        private static readonly var mapError = 1; // Error out
+        private static readonly missingKeyAction mapInvalid = (missingKeyAction)iota; // Return an invalid reflect.Value.
+        private static readonly var mapZeroValue = (var)0; // Return the zero value for the map element.
+        private static readonly var mapError = (var)1; // Error out
 
         private partial struct option
         {
@@ -47,22 +47,29 @@ namespace text
         //    "missingkey=error"
         //        Execution stops immediately with an error.
         //
-        private static ref Template Option(this ref Template t, params @string[] opt)
+        private static ptr<Template> Option(this ptr<Template> _addr_t, params @string[] opt)
         {
+            opt = opt.Clone();
+            ref Template t = ref _addr_t.val;
+
             t.init();
             foreach (var (_, s) in opt)
             {
                 t.setOption(s);
             }
-            return t;
+            return _addr_t!;
+
         }
 
-        private static void setOption(this ref Template _t, @string opt) => func(_t, (ref Template t, Defer _, Panic panic, Recover __) =>
+        private static void setOption(this ptr<Template> _addr_t, @string opt) => func((_, panic, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             if (opt == "")
             {
                 panic("empty option string");
             }
+
             var elems = strings.Split(opt, "=");
             switch (len(elems))
             {
@@ -77,15 +84,15 @@ namespace text
 
                                 case "default": 
                                     t.option.missingKey = mapInvalid;
-                                    return;
+                                    return ;
                                     break;
                                 case "zero": 
                                     t.option.missingKey = mapZeroValue;
-                                    return;
+                                    return ;
                                     break;
                                 case "error": 
                                     t.option.missingKey = mapError;
-                                    return;
+                                    return ;
                                     break;
                             }
                             break;
@@ -93,6 +100,7 @@ namespace text
                     break;
             }
             panic("unrecognized option: " + opt);
+
         });
     }
 }}

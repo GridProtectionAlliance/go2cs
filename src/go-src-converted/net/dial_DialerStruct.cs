@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:16 UTC
+//     Generated on 2020 October 08 03:31:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
 using nettrace = go.@internal.nettrace_package;
-using poll = go.@internal.poll_package;
+using syscall = go.syscall_package;
 using time = go.time_package;
 
 namespace go
@@ -36,9 +36,10 @@ namespace go
                 this.KeepAlive = default;
                 this.Resolver = default;
                 this.Cancel = default;
+                this.Control = default;
             }
 
-            public Dialer(time.Duration Timeout = default, time.Time Deadline = default, Addr LocalAddr = default, bool DualStack = default, time.Duration FallbackDelay = default, time.Duration KeepAlive = default, ref ptr<Resolver> Resolver = default, channel<object> Cancel = default)
+            public Dialer(time.Duration Timeout = default, time.Time Deadline = default, Addr LocalAddr = default, bool DualStack = default, time.Duration FallbackDelay = default, time.Duration KeepAlive = default, ref ptr<Resolver> Resolver = default, channel<object> Cancel = default, Func<@string, @string, syscall.RawConn, error> Control = default)
             {
                 this.Timeout = Timeout;
                 this.Deadline = Deadline;
@@ -48,6 +49,7 @@ namespace go
                 this.KeepAlive = KeepAlive;
                 this.Resolver = Resolver;
                 this.Cancel = Cancel;
+                this.Control = Control;
             }
 
             // Enable comparisons between nil and Dialer struct
@@ -70,7 +72,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Dialer Dialer_cast(dynamic value)
         {
-            return new Dialer(value.Timeout, value.Deadline, value.LocalAddr, value.DualStack, value.FallbackDelay, value.KeepAlive, ref value.Resolver, value.Cancel);
+            return new Dialer(value.Timeout, value.Deadline, value.LocalAddr, value.DualStack, value.FallbackDelay, value.KeepAlive, ref value.Resolver, value.Cancel, value.Control);
         }
     }
 }

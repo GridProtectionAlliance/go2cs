@@ -13,9 +13,9 @@
 // already part of the program are called. The main function is not run.
 // A plugin is only initialized once, and cannot be closed.
 //
-// Currently plugins are only supported on Linux and macOS.
+// Currently plugins are only supported on Linux, FreeBSD, and macOS.
 // Please report any issues.
-// package plugin -- go2cs converted at 2020 August 29 10:11:10 UTC
+// package plugin -- go2cs converted at 2020 October 08 04:59:50 UTC
 // import "plugin" ==> using plugin = go.plugin_package
 // Original source: C:\Go\src\plugin\plugin.go
 
@@ -36,17 +36,24 @@ namespace go
         // Open opens a Go plugin.
         // If a path has already been opened, then the existing *Plugin is returned.
         // It is safe for concurrent use by multiple goroutines.
-        public static (ref Plugin, error) Open(@string path)
+        public static (ptr<Plugin>, error) Open(@string path)
         {
-            return open(path);
+            ptr<Plugin> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_open(path)!;
         }
 
         // Lookup searches for a symbol named symName in plugin p.
         // A symbol is any exported variable or function.
         // It reports an error if the symbol is not found.
         // It is safe for concurrent use by multiple goroutines.
-        private static (Symbol, error) Lookup(this ref Plugin p, @string symName)
+        private static (Symbol, error) Lookup(this ptr<Plugin> _addr_p, @string symName)
         {
+            Symbol _p0 = default;
+            error _p0 = default!;
+            ref Plugin p = ref _addr_p.val;
+
             return lookup(p, symName);
         }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 August 29 08:45:00 UTC
+// package cmplx -- go2cs converted at 2020 October 08 03:25:54 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\asin.go
 using math = go.math_package;
@@ -57,9 +57,34 @@ namespace math
         // Asin returns the inverse sine of x.
         public static System.Numerics.Complex128 Asin(System.Numerics.Complex128 x)
         {
-            if (imag(x) == 0L && math.Abs(real(x)) <= 1L)
             {
-                return complex(math.Asin(real(x)), imag(x));
+                var re = real(x);
+                var im = imag(x);
+
+
+                if (im == 0L && math.Abs(re) <= 1L) 
+                    return complex(math.Asin(re), im);
+                else if (re == 0L && math.Abs(im) <= 1L) 
+                    return complex(re, math.Asinh(im));
+                else if (math.IsNaN(im)) 
+
+                    if (re == 0L) 
+                        return complex(re, math.NaN());
+                    else if (math.IsInf(re, 0L)) 
+                        return complex(math.NaN(), re);
+                    else 
+                        return NaN();
+                                    else if (math.IsInf(im, 0L)) 
+
+                    if (math.IsNaN(re)) 
+                        return x;
+                    else if (math.IsInf(re, 0L)) 
+                        return complex(math.Copysign(math.Pi / 4L, re), im);
+                    else 
+                        return complex(math.Copysign(0L, re), im);
+                                    else if (math.IsInf(re, 0L)) 
+                    return complex(math.Copysign(math.Pi / 2L, re), math.Copysign(re, im));
+
             }
             var ct = complex(-imag(x), real(x)); // i * x
             var xx = x * x;
@@ -72,9 +97,34 @@ namespace math
         // Asinh returns the inverse hyperbolic sine of x.
         public static System.Numerics.Complex128 Asinh(System.Numerics.Complex128 x)
         {
-            if (imag(x) == 0L && math.Abs(real(x)) <= 1L)
             {
-                return complex(math.Asinh(real(x)), imag(x));
+                var re = real(x);
+                var im = imag(x);
+
+
+                if (im == 0L && math.Abs(re) <= 1L) 
+                    return complex(math.Asinh(re), im);
+                else if (re == 0L && math.Abs(im) <= 1L) 
+                    return complex(re, math.Asin(im));
+                else if (math.IsInf(re, 0L)) 
+
+                    if (math.IsInf(im, 0L)) 
+                        return complex(re, math.Copysign(math.Pi / 4L, im));
+                    else if (math.IsNaN(im)) 
+                        return x;
+                    else 
+                        return complex(re, math.Copysign(0.0F, im));
+                                    else if (math.IsNaN(re)) 
+
+                    if (im == 0L) 
+                        return x;
+                    else if (math.IsInf(im, 0L)) 
+                        return complex(im, re);
+                    else 
+                        return NaN();
+                                    else if (math.IsInf(im, 0L)) 
+                    return complex(math.Copysign(im, re), math.Copysign(math.Pi / 2L, im));
+
             }
             var xx = x * x;
             var x1 = complex(1L + real(xx), imag(xx)); // 1 + x*x
@@ -104,11 +154,17 @@ namespace math
         // Acosh returns the inverse hyperbolic cosine of x.
         public static System.Numerics.Complex128 Acosh(System.Numerics.Complex128 x)
         {
+            if (x == 0L)
+            {
+                return complex(0L, math.Copysign(math.Pi / 2L, imag(x)));
+            }
+
             var w = Acos(x);
             if (imag(w) <= 0L)
             {
                 return complex(-imag(w), real(w)); // i * w
             }
+
             return complex(imag(w), -real(w)); // -i * w
         }
 
@@ -148,12 +204,33 @@ namespace math
         // Atan returns the inverse tangent of x.
         public static System.Numerics.Complex128 Atan(System.Numerics.Complex128 x)
         {
+            {
+                var re = real(x);
+                var im = imag(x);
+
+
+                if (im == 0L) 
+                    return complex(math.Atan(re), im);
+                else if (re == 0L && math.Abs(im) <= 1L) 
+                    return complex(re, math.Atanh(im));
+                else if (math.IsInf(im, 0L) || math.IsInf(re, 0L)) 
+                    if (math.IsNaN(re))
+                    {
+                        return complex(math.NaN(), math.Copysign(0L, im));
+                    }
+
+                    return complex(math.Copysign(math.Pi / 2L, re), math.Copysign(0L, im));
+                else if (math.IsNaN(re) || math.IsNaN(im)) 
+                    return NaN();
+
+            }
             var x2 = real(x) * real(x);
             long a = 1L - x2 - imag(x) * imag(x);
             if (a == 0L)
             {
                 return NaN();
             }
+
             float t = 0.5F * math.Atan2(2L * real(x), a);
             var w = reducePi(t);
 
@@ -163,9 +240,11 @@ namespace math
             {
                 return NaN();
             }
+
             t = imag(x) + 1L;
             var c = (x2 + t * t) / b;
             return complex(w, 0.25F * math.Log(c));
+
         }
 
         // Atanh returns the inverse hyperbolic tangent of x.

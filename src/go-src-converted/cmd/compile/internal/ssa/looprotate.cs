@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:54:07 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:43 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\looprotate.go
 
@@ -32,16 +32,18 @@ namespace @internal
         //  entry:
         //    CMPQ ...
         //    JLT loop
-        private static void loopRotate(ref Func f)
+        private static void loopRotate(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             var loopnest = f.loopnest();
             if (loopnest.hasIrreducible)
             {
-                return;
+                return ;
             }
             if (len(loopnest.loops) == 0L)
             {
-                return;
+                return ;
             }
             var idToIdx = make_slice<long>(f.NumBlocks());
             {
@@ -58,13 +60,13 @@ namespace @internal
                 b = b__prev1;
             }
 
-            map after = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ID, slice<ref Block>>{}; 
+            map after = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ID, slice<ptr<Block>>>{}; 
 
             // Check each loop header and decide if we want to move it.
             foreach (var (_, loop) in loopnest.loops)
             {
                 var b = loop.header;
-                ref Block p = default; // b's in-loop predecessor
+                ptr<Block> p; // b's in-loop predecessor
                 foreach (var (_, e) in b.Preds)
                 {
                     if (e.b.Kind != BlockPlain)
@@ -76,29 +78,34 @@ namespace @internal
                         continue;
                     }
                     p = e.b;
+
                 }                if (p == null || p == b)
                 {
                     continue;
                 }
-                after[p.ID] = new slice<ref Block>(new ref Block[] { b });
+                after[p.ID] = new slice<ptr<Block>>(new ptr<Block>[] { b });
                 while (true)
                 {
                     var nextIdx = idToIdx[b.ID] + 1L;
                     if (nextIdx >= len(f.Blocks))
                     { // reached end of function (maybe impossible?)
                         break;
+
                     }
                     var nextb = f.Blocks[nextIdx];
                     if (nextb == p)
                     { // original loop predecessor is next
                         break;
+
                     }
                     if (loopnest.b2l[nextb.ID] != loop)
                     { // about to leave loop
                         break;
+
                     }
                     after[p.ID] = append(after[p.ID], nextb);
                     b = nextb;
+
                 } 
 
                 // Place b after p.
@@ -112,7 +119,6 @@ namespace @internal
                     }
                     b = b__prev2;
                 }
-
             }            long j = 0L;
             {
                 var i__prev1 = i;
@@ -130,6 +136,7 @@ namespace @internal
                             continue;
                         }
                     }
+
                     f.Blocks[j] = b;
                     j++;
                     foreach (var (_, a) in after[b.ID])
@@ -140,6 +147,7 @@ namespace @internal
                         }
                         f.Blocks[j] = a;
                         j++;
+
                     }
                 }
                 i = i__prev1;

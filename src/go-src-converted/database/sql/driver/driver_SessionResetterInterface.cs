@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate error ResetSessionByRef(ref T value, context.Context ctx);
+            private delegate error ResetSessionByPtr(ptr<T> value, context.Context ctx);
             private delegate error ResetSessionByVal(T value, context.Context ctx);
 
-            private static readonly ResetSessionByRef s_ResetSessionByRef;
+            private static readonly ResetSessionByPtr s_ResetSessionByPtr;
             private static readonly ResetSessionByVal s_ResetSessionByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ResetSessionByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ResetSessionByPtr is null || !m_target_is_ptr)
                     return s_ResetSessionByVal!(target, ctx);
 
-                return s_ResetSessionByRef(ref target, ctx);
+                return s_ResetSessionByPtr(m_target_ptr, ctx);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static SessionResetter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ResetSession");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ResetSession");
 
                 if (!(extensionMethod is null))
-                    s_ResetSessionByRef = extensionMethod.CreateStaticDelegate(typeof(ResetSessionByRef)) as ResetSessionByRef;
+                    s_ResetSessionByPtr = extensionMethod.CreateStaticDelegate(typeof(ResetSessionByPtr)) as ResetSessionByPtr;
 
-                if (s_ResetSessionByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ResetSession");
+                extensionMethod = targetType.GetExtensionMethod("ResetSession");
 
-                    if (!(extensionMethod is null))
-                        s_ResetSessionByVal = extensionMethod.CreateStaticDelegate(typeof(ResetSessionByVal)) as ResetSessionByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ResetSessionByVal = extensionMethod.CreateStaticDelegate(typeof(ResetSessionByVal)) as ResetSessionByVal;
 
-                if (s_ResetSessionByRef is null && s_ResetSessionByVal is null)
+                if (s_ResetSessionByPtr is null && s_ResetSessionByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement SessionResetter.ResetSession method", new Exception("ResetSession"));
             }
 

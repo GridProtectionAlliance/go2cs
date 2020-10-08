@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:18:11 UTC
+//     Generated on 2020 October 08 03:21:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,9 +32,10 @@ namespace go
                 this.started = default;
                 this.nbgsweep = default;
                 this.npausesweep = default;
+                this.centralIndex = default;
             }
 
-            public sweepdata(mutex @lock = default, ref ptr<g> g = default, bool parked = default, bool started = default, uint nbgsweep = default, uint npausesweep = default)
+            public sweepdata(mutex @lock = default, ref ptr<g> g = default, bool parked = default, bool started = default, uint nbgsweep = default, uint npausesweep = default, sweepClass centralIndex = default)
             {
                 this.@lock = @lock;
                 this.g = g;
@@ -42,6 +43,7 @@ namespace go
                 this.started = started;
                 this.nbgsweep = nbgsweep;
                 this.npausesweep = npausesweep;
+                this.centralIndex = centralIndex;
             }
 
             // Enable comparisons between nil and sweepdata struct
@@ -64,7 +66,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static sweepdata sweepdata_cast(dynamic value)
         {
-            return new sweepdata(value.@lock, ref value.g, value.parked, value.started, value.nbgsweep, value.npausesweep);
+            return new sweepdata(value.@lock, ref value.g, value.parked, value.started, value.nbgsweep, value.npausesweep, value.centralIndex);
         }
     }
 }

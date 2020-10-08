@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:51:52 UTC
+//     Generated on 2020 October 08 04:08:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using arch = go.cmd.asm.@internal.arch_package;
 using flags = go.cmd.asm.@internal.flags_package;
 using lex = go.cmd.asm.@internal.lex_package;
 using obj = go.cmd.@internal.obj_package;
+using x86 = go.cmd.@internal.obj.x86_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
 using go;
@@ -61,7 +62,7 @@ namespace @internal
                 this.errorWriter = default;
             }
 
-            public Parser(lex.TokenReader lex = default, long lineNum = default, long errorLine = default, long errorCount = default, long pc = default, slice<lex.Token> input = default, long inputPos = default, slice<@string> pendingLabels = default, map<@string, ref obj.Prog> labels = default, slice<Patch> toPatch = default, slice<obj.Addr> addr = default, ref ptr<arch.Arch> arch = default, ref ptr<obj.Link> ctxt = default, ref ptr<obj.Prog> firstProg = default, ref ptr<obj.Prog> lastProg = default, map<@string, long> dataAddr = default, bool isJump = default, io.Writer errorWriter = default)
+            public Parser(lex.TokenReader lex = default, long lineNum = default, long errorLine = default, long errorCount = default, long pc = default, slice<lex.Token> input = default, long inputPos = default, slice<@string> pendingLabels = default, map<@string, ptr<obj.Prog>> labels = default, slice<Patch> toPatch = default, slice<obj.Addr> addr = default, ref ptr<arch.Arch> arch = default, ref ptr<obj.Link> ctxt = default, ref ptr<obj.Prog> firstProg = default, ref ptr<obj.Prog> lastProg = default, map<@string, long> dataAddr = default, bool isJump = default, io.Writer errorWriter = default)
             {
                 this.lex = lex;
                 this.lineNum = lineNum;

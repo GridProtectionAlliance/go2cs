@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:58 UTC
+//     Generated on 2020 October 08 04:29:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
                 this.level = default;
             }
 
-            public blockHeap(slice<ref ssa.Block> a = default, slice<int> level = default)
+            public blockHeap(slice<ptr<ssa.Block>> a = default, slice<int> level = default)
             {
                 this.a = a;
                 this.level = level;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:44:40 UTC
+//     Generated on 2020 October 08 03:45:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,11 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using windows = go.@internal.syscall.windows_package;
 using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
+using @unsafe = go.@unsafe_package;
 
 namespace go
 {
@@ -38,7 +40,13 @@ namespace go
             public fileStat(NilType _)
             {
                 this.name = default;
-                this.sys = default;
+                this.FileAttributes = default;
+                this.CreationTime = default;
+                this.LastAccessTime = default;
+                this.LastWriteTime = default;
+                this.FileSizeHigh = default;
+                this.FileSizeLow = default;
+                this.Reserved0 = default;
                 this.filetype = default;
                 this.m_MutexRef = new ptr<sync.Mutex>(new sync.Mutex(nil));
                 this.path = default;
@@ -48,10 +56,16 @@ namespace go
                 this.appendNameToPath = default;
             }
 
-            public fileStat(@string name = default, syscall.Win32FileAttributeData sys = default, uint filetype = default, sync.Mutex Mutex = default, @string path = default, uint vol = default, uint idxhi = default, uint idxlo = default, bool appendNameToPath = default)
+            public fileStat(@string name = default, uint FileAttributes = default, syscall.Filetime CreationTime = default, syscall.Filetime LastAccessTime = default, syscall.Filetime LastWriteTime = default, uint FileSizeHigh = default, uint FileSizeLow = default, uint Reserved0 = default, uint filetype = default, sync.Mutex Mutex = default, @string path = default, uint vol = default, uint idxhi = default, uint idxlo = default, bool appendNameToPath = default)
             {
                 this.name = name;
-                this.sys = sys;
+                this.FileAttributes = FileAttributes;
+                this.CreationTime = CreationTime;
+                this.LastAccessTime = LastAccessTime;
+                this.LastWriteTime = LastWriteTime;
+                this.FileSizeHigh = FileSizeHigh;
+                this.FileSizeLow = FileSizeLow;
+                this.Reserved0 = Reserved0;
                 this.filetype = filetype;
                 this.m_MutexRef = new ptr<sync.Mutex>(Mutex);
                 this.path = path;
@@ -81,7 +95,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static fileStat fileStat_cast(dynamic value)
         {
-            return new fileStat(value.name, value.sys, value.filetype, value.Mutex, value.path, value.vol, value.idxhi, value.idxlo, value.appendNameToPath);
+            return new fileStat(value.name, value.FileAttributes, value.CreationTime, value.LastAccessTime, value.LastWriteTime, value.FileSizeHigh, value.FileSizeLow, value.Reserved0, value.filetype, value.Mutex, value.path, value.vol, value.idxhi, value.idxlo, value.appendNameToPath);
         }
     }
 }

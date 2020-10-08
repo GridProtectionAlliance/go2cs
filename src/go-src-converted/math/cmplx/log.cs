@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 August 29 08:45:00 UTC
+// package cmplx -- go2cs converted at 2020 October 08 03:25:54 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\log.go
 using math = go.math_package;
@@ -69,7 +69,8 @@ namespace math
         // Log10 returns the decimal logarithm of x.
         public static System.Numerics.Complex128 Log10(System.Numerics.Complex128 x)
         {
-            return math.Log10E * Log(x);
+            var z = Log(x);
+            return complex(math.Log10E * real(z), math.Log10E * imag(z));
         }
     }
 }}

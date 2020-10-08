@@ -4,7 +4,7 @@
 
 // +build s390x ppc64le
 
-// package sha512 -- go2cs converted at 2020 August 29 08:29:50 UTC
+// package sha512 -- go2cs converted at 2020 October 08 03:35:43 UTC
 // import "crypto/sha512" ==> using sha512 = go.crypto.sha512_package
 // Original source: C:\Go\src\crypto\sha512\sha512block_decl.go
 
@@ -16,7 +16,7 @@ namespace crypto
     public static partial class sha512_package
     {
         //go:noescape
-        private static void block(ref digest dig, slice<byte> p)
+        private static void block(ptr<digest> dig, slice<byte> p)
 ;
     }
 }}

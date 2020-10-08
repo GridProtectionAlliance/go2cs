@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:38 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:43 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\proc.go
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -14,9 +15,12 @@ using System.Threading;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         private static var buildVersion = sys.TheVersion;
+
+        // set using cmd/go/internal/modload.ModInfoProg
+        private static @string modinfo = default;
 
         // Goroutine scheduler
         // The scheduler's job is to distribute ready-to-run goroutines over worker threads.
@@ -81,15 +85,13 @@ namespace go
         // sloppy about thread unparking when submitting to global queue. Also see comments
         // for nmspinning manipulation.
 
-        private static m m0 = default;        private static g g0 = default;        private static System.UIntPtr raceprocctx0 = default;
+        private static m m0 = default;        private static g g0 = default;        private static ptr<mcache> mcache0;        private static System.UIntPtr raceprocctx0 = default;
 
-        //go:linkname runtime_init runtime.init
-        private static void runtime_init()
-;
+        //go:linkname runtime_inittask runtime..inittask
+        private static initTask runtime_inittask = default;
 
-        //go:linkname main_init main.init
-        private static void main_init()
-;
+        //go:linkname main_inittask main..inittask
+        private static initTask main_inittask = default;
 
         // main_init_done is a signal used by cgocallbackg that initialization
         // has been completed. It is made before _cgo_notify_runtime_init_done,
@@ -127,17 +129,21 @@ namespace go
                 maxstacksize = 1000000000L;
             }
             else
-            {>>MARKER:FUNCTION_main_init_BLOCK_PREFIX<<
+            {
                 maxstacksize = 250000000L;
             } 
 
             // Allow newproc to start new Ms.
             mainStarted = true;
 
-            systemstack(() =>
-            {>>MARKER:FUNCTION_runtime_init_BLOCK_PREFIX<<
-                newm(sysmon, null);
-            }); 
+            if (GOARCH != "wasm")
+            { // no threads on wasm yet, so no sysmon
+                systemstack(() =>
+                {
+                    newm(sysmon, _addr_null, -1L);
+                });
+
+            } 
 
             // Lock the main goroutine onto this, the main OS thread,
             // during initialization. Most programs won't care, but a few
@@ -147,11 +153,12 @@ namespace go
             // to preserve the lock.
             lockOSThread();
 
-            if (g.m != ref m0)
+            if (g.m != _addr_m0)
             {
                 throw("runtime.main not on m0");
             }
-            runtime_init(); // must be before defer
+
+            doInit(_addr_runtime_inittask); // must be before defer
             if (nanotime() == 0L)
             {
                 throw("nanotime returning zero");
@@ -165,10 +172,10 @@ namespace go
                 {
                     unlockOSThread();
                 }
+
             }()); 
 
-            // Record when the world started. Must be after runtime_init
-            // because nanotime on some platforms depends on startNano.
+            // Record when the world started.
             runtimeInitTime = nanotime();
 
             gcenable();
@@ -180,17 +187,21 @@ namespace go
                 {
                     throw("_cgo_thread_start missing");
                 }
+
                 if (GOOS != "windows")
                 {
                     if (_cgo_setenv == null)
                     {
                         throw("_cgo_setenv missing");
                     }
+
                     if (_cgo_unsetenv == null)
                     {
                         throw("_cgo_unsetenv missing");
                     }
+
                 }
+
                 if (_cgo_notify_runtime_init_done == null)
                 {
                     throw("_cgo_notify_runtime_init_done missing");
@@ -199,9 +210,11 @@ namespace go
                 // a C-created thread and need to create a new thread.
                 startTemplateThread();
                 cgocall(_cgo_notify_runtime_init_done, null);
+
             }
-            var fn = main_init; // make an indirect call, as the linker doesn't know the address of the main package when laying down the runtime
-            fn();
+
+            doInit(_addr_main_inittask);
+
             close(main_init_done);
 
             needUnlock = false;
@@ -211,9 +224,11 @@ namespace go
             { 
                 // A program compiled with -buildmode=c-archive or c-shared
                 // has a main, but it is not executed.
-                return;
+                return ;
+
             }
-            fn = main_main; // make an indirect call, as the linker doesn't know the address of the main package when laying down the runtime
+
+            var fn = main_main; // make an indirect call, as the linker doesn't know the address of the main package when laying down the runtime
             fn();
             if (raceenabled)
             {
@@ -224,29 +239,35 @@ namespace go
             // another goroutine at the same time as main returns,
             // let the other goroutine finish printing the panic trace.
             // Once it does, it will exit. See issues 3934 and 20018.
-            if (atomic.Load(ref runningPanicDefers) != 0L)
+            if (atomic.Load(_addr_runningPanicDefers) != 0L)
             { 
                 // Running deferred functions should not take long.
                 for (long c = 0L; c < 1000L; c++)
                 {
-                    if (atomic.Load(ref runningPanicDefers) == 0L)
+                    if (atomic.Load(_addr_runningPanicDefers) == 0L)
                     {
                         break;
                     }
+
                     Gosched();
+
                 }
 
+
             }
-            if (atomic.Load(ref panicking) != 0L)
+
+            if (atomic.Load(_addr_panicking) != 0L)
             {
-                gopark(null, null, "panicwait", traceEvGoStop, 1L);
+                gopark(null, null, waitReasonPanicWait, traceEvGoStop, 1L);
             }
+
             exit(0L);
             while (true)
             {
-                ref int x = default;
-                x.Value = 0L;
+                ptr<int> x;
+                x.val = 0L;
             }
+
 
         });
 
@@ -258,6 +279,7 @@ namespace go
             {
                 racefini();
             }
+
         }
 
         // start forcegc helper goroutine
@@ -269,23 +291,27 @@ namespace go
         private static void forcegchelper()
         {
             forcegc.g = getg();
+            lockInit(_addr_forcegc.@lock, lockRankForcegc);
             while (true)
             {
-                lock(ref forcegc.@lock);
+                lock(_addr_forcegc.@lock);
                 if (forcegc.idle != 0L)
                 {
                     throw("forcegc: phase error");
                 }
-                atomic.Store(ref forcegc.idle, 1L);
-                goparkunlock(ref forcegc.@lock, "force gc (idle)", traceEvGoBlock, 1L); 
+
+                atomic.Store(_addr_forcegc.idle, 1L);
+                goparkunlock(_addr_forcegc.@lock, waitReasonForceGCIdle, traceEvGoBlock, 1L); 
                 // this goroutine is explicitly resumed by sysmon
                 if (debug.gctrace > 0L)
                 {
                     println("GC forced");
                 } 
                 // Time-triggered, fully concurrent.
-                gcStart(gcBackgroundMode, new gcTrigger(kind:gcTriggerTime,now:nanotime()));
+                gcStart(new gcTrigger(kind:gcTriggerTime,now:nanotime()));
+
             }
+
 
         }
 
@@ -295,6 +321,7 @@ namespace go
         // suspend the current goroutine, so execution resumes automatically.
         public static void Gosched()
         {
+            checkTimeouts();
             mcall(gosched_m);
         }
 
@@ -310,42 +337,58 @@ namespace go
         // If unlockf returns false, the goroutine is resumed.
         // unlockf must not access this G's stack, as it may be moved between
         // the call to gopark and the call to unlockf.
-        private static bool gopark(Func<ref g, unsafe.Pointer, bool> unlockf, unsafe.Pointer @lock, @string reason, byte traceEv, long traceskip)
+        // Reason explains why the goroutine has been parked.
+        // It is displayed in stack traces and heap dumps.
+        // Reasons should be unique and descriptive.
+        // Do not re-use reasons, add new ones.
+        private static bool gopark(Func<ptr<g>, unsafe.Pointer, bool> unlockf, unsafe.Pointer @lock, waitReason reason, byte traceEv, long traceskip)
         {
+            if (reason != waitReasonSleep)
+            {
+                checkTimeouts(); // timeouts may expire while two goroutines keep the scheduler busy
+            }
+
             var mp = acquirem();
             var gp = mp.curg;
-            var status = readgstatus(gp);
+            var status = readgstatus(_addr_gp);
             if (status != _Grunning && status != _Gscanrunning)
             {
                 throw("gopark: bad g status");
             }
+
             mp.waitlock = lock;
-            mp.waitunlockf = @unsafe.Pointer(ref unlockf).Value;
+            mp.waitunlockf = unlockf;
             gp.waitreason = reason;
             mp.waittraceev = traceEv;
             mp.waittraceskip = traceskip;
             releasem(mp); 
             // can't do anything that might move the G between Ms here.
             mcall(park_m);
+
         }
 
         // Puts the current goroutine into a waiting state and unlocks the lock.
         // The goroutine can be made runnable again by calling goready(gp).
-        private static void goparkunlock(ref mutex @lock, @string reason, byte traceEv, long traceskip)
+        private static void goparkunlock(ptr<mutex> _addr_@lock, waitReason reason, byte traceEv, long traceskip)
         {
+            ref mutex @lock = ref _addr_@lock.val;
+
             gopark(parkunlock_c, @unsafe.Pointer(lock), reason, traceEv, traceskip);
         }
 
-        private static void goready(ref g gp, long traceskip)
+        private static void goready(ptr<g> _addr_gp, long traceskip)
         {
+            ref g gp = ref _addr_gp.val;
+
             systemstack(() =>
             {
-                ready(gp, traceskip, true);
+                ready(_addr_gp, traceskip, true);
             });
+
         }
 
         //go:nosplit
-        private static ref sudog acquireSudog()
+        private static ptr<sudog> acquireSudog()
         { 
             // Delicate dance: the semaphore implementation calls
             // acquireSudog, acquireSudog calls new(sudog),
@@ -359,7 +402,7 @@ namespace go
             var pp = mp.p.ptr();
             if (len(pp.sudogcache) == 0L)
             {
-                lock(ref sched.sudoglock); 
+                lock(_addr_sched.sudoglock); 
                 // First, try to grab a batch from central cache.
                 while (len(pp.sudogcache) < cap(pp.sudogcache) / 2L && sched.sudogcache != null)
                 {
@@ -369,13 +412,15 @@ namespace go
                     pp.sudogcache = append(pp.sudogcache, s);
                 }
 
-                unlock(ref sched.sudoglock); 
+                unlock(_addr_sched.sudoglock); 
                 // If the central cache is empty, allocate a new one.
                 if (len(pp.sudogcache) == 0L)
                 {
                     pp.sudogcache = append(pp.sudogcache, @new<sudog>());
                 }
+
             }
+
             var n = len(pp.sudogcache);
             s = pp.sudogcache[n - 1L];
             pp.sudogcache[n - 1L] = null;
@@ -384,48 +429,59 @@ namespace go
             {
                 throw("acquireSudog: found s.elem != nil in cache");
             }
+
             releasem(mp);
-            return s;
+            return _addr_s!;
+
         }
 
         //go:nosplit
-        private static void releaseSudog(ref sudog s)
+        private static void releaseSudog(ptr<sudog> _addr_s)
         {
+            ref sudog s = ref _addr_s.val;
+
             if (s.elem != null)
             {
                 throw("runtime: sudog with non-nil elem");
             }
+
             if (s.isSelect)
             {
                 throw("runtime: sudog with non-false isSelect");
             }
+
             if (s.next != null)
             {
                 throw("runtime: sudog with non-nil next");
             }
+
             if (s.prev != null)
             {
                 throw("runtime: sudog with non-nil prev");
             }
+
             if (s.waitlink != null)
             {
                 throw("runtime: sudog with non-nil waitlink");
             }
+
             if (s.c != null)
             {
                 throw("runtime: sudog with non-nil c");
             }
+
             var gp = getg();
             if (gp.param != null)
             {
                 throw("runtime: releaseSudog with non-nil gp.param");
             }
+
             var mp = acquirem(); // avoid rescheduling to another P
             var pp = mp.p.ptr();
             if (len(pp.sudogcache) == cap(pp.sudogcache))
             { 
                 // Transfer half of local cache to the central cache.
-                ref sudog first = default;                ref sudog last = default;
+                ptr<sudog> first;                ptr<sudog> last;
 
                 while (len(pp.sudogcache) > cap(pp.sudogcache) / 2L)
                 {
@@ -441,16 +497,21 @@ namespace go
                     {
                         last.next = p;
                     }
+
                     last = p;
+
                 }
 
-                lock(ref sched.sudoglock);
+                lock(_addr_sched.sudoglock);
                 last.next = sched.sudogcache;
                 sched.sudogcache = first;
-                unlock(ref sched.sudoglock);
+                unlock(_addr_sched.sudoglock);
+
             }
+
             pp.sudogcache = append(pp.sudogcache, s);
             releasem(mp);
+
         }
 
         // funcPC returns the entry PC of the function f.
@@ -463,16 +524,16 @@ namespace go
         //go:nosplit
         private static System.UIntPtr funcPC(object f)
         {
-            return new ptr<ptr<ptr<*(ptr<ptr<System.UIntPtr>>)>>>(add(@unsafe.Pointer(ref f), sys.PtrSize));
+            return new ptr<ptr<ptr<System.UIntPtr>>>(efaceOf(_addr_f).data);
         }
 
         // called from assembly
-        private static void badmcall(Action<ref g> fn)
+        private static void badmcall(Action<ptr<g>> fn)
         {
             throw("runtime: mcall called on m->g0 stack");
         }
 
-        private static void badmcall2(Action<ref g> fn)
+        private static void badmcall2(Action<ptr<g>> fn)
         {
             throw("runtime: mcall function returned");
         }
@@ -488,7 +549,7 @@ namespace go
         //go:nowritebarrierrec
         private static void badmorestackg0()
         {
-            var sp = stringStructOf(ref badmorestackg0Msg);
+            var sp = stringStructOf(_addr_badmorestackg0Msg);
             write(2L, sp.str, int32(sp.len));
         }
 
@@ -498,7 +559,7 @@ namespace go
         //go:nowritebarrierrec
         private static void badmorestackgsignal()
         {
-            var sp = stringStructOf(ref badmorestackgsignalMsg);
+            var sp = stringStructOf(_addr_badmorestackgsignalMsg);
             write(2L, sp.str, int32(sp.len));
         }
 
@@ -514,24 +575,97 @@ namespace go
             return gp.lockedm != 0L && gp.m.lockedg != 0L;
         }
 
-        private static slice<ref g> allgs = default;        private static mutex allglock = default;
+        private static slice<ptr<g>> allgs = default;        private static mutex allglock = default;
 
-        private static void allgadd(ref g gp)
+        private static void allgadd(ptr<g> _addr_gp)
         {
-            if (readgstatus(gp) == _Gidle)
+            ref g gp = ref _addr_gp.val;
+
+            if (readgstatus(_addr_gp) == _Gidle)
             {
                 throw("allgadd: bad status Gidle");
             }
-            lock(ref allglock);
+
+            lock(_addr_allglock);
             allgs = append(allgs, gp);
             allglen = uintptr(len(allgs));
-            unlock(ref allglock);
+            unlock(_addr_allglock);
+
         }
 
  
         // Number of goroutine ids to grab from sched.goidgen to local per-P cache at once.
         // 16 seems to provide enough amortization, but other than that it's mostly arbitrary number.
-        private static readonly long _GoidCacheBatch = 16L;
+        private static readonly long _GoidCacheBatch = (long)16L;
+
+
+        // cpuinit extracts the environment variable GODEBUG from the environment on
+        // Unix-like operating systems and calls internal/cpu.Initialize.
+        private static void cpuinit()
+        {
+            const @string prefix = (@string)"GODEBUG=";
+
+            @string env = default;
+
+            switch (GOOS)
+            {
+                case "aix": 
+
+                case "darwin": 
+
+                case "dragonfly": 
+
+                case "freebsd": 
+
+                case "netbsd": 
+
+                case "openbsd": 
+
+                case "illumos": 
+
+                case "solaris": 
+
+                case "linux": 
+                    cpu.DebugOptions = true; 
+
+                    // Similar to goenv_unix but extracts the environment value for
+                    // GODEBUG directly.
+                    // TODO(moehrmann): remove when general goenvs() can be called before cpuinit()
+                    var n = int32(0L);
+                    while (argv_index(argv, argc + 1L + n) != null)
+                    {
+                        n++;
+                    }
+
+
+                    for (var i = int32(0L); i < n; i++)
+                    {
+                        var p = argv_index(argv, argc + 1L + i);
+                        ptr<ptr<@string>> s = new ptr<ptr<ptr<@string>>>(@unsafe.Pointer(addr(new stringStruct(unsafe.Pointer(p),findnull(p)))));
+
+                        if (hasPrefix(s, prefix))
+                        {
+                            env = gostring(p)[len(prefix)..];
+                            break;
+                        }
+
+                    }
+                    break;
+            }
+
+            cpu.Initialize(env); 
+
+            // Support cpu feature variables are used in code generated by the compiler
+            // to guard execution of instructions that can not be assumed to be always supported.
+            x86HasPOPCNT = cpu.X86.HasPOPCNT;
+            x86HasSSE41 = cpu.X86.HasSSE41;
+            x86HasFMA = cpu.X86.HasFMA;
+
+            armHasVFPv4 = cpu.ARM.HasVFPv4;
+
+            arm64HasATOMICS = cpu.ARM64.HasATOMICS;
+
+        }
 
         // The bootstrap sequence is:
         //
@@ -542,7 +676,23 @@ namespace go
         //
         // The new G calls runtime·main.
         private static void schedinit()
-        { 
+        {
+            lockInit(_addr_sched.@lock, lockRankSched);
+            lockInit(_addr_sched.sysmonlock, lockRankSysmon);
+            lockInit(_addr_sched.deferlock, lockRankDefer);
+            lockInit(_addr_sched.sudoglock, lockRankSudog);
+            lockInit(_addr_deadlock, lockRankDeadlock);
+            lockInit(_addr_paniclk, lockRankPanic);
+            lockInit(_addr_allglock, lockRankAllg);
+            lockInit(_addr_allpLock, lockRankAllp);
+            lockInit(_addr_reflectOffs.@lock, lockRankReflectOffs);
+            lockInit(_addr_finlock, lockRankFin);
+            lockInit(_addr_trace.bufLock, lockRankTraceBuf);
+            lockInit(_addr_trace.stringsLock, lockRankTraceStrings);
+            lockInit(_addr_trace.@lock, lockRankTrace);
+            lockInit(_addr_cpuprof.@lock, lockRankCpuprof);
+            lockInit(_addr_trace.stackTab.@lock, lockRankTraceStackTab); 
+
             // raceinit must be the first call to race detector.
             // In particular, it must be done before mallocinit below calls racemapshadow.
             var _g_ = getg();
@@ -550,13 +700,16 @@ namespace go
             {
                 _g_.racectx, raceprocctx0 = raceinit();
             }
+
             sched.maxmcount = 10000L;
 
             tracebackinit();
             moduledataverify();
             stackinit();
             mallocinit();
-            mcommoninit(_g_.m);
+            fastrandinit(); // must run before mcommoninit
+            mcommoninit(_addr__g_.m, -1L);
+            cpuinit(); // must run before alginit
             alginit(); // maps must not be used before this call
             modulesinit(); // provides activeModules
             typelinksinit(); // uses maps, activeModules
@@ -581,6 +734,7 @@ namespace go
                 }
 
             }
+
             if (procresize(procs) != null)
             {
                 throw("unknown runnable goroutine during bootstrap");
@@ -597,20 +751,34 @@ namespace go
                 {
                     p.wbBuf.reset();
                 }
+
             }
+
             if (buildVersion == "")
             { 
                 // Condition should never trigger. This code just serves
                 // to ensure runtime·buildVersion is kept in the resulting binary.
                 buildVersion = "unknown";
+
             }
+
+            if (len(modinfo) == 1L)
+            { 
+                // Condition should never trigger. This code just serves
+                // to ensure runtime·modinfo is kept in the resulting binary.
+                modinfo = "";
+
+            }
+
         }
 
-        private static void dumpgstatus(ref g gp)
+        private static void dumpgstatus(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             var _g_ = getg();
-            print("runtime: gp: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(gp), "\n");
-            print("runtime:  g:  g=", _g_, ", goid=", _g_.goid, ",  g->atomicstatus=", readgstatus(_g_), "\n");
+            print("runtime: gp: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(_addr_gp), "\n");
+            print("runtime:  g:  g=", _g_, ", goid=", _g_.goid, ",  g->atomicstatus=", readgstatus(_addr__g_), "\n");
         }
 
         private static void checkmcount()
@@ -621,10 +789,32 @@ namespace go
                 print("runtime: program exceeds ", sched.maxmcount, "-thread limit\n");
                 throw("thread exhaustion");
             }
+
         }
 
-        private static void mcommoninit(ref m mp)
+        // mReserveID returns the next ID to use for a new m. This new m is immediately
+        // considered 'running' by checkdead.
+        //
+        // sched.lock must be held.
+        private static long mReserveID()
         {
+            if (sched.mnext + 1L < sched.mnext)
+            {
+                throw("runtime: thread ID overflow");
+            }
+
+            var id = sched.mnext;
+            sched.mnext++;
+            checkmcount();
+            return id;
+
+        }
+
+        // Pre-allocated ID may be passed as 'id', or omitted by passing -1.
+        private static void mcommoninit(ptr<m> _addr_mp, long id)
+        {
+            ref m mp = ref _addr_mp.val;
+
             var _g_ = getg(); 
 
             // g0 stack won't make sense for user (and is not necessary unwindable).
@@ -632,21 +822,25 @@ namespace go
             {
                 callers(1L, mp.createstack[..]);
             }
-            lock(ref sched.@lock);
-            if (sched.mnext + 1L < sched.mnext)
-            {
-                throw("runtime: thread ID overflow");
-            }
-            mp.id = sched.mnext;
-            sched.mnext++;
-            checkmcount();
 
-            mp.fastrand[0L] = 1597334677L * uint32(mp.id);
-            mp.fastrand[1L] = uint32(cputicks());
+            lock(_addr_sched.@lock);
+
+            if (id >= 0L)
+            {
+                mp.id = id;
+            }
+            else
+            {
+                mp.id = mReserveID();
+            }
+
+            mp.fastrand[0L] = uint32(int64Hash(uint64(mp.id), fastrandseed));
+            mp.fastrand[1L] = uint32(int64Hash(uint64(cputicks()), ~fastrandseed));
             if (mp.fastrand[0L] | mp.fastrand[1L] == 0L)
             {
                 mp.fastrand[1L] = 1L;
             }
+
             mpreinit(mp);
             if (mp.gsignal != null)
             {
@@ -659,116 +853,57 @@ namespace go
 
             // NumCgoCall() iterates over allm w/o schedlock,
             // so we need to publish it safely.
-            atomicstorep(@unsafe.Pointer(ref allm), @unsafe.Pointer(mp));
-            unlock(ref sched.@lock); 
+            atomicstorep(@unsafe.Pointer(_addr_allm), @unsafe.Pointer(mp));
+            unlock(_addr_sched.@lock); 
 
             // Allocate memory to hold a cgo traceback if the cgo call crashes.
-            if (iscgo || GOOS == "solaris" || GOOS == "windows")
+            if (iscgo || GOOS == "solaris" || GOOS == "illumos" || GOOS == "windows")
             {
                 mp.cgoCallers = @new<cgoCallers>();
             }
+
+        }
+
+        private static System.UIntPtr fastrandseed = default;
+
+        private static void fastrandinit()
+        {
+            ptr<array<byte>> s = new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_fastrandseed))[..];
+            getRandomData(s);
         }
 
         // Mark gp ready to run.
-        private static void ready(ref g gp, long traceskip, bool next)
+        private static void ready(ptr<g> _addr_gp, long traceskip, bool next)
         {
+            ref g gp = ref _addr_gp.val;
+
             if (trace.enabled)
             {
                 traceGoUnpark(gp, traceskip);
             }
-            var status = readgstatus(gp); 
+
+            var status = readgstatus(_addr_gp); 
 
             // Mark runnable.
             var _g_ = getg();
-            _g_.m.locks++; // disable preemption because it can be holding p in a local var
+            var mp = acquirem(); // disable preemption because it can be holding p in a local var
             if (status & ~_Gscan != _Gwaiting)
             {
-                dumpgstatus(gp);
+                dumpgstatus(_addr_gp);
                 throw("bad g->status in ready");
             } 
 
             // status is Gwaiting or Gscanwaiting, make Grunnable and put on runq
-            casgstatus(gp, _Gwaiting, _Grunnable);
-            runqput(_g_.m.p.ptr(), gp, next);
-            if (atomic.Load(ref sched.npidle) != 0L && atomic.Load(ref sched.nmspinning) == 0L)
-            {
-                wakep();
-            }
-            _g_.m.locks--;
-            if (_g_.m.locks == 0L && _g_.preempt)
-            { // restore the preemption request in Case we've cleared it in newstack
-                _g_.stackguard0 = stackPreempt;
-            }
-        }
+            casgstatus(_addr_gp, _Gwaiting, _Grunnable);
+            runqput(_addr__g_.m.p.ptr(), _addr_gp, next);
+            wakep();
+            releasem(mp);
 
-        private static int gcprocs()
-        { 
-            // Figure out how many CPUs to use during GC.
-            // Limited by gomaxprocs, number of actual CPUs, and MaxGcproc.
-            lock(ref sched.@lock);
-            var n = gomaxprocs;
-            if (n > ncpu)
-            {
-                n = ncpu;
-            }
-            if (n > _MaxGcproc)
-            {
-                n = _MaxGcproc;
-            }
-            if (n > sched.nmidle + 1L)
-            { // one M is currently running
-                n = sched.nmidle + 1L;
-            }
-            unlock(ref sched.@lock);
-            return n;
-        }
-
-        private static bool needaddgcproc()
-        {
-            lock(ref sched.@lock);
-            var n = gomaxprocs;
-            if (n > ncpu)
-            {
-                n = ncpu;
-            }
-            if (n > _MaxGcproc)
-            {
-                n = _MaxGcproc;
-            }
-            n -= sched.nmidle + 1L; // one M is currently running
-            unlock(ref sched.@lock);
-            return n > 0L;
-        }
-
-        private static void helpgc(int nproc)
-        {
-            var _g_ = getg();
-            lock(ref sched.@lock);
-            long pos = 0L;
-            for (var n = int32(1L); n < nproc; n++)
-            { // one M is currently running
-                if (allp[pos].mcache == _g_.m.mcache)
-                {
-                    pos++;
-                }
-                var mp = mget();
-                if (mp == null)
-                {
-                    throw("gcprocs inconsistency");
-                }
-                mp.helpgc = n;
-                mp.p.set(allp[pos]);
-                mp.mcache = allp[pos].mcache;
-                pos++;
-                notewakeup(ref mp.park);
-            }
-
-            unlock(ref sched.@lock);
         }
 
         // freezeStopWait is a large value that freezetheworld sets
         // sched.stopwait to in order to request that all Gs permanently stop.
-        private static readonly ulong freezeStopWait = 0x7fffffffUL;
+        private static readonly ulong freezeStopWait = (ulong)0x7fffffffUL;
 
         // freezing is set to non-zero if the runtime is trying to freeze the
         // world.
@@ -783,7 +918,7 @@ namespace go
         // This function must not lock any mutexes.
         private static void freezetheworld()
         {
-            atomic.Store(ref freezing, 1L); 
+            atomic.Store(_addr_freezing, 1L); 
             // stopwait and preemption requests can be lost
             // due to races with concurrently executing threads,
             // so try several times
@@ -791,13 +926,15 @@ namespace go
             { 
                 // this should tell the scheduler to not start any new goroutines
                 sched.stopwait = freezeStopWait;
-                atomic.Store(ref sched.gcwaiting, 1L); 
+                atomic.Store(_addr_sched.gcwaiting, 1L); 
                 // this should stop running goroutines
                 if (!preemptall())
                 {
                     break; // no running goroutines
                 }
+
                 usleep(1000L);
+
             } 
             // to be sure
  
@@ -805,77 +942,77 @@ namespace go
             usleep(1000L);
             preemptall();
             usleep(1000L);
-        }
 
-        private static bool isscanstatus(uint status)
-        {
-            if (status == _Gscan)
-            {
-                throw("isscanstatus: Bad status Gscan");
-            }
-            return status & _Gscan == _Gscan;
         }
 
         // All reads and writes of g's status go through readgstatus, casgstatus
         // castogscanstatus, casfrom_Gscanstatus.
         //go:nosplit
-        private static uint readgstatus(ref g gp)
+        private static uint readgstatus(ptr<g> _addr_gp)
         {
-            return atomic.Load(ref gp.atomicstatus);
-        }
+            ref g gp = ref _addr_gp.val;
 
-        // Ownership of gcscanvalid:
-        //
-        // If gp is running (meaning status == _Grunning or _Grunning|_Gscan),
-        // then gp owns gp.gcscanvalid, and other goroutines must not modify it.
-        //
-        // Otherwise, a second goroutine can lock the scan state by setting _Gscan
-        // in the status bit and then modify gcscanvalid, and then unlock the scan state.
-        //
-        // Note that the first condition implies an exception to the second:
-        // if a second goroutine changes gp's status to _Grunning|_Gscan,
-        // that second goroutine still does not have the right to modify gcscanvalid.
+            return atomic.Load(_addr_gp.atomicstatus);
+        }
 
         // The Gscanstatuses are acting like locks and this releases them.
         // If it proves to be a performance hit we should be able to make these
         // simple atomic stores but for now we are going to throw if
         // we see an inconsistent state.
-        private static void casfrom_Gscanstatus(ref g gp, uint oldval, uint newval)
+        private static void casfrom_Gscanstatus(ptr<g> _addr_gp, uint oldval, uint newval)
         {
+            ref g gp = ref _addr_gp.val;
+
             var success = false; 
 
             // Check that transition is valid.
 
-            if (oldval == _Gscanrunnable || oldval == _Gscanwaiting || oldval == _Gscanrunning || oldval == _Gscansyscall) 
+            if (oldval == _Gscanrunnable || oldval == _Gscanwaiting || oldval == _Gscanrunning || oldval == _Gscansyscall || oldval == _Gscanpreempted) 
                 if (newval == oldval & ~_Gscan)
                 {
-                    success = atomic.Cas(ref gp.atomicstatus, oldval, newval);
+                    success = atomic.Cas(_addr_gp.atomicstatus, oldval, newval);
                 }
+
             else 
                 print("runtime: casfrom_Gscanstatus bad oldval gp=", gp, ", oldval=", hex(oldval), ", newval=", hex(newval), "\n");
-                dumpgstatus(gp);
+                dumpgstatus(_addr_gp);
                 throw("casfrom_Gscanstatus:top gp->status is not in scan state");
                         if (!success)
             {
                 print("runtime: casfrom_Gscanstatus failed gp=", gp, ", oldval=", hex(oldval), ", newval=", hex(newval), "\n");
-                dumpgstatus(gp);
+                dumpgstatus(_addr_gp);
                 throw("casfrom_Gscanstatus: gp->status is not in scan state");
             }
+
+            releaseLockRank(lockRankGscan);
+
         }
 
         // This will return false if the gp is not in the expected status and the cas fails.
         // This acts like a lock acquire while the casfromgstatus acts like a lock release.
-        private static bool castogscanstatus(ref g _gp, uint oldval, uint newval) => func(_gp, (ref g gp, Defer _, Panic panic, Recover __) =>
+        private static bool castogscanstatus(ptr<g> _addr_gp, uint oldval, uint newval) => func((_, panic, __) =>
         {
+            ref g gp = ref _addr_gp.val;
+
 
             if (oldval == _Grunnable || oldval == _Grunning || oldval == _Gwaiting || oldval == _Gsyscall) 
                 if (newval == oldval | _Gscan)
                 {
-                    return atomic.Cas(ref gp.atomicstatus, oldval, newval);
+                    var r = atomic.Cas(_addr_gp.atomicstatus, oldval, newval);
+                    if (r)
+                    {
+                        acquireLockRank(lockRankGscan);
+                    }
+
+                    return r;
+
+
                 }
+
                         print("runtime: castogscanstatus oldval=", hex(oldval), " newval=", hex(newval), "\n");
             throw("castogscanstatus");
             panic("not reached");
+
         });
 
         // If asked to move to or from a Gscanstatus this will throw. Use the castogscanstatus
@@ -883,8 +1020,10 @@ namespace go
         // casgstatus will loop if the g->atomicstatus is in a Gscan status until the routine that
         // put it in the Gscan state is finished.
         //go:nosplit
-        private static void casgstatus(ref g gp, uint oldval, uint newval)
+        private static void casgstatus(ptr<g> _addr_gp, uint oldval, uint newval)
         {
+            ref g gp = ref _addr_gp.val;
+
             if ((oldval & _Gscan != 0L) || (newval & _Gscan != 0L) || oldval == newval)
             {
                 systemstack(() =>
@@ -892,48 +1031,31 @@ namespace go
                     print("runtime: casgstatus: oldval=", hex(oldval), " newval=", hex(newval), "\n");
                     throw("casgstatus: bad incoming values");
                 });
-            }
-            if (oldval == _Grunning && gp.gcscanvalid)
-            { 
-                // If oldvall == _Grunning, then the actual status must be
-                // _Grunning or _Grunning|_Gscan; either way,
-                // we own gp.gcscanvalid, so it's safe to read.
-                // gp.gcscanvalid must not be true when we are running.
-                systemstack(() =>
-                {
-                    print("runtime: casgstatus ", hex(oldval), "->", hex(newval), " gp.status=", hex(gp.atomicstatus), " gp.gcscanvalid=true\n");
-                    throw("casgstatus");
-                });
-            } 
 
-            // See http://golang.org/cl/21503 for justification of the yield delay.
-            const long yieldDelay = 5L * 1000L;
+            }
+
+            acquireLockRank(lockRankGscan);
+            releaseLockRank(lockRankGscan); 
+
+            // See https://golang.org/cl/21503 for justification of the yield delay.
+            const long yieldDelay = (long)5L * 1000L;
 
             long nextYield = default; 
 
             // loop if gp->atomicstatus is in a scan state giving
             // GC time to finish and change the state to oldval.
-            for (long i = 0L; !atomic.Cas(ref gp.atomicstatus, oldval, newval); i++)
+            for (long i = 0L; !atomic.Cas(_addr_gp.atomicstatus, oldval, newval); i++)
             {
                 if (oldval == _Gwaiting && gp.atomicstatus == _Grunnable)
                 {
-                    systemstack(() =>
-                    {
-                        throw("casgstatus: waiting for Gwaiting but is Grunnable");
-                    });
-                } 
-                // Help GC if needed.
-                // if gp.preemptscan && !gp.gcworkdone && (oldval == _Grunning || oldval == _Gsyscall) {
-                //     gp.preemptscan = false
-                //     systemstack(func() {
-                //         gcphasework(gp)
-                //     })
-                // }
-                // But meanwhile just yield.
+                    throw("casgstatus: waiting for Gwaiting but is Grunnable");
+                }
+
                 if (i == 0L)
                 {
                     nextYield = nanotime() + yieldDelay;
                 }
+
                 if (nanotime() < nextYield)
                 {
                     for (long x = 0L; x < 10L && gp.atomicstatus != oldval; x++)
@@ -942,16 +1064,15 @@ namespace go
                     }
                 else
 
+
                 }                {
                     osyield();
                     nextYield = nanotime() + yieldDelay / 2L;
                 }
+
             }
 
-            if (newval == _Grunning)
-            {
-                gp.gcscanvalid = false;
-            }
+
         }
 
         // casgstatus(gp, oldstatus, Gcopystack), assuming oldstatus is Gwaiting or Grunnable.
@@ -960,132 +1081,64 @@ namespace go
         // it might have become Grunnable by the time we get to the cas. If we called casgstatus,
         // it would loop waiting for the status to go back to Gwaiting, which it never will.
         //go:nosplit
-        private static uint casgcopystack(ref g gp)
+        private static uint casgcopystack(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             while (true)
             {
-                var oldstatus = readgstatus(gp) & ~_Gscan;
+                var oldstatus = readgstatus(_addr_gp) & ~_Gscan;
                 if (oldstatus != _Gwaiting && oldstatus != _Grunnable)
                 {
                     throw("copystack: bad status, not Gwaiting or Grunnable");
                 }
-                if (atomic.Cas(ref gp.atomicstatus, oldstatus, _Gcopystack))
+
+                if (atomic.Cas(_addr_gp.atomicstatus, oldstatus, _Gcopystack))
                 {
                     return oldstatus;
                 }
+
             }
+
 
         }
 
-        // scang blocks until gp's stack has been scanned.
-        // It might be scanned by scang or it might be scanned by the goroutine itself.
-        // Either way, the stack scan has completed when scang returns.
-        private static void scang(ref g gp, ref gcWork gcw)
-        { 
-            // Invariant; we (the caller, markroot for a specific goroutine) own gp.gcscandone.
-            // Nothing is racing with us now, but gcscandone might be set to true left over
-            // from an earlier round of stack scanning (we scan twice per GC).
-            // We use gcscandone to record whether the scan has been done during this round.
-
-            gp.gcscandone = false; 
-
-            // See http://golang.org/cl/21503 for justification of the yield delay.
-            const long yieldDelay = 10L * 1000L;
-
-            long nextYield = default; 
-
-            // Endeavor to get gcscandone set to true,
-            // either by doing the stack scan ourselves or by coercing gp to scan itself.
-            // gp.gcscandone can transition from false to true when we're not looking
-            // (if we asked for preemption), so any time we lock the status using
-            // castogscanstatus we have to double-check that the scan is still not done.
-loop:
-
-            for (long i = 0L; !gp.gcscandone; i++)
-            {
-                {
-                    var s = readgstatus(gp);
-
-
-                    if (s == _Gdead) 
-                        // No stack.
-                        gp.gcscandone = true;
-                        _breakloop = true;
-
-                        break;
-                    else if (s == _Gcopystack)                     else if (s == _Grunnable || s == _Gsyscall || s == _Gwaiting) 
-                        // Claim goroutine by setting scan bit.
-                        // Racing with execution or readying of gp.
-                        // The scan bit keeps them from running
-                        // the goroutine until we're done.
-                        if (castogscanstatus(gp, s, s | _Gscan))
-                        {
-                            if (!gp.gcscandone)
-                            {
-                                scanstack(gp, gcw);
-                                gp.gcscandone = true;
-                            }
-                            restartg(gp);
-                            _breakloop = true;
-                            break;
-                        }
-                    else if (s == _Gscanwaiting)                     else if (s == _Grunning) 
-                        // Goroutine running. Try to preempt execution so it can scan itself.
-                        // The preemption handler (in newstack) does the actual scan.
-
-                        // Optimization: if there is already a pending preemption request
-                        // (from the previous loop iteration), don't bother with the atomics.
-                        if (gp.preemptscan && gp.preempt && gp.stackguard0 == stackPreempt)
-                        {
-                            break;
-                        } 
-
-                        // Ask for preemption and self scan.
-                        if (castogscanstatus(gp, _Grunning, _Gscanrunning))
-                        {
-                            if (!gp.gcscandone)
-                            {
-                                gp.preemptscan = true;
-                                gp.preempt = true;
-                                gp.stackguard0 = stackPreempt;
-                            }
-                            casfrom_Gscanstatus(gp, _Gscanrunning, _Grunning);
-                        }
-                    else 
-                        dumpgstatus(gp);
-                        throw("stopg: invalid status");
-
-                }
-
-                if (i == 0L)
-                {
-                    nextYield = nanotime() + yieldDelay;
-                }
-                if (nanotime() < nextYield)
-                {
-                    procyield(10L);
-                }
-                else
-                {
-                    osyield();
-                    nextYield = nanotime() + yieldDelay / 2L;
-                }
-            }
-
-            gp.preemptscan = false; // cancel scan request if no longer needed
-        }
-
-        // The GC requests that this routine be moved from a scanmumble state to a mumble state.
-        private static void restartg(ref g gp)
+        // casGToPreemptScan transitions gp from _Grunning to _Gscan|_Gpreempted.
+        //
+        // TODO(austin): This is the only status operation that both changes
+        // the status and locks the _Gscan bit. Rethink this.
+        private static void casGToPreemptScan(ptr<g> _addr_gp, uint old, uint @new)
         {
-            var s = readgstatus(gp);
+            ref g gp = ref _addr_gp.val;
 
-            if (s == _Gdead)             else if (s == _Gscanrunnable || s == _Gscanwaiting || s == _Gscansyscall) 
-                casfrom_Gscanstatus(gp, s, s & ~_Gscan);
-            else 
-                dumpgstatus(gp);
-                throw("restartg: unexpected status");
-                    }
+            if (old != _Grunning || new != _Gscan | _Gpreempted)
+            {
+                throw("bad g transition");
+            }
+
+            acquireLockRank(lockRankGscan);
+            while (!atomic.Cas(_addr_gp.atomicstatus, _Grunning, _Gscan | _Gpreempted))
+            {
+            }
+
+
+        }
+
+        // casGFromPreempted attempts to transition gp from _Gpreempted to
+        // _Gwaiting. If successful, the caller is responsible for
+        // re-scheduling gp.
+        private static bool casGFromPreempted(ptr<g> _addr_gp, uint old, uint @new)
+        {
+            ref g gp = ref _addr_gp.val;
+
+            if (old != _Gpreempted || new != _Gwaiting)
+            {
+                throw("bad g transition");
+            }
+
+            return atomic.Cas(_addr_gp.atomicstatus, _Gpreempted, _Gwaiting);
+
+        }
 
         // stopTheWorld stops all P's from executing goroutines, interrupting
         // all goroutines at GC safe points and records reason as the reason
@@ -1103,9 +1156,27 @@ loop:
         // goroutines.
         private static void stopTheWorld(@string reason)
         {
-            semacquire(ref worldsema);
-            getg().m.preemptoff = reason;
-            systemstack(stopTheWorldWithSema);
+            semacquire(_addr_worldsema);
+            var gp = getg();
+            gp.m.preemptoff = reason;
+            systemstack(() =>
+            { 
+                // Mark the goroutine which called stopTheWorld preemptible so its
+                // stack may be scanned.
+                // This lets a mark worker scan us while we try to stop the world
+                // since otherwise we could get in a mutual preemption deadlock.
+                // We must not modify anything on the G stack because a stack shrink
+                // may occur. A stack shrink is otherwise OK though because in order
+                // to return from this function (and to leave the system stack) we
+                // must have preempted all goroutines, including any attempting
+                // to scan our stack, in which case, any stack shrinking will
+                // have already completed by the time we exit.
+                casgstatus(_addr_gp, _Grunning, _Gwaiting);
+                stopTheWorldWithSema();
+                casgstatus(_addr_gp, _Gwaiting, _Grunning);
+
+            });
+
         }
 
         // startTheWorld undoes the effects of stopTheWorld.
@@ -1114,17 +1185,40 @@ loop:
             systemstack(() =>
             {
                 startTheWorldWithSema(false);
-
             }); 
             // worldsema must be held over startTheWorldWithSema to ensure
             // gomaxprocs cannot change while worldsema is held.
-            semrelease(ref worldsema);
+            semrelease(_addr_worldsema);
             getg().m.preemptoff = "";
+
         }
 
-        // Holding worldsema grants an M the right to try to stop the world
-        // and prevents gomaxprocs from changing concurrently.
+        // stopTheWorldGC has the same effect as stopTheWorld, but blocks
+        // until the GC is not running. It also blocks a GC from starting
+        // until startTheWorldGC is called.
+        private static void stopTheWorldGC(@string reason)
+        {
+            semacquire(_addr_gcsema);
+            stopTheWorld(reason);
+        }
+
+        // startTheWorldGC undoes the effects of stopTheWorldGC.
+        private static void startTheWorldGC()
+        {
+            startTheWorld();
+            semrelease(_addr_gcsema);
+        }
+
+        // Holding worldsema grants an M the right to try to stop the world.
         private static uint worldsema = 1L;
+
+        // Holding gcsema grants the M the right to block a GC, and blocks
+        // until the current GC is done. In particular, it prevents gomaxprocs
+        // from changing concurrently.
+        //
+        // TODO(mknyszek): Once gomaxprocs and the execution tracer can handle
+        // being changed/enabled during a GC, remove this.
+        private static uint gcsema = 1L;
 
         // stopTheWorldWithSema is the core implementation of stopTheWorld.
         // The caller is responsible for acquiring worldsema and disabling
@@ -1158,9 +1252,10 @@ loop:
             {
                 throw("stopTheWorld: holding locks");
             }
-            lock(ref sched.@lock);
+
+            lock(_addr_sched.@lock);
             sched.stopwait = gomaxprocs;
-            atomic.Store(ref sched.gcwaiting, 1L);
+            atomic.Store(_addr_sched.gcwaiting, 1L);
             preemptall(); 
             // stop current P
             _g_.m.p.ptr().status = _Pgcstop; // Pgcstop is only diagnostic.
@@ -1173,16 +1268,19 @@ loop:
                 {
                     p = __p;
                     var s = p.status;
-                    if (s == _Psyscall && atomic.Cas(ref p.status, s, _Pgcstop))
+                    if (s == _Psyscall && atomic.Cas(_addr_p.status, s, _Pgcstop))
                     {
                         if (trace.enabled)
                         {
                             traceGoSysBlock(p);
                             traceProcStop(p);
                         }
+
                         p.syscalltick++;
                         sched.stopwait--;
+
                     }
+
                 } 
                 // stop idle P's
 
@@ -1196,12 +1294,14 @@ loop:
                 {
                     break;
                 }
+
                 p.status = _Pgcstop;
                 sched.stopwait--;
+
             }
 
             var wait = sched.stopwait > 0L;
-            unlock(ref sched.@lock); 
+            unlock(_addr_sched.@lock); 
 
             // wait for remaining P's to stop voluntarily
             if (wait)
@@ -1209,13 +1309,16 @@ loop:
                 while (true)
                 { 
                     // wait for 100us, then try to re-preempt in case of any races
-                    if (notetsleep(ref sched.stopnote, 100L * 1000L))
+                    if (notetsleep(_addr_sched.stopnote, 100L * 1000L))
                     {
-                        noteclear(ref sched.stopnote);
+                        noteclear(_addr_sched.stopnote);
                         break;
                     }
+
                     preemptall();
+
                 }
+
 
             } 
 
@@ -1237,45 +1340,42 @@ loop:
                         {
                             bad = "stopTheWorld: not stopped (status != _Pgcstop)";
                         }
+
                     }
 
                     p = p__prev1;
                 }
-
             }
-            if (atomic.Load(ref freezing) != 0L)
+
+            if (atomic.Load(_addr_freezing) != 0L)
             { 
                 // Some other thread is panicking. This can cause the
                 // sanity checks above to fail if the panic happens in
                 // the signal handler on a stopped thread. Either way,
                 // we should halt this thread.
-                lock(ref deadlock);
-                lock(ref deadlock);
+                lock(_addr_deadlock);
+                lock(_addr_deadlock);
+
             }
+
             if (bad != "")
             {
                 throw(bad);
             }
-        }
 
-        private static void mhelpgc()
-        {
-            var _g_ = getg();
-            _g_.m.helpgc = -1L;
         }
 
         private static long startTheWorldWithSema(bool emitTraceEvent)
         {
-            var _g_ = getg();
-
-            _g_.m.locks++; // disable preemption because it can be holding p in a local var
+            var mp = acquirem(); // disable preemption because it can be holding p in a local var
             if (netpollinited())
             {
-                var gp = netpoll(false); // non-blocking
-                injectglist(gp);
+                ref var list = ref heap(netpoll(0L), out ptr<var> _addr_list); // non-blocking
+                injectglist(_addr_list);
+
             }
-            var add = needaddgcproc();
-            lock(ref sched.@lock);
+
+            lock(_addr_sched.@lock);
 
             var procs = gomaxprocs;
             if (newprocs != 0L)
@@ -1283,14 +1383,16 @@ loop:
                 procs = newprocs;
                 newprocs = 0L;
             }
+
             var p1 = procresize(procs);
             sched.gcwaiting = 0L;
             if (sched.sysmonwait != 0L)
             {
                 sched.sysmonwait = 0L;
-                notewakeup(ref sched.sysmonnote);
+                notewakeup(_addr_sched.sysmonnote);
             }
-            unlock(ref sched.@lock);
+
+            unlock(_addr_sched.@lock);
 
             while (p1 != null)
             {
@@ -1298,21 +1400,24 @@ loop:
                 p1 = p1.link.ptr();
                 if (p.m != 0L)
                 {
-                    var mp = p.m.ptr();
+                    mp = p.m.ptr();
                     p.m = 0L;
                     if (mp.nextp != 0L)
                     {
                         throw("startTheWorld: inconsistent mp->nextp");
                     }
+
                     mp.nextp.set(p);
-                    notewakeup(ref mp.park);
+                    notewakeup(_addr_mp.park);
+
                 }
                 else
                 { 
                     // Start M to run P.  Do not start another M below.
-                    newm(null, p);
-                    add = false;
+                    newm(null, _addr_p, -1L);
+
                 }
+
             } 
 
             // Capture start-the-world time before doing clean-up tasks.
@@ -1328,30 +1433,15 @@ loop:
             // Wakeup an additional proc in case we have excessive runnable goroutines
             // in local queues or in the global queue. If we don't, the proc will park itself.
             // If we have lots of excessive work, resetspinning will unpark additional procs as necessary.
-            if (atomic.Load(ref sched.npidle) != 0L && atomic.Load(ref sched.nmspinning) == 0L)
-            {
-                wakep();
-            }
-            if (add)
-            { 
-                // If GC could have used another helper proc, start one now,
-                // in the hope that it will be available next time.
-                // It would have been even better to start it before the collection,
-                // but doing so requires allocating memory, so it's tricky to
-                // coordinate. This lazy approach works out in practice:
-                // we don't mind if the first couple gc rounds don't have quite
-                // the maximum number of procs.
-                newm(mhelpgc, null);
-            }
-            _g_.m.locks--;
-            if (_g_.m.locks == 0L && _g_.preempt)
-            { // restore the preemption request in case we've cleared it in newstack
-                _g_.stackguard0 = stackPreempt;
-            }
+            wakep();
+
+            releasem(mp);
+
             return startTime;
+
         }
 
-        // Called to start an M.
+        // mstart is the entry-point for new Ms.
         //
         // This must not split the stack because we may not even have stack
         // bounds set up yet.
@@ -1370,32 +1460,65 @@ loop:
             { 
                 // Initialize stack bounds from system stack.
                 // Cgo may have left stack size in stack.hi.
-                var size = _g_.stack.hi;
+                // minit may update the stack bounds.
+                ref var size = ref heap(_g_.stack.hi, out ptr<var> _addr_size);
                 if (size == 0L)
                 {
                     size = 8192L * sys.StackGuardMultiplier;
                 }
-                _g_.stack.hi = uintptr(noescape(@unsafe.Pointer(ref size)));
+
+                _g_.stack.hi = uintptr(noescape(@unsafe.Pointer(_addr_size)));
                 _g_.stack.lo = _g_.stack.hi - size + 1024L;
+
             } 
-            // Initialize stack guards so that we can start calling
-            // both Go and C functions with stack growth prologues.
-            _g_.stackguard0 = _g_.stack.lo + _StackGuard;
+            // Initialize stack guard so that we can start calling regular
+            // Go code.
+            _g_.stackguard0 = _g_.stack.lo + _StackGuard; 
+            // This is the g0, so we can also call go:systemstack
+            // functions, which check stackguard1.
             _g_.stackguard1 = _g_.stackguard0;
-            mstart1(0L); 
+            mstart1(); 
 
             // Exit this thread.
-            if (GOOS == "windows" || GOOS == "solaris" || GOOS == "plan9")
-            { 
-                // Window, Solaris and Plan 9 always system-allocate
-                // the stack, but put it in _g_.stack before mstart,
-                // so the logic above hasn't set osStack yet.
-                osStack = true;
+            switch (GOOS)
+            {
+                case "windows": 
+                    // Windows, Solaris, illumos, Darwin, AIX and Plan 9 always system-allocate
+                    // the stack, but put it in _g_.stack before mstart,
+                    // so the logic above hasn't set osStack yet.
+
+                case "solaris": 
+                    // Windows, Solaris, illumos, Darwin, AIX and Plan 9 always system-allocate
+                    // the stack, but put it in _g_.stack before mstart,
+                    // so the logic above hasn't set osStack yet.
+
+                case "illumos": 
+                    // Windows, Solaris, illumos, Darwin, AIX and Plan 9 always system-allocate
+                    // the stack, but put it in _g_.stack before mstart,
+                    // so the logic above hasn't set osStack yet.
+
+                case "plan9": 
+                    // Windows, Solaris, illumos, Darwin, AIX and Plan 9 always system-allocate
+                    // the stack, but put it in _g_.stack before mstart,
+                    // so the logic above hasn't set osStack yet.
+
+                case "darwin": 
+                    // Windows, Solaris, illumos, Darwin, AIX and Plan 9 always system-allocate
+                    // the stack, but put it in _g_.stack before mstart,
+                    // so the logic above hasn't set osStack yet.
+
+                case "aix": 
+                    // Windows, Solaris, illumos, Darwin, AIX and Plan 9 always system-allocate
+                    // the stack, but put it in _g_.stack before mstart,
+                    // so the logic above hasn't set osStack yet.
+                    osStack = true;
+                    break;
             }
             mexit(osStack);
+
         }
 
-        private static void mstart1(int dummy)
+        private static void mstart1()
         {
             var _g_ = getg();
 
@@ -1408,16 +1531,17 @@ loop:
             // for terminating the thread.
             // We're never coming back to mstart1 after we call schedule,
             // so other calls can reuse the current frame.
-            save(getcallerpc(), getcallersp(@unsafe.Pointer(ref dummy)));
+            save(getcallerpc(), getcallersp());
             asminit();
             minit(); 
 
             // Install signal handlers; after minit so that minit can
             // prepare the thread to be able to handle the signals.
-            if (_g_.m == ref m0)
+            if (_g_.m == _addr_m0)
             {
                 mstartm0();
             }
+
             {
                 var fn = _g_.m.mstartfn;
 
@@ -1428,17 +1552,15 @@ loop:
 
             }
 
-            if (_g_.m.helpgc != 0L)
+
+            if (_g_.m != _addr_m0)
             {
-                _g_.m.helpgc = 0L;
-                stopm();
-            }
-            else if (_g_.m != ref m0)
-            {
-                acquirep(_g_.m.nextp.ptr());
+                acquirep(_addr__g_.m.nextp.ptr());
                 _g_.m.nextp = 0L;
             }
+
             schedule();
+
         }
 
         // mstartm0 implements part of mstart1 that only runs on the m0.
@@ -1450,12 +1572,16 @@ loop:
         private static void mstartm0()
         { 
             // Create an extra M for callbacks on threads not created by Go.
-            if (iscgo && !cgoHasExtraM)
+            // An extra M is also needed on Windows for callbacks created by
+            // syscall.NewCallback. See issue #6751 for details.
+            if ((iscgo || GOOS == "windows") && !cgoHasExtraM)
             {
                 cgoHasExtraM = true;
                 newextram();
             }
+
             initsig(false);
+
         }
 
         // mexit tears down and exits the current thread.
@@ -1473,7 +1599,7 @@ loop:
             var g = getg();
             var m = g.m;
 
-            if (m == ref m0)
+            if (m == _addr_m0)
             { 
                 // This is the main thread. Just wedge it.
                 //
@@ -1486,36 +1612,45 @@ loop:
                 //
                 // We could try to clean up this M more before wedging
                 // it, but that complicates signal handling.
-                handoffp(releasep());
-                lock(ref sched.@lock);
+                handoffp(_addr_releasep());
+                lock(_addr_sched.@lock);
                 sched.nmfreed++;
                 checkdead();
-                unlock(ref sched.@lock);
-                notesleep(ref m.park);
+                unlock(_addr_sched.@lock);
+                notesleep(_addr_m.park);
                 throw("locked m0 woke up");
+
             }
+
             sigblock();
             unminit(); 
 
             // Free the gsignal stack.
             if (m.gsignal != null)
             {
-                stackfree(m.gsignal.stack);
+                stackfree(m.gsignal.stack); 
+                // On some platforms, when calling into VDSO (e.g. nanotime)
+                // we store our g on the gsignal stack, if there is one.
+                // Now the stack is freed, unlink it from the m, so we
+                // won't write to it when calling VDSO code.
+                m.gsignal = null;
+
             } 
 
             // Remove m from allm.
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             {
-                var pprev = ref allm;
+                var pprev = _addr_allm;
 
-                while (pprev != null.Value)
+                while (pprev != null.val)
                 {
-                    if (pprev == m.Value)
+                    if (pprev == m.val)
                     {
-                        pprev.Value = m.alllink;
+                        pprev.val = m.alllink;
                         goto found;
-                    pprev = ref ref pprev;
+                    pprev = _addr_ptr<pprev>;
                     }
+
                 }
 
             }
@@ -1527,40 +1662,44 @@ found:
                 //
                 // If this is using an OS stack, the OS will free it
                 // so there's no need for reaping.
-                atomic.Store(ref m.freeWait, 1L); 
+                atomic.Store(_addr_m.freeWait, 1L); 
                 // Put m on the free list, though it will not be reaped until
                 // freeWait is 0. Note that the free list must not be linked
                 // through alllink because some functions walk allm without
                 // locking, so may be using alllink.
                 m.freelink = sched.freem;
                 sched.freem = m;
+
             }
-            unlock(ref sched.@lock); 
+
+            unlock(_addr_sched.@lock); 
 
             // Release the P.
-            handoffp(releasep()); 
+            handoffp(_addr_releasep()); 
             // After this point we must not have write barriers.
 
             // Invoke the deadlock detector. This must happen after
             // handoffp because it may have started a new M to take our
             // P's work.
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             sched.nmfreed++;
             checkdead();
-            unlock(ref sched.@lock);
+            unlock(_addr_sched.@lock);
 
             if (osStack)
             { 
                 // Return from mstart and let the system thread
                 // library free the g0 stack and terminate the thread.
-                return;
+                return ;
+
             } 
 
             // mstart is the thread's entry point, so there's nothing to
             // return to. Exit the thread directly. exitThread will clear
             // m.freeWait when it's done with the stack and the m can be
             // reaped.
-            exitThread(ref m.freeWait);
+            exitThread(_addr_m.freeWait);
+
         }
 
         // forEachP calls fn(p) for every P p when p reaches a GC safe point.
@@ -1574,16 +1713,17 @@ found:
         // The caller must hold worldsema.
         //
         //go:systemstack
-        private static void forEachP(Action<ref p> fn)
+        private static void forEachP(Action<ptr<p>> fn)
         {
             var mp = acquirem();
             var _p_ = getg().m.p.ptr();
 
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             if (sched.safePointWait != 0L)
             {
                 throw("forEachP: sched.safePointWait != 0");
             }
+
             sched.safePointWait = gomaxprocs - 1L;
             sched.safePointFn = fn; 
 
@@ -1596,8 +1736,9 @@ found:
                     p = __p;
                     if (p != _p_)
                     {
-                        atomic.Store(ref p.runSafePointFn, 1L);
+                        atomic.Store(_addr_p.runSafePointFn, 1L);
                     }
+
                 }
 
                 p = p__prev1;
@@ -1618,12 +1759,13 @@ found:
 
                 while (p != null)
                 {
-                    if (atomic.Cas(ref p.runSafePointFn, 1L, 0L))
+                    if (atomic.Cas(_addr_p.runSafePointFn, 1L, 0L))
                     {
                         fn(p);
                         sched.safePointWait--;
                     p = p.link.ptr();
                     }
+
                 }
 
 
@@ -1631,7 +1773,7 @@ found:
             }
 
             var wait = sched.safePointWait > 0L;
-            unlock(ref sched.@lock); 
+            unlock(_addr_sched.@lock); 
 
             // Run fn for the current P.
             fn(_p_); 
@@ -1645,16 +1787,19 @@ found:
                 {
                     p = __p;
                     var s = p.status;
-                    if (s == _Psyscall && p.runSafePointFn == 1L && atomic.Cas(ref p.status, s, _Pidle))
+                    if (s == _Psyscall && p.runSafePointFn == 1L && atomic.Cas(_addr_p.status, s, _Pidle))
                     {
                         if (trace.enabled)
                         {
                             traceGoSysBlock(p);
                             traceProcStop(p);
                         }
+
                         p.syscalltick++;
-                        handoffp(p);
+                        handoffp(_addr_p);
+
                     }
+
                 } 
 
                 // Wait for remaining Ps to run fn.
@@ -1670,19 +1815,24 @@ found:
                     // case of any races.
                     //
                     // Requires system stack.
-                    if (notetsleep(ref sched.safePointNote, 100L * 1000L))
+                    if (notetsleep(_addr_sched.safePointNote, 100L * 1000L))
                     {
-                        noteclear(ref sched.safePointNote);
+                        noteclear(_addr_sched.safePointNote);
                         break;
                     }
+
                     preemptall();
+
                 }
 
+
             }
+
             if (sched.safePointWait != 0L)
             {
                 throw("forEachP: not done");
             }
+
             {
                 var p__prev1 = p;
 
@@ -1693,15 +1843,17 @@ found:
                     {
                         throw("forEachP: P did not run fn");
                     }
+
                 }
 
                 p = p__prev1;
             }
 
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             sched.safePointFn = null;
-            unlock(ref sched.@lock);
+            unlock(_addr_sched.@lock);
             releasem(mp);
+
         }
 
         // runSafePointFn runs the safe point function, if any, for this P.
@@ -1721,18 +1873,21 @@ found:
             // Resolve the race between forEachP running the safe-point
             // function on this P's behalf and this P running the
             // safe-point function directly.
-            if (!atomic.Cas(ref p.runSafePointFn, 1L, 0L))
+            if (!atomic.Cas(_addr_p.runSafePointFn, 1L, 0L))
             {
-                return;
+                return ;
             }
+
             sched.safePointFn(p);
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             sched.safePointWait--;
             if (sched.safePointWait == 0L)
             {
-                notewakeup(ref sched.safePointNote);
+                notewakeup(_addr_sched.safePointNote);
             }
-            unlock(ref sched.@lock);
+
+            unlock(_addr_sched.@lock);
+
         }
 
         // When running with cgo, we call _cgo_thread_start
@@ -1750,26 +1905,29 @@ found:
         // Allocate a new m unassociated with any thread.
         // Can use p for allocation context if needed.
         // fn is recorded as the new m's m.mstartfn.
+        // id is optional pre-allocated m ID. Omit by passing -1.
         //
         // This function is allowed to have write barriers even if the caller
         // isn't because it borrows _p_.
         //
         //go:yeswritebarrierrec
-        private static ref m allocm(ref p _p_, Action fn)
+        private static ptr<m> allocm(ptr<p> _addr__p_, Action fn, long id)
         {
+            ref p _p_ = ref _addr__p_.val;
+
             var _g_ = getg();
-            _g_.m.locks++; // disable GC because it can be called from sysmon
+            acquirem(); // disable GC because it can be called from sysmon
             if (_g_.m.p == 0L)
             {
-                acquirep(_p_); // temporarily borrow p for mallocs in this function
+                acquirep(_addr__p_); // temporarily borrow p for mallocs in this function
             } 
 
             // Release the free M list. We need to do this somewhere and
             // this may free up a stack we can use.
             if (sched.freem != null)
             {
-                lock(ref sched.@lock);
-                ref m newList = default;
+                lock(_addr_sched.@lock);
+                ptr<m> newList;
                 {
                     var freem = sched.freem;
 
@@ -1783,21 +1941,25 @@ found:
                             freem = next;
                             continue;
                         }
+
                         stackfree(freem.g0.stack);
                         freem = freem.freelink;
+
                     }
 
                 }
                 sched.freem = newList;
-                unlock(ref sched.@lock);
+                unlock(_addr_sched.@lock);
+
             }
+
             ptr<m> mp = @new<m>();
             mp.mstartfn = fn;
-            mcommoninit(mp); 
+            mcommoninit(mp, id); 
 
-            // In case of cgo or Solaris, pthread_create will make us a stack.
+            // In case of cgo or Solaris or illumos or Darwin, pthread_create will make us a stack.
             // Windows and Plan 9 will layout sched stack on OS stack.
-            if (iscgo || GOOS == "solaris" || GOOS == "windows" || GOOS == "plan9")
+            if (iscgo || GOOS == "solaris" || GOOS == "illumos" || GOOS == "windows" || GOOS == "plan9" || GOOS == "darwin")
             {
                 mp.g0 = malg(-1L);
             }
@@ -1805,18 +1967,18 @@ found:
             {
                 mp.g0 = malg(8192L * sys.StackGuardMultiplier);
             }
+
             mp.g0.m = mp;
 
             if (_p_ == _g_.m.p.ptr())
             {
                 releasep();
             }
-            _g_.m.locks--;
-            if (_g_.m.locks == 0L && _g_.preempt)
-            { // restore the preemption request in case we've cleared it in newstack
-                _g_.stackguard0 = stackPreempt;
-            }
-            return mp;
+
+            releasem(_g_.m);
+
+            return _addr_mp!;
+
         }
 
         // needm is called when a cgo callback happens on a
@@ -1832,7 +1994,7 @@ found:
         // the following strategy: there is a stack of available m's
         // that can be stolen. Using compare-and-swap
         // to pop from the stack has ABA races, so we simulate
-        // a lock by doing an exchange (via casp) to steal the stack
+        // a lock by doing an exchange (via Casuintptr) to steal the stack
         // head and replace the top pointer with MLOCKED (1).
         // This serves as a simple spin lock that we can use even
         // without an m. The thread that locks the stack in this way
@@ -1855,12 +2017,17 @@ found:
         //go:nosplit
         private static void needm(byte x)
         {
-            if (iscgo && !cgoHasExtraM)
+            if ((iscgo || GOOS == "windows") && !cgoHasExtraM)
             { 
                 // Can happen if C/C++ code calls Go from a global ctor.
+                // Can also happen on Windows if a global ctor uses a
+                // callback created by syscall.NewCallback. See issue #6751
+                // for details.
+                //
                 // Can not throw, because scheduler is not initialized yet.
-                write(2L, @unsafe.Pointer(ref earlycgocallback[0L]), int32(len(earlycgocallback)));
+                write(2L, @unsafe.Pointer(_addr_earlycgocallback[0L]), int32(len(earlycgocallback)));
                 exit(1L);
+
             } 
 
             // Lock extra list, take head, unlock popped list.
@@ -1878,7 +2045,7 @@ found:
             // running right now).
             mp.needextram = mp.schedlink == 0L;
             extraMCount--;
-            unlockextra(mp.schedlink.ptr()); 
+            unlockextra(_addr_mp.schedlink.ptr()); 
 
             // Save and block signals before installing g.
             // Once g is installed, any incoming signals will try to execute,
@@ -1896,8 +2063,8 @@ found:
             // which is more than enough for us.
             setg(mp.g0);
             var _g_ = getg();
-            _g_.stack.hi = uintptr(noescape(@unsafe.Pointer(ref x))) + 1024L;
-            _g_.stack.lo = uintptr(noescape(@unsafe.Pointer(ref x))) - 32L * 1024L;
+            _g_.stack.hi = uintptr(noescape(@unsafe.Pointer(_addr_x))) + 1024L;
+            _g_.stack.lo = uintptr(noescape(@unsafe.Pointer(_addr_x))) - 32L * 1024L;
             _g_.stackguard0 = _g_.stack.lo + _StackGuard; 
 
             // Initialize this thread to use the m.
@@ -1905,8 +2072,9 @@ found:
             minit(); 
 
             // mp.curg is now a real goroutine.
-            casgstatus(mp.curg, _Gdead, _Gsyscall);
-            atomic.Xadd(ref sched.ngsys, -1L);
+            casgstatus(_addr_mp.curg, _Gdead, _Gsyscall);
+            atomic.Xadd(_addr_sched.ngsys, -1L);
+
         }
 
         private static slice<byte> earlycgocallback = (slice<byte>)"fatal error: cgo callback before cgo call\n";
@@ -1916,7 +2084,7 @@ found:
         // like call schedlock and allocate.
         private static void newextram()
         {
-            var c = atomic.Xchg(ref extraMWaiters, 0L);
+            var c = atomic.Xchg(_addr_extraMWaiters, 0L);
             if (c > 0L)
             {
                 for (var i = uint32(0L); i < c; i++)
@@ -1925,15 +2093,18 @@ found:
                 }
             else
 
+
             }            { 
                 // Make sure there is at least one extra M.
                 var mp = lockextra(true);
-                unlockextra(mp);
+                unlockextra(_addr_mp);
                 if (mp == null)
                 {
                     oneNewExtraM();
                 }
+
             }
+
         }
 
         // oneNewExtraM allocates an m and puts it on the extra list.
@@ -1944,7 +2115,7 @@ found:
             // The sched.pc will never be returned to, but setting it to
             // goexit makes clear to the traceback routines where
             // the goroutine stack ends.
-            var mp = allocm(null, null);
+            var mp = allocm(_addr_null, null, -1L);
             var gp = malg(4096L);
             gp.sched.pc = funcPC(goexit) + sys.PCQuantum;
             gp.sched.sp = gp.stack.hi;
@@ -1953,38 +2124,37 @@ found:
             gp.sched.g = guintptr(@unsafe.Pointer(gp));
             gp.syscallpc = gp.sched.pc;
             gp.syscallsp = gp.sched.sp;
-            gp.stktopsp = gp.sched.sp;
-            gp.gcscanvalid = true;
-            gp.gcscandone = true; 
+            gp.stktopsp = gp.sched.sp; 
             // malg returns status as _Gidle. Change to _Gdead before
             // adding to allg where GC can see it. We use _Gdead to hide
             // this from tracebacks and stack scans since it isn't a
             // "real" goroutine until needm grabs it.
-            casgstatus(gp, _Gidle, _Gdead);
+            casgstatus(_addr_gp, _Gidle, _Gdead);
             gp.m = mp;
             mp.curg = gp;
             mp.lockedInt++;
             mp.lockedg.set(gp);
             gp.lockedm.set(mp);
-            gp.goid = int64(atomic.Xadd64(ref sched.goidgen, 1L));
+            gp.goid = int64(atomic.Xadd64(_addr_sched.goidgen, 1L));
             if (raceenabled)
             {
                 gp.racectx = racegostart(funcPC(newextram) + sys.PCQuantum);
             } 
             // put on allg for garbage collector
-            allgadd(gp); 
+            allgadd(_addr_gp); 
 
             // gp is now on the allg list, but we don't want it to be
             // counted by gcount. It would be more "proper" to increment
             // sched.ngfree, but that requires locking. Incrementing ngsys
             // has the same effect.
-            atomic.Xadd(ref sched.ngsys, +1L); 
+            atomic.Xadd(_addr_sched.ngsys, +1L); 
 
             // Add m to the extra list.
             var mnext = lockextra(true);
             mp.schedlink.set(mnext);
             extraMCount++;
-            unlockextra(mp);
+            unlockextra(_addr_mp);
+
         }
 
         // dropm is called when a cgo callback has called needm but is now
@@ -2018,8 +2188,9 @@ found:
             var mp = getg().m; 
 
             // Return mp.curg to dead state.
-            casgstatus(mp.curg, _Gsyscall, _Gdead);
-            atomic.Xadd(ref sched.ngsys, +1L); 
+            casgstatus(_addr_mp.curg, _Gsyscall, _Gdead);
+            mp.curg.preemptStop = false;
+            atomic.Xadd(_addr_sched.ngsys, +1L); 
 
             // Block signals before unminit.
             // Unminit unregisters the signal handling stack (but needs g on some systems).
@@ -2036,9 +2207,10 @@ found:
             setg(null); 
 
             // Commit the release of mp.
-            unlockextra(mp);
+            unlockextra(_addr_mp);
 
             msigrestore(sigmask);
+
         }
 
         // A helper function for EnsureDropM.
@@ -2057,22 +2229,22 @@ found:
         // return a nil list head if that's what it finds. If nilokay is false,
         // lockextra will keep waiting until the list head is no longer nil.
         //go:nosplit
-        private static ref m lockextra(bool nilokay)
+        private static ptr<m> lockextra(bool nilokay)
         {
-            const long locked = 1L;
+            const long locked = (long)1L;
 
 
 
             var incr = false;
             while (true)
             {
-                var old = atomic.Loaduintptr(ref extram);
+                var old = atomic.Loaduintptr(_addr_extram);
                 if (old == locked)
                 {
-                    var yield = osyield;
-                    yield();
+                    osyield();
                     continue;
                 }
+
                 if (old == 0L && !nilokay)
                 {
                     if (!incr)
@@ -2080,27 +2252,35 @@ found:
                         // Add 1 to the number of threads
                         // waiting for an M.
                         // This is cleared by newextram.
-                        atomic.Xadd(ref extraMWaiters, 1L);
+                        atomic.Xadd(_addr_extraMWaiters, 1L);
                         incr = true;
+
                     }
+
                     usleep(1L);
                     continue;
+
                 }
-                if (atomic.Casuintptr(ref extram, old, locked))
+
+                if (atomic.Casuintptr(_addr_extram, old, locked))
                 {
-                    return (m.Value)(@unsafe.Pointer(old));
+                    return _addr_(m.val)(@unsafe.Pointer(old))!;
                 }
-                yield = osyield;
-                yield();
+
+                osyield();
                 continue;
+
             }
+
 
         }
 
         //go:nosplit
-        private static void unlockextra(ref m mp)
+        private static void unlockextra(ptr<m> _addr_mp)
         {
-            atomic.Storeuintptr(ref extram, uintptr(@unsafe.Pointer(mp)));
+            ref m mp = ref _addr_mp.val;
+
+            atomic.Storeuintptr(_addr_extram, uintptr(@unsafe.Pointer(mp)));
         }
 
         // execLock serializes exec and clone to avoid bugs or unspecified behaviour
@@ -2115,10 +2295,14 @@ found:
         // Create a new m. It will start off with a call to fn, or else the scheduler.
         // fn needs to be static and not a heap allocated closure.
         // May run with m.p==nil, so write barriers are not allowed.
+        //
+        // id is optional pre-allocated m ID. Omit by passing -1.
         //go:nowritebarrierrec
-        private static void newm(Action fn, ref p _p_)
+        private static void newm(Action fn, ptr<p> _addr__p_, long id)
         {
-            var mp = allocm(_p_, fn);
+            ref p _p_ = ref _addr__p_.val;
+
+            var mp = allocm(_addr__p_, fn, id);
             mp.nextp.set(_p_);
             mp.sigmask = initSigmask;
             {
@@ -2137,50 +2321,62 @@ found:
                     //
                     // TODO: This may be unnecessary on Windows, which
                     // doesn't model thread creation off fork.
-                    lock(ref newmHandoff.@lock);
+                    lock(_addr_newmHandoff.@lock);
                     if (newmHandoff.haveTemplateThread == 0L)
                     {
                         throw("on a locked thread with no template thread");
                     }
+
                     mp.schedlink = newmHandoff.newm;
                     newmHandoff.newm.set(mp);
                     if (newmHandoff.waiting)
                     {
                         newmHandoff.waiting = false;
-                        notewakeup(ref newmHandoff.wake);
+                        notewakeup(_addr_newmHandoff.wake);
                     }
-                    unlock(ref newmHandoff.@lock);
-                    return;
+
+                    unlock(_addr_newmHandoff.@lock);
+                    return ;
+
                 }
 
             }
-            newm1(mp);
+
+            newm1(_addr_mp);
+
         }
 
-        private static void newm1(ref m mp)
+        private static void newm1(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
             if (iscgo)
             {
-                cgothreadstart ts = default;
+                ref cgothreadstart ts = ref heap(out ptr<cgothreadstart> _addr_ts);
                 if (_cgo_thread_start == null)
                 {
                     throw("_cgo_thread_start missing");
                 }
+
                 ts.g.set(mp.g0);
-                ts.tls = (uint64.Value)(@unsafe.Pointer(ref mp.tls[0L]));
+                ts.tls = (uint64.val)(@unsafe.Pointer(_addr_mp.tls[0L]));
                 ts.fn = @unsafe.Pointer(funcPC(mstart));
                 if (msanenabled)
                 {
-                    msanwrite(@unsafe.Pointer(ref ts), @unsafe.Sizeof(ts));
+                    msanwrite(@unsafe.Pointer(_addr_ts), @unsafe.Sizeof(ts));
                 }
+
                 execLock.rlock(); // Prevent process clone.
-                asmcgocall(_cgo_thread_start, @unsafe.Pointer(ref ts));
+                asmcgocall(_cgo_thread_start, @unsafe.Pointer(_addr_ts));
                 execLock.runlock();
-                return;
+                return ;
+
             }
+
             execLock.rlock(); // Prevent process clone.
-            newosproc(mp, @unsafe.Pointer(mp.g0.stack.hi));
+            newosproc(mp);
             execLock.runlock();
+
         }
 
         // startTemplateThread starts the template thread if it is not already
@@ -2189,16 +2385,29 @@ found:
         // The calling thread must itself be in a known-good state.
         private static void startTemplateThread()
         {
-            if (!atomic.Cas(ref newmHandoff.haveTemplateThread, 0L, 1L))
+            if (GOARCH == "wasm")
+            { // no threads on wasm yet
+                return ;
+
+            } 
+
+            // Disable preemption to guarantee that the template thread will be
+            // created before a park once haveTemplateThread is set.
+            var mp = acquirem();
+            if (!atomic.Cas(_addr_newmHandoff.haveTemplateThread, 0L, 1L))
             {
-                return;
+                releasem(mp);
+                return ;
             }
-            newm(templateThread, null);
+
+            newm(templateThread, _addr_null, -1L);
+            releasem(mp);
+
         }
 
-        // tmeplateThread is a thread in a known-good state that exists solely
+        // templateThread is a thread in a known-good state that exists solely
         // to start new threads in known-good states when the calling thread
-        // may not be a a good state.
+        // may not be in a good state.
         //
         // Many programs never need this, so templateThread is started lazily
         // when we first enter a state that might lead to running on a thread
@@ -2210,35 +2419,38 @@ found:
         //go:nowritebarrierrec
         private static void templateThread()
         {
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             sched.nmsys++;
             checkdead();
-            unlock(ref sched.@lock);
+            unlock(_addr_sched.@lock);
 
             while (true)
             {
-                lock(ref newmHandoff.@lock);
+                lock(_addr_newmHandoff.@lock);
                 while (newmHandoff.newm != 0L)
                 {
                     var newm = newmHandoff.newm.ptr();
                     newmHandoff.newm = 0L;
-                    unlock(ref newmHandoff.@lock);
+                    unlock(_addr_newmHandoff.@lock);
                     while (newm != null)
                     {
                         var next = newm.schedlink.ptr();
                         newm.schedlink = 0L;
-                        newm1(newm);
+                        newm1(_addr_newm);
                         newm = next;
                     }
 
-                    lock(ref newmHandoff.@lock);
+                    lock(_addr_newmHandoff.@lock);
+
                 }
 
                 newmHandoff.waiting = true;
-                noteclear(ref newmHandoff.wake);
-                unlock(ref newmHandoff.@lock);
-                notesleep(ref newmHandoff.wake);
+                noteclear(_addr_newmHandoff.wake);
+                unlock(_addr_newmHandoff.@lock);
+                notesleep(_addr_newmHandoff.wake);
+
             }
+
 
         }
 
@@ -2252,38 +2464,32 @@ found:
             {
                 throw("stopm holding locks");
             }
+
             if (_g_.m.p != 0L)
             {
                 throw("stopm holding p");
             }
+
             if (_g_.m.spinning)
             {
                 throw("stopm spinning");
             }
-retry:
-            lock(ref sched.@lock);
-            mput(_g_.m);
-            unlock(ref sched.@lock);
-            notesleep(ref _g_.m.park);
-            noteclear(ref _g_.m.park);
-            if (_g_.m.helpgc != 0L)
-            { 
-                // helpgc() set _g_.m.p and _g_.m.mcache, so we have a P.
-                gchelper(); 
-                // Undo the effects of helpgc().
-                _g_.m.helpgc = 0L;
-                _g_.m.mcache = null;
-                _g_.m.p = 0L;
-                goto retry;
-            }
-            acquirep(_g_.m.nextp.ptr());
+
+            lock(_addr_sched.@lock);
+            mput(_addr__g_.m);
+            unlock(_addr_sched.@lock);
+            notesleep(_addr__g_.m.park);
+            noteclear(_addr__g_.m.park);
+            acquirep(_addr__g_.m.nextp.ptr());
             _g_.m.nextp = 0L;
+
         }
 
         private static void mspinning()
         { 
             // startm's caller incremented nmspinning. Set the new M's spinning.
             getg().m.spinning = true;
+
         }
 
         // Schedules some M to run the p (creates an M if necessary).
@@ -2292,134 +2498,190 @@ retry:
         // If spinning is set, the caller has incremented nmspinning and startm will
         // either decrement nmspinning or set m.spinning in the newly started M.
         //go:nowritebarrierrec
-        private static void startm(ref p _p_, bool spinning)
+        private static void startm(ptr<p> _addr__p_, bool spinning)
         {
-            lock(ref sched.@lock);
+            ref p _p_ = ref _addr__p_.val;
+
+            lock(_addr_sched.@lock);
             if (_p_ == null)
             {
                 _p_ = pidleget();
                 if (_p_ == null)
                 {
-                    unlock(ref sched.@lock);
+                    unlock(_addr_sched.@lock);
                     if (spinning)
                     { 
                         // The caller incremented nmspinning, but there are no idle Ps,
                         // so it's okay to just undo the increment and give up.
-                        if (int32(atomic.Xadd(ref sched.nmspinning, -1L)) < 0L)
+                        if (int32(atomic.Xadd(_addr_sched.nmspinning, -1L)) < 0L)
                         {
                             throw("startm: negative nmspinning");
                         }
+
                     }
-                    return;
+
+                    return ;
+
                 }
+
             }
+
             var mp = mget();
-            unlock(ref sched.@lock);
             if (mp == null)
-            {
+            { 
+                // No M is available, we must drop sched.lock and call newm.
+                // However, we already own a P to assign to the M.
+                //
+                // Once sched.lock is released, another G (e.g., in a syscall),
+                // could find no idle P while checkdead finds a runnable G but
+                // no running M's because this new M hasn't started yet, thus
+                // throwing in an apparent deadlock.
+                //
+                // Avoid this situation by pre-allocating the ID for the new M,
+                // thus marking it as 'running' before we drop sched.lock. This
+                // new M will eventually run the scheduler to execute any
+                // queued G's.
+                var id = mReserveID();
+                unlock(_addr_sched.@lock);
+
                 Action fn = default;
                 if (spinning)
                 { 
                     // The caller incremented nmspinning, so set m.spinning in the new M.
                     fn = mspinning;
+
                 }
-                newm(fn, _p_);
-                return;
+
+                newm(fn, _addr__p_, id);
+                return ;
+
             }
+
+            unlock(_addr_sched.@lock);
             if (mp.spinning)
             {
                 throw("startm: m is spinning");
             }
+
             if (mp.nextp != 0L)
             {
                 throw("startm: m has p");
             }
-            if (spinning && !runqempty(_p_))
+
+            if (spinning && !runqempty(_addr__p_))
             {
                 throw("startm: p has runnable gs");
             } 
             // The caller incremented nmspinning, so set m.spinning in the new M.
             mp.spinning = spinning;
             mp.nextp.set(_p_);
-            notewakeup(ref mp.park);
+            notewakeup(_addr_mp.park);
+
         }
 
         // Hands off P from syscall or locked M.
         // Always runs without a P, so write barriers are not allowed.
         //go:nowritebarrierrec
-        private static void handoffp(ref p _p_)
-        { 
+        private static void handoffp(ptr<p> _addr__p_)
+        {
+            ref p _p_ = ref _addr__p_.val;
+ 
             // handoffp must start an M in any situation where
             // findrunnable would return a G to run on _p_.
 
             // if it has local work, start it straight away
-            if (!runqempty(_p_) || sched.runqsize != 0L)
+            if (!runqempty(_addr__p_) || sched.runqsize != 0L)
             {
-                startm(_p_, false);
-                return;
+                startm(_addr__p_, false);
+                return ;
             } 
             // if it has GC work, start it straight away
             if (gcBlackenEnabled != 0L && gcMarkWorkAvailable(_p_))
             {
-                startm(_p_, false);
-                return;
+                startm(_addr__p_, false);
+                return ;
             } 
             // no local work, check that there are no spinning/idle M's,
             // otherwise our help is not required
-            if (atomic.Load(ref sched.nmspinning) + atomic.Load(ref sched.npidle) == 0L && atomic.Cas(ref sched.nmspinning, 0L, 1L))
+            if (atomic.Load(_addr_sched.nmspinning) + atomic.Load(_addr_sched.npidle) == 0L && atomic.Cas(_addr_sched.nmspinning, 0L, 1L))
             { // TODO: fast atomic
-                startm(_p_, true);
-                return;
+                startm(_addr__p_, true);
+                return ;
+
             }
-            lock(ref sched.@lock);
+
+            lock(_addr_sched.@lock);
             if (sched.gcwaiting != 0L)
             {
                 _p_.status = _Pgcstop;
                 sched.stopwait--;
                 if (sched.stopwait == 0L)
                 {
-                    notewakeup(ref sched.stopnote);
+                    notewakeup(_addr_sched.stopnote);
                 }
-                unlock(ref sched.@lock);
-                return;
+
+                unlock(_addr_sched.@lock);
+                return ;
+
             }
-            if (_p_.runSafePointFn != 0L && atomic.Cas(ref _p_.runSafePointFn, 1L, 0L))
+
+            if (_p_.runSafePointFn != 0L && atomic.Cas(_addr__p_.runSafePointFn, 1L, 0L))
             {
                 sched.safePointFn(_p_);
                 sched.safePointWait--;
                 if (sched.safePointWait == 0L)
                 {
-                    notewakeup(ref sched.safePointNote);
+                    notewakeup(_addr_sched.safePointNote);
                 }
+
             }
+
             if (sched.runqsize != 0L)
             {
-                unlock(ref sched.@lock);
-                startm(_p_, false);
-                return;
+                unlock(_addr_sched.@lock);
+                startm(_addr__p_, false);
+                return ;
             } 
             // If this is the last running P and nobody is polling network,
             // need to wakeup another M to poll network.
-            if (sched.npidle == uint32(gomaxprocs - 1L) && atomic.Load64(ref sched.lastpoll) != 0L)
+            if (sched.npidle == uint32(gomaxprocs - 1L) && atomic.Load64(_addr_sched.lastpoll) != 0L)
             {
-                unlock(ref sched.@lock);
-                startm(_p_, false);
-                return;
+                unlock(_addr_sched.@lock);
+                startm(_addr__p_, false);
+                return ;
             }
-            pidleput(_p_);
-            unlock(ref sched.@lock);
+
+            {
+                var when = nobarrierWakeTime(_p_);
+
+                if (when != 0L)
+                {
+                    wakeNetPoller(when);
+                }
+
+            }
+
+            pidleput(_addr__p_);
+            unlock(_addr_sched.@lock);
+
         }
 
         // Tries to add one more P to execute G's.
         // Called when a G is made runnable (newproc, ready).
         private static void wakep()
-        { 
-            // be conservative about spinning threads
-            if (!atomic.Cas(ref sched.nmspinning, 0L, 1L))
+        {
+            if (atomic.Load(_addr_sched.npidle) == 0L)
             {
-                return;
+                return ;
+            } 
+            // be conservative about spinning threads
+            if (atomic.Load(_addr_sched.nmspinning) != 0L || !atomic.Cas(_addr_sched.nmspinning, 0L, 1L))
+            {
+                return ;
             }
-            startm(null, true);
+
+            startm(_addr_null, true);
+
         }
 
         // Stops execution of the current m that is locked to a g until the g is runnable again.
@@ -2432,32 +2694,39 @@ retry:
             {
                 throw("stoplockedm: inconsistent locking");
             }
+
             if (_g_.m.p != 0L)
             { 
                 // Schedule another M to run this p.
                 var _p_ = releasep();
-                handoffp(_p_);
+                handoffp(_addr__p_);
+
             }
+
             incidlelocked(1L); 
             // Wait until another thread schedules lockedg again.
-            notesleep(ref _g_.m.park);
-            noteclear(ref _g_.m.park);
-            var status = readgstatus(_g_.m.lockedg.ptr());
+            notesleep(_addr__g_.m.park);
+            noteclear(_addr__g_.m.park);
+            var status = readgstatus(_addr__g_.m.lockedg.ptr());
             if (status & ~_Gscan != _Grunnable)
             {
                 print("runtime:stoplockedm: g is not Grunnable or Gscanrunnable\n");
-                dumpgstatus(_g_);
+                dumpgstatus(_addr__g_);
                 throw("stoplockedm: not runnable");
             }
-            acquirep(_g_.m.nextp.ptr());
+
+            acquirep(_addr__g_.m.nextp.ptr());
             _g_.m.nextp = 0L;
+
         }
 
         // Schedules the locked m to run the locked gp.
         // May run during STW, so write barriers are not allowed.
         //go:nowritebarrierrec
-        private static void startlockedm(ref g gp)
+        private static void startlockedm(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             var _g_ = getg();
 
             var mp = gp.lockedm.ptr();
@@ -2465,6 +2734,7 @@ retry:
             {
                 throw("startlockedm: locked to me");
             }
+
             if (mp.nextp != 0L)
             {
                 throw("startlockedm: m has p");
@@ -2473,8 +2743,9 @@ retry:
             incidlelocked(-1L);
             var _p_ = releasep();
             mp.nextp.set(_p_);
-            notewakeup(ref mp.park);
+            notewakeup(_addr_mp.park);
             stopm();
+
         }
 
         // Stops the current m for stopTheWorld.
@@ -2487,26 +2758,31 @@ retry:
             {
                 throw("gcstopm: not waiting for gc");
             }
+
             if (_g_.m.spinning)
             {
                 _g_.m.spinning = false; 
                 // OK to just drop nmspinning here,
                 // startTheWorld will unpark threads as necessary.
-                if (int32(atomic.Xadd(ref sched.nmspinning, -1L)) < 0L)
+                if (int32(atomic.Xadd(_addr_sched.nmspinning, -1L)) < 0L)
                 {
                     throw("gcstopm: negative nmspinning");
                 }
+
             }
+
             var _p_ = releasep();
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             _p_.status = _Pgcstop;
             sched.stopwait--;
             if (sched.stopwait == 0L)
             {
-                notewakeup(ref sched.stopnote);
+                notewakeup(_addr_sched.stopnote);
             }
-            unlock(ref sched.@lock);
+
+            unlock(_addr_sched.@lock);
             stopm();
+
         }
 
         // Schedules gp to run on the current M.
@@ -2518,20 +2794,24 @@ retry:
         // acquiring a P in several places.
         //
         //go:yeswritebarrierrec
-        private static void execute(ref g gp, bool inheritTime)
+        private static void execute(ptr<g> _addr_gp, bool inheritTime)
         {
-            var _g_ = getg();
+            ref g gp = ref _addr_gp.val;
 
-            casgstatus(gp, _Grunnable, _Grunning);
+            var _g_ = getg(); 
+
+            // Assign gp.m before entering _Grunning so running Gs have an
+            // M.
+            _g_.m.curg = gp;
+            gp.m = _g_.m;
+            casgstatus(_addr_gp, _Grunnable, _Grunning);
             gp.waitsince = 0L;
             gp.preempt = false;
             gp.stackguard0 = gp.stack.lo + _StackGuard;
             if (!inheritTime)
             {
                 _g_.m.p.ptr().schedtick++;
-            }
-            _g_.m.curg = gp;
-            gp.m = _g_.m; 
+            } 
 
             // Check whether the profiler needs to be turned on or off.
             var hz = sched.profilehz;
@@ -2539,6 +2819,7 @@ retry:
             {
                 setThreadCPUProfiler(hz);
             }
+
             if (trace.enabled)
             { 
                 // GoSysExit has to happen when we have a P, but before GoStart.
@@ -2547,15 +2828,22 @@ retry:
                 {
                     traceGoSysExit(gp.sysexitticks);
                 }
+
                 traceGoStart();
+
             }
-            gogo(ref gp.sched);
+
+            gogo(_addr_gp.sched);
+
         }
 
         // Finds a runnable goroutine to execute.
-        // Tries to steal from other P's, get g from global queue, poll network.
-        private static (ref g, bool) findrunnable()
+        // Tries to steal from other P's, get g from local or global queue, poll network.
+        private static (ptr<g>, bool) findrunnable()
         {
+            ptr<g> gp = default!;
+            bool inheritTime = default;
+
             var _g_ = getg(); 
 
             // The conditions here and in handoffp must agree: if
@@ -2569,10 +2857,14 @@ top:
                 gcstopm();
                 goto top;
             }
+
             if (_p_.runSafePointFn != 0L)
             {
                 runSafePointFn();
             }
+
+            var (now, pollUntil, _) = checkTimers(_addr__p_, 0L);
+
             if (fingwait && fingwake)
             {
                 {
@@ -2582,27 +2874,29 @@ top:
 
                     if (gp != null)
                     {
-                        ready(gp, 0L, true);
+                        ready(_addr_gp, 0L, true);
                     }
 
                     gp = gp__prev2;
 
                 }
+
             }
-            if (cgo_yield != null.Value)
+
+            if (cgo_yield != null.val)
             {
-                asmcgocall(cgo_yield.Value, null);
+                asmcgocall(cgo_yield.val, null);
             } 
 
             // local runq
             {
                 var gp__prev1 = gp;
 
-                var (gp, inheritTime) = runqget(_p_);
+                var (gp, inheritTime) = runqget(_addr__p_);
 
                 if (gp != null)
                 {
-                    return (gp, inheritTime);
+                    return (_addr_gp!, inheritTime);
                 } 
 
                 // global runq
@@ -2614,13 +2908,14 @@ top:
             // global runq
             if (sched.runqsize != 0L)
             {
-                lock(ref sched.@lock);
-                gp = globrunqget(_p_, 0L);
-                unlock(ref sched.@lock);
+                lock(_addr_sched.@lock);
+                gp = globrunqget(_addr__p_, 0L);
+                unlock(_addr_sched.@lock);
                 if (gp != null)
                 {
-                    return (gp, false);
+                    return (_addr_gp!, false);
                 }
+
             } 
 
             // Poll network.
@@ -2630,51 +2925,50 @@ top:
             // blocked thread (e.g. it has already returned from netpoll, but does
             // not set lastpoll yet), this thread will do blocking netpoll below
             // anyway.
-            if (netpollinited() && atomic.Load(ref netpollWaiters) > 0L && atomic.Load64(ref sched.lastpoll) != 0L)
+            if (netpollinited() && atomic.Load(_addr_netpollWaiters) > 0L && atomic.Load64(_addr_sched.lastpoll) != 0L)
             {
                 {
-                    var gp__prev2 = gp;
+                    var list__prev2 = list;
 
-                    gp = netpoll(false);
+                    ref var list = ref heap(netpoll(0L), out ptr<var> _addr_list);
 
-                    if (gp != null)
+                    if (!list.empty())
                     { // non-blocking
-                        // netpoll returns list of goroutines linked by schedlink.
-                        injectglist(gp.schedlink.ptr());
-                        casgstatus(gp, _Gwaiting, _Grunnable);
+                        gp = list.pop();
+                        injectglist(_addr_list);
+                        casgstatus(_addr_gp, _Gwaiting, _Grunnable);
                         if (trace.enabled)
                         {
                             traceGoUnpark(gp, 0L);
                         }
-                        return (gp, false);
+
+                        return (_addr_gp!, false);
+
                     }
 
-                    gp = gp__prev2;
+                    list = list__prev2;
 
                 }
+
             } 
 
             // Steal work from other P's.
             var procs = uint32(gomaxprocs);
-            if (atomic.Load(ref sched.npidle) == procs - 1L)
-            { 
-                // Either GOMAXPROCS=1 or everybody, except for us, is idle already.
-                // New work can appear from returning syscall/cgocall, network or timers.
-                // Neither of that submits to local run queues, so no point in stealing.
-                goto stop;
-            } 
+            var ranTimer = false; 
             // If number of spinning M's >= number of busy P's, block.
             // This is necessary to prevent excessive CPU consumption
             // when GOMAXPROCS>>1 but the program parallelism is low.
-            if (!_g_.m.spinning && 2L * atomic.Load(ref sched.nmspinning) >= procs - atomic.Load(ref sched.npidle))
+            if (!_g_.m.spinning && 2L * atomic.Load(_addr_sched.nmspinning) >= procs - atomic.Load(_addr_sched.npidle))
             {
                 goto stop;
             }
+
             if (!_g_.m.spinning)
             {
                 _g_.m.spinning = true;
-                atomic.Xadd(ref sched.nmspinning, 1L);
+                atomic.Xadd(_addr_sched.nmspinning, 1L);
             }
+
             for (long i = 0L; i < 4L; i++)
             {
                 for (var @enum = stealOrder.start(fastrand()); !@enum.done(); @enum.next())
@@ -2683,41 +2977,144 @@ top:
                     {
                         goto top;
                     }
+
                     var stealRunNextG = i > 2L; // first look for ready queues with more than 1 g
+                    var p2 = allp[@enum.position()];
+                    if (_p_ == p2)
+                    {
+                        continue;
+                    }
+
                     {
                         var gp__prev1 = gp;
 
-                        gp = runqsteal(_p_, allp[@enum.position()], stealRunNextG);
+                        gp = runqsteal(_addr__p_, _addr_p2, stealRunNextG);
 
                         if (gp != null)
                         {
-                            return (gp, false);
-                        }
+                            return (_addr_gp!, false);
+                        } 
+
+                        // Consider stealing timers from p2.
+                        // This call to checkTimers is the only place where
+                        // we hold a lock on a different P's timers.
+                        // Lock contention can be a problem here, so
+                        // initially avoid grabbing the lock if p2 is running
+                        // and is not marked for preemption. If p2 is running
+                        // and not being preempted we assume it will handle its
+                        // own timers.
+                        // If we're still looking for work after checking all
+                        // the P's, then go ahead and steal from an active P.
 
                         gp = gp__prev1;
 
+                    } 
+
+                    // Consider stealing timers from p2.
+                    // This call to checkTimers is the only place where
+                    // we hold a lock on a different P's timers.
+                    // Lock contention can be a problem here, so
+                    // initially avoid grabbing the lock if p2 is running
+                    // and is not marked for preemption. If p2 is running
+                    // and not being preempted we assume it will handle its
+                    // own timers.
+                    // If we're still looking for work after checking all
+                    // the P's, then go ahead and steal from an active P.
+                    if (i > 2L || (i > 1L && shouldStealTimers(_addr_p2)))
+                    {
+                        var (tnow, w, ran) = checkTimers(_addr_p2, now);
+                        now = tnow;
+                        if (w != 0L && (pollUntil == 0L || w < pollUntil))
+                        {
+                            pollUntil = w;
+                        }
+
+                        if (ran)
+                        { 
+                            // Running the timers may have
+                            // made an arbitrary number of G's
+                            // ready and added them to this P's
+                            // local run queue. That invalidates
+                            // the assumption of runqsteal
+                            // that is always has room to add
+                            // stolen G's. So check now if there
+                            // is a local G to run.
+                            {
+                                var gp__prev3 = gp;
+
+                                (gp, inheritTime) = runqget(_addr__p_);
+
+                                if (gp != null)
+                                {
+                                    return (_addr_gp!, inheritTime);
+                                }
+
+                                gp = gp__prev3;
+
+                            }
+
+                            ranTimer = true;
+
+                        }
+
                     }
+
                 }
+
 
             }
 
+            if (ranTimer)
+            { 
+                // Running a timer may have made some goroutine ready.
+                goto top;
 
-stop: 
+            }
 
-            // Before we drop our P, make a snapshot of the allp slice,
-            // which can change underfoot once we no longer block
-            // safe-points. We don't need to snapshot the contents because
-            // everything up to cap(allp) is immutable.
+stop:
+
             if (gcBlackenEnabled != 0L && _p_.gcBgMarkWorker != 0L && gcMarkWorkAvailable(_p_))
             {
                 _p_.gcMarkWorkerMode = gcMarkWorkerIdleMode;
                 gp = _p_.gcBgMarkWorker.ptr();
-                casgstatus(gp, _Gwaiting, _Grunnable);
+                casgstatus(_addr_gp, _Gwaiting, _Grunnable);
                 if (trace.enabled)
                 {
                     traceGoUnpark(gp, 0L);
                 }
-                return (gp, false);
+
+                return (_addr_gp!, false);
+
+            }
+
+            var delta = int64(-1L);
+            if (pollUntil != 0L)
+            { 
+                // checkTimers ensures that polluntil > now.
+                delta = pollUntil - now;
+
+            } 
+
+            // wasm only:
+            // If a callback returned and no other goroutine is awake,
+            // then wake event handler goroutine which pauses execution
+            // until a callback was triggered.
+            var (gp, otherReady) = beforeIdle(delta);
+            if (gp != null)
+            {
+                casgstatus(_addr_gp, _Gwaiting, _Grunnable);
+                if (trace.enabled)
+                {
+                    traceGoUnpark(gp, 0L);
+                }
+
+                return (_addr_gp!, false);
+
+            }
+
+            if (otherReady)
+            {
+                goto top;
             } 
 
             // Before we drop our P, make a snapshot of the allp slice,
@@ -2727,24 +3124,27 @@ stop:
             var allpSnapshot = allp; 
 
             // return P and block
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             if (sched.gcwaiting != 0L || _p_.runSafePointFn != 0L)
             {
-                unlock(ref sched.@lock);
+                unlock(_addr_sched.@lock);
                 goto top;
             }
+
             if (sched.runqsize != 0L)
             {
-                gp = globrunqget(_p_, 0L);
-                unlock(ref sched.@lock);
-                return (gp, false);
+                gp = globrunqget(_addr__p_, 0L);
+                unlock(_addr_sched.@lock);
+                return (_addr_gp!, false);
             }
+
             if (releasep() != _p_)
             {
                 throw("findrunnable: wrong p");
             }
-            pidleput(_p_);
-            unlock(ref sched.@lock); 
+
+            pidleput(_addr__p_);
+            unlock(_addr_sched.@lock); 
 
             // Delicate dance: thread transitions from spinning to non-spinning state,
             // potentially concurrently with submission of new goroutines. We must
@@ -2763,10 +3163,11 @@ stop:
             if (_g_.m.spinning)
             {
                 _g_.m.spinning = false;
-                if (int32(atomic.Xadd(ref sched.nmspinning, -1L)) < 0L)
+                if (int32(atomic.Xadd(_addr_sched.nmspinning, -1L)) < 0L)
                 {
                     throw("findrunnable: negative nmspinning");
                 }
+
             } 
 
             // check all runqueues once again
@@ -2776,23 +3177,28 @@ stop:
                 foreach (var (_, ___p_) in allpSnapshot)
                 {
                     _p_ = ___p_;
-                    if (!runqempty(_p_))
+                    if (!runqempty(_addr__p_))
                     {
-                        lock(ref sched.@lock);
+                        lock(_addr_sched.@lock);
                         _p_ = pidleget();
-                        unlock(ref sched.@lock);
+                        unlock(_addr_sched.@lock);
                         if (_p_ != null)
                         {
-                            acquirep(_p_);
+                            acquirep(_addr__p_);
                             if (wasSpinning)
                             {
                                 _g_.m.spinning = true;
-                                atomic.Xadd(ref sched.nmspinning, 1L);
+                                atomic.Xadd(_addr_sched.nmspinning, 1L);
                             }
+
                             goto top;
+
                         }
+
                         break;
+
                     }
+
                 } 
 
                 // Check for idle-priority GC work again.
@@ -2802,64 +3208,114 @@ stop:
 
             if (gcBlackenEnabled != 0L && gcMarkWorkAvailable(null))
             {
-                lock(ref sched.@lock);
+                lock(_addr_sched.@lock);
                 _p_ = pidleget();
                 if (_p_ != null && _p_.gcBgMarkWorker == 0L)
                 {
-                    pidleput(_p_);
+                    pidleput(_addr__p_);
                     _p_ = null;
                 }
-                unlock(ref sched.@lock);
+
+                unlock(_addr_sched.@lock);
                 if (_p_ != null)
                 {
-                    acquirep(_p_);
+                    acquirep(_addr__p_);
                     if (wasSpinning)
                     {
                         _g_.m.spinning = true;
-                        atomic.Xadd(ref sched.nmspinning, 1L);
+                        atomic.Xadd(_addr_sched.nmspinning, 1L);
                     } 
                     // Go back to idle GC check.
                     goto stop;
+
                 }
+
             } 
 
             // poll network
-            if (netpollinited() && atomic.Load(ref netpollWaiters) > 0L && atomic.Xchg64(ref sched.lastpoll, 0L) != 0L)
+            if (netpollinited() && (atomic.Load(_addr_netpollWaiters) > 0L || pollUntil != 0L) && atomic.Xchg64(_addr_sched.lastpoll, 0L) != 0L)
             {
+                atomic.Store64(_addr_sched.pollUntil, uint64(pollUntil));
                 if (_g_.m.p != 0L)
                 {
                     throw("findrunnable: netpoll with p");
                 }
+
                 if (_g_.m.spinning)
                 {
                     throw("findrunnable: netpoll with spinning");
                 }
-                gp = netpoll(true); // block until new work is available
-                atomic.Store64(ref sched.lastpoll, uint64(nanotime()));
-                if (gp != null)
+
+                if (faketime != 0L)
+                { 
+                    // When using fake time, just poll.
+                    delta = 0L;
+
+                }
+
+                list = netpoll(delta); // block until new work is available
+                atomic.Store64(_addr_sched.pollUntil, 0L);
+                atomic.Store64(_addr_sched.lastpoll, uint64(nanotime()));
+                if (faketime != 0L && list.empty())
+                { 
+                    // Using fake time and nothing is ready; stop M.
+                    // When all M's stop, checkdead will call timejump.
+                    stopm();
+                    goto top;
+
+                }
+
+                lock(_addr_sched.@lock);
+                _p_ = pidleget();
+                unlock(_addr_sched.@lock);
+                if (_p_ == null)
                 {
-                    lock(ref sched.@lock);
-                    _p_ = pidleget();
-                    unlock(ref sched.@lock);
-                    if (_p_ != null)
+                    injectglist(_addr_list);
+                }
+                else
+                {
+                    acquirep(_addr__p_);
+                    if (!list.empty())
                     {
-                        acquirep(_p_);
-                        injectglist(gp.schedlink.ptr());
-                        casgstatus(gp, _Gwaiting, _Grunnable);
+                        gp = list.pop();
+                        injectglist(_addr_list);
+                        casgstatus(_addr_gp, _Gwaiting, _Grunnable);
                         if (trace.enabled)
                         {
                             traceGoUnpark(gp, 0L);
                         }
-                        return (gp, false);
+
+                        return (_addr_gp!, false);
+
                     }
-                    injectglist(gp);
+
+                    if (wasSpinning)
+                    {
+                        _g_.m.spinning = true;
+                        atomic.Xadd(_addr_sched.nmspinning, 1L);
+                    }
+
+                    goto top;
+
                 }
+
             }
+            else if (pollUntil != 0L && netpollinited())
+            {
+                var pollerPollUntil = int64(atomic.Load64(_addr_sched.pollUntil));
+                if (pollerPollUntil == 0L || pollerPollUntil > pollUntil)
+                {
+                    netpollBreak();
+                }
+
+            }
+
             stopm();
             goto top;
+
         }
 
-        // pollWork returns true if there is non-background work this P could
+        // pollWork reports whether there is non-background work this P could
         // be doing. This is a fairly lightweight check to be used for
         // background work loops, like idle GC. It checks a subset of the
         // conditions checked by the actual scheduler.
@@ -2869,25 +3325,51 @@ stop:
             {
                 return true;
             }
+
             var p = getg().m.p.ptr();
-            if (!runqempty(p))
+            if (!runqempty(_addr_p))
             {
                 return true;
             }
-            if (netpollinited() && atomic.Load(ref netpollWaiters) > 0L && sched.lastpoll != 0L)
+
+            if (netpollinited() && atomic.Load(_addr_netpollWaiters) > 0L && sched.lastpoll != 0L)
             {
                 {
-                    var gp = netpoll(false);
+                    ref var list = ref heap(netpoll(0L), out ptr<var> _addr_list);
 
-                    if (gp != null)
+                    if (!list.empty())
                     {
-                        injectglist(gp);
+                        injectglist(_addr_list);
                         return true;
                     }
 
                 }
+
             }
+
             return false;
+
+        }
+
+        // wakeNetPoller wakes up the thread sleeping in the network poller,
+        // if there is one, and if it isn't going to wake up anyhow before
+        // the when argument.
+        private static void wakeNetPoller(long when)
+        {
+            if (atomic.Load64(_addr_sched.lastpoll) == 0L)
+            { 
+                // In findrunnable we ensure that when polling the pollUntil
+                // field is either zero or the time to which the current
+                // poll is expected to run. This can have a spurious wakeup
+                // but should never miss a wakeup.
+                var pollerPollUntil = int64(atomic.Load64(_addr_sched.pollUntil));
+                if (pollerPollUntil == 0L || pollerPollUntil > when)
+                {
+                    netpollBreak();
+                }
+
+            }
+
         }
 
         private static void resetspinning()
@@ -2897,8 +3379,9 @@ stop:
             {
                 throw("resetspinning: not a spinning m");
             }
+
             _g_.m.spinning = false;
-            var nmspinning = atomic.Xadd(ref sched.nmspinning, -1L);
+            var nmspinning = atomic.Xadd(_addr_sched.nmspinning, -1L);
             if (int32(nmspinning) < 0L)
             {
                 throw("findrunnable: negative nmspinning");
@@ -2906,26 +3389,33 @@ stop:
             // M wakeup policy is deliberately somewhat conservative, so check if we
             // need to wakeup another P here. See "Worker thread parking/unparking"
             // comment at the top of the file for details.
-            if (nmspinning == 0L && atomic.Load(ref sched.npidle) > 0L)
-            {
-                wakep();
-            }
+            wakep();
+
         }
 
-        // Injects the list of runnable G's into the scheduler.
+        // injectglist adds each runnable G on the list to some run queue,
+        // and clears glist. If there is no current P, they are added to the
+        // global queue, and up to npidle M's are started to run them.
+        // Otherwise, for each idle P, this adds a G to the global queue
+        // and starts an M. Any remaining G's are added to the current P's
+        // local run queue.
+        // This may temporarily acquire the scheduler lock.
         // Can run concurrently with GC.
-        private static void injectglist(ref g glist)
+        private static void injectglist(ptr<gList> _addr_glist)
         {
-            if (glist == null)
+            ref gList glist = ref _addr_glist.val;
+
+            if (glist.empty())
             {
-                return;
+                return ;
             }
+
             if (trace.enabled)
             {
                 {
                     var gp__prev1 = gp;
 
-                    var gp = glist;
+                    var gp = glist.head.ptr();
 
                     while (gp != null)
                     {
@@ -2936,22 +3426,76 @@ stop:
 
                     gp = gp__prev1;
                 }
-            }
-            lock(ref sched.@lock);
-            long n = default;
-            for (n = 0L; glist != null; n++)
+
+            } 
+
+            // Mark all the goroutines as runnable before we put them
+            // on the run queues.
+            var head = glist.head.ptr();
+            ptr<g> tail;
+            long qsize = 0L;
             {
-                gp = glist;
-                glist = gp.schedlink.ptr();
-                casgstatus(gp, _Gwaiting, _Grunnable);
-                globrunqput(gp);
+                var gp__prev1 = gp;
+
+                gp = head;
+
+                while (gp != null)
+                {
+                    tail = gp;
+                    qsize++;
+                    casgstatus(_addr_gp, _Gwaiting, _Grunnable);
+                    gp = gp.schedlink.ptr();
+                } 
+
+                // Turn the gList into a gQueue.
+
+
+                gp = gp__prev1;
+            } 
+
+            // Turn the gList into a gQueue.
+            ref gQueue q = ref heap(out ptr<gQueue> _addr_q);
+            q.head.set(head);
+            q.tail.set(tail);
+            glist = new gList();
+
+            Action<long> startIdle = n =>
+            {
+                while (n != 0L && sched.npidle != 0L)
+                {
+                    startm(_addr_null, false);
+                    n--;
+                }
+
+
+            }
+;
+
+            var pp = getg().m.p.ptr();
+            if (pp == null)
+            {
+                lock(_addr_sched.@lock);
+                globrunqputbatch(_addr_q, int32(qsize));
+                unlock(_addr_sched.@lock);
+                startIdle(qsize);
+                return ;
             }
 
-            unlock(ref sched.@lock);
-            while (n != 0L && sched.npidle != 0L)
+            lock(_addr_sched.@lock);
+            var npidle = int(sched.npidle);
+            long n = default;
+            for (n = 0L; n < npidle && !q.empty(); n++)
             {
-                startm(null, false);
-                n--;
+                globrunqput(_addr_q.pop());
+            }
+
+            unlock(_addr_sched.@lock);
+            startIdle(n);
+            qsize -= n;
+
+            if (!q.empty())
+            {
+                runqputbatch(_addr_pp, _addr_q, qsize);
             }
 
         }
@@ -2966,10 +3510,11 @@ stop:
             {
                 throw("schedule: holding locks");
             }
+
             if (_g_.m.lockedg != 0L)
             {
                 stoplockedm();
-                execute(_g_.m.lockedg.ptr(), false); // Never returns.
+                execute(_addr__g_.m.lockedg.ptr(), false); // Never returns.
             } 
 
             // We should not schedule away from a g that is executing a cgo call,
@@ -2978,18 +3523,39 @@ stop:
             {
                 throw("schedule: in cgo");
             }
+
 top:
+            var pp = _g_.m.p.ptr();
+            pp.preempt = false;
+
             if (sched.gcwaiting != 0L)
             {
                 gcstopm();
                 goto top;
             }
-            if (_g_.m.p.ptr().runSafePointFn != 0L)
+
+            if (pp.runSafePointFn != 0L)
             {
                 runSafePointFn();
+            } 
+
+            // Sanity check: if we are spinning, the run queue should be empty.
+            // Check this before calling checkTimers, as that might call
+            // goready to put a ready goroutine on the local run queue.
+            if (_g_.m.spinning && (pp.runnext != 0L || pp.runqhead != pp.runqtail))
+            {
+                throw("schedule: spinning with local work");
             }
-            ref g gp = default;
-            bool inheritTime = default;
+
+            checkTimers(_addr_pp, 0L);
+
+            ptr<g> gp;
+            bool inheritTime = default; 
+
+            // Normal goroutines will check for need to wakeP in ready,
+            // but GCworkers and tracereaders will not, so the check must
+            // be done here instead.
+            var tryWakeP = false;
             if (trace.enabled || trace.shutdown)
             {
                 gp = traceReader();
@@ -2997,12 +3563,17 @@ top:
                 {
                     casgstatus(gp, _Gwaiting, _Grunnable);
                     traceGoUnpark(gp, 0L);
+                    tryWakeP = true;
                 }
+
             }
+
             if (gp == null && gcBlackenEnabled != 0L)
             {
                 gp = gcController.findRunnableGCWorker(_g_.m.p.ptr());
+                tryWakeP = tryWakeP || gp != null;
             }
+
             if (gp == null)
             { 
                 // Check the global runnable queue once in a while to ensure fairness.
@@ -3010,19 +3581,20 @@ top:
                 // by constantly respawning each other.
                 if (_g_.m.p.ptr().schedtick % 61L == 0L && sched.runqsize > 0L)
                 {
-                    lock(ref sched.@lock);
-                    gp = globrunqget(_g_.m.p.ptr(), 1L);
-                    unlock(ref sched.@lock);
+                    lock(_addr_sched.@lock);
+                    gp = globrunqget(_addr__g_.m.p.ptr(), 1L);
+                    unlock(_addr_sched.@lock);
                 }
+
             }
+
             if (gp == null)
             {
-                gp, inheritTime = runqget(_g_.m.p.ptr());
-                if (gp != null && _g_.m.spinning)
-                {
-                    throw("schedule: spinning with local work");
-                }
+                gp, inheritTime = runqget(_addr__g_.m.p.ptr()); 
+                // We can see gp != nil here even if the M is spinning,
+                // if checkTimers added a local goroutine via goready.
             }
+
             if (gp == null)
             {
                 gp, inheritTime = findrunnable(); // blocks until work is available
@@ -3035,14 +3607,48 @@ top:
             {
                 resetspinning();
             }
+
+            if (sched.disable.user && !schedEnabled(gp))
+            { 
+                // Scheduling of this goroutine is disabled. Put it on
+                // the list of pending runnable goroutines for when we
+                // re-enable user scheduling and look again.
+                lock(_addr_sched.@lock);
+                if (schedEnabled(gp))
+                { 
+                    // Something re-enabled scheduling while we
+                    // were acquiring the lock.
+                    unlock(_addr_sched.@lock);
+
+                }
+                else
+                {
+                    sched.disable.runnable.pushBack(gp);
+                    sched.disable.n++;
+                    unlock(_addr_sched.@lock);
+                    goto top;
+                }
+
+            } 
+
+            // If about to schedule a not-normal goroutine (a GCworker or tracereader),
+            // wake a P if there is one.
+            if (tryWakeP)
+            {
+                wakep();
+            }
+
             if (gp.lockedm != 0L)
             { 
                 // Hands off own p to the locked m,
                 // then blocks waiting for a new p.
                 startlockedm(gp);
                 goto top;
+
             }
+
             execute(gp, inheritTime);
+
         }
 
         // dropg removes the association between m and the current goroutine m->curg (gp for short).
@@ -3056,95 +3662,312 @@ top:
         {
             var _g_ = getg();
 
-            setMNoWB(ref _g_.m.curg.m, null);
-            setGNoWB(ref _g_.m.curg, null);
+            setMNoWB(_addr__g_.m.curg.m, null);
+            setGNoWB(_addr__g_.m.curg, null);
         }
 
-        private static bool parkunlock_c(ref g gp, unsafe.Pointer @lock)
+        // checkTimers runs any timers for the P that are ready.
+        // If now is not 0 it is the current time.
+        // It returns the current time or 0 if it is not known,
+        // and the time when the next timer should run or 0 if there is no next timer,
+        // and reports whether it ran any timers.
+        // If the time when the next timer should run is not 0,
+        // it is always larger than the returned time.
+        // We pass now in and out to avoid extra calls of nanotime.
+        //go:yeswritebarrierrec
+        private static (long, long, bool) checkTimers(ptr<p> _addr_pp, long now)
         {
-            unlock((mutex.Value)(lock));
+            long rnow = default;
+            long pollUntil = default;
+            bool ran = default;
+            ref p pp = ref _addr_pp.val;
+ 
+            // If there are no timers to adjust, and the first timer on
+            // the heap is not yet ready to run, then there is nothing to do.
+            if (atomic.Load(_addr_pp.adjustTimers) == 0L)
+            {
+                var next = int64(atomic.Load64(_addr_pp.timer0When));
+                if (next == 0L)
+                {
+                    return (now, 0L, false);
+                }
+
+                if (now == 0L)
+                {
+                    now = nanotime();
+                }
+
+                if (now < next)
+                { 
+                    // Next timer is not ready to run.
+                    // But keep going if we would clear deleted timers.
+                    // This corresponds to the condition below where
+                    // we decide whether to call clearDeletedTimers.
+                    if (pp != getg().m.p.ptr() || int(atomic.Load(_addr_pp.deletedTimers)) <= int(atomic.Load(_addr_pp.numTimers) / 4L))
+                    {
+                        return (now, next, false);
+                    }
+
+                }
+
+            }
+
+            lock(_addr_pp.timersLock);
+
+            adjusttimers(pp);
+
+            rnow = now;
+            if (len(pp.timers) > 0L)
+            {
+                if (rnow == 0L)
+                {
+                    rnow = nanotime();
+                }
+
+                while (len(pp.timers) > 0L)
+                { 
+                    // Note that runtimer may temporarily unlock
+                    // pp.timersLock.
+                    {
+                        var tw = runtimer(pp, rnow);
+
+                        if (tw != 0L)
+                        {
+                            if (tw > 0L)
+                            {
+                                pollUntil = tw;
+                            }
+
+                            break;
+
+                        }
+
+                    }
+
+                    ran = true;
+
+                }
+
+
+            } 
+
+            // If this is the local P, and there are a lot of deleted timers,
+            // clear them out. We only do this for the local P to reduce
+            // lock contention on timersLock.
+            if (pp == getg().m.p.ptr() && int(atomic.Load(_addr_pp.deletedTimers)) > len(pp.timers) / 4L)
+            {
+                clearDeletedTimers(pp);
+            }
+
+            unlock(_addr_pp.timersLock);
+
+            return (rnow, pollUntil, ran);
+
+        }
+
+        // shouldStealTimers reports whether we should try stealing the timers from p2.
+        // We don't steal timers from a running P that is not marked for preemption,
+        // on the assumption that it will run its own timers. This reduces
+        // contention on the timers lock.
+        private static bool shouldStealTimers(ptr<p> _addr_p2)
+        {
+            ref p p2 = ref _addr_p2.val;
+
+            if (p2.status != _Prunning)
+            {
+                return true;
+            }
+
+            var mp = p2.m.ptr();
+            if (mp == null || mp.locks > 0L)
+            {
+                return false;
+            }
+
+            var gp = mp.curg;
+            if (gp == null || gp.atomicstatus != _Grunning || !gp.preempt)
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
+        private static bool parkunlock_c(ptr<g> _addr_gp, unsafe.Pointer @lock)
+        {
+            ref g gp = ref _addr_gp.val;
+
+            unlock((mutex.val)(lock));
             return true;
         }
 
         // park continuation on g0.
-        private static void park_m(ref g gp)
+        private static void park_m(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             var _g_ = getg();
 
             if (trace.enabled)
             {
                 traceGoPark(_g_.m.waittraceev, _g_.m.waittraceskip);
             }
-            casgstatus(gp, _Grunning, _Gwaiting);
+
+            casgstatus(_addr_gp, _Grunning, _Gwaiting);
             dropg();
 
-            if (_g_.m.waitunlockf != null)
             {
-                *(ref Func<ref g, unsafe.Pointer, bool>) fn = new ptr<*(ref Func<ref g, unsafe.Pointer, bool>)>(@unsafe.Pointer(ref _g_.m.waitunlockf));
-                var ok = fn(gp, _g_.m.waitlock);
-                _g_.m.waitunlockf = null;
-                _g_.m.waitlock = null;
-                if (!ok)
+                var fn = _g_.m.waitunlockf;
+
+                if (fn != null)
                 {
-                    if (trace.enabled)
+                    var ok = fn(gp, _g_.m.waitlock);
+                    _g_.m.waitunlockf = null;
+                    _g_.m.waitlock = null;
+                    if (!ok)
                     {
-                        traceGoUnpark(gp, 2L);
+                        if (trace.enabled)
+                        {
+                            traceGoUnpark(gp, 2L);
+                        }
+
+                        casgstatus(_addr_gp, _Gwaiting, _Grunnable);
+                        execute(_addr_gp, true); // Schedule it back, never returns.
                     }
-                    casgstatus(gp, _Gwaiting, _Grunnable);
-                    execute(gp, true); // Schedule it back, never returns.
+
                 }
+
             }
+
             schedule();
+
         }
 
-        private static void goschedImpl(ref g gp)
+        private static void goschedImpl(ptr<g> _addr_gp)
         {
-            var status = readgstatus(gp);
+            ref g gp = ref _addr_gp.val;
+
+            var status = readgstatus(_addr_gp);
             if (status & ~_Gscan != _Grunning)
             {
-                dumpgstatus(gp);
+                dumpgstatus(_addr_gp);
                 throw("bad g status");
             }
-            casgstatus(gp, _Grunning, _Grunnable);
+
+            casgstatus(_addr_gp, _Grunning, _Grunnable);
             dropg();
-            lock(ref sched.@lock);
-            globrunqput(gp);
-            unlock(ref sched.@lock);
+            lock(_addr_sched.@lock);
+            globrunqput(_addr_gp);
+            unlock(_addr_sched.@lock);
 
             schedule();
+
         }
 
         // Gosched continuation on g0.
-        private static void gosched_m(ref g gp)
+        private static void gosched_m(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             if (trace.enabled)
             {
                 traceGoSched();
             }
-            goschedImpl(gp);
+
+            goschedImpl(_addr_gp);
+
         }
 
         // goschedguarded is a forbidden-states-avoided version of gosched_m
-        private static void goschedguarded_m(ref g gp)
+        private static void goschedguarded_m(ptr<g> _addr_gp)
         {
-            if (gp.m.locks != 0L || gp.m.mallocing != 0L || gp.m.preemptoff != "" || gp.m.p.ptr().status != _Prunning)
+            ref g gp = ref _addr_gp.val;
+
+            if (!canPreemptM(gp.m))
             {
-                gogo(ref gp.sched); // never return
+                gogo(_addr_gp.sched); // never return
             }
+
             if (trace.enabled)
             {
                 traceGoSched();
             }
-            goschedImpl(gp);
+
+            goschedImpl(_addr_gp);
+
         }
 
-        private static void gopreempt_m(ref g gp)
+        private static void gopreempt_m(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             if (trace.enabled)
             {
                 traceGoPreempt();
             }
-            goschedImpl(gp);
+
+            goschedImpl(_addr_gp);
+
+        }
+
+        // preemptPark parks gp and puts it in _Gpreempted.
+        //
+        //go:systemstack
+        private static void preemptPark(ptr<g> _addr_gp)
+        {
+            ref g gp = ref _addr_gp.val;
+
+            if (trace.enabled)
+            {
+                traceGoPark(traceEvGoBlock, 0L);
+            }
+
+            var status = readgstatus(_addr_gp);
+            if (status & ~_Gscan != _Grunning)
+            {
+                dumpgstatus(_addr_gp);
+                throw("bad g status");
+            }
+
+            gp.waitreason = waitReasonPreempted; 
+            // Transition from _Grunning to _Gscan|_Gpreempted. We can't
+            // be in _Grunning when we dropg because then we'd be running
+            // without an M, but the moment we're in _Gpreempted,
+            // something could claim this G before we've fully cleaned it
+            // up. Hence, we set the scan bit to lock down further
+            // transitions until we can dropg.
+            casGToPreemptScan(_addr_gp, _Grunning, _Gscan | _Gpreempted);
+            dropg();
+            casfrom_Gscanstatus(_addr_gp, _Gscan | _Gpreempted, _Gpreempted);
+            schedule();
+
+        }
+
+        // goyield is like Gosched, but it:
+        // - emits a GoPreempt trace event instead of a GoSched trace event
+        // - puts the current G on the runq of the current P instead of the globrunq
+        private static void goyield()
+        {
+            checkTimeouts();
+            mcall(goyield_m);
+        }
+
+        private static void goyield_m(ptr<g> _addr_gp)
+        {
+            ref g gp = ref _addr_gp.val;
+
+            if (trace.enabled)
+            {
+                traceGoPreempt();
+            }
+
+            var pp = gp.m.p.ptr();
+            casgstatus(_addr_gp, _Grunning, _Grunnable);
+            dropg();
+            runqput(_addr_pp, _addr_gp, false);
+            schedule();
+
         }
 
         // Finishes execution of the current goroutine.
@@ -3154,32 +3977,39 @@ top:
             {
                 racegoend();
             }
+
             if (trace.enabled)
             {
                 traceGoEnd();
             }
+
             mcall(goexit0);
+
         }
 
         // goexit continuation on g0.
-        private static void goexit0(ref g gp)
+        private static void goexit0(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             var _g_ = getg();
 
-            casgstatus(gp, _Grunning, _Gdead);
-            if (isSystemGoroutine(gp))
+            casgstatus(_addr_gp, _Grunning, _Gdead);
+            if (isSystemGoroutine(gp, false))
             {
-                atomic.Xadd(ref sched.ngsys, -1L);
+                atomic.Xadd(_addr_sched.ngsys, -1L);
             }
+
             gp.m = null;
             var locked = gp.lockedm != 0L;
             gp.lockedm = 0L;
             _g_.m.lockedg = 0L;
+            gp.preemptStop = false;
             gp.paniconfault = false;
             gp._defer = null; // should be true already but just in case.
             gp._panic = null; // non-nil for Goexit during panic. points at stack-allocated data.
             gp.writebuf = null;
-            gp.waitreason = "";
+            gp.waitreason = 0L;
             gp.param = null;
             gp.labels = null;
             gp.timer = null;
@@ -3190,22 +4020,26 @@ top:
                 // better information to pacing if the application is
                 // rapidly creating an exiting goroutines.
                 var scanCredit = int64(gcController.assistWorkPerByte * float64(gp.gcAssistBytes));
-                atomic.Xaddint64(ref gcController.bgScanCredit, scanCredit);
+                atomic.Xaddint64(_addr_gcController.bgScanCredit, scanCredit);
                 gp.gcAssistBytes = 0L;
-            } 
 
-            // Note that gp's stack scan is now "valid" because it has no
-            // stack.
-            gp.gcscanvalid = true;
+            }
+
             dropg();
+
+            if (GOARCH == "wasm")
+            { // no threads yet on wasm
+                gfput(_addr__g_.m.p.ptr(), _addr_gp);
+                schedule(); // never returns
+            }
 
             if (_g_.m.lockedInt != 0L)
             {
                 print("invalid m->lockedInt = ", _g_.m.lockedInt, "\n");
                 throw("internal lockOSThread error");
             }
-            _g_.m.lockedExt = 0L;
-            gfput(_g_.m.p.ptr(), gp);
+
+            gfput(_addr__g_.m.p.ptr(), _addr_gp);
             if (locked)
             { 
                 // The goroutine may have locked this thread because
@@ -3216,10 +4050,21 @@ top:
                 // the thread.
                 if (GOOS != "plan9")
                 { // See golang.org/issue/22227.
-                    gogo(ref _g_.m.g0.sched);
+                    gogo(_addr__g_.m.g0.sched);
+
                 }
+                else
+                { 
+                    // Clear lockedExt on plan9 since we may end up re-using
+                    // this thread.
+                    _g_.m.lockedExt = 0L;
+
+                }
+
             }
+
             schedule();
+
         }
 
         // save updates getg().sched to refer to pc and sp so that a following
@@ -3246,6 +4091,7 @@ top:
             {
                 badctxt();
             }
+
         }
 
         // The goroutine g is about to enter a system call.
@@ -3304,7 +4150,7 @@ top:
             save(pc, sp);
             _g_.syscallsp = sp;
             _g_.syscallpc = pc;
-            casgstatus(_g_, _Grunning, _Gsyscall);
+            casgstatus(_addr__g_, _Grunning, _Gsyscall);
             if (_g_.syscallsp < _g_.stack.lo || _g_.stack.hi < _g_.syscallsp)
             {
                 systemstack(() =>
@@ -3312,7 +4158,9 @@ top:
                     print("entersyscall inconsistent ", hex(_g_.syscallsp), " [", hex(_g_.stack.lo), ",", hex(_g_.stack.hi), "]\n");
                     throw("entersyscall");
                 });
+
             }
+
             if (trace.enabled)
             {
                 systemstack(traceGoSysCall); 
@@ -3320,81 +4168,95 @@ top:
                 // need them later when the G is genuinely blocked in a
                 // syscall
                 save(pc, sp);
+
             }
-            if (atomic.Load(ref sched.sysmonwait) != 0L)
+
+            if (atomic.Load(_addr_sched.sysmonwait) != 0L)
             {
                 systemstack(entersyscall_sysmon);
                 save(pc, sp);
             }
+
             if (_g_.m.p.ptr().runSafePointFn != 0L)
             { 
                 // runSafePointFn may stack split if run on this stack
                 systemstack(runSafePointFn);
                 save(pc, sp);
+
             }
+
             _g_.m.syscalltick = _g_.m.p.ptr().syscalltick;
             _g_.sysblocktraced = true;
-            _g_.m.mcache = null;
-            _g_.m.p.ptr().m = 0L;
-            atomic.Store(ref _g_.m.p.ptr().status, _Psyscall);
+            var pp = _g_.m.p.ptr();
+            pp.m = 0L;
+            _g_.m.oldp.set(pp);
+            _g_.m.p = 0L;
+            atomic.Store(_addr_pp.status, _Psyscall);
             if (sched.gcwaiting != 0L)
             {
                 systemstack(entersyscall_gcwait);
                 save(pc, sp);
-            } 
+            }
 
-            // Goroutines must not split stacks in Gsyscall status (it would corrupt g->sched).
-            // We set _StackGuard to StackPreempt so that first split stack check calls morestack.
-            // Morestack detects this case and throws.
-            _g_.stackguard0 = stackPreempt;
             _g_.m.locks--;
+
         }
 
         // Standard syscall entry used by the go syscall library and normal cgo calls.
+        //
+        // This is exported via linkname to assembly in the syscall package.
+        //
         //go:nosplit
-        private static void entersyscall(int dummy)
+        //go:linkname entersyscall
+        private static void entersyscall()
         {
-            reentersyscall(getcallerpc(), getcallersp(@unsafe.Pointer(ref dummy)));
+            reentersyscall(getcallerpc(), getcallersp());
         }
 
         private static void entersyscall_sysmon()
         {
-            lock(ref sched.@lock);
-            if (atomic.Load(ref sched.sysmonwait) != 0L)
+            lock(_addr_sched.@lock);
+            if (atomic.Load(_addr_sched.sysmonwait) != 0L)
             {
-                atomic.Store(ref sched.sysmonwait, 0L);
-                notewakeup(ref sched.sysmonnote);
+                atomic.Store(_addr_sched.sysmonwait, 0L);
+                notewakeup(_addr_sched.sysmonnote);
             }
-            unlock(ref sched.@lock);
+
+            unlock(_addr_sched.@lock);
+
         }
 
         private static void entersyscall_gcwait()
         {
             var _g_ = getg();
-            var _p_ = _g_.m.p.ptr();
+            var _p_ = _g_.m.oldp.ptr();
 
-            lock(ref sched.@lock);
-            if (sched.stopwait > 0L && atomic.Cas(ref _p_.status, _Psyscall, _Pgcstop))
+            lock(_addr_sched.@lock);
+            if (sched.stopwait > 0L && atomic.Cas(_addr__p_.status, _Psyscall, _Pgcstop))
             {
                 if (trace.enabled)
                 {
                     traceGoSysBlock(_p_);
                     traceProcStop(_p_);
                 }
+
                 _p_.syscalltick++;
                 sched.stopwait--;
 
                 if (sched.stopwait == 0L)
                 {
-                    notewakeup(ref sched.stopnote);
+                    notewakeup(_addr_sched.stopnote);
                 }
+
             }
-            unlock(ref sched.@lock);
+
+            unlock(_addr_sched.@lock);
+
         }
 
         // The same as entersyscall(), but with a hint that the syscall is blocking.
         //go:nosplit
-        private static void entersyscallblock(int dummy)
+        private static void entersyscallblock()
         {
             var _g_ = getg();
 
@@ -3407,7 +4269,7 @@ top:
 
             // Leave SP around for GC and traceback.
             var pc = getcallerpc();
-            var sp = getcallersp(@unsafe.Pointer(ref dummy));
+            var sp = getcallersp();
             save(pc, sp);
             _g_.syscallsp = _g_.sched.sp;
             _g_.syscallpc = _g_.sched.pc;
@@ -3421,8 +4283,10 @@ top:
                     print("entersyscallblock inconsistent ", hex(sp1), " ", hex(sp2), " ", hex(sp3), " [", hex(_g_.stack.lo), ",", hex(_g_.stack.hi), "]\n");
                     throw("entersyscallblock");
                 });
+
             }
-            casgstatus(_g_, _Grunning, _Gsyscall);
+
+            casgstatus(_addr__g_, _Grunning, _Gsyscall);
             if (_g_.syscallsp < _g_.stack.lo || _g_.stack.hi < _g_.syscallsp)
             {
                 systemstack(() =>
@@ -3430,13 +4294,16 @@ top:
                     print("entersyscallblock inconsistent ", hex(sp), " ", hex(_g_.sched.sp), " ", hex(_g_.syscallsp), " [", hex(_g_.stack.lo), ",", hex(_g_.stack.hi), "]\n");
                     throw("entersyscallblock");
                 });
+
             }
+
             systemstack(entersyscallblock_handoff); 
 
             // Resave for traceback during blocked call.
-            save(getcallerpc(), getcallersp(@unsafe.Pointer(ref dummy)));
+            save(getcallerpc(), getcallersp());
 
             _g_.m.locks--;
+
         }
 
         private static void entersyscallblock_handoff()
@@ -3446,7 +4313,9 @@ top:
                 traceGoSysCall();
                 traceGoSysBlock(getg().m.p.ptr());
             }
-            handoffp(releasep());
+
+            handoffp(_addr_releasep());
+
         }
 
         // The goroutine g exited its system call.
@@ -3456,45 +4325,38 @@ top:
         //
         // Write barriers are not allowed because our P may have been stolen.
         //
+        // This is exported via linkname to assembly in the syscall package.
+        //
         //go:nosplit
         //go:nowritebarrierrec
-        private static void exitsyscall(int dummy)
+        //go:linkname exitsyscall
+        private static void exitsyscall()
         {
             var _g_ = getg();
 
             _g_.m.locks++; // see comment in entersyscall
-            if (getcallersp(@unsafe.Pointer(ref dummy)) > _g_.syscallsp)
-            { 
-                // throw calls print which may try to grow the stack,
-                // but throwsplit == true so the stack can not be grown;
-                // use systemstack to avoid that possible problem.
-                systemstack(() =>
-                {
-                    throw("exitsyscall: syscall frame is no longer valid");
-                });
-            }
-            _g_.waitsince = 0L;
-            var oldp = _g_.m.p.ptr();
-            if (exitsyscallfast())
+            if (getcallersp() > _g_.syscallsp)
             {
-                if (_g_.m.mcache == null)
-                {
-                    systemstack(() =>
-                    {
-                        throw("lost mcache");
-                    });
-                }
+                throw("exitsyscall: syscall frame is no longer valid");
+            }
+
+            _g_.waitsince = 0L;
+            var oldp = _g_.m.oldp.ptr();
+            _g_.m.oldp = 0L;
+            if (exitsyscallfast(_addr_oldp))
+            {
                 if (trace.enabled)
                 {
                     if (oldp != _g_.m.p.ptr() || _g_.m.syscalltick != _g_.m.p.ptr().syscalltick)
                     {
                         systemstack(traceGoStart);
                     }
+
                 } 
                 // There's a cpu for us, so we can run.
                 _g_.m.p.ptr().syscalltick++; 
                 // We need to cas the status and scan before resuming...
-                casgstatus(_g_, _Gsyscall, _Grunning); 
+                casgstatus(_addr__g_, _Gsyscall, _Grunning); 
 
                 // Garbage collector isn't running (since we are),
                 // so okay to clear syscallsp.
@@ -3504,15 +4366,28 @@ top:
                 { 
                     // restore the preemption request in case we've cleared it in newstack
                     _g_.stackguard0 = stackPreempt;
+
                 }
                 else
                 { 
                     // otherwise restore the real _StackGuard, we've spoiled it in entersyscall/entersyscallblock
                     _g_.stackguard0 = _g_.stack.lo + _StackGuard;
+
                 }
+
                 _g_.throwsplit = false;
-                return;
+
+                if (sched.disable.user && !schedEnabled(_addr__g_))
+                { 
+                    // Scheduling of this goroutine is disabled.
+                    Gosched();
+
+                }
+
+                return ;
+
             }
+
             _g_.sysexitticks = 0L;
             if (trace.enabled)
             { 
@@ -3532,19 +4407,13 @@ top:
                 // So instead we remember the syscall exit time and emit the event
                 // in execute when we have a P.
                 _g_.sysexitticks = cputicks();
+
             }
+
             _g_.m.locks--; 
 
             // Call the scheduler.
-            mcall(exitsyscall0);
-
-            if (_g_.m.mcache == null)
-            {
-                systemstack(() =>
-                {
-                    throw("lost mcache");
-                });
-            } 
+            mcall(exitsyscall0); 
 
             // Scheduler returned, so we're allowed to run now.
             // Delete the syscallsp information that we left for
@@ -3555,33 +4424,33 @@ top:
             _g_.syscallsp = 0L;
             _g_.m.p.ptr().syscalltick++;
             _g_.throwsplit = false;
+
         }
 
         //go:nosplit
-        private static bool exitsyscallfast()
+        private static bool exitsyscallfast(ptr<p> _addr_oldp)
         {
+            ref p oldp = ref _addr_oldp.val;
+
             var _g_ = getg(); 
 
             // Freezetheworld sets stopwait but does not retake P's.
             if (sched.stopwait == freezeStopWait)
             {
-                _g_.m.mcache = null;
-                _g_.m.p = 0L;
                 return false;
             } 
 
             // Try to re-acquire the last P.
-            if (_g_.m.p != 0L && _g_.m.p.ptr().status == _Psyscall && atomic.Cas(ref _g_.m.p.ptr().status, _Psyscall, _Prunning))
+            if (oldp != null && oldp.status == _Psyscall && atomic.Cas(_addr_oldp.status, _Psyscall, _Pidle))
             { 
                 // There's a cpu for us, so we can run.
+                wirep(_addr_oldp);
                 exitsyscallfast_reacquired();
                 return true;
+
             } 
 
             // Try to get any other idle P.
-            var oldp = _g_.m.p.ptr();
-            _g_.m.mcache = null;
-            _g_.m.p = 0L;
             if (sched.pidle != 0L)
             {
                 bool ok = default;
@@ -3599,32 +4468,33 @@ top:
                                 osyield();
                             }
 
+
                         }
+
                         traceGoSysExit(0L);
+
                     }
+
                 });
                 if (ok)
                 {
                     return true;
                 }
+
             }
+
             return false;
+
         }
 
         // exitsyscallfast_reacquired is the exitsyscall path on which this G
         // has successfully reacquired the P it was running on before the
         // syscall.
         //
-        // This function is allowed to have write barriers because exitsyscall
-        // has acquired a P at this point.
-        //
-        //go:yeswritebarrierrec
         //go:nosplit
         private static void exitsyscallfast_reacquired()
         {
             var _g_ = getg();
-            _g_.m.mcache = _g_.m.p.ptr().mcache;
-            _g_.m.p.ptr().m.set(_g_.m);
             if (_g_.m.syscalltick != _g_.m.p.ptr().syscalltick)
             {
                 if (trace.enabled)
@@ -3638,63 +4508,81 @@ top:
                         traceGoSysBlock(_g_.m.p.ptr()); 
                         // Denote completion of the current syscall.
                         traceGoSysExit(0L);
+
                     });
+
                 }
+
                 _g_.m.p.ptr().syscalltick++;
+
             }
+
         }
 
         private static bool exitsyscallfast_pidle()
         {
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             var _p_ = pidleget();
-            if (_p_ != null && atomic.Load(ref sched.sysmonwait) != 0L)
+            if (_p_ != null && atomic.Load(_addr_sched.sysmonwait) != 0L)
             {
-                atomic.Store(ref sched.sysmonwait, 0L);
-                notewakeup(ref sched.sysmonnote);
+                atomic.Store(_addr_sched.sysmonwait, 0L);
+                notewakeup(_addr_sched.sysmonnote);
             }
-            unlock(ref sched.@lock);
+
+            unlock(_addr_sched.@lock);
             if (_p_ != null)
             {
-                acquirep(_p_);
+                acquirep(_addr__p_);
                 return true;
             }
+
             return false;
+
         }
 
         // exitsyscall slow path on g0.
         // Failed to acquire P, enqueue gp as runnable.
         //
         //go:nowritebarrierrec
-        private static void exitsyscall0(ref g gp)
+        private static void exitsyscall0(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             var _g_ = getg();
 
-            casgstatus(gp, _Gsyscall, _Grunnable);
+            casgstatus(_addr_gp, _Gsyscall, _Grunnable);
             dropg();
-            lock(ref sched.@lock);
-            var _p_ = pidleget();
+            lock(_addr_sched.@lock);
+            ptr<p> _p_;
+            if (schedEnabled(_addr__g_))
+            {
+                _p_ = pidleget();
+            }
+
             if (_p_ == null)
             {
-                globrunqput(gp);
+                globrunqput(_addr_gp);
             }
-            else if (atomic.Load(ref sched.sysmonwait) != 0L)
+            else if (atomic.Load(_addr_sched.sysmonwait) != 0L)
             {
-                atomic.Store(ref sched.sysmonwait, 0L);
-                notewakeup(ref sched.sysmonnote);
+                atomic.Store(_addr_sched.sysmonwait, 0L);
+                notewakeup(_addr_sched.sysmonnote);
             }
-            unlock(ref sched.@lock);
+
+            unlock(_addr_sched.@lock);
             if (_p_ != null)
             {
                 acquirep(_p_);
-                execute(gp, false); // Never returns.
+                execute(_addr_gp, false); // Never returns.
             }
+
             if (_g_.m.lockedg != 0L)
             { 
                 // Wait until another thread schedules gp and so m again.
                 stoplockedm();
-                execute(gp, false); // Never returns.
+                execute(_addr_gp, false); // Never returns.
             }
+
             stopm();
             schedule(); // Never returns.
         }
@@ -3715,6 +4603,7 @@ top:
             // Here we spoil g->_StackGuard to reliably detect any attempts to grow stack.
             // runtime_AfterFork will undo this in parent process, but not in child.
             gp.stackguard0 = stackFork;
+
         }
 
         // Called from syscall package before fork.
@@ -3735,6 +4624,7 @@ top:
             msigrestore(gp.m.sigmask);
 
             gp.m.locks--;
+
         }
 
         // Called from syscall package after fork in parent.
@@ -3775,6 +4665,7 @@ top:
             msigrestore(getg().m.sigmask);
 
             inForkedChild = false;
+
         }
 
         // Called from syscall package before Exec.
@@ -3783,6 +4674,7 @@ top:
         { 
             // Prevent thread creation during exec.
             execLock.@lock();
+
         }
 
         // Called from syscall package after Exec.
@@ -3793,7 +4685,7 @@ top:
         }
 
         // Allocate a new g, with a stack big enough for stacksize bytes.
-        private static ref g malg(int stacksize)
+        private static ptr<g> malg(int stacksize)
         {
             ptr<g> newg = @new<g>();
             if (stacksize >= 0L)
@@ -3804,41 +4696,78 @@ top:
                     newg.stack = stackalloc(uint32(stacksize));
                 });
                 newg.stackguard0 = newg.stack.lo + _StackGuard;
-                newg.stackguard1 = ~uintptr(0L);
+                newg.stackguard1 = ~uintptr(0L) * (uintptr.val)(@unsafe.Pointer(newg.stack.lo));
+
+                0L;
+
             }
-            return newg;
+
+            return _addr_newg!;
+
         }
 
         // Create a new g running fn with siz bytes of arguments.
         // Put it on the queue of g's waiting to run.
         // The compiler turns a go statement into a call to this.
-        // Cannot split the stack because it assumes that the arguments
-        // are available sequentially after &fn; they would not be
-        // copied if a stack split occurred.
+        //
+        // The stack layout of this call is unusual: it assumes that the
+        // arguments to pass to fn are on the stack sequentially immediately
+        // after &fn. Hence, they are logically part of newproc's argument
+        // frame, even though they don't appear in its signature (and can't
+        // because their types differ between call sites).
+        //
+        // This must be nosplit because this stack layout means there are
+        // untyped arguments in newproc's argument frame. Stack copies won't
+        // be able to adjust them and stack splits won't be able to copy them.
+        //
         //go:nosplit
-        private static void newproc(int siz, ref funcval fn)
+        private static void newproc(int siz, ptr<funcval> _addr_fn)
         {
-            var argp = add(@unsafe.Pointer(ref fn), sys.PtrSize);
+            ref funcval fn = ref _addr_fn.val;
+
+            var argp = add(@unsafe.Pointer(_addr_fn), sys.PtrSize);
+            var gp = getg();
             var pc = getcallerpc();
             systemstack(() =>
             {
-                newproc1(fn, (uint8.Value)(argp), siz, pc);
+                var newg = newproc1(_addr_fn, argp, siz, _addr_gp, pc);
+
+                var _p_ = getg().m.p.ptr();
+                runqput(_addr__p_, _addr_newg, true);
+
+                if (mainStarted)
+                {
+                    wakep();
+                }
+
             });
+
         }
 
-        // Create a new g running fn with narg bytes of arguments starting
-        // at argp. callerpc is the address of the go statement that created
-        // this. The new g is put on the queue of g's waiting to run.
-        private static void newproc1(ref funcval fn, ref byte argp, int narg, System.UIntPtr callerpc)
+        // Create a new g in state _Grunnable, starting at fn, with narg bytes
+        // of arguments starting at argp. callerpc is the address of the go
+        // statement that created this. The caller is responsible for adding
+        // the new g to the scheduler.
+        //
+        // This must run on the system stack because it's the continuation of
+        // newproc, which cannot split the stack.
+        //
+        //go:systemstack
+        private static ptr<g> newproc1(ptr<funcval> _addr_fn, unsafe.Pointer argp, int narg, ptr<g> _addr_callergp, System.UIntPtr callerpc)
         {
+            ref funcval fn = ref _addr_fn.val;
+            ref g callergp = ref _addr_callergp.val;
+
             var _g_ = getg();
 
             if (fn == null)
             {
                 _g_.m.throwing = -1L; // do not dump full stacks
                 throw("go of nil func value");
+
             }
-            _g_.m.locks++; // disable preemption because it can be holding p in a local var
+
+            acquirem(); // disable preemption because it can be holding p in a local var
             var siz = narg;
             siz = (siz + 7L) & ~7L; 
 
@@ -3850,22 +4779,26 @@ top:
             {
                 throw("newproc: function arguments too large for new goroutine");
             }
+
             var _p_ = _g_.m.p.ptr();
-            var newg = gfget(_p_);
+            var newg = gfget(_addr__p_);
             if (newg == null)
             {
                 newg = malg(_StackMin);
-                casgstatus(newg, _Gidle, _Gdead);
-                allgadd(newg); // publishes with a g->status of Gdead so GC scanner doesn't look at uninitialized stack.
+                casgstatus(_addr_newg, _Gidle, _Gdead);
+                allgadd(_addr_newg); // publishes with a g->status of Gdead so GC scanner doesn't look at uninitialized stack.
             }
+
             if (newg.stack.hi == 0L)
             {
                 throw("newproc1: newg missing stack");
             }
-            if (readgstatus(newg) != _Gdead)
+
+            if (readgstatus(_addr_newg) != _Gdead)
             {
                 throw("newproc1: new g is not Gdead");
             }
+
             long totalSize = 4L * sys.RegSize + uintptr(siz) + sys.MinFrameSize; // extra space in case of reads slightly beyond frame
             totalSize += -totalSize & (sys.SpAlign - 1L); // align to spAlign
             var sp = newg.stack.hi - totalSize;
@@ -3873,15 +4806,17 @@ top:
             if (usesLR)
             { 
                 // caller's LR
-                (uintptr.Value)(@unsafe.Pointer(sp)).Value;
+                (uintptr.val)(@unsafe.Pointer(sp)).val;
 
                 0L;
                 prepGoExitFrame(sp);
                 spArg += sys.MinFrameSize;
+
             }
+
             if (narg > 0L)
             {
-                memmove(@unsafe.Pointer(spArg), @unsafe.Pointer(argp), uintptr(narg)); 
+                memmove(@unsafe.Pointer(spArg), argp, uintptr(narg)); 
                 // This is a stack-to-stack copy. If write barriers
                 // are enabled and the source stack is grey (the
                 // destination is always black), then perform a
@@ -3891,71 +4826,121 @@ top:
                 if (writeBarrier.needed && !_g_.m.curg.gcscandone)
                 {
                     var f = findfunc(fn.fn);
-                    var stkmap = (stackmap.Value)(funcdata(f, _FUNCDATA_ArgsPointerMaps)); 
-                    // We're in the prologue, so it's always stack map index 0.
-                    var bv = stackmapdata(stkmap, 0L);
-                    bulkBarrierBitmap(spArg, spArg, uintptr(narg), 0L, bv.bytedata);
+                    var stkmap = (stackmap.val)(funcdata(f, _FUNCDATA_ArgsPointerMaps));
+                    if (stkmap.nbit > 0L)
+                    { 
+                        // We're in the prologue, so it's always stack map index 0.
+                        var bv = stackmapdata(stkmap, 0L);
+                        bulkBarrierBitmap(spArg, spArg, uintptr(bv.n) * sys.PtrSize, 0L, bv.bytedata);
+
+                    }
+
                 }
+
             }
-            memclrNoHeapPointers(@unsafe.Pointer(ref newg.sched), @unsafe.Sizeof(newg.sched));
+
+            memclrNoHeapPointers(@unsafe.Pointer(_addr_newg.sched), @unsafe.Sizeof(newg.sched));
             newg.sched.sp = sp;
             newg.stktopsp = sp;
             newg.sched.pc = funcPC(goexit) + sys.PCQuantum; // +PCQuantum so that previous instruction is in same function
             newg.sched.g = guintptr(@unsafe.Pointer(newg));
-            gostartcallfn(ref newg.sched, fn);
+            gostartcallfn(_addr_newg.sched, fn);
             newg.gopc = callerpc;
+            newg.ancestors = saveAncestors(_addr_callergp);
             newg.startpc = fn.fn;
             if (_g_.m.curg != null)
             {
                 newg.labels = _g_.m.curg.labels;
             }
-            if (isSystemGoroutine(newg))
+
+            if (isSystemGoroutine(newg, false))
             {
-                atomic.Xadd(ref sched.ngsys, +1L);
+                atomic.Xadd(_addr_sched.ngsys, +1L);
             }
-            newg.gcscanvalid = false;
-            casgstatus(newg, _Gdead, _Grunnable);
+
+            casgstatus(_addr_newg, _Gdead, _Grunnable);
 
             if (_p_.goidcache == _p_.goidcacheend)
             { 
                 // Sched.goidgen is the last allocated id,
                 // this batch must be [sched.goidgen+1, sched.goidgen+GoidCacheBatch].
                 // At startup sched.goidgen=0, so main goroutine receives goid=1.
-                _p_.goidcache = atomic.Xadd64(ref sched.goidgen, _GoidCacheBatch);
+                _p_.goidcache = atomic.Xadd64(_addr_sched.goidgen, _GoidCacheBatch);
                 _p_.goidcache -= _GoidCacheBatch - 1L;
                 _p_.goidcacheend = _p_.goidcache + _GoidCacheBatch;
+
             }
+
             newg.goid = int64(_p_.goidcache);
             _p_.goidcache++;
             if (raceenabled)
             {
                 newg.racectx = racegostart(callerpc);
             }
+
             if (trace.enabled)
             {
                 traceGoCreate(newg, newg.startpc);
             }
-            runqput(_p_, newg, true);
 
-            if (atomic.Load(ref sched.npidle) != 0L && atomic.Load(ref sched.nmspinning) == 0L && mainStarted)
+            releasem(_g_.m);
+
+            return _addr_newg!;
+
+        }
+
+        // saveAncestors copies previous ancestors of the given caller g and
+        // includes infor for the current caller into a new set of tracebacks for
+        // a g being created.
+        private static ptr<slice<ancestorInfo>> saveAncestors(ptr<g> _addr_callergp)
+        {
+            ref g callergp = ref _addr_callergp.val;
+ 
+            // Copy all prior info, except for the root goroutine (goid 0).
+            if (debug.tracebackancestors <= 0L || callergp.goid == 0L)
             {
-                wakep();
+                return _addr_null!;
             }
-            _g_.m.locks--;
-            if (_g_.m.locks == 0L && _g_.preempt)
-            { // restore the preemption request in case we've cleared it in newstack
-                _g_.stackguard0 = stackPreempt;
+
+            slice<ancestorInfo> callerAncestors = default;
+            if (callergp.ancestors != null)
+            {
+                callerAncestors = callergp.ancestors.val;
             }
+
+            var n = int32(len(callerAncestors)) + 1L;
+            if (n > debug.tracebackancestors)
+            {
+                n = debug.tracebackancestors;
+            }
+
+            var ancestors = make_slice<ancestorInfo>(n);
+            copy(ancestors[1L..], callerAncestors);
+
+            array<System.UIntPtr> pcs = new array<System.UIntPtr>(_TracebackMaxFrames);
+            var npcs = gcallers(callergp, 0L, pcs[..]);
+            var ipcs = make_slice<System.UIntPtr>(npcs);
+            copy(ipcs, pcs[..]);
+            ancestors[0L] = new ancestorInfo(pcs:ipcs,goid:callergp.goid,gopc:callergp.gopc,);
+
+            ptr<var> ancestorsp = @new<ancestorInfo>();
+            ancestorsp.val = ancestors;
+            return _addr_ancestorsp!;
+
         }
 
         // Put on gfree list.
         // If local list is too long, transfer a batch to the global list.
-        private static void gfput(ref p _p_, ref g gp)
+        private static void gfput(ptr<p> _addr__p_, ptr<g> _addr_gp)
         {
-            if (readgstatus(gp) != _Gdead)
+            ref p _p_ = ref _addr__p_.val;
+            ref g gp = ref _addr_gp.val;
+
+            if (readgstatus(_addr_gp) != _Gdead)
             {
                 throw("gfput: bad status (not Gdead)");
             }
+
             var stksize = gp.stack.hi - gp.stack.lo;
 
             if (stksize != _FixedStack)
@@ -3965,121 +4950,133 @@ top:
                 gp.stack.lo = 0L;
                 gp.stack.hi = 0L;
                 gp.stackguard0 = 0L;
+
             }
-            gp.schedlink.set(_p_.gfree);
-            _p_.gfree = gp;
-            _p_.gfreecnt++;
-            if (_p_.gfreecnt >= 64L)
+
+            _p_.gFree.push(gp);
+            _p_.gFree.n++;
+            if (_p_.gFree.n >= 64L)
             {
-                lock(ref sched.gflock);
-                while (_p_.gfreecnt >= 32L)
+                lock(_addr_sched.gFree.@lock);
+                while (_p_.gFree.n >= 32L)
                 {
-                    _p_.gfreecnt--;
-                    gp = _p_.gfree;
-                    _p_.gfree = gp.schedlink.ptr();
+                    _p_.gFree.n--;
+                    gp = _p_.gFree.pop();
                     if (gp.stack.lo == 0L)
                     {
-                        gp.schedlink.set(sched.gfreeNoStack);
-                        sched.gfreeNoStack = gp;
+                        sched.gFree.noStack.push(gp);
                     }
                     else
                     {
-                        gp.schedlink.set(sched.gfreeStack);
-                        sched.gfreeStack = gp;
+                        sched.gFree.stack.push(gp);
                     }
-                    sched.ngfree++;
+
+                    sched.gFree.n++;
+
                 }
 
-                unlock(ref sched.gflock);
+                unlock(_addr_sched.gFree.@lock);
+
             }
+
         }
 
         // Get from gfree list.
         // If local list is empty, grab a batch from global list.
-        private static ref g gfget(ref p _p_)
+        private static ptr<g> gfget(ptr<p> _addr__p_)
         {
+            ref p _p_ = ref _addr__p_.val;
+
 retry:
-            var gp = _p_.gfree;
-            if (gp == null && (sched.gfreeStack != null || sched.gfreeNoStack != null))
+            if (_p_.gFree.empty() && (!sched.gFree.stack.empty() || !sched.gFree.noStack.empty()))
             {
-                lock(ref sched.gflock);
-                while (_p_.gfreecnt < 32L)
-                {
-                    if (sched.gfreeStack != null)
-                    { 
-                        // Prefer Gs with stacks.
-                        gp = sched.gfreeStack;
-                        sched.gfreeStack = gp.schedlink.ptr();
-                    }
-                    else if (sched.gfreeNoStack != null)
+                lock(_addr_sched.gFree.@lock); 
+                // Move a batch of free Gs to the P.
+                while (_p_.gFree.n < 32L)
+                { 
+                    // Prefer Gs with stacks.
+                    var gp = sched.gFree.stack.pop();
+                    if (gp == null)
                     {
-                        gp = sched.gfreeNoStack;
-                        sched.gfreeNoStack = gp.schedlink.ptr();
+                        gp = sched.gFree.noStack.pop();
+                        if (gp == null)
+                        {
+                            break;
+                        }
+
                     }
-                    else
-                    {
-                        break;
-                    }
-                    _p_.gfreecnt++;
-                    sched.ngfree--;
-                    gp.schedlink.set(_p_.gfree);
-                    _p_.gfree = gp;
+
+                    sched.gFree.n--;
+                    _p_.gFree.push(gp);
+                    _p_.gFree.n++;
+
                 }
 
-                unlock(ref sched.gflock);
+                unlock(_addr_sched.gFree.@lock);
                 goto retry;
+
             }
-            if (gp != null)
+
+            gp = _p_.gFree.pop();
+            if (gp == null)
             {
-                _p_.gfree = gp.schedlink.ptr();
-                _p_.gfreecnt--;
-                if (gp.stack.lo == 0L)
-                { 
-                    // Stack was deallocated in gfput. Allocate a new one.
-                    systemstack(() =>
-                    {
-                        gp.stack = stackalloc(_FixedStack);
-                    }
-                else
-);
-                    gp.stackguard0 = gp.stack.lo + _StackGuard;
-                }                {
-                    if (raceenabled)
-                    {
-                        racemalloc(@unsafe.Pointer(gp.stack.lo), gp.stack.hi - gp.stack.lo);
-                    }
-                    if (msanenabled)
-                    {
-                        msanmalloc(@unsafe.Pointer(gp.stack.lo), gp.stack.hi - gp.stack.lo);
-                    }
-                }
+                return _addr_null!;
             }
-            return gp;
+
+            _p_.gFree.n--;
+            if (gp.stack.lo == 0L)
+            { 
+                // Stack was deallocated in gfput. Allocate a new one.
+                systemstack(() =>
+                {
+                    gp.stack = stackalloc(_FixedStack);
+                }
+            else
+);
+                gp.stackguard0 = gp.stack.lo + _StackGuard;
+
+            }            {
+                if (raceenabled)
+                {
+                    racemalloc(@unsafe.Pointer(gp.stack.lo), gp.stack.hi - gp.stack.lo);
+                }
+
+                if (msanenabled)
+                {
+                    msanmalloc(@unsafe.Pointer(gp.stack.lo), gp.stack.hi - gp.stack.lo);
+                }
+
+            }
+
+            return _addr_gp!;
+
         }
 
         // Purge all cached G's from gfree list to the global list.
-        private static void gfpurge(ref p _p_)
+        private static void gfpurge(ptr<p> _addr__p_)
         {
-            lock(ref sched.gflock);
-            while (_p_.gfreecnt != 0L)
+            ref p _p_ = ref _addr__p_.val;
+
+            lock(_addr_sched.gFree.@lock);
+            while (!_p_.gFree.empty())
             {
-                _p_.gfreecnt--;
-                var gp = _p_.gfree;
-                _p_.gfree = gp.schedlink.ptr();
+                var gp = _p_.gFree.pop();
+                _p_.gFree.n--;
                 if (gp.stack.lo == 0L)
                 {
-                    gp.schedlink.set(sched.gfreeNoStack);
-                    sched.gfreeNoStack = gp;
+                    sched.gFree.noStack.push(gp);
                 }
                 else
                 {
-                    gp.schedlink.set(sched.gfreeStack);
-                    sched.gfreeStack = gp;
+                    sched.gFree.stack.push(gp);
                 }
-                sched.ngfree++;
+
+                sched.gFree.n++;
+
             }
 
-            unlock(ref sched.gflock);
+            unlock(_addr_sched.gFree.@lock);
+
         }
 
         // Breakpoint executes a breakpoint trap.
@@ -4094,9 +5091,15 @@ retry:
         //go:nosplit
         private static void dolockOSThread()
         {
+            if (GOARCH == "wasm")
+            {
+                return ; // no threads on wasm yet
+            }
+
             var _g_ = getg();
             _g_.m.lockedg.set(_g_);
             _g_.lockedm.set(_g_.m);
+
         }
 
         //go:nosplit
@@ -4109,17 +5112,23 @@ retry:
         // If the calling goroutine exits without unlocking the thread,
         // the thread will be terminated.
         //
+        // All init functions are run on the startup thread. Calling LockOSThread
+        // from an init function will cause the main function to be invoked on
+        // that thread.
+        //
         // A goroutine should call LockOSThread before calling OS services or
         // non-Go library functions that depend on per-thread state.
         public static void LockOSThread() => func((_, panic, __) =>
         {
-            if (atomic.Load(ref newmHandoff.haveTemplateThread) == 0L && GOOS != "plan9")
+            if (atomic.Load(_addr_newmHandoff.haveTemplateThread) == 0L && GOOS != "plan9")
             { 
                 // If we need to start a new thread from the locked
                 // thread, we need the template thread. Start it now
                 // while we're in a known-good state.
                 startTemplateThread();
+
             }
+
             var _g_ = getg();
             _g_.m.lockedExt++;
             if (_g_.m.lockedExt == 0L)
@@ -4127,7 +5136,9 @@ retry:
                 _g_.m.lockedExt--;
                 panic("LockOSThread nesting overflow");
             }
+
             dolockOSThread();
+
         });
 
         //go:nosplit
@@ -4143,13 +5154,20 @@ retry:
         //go:nosplit
         private static void dounlockOSThread()
         {
+            if (GOARCH == "wasm")
+            {
+                return ; // no threads on wasm yet
+            }
+
             var _g_ = getg();
             if (_g_.m.lockedInt != 0L || _g_.m.lockedExt != 0L)
             {
-                return;
+                return ;
             }
+
             _g_.m.lockedg = 0L;
             _g_.lockedm = 0L;
+
         }
 
         //go:nosplit
@@ -4171,10 +5189,12 @@ retry:
             var _g_ = getg();
             if (_g_.m.lockedExt == 0L)
             {
-                return;
+                return ;
             }
+
             _g_.m.lockedExt--;
             dounlockOSThread();
+
         }
 
         //go:nosplit
@@ -4185,8 +5205,10 @@ retry:
             {
                 systemstack(badunlockosthread);
             }
+
             _g_.m.lockedInt--;
             dounlockOSThread();
+
         }
 
         private static void badunlockosthread()
@@ -4196,10 +5218,10 @@ retry:
 
         private static int gcount()
         {
-            var n = int32(allglen) - sched.ngfree - int32(atomic.Load(ref sched.ngsys));
+            var n = int32(allglen) - sched.gFree.n - int32(atomic.Load(_addr_sched.ngsys));
             foreach (var (_, _p_) in allp)
             {
-                n -= _p_.gfreecnt;
+                n -= _p_.gFree.n;
             } 
 
             // All these variables can be changed concurrently, so the result can be inconsistent.
@@ -4208,7 +5230,9 @@ retry:
             {
                 n = 1L;
             }
+
             return n;
+
         }
 
         private static int mcount()
@@ -4221,40 +5245,39 @@ retry:
         private static void _System()
         {
             _System();
-
         }
         private static void _ExternalCode()
         {
             _ExternalCode();
-
         }
         private static void _LostExternalCode()
         {
             _LostExternalCode();
-
         }
         private static void _GC()
         {
             _GC();
-
         }
         private static void _LostSIGPROFDuringAtomic64()
         {
             _LostSIGPROFDuringAtomic64();
-
         }
-
-        // Counts SIGPROFs received while in atomic64 critical section, on mips{,le}
-        private static ulong lostAtomic64Count = default;
+        private static void _VDSO()
+        {
+            _VDSO();
+        }
 
         // Called if we receive a SIGPROF signal.
         // Called by the signal handler, may run during STW.
         //go:nowritebarrierrec
-        private static void sigprof(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr lr, ref g gp, ref m mp)
+        private static void sigprof(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr lr, ptr<g> _addr_gp, ptr<m> _addr_mp)
         {
+            ref g gp = ref _addr_gp.val;
+            ref m mp = ref _addr_mp.val;
+
             if (prof.hz == 0L)
             {
-                return;
+                return ;
             } 
 
             // On mips{,le}, 64bit atomics are emulated with spinlocks, in
@@ -4263,21 +5286,23 @@ retry:
             // As a workaround, create a counter of SIGPROFs while in critical section
             // to store the count, and pass it to sigprof.add() later when SIGPROF is
             // received from somewhere else (with _LostSIGPROFDuringAtomic64 as pc).
-            if (GOARCH == "mips" || GOARCH == "mipsle")
+            if (GOARCH == "mips" || GOARCH == "mipsle" || GOARCH == "arm")
             {
                 {
                     var f = findfunc(pc);
 
                     if (f.valid())
                     {
-                        if (hasprefix(funcname(f), "runtime/internal/atomic"))
+                        if (hasPrefix(funcname(f), "runtime/internal/atomic"))
                         {
-                            lostAtomic64Count++;
-                            return;
+                            cpuprof.lostAtomic++;
+                            return ;
                         }
+
                     }
 
                 }
+
             } 
 
             // Profiling runs concurrently with GC, so it must not allocate.
@@ -4354,10 +5379,11 @@ retry:
             // transition. We simply require that g and SP match and that the PC is not
             // in gogo.
             var traceback = true;
-            if (gp == null || sp < gp.stack.lo || gp.stack.hi < sp || setsSP(pc))
+            if (gp == null || sp < gp.stack.lo || gp.stack.hi < sp || setsSP(pc) || (mp != null && mp.vdsoSP != 0L))
             {
                 traceback = false;
             }
+
             array<System.UIntPtr> stk = new array<System.UIntPtr>(maxCPUProfStack);
             long n = 0L;
             if (mp.ncgo > 0L && mp.curg != null && mp.curg.syscallpc != 0L && mp.curg.syscallsp != 0L)
@@ -4368,7 +5394,7 @@ retry:
                 // cgoCallers.  We are running in a signal handler
                 // with all signals blocked, so we don't have to worry
                 // about any other code interrupting us.
-                if (atomic.Load(ref mp.cgoCallersUse) == 0L && mp.cgoCallers != null && mp.cgoCallers[0L] != 0L)
+                if (atomic.Load(_addr_mp.cgoCallersUse) == 0L && mp.cgoCallers != null && mp.cgoCallers[0L] != 0L)
                 {
                     while (cgoOff < len(mp.cgoCallers) && mp.cgoCallers[cgoOff] != 0L)
                     {
@@ -4377,37 +5403,57 @@ retry:
 
                     copy(stk[..], mp.cgoCallers[..cgoOff]);
                     mp.cgoCallers[0L] = 0L;
+
                 } 
 
                 // Collect Go stack that leads to the cgo call.
-                n = gentraceback(mp.curg.syscallpc, mp.curg.syscallsp, 0L, mp.curg, 0L, ref stk[cgoOff], len(stk) - cgoOff, null, null, 0L);
+                n = gentraceback(mp.curg.syscallpc, mp.curg.syscallsp, 0L, mp.curg, 0L, _addr_stk[cgoOff], len(stk) - cgoOff, null, null, 0L);
+                if (n > 0L)
+                {
+                    n += cgoOff;
+                }
+
             }
             else if (traceback)
             {
-                n = gentraceback(pc, sp, lr, gp, 0L, ref stk[0L], len(stk), null, null, _TraceTrap | _TraceJumpStack);
+                n = gentraceback(pc, sp, lr, gp, 0L, _addr_stk[0L], len(stk), null, null, _TraceTrap | _TraceJumpStack);
             }
+
             if (n <= 0L)
             { 
                 // Normal traceback is impossible or has failed.
                 // See if it falls into several common cases.
                 n = 0L;
-                if (GOOS == "windows" && mp.libcallg != 0L && mp.libcallpc != 0L && mp.libcallsp != 0L)
+                if ((GOOS == "windows" || GOOS == "solaris" || GOOS == "illumos" || GOOS == "darwin" || GOOS == "aix") && mp.libcallg != 0L && mp.libcallpc != 0L && mp.libcallsp != 0L)
                 { 
                     // Libcall, i.e. runtime syscall on windows.
                     // Collect Go stack that leads to the call.
-                    n = gentraceback(mp.libcallpc, mp.libcallsp, 0L, mp.libcallg.ptr(), 0L, ref stk[0L], len(stk), null, null, 0L);
+                    n = gentraceback(mp.libcallpc, mp.libcallsp, 0L, mp.libcallg.ptr(), 0L, _addr_stk[0L], len(stk), null, null, 0L);
+
                 }
+
+                if (n == 0L && mp != null && mp.vdsoSP != 0L)
+                {
+                    n = gentraceback(mp.vdsoPC, mp.vdsoSP, 0L, gp, 0L, _addr_stk[0L], len(stk), null, null, _TraceTrap | _TraceJumpStack);
+                }
+
                 if (n == 0L)
                 { 
                     // If all of the above has failed, account it against abstract "System" or "GC".
-                    n = 2L; 
-                    // "ExternalCode" is better than "etext".
-                    if (pc > firstmoduledata.etext)
+                    n = 2L;
+                    if (inVDSOPage(pc))
                     {
-                        pc = funcPC(_ExternalCode) + sys.PCQuantum;
+                        pc = funcPC(_VDSO) + sys.PCQuantum;
                     }
+                    else if (pc > firstmoduledata.etext)
+                    { 
+                        // "ExternalCode" is better than "etext".
+                        pc = funcPC(_ExternalCode) + sys.PCQuantum;
+
+                    }
+
                     stk[0L] = pc;
-                    if (mp.preemptoff != "" || mp.helpgc != 0L)
+                    if (mp.preemptoff != "")
                     {
                         stk[1L] = funcPC(_GC) + sys.PCQuantum;
                     }
@@ -4415,18 +5461,18 @@ retry:
                     {
                         stk[1L] = funcPC(_System) + sys.PCQuantum;
                     }
+
                 }
+
             }
+
             if (prof.hz != 0L)
             {
-                if ((GOARCH == "mips" || GOARCH == "mipsle") && lostAtomic64Count > 0L)
-                {
-                    cpuprof.addLostAtomic64(lostAtomic64Count);
-                    lostAtomic64Count = 0L;
-                }
                 cpuprof.add(gp, stk[..n]);
             }
+
             getg().m.mallocing--;
+
         }
 
         // If the signal handler receives a SIGPROF signal on a non-Go thread,
@@ -4452,8 +5498,11 @@ retry:
                 }
 
                 cpuprof.addNonGo(sigprofCallers[..n]);
+
             }
-            atomic.Store(ref sigprofCallersUse, 0L);
+
+            atomic.Store(_addr_sigprofCallersUse, 0L);
+
         }
 
         // sigprofNonGoPC is called when a profiling signal arrived on a
@@ -4468,6 +5517,7 @@ retry:
                 System.UIntPtr stk = new slice<System.UIntPtr>(new System.UIntPtr[] { pc, funcPC(_ExternalCode)+sys.PCQuantum });
                 cpuprof.addNonGo(stk);
             }
+
         }
 
         // Reports whether a function will set the SP
@@ -4488,11 +5538,14 @@ retry:
                 // couldn't find the function for this PC,
                 // so assume the worst and stop traceback
                 return true;
+
             }
+
 
             if (f.funcID == funcID_gogo || f.funcID == funcID_systemstack || f.funcID == funcID_mcall || f.funcID == funcID_morestack) 
                 return true;
                         return false;
+
         }
 
         // setcpuprofilerate sets the CPU profiling rate to hz times per second.
@@ -4515,7 +5568,7 @@ retry:
             // it would deadlock.
             setThreadCPUProfiler(0L);
 
-            while (!atomic.Cas(ref prof.signalLock, 0L, 1L))
+            while (!atomic.Cas(_addr_prof.signalLock, 0L, 1L))
             {
                 osyield();
             }
@@ -4525,30 +5578,246 @@ retry:
                 setProcessCPUProfiler(hz);
                 prof.hz = hz;
             }
-            atomic.Store(ref prof.signalLock, 0L);
 
-            lock(ref sched.@lock);
+            atomic.Store(_addr_prof.signalLock, 0L);
+
+            lock(_addr_sched.@lock);
             sched.profilehz = hz;
-            unlock(ref sched.@lock);
+            unlock(_addr_sched.@lock);
 
             if (hz != 0L)
             {
                 setThreadCPUProfiler(hz);
             }
+
             _g_.m.locks--;
+
+        }
+
+        // init initializes pp, which may be a freshly allocated p or a
+        // previously destroyed p, and transitions it to status _Pgcstop.
+        private static void init(this ptr<p> _addr_pp, int id)
+        {
+            ref p pp = ref _addr_pp.val;
+
+            pp.id = id;
+            pp.status = _Pgcstop;
+            pp.sudogcache = pp.sudogbuf[..0L];
+            foreach (var (i) in pp.deferpool)
+            {
+                pp.deferpool[i] = pp.deferpoolbuf[i][..0L];
+            }
+            pp.wbBuf.reset();
+            if (pp.mcache == null)
+            {
+                if (id == 0L)
+                {
+                    if (mcache0 == null)
+                    {
+                        throw("missing mcache?");
+                    } 
+                    // Use the bootstrap mcache0. Only one P will get
+                    // mcache0: the one with ID 0.
+                    pp.mcache = mcache0;
+
+                }
+                else
+                {
+                    pp.mcache = allocmcache();
+                }
+
+            }
+
+            if (raceenabled && pp.raceprocctx == 0L)
+            {
+                if (id == 0L)
+                {
+                    pp.raceprocctx = raceprocctx0;
+                    raceprocctx0 = 0L; // bootstrap
+                }
+                else
+                {
+                    pp.raceprocctx = raceproccreate();
+                }
+
+            }
+
+            lockInit(_addr_pp.timersLock, lockRankTimers);
+
+        }
+
+        // destroy releases all of the resources associated with pp and
+        // transitions it to status _Pdead.
+        //
+        // sched.lock must be held and the world must be stopped.
+        private static void destroy(this ptr<p> _addr_pp)
+        {
+            ref p pp = ref _addr_pp.val;
+ 
+            // Move all runnable goroutines to the global queue
+            while (pp.runqhead != pp.runqtail)
+            { 
+                // Pop from tail of local queue
+                pp.runqtail--;
+                var gp = pp.runq[pp.runqtail % uint32(len(pp.runq))].ptr(); 
+                // Push onto head of global queue
+                globrunqputhead(_addr_gp);
+
+            }
+
+            if (pp.runnext != 0L)
+            {
+                globrunqputhead(_addr_pp.runnext.ptr());
+                pp.runnext = 0L;
+            }
+
+            if (len(pp.timers) > 0L)
+            {
+                var plocal = getg().m.p.ptr(); 
+                // The world is stopped, but we acquire timersLock to
+                // protect against sysmon calling timeSleepUntil.
+                // This is the only case where we hold the timersLock of
+                // more than one P, so there are no deadlock concerns.
+                lock(_addr_plocal.timersLock);
+                lock(_addr_pp.timersLock);
+                moveTimers(plocal, pp.timers);
+                pp.timers = null;
+                pp.numTimers = 0L;
+                pp.adjustTimers = 0L;
+                pp.deletedTimers = 0L;
+                atomic.Store64(_addr_pp.timer0When, 0L);
+                unlock(_addr_pp.timersLock);
+                unlock(_addr_plocal.timersLock);
+
+            } 
+            // If there's a background worker, make it runnable and put
+            // it on the global queue so it can clean itself up.
+            {
+                var gp__prev1 = gp;
+
+                gp = pp.gcBgMarkWorker.ptr();
+
+                if (gp != null)
+                {
+                    casgstatus(_addr_gp, _Gwaiting, _Grunnable);
+                    if (trace.enabled)
+                    {
+                        traceGoUnpark(gp, 0L);
+                    }
+
+                    globrunqput(_addr_gp); 
+                    // This assignment doesn't race because the
+                    // world is stopped.
+                    pp.gcBgMarkWorker.set(null);
+
+                } 
+                // Flush p's write barrier buffer.
+
+                gp = gp__prev1;
+
+            } 
+            // Flush p's write barrier buffer.
+            if (gcphase != _GCoff)
+            {
+                wbBufFlush1(pp);
+                pp.gcw.dispose();
+            }
+
+            {
+                var i__prev1 = i;
+
+                foreach (var (__i) in pp.sudogbuf)
+                {
+                    i = __i;
+                    pp.sudogbuf[i] = null;
+                }
+
+                i = i__prev1;
+            }
+
+            pp.sudogcache = pp.sudogbuf[..0L];
+            {
+                var i__prev1 = i;
+
+                foreach (var (__i) in pp.deferpool)
+                {
+                    i = __i;
+                    foreach (var (j) in pp.deferpoolbuf[i])
+                    {
+                        pp.deferpoolbuf[i][j] = null;
+                    }
+                    pp.deferpool[i] = pp.deferpoolbuf[i][..0L];
+
+                }
+
+                i = i__prev1;
+            }
+
+            systemstack(() =>
+            {
+                {
+                    var i__prev1 = i;
+
+                    for (long i = 0L; i < pp.mspancache.len; i++)
+                    { 
+                        // Safe to call since the world is stopped.
+                        mheap_.spanalloc.free(@unsafe.Pointer(pp.mspancache.buf[i]));
+
+                    }
+
+
+                    i = i__prev1;
+                }
+                pp.mspancache.len = 0L;
+                pp.pcache.flush(_addr_mheap_.pages);
+
+            });
+            freemcache(pp.mcache);
+            pp.mcache = null;
+            gfpurge(_addr_pp);
+            traceProcFree(pp);
+            if (raceenabled)
+            {
+                if (pp.timerRaceCtx != 0L)
+                { 
+                    // The race detector code uses a callback to fetch
+                    // the proc context, so arrange for that callback
+                    // to see the right thing.
+                    // This hack only works because we are the only
+                    // thread running.
+                    var mp = getg().m;
+                    var phold = mp.p.ptr();
+                    mp.p.set(pp);
+
+                    racectxend(pp.timerRaceCtx);
+                    pp.timerRaceCtx = 0L;
+
+                    mp.p.set(phold);
+
+                }
+
+                raceprocdestroy(pp.raceprocctx);
+                pp.raceprocctx = 0L;
+
+            }
+
+            pp.gcAssistTime = 0L;
+            pp.status = _Pdead;
+
         }
 
         // Change number of processors. The world is stopped, sched is locked.
         // gcworkbufs are not being modified by either the GC or
         // the write barrier code.
         // Returns list of Ps with local work, they need to be scheduled by the caller.
-        private static ref p procresize(int nprocs)
+        private static ptr<p> procresize(int nprocs)
         {
             var old = gomaxprocs;
             if (old < 0L || nprocs <= 0L)
             {
                 throw("procresize: invalid arg");
             }
+
             if (trace.enabled)
             {
                 traceGomaxprocs(nprocs);
@@ -4560,6 +5829,7 @@ retry:
             {
                 sched.totaltime += int64(old) * (now - sched.procresizetime);
             }
+
             sched.procresizetime = now; 
 
             // Grow allp if necessary.
@@ -4567,184 +5837,100 @@ retry:
             { 
                 // Synchronize with retake, which could be running
                 // concurrently since it doesn't run on a P.
-                lock(ref allpLock);
+                lock(_addr_allpLock);
                 if (nprocs <= int32(cap(allp)))
                 {
                     allp = allp[..nprocs];
                 }
                 else
                 {
-                    var nallp = make_slice<ref p>(nprocs); 
+                    var nallp = make_slice<ptr<p>>(nprocs); 
                     // Copy everything up to allp's cap so we
                     // never lose old allocated Ps.
                     copy(nallp, allp[..cap(allp)]);
                     allp = nallp;
+
                 }
-                unlock(ref allpLock);
+
+                unlock(_addr_allpLock);
+
             } 
 
             // initialize new P's
             {
                 var i__prev1 = i;
 
-                for (var i = int32(0L); i < nprocs; i++)
+                for (var i = old; i < nprocs; i++)
                 {
                     var pp = allp[i];
                     if (pp == null)
                     {
                         pp = @new<p>();
-                        pp.id = i;
-                        pp.status = _Pgcstop;
-                        pp.sudogcache = pp.sudogbuf[..0L];
-                        {
-                            var i__prev2 = i;
-
-                            foreach (var (__i) in pp.deferpool)
-                            {
-                                i = __i;
-                                pp.deferpool[i] = pp.deferpoolbuf[i][..0L];
-                            }
-
-                            i = i__prev2;
-                        }
-
-                        pp.wbBuf.reset();
-                        atomicstorep(@unsafe.Pointer(ref allp[i]), @unsafe.Pointer(pp));
                     }
-                    if (pp.mcache == null)
-                    {
-                        if (old == 0L && i == 0L)
-                        {
-                            if (getg().m.mcache == null)
-                            {
-                                throw("missing mcache?");
-                            }
-                            pp.mcache = getg().m.mcache; // bootstrap
-                        }
-                        else
-                        {
-                            pp.mcache = allocmcache();
-                        }
-                    }
-                    if (raceenabled && pp.racectx == 0L)
-                    {
-                        if (old == 0L && i == 0L)
-                        {
-                            pp.racectx = raceprocctx0;
-                            raceprocctx0 = 0L; // bootstrap
-                        }
-                        else
-                        {
-                            pp.racectx = raceproccreate();
-                        }
-                    }
-                } 
 
-                // free unused P's
+                    pp.init(i);
+                    atomicstorep(@unsafe.Pointer(_addr_allp[i]), @unsafe.Pointer(pp));
+
+                }
 
 
                 i = i__prev1;
+            }
+
+            var _g_ = getg();
+            if (_g_.m.p != 0L && _g_.m.p.ptr().id < nprocs)
+            { 
+                // continue to use the current P
+                _g_.m.p.ptr().status = _Prunning;
+                _g_.m.p.ptr().mcache.prepareForSweep();
+
+            }
+            else
+            { 
+                // release the current P and acquire allp[0].
+                //
+                // We must do this before destroying our current P
+                // because p.destroy itself has write barriers, so we
+                // need to do that from a valid P.
+                if (_g_.m.p != 0L)
+                {
+                    if (trace.enabled)
+                    { 
+                        // Pretend that we were descheduled
+                        // and then scheduled again to keep
+                        // the trace sane.
+                        traceGoSched();
+                        traceProcStop(_g_.m.p.ptr());
+
+                    }
+
+                    _g_.m.p.ptr().m = 0L;
+
+                }
+
+                _g_.m.p = 0L;
+                var p = allp[0L];
+                p.m = 0L;
+                p.status = _Pidle;
+                acquirep(_addr_p);
+                if (trace.enabled)
+                {
+                    traceGoStart();
+                }
+
             } 
 
-            // free unused P's
+            // g.m.p is now set, so we no longer need mcache0 for bootstrapping.
+            mcache0 = null; 
+
+            // release resources from unused P's
             {
                 var i__prev1 = i;
 
                 for (i = nprocs; i < old; i++)
                 {
-                    var p = allp[i];
-                    if (trace.enabled && p == getg().m.p.ptr())
-                    { 
-                        // moving to p[0], pretend that we were descheduled
-                        // and then scheduled again to keep the trace sane.
-                        traceGoSched();
-                        traceProcStop(p);
-                    } 
-                    // move all runnable goroutines to the global queue
-                    while (p.runqhead != p.runqtail)
-                    { 
-                        // pop from tail of local queue
-                        p.runqtail--;
-                        var gp = p.runq[p.runqtail % uint32(len(p.runq))].ptr(); 
-                        // push onto head of global queue
-                        globrunqputhead(gp);
-                    }
-
-                    if (p.runnext != 0L)
-                    {
-                        globrunqputhead(p.runnext.ptr());
-                        p.runnext = 0L;
-                    } 
-                    // if there's a background worker, make it runnable and put
-                    // it on the global queue so it can clean itself up
-                    {
-                        var gp__prev1 = gp;
-
-                        gp = p.gcBgMarkWorker.ptr();
-
-                        if (gp != null)
-                        {
-                            casgstatus(gp, _Gwaiting, _Grunnable);
-                            if (trace.enabled)
-                            {
-                                traceGoUnpark(gp, 0L);
-                            }
-                            globrunqput(gp); 
-                            // This assignment doesn't race because the
-                            // world is stopped.
-                            p.gcBgMarkWorker.set(null);
-                        } 
-                        // Flush p's write barrier buffer.
-
-                        gp = gp__prev1;
-
-                    } 
-                    // Flush p's write barrier buffer.
-                    if (gcphase != _GCoff)
-                    {
-                        wbBufFlush1(p);
-                        p.gcw.dispose();
-                    }
-                    {
-                        var i__prev2 = i;
-
-                        foreach (var (__i) in p.sudogbuf)
-                        {
-                            i = __i;
-                            p.sudogbuf[i] = null;
-                        }
-
-                        i = i__prev2;
-                    }
-
-                    p.sudogcache = p.sudogbuf[..0L];
-                    {
-                        var i__prev2 = i;
-
-                        foreach (var (__i) in p.deferpool)
-                        {
-                            i = __i;
-                            foreach (var (j) in p.deferpoolbuf[i])
-                            {
-                                p.deferpoolbuf[i][j] = null;
-                            }
-                            p.deferpool[i] = p.deferpoolbuf[i][..0L];
-                        }
-
-                        i = i__prev2;
-                    }
-
-                    freemcache(p.mcache);
-                    p.mcache = null;
-                    gfpurge(p);
-                    traceProcFree(p);
-                    if (raceenabled)
-                    {
-                        raceprocdestroy(p.racectx);
-                        p.racectx = 0L;
-                    }
-                    p.gcAssistTime = 0L;
-                    p.status = _Pdead; 
+                    p = allp[i];
+                    p.destroy(); 
                     // can't free P itself because it can be referenced by an M in syscall
                 } 
 
@@ -4757,35 +5943,12 @@ retry:
             // Trim allp.
             if (int32(len(allp)) != nprocs)
             {
-                lock(ref allpLock);
+                lock(_addr_allpLock);
                 allp = allp[..nprocs];
-                unlock(ref allpLock);
+                unlock(_addr_allpLock);
             }
-            var _g_ = getg();
-            if (_g_.m.p != 0L && _g_.m.p.ptr().id < nprocs)
-            { 
-                // continue to use the current P
-                _g_.m.p.ptr().status = _Prunning;
-            }
-            else
-            { 
-                // release the current P and acquire allp[0]
-                if (_g_.m.p != 0L)
-                {
-                    _g_.m.p.ptr().m = 0L;
-                }
-                _g_.m.p = 0L;
-                _g_.m.mcache = null;
-                p = allp[0L];
-                p.m = 0L;
-                p.status = _Pidle;
-                acquirep(p);
-                if (trace.enabled)
-                {
-                    traceGoStart();
-                }
-            }
-            ref p runnablePs = default;
+
+            ptr<p> runnablePs;
             {
                 var i__prev1 = i;
 
@@ -4796,10 +5959,11 @@ retry:
                     {
                         continue;
                     }
+
                     p.status = _Pidle;
-                    if (runqempty(p))
+                    if (runqempty(_addr_p))
                     {
-                        pidleput(p);
+                        pidleput(_addr_p);
                     }
                     else
                     {
@@ -4807,15 +5971,17 @@ retry:
                         p.link.set(runnablePs);
                         runnablePs = p;
                     }
+
                 }
 
 
                 i = i__prev1;
             }
             stealOrder.reset(uint32(nprocs));
-            ref int int32p = ref gomaxprocs; // make compiler check that gomaxprocs is an int32
-            atomic.Store((uint32.Value)(@unsafe.Pointer(int32p)), uint32(nprocs));
-            return runnablePs;
+            ptr<int> int32p_addr_gomaxprocs; // make compiler check that gomaxprocs is an int32
+            atomic.Store((uint32.val)(@unsafe.Pointer(int32p)), uint32(nprocs));
+            return _addr_runnablePs!;
+
         }
 
         // Associate p and the current m.
@@ -4824,34 +5990,43 @@ retry:
         // isn't because it immediately acquires _p_.
         //
         //go:yeswritebarrierrec
-        private static void acquirep(ref p _p_)
-        { 
+        private static void acquirep(ptr<p> _addr__p_)
+        {
+            ref p _p_ = ref _addr__p_.val;
+ 
             // Do the part that isn't allowed to have write barriers.
-            acquirep1(_p_); 
+            wirep(_addr__p_); 
 
-            // have p; write barriers now allowed
-            var _g_ = getg();
-            _g_.m.mcache = _p_.mcache;
+            // Have p; write barriers now allowed.
+
+            // Perform deferred mcache flush before this P can allocate
+            // from a potentially stale mcache.
+            _p_.mcache.prepareForSweep();
 
             if (trace.enabled)
             {
                 traceProcStart();
             }
+
         }
 
-        // acquirep1 is the first step of acquirep, which actually acquires
-        // _p_. This is broken out so we can disallow write barriers for this
-        // part, since we don't yet have a P.
+        // wirep is the first step of acquirep, which actually associates the
+        // current M to _p_. This is broken out so we can disallow write
+        // barriers for this part, since we don't yet have a P.
         //
         //go:nowritebarrierrec
-        private static void acquirep1(ref p _p_)
+        //go:nosplit
+        private static void wirep(ptr<p> _addr__p_)
         {
+            ref p _p_ = ref _addr__p_.val;
+
             var _g_ = getg();
 
-            if (_g_.m.p != 0L || _g_.m.mcache != null)
+            if (_g_.m.p != 0L)
             {
-                throw("acquirep: already in go");
+                throw("wirep: already in go");
             }
+
             if (_p_.m != 0L || _p_.status != _Pidle)
             {
                 var id = int64(0L);
@@ -4859,49 +6034,58 @@ retry:
                 {
                     id = _p_.m.ptr().id;
                 }
-                print("acquirep: p->m=", _p_.m, "(", id, ") p->status=", _p_.status, "\n");
-                throw("acquirep: invalid p state");
+
+                print("wirep: p->m=", _p_.m, "(", id, ") p->status=", _p_.status, "\n");
+                throw("wirep: invalid p state");
+
             }
+
             _g_.m.p.set(_p_);
             _p_.m.set(_g_.m);
             _p_.status = _Prunning;
+
         }
 
         // Disassociate p and the current m.
-        private static ref p releasep()
+        private static ptr<p> releasep()
         {
             var _g_ = getg();
 
-            if (_g_.m.p == 0L || _g_.m.mcache == null)
+            if (_g_.m.p == 0L)
             {
                 throw("releasep: invalid arg");
             }
+
             var _p_ = _g_.m.p.ptr();
-            if (_p_.m.ptr() != _g_.m || _p_.mcache != _g_.m.mcache || _p_.status != _Prunning)
+            if (_p_.m.ptr() != _g_.m || _p_.status != _Prunning)
             {
-                print("releasep: m=", _g_.m, " m->p=", _g_.m.p.ptr(), " p->m=", _p_.m, " m->mcache=", _g_.m.mcache, " p->mcache=", _p_.mcache, " p->status=", _p_.status, "\n");
+                print("releasep: m=", _g_.m, " m->p=", _g_.m.p.ptr(), " p->m=", hex(_p_.m), " p->status=", _p_.status, "\n");
                 throw("releasep: invalid p state");
             }
+
             if (trace.enabled)
             {
                 traceProcStop(_g_.m.p.ptr());
             }
+
             _g_.m.p = 0L;
-            _g_.m.mcache = null;
             _p_.m = 0L;
             _p_.status = _Pidle;
-            return _p_;
+            return _addr__p_!;
+
         }
 
         private static void incidlelocked(int v)
         {
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             sched.nmidlelocked += v;
             if (v > 0L)
             {
                 checkdead();
             }
-            unlock(ref sched.@lock);
+
+            unlock(_addr_sched.@lock);
+
         }
 
         // Check for deadlock situation.
@@ -4914,7 +6098,7 @@ retry:
             // assumed to be running.
             if (islibrary || isarchive)
             {
-                return;
+                return ;
             } 
 
             // If we are dying because of a signal caught on an already idle thread,
@@ -4923,67 +6107,119 @@ retry:
             // except that there is a thread that will call exit soon.
             if (panicking > 0L)
             {
-                return;
-            }
-            var run = mcount() - sched.nmidle - sched.nmidlelocked - sched.nmsys;
-            if (run > 0L)
+                return ;
+            } 
+
+            // If we are not running under cgo, but we have an extra M then account
+            // for it. (It is possible to have an extra M on Windows without cgo to
+            // accommodate callbacks created by syscall.NewCallback. See issue #6751
+            // for details.)
+            int run0 = default;
+            if (!iscgo && cgoHasExtraM)
             {
-                return;
+                var mp = lockextra(true);
+                var haveExtraM = extraMCount > 0L;
+                unlockextra(_addr_mp);
+                if (haveExtraM)
+                {
+                    run0 = 1L;
+                }
+
             }
+
+            var run = mcount() - sched.nmidle - sched.nmidlelocked - sched.nmsys;
+            if (run > run0)
+            {
+                return ;
+            }
+
             if (run < 0L)
             {
                 print("runtime: checkdead: nmidle=", sched.nmidle, " nmidlelocked=", sched.nmidlelocked, " mcount=", mcount(), " nmsys=", sched.nmsys, "\n");
                 throw("checkdead: inconsistent counts");
             }
+
             long grunning = 0L;
-            lock(ref allglock);
+            lock(_addr_allglock);
             for (long i = 0L; i < len(allgs); i++)
             {
                 var gp = allgs[i];
-                if (isSystemGoroutine(gp))
+                if (isSystemGoroutine(gp, false))
                 {
                     continue;
                 }
-                var s = readgstatus(gp);
 
-                if (s & ~_Gscan == _Gwaiting) 
+                var s = readgstatus(_addr_gp);
+
+                if (s & ~_Gscan == _Gwaiting || s & ~_Gscan == _Gpreempted) 
                     grunning++;
                 else if (s & ~_Gscan == _Grunnable || s & ~_Gscan == _Grunning || s & ~_Gscan == _Gsyscall) 
-                    unlock(ref allglock);
+                    unlock(_addr_allglock);
                     print("runtime: checkdead: find g ", gp.goid, " in status ", s, "\n");
                     throw("checkdead: runnable g");
-                            }
+                
+            }
 
-            unlock(ref allglock);
+            unlock(_addr_allglock);
             if (grunning == 0L)
             { // possible if main goroutine calls runtime·Goexit()
+                unlock(_addr_sched.@lock); // unlock so that GODEBUG=scheddetail=1 doesn't hang
                 throw("no goroutines (main called runtime.Goexit) - deadlock!");
+
             } 
 
             // Maybe jump time forward for playground.
-            gp = timejump();
-            if (gp != null)
+            if (faketime != 0L)
             {
-                casgstatus(gp, _Gwaiting, _Grunnable);
-                globrunqput(gp);
-                var _p_ = pidleget();
-                if (_p_ == null)
+                var (when, _p_) = timeSleepUntil();
+                if (_p_ != null)
                 {
-                    throw("checkdead: no p for timer");
+                    faketime = when;
+                    {
+                        var pp = _addr_sched.pidle;
+
+                        while (pp != 0L.val)
+                        {
+                            if (ptr<pp>() == _p_)
+                            {
+                                pp.val = _p_.link;
+                                break;
+                            pp = _addr_ptr<pp>().link;
+                            }
+
+                        }
+
+                    }
+                    mp = mget();
+                    if (mp == null)
+                    { 
+                        // There should always be a free M since
+                        // nothing is running.
+                        throw("checkdead: no m for timer");
+
+                    }
+
+                    mp.nextp.set(_p_);
+                    notewakeup(_addr_mp.park);
+                    return ;
+
                 }
-                var mp = mget();
-                if (mp == null)
-                { 
-                    // There should always be a free M since
-                    // nothing is running.
-                    throw("checkdead: no m for timer");
+
+            } 
+
+            // There are no goroutines running, so we can look at the P's.
+            foreach (var (_, _p_) in allp)
+            {
+                if (len(_p_.timers) > 0L)
+                {
+                    return ;
                 }
-                mp.nextp.set(_p_);
-                notewakeup(ref mp.park);
-                return;
+
             }
             getg().m.throwing = -1L; // do not dump full stacks
+            unlock(_addr_sched.@lock); // unlock so that GODEBUG=scheddetail=1 doesn't hang
             throw("all goroutines are asleep - deadlock!");
+
         }
 
         // forcegcperiod is the maximum time in nanoseconds between garbage
@@ -4998,23 +6234,10 @@ retry:
         //go:nowritebarrierrec
         private static void sysmon()
         {
-            lock(ref sched.@lock);
+            lock(_addr_sched.@lock);
             sched.nmsys++;
             checkdead();
-            unlock(ref sched.@lock); 
-
-            // If a heap span goes unused for 5 minutes after a garbage collection,
-            // we hand it back to the operating system.
-            var scavengelimit = int64(5L * 60L * 1e9F);
-
-            if (debug.scavenge > 0L)
-            { 
-                // Scavenge-a-lot for testing.
-                forcegcperiod = 10L * 1e6F;
-                scavengelimit = 20L * 1e6F;
-            }
-            var lastscavenge = nanotime();
-            long nscavenge = 0L;
+            unlock(_addr_sched.@lock);
 
             var lasttrace = int64(0L);
             long idle = 0L; // how many cycles in succession we had not wokeup somebody
@@ -5024,70 +6247,96 @@ retry:
                 if (idle == 0L)
                 { // start with 20us sleep...
                     delay = 20L;
+
                 }
                 else if (idle > 50L)
                 { // start doubling the sleep after 1ms...
                     delay *= 2L;
+
                 }
+
                 if (delay > 10L * 1000L)
                 { // up to 10ms
                     delay = 10L * 1000L;
+
                 }
+
                 usleep(delay);
-                if (debug.schedtrace <= 0L && (sched.gcwaiting != 0L || atomic.Load(ref sched.npidle) == uint32(gomaxprocs)))
+                var now = nanotime();
+                var (next, _) = timeSleepUntil();
+                if (debug.schedtrace <= 0L && (sched.gcwaiting != 0L || atomic.Load(_addr_sched.npidle) == uint32(gomaxprocs)))
                 {
-                    lock(ref sched.@lock);
-                    if (atomic.Load(ref sched.gcwaiting) != 0L || atomic.Load(ref sched.npidle) == uint32(gomaxprocs))
+                    lock(_addr_sched.@lock);
+                    if (atomic.Load(_addr_sched.gcwaiting) != 0L || atomic.Load(_addr_sched.npidle) == uint32(gomaxprocs))
                     {
-                        atomic.Store(ref sched.sysmonwait, 1L);
-                        unlock(ref sched.@lock); 
-                        // Make wake-up period small enough
-                        // for the sampling to be correct.
-                        var maxsleep = forcegcperiod / 2L;
-                        if (scavengelimit < forcegcperiod)
+                        if (next > now)
                         {
-                            maxsleep = scavengelimit / 2L;
-                        }
-                        var shouldRelax = true;
-                        if (osRelaxMinNS > 0L)
-                        {
-                            var next = timeSleepUntil();
-                            var now = nanotime();
-                            if (next - now < osRelaxMinNS)
+                            atomic.Store(_addr_sched.sysmonwait, 1L);
+                            unlock(_addr_sched.@lock); 
+                            // Make wake-up period small enough
+                            // for the sampling to be correct.
+                            var sleep = forcegcperiod / 2L;
+                            if (next - now < sleep)
                             {
-                                shouldRelax = false;
+                                sleep = next - now;
                             }
+
+                            var shouldRelax = sleep >= osRelaxMinNS;
+                            if (shouldRelax)
+                            {
+                                osRelax(true);
+                            }
+
+                            notetsleep(_addr_sched.sysmonnote, sleep);
+                            if (shouldRelax)
+                            {
+                                osRelax(false);
+                            }
+
+                            now = nanotime();
+                            next, _ = timeSleepUntil();
+                            lock(_addr_sched.@lock);
+                            atomic.Store(_addr_sched.sysmonwait, 0L);
+                            noteclear(_addr_sched.sysmonnote);
+
                         }
-                        if (shouldRelax)
-                        {
-                            osRelax(true);
-                        }
-                        notetsleep(ref sched.sysmonnote, maxsleep);
-                        if (shouldRelax)
-                        {
-                            osRelax(false);
-                        }
-                        lock(ref sched.@lock);
-                        atomic.Store(ref sched.sysmonwait, 0L);
-                        noteclear(ref sched.sysmonnote);
+
                         idle = 0L;
                         delay = 20L;
+
                     }
-                    unlock(ref sched.@lock);
+
+                    unlock(_addr_sched.@lock);
+
+                }
+
+                lock(_addr_sched.sysmonlock);
+                { 
+                    // If we spent a long time blocked on sysmonlock
+                    // then we want to update now and next since it's
+                    // likely stale.
+                    var now1 = nanotime();
+                    if (now1 - now > 50L * 1000L)
+                    {
+                        next, _ = timeSleepUntil();
+                    }
+
+                    now = now1;
+
                 } 
+
                 // trigger libc interceptors if needed
-                if (cgo_yield != null.Value)
+                if (cgo_yield != null.val)
                 {
-                    asmcgocall(cgo_yield.Value, null);
+                    asmcgocall(cgo_yield.val, null);
                 } 
                 // poll network if not polled for more than 10ms
-                var lastpoll = int64(atomic.Load64(ref sched.lastpoll));
-                now = nanotime();
+                var lastpoll = int64(atomic.Load64(_addr_sched.lastpoll));
                 if (netpollinited() && lastpoll != 0L && lastpoll + 10L * 1000L * 1000L < now)
                 {
-                    atomic.Cas64(ref sched.lastpoll, uint64(lastpoll), uint64(now));
-                    var gp = netpoll(false); // non-blocking - returns list of goroutines
-                    if (gp != null)
+                    atomic.Cas64(_addr_sched.lastpoll, uint64(lastpoll), uint64(now));
+                    ref var list = ref heap(netpoll(0L), out ptr<var> _addr_list); // non-blocking - returns list of goroutines
+                    if (!list.empty())
                     { 
                         // Need to decrement number of idle locked M's
                         // (pretending that one more is running) before injectglist.
@@ -5097,9 +6346,27 @@ retry:
                         // observes that there is no work to do and no other running M's
                         // and reports deadlock.
                         incidlelocked(-1L);
-                        injectglist(gp);
+                        injectglist(_addr_list);
                         incidlelocked(1L);
+
                     }
+
+                }
+
+                if (next < now)
+                { 
+                    // There are timers that should have already run,
+                    // perhaps because there is an unpreemptible P.
+                    // Try to start an M to run them.
+                    startm(_addr_null, false);
+
+                }
+
+                if (atomic.Load(_addr_scavenge.sysmonWake) != 0L)
+                { 
+                    // Kick the scavenger awake if someone requested it.
+                    wakeScavenger();
+
                 } 
                 // retake P's blocked in syscalls
                 // and preempt long running G's
@@ -5115,30 +6382,28 @@ retry:
                 {
                     gcTrigger t = (new gcTrigger(kind:gcTriggerTime,now:now));
 
-                    if (t.test() && atomic.Load(ref forcegc.idle) != 0L)
+                    if (t.test() && atomic.Load(_addr_forcegc.idle) != 0L)
                     {
-                        lock(ref forcegc.@lock);
+                        lock(_addr_forcegc.@lock);
                         forcegc.idle = 0L;
-                        forcegc.g.schedlink = 0L;
-                        injectglist(forcegc.g);
-                        unlock(ref forcegc.@lock);
-                    } 
-                    // scavenge heap once in a while
+                        list = default;
+                        list.push(forcegc.g);
+                        injectglist(_addr_list);
+                        unlock(_addr_forcegc.@lock);
+                    }
 
-                } 
-                // scavenge heap once in a while
-                if (lastscavenge + scavengelimit / 2L < now)
-                {
-                    mheap_.scavenge(int32(nscavenge), uint64(now), uint64(scavengelimit));
-                    lastscavenge = now;
-                    nscavenge++;
                 }
+
                 if (debug.schedtrace > 0L && lasttrace + int64(debug.schedtrace) * 1000000L <= now)
                 {
                     lasttrace = now;
                     schedtrace(debug.scheddetail > 0L);
                 }
+
+                unlock(_addr_sched.sysmonlock);
+
             }
+
 
         }
 
@@ -5152,7 +6417,7 @@ retry:
 
         // forcePreemptNS is the time slice given to a G before it is
         // preempted.
-        private static readonly long forcePreemptNS = 10L * 1000L * 1000L; // 10ms
+        private static readonly long forcePreemptNS = (long)10L * 1000L * 1000L; // 10ms
 
  // 10ms
 
@@ -5161,7 +6426,7 @@ retry:
             long n = 0L; 
             // Prevent allp slice changes. This lock will be completely
             // uncontended unless we're already stopping the world.
-            lock(ref allpLock); 
+            lock(_addr_allpLock); 
             // We can't use a range loop over allp because we may
             // temporarily drop the allpLock. Hence, we need to re-fetch
             // allp each time around the loop.
@@ -5173,14 +6438,37 @@ retry:
                     // This can happen if procresize has grown
                     // allp but not yet created new Ps.
                     continue;
+
                 }
-                var pd = ref _p_.sysmontick;
+
+                var pd = _addr__p_.sysmontick;
                 var s = _p_.status;
+                var sysretake = false;
+                if (s == _Prunning || s == _Psyscall)
+                { 
+                    // Preempt G if it's running for too long.
+                    var t = int64(_p_.schedtick);
+                    if (int64(pd.schedtick) != t)
+                    {
+                        pd.schedtick = uint32(t);
+                        pd.schedwhen = now;
+                    }
+                    else if (pd.schedwhen + forcePreemptNS <= now)
+                    {
+                        preemptone(_addr__p_); 
+                        // In case of syscall, preemptone() doesn't
+                        // work, because there is no M wired to P.
+                        sysretake = true;
+
+                    }
+
+                }
+
                 if (s == _Psyscall)
                 { 
                     // Retake P from syscall if it's there for more than 1 sysmon tick (at least 20us).
-                    var t = int64(_p_.syscalltick);
-                    if (int64(pd.syscalltick) != t)
+                    t = int64(_p_.syscalltick);
+                    if (!sysretake && int64(pd.syscalltick) != t)
                     {
                         pd.syscalltick = uint32(t);
                         pd.syscallwhen = now;
@@ -5189,51 +6477,41 @@ retry:
                     // On the one hand we don't want to retake Ps if there is no other work to do,
                     // but on the other hand we want to retake them eventually
                     // because they can prevent the sysmon thread from deep sleep.
-                    if (runqempty(_p_) && atomic.Load(ref sched.nmspinning) + atomic.Load(ref sched.npidle) > 0L && pd.syscallwhen + 10L * 1000L * 1000L > now)
+                    if (runqempty(_addr__p_) && atomic.Load(_addr_sched.nmspinning) + atomic.Load(_addr_sched.npidle) > 0L && pd.syscallwhen + 10L * 1000L * 1000L > now)
                     {
                         continue;
                     } 
                     // Drop allpLock so we can take sched.lock.
-                    unlock(ref allpLock); 
+                    unlock(_addr_allpLock); 
                     // Need to decrement number of idle locked M's
                     // (pretending that one more is running) before the CAS.
                     // Otherwise the M from which we retake can exit the syscall,
                     // increment nmidle and report deadlock.
                     incidlelocked(-1L);
-                    if (atomic.Cas(ref _p_.status, s, _Pidle))
+                    if (atomic.Cas(_addr__p_.status, s, _Pidle))
                     {
                         if (trace.enabled)
                         {
                             traceGoSysBlock(_p_);
                             traceProcStop(_p_);
                         }
+
                         n++;
                         _p_.syscalltick++;
-                        handoffp(_p_);
+                        handoffp(_addr__p_);
+
                     }
+
                     incidlelocked(1L);
-                    lock(ref allpLock);
+                    lock(_addr_allpLock);
+
                 }
-                else if (s == _Prunning)
-                { 
-                    // Preempt G if it's running for too long.
-                    t = int64(_p_.schedtick);
-                    if (int64(pd.schedtick) != t)
-                    {
-                        pd.schedtick = uint32(t);
-                        pd.schedwhen = now;
-                        continue;
-                    }
-                    if (pd.schedwhen + forcePreemptNS > now)
-                    {
-                        continue;
-                    }
-                    preemptone(_p_);
-                }
+
             }
 
-            unlock(ref allpLock);
+            unlock(_addr_allpLock);
             return uint32(n);
+
         }
 
         // Tell all goroutines that they have been preempted and they should stop.
@@ -5250,12 +6528,15 @@ retry:
                 {
                     continue;
                 }
-                if (preemptone(_p_))
+
+                if (preemptone(_addr__p_))
                 {
                     res = true;
                 }
+
             }
             return res;
+
         }
 
         // Tell the goroutine running on processor P to stop.
@@ -5268,26 +6549,39 @@ retry:
         // The actual preemption will happen at some point in the future
         // and will be indicated by the gp->status no longer being
         // Grunning
-        private static bool preemptone(ref p _p_)
+        private static bool preemptone(ptr<p> _addr__p_)
         {
+            ref p _p_ = ref _addr__p_.val;
+
             var mp = _p_.m.ptr();
             if (mp == null || mp == getg().m)
             {
                 return false;
             }
+
             var gp = mp.curg;
             if (gp == null || gp == mp.g0)
             {
                 return false;
             }
+
             gp.preempt = true; 
 
             // Every call in a go routine checks for stack overflow by
             // comparing the current stack pointer to gp->stackguard0.
             // Setting gp->stackguard0 to StackPreempt folds
             // preemption into the normal stack overflow check.
-            gp.stackguard0 = stackPreempt;
+            gp.stackguard0 = stackPreempt; 
+
+            // Request an async preemption of this P.
+            if (preemptMSupported && debug.asyncpreemptoff == 0L)
+            {
+                _p_.preempt = true;
+                preemptM(mp);
+            }
+
             return true;
+
         }
 
         private static long starttime = default;
@@ -5299,7 +6593,8 @@ retry:
             {
                 starttime = now;
             }
-            lock(ref sched.@lock);
+
+            lock(_addr_sched.@lock);
             print("SCHED ", (now - starttime) / 1e6F, "ms: gomaxprocs=", gomaxprocs, " idleprocs=", sched.npidle, " threads=", mcount(), " spinningthreads=", sched.nmspinning, " idlethreads=", sched.nmidle, " runqueue=", sched.runqsize);
             if (detailed)
             {
@@ -5316,8 +6611,8 @@ retry:
                     i = __i;
                     _p_ = ___p_;
                     var mp = _p_.m.ptr();
-                    var h = atomic.Load(ref _p_.runqhead);
-                    var t = atomic.Load(ref _p_.runqtail);
+                    var h = atomic.Load(_addr__p_.runqhead);
+                    var t = atomic.Load(_addr__p_.runqtail);
                     if (detailed)
                     {
                         var id = int64(-1L);
@@ -5325,7 +6620,9 @@ retry:
                         {
                             id = mp.id;
                         }
-                        print("  P", i, ": status=", _p_.status, " schedtick=", _p_.schedtick, " syscalltick=", _p_.syscalltick, " m=", id, " runqsize=", t - h, " gfreecnt=", _p_.gfreecnt, "\n");
+
+                        print("  P", i, ": status=", _p_.status, " schedtick=", _p_.schedtick, " syscalltick=", _p_.syscalltick, " m=", id, " runqsize=", t - h, " gfreecnt=", _p_.gFree.n, " timerslen=", len(_p_.timers), "\n");
+
                     }
                     else
                     { 
@@ -5336,12 +6633,15 @@ retry:
                         {
                             print("[");
                         }
+
                         print(t - h);
                         if (i == len(allp) - 1L)
                         {
                             print("]\n");
                         }
+
                     }
+
                 }
 
                 _p_ = _p___prev1;
@@ -5349,9 +6649,10 @@ retry:
 
             if (!detailed)
             {
-                unlock(ref sched.@lock);
-                return;
+                unlock(_addr_sched.@lock);
+                return ;
             }
+
             {
                 var mp__prev1 = mp;
 
@@ -5368,24 +6669,28 @@ retry:
                         id1 = _p_.id;
                     mp = mp.alllink;
                     }
+
                     var id2 = int64(-1L);
                     if (gp != null)
                     {
                         id2 = gp.goid;
                     }
+
                     var id3 = int64(-1L);
                     if (lockedg != null)
                     {
                         id3 = lockedg.goid;
                     }
-                    print("  M", mp.id, ": p=", id1, " curg=", id2, " mallocing=", mp.mallocing, " throwing=", mp.throwing, " preemptoff=", mp.preemptoff, "" + " locks=", mp.locks, " dying=", mp.dying, " helpgc=", mp.helpgc, " spinning=", mp.spinning, " blocked=", mp.blocked, " lockedg=", id3, "\n");
+
+                    print("  M", mp.id, ": p=", id1, " curg=", id2, " mallocing=", mp.mallocing, " throwing=", mp.throwing, " preemptoff=", mp.preemptoff, "" + " locks=", mp.locks, " dying=", mp.dying, " spinning=", mp.spinning, " blocked=", mp.blocked, " lockedg=", id3, "\n");
+
                 }
 
 
                 mp = mp__prev1;
             }
 
-            lock(ref allglock);
+            lock(_addr_allglock);
             for (long gi = 0L; gi < len(allgs); gi++)
             {
                 gp = allgs[gi];
@@ -5396,24 +6701,80 @@ retry:
                 {
                     id1 = mp.id;
                 }
+
                 id2 = int64(-1L);
                 if (lockedm != null)
                 {
                     id2 = lockedm.id;
                 }
-                print("  G", gp.goid, ": status=", readgstatus(gp), "(", gp.waitreason, ") m=", id1, " lockedm=", id2, "\n");
+
+                print("  G", gp.goid, ": status=", readgstatus(_addr_gp), "(", gp.waitreason.String(), ") m=", id1, " lockedm=", id2, "\n");
+
             }
 
-            unlock(ref allglock);
-            unlock(ref sched.@lock);
+            unlock(_addr_allglock);
+            unlock(_addr_sched.@lock);
+
+        }
+
+        // schedEnableUser enables or disables the scheduling of user
+        // goroutines.
+        //
+        // This does not stop already running user goroutines, so the caller
+        // should first stop the world when disabling user goroutines.
+        private static void schedEnableUser(bool enable)
+        {
+            lock(_addr_sched.@lock);
+            if (sched.disable.user == !enable)
+            {
+                unlock(_addr_sched.@lock);
+                return ;
+            }
+
+            sched.disable.user = !enable;
+            if (enable)
+            {
+                var n = sched.disable.n;
+                sched.disable.n = 0L;
+                globrunqputbatch(_addr_sched.disable.runnable, n);
+                unlock(_addr_sched.@lock);
+                while (n != 0L && sched.npidle != 0L)
+                {
+                    startm(_addr_null, false);
+                    n--;
+                }
+            else
+
+
+            }            {
+                unlock(_addr_sched.@lock);
+            }
+
+        }
+
+        // schedEnabled reports whether gp should be scheduled. It returns
+        // false is scheduling of gp is disabled.
+        private static bool schedEnabled(ptr<g> _addr_gp)
+        {
+            ref g gp = ref _addr_gp.val;
+
+            if (sched.disable.user)
+            {
+                return isSystemGoroutine(gp, true);
+            }
+
+            return true;
+
         }
 
         // Put mp on midle list.
         // Sched must be locked.
         // May run during STW, so write barriers are not allowed.
         //go:nowritebarrierrec
-        private static void mput(ref m mp)
+        private static void mput(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
             mp.schedlink = sched.midle;
             sched.midle.set(mp);
             sched.nmidle++;
@@ -5424,7 +6785,7 @@ retry:
         // Sched must be locked.
         // May run during STW, so write barriers are not allowed.
         //go:nowritebarrierrec
-        private static ref m mget()
+        private static ptr<m> mget()
         {
             var mp = sched.midle.ptr();
             if (mp != null)
@@ -5432,25 +6793,20 @@ retry:
                 sched.midle = mp.schedlink;
                 sched.nmidle--;
             }
-            return mp;
+
+            return _addr_mp!;
+
         }
 
         // Put gp on the global runnable queue.
         // Sched must be locked.
         // May run during STW, so write barriers are not allowed.
         //go:nowritebarrierrec
-        private static void globrunqput(ref g gp)
+        private static void globrunqput(ptr<g> _addr_gp)
         {
-            gp.schedlink = 0L;
-            if (sched.runqtail != 0L)
-            {
-                sched.runqtail.ptr().schedlink.set(gp);
-            }
-            else
-            {
-                sched.runqhead.set(gp);
-            }
-            sched.runqtail.set(gp);
+            ref g gp = ref _addr_gp.val;
+
+            sched.runq.pushBack(gp);
             sched.runqsize++;
         }
 
@@ -5458,122 +6814,125 @@ retry:
         // Sched must be locked.
         // May run during STW, so write barriers are not allowed.
         //go:nowritebarrierrec
-        private static void globrunqputhead(ref g gp)
+        private static void globrunqputhead(ptr<g> _addr_gp)
         {
-            gp.schedlink = sched.runqhead;
-            sched.runqhead.set(gp);
-            if (sched.runqtail == 0L)
-            {
-                sched.runqtail.set(gp);
-            }
+            ref g gp = ref _addr_gp.val;
+
+            sched.runq.push(gp);
             sched.runqsize++;
         }
 
         // Put a batch of runnable goroutines on the global runnable queue.
+        // This clears *batch.
         // Sched must be locked.
-        private static void globrunqputbatch(ref g ghead, ref g gtail, int n)
+        private static void globrunqputbatch(ptr<gQueue> _addr_batch, int n)
         {
-            gtail.schedlink = 0L;
-            if (sched.runqtail != 0L)
-            {
-                sched.runqtail.ptr().schedlink.set(ghead);
-            }
-            else
-            {
-                sched.runqhead.set(ghead);
-            }
-            sched.runqtail.set(gtail);
+            ref gQueue batch = ref _addr_batch.val;
+
+            sched.runq.pushBackAll(batch);
             sched.runqsize += n;
+            batch = new gQueue();
         }
 
         // Try get a batch of G's from the global runnable queue.
         // Sched must be locked.
-        private static ref g globrunqget(ref p _p_, int max)
+        private static ptr<g> globrunqget(ptr<p> _addr__p_, int max)
         {
+            ref p _p_ = ref _addr__p_.val;
+
             if (sched.runqsize == 0L)
             {
-                return null;
+                return _addr_null!;
             }
+
             var n = sched.runqsize / gomaxprocs + 1L;
             if (n > sched.runqsize)
             {
                 n = sched.runqsize;
             }
+
             if (max > 0L && n > max)
             {
                 n = max;
             }
+
             if (n > int32(len(_p_.runq)) / 2L)
             {
                 n = int32(len(_p_.runq)) / 2L;
             }
+
             sched.runqsize -= n;
-            if (sched.runqsize == 0L)
-            {
-                sched.runqtail = 0L;
-            }
-            var gp = sched.runqhead.ptr();
-            sched.runqhead = gp.schedlink;
+
+            var gp = sched.runq.pop();
             n--;
             while (n > 0L)
             {
-                var gp1 = sched.runqhead.ptr();
-                sched.runqhead = gp1.schedlink;
-                runqput(_p_, gp1, false);
+                var gp1 = sched.runq.pop();
+                runqput(_addr__p_, _addr_gp1, false);
                 n--;
             }
 
-            return gp;
+            return _addr_gp!;
+
         }
 
         // Put p to on _Pidle list.
         // Sched must be locked.
         // May run during STW, so write barriers are not allowed.
         //go:nowritebarrierrec
-        private static void pidleput(ref p _p_)
+        private static void pidleput(ptr<p> _addr__p_)
         {
-            if (!runqempty(_p_))
+            ref p _p_ = ref _addr__p_.val;
+
+            if (!runqempty(_addr__p_))
             {
                 throw("pidleput: P has non-empty run queue");
             }
+
             _p_.link = sched.pidle;
             sched.pidle.set(_p_);
-            atomic.Xadd(ref sched.npidle, 1L); // TODO: fast atomic
+            atomic.Xadd(_addr_sched.npidle, 1L); // TODO: fast atomic
         }
 
         // Try get a p from _Pidle list.
         // Sched must be locked.
         // May run during STW, so write barriers are not allowed.
         //go:nowritebarrierrec
-        private static ref p pidleget()
+        private static ptr<p> pidleget()
         {
             var _p_ = sched.pidle.ptr();
             if (_p_ != null)
             {
                 sched.pidle = _p_.link;
-                atomic.Xadd(ref sched.npidle, -1L); // TODO: fast atomic
+                atomic.Xadd(_addr_sched.npidle, -1L); // TODO: fast atomic
             }
-            return _p_;
+
+            return _addr__p_!;
+
         }
 
-        // runqempty returns true if _p_ has no Gs on its local run queue.
+        // runqempty reports whether _p_ has no Gs on its local run queue.
         // It never returns true spuriously.
-        private static bool runqempty(ref p _p_)
-        { 
+        private static bool runqempty(ptr<p> _addr__p_)
+        {
+            ref p _p_ = ref _addr__p_.val;
+ 
             // Defend against a race where 1) _p_ has G1 in runqnext but runqhead == runqtail,
             // 2) runqput on _p_ kicks G1 to the runq, 3) runqget on _p_ empties runqnext.
             // Simply observing that runqhead == runqtail and then observing that runqnext == nil
             // does not mean the queue is empty.
             while (true)
             {
-                var head = atomic.Load(ref _p_.runqhead);
-                var tail = atomic.Load(ref _p_.runqtail);
-                var runnext = atomic.Loaduintptr((uintptr.Value)(@unsafe.Pointer(ref _p_.runnext)));
-                if (tail == atomic.Load(ref _p_.runqtail))
+                var head = atomic.Load(_addr__p_.runqhead);
+                var tail = atomic.Load(_addr__p_.runqtail);
+                var runnext = atomic.Loaduintptr((uintptr.val)(@unsafe.Pointer(_addr__p_.runnext)));
+                if (tail == atomic.Load(_addr__p_.runqtail))
                 {
                     return head == tail && runnext == 0L;
                 }
+
             }
+
 
         }
 
@@ -5586,26 +6945,30 @@ retry:
         // With the randomness here, as long as the tests pass
         // consistently with -race, they shouldn't have latent scheduling
         // assumptions.
-        private static readonly var randomizeScheduler = raceenabled;
+        private static readonly var randomizeScheduler = (var)raceenabled;
 
         // runqput tries to put g on the local runnable queue.
-        // If next if false, runqput adds g to the tail of the runnable queue.
+        // If next is false, runqput adds g to the tail of the runnable queue.
         // If next is true, runqput puts g in the _p_.runnext slot.
         // If the run queue is full, runnext puts g on the global queue.
         // Executed only by the owner P.
 
 
         // runqput tries to put g on the local runnable queue.
-        // If next if false, runqput adds g to the tail of the runnable queue.
+        // If next is false, runqput adds g to the tail of the runnable queue.
         // If next is true, runqput puts g in the _p_.runnext slot.
         // If the run queue is full, runnext puts g on the global queue.
         // Executed only by the owner P.
-        private static void runqput(ref p _p_, ref g gp, bool next)
+        private static void runqput(ptr<p> _addr__p_, ptr<g> _addr_gp, bool next)
         {
+            ref p _p_ = ref _addr__p_.val;
+            ref g gp = ref _addr_gp.val;
+
             if (randomizeScheduler && next && fastrand() % 2L == 0L)
             {
                 next = false;
             }
+
             if (next)
             {
 retryNext:
@@ -5614,35 +6977,44 @@ retryNext:
                 {
                     goto retryNext;
                 }
+
                 if (oldnext == 0L)
                 {
-                    return;
+                    return ;
                 } 
                 // Kick the old runnext out to the regular run queue.
                 gp = oldnext.ptr();
+
             }
+
 retry: // load-acquire, synchronize with consumers
-            var h = atomic.Load(ref _p_.runqhead); // load-acquire, synchronize with consumers
+            var h = atomic.LoadAcq(_addr__p_.runqhead); // load-acquire, synchronize with consumers
             var t = _p_.runqtail;
             if (t - h < uint32(len(_p_.runq)))
             {
                 _p_.runq[t % uint32(len(_p_.runq))].set(gp);
-                atomic.Store(ref _p_.runqtail, t + 1L); // store-release, makes the item available for consumption
-                return;
+                atomic.StoreRel(_addr__p_.runqtail, t + 1L); // store-release, makes the item available for consumption
+                return ;
+
             }
-            if (runqputslow(_p_, gp, h, t))
+
+            if (runqputslow(_addr__p_, _addr_gp, h, t))
             {
-                return;
+                return ;
             } 
             // the queue is not full, now the put above must succeed
             goto retry;
+
         }
 
         // Put g and a batch of work from local runnable queue on global queue.
         // Executed only by the owner P.
-        private static bool runqputslow(ref p _p_, ref g gp, uint h, uint t)
+        private static bool runqputslow(ptr<p> _addr__p_, ptr<g> _addr_gp, uint h, uint t)
         {
-            array<ref g> batch = new array<ref g>(len(_p_.runq) / 2L + 1L); 
+            ref p _p_ = ref _addr__p_.val;
+            ref g gp = ref _addr_gp.val;
+
+            array<ptr<g>> batch = new array<ptr<g>>(len(_p_.runq) / 2L + 1L); 
 
             // First, grab a batch from local queue.
             var n = t - h;
@@ -5651,6 +7023,7 @@ retry: // load-acquire, synchronize with consumers
             {
                 throw("runqputslow: queue is not full");
             }
+
             {
                 var i__prev1 = i;
 
@@ -5662,10 +7035,12 @@ retry: // load-acquire, synchronize with consumers
 
                 i = i__prev1;
             }
-            if (!atomic.Cas(ref _p_.runqhead, h, h + n))
+            if (!atomic.CasRel(_addr__p_.runqhead, h, h + n))
             { // cas-release, commits consume
                 return false;
+
             }
+
             batch[n] = gp;
 
             if (randomizeScheduler)
@@ -5678,11 +7053,13 @@ retry: // load-acquire, synchronize with consumers
                         var j = fastrandn(i + 1L);
                         batch[i] = batch[j];
                         batch[j] = batch[i];
+
                     }
 
 
                     i = i__prev1;
                 }
+
             } 
 
             // Link the goroutines.
@@ -5692,27 +7069,83 @@ retry: // load-acquire, synchronize with consumers
                 for (i = uint32(0L); i < n; i++)
                 {
                     batch[i].schedlink.set(batch[i + 1L]);
-                } 
-
-                // Now put the batch on global queue.
+                }
 
 
                 i = i__prev1;
-            } 
+            }
+            ref gQueue q = ref heap(out ptr<gQueue> _addr_q);
+            q.head.set(batch[0L]);
+            q.tail.set(batch[n]); 
 
             // Now put the batch on global queue.
-            lock(ref sched.@lock);
-            globrunqputbatch(batch[0L], batch[n], int32(n + 1L));
-            unlock(ref sched.@lock);
+            lock(_addr_sched.@lock);
+            globrunqputbatch(_addr_q, int32(n + 1L));
+            unlock(_addr_sched.@lock);
             return true;
+
+        }
+
+        // runqputbatch tries to put all the G's on q on the local runnable queue.
+        // If the queue is full, they are put on the global queue; in that case
+        // this will temporarily acquire the scheduler lock.
+        // Executed only by the owner P.
+        private static void runqputbatch(ptr<p> _addr_pp, ptr<gQueue> _addr_q, long qsize)
+        {
+            ref p pp = ref _addr_pp.val;
+            ref gQueue q = ref _addr_q.val;
+
+            var h = atomic.LoadAcq(_addr_pp.runqhead);
+            var t = pp.runqtail;
+            var n = uint32(0L);
+            while (!q.empty() && t - h < uint32(len(pp.runq)))
+            {
+                var gp = q.pop();
+                pp.runq[t % uint32(len(pp.runq))].set(gp);
+                t++;
+                n++;
+            }
+
+            qsize -= int(n);
+
+            if (randomizeScheduler)
+            {
+                Func<uint, uint> off = o =>
+                {
+                    return (pp.runqtail + o) % uint32(len(pp.runq));
+                }
+;
+                for (var i = uint32(1L); i < n; i++)
+                {
+                    var j = fastrandn(i + 1L);
+                    pp.runq[off(i)] = pp.runq[off(j)];
+                    pp.runq[off(j)] = pp.runq[off(i)];
+
+                }
+
+
+            }
+
+            atomic.StoreRel(_addr_pp.runqtail, t);
+            if (!q.empty())
+            {
+                lock(_addr_sched.@lock);
+                globrunqputbatch(_addr_q, int32(qsize));
+                unlock(_addr_sched.@lock);
+            }
+
         }
 
         // Get g from local runnable queue.
         // If inheritTime is true, gp should inherit the remaining time in the
         // current time slice. Otherwise, it should start a new time slice.
         // Executed only by the owner P.
-        private static (ref g, bool) runqget(ref p _p_)
-        { 
+        private static (ptr<g>, bool) runqget(ptr<p> _addr__p_)
+        {
+            ptr<g> gp = default!;
+            bool inheritTime = default;
+            ref p _p_ = ref _addr__p_.val;
+ 
             // If there's a runnext, it's the next G to run.
             while (true)
             {
@@ -5721,27 +7154,33 @@ retry: // load-acquire, synchronize with consumers
                 {
                     break;
                 }
+
                 if (_p_.runnext.cas(next, 0L))
                 {
-                    return (next.ptr(), true);
+                    return (_addr_next.ptr()!, true);
                 }
+
             }
 
 
             while (true)
             {
-                var h = atomic.Load(ref _p_.runqhead); // load-acquire, synchronize with other consumers
+                var h = atomic.LoadAcq(_addr__p_.runqhead); // load-acquire, synchronize with other consumers
                 var t = _p_.runqtail;
                 if (t == h)
                 {
-                    return (null, false);
+                    return (_addr_null!, false);
                 }
+
                 var gp = _p_.runq[h % uint32(len(_p_.runq))].ptr();
-                if (atomic.Cas(ref _p_.runqhead, h, h + 1L))
+                if (atomic.CasRel(_addr__p_.runqhead, h, h + 1L))
                 { // cas-release, commits consume
-                    return (gp, false);
+                    return (_addr_gp!, false);
+
                 }
+
             }
+
 
         }
 
@@ -5749,12 +7188,15 @@ retry: // load-acquire, synchronize with consumers
         // Batch is a ring buffer starting at batchHead.
         // Returns number of grabbed goroutines.
         // Can be executed by any P.
-        private static uint runqgrab(ref p _p_, ref array<guintptr> batch, uint batchHead, bool stealRunNextG)
+        private static uint runqgrab(ptr<p> _addr__p_, ptr<array<guintptr>> _addr_batch, uint batchHead, bool stealRunNextG)
         {
+            ref p _p_ = ref _addr__p_.val;
+            ref array<guintptr> batch = ref _addr_batch.val;
+
             while (true)
             {
-                var h = atomic.Load(ref _p_.runqhead); // load-acquire, synchronize with other consumers
-                var t = atomic.Load(ref _p_.runqtail); // load-acquire, synchronize with the producer
+                var h = atomic.LoadAcq(_addr__p_.runqhead); // load-acquire, synchronize with other consumers
+                var t = atomic.LoadAcq(_addr__p_.runqtail); // load-acquire, synchronize with the producer
                 var n = t - h;
                 n = n - n / 2L;
                 if (n == 0L)
@@ -5789,80 +7231,266 @@ retry: // load-acquire, synchronize with consumers
                                         // 1-15ms, which is way too much for this
                                         // optimization. So just yield.
                                         osyield();
+
                                     }
+
                                 }
+
                                 if (!_p_.runnext.cas(next, 0L))
                                 {
                                     continue;
                                 }
+
                                 batch[batchHead % uint32(len(batch))] = next;
                                 return 1L;
+
                             }
 
                         }
+
                     }
+
                     return 0L;
+
                 }
+
                 if (n > uint32(len(_p_.runq) / 2L))
                 { // read inconsistent h and t
                     continue;
+
                 }
+
                 for (var i = uint32(0L); i < n; i++)
                 {
                     var g = _p_.runq[(h + i) % uint32(len(_p_.runq))];
                     batch[(batchHead + i) % uint32(len(batch))] = g;
                 }
 
-                if (atomic.Cas(ref _p_.runqhead, h, h + n))
+                if (atomic.CasRel(_addr__p_.runqhead, h, h + n))
                 { // cas-release, commits consume
                     return n;
+
                 }
+
             }
+
 
         }
 
         // Steal half of elements from local runnable queue of p2
         // and put onto local runnable queue of p.
         // Returns one of the stolen elements (or nil if failed).
-        private static ref g runqsteal(ref p _p_, ref p p2, bool stealRunNextG)
+        private static ptr<g> runqsteal(ptr<p> _addr__p_, ptr<p> _addr_p2, bool stealRunNextG)
         {
+            ref p _p_ = ref _addr__p_.val;
+            ref p p2 = ref _addr_p2.val;
+
             var t = _p_.runqtail;
-            var n = runqgrab(p2, ref _p_.runq, t, stealRunNextG);
+            var n = runqgrab(_addr_p2, _addr__p_.runq, t, stealRunNextG);
             if (n == 0L)
             {
-                return null;
+                return _addr_null!;
             }
+
             n--;
             var gp = _p_.runq[(t + n) % uint32(len(_p_.runq))].ptr();
             if (n == 0L)
             {
-                return gp;
+                return _addr_gp!;
             }
-            var h = atomic.Load(ref _p_.runqhead); // load-acquire, synchronize with consumers
+
+            var h = atomic.LoadAcq(_addr__p_.runqhead); // load-acquire, synchronize with consumers
             if (t - h + n >= uint32(len(_p_.runq)))
             {
                 throw("runqsteal: runq overflow");
             }
-            atomic.Store(ref _p_.runqtail, t + n); // store-release, makes the item available for consumption
-            return gp;
+
+            atomic.StoreRel(_addr__p_.runqtail, t + n); // store-release, makes the item available for consumption
+            return _addr_gp!;
+
+        }
+
+        // A gQueue is a dequeue of Gs linked through g.schedlink. A G can only
+        // be on one gQueue or gList at a time.
+        private partial struct gQueue
+        {
+            public guintptr head;
+            public guintptr tail;
+        }
+
+        // empty reports whether q is empty.
+        private static bool empty(this ptr<gQueue> _addr_q)
+        {
+            ref gQueue q = ref _addr_q.val;
+
+            return q.head == 0L;
+        }
+
+        // push adds gp to the head of q.
+        private static void push(this ptr<gQueue> _addr_q, ptr<g> _addr_gp)
+        {
+            ref gQueue q = ref _addr_q.val;
+            ref g gp = ref _addr_gp.val;
+
+            gp.schedlink = q.head;
+            q.head.set(gp);
+            if (q.tail == 0L)
+            {
+                q.tail.set(gp);
+            }
+
+        }
+
+        // pushBack adds gp to the tail of q.
+        private static void pushBack(this ptr<gQueue> _addr_q, ptr<g> _addr_gp)
+        {
+            ref gQueue q = ref _addr_q.val;
+            ref g gp = ref _addr_gp.val;
+
+            gp.schedlink = 0L;
+            if (q.tail != 0L)
+            {
+                q.tail.ptr().schedlink.set(gp);
+            }
+            else
+            {
+                q.head.set(gp);
+            }
+
+            q.tail.set(gp);
+
+        }
+
+        // pushBackAll adds all Gs in l2 to the tail of q. After this q2 must
+        // not be used.
+        private static void pushBackAll(this ptr<gQueue> _addr_q, gQueue q2)
+        {
+            ref gQueue q = ref _addr_q.val;
+
+            if (q2.tail == 0L)
+            {
+                return ;
+            }
+
+            q2.tail.ptr().schedlink = 0L;
+            if (q.tail != 0L)
+            {
+                q.tail.ptr().schedlink = q2.head;
+            }
+            else
+            {
+                q.head = q2.head;
+            }
+
+            q.tail = q2.tail;
+
+        }
+
+        // pop removes and returns the head of queue q. It returns nil if
+        // q is empty.
+        private static ptr<g> pop(this ptr<gQueue> _addr_q)
+        {
+            ref gQueue q = ref _addr_q.val;
+
+            var gp = q.head.ptr();
+            if (gp != null)
+            {
+                q.head = gp.schedlink;
+                if (q.head == 0L)
+                {
+                    q.tail = 0L;
+                }
+
+            }
+
+            return _addr_gp!;
+
+        }
+
+        // popList takes all Gs in q and returns them as a gList.
+        private static gList popList(this ptr<gQueue> _addr_q)
+        {
+            ref gQueue q = ref _addr_q.val;
+
+            gList stack = new gList(q.head);
+            q.val = new gQueue();
+            return stack;
+        }
+
+        // A gList is a list of Gs linked through g.schedlink. A G can only be
+        // on one gQueue or gList at a time.
+        private partial struct gList
+        {
+            public guintptr head;
+        }
+
+        // empty reports whether l is empty.
+        private static bool empty(this ptr<gList> _addr_l)
+        {
+            ref gList l = ref _addr_l.val;
+
+            return l.head == 0L;
+        }
+
+        // push adds gp to the head of l.
+        private static void push(this ptr<gList> _addr_l, ptr<g> _addr_gp)
+        {
+            ref gList l = ref _addr_l.val;
+            ref g gp = ref _addr_gp.val;
+
+            gp.schedlink = l.head;
+            l.head.set(gp);
+        }
+
+        // pushAll prepends all Gs in q to l.
+        private static void pushAll(this ptr<gList> _addr_l, gQueue q)
+        {
+            ref gList l = ref _addr_l.val;
+
+            if (!q.empty())
+            {
+                q.tail.ptr().schedlink = l.head;
+                l.head = q.head;
+            }
+
+        }
+
+        // pop removes and returns the head of l. If l is empty, it returns nil.
+        private static ptr<g> pop(this ptr<gList> _addr_l)
+        {
+            ref gList l = ref _addr_l.val;
+
+            var gp = l.head.ptr();
+            if (gp != null)
+            {
+                l.head = gp.schedlink;
+            }
+
+            return _addr_gp!;
+
         }
 
         //go:linkname setMaxThreads runtime/debug.setMaxThreads
         private static long setMaxThreads(long @in)
         {
-            lock(ref sched.@lock);
+            long @out = default;
+
+            lock(_addr_sched.@lock);
             out = int(sched.maxmcount);
             if (in > 0x7fffffffUL)
             { // MaxInt32
                 sched.maxmcount = 0x7fffffffUL;
+
             }
             else
             {
                 sched.maxmcount = int32(in);
             }
+
             checkmcount();
-            unlock(ref sched.@lock);
-            return;
+            unlock(_addr_sched.@lock);
+            return ;
+
         }
 
         private static bool haveexperiment(@string name)
@@ -5871,6 +7499,7 @@ retry: // load-acquire, synchronize with consumers
             {
                 return framepointer_enabled; // set by linker
             }
+
             var x = sys.Goexperiment;
             while (x != "")
             {
@@ -5880,23 +7509,29 @@ retry: // load-acquire, synchronize with consumers
                 {
                     xname = x;
                     x = "";
+
                 }
                 else
                 {
                     xname = x[..i];
                     x = x[i + 1L..];
+
                 }
+
                 if (xname == name)
                 {
                     return true;
                 }
+
                 if (len(xname) > 2L && xname[..2L] == "no" && xname[2L..] == name)
                 {
                     return false;
                 }
+
             }
 
             return false;
+
         }
 
         //go:nosplit
@@ -5953,21 +7588,24 @@ retry: // load-acquire, synchronize with consumers
             // Spin only few times and only if running on a multicore machine and
             // GOMAXPROCS>1 and there is at least one other running P and local runq is empty.
             // As opposed to runtime mutex we don't do passive spinning here,
-            // because there can be work on global runq on on other Ps.
+            // because there can be work on global runq or on other Ps.
             if (i >= active_spin || ncpu <= 1L || gomaxprocs <= int32(sched.npidle + sched.nmspinning) + 1L)
             {
                 return false;
             }
+
             {
                 var p = getg().m.p.ptr();
 
-                if (!runqempty(p))
+                if (!runqempty(_addr_p))
                 {
                     return false;
                 }
 
             }
+
             return true;
+
         }
 
         //go:linkname sync_runtime_doSpin sync.runtime_doSpin
@@ -5997,8 +7635,10 @@ retry: // load-acquire, synchronize with consumers
             public uint inc;
         }
 
-        private static void reset(this ref randomOrder ord, uint count)
+        private static void reset(this ptr<randomOrder> _addr_ord, uint count)
         {
+            ref randomOrder ord = ref _addr_ord.val;
+
             ord.count = count;
             ord.coprimes = ord.coprimes[..0L];
             for (var i = uint32(1L); i <= count; i++)
@@ -6007,28 +7647,38 @@ retry: // load-acquire, synchronize with consumers
                 {
                     ord.coprimes = append(ord.coprimes, i);
                 }
+
             }
+
 
         }
 
-        private static randomEnum start(this ref randomOrder ord, uint i)
+        private static randomEnum start(this ptr<randomOrder> _addr_ord, uint i)
         {
+            ref randomOrder ord = ref _addr_ord.val;
+
             return new randomEnum(count:ord.count,pos:i%ord.count,inc:ord.coprimes[i%uint32(len(ord.coprimes))],);
         }
 
-        private static bool done(this ref randomEnum @enum)
+        private static bool done(this ptr<randomEnum> _addr_@enum)
         {
+            ref randomEnum @enum = ref _addr_@enum.val;
+
             return @enum.i == @enum.count;
         }
 
-        private static void next(this ref randomEnum @enum)
+        private static void next(this ptr<randomEnum> _addr_@enum)
         {
+            ref randomEnum @enum = ref _addr_@enum.val;
+
             @enum.i++;
             @enum.pos = (@enum.pos + @enum.inc) % @enum.count;
         }
 
-        private static uint position(this ref randomEnum @enum)
+        private static uint position(this ptr<randomEnum> _addr_@enum)
         {
+            ref randomEnum @enum = ref _addr_@enum.val;
+
             return @enum.pos;
         }
 
@@ -6038,9 +7688,67 @@ retry: // load-acquire, synchronize with consumers
             {
                 a = b;
                 b = a % b;
+
             }
 
             return a;
+
+        }
+
+        // An initTask represents the set of initializations that need to be done for a package.
+        // Keep in sync with ../../test/initempty.go:initTask
+        private partial struct initTask
+        {
+            public System.UIntPtr state; // 0 = uninitialized, 1 = in progress, 2 = done
+            public System.UIntPtr ndeps;
+            public System.UIntPtr nfns; // followed by ndeps instances of an *initTask, one per package depended on
+// followed by nfns pcs, one per init function to run
+        }
+
+        private static void doInit(ptr<initTask> _addr_t)
+        {
+            ref initTask t = ref _addr_t.val;
+
+            switch (t.state)
+            {
+                case 2L: // fully initialized
+                    return ;
+                    break;
+                case 1L: // initialization in progress
+                    throw("recursive call during initialization - linker skew");
+                    break;
+                default: // not initialized yet
+                    t.state = 1L; // initialization in progress
+                    {
+                        var i__prev1 = i;
+
+                        for (var i = uintptr(0L); i < t.ndeps; i++)
+                        {
+                            ref var p = ref heap(add(@unsafe.Pointer(t), (3L + i) * sys.PtrSize), out ptr<var> _addr_p);
+                            ptr<ptr<ptr<initTask>>> t2 = new ptr<ptr<ptr<ptr<initTask>>>>(p);
+                            doInit(t2);
+                        }
+
+
+                        i = i__prev1;
+                    }
+                    {
+                        var i__prev1 = i;
+
+                        for (i = uintptr(0L); i < t.nfns; i++)
+                        {
+                            p = add(@unsafe.Pointer(t), (3L + t.ndeps + i) * sys.PtrSize);
+                            object f = Action(@unsafe.Pointer(_addr_p)).val;
+                            f();
+                        }
+
+
+                        i = i__prev1;
+                    }
+                    t.state = 2L; // initialization done
+                    break;
+            }
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:14 UTC
+//     Generated on 2020 October 08 03:24:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using runtime = go.runtime_package;
+using unsafeheader = go.@internal.unsafeheader_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using unicode = go.unicode_package;
@@ -30,13 +30,13 @@ namespace go
             // Constructors
             public layoutKey(NilType _)
             {
-                this.t = default;
+                this.ftyp = default;
                 this.rcvr = default;
             }
 
-            public layoutKey(ref ptr<rtype> t = default, ref ptr<rtype> rcvr = default)
+            public layoutKey(ref ptr<funcType> ftyp = default, ref ptr<rtype> rcvr = default)
             {
-                this.t = t;
+                this.ftyp = ftyp;
                 this.rcvr = rcvr;
             }
 
@@ -60,7 +60,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static layoutKey layoutKey_cast(dynamic value)
         {
-            return new layoutKey(ref value.t, ref value.rcvr);
+            return new layoutKey(ref value.ftyp, ref value.rcvr);
         }
     }
 }

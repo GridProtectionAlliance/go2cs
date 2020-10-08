@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:12 UTC
+//     Generated on 2020 October 08 04:02:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,23 +21,17 @@ namespace go
     public static partial class e_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(u5))]
         public partial struct U4
         {
-            // u5 structure promotion - sourced from pointer
-            private readonly ptr<u5> m_u5Ref;
-
-            private ref u5 u5_ptr => ref m_u5Ref.Value;
-
             // Constructors
             public U4(NilType _)
             {
-                this.m_u5Ref = new ptr<u5>(new u5(nil));
+                this.ptr<u5> = default;
             }
 
-            public U4(ref u5 u5 = default)
+            public U4(ref ptr<u5> ptr<u5> = default)
             {
-                this.m_u5Ref = new ptr<u5>(ref u5);
+                this.ptr<u5> = ptr<u5>;
             }
 
             // Enable comparisons between nil and U4 struct
@@ -60,7 +54,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static U4 U4_cast(dynamic value)
         {
-            return new U4(ref value.u5);
+            return new U4(ref value.ptr<u5>);
         }
     }
 }}

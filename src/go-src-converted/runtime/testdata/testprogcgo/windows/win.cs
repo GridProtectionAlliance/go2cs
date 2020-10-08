@@ -1,4 +1,4 @@
-// package windows -- go2cs converted at 2020 August 29 08:25:04 UTC
+// package windows -- go2cs converted at 2020 October 08 03:43:51 UTC
 // import "runtime/testdata/testprogcgo/windows" ==> using windows = go.runtime.testdata.testprogcgo.windows_package
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\windows\win.go
 /*

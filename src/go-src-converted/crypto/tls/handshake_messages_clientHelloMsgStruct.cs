@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:25 UTC
+//     Generated on 2020 October 08 03:38:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
+using fmt = go.fmt_package;
 using strings = go.strings_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using go;
 
 namespace go {
@@ -34,21 +35,28 @@ namespace crypto
                 this.sessionId = default;
                 this.cipherSuites = default;
                 this.compressionMethods = default;
-                this.nextProtoNeg = default;
                 this.serverName = default;
                 this.ocspStapling = default;
-                this.scts = default;
                 this.supportedCurves = default;
                 this.supportedPoints = default;
                 this.ticketSupported = default;
                 this.sessionTicket = default;
                 this.supportedSignatureAlgorithms = default;
-                this.secureRenegotiation = default;
+                this.supportedSignatureAlgorithmsCert = default;
                 this.secureRenegotiationSupported = default;
+                this.secureRenegotiation = default;
                 this.alpnProtocols = default;
+                this.scts = default;
+                this.supportedVersions = default;
+                this.cookie = default;
+                this.keyShares = default;
+                this.earlyData = default;
+                this.pskModes = default;
+                this.pskIdentities = default;
+                this.pskBinders = default;
             }
 
-            public clientHelloMsg(slice<byte> raw = default, ushort vers = default, slice<byte> random = default, slice<byte> sessionId = default, slice<ushort> cipherSuites = default, slice<byte> compressionMethods = default, bool nextProtoNeg = default, @string serverName = default, bool ocspStapling = default, bool scts = default, slice<CurveID> supportedCurves = default, slice<byte> supportedPoints = default, bool ticketSupported = default, slice<byte> sessionTicket = default, slice<SignatureScheme> supportedSignatureAlgorithms = default, slice<byte> secureRenegotiation = default, bool secureRenegotiationSupported = default, slice<@string> alpnProtocols = default)
+            public clientHelloMsg(slice<byte> raw = default, ushort vers = default, slice<byte> random = default, slice<byte> sessionId = default, slice<ushort> cipherSuites = default, slice<byte> compressionMethods = default, @string serverName = default, bool ocspStapling = default, slice<CurveID> supportedCurves = default, slice<byte> supportedPoints = default, bool ticketSupported = default, slice<byte> sessionTicket = default, slice<SignatureScheme> supportedSignatureAlgorithms = default, slice<SignatureScheme> supportedSignatureAlgorithmsCert = default, bool secureRenegotiationSupported = default, slice<byte> secureRenegotiation = default, slice<@string> alpnProtocols = default, bool scts = default, slice<ushort> supportedVersions = default, slice<byte> cookie = default, slice<keyShare> keyShares = default, bool earlyData = default, slice<byte> pskModes = default, slice<pskIdentity> pskIdentities = default, slice<slice<byte>> pskBinders = default)
             {
                 this.raw = raw;
                 this.vers = vers;
@@ -56,18 +64,25 @@ namespace crypto
                 this.sessionId = sessionId;
                 this.cipherSuites = cipherSuites;
                 this.compressionMethods = compressionMethods;
-                this.nextProtoNeg = nextProtoNeg;
                 this.serverName = serverName;
                 this.ocspStapling = ocspStapling;
-                this.scts = scts;
                 this.supportedCurves = supportedCurves;
                 this.supportedPoints = supportedPoints;
                 this.ticketSupported = ticketSupported;
                 this.sessionTicket = sessionTicket;
                 this.supportedSignatureAlgorithms = supportedSignatureAlgorithms;
-                this.secureRenegotiation = secureRenegotiation;
+                this.supportedSignatureAlgorithmsCert = supportedSignatureAlgorithmsCert;
                 this.secureRenegotiationSupported = secureRenegotiationSupported;
+                this.secureRenegotiation = secureRenegotiation;
                 this.alpnProtocols = alpnProtocols;
+                this.scts = scts;
+                this.supportedVersions = supportedVersions;
+                this.cookie = cookie;
+                this.keyShares = keyShares;
+                this.earlyData = earlyData;
+                this.pskModes = pskModes;
+                this.pskIdentities = pskIdentities;
+                this.pskBinders = pskBinders;
             }
 
             // Enable comparisons between nil and clientHelloMsg struct
@@ -90,7 +105,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static clientHelloMsg clientHelloMsg_cast(dynamic value)
         {
-            return new clientHelloMsg(value.raw, value.vers, value.random, value.sessionId, value.cipherSuites, value.compressionMethods, value.nextProtoNeg, value.serverName, value.ocspStapling, value.scts, value.supportedCurves, value.supportedPoints, value.ticketSupported, value.sessionTicket, value.supportedSignatureAlgorithms, value.secureRenegotiation, value.secureRenegotiationSupported, value.alpnProtocols);
+            return new clientHelloMsg(value.raw, value.vers, value.random, value.sessionId, value.cipherSuites, value.compressionMethods, value.serverName, value.ocspStapling, value.supportedCurves, value.supportedPoints, value.ticketSupported, value.sessionTicket, value.supportedSignatureAlgorithms, value.supportedSignatureAlgorithmsCert, value.secureRenegotiationSupported, value.secureRenegotiation, value.alpnProtocols, value.scts, value.supportedVersions, value.cookie, value.keyShares, value.earlyData, value.pskModes, value.pskIdentities, value.pskBinders);
         }
     }
 }}

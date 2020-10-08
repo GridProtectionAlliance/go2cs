@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:29:45 UTC
+//     Generated on 2020 October 08 03:36:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using big = go.math.big_package;
 using reflect = go.reflect_package;
 using strconv = go.strconv_package;
 using time = go.time_package;
+using utf16 = go.unicode.utf16_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 

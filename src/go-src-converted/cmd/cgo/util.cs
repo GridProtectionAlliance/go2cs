@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:52:56 UTC
+// package main -- go2cs converted at 2020 October 08 04:09:24 UTC
 // Original source: C:\Go\src\cmd\cgo\util.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
@@ -21,6 +21,10 @@ namespace go
         // ok indicates whether the command exited successfully.
         private static (slice<byte>, slice<byte>, bool) run(slice<byte> stdin, slice<@string> argv) => func((defer, _, __) =>
         {
+            slice<byte> stdout = default;
+            slice<byte> stderr = default;
+            bool ok = default;
+
             {
                 var i = find(argv, "-xc");
 
@@ -49,6 +53,7 @@ namespace go
                         err = err__prev2;
 
                     }
+
                     defer(os.Remove(name));
                     defer(os.Remove(name + ".c")); 
 
@@ -70,28 +75,36 @@ namespace go
 
                     argv = new;
                     stdin = null;
+
                 }
             }
 
+
             var p = exec.Command(argv[0L], argv[1L..]);
             p.Stdin = bytes.NewReader(stdin);
-            bytes.Buffer bout = default;            bytes.Buffer berr = default;
+            ref bytes.Buffer bout = ref heap(out ptr<bytes.Buffer> _addr_bout);            ref bytes.Buffer berr = ref heap(out ptr<bytes.Buffer> _addr_berr);
 
-            p.Stdout = ref bout;
-            p.Stderr = ref berr;
+            _addr_p.Stdout = _addr_bout;
+            p.Stdout = ref _addr_p.Stdout.val;
+            _addr_p.Stderr = _addr_berr;
+            p.Stderr = ref _addr_p.Stderr.val; 
+            // Disable escape codes in clang error messages.
+            p.Env = append(os.Environ(), "TERM=dumb");
             err = p.Run();
             {
-                ref exec.ExitError (_, ok) = err._<ref exec.ExitError>();
+                ptr<exec.ExitError> (_, ok) = err._<ptr<exec.ExitError>>();
 
                 if (err != null && !ok)
                 {
                     fatalf("%s", err);
                 }
             }
+
             ok = p.ProcessState.Success();
             stdout = bout.Bytes();
             stderr = berr.Bytes();
-            return;
+            return ;
+
         });
 
         private static long find(slice<@string> argv, @string target)
@@ -102,8 +115,10 @@ namespace go
                 {
                     return i;
                 }
+
             }
             return -1L;
+
         }
 
         private static @string lineno(token.Pos pos)
@@ -122,7 +137,9 @@ namespace go
             {
                 fmt.Fprintf(os.Stderr, msg + "\n", args);
             }
+
             os.Exit(2L);
+
         }
 
         private static long nerrors = default;
@@ -136,8 +153,14 @@ namespace go
             {
                 fmt.Fprintf(os.Stderr, "%s: ", fset.Position(pos).String());
             }
+            else
+            {
+                fmt.Fprintf(os.Stderr, "cgo: ");
+            }
+
             fmt.Fprintf(os.Stderr, msg, args);
             fmt.Fprintf(os.Stderr, "\n");
+
         }
 
         // isName reports whether s is a valid C identifier
@@ -149,22 +172,27 @@ namespace go
                 {
                     return false;
                 }
+
                 if (i == 0L && '0' <= v && v <= '9')
                 {
                     return false;
                 }
+
             }
             return s != "";
+
         }
 
-        private static ref os.File creat(@string name)
+        private static ptr<os.File> creat(@string name)
         {
             var (f, err) = os.Create(name);
             if (err != null)
             {
                 fatalf("%s", err);
             }
-            return f;
+
+            return _addr_f!;
+
         }
 
         private static int slashToUnderscore(int c)
@@ -173,7 +201,9 @@ namespace go
             {
                 c = '_';
             }
+
             return c;
+
         }
     }
 }

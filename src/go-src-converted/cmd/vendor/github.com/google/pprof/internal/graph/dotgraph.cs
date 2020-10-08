@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package graph -- go2cs converted at 2020 August 29 10:05:35 UTC
+// package graph -- go2cs converted at 2020 October 08 04:43:11 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/graph" ==> using graph = go.cmd.vendor.github.com.google.pprof.@internal.graph_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\graph\dotgraph.go
 using fmt = go.fmt_package;
@@ -39,7 +39,7 @@ namespace @internal
         // insight into how its elements should be rendered.
         public partial struct DotAttributes
         {
-            public map<ref Node, ref DotNodeAttributes> Nodes; // A map allowing each Node to have its own visualization option
+            public map<ptr<Node>, ptr<DotNodeAttributes>> Nodes; // A map allowing each Node to have its own visualization option
         }
 
         // DotNodeAttributes contains Node specific visualization options.
@@ -49,7 +49,7 @@ namespace @internal
             public bool Bold; // If the node should be bold or not
             public long Peripheries; // An optional number of borders to place around a node
             public @string URL; // An optional url link to add to a node
-            public Func<ref NodeInfo, @string> Formatter; // An optional formatter for the node's label
+            public Func<ptr<NodeInfo>, @string> Formatter; // An optional formatter for the node's label
         }
 
         // DotConfig contains attributes about how a graph should be
@@ -64,7 +64,7 @@ namespace @internal
             public long Total; // The total weight of the graph, used to compute percentages
         }
 
-        private static readonly long maxNodelets = 4L; // Number of nodelets for labels (both numeric and non)
+        private static readonly long maxNodelets = (long)4L; // Number of nodelets for labels (both numeric and non)
 
         // ComposeDot creates and writes a in the DOT format to the writer, using
         // the configurations given.
@@ -72,9 +72,13 @@ namespace @internal
 
         // ComposeDot creates and writes a in the DOT format to the writer, using
         // the configurations given.
-        public static void ComposeDot(io.Writer w, ref Graph _g, ref DotAttributes _a, ref DotConfig _c) => func(_g, _a, _c, (ref Graph g, ref DotAttributes a, ref DotConfig c, Defer defer, Panic _, Recover __) =>
+        public static void ComposeDot(io.Writer w, ptr<Graph> _addr_g, ptr<DotAttributes> _addr_a, ptr<DotConfig> _addr_c) => func((defer, _, __) =>
         {
-            builder builder = ref new builder(w,a,c); 
+            ref Graph g = ref _addr_g.val;
+            ref DotAttributes a = ref _addr_a.val;
+            ref DotConfig c = ref _addr_c.val;
+
+            ptr<builder> builder = addr(new builder(w,a,c)); 
 
             // Begin constructing DOT by adding a title and legend.
             builder.start();
@@ -83,12 +87,12 @@ namespace @internal
 
             if (len(g.Nodes) == 0L)
             {
-                return;
+                return ;
             } 
 
             // Preprocess graph to get id map and find max flat.
-            var nodeIDMap = make_map<ref Node, long>();
-            var hasNodelets = make_map<ref Node, bool>();
+            var nodeIDMap = make_map<ptr<Node>, long>();
+            var hasNodelets = make_map<ptr<Node>, bool>();
 
             var maxFlat = float64(abs64(g.Nodes[0L].FlatValue()));
             {
@@ -103,6 +107,7 @@ namespace @internal
                     {
                         maxFlat = float64(abs64(n.FlatValue()));
                     }
+
                 }
 
                 n = n__prev1;
@@ -127,12 +132,11 @@ namespace @internal
                         foreach (var (_, __e) in n.Out)
                         {
                             e = __e;
-                            edges[ref new Node()] = e;
+                            edges[addr(new Node())] = e;
                         }
 
                         e = e__prev2;
                     }
-
                 } 
 
                 // Add edges to DOT builder. Sort edges by frequency as a hint to the graph layout engine.
@@ -151,7 +155,6 @@ namespace @internal
 
                 e = e__prev1;
             }
-
         });
 
         // builder wraps an io.Writer and understands how to compose DOT formatted elements.
@@ -163,31 +166,40 @@ namespace @internal
         }
 
         // start generates a title and initial node in DOT format.
-        private static void start(this ref builder b)
+        private static void start(this ptr<builder> _addr_b)
         {
+            ref builder b = ref _addr_b.val;
+
             @string graphname = "unnamed";
             if (b.config.Title != "")
             {
                 graphname = b.config.Title;
             }
+
             fmt.Fprintln(b, "digraph \"" + graphname + "\" {");
             fmt.Fprintln(b, "node [style=filled fillcolor=\"#f8f8f8\"]");
+
         }
 
         // finish closes the opening curly bracket in the constructed DOT buffer.
-        private static void finish(this ref builder b)
+        private static void finish(this ptr<builder> _addr_b)
         {
+            ref builder b = ref _addr_b.val;
+
             fmt.Fprintln(b, "}");
         }
 
         // addLegend generates a legend in DOT format.
-        private static void addLegend(this ref builder b)
+        private static void addLegend(this ptr<builder> _addr_b)
         {
+            ref builder b = ref _addr_b.val;
+
             var labels = b.config.Labels;
             if (len(labels) == 0L)
             {
-                return;
+                return ;
             }
+
             var title = labels[0L];
             fmt.Fprintf(b, "subgraph cluster_L { \"%s\" [shape=box fontsize=16", title);
             fmt.Fprintf(b, " label=\"%s\\l\"", strings.Join(labels, "\\l"));
@@ -195,16 +207,22 @@ namespace @internal
             {
                 fmt.Fprintf(b, " URL=\"%s\" target=\"_blank\"", b.config.LegendURL);
             }
+
             if (b.config.Title != "")
             {
                 fmt.Fprintf(b, " tooltip=\"%s\"", b.config.Title);
             }
+
             fmt.Fprintf(b, "] }\n");
+
         }
 
         // addNode generates a graph node in DOT format.
-        private static void addNode(this ref builder b, ref Node node, long nodeID, double maxFlat)
+        private static void addNode(this ptr<builder> _addr_b, ptr<Node> _addr_node, long nodeID, double maxFlat)
         {
+            ref builder b = ref _addr_b.val;
+            ref Node node = ref _addr_node.val;
+
             var flat = node.FlatValue();
             var cum = node.CumValue();
             var attrs = b.attributes.Nodes[node]; 
@@ -213,21 +231,23 @@ namespace @internal
             @string label = default;
             if (attrs != null && attrs.Formatter != null)
             {
-                label = attrs.Formatter(ref node.Info);
+                label = attrs.Formatter(_addr_node.Info);
             }
             else
             {
-                label = multilinePrintableName(ref node.Info);
+                label = multilinePrintableName(_addr_node.Info);
             }
+
             var flatValue = b.config.FormatValue(flat);
             if (flat != 0L)
             {
-                label = label + fmt.Sprintf("%s (%s)", flatValue, strings.TrimSpace(percentage(flat, b.config.Total)));
+                label = label + fmt.Sprintf("%s (%s)", flatValue, strings.TrimSpace(measurement.Percentage(flat, b.config.Total)));
             }
             else
             {
                 label = label + "0";
             }
+
             var cumValue = flatValue;
             if (cum != flat)
             {
@@ -239,8 +259,10 @@ namespace @internal
                 {
                     label = label + " ";
                 }
+
                 cumValue = b.config.FormatValue(cum);
-                label = label + fmt.Sprintf("of %s (%s)", cumValue, strings.TrimSpace(percentage(cum, b.config.Total)));
+                label = label + fmt.Sprintf("of %s (%s)", cumValue, strings.TrimSpace(measurement.Percentage(cum, b.config.Total)));
+
             } 
 
             // Scale font sizes from 8 to 24 based on percentage of flat frequency.
@@ -284,18 +306,24 @@ namespace @internal
                 {
                     attr += fmt.Sprintf(" URL=\"%s\" target=\"_blank\"", attrs.URL);
                 }
+
             }
+
             fmt.Fprintf(b, "N%d [%s]\n", nodeID, attr);
+
         }
 
         // addNodelets generates the DOT boxes for the node tags if they exist.
-        private static bool addNodelets(this ref builder b, ref Node node, long nodeID)
+        private static bool addNodelets(this ptr<builder> _addr_b, ptr<Node> _addr_node, long nodeID)
         {
+            ref builder b = ref _addr_b.val;
+            ref Node node = ref _addr_node.val;
+
             @string nodelets = default; 
 
             // Populate two Tag slices, one for LabelTags and one for NumericTags.
-            slice<ref Tag> ts = default;
-            var lnts = make_map<@string, slice<ref Tag>>();
+            slice<ptr<Tag>> ts = default;
+            var lnts = make_map<@string, slice<ptr<Tag>>>();
             {
                 var t__prev1 = t;
 
@@ -321,7 +349,6 @@ namespace @internal
 
                     t = t__prev2;
                 }
-
             } 
 
             // For leaf nodes, print cumulative tags (includes weight from
@@ -335,6 +362,7 @@ namespace @internal
             {
                 ts = ts[..maxNodelets];
             }
+
             {
                 var t__prev1 = t;
 
@@ -347,10 +375,12 @@ namespace @internal
                     {
                         w = t.FlatValue();
                     }
+
                     if (w == 0L)
                     {
                         continue;
                     }
+
                     var weight = b.config.FormatValue(w);
                     nodelets += fmt.Sprintf("N%d_%d [label = \"%s\" id=\"N%d_%d\" fontsize=8 shape=box3d tooltip=\"%s\"]" + "\n", nodeID, i, t.Name, nodeID, i, weight);
                     nodelets += fmt.Sprintf("N%d -> N%d_%d [label=\" %s\" weight=100 tooltip=\"%s\" labeltooltip=\"%s\"]" + "\n", nodeID, nodeID, i, weight, weight, weight);
@@ -367,6 +397,7 @@ namespace @internal
                         nts = nts__prev1;
 
                     }
+
                 }
 
                 t = t__prev1;
@@ -386,12 +417,16 @@ namespace @internal
 
             }
 
+
             fmt.Fprint(b, nodelets);
             return nodelets != "";
+
         }
 
-        private static @string numericNodelets(this ref builder b, slice<ref Tag> nts, long maxNumNodelets, bool flatTags, @string source)
+        private static @string numericNodelets(this ptr<builder> _addr_b, slice<ptr<Tag>> nts, long maxNumNodelets, bool flatTags, @string source)
         {
+            ref builder b = ref _addr_b.val;
+
             @string nodelets = ""; 
 
             // Collapse numeric labels into maxNumNodelets buckets, of the form:
@@ -404,25 +439,33 @@ namespace @internal
                 {
                     w = t.FlatValue();
                     attr = "";
+
                 }
+
                 if (w != 0L)
                 {
                     var weight = b.config.FormatValue(w);
                     nodelets += fmt.Sprintf("N%s_%d [label = \"%s\" id=\"N%s_%d\" fontsize=8 shape=box3d tooltip=\"%s\"]" + "\n", source, j, t.Name, source, j, weight);
                     nodelets += fmt.Sprintf("%s -> N%s_%d [label=\" %s\" weight=100 tooltip=\"%s\" labeltooltip=\"%s\"%s]" + "\n", source, source, j, weight, weight, weight, attr);
                 }
+
             }
             return nodelets;
+
         }
 
         // addEdge generates a graph edge in DOT format.
-        private static void addEdge(this ref builder b, ref Edge edge, long from, long to, bool hasNodelets)
+        private static void addEdge(this ptr<builder> _addr_b, ptr<Edge> _addr_edge, long from, long to, bool hasNodelets)
         {
+            ref builder b = ref _addr_b.val;
+            ref Edge edge = ref _addr_edge.val;
+
             @string inline = default;
             if (edge.Inline)
             {
                 inline = "\\n (inline)";
             }
+
             var w = b.config.FormatValue(edge.WeightValue());
             var attr = fmt.Sprintf("label=\" %s%s\"", w, inline);
             if (b.config.Total != 0L)
@@ -437,6 +480,7 @@ namespace @internal
                     }
 
                 }
+
                 {
                     long width = 1L + int(min64(abs64(edge.WeightValue() * 5L / b.config.Total), 5L));
 
@@ -446,13 +490,17 @@ namespace @internal
                     }
 
                 }
+
                 attr = fmt.Sprintf("%s color=\"%s\"", attr, dotColor(float64(edge.WeightValue()) / float64(abs64(b.config.Total)), false));
+
             }
+
             @string arrow = "->";
             if (edge.Residual)
             {
                 arrow = "...";
             }
+
             var tooltip = fmt.Sprintf("\"%s %s %s (%s)\"", edge.Src.Info.PrintableName(), arrow, edge.Dest.Info.PrintableName(), w);
             attr = fmt.Sprintf("%s tooltip=%s labeltooltip=%s", attr, tooltip, tooltip);
 
@@ -460,12 +508,16 @@ namespace @internal
             {
                 attr = attr + " style=\"dotted\"";
             }
+
             if (hasNodelets)
             { 
                 // Separate children further if source has tags.
                 attr = attr + " minlen=2";
+
             }
+
             fmt.Fprintf(b, "N%d -> N%d [%s]\n", from, to, attr);
+
         }
 
         // dotColor returns a color for the given score (between -1.0 and
@@ -480,23 +532,23 @@ namespace @internal
             // colors should be shifted away from grey (to make positive and
             // negative values easier to distinguish, and to make more use of
             // the color range.)
-            const float shift = 0.7F; 
+            const float shift = (float)0.7F; 
 
             // Saturation and value (in hsv colorspace) for background colors.
  
 
             // Saturation and value (in hsv colorspace) for background colors.
-            const float bgSaturation = 0.1F;
+            const float bgSaturation = (float)0.1F;
 
-            const float bgValue = 0.93F; 
+            const float bgValue = (float)0.93F; 
 
             // Saturation and value (in hsv colorspace) for foreground colors.
  
 
             // Saturation and value (in hsv colorspace) for foreground colors.
-            const float fgSaturation = 1.0F;
+            const float fgSaturation = (float)1.0F;
 
-            const float fgValue = 0.7F; 
+            const float fgValue = (float)0.7F; 
 
             // Choose saturation and value based on isBackground.
  
@@ -529,10 +581,12 @@ namespace @internal
             {
                 score = math.Pow(score, (1.0F - shift));
             }
+
             if (score < 0.0F)
             {
                 score = -math.Pow(-score, (1.0F - shift));
             }
+
             double r = default;            double g = default;            double b = default; // red, green, blue
  // red, green, blue
             if (score < 0.0F)
@@ -545,49 +599,41 @@ namespace @internal
                 r = value;
                 g = value * (1L - saturation * score);
             }
+
             b = value * (1L - saturation);
             return fmt.Sprintf("#%02x%02x%02x", uint8(r * 255.0F), uint8(g * 255.0F), uint8(b * 255.0F));
+
         }
 
-        // percentage computes the percentage of total of a value, and encodes
-        // it as a string. At least two digits of precision are printed.
-        private static @string percentage(long value, long total)
+        private static @string multilinePrintableName(ptr<NodeInfo> _addr_info)
         {
-            double ratio = default;
-            if (total != 0L)
-            {
-                ratio = math.Abs(float64(value) / float64(total)) * 100L;
-            }
+            ref NodeInfo info = ref _addr_info.val;
 
-            if (math.Abs(ratio) >= 99.95F && math.Abs(ratio) <= 100.05F) 
-                return "  100%";
-            else if (math.Abs(ratio) >= 1.0F) 
-                return fmt.Sprintf("%5.2f%%", ratio);
-            else 
-                return fmt.Sprintf("%5.2g%%", ratio);
-                    }
-
-        private static @string multilinePrintableName(ref NodeInfo info)
-        {
-            var infoCopy = info.Value;
+            NodeInfo infoCopy = info;
+            infoCopy.Name = ShortenFunctionName(infoCopy.Name);
             infoCopy.Name = strings.Replace(infoCopy.Name, "::", "\\n", -1L);
             infoCopy.Name = strings.Replace(infoCopy.Name, ".", "\\n", -1L);
             if (infoCopy.File != "")
             {
                 infoCopy.File = filepath.Base(infoCopy.File);
             }
+
             return strings.Join(infoCopy.NameComponents(), "\\n") + "\\n";
+
         }
 
         // collapsedTags trims and sorts a slice of tags.
-        private static slice<ref Tag> collapsedTags(this ref builder b, slice<ref Tag> ts, long count, bool flatTags)
+        private static slice<ptr<Tag>> collapsedTags(this ptr<builder> _addr_b, slice<ptr<Tag>> ts, long count, bool flatTags)
         {
+            ref builder b = ref _addr_b.val;
+
             ts = SortTags(ts, flatTags);
             if (len(ts) <= count)
             {
                 return ts;
             }
-            var tagGroups = make_slice<slice<ref Tag>>(count);
+
+            var tagGroups = make_slice<slice<ptr<Tag>>>(count);
             {
                 var i__prev1 = i;
                 var t__prev1 = t;
@@ -596,7 +642,7 @@ namespace @internal
                 {
                     i = __i;
                     t = __t;
-                    tagGroups[i] = new slice<ref Tag>(new ref Tag[] { t });
+                    tagGroups[i] = new slice<ptr<Tag>>(new ptr<Tag>[] { t });
                 }
 
                 i = i__prev1;
@@ -610,34 +656,37 @@ namespace @internal
                 {
                     t = __t;
                     long g = 0L;
-                    var d = tagDistance(t, tagGroups[0L][0L]);
+                    var d = tagDistance(_addr_t, _addr_tagGroups[0L][0L]);
                     {
                         var i__prev2 = i;
 
                         for (long i = 1L; i < count; i++)
                         {
                             {
-                                var nd = tagDistance(t, tagGroups[i][0L]);
+                                var nd = tagDistance(_addr_t, _addr_tagGroups[i][0L]);
 
                                 if (nd < d)
                                 {
                                     g = i;
                                     d = nd;
+
                                 }
 
                             }
+
                         }
 
 
                         i = i__prev2;
                     }
                     tagGroups[g] = append(tagGroups[g], t);
+
                 }
 
                 t = t__prev1;
             }
 
-            slice<ref Tag> nts = default;
+            slice<ptr<Tag>> nts = default;
             {
                 long g__prev1 = g;
 
@@ -645,32 +694,44 @@ namespace @internal
                 {
                     g = __g;
                     var (l, w, c) = b.tagGroupLabel(g);
-                    nts = append(nts, ref new Tag(Name:l,Flat:w,Cum:c,));
+                    nts = append(nts, addr(new Tag(Name:l,Flat:w,Cum:c,)));
                 }
 
                 g = g__prev1;
             }
 
             return SortTags(nts, flatTags);
+
         }
 
-        private static double tagDistance(ref Tag t, ref Tag u)
+        private static double tagDistance(ptr<Tag> _addr_t, ptr<Tag> _addr_u)
         {
+            ref Tag t = ref _addr_t.val;
+            ref Tag u = ref _addr_u.val;
+
             var (v, _) = measurement.Scale(u.Value, u.Unit, t.Unit);
             if (v < float64(t.Value))
             {
                 return float64(t.Value) - v;
             }
+
             return v - float64(t.Value);
+
         }
 
-        private static (@string, long, long) tagGroupLabel(this ref builder b, slice<ref Tag> g)
+        private static (@string, long, long) tagGroupLabel(this ptr<builder> _addr_b, slice<ptr<Tag>> g)
         {
+            @string label = default;
+            long flat = default;
+            long cum = default;
+            ref builder b = ref _addr_b.val;
+
             if (len(g) == 1L)
             {
                 var t = g[0L];
                 return (measurement.Label(t.Value, t.Unit), t.FlatValue(), t.CumValue());
             }
+
             var min = g[0L];
             var max = g[0L];
             var df = min.FlatDiv;
@@ -696,6 +757,7 @@ namespace @internal
                         v = v__prev1;
 
                     }
+
                     {
                         var v__prev1 = v;
 
@@ -709,10 +771,12 @@ namespace @internal
                         v = v__prev1;
 
                     }
+
                     f += t.Flat;
                     df += t.FlatDiv;
                     c += t.Cum;
                     dc += t.CumDiv;
+
                 }
 
                 t = t__prev1;
@@ -722,6 +786,7 @@ namespace @internal
             {
                 f = f / df;
             }
+
             if (dc != 0L)
             {
                 c = c / dc;
@@ -731,6 +796,7 @@ namespace @internal
             // much smaller than other values which appear, so the range of tag sizes
             // sometimes would appear to be "0..0" when scaled to the selected output unit.
             return (measurement.Label(min.Value, min.Unit) + ".." + measurement.Label(max.Value, max.Unit), f, c);
+
         }
 
         private static long min64(long a, long b)
@@ -739,7 +805,9 @@ namespace @internal
             {
                 return a;
             }
+
             return b;
+
         }
     }
 }}}}}}}

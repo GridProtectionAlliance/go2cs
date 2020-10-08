@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2020 August 29 10:10:20 UTC
+// package jpeg -- go2cs converted at 2020 October 08 04:59:32 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\writer.go
 using bufio = go.bufio_package;
@@ -25,6 +25,7 @@ namespace image
                 return x;
             }
             return y;
+
         }
 
         // div returns a/b rounded to the nearest integer, instead of rounded to zero.
@@ -34,7 +35,9 @@ namespace image
             {
                 return (a + (b >> (int)(1L))) / b;
             }
+
             return -((-a + (b >> (int)(1L))) / b);
+
         }
 
         // bitCount counts the number of bits needed to hold an integer.
@@ -44,9 +47,10 @@ namespace image
         {
         }
 
-        private static readonly quantIndex quantIndexLuminance = iota;
-        private static readonly var quantIndexChrominance = 0;
-        private static readonly var nQuantIndex = 1;
+        private static readonly quantIndex quantIndexLuminance = (quantIndex)iota;
+        private static readonly var quantIndexChrominance = (var)0;
+        private static readonly var nQuantIndex = (var)1;
+
 
         // unscaledQuant are the unscaled quantization tables in zig-zag order. Each
         // encoder copies and scales the tables according to its quality parameter.
@@ -58,11 +62,12 @@ namespace image
         {
         }
 
-        private static readonly huffIndex huffIndexLuminanceDC = iota;
-        private static readonly var huffIndexLuminanceAC = 0;
-        private static readonly var huffIndexChrominanceDC = 1;
-        private static readonly var huffIndexChrominanceAC = 2;
-        private static readonly var nHuffIndex = 3;
+        private static readonly huffIndex huffIndexLuminanceDC = (huffIndex)iota;
+        private static readonly var huffIndexLuminanceAC = (var)0;
+        private static readonly var huffIndexChrominanceDC = (var)1;
+        private static readonly var huffIndexChrominanceAC = (var)2;
+        private static readonly var nHuffIndex = (var)3;
+
 
         // huffmanSpec specifies a Huffman encoding.
         private partial struct huffmanSpec
@@ -83,8 +88,10 @@ namespace image
         {
         }
 
-        private static void init(this ref huffmanLUT h, huffmanSpec s)
+        private static void init(this ptr<huffmanLUT> _addr_h, huffmanSpec s)
         {
+            ref huffmanLUT h = ref _addr_h.val;
+
             long maxValue = 0L;
             foreach (var (_, v) in s.value)
             {
@@ -92,8 +99,9 @@ namespace image
                 {
                     maxValue = int(v);
                 }
+
             }
-            h.Value = make_slice<uint>(maxValue + 1L);
+            h.val = make_slice<uint>(maxValue + 1L);
             var code = uint32(0L);
             long k = 0L;
             for (long i = 0L; i < len(s.count); i++)
@@ -101,13 +109,15 @@ namespace image
                 var nBits = uint32(i + 1L) << (int)(24L);
                 for (var j = uint8(0L); j < s.count[i]; j++)
                 {
-                    (h.Value)[s.value[k]] = nBits | code;
+                    (h.val)[s.value[k]] = nBits | code;
                     code++;
                     k++;
                 }
 
                 code <<= 1L;
+
             }
+
 
         }
 
@@ -120,6 +130,7 @@ namespace image
             {
                 theHuffmanLUT[i].init(s);
             }
+
         }
 
         // writer is a buffered writer.
@@ -139,37 +150,51 @@ namespace image
             public array<array<byte>> quant;
         }
 
-        private static void flush(this ref encoder e)
+        private static void flush(this ptr<encoder> _addr_e)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             e.err = e.w.Flush();
+
         }
 
-        private static void write(this ref encoder e, slice<byte> p)
+        private static void write(this ptr<encoder> _addr_e, slice<byte> p)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             _, e.err = e.w.Write(p);
+
         }
 
-        private static void writeByte(this ref encoder e, byte b)
+        private static void writeByte(this ptr<encoder> _addr_e, byte b)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             e.err = e.w.WriteByte(b);
+
         }
 
         // emit emits the least significant nBits bits of bits to the bit-stream.
         // The precondition is bits < 1<<nBits && nBits <= 16.
-        private static void emit(this ref encoder e, uint bits, uint nBits)
+        private static void emit(this ptr<encoder> _addr_e, uint bits, uint nBits)
         {
+            ref encoder e = ref _addr_e.val;
+
             nBits += e.nBits;
             bits <<= 32L - nBits;
             bits |= e.bits;
@@ -181,32 +206,41 @@ namespace image
                 {
                     e.writeByte(0x00UL);
                 }
+
                 bits <<= 8L;
                 nBits -= 8L;
+
             }
 
             e.bits = bits;
             e.nBits = nBits;
+
         }
 
         // emitHuff emits the given value with the given Huffman encoder.
-        private static void emitHuff(this ref encoder e, huffIndex h, int value)
+        private static void emitHuff(this ptr<encoder> _addr_e, huffIndex h, int value)
         {
+            ref encoder e = ref _addr_e.val;
+
             var x = theHuffmanLUT[h][value];
             e.emit(x & (1L << (int)(24L) - 1L), x >> (int)(24L));
         }
 
         // emitHuffRLE emits a run of runLength copies of value encoded with the given
         // Huffman encoder.
-        private static void emitHuffRLE(this ref encoder e, huffIndex h, int runLength, int value)
+        private static void emitHuffRLE(this ptr<encoder> _addr_e, huffIndex h, int runLength, int value)
         {
+            ref encoder e = ref _addr_e.val;
+
             var a = value;
             var b = value;
             if (a < 0L)
             {
                 a = -value;
                 b = value - 1L;
+
             }
+
             uint nBits = default;
             if (a < 0x100UL)
             {
@@ -216,16 +250,20 @@ namespace image
             {
                 nBits = 8L + uint32(bitCount[a >> (int)(8L)]);
             }
+
             e.emitHuff(h, runLength << (int)(4L) | int32(nBits));
             if (nBits > 0L)
             {
                 e.emit(uint32(b) & (1L << (int)(nBits) - 1L), nBits);
             }
+
         }
 
         // writeMarkerHeader writes the header for a marker with the given length.
-        private static void writeMarkerHeader(this ref encoder e, byte marker, long markerlen)
+        private static void writeMarkerHeader(this ptr<encoder> _addr_e, byte marker, long markerlen)
         {
+            ref encoder e = ref _addr_e.val;
+
             e.buf[0L] = 0xffUL;
             e.buf[1L] = marker;
             e.buf[2L] = uint8(markerlen >> (int)(8L));
@@ -234,9 +272,11 @@ namespace image
         }
 
         // writeDQT writes the Define Quantization Table marker.
-        private static void writeDQT(this ref encoder e)
+        private static void writeDQT(this ptr<encoder> _addr_e)
         {
-            const long markerlen = 2L + int(nQuantIndex) * (1L + blockSize);
+            ref encoder e = ref _addr_e.val;
+
+            const long markerlen = (long)2L + int(nQuantIndex) * (1L + blockSize);
 
             e.writeMarkerHeader(dqtMarker, markerlen);
             foreach (var (i) in e.quant)
@@ -244,11 +284,14 @@ namespace image
                 e.writeByte(uint8(i));
                 e.write(e.quant[i][..]);
             }
+
         }
 
         // writeSOF0 writes the Start Of Frame (Baseline Sequential) marker.
-        private static void writeSOF0(this ref encoder e, image.Point size, long nComponent)
+        private static void writeSOF0(this ptr<encoder> _addr_e, image.Point size, long nComponent)
         {
+            ref encoder e = ref _addr_e.val;
+
             long markerlen = 8L + 3L * nComponent;
             e.writeMarkerHeader(sof0Marker, markerlen);
             e.buf[0L] = 8L; // 8-bit color.
@@ -263,6 +306,7 @@ namespace image
                 // No subsampling for grayscale image.
                 e.buf[7L] = 0x11UL;
                 e.buf[8L] = 0x00UL;
+
             }
             else
             {
@@ -272,22 +316,30 @@ namespace image
                     // We use 4:2:0 chroma subsampling.
                     e.buf[3L * i + 7L] = "\x22\x11\x11"[i];
                     e.buf[3L * i + 8L] = "\x00\x01\x01"[i];
+
                 }
 
+
             }
+
             e.write(e.buf[..3L * (nComponent - 1L) + 9L]);
+
         }
 
         // writeDHT writes the Define Huffman Table marker.
-        private static void writeDHT(this ref encoder e, long nComponent)
+        private static void writeDHT(this ptr<encoder> _addr_e, long nComponent)
         {
+            ref encoder e = ref _addr_e.val;
+
             long markerlen = 2L;
             var specs = theHuffmanSpec[..];
             if (nComponent == 1L)
             { 
                 // Drop the Chrominance tables.
                 specs = specs[..2L];
+
             }
+
             {
                 var s__prev1 = s;
 
@@ -315,14 +367,16 @@ namespace image
 
                 s = s__prev1;
             }
-
         }
 
         // writeBlock writes a block of pixel data using the given quantization table,
         // returning the post-quantized DC value of the DCT-transformed block. b is in
         // natural (not zig-zag) order.
-        private static int writeBlock(this ref encoder e, ref block b, quantIndex q, int prevDC)
+        private static int writeBlock(this ptr<encoder> _addr_e, ptr<block> _addr_b, quantIndex q, int prevDC)
         {
+            ref encoder e = ref _addr_e.val;
+            ref block b = ref _addr_b.val;
+
             fdct(b); 
             // Emit the DC delta.
             var dc = div(b[0L], 8L * int32(e.quant[q][0L]));
@@ -347,20 +401,28 @@ namespace image
 
                     e.emitHuffRLE(h, runLength, ac);
                     runLength = 0L;
+
                 }
+
             }
 
             if (runLength > 0L)
             {
                 e.emitHuff(h, 0x00UL);
             }
+
             return dc;
+
         }
 
         // toYCbCr converts the 8x8 region of m whose top-left corner is p to its
         // YCbCr values.
-        private static void toYCbCr(image.Image m, image.Point p, ref block yBlock, ref block cbBlock, ref block crBlock)
+        private static void toYCbCr(image.Image m, image.Point p, ptr<block> _addr_yBlock, ptr<block> _addr_cbBlock, ptr<block> _addr_crBlock)
         {
+            ref block yBlock = ref _addr_yBlock.val;
+            ref block cbBlock = ref _addr_cbBlock.val;
+            ref block crBlock = ref _addr_crBlock.val;
+
             var b = m.Bounds();
             var xmax = b.Max.X - 1L;
             var ymax = b.Max.Y - 1L;
@@ -375,13 +437,18 @@ namespace image
                     crBlock[8L * j + i] = int32(cr);
                 }
 
+
             }
+
 
         }
 
         // grayToY stores the 8x8 region of m whose top-left corner is p in yBlock.
-        private static void grayToY(ref image.Gray m, image.Point p, ref block yBlock)
+        private static void grayToY(ptr<image.Gray> _addr_m, image.Point p, ptr<block> _addr_yBlock)
         {
+            ref image.Gray m = ref _addr_m.val;
+            ref block yBlock = ref _addr_yBlock.val;
+
             var b = m.Bounds();
             var xmax = b.Max.X - 1L;
             var ymax = b.Max.Y - 1L;
@@ -394,13 +461,20 @@ namespace image
                     yBlock[8L * j + i] = int32(pix[idx]);
                 }
 
+
             }
+
 
         }
 
         // rgbaToYCbCr is a specialized version of toYCbCr for image.RGBA images.
-        private static void rgbaToYCbCr(ref image.RGBA m, image.Point p, ref block yBlock, ref block cbBlock, ref block crBlock)
+        private static void rgbaToYCbCr(ptr<image.RGBA> _addr_m, image.Point p, ptr<block> _addr_yBlock, ptr<block> _addr_cbBlock, ptr<block> _addr_crBlock)
         {
+            ref image.RGBA m = ref _addr_m.val;
+            ref block yBlock = ref _addr_yBlock.val;
+            ref block cbBlock = ref _addr_cbBlock.val;
+            ref block crBlock = ref _addr_crBlock.val;
+
             var b = m.Bounds();
             var xmax = b.Max.X - 1L;
             var ymax = b.Max.Y - 1L;
@@ -411,6 +485,7 @@ namespace image
                 {
                     sj = ymax;
                 }
+
                 var offset = (sj - b.Min.Y) * m.Stride - b.Min.X * 4L;
                 for (long i = 0L; i < 8L; i++)
                 {
@@ -419,20 +494,29 @@ namespace image
                     {
                         sx = xmax;
                     }
+
                     var pix = m.Pix[offset + sx * 4L..];
                     var (yy, cb, cr) = color.RGBToYCbCr(pix[0L], pix[1L], pix[2L]);
                     yBlock[8L * j + i] = int32(yy);
                     cbBlock[8L * j + i] = int32(cb);
                     crBlock[8L * j + i] = int32(cr);
+
                 }
 
+
             }
+
 
         }
 
         // yCbCrToYCbCr is a specialized version of toYCbCr for image.YCbCr images.
-        private static void yCbCrToYCbCr(ref image.YCbCr m, image.Point p, ref block yBlock, ref block cbBlock, ref block crBlock)
+        private static void yCbCrToYCbCr(ptr<image.YCbCr> _addr_m, image.Point p, ptr<block> _addr_yBlock, ptr<block> _addr_cbBlock, ptr<block> _addr_crBlock)
         {
+            ref image.YCbCr m = ref _addr_m.val;
+            ref block yBlock = ref _addr_yBlock.val;
+            ref block cbBlock = ref _addr_cbBlock.val;
+            ref block crBlock = ref _addr_crBlock.val;
+
             var b = m.Bounds();
             var xmax = b.Max.X - 1L;
             var ymax = b.Max.Y - 1L;
@@ -443,6 +527,7 @@ namespace image
                 {
                     sy = ymax;
                 }
+
                 for (long i = 0L; i < 8L; i++)
                 {
                     var sx = p.X + i;
@@ -450,21 +535,28 @@ namespace image
                     {
                         sx = xmax;
                     }
+
                     var yi = m.YOffset(sx, sy);
                     var ci = m.COffset(sx, sy);
                     yBlock[8L * j + i] = int32(m.Y[yi]);
                     cbBlock[8L * j + i] = int32(m.Cb[ci]);
                     crBlock[8L * j + i] = int32(m.Cr[ci]);
+
                 }
 
+
             }
+
 
         }
 
         // scale scales the 16x16 region represented by the 4 src blocks to the 8x8
         // dst block.
-        private static void scale(ref block dst, ref array<block> src)
+        private static void scale(ptr<block> _addr_dst, ptr<array<block>> _addr_src)
         {
+            ref block dst = ref _addr_dst.val;
+            ref array<block> src = ref _addr_src.val;
+
             for (long i = 0L; i < 4L; i++)
             {
                 var dstOff = (i & 2L) << (int)(4L) | (i & 1L) << (int)(2L);
@@ -477,9 +569,12 @@ namespace image
                         dst[8L * y + x + dstOff] = (sum + 2L) >> (int)(2L);
                     }
 
+
                 }
 
+
             }
+
 
         }
 
@@ -504,11 +599,13 @@ namespace image
         private static byte sosHeaderYCbCr = new slice<byte>(new byte[] { 0xff, 0xda, 0x00, 0x0c, 0x03, 0x01, 0x00, 0x02, 0x11, 0x03, 0x11, 0x00, 0x3f, 0x00 });
 
         // writeSOS writes the StartOfScan marker.
-        private static void writeSOS(this ref encoder e, image.Image m)
+        private static void writeSOS(this ptr<encoder> _addr_e, image.Image m)
         {
+            ref encoder e = ref _addr_e.val;
+
             switch (m.type())
             {
-                case ref image.Gray _:
+                case ptr<image.Gray> _:
                     e.write(sosHeaderY);
                     break;
                 default:
@@ -520,13 +617,14 @@ namespace image
  
             // Scratch buffers to hold the YCbCr values.
             // The blocks are in natural (not zig-zag) order.
-            block b = default;            array<block> cb = new array<block>(4L);            array<block> cr = new array<block>(4L); 
+            ref block b = ref heap(out ptr<block> _addr_b);            ref array<block> cb = ref heap(new array<block>(4L), out ptr<array<block>> _addr_cb);            ref array<block> cr = ref heap(new array<block>(4L), out ptr<array<block>> _addr_cr); 
             // DC components are delta-encoded.
             int prevDCY = default;            int prevDCCb = default;            int prevDCCr = default;
+
             var bounds = m.Bounds();
             switch (m.type())
             {
-                case ref image.Gray m:
+                case ptr<image.Gray> m:
                     {
                         var y__prev1 = y;
 
@@ -542,8 +640,8 @@ namespace image
                                 while (x < bounds.Max.X)
                                 {
                                     var p = image.Pt(x, y);
-                                    grayToY(m, p, ref b);
-                                    prevDCY = e.writeBlock(ref b, 0L, prevDCY);
+                                    grayToY(_addr_m, p, _addr_b);
+                                    prevDCY = e.writeBlock(_addr_b, 0L, prevDCY);
                                     x += 8L;
                                 }
 
@@ -560,8 +658,8 @@ namespace image
                 default:
                 {
                     var m = m.type();
-                    ref image.RGBA (rgba, _) = m._<ref image.RGBA>();
-                    ref image.YCbCr (ycbcr, _) = m._<ref image.YCbCr>();
+                    ptr<image.RGBA> (rgba, _) = m._<ptr<image.RGBA>>();
+                    ptr<image.YCbCr> (ycbcr, _) = m._<ptr<image.YCbCr>>();
                     {
                         var y__prev1 = y;
 
@@ -583,30 +681,34 @@ namespace image
                                         p = image.Pt(x + xOff, y + yOff);
                                         if (rgba != null)
                                         {
-                                            rgbaToYCbCr(rgba, p, ref b, ref cb[i], ref cr[i]);
+                                            rgbaToYCbCr(rgba, p, _addr_b, _addr_cb[i], _addr_cr[i]);
                                         }
                                         else if (ycbcr != null)
                                         {
-                                            yCbCrToYCbCr(ycbcr, p, ref b, ref cb[i], ref cr[i]);
+                                            yCbCrToYCbCr(ycbcr, p, _addr_b, _addr_cb[i], _addr_cr[i]);
                                     x += 16L;
                                         }
                                         else
                                         {
-                                            toYCbCr(m, p, ref b, ref cb[i], ref cr[i]);
+                                            toYCbCr(m, p, _addr_b, _addr_cb[i], _addr_cr[i]);
                             y += 16L;
                                         }
-                                        prevDCY = e.writeBlock(ref b, 0L, prevDCY);
+
+                                        prevDCY = e.writeBlock(_addr_b, 0L, prevDCY);
+
                                     }
 
-                                    scale(ref b, ref cb);
-                                    prevDCCb = e.writeBlock(ref b, 1L, prevDCCb);
-                                    scale(ref b, ref cr);
-                                    prevDCCr = e.writeBlock(ref b, 1L, prevDCCr);
+                                    scale(_addr_b, _addr_cb);
+                                    prevDCCb = e.writeBlock(_addr_b, 1L, prevDCCb);
+                                    scale(_addr_b, _addr_cr);
+                                    prevDCCr = e.writeBlock(_addr_b, 1L, prevDCCr);
+
                                 }
 
 
                                 x = x__prev2;
                             }
+
                         }
 
 
@@ -618,10 +720,11 @@ namespace image
             } 
             // Pad the last byte with 1's.
             e.emit(0x7fUL, 7L);
+
         }
 
         // DefaultQuality is the default quality encoding parameter.
-        public static readonly long DefaultQuality = 75L;
+        public static readonly long DefaultQuality = (long)75L;
 
         // Options are the encoding parameters.
         // Quality ranges from 1 to 100 inclusive, higher is better.
@@ -636,16 +739,19 @@ namespace image
 
         // Encode writes the Image m to w in JPEG 4:2:0 baseline format with the given
         // options. Default parameters are used if a nil *Options is passed.
-        public static error Encode(io.Writer w, image.Image m, ref Options o)
+        public static error Encode(io.Writer w, image.Image m, ptr<Options> _addr_o)
         {
+            ref Options o = ref _addr_o.val;
+
             var b = m.Bounds();
             if (b.Dx() >= 1L << (int)(16L) || b.Dy() >= 1L << (int)(16L))
             {
-                return error.As(errors.New("jpeg: image is too large to encode"));
+                return error.As(errors.New("jpeg: image is too large to encode"))!;
             }
+
             encoder e = default;
             {
-                writer (ww, ok) = w._<writer>();
+                writer (ww, ok) = writer.As(w._<writer>())!;
 
                 if (ok)
                 {
@@ -671,6 +777,7 @@ namespace image
                 {
                     quality = 100L;
                 }
+
             } 
             // Convert from a quality rating to a scaling factor.
             long scale = default;
@@ -697,14 +804,17 @@ namespace image
                     {
                         x = 255L;
                     }
+
                     e.quant[i][j] = uint8(x);
+
                 }
+
             } 
             // Compute number of components based on input image type.
             long nComponent = 3L;
             switch (m.type())
             {
-                case ref image.Gray _:
+                case ptr<image.Gray> _:
                     nComponent = 1L;
                     break; 
                 // Write the Start Of Image marker.
@@ -726,7 +836,8 @@ namespace image
             e.buf[1L] = 0xd9UL;
             e.write(e.buf[..2L]);
             e.flush();
-            return error.As(e.err);
+            return error.As(e.err)!;
+
         }
     }
 }}

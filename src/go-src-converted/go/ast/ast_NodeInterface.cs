@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:42 UTC
+//     Generated on 2020 October 08 04:02:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,8 +16,6 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using token = go.go.token_package;
 using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -53,7 +51,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +65,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate token.Pos PosByRef(ref T value);
+            private delegate token.Pos PosByPtr(ptr<T> value);
             private delegate token.Pos PosByVal(T value);
 
-            private static readonly PosByRef s_PosByRef;
+            private static readonly PosByPtr s_PosByPtr;
             private static readonly PosByVal s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +77,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PosByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PosByPtr is null || !m_target_is_ptr)
                     return s_PosByVal!(target);
 
-                return s_PosByRef(ref target);
+                return s_PosByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos EndByRef(ref T value);
+            private delegate token.Pos EndByPtr(ptr<T> value);
             private delegate token.Pos EndByVal(T value);
 
-            private static readonly EndByRef s_EndByRef;
+            private static readonly EndByPtr s_EndByPtr;
             private static readonly EndByVal s_EndByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,11 +97,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_EndByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_EndByPtr is null || !m_target_is_ptr)
                     return s_EndByVal!(target);
 
-                return s_EndByRef(ref target);
+                return s_EndByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -111,39 +111,33 @@ namespace go
             static Node()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Pos");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Pos");
 
                 if (!(extensionMethod is null))
-                    s_PosByRef = extensionMethod.CreateStaticDelegate(typeof(PosByRef)) as PosByRef;
+                    s_PosByPtr = extensionMethod.CreateStaticDelegate(typeof(PosByPtr)) as PosByPtr;
 
-                if (s_PosByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Pos");
+                extensionMethod = targetType.GetExtensionMethod("Pos");
 
-                    if (!(extensionMethod is null))
-                        s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
 
-                if (s_PosByRef is null && s_PosByVal is null)
+                if (s_PosByPtr is null && s_PosByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Node.Pos method", new Exception("Pos"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("End");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("End");
 
                 if (!(extensionMethod is null))
-                    s_EndByRef = extensionMethod.CreateStaticDelegate(typeof(EndByRef)) as EndByRef;
+                    s_EndByPtr = extensionMethod.CreateStaticDelegate(typeof(EndByPtr)) as EndByPtr;
 
-                if (s_EndByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("End");
+                extensionMethod = targetType.GetExtensionMethod("End");
 
-                    if (!(extensionMethod is null))
-                        s_EndByVal = extensionMethod.CreateStaticDelegate(typeof(EndByVal)) as EndByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_EndByVal = extensionMethod.CreateStaticDelegate(typeof(EndByVal)) as EndByVal;
 
-                if (s_EndByRef is null && s_EndByVal is null)
+                if (s_EndByPtr is null && s_EndByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Node.End method", new Exception("End"));
             }
 

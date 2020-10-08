@@ -3,10 +3,11 @@
 // license that can be found in the LICENSE file.
 
 // Package mime implements parts of the MIME spec.
-// package mime -- go2cs converted at 2020 August 29 08:32:38 UTC
+// package mime -- go2cs converted at 2020 October 08 03:38:34 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Go\src\mime\type.go
 using fmt = go.fmt_package;
+using sort = go.sort_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using static go.builtin;
@@ -18,21 +19,24 @@ namespace go
     {
         private static sync.Map mimeTypes = default;        private static sync.Map mimeTypesLower = default;        private static sync.Mutex extensionsMu = default;        private static sync.Map extensions = default;
 
-        private static void clearSyncMap(ref sync.Map m)
+        private static void clearSyncMap(ptr<sync.Map> _addr_m)
         {
+            ref sync.Map m = ref _addr_m.val;
+
             m.Range((k, _) =>
             {
                 m.Delete(k);
                 return true;
             });
+
         }
 
         // setMimeTypes is used by initMime's non-test path, and by tests.
         private static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @string> mixExt) => func((defer, panic, _) =>
         {
-            clearSyncMap(ref mimeTypes);
-            clearSyncMap(ref mimeTypesLower);
-            clearSyncMap(ref extensions);
+            clearSyncMap(_addr_mimeTypes);
+            clearSyncMap(_addr_mimeTypesLower);
+            clearSyncMap(_addr_extensions);
 
             {
                 var k__prev1 = k;
@@ -79,9 +83,10 @@ namespace go
                     {
                         panic(err);
                     }
+
                     slice<@string> exts = default;
                     {
-                        var (ei, ok) = extensions.Load(k);
+                        var (ei, ok) = extensions.Load(justType);
 
                         if (ok)
                         {
@@ -89,16 +94,17 @@ namespace go
                         }
 
                     }
+
                     extensions.Store(justType, append(exts, k));
+
                 }
 
                 k = k__prev1;
                 v = v__prev1;
             }
-
         });
 
-        private static map builtinTypesLower = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{".css":"text/css; charset=utf-8",".gif":"image/gif",".htm":"text/html; charset=utf-8",".html":"text/html; charset=utf-8",".jpg":"image/jpeg",".js":"application/x-javascript",".pdf":"application/pdf",".png":"image/png",".svg":"image/svg+xml",".xml":"text/xml; charset=utf-8",};
+        private static map builtinTypesLower = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{".css":"text/css; charset=utf-8",".gif":"image/gif",".htm":"text/html; charset=utf-8",".html":"text/html; charset=utf-8",".jpeg":"image/jpeg",".jpg":"image/jpeg",".js":"text/javascript; charset=utf-8",".json":"application/json",".mjs":"text/javascript; charset=utf-8",".pdf":"application/pdf",".png":"image/png",".svg":"image/svg+xml",".wasm":"application/wasm",".webp":"image/webp",".xml":"text/xml; charset=utf-8",};
 
         private static sync.Once once = default; // guards initMime
 
@@ -122,6 +128,7 @@ namespace go
                 }
 
             }
+
         }
 
         // TypeByExtension returns the MIME type associated with the file extension ext.
@@ -165,7 +172,7 @@ namespace go
             // allocation-free in that case.
             array<byte> buf = new array<byte>(10L);
             var lower = buf[..0L];
-            const ulong utf8RuneSelf = 0x80UL; // from utf8 package, but not importing it.
+            const ulong utf8RuneSelf = (ulong)0x80UL; // from utf8 package, but not importing it.
  // from utf8 package, but not importing it.
             for (long i = 0L; i < len(ext); i++)
             {
@@ -176,7 +183,9 @@ namespace go
                     var (si, _) = mimeTypesLower.Load(strings.ToLower(ext));
                     @string (s, _) = si._<@string>();
                     return s;
+
                 }
+
                 if ('A' <= c && c <= 'Z')
                 {
                     lower = append(lower, c + ('a' - 'A'));
@@ -185,11 +194,13 @@ namespace go
                 {
                     lower = append(lower, c);
                 }
+
             }
 
             (si, _) = mimeTypesLower.Load(string(lower));
             (s, _) = si._<@string>();
             return s;
+
         }
 
         // ExtensionsByType returns the extensions known to be associated with the MIME
@@ -198,18 +209,26 @@ namespace go
         // nil slice.
         public static (slice<@string>, error) ExtensionsByType(@string typ)
         {
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+
             var (justType, _, err) = ParseMediaType(typ);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             once.Do(initMime);
             var (s, ok) = extensions.Load(justType);
             if (!ok)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
-            return (append(new slice<@string>(new @string[] {  }), s._<slice<@string>>()), null);
+
+            var ret = append((slice<@string>)null, s._<slice<@string>>());
+            sort.Strings(ret);
+            return (ret, error.As(null!)!);
+
         }
 
         // AddExtensionType sets the MIME type associated with
@@ -219,10 +238,12 @@ namespace go
         {
             if (!strings.HasPrefix(ext, "."))
             {
-                return error.As(fmt.Errorf("mime: extension %q missing leading dot", ext));
+                return error.As(fmt.Errorf("mime: extension %q missing leading dot", ext))!;
             }
+
             once.Do(initMime);
-            return error.As(setExtensionType(ext, typ));
+            return error.As(setExtensionType(ext, typ))!;
+
         }
 
         private static error setExtensionType(@string extension, @string mimeType) => func((defer, _, __) =>
@@ -230,13 +251,15 @@ namespace go
             var (justType, param, err) = ParseMediaType(mimeType);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (strings.HasPrefix(mimeType, "text/") && param["charset"] == "")
             {
                 param["charset"] = "utf-8";
                 mimeType = FormatMediaType(mimeType, param);
             }
+
             var extLower = strings.ToLower(extension);
 
             mimeTypes.Store(extension, mimeType);
@@ -254,15 +277,18 @@ namespace go
                 }
 
             }
+
             foreach (var (_, v) in exts)
             {
                 if (v == extLower)
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
             }
             extensions.Store(justType, append(exts, extLower));
-            return error.As(null);
+            return error.As(null!)!;
+
         });
     }
 }

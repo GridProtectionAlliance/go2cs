@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 August 29 08:45:00 UTC
+// package cmplx -- go2cs converted at 2020 October 08 03:25:55 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\pow.go
 using math = go.math_package;
@@ -57,6 +57,10 @@ namespace math
         {
             if (x == 0L)
             { // Guaranteed also true for x == -0.
+                if (IsNaN(y))
+                {
+                    return NaN();
+                }
                 var r = real(y);
                 var i = imag(y);
 
@@ -71,6 +75,7 @@ namespace math
                 else if (r > 0L) 
                     return 0L;
                                 panic("not reached");
+
             }
             var modulus = Abs(x);
             if (modulus == 0L)
@@ -87,6 +92,7 @@ namespace math
             }
             var (s, c) = math.Sincos(theta);
             return complex(r * c, r * s);
+
         });
     }
 }}

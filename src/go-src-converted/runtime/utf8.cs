@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:36 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:24:20 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\utf8.go
 
@@ -13,33 +13,46 @@ namespace go
     public static partial class runtime_package
     {
         // Numbers fundamental to the encoding.
-        private static readonly char runeError = '\uFFFD'; // the "error" Rune or "Unicode replacement character"
-        private static readonly ulong runeSelf = 0x80UL; // characters below Runeself are represented as themselves in a single byte.
-        private static readonly char maxRune = '\U0010FFFF'; // Maximum valid Unicode code point.
+        private static readonly char runeError = (char)'\uFFFD'; // the "error" Rune or "Unicode replacement character"
+        private static readonly ulong runeSelf = (ulong)0x80UL; // characters below runeSelf are represented as themselves in a single byte.
+        private static readonly char maxRune = (char)'\U0010FFFF'; // Maximum valid Unicode code point.
 
         // Code points in the surrogate range are not valid for UTF-8.
-        private static readonly ulong surrogateMin = 0xD800UL;
-        private static readonly ulong surrogateMax = 0xDFFFUL;
+        private static readonly ulong surrogateMin = (ulong)0xD800UL;
+        private static readonly ulong surrogateMax = (ulong)0xDFFFUL;
 
-        private static readonly ulong t1 = 0x00UL; // 0000 0000
-        private static readonly ulong tx = 0x80UL; // 1000 0000
-        private static readonly ulong t2 = 0xC0UL; // 1100 0000
-        private static readonly ulong t3 = 0xE0UL; // 1110 0000
-        private static readonly ulong t4 = 0xF0UL; // 1111 0000
-        private static readonly ulong t5 = 0xF8UL; // 1111 1000
 
-        private static readonly ulong maskx = 0x3FUL; // 0011 1111
-        private static readonly ulong mask2 = 0x1FUL; // 0001 1111
-        private static readonly ulong mask3 = 0x0FUL; // 0000 1111
-        private static readonly ulong mask4 = 0x07UL; // 0000 0111
+        private static readonly ulong t1 = (ulong)0x00UL; // 0000 0000
+        private static readonly ulong tx = (ulong)0x80UL; // 1000 0000
+        private static readonly ulong t2 = (ulong)0xC0UL; // 1100 0000
+        private static readonly ulong t3 = (ulong)0xE0UL; // 1110 0000
+        private static readonly ulong t4 = (ulong)0xF0UL; // 1111 0000
+        private static readonly ulong t5 = (ulong)0xF8UL; // 1111 1000
 
-        private static readonly long rune1Max = 1L << (int)(7L) - 1L;
-        private static readonly long rune2Max = 1L << (int)(11L) - 1L;
-        private static readonly long rune3Max = 1L << (int)(16L) - 1L; 
+        private static readonly ulong maskx = (ulong)0x3FUL; // 0011 1111
+        private static readonly ulong mask2 = (ulong)0x1FUL; // 0001 1111
+        private static readonly ulong mask3 = (ulong)0x0FUL; // 0000 1111
+        private static readonly ulong mask4 = (ulong)0x07UL; // 0000 0111
+
+        private static readonly long rune1Max = (long)1L << (int)(7L) - 1L;
+        private static readonly long rune2Max = (long)1L << (int)(11L) - 1L;
+        private static readonly long rune3Max = (long)1L << (int)(16L) - 1L; 
 
         // The default lowest and highest continuation byte.
-        private static readonly ulong locb = 0x80UL; // 1000 0000
-        private static readonly ulong hicb = 0xBFUL; // 1011 1111
+        private static readonly ulong locb = (ulong)0x80UL; // 1000 0000
+        private static readonly ulong hicb = (ulong)0xBFUL; // 1011 1111
+
+        // countrunes returns the number of runes in s.
+        private static long countrunes(@string s)
+        {
+            long n = 0L;
+            foreach (>>MARKER:FORRANGEEXPRESSIONS_LEVEL_1<< in s)
+            {>>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_1<<
+                n++;
+            }
+            return n;
+
+        }
 
         // decoderune returns the non-ASCII rune at the start of
         // s[k:] and the index after the rune in s.
@@ -52,12 +65,16 @@ namespace go
         // progress when decoderune is used to iterate over a string.
         private static (int, long) decoderune(@string s, long k)
         {
+            int r = default;
+            long pos = default;
+
             pos = k;
 
             if (k >= len(s))
             {
                 return (runeError, k + 1L);
             }
+
             s = s[k..];
 
 
@@ -69,9 +86,11 @@ namespace go
                     pos += 2L;
                     if (rune1Max < r)
                     {
-                        return;
+                        return ;
                     }
+
                 }
+
             else if (t3 <= s[0L] && s[0L] < t4) 
                 // 0800-FFFF three byte sequence
                 if (len(s) > 2L && (locb <= s[1L] && s[1L] <= hicb) && (locb <= s[2L] && s[2L] <= hicb))
@@ -80,9 +99,11 @@ namespace go
                     pos += 3L;
                     if (rune2Max < r && !(surrogateMin <= r && r <= surrogateMax))
                     {
-                        return;
+                        return ;
                     }
+
                 }
+
             else if (t4 <= s[0L] && s[0L] < t5) 
                 // 10000-1FFFFF four byte sequence
                 if (len(s) > 3L && (locb <= s[1L] && s[1L] <= hicb) && (locb <= s[2L] && s[2L] <= hicb) && (locb <= s[3L] && s[3L] <= hicb))
@@ -91,10 +112,13 @@ namespace go
                     pos += 4L;
                     if (rune3Max < r && r <= maxRune)
                     {
-                        return;
+                        return ;
                     }
+
                 }
+
                         return (runeError, k + 1L);
+
         }
 
         // encoderune writes into p (which must be large enough) the UTF-8 encoding of the rune.
@@ -144,6 +168,7 @@ namespace go
 
                 __switch_break0:;
             }
+
         }
     }
 }

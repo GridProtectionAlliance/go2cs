@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:51:52 UTC
+//     Generated on 2020 October 08 04:08:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using arch = go.cmd.asm.@internal.arch_package;
 using flags = go.cmd.asm.@internal.flags_package;
 using lex = go.cmd.asm.@internal.lex_package;
 using obj = go.cmd.@internal.obj_package;
+using x86 = go.cmd.@internal.obj.x86_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
 using go;

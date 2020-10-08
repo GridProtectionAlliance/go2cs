@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:39 UTC
+//     Generated on 2020 October 08 03:35:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +64,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, error) PublicByRef(ref T value);
+            private delegate (slice<byte>, error) PublicByPtr(ptr<T> value);
             private delegate (slice<byte>, error) PublicByVal(T value);
 
-            private static readonly PublicByRef s_PublicByRef;
+            private static readonly PublicByPtr s_PublicByPtr;
             private static readonly PublicByVal s_PublicByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,17 +76,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PublicByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PublicByPtr is null || !m_target_is_ptr)
                     return s_PublicByVal!(target);
 
-                return s_PublicByRef(ref target);
+                return s_PublicByPtr(m_target_ptr);
             }
 
-            private delegate (slice<byte>, error) SignByRef(ref T value, io.Reader rand, slice<byte> digest, SignerOpts opts);
+            private delegate (slice<byte>, error) SignByPtr(ptr<T> value, io.Reader rand, slice<byte> digest, SignerOpts opts);
             private delegate (slice<byte>, error) SignByVal(T value, io.Reader rand, slice<byte> digest, SignerOpts opts);
 
-            private static readonly SignByRef s_SignByRef;
+            private static readonly SignByPtr s_SignByPtr;
             private static readonly SignByVal s_SignByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,11 +96,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SignByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SignByPtr is null || !m_target_is_ptr)
                     return s_SignByVal!(target, rand, digest, opts);
 
-                return s_SignByRef(ref target, rand, digest, opts);
+                return s_SignByPtr(m_target_ptr, rand, digest, opts);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -108,39 +110,33 @@ namespace go
             static Signer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Public");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Public");
 
                 if (!(extensionMethod is null))
-                    s_PublicByRef = extensionMethod.CreateStaticDelegate(typeof(PublicByRef)) as PublicByRef;
+                    s_PublicByPtr = extensionMethod.CreateStaticDelegate(typeof(PublicByPtr)) as PublicByPtr;
 
-                if (s_PublicByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Public");
+                extensionMethod = targetType.GetExtensionMethod("Public");
 
-                    if (!(extensionMethod is null))
-                        s_PublicByVal = extensionMethod.CreateStaticDelegate(typeof(PublicByVal)) as PublicByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PublicByVal = extensionMethod.CreateStaticDelegate(typeof(PublicByVal)) as PublicByVal;
 
-                if (s_PublicByRef is null && s_PublicByVal is null)
+                if (s_PublicByPtr is null && s_PublicByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Signer.Public method", new Exception("Public"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Sign");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Sign");
 
                 if (!(extensionMethod is null))
-                    s_SignByRef = extensionMethod.CreateStaticDelegate(typeof(SignByRef)) as SignByRef;
+                    s_SignByPtr = extensionMethod.CreateStaticDelegate(typeof(SignByPtr)) as SignByPtr;
 
-                if (s_SignByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Sign");
+                extensionMethod = targetType.GetExtensionMethod("Sign");
 
-                    if (!(extensionMethod is null))
-                        s_SignByVal = extensionMethod.CreateStaticDelegate(typeof(SignByVal)) as SignByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SignByVal = extensionMethod.CreateStaticDelegate(typeof(SignByVal)) as SignByVal;
 
-                if (s_SignByRef is null && s_SignByVal is null)
+                if (s_SignByPtr is null && s_SignByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Signer.Sign method", new Exception("Sign"));
             }
 

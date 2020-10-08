@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:48 UTC
+//     Generated on 2020 October 08 04:33:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,8 +22,10 @@ using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using time = go.time_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;

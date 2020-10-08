@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mime -- go2cs converted at 2020 August 29 08:32:26 UTC
+// package mime -- go2cs converted at 2020 October 08 03:38:32 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Go\src\mime\encodedword.go
 using bytes = go.bytes_package;
@@ -11,7 +11,6 @@ using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using strings = go.strings_package;
-using sync = go.sync_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using static go.builtin;
@@ -28,9 +27,10 @@ namespace go
 
  
         // BEncoding represents Base64 encoding scheme as defined by RFC 2045.
-        public static readonly var BEncoding = WordEncoder('b'); 
+        public static readonly var BEncoding = (var)WordEncoder('b'); 
         // QEncoding represents the Q-encoding scheme as defined by RFC 2047.
-        public static readonly var QEncoding = WordEncoder('q');
+        public static readonly var QEncoding = (var)WordEncoder('q');
+
 
         private static var errInvalidWord = errors.New("mime: invalid RFC 2047 encoded-word");
 
@@ -43,7 +43,9 @@ namespace go
             {
                 return s;
             }
+
             return e.encodeWord(charset, s);
+
         }
 
         private static bool needsEncoding(@string s)
@@ -54,43 +56,53 @@ namespace go
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
         // encodeWord encodes a string into an encoded-word.
-        public static @string encodeWord(this WordEncoder e, @string charset, @string s) => func((defer, _, __) =>
+        public static @string encodeWord(this WordEncoder e, @string charset, @string s)
         {
-            var buf = getBuffer();
-            defer(putBuffer(buf));
+            ref strings.Builder buf = ref heap(out ptr<strings.Builder> _addr_buf); 
+            // Could use a hint like len(s)*3, but that's not enough for cases
+            // with word splits and too much for simpler inputs.
+            // 48 is close to maxEncodedWordLen/2, but adjusted to allocator size class.
+            buf.Grow(48L);
 
-            e.openWord(buf, charset);
+            e.openWord(_addr_buf, charset);
             if (e == BEncoding)
             {
-                e.bEncode(buf, charset, s);
+                e.bEncode(_addr_buf, charset, s);
             }
             else
             {
-                e.qEncode(buf, charset, s);
+                e.qEncode(_addr_buf, charset, s);
             }
-            closeWord(buf);
+
+            closeWord(_addr_buf);
 
             return buf.String();
-        });
+
+        }
 
  
         // The maximum length of an encoded-word is 75 characters.
         // See RFC 2047, section 2.
-        private static readonly long maxEncodedWordLen = 75L; 
+        private static readonly long maxEncodedWordLen = (long)75L; 
         // maxContentLen is how much content can be encoded, ignoring the header and
         // 2-byte footer.
-        private static readonly var maxContentLen = maxEncodedWordLen - len("=?UTF-8?q?") - len("?=");
+        private static readonly var maxContentLen = (var)maxEncodedWordLen - len("=?UTF-8?q?") - len("?=");
+
 
         private static var maxBase64Len = base64.StdEncoding.DecodedLen(maxContentLen);
 
         // bEncode encodes s using base64 encoding and writes it to buf.
-        public static void bEncode(this WordEncoder e, ref bytes.Buffer buf, @string charset, @string s)
+        public static void bEncode(this WordEncoder e, ptr<strings.Builder> _addr_buf, @string charset, @string s)
         {
+            ref strings.Builder buf = ref _addr_buf.val;
+
             var w = base64.NewEncoder(base64.StdEncoding, buf); 
             // If the charset is not UTF-8 or if the content is short, do not bother
             // splitting the encoded-word.
@@ -98,8 +110,9 @@ namespace go
             {
                 io.WriteString(w, s);
                 w.Close();
-                return;
+                return ;
             }
+
             long currentLen = default;            long last = default;            long runeLen = default;
 
             {
@@ -124,23 +137,28 @@ namespace go
                         last = i;
                         currentLen = runeLen;
                     }
+
                 }
 
             }
             io.WriteString(w, s[last..]);
             w.Close();
+
         }
 
         // qEncode encodes s using Q encoding and writes it to buf. It splits the
         // encoded-words when necessary.
-        public static void qEncode(this WordEncoder e, ref bytes.Buffer buf, @string charset, @string s)
-        { 
+        public static void qEncode(this WordEncoder e, ptr<strings.Builder> _addr_buf, @string charset, @string s)
+        {
+            ref strings.Builder buf = ref _addr_buf.val;
+ 
             // We only split encoded-words when the charset is UTF-8.
             if (!isUTF8(charset))
             {
-                writeQString(buf, s);
-                return;
+                writeQString(_addr_buf, s);
+                return ;
             }
+
             long currentLen = default;            long runeLen = default;
 
             {
@@ -163,21 +181,27 @@ namespace go
                         _, runeLen = utf8.DecodeRuneInString(s[i..]);
                         encLen = 3L * runeLen;
                     }
+
                     if (currentLen + encLen > maxContentLen)
                     {
                         e.splitWord(buf, charset);
                         currentLen = 0L;
                     }
-                    writeQString(buf, s[i..i + runeLen]);
+
+                    writeQString(_addr_buf, s[i..i + runeLen]);
                     currentLen += encLen;
+
                 }
 
             }
+
         }
 
         // writeQString encodes s using Q encoding and writes it to buf.
-        private static void writeQString(ref bytes.Buffer buf, @string s)
+        private static void writeQString(ptr<strings.Builder> _addr_buf, @string s)
         {
+            ref strings.Builder buf = ref _addr_buf.val;
+
             for (long i = 0L; i < len(s); i++)
             {
                 {
@@ -194,13 +218,17 @@ namespace go
                         buf.WriteByte(upperhex[b & 0x0fUL]);
 
                 }
+
             }
+
 
         }
 
         // openWord writes the beginning of an encoded-word into buf.
-        public static void openWord(this WordEncoder e, ref bytes.Buffer buf, @string charset)
+        public static void openWord(this WordEncoder e, ptr<strings.Builder> _addr_buf, @string charset)
         {
+            ref strings.Builder buf = ref _addr_buf.val;
+
             buf.WriteString("=?");
             buf.WriteString(charset);
             buf.WriteByte('?');
@@ -209,15 +237,19 @@ namespace go
         }
 
         // closeWord writes the end of an encoded-word into buf.
-        private static void closeWord(ref bytes.Buffer buf)
+        private static void closeWord(ptr<strings.Builder> _addr_buf)
         {
+            ref strings.Builder buf = ref _addr_buf.val;
+
             buf.WriteString("?=");
         }
 
         // splitWord closes the current encoded-word and opens a new one.
-        public static void splitWord(this WordEncoder e, ref bytes.Buffer buf, @string charset)
+        public static void splitWord(this WordEncoder e, ptr<strings.Builder> _addr_buf, @string charset)
         {
-            closeWord(buf);
+            ref strings.Builder buf = ref _addr_buf.val;
+
+            closeWord(_addr_buf);
             buf.WriteByte(' ');
             e.openWord(buf, charset);
         }
@@ -227,7 +259,7 @@ namespace go
             return strings.EqualFold(charset, "UTF-8");
         }
 
-        private static readonly @string upperhex = "0123456789ABCDEF";
+        private static readonly @string upperhex = (@string)"0123456789ABCDEF";
 
         // A WordDecoder decodes MIME headers containing RFC 2047 encoded-words.
 
@@ -239,14 +271,19 @@ namespace go
         }
 
         // Decode decodes an RFC 2047 encoded-word.
-        private static (@string, error) Decode(this ref WordDecoder _d, @string word) => func(_d, (ref WordDecoder d, Defer defer, Panic _, Recover __) =>
-        { 
+        private static (@string, error) Decode(this ptr<WordDecoder> _addr_d, @string word)
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref WordDecoder d = ref _addr_d.val;
+ 
             // See https://tools.ietf.org/html/rfc2047#section-2 for details.
             // Our decoder is permissive, we accept empty encoded-text.
             if (len(word) < 8L || !strings.HasPrefix(word, "=?") || !strings.HasSuffix(word, "?=") || strings.Count(word, "?") != 4L)
             {
-                return ("", errInvalidWord);
+                return ("", error.As(errInvalidWord)!);
             }
+
             word = word[2L..len(word) - 2L]; 
 
             // split delimits the first 2 fields
@@ -256,53 +293,62 @@ namespace go
             var charset = word[..split];
             if (len(charset) == 0L)
             {
-                return ("", errInvalidWord);
+                return ("", error.As(errInvalidWord)!);
             }
+
             if (len(word) < split + 3L)
             {
-                return ("", errInvalidWord);
+                return ("", error.As(errInvalidWord)!);
             }
+
             var encoding = word[split + 1L]; 
             // the field after split must only be one byte
             if (word[split + 2L] != '?')
             {
-                return ("", errInvalidWord);
+                return ("", error.As(errInvalidWord)!);
             }
+
             var text = word[split + 3L..];
 
             var (content, err) = decode(encoding, text);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
-            var buf = getBuffer();
-            defer(putBuffer(buf));
+
+            ref strings.Builder buf = ref heap(out ptr<strings.Builder> _addr_buf);
 
             {
-                var err = d.convert(buf, charset, content);
+                var err = d.convert(_addr_buf, charset, content);
 
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 }
 
             }
 
-            return (buf.String(), null);
-        });
+
+            return (buf.String(), error.As(null!)!);
+
+        }
 
         // DecodeHeader decodes all encoded-words of the given string. It returns an
         // error if and only if CharsetReader of d returns an error.
-        private static (@string, error) DecodeHeader(this ref WordDecoder _d, @string header) => func(_d, (ref WordDecoder d, Defer defer, Panic _, Recover __) =>
-        { 
+        private static (@string, error) DecodeHeader(this ptr<WordDecoder> _addr_d, @string header)
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref WordDecoder d = ref _addr_d.val;
+ 
             // If there is no encoded-word, returns before creating a buffer.
             var i = strings.Index(header, "=?");
             if (i == -1L)
             {
-                return (header, null);
+                return (header, error.As(null!)!);
             }
-            var buf = getBuffer();
-            defer(putBuffer(buf));
+
+            ref strings.Builder buf = ref heap(out ptr<strings.Builder> _addr_buf);
 
             buf.WriteString(header[..i]);
             header = header[i..];
@@ -315,6 +361,7 @@ namespace go
                 {
                     break;
                 }
+
                 var cur = start + len("=?");
 
                 i = strings.Index(header[cur..], "?");
@@ -322,6 +369,7 @@ namespace go
                 {
                     break;
                 }
+
                 var charset = header[cur..cur + i];
                 cur += i + len("?");
 
@@ -329,6 +377,7 @@ namespace go
                 {
                     break;
                 }
+
                 var encoding = header[cur];
                 cur++;
 
@@ -336,6 +385,7 @@ namespace go
                 {
                     break;
                 }
+
                 cur++;
 
                 var j = strings.Index(header[cur..], "?=");
@@ -343,6 +393,7 @@ namespace go
                 {
                     break;
                 }
+
                 var text = header[cur..cur + j];
                 var end = cur + j + len("?=");
 
@@ -361,18 +412,21 @@ namespace go
                 {
                     buf.WriteString(header[..start]);
                 }
+
                 {
-                    var err = d.convert(buf, charset, content);
+                    var err = d.convert(_addr_buf, charset, content);
 
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     }
 
                 }
 
+
                 header = header[end..];
                 betweenWords = true;
+
             }
 
 
@@ -380,11 +434,16 @@ namespace go
             {
                 buf.WriteString(header);
             }
-            return (buf.String(), null);
-        });
+
+            return (buf.String(), error.As(null!)!);
+
+        }
 
         private static (slice<byte>, error) decode(byte encoding, @string text)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             switch (encoding)
             {
                 case 'B': 
@@ -398,13 +457,17 @@ namespace go
                     return qDecode(text);
                     break;
                 default: 
-                    return (null, errInvalidWord);
+                    return (null, error.As(errInvalidWord)!);
                     break;
             }
+
         }
 
-        private static error convert(this ref WordDecoder d, ref bytes.Buffer buf, @string charset, slice<byte> content)
+        private static error convert(this ptr<WordDecoder> _addr_d, ptr<strings.Builder> _addr_buf, @string charset, slice<byte> content)
         {
+            ref WordDecoder d = ref _addr_d.val;
+            ref strings.Builder buf = ref _addr_buf.val;
+
 
             if (strings.EqualFold("utf-8", charset)) 
                 buf.Write(content);
@@ -435,6 +498,7 @@ namespace go
                         {
                             buf.WriteByte(c);
                         }
+
                     }
 
                     c = c__prev1;
@@ -442,20 +506,24 @@ namespace go
             else 
                 if (d.CharsetReader == null)
                 {
-                    return error.As(fmt.Errorf("mime: unhandled charset %q", charset));
+                    return error.As(fmt.Errorf("mime: unhandled charset %q", charset))!;
                 }
+
                 var (r, err) = d.CharsetReader(strings.ToLower(charset), bytes.NewReader(content));
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
-                _, err = buf.ReadFrom(r);
+
+                _, err = io.Copy(buf, r);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
-                        return error.As(null);
+
+                        return error.As(null!)!;
+
         }
 
         // hasNonWhitespace reports whether s (assumed to be ASCII) contains at least
@@ -480,13 +548,18 @@ namespace go
                         return true;
                         break;
                 }
+
             }
             return false;
+
         }
 
         // qDecode decodes a Q encoded string.
         private static (slice<byte>, error) qDecode(@string s)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             var dec = make_slice<byte>(len(s));
             long n = 0L;
             for (long i = 0L; i < len(s); i++)
@@ -500,77 +573,74 @@ namespace go
                     else if (c == '=') 
                         if (i + 2L >= len(s))
                         {
-                            return (null, errInvalidWord);
+                            return (null, error.As(errInvalidWord)!);
                         }
+
                         var (b, err) = readHexByte(s[i + 1L], s[i + 2L]);
                         if (err != null)
                         {
-                            return (null, err);
+                            return (null, error.As(err)!);
                         }
+
                         dec[n] = b;
                         i += 2L;
                     else if ((c <= '~' && c >= ' ') || c == '\n' || c == '\r' || c == '\t') 
                         dec[n] = c;
                     else 
-                        return (null, errInvalidWord);
+                        return (null, error.As(errInvalidWord)!);
 
                 }
                 n++;
+
             }
 
 
-            return (dec[..n], null);
+            return (dec[..n], error.As(null!)!);
+
         }
 
         // readHexByte returns the byte from its quoted-printable representation.
         private static (byte, error) readHexByte(byte a, byte b)
         {
+            byte _p0 = default;
+            error _p0 = default!;
+
             byte hb = default;            byte lb = default;
 
-            error err = default;
+            error err = default!;
             hb, err = fromHex(a);
 
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             lb, err = fromHex(b);
 
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
-            return (hb << (int)(4L) | lb, null);
+
+            return (hb << (int)(4L) | lb, error.As(null!)!);
+
         }
 
         private static (byte, error) fromHex(byte b)
         {
+            byte _p0 = default;
+            error _p0 = default!;
+
 
             if (b >= '0' && b <= '9') 
-                return (b - '0', null);
+                return (b - '0', error.As(null!)!);
             else if (b >= 'A' && b <= 'F') 
-                return (b - 'A' + 10L, null); 
+                return (b - 'A' + 10L, error.As(null!)!); 
                 // Accept badly encoded bytes.
             else if (b >= 'a' && b <= 'f') 
-                return (b - 'a' + 10L, null);
-                        return (0L, fmt.Errorf("mime: invalid hex byte %#02x", b));
-        }
+                return (b - 'a' + 10L, error.As(null!)!);
+                        return (0L, error.As(fmt.Errorf("mime: invalid hex byte %#02x", b))!);
 
-        private static sync.Pool bufPool = new sync.Pool(New:func()interface{}{returnnew(bytes.Buffer)},);
-
-        private static ref bytes.Buffer getBuffer()
-        {
-            return bufPool.Get()._<ref bytes.Buffer>();
-        }
-
-        private static void putBuffer(ref bytes.Buffer buf)
-        {
-            if (buf.Len() > 1024L)
-            {
-                return;
-            }
-            buf.Reset();
-            bufPool.Put(buf);
         }
     }
 }

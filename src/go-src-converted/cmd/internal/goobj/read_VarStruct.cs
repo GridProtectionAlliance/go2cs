@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:18 UTC
+//     Generated on 2020 October 08 03:50:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build amd64p32 arm 386 s390x
+// +build arm 386 s390x
 
-// package sha1 -- go2cs converted at 2020 August 29 08:31:01 UTC
+// package sha1 -- go2cs converted at 2020 October 08 03:36:42 UTC
 // import "crypto/sha1" ==> using sha1 = go.crypto.sha1_package
 // Original source: C:\Go\src\crypto\sha1\sha1block_decl.go
 
@@ -16,7 +16,7 @@ namespace crypto
     public static partial class sha1_package
     {
         //go:noescape
-        private static void block(ref digest dig, slice<byte> p)
+        private static void block(ptr<digest> dig, slice<byte> p)
 ;
     }
 }}

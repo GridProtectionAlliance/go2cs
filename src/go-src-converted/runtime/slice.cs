@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:20:46 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:23:37 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\slice.go
+using math = go.runtime.@internal.math_package;
+using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         private partial struct slice
         {
@@ -19,7 +21,7 @@ namespace go
             public long cap;
         }
 
-        // An notInHeapSlice is a slice backed by go:notinheap memory.
+        // A notInHeapSlice is a slice backed by go:notinheap memory.
         private partial struct notInHeapSlice
         {
             public ptr<notInHeap> array;
@@ -27,54 +29,133 @@ namespace go
             public long cap;
         }
 
-        // maxElems is a lookup table containing the maximum capacity for a slice.
-        // The index is the size of the slice element.
-        private static array<System.UIntPtr> maxElems = new array<System.UIntPtr>(new System.UIntPtr[] { ^uintptr(0), _MaxMem/1, _MaxMem/2, _MaxMem/3, _MaxMem/4, _MaxMem/5, _MaxMem/6, _MaxMem/7, _MaxMem/8, _MaxMem/9, _MaxMem/10, _MaxMem/11, _MaxMem/12, _MaxMem/13, _MaxMem/14, _MaxMem/15, _MaxMem/16, _MaxMem/17, _MaxMem/18, _MaxMem/19, _MaxMem/20, _MaxMem/21, _MaxMem/22, _MaxMem/23, _MaxMem/24, _MaxMem/25, _MaxMem/26, _MaxMem/27, _MaxMem/28, _MaxMem/29, _MaxMem/30, _MaxMem/31, _MaxMem/32 });
-
-        // maxSliceCap returns the maximum capacity for a slice.
-        private static System.UIntPtr maxSliceCap(System.UIntPtr elemsize)
+        private static void panicmakeslicelen() => func((_, panic, __) =>
         {
-            if (elemsize < uintptr(len(maxElems)))
-            {
-                return maxElems[elemsize];
-            }
-            return _MaxMem / elemsize;
-        }
-
-        private static slice makeslice(ref _type _et, long len, long cap) => func(_et, (ref _type et, Defer _, Panic panic, Recover __) =>
-        { 
-            // NOTE: The len > maxElements check here is not strictly necessary,
-            // but it produces a 'len out of range' error instead of a 'cap out of range' error
-            // when someone does make([]T, bignumber). 'cap out of range' is true too,
-            // but since the cap is only being supplied implicitly, saying len is clearer.
-            // See issue 4085.
-            var maxElements = maxSliceCap(et.size);
-            if (len < 0L || uintptr(len) > maxElements)
-            {
-                panic(errorString("makeslice: len out of range"));
-            }
-            if (cap < len || uintptr(cap) > maxElements)
-            {
-                panic(errorString("makeslice: cap out of range"));
-            }
-            var p = mallocgc(et.size * uintptr(cap), et, true);
-            return new slice(p,len,cap);
+            panic(errorString("makeslice: len out of range"));
         });
 
-        private static slice makeslice64(ref _type _et, long len64, long cap64) => func(_et, (ref _type et, Defer _, Panic panic, Recover __) =>
+        private static void panicmakeslicecap() => func((_, panic, __) =>
         {
+            panic(errorString("makeslice: cap out of range"));
+        });
+
+        // makeslicecopy allocates a slice of "tolen" elements of type "et",
+        // then copies "fromlen" elements of type "et" into that new allocation from "from".
+        private static unsafe.Pointer makeslicecopy(ptr<_type> _addr_et, long tolen, long fromlen, unsafe.Pointer from)
+        {
+            ref _type et = ref _addr_et.val;
+
+            System.UIntPtr tomem = default;            System.UIntPtr copymem = default;
+
+            if (uintptr(tolen) > uintptr(fromlen))
+            {
+                bool overflow = default;
+                tomem, overflow = math.MulUintptr(et.size, uintptr(tolen));
+                if (overflow || tomem > maxAlloc || tolen < 0L)
+                {
+                    panicmakeslicelen();
+                }
+
+                copymem = et.size * uintptr(fromlen);
+
+            }
+            else
+            { 
+                // fromlen is a known good length providing and equal or greater than tolen,
+                // thereby making tolen a good slice length too as from and to slices have the
+                // same element width.
+                tomem = et.size * uintptr(tolen);
+                copymem = tomem;
+
+            }
+
+            unsafe.Pointer to = default;
+            if (et.ptrdata == 0L)
+            {
+                to = mallocgc(tomem, null, false);
+                if (copymem < tomem)
+                {
+                    memclrNoHeapPointers(add(to, copymem), tomem - copymem);
+                }
+
+            }
+            else
+            { 
+                // Note: can't use rawmem (which avoids zeroing of memory), because then GC can scan uninitialized memory.
+                to = mallocgc(tomem, et, true);
+                if (copymem > 0L && writeBarrier.enabled)
+                { 
+                    // Only shade the pointers in old.array since we know the destination slice to
+                    // only contains nil pointers because it has been cleared during alloc.
+                    bulkBarrierPreWriteSrcOnly(uintptr(to), uintptr(from), copymem);
+
+                }
+
+            }
+
+            if (raceenabled)
+            {
+                var callerpc = getcallerpc();
+                var pc = funcPC(makeslicecopy);
+                racereadrangepc(from, copymem, callerpc, pc);
+            }
+
+            if (msanenabled)
+            {
+                msanread(from, copymem);
+            }
+
+            memmove(to, from, copymem);
+
+            return to;
+
+        }
+
+        private static unsafe.Pointer makeslice(ptr<_type> _addr_et, long len, long cap)
+        {
+            ref _type et = ref _addr_et.val;
+
+            var (mem, overflow) = math.MulUintptr(et.size, uintptr(cap));
+            if (overflow || mem > maxAlloc || len < 0L || len > cap)
+            { 
+                // NOTE: Produce a 'len out of range' error instead of a
+                // 'cap out of range' error when someone does make([]T, bignumber).
+                // 'cap out of range' is true too, but since the cap is only being
+                // supplied implicitly, saying len is clearer.
+                // See golang.org/issue/4085.
+                (mem, overflow) = math.MulUintptr(et.size, uintptr(len));
+                if (overflow || mem > maxAlloc || len < 0L)
+                {
+                    panicmakeslicelen();
+                }
+
+                panicmakeslicecap();
+
+            }
+
+            return mallocgc(mem, et, true);
+
+        }
+
+        private static unsafe.Pointer makeslice64(ptr<_type> _addr_et, long len64, long cap64)
+        {
+            ref _type et = ref _addr_et.val;
+
             var len = int(len64);
             if (int64(len) != len64)
             {
-                panic(errorString("makeslice: len out of range"));
+                panicmakeslicelen();
             }
+
             var cap = int(cap64);
             if (int64(cap) != cap64)
             {
-                panic(errorString("makeslice: cap out of range"));
+                panicmakeslicecap();
             }
-            return makeslice(et, len, cap);
-        });
+
+            return makeslice(_addr_et, len, cap);
+
+        }
 
         // growslice handles slice growth during append.
         // It is passed the slice element type, the old slice, and the desired new minimum capacity,
@@ -86,27 +167,34 @@ namespace go
         // to calculate where to write new values during an append.
         // TODO: When the old backend is gone, reconsider this decision.
         // The SSA backend might prefer the new length or to return only ptr/cap and save stack space.
-        private static slice growslice(ref _type _et, slice old, long cap) => func(_et, (ref _type et, Defer _, Panic panic, Recover __) =>
+        private static slice growslice(ptr<_type> _addr_et, slice old, long cap) => func((_, panic, __) =>
         {
+            ref _type et = ref _addr_et.val;
+
             if (raceenabled)
             {
                 var callerpc = getcallerpc();
                 racereadrangepc(old.array, uintptr(old.len * int(et.size)), callerpc, funcPC(growslice));
             }
+
             if (msanenabled)
             {
                 msanread(old.array, uintptr(old.len * int(et.size)));
             }
-            if (et.size == 0L)
+
+            if (cap < old.cap)
             {
-                if (cap < old.cap)
-                {
-                    panic(errorString("growslice: cap out of range"));
-                } 
+                panic(errorString("growslice: cap out of range"));
+            }
+
+            if (et.size == 0L)
+            { 
                 // append should not create a slice with nil pointer but non-zero len.
                 // We assume that append doesn't need to preserve old.array in this case.
                 return new slice(unsafe.Pointer(&zerobase),old.len,cap);
+
             }
+
             var newcap = old.cap;
             var doublecap = newcap + newcap;
             if (cap > doublecap)
@@ -136,36 +224,62 @@ namespace go
                     {
                         newcap = cap;
                     }
+
                 }
+
             }
+
             bool overflow = default;
-            System.UIntPtr lenmem = default;            System.UIntPtr newlenmem = default;            System.UIntPtr capmem = default;
-
-            const var ptrSize = @unsafe.Sizeof((byte.Value)(null));
-
+            System.UIntPtr lenmem = default;            System.UIntPtr newlenmem = default;            System.UIntPtr capmem = default; 
+            // Specialize for common values of et.size.
+            // For 1 we don't need any division/multiplication.
+            // For sys.PtrSize, compiler will optimize division/multiplication into a shift by a constant.
+            // For powers of 2, use a variable shift.
+ 
+            // Specialize for common values of et.size.
+            // For 1 we don't need any division/multiplication.
+            // For sys.PtrSize, compiler will optimize division/multiplication into a shift by a constant.
+            // For powers of 2, use a variable shift.
 
             if (et.size == 1L) 
                 lenmem = uintptr(old.len);
                 newlenmem = uintptr(cap);
                 capmem = roundupsize(uintptr(newcap));
-                overflow = uintptr(newcap) > _MaxMem;
+                overflow = uintptr(newcap) > maxAlloc;
                 newcap = int(capmem);
-            else if (et.size == ptrSize) 
-                lenmem = uintptr(old.len) * ptrSize;
-                newlenmem = uintptr(cap) * ptrSize;
-                capmem = roundupsize(uintptr(newcap) * ptrSize);
-                overflow = uintptr(newcap) > _MaxMem / ptrSize;
-                newcap = int(capmem / ptrSize);
+            else if (et.size == sys.PtrSize) 
+                lenmem = uintptr(old.len) * sys.PtrSize;
+                newlenmem = uintptr(cap) * sys.PtrSize;
+                capmem = roundupsize(uintptr(newcap) * sys.PtrSize);
+                overflow = uintptr(newcap) > maxAlloc / sys.PtrSize;
+                newcap = int(capmem / sys.PtrSize);
+            else if (isPowerOfTwo(et.size)) 
+                System.UIntPtr shift = default;
+                if (sys.PtrSize == 8L)
+                { 
+                    // Mask shift for better code generation.
+                    shift = uintptr(sys.Ctz64(uint64(et.size))) & 63L;
+
+                }
+                else
+                {
+                    shift = uintptr(sys.Ctz32(uint32(et.size))) & 31L;
+                }
+
+                lenmem = uintptr(old.len) << (int)(shift);
+                newlenmem = uintptr(cap) << (int)(shift);
+                capmem = roundupsize(uintptr(newcap) << (int)(shift));
+                overflow = uintptr(newcap) > (maxAlloc >> (int)(shift));
+                newcap = int(capmem >> (int)(shift));
             else 
                 lenmem = uintptr(old.len) * et.size;
                 newlenmem = uintptr(cap) * et.size;
-                capmem = roundupsize(uintptr(newcap) * et.size);
-                overflow = uintptr(newcap) > maxSliceCap(et.size);
+                capmem, overflow = math.MulUintptr(et.size, uintptr(newcap));
+                capmem = roundupsize(capmem);
                 newcap = int(capmem / et.size);
-            // The check of overflow (uintptr(newcap) > maxSliceCap(et.size))
-            // in addition to capmem > _MaxMem is needed to prevent an overflow
-            // which can be used to trigger a segfault on 32bit architectures
-            // with this example program:
+            // The check of overflow in addition to capmem > maxAlloc is needed
+            // to prevent an overflow which can be used to trigger a segfault
+            // on 32bit architectures with this example program:
             //
             // type T [1<<27 + 1]int64
             //
@@ -176,109 +290,124 @@ namespace go
             //   s = append(s, d, d, d, d)
             //   print(len(s), "\n")
             // }
-            if (cap < old.cap || overflow || capmem > _MaxMem)
+            if (overflow || capmem > maxAlloc)
             {
                 panic(errorString("growslice: cap out of range"));
             }
+
             unsafe.Pointer p = default;
-            if (et.kind & kindNoPointers != 0L)
+            if (et.ptrdata == 0L)
             {
-                p = mallocgc(capmem, null, false);
-                memmove(p, old.array, lenmem); 
+                p = mallocgc(capmem, null, false); 
                 // The append() that calls growslice is going to overwrite from old.len to cap (which will be the new length).
                 // Only clear the part that will not be overwritten.
                 memclrNoHeapPointers(add(p, newlenmem), capmem - newlenmem);
+
             }
             else
             { 
                 // Note: can't use rawmem (which avoids zeroing of memory), because then GC can scan uninitialized memory.
                 p = mallocgc(capmem, et, true);
-                if (!writeBarrier.enabled)
-                {
-                    memmove(p, old.array, lenmem);
-                }
-                else
-                {
-                    {
-                        var i = uintptr(0L);
+                if (lenmem > 0L && writeBarrier.enabled)
+                { 
+                    // Only shade the pointers in old.array since we know the destination slice p
+                    // only contains nil pointers because it has been cleared during alloc.
+                    bulkBarrierPreWriteSrcOnly(uintptr(p), uintptr(old.array), lenmem - et.size + et.ptrdata);
 
-                        while (i < lenmem)
-                        {
-                            typedmemmove(et, add(p, i), add(old.array, i));
-                            i += et.size;
-                        }
-
-                    }
                 }
+
             }
+
+            memmove(p, old.array, lenmem);
+
             return new slice(p,old.len,newcap);
+
         });
 
-        private static long slicecopy(slice to, slice fm, System.UIntPtr width)
+        private static bool isPowerOfTwo(System.UIntPtr x)
         {
-            if (fm.len == 0L || to.len == 0L)
+            return x & (x - 1L) == 0L;
+        }
+
+        private static long slicecopy(unsafe.Pointer toPtr, long toLen, unsafe.Pointer fmPtr, long fmLen, System.UIntPtr width)
+        {
+            if (fmLen == 0L || toLen == 0L)
             {
                 return 0L;
             }
-            var n = fm.len;
-            if (to.len < n)
+
+            var n = fmLen;
+            if (toLen < n)
             {
-                n = to.len;
+                n = toLen;
             }
+
             if (width == 0L)
             {
                 return n;
             }
+
             if (raceenabled)
             {
                 var callerpc = getcallerpc();
                 var pc = funcPC(slicecopy);
-                racewriterangepc(to.array, uintptr(n * int(width)), callerpc, pc);
-                racereadrangepc(fm.array, uintptr(n * int(width)), callerpc, pc);
+                racereadrangepc(fmPtr, uintptr(n * int(width)), callerpc, pc);
+                racewriterangepc(toPtr, uintptr(n * int(width)), callerpc, pc);
             }
+
             if (msanenabled)
             {
-                msanwrite(to.array, uintptr(n * int(width)));
-                msanread(fm.array, uintptr(n * int(width)));
+                msanread(fmPtr, uintptr(n * int(width)));
+                msanwrite(toPtr, uintptr(n * int(width)));
             }
+
             var size = uintptr(n) * width;
             if (size == 1L)
             { // common case worth about 2x to do here
                 // TODO: is this still worth it with new memmove impl?
-                (byte.Value)(to.array).Value;
+                (byte.val)(toPtr).val;
 
-                fm.array.Value; // known to be a byte pointer
+                new ptr<ptr<ptr<byte>>>(fmPtr); // known to be a byte pointer
             }
             else
             {
-                memmove(to.array, fm.array, size);
+                memmove(toPtr, fmPtr, size);
             }
+
             return n;
+
         }
 
-        private static long slicestringcopy(slice<byte> to, @string fm)
+        private static long slicestringcopy(ptr<byte> _addr_toPtr, long toLen, @string fm)
         {
-            if (len(fm) == 0L || len(to) == 0L)
+            ref byte toPtr = ref _addr_toPtr.val;
+
+            if (len(fm) == 0L || toLen == 0L)
             {
                 return 0L;
             }
+
             var n = len(fm);
-            if (len(to) < n)
+            if (toLen < n)
             {
-                n = len(to);
+                n = toLen;
             }
+
             if (raceenabled)
             {
                 var callerpc = getcallerpc();
                 var pc = funcPC(slicestringcopy);
-                racewriterangepc(@unsafe.Pointer(ref to[0L]), uintptr(n), callerpc, pc);
+                racewriterangepc(@unsafe.Pointer(toPtr), uintptr(n), callerpc, pc);
             }
+
             if (msanenabled)
             {
-                msanwrite(@unsafe.Pointer(ref to[0L]), uintptr(n));
+                msanwrite(@unsafe.Pointer(toPtr), uintptr(n));
             }
-            memmove(@unsafe.Pointer(ref to[0L]), stringStructOf(ref fm).str, uintptr(n));
+
+            memmove(@unsafe.Pointer(toPtr), stringStructOf(_addr_fm).str, uintptr(n));
             return n;
+
         }
     }
 }

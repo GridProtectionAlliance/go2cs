@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:29:35 UTC
+//     Generated on 2020 October 08 03:35:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,11 +17,13 @@ using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
 using elliptic = go.crypto.elliptic_package;
+using randutil = go.crypto.@internal.randutil_package;
 using sha512 = go.crypto.sha512_package;
-using asn1 = go.encoding.asn1_package;
 using errors = go.errors_package;
 using io = go.io_package;
 using big = go.math.big_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
+using asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
 using go;
 
 namespace go {

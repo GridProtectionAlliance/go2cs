@@ -28,8 +28,7 @@
 //    b. Sweep any unswept spans. There will only be unswept spans if
 //    this GC cycle was forced before the expected time.
 //
-// 2. GC performs the "mark 1" sub-phase. In this sub-phase, Ps are
-// allowed to locally cache parts of the work queue.
+// 2. GC performs the mark phase.
 //
 //    a. Prepare for the mark phase by setting gcphase to _GCmark
 //    (from _GCoff), enabling the write barrier, enabling mutator
@@ -54,28 +53,21 @@
 //    object to black and shading all pointers found in the object
 //    (which in turn may add those pointers to the work queue).
 //
-// 3. Once the global work queue is empty (but local work queue caches
-// may still contain work), GC performs the "mark 2" sub-phase.
+//    e. Because GC work is spread across local caches, GC uses a
+//    distributed termination algorithm to detect when there are no
+//    more root marking jobs or grey objects (see gcMarkDone). At this
+//    point, GC transitions to mark termination.
 //
-//    a. GC stops all workers, disables local work queue caches,
-//    flushes each P's local work queue cache to the global work queue
-//    cache, and reenables workers.
-//
-//    b. GC again drains the work queue, as in 2d above.
-//
-// 4. Once the work queue is empty, GC performs mark termination.
+// 3. GC performs mark termination.
 //
 //    a. Stop the world.
 //
 //    b. Set gcphase to _GCmarktermination, and disable workers and
 //    assists.
 //
-//    c. Drain any remaining work from the work queue (typically there
-//    will be none).
+//    c. Perform housekeeping like flushing mcaches.
 //
-//    d. Perform other housekeeping like flushing mcaches.
-//
-// 5. GC performs the sweep phase.
+// 4. GC performs the sweep phase.
 //
 //    a. Prepare for the sweep phase by setting gcphase to _GCoff,
 //    setting up sweep state and disabling the write barrier.
@@ -86,7 +78,7 @@
 //    c. GC does concurrent sweeping in the background and in response
 //    to allocation. See description below.
 //
-// 6. When sufficient allocation has taken place, replay the sequence
+// 5. When sufficient allocation has taken place, replay the sequence
 // starting with 1 above. See discussion of GC rate below.
 
 // Concurrent sweep.
@@ -134,11 +126,11 @@
 // object, it scans only the first oblet and enqueues the remaining
 // oblets as new scan jobs.
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:01 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:20:51 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mgc.go
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 using System.Threading;
@@ -148,14 +140,19 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly long _DebugGC = 0L;
-        private static readonly var _ConcurrentSweep = true;
-        private static readonly long _FinBlockSize = 4L * 1024L; 
+        private static readonly long _DebugGC = (long)0L;
+        private static readonly var _ConcurrentSweep = (var)true;
+        private static readonly long _FinBlockSize = (long)4L * 1024L; 
+
+        // debugScanConservative enables debug logging for stack
+        // frames that are scanned conservatively.
+        private static readonly var debugScanConservative = (var)false; 
 
         // sweepMinHeapDistance is a lower bound on the heap distance
         // (in bytes) reserved for concurrent sweeping between GC
-        // cycles. This will be scaled by gcpercent/100.
-        private static readonly long sweepMinHeapDistance = 1024L * 1024L;
+        // cycles.
+        private static readonly long sweepMinHeapDistance = (long)1024L * 1024L;
+
 
         // heapminimum is the minimum heap size at which to trigger GC.
         // For small heaps, this overrides the usual GOGC*live set rule.
@@ -172,7 +169,7 @@ namespace go
         private static ulong heapminimum = defaultHeapMinimum;
 
         // defaultHeapMinimum is the value of heapminimum for GOGC==100.
-        private static readonly long defaultHeapMinimum = 4L << (int)(20L);
+        private static readonly long defaultHeapMinimum = (long)4L << (int)(20L);
 
         // Initialized from $GOGC.  GOGC=off means no GC.
 
@@ -204,6 +201,10 @@ namespace go
 
             work.startSema = 1L;
             work.markDoneSema = 1L;
+            lockInit(_addr_work.sweepWaiters.@lock, lockRankSweepWaiters);
+            lockInit(_addr_work.assistQueue.@lock, lockRankAssistQueue);
+            lockInit(_addr_work.wbufSpans.@lock, lockRankWbufSpans);
+
         }
 
         private static int readgogc()
@@ -213,6 +214,7 @@ namespace go
             {
                 return -1L;
             }
+
             {
                 var (n, ok) = atoi32(p);
 
@@ -222,56 +224,57 @@ namespace go
                 }
 
             }
+
             return 100L;
+
         }
 
         // gcenable is called after the bulk of the runtime initialization,
         // just before we're about to start letting user code run.
-        // It kicks off the background sweeper goroutine and enables GC.
+        // It kicks off the background sweeper goroutine, the background
+        // scavenger goroutine, and enables GC.
         private static void gcenable()
-        {
-            var c = make_channel<long>(1L);
+        { 
+            // Kick off sweeping and scavenging.
+            var c = make_channel<long>(2L);
             go_(() => bgsweep(c));
-            c.Receive();
+            go_(() => bgscavenge(c));
+            c.Receive().Send(c);
             memstats.enablegc = true; // now that runtime is initialized, GC is okay
         }
 
         //go:linkname setGCPercent runtime/debug.setGCPercent
         private static int setGCPercent(int @in)
         {
-            lock(ref mheap_.@lock);
-            out = gcpercent;
-            if (in < 0L)
+            int @out = default;
+ 
+            // Run on the system stack since we grab the heap lock.
+            systemstack(() =>
             {
-                in = -1L;
-            }
-            gcpercent = in;
-            heapminimum = defaultHeapMinimum * uint64(gcpercent) / 100L; 
-            // Update pacing in response to gcpercent change.
-            gcSetTriggerRatio(memstats.triggerRatio);
-            unlock(ref mheap_.@lock); 
+                lock(_addr_mheap_.@lock);
+                out = gcpercent;
+                if (in < 0L)
+                {
+                    in = -1L;
+                }
 
-            // If we just disabled GC, wait for any concurrent GC to
+                gcpercent = in;
+                heapminimum = defaultHeapMinimum * uint64(gcpercent) / 100L; 
+                // Update pacing in response to gcpercent change.
+                gcSetTriggerRatio(memstats.triggerRatio);
+                unlock(_addr_mheap_.@lock);
+
+            }); 
+
+            // If we just disabled GC, wait for any concurrent GC mark to
             // finish so we always return with no GC running.
             if (in < 0L)
-            { 
-                // Disable phase transitions.
-                lock(ref work.sweepWaiters.@lock);
-                if (gcphase == _GCmark)
-                { 
-                    // GC is active. Wait until we reach sweeping.
-                    var gp = getg();
-                    gp.schedlink = work.sweepWaiters.head;
-                    work.sweepWaiters.head.set(gp);
-                    goparkunlock(ref work.sweepWaiters.@lock, "wait for GC cycle", traceEvGoBlock, 1L);
-                }
-                else
-                { 
-                    // GC isn't active.
-                    unlock(ref work.sweepWaiters.@lock);
-                }
+            {
+                gcWaitOnMark(atomic.Load(_addr_work.cycles));
             }
+
             return out;
+
         }
 
         // Garbage collector phase.
@@ -289,29 +292,14 @@ namespace go
         // gcphase == _GCmark.
         private static uint gcBlackenEnabled = default;
 
-        // gcBlackenPromptly indicates that optimizations that may
-        // hide work from the global work queue should be disabled.
-        //
-        // If gcBlackenPromptly is true, per-P gcWork caches should
-        // be flushed immediately and new objects should be allocated black.
-        //
-        // There is a tension between allocating objects white and
-        // allocating them black. If white and the objects die before being
-        // marked they can be collected during this GC cycle. On the other
-        // hand allocating them black will reduce _GCmarktermination latency
-        // since more work is done in the mark phase. This tension is resolved
-        // by allocating white until the mark phase is approaching its end and
-        // then allocating black for the remainder of the mark phase.
-        private static bool gcBlackenPromptly = default;
-
-        private static readonly var _GCoff = iota; // GC not running; sweeping in background, write barrier disabled
-        private static readonly var _GCmark = 0; // GC marking roots and workbufs: allocate black, write barrier ENABLED
-        private static readonly var _GCmarktermination = 1; // GC mark termination: allocate black, P's help GC, write barrier ENABLED
+        private static readonly var _GCoff = (var)iota; // GC not running; sweeping in background, write barrier disabled
+        private static readonly var _GCmark = (var)0; // GC marking roots and workbufs: allocate black, write barrier ENABLED
+        private static readonly var _GCmarktermination = (var)1; // GC mark termination: allocate black, P's help GC, write barrier ENABLED
 
         //go:nosplit
         private static void setGCPhase(uint x)
         {
-            atomic.Store(ref gcphase, x);
+            atomic.Store(_addr_gcphase, x);
             writeBarrier.needed = gcphase == _GCmark || gcphase == _GCmarktermination;
             writeBarrier.enabled = writeBarrier.needed || writeBarrier.cgo;
         }
@@ -331,7 +319,7 @@ namespace go
         // gcMarkWorkerDedicatedMode indicates that the P of a mark
         // worker is dedicated to running that mark worker. The mark
         // worker should run without preemption.
-        private static readonly gcMarkWorkerMode gcMarkWorkerDedicatedMode = iota; 
+        private static readonly gcMarkWorkerMode gcMarkWorkerDedicatedMode = (gcMarkWorkerMode)iota; 
 
         // gcMarkWorkerFractionalMode indicates that a P is currently
         // running the "fractional" mark worker. The fractional worker
@@ -339,13 +327,14 @@ namespace go
         // an integer. The fractional worker should run until it is
         // preempted and will be scheduled to pick up the fractional
         // part of GOMAXPROCS*gcBackgroundUtilization.
-        private static readonly var gcMarkWorkerFractionalMode = 0; 
+        private static readonly var gcMarkWorkerFractionalMode = (var)0; 
 
         // gcMarkWorkerIdleMode indicates that a P is running the mark
         // worker because it has nothing else to do. The idle worker
         // should run until it is preempted and account its time
         // against gcController.idleMarkTime.
-        private static readonly var gcMarkWorkerIdleMode = 1;
+        private static readonly var gcMarkWorkerIdleMode = (var)1;
+
 
         // gcMarkWorkerModeStrings are the strings labels of gcMarkWorkerModes
         // to use in execution traces.
@@ -403,44 +392,27 @@ namespace go
 // each P that isn't running a dedicated worker.
 //
 // For example, if the utilization goal is 25% and there are
-// no dedicated workers, this will be 0.25. If there goal is
+// no dedicated workers, this will be 0.25. If the goal is
 // 25%, there is one dedicated worker, and GOMAXPROCS is 5,
 // this will be 0.05 to make up the missing 5%.
 //
 // If this is zero, no fractional workers are needed.
             public double fractionalUtilizationGoal;
-            public array<byte> _;
+            public cpu.CacheLinePad _;
         }
 
         // startCycle resets the GC controller's state and computes estimates
         // for a new GC cycle. The caller must hold worldsema.
-        private static void startCycle(this ref gcControllerState c)
+        private static void startCycle(this ptr<gcControllerState> _addr_c)
         {
+            ref gcControllerState c = ref _addr_c.val;
+
             c.scanWork = 0L;
             c.bgScanCredit = 0L;
             c.assistTime = 0L;
             c.dedicatedMarkTime = 0L;
             c.fractionalMarkTime = 0L;
             c.idleMarkTime = 0L; 
-
-            // If this is the first GC cycle or we're operating on a very
-            // small heap, fake heap_marked so it looks like gc_trigger is
-            // the appropriate growth from heap_marked, even though the
-            // real heap_marked may not have a meaningful value (on the
-            // first cycle) or may be much smaller (resulting in a large
-            // error response).
-            if (memstats.gc_trigger <= heapminimum)
-            {
-                memstats.heap_marked = uint64(float64(memstats.gc_trigger) / (1L + memstats.triggerRatio));
-            } 
-
-            // Re-compute the heap goal for this cycle in case something
-            // changed. This is the same calculation we use elsewhere.
-            memstats.next_gc = memstats.heap_marked + memstats.heap_marked * uint64(gcpercent) / 100L;
-            if (gcpercent < 0L)
-            {
-                memstats.next_gc = ~uint64(0L);
-            } 
 
             // Ensure that the heap goal is at least a little larger than
             // the current live heap size. This may not be the case if GC
@@ -462,7 +434,7 @@ namespace go
             var totalUtilizationGoal = float64(gomaxprocs) * gcBackgroundUtilization;
             c.dedicatedMarkWorkersNeeded = int64(totalUtilizationGoal + 0.5F);
             var utilError = float64(c.dedicatedMarkWorkersNeeded) / totalUtilizationGoal - 1L;
-            const float maxUtilError = 0.3F;
+            const float maxUtilError = (float)0.3F;
 
             if (utilError < -maxUtilError || utilError > maxUtilError)
             { 
@@ -474,11 +446,21 @@ namespace go
                 { 
                     // Too many dedicated workers.
                     c.dedicatedMarkWorkersNeeded--;
+
                 }
+
                 c.fractionalUtilizationGoal = (totalUtilizationGoal - float64(c.dedicatedMarkWorkersNeeded)) / float64(gomaxprocs);
+
             }
             else
             {
+                c.fractionalUtilizationGoal = 0L;
+            } 
+
+            // In STW mode, we just want dedicated workers.
+            if (debug.gcstoptheworld > 0L)
+            {
+                c.dedicatedMarkWorkersNeeded = int64(gomaxprocs);
                 c.fractionalUtilizationGoal = 0L;
             } 
 
@@ -497,6 +479,7 @@ namespace go
             {
                 print("pacer: assist ratio=", c.assistWorkPerByte, " (scan ", memstats.heap_scan >> (int)(20L), " MB in ", work.initialHeapLive >> (int)(20L), "->", memstats.next_gc >> (int)(20L), " MB)", " workers=", c.dedicatedMarkWorkersNeeded, "+", c.fractionalUtilizationGoal, "\n");
             }
+
         }
 
         // revise updates the assist ratio during the GC cycle to account for
@@ -507,53 +490,55 @@ namespace go
         // It should only be called when gcBlackenEnabled != 0 (because this
         // is when assists are enabled and the necessary statistics are
         // available).
-        private static void revise(this ref gcControllerState c)
+        private static void revise(this ptr<gcControllerState> _addr_c)
         {
+            ref gcControllerState c = ref _addr_c.val;
+
             var gcpercent = gcpercent;
             if (gcpercent < 0L)
             { 
                 // If GC is disabled but we're running a forced GC,
                 // act like GOGC is huge for the below calculations.
                 gcpercent = 100000L;
+
             }
-            var live = atomic.Load64(ref memstats.heap_live);
 
-            long heapGoal = default;            long scanWorkExpected = default;
+            var live = atomic.Load64(_addr_memstats.heap_live); 
 
-            if (live <= memstats.next_gc)
+            // Assume we're under the soft goal. Pace GC to complete at
+            // next_gc assuming the heap is in steady-state.
+            var heapGoal = int64(memstats.next_gc); 
+
+            // Compute the expected scan work remaining.
+            //
+            // This is estimated based on the expected
+            // steady-state scannable heap. For example, with
+            // GOGC=100, only half of the scannable heap is
+            // expected to be live, so that's what we target.
+            //
+            // (This is a float calculation to avoid overflowing on
+            // 100*heap_scan.)
+            var scanWorkExpected = int64(float64(memstats.heap_scan) * 100L / float64(100L + gcpercent));
+
+            if (live > memstats.next_gc || c.scanWork > scanWorkExpected)
             { 
-                // We're under the soft goal. Pace GC to complete at
-                // next_gc assuming the heap is in steady-state.
-                heapGoal = int64(memstats.next_gc); 
-
-                // Compute the expected scan work remaining.
-                //
-                // This is estimated based on the expected
-                // steady-state scannable heap. For example, with
-                // GOGC=100, only half of the scannable heap is
-                // expected to be live, so that's what we target.
-                //
-                // (This is a float calculation to avoid overflowing on
-                // 100*heap_scan.)
-                scanWorkExpected = int64(float64(memstats.heap_scan) * 100L / float64(100L + gcpercent));
-            }
-            else
-            { 
-                // We're past the soft goal. Pace GC so that in the
-                // worst case it will complete by the hard goal.
-                const float maxOvershoot = 1.1F;
+                // We're past the soft goal, or we've already done more scan
+                // work than we expected. Pace GC so that in the worst case it
+                // will complete by the hard goal.
+                const float maxOvershoot = (float)1.1F;
 
                 heapGoal = int64(float64(memstats.next_gc) * maxOvershoot); 
 
                 // Compute the upper bound on the scan work remaining.
                 scanWorkExpected = int64(memstats.heap_scan);
+
             } 
 
             // Compute the remaining scan work estimate.
             //
             // Note that we currently count allocations during GC as both
             // scannable heap (heap_scan) and scan work completed
-            // (scanWork), so allocation will change this difference will
+            // (scanWork), so allocation will change this difference
             // slowly in the soft regime and not at all in the hard
             // regime.
             var scanWorkRemaining = scanWorkExpected - c.scanWork;
@@ -568,6 +553,7 @@ namespace go
                 // may legitimately make the remaining scan work
                 // negative, even in the hard goal regime.
                 scanWorkRemaining = 1000L;
+
             } 
 
             // Compute the heap distance remaining.
@@ -577,6 +563,7 @@ namespace go
                 // This shouldn't happen, but if it does, avoid
                 // dividing by zero or setting the assist negative.
                 heapRemaining = 1L;
+
             } 
 
             // Compute the mutator assist ratio so by the time the mutator
@@ -584,11 +571,14 @@ namespace go
             // have done (or stolen) the remaining amount of scan work.
             c.assistWorkPerByte = float64(scanWorkRemaining) / float64(heapRemaining);
             c.assistBytesPerWork = float64(heapRemaining) / float64(scanWorkRemaining);
+
         }
 
         // endCycle computes the trigger ratio for the next cycle.
-        private static double endCycle(this ref gcControllerState c)
+        private static double endCycle(this ptr<gcControllerState> _addr_c)
         {
+            ref gcControllerState c = ref _addr_c.val;
+
             if (work.userForced)
             { 
                 // Forced GC means this cycle didn't start at the
@@ -596,6 +586,7 @@ namespace go
                 // information about how to adjust the trigger.
                 // Just leave it where it is.
                 return memstats.triggerRatio;
+
             } 
 
             // Proportional response gain for the trigger controller. Must
@@ -603,7 +594,7 @@ namespace go
             // take longer to respond to phase changes. Higher values
             // react to phase changes quickly, but are more affected by
             // transient changes. Values near 1 may be unstable.
-            const float triggerGain = 0.5F; 
+            const float triggerGain = (float)0.5F; 
 
             // Compute next cycle trigger ratio. First, this computes the
             // "error" for this cycle; that is, how far off the trigger
@@ -625,7 +616,7 @@ namespace go
             // growth if we had the desired CPU utilization). The
             // difference between this estimate and the GOGC-based goal
             // heap growth is the error.
-            var goalGrowthRatio = float64(gcpercent) / 100L;
+            var goalGrowthRatio = gcEffectiveGrowthRatio();
             var actualGrowthRatio = float64(memstats.heap_live) / float64(memstats.heap_marked) - 1L;
             var assistDuration = nanotime() - c.markStartTime; 
 
@@ -636,6 +627,7 @@ namespace go
             {
                 utilization += float64(c.assistTime) / float64(assistDuration * int64(gomaxprocs));
             }
+
             var triggerError = goalGrowthRatio - memstats.triggerRatio - utilization / gcGoalUtilization * (actualGrowthRatio - memstats.triggerRatio); 
 
             // Finally, we adjust the trigger for next time by this error,
@@ -657,8 +649,11 @@ namespace go
                 var u_g = gcGoalUtilization;
                 var W_a = c.scanWork;
                 print("pacer: H_m_prev=", H_m_prev, " h_t=", h_t, " H_T=", H_T, " h_a=", h_a, " H_a=", H_a, " h_g=", h_g, " H_g=", H_g, " u_a=", u_a, " u_g=", u_g, " W_a=", W_a, " goalΔ=", goalGrowthRatio - h_t, " actualΔ=", h_a - h_t, " u_a/u_g=", u_a / u_g, "\n");
+
             }
+
             return triggerRatio;
+
         }
 
         // enlistWorker encourages another dedicated mark worker to start on
@@ -666,8 +661,10 @@ namespace go
         // when more work is made available.
         //
         //go:nowritebarrier
-        private static void enlistWorker(this ref gcControllerState c)
-        { 
+        private static void enlistWorker(this ptr<gcControllerState> _addr_c)
+        {
+            ref gcControllerState c = ref _addr_c.val;
+ 
             // If there are idle Ps, wake one so it will run an idle worker.
             // NOTE: This is suspected of causing deadlocks. See golang.org/issue/19112.
             //
@@ -680,18 +677,20 @@ namespace go
             // try to preempt a running P so it will switch to a worker.
             if (c.dedicatedMarkWorkersNeeded <= 0L)
             {
-                return;
+                return ;
             } 
             // Pick a random other P to preempt.
             if (gomaxprocs <= 1L)
             {
-                return;
+                return ;
             }
+
             var gp = getg();
             if (gp == null || gp.m == null || gp.m.p == 0L)
             {
-                return;
+                return ;
             }
+
             var myID = gp.m.p.ptr().id;
             for (long tries = 0L; tries < 5L; tries++)
             {
@@ -700,67 +699,84 @@ namespace go
                 {
                     id++;
                 }
+
                 var p = allp[id];
                 if (p.status != _Prunning)
                 {
                     continue;
                 }
+
                 if (preemptone(p))
                 {
-                    return;
+                    return ;
                 }
+
             }
+
 
         }
 
         // findRunnableGCWorker returns the background mark worker for _p_ if it
         // should be run. This must only be called when gcBlackenEnabled != 0.
-        private static ref g findRunnableGCWorker(this ref gcControllerState c, ref p _p_)
+        private static ptr<g> findRunnableGCWorker(this ptr<gcControllerState> _addr_c, ptr<p> _addr__p_)
         {
+            ref gcControllerState c = ref _addr_c.val;
+            ref p _p_ = ref _addr__p_.val;
+
             if (gcBlackenEnabled == 0L)
             {
                 throw("gcControllerState.findRunnable: blackening not enabled");
             }
+
             if (_p_.gcBgMarkWorker == 0L)
             { 
                 // The mark worker associated with this P is blocked
                 // performing a mark transition. We can't run it
                 // because it may be on some other run or wait queue.
-                return null;
+                return _addr_null!;
+
             }
-            if (!gcMarkWorkAvailable(_p_))
+
+            if (!gcMarkWorkAvailable(_addr__p_))
             { 
                 // No work to be done right now. This can happen at
                 // the end of the mark phase when there are still
                 // assists tapering off. Don't bother running a worker
                 // now because it'll just return immediately.
-                return null;
+                return _addr_null!;
+
             }
-            Func<ref long, bool> decIfPositive = ptr =>
+
+            Func<ptr<long>, bool> decIfPositive = ptr =>
             {
-                if (ptr > 0L.Value)
+                if (ptr > 0L.val)
                 {
                     if (atomic.Xaddint64(ptr, -1L) >= 0L)
                     {
-                        return true;
+                        return _addr_true!;
                     } 
                     // We lost a race
                     atomic.Xaddint64(ptr, +1L);
+
                 }
-                return false;
+
+                return _addr_false!;
+
             }
 ;
 
-            if (decIfPositive(ref c.dedicatedMarkWorkersNeeded))
+            if (decIfPositive(_addr_c.dedicatedMarkWorkersNeeded))
             { 
                 // This P is now dedicated to marking until the end of
                 // the concurrent mark phase.
                 _p_.gcMarkWorkerMode = gcMarkWorkerDedicatedMode;
+
             }
             else if (c.fractionalUtilizationGoal == 0L)
             { 
                 // No need for fractional workers.
-                return null;
+                return _addr_null!;
+
             }
             else
             { 
@@ -772,10 +788,12 @@ namespace go
                 if (delta > 0L && float64(_p_.gcFractionalMarkTime) / float64(delta) > c.fractionalUtilizationGoal)
                 { 
                     // Nope. No need to run a fractional worker.
-                    return null;
+                    return _addr_null!;
+
                 } 
                 // Run a fractional worker.
                 _p_.gcMarkWorkerMode = gcMarkWorkerFractionalMode;
+
             } 
 
             // Run the background mark worker
@@ -785,10 +803,12 @@ namespace go
             {
                 traceGoUnpark(gp, 0L);
             }
-            return gp;
+
+            return _addr_gp!;
+
         }
 
-        // pollFractionalWorkerExit returns true if a fractional mark worker
+        // pollFractionalWorkerExit reports whether a fractional mark worker
         // should self-preempt. It assumes it is called from the fractional
         // worker.
         private static bool pollFractionalWorkerExit()
@@ -801,11 +821,13 @@ namespace go
             {
                 return true;
             }
+
             var p = getg().m.p.ptr();
             var selfTime = p.gcFractionalMarkTime + (now - p.gcMarkWorkerStartTime); 
             // Add some slack to the utilization goal so that the
             // fractional worker isn't behind again the instant it exits.
             return float64(selfTime) / float64(delta) > 1.2F * gcController.fractionalUtilizationGoal;
+
         }
 
         // gcSetTriggerRatio sets the trigger ratio and updates everything
@@ -821,23 +843,58 @@ namespace go
         // mheap_.lock must be held or the world must be stopped.
         private static void gcSetTriggerRatio(double triggerRatio)
         { 
+            // Compute the next GC goal, which is when the allocated heap
+            // has grown by GOGC/100 over the heap marked by the last
+            // cycle.
+            var goal = ~uint64(0L);
+            if (gcpercent >= 0L)
+            {
+                goal = memstats.heap_marked + memstats.heap_marked * uint64(gcpercent) / 100L;
+            } 
+
             // Set the trigger ratio, capped to reasonable bounds.
-            if (triggerRatio < 0L)
-            { 
-                // This can happen if the mutator is allocating very
-                // quickly or the GC is scanning very slowly.
-                triggerRatio = 0L;
-            }
-            else if (gcpercent >= 0L)
-            { 
+            if (gcpercent >= 0L)
+            {
+                var scalingFactor = float64(gcpercent) / 100L; 
                 // Ensure there's always a little margin so that the
                 // mutator assist ratio isn't infinity.
-                float maxTriggerRatio = 0.95F * float64(gcpercent) / 100L;
+                float maxTriggerRatio = 0.95F * scalingFactor;
                 if (triggerRatio > maxTriggerRatio)
                 {
                     triggerRatio = maxTriggerRatio;
+                } 
+
+                // If we let triggerRatio go too low, then if the application
+                // is allocating very rapidly we might end up in a situation
+                // where we're allocating black during a nearly always-on GC.
+                // The result of this is a growing heap and ultimately an
+                // increase in RSS. By capping us at a point >0, we're essentially
+                // saying that we're OK using more CPU during the GC to prevent
+                // this growth in RSS.
+                //
+                // The current constant was chosen empirically: given a sufficiently
+                // fast/scalable allocator with 48 Ps that could drive the trigger ratio
+                // to <0.05, this constant causes applications to retain the same peak
+                // RSS compared to not having this allocator.
+                float minTriggerRatio = 0.6F * scalingFactor;
+                if (triggerRatio < minTriggerRatio)
+                {
+                    triggerRatio = minTriggerRatio;
                 }
+
             }
+            else if (triggerRatio < 0L)
+            { 
+                // gcpercent < 0, so just make sure we're not getting a negative
+                // triggerRatio. This case isn't expected to happen in practice,
+                // and doesn't really matter because if gcpercent < 0 then we won't
+                // ever consume triggerRatio further on in this function, but let's
+                // just be defensive here; the triggerRatio being negative is almost
+                // certainly undesirable.
+                triggerRatio = 0L;
+
+            }
+
             memstats.triggerRatio = triggerRatio; 
 
             // Compute the absolute GC trigger from the trigger ratio.
@@ -850,46 +907,45 @@ namespace go
                 trigger = uint64(float64(memstats.heap_marked) * (1L + triggerRatio)); 
                 // Don't trigger below the minimum heap size.
                 var minTrigger = heapminimum;
-                if (!gosweepdone())
+                if (!isSweepDone())
                 { 
                     // Concurrent sweep happens in the heap growth
                     // from heap_live to gc_trigger, so ensure
                     // that concurrent sweep has some heap growth
                     // in which to perform sweeping before we
                     // start the next GC cycle.
-                    var sweepMin = atomic.Load64(ref memstats.heap_live) + sweepMinHeapDistance * uint64(gcpercent) / 100L;
+                    var sweepMin = atomic.Load64(_addr_memstats.heap_live) + sweepMinHeapDistance;
                     if (sweepMin > minTrigger)
                     {
                         minTrigger = sweepMin;
                     }
+
                 }
+
                 if (trigger < minTrigger)
                 {
                     trigger = minTrigger;
                 }
+
                 if (int64(trigger) < 0L)
                 {
                     print("runtime: next_gc=", memstats.next_gc, " heap_marked=", memstats.heap_marked, " heap_live=", memstats.heap_live, " initialHeapLive=", work.initialHeapLive, "triggerRatio=", triggerRatio, " minTrigger=", minTrigger, "\n");
                     throw("gc_trigger underflow");
                 }
-            }
-            memstats.gc_trigger = trigger; 
 
-            // Compute the next GC goal, which is when the allocated heap
-            // has grown by GOGC/100 over the heap marked by the last
-            // cycle.
-            var goal = ~uint64(0L);
-            if (gcpercent >= 0L)
-            {
-                goal = memstats.heap_marked + memstats.heap_marked * uint64(gcpercent) / 100L;
-                if (goal < trigger)
+                if (trigger > goal)
                 { 
                     // The trigger ratio is always less than GOGC/100, but
                     // other bounds on the trigger may have raised it.
                     // Push up the goal, too.
                     goal = trigger;
+
                 }
-            }
+
+            } 
+
+            // Commit to the trigger and goal.
+            memstats.gc_trigger = trigger;
             memstats.next_gc = goal;
             if (trace.enabled)
             {
@@ -903,7 +959,7 @@ namespace go
             } 
 
             // Update sweep pacing.
-            if (gosweepdone())
+            if (isSweepDone())
             {
                 mheap_.sweepPagesPerByte = 0L;
             }
@@ -914,7 +970,7 @@ namespace go
                 // trigger. Compute the ratio of in-use pages to sweep
                 // per byte allocated, accounting for the fact that
                 // some might already be swept.
-                var heapLiveBasis = atomic.Load64(ref memstats.heap_live);
+                var heapLiveBasis = atomic.Load64(_addr_memstats.heap_live);
                 var heapDistance = int64(trigger) - int64(heapLiveBasis); 
                 // Add a little margin so rounding errors and
                 // concurrent sweep are less likely to leave pages
@@ -924,9 +980,12 @@ namespace go
                 { 
                     // Avoid setting the sweep ratio extremely high
                     heapDistance = _PageSize;
+
                 }
-                var pagesSwept = atomic.Load64(ref mheap_.pagesSwept);
-                var sweepDistancePages = int64(mheap_.pagesInUse) - int64(pagesSwept);
+
+                var pagesSwept = atomic.Load64(_addr_mheap_.pagesSwept);
+                var pagesInUse = atomic.Load64(_addr_mheap_.pagesInUse);
+                var sweepDistancePages = int64(pagesInUse) - int64(pagesSwept);
                 if (sweepDistancePages <= 0L)
                 {
                     mheap_.sweepPagesPerByte = 0L;
@@ -938,14 +997,42 @@ namespace go
                     // Write pagesSweptBasis last, since this
                     // signals concurrent sweeps to recompute
                     // their debt.
-                    atomic.Store64(ref mheap_.pagesSweptBasis, pagesSwept);
+                    atomic.Store64(_addr_mheap_.pagesSweptBasis, pagesSwept);
+
                 }
+
             }
+
+            gcPaceScavenger();
+
+        }
+
+        // gcEffectiveGrowthRatio returns the current effective heap growth
+        // ratio (GOGC/100) based on heap_marked from the previous GC and
+        // next_gc for the current GC.
+        //
+        // This may differ from gcpercent/100 because of various upper and
+        // lower bounds on gcpercent. For example, if the heap is smaller than
+        // heapminimum, this can be higher than gcpercent/100.
+        //
+        // mheap_.lock must be held or the world must be stopped.
+        private static double gcEffectiveGrowthRatio()
+        {
+            var egogc = float64(memstats.next_gc - memstats.heap_marked) / float64(memstats.heap_marked);
+            if (egogc < 0L)
+            { 
+                // Shouldn't happen, but just in case.
+                egogc = 0L;
+
+            }
+
+            return egogc;
+
         }
 
         // gcGoalUtilization is the goal CPU utilization for
         // marking as a fraction of GOMAXPROCS.
-        private static readonly float gcGoalUtilization = 0.30F;
+        private static readonly float gcGoalUtilization = (float)0.30F;
 
         // gcBackgroundUtilization is the fixed CPU utilization for background
         // marking. It must be <= gcGoalUtilization. The difference between
@@ -971,9 +1058,9 @@ namespace go
         // better control CPU and heap growth. However, the larger the gap,
         // the more mutator assists are expected to happen, which impact
         // mutator latency.
-        private static readonly float gcBackgroundUtilization = 0.25F;
+        private static readonly float gcBackgroundUtilization = (float)0.25F;
 
-        // gcCreditSlack is the amount of scan work credit that can can
+        // gcCreditSlack is the amount of scan work credit that can
         // accumulate locally before updating gcController.scanWork and,
         // optionally, gcController.bgScanCredit. Lower values give a more
         // accurate assist ratio and make it more likely that assists will
@@ -981,13 +1068,13 @@ namespace go
         // contention.
 
 
-        // gcCreditSlack is the amount of scan work credit that can can
+        // gcCreditSlack is the amount of scan work credit that can
         // accumulate locally before updating gcController.scanWork and,
         // optionally, gcController.bgScanCredit. Lower values give a more
         // accurate assist ratio and make it more likely that assists will
         // successfully steal background credit. Higher values reduce memory
         // contention.
-        private static readonly long gcCreditSlack = 2000L;
+        private static readonly long gcCreditSlack = (long)2000L;
 
         // gcAssistTimeSlack is the nanoseconds of mutator assist time that
         // can accumulate on a P before updating gcController.assistTime.
@@ -995,7 +1082,7 @@ namespace go
 
         // gcAssistTimeSlack is the nanoseconds of mutator assist time that
         // can accumulate on a P before updating gcController.assistTime.
-        private static readonly long gcAssistTimeSlack = 5000L;
+        private static readonly long gcAssistTimeSlack = (long)5000L;
 
         // gcOverAssistWork determines how many extra units of scan work a GC
         // assist does when an assist happens. This amortizes the cost of an
@@ -1005,7 +1092,7 @@ namespace go
         // gcOverAssistWork determines how many extra units of scan work a GC
         // assist does when an assist happens. This amortizes the cost of an
         // assist by pre-paying for this many bytes of future allocations.
-        private static readonly long gcOverAssistWork = 64L << (int)(10L);
+        private static readonly long gcOverAssistWork = (long)64L << (int)(10L);
 
 
 
@@ -1040,48 +1127,24 @@ namespace go
             // GC may move ahead on its own. For example, when we block
             // until mark termination N, we may wake up in cycle N+2.
 
-            var gp = getg(); 
-
-            // Prevent the GC phase or cycle count from changing.
-            lock(ref work.sweepWaiters.@lock);
-            var n = atomic.Load(ref work.cycles);
-            if (gcphase == _GCmark)
-            { 
-                // Wait until sweep termination, mark, and mark
-                // termination of cycle N complete.
-                gp.schedlink = work.sweepWaiters.head;
-                work.sweepWaiters.head.set(gp);
-                goparkunlock(ref work.sweepWaiters.@lock, "wait for GC cycle", traceEvGoBlock, 1L);
-            }
-            else
-            { 
-                // We're in sweep N already.
-                unlock(ref work.sweepWaiters.@lock);
-            } 
+            // Wait until the current sweep termination, mark, and mark
+            // termination complete.
+            var n = atomic.Load(_addr_work.cycles);
+            gcWaitOnMark(n); 
 
             // We're now in sweep N or later. Trigger GC cycle N+1, which
             // will first finish sweep N if necessary and then enter sweep
             // termination N+1.
-            gcStart(gcBackgroundMode, new gcTrigger(kind:gcTriggerCycle,n:n+1)); 
+            gcStart(new gcTrigger(kind:gcTriggerCycle,n:n+1)); 
 
             // Wait for mark termination N+1 to complete.
-            lock(ref work.sweepWaiters.@lock);
-            if (gcphase == _GCmark && atomic.Load(ref work.cycles) == n + 1L)
-            {
-                gp.schedlink = work.sweepWaiters.head;
-                work.sweepWaiters.head.set(gp);
-                goparkunlock(ref work.sweepWaiters.@lock, "wait for GC cycle", traceEvGoBlock, 1L);
-            }
-            else
-            {
-                unlock(ref work.sweepWaiters.@lock);
-            } 
+            gcWaitOnMark(n + 1L); 
 
             // Finish sweep N+1 before returning. We do this both to
             // complete the cycle and because runtime.GC() is often used
             // as part of tests and benchmarks to get the system into a
             // relatively stable and isolated state.
-            while (atomic.Load(ref work.cycles) == n + 1L && gosweepone() != ~uintptr(0L))
+            while (atomic.Load(_addr_work.cycles) == n + 1L && sweepone() != ~uintptr(0L))
             {
                 sweep.nbgsweep++;
                 Gosched();
@@ -1111,7 +1174,7 @@ namespace go
             // First, wait for sweeping to finish. (We know there are no
             // more spans on the sweep queue, but we may be concurrently
             // sweeping spans, so we have to wait.)
-            while (atomic.Load(ref work.cycles) == n + 1L && atomic.Load(ref mheap_.sweepers) != 0L)
+            while (atomic.Load(_addr_work.cycles) == n + 1L && atomic.Load(_addr_mheap_.sweepers) != 0L)
             {
                 Gosched();
             } 
@@ -1125,12 +1188,48 @@ namespace go
             // stable heap profile. Only do this if we haven't already hit
             // another mark termination.
             var mp = acquirem();
-            var cycle = atomic.Load(ref work.cycles);
+            var cycle = atomic.Load(_addr_work.cycles);
             if (cycle == n + 1L || (gcphase == _GCmark && cycle == n + 2L))
             {
                 mProf_PostSweep();
             }
+
             releasem(mp);
+
+        }
+
+        // gcWaitOnMark blocks until GC finishes the Nth mark phase. If GC has
+        // already completed this mark phase, it returns immediately.
+        private static void gcWaitOnMark(uint n)
+        {
+            while (true)
+            { 
+                // Disable phase transitions.
+                lock(_addr_work.sweepWaiters.@lock);
+                var nMarks = atomic.Load(_addr_work.cycles);
+                if (gcphase != _GCmark)
+                { 
+                    // We've already completed this cycle's mark.
+                    nMarks++;
+
+                }
+
+                if (nMarks > n)
+                { 
+                    // We're done.
+                    unlock(_addr_work.sweepWaiters.@lock);
+                    return ;
+
+                } 
+
+                // Wait until sweep termination, mark, and mark
+                // termination of cycle N complete.
+                work.sweepWaiters.list.push(getg());
+                goparkunlock(_addr_work.sweepWaiters.@lock, waitReasonWaitForGCCycle, traceEvGoBlock, 1L);
+
+            }
+
+
         }
 
         // gcMode indicates how concurrent a GC cycle should be.
@@ -1138,9 +1237,9 @@ namespace go
         {
         }
 
-        private static readonly gcMode gcBackgroundMode = iota; // concurrent GC and sweep
-        private static readonly var gcForceMode = 0; // stop-the-world GC now, concurrent sweep
-        private static readonly var gcForceBlockMode = 1; // stop-the-world GC now and STW sweep (forced by user)
+        private static readonly gcMode gcBackgroundMode = (gcMode)iota; // concurrent GC and sweep
+        private static readonly var gcForceMode = (var)0; // stop-the-world GC now, concurrent sweep
+        private static readonly var gcForceBlockMode = (var)1; // stop-the-world GC now and STW sweep (forced by user)
 
         // A gcTrigger is a predicate for starting a GC cycle. Specifically,
         // it is an exit condition for the _GCoff phase.
@@ -1156,43 +1255,32 @@ namespace go
         }
 
  
-        // gcTriggerAlways indicates that a cycle should be started
-        // unconditionally, even if GOGC is off or we're in a cycle
-        // right now. This cannot be consolidated with other cycles.
-        private static readonly gcTriggerKind gcTriggerAlways = iota; 
-
         // gcTriggerHeap indicates that a cycle should be started when
         // the heap size reaches the trigger heap size computed by the
         // controller.
-        private static readonly var gcTriggerHeap = 0; 
+        private static readonly gcTriggerKind gcTriggerHeap = (gcTriggerKind)iota; 
 
         // gcTriggerTime indicates that a cycle should be started when
         // it's been more than forcegcperiod nanoseconds since the
         // previous GC cycle.
-        private static readonly var gcTriggerTime = 1; 
+        private static readonly var gcTriggerTime = (var)0; 
 
         // gcTriggerCycle indicates that a cycle should be started if
         // we have not yet started cycle number gcTrigger.n (relative
         // to work.cycles).
-        private static readonly var gcTriggerCycle = 2;
+        private static readonly var gcTriggerCycle = (var)1;
 
-        // test returns true if the trigger condition is satisfied, meaning
+
+        // test reports whether the trigger condition is satisfied, meaning
         // that the exit condition for the _GCoff phase has been met. The exit
         // condition should be tested when allocating.
         private static bool test(this gcTrigger t)
         {
-            if (!memstats.enablegc || panicking != 0L)
+            if (!memstats.enablegc || panicking != 0L || gcphase != _GCoff)
             {
                 return false;
             }
-            if (t.kind == gcTriggerAlways)
-            {
-                return true;
-            }
-            if (gcphase != _GCoff)
-            {
-                return false;
-            }
+
 
             if (t.kind == gcTriggerHeap) 
                 // Non-atomic access to heap_live for performance. If
@@ -1205,21 +1293,23 @@ namespace go
                 {
                     return false;
                 }
-                var lastgc = int64(atomic.Load64(ref memstats.last_gc_nanotime));
+
+                var lastgc = int64(atomic.Load64(_addr_memstats.last_gc_nanotime));
                 return lastgc != 0L && t.now - lastgc > forcegcperiod;
             else if (t.kind == gcTriggerCycle) 
                 // t.n > work.cycles, but accounting for wraparound.
                 return int32(t.n - work.cycles) > 0L;
                         return true;
+
         }
 
-        // gcStart transitions the GC from _GCoff to _GCmark (if
-        // !mode.stwMark) or _GCmarktermination (if mode.stwMark) by
-        // performing sweep termination and GC initialization.
+        // gcStart starts the GC. It transitions from _GCoff to _GCmark (if
+        // debug.gcstoptheworld == 0) or performs all of GC (if
+        // debug.gcstoptheworld != 0).
         //
         // This may return without performing this transition in some cases,
         // such as when called on a system stack or with locks held.
-        private static void gcStart(gcMode mode, gcTrigger trigger)
+        private static void gcStart(gcTrigger trigger)
         { 
             // Since this is called from malloc and malloc is called in
             // the guts of a number of libraries that might be holding
@@ -1232,10 +1322,11 @@ namespace go
                 if (gp == mp.g0 || mp.locks > 1L || mp.preemptoff != "")
                 {
                     releasem(mp);
-                    return;
+                    return ;
                 }
 
             }
+
             releasem(mp);
             mp = null; 
 
@@ -1249,7 +1340,7 @@ namespace go
             //
             // We check the transition condition continuously here in case
             // this G gets delayed in to the next GC cycle.
-            while (trigger.test() && gosweepone() != ~uintptr(0L))
+            while (trigger.test() && sweepone() != ~uintptr(0L))
             {
                 sweep.nbgsweep++;
             } 
@@ -1260,45 +1351,58 @@ namespace go
 
             // Perform GC initialization and the sweep termination
             // transition.
-            semacquire(ref work.startSema); 
+            semacquire(_addr_work.startSema); 
             // Re-check transition condition under transition lock.
             if (!trigger.test())
             {
-                semrelease(ref work.startSema);
-                return;
+                semrelease(_addr_work.startSema);
+                return ;
             } 
 
             // For stats, check if this GC was forced by the user.
-            work.userForced = trigger.kind == gcTriggerAlways || trigger.kind == gcTriggerCycle; 
+            work.userForced = trigger.kind == gcTriggerCycle; 
 
             // In gcstoptheworld debug mode, upgrade the mode accordingly.
             // We do this after re-checking the transition condition so
             // that multiple goroutines that detect the heap trigger don't
             // start multiple STW GCs.
-            if (mode == gcBackgroundMode)
+            var mode = gcBackgroundMode;
+            if (debug.gcstoptheworld == 1L)
             {
-                if (debug.gcstoptheworld == 1L)
-                {
-                    mode = gcForceMode;
-                }
-                else if (debug.gcstoptheworld == 2L)
-                {
-                    mode = gcForceBlockMode;
-                }
+                mode = gcForceMode;
+            }
+            else if (debug.gcstoptheworld == 2L)
+            {
+                mode = gcForceBlockMode;
             } 
 
             // Ok, we're doing it! Stop everybody else
-            semacquire(ref worldsema);
+            semacquire(_addr_gcsema);
+            semacquire(_addr_worldsema);
 
             if (trace.enabled)
             {
                 traceGCStart();
-            }
-            if (mode == gcBackgroundMode)
+            } 
+
+            // Check that all Ps have finished deferred mcache flushes.
+            foreach (var (_, p) in allp)
             {
-                gcBgMarkStartWorkers();
+                {
+                    var fg = atomic.Load(_addr_p.mcache.flushGen);
+
+                    if (fg != mheap_.sweepgen)
+                    {
+                        println("runtime: p", p.id, "flushGen", fg, "!= sweepgen", mheap_.sweepgen);
+                        throw("p mcache not flushed");
+                    }
+
+                }
+
             }
-            gcResetMarkState();
+            gcBgMarkStartWorkers();
+
+            systemstack(gcResetMarkState);
 
             work.stwprocs = gomaxprocs;
             work.maxprocs = gomaxprocs;
@@ -1307,8 +1411,10 @@ namespace go
                 // This is used to compute CPU time of the STW phases,
                 // so it can't be more than ncpu, even if GOMAXPROCS is.
                 work.stwprocs = ncpu;
+
             }
-            work.heap0 = atomic.Load64(ref memstats.heap_live);
+
+            work.heap0 = atomic.Load64(_addr_memstats.heap_live);
             work.pauseNS = 0L;
             work.mode = mode;
 
@@ -1319,227 +1425,397 @@ namespace go
             {
                 traceGCSTWStart(1L);
             }
+
             systemstack(stopTheWorldWithSema); 
             // Finish sweep before we start concurrent scan.
             systemstack(() =>
             {
                 finishsweep_m();
             }); 
+
             // clearpools before we start the GC. If we wait they memory will not be
             // reclaimed until the next GC cycle.
             clearpools();
 
             work.cycles++;
-            if (mode == gcBackgroundMode)
-            { // Do as much work concurrently as possible
-                gcController.startCycle();
-                work.heapGoal = memstats.next_gc; 
 
-                // Enter concurrent mark phase and enable
-                // write barriers.
-                //
-                // Because the world is stopped, all Ps will
-                // observe that write barriers are enabled by
-                // the time we start the world and begin
-                // scanning.
-                //
-                // Write barriers must be enabled before assists are
-                // enabled because they must be enabled before
-                // any non-leaf heap objects are marked. Since
-                // allocations are blocked until assists can
-                // happen, we want enable assists as early as
-                // possible.
-                setGCPhase(_GCmark);
+            gcController.startCycle();
+            work.heapGoal = memstats.next_gc; 
 
-                gcBgMarkPrepare(); // Must happen before assist enable.
-                gcMarkRootPrepare(); 
+            // In STW mode, disable scheduling of user Gs. This may also
+            // disable scheduling of this goroutine, so it may block as
+            // soon as we start the world again.
+            if (mode != gcBackgroundMode)
+            {
+                schedEnableUser(false);
+            } 
 
-                // Mark all active tinyalloc blocks. Since we're
-                // allocating from these, they need to be black like
-                // other allocations. The alternative is to blacken
-                // the tiny block on every allocation from it, which
-                // would slow down the tiny allocator.
-                gcMarkTinyAllocs(); 
+            // Enter concurrent mark phase and enable
+            // write barriers.
+            //
+            // Because the world is stopped, all Ps will
+            // observe that write barriers are enabled by
+            // the time we start the world and begin
+            // scanning.
+            //
+            // Write barriers must be enabled before assists are
+            // enabled because they must be enabled before
+            // any non-leaf heap objects are marked. Since
+            // allocations are blocked until assists can
+            // happen, we want enable assists as early as
+            // possible.
+            setGCPhase(_GCmark);
 
-                // At this point all Ps have enabled the write
-                // barrier, thus maintaining the no white to
-                // black invariant. Enable mutator assists to
-                // put back-pressure on fast allocating
-                // mutators.
-                atomic.Store(ref gcBlackenEnabled, 1L); 
+            gcBgMarkPrepare(); // Must happen before assist enable.
+            gcMarkRootPrepare(); 
 
-                // Assists and workers can start the moment we start
-                // the world.
-                gcController.markStartTime = now; 
+            // Mark all active tinyalloc blocks. Since we're
+            // allocating from these, they need to be black like
+            // other allocations. The alternative is to blacken
+            // the tiny block on every allocation from it, which
+            // would slow down the tiny allocator.
+            gcMarkTinyAllocs(); 
 
-                // Concurrent mark.
-                systemstack(() =>
-                {
-                    now = startTheWorldWithSema(trace.enabled);
-                }
-            else
-);
+            // At this point all Ps have enabled the write
+            // barrier, thus maintaining the no white to
+            // black invariant. Enable mutator assists to
+            // put back-pressure on fast allocating
+            // mutators.
+            atomic.Store(_addr_gcBlackenEnabled, 1L); 
+
+            // Assists and workers can start the moment we start
+            // the world.
+            gcController.markStartTime = now; 
+
+            // In STW mode, we could block the instant systemstack
+            // returns, so make sure we're not preemptible.
+            mp = acquirem(); 
+
+            // Concurrent mark.
+            systemstack(() =>
+            {
+                now = startTheWorldWithSema(trace.enabled);
                 work.pauseNS += now - work.pauseStart;
                 work.tMark = now;
-            }            {
-                if (trace.enabled)
-                { 
-                    // Switch to mark termination STW.
-                    traceGCSTWDone();
-                    traceGCSTWStart(0L);
-                }
-                var t = nanotime();
-                work.tMark = t;
-                work.tMarkTerm = t;
-                work.heapGoal = work.heap0; 
+            }); 
 
-                // Perform mark termination. This will restart the world.
-                gcMarkTermination(memstats.triggerRatio);
+            // Release the world sema before Gosched() in STW mode
+            // because we will need to reacquire it later but before
+            // this goroutine becomes runnable again, and we could
+            // self-deadlock otherwise.
+            semrelease(_addr_worldsema);
+            releasem(mp); 
+
+            // Make sure we block instead of returning to user code
+            // in STW mode.
+            if (mode != gcBackgroundMode)
+            {
+                Gosched();
             }
-            semrelease(ref work.startSema);
+
+            semrelease(_addr_work.startSema);
+
         }
 
-        // gcMarkDone transitions the GC from mark 1 to mark 2 and from mark 2
-        // to mark termination.
+        // gcMarkDoneFlushed counts the number of P's with flushed work.
         //
-        // This should be called when all mark work has been drained. In mark
-        // 1, this includes all root marking jobs, global work buffers, and
-        // active work buffers in assists and background workers; however,
-        // work may still be cached in per-P work buffers. In mark 2, per-P
-        // caches are disabled.
+        // Ideally this would be a captured local in gcMarkDone, but forEachP
+        // escapes its callback closure, so it can't capture anything.
+        //
+        // This is protected by markDoneSema.
+        private static uint gcMarkDoneFlushed = default;
+
+        // debugCachedWork enables extra checks for debugging premature mark
+        // termination.
+        //
+        // For debugging issue #27993.
+        private static readonly var debugCachedWork = (var)false;
+
+        // gcWorkPauseGen is for debugging the mark completion algorithm.
+        // gcWork put operations spin while gcWork.pauseGen == gcWorkPauseGen.
+        // Only used if debugCachedWork is true.
+        //
+        // For debugging issue #27993.
+
+
+        // gcWorkPauseGen is for debugging the mark completion algorithm.
+        // gcWork put operations spin while gcWork.pauseGen == gcWorkPauseGen.
+        // Only used if debugCachedWork is true.
+        //
+        // For debugging issue #27993.
+        private static uint gcWorkPauseGen = 1L;
+
+        // gcMarkDone transitions the GC from mark to mark termination if all
+        // reachable objects have been marked (that is, there are no grey
+        // objects and can be no more in the future). Otherwise, it flushes
+        // all local work to the global queues where it can be discovered by
+        // other workers.
+        //
+        // This should be called when all local mark work has been drained and
+        // there are no remaining workers. Specifically, when
+        //
+        //   work.nwait == work.nproc && !gcMarkWorkAvailable(p)
         //
         // The calling context must be preemptible.
         //
-        // Note that it is explicitly okay to have write barriers in this
-        // function because completion of concurrent mark is best-effort
-        // anyway. Any work created by write barriers here will be cleaned up
-        // by mark termination.
+        // Flushing local work is important because idle Ps may have local
+        // work queued. This is the only way to make that work visible and
+        // drive GC to completion.
+        //
+        // It is explicitly okay to have write barriers in this function. If
+        // it does transition to mark termination, then all reachable objects
+        // have been marked, so the write barrier cannot shade any more
+        // objects.
         private static void gcMarkDone()
-        {
+        { 
+            // Ensure only one thread is running the ragged barrier at a
+            // time.
+            semacquire(_addr_work.markDoneSema);
+
 top: 
 
-            // Re-check transition condition under transition lock.
-            semacquire(ref work.markDoneSema); 
-
-            // Re-check transition condition under transition lock.
-            if (!(gcphase == _GCmark && work.nwait == work.nproc && !gcMarkWorkAvailable(null)))
+            // forEachP needs worldsema to execute, and we'll need it to
+            // stop the world later, so acquire worldsema now.
+            if (!(gcphase == _GCmark && work.nwait == work.nproc && !gcMarkWorkAvailable(_addr_null)))
             {
-                semrelease(ref work.markDoneSema);
-                return;
+                semrelease(_addr_work.markDoneSema);
+                return ;
             } 
 
-            // Disallow starting new workers so that any remaining workers
-            // in the current mark phase will drain out.
-            //
-            // TODO(austin): Should dedicated workers keep an eye on this
-            // and exit gcDrain promptly?
-            atomic.Xaddint64(ref gcController.dedicatedMarkWorkersNeeded, -0xffffffffUL);
-            var prevFractionalGoal = gcController.fractionalUtilizationGoal;
-            gcController.fractionalUtilizationGoal = 0L;
+            // forEachP needs worldsema to execute, and we'll need it to
+            // stop the world later, so acquire worldsema now.
+            semacquire(_addr_worldsema); 
 
-            if (!gcBlackenPromptly)
-            { 
-                // Transition from mark 1 to mark 2.
-                //
-                // The global work list is empty, but there can still be work
-                // sitting in the per-P work caches.
-                // Flush and disable work caches.
-
-                // Disallow caching workbufs and indicate that we're in mark 2.
-                gcBlackenPromptly = true; 
-
-                // Prevent completion of mark 2 until we've flushed
-                // cached workbufs.
-                atomic.Xadd(ref work.nwait, -1L); 
-
-                // GC is set up for mark 2. Let Gs blocked on the
-                // transition lock go while we flush caches.
-                semrelease(ref work.markDoneSema);
-
-                systemstack(() =>
+            // Flush all local buffers and collect flushedWork flags.
+            gcMarkDoneFlushed = 0L;
+            systemstack(() =>
+            {
+                var gp = getg().m.curg; 
+                // Mark the user stack as preemptible so that it may be scanned.
+                // Otherwise, our attempt to force all P's to a safepoint could
+                // result in a deadlock as we attempt to preempt a worker that's
+                // trying to preempt us (e.g. for a stack scan).
+                casgstatus(gp, _Grunning, _Gwaiting);
+                forEachP(_p_ =>
                 { 
-                    // Flush all currently cached workbufs and
-                    // ensure all Ps see gcBlackenPromptly. This
-                    // also blocks until any remaining mark 1
-                    // workers have exited their loop so we can
-                    // start new mark 2 workers.
-                    forEachP(_p_ =>
+                    // Flush the write barrier buffer, since this may add
+                    // work to the gcWork.
+                    wbBufFlush1(_p_); 
+                    // For debugging, shrink the write barrier
+                    // buffer so it flushes immediately.
+                    // wbBuf.reset will keep it at this size as
+                    // long as throwOnGCWork is set.
+                    if (debugCachedWork)
                     {
-                        wbBufFlush1(_p_);
-                        _p_.gcw.dispose();
+                        var b = _addr__p_.wbBuf;
+                        b.end = uintptr(@unsafe.Pointer(_addr_b.buf[wbBufEntryPointers]));
+                        b.debugGen = gcWorkPauseGen;
+                    } 
+                    // Flush the gcWork, since this may create global work
+                    // and set the flushedWork flag.
+                    //
+                    // TODO(austin): Break up these workbufs to
+                    // better distribute work.
+                    _p_.gcw.dispose(); 
+                    // Collect the flushedWork flag.
+                    if (_p_.gcw.flushedWork)
+                    {
+                        atomic.Xadd(_addr_gcMarkDoneFlushed, 1L);
+                        _p_.gcw.flushedWork = false;
+                    }
+                    else if (debugCachedWork)
+                    { 
+                        // For debugging, freeze the gcWork
+                        // until we know whether we've reached
+                        // completion or not. If we think
+                        // we've reached completion, but
+                        // there's a paused gcWork, then
+                        // that's a bug.
+                        _p_.gcw.pauseGen = gcWorkPauseGen; 
+                        // Capture the G's stack.
+                        foreach (var (i) in _p_.gcw.pauseStack)
+                        {
+                            _p_.gcw.pauseStack[i] = 0L;
+                        }
+                        callers(1L, _p_.gcw.pauseStack[..]);
+
+                    }
+
+                });
+                casgstatus(gp, _Gwaiting, _Grunning);
+
+            });
+
+            if (gcMarkDoneFlushed != 0L)
+            {
+                if (debugCachedWork)
+                { 
+                    // Release paused gcWorks.
+                    atomic.Xadd(_addr_gcWorkPauseGen, 1L);
+
+                } 
+                // More grey objects were discovered since the
+                // previous termination check, so there may be more
+                // work to do. Keep going. It's possible the
+                // transition condition became true again during the
+                // ragged barrier, so re-check it.
+                semrelease(_addr_worldsema);
+                goto top;
+
+            }
+
+            if (debugCachedWork)
+            {
+                throwOnGCWork = true; 
+                // Release paused gcWorks. If there are any, they
+                // should now observe throwOnGCWork and panic.
+                atomic.Xadd(_addr_gcWorkPauseGen, 1L);
+
+            } 
+
+            // There was no global work, no local work, and no Ps
+            // communicated work since we took markDoneSema. Therefore
+            // there are no grey objects and no more objects can be
+            // shaded. Transition to mark termination.
+            var now = nanotime();
+            work.tMarkTerm = now;
+            work.pauseStart = now;
+            getg().m.preemptoff = "gcing";
+            if (trace.enabled)
+            {
+                traceGCSTWStart(0L);
+            }
+
+            systemstack(stopTheWorldWithSema); 
+            // The gcphase is _GCmark, it will transition to _GCmarktermination
+            // below. The important thing is that the wb remains active until
+            // all marking is complete. This includes writes made by the GC.
+
+            if (debugCachedWork)
+            { 
+                // For debugging, double check that no work was added after we
+                // went around above and disable write barrier buffering.
+                {
+                    var p__prev1 = p;
+
+                    foreach (var (_, __p) in allp)
+                    {
+                        p = __p;
+                        var gcw = _addr_p.gcw;
+                        if (!gcw.empty())
+                        {
+                            printlock();
+                            print("runtime: P ", p.id, " flushedWork ", gcw.flushedWork);
+                            if (gcw.wbuf1 == null)
+                            {
+                                print(" wbuf1=<nil>");
+                            }
+                            else
+                            {
+                                print(" wbuf1.n=", gcw.wbuf1.nobj);
+                            }
+
+                            if (gcw.wbuf2 == null)
+                            {
+                                print(" wbuf2=<nil>");
+                            }
+                            else
+                            {
+                                print(" wbuf2.n=", gcw.wbuf2.nobj);
+                            }
+
+                            print("\n");
+                            if (gcw.pauseGen == gcw.putGen)
+                            {
+                                println("runtime: checkPut already failed at this generation");
+                            }
+
+                            throw("throwOnGCWork");
+
+                        }
+
                     }
             else
-);
-                }); 
 
-                // Check that roots are marked. We should be able to
-                // do this before the forEachP, but based on issue
-                // #16083 there may be a (harmless) race where we can
-                // enter mark 2 while some workers are still scanning
-                // stacks. The forEachP ensures these scans are done.
-                //
-                // TODO(austin): Figure out the race and fix this
-                // properly.
-                gcMarkRootCheck(); 
-
-                // Now we can start up mark 2 workers.
-                atomic.Xaddint64(ref gcController.dedicatedMarkWorkersNeeded, 0xffffffffUL);
-                gcController.fractionalUtilizationGoal = prevFractionalGoal;
-
-                var incnwait = atomic.Xadd(ref work.nwait, +1L);
-                if (incnwait == work.nproc && !gcMarkWorkAvailable(null))
-                { 
-                    // This loop will make progress because
-                    // gcBlackenPromptly is now true, so it won't
-                    // take this same "if" branch.
-                    goto top;
+                    p = p__prev1;
                 }
             }            { 
-                // Transition to mark termination.
-                var now = nanotime();
-                work.tMarkTerm = now;
-                work.pauseStart = now;
-                getg().m.preemptoff = "gcing";
-                if (trace.enabled)
+                // For unknown reasons (see issue #27993), there is
+                // sometimes work left over when we enter mark
+                // termination. Detect this and resume concurrent
+                // mark. This is obviously unfortunate.
+                //
+                // Switch to the system stack to call wbBufFlush1,
+                // though in this case it doesn't matter because we're
+                // non-preemptible anyway.
+                var restart = false;
+                systemstack(() =>
                 {
-                    traceGCSTWStart(0L);
+                    {
+                        var p__prev1 = p;
+
+                        foreach (var (_, __p) in allp)
+                        {
+                            p = __p;
+                            wbBufFlush1(p);
+                            if (!p.gcw.empty())
+                            {
+                                restart = true;
+                                break;
+                            }
+
+                        }
+
+                        p = p__prev1;
+                    }
+                });
+                if (restart)
+                {
+                    getg().m.preemptoff = "";
+                    systemstack(() =>
+                    {
+                        now = startTheWorldWithSema(true);
+                        work.pauseNS += now - work.pauseStart;
+                    });
+                    semrelease(_addr_worldsema);
+                    goto top;
+
                 }
-                systemstack(stopTheWorldWithSema); 
-                // The gcphase is _GCmark, it will transition to _GCmarktermination
-                // below. The important thing is that the wb remains active until
-                // all marking is complete. This includes writes made by the GC.
 
-                // Record that one root marking pass has completed.
-                work.markrootDone = true; 
+            } 
 
-                // Disable assists and background workers. We must do
-                // this before waking blocked assists.
-                atomic.Store(ref gcBlackenEnabled, 0L); 
+            // Disable assists and background workers. We must do
+            // this before waking blocked assists.
+            atomic.Store(_addr_gcBlackenEnabled, 0L); 
 
-                // Wake all blocked assists. These will run when we
-                // start the world again.
-                gcWakeAllAssists(); 
+            // Wake all blocked assists. These will run when we
+            // start the world again.
+            gcWakeAllAssists(); 
 
-                // Likewise, release the transition lock. Blocked
-                // workers and assists will run when we start the
-                // world again.
-                semrelease(ref work.markDoneSema); 
+            // Likewise, release the transition lock. Blocked
+            // workers and assists will run when we start the
+            // world again.
+            semrelease(_addr_work.markDoneSema); 
 
-                // endCycle depends on all gcWork cache stats being
-                // flushed. This is ensured by mark 2.
-                var nextTriggerRatio = gcController.endCycle(); 
+            // In STW mode, re-enable user goroutines. These will be
+            // queued to run after we start the world.
+            schedEnableUser(true); 
 
-                // Perform mark termination. This will restart the world.
-                gcMarkTermination(nextTriggerRatio);
-            }
+            // endCycle depends on all gcWork cache stats being flushed.
+            // The termination algorithm above ensured that up to
+            // allocations since the ragged barrier.
+            var nextTriggerRatio = gcController.endCycle(); 
+
+            // Perform mark termination. This will restart the world.
+            gcMarkTermination(nextTriggerRatio);
+
         }
 
         private static void gcMarkTermination(double nextTriggerRatio)
         { 
             // World is stopped.
             // Start marktermination which includes enabling the write barrier.
-            atomic.Store(ref gcBlackenEnabled, 0L);
-            gcBlackenPromptly = false;
+            atomic.Store(_addr_gcBlackenEnabled, 0L);
             setGCPhase(_GCmarktermination);
 
             work.heap1 = memstats.heap_live;
@@ -1551,7 +1827,7 @@ top:
             _g_.m.traceback = 2L;
             var gp = _g_.m.curg;
             casgstatus(gp, _Grunning, _Gwaiting);
-            gp.waitreason = "garbage collection"; 
+            gp.waitreason = waitReasonGarbageCollection; 
 
             // Run gc on the g0 stack. We do this so that the g stack
             // we're currently running on will no longer change. Cuts
@@ -1575,36 +1851,24 @@ top:
                 work.heap2 = work.bytesMarked;
                 if (debug.gccheckmark > 0L)
                 { 
-                    // Run a full stop-the-world mark using checkmark bits,
-                    // to check that we didn't forget to mark anything during
-                    // the concurrent mark process.
+                    // Run a full non-parallel, stop-the-world
+                    // mark using checkmark bits, to check that we
+                    // didn't forget to mark anything during the
+                    // concurrent mark process.
                     gcResetMarkState();
                     initCheckmarks();
-                    gcMark(startTime);
+                    var gcw = _addr_getg().m.p.ptr().gcw;
+                    gcDrain(gcw, 0L);
+                    wbBufFlush1(getg().m.p.ptr());
+                    gcw.dispose();
                     clearCheckmarks();
+
                 } 
 
                 // marking is complete so we can turn the write barrier off
                 setGCPhase(_GCoff);
                 gcSweep(work.mode);
 
-                if (debug.gctrace > 1L)
-                {
-                    startTime = nanotime(); 
-                    // The g stacks have been scanned so
-                    // they have gcscanvalid==true and gcworkdone==true.
-                    // Reset these so that all stacks will be rescanned.
-                    gcResetMarkState();
-                    finishsweep_m(); 
-
-                    // Still in STW but gcphase is _GCoff, reset to _GCmarktermination
-                    // At this point all objects will be found during the gcMark which
-                    // does a complete STW mark and object scan.
-                    setGCPhase(_GCmarktermination);
-                    gcMark(startTime);
-                    setGCPhase(_GCoff); // marking is done, turn off wb.
-                    gcSweep(work.mode);
-                }
             });
 
             _g_.m.traceback = 0L;
@@ -1623,6 +1887,10 @@ top:
                 throw("gc done but gcphase != _GCoff");
             } 
 
+            // Record next_gc and heap_inuse for scavenger.
+            memstats.last_next_gc = memstats.next_gc;
+            memstats.last_heap_inuse = memstats.heap_inuse; 
+
             // Update GC trigger and pacing for the next cycle.
             gcSetTriggerRatio(nextTriggerRatio); 
 
@@ -1632,8 +1900,8 @@ top:
             var unixNow = sec * 1e9F + int64(nsec);
             work.pauseNS += now - work.pauseStart;
             work.tEnd = now;
-            atomic.Store64(ref memstats.last_gc_unix, uint64(unixNow)); // must be Unix time to make sense to user
-            atomic.Store64(ref memstats.last_gc_nanotime, uint64(now)); // monotonic time for us
+            atomic.Store64(_addr_memstats.last_gc_unix, uint64(unixNow)); // must be Unix time to make sense to user
+            atomic.Store64(_addr_memstats.last_gc_nanotime, uint64(now)); // monotonic time for us
             memstats.pause_ns[memstats.numgc % uint32(len(memstats.pause_ns))] = uint64(work.pauseNS);
             memstats.pause_end[memstats.numgc % uint32(len(memstats.pause_end))] = uint64(unixNow);
             memstats.pause_total_ns += uint64(work.pauseNS); 
@@ -1661,11 +1929,10 @@ top:
             } 
 
             // Bump GC cycle count and wake goroutines waiting on sweep.
-            lock(ref work.sweepWaiters.@lock);
+            lock(_addr_work.sweepWaiters.@lock);
             memstats.numgc++;
-            injectglist(work.sweepWaiters.head.ptr());
-            work.sweepWaiters.head = 0L;
-            unlock(ref work.sweepWaiters.@lock); 
+            injectglist(_addr_work.sweepWaiters.list);
+            unlock(_addr_work.sweepWaiters.@lock); 
 
             // Finish the current heap profiling cycle and start a new
             // heap profiling cycle. We do this before starting the world
@@ -1675,7 +1942,6 @@ top:
             systemstack(() =>
             {
                 startTheWorldWithSema(true);
-
             }); 
 
             // Flush the heap profile so we can start a new cycle next GC.
@@ -1689,6 +1955,19 @@ top:
 
             // Free stack spans. This must be done between GC cycles.
             systemstack(freeStackSpans); 
+
+            // Ensure all mcaches are flushed. Each P will flush its own
+            // mcache before allocating, but idle Ps may not. Since this
+            // is necessary to sweep all spans, we need to ensure all
+            // mcaches are flushed before we start the next GC cycle.
+            systemstack(() =>
+            {
+                forEachP(_p_ =>
+                {
+                    _p_.mcache.prepareForSweep();
+                });
+
+            }); 
 
             // Print gctrace before dropping worldsema. As soon as we drop
             // worldsema another cycle could start and smash the stats
@@ -1713,8 +1992,10 @@ top:
                         {
                             print("+");
                         }
+
                         print(string(fmtNSAsMS(sbuf[..], uint64(ns - prev))));
                         prev = ns;
+
                     }
 
                     i = i__prev1;
@@ -1734,12 +2015,15 @@ top:
                         { 
                             // Separate mark time components with /.
                             print("/");
+
                         }
                         else if (i != 0L)
                         {
                             print("+");
                         }
+
                         print(string(fmtNSAsMS(sbuf[..], uint64(ns))));
+
                     }
 
                     i = i__prev1;
@@ -1751,10 +2035,14 @@ top:
                 {
                     print(" (forced)");
                 }
+
                 print("\n");
                 printunlock();
+
             }
-            semrelease(ref worldsema); 
+
+            semrelease(_addr_worldsema);
+            semrelease(_addr_gcsema); 
             // Careful: another GC cycle may start now.
 
             releasem(mp);
@@ -1765,7 +2053,9 @@ top:
             { 
                 // give the queued finalizers, if any, a chance to run
                 Gosched();
+
             }
+
         }
 
         // gcBgMarkStartWorkers prepares background mark worker goroutines.
@@ -1780,11 +2070,13 @@ top:
             {
                 if (p.gcBgMarkWorker == 0L)
                 {
-                    go_(() => gcBgMarkWorker(p));
-                    notetsleepg(ref work.bgMarkReady, -1L);
-                    noteclear(ref work.bgMarkReady);
+                    go_(() => gcBgMarkWorker(_addr_p));
+                    notetsleepg(_addr_work.bgMarkReady, -1L);
+                    noteclear(_addr_work.bgMarkReady);
                 }
+
             }
+
         }
 
         // gcBgMarkPrepare sets up state for background marking.
@@ -1802,10 +2094,13 @@ top:
             // there are no workers.
             work.nproc = ~uint32(0L);
             work.nwait = ~uint32(0L);
+
         }
 
-        private static void gcBgMarkWorker(ref p _p_)
+        private static void gcBgMarkWorker(ptr<p> _addr__p_)
         {
+            ref p _p_ = ref _addr__p_.val;
+
             var gp = getg();
 
             private partial struct parkInfo
@@ -1817,7 +2112,7 @@ top:
             // the stack (see gopark). Prevent deadlock from recursively
             // starting GC by disabling preemption.
             gp.m.preemptoff = "GC worker init";
-            ptr<object> park = @new<parkInfo>();
+            ptr<parkInfo> park = @new<parkInfo>();
             gp.m.preemptoff = "";
 
             park.m.set(acquirem());
@@ -1829,7 +2124,7 @@ top:
             // and put it on a run queue. Instead, when the preempt flag
             // is set, this puts itself into _Gwaiting to be woken up by
             // gcController.findRunnable at the appropriate time.
-            notewakeup(ref work.bgMarkReady);
+            notewakeup(_addr_work.bgMarkReady);
 
             while (true)
             { 
@@ -1838,7 +2133,7 @@ top:
                 // may be preempted.
                 gopark((g, parkp) =>
                 {
-                    park = (parkInfo.Value)(parkp); 
+                    park = (parkInfo.val)(parkp); 
 
                     // The worker G is no longer running, so it's
                     // now safe to allow preemption.
@@ -1863,10 +2158,14 @@ top:
                             // The P got a new worker.
                             // Exit this worker.
                             return false;
+
                         }
+
                     }
+
                     return true;
-                }, @unsafe.Pointer(park), "GC worker (idle)", traceEvGoBlock, 0L); 
+
+                }, @unsafe.Pointer(park), waitReasonGCWorkerIdle, traceEvGoBlock, 0L); 
 
                 // Loop until the P dies and disassociates this
                 // worker (the P may later be reused, in which case
@@ -1885,15 +2184,17 @@ top:
                 {
                     throw("gcBgMarkWorker: blackening not enabled");
                 }
+
                 var startTime = nanotime();
                 _p_.gcMarkWorkerStartTime = startTime;
 
-                var decnwait = atomic.Xadd(ref work.nwait, -1L);
+                var decnwait = atomic.Xadd(_addr_work.nwait, -1L);
                 if (decnwait == work.nproc)
                 {
                     println("runtime: work.nwait=", decnwait, "work.nproc=", work.nproc);
                     throw("work.nwait was > work.nproc");
                 }
+
                 systemstack(() =>
                 { 
                     // Mark our goroutine preemptible so its stack
@@ -1906,7 +2207,7 @@ top:
                     casgstatus(gp, _Grunning, _Gwaiting);
 
                     if (_p_.gcMarkWorkerMode == gcMarkWorkerDedicatedMode) 
-                        gcDrain(ref _p_.gcw, gcDrainUntilPreempt | gcDrainFlushBgCredit);
+                        gcDrain(_addr__p_.gcw, gcDrainUntilPreempt | gcDrainFlushBgCredit);
                         if (gp.preempt)
                         { 
                             // We were preempted. This is
@@ -1914,7 +2215,7 @@ top:
                             // everything out of the run
                             // queue so it can run
                             // somewhere else.
-                            lock(ref sched.@lock);
+                            lock(_addr_sched.@lock);
                             while (true)
                             {
                                 var (gp, _) = runqget(_p_);
@@ -1922,48 +2223,41 @@ top:
                                 {
                                     break;
                                 }
+
                                 globrunqput(gp);
+
                             }
 
-                            unlock(ref sched.@lock);
+                            unlock(_addr_sched.@lock);
+
                         } 
                         // Go back to draining, this time
                         // without preemption.
-                        gcDrain(ref _p_.gcw, gcDrainNoBlock | gcDrainFlushBgCredit);
+                        gcDrain(_addr__p_.gcw, gcDrainFlushBgCredit);
                     else if (_p_.gcMarkWorkerMode == gcMarkWorkerFractionalMode) 
-                        gcDrain(ref _p_.gcw, gcDrainFractional | gcDrainUntilPreempt | gcDrainFlushBgCredit);
+                        gcDrain(_addr__p_.gcw, gcDrainFractional | gcDrainUntilPreempt | gcDrainFlushBgCredit);
                     else if (_p_.gcMarkWorkerMode == gcMarkWorkerIdleMode) 
-                        gcDrain(ref _p_.gcw, gcDrainIdle | gcDrainUntilPreempt | gcDrainFlushBgCredit);
+                        gcDrain(_addr__p_.gcw, gcDrainIdle | gcDrainUntilPreempt | gcDrainFlushBgCredit);
                     else 
                         throw("gcBgMarkWorker: unexpected gcMarkWorkerMode");
                                         casgstatus(gp, _Gwaiting, _Grunning);
-                }); 
 
-                // If we are nearing the end of mark, dispose
-                // of the cache promptly. We must do this
-                // before signaling that we're no longer
-                // working so that other workers can't observe
-                // no workers and no work while we have this
-                // cached, and before we compute done.
-                if (gcBlackenPromptly)
-                {
-                    _p_.gcw.dispose();
-                } 
+                }); 
 
                 // Account for time.
                 var duration = nanotime() - startTime;
 
                 if (_p_.gcMarkWorkerMode == gcMarkWorkerDedicatedMode) 
-                    atomic.Xaddint64(ref gcController.dedicatedMarkTime, duration);
-                    atomic.Xaddint64(ref gcController.dedicatedMarkWorkersNeeded, 1L);
+                    atomic.Xaddint64(_addr_gcController.dedicatedMarkTime, duration);
+                    atomic.Xaddint64(_addr_gcController.dedicatedMarkWorkersNeeded, 1L);
                 else if (_p_.gcMarkWorkerMode == gcMarkWorkerFractionalMode) 
-                    atomic.Xaddint64(ref gcController.fractionalMarkTime, duration);
-                    atomic.Xaddint64(ref _p_.gcFractionalMarkTime, duration);
+                    atomic.Xaddint64(_addr_gcController.fractionalMarkTime, duration);
+                    atomic.Xaddint64(_addr__p_.gcFractionalMarkTime, duration);
                 else if (_p_.gcMarkWorkerMode == gcMarkWorkerIdleMode) 
-                    atomic.Xaddint64(ref gcController.idleMarkTime, duration);
+                    atomic.Xaddint64(_addr_gcController.idleMarkTime, duration);
                 // Was this the last worker and did we run out
                 // of work?
-                var incnwait = atomic.Xadd(ref work.nwait, +1L);
+                var incnwait = atomic.Xadd(_addr_work.nwait, +1L);
                 if (incnwait > work.nproc)
                 {
                     println("runtime: p.gcMarkWorkerMode=", _p_.gcMarkWorkerMode, "work.nwait=", incnwait, "work.nproc=", work.nproc);
@@ -1972,7 +2266,7 @@ top:
 
                 // If this worker reached a background mark completion
                 // point, signal the main GC goroutine.
-                if (incnwait == work.nproc && !gcMarkWorkAvailable(null))
+                if (incnwait == work.nproc && !gcMarkWorkAvailable(_addr_null))
                 { 
                     // Make this G preemptible and disassociate it
                     // as the worker for this P so
@@ -1991,129 +2285,138 @@ top:
                     // parked.
                     park.m.set(acquirem());
                     park.attach.set(_p_);
+
                 }
+
             }
+
 
         }
 
-        // gcMarkWorkAvailable returns true if executing a mark worker
+        // gcMarkWorkAvailable reports whether executing a mark worker
         // on p is potentially useful. p may be nil, in which case it only
         // checks the global sources of work.
-        private static bool gcMarkWorkAvailable(ref p p)
+        private static bool gcMarkWorkAvailable(ptr<p> _addr_p)
         {
+            ref p p = ref _addr_p.val;
+
             if (p != null && !p.gcw.empty())
             {
                 return true;
             }
+
             if (!work.full.empty())
             {
                 return true; // global work available
             }
+
             if (work.markrootNext < work.markrootJobs)
             {
                 return true; // root scan work available
             }
+
             return false;
+
         }
 
         // gcMark runs the mark (or, for concurrent GC, mark termination)
         // All gcWork caches must be empty.
         // STW is in effect at this point.
-        //TODO go:nowritebarrier
-        private static void gcMark(long start_time)
+        private static void gcMark(long start_time) => func((_, panic, __) =>
         {
             if (debug.allocfreetrace > 0L)
             {
                 tracegc();
             }
+
             if (gcphase != _GCmarktermination)
             {
                 throw("in gcMark expecting to see gcphase as _GCmarktermination");
             }
+
             work.tstart = start_time; 
 
-            // Queue root marking jobs.
-            gcMarkRootPrepare();
-
-            work.nwait = 0L;
-            work.ndone = 0L;
-            work.nproc = uint32(gcprocs());
-
-            if (work.full == 0L && work.nDataRoots + work.nBSSRoots + work.nSpanRoots + work.nStackRoots == 0L)
-            { 
-                // There's no work on the work queue and no root jobs
-                // that can produce work, so don't bother entering the
-                // getfull() barrier.
-                //
-                // This will be the situation the vast majority of the
-                // time after concurrent mark. However, we still need
-                // a fallback for STW GC and because there are some
-                // known races that occasionally leave work around for
-                // mark termination.
-                //
-                // We're still hedging our bets here: if we do
-                // accidentally produce some work, we'll still process
-                // it, just not necessarily in parallel.
-                //
-                // TODO(austin): Fix the races and and remove
-                // work draining from mark termination so we don't
-                // need the fallback path.
-                work.helperDrainBlock = false;
-            }
-            else
+            // Check that there's no marking work remaining.
+            if (work.full != 0L || work.markrootNext < work.markrootJobs)
             {
-                work.helperDrainBlock = true;
+                print("runtime: full=", hex(work.full), " next=", work.markrootNext, " jobs=", work.markrootJobs, " nDataRoots=", work.nDataRoots, " nBSSRoots=", work.nBSSRoots, " nSpanRoots=", work.nSpanRoots, " nStackRoots=", work.nStackRoots, "\n");
+                panic("non-empty mark queue after concurrent mark");
             }
-            if (work.nproc > 1L)
-            {
-                noteclear(ref work.alldone);
-                helpgc(int32(work.nproc));
-            }
-            gchelperstart();
-
-            var gcw = ref getg().m.p.ptr().gcw;
-            if (work.helperDrainBlock)
-            {
-                gcDrain(gcw, gcDrainBlock);
-            }
-            else
-            {
-                gcDrain(gcw, gcDrainNoBlock);
-            }
-            gcw.dispose();
 
             if (debug.gccheckmark > 0L)
             { 
                 // This is expensive when there's a large number of
                 // Gs, so only do it if checkmark is also enabled.
                 gcMarkRootCheck();
+
             }
+
             if (work.full != 0L)
             {
                 throw("work.full != 0");
-            }
-            if (work.nproc > 1L)
-            {
-                notesleep(ref work.alldone);
             } 
 
-            // Record that at least one root marking pass has completed.
-            work.markrootDone = true; 
-
-            // Double-check that all gcWork caches are empty. This should
-            // be ensured by mark 2 before we enter mark termination.
+            // Clear out buffers and double-check that all gcWork caches
+            // are empty. This should be ensured by gcMarkDone before we
+            // enter mark termination.
+            //
+            // TODO: We could clear out buffers just before mark if this
+            // has a non-negligible impact on STW time.
             foreach (var (_, p) in allp)
-            {
-                gcw = ref p.gcw;
+            { 
+                // The write barrier may have buffered pointers since
+                // the gcMarkDone barrier. However, since the barrier
+                // ensured all reachable objects were marked, all of
+                // these must be pointers to black objects. Hence we
+                // can just discard the write barrier buffer.
+                if (debug.gccheckmark > 0L || throwOnGCWork)
+                { 
+                    // For debugging, flush the buffer and make
+                    // sure it really was all marked.
+                    wbBufFlush1(p);
+
+                }
+                else
+                {
+                    p.wbBuf.reset();
+                }
+
+                var gcw = _addr_p.gcw;
                 if (!gcw.empty())
                 {
+                    printlock();
+                    print("runtime: P ", p.id, " flushedWork ", gcw.flushedWork);
+                    if (gcw.wbuf1 == null)
+                    {
+                        print(" wbuf1=<nil>");
+                    }
+                    else
+                    {
+                        print(" wbuf1.n=", gcw.wbuf1.nobj);
+                    }
+
+                    if (gcw.wbuf2 == null)
+                    {
+                        print(" wbuf2=<nil>");
+                    }
+                    else
+                    {
+                        print(" wbuf2.n=", gcw.wbuf2.nobj);
+                    }
+
+                    print("\n");
                     throw("P has cached GC work at end of mark termination");
-                }
-                if (gcw.scanWork != 0L || gcw.bytesMarked != 0L)
-                {
-                    throw("P has unflushed stats at end of mark termination");
-                }
+
+                } 
+                // There may still be cached empty buffers, which we
+                // need to flush since we're going to free them. Also,
+                // there may be non-zero stats because we allocated
+                // black after the gcMarkDone barrier.
+                gcw.dispose();
+
             }
+            throwOnGCWork = false;
+
             cachestats(); 
 
             // Update the marked heap stat.
@@ -2129,34 +2432,52 @@ top:
             {
                 traceHeapAlloc();
             }
-        }
 
+        });
+
+        // gcSweep must be called on the system stack because it acquires the heap
+        // lock. See mheap for details.
+        //
+        // The world must be stopped.
+        //
+        //go:systemstack
         private static void gcSweep(gcMode mode)
         {
             if (gcphase != _GCoff)
             {
                 throw("gcSweep being done but phase is not GCoff");
             }
-            lock(ref mheap_.@lock);
+
+            lock(_addr_mheap_.@lock);
             mheap_.sweepgen += 2L;
             mheap_.sweepdone = 0L;
-            if (mheap_.sweepSpans[mheap_.sweepgen / 2L % 2L].index != 0L)
+            if (!go115NewMCentralImpl && mheap_.sweepSpans[mheap_.sweepgen / 2L % 2L].index != 0L)
             { 
                 // We should have drained this list during the last
                 // sweep phase. We certainly need to start this phase
                 // with an empty swept list.
                 throw("non-empty swept list");
+
             }
+
             mheap_.pagesSwept = 0L;
-            unlock(ref mheap_.@lock);
+            mheap_.sweepArenas = mheap_.allArenas;
+            mheap_.reclaimIndex = 0L;
+            mheap_.reclaimCredit = 0L;
+            unlock(_addr_mheap_.@lock);
+
+            if (go115NewMCentralImpl)
+            {
+                sweep.centralIndex.clear();
+            }
 
             if (!_ConcurrentSweep || mode == gcForceBlockMode)
             { 
                 // Special case synchronous sweep.
                 // Record that no proportional sweeping has to happen.
-                lock(ref mheap_.@lock);
+                lock(_addr_mheap_.@lock);
                 mheap_.sweepPagesPerByte = 0L;
-                unlock(ref mheap_.@lock); 
+                unlock(_addr_mheap_.@lock); 
                 // Sweep all spans eagerly.
                 while (sweepone() != ~uintptr(0L))
                 {
@@ -2178,17 +2499,20 @@ top:
                 // available immediately.
                 mProf_NextCycle();
                 mProf_Flush();
-                return;
+                return ;
+
             } 
 
             // Background sweep.
-            lock(ref sweep.@lock);
+            lock(_addr_sweep.@lock);
             if (sweep.parked)
             {
                 sweep.parked = false;
                 ready(sweep.g, 0L, true);
             }
-            unlock(ref sweep.@lock);
+
+            unlock(_addr_sweep.@lock);
+
         }
 
         // gcResetMarkState resets global state prior to marking (concurrent
@@ -2196,22 +2520,41 @@ top:
         //
         // This is safe to do without the world stopped because any Gs created
         // during or after this will start out in the reset state.
+        //
+        // gcResetMarkState must be called on the system stack because it acquires
+        // the heap lock. See mheap for details.
+        //
+        //go:systemstack
         private static void gcResetMarkState()
         { 
             // This may be called during a concurrent phase, so make sure
             // allgs doesn't change.
-            lock(ref allglock);
+            lock(_addr_allglock);
             foreach (var (_, gp) in allgs)
             {
                 gp.gcscandone = false; // set to true in gcphasework
-                gp.gcscanvalid = false; // stack has not been scanned
                 gp.gcAssistBytes = 0L;
-            }
-            unlock(ref allglock);
 
+            }
+            unlock(_addr_allglock); 
+
+            // Clear page marks. This is just 1MB per 64GB of heap, so the
+            // time here is pretty trivial.
+            lock(_addr_mheap_.@lock);
+            var arenas = mheap_.allArenas;
+            unlock(_addr_mheap_.@lock);
+            foreach (var (_, ai) in arenas)
+            {
+                var ha = mheap_.arenas[ai.l1()][ai.l2()];
+                foreach (var (i) in ha.pageMarks)
+                {
+                    ha.pageMarks[i] = 0L;
+                }
+
+            }
             work.bytesMarked = 0L;
-            work.initialHeapLive = atomic.Load64(ref memstats.heap_live);
-            work.markrootDone = false;
+            work.initialHeapLive = atomic.Load64(_addr_memstats.heap_live);
+
         }
 
         // Hooks for other packages
@@ -2236,8 +2579,8 @@ top:
             // Leave per-P caches alone, they have strictly bounded size.
             // Disconnect cached list before dropping it on the floor,
             // so that a dangling ref to one entry does not pin all of them.
-            lock(ref sched.sudoglock);
-            ref sudog sg = default;            ref sudog sgnext = default;
+            lock(_addr_sched.sudoglock);
+            ptr<sudog> sg;            ptr<sudog> sgnext;
 
             sg = sched.sudogcache;
 
@@ -2245,20 +2588,20 @@ top:
             {
                 sgnext = sg.next;
                 sg.next = null;
-                sg = sgnext;
+                sg = addr(sgnext);
             }
 
             sched.sudogcache = null;
-            unlock(ref sched.sudoglock); 
+            unlock(_addr_sched.sudoglock); 
 
             // Clear central defer pools.
             // Leave per-P pools alone, they have strictly bounded size.
-            lock(ref sched.deferlock);
+            lock(_addr_sched.deferlock);
             foreach (var (i) in sched.deferpool)
             { 
                 // disconnect cached list before dropping it on the floor,
                 // so that a dangling ref to one entry does not pin all of them.
-                ref _defer d = default;                ref _defer dlink = default;
+                ptr<_defer> d;                ptr<_defer> dlink;
 
                 d = sched.deferpool[i];
 
@@ -2266,62 +2609,14 @@ top:
                 {
                     dlink = d.link;
                     d.link = null;
-                    d = dlink;
+                    d = addr(dlink);
                 }
 
                 sched.deferpool[i] = null;
-            }
-            unlock(ref sched.deferlock);
-        }
 
-        // gchelper runs mark termination tasks on Ps other than the P
-        // coordinating mark termination.
-        //
-        // The caller is responsible for ensuring that this has a P to run on,
-        // even though it's running during STW. Because of this, it's allowed
-        // to have write barriers.
-        //
-        //go:yeswritebarrierrec
-        private static void gchelper()
-        {
-            var _g_ = getg();
-            _g_.m.traceback = 2L;
-            gchelperstart(); 
+            }
+            unlock(_addr_sched.deferlock);
 
-            // Parallel mark over GC roots and heap
-            if (gcphase == _GCmarktermination)
-            {
-                var gcw = ref _g_.m.p.ptr().gcw;
-                if (work.helperDrainBlock)
-                {
-                    gcDrain(gcw, gcDrainBlock); // blocks in getfull
-                }
-                else
-                {
-                    gcDrain(gcw, gcDrainNoBlock);
-                }
-                gcw.dispose();
-            }
-            var nproc = atomic.Load(ref work.nproc); // work.nproc can change right after we increment work.ndone
-            if (atomic.Xadd(ref work.ndone, +1L) == nproc - 1L)
-            {
-                notewakeup(ref work.alldone);
-            }
-            _g_.m.traceback = 0L;
-        }
-
-        private static void gchelperstart()
-        {
-            var _g_ = getg();
-
-            if (_g_.m.helpgc < 0L || _g_.m.helpgc >= _MaxGcproc)
-            {
-                throw("gchelperstart: bad m->helpgc");
-            }
-            if (_g_ != _g_.m.g0)
-            {
-                throw("gchelper not running on g0 stack");
-            }
         }
 
         // Timing
@@ -2340,11 +2635,14 @@ top:
                     buf[i] = '.';
                     i--;
                 }
+
                 val /= 10L;
+
             }
 
             buf[i] = byte(val + '0');
             return buf[i..];
+
         }
 
         // fmtNSAsMS nicely formats ns nanoseconds as milliseconds.
@@ -2354,6 +2652,7 @@ top:
             { 
                 // Format as whole milliseconds.
                 return itoaDiv(buf, ns / 1e6F, 0L);
+
             } 
             // Format two digits of precision, with at most three decimal places.
             var x = ns / 1e3F;
@@ -2362,6 +2661,7 @@ top:
                 buf[0L] = '0';
                 return buf[..1L];
             }
+
             long dec = 3L;
             while (x >= 100L)
             {
@@ -2370,6 +2670,7 @@ top:
             }
 
             return itoaDiv(buf, x, dec);
+
         }
     }
 }

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2020 August 29 08:16:17 UTC
+// package syscall -- go2cs converted at 2020 October 08 00:33:57 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\dirent.go
 using @unsafe = go.@unsafe_package;
@@ -17,6 +17,9 @@ namespace go
         // readInt returns the size-bytes unsigned integer in native byte order at offset off.
         private static (ulong, bool) readInt(slice<byte> b, System.UIntPtr off, System.UIntPtr size)
         {
+            ulong u = default;
+            bool ok = default;
+
             if (len(b) < int(off + size))
             {
                 return (0L, false);
@@ -26,6 +29,7 @@ namespace go
                 return (readIntBE(b[off..], size), true);
             }
             return (readIntLE(b[off..], size), true);
+
         }
 
         private static ulong readIntBE(slice<byte> b, System.UIntPtr size) => func((_, panic, __) =>
@@ -51,6 +55,7 @@ namespace go
                     panic("syscall: readInt with unsupported size");
                     break;
             }
+
         });
 
         private static ulong readIntLE(slice<byte> b, System.UIntPtr size) => func((_, panic, __) =>
@@ -76,6 +81,7 @@ namespace go
                     panic("syscall: readInt with unsupported size");
                     break;
             }
+
         });
 
         // ParseDirent parses up to max directory entries in buf,
@@ -84,6 +90,10 @@ namespace go
         // to names, and the new names slice.
         public static (long, long, slice<@string>) ParseDirent(slice<byte> buf, long max, slice<@string> names)
         {
+            long consumed = default;
+            long count = default;
+            slice<@string> newnames = default;
+
             var origlen = len(buf);
             count = 0L;
             while (max != 0L && len(buf) > 0L)
@@ -93,6 +103,7 @@ namespace go
                 {
                     return (origlen, count, names);
                 }
+
                 var rec = buf[..reclen];
                 buf = buf[reclen..];
                 var (ino, ok) = direntIno(rec);
@@ -100,17 +111,21 @@ namespace go
                 {
                     break;
                 }
+
                 if (ino == 0L)
                 { // File absent in directory.
                     continue;
+
                 }
-                const var namoff = uint64(@unsafe.Offsetof(new Dirent().Name));
+
+                const var namoff = (var)uint64(@unsafe.Offsetof(new Dirent().Name));
 
                 var (namlen, ok) = direntNamlen(rec);
                 if (!ok || namoff + namlen > uint64(len(rec)))
                 {
                     break;
                 }
+
                 var name = rec[namoff..namoff + namlen];
                 foreach (var (i, c) in name)
                 {
@@ -119,18 +134,22 @@ namespace go
                         name = name[..i];
                         break;
                     }
+
                 } 
                 // Check for useless names before allocating a string.
                 if (string(name) == "." || string(name) == "..")
                 {
                     continue;
                 }
+
                 max--;
                 count++;
                 names = append(names, string(name));
+
             }
 
             return (origlen - len(buf), count, names);
+
         }
     }
 }

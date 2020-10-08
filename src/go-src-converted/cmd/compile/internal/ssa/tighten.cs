@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 09:24:25 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:26:44 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\tighten.go
 
@@ -20,8 +20,10 @@ namespace @internal
         // if it doesn't also create more live values.
         // A Value can be moved to any block that
         // dominates all blocks in which it is used.
-        private static void tighten(ref Func f)
+        private static void tighten(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             var canMove = make_slice<bool>(f.NumValues());
             {
                 var b__prev1 = b;
@@ -35,10 +37,16 @@ namespace @internal
                         foreach (var (_, __v) in b.Values)
                         {
                             v = __v;
+                            if (v.Op.isLoweredGetClosurePtr())
+                            { 
+                                // Must stay in the entry block.
+                                continue;
 
-                            if (v.Op == OpPhi || v.Op == OpGetClosurePtr || v.Op == OpArg || v.Op == OpSelect0 || v.Op == OpSelect1) 
+                            }
+
+                            if (v.Op == OpPhi || v.Op == OpArg || v.Op == OpSelect0 || v.Op == OpSelect1) 
                                 // Phis need to stay in their block.
-                                // GetClosurePtr & Arg must stay in the entry block.
+                                // Arg must stay in the entry block.
                                 // Tuple selectors must stay with the tuple generator.
                                 continue;
                                                         if (v.MemoryArg() != null)
@@ -46,6 +54,7 @@ namespace @internal
                                 // We can't move values which have a memory arg - it might
                                 // make two memory values live across a block boundary.
                                 continue;
+
                             }
                             long narg = 0L;
                             {
@@ -54,27 +63,28 @@ namespace @internal
                                 foreach (var (_, __a) in v.Args)
                                 {
                                     a = __a;
-
-                                    if (a.Op == OpConst8 || a.Op == OpConst16 || a.Op == OpConst32 || a.Op == OpConst64 || a.Op == OpAddr)                                     else 
+                                    if (!a.rematerializeable())
+                                    {
                                         narg++;
-                                                                    }
+                                    }
+                                }
                                 a = a__prev3;
                             }
 
-                            if (narg >= 2L && !v.Type.IsBoolean())
+                            if (narg >= 2L && !v.Type.IsFlags())
                             { 
                                 // Don't move values with more than one input, as that may
                                 // increase register pressure.
-                                // We make an exception for boolean-typed values, as they will
-                                // likely be converted to flags, and we want flag generators
+                                // We make an exception for flags, as we want flag generators
                                 // moved next to uses (because we only have 1 flag register).
                                 continue;
+
                             }
                             canMove[v.ID] = true;
+
                         }
                         v = v__prev2;
                     }
-
                 }
                 b = b__prev1;
             }
@@ -82,7 +92,7 @@ namespace @internal
             var lca = makeLCArange(f); 
 
             // For each moveable value, record the block that dominates all uses found so far.
-            var target = make_slice<ref Block>(f.NumValues()); 
+            var target = make_slice<ptr<Block>>(f.NumValues()); 
 
             // Grab loop information.
             // We use this to make sure we don't tighten a value into a (deeper) loop.
@@ -148,28 +158,23 @@ namespace @internal
                                     i = i__prev4;
                                     a = a__prev4;
                                 }
-
                             }
                             v = v__prev3;
                         }
 
+                        foreach (var (_, c) in b.ControlValues())
                         {
-                            var c = b.Control;
-
-                            if (c != null)
+                            if (!canMove[c.ID])
                             {
-                                if (!canMove[c.ID])
-                                {
-                                    continue;
-                                }
-                                if (target[c.ID] == null)
-                                {
-                                    target[c.ID] = b;
-                                }
-                                else
-                                {
-                                    target[c.ID] = lca.find(target[c.ID], b);
-                                }
+                                continue;
+                            }
+                            if (target[c.ID] == null)
+                            {
+                                target[c.ID] = b;
+                            }
+                            else
+                            {
+                                target[c.ID] = lca.find(target[c.ID], b);
                             }
                         }
                     }
@@ -201,10 +206,10 @@ namespace @internal
                                     target[v.ID] = t;
                                     targetloop = loops.b2l[t.ID];
                                 }
+
                             }
                             v = v__prev3;
                         }
-
                     }
                     b = b__prev2;
                 }
@@ -226,6 +231,7 @@ namespace @internal
                                 { 
                                     // v is not moveable, or is already in correct place.
                                     continue;
+
                                 }
                                 t.Values = append(t.Values, v);
                                 v.Block = t;
@@ -235,22 +241,26 @@ namespace @internal
                                 b.Values = b.Values[..last];
                                 changed = true;
                                 i--;
+
                             }
 
                             i = i__prev3;
                         }
+
                     }
                     b = b__prev2;
                 }
-
             }
+
         }
 
         // phiTighten moves constants closer to phi users.
         // This pass avoids having lots of constants live for lots of the program.
         // See issue 16407.
-        private static void phiTighten(ref Func f)
+        private static void phiTighten(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             foreach (var (_, b) in f.Blocks)
             {
                 foreach (var (_, v) in b.Values)
@@ -259,21 +269,27 @@ namespace @internal
                     {
                         continue;
                     }
+
                     foreach (var (i, a) in v.Args)
                     {
                         if (!a.rematerializeable())
                         {
                             continue; // not a constant we can move around
                         }
+
                         if (a.Block == b.Preds[i].b)
                         {
                             continue; // already in the right place
                         } 
                         // Make a copy of a, put in predecessor block.
                         v.SetArg(i, a.copyInto(b.Preds[i].b));
+
                     }
+
                 }
+
             }
+
         }
     }
 }}}}

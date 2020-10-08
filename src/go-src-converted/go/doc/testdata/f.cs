@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // The package f is a go/doc test for functions and factory methods.
-// package f -- go2cs converted at 2020 August 29 08:47:13 UTC
+// package f -- go2cs converted at 2020 October 08 04:02:53 UTC
 // import "go/doc.f" ==> using f = go.go.doc.f_package
 // Original source: C:\Go\src\go\doc\testdata\f.go
 

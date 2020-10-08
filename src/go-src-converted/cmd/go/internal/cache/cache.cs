@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package cache implements a build artifact cache.
-// package cache -- go2cs converted at 2020 August 29 10:00:51 UTC
+// package cache -- go2cs converted at 2020 October 08 04:33:58 UTC
 // import "cmd/go/internal/cache" ==> using cache = go.cmd.go.@internal.cache_package
 // Original source: C:\Go\src\cmd\go\internal\cache\cache.go
 using bytes = go.bytes_package;
@@ -18,6 +18,8 @@ using filepath = go.path.filepath_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
+
+using renameio = go.cmd.go.@internal.renameio_package;
 using static go.builtin;
 using System;
 
@@ -44,7 +46,6 @@ namespace @internal
         public partial struct Cache
         {
             public @string dir;
-            public ptr<os.File> log;
             public Func<time.Time> now;
         }
 
@@ -60,17 +61,22 @@ namespace @internal
         // in a network file system). File locking is notoriously unreliable in
         // network file systems and may not suffice to protect the cache.
         //
-        public static (ref Cache, error) Open(@string dir)
+        public static (ptr<Cache>, error) Open(@string dir)
         {
+            ptr<Cache> _p0 = default!;
+            error _p0 = default!;
+
             var (info, err) = os.Stat(dir);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             if (!info.IsDir())
             {
-                return (null, ref new os.PathError(Op:"open",Path:dir,Err:fmt.Errorf("not a directory")));
+                return (_addr_null!, error.As(addr(new os.PathError(Op:"open",Path:dir,Err:fmt.Errorf("not a directory")))!)!);
             }
+
             for (long i = 0L; i < 256L; i++)
             {
                 var name = filepath.Join(dir, fmt.Sprintf("%02x", i));
@@ -79,33 +85,59 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                 }
+
             }
 
-            var (f, err) = os.OpenFile(filepath.Join(dir, "log.txt"), os.O_WRONLY | os.O_APPEND | os.O_CREATE, 0666L);
-            if (err != null)
-            {
-                return (null, err);
-            }
-            Cache c = ref new Cache(dir:dir,log:f,now:time.Now,);
-            return (c, null);
+            ptr<Cache> c = addr(new Cache(dir:dir,now:time.Now,));
+            return (_addr_c!, error.As(null!)!);
+
         }
 
         // fileName returns the name of the file corresponding to the given id.
-        private static @string fileName(this ref Cache c, array<byte> id, @string key)
+        private static @string fileName(this ptr<Cache> _addr_c, array<byte> id, @string key)
         {
+            id = id.Clone();
+            ref Cache c = ref _addr_c.val;
+
             return filepath.Join(c.dir, fmt.Sprintf("%02x", id[0L]), fmt.Sprintf("%x", id) + "-" + key);
         }
 
-        private static var errMissing = errors.New("cache entry not found");
+        // An entryNotFoundError indicates that a cache entry was not found, with an
+        // optional underlying reason.
+        private partial struct entryNotFoundError
+        {
+            public error Err;
+        }
+
+        private static @string Error(this ptr<entryNotFoundError> _addr_e)
+        {
+            ref entryNotFoundError e = ref _addr_e.val;
+
+            if (e.Err == null)
+            {
+                return "cache entry not found";
+            }
+
+            return fmt.Sprintf("cache entry not found: %v", e.Err);
+
+        }
+
+        private static error Unwrap(this ptr<entryNotFoundError> _addr_e)
+        {
+            ref entryNotFoundError e = ref _addr_e.val;
+
+            return error.As(e.Err)!;
+        }
 
  
         // action entry file is "v1 <hex id> <hex out> <decimal size space-padded to 20 bytes> <unixnano space-padded to 20 bytes>\n"
-        private static readonly var hexSize = HashSize * 2L;
-        private static readonly long entrySize = 2L + 1L + hexSize + 1L + hexSize + 1L + 20L + 1L + 20L + 1L;
+        private static readonly var hexSize = (var)HashSize * 2L;
+        private static readonly long entrySize = (long)2L + 1L + hexSize + 1L + hexSize + 1L + 20L + 1L + 20L + 1L;
+
 
         // verify controls whether to run the cache in verify mode.
         // In verify mode, the cache always returns errMissing from Get
@@ -118,13 +150,14 @@ namespace @internal
         // GODEBUG=gocacheverify=1.
         private static var verify = false;
 
+        private static var errVerifyMode = errors.New("gocacheverify=1");
+
         // DebugTest is set when GODEBUG=gocachetest=1 is in the environment.
         public static var DebugTest = false;
 
         private static void init()
         {
             initEnv();
-
         }
 
         private static void initEnv()
@@ -138,28 +171,38 @@ namespace @internal
                 {
                     verify = true;
                 }
+
                 if (f == "gocachehash=1")
                 {
                     debugHash = true;
                 }
+
                 if (f == "gocachetest=1")
                 {
                     DebugTest = true;
                 }
+
             }
+
         }
 
         // Get looks up the action ID in the cache,
         // returning the corresponding output ID and file size, if any.
         // Note that finding an output ID does not guarantee that the
         // saved file for that output ID is still available.
-        private static (Entry, error) Get(this ref Cache c, ActionID id)
+        private static (Entry, error) Get(this ptr<Cache> _addr_c, ActionID id)
         {
+            Entry _p0 = default;
+            error _p0 = default!;
+            ref Cache c = ref _addr_c.val;
+
             if (verify)
             {
-                return (new Entry(), errMissing);
+                return (new Entry(), error.As(addr(new entryNotFoundError(Err:errVerifyMode))!)!);
             }
+
             return c.get(id);
+
         }
 
         public partial struct Entry
@@ -170,34 +213,55 @@ namespace @internal
         }
 
         // get is Get but does not respect verify mode, so that Put can use it.
-        private static (Entry, error) get(this ref Cache _c, ActionID id) => func(_c, (ref Cache c, Defer defer, Panic _, Recover __) =>
+        private static (Entry, error) get(this ptr<Cache> _addr_c, ActionID id) => func((defer, _, __) =>
         {
-            Func<(Entry, error)> missing = () =>
+            Entry _p0 = default;
+            error _p0 = default!;
+            ref Cache c = ref _addr_c.val;
+
+            Func<error, (Entry, error)> missing = reason =>
             {
-                fmt.Fprintf(c.log, "%d miss %x\n", c.now().Unix(), id);
-                return (new Entry(), errMissing);
+                return (new Entry(), error.As(addr(new entryNotFoundError(Err:reason))!)!);
             }
 ;
             var (f, err) = os.Open(c.fileName(id, "a"));
             if (err != null)
             {
-                return missing();
+                return missing(err);
             }
+
             defer(f.Close());
             var entry = make_slice<byte>(entrySize + 1L); // +1 to detect whether f is too long
             {
                 var (n, err) = io.ReadFull(f, entry);
 
-                if (n != entrySize || err != io.ErrUnexpectedEOF)
+                if (n > entrySize)
                 {
-                    return missing();
+                    return missing(errors.New("too long"));
+                }
+                else if (err != io.ErrUnexpectedEOF)
+                {
+                    if (err == io.EOF)
+                    {
+                        return missing(errors.New("file is empty"));
+                    }
+
+                    return missing(err);
+
+                }
+                else if (n < entrySize)
+                {
+                    return missing(errors.New("entry file incomplete"));
                 }
 
+
             }
+
             if (entry[0L] != 'v' || entry[1L] != '1' || entry[2L] != ' ' || entry[3L + hexSize] != ' ' || entry[3L + hexSize + 1L + hexSize] != ' ' || entry[3L + hexSize + 1L + hexSize + 1L + 20L] != ' ' || entry[entrySize - 1L] != '\n')
             {
-                return missing();
+                return missing(errors.New("invalid header"));
             }
+
             var eid = entry[3L..3L + hexSize];
             entry = entry[3L + hexSize..];
             var eout = entry[1L..1L + hexSize];
@@ -210,21 +274,28 @@ namespace @internal
             {
                 var (_, err) = hex.Decode(buf[..], eid);
 
-                if (err != null || buf != id)
+                if (err != null)
                 {
-                    return missing();
+                    return missing(fmt.Errorf("decoding ID: %v", err));
+                }
+                else if (buf != id)
+                {
+                    return missing(errors.New("mismatched ID"));
                 }
 
+
             }
+
             {
                 (_, err) = hex.Decode(buf[..], eout);
 
                 if (err != null)
                 {
-                    return missing();
+                    return missing(fmt.Errorf("decoding output ID: %v", err));
                 }
 
             }
+
             long i = 0L;
             while (i < len(esize) && esize[i] == ' ')
             {
@@ -232,10 +303,15 @@ namespace @internal
             }
 
             var (size, err) = strconv.ParseInt(string(esize[i..]), 10L, 64L);
-            if (err != null || size < 0L)
+            if (err != null)
             {
-                return missing();
+                return missing(fmt.Errorf("parsing size: %v", err));
             }
+            else if (size < 0L)
+            {
+                return missing(errors.New("negative size"));
+            }
+
             i = 0L;
             while (i < len(etime) && etime[i] == ' ')
             {
@@ -243,38 +319,83 @@ namespace @internal
             }
 
             var (tm, err) = strconv.ParseInt(string(etime[i..]), 10L, 64L);
-            if (err != null || size < 0L)
+            if (err != null)
             {
-                return missing();
+                return missing(fmt.Errorf("parsing timestamp: %v", err));
             }
-            fmt.Fprintf(c.log, "%d get %x\n", c.now().Unix(), id);
+            else if (tm < 0L)
+            {
+                return missing(errors.New("negative timestamp"));
+            }
 
             c.used(c.fileName(id, "a"));
 
-            return (new Entry(buf,size,time.Unix(0,tm)), null);
+            return (new Entry(buf,size,time.Unix(0,tm)), error.As(null!)!);
+
         });
+
+        // GetFile looks up the action ID in the cache and returns
+        // the name of the corresponding data file.
+        private static (@string, Entry, error) GetFile(this ptr<Cache> _addr_c, ActionID id)
+        {
+            @string file = default;
+            Entry entry = default;
+            error err = default!;
+            ref Cache c = ref _addr_c.val;
+
+            entry, err = c.Get(id);
+            if (err != null)
+            {
+                return ("", new Entry(), error.As(err)!);
+            }
+
+            file = c.OutputFile(entry.OutputID);
+            var (info, err) = os.Stat(file);
+            if (err != null)
+            {
+                return ("", new Entry(), error.As(addr(new entryNotFoundError(Err:err))!)!);
+            }
+
+            if (info.Size() != entry.Size)
+            {
+                return ("", new Entry(), error.As(addr(new entryNotFoundError(Err:errors.New("file incomplete")))!)!);
+            }
+
+            return (file, entry, error.As(null!)!);
+
+        }
 
         // GetBytes looks up the action ID in the cache and returns
         // the corresponding output bytes.
         // GetBytes should only be used for data that can be expected to fit in memory.
-        private static (slice<byte>, Entry, error) GetBytes(this ref Cache c, ActionID id)
+        private static (slice<byte>, Entry, error) GetBytes(this ptr<Cache> _addr_c, ActionID id)
         {
+            slice<byte> _p0 = default;
+            Entry _p0 = default;
+            error _p0 = default!;
+            ref Cache c = ref _addr_c.val;
+
             var (entry, err) = c.Get(id);
             if (err != null)
             {
-                return (null, entry, err);
+                return (null, entry, error.As(err)!);
             }
+
             var (data, _) = ioutil.ReadFile(c.OutputFile(entry.OutputID));
             if (sha256.Sum256(data) != entry.OutputID)
             {
-                return (null, entry, errMissing);
+                return (null, entry, error.As(addr(new entryNotFoundError(Err:errors.New("bad checksum")))!)!);
             }
-            return (data, entry, null);
+
+            return (data, entry, error.As(null!)!);
+
         }
 
         // OutputFile returns the name of the cache file storing output with the given OutputID.
-        private static @string OutputFile(this ref Cache c, OutputID @out)
+        private static @string OutputFile(this ptr<Cache> _addr_c, OutputID @out)
         {
+            ref Cache c = ref _addr_c.val;
+
             var file = c.fileName(out, "d");
             c.used(file);
             return file;
@@ -292,9 +413,10 @@ namespace @internal
         // at least trimLimit (5 days). Statistics gathered from a month of usage by
         // Go developers found that essentially all reuse of cached entries happened
         // within 5 days of the previous reuse. See golang.org/issue/22990.
-        private static readonly long mtimeInterval = 1L * time.Hour;
-        private static readonly long trimInterval = 24L * time.Hour;
-        private static readonly long trimLimit = 5L * 24L * time.Hour;
+        private static readonly long mtimeInterval = (long)1L * time.Hour;
+        private static readonly long trimInterval = (long)24L * time.Hour;
+        private static readonly long trimLimit = (long)5L * 24L * time.Hour;
+
 
         // used makes a best-effort attempt to update mtime on file,
         // so that mtime reflects cache access time.
@@ -305,29 +427,35 @@ namespace @internal
         // mtime is more than an hour old. This heuristic eliminates
         // nearly all of the mtime updates that would otherwise happen,
         // while still keeping the mtimes useful for cache trimming.
-        private static void used(this ref Cache c, @string file)
+        private static void used(this ptr<Cache> _addr_c, @string file)
         {
+            ref Cache c = ref _addr_c.val;
+
             var (info, err) = os.Stat(file);
             if (err == null && c.now().Sub(info.ModTime()) < mtimeInterval)
             {
-                return;
+                return ;
             }
+
             os.Chtimes(file, c.now(), c.now());
+
         }
 
         // Trim removes old cache entries that are likely not to be reused.
-        private static void Trim(this ref Cache c)
+        private static void Trim(this ptr<Cache> _addr_c)
         {
+            ref Cache c = ref _addr_c.val;
+
             var now = c.now(); 
 
             // We maintain in dir/trim.txt the time of the last completed cache trim.
             // If the cache has been trimmed recently enough, do nothing.
             // This is the common case.
-            var (data, _) = ioutil.ReadFile(filepath.Join(c.dir, "trim.txt"));
+            var (data, _) = renameio.ReadFile(filepath.Join(c.dir, "trim.txt"));
             var (t, err) = strconv.ParseInt(strings.TrimSpace(string(data)), 10L, 64L);
             if (err == null && now.Sub(time.Unix(t, 0L)) < trimInterval)
             {
-                return;
+                return ;
             } 
 
             // Trim each of the 256 subdirectories.
@@ -338,15 +466,23 @@ namespace @internal
             {
                 var subdir = filepath.Join(c.dir, fmt.Sprintf("%02x", i));
                 c.trimSubdir(subdir, cutoff);
-            }
+            } 
 
+            // Ignore errors from here: if we don't write the complete timestamp, the
+            // cache will appear older than it is, and we'll trim it again next time.
+ 
 
-            ioutil.WriteFile(filepath.Join(c.dir, "trim.txt"), (slice<byte>)fmt.Sprintf("%d", now.Unix()), 0666L);
+            // Ignore errors from here: if we don't write the complete timestamp, the
+            // cache will appear older than it is, and we'll trim it again next time.
+            renameio.WriteFile(filepath.Join(c.dir, "trim.txt"), (slice<byte>)fmt.Sprintf("%d", now.Unix()), 0666L);
+
         }
 
         // trimSubdir trims a single cache subdirectory.
-        private static void trimSubdir(this ref Cache c, @string subdir, time.Time cutoff)
-        { 
+        private static void trimSubdir(this ptr<Cache> _addr_c, @string subdir, time.Time cutoff)
+        {
+            ref Cache c = ref _addr_c.val;
+ 
             // Read all directory entries from subdir before removing
             // any files, in case removing files invalidates the file offset
             // in the directory scan. Also, ignore error from f.Readdirnames,
@@ -355,8 +491,9 @@ namespace @internal
             var (f, err) = os.Open(subdir);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             var (names, _) = f.Readdirnames(-1L);
             f.Close();
 
@@ -367,19 +504,24 @@ namespace @internal
                 {
                     continue;
                 }
+
                 var entry = filepath.Join(subdir, name);
                 var (info, err) = os.Stat(entry);
                 if (err == null && info.ModTime().Before(cutoff))
                 {
                     os.Remove(entry);
                 }
+
             }
+
         }
 
         // putIndexEntry adds an entry to the cache recording that executing the action
         // with the given id produces an output with the given output id (hash) and size.
-        private static error putIndexEntry(this ref Cache _c, ActionID id, OutputID @out, long size, bool allowVerify) => func(_c, (ref Cache c, Defer _, Panic panic, Recover __) =>
-        { 
+        private static error putIndexEntry(this ptr<Cache> _addr_c, ActionID id, OutputID @out, long size, bool allowVerify) => func((_, panic, __) =>
+        {
+            ref Cache c = ref _addr_c.val;
+ 
             // Note: We expect that for one reason or another it may happen
             // that repeating an action produces a different output hash
             // (for example, if the output contains a time stamp or temp dir name).
@@ -391,7 +533,7 @@ namespace @internal
             // in verify mode we are double-checking that the cache entries
             // are entirely reproducible. As just noted, this may be unrealistic
             // in some cases but the check is also useful for shaking out real bugs.
-            slice<byte> entry = (slice<byte>)fmt.Sprintf("v1 %x %x %20d %20d\n", id, out, size, time.Now().UnixNano());
+            var entry = fmt.Sprintf("v1 %x %x %20d %20d\n", id, out, size, time.Now().UnixNano());
             if (verify && allowVerify)
             {
                 var (old, err) = c.get(id);
@@ -400,29 +542,69 @@ namespace @internal
                     // panic to show stack trace, so we can see what code is generating this cache entry.
                     var msg = fmt.Sprintf("go: internal cache error: cache verify failed: id=%x changed:<<<\n%s\n>>>\nold: %x %d\nnew: %x %d", id, reverseHash(id), out, size, old.OutputID, old.Size);
                     panic(msg);
+
                 }
+
             }
-            var file = c.fileName(id, "a");
+
+            var file = c.fileName(id, "a"); 
+
+            // Copy file to cache directory.
+            var mode = os.O_WRONLY | os.O_CREATE;
+            var (f, err) = os.OpenFile(file, mode, 0666L);
+            if (err != null)
             {
-                var err = ioutil.WriteFile(file, entry, 0666L);
+                return error.As(err)!;
+            }
 
-                if (err != null)
+            _, err = f.WriteString(entry);
+            if (err == null)
+            { 
+                // Truncate the file only *after* writing it.
+                // (This should be a no-op, but truncate just in case of previous corruption.)
+                //
+                // This differs from ioutil.WriteFile, which truncates to 0 *before* writing
+                // via os.O_TRUNC. Truncating only after writing ensures that a second write
+                // of the same content to the same file is idempotent, and does not — even
+                // temporarily! — undo the effect of the first write.
+                err = f.Truncate(int64(len(entry)));
+
+            }
+
+            {
+                var closeErr = f.Close();
+
+                if (err == null)
                 {
-                    os.Remove(file);
-                    return error.As(err);
+                    err = closeErr;
                 }
 
             }
+
+            if (err != null)
+            { 
+                // TODO(bcmills): This Remove potentially races with another go command writing to file.
+                // Can we eliminate it?
+                os.Remove(file);
+                return error.As(err)!;
+
+            }
+
             os.Chtimes(file, c.now(), c.now()); // mainly for tests
 
-            fmt.Fprintf(c.log, "%d put %x %x %d\n", c.now().Unix(), id, out, size);
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // Put stores the given output in the cache as the output for the action ID.
         // It may read file twice. The content of file must not change between the two passes.
-        private static (OutputID, long, error) Put(this ref Cache c, ActionID id, io.ReadSeeker file)
+        private static (OutputID, long, error) Put(this ptr<Cache> _addr_c, ActionID id, io.ReadSeeker file)
         {
+            OutputID _p0 = default;
+            long _p0 = default;
+            error _p0 = default!;
+            ref Cache c = ref _addr_c.val;
+
             return c.put(id, file, true);
         }
 
@@ -430,13 +612,23 @@ namespace @internal
         // when GODEBUG=goverifycache=1 is set.
         // It is meant for data that is OK to cache but that we expect to vary slightly from run to run,
         // like test output containing times and the like.
-        private static (OutputID, long, error) PutNoVerify(this ref Cache c, ActionID id, io.ReadSeeker file)
+        private static (OutputID, long, error) PutNoVerify(this ptr<Cache> _addr_c, ActionID id, io.ReadSeeker file)
         {
+            OutputID _p0 = default;
+            long _p0 = default;
+            error _p0 = default!;
+            ref Cache c = ref _addr_c.val;
+
             return c.put(id, file, false);
         }
 
-        private static (OutputID, long, error) put(this ref Cache c, ActionID id, io.ReadSeeker file, bool allowVerify)
-        { 
+        private static (OutputID, long, error) put(this ptr<Cache> _addr_c, ActionID id, io.ReadSeeker file, bool allowVerify)
+        {
+            OutputID _p0 = default;
+            long _p0 = default;
+            error _p0 = default!;
+            ref Cache c = ref _addr_c.val;
+ 
             // Compute output ID.
             var h = sha256.New();
             {
@@ -444,15 +636,17 @@ namespace @internal
 
                 if (err != null)
                 {
-                    return (new OutputID(), 0L, err);
+                    return (new OutputID(), 0L, error.As(err)!);
                 }
 
             }
+
             var (size, err) = io.Copy(h, file);
             if (err != null)
             {
-                return (new OutputID(), 0L, err);
+                return (new OutputID(), 0L, error.As(err)!);
             }
+
             OutputID @out = default;
             h.Sum(out[..0L]); 
 
@@ -462,7 +656,7 @@ namespace @internal
 
                 if (err != null)
                 {
-                    return (out, size, err);
+                    return (out, size, error.As(err)!);
                 } 
 
                 // Add to cache index.
@@ -470,20 +664,25 @@ namespace @internal
             } 
 
             // Add to cache index.
-            return (out, size, c.putIndexEntry(id, out, size, allowVerify));
+            return (out, size, error.As(c.putIndexEntry(id, out, size, allowVerify))!);
+
         }
 
         // PutBytes stores the given bytes in the cache as the output for the action ID.
-        private static error PutBytes(this ref Cache c, ActionID id, slice<byte> data)
+        private static error PutBytes(this ptr<Cache> _addr_c, ActionID id, slice<byte> data)
         {
+            ref Cache c = ref _addr_c.val;
+
             var (_, _, err) = c.Put(id, bytes.NewReader(data));
-            return error.As(err);
+            return error.As(err)!;
         }
 
         // copyFile copies file into the cache, expecting it to have the given
         // output ID and size, if that file is not present already.
-        private static error copyFile(this ref Cache _c, io.ReadSeeker file, OutputID @out, long size) => func(_c, (ref Cache c, Defer defer, Panic _, Recover __) =>
+        private static error copyFile(this ptr<Cache> _addr_c, io.ReadSeeker file, OutputID @out, long size) => func((defer, _, __) =>
         {
+            ref Cache c = ref _addr_c.val;
+
             var name = c.fileName(out, "d");
             var (info, err) = os.Stat(name);
             if (err == null && info.Size() == size)
@@ -503,8 +702,9 @@ namespace @internal
                         h.Sum(out2[..0L]);
                         if (out == out2)
                         {
-                            return error.As(null);
+                            return error.As(null!)!;
                         }
+
                     } 
                     // Hash did not match. Fall through and rewrite file.
 
@@ -519,19 +719,23 @@ namespace @internal
             if (err == null && info.Size() > size)
             { // shouldn't happen but fix in case
                 mode |= os.O_TRUNC;
+
             }
+
             (f, err) = os.OpenFile(name, mode, 0666L);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             defer(f.Close());
             if (size == 0L)
             { 
                 // File now exists with correct size.
                 // Only one possible zero-length file, so contents are OK too.
                 // Early return here makes sure there's a "last byte" for code below.
-                return error.As(null);
+                return error.As(null!)!;
+
             } 
 
             // From here on, if any of the I/O writing the file fails,
@@ -545,10 +749,11 @@ namespace @internal
                 if (err != null)
                 {
                     f.Truncate(0L);
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             h = sha256.New();
             var w = io.MultiWriter(f, h);
             {
@@ -557,7 +762,7 @@ namespace @internal
                 if (err != null)
                 {
                     f.Truncate(0L);
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
                 // Check last byte before writing it; writing it will make the size match
                 // what other processes expect to find and might cause them to start
@@ -574,16 +779,17 @@ namespace @internal
                 if (err != null)
                 {
                     f.Truncate(0L);
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             h.Write(buf);
             var sum = h.Sum(null);
             if (!bytes.Equal(sum, out[..]))
             {
                 f.Truncate(0L);
-                return error.As(fmt.Errorf("file content changed underfoot"));
+                return error.As(fmt.Errorf("file content changed underfoot"))!;
             } 
 
             // Commit cache file entry.
@@ -593,10 +799,11 @@ namespace @internal
                 if (err != null)
                 {
                     f.Truncate(0L);
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             {
                 var err = f.Close();
 
@@ -606,13 +813,16 @@ namespace @internal
                     // but file may look like it is the right size.
                     // To be extra careful, remove cached file.
                     os.Remove(name);
-                    return error.As(err);
+                    return error.As(err)!;
+
                 }
 
             }
+
             os.Chtimes(name, c.now(), c.now()); // mainly for tests
 
-            return error.As(null);
+            return error.As(null!)!;
+
         });
     }
 }}}}

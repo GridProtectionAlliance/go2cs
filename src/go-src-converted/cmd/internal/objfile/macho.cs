@@ -4,7 +4,7 @@
 
 // Parsing of Mach-O executables (OS X).
 
-// package objfile -- go2cs converted at 2020 August 29 08:46:22 UTC
+// package objfile -- go2cs converted at 2020 October 08 03:50:18 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\macho.go
 using dwarf = go.debug.dwarf_package;
@@ -21,7 +21,7 @@ namespace @internal
 {
     public static partial class objfile_package
     {
-        private static readonly ulong stabTypeMask = 0xe0UL;
+        private static readonly ulong stabTypeMask = (ulong)0xe0UL;
 
 
 
@@ -32,19 +32,28 @@ namespace @internal
 
         private static (rawFile, error) openMacho(io.ReaderAt r)
         {
+            rawFile _p0 = default;
+            error _p0 = default!;
+
             var (f, err) = macho.NewFile(r);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (ref new machoFile(f), null);
+
+            return (addr(new machoFile(f)), error.As(null!)!);
+
         }
 
-        private static (slice<Sym>, error) symbols(this ref machoFile f)
+        private static (slice<Sym>, error) symbols(this ptr<machoFile> _addr_f)
         {
+            slice<Sym> _p0 = default;
+            error _p0 = default!;
+            ref machoFile f = ref _addr_f.val;
+
             if (f.macho.Symtab == null)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             } 
 
             // Build sorted list of addresses of all symbols.
@@ -61,6 +70,7 @@ namespace @internal
                     {
                         addrs = append(addrs, s.Value);
                     }
+
                 }
 
                 s = s__prev1;
@@ -79,13 +89,16 @@ namespace @internal
                     { 
                         // Skip stab debug info.
                         continue;
+
                     }
+
                     Sym sym = new Sym(Name:s.Name,Addr:s.Value,Code:'?');
                     var i = sort.Search(len(addrs), x => addrs[x] > s.Value);
                     if (i < len(addrs))
                     {
                         sym.Size = int64(addrs[i] - s.Value);
                     }
+
                     if (s.Sect == 0L)
                     {
                         sym.Code = 'U';
@@ -113,18 +126,28 @@ namespace @internal
                                 sym.Code = 'B';
                                 break;
                         }
+
                     }
+
                     syms = append(syms, sym);
+
                 }
 
                 s = s__prev1;
             }
 
-            return (syms, null);
+            return (syms, error.As(null!)!);
+
         }
 
-        private static (ulong, slice<byte>, slice<byte>, error) pcln(this ref machoFile f)
+        private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<machoFile> _addr_f)
         {
+            ulong textStart = default;
+            slice<byte> symtab = default;
+            slice<byte> pclntab = default;
+            error err = default!;
+            ref machoFile f = ref _addr_f.val;
+
             {
                 var sect__prev1 = sect;
 
@@ -138,6 +161,7 @@ namespace @internal
                 sect = sect__prev1;
 
             }
+
             {
                 var sect__prev1 = sect;
 
@@ -149,13 +173,15 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return (0L, null, null, err);
+                        return (0L, null, null, error.As(err)!);
                     }
+
                 }
 
                 sect = sect__prev1;
 
             }
+
             {
                 var sect__prev1 = sect;
 
@@ -167,30 +193,42 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return (0L, null, null, err);
+                        return (0L, null, null, error.As(err)!);
                     }
+
                 }
 
                 sect = sect__prev1;
 
             }
-            return (textStart, symtab, pclntab, null);
+
+            return (textStart, symtab, pclntab, error.As(null!)!);
+
         }
 
-        private static (ulong, slice<byte>, error) text(this ref machoFile f)
+        private static (ulong, slice<byte>, error) text(this ptr<machoFile> _addr_f)
         {
+            ulong textStart = default;
+            slice<byte> text = default;
+            error err = default!;
+            ref machoFile f = ref _addr_f.val;
+
             var sect = f.macho.Section("__text");
             if (sect == null)
             {
-                return (0L, null, fmt.Errorf("text section not found"));
+                return (0L, null, error.As(fmt.Errorf("text section not found"))!);
             }
+
             textStart = sect.Addr;
             text, err = sect.Data();
-            return;
+            return ;
+
         }
 
-        private static @string goarch(this ref machoFile f)
+        private static @string goarch(this ptr<machoFile> _addr_f)
         {
+            ref machoFile f = ref _addr_f.val;
+
 
             if (f.macho.Cpu == macho.Cpu386) 
                 return "386";
@@ -198,9 +236,12 @@ namespace @internal
                 return "amd64";
             else if (f.macho.Cpu == macho.CpuArm) 
                 return "arm";
+            else if (f.macho.Cpu == macho.CpuArm64) 
+                return "arm64";
             else if (f.macho.Cpu == macho.CpuPpc64) 
                 return "ppc64";
                         return "";
+
         }
 
         private partial struct uint64s // : slice<ulong>
@@ -215,21 +256,28 @@ namespace @internal
         {
             x[i] = x[j];
             x[j] = x[i];
-
         }
         private static bool Less(this uint64s x, long i, long j)
         {
             return x[i] < x[j];
         }
 
-        private static (ulong, error) loadAddress(this ref machoFile f)
+        private static (ulong, error) loadAddress(this ptr<machoFile> _addr_f)
         {
-            return (0L, fmt.Errorf("unknown load address"));
+            ulong _p0 = default;
+            error _p0 = default!;
+            ref machoFile f = ref _addr_f.val;
+
+            return (0L, error.As(fmt.Errorf("unknown load address"))!);
         }
 
-        private static (ref dwarf.Data, error) dwarf(this ref machoFile f)
+        private static (ptr<dwarf.Data>, error) dwarf(this ptr<machoFile> _addr_f)
         {
-            return f.macho.DWARF();
+            ptr<dwarf.Data> _p0 = default!;
+            error _p0 = default!;
+            ref machoFile f = ref _addr_f.val;
+
+            return _addr_f.macho.DWARF()!;
         }
     }
 }}}

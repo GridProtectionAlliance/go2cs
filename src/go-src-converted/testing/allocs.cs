@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2020 August 29 10:05:44 UTC
+// package testing -- go2cs converted at 2020 October 08 04:36:24 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Go\src\testing\allocs.go
 using runtime = go.runtime_package;
@@ -24,14 +24,16 @@ namespace go
         // it before returning.
         public static double AllocsPerRun(long runs, Action f) => func((defer, _, __) =>
         {
+            double avg = default;
+
             defer(runtime.GOMAXPROCS(runtime.GOMAXPROCS(1L))); 
 
             // Warm up the function
             f(); 
 
             // Measure the starting statistics
-            runtime.MemStats memstats = default;
-            runtime.ReadMemStats(ref memstats);
+            ref runtime.MemStats memstats = ref heap(out ptr<runtime.MemStats> _addr_memstats);
+            runtime.ReadMemStats(_addr_memstats);
             long mallocs = 0L - memstats.Mallocs; 
 
             // Run the function the specified number of times
@@ -41,7 +43,7 @@ namespace go
             } 
 
             // Read the final statistics
-            runtime.ReadMemStats(ref memstats);
+            runtime.ReadMemStats(_addr_memstats);
             mallocs += memstats.Mallocs; 
 
             // Average the mallocs over the runs (not counting the warm-up).
@@ -49,6 +51,7 @@ namespace go
             // the division as integers so we can ask if AllocsPerRun()==1
             // instead of AllocsPerRun()<2.
             return float64(mallocs / uint64(runs));
+
         });
     }
 }

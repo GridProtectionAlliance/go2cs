@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:18 UTC
+//     Generated on 2020 October 08 04:09:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,16 +32,16 @@ namespace @internal
             public Map(NilType _)
             {
                 this.Key = default;
-                this.Val = default;
+                this.Elem = default;
                 this.Bucket = default;
                 this.Hmap = default;
                 this.Hiter = default;
             }
 
-            public Map(ref ptr<Type> Key = default, ref ptr<Type> Val = default, ref ptr<Type> Bucket = default, ref ptr<Type> Hmap = default, ref ptr<Type> Hiter = default)
+            public Map(ref ptr<Type> Key = default, ref ptr<Type> Elem = default, ref ptr<Type> Bucket = default, ref ptr<Type> Hmap = default, ref ptr<Type> Hiter = default)
             {
                 this.Key = Key;
-                this.Val = Val;
+                this.Elem = Elem;
                 this.Bucket = Bucket;
                 this.Hmap = Hmap;
                 this.Hiter = Hiter;
@@ -67,7 +67,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Map Map_cast(dynamic value)
         {
-            return new Map(ref value.Key, ref value.Val, ref value.Bucket, ref value.Hmap, ref value.Hiter);
+            return new Map(ref value.Key, ref value.Elem, ref value.Bucket, ref value.Hmap, ref value.Hiter);
         }
     }
 }}}}

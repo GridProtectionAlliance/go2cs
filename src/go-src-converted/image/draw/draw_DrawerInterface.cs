@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:57 UTC
+//     Generated on 2020 October 08 04:59:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -52,7 +52,7 @@ namespace image
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -66,10 +66,10 @@ namespace image
                 m_target_is_ptr = true;
             }
 
-            private delegate void DrawByRef(ref T value, Image dst, image.Rectangle r, image.Image src, image.Point sp);
+            private delegate void DrawByPtr(ptr<T> value, Image dst, image.Rectangle r, image.Image src, image.Point sp);
             private delegate void DrawByVal(T value, Image dst, image.Rectangle r, image.Image src, image.Point sp);
 
-            private static readonly DrawByRef s_DrawByRef;
+            private static readonly DrawByPtr s_DrawByPtr;
             private static readonly DrawByVal s_DrawByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,14 +78,15 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DrawByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DrawByPtr is null || !m_target_is_ptr)
                 {
                     s_DrawByVal!(target, dst, r, src, sp);
                     return;
                 }
 
-                s_DrawByRef(ref target, dst, r, src, sp);
+                s_DrawByPtr(m_target_ptr, dst, r, src, sp);
                 return;
                 
             }
@@ -96,23 +97,20 @@ namespace image
             static Drawer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Draw");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Draw");
 
                 if (!(extensionMethod is null))
-                    s_DrawByRef = extensionMethod.CreateStaticDelegate(typeof(DrawByRef)) as DrawByRef;
+                    s_DrawByPtr = extensionMethod.CreateStaticDelegate(typeof(DrawByPtr)) as DrawByPtr;
 
-                if (s_DrawByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Draw");
+                extensionMethod = targetType.GetExtensionMethod("Draw");
 
-                    if (!(extensionMethod is null))
-                        s_DrawByVal = extensionMethod.CreateStaticDelegate(typeof(DrawByVal)) as DrawByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DrawByVal = extensionMethod.CreateStaticDelegate(typeof(DrawByVal)) as DrawByVal;
 
-                if (s_DrawByRef is null && s_DrawByVal is null)
+                if (s_DrawByPtr is null && s_DrawByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Drawer.Draw method", new Exception("Draw"));
             }
 

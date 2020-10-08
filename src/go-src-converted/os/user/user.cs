@@ -2,8 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package user allows user account lookups by name or id.
-// package user -- go2cs converted at 2020 August 29 08:31:54 UTC
+/*
+Package user allows user account lookups by name or id.
+
+For most Unix systems, this package has two internal implementations of
+resolving user and group ids to names. One is written in pure Go and
+parses /etc/passwd and /etc/group. The other is cgo-based and relies on
+the standard C library (libc) routines such as getpwuid_r and getgrnam_r.
+
+When cgo is available, cgo-based (libc-backed) code is used by default.
+This can be overridden by using osusergo build tag, which enforces
+the pure Go implementation.
+*/
+// package user -- go2cs converted at 2020 October 08 03:45:36 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\user.go
 using strconv = go.strconv_package;

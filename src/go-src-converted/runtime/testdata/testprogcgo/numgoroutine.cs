@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 August 29 08:24:55 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:01 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\numgoroutine.go
 /*
 #include <stddef.h>
@@ -63,20 +63,12 @@ namespace go
             // Test that there are just the expected number of goroutines
             // running. Specifically, test that the spare M's goroutine
             // doesn't show up.
-            //
-            // On non-Windows platforms there's a signal handling thread
-            // started by os/signal.init in addition to the main
-            // goroutine.
-            if (runtime.GOOS != "windows")
-            {
-                baseGoroutines = 1L;
-            }
             {
                 var (_, ok) = checkNumGoroutine("first", 1L + baseGoroutines);
 
                 if (!ok)
                 {
-                    return;
+                    return ;
                 } 
 
                 // Test that the goroutine for a callback from C appears.
@@ -88,7 +80,7 @@ namespace go
 
             if (!callbackok)
             {
-                return;
+                return ;
             } 
 
             // Make sure we're back to the initial goroutines.
@@ -97,22 +89,28 @@ namespace go
 
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
 
             }
 
+
             fmt.Println("OK");
+
         }
 
         private static (@string, bool) checkNumGoroutine(@string label, long want)
         {
+            @string _p0 = default;
+            bool _p0 = default;
+
             var n = runtime.NumGoroutine();
             if (n != want)
             {
                 fmt.Printf("%s NumGoroutine: want %d; got %d\n", label, want, n);
                 return ("", false);
             }
+
             var sbuf = make_slice<byte>(32L << (int)(10L));
             sbuf = sbuf[..runtime.Stack(sbuf, true)];
             n = strings.Count(string(sbuf), "goroutine ");
@@ -121,7 +119,9 @@ namespace go
                 fmt.Printf("%s Stack: want %d; got %d:\n%s\n", label, want, n, string(sbuf));
                 return ("", false);
             }
+
             return (string(sbuf), true);
+
         }
 
         private static bool callbackok = default;
@@ -132,14 +132,17 @@ namespace go
             var (stk, ok) = checkNumGoroutine("second", 2L + baseGoroutines);
             if (!ok)
             {
-                return;
+                return ;
             }
+
             if (!strings.Contains(stk, "CallbackNumGoroutine"))
             {
                 fmt.Printf("missing CallbackNumGoroutine from stack:\n%s\n", stk);
-                return;
+                return ;
             }
+
             callbackok = true;
+
         }
     }
 }

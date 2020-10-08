@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:12 UTC
+//     Generated on 2020 October 08 03:41:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,8 +17,10 @@ using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using http = go.net.http_package;
+using textproto = go.net.textproto_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {

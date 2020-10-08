@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:32 UTC
+//     Generated on 2020 October 08 04:43:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -62,7 +62,7 @@ namespace pprof
                 this.defaultSampleTypeX = default;
             }
 
-            public Profile(slice<ref ValueType> SampleType = default, @string DefaultSampleType = default, slice<ref Sample> Sample = default, slice<ref Mapping> Mapping = default, slice<ref Location> Location = default, slice<ref Function> Function = default, slice<@string> Comments = default, @string DropFrames = default, @string KeepFrames = default, long TimeNanos = default, long DurationNanos = default, ref ptr<ValueType> PeriodType = default, long Period = default, sync.Mutex encodeMu = default, slice<long> commentX = default, long dropFramesX = default, long keepFramesX = default, slice<@string> stringTable = default, long defaultSampleTypeX = default)
+            public Profile(slice<ptr<ValueType>> SampleType = default, @string DefaultSampleType = default, slice<ptr<Sample>> Sample = default, slice<ptr<Mapping>> Mapping = default, slice<ptr<Location>> Location = default, slice<ptr<Function>> Function = default, slice<@string> Comments = default, @string DropFrames = default, @string KeepFrames = default, long TimeNanos = default, long DurationNanos = default, ref ptr<ValueType> PeriodType = default, long Period = default, sync.Mutex encodeMu = default, slice<long> commentX = default, long dropFramesX = default, long keepFramesX = default, slice<@string> stringTable = default, long defaultSampleTypeX = default)
             {
                 this.SampleType = SampleType;
                 this.DefaultSampleType = DefaultSampleType;

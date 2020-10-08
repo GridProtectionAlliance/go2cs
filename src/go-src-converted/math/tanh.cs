@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:59 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:22 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\tanh.go
 
@@ -61,8 +61,8 @@ namespace go
         //   Stephen L. Moshier
         //   moshier@na-net.ornl.gov
         //
-        private static array<double> tanhP = new array<double>(new double[] { -9.64399179425052238628E-1, -9.92877231001918586564E1, -1.61468768441708447952E3 });
-        private static array<double> tanhQ = new array<double>(new double[] { 1.12811678491632931402E2, 2.23548839060100448583E3, 4.84406305325125486048E3 });
+        private static array<double> tanhP = new array<double>(new double[] { -9.64399179425052238628e-1, -9.92877231001918586564e1, -1.61468768441708447952e3 });
+        private static array<double> tanhQ = new array<double>(new double[] { 1.12811678491632931402e2, 2.23548839060100448583e3, 4.84406305325125486048e3 });
 
         // Tanh returns the hyperbolic tangent of x.
         //
@@ -75,7 +75,7 @@ namespace go
 
         private static double tanh(double x)
         {
-            const float MAXLOG = 8.8029691931113054295988e+01F; // log(2**127)
+            const float MAXLOG = (float)8.8029691931113054295988e+01F; // log(2**127)
  // log(2**127)
             var z = Abs(x);
 
@@ -84,6 +84,7 @@ namespace go
                 {>>MARKER:FUNCTION_Tanh_BLOCK_PREFIX<<
                     return -1L;
                 }
+
                 return 1L;
             else if (z >= 0.625F) 
                 var s = Exp(2L * z);
@@ -92,14 +93,17 @@ namespace go
                 {
                     z = -z;
                 }
+
             else 
                 if (x == 0L)
                 {
                     return x;
                 }
+
                 s = x * x;
                 z = x + x * s * ((tanhP[0L] * s + tanhP[1L]) * s + tanhP[2L]) / (((s + tanhQ[0L]) * s + tanhQ[1L]) * s + tanhQ[2L]);
                         return z;
+
         }
     }
 }

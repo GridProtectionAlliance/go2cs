@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:59:30 UTC
+//     Generated on 2020 October 08 04:32:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,14 +36,16 @@ namespace go
                 this.Start = default;
                 this.Count = default;
                 this.Norm = default;
+                this.Index = default;
             }
 
-            public Boundary(long Offset = default, bool Start = default, long Count = default, double Norm = default)
+            public Boundary(long Offset = default, bool Start = default, long Count = default, double Norm = default, long Index = default)
             {
                 this.Offset = Offset;
                 this.Start = Start;
                 this.Count = Count;
                 this.Norm = Norm;
+                this.Index = Index;
             }
 
             // Enable comparisons between nil and Boundary struct
@@ -66,7 +68,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Boundary Boundary_cast(dynamic value)
         {
-            return new Boundary(value.Offset, value.Start, value.Count, value.Norm);
+            return new Boundary(value.Offset, value.Start, value.Count, value.Norm, value.Index);
         }
     }
 }

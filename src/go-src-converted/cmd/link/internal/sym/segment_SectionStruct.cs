@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:02:54 UTC
+//     Generated on 2020 October 08 04:37:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,9 +37,12 @@ namespace @internal
                 this.Seg = default;
                 this.Reloff = default;
                 this.Rellen = default;
+                this.Sym = default;
+                this.Sym2 = default;
+                this.Index = default;
             }
 
-            public Section(byte Rwx = default, short Extnum = default, int Align = default, @string Name = default, ulong Vaddr = default, ulong Length = default, ref ptr<Segment> Seg = default, ulong Reloff = default, ulong Rellen = default)
+            public Section(byte Rwx = default, short Extnum = default, int Align = default, @string Name = default, ulong Vaddr = default, ulong Length = default, ref ptr<Segment> Seg = default, ulong Reloff = default, ulong Rellen = default, ref ptr<Symbol> Sym = default, LoaderSym Sym2 = default, ushort Index = default)
             {
                 this.Rwx = Rwx;
                 this.Extnum = Extnum;
@@ -50,6 +53,9 @@ namespace @internal
                 this.Seg = Seg;
                 this.Reloff = Reloff;
                 this.Rellen = Rellen;
+                this.Sym = Sym;
+                this.Sym2 = Sym2;
+                this.Index = Index;
             }
 
             // Enable comparisons between nil and Section struct
@@ -72,7 +78,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Section Section_cast(dynamic value)
         {
-            return new Section(value.Rwx, value.Extnum, value.Align, value.Name, value.Vaddr, value.Length, ref value.Seg, value.Reloff, value.Rellen);
+            return new Section(value.Rwx, value.Extnum, value.Align, value.Name, value.Vaddr, value.Length, ref value.Seg, value.Reloff, value.Rellen, ref value.Sym, value.Sym2, value.Index);
         }
     }
 }}}}

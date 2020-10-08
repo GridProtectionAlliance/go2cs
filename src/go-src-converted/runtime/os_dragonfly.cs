@@ -2,161 +2,193 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:49 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:51 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_dragonfly.go
+using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 using System;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
-        private static readonly long _NSIG = 33L;
-        private static readonly long _SI_USER = 0L;
-        private static readonly long _SS_DISABLE = 4L;
-        private static readonly long _RLIMIT_AS = 10L;
-        private static readonly long _SIG_BLOCK = 1L;
-        private static readonly long _SIG_UNBLOCK = 2L;
-        private static readonly long _SIG_SETMASK = 3L;
+        private static readonly long _NSIG = (long)33L;
+        private static readonly long _SI_USER = (long)0L;
+        private static readonly long _SS_DISABLE = (long)4L;
+        private static readonly long _SIG_BLOCK = (long)1L;
+        private static readonly long _SIG_UNBLOCK = (long)2L;
+        private static readonly long _SIG_SETMASK = (long)3L;
+
 
         private partial struct mOS
         {
         }
 
         //go:noescape
-        private static int lwp_create(ref lwpparams param)
+        private static int lwp_create(ptr<lwpparams> param)
 ;
 
         //go:noescape
-        private static void sigaltstack(ref stackt @new, ref stackt old)
+        private static void sigaltstack(ptr<stackt> @new, ptr<stackt> old)
 ;
 
         //go:noescape
-        private static void sigaction(uint sig, ref sigactiont @new, ref sigactiont old)
+        private static void sigaction(uint sig, ptr<sigactiont> @new, ptr<sigactiont> old)
 ;
 
         //go:noescape
-        private static void sigprocmask(int how, ref sigset @new, ref sigset old)
+        private static void sigprocmask(int how, ptr<sigset> @new, ptr<sigset> old)
 ;
 
         //go:noescape
-        private static void setitimer(int mode, ref itimerval @new, ref itimerval old)
+        private static void setitimer(int mode, ptr<itimerval> @new, ptr<itimerval> old)
 ;
 
         //go:noescape
-        private static int sysctl(ref uint mib, uint miblen, ref byte @out, ref System.UIntPtr size, ref byte dst, System.UIntPtr ndst)
+        private static int sysctl(ptr<uint> mib, uint miblen, ptr<byte> @out, ptr<System.UIntPtr> size, ptr<byte> dst, System.UIntPtr ndst)
 ;
 
-        //go:noescape
-        private static int getrlimit(int kind, unsafe.Pointer limit)
-;
-
-        private static void raise(uint sig)
-;
         private static void raiseproc(uint sig)
 ;
 
-        //go:noescape
-        private static int sys_umtx_sleep(ref uint addr, int val, int timeout)
+        private static int lwp_gettid()
+;
+        private static void lwp_kill(int pid, int tid, long sig)
 ;
 
         //go:noescape
-        private static int sys_umtx_wakeup(ref uint addr, int val)
+        private static int sys_umtx_sleep(ptr<uint> addr, int val, int timeout)
+;
+
+        //go:noescape
+        private static int sys_umtx_wakeup(ptr<uint> addr, int val)
 ;
 
         private static void osyield()
 ;
 
-        private static readonly long stackSystem = 0L;
+        private static int kqueue()
+;
+
+        //go:noescape
+        private static int kevent(int kq, ptr<keventt> ch, int nch, ptr<keventt> ev, int nev, ptr<timespec> ts)
+;
+        private static void closeonexec(int fd)
+;
+        private static void setNonblock(int fd)
+;
+
+        private static (int, int, int) pipe()
+;
+
+        private static readonly long stackSystem = (long)0L;
 
         // From DragonFly's <sys/sysctl.h>
 
 
         // From DragonFly's <sys/sysctl.h>
-        private static readonly long _CTL_HW = 6L;
-        private static readonly long _HW_NCPU = 3L;
-        private static readonly long _HW_PAGESIZE = 7L;
+        private static readonly long _CTL_HW = (long)6L;
+        private static readonly long _HW_NCPU = (long)3L;
+        private static readonly long _HW_PAGESIZE = (long)7L;
+
 
         private static sigset sigset_all = new sigset([4]uint32{^uint32(0),^uint32(0),^uint32(0),^uint32(0)});
 
         private static int getncpu()
         {
             array<uint> mib = new array<uint>(new uint[] { _CTL_HW, _HW_NCPU });
-            var @out = uint32(0L);
-            var nout = @unsafe.Sizeof(out);
-            var ret = sysctl(ref mib[0L], 2L, (byte.Value)(@unsafe.Pointer(ref out)), ref nout, null, 0L);
+            ref var @out = ref heap(uint32(0L), out ptr<var> _addr_@out);
+            ref var nout = ref heap(@unsafe.Sizeof(out), out ptr<var> _addr_nout);
+            var ret = sysctl(_addr_mib[0L], 2L, _addr_(byte.val)(@unsafe.Pointer(_addr_out)), _addr_nout, _addr_null, 0L);
             if (ret >= 0L)
-            {>>MARKER:FUNCTION_osyield_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_pipe_BLOCK_PREFIX<<
                 return int32(out);
             }
+
             return 1L;
+
         }
 
         private static System.UIntPtr getPageSize()
         {
             array<uint> mib = new array<uint>(new uint[] { _CTL_HW, _HW_PAGESIZE });
-            var @out = uint32(0L);
-            var nout = @unsafe.Sizeof(out);
-            var ret = sysctl(ref mib[0L], 2L, (byte.Value)(@unsafe.Pointer(ref out)), ref nout, null, 0L);
+            ref var @out = ref heap(uint32(0L), out ptr<var> _addr_@out);
+            ref var nout = ref heap(@unsafe.Sizeof(out), out ptr<var> _addr_nout);
+            var ret = sysctl(_addr_mib[0L], 2L, _addr_(byte.val)(@unsafe.Pointer(_addr_out)), _addr_nout, _addr_null, 0L);
             if (ret >= 0L)
-            {>>MARKER:FUNCTION_sys_umtx_wakeup_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_setNonblock_BLOCK_PREFIX<<
                 return uintptr(out);
             }
+
             return 0L;
+
         }
 
         //go:nosplit
-        private static void futexsleep(ref uint addr, uint val, long ns)
+        private static void futexsleep(ptr<uint> _addr_addr, uint val, long ns)
         {
+            ref uint addr = ref _addr_addr.val;
+
             systemstack(() =>
-            {>>MARKER:FUNCTION_sys_umtx_sleep_BLOCK_PREFIX<<
-                futexsleep1(addr, val, ns);
+            {>>MARKER:FUNCTION_closeonexec_BLOCK_PREFIX<<
+                futexsleep1(_addr_addr, val, ns);
             });
+
         }
 
-        private static void futexsleep1(ref uint addr, uint val, long ns)
+        private static void futexsleep1(ptr<uint> _addr_addr, uint val, long ns)
         {
+            ref uint addr = ref _addr_addr.val;
+
             int timeout = default;
             if (ns >= 0L)
-            {>>MARKER:FUNCTION_raiseproc_BLOCK_PREFIX<< 
+            {>>MARKER:FUNCTION_kevent_BLOCK_PREFIX<< 
                 // The timeout is specified in microseconds - ensure that we
                 // do not end up dividing to zero, which would put us to sleep
                 // indefinitely...
                 timeout = timediv(ns, 1000L, null);
                 if (timeout == 0L)
-                {>>MARKER:FUNCTION_raise_BLOCK_PREFIX<<
+                {>>MARKER:FUNCTION_kqueue_BLOCK_PREFIX<<
                     timeout = 1L;
                 }
+
             } 
 
             // sys_umtx_sleep will return EWOULDBLOCK (EAGAIN) when the timeout
             // expires or EBUSY if the mutex value does not match.
-            var ret = sys_umtx_sleep(addr, int32(val), timeout);
+            var ret = sys_umtx_sleep(_addr_addr, int32(val), timeout);
             if (ret >= 0L || ret == -_EINTR || ret == -_EAGAIN || ret == -_EBUSY)
-            {>>MARKER:FUNCTION_getrlimit_BLOCK_PREFIX<<
-                return;
+            {>>MARKER:FUNCTION_osyield_BLOCK_PREFIX<<
+                return ;
             }
-            print("umtx_sleep addr=", addr, " val=", val, " ret=", ret, "\n") * (int32.Value)(@unsafe.Pointer(uintptr(0x1005UL)));
+
+            print("umtx_sleep addr=", addr, " val=", val, " ret=", ret, "\n") * (int32.val)(@unsafe.Pointer(uintptr(0x1005UL)));
 
             0x1005UL;
+
         }
 
         //go:nosplit
-        private static void futexwakeup(ref uint addr, uint cnt)
+        private static void futexwakeup(ptr<uint> _addr_addr, uint cnt)
         {
-            var ret = sys_umtx_wakeup(addr, int32(cnt));
+            ref uint addr = ref _addr_addr.val;
+
+            var ret = sys_umtx_wakeup(_addr_addr, int32(cnt));
             if (ret >= 0L)
-            {>>MARKER:FUNCTION_sysctl_BLOCK_PREFIX<<
-                return;
+            {>>MARKER:FUNCTION_sys_umtx_wakeup_BLOCK_PREFIX<<
+                return ;
             }
+
             systemstack(() =>
-            {>>MARKER:FUNCTION_setitimer_BLOCK_PREFIX<<
-                print("umtx_wake_addr=", addr, " ret=", ret, "\n") * (int32.Value)(@unsafe.Pointer(uintptr(0x1006UL)));
+            {>>MARKER:FUNCTION_sys_umtx_sleep_BLOCK_PREFIX<<
+                print("umtx_wake_addr=", addr, " ret=", ret, "\n") * (int32.val)(@unsafe.Pointer(uintptr(0x1006UL)));
 
                 0x1006UL;
+
             });
+
         }
 
         private static void lwp_start(System.UIntPtr _p0)
@@ -164,26 +196,35 @@ namespace go
 
         // May run with m.p==nil, so write barriers are not allowed.
         //go:nowritebarrier
-        private static void newosproc(ref m mp, unsafe.Pointer stk)
+        private static void newosproc(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
+            var stk = @unsafe.Pointer(mp.g0.stack.hi);
             if (false)
             {>>MARKER:FUNCTION_lwp_start_BLOCK_PREFIX<<
-                print("newosproc stk=", stk, " m=", mp, " g=", mp.g0, " lwp_start=", funcPC(lwp_start), " id=", mp.id, " ostk=", ref mp, "\n");
+                print("newosproc stk=", stk, " m=", mp, " g=", mp.g0, " lwp_start=", funcPC(lwp_start), " id=", mp.id, " ostk=", _addr_mp, "\n");
             }
-            sigset oset = default;
-            sigprocmask(_SIG_SETMASK, ref sigset_all, ref oset);
 
-            lwpparams @params = new lwpparams(start_func:funcPC(lwp_start),arg:unsafe.Pointer(mp),stack:uintptr(stk),tid1:unsafe.Pointer(&mp.procid),tid2:nil,); 
+            ref sigset oset = ref heap(out ptr<sigset> _addr_oset);
+            sigprocmask(_SIG_SETMASK, _addr_sigset_all, _addr_oset);
+
+            ref lwpparams @params = ref heap(new lwpparams(start_func:funcPC(lwp_start),arg:unsafe.Pointer(mp),stack:uintptr(stk),tid1:nil,tid2:nil,), out ptr<lwpparams> _addr_@params); 
 
             // TODO: Check for error.
-            lwp_create(ref params);
-            sigprocmask(_SIG_SETMASK, ref oset, null);
+            lwp_create(_addr_params);
+            sigprocmask(_SIG_SETMASK, _addr_oset, _addr_null);
+
         }
 
         private static void osinit()
         {
             ncpu = getncpu();
-            physPageSize = getPageSize();
+            if (physPageSize == 0L)
+            {>>MARKER:FUNCTION_lwp_kill_BLOCK_PREFIX<<
+                physPageSize = getPageSize();
+            }
+
         }
 
         private static slice<byte> urandom_dev = (slice<byte>)"/dev/urandom\x00";
@@ -191,8 +232,8 @@ namespace go
         //go:nosplit
         private static void getRandomData(slice<byte> r)
         {
-            var fd = open(ref urandom_dev[0L], 0L, 0L);
-            var n = read(fd, @unsafe.Pointer(ref r[0L]), int32(len(r)));
+            var fd = open(_addr_urandom_dev[0L], 0L, 0L);
+            var n = read(fd, @unsafe.Pointer(_addr_r[0L]), int32(len(r)));
             closefd(fd);
             extendRandom(r, int(n));
         }
@@ -204,8 +245,10 @@ namespace go
 
         // Called to initialize a new m (including the bootstrap m).
         // Called on the parent thread (main thread in case of bootstrap), can allocate memory.
-        private static void mpreinit(ref m mp)
+        private static void mpreinit(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
             mp.gsignal = malg(32L * 1024L);
             mp.gsignal.m = mp;
         }
@@ -213,11 +256,8 @@ namespace go
         // Called to initialize a new m (including the bootstrap m).
         // Called on the new thread, cannot allocate memory.
         private static void minit()
-        { 
-            // m.procid is a uint64, but lwp_start writes an int32. Fix it up.
-            var _g_ = getg();
-            _g_.m.procid = uint64(@unsafe.Pointer(ref _g_.m.procid).Value);
-
+        {
+            getg().m.procid = uint64(lwp_gettid());
             minitSignals();
         }
 
@@ -226,38 +266,6 @@ namespace go
         private static void unminit()
         {
             unminitSignals();
-        }
-
-        private static System.UIntPtr memlimit()
-        {
-            /*
-                                    TODO: Convert to Go when something actually uses the result.
-
-                            Rlimit rl;
-                            extern byte runtime·text[], runtime·end[];
-                            uintptr used;
-
-                            if(runtime·getrlimit(RLIMIT_AS, &rl) != 0)
-                                return 0;
-                            if(rl.rlim_cur >= 0x7fffffff)
-                                return 0;
-
-                            // Estimate our VM footprint excluding the heap.
-                            // Not an exact science: use size of binary plus
-                            // some room for thread stacks.
-                            used = runtime·end - runtime·text + (64<<20);
-                            if(used >= rl.rlim_cur)
-                                return 0;
-
-                            // If there's not at least 16 MB left, we're probably
-                            // not going to be able to do much. Treat as no limit.
-                            rl.rlim_cur -= used;
-                            if(rl.rlim_cur < (16<<20))
-                                return 0;
-
-                            return rl.rlim_cur - used;
-                */
-            return 0L;
         }
 
         private static void sigtramp()
@@ -274,15 +282,17 @@ namespace go
         //go:nowritebarrierrec
         private static void setsig(uint i, System.UIntPtr fn)
         {
-            sigactiont sa = default;
+            ref sigactiont sa = ref heap(out ptr<sigactiont> _addr_sa);
             sa.sa_flags = _SA_SIGINFO | _SA_ONSTACK | _SA_RESTART;
             sa.sa_mask = sigset_all;
             if (fn == funcPC(sighandler))
             {>>MARKER:FUNCTION_sigtramp_BLOCK_PREFIX<<
                 fn = funcPC(sigtramp);
             }
+
             sa.sa_sigaction = fn;
-            sigaction(i, ref sa, null);
+            sigaction(i, _addr_sa, _addr_null);
+
         }
 
         //go:nosplit
@@ -296,32 +306,105 @@ namespace go
         //go:nowritebarrierrec
         private static System.UIntPtr getsig(uint i)
         {
-            sigactiont sa = default;
-            sigaction(i, null, ref sa);
+            ref sigactiont sa = ref heap(out ptr<sigactiont> _addr_sa);
+            sigaction(i, _addr_null, _addr_sa);
             return sa.sa_sigaction;
         }
 
         // setSignaltstackSP sets the ss_sp field of a stackt.
         //go:nosplit
-        private static void setSignalstackSP(ref stackt s, System.UIntPtr sp)
+        private static void setSignalstackSP(ptr<stackt> _addr_s, System.UIntPtr sp)
         {
+            ref stackt s = ref _addr_s.val;
+
             s.ss_sp = sp;
         }
 
         //go:nosplit
         //go:nowritebarrierrec
-        private static void sigaddset(ref sigset mask, long i)
+        private static void sigaddset(ptr<sigset> _addr_mask, long i)
         {
+            ref sigset mask = ref _addr_mask.val;
+
             mask.__bits[(i - 1L) / 32L] |= 1L << (int)(((uint32(i) - 1L) & 31L));
         }
 
-        private static void sigdelset(ref sigset mask, long i)
+        private static void sigdelset(ptr<sigset> _addr_mask, long i)
         {
+            ref sigset mask = ref _addr_mask.val;
+
             mask.__bits[(i - 1L) / 32L] &= 1L << (int)(((uint32(i) - 1L) & 31L));
         }
 
-        private static void fixsigcode(this ref sigctxt c, uint sig)
-        {>>MARKER:FUNCTION_sigprocmask_BLOCK_PREFIX<<
+        //go:nosplit
+        private static void fixsigcode(this ptr<sigctxt> _addr_c, uint sig)
+        {
+            ref sigctxt c = ref _addr_c.val;
+
+        }
+
+        private static void sysargs(int argc, ptr<ptr<byte>> _addr_argv)
+        {
+            ref ptr<byte> argv = ref _addr_argv.val;
+
+            var n = argc + 1L; 
+
+            // skip over argv, envp to get to auxv
+            while (argv_index(argv, n) != null)
+            {>>MARKER:FUNCTION_lwp_gettid_BLOCK_PREFIX<<
+                n++;
+            } 
+
+            // skip NULL separator
+ 
+
+            // skip NULL separator
+            n++;
+
+            ptr<array<System.UIntPtr>> auxv = new ptr<ptr<array<System.UIntPtr>>>(add(@unsafe.Pointer(argv), uintptr(n) * sys.PtrSize));
+            sysauxv(auxv[..]);
+
+        }
+
+        private static readonly long _AT_NULL = (long)0L;
+        private static readonly long _AT_PAGESZ = (long)6L;
+
+
+        private static void sysauxv(slice<System.UIntPtr> auxv)
+        {
+            {
+                long i = 0L;
+
+                while (auxv[i] != _AT_NULL)
+                {>>MARKER:FUNCTION_raiseproc_BLOCK_PREFIX<<
+                    var tag = auxv[i];
+                    var val = auxv[i + 1L];
+
+                    if (tag == _AT_PAGESZ) 
+                        physPageSize = val;
+                                        i += 2L;
+                }
+
+            }
+
+        }
+
+        // raise sends a signal to the calling thread.
+        //
+        // It must be nosplit because it is used by the signal handler before
+        // it definitely has a Go stack.
+        //
+        //go:nosplit
+        private static void raise(uint sig)
+        {
+            lwp_kill(-1L, lwp_gettid(), int(sig));
+        }
+
+        private static void signalM(ptr<m> _addr_mp, long sig)
+        {
+            ref m mp = ref _addr_mp.val;
+
+            lwp_kill(-1L, int32(mp.procid), sig);
         }
     }
 }

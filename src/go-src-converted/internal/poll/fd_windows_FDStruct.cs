@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:34 UTC
+//     Generated on 2020 October 08 03:32:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,7 +17,6 @@ using errors = go.errors_package;
 using race = go.@internal.race_package;
 using windows = go.@internal.syscall.windows_package;
 using io = go.io_package;
-using runtime = go.runtime_package;
 using sync = go.sync_package;
 using syscall = go.syscall_package;
 using utf16 = go.unicode.utf16_package;
@@ -42,7 +41,6 @@ namespace @internal
                 this.wop = default;
                 this.pd = default;
                 this.l = default;
-                this.isConsole = default;
                 this.lastbits = default;
                 this.readuint16 = default;
                 this.readbyte = default;
@@ -52,10 +50,10 @@ namespace @internal
                 this.IsStream = default;
                 this.ZeroReadIsEOF = default;
                 this.isFile = default;
-                this.isDir = default;
+                this.kind = default;
             }
 
-            public FD(fdMutex fdmu = default, syscall.Handle Sysfd = default, operation rop = default, operation wop = default, pollDesc pd = default, sync.Mutex l = default, bool isConsole = default, slice<byte> lastbits = default, slice<ushort> readuint16 = default, slice<byte> readbyte = default, long readbyteOffset = default, uint csema = default, bool skipSyncNotif = default, bool IsStream = default, bool ZeroReadIsEOF = default, bool isFile = default, bool isDir = default)
+            public FD(fdMutex fdmu = default, syscall.Handle Sysfd = default, operation rop = default, operation wop = default, pollDesc pd = default, sync.Mutex l = default, slice<byte> lastbits = default, slice<ushort> readuint16 = default, slice<byte> readbyte = default, long readbyteOffset = default, uint csema = default, bool skipSyncNotif = default, bool IsStream = default, bool ZeroReadIsEOF = default, bool isFile = default, fileKind kind = default)
             {
                 this.fdmu = fdmu;
                 this.Sysfd = Sysfd;
@@ -63,7 +61,6 @@ namespace @internal
                 this.wop = wop;
                 this.pd = pd;
                 this.l = l;
-                this.isConsole = isConsole;
                 this.lastbits = lastbits;
                 this.readuint16 = readuint16;
                 this.readbyte = readbyte;
@@ -73,7 +70,7 @@ namespace @internal
                 this.IsStream = IsStream;
                 this.ZeroReadIsEOF = ZeroReadIsEOF;
                 this.isFile = isFile;
-                this.isDir = isDir;
+                this.kind = kind;
             }
 
             // Enable comparisons between nil and FD struct
@@ -96,7 +93,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static FD FD_cast(dynamic value)
         {
-            return new FD(value.fdmu, value.Sysfd, value.rop, value.wop, value.pd, value.l, value.isConsole, value.lastbits, value.readuint16, value.readbyte, value.readbyteOffset, value.csema, value.skipSyncNotif, value.IsStream, value.ZeroReadIsEOF, value.isFile, value.isDir);
+            return new FD(value.fdmu, value.Sysfd, value.rop, value.wop, value.pd, value.l, value.lastbits, value.readuint16, value.readbyte, value.readbyteOffset, value.csema, value.skipSyncNotif, value.IsStream, value.ZeroReadIsEOF, value.isFile, value.kind);
         }
     }
 }}

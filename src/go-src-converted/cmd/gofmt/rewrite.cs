@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:02:12 UTC
+// package main -- go2cs converted at 2020 October 08 04:37:04 UTC
 // Original source: C:\Go\src\cmd\gofmt\rewrite.go
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -22,12 +22,13 @@ namespace go
     {
         private static void initRewrite()
         {
-            if (rewriteRule == "".Value)
+            if (rewriteRule == "".val)
             {
                 rewrite = null; // disable any previous rewrite
-                return;
+                return ;
+
             }
-            var f = strings.Split(rewriteRule.Value, "->");
+            var f = strings.Split(rewriteRule.val, "->");
             if (len(f) != 2L)
             {
                 fmt.Fprintf(os.Stderr, "rewrite rule must be of the form 'pattern -> replacement'\n");
@@ -35,7 +36,8 @@ namespace go
             }
             var pattern = parseExpr(f[0L], "pattern");
             var replace = parseExpr(f[1L], "replacement");
-            rewrite = p => rewriteFile(pattern, replace, p);
+            rewrite = p => rewriteFile(pattern, replace, _addr_p);
+
         }
 
         // parseExpr parses s as an expression.
@@ -50,7 +52,9 @@ namespace go
                 fmt.Fprintf(os.Stderr, "parsing %s %s at %s\n", what, s, err);
                 os.Exit(2L);
             }
+
             return x;
+
         }
 
         // Keep this function for debugging.
@@ -63,8 +67,10 @@ namespace go
         */
 
         // rewriteFile applies the rewrite rule 'pattern -> replace' to an entire file.
-        private static ref ast.File rewriteFile(ast.Expr pattern, ast.Expr replace, ref ast.File p)
+        private static ptr<ast.File> rewriteFile(ast.Expr pattern, ast.Expr replace, ptr<ast.File> _addr_p)
         {
+            ref ast.File p = ref _addr_p.val;
+
             var cmap = ast.NewCommentMap(fileSet, p, p.Comments);
             var m = make_map<@string, reflect.Value>();
             var pat = reflect.ValueOf(pattern);
@@ -76,8 +82,9 @@ namespace go
                 // don't bother if val is invalid to start with
                 if (!val.IsValid())
                 {
-                    return new reflect.Value();
+                    return _addr_new reflect.Value()!;
                 }
+
                 val = apply(rewriteVal, val);
                 foreach (var (k) in m)
                 {
@@ -87,13 +94,16 @@ namespace go
                 {
                     val = subst(m, repl, reflect.ValueOf(val.Interface()._<ast.Node>().Pos()));
                 }
-                return val;
+
+                return _addr_val!;
+
             }
 ;
 
-            ref ast.File r = apply(rewriteVal, reflect.ValueOf(p)).Interface()._<ref ast.File>();
+            ptr<ast.File> r = apply(rewriteVal, reflect.ValueOf(p)).Interface()._<ptr<ast.File>>();
             r.Comments = cmap.Filter(r).Comments(); // recreate comments list
-            return r;
+            return _addr_r!;
+
         }
 
         // set is a wrapper for x.Set(y); it protects the caller from panics if x cannot be changed to y.
@@ -102,8 +112,9 @@ namespace go
             // don't bother if x cannot be set or y is invalid
             if (!x.CanSet() || !y.IsValid())
             {
-                return;
+                return ;
             }
+
             defer(() =>
             {
                 {
@@ -117,20 +128,25 @@ namespace go
                             if (ok && (strings.Contains(s, "type mismatch") || strings.Contains(s, "not assignable")))
                             { 
                                 // x cannot be set to y - ignore this rewrite
-                                return;
+                                return ;
+
                             }
 
                         }
+
                         panic(x);
+
                     }
 
                 }
+
             }());
             x.Set(y);
+
         });
 
         // Values/types for special cases.
-        private static var objectPtrNil = reflect.ValueOf((ast.Object.Value)(null));        private static var scopePtrNil = reflect.ValueOf((ast.Scope.Value)(null));        private static var identType = reflect.TypeOf((ast.Ident.Value)(null));        private static var objectPtrType = reflect.TypeOf((ast.Object.Value)(null));        private static var positionType = reflect.TypeOf(token.NoPos);        private static var callExprType = reflect.TypeOf((ast.CallExpr.Value)(null));        private static var scopePtrType = reflect.TypeOf((ast.Scope.Value)(null));
+        private static var objectPtrNil = reflect.ValueOf((ast.Object.val)(null));        private static var scopePtrNil = reflect.ValueOf((ast.Scope.val)(null));        private static var identType = reflect.TypeOf((ast.Ident.val)(null));        private static var objectPtrType = reflect.TypeOf((ast.Object.val)(null));        private static var positionType = reflect.TypeOf(token.NoPos);        private static var callExprType = reflect.TypeOf((ast.CallExpr.val)(null));        private static var scopePtrType = reflect.TypeOf((ast.Scope.val)(null));
 
         // apply replaces each AST field x in val with f(x), returning val.
         // To avoid extra conversions, f operates on the reflect.Value form.
@@ -154,6 +170,7 @@ namespace go
             {
                 return scopePtrNil;
             }
+
             {
                 var v = reflect.Indirect(val);
 
@@ -190,6 +207,7 @@ namespace go
 
             }
             return val;
+
         }
 
         private static bool isWildcard(@string s)
@@ -208,7 +226,7 @@ namespace go
             // each time.
             if (m != null && pattern.IsValid() && pattern.Type() == identType)
             {
-                ref ast.Ident name = pattern.Interface()._<ref ast.Ident>().Name;
+                ptr<ast.Ident> name = pattern.Interface()._<ptr<ast.Ident>>().Name;
                 if (isWildcard(name) && val.IsValid())
                 { 
                     // wildcards only match valid (non-nil) expressions.
@@ -226,12 +244,16 @@ namespace go
                                 }
 
                             }
+
                             m[name] = val;
                             return true;
+
                         }
 
                     }
+
                 }
+
             } 
 
             // Otherwise, pattern and val must match recursively.
@@ -239,6 +261,7 @@ namespace go
             {
                 return !pattern.IsValid() && !val.IsValid();
             }
+
             if (pattern.Type() != val.Type())
             {
                 return false;
@@ -251,8 +274,8 @@ namespace go
                 // (and none of the other *ast.Object information).
                 // This is a common case, handle it all here instead
                 // of recursing down any further via reflection.
-                ref ast.Ident p = pattern.Interface()._<ref ast.Ident>();
-                ref ast.Ident v = val.Interface()._<ref ast.Ident>();
+                ptr<ast.Ident> p = pattern.Interface()._<ptr<ast.Ident>>();
+                ptr<ast.Ident> v = val.Interface()._<ptr<ast.Ident>>();
                 return p == null && v == null || p != null && v != null && p.Name == v.Name;
             else if (pattern.Type() == objectPtrType || pattern.Type() == positionType) 
                 // object pointers and token positions always match
@@ -261,12 +284,13 @@ namespace go
                 // For calls, the Ellipsis fields (token.Position) must
                 // match since that is how f(x) and f(x...) are different.
                 // Check them here but fall through for the remaining fields.
-                p = pattern.Interface()._<ref ast.CallExpr>();
-                v = val.Interface()._<ref ast.CallExpr>();
+                p = pattern.Interface()._<ptr<ast.CallExpr>>();
+                v = val.Interface()._<ptr<ast.CallExpr>>();
                 if (p.Ellipsis.IsValid() != v.Ellipsis.IsValid())
                 {
                     return false;
                 }
+
                         p = reflect.Indirect(pattern);
             v = reflect.Indirect(val);
             if (!p.IsValid() || !v.IsValid())
@@ -274,11 +298,13 @@ namespace go
                 return !p.IsValid() && !v.IsValid();
             }
 
+
             if (p.Kind() == reflect.Slice) 
                 if (p.Len() != v.Len())
                 {
                     return false;
                 }
+
                 {
                     long i__prev1 = i;
 
@@ -288,6 +314,7 @@ namespace go
                         {
                             return false;
                         }
+
                     }
 
 
@@ -304,6 +331,7 @@ namespace go
                         {
                             return false;
                         }
+
                     }
 
 
@@ -314,6 +342,7 @@ namespace go
                 return match(m, p.Elem(), v.Elem());
             // Handle token integers, etc.
             return p.Interface() == v.Interface();
+
         }
 
         // subst returns a copy of pattern with values from m substituted in place
@@ -330,7 +359,7 @@ namespace go
             // Wildcard gets replaced with map value.
             if (m != null && pattern.Type() == identType)
             {
-                ref ast.Ident name = pattern.Interface()._<ref ast.Ident>().Name;
+                ptr<ast.Ident> name = pattern.Interface()._<ptr<ast.Ident>>().Name;
                 if (isWildcard(name))
                 {
                     {
@@ -346,8 +375,11 @@ namespace go
                         old = old__prev3;
 
                     }
+
                 }
+
             }
+
             if (pos.IsValid() && pattern.Type() == positionType)
             { 
                 // use new position only if old position was valid in the first place
@@ -364,7 +396,9 @@ namespace go
                     old = old__prev2;
 
                 }
+
                 return pos;
+
             } 
 
             // Otherwise copy.
@@ -373,6 +407,15 @@ namespace go
 
 
                 if (p.Kind() == reflect.Slice) 
+                    if (p.IsNil())
+                    { 
+                        // Do not turn nil slices into empty slices. go/ast
+                        // guarantees that certain lists will be nil if not
+                        // populated.
+                        return reflect.Zero(p.Type());
+
+                    }
+
                     var v = reflect.MakeSlice(p.Type(), p.Len(), p.Len());
                     {
                         long i__prev1 = i;
@@ -415,6 +458,7 @@ namespace go
                         elem = elem__prev1;
 
                     }
+
                     return v;
                 else if (p.Kind() == reflect.Interface) 
                     v = reflect.New(p.Type()).Elem();
@@ -431,11 +475,13 @@ namespace go
                         elem = elem__prev1;
 
                     }
+
                     return v;
 
             }
 
             return pattern;
+
         }
     }
 }

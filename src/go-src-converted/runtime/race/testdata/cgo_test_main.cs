@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:21 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:30 UTC
 // Original source: C:\Go\src\runtime\race\testdata\cgo_test_main.go
 /*
 int sync;
@@ -36,6 +36,7 @@ namespace go
             }());
             C.Wait();
             _ = data;
+
         }
     }
 }

@@ -4,7 +4,7 @@
 
 // +build plan9
 
-// package x509 -- go2cs converted at 2020 August 29 08:31:55 UTC
+// package x509 -- go2cs converted at 2020 October 08 03:36:58 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\root_plan9.go
 using ioutil = go.io.ioutil_package;
@@ -19,29 +19,45 @@ namespace crypto
         // Possible certificate files; stop after finding one.
         private static @string certFiles = new slice<@string>(new @string[] { "/sys/lib/tls/ca.pem" });
 
-        private static (slice<slice<ref Certificate>>, error) systemVerify(this ref Certificate c, ref VerifyOptions opts)
+        private static (slice<slice<ptr<Certificate>>>, error) systemVerify(this ptr<Certificate> _addr_c, ptr<VerifyOptions> _addr_opts)
         {
-            return (null, null);
+            slice<slice<ptr<Certificate>>> chains = default;
+            error err = default!;
+            ref Certificate c = ref _addr_c.val;
+            ref VerifyOptions opts = ref _addr_opts.val;
+
+            return (null, error.As(null!)!);
         }
 
-        private static (ref CertPool, error) loadSystemRoots()
+        private static (ptr<CertPool>, error) loadSystemRoots()
         {
+            ptr<CertPool> _p0 = default!;
+            error _p0 = default!;
+
             var roots = NewCertPool();
-            error bestErr = default;
+            error bestErr = default!;
             foreach (var (_, file) in certFiles)
             {
                 var (data, err) = ioutil.ReadFile(file);
                 if (err == null)
                 {
                     roots.AppendCertsFromPEM(data);
-                    return (roots, null);
+                    return (_addr_roots!, error.As(null!)!);
                 }
+
                 if (bestErr == null || (os.IsNotExist(bestErr) && !os.IsNotExist(err)))
                 {
-                    bestErr = error.As(err);
+                    bestErr = error.As(err)!;
                 }
+
             }
-            return (null, bestErr);
+            if (bestErr == null)
+            {
+                return (_addr_roots!, error.As(null!)!);
+            }
+
+            return (_addr_null!, error.As(bestErr)!);
+
         }
     }
 }}

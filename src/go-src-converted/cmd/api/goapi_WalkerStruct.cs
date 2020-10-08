@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:39 UTC
+//     Generated on 2020 October 08 04:02:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
+using json = go.encoding.json_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -32,6 +33,7 @@ using regexp = go.regexp_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
+using sync = go.sync_package;
 
 namespace go
 {
@@ -49,9 +51,12 @@ namespace go
                 this.current = default;
                 this.features = default;
                 this.imported = default;
+                this.stdPackages = default;
+                this.importMap = default;
+                this.importDir = default;
             }
 
-            public Walker(ref ptr<build.Context> context = default, @string root = default, slice<@string> scope = default, ref ptr<types.Package> current = default, map<@string, bool> features = default, map<@string, ref types.Package> imported = default)
+            public Walker(ref ptr<build.Context> context = default, @string root = default, slice<@string> scope = default, ref ptr<types.Package> current = default, map<@string, bool> features = default, map<@string, ptr<types.Package>> imported = default, slice<@string> stdPackages = default, map<@string, map<@string, @string>> importMap = default, map<@string, @string> importDir = default)
             {
                 this.context = context;
                 this.root = root;
@@ -59,6 +64,9 @@ namespace go
                 this.current = current;
                 this.features = features;
                 this.imported = imported;
+                this.stdPackages = stdPackages;
+                this.importMap = importMap;
+                this.importDir = importDir;
             }
 
             // Enable comparisons between nil and Walker struct
@@ -81,7 +89,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Walker Walker_cast(dynamic value)
         {
-            return new Walker(ref value.context, value.root, value.scope, ref value.current, value.features, value.imported);
+            return new Walker(ref value.context, value.root, value.scope, ref value.current, value.features, value.imported, value.stdPackages, value.importMap, value.importDir);
         }
     }
 }

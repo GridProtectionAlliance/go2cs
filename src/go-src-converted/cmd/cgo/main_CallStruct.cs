@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:52:43 UTC
+//     Generated on 2020 October 08 04:09:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using printer = go.go.printer_package;
 using token = go.go.token_package;
+using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -41,12 +42,14 @@ namespace go
             {
                 this.Call = default;
                 this.Deferred = default;
+                this.Done = default;
             }
 
-            public Call(ref ptr<ast.CallExpr> Call = default, bool Deferred = default)
+            public Call(ref ptr<ast.CallExpr> Call = default, bool Deferred = default, bool Done = default)
             {
                 this.Call = Call;
                 this.Deferred = Deferred;
+                this.Done = Done;
             }
 
             // Enable comparisons between nil and Call struct
@@ -69,7 +72,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Call Call_cast(dynamic value)
         {
-            return new Call(ref value.Call, value.Deferred);
+            return new Call(ref value.Call, value.Deferred, value.Done);
         }
     }
 }

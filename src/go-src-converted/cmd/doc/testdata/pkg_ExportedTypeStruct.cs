@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:08 UTC
+//     Generated on 2020 October 08 04:33:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using static go.builtin;
+using io = go.io_package;
 using go;
 
 namespace go {
@@ -23,6 +24,16 @@ namespace cmd
         [GeneratedCode("go2cs", "0.1.0.0")]
         public partial struct ExportedType
         {
+            // Reader.Read function promotion
+            private delegate (long, error) ReadByVal(T value, slice<byte> p);
+            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+
+            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByRef s_ReadByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public (long, error) Read(slice<byte> p) => s_ReadByRef?.Invoke(ref this, p) ?? s_ReadByVal?.Invoke(this, p) ?? Reader?.Read(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+
             // error.Error function promotion
             private delegate @string ErrorByVal(T value);
             private delegate @string ErrorByRef(ref T value);
@@ -38,6 +49,16 @@ namespace cmd
             {
                 Type targetType = typeof(ExportedType);
                 MethodInfo extensionMethod;
+                
+                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Read");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+
+                    if ((object)s_ReadByRef == null)
+                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
+                }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Error");
 
@@ -56,23 +77,23 @@ namespace cmd
                 this.ExportedField = default;
                 this.unexportedField = default;
                 this.ExportedEmbeddedType = default;
-                this.ExportedEmbeddedType = default;
-                this.ExportedEmbeddedType = default;
+                this.ptr<ExportedEmbeddedType> = default;
+                this.ExportedEmbeddedType> = default;
                 this.unexportedType = default;
-                this.unexportedType = default;
+                this.ptr<unexportedType> = default;
                 this.Reader = default;
                 this.error = default;
             }
 
-            public ExportedType(long ExportedField = default, long unexportedField = default, ExportedEmbeddedType ExportedEmbeddedType = default, ref ExportedEmbeddedType ExportedEmbeddedType = default, ref qualified.ExportedEmbeddedType ExportedEmbeddedType = default, unexportedType unexportedType = default, ref unexportedType unexportedType = default, io.Reader Reader = default, error error = default)
+            public ExportedType(long ExportedField = default, long unexportedField = default, ExportedEmbeddedType ExportedEmbeddedType = default, ref ptr<ExportedEmbeddedType> ptr<ExportedEmbeddedType> = default, ref ptr<qualified.ExportedEmbeddedType> ExportedEmbeddedType> = default, unexportedType unexportedType = default, ref ptr<unexportedType> ptr<unexportedType> = default, io.Reader Reader = default, error error = default)
             {
                 this.ExportedField = ExportedField;
                 this.unexportedField = unexportedField;
                 this.ExportedEmbeddedType = ExportedEmbeddedType;
-                this.ExportedEmbeddedType = ExportedEmbeddedType;
-                this.ExportedEmbeddedType = ExportedEmbeddedType;
+                this.ptr<ExportedEmbeddedType> = ptr<ExportedEmbeddedType>;
+                this.ExportedEmbeddedType> = ExportedEmbeddedType>;
                 this.unexportedType = unexportedType;
-                this.unexportedType = unexportedType;
+                this.ptr<unexportedType> = ptr<unexportedType>;
                 this.Reader = Reader;
                 this.error = error;
             }
@@ -97,7 +118,7 @@ namespace cmd
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ExportedType ExportedType_cast(dynamic value)
         {
-            return new ExportedType(value.ExportedField, value.unexportedField, value.ExportedEmbeddedType, ref value.ExportedEmbeddedType, ref value.ExportedEmbeddedType, value.unexportedType, ref value.unexportedType, value.Reader, value.error);
+            return new ExportedType(value.ExportedField, value.unexportedField, value.ExportedEmbeddedType, ref value.ptr<ExportedEmbeddedType>, ref value.ExportedEmbeddedType>, value.unexportedType, ref value.ptr<unexportedType>, value.Reader, value.error);
         }
     }
 }}

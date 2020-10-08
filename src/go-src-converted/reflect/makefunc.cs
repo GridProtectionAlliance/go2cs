@@ -4,7 +4,7 @@
 
 // MakeFunc implementation.
 
-// package reflect -- go2cs converted at 2020 August 29 08:42:59 UTC
+// package reflect -- go2cs converted at 2020 October 08 03:24:33 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\makefunc.go
 using @unsafe = go.@unsafe_package;
@@ -13,18 +13,19 @@ using System;
 
 namespace go
 {
-    public static unsafe partial class reflect_package
+    public static partial class reflect_package
     {
         // makeFuncImpl is the closure value implementing the function
         // returned by MakeFunc.
-        // The first two words of this type must be kept in sync with
+        // The first three words of this type must be kept in sync with
         // methodValue and runtime.reflectMethodValue.
         // Any changes should be reflected in all three.
         private partial struct makeFuncImpl
         {
             public System.UIntPtr code;
-            public ptr<bitVector> stack;
-            public ptr<funcType> typ;
+            public ptr<bitVector> stack; // ptrmap for both args and results
+            public System.UIntPtr argLen; // just args
+            public ptr<funcType> ftyp;
             public Func<slice<Value>, slice<Value>> fn;
         }
 
@@ -56,21 +57,23 @@ namespace go
             {
                 panic("reflect: call of MakeFunc with non-Func type");
             }
+
             var t = typ.common();
-            var ftyp = (funcType.Value)(@unsafe.Pointer(t)); 
+            var ftyp = (funcType.val)(@unsafe.Pointer(t)); 
 
             // Indirect Go func value (dummy) to obtain
             // actual code address. (A Go func value is a pointer
             // to a C function pointer. https://golang.org/s/go11func.)
-            var dummy = makeFuncStub;
-            ptr<ptr<*(ptr<ptr<System.UIntPtr>>)>> code = new ptr<ptr<ptr<*(ptr<ptr<System.UIntPtr>>)>>>(@unsafe.Pointer(ref dummy)); 
+            ref var dummy = ref heap(makeFuncStub, out ptr<var> _addr_dummy);
+            ptr<ptr<ptr<ptr<System.UIntPtr>>>> code = new ptr<ptr<ptr<ptr<ptr<System.UIntPtr>>>>>(@unsafe.Pointer(_addr_dummy)); 
 
             // makeFuncImpl contains a stack map for use by the runtime
-            var (_, _, _, stack, _) = funcLayout(t, null);
+            var (_, argLen, _, stack, _) = funcLayout(ftyp, null);
 
-            makeFuncImpl impl = ref new makeFuncImpl(code:code,stack:stack,typ:ftyp,fn:fn);
+            ptr<makeFuncImpl> impl = addr(new makeFuncImpl(code:code,stack:stack,argLen:argLen,ftyp:ftyp,fn:fn));
 
             return new Value(t,unsafe.Pointer(impl),flag(Func));
+
         });
 
         // makeFuncStub is an assembly function that is the code half of
@@ -81,13 +84,14 @@ namespace go
         private static void makeFuncStub()
 ;
 
-        // The first two words of this type must be kept in sync with
+        // The first 3 words of this type must be kept in sync with
         // makeFuncImpl and runtime.reflectMethodValue.
         // Any changes should be reflected in all three.
         private partial struct methodValue
         {
             public System.UIntPtr fn;
-            public ptr<bitVector> stack;
+            public ptr<bitVector> stack; // ptrmap for both args and results
+            public System.UIntPtr argLen; // just args
             public long method;
             public Value rcvr;
         }
@@ -112,25 +116,26 @@ namespace go
             Value rcvr = new Value(v.typ,v.ptr,fl); 
 
             // v.Type returns the actual type of the method value.
-            ref rtype funcType = v.Type()._<ref rtype>(); 
+            var ftyp = (funcType.val)(@unsafe.Pointer(v.Type()._<ptr<rtype>>())); 
 
             // Indirect Go func value (dummy) to obtain
             // actual code address. (A Go func value is a pointer
             // to a C function pointer. https://golang.org/s/go11func.)
-            var dummy = methodValueCall;
-            ptr<ptr<*(ptr<ptr<System.UIntPtr>>)>> code = new ptr<ptr<ptr<*(ptr<ptr<System.UIntPtr>>)>>>(@unsafe.Pointer(ref dummy)); 
+            ref var dummy = ref heap(methodValueCall, out ptr<var> _addr_dummy);
+            ptr<ptr<ptr<ptr<System.UIntPtr>>>> code = new ptr<ptr<ptr<ptr<ptr<System.UIntPtr>>>>>(@unsafe.Pointer(_addr_dummy)); 
 
             // methodValue contains a stack map for use by the runtime
-            var (_, _, _, stack, _) = funcLayout(funcType, null);
+            var (_, argLen, _, stack, _) = funcLayout(ftyp, null);
 
-            methodValue fv = ref new methodValue(fn:code,stack:stack,method:int(v.flag)>>flagMethodShift,rcvr:rcvr,); 
+            ptr<methodValue> fv = addr(new methodValue(fn:code,stack:stack,argLen:argLen,method:int(v.flag)>>flagMethodShift,rcvr:rcvr,)); 
 
             // Cause panic if method is not appropriate.
             // The panic would still happen during the call if we omit this,
             // but we want Interface() and other operations to fail early.
             methodReceiver(op, fv.rcvr, fv.method);
 
-            return new Value(funcType,unsafe.Pointer(fv),v.flag&flagRO|flag(Func));
+            return new Value(&ftyp.rtype,unsafe.Pointer(fv),v.flag&flagRO|flag(Func));
+
         });
 
         // methodValueCall is an assembly function that is the code half of

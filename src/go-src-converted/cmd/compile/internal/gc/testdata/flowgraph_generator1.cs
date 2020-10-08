@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 09:58:14 UTC
+// package main -- go2cs converted at 2020 October 08 04:31:58 UTC
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\flowgraph_generator1.go
 using fmt = go.fmt_package;
 using strings = go.strings_package;
@@ -33,7 +33,7 @@ namespace go
         // of the 2-to-the-(J-1) serial numbers.
 
         // For each generated function a compact summary is also
-        // created so that the generated funtion can be simulated
+        // created so that the generated function can be simulated
         // with a simple interpreter to sanity check the behavior of
         // the compiled code.
 
@@ -100,10 +100,13 @@ namespace go
 
         private static (slice<@string>, @string) blocks(@string spec)
         {
+            slice<@string> blocks = default;
+            @string fnameBase = default;
+
             spec = strings.ToUpper(spec);
             blocks = strings.Split(spec, ",");
             fnameBase = strings.Replace(spec, ",", "_", -1L);
-            return;
+            return ;
         }
 
         private static @string makeFunctionFromFlowGraph(slice<blo> blocks, @string fname)
@@ -117,6 +120,7 @@ namespace go
                 { 
                     // block A, implicit label
                     s += "\nfunc " + fname + "(x int64) int64 {\n\ty := int64(0)\n\tvar b int64\n\t_ = b";
+
                 }
                 else
                 { 
@@ -127,7 +131,9 @@ namespace go
                     {
                         yeq = "\n\ty += " + fmt.Sprintf("%d", blocks[j].inc);
                     }
+
                     s += "\n" + l + ":\n\tglob = !glob" + yeq;
+
                 } 
 
                 // edges to successors
@@ -135,14 +141,17 @@ namespace go
                 { // conditionally branch to second successor
                     s += "\n\tb = x & 1\n\tx = x >> 1\n\tif b != 0 {" + "\n\t\tgoto " + string(labels[blocks[j].succs[1L]]) + "\n\t}";
 
+
                 } 
                 // branch to first successor
                 s += "\n\tgoto " + string(labels[blocks[j].succs[0L]]);
+
             } 
 
             // end block (Z)
             s += "\nZ:\n\treturn y\n}\n";
             return s;
+
         }
 
         private static slice<@string> graphs = new slice<@string>(new @string[] { "Z", "BZ,Z", "B,BZ", "BZ,BZ", "ZB,Z", "B,ZB", "ZB,BZ", "ZB,ZB", "BC,C,Z", "BC,BC,Z", "BC,BC,BZ", "BC,Z,Z", "BC,ZC,Z", "BC,ZC,BZ", "BZ,C,Z", "BZ,BC,Z", "BZ,CZ,Z", "BZ,C,BZ", "BZ,BC,BZ", "BZ,CZ,BZ", "BZ,C,CZ", "BZ,BC,CZ", "BZ,CZ,CZ", "BC,CD,BE,BZ,CZ", "BC,BD,CE,CZ,BZ", "BC,BD,CE,FZ,GZ,F,G", "BC,BD,CE,FZ,GZ,G,F", "BC,DE,BE,FZ,FZ,Z", "BC,DE,BE,FZ,ZF,Z", "BC,DE,BE,ZF,FZ,Z", "BC,DE,EB,FZ,FZ,Z", "BC,ED,BE,FZ,FZ,Z", "CB,DE,BE,FZ,FZ,Z", "CB,ED,BE,FZ,FZ,Z", "BC,ED,EB,FZ,ZF,Z", "CB,DE,EB,ZF,FZ,Z", "CB,ED,EB,FZ,FZ,Z", "BZ,CD,CD,CE,BZ", "EC,DF,FG,ZC,GB,BE,FD", "BH,CF,DG,HE,BF,CG,DH,BZ" });
@@ -160,6 +169,9 @@ namespace go
         // common form easy to execute or interpret.
         private static (slice<blo>, ulong) strings2blocks(slice<@string> blocks, @string fname, long i)
         {
+            slice<blo> bs = default;
+            ulong cond = default;
+
             bs = make_slice<blo>(len(blocks));
             var edge = int64(1L);
             cond = 0L;
@@ -176,17 +188,23 @@ namespace go
                         bs[j].inc = edge;
                         edge *= 10L;
                     }
+
                     k++;
+
                 }
+
                 if (len(s) > 1L)
                 {
                     bs[j].succs[1L] = int64(blocks[j][1L] - 'A');
                     bs[j].cond = true;
                     cond++;
                 }
+
                 bs[j].succs[0L] = int64(blocks[j][0L] - 'A');
+
             }
             return (bs, cond);
+
         }
 
         // fmtBlocks writes out the blocks for consumption in the generated test
@@ -199,6 +217,7 @@ namespace go
             }
             s += "}";
             return s;
+
         }
 
         private static void Main()
@@ -218,6 +237,7 @@ namespace go
                     fmt.Printf("%s", makeFunctionFromFlowGraph(bs, fname));
                     s += "\n\t\t{f:" + fname + ", maxin:" + fmt.Sprintf("%d", 1L << (int)(k)) + ", blocks:" + fmtBlocks(bs) + "},";
                 }
+
 
 
             }
@@ -271,6 +291,7 @@ func main() {
 //	fmt.Printf(""Sum of all returns over all terminating inputs is %d\n"", sum)
 }
 ");
+
         }
     }
 }

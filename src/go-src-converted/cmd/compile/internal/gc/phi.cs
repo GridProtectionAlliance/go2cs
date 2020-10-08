@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:27:57 UTC
+// package gc -- go2cs converted at 2020 October 08 04:29:55 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\phi.go
 using ssa = go.cmd.compile.@internal.ssa_package;
@@ -21,23 +21,14 @@ namespace @internal
     {
         // This file contains the algorithm to place phi nodes in a function.
         // For small functions, we use Braun, Buchwald, Hack, Leißa, Mallon, and Zwinkau.
-        // http://pp.info.uni-karlsruhe.de/uploads/publikationen/braun13cc.pdf
+        // https://pp.info.uni-karlsruhe.de/uploads/publikationen/braun13cc.pdf
         // For large functions, we use Sreedhar & Gao: A Linear Time Algorithm for Placing Φ-Nodes.
         // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.8.1979&rep=rep1&type=pdf
-        private static readonly long smallBlocks = 500L;
+        private static readonly long smallBlocks = (long)500L;
 
 
 
-        private static readonly var debugPhi = false;
-
-        // insertPhis finds all the places in the function where a phi is
-        // necessary and inserts them.
-        // Uses FwdRef ops to find all uses of variables, and s.defvars to find
-        // all definitions.
-        // Phi values are inserted, and all FwdRefs are changed to a Copy
-        // of the appropriate phi or definition.
-        // TODO: make this part of cmd/compile/internal/ssa somehow?
-
+        private static readonly var debugPhi = (var)false;
 
         // insertPhis finds all the places in the function where a phi is
         // necessary and inserts them.
@@ -46,34 +37,47 @@ namespace @internal
         // Phi values are inserted, and all FwdRefs are changed to a Copy
         // of the appropriate phi or definition.
         // TODO: make this part of cmd/compile/internal/ssa somehow?
-        private static void insertPhis(this ref state s)
+
+
+        // insertPhis finds all the places in the function where a phi is
+        // necessary and inserts them.
+        // Uses FwdRef ops to find all uses of variables, and s.defvars to find
+        // all definitions.
+        // Phi values are inserted, and all FwdRefs are changed to a Copy
+        // of the appropriate phi or definition.
+        // TODO: make this part of cmd/compile/internal/ssa somehow?
+        private static void insertPhis(this ptr<state> _addr_s)
         {
+            ref state s = ref _addr_s.val;
+
             if (len(s.f.Blocks) <= smallBlocks)
             {
                 simplePhiState sps = new simplePhiState(s:s,f:s.f,defvars:s.defvars);
                 sps.insertPhis();
-                return;
+                return ;
             }
+
             phiState ps = new phiState(s:s,f:s.f,defvars:s.defvars);
             ps.insertPhis();
+
         }
 
         private partial struct phiState
         {
             public ptr<state> s; // SSA state
             public ptr<ssa.Func> f; // function to work on
-            public slice<map<ref Node, ref ssa.Value>> defvars; // defined variables at end of each block
+            public slice<map<ptr<Node>, ptr<ssa.Value>>> defvars; // defined variables at end of each block
 
-            public map<ref Node, int> varnum; // variable numbering
+            public map<ptr<Node>, int> varnum; // variable numbering
 
 // properties of the dominator tree
-            public slice<ref ssa.Block> idom; // dominator parents
+            public slice<ptr<ssa.Block>> idom; // dominator parents
             public slice<domBlock> tree; // dominator child+sibling
             public slice<int> level; // level in dominator tree (0 = root or unreachable, 1 = children of root, ...)
 
 // scratch locations
             public blockHeap priq; // priority queue of blocks, higher level (toward leaves) = higher priority
-            public slice<ref ssa.Block> q; // inner loop queue
+            public slice<ptr<ssa.Block>> q; // inner loop queue
             public ptr<sparseSet> queued; // has been put in q
             public ptr<sparseSet> hasPhi; // has a phi
             public ptr<sparseSet> hasDef; // has a write of the variable we're processing
@@ -82,8 +86,10 @@ namespace @internal
             public ptr<ssa.Value> placeholder; // dummy value to use as a "not set yet" placeholder.
         }
 
-        private static void insertPhis(this ref phiState s)
+        private static void insertPhis(this ptr<phiState> _addr_s)
         {
+            ref phiState s = ref _addr_s.val;
+
             if (debugPhi)
             {
                 fmt.Println(s.f.String());
@@ -92,9 +98,9 @@ namespace @internal
             // Find all the variables for which we need to match up reads & writes.
             // This step prunes any basic-block-only variables from consideration.
             // Generate a numbering for these variables.
-            s.varnum = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref Node, int>{};
-            slice<ref Node> vars = default;
-            slice<ref types.Type> vartypes = default;
+            s.varnum = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<Node>, int>{};
+            slice<ptr<Node>> vars = default;
+            slice<ptr<types.Type>> vartypes = default;
             {
                 var b__prev1 = b;
 
@@ -111,7 +117,8 @@ namespace @internal
                             {
                                 continue;
                             }
-                            ref Node var_ = v.Aux._<ref Node>(); 
+
+                            ptr<Node> var_ = v.Aux._<ptr<Node>>(); 
 
                             // Optimization: look back 1 block for the definition.
                             if (len(b.Preds) == 1L)
@@ -129,7 +136,9 @@ namespace @internal
                                     }
 
                                 }
+
                             }
+
                             {
                                 var (_, ok) = s.varnum[var_];
 
@@ -139,18 +148,20 @@ namespace @internal
                                 }
 
                             }
+
                             s.varnum[var_] = int32(len(vartypes));
                             if (debugPhi)
                             {
                                 fmt.Printf("var%d = %v\n", len(vartypes), var_);
                             }
+
                             vars = append(vars, var_);
                             vartypes = append(vartypes, v.Type);
+
                         }
 
                         v = v__prev2;
                     }
-
                 }
 
                 b = b__prev1;
@@ -158,12 +169,12 @@ namespace @internal
 
             if (len(vartypes) == 0L)
             {
-                return;
+                return ;
             } 
 
             // Find all definitions of the variables we need to process.
             // defs[n] contains all the blocks in which variable number n is assigned.
-            var defs = make_slice<slice<ref ssa.Block>>(len(vartypes));
+            var defs = make_slice<slice<ptr<ssa.Block>>>(len(vartypes));
             {
                 var b__prev1 = b;
 
@@ -171,7 +182,7 @@ namespace @internal
                 {
                     b = __b;
                     {
-                        ref Node var___prev2 = var_;
+                        ptr<Node> var___prev2 = var_;
 
                         foreach (var (__var_) in s.defvars[b.ID])
                         {
@@ -189,11 +200,11 @@ namespace @internal
                                 n = n__prev1;
 
                             }
+
                         }
 
                         var_ = var___prev2;
                     }
-
                 } 
 
                 // Make dominator tree.
@@ -215,6 +226,7 @@ namespace @internal
                         s.tree[b.ID].sibling = s.tree[p.ID].firstChild;
                         s.tree[p.ID].firstChild = b;
                     }
+
                 } 
                 // Compute levels in dominator tree.
                 // With parent pointers we can do a depth-first walk without
@@ -242,11 +254,13 @@ levels:
                         {
                             fmt.Printf("level %s = %d\n", b, s.level[b.ID]);
                         }
+
                     }
 
                     p = p__prev1;
 
                 }
+
                 {
                     var c__prev1 = c;
 
@@ -261,6 +275,7 @@ levels:
                     c = c__prev1;
 
                 }
+
                 while (true)
                 {
                     {
@@ -278,13 +293,16 @@ levels:
                         c = c__prev1;
 
                     }
+
                     b = s.idom[b.ID];
                     if (b == null)
                     {
                         _breaklevels = true;
                         break;
                     }
+
                 }
+
 
             } 
 
@@ -293,7 +311,7 @@ levels:
 
             // Allocate scratch locations.
             s.priq.level = s.level;
-            s.q = make_slice<ref ssa.Block>(0L, s.f.NumBlocks());
+            s.q = make_slice<ptr<ssa.Block>>(0L, s.f.NumBlocks());
             s.queued = newSparseSet(s.f.NumBlocks());
             s.hasPhi = newSparseSet(s.f.NumBlocks());
             s.hasDef = newSparseSet(s.f.NumBlocks());
@@ -333,21 +351,24 @@ levels:
                             {
                                 v.AuxInt = 0L;
                             }
+
                         }
 
                         v = v__prev2;
                     }
-
                 }
 
                 b = b__prev1;
             }
-
         }
 
-        private static void insertVarPhis(this ref phiState s, long n, ref Node var_, slice<ref ssa.Block> defs, ref types.Type typ)
+        private static void insertVarPhis(this ptr<phiState> _addr_s, long n, ptr<Node> _addr_var_, slice<ptr<ssa.Block>> defs, ptr<types.Type> _addr_typ)
         {
-            var priq = ref s.priq;
+            ref phiState s = ref _addr_s.val;
+            ref Node var_ = ref _addr_var_.val;
+            ref types.Type typ = ref _addr_typ.val;
+
+            var priq = _addr_s.priq;
             var q = s.q;
             var queued = s.queued;
             queued.clear();
@@ -369,6 +390,7 @@ levels:
                     {
                         fmt.Printf("def of var%d in %s\n", n, b);
                     }
+
                 }
 
                 b = b__prev1;
@@ -379,7 +401,7 @@ levels:
             // Visit blocks defining variable n, from deepest to shallowest.
             while (len(priq.a) > 0L)
             {
-                ref ssa.Block currentRoot = heap.Pop(priq)._<ref ssa.Block>();
+                ptr<ssa.Block> currentRoot = heap.Pop(priq)._<ptr<ssa.Block>>();
                 if (debugPhi)
                 {
                     fmt.Printf("currentRoot %s\n", currentRoot);
@@ -392,6 +414,7 @@ levels:
                 {
                     s.s.Fatalf("root already in queue");
                 }
+
                 q = append(q, currentRoot);
                 queued.add(currentRoot.ID);
                 while (len(q) > 0L)
@@ -402,6 +425,7 @@ levels:
                     {
                         fmt.Printf("  processing %s\n", b);
                     }
+
                     var currentRootLevel = s.level[currentRoot.ID];
                     foreach (var (_, e) in b.Succs)
                     {
@@ -411,7 +435,9 @@ levels:
                         { 
                             // a D-edge, or an edge whose target is in currentRoot's subtree.
                             continue;
+
                         }
+
                         if (hasPhi.contains(c.ID))
                         {
                             continue;
@@ -421,22 +447,24 @@ levels:
                         var v = c.NewValue0I(currentRoot.Pos, ssa.OpPhi, typ, int64(n)); // TODO: line number right?
                         // Note: we store the variable number in the phi's AuxInt field. Used temporarily by phi building.
                         s.s.addNamedValue(var_, v);
-                        for (long i = 0L; i < len(c.Preds); i++)
-                        {
+                        foreach (>>MARKER:FORRANGEEXPRESSIONS_LEVEL_4<< in c.Preds)
+                        {>>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_4<<
                             v.AddArg(s.placeholder); // Actual args will be filled in by resolveFwdRefs.
                         }
-
                         if (debugPhi)
                         {
                             fmt.Printf("new phi for var%d in %s: %s\n", n, c, v);
                         }
+
                         if (!hasDef.contains(c.ID))
                         { 
                             // There's now a new definition of this variable in block c.
                             // Add it to the priority queue to explore.
                             heap.Push(priq, c);
                             hasDef.add(c.ID);
+
                         }
+
                     } 
 
                     // Visit children if they have not been visited yet.
@@ -453,25 +481,31 @@ levels:
                                 queued.add(c.ID);
                             c = s.tree[c.ID].sibling;
                             }
+
                         }
 
 
                         c = c__prev3;
                     }
+
                 }
 
+
             }
+
 
         }
 
         // resolveFwdRefs links all FwdRef uses up to their nearest dominating definition.
-        private static void resolveFwdRefs(this ref phiState s)
-        { 
+        private static void resolveFwdRefs(this ptr<phiState> _addr_s)
+        {
+            ref phiState s = ref _addr_s.val;
+ 
             // Do a depth-first walk of the dominator tree, keeping track
             // of the most-recently-seen value for each variable.
 
             // Map from variable ID to SSA value at the current point of the walk.
-            var values = make_slice<ref ssa.Value>(len(s.varnum));
+            var values = make_slice<ptr<ssa.Value>>(len(s.varnum));
             {
                 var i__prev1 = i;
 
@@ -508,6 +542,7 @@ levels:
                     // On exit from a block, this case will undo any assignments done below.
                     values[work.n] = work.v;
                     continue;
+
                 } 
 
                 // Process phis as new defs. They come before FwdRefs in this block.
@@ -521,11 +556,13 @@ levels:
                         {
                             continue;
                         }
+
                         var n = int32(v.AuxInt); 
                         // Remember the old assignment so we can undo it when we exit b.
                         stk = append(stk, new stackEntry(n:n,v:values[n])); 
                         // Record the new assignment.
                         values[n] = v;
+
                     } 
 
                     // Replace a FwdRef op with the current incoming value for its variable.
@@ -543,10 +580,12 @@ levels:
                         {
                             continue;
                         }
-                        n = s.varnum[v.Aux._<ref Node>()];
+
+                        n = s.varnum[v.Aux._<ptr<Node>>()];
                         v.Op = ssa.OpCopy;
                         v.Aux = null;
                         v.AddArg(values[n]);
+
                     } 
 
                     // Establish values for variables defined in b.
@@ -566,11 +605,13 @@ levels:
                         { 
                             // some variable not live across a basic block boundary.
                             continue;
+
                         } 
                         // Remember the old assignment so we can undo it when we exit b.
                         stk = append(stk, new stackEntry(n:n,v:values[n])); 
                         // Record the new assignment.
                         values[n] = v;
+
                     } 
 
                     // Replace phi args in successors with the current incoming value.
@@ -601,7 +642,9 @@ levels:
                             }
 
                         }
+
                     }
+
 
                 } 
 
@@ -620,7 +663,9 @@ levels:
 
                     c = c__prev2;
                 }
+
             }
+
 
         }
 
@@ -637,38 +682,47 @@ levels:
         // holds a sparse set of blocks.
         private partial struct blockHeap
         {
-            public slice<ref ssa.Block> a; // block IDs in heap
+            public slice<ptr<ssa.Block>> a; // block IDs in heap
             public slice<int> level; // depth in dominator tree (static, used for determining priority)
         }
 
-        private static long Len(this ref blockHeap h)
+        private static long Len(this ptr<blockHeap> _addr_h)
         {
+            ref blockHeap h = ref _addr_h.val;
+
             return len(h.a);
         }
-        private static void Swap(this ref blockHeap h, long i, long j)
+        private static void Swap(this ptr<blockHeap> _addr_h, long i, long j)
         {
+            ref blockHeap h = ref _addr_h.val;
+
             var a = h.a;
 
             a[i] = a[j];
             a[j] = a[i];
-
         }
 
-        private static void Push(this ref blockHeap h, object x)
+        private static void Push(this ptr<blockHeap> _addr_h, object x)
         {
-            ref ssa.Block v = x._<ref ssa.Block>();
+            ref blockHeap h = ref _addr_h.val;
+
+            ptr<ssa.Block> v = x._<ptr<ssa.Block>>();
             h.a = append(h.a, v);
         }
-        private static void Pop(this ref blockHeap h)
+        private static void Pop(this ptr<blockHeap> _addr_h)
         {
+            ref blockHeap h = ref _addr_h.val;
+
             var old = h.a;
             var n = len(old);
             var x = old[n - 1L];
             h.a = old[..n - 1L];
             return x;
         }
-        private static bool Less(this ref blockHeap h, long i, long j)
+        private static bool Less(this ptr<blockHeap> _addr_h, long i, long j)
         {
+            ref blockHeap h = ref _addr_h.val;
+
             return h.level[h.a[i].ID] > h.level[h.a[j].ID];
         }
 
@@ -687,30 +741,38 @@ levels:
 
         // newSparseSet returns a sparseSet that can represent
         // integers between 0 and n-1
-        private static ref sparseSet newSparseSet(long n)
+        private static ptr<sparseSet> newSparseSet(long n)
         {
-            return ref new sparseSet(dense:nil,sparse:make([]int32,n));
+            return addr(new sparseSet(dense:nil,sparse:make([]int32,n)));
         }
 
-        private static bool contains(this ref sparseSet s, ssa.ID x)
+        private static bool contains(this ptr<sparseSet> _addr_s, ssa.ID x)
         {
+            ref sparseSet s = ref _addr_s.val;
+
             var i = s.sparse[x];
             return i < int32(len(s.dense)) && s.dense[i] == x;
         }
 
-        private static void add(this ref sparseSet s, ssa.ID x)
+        private static void add(this ptr<sparseSet> _addr_s, ssa.ID x)
         {
+            ref sparseSet s = ref _addr_s.val;
+
             var i = s.sparse[x];
             if (i < int32(len(s.dense)) && s.dense[i] == x)
             {
-                return;
+                return ;
             }
+
             s.dense = append(s.dense, x);
             s.sparse[x] = int32(len(s.dense)) - 1L;
+
         }
 
-        private static void clear(this ref sparseSet s)
+        private static void clear(this ptr<sparseSet> _addr_s)
         {
+            ref sparseSet s = ref _addr_s.val;
+
             s.dense = s.dense[..0L];
         }
 
@@ -719,13 +781,15 @@ levels:
         {
             public ptr<state> s; // SSA state
             public ptr<ssa.Func> f; // function to work on
-            public slice<ref ssa.Value> fwdrefs; // list of FwdRefs to be processed
-            public slice<map<ref Node, ref ssa.Value>> defvars; // defined variables at end of each block
+            public slice<ptr<ssa.Value>> fwdrefs; // list of FwdRefs to be processed
+            public slice<map<ptr<Node>, ptr<ssa.Value>>> defvars; // defined variables at end of each block
             public slice<bool> reachable; // which blocks are reachable
         }
 
-        private static void insertPhis(this ref simplePhiState s)
+        private static void insertPhis(this ptr<simplePhiState> _addr_s)
         {
+            ref simplePhiState s = ref _addr_s.val;
+
             s.reachable = ssa.ReachableBlocks(s.f); 
 
             // Find FwdRef ops.
@@ -745,8 +809,9 @@ levels:
                             {
                                 continue;
                             }
+
                             s.fwdrefs = append(s.fwdrefs, v);
-                            ref Node var_ = v.Aux._<ref Node>();
+                            ptr<Node> var_ = v.Aux._<ptr<Node>>();
                             {
                                 var (_, ok) = s.defvars[b.ID][var_];
 
@@ -756,17 +821,17 @@ levels:
                                 }
 
                             }
+
                         }
 
                         v = v__prev2;
                     }
-
                 }
 
                 b = b__prev1;
             }
 
-            slice<ref ssa.Value> args = default;
+            slice<ptr<ssa.Value>> args = default;
 
 loop:
             while (len(s.fwdrefs) > 0L)
@@ -774,12 +839,14 @@ loop:
                 var v = s.fwdrefs[len(s.fwdrefs) - 1L];
                 s.fwdrefs = s.fwdrefs[..len(s.fwdrefs) - 1L];
                 var b = v.Block;
-                var_ = v.Aux._<ref Node>();
+                var_ = v.Aux._<ptr<Node>>();
                 if (b == s.f.Entry)
                 { 
                     // No variable should be live at entry.
                     s.s.Fatalf("Value live at entry. It shouldn't be. func %s, node %v, value %v", s.f.Name, var_, v);
+
                 }
+
                 if (!s.reachable[b.ID])
                 { 
                     // This block is dead.
@@ -787,6 +854,7 @@ loop:
                     v.Op = ssa.OpUnknown;
                     v.Aux = null;
                     continue;
+
                 } 
                 // Find variable value on each predecessor.
                 args = args[..0L];
@@ -797,17 +865,19 @@ loop:
 
                 // Decide if we need a phi or not. We need a phi if there
                 // are two different args (which are both not v).
-                ref ssa.Value w = default;
+                ptr<ssa.Value> w;
                 foreach (var (_, a) in args)
                 {
                     if (a == v)
                     {
                         continue; // self-reference
                     }
+
                     if (a == w)
                     {
                         continue; // already have this witness
                     }
+
                     if (w != null)
                     { 
                         // two witnesses, need a phi value
@@ -817,6 +887,7 @@ loop:
                         _continueloop = true;
                         break;
                     }
+
                     w = a; // save witness
                 }
                 if (w == null)
@@ -827,12 +898,19 @@ loop:
                 v.Op = ssa.OpCopy;
                 v.Aux = null;
                 v.AddArg(w);
+
             }
+
         }
 
         // lookupVarOutgoing finds the variable's value at the end of block b.
-        private static ref ssa.Value lookupVarOutgoing(this ref simplePhiState s, ref ssa.Block b, ref types.Type t, ref Node var_, src.XPos line)
+        private static ptr<ssa.Value> lookupVarOutgoing(this ptr<simplePhiState> _addr_s, ptr<ssa.Block> _addr_b, ptr<types.Type> _addr_t, ptr<Node> _addr_var_, src.XPos line)
         {
+            ref simplePhiState s = ref _addr_s.val;
+            ref ssa.Block b = ref _addr_b.val;
+            ref types.Type t = ref _addr_t.val;
+            ref Node var_ = ref _addr_var_.val;
+
             while (true)
             {
                 {
@@ -842,7 +920,7 @@ loop:
 
                     if (v != null)
                     {
-                        return v;
+                        return _addr_v!;
                     } 
                     // The variable is not defined by b and we haven't looked it up yet.
                     // If b has exactly one predecessor, loop to look it up there.
@@ -858,13 +936,16 @@ loop:
                 {
                     break;
                 }
+
                 b = b.Preds[0L].Block();
                 if (!s.reachable[b.ID])
                 { 
                     // This is rare; it happens with oddly interleaved infinite loops in dead code.
                     // See issue 19783.
                     break;
+
                 }
+
             } 
             // Generate a FwdRef for the variable and return that.
  
@@ -873,7 +954,8 @@ loop:
             s.defvars[b.ID][var_] = v;
             s.s.addNamedValue(var_, v);
             s.fwdrefs = append(s.fwdrefs, v);
-            return v;
+            return _addr_v!;
+
         }
     }
 }}}}

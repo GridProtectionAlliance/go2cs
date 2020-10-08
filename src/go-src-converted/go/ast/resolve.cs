@@ -4,7 +4,7 @@
 
 // This file implements NewPackage.
 
-// package ast -- go2cs converted at 2020 August 29 08:48:35 UTC
+// package ast -- go2cs converted at 2020 October 08 04:04:23 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\resolve.go
 using fmt = go.fmt_package;
@@ -24,24 +24,36 @@ namespace go
             public scanner.ErrorList errors;
         }
 
-        private static void error(this ref pkgBuilder p, token.Pos pos, @string msg)
+        private static void error(this ptr<pkgBuilder> _addr_p, token.Pos pos, @string msg)
         {
+            ref pkgBuilder p = ref _addr_p.val;
+
             p.errors.Add(p.fset.Position(pos), msg);
         }
 
-        private static void errorf(this ref pkgBuilder p, token.Pos pos, @string format, params object[] args)
+        private static void errorf(this ptr<pkgBuilder> _addr_p, token.Pos pos, @string format, params object[] args)
         {
+            args = args.Clone();
+            ref pkgBuilder p = ref _addr_p.val;
+
             p.error(pos, fmt.Sprintf(format, args));
         }
 
-        private static void declare(this ref pkgBuilder p, ref Scope scope, ref Scope altScope, ref Object obj)
+        private static void declare(this ptr<pkgBuilder> _addr_p, ptr<Scope> _addr_scope, ptr<Scope> _addr_altScope, ptr<Object> _addr_obj)
         {
+            ref pkgBuilder p = ref _addr_p.val;
+            ref Scope scope = ref _addr_scope.val;
+            ref Scope altScope = ref _addr_altScope.val;
+            ref Object obj = ref _addr_obj.val;
+
             var alt = scope.Insert(obj);
             if (alt == null && altScope != null)
             { 
                 // see if there is a conflicting declaration in altScope
                 alt = altScope.Lookup(obj.Name);
+
             }
+
             if (alt != null)
             {
                 @string prevDecl = "";
@@ -54,12 +66,18 @@ namespace go
                     }
 
                 }
+
                 p.error(obj.Pos(), fmt.Sprintf("%s redeclared in this block%s", obj.Name, prevDecl));
+
             }
+
         }
 
-        private static bool resolve(ref Scope scope, ref Ident ident)
+        private static bool resolve(ptr<Scope> _addr_scope, ptr<Ident> _addr_ident)
         {
+            ref Scope scope = ref _addr_scope.val;
+            ref Ident ident = ref _addr_ident.val;
+
             while (scope != null)
             {
                 {
@@ -73,9 +91,11 @@ namespace go
                     }
 
                 }
+
             }
 
             return false;
+
         }
 
         // An Importer resolves import paths to package Objects.
@@ -87,7 +107,7 @@ namespace go
         // Importer should load the package data for the given path into
         // a new *Object (pkg), record pkg in the imports map, and then
         // return pkg.
-        public delegate  error) Importer(map<@string,  ref Object>,  @string,  (ref Object);
+        public delegate  error) Importer(map<@string,  ptr<Object>>,  @string,  (ptr<Object>);
 
         // NewPackage creates a new Package node from a set of File nodes. It resolves
         // unresolved identifiers across files and updates each file's Unresolved list
@@ -98,8 +118,13 @@ namespace go
         // different package names are reported and then ignored.
         // The result is a package node and a scanner.ErrorList if there were errors.
         //
-        public static (ref Package, error) NewPackage(ref token.FileSet fset, map<@string, ref File> files, Importer importer, ref Scope universe)
+        public static (ptr<Package>, error) NewPackage(ptr<token.FileSet> _addr_fset, map<@string, ptr<File>> files, Importer importer, ptr<Scope> _addr_universe)
         {
+            ptr<Package> _p0 = default!;
+            error _p0 = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
+            ref Scope universe = ref _addr_universe.val;
+
             pkgBuilder p = default;
             p.fset = fset; 
 
@@ -141,7 +166,6 @@ namespace go
 
                         obj = obj__prev2;
                     }
-
                 } 
 
                 // package global mapping of imported package ids to package objects
@@ -149,7 +173,7 @@ namespace go
                 file = file__prev1;
             }
 
-            var imports = make_map<@string, ref Object>(); 
+            var imports = make_map<@string, ptr<Object>>(); 
 
             // complete file scopes with imports and resolve identifiers
             {
@@ -175,6 +199,7 @@ namespace go
                             importErrors = true;
                             continue;
                         }
+
                         var (path, _) = strconv.Unquote(spec.Path.Value);
                         var (pkg, err) = importer(imports, path);
                         if (err != null)
@@ -201,7 +226,7 @@ namespace go
                             {
                                 var obj__prev3 = obj;
 
-                                foreach (var (_, __obj) in pkg.Data._<ref Scope>().Objects)
+                                foreach (var (_, __obj) in pkg.Data._<ptr<Scope>>().Objects)
                                 {
                                     obj = __obj;
                                     p.declare(fileScope, pkgScope, obj);
@@ -209,7 +234,6 @@ namespace go
 
                                 obj = obj__prev3;
                             }
-
                         }
                         else if (name != "_")
                         { 
@@ -221,7 +245,9 @@ namespace go
                             obj.Decl = spec;
                             obj.Data = pkg.Data;
                             p.declare(fileScope, pkgScope, obj);
+
                         }
+
                     } 
 
                     // resolve identifiers
@@ -232,16 +258,19 @@ namespace go
                         // with missing imports, identifiers might get resolved
                         // incorrectly to universe objects)
                         pkgScope.Outer = null;
+
                     }
+
                     long i = 0L;
                     foreach (var (_, ident) in file.Unresolved)
                     {
-                        if (!resolve(fileScope, ident))
+                        if (!resolve(_addr_fileScope, _addr_ident))
                         {
                             p.errorf(ident.Pos(), "undeclared name: %s", ident.Name);
                             file.Unresolved[i] = ident;
                             i++;
                         }
+
                     }
                     file.Unresolved = file.Unresolved[0L..i];
                     pkgScope.Outer = universe; // reset universe scope
@@ -251,7 +280,8 @@ namespace go
             }
 
             p.errors.Sort();
-            return (ref new Package(pkgName,pkgScope,imports,files), p.errors.Err());
+            return (addr(new Package(pkgName,pkgScope,imports,files)), error.As(p.errors.Err())!);
+
         }
     }
 }}

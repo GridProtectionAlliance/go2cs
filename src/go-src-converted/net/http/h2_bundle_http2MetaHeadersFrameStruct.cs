@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:18 UTC
+//     Generated on 2020 October 08 03:39:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -50,29 +51,19 @@ namespace net
     public static partial class http_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(http2HeadersFrame))]
         private partial struct http2MetaHeadersFrame
         {
-            // http2HeadersFrame structure promotion - sourced from pointer
-            private readonly ptr<http2HeadersFrame> m_http2HeadersFrameRef;
-
-            private ref http2HeadersFrame http2HeadersFrame_ptr => ref m_http2HeadersFrameRef.Value;
-
-            public ref http2PriorityParam Priority => ref m_http2HeadersFrameRef.Value.Priority;
-
-            public ref slice<byte> headerFragBuf => ref m_http2HeadersFrameRef.Value.headerFragBuf;
-
             // Constructors
             public http2MetaHeadersFrame(NilType _)
             {
-                this.m_http2HeadersFrameRef = new ptr<http2HeadersFrame>(new http2HeadersFrame(nil));
+                this.ptr<http2HeadersFrame> = default;
                 this.Fields = default;
                 this.Truncated = default;
             }
 
-            public http2MetaHeadersFrame(ref http2HeadersFrame http2HeadersFrame = default, slice<hpack.HeaderField> Fields = default, bool Truncated = default)
+            public http2MetaHeadersFrame(ref ptr<http2HeadersFrame> ptr<http2HeadersFrame> = default, slice<hpack.HeaderField> Fields = default, bool Truncated = default)
             {
-                this.m_http2HeadersFrameRef = new ptr<http2HeadersFrame>(ref http2HeadersFrame);
+                this.ptr<http2HeadersFrame> = ptr<http2HeadersFrame>;
                 this.Fields = Fields;
                 this.Truncated = Truncated;
             }
@@ -97,7 +88,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2MetaHeadersFrame http2MetaHeadersFrame_cast(dynamic value)
         {
-            return new http2MetaHeadersFrame(ref value.http2HeadersFrame, value.Fields, value.Truncated);
+            return new http2MetaHeadersFrame(ref value.ptr<http2HeadersFrame>, value.Fields, value.Truncated);
         }
     }
 }}

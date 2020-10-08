@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:03 UTC
+//     Generated on 2020 October 08 04:56:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace go
                 this.lookup = default;
             }
 
-            public gccgoimports(map<@string, ref types.Package> packages = default, gccgoimporter.Importer importer = default, Lookup lookup = default)
+            public gccgoimports(map<@string, ptr<types.Package>> packages = default, gccgoimporter.Importer importer = default, Lookup lookup = default)
             {
                 this.packages = packages;
                 this.importer = importer;

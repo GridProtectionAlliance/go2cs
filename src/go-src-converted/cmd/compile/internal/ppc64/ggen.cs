@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64 -- go2cs converted at 2020 August 29 09:25:00 UTC
+// package ppc64 -- go2cs converted at 2020 October 08 04:27:30 UTC
 // import "cmd/compile/internal/ppc64" ==> using ppc64 = go.cmd.compile.@internal.ppc64_package
 // Original source: C:\Go\src\cmd\compile\internal\ppc64\ggen.go
 using gc = go.cmd.compile.@internal.gc_package;
@@ -17,11 +17,15 @@ namespace @internal
 {
     public static partial class ppc64_package
     {
-        private static ref obj.Prog zerorange(ref gc.Progs pp, ref obj.Prog p, long off, long cnt, ref uint _)
+        private static ptr<obj.Prog> zerorange(ptr<gc.Progs> _addr_pp, ptr<obj.Prog> _addr_p, long off, long cnt, ptr<uint> _addr__)
         {
+            ref gc.Progs pp = ref _addr_pp.val;
+            ref obj.Prog p = ref _addr_p.val;
+            ref uint _ = ref _addr__.val;
+
             if (cnt == 0L)
             {
-                return p;
+                return _addr_p!;
             }
             if (cnt < int64(4L * gc.Widthptr))
             {
@@ -34,6 +38,7 @@ namespace @internal
                         i += int64(gc.Widthptr);
                     }
                 }
+
             }
             else if (cnt <= int64(128L * gc.Widthptr))
             {
@@ -58,45 +63,28 @@ namespace @internal
                 p = pp.Appendpp(p, ppc64.ABNE, obj.TYPE_NONE, 0L, 0L, obj.TYPE_BRANCH, 0L, 0L);
                 gc.Patch(p, p1);
             }
-            return p;
+            return _addr_p!;
+
         }
 
-        private static void zeroAuto(ref gc.Progs pp, ref gc.Node n)
-        { 
-            // Note: this code must not clobber any registers.
-            var sym = n.Sym.Linksym();
-            var size = n.Type.Size();
-            {
-                var i = int64(0L);
-
-                while (i < size)
-                {
-                    var p = pp.Prog(ppc64.AMOVD);
-                    p.From.Type = obj.TYPE_REG;
-                    p.From.Reg = ppc64.REGZERO;
-                    p.To.Type = obj.TYPE_MEM;
-                    p.To.Name = obj.NAME_AUTO;
-                    p.To.Reg = ppc64.REGSP;
-                    p.To.Offset = n.Xoffset + i;
-                    p.To.Sym = sym;
-                    i += 8L;
-                }
-
-            }
-        }
-
-        private static void ginsnop(ref gc.Progs pp)
+        private static ptr<obj.Prog> ginsnop(ptr<gc.Progs> _addr_pp)
         {
+            ref gc.Progs pp = ref _addr_pp.val;
+
             var p = pp.Prog(ppc64.AOR);
             p.From.Type = obj.TYPE_REG;
             p.From.Reg = ppc64.REG_R0;
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = ppc64.REG_R0;
+            return _addr_p!;
         }
 
-        private static void ginsnop2(ref gc.Progs pp)
-        { 
-            // PPC64 is unusual because TWO nops are required
+        private static ptr<obj.Prog> ginsnopdefer(ptr<gc.Progs> _addr_pp)
+        {
+            ref gc.Progs pp = ref _addr_pp.val;
+ 
+            // On PPC64 two nops are required in the defer case.
+            //
             // (see gc/cgen.go, gc/plive.go -- copy of comment below)
             //
             // On ppc64, when compiling Go into position
@@ -108,7 +96,7 @@ namespace @internal
             // so that the same number of instructions are used
             // on ppc64 in both shared and non-shared modes.
 
-            ginsnop(pp);
+            ginsnop(_addr_pp);
             if (gc.Ctxt.Flag_shared)
             {
                 var p = pp.Prog(ppc64.AMOVD);
@@ -117,11 +105,11 @@ namespace @internal
                 p.From.Reg = ppc64.REGSP;
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = ppc64.REG_R2;
+                return _addr_p!;
             }
-            else
-            {
-                ginsnop(pp);
-            }
+
+            return _addr_ginsnop(_addr_pp)!;
+
         }
     }
 }}}}

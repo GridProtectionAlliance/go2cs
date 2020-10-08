@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:17 UTC
+//     Generated on 2020 October 08 03:26:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,10 +69,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error ScanByRef(ref T value, ScanState state, int verb);
+            private delegate error ScanByPtr(ptr<T> value, ScanState state, int verb);
             private delegate error ScanByVal(T value, ScanState state, int verb);
 
-            private static readonly ScanByRef s_ScanByRef;
+            private static readonly ScanByPtr s_ScanByPtr;
             private static readonly ScanByVal s_ScanByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -81,11 +81,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ScanByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ScanByPtr is null || !m_target_is_ptr)
                     return s_ScanByVal!(target, state, verb);
 
-                return s_ScanByRef(ref target, state, verb);
+                return s_ScanByPtr(m_target_ptr, state, verb);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -94,23 +95,20 @@ namespace go
             static Scanner()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Scan");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Scan");
 
                 if (!(extensionMethod is null))
-                    s_ScanByRef = extensionMethod.CreateStaticDelegate(typeof(ScanByRef)) as ScanByRef;
+                    s_ScanByPtr = extensionMethod.CreateStaticDelegate(typeof(ScanByPtr)) as ScanByPtr;
 
-                if (s_ScanByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Scan");
+                extensionMethod = targetType.GetExtensionMethod("Scan");
 
-                    if (!(extensionMethod is null))
-                        s_ScanByVal = extensionMethod.CreateStaticDelegate(typeof(ScanByVal)) as ScanByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ScanByVal = extensionMethod.CreateStaticDelegate(typeof(ScanByVal)) as ScanByVal;
 
-                if (s_ScanByRef is null && s_ScanByVal is null)
+                if (s_ScanByPtr is null && s_ScanByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Scanner.Scan method", new Exception("Scan"));
             }
 

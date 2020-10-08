@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build msan,linux,amd64
+// +build msan,linux
+// +build amd64 arm64
 
-// package msan -- go2cs converted at 2020 August 29 08:21:47 UTC
+// package msan -- go2cs converted at 2020 October 08 03:24:28 UTC
 // import "runtime/msan" ==> using msan = go.runtime.msan_package
 // Original source: C:\Go\src\runtime\msan\msan.go
 /*

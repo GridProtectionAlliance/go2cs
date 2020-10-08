@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:57 UTC
+//     Generated on 2020 October 08 03:18:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,15 +29,13 @@ namespace go
             {
                 this.buf = default;
                 this.off = default;
-                this.bootstrap = default;
                 this.lastRead = default;
             }
 
-            public Buffer(slice<byte> buf = default, long off = default, array<byte> bootstrap = default, readOp lastRead = default)
+            public Buffer(slice<byte> buf = default, long off = default, readOp lastRead = default)
             {
                 this.buf = buf;
                 this.off = off;
-                this.bootstrap = bootstrap;
                 this.lastRead = lastRead;
             }
 
@@ -61,7 +59,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Buffer Buffer_cast(dynamic value)
         {
-            return new Buffer(value.buf, value.off, value.bootstrap, value.lastRead);
+            return new Buffer(value.buf, value.off, value.lastRead);
         }
     }
 }

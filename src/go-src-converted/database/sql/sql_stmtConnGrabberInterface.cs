@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:11:01 UTC
+//     Generated on 2020 October 08 04:58:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using io = go.io_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -60,7 +61,7 @@ namespace database
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -74,10 +75,10 @@ namespace database
                 m_target_is_ptr = true;
             }
 
-            private delegate context.Context grabConnByRef(ref T value, context.Context _p0);
+            private delegate context.Context grabConnByPtr(ptr<T> value, context.Context _p0);
             private delegate context.Context grabConnByVal(T value, context.Context _p0);
 
-            private static readonly grabConnByRef s_grabConnByRef;
+            private static readonly grabConnByPtr s_grabConnByPtr;
             private static readonly grabConnByVal s_grabConnByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,17 +87,18 @@ namespace database
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_grabConnByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_grabConnByPtr is null || !m_target_is_ptr)
                     return s_grabConnByVal!(target, _p0);
 
-                return s_grabConnByRef(ref target, _p0);
+                return s_grabConnByPtr(m_target_ptr, _p0);
             }
 
-            private delegate context.Context txCtxByRef(ref T value);
+            private delegate context.Context txCtxByPtr(ptr<T> value);
             private delegate context.Context txCtxByVal(T value);
 
-            private static readonly txCtxByRef s_txCtxByRef;
+            private static readonly txCtxByPtr s_txCtxByPtr;
             private static readonly txCtxByVal s_txCtxByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -105,11 +107,12 @@ namespace database
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_txCtxByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_txCtxByPtr is null || !m_target_is_ptr)
                     return s_txCtxByVal!(target);
 
-                return s_txCtxByRef(ref target);
+                return s_txCtxByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -118,39 +121,33 @@ namespace database
             static stmtConnGrabber()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("grabConn");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("grabConn");
 
                 if (!(extensionMethod is null))
-                    s_grabConnByRef = extensionMethod.CreateStaticDelegate(typeof(grabConnByRef)) as grabConnByRef;
+                    s_grabConnByPtr = extensionMethod.CreateStaticDelegate(typeof(grabConnByPtr)) as grabConnByPtr;
 
-                if (s_grabConnByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("grabConn");
+                extensionMethod = targetType.GetExtensionMethod("grabConn");
 
-                    if (!(extensionMethod is null))
-                        s_grabConnByVal = extensionMethod.CreateStaticDelegate(typeof(grabConnByVal)) as grabConnByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_grabConnByVal = extensionMethod.CreateStaticDelegate(typeof(grabConnByVal)) as grabConnByVal;
 
-                if (s_grabConnByRef is null && s_grabConnByVal is null)
+                if (s_grabConnByPtr is null && s_grabConnByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement stmtConnGrabber.grabConn method", new Exception("grabConn"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("txCtx");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("txCtx");
 
                 if (!(extensionMethod is null))
-                    s_txCtxByRef = extensionMethod.CreateStaticDelegate(typeof(txCtxByRef)) as txCtxByRef;
+                    s_txCtxByPtr = extensionMethod.CreateStaticDelegate(typeof(txCtxByPtr)) as txCtxByPtr;
 
-                if (s_txCtxByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("txCtx");
+                extensionMethod = targetType.GetExtensionMethod("txCtx");
 
-                    if (!(extensionMethod is null))
-                        s_txCtxByVal = extensionMethod.CreateStaticDelegate(typeof(txCtxByVal)) as txCtxByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_txCtxByVal = extensionMethod.CreateStaticDelegate(typeof(txCtxByVal)) as txCtxByVal;
 
-                if (s_txCtxByRef is null && s_txCtxByVal is null)
+                if (s_txCtxByPtr is null && s_txCtxByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement stmtConnGrabber.txCtx method", new Exception("txCtx"));
             }
 

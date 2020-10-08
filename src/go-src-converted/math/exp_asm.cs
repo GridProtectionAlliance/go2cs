@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build amd64 amd64p32
+// +build amd64
 
-// package math -- go2cs converted at 2020 August 29 08:44:48 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:12 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\exp_asm.go
 using cpu = go.@internal.cpu_package;

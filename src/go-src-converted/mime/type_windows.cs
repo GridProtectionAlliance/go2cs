@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mime -- go2cs converted at 2020 August 29 08:32:39 UTC
+// package mime -- go2cs converted at 2020 October 08 03:38:35 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Go\src\mime\type_windows.go
 using registry = go.@internal.syscall.windows.registry_package;
@@ -22,27 +22,34 @@ namespace go
             var (names, err) = registry.CLASSES_ROOT.ReadSubKeyNames(-1L);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             foreach (var (_, name) in names)
             {
                 if (len(name) < 2L || name[0L] != '.')
                 { // looking for extensions only
                     continue;
+
                 }
+
                 var (k, err) = registry.OpenKey(registry.CLASSES_ROOT, name, registry.READ);
                 if (err != null)
                 {
                     continue;
                 }
+
                 var (v, _, err) = k.GetStringValue("Content Type");
                 k.Close();
                 if (err != null)
                 {
                     continue;
                 }
+
                 setExtensionType(name, v);
+
             }
+
         }
 
         private static map<@string, @string> initMimeForTests()

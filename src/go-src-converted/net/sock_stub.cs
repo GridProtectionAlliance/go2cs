@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build nacl solaris
+// +build aix js,wasm solaris
 
-// package net -- go2cs converted at 2020 August 29 08:27:42 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:36 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sock_stub.go
 using syscall = go.syscall_package;
@@ -19,6 +19,7 @@ namespace go
             // TODO: Implement this
             // NOTE: Never return a number bigger than 1<<16 - 1. See issue 5030.
             return syscall.SOMAXCONN;
+
         }
     }
 }

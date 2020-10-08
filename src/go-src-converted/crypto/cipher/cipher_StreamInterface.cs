@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:50 UTC
+//     Generated on 2020 October 08 03:35:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +63,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate void XORKeyStreamByRef(ref T value, slice<byte> dst, slice<byte> src);
+            private delegate void XORKeyStreamByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
             private delegate void XORKeyStreamByVal(T value, slice<byte> dst, slice<byte> src);
 
-            private static readonly XORKeyStreamByRef s_XORKeyStreamByRef;
+            private static readonly XORKeyStreamByPtr s_XORKeyStreamByPtr;
             private static readonly XORKeyStreamByVal s_XORKeyStreamByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,14 +75,15 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_XORKeyStreamByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_XORKeyStreamByPtr is null || !m_target_is_ptr)
                 {
                     s_XORKeyStreamByVal!(target, dst, src);
                     return;
                 }
 
-                s_XORKeyStreamByRef(ref target, dst, src);
+                s_XORKeyStreamByPtr(m_target_ptr, dst, src);
                 return;
                 
             }
@@ -93,23 +94,20 @@ namespace crypto
             static Stream()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("XORKeyStream");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("XORKeyStream");
 
                 if (!(extensionMethod is null))
-                    s_XORKeyStreamByRef = extensionMethod.CreateStaticDelegate(typeof(XORKeyStreamByRef)) as XORKeyStreamByRef;
+                    s_XORKeyStreamByPtr = extensionMethod.CreateStaticDelegate(typeof(XORKeyStreamByPtr)) as XORKeyStreamByPtr;
 
-                if (s_XORKeyStreamByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("XORKeyStream");
+                extensionMethod = targetType.GetExtensionMethod("XORKeyStream");
 
-                    if (!(extensionMethod is null))
-                        s_XORKeyStreamByVal = extensionMethod.CreateStaticDelegate(typeof(XORKeyStreamByVal)) as XORKeyStreamByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_XORKeyStreamByVal = extensionMethod.CreateStaticDelegate(typeof(XORKeyStreamByVal)) as XORKeyStreamByVal;
 
-                if (s_XORKeyStreamByRef is null && s_XORKeyStreamByVal is null)
+                if (s_XORKeyStreamByPtr is null && s_XORKeyStreamByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stream.XORKeyStream method", new Exception("XORKeyStream"));
             }
 

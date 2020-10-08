@@ -4,7 +4,7 @@
 
 // Package subtle implements functions that are often useful in cryptographic
 // code but require careful thought to use correctly.
-// package subtle -- go2cs converted at 2020 August 29 08:28:39 UTC
+// package subtle -- go2cs converted at 2020 October 08 03:35:30 UTC
 // import "crypto/subtle" ==> using subtle = go.crypto.subtle_package
 // Original source: C:\Go\src\crypto\subtle\constant_time.go
 
@@ -15,9 +15,9 @@ namespace crypto
 {
     public static partial class subtle_package
     {
-        // ConstantTimeCompare returns 1 if and only if the two slices, x
-        // and y, have equal contents. The time taken is a function of the length of
-        // the slices and is independent of the contents.
+        // ConstantTimeCompare returns 1 if the two slices, x and y, have equal contents
+        // and 0 otherwise. The time taken is a function of the length of the slices and
+        // is independent of the contents.
         public static long ConstantTimeCompare(slice<byte> x, slice<byte> y)
         {
             if (len(x) != len(y))
@@ -32,9 +32,10 @@ namespace crypto
             }
 
             return ConstantTimeByteEq(v, 0L);
+
         }
 
-        // ConstantTimeSelect returns x if v is 1 and y if v is 0.
+        // ConstantTimeSelect returns x if v == 1 and y if v == 0.
         // Its behavior is undefined if v takes any other value.
         public static long ConstantTimeSelect(long v, long x, long y)
         {
@@ -62,12 +63,14 @@ namespace crypto
             {
                 panic("subtle: slices have different lengths");
             }
+
             var xmask = byte(v - 1L);
             var ymask = byte(~(v - 1L));
             for (long i = 0L; i < len(x); i++)
             {
                 x[i] = x[i] & xmask | y[i] & ymask;
             }
+
 
         });
 

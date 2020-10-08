@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:54:05 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:42 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\loopreschedchecks.go
 using types = go.cmd.compile.@internal.types_package;
@@ -42,8 +42,10 @@ namespace @internal
             public slice<rewriteTarget> rewrites; // all the targets for this rewrite.
         }
 
-        private static @string String(this ref rewrite r)
+        private static @string String(this ptr<rewrite> _addr_r)
         {
+            ref rewrite r = ref _addr_r.val;
+
             @string s = "\n\tbefore=" + r.before.String() + ", after=" + r.after.String();
             foreach (var (_, rw) in r.rewrites)
             {
@@ -51,11 +53,14 @@ namespace @internal
             }
             s += "\n";
             return s;
+
         }
 
         // insertLoopReschedChecks inserts rescheduling checks on loop backedges.
-        private static void insertLoopReschedChecks(ref Func f)
-        { 
+        private static void insertLoopReschedChecks(ptr<Func> _addr_f)
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // TODO: when split information is recorded in export data, insert checks only on backedges that can be reached on a split-call-free path.
 
             // Loop reschedule checks compare the stack pointer with
@@ -70,21 +75,25 @@ namespace @internal
             //    are present in the graph, initially with trivial inputs.
             // 4. Record all to-be-modified uses of mem;
             //    apply modifications (split into two steps to simplify and
-            //    avoided nagging order-dependences).
+            //    avoided nagging order-dependencies).
             // 5. Rewrite backedges to include reschedule check,
             //    and modify destination phi function appropriately with new
             //    definitions for mem.
 
             if (f.NoSplit)
             { // nosplit functions don't reschedule.
-                return;
+                return ;
+
             }
-            var backedges = backedges(f);
+
+            var backedges = backedges(_addr_f);
             if (len(backedges) == 0L)
             { // no backedges means no rescheduling checks.
-                return;
+                return ;
+
             }
-            var lastMems = findLastMems(f);
+
+            var lastMems = findLastMems(_addr_f);
 
             var idom = f.Idom();
             var po = f.postorder(); 
@@ -97,6 +106,7 @@ namespace @internal
             {
                 fmt.Printf("before %s = %s\n", f.Name, sdom.treestructure(f.Entry));
             }
+
             edgeMem tofixBackedges = new slice<edgeMem>(new edgeMem[] {  });
 
             {
@@ -106,6 +116,7 @@ namespace @internal
                 {
                     e = __e; // TODO: could filter here by calls in loops, if declared and inferred nosplit are recorded in export data.
                     tofixBackedges = append(tofixBackedges, new edgeMem(e,nil));
+
                 } 
 
                 // It's possible that there is no memory state (no global/pointer loads/stores or calls)
@@ -117,7 +128,8 @@ namespace @internal
             {
                 lastMems[f.Entry.ID] = f.Entry.NewValue0(f.Entry.Pos, OpInitMem, types.TypeMem);
             }
-            var memDefsAtBlockEnds = make_slice<ref Value>(f.NumBlocks()); // For each block, the mem def seen at its bottom. Could be from earlier block.
+
+            var memDefsAtBlockEnds = make_slice<ptr<Value>>(f.NumBlocks()); // For each block, the mem def seen at its bottom. Could be from earlier block.
 
             // Propagate last mem definitions forward through successor blocks.
             {
@@ -131,6 +143,7 @@ namespace @internal
                     { // if there's no def, then there's no phi, so the visible mem is identical in all predecessors.
                         // loop because there might be backedges that haven't been visited yet.
                         mem = memDefsAtBlockEnds[b.Preds[j].b.ID];
+
                     }
 
                     memDefsAtBlockEnds[b.ID] = mem;
@@ -138,6 +151,7 @@ namespace @internal
                     {
                         fmt.Printf("memDefsAtBlockEnds[%s] = %s\n", b, mem);
                     }
+
                 } 
 
                 // Maps from block to newly-inserted phi function in block.
@@ -147,7 +161,7 @@ namespace @internal
             } 
 
             // Maps from block to newly-inserted phi function in block.
-            var newmemphis = make_map<ref Block, rewrite>(); 
+            var newmemphis = make_map<ptr<Block>, rewrite>(); 
 
             // Insert phi functions as necessary for future changes to flow graph.
             {
@@ -162,7 +176,7 @@ namespace @internal
                     var h = e.b; 
 
                     // find the phi function for the memory input at "h", if there is one.
-                    ref Value headerMemPhi = default; // look for header mem phi
+                    ptr<Value> headerMemPhi; // look for header mem phi
 
                     {
                         var v__prev2 = v;
@@ -174,6 +188,7 @@ namespace @internal
                             {
                                 headerMemPhi = v;
                             }
+
                         }
 
                         v = v__prev2;
@@ -183,12 +198,15 @@ namespace @internal
                     { 
                         // if the header is nil, make a trivial phi from the dominator
                         var mem0 = memDefsAtBlockEnds[idom[h.ID].ID];
-                        headerMemPhi = newPhiFor(h, mem0);
+                        headerMemPhi = newPhiFor(_addr_h, _addr_mem0);
                         newmemphis[h] = new rewrite(before:mem0,after:headerMemPhi);
-                        addDFphis(mem0, h, h, f, memDefsAtBlockEnds, newmemphis, sdom);
+                        addDFphis(_addr_mem0, _addr_h, _addr_h, _addr_f, memDefsAtBlockEnds, newmemphis, sdom);
+
 
                     }
+
                     tofixBackedges[i].m = headerMemPhi;
+
 
                 }
 
@@ -212,14 +230,13 @@ namespace @internal
                     b = b__prev1;
                     r = r__prev1;
                 }
-
             } 
 
             // dfPhiTargets notes inputs to phis in dominance frontiers that should not
             // be rewritten as part of the dominated children of some outer rewrite.
             var dfPhiTargets = make_map<rewriteTarget, bool>();
 
-            rewriteNewPhis(f.Entry, f.Entry, f, memDefsAtBlockEnds, newmemphis, dfPhiTargets, sdom);
+            rewriteNewPhis(_addr_f.Entry, _addr_f.Entry, _addr_f, memDefsAtBlockEnds, newmemphis, dfPhiTargets, sdom);
 
             if (f.pass.debug > 0L)
             {
@@ -237,7 +254,6 @@ namespace @internal
                     b = b__prev1;
                     r = r__prev1;
                 }
-
             } 
 
             // Apply collected rewrites.
@@ -251,6 +267,7 @@ namespace @internal
                     {
                         rw.v.SetArg(rw.i, r.after);
                     }
+
                 } 
 
                 // Rewrite backedges to include reschedule checks.
@@ -279,7 +296,12 @@ namespace @internal
                     {
                         likely = BranchUnlikely;
                     }
-                    bb.Likely = likely; 
+
+                    if (bb.Kind != BlockPlain)
+                    { // backedges can be unconditional. e.g., if x { something; continue }
+                        bb.Likely = likely;
+
+                    } 
 
                     // rewrite edge to include reschedule check
                     // existing edges:
@@ -305,7 +327,6 @@ namespace @internal
                     // join, and branches targeting join must instead target
                     // the header, and the other phi functions within header are
                     // adjusted for the additional input.
-
                     var test = f.NewBlock(BlockIf);
                     var sched = f.NewBlock(BlockPlain);
 
@@ -315,7 +336,7 @@ namespace @internal
                     // if sp < g.limit { goto sched }
                     // goto header
 
-                    var cfgtypes = ref f.Config.Types;
+                    var cfgtypes = _addr_f.Config.Types;
                     var pt = cfgtypes.Uintptr;
                     var g = test.NewValue1(bb.Pos, OpGetG, pt, mem0);
                     var sp = test.NewValue0(bb.Pos, OpSP, pt);
@@ -324,6 +345,7 @@ namespace @internal
                     {
                         cmpOp = OpLess32U;
                     }
+
                     var limaddr = test.NewValue1I(bb.Pos, OpOffPtr, pt, 2L * pt.Size(), g);
                     var lim = test.NewValue2(bb.Pos, OpLoad, pt, limaddr, mem0);
                     var cmp = test.NewValue2(bb.Pos, cmpOp, cfgtypes.Bool, sp, lim);
@@ -365,11 +387,11 @@ namespace @internal
                             {
                                 v.AddArg(v.Args[i]);
                             }
+
                         }
 
                         v = v__prev2;
                     }
-
                 }
 
                 emc = emc__prev1;
@@ -382,19 +404,24 @@ namespace @internal
                 sdom = newSparseTree(f, f.Idom());
                 fmt.Printf("after %s = %s\n", f.Name, sdom.treestructure(f.Entry));
             }
+
         }
 
         // newPhiFor inserts a new Phi function into b,
         // with all inputs set to v.
-        private static ref Value newPhiFor(ref Block b, ref Value v)
+        private static ptr<Value> newPhiFor(ptr<Block> _addr_b, ptr<Value> _addr_v)
         {
+            ref Block b = ref _addr_b.val;
+            ref Value v = ref _addr_v.val;
+
             var phiV = b.NewValue0(b.Pos, OpPhi, v.Type);
 
             foreach (>>MARKER:FORRANGEEXPRESSIONS_LEVEL_1<< in b.Preds)
             {>>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_1<<
                 phiV.AddArg(v);
             }
-            return phiV;
+            return _addr_phiV!;
+
         }
 
         // rewriteNewPhis updates newphis[h] to record all places where the new phi function inserted
@@ -405,8 +432,12 @@ namespace @internal
         // sdom must yield a preorder of the flow graph if recursively walked, root-to-children.
         // The result of newSparseOrderedTree with order supplied by a dfs-postorder satisfies this
         // requirement.
-        private static void rewriteNewPhis(ref Block h, ref Block b, ref Func f, slice<ref Value> defsForUses, map<ref Block, rewrite> newphis, map<rewriteTarget, bool> dfPhiTargets, SparseTree sdom)
-        { 
+        private static void rewriteNewPhis(ptr<Block> _addr_h, ptr<Block> _addr_b, ptr<Func> _addr_f, slice<ptr<Value>> defsForUses, map<ptr<Block>, rewrite> newphis, map<rewriteTarget, bool> dfPhiTargets, SparseTree sdom)
+        {
+            ref Block h = ref _addr_h.val;
+            ref Block b = ref _addr_b.val;
+            ref Func f = ref _addr_f.val;
+ 
             // If b is a block with a new phi, then a new rewrite applies below it in the dominator tree.
             {
                 var (_, ok) = newphis[b];
@@ -417,6 +448,7 @@ namespace @internal
                 }
 
             }
+
             var change = newphis[h];
             var x = change.before;
             var y = change.after; 
@@ -424,7 +456,7 @@ namespace @internal
             // Apply rewrites to this block
             if (x != null)
             { // don't waste time on the common case of no definition.
-                var p = ref change.rewrites;
+                var p = _addr_change.rewrites;
                 {
                     var v__prev1 = v;
 
@@ -434,13 +466,16 @@ namespace @internal
                         if (v == y)
                         { // don't rewrite self -- phi inputs are handled below.
                             continue;
+
                         }
+
                         foreach (var (i, w) in v.Args)
                         {
                             if (w != x)
                             {
                                 continue;
                             }
+
                             rewriteTarget tgt = new rewriteTarget(v,i); 
 
                             // It's possible dominated control flow will rewrite this instead.
@@ -450,12 +485,15 @@ namespace @internal
                             {
                                 continue;
                             }
-                            p.Value = append(p.Value, tgt);
+
+                            p.val = append(p.val, tgt);
                             if (f.pass.debug > 1L)
                             {
                                 fmt.Printf("added block target for h=%v, b=%v, x=%v, y=%v, tgt.v=%s, tgt.i=%d\n", h, b, x, y, v, i);
                             }
+
                         }
+
                     } 
 
                     // Rewrite appropriate inputs of phis reached in successors
@@ -485,35 +523,42 @@ namespace @internal
                                     if (v.Op == OpPhi && v.Args[e.i] == x)
                                     {
                                         tgt = new rewriteTarget(v,e.i);
-                                        p.Value = append(p.Value, tgt);
+                                        p.val = append(p.val, tgt);
                                         dfPhiTargets[tgt] = true;
                                         if (f.pass.debug > 1L)
                                         {
                                             fmt.Printf("added phi target for h=%v, b=%v, s=%v, x=%v, y=%v, tgt.v=%s, tgt.i=%d\n", h, b, s, x, y, v.LongString(), e.i);
                                         }
+
                                         break;
+
                                     }
+
                                 }
 
                                 v = v__prev2;
                             }
-
                         }
+
                     }
 
                 }
+
                 newphis[h] = change;
+
             }
+
             {
                 var c = sdom[b.ID].child;
 
                 while (c != null)
                 {
-                    rewriteNewPhis(h, c, f, defsForUses, newphis, dfPhiTargets, sdom); // TODO: convert to explicit stack from recursion.
+                    rewriteNewPhis(_addr_h, _addr_c, _addr_f, defsForUses, newphis, dfPhiTargets, sdom); // TODO: convert to explicit stack from recursion.
                     c = sdom[c.ID].sibling;
                 }
 
             }
+
         }
 
         // addDFphis creates new trivial phis that are necessary to correctly reflect (within SSA)
@@ -523,13 +568,20 @@ namespace @internal
         // either b = h or h strictly dominates b.
         // These newly created phis are themselves new definitions that may require addition of their
         // own trivial phi functions in their own dominance frontier, and this is handled recursively.
-        private static void addDFphis(ref Value x, ref Block h, ref Block b, ref Func f, slice<ref Value> defForUses, map<ref Block, rewrite> newphis, SparseTree sdom)
+        private static void addDFphis(ptr<Value> _addr_x, ptr<Block> _addr_h, ptr<Block> _addr_b, ptr<Func> _addr_f, slice<ptr<Value>> defForUses, map<ptr<Block>, rewrite> newphis, SparseTree sdom)
         {
+            ref Value x = ref _addr_x.val;
+            ref Block h = ref _addr_h.val;
+            ref Block b = ref _addr_b.val;
+            ref Func f = ref _addr_f.val;
+
             var oldv = defForUses[b.ID];
             if (oldv != x)
             { // either a new definition replacing x, or nil if it is proven that there are no uses reachable from b
-                return;
+                return ;
+
             }
+
             var idom = f.Idom();
 outer:
             foreach (var (_, e) in b.Succs)
@@ -540,6 +592,7 @@ outer:
                 {
                     continue; // h dominates s, successor of b, therefore s is not in the frontier.
                 }
+
                 {
                     var (_, ok) = newphis[s];
 
@@ -549,6 +602,7 @@ outer:
                     }
 
                 }
+
                 if (x != null)
                 {
                     foreach (var (_, v) in s.Values)
@@ -558,31 +612,37 @@ outer:
                             _continueouter = true; // successor s of b has an old phi function, so there is no need to add another.
                             break;
                         }
+
                     }
+
                 }
+
                 var old = defForUses[idom[s.ID].ID]; // new phi function is correct-but-redundant, combining value "old" on all inputs.
-                var headerPhi = newPhiFor(s, old); 
+                var headerPhi = newPhiFor(_addr_s, _addr_old); 
                 // the new phi will replace "old" in block s and all blocks dominated by s.
                 newphis[s] = new rewrite(before:old,after:headerPhi); // record new phi, to have inputs labeled "old" rewritten to "headerPhi"
-                addDFphis(old, s, s, f, defForUses, newphis, sdom); // the new definition may also create new phi functions.
+                addDFphis(_addr_old, _addr_s, _addr_s, _addr_f, defForUses, newphis, sdom); // the new definition may also create new phi functions.
             }
             {
                 var c = sdom[b.ID].child;
 
                 while (c != null)
                 {
-                    addDFphis(x, h, c, f, defForUses, newphis, sdom); // TODO: convert to explicit stack from recursion.
+                    addDFphis(_addr_x, _addr_h, _addr_c, _addr_f, defForUses, newphis, sdom); // TODO: convert to explicit stack from recursion.
                     c = sdom[c.ID].sibling;
                 }
 
             }
+
         }
 
         // findLastMems maps block ids to last memory-output op in a block, if any
-        private static slice<ref Value> findLastMems(ref Func _f) => func(_f, (ref Func f, Defer defer, Panic _, Recover __) =>
+        private static slice<ptr<Value>> findLastMems(ptr<Func> _addr_f) => func((defer, _, __) =>
         {
-            slice<ref Value> stores = default;
-            var lastMems = make_slice<ref Value>(f.NumBlocks());
+            ref Func f = ref _addr_f.val;
+
+            slice<ptr<Value>> stores = default;
+            var lastMems = make_slice<ptr<Value>>(f.NumBlocks());
             var storeUse = f.newSparseSet(f.NumValues());
             defer(f.retSparseSet(storeUse));
             foreach (var (_, b) in f.Blocks)
@@ -591,7 +651,7 @@ outer:
                 //  storeUse contains stores which are used by a subsequent store.
                 storeUse.clear();
                 stores = stores[..0L];
-                ref Value memPhi = default;
+                ptr<Value> memPhi;
                 {
                     var v__prev2 = v;
 
@@ -604,8 +664,11 @@ outer:
                             {
                                 memPhi = v;
                             }
+
                             continue;
+
                         }
+
                         if (v.Type.IsMemory())
                         {
                             stores = append(stores, v);
@@ -615,8 +678,11 @@ outer:
                                 {
                                     storeUse.add(a.ID);
                                 }
+
                             }
+
                         }
+
                     }
 
                     v = v__prev2;
@@ -629,7 +695,7 @@ outer:
                 } 
 
                 // find last store in the block
-                ref Value last = default;
+                ptr<Value> last;
                 {
                     var v__prev2 = v;
 
@@ -640,11 +706,14 @@ outer:
                         {
                             continue;
                         }
+
                         if (last != null)
                         {
                             b.Fatalf("two final stores - simultaneous live stores %s %s", last, v);
                         }
+
                         last = v;
+
                     }
 
                     v = v__prev2;
@@ -654,10 +723,23 @@ outer:
                 {
                     b.Fatalf("no last store found - cycle?");
                 }
+
                 lastMems[b.ID] = last;
+
             }
             return lastMems;
+
         });
+
+        // mark values
+        private partial struct markKind // : byte
+        {
+        }
+
+        private static readonly markKind notFound = (markKind)iota; // block has not been discovered yet
+        private static readonly var notExplored = (var)0; // discovered and in queue, outedges not processed yet
+        private static readonly var explored = (var)1; // discovered and in queue, outedges processed
+        private static readonly var done = (var)2; // all done, in output ordering
 
         private partial struct backedgesState
         {
@@ -667,8 +749,10 @@ outer:
 
         // backedges returns a slice of successor edges that are back
         // edges.  For reducible loops, edge.b is the header.
-        private static slice<Edge> backedges(ref Func f)
+        private static slice<Edge> backedges(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             Edge edges = new slice<Edge>(new Edge[] {  });
             var mark = make_slice<markKind>(f.NumBlocks());
             backedgesState stack = new slice<backedgesState>(new backedgesState[] {  });
@@ -694,15 +778,18 @@ outer:
                     {
                         edges = append(edges, e);
                     }
+
                 }
                 else
                 {
                     mark[x.b.ID] = done;
                     stack = stack[0L..l - 1L];
                 }
+
             }
 
             return edges;
+
         }
     }
 }}}}

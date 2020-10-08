@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:27:40 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:34 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sock_plan9.go
 
@@ -16,6 +16,7 @@ namespace go
         { 
             // /sys/include/ape/sys/socket.h:/SOMAXCONN
             return 5L;
+
         }
     }
 }

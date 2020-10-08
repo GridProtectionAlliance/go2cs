@@ -4,7 +4,7 @@
 
 // +build !gccgo
 
-// package main -- go2cs converted at 2020 August 29 10:00:01 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:01 UTC
 // Original source: C:\Go\src\cmd\dist\util_gc.go
 
 using static go.builtin;
@@ -13,7 +13,7 @@ namespace go
 {
     public static partial class main_package
     {
-        private static void cpuid(ref array<uint> info, uint ax)
+        private static void cpuid(ptr<array<uint>> info, uint ax)
 ;
 
         private static bool cansse2()
@@ -22,8 +22,9 @@ namespace go
             {>>MARKER:FUNCTION_cpuid_BLOCK_PREFIX<<
                 return false;
             }
-            array<uint> info = new array<uint>(4L);
-            cpuid(ref info, 1L);
+
+            ref array<uint> info = ref heap(new array<uint>(4L), out ptr<array<uint>> _addr_info);
+            cpuid(_addr_info, 1L);
             return info[3L] & (1L << (int)(26L)) != 0L; // SSE2
         }
 

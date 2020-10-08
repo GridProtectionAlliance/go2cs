@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:43 UTC
+//     Generated on 2020 October 08 03:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,12 +29,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -70,7 +71,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -84,10 +85,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate channel<bool> CloseNotifyByRef(ref T value);
+            private delegate channel<bool> CloseNotifyByPtr(ptr<T> value);
             private delegate channel<bool> CloseNotifyByVal(T value);
 
-            private static readonly CloseNotifyByRef s_CloseNotifyByRef;
+            private static readonly CloseNotifyByPtr s_CloseNotifyByPtr;
             private static readonly CloseNotifyByVal s_CloseNotifyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,11 +97,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseNotifyByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseNotifyByPtr is null || !m_target_is_ptr)
                     return s_CloseNotifyByVal!(target);
 
-                return s_CloseNotifyByRef(ref target);
+                return s_CloseNotifyByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -109,23 +111,20 @@ namespace net
             static CloseNotifier()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CloseNotify");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CloseNotify");
 
                 if (!(extensionMethod is null))
-                    s_CloseNotifyByRef = extensionMethod.CreateStaticDelegate(typeof(CloseNotifyByRef)) as CloseNotifyByRef;
+                    s_CloseNotifyByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseNotifyByPtr)) as CloseNotifyByPtr;
 
-                if (s_CloseNotifyByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CloseNotify");
+                extensionMethod = targetType.GetExtensionMethod("CloseNotify");
 
-                    if (!(extensionMethod is null))
-                        s_CloseNotifyByVal = extensionMethod.CreateStaticDelegate(typeof(CloseNotifyByVal)) as CloseNotifyByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseNotifyByVal = extensionMethod.CreateStaticDelegate(typeof(CloseNotifyByVal)) as CloseNotifyByVal;
 
-                if (s_CloseNotifyByRef is null && s_CloseNotifyByVal is null)
+                if (s_CloseNotifyByPtr is null && s_CloseNotifyByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement CloseNotifier.CloseNotify method", new Exception("CloseNotify"));
             }
 

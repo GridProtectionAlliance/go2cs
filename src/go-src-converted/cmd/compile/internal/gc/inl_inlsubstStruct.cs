@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:17 UTC
+//     Generated on 2020 October 08 04:29:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using logopt = go.cmd.compile.@internal.logopt_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using src = go.cmd.@internal.src_package;
@@ -40,7 +41,7 @@ namespace @internal
                 this.newInlIndex = default;
             }
 
-            public inlsubst(ref ptr<Node> retlabel = default, slice<ref Node> retvars = default, map<ref Node, ref Node> inlvars = default, map<ref src.PosBase, ref src.PosBase> bases = default, long newInlIndex = default)
+            public inlsubst(ref ptr<types.Sym> retlabel = default, slice<ptr<Node>> retvars = default, map<ptr<Node>, ptr<Node>> inlvars = default, map<ptr<src.PosBase>, ptr<src.PosBase>> bases = default, long newInlIndex = default)
             {
                 this.retlabel = retlabel;
                 this.retvars = retvars;

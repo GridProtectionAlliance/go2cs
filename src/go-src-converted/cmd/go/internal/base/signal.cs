@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2020 August 29 10:01:59 UTC
+// package @base -- go2cs converted at 2020 October 08 04:36:58 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Go\src\cmd\go\internal\base\signal.go
 using os = go.os_package;
@@ -32,6 +32,7 @@ namespace @internal
                 sig.Receive();
                 close(Interrupted);
             }());
+
         }
 
         private static sync.Once onceProcessSignals = default;

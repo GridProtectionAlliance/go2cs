@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:40 UTC
+//     Generated on 2020 October 08 04:59:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace image
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +63,10 @@ namespace image
                 m_target_is_ptr = true;
             }
 
-            private delegate (uint, uint, uint, uint) RGBAByRef(ref T value);
+            private delegate (uint, uint, uint, uint) RGBAByPtr(ptr<T> value);
             private delegate (uint, uint, uint, uint) RGBAByVal(T value);
 
-            private static readonly RGBAByRef s_RGBAByRef;
+            private static readonly RGBAByPtr s_RGBAByPtr;
             private static readonly RGBAByVal s_RGBAByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,11 +75,12 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_RGBAByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_RGBAByPtr is null || !m_target_is_ptr)
                     return s_RGBAByVal!(target);
 
-                return s_RGBAByRef(ref target);
+                return s_RGBAByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -88,23 +89,20 @@ namespace image
             static Color()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("RGBA");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("RGBA");
 
                 if (!(extensionMethod is null))
-                    s_RGBAByRef = extensionMethod.CreateStaticDelegate(typeof(RGBAByRef)) as RGBAByRef;
+                    s_RGBAByPtr = extensionMethod.CreateStaticDelegate(typeof(RGBAByPtr)) as RGBAByPtr;
 
-                if (s_RGBAByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("RGBA");
+                extensionMethod = targetType.GetExtensionMethod("RGBA");
 
-                    if (!(extensionMethod is null))
-                        s_RGBAByVal = extensionMethod.CreateStaticDelegate(typeof(RGBAByVal)) as RGBAByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_RGBAByVal = extensionMethod.CreateStaticDelegate(typeof(RGBAByVal)) as RGBAByVal;
 
-                if (s_RGBAByRef is null && s_RGBAByVal is null)
+                if (s_RGBAByPtr is null && s_RGBAByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Color.RGBA method", new Exception("RGBA"));
             }
 

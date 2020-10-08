@@ -4,7 +4,7 @@
 
 // +build freebsd
 
-// package os -- go2cs converted at 2020 August 29 08:44:40 UTC
+// package os -- go2cs converted at 2020 October 08 03:45:26 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\wait_wait6.go
 using runtime = go.runtime_package;
@@ -15,40 +15,56 @@ namespace go
 {
     public static partial class os_package
     {
-        private static readonly long _P_PID = 0L;
+        private static readonly long _P_PID = (long)0L;
 
         // blockUntilWaitable attempts to block until a call to p.Wait will
-        // succeed immediately, and returns whether it has done so.
+        // succeed immediately, and reports whether it has done so.
         // It does not actually call p.Wait.
 
 
         // blockUntilWaitable attempts to block until a call to p.Wait will
-        // succeed immediately, and returns whether it has done so.
+        // succeed immediately, and reports whether it has done so.
         // It does not actually call p.Wait.
-        private static (bool, error) blockUntilWaitable(this ref Process p)
+        private static (bool, error) blockUntilWaitable(this ptr<Process> _addr_p)
         {
-            syscall.Errno errno = default; 
-            // The arguments on 32-bit FreeBSD look like the following:
-            // - freebsd32_wait6_args{ idtype, id1, id2, status, options, wrusage, info } or
-            // - freebsd32_wait6_args{ idtype, pad, id1, id2, status, options, wrusage, info } when PAD64_REQUIRED=1 on ARM, MIPS or PowerPC
-            if (runtime.GOARCH == "386")
-            {
-                _, _, errno = syscall.Syscall9(syscall.SYS_WAIT6, _P_PID, uintptr(p.Pid), 0L, 0L, syscall.WEXITED | syscall.WNOWAIT, 0L, 0L, 0L, 0L);
+            bool _p0 = default;
+            error _p0 = default!;
+            ref Process p = ref _addr_p.val;
+
+            syscall.Errno errno = default;
+            while (true)
+            { 
+                // The arguments on 32-bit FreeBSD look like the following:
+                // - freebsd32_wait6_args{ idtype, id1, id2, status, options, wrusage, info } or
+                // - freebsd32_wait6_args{ idtype, pad, id1, id2, status, options, wrusage, info } when PAD64_REQUIRED=1 on ARM, MIPS or PowerPC
+                if (runtime.GOARCH == "386")
+                {
+                    _, _, errno = syscall.Syscall9(syscall.SYS_WAIT6, _P_PID, uintptr(p.Pid), 0L, 0L, syscall.WEXITED | syscall.WNOWAIT, 0L, 0L, 0L, 0L);
+                }
+                else if (runtime.GOARCH == "arm")
+                {
+                    _, _, errno = syscall.Syscall9(syscall.SYS_WAIT6, _P_PID, 0L, uintptr(p.Pid), 0L, 0L, syscall.WEXITED | syscall.WNOWAIT, 0L, 0L, 0L);
+                }
+                else
+                {
+                    _, _, errno = syscall.Syscall6(syscall.SYS_WAIT6, _P_PID, uintptr(p.Pid), 0L, syscall.WEXITED | syscall.WNOWAIT, 0L, 0L);
+                }
+
+                if (errno != syscall.EINTR)
+                {
+                    break;
+                }
+
             }
-            else if (runtime.GOARCH == "arm")
-            {
-                _, _, errno = syscall.Syscall9(syscall.SYS_WAIT6, _P_PID, 0L, uintptr(p.Pid), 0L, 0L, syscall.WEXITED | syscall.WNOWAIT, 0L, 0L, 0L);
-            }
-            else
-            {
-                _, _, errno = syscall.Syscall6(syscall.SYS_WAIT6, _P_PID, uintptr(p.Pid), 0L, syscall.WEXITED | syscall.WNOWAIT, 0L, 0L);
-            }
+
             runtime.KeepAlive(p);
             if (errno != 0L)
             {
-                return (false, NewSyscallError("wait6", errno));
+                return (false, error.As(NewSyscallError("wait6", errno))!);
             }
-            return (true, null);
+
+            return (true, error.As(null!)!);
+
         }
     }
 }

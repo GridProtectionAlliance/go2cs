@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mips -- go2cs converted at 2020 August 29 08:53:03 UTC
+// package mips -- go2cs converted at 2020 October 08 04:09:33 UTC
 // import "cmd/compile/internal/mips" ==> using mips = go.cmd.compile.@internal.mips_package
 // Original source: C:\Go\src\cmd\compile\internal\mips\galign.go
 using gc = go.cmd.compile.@internal.gc_package;
@@ -19,24 +19,27 @@ namespace @internal
 {
     public static partial class mips_package
     {
-        public static void Init(ref gc.Arch arch)
+        public static void Init(ptr<gc.Arch> _addr_arch)
         {
-            arch.LinkArch = ref mips.Linkmips;
+            ref gc.Arch arch = ref _addr_arch.val;
+
+            arch.LinkArch = _addr_mips.Linkmips;
             if (objabi.GOARCH == "mipsle")
             {
-                arch.LinkArch = ref mips.Linkmipsle;
+                arch.LinkArch = _addr_mips.Linkmipsle;
             }
             arch.REGSP = mips.REGSP;
             arch.MAXWIDTH = (1L << (int)(31L)) - 1L;
             arch.SoftFloat = (objabi.GOMIPS == "softfloat");
             arch.ZeroRange = zerorange;
-            arch.ZeroAuto = zeroAuto;
             arch.Ginsnop = ginsnop;
+            arch.Ginsnopdefer = ginsnop;
             arch.SSAMarkMoves = (s, b) =>
             {
             };
             arch.SSAGenValue = ssaGenValue;
             arch.SSAGenBlock = ssaGenBlock;
+
         }
     }
 }}}}

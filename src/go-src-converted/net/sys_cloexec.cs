@@ -5,9 +5,9 @@
 // This file implements sysSocket and accept for platforms that do not
 // provide a fast path for setting SetNonblock and CloseOnExec.
 
-// +build darwin nacl netbsd openbsd solaris
+// +build aix darwin solaris
 
-// package net -- go2cs converted at 2020 August 29 08:27:44 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:38 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sys_cloexec.go
 using poll = go.@internal.poll_package;
@@ -22,7 +22,10 @@ namespace go
         // Wrapper around the socket system call that marks the returned file
         // descriptor as nonblocking and close-on-exec.
         private static (long, error) sysSocket(long family, long sotype, long proto)
-        { 
+        {
+            long _p0 = default;
+            error _p0 = default!;
+ 
             // See ../syscall/exec_unix.go for description of ForkLock.
             syscall.ForkLock.RLock();
             var (s, err) = socketFunc(family, sotype, proto);
@@ -33,16 +36,17 @@ namespace go
             syscall.ForkLock.RUnlock();
             if (err != null)
             {
-                return (-1L, os.NewSyscallError("socket", err));
+                return (-1L, error.As(os.NewSyscallError("socket", err))!);
             }
             err = syscall.SetNonblock(s, true);
 
             if (err != null)
             {
                 poll.CloseFunc(s);
-                return (-1L, os.NewSyscallError("setnonblock", err));
+                return (-1L, error.As(os.NewSyscallError("setnonblock", err))!);
             }
-            return (s, null);
+            return (s, error.As(null!)!);
+
         }
     }
 }

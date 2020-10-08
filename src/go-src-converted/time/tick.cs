@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package time -- go2cs converted at 2020 August 29 08:42:20 UTC
+// package time -- go2cs converted at 2020 October 08 03:45:43 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\tick.go
 using errors = go.errors_package;
@@ -25,7 +25,7 @@ namespace go
         // It adjusts the intervals or drops ticks to make up for slow receivers.
         // The duration d must be greater than zero; if not, NewTicker will panic.
         // Stop the ticker to release associated resources.
-        public static ref Ticker NewTicker(Duration d) => func((_, panic, __) =>
+        public static ptr<Ticker> NewTicker(Duration d) => func((_, panic, __) =>
         {
             if (d <= 0L)
             {
@@ -35,18 +35,36 @@ namespace go
             // If the client falls behind while reading, we drop ticks
             // on the floor until the client catches up.
             var c = make_channel<Time>(1L);
-            Ticker t = ref new Ticker(C:c,r:runtimeTimer{when:when(d),period:int64(d),f:sendTime,arg:c,},);
-            startTimer(ref t.r);
-            return t;
+            ptr<Ticker> t = addr(new Ticker(C:c,r:runtimeTimer{when:when(d),period:int64(d),f:sendTime,arg:c,},));
+            startTimer(_addr_t.r);
+            return _addr_t!;
+
         });
 
         // Stop turns off a ticker. After Stop, no more ticks will be sent.
-        // Stop does not close the channel, to prevent a read from the channel succeeding
-        // incorrectly.
-        private static void Stop(this ref Ticker t)
+        // Stop does not close the channel, to prevent a concurrent goroutine
+        // reading from the channel from seeing an erroneous "tick".
+        private static void Stop(this ptr<Ticker> _addr_t)
         {
-            stopTimer(ref t.r);
+            ref Ticker t = ref _addr_t.val;
+
+            stopTimer(_addr_t.r);
         }
+
+        // Reset stops a ticker and resets its period to the specified duration.
+        // The next tick will arrive after the new period elapses.
+        private static void Reset(this ptr<Ticker> _addr_t, Duration d) => func((_, panic, __) =>
+        {
+            ref Ticker t = ref _addr_t.val;
+
+            if (t.r.f == null)
+            {
+                panic("time: Reset called on uninitialized Ticker");
+            }
+
+            modTimer(_addr_t.r, when(d), int64(d), t.r.f, t.r.arg, t.r.seq);
+
+        });
 
         // Tick is a convenience wrapper for NewTicker providing access to the ticking
         // channel only. While Tick is useful for clients that have no need to shut down
@@ -59,7 +77,9 @@ namespace go
             {
                 return null;
             }
+
             return NewTicker(d).C;
+
         }
     }
 }

@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 August 29 08:26:10 UTC
+// package net -- go2cs converted at 2020 October 08 03:32:58 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\fd_unix.go
 using context = go.context_package;
 using poll = go.@internal.poll_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
-using atomic = go.sync.atomic_package;
 using syscall = go.syscall_package;
 using static go.builtin;
 using System;
@@ -21,53 +20,56 @@ namespace go
 {
     public static partial class net_package
     {
-        // Network file descriptor.
-        private partial struct netFD
+        private static readonly @string readSyscallName = (@string)"read";
+        private static readonly @string readFromSyscallName = (@string)"recvfrom";
+        private static readonly @string readMsgSyscallName = (@string)"recvmsg";
+        private static readonly @string writeSyscallName = (@string)"write";
+        private static readonly @string writeToSyscallName = (@string)"sendto";
+        private static readonly @string writeMsgSyscallName = (@string)"sendmsg";
+
+
+        private static (ptr<netFD>, error) newFD(long sysfd, long family, long sotype, @string net)
         {
-            public poll.FD pfd; // immutable until Close
-            public long family;
-            public long sotype;
-            public bool isConnected;
-            public @string net;
-            public Addr laddr;
-            public Addr raddr;
+            ptr<netFD> _p0 = default!;
+            error _p0 = default!;
+
+            ptr<netFD> ret = addr(new netFD(pfd:poll.FD{Sysfd:sysfd,IsStream:sotype==syscall.SOCK_STREAM,ZeroReadIsEOF:sotype!=syscall.SOCK_DGRAM&&sotype!=syscall.SOCK_RAW,},family:family,sotype:sotype,net:net,));
+            return (_addr_ret!, error.As(null!)!);
         }
 
-        private static (ref netFD, error) newFD(long sysfd, long family, long sotype, @string net)
+        private static error init(this ptr<netFD> _addr_fd)
         {
-            netFD ret = ref new netFD(pfd:poll.FD{Sysfd:sysfd,IsStream:sotype==syscall.SOCK_STREAM,ZeroReadIsEOF:sotype!=syscall.SOCK_DGRAM&&sotype!=syscall.SOCK_RAW,},family:family,sotype:sotype,net:net,);
-            return (ret, null);
+            ref netFD fd = ref _addr_fd.val;
+
+            return error.As(fd.pfd.Init(fd.net, true))!;
         }
 
-        private static error init(this ref netFD fd)
+        private static @string name(this ptr<netFD> _addr_fd)
         {
-            return error.As(fd.pfd.Init(fd.net, true));
-        }
+            ref netFD fd = ref _addr_fd.val;
 
-        private static void setAddr(this ref netFD fd, Addr laddr, Addr raddr)
-        {
-            fd.laddr = laddr;
-            fd.raddr = raddr;
-            runtime.SetFinalizer(fd, ref netFD);
-        }
-
-        private static @string name(this ref netFD fd)
-        {
             @string ls = default;            @string rs = default;
 
             if (fd.laddr != null)
             {
                 ls = fd.laddr.String();
             }
+
             if (fd.raddr != null)
             {
                 rs = fd.raddr.String();
             }
+
             return fd.net + ":" + ls + "->" + rs;
+
         }
 
-        private static (syscall.Sockaddr, error) connect(this ref netFD _fd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) => func(_fd, (ref netFD fd, Defer defer, Panic _, Recover __) =>
-        { 
+        private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) => func((defer, _, __) =>
+        {
+            syscall.Sockaddr rsa = default;
+            error ret = default!;
+            ref netFD fd = ref _addr_fd.val;
+ 
             // Do not need to call fd.writeLock here,
             // because fd is not yet accessible to user,
             // so no concurrent operations are possible.
@@ -83,7 +85,7 @@ namespace go
                 }
                 if (err == null || err == syscall.EISCONN)
                 {
-                    return (null, mapErr(ctx.Err()));
+                    return (null, error.As(mapErr(ctx.Err()))!);
                     {
                         var err__prev1 = err;
 
@@ -91,30 +93,32 @@ namespace go
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (null, error.As(err)!);
                         }
 
                         err = err__prev1;
 
                     }
+
                     runtime.KeepAlive(fd);
-                    return (null, null);
+                    return (null, error.As(null!)!);
                     goto __switch_break0;
                 }
                 if (err == syscall.EINVAL) 
                 {
-                    // On Solaris we can see EINVAL if the socket has
-                    // already been accepted and closed by the server.
-                    // Treat this as a successful connection--writes to
-                    // the socket will see EOF.  For details and a test
-                    // case in C see https://golang.org/issue/6828.
-                    if (runtime.GOOS == "solaris")
+                    // On Solaris and illumos we can see EINVAL if the socket has
+                    // already been accepted and closed by the server.  Treat this
+                    // as a successful connection--writes to the socket will see
+                    // EOF.  For details and a test case in C see
+                    // https://golang.org/issue/6828.
+                    if (runtime.GOOS == "solaris" || runtime.GOOS == "illumos")
                     {
-                        return (null, null);
+                        return (null, error.As(null!)!);
                     }
+
                 }
                 // default: 
-                    return (null, os.NewSyscallError("connect", err));
+                    return (null, error.As(os.NewSyscallError("connect", err))!);
 
                 __switch_break0:;
 
@@ -127,16 +131,17 @@ namespace go
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
-            {
-                var (deadline, _) = ctx.Deadline();
 
-                if (!deadline.IsZero())
+            {
+                var (deadline, hasDeadline) = ctx.Deadline();
+
+                if (hasDeadline)
                 {
                     fd.pfd.SetWriteDeadline(deadline);
                     defer(fd.pfd.SetWriteDeadline(noDeadline));
@@ -177,11 +182,12 @@ namespace go
                             // == nil). Because we've now poisoned the connection
                             // by making it unwritable, don't return a successful
                             // dial. This was issue 16523.
-                            ret = ctxErr;
+                            ret = mapErr(ctxErr);
                             fd.Close(); // prevent a leak
                         }
 
                     }
+
                 }());
                 go_(() => () =>
                 {
@@ -190,7 +196,9 @@ namespace go
                     interruptRes.Send(ctx.Err());
                     interruptRes.Send(null);
                 }());
+
             }
+
             while (true)
             { 
                 // Performing multiple connect system calls on a
@@ -208,18 +216,20 @@ namespace go
 
                     if (err != null)
                     {
-                        return (null, mapErr(ctx.Err()));
-                        return (null, err);
+                        return (null, error.As(mapErr(ctx.Err()))!);
+                        return (null, error.As(err)!);
                     }
 
                     err = err__prev1;
 
                 }
+
                 var (nerr, err) = getsockoptIntFunc(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_ERROR);
                 if (err != null)
                 {
-                    return (null, os.NewSyscallError("getsockopt", err));
+                    return (null, error.As(os.NewSyscallError("getsockopt", err))!);
                 }
+
                 {
                     var err__prev1 = err;
 
@@ -227,7 +237,7 @@ namespace go
 
 
                     if (err == syscall.EINPROGRESS || err == syscall.EALREADY || err == syscall.EINTR)                     else if (err == syscall.EISCONN) 
-                        return (null, null);
+                        return (null, error.As(null!)!);
                     else if (err == syscall.Errno(0L)) 
                         // The runtime poller can wake us up spuriously;
                         // see issues 14548 and 19289. Check that we are
@@ -239,90 +249,32 @@ namespace go
 
                             if (err == null)
                             {
-                                return (rsa, null);
+                                return (rsa, error.As(null!)!);
                             }
 
                             err = err__prev1;
 
                         }
+
                     else 
-                        return (null, os.NewSyscallError("connect", err));
+                        return (null, error.As(os.NewSyscallError("connect", err))!);
 
 
                     err = err__prev1;
                 }
                 runtime.KeepAlive(fd);
+
             }
+
 
         });
 
-        private static error Close(this ref netFD fd)
+        private static (ptr<netFD>, error) accept(this ptr<netFD> _addr_fd)
         {
-            runtime.SetFinalizer(fd, null);
-            return error.As(fd.pfd.Close());
-        }
+            ptr<netFD> netfd = default!;
+            error err = default!;
+            ref netFD fd = ref _addr_fd.val;
 
-        private static error shutdown(this ref netFD fd, long how)
-        {
-            var err = fd.pfd.Shutdown(how);
-            runtime.KeepAlive(fd);
-            return error.As(wrapSyscallError("shutdown", err));
-        }
-
-        private static error closeRead(this ref netFD fd)
-        {
-            return error.As(fd.shutdown(syscall.SHUT_RD));
-        }
-
-        private static error closeWrite(this ref netFD fd)
-        {
-            return error.As(fd.shutdown(syscall.SHUT_WR));
-        }
-
-        private static (long, error) Read(this ref netFD fd, slice<byte> p)
-        {
-            n, err = fd.pfd.Read(p);
-            runtime.KeepAlive(fd);
-            return (n, wrapSyscallError("read", err));
-        }
-
-        private static (long, syscall.Sockaddr, error) readFrom(this ref netFD fd, slice<byte> p)
-        {
-            n, sa, err = fd.pfd.ReadFrom(p);
-            runtime.KeepAlive(fd);
-            return (n, sa, wrapSyscallError("recvfrom", err));
-        }
-
-        private static (long, long, long, syscall.Sockaddr, error) readMsg(this ref netFD fd, slice<byte> p, slice<byte> oob)
-        {
-            n, oobn, flags, sa, err = fd.pfd.ReadMsg(p, oob);
-            runtime.KeepAlive(fd);
-            return (n, oobn, flags, sa, wrapSyscallError("recvmsg", err));
-        }
-
-        private static (long, error) Write(this ref netFD fd, slice<byte> p)
-        {
-            nn, err = fd.pfd.Write(p);
-            runtime.KeepAlive(fd);
-            return (nn, wrapSyscallError("write", err));
-        }
-
-        private static (long, error) writeTo(this ref netFD fd, slice<byte> p, syscall.Sockaddr sa)
-        {
-            n, err = fd.pfd.WriteTo(p, sa);
-            runtime.KeepAlive(fd);
-            return (n, wrapSyscallError("sendto", err));
-        }
-
-        private static (long, long, error) writeMsg(this ref netFD fd, slice<byte> p, slice<byte> oob, syscall.Sockaddr sa)
-        {
-            n, oobn, err = fd.pfd.WriteMsg(p, oob, sa);
-            runtime.KeepAlive(fd);
-            return (n, oobn, wrapSyscallError("sendmsg", err));
-        }
-
-        private static (ref netFD, error) accept(this ref netFD fd)
-        {
             var (d, rsa, errcall, err) = fd.pfd.Accept();
             if (err != null)
             {
@@ -330,97 +282,53 @@ namespace go
                 {
                     err = wrapSyscallError(errcall, err);
                 }
-                return (null, err);
+
+                return (_addr_null!, error.As(err)!);
+
             }
+
             netfd, err = newFD(d, fd.family, fd.sotype, fd.net);
 
             if (err != null)
             {
                 poll.CloseFunc(d);
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             err = netfd.init();
 
             if (err != null)
             {
-                fd.Close();
-                return (null, err);
+                netfd.Close();
+                return (_addr_null!, error.As(err)!);
             }
+
             var (lsa, _) = syscall.Getsockname(netfd.pfd.Sysfd);
             netfd.setAddr(netfd.addrFunc()(lsa), netfd.addrFunc()(rsa));
-            return (netfd, null);
+            return (_addr_netfd!, error.As(null!)!);
+
         }
 
-        // tryDupCloexec indicates whether F_DUPFD_CLOEXEC should be used.
-        // If the kernel doesn't support it, this is set to 0.
-        private static var tryDupCloexec = int32(1L);
-
-        private static (long, error) dupCloseOnExec(long fd)
+        private static (ptr<os.File>, error) dup(this ptr<netFD> _addr_fd)
         {
-            if (atomic.LoadInt32(ref tryDupCloexec) == 1L)
+            ptr<os.File> f = default!;
+            error err = default!;
+            ref netFD fd = ref _addr_fd.val;
+
+            var (ns, call, err) = fd.pfd.Dup();
+            if (err != null)
             {
-                var (r0, _, e1) = syscall.Syscall(syscall.SYS_FCNTL, uintptr(fd), syscall.F_DUPFD_CLOEXEC, 0L);
-                if (runtime.GOOS == "darwin" && e1 == syscall.EBADF)
-                { 
-                    // On OS X 10.6 and below (but we only support
-                    // >= 10.6), F_DUPFD_CLOEXEC is unsupported
-                    // and fcntl there falls back (undocumented)
-                    // to doing an ioctl instead, returning EBADF
-                    // in this case because fd is not of the
-                    // expected device fd type. Treat it as
-                    // EINVAL instead, so we fall back to the
-                    // normal dup path.
-                    // TODO: only do this on 10.6 if we can detect 10.6
-                    // cheaply.
-                    e1 = syscall.EINVAL;
+                if (call != "")
+                {
+                    err = os.NewSyscallError(call, err);
                 }
 
-                if (e1 == 0L) 
-                    return (int(r0), null);
-                else if (e1 == syscall.EINVAL) 
-                    // Old kernel. Fall back to the portable way
-                    // from now on.
-                    atomic.StoreInt32(ref tryDupCloexec, 0L);
-                else 
-                    return (-1L, os.NewSyscallError("fcntl", e1));
-                            }
-            return dupCloseOnExecOld(fd);
-        }
+                return (_addr_null!, error.As(err)!);
 
-        // dupCloseOnExecUnixOld is the traditional way to dup an fd and
-        // set its O_CLOEXEC bit, using two system calls.
-        private static (long, error) dupCloseOnExecOld(long fd) => func((defer, _, __) =>
-        {
-            syscall.ForkLock.RLock();
-            defer(syscall.ForkLock.RUnlock());
-            newfd, err = syscall.Dup(fd);
-            if (err != null)
-            {
-                return (-1L, os.NewSyscallError("dup", err));
             }
-            syscall.CloseOnExec(newfd);
-            return;
-        });
 
-        private static (ref os.File, error) dup(this ref netFD fd)
-        {
-            var (ns, err) = dupCloseOnExec(fd.pfd.Sysfd);
-            if (err != null)
-            {
-                return (null, err);
-            } 
+            return (_addr_os.NewFile(uintptr(ns), fd.name())!, error.As(null!)!);
 
-            // We want blocking mode for the new fd, hence the double negative.
-            // This also puts the old fd into blocking mode, meaning that
-            // I/O will block the thread instead of letting us use the epoll server.
-            // Everything will still work, just with more threads.
-            err = fd.pfd.SetBlocking();
-
-            if (err != null)
-            {
-                return (null, os.NewSyscallError("setnonblock", err));
-            }
-            return (os.NewFile(uintptr(ns), fd.name()), null);
         }
     }
 }

@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2020 August 29 08:42:57 UTC
+// package strconv -- go2cs converted at 2020 October 08 03:48:59 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\itoa.go
-
+using bits = go.math.bits_package;
 using static go.builtin;
 
 namespace go
 {
     public static partial class strconv_package
     {
-        private static readonly var fastSmalls = true; // enable fast path for small integers
+        private static readonly var fastSmalls = (var)true; // enable fast path for small integers
 
         // FormatUint returns the string representation of i in the given base,
         // for 2 <= base <= 36. The result uses the lower-case letters 'a' to 'z'
@@ -28,8 +28,10 @@ namespace go
             {
                 return small(int(i));
             }
+
             var (_, s) = formatBits(null, i, base, false, false);
             return s;
+
         }
 
         // FormatInt returns the string representation of i in the given base,
@@ -41,11 +43,13 @@ namespace go
             {
                 return small(int(i));
             }
+
             var (_, s) = formatBits(null, uint64(i), base, i < 0L, false);
             return s;
+
         }
 
-        // Itoa is shorthand for FormatInt(int64(i), 10).
+        // Itoa is equivalent to FormatInt(int64(i), 10).
         public static @string Itoa(long i)
         {
             return FormatInt(int64(i), 10L);
@@ -59,8 +63,10 @@ namespace go
             {
                 return append(dst, small(int(i)));
             }
+
             dst, _ = formatBits(dst, uint64(i), base, i < 0L, true);
             return dst;
+
         }
 
         // AppendUint appends the string form of the unsigned integer i,
@@ -71,38 +77,45 @@ namespace go
             {
                 return append(dst, small(int(i)));
             }
+
             dst, _ = formatBits(dst, i, base, false, true);
             return dst;
+
         }
 
         // small returns the string for an i with 0 <= i < nSmalls.
         private static @string small(long i)
         {
-            long off = 0L;
             if (i < 10L)
             {
-                off = 1L;
+                return digits[i..i + 1L];
             }
-            return smallsString[i * 2L + off..i * 2L + 2L];
+
+            return smallsString[i * 2L..i * 2L + 2L];
+
         }
 
-        private static readonly long nSmalls = 100L;
+        private static readonly long nSmalls = (long)100L;
 
 
 
-        private static readonly @string smallsString = "00010203040506070809" + "10111213141516171819" + "20212223242526272829" + "30313233343536373839" + "40414243444546474849" + "50515253545556575859" + "60616263646566676869" + "70717273747576777879" + "80818283848586878889" + "90919293949596979899";
+        private static readonly @string smallsString = (@string)"00010203040506070809" + "10111213141516171819" + "20212223242526272829" + "30313233343536373839" + "40414243444546474849" + "50515253545556575859" + "60616263646566676869" + "70717273747576777879" + "80818283848586878889" + "90919293949596979899";
 
 
 
-        private static readonly var host32bit = ~uint(0L) >> (int)(32L) == 0L;
+        private static readonly var host32bit = (var)~uint(0L) >> (int)(32L) == 0L;
 
 
 
-        private static readonly @string digits = "0123456789abcdefghijklmnopqrstuvwxyz";
+        private static readonly @string digits = (@string)"0123456789abcdefghijklmnopqrstuvwxyz";
 
+        // formatBits computes the string representation of u in the given base.
+        // If neg is set, u is treated as negative int64 value. If append_ is
+        // set, the string is appended to dst and the resulting byte slice is
+        // returned as the first result value; otherwise the string is returned
+        // as the second result value.
+        //
 
-
-        private static array<ulong> shifts = new array<ulong>(InitKeyedValues<ulong>(len(digits)+1, (1<<1, 1), (1<<2, 2), (1<<3, 3), (1<<4, 4), (1<<5, 5)));
 
         // formatBits computes the string representation of u in the given base.
         // If neg is set, u is treated as negative int64 value. If append_ is
@@ -112,6 +125,9 @@ namespace go
         //
         private static (slice<byte>, @string) formatBits(slice<byte> dst, ulong u, long @base, bool neg, bool append_) => func((_, panic, __) =>
         {
+            slice<byte> d = default;
+            @string s = default;
+
             if (base < 2L || base > len(digits))
             {
                 panic("strconv: illegal AppendInt/FormatInt base");
@@ -162,6 +178,7 @@ namespace go
                         a[i] = smallsString[us * 2L + 1L];
 
                         u = q;
+
                     } 
                     // u < 1e9
  
@@ -191,49 +208,53 @@ namespace go
                     i--;
                     a[i] = smallsString[is];
                 }
-            }            {
-                var s = shifts[base];
 
+            }
+            else if (isPowerOfTwo(base))
+            { 
+                // Use shifts and masks instead of / and %.
+                // Base is a power of 2 and 2 <= base <= len(digits) where len(digits) is 36.
+                // The largest power of 2 below or equal to 36 is 32, which is 1 << 5;
+                // i.e., the largest possible shift count is 5. By &-ind that value with
+                // the constant 7 we tell the compiler that the shift count is always
+                // less than 8 which is smaller than any register width. This allows
+                // the compiler to generate better code for the shift operation.
+                var shift = uint(bits.TrailingZeros(uint(base))) & 7L;
+                var b = uint64(base);
+                var m = uint(base) - 1L; // == 1<<shift - 1
+                while (u >= b)
+                {
+                    i--;
+                    a[i] = digits[uint(u) & m];
+                    u >>= shift;
+                }
+            else
+ 
+                // u < base
+ 
+                // u < base
+                i--;
+                a[i] = digits[uint(u)];
 
-                else if (s > 0L)
-                { 
-                    // base is power of 2: use shifts and masks instead of / and %
-                    var b = uint64(base);
-                    var m = uint(base) - 1L; // == 1<<s - 1
-                    while (u >= b)
-                    {
-                        i--;
-                        a[i] = digits[uint(u) & m];
-                        u >>= s;
-                    }
-                else
- 
-                    // u < base
- 
-                    // u < base
-                    i--;
-                    a[i] = digits[uint(u)];
-                }                { 
-                    // general case
-                    b = uint64(base);
-                    while (u >= b)
-                    {
-                        i--; 
-                        // Avoid using r = a%b in addition to q = a/b
-                        // since 64bit division and modulo operations
-                        // are calculated by runtime functions on 32bit machines.
-                        q = u / b;
-                        a[i] = digits[uint(u - q * b)];
-                        u = q;
-                    } 
-                    // u < base
- 
-                    // u < base
-                    i--;
-                    a[i] = digits[uint(u)];
+            }            { 
+                // general case
+                b = uint64(base);
+                while (u >= b)
+                {
+                    i--; 
+                    // Avoid using r = a%b in addition to q = a/b
+                    // since 64bit division and modulo operations
+                    // are calculated by runtime functions on 32bit machines.
+                    q = u / b;
+                    a[i] = digits[uint(u - q * b)];
+                    u = q;
+
                 } 
-
-                // add sign, if any
+                // u < base
+ 
+                // u < base
+                i--;
+                a[i] = digits[uint(u)];
 
             } 
 
@@ -243,13 +264,21 @@ namespace go
                 i--;
                 a[i] = '-';
             }
+
             if (append_)
             {
                 d = append(dst, a[i..]);
-                return;
+                return ;
             }
+
             s = string(a[i..]);
-            return;
+            return ;
+
         });
+
+        private static bool isPowerOfTwo(long x)
+        {
+            return x & (x - 1L) == 0L;
+        }
     }
 }

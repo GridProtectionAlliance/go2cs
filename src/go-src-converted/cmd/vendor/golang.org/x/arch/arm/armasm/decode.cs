@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2020 August 29 10:07:08 UTC
+// package armasm -- go2cs converted at 2020 October 08 04:44:08 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\decode.go
 using binary = go.encoding.binary_package;
@@ -53,18 +53,24 @@ namespace arm
         // Decode decodes the leading bytes in src as a single instruction.
         public static (Inst, error) Decode(slice<byte> src, Mode mode)
         {
+            Inst inst = default;
+            error err = default!;
+
             if (mode != ModeARM)
             {
-                return (new Inst(), errMode);
+                return (new Inst(), error.As(errMode)!);
             }
+
             if (len(src) < 4L)
             {
-                return (new Inst(), errShort);
+                return (new Inst(), error.As(errShort)!);
             }
+
             if (decoderCover == null)
             {
                 decoderCover = make_slice<bool>(len(instFormats));
             }
+
             var x = binary.LittleEndian.Uint32(src); 
 
             // The instFormat table contains both conditional and unconditional instructions.
@@ -72,22 +78,24 @@ namespace arm
             // while the unconditional instructions use mask=f, value=f.
             // Prepare a version of x with the condition cleared to 0 in conditional instructions
             // and then assume mask=f during matching.
-            const ulong condMask = 0xf0000000UL;
+            const ulong condMask = (ulong)0xf0000000UL;
 
             var xNoCond = x;
             if (x & condMask != condMask)
             {
                 xNoCond &= condMask;
             }
+
             sbyte priority = default;
 Search:
             foreach (var (i) in instFormats)
             {
-                var f = ref instFormats[i];
+                var f = _addr_instFormats[i];
                 if (xNoCond & (f.mask | condMask) != f.value || f.priority <= priority)
                 {
                     continue;
                 }
+
                 var delta = uint32(0L);
                 var deltaShift = uint(0L);
                 {
@@ -111,6 +119,7 @@ Search:
                     _continueSearch = true;
                     break;
                 }
+
                 Args args = default;
                 foreach (var (j, aop) in f.args)
                 {
@@ -118,13 +127,16 @@ Search:
                     {
                         break;
                     }
+
                     var arg = decodeArg(aop, x);
                     if (arg == null)
                     { // cannot decode argument
                         _continueSearch = true;
                         break;
                     }
+
                     args[j] = arg;
+
                 }
                 decoderCover[i] = true;
 
@@ -135,9 +147,11 @@ Search:
             }
             if (inst.Op != 0L)
             {
-                return (inst, null);
+                return (inst, error.As(null!)!);
             }
-            return (new Inst(), errUnknown);
+
+            return (new Inst(), error.As(errUnknown)!);
+
         }
 
         // An instArg describes the encoding of a single argument.
@@ -151,70 +165,71 @@ Search:
         {
         }
 
-        private static readonly instArg _ = iota;
-        private static readonly var arg_APSR = 0;
-        private static readonly var arg_FPSCR = 1;
-        private static readonly var arg_Dn_half = 2;
-        private static readonly var arg_R1_0 = 3;
-        private static readonly var arg_R1_12 = 4;
-        private static readonly var arg_R2_0 = 5;
-        private static readonly var arg_R2_12 = 6;
-        private static readonly var arg_R_0 = 7;
-        private static readonly var arg_R_12 = 8;
-        private static readonly var arg_R_12_nzcv = 9;
-        private static readonly var arg_R_16 = 10;
-        private static readonly var arg_R_16_WB = 11;
-        private static readonly var arg_R_8 = 12;
-        private static readonly var arg_R_rotate = 13;
-        private static readonly var arg_R_shift_R = 14;
-        private static readonly var arg_R_shift_imm = 15;
-        private static readonly var arg_SP = 16;
-        private static readonly var arg_Sd = 17;
-        private static readonly var arg_Sd_Dd = 18;
-        private static readonly var arg_Dd_Sd = 19;
-        private static readonly var arg_Sm = 20;
-        private static readonly var arg_Sm_Dm = 21;
-        private static readonly var arg_Sn = 22;
-        private static readonly var arg_Sn_Dn = 23;
-        private static readonly var arg_const = 24;
-        private static readonly var arg_endian = 25;
-        private static readonly var arg_fbits = 26;
-        private static readonly var arg_fp_0 = 27;
-        private static readonly var arg_imm24 = 28;
-        private static readonly var arg_imm5 = 29;
-        private static readonly var arg_imm5_32 = 30;
-        private static readonly var arg_imm5_nz = 31;
-        private static readonly var arg_imm_12at8_4at0 = 32;
-        private static readonly var arg_imm_4at16_12at0 = 33;
-        private static readonly var arg_imm_vfp = 34;
-        private static readonly var arg_label24 = 35;
-        private static readonly var arg_label24H = 36;
-        private static readonly var arg_label_m_12 = 37;
-        private static readonly var arg_label_p_12 = 38;
-        private static readonly var arg_label_pm_12 = 39;
-        private static readonly var arg_label_pm_4_4 = 40;
-        private static readonly var arg_lsb_width = 41;
-        private static readonly var arg_mem_R = 42;
-        private static readonly var arg_mem_R_pm_R_W = 43;
-        private static readonly var arg_mem_R_pm_R_postindex = 44;
-        private static readonly var arg_mem_R_pm_R_shift_imm_W = 45;
-        private static readonly var arg_mem_R_pm_R_shift_imm_offset = 46;
-        private static readonly var arg_mem_R_pm_R_shift_imm_postindex = 47;
-        private static readonly var arg_mem_R_pm_imm12_W = 48;
-        private static readonly var arg_mem_R_pm_imm12_offset = 49;
-        private static readonly var arg_mem_R_pm_imm12_postindex = 50;
-        private static readonly var arg_mem_R_pm_imm8_W = 51;
-        private static readonly var arg_mem_R_pm_imm8_postindex = 52;
-        private static readonly var arg_mem_R_pm_imm8at0_offset = 53;
-        private static readonly var arg_option = 54;
-        private static readonly var arg_registers = 55;
-        private static readonly var arg_registers1 = 56;
-        private static readonly var arg_registers2 = 57;
-        private static readonly var arg_satimm4 = 58;
-        private static readonly var arg_satimm5 = 59;
-        private static readonly var arg_satimm4m1 = 60;
-        private static readonly var arg_satimm5m1 = 61;
-        private static readonly var arg_widthm1 = 62;
+        private static readonly instArg _ = (instArg)iota;
+        private static readonly var arg_APSR = (var)0;
+        private static readonly var arg_FPSCR = (var)1;
+        private static readonly var arg_Dn_half = (var)2;
+        private static readonly var arg_R1_0 = (var)3;
+        private static readonly var arg_R1_12 = (var)4;
+        private static readonly var arg_R2_0 = (var)5;
+        private static readonly var arg_R2_12 = (var)6;
+        private static readonly var arg_R_0 = (var)7;
+        private static readonly var arg_R_12 = (var)8;
+        private static readonly var arg_R_12_nzcv = (var)9;
+        private static readonly var arg_R_16 = (var)10;
+        private static readonly var arg_R_16_WB = (var)11;
+        private static readonly var arg_R_8 = (var)12;
+        private static readonly var arg_R_rotate = (var)13;
+        private static readonly var arg_R_shift_R = (var)14;
+        private static readonly var arg_R_shift_imm = (var)15;
+        private static readonly var arg_SP = (var)16;
+        private static readonly var arg_Sd = (var)17;
+        private static readonly var arg_Sd_Dd = (var)18;
+        private static readonly var arg_Dd_Sd = (var)19;
+        private static readonly var arg_Sm = (var)20;
+        private static readonly var arg_Sm_Dm = (var)21;
+        private static readonly var arg_Sn = (var)22;
+        private static readonly var arg_Sn_Dn = (var)23;
+        private static readonly var arg_const = (var)24;
+        private static readonly var arg_endian = (var)25;
+        private static readonly var arg_fbits = (var)26;
+        private static readonly var arg_fp_0 = (var)27;
+        private static readonly var arg_imm24 = (var)28;
+        private static readonly var arg_imm5 = (var)29;
+        private static readonly var arg_imm5_32 = (var)30;
+        private static readonly var arg_imm5_nz = (var)31;
+        private static readonly var arg_imm_12at8_4at0 = (var)32;
+        private static readonly var arg_imm_4at16_12at0 = (var)33;
+        private static readonly var arg_imm_vfp = (var)34;
+        private static readonly var arg_label24 = (var)35;
+        private static readonly var arg_label24H = (var)36;
+        private static readonly var arg_label_m_12 = (var)37;
+        private static readonly var arg_label_p_12 = (var)38;
+        private static readonly var arg_label_pm_12 = (var)39;
+        private static readonly var arg_label_pm_4_4 = (var)40;
+        private static readonly var arg_lsb_width = (var)41;
+        private static readonly var arg_mem_R = (var)42;
+        private static readonly var arg_mem_R_pm_R_W = (var)43;
+        private static readonly var arg_mem_R_pm_R_postindex = (var)44;
+        private static readonly var arg_mem_R_pm_R_shift_imm_W = (var)45;
+        private static readonly var arg_mem_R_pm_R_shift_imm_offset = (var)46;
+        private static readonly var arg_mem_R_pm_R_shift_imm_postindex = (var)47;
+        private static readonly var arg_mem_R_pm_imm12_W = (var)48;
+        private static readonly var arg_mem_R_pm_imm12_offset = (var)49;
+        private static readonly var arg_mem_R_pm_imm12_postindex = (var)50;
+        private static readonly var arg_mem_R_pm_imm8_W = (var)51;
+        private static readonly var arg_mem_R_pm_imm8_postindex = (var)52;
+        private static readonly var arg_mem_R_pm_imm8at0_offset = (var)53;
+        private static readonly var arg_option = (var)54;
+        private static readonly var arg_registers = (var)55;
+        private static readonly var arg_registers1 = (var)56;
+        private static readonly var arg_registers2 = (var)57;
+        private static readonly var arg_satimm4 = (var)58;
+        private static readonly var arg_satimm5 = (var)59;
+        private static readonly var arg_satimm4m1 = (var)60;
+        private static readonly var arg_satimm5m1 = (var)61;
+        private static readonly var arg_widthm1 = (var)62;
+
 
         // decodeArg decodes the arg described by aop from the instruction bits x.
         // It returns nil if x cannot be decoded according to aop.
@@ -239,6 +254,7 @@ Search:
                 {
                     return APSR_nzcv;
                 }
+
                 return r;
             else if (aop == arg_R_16_WB) 
                 var mode = AddrLDM;
@@ -246,6 +262,7 @@ Search:
                 {
                     mode = AddrLDM_WB;
                 }
+
                 return new Mem(Base:Reg((x>>16)&(1<<4-1)),Mode:mode);
             else if (aop == arg_R_rotate) 
                 var Rm = Reg(x & (1L << (int)(4L) - 1L));
@@ -255,6 +272,7 @@ Search:
                 {
                     return Reg(Rm);
                 }
+
                 return new RegShift(Rm,typ,uint8(count));
             else if (aop == arg_R_shift_R) 
                 Rm = Reg(x & (1L << (int)(4L) - 1L));
@@ -268,6 +286,7 @@ Search:
                 {
                     return Reg(Rm);
                 }
+
                 return new RegShift(Rm,typ,uint8(count));
             else if (aop == arg_R1_0) 
                 return Reg((x & (1L << (int)(4L) - 1L)));
@@ -291,6 +310,7 @@ Search:
                 {
                     return S0 + Reg(v << (int)(1L) + vx);
                 }
+
             else if (aop == arg_Dd_Sd) 
                 return decodeArg(arg_Sd_Dd, x ^ (1L << (int)(8L)));
             else if (aop == arg_Sd) 
@@ -309,6 +329,7 @@ Search:
                 {
                     return S0 + Reg(v << (int)(1L) + vx);
                 }
+
             else if (aop == arg_Sm) 
                 v = (x >> (int)(0L)) & (1L << (int)(4L) - 1L);
                 vx = (x >> (int)(5L)) & 1L;
@@ -329,6 +350,7 @@ Search:
                 {
                     return S0 + Reg(v << (int)(1L) + vx);
                 }
+
             else if (aop == arg_Sn) 
                 v = (x >> (int)(16L)) & (1L << (int)(4L) - 1L);
                 vx = (x >> (int)(7L)) & 1L;
@@ -340,12 +362,16 @@ Search:
                 { 
                     // could rotate less
                     return new ImmAlt(uint8(v),uint8(rot));
+
                 }
+
                 if (rot >= 24L && ((v << (int)((32L - rot))) & 0xFFUL) >> (int)((32L - rot)) == v)
                 { 
                     // could wrap around to rot==0.
                     return new ImmAlt(uint8(v),uint8(rot));
+
                 }
+
                 return Imm(v >> (int)(rot) | v << (int)((32L - rot)));
             else if (aop == arg_endian) 
                 return Endian((x >> (int)(9L)) & 1L);
@@ -363,6 +389,7 @@ Search:
                 {
                     x = 32L;
                 }
+
                 return Imm(x);
             else if (aop == arg_imm5_nz) 
                 x = (x >> (int)(7L)) & (1L << (int)(5L) - 1L);
@@ -370,6 +397,7 @@ Search:
                 {
                     return null;
                 }
+
                 return Imm(x);
             else if (aop == arg_imm_4at16_12at0) 
                 return Imm((x >> (int)(16L)) & (1L << (int)(4L) - 1L) << (int)(12L) | x & (1L << (int)(12L) - 1L));
@@ -398,6 +426,7 @@ Search:
                 {
                     d = -d;
                 }
+
                 return new Mem(Base:PC,Mode:AddrOffset,Offset:int16(d));
             else if (aop == arg_label_pm_4_4) 
                 d = int32((x >> (int)(8L)) & (1L << (int)(4L) - 1L) << (int)(4L) | x & (1L << (int)(4L) - 1L));
@@ -406,6 +435,7 @@ Search:
                 {
                     d = -d;
                 }
+
                 return PCRel(d);
             else if (aop == arg_lsb_width) 
                 var lsb = (x >> (int)(7L)) & (1L << (int)(5L) - 1L);
@@ -414,6 +444,7 @@ Search:
                 {
                     return null;
                 }
+
                 return Imm(msb + 1L - lsb);
             else if (aop == arg_mem_R) 
                 var Rn = Reg((x >> (int)(16L)) & (1L << (int)(4L) - 1L));
@@ -445,11 +476,13 @@ Search:
                 {
                     return null;
                 }
+
                 var sign = int8(+1L);
                 if (u == 0L)
                 {
                     sign = -1L;
                 }
+
                 mode = AddrMode(uint8(p << (int)(1L)) | uint8(w ^ 1L));
                 return new Mem(Base:Rn,Mode:mode,Sign:sign,Index:Rm,Shift:typ,Count:count);
             else if (aop == arg_mem_R_pm_imm12_offset) 
@@ -469,11 +502,13 @@ Search:
                 {
                     return null;
                 }
+
                 sign = int8(+1L);
                 if (u == 0L)
                 {
                     sign = -1L;
                 }
+
                 imm = int16(x & (1L << (int)(12L) - 1L));
                 mode = AddrMode(uint8(p << (int)(1L)) | uint8(w ^ 1L));
                 return new Mem(Base:Rn,Mode:mode,Offset:int16(sign)*imm);
@@ -490,11 +525,13 @@ Search:
                 {
                     return null;
                 }
+
                 sign = int8(+1L);
                 if (u == 0L)
                 {
                     sign = -1L;
                 }
+
                 imm = int16((x >> (int)(8L)) & (1L << (int)(4L) - 1L) << (int)(4L) | x & (1L << (int)(4L) - 1L));
                 mode = AddrMode(uint8(p << (int)(1L)) | uint8(w ^ 1L));
                 return new Mem(Base:Rn,Mode:mode,Offset:int16(sign)*imm);
@@ -506,6 +543,7 @@ Search:
                 {
                     sign = -1L;
                 }
+
                 imm = int16(x & (1L << (int)(8L) - 1L)) << (int)(2L);
                 return new Mem(Base:Rn,Mode:AddrOffset,Offset:int16(sign)*imm);
             else if (aop == arg_option) 
@@ -521,12 +559,14 @@ Search:
                     {
                         n++;
                     }
+
                 }
 
                 if (n < 2L)
                 {
                     return null;
                 }
+
                 return RegList(x);
             else if (aop == arg_registers1) 
                 var Rt = (x >> (int)(12L)) & (1L << (int)(4L) - 1L);
@@ -543,11 +583,15 @@ Search:
                 return Imm((x >> (int)(16L)) & (1L << (int)(5L) - 1L) + 1L);
             else 
                 return null;
-                    }
+            
+        }
 
         // decodeShift decodes the shift-by-immediate encoded in x.
         private static (Shift, byte) decodeShift(uint x)
         {
+            Shift _p0 = default;
+            byte _p0 = default;
+
             var count = (x >> (int)(7L)) & (1L << (int)(5L) - 1L);
             var typ = Shift((x >> (int)(5L)) & (1L << (int)(2L) - 1L));
 
@@ -556,13 +600,16 @@ Search:
                 {
                     count = 32L;
                 }
+
             else if (typ == RotateRight) 
                 if (count == 0L)
                 {
                     typ = RotateRightExt;
                     count = 1L;
                 }
+
                         return (typ, uint8(count));
+
         }
     }
 }}}}}}}

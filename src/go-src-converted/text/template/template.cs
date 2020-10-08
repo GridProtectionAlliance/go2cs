@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:35:01 UTC
+// package template -- go2cs converted at 2020 October 08 03:42:16 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Go\src\text\template\template.go
 using reflect = go.reflect_package;
@@ -18,7 +18,7 @@ namespace text
         // common holds the information shared by related templates.
         private partial struct common
         {
-            public map<@string, ref Template> tmpl; // Map from name to defined templates.
+            public map<@string, ptr<Template>> tmpl; // Map from name to defined templates.
             public option option; // We use two maps, one for parsing and one for execution.
 // This separation makes the API cleaner since it doesn't
 // expose reflection to the client.
@@ -33,47 +33,58 @@ namespace text
         public partial struct Template
         {
             public @string name;
-            public ref parse.Tree Tree => ref Tree_ptr;
-            public ref common common => ref common_ptr;
+            public ref ptr<parse.Tree> Tree> => ref Tree>_ptr;
+            public ref ptr<common> ptr<common> => ref ptr<common>_ptr;
             public @string leftDelim;
             public @string rightDelim;
         }
 
         // New allocates a new, undefined template with the given name.
-        public static ref Template New(@string name)
+        public static ptr<Template> New(@string name)
         {
-            Template t = ref new Template(name:name,);
+            ptr<Template> t = addr(new Template(name:name,));
             t.init();
-            return t;
+            return _addr_t!;
         }
 
         // Name returns the name of the template.
-        private static @string Name(this ref Template t)
+        private static @string Name(this ptr<Template> _addr_t)
         {
+            ref Template t = ref _addr_t.val;
+
             return t.name;
         }
 
         // New allocates a new, undefined template associated with the given one and with the same
         // delimiters. The association, which is transitive, allows one template to
         // invoke another with a {{template}} action.
-        private static ref Template New(this ref Template t, @string name)
+        //
+        // Because associated templates share underlying data, template construction
+        // cannot be done safely in parallel. Once the templates are constructed, they
+        // can be executed in parallel.
+        private static ptr<Template> New(this ptr<Template> _addr_t, @string name)
         {
+            ref Template t = ref _addr_t.val;
+
             t.init();
-            Template nt = ref new Template(name:name,common:t.common,leftDelim:t.leftDelim,rightDelim:t.rightDelim,);
-            return nt;
+            ptr<Template> nt = addr(new Template(name:name,common:t.common,leftDelim:t.leftDelim,rightDelim:t.rightDelim,));
+            return _addr_nt!;
         }
 
         // init guarantees that t has a valid common structure.
-        private static void init(this ref Template t)
+        private static void init(this ptr<Template> _addr_t)
         {
+            ref Template t = ref _addr_t.val;
+
             if (t.common == null)
             {
                 ptr<common> c = @new<common>();
-                c.tmpl = make_map<@string, ref Template>();
+                c.tmpl = make_map<@string, ptr<Template>>();
                 c.parseFuncs = make(FuncMap);
                 c.execFuncs = make_map<@string, reflect.Value>();
                 t.common = c;
             }
+
         }
 
         // Clone returns a duplicate of the template, including all associated
@@ -82,14 +93,19 @@ namespace text
         // templates to the copy but not to the original. Clone can be used to prepare
         // common templates and use them with variant definitions for other templates
         // by adding the variants after the clone is made.
-        private static (ref Template, error) Clone(this ref Template _t) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static (ptr<Template>, error) Clone(this ptr<Template> _addr_t) => func((defer, _, __) =>
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+
             var nt = t.copy(null);
             nt.init();
             if (t.common == null)
             {
-                return (nt, null);
+                return (_addr_nt!, error.As(null!)!);
             }
+
             {
                 var k__prev1 = k;
                 var v__prev1 = v;
@@ -106,6 +122,7 @@ namespace text
                     // The associated templates share nt's common structure.
                     var tmpl = v.copy(nt.common);
                     nt.tmpl[k] = tmpl;
+
                 }
 
                 k = k__prev1;
@@ -144,63 +161,63 @@ namespace text
                 v = v__prev1;
             }
 
-            return (nt, null);
+            return (_addr_nt!, error.As(null!)!);
+
         });
 
         // copy returns a shallow copy of t, with common set to the argument.
-        private static ref Template copy(this ref Template t, ref common c)
+        private static ptr<Template> copy(this ptr<Template> _addr_t, ptr<common> _addr_c)
         {
-            var nt = New(t.name);
-            nt.Tree = t.Tree;
-            nt.common = c;
-            nt.leftDelim = t.leftDelim;
-            nt.rightDelim = t.rightDelim;
-            return nt;
+            ref Template t = ref _addr_t.val;
+            ref common c = ref _addr_c.val;
+
+            return addr(new Template(name:t.name,Tree:t.Tree,common:c,leftDelim:t.leftDelim,rightDelim:t.rightDelim,));
         }
 
-        // AddParseTree adds parse tree for template with given name and associates it with t.
-        // If the template does not already exist, it will create a new one.
-        // If the template does exist, it will be replaced.
-        private static (ref Template, error) AddParseTree(this ref Template t, @string name, ref parse.Tree tree)
+        // AddParseTree associates the argument parse tree with the template t, giving
+        // it the specified name. If the template has not been defined, this tree becomes
+        // its definition. If it has been defined and already has that name, the existing
+        // definition is replaced; otherwise a new template is created, defined, and returned.
+        private static (ptr<Template>, error) AddParseTree(this ptr<Template> _addr_t, @string name, ptr<parse.Tree> _addr_tree)
         {
-            t.init(); 
-            // If the name is the name of this template, overwrite this template.
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+            ref parse.Tree tree = ref _addr_tree.val;
+
+            t.init();
             var nt = t;
             if (name != t.name)
             {
                 nt = t.New(name);
             } 
             // Even if nt == t, we need to install it in the common.tmpl map.
+            if (t.associate(nt, tree) || nt.Tree == null)
             {
-                var (replace, err) = t.associate(nt, tree);
-
-                if (err != null)
-                {
-                    return (null, err);
-                }
-                else if (replace || nt.Tree == null)
-                {
-                    nt.Tree = tree;
-                }
-
+                nt.Tree = tree;
             }
-            return (nt, null);
+
+            return (_addr_nt!, error.As(null!)!);
+
         }
 
         // Templates returns a slice of defined templates associated with t.
-        private static slice<ref Template> Templates(this ref Template t)
+        private static slice<ptr<Template>> Templates(this ptr<Template> _addr_t)
         {
+            ref Template t = ref _addr_t.val;
+
             if (t.common == null)
             {
                 return null;
             } 
             // Return a slice so we don't expose the map.
-            var m = make_slice<ref Template>(0L, len(t.tmpl));
+            var m = make_slice<ptr<Template>>(0L, len(t.tmpl));
             foreach (var (_, v) in t.tmpl)
             {
                 m = append(m, v);
             }
             return m;
+
         }
 
         // Delims sets the action delimiters to the specified strings, to be used in
@@ -208,12 +225,14 @@ namespace text
         // definitions will inherit the settings. An empty delimiter stands for the
         // corresponding default: {{ or }}.
         // The return value is the template, so calls can be chained.
-        private static ref Template Delims(this ref Template t, @string left, @string right)
+        private static ptr<Template> Delims(this ptr<Template> _addr_t, @string left, @string right)
         {
+            ref Template t = ref _addr_t.val;
+
             t.init();
             t.leftDelim = left;
             t.rightDelim = right;
-            return t;
+            return _addr_t!;
         }
 
         // Funcs adds the elements of the argument map to the template's function map.
@@ -222,25 +241,31 @@ namespace text
         // type or if the name cannot be used syntactically as a function in a template.
         // It is legal to overwrite elements of the map. The return value is the template,
         // so calls can be chained.
-        private static ref Template Funcs(this ref Template _t, FuncMap funcMap) => func(_t, (ref Template t, Defer defer, Panic _, Recover __) =>
+        private static ptr<Template> Funcs(this ptr<Template> _addr_t, FuncMap funcMap) => func((defer, _, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             t.init();
             t.muFuncs.Lock();
             defer(t.muFuncs.Unlock());
             addValueFuncs(t.execFuncs, funcMap);
             addFuncs(t.parseFuncs, funcMap);
-            return t;
+            return _addr_t!;
         });
 
         // Lookup returns the template with the given name that is associated with t.
         // It returns nil if there is no such template or the template has no definition.
-        private static ref Template Lookup(this ref Template t, @string name)
+        private static ptr<Template> Lookup(this ptr<Template> _addr_t, @string name)
         {
+            ref Template t = ref _addr_t.val;
+
             if (t.common == null)
             {
-                return null;
+                return _addr_null!;
             }
-            return t.tmpl[name];
+
+            return _addr_t.tmpl[name]!;
+
         }
 
         // Parse parses text as a template body for t.
@@ -253,15 +278,19 @@ namespace text
         // is considered empty and will not replace an existing template's body.
         // This allows using Parse to add new named template definitions without
         // overwriting the main template body.
-        private static (ref Template, error) Parse(this ref Template t, @string text)
+        private static (ptr<Template>, error) Parse(this ptr<Template> _addr_t, @string text)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+
             t.init();
             t.muFuncs.RLock();
-            var (trees, err) = parse.Parse(t.name, text, t.leftDelim, t.rightDelim, t.parseFuncs, builtins);
+            var (trees, err) = parse.Parse(t.name, text, t.leftDelim, t.rightDelim, t.parseFuncs, builtins());
             t.muFuncs.RUnlock();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             } 
             // Add the newly parsed trees, including the one for t, into our common structure.
             foreach (var (name, tree) in trees)
@@ -271,23 +300,30 @@ namespace text
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                 }
+
             }
-            return (t, null);
+            return (_addr_t!, error.As(null!)!);
+
         }
 
         // associate installs the new template into the group of templates associated
         // with t. The two are already known to share the common structure.
         // The boolean return value reports whether to store this tree as t.Tree.
-        private static (bool, error) associate(this ref Template _t, ref Template _@new, ref parse.Tree _tree) => func(_t, _@new, _tree, (ref Template t, ref Template @new, ref parse.Tree tree, Defer _, Panic panic, Recover __) =>
+        private static bool associate(this ptr<Template> _addr_t, ptr<Template> _addr_@new, ptr<parse.Tree> _addr_tree) => func((_, panic, __) =>
         {
+            ref Template t = ref _addr_t.val;
+            ref Template @new = ref _addr_@new.val;
+            ref parse.Tree tree = ref _addr_tree.val;
+
             if (@new.common != t.common)
             {
                 panic("internal error: associate not common");
             }
+
             {
                 var old = t.tmpl[@new.name];
 
@@ -295,12 +331,15 @@ namespace text
                 { 
                     // If a template by that name exists,
                     // don't replace it with an empty template.
-                    return (false, null);
+                    return false;
+
                 }
 
             }
+
             t.tmpl[@new.name] = new;
-            return (true, null);
+            return true;
+
         });
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:41 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:24:26 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\write_err_android.go
 using @unsafe = go.@unsafe_package;
@@ -18,14 +18,14 @@ namespace go
         // in kernel ring buffers. In Android-L, those /dev/log files are no longer
         // accessible and logging is done through a centralized user-mode logger, logd.
         //
-        // https://android.googlesource.com/platform/system/core/+/master/liblog/logd_write.c
+        // https://android.googlesource.com/platform/system/core/+/refs/tags/android-6.0.1_r78/liblog/logd_write.c
         private partial struct loggerType // : int
         {
         }
 
-        private static readonly loggerType unknown = iota;
-        private static readonly var legacy = 0;
-        private static readonly var logd = 1; 
+        private static readonly loggerType unknown = (loggerType)iota;
+        private static readonly var legacy = (var)0;
+        private static readonly var logd = (var)1; 
         // TODO(hakim): logging for emulator?
 
         private static loggerType logger = default;
@@ -38,7 +38,7 @@ namespace go
                 {
                     var v__prev2 = v;
 
-                    var v = uintptr(access(ref writeLogd[0L], 0x02UL));
+                    var v = uintptr(access(_addr_writeLogd[0L], 0x02UL));
 
                     if (v == 0L)
                     {
@@ -54,10 +54,11 @@ namespace go
                     v = v__prev2;
 
                 }
+
             } 
 
             // Write to stderr for command-line programs.
-            write(2L, @unsafe.Pointer(ref b[0L]), int32(len(b))); 
+            write(2L, @unsafe.Pointer(_addr_b[0L]), int32(len(b))); 
 
             // Log format: "<header>\x00<message m bytes>\x00"
             //
@@ -84,42 +85,47 @@ namespace go
                     if (v == 0L)
                     { // android logging won't print a zero byte
                         v = '0';
+
                     }
+
                     dst[writePos] = v;
                     writePos++;
                     if (v == '\n' || writePos == len(dst) - 1L)
                     {
                         dst[writePos] = 0L;
-                        write(writeFD, @unsafe.Pointer(ref writeBuf[0L]), int32(hlen + writePos));
+                        write(writeFD, @unsafe.Pointer(_addr_writeBuf[0L]), int32(hlen + writePos));
                         foreach (var (i) in dst)
                         {
                             dst[i] = 0L;
                         }
                         writePos = 0L;
+
                     }
+
                 }
 
                 v = v__prev1;
             }
-
         }
 
         private static void initLegacy()
         { 
             // In legacy mode, logs are written to /dev/log/main
-            writeFD = uintptr(open(ref writePath[0L], 0x1UL, 0L));
+            writeFD = uintptr(open(_addr_writePath[0L], 0x1UL, 0L));
             if (writeFD == 0L)
             { 
                 // It is hard to do anything here. Write to stderr just
                 // in case user has root on device and has run
                 //    adb shell setprop log.redirect-stdio true
                 slice<byte> msg = (slice<byte>)"runtime: cannot open /dev/log/main\x00";
-                write(2L, @unsafe.Pointer(ref msg[0L]), int32(len(msg)));
+                write(2L, @unsafe.Pointer(_addr_msg[0L]), int32(len(msg)));
                 exit(2L);
+
             } 
 
             // Prepopulate the invariant header part.
             copy(writeBuf[..len(writeHeader)], writeHeader);
+
         }
 
         // used in initLogdWrite but defined here to avoid heap allocation.
@@ -139,22 +145,26 @@ namespace go
             if (fd < 0L)
             {
                 slice<byte> msg = (slice<byte>)"runtime: cannot create a socket for logging\x00";
-                write(2L, @unsafe.Pointer(ref msg[0L]), int32(len(msg)));
+                write(2L, @unsafe.Pointer(_addr_msg[0L]), int32(len(msg)));
                 exit(2L);
             }
-            var errno = connect(fd, @unsafe.Pointer(ref logdAddr), int32(@unsafe.Sizeof(logdAddr)));
+
+            var errno = connect(fd, @unsafe.Pointer(_addr_logdAddr), int32(@unsafe.Sizeof(logdAddr)));
             if (errno < 0L)
             {
                 msg = (slice<byte>)"runtime: cannot connect to /dev/socket/logdw\x00";
-                write(2L, @unsafe.Pointer(ref msg[0L]), int32(len(msg))); 
+                write(2L, @unsafe.Pointer(_addr_msg[0L]), int32(len(msg))); 
                 // TODO(hakim): or should we just close fd and hope for better luck next time?
                 exit(2L);
+
             }
+
             writeFD = uintptr(fd); 
 
             // Prepopulate invariant part of the header.
             // The first 11 bytes will be populated later in writeLogdHeader.
             copy(writeBuf[11L..11L + len(writeHeader)], writeHeader);
+
         }
 
         // writeLogdHeader populates the header and returns the length of the payload.
@@ -177,6 +187,7 @@ namespace go
             // TODO(hakim):  hdr[1:2] = gettid?
 
             return 11L + len(writeHeader);
+
         }
 
         private static void packUint32(slice<byte> b, uint v)
@@ -186,6 +197,7 @@ namespace go
             b[1L] = byte(v >> (int)(8L));
             b[2L] = byte(v >> (int)(16L));
             b[3L] = byte(v >> (int)(24L));
+
         }
     }
 }

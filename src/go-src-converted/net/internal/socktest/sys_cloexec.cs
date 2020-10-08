@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build dragonfly freebsd linux
+// +build dragonfly freebsd linux netbsd openbsd
 
-// package socktest -- go2cs converted at 2020 August 29 08:36:20 UTC
+// package socktest -- go2cs converted at 2020 October 08 03:43:14 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Go\src\net\internal\socktest\sys_cloexec.go
 using syscall = go.syscall_package;
@@ -17,8 +17,13 @@ namespace @internal
     public static partial class socktest_package
     {
         // Accept4 wraps syscall.Accept4.
-        private static (long, syscall.Sockaddr, error) Accept4(this ref Switch _sw, long s, long flags) => func(_sw, (ref Switch sw, Defer defer, Panic _, Recover __) =>
+        private static (long, syscall.Sockaddr, error) Accept4(this ptr<Switch> _addr_sw, long s, long flags) => func((defer, _, __) =>
         {
+            long ns = default;
+            syscall.Sockaddr sa = default;
+            error err = default!;
+            ref Switch sw = ref _addr_sw.val;
+
             var so = sw.sockso(s);
             if (so == null)
             {
@@ -31,7 +36,7 @@ namespace @internal
             var (af, err) = f.apply(so);
             if (err != null)
             {
-                return (-1L, null, err);
+                return (-1L, null, error.As(err)!);
             }
             ns, sa, so.Err = syscall.Accept4(s, flags);
             err = af.apply(so);
@@ -42,7 +47,8 @@ namespace @internal
                 {
                     syscall.Close(ns);
                 }
-                return (-1L, null, err);
+                return (-1L, null, error.As(err)!);
+
             }
             sw.smu.Lock();
             defer(sw.smu.Unlock());
@@ -50,12 +56,14 @@ namespace @internal
             {
                 sw.stats.getLocked(so.Cookie).AcceptFailed;
 
-                return (-1L, null, so.Err);
+                return (-1L, null, error.As(so.Err)!);
+
             }
             var nso = sw.addLocked(ns, so.Cookie.Family(), so.Cookie.Type(), so.Cookie.Protocol());
             sw.stats.getLocked(nso.Cookie).Accepted;
 
-            return (ns, sa, null);
+            return (ns, sa, error.As(null!)!);
+
         });
     }
 }}}

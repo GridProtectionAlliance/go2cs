@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:25:43 UTC
+//     Generated on 2020 October 08 04:27:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,14 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
 using types = go.cmd.compile.@internal.types_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using big = go.math.big_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
 using go;
 
 namespace go {
@@ -36,36 +29,12 @@ namespace @internal
             // Constructors
             public exporter(NilType _)
             {
-                this.@out = default;
-                this.strIndex = default;
-                this.pathIndex = default;
-                this.pkgIndex = default;
-                this.typIndex = default;
-                this.funcList = default;
                 this.marked = default;
-                this.posInfoFormat = default;
-                this.prevFile = default;
-                this.prevLine = default;
-                this.written = default;
-                this.indent = default;
-                this.trace = default;
             }
 
-            public exporter(ref ptr<bufio.Writer> @out = default, map<@string, long> strIndex = default, map<@string, long> pathIndex = default, map<ref types.Pkg, long> pkgIndex = default, map<ref types.Type, long> typIndex = default, slice<ref Func> funcList = default, map<ref types.Type, bool> marked = default, bool posInfoFormat = default, @string prevFile = default, long prevLine = default, long written = default, long indent = default, bool trace = default)
+            public exporter(map<ptr<types.Type>, bool> marked = default)
             {
-                this.@out = @out;
-                this.strIndex = strIndex;
-                this.pathIndex = pathIndex;
-                this.pkgIndex = pkgIndex;
-                this.typIndex = typIndex;
-                this.funcList = funcList;
                 this.marked = marked;
-                this.posInfoFormat = posInfoFormat;
-                this.prevFile = prevFile;
-                this.prevLine = prevLine;
-                this.written = written;
-                this.indent = indent;
-                this.trace = trace;
             }
 
             // Enable comparisons between nil and exporter struct
@@ -88,7 +57,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static exporter exporter_cast(dynamic value)
         {
-            return new exporter(ref value.@out, value.strIndex, value.pathIndex, value.pkgIndex, value.typIndex, value.funcList, value.marked, value.posInfoFormat, value.prevFile, value.prevLine, value.written, value.indent, value.trace);
+            return new exporter(value.marked);
         }
     }
 }}}}

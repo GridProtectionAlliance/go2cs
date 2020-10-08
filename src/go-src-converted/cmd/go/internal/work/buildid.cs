@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2020 August 29 10:01:15 UTC
+// package work -- go2cs converted at 2020 October 08 04:34:44 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\buildid.go
 using bytes = go.bytes_package;
@@ -15,7 +15,6 @@ using strings = go.strings_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
 using str = go.cmd.go.@internal.str_package;
 using buildid = go.cmd.@internal.buildid_package;
 using static go.builtin;
@@ -99,7 +98,7 @@ namespace @internal
         // main cache, but at least at the start we will be using the content-based
         // staleness determination without a cache beyond the usual installed
         // package and binary locations.
-        private static readonly @string buildIDSeparator = "/";
+        private static readonly @string buildIDSeparator = (@string)"/";
 
         // actionID returns the action ID half of a build ID.
 
@@ -112,7 +111,9 @@ namespace @internal
             {
                 return buildID;
             }
+
             return buildID[..i];
+
         }
 
         // contentID returns the content ID half of a build ID.
@@ -136,9 +137,9 @@ namespace @internal
         {
             h = h.Clone();
 
-            const @string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+            const @string b64 = (@string)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-            const long chunks = 5L;
+            const long chunks = (long)5L;
 
             array<byte> dst = new array<byte>(chunks * 4L);
             for (long i = 0L; i < chunks; i++)
@@ -151,6 +152,7 @@ namespace @internal
             }
 
             return string(dst[..]);
+
         }
 
         // toolID returns the unique ID to use for the current copy of the
@@ -178,14 +180,16 @@ namespace @internal
         // which influences the action ID half of the build ID, is based on the content ID,
         // then the Linux compiler binary and Mac compiler binary will have different tool IDs
         // and therefore produce executables with different action IDs.
-        // To avoids this problem, for releases we use the release version string instead
+        // To avoid this problem, for releases we use the release version string instead
         // of the compiler binary's content hash. This assumes that all compilers built
         // on all different systems are semantically equivalent, which is of course only true
         // modulo bugs. (Producing the exact same executables also requires that the different
         // build setups agree on details like $GOROOT and file name paths, but at least the
         // tool IDs do not make it impossible.)
-        private static @string toolID(this ref Builder b, @string name)
+        private static @string toolID(this ptr<Builder> _addr_b, @string name)
         {
+            ref Builder b = ref _addr_b.val;
+
             b.id.Lock();
             var id = b.toolIDCache[name];
             b.id.Unlock();
@@ -194,48 +198,69 @@ namespace @internal
             {
                 return id;
             }
-            var cmdline = str.StringList(cfg.BuildToolexec, @base.Tool(name), "-V=full");
-            var cmd = exec.Command(cmdline[0L], cmdline[1L..]);
-            cmd.Env = @base.EnvForDir(cmd.Dir, os.Environ());
-            bytes.Buffer stdout = default;            bytes.Buffer stderr = default;
 
-            cmd.Stdout = ref stdout;
-            cmd.Stderr = ref stderr;
+            var path = @base.Tool(name);
+            @string desc = "go tool " + name; 
+
+            // Special case: undocumented -vettool overrides usual vet,
+            // for testing vet or supplying an alternative analysis tool.
+            if (name == "vet" && VetTool != "")
+            {
+                path = VetTool;
+                desc = VetTool;
+            }
+
+            var cmdline = str.StringList(cfg.BuildToolexec, path, "-V=full");
+            var cmd = exec.Command(cmdline[0L], cmdline[1L..]);
+            cmd.Env = @base.AppendPWD(os.Environ(), cmd.Dir);
+            ref bytes.Buffer stdout = ref heap(out ptr<bytes.Buffer> _addr_stdout);            ref bytes.Buffer stderr = ref heap(out ptr<bytes.Buffer> _addr_stderr);
+
+            _addr_cmd.Stdout = _addr_stdout;
+            cmd.Stdout = ref _addr_cmd.Stdout.val;
+            _addr_cmd.Stderr = _addr_stderr;
+            cmd.Stderr = ref _addr_cmd.Stderr.val;
             {
                 var err = cmd.Run();
 
                 if (err != null)
                 {
-                    @base.Fatalf("go tool %s: %v\n%s%s", name, err, stdout.Bytes(), stderr.Bytes());
+                    @base.Fatalf("%s: %v\n%s%s", desc, err, stdout.Bytes(), stderr.Bytes());
                 }
 
             }
 
+
             var line = stdout.String();
             var f = strings.Fields(line);
-            if (len(f) < 3L || f[0L] != name || f[1L] != "version" || f[2L] == "devel" && !strings.HasPrefix(f[len(f) - 1L], "buildID="))
+            if (len(f) < 3L || f[0L] != name && path != VetTool || f[1L] != "version" || f[2L] == "devel" && !strings.HasPrefix(f[len(f) - 1L], "buildID="))
             {
-                @base.Fatalf("go tool %s -V=full: unexpected output:\n\t%s", name, line);
+                @base.Fatalf("%s -V=full: unexpected output:\n\t%s", desc, line);
             }
+
             if (f[2L] == "devel")
             { 
                 // On the development branch, use the content ID part of the build ID.
                 id = contentID(f[len(f) - 1L]);
+
             }
             else
             { 
-                // For a release, the output is like: "compile version go1.9.1". Use the whole line.
-                id = f[2L];
+                // For a release, the output is like: "compile version go1.9.1 X:framepointer".
+                // Use the whole line.
+                id = strings.TrimSpace(line);
+
             }
+
             b.id.Lock();
             b.toolIDCache[name] = id;
             b.id.Unlock();
 
             return id;
+
         }
 
         // gccToolID returns the unique ID to use for a tool that is invoked
-        // by the GCC driver. This is in particular gccgo, but this can also
+        // by the GCC driver. This is used particularly for gccgo, but this can also
         // be used for gcc, g++, gfortran, etc.; those tools all use the GCC
         // driver under different names. The approach used here should also
         // work for sufficiently new versions of clang. Unlike toolID, the
@@ -249,8 +274,12 @@ namespace @internal
         // In order to get reproducible builds for released compilers, we
         // detect a released compiler by the absence of "experimental" in the
         // --version output, and in that case we just use the version string.
-        private static (@string, error) gccgoToolID(this ref Builder b, @string name, @string language)
+        private static (@string, error) gccgoToolID(this ptr<Builder> _addr_b, @string name, @string language)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref Builder b = ref _addr_b.val;
+
             var key = name + "." + language;
             b.id.Lock();
             var id = b.toolIDCache[key];
@@ -258,7 +287,7 @@ namespace @internal
 
             if (id != "")
             {
-                return (id, null);
+                return (id, error.As(null!)!);
             } 
 
             // Invoke the driver with -### to see the subcommands and the
@@ -266,12 +295,15 @@ namespace @internal
             // compile an empty file on standard input.
             var cmdline = str.StringList(cfg.BuildToolexec, name, "-###", "-x", language, "-c", "-");
             var cmd = exec.Command(cmdline[0L], cmdline[1L..]);
-            cmd.Env = @base.EnvForDir(cmd.Dir, os.Environ());
+            cmd.Env = @base.AppendPWD(os.Environ(), cmd.Dir); 
+            // Force untranslated output so that we see the string "version".
+            cmd.Env = append(cmd.Env, "LC_ALL=C");
             var (out, err) = cmd.CombinedOutput();
             if (err != null)
             {
-                return ("", fmt.Errorf("%s: %v; output: %q", name, err, out));
+                return ("", error.As(fmt.Errorf("%s: %v; output: %q", name, err, out))!);
             }
+
             @string version = "";
             var lines = strings.Split(string(out), "\n");
             {
@@ -294,6 +326,7 @@ namespace @internal
                         fields = fields__prev1;
 
                     }
+
                 }
 
                 line = line__prev1;
@@ -301,12 +334,14 @@ namespace @internal
 
             if (version == "")
             {
-                return ("", fmt.Errorf("%s: can not find version number in %q", name, out));
+                return ("", error.As(fmt.Errorf("%s: can not find version number in %q", name, out))!);
             }
+
             if (!strings.Contains(version, "experimental"))
             { 
                 // This is a release. Use this line as the tool ID.
                 id = version;
+
             }
             else
             { 
@@ -324,6 +359,7 @@ namespace @internal
                             compiler = line;
                             break;
                         }
+
                     }
 
                     line = line__prev1;
@@ -331,13 +367,15 @@ namespace @internal
 
                 if (compiler == "")
                 {
-                    return ("", fmt.Errorf("%s: can not find compilation command in %q", name, out));
+                    return ("", error.As(fmt.Errorf("%s: can not find compilation command in %q", name, out))!);
                 }
+
                 fields = strings.Fields(compiler);
                 if (len(fields) == 0L)
                 {
-                    return ("", fmt.Errorf("%s: compilation command confusion %q", name, out));
+                    return ("", error.As(fmt.Errorf("%s: compilation command confusion %q", name, out))!);
                 }
+
                 var exe = fields[0L];
                 if (!strings.ContainsAny(exe, "/\\"))
                 {
@@ -350,53 +388,113 @@ namespace @internal
                         }
 
                     }
+
                 }
+
+                id, err = buildid.ReadFile(exe);
+                if (err != null)
                 {
-                    var (_, err) = os.Stat(exe);
+                    return ("", error.As(err)!);
+                } 
 
-                    if (err != null)
-                    {
-                        return ("", fmt.Errorf("%s: can not find compiler %q: %v; output %q", name, exe, err, out));
-                    }
-
+                // If we can't find a build ID, use a hash.
+                if (id == "")
+                {
+                    id = b.fileHash(exe);
                 }
-                id = b.fileHash(exe);
+
             }
+
             b.id.Lock();
-            b.toolIDCache[name] = id;
+            b.toolIDCache[key] = id;
             b.id.Unlock();
 
-            return (id, null);
+            return (id, error.As(null!)!);
+
         }
 
-        // gccgoBuildIDELFFile creates an assembler file that records the
-        // action's build ID in an SHF_EXCLUDE section.
-        private static (@string, error) gccgoBuildIDELFFile(this ref Builder b, ref Action a)
+        // Check if assembler used by gccgo is GNU as.
+        private static bool assemblerIsGas()
         {
+            var cmd = exec.Command(BuildToolchain.compiler(), "-print-prog-name=as");
+            var (assembler, err) = cmd.Output();
+            if (err == null)
+            {
+                cmd = exec.Command(strings.TrimSpace(string(assembler)), "--version");
+                var (out, err) = cmd.Output();
+                return err == null && strings.Contains(string(out), "GNU");
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+        // gccgoBuildIDFile creates an assembler file that records the
+        // action's build ID in an SHF_EXCLUDE section for ELF files or
+        // in a CSECT in XCOFF files.
+        private static (@string, error) gccgoBuildIDFile(this ptr<Builder> _addr_b, ptr<Action> _addr_a)
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+
             var sfile = a.Objdir + "_buildid.s";
 
-            bytes.Buffer buf = default;
-            fmt.Fprintf(ref buf, "\t" + ".section .go.buildid,\"e\"" + "\n");
-            fmt.Fprintf(ref buf, "\t.byte ");
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            if (cfg.Goos == "aix")
+            {
+                fmt.Fprintf(_addr_buf, "\t.csect .go.buildid[XO]\n");
+            }
+            else if ((cfg.Goos != "solaris" && cfg.Goos != "illumos") || assemblerIsGas())
+            {
+                fmt.Fprintf(_addr_buf, "\t" + ".section .go.buildid,\"e\"" + "\n");
+            }
+            else if (cfg.Goarch == "sparc" || cfg.Goarch == "sparc64")
+            {
+                fmt.Fprintf(_addr_buf, "\t" + ".section \".go.buildid\",#exclude" + "\n");
+            }
+            else
+            { // cfg.Goarch == "386" || cfg.Goarch == "amd64"
+                fmt.Fprintf(_addr_buf, "\t" + ".section .go.buildid,#exclude" + "\n");
+
+            }
+
+            fmt.Fprintf(_addr_buf, "\t.byte ");
             for (long i = 0L; i < len(a.buildID); i++)
             {
                 if (i > 0L)
                 {
                     if (i % 8L == 0L)
                     {
-                        fmt.Fprintf(ref buf, "\n\t.byte ");
+                        fmt.Fprintf(_addr_buf, "\n\t.byte ");
                     }
                     else
                     {
-                        fmt.Fprintf(ref buf, ",");
+                        fmt.Fprintf(_addr_buf, ",");
                     }
+
                 }
-                fmt.Fprintf(ref buf, "%#02x", a.buildID[i]);
+
+                fmt.Fprintf(_addr_buf, "%#02x", a.buildID[i]);
+
             }
 
-            fmt.Fprintf(ref buf, "\n");
-            fmt.Fprintf(ref buf, "\t" + ".section .note.GNU-stack,\"\",@progbits" + "\n");
-            fmt.Fprintf(ref buf, "\t" + ".section .note.GNU-split-stack,\"\",@progbits" + "\n");
+            fmt.Fprintf(_addr_buf, "\n");
+            if (cfg.Goos != "solaris" && cfg.Goos != "illumos" && cfg.Goos != "aix")
+            {
+                @string secType = "@progbits";
+                if (cfg.Goarch == "arm")
+                {
+                    secType = "%progbits";
+                }
+
+                fmt.Fprintf(_addr_buf, "\t" + ".section .note.GNU-stack,\"\",%s" + "\n", secType);
+                fmt.Fprintf(_addr_buf, "\t" + ".section .note.GNU-split-stack,\"\",%s" + "\n", secType);
+
+            }
 
             if (cfg.BuildN || cfg.BuildX)
             {
@@ -406,26 +504,32 @@ namespace @internal
                 }
                 if (cfg.BuildN)
                 {
-                    return (sfile, null);
+                    return (sfile, error.As(null!)!);
                 }
+
             }
+
             {
                 var err = ioutil.WriteFile(sfile, buf.Bytes(), 0666L);
 
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 }
 
             }
 
-            return (sfile, null);
+
+            return (sfile, error.As(null!)!);
+
         }
 
         // buildID returns the build ID found in the given file.
         // If no build ID is found, buildID returns the content hash of the file.
-        private static @string buildID(this ref Builder b, @string file)
+        private static @string buildID(this ptr<Builder> _addr_b, @string file)
         {
+            ref Builder b = ref _addr_b.val;
+
             b.id.Lock();
             var id = b.buildIDCache[file];
             b.id.Unlock();
@@ -434,27 +538,34 @@ namespace @internal
             {
                 return id;
             }
+
             var (id, err) = buildid.ReadFile(file);
             if (err != null)
             {
                 id = b.fileHash(file);
             }
+
             b.id.Lock();
             b.buildIDCache[file] = id;
             b.id.Unlock();
 
             return id;
+
         }
 
         // fileHash returns the content hash of the named file.
-        private static @string fileHash(this ref Builder b, @string file)
+        private static @string fileHash(this ptr<Builder> _addr_b, @string file)
         {
+            ref Builder b = ref _addr_b.val;
+
             var (sum, err) = cache.FileHash(file);
             if (err != null)
             {
                 return "";
             }
+
             return hashToString(sum);
+
         }
 
         // useCache tries to satisfy the action a, which has action ID actionHash,
@@ -470,8 +581,11 @@ namespace @internal
         // during a's work. The caller should defer b.flushOutput(a), to make sure
         // that flushOutput is eventually called regardless of whether the action
         // succeeds. The flushOutput call must happen after updateBuildID.
-        private static bool useCache(this ref Builder b, ref Action a, ref load.Package p, cache.ActionID actionHash, @string target)
-        { 
+        private static bool useCache(this ptr<Builder> _addr_b, ptr<Action> _addr_a, cache.ActionID actionHash, @string target)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+ 
             // The second half of the build ID here is a placeholder for the content hash.
             // It's important that the overall buildID be unlikely verging on impossible
             // to appear in the output by chance, but that should be taken care of by
@@ -479,6 +593,11 @@ namespace @internal
             // engineered 96-bit partial SHA256 collision.
             a.actionID = actionHash;
             var actionID = hashToString(actionHash);
+            if (a.json != null)
+            {
+                a.json.ActionID = actionID;
+            }
+
             var contentID = actionID; // temporary placeholder, likely unique
             a.buildID = actionID + buildIDSeparator + contentID; 
 
@@ -495,25 +614,22 @@ namespace @internal
             @string buildID = default;
             if (target != "" && !cfg.BuildA)
             {
-                error err = default;
-                buildID, err = buildid.ReadFile(target);
-                if (err != null && b.ComputeStaleOnly)
-                {
-                    if (p != null && !p.Stale)
-                    {
-                        p.Stale = true;
-                        p.StaleReason = "target missing";
-                    }
-                    return true;
-                }
+                buildID, _ = buildid.ReadFile(target);
                 if (strings.HasPrefix(buildID, actionID + buildIDSeparator))
                 {
                     a.buildID = buildID;
+                    if (a.json != null)
+                    {
+                        a.json.BuildID = a.buildID;
+                    }
+
                     a.built = target; 
                     // Poison a.Target to catch uses later in the build.
                     a.Target = "DO NOT USE - " + a.Mode;
                     return true;
+
                 }
+
             } 
 
             // Special case for building a main package: if the only thing we
@@ -521,7 +637,7 @@ namespace @internal
             // already up-to-date, then to avoid a rebuild, report the package
             // as up-to-date as well. See "Build IDs" comment above.
             // TODO(rsc): Rewrite this code to use a TryCache func on the link action.
-            if (target != "" && !cfg.BuildA && a.Mode == "build" && len(a.triggers) == 1L && a.triggers[0L].Mode == "link")
+            if (target != "" && !cfg.BuildA && !b.NeedExport && a.Mode == "build" && len(a.triggers) == 1L && a.triggers[0L].Mode == "link")
             {
                 var (buildID, err) = buildid.ReadFile(target);
                 if (err == null)
@@ -544,15 +660,44 @@ namespace @internal
                         var linkID = hashToString(b.linkActionID(a.triggers[0L]));
                         if (id[0L] == linkID)
                         { 
+                            // Best effort attempt to display output from the compile and link steps.
+                            // If it doesn't work, it doesn't work: reusing the cached binary is more
+                            // important than reprinting diagnostic information.
+                            {
+                                var c__prev5 = c;
+
+                                var c = cache.Default();
+
+                                if (c != null)
+                                {
+                                    showStdout(_addr_b, _addr_c, a.actionID, "stdout"); // compile output
+                                    showStdout(_addr_b, _addr_c, a.actionID, "link-stdout"); // link output
+                                } 
+
+                                // Poison a.Target to catch uses later in the build.
+
+                                c = c__prev5;
+
+                            } 
+
                             // Poison a.Target to catch uses later in the build.
                             a.Target = "DO NOT USE - main build pseudo-cache Target";
                             a.built = "DO NOT USE - main build pseudo-cache built";
+                            if (a.json != null)
+                            {
+                                a.json.BuildID = a.buildID;
+                            }
+
                             return true;
+
                         } 
                         // Otherwise restore old build ID for main build.
                         a.buildID = oldBuildID;
+
                     }
+
                 }
+
             } 
 
             // Special case for linking a test binary: if the only thing we
@@ -561,15 +706,40 @@ namespace @internal
             // We avoid the nested build ID problem in the previous special case
             // by recording the test results in the cache under the action ID half.
             if (!cfg.BuildA && len(a.triggers) == 1L && a.triggers[0L].TryCache != null && a.triggers[0L].TryCache(b, a.triggers[0L]))
-            {
+            { 
+                // Best effort attempt to display output from the compile and link steps.
+                // If it doesn't work, it doesn't work: reusing the test result is more
+                // important than reprinting diagnostic information.
+                {
+                    var c__prev2 = c;
+
+                    c = cache.Default();
+
+                    if (c != null)
+                    {
+                        showStdout(_addr_b, _addr_c, a.Deps[0L].actionID, "stdout"); // compile output
+                        showStdout(_addr_b, _addr_c, a.Deps[0L].actionID, "link-stdout"); // link output
+                    } 
+
+                    // Poison a.Target to catch uses later in the build.
+
+                    c = c__prev2;
+
+                } 
+
+                // Poison a.Target to catch uses later in the build.
                 a.Target = "DO NOT USE -  pseudo-cache Target";
                 a.built = "DO NOT USE - pseudo-cache built";
                 return true;
+
             }
-            if (b.ComputeStaleOnly)
+
+            if (b.IsCmdList)
             { 
-                // Invoked during go list only to compute and record staleness.
+                // Invoked during go list to compute and record staleness.
                 {
+                    var p__prev2 = p;
+
                     var p = a.Package;
 
                     if (p != null && !p.Stale)
@@ -591,17 +761,31 @@ namespace @internal
                                         p.StaleReason = p1.StaleReason;
                                         break;
                                     }
+
                                     if (strings.HasPrefix(p.StaleReason, "build ID mismatch"))
                                     {
                                         p.StaleReason = "stale dependency: " + p1.ImportPath;
                                     }
-                                }
-                            }
-                        }
-                    }
 
-                }
-                return true;
+                                }
+
+                            }
+
+                        }
+
+                    } 
+
+                    // Fall through to update a.buildID from the build artifact cache,
+                    // which will affect the computation of buildIDs for targets
+                    // higher up in the dependency graph.
+
+                    p = p__prev2;
+
+                } 
+
+                // Fall through to update a.buildID from the build artifact cache,
+                // which will affect the computation of buildIDs for targets
+                // higher up in the dependency graph.
             } 
 
             // Check the build artifact cache.
@@ -609,55 +793,122 @@ namespace @internal
             // (in effect, "stale" means whether p.Target is up-to-date),
             // but we're still happy to use results from the build artifact cache.
             {
-                var c = cache.Default();
+                var c__prev1 = c;
+
+                c = cache.Default();
 
                 if (c != null)
                 {
                     if (!cfg.BuildA)
                     {
-                        var (entry, err) = c.Get(actionHash);
-                        if (err == null)
                         {
-                            var file = c.OutputFile(entry.OutputID);
-                            var (info, err1) = os.Stat(file);
-                            var (buildID, err2) = buildid.ReadFile(file);
-                            if (err1 == null && err2 == null && info.Size() == entry.Size)
+                            var (file, _, err) = c.GetFile(actionHash);
+
+                            if (err == null)
                             {
-                                var (stdout, stdoutEntry, err) = c.GetBytes(cache.Subkey(a.actionID, "stdout"));
-                                if (err == null)
                                 {
-                                    if (len(stdout) > 0L)
+                                    @string buildID__prev4 = buildID;
+
+                                    (buildID, err) = buildid.ReadFile(file);
+
+                                    if (err == null)
                                     {
-                                        if (cfg.BuildX || cfg.BuildN)
                                         {
-                                            b.Showcmd("", "%s  # internal", joinUnambiguously(str.StringList("cat", c.OutputFile(stdoutEntry.OutputID))));
+                                            var err = showStdout(_addr_b, _addr_c, a.actionID, "stdout");
+
+                                            if (err == null)
+                                            {
+                                                a.built = file;
+                                                a.Target = "DO NOT USE - using cache";
+                                                a.buildID = buildID;
+                                                if (a.json != null)
+                                                {
+                                                    a.json.BuildID = a.buildID;
+                                                }
+
+                                                {
+                                                    var p__prev6 = p;
+
+                                                    p = a.Package;
+
+                                                    if (p != null)
+                                                    { 
+                                                        // Clearer than explaining that something else is stale.
+                                                        p.StaleReason = "not installed but available in build cache";
+
+                                                    }
+
+                                                    p = p__prev6;
+
+                                                }
+
+                                                return true;
+
+                                            }
+
                                         }
-                                        if (!cfg.BuildN)
-                                        {
-                                            b.Print(string(stdout));
-                                        }
+
                                     }
-                                    a.built = file;
-                                    a.Target = "DO NOT USE - using cache";
-                                    a.buildID = buildID;
-                                    return true;
+
+                                    buildID = buildID__prev4;
+
                                 }
+
                             }
+
                         }
+
                     } 
 
                     // Begin saving output for later writing to cache.
                     a.output = new slice<byte>(new byte[] {  });
+
+                }
+
+                c = c__prev1;
+
+            }
+
+
+            return false;
+
+        }
+
+        private static error showStdout(ptr<Builder> _addr_b, ptr<cache.Cache> _addr_c, cache.ActionID actionID, @string key)
+        {
+            ref Builder b = ref _addr_b.val;
+            ref cache.Cache c = ref _addr_c.val;
+
+            var (stdout, stdoutEntry, err) = c.GetBytes(cache.Subkey(actionID, key));
+            if (err != null)
+            {
+                return error.As(err)!;
+            }
+
+            if (len(stdout) > 0L)
+            {
+                if (cfg.BuildX || cfg.BuildN)
+                {
+                    b.Showcmd("", "%s  # internal", joinUnambiguously(str.StringList("cat", c.OutputFile(stdoutEntry.OutputID))));
+                }
+
+                if (!cfg.BuildN)
+                {
+                    b.Print(string(stdout));
                 }
 
             }
 
-            return false;
+            return error.As(null!)!;
+
         }
 
         // flushOutput flushes the output being queued in a.
-        private static void flushOutput(this ref Builder b, ref Action a)
+        private static void flushOutput(this ptr<Builder> _addr_b, ptr<Action> _addr_a)
         {
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+
             b.Print(string(a.output));
             a.output = null;
         }
@@ -670,67 +921,128 @@ namespace @internal
         // in the binary.
         //
         // Keep in sync with src/cmd/buildid/buildid.go
-        private static error updateBuildID(this ref Builder _b, ref Action _a, @string target, bool rewrite) => func(_b, _a, (ref Builder b, ref Action a, Defer _, Panic panic, Recover __) =>
+        private static error updateBuildID(this ptr<Builder> _addr_b, ptr<Action> _addr_a, @string target, bool rewrite) => func((_, panic, __) =>
         {
+            ref Builder b = ref _addr_b.val;
+            ref Action a = ref _addr_a.val;
+
             if (cfg.BuildX || cfg.BuildN)
             {
                 if (rewrite)
                 {
                     b.Showcmd("", "%s # internal", joinUnambiguously(str.StringList(@base.Tool("buildid"), "-w", target)));
                 }
+
                 if (cfg.BuildN)
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
+            } 
+
+            // Cache output from compile/link, even if we don't do the rest.
+            {
+                var c__prev1 = c;
+
+                var c = cache.Default();
+
+                if (c != null)
+                {
+                    switch (a.Mode)
+                    {
+                        case "build": 
+                            c.PutBytes(cache.Subkey(a.actionID, "stdout"), a.output);
+                            break;
+                        case "link": 
+                            // Even though we don't cache the binary, cache the linker text output.
+                            // We might notice that an installed binary is up-to-date but still
+                            // want to pretend to have run the linker.
+                            // Store it under the main package's action ID
+                            // to make it easier to find when that's all we have.
+                            foreach (var (_, a1) in a.Deps)
+                            {
+                                {
+                                    var p1 = a1.Package;
+
+                                    if (p1 != null && p1.Name == "main")
+                                    {
+                                        c.PutBytes(cache.Subkey(a1.actionID, "link-stdout"), a.output);
+                                        break;
+                                    }
+
+                                }
+
+                            }
+                            break;
+                    }
+
+                } 
+
+                // Find occurrences of old ID and compute new content-based ID.
+
+                c = c__prev1;
+
             } 
 
             // Find occurrences of old ID and compute new content-based ID.
             var (r, err) = os.Open(target);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var (matches, hash, err) = buildid.FindAndHash(r, a.buildID, 0L);
             r.Close();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var newID = a.buildID[..strings.LastIndex(a.buildID, buildIDSeparator)] + buildIDSeparator + hashToString(hash);
             if (len(newID) != len(a.buildID))
             {
-                return error.As(fmt.Errorf("internal error: build ID length mismatch %q vs %q", a.buildID, newID));
+                return error.As(fmt.Errorf("internal error: build ID length mismatch %q vs %q", a.buildID, newID))!;
             } 
 
             // Replace with new content-based ID.
             a.buildID = newID;
+            if (a.json != null)
+            {
+                a.json.BuildID = a.buildID;
+            }
+
             if (len(matches) == 0L)
             { 
                 // Assume the user specified -buildid= to override what we were going to choose.
-                return error.As(null);
+                return error.As(null!)!;
+
             }
+
             if (rewrite)
             {
                 var (w, err) = os.OpenFile(target, os.O_WRONLY, 0L);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 err = buildid.Rewrite(w, matches, newID);
                 if (err != null)
                 {
                     w.Close();
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 {
                     var err = w.Close();
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             } 
 
             // Cache package builds, but not binaries (link steps).
@@ -747,7 +1059,9 @@ namespace @internal
             // and then executing it, so we will need to defend against
             // ETXTBSY problems as discussed in exec.go and golang.org/issue/22220.
             {
-                var c = cache.Default();
+                var c__prev1 = c;
+
+                c = cache.Default();
 
                 if (c != null && a.Mode == "build")
                 {
@@ -758,19 +1072,36 @@ namespace @internal
                         {
                             panic("internal error: a.output not set");
                         }
+
                         var (outputID, _, err) = c.Put(a.actionID, r);
+                        r.Close();
                         if (err == null && cfg.BuildX)
                         {
                             b.Showcmd("", "%s # internal", joinUnambiguously(str.StringList("cp", target, c.OutputFile(outputID))));
                         }
-                        c.PutBytes(cache.Subkey(a.actionID, "stdout"), a.output);
-                        r.Close();
+
+                        if (b.NeedExport)
+                        {
+                            if (err != null)
+                            {
+                                return error.As(err)!;
+                            }
+
+                            a.Package.Export = c.OutputFile(outputID);
+
+                        }
+
                     }
+
                 }
+
+                c = c__prev1;
 
             }
 
-            return error.As(null);
+
+            return error.As(null!)!;
+
         });
     }
 }}}}

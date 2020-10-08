@@ -1,10 +1,10 @@
-// DO NOT EDIT; AUTO-GENERATED from sort.go using genzfunc.go
+// Code generated from sort.go using genzfunc.go; DO NOT EDIT.
 
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sort -- go2cs converted at 2020 August 29 08:21:46 UTC
+// package sort -- go2cs converted at 2020 October 08 03:44:13 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Go\src\sort\zfuncversion.go
 
@@ -23,7 +23,9 @@ namespace go
                 {
                     data.Swap(j, j - 1L);
                 }
+
             }
+
         }
 
         // Auto-generated variant of sort.go:siftDown
@@ -37,17 +39,22 @@ namespace go
                 {
                     break;
                 }
+
                 if (child + 1L < hi && data.Less(first + child, first + child + 1L))
                 {
                     child++;
                 }
+
                 if (!data.Less(first + root, first + child))
                 {
-                    return;
+                    return ;
                 }
+
                 data.Swap(first + root, first + child);
                 root = child;
+
             }
+
 
         }
 
@@ -80,6 +87,7 @@ namespace go
 
                 i = i__prev1;
             }
+
         }
 
         // Auto-generated variant of sort.go:medianOfThree
@@ -89,6 +97,7 @@ namespace go
             {
                 data.Swap(m1, m0);
             }
+
             if (data.Less(m2, m1))
             {
                 data.Swap(m2, m1);
@@ -96,7 +105,9 @@ namespace go
                 {
                     data.Swap(m1, m0);
                 }
+
             }
+
         }
 
         // Auto-generated variant of sort.go:swapRange
@@ -107,11 +118,15 @@ namespace go
                 data.Swap(a + i, b + i);
             }
 
+
         }
 
         // Auto-generated variant of sort.go:doPivot
         private static (long, long) doPivot_func(lessSwap data, long lo, long hi)
         {
+            long midlo = default;
+            long midhi = default;
+
             var m = int(uint(lo + hi) >> (int)(1L));
             if (hi - lo > 40L)
             {
@@ -120,6 +135,7 @@ namespace go
                 medianOfThree_func(data, m, m - s, m + s);
                 medianOfThree_func(data, hi - 1L, hi - 1L - s, hi - 1L - 2L * s);
             }
+
             medianOfThree_func(data, lo, m, hi - 1L);
             var pivot = lo;
             var a = lo + 1L;
@@ -146,9 +162,11 @@ namespace go
                 {
                     break;
                 }
+
                 data.Swap(b, c - 1L);
                 b++;
                 c--;
+
             }
 
             var protect = hi - c < 5L;
@@ -161,19 +179,24 @@ namespace go
                     c++;
                     dups++;
                 }
+
                 if (!data.Less(b - 1L, pivot))
                 {
                     b--;
                     dups++;
                 }
+
                 if (!data.Less(m, pivot))
                 {
                     data.Swap(m, b - 1L);
                     b--;
                     dups++;
                 }
+
                 protect = dups > 1L;
+
             }
+
             if (protect)
             {
                 while (true)
@@ -192,14 +215,19 @@ namespace go
                     {
                         break;
                     }
+
                     data.Swap(a, b - 1L);
                     a++;
                     b--;
+
                 }
 
+
             }
+
             data.Swap(pivot, b - 1L);
             return (b - 1L, c);
+
         }
 
         // Auto-generated variant of sort.go:quickSort
@@ -210,8 +238,9 @@ namespace go
                 if (maxDepth == 0L)
                 {
                     heapSort_func(data, a, b);
-                    return;
+                    return ;
                 }
+
                 maxDepth--;
                 var (mlo, mhi) = doPivot_func(data, a, b);
                 if (mlo - a < b - mhi)
@@ -224,6 +253,7 @@ namespace go
                     quickSort_func(data, mhi, b, maxDepth);
                     b = mlo;
                 }
+
             }
 
             if (b - a > 1L)
@@ -234,10 +264,13 @@ namespace go
                     {
                         data.Swap(i, i - 6L);
                     }
+
                 }
 
                 insertionSort_func(data, a, b);
+
             }
+
         }
 
         // Auto-generated variant of sort.go:stable
@@ -274,8 +307,11 @@ namespace go
                     }
 
                 }
+
                 blockSize *= 2L;
+
             }
+
 
         }
 
@@ -297,6 +333,7 @@ namespace go
                     {
                         j = h;
                     }
+
                 }
 
                 {
@@ -310,8 +347,10 @@ namespace go
 
                     k = k__prev1;
                 }
-                return;
+                return ;
+
             }
+
             if (b - m == 1L)
             {
                 i = a;
@@ -327,6 +366,7 @@ namespace go
                     {
                         j = h;
                     }
+
                 }
 
                 {
@@ -340,8 +380,10 @@ namespace go
 
                     k = k__prev1;
                 }
-                return;
+                return ;
+
             }
+
             var mid = int(uint(a + b) >> (int)(1L));
             var n = mid + m;
             long start = default;            long r = default;
@@ -356,6 +398,7 @@ namespace go
                 start = a;
                 r = m;
             }
+
             var p = n - 1L;
             while (start < r)
             {
@@ -368,6 +411,7 @@ namespace go
                 {
                     r = c;
                 }
+
             }
 
             var end = n - start;
@@ -375,14 +419,17 @@ namespace go
             {
                 rotate_func(data, start, m, end);
             }
+
             if (a < start && start < mid)
             {
                 symMerge_func(data, a, start, mid);
             }
+
             if (mid < end && end < b)
             {
                 symMerge_func(data, mid, end, b);
             }
+
         }
 
         // Auto-generated variant of sort.go:rotate
@@ -402,9 +449,11 @@ namespace go
                     swapRange_func(data, m - i, m + j - i, i);
                     j -= i;
                 }
+
             }
 
             swapRange_func(data, m - i, m, i);
+
         }
     }
 }

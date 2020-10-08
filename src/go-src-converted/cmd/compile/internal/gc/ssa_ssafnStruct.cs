@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:12 UTC
+//     Generated on 2020 October 08 04:31:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,15 +13,17 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using html = go.html_package;
 using os = go.os_package;
 using sort = go.sort_package;
+using bufio = go.bufio_package;
+using bytes = go.bytes_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using x86 = go.cmd.@internal.obj.x86_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
@@ -41,15 +43,17 @@ namespace @internal
             public ssafn(NilType _)
             {
                 this.curfn = default;
+                this.strings = default;
                 this.scratchFpMem = default;
                 this.stksize = default;
                 this.stkptrsize = default;
                 this.log = default;
             }
 
-            public ssafn(ref ptr<Node> curfn = default, ref ptr<Node> scratchFpMem = default, long stksize = default, long stkptrsize = default, bool log = default)
+            public ssafn(ref ptr<Node> curfn = default, map<@string, ptr<obj.LSym>> strings = default, ref ptr<Node> scratchFpMem = default, long stksize = default, long stkptrsize = default, bool log = default)
             {
                 this.curfn = curfn;
+                this.strings = strings;
                 this.scratchFpMem = scratchFpMem;
                 this.stksize = stksize;
                 this.stkptrsize = stkptrsize;
@@ -76,7 +80,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static ssafn ssafn_cast(dynamic value)
         {
-            return new ssafn(ref value.curfn, ref value.scratchFpMem, value.stksize, value.stkptrsize, value.log);
+            return new ssafn(ref value.curfn, value.strings, ref value.scratchFpMem, value.stksize, value.stkptrsize, value.log);
         }
     }
 }}}}

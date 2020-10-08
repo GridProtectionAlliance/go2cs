@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:10 UTC
+//     Generated on 2020 October 08 03:41:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -45,7 +45,7 @@ namespace http
                 this.requests = default;
             }
 
-            public child(ref ptr<conn> conn = default, http.Handler handler = default, sync.Mutex mu = default, map<ushort, ref request> requests = default)
+            public child(ref ptr<conn> conn = default, http.Handler handler = default, sync.Mutex mu = default, map<ushort, ptr<request>> requests = default)
             {
                 this.conn = conn;
                 this.handler = handler;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gccgoimporter -- go2cs converted at 2020 August 29 10:09:04 UTC
+// package gccgoimporter -- go2cs converted at 2020 October 08 04:56:12 UTC
 // import "go/internal/gccgoimporter" ==> using gccgoimporter = go.go.@internal.gccgoimporter_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\gccgoinstallation.go
 using bufio = go.bufio_package;
@@ -28,19 +28,27 @@ namespace @internal
         }
 
         // Ask the driver at the given path for information for this GccgoInstallation.
-        private static error InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath)
+        // The given arguments are passed directly to the call of the driver.
+        private static error InitFromDriver(this ptr<GccgoInstallation> _addr_inst, @string gccgoPath, params @string[] args)
         {
-            var cmd = exec.Command(gccgoPath, "-###", "-S", "-x", "go", "-");
+            error err = default!;
+            args = args.Clone();
+            ref GccgoInstallation inst = ref _addr_inst.val;
+
+            var argv = append(new slice<@string>(new @string[] { "-###", "-S", "-x", "go", "-" }), args);
+            var cmd = exec.Command(gccgoPath, argv);
             var (stderr, err) = cmd.StderrPipe();
             if (err != null)
             {
-                return;
+                return ;
             }
+
             err = cmd.Start();
             if (err != null)
             {
-                return;
+                return ;
             }
+
             var scanner = bufio.NewScanner(stderr);
             while (scanner.Scan())
             {
@@ -56,23 +64,31 @@ namespace @internal
                         {
                             inst.LibPaths = append(inst.LibPaths, arg[2L..]);
                         }
+
                     }
-                            }
+                
+            }
 
 
-            var (stdout, err) = exec.Command(gccgoPath, "-dumpversion").Output();
+            argv = append(new slice<@string>(new @string[] { "-dumpversion" }), args);
+            var (stdout, err) = exec.Command(gccgoPath, argv).Output();
             if (err != null)
             {
-                return;
+                return ;
             }
+
             inst.GccVersion = strings.TrimSpace(string(stdout));
 
-            return;
+            return ;
+
         }
 
         // Return the list of export search paths for this GccgoInstallation.
-        private static slice<@string> SearchPaths(this ref GccgoInstallation inst)
+        private static slice<@string> SearchPaths(this ptr<GccgoInstallation> _addr_inst)
         {
+            slice<@string> paths = default;
+            ref GccgoInstallation inst = ref _addr_inst.val;
+
             foreach (var (_, lpath) in inst.LibPaths)
             {
                 var spath = filepath.Join(lpath, "go", inst.GccVersion);
@@ -81,6 +97,7 @@ namespace @internal
                 {
                     continue;
                 }
+
                 paths = append(paths, spath);
 
                 spath = filepath.Join(spath, inst.TargetTriple);
@@ -89,17 +106,22 @@ namespace @internal
                 {
                     continue;
                 }
+
                 paths = append(paths, spath);
+
             }
             paths = append(paths, inst.LibPaths);
 
-            return;
+            return ;
+
         }
 
         // Return an importer that searches incpaths followed by the gcc installation's
         // built-in search paths and the current directory.
-        private static Importer GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ref types.Package, InitData> initmap)
+        private static Importer GetImporter(this ptr<GccgoInstallation> _addr_inst, slice<@string> incpaths, map<ptr<types.Package>, InitData> initmap)
         {
+            ref GccgoInstallation inst = ref _addr_inst.val;
+
             return GetImporter(append(append(incpaths, inst.SearchPaths()), "."), initmap);
         }
     }

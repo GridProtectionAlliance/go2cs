@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:04 UTC
+//     Generated on 2020 October 08 03:37:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,16 +13,20 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
 using list = go.container.list_package;
 using crypto = go.crypto_package;
-using cipherhw = go.crypto.@internal.cipherhw_package;
+using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
+using elliptic = go.crypto.elliptic_package;
 using rand = go.crypto.rand_package;
+using rsa = go.crypto.rsa_package;
 using sha512 = go.crypto.sha512_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using cpu = go.@internal.cpu_package;
 using io = go.io_package;
-using big = go.math.big_package;
 using net = go.net_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -42,15 +46,17 @@ namespace crypto
             {
                 this.Certificate = default;
                 this.PrivateKey = default;
+                this.SupportedSignatureAlgorithms = default;
                 this.OCSPStaple = default;
                 this.SignedCertificateTimestamps = default;
                 this.Leaf = default;
             }
 
-            public Certificate(slice<slice<byte>> Certificate = default, crypto.PrivateKey PrivateKey = default, slice<byte> OCSPStaple = default, slice<slice<byte>> SignedCertificateTimestamps = default, ref ptr<x509.Certificate> Leaf = default)
+            public Certificate(slice<slice<byte>> Certificate = default, crypto.PrivateKey PrivateKey = default, slice<SignatureScheme> SupportedSignatureAlgorithms = default, slice<byte> OCSPStaple = default, slice<slice<byte>> SignedCertificateTimestamps = default, ref ptr<x509.Certificate> Leaf = default)
             {
                 this.Certificate = Certificate;
                 this.PrivateKey = PrivateKey;
+                this.SupportedSignatureAlgorithms = SupportedSignatureAlgorithms;
                 this.OCSPStaple = OCSPStaple;
                 this.SignedCertificateTimestamps = SignedCertificateTimestamps;
                 this.Leaf = Leaf;
@@ -76,7 +82,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Certificate Certificate_cast(dynamic value)
         {
-            return new Certificate(value.Certificate, value.PrivateKey, value.OCSPStaple, value.SignedCertificateTimestamps, ref value.Leaf);
+            return new Certificate(value.Certificate, value.PrivateKey, value.SupportedSignatureAlgorithms, value.OCSPStaple, value.SignedCertificateTimestamps, ref value.Leaf);
         }
     }
 }}

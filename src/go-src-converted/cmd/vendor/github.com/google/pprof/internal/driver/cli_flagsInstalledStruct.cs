@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:15 UTC
+//     Generated on 2020 October 08 04:42:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using errors = go.errors_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
 using strings = go.strings_package;
@@ -42,7 +43,7 @@ namespace @internal
                 this.strings = default;
             }
 
-            public flagsInstalled(map<@string, ref long> ints = default, map<@string, ref bool> bools = default, map<@string, ref double> floats = default, map<@string, ref @string> strings = default)
+            public flagsInstalled(map<@string, ptr<long>> ints = default, map<@string, ptr<bool>> bools = default, map<@string, ptr<double>> floats = default, map<@string, ptr<@string>> strings = default)
             {
                 this.ints = ints;
                 this.bools = bools;

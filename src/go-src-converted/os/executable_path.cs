@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build openbsd
+// +build aix openbsd
 
-// package os -- go2cs converted at 2020 August 29 08:43:42 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:26 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\executable_path.go
 
@@ -21,16 +21,21 @@ namespace go
 
         private static (@string, error) executable()
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             @string exePath = default;
             if (len(Args) == 0L || Args[0L] == "")
             {
-                return ("", ErrNotExist);
+                return ("", error.As(ErrNotExist)!);
             }
+
             if (IsPathSeparator(Args[0L][0L]))
             { 
                 // Args[0] is an absolute path, so it is the executable.
                 // Note that we only need to worry about Unix paths here.
                 exePath = Args[0L];
+
             }
             else
             {
@@ -42,14 +47,19 @@ namespace go
                         // initial working directory.
                         if (errWd != null)
                         {
-                            return ("", errWd);
+                            return ("", error.As(errWd)!);
                         }
+
                         exePath = initWd + string(PathSeparator) + Args[0L];
                         break;
+
                     }
+
                 }
 
+
             }
+
             if (exePath != "")
             {
                 {
@@ -57,11 +67,13 @@ namespace go
 
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     }
 
                 }
-                return (exePath, null);
+
+                return (exePath, error.As(null!)!);
+
             } 
             // Search for executable in $PATH.
             foreach (var (_, dir) in splitPathList(Getenv("PATH")))
@@ -70,22 +82,28 @@ namespace go
                 {
                     dir = ".";
                 }
+
                 if (!IsPathSeparator(dir[0L]))
                 {
                     if (errWd != null)
                     {
-                        return ("", errWd);
+                        return ("", error.As(errWd)!);
                     }
+
                     dir = initWd + string(PathSeparator) + dir;
+
                 }
+
                 exePath = dir + string(PathSeparator) + Args[0L];
 
                 if (isExecutable(exePath) == null) 
-                    return (exePath, null);
+                    return (exePath, error.As(null!)!);
                 else if (isExecutable(exePath) == ErrPermission) 
-                    return ("", ErrPermission);
-                            }
-            return ("", ErrNotExist);
+                    return ("", error.As(ErrPermission)!);
+                
+            }
+            return ("", error.As(ErrNotExist)!);
+
         }
 
         // isExecutable returns an error if a given file is not an executable.
@@ -94,18 +112,22 @@ namespace go
             var (stat, err) = Stat(path);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var mode = stat.Mode();
             if (!mode.IsRegular())
             {
-                return error.As(ErrPermission);
+                return error.As(ErrPermission)!;
             }
+
             if ((mode & 0111L) == 0L)
             {
-                return error.As(ErrPermission);
+                return error.As(ErrPermission)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // splitPathList splits a path list.
@@ -116,6 +138,7 @@ namespace go
             {
                 return null;
             }
+
             long n = 1L;
             {
                 long i__prev1 = i;
@@ -126,6 +149,7 @@ namespace go
                     {
                         n++;
                     }
+
                 }
 
 
@@ -145,6 +169,7 @@ namespace go
                         na++;
                         start = i + 1L;
                     }
+
                 }
 
 
@@ -152,6 +177,7 @@ namespace go
             }
             a[na] = pathList[start..];
             return a[..na + 1L];
+
         }
     }
 }

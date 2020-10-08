@@ -8,7 +8,7 @@
 // better done via channels and communication.
 //
 // Values containing the types defined in this package should not be copied.
-// package sync -- go2cs converted at 2020 August 29 08:16:24 UTC
+// package sync -- go2cs converted at 2020 October 08 00:34:03 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\mutex.go
 using race = go.@internal.race_package;
@@ -40,9 +40,9 @@ namespace go
             void Unlock();
         }
 
-        private static readonly long mutexLocked = 1L << (int)(iota); // mutex is locked
-        private static readonly var mutexWoken = 0;
-        private static readonly mutexWaiterShift mutexStarving = iota; 
+        private static readonly long mutexLocked = (long)1L << (int)(iota); // mutex is locked
+        private static readonly var mutexWoken = (var)0;
+        private static readonly mutexWaiterShift mutexStarving = (mutexWaiterShift)iota; 
 
         // Mutex fairness.
         //
@@ -68,22 +68,36 @@ namespace go
         // Normal mode has considerably better performance as a goroutine can acquire
         // a mutex several times in a row even if there are blocked waiters.
         // Starvation mode is important to prevent pathological cases of tail latency.
-        private static readonly float starvationThresholdNs = 1e6F;
+        private static readonly float starvationThresholdNs = (float)1e6F;
+
 
         // Lock locks m.
         // If the lock is already in use, the calling goroutine
         // blocks until the mutex is available.
-        private static void Lock(this ref Mutex m)
-        {>>MARKER:FUNCTION_@throw_BLOCK_PREFIX<< 
+        private static void Lock(this ptr<Mutex> _addr_m)
+        {
+            ref Mutex m = ref _addr_m.val;
+ 
             // Fast path: grab unlocked mutex.
-            if (atomic.CompareAndSwapInt32(ref m.state, 0L, mutexLocked))
-            {
+            if (atomic.CompareAndSwapInt32(_addr_m.state, 0L, mutexLocked))
+            {>>MARKER:FUNCTION_@throw_BLOCK_PREFIX<<
                 if (race.Enabled)
                 {
                     race.Acquire(@unsafe.Pointer(m));
                 }
-                return;
-            }
+
+                return ;
+
+            } 
+            // Slow path (outlined so that the fast path can be inlined)
+            m.lockSlow();
+
+        }
+
+        private static void lockSlow(this ptr<Mutex> _addr_m)
+        {
+            ref Mutex m = ref _addr_m.val;
+
             long waitStartTime = default;
             var starving = false;
             var awoke = false;
@@ -98,21 +112,25 @@ namespace go
                     // Active spinning makes sense.
                     // Try to set mutexWoken flag to inform Unlock
                     // to not wake other blocked goroutines.
-                    if (!awoke && old & mutexWoken == 0L && old >> (int)(mutexWaiterShift) != 0L && atomic.CompareAndSwapInt32(ref m.state, old, old | mutexWoken))
+                    if (!awoke && old & mutexWoken == 0L && old >> (int)(mutexWaiterShift) != 0L && atomic.CompareAndSwapInt32(_addr_m.state, old, old | mutexWoken))
                     {
                         awoke = true;
                     }
+
                     runtime_doSpin();
                     iter++;
                     old = m.state;
                     continue;
+
                 }
+
                 var @new = old; 
                 // Don't try to acquire starving mutex, new arriving goroutines must queue.
                 if (old & mutexStarving == 0L)
                 {
                     new |= mutexLocked;
                 }
+
                 if (old & (mutexLocked | mutexStarving) != 0L)
                 {
                     new += 1L << (int)(mutexWaiterShift);
@@ -125,6 +143,7 @@ namespace go
                 {
                     new |= mutexStarving;
                 }
+
                 if (awoke)
                 { 
                     // The goroutine has been woken from sleep,
@@ -133,9 +152,12 @@ namespace go
                     {
                         throw("sync: inconsistent mutex state");
                     }
+
                     new &= mutexWoken;
+
                 }
-                if (atomic.CompareAndSwapInt32(ref m.state, old, new))
+
+                if (atomic.CompareAndSwapInt32(_addr_m.state, old, new))
                 {
                     if (old & (mutexLocked | mutexStarving) == 0L)
                     {
@@ -147,7 +169,8 @@ namespace go
                     {
                         waitStartTime = runtime_nanotime();
                     }
-                    runtime_SemacquireMutex(ref m.sema, queueLifo);
+
+                    runtime_SemacquireMutex(_addr_m.sema, queueLifo, 1L);
                     starving = starving || runtime_nanotime() - waitStartTime > starvationThresholdNs;
                     old = m.state;
                     if (old & mutexStarving != 0L)
@@ -160,6 +183,7 @@ namespace go
                         {
                             throw("sync: inconsistent mutex state");
                         }
+
                         var delta = int32(mutexLocked - 1L << (int)(mutexWaiterShift));
                         if (!starving || old >> (int)(mutexWaiterShift) == 1L)
                         { 
@@ -169,17 +193,23 @@ namespace go
                             // can go lock-step infinitely once they switch mutex
                             // to starvation mode.
                             delta -= mutexStarving;
+
                         }
-                        atomic.AddInt32(ref m.state, delta);
+
+                        atomic.AddInt32(_addr_m.state, delta);
                         break;
+
                     }
+
                     awoke = true;
                     iter = 0L;
+
                 }
                 else
                 {
                     old = m.state;
                 }
+
             }
 
 
@@ -187,6 +217,7 @@ namespace go
             {
                 race.Acquire(@unsafe.Pointer(m));
             }
+
         }
 
         // Unlock unlocks m.
@@ -195,8 +226,10 @@ namespace go
         // A locked Mutex is not associated with a particular goroutine.
         // It is allowed for one goroutine to lock a Mutex and then
         // arrange for another goroutine to unlock it.
-        private static void Unlock(this ref Mutex m)
+        private static void Unlock(this ptr<Mutex> _addr_m)
         {
+            ref Mutex m = ref _addr_m.val;
+
             if (race.Enabled)
             {
                 _ = m.state;
@@ -204,11 +237,26 @@ namespace go
             } 
 
             // Fast path: drop lock bit.
-            var @new = atomic.AddInt32(ref m.state, -mutexLocked);
+            var @new = atomic.AddInt32(_addr_m.state, -mutexLocked);
+            if (new != 0L)
+            { 
+                // Outlined slow path to allow inlining the fast path.
+                // To hide unlockSlow during tracing we skip one extra frame when tracing GoUnblock.
+                m.unlockSlow(new);
+
+            }
+
+        }
+
+        private static void unlockSlow(this ptr<Mutex> _addr_m, int @new)
+        {
+            ref Mutex m = ref _addr_m.val;
+
             if ((new + mutexLocked) & mutexLocked == 0L)
             {
                 throw("sync: unlock of unlocked mutex");
             }
+
             if (new & mutexStarving == 0L)
             {
                 var old = new;
@@ -222,26 +270,32 @@ namespace go
                     // So get off the way.
                     if (old >> (int)(mutexWaiterShift) == 0L || old & (mutexLocked | mutexWoken | mutexStarving) != 0L)
                     {
-                        return;
+                        return ;
                     } 
                     // Grab the right to wake someone.
                     new = (old - 1L << (int)(mutexWaiterShift)) | mutexWoken;
-                    if (atomic.CompareAndSwapInt32(ref m.state, old, new))
+                    if (atomic.CompareAndSwapInt32(_addr_m.state, old, new))
                     {
-                        runtime_Semrelease(ref m.sema, false);
-                        return;
+                        runtime_Semrelease(_addr_m.sema, false, 1L);
+                        return ;
                     }
+
                     old = m.state;
+
                 }
             else
 
+
             }            { 
-                // Starving mode: handoff mutex ownership to the next waiter.
+                // Starving mode: handoff mutex ownership to the next waiter, and yield
+                // our time slice so that the next waiter can start to run immediately.
                 // Note: mutexLocked is not set, the waiter will set it after wakeup.
                 // But mutex is still considered locked if mutexStarving is set,
                 // so new coming goroutines won't acquire it.
-                runtime_Semrelease(ref m.sema, true);
+                runtime_Semrelease(_addr_m.sema, true, 1L);
+
             }
+
         }
     }
 }

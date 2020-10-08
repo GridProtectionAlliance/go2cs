@@ -4,7 +4,7 @@
 
 // Memory statistics
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:32 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:32 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mstats.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -31,47 +31,38 @@ namespace go
             public ulong alloc; // bytes allocated and not yet freed
             public ulong total_alloc; // bytes allocated (even if freed)
             public ulong sys; // bytes obtained from system (should be sum of xxx_sys below, no locking, approximate)
-            public ulong nlookup; // number of pointer lookups
+            public ulong nlookup; // number of pointer lookups (unused)
             public ulong nmalloc; // number of mallocs
             public ulong nfree; // number of frees
 
 // Statistics about malloc heap.
-// Protected by mheap.lock
+// Updated atomically, or with the world stopped.
 //
 // Like MemStats, heap_sys and heap_inuse do not count memory
 // in manually-managed spans.
             public ulong heap_alloc; // bytes allocated and not yet freed (same as alloc above)
             public ulong heap_sys; // virtual address space obtained from system for GC'd heap
             public ulong heap_idle; // bytes in idle spans
-            public ulong heap_inuse; // bytes in _MSpanInUse spans
+            public ulong heap_inuse; // bytes in mSpanInUse spans
             public ulong heap_released; // bytes released to the os
-            public ulong heap_objects; // total number of allocated objects
 
-// TODO(austin): heap_released is both useless and inaccurate
-// in its current form. It's useless because, from the user's
-// and OS's perspectives, there's no difference between a page
-// that has not yet been faulted in and a page that has been
-// released back to the OS. We could fix this by considering
-// newly mapped spans to be "released". It's inaccurate
-// because when we split a large span for allocation, we
-// "unrelease" all pages in the large span and not just the
-// ones we split off for use. This is trickier to fix because
-// we currently don't know which pages of a span we've
-// released. We could fix it by separating "free" and
-// "released" spans, but then we have to allocate from runs of
-// free and released spans.
+// heap_objects is not used by the runtime directly and instead
+// computed on the fly by updatememstats.
+            public ulong heap_objects; // total number of allocated objects
 
 // Statistics about allocation of low-level fixed-size structures.
 // Protected by FixAlloc locks.
-            public ulong stacks_inuse; // bytes in manually-managed stack spans
+            public ulong stacks_inuse; // bytes in manually-managed stack spans; updated atomically or during STW
             public ulong stacks_sys; // only counts newosproc0 stack in mstats; differs from MemStats.StackSys
             public ulong mspan_inuse; // mspan structures
             public ulong mspan_sys;
             public ulong mcache_inuse; // mcache structures
             public ulong mcache_sys;
             public ulong buckhash_sys; // profiling bucket hash table
-            public ulong gc_sys;
-            public ulong other_sys; // Statistics about garbage collector.
+            public ulong gc_sys; // updated atomically or during STW
+            public ulong other_sys; // updated atomically or during STW
+
+// Statistics about garbage collector.
 // Protected by mheap or stopping the world during GC.
             public ulong next_gc; // goal heap_live for when next GC ends; ^0 if disabled
             public ulong last_gc_unix; // last gc (in unix time)
@@ -86,6 +77,8 @@ namespace go
 
             public ulong last_gc_nanotime; // last gc (monotonic time)
             public ulong tinyallocs; // number of tiny allocations that didn't cause actual allocation; not exported to go directly
+            public ulong last_next_gc; // next_gc for the previous GC
+            public ulong last_heap_inuse; // heap_inuse at mark termination of the previous GC
 
 // triggerRatio is the heap growth ratio that triggers marking.
 //
@@ -347,11 +340,13 @@ namespace go
                 println(sizeof_C_MStats, @unsafe.Sizeof(memStats));
                 throw("MStats vs MemStatsType size mismatch");
             }
+
             if (@unsafe.Offsetof(memstats.heap_live) % 8L != 0L)
             {
                 println(@unsafe.Offsetof(memstats.heap_live));
                 throw("memstats.heap_live not aligned to 8 bytes");
             }
+
         }
 
         // ReadMemStats populates m with memory allocator statistics.
@@ -360,44 +355,58 @@ namespace go
         // call to ReadMemStats. This is in contrast with a heap profile,
         // which is a snapshot as of the most recently completed garbage
         // collection cycle.
-        public static void ReadMemStats(ref MemStats m)
+        public static void ReadMemStats(ptr<MemStats> _addr_m)
         {
+            ref MemStats m = ref _addr_m.val;
+
             stopTheWorld("read mem stats");
 
             systemstack(() =>
             {
-                readmemstats_m(m);
+                readmemstats_m(_addr_m);
             });
 
             startTheWorld();
+
         }
 
-        private static void readmemstats_m(ref MemStats stats)
+        private static void readmemstats_m(ptr<MemStats> _addr_stats)
         {
+            ref MemStats stats = ref _addr_stats.val;
+
             updatememstats(); 
 
             // The size of the trailing by_size array differs between
             // mstats and MemStats. NumSizeClasses was changed, but we
             // cannot change MemStats because of backward compatibility.
-            memmove(@unsafe.Pointer(stats), @unsafe.Pointer(ref memstats), sizeof_C_MStats); 
+            memmove(@unsafe.Pointer(stats), @unsafe.Pointer(_addr_memstats), sizeof_C_MStats); 
 
             // memstats.stacks_sys is only memory mapped directly for OS stacks.
             // Add in heap-allocated stack memory for user consumption.
             stats.StackSys += stats.StackInuse;
+
         }
 
         //go:linkname readGCStats runtime/debug.readGCStats
-        private static void readGCStats(ref slice<ulong> pauses)
+        private static void readGCStats(ptr<slice<ulong>> _addr_pauses)
         {
+            ref slice<ulong> pauses = ref _addr_pauses.val;
+
             systemstack(() =>
             {
-                readGCStats_m(pauses);
+                readGCStats_m(_addr_pauses);
             });
+
         }
 
-        private static void readGCStats_m(ref slice<ulong> pauses)
+        // readGCStats_m must be called on the system stack because it acquires the heap
+        // lock. See mheap for details.
+        //go:systemstack
+        private static void readGCStats_m(ptr<slice<ulong>> _addr_pauses)
         {
-            var p = pauses.Value; 
+            ref slice<ulong> pauses = ref _addr_pauses.val;
+
+            slice<ulong> p = pauses; 
             // Calling code in runtime/debug should make the slice large enough.
             if (cap(p) < len(memstats.pause_ns) + 3L)
             {
@@ -405,7 +414,7 @@ namespace go
             } 
 
             // Pass back: pauses, pause ends, last gc (absolute time), number of gc, total pause ns.
-            lock(ref mheap_.@lock);
+            lock(_addr_mheap_.@lock);
 
             var n = memstats.numgc;
             if (n > uint32(len(memstats.pause_ns)))
@@ -429,13 +438,20 @@ namespace go
             p[n + n] = memstats.last_gc_unix;
             p[n + n + 1L] = uint64(memstats.numgc);
             p[n + n + 2L] = memstats.pause_total_ns;
-            unlock(ref mheap_.@lock);
-            pauses.Value = p[..n + n + 3L];
+            unlock(_addr_mheap_.@lock);
+            pauses = p[..n + n + 3L];
+
         }
 
         //go:nowritebarrier
         private static void updatememstats()
-        {
+        { 
+            // Flush mcaches to mcentral before doing anything else.
+            //
+            // Flushing to the mcentral may in general cause stats to
+            // change as mcentral data structures are manipulated.
+            systemstack(flushallmcaches);
+
             memstats.mcache_inuse = uint64(mheap_.cachealloc.inuse);
             memstats.mspan_inuse = uint64(mheap_.spanalloc.inuse);
             memstats.sys = memstats.heap_sys + memstats.stacks_sys + memstats.mspan_sys + memstats.mcache_sys + memstats.buckhash_sys + memstats.gc_sys + memstats.other_sys; 
@@ -445,7 +461,7 @@ namespace go
 
             // Calculate memory allocator stats.
             // During program execution we only count number of frees and amount of freed memory.
-            // Current number of alive object in the heap and amount of alive heap memory
+            // Current number of alive objects in the heap and amount of alive heap memory
             // are calculated by scanning all spans.
             // Total number of mallocs is calculated as number of frees plus number of alive objects.
             // Similarly, total amount of allocated memory is calculated as amount of freed memory
@@ -463,14 +479,11 @@ namespace go
                     memstats.by_size[i].nfree = 0L;
                 } 
 
-                // Flush MCache's to MCentral.
+                // Aggregate local stats.
 
 
                 i = i__prev1;
             } 
-
-            // Flush MCache's to MCentral.
-            systemstack(flushallmcaches); 
 
             // Aggregate local stats.
             cachestats(); 
@@ -485,11 +498,12 @@ namespace go
             { 
                 // The mcaches are now empty, so mcentral stats are
                 // up-to-date.
-                var c = ref mheap_.central[spc].mcentral;
+                var c = _addr_mheap_.central[spc].mcentral;
                 memstats.nmalloc += c.nmalloc;
                 i = spanClass(spc).sizeclass();
                 memstats.by_size[i].nmalloc += c.nmalloc;
                 totalAlloc += c.nmalloc * uint64(class_to_size[i]);
+
             } 
             // Collect per-sizeclass stats.
             {
@@ -510,6 +524,7 @@ namespace go
                     memstats.nfree += mheap_.nsmallfree[i];
                     memstats.by_size[i].nfree = mheap_.nsmallfree[i];
                     smallFree += mheap_.nsmallfree[i] * uint64(class_to_size[i]);
+
                 }
 
 
@@ -525,6 +540,7 @@ namespace go
             memstats.alloc = totalAlloc - totalFree;
             memstats.heap_alloc = memstats.alloc;
             memstats.heap_objects = memstats.nmalloc - memstats.nfree;
+
         }
 
         // cachestats flushes all mcache stats.
@@ -541,8 +557,11 @@ namespace go
                 {
                     continue;
                 }
-                purgecachedstats(c);
+
+                purgecachedstats(_addr_c);
+
             }
+
         }
 
         // flushmcache flushes the mcache of allp[i].
@@ -556,10 +575,12 @@ namespace go
             var c = p.mcache;
             if (c == null)
             {
-                return;
+                return ;
             }
+
             c.releaseAll();
             stackcache_clear(c);
+
         }
 
         // flushallmcaches flushes the mcaches of all Ps.
@@ -574,19 +595,20 @@ namespace go
                 flushmcache(i);
             }
 
+
         }
 
         //go:nosplit
-        private static void purgecachedstats(ref mcache c)
-        { 
+        private static void purgecachedstats(ptr<mcache> _addr_c)
+        {
+            ref mcache c = ref _addr_c.val;
+ 
             // Protected by either heap or GC lock.
-            var h = ref mheap_;
+            var h = _addr_mheap_;
             memstats.heap_scan += uint64(c.local_scan);
             c.local_scan = 0L;
             memstats.tinyallocs += uint64(c.local_tinyallocs);
             c.local_tinyallocs = 0L;
-            memstats.nlookup += uint64(c.local_nlookup);
-            c.local_nlookup = 0L;
             h.largefree += uint64(c.local_largefree);
             c.local_largefree = 0L;
             h.nlargefree += uint64(c.local_nlargefree);
@@ -596,6 +618,7 @@ namespace go
                 h.nsmallfree[i] += uint64(c.local_nsmallfree[i]);
                 c.local_nsmallfree[i] = 0L;
             }
+
 
         }
 
@@ -612,15 +635,23 @@ namespace go
         // A side-effect of using xadduintptr() is that we need to check for
         // overflow errors.
         //go:nosplit
-        private static void mSysStatInc(ref ulong sysStat, System.UIntPtr n)
+        private static void mSysStatInc(ptr<ulong> _addr_sysStat, System.UIntPtr n)
         {
+            ref ulong sysStat = ref _addr_sysStat.val;
+
+            if (sysStat == null)
+            {
+                return ;
+            }
+
             if (sys.BigEndian)
             {
                 atomic.Xadd64(sysStat, int64(n));
-                return;
+                return ;
             }
+
             {
-                var val = atomic.Xadduintptr((uintptr.Value)(@unsafe.Pointer(sysStat)), n);
+                var val = atomic.Xadduintptr((uintptr.val)(@unsafe.Pointer(sysStat)), n);
 
                 if (val < n)
                 {
@@ -629,20 +660,29 @@ namespace go
                 }
 
             }
+
         }
 
         // Atomically decreases a given *system* memory stat. Same comments as
         // mSysStatInc apply.
         //go:nosplit
-        private static void mSysStatDec(ref ulong sysStat, System.UIntPtr n)
+        private static void mSysStatDec(ptr<ulong> _addr_sysStat, System.UIntPtr n)
         {
+            ref ulong sysStat = ref _addr_sysStat.val;
+
+            if (sysStat == null)
+            {
+                return ;
+            }
+
             if (sys.BigEndian)
             {
                 atomic.Xadd64(sysStat, -int64(n));
-                return;
+                return ;
             }
+
             {
-                var val = atomic.Xadduintptr((uintptr.Value)(@unsafe.Pointer(sysStat)), uintptr(-int64(n)));
+                var val = atomic.Xadduintptr((uintptr.val)(@unsafe.Pointer(sysStat)), uintptr(-int64(n)));
 
                 if (val + n < n)
                 {
@@ -651,6 +691,7 @@ namespace go
                 }
 
             }
+
         }
     }
 }

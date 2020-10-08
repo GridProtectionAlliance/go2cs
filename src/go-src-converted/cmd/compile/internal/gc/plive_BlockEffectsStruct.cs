@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:28:05 UTC
+//     Generated on 2020 October 08 04:30:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,11 +17,8 @@ using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
 using md5 = go.crypto.md5_package;
-using sha1 = go.crypto.sha1_package;
 using fmt = go.fmt_package;
-using os = go.os_package;
 using strings = go.strings_package;
 using go;
 
@@ -38,26 +35,18 @@ namespace @internal
             // Constructors
             public BlockEffects(NilType _)
             {
-                this.lastbitmapindex = default;
                 this.uevar = default;
                 this.varkill = default;
-                this.avarinit = default;
                 this.livein = default;
                 this.liveout = default;
-                this.avarinitany = default;
-                this.avarinitall = default;
             }
 
-            public BlockEffects(long lastbitmapindex = default, bvec uevar = default, bvec varkill = default, bvec avarinit = default, bvec livein = default, bvec liveout = default, bvec avarinitany = default, bvec avarinitall = default)
+            public BlockEffects(varRegVec uevar = default, varRegVec varkill = default, varRegVec livein = default, varRegVec liveout = default)
             {
-                this.lastbitmapindex = lastbitmapindex;
                 this.uevar = uevar;
                 this.varkill = varkill;
-                this.avarinit = avarinit;
                 this.livein = livein;
                 this.liveout = liveout;
-                this.avarinitany = avarinitany;
-                this.avarinitall = avarinitall;
             }
 
             // Enable comparisons between nil and BlockEffects struct
@@ -80,7 +69,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static BlockEffects BlockEffects_cast(dynamic value)
         {
-            return new BlockEffects(value.lastbitmapindex, value.uevar, value.varkill, value.avarinit, value.livein, value.liveout, value.avarinitany, value.avarinitall);
+            return new BlockEffects(value.uevar, value.varkill, value.livein, value.liveout);
         }
     }
 }}}}

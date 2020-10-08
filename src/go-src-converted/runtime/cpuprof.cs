@@ -10,7 +10,7 @@
 // with the log, those writes will be recorded as a count of lost records.
 // The actual profile buffer is in profbuf.go.
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:40 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:20 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\cpuprof.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly long maxCPUProfStack = 64L;
+        private static readonly long maxCPUProfStack = (long)64L;
 
 
 
@@ -46,6 +46,7 @@ namespace go
             public array<System.UIntPtr> extra;
             public long numExtra;
             public ulong lostExtra; // count of frames lost because extra is full
+            public ulong lostAtomic; // count of frames lost because of being in atomic64 on mips/arm; updated racily
         }
 
         private static cpuProfile cpuprof = default;
@@ -64,24 +65,28 @@ namespace go
             {
                 hz = 0L;
             }
+
             if (hz > 1000000L)
             {
                 hz = 1000000L;
             }
-            lock(ref cpuprof.@lock);
+
+            lock(_addr_cpuprof.@lock);
             if (hz > 0L)
             {
                 if (cpuprof.on || cpuprof.log != null)
                 {
                     print("runtime: cannot set cpu profile rate until previous profile has finished.\n");
-                    unlock(ref cpuprof.@lock);
-                    return;
+                    unlock(_addr_cpuprof.@lock);
+                    return ;
                 }
+
                 cpuprof.on = true;
                 cpuprof.log = newProfBuf(1L, 1L << (int)(17L), 1L << (int)(14L));
                 array<ulong> hdr = new array<ulong>(new ulong[] { uint64(hz) });
                 cpuprof.log.write(null, nanotime(), hdr[..], null);
                 setcpuprofilerate(int32(hz));
+
             }
             else if (cpuprof.on)
             {
@@ -90,7 +95,9 @@ namespace go
                 cpuprof.addExtra();
                 cpuprof.log.close();
             }
-            unlock(ref cpuprof.@lock);
+
+            unlock(_addr_cpuprof.@lock);
+
         }
 
         // add adds the stack trace to the profile.
@@ -99,10 +106,13 @@ namespace go
         // held at the time of the signal, nor can it use substantial amounts
         // of stack.
         //go:nowritebarrierrec
-        private static void add(this ref cpuProfile p, ref g gp, slice<System.UIntPtr> stk)
-        { 
+        private static void add(this ptr<cpuProfile> _addr_p, ptr<g> _addr_gp, slice<System.UIntPtr> stk)
+        {
+            ref cpuProfile p = ref _addr_p.val;
+            ref g gp = ref _addr_gp.val;
+ 
             // Simple cas-lock to coordinate with setcpuprofilerate.
-            while (!atomic.Cas(ref prof.signalLock, 0L, 1L))
+            while (!atomic.Cas(_addr_prof.signalLock, 0L, 1L))
             {
                 osyield();
             }
@@ -110,18 +120,22 @@ namespace go
 
             if (prof.hz != 0L)
             { // implies cpuprof.log != nil
-                if (p.numExtra > 0L || p.lostExtra > 0L)
+                if (p.numExtra > 0L || p.lostExtra > 0L || p.lostAtomic > 0L)
                 {
                     p.addExtra();
                 }
+
                 array<ulong> hdr = new array<ulong>(new ulong[] { 1 }); 
                 // Note: write "knows" that the argument is &gp.labels,
                 // because otherwise its write barrier behavior may not
                 // be correct. See the long comment there before
                 // changing the argument here.
-                cpuprof.log.write(ref gp.labels, nanotime(), hdr[..], stk);
+                cpuprof.log.write(_addr_gp.labels, nanotime(), hdr[..], stk);
+
             }
-            atomic.Store(ref prof.signalLock, 0L);
+
+            atomic.Store(_addr_prof.signalLock, 0L);
+
         }
 
         // addNonGo adds the non-Go stack trace to the profile.
@@ -133,13 +147,15 @@ namespace go
         // gets the signal handling event.
         //go:nosplit
         //go:nowritebarrierrec
-        private static void addNonGo(this ref cpuProfile p, slice<System.UIntPtr> stk)
-        { 
+        private static void addNonGo(this ptr<cpuProfile> _addr_p, slice<System.UIntPtr> stk)
+        {
+            ref cpuProfile p = ref _addr_p.val;
+ 
             // Simple cas-lock to coordinate with SetCPUProfileRate.
             // (Other calls to add or addNonGo should be blocked out
             // by the fact that only one SIGPROF can be handled by the
             // process at a time. If not, this lock will serialize those too.)
-            while (!atomic.Cas(ref prof.signalLock, 0L, 1L))
+            while (!atomic.Cas(_addr_prof.signalLock, 0L, 1L))
             {
                 osyield();
             }
@@ -156,7 +172,9 @@ namespace go
             {
                 cpuprof.lostExtra++;
             }
-            atomic.Store(ref prof.signalLock, 0L);
+
+            atomic.Store(_addr_prof.signalLock, 0L);
+
         }
 
         // addExtra adds the "extra" profiling events,
@@ -164,8 +182,10 @@ namespace go
         // addExtra is called either from a signal handler on a Go thread
         // or from an ordinary goroutine; either way it can use stack
         // and has a g. The world may be stopped, though.
-        private static void addExtra(this ref cpuProfile p)
-        { 
+        private static void addExtra(this ptr<cpuProfile> _addr_p)
+        {
+            ref cpuProfile p = ref _addr_p.val;
+ 
             // Copy accumulated non-Go profile events.
             array<ulong> hdr = new array<ulong>(new ulong[] { 1 });
             {
@@ -185,16 +205,18 @@ namespace go
             {
                 hdr = new array<ulong>(new ulong[] { p.lostExtra });
                 array<System.UIntPtr> lostStk = new array<System.UIntPtr>(new System.UIntPtr[] { funcPC(_LostExternalCode)+sys.PCQuantum, funcPC(_ExternalCode)+sys.PCQuantum });
-                cpuprof.log.write(null, 0L, hdr[..], lostStk[..]);
+                p.log.write(null, 0L, hdr[..], lostStk[..]);
                 p.lostExtra = 0L;
             }
-        }
 
-        private static void addLostAtomic64(this ref cpuProfile p, ulong count)
-        {
-            array<ulong> hdr = new array<ulong>(new ulong[] { count });
-            array<System.UIntPtr> lostStk = new array<System.UIntPtr>(new System.UIntPtr[] { funcPC(_LostSIGPROFDuringAtomic64)+sys.PCQuantum, funcPC(_System)+sys.PCQuantum });
-            cpuprof.log.write(null, 0L, hdr[..], lostStk[..]);
+            if (p.lostAtomic > 0L)
+            {
+                hdr = new array<ulong>(new ulong[] { p.lostAtomic });
+                lostStk = new array<System.UIntPtr>(new System.UIntPtr[] { funcPC(_LostSIGPROFDuringAtomic64)+sys.PCQuantum, funcPC(_System)+sys.PCQuantum });
+                p.log.write(null, 0L, hdr[..], lostStk[..]);
+                p.lostAtomic = 0L;
+            }
+
         }
 
         // CPUProfile panics.
@@ -203,7 +225,7 @@ namespace go
         // The details of generating that format have changed,
         // so this functionality has been removed.
         //
-        // Deprecated: use the runtime/pprof package,
+        // Deprecated: Use the runtime/pprof package,
         // or the handlers in the net/http/pprof package,
         // or the testing package's -test.cpuprofile flag instead.
         public static slice<byte> CPUProfile() => func((_, panic, __) =>
@@ -226,17 +248,23 @@ namespace go
         //go:linkname runtime_pprof_readProfile runtime/pprof.readProfile
         private static (slice<ulong>, slice<unsafe.Pointer>, bool) runtime_pprof_readProfile()
         {
-            lock(ref cpuprof.@lock);
+            slice<ulong> _p0 = default;
+            slice<unsafe.Pointer> _p0 = default;
+            bool _p0 = default;
+
+            lock(_addr_cpuprof.@lock);
             var log = cpuprof.log;
-            unlock(ref cpuprof.@lock);
+            unlock(_addr_cpuprof.@lock);
             var (data, tags, eof) = log.read(profBufBlocking);
             if (len(data) == 0L && eof)
             {
-                lock(ref cpuprof.@lock);
+                lock(_addr_cpuprof.@lock);
                 cpuprof.log = null;
-                unlock(ref cpuprof.@lock);
+                unlock(_addr_cpuprof.@lock);
             }
+
             return (data, tags, eof);
+
         }
     }
 }

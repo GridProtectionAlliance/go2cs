@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:23:04 UTC
+//     Generated on 2020 October 08 03:30:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,7 +19,6 @@ using fmt = go.fmt_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using runtime = go.runtime_package;
-using sort = go.sort_package;
 using strconv = go.strconv_package;
 using time = go.time_package;
 using @unsafe = go.@unsafe_package;
@@ -49,9 +48,10 @@ namespace runtime
                 this.locs = default;
                 this.funcs = default;
                 this.mem = default;
+                this.deck = default;
             }
 
-            public profileBuilder(time.Time start = default, time.Time end = default, bool havePeriod = default, long period = default, profMap m = default, io.Writer w = default, ref ptr<gzip.Writer> zw = default, protobuf pb = default, slice<@string> strings = default, map<@string, long> stringMap = default, map<System.UIntPtr, long> locs = default, map<@string, long> funcs = default, slice<memMap> mem = default)
+            public profileBuilder(time.Time start = default, time.Time end = default, bool havePeriod = default, long period = default, profMap m = default, io.Writer w = default, ref ptr<gzip.Writer> zw = default, protobuf pb = default, slice<@string> strings = default, map<@string, long> stringMap = default, map<System.UIntPtr, locInfo> locs = default, map<@string, long> funcs = default, slice<memMap> mem = default, pcDeck deck = default)
             {
                 this.start = start;
                 this.end = end;
@@ -66,6 +66,7 @@ namespace runtime
                 this.locs = locs;
                 this.funcs = funcs;
                 this.mem = mem;
+                this.deck = deck;
             }
 
             // Enable comparisons between nil and profileBuilder struct
@@ -88,7 +89,7 @@ namespace runtime
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static profileBuilder profileBuilder_cast(dynamic value)
         {
-            return new profileBuilder(value.start, value.end, value.havePeriod, value.period, value.m, value.w, ref value.zw, value.pb, value.strings, value.stringMap, value.locs, value.funcs, value.mem);
+            return new profileBuilder(value.start, value.end, value.havePeriod, value.period, value.m, value.w, ref value.zw, value.pb, value.strings, value.stringMap, value.locs, value.funcs, value.mem, value.deck);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:27:07 UTC
+//     Generated on 2020 October 08 03:34:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,9 +16,9 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
-using poll = go.@internal.poll_package;
 using io = go.io_package;
 using os = go.os_package;
+using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
 
@@ -54,7 +54,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate bool TemporaryByRef(ref T value);
+            private delegate bool TemporaryByPtr(ptr<T> value);
             private delegate bool TemporaryByVal(T value);
 
-            private static readonly TemporaryByRef s_TemporaryByRef;
+            private static readonly TemporaryByPtr s_TemporaryByPtr;
             private static readonly TemporaryByVal s_TemporaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,11 +80,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TemporaryByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TemporaryByPtr is null || !m_target_is_ptr)
                     return s_TemporaryByVal!(target);
 
-                return s_TemporaryByRef(ref target);
+                return s_TemporaryByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -93,23 +94,20 @@ namespace go
             static temporary()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Temporary");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Temporary");
 
                 if (!(extensionMethod is null))
-                    s_TemporaryByRef = extensionMethod.CreateStaticDelegate(typeof(TemporaryByRef)) as TemporaryByRef;
+                    s_TemporaryByPtr = extensionMethod.CreateStaticDelegate(typeof(TemporaryByPtr)) as TemporaryByPtr;
 
-                if (s_TemporaryByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Temporary");
+                extensionMethod = targetType.GetExtensionMethod("Temporary");
 
-                    if (!(extensionMethod is null))
-                        s_TemporaryByVal = extensionMethod.CreateStaticDelegate(typeof(TemporaryByVal)) as TemporaryByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TemporaryByVal = extensionMethod.CreateStaticDelegate(typeof(TemporaryByVal)) as TemporaryByVal;
 
-                if (s_TemporaryByRef is null && s_TemporaryByVal is null)
+                if (s_TemporaryByPtr is null && s_TemporaryByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement temporary.Temporary method", new Exception("Temporary"));
             }
 

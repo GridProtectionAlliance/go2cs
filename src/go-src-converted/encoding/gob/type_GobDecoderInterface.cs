@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:41 UTC
+//     Generated on 2020 October 08 03:42:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -58,7 +58,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -72,10 +72,10 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate error GobDecodeByRef(ref T value, slice<byte> _p0);
+            private delegate error GobDecodeByPtr(ptr<T> value, slice<byte> _p0);
             private delegate error GobDecodeByVal(T value, slice<byte> _p0);
 
-            private static readonly GobDecodeByRef s_GobDecodeByRef;
+            private static readonly GobDecodeByPtr s_GobDecodeByPtr;
             private static readonly GobDecodeByVal s_GobDecodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,11 +84,12 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GobDecodeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GobDecodeByPtr is null || !m_target_is_ptr)
                     return s_GobDecodeByVal!(target, _p0);
 
-                return s_GobDecodeByRef(ref target, _p0);
+                return s_GobDecodeByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -97,23 +98,20 @@ namespace encoding
             static GobDecoder()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("GobDecode");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("GobDecode");
 
                 if (!(extensionMethod is null))
-                    s_GobDecodeByRef = extensionMethod.CreateStaticDelegate(typeof(GobDecodeByRef)) as GobDecodeByRef;
+                    s_GobDecodeByPtr = extensionMethod.CreateStaticDelegate(typeof(GobDecodeByPtr)) as GobDecodeByPtr;
 
-                if (s_GobDecodeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("GobDecode");
+                extensionMethod = targetType.GetExtensionMethod("GobDecode");
 
-                    if (!(extensionMethod is null))
-                        s_GobDecodeByVal = extensionMethod.CreateStaticDelegate(typeof(GobDecodeByVal)) as GobDecodeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GobDecodeByVal = extensionMethod.CreateStaticDelegate(typeof(GobDecodeByVal)) as GobDecodeByVal;
 
-                if (s_GobDecodeByRef is null && s_GobDecodeByVal is null)
+                if (s_GobDecodeByPtr is null && s_GobDecodeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement GobDecoder.GobDecode method", new Exception("GobDecode"));
             }
 

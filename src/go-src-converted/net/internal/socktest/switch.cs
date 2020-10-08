@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package socktest provides utilities for socket testing.
-// package socktest -- go2cs converted at 2020 August 29 08:36:18 UTC
+// package socktest -- go2cs converted at 2020 October 08 03:43:12 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Go\src\net\internal\socktest\switch.go
 using fmt = go.fmt_package;
@@ -28,30 +28,37 @@ namespace @internal
             public stats stats;
         }
 
-        private static void init(this ref Switch sw)
+        private static void init(this ptr<Switch> _addr_sw)
         {
+            ref Switch sw = ref _addr_sw.val;
+
             sw.fltab = make_map<FilterType, Filter>();
             sw.sotab = make(Sockets);
             sw.stats = make(stats);
         }
 
         // Stats returns a list of per-cookie socket statistics.
-        private static slice<Stat> Stats(this ref Switch sw)
+        private static slice<Stat> Stats(this ptr<Switch> _addr_sw)
         {
+            ref Switch sw = ref _addr_sw.val;
+
             slice<Stat> st = default;
             sw.smu.RLock();
             foreach (var (_, s) in sw.stats)
             {
-                var ns = s.Value;
+                var ns = s.val;
                 st = append(st, ns);
             }
             sw.smu.RUnlock();
             return st;
+
         }
 
         // Sockets returns mappings of socket descriptor to socket status.
-        private static Sockets Sockets(this ref Switch sw)
+        private static Sockets Sockets(this ptr<Switch> _addr_sw)
         {
+            ref Switch sw = ref _addr_sw.val;
+
             sw.smu.RLock();
             var tab = make(Sockets, len(sw.sotab));
             foreach (var (i, s) in sw.sotab)
@@ -60,6 +67,7 @@ namespace @internal
             }
             sw.smu.RUnlock();
             return tab;
+
         }
 
         // A Cookie represents a 3-tuple of a socket; address family, socket
@@ -129,19 +137,21 @@ namespace @internal
             return fmt.Sprintf("(%s, %s, %s): opened=%d connected=%d listened=%d accepted=%d closed=%d openfailed=%d connectfailed=%d listenfailed=%d acceptfailed=%d closefailed=%d", familyString(st.Family), typeString(st.Type), protocolString(st.Protocol), st.Opened, st.Connected, st.Listened, st.Accepted, st.Closed, st.OpenFailed, st.ConnectFailed, st.ListenFailed, st.AcceptFailed, st.CloseFailed);
         }
 
-        private partial struct stats // : map<Cookie, ref Stat>
+        private partial struct stats // : map<Cookie, ptr<Stat>>
         {
         }
 
-        private static ref Stat getLocked(this stats st, Cookie c)
+        private static ptr<Stat> getLocked(this stats st, Cookie c)
         {
             var (s, ok) = st[c];
             if (!ok)
             {
-                s = ref new Stat(Family:c.Family(),Type:c.Type(),Protocol:c.Protocol());
+                s = addr(new Stat(Family:c.Family(),Type:c.Type(),Protocol:c.Protocol()));
                 st[c] = s;
             }
-            return s;
+
+            return _addr_s!;
+
         }
 
         // A FilterType represents a filter type.
@@ -149,12 +159,12 @@ namespace @internal
         {
         }
 
-        public static readonly FilterType FilterSocket = iota; // for Socket
-        public static readonly var FilterConnect = 0; // for Connect or ConnectEx
-        public static readonly var FilterListen = 1; // for Listen
-        public static readonly var FilterAccept = 2; // for Accept, Accept4 or AcceptEx
-        public static readonly var FilterGetsockoptInt = 3; // for GetsockoptInt
-        public static readonly var FilterClose = 4; // for Close or Closesocket
+        public static readonly FilterType FilterSocket = (FilterType)iota; // for Socket
+        public static readonly var FilterConnect = (var)0; // for Connect or ConnectEx
+        public static readonly var FilterListen = (var)1; // for Listen
+        public static readonly var FilterAccept = (var)2; // for Accept, Accept4 or AcceptEx
+        public static readonly var FilterGetsockoptInt = (var)3; // for GetsockoptInt
+        public static readonly var FilterClose = (var)4; // for Close or Closesocket
 
         // A Filter represents a socket system call filter.
         //
@@ -165,15 +175,21 @@ namespace @internal
         // error.
         // It can return a non-nil AfterFilter for filtering after the
         // execution of the system call.
-        public delegate  error) Filter(ref Status,  (AfterFilter);
+        public delegate  error) Filter(ptr<Status>,  (AfterFilter);
 
-        public static (AfterFilter, error) apply(this Filter f, ref Status st)
+        public static (AfterFilter, error) apply(this Filter f, ptr<Status> _addr_st)
         {
+            AfterFilter _p0 = default;
+            error _p0 = default!;
+            ref Status st = ref _addr_st.val;
+
             if (f == null)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
+
             return f(st);
+
         }
 
         // An AfterFilter represents a socket system call filter after an
@@ -183,20 +199,26 @@ namespace @internal
         // an entry in internal table.
         // If the filter returns a non-nil error, the system call function
         // returns the non-nil error.
-        public delegate  error AfterFilter(ref Status);
+        public delegate  error AfterFilter(ptr<Status>);
 
-        public static error apply(this AfterFilter f, ref Status st)
+        public static error apply(this AfterFilter f, ptr<Status> _addr_st)
         {
+            ref Status st = ref _addr_st.val;
+
             if (f == null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
-            return error.As(f(st));
+
+            return error.As(f(st))!;
+
         }
 
         // Set deploys the socket system call filter f for the filter type t.
-        private static void Set(this ref Switch sw, FilterType t, Filter f)
+        private static void Set(this ptr<Switch> _addr_sw, FilterType t, Filter f)
         {
+            ref Switch sw = ref _addr_sw.val;
+
             sw.once.Do(sw.init);
             sw.fmu.Lock();
             sw.fltab[t] = f;

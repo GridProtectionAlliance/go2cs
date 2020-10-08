@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd linux netbsd openbsd
 
-// package net -- go2cs converted at 2020 August 29 08:28:13 UTC
+// package net -- go2cs converted at 2020 October 08 03:35:04 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\writev_unix.go
 using runtime = go.runtime_package;
@@ -15,25 +15,36 @@ namespace go
 {
     public static partial class net_package
     {
-        private static (long, error) writeBuffers(this ref conn c, ref Buffers v)
+        private static (long, error) writeBuffers(this ptr<conn> _addr_c, ptr<Buffers> _addr_v)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref conn c = ref _addr_c.val;
+            ref Buffers v = ref _addr_v.val;
+
             if (!c.ok())
             {
-                return (0L, syscall.EINVAL);
+                return (0L, error.As(syscall.EINVAL)!);
             }
             var (n, err) = c.fd.writeBuffers(v);
             if (err != null)
             {
-                return (n, ref new OpError(Op:"writev",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
+                return (n, error.As(addr(new OpError(Op:"writev",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!);
             }
-            return (n, null);
+            return (n, error.As(null!)!);
+
         }
 
-        private static (long, error) writeBuffers(this ref netFD fd, ref Buffers v)
+        private static (long, error) writeBuffers(this ptr<netFD> _addr_fd, ptr<Buffers> _addr_v)
         {
-            n, err = fd.pfd.Writev(new ptr<ref slice<slice<byte>>>(v));
+            long n = default;
+            error err = default!;
+            ref netFD fd = ref _addr_fd.val;
+            ref Buffers v = ref _addr_v.val;
+
+            n, err = fd.pfd.Writev(new ptr<ptr<slice<slice<byte>>>>(v));
             runtime.KeepAlive(fd);
-            return (n, wrapSyscallError("writev", err));
+            return (n, error.As(wrapSyscallError("writev", err))!);
         }
     }
 }

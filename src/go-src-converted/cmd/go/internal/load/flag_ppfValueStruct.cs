@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:52 UTC
+//     Generated on 2020 October 08 04:33:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace @internal
                 this.flags = default;
             }
 
-            public ppfValue(Func<ref Package, bool> match = default, slice<@string> flags = default)
+            public ppfValue(Func<ptr<Package>, bool> match = default, slice<@string> flags = default)
             {
                 this.match = match;
                 this.flags = flags;

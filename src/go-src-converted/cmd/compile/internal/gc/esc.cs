@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:26:51 UTC
+// package gc -- go2cs converted at 2020 October 08 04:28:43 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\esc.go
 using types = go.cmd.compile.@internal.types_package;
 using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
 using static go.builtin;
 using System;
 
@@ -19,278 +17,16 @@ namespace @internal
 {
     public static partial class gc_package
     {
-        // Run analysis on minimal sets of mutually recursive functions
-        // or single non-recursive functions, bottom up.
-        //
-        // Finding these sets is finding strongly connected components
-        // by reverse topological order in the static call graph.
-        // The algorithm (known as Tarjan's algorithm) for doing that is taken from
-        // Sedgewick, Algorithms, Second Edition, p. 482, with two adaptations.
-        //
-        // First, a hidden closure function (n.Func.IsHiddenClosure()) cannot be the
-        // root of a connected component. Refusing to use it as a root
-        // forces it into the component of the function in which it appears.
-        // This is more convenient for escape analysis.
-        //
-        // Second, each function becomes two virtual nodes in the graph,
-        // with numbers n and n+1. We record the function's node number as n
-        // but search from node n+1. If the search tells us that the component
-        // number (min) is n+1, we know that this is a trivial component: one function
-        // plus its closures. If the search tells us that the component number is
-        // n, then there was a path from node n+1 back to node n, meaning that
-        // the function set is mutually recursive. The escape analysis can be
-        // more precise when analyzing a single non-recursive function than
-        // when analyzing a set of mutually recursive functions.
-        private partial struct bottomUpVisitor
+        private static void escapes(slice<ptr<Node>> all)
         {
-            public Action<slice<ref Node>, bool> analyze;
-            public uint visitgen;
-            public map<ref Node, uint> nodeID;
-            public slice<ref Node> stack;
+            visitBottomUp(all, escapeFuncs);
         }
 
-        // visitBottomUp invokes analyze on the ODCLFUNC nodes listed in list.
-        // It calls analyze with successive groups of functions, working from
-        // the bottom of the call graph upward. Each time analyze is called with
-        // a list of functions, every function on that list only calls other functions
-        // on the list or functions that have been passed in previous invocations of
-        // analyze. Closures appear in the same list as their outer functions.
-        // The lists are as short as possible while preserving those requirements.
-        // (In a typical program, many invocations of analyze will be passed just
-        // a single function.) The boolean argument 'recursive' passed to analyze
-        // specifies whether the functions on the list are mutually recursive.
-        // If recursive is false, the list consists of only a single function and its closures.
-        // If recursive is true, the list may still contain only a single function,
-        // if that function is itself recursive.
-        private static void visitBottomUp(slice<ref Node> list, Action<slice<ref Node>, bool> analyze)
-        {
-            bottomUpVisitor v = default;
-            v.analyze = analyze;
-            v.nodeID = make_map<ref Node, uint>();
-            foreach (var (_, n) in list)
-            {
-                if (n.Op == ODCLFUNC && !n.Func.IsHiddenClosure())
-                {
-                    v.visit(n);
-                }
-            }
-        }
+        public static readonly long EscFuncUnknown = (long)0L + iota;
+        public static readonly var EscFuncPlanned = (var)0;
+        public static readonly var EscFuncStarted = (var)1;
+        public static readonly var EscFuncTagged = (var)2;
 
-        private static uint visit(this ref bottomUpVisitor v, ref Node n)
-        {
-            {
-                var id__prev1 = id;
-
-                var id = v.nodeID[n];
-
-                if (id > 0L)
-                { 
-                    // already visited
-                    return id;
-                }
-
-                id = id__prev1;
-
-            }
-
-            v.visitgen++;
-            id = v.visitgen;
-            v.nodeID[n] = id;
-            v.visitgen++;
-            var min = v.visitgen;
-
-            v.stack = append(v.stack, n);
-            min = v.visitcodelist(n.Nbody, min);
-            if ((min == id || min == id + 1L) && !n.Func.IsHiddenClosure())
-            { 
-                // This node is the root of a strongly connected component.
-
-                // The original min passed to visitcodelist was v.nodeID[n]+1.
-                // If visitcodelist found its way back to v.nodeID[n], then this
-                // block is a set of mutually recursive functions.
-                // Otherwise it's just a lone function that does not recurse.
-                var recursive = min == id; 
-
-                // Remove connected component from stack.
-                // Mark walkgen so that future visits return a large number
-                // so as not to affect the caller's min.
-
-                long i = default;
-                for (i = len(v.stack) - 1L; i >= 0L; i--)
-                {
-                    var x = v.stack[i];
-                    if (x == n)
-                    {
-                        break;
-                    }
-                    v.nodeID[x] = ~uint32(0L);
-                }
-
-                v.nodeID[n] = ~uint32(0L);
-                var block = v.stack[i..]; 
-                // Run escape analysis on this set of functions.
-                v.stack = v.stack[..i];
-                v.analyze(block, recursive);
-            }
-            return min;
-        }
-
-        private static uint visitcodelist(this ref bottomUpVisitor v, Nodes l, uint min)
-        {
-            foreach (var (_, n) in l.Slice())
-            {
-                min = v.visitcode(n, min);
-            }
-            return min;
-        }
-
-        private static uint visitcode(this ref bottomUpVisitor v, ref Node n, uint min)
-        {
-            if (n == null)
-            {
-                return min;
-            }
-            min = v.visitcodelist(n.Ninit, min);
-            min = v.visitcode(n.Left, min);
-            min = v.visitcode(n.Right, min);
-            min = v.visitcodelist(n.List, min);
-            min = v.visitcodelist(n.Nbody, min);
-            min = v.visitcodelist(n.Rlist, min);
-
-
-            if (n.Op == OCALLFUNC || n.Op == OCALLMETH) 
-                var fn = asNode(n.Left.Type.Nname());
-                if (fn != null && fn.Op == ONAME && fn.Class() == PFUNC && fn.Name.Defn != null)
-                {
-                    var m = v.visit(fn.Name.Defn);
-                    if (m < min)
-                    {
-                        min = m;
-                    }
-                }
-            else if (n.Op == OCLOSURE) 
-                m = v.visit(n.Func.Closure);
-                if (m < min)
-                {
-                    min = m;
-                }
-                        return min;
-        }
-
-        // Escape analysis.
-
-        // An escape analysis pass for a set of functions.
-        // The analysis assumes that closures and the functions in which they
-        // appear are analyzed together, so that the aliasing between their
-        // variables can be modeled more precisely.
-        //
-        // First escfunc, esc and escassign recurse over the ast of each
-        // function to dig out flow(dst,src) edges between any
-        // pointer-containing nodes and store them in e.nodeEscState(dst).Flowsrc. For
-        // variables assigned to a variable in an outer scope or used as a
-        // return value, they store a flow(theSink, src) edge to a fake node
-        // 'the Sink'.  For variables referenced in closures, an edge
-        // flow(closure, &var) is recorded and the flow of a closure itself to
-        // an outer scope is tracked the same way as other variables.
-        //
-        // Then escflood walks the graph starting at theSink and tags all
-        // variables of it can reach an & node as escaping and all function
-        // parameters it can reach as leaking.
-        //
-        // If a value's address is taken but the address does not escape,
-        // then the value can stay on the stack. If the value new(T) does
-        // not escape, then new(T) can be rewritten into a stack allocation.
-        // The same is true of slice literals.
-
-        private static void escapes(slice<ref Node> all)
-        {
-            visitBottomUp(all, escAnalyze);
-        }
-
-        public static readonly long EscFuncUnknown = 0L + iota;
-        public static readonly var EscFuncPlanned = 0;
-        public static readonly var EscFuncStarted = 1;
-        public static readonly var EscFuncTagged = 2;
-
-        // There appear to be some loops in the escape graph, causing
-        // arbitrary recursion into deeper and deeper levels.
-        // Cut this off safely by making minLevel sticky: once you
-        // get that deep, you cannot go down any further but you also
-        // cannot go up any further. This is a conservative fix.
-        // Making minLevel smaller (more negative) would handle more
-        // complex chains of indirections followed by address-of operations,
-        // at the cost of repeating the traversal once for each additional
-        // allowed level when a loop is encountered. Using -2 suffices to
-        // pass all the tests we have written so far, which we assume matches
-        // the level of complexity we want the escape analysis code to handle.
-        public static readonly long MinLevel = -2L;
-
-        // A Level encodes the reference state and context applied to
-        // (stack, heap) allocated memory.
-        //
-        // value is the overall sum of *(1) and &(-1) operations encountered
-        // along a path from a destination (sink, return value) to a source
-        // (allocation, parameter).
-        //
-        // suffixValue is the maximum-copy-started-suffix-level applied to a sink.
-        // For example:
-        // sink = x.left.left --> level=2, x is dereferenced twice and does not escape to sink.
-        // sink = &Node{x} --> level=-1, x is accessible from sink via one "address of"
-        // sink = &Node{&Node{x}} --> level=-2, x is accessible from sink via two "address of"
-        // sink = &Node{&Node{x.left}} --> level=-1, but x is NOT accessible from sink because it was indirected and then copied.
-        // (The copy operations are sometimes implicit in the source code; in this case,
-        // value of x.left was copied into a field of a newly allocated Node)
-        //
-        // There's one of these for each Node, and the integer values
-        // rarely exceed even what can be stored in 4 bits, never mind 8.
-
-
-        // A Level encodes the reference state and context applied to
-        // (stack, heap) allocated memory.
-        //
-        // value is the overall sum of *(1) and &(-1) operations encountered
-        // along a path from a destination (sink, return value) to a source
-        // (allocation, parameter).
-        //
-        // suffixValue is the maximum-copy-started-suffix-level applied to a sink.
-        // For example:
-        // sink = x.left.left --> level=2, x is dereferenced twice and does not escape to sink.
-        // sink = &Node{x} --> level=-1, x is accessible from sink via one "address of"
-        // sink = &Node{&Node{x}} --> level=-2, x is accessible from sink via two "address of"
-        // sink = &Node{&Node{x.left}} --> level=-1, but x is NOT accessible from sink because it was indirected and then copied.
-        // (The copy operations are sometimes implicit in the source code; in this case,
-        // value of x.left was copied into a field of a newly allocated Node)
-        //
-        // There's one of these for each Node, and the integer values
-        // rarely exceed even what can be stored in 4 bits, never mind 8.
-        public partial struct Level
-        {
-            public sbyte value;
-            public sbyte suffixValue;
-        }
-
-        public static long @int(this Level l)
-        {
-            return int(l.value);
-        }
-
-        private static Level levelFrom(long i)
-        {
-            if (i <= MinLevel)
-            {
-                return new Level(value:MinLevel);
-            }
-            return new Level(value:int8(i));
-        }
-
-        private static sbyte satInc8(sbyte x)
-        {
-            if (x == 127L)
-            {
-                return 127L;
-            }
-            return x + 1L;
-        }
 
         private static sbyte min8(sbyte a, sbyte b)
         {
@@ -298,7 +34,9 @@ namespace @internal
             {
                 return a;
             }
+
             return b;
+
         }
 
         private static sbyte max8(sbyte a, sbyte b)
@@ -307,471 +45,28 @@ namespace @internal
             {
                 return a;
             }
+
             return b;
+
         }
 
-        // inc returns the level l + 1, representing the effect of an indirect (*) operation.
-        public static Level inc(this Level l)
-        {
-            if (l.value <= MinLevel)
-            {
-                return new Level(value:MinLevel);
-            }
-            return new Level(value:satInc8(l.value),suffixValue:satInc8(l.suffixValue));
-        }
-
-        // dec returns the level l - 1, representing the effect of an address-of (&) operation.
-        public static Level dec(this Level l)
-        {
-            if (l.value <= MinLevel)
-            {
-                return new Level(value:MinLevel);
-            }
-            return new Level(value:l.value-1,suffixValue:l.suffixValue-1);
-        }
-
-        // copy returns the level for a copy of a value with level l.
-        public static Level copy(this Level l)
-        {
-            return new Level(value:l.value,suffixValue:max8(l.suffixValue,0));
-        }
-
-        public static Level min(this Level l1, Level l2)
-        {
-            return new Level(value:min8(l1.value,l2.value),suffixValue:min8(l1.suffixValue,l2.suffixValue));
-        }
-
-        // guaranteedDereference returns the number of dereferences
-        // applied to a pointer before addresses are taken/generated.
-        // This is the maximum level computed from path suffixes starting
-        // with copies where paths flow from destination to source.
-        public static long guaranteedDereference(this Level l)
-        {
-            return int(l.suffixValue);
-        }
-
-        // An EscStep documents one step in the path from memory
-        // that is heap allocated to the (alleged) reason for the
-        // heap allocation.
-        public partial struct EscStep
-        {
-            public ptr<Node> src; // the endpoints of this edge in the escape-to-heap chain.
-            public ptr<Node> dst; // the endpoints of this edge in the escape-to-heap chain.
-            public ptr<Node> where; // sometimes the endpoints don't match source locations; set 'where' to make that right
-            public ptr<EscStep> parent; // used in flood to record path
-            public @string why; // explanation for this step in the escape-to-heap chain
-            public bool busy; // used in prevent to snip cycles.
-        }
-
-        public partial struct NodeEscState
-        {
-            public ptr<Node> Curfn;
-            public slice<EscStep> Flowsrc; // flow(this, src)
-            public Nodes Retval; // on OCALLxxx, list of dummy return values
-            public int Loopdepth; // -1: global, 0: return variables, 1:function top level, increased inside function for every loop or label to mark scopes
-            public Level Level;
-            public uint Walkgen;
-            public int Maxextraloopdepth;
-        }
-
-        private static ref NodeEscState nodeEscState(this ref EscState e, ref Node n)
-        {
-            {
-                ref NodeEscState nE__prev1 = nE;
-
-                ref NodeEscState (nE, ok) = n.Opt()._<ref NodeEscState>();
-
-                if (ok)
-                {
-                    return nE;
-                }
-
-                nE = nE__prev1;
-
-            }
-            if (n.Opt() != null)
-            {
-                Fatalf("nodeEscState: opt in use (%T)", n.Opt());
-            }
-            NodeEscState nE = ref new NodeEscState(Curfn:Curfn,);
-            n.SetOpt(nE);
-            e.opts = append(e.opts, n);
-            return nE;
-        }
-
-        private static void track(this ref EscState e, ref Node n)
-        {
-            if (Curfn == null)
-            {
-                Fatalf("EscState.track: Curfn nil");
-            }
-            n.Esc = EscNone; // until proven otherwise
-            var nE = e.nodeEscState(n);
-            nE.Loopdepth = e.loopdepth;
-            e.noesc = append(e.noesc, n);
-        }
-
-        // Escape constants are numbered in order of increasing "escapiness"
-        // to help make inferences be monotonic. With the exception of
-        // EscNever which is sticky, eX < eY means that eY is more exposed
-        // than eX, and hence replaces it in a conservative analysis.
-        public static readonly var EscUnknown = iota;
-        public static readonly var EscNone = 0; // Does not escape to heap, result, or parameters.
-        public static readonly var EscReturn = 1; // Is returned or reachable from returned.
-        public static readonly var EscHeap = 2; // Reachable from the heap
-        public static readonly EscBits EscNever = 3L;
-        public static readonly long EscMask = (1L << (int)(EscBits)) - 1L;
-        public static readonly long EscContentEscapes = 1L << (int)(EscBits); // value obtained by indirect of parameter escapes to heap
-        public static readonly var EscReturnBits = EscBits + 1L; 
-        // Node.esc encoding = | escapeReturnEncoding:(width-4) | contentEscapes:1 | escEnum:3
-
-        // escMax returns the maximum of an existing escape value
-        // (and its additional parameter flow flags) and a new escape type.
-        private static ushort escMax(ushort e, ushort etype)
-        {
-            if (e & EscMask >= EscHeap)
-            { 
-                // normalize
-                if (e & ~EscMask != 0L)
-                {
-                    Fatalf("Escape information had unexpected return encoding bits (w/ EscHeap, EscNever), e&EscMask=%v", e & EscMask);
-                }
-            }
-            if (e & EscMask > etype)
-            {
-                return e;
-            }
-            if (etype == EscNone || etype == EscReturn)
-            {
-                return (e & ~EscMask) | etype;
-            }
-            return etype;
-        }
-
-        // For each input parameter to a function, the escapeReturnEncoding describes
-        // how the parameter may leak to the function's outputs. This is currently the
-        // "level" of the leak where level is 0 or larger (negative level means stored into
-        // something whose address is returned -- but that implies stored into the heap,
-        // hence EscHeap, which means that the details are not currently relevant. )
-        private static readonly long bitsPerOutputInTag = 3L; // For each output, the number of bits for a tag
-        private static readonly var bitsMaskForTag = uint16(1L << (int)(bitsPerOutputInTag)) - 1L; // The bit mask to extract a single tag.
-        private static readonly var maxEncodedLevel = int(bitsMaskForTag - 1L); // The largest level that can be stored in a tag.
-
-        public partial struct EscState
-        {
-            public Node theSink;
-            public slice<ref Node> dsts; // all dst nodes
-            public int loopdepth; // for detecting nested loop scopes
-            public long pdepth; // for debug printing in recursions.
-            public long dstcount; // diagnostic
-            public long edgecount; // diagnostic
-            public slice<ref Node> noesc; // list of possible non-escaping nodes, for printing
-            public bool recursive; // recursive function or group of mutually recursive functions.
-            public slice<ref Node> opts; // nodes with .Opt initialized
-            public uint walkgen;
-        }
-
-        private static ref EscState newEscState(bool recursive)
-        {
-            ptr<EscState> e = @new<EscState>();
-            e.theSink.Op = ONAME;
-            e.theSink.Orig = ref e.theSink;
-            e.theSink.SetClass(PEXTERN);
-            e.theSink.Sym = lookup(".sink");
-            e.nodeEscState(ref e.theSink).Loopdepth;
-
-            -1L;
-            e.recursive = recursive;
-            return e;
-        }
-
-        private static ref EscStep stepWalk(this ref EscState e, ref Node dst, ref Node src, @string why, ref EscStep parent)
-        { 
-            // TODO: keep a cache of these, mark entry/exit in escwalk to avoid allocation
-            // Or perhaps never mind, since it is disabled unless printing is on.
-            // We may want to revisit this, since the EscStep nodes would make
-            // an excellent replacement for the poorly-separated graph-build/graph-flood
-            // stages.
-            if (Debug['m'] == 0L)
-            {
-                return null;
-            }
-            return ref new EscStep(src:src,dst:dst,why:why,parent:parent);
-        }
-
-        private static ref EscStep stepAssign(this ref EscState e, ref EscStep step, ref Node dst, ref Node src, @string why)
-        {
-            if (Debug['m'] == 0L)
-            {
-                return null;
-            }
-            if (step != null)
-            { // Caller may have known better.
-                if (step.why == "")
-                {
-                    step.why = why;
-                }
-                if (step.dst == null)
-                {
-                    step.dst = dst;
-                }
-                if (step.src == null)
-                {
-                    step.src = src;
-                }
-                return step;
-            }
-            return ref new EscStep(src:src,dst:dst,why:why);
-        }
-
-        private static ref EscStep stepAssignWhere(this ref EscState e, ref Node dst, ref Node src, @string why, ref Node where)
-        {
-            if (Debug['m'] == 0L)
-            {
-                return null;
-            }
-            return ref new EscStep(src:src,dst:dst,why:why,where:where);
-        }
+        public static readonly var EscUnknown = (var)iota;
+        public static readonly var EscNone = (var)0; // Does not escape to heap, result, or parameters.
+        public static readonly var EscHeap = (var)1; // Reachable from the heap
+        public static readonly var EscNever = (var)2; // By construction will not escape.
 
         // funcSym returns fn.Func.Nname.Sym if no nils are encountered along the way.
-        private static ref types.Sym funcSym(ref Node fn)
+        private static ptr<types.Sym> funcSym(ptr<Node> _addr_fn)
         {
+            ref Node fn = ref _addr_fn.val;
+
             if (fn == null || fn.Func.Nname == null)
             {
-                return null;
-            }
-            return fn.Func.Nname.Sym;
-        }
-
-        // curfnSym returns n.Curfn.Nname.Sym if no nils are encountered along the way.
-        private static ref types.Sym curfnSym(this ref EscState e, ref Node n)
-        {
-            var nE = e.nodeEscState(n);
-            return funcSym(nE.Curfn);
-        }
-
-        private static void escAnalyze(slice<ref Node> all, bool recursive)
-        {
-            var e = newEscState(recursive);
-
-            {
-                var n__prev1 = n;
-
-                foreach (var (_, __n) in all)
-                {
-                    n = __n;
-                    if (n.Op == ODCLFUNC)
-                    {
-                        n.Esc = EscFuncPlanned;
-                        if (Debug['m'] > 3L)
-                        {
-                            Dump("escAnalyze", n);
-                        }
-                    }
-                } 
-
-                // flow-analyze functions
-
-                n = n__prev1;
+                return _addr_null!;
             }
 
-            {
-                var n__prev1 = n;
+            return _addr_fn.Func.Nname.Sym!;
 
-                foreach (var (_, __n) in all)
-                {
-                    n = __n;
-                    if (n.Op == ODCLFUNC)
-                    {
-                        e.escfunc(n);
-                    }
-                } 
-
-                // print("escapes: %d e.dsts, %d edges\n", e.dstcount, e.edgecount);
-
-                // visit the upstream of each dst, mark address nodes with
-                // addrescapes, mark parameters unsafe
-
-                n = n__prev1;
-            }
-
-            var escapes = make_slice<ushort>(len(e.dsts));
-            {
-                var i__prev1 = i;
-                var n__prev1 = n;
-
-                foreach (var (__i, __n) in e.dsts)
-                {
-                    i = __i;
-                    n = __n;
-                    escapes[i] = n.Esc;
-                }
-
-                i = i__prev1;
-                n = n__prev1;
-            }
-
-            {
-                var n__prev1 = n;
-
-                foreach (var (_, __n) in e.dsts)
-                {
-                    n = __n;
-                    e.escflood(n);
-                }
-
-                n = n__prev1;
-            }
-
-            while (true)
-            {
-                var done = true;
-                {
-                    var i__prev2 = i;
-                    var n__prev2 = n;
-
-                    foreach (var (__i, __n) in e.dsts)
-                    {
-                        i = __i;
-                        n = __n;
-                        if (n.Esc != escapes[i])
-                        {
-                            done = false;
-                            if (Debug['m'] > 2L)
-                            {
-                                Warnl(n.Pos, "Reflooding %v %S", e.curfnSym(n), n);
-                            }
-                            escapes[i] = n.Esc;
-                            e.escflood(n);
-                        }
-                    }
-
-                    i = i__prev2;
-                    n = n__prev2;
-                }
-
-                if (done)
-                {
-                    break;
-                }
-            } 
-
-            // for all top level functions, tag the typenodes corresponding to the param nodes
- 
-
-            // for all top level functions, tag the typenodes corresponding to the param nodes
-            {
-                var n__prev1 = n;
-
-                foreach (var (_, __n) in all)
-                {
-                    n = __n;
-                    if (n.Op == ODCLFUNC)
-                    {
-                        e.esctag(n);
-                    }
-                }
-
-                n = n__prev1;
-            }
-
-            if (Debug['m'] != 0L)
-            {
-                {
-                    var n__prev1 = n;
-
-                    foreach (var (_, __n) in e.noesc)
-                    {
-                        n = __n;
-                        if (n.Esc == EscNone)
-                        {
-                            Warnl(n.Pos, "%v %S does not escape", e.curfnSym(n), n);
-                        }
-                    }
-
-                    n = n__prev1;
-                }
-
-            }
-            foreach (var (_, x) in e.opts)
-            {
-                x.SetOpt(null);
-            }
-        }
-
-        private static void escfunc(this ref EscState e, ref Node fn)
-        { 
-            //    print("escfunc %N %s\n", fn.Func.Nname, e.recursive?"(recursive)":"");
-            if (fn.Esc != EscFuncPlanned)
-            {
-                Fatalf("repeat escfunc %v", fn.Func.Nname);
-            }
-            fn.Esc = EscFuncStarted;
-
-            var saveld = e.loopdepth;
-            e.loopdepth = 1L;
-            var savefn = Curfn;
-            Curfn = fn;
-
-            {
-                var ln__prev1 = ln;
-
-                foreach (var (_, __ln) in Curfn.Func.Dcl)
-                {
-                    ln = __ln;
-                    if (ln.Op != ONAME)
-                    {
-                        continue;
-                    }
-                    var lnE = e.nodeEscState(ln);
-
-                    // out params are in a loopdepth between the sink and all local variables
-                    if (ln.Class() == PPARAMOUT) 
-                        lnE.Loopdepth = 0L;
-                    else if (ln.Class() == PPARAM) 
-                        lnE.Loopdepth = 1L;
-                        if (ln.Type != null && !types.Haspointers(ln.Type))
-                        {
-                            break;
-                        }
-                        if (Curfn.Nbody.Len() == 0L && !Curfn.Noescape())
-                        {
-                            ln.Esc = EscHeap;
-                        }
-                        else
-                        {
-                            ln.Esc = EscNone; // prime for escflood later
-                        }
-                        e.noesc = append(e.noesc, ln);
-                                    } 
-
-                // in a mutually recursive group we lose track of the return values
-
-                ln = ln__prev1;
-            }
-
-            if (e.recursive)
-            {
-                {
-                    var ln__prev1 = ln;
-
-                    foreach (var (_, __ln) in Curfn.Func.Dcl)
-                    {
-                        ln = __ln;
-                        if (ln.Op == ONAME && ln.Class() == PPARAMOUT)
-                        {
-                            e.escflows(ref e.theSink, ln, e.stepAssign(null, ln, ln, "returned from recursive function"));
-                        }
-                    }
-
-                    ln = ln__prev1;
-                }
-
-            }
-            e.escloopdepthlist(Curfn.Nbody);
-            e.esclist(Curfn.Nbody, Curfn);
-            Curfn = savefn;
-            e.loopdepth = saveld;
         }
 
         // Mark labels that have no backjumps to them as not increasing e.loopdepth.
@@ -779,1775 +74,173 @@ namespace @internal
         // and set it to one of the following two. Then in esc we'll clear it again.
         private static Node looping = default;        private static Node nonlooping = default;
 
-        private static void escloopdepthlist(this ref EscState e, Nodes l)
+        private static bool isSliceSelfAssign(ptr<Node> _addr_dst, ptr<Node> _addr_src)
         {
-            foreach (var (_, n) in l.Slice())
-            {
-                e.escloopdepth(n);
-            }
-        }
-
-        private static void escloopdepth(this ref EscState e, ref Node n)
-        {
-            if (n == null)
-            {
-                return;
-            }
-            e.escloopdepthlist(n.Ninit);
-
-
-            if (n.Op == OLABEL) 
-                if (n.Left == null || n.Left.Sym == null)
-                {
-                    Fatalf("esc:label without label: %+v", n);
-                } 
-
-                // Walk will complain about this label being already defined, but that's not until
-                // after escape analysis. in the future, maybe pull label & goto analysis out of walk and put before esc
-                // if(n.Left.Sym.Label != nil)
-                //    fatal("escape analysis messed up analyzing label: %+N", n);
-                n.Left.Sym.Label = asTypesNode(ref nonlooping);
-            else if (n.Op == OGOTO) 
-                if (n.Left == null || n.Left.Sym == null)
-                {
-                    Fatalf("esc:goto without label: %+v", n);
-                } 
-
-                // If we come past one that's uninitialized, this must be a (harmless) forward jump
-                // but if it's set to nonlooping the label must have preceded this goto.
-                if (asNode(n.Left.Sym.Label) == ref nonlooping)
-                {
-                    n.Left.Sym.Label = asTypesNode(ref looping);
-                }
-                        e.escloopdepth(n.Left);
-            e.escloopdepth(n.Right);
-            e.escloopdepthlist(n.List);
-            e.escloopdepthlist(n.Nbody);
-            e.escloopdepthlist(n.Rlist);
-        }
-
-        private static void esclist(this ref EscState e, Nodes l, ref Node parent)
-        {
-            foreach (var (_, n) in l.Slice())
-            {
-                e.esc(n, parent);
-            }
-        }
-
-        private static void esc(this ref EscState e, ref Node n, ref Node parent)
-        {
-            if (n == null)
-            {
-                return;
-            }
-            var lno = setlineno(n); 
-
-            // ninit logically runs at a different loopdepth than the rest of the for loop.
-            e.esclist(n.Ninit, n);
-
-            if (n.Op == OFOR || n.Op == OFORUNTIL || n.Op == ORANGE)
-            {
-                e.loopdepth++;
-            } 
-
-            // type switch variables have no ODCL.
-            // process type switch as declaration.
-            // must happen before processing of switch body,
-            // so before recursion.
-            if (n.Op == OSWITCH && n.Left != null && n.Left.Op == OTYPESW)
-            {
-                {
-                    var cas__prev1 = cas;
-
-                    foreach (var (_, __cas) in n.List.Slice())
-                    {
-                        cas = __cas; // cases
-                        // it.N().Rlist is the variable per case
-                        if (cas.Rlist.Len() != 0L)
-                        {
-                            e.nodeEscState(cas.Rlist.First()).Loopdepth;
-
-                            e.loopdepth;
-                        }
-                    }
-
-                    cas = cas__prev1;
-                }
-
-            } 
-
-            // Big stuff escapes unconditionally
-            // "Big" conditions that were scattered around in walk have been gathered here
-            if (n.Esc != EscHeap && n.Type != null && (n.Type.Width > maxStackVarSize || (n.Op == ONEW || n.Op == OPTRLIT) && n.Type.Elem().Width >= 1L << (int)(16L) || n.Op == OMAKESLICE && !isSmallMakeSlice(n)))
-            {
-                if (Debug['m'] > 2L)
-                {
-                    Warnl(n.Pos, "%v is too large for stack", n);
-                }
-                n.Esc = EscHeap;
-                addrescapes(n);
-                e.escassignSinkWhy(n, n, "too large for stack"); // TODO category: tooLarge
-            }
-            e.esc(n.Left, n);
-
-            if (n.Op == ORANGE)
-            { 
-                // ORANGE node's Right is evaluated before the loop
-                e.loopdepth--;
-            }
-            e.esc(n.Right, n);
-
-            if (n.Op == ORANGE)
-            {
-                e.loopdepth++;
-            }
-            e.esclist(n.Nbody, n);
-            e.esclist(n.List, n);
-            e.esclist(n.Rlist, n);
-
-            if (n.Op == OFOR || n.Op == OFORUNTIL || n.Op == ORANGE)
-            {
-                e.loopdepth--;
-            }
-            if (Debug['m'] > 2L)
-            {
-                fmt.Printf("%v:[%d] %v esc: %v\n", linestr(lineno), e.loopdepth, funcSym(Curfn), n);
-            }
-
-            // Record loop depth at declaration.
-            if (n.Op == ODCL)
-            {
-                if (n.Left != null)
-                {
-                    e.nodeEscState(n.Left).Loopdepth;
-
-                    e.loopdepth;
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OLABEL)
-            {
-                if (asNode(n.Left.Sym.Label) == ref nonlooping)
-                {
-                    if (Debug['m'] > 2L)
-                    {
-                        fmt.Printf("%v:%v non-looping label\n", linestr(lineno), n);
-                    }
-                }
-                else if (asNode(n.Left.Sym.Label) == ref looping)
-                {
-                    if (Debug['m'] > 2L)
-                    {
-                        fmt.Printf("%v: %v looping label\n", linestr(lineno), n);
-                    }
-                    e.loopdepth++;
-                } 
-
-                // See case OLABEL in escloopdepth above
-                // else if(n.Left.Sym.Label == nil)
-                //    fatal("escape analysis missed or messed up a label: %+N", n);
-                n.Left.Sym.Label = null;
-                goto __switch_break0;
-            }
-            if (n.Op == ORANGE)
-            {
-                if (n.List.Len() >= 2L)
-                { 
-                    // Everything but fixed array is a dereference.
-
-                    // If fixed array is really the address of fixed array,
-                    // it is also a dereference, because it is implicitly
-                    // dereferenced (see #12588)
-                    if (n.Type.IsArray() && !(n.Right.Type.IsPtr() && eqtype(n.Right.Type.Elem(), n.Type)))
-                    {
-                        e.escassignWhyWhere(n.List.Second(), n.Right, "range", n);
-                    }
-                    else
-                    {
-                        e.escassignDereference(n.List.Second(), n.Right, e.stepAssignWhere(n.List.Second(), n.Right, "range-deref", n));
-                    }
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OSWITCH)
-            {
-                if (n.Left != null && n.Left.Op == OTYPESW)
-                {
-                    {
-                        var cas__prev1 = cas;
-
-                        foreach (var (_, __cas) in n.List.Slice())
-                        {
-                            cas = __cas; 
-                            // cases
-                            // n.Left.Right is the argument of the .(type),
-                            // it.N().Rlist is the variable per case
-                            if (cas.Rlist.Len() != 0L)
-                            {
-                                e.escassignWhyWhere(cas.Rlist.First(), n.Left.Right, "switch case", n);
-                            }
-                        }
-
-                        cas = cas__prev1;
-                    }
-
-                } 
-
-                // Filter out the following special case.
-                //
-                //    func (b *Buffer) Foo() {
-                //        n, m := ...
-                //        b.buf = b.buf[n:m]
-                //    }
-                //
-                // This assignment is a no-op for escape analysis,
-                // it does not store any new pointers into b that were not already there.
-                // However, without this special case b will escape, because we assign to OIND/ODOTPTR.
-                goto __switch_break0;
-            }
-            if (n.Op == OAS || n.Op == OASOP)
-            {
-                if ((n.Left.Op == OIND || n.Left.Op == ODOTPTR) && n.Left.Left.Op == ONAME && (n.Right.Op == OSLICE || n.Right.Op == OSLICE3 || n.Right.Op == OSLICESTR) && (n.Right.Left.Op == OIND || n.Right.Left.Op == ODOTPTR) && n.Right.Left.Left.Op == ONAME && n.Left.Left == n.Right.Left.Left)
-                { // dst and src reference the same base ONAME
-
-                    // Here we also assume that the statement will not contain calls,
-                    // that is, that order will move any calls to init.
-                    // Otherwise base ONAME value could change between the moments
-                    // when we evaluate it for dst and for src.
-                    //
-                    // Note, this optimization does not apply to OSLICEARR,
-                    // because it does introduce a new pointer into b that was not already there
-                    // (pointer to b itself). After such assignment, if b contents escape,
-                    // b escapes as well. If we ignore such OSLICEARR, we will conclude
-                    // that b does not escape when b contents do.
-                    if (Debug['m'] != 0L)
-                    {
-                        Warnl(n.Pos, "%v ignoring self-assignment to %S", e.curfnSym(n), n.Left);
-                    }
-                    break;
-                }
-                e.escassign(n.Left, n.Right, e.stepAssignWhere(null, null, "", n));
-                goto __switch_break0;
-            }
-            if (n.Op == OAS2) // x,y = a,b
-            {
-                if (n.List.Len() == n.Rlist.Len())
-                {
-                    var rs = n.Rlist.Slice();
-                    {
-                        var i__prev1 = i;
-                        var n__prev1 = n;
-
-                        foreach (var (__i, __n) in n.List.Slice())
-                        {
-                            i = __i;
-                            n = __n;
-                            e.escassignWhyWhere(n, rs[i], "assign-pair", n);
-                        }
-
-                        i = i__prev1;
-                        n = n__prev1;
-                    }
-
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OAS2RECV) // v, ok = <-ch
-            {
-                e.escassignWhyWhere(n.List.First(), n.Rlist.First(), "assign-pair-receive", n);
-                goto __switch_break0;
-            }
-            if (n.Op == OAS2MAPR) // v, ok = m[k]
-            {
-                e.escassignWhyWhere(n.List.First(), n.Rlist.First(), "assign-pair-mapr", n);
-                goto __switch_break0;
-            }
-            if (n.Op == OAS2DOTTYPE) // v, ok = x.(type)
-            {
-                e.escassignWhyWhere(n.List.First(), n.Rlist.First(), "assign-pair-dot-type", n);
-                goto __switch_break0;
-            }
-            if (n.Op == OSEND) // ch <- x
-            {
-                e.escassignSinkWhy(n, n.Right, "send");
-                goto __switch_break0;
-            }
-            if (n.Op == ODEFER)
-            {
-                if (e.loopdepth == 1L)
-                { // top level
-                    break;
-                } 
-                // arguments leak out of scope
-                // TODO: leak to a dummy node instead
-                // defer f(x) - f and x escape
-                e.escassignSinkWhy(n, n.Left.Left, "defer func");
-                e.escassignSinkWhy(n, n.Left.Right, "defer func ..."); // ODDDARG for call
-                {
-                    var arg__prev1 = arg;
-
-                    foreach (var (_, __arg) in n.Left.List.Slice())
-                    {
-                        arg = __arg;
-                        e.escassignSinkWhy(n, arg, "defer func arg");
-                    }
-
-                    arg = arg__prev1;
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OPROC) 
-            {
-                // go f(x) - f and x escape
-                e.escassignSinkWhy(n, n.Left.Left, "go func");
-                e.escassignSinkWhy(n, n.Left.Right, "go func ..."); // ODDDARG for call
-                {
-                    var arg__prev1 = arg;
-
-                    foreach (var (_, __arg) in n.Left.List.Slice())
-                    {
-                        arg = __arg;
-                        e.escassignSinkWhy(n, arg, "go func arg");
-                    }
-
-                    arg = arg__prev1;
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OCALLMETH || n.Op == OCALLFUNC || n.Op == OCALLINTER)
-            {
-                e.esccall(n, parent); 
-
-                // esccall already done on n.Rlist.First(). tie it's Retval to n.List
-                goto __switch_break0;
-            }
-            if (n.Op == OAS2FUNC) // x,y = f()
-            {
-                rs = e.nodeEscState(n.Rlist.First()).Retval.Slice();
-                {
-                    var i__prev1 = i;
-                    var n__prev1 = n;
-
-                    foreach (var (__i, __n) in n.List.Slice())
-                    {
-                        i = __i;
-                        n = __n;
-                        if (i >= len(rs))
-                        {
-                            break;
-                        }
-                        e.escassignWhyWhere(n, rs[i], "assign-pair-func-call", n);
-                    }
-
-                    i = i__prev1;
-                    n = n__prev1;
-                }
-
-                if (n.List.Len() != len(rs))
-                {
-                    Fatalf("esc oas2func");
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == ORETURN)
-            {
-                var retList = n.List;
-                if (retList.Len() == 1L && Curfn.Type.NumResults() > 1L)
-                { 
-                    // OAS2FUNC in disguise
-                    // esccall already done on n.List.First()
-                    // tie e.nodeEscState(n.List.First()).Retval to Curfn.Func.Dcl PPARAMOUT's
-                    retList = e.nodeEscState(n.List.First()).Retval;
-                }
-                long i = 0L;
-                foreach (var (_, lrn) in Curfn.Func.Dcl)
-                {
-                    if (i >= retList.Len())
-                    {
-                        break;
-                    }
-                    if (lrn.Op != ONAME || lrn.Class() != PPARAMOUT)
-                    {
-                        continue;
-                    }
-                    e.escassignWhyWhere(lrn, retList.Index(i), "return", n);
-                    i++;
-                }
-                if (i < retList.Len())
-                {
-                    Fatalf("esc return list");
-                } 
-
-                // Argument could leak through recover.
-                goto __switch_break0;
-            }
-            if (n.Op == OPANIC)
-            {
-                e.escassignSinkWhy(n, n.Left, "panic");
-                goto __switch_break0;
-            }
-            if (n.Op == OAPPEND)
-            {
-                if (!n.Isddd())
-                {
-                    foreach (var (_, nn) in n.List.Slice()[1L..])
-                    {
-                        e.escassignSinkWhy(n, nn, "appended to slice"); // lose track of assign to dereference
-                    }
-                else
-                }                { 
-                    // append(slice1, slice2...) -- slice2 itself does not escape, but contents do.
-                    var slice2 = n.List.Second();
-                    e.escassignDereference(ref e.theSink, slice2, e.stepAssignWhere(n, slice2, "appended slice...", n)); // lose track of assign of dereference
-                    if (Debug['m'] > 3L)
-                    {
-                        Warnl(n.Pos, "%v special treatment of append(slice1, slice2...) %S", e.curfnSym(n), n);
-                    }
-                }
-                e.escassignDereference(ref e.theSink, n.List.First(), e.stepAssignWhere(n, n.List.First(), "appendee slice", n)); // The original elements are now leaked, too
-                goto __switch_break0;
-            }
-            if (n.Op == OCOPY)
-            {
-                e.escassignDereference(ref e.theSink, n.Right, e.stepAssignWhere(n, n.Right, "copied slice", n)); // lose track of assign of dereference
-                goto __switch_break0;
-            }
-            if (n.Op == OCONV || n.Op == OCONVNOP)
-            {
-                e.escassignWhyWhere(n, n.Left, "converted", n);
-                goto __switch_break0;
-            }
-            if (n.Op == OCONVIFACE)
-            {
-                e.track(n);
-                e.escassignWhyWhere(n, n.Left, "interface-converted", n);
-                goto __switch_break0;
-            }
-            if (n.Op == OARRAYLIT) 
-            {
-                // Link values to array
-                {
-                    var elt__prev1 = elt;
-
-                    foreach (var (_, __elt) in n.List.Slice())
-                    {
-                        elt = __elt;
-                        if (elt.Op == OKEY)
-                        {
-                            elt = elt.Right;
-                        }
-                        e.escassign(n, elt, e.stepAssignWhere(n, elt, "array literal element", n));
-                    }
-
-                    elt = elt__prev1;
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OSLICELIT) 
-            {
-                // Slice is not leaked until proven otherwise
-                e.track(n); 
-                // Link values to slice
-                {
-                    var elt__prev1 = elt;
-
-                    foreach (var (_, __elt) in n.List.Slice())
-                    {
-                        elt = __elt;
-                        if (elt.Op == OKEY)
-                        {
-                            elt = elt.Right;
-                        }
-                        e.escassign(n, elt, e.stepAssignWhere(n, elt, "slice literal element", n));
-                    } 
-
-                    // Link values to struct.
-
-                    elt = elt__prev1;
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OSTRUCTLIT)
-            {
-                {
-                    var elt__prev1 = elt;
-
-                    foreach (var (_, __elt) in n.List.Slice())
-                    {
-                        elt = __elt;
-                        e.escassignWhyWhere(n, elt.Left, "struct literal element", n);
-                    }
-
-                    elt = elt__prev1;
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OPTRLIT)
-            {
-                e.track(n); 
-
-                // Link OSTRUCTLIT to OPTRLIT; if OPTRLIT escapes, OSTRUCTLIT elements do too.
-                e.escassignWhyWhere(n, n.Left, "pointer literal [assign]", n);
-                goto __switch_break0;
-            }
-            if (n.Op == OCALLPART)
-            {
-                e.track(n); 
-
-                // Contents make it to memory, lose track.
-                e.escassignSinkWhy(n, n.Left, "call part");
-                goto __switch_break0;
-            }
-            if (n.Op == OMAPLIT)
-            {
-                e.track(n); 
-                // Keys and values make it to memory, lose track.
-                {
-                    var elt__prev1 = elt;
-
-                    foreach (var (_, __elt) in n.List.Slice())
-                    {
-                        elt = __elt;
-                        e.escassignSinkWhy(n, elt.Left, "map literal key");
-                        e.escassignSinkWhy(n, elt.Right, "map literal value");
-                    }
-
-                    elt = elt__prev1;
-                }
-                goto __switch_break0;
-            }
-            if (n.Op == OCLOSURE) 
-            {
-                // Link addresses of captured variables to closure.
-                foreach (var (_, v) in n.Func.Cvars.Slice())
-                {
-                    if (v.Op == OXXX)
-                    { // unnamed out argument; see dcl.go:/^funcargs
-                        continue;
-                    }
-                    var a = v.Name.Defn;
-                    if (!v.Name.Byval())
-                    {
-                        a = nod(OADDR, a, null);
-                        a.Pos = v.Pos;
-                        e.nodeEscState(a).Loopdepth;
-
-                        e.loopdepth;
-                        a = typecheck(a, Erv);
-                    }
-                    e.escassignWhyWhere(n, a, "captured by a closure", n);
-                }
-                fallthrough = true;
-
-            }
-            if (fallthrough || n.Op == OMAKECHAN || n.Op == OMAKEMAP || n.Op == OMAKESLICE || n.Op == ONEW || n.Op == OARRAYRUNESTR || n.Op == OARRAYBYTESTR || n.Op == OSTRARRAYRUNE || n.Op == OSTRARRAYBYTE || n.Op == ORUNESTR)
-            {
-                e.track(n);
-                goto __switch_break0;
-            }
-            if (n.Op == OADDSTR)
-            {
-                e.track(n); 
-                // Arguments of OADDSTR do not escape.
-                goto __switch_break0;
-            }
-            if (n.Op == OADDR) 
-            {
-                // current loop depth is an upper bound on actual loop depth
-                // of addressed value.
-                e.track(n); 
-
-                // for &x, use loop depth of x if known.
-                // it should always be known, but if not, be conservative
-                // and keep the current loop depth.
-                if (n.Left.Op == ONAME)
-                {
-
-                    if (n.Left.Class() == PAUTO) 
-                        var nE = e.nodeEscState(n);
-                        var leftE = e.nodeEscState(n.Left);
-                        if (leftE.Loopdepth != 0L)
-                        {
-                            nE.Loopdepth = leftE.Loopdepth;
-                        } 
-
-                        // PPARAM is loop depth 1 always.
-                        // PPARAMOUT is loop depth 0 for writes
-                        // but considered loop depth 1 for address-of,
-                        // so that writing the address of one result
-                        // to another (or the same) result makes the
-                        // first result move to the heap.
-                    else if (n.Left.Class() == PPARAM || n.Left.Class() == PPARAMOUT) 
-                        nE = e.nodeEscState(n);
-                        nE.Loopdepth = 1L;
-                                    }
-                goto __switch_break0;
-            }
-
-            __switch_break0:;
-
-            lineno = lno;
-        }
-
-        // escassignWhyWhere bundles a common case of
-        // escassign(e, dst, src, e.stepAssignWhere(dst, src, reason, where))
-        private static void escassignWhyWhere(this ref EscState e, ref Node dst, ref Node src, @string reason, ref Node where)
-        {
-            ref EscStep step = default;
-            if (Debug['m'] != 0L)
-            {
-                step = e.stepAssignWhere(dst, src, reason, where);
-            }
-            e.escassign(dst, src, step);
-        }
-
-        // escassignSinkWhy bundles a common case of
-        // escassign(e, &e.theSink, src, e.stepAssign(nil, dst, src, reason))
-        private static void escassignSinkWhy(this ref EscState e, ref Node dst, ref Node src, @string reason)
-        {
-            ref EscStep step = default;
-            if (Debug['m'] != 0L)
-            {
-                step = e.stepAssign(null, dst, src, reason);
-            }
-            e.escassign(ref e.theSink, src, step);
-        }
-
-        // escassignSinkWhyWhere is escassignSinkWhy but includes a call site
-        // for accurate location reporting.
-        private static void escassignSinkWhyWhere(this ref EscState e, ref Node dst, ref Node src, @string reason, ref Node call)
-        {
-            ref EscStep step = default;
-            if (Debug['m'] != 0L)
-            {
-                step = e.stepAssignWhere(dst, src, reason, call);
-            }
-            e.escassign(ref e.theSink, src, step);
-        }
-
-        // Assert that expr somehow gets assigned to dst, if non nil.  for
-        // dst==nil, any name node expr still must be marked as being
-        // evaluated in curfn.    For expr==nil, dst must still be examined for
-        // evaluations inside it (e.g *f(x) = y)
-        private static void escassign(this ref EscState e, ref Node dst, ref Node src, ref EscStep step)
-        {
-            if (isblank(dst) || dst == null || src == null || src.Op == ONONAME || src.Op == OXXX)
-            {
-                return;
-            }
-            if (Debug['m'] > 2L)
-            {
-                fmt.Printf("%v:[%d] %v escassign: %S(%0j)[%v] = %S(%0j)[%v]\n", linestr(lineno), e.loopdepth, funcSym(Curfn), dst, dst, dst.Op, src, src, src.Op);
-            }
-            setlineno(dst);
-
-            var originalDst = dst;
-            @string dstwhy = "assigned"; 
-
-            // Analyze lhs of assignment.
-            // Replace dst with &e.theSink if we can't track it.
-
-            if (dst.Op == OARRAYLIT || dst.Op == OSLICELIT || dst.Op == OCLOSURE || dst.Op == OCONV || dst.Op == OCONVIFACE || dst.Op == OCONVNOP || dst.Op == OMAPLIT || dst.Op == OSTRUCTLIT || dst.Op == OPTRLIT || dst.Op == ODDDARG || dst.Op == OCALLPART)             else if (dst.Op == ONAME) 
-                if (dst.Class() == PEXTERN)
-                {
-                    dstwhy = "assigned to top level variable";
-                    dst = ref e.theSink;
-                }
-            else if (dst.Op == ODOT) // treat "dst.x = src" as "dst = src"
-                e.escassign(dst.Left, src, e.stepAssign(step, originalDst, src, "dot-equals"));
-                return;
-            else if (dst.Op == OINDEX) 
-                if (dst.Left.Type.IsArray())
-                {
-                    e.escassign(dst.Left, src, e.stepAssign(step, originalDst, src, "array-element-equals"));
-                    return;
-                }
-                dstwhy = "slice-element-equals";
-                dst = ref e.theSink; // lose track of dereference
-            else if (dst.Op == OIND) 
-                dstwhy = "star-equals";
-                dst = ref e.theSink; // lose track of dereference
-            else if (dst.Op == ODOTPTR) 
-                dstwhy = "star-dot-equals";
-                dst = ref e.theSink; // lose track of dereference
-
-                // lose track of key and value
-            else if (dst.Op == OINDEXMAP) 
-                e.escassign(ref e.theSink, dst.Right, e.stepAssign(null, originalDst, src, "key of map put"));
-                dstwhy = "value of map put";
-                dst = ref e.theSink;
-            else 
-                Dump("dst", dst);
-                Fatalf("escassign: unexpected dst");
-                        var lno = setlineno(src);
-            e.pdepth++;
-
-
-            if (src.Op == OADDR || src.Op == OIND || src.Op == ODOTPTR || src.Op == ONAME || src.Op == ODDDARG || src.Op == OPTRLIT || src.Op == OARRAYLIT || src.Op == OSLICELIT || src.Op == OMAPLIT || src.Op == OSTRUCTLIT || src.Op == OMAKECHAN || src.Op == OMAKEMAP || src.Op == OMAKESLICE || src.Op == OARRAYRUNESTR || src.Op == OARRAYBYTESTR || src.Op == OSTRARRAYRUNE || src.Op == OSTRARRAYBYTE || src.Op == OADDSTR || src.Op == ONEW || src.Op == OCALLPART || src.Op == ORUNESTR || src.Op == OCONVIFACE)
-            {
-                e.escflows(dst, src, e.stepAssign(step, originalDst, src, dstwhy));
-                goto __switch_break1;
-            }
-            if (src.Op == OCLOSURE) 
-            {
-                // OCLOSURE is lowered to OPTRLIT,
-                // insert OADDR to account for the additional indirection.
-                var a = nod(OADDR, src, null);
-                a.Pos = src.Pos;
-                e.nodeEscState(a).Loopdepth;
-
-                e.nodeEscState(src).Loopdepth;
-                a.Type = types.NewPtr(src.Type);
-                e.escflows(dst, a, e.stepAssign(null, originalDst, src, dstwhy)); 
-
-                // Flowing multiple returns to a single dst happens when
-                // analyzing "go f(g())": here g() flows to sink (issue 4529).
-                goto __switch_break1;
-            }
-            if (src.Op == OCALLMETH || src.Op == OCALLFUNC || src.Op == OCALLINTER)
-            {
-                foreach (var (_, n) in e.nodeEscState(src).Retval.Slice())
-                {
-                    e.escflows(dst, n, e.stepAssign(null, originalDst, n, dstwhy));
-                } 
-
-                // A non-pointer escaping from a struct does not concern us.
-                goto __switch_break1;
-            }
-            if (src.Op == ODOT)
-            {
-                if (src.Type != null && !types.Haspointers(src.Type))
-                {
-                    break;
-                }
-                fallthrough = true; 
-
-                // Conversions, field access, slice all preserve the input value.
-            }
-            if (fallthrough || src.Op == OCONV || src.Op == OCONVNOP || src.Op == ODOTMETH || src.Op == OSLICE || src.Op == OSLICE3 || src.Op == OSLICEARR || src.Op == OSLICE3ARR || src.Op == OSLICESTR) 
-            {
-                // Conversions, field access, slice all preserve the input value.
-                e.escassign(dst, src.Left, e.stepAssign(step, originalDst, src, dstwhy));
-                goto __switch_break1;
-            }
-            if (src.Op == ODOTTYPE || src.Op == ODOTTYPE2)
-            {
-                if (src.Type != null && !types.Haspointers(src.Type))
-                {
-                    break;
-                }
-                e.escassign(dst, src.Left, e.stepAssign(step, originalDst, src, dstwhy));
-                goto __switch_break1;
-            }
-            if (src.Op == OAPPEND) 
-            {
-                // Append returns first argument.
-                // Subsequent arguments are already leaked because they are operands to append.
-                e.escassign(dst, src.List.First(), e.stepAssign(step, dst, src.List.First(), dstwhy));
-                goto __switch_break1;
-            }
-            if (src.Op == OINDEX) 
-            {
-                // Index of array preserves input value.
-                if (src.Left.Type.IsArray())
-                {
-                    e.escassign(dst, src.Left, e.stepAssign(step, originalDst, src, dstwhy));
-                }
-                else
-                {
-                    e.escflows(dst, src, e.stepAssign(step, originalDst, src, dstwhy));
-                } 
-
-                // Might be pointer arithmetic, in which case
-                // the operands flow into the result.
-                // TODO(rsc): Decide what the story is here. This is unsettling.
-                goto __switch_break1;
-            }
-            if (src.Op == OADD || src.Op == OSUB || src.Op == OOR || src.Op == OXOR || src.Op == OMUL || src.Op == ODIV || src.Op == OMOD || src.Op == OLSH || src.Op == ORSH || src.Op == OAND || src.Op == OANDNOT || src.Op == OPLUS || src.Op == OMINUS || src.Op == OCOM)
-            {
-                e.escassign(dst, src.Left, e.stepAssign(step, originalDst, src, dstwhy));
-
-                e.escassign(dst, src.Right, e.stepAssign(step, originalDst, src, dstwhy));
-                goto __switch_break1;
-            }
-
-            __switch_break1:;
-
-            e.pdepth--;
-            lineno = lno;
-        }
-
-        // Common case for escapes is 16 bits 000000000xxxEEEE
-        // where commonest cases for xxx encoding in-to-out pointer
-        //  flow are 000, 001, 010, 011  and EEEE is computed Esc bits.
-        // Note width of xxx depends on value of constant
-        // bitsPerOutputInTag -- expect 2 or 3, so in practice the
-        // tag cache array is 64 or 128 long. Some entries will
-        // never be populated.
-        private static array<@string> tags = new array<@string>(1L << (int)((bitsPerOutputInTag + EscReturnBits)));
-
-        // mktag returns the string representation for an escape analysis tag.
-        private static @string mktag(long mask)
-        {
-
-            if (mask & EscMask == EscNone || mask & EscMask == EscReturn)             else 
-                Fatalf("escape mktag");
-                        if (mask < len(tags) && tags[mask] != "")
-            {
-                return tags[mask];
-            }
-            var s = fmt.Sprintf("esc:0x%x", mask);
-            if (mask < len(tags))
-            {
-                tags[mask] = s;
-            }
-            return s;
-        }
-
-        // parsetag decodes an escape analysis tag and returns the esc value.
-        private static ushort parsetag(@string note)
-        {
-            if (!strings.HasPrefix(note, "esc:"))
-            {
-                return EscUnknown;
-            }
-            var (n, _) = strconv.ParseInt(note[4L..], 0L, 0L);
-            var em = uint16(n);
-            if (em == 0L)
-            {
-                return EscNone;
-            }
-            return em;
-        }
-
-        // describeEscape returns a string describing the escape tag.
-        // The result is either one of {EscUnknown, EscNone, EscHeap} which all have no further annotation
-        // or a description of parameter flow, which takes the form of an optional "contentToHeap"
-        // indicating that the content of this parameter is leaked to the heap, followed by a sequence
-        // of level encodings separated by spaces, one for each parameter, where _ means no flow,
-        // = means direct flow, and N asterisks (*) encodes content (obtained by indirection) flow.
-        // e.g., "contentToHeap _ =" means that a parameter's content (one or more dereferences)
-        // escapes to the heap, the parameter does not leak to the first output, but does leak directly
-        // to the second output (and if there are more than two outputs, there is no flow to those.)
-        private static @string describeEscape(ushort em)
-        {
-            @string s = default;
-
-            if (em & EscMask == EscUnknown) 
-                s = "EscUnknown";
-            else if (em & EscMask == EscNone) 
-                s = "EscNone";
-            else if (em & EscMask == EscHeap) 
-                s = "EscHeap";
-            else if (em & EscMask == EscReturn) 
-                s = "EscReturn";
-                        if (em & EscContentEscapes != 0L)
-            {
-                if (s != "")
-                {
-                    s += " ";
-                }
-                s += "contentToHeap";
-            }
-            em >>= EscReturnBits;
-
-            while (em != 0L)
-            { 
-                // See encoding description above
-                if (s != "")
-                {
-                    s += " ";
-                em = em >> (int)(bitsPerOutputInTag);
-                }
-                {
-                    var embits = em & bitsMaskForTag;
-
-                    switch (embits)
-                    {
-                        case 0L: 
-                            s += "_";
-                            break;
-                        case 1L: 
-                            s += "=";
-                            break;
-                        default: 
-                            for (var i = uint16(0L); i < embits - 1L; i++)
-                            {
-                                s += "*";
-                            }
-                            break;
-                    }
-                }
-
-            }
-
-            return s;
-        }
-
-        // escassignfromtag models the input-to-output assignment flow of one of a function
-        // calls arguments, where the flow is encoded in "note".
-        private static ushort escassignfromtag(this ref EscState e, @string note, Nodes dsts, ref Node src, ref Node call)
-        {
-            var em = parsetag(note);
-            if (src.Op == OLITERAL)
-            {
-                return em;
-            }
-            if (Debug['m'] > 3L)
-            {
-                fmt.Printf("%v::assignfromtag:: src=%S, em=%s\n", linestr(lineno), src, describeEscape(em));
-            }
-            if (em == EscUnknown)
-            {
-                e.escassignSinkWhyWhere(src, src, "passed to call[argument escapes]", call);
-                return em;
-            }
-            if (em == EscNone)
-            {
-                return em;
-            } 
-
-            // If content inside parameter (reached via indirection)
-            // escapes to heap, mark as such.
-            if (em & EscContentEscapes != 0L)
-            {
-                e.escassign(ref e.theSink, e.addDereference(src), e.stepAssignWhere(src, src, "passed to call[argument content escapes]", call));
-            }
-            var em0 = em;
-            long dstsi = 0L;
-            em >>= EscReturnBits;
-
-            while (em != 0L && dstsi < dsts.Len())
-            { 
-                // Prefer the lowest-level path to the reference (for escape purposes).
-                // Two-bit encoding (for example. 1, 3, and 4 bits are other options)
-                //  01 = 0-level
-                //  10 = 1-level, (content escapes),
-                //  11 = 2-level, (content of content escapes),
-                var embits = em & bitsMaskForTag;
-                if (embits > 0L)
-                {
-                    var n = src;
-                    for (var i = uint16(0L); i < embits - 1L; i++)
-                    {
-                        n = e.addDereference(n); // encode level>0 as indirections
-                    }
-
-                    e.escassign(dsts.Index(dstsi), n, e.stepAssignWhere(dsts.Index(dstsi), src, "passed-to-and-returned-from-call", call));
-                em = em >> (int)(bitsPerOutputInTag);
-                }
-                dstsi++;
-            } 
-            // If there are too many outputs to fit in the tag,
-            // that is handled at the encoding end as EscHeap,
-            // so there is no need to check here.
+            ref Node dst = ref _addr_dst.val;
+            ref Node src = ref _addr_src.val;
  
-            // If there are too many outputs to fit in the tag,
-            // that is handled at the encoding end as EscHeap,
-            // so there is no need to check here.
+            // Detect the following special case.
+            //
+            //    func (b *Buffer) Foo() {
+            //        n, m := ...
+            //        b.buf = b.buf[n:m]
+            //    }
+            //
+            // This assignment is a no-op for escape analysis,
+            // it does not store any new pointers into b that were not already there.
+            // However, without this special case b will escape, because we assign to OIND/ODOTPTR.
+            // Here we assume that the statement will not contain calls,
+            // that is, that order will move any calls to init.
+            // Otherwise base ONAME value could change between the moments
+            // when we evaluate it for dst and for src.
 
-            if (em != 0L && dstsi >= dsts.Len())
+            // dst is ONAME dereference.
+            if (dst.Op != ODEREF && dst.Op != ODOTPTR || dst.Left.Op != ONAME)
             {
-                Fatalf("corrupt esc tag %q or messed up escretval list\n", note);
-            }
-            return em0;
-        }
+                return false;
+            } 
+            // src is a slice operation.
 
-        private static void escassignDereference(this ref EscState e, ref Node dst, ref Node src, ref EscStep step)
-        {
-            if (src.Op == OLITERAL)
-            {
-                return;
-            }
-            e.escassign(dst, e.addDereference(src), step);
-        }
-
-        // addDereference constructs a suitable OIND note applied to src.
-        // Because this is for purposes of escape accounting, not execution,
-        // some semantically dubious node combinations are (currently) possible.
-        private static ref Node addDereference(this ref EscState e, ref Node n)
-        {
-            var ind = nod(OIND, n, null);
-            e.nodeEscState(ind).Loopdepth;
-
-            e.nodeEscState(n).Loopdepth;
-            ind.Pos = n.Pos;
-            var t = n.Type;
-            if (t.IsKind(types.Tptr))
-            { 
-                // This should model our own sloppy use of OIND to encode
-                // decreasing levels of indirection; i.e., "indirecting" an array
-                // might yield the type of an element. To be enhanced...
-                t = t.Elem();
-            }
-            ind.Type = t;
-            return ind;
-        }
-
-        // escNoteOutputParamFlow encodes maxEncodedLevel/.../1/0-level flow to the vargen'th parameter.
-        // Levels greater than maxEncodedLevel are replaced with maxEncodedLevel.
-        // If the encoding cannot describe the modified input level and output number, then EscHeap is returned.
-        private static ushort escNoteOutputParamFlow(ushort e, int vargen, Level level)
-        { 
-            // Flow+level is encoded in two bits.
-            // 00 = not flow, xx = level+1 for 0 <= level <= maxEncodedLevel
-            // 16 bits for Esc allows 6x2bits or 4x3bits or 3x4bits if additional information would be useful.
-            if (level.@int() <= 0L && level.guaranteedDereference() > 0L)
-            {
-                return escMax(e | EscContentEscapes, EscNone); // At least one deref, thus only content.
-            }
-            if (level.@int() < 0L)
-            {
-                return EscHeap;
-            }
-            if (level.@int() > maxEncodedLevel)
-            { 
-                // Cannot encode larger values than maxEncodedLevel.
-                level = levelFrom(maxEncodedLevel);
-            }
-            var encoded = uint16(level.@int() + 1L);
-
-            var shift = uint(bitsPerOutputInTag * (vargen - 1L) + EscReturnBits);
-            var old = (e >> (int)(shift)) & bitsMaskForTag;
-            if (old == 0L || encoded != 0L && encoded < old)
-            {
-                old = encoded;
-            }
-            var encodedFlow = old << (int)(shift);
-            if ((encodedFlow >> (int)(shift)) & bitsMaskForTag != old)
-            { 
-                // Encoding failure defaults to heap.
-                return EscHeap;
-            }
-            return (e & ~(bitsMaskForTag << (int)(shift))) | encodedFlow;
-        }
-
-        private static void initEscRetval(this ref EscState e, ref Node call, ref types.Type fntype)
-        {
-            var cE = e.nodeEscState(call);
-            cE.Retval.Set(null); // Suspect this is not nil for indirect calls.
-            foreach (var (i, f) in fntype.Results().Fields().Slice())
-            {
-                var buf = fmt.Sprintf(".out%d", i);
-                var ret = newname(lookup(buf));
-                ret.SetAddable(false); // TODO(mdempsky): Seems suspicious.
-                ret.Type = f.Type;
-                ret.SetClass(PAUTO);
-                ret.Name.Curfn = Curfn;
-                e.nodeEscState(ret).Loopdepth;
-
-                e.loopdepth;
-                ret.Name.SetUsed(true);
-                ret.Pos = call.Pos;
-                cE.Retval.Append(ret);
-            }
-        }
-
-        // This is a bit messier than fortunate, pulled out of esc's big
-        // switch for clarity. We either have the paramnodes, which may be
-        // connected to other things through flows or we have the parameter type
-        // nodes, which may be marked "noescape". Navigating the ast is slightly
-        // different for methods vs plain functions and for imported vs
-        // this-package
-        private static void esccall(this ref EscState e, ref Node call, ref Node parent)
-        {
-            ref types.Type fntype = default;
-            bool indirect = default;
-            ref Node fn = default;
-
-            if (call.Op == OCALLFUNC) 
-                fn = call.Left;
-                fntype = fn.Type;
-                indirect = fn.Op != ONAME || fn.Class() != PFUNC;
-            else if (call.Op == OCALLMETH) 
-                fn = asNode(call.Left.Sym.Def);
-                if (fn != null)
+            if (src.Op == OSLICE || src.Op == OSLICE3 || src.Op == OSLICESTR)             else if (src.Op == OSLICEARR || src.Op == OSLICE3ARR) 
+                // Since arrays are embedded into containing object,
+                // slice of non-pointer array will introduce a new pointer into b that was not already there
+                // (pointer to b itself). After such assignment, if b contents escape,
+                // b escapes as well. If we ignore such OSLICEARR, we will conclude
+                // that b does not escape when b contents do.
+                //
+                // Pointer to an array is OK since it's not stored inside b directly.
+                // For slicing an array (not pointer to array), there is an implicit OADDR.
+                // We check that to determine non-pointer array slicing.
+                if (src.Left.Op == OADDR)
                 {
-                    fntype = fn.Type;
+                    return false;
                 }
-                else
-                {
-                    fntype = call.Left.Type;
-                }
-            else if (call.Op == OCALLINTER) 
-                fntype = call.Left.Type;
-                indirect = true;
+
             else 
-                Fatalf("esccall");
-                        var argList = call.List;
-            if (argList.Len() == 1L)
+                return false;
+            // slice is applied to ONAME dereference.
+            if (src.Left.Op != ODEREF && src.Left.Op != ODOTPTR || src.Left.Left.Op != ONAME)
             {
-                var arg = argList.First();
-                if (arg.Type.IsFuncArgStruct())
-                { // f(g())
-                    argList = e.nodeEscState(arg).Retval;
-                }
-            }
-            var args = argList.Slice();
+                return false;
+            } 
+            // dst and src reference the same base ONAME.
+            return dst.Left == src.Left.Left;
 
-            if (indirect)
-            { 
-                // We know nothing!
-                // Leak all the parameters
-                {
-                    var arg__prev1 = arg;
+        }
 
-                    foreach (var (_, __arg) in args)
-                    {
-                        arg = __arg;
-                        e.escassignSinkWhy(call, arg, "parameter to indirect call");
-                        if (Debug['m'] > 3L)
-                        {
-                            fmt.Printf("%v::esccall:: indirect call <- %S, untracked\n", linestr(lineno), arg);
-                        }
-                    } 
-                    // Set up bogus outputs
+        // isSelfAssign reports whether assignment from src to dst can
+        // be ignored by the escape analysis as it's effectively a self-assignment.
+        private static bool isSelfAssign(ptr<Node> _addr_dst, ptr<Node> _addr_src)
+        {
+            ref Node dst = ref _addr_dst.val;
+            ref Node src = ref _addr_src.val;
 
-                    arg = arg__prev1;
-                }
-
-                e.initEscRetval(call, fntype); 
-                // If there is a receiver, it also leaks to heap.
-                if (call.Op != OCALLFUNC)
-                {
-                    var rf = fntype.Recv();
-                    var r = call.Left.Left;
-                    if (types.Haspointers(rf.Type))
-                    {
-                        e.escassignSinkWhy(call, r, "receiver in indirect call");
-                    }
-                }
-                else
-                { // indirect and OCALLFUNC = could be captured variables, too. (#14409)
-                    var rets = e.nodeEscState(call).Retval.Slice();
-                    foreach (var (_, ret) in rets)
-                    {
-                        e.escassignDereference(ret, fn, e.stepAssignWhere(ret, fn, "captured by called closure", call));
-                    }
-                }
-                return;
-            }
-            var cE = e.nodeEscState(call);
-            if (fn != null && fn.Op == ONAME && fn.Class() == PFUNC && fn.Name.Defn != null && fn.Name.Defn.Nbody.Len() != 0L && fn.Name.Param.Ntype != null && fn.Name.Defn.Esc < EscFuncTagged)
+            if (isSliceSelfAssign(_addr_dst, _addr_src))
             {
-                if (Debug['m'] > 3L)
-                {
-                    fmt.Printf("%v::esccall:: %S in recursive group\n", linestr(lineno), call);
-                } 
-
-                // function in same mutually recursive group. Incorporate into flow graph.
-                //        print("esc local fn: %N\n", fn.Func.Ntype);
-                if (fn.Name.Defn.Esc == EscFuncUnknown || cE.Retval.Len() != 0L)
-                {
-                    Fatalf("graph inconsistency");
-                }
-                var sawRcvr = false;
-                foreach (var (_, n) in fn.Name.Defn.Func.Dcl)
-                {
-
-                    if (n.Class() == PPARAM) 
-                        if (call.Op != OCALLFUNC && !sawRcvr)
-                        {
-                            e.escassignWhyWhere(n, call.Left.Left, "call receiver", call);
-                            sawRcvr = true;
-                            continue;
-                        }
-                        if (len(args) == 0L)
-                        {
-                            continue;
-                        }
-                        arg = args[0L];
-                        if (n.Isddd() && !call.Isddd())
-                        { 
-                            // Introduce ODDDARG node to represent ... allocation.
-                            arg = nod(ODDDARG, null, null);
-                            var arr = types.NewArray(n.Type.Elem(), int64(len(args)));
-                            arg.Type = types.NewPtr(arr); // make pointer so it will be tracked
-                            arg.Pos = call.Pos;
-                            e.track(arg);
-                            call.Right = arg;
-                        }
-                        e.escassignWhyWhere(n, arg, "arg to recursive call", call); // TODO this message needs help.
-                        if (arg == args[0L])
-                        {
-                            args = args[1L..];
-                            continue;
-                        } 
-                        // "..." arguments are untracked
-                        {
-                            var a__prev2 = a;
-
-                            foreach (var (_, __a) in args)
-                            {
-                                a = __a;
-                                if (Debug['m'] > 3L)
-                                {
-                                    fmt.Printf("%v::esccall:: ... <- %S, untracked\n", linestr(lineno), a);
-                                }
-                                e.escassignSinkWhyWhere(arg, a, "... arg to recursive call", call);
-                            } 
-                            // No more PPARAM processing, but keep
-                            // going for PPARAMOUT.
-
-                            a = a__prev2;
-                        }
-
-                        args = null;
-                    else if (n.Class() == PPARAMOUT) 
-                        cE.Retval.Append(n);
-                                    }
-                return;
+                return true;
             } 
 
-            // Imported or completely analyzed function. Use the escape tags.
-            if (cE.Retval.Len() != 0L)
+            // Detect trivial assignments that assign back to the same object.
+            //
+            // It covers these cases:
+            //    val.x = val.y
+            //    val.x[i] = val.y[j]
+            //    val.x1.x2 = val.x1.y2
+            //    ... etc
+            //
+            // These assignments do not change assigned object lifetime.
+            if (dst == null || src == null || dst.Op != src.Op)
             {
-                Fatalf("esc already decorated call %+v\n", call);
+                return false;
             }
-            if (Debug['m'] > 3L)
+
+
+            if (dst.Op == ODOT || dst.Op == ODOTPTR)             else if (dst.Op == OINDEX) 
+                if (mayAffectMemory(_addr_dst.Right) || mayAffectMemory(_addr_src.Right))
+                {
+                    return false;
+                }
+
+            else 
+                return false;
+            // The expression prefix must be both "safe" and identical.
+            return samesafeexpr(dst.Left, src.Left);
+
+        }
+
+        // mayAffectMemory reports whether evaluation of n may affect the program's
+        // memory state. If the expression can't affect memory state, then it can be
+        // safely ignored by the escape analysis.
+        private static bool mayAffectMemory(ptr<Node> _addr_n)
+        {
+            ref Node n = ref _addr_n.val;
+ 
+            // We may want to use a list of "memory safe" ops instead of generally
+            // "side-effect free", which would include all calls and other ops that can
+            // allocate or change global state. For now, it's safer to start with the latter.
+            //
+            // We're ignoring things like division by zero, index out of range,
+            // and nil pointer dereference here.
+
+            if (n.Op == ONAME || n.Op == OCLOSUREVAR || n.Op == OLITERAL) 
+                return false; 
+
+                // Left+Right group.
+            else if (n.Op == OINDEX || n.Op == OADD || n.Op == OSUB || n.Op == OOR || n.Op == OXOR || n.Op == OMUL || n.Op == OLSH || n.Op == ORSH || n.Op == OAND || n.Op == OANDNOT || n.Op == ODIV || n.Op == OMOD) 
+                return mayAffectMemory(_addr_n.Left) || mayAffectMemory(_addr_n.Right); 
+
+                // Left group.
+            else if (n.Op == ODOT || n.Op == ODOTPTR || n.Op == ODEREF || n.Op == OCONVNOP || n.Op == OCONV || n.Op == OLEN || n.Op == OCAP || n.Op == ONOT || n.Op == OBITNOT || n.Op == OPLUS || n.Op == ONEG || n.Op == OALIGNOF || n.Op == OOFFSETOF || n.Op == OSIZEOF) 
+                return mayAffectMemory(_addr_n.Left);
+            else 
+                return true;
+            
+        }
+
+        private static bool mustHeapAlloc(ptr<Node> _addr_n)
+        {
+            ref Node n = ref _addr_n.val;
+
+            if (n.Type == null)
             {
-                fmt.Printf("%v::esccall:: %S not recursive\n", linestr(lineno), call);
+                return false;
             } 
 
-            // set up out list on this call node with dummy auto ONAMES in the current (calling) function.
-            e.initEscRetval(call, fntype); 
-
-            //    print("esc analyzed fn: %#N (%+T) returning (%+H)\n", fn, fntype, e.nodeEscState(call).Retval);
-
-            // Receiver.
-            if (call.Op != OCALLFUNC)
+            // Parameters are always passed via the stack.
+            if (n.Op == ONAME && (n.Class() == PPARAM || n.Class() == PPARAMOUT))
             {
-                rf = fntype.Recv();
-                r = call.Left.Left;
-                if (types.Haspointers(rf.Type))
-                {
-                    e.escassignfromtag(rf.Note, cE.Retval, r, call);
-                }
+                return false;
             }
-            foreach (var (i, param) in fntype.Params().FieldSlice())
+
+            if (n.Type.Width > maxStackVarSize)
             {
-                var note = param.Note;
-                arg = default;
-                if (param.Isddd() && !call.Isddd())
-                {
-                    var rest = args[i..];
-                    if (len(rest) == 0L)
-                    {
-                        break;
-                    } 
-
-                    // Introduce ODDDARG node to represent ... allocation.
-                    arg = nod(ODDDARG, null, null);
-                    arg.Pos = call.Pos;
-                    arr = types.NewArray(param.Type.Elem(), int64(len(rest)));
-                    arg.Type = types.NewPtr(arr); // make pointer so it will be tracked
-                    e.track(arg);
-                    call.Right = arg; 
-
-                    // Store arguments into slice for ... arg.
-                    {
-                        var a__prev2 = a;
-
-                        foreach (var (_, __a) in rest)
-                        {
-                            a = __a;
-                            if (Debug['m'] > 3L)
-                            {
-                                fmt.Printf("%v::esccall:: ... <- %S\n", linestr(lineno), a);
-                            }
-                            if (note == uintptrEscapesTag)
-                            {
-                                e.escassignSinkWhyWhere(arg, a, "arg to uintptrescapes ...", call);
-                            }
-                            else
-                            {
-                                e.escassignWhyWhere(arg, a, "arg to ...", call);
-                            }
-                        }
-                else
-
-                        a = a__prev2;
-                    }
-
-                }                {
-                    arg = args[i];
-                    if (note == uintptrEscapesTag)
-                    {
-                        e.escassignSinkWhy(arg, arg, "escaping uintptr");
-                    }
-                }
-                if (types.Haspointers(param.Type) && e.escassignfromtag(note, cE.Retval, arg, call) & EscMask == EscNone && parent.Op != ODEFER && parent.Op != OPROC)
-                {
-                    var a = arg;
-                    while (a.Op == OCONVNOP)
-                    {
-                        a = a.Left;
-                    }
-
-
-                    // The callee has already been analyzed, so its arguments have esc tags.
-                    // The argument is marked as not escaping at all.
-                    // Record that fact so that any temporary used for
-                    // synthesizing this expression can be reclaimed when
-                    // the function returns.
-                    // This 'noescape' is even stronger than the usual esc == EscNone.
-                    // arg.Esc == EscNone means that arg does not escape the current function.
-                    // arg.SetNoescape(true) here means that arg does not escape this statement
-                    // in the current function.
-                    if (a.Op == OCALLPART || a.Op == OCLOSURE || a.Op == ODDDARG || a.Op == OARRAYLIT || a.Op == OSLICELIT || a.Op == OPTRLIT || a.Op == OSTRUCTLIT) 
-                        a.SetNoescape(true);
-                                    }
+                return true;
             }
-        }
 
-        // escflows records the link src->dst in dst, throwing out some quick wins,
-        // and also ensuring that dst is noted as a flow destination.
-        private static void escflows(this ref EscState e, ref Node dst, ref Node src, ref EscStep why)
-        {
-            if (dst == null || src == null || dst == src)
+            if ((n.Op == ONEW || n.Op == OPTRLIT) && n.Type.Elem().Width >= maxImplicitStackVarSize)
             {
-                return;
-            } 
+                return true;
+            }
 
-            // Don't bother building a graph for scalars.
-            if (src.Type != null && !types.Haspointers(src.Type) && !isReflectHeaderDataField(src))
+            if (n.Op == OMAKESLICE && !isSmallMakeSlice(n))
             {
-                if (Debug['m'] > 3L)
-                {
-                    fmt.Printf("%v::NOT flows:: %S <- %S\n", linestr(lineno), dst, src);
-                }
-                return;
-            }
-            if (Debug['m'] > 3L)
-            {
-                fmt.Printf("%v::flows:: %S <- %S\n", linestr(lineno), dst, src);
-            }
-            var dstE = e.nodeEscState(dst);
-            if (len(dstE.Flowsrc) == 0L)
-            {
-                e.dsts = append(e.dsts, dst);
-                e.dstcount++;
-            }
-            e.edgecount++;
-
-            if (why == null)
-            {
-                dstE.Flowsrc = append(dstE.Flowsrc, new EscStep(src:src));
-            }
-            else
-            {
-                var starwhy = why.Value;
-                starwhy.src = src; // TODO: need to reconcile this w/ needs of explanations.
-                dstE.Flowsrc = append(dstE.Flowsrc, starwhy);
-            }
-        }
-
-        // Whenever we hit a reference node, the level goes up by one, and whenever
-        // we hit an OADDR, the level goes down by one. as long as we're on a level > 0
-        // finding an OADDR just means we're following the upstream of a dereference,
-        // so this address doesn't leak (yet).
-        // If level == 0, it means the /value/ of this node can reach the root of this flood.
-        // so if this node is an OADDR, its argument should be marked as escaping iff
-        // its currfn/e.loopdepth are different from the flood's root.
-        // Once an object has been moved to the heap, all of its upstream should be considered
-        // escaping to the global scope.
-        private static void escflood(this ref EscState e, ref Node dst)
-        {
-
-            if (dst.Op == ONAME || dst.Op == OCLOSURE)             else 
-                return;
-                        var dstE = e.nodeEscState(dst);
-            if (Debug['m'] > 2L)
-            {
-                fmt.Printf("\nescflood:%d: dst %S scope:%v[%d]\n", e.walkgen, dst, e.curfnSym(dst), dstE.Loopdepth);
-            }
-            foreach (var (i) in dstE.Flowsrc)
-            {
-                e.walkgen++;
-                var s = ref dstE.Flowsrc[i];
-                s.parent = null;
-                e.escwalk(levelFrom(0L), dst, s.src, s);
-            }
-        }
-
-        // funcOutputAndInput reports whether dst and src correspond to output and input parameters of the same function.
-        private static bool funcOutputAndInput(ref Node dst, ref Node src)
-        { 
-            // Note if dst is marked as escaping, then "returned" is too weak.
-            return dst.Op == ONAME && dst.Class() == PPARAMOUT && src.Op == ONAME && src.Class() == PPARAM && src.Name.Curfn == dst.Name.Curfn;
-        }
-
-        private static void describe(this ref EscStep es, ref Node src)
-        {
-            if (Debug['m'] < 2L)
-            {
-                return;
-            }
-            var step0 = es;
-            {
-                var step__prev1 = step;
-
-                var step = step0;
-
-                while (step != null && !step.busy)
-                { 
-                    // TODO: We get cycles. Trigger is i = &i (where var i interface{})
-                    step.busy = true; 
-                    // The trail is a little odd because of how the
-                    // graph is constructed.  The link to the current
-                    // Node is parent.src unless parent is nil in which
-                    // case it is step.dst.
-                    var nextDest = step.parent;
-                    var dst = step.dst;
-                    var where = step.where;
-                    if (nextDest != null)
-                    {
-                        dst = nextDest.src;
-                    step = step.parent;
-                    }
-                    if (where == null)
-                    {
-                        where = dst;
-                    }
-                    Warnl(src.Pos, "\tfrom %v (%s) at %s", dst, step.why, where.Line());
-                }
-
-
-                step = step__prev1;
-            }
-            {
-                var step__prev1 = step;
-
-                step = step0;
-
-                while (step != null && step.busy)
-                {
-                    step.busy = false;
-                    step = step.parent;
-                }
-
-
-                step = step__prev1;
-            }
-        }
-
-        public static readonly long NOTALOOPDEPTH = -1L;
-
-
-
-        private static void escwalk(this ref EscState e, Level level, ref Node dst, ref Node src, ref EscStep step)
-        {
-            e.escwalkBody(level, dst, src, step, NOTALOOPDEPTH);
-        }
-
-        private static void escwalkBody(this ref EscState e, Level level, ref Node dst, ref Node src, ref EscStep step, int extraloopdepth)
-        {
-            if (src.Op == OLITERAL)
-            {
-                return;
-            }
-            var srcE = e.nodeEscState(src);
-            if (srcE.Walkgen == e.walkgen)
-            { 
-                // Esclevels are vectors, do not compare as integers,
-                // and must use "min" of old and new to guarantee
-                // convergence.
-                level = level.min(srcE.Level);
-                if (level == srcE.Level)
-                { 
-                    // Have we been here already with an extraloopdepth,
-                    // or is the extraloopdepth provided no improvement on
-                    // what's already been seen?
-                    if (srcE.Maxextraloopdepth >= extraloopdepth || srcE.Loopdepth >= extraloopdepth)
-                    {
-                        return;
-                    }
-                    srcE.Maxextraloopdepth = extraloopdepth;
-                }
-            }
-            else
-            { // srcE.Walkgen < e.walkgen -- first time, reset this.
-                srcE.Maxextraloopdepth = NOTALOOPDEPTH;
-            }
-            srcE.Walkgen = e.walkgen;
-            srcE.Level = level;
-            var modSrcLoopdepth = srcE.Loopdepth;
-
-            if (extraloopdepth > modSrcLoopdepth)
-            {
-                modSrcLoopdepth = extraloopdepth;
-            }
-            if (Debug['m'] > 2L)
-            {
-                fmt.Printf("escwalk: level:%d depth:%d %.*s op=%v %S(%0j) scope:%v[%d] extraloopdepth=%v\n", level, e.pdepth, e.pdepth, "\t\t\t\t\t\t\t\t\t\t", src.Op, src, src, e.curfnSym(src), srcE.Loopdepth, extraloopdepth);
-            }
-            e.pdepth++; 
-
-            // Input parameter flowing to output parameter?
-            bool leaks = default;
-            ushort osrcesc = default; // used to prevent duplicate error messages
-
-            var dstE = e.nodeEscState(dst);
-            if (funcOutputAndInput(dst, src) && src.Esc & EscMask < EscHeap && dst.Esc != EscHeap)
-            { 
-                // This case handles:
-                // 1. return in
-                // 2. return &in
-                // 3. tmp := in; return &tmp
-                // 4. return *in
-                if (Debug['m'] != 0L)
-                {
-                    if (Debug['m'] <= 2L)
-                    {
-                        Warnl(src.Pos, "leaking param: %S to result %v level=%v", src, dst.Sym, level.@int());
-                        step.describe(src);
-                    }
-                    else
-                    {
-                        Warnl(src.Pos, "leaking param: %S to result %v level=%v", src, dst.Sym, level);
-                    }
-                }
-                if (src.Esc & EscMask != EscReturn)
-                {
-                    src.Esc = EscReturn | src.Esc & EscContentEscapes;
-                }
-                src.Esc = escNoteOutputParamFlow(src.Esc, dst.Name.Vargen, level);
-                goto recurse;
-            } 
-
-            // If parameter content escapes to heap, set EscContentEscapes
-            // Note minor confusion around escape from pointer-to-struct vs escape from struct
-            if (dst.Esc == EscHeap && src.Op == ONAME && src.Class() == PPARAM && src.Esc & EscMask < EscHeap && level.@int() > 0L)
-            {
-                src.Esc = escMax(EscContentEscapes | src.Esc, EscNone);
-                if (Debug['m'] != 0L)
-                {
-                    Warnl(src.Pos, "mark escaped content: %S", src);
-                    step.describe(src);
-                }
-            }
-            leaks = level.@int() <= 0L && level.guaranteedDereference() <= 0L && dstE.Loopdepth < modSrcLoopdepth;
-            leaks = leaks || level.@int() <= 0L && dst.Esc & EscMask == EscHeap;
-
-            osrcesc = src.Esc;
-
-            if (src.Op == ONAME)
-            {
-                if (src.Class() == PPARAM && (leaks || dstE.Loopdepth < 0L) && src.Esc & EscMask < EscHeap)
-                {
-                    if (level.guaranteedDereference() > 0L)
-                    {
-                        src.Esc = escMax(EscContentEscapes | src.Esc, EscNone);
-                        if (Debug['m'] != 0L)
-                        {
-                            if (Debug['m'] <= 2L)
-                            {
-                                if (osrcesc != src.Esc)
-                                {
-                                    Warnl(src.Pos, "leaking param content: %S", src);
-                                    step.describe(src);
-                                }
-                            }
-                            else
-                            {
-                                Warnl(src.Pos, "leaking param content: %S level=%v dst.eld=%v src.eld=%v dst=%S", src, level, dstE.Loopdepth, modSrcLoopdepth, dst);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        src.Esc = EscHeap;
-                        if (Debug['m'] != 0L)
-                        {
-                            if (Debug['m'] <= 2L)
-                            {
-                                Warnl(src.Pos, "leaking param: %S", src);
-                                step.describe(src);
-                            }
-                            else
-                            {
-                                Warnl(src.Pos, "leaking param: %S level=%v dst.eld=%v src.eld=%v dst=%S", src, level, dstE.Loopdepth, modSrcLoopdepth, dst);
-                            }
-                        }
-                    }
-                } 
-
-                // Treat a captured closure variable as equivalent to the
-                // original variable.
-                if (src.IsClosureVar())
-                {
-                    if (leaks && Debug['m'] != 0L)
-                    {
-                        Warnl(src.Pos, "leaking closure reference %S", src);
-                        step.describe(src);
-                    }
-                    e.escwalk(level, dst, src.Name.Defn, e.stepWalk(dst, src.Name.Defn, "closure-var", step));
-                }
-                goto __switch_break2;
-            }
-            if (src.Op == OPTRLIT || src.Op == OADDR)
-            {
-                @string why = "pointer literal";
-                if (src.Op == OADDR)
-                {
-                    why = "address-of";
-                }
-                if (leaks)
-                {
-                    src.Esc = EscHeap;
-                    if (Debug['m'] != 0L && osrcesc != src.Esc)
-                    {
-                        var p = src;
-                        if (p.Left.Op == OCLOSURE)
-                        {
-                            p = p.Left; // merely to satisfy error messages in tests
-                        }
-                        if (Debug['m'] > 2L)
-                        {
-                            Warnl(src.Pos, "%S escapes to heap, level=%v, dst=%v dst.eld=%v, src.eld=%v", p, level, dst, dstE.Loopdepth, modSrcLoopdepth);
-                        }
-                        else
-                        {
-                            Warnl(src.Pos, "%S escapes to heap", p);
-                            step.describe(src);
-                        }
-                    }
-                    addrescapes(src.Left);
-                    e.escwalkBody(level.dec(), dst, src.Left, e.stepWalk(dst, src.Left, why, step), modSrcLoopdepth);
-                    extraloopdepth = modSrcLoopdepth; // passes to recursive case, seems likely a no-op
-                }
-                else
-                {
-                    e.escwalk(level.dec(), dst, src.Left, e.stepWalk(dst, src.Left, why, step));
-                }
-                goto __switch_break2;
-            }
-            if (src.Op == OAPPEND)
-            {
-                e.escwalk(level, dst, src.List.First(), e.stepWalk(dst, src.List.First(), "append-first-arg", step));
-                goto __switch_break2;
-            }
-            if (src.Op == ODDDARG)
-            {
-                if (leaks)
-                {
-                    src.Esc = EscHeap;
-                    if (Debug['m'] != 0L && osrcesc != src.Esc)
-                    {
-                        Warnl(src.Pos, "%S escapes to heap", src);
-                        step.describe(src);
-                    }
-                    extraloopdepth = modSrcLoopdepth;
-                } 
-                // similar to a slice arraylit and its args.
-                level = level.dec();
-                goto __switch_break2;
-            }
-            if (src.Op == OSLICELIT)
-            {
-                foreach (var (_, elt) in src.List.Slice())
-                {
-                    if (elt.Op == OKEY)
-                    {
-                        elt = elt.Right;
-                    }
-                    e.escwalk(level.dec(), dst, elt, e.stepWalk(dst, elt, "slice-literal-element", step));
-                }
-                fallthrough = true;
-
-            }
-            if (fallthrough || src.Op == OMAKECHAN || src.Op == OMAKEMAP || src.Op == OMAKESLICE || src.Op == OARRAYRUNESTR || src.Op == OARRAYBYTESTR || src.Op == OSTRARRAYRUNE || src.Op == OSTRARRAYBYTE || src.Op == OADDSTR || src.Op == OMAPLIT || src.Op == ONEW || src.Op == OCLOSURE || src.Op == OCALLPART || src.Op == ORUNESTR || src.Op == OCONVIFACE)
-            {
-                if (leaks)
-                {
-                    src.Esc = EscHeap;
-                    if (Debug['m'] != 0L && osrcesc != src.Esc)
-                    {
-                        Warnl(src.Pos, "%S escapes to heap", src);
-                        step.describe(src);
-                    }
-                    extraloopdepth = modSrcLoopdepth;
-                }
-                goto __switch_break2;
-            }
-            if (src.Op == ODOT || src.Op == ODOTTYPE)
-            {
-                e.escwalk(level, dst, src.Left, e.stepWalk(dst, src.Left, "dot", step));
-                goto __switch_break2;
-            }
-            if (src.Op == OSLICE || src.Op == OSLICEARR || src.Op == OSLICE3 || src.Op == OSLICE3ARR || src.Op == OSLICESTR)
-            {
-                e.escwalk(level, dst, src.Left, e.stepWalk(dst, src.Left, "slice", step));
-                goto __switch_break2;
-            }
-            if (src.Op == OINDEX)
-            {
-                if (src.Left.Type.IsArray())
-                {
-                    e.escwalk(level, dst, src.Left, e.stepWalk(dst, src.Left, "fixed-array-index-of", step));
-                    break;
-                }
-                fallthrough = true;
-
-            }
-            if (fallthrough || src.Op == ODOTPTR)
-            {
-                e.escwalk(level.inc(), dst, src.Left, e.stepWalk(dst, src.Left, "dot of pointer", step));
-                goto __switch_break2;
-            }
-            if (src.Op == OINDEXMAP)
-            {
-                e.escwalk(level.inc(), dst, src.Left, e.stepWalk(dst, src.Left, "map index", step));
-                goto __switch_break2;
-            }
-            if (src.Op == OIND)
-            {
-                e.escwalk(level.inc(), dst, src.Left, e.stepWalk(dst, src.Left, "indirection", step)); 
-
-                // In this case a link went directly to a call, but should really go
-                // to the dummy .outN outputs that were created for the call that
-                // themselves link to the inputs with levels adjusted.
-                // See e.g. #10466
-                // This can only happen with functions returning a single result.
-                goto __switch_break2;
-            }
-            if (src.Op == OCALLMETH || src.Op == OCALLFUNC || src.Op == OCALLINTER)
-            {
-                if (srcE.Retval.Len() != 0L)
-                {
-                    if (Debug['m'] > 2L)
-                    {
-                        fmt.Printf("%v:[%d] dst %S escwalk replace src: %S with %S\n", linestr(lineno), e.loopdepth, dst, src, srcE.Retval.First());
-                    }
-                    src = srcE.Retval.First();
-                    srcE = e.nodeEscState(src);
-                }
-                goto __switch_break2;
+                return true;
             }
 
-            __switch_break2:;
+            return false;
 
-recurse:
-
-            level = level.copy();
-            foreach (var (i) in srcE.Flowsrc)
-            {
-                var s = ref srcE.Flowsrc[i];
-                s.parent = step;
-                e.escwalkBody(level, dst, s.src, s, extraloopdepth);
-                s.parent = null;
-            }
-            e.pdepth--;
         }
 
         // addrescapes tags node n as having had its address taken
         // by "increasing" the "value" of n.Esc to EscHeap.
         // Storage is allocated as necessary to allow the address
         // to be taken.
-        private static void addrescapes(ref Node n)
+        private static void addrescapes(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
 
-            if (n.Op == OIND || n.Op == ODOTPTR)             else if (n.Op == ONAME) 
+
+            if (n.Op == ODEREF || n.Op == ODOTPTR)             else if (n.Op == ONAME) 
                 if (n == nodfp)
                 {
                     break;
@@ -2561,11 +254,12 @@ recurse:
                 } 
 
                 // If a closure reference escapes, mark the outer variable as escaping.
-                if (n.IsClosureVar())
+                if (n.Name.IsClosureVar())
                 {
-                    addrescapes(n.Name.Defn);
+                    addrescapes(_addr_n.Name.Defn);
                     break;
                 }
+
                 if (n.Class() != PPARAM && n.Class() != PPARAMOUT && n.Class() != PAUTO)
                 {
                     break;
@@ -2589,9 +283,10 @@ recurse:
                 {
                     Curfn = Curfn.Func.Closure;
                 }
+
                 var ln = lineno;
                 lineno = Curfn.Pos;
-                moveToHeap(n);
+                moveToHeap(_addr_n);
                 Curfn = oldfn;
                 lineno = ln; 
 
@@ -2603,22 +298,27 @@ recurse:
             else if (n.Op == ODOT || n.Op == OINDEX || n.Op == OPAREN || n.Op == OCONVNOP) 
                 if (!n.Left.Type.IsSlice())
                 {
-                    addrescapes(n.Left);
+                    addrescapes(_addr_n.Left);
                 }
+
             else             
         }
 
         // moveToHeap records the parameter or local variable n as moved to the heap.
-        private static void moveToHeap(ref Node n)
+        private static void moveToHeap(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
             if (Debug['r'] != 0L)
             {
                 Dump("MOVE", n);
             }
+
             if (compiling_runtime)
             {
-                yyerror("%v escapes to heap, not allowed in runtime.", n);
+                yyerror("%v escapes to heap, not allowed in runtime", n);
             }
+
             if (n.Class() == PAUTOHEAP)
             {
                 Dump("n", n);
@@ -2652,7 +352,6 @@ recurse:
                 // and substitute that copy into the function declaration list
                 // so that analyses of the local (on-stack) variables use it.
                 var stackcopy = newname(n.Sym);
-                stackcopy.SetAddable(false);
                 stackcopy.Type = n.Type;
                 stackcopy.Xoffset = n.Xoffset;
                 stackcopy.SetClass(n.Class());
@@ -2664,8 +363,10 @@ recurse:
                     // Thus, we need the pointer to the heap copy always available so the
                     // post-deferreturn code can copy the return value back to the stack.
                     // See issue 16095.
-                    heapaddr.SetIsOutputParamHeapAddr(true);
+                    heapaddr.Name.SetIsOutputParamHeapAddr(true);
+
                 }
+
                 n.Name.Param.Stackcopy = stackcopy; 
 
                 // Substitute the stackcopy into the function variable list so that
@@ -2686,12 +387,15 @@ recurse:
                     {
                         break;
                     }
+
                 }
                 if (!found)
                 {
                     Fatalf("cannot find %v in local variable list", n);
                 }
+
                 Curfn.Func.Dcl = append(Curfn.Func.Dcl, n);
+
             } 
 
             // Modify n in place so that uses of n now mean indirection of the heapaddr.
@@ -2701,160 +405,195 @@ recurse:
             n.Esc = EscHeap;
             if (Debug['m'] != 0L)
             {
-                fmt.Printf("%v: moved to heap: %v\n", n.Line(), n);
+                Warnl(n.Pos, "moved to heap: %v", n);
             }
+
         }
 
         // This special tag is applied to uintptr variables
         // that we believe may hold unsafe.Pointers for
         // calls into assembly functions.
-        // It is logically a constant, but using a var
-        // lets us take the address below to get a *string.
-        private static @string unsafeUintptrTag = "unsafe-uintptr";
+        private static readonly @string unsafeUintptrTag = (@string)"unsafe-uintptr";
 
         // This special tag is applied to uintptr parameters of functions
         // marked go:uintptrescapes.
-        private static readonly @string uintptrEscapesTag = "uintptr-escapes";
+
+
+        // This special tag is applied to uintptr parameters of functions
+        // marked go:uintptrescapes.
+        private static readonly @string uintptrEscapesTag = (@string)"uintptr-escapes";
 
 
 
-        private static void esctag(this ref EscState e, ref Node fn)
+        private static @string paramTag(this ptr<Escape> _addr_e, ptr<Node> _addr_fn, long narg, ptr<types.Field> _addr_f)
         {
-            fn.Esc = EscFuncTagged;
+            ref Escape e = ref _addr_e.val;
+            ref Node fn = ref _addr_fn.val;
+            ref types.Field f = ref _addr_f.val;
 
-            Func<ref types.Sym, long, @string> name = (s, narg) =>
+            Func<@string> name = () =>
             {
-                if (s != null)
+                if (f.Sym != null)
                 {
-                    return s.Name;
+                    return f.Sym.Name;
                 }
+
                 return fmt.Sprintf("arg#%d", narg);
-            } 
 
-            // External functions are assumed unsafe,
-            // unless //go:noescape is given before the declaration.
-; 
+            }
+;
 
-            // External functions are assumed unsafe,
-            // unless //go:noescape is given before the declaration.
             if (fn.Nbody.Len() == 0L)
-            {
-                if (fn.Noescape())
-                {
-                    {
-                        var f__prev1 = f;
-
-                        foreach (var (_, __f) in fn.Type.Params().Fields().Slice())
-                        {
-                            f = __f;
-                            if (types.Haspointers(f.Type))
-                            {
-                                f.Note = mktag(EscNone);
-                            }
-                        }
-
-                        f = f__prev1;
-                    }
-
-                } 
-
+            { 
                 // Assume that uintptr arguments must be held live across the call.
                 // This is most important for syscall.Syscall.
                 // See golang.org/issue/13372.
                 // This really doesn't have much to do with escape analysis per se,
                 // but we are reusing the ability to annotate an individual function
                 // argument and pass those annotations along to importing code.
-                long narg = 0L;
+                if (f.Type.Etype == TUINTPTR)
                 {
-                    var f__prev1 = f;
-
-                    foreach (var (_, __f) in fn.Type.Params().Fields().Slice())
+                    if (Debug['m'] != 0L)
                     {
-                        f = __f;
-                        narg++;
-                        if (f.Type.Etype == TUINTPTR)
-                        {
-                            if (Debug['m'] != 0L)
-                            {
-                                Warnl(fn.Pos, "%v assuming %v is unsafe uintptr", funcSym(fn), name(f.Sym, narg));
-                            }
-                            f.Note = unsafeUintptrTag;
-                        }
+                        Warnl(f.Pos, "assuming %v is unsafe uintptr", name());
                     }
 
-                    f = f__prev1;
+                    return unsafeUintptrTag;
+
                 }
 
-                return;
+                if (!types.Haspointers(f.Type))
+                { // don't bother tagging for scalars
+                    return "";
+
+                }
+
+                EscLeaks esc = default; 
+
+                // External functions are assumed unsafe, unless
+                // //go:noescape is given before the declaration.
+                if (fn.Func.Pragma & Noescape != 0L)
+                {
+                    if (Debug['m'] != 0L && f.Sym != null)
+                    {
+                        Warnl(f.Pos, "%v does not escape", name());
+                    }
+
+                }
+                else
+                {
+                    if (Debug['m'] != 0L && f.Sym != null)
+                    {
+                        Warnl(f.Pos, "leaking param: %v", name());
+                    }
+
+                    esc.AddHeap(0L);
+
+                }
+
+                return esc.Encode();
+
             }
+
             if (fn.Func.Pragma & UintptrEscapes != 0L)
             {
-                narg = 0L;
+                if (f.Type.Etype == TUINTPTR)
                 {
-                    var f__prev1 = f;
-
-                    foreach (var (_, __f) in fn.Type.Params().Fields().Slice())
+                    if (Debug['m'] != 0L)
                     {
-                        f = __f;
-                        narg++;
-                        if (f.Type.Etype == TUINTPTR)
-                        {
-                            if (Debug['m'] != 0L)
-                            {
-                                Warnl(fn.Pos, "%v marking %v as escaping uintptr", funcSym(fn), name(f.Sym, narg));
-                            }
-                            f.Note = uintptrEscapesTag;
-                        }
-                        if (f.Isddd() && f.Type.Elem().Etype == TUINTPTR)
-                        { 
-                            // final argument is ...uintptr.
-                            if (Debug['m'] != 0L)
-                            {
-                                Warnl(fn.Pos, "%v marking %v as escaping ...uintptr", funcSym(fn), name(f.Sym, narg));
-                            }
-                            f.Note = uintptrEscapesTag;
-                        }
+                        Warnl(f.Pos, "marking %v as escaping uintptr", name());
                     }
 
-                    f = f__prev1;
+                    return uintptrEscapesTag;
+
+                }
+
+                if (f.IsDDD() && f.Type.Elem().Etype == TUINTPTR)
+                { 
+                    // final argument is ...uintptr.
+                    if (Debug['m'] != 0L)
+                    {
+                        Warnl(f.Pos, "marking %v as escaping ...uintptr", name());
+                    }
+
+                    return uintptrEscapesTag;
+
                 }
 
             }
-            foreach (var (_, ln) in fn.Func.Dcl)
-            {
-                if (ln.Op != ONAME)
-                {
-                    continue;
-                }
 
-                if (ln.Esc & EscMask == EscNone || ln.Esc & EscMask == EscReturn) 
-                    if (types.Haspointers(ln.Type))
-                    { // don't bother tagging for scalars
-                        if (ln.Name.Param.Field.Note != uintptrEscapesTag)
-                        {
-                            ln.Name.Param.Field.Note = mktag(int(ln.Esc));
-                        }
-                    }
-                else if (ln.Esc & EscMask == EscHeap)                 
+            if (!types.Haspointers(f.Type))
+            { // don't bother tagging for scalars
+                return "";
+
             } 
 
             // Unnamed parameters are unused and therefore do not escape.
-            // (Unnamed parameters are not in the Dcl list in the loop above
-            // so we need to mark them separately.)
+            if (f.Sym == null || f.Sym.IsBlank())
             {
-                var f__prev1 = f;
+                esc = default;
+                return esc.Encode();
+            }
 
-                foreach (var (_, __f) in fn.Type.Params().Fields().Slice())
+            var n = asNode(f.Nname);
+            var loc = e.oldLoc(n);
+            esc = loc.paramEsc;
+            esc.Optimize();
+
+            if (Debug['m'] != 0L && !loc.escapes)
+            {
+                if (esc.Empty())
                 {
-                    f = __f;
-                    if (f.Sym == null || f.Sym.IsBlank())
-                    {
-                        f.Note = mktag(EscNone);
-                    }
+                    Warnl(f.Pos, "%v does not escape", name());
                 }
 
-                f = f__prev1;
+                {
+                    var x__prev2 = x;
+
+                    var x = esc.Heap();
+
+                    if (x >= 0L)
+                    {
+                        if (x == 0L)
+                        {
+                            Warnl(f.Pos, "leaking param: %v", name());
+                        }
+                        else
+                        { 
+                            // TODO(mdempsky): Mention level=x like below?
+                            Warnl(f.Pos, "leaking param content: %v", name());
+
+                        }
+
+                    }
+
+                    x = x__prev2;
+
+                }
+
+                for (long i = 0L; i < numEscResults; i++)
+                {
+                    {
+                        var x__prev2 = x;
+
+                        x = esc.Result(i);
+
+                        if (x >= 0L)
+                        {
+                            var res = fn.Type.Results().Field(i).Sym;
+                            Warnl(f.Pos, "leaking param: %v to result %v level=%d", name(), res, x);
+                        }
+
+                        x = x__prev2;
+
+                    }
+
+                }
+
+
             }
+
+            return esc.Encode();
 
         }
     }

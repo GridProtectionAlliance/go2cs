@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:18:23 UTC
+//     Generated on 2020 October 08 03:21:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -28,15 +29,11 @@ namespace go
             public mheap(NilType _)
             {
                 this.@lock = default;
-                this.free = default;
-                this.freelarge = default;
-                this.busy = default;
-                this.busylarge = default;
+                this.pages = default;
                 this.sweepgen = default;
                 this.sweepdone = default;
                 this.sweepers = default;
                 this.allspans = default;
-                this.spans = default;
                 this.sweepSpans = default;
                 this._ = default;
                 this.pagesInUse = default;
@@ -44,40 +41,38 @@ namespace go
                 this.pagesSweptBasis = default;
                 this.sweepHeapLiveBasis = default;
                 this.sweepPagesPerByte = default;
+                this.scavengeGoal = default;
+                this.reclaimIndex = default;
+                this.reclaimCredit = default;
                 this.largealloc = default;
                 this.nlargealloc = default;
                 this.largefree = default;
                 this.nlargefree = default;
                 this.nsmallfree = default;
-                this.bitmap = default;
-                this.bitmap_mapped = default;
-                this.arena_start = default;
-                this.arena_used = default;
-                this.arena_alloc = default;
-                this.arena_end = default;
-                this.arena_reserved = default;
-                this._ = default;
+                this.arenas = default;
+                this.heapArenaAlloc = default;
+                this.arenaHints = default;
+                this.arena = default;
+                this.allArenas = default;
+                this.sweepArenas = default;
+                this.markArenas = default;
                 this.spanalloc = default;
                 this.cachealloc = default;
-                this.treapalloc = default;
                 this.specialfinalizeralloc = default;
                 this.specialprofilealloc = default;
                 this.speciallock = default;
+                this.arenaHintAlloc = default;
                 this.unused = default;
             }
 
-            public mheap(mutex @lock = default, array<mSpanList> free = default, mTreap freelarge = default, array<mSpanList> busy = default, mSpanList busylarge = default, uint sweepgen = default, uint sweepdone = default, uint sweepers = default, slice<ref mspan> allspans = default, slice<ref mspan> spans = default, array<gcSweepBuf> sweepSpans = default, uint _ = default, ulong pagesInUse = default, ulong pagesSwept = default, ulong pagesSweptBasis = default, ulong sweepHeapLiveBasis = default, double sweepPagesPerByte = default, ulong largealloc = default, ulong nlargealloc = default, ulong largefree = default, ulong nlargefree = default, array<ulong> nsmallfree = default, System.UIntPtr bitmap = default, System.UIntPtr bitmap_mapped = default, System.UIntPtr arena_start = default, System.UIntPtr arena_used = default, System.UIntPtr arena_alloc = default, System.UIntPtr arena_end = default, bool arena_reserved = default, uint _ = default, fixalloc spanalloc = default, fixalloc cachealloc = default, fixalloc treapalloc = default, fixalloc specialfinalizeralloc = default, fixalloc specialprofilealloc = default, mutex speciallock = default, ref ptr<specialfinalizer> unused = default)
+            public mheap(mutex @lock = default, pageAlloc pages = default, uint sweepgen = default, uint sweepdone = default, uint sweepers = default, slice<ptr<mspan>> allspans = default, array<gcSweepBuf> sweepSpans = default, uint _ = default, ulong pagesInUse = default, ulong pagesSwept = default, ulong pagesSweptBasis = default, ulong sweepHeapLiveBasis = default, double sweepPagesPerByte = default, ulong scavengeGoal = default, ulong reclaimIndex = default, System.UIntPtr reclaimCredit = default, ulong largealloc = default, ulong nlargealloc = default, ulong largefree = default, ulong nlargefree = default, array<ulong> nsmallfree = default, array<ptr<array<ptr<heapArena>>>> arenas = default, linearAlloc heapArenaAlloc = default, ref ptr<arenaHint> arenaHints = default, linearAlloc arena = default, slice<arenaIdx> allArenas = default, slice<arenaIdx> sweepArenas = default, slice<arenaIdx> markArenas = default, fixalloc spanalloc = default, fixalloc cachealloc = default, fixalloc specialfinalizeralloc = default, fixalloc specialprofilealloc = default, mutex speciallock = default, fixalloc arenaHintAlloc = default, ref ptr<specialfinalizer> unused = default)
             {
                 this.@lock = @lock;
-                this.free = free;
-                this.freelarge = freelarge;
-                this.busy = busy;
-                this.busylarge = busylarge;
+                this.pages = pages;
                 this.sweepgen = sweepgen;
                 this.sweepdone = sweepdone;
                 this.sweepers = sweepers;
                 this.allspans = allspans;
-                this.spans = spans;
                 this.sweepSpans = sweepSpans;
                 this._ = _;
                 this.pagesInUse = pagesInUse;
@@ -85,25 +80,27 @@ namespace go
                 this.pagesSweptBasis = pagesSweptBasis;
                 this.sweepHeapLiveBasis = sweepHeapLiveBasis;
                 this.sweepPagesPerByte = sweepPagesPerByte;
+                this.scavengeGoal = scavengeGoal;
+                this.reclaimIndex = reclaimIndex;
+                this.reclaimCredit = reclaimCredit;
                 this.largealloc = largealloc;
                 this.nlargealloc = nlargealloc;
                 this.largefree = largefree;
                 this.nlargefree = nlargefree;
                 this.nsmallfree = nsmallfree;
-                this.bitmap = bitmap;
-                this.bitmap_mapped = bitmap_mapped;
-                this.arena_start = arena_start;
-                this.arena_used = arena_used;
-                this.arena_alloc = arena_alloc;
-                this.arena_end = arena_end;
-                this.arena_reserved = arena_reserved;
-                this._ = _;
+                this.arenas = arenas;
+                this.heapArenaAlloc = heapArenaAlloc;
+                this.arenaHints = arenaHints;
+                this.arena = arena;
+                this.allArenas = allArenas;
+                this.sweepArenas = sweepArenas;
+                this.markArenas = markArenas;
                 this.spanalloc = spanalloc;
                 this.cachealloc = cachealloc;
-                this.treapalloc = treapalloc;
                 this.specialfinalizeralloc = specialfinalizeralloc;
                 this.specialprofilealloc = specialprofilealloc;
                 this.speciallock = speciallock;
+                this.arenaHintAlloc = arenaHintAlloc;
                 this.unused = unused;
             }
 
@@ -127,7 +124,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mheap mheap_cast(dynamic value)
         {
-            return new mheap(value.@lock, value.free, value.freelarge, value.busy, value.busylarge, value.sweepgen, value.sweepdone, value.sweepers, value.allspans, value.spans, value.sweepSpans, value._, value.pagesInUse, value.pagesSwept, value.pagesSweptBasis, value.sweepHeapLiveBasis, value.sweepPagesPerByte, value.largealloc, value.nlargealloc, value.largefree, value.nlargefree, value.nsmallfree, value.bitmap, value.bitmap_mapped, value.arena_start, value.arena_used, value.arena_alloc, value.arena_end, value.arena_reserved, value._, value.spanalloc, value.cachealloc, value.treapalloc, value.specialfinalizeralloc, value.specialprofilealloc, value.speciallock, ref value.unused);
+            return new mheap(value.@lock, value.pages, value.sweepgen, value.sweepdone, value.sweepers, value.allspans, value.sweepSpans, value._, value.pagesInUse, value.pagesSwept, value.pagesSweptBasis, value.sweepHeapLiveBasis, value.sweepPagesPerByte, value.scavengeGoal, value.reclaimIndex, value.reclaimCredit, value.largealloc, value.nlargealloc, value.largefree, value.nlargefree, value.nsmallfree, value.arenas, value.heapArenaAlloc, ref value.arenaHints, value.arena, value.allArenas, value.sweepArenas, value.markArenas, value.spanalloc, value.cachealloc, value.specialfinalizeralloc, value.specialprofilealloc, value.speciallock, value.arenaHintAlloc, ref value.unused);
         }
     }
 }

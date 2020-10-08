@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:02 UTC
+//     Generated on 2020 October 08 04:03:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace go
                 this.tags = default;
             }
 
-            public Struct(slice<ref Var> fields = default, slice<@string> tags = default)
+            public Struct(slice<ptr<Var>> fields = default, slice<@string> tags = default)
             {
                 this.fields = fields;
                 this.tags = tags;

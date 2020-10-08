@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:44:16 UTC
+// package os -- go2cs converted at 2020 October 08 03:45:02 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\stat.go
 using testlog = go.@internal.testlog_package;
@@ -16,6 +16,9 @@ namespace go
         // If there is an error, it will be of type *PathError.
         public static (FileInfo, error) Stat(@string name)
         {
+            FileInfo _p0 = default;
+            error _p0 = default!;
+
             testlog.Stat(name);
             return statNolog(name);
         }
@@ -26,6 +29,9 @@ namespace go
         // If there is an error, it will be of type *PathError.
         public static (FileInfo, error) Lstat(@string name)
         {
+            FileInfo _p0 = default;
+            error _p0 = default!;
+
             testlog.Stat(name);
             return lstatNolog(name);
         }

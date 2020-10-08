@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:06 UTC
+//     Generated on 2020 October 08 03:30:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,42 +26,46 @@ namespace go
             {
                 this.Dev = default;
                 this.Ino = default;
-                this.Mode = default;
                 this.Nlink = default;
+                this.Mode = default;
+                this.Padding0 = default;
                 this.Uid = default;
                 this.Gid = default;
+                this.Padding1 = default;
                 this.Rdev = default;
                 this.Atimespec = default;
                 this.Mtimespec = default;
                 this.Ctimespec = default;
+                this.Birthtimespec = default;
                 this.Size = default;
                 this.Blocks = default;
                 this.Blksize = default;
                 this.Flags = default;
                 this.Gen = default;
-                this.Lspare = default;
-                this.Birthtimespec = default;
+                this.Spare = default;
             }
 
-            public Stat_t(uint Dev = default, uint Ino = default, ushort Mode = default, ushort Nlink = default, uint Uid = default, uint Gid = default, uint Rdev = default, Timespec Atimespec = default, Timespec Mtimespec = default, Timespec Ctimespec = default, long Size = default, long Blocks = default, uint Blksize = default, uint Flags = default, uint Gen = default, int Lspare = default, Timespec Birthtimespec = default)
+            public Stat_t(ulong Dev = default, ulong Ino = default, ulong Nlink = default, ushort Mode = default, short Padding0 = default, uint Uid = default, uint Gid = default, int Padding1 = default, ulong Rdev = default, Timespec Atimespec = default, Timespec Mtimespec = default, Timespec Ctimespec = default, Timespec Birthtimespec = default, long Size = default, long Blocks = default, int Blksize = default, uint Flags = default, ulong Gen = default, array<ulong> Spare = default)
             {
                 this.Dev = Dev;
                 this.Ino = Ino;
-                this.Mode = Mode;
                 this.Nlink = Nlink;
+                this.Mode = Mode;
+                this.Padding0 = Padding0;
                 this.Uid = Uid;
                 this.Gid = Gid;
+                this.Padding1 = Padding1;
                 this.Rdev = Rdev;
                 this.Atimespec = Atimespec;
                 this.Mtimespec = Mtimespec;
                 this.Ctimespec = Ctimespec;
+                this.Birthtimespec = Birthtimespec;
                 this.Size = Size;
                 this.Blocks = Blocks;
                 this.Blksize = Blksize;
                 this.Flags = Flags;
                 this.Gen = Gen;
-                this.Lspare = Lspare;
-                this.Birthtimespec = Birthtimespec;
+                this.Spare = Spare;
             }
 
             // Enable comparisons between nil and Stat_t struct
@@ -84,7 +88,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Stat_t Stat_t_cast(dynamic value)
         {
-            return new Stat_t(value.Dev, value.Ino, value.Mode, value.Nlink, value.Uid, value.Gid, value.Rdev, value.Atimespec, value.Mtimespec, value.Ctimespec, value.Size, value.Blocks, value.Blksize, value.Flags, value.Gen, value.Lspare, value.Birthtimespec);
+            return new Stat_t(value.Dev, value.Ino, value.Nlink, value.Mode, value.Padding0, value.Uid, value.Gid, value.Padding1, value.Rdev, value.Atimespec, value.Mtimespec, value.Ctimespec, value.Birthtimespec, value.Size, value.Blocks, value.Blksize, value.Flags, value.Gen, value.Spare);
         }
     }
 }

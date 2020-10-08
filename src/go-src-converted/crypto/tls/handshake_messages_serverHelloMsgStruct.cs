@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:25 UTC
+//     Generated on 2020 October 08 03:38:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
+using fmt = go.fmt_package;
 using strings = go.strings_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using go;
 
 namespace go {
@@ -34,17 +35,22 @@ namespace crypto
                 this.sessionId = default;
                 this.cipherSuite = default;
                 this.compressionMethod = default;
-                this.nextProtoNeg = default;
-                this.nextProtos = default;
                 this.ocspStapling = default;
-                this.scts = default;
                 this.ticketSupported = default;
-                this.secureRenegotiation = default;
                 this.secureRenegotiationSupported = default;
+                this.secureRenegotiation = default;
                 this.alpnProtocol = default;
+                this.scts = default;
+                this.supportedVersion = default;
+                this.serverShare = default;
+                this.selectedIdentityPresent = default;
+                this.selectedIdentity = default;
+                this.supportedPoints = default;
+                this.cookie = default;
+                this.selectedGroup = default;
             }
 
-            public serverHelloMsg(slice<byte> raw = default, ushort vers = default, slice<byte> random = default, slice<byte> sessionId = default, ushort cipherSuite = default, byte compressionMethod = default, bool nextProtoNeg = default, slice<@string> nextProtos = default, bool ocspStapling = default, slice<slice<byte>> scts = default, bool ticketSupported = default, slice<byte> secureRenegotiation = default, bool secureRenegotiationSupported = default, @string alpnProtocol = default)
+            public serverHelloMsg(slice<byte> raw = default, ushort vers = default, slice<byte> random = default, slice<byte> sessionId = default, ushort cipherSuite = default, byte compressionMethod = default, bool ocspStapling = default, bool ticketSupported = default, bool secureRenegotiationSupported = default, slice<byte> secureRenegotiation = default, @string alpnProtocol = default, slice<slice<byte>> scts = default, ushort supportedVersion = default, keyShare serverShare = default, bool selectedIdentityPresent = default, ushort selectedIdentity = default, slice<byte> supportedPoints = default, slice<byte> cookie = default, CurveID selectedGroup = default)
             {
                 this.raw = raw;
                 this.vers = vers;
@@ -52,14 +58,19 @@ namespace crypto
                 this.sessionId = sessionId;
                 this.cipherSuite = cipherSuite;
                 this.compressionMethod = compressionMethod;
-                this.nextProtoNeg = nextProtoNeg;
-                this.nextProtos = nextProtos;
                 this.ocspStapling = ocspStapling;
-                this.scts = scts;
                 this.ticketSupported = ticketSupported;
-                this.secureRenegotiation = secureRenegotiation;
                 this.secureRenegotiationSupported = secureRenegotiationSupported;
+                this.secureRenegotiation = secureRenegotiation;
                 this.alpnProtocol = alpnProtocol;
+                this.scts = scts;
+                this.supportedVersion = supportedVersion;
+                this.serverShare = serverShare;
+                this.selectedIdentityPresent = selectedIdentityPresent;
+                this.selectedIdentity = selectedIdentity;
+                this.supportedPoints = supportedPoints;
+                this.cookie = cookie;
+                this.selectedGroup = selectedGroup;
             }
 
             // Enable comparisons between nil and serverHelloMsg struct
@@ -82,7 +93,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static serverHelloMsg serverHelloMsg_cast(dynamic value)
         {
-            return new serverHelloMsg(value.raw, value.vers, value.random, value.sessionId, value.cipherSuite, value.compressionMethod, value.nextProtoNeg, value.nextProtos, value.ocspStapling, value.scts, value.ticketSupported, value.secureRenegotiation, value.secureRenegotiationSupported, value.alpnProtocol);
+            return new serverHelloMsg(value.raw, value.vers, value.random, value.sessionId, value.cipherSuite, value.compressionMethod, value.ocspStapling, value.ticketSupported, value.secureRenegotiationSupported, value.secureRenegotiation, value.alpnProtocol, value.scts, value.supportedVersion, value.serverShare, value.selectedIdentityPresent, value.selectedIdentity, value.supportedPoints, value.cookie, value.selectedGroup);
         }
     }
 }}

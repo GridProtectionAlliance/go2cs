@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2020 August 29 10:10:11 UTC
+// package jpeg -- go2cs converted at 2020 October 08 04:59:25 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\idct.go
 
@@ -45,7 +45,7 @@ namespace image
          * design.
          *
          */
-        private static readonly long blockSize = 64L; // A DCT block is 8x8.
+        private static readonly long blockSize = (long)64L; // A DCT block is 8x8.
 
  // A DCT block is 8x8.
 
@@ -53,21 +53,21 @@ namespace image
         {
         }
 
-        private static readonly long w1 = 2841L; // 2048*sqrt(2)*cos(1*pi/16)
-        private static readonly long w2 = 2676L; // 2048*sqrt(2)*cos(2*pi/16)
-        private static readonly long w3 = 2408L; // 2048*sqrt(2)*cos(3*pi/16)
-        private static readonly long w5 = 1609L; // 2048*sqrt(2)*cos(5*pi/16)
-        private static readonly long w6 = 1108L; // 2048*sqrt(2)*cos(6*pi/16)
-        private static readonly long w7 = 565L; // 2048*sqrt(2)*cos(7*pi/16)
+        private static readonly long w1 = (long)2841L; // 2048*sqrt(2)*cos(1*pi/16)
+        private static readonly long w2 = (long)2676L; // 2048*sqrt(2)*cos(2*pi/16)
+        private static readonly long w3 = (long)2408L; // 2048*sqrt(2)*cos(3*pi/16)
+        private static readonly long w5 = (long)1609L; // 2048*sqrt(2)*cos(5*pi/16)
+        private static readonly long w6 = (long)1108L; // 2048*sqrt(2)*cos(6*pi/16)
+        private static readonly long w7 = (long)565L; // 2048*sqrt(2)*cos(7*pi/16)
 
-        private static readonly var w1pw7 = w1 + w7;
-        private static readonly var w1mw7 = w1 - w7;
-        private static readonly var w2pw6 = w2 + w6;
-        private static readonly var w2mw6 = w2 - w6;
-        private static readonly var w3pw5 = w3 + w5;
-        private static readonly var w3mw5 = w3 - w5;
+        private static readonly var w1pw7 = (var)w1 + w7;
+        private static readonly var w1mw7 = (var)w1 - w7;
+        private static readonly var w2pw6 = (var)w2 + w6;
+        private static readonly var w2mw6 = (var)w2 - w6;
+        private static readonly var w3pw5 = (var)w3 + w5;
+        private static readonly var w3mw5 = (var)w3 - w5;
 
-        private static readonly long r2 = 181L; // 256/sqrt(2)
+        private static readonly long r2 = (long)181L; // 256/sqrt(2)
 
         // idct performs a 2-D Inverse Discrete Cosine Transformation.
         //
@@ -79,36 +79,39 @@ namespace image
         // For more on the actual algorithm, see Z. Wang, "Fast algorithms for the
         // discrete W transform and for the discrete Fourier transform", IEEE Trans. on
         // ASSP, Vol. ASSP- 32, pp. 803-816, Aug. 1984.
-        private static void idct(ref block src)
-        { 
+        private static void idct(ptr<block> _addr_src)
+        {
+            ref block src = ref _addr_src.val;
+ 
             // Horizontal 1-D IDCT.
             for (long y = 0L; y < 8L; y++)
             {
-                var y8 = y * 8L; 
+                var y8 = y * 8L;
+                var s = src.slice(y8, y8 + 8L, y8 + 8L); // Small cap improves performance, see https://golang.org/issue/27857
                 // If all the AC components are zero, then the IDCT is trivial.
-                if (src[y8 + 1L] == 0L && src[y8 + 2L] == 0L && src[y8 + 3L] == 0L && src[y8 + 4L] == 0L && src[y8 + 5L] == 0L && src[y8 + 6L] == 0L && src[y8 + 7L] == 0L)
+                if (s[1L] == 0L && s[2L] == 0L && s[3L] == 0L && s[4L] == 0L && s[5L] == 0L && s[6L] == 0L && s[7L] == 0L)
                 {
-                    var dc = src[y8 + 0L] << (int)(3L);
-                    src[y8 + 0L] = dc;
-                    src[y8 + 1L] = dc;
-                    src[y8 + 2L] = dc;
-                    src[y8 + 3L] = dc;
-                    src[y8 + 4L] = dc;
-                    src[y8 + 5L] = dc;
-                    src[y8 + 6L] = dc;
-                    src[y8 + 7L] = dc;
+                    var dc = s[0L] << (int)(3L);
+                    s[0L] = dc;
+                    s[1L] = dc;
+                    s[2L] = dc;
+                    s[3L] = dc;
+                    s[4L] = dc;
+                    s[5L] = dc;
+                    s[6L] = dc;
+                    s[7L] = dc;
                     continue;
                 } 
 
                 // Prescale.
-                var x0 = (src[y8 + 0L] << (int)(11L)) + 128L;
-                var x1 = src[y8 + 4L] << (int)(11L);
-                var x2 = src[y8 + 6L];
-                var x3 = src[y8 + 2L];
-                var x4 = src[y8 + 1L];
-                var x5 = src[y8 + 7L];
-                var x6 = src[y8 + 5L];
-                var x7 = src[y8 + 3L]; 
+                var x0 = (s[0L] << (int)(11L)) + 128L;
+                var x1 = s[4L] << (int)(11L);
+                var x2 = s[6L];
+                var x3 = s[2L];
+                var x4 = s[1L];
+                var x5 = s[7L];
+                var x6 = s[5L];
+                var x7 = s[3L]; 
 
                 // Stage 1.
                 var x8 = w7 * (x4 + x5);
@@ -138,14 +141,15 @@ namespace image
                 x4 = (r2 * (x4 - x5) + 128L) >> (int)(8L); 
 
                 // Stage 4.
-                src[y8 + 0L] = (x7 + x1) >> (int)(8L);
-                src[y8 + 1L] = (x3 + x2) >> (int)(8L);
-                src[y8 + 2L] = (x0 + x4) >> (int)(8L);
-                src[y8 + 3L] = (x8 + x6) >> (int)(8L);
-                src[y8 + 4L] = (x8 - x6) >> (int)(8L);
-                src[y8 + 5L] = (x0 - x4) >> (int)(8L);
-                src[y8 + 6L] = (x3 - x2) >> (int)(8L);
-                src[y8 + 7L] = (x7 - x1) >> (int)(8L);
+                s[0L] = (x7 + x1) >> (int)(8L);
+                s[1L] = (x3 + x2) >> (int)(8L);
+                s[2L] = (x0 + x4) >> (int)(8L);
+                s[3L] = (x8 + x6) >> (int)(8L);
+                s[4L] = (x8 - x6) >> (int)(8L);
+                s[5L] = (x0 - x4) >> (int)(8L);
+                s[6L] = (x3 - x2) >> (int)(8L);
+                s[7L] = (x7 - x1) >> (int)(8L);
+
             } 
 
             // Vertical 1-D IDCT.
@@ -157,16 +161,17 @@ namespace image
                 // Similar to the horizontal 1-D IDCT case, if all the AC components are zero, then the IDCT is trivial.
                 // However, after performing the horizontal 1-D IDCT, there are typically non-zero AC components, so
                 // we do not bother to check for the all-zero case.
+                s = src.slice(x, x + 57L, x + 57L); // Small cap improves performance, see https://golang.org/issue/27857
 
                 // Prescale.
-                var y0 = (src[8L * 0L + x] << (int)(8L)) + 8192L;
-                var y1 = src[8L * 4L + x] << (int)(8L);
-                var y2 = src[8L * 6L + x];
-                var y3 = src[8L * 2L + x];
-                var y4 = src[8L * 1L + x];
-                var y5 = src[8L * 7L + x];
-                var y6 = src[8L * 5L + x];
-                var y7 = src[8L * 3L + x]; 
+                var y0 = (s[8L * 0L] << (int)(8L)) + 8192L;
+                var y1 = s[8L * 4L] << (int)(8L);
+                var y2 = s[8L * 6L];
+                var y3 = s[8L * 2L];
+                var y4 = s[8L * 1L];
+                var y5 = s[8L * 7L];
+                var y6 = s[8L * 5L];
+                var y7 = s[8L * 3L]; 
 
                 // Stage 1.
                 y8 = w7 * (y4 + y5) + 4L;
@@ -196,15 +201,17 @@ namespace image
                 y4 = (r2 * (y4 - y5) + 128L) >> (int)(8L); 
 
                 // Stage 4.
-                src[8L * 0L + x] = (y7 + y1) >> (int)(14L);
-                src[8L * 1L + x] = (y3 + y2) >> (int)(14L);
-                src[8L * 2L + x] = (y0 + y4) >> (int)(14L);
-                src[8L * 3L + x] = (y8 + y6) >> (int)(14L);
-                src[8L * 4L + x] = (y8 - y6) >> (int)(14L);
-                src[8L * 5L + x] = (y0 - y4) >> (int)(14L);
-                src[8L * 6L + x] = (y3 - y2) >> (int)(14L);
-                src[8L * 7L + x] = (y7 - y1) >> (int)(14L);
+                s[8L * 0L] = (y7 + y1) >> (int)(14L);
+                s[8L * 1L] = (y3 + y2) >> (int)(14L);
+                s[8L * 2L] = (y0 + y4) >> (int)(14L);
+                s[8L * 3L] = (y8 + y6) >> (int)(14L);
+                s[8L * 4L] = (y8 - y6) >> (int)(14L);
+                s[8L * 5L] = (y0 - y4) >> (int)(14L);
+                s[8L * 6L] = (y3 - y2) >> (int)(14L);
+                s[8L * 7L] = (y7 - y1) >> (int)(14L);
+
             }
+
 
         }
     }

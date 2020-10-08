@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gif -- go2cs converted at 2020 August 29 10:10:08 UTC
+// package gif -- go2cs converted at 2020 October 08 04:59:23 UTC
 // import "image/gif" ==> using gif = go.image.gif_package
 // Original source: C:\Go\src\image\gif\writer.go
 using bufio = go.bufio_package;
@@ -22,8 +22,9 @@ namespace image
     public static partial class gif_package
     {
         // Graphic control extension fields.
-        private static readonly ulong gcLabel = 0xF9UL;
-        private static readonly ulong gcBlockSize = 0x04UL;
+        private static readonly ulong gcLabel = (ulong)0xF9UL;
+        private static readonly ulong gcBlockSize = (ulong)0x04UL;
+
 
         private static array<long> log2Lookup = new array<long>(new long[] { 2, 4, 8, 16, 32, 64, 128, 256 });
 
@@ -35,8 +36,10 @@ namespace image
                 {
                     return i;
                 }
+
             }
             return -1L;
+
         }
 
         // Little-endian.
@@ -80,14 +83,14 @@ namespace image
 
         private static error Flush(this blockWriter b)
         {
-            return error.As(b.e.err);
+            return error.As(b.e.err)!;
         }
 
         private static error WriteByte(this blockWriter b, byte c)
         {
             if (b.e.err != null)
             {
-                return error.As(b.e.err);
+                return error.As(b.e.err)!;
             } 
 
             // Append c to buffered sub-block.
@@ -95,19 +98,23 @@ namespace image
             b.e.buf[b.e.buf[0L]] = c;
             if (b.e.buf[0L] < 255L)
             {
-                return error.As(null);
+                return error.As(null!)!;
             } 
 
             // Flush block
             b.e.write(b.e.buf[..256L]);
             b.e.buf[0L] = 0L;
-            return error.As(b.e.err);
+            return error.As(b.e.err)!;
+
         }
 
         // blockWriter must be an io.Writer for lzw.NewWriter, but this is never
         // actually called.
         private static (long, error) Write(this blockWriter b, slice<byte> data)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             foreach (var (i, c) in data)
             {
                 {
@@ -115,12 +122,14 @@ namespace image
 
                     if (err != null)
                     {
-                        return (i, err);
+                        return (i, error.As(err)!);
                     }
 
                 }
+
             }
-            return (len(data), null);
+            return (len(data), error.As(null!)!);
+
         }
 
         private static void close(this blockWriter b)
@@ -137,46 +146,63 @@ namespace image
                 b.e.buf[n + 1L] = 0L;
                 b.e.write(b.e.buf[..n + 2L]);
             }
+
             b.e.flush();
+
         }
 
-        private static void flush(this ref encoder e)
+        private static void flush(this ptr<encoder> _addr_e)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             e.err = e.w.Flush();
+
         }
 
-        private static void write(this ref encoder e, slice<byte> p)
+        private static void write(this ptr<encoder> _addr_e, slice<byte> p)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             _, e.err = e.w.Write(p);
+
         }
 
-        private static void writeByte(this ref encoder e, byte b)
+        private static void writeByte(this ptr<encoder> _addr_e, byte b)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             e.err = e.w.WriteByte(b);
+
         }
 
-        private static void writeHeader(this ref encoder e)
+        private static void writeHeader(this ptr<encoder> _addr_e)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             _, e.err = io.WriteString(e.w, "GIF89a");
             if (e.err != null)
             {
-                return;
+                return ;
             } 
 
             // Logical screen width and height.
@@ -194,14 +220,16 @@ namespace image
                     e.buf[1L] = e.g.BackgroundIndex;
                     e.buf[2L] = 0x00UL; // Pixel Aspect Ratio.
                     e.write(e.buf[..3L]);
-                    error err = default;
+                    error err = default!;
                     e.globalCT, err = encodeColorTable(e.globalColorTable[..], p, paddedSize);
                     if (err != null && e.err == null)
                     {
                         e.err = err;
-                        return;
+                        return ;
                     }
+
                     e.write(e.globalColorTable[..e.globalCT]);
+
                 }
                 else
                 { 
@@ -211,6 +239,7 @@ namespace image
                     e.buf[1L] = 0x00UL; // Background Color Index.
                     e.buf[2L] = 0x00UL; // Pixel Aspect Ratio.
                     e.write(e.buf[..3L]);
+
                 } 
 
                 // Add animation info if necessary.
@@ -218,7 +247,7 @@ namespace image
             } 
 
             // Add animation info if necessary.
-            if (len(e.g.Image) > 1L)
+            if (len(e.g.Image) > 1L && e.g.LoopCount >= 0L)
             {
                 e.buf[0L] = 0x21UL; // Extension Introducer.
                 e.buf[1L] = 0xffUL; // Application Label.
@@ -228,22 +257,29 @@ namespace image
                 if (err != null && e.err == null)
                 {
                     e.err = err;
-                    return;
+                    return ;
                 }
+
                 e.buf[0L] = 0x03UL; // Block Size.
                 e.buf[1L] = 0x01UL; // Sub-block Index.
                 writeUint16(e.buf[2L..4L], uint16(e.g.LoopCount));
                 e.buf[4L] = 0x00UL; // Block Terminator.
                 e.write(e.buf[..5L]);
+
             }
+
         }
 
         private static (long, error) encodeColorTable(slice<byte> dst, color.Palette p, long size)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             if (uint(size) >= uint(len(log2Lookup)))
             {
-                return (0L, errors.New("gif: cannot encode color table with more than 256 entries"));
+                return (0L, error.As(errors.New("gif: cannot encode color table with more than 256 entries"))!);
             }
+
             {
                 var i__prev1 = i;
 
@@ -253,8 +289,9 @@ namespace image
                     c = __c;
                     if (c == null)
                     {
-                        return (0L, errors.New("gif: cannot encode color table with nil entries"));
+                        return (0L, error.As(errors.New("gif: cannot encode color table with nil entries"))!);
                     }
+
                     byte r = default;                    byte g = default;                    byte b = default; 
                     // It is most likely that the palette is full of color.RGBAs, so they
                     // get a fast path.
@@ -269,6 +306,7 @@ namespace image
                             r = rgba.R;
                             g = rgba.G;
                             b = rgba.B;
+
                         }
                         else
                         {
@@ -276,12 +314,15 @@ namespace image
                             r = uint8(rr >> (int)(8L));
                             g = uint8(gg >> (int)(8L));
                             b = uint8(bb >> (int)(8L));
+
                         }
 
                     }
+
                     dst[3L * i + 0L] = r;
                     dst[3L * i + 1L] = g;
                     dst[3L * i + 2L] = b;
+
                 }
 
                 i = i__prev1;
@@ -303,44 +344,56 @@ namespace image
 
                     i = i__prev1;
                 }
-
             }
-            return (3L * n, null);
+
+            return (3L * n, error.As(null!)!);
+
         }
 
-        private static bool colorTablesMatch(this ref encoder e, long localLen, long transparentIndex)
+        private static bool colorTablesMatch(this ptr<encoder> _addr_e, long localLen, long transparentIndex)
         {
+            ref encoder e = ref _addr_e.val;
+
             long localSize = 3L * localLen;
             if (transparentIndex >= 0L)
             {
                 long trOff = 3L * transparentIndex;
                 return bytes.Equal(e.globalColorTable[..trOff], e.localColorTable[..trOff]) && bytes.Equal(e.globalColorTable[trOff + 3L..localSize], e.localColorTable[trOff + 3L..localSize]);
             }
+
             return bytes.Equal(e.globalColorTable[..localSize], e.localColorTable[..localSize]);
+
         }
 
-        private static void writeImageBlock(this ref encoder e, ref image.Paletted pm, long delay, byte disposal)
+        private static void writeImageBlock(this ptr<encoder> _addr_e, ptr<image.Paletted> _addr_pm, long delay, byte disposal)
         {
+            ref encoder e = ref _addr_e.val;
+            ref image.Paletted pm = ref _addr_pm.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             if (len(pm.Palette) == 0L)
             {
                 e.err = errors.New("gif: cannot encode image block with empty palette");
-                return;
+                return ;
             }
+
             var b = pm.Bounds();
             if (b.Min.X < 0L || b.Max.X >= 1L << (int)(16L) || b.Min.Y < 0L || b.Max.Y >= 1L << (int)(16L))
             {
                 e.err = errors.New("gif: image block is too large to encode");
-                return;
+                return ;
             }
+
             if (!b.In(new image.Rectangle(Max:image.Point{e.g.Config.Width,e.g.Config.Height})))
             {
                 e.err = errors.New("gif: image block is out of bounds");
-                return;
+                return ;
             }
+
             long transparentIndex = -1L;
             {
                 var i__prev1 = i;
@@ -352,8 +405,9 @@ namespace image
                     if (c == null)
                     {
                         e.err = errors.New("gif: cannot encode color table with nil entries");
-                        return;
+                        return ;
                     }
+
                     {
                         var (_, _, _, a) = c.RGBA();
 
@@ -364,6 +418,7 @@ namespace image
                         }
 
                     }
+
                 }
 
                 i = i__prev1;
@@ -382,6 +437,7 @@ namespace image
                 {
                     e.buf[3L] = 0x00UL | disposal << (int)(2L);
                 }
+
                 writeUint16(e.buf[4L..6L], uint16(delay)); // Delay Time (1/100ths of a second)
 
                 // Transparent color index.
@@ -393,9 +449,12 @@ namespace image
                 {
                     e.buf[6L] = 0x00UL;
                 }
+
                 e.buf[7L] = 0x00UL; // Block Terminator.
                 e.write(e.buf[..8L]);
+
             }
+
             e.buf[0L] = sImageDescriptor;
             writeUint16(e.buf[1L..3L], uint16(b.Min.X));
             writeUint16(e.buf[3L..5L], uint16(b.Min.Y));
@@ -411,7 +470,7 @@ namespace image
             {
                 color.Palette (gp, ok) = e.g.Config.ColorModel._<color.Palette>();
 
-                if (ok && len(pm.Palette) <= len(gp) && ref gp[0L] == ref pm.Palette[0L])
+                if (ok && len(pm.Palette) <= len(gp) && _addr_gp[0L] == _addr_pm.Palette[0L])
                 {
                     e.writeByte(0L); // Use the global color table.
                 }
@@ -424,7 +483,9 @@ namespace image
                         {
                             e.err = err;
                         }
-                        return;
+
+                        return ;
+
                     } 
                     // This frame's palette is not the very same slice as the global
                     // palette, but it might be a copy, possibly with one value turned into
@@ -438,16 +499,20 @@ namespace image
                         // Use a local color table.
                         e.writeByte(fColorTable | uint8(paddedSize));
                         e.write(e.localColorTable[..ct]);
+
                     }
+
                 }
 
             }
+
 
             var litWidth = paddedSize + 1L;
             if (litWidth < 2L)
             {
                 litWidth = 2L;
             }
+
             e.writeByte(uint8(litWidth)); // LZW Minimum Code Size.
 
             blockWriter bw = new blockWriter(e:e);
@@ -462,8 +527,9 @@ namespace image
                     if (e.err != null)
                     {
                         lzww.Close();
-                        return;
+                        return ;
                     }
+
                 }
                 else
                 {
@@ -479,18 +545,21 @@ namespace image
                             if (e.err != null)
                             {
                                 lzww.Close();
-                                return;
+                                return ;
                             i = i + pm.Stride;
                         y = y + 1L;
                             }
+
                         }
 
 
                         i = i__prev1;
                     }
+
                 }
 
             }
+
             lzww.Close(); // flush to bw
             bw.close(); // flush to e.w
         }
@@ -507,28 +576,29 @@ namespace image
 
         // EncodeAll writes the images in g to w in GIF format with the
         // given loop count and delay between frames.
-        public static error EncodeAll(io.Writer w, ref GIF g)
+        public static error EncodeAll(io.Writer w, ptr<GIF> _addr_g)
         {
+            ref GIF g = ref _addr_g.val;
+
             if (len(g.Image) == 0L)
             {
-                return error.As(errors.New("gif: must provide at least one image"));
+                return error.As(errors.New("gif: must provide at least one image"))!;
             }
+
             if (len(g.Image) != len(g.Delay))
             {
-                return error.As(errors.New("gif: mismatched image and delay lengths"));
+                return error.As(errors.New("gif: mismatched image and delay lengths"))!;
             }
-            if (g.LoopCount < 0L)
-            {
-                g.LoopCount = 0L;
-            }
+
             encoder e = new encoder(g:*g); 
             // The GIF.Disposal, GIF.Config and GIF.BackgroundIndex fields were added
             // in Go 1.5. Valid Go 1.4 code, such as when the Disposal field is omitted
             // in a GIF struct literal, should still produce valid GIFs.
             if (e.g.Disposal != null && len(e.g.Image) != len(e.g.Disposal))
             {
-                return error.As(errors.New("gif: mismatched image and disposal lengths"));
+                return error.As(errors.New("gif: mismatched image and disposal lengths"))!;
             }
+
             if (e.g.Config == (new image.Config()))
             {
                 var p = g.Image[0L].Bounds().Max;
@@ -542,13 +612,15 @@ namespace image
 
                     if (!ok)
                     {
-                        return error.As(errors.New("gif: GIF color model must be a color.Palette"));
+                        return error.As(errors.New("gif: GIF color model must be a color.Palette"))!;
                     }
 
                 }
+
             }
+
             {
-                writer (ww, ok) = w._<writer>();
+                writer (ww, ok) = writer.As(w._<writer>())!;
 
                 if (ok)
                 {
@@ -561,6 +633,7 @@ namespace image
 
             }
 
+
             e.writeHeader();
             foreach (var (i, pm) in g.Image)
             {
@@ -569,45 +642,84 @@ namespace image
                 {
                     disposal = g.Disposal[i];
                 }
+
                 e.writeImageBlock(pm, g.Delay[i], disposal);
+
             }
             e.writeByte(sTrailer);
             e.flush();
-            return error.As(e.err);
+            return error.As(e.err)!;
+
         }
 
         // Encode writes the Image m to w in GIF format.
-        public static error Encode(io.Writer w, image.Image m, ref Options o)
-        { 
+        public static error Encode(io.Writer w, image.Image m, ptr<Options> _addr_o)
+        {
+            ref Options o = ref _addr_o.val;
+ 
             // Check for bounds and size restrictions.
             var b = m.Bounds();
             if (b.Dx() >= 1L << (int)(16L) || b.Dy() >= 1L << (int)(16L))
             {
-                return error.As(errors.New("gif: image is too large to encode"));
+                return error.As(errors.New("gif: image is too large to encode"))!;
             }
+
             Options opts = new Options();
             if (o != null)
             {
-                opts = o.Value;
+                opts = o;
             }
+
             if (opts.NumColors < 1L || 256L < opts.NumColors)
             {
                 opts.NumColors = 256L;
             }
+
             if (opts.Drawer == null)
             {
                 opts.Drawer = draw.FloydSteinberg;
             }
-            ref image.Paletted (pm, ok) = m._<ref image.Paletted>();
-            if (!ok || len(pm.Palette) > opts.NumColors)
+
+            ptr<image.Paletted> (pm, _) = m._<ptr<image.Paletted>>();
+            if (pm == null)
+            {
+                {
+                    color.Palette (cp, ok) = m.ColorModel()._<color.Palette>();
+
+                    if (ok)
+                    {
+                        pm = image.NewPaletted(b, cp);
+                        for (var y = b.Min.Y; y < b.Max.Y; y++)
+                        {
+                            for (var x = b.Min.X; x < b.Max.X; x++)
+                            {
+                                pm.Set(x, y, cp.Convert(m.At(x, y)));
+                            }
+
+
+                        }
+
+
+                    }
+
+                }
+
+            }
+
+            if (pm == null || len(pm.Palette) > opts.NumColors)
             { 
+                // Set pm to be a palettedized copy of m, including its bounds, which
+                // might not start at (0, 0).
+                //
                 // TODO: Pick a better sub-sample of the Plan 9 palette.
                 pm = image.NewPaletted(b, palette.Plan9[..opts.NumColors]);
                 if (opts.Quantizer != null)
                 {
                     pm.Palette = opts.Quantizer.Quantize(make(color.Palette, 0L, opts.NumColors), m);
                 }
-                opts.Drawer.Draw(pm, b, m, image.ZP);
+
+                opts.Drawer.Draw(pm, b, m, b.Min);
+
             } 
 
             // When calling Encode instead of EncodeAll, the single-frame image is
@@ -615,11 +727,15 @@ namespace image
             // frame completely fills the overall GIF's bounds.
             if (pm.Rect.Min != (new image.Point()))
             {
-                var dup = pm.Value;
+                ref var dup = ref heap(pm.val, out ptr<var> _addr_dup);
                 dup.Rect = dup.Rect.Sub(dup.Rect.Min);
-                pm = ref dup;
+                _addr_pm = _addr_dup;
+                pm = ref _addr_pm.val;
+
             }
-            return error.As(EncodeAll(w, ref new GIF(Image:[]*image.Paletted{pm},Delay:[]int{0},Config:image.Config{ColorModel:pm.Palette,Width:b.Dx(),Height:b.Dy(),},)));
+
+            return error.As(EncodeAll(w, addr(new GIF(Image:[]*image.Paletted{pm},Delay:[]int{0},Config:image.Config{ColorModel:pm.Palette,Width:b.Dx(),Height:b.Dy(),},))))!;
+
         }
     }
 }}

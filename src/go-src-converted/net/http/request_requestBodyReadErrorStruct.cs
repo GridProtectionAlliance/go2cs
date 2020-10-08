@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:29 UTC
+//     Generated on 2020 October 08 03:40:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ using url = go.net.url_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using idna = go.golang_org.x.net.idna_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {

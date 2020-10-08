@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:53 UTC
+//     Generated on 2020 October 08 03:35:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using subtleoverlap = go.crypto.@internal.subtle_package;
 using subtle = go.crypto.subtle_package;
+using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using go;
 
@@ -51,7 +53,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -65,10 +67,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, error) NonceSizeByRef(ref T value);
+            private delegate (slice<byte>, error) NonceSizeByPtr(ptr<T> value);
             private delegate (slice<byte>, error) NonceSizeByVal(T value);
 
-            private static readonly NonceSizeByRef s_NonceSizeByRef;
+            private static readonly NonceSizeByPtr s_NonceSizeByPtr;
             private static readonly NonceSizeByVal s_NonceSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,17 +79,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NonceSizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NonceSizeByPtr is null || !m_target_is_ptr)
                     return s_NonceSizeByVal!(target);
 
-                return s_NonceSizeByRef(ref target);
+                return s_NonceSizeByPtr(m_target_ptr);
             }
 
-            private delegate (slice<byte>, error) OverheadByRef(ref T value);
+            private delegate (slice<byte>, error) OverheadByPtr(ptr<T> value);
             private delegate (slice<byte>, error) OverheadByVal(T value);
 
-            private static readonly OverheadByRef s_OverheadByRef;
+            private static readonly OverheadByPtr s_OverheadByPtr;
             private static readonly OverheadByVal s_OverheadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,17 +99,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OverheadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OverheadByPtr is null || !m_target_is_ptr)
                     return s_OverheadByVal!(target);
 
-                return s_OverheadByRef(ref target);
+                return s_OverheadByPtr(m_target_ptr);
             }
 
-            private delegate (slice<byte>, error) SealByRef(ref T value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
+            private delegate (slice<byte>, error) SealByPtr(ptr<T> value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
             private delegate (slice<byte>, error) SealByVal(T value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
 
-            private static readonly SealByRef s_SealByRef;
+            private static readonly SealByPtr s_SealByPtr;
             private static readonly SealByVal s_SealByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -115,17 +119,18 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SealByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SealByPtr is null || !m_target_is_ptr)
                     return s_SealByVal!(target, dst, nonce, plaintext, additionalData);
 
-                return s_SealByRef(ref target, dst, nonce, plaintext, additionalData);
+                return s_SealByPtr(m_target_ptr, dst, nonce, plaintext, additionalData);
             }
 
-            private delegate (slice<byte>, error) OpenByRef(ref T value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
+            private delegate (slice<byte>, error) OpenByPtr(ptr<T> value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
             private delegate (slice<byte>, error) OpenByVal(T value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
 
-            private static readonly OpenByRef s_OpenByRef;
+            private static readonly OpenByPtr s_OpenByPtr;
             private static readonly OpenByVal s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -134,11 +139,12 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OpenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OpenByPtr is null || !m_target_is_ptr)
                     return s_OpenByVal!(target, dst, nonce, ciphertext, additionalData);
 
-                return s_OpenByRef(ref target, dst, nonce, ciphertext, additionalData);
+                return s_OpenByPtr(m_target_ptr, dst, nonce, ciphertext, additionalData);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -147,71 +153,59 @@ namespace crypto
             static AEAD()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NonceSize");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NonceSize");
 
                 if (!(extensionMethod is null))
-                    s_NonceSizeByRef = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByRef)) as NonceSizeByRef;
+                    s_NonceSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByPtr)) as NonceSizeByPtr;
 
-                if (s_NonceSizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NonceSize");
+                extensionMethod = targetType.GetExtensionMethod("NonceSize");
 
-                    if (!(extensionMethod is null))
-                        s_NonceSizeByVal = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByVal)) as NonceSizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NonceSizeByVal = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByVal)) as NonceSizeByVal;
 
-                if (s_NonceSizeByRef is null && s_NonceSizeByVal is null)
+                if (s_NonceSizeByPtr is null && s_NonceSizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AEAD.NonceSize method", new Exception("NonceSize"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Overhead");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Overhead");
 
                 if (!(extensionMethod is null))
-                    s_OverheadByRef = extensionMethod.CreateStaticDelegate(typeof(OverheadByRef)) as OverheadByRef;
+                    s_OverheadByPtr = extensionMethod.CreateStaticDelegate(typeof(OverheadByPtr)) as OverheadByPtr;
 
-                if (s_OverheadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Overhead");
+                extensionMethod = targetType.GetExtensionMethod("Overhead");
 
-                    if (!(extensionMethod is null))
-                        s_OverheadByVal = extensionMethod.CreateStaticDelegate(typeof(OverheadByVal)) as OverheadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OverheadByVal = extensionMethod.CreateStaticDelegate(typeof(OverheadByVal)) as OverheadByVal;
 
-                if (s_OverheadByRef is null && s_OverheadByVal is null)
+                if (s_OverheadByPtr is null && s_OverheadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AEAD.Overhead method", new Exception("Overhead"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Seal");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Seal");
 
                 if (!(extensionMethod is null))
-                    s_SealByRef = extensionMethod.CreateStaticDelegate(typeof(SealByRef)) as SealByRef;
+                    s_SealByPtr = extensionMethod.CreateStaticDelegate(typeof(SealByPtr)) as SealByPtr;
 
-                if (s_SealByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Seal");
+                extensionMethod = targetType.GetExtensionMethod("Seal");
 
-                    if (!(extensionMethod is null))
-                        s_SealByVal = extensionMethod.CreateStaticDelegate(typeof(SealByVal)) as SealByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SealByVal = extensionMethod.CreateStaticDelegate(typeof(SealByVal)) as SealByVal;
 
-                if (s_SealByRef is null && s_SealByVal is null)
+                if (s_SealByPtr is null && s_SealByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AEAD.Seal method", new Exception("Seal"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Open");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
                 if (!(extensionMethod is null))
-                    s_OpenByRef = extensionMethod.CreateStaticDelegate(typeof(OpenByRef)) as OpenByRef;
+                    s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
-                if (s_OpenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Open");
+                extensionMethod = targetType.GetExtensionMethod("Open");
 
-                    if (!(extensionMethod is null))
-                        s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
-                if (s_OpenByRef is null && s_OpenByVal is null)
+                if (s_OpenByPtr is null && s_OpenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement AEAD.Open method", new Exception("Open"));
             }
 

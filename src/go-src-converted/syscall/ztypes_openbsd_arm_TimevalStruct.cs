@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:17 UTC
+//     Generated on 2020 October 08 03:30:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,12 +26,14 @@ namespace go
             {
                 this.Sec = default;
                 this.Usec = default;
+                this.Pad_cgo_0 = default;
             }
 
-            public Timeval(long Sec = default, int Usec = default)
+            public Timeval(long Sec = default, int Usec = default, array<byte> Pad_cgo_0 = default)
             {
                 this.Sec = Sec;
                 this.Usec = Usec;
+                this.Pad_cgo_0 = Pad_cgo_0;
             }
 
             // Enable comparisons between nil and Timeval struct
@@ -54,7 +56,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Timeval Timeval_cast(dynamic value)
         {
-            return new Timeval(value.Sec, value.Usec);
+            return new Timeval(value.Sec, value.Usec, value.Pad_cgo_0);
         }
     }
 }

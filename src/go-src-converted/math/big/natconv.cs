@@ -4,7 +4,7 @@
 
 // This file implements nat-to-string conversion functions.
 
-// package big -- go2cs converted at 2020 August 29 08:29:26 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:48 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\natconv.go
 using errors = go.errors_package;
@@ -20,7 +20,7 @@ namespace math
 {
     public static partial class big_package
     {
-        private static readonly @string digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private static readonly @string digits = (@string)"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         // Note: MaxBase = len(digits), but it must remain an untyped rune constant
         //       for API compatibility.
@@ -32,9 +32,9 @@ namespace math
         //       for API compatibility.
 
         // MaxBase is the largest number base accepted for string conversions.
-        public static readonly long MaxBase = 10L + ('z' - 'a' + 1L) + ('Z' - 'A' + 1L);
+        public static readonly long MaxBase = (long)10L + ('z' - 'a' + 1L) + ('Z' - 'A' + 1L);
 
-        private static readonly long maxBaseSmall = 10L + ('z' - 'a' + 1L);
+        private static readonly long maxBaseSmall = (long)10L + ('z' - 'a' + 1L);
 
         // maxPow returns (b**n, n) such that b**n is the largest power b**n <= _M.
         // For instance maxPow(10) == (1e19, 19) for 19 decimal digits in a 64bit Word.
@@ -48,6 +48,9 @@ namespace math
         // TODO(gri) replace this with a table, generated at build time.
         private static (Word, long) maxPow(Word b)
         {
+            Word p = default;
+            long n = default;
+
             p = b;
             n = 1L; // assuming b <= _M
             {
@@ -58,17 +61,21 @@ namespace math
                     // p == b**n && p <= max
                     p *= b;
                     n++;
+
                 } 
                 // p == b**n && p <= _M
 
             } 
             // p == b**n && p <= _M
-            return;
+            return ;
+
         }
 
         // pow returns x**n for n > 0, and 1 otherwise.
         private static Word pow(Word x, long n)
-        { 
+        {
+            Word p = default;
+ 
             // n == sum of bi * 2**i, for 0 <= i < imax, and bi is 0 or 1
             // thus x**n == product of x**(2**i) for all i where bi == 1
             // (Russian Peasant Method for exponentiation)
@@ -79,38 +86,53 @@ namespace math
                 {
                     p *= x;
                 }
+
                 x *= x;
                 n >>= 1L;
+
             }
 
-            return;
+            return ;
+
         }
+
+        // scan errors
+        private static var errNoDigits = errors.New("number has no digits");        private static var errInvalSep = errors.New("'_' must separate successive digits");
 
         // scan scans the number corresponding to the longest possible prefix
         // from r representing an unsigned number in a given conversion base.
-        // It returns the corresponding natural number res, the actual base b,
+        // scan returns the corresponding natural number res, the actual base b,
         // a digit count, and a read or syntax error err, if any.
         //
-        //     number   = [ prefix ] mantissa .
-        //     prefix   = "0" [ "x" | "X" | "b" | "B" ] .
-        //     mantissa = digits | digits "." [ digits ] | "." digits .
-        //     digits   = digit { digit } .
-        //     digit    = "0" ... "9" | "a" ... "z" | "A" ... "Z" .
+        // For base 0, an underscore character ``_'' may appear between a base
+        // prefix and an adjacent digit, and between successive digits; such
+        // underscores do not change the value of the number, or the returned
+        // digit count. Incorrect placement of underscores is reported as an
+        // error if there are no other errors. If base != 0, underscores are
+        // not recognized and thus terminate scanning like any other character
+        // that is not a valid radix point or digit.
+        //
+        //     number    = mantissa | prefix pmantissa .
+        //     prefix    = "0" [ "b" | "B" | "o" | "O" | "x" | "X" ] .
+        //     mantissa  = digits "." [ digits ] | digits | "." digits .
+        //     pmantissa = [ "_" ] digits "." [ digits ] | [ "_" ] digits | "." digits .
+        //     digits    = digit { [ "_" ] digit } .
+        //     digit     = "0" ... "9" | "a" ... "z" | "A" ... "Z" .
         //
         // Unless fracOk is set, the base argument must be 0 or a value between
         // 2 and MaxBase. If fracOk is set, the base argument must be one of
-        // 0, 2, 10, or 16. Providing an invalid base argument leads to a run-
+        // 0, 2, 8, 10, or 16. Providing an invalid base argument leads to a run-
         // time panic.
         //
         // For base 0, the number prefix determines the actual base: A prefix of
-        // ``0x'' or ``0X'' selects base 16; if fracOk is not set, the ``0'' prefix
-        // selects base 8, and a ``0b'' or ``0B'' prefix selects base 2. Otherwise
+        // ``0b'' or ``0B'' selects base 2, ``0o'' or ``0O'' selects base 8, and
+        // ``0x'' or ``0X'' selects base 16. If fracOk is false, a ``0'' prefix
+        // (immediately followed by digits) selects base 8 as well. Otherwise,
         // the selected base is 10 and no prefix is accepted.
         //
-        // If fracOk is set, an octal prefix is ignored (a leading ``0'' simply
-        // stands for a zero digit), and a period followed by a fractional part
-        // is permitted. The result value is computed as if there were no period
-        // present; and the count value is used to determine the fractional part.
+        // If fracOk is set, a period followed by a fractional part is permitted.
+        // The result value is computed as if there were no period present; and
+        // the count value is used to determine the fractional part.
         //
         // For bases <= 36, lower and upper case letters are considered the same:
         // The letters 'a' to 'z' and 'A' to 'Z' represent digit values 10 to 35.
@@ -123,80 +145,88 @@ namespace math
         // In this case, the actual value of the scanned number is res * b**count.
         //
         private static (nat, long, long, error) scan(this nat z, io.ByteScanner r, long @base, bool fracOk) => func((_, panic, __) =>
-        { 
-            // reject illegal bases
-            var baseOk = base == 0L || !fracOk && 2L <= base && base <= MaxBase || fracOk && (base == 2L || base == 10L || base == 16L);
+        {
+            nat res = default;
+            long b = default;
+            long count = default;
+            error err = default!;
+ 
+            // reject invalid bases
+            var baseOk = base == 0L || !fracOk && 2L <= base && base <= MaxBase || fracOk && (base == 2L || base == 8L || base == 10L || base == 16L);
             if (!baseOk)
             {
-                panic(fmt.Sprintf("illegal number base %d", base));
+                panic(fmt.Sprintf("invalid number base %d", base));
             } 
+
+            // prev encodes the previously seen char: it is one
+            // of '_', '0' (a digit), or '.' (anything else). A
+            // valid separator '_' may only occur after a digit
+            // and if base == 0.
+            char prev = '.';
+            var invalSep = false; 
 
             // one char look-ahead
-            var (ch, err) = r.ReadByte();
-            if (err != null)
-            {
-                return;
-            } 
+            var (ch, err) = r.ReadByte(); 
 
             // determine actual base
-            b = base;
+            var b = base;
+            long prefix = 0L;
             if (base == 0L)
             { 
                 // actual base is 10 unless there's a base prefix
                 b = 10L;
-                if (ch == '0')
+                if (err == null && ch == '0')
                 {
+                    prev = '0';
                     count = 1L;
                     ch, err = r.ReadByte();
-
-
-                    if (err == null) 
-                        // possibly one of 0x, 0X, 0b, 0B
-                        if (!fracOk)
-                        {
-                            b = 8L;
-                        }
+                    if (err == null)
+                    { 
+                        // possibly one of 0b, 0B, 0o, 0O, 0x, 0X
                         switch (ch)
                         {
-                            case 'x': 
-
-                            case 'X': 
-                                b = 16L;
-                                break;
                             case 'b': 
 
                             case 'B': 
                                 b = 2L;
+                                prefix = 'b';
                                 break;
-                        }
-                        switch (b)
-                        {
-                            case 16L: 
+                            case 'o': 
 
-                            case 2L: 
-                                count = 0L; // prefix is not counted
-                                ch, err = r.ReadByte();
+                            case 'O': 
+                                b = 8L;
+                                prefix = 'o';
+                                break;
+                            case 'x': 
 
-                                if (err != null)
-                                { 
-                                    // io.EOF is also an error in this case
-                                    return;
+                            case 'X': 
+                                b = 16L;
+                                prefix = 'x';
+                                break;
+                            default: 
+                                if (!fracOk)
+                                {
+                                    b = 8L;
+                                    prefix = '0';
+
                                 }
-                                break;
-                            case 8L: 
-                                count = 0L; // prefix is not counted
+
                                 break;
                         }
-                    else if (err == io.EOF) 
-                        // input is "0"
-                        res = z[..0L];
-                        err = null;
-                        return;
-                    else 
-                        // read error
-                        return;
+                        if (prefix != 0L)
+                        {
+                            count = 0L; // prefix is not counted
+                            if (prefix != '0')
+                            {
+                                ch, err = r.ReadByte();
+                            }
+
+                        }
+
+                    }
 
                 }
+
             } 
 
             // convert string
@@ -209,108 +239,123 @@ namespace math
             var di = Word(0L); // 0 <= di < b1**i < bn
             long i = 0L; // 0 <= i < n
             long dp = -1L; // position of decimal point
-            while (true)
+            while (err == null)
             {
-                if (fracOk && ch == '.')
+                if (ch == '.' && fracOk)
                 {
                     fracOk = false;
-                    dp = count; 
-                    // advance
-                    ch, err = r.ReadByte();
-
-                    if (err != null)
+                    if (prev == '_')
                     {
-                        if (err == io.EOF)
-                        {
-                            err = null;
-                            break;
-                        }
-                        return;
+                        invalSep = true;
                     }
-                } 
 
-                // convert rune into digit value d1
-                Word d1 = default;
+                    prev = '.';
+                    dp = count;
 
-                if ('0' <= ch && ch <= '9') 
-                    d1 = Word(ch - '0');
-                else if ('a' <= ch && ch <= 'z') 
-                    d1 = Word(ch - 'a' + 10L);
-                else if ('A' <= ch && ch <= 'Z') 
-                    if (b <= maxBaseSmall)
-                    {
-                        d1 = Word(ch - 'A' + 10L);
-                    }
-                    else
-                    {
-                        d1 = Word(ch - 'A' + maxBaseSmall);
-                    }
-                else 
-                    d1 = MaxBase + 1L;
-                                if (d1 >= b1)
-                {
-                    r.UnreadByte(); // ch does not belong to number anymore
-                    break;
                 }
-                count++; 
-
-                // collect d1 in di
-                di = di * b1 + d1;
-                i++; 
-
-                // if di is "full", add it to the result
-                if (i == n)
+                else if (ch == '_' && base == 0L)
                 {
-                    z = z.mulAddWW(z, bn, di);
-                    di = 0L;
-                    i = 0L;
-                } 
+                    if (prev != '0')
+                    {
+                        invalSep = true;
+                    }
 
-                // advance
+                    prev = '_';
+
+                }
+                else
+                { 
+                    // convert rune into digit value d1
+                    Word d1 = default;
+
+                    if ('0' <= ch && ch <= '9') 
+                        d1 = Word(ch - '0');
+                    else if ('a' <= ch && ch <= 'z') 
+                        d1 = Word(ch - 'a' + 10L);
+                    else if ('A' <= ch && ch <= 'Z') 
+                        if (b <= maxBaseSmall)
+                        {
+                            d1 = Word(ch - 'A' + 10L);
+                        }
+                        else
+                        {
+                            d1 = Word(ch - 'A' + maxBaseSmall);
+                        }
+
+                    else 
+                        d1 = MaxBase + 1L;
+                                        if (d1 >= b1)
+                    {
+                        r.UnreadByte(); // ch does not belong to number anymore
+                        break;
+
+                    }
+
+                    prev = '0';
+                    count++; 
+
+                    // collect d1 in di
+                    di = di * b1 + d1;
+                    i++; 
+
+                    // if di is "full", add it to the result
+                    if (i == n)
+                    {
+                        z = z.mulAddWW(z, bn, di);
+                        di = 0L;
+                        i = 0L;
+                    }
+
+                }
+
                 ch, err = r.ReadByte();
 
-                if (err != null)
-                {
-                    if (err == io.EOF)
-                    {
-                        err = null;
-                        break;
-                    }
-                    return;
-                }
             }
 
+
+            if (err == io.EOF)
+            {
+                err = null;
+            } 
+
+            // other errors take precedence over invalid separators
+            if (err == null && (invalSep || prev == '_'))
+            {
+                err = errInvalSep;
+            }
 
             if (count == 0L)
             { 
                 // no digits found
+                if (prefix == '0')
+                { 
+                    // there was only the octal prefix 0 (possibly followed by separators and digits > 7);
+                    // interpret as decimal 0
+                    return (z[..0L], 10L, 1L, error.As(err)!);
 
-                if (base == 0L && b == 8L) 
-                    // there was only the octal prefix 0 (possibly followed by digits > 7);
-                    // count as one digit and return base 10, not 8
-                    count = 1L;
-                    b = 10L;
-                else if (base != 0L || b != 8L) 
-                    // there was neither a mantissa digit nor the octal prefix 0
-                    err = errors.New("syntax error scanning number");
-                                return;
+                }
+
+                err = errNoDigits; // fall through; result will be 0
             } 
-            // count > 0
 
             // add remaining digits to result
             if (i > 0L)
             {
                 z = z.mulAddWW(z, pow(b1, i), di);
             }
+
             res = z.norm(); 
 
-            // adjust for fraction, if any
+            // adjust count for fraction, if any
             if (dp >= 0L)
             { 
-                // 0 <= dp <= count > 0
+                // 0 <= dp <= count
                 count = dp - count;
+
             }
-            return;
+
+            return ;
+
         });
 
         // utoa converts x to an ASCII representation in the given base;
@@ -341,6 +386,7 @@ namespace math
             {
                 i++;
             }
+
             var s = make_slice<byte>(i); 
 
             // convert power of two and non power of two bases separately
@@ -378,6 +424,7 @@ namespace math
                             // no partial digit remaining, just advance
                             w = x[k];
                             nbits = _W;
+
                         }
                         else
                         { 
@@ -389,7 +436,9 @@ namespace math
                             // advance
                             w = x[k] >> (int)((shift - nbits));
                             nbits = _W - (shift - nbits);
+
                         }
+
                     } 
 
                     // convert digits of most-significant word w (omit leading zeros)
@@ -402,6 +451,7 @@ namespace math
                         s[i] = digits[w & mask];
                         w >>= shift;
                     }
+
 
 
                 }                {
@@ -426,16 +476,20 @@ namespace math
                         i++;
                     }
 
+
                 }
 
             }
+
 
             if (neg)
             {
                 i--;
                 s[i] = '-';
             }
+
             return s[i..];
+
         });
 
         // Convert words of q to base b digits in s. If q is large, it is recursively "split in half"
@@ -479,6 +533,7 @@ namespace math
                         {
                             panic("internal inconsistency");
                         }
+
                     } 
 
                     // split q into the two digit number (q'*bbb + r) to form independent subblocks
@@ -489,6 +544,7 @@ namespace math
                     r.convertWords(s[h..], b, ndigits, bb, table[0L..index]);
                     s = s[..h]; // == q.convertWords(s, b, ndigits, bb, table[0:index+1])
                 }
+
 
             } 
 
@@ -514,13 +570,16 @@ namespace math
                             var t = r / 10L;
                             s[i] = '0' + byte(r - t * 10L);
                             r = t;
+
                         }
             else
 
 
                         j = j__prev2;
                     }
+
                 }
+
 
             }            {
                 while (len(q) > 0L)
@@ -540,7 +599,9 @@ namespace math
 
                         j = j__prev2;
                     }
+
                 }
+
 
             } 
 
@@ -549,7 +610,9 @@ namespace math
             { // while need more leading zeros
                 i--;
                 s[i] = '0';
+
             }
+
 
         });
 
@@ -640,15 +703,21 @@ namespace math
 
 
                         table[i].nbits = table[i].bbb.bitLen();
+
                     }
+
                 }
 
+
             }
+
             if (b == 10L)
             {
                 cacheBase10.Unlock();
             }
+
             return table;
+
         }
     }
 }}

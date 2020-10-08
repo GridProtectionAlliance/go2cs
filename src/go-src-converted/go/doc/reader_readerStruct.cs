@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:09 UTC
+//     Generated on 2020 October 08 04:02:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
-using regexp = go.regexp_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using go;
@@ -45,7 +45,7 @@ namespace go
                 this.fixlist = default;
             }
 
-            public reader(Mode mode = default, @string doc = default, slice<@string> filenames = default, map<@string, slice<ref Note>> notes = default, map<@string, long> imports = default, bool hasDotImp = default, slice<ref Value> values = default, long order = default, map<@string, ref namedType> types = default, methodSet funcs = default, bool errorDecl = default, slice<ref ast.InterfaceType> fixlist = default)
+            public reader(Mode mode = default, @string doc = default, slice<@string> filenames = default, map<@string, slice<ptr<Note>>> notes = default, map<@string, long> imports = default, bool hasDotImp = default, slice<ptr<Value>> values = default, long order = default, map<@string, ptr<namedType>> types = default, methodSet funcs = default, bool errorDecl = default, slice<ptr<ast.InterfaceType>> fixlist = default)
             {
                 this.mode = mode;
                 this.doc = doc;

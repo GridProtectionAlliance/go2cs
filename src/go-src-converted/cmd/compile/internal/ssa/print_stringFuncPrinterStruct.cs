@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:54:43 UTC
+//     Generated on 2020 October 08 04:11:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytes = go.bytes_package;
+using sha256 = go.crypto.sha256_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using go;

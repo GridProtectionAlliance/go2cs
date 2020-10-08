@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:27 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:24:16 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\traceback.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -13,7 +13,7 @@ using System;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         // The code in this file implements stack trace walking for all architectures.
         // The most important fact about a given architecture is whether it uses a link register.
@@ -31,13 +31,13 @@ namespace go
         // takes up only 4 bytes on the stack, while on 64-bit systems it takes up 8 bytes.
         // Typically this is ptrSize.
         //
-        // As an exception, amd64p32 has ptrSize == 4 but the CALL instruction still
-        // stores an 8-byte return PC onto the stack. To accommodate this, we use regSize
+        // As an exception, amd64p32 had ptrSize == 4 but the CALL instruction still
+        // stored an 8-byte return PC onto the stack. To accommodate this, we used regSize
         // as the size of the architecture-pushed return PC.
         //
         // usesLR is defined below in terms of minFrameSize, which is defined in
         // arch_$GOARCH.go. ptrSize and regSize are defined in stubs.go.
-        private static readonly var usesLR = sys.MinFrameSize > 0L;
+        private static readonly var usesLR = (var)sys.MinFrameSize > 0L;
 
 
 
@@ -50,13 +50,16 @@ namespace go
             // schedinit calls this function so that the variables are
             // initialized and available earlier in the startup sequence.
             skipPC = funcPC(skipPleaseUseCallersFrames);
+
         }
 
         // Traceback over the deferred function calls.
         // Report them like calls that have been invoked but not started executing yet.
-        private static bool tracebackdefers(ref g gp, Func<ref stkframe, unsafe.Pointer, bool> callback, unsafe.Pointer v)
+        private static bool tracebackdefers(ptr<g> _addr_gp, Func<ptr<stkframe>, unsafe.Pointer, bool> callback, unsafe.Pointer v)
         {
-            stkframe frame = default;
+            ref g gp = ref _addr_gp.val;
+
+            ref stkframe frame = ref heap(out ptr<stkframe> _addr_frame);
             {
                 var d = gp._defer;
 
@@ -82,21 +85,31 @@ namespace go
                             print("runtime: unknown pc in defer ", hex(frame.pc), "\n");
                             throw("unknown pc");
                         }
+
                         frame.fn = f;
                         frame.argp = uintptr(deferArgs(d));
-                        frame.arglen, frame.argmap = getArgInfo(ref frame, f, true, fn);
+                        bool ok = default;
+                        frame.arglen, frame.argmap, ok = getArgInfoFast(f, true);
+                        if (!ok)
+                        {
+                            frame.arglen, frame.argmap = getArgInfo(_addr_frame, f, true, _addr_fn);
+                        }
+
                     }
+
                     frame.continpc = frame.pc;
-                    if (!callback((stkframe.Value)(noescape(@unsafe.Pointer(ref frame))), v))
+                    if (!callback((stkframe.val)(noescape(@unsafe.Pointer(_addr_frame))), v))
                     {
-                        return;
+                        return ;
                     }
+
                 }
 
             }
+
         }
 
-        private static readonly long sizeofSkipFunction = 256L;
+        private static readonly long sizeofSkipFunction = (long)256L;
 
         // This function is defined in asm.s to be sizeofSkipFunction bytes long.
 
@@ -115,31 +128,44 @@ namespace go
         // PC in pcbuf can represent multiple calls). If a PC is partially skipped
         // and max > 1, pcbuf[1] will be runtime.skipPleaseUseCallersFrames+N where
         // N indicates the number of logical frames to skip in pcbuf[0].
-        private static long gentraceback(System.UIntPtr pc0, System.UIntPtr sp0, System.UIntPtr lr0, ref g gp, long skip, ref System.UIntPtr pcbuf, long max, Func<ref stkframe, unsafe.Pointer, bool> callback, unsafe.Pointer v, ulong flags)
+        private static long gentraceback(System.UIntPtr pc0, System.UIntPtr sp0, System.UIntPtr lr0, ptr<g> _addr_gp, long skip, ptr<System.UIntPtr> _addr_pcbuf, long max, Func<ptr<stkframe>, unsafe.Pointer, bool> callback, unsafe.Pointer v, ulong flags)
         {
+            ref g gp = ref _addr_gp.val;
+            ref System.UIntPtr pcbuf = ref _addr_pcbuf.val;
+
             if (skip > 0L && callback != null)
             {>>MARKER:FUNCTION_skipPleaseUseCallersFrames_BLOCK_PREFIX<<
                 throw("gentraceback callback cannot be used with non-zero skip");
+            } 
+
+            // Don't call this "g"; it's too easy get "g" and "gp" confused.
+            {
+                var ourg = getg();
+
+                if (ourg == gp && ourg == ourg.m.curg)
+                { 
+                    // The starting sp has been passed in as a uintptr, and the caller may
+                    // have other uintptr-typed stack references as well.
+                    // If during one of the calls that got us here or during one of the
+                    // callbacks below the stack must be grown, all these uintptr references
+                    // to the stack will not be updated, and gentraceback will continue
+                    // to inspect the old stack memory, which may no longer be valid.
+                    // Even if all the variables were updated correctly, it is not clear that
+                    // we want to expose a traceback that begins on one stack and ends
+                    // on another stack. That could confuse callers quite a bit.
+                    // Instead, we require that gentraceback and any other function that
+                    // accepts an sp for the current goroutine (typically obtained by
+                    // calling getcallersp) must not run on that goroutine's stack but
+                    // instead on the g0 stack.
+                    throw("gentraceback cannot trace user goroutine on its own stack");
+
+                }
+
             }
-            var g = getg();
-            if (g == gp && g == g.m.curg)
-            { 
-                // The starting sp has been passed in as a uintptr, and the caller may
-                // have other uintptr-typed stack references as well.
-                // If during one of the calls that got us here or during one of the
-                // callbacks below the stack must be grown, all these uintptr references
-                // to the stack will not be updated, and gentraceback will continue
-                // to inspect the old stack memory, which may no longer be valid.
-                // Even if all the variables were updated correctly, it is not clear that
-                // we want to expose a traceback that begins on one stack and ends
-                // on another stack. That could confuse callers quite a bit.
-                // Instead, we require that gentraceback and any other function that
-                // accepts an sp for the current goroutine (typically obtained by
-                // calling getcallersp) must not run on that goroutine's stack but
-                // instead on the g0 stack.
-                throw("gentraceback cannot trace user goroutine on its own stack");
-            }
+
             var (level, _, _) = gotraceback();
+
+            ptr<funcval> ctxt; // Context pointer for unstarted goroutines. See issue #25897.
 
             if (pc0 == ~uintptr(0L) && sp0 == ~uintptr(0L))
             { // Signal to fetch saved values from gp.
@@ -151,6 +177,7 @@ namespace go
                     {
                         lr0 = 0L;
                     }
+
                 }
                 else
                 {
@@ -160,30 +187,25 @@ namespace go
                     {
                         lr0 = gp.sched.lr;
                     }
+
+                    ctxt = (funcval.val)(gp.sched.ctxt);
+
                 }
+
             }
+
             long nprint = 0L;
-            stkframe frame = default;
+            ref stkframe frame = ref heap(out ptr<stkframe> _addr_frame);
             frame.pc = pc0;
             frame.sp = sp0;
             if (usesLR)
             {
                 frame.lr = lr0;
             }
+
             var waspanic = false;
             var cgoCtxt = gp.cgoCtxt;
-            var printing = pcbuf == null && callback == null;
-            var _defer = gp._defer;
-            var elideWrapper = false;
-
-            while (_defer != null && _defer.sp == _NoArgs)
-            {
-                _defer = _defer.link;
-            } 
-
-            // If the PC is zero, it's likely a nil function call.
-            // Start in the caller's frame.
- 
+            var printing = pcbuf == null && callback == null; 
 
             // If the PC is zero, it's likely a nil function call.
             // Start in the caller's frame.
@@ -191,33 +213,40 @@ namespace go
             {
                 if (usesLR)
                 {
-                    frame.pc = @unsafe.Pointer(frame.sp).Value;
+                    frame.pc = new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(frame.sp));
                     frame.lr = 0L;
                 }
                 else
                 {
-                    frame.pc = uintptr(@unsafe.Pointer(frame.sp).Value);
+                    frame.pc = uintptr(new ptr<ptr<ptr<sys.Uintreg>>>(@unsafe.Pointer(frame.sp)));
                     frame.sp += sys.RegSize;
                 }
+
             }
+
             var f = findfunc(frame.pc);
             if (!f.valid())
             {
                 if (callback != null || printing)
                 {
                     print("runtime: unknown pc ", hex(frame.pc), "\n");
-                    tracebackHexdump(gp.stack, ref frame, 0L);
+                    tracebackHexdump(gp.stack, _addr_frame, 0L);
                 }
+
                 if (callback != null)
                 {
                     throw("unknown pc");
                 }
+
                 return 0L;
+
             }
+
             frame.fn = f;
 
-            pcvalueCache cache = default;
+            ref pcvalueCache cache = ref heap(out ptr<pcvalueCache> _addr_cache);
 
+            var lastFuncID = funcID_normal;
             long n = 0L;
             while (n < max)
             { 
@@ -233,29 +262,47 @@ namespace go
                     // No frame information, must be external function, like race support.
                     // See golang.org/issue/13568.
                     break;
+
                 } 
 
                 // Found an actual function.
                 // Derive frame pointer and link register.
                 if (frame.fp == 0L)
                 { 
-                    // We want to jump over the systemstack switch. If we're running on the
-                    // g0, this systemstack is at the top of the stack.
-                    // if we're not on g0 or there's a no curg, then this is a regular call.
-                    var sp = frame.sp;
-                    if (flags & _TraceJumpStack != 0L && f.funcID == funcID_systemstack && gp == g.m.g0 && gp.m.curg != null)
+                    // Jump over system stack transitions. If we're on g0 and there's a user
+                    // goroutine, try to jump. Otherwise this is a regular call.
+                    if (flags & _TraceJumpStack != 0L && gp == gp.m.g0 && gp.m.curg != null)
                     {
-                        sp = gp.m.curg.sched.sp;
-                        frame.sp = sp;
-                        cgoCtxt = gp.m.curg.cgoCtxt;
+
+                        if (f.funcID == funcID_morestack) 
+                            // morestack does not return normally -- newstack()
+                            // gogo's to curg.sched. Match that.
+                            // This keeps morestack() from showing up in the backtrace,
+                            // but that makes some sense since it'll never be returned
+                            // to.
+                            frame.pc = gp.m.curg.sched.pc;
+                            frame.fn = findfunc(frame.pc);
+                            f = frame.fn;
+                            frame.sp = gp.m.curg.sched.sp;
+                            cgoCtxt = gp.m.curg.cgoCtxt;
+                        else if (f.funcID == funcID_systemstack) 
+                            // systemstack returns normally, so just follow the
+                            // stack transition.
+                            frame.sp = gp.m.curg.sched.sp;
+                            cgoCtxt = gp.m.curg.cgoCtxt;
+                        
                     }
-                    frame.fp = sp + uintptr(funcspdelta(f, frame.pc, ref cache));
+
+                    frame.fp = frame.sp + uintptr(funcspdelta(f, frame.pc, _addr_cache));
                     if (!usesLR)
                     { 
                         // On x86, call instruction pushes return PC before entering new function.
                         frame.fp += sys.RegSize;
+
                     }
+
                 }
+
                 funcInfo flr = default;
                 if (topofstack(f, gp.m != null && gp == gp.m.g0))
                 {
@@ -274,7 +321,9 @@ namespace go
                     {
                         throw("traceback_arm: found jmpdefer when tracing with callback");
                     }
+
                     frame.lr = 0L;
+
                 }
                 else
                 {
@@ -284,17 +333,20 @@ namespace go
                         if (n == 0L && frame.sp < frame.fp || frame.lr == 0L)
                         {
                             lrPtr = frame.sp;
-                            frame.lr = @unsafe.Pointer(lrPtr).Value;
+                            frame.lr = new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(lrPtr));
                         }
+
                     }
                     else
                     {
                         if (frame.lr == 0L)
                         {
                             lrPtr = frame.fp - sys.RegSize;
-                            frame.lr = uintptr(@unsafe.Pointer(lrPtr).Value);
+                            frame.lr = uintptr(new ptr<ptr<ptr<sys.Uintreg>>>(@unsafe.Pointer(lrPtr)));
                         }
+
                     }
+
                     flr = findfunc(frame.lr);
                     if (!flr.valid())
                     { 
@@ -310,28 +362,35 @@ namespace go
                             // in which case we'll see a C
                             // return PC. Don't complain.
                             doPrint = false;
+
                         }
+
                         if (callback != null || doPrint)
                         {
                             print("runtime: unexpected return pc for ", funcname(f), " called from ", hex(frame.lr), "\n");
-                            tracebackHexdump(gp.stack, ref frame, lrPtr);
+                            tracebackHexdump(gp.stack, _addr_frame, lrPtr);
                         }
+
                         if (callback != null)
                         {
                             throw("unknown caller pc");
                         }
+
                     }
+
                 }
+
                 frame.varp = frame.fp;
                 if (!usesLR)
                 { 
                     // On x86, call instruction pushes return PC before entering new function.
                     frame.varp -= sys.RegSize;
+
                 } 
 
                 // If framepointer_enabled and there's a frame, then
                 // there's a saved bp here.
-                if (framepointer_enabled && GOARCH == "amd64" && frame.varp > frame.sp)
+                if (frame.varp > frame.sp && (framepointer_enabled && GOARCH == "amd64" || GOARCH == "arm64"))
                 {
                     frame.varp -= sys.RegSize;
                 } 
@@ -345,8 +404,16 @@ namespace go
                 if (callback != null || printing)
                 {
                     frame.argp = frame.fp + sys.MinFrameSize;
-                    frame.arglen, frame.argmap = getArgInfo(ref frame, f, callback != null, null);
-                } 
+                    bool ok = default;
+                    frame.arglen, frame.argmap, ok = getArgInfoFast(f, callback != null);
+                    if (!ok)
+                    {
+                        frame.arglen, frame.argmap = getArgInfo(_addr_frame, f, callback != null, ctxt);
+                    }
+
+                }
+
+                ctxt = null; // ctxt is only needed to get arg maps for the topmost frame
 
                 // Determine frame's 'continuation PC', where it can continue.
                 // Normally this is the return address on the stack, but if sigpanic
@@ -356,91 +423,128 @@ namespace go
                 // the function either doesn't return at all (if it has no defers or if the
                 // defers do not recover) or it returns from one of the calls to
                 // deferproc a second time (if the corresponding deferred func recovers).
-                // It suffices to assume that the most recent deferproc is the one that
-                // returns; everything live at earlier deferprocs is still live at that one.
+                // In the latter case, use a deferreturn call site as the continuation pc.
                 frame.continpc = frame.pc;
                 if (waspanic)
                 {
-                    if (_defer != null && _defer.sp == frame.sp)
+                    if (frame.fn.deferreturn != 0L)
                     {
-                        frame.continpc = _defer.pc;
+                        frame.continpc = frame.fn.entry + uintptr(frame.fn.deferreturn) + 1L; 
+                        // Note: this may perhaps keep return variables alive longer than
+                        // strictly necessary, as we are using "function has a defer statement"
+                        // as a proxy for "function actually deferred something". It seems
+                        // to be a minor drawback. (We used to actually look through the
+                        // gp._defer for a defer corresponding to this function, but that
+                        // is hard to do with defer records on the stack during a stack copy.)
+                        // Note: the +1 is to offset the -1 that
+                        // stack.go:getStackMap does to back up a return
+                        // address make sure the pc is in the CALL instruction.
                     }
                     else
                     {
                         frame.continpc = 0L;
                     }
-                } 
 
-                // Unwind our local defer stack past this frame.
-                while (_defer != null && (_defer.sp == frame.sp || _defer.sp == _NoArgs))
-                {
-                    _defer = _defer.link;
                 }
-
 
                 if (callback != null)
                 {
-                    if (!callback((stkframe.Value)(noescape(@unsafe.Pointer(ref frame))), v))
+                    if (!callback((stkframe.val)(noescape(@unsafe.Pointer(_addr_frame))), v))
                     {
                         return n;
                     }
+
                 }
+
                 if (pcbuf != null)
                 {
-                    if (skip == 0L)
+                    var pc = frame.pc; 
+                    // backup to CALL instruction to read inlining info (same logic as below)
+                    var tracepc = pc; 
+                    // Normally, pc is a return address. In that case, we want to look up
+                    // file/line information using pc-1, because that is the pc of the
+                    // call instruction (more precisely, the last byte of the call instruction).
+                    // Callers expect the pc buffer to contain return addresses and do the
+                    // same -1 themselves, so we keep pc unchanged.
+                    // When the pc is from a signal (e.g. profiler or segv) then we want
+                    // to look up file/line information using pc, and we store pc+1 in the
+                    // pc buffer so callers can unconditionally subtract 1 before looking up.
+                    // See issue 34123.
+                    // The pc can be at function entry when the frame is initialized without
+                    // actually running code, like runtime.mstart.
+                    if ((n == 0L && flags & _TraceTrap != 0L) || waspanic || pc == f.entry)
                     {
-                        new ptr<ref array<System.UIntPtr>>(@unsafe.Pointer(pcbuf))[n] = frame.pc;
+                        pc++;
                     }
                     else
+                    {
+                        tracepc--;
+                    } 
+
+                    // If there is inlining info, record the inner frames.
+                    {
+                        var inldata__prev2 = inldata;
+
+                        var inldata = funcdata(f, _FUNCDATA_InlTree);
+
+                        if (inldata != null)
+                        {
+                            ptr<array<inlinedCall>> inltree = new ptr<ptr<array<inlinedCall>>>(inldata);
+                            while (true)
+                            {
+                                var ix = pcdatavalue(f, _PCDATA_InlTreeIndex, tracepc, _addr_cache);
+                                if (ix < 0L)
+                                {
+                                    break;
+                                }
+
+                                if (inltree[ix].funcID == funcID_wrapper && elideWrapperCalling(lastFuncID))
+                                { 
+                                    // ignore wrappers
+                                }
+                                else if (skip > 0L)
+                                {
+                                    skip--;
+                                }
+                                else if (n < max)
+                                {
+                                    new ptr<ptr<array<System.UIntPtr>>>(@unsafe.Pointer(pcbuf))[n] = pc;
+                                    n++;
+                                }
+
+                                lastFuncID = inltree[ix].funcID; 
+                                // Back up to an instruction in the "caller".
+                                tracepc = frame.fn.entry + uintptr(inltree[ix].parentPc);
+                                pc = tracepc + 1L;
+
+                            }
+
+
+                        } 
+                        // Record the main frame.
+
+                        inldata = inldata__prev2;
+
+                    } 
+                    // Record the main frame.
+                    if (f.funcID == funcID_wrapper && elideWrapperCalling(lastFuncID))
                     { 
-                        // backup to CALL instruction to read inlining info (same logic as below)
-                        var tracepc = frame.pc;
-                        if ((n > 0L || flags & _TraceTrap == 0L) && frame.pc > f.entry && !waspanic)
-                        {
-                            tracepc--;
-                        }
-                        var inldata = funcdata(f, _FUNCDATA_InlTree); 
-
-                        // no inlining info, skip the physical frame
-                        if (inldata == null)
-                        {
-                            skip--;
-                            goto skipped;
-                        }
-                        var ix = pcdatavalue(f, _PCDATA_InlTreeIndex, tracepc, ref cache);
-                        ref array<inlinedCall> inltree = new ptr<ref array<inlinedCall>>(inldata); 
-                        // skip the logical (inlined) frames
-                        long logicalSkipped = 0L;
-                        while (ix >= 0L && skip > 0L)
-                        {
-                            skip--;
-                            logicalSkipped++;
-                            ix = inltree[ix].parent;
-                        } 
-
-                        // skip the physical frame if there's more to skip
- 
-
-                        // skip the physical frame if there's more to skip
-                        if (skip > 0L)
-                        {
-                            skip--;
-                            goto skipped;
-                        } 
-
-                        // now we have a partially skipped frame
-                        new ptr<ref array<System.UIntPtr>>(@unsafe.Pointer(pcbuf))[n] = frame.pc; 
-
-                        // if there's room, pcbuf[1] is a skip PC that encodes the number of skipped frames in pcbuf[0]
-                        if (n + 1L < max)
-                        {
-                            n++;
-                            var pc = skipPC + uintptr(logicalSkipped)(typeof(ref array<System.UIntPtr>))(@unsafe.Pointer(pcbuf))[n];
-
-                            pc;
-                        }
+                        // Ignore wrapper functions (except when they trigger panics).
                     }
+                    else if (skip > 0L)
+                    {
+                        skip--;
+                    }
+                    else if (n < max)
+                    {
+                        new ptr<ptr<array<System.UIntPtr>>>(@unsafe.Pointer(pcbuf))[n] = pc;
+                        n++;
+                    }
+
+                    lastFuncID = f.funcID;
+                    n--; // offset n++ below
                 }
+
                 if (printing)
                 { 
                     // assume skip=0 for printing.
@@ -449,43 +553,67 @@ namespace go
                     // any frames. And don't elide wrappers that
                     // called panic rather than the wrapped
                     // function. Otherwise, leave them out.
-                    var name = funcname(f);
-                    var nextElideWrapper = elideWrapperCalling(name);
-                    if ((flags & _TraceRuntimeFrames) != 0L || showframe(f, gp, nprint == 0L, elideWrapper && nprint != 0L))
+
+                    // backup to CALL instruction to read inlining info (same logic as below)
+                    tracepc = frame.pc;
+                    if ((n > 0L || flags & _TraceTrap == 0L) && frame.pc > f.entry && !waspanic)
+                    {
+                        tracepc--;
+                    } 
+                    // If there is inlining info, print the inner frames.
+                    {
+                        var inldata__prev2 = inldata;
+
+                        inldata = funcdata(f, _FUNCDATA_InlTree);
+
+                        if (inldata != null)
+                        {
+                            inltree = new ptr<ptr<array<inlinedCall>>>(inldata);
+                            while (true)
+                            {
+                                ix = pcdatavalue(f, _PCDATA_InlTreeIndex, tracepc, null);
+                                if (ix < 0L)
+                                {
+                                    break;
+                                }
+
+                                if ((flags & _TraceRuntimeFrames) != 0L || showframe(f, _addr_gp, nprint == 0L, inltree[ix].funcID, lastFuncID))
+                                {
+                                    var name = funcnameFromNameoff(f, inltree[ix].func_);
+                                    var (file, line) = funcline(f, tracepc);
+                                    print(name, "(...)\n");
+                                    print("\t", file, ":", line, "\n");
+                                    nprint++;
+                                }
+
+                                lastFuncID = inltree[ix].funcID; 
+                                // Back up to an instruction in the "caller".
+                                tracepc = frame.fn.entry + uintptr(inltree[ix].parentPc);
+
+                            }
+
+
+                        }
+
+                        inldata = inldata__prev2;
+
+                    }
+
+                    if ((flags & _TraceRuntimeFrames) != 0L || showframe(f, _addr_gp, nprint == 0L, f.funcID, lastFuncID))
                     { 
                         // Print during crash.
                         //    main(0x1, 0x2, 0x3)
                         //        /home/rsc/go/src/runtime/x.go:23 +0xf
                         //
-                        tracepc = frame.pc; // back up to CALL instruction for funcline.
-                        if ((n > 0L || flags & _TraceTrap == 0L) && frame.pc > f.entry && !waspanic)
-                        {
-                            tracepc--;
-                        }
-                        var (file, line) = funcline(f, tracepc);
-                        inldata = funcdata(f, _FUNCDATA_InlTree);
-                        if (inldata != null)
-                        {
-                            inltree = new ptr<ref array<inlinedCall>>(inldata);
-                            ix = pcdatavalue(f, _PCDATA_InlTreeIndex, tracepc, null);
-                            while (ix != -1L)
-                            {
-                                name = funcnameFromNameoff(f, inltree[ix].func_);
-                                print(name, "(...)\n");
-                                print("\t", file, ":", line, "\n");
-
-                                file = funcfile(f, inltree[ix].file);
-                                line = inltree[ix].line;
-                                ix = inltree[ix].parent;
-                            }
-
-                        }
+                        name = funcname(f);
+                        (file, line) = funcline(f, tracepc);
                         if (name == "runtime.gopanic")
                         {
                             name = "panic";
                         }
+
                         print(name, "(");
-                        ref array<System.UIntPtr> argp = new ptr<ref array<System.UIntPtr>>(@unsafe.Pointer(frame.argp));
+                        ptr<array<System.UIntPtr>> argp = new ptr<ptr<array<System.UIntPtr>>>(@unsafe.Pointer(frame.argp));
                         for (var i = uintptr(0L); i < frame.arglen / sys.PtrSize; i++)
                         {
                             if (i >= 10L)
@@ -493,11 +621,14 @@ namespace go
                                 print(", ...");
                                 break;
                             }
+
                             if (i != 0L)
                             {
                                 print(", ");
                             }
+
                             print(hex(argp[i]));
+
                         }
 
                         print(")\n");
@@ -506,22 +637,26 @@ namespace go
                         {
                             print(" +", hex(frame.pc - f.entry));
                         }
-                        if (g.m.throwing > 0L && gp == g.m.curg || level >= 2L)
+
+                        if (gp.m != null && gp.m.throwing > 0L && gp == gp.m.curg || level >= 2L)
                         {
                             print(" fp=", hex(frame.fp), " sp=", hex(frame.sp), " pc=", hex(frame.pc));
                         }
+
                         print("\n");
                         nprint++;
-                    }
-                    elideWrapper = nextElideWrapper;
-                }
-                n++;
 
-skipped:
+                    }
+
+                    lastFuncID = f.funcID;
+
+                }
+
+                n++;
 
                 if (f.funcID == funcID_cgocallback_gofunc && len(cgoCtxt) > 0L)
                 {
-                    var ctxt = cgoCtxt[len(cgoCtxt) - 1L];
+                    ctxt = cgoCtxt[len(cgoCtxt) - 1L];
                     cgoCtxt = cgoCtxt[..len(cgoCtxt) - 1L]; 
 
                     // skip only applies to Go frames.
@@ -529,10 +664,13 @@ skipped:
                     // about Go frames.
                     if (skip == 0L && callback == null)
                     {
-                        n = tracebackCgoContext(pcbuf, printing, ctxt, n, max);
+                        n = tracebackCgoContext(_addr_pcbuf, printing, ctxt, n, max);
                     }
+
                 }
-                waspanic = f.funcID == funcID_sigpanic; 
+
+                waspanic = f.funcID == funcID_sigpanic;
+                var injectedCall = waspanic || f.funcID == funcID_asyncPreempt; 
 
                 // Do not unwind past the bottom of the stack.
                 if (!flr.valid())
@@ -549,27 +687,31 @@ skipped:
                 frame.argmap = null; 
 
                 // On link register architectures, sighandler saves the LR on stack
-                // before faking a call to sigpanic.
-                if (usesLR && waspanic)
+                // before faking a call.
+                if (usesLR && injectedCall)
                 {
-                    *(*System.UIntPtr) x = @unsafe.Pointer(frame.sp).Value;
+                    ptr<ptr<System.UIntPtr>> x = new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(frame.sp));
                     frame.sp += sys.MinFrameSize;
                     if (GOARCH == "arm64")
                     { 
                         // arm64 needs 16-byte aligned SP, always
                         frame.sp += sys.PtrSize;
+
                     }
+
                     f = findfunc(frame.pc);
                     frame.fn = f;
                     if (!f.valid())
                     {
                         frame.pc = x;
                     }
-                    else if (funcspdelta(f, frame.pc, ref cache) == 0L)
+                    else if (funcspdelta(f, frame.pc, _addr_cache) == 0L)
                     {
                         frame.lr = x;
                     }
+
                 }
+
             }
 
 
@@ -578,13 +720,6 @@ skipped:
                 n = nprint;
             } 
 
-            // If callback != nil, we're being called to gather stack information during
-            // garbage collection or stack growth. In that context, require that we used
-            // up the entire defer stack. If not, then there is a bug somewhere and the
-            // garbage collection or stack growth may not have seen the correct picture
-            // of the stack. Crash now instead of silently executing the garbage collection
-            // or stack copy incorrectly and setting up for a mysterious crash later.
-            //
             // Note that panic != nil is okay here: there can be leftover panics,
             // because the defers on the panic stack do not nest in frame order as
             // they do on the defer stack. If you have:
@@ -625,31 +760,15 @@ skipped:
             // At other times, such as when gathering a stack for a profiling signal
             // or when printing a traceback during a crash, everything may not be
             // stopped nicely, and the stack walk may not be able to complete.
-            // It's okay in those situations not to use up the entire defer stack:
-            // incomplete information then is still better than nothing.
-            if (callback != null && n < max && _defer != null)
-            {
-                if (_defer != null)
-                {
-                    print("runtime: g", gp.goid, ": leftover defer sp=", hex(_defer.sp), " pc=", hex(_defer.pc), "\n");
-                }
-                _defer = gp._defer;
-
-                while (_defer != null)
-                {
-                    print("\tdefer ", _defer, " sp=", hex(_defer.sp), " pc=", hex(_defer.pc), "\n");
-                    _defer = _defer.link;
-                }
-
-                throw("traceback has leftover defers");
-            }
             if (callback != null && n < max && frame.sp != gp.stktopsp)
             {
                 print("runtime: g", gp.goid, ": frame.sp=", hex(frame.sp), " top=", hex(gp.stktopsp), "\n");
                 print("\tstack=[", hex(gp.stack.lo), "-", hex(gp.stack.hi), "] n=", n, " max=", max, "\n");
                 throw("traceback did not unwind completely");
             }
+
             return n;
+
         }
 
         // reflectMethodValue is a partial duplicate of reflect.makeFuncImpl
@@ -657,19 +776,39 @@ skipped:
         private partial struct reflectMethodValue
         {
             public System.UIntPtr fn;
-            public ptr<bitvector> stack; // args bitmap
+            public ptr<bitvector> stack; // ptrmap for both args and results
+            public System.UIntPtr argLen; // just args
+        }
+
+        // getArgInfoFast returns the argument frame information for a call to f.
+        // It is short and inlineable. However, it does not handle all functions.
+        // If ok reports false, you must call getArgInfo instead.
+        // TODO(josharian): once we do mid-stack inlining,
+        // call getArgInfo directly from getArgInfoFast and stop returning an ok bool.
+        private static (System.UIntPtr, ptr<bitvector>, bool) getArgInfoFast(funcInfo f, bool needArgMap)
+        {
+            System.UIntPtr arglen = default;
+            ptr<bitvector> argmap = default!;
+            bool ok = default;
+
+            return (uintptr(f.args), _addr_null!, !(needArgMap && f.args == _ArgsSizeUnknown));
         }
 
         // getArgInfo returns the argument frame information for a call to f
         // with call frame frame.
         //
         // This is used for both actual calls with active stack frames and for
-        // deferred calls that are not yet executing. If this is an actual
+        // deferred calls or goroutines that are not yet executing. If this is an actual
         // call, ctxt must be nil (getArgInfo will retrieve what it needs from
-        // the active stack frame). If this is a deferred call, ctxt must be
-        // the function object that was deferred.
-        private static (System.UIntPtr, ref bitvector) getArgInfo(ref stkframe frame, funcInfo f, bool needArgMap, ref funcval ctxt)
+        // the active stack frame). If this is a deferred call or unstarted goroutine,
+        // ctxt must be the function object that was deferred or go'd.
+        private static (System.UIntPtr, ptr<bitvector>) getArgInfo(ptr<stkframe> _addr_frame, funcInfo f, bool needArgMap, ptr<funcval> _addr_ctxt)
         {
+            System.UIntPtr arglen = default;
+            ptr<bitvector> argmap = default!;
+            ref stkframe frame = ref _addr_frame.val;
+            ref funcval ctxt = ref _addr_ctxt.val;
+
             arglen = uintptr(f.args);
             if (needArgMap && f.args == _ArgsSizeUnknown)
             { 
@@ -683,13 +822,15 @@ skipped:
                     case "reflect.methodValueCall": 
                         // These take a *reflect.methodValue as their
                         // context register.
-                        ref reflectMethodValue mv = default;
+                        ptr<reflectMethodValue> mv;
+                        bool retValid = default;
                         if (ctxt != null)
                         { 
                             // This is not an actual call, but a
-                            // deferred call. The function value
-                            // is itself the *reflect.methodValue.
-                            mv = (reflectMethodValue.Value)(@unsafe.Pointer(ctxt));
+                            // deferred call or an unstarted goroutine.
+                            // The function value is itself the *reflect.methodValue.
+                            mv = (reflectMethodValue.val)(@unsafe.Pointer(ctxt));
+
                         }
                         else
                         { 
@@ -699,30 +840,47 @@ skipped:
                             // to 0(SP). Get the methodValue from
                             // 0(SP).
                             var arg0 = frame.sp + sys.MinFrameSize;
-                            mv = new ptr<*(ptr<ptr<reflectMethodValue>>)>(@unsafe.Pointer(arg0));
+                            mv = new ptr<ptr<ptr<ptr<reflectMethodValue>>>>(@unsafe.Pointer(arg0)); 
+                            // Figure out whether the return values are valid.
+                            // Reflect will update this value after it copies
+                            // in the return values.
+                            retValid = new ptr<ptr<ptr<bool>>>(@unsafe.Pointer(arg0 + 3L * sys.PtrSize));
+
                         }
+
                         if (mv.fn != f.entry)
                         {
                             print("runtime: confused by ", funcname(f), "\n");
                             throw("reflect mismatch");
                         }
+
                         var bv = mv.stack;
                         arglen = uintptr(bv.n * sys.PtrSize);
+                        if (!retValid)
+                        {
+                            arglen = uintptr(mv.argLen) & ~(sys.PtrSize - 1L);
+                        }
+
                         argmap = bv;
                         break;
                 }
+
             }
-            return;
+
+            return ;
+
         }
 
         // tracebackCgoContext handles tracing back a cgo context value, from
         // the context argument to setCgoTraceback, for the gentraceback
         // function. It returns the new value of n.
-        private static long tracebackCgoContext(ref System.UIntPtr pcbuf, bool printing, System.UIntPtr ctxt, long n, long max)
+        private static long tracebackCgoContext(ptr<System.UIntPtr> _addr_pcbuf, bool printing, System.UIntPtr ctxt, long n, long max)
         {
+            ref System.UIntPtr pcbuf = ref _addr_pcbuf.val;
+
             array<System.UIntPtr> cgoPCs = new array<System.UIntPtr>(32L);
             cgoContextPCs(ctxt, cgoPCs[..]);
-            cgoSymbolizerArg arg = default;
+            ref cgoSymbolizerArg arg = ref heap(out ptr<cgoSymbolizerArg> _addr_arg);
             var anySymbolized = false;
             foreach (var (_, pc) in cgoPCs)
             {
@@ -730,10 +888,12 @@ skipped:
                 {
                     break;
                 }
+
                 if (pcbuf != null)
                 {
-                    new ptr<ref array<System.UIntPtr>>(@unsafe.Pointer(pcbuf))[n] = pc;
+                    new ptr<ptr<array<System.UIntPtr>>>(@unsafe.Pointer(pcbuf))[n] = pc;
                 }
+
                 if (printing)
                 {
                     if (cgoSymbolizer == null)
@@ -742,47 +902,66 @@ skipped:
                     }
                     else
                     {
-                        var c = printOneCgoTraceback(pc, max - n, ref arg);
+                        var c = printOneCgoTraceback(pc, max - n, _addr_arg);
                         n += c - 1L; // +1 a few lines down
                         anySymbolized = true;
+
                     }
+
                 }
+
                 n++;
+
             }
             if (anySymbolized)
             {
                 arg.pc = 0L;
-                callCgoSymbolizer(ref arg);
+                callCgoSymbolizer(_addr_arg);
             }
+
             return n;
+
         }
 
-        private static void printcreatedby(ref g gp)
-        { 
+        private static void printcreatedby(ptr<g> _addr_gp)
+        {
+            ref g gp = ref _addr_gp.val;
+ 
             // Show what created goroutine, except main goroutine (goid 1).
             var pc = gp.gopc;
             var f = findfunc(pc);
-            if (f.valid() && showframe(f, gp, false, false) && gp.goid != 1L)
+            if (f.valid() && showframe(f, _addr_gp, false, funcID_normal, funcID_normal) && gp.goid != 1L)
             {
-                print("created by ", funcname(f), "\n");
-                var tracepc = pc; // back up to CALL instruction for funcline.
-                if (pc > f.entry)
-                {
-                    tracepc -= sys.PCQuantum;
-                }
-                var (file, line) = funcline(f, tracepc);
-                print("\t", file, ":", line);
-                if (pc > f.entry)
-                {
-                    print(" +", hex(pc - f.entry));
-                }
-                print("\n");
+                printcreatedby1(f, pc);
             }
+
         }
 
-        private static void traceback(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr lr, ref g gp)
+        private static void printcreatedby1(funcInfo f, System.UIntPtr pc)
         {
-            traceback1(pc, sp, lr, gp, 0L);
+            print("created by ", funcname(f), "\n");
+            var tracepc = pc; // back up to CALL instruction for funcline.
+            if (pc > f.entry)
+            {
+                tracepc -= sys.PCQuantum;
+            }
+
+            var (file, line) = funcline(f, tracepc);
+            print("\t", file, ":", line);
+            if (pc > f.entry)
+            {
+                print(" +", hex(pc - f.entry));
+            }
+
+            print("\n");
+
+        }
+
+        private static void traceback(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr lr, ptr<g> _addr_gp)
+        {
+            ref g gp = ref _addr_gp.val;
+
+            traceback1(pc, sp, lr, _addr_gp, 0L);
         }
 
         // tracebacktrap is like traceback but expects that the PC and SP were obtained
@@ -791,13 +970,28 @@ skipped:
         // the initial PC must not be rewound to the previous instruction.
         // (All the saved pairs record a PC that is a return address, so we
         // rewind it into the CALL instruction.)
-        private static void tracebacktrap(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr lr, ref g gp)
+        // If gp.m.libcall{g,pc,sp} information is available, it uses that information in preference to
+        // the pc/sp/lr passed in.
+        private static void tracebacktrap(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr lr, ptr<g> _addr_gp)
         {
-            traceback1(pc, sp, lr, gp, _TraceTrap);
+            ref g gp = ref _addr_gp.val;
+
+            if (gp.m.libcallsp != 0L)
+            { 
+                // We're in C code somewhere, traceback from the saved position.
+                traceback1(gp.m.libcallpc, gp.m.libcallsp, 0L, _addr_gp.m.libcallg.ptr(), 0L);
+                return ;
+
+            }
+
+            traceback1(pc, sp, lr, _addr_gp, _TraceTrap);
+
         }
 
-        private static void traceback1(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr lr, ref g gp, ulong flags)
-        { 
+        private static void traceback1(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr lr, ptr<g> _addr_gp, ulong flags)
+        {
+            ref g gp = ref _addr_gp.val;
+ 
             // If the goroutine is in cgo, and we have a cgo traceback, print that.
             if (iscgo && gp.m != null && gp.m.ncgo > 0L && gp.syscallsp != 0L && gp.m.cgoCallers != null && gp.m.cgoCallers[0L] != 0L)
             { 
@@ -807,13 +1001,15 @@ skipped:
                 // concurrently with a signal handler.
                 // We just have to stop a signal handler from interrupting
                 // in the middle of our copy.
-                atomic.Store(ref gp.m.cgoCallersUse, 1L);
-                var cgoCallers = gp.m.cgoCallers.Value;
+                atomic.Store(_addr_gp.m.cgoCallersUse, 1L);
+                ref var cgoCallers = ref heap(gp.m.cgoCallers.val, out ptr<var> _addr_cgoCallers);
                 gp.m.cgoCallers[0L] = 0L;
-                atomic.Store(ref gp.m.cgoCallersUse, 0L);
+                atomic.Store(_addr_gp.m.cgoCallersUse, 0L);
 
-                printCgoTraceback(ref cgoCallers);
+                printCgoTraceback(_addr_cgoCallers);
+
             }
+
             long n = default;
             if (readgstatus(gp) & ~_Gscan == _Gsyscall)
             { 
@@ -821,64 +1017,161 @@ skipped:
                 pc = gp.syscallpc;
                 sp = gp.syscallsp;
                 flags &= _TraceTrap;
+
             } 
             // Print traceback. By default, omits runtime frames.
             // If that means we print nothing at all, repeat forcing all frames printed.
-            n = gentraceback(pc, sp, lr, gp, 0L, null, _TracebackMaxFrames, null, null, flags);
+            n = gentraceback(pc, sp, lr, _addr_gp, 0L, _addr_null, _TracebackMaxFrames, null, null, flags);
             if (n == 0L && (flags & _TraceRuntimeFrames) == 0L)
             {
-                n = gentraceback(pc, sp, lr, gp, 0L, null, _TracebackMaxFrames, null, null, flags | _TraceRuntimeFrames);
+                n = gentraceback(pc, sp, lr, _addr_gp, 0L, _addr_null, _TracebackMaxFrames, null, null, flags | _TraceRuntimeFrames);
             }
+
             if (n == _TracebackMaxFrames)
             {
                 print("...additional frames elided...\n");
             }
-            printcreatedby(gp);
+
+            printcreatedby(_addr_gp);
+
+            if (gp.ancestors == null)
+            {
+                return ;
+            }
+
+            foreach (var (_, ancestor) in gp.ancestors.val)
+            {
+                printAncestorTraceback(ancestor);
+            }
+
+        }
+
+        // printAncestorTraceback prints the traceback of the given ancestor.
+        // TODO: Unify this with gentraceback and CallersFrames.
+        private static void printAncestorTraceback(ancestorInfo ancestor)
+        {
+            print("[originating from goroutine ", ancestor.goid, "]:\n");
+            foreach (var (fidx, pc) in ancestor.pcs)
+            {
+                var f = findfunc(pc); // f previously validated
+                if (showfuncinfo(f, fidx == 0L, funcID_normal, funcID_normal))
+                {
+                    printAncestorTracebackFuncInfo(f, pc);
+                }
+
+            }
+            if (len(ancestor.pcs) == _TracebackMaxFrames)
+            {
+                print("...additional frames elided...\n");
+            } 
+            // Show what created goroutine, except main goroutine (goid 1).
+            f = findfunc(ancestor.gopc);
+            if (f.valid() && showfuncinfo(f, false, funcID_normal, funcID_normal) && ancestor.goid != 1L)
+            {
+                printcreatedby1(f, ancestor.gopc);
+            }
+
+        }
+
+        // printAncestorTraceback prints the given function info at a given pc
+        // within an ancestor traceback. The precision of this info is reduced
+        // due to only have access to the pcs at the time of the caller
+        // goroutine being created.
+        private static void printAncestorTracebackFuncInfo(funcInfo f, System.UIntPtr pc)
+        {
+            var name = funcname(f);
+            {
+                var inldata = funcdata(f, _FUNCDATA_InlTree);
+
+                if (inldata != null)
+                {
+                    ptr<array<inlinedCall>> inltree = new ptr<ptr<array<inlinedCall>>>(inldata);
+                    var ix = pcdatavalue(f, _PCDATA_InlTreeIndex, pc, null);
+                    if (ix >= 0L)
+                    {
+                        name = funcnameFromNameoff(f, inltree[ix].func_);
+                    }
+
+                }
+
+            }
+
+            var (file, line) = funcline(f, pc);
+            if (name == "runtime.gopanic")
+            {
+                name = "panic";
+            }
+
+            print(name, "(...)\n");
+            print("\t", file, ":", line);
+            if (pc > f.entry)
+            {
+                print(" +", hex(pc - f.entry));
+            }
+
+            print("\n");
+
         }
 
         private static long callers(long skip, slice<System.UIntPtr> pcbuf)
         {
-            var sp = getcallersp(@unsafe.Pointer(ref skip));
+            var sp = getcallersp();
             var pc = getcallerpc();
             var gp = getg();
             long n = default;
             systemstack(() =>
             {
-                n = gentraceback(pc, sp, 0L, gp, skip, ref pcbuf[0L], len(pcbuf), null, null, 0L);
+                n = gentraceback(pc, sp, 0L, _addr_gp, skip, _addr_pcbuf[0L], len(pcbuf), null, null, 0L);
             });
             return n;
+
         }
 
-        private static long gcallers(ref g gp, long skip, slice<System.UIntPtr> pcbuf)
+        private static long gcallers(ptr<g> _addr_gp, long skip, slice<System.UIntPtr> pcbuf)
         {
-            return gentraceback(~uintptr(0L), ~uintptr(0L), 0L, gp, skip, ref pcbuf[0L], len(pcbuf), null, null, 0L);
+            ref g gp = ref _addr_gp.val;
+
+            return gentraceback(~uintptr(0L), ~uintptr(0L), 0L, _addr_gp, skip, _addr_pcbuf[0L], len(pcbuf), null, null, 0L);
         }
 
-        private static bool showframe(funcInfo f, ref g gp, bool firstFrame, bool elideWrapper)
+        // showframe reports whether the frame with the given characteristics should
+        // be printed during a traceback.
+        private static bool showframe(funcInfo f, ptr<g> _addr_gp, bool firstFrame, funcID funcID, funcID childID)
         {
+            ref g gp = ref _addr_gp.val;
+
             var g = getg();
             if (g.m.throwing > 0L && gp != null && (gp == g.m.curg || gp == g.m.caughtsig.ptr()))
             {
                 return true;
             }
+
+            return showfuncinfo(f, firstFrame, funcID, childID);
+
+        }
+
+        // showfuncinfo reports whether a function with the given characteristics should
+        // be printed during a traceback.
+        private static bool showfuncinfo(funcInfo f, bool firstFrame, funcID funcID, funcID childID)
+        {
             var (level, _, _) = gotraceback();
             if (level > 1L)
             { 
                 // Show all frames.
                 return true;
+
             }
+
             if (!f.valid())
             {
                 return false;
             }
-            if (elideWrapper)
+
+            if (funcID == funcID_wrapper && elideWrapperCalling(childID))
             {
-                var (file, _) = funcline(f, f.entry);
-                if (file == "<autogenerated>")
-                {
-                    return false;
-                }
+                return false;
             }
+
             var name = funcname(f); 
 
             // Special case: always show runtime.gopanic frame
@@ -890,31 +1183,36 @@ skipped:
             {
                 return true;
             }
-            return contains(name, ".") && (!hasprefix(name, "runtime.") || isExportedRuntime(name));
+
+            return contains(name, ".") && (!hasPrefix(name, "runtime.") || isExportedRuntime(name));
+
         }
 
         // isExportedRuntime reports whether name is an exported runtime function.
         // It is only for runtime functions, so ASCII A-Z is fine.
         private static bool isExportedRuntime(@string name)
         {
-            const var n = len("runtime.");
+            const var n = (var)len("runtime.");
 
             return len(name) > n && name[..n] == "runtime." && 'A' <= name[n] && name[n] <= 'Z';
         }
 
-        // elideWrapperCalling returns whether a wrapper function that called
-        // function "name" should be elided from stack traces.
-        private static bool elideWrapperCalling(@string name)
+        // elideWrapperCalling reports whether a wrapper function that called
+        // function id should be elided from stack traces.
+        private static bool elideWrapperCalling(funcID id)
         { 
             // If the wrapper called a panic function instead of the
             // wrapped function, we want to include it in stacks.
-            return !(name == "runtime.gopanic" || name == "runtime.sigpanic" || name == "runtime.panicwrap");
+            return !(id == funcID_gopanic || id == funcID_sigpanic || id == funcID_panicwrap);
+
         }
 
-        private static array<@string> gStatusStrings = new array<@string>(InitKeyedValues<@string>((_Gidle, "idle"), (_Grunnable, "runnable"), (_Grunning, "running"), (_Gsyscall, "syscall"), (_Gwaiting, "waiting"), (_Gdead, "dead"), (_Gcopystack, "copystack")));
+        private static array<@string> gStatusStrings = new array<@string>(InitKeyedValues<@string>((_Gidle, "idle"), (_Grunnable, "runnable"), (_Grunning, "running"), (_Gsyscall, "syscall"), (_Gwaiting, "waiting"), (_Gdead, "dead"), (_Gcopystack, "copystack"), (_Gpreempted, "preempted")));
 
-        private static void goroutineheader(ref g gp)
+        private static void goroutineheader(ptr<g> _addr_gp)
         {
+            ref g gp = ref _addr_gp.val;
+
             var gpstatus = readgstatus(gp);
 
             var isScan = gpstatus & _Gscan != 0L;
@@ -932,9 +1230,9 @@ skipped:
             } 
 
             // Override.
-            if (gpstatus == _Gwaiting && gp.waitreason != "")
+            if (gpstatus == _Gwaiting && gp.waitreason != waitReasonZero)
             {
-                status = gp.waitreason;
+                status = gp.waitreason.String();
             } 
 
             // approx time the G is blocked, in minutes
@@ -943,24 +1241,31 @@ skipped:
             {
                 waitfor = (nanotime() - gp.waitsince) / 60e9F;
             }
+
             print("goroutine ", gp.goid, " [", status);
             if (isScan)
             {
                 print(" (scan)");
             }
+
             if (waitfor >= 1L)
             {
                 print(", ", waitfor, " minutes");
             }
+
             if (gp.lockedm != 0L)
             {
                 print(", locked to thread");
             }
+
             print("]:\n");
+
         }
 
-        private static void tracebackothers(ref g me)
+        private static void tracebackothers(ptr<g> _addr_me)
         {
+            ref g me = ref _addr_me.val;
+
             var (level, _, _) = gotraceback(); 
 
             // Show the current goroutine first, if we haven't already.
@@ -969,22 +1274,24 @@ skipped:
             if (gp != null && gp != me)
             {
                 print("\n");
-                goroutineheader(gp);
-                traceback(~uintptr(0L), ~uintptr(0L), 0L, gp);
+                goroutineheader(_addr_gp);
+                traceback(~uintptr(0L), ~uintptr(0L), 0L, _addr_gp);
             }
-            lock(ref allglock);
+
+            lock(_addr_allglock);
             {
                 var gp__prev1 = gp;
 
                 foreach (var (_, __gp) in allgs)
                 {
                     gp = __gp;
-                    if (gp == me || gp == g.m.curg || readgstatus(gp) == _Gdead || isSystemGoroutine(gp) && level < 2L)
+                    if (gp == me || gp == g.m.curg || readgstatus(gp) == _Gdead || isSystemGoroutine(_addr_gp, false) && level < 2L)
                     {
                         continue;
                     }
+
                     print("\n");
-                    goroutineheader(gp); 
+                    goroutineheader(_addr_gp); 
                     // Note: gp.m == g.m occurs when tracebackothers is
                     // called from a signal handler initiated during a
                     // systemstack call. The original G is still in the
@@ -992,28 +1299,32 @@ skipped:
                     if (gp.m != g.m && readgstatus(gp) & ~_Gscan == _Grunning)
                     {
                         print("\tgoroutine running on other thread; stack unavailable\n");
-                        printcreatedby(gp);
+                        printcreatedby(_addr_gp);
                     }
                     else
                     {
-                        traceback(~uintptr(0L), ~uintptr(0L), 0L, gp);
+                        traceback(~uintptr(0L), ~uintptr(0L), 0L, _addr_gp);
                     }
+
                 }
 
                 gp = gp__prev1;
             }
 
-            unlock(ref allglock);
+            unlock(_addr_allglock);
+
         }
 
         // tracebackHexdump hexdumps part of stk around frame.sp and frame.fp
         // for debugging purposes. If the address bad is included in the
         // hexdumped range, it will mark it as well.
-        private static void tracebackHexdump(stack stk, ref stkframe frame, System.UIntPtr bad)
+        private static void tracebackHexdump(stack stk, ptr<stkframe> _addr_frame, System.UIntPtr bad)
         {
-            const long expand = 32L * sys.PtrSize;
+            ref stkframe frame = ref _addr_frame.val;
 
-            const long maxExpand = 256L * sys.PtrSize; 
+            const long expand = (long)32L * sys.PtrSize;
+
+            const long maxExpand = (long)256L * sys.PtrSize; 
             // Start around frame.sp.
  
             // Start around frame.sp.
@@ -1024,6 +1335,7 @@ skipped:
             {
                 lo = frame.fp;
             }
+
             if (frame.fp != 0L && frame.fp > hi)
             {
                 hi = frame.fp;
@@ -1036,6 +1348,7 @@ skipped:
             {
                 lo = frame.sp - maxExpand;
             }
+
             if (hi > frame.sp + maxExpand)
             {
                 hi = frame.sp + maxExpand;
@@ -1045,6 +1358,7 @@ skipped:
             {
                 lo = stk.lo;
             }
+
             if (hi > stk.hi)
             {
                 hi = stk.hi;
@@ -1062,7 +1376,9 @@ skipped:
                 else if (p == bad) 
                     return '!';
                                 return 0L;
+
             });
+
         }
 
         // Does f mark the top of a goroutine stack?
@@ -1071,16 +1387,48 @@ skipped:
             return f.funcID == funcID_goexit || f.funcID == funcID_mstart || f.funcID == funcID_mcall || f.funcID == funcID_morestack || f.funcID == funcID_rt0_go || f.funcID == funcID_externalthreadhandler || (g0 && f.funcID == funcID_asmcgocall);
         }
 
-        // isSystemGoroutine reports whether the goroutine g must be omitted in
-        // stack dumps and deadlock detector.
-        private static bool isSystemGoroutine(ref g gp)
+        // isSystemGoroutine reports whether the goroutine g must be omitted
+        // in stack dumps and deadlock detector. This is any goroutine that
+        // starts at a runtime.* entry point, except for runtime.main,
+        // runtime.handleAsyncEvent (wasm only) and sometimes runtime.runfinq.
+        //
+        // If fixed is true, any goroutine that can vary between user and
+        // system (that is, the finalizer goroutine) is considered a user
+        // goroutine.
+        private static bool isSystemGoroutine(ptr<g> _addr_gp, bool @fixed)
         {
+            ref g gp = ref _addr_gp.val;
+ 
+            // Keep this in sync with cmd/trace/trace.go:isSystemGoroutine.
             var f = findfunc(gp.startpc);
             if (!f.valid())
             {
                 return false;
             }
-            return f.funcID == funcID_runfinq && !fingRunning || f.funcID == funcID_bgsweep || f.funcID == funcID_forcegchelper || f.funcID == funcID_timerproc || f.funcID == funcID_gcBgMarkWorker;
+
+            if (f.funcID == funcID_runtime_main || f.funcID == funcID_handleAsyncEvent)
+            {
+                return false;
+            }
+
+            if (f.funcID == funcID_runfinq)
+            { 
+                // We include the finalizer goroutine if it's calling
+                // back into user code.
+                if (fixed)
+                { 
+                    // This goroutine can vary. In fixed mode,
+                    // always consider it a user goroutine.
+                    return false;
+
+                }
+
+                return !fingRunning;
+
+            }
+
+            return hasPrefix(funcname(f), "runtime.");
+
         }
 
         // SetCgoTraceback records three C functions to use to gather
@@ -1180,6 +1528,13 @@ skipped:
         // to the symbolizer function, return the file/line of the call
         // instruction.  No additional subtraction is required or appropriate.
         //
+        // On all platforms, the traceback function is invoked when a call from
+        // Go to C to Go requests a stack trace. On linux/amd64, linux/ppc64le,
+        // and freebsd/amd64, the traceback function is also invoked when a
+        // signal is received by a thread that is executing a cgo call. The
+        // traceback function should not make assumptions about when it is
+        // called, as future versions of Go may make additional calls.
+        //
         // The symbolizer function will be called with a single argument, a
         // pointer to a struct:
         //
@@ -1243,10 +1598,12 @@ skipped:
             {
                 panic("unsupported version");
             }
+
             if (cgoTraceback != null && cgoTraceback != traceback || cgoContext != null && cgoContext != context || cgoSymbolizer != null && cgoSymbolizer != symbolizer)
             {
                 panic("call SetCgoTraceback only once");
             }
+
             cgoTraceback = traceback;
             cgoContext = context;
             cgoSymbolizer = symbolizer; 
@@ -1257,6 +1614,7 @@ skipped:
             {
                 cgocall(_cgo_set_context_function, context);
             }
+
         });
 
         private static unsafe.Pointer cgoTraceback = default;
@@ -1291,8 +1649,10 @@ skipped:
         }
 
         // cgoTraceback prints a traceback of callers.
-        private static void printCgoTraceback(ref cgoCallers callers)
+        private static void printCgoTraceback(ptr<cgoCallers> _addr_callers)
         {
+            ref cgoCallers callers = ref _addr_callers.val;
+
             if (cgoSymbolizer == null)
             {
                 {
@@ -1305,15 +1665,19 @@ skipped:
                         {
                             break;
                         }
+
                         print("non-Go function at pc=", hex(c), "\n");
+
                     }
 
                     c = c__prev1;
                 }
 
-                return;
+                return ;
+
             }
-            cgoSymbolizerArg arg = default;
+
+            ref cgoSymbolizerArg arg = ref heap(out ptr<cgoSymbolizerArg> _addr_arg);
             {
                 var c__prev1 = c;
 
@@ -1324,72 +1688,84 @@ skipped:
                     {
                         break;
                     }
-                    printOneCgoTraceback(c, 0x7fffffffUL, ref arg);
+
+                    printOneCgoTraceback(c, 0x7fffffffUL, _addr_arg);
+
                 }
 
                 c = c__prev1;
             }
 
             arg.pc = 0L;
-            callCgoSymbolizer(ref arg);
+            callCgoSymbolizer(_addr_arg);
+
         }
 
         // printOneCgoTraceback prints the traceback of a single cgo caller.
         // This can print more than one line because of inlining.
         // Returns the number of frames printed.
-        private static long printOneCgoTraceback(System.UIntPtr pc, long max, ref cgoSymbolizerArg arg)
+        private static long printOneCgoTraceback(System.UIntPtr pc, long max, ptr<cgoSymbolizerArg> _addr_arg)
         {
+            ref cgoSymbolizerArg arg = ref _addr_arg.val;
+
             long c = 0L;
             arg.pc = pc;
-            while (true)
+            while (c <= max)
             {
-                if (c > max)
-                {
-                    break;
-                }
-                callCgoSymbolizer(arg);
+                callCgoSymbolizer(_addr_arg);
                 if (arg.funcName != null)
                 { 
                     // Note that we don't print any argument
                     // information here, not even parentheses.
                     // The symbolizer must add that if appropriate.
                     println(gostringnocopy(arg.funcName));
+
                 }
                 else
                 {
                     println("non-Go function");
                 }
+
                 print("\t");
                 if (arg.file != null)
                 {
                     print(gostringnocopy(arg.file), ":", arg.lineno, " ");
                 }
+
                 print("pc=", hex(pc), "\n");
                 c++;
                 if (arg.more == 0L)
                 {
                     break;
                 }
+
             }
 
             return c;
+
         }
 
         // callCgoSymbolizer calls the cgoSymbolizer function.
-        private static void callCgoSymbolizer(ref cgoSymbolizerArg arg)
+        private static void callCgoSymbolizer(ptr<cgoSymbolizerArg> _addr_arg)
         {
+            ref cgoSymbolizerArg arg = ref _addr_arg.val;
+
             var call = cgocall;
             if (panicking > 0L || getg().m.curg != getg())
             { 
                 // We do not want to call into the scheduler when panicking
                 // or when on the system stack.
                 call = asmcgocall;
+
             }
+
             if (msanenabled)
             {
                 msanwrite(@unsafe.Pointer(arg), @unsafe.Sizeof(new cgoSymbolizerArg()));
             }
+
             call(cgoSymbolizer, noescape(@unsafe.Pointer(arg)));
+
         }
 
         // cgoContextPCs gets the PC values from a cgo traceback.
@@ -1397,21 +1773,26 @@ skipped:
         {
             if (cgoTraceback == null)
             {
-                return;
+                return ;
             }
+
             var call = cgocall;
             if (panicking > 0L || getg().m.curg != getg())
             { 
                 // We do not want to call into the scheduler when panicking
                 // or when on the system stack.
                 call = asmcgocall;
+
             }
-            cgoTracebackArg arg = new cgoTracebackArg(context:ctxt,buf:(*uintptr)(noescape(unsafe.Pointer(&buf[0]))),max:uintptr(len(buf)),);
+
+            ref cgoTracebackArg arg = ref heap(new cgoTracebackArg(context:ctxt,buf:(*uintptr)(noescape(unsafe.Pointer(&buf[0]))),max:uintptr(len(buf)),), out ptr<cgoTracebackArg> _addr_arg);
             if (msanenabled)
             {
-                msanwrite(@unsafe.Pointer(ref arg), @unsafe.Sizeof(arg));
+                msanwrite(@unsafe.Pointer(_addr_arg), @unsafe.Sizeof(arg));
             }
-            call(cgoTraceback, noescape(@unsafe.Pointer(ref arg)));
+
+            call(cgoTraceback, noescape(@unsafe.Pointer(_addr_arg)));
+
         }
     }
 }

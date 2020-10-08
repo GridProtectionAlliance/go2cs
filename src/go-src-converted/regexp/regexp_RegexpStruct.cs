@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:24:11 UTC
+//     Generated on 2020 October 08 03:41:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,51 +27,47 @@ namespace go
     public static partial class regexp_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(regexpRO))]
         public partial struct Regexp
         {
-            // regexpRO structure promotion - sourced from value copy
-            private readonly ptr<regexpRO> m_regexpRORef;
-
-            private ref regexpRO regexpRO_val => ref m_regexpRORef.Value;
-
-            public ref @string expr => ref m_regexpRORef.Value.expr;
-
-            public ref ptr<syntax.Prog> prog => ref m_regexpRORef.Value.prog;
-
-            public ref ptr<onePassProg> onepass => ref m_regexpRORef.Value.onepass;
-
-            public ref @string prefix => ref m_regexpRORef.Value.prefix;
-
-            public ref slice<byte> prefixBytes => ref m_regexpRORef.Value.prefixBytes;
-
-            public ref bool prefixComplete => ref m_regexpRORef.Value.prefixComplete;
-
-            public ref int prefixRune => ref m_regexpRORef.Value.prefixRune;
-
-            public ref uint prefixEnd => ref m_regexpRORef.Value.prefixEnd;
-
-            public ref syntax.EmptyOp cond => ref m_regexpRORef.Value.cond;
-
-            public ref long numSubexp => ref m_regexpRORef.Value.numSubexp;
-
-            public ref slice<@string> subexpNames => ref m_regexpRORef.Value.subexpNames;
-
-            public ref bool longest => ref m_regexpRORef.Value.longest;
-
             // Constructors
             public Regexp(NilType _)
             {
-                this.m_regexpRORef = new ptr<regexpRO>(new regexpRO(nil));
-                this.mu = default;
-                this.machine = default;
+                this.expr = default;
+                this.prog = default;
+                this.onepass = default;
+                this.numSubexp = default;
+                this.maxBitStateLen = default;
+                this.subexpNames = default;
+                this.prefix = default;
+                this.prefixBytes = default;
+                this.prefixRune = default;
+                this.prefixEnd = default;
+                this.mpool = default;
+                this.matchcap = default;
+                this.prefixComplete = default;
+                this.cond = default;
+                this.minInputLen = default;
+                this.longest = default;
             }
 
-            public Regexp(regexpRO regexpRO = default, sync.Mutex mu = default, slice<ref machine> machine = default)
+            public Regexp(@string expr = default, ref ptr<syntax.Prog> prog = default, ref ptr<onePassProg> onepass = default, long numSubexp = default, long maxBitStateLen = default, slice<@string> subexpNames = default, @string prefix = default, slice<byte> prefixBytes = default, int prefixRune = default, uint prefixEnd = default, long mpool = default, long matchcap = default, bool prefixComplete = default, syntax.EmptyOp cond = default, long minInputLen = default, bool longest = default)
             {
-                this.m_regexpRORef = new ptr<regexpRO>(regexpRO);
-                this.mu = mu;
-                this.machine = machine;
+                this.expr = expr;
+                this.prog = prog;
+                this.onepass = onepass;
+                this.numSubexp = numSubexp;
+                this.maxBitStateLen = maxBitStateLen;
+                this.subexpNames = subexpNames;
+                this.prefix = prefix;
+                this.prefixBytes = prefixBytes;
+                this.prefixRune = prefixRune;
+                this.prefixEnd = prefixEnd;
+                this.mpool = mpool;
+                this.matchcap = matchcap;
+                this.prefixComplete = prefixComplete;
+                this.cond = cond;
+                this.minInputLen = minInputLen;
+                this.longest = longest;
             }
 
             // Enable comparisons between nil and Regexp struct
@@ -94,7 +90,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Regexp Regexp_cast(dynamic value)
         {
-            return new Regexp(value.regexpRO, value.mu, value.machine);
+            return new Regexp(value.expr, ref value.prog, ref value.onepass, value.numSubexp, value.maxBitStateLen, value.subexpNames, value.prefix, value.prefixBytes, value.prefixRune, value.prefixEnd, value.mpool, value.matchcap, value.prefixComplete, value.cond, value.minInputLen, value.longest);
         }
     }
 }

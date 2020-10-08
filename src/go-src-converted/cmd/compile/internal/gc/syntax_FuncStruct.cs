@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:28 UTC
+//     Generated on 2020 October 08 04:31:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,10 +14,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using ssa = go.cmd.compile.@internal.ssa_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -38,11 +39,9 @@ namespace @internal
                 this.Exit = default;
                 this.Cvars = default;
                 this.Dcl = default;
-                this.Inldcl = default;
                 this.Parents = default;
                 this.Marks = default;
                 this.Closgen = default;
-                this.Outerfunc = default;
                 this.DebugInfo = default;
                 this.Ntype = default;
                 this.Top = default;
@@ -50,28 +49,26 @@ namespace @internal
                 this.Nname = default;
                 this.lsym = default;
                 this.Inl = default;
-                this.InlCost = default;
-                this.Depth = default;
                 this.Label = default;
                 this.Endlineno = default;
                 this.WBPos = default;
                 this.Pragma = default;
                 this.flags = default;
+                this.numDefers = default;
+                this.numReturns = default;
                 this.nwbrCalls = default;
             }
 
-            public Func(ref ptr<types.Sym> Shortname = default, Nodes Enter = default, Nodes Exit = default, Nodes Cvars = default, slice<ref Node> Dcl = default, Nodes Inldcl = default, slice<ScopeID> Parents = default, slice<Mark> Marks = default, long Closgen = default, ref ptr<Node> Outerfunc = default, ref ptr<ssa.FuncDebug> DebugInfo = default, ref ptr<Node> Ntype = default, long Top = default, ref ptr<Node> Closure = default, ref ptr<Node> Nname = default, ref ptr<obj.LSym> lsym = default, Nodes Inl = default, int InlCost = default, int Depth = default, int Label = default, src.XPos Endlineno = default, src.XPos WBPos = default, syntax.Pragma Pragma = default, bitset16 flags = default, ref ptr<slice<nowritebarrierrecCallSym>> nwbrCalls = default)
+            public Func(ref ptr<types.Sym> Shortname = default, Nodes Enter = default, Nodes Exit = default, Nodes Cvars = default, slice<ptr<Node>> Dcl = default, slice<ScopeID> Parents = default, slice<Mark> Marks = default, long Closgen = default, ref ptr<ssa.FuncDebug> DebugInfo = default, ref ptr<Node> Ntype = default, long Top = default, ref ptr<Node> Closure = default, ref ptr<Node> Nname = default, ref ptr<obj.LSym> lsym = default, ref ptr<Inline> Inl = default, int Label = default, src.XPos Endlineno = default, src.XPos WBPos = default, PragmaFlag Pragma = default, bitset16 flags = default, long numDefers = default, long numReturns = default, ref ptr<slice<nowritebarrierrecCallSym>> nwbrCalls = default)
             {
                 this.Shortname = Shortname;
                 this.Enter = Enter;
                 this.Exit = Exit;
                 this.Cvars = Cvars;
                 this.Dcl = Dcl;
-                this.Inldcl = Inldcl;
                 this.Parents = Parents;
                 this.Marks = Marks;
                 this.Closgen = Closgen;
-                this.Outerfunc = Outerfunc;
                 this.DebugInfo = DebugInfo;
                 this.Ntype = Ntype;
                 this.Top = Top;
@@ -79,13 +76,13 @@ namespace @internal
                 this.Nname = Nname;
                 this.lsym = lsym;
                 this.Inl = Inl;
-                this.InlCost = InlCost;
-                this.Depth = Depth;
                 this.Label = Label;
                 this.Endlineno = Endlineno;
                 this.WBPos = WBPos;
                 this.Pragma = Pragma;
                 this.flags = flags;
+                this.numDefers = numDefers;
+                this.numReturns = numReturns;
                 this.nwbrCalls = nwbrCalls;
             }
 
@@ -109,7 +106,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Func Func_cast(dynamic value)
         {
-            return new Func(ref value.Shortname, value.Enter, value.Exit, value.Cvars, value.Dcl, value.Inldcl, value.Parents, value.Marks, value.Closgen, ref value.Outerfunc, ref value.DebugInfo, ref value.Ntype, value.Top, ref value.Closure, ref value.Nname, ref value.lsym, value.Inl, value.InlCost, value.Depth, value.Label, value.Endlineno, value.WBPos, value.Pragma, value.flags, ref value.nwbrCalls);
+            return new Func(ref value.Shortname, value.Enter, value.Exit, value.Cvars, value.Dcl, value.Parents, value.Marks, value.Closgen, ref value.DebugInfo, ref value.Ntype, value.Top, ref value.Closure, ref value.Nname, ref value.lsym, ref value.Inl, value.Label, value.Endlineno, value.WBPos, value.Pragma, value.flags, value.numDefers, value.numReturns, ref value.nwbrCalls);
         }
     }
 }}}}

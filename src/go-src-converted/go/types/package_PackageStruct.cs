@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:47 UTC
+//     Generated on 2020 October 08 04:03:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,9 +34,10 @@ namespace go
                 this.complete = default;
                 this.imports = default;
                 this.fake = default;
+                this.cgo = default;
             }
 
-            public Package(@string path = default, @string name = default, ref ptr<Scope> scope = default, bool complete = default, slice<ref Package> imports = default, bool fake = default)
+            public Package(@string path = default, @string name = default, ref ptr<Scope> scope = default, bool complete = default, slice<ptr<Package>> imports = default, bool fake = default, bool cgo = default)
             {
                 this.path = path;
                 this.name = name;
@@ -44,6 +45,7 @@ namespace go
                 this.complete = complete;
                 this.imports = imports;
                 this.fake = fake;
+                this.cgo = cgo;
             }
 
             // Enable comparisons between nil and Package struct
@@ -66,7 +68,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Package Package_cast(dynamic value)
         {
-            return new Package(value.path, value.name, ref value.scope, value.complete, value.imports, value.fake);
+            return new Package(value.path, value.name, ref value.scope, value.complete, value.imports, value.fake, value.cgo);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:03 UTC
+//     Generated on 2020 October 08 03:49:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace compress
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,10 +69,10 @@ namespace compress
                 m_target_is_ptr = true;
             }
 
-            private delegate error ResetByRef(ref T value, io.Reader r, slice<byte> dict);
+            private delegate error ResetByPtr(ptr<T> value, io.Reader r, slice<byte> dict);
             private delegate error ResetByVal(T value, io.Reader r, slice<byte> dict);
 
-            private static readonly ResetByRef s_ResetByRef;
+            private static readonly ResetByPtr s_ResetByPtr;
             private static readonly ResetByVal s_ResetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -81,11 +81,12 @@ namespace compress
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ResetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ResetByPtr is null || !m_target_is_ptr)
                     return s_ResetByVal!(target, r, dict);
 
-                return s_ResetByRef(ref target, r, dict);
+                return s_ResetByPtr(m_target_ptr, r, dict);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -94,23 +95,20 @@ namespace compress
             static Resetter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Reset");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Reset");
 
                 if (!(extensionMethod is null))
-                    s_ResetByRef = extensionMethod.CreateStaticDelegate(typeof(ResetByRef)) as ResetByRef;
+                    s_ResetByPtr = extensionMethod.CreateStaticDelegate(typeof(ResetByPtr)) as ResetByPtr;
 
-                if (s_ResetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Reset");
+                extensionMethod = targetType.GetExtensionMethod("Reset");
 
-                    if (!(extensionMethod is null))
-                        s_ResetByVal = extensionMethod.CreateStaticDelegate(typeof(ResetByVal)) as ResetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ResetByVal = extensionMethod.CreateStaticDelegate(typeof(ResetByVal)) as ResetByVal;
 
-                if (s_ResetByRef is null && s_ResetByVal is null)
+                if (s_ResetByPtr is null && s_ResetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Resetter.Reset method", new Exception("Reset"));
             }
 

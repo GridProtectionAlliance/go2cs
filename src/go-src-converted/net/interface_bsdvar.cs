@@ -4,12 +4,12 @@
 
 // +build dragonfly netbsd openbsd
 
-// package net -- go2cs converted at 2020 August 29 08:26:30 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:27 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\interface_bsdvar.go
 using syscall = go.syscall_package;
 
-using route = go.golang_org.x.net.route_package;
+using route = go.golang.org.x.net.route_package;
 using static go.builtin;
 
 namespace go
@@ -18,20 +18,29 @@ namespace go
     {
         private static (slice<route.Message>, error) interfaceMessages(long ifindex)
         {
+            slice<route.Message> _p0 = default;
+            error _p0 = default!;
+
             var (rib, err) = route.FetchRIB(syscall.AF_UNSPEC, syscall.NET_RT_IFLIST, ifindex);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
             return route.ParseRIB(syscall.NET_RT_IFLIST, rib);
+
         }
 
         // interfaceMulticastAddrTable returns addresses for a specific
         // interface.
-        private static (slice<Addr>, error) interfaceMulticastAddrTable(ref Interface ifi)
-        { 
+        private static (slice<Addr>, error) interfaceMulticastAddrTable(ptr<Interface> _addr_ifi)
+        {
+            slice<Addr> _p0 = default;
+            error _p0 = default!;
+            ref Interface ifi = ref _addr_ifi.val;
+ 
             // TODO(mikio): Implement this like other platforms.
-            return (null, null);
+            return (null, error.As(null!)!);
+
         }
     }
 }

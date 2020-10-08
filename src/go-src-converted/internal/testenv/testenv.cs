@@ -8,17 +8,19 @@
 // It is an internal package because these details are specific
 // to the Go team's test setup (on build.golang.org) and not
 // fundamental to tests in general.
-// package testenv -- go2cs converted at 2020 August 29 10:11:07 UTC
+// package testenv -- go2cs converted at 2020 October 08 04:59:48 UTC
 // import "internal/testenv" ==> using testenv = go.@internal.testenv_package
 // Original source: C:\Go\src\internal\testenv\testenv.go
 using errors = go.errors_package;
 using flag = go.flag_package;
+using cfg = go.@internal.cfg_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
+using sync = go.sync_package;
 using testing = go.testing_package;
 using static go.builtin;
 
@@ -47,22 +49,26 @@ namespace @internal
                 // For now, if $GO_GCFLAGS is set, report that we simply can't
                 // run go build.
                 return false;
+
             }
+
             switch (runtime.GOOS)
             {
                 case "android": 
 
-                case "nacl": 
+                case "js": 
                     return false;
                     break;
                 case "darwin": 
-                    if (strings.HasPrefix(runtime.GOARCH, "arm"))
+                    if (runtime.GOARCH == "arm64")
                     {
                         return false;
                     }
+
                     break;
             }
             return true;
+
         }
 
         // MustHaveGoBuild checks that the current system can build programs with ``go build''
@@ -74,10 +80,12 @@ namespace @internal
             {
                 t.Skipf("skipping test: 'go build' not compatible with setting $GO_GCFLAGS");
             }
+
             if (!HasGoBuild())
             {
                 t.Skipf("skipping test: 'go build' not available on %s/%s", runtime.GOOS, runtime.GOARCH);
             }
+
         }
 
         // HasGoRun reports whether the current system can run programs with ``go run.''
@@ -85,6 +93,7 @@ namespace @internal
         { 
             // For now, having go run and having go build are the same.
             return HasGoBuild();
+
         }
 
         // MustHaveGoRun checks that the current system can run programs with ``go run.''
@@ -95,6 +104,7 @@ namespace @internal
             {
                 t.Skipf("skipping test: 'go run' not available on %s/%s", runtime.GOOS, runtime.GOARCH);
             }
+
         }
 
         // GoToolPath reports the path to the Go tool.
@@ -108,38 +118,54 @@ namespace @internal
             if (err != null)
             {
                 t.Fatal(err);
+            } 
+            // Add all environment variables that affect the Go command to test metadata.
+            // Cached test results will be invalidate when these variables change.
+            // See golang.org/issue/32285.
+            foreach (var (_, envVar) in strings.Fields(cfg.KnownEnv))
+            {
+                os.Getenv(envVar);
             }
             return path;
+
         }
 
         // GoTool reports the path to the Go tool.
         public static (@string, error) GoTool()
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             if (!HasGoBuild())
             {
-                return ("", errors.New("platform cannot run go tool"));
+                return ("", error.As(errors.New("platform cannot run go tool"))!);
             }
+
             @string exeSuffix = default;
             if (runtime.GOOS == "windows")
             {
                 exeSuffix = ".exe";
             }
+
             var path = filepath.Join(runtime.GOROOT(), "bin", "go" + exeSuffix);
             {
                 var (_, err) = os.Stat(path);
 
                 if (err == null)
                 {
-                    return (path, null);
+                    return (path, error.As(null!)!);
                 }
 
             }
+
             var (goBin, err) = exec.LookPath("go" + exeSuffix);
             if (err != null)
             {
-                return ("", errors.New("cannot find go tool: " + err.Error()));
+                return ("", error.As(errors.New("cannot find go tool: " + err.Error()))!);
             }
-            return (goBin, null);
+
+            return (goBin, error.As(null!)!);
+
         }
 
         // HasExec reports whether the current system can start new processes
@@ -148,17 +174,19 @@ namespace @internal
         {
             switch (runtime.GOOS)
             {
-                case "nacl": 
+                case "js": 
                     return false;
                     break;
                 case "darwin": 
-                    if (strings.HasPrefix(runtime.GOARCH, "arm"))
+                    if (runtime.GOARCH == "arm64")
                     {
                         return false;
                     }
+
                     break;
             }
             return true;
+
         }
 
         // HasSrc reports whether the entire source tree is available under GOROOT.
@@ -166,17 +194,16 @@ namespace @internal
         {
             switch (runtime.GOOS)
             {
-                case "nacl": 
-                    return false;
-                    break;
                 case "darwin": 
-                    if (strings.HasPrefix(runtime.GOARCH, "arm"))
+                    if (runtime.GOARCH == "arm64")
                     {
                         return false;
                     }
+
                     break;
             }
             return true;
+
         }
 
         // MustHaveExec checks that the current system can start new processes
@@ -188,13 +215,37 @@ namespace @internal
             {
                 t.Skipf("skipping test: cannot exec subprocess on %s/%s", runtime.GOOS, runtime.GOARCH);
             }
+
+        }
+
+        private static sync.Map execPaths = default; // path -> error
+
+        // MustHaveExecPath checks that the current system can start the named executable
+        // using os.StartProcess or (more commonly) exec.Command.
+        // If not, MustHaveExecPath calls t.Skip with an explanation.
+        public static void MustHaveExecPath(testing.TB t, @string path)
+        {
+            MustHaveExec(t);
+
+            var (err, found) = execPaths.Load(path);
+            if (!found)
+            {
+                _, err = exec.LookPath(path);
+                err, _ = execPaths.LoadOrStore(path, err);
+            }
+
+            if (err != null)
+            {
+                t.Skipf("skipping test: %s: %s", path, err);
+            }
+
         }
 
         // HasExternalNetwork reports whether the current system can use
         // external (non-localhost) networks.
         public static bool HasExternalNetwork()
         {
-            return !testing.Short();
+            return !testing.Short() && runtime.GOOS != "js";
         }
 
         // MustHaveExternalNetwork checks that the current system can use
@@ -202,10 +253,16 @@ namespace @internal
         // If not, MustHaveExternalNetwork calls t.Skip with an explanation.
         public static void MustHaveExternalNetwork(testing.TB t)
         {
+            if (runtime.GOOS == "js")
+            {
+                t.Skipf("skipping test: no external network on %s", runtime.GOOS);
+            }
+
             if (testing.Short())
             {
                 t.Skipf("skipping test: no external network in -short mode");
             }
+
         }
 
         private static bool haveCGO = default;
@@ -223,6 +280,7 @@ namespace @internal
             {
                 t.Skipf("skipping test: no cgo");
             }
+
         }
 
         // HasSymlink reports whether the current system can use os.Symlink.
@@ -241,6 +299,7 @@ namespace @internal
             {
                 t.Skipf("skipping test: cannot make symlinks on %s/%s%s", runtime.GOOS, runtime.GOARCH, reason);
             }
+
         }
 
         // HasLink reports whether the current system can use os.Link.
@@ -250,6 +309,7 @@ namespace @internal
             // and an attempt to call link() on a file will return EACCES.
             // - https://code.google.com/p/android-developer-preview/issues/detail?id=3150
             return runtime.GOOS != "plan9" && runtime.GOOS != "android";
+
         }
 
         // MustHaveLink reports whether the current system can use os.Link.
@@ -260,6 +320,7 @@ namespace @internal
             {
                 t.Skipf("skipping test: hardlinks are not supported on %s/%s", runtime.GOOS, runtime.GOARCH);
             }
+
         }
 
         private static var flaky = flag.Bool("flaky", false, "run known-flaky tests too");
@@ -267,10 +328,11 @@ namespace @internal
         public static void SkipFlaky(testing.TB t, long issue)
         {
             t.Helper();
-            if (!flaky.Value)
+            if (!flaky.val)
             {
                 t.Skipf("skipping known flaky test without the -flaky flag; see golang.org/issue/%d", issue);
             }
+
         }
 
         public static void SkipFlakyNet(testing.TB t)
@@ -285,17 +347,21 @@ namespace @internal
                 }
 
             }
+
         }
 
         // CleanCmdEnv will fill cmd.Env with the environment, excluding certain
         // variables that could modify the behavior of the Go tools such as
         // GODEBUG and GOTRACEBACK.
-        public static ref exec.Cmd CleanCmdEnv(ref exec.Cmd _cmd) => func(_cmd, (ref exec.Cmd cmd, Defer _, Panic panic, Recover __) =>
+        public static ptr<exec.Cmd> CleanCmdEnv(ptr<exec.Cmd> _addr_cmd) => func((_, panic, __) =>
         {
+            ref exec.Cmd cmd = ref _addr_cmd.val;
+
             if (cmd.Env != null)
             {
                 panic("environment already set");
             }
+
             foreach (var (_, env) in os.Environ())
             { 
                 // Exclude GODEBUG from the environment to prevent its output
@@ -309,9 +375,12 @@ namespace @internal
                 {
                     continue;
                 }
+
                 cmd.Env = append(cmd.Env, env);
+
             }
-            return cmd;
+            return _addr_cmd!;
+
         });
     }
 }}

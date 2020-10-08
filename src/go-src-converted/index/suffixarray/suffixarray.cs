@@ -14,12 +14,14 @@
 //    offsets1 := index.Lookup(s, -1) // the list of all indices where s occurs in data
 //    offsets2 := index.Lookup(s, 3)  // the list of at most 3 indices where s occurs in data
 //
-// package suffixarray -- go2cs converted at 2020 August 29 10:11:06 UTC
+// package suffixarray -- go2cs converted at 2020 October 08 04:59:47 UTC
 // import "index/suffixarray" ==> using suffixarray = go.index.suffixarray_package
 // Original source: C:\Go\src\index\suffixarray\suffixarray.go
 using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
+using errors = go.errors_package;
 using io = go.io_package;
+using math = go.math_package;
 using regexp = go.regexp_package;
 using sort = go.sort_package;
 using static go.builtin;
@@ -30,18 +32,96 @@ namespace index
 {
     public static partial class suffixarray_package
     {
+        // Can change for testing
+        private static long maxData32 = realMaxData32;
+
+        private static readonly var realMaxData32 = (var)math.MaxInt32;
+
+        // Index implements a suffix array for fast substring search.
+
+
         // Index implements a suffix array for fast substring search.
         public partial struct Index
         {
             public slice<byte> data;
-            public slice<long> sa; // suffix array for data; len(sa) == len(data)
+            public ints sa; // suffix array for data; sa.len() == len(data)
+        }
+
+        // An ints is either an []int32 or an []int64.
+        // That is, one of them is empty, and one is the real data.
+        // The int64 form is used when len(data) > maxData32
+        private partial struct ints
+        {
+            public slice<int> int32;
+            public slice<long> int64;
+        }
+
+        private static long len(this ptr<ints> _addr_a)
+        {
+            ref ints a = ref _addr_a.val;
+
+            return len(a.int32) + len(a.int64);
+        }
+
+        private static long get(this ptr<ints> _addr_a, long i)
+        {
+            ref ints a = ref _addr_a.val;
+
+            if (a.int32 != null)
+            {
+                return int64(a.int32[i]);
+            }
+
+            return a.int64[i];
+
+        }
+
+        private static void set(this ptr<ints> _addr_a, long i, long v)
+        {
+            ref ints a = ref _addr_a.val;
+
+            if (a.int32 != null)
+            {
+                a.int32[i] = int32(v);
+            }
+            else
+            {
+                a.int64[i] = v;
+            }
+
+        }
+
+        private static ints slice(this ptr<ints> _addr_a, long i, long j)
+        {
+            ref ints a = ref _addr_a.val;
+
+            if (a.int32 != null)
+            {
+                return new ints(a.int32[i:j],nil);
+            }
+
+            return new ints(nil,a.int64[i:j]);
+
         }
 
         // New creates a new Index for data.
-        // Index creation time is O(N*log(N)) for N = len(data).
-        public static ref Index New(slice<byte> data)
+        // Index creation time is O(N) for N = len(data).
+        public static ptr<Index> New(slice<byte> data)
         {
-            return ref new Index(data,qsufsort(data));
+            ptr<Index> ix = addr(new Index(data:data));
+            if (len(data) <= maxData32)
+            {
+                ix.sa.int32 = make_slice<int>(len(data));
+                text_32(data, ix.sa.int32);
+            }
+            else
+            {
+                ix.sa.int64 = make_slice<long>(len(data));
+                text_64(data, ix.sa.int64);
+            }
+
+            return _addr_ix!;
+
         }
 
         // writeInt writes an int x to w using buf to buffer the write.
@@ -49,26 +129,34 @@ namespace index
         {
             binary.PutVarint(buf, int64(x));
             var (_, err) = w.Write(buf[0L..binary.MaxVarintLen64]);
-            return error.As(err);
+            return error.As(err)!;
         }
 
         // readInt reads an int x from r using buf to buffer the read and returns x.
         private static (long, error) readInt(io.Reader r, slice<byte> buf)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             var (_, err) = io.ReadFull(r, buf[0L..binary.MaxVarintLen64]); // ok to continue with error
             var (x, _) = binary.Varint(buf);
-            return (int(x), err);
+            return (x, error.As(err)!);
+
         }
 
         // writeSlice writes data[:n] to w and returns n.
         // It uses buf to buffer the write.
-        private static (long, error) writeSlice(io.Writer w, slice<byte> buf, slice<long> data)
-        { 
+        private static (long, error) writeSlice(io.Writer w, slice<byte> buf, ints data)
+        {
+            long n = default;
+            error err = default!;
+ 
             // encode as many elements as fit into buf
             var p = binary.MaxVarintLen64;
-            while (n < len(data) && p + binary.MaxVarintLen64 <= len(buf))
+            var m = data.len();
+            while (n < m && p + binary.MaxVarintLen64 <= len(buf))
             {
-                p += binary.PutUvarint(buf[p..], uint64(data[n]));
+                p += binary.PutUvarint(buf[p..], uint64(data.get(n)));
                 n++;
             } 
 
@@ -80,72 +168,108 @@ namespace index
 
             // write buffer
             _, err = w.Write(buf[0L..p]);
-            return;
+            return ;
+
         }
+
+        private static var errTooBig = errors.New("suffixarray: data too large");
 
         // readSlice reads data[:n] from r and returns n.
         // It uses buf to buffer the read.
-        private static (long, error) readSlice(io.Reader r, slice<byte> buf, slice<long> data)
-        { 
+        private static (long, error) readSlice(io.Reader r, slice<byte> buf, ints data)
+        {
+            long n = default;
+            error err = default!;
+ 
             // read buffer size
-            long size = default;
-            size, err = readInt(r, buf);
+            long size64 = default;
+            size64, err = readInt(r, buf);
             if (err != null)
             {
-                return;
-            } 
+                return ;
+            }
+
+            if (int64(int(size64)) != size64 || int(size64) < 0L)
+            { 
+                // We never write chunks this big anyway.
+                return (0L, error.As(errTooBig)!);
+
+            }
+
+            var size = int(size64); 
 
             // read buffer w/o the size
             _, err = io.ReadFull(r, buf[binary.MaxVarintLen64..size]);
 
             if (err != null)
             {
-                return;
+                return ;
             } 
 
             // decode as many elements as present in buf
             for (var p = binary.MaxVarintLen64; p < size; n++)
             {
                 var (x, w) = binary.Uvarint(buf[p..]);
-                data[n] = int(x);
+                data.set(n, int64(x));
                 p += w;
             }
 
 
-            return;
+            return ;
+
         }
 
-        private static readonly long bufSize = 16L << (int)(10L); // reasonable for BenchmarkSaveRestore
+        private static readonly long bufSize = (long)16L << (int)(10L); // reasonable for BenchmarkSaveRestore
 
         // Read reads the index from r into x; x must not be nil.
  // reasonable for BenchmarkSaveRestore
 
         // Read reads the index from r into x; x must not be nil.
-        private static error Read(this ref Index x, io.Reader r)
-        { 
+        private static error Read(this ptr<Index> _addr_x, io.Reader r)
+        {
+            ref Index x = ref _addr_x.val;
+ 
             // buffer for all reads
             var buf = make_slice<byte>(bufSize); 
 
             // read length
-            var (n, err) = readInt(r, buf);
+            var (n64, err) = readInt(r, buf);
             if (err != null)
             {
-                return error.As(err);
-            } 
+                return error.As(err)!;
+            }
+
+            if (int64(int(n64)) != n64 || int(n64) < 0L)
+            {
+                return error.As(errTooBig)!;
+            }
+
+            var n = int(n64); 
 
             // allocate space
-            if (2L * n < cap(x.data) || cap(x.data) < n)
+            if (2L * n < cap(x.data) || cap(x.data) < n || x.sa.int32 != null && n > maxData32 || x.sa.int64 != null && n <= maxData32)
             { 
-                // new data is significantly smaller or larger then
+                // new data is significantly smaller or larger than
                 // existing buffers - allocate new ones
                 x.data = make_slice<byte>(n);
-                x.sa = make_slice<long>(n);
+                x.sa.int32 = null;
+                x.sa.int64 = null;
+                if (n <= maxData32)
+                {
+                    x.sa.int32 = make_slice<int>(n);
+                }
+                else
+                {
+                    x.sa.int64 = make_slice<long>(n);
+                }
+
             }
             else
             { 
                 // re-use existing buffers
                 x.data = x.data[0L..n];
-                x.sa = x.sa[0L..n];
+                x.sa = x.sa.slice(0L, n);
+
             } 
 
             // read data
@@ -154,7 +278,7 @@ namespace index
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // read index
@@ -162,26 +286,28 @@ namespace index
             } 
 
             // read index
+            var sa = x.sa;
+            while (sa.len() > 0L)
             {
-                var sa = x.sa;
-
-                while (len(sa) > 0L)
+                var (n, err) = readSlice(r, buf, sa);
+                if (err != null)
                 {
-                    (n, err) = readSlice(r, buf, sa);
-                    if (err != null)
-                    {
-                        return error.As(err);
-                    }
-                    sa = sa[n..];
+                    return error.As(err)!;
                 }
 
+                sa = sa.slice(n, sa.len());
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Write writes the index x to w.
-        private static error Write(this ref Index x, io.Writer w)
-        { 
+        private static error Write(this ptr<Index> _addr_x, io.Writer w)
+        {
+            ref Index x = ref _addr_x.val;
+ 
             // buffer for all writes
             var buf = make_slice<byte>(bufSize); 
 
@@ -191,7 +317,7 @@ namespace index
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // write data
@@ -204,7 +330,7 @@ namespace index
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // write index
@@ -212,46 +338,53 @@ namespace index
             } 
 
             // write index
+            var sa = x.sa;
+            while (sa.len() > 0L)
             {
-                var sa = x.sa;
-
-                while (len(sa) > 0L)
+                var (n, err) = writeSlice(w, buf, sa);
+                if (err != null)
                 {
-                    var (n, err) = writeSlice(w, buf, sa);
-                    if (err != null)
-                    {
-                        return error.As(err);
-                    }
-                    sa = sa[n..];
+                    return error.As(err)!;
                 }
 
+                sa = sa.slice(n, sa.len());
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Bytes returns the data over which the index was created.
         // It must not be modified.
         //
-        private static slice<byte> Bytes(this ref Index x)
+        private static slice<byte> Bytes(this ptr<Index> _addr_x)
         {
+            ref Index x = ref _addr_x.val;
+
             return x.data;
         }
 
-        private static slice<byte> at(this ref Index x, long i)
+        private static slice<byte> at(this ptr<Index> _addr_x, long i)
         {
-            return x.data[x.sa[i]..];
+            ref Index x = ref _addr_x.val;
+
+            return x.data[x.sa.get(i)..];
         }
 
         // lookupAll returns a slice into the matching region of the index.
         // The runtime is O(log(N)*len(s)).
-        private static slice<long> lookupAll(this ref Index x, slice<byte> s)
-        { 
+        private static ints lookupAll(this ptr<Index> _addr_x, slice<byte> s)
+        {
+            ref Index x = ref _addr_x.val;
+ 
             // find matching suffix index range [i:j]
             // find the first index where s would be the prefix
-            var i = sort.Search(len(x.sa), i => bytes.Compare(x.at(i), s) >= 0L); 
+            var i = sort.Search(x.sa.len(), i => bytes.Compare(x.at(i), s) >= 0L); 
             // starting at i, find the first index at which s is not a prefix
-            var j = i + sort.Search(len(x.sa) - i, j => !bytes.HasPrefix(x.at(j + i), s));
-            return x.sa[i..j];
+            var j = i + sort.Search(x.sa.len() - i, j => !bytes.HasPrefix(x.at(j + i), s));
+            return x.sa.slice(i, j);
+
         }
 
         // Lookup returns an unsorted list of at most n indices where the byte string s
@@ -260,23 +393,57 @@ namespace index
         // Lookup time is O(log(N)*len(s) + len(result)) where N is the
         // size of the indexed data.
         //
-        private static slice<long> Lookup(this ref Index x, slice<byte> s, long n)
+        private static slice<long> Lookup(this ptr<Index> _addr_x, slice<byte> s, long n)
         {
+            slice<long> result = default;
+            ref Index x = ref _addr_x.val;
+
             if (len(s) > 0L && n != 0L)
             {
                 var matches = x.lookupAll(s);
-                if (n < 0L || len(matches) < n)
+                var count = matches.len();
+                if (n < 0L || count < n)
                 {
-                    n = len(matches);
+                    n = count;
                 } 
-                // 0 <= n <= len(matches)
+                // 0 <= n <= count
                 if (n > 0L)
                 {
                     result = make_slice<long>(n);
-                    copy(result, matches);
+                    if (matches.int32 != null)
+                    {
+                        {
+                            var i__prev1 = i;
+
+                            foreach (var (__i) in result)
+                            {
+                                i = __i;
+                                result[i] = int(matches.int32[i]);
+                            }
+                    else
+
+                            i = i__prev1;
+                        }
+                    }                    {
+                        {
+                            var i__prev1 = i;
+
+                            foreach (var (__i) in result)
+                            {
+                                i = __i;
+                                result[i] = int(matches.int64[i]);
+                            }
+
+                            i = i__prev1;
+                        }
+                    }
+
                 }
+
             }
-            return;
+
+            return ;
+
         }
 
         // FindAllIndex returns a sorted list of non-overlapping matches of the
@@ -286,8 +453,12 @@ namespace index
         // they may not be successive. The result is nil if there are no matches,
         // or if n == 0.
         //
-        private static slice<slice<long>> FindAllIndex(this ref Index x, ref regexp.Regexp r, long n)
-        { 
+        private static slice<slice<long>> FindAllIndex(this ptr<Index> _addr_x, ptr<regexp.Regexp> _addr_r, long n)
+        {
+            slice<slice<long>> result = default;
+            ref Index x = ref _addr_x.val;
+            ref regexp.Regexp r = ref _addr_r.val;
+ 
             // a non-empty literal prefix is used to determine possible
             // match start indices with Lookup
             var (prefix, complete) = r.LiteralPrefix();
@@ -319,9 +490,10 @@ namespace index
                         var indices = x.Lookup(lit, n1);
                         if (len(indices) == 0L)
                         {
-                            return;
+                            return ;
                         n1 += 2L * (n - len(result)); /* overflow ok */
                         }
+
                         sort.Ints(indices);
                         var pairs = make_slice<long>(2L * len(indices));
                         result = make_slice<slice<long>>(len(indices));
@@ -347,6 +519,7 @@ namespace index
                                     count++;
                                     prev = i + len(lit);
                                 }
+
                             }
 
                             i = i__prev2;
@@ -358,7 +531,9 @@ namespace index
                             // found all matches or there's no chance to find more
                             // (n and n1 can be negative)
                             break;
+
                         }
+
                     }
 
 
@@ -368,7 +543,9 @@ namespace index
                 {
                     result = null;
                 }
-                return;
+
+                return ;
+
             } 
 
             // regexp has a non-empty literal prefix; Lookup(lit) computes
@@ -388,9 +565,10 @@ namespace index
                     indices = x.Lookup(lit, n1);
                     if (len(indices) == 0L)
                     {
-                        return;
+                        return ;
                     n1 += 2L * (n - len(result)); /* overflow ok */
                     }
+
                     sort.Ints(indices);
                     result = result[0L..0L];
                     prev = 0L;
@@ -404,6 +582,7 @@ namespace index
                             {
                                 break;
                             }
+
                             var m = r.FindIndex(x.data[i..]); // anchored search - will not run off
                             // ignore indices leading to overlapping matches
                             if (m != null && prev <= i)
@@ -412,7 +591,9 @@ namespace index
                                 m[1L] += i;
                                 result = append(result, m);
                                 prev = m[1L];
+
                             }
+
                         }
 
                         i = i__prev2;
@@ -423,7 +604,9 @@ namespace index
                         // found all matches or there's no chance to find more
                         // (n and n1 can be negative)
                         break;
+
                     }
+
                 }
 
 
@@ -433,7 +616,9 @@ namespace index
             {
                 result = null;
             }
-            return;
+
+            return ;
+
         }
     }
 }}

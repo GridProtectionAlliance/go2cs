@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:26:40 UTC
+// package gc -- go2cs converted at 2020 October 08 04:28:39 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\dcl.go
 using bytes = go.bytes_package;
@@ -22,7 +22,7 @@ namespace @internal
     public static partial class gc_package
     {
         // Declaration stack & operations
-        private static slice<ref Node> externdcl = default;
+        private static slice<ptr<Node>> externdcl = default;
 
         private static void testdclstack()
         {
@@ -32,31 +32,32 @@ namespace @internal
                 {
                     errorexit();
                 }
+
                 Fatalf("mark left on the dclstack");
+
             }
+
         }
 
-        // redeclare emits a diagnostic about symbol s being redeclared somewhere.
-        private static void redeclare(ref types.Sym s, @string where)
+        // redeclare emits a diagnostic about symbol s being redeclared at pos.
+        private static void redeclare(src.XPos pos, ptr<types.Sym> _addr_s, @string where)
         {
+            ref types.Sym s = ref _addr_s.val;
+
             if (!s.Lastlineno.IsKnown())
             {
-                @string tmp = default;
-                if (s.Origpkg != null)
+                var pkg = s.Origpkg;
+                if (pkg == null)
                 {
-                    tmp = s.Origpkg.Path;
+                    pkg = s.Pkg;
                 }
-                else
-                {
-                    tmp = s.Pkg.Path;
-                }
-                var pkgstr = tmp;
-                yyerror("%v redeclared %s\n" + "\tprevious declaration during import %q", s, where, pkgstr);
+
+                yyerrorl(pos, "%v redeclared %s\n" + "\tprevious declaration during import %q", s, where, pkg.Path);
+
             }
             else
             {
-                var line1 = lineno;
-                var line2 = s.Lastlineno; 
+                var prevPos = s.Lastlineno; 
 
                 // When an import and a declaration collide in separate files,
                 // present the import as the "redeclared", because the declaration
@@ -64,11 +65,15 @@ namespace @internal
                 // See issue 4510.
                 if (s.Def == null)
                 {
-                    line2 = line1;
-                    line1 = s.Lastlineno;
+                    pos = prevPos;
+                    prevPos = pos;
+
                 }
-                yyerrorl(line1, "%v redeclared %s\n" + "\tprevious declaration at %v", s, where, linestr(line2));
+
+                yyerrorl(pos, "%v redeclared %s\n" + "\tprevious declaration at %v", s, where, linestr(prevPos));
+
             }
+
         }
 
         private static long vargen = default;
@@ -79,52 +84,59 @@ namespace @internal
 
         // declare records that Node n declares symbol n.Sym in the specified
         // declaration context.
-        private static void declare(ref Node n, Class ctxt)
+        private static void declare(ptr<Node> _addr_n, Class ctxt)
         {
-            if (ctxt == PDISCARD)
+            ref Node n = ref _addr_n.val;
+
+            if (n.isBlank())
             {
-                return;
+                return ;
             }
-            if (isblank(n))
-            {
-                return;
-            }
+
             if (n.Name == null)
             { 
                 // named OLITERAL needs Name; most OLITERALs don't.
                 n.Name = @new<Name>();
+
             }
-            n.Pos = lineno;
+
             var s = n.Sym; 
 
             // kludgy: typecheckok means we're past parsing. Eg genwrapper may declare out of package names later.
             if (!inimport && !typecheckok && s.Pkg != localpkg)
             {
-                yyerror("cannot declare name %v", s);
+                yyerrorl(n.Pos, "cannot declare name %v", s);
             }
+
             long gen = 0L;
             if (ctxt == PEXTERN)
             {
                 if (s.Name == "init")
                 {
-                    yyerror("cannot declare init - must be func");
+                    yyerrorl(n.Pos, "cannot declare init - must be func");
                 }
-                if (s.Name == "main" && localpkg.Name == "main")
+
+                if (s.Name == "main" && s.Pkg.Name == "main")
                 {
-                    yyerror("cannot declare main - must be func");
+                    yyerrorl(n.Pos, "cannot declare main - must be func");
                 }
+
                 externdcl = append(externdcl, n);
+
             }
             else
             {
                 if (Curfn == null && ctxt == PAUTO)
                 {
+                    lineno = n.Pos;
                     Fatalf("automatic outside function");
                 }
+
                 if (Curfn != null)
                 {
                     Curfn.Func.Dcl = append(Curfn.Func.Dcl, n);
                 }
+
                 if (n.Op == OTYPE)
                 {
                     declare_typegen++;
@@ -135,48 +147,65 @@ namespace @internal
                     vargen++;
                     gen = vargen;
                 }
+
                 types.Pushdcl(s);
                 n.Name.Curfn = Curfn;
+
             }
+
             if (ctxt == PAUTO)
             {
                 n.Xoffset = 0L;
             }
+
             if (s.Block == types.Block)
             { 
                 // functype will print errors about duplicate function arguments.
                 // Don't repeat the error here.
                 if (ctxt != PPARAM && ctxt != PPARAMOUT)
                 {
-                    redeclare(s, "in this block");
+                    redeclare(n.Pos, _addr_s, "in this block");
                 }
+
             }
+
             s.Block = types.Block;
             s.Lastlineno = lineno;
             s.Def = asTypesNode(n);
             n.Name.Vargen = int32(gen);
-            n.Name.Funcdepth = funcdepth;
             n.SetClass(ctxt);
+            if (ctxt == PFUNC)
+            {
+                n.Sym.SetFunc(true);
+            }
 
             autoexport(n, ctxt);
+
         }
 
-        private static void addvar(ref Node n, ref types.Type t, Class ctxt)
+        private static void addvar(ptr<Node> _addr_n, ptr<types.Type> _addr_t, Class ctxt)
         {
+            ref Node n = ref _addr_n.val;
+            ref types.Type t = ref _addr_t.val;
+
             if (n == null || n.Sym == null || (n.Op != ONAME && n.Op != ONONAME) || t == null)
             {
                 Fatalf("addvar: n=%v t=%v nil", n, t);
             }
+
             n.Op = ONAME;
-            declare(n, ctxt);
+            declare(_addr_n, ctxt);
             n.Type = t;
+
         }
 
         // declare variables from grammar
         // new_name_list (type | [type] = expr_list)
-        private static slice<ref Node> variter(slice<ref Node> vl, ref Node t, slice<ref Node> el)
+        private static slice<ptr<Node>> variter(slice<ptr<Node>> vl, ptr<Node> _addr_t, slice<ptr<Node>> el)
         {
-            slice<ref Node> init = default;
+            ref Node t = ref _addr_t.val;
+
+            slice<ptr<Node>> init = default;
             var doexpr = len(el) > 0L;
 
             if (len(el) == 1L && len(vl) > 1L)
@@ -192,54 +221,64 @@ namespace @internal
                     {
                         v = __v;
                         v.Op = ONAME;
-                        declare(v, dclcontext);
+                        declare(_addr_v, dclcontext);
                         v.Name.Param.Ntype = t;
                         v.Name.Defn = as2;
-                        if (funcdepth > 0L)
+                        if (Curfn != null)
                         {
                             init = append(init, nod(ODCL, v, null));
                         }
+
                     }
 
                     v = v__prev1;
                 }
 
                 return append(init, as2);
+
             }
+
+            var nel = len(el);
             {
                 var v__prev1 = v;
 
                 foreach (var (_, __v) in vl)
                 {
                     v = __v;
-                    e = default;
+                    e = ;
                     if (doexpr)
                     {
                         if (len(el) == 0L)
                         {
-                            yyerror("missing expression in var declaration");
+                            yyerror("assignment mismatch: %d variables but %d values", len(vl), nel);
                             break;
                         }
+
                         e = el[0L];
                         el = el[1L..];
+
                     }
+
                     v.Op = ONAME;
-                    declare(v, dclcontext);
+                    declare(_addr_v, dclcontext);
                     v.Name.Param.Ntype = t;
 
-                    if (e != null || funcdepth > 0L || isblank(v))
+                    if (e != null || Curfn != null || v.isBlank())
                     {
-                        if (funcdepth > 0L)
+                        if (Curfn != null)
                         {
                             init = append(init, nod(ODCL, v, null));
                         }
+
                         e = nod(OAS, v, e);
                         init = append(init, e);
                         if (e.Right != null)
                         {
                             v.Name.Defn = e;
                         }
+
                     }
+
                 }
 
                 v = v__prev1;
@@ -247,58 +286,65 @@ namespace @internal
 
             if (len(el) != 0L)
             {
-                yyerror("extra expression in var declaration");
+                yyerror("assignment mismatch: %d variables but %d values", len(vl), nel);
             }
+
             return init;
+
         }
 
         // newnoname returns a new ONONAME Node associated with symbol s.
-        private static ref Node newnoname(ref types.Sym s)
+        private static ptr<Node> newnoname(ptr<types.Sym> _addr_s)
         {
+            ref types.Sym s = ref _addr_s.val;
+
             if (s == null)
             {
                 Fatalf("newnoname nil");
             }
+
             var n = nod(ONONAME, null, null);
             n.Sym = s;
-            n.SetAddable(true);
             n.Xoffset = 0L;
-            return n;
-        }
+            return _addr_n!;
 
-        // newfuncname generates a new name node for a function or method.
-        // TODO(rsc): Use an ODCLFUNC node instead. See comment in CL 7360.
-        private static ref Node newfuncname(ref types.Sym s)
-        {
-            return newfuncnamel(lineno, s);
         }
 
         // newfuncnamel generates a new name node for a function or method.
         // TODO(rsc): Use an ODCLFUNC node instead. See comment in CL 7360.
-        private static ref Node newfuncnamel(src.XPos pos, ref types.Sym s)
+        private static ptr<Node> newfuncnamel(src.XPos pos, ptr<types.Sym> _addr_s)
         {
+            ref types.Sym s = ref _addr_s.val;
+
             var n = newnamel(pos, s);
             n.Func = @new<Func>();
             n.Func.SetIsHiddenClosure(Curfn != null);
-            return n;
+            return _addr_n!;
         }
 
         // this generates a new name node for a name
         // being declared.
-        private static ref Node dclname(ref types.Sym s)
+        private static ptr<Node> dclname(ptr<types.Sym> _addr_s)
         {
+            ref types.Sym s = ref _addr_s.val;
+
             var n = newname(s);
             n.Op = ONONAME; // caller will correct it
-            return n;
+            return _addr_n!;
+
         }
 
-        private static ref Node typenod(ref types.Type t)
+        private static ptr<Node> typenod(ptr<types.Type> _addr_t)
         {
-            return typenodl(src.NoXPos, t);
+            ref types.Type t = ref _addr_t.val;
+
+            return _addr_typenodl(src.NoXPos, _addr_t)!;
         }
 
-        private static ref Node typenodl(src.XPos pos, ref types.Type t)
-        { 
+        private static ptr<Node> typenodl(src.XPos pos, ptr<types.Type> _addr_t)
+        {
+            ref types.Type t = ref _addr_t.val;
+ 
             // if we copied another type with *t = *u
             // then t->nod might be out of date, so
             // check t->nod->type too
@@ -311,38 +357,54 @@ namespace @internal
                 asNode(t.Nod).Sym;
 
                 t.Sym;
+
             }
-            return asNode(t.Nod);
+
+            return _addr_asNode(t.Nod)!;
+
         }
 
-        private static ref Node anonfield(ref types.Type typ)
+        private static ptr<Node> anonfield(ptr<types.Type> _addr_typ)
         {
-            return nod(ODCLFIELD, null, typenod(typ));
+            ref types.Type typ = ref _addr_typ.val;
+
+            return _addr_symfield(_addr_null, _addr_typ)!;
         }
 
-        private static ref Node namedfield(@string s, ref types.Type typ)
+        private static ptr<Node> namedfield(@string s, ptr<types.Type> _addr_typ)
         {
-            return symfield(lookup(s), typ);
+            ref types.Type typ = ref _addr_typ.val;
+
+            return _addr_symfield(_addr_lookup(s), _addr_typ)!;
         }
 
-        private static ref Node symfield(ref types.Sym s, ref types.Type typ)
+        private static ptr<Node> symfield(ptr<types.Sym> _addr_s, ptr<types.Type> _addr_typ)
         {
-            return nod(ODCLFIELD, newname(s), typenod(typ));
+            ref types.Sym s = ref _addr_s.val;
+            ref types.Type typ = ref _addr_typ.val;
+
+            var n = nodSym(ODCLFIELD, null, s);
+            n.Type = typ;
+            return _addr_n!;
         }
 
         // oldname returns the Node that declares symbol s in the current scope.
         // If no such Node currently exists, an ONONAME Node is returned instead.
-        private static ref Node oldname(ref types.Sym s)
+        private static ptr<Node> oldname(ptr<types.Sym> _addr_s)
         {
+            ref types.Sym s = ref _addr_s.val;
+
             var n = asNode(s.Def);
             if (n == null)
             { 
                 // Maybe a top-level declaration will come along later to
                 // define s. resolve will check s.Def again once all input
                 // source has been processed.
-                return newnoname(s);
+                return _addr_newnoname(_addr_s)!;
+
             }
-            if (Curfn != null && n.Op == ONAME && n.Name.Funcdepth > 0L && n.Name.Funcdepth != funcdepth)
+
+            if (Curfn != null && n.Op == ONAME && n.Name.Curfn != null && n.Name.Curfn != Curfn)
             { 
                 // Inner func is referring to var in outer func.
                 //
@@ -351,16 +413,14 @@ namespace @internal
                 // the := it looks like a reference to the outer x so we'll
                 // make x a closure variable unnecessarily.
                 var c = n.Name.Param.Innermost;
-                if (c == null || c.Name.Funcdepth != funcdepth)
+                if (c == null || c.Name.Curfn != Curfn)
                 { 
                     // Do not have a closure var for the active closure yet; make one.
                     c = newname(s);
                     c.SetClass(PAUTOHEAP);
-                    c.SetIsClosureVar(true);
-                    c.SetIsddd(n.Isddd());
-                    c.Name.Defn = n;
-                    c.SetAddable(false);
-                    c.Name.Funcdepth = funcdepth; 
+                    c.Name.SetIsClosureVar(true);
+                    c.SetIsDDD(n.IsDDD());
+                    c.Name.Defn = n; 
 
                     // Link into list of active closure variables.
                     // Popped from list in func closurebody.
@@ -368,25 +428,34 @@ namespace @internal
                     n.Name.Param.Innermost = c;
 
                     Curfn.Func.Cvars.Append(c);
+
                 } 
 
                 // return ref to closure var, not original
-                return c;
+                return _addr_c!;
+
             }
-            return n;
+
+            return _addr_n!;
+
         }
 
         // := declarations
-        private static bool colasname(ref Node n)
+        private static bool colasname(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
 
             if (n.Op == ONAME || n.Op == ONONAME || n.Op == OPACK || n.Op == OTYPE || n.Op == OLITERAL) 
                 return n.Sym != null;
                         return false;
+
         }
 
-        private static void colasdefn(slice<ref Node> left, ref Node defn)
+        private static void colasdefn(slice<ptr<Node>> left, ptr<Node> _addr_defn)
         {
+            ref Node defn = ref _addr_defn.val;
+
             {
                 var n__prev1 = n;
 
@@ -397,6 +466,7 @@ namespace @internal
                     {
                         n.Sym.SetUniq(true);
                     }
+
                 }
 
                 n = n__prev1;
@@ -411,16 +481,18 @@ namespace @internal
                 {
                     i = __i;
                     n = __n;
-                    if (isblank(n))
+                    if (n.isBlank())
                     {
                         continue;
                     }
-                    if (!colasname(n))
+
+                    if (!colasname(_addr_n))
                     {
                         yyerrorl(defn.Pos, "non-name %v on left side of :=", n);
                         nerr++;
                         continue;
                     }
+
                     if (!n.Sym.Uniq())
                     {
                         yyerrorl(defn.Pos, "%v repeated on left side of :=", n.Sym);
@@ -428,17 +500,20 @@ namespace @internal
                         nerr++;
                         continue;
                     }
+
                     n.Sym.SetUniq(false);
                     if (n.Sym.Block == types.Block)
                     {
                         continue;
                     }
+
                     nnew++;
                     n = newname(n.Sym);
-                    declare(n, dclcontext);
+                    declare(_addr_n, dclcontext);
                     n.Name.Defn = defn;
                     defn.Ninit.Append(nod(ODCL, n, null));
                     left[i] = n;
+
                 }
 
                 n = n__prev1;
@@ -448,52 +523,65 @@ namespace @internal
             {
                 yyerrorl(defn.Pos, "no new variables on left side of :=");
             }
+
         }
 
         // declare the arguments in an
         // interface field declaration.
-        private static void ifacedcl(ref Node n)
+        private static void ifacedcl(ptr<Node> _addr_n)
         {
-            if (n.Op != ODCLFIELD || n.Right == null)
+            ref Node n = ref _addr_n.val;
+
+            if (n.Op != ODCLFIELD || n.Left == null)
             {
                 Fatalf("ifacedcl");
             }
-            if (isblank(n.Left))
+
+            if (n.Sym.IsBlank())
             {
                 yyerror("methods must have a unique non-blank name");
             }
+
         }
 
         // declare the function proper
         // and declare the arguments.
         // called in extern-declaration context
         // returns in auto-declaration context.
-        private static void funchdr(ref Node n)
-        { 
+        private static void funchdr(ptr<Node> _addr_n)
+        {
+            ref Node n = ref _addr_n.val;
+ 
             // change the declaration context from extern to auto
-            if (funcdepth == 0L && dclcontext != PEXTERN)
+            if (Curfn == null && dclcontext != PEXTERN)
             {
                 Fatalf("funchdr: dclcontext = %d", dclcontext);
             }
+
             dclcontext = PAUTO;
-            funcstart(n);
+            types.Markdcl();
+            funcstack = append(funcstack, Curfn);
+            Curfn = n;
 
             if (n.Func.Nname != null)
             {
-                funcargs(n.Func.Nname.Name.Param.Ntype);
+                funcargs(_addr_n.Func.Nname.Name.Param.Ntype);
             }
             else if (n.Func.Ntype != null)
             {
-                funcargs(n.Func.Ntype);
+                funcargs(_addr_n.Func.Ntype);
             }
             else
             {
-                funcargs2(n.Type);
+                funcargs2(_addr_n.Type);
             }
+
         }
 
-        private static void funcargs(ref Node nt)
+        private static void funcargs(ptr<Node> _addr_nt)
         {
+            ref Node nt = ref _addr_nt.val;
+
             if (nt.Op != OTFUNC)
             {
                 Fatalf("funcargs %v", nt.Op);
@@ -502,81 +590,50 @@ namespace @internal
             // re-start the variable generation number
             // we want to use small numbers for the return variables,
             // so let them have the chunk starting at 1.
+            //
+            // TODO(mdempsky): This is ugly, and only necessary because
+            // esc.go uses Vargen to figure out result parameters' index
+            // within the result tuple.
             vargen = nt.Rlist.Len(); 
 
             // declare the receiver and in arguments.
-            // no n->defn because type checking of func header
-            // will not fill in the types until later
             if (nt.Left != null)
             {
-                var n = nt.Left;
-                if (n.Op != ODCLFIELD)
-                {
-                    Fatalf("funcargs receiver %v", n.Op);
-                }
-                if (n.Left != null)
-                {
-                    n.Left.Op = ONAME;
-                    n.Left.Name.Param.Ntype = n.Right;
-                    declare(n.Left, PPARAM);
-                    if (dclcontext == PAUTO)
-                    {
-                        vargen++;
-                        n.Left.Name.Vargen = int32(vargen);
-                    }
-                }
+                funcarg(_addr_nt.Left, PPARAM);
             }
+
             {
                 var n__prev1 = n;
 
                 foreach (var (_, __n) in nt.List.Slice())
                 {
                     n = __n;
-                    if (n.Op != ODCLFIELD)
-                    {
-                        Fatalf("funcargs in %v", n.Op);
-                    }
-                    if (n.Left != null)
-                    {
-                        n.Left.Op = ONAME;
-                        n.Left.Name.Param.Ntype = n.Right;
-                        declare(n.Left, PPARAM);
-                        if (dclcontext == PAUTO)
-                        {
-                            vargen++;
-                            n.Left.Name.Vargen = int32(vargen);
-                        }
-                    }
-                } 
-
-                // declare the out arguments.
+                    funcarg(_addr_n, PPARAM);
+                }
 
                 n = n__prev1;
             }
 
+            var oldvargen = vargen;
+            vargen = 0L; 
+
+            // declare the out arguments.
             var gen = nt.List.Len();
-            long i = 0L;
             {
                 var n__prev1 = n;
 
                 foreach (var (_, __n) in nt.Rlist.Slice())
                 {
                     n = __n;
-                    if (n.Op != ODCLFIELD)
-                    {
-                        Fatalf("funcargs out %v", n.Op);
-                    }
-                    if (n.Left == null)
+                    if (n.Sym == null)
                     { 
                         // Name so that escape analysis can track it. ~r stands for 'result'.
-                        n.Left = newname(lookupN("~r", gen));
+                        n.Sym = lookupN("~r", gen);
                         gen++;
-                    } 
 
-                    // TODO: n->left->missing = 1;
-                    n.Left.Op = ONAME;
+                    }
 
-                    if (isblank(n.Left))
+                    if (n.Sym.IsBlank())
                     { 
                         // Give it a name so we can assign to it during return. ~b stands for 'blank'.
                         // The name must be different from ~r above because if you have
@@ -584,105 +641,113 @@ namespace @internal
                         //    func g() int
                         // f is allowed to use a plain 'return' with no arguments, while g is not.
                         // So the two cases must be distinguished.
-                        // We do not record a pointer to the original node (n->orig).
-                        // Having multiple names causes too much confusion in later passes.
-                        var nn = n.Left.Value;
-                        nn.Orig = ref nn;
-                        nn.Sym = lookupN("~b", gen);
+                        n.Sym = lookupN("~b", gen);
                         gen++;
-                        n.Left = ref nn;
+
                     }
-                    n.Left.Name.Param.Ntype = n.Right;
-                    declare(n.Left, PPARAMOUT);
-                    if (dclcontext == PAUTO)
-                    {
-                        i++;
-                        n.Left.Name.Vargen = int32(i);
-                    }
+
+                    funcarg(_addr_n, PPARAMOUT);
+
                 }
 
                 n = n__prev1;
             }
+
+            vargen = oldvargen;
+
+        }
+
+        private static void funcarg(ptr<Node> _addr_n, Class ctxt)
+        {
+            ref Node n = ref _addr_n.val;
+
+            if (n.Op != ODCLFIELD)
+            {
+                Fatalf("funcarg %v", n.Op);
+            }
+
+            if (n.Sym == null)
+            {
+                return ;
+            }
+
+            n.Right = newnamel(n.Pos, n.Sym);
+            n.Right.Name.Param.Ntype = n.Left;
+            n.Right.SetIsDDD(n.IsDDD());
+            declare(_addr_n.Right, ctxt);
+
+            vargen++;
+            n.Right.Name.Vargen = int32(vargen);
 
         }
 
         // Same as funcargs, except run over an already constructed TFUNC.
         // This happens during import, where the hidden_fndcl rule has
         // used functype directly to parse the function's type.
-        private static void funcargs2(ref types.Type t)
+        private static void funcargs2(ptr<types.Type> _addr_t)
         {
+            ref types.Type t = ref _addr_t.val;
+
             if (t.Etype != TFUNC)
             {
                 Fatalf("funcargs2 %v", t);
             }
-            {
-                var ft__prev1 = ft;
 
-                foreach (var (_, __ft) in t.Recvs().Fields().Slice())
+            {
+                var f__prev1 = f;
+
+                foreach (var (_, __f) in t.Recvs().Fields().Slice())
                 {
-                    ft = __ft;
-                    if (asNode(ft.Nname) == null || asNode(ft.Nname).Sym == null)
-                    {
-                        continue;
-                    }
-                    var n = asNode(ft.Nname); // no need for newname(ft->nname->sym)
-                    n.Type = ft.Type;
-                    declare(n, PPARAM);
+                    f = __f;
+                    funcarg2(_addr_f, PPARAM);
                 }
 
-                ft = ft__prev1;
+                f = f__prev1;
             }
 
             {
-                var ft__prev1 = ft;
+                var f__prev1 = f;
 
-                foreach (var (_, __ft) in t.Params().Fields().Slice())
+                foreach (var (_, __f) in t.Params().Fields().Slice())
                 {
-                    ft = __ft;
-                    if (asNode(ft.Nname) == null || asNode(ft.Nname).Sym == null)
-                    {
-                        continue;
-                    }
-                    n = asNode(ft.Nname);
-                    n.Type = ft.Type;
-                    declare(n, PPARAM);
+                    f = __f;
+                    funcarg2(_addr_f, PPARAM);
                 }
 
-                ft = ft__prev1;
+                f = f__prev1;
             }
 
             {
-                var ft__prev1 = ft;
+                var f__prev1 = f;
 
-                foreach (var (_, __ft) in t.Results().Fields().Slice())
+                foreach (var (_, __f) in t.Results().Fields().Slice())
                 {
-                    ft = __ft;
-                    if (asNode(ft.Nname) == null || asNode(ft.Nname).Sym == null)
-                    {
-                        continue;
-                    }
-                    n = asNode(ft.Nname);
-                    n.Type = ft.Type;
-                    declare(n, PPARAMOUT);
+                    f = __f;
+                    funcarg2(_addr_f, PPARAMOUT);
                 }
 
-                ft = ft__prev1;
+                f = f__prev1;
             }
-
         }
 
-        private static slice<ref Node> funcstack = default; // stack of previous values of Curfn
-        private static int funcdepth = default; // len(funcstack) during parsing, but then forced to be the same later during compilation
-
-        // start the function.
-        // called before funcargs; undone at end of funcbody.
-        private static void funcstart(ref Node n)
+        private static void funcarg2(ptr<types.Field> _addr_f, Class ctxt)
         {
-            types.Markdcl();
-            funcstack = append(funcstack, Curfn);
-            funcdepth++;
-            Curfn = n;
+            ref types.Field f = ref _addr_f.val;
+
+            if (f.Sym == null)
+            {
+                return ;
+            }
+
+            var n = newnamel(f.Pos, f.Sym);
+            f.Nname = asTypesNode(n);
+            n.Type = f.Type;
+            n.SetIsDDD(f.IsDDD());
+            declare(_addr_n, ctxt);
+
         }
+
+        private static slice<ptr<Node>> funcstack = default; // stack of previous values of Curfn
 
         // finish the body.
         // called in auto-declaration context.
@@ -694,24 +759,28 @@ namespace @internal
             {
                 Fatalf("funcbody: unexpected dclcontext %d", dclcontext);
             }
+
             types.Popdcl();
             funcstack = funcstack[..len(funcstack) - 1L];
             Curfn = funcstack[len(funcstack) - 1L];
-            funcdepth--;
-            if (funcdepth == 0L)
+            if (Curfn == null)
             {
                 dclcontext = PEXTERN;
             }
+
         }
 
         // structs, functions, and methods.
         // they don't belong here, but where do they belong?
-        private static void checkembeddedtype(ref types.Type t)
+        private static void checkembeddedtype(ptr<types.Type> _addr_t)
         {
+            ref types.Type t = ref _addr_t.val;
+
             if (t == null)
             {
-                return;
+                return ;
             }
+
             if (t.Sym == null && t.IsPtr())
             {
                 t = t.Elem();
@@ -719,7 +788,9 @@ namespace @internal
                 {
                     yyerror("embedded type cannot be a pointer to interface");
                 }
+
             }
+
             if (t.IsPtr() || t.IsUnsafePtr())
             {
                 yyerror("embedded type cannot be a pointer");
@@ -728,10 +799,13 @@ namespace @internal
             {
                 t.ForwardType().Embedlineno = lineno;
             }
+
         }
 
-        private static ref types.Field structfield(ref Node n)
+        private static ptr<types.Field> structfield(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
             var lno = lineno;
             lineno = n.Pos;
 
@@ -739,29 +813,34 @@ namespace @internal
             {
                 Fatalf("structfield: oops %v\n", n);
             }
-            var f = types.NewField();
-            f.SetIsddd(n.Isddd());
 
-            if (n.Right != null)
+            var f = types.NewField();
+            f.Pos = n.Pos;
+            f.Sym = n.Sym;
+
+            if (n.Left != null)
             {
-                n.Right = typecheck(n.Right, Etype);
-                n.Type = n.Right.Type;
-                if (n.Left != null)
-                {
-                    n.Left.Type = n.Type;
-                }
-                if (n.Embedded())
-                {
-                    checkembeddedtype(n.Type);
-                }
+                n.Left = typecheck(n.Left, ctxType);
+                n.Type = n.Left.Type;
+                n.Left = null;
             }
-            n.Right = null;
 
             f.Type = n.Type;
             if (f.Type == null)
             {
                 f.SetBroke(true);
             }
+
+            if (n.Embedded())
+            {
+                checkembeddedtype(_addr_n.Type);
+                f.Embedded = 1L;
+            }
+            else
+            {
+                f.Embedded = 0L;
+            }
+
             switch (n.Val().U.type())
             {
                 case @string u:
@@ -778,132 +857,113 @@ namespace @internal
 
             }
 
-            if (n.Left != null && n.Left.Op == ONAME)
-            {
-                f.Nname = asTypesNode(n.Left);
-                if (n.Embedded())
-                {
-                    f.Embedded = 1L;
-                }
-                else
-                {
-                    f.Embedded = 0L;
-                }
-                f.Sym = asNode(f.Nname).Sym;
-            }
             lineno = lno;
-            return f;
+            return _addr_f!;
+
         }
 
         // checkdupfields emits errors for duplicately named fields or methods in
         // a list of struct or interface types.
-        private static void checkdupfields(@string what, params ptr<types.Type>[] ts)
+        private static void checkdupfields(@string what, params slice<ptr<types.Field>>[] fss)
         {
-            ts = ts.Clone();
+            fss = fss.Clone();
 
-            var seen = make_map<ref types.Sym, bool>();
-            foreach (var (_, t) in ts)
+            var seen = make_map<ptr<types.Sym>, bool>();
+            foreach (var (_, fs) in fss)
             {
-                foreach (var (_, f) in t.Fields().Slice())
+                foreach (var (_, f) in fs)
                 {
-                    if (f.Sym == null || f.Sym.IsBlank() || asNode(f.Nname) == null)
+                    if (f.Sym == null || f.Sym.IsBlank())
                     {
                         continue;
                     }
+
                     if (seen[f.Sym])
                     {
-                        yyerrorl(asNode(f.Nname).Pos, "duplicate %s %s", what, f.Sym.Name);
+                        yyerrorl(f.Pos, "duplicate %s %s", what, f.Sym.Name);
                         continue;
                     }
+
                     seen[f.Sym] = true;
+
                 }
+
             }
+
         }
 
         // convert a parsed id/type list into
         // a type for struct/interface/arglist
-        private static ref types.Type tostruct(slice<ref Node> l)
+        private static ptr<types.Type> tostruct(slice<ptr<Node>> l)
         {
             var t = types.New(TSTRUCT);
-            tostruct0(t, l);
-            return t;
-        }
 
-        private static void tostruct0(ref types.Type t, slice<ref Node> l)
-        {
-            if (t == null || !t.IsStruct())
-            {
-                Fatalf("struct expected");
-            }
-            var fields = make_slice<ref types.Field>(len(l));
+            var fields = make_slice<ptr<types.Field>>(len(l));
             foreach (var (i, n) in l)
             {
-                var f = structfield(n);
+                var f = structfield(_addr_n);
                 if (f.Broke())
                 {
                     t.SetBroke(true);
                 }
+
                 fields[i] = f;
+
             }
             t.SetFields(fields);
 
-            checkdupfields("field", t);
+            checkdupfields("field", t.FieldSlice());
 
             if (!t.Broke())
             {
                 checkwidth(t);
             }
+
+            return _addr_t!;
+
         }
 
-        private static ref types.Type tofunargs(slice<ref Node> l, types.Funarg funarg)
+        private static ptr<types.Type> tofunargs(slice<ptr<Node>> l, types.Funarg funarg)
         {
             var t = types.New(TSTRUCT);
             t.StructType().Funarg = funarg;
 
-            var fields = make_slice<ref types.Field>(len(l));
+            var fields = make_slice<ptr<types.Field>>(len(l));
             foreach (var (i, n) in l)
             {
-                var f = structfield(n);
-                f.Funarg = funarg; 
-
-                // esc.go needs to find f given a PPARAM to add the tag.
-                if (n.Left != null && n.Left.Class() == PPARAM)
+                var f = structfield(_addr_n);
+                f.SetIsDDD(n.IsDDD());
+                if (n.Right != null)
                 {
-                    n.Left.Name.Param.Field = f;
+                    n.Right.Type = f.Type;
+                    f.Nname = asTypesNode(n.Right);
                 }
+
                 if (f.Broke())
                 {
                     t.SetBroke(true);
                 }
+
                 fields[i] = f;
+
             }
             t.SetFields(fields);
-            return t;
+            return _addr_t!;
+
         }
 
-        private static ref types.Type tofunargsfield(slice<ref types.Field> fields, types.Funarg funarg)
+        private static ptr<types.Type> tofunargsfield(slice<ptr<types.Field>> fields, types.Funarg funarg)
         {
             var t = types.New(TSTRUCT);
             t.StructType().Funarg = funarg;
-
-            foreach (var (_, f) in fields)
-            {
-                f.Funarg = funarg; 
-
-                // esc.go needs to find f given a PPARAM to add the tag.
-                if (asNode(f.Nname) != null && asNode(f.Nname).Class() == PPARAM)
-                {
-                    asNode(f.Nname).Name.Param.Field;
-
-                    f;
-                }
-            }
             t.SetFields(fields);
-            return t;
+            return _addr_t!;
         }
 
-        private static ref types.Field interfacefield(ref Node n)
+        private static ptr<types.Field> interfacefield(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
             var lno = lineno;
             lineno = n.Pos;
 
@@ -911,6 +971,7 @@ namespace @internal
             {
                 Fatalf("interfacefield: oops %v\n", n);
             }
+
             if (n.Val().Ctype() != CTxxx)
             {
                 yyerror("interface method cannot have annotation");
@@ -918,255 +979,257 @@ namespace @internal
 
             // MethodSpec = MethodName Signature | InterfaceTypeName .
             //
-            // If Left != nil, then Left is MethodName and Right is Signature.
-            // Otherwise, Right is InterfaceTypeName.
-            if (n.Right != null)
-            {
-                n.Right = typecheck(n.Right, Etype);
-                n.Type = n.Right.Type;
-                n.Right = null;
-            }
-            var f = types.NewField();
+            // If Sym != nil, then Sym is MethodName and Left is Signature.
+            // Otherwise, Left is InterfaceTypeName.
             if (n.Left != null)
             {
-                f.Nname = asTypesNode(n.Left);
-                f.Sym = asNode(f.Nname).Sym;
+                n.Left = typecheck(n.Left, ctxType);
+                n.Type = n.Left.Type;
+                n.Left = null;
             }
-            else
-            { 
-                // Placeholder ONAME just to hold Pos.
-                // TODO(mdempsky): Add Pos directly to Field instead.
-                f.Nname = asTypesNode(newname(nblank.Sym));
-            }
+
+            var f = types.NewField();
+            f.Pos = n.Pos;
+            f.Sym = n.Sym;
             f.Type = n.Type;
             if (f.Type == null)
             {
                 f.SetBroke(true);
             }
+
             lineno = lno;
-            return f;
+            return _addr_f!;
+
         }
 
-        private static ref types.Type tointerface(slice<ref Node> l)
+        private static ptr<types.Type> tointerface(slice<ptr<Node>> l)
         {
             if (len(l) == 0L)
             {
-                return types.Types[TINTER];
+                return _addr_types.Types[TINTER]!;
             }
-            var t = types.New(TINTER);
-            tointerface0(t, l);
-            return t;
-        }
 
-        private static void tointerface0(ref types.Type t, slice<ref Node> l)
-        {
-            if (t == null || !t.IsInterface())
-            {
-                Fatalf("interface expected");
-            }
-            slice<ref types.Field> fields = default;
+            var t = types.New(TINTER);
+            slice<ptr<types.Field>> fields = default;
             foreach (var (_, n) in l)
             {
-                var f = interfacefield(n);
+                var f = interfacefield(_addr_n);
                 if (f.Broke())
                 {
                     t.SetBroke(true);
                 }
+
                 fields = append(fields, f);
+
             }
             t.SetInterface(fields);
+            return _addr_t!;
+
         }
 
-        private static ref Node fakeRecv()
+        private static ptr<Node> fakeRecv()
         {
-            return anonfield(types.FakeRecvType());
+            return _addr_anonfield(_addr_types.FakeRecvType())!;
         }
 
-        private static ref types.Field fakeRecvField()
+        private static ptr<types.Field> fakeRecvField()
         {
             var f = types.NewField();
             f.Type = types.FakeRecvType();
-            return f;
+            return _addr_f!;
         }
 
         // isifacemethod reports whether (field) m is
         // an interface method. Such methods have the
         // special receiver type types.FakeRecvType().
-        private static bool isifacemethod(ref types.Type f)
+        private static bool isifacemethod(ptr<types.Type> _addr_f)
         {
+            ref types.Type f = ref _addr_f.val;
+
             return f.Recv().Type == types.FakeRecvType();
         }
 
         // turn a parsed function declaration into a type
-        private static ref types.Type functype(ref Node @this, slice<ref Node> @in, slice<ref Node> @out)
+        private static ptr<types.Type> functype(ptr<Node> _addr_@this, slice<ptr<Node>> @in, slice<ptr<Node>> @out)
         {
-            var t = types.New(TFUNC);
-            functype0(t, this, in, out);
-            return t;
-        }
+            ref Node @this = ref _addr_@this.val;
 
-        private static void functype0(ref types.Type t, ref Node @this, slice<ref Node> @in, slice<ref Node> @out)
-        {
-            if (t == null || t.Etype != TFUNC)
-            {
-                Fatalf("function type expected");
-            }
-            slice<ref Node> rcvr = default;
+            var t = types.New(TFUNC);
+
+            slice<ptr<Node>> rcvr = default;
             if (this != null)
             {
-                rcvr = new slice<ref Node>(new ref Node[] { this });
+                rcvr = new slice<ptr<Node>>(new ptr<Node>[] { this });
             }
-            t.FuncType().Receiver = tofunargs(rcvr, types.FunargRcvr);
-            t.FuncType().Results = tofunargs(out, types.FunargResults);
-            t.FuncType().Params = tofunargs(in, types.FunargParams);
 
-            checkdupfields("argument", t.Recvs(), t.Results(), t.Params());
+            t.FuncType().Receiver = tofunargs(rcvr, types.FunargRcvr);
+            t.FuncType().Params = tofunargs(in, types.FunargParams);
+            t.FuncType().Results = tofunargs(out, types.FunargResults);
+
+            checkdupfields("argument", t.Recvs().FieldSlice(), t.Params().FieldSlice(), t.Results().FieldSlice());
 
             if (t.Recvs().Broke() || t.Results().Broke() || t.Params().Broke())
             {
                 t.SetBroke(true);
             }
-            t.FuncType().Outnamed = false;
-            if (len(out) > 0L && out[0L].Left != null && out[0L].Left.Orig != null)
-            {
-                var s = out[0L].Left.Orig.Sym;
-                if (s != null && (s.Name[0L] != '~' || s.Name[1L] != 'r'))
-                { // ~r%d is the name invented for an unnamed result
-                    t.FuncType().Outnamed = true;
-                }
-            }
+
+            t.FuncType().Outnamed = t.NumResults() > 0L && origSym(_addr_t.Results().Field(0L).Sym) != null;
+
+            return _addr_t!;
+
         }
 
-        private static ref types.Type functypefield(ref types.Field @this, slice<ref types.Field> @in, slice<ref types.Field> @out)
+        private static ptr<types.Type> functypefield(ptr<types.Field> _addr_@this, slice<ptr<types.Field>> @in, slice<ptr<types.Field>> @out)
         {
+            ref types.Field @this = ref _addr_@this.val;
+
             var t = types.New(TFUNC);
-            functypefield0(t, this, in, out);
-            return t;
-        }
 
-        private static void functypefield0(ref types.Type t, ref types.Field @this, slice<ref types.Field> @in, slice<ref types.Field> @out)
-        {
-            slice<ref types.Field> rcvr = default;
+            slice<ptr<types.Field>> rcvr = default;
             if (this != null)
             {
-                rcvr = new slice<ref types.Field>(new ref types.Field[] { this });
+                rcvr = new slice<ptr<types.Field>>(new ptr<types.Field>[] { this });
             }
+
             t.FuncType().Receiver = tofunargsfield(rcvr, types.FunargRcvr);
-            t.FuncType().Results = tofunargsfield(out, types.FunargRcvr);
-            t.FuncType().Params = tofunargsfield(in, types.FunargRcvr);
+            t.FuncType().Params = tofunargsfield(in, types.FunargParams);
+            t.FuncType().Results = tofunargsfield(out, types.FunargResults);
 
-            t.FuncType().Outnamed = false;
-            if (len(out) > 0L && asNode(out[0L].Nname) != null && asNode(out[0L].Nname).Orig != null)
-            {
-                var s = asNode(out[0L].Nname).Orig.Sym;
-                if (s != null && (s.Name[0L] != '~' || s.Name[1L] != 'r'))
-                { // ~r%d is the name invented for an unnamed result
-                    t.FuncType().Outnamed = true;
-                }
-            }
+            t.FuncType().Outnamed = t.NumResults() > 0L && origSym(_addr_t.Results().Field(0L).Sym) != null;
+
+            return _addr_t!;
+
         }
 
-        private static ref types.Pkg methodsym_toppkg = default;
-
-        private static ref types.Sym methodsym(ref types.Sym nsym, ref types.Type t0, bool iface)
+        // origSym returns the original symbol written by the user.
+        private static ptr<types.Sym> origSym(ptr<types.Sym> _addr_s)
         {
-            if (t0 == null)
-            {
-                Fatalf("methodsym: nil receiver type");
-            }
-            var t = t0;
-            var s = t.Sym;
-            if (s == null && t.IsPtr())
-            {
-                t = t.Elem();
-                if (t == null)
-                {
-                    Fatalf("methodsym: ptrto nil");
-                }
-                s = t.Sym;
-            } 
+            ref types.Sym s = ref _addr_s.val;
 
-            // if t0 == *t and t0 has a sym,
-            // we want to see *t, not t0, in the method name.
-            if (t != t0 && t0.Sym != null)
+            if (s == null)
             {
-                t0 = types.NewPtr(t);
+                return _addr_null!;
             }
-            @string suffix = "";
-            if (iface)
+
+            if (len(s.Name) > 1L && s.Name[0L] == '~')
             {
-                dowidth(t0);
-                if (t0.Width < int64(Widthptr))
+                switch (s.Name[1L])
                 {
-                    suffix = "·i";
+                    case 'r': // originally an unnamed result
+                        return _addr_null!;
+                        break;
+                    case 'b': // originally the blank identifier _
+                        // TODO(mdempsky): Does s.Pkg matter here?
+                        return _addr_nblank.Sym!;
+                        break;
                 }
+                return _addr_s!;
+
             }
-            ref types.Pkg spkg = default;
-            if (s != null)
-            {
-                spkg = s.Pkg;
+
+            if (strings.HasPrefix(s.Name, ".anon"))
+            { 
+                // originally an unnamed or _ name (see subr.go: structargs)
+                return _addr_null!;
+
             }
-            @string pkgprefix = "";
-            if ((spkg == null || nsym.Pkg != spkg) && !exportname(nsym.Name) && nsym.Pkg.Prefix != "\"\"")
-            {
-                pkgprefix = "." + nsym.Pkg.Prefix;
-            }
-            @string p = default;
-            if (t0.Sym == null && t0.IsPtr())
-            {
-                p = fmt.Sprintf("(%-S)%s.%s%s", t0, pkgprefix, nsym.Name, suffix);
-            }
-            else
-            {
-                p = fmt.Sprintf("%-S%s.%s%s", t0, pkgprefix, nsym.Name, suffix);
-            }
-            if (spkg == null)
-            {
-                if (methodsym_toppkg == null)
-                {
-                    methodsym_toppkg = types.NewPkg("go", "");
-                }
-                spkg = methodsym_toppkg;
-            }
-            return spkg.Lookup(p);
+
+            return _addr_s!;
+
         }
 
-        // methodname is a misnomer because this now returns a Sym, rather
-        // than an ONAME.
-        // TODO(mdempsky): Reconcile with methodsym.
-        private static ref types.Sym methodname(ref types.Sym s, ref types.Type recv)
+        // methodSym returns the method symbol representing a method name
+        // associated with a specific receiver type.
+        //
+        // Method symbols can be used to distinguish the same method appearing
+        // in different method sets. For example, T.M and (*T).M have distinct
+        // method symbols.
+        //
+        // The returned symbol will be marked as a function.
+        private static ptr<types.Sym> methodSym(ptr<types.Type> _addr_recv, ptr<types.Sym> _addr_msym)
         {
-            var star = false;
+            ref types.Type recv = ref _addr_recv.val;
+            ref types.Sym msym = ref _addr_msym.val;
+
+            var sym = methodSymSuffix(_addr_recv, _addr_msym, "");
+            sym.SetFunc(true);
+            return _addr_sym!;
+        }
+
+        // methodSymSuffix is like methodsym, but allows attaching a
+        // distinguisher suffix. To avoid collisions, the suffix must not
+        // start with a letter, number, or period.
+        private static ptr<types.Sym> methodSymSuffix(ptr<types.Type> _addr_recv, ptr<types.Sym> _addr_msym, @string suffix)
+        {
+            ref types.Type recv = ref _addr_recv.val;
+            ref types.Sym msym = ref _addr_msym.val;
+
+            if (msym.IsBlank())
+            {
+                Fatalf("blank method name");
+            }
+
+            var rsym = recv.Sym;
             if (recv.IsPtr())
             {
-                star = true;
-                recv = recv.Elem();
-            }
-            var tsym = recv.Sym;
-            if (tsym == null || s.IsBlank())
+                if (rsym != null)
+                {
+                    Fatalf("declared pointer receiver type: %v", recv);
+                }
+
+                rsym = recv.Elem().Sym;
+
+            } 
+
+            // Find the package the receiver type appeared in. For
+            // anonymous receiver types (i.e., anonymous structs with
+            // embedded fields), use the "go" pseudo-package instead.
+            var rpkg = gopkg;
+            if (rsym != null)
             {
-                return s;
+                rpkg = rsym.Pkg;
             }
-            @string p = default;
-            if (star)
-            {
-                p = fmt.Sprintf("(*%v).%v", tsym.Name, s);
+
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
+            if (recv.IsPtr())
+            { 
+                // The parentheses aren't really necessary, but
+                // they're pretty traditional at this point.
+                fmt.Fprintf(_addr_b, "(%-S)", recv);
+
             }
             else
             {
-                p = fmt.Sprintf("%v.%v", tsym, s);
-            }
-            s = tsym.Pkg.Lookup(p);
+                fmt.Fprintf(_addr_b, "%-S", recv);
+            } 
 
-            return s;
+            // A particular receiver type may have multiple non-exported
+            // methods with the same name. To disambiguate them, include a
+            // package qualifier for names that came from a different
+            // package than the receiver type.
+            if (!types.IsExported(msym.Name) && msym.Pkg != rpkg)
+            {
+                b.WriteString(".");
+                b.WriteString(msym.Pkg.Prefix);
+            }
+
+            b.WriteString(".");
+            b.WriteString(msym.Name);
+            b.WriteString(suffix);
+
+            return _addr_rpkg.LookupBytes(b.Bytes())!;
+
         }
 
         // Add a method, declared as a function.
         // - msym is the method symbol
         // - t is function type (with receiver)
-        // Returns a pointer to the existing or added Field.
-        private static ref types.Field addmethod(ref types.Sym msym, ref types.Type t, bool local, bool nointerface)
+        // Returns a pointer to the existing or added Field; or nil if there's an error.
+        private static ptr<types.Field> addmethod(ptr<types.Sym> _addr_msym, ptr<types.Type> _addr_t, bool local, bool nointerface)
         {
+            ref types.Sym msym = ref _addr_msym.val;
+            ref types.Type t = ref _addr_t.val;
+
             if (msym == null)
             {
                 Fatalf("no method symbol");
@@ -1177,8 +1240,9 @@ namespace @internal
             if (rf == null)
             {
                 yyerror("missing receiver");
-                return null;
+                return _addr_null!;
             }
+
             var mt = methtype(rf.Type);
             if (mt == null || mt.Sym == null)
             {
@@ -1189,13 +1253,16 @@ namespace @internal
                     if (t.Sym != null)
                     {
                         yyerror("invalid receiver type %v (%v is a pointer type)", pa, t);
-                        return null;
+                        return _addr_null!;
                     }
+
                     t = t.Elem();
+
                 }
 
+
                 if (t == null || t.Broke())                 else if (t.Sym == null) 
-                    yyerror("invalid receiver type %v (%v is an unnamed type)", pa, t);
+                    yyerror("invalid receiver type %v (%v is not a defined type)", pa, t);
                 else if (t.IsPtr()) 
                     yyerror("invalid receiver type %v (%v is a pointer type)", pa, t);
                 else if (t.IsInterface()) 
@@ -1204,17 +1271,21 @@ namespace @internal
                     // Should have picked off all the reasons above,
                     // but just in case, fall back to generic error.
                     yyerror("invalid receiver type %v (%L / %L)", pa, pa, t);
-                                return null;
+                                return _addr_null!;
+
             }
+
             if (local && mt.Sym.Pkg != localpkg)
             {
                 yyerror("cannot define new methods on non-local type %v", mt);
-                return null;
+                return _addr_null!;
             }
+
             if (msym.IsBlank())
             {
-                return null;
+                return _addr_null!;
             }
+
             if (mt.IsStruct())
             {
                 {
@@ -1226,14 +1297,16 @@ namespace @internal
                         if (f.Sym == msym)
                         {
                             yyerror("type %v has both field and method named %v", mt, msym);
-                            return null;
+                            f.SetBroke(true);
+                            return _addr_null!;
                         }
+
                     }
 
                     f = f__prev1;
                 }
-
             }
+
             {
                 var f__prev1 = f;
 
@@ -1244,62 +1317,43 @@ namespace @internal
                     {
                         continue;
                     } 
-                    // eqtype only checks that incoming and result parameters match,
+                    // types.Identical only checks that incoming and result parameters match,
                     // so explicitly check that the receiver parameters match too.
-                    if (!eqtype(t, f.Type) || !eqtype(t.Recv().Type, f.Type.Recv().Type))
+                    if (!types.Identical(t, f.Type) || !types.Identical(t.Recv().Type, f.Type.Recv().Type))
                     {
                         yyerror("method redeclared: %v.%v\n\t%v\n\t%v", mt, msym, f.Type, t);
                     }
-                    return f;
+
+                    return _addr_f!;
+
                 }
 
                 f = f__prev1;
             }
 
             var f = types.NewField();
+            f.Pos = lineno;
             f.Sym = msym;
-            f.Nname = asTypesNode(newname(msym));
             f.Type = t;
             f.SetNointerface(nointerface);
 
             mt.Methods().Append(f);
-            return f;
+            return _addr_f!;
+
         }
 
-        private static void funccompile(ref Node n)
+        private static @string funcsymname(ptr<types.Sym> _addr_s)
         {
-            if (n.Type == null)
-            {
-                if (nerrors == 0L)
-                {
-                    Fatalf("funccompile missing type");
-                }
-                return;
-            } 
+            ref types.Sym s = ref _addr_s.val;
 
-            // assign parameter offsets
-            checkwidth(n.Type);
-
-            if (Curfn != null)
-            {
-                Fatalf("funccompile %v inside %v", n.Func.Nname.Sym, Curfn.Func.Nname.Sym);
-            }
-            dclcontext = PAUTO;
-            funcdepth = n.Func.Depth + 1L;
-            compile(n);
-            Curfn = null;
-            funcdepth = 0L;
-            dclcontext = PEXTERN;
-        }
-
-        private static @string funcsymname(ref types.Sym s)
-        {
             return s.Name + "·f";
         }
 
         // funcsym returns s·f.
-        private static ref types.Sym funcsym(ref types.Sym s)
-        { 
+        private static ptr<types.Sym> funcsym(ptr<types.Sym> _addr_s)
+        {
+            ref types.Sym s = ref _addr_s.val;
+ 
             // funcsymsmu here serves to protect not just mutations of funcsyms (below),
             // but also the package lookup of the func sym name,
             // since this function gets called concurrently from the backend.
@@ -1310,7 +1364,7 @@ namespace @internal
             // Note makefuncsym also does package look-up of func sym names,
             // but that it is only called serially, from the front end.
             funcsymsmu.Lock();
-            var (sf, existed) = s.Pkg.LookupOK(funcsymname(s)); 
+            var (sf, existed) = s.Pkg.LookupOK(funcsymname(_addr_s)); 
             // Don't export s·f when compiling for dynamic linking.
             // When dynamically linking, the necessary function
             // symbols will be created explicitly with makefuncsym.
@@ -1319,8 +1373,10 @@ namespace @internal
             {
                 funcsyms = append(funcsyms, s);
             }
+
             funcsymsmu.Unlock();
-            return sf;
+            return _addr_sf!;
+
         }
 
         // makefuncsym ensures that s·f is exported.
@@ -1332,25 +1388,31 @@ namespace @internal
         // but DUPOK doesn't work across shared library boundaries.
         // So instead, when dynamic linking, we only create
         // the s·f stubs in s's package.
-        private static void makefuncsym(ref types.Sym s)
+        private static void makefuncsym(ptr<types.Sym> _addr_s)
         {
+            ref types.Sym s = ref _addr_s.val;
+
             if (!Ctxt.Flag_dynlink)
             {
                 Fatalf("makefuncsym dynlink");
             }
+
             if (s.IsBlank())
             {
-                return;
+                return ;
             }
+
             if (compiling_runtime && (s.Name == "getg" || s.Name == "getclosureptr" || s.Name == "getcallerpc" || s.Name == "getcallersp"))
             { 
                 // runtime.getg(), getclosureptr(), getcallerpc(), and
                 // getcallersp() are not real functions and so do not
                 // get funcsyms.
-                return;
+                return ;
+
             }
+
             {
-                var (_, existed) = s.Pkg.LookupOK(funcsymname(s));
+                var (_, existed) = s.Pkg.LookupOK(funcsymname(_addr_s));
 
                 if (!existed)
                 {
@@ -1358,27 +1420,42 @@ namespace @internal
                 }
 
             }
+
         }
 
-        private static ref Node dclfunc(ref types.Sym sym, ref Node tfn)
+        // disableExport prevents sym from being included in package export
+        // data. To be effectual, it must be called before declare.
+        private static void disableExport(ptr<types.Sym> _addr_sym)
         {
+            ref types.Sym sym = ref _addr_sym.val;
+
+            sym.SetOnExportList(true);
+        }
+
+        private static ptr<Node> dclfunc(ptr<types.Sym> _addr_sym, ptr<Node> _addr_tfn)
+        {
+            ref types.Sym sym = ref _addr_sym.val;
+            ref Node tfn = ref _addr_tfn.val;
+
             if (tfn.Op != OTFUNC)
             {
                 Fatalf("expected OTFUNC node, got %v", tfn);
             }
+
             var fn = nod(ODCLFUNC, null, null);
-            fn.Func.Nname = newname(sym);
+            fn.Func.Nname = newfuncnamel(lineno, _addr_sym);
             fn.Func.Nname.Name.Defn = fn;
             fn.Func.Nname.Name.Param.Ntype = tfn;
-            declare(fn.Func.Nname, PFUNC);
-            funchdr(fn);
-            fn.Func.Nname.Name.Param.Ntype = typecheck(fn.Func.Nname.Name.Param.Ntype, Etype);
-            return fn;
+            declare(_addr_fn.Func.Nname, PFUNC);
+            funchdr(_addr_fn);
+            fn.Func.Nname.Name.Param.Ntype = typecheck(fn.Func.Nname.Name.Param.Ntype, ctxType);
+            return _addr_fn!;
+
         }
 
         private partial struct nowritebarrierrecChecker
         {
-            public map<ref Node, slice<nowritebarrierrecCall>> extraCalls; // curfn is the current function during AST walks.
+            public map<ptr<Node>, slice<nowritebarrierrecCall>> extraCalls; // curfn is the current function during AST walks.
             public ptr<Node> curfn;
         }
 
@@ -1396,9 +1473,9 @@ namespace @internal
 
         // newNowritebarrierrecChecker creates a nowritebarrierrecChecker. It
         // must be called before transformclosure and walk.
-        private static ref nowritebarrierrecChecker newNowritebarrierrecChecker()
+        private static ptr<nowritebarrierrecChecker> newNowritebarrierrecChecker()
         {
-            nowritebarrierrecChecker c = ref new nowritebarrierrecChecker(extraCalls:make(map[*Node][]nowritebarrierrecCall),); 
+            ptr<nowritebarrierrecChecker> c = addr(new nowritebarrierrecChecker(extraCalls:make(map[*Node][]nowritebarrierrecCall),)); 
 
             // Find all systemstack calls and record their targets. In
             // general, flow analysis can't see into systemstack, but it's
@@ -1411,29 +1488,38 @@ namespace @internal
                 {
                     continue;
                 }
+
                 c.curfn = n;
                 inspect(n, c.findExtraCalls);
+
             }
             c.curfn = null;
-            return c;
+            return _addr_c!;
+
         }
 
-        private static bool findExtraCalls(this ref nowritebarrierrecChecker c, ref Node n)
+        private static bool findExtraCalls(this ptr<nowritebarrierrecChecker> _addr_c, ptr<Node> _addr_n)
         {
+            ref nowritebarrierrecChecker c = ref _addr_c.val;
+            ref Node n = ref _addr_n.val;
+
             if (n.Op != OCALLFUNC)
             {
                 return true;
             }
+
             var fn = n.Left;
             if (fn == null || fn.Op != ONAME || fn.Class() != PFUNC || fn.Name.Defn == null)
             {
                 return true;
             }
+
             if (!isRuntimePkg(fn.Sym.Pkg) || fn.Sym.Name != "systemstack")
             {
                 return true;
             }
-            ref Node callee = default;
+
+            ptr<Node> callee;
             var arg = n.List.First();
 
             if (arg.Op == ONAME) 
@@ -1446,8 +1532,10 @@ namespace @internal
             {
                 Fatalf("expected ODCLFUNC node, got %+v", callee);
             }
+
             c.extraCalls[c.curfn] = append(c.extraCalls[c.curfn], new nowritebarrierrecCall(callee,n.Pos));
             return true;
+
         }
 
         // recordCall records a call from ODCLFUNC node "from", to function
@@ -1458,8 +1546,12 @@ namespace @internal
         // because that's all we know after we start SSA.
         //
         // This can be called concurrently for different from Nodes.
-        private static void recordCall(this ref nowritebarrierrecChecker c, ref Node from, ref obj.LSym to, src.XPos pos)
+        private static void recordCall(this ptr<nowritebarrierrecChecker> _addr_c, ptr<Node> _addr_from, ptr<obj.LSym> _addr_to, src.XPos pos)
         {
+            ref nowritebarrierrecChecker c = ref _addr_c.val;
+            ref Node from = ref _addr_from.val;
+            ref obj.LSym to = ref _addr_to.val;
+
             if (from.Op != ODCLFUNC)
             {
                 Fatalf("expected ODCLFUNC, got %v", from);
@@ -1469,25 +1561,29 @@ namespace @internal
             var fn = from.Func;
             if (fn.nwbrCalls == null)
             {
-                fn.nwbrCalls = @new<slice<nowritebarrierrecCallSym>>();
+                fn.nwbrCalls = @new<nowritebarrierrecCallSym>();
             }
-            fn.nwbrCalls.Value = append(fn.nwbrCalls.Value, new nowritebarrierrecCallSym(to,pos));
+
+            fn.nwbrCalls.val = append(fn.nwbrCalls.val, new nowritebarrierrecCallSym(to,pos));
+
         }
 
-        private static void check(this ref nowritebarrierrecChecker c)
-        { 
+        private static void check(this ptr<nowritebarrierrecChecker> _addr_c)
+        {
+            ref nowritebarrierrecChecker c = ref _addr_c.val;
+ 
             // We walk the call graph as late as possible so we can
             // capture all calls created by lowering, but this means we
             // only get to see the obj.LSyms of calls. symToFunc lets us
             // get back to the ODCLFUNCs.
-            var symToFunc = make_map<ref obj.LSym, ref Node>(); 
+            var symToFunc = make_map<ptr<obj.LSym>, ptr<Node>>(); 
             // funcs records the back-edges of the BFS call graph walk. It
             // maps from the ODCLFUNC of each function that must not have
             // write barriers to the call that inhibits them. Functions
             // that are directly marked go:nowritebarrierrec are in this
             // map with a zero-valued nowritebarrierrecCall. This also
             // acts as the set of marks for the BFS of the call graph.
-            var funcs = make_map<ref Node, nowritebarrierrecCall>(); 
+            var funcs = make_map<ptr<Node>, nowritebarrierrecCall>(); 
             // q is the queue of ODCLFUNC Nodes to visit in BFS order.
             nodeQueue q = default;
 
@@ -1497,6 +1593,7 @@ namespace @internal
                 {
                     continue;
                 }
+
                 symToFunc[n.Func.lsym] = n; 
 
                 // Make nowritebarrierrec functions BFS roots.
@@ -1510,24 +1607,28 @@ namespace @internal
                 {
                     yyerrorl(n.Func.WBPos, "write barrier prohibited");
                 }
+
             } 
 
             // Perform a BFS of the call graph from all
             // go:nowritebarrierrec functions.
-            Action<ref Node, ref Node, src.XPos> enqueue = (src, target, pos) =>
+            Action<ptr<Node>, ptr<Node>, src.XPos> enqueue = (src, target, pos) =>
             {
                 if (target.Func.Pragma & Yeswritebarrierrec != 0L)
                 { 
                     // Don't flow into this function.
-                    return;
+                    return ;
+
                 }
+
                 {
                     var (_, ok) = funcs[target];
 
                     if (ok)
                     { 
                         // Already found a path to target.
-                        return;
+                        return ;
+
                     } 
 
                     // Record the path.
@@ -1537,6 +1638,7 @@ namespace @internal
                 // Record the path.
                 funcs[target] = new nowritebarrierrecCall(target:src,lineno:pos);
                 q.pushRight(target);
+
             }
 ;
             while (!q.empty())
@@ -1546,16 +1648,17 @@ namespace @internal
                 // Check fn.
                 if (fn.Func.WBPos.IsKnown())
                 {
-                    bytes.Buffer err = default;
+                    ref bytes.Buffer err = ref heap(out ptr<bytes.Buffer> _addr_err);
                     var call = funcs[fn];
                     while (call.target != null)
                     {
-                        fmt.Fprintf(ref err, "\n\t%v: called by %v", linestr(call.lineno), call.target.Func.Nname);
+                        fmt.Fprintf(_addr_err, "\n\t%v: called by %v", linestr(call.lineno), call.target.Func.Nname);
                         call = funcs[call.target];
                     }
 
                     yyerrorl(fn.Func.WBPos, "write barrier prohibited by caller; %v%s", fn.Func.Nname, err.String());
                     continue;
+
                 } 
 
                 // Enqueue fn's calls.
@@ -1575,10 +1678,11 @@ namespace @internal
                 {
                     continue;
                 }
+
                 {
                     var callee__prev2 = callee;
 
-                    foreach (var (_, __callee) in fn.Func.nwbrCalls.Value)
+                    foreach (var (_, __callee) in fn.Func.nwbrCalls.val)
                     {
                         callee = __callee;
                         var target = symToFunc[callee.target];
@@ -1586,12 +1690,13 @@ namespace @internal
                         {
                             enqueue(fn, target, callee.lineno);
                         }
+
                     }
 
                     callee = callee__prev2;
                 }
-
             }
+
 
         }
     }

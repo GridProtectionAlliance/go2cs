@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package scanner -- go2cs converted at 2020 August 29 08:48:23 UTC
+// package scanner -- go2cs converted at 2020 October 08 04:04:11 UTC
 // import "go/scanner" ==> using scanner = go.go.scanner_package
 // Original source: C:\Go\src\go\scanner\errors.go
 using fmt = go.fmt_package;
@@ -35,28 +35,34 @@ namespace go
                 // don't print "<unknown position>"
                 // TODO(gri) reconsider the semantics of Position.IsValid
                 return e.Pos.String() + ": " + e.Msg;
+
             }
+
             return e.Msg;
+
         }
 
         // ErrorList is a list of *Errors.
         // The zero value for an ErrorList is an empty ErrorList ready to use.
         //
-        public partial struct ErrorList // : slice<ref Error>
+        public partial struct ErrorList // : slice<ptr<Error>>
         {
         }
 
         // Add adds an Error with given position and error message to an ErrorList.
-        private static void Add(this ref ErrorList p, token.Position pos, @string msg)
+        private static void Add(this ptr<ErrorList> _addr_p, token.Position pos, @string msg)
         {
-            p.Value = append(p.Value, ref new Error(pos,msg));
+            ref ErrorList p = ref _addr_p.val;
+
+            p.val = append(p.val, addr(new Error(pos,msg)));
         }
 
         // Reset resets an ErrorList to no errors.
-        private static void Reset(this ref ErrorList p)
+        private static void Reset(this ptr<ErrorList> _addr_p)
         {
-            p.Value = (p.Value)[0L..0L];
+            ref ErrorList p = ref _addr_p.val;
 
+            p.val = (p.val)[0L..0L];
         }
 
         // ErrorList implements the sort Interface.
@@ -68,13 +74,12 @@ namespace go
         {
             p[i] = p[j];
             p[j] = p[i];
-
         }
 
         public static bool Less(this ErrorList p, long i, long j)
         {
-            var e = ref p[i].Pos;
-            var f = ref p[j].Pos; 
+            var e = _addr_p[i].Pos;
+            var f = _addr_p[j].Pos; 
             // Note that it is not sufficient to simply compare file offsets because
             // the offsets do not reflect modified line information (through //line
             // comments).
@@ -82,15 +87,19 @@ namespace go
             {
                 return e.Filename < f.Filename;
             }
+
             if (e.Line != f.Line)
             {
                 return e.Line < f.Line;
             }
+
             if (e.Column != f.Column)
             {
                 return e.Column < f.Column;
             }
+
             return p[i].Msg < p[j].Msg;
+
         }
 
         // Sort sorts an ErrorList. *Error entries are sorted by position,
@@ -103,21 +112,25 @@ namespace go
         }
 
         // RemoveMultiples sorts an ErrorList and removes all but the first error per line.
-        private static void RemoveMultiples(this ref ErrorList p)
+        private static void RemoveMultiples(this ptr<ErrorList> _addr_p)
         {
+            ref ErrorList p = ref _addr_p.val;
+
             sort.Sort(p);
             token.Position last = default; // initial last.Line is != any legal error line
             long i = 0L;
-            foreach (var (_, e) in p.Value)
+            foreach (var (_, e) in p.val)
             {
                 if (e.Pos.Filename != last.Filename || e.Pos.Line != last.Line)
                 {
                     last = e.Pos;
-                    (p.Value)[i] = e;
+                    (p.val)[i] = e;
                     i++;
                 }
+
             }
-            (p.Value) = (p.Value)[0L..i];
+            (p.val) = (p.val)[0L..i];
+
         }
 
         // An ErrorList implements the error interface.
@@ -133,6 +146,7 @@ namespace go
                     break;
             }
             return fmt.Sprintf("%s (and %d more errors)", p[0L], len(p) - 1L);
+
         }
 
         // Err returns an error equivalent to this error list.
@@ -141,9 +155,11 @@ namespace go
         {
             if (len(p) == 0L)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
-            return error.As(p);
+
+            return error.As(p)!;
+
         }
 
         // PrintError is a utility function that prints a list of errors to w,
@@ -161,13 +177,16 @@ namespace go
                     {
                         fmt.Fprintf(w, "%s\n", e);
                     }
+
                 }
                 else if (err != null)
                 {
                     fmt.Fprintf(w, "%s\n", err);
                 }
 
+
             }
+
         }
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 August 29 08:24:00 UTC
+// package syntax -- go2cs converted at 2020 October 08 03:41:07 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\simplify.go
 
@@ -20,11 +20,13 @@ namespace regexp
         // may have been duplicated or removed. For example, the simplified form
         // for /(x){1,2}/ is /(x)(x)?/ but both parentheses capture as $1.
         // The returned regexp may share structure with or be the original.
-        private static ref Regexp Simplify(this ref Regexp re)
+        private static ptr<Regexp> Simplify(this ptr<Regexp> _addr_re)
         {
+            ref Regexp re = ref _addr_re.val;
+
             if (re == null)
             {
-                return null;
+                return _addr_null!;
             }
 
             if (re.Op == OpCapture || re.Op == OpConcat || re.Op == OpAlternate) 
@@ -43,9 +45,10 @@ namespace regexp
                         { 
                             // Start a copy.
                             nre = @new<Regexp>();
-                            nre.Value = re.Value;
+                            nre.val = re.val;
                             nre.Rune = null;
                             nre.Sub = append(nre.Sub0[..0L], re.Sub[..i]);
+
                         }
                         if (nre != re)
                         {
@@ -56,16 +59,16 @@ namespace regexp
                     sub = sub__prev1;
                 }
 
-                return nre;
+                return _addr_nre!;
             else if (re.Op == OpStar || re.Op == OpPlus || re.Op == OpQuest) 
                 var sub = re.Sub[0L].Simplify();
-                return simplify1(re.Op, re.Flags, sub, re);
+                return _addr_simplify1(re.Op, re.Flags, _addr_sub, _addr_re)!;
             else if (re.Op == OpRepeat) 
                 // Special special case: x{0} matches the empty string
                 // and doesn't even need to consider x.
                 if (re.Min == 0L && re.Max == 0L)
                 {
-                    return ref new Regexp(Op:OpEmptyMatch);
+                    return addr(new Regexp(Op:OpEmptyMatch));
                 }
                 sub = re.Sub[0L].Simplify(); 
 
@@ -75,13 +78,13 @@ namespace regexp
                     // Special case: x{0,} is x*.
                     if (re.Min == 0L)
                     {
-                        return simplify1(OpStar, re.Flags, sub, null);
+                        return _addr_simplify1(OpStar, re.Flags, _addr_sub, _addr_null)!;
                     }
                     if (re.Min == 1L)
                     {
-                        return simplify1(OpPlus, re.Flags, sub, null);
+                        return _addr_simplify1(OpPlus, re.Flags, _addr_sub, _addr_null)!;
                     }
-                    nre = ref new Regexp(Op:OpConcat);
+                    nre = addr(new Regexp(Op:OpConcat));
                     nre.Sub = nre.Sub0[..0L];
                     {
                         var i__prev1 = i;
@@ -93,17 +96,18 @@ namespace regexp
 
                         i = i__prev1;
                     }
-                    nre.Sub = append(nre.Sub, simplify1(OpPlus, re.Flags, sub, null));
-                    return nre;
+                    nre.Sub = append(nre.Sub, simplify1(OpPlus, re.Flags, _addr_sub, _addr_null));
+                    return _addr_nre!;
+
                 }
                 if (re.Min == 1L && re.Max == 1L)
                 {
-                    return sub;
+                    return _addr_sub!;
                 }
-                ref Regexp prefix = default;
+                ptr<Regexp> prefix;
                 if (re.Min > 0L)
                 {
-                    prefix = ref new Regexp(Op:OpConcat);
+                    prefix = addr(new Regexp(Op:OpConcat));
                     prefix.Sub = prefix.Sub0[..0L];
                     {
                         var i__prev1 = i;
@@ -115,34 +119,37 @@ namespace regexp
 
                         i = i__prev1;
                     }
+
                 }
                 if (re.Max > re.Min)
                 {
-                    var suffix = simplify1(OpQuest, re.Flags, sub, null);
+                    var suffix = simplify1(OpQuest, re.Flags, _addr_sub, _addr_null);
                     {
                         var i__prev1 = i;
 
                         for (i = re.Min + 1L; i < re.Max; i++)
                         {
-                            Regexp nre2 = ref new Regexp(Op:OpConcat);
+                            ptr<Regexp> nre2 = addr(new Regexp(Op:OpConcat));
                             nre2.Sub = append(nre2.Sub0[..0L], sub, suffix);
-                            suffix = simplify1(OpQuest, re.Flags, nre2, null);
+                            suffix = simplify1(OpQuest, re.Flags, _addr_nre2, _addr_null);
                         }
 
                         i = i__prev1;
                     }
                     if (prefix == null)
                     {
-                        return suffix;
+                        return _addr_suffix!;
                     }
                     prefix.Sub = append(prefix.Sub, suffix);
+
                 }
                 if (prefix != null)
                 {
-                    return prefix;
+                    return _addr_prefix!;
                 }
-                return ref new Regexp(Op:OpNoMatch);
-                        return re;
+                return addr(new Regexp(Op:OpNoMatch));
+                        return _addr_re!;
+
         }
 
         // simplify1 implements Simplify for the unary OpStar,
@@ -160,26 +167,32 @@ namespace regexp
         // for other operators generates these unary expressions.
         // Letting them call simplify1 makes sure the expressions they
         // generate are simple.
-        private static ref Regexp simplify1(Op op, Flags flags, ref Regexp sub, ref Regexp re)
-        { 
+        private static ptr<Regexp> simplify1(Op op, Flags flags, ptr<Regexp> _addr_sub, ptr<Regexp> _addr_re)
+        {
+            ref Regexp sub = ref _addr_sub.val;
+            ref Regexp re = ref _addr_re.val;
+ 
             // Special case: repeat the empty string as much as
             // you want, but it's still the empty string.
             if (sub.Op == OpEmptyMatch)
             {
-                return sub;
+                return _addr_sub!;
             } 
             // The operators are idempotent if the flags match.
             if (op == sub.Op && flags & NonGreedy == sub.Flags & NonGreedy)
             {
-                return sub;
+                return _addr_sub!;
             }
+
             if (re != null && re.Op == op && re.Flags & NonGreedy == flags & NonGreedy && sub == re.Sub[0L])
             {
-                return re;
+                return _addr_re!;
             }
-            re = ref new Regexp(Op:op,Flags:flags);
+
+            re = addr(new Regexp(Op:op,Flags:flags));
             re.Sub = append(re.Sub0[..0L], sub);
-            return re;
+            return _addr_re!;
+
         }
     }
 }}

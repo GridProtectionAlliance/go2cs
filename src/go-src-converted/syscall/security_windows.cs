@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2020 August 29 08:37:37 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:27:01 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\security_windows.go
 using @unsafe = go.@unsafe_package;
@@ -12,25 +12,27 @@ namespace go
 {
     public static partial class syscall_package
     {
-        public static readonly ulong STANDARD_RIGHTS_REQUIRED = 0xf0000UL;
-        public static readonly ulong STANDARD_RIGHTS_READ = 0x20000UL;
-        public static readonly ulong STANDARD_RIGHTS_WRITE = 0x20000UL;
-        public static readonly ulong STANDARD_RIGHTS_EXECUTE = 0x20000UL;
-        public static readonly ulong STANDARD_RIGHTS_ALL = 0x1F0000UL;
+        public static readonly ulong STANDARD_RIGHTS_REQUIRED = (ulong)0xf0000UL;
+        public static readonly ulong STANDARD_RIGHTS_READ = (ulong)0x20000UL;
+        public static readonly ulong STANDARD_RIGHTS_WRITE = (ulong)0x20000UL;
+        public static readonly ulong STANDARD_RIGHTS_EXECUTE = (ulong)0x20000UL;
+        public static readonly ulong STANDARD_RIGHTS_ALL = (ulong)0x1F0000UL;
 
-        public static readonly long NameUnknown = 0L;
-        public static readonly long NameFullyQualifiedDN = 1L;
-        public static readonly long NameSamCompatible = 2L;
-        public static readonly long NameDisplay = 3L;
-        public static readonly long NameUniqueId = 6L;
-        public static readonly long NameCanonical = 7L;
-        public static readonly long NameUserPrincipal = 8L;
-        public static readonly long NameCanonicalEx = 9L;
-        public static readonly long NameServicePrincipal = 10L;
-        public static readonly long NameDnsDomain = 12L;
+
+        public static readonly long NameUnknown = (long)0L;
+        public static readonly long NameFullyQualifiedDN = (long)1L;
+        public static readonly long NameSamCompatible = (long)2L;
+        public static readonly long NameDisplay = (long)3L;
+        public static readonly long NameUniqueId = (long)6L;
+        public static readonly long NameCanonical = (long)7L;
+        public static readonly long NameUserPrincipal = (long)8L;
+        public static readonly long NameCanonicalEx = (long)9L;
+        public static readonly long NameServicePrincipal = (long)10L;
+        public static readonly long NameDnsDomain = (long)12L;
+
 
         // This function returns 1 byte BOOLEAN rather than the 4 byte BOOL.
-        // http://blogs.msdn.com/b/drnick/archive/2007/12/19/windows-and-upn-format-credentials.aspx
+        // https://blogs.msdn.com/b/drnick/archive/2007/12/19/windows-and-upn-format-credentials.aspx
         //sys    TranslateName(accName *uint16, accNameFormat uint32, desiredNameFormat uint32, translatedName *uint16, nSize *uint32) (err error) [failretval&0xff==0] = secur32.TranslateNameW
         //sys    GetUserNameEx(nameFormat uint32, nameBuffre *uint16, nSize *uint32) (err error) [failretval&0xff==0] = secur32.GetUserNameExW
 
@@ -38,38 +40,47 @@ namespace go
         // object name from one format to another.
         public static (@string, error) TranslateAccountName(@string username, uint from, uint to, long initSize)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             var (u, e) = UTF16PtrFromString(username);
             if (e != null)
             {
-                return ("", e);
+                return ("", error.As(e)!);
             }
-            var n = uint32(50L);
+
+            ref var n = ref heap(uint32(50L), out ptr<var> _addr_n);
             while (true)
             {
                 var b = make_slice<ushort>(n);
-                e = TranslateName(u, from, to, ref b[0L], ref n);
+                e = TranslateName(u, from, to, _addr_b[0L], _addr_n);
                 if (e == null)
                 {
-                    return (UTF16ToString(b[..n]), null);
+                    return (UTF16ToString(b[..n]), error.As(null!)!);
                 }
+
                 if (e != ERROR_INSUFFICIENT_BUFFER)
                 {
-                    return ("", e);
+                    return ("", error.As(e)!);
                 }
+
                 if (n <= uint32(len(b)))
                 {
-                    return ("", e);
+                    return ("", error.As(e)!);
                 }
+
             }
+
 
         }
 
  
         // do not reorder
-        public static readonly var NetSetupUnknownStatus = iota;
-        public static readonly var NetSetupUnjoined = 0;
-        public static readonly var NetSetupWorkgroupName = 1;
-        public static readonly var NetSetupDomainName = 2;
+        public static readonly var NetSetupUnknownStatus = (var)iota;
+        public static readonly var NetSetupUnjoined = (var)0;
+        public static readonly var NetSetupWorkgroupName = (var)1;
+        public static readonly var NetSetupDomainName = (var)2;
+
 
         public partial struct UserInfo10
         {
@@ -85,16 +96,17 @@ namespace go
 
  
         // do not reorder
-        public static readonly long SidTypeUser = 1L + iota;
-        public static readonly var SidTypeGroup = 0;
-        public static readonly var SidTypeDomain = 1;
-        public static readonly var SidTypeAlias = 2;
-        public static readonly var SidTypeWellKnownGroup = 3;
-        public static readonly var SidTypeDeletedAccount = 4;
-        public static readonly var SidTypeInvalid = 5;
-        public static readonly var SidTypeUnknown = 6;
-        public static readonly var SidTypeComputer = 7;
-        public static readonly var SidTypeLabel = 8;
+        public static readonly long SidTypeUser = (long)1L + iota;
+        public static readonly var SidTypeGroup = (var)0;
+        public static readonly var SidTypeDomain = (var)1;
+        public static readonly var SidTypeAlias = (var)2;
+        public static readonly var SidTypeWellKnownGroup = (var)3;
+        public static readonly var SidTypeDeletedAccount = (var)4;
+        public static readonly var SidTypeInvalid = (var)5;
+        public static readonly var SidTypeUnknown = (var)6;
+        public static readonly var SidTypeComputer = (var)7;
+        public static readonly var SidTypeLabel = (var)8;
+
 
         //sys    LookupAccountSid(systemName *uint16, sid *SID, name *uint16, nameLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) = advapi32.LookupAccountSidW
         //sys    LookupAccountName(systemName *uint16, accountName *uint16, sid *SID, sidLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) = advapi32.LookupAccountNameW
@@ -111,185 +123,233 @@ namespace go
 
         // StringToSid converts a string-format security identifier
         // sid into a valid, functional sid.
-        public static (ref SID, error) StringToSid(@string s) => func((defer, _, __) =>
+        public static (ptr<SID>, error) StringToSid(@string s) => func((defer, _, __) =>
         {
-            ref SID sid = default;
+            ptr<SID> _p0 = default!;
+            error _p0 = default!;
+
+            ptr<SID> sid;
             var (p, e) = UTF16PtrFromString(s);
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
-            e = ConvertStringSidToSid(p, ref sid);
+
+            e = ConvertStringSidToSid(p, _addr_sid);
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
+
             defer(LocalFree((Handle)(@unsafe.Pointer(sid))));
-            return sid.Copy();
+            return _addr_sid.Copy()!;
+
         });
 
         // LookupSID retrieves a security identifier sid for the account
         // and the name of the domain on which the account was found.
         // System specify target computer to search.
-        public static (ref SID, @string, uint, error) LookupSID(@string system, @string account)
+        public static (ptr<SID>, @string, uint, error) LookupSID(@string system, @string account)
         {
+            ptr<SID> sid = default!;
+            @string domain = default;
+            uint accType = default;
+            error err = default!;
+
             if (len(account) == 0L)
             {
-                return (null, "", 0L, EINVAL);
+                return (_addr_null!, "", 0L, error.As(EINVAL)!);
             }
+
             var (acc, e) = UTF16PtrFromString(account);
             if (e != null)
             {
-                return (null, "", 0L, e);
+                return (_addr_null!, "", 0L, error.As(e)!);
             }
-            ref ushort sys = default;
+
+            ptr<ushort> sys;
             if (len(system) > 0L)
             {
                 sys, e = UTF16PtrFromString(system);
                 if (e != null)
                 {
-                    return (null, "", 0L, e);
+                    return (_addr_null!, "", 0L, error.As(e)!);
                 }
+
             }
-            var n = uint32(50L);
-            var dn = uint32(50L);
+
+            ref var n = ref heap(uint32(50L), out ptr<var> _addr_n);
+            ref var dn = ref heap(uint32(50L), out ptr<var> _addr_dn);
             while (true)
             {
                 var b = make_slice<byte>(n);
                 var db = make_slice<ushort>(dn);
-                sid = (SID.Value)(@unsafe.Pointer(ref b[0L]));
-                e = LookupAccountName(sys, acc, sid, ref n, ref db[0L], ref dn, ref accType);
+                sid = (SID.val)(@unsafe.Pointer(_addr_b[0L]));
+                e = LookupAccountName(sys, acc, sid, _addr_n, _addr_db[0L], _addr_dn, _addr_accType);
                 if (e == null)
                 {
-                    return (sid, UTF16ToString(db), accType, null);
+                    return (_addr_sid!, UTF16ToString(db), accType, error.As(null!)!);
                 }
+
                 if (e != ERROR_INSUFFICIENT_BUFFER)
                 {
-                    return (null, "", 0L, e);
+                    return (_addr_null!, "", 0L, error.As(e)!);
                 }
+
                 if (n <= uint32(len(b)))
                 {
-                    return (null, "", 0L, e);
+                    return (_addr_null!, "", 0L, error.As(e)!);
                 }
+
             }
+
 
         }
 
         // String converts sid to a string format
         // suitable for display, storage, or transmission.
-        private static (@string, error) String(this ref SID _sid) => func(_sid, (ref SID sid, Defer defer, Panic _, Recover __) =>
+        private static (@string, error) String(this ptr<SID> _addr_sid) => func((defer, _, __) =>
         {
-            ref ushort s = default;
-            var e = ConvertSidToStringSid(sid, ref s);
+            @string _p0 = default;
+            error _p0 = default!;
+            ref SID sid = ref _addr_sid.val;
+
+            ptr<ushort> s;
+            var e = ConvertSidToStringSid(sid, _addr_s);
             if (e != null)
             {
-                return ("", e);
+                return ("", error.As(e)!);
             }
+
             defer(LocalFree((Handle)(@unsafe.Pointer(s))));
-            return (UTF16ToString(new ptr<ref array<ushort>>(@unsafe.Pointer(s))[..]), null);
+            return (utf16PtrToString(s), error.As(null!)!);
+
         });
 
         // Len returns the length, in bytes, of a valid security identifier sid.
-        private static long Len(this ref SID sid)
+        private static long Len(this ptr<SID> _addr_sid)
         {
+            ref SID sid = ref _addr_sid.val;
+
             return int(GetLengthSid(sid));
         }
 
         // Copy creates a duplicate of security identifier sid.
-        private static (ref SID, error) Copy(this ref SID sid)
+        private static (ptr<SID>, error) Copy(this ptr<SID> _addr_sid)
         {
+            ptr<SID> _p0 = default!;
+            error _p0 = default!;
+            ref SID sid = ref _addr_sid.val;
+
             var b = make_slice<byte>(sid.Len());
-            var sid2 = (SID.Value)(@unsafe.Pointer(ref b[0L]));
+            var sid2 = (SID.val)(@unsafe.Pointer(_addr_b[0L]));
             var e = CopySid(uint32(len(b)), sid2, sid);
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
-            return (sid2, null);
+
+            return (_addr_sid2!, error.As(null!)!);
+
         }
 
         // LookupAccount retrieves the name of the account for this sid
         // and the name of the first domain on which this sid is found.
         // System specify target computer to search for.
-        private static (@string, @string, uint, error) LookupAccount(this ref SID sid, @string system)
+        private static (@string, @string, uint, error) LookupAccount(this ptr<SID> _addr_sid, @string system)
         {
-            ref ushort sys = default;
+            @string account = default;
+            @string domain = default;
+            uint accType = default;
+            error err = default!;
+            ref SID sid = ref _addr_sid.val;
+
+            ptr<ushort> sys;
             if (len(system) > 0L)
             {
                 sys, err = UTF16PtrFromString(system);
                 if (err != null)
                 {
-                    return ("", "", 0L, err);
+                    return ("", "", 0L, error.As(err)!);
                 }
+
             }
-            var n = uint32(50L);
-            var dn = uint32(50L);
+
+            ref var n = ref heap(uint32(50L), out ptr<var> _addr_n);
+            ref var dn = ref heap(uint32(50L), out ptr<var> _addr_dn);
             while (true)
             {
                 var b = make_slice<ushort>(n);
                 var db = make_slice<ushort>(dn);
-                var e = LookupAccountSid(sys, sid, ref b[0L], ref n, ref db[0L], ref dn, ref accType);
+                var e = LookupAccountSid(sys, sid, _addr_b[0L], _addr_n, _addr_db[0L], _addr_dn, _addr_accType);
                 if (e == null)
                 {
-                    return (UTF16ToString(b), UTF16ToString(db), accType, null);
+                    return (UTF16ToString(b), UTF16ToString(db), accType, error.As(null!)!);
                 }
+
                 if (e != ERROR_INSUFFICIENT_BUFFER)
                 {
-                    return ("", "", 0L, e);
+                    return ("", "", 0L, error.As(e)!);
                 }
+
                 if (n <= uint32(len(b)))
                 {
-                    return ("", "", 0L, e);
+                    return ("", "", 0L, error.As(e)!);
                 }
+
             }
+
 
         }
 
  
         // do not reorder
-        public static readonly long TOKEN_ASSIGN_PRIMARY = 1L << (int)(iota);
-        public static readonly var TOKEN_DUPLICATE = 0;
-        public static readonly var TOKEN_IMPERSONATE = 1;
-        public static readonly var TOKEN_QUERY = 2;
-        public static readonly var TOKEN_QUERY_SOURCE = 3;
-        public static readonly var TOKEN_ADJUST_PRIVILEGES = 4;
-        public static readonly var TOKEN_ADJUST_GROUPS = 5;
-        public static readonly TOKEN_ALL_ACCESS TOKEN_ADJUST_DEFAULT = STANDARD_RIGHTS_REQUIRED | TOKEN_ASSIGN_PRIMARY | TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_QUERY_SOURCE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT;
-        public static readonly var TOKEN_READ = STANDARD_RIGHTS_READ | TOKEN_QUERY;
-        public static readonly var TOKEN_WRITE = STANDARD_RIGHTS_WRITE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT;
-        public static readonly var TOKEN_EXECUTE = STANDARD_RIGHTS_EXECUTE;
+        public static readonly long TOKEN_ASSIGN_PRIMARY = (long)1L << (int)(iota);
+        public static readonly var TOKEN_DUPLICATE = (var)0;
+        public static readonly var TOKEN_IMPERSONATE = (var)1;
+        public static readonly var TOKEN_QUERY = (var)2;
+        public static readonly var TOKEN_QUERY_SOURCE = (var)3;
+        public static readonly var TOKEN_ADJUST_PRIVILEGES = (var)4;
+        public static readonly var TOKEN_ADJUST_GROUPS = (var)5;
+        public static readonly var TOKEN_ADJUST_DEFAULT = (var)6;
+        public static readonly TOKEN_ALL_ACCESS TOKEN_ADJUST_SESSIONID = (TOKEN_ALL_ACCESS)STANDARD_RIGHTS_REQUIRED | TOKEN_ASSIGN_PRIMARY | TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_QUERY_SOURCE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT | TOKEN_ADJUST_SESSIONID;
+        public static readonly var TOKEN_READ = (var)STANDARD_RIGHTS_READ | TOKEN_QUERY;
+        public static readonly var TOKEN_WRITE = (var)STANDARD_RIGHTS_WRITE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT;
+        public static readonly var TOKEN_EXECUTE = (var)STANDARD_RIGHTS_EXECUTE;
+
 
  
         // do not reorder
-        public static readonly long TokenUser = 1L + iota;
-        public static readonly var TokenGroups = 0;
-        public static readonly var TokenPrivileges = 1;
-        public static readonly var TokenOwner = 2;
-        public static readonly var TokenPrimaryGroup = 3;
-        public static readonly var TokenDefaultDacl = 4;
-        public static readonly var TokenSource = 5;
-        public static readonly var TokenType = 6;
-        public static readonly var TokenImpersonationLevel = 7;
-        public static readonly var TokenStatistics = 8;
-        public static readonly var TokenRestrictedSids = 9;
-        public static readonly var TokenSessionId = 10;
-        public static readonly var TokenGroupsAndPrivileges = 11;
-        public static readonly var TokenSessionReference = 12;
-        public static readonly var TokenSandBoxInert = 13;
-        public static readonly var TokenAuditPolicy = 14;
-        public static readonly var TokenOrigin = 15;
-        public static readonly var TokenElevationType = 16;
-        public static readonly var TokenLinkedToken = 17;
-        public static readonly var TokenElevation = 18;
-        public static readonly var TokenHasRestrictions = 19;
-        public static readonly var TokenAccessInformation = 20;
-        public static readonly var TokenVirtualizationAllowed = 21;
-        public static readonly var TokenVirtualizationEnabled = 22;
-        public static readonly var TokenIntegrityLevel = 23;
-        public static readonly var TokenUIAccess = 24;
-        public static readonly var TokenMandatoryPolicy = 25;
-        public static readonly var TokenLogonSid = 26;
-        public static readonly var MaxTokenInfoClass = 27;
+        public static readonly long TokenUser = (long)1L + iota;
+        public static readonly var TokenGroups = (var)0;
+        public static readonly var TokenPrivileges = (var)1;
+        public static readonly var TokenOwner = (var)2;
+        public static readonly var TokenPrimaryGroup = (var)3;
+        public static readonly var TokenDefaultDacl = (var)4;
+        public static readonly var TokenSource = (var)5;
+        public static readonly var TokenType = (var)6;
+        public static readonly var TokenImpersonationLevel = (var)7;
+        public static readonly var TokenStatistics = (var)8;
+        public static readonly var TokenRestrictedSids = (var)9;
+        public static readonly var TokenSessionId = (var)10;
+        public static readonly var TokenGroupsAndPrivileges = (var)11;
+        public static readonly var TokenSessionReference = (var)12;
+        public static readonly var TokenSandBoxInert = (var)13;
+        public static readonly var TokenAuditPolicy = (var)14;
+        public static readonly var TokenOrigin = (var)15;
+        public static readonly var TokenElevationType = (var)16;
+        public static readonly var TokenLinkedToken = (var)17;
+        public static readonly var TokenElevation = (var)18;
+        public static readonly var TokenHasRestrictions = (var)19;
+        public static readonly var TokenAccessInformation = (var)20;
+        public static readonly var TokenVirtualizationAllowed = (var)21;
+        public static readonly var TokenVirtualizationEnabled = (var)22;
+        public static readonly var TokenIntegrityLevel = (var)23;
+        public static readonly var TokenUIAccess = (var)24;
+        public static readonly var TokenMandatoryPolicy = (var)25;
+        public static readonly var TokenLogonSid = (var)26;
+        public static readonly var MaxTokenInfoClass = (var)27;
+
 
         public partial struct SIDAndAttributes
         {
@@ -310,6 +370,7 @@ namespace go
         //sys    OpenProcessToken(h Handle, access uint32, token *Token) (err error) = advapi32.OpenProcessToken
         //sys    GetTokenInformation(t Token, infoClass uint32, info *byte, infoLen uint32, returnedLen *uint32) (err error) = advapi32.GetTokenInformation
         //sys    GetUserProfileDirectory(t Token, dir *uint16, dirLen *uint32) (err error) = userenv.GetUserProfileDirectoryW
+        //sys    getSystemDirectory(dir *uint16, dirLen uint32) (len uint32, err error) = kernel32.GetSystemDirectoryW
 
         // An access token contains the security information for a logon session.
         // The system creates an access token when a user logs on, and every
@@ -326,96 +387,126 @@ namespace go
         // associated with current process.
         public static (Token, error) OpenCurrentProcessToken()
         {
+            Token _p0 = default;
+            error _p0 = default!;
+
             var (p, e) = GetCurrentProcess();
             if (e != null)
             {
-                return (0L, e);
+                return (0L, error.As(e)!);
             }
-            Token t = default;
-            e = OpenProcessToken(p, TOKEN_QUERY, ref t);
+
+            ref Token t = ref heap(out ptr<Token> _addr_t);
+            e = OpenProcessToken(p, TOKEN_QUERY, _addr_t);
             if (e != null)
             {
-                return (0L, e);
+                return (0L, error.As(e)!);
             }
-            return (t, null);
+
+            return (t, error.As(null!)!);
+
         }
 
         // Close releases access to access token.
         public static error Close(this Token t)
         {
-            return error.As(CloseHandle(Handle(t)));
+            return error.As(CloseHandle(Handle(t)))!;
         }
 
         // getInfo retrieves a specified type of information about an access token.
         public static (unsafe.Pointer, error) getInfo(this Token t, uint @class, long initSize)
         {
-            var n = uint32(initSize);
+            unsafe.Pointer _p0 = default;
+            error _p0 = default!;
+
+            ref var n = ref heap(uint32(initSize), out ptr<var> _addr_n);
             while (true)
             {
                 var b = make_slice<byte>(n);
-                var e = GetTokenInformation(t, class, ref b[0L], uint32(len(b)), ref n);
+                var e = GetTokenInformation(t, class, _addr_b[0L], uint32(len(b)), _addr_n);
                 if (e == null)
                 {
-                    return (@unsafe.Pointer(ref b[0L]), null);
+                    return (@unsafe.Pointer(_addr_b[0L]), error.As(null!)!);
                 }
+
                 if (e != ERROR_INSUFFICIENT_BUFFER)
                 {
-                    return (null, e);
+                    return (null, error.As(e)!);
                 }
+
                 if (n <= uint32(len(b)))
                 {
-                    return (null, e);
+                    return (null, error.As(e)!);
                 }
+
             }
+
 
         }
 
         // GetTokenUser retrieves access token t user account information.
-        public static (ref Tokenuser, error) GetTokenUser(this Token t)
+        public static (ptr<Tokenuser>, error) GetTokenUser(this Token t)
         {
+            ptr<Tokenuser> _p0 = default!;
+            error _p0 = default!;
+
             var (i, e) = t.getInfo(TokenUser, 50L);
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
-            return ((Tokenuser.Value)(i), null);
+
+            return (_addr_(Tokenuser.val)(i)!, error.As(null!)!);
+
         }
 
         // GetTokenPrimaryGroup retrieves access token t primary group information.
         // A pointer to a SID structure representing a group that will become
         // the primary group of any objects created by a process using this access token.
-        public static (ref Tokenprimarygroup, error) GetTokenPrimaryGroup(this Token t)
+        public static (ptr<Tokenprimarygroup>, error) GetTokenPrimaryGroup(this Token t)
         {
+            ptr<Tokenprimarygroup> _p0 = default!;
+            error _p0 = default!;
+
             var (i, e) = t.getInfo(TokenPrimaryGroup, 50L);
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
-            return ((Tokenprimarygroup.Value)(i), null);
+
+            return (_addr_(Tokenprimarygroup.val)(i)!, error.As(null!)!);
+
         }
 
         // GetUserProfileDirectory retrieves path to the
         // root directory of the access token t user's profile.
         public static (@string, error) GetUserProfileDirectory(this Token t)
         {
-            var n = uint32(100L);
+            @string _p0 = default;
+            error _p0 = default!;
+
+            ref var n = ref heap(uint32(100L), out ptr<var> _addr_n);
             while (true)
             {
                 var b = make_slice<ushort>(n);
-                var e = GetUserProfileDirectory(t, ref b[0L], ref n);
+                var e = GetUserProfileDirectory(t, _addr_b[0L], _addr_n);
                 if (e == null)
                 {
-                    return (UTF16ToString(b), null);
+                    return (UTF16ToString(b), error.As(null!)!);
                 }
+
                 if (e != ERROR_INSUFFICIENT_BUFFER)
                 {
-                    return ("", e);
+                    return ("", error.As(e)!);
                 }
+
                 if (n <= uint32(len(b)))
                 {
-                    return ("", e);
+                    return ("", error.As(e)!);
                 }
+
             }
+
 
         }
     }

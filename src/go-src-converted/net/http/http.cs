@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2020 August 29 08:33:24 UTC
+//go:generate bundle -o=h2_bundle.go -prefix=http2 -tags=!nethttpomithttp2 golang.org/x/net/http2
+
+// package http -- go2cs converted at 2020 October 08 03:40:13 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\http.go
 using io = go.io_package;
@@ -11,25 +13,38 @@ using strings = go.strings_package;
 using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
 
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace net
 {
     public static partial class http_package
     {
+        // incomparable is a zero-width, non-comparable type. Adding it to a struct
+        // makes that struct also non-comparable, and generally doesn't add
+        // any size (as long as it's first).
+        private partial struct incomparable // : array<Action>
+        {
+        }
+
         // maxInt64 is the effective "infinite" value for the Server and
         // Transport's byte-limiting readers.
-        private static readonly long maxInt64 = 1L << (int)(63L) - 1L;
+        private static readonly long maxInt64 = (long)1L << (int)(63L) - 1L;
 
         // aLongTimeAgo is a non-zero time, far in the past, used for
-        // immediate cancelation of network operations.
+        // immediate cancellation of network operations.
 
 
         // aLongTimeAgo is a non-zero time, far in the past, used for
-        // immediate cancelation of network operations.
+        // immediate cancellation of network operations.
         private static var aLongTimeAgo = time.Unix(1L, 0L);
+
+        // omitBundledHTTP2 is set by omithttp2.go when the nethttpomithttp2
+        // build tag is set. That means h2_bundle.go isn't compiled in and we
+        // shouldn't try to use it.
+        private static bool omitBundledHTTP2 = default;
 
         // TODO(bradfitz): move common stuff here. The other files have accumulated
         // generic http stuff in random places.
@@ -41,8 +56,10 @@ namespace net
             public @string name;
         }
 
-        private static @string String(this ref contextKey k)
+        private static @string String(this ptr<contextKey> _addr_k)
         {
+            ref contextKey k = ref _addr_k.val;
+
             return "net/http context value " + k.name;
         }
 
@@ -61,12 +78,14 @@ namespace net
             {
                 return strings.TrimSuffix(host, ":");
             }
+
             return host;
+
         }
 
         private static bool isNotToken(int r)
         {
-            return !httplex.IsTokenRune(r);
+            return !httpguts.IsTokenRune(r);
         }
 
         private static bool isASCII(@string s)
@@ -77,9 +96,28 @@ namespace net
                 {
                     return false;
                 }
+
             }
 
             return true;
+
+        }
+
+        // stringContainsCTLByte reports whether s contains any ASCII control character.
+        private static bool stringContainsCTLByte(@string s)
+        {
+            for (long i = 0L; i < len(s); i++)
+            {
+                var b = s[i];
+                if (b < ' ' || b == 0x7fUL)
+                {
+                    return true;
+                }
+
+            }
+
+            return false;
+
         }
 
         private static @string hexEscapeNonASCII(@string s)
@@ -98,6 +136,7 @@ namespace net
                     {
                         newLen++;
                     }
+
                 }
 
 
@@ -107,6 +146,7 @@ namespace net
             {
                 return s;
             }
+
             var b = make_slice<byte>(0L, newLen);
             {
                 long i__prev1 = i;
@@ -122,12 +162,14 @@ namespace net
                     {
                         b = append(b, s[i]);
                     }
+
                 }
 
 
                 i = i__prev1;
             }
             return string(b);
+
         }
 
         // NoBody is an io.ReadCloser with no bytes. Read always returns EOF
@@ -142,15 +184,21 @@ namespace net
 
         private static (long, error) Read(this noBody _p0, slice<byte> _p0)
         {
-            return (0L, io.EOF);
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (0L, error.As(io.EOF)!);
         }
         private static error Close(this noBody _p0)
         {
-            return error.As(null);
+            return error.As(null!)!;
         }
         private static (long, error) WriteTo(this noBody _p0, io.Writer _p0)
         {
-            return (0L, null);
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (0L, error.As(null!)!);
         }
 
  
@@ -171,7 +219,7 @@ namespace net
         // https://tools.ietf.org/html/rfc7540#section-8.2.
         public partial interface Pusher
         {
-            error Push(@string target, ref PushOptions opts);
+            error Push(@string target, ptr<PushOptions> opts);
         }
     }
 }}

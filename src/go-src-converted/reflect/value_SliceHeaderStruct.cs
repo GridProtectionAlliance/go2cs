@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:27 UTC
+//     Generated on 2020 October 08 03:25:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using unsafeheader = go.@internal.unsafeheader_package;
 using math = go.math_package;
 using runtime = go.runtime_package;
 using @unsafe = go.@unsafe_package;
@@ -22,44 +23,44 @@ namespace go
     public static partial class reflect_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct sliceHeader
+        public partial struct SliceHeader
         {
             // Constructors
-            public sliceHeader(NilType _)
+            public SliceHeader(NilType _)
             {
                 this.Data = default;
                 this.Len = default;
                 this.Cap = default;
             }
 
-            public sliceHeader(unsafe.Pointer Data = default, long Len = default, long Cap = default)
+            public SliceHeader(System.UIntPtr Data = default, long Len = default, long Cap = default)
             {
                 this.Data = Data;
                 this.Len = Len;
                 this.Cap = Cap;
             }
 
-            // Enable comparisons between nil and sliceHeader struct
+            // Enable comparisons between nil and SliceHeader struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(sliceHeader value, NilType nil) => value.Equals(default(sliceHeader));
+            public static bool operator ==(SliceHeader value, NilType nil) => value.Equals(default(SliceHeader));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(sliceHeader value, NilType nil) => !(value == nil);
+            public static bool operator !=(SliceHeader value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, sliceHeader value) => value == nil;
+            public static bool operator ==(NilType nil, SliceHeader value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, sliceHeader value) => value != nil;
+            public static bool operator !=(NilType nil, SliceHeader value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator sliceHeader(NilType nil) => default(sliceHeader);
+            public static implicit operator SliceHeader(NilType nil) => default(SliceHeader);
         }
 
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private static sliceHeader sliceHeader_cast(dynamic value)
+        public static SliceHeader SliceHeader_cast(dynamic value)
         {
-            return new sliceHeader(value.Data, value.Len, value.Cap);
+            return new SliceHeader(value.Data, value.Len, value.Cap);
         }
     }
 }

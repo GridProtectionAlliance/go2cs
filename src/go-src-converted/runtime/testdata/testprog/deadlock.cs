@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:24 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:34 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\deadlock.go
 using fmt = go.fmt_package;
 using runtime = go.runtime_package;
@@ -28,6 +28,9 @@ namespace go
             register("StackOverflow", StackOverflow);
             register("ThreadExhaustion", ThreadExhaustion);
             register("RecursivePanic", RecursivePanic);
+            register("RecursivePanic2", RecursivePanic2);
+            register("RecursivePanic3", RecursivePanic3);
+            register("RecursivePanic4", RecursivePanic4);
             register("GoexitExit", GoexitExit);
             register("GoNil", GoNil);
             register("MainGoroutineID", MainGoroutineID);
@@ -35,6 +38,8 @@ namespace go
             register("GoexitInPanic", GoexitInPanic);
             register("PanicAfterGoexit", PanicAfterGoexit);
             register("RecoveredPanicAfterGoexit", RecoveredPanicAfterGoexit);
+            register("RecoverBeforePanicAfterGoexit", RecoverBeforePanicAfterGoexit);
+            register("RecoverBeforePanicAfterGoexit2", RecoverBeforePanicAfterGoexit2);
             register("PanicTraceback", PanicTraceback);
             register("GoschedInPanic", GoschedInPanic);
             register("SyscallInPanic", SyscallInPanic);
@@ -63,6 +68,7 @@ namespace go
                 runtime.LockOSThread();
             }());
             time.Sleep(time.Millisecond);
+
         }
 
         public static void GoexitDeadlock()
@@ -73,12 +79,14 @@ namespace go
                 {
                 }
 
+
             }
 ;
 
             go_(() => F());
             go_(() => F());
             runtime.Goexit();
+
         }
 
         public static void StackOverflow()
@@ -92,6 +100,7 @@ namespace go
 ;
             debug.SetMaxStack(1474560L);
             f();
+
         }
 
         public static void ThreadExhaustion()
@@ -106,7 +115,9 @@ namespace go
                     c.Send(0L);
                 }());
                 c.Receive();
+
             }
+
 
         }
 
@@ -132,25 +143,95 @@ namespace go
                             }
 
                         }
+
                     }());
                     panic("bad");
+
                 }(x);
+
             }();
             panic("again");
+
+        });
+
+        // Same as RecursivePanic, but do the first recover and the second panic in
+        // separate defers, and make sure they are executed in the correct order.
+        public static void RecursivePanic2() => func((defer, panic, _) =>
+        {
+            () =>
+            {
+                defer(() =>
+                {
+                    fmt.Println(recover());
+                }());
+                array<byte> x = new array<byte>(8192L);
+                x =>
+                {
+                    defer(() =>
+                    {
+                        panic("second panic");
+                    }());
+                    defer(() =>
+                    {
+                        fmt.Println(recover());
+                    }());
+                    panic("first panic");
+
+                }(x);
+
+            }();
+            panic("third panic");
+
+        });
+
+        // Make sure that the first panic finished as a panic, even though the second
+        // panic was recovered
+        public static void RecursivePanic3() => func((defer, panic, recover) =>
+        {
+            defer(() =>
+            {
+                defer(() =>
+                {
+                    recover();
+                }());
+                panic("second panic");
+
+            }());
+            panic("first panic");
+
+        });
+
+        // Test case where a single defer recovers one panic but starts another panic. If
+        // the second panic is never recovered, then the recovered first panic will still
+        // appear on the panic stack (labeled '[recovered]') and the runtime stack.
+        public static void RecursivePanic4() => func((defer, panic, recover) =>
+        {
+            defer(() =>
+            {
+                recover();
+                panic("second panic");
+            }());
+            panic("first panic");
+
         });
 
         public static void GoexitExit()
         {
+            println("t1");
             go_(() => () =>
             {
                 time.Sleep(time.Millisecond);
             }());
-            long i = 0L;
-            runtime.SetFinalizer(ref i, p =>
+            ref long i = ref heap(0L, out ptr<long> _addr_i);
+            println("t2");
+            runtime.SetFinalizer(_addr_i, p =>
             {
             });
+            println("t3");
             runtime.GC();
+            println("t4");
             runtime.Goexit();
+
         }
 
         public static void GoNil() => func((defer, _, recover) =>
@@ -161,6 +242,7 @@ namespace go
             }());
             Action f = default;
             go_(() => f());
+
         });
 
         public static void MainGoroutineID() => func((_, panic, __) =>
@@ -170,14 +252,15 @@ namespace go
 
         public static void NoHelperGoroutines() => func((_, panic, __) =>
         {
-            long i = 0L;
-            runtime.SetFinalizer(ref i, p =>
+            ref long i = ref heap(0L, out ptr<long> _addr_i);
+            runtime.SetFinalizer(_addr_i, p =>
             {
             });
             time.AfterFunc(time.Hour, () =>
             {
             });
             panic("oops");
+
         });
 
         public static void Breakpoint()
@@ -194,8 +277,10 @@ namespace go
                     runtime.Goexit();
                 }());
                 panic("hello");
+
             }());
             runtime.Goexit();
+
         });
 
         private partial struct errorThatGosched
@@ -236,6 +321,7 @@ namespace go
                 panic("hello");
             }());
             runtime.Goexit();
+
         });
 
         public static void RecoveredPanicAfterGoexit() => func((defer, panic, _) =>
@@ -249,10 +335,80 @@ namespace go
                     {
                         panic("bad recover");
                     }
+
                 }());
+                panic("hello");
+
+            }());
+            runtime.Goexit();
+
+        });
+
+        public static void RecoverBeforePanicAfterGoexit() => func((defer, panic, _) =>
+        { 
+            // 1. defer a function that recovers
+            // 2. defer a function that panics
+            // 3. call goexit
+            // Goexit runs the #2 defer. Its panic
+            // is caught by the #1 defer.  For Goexit, we explicitly
+            // resume execution in the Goexit loop, instead of resuming
+            // execution in the caller (which would make the Goexit disappear!)
+            defer(() =>
+            {
+                var r = recover();
+                if (r == null)
+                {
+                    panic("bad recover");
+                }
+
+            }());
+            defer(() =>
+            {
                 panic("hello");
             }());
             runtime.Goexit();
+
+        });
+
+        public static void RecoverBeforePanicAfterGoexit2() => func((defer, panic, _) =>
+        {
+            for (long i = 0L; i < 2L; i++)
+            {
+                defer(() =>
+                {
+                }());
+
+            } 
+            // 1. defer a function that recovers
+            // 2. defer a function that panics
+            // 3. call goexit
+            // Goexit runs the #2 defer. Its panic
+            // is caught by the #1 defer.  For Goexit, we explicitly
+            // resume execution in the Goexit loop, instead of resuming
+            // execution in the caller (which would make the Goexit disappear!)
+ 
+            // 1. defer a function that recovers
+            // 2. defer a function that panics
+            // 3. call goexit
+            // Goexit runs the #2 defer. Its panic
+            // is caught by the #1 defer.  For Goexit, we explicitly
+            // resume execution in the Goexit loop, instead of resuming
+            // execution in the caller (which would make the Goexit disappear!)
+            defer(() =>
+            {
+                var r = recover();
+                if (r == null)
+                {
+                    panic("bad recover");
+                }
+
+            }());
+            defer(() =>
+            {
+                panic("hello");
+            }());
+            runtime.Goexit();
+
         });
 
         public static void PanicTraceback()
@@ -267,6 +423,7 @@ namespace go
                 panic("panic pt1");
             }());
             pt2();
+
         });
 
         private static void pt2() => func((defer, panic, _) =>
@@ -276,20 +433,23 @@ namespace go
                 panic("panic pt2");
             }());
             panic("hello");
+
         });
 
         private partial struct panicError
         {
         }
 
-        private static @string Error(this ref panicError __p0) => func(__p0, (ref panicError _p0, Defer _, Panic panic, Recover __) =>
+        private static @string Error(this ptr<panicError> _addr__p0) => func((_, panic, __) =>
         {
+            ref panicError _p0 = ref _addr__p0.val;
+
             panic("double error");
         });
 
         public static void PanicLoop() => func((_, panic, __) =>
         {
-            panic(ref new panicError());
+            panic(addr(new panicError()));
         });
     }
 }

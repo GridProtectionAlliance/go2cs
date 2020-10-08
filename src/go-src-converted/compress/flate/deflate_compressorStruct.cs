@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:23:11 UTC
+//     Generated on 2020 October 08 03:30:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -72,7 +72,7 @@ namespace compress
                 this.hashMatch = default;
             }
 
-            public compressor(compressionLevel compressionLevel = default, ref ptr<huffmanBitWriter> w = default, Action<slice<byte>, slice<uint>> bulkHasher = default, Func<ref compressor, slice<byte>, long> fill = default, Action<ref compressor> step = default, bool sync = default, ref ptr<deflateFast> bestSpeed = default, long chainHead = default, array<uint> hashHead = default, array<uint> hashPrev = default, long hashOffset = default, long index = default, slice<byte> window = default, long windowEnd = default, long blockStart = default, bool byteAvailable = default, slice<token> tokens = default, long length = default, long offset = default, uint hash = default, long maxInsertIndex = default, error err = default, array<uint> hashMatch = default)
+            public compressor(compressionLevel compressionLevel = default, ref ptr<huffmanBitWriter> w = default, Action<slice<byte>, slice<uint>> bulkHasher = default, Func<ptr<compressor>, slice<byte>, long> fill = default, Action<ptr<compressor>> step = default, bool sync = default, ref ptr<deflateFast> bestSpeed = default, long chainHead = default, array<uint> hashHead = default, array<uint> hashPrev = default, long hashOffset = default, long index = default, slice<byte> window = default, long windowEnd = default, long blockStart = default, bool byteAvailable = default, slice<token> tokens = default, long length = default, long offset = default, uint hash = default, long maxInsertIndex = default, error err = default, array<uint> hashMatch = default)
             {
                 this.m_compressionLevelRef = new ptr<compressionLevel>(compressionLevel);
                 this.w = w;

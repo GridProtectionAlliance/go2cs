@@ -9,7 +9,7 @@
 // slashes, such as the paths in URLs. This package does not deal with
 // Windows paths with drive letters or backslashes; to manipulate
 // operating system paths, use the path/filepath package.
-// package path -- go2cs converted at 2020 August 29 08:43:28 UTC
+// package path -- go2cs converted at 2020 October 08 03:38:41 UTC
 // import "path" ==> using path = go.path_package
 // Original source: C:\Go\src\path\path.go
 using strings = go.strings_package;
@@ -30,38 +30,52 @@ namespace go
             public long w;
         }
 
-        private static byte index(this ref lazybuf b, long i)
+        private static byte index(this ptr<lazybuf> _addr_b, long i)
         {
+            ref lazybuf b = ref _addr_b.val;
+
             if (b.buf != null)
             {
                 return b.buf[i];
             }
+
             return b.s[i];
+
         }
 
-        private static void append(this ref lazybuf b, byte c)
+        private static void append(this ptr<lazybuf> _addr_b, byte c)
         {
+            ref lazybuf b = ref _addr_b.val;
+
             if (b.buf == null)
             {
                 if (b.w < len(b.s) && b.s[b.w] == c)
                 {
                     b.w++;
-                    return;
+                    return ;
                 }
+
                 b.buf = make_slice<byte>(len(b.s));
                 copy(b.buf, b.s[..b.w]);
+
             }
+
             b.buf[b.w] = c;
             b.w++;
+
         }
 
-        private static @string @string(this ref lazybuf b)
+        private static @string @string(this ptr<lazybuf> _addr_b)
         {
+            ref lazybuf b = ref _addr_b.val;
+
             if (b.buf == null)
             {
                 return b.s[..b.w];
             }
+
             return string(b.buf[..b.w]);
+
         }
 
         // Clean returns the shortest path name equivalent to path
@@ -89,6 +103,7 @@ namespace go
             {
                 return ".";
             }
+
             var rooted = path[0L] == '/';
             var n = len(path); 
 
@@ -105,7 +120,9 @@ namespace go
                 @out.append('/');
                 r = 1L;
                 dotdot = 1L;
+
             }
+
             while (r < n)
             {
 
@@ -132,6 +149,7 @@ namespace go
                         {
                             @out.append('/');
                         }
+
                         @out.append('.');
                         @out.append('.');
                         dotdot = @out.w;
@@ -148,7 +166,8 @@ namespace go
                         @out.append(path[r]);
                         r++;
                     }
-                            } 
+                
+            } 
 
             // Turn empty string into "."
  
@@ -158,7 +177,9 @@ namespace go
             {
                 return ".";
             }
+
             return @out.@string();
+
         }
 
         // Split splits path immediately following the final slash,
@@ -168,13 +189,18 @@ namespace go
         // The returned values have the property that path = dir+file.
         public static (@string, @string) Split(@string path)
         {
+            @string dir = default;
+            @string file = default;
+
             var i = strings.LastIndex(path, "/");
             return (path[..i + 1L], path[i + 1L..]);
         }
 
-        // Join joins any number of path elements into a single path, adding a
-        // separating slash if necessary. The result is Cleaned; in particular,
-        // all empty strings are ignored.
+        // Join joins any number of path elements into a single path,
+        // separating them with slashes. Empty elements are ignored.
+        // The result is Cleaned. However, if the argument list is
+        // empty or all its elements are empty, Join returns
+        // an empty string.
         public static @string Join(params @string[] elem)
         {
             elem = elem.Clone();
@@ -185,8 +211,10 @@ namespace go
                 {
                     return Clean(strings.Join(elem[i..], "/"));
                 }
+
             }
             return "";
+
         }
 
         // Ext returns the file name extension used by path.
@@ -201,9 +229,11 @@ namespace go
                 {
                     return path[i..];
                 }
+
             }
 
             return "";
+
         }
 
         // Base returns the last element of path.
@@ -239,7 +269,9 @@ namespace go
             {
                 return "/";
             }
+
             return path;
+
         }
 
         // IsAbs reports whether the path is absolute.

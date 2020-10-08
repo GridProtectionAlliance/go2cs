@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:58:44 UTC
+//     Generated on 2020 October 08 04:32:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,6 +31,7 @@ namespace go
             // Constructors
             public cfncData(NilType _)
             {
+                this.Size = default;
                 this.Name = default;
                 this.Type_ = default;
                 this.Symbol = default;
@@ -40,8 +41,9 @@ namespace go
                 this.Input = default;
             }
 
-            public cfncData(@string Name = default, @string Type_ = default, @string Symbol = default, @string FNumber = default, @string Number = default, @string Ans = default, @string Input = default)
+            public cfncData(@string Size = default, @string Name = default, @string Type_ = default, @string Symbol = default, @string FNumber = default, @string Number = default, @string Ans = default, @string Input = default)
             {
+                this.Size = Size;
                 this.Name = Name;
                 this.Type_ = Type_;
                 this.Symbol = Symbol;
@@ -71,7 +73,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static cfncData cfncData_cast(dynamic value)
         {
-            return new cfncData(value.Name, value.Type_, value.Symbol, value.FNumber, value.Number, value.Ans, value.Input);
+            return new cfncData(value.Size, value.Name, value.Type_, value.Symbol, value.FNumber, value.Number, value.Ans, value.Input);
         }
     }
 }

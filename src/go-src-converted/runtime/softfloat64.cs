@@ -6,7 +6,7 @@
 // Only referred to (and thus linked in) by arm port
 // and by tests in this directory.
 
-// package runtime -- go2cs converted at 2020 August 29 08:20:49 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:23:39 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\softfloat64.go
 
@@ -16,24 +16,31 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly ulong mantbits64 = 52L;
-        private static readonly ulong expbits64 = 11L;
-        private static readonly long bias64 = -1L << (int)((expbits64 - 1L)) + 1L;
+        private static readonly ulong mantbits64 = (ulong)52L;
+        private static readonly ulong expbits64 = (ulong)11L;
+        private static readonly long bias64 = (long)-1L << (int)((expbits64 - 1L)) + 1L;
 
-        private static readonly ulong nan64 = (1L << (int)(expbits64) - 1L) << (int)(mantbits64) + 1L;
-        private static readonly ulong inf64 = (1L << (int)(expbits64) - 1L) << (int)(mantbits64);
-        private static readonly ulong neg64 = 1L << (int)((expbits64 + mantbits64));
+        private static readonly ulong nan64 = (ulong)(1L << (int)(expbits64) - 1L) << (int)(mantbits64) + 1L << (int)((mantbits64 - 1L)); // quiet NaN, 0 payload
+        private static readonly ulong inf64 = (ulong)(1L << (int)(expbits64) - 1L) << (int)(mantbits64);
+        private static readonly ulong neg64 = (ulong)1L << (int)((expbits64 + mantbits64));
 
-        private static readonly ulong mantbits32 = 23L;
-        private static readonly ulong expbits32 = 8L;
-        private static readonly long bias32 = -1L << (int)((expbits32 - 1L)) + 1L;
+        private static readonly ulong mantbits32 = (ulong)23L;
+        private static readonly ulong expbits32 = (ulong)8L;
+        private static readonly long bias32 = (long)-1L << (int)((expbits32 - 1L)) + 1L;
 
-        private static readonly uint nan32 = (1L << (int)(expbits32) - 1L) << (int)(mantbits32) + 1L;
-        private static readonly uint inf32 = (1L << (int)(expbits32) - 1L) << (int)(mantbits32);
-        private static readonly uint neg32 = 1L << (int)((expbits32 + mantbits32));
+        private static readonly uint nan32 = (uint)(1L << (int)(expbits32) - 1L) << (int)(mantbits32) + 1L << (int)((mantbits32 - 1L)); // quiet NaN, 0 payload
+        private static readonly uint inf32 = (uint)(1L << (int)(expbits32) - 1L) << (int)(mantbits32);
+        private static readonly uint neg32 = (uint)1L << (int)((expbits32 + mantbits32));
+
 
         private static (ulong, ulong, long, bool, bool) funpack64(ulong f)
         {
+            ulong sign = default;
+            ulong mant = default;
+            long exp = default;
+            bool inf = default;
+            bool nan = default;
+
             sign = f & (1L << (int)((mantbits64 + expbits64)));
             mant = f & (1L << (int)(mantbits64) - 1L);
             exp = int(f >> (int)(mantbits64)) & (1L << (int)(expbits64) - 1L);
@@ -44,10 +51,11 @@ namespace go
                     if (mant != 0L)
                     {
                         nan = true;
-                        return;
+                        return ;
                     }
+
                     inf = true;
-                    return;
+                    return ;
                     break;
                 case 0L: 
                     // denormalized
@@ -60,7 +68,9 @@ namespace go
                             exp--;
                         }
 
+
                     }
+
                     break;
                 default: 
                     // add implicit top bit
@@ -68,11 +78,18 @@ namespace go
                     exp += bias64;
                     break;
             }
-            return;
+            return ;
+
         }
 
         private static (uint, uint, long, bool, bool) funpack32(uint f)
         {
+            uint sign = default;
+            uint mant = default;
+            long exp = default;
+            bool inf = default;
+            bool nan = default;
+
             sign = f & (1L << (int)((mantbits32 + expbits32)));
             mant = f & (1L << (int)(mantbits32) - 1L);
             exp = int(f >> (int)(mantbits32)) & (1L << (int)(expbits32) - 1L);
@@ -83,10 +100,11 @@ namespace go
                     if (mant != 0L)
                     {
                         nan = true;
-                        return;
+                        return ;
                     }
+
                     inf = true;
-                    return;
+                    return ;
                     break;
                 case 0L: 
                     // denormalized
@@ -99,7 +117,9 @@ namespace go
                             exp--;
                         }
 
+
                     }
+
                     break;
                 default: 
                     // add implicit top bit
@@ -107,7 +127,8 @@ namespace go
                     exp += bias32;
                     break;
             }
-            return;
+            return ;
+
         }
 
         private static ulong fpack64(ulong sign, ulong mant, long exp, ulong trunc)
@@ -119,6 +140,7 @@ namespace go
             {
                 return sign;
             }
+
             while (mant < 1L << (int)(mantbits64))
             {
                 mant <<= 1L;
@@ -142,14 +164,19 @@ namespace go
                         mant >>= 1L;
                         exp++;
                     }
+
                 }
+
                 mant >>= 1L;
                 exp++;
+
             }
+
             if (exp >= 1L << (int)(expbits64) - 1L + bias64)
             {
                 return sign ^ inf64;
             }
+
             if (exp < bias64 + 1L)
             {
                 if (exp < bias64 - int(mantbits64))
@@ -171,14 +198,18 @@ namespace go
                 {
                     mant++;
                 }
+
                 mant >>= 1L;
                 exp++;
                 if (mant < 1L << (int)(mantbits64))
                 {
                     return sign | mant;
                 }
+
             }
+
             return sign | uint64(exp - bias64) << (int)(mantbits64) | mant & (1L << (int)(mantbits64) - 1L);
+
         }
 
         private static uint fpack32(uint sign, uint mant, long exp, uint trunc)
@@ -190,6 +221,7 @@ namespace go
             {
                 return sign;
             }
+
             while (mant < 1L << (int)(mantbits32))
             {
                 mant <<= 1L;
@@ -213,14 +245,19 @@ namespace go
                         mant >>= 1L;
                         exp++;
                     }
+
                 }
+
                 mant >>= 1L;
                 exp++;
+
             }
+
             if (exp >= 1L << (int)(expbits32) - 1L + bias32)
             {
                 return sign ^ inf32;
             }
+
             if (exp < bias32 + 1L)
             {
                 if (exp < bias32 - int(mantbits32))
@@ -242,14 +279,18 @@ namespace go
                 {
                     mant++;
                 }
+
                 mant >>= 1L;
                 exp++;
                 if (mant < 1L << (int)(mantbits32))
                 {
                     return sign | mant;
                 }
+
             }
+
             return sign | uint32(exp - bias32) << (int)(mantbits32) | mant & (1L << (int)(mantbits32) - 1L);
+
         }
 
         private static ulong fadd64(ulong f, ulong g)
@@ -274,6 +315,7 @@ namespace go
                 {
                     g ^= gs;
                 }
+
                 return g;
             else if (gm == 0L) // f + 0 = f
                 return f;
@@ -287,7 +329,9 @@ namespace go
                 gs = fs;
                 gm = fm;
                 ge = fe;
+
             }
+
             var shift = uint(fe - ge);
             fm <<= 2L;
             gm <<= 2L;
@@ -304,12 +348,16 @@ namespace go
                 {
                     fm--;
                 }
+
             }
+
             if (fm == 0L)
             {
                 fs = 0L;
             }
+
             return fpack64(fs, fm, fe - 2L, trunc);
+
         }
 
         private static ulong fsub64(ulong f, ulong g)
@@ -345,6 +393,7 @@ namespace go
             var trunc = lo & (1L << (int)(shift) - 1L);
             var mant = hi << (int)((64L - shift)) | lo >> (int)(shift);
             return fpack64(fs ^ gs, mant, fe + ge - 1L, trunc);
+
         }
 
         private static ulong fdiv64(ulong f, ulong g)
@@ -373,6 +422,7 @@ namespace go
             var shift = mantbits64 + 2L;
             var (q, r) = divlu(fm >> (int)((64L - shift)), fm << (int)(shift), gm);
             return fpack64(fs ^ gs, q, fe - ge - 2L, r);
+
         }
 
         private static uint f64to32(ulong f)
@@ -382,35 +432,44 @@ namespace go
             {
                 return nan32;
             }
+
             var fs32 = uint32(fs >> (int)(32L));
             if (fi)
             {
                 return fs32 ^ inf32;
             }
-            const var d = mantbits64 - mantbits32 - 1L;
+
+            const var d = (var)mantbits64 - mantbits32 - 1L;
 
             return fpack32(fs32, uint32(fm >> (int)(d)), fe - 1L, uint32(fm & (1L << (int)(d) - 1L)));
+
         }
 
         private static ulong f32to64(uint f)
         {
-            const var d = mantbits64 - mantbits32;
+            const var d = (var)mantbits64 - mantbits32;
 
             var (fs, fm, fe, fi, fn) = funpack32(f);
             if (fn)
             {
                 return nan64;
             }
+
             var fs64 = uint64(fs) << (int)(32L);
             if (fi)
             {
                 return fs64 ^ inf64;
             }
+
             return fpack64(fs64, uint64(fm) << (int)(d), fe, 0L);
+
         }
 
         private static (int, bool) fcmp64(ulong f, ulong g)
         {
+            int cmp = default;
+            bool isnan = default;
+
             var (fs, fm, _, fi, fn) = funpack64(f);
             var (gs, gm, _, gi, gn) = funpack64(g);
 
@@ -433,10 +492,14 @@ namespace go
                 return (+1L, false);
             // f == g
             return (0L, false);
+
         }
 
         private static (long, bool) f64toint(ulong f)
         {
+            long val = default;
+            bool ok = default;
+
             var (fs, fm, fe, fi, fn) = funpack64(f);
 
 
@@ -448,11 +511,14 @@ namespace go
                 if (fs != 0L && fm == 0L)
                 { // f == -2^63
                     return (-1L << (int)(63L), true);
+
                 }
+
                 if (fs != 0L)
                 {
                     return (0L, false);
                 }
+
                 return (0L, false);
                         while (fe > int(mantbits64))
             {
@@ -471,26 +537,35 @@ namespace go
             {
                 val = -val;
             }
+
             return (val, true);
+
         }
 
         private static ulong fintto64(long val)
         {
+            ulong f = default;
+
             var fs = uint64(val) & (1L << (int)(63L));
             var mant = uint64(val);
             if (fs != 0L)
             {
                 mant = -mant;
             }
+
             return fpack64(fs, mant, int(mantbits64), 0L);
+
         }
 
         // 64x64 -> 128 multiply.
         // adapted from hacker's delight.
         private static (ulong, ulong) mullu(ulong u, ulong v)
         {
-            const long s = 32L;
-            const long mask = 1L << (int)(s) - 1L;
+            ulong lo = default;
+            ulong hi = default;
+
+            const long s = (long)32L;
+            const long mask = (long)1L << (int)(s) - 1L;
             var u0 = u & mask;
             var u1 = u >> (int)(s);
             var v0 = v & mask;
@@ -507,7 +582,10 @@ namespace go
         // adapted from hacker's delight
         private static (ulong, ulong) divlu(ulong u1, ulong u0, ulong v)
         {
-            const long b = 1L << (int)(32L);
+            ulong q = default;
+            ulong r = default;
+
+            const long b = (long)1L << (int)(32L);
 
 
 
@@ -544,7 +622,9 @@ again1:
                 {
                     goto again1;
                 }
+
             }
+
             var un21 = un32 * b + un1 - q1 * v;
             var q0 = un21 / vn1;
             rhat = un21 - q0 * vn1;
@@ -559,8 +639,11 @@ again2:
                 {
                     goto again2;
                 }
+
             }
+
             return (q1 * b + q0, (un21 * b + un0 - q0 * v) >> (int)(s));
+
         }
 
         private static uint fadd32(uint x, uint y)
@@ -664,9 +747,11 @@ again2:
             {
                 return uint64(int64(x));
             }
+
             var y = x - float64(1L << (int)(63L));
             var z = uint64(int64(y));
             return z | (1L << (int)(63L));
+
         }
 
         private static ulong f32touint64(float x)
@@ -675,9 +760,11 @@ again2:
             {
                 return uint64(int64(x));
             }
+
             var y = x - float32(1L << (int)(63L));
             var z = uint64(int64(y));
             return z | (1L << (int)(63L));
+
         }
 
         private static double fuint64to64(ulong x)
@@ -692,6 +779,7 @@ again2:
             z = z | y;
             var r = float64(int64(z));
             return r + r;
+
         }
 
         private static float fuint64to32(ulong x)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Stmt, error) PrepareContextByRef(ref T value, context.Context ctx, @string query);
+            private delegate (Stmt, error) PrepareContextByPtr(ptr<T> value, context.Context ctx, @string query);
             private delegate (Stmt, error) PrepareContextByVal(T value, context.Context ctx, @string query);
 
-            private static readonly PrepareContextByRef s_PrepareContextByRef;
+            private static readonly PrepareContextByPtr s_PrepareContextByPtr;
             private static readonly PrepareContextByVal s_PrepareContextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PrepareContextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PrepareContextByPtr is null || !m_target_is_ptr)
                     return s_PrepareContextByVal!(target, ctx, query);
 
-                return s_PrepareContextByRef(ref target, ctx, query);
+                return s_PrepareContextByPtr(m_target_ptr, ctx, query);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static ConnPrepareContext()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PrepareContext");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PrepareContext");
 
                 if (!(extensionMethod is null))
-                    s_PrepareContextByRef = extensionMethod.CreateStaticDelegate(typeof(PrepareContextByRef)) as PrepareContextByRef;
+                    s_PrepareContextByPtr = extensionMethod.CreateStaticDelegate(typeof(PrepareContextByPtr)) as PrepareContextByPtr;
 
-                if (s_PrepareContextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PrepareContext");
+                extensionMethod = targetType.GetExtensionMethod("PrepareContext");
 
-                    if (!(extensionMethod is null))
-                        s_PrepareContextByVal = extensionMethod.CreateStaticDelegate(typeof(PrepareContextByVal)) as PrepareContextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PrepareContextByVal = extensionMethod.CreateStaticDelegate(typeof(PrepareContextByVal)) as PrepareContextByVal;
 
-                if (s_PrepareContextByRef is null && s_PrepareContextByVal is null)
+                if (s_PrepareContextByPtr is null && s_PrepareContextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ConnPrepareContext.PrepareContext method", new Exception("PrepareContext"));
             }
 

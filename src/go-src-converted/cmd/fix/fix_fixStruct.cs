@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:15 UTC
+//     Generated on 2020 October 08 04:33:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,7 +40,7 @@ namespace go
                 this.disabled = default;
             }
 
-            public fix(@string name = default, @string date = default, Func<ref ast.File, bool> f = default, @string desc = default, bool disabled = default)
+            public fix(@string name = default, @string date = default, Func<ptr<ast.File>, bool> f = default, @string desc = default, bool disabled = default)
             {
                 this.name = name;
                 this.date = date;

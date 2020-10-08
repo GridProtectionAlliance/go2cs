@@ -3,11 +3,10 @@
 // license that can be found in the LICENSE file.
 
 // Package get implements the ``go get'' command.
-// package get -- go2cs converted at 2020 August 29 10:01:53 UTC
+// package get -- go2cs converted at 2020 October 08 04:36:51 UTC
 // import "cmd/go/internal/get" ==> using get = go.cmd.go.@internal.get_package
 // Original source: C:\Go\src\cmd\go\internal\get\get.go
 using fmt = go.fmt_package;
-using build = go.go.build_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
@@ -16,6 +15,7 @@ using strings = go.strings_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
+using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
 using web = go.cmd.go.@internal.web_package;
 using work = go.cmd.go.@internal.work_package;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class get_package
     {
-        public static base.Command CmdGet = ref new base.Command(UsageLine:"get [-d] [-f] [-fix] [-insecure] [-t] [-u] [-v] [build flags] [packages]",Short:"download and install packages and dependencies",Long:`
+        public static ptr<base.Command> CmdGet = addr(new base.Command(UsageLine:"go get [-d] [-f] [-t] [-u] [-v] [-fix] [-insecure] [build flags] [packages]",Short:"download and install packages and dependencies",Long:`
 Get downloads the packages named by the import paths, along with their
 dependencies. It then installs the named packages, like 'go install'.
 
@@ -78,27 +78,48 @@ For more about specifying packages, see 'go help packages'.
 For more about how 'go get' finds source code to
 download, see 'go help importpath'.
 
-See also: go build, go install, go clean.
-	`,);
+This text describes the behavior of get when using GOPATH
+to manage source code and dependencies.
+If instead the go command is running in module-aware mode,
+the details of get's flags and effects change, as does 'go help get'.
+See 'go help modules' and 'go help module-get'.
 
-        private static var getD = CmdGet.Flag.Bool("d", false, "");
-        private static var getF = CmdGet.Flag.Bool("f", false, "");
-        private static var getT = CmdGet.Flag.Bool("t", false, "");
-        private static var getU = CmdGet.Flag.Bool("u", false, "");
-        private static var getFix = CmdGet.Flag.Bool("fix", false, "");
-        private static var getInsecure = CmdGet.Flag.Bool("insecure", false, "");
+See also: go build, go install, go clean.
+	`,));
+
+        public static ptr<base.Command> HelpGopathGet = addr(new base.Command(UsageLine:"gopath-get",Short:"legacy GOPATH go get",Long:`
+The 'go get' command changes behavior depending on whether the
+go command is running in module-aware mode or legacy GOPATH mode.
+This help text, accessible as 'go help gopath-get' even in module-aware mode,
+describes 'go get' as it operates in legacy GOPATH mode.
+
+Usage: `+CmdGet.UsageLine+`
+`+CmdGet.Long,));
+
+        private static var getD = CmdGet.Flag.Bool("d", false, "");        private static var getF = CmdGet.Flag.Bool("f", false, "");        private static var getT = CmdGet.Flag.Bool("t", false, "");        private static var getU = CmdGet.Flag.Bool("u", false, "");        private static var getFix = CmdGet.Flag.Bool("fix", false, "");        public static bool Insecure = default;
 
         private static void init()
         {
-            work.AddBuildFlags(CmdGet);
+            work.AddBuildFlags(CmdGet, work.OmitModFlag | work.OmitModCommonFlags);
             CmdGet.Run = runGet; // break init loop
+            CmdGet.Flag.BoolVar(_addr_Insecure, "insecure", Insecure, "");
+
         }
 
-        private static void runGet(ref base.Command cmd, slice<@string> args)
+        private static void runGet(ptr<base.Command> _addr_cmd, slice<@string> args)
         {
+            ref base.Command cmd = ref _addr_cmd.val;
+
+            if (cfg.ModulesEnabled)
+            { 
+                // Should not happen: main.go should install the separate module-enabled get code.
+                @base.Fatalf("go get: modules not implemented");
+
+            }
+
             work.BuildInit();
 
-            if (getF && !getU.Value.Value)
+            if (getF && !getU.val)
             {
                 @base.Fatalf("go get: cannot use -f flag without -u");
             } 
@@ -133,16 +154,16 @@ See also: go build, go install, go clean.
             } 
 
             // Phase 1. Download/update.
-            load.ImportStack stk = default;
+            ref load.ImportStack stk = ref heap(out ptr<load.ImportStack> _addr_stk);
             long mode = 0L;
-            if (getT.Value)
+            if (getT.val)
             {
                 mode |= load.GetTestDeps;
             }
-            args = downloadPaths(args);
-            foreach (var (_, arg) in args)
+
+            foreach (var (_, pkg) in downloadPaths(args))
             {
-                download(arg, null, ref stk, mode);
+                download(pkg, _addr_null, _addr_stk, mode);
             }
             @base.ExitIfErrors(); 
 
@@ -153,26 +174,22 @@ See also: go build, go install, go clean.
             // the information will be recomputed. Instead of keeping
             // track of the reverse dependency information, evict
             // everything.
-            load.ClearPackageCache(); 
+            load.ClearPackageCache();
 
-            // In order to rebuild packages information completely,
-            // we need to clear commands cache. Command packages are
-            // referring to evicted packages from the package cache.
-            // This leads to duplicated loads of the standard packages.
-            load.ClearCmdCache();
-
-            args = load.ImportPaths(args);
-            load.PackagesForBuild(args); 
+            var pkgs = load.PackagesForBuild(args); 
 
             // Phase 3. Install.
-            if (getD.Value)
+            if (getD.val)
             { 
                 // Download only.
                 // Check delayed until now so that importPaths
                 // and packagesForBuild have a chance to print errors.
-                return;
+                return ;
+
             }
-            work.InstallPackages(args, true);
+
+            work.InstallPackages(args, pkgs);
+
         }
 
         // downloadPaths prepares the list of paths to pass to download.
@@ -180,35 +197,57 @@ See also: go build, go install, go clean.
         // for a particular pattern, downloadPaths leaves it in the result list,
         // in the hope that we can figure out the repository from the
         // initial ...-free prefix.
-        private static slice<@string> downloadPaths(slice<@string> args)
+        private static slice<@string> downloadPaths(slice<@string> patterns)
         {
-            args = load.ImportPathsNoDotExpansion(args);
-            slice<@string> @out = default;
-            foreach (var (_, a) in args)
+            foreach (var (_, arg) in patterns)
             {
-                if (strings.Contains(a, "..."))
+                if (strings.Contains(arg, "@"))
                 {
-                    slice<@string> expand = default; 
-                    // Use matchPackagesInFS to avoid printing
-                    // warnings. They will be printed by the
-                    // eventual call to importPaths instead.
-                    if (build.IsLocalImport(a))
+                    @base.Fatalf("go: cannot use path@version syntax in GOPATH mode");
+                    continue;
+                } 
+
+                // Guard against 'go get x.go', a common mistake.
+                // Note that package and module paths may end with '.go', so only print an error
+                // if the argument has no slash or refers to an existing file.
+                if (strings.HasSuffix(arg, ".go"))
+                {
+                    if (!strings.Contains(arg, "/"))
                     {
-                        expand = load.MatchPackagesInFS(a);
-                    }
-                    else
-                    {
-                        expand = load.MatchPackages(a);
-                    }
-                    if (len(expand) > 0L)
-                    {
-                        out = append(out, expand);
+                        @base.Errorf("go get %s: arguments must be package or module paths", arg);
                         continue;
                     }
+
+                    {
+                        var (fi, err) = os.Stat(arg);
+
+                        if (err == null && !fi.IsDir())
+                        {
+                            @base.Errorf("go get: %s exists as a file, but 'go get' requires package arguments", arg);
+                        }
+
+                    }
+
                 }
-                out = append(out, a);
+
             }
-            return out;
+            @base.ExitIfErrors();
+
+            slice<@string> pkgs = default;
+            foreach (var (_, m) in search.ImportPathsQuiet(patterns))
+            {
+                if (len(m.Pkgs) == 0L && strings.Contains(m.Pattern(), "..."))
+                {
+                    pkgs = append(pkgs, m.Pattern());
+                }
+                else
+                {
+                    pkgs = append(pkgs, m.Pkgs);
+                }
+
+            }
+            return pkgs;
+
         }
 
         // downloadCache records the import paths we have already
@@ -225,21 +264,30 @@ See also: go build, go install, go clean.
         private static map downloadRootCache = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{};
 
         // download runs the download half of the get command
-        // for the package named by the argument.
-        private static void download(@string arg, ref load.Package _parent, ref load.ImportStack _stk, long mode) => func(_parent, _stk, (ref load.Package parent, ref load.ImportStack stk, Defer _, Panic panic, Recover __) =>
+        // for the package or pattern named by the argument.
+        private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<load.ImportStack> _addr_stk, long mode) => func((_, panic, __) =>
         {
-            if (mode & load.UseVendor != 0L)
+            ref load.Package parent = ref _addr_parent.val;
+            ref load.ImportStack stk = ref _addr_stk.val;
+
+            if (mode & load.ResolveImport != 0L)
             { 
                 // Caller is responsible for expanding vendor paths.
                 panic("internal error: download mode has useVendor set");
+
             }
-            Func<@string, long, ref load.Package> load1 = (path, mode) =>
+
+            Func<@string, long, ptr<load.Package>> load1 = (path, mode) =>
             {
                 if (parent == null)
                 {
-                    return load.LoadPackage(path, stk);
+                    long mode = 0L; // don't do module or vendor resolution
+                    return load.LoadImport(path, @base.Cwd, null, stk, null, mode);
+
                 }
-                return load.LoadImport(path, parent.Dir, parent, stk, null, mode);
+
+                return load.LoadImport(path, parent.Dir, parent, stk, null, mode | load.ResolveModule);
+
             }
 ;
 
@@ -247,7 +295,7 @@ See also: go build, go install, go clean.
             if (p.Error != null && p.Error.Hard)
             {
                 @base.Errorf("%s", p.Error);
-                return;
+                return ;
             } 
 
             // loadPackage inferred the canonical ImportPath from arg.
@@ -263,7 +311,7 @@ See also: go build, go install, go clean.
             // There's nothing to do if this is a package in the standard library.
             if (p.Standard)
             {
-                return;
+                return ;
             } 
 
             // Only process each package once.
@@ -271,26 +319,28 @@ See also: go build, go install, go clean.
             // in which case we want to process it again.)
             if (downloadCache[arg] && mode & load.GetTestDeps == 0L)
             {
-                return;
+                return ;
             }
+
             downloadCache[arg] = true;
 
-            ref load.Package pkgs = new slice<ref load.Package>(new ref load.Package[] { p });
-            var wildcardOkay = len(stk.Value) == 0L;
+            ptr<load.Package> pkgs = new slice<ptr<load.Package>>(new ptr<load.Package>[] { p });
+            var wildcardOkay = len(stk) == 0L;
             var isWildcard = false; 
 
             // Download if the package is missing, or update if we're using -u.
-            if (p.Dir == "" || getU.Value)
+            if (p.Dir == "" || getU.val)
             { 
                 // The actual download.
                 stk.Push(arg);
-                var err = downloadPackage(p);
+                var err = downloadPackage(_addr_p);
                 if (err != null)
                 {
-                    @base.Errorf("%s", ref new load.PackageError(ImportStack:stk.Copy(),Err:err.Error()));
+                    @base.Errorf("%s", addr(new load.PackageError(ImportStack:stk.Copy(),Err:err)));
                     stk.Pop();
-                    return;
+                    return ;
                 }
+
                 stk.Pop();
 
                 @string args = new slice<@string>(new @string[] { arg }); 
@@ -299,15 +349,32 @@ See also: go build, go install, go clean.
                 // for p has been replaced in the package cache.
                 if (wildcardOkay && strings.Contains(arg, "..."))
                 {
-                    if (build.IsLocalImport(arg))
+                    var match = search.NewMatch(arg);
+                    if (match.IsLocal())
                     {
-                        args = load.MatchPackagesInFS(arg);
+                        match.MatchDirs();
+                        args = match.Dirs;
                     }
                     else
                     {
-                        args = load.MatchPackages(arg);
+                        match.MatchPackages();
+                        args = match.Pkgs;
                     }
+
+                    {
+                        var err__prev1 = err;
+
+                        foreach (var (_, __err) in match.Errs)
+                        {
+                            err = __err;
+                            @base.Errorf("%s", err);
+                        }
+
+                        err = err__prev1;
+                    }
+
                     isWildcard = true;
+
                 } 
 
                 // Clear all relevant package cache entries before
@@ -326,8 +393,11 @@ See also: go build, go install, go clean.
                         @base.Errorf("%s", p.Error);
                         continue;
                     }
+
                     pkgs = append(pkgs, p);
+
                 }
+
             } 
 
             // Process package, which might now be multiple packages
@@ -338,24 +408,27 @@ See also: go build, go install, go clean.
                 foreach (var (_, __p) in pkgs)
                 {
                     p = __p;
-                    if (getFix.Value)
+                    if (getFix.val)
                     {
                         var files = @base.RelPaths(p.InternalAllGoFiles());
                         @base.Run(cfg.BuildToolexec, str.StringList(@base.Tool("fix"), files)); 
 
                         // The imports might have changed, so reload again.
-                        p = load.ReloadPackage(arg, stk);
+                        p = load.ReloadPackageNoFlags(arg, stk);
                         if (p.Error != null)
                         {
                             @base.Errorf("%s", p.Error);
-                            return;
+                            return ;
                         }
+
                     }
+
                     if (isWildcard)
                     { 
                         // Report both the real package and the
                         // wildcard in any error message.
                         stk.Push(p.ImportPath);
+
                     } 
 
                     // Process dependencies, now that we know what they are.
@@ -366,7 +439,9 @@ See also: go build, go install, go clean.
                         // (But don't get test dependencies for test dependencies:
                         // we always pass mode 0 to the recursive calls below.)
                         imports = str.StringList(imports, p.TestImports, p.XTestImports);
+
                     }
+
                     foreach (var (i, path) in imports)
                     {
                         if (path == "C")
@@ -381,87 +456,140 @@ See also: go build, go install, go clean.
                         {
                             orig = p.Internal.Build.Imports[i];
                         }
+
                         {
                             var (j, ok) = load.FindVendor(orig);
 
                             if (ok)
                             {
                                 stk.Push(path);
-                                err = ref new load.PackageError(ImportStack:stk.Copy(),Err:"must be imported as "+path[j+len("vendor/"):],);
+                                err = addr(new load.PackageError(ImportStack:stk.Copy(),Err:load.ImportErrorf(path,"%s must be imported as %s",path,path[j+len("vendor/"):]),));
                                 stk.Pop();
                                 @base.Errorf("%s", err);
                                 continue;
                             } 
-                            // If this is a test import, apply vendor lookup now.
-                            // We cannot pass useVendor to download, because
+                            // If this is a test import, apply module and vendor lookup now.
+                            // We cannot pass ResolveImport to download, because
                             // download does caching based on the value of path,
                             // so it must be the fully qualified path already.
 
                         } 
-                        // If this is a test import, apply vendor lookup now.
-                        // We cannot pass useVendor to download, because
+                        // If this is a test import, apply module and vendor lookup now.
+                        // We cannot pass ResolveImport to download, because
                         // download does caching based on the value of path,
                         // so it must be the fully qualified path already.
                         if (i >= len(p.Imports))
                         {
-                            path = load.VendoredImportPath(p, path);
+                            path = load.ResolveImportPath(p, path);
                         }
-                        download(path, p, stk, 0L);
+
+                        download(path, _addr_p, _addr_stk, 0L);
+
                     }
                     if (isWildcard)
                     {
                         stk.Pop();
                     }
+
                 }
 
                 p = p__prev1;
             }
-
         });
 
         // downloadPackage runs the create or download command
         // to make the first copy of or update a copy of the given package.
-        private static error downloadPackage(ref load.Package p)
+        private static error downloadPackage(ptr<load.Package> _addr_p)
         {
-            ref vcsCmd vcs = default;            @string repo = default;            @string rootPath = default;
-            error err = default;
+            ref load.Package p = ref _addr_p.val;
 
-            var security = web.Secure;
-            if (getInsecure.Value)
+            ptr<vcsCmd> vcs;            @string repo = default;            @string rootPath = default;
+            error err = default!;            bool blindRepo = default;
+
+            var security = web.SecureOnly;
+            if (Insecure)
             {
                 security = web.Insecure;
+            } 
+
+            // p can be either a real package, or a pseudo-package whose “import path” is
+            // actually a wildcard pattern.
+            // Trim the path at the element containing the first wildcard,
+            // and hope that it applies to the wildcarded parts too.
+            // This makes 'go get rsc.io/pdf/...' work in a fresh GOPATH.
+            var importPrefix = p.ImportPath;
+            {
+                var i__prev1 = i;
+
+                var i = strings.Index(importPrefix, "...");
+
+                if (i >= 0L)
+                {
+                    var slash = strings.LastIndexByte(importPrefix[..i], '/');
+                    if (slash < 0L)
+                    {
+                        return error.As(fmt.Errorf("cannot expand ... in %q", p.ImportPath))!;
+                    }
+
+                    importPrefix = importPrefix[..slash];
+
+                }
+
+                i = i__prev1;
+
             }
+
+            {
+                error err__prev1 = err;
+
+                err = CheckImportPath(importPrefix);
+
+                if (err != null)
+                {
+                    return error.As(fmt.Errorf("%s: invalid import path: %v", p.ImportPath, err))!;
+                }
+
+                err = err__prev1;
+
+            }
+
+
             if (p.Internal.Build.SrcRoot != "")
             { 
                 // Directory exists. Look for checkout along path to src.
                 vcs, rootPath, err = vcsFromDir(p.Dir, p.Internal.Build.SrcRoot);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 repo = "<local>"; // should be unused; make distinctive
 
                 // Double-check where it came from.
-                if (getU && vcs.remoteRepo != null.Value)
+                if (getU && vcs.remoteRepo != null.val)
                 {
                     var dir = filepath.Join(p.Internal.Build.SrcRoot, filepath.FromSlash(rootPath));
                     var (remote, err) = vcs.remoteRepo(vcs, dir);
                     if (err != null)
-                    {
-                        return error.As(err);
+                    { 
+                        // Proceed anyway. The package is present; we likely just don't understand
+                        // the repo configuration (e.g. unusual remote protocol).
+                        blindRepo = true;
+
                     }
+
                     repo = remote;
-                    if (!getF.Value)
+                    if (!getF && err == null.val)
                     {
                         {
                             var rr__prev4 = rr;
                             error err__prev4 = err;
 
-                            var (rr, err) = repoRootForImportPath(p.ImportPath, security);
+                            var (rr, err) = RepoRootForImportPath(importPrefix, IgnoreMod, security);
 
                             if (err == null)
                             {
-                                repo = rr.repo;
+                                repo = rr.Repo;
                                 if (rr.vcs.resolveRepo != null)
                                 {
                                     var (resolved, err) = rr.vcs.resolveRepo(rr.vcs, dir, repo);
@@ -469,50 +597,61 @@ See also: go build, go install, go clean.
                                     {
                                         repo = resolved;
                                     }
+
                                 }
-                                if (remote != repo && rr.isCustom)
+
+                                if (remote != repo && rr.IsCustom)
                                 {
-                                    return error.As(fmt.Errorf("%s is a custom import path for %s, but %s is checked out from %s", rr.root, repo, dir, remote));
+                                    return error.As(fmt.Errorf("%s is a custom import path for %s, but %s is checked out from %s", rr.Root, repo, dir, remote))!;
                                 }
+
                             }
 
                             rr = rr__prev4;
                             err = err__prev4;
 
                         }
+
                     }
+
                 }
+
             }
             else
             { 
                 // Analyze the import path to determine the version control system,
                 // repository, and the import path for the root of the repository.
-                (rr, err) = repoRootForImportPath(p.ImportPath, security);
+                (rr, err) = RepoRootForImportPath(importPrefix, IgnoreMod, security);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 vcs = rr.vcs;
-                repo = rr.repo;
-                rootPath = rr.root;
+                repo = rr.Repo;
+                rootPath = rr.Root;
+
             }
-            if (!vcs.isSecure(repo) && !getInsecure.Value)
+
+            if (!blindRepo && !vcs.isSecure(repo) && !Insecure)
             {
-                return error.As(fmt.Errorf("cannot download, %v uses insecure protocol", repo));
+                return error.As(fmt.Errorf("cannot download, %v uses insecure protocol", repo))!;
             }
+
             if (p.Internal.Build.SrcRoot == "")
             { 
                 // Package not found. Put in first directory of $GOPATH.
                 var list = filepath.SplitList(cfg.BuildContext.GOPATH);
                 if (len(list) == 0L)
                 {
-                    return error.As(fmt.Errorf("cannot download, $GOPATH not set. For more details see: 'go help gopath'"));
+                    return error.As(fmt.Errorf("cannot download, $GOPATH not set. For more details see: 'go help gopath'"))!;
                 } 
                 // Guard against people setting GOPATH=$GOROOT.
                 if (filepath.Clean(list[0L]) == filepath.Clean(cfg.GOROOT))
                 {
-                    return error.As(fmt.Errorf("cannot download, $GOPATH must not be set to $GOROOT. For more details see: 'go help gopath'"));
+                    return error.As(fmt.Errorf("cannot download, $GOPATH must not be set to $GOROOT. For more details see: 'go help gopath'"))!;
                 }
+
                 {
                     error err__prev2 = err;
 
@@ -520,16 +659,19 @@ See also: go build, go install, go clean.
 
                     if (err == null)
                     {
-                        return error.As(fmt.Errorf("cannot download, %s is a GOROOT, not a GOPATH. For more details see: 'go help gopath'", list[0L]));
+                        return error.As(fmt.Errorf("cannot download, %s is a GOROOT, not a GOPATH. For more details see: 'go help gopath'", list[0L]))!;
                     }
 
                     err = err__prev2;
 
                 }
+
                 p.Internal.Build.Root = list[0L];
                 p.Internal.Build.SrcRoot = filepath.Join(list[0L], "src");
                 p.Internal.Build.PkgRoot = filepath.Join(list[0L], "pkg");
+
             }
+
             var root = filepath.Join(p.Internal.Build.SrcRoot, filepath.FromSlash(rootPath));
 
             {
@@ -539,7 +681,7 @@ See also: go build, go install, go clean.
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // If we've considered this repository already, don't do it again.
@@ -551,8 +693,9 @@ See also: go build, go install, go clean.
             // If we've considered this repository already, don't do it again.
             if (downloadRootCache[root])
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             downloadRootCache[root] = true;
 
             if (cfg.BuildV)
@@ -580,49 +723,55 @@ See also: go build, go install, go clean.
 
                         if (err == null)
                         {
-                            return error.As(fmt.Errorf("%s exists but %s does not - stale checkout?", root, meta));
+                            return error.As(fmt.Errorf("%s exists but %s does not - stale checkout?", root, meta))!;
                         }
 
                         err = err__prev2;
 
                     }
 
+
                     (_, err) = os.Stat(p.Internal.Build.Root);
                     var gopathExisted = err == null; 
 
                     // Some version control tools require the parent of the target to exist.
                     var (parent, _) = filepath.Split(root);
-                    err = error.As(os.MkdirAll(parent, 0777L));
+                    err = error.As(os.MkdirAll(parent, 0777L))!;
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                     if (cfg.BuildV && !gopathExisted && p.Internal.Build.Root == cfg.BuildContext.GOPATH)
                     {
                         fmt.Fprintf(os.Stderr, "created GOPATH=%s; see 'go help gopath'\n", p.Internal.Build.Root);
                     }
-                    err = error.As(vcs.create(root, repo));
+
+                    err = error.As(vcs.create(root, repo))!;
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                 }
                 else
                 { 
                     // Metadata directory does exist; download incremental updates.
-                    err = error.As(vcs.download(root));
+                    err = error.As(vcs.download(root))!;
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                 }
 
                 err = err__prev1;
 
             }
+
 
             if (cfg.BuildN)
             { 
@@ -630,25 +779,32 @@ See also: go build, go install, go clean.
                 // and since we're not running commands, no tag will be found.
                 // But avoid printing nothing.
                 fmt.Fprintf(os.Stderr, "# cd %s; %s sync/update\n", root, vcs.cmd);
-                return error.As(null);
+                return error.As(null!)!;
+
             } 
 
             // Select and sync to appropriate version of the repository.
             var (tags, err) = vcs.tags(root);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var vers = runtime.Version();
             {
-                var i = strings.Index(vers, " ");
+                var i__prev1 = i;
+
+                i = strings.Index(vers, " ");
 
                 if (i >= 0L)
                 {
                     vers = vers[..i];
                 }
 
+                i = i__prev1;
+
             }
+
             {
                 error err__prev1 = err;
 
@@ -656,14 +812,16 @@ See also: go build, go install, go clean.
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
 
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // selectTag returns the closest matching tag for a given version.
@@ -676,14 +834,18 @@ See also: go build, go install, go clean.
         // For now, there is only "go1". This matches the docs in go help get.
         private static @string selectTag(@string goVersion, slice<@string> tags)
         {
+            @string match = default;
+
             foreach (var (_, t) in tags)
             {
                 if (t == "go1")
                 {
                     return "go1";
                 }
+
             }
             return "";
+
         }
     }
 }}}}

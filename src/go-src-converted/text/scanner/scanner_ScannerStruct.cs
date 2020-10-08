@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:55 UTC
+//     Generated on 2020 October 08 04:04:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -67,7 +67,7 @@ namespace text
                 this.m_PositionRef = new ptr<Position>(new Position(nil));
             }
 
-            public Scanner(io.Reader src = default, array<byte> srcBuf = default, long srcPos = default, long srcEnd = default, long srcBufOffset = default, long line = default, long column = default, long lastLineLen = default, long lastCharLen = default, bytes.Buffer tokBuf = default, long tokPos = default, long tokEnd = default, int ch = default, Action<ref Scanner, @string> Error = default, long ErrorCount = default, ulong Mode = default, ulong Whitespace = default, Func<int, long, bool> IsIdentRune = default, Position Position = default)
+            public Scanner(io.Reader src = default, array<byte> srcBuf = default, long srcPos = default, long srcEnd = default, long srcBufOffset = default, long line = default, long column = default, long lastLineLen = default, long lastCharLen = default, bytes.Buffer tokBuf = default, long tokPos = default, long tokEnd = default, int ch = default, Action<ptr<Scanner>, @string> Error = default, long ErrorCount = default, ulong Mode = default, ulong Whitespace = default, Func<int, long, bool> IsIdentRune = default, Position Position = default)
             {
                 this.src = src;
                 this.srcBuf = srcBuf;

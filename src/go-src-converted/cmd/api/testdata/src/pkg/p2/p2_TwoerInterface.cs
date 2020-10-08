@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:37 UTC
+//     Generated on 2020 October 08 04:04:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace pkg
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace pkg
                 m_target_is_ptr = true;
             }
 
-            private delegate void PackageTwoMethByRef(ref T value);
+            private delegate void PackageTwoMethByPtr(ptr<T> value);
             private delegate void PackageTwoMethByVal(T value);
 
-            private static readonly PackageTwoMethByRef s_PackageTwoMethByRef;
+            private static readonly PackageTwoMethByPtr s_PackageTwoMethByPtr;
             private static readonly PackageTwoMethByVal s_PackageTwoMethByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,14 +79,15 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PackageTwoMethByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PackageTwoMethByPtr is null || !m_target_is_ptr)
                 {
                     s_PackageTwoMethByVal!(target);
                     return;
                 }
 
-                s_PackageTwoMethByRef(ref target);
+                s_PackageTwoMethByPtr(m_target_ptr);
                 return;
                 
             }
@@ -97,23 +98,20 @@ namespace pkg
             static Twoer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PackageTwoMeth");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PackageTwoMeth");
 
                 if (!(extensionMethod is null))
-                    s_PackageTwoMethByRef = extensionMethod.CreateStaticDelegate(typeof(PackageTwoMethByRef)) as PackageTwoMethByRef;
+                    s_PackageTwoMethByPtr = extensionMethod.CreateStaticDelegate(typeof(PackageTwoMethByPtr)) as PackageTwoMethByPtr;
 
-                if (s_PackageTwoMethByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PackageTwoMeth");
+                extensionMethod = targetType.GetExtensionMethod("PackageTwoMeth");
 
-                    if (!(extensionMethod is null))
-                        s_PackageTwoMethByVal = extensionMethod.CreateStaticDelegate(typeof(PackageTwoMethByVal)) as PackageTwoMethByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PackageTwoMethByVal = extensionMethod.CreateStaticDelegate(typeof(PackageTwoMethByVal)) as PackageTwoMethByVal;
 
-                if (s_PackageTwoMethByRef is null && s_PackageTwoMethByVal is null)
+                if (s_PackageTwoMethByPtr is null && s_PackageTwoMethByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Twoer.PackageTwoMeth method", new Exception("PackageTwoMeth"));
             }
 

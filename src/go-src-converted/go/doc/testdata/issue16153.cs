@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue16153 -- go2cs converted at 2020 August 29 08:47:13 UTC
+// package issue16153 -- go2cs converted at 2020 October 08 04:02:54 UTC
 // import "go/doc.issue16153" ==> using issue16153 = go.go.doc.issue16153_package
 // Original source: C:\Go\src\go\doc\testdata\issue16153.go
 
@@ -14,17 +14,21 @@ namespace go
     public static partial class issue16153_package
     {
         // original test case
-        private static readonly byte x1 = 255L;
-        public static readonly long Y1 = 256L;
+        private static readonly byte x1 = (byte)255L;
+        public static readonly long Y1 = (long)256L;
+
 
         // variations
-        private static readonly byte x2 = 255L;
-        public static readonly var Y2 = 0;
+        private static readonly byte x2 = (byte)255L;
+        public static readonly var Y2 = (var)0;
 
-        public static readonly long X3 = iota;
-        public static readonly long Y3 = 1L;
 
-        public static readonly long X4 = iota;
-        public static readonly var Y4 = 0;
+        public static readonly long X3 = (long)iota;
+        public static readonly long Y3 = (long)1L;
+
+
+        public static readonly long X4 = (long)iota;
+        public static readonly var Y4 = (var)0;
+
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:42 UTC
+//     Generated on 2020 October 08 04:10:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using dwarf = go.cmd.@internal.dwarf_package;
 using obj = go.cmd.@internal.obj_package;
+using hex = go.encoding.hex_package;
 using fmt = go.fmt_package;
+using bits = go.math.bits_package;
+using sort = go.sort_package;
 using strings = go.strings_package;
 using go;
 
@@ -32,17 +36,19 @@ namespace @internal
             public FuncDebug(NilType _)
             {
                 this.Slots = default;
+                this.Vars = default;
                 this.VarSlots = default;
-                this.Blocks = default;
-                this.Registers = default;
+                this.LocationLists = default;
+                this.GetPC = default;
             }
 
-            public FuncDebug(slice<ref LocalSlot> Slots = default, slice<ref LocalSlot> VarSlots = default, slice<ref BlockDebug> Blocks = default, slice<Register> Registers = default)
+            public FuncDebug(slice<LocalSlot> Slots = default, slice<GCNode> Vars = default, slice<slice<SlotID>> VarSlots = default, slice<slice<byte>> LocationLists = default, Func<ID, ID, long> GetPC = default)
             {
                 this.Slots = Slots;
+                this.Vars = Vars;
                 this.VarSlots = VarSlots;
-                this.Blocks = Blocks;
-                this.Registers = Registers;
+                this.LocationLists = LocationLists;
+                this.GetPC = GetPC;
             }
 
             // Enable comparisons between nil and FuncDebug struct
@@ -65,7 +71,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static FuncDebug FuncDebug_cast(dynamic value)
         {
-            return new FuncDebug(value.Slots, value.VarSlots, value.Blocks, value.Registers);
+            return new FuncDebug(value.Slots, value.Vars, value.VarSlots, value.LocationLists, value.GetPC);
         }
     }
 }}}}

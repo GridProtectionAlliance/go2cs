@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:30 UTC
+//     Generated on 2020 October 08 03:40:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {

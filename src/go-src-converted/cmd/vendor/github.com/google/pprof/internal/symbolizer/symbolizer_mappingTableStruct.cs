@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:14 UTC
+//     Generated on 2020 October 08 04:43:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using tls = go.crypto.tls_package;
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using http = go.net.http_package;
@@ -47,7 +46,7 @@ namespace @internal
                 this.segments = default;
             }
 
-            public mappingTable(ref ptr<profile.Profile> prof = default, map<ref profile.Mapping, plugin.ObjFile> segments = default)
+            public mappingTable(ref ptr<profile.Profile> prof = default, map<ptr<profile.Mapping>, plugin.ObjFile> segments = default)
             {
                 this.prof = prof;
                 this.segments = segments;

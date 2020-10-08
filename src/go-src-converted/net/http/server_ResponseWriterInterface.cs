@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:43 UTC
+//     Generated on 2020 October 08 03:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,12 +29,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -70,7 +71,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -84,10 +85,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) HeaderByRef(ref T value);
+            private delegate (long, error) HeaderByPtr(ptr<T> value);
             private delegate (long, error) HeaderByVal(T value);
 
-            private static readonly HeaderByRef s_HeaderByRef;
+            private static readonly HeaderByPtr s_HeaderByPtr;
             private static readonly HeaderByVal s_HeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,17 +97,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_HeaderByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_HeaderByPtr is null || !m_target_is_ptr)
                     return s_HeaderByVal!(target);
 
-                return s_HeaderByRef(ref target);
+                return s_HeaderByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) WriteByRef(ref T value, slice<byte> _p0);
+            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> _p0);
             private delegate (long, error) WriteByVal(T value, slice<byte> _p0);
 
-            private static readonly WriteByRef s_WriteByRef;
+            private static readonly WriteByPtr s_WriteByPtr;
             private static readonly WriteByVal s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -115,17 +117,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, _p0);
 
-                return s_WriteByRef(ref target, _p0);
+                return s_WriteByPtr(m_target_ptr, _p0);
             }
 
-            private delegate (long, error) WriteHeaderByRef(ref T value, long statusCode);
+            private delegate (long, error) WriteHeaderByPtr(ptr<T> value, long statusCode);
             private delegate (long, error) WriteHeaderByVal(T value, long statusCode);
 
-            private static readonly WriteHeaderByRef s_WriteHeaderByRef;
+            private static readonly WriteHeaderByPtr s_WriteHeaderByPtr;
             private static readonly WriteHeaderByVal s_WriteHeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -134,11 +137,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteHeaderByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteHeaderByPtr is null || !m_target_is_ptr)
                     return s_WriteHeaderByVal!(target, statusCode);
 
-                return s_WriteHeaderByRef(ref target, statusCode);
+                return s_WriteHeaderByPtr(m_target_ptr, statusCode);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -147,55 +151,46 @@ namespace net
             static ResponseWriter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Header");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Header");
 
                 if (!(extensionMethod is null))
-                    s_HeaderByRef = extensionMethod.CreateStaticDelegate(typeof(HeaderByRef)) as HeaderByRef;
+                    s_HeaderByPtr = extensionMethod.CreateStaticDelegate(typeof(HeaderByPtr)) as HeaderByPtr;
 
-                if (s_HeaderByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Header");
+                extensionMethod = targetType.GetExtensionMethod("Header");
 
-                    if (!(extensionMethod is null))
-                        s_HeaderByVal = extensionMethod.CreateStaticDelegate(typeof(HeaderByVal)) as HeaderByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_HeaderByVal = extensionMethod.CreateStaticDelegate(typeof(HeaderByVal)) as HeaderByVal;
 
-                if (s_HeaderByRef is null && s_HeaderByVal is null)
+                if (s_HeaderByPtr is null && s_HeaderByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ResponseWriter.Header method", new Exception("Header"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Write");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
                 if (!(extensionMethod is null))
-                    s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
+                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
-                if (s_WriteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Write");
+                extensionMethod = targetType.GetExtensionMethod("Write");
 
-                    if (!(extensionMethod is null))
-                        s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
-                if (s_WriteByRef is null && s_WriteByVal is null)
+                if (s_WriteByPtr is null && s_WriteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ResponseWriter.Write method", new Exception("Write"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteHeader");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteHeader");
 
                 if (!(extensionMethod is null))
-                    s_WriteHeaderByRef = extensionMethod.CreateStaticDelegate(typeof(WriteHeaderByRef)) as WriteHeaderByRef;
+                    s_WriteHeaderByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteHeaderByPtr)) as WriteHeaderByPtr;
 
-                if (s_WriteHeaderByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteHeader");
+                extensionMethod = targetType.GetExtensionMethod("WriteHeader");
 
-                    if (!(extensionMethod is null))
-                        s_WriteHeaderByVal = extensionMethod.CreateStaticDelegate(typeof(WriteHeaderByVal)) as WriteHeaderByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteHeaderByVal = extensionMethod.CreateStaticDelegate(typeof(WriteHeaderByVal)) as WriteHeaderByVal;
 
-                if (s_WriteHeaderByRef is null && s_WriteHeaderByVal is null)
+                if (s_WriteHeaderByPtr is null && s_WriteHeaderByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ResponseWriter.WriteHeader method", new Exception("WriteHeader"));
             }
 

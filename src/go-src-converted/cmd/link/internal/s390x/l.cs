@@ -1,5 +1,5 @@
 // Inferno utils/5l/asm.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/5l/asm.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/5l/asm.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package s390x -- go2cs converted at 2020 August 29 10:02:57 UTC
+// package s390x -- go2cs converted at 2020 October 08 04:37:58 UTC
 // import "cmd/link/internal/s390x" ==> using s390x = go.cmd.link.@internal.s390x_package
 // Original source: C:\Go\src\cmd\link\internal\s390x\l.go
 
@@ -71,12 +71,14 @@ namespace @internal
         // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
         // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         // THE SOFTWARE.
-        private static readonly long maxAlign = 32L; // max data alignment
-        private static readonly long minAlign = 2L; // min data alignment
-        private static readonly long funcAlign = 16L;
+        private static readonly long maxAlign = (long)32L; // max data alignment
+        private static readonly long minAlign = (long)2L; // min data alignment
+        private static readonly long funcAlign = (long)16L;
+
 
         /* Used by ../internal/ld/dwarf.go */
-        private static readonly long dwarfRegSP = 15L;
-        private static readonly long dwarfRegLR = 14L;
+        private static readonly long dwarfRegSP = (long)15L;
+        private static readonly long dwarfRegLR = (long)14L;
+
     }
 }}}}

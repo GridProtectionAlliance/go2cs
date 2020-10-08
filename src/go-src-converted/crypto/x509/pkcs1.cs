@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 August 29 08:31:42 UTC
+// package x509 -- go2cs converted at 2020 October 08 03:36:48 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\pkcs1.go
 using rsa = go.crypto.rsa_package;
@@ -17,7 +17,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        // pkcs1PrivateKey is a structure which mirrors the PKCS#1 ASN.1 for an RSA private key.
+        // pkcs1PrivateKey is a structure which mirrors the PKCS #1 ASN.1 for an RSA private key.
         private partial struct pkcs1PrivateKey
         {
             public long Version;
@@ -43,47 +43,78 @@ namespace crypto
             public ptr<big.Int> Coeff;
         }
 
-        // pkcs1PublicKey reflects the ASN.1 structure of a PKCS#1 public key.
+        // pkcs1PublicKey reflects the ASN.1 structure of a PKCS #1 public key.
         private partial struct pkcs1PublicKey
         {
             public ptr<big.Int> N;
             public long E;
         }
 
-        // ParsePKCS1PrivateKey returns an RSA private key from its ASN.1 PKCS#1 DER encoded form.
-        public static (ref rsa.PrivateKey, error) ParsePKCS1PrivateKey(slice<byte> der)
+        // ParsePKCS1PrivateKey parses an RSA private key in PKCS #1, ASN.1 DER form.
+        //
+        // This kind of key is commonly encoded in PEM blocks of type "RSA PRIVATE KEY".
+        public static (ptr<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der)
         {
-            pkcs1PrivateKey priv = default;
-            var (rest, err) = asn1.Unmarshal(der, ref priv);
+            ptr<rsa.PrivateKey> _p0 = default!;
+            error _p0 = default!;
+
+            ref pkcs1PrivateKey priv = ref heap(out ptr<pkcs1PrivateKey> _addr_priv);
+            var (rest, err) = asn1.Unmarshal(der, _addr_priv);
             if (len(rest) > 0L)
             {
-                return (null, new asn1.SyntaxError(Msg:"trailing data"));
+                return (_addr_null!, error.As(new asn1.SyntaxError(Msg:"trailing data"))!);
             }
+
             if (err != null)
             {
-                return (null, err);
+                {
+                    var (_, err) = asn1.Unmarshal(der, addr(new ecPrivateKey()));
+
+                    if (err == null)
+                    {
+                        return (_addr_null!, error.As(errors.New("x509: failed to parse private key (use ParseECPrivateKey instead for this key format)"))!);
+                    }
+
+                }
+
+                {
+                    (_, err) = asn1.Unmarshal(der, addr(new pkcs8()));
+
+                    if (err == null)
+                    {
+                        return (_addr_null!, error.As(errors.New("x509: failed to parse private key (use ParsePKCS8PrivateKey instead for this key format)"))!);
+                    }
+
+                }
+
+                return (_addr_null!, error.As(err)!);
+
             }
+
             if (priv.Version > 1L)
             {
-                return (null, errors.New("x509: unsupported private key version"));
+                return (_addr_null!, error.As(errors.New("x509: unsupported private key version"))!);
             }
+
             if (priv.N.Sign() <= 0L || priv.D.Sign() <= 0L || priv.P.Sign() <= 0L || priv.Q.Sign() <= 0L)
             {
-                return (null, errors.New("x509: private key contains zero or negative value"));
+                return (_addr_null!, error.As(errors.New("x509: private key contains zero or negative value"))!);
             }
+
             ptr<rsa.PrivateKey> key = @new<rsa.PrivateKey>();
             key.PublicKey = new rsa.PublicKey(E:priv.E,N:priv.N,);
 
             key.D = priv.D;
-            key.Primes = make_slice<ref big.Int>(2L + len(priv.AdditionalPrimes));
+            key.Primes = make_slice<ptr<big.Int>>(2L + len(priv.AdditionalPrimes));
             key.Primes[0L] = priv.P;
             key.Primes[1L] = priv.Q;
             foreach (var (i, a) in priv.AdditionalPrimes)
             {
                 if (a.Prime.Sign() <= 0L)
                 {
-                    return (null, errors.New("x509: private key contains zero or negative prime"));
+                    return (_addr_null!, error.As(errors.New("x509: private key contains zero or negative prime"))!);
                 }
+
                 key.Primes[i + 2L] = a.Prime; 
                 // We ignore the other two values because rsa will calculate
                 // them as needed.
@@ -91,16 +122,24 @@ namespace crypto
             err = key.Validate();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             key.Precompute();
 
-            return (key, null);
+            return (_addr_key!, error.As(null!)!);
+
         }
 
-        // MarshalPKCS1PrivateKey converts a private key to ASN.1 DER encoded form.
-        public static slice<byte> MarshalPKCS1PrivateKey(ref rsa.PrivateKey key)
+        // MarshalPKCS1PrivateKey converts an RSA private key to PKCS #1, ASN.1 DER form.
+        //
+        // This kind of key is commonly encoded in PEM blocks of type "RSA PRIVATE KEY".
+        // For a more flexible key format which is not RSA specific, use
+        // MarshalPKCS8PrivateKey.
+        public static slice<byte> MarshalPKCS1PrivateKey(ptr<rsa.PrivateKey> _addr_key)
         {
+            ref rsa.PrivateKey key = ref _addr_key.val;
+
             key.Precompute();
 
             long version = 0L;
@@ -108,6 +147,7 @@ namespace crypto
             {
                 version = 1L;
             }
+
             pkcs1PrivateKey priv = new pkcs1PrivateKey(Version:version,N:key.N,E:key.PublicKey.E,D:key.D,P:key.Primes[0],Q:key.Primes[1],Dp:key.Precomputed.Dp,Dq:key.Precomputed.Dq,Qinv:key.Precomputed.Qinv,);
 
             priv.AdditionalPrimes = make_slice<pkcs1AdditionalRSAPrime>(len(key.Precomputed.CRTValues));
@@ -119,35 +159,61 @@ namespace crypto
             }
             var (b, _) = asn1.Marshal(priv);
             return b;
+
         }
 
-        // ParsePKCS1PublicKey parses a PKCS#1 public key in ASN.1 DER form.
-        public static (ref rsa.PublicKey, error) ParsePKCS1PublicKey(slice<byte> der)
+        // ParsePKCS1PublicKey parses an RSA public key in PKCS #1, ASN.1 DER form.
+        //
+        // This kind of key is commonly encoded in PEM blocks of type "RSA PUBLIC KEY".
+        public static (ptr<rsa.PublicKey>, error) ParsePKCS1PublicKey(slice<byte> der)
         {
-            pkcs1PublicKey pub = default;
-            var (rest, err) = asn1.Unmarshal(der, ref pub);
+            ptr<rsa.PublicKey> _p0 = default!;
+            error _p0 = default!;
+
+            ref pkcs1PublicKey pub = ref heap(out ptr<pkcs1PublicKey> _addr_pub);
+            var (rest, err) = asn1.Unmarshal(der, _addr_pub);
             if (err != null)
             {
-                return (null, err);
+                {
+                    var (_, err) = asn1.Unmarshal(der, addr(new publicKeyInfo()));
+
+                    if (err == null)
+                    {
+                        return (_addr_null!, error.As(errors.New("x509: failed to parse public key (use ParsePKIXPublicKey instead for this key format)"))!);
+                    }
+
+                }
+
+                return (_addr_null!, error.As(err)!);
+
             }
+
             if (len(rest) > 0L)
             {
-                return (null, new asn1.SyntaxError(Msg:"trailing data"));
+                return (_addr_null!, error.As(new asn1.SyntaxError(Msg:"trailing data"))!);
             }
+
             if (pub.N.Sign() <= 0L || pub.E <= 0L)
             {
-                return (null, errors.New("x509: public key contains zero or negative value"));
+                return (_addr_null!, error.As(errors.New("x509: public key contains zero or negative value"))!);
             }
+
             if (pub.E > 1L << (int)(31L) - 1L)
             {
-                return (null, errors.New("x509: public key contains large public exponent"));
+                return (_addr_null!, error.As(errors.New("x509: public key contains large public exponent"))!);
             }
-            return (ref new rsa.PublicKey(E:pub.E,N:pub.N,), null);
+
+            return (addr(new rsa.PublicKey(E:pub.E,N:pub.N,)), error.As(null!)!);
+
         }
 
-        // MarshalPKCS1PublicKey converts an RSA public key to PKCS#1, ASN.1 DER form.
-        public static slice<byte> MarshalPKCS1PublicKey(ref rsa.PublicKey key)
+        // MarshalPKCS1PublicKey converts an RSA public key to PKCS #1, ASN.1 DER form.
+        //
+        // This kind of key is commonly encoded in PEM blocks of type "RSA PUBLIC KEY".
+        public static slice<byte> MarshalPKCS1PublicKey(ptr<rsa.PublicKey> _addr_key)
         {
+            ref rsa.PublicKey key = ref _addr_key.val;
+
             var (derBytes, _) = asn1.Marshal(new pkcs1PublicKey(N:key.N,E:key.E,));
             return derBytes;
         }

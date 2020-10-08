@@ -1,5 +1,5 @@
 // Inferno utils/6l/span.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/span.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/span.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,11 +28,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 August 29 10:04:40 UTC
+// package ld -- go2cs converted at 2020 October 08 04:39:45 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\symtab.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using fmt = go.fmt_package;
 using filepath = go.path.filepath_package;
@@ -54,15 +55,19 @@ namespace @internal
             { 
                 // first entry must be empty string
                 putelfstr("");
+
             }
             var off = len(Elfstrdat);
             Elfstrdat = append(Elfstrdat, s);
             Elfstrdat = append(Elfstrdat, 0L);
             return off;
+
         }
 
-        private static void putelfsyment(ref OutBuf @out, long off, long addr, long size, long info, long shndx, long other)
+        private static void putelfsyment(ptr<OutBuf> _addr_@out, long off, long addr, long size, long info, long shndx, long other)
         {
+            ref OutBuf @out = ref _addr_@out.val;
+
             if (elf64)
             {
                 @out.Write32(uint32(off));
@@ -83,14 +88,14 @@ namespace @internal
                 @out.Write16(uint16(shndx));
                 Symsize += ELF32SYMSIZE;
             }
+
         }
 
-        private static long numelfsym = 1L; // 0 is reserved
-
-        private static long elfbind = default;
-
-        private static void putelfsym(ref Link ctxt, ref sym.Symbol x, @string s, SymbolType t, long addr, ref sym.Symbol go_)
+        private static void putelfsym(ptr<Link> _addr_ctxt, ptr<sym.Symbol> _addr_x, @string s, SymbolType t, long addr)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref sym.Symbol x = ref _addr_x.val;
+
             long typ = default;
 
 
@@ -101,16 +106,17 @@ namespace @internal
             else if (t == UndefinedSym) 
                 // ElfType is only set for symbols read from Go shared libraries, but
                 // for other symbols it is left as STT_NOTYPE which is fine.
-                typ = int(x.ElfType);
+                typ = int(x.ElfType());
             else if (t == TLSSym) 
                 typ = STT_TLS;
             else 
-                return;
+                return ;
                         var size = x.Size;
             if (t == UndefinedSym)
             {
                 size = 0L;
             }
+
             var xo = x;
             while (xo.Outer != null)
             {
@@ -119,7 +125,7 @@ namespace @internal
 
 
             long elfshnum = default;
-            if (xo.Type == sym.SDYNIMPORT || xo.Type == sym.SHOSTOBJ)
+            if (xo.Type == sym.SDYNIMPORT || xo.Type == sym.SHOSTOBJ || xo.Type == sym.SUNDEFEXT)
             {
                 elfshnum = SHN_UNDEF;
             }
@@ -128,21 +134,24 @@ namespace @internal
                 if (xo.Sect == null)
                 {
                     Errorf(x, "missing section in putelfsym");
-                    return;
+                    return ;
                 }
+
                 if (xo.Sect.Elfsect == null)
                 {
                     Errorf(x, "missing ELF section in putelfsym");
-                    return;
+                    return ;
                 }
-                elfshnum = xo.Sect.Elfsect._<ref ElfShdr>().shnum;
+
+                elfshnum = xo.Sect.Elfsect._<ptr<ElfShdr>>().shnum;
+
             } 
 
             // One pass for each binding: STB_LOCAL, STB_GLOBAL,
             // maybe one day STB_WEAK.
             var bind = STB_GLOBAL;
 
-            if (x.Version != 0L || x.Attr.VisibilityHidden() || x.Attr.Local())
+            if (x.IsFileLocal() || x.Attr.VisibilityHidden() || x.Attr.Local())
             {
                 bind = STB_LOCAL;
             } 
@@ -156,10 +165,12 @@ namespace @internal
             {
                 bind = STB_LOCAL;
             }
+
             if (ctxt.LinkMode == LinkExternal && elfshnum != SHN_UNDEF)
             {
                 addr -= int64(xo.Sect.Vaddr);
             }
+
             var other = STV_DEFAULT;
             if (x.Attr.VisibilityHidden())
             { 
@@ -169,7 +180,9 @@ namespace @internal
                 // internal linking for shared libraries and only create object files when
                 // externally linking, I don't think this makes a lot of sense.
                 other = STV_HIDDEN;
+
             }
+
             if (ctxt.Arch.Family == sys.PPC64 && typ == STT_FUNC && x.Attr.Shared() && x.Name != "runtime.duffzero" && x.Name != "runtime.duffcopy")
             { 
                 // On ppc64 the top three bits of the st_other field indicate how
@@ -179,6 +192,16 @@ namespace @internal
                 // cmd/internal/obj/ppc64/obj9.go, which is where the
                 // instructions are inserted.
                 other |= 3L << (int)(5L);
+
+            }
+
+            if (s == x.Name)
+            { 
+                // We should use Extname for ELF symbol table.
+                // TODO: maybe genasmsym should have done this. That function is too
+                // overloaded and I would rather not change it for now.
+                s = x.Extname();
+
             } 
 
             // When dynamically linking, we create Symbols by reading the names from
@@ -188,8 +211,10 @@ namespace @internal
             { 
                 // Rewrite · to . for ASCII-only tools like DTrace (sigh)
                 s = strings.Replace(s, "·", ".", -1L);
+
             }
-            if (ctxt.DynlinkingGo() && bind == STB_GLOBAL && elfbind == STB_LOCAL && x.Type == sym.STEXT)
+
+            if (ctxt.DynlinkingGo() && bind == STB_GLOBAL && ctxt.elfbind == STB_LOCAL && x.Type == sym.STEXT)
             { 
                 // When dynamically linking, we want references to functions defined
                 // in this module to always be to the function object, not to the
@@ -199,31 +224,40 @@ namespace @internal
                 // (*sym.Symbol).ElfsymForReloc). This is approximately equivalent to the
                 // ELF linker -Bsymbolic-functions option, but that is buggy on
                 // several platforms.
-                putelfsyment(ctxt.Out, putelfstr("local." + s), addr, size, STB_LOCAL << (int)(4L) | typ & 0xfUL, elfshnum, other);
-                x.LocalElfsym = int32(numelfsym);
-                numelfsym++;
-                return;
+                putelfsyment(_addr_ctxt.Out, putelfstr("local." + s), addr, size, STB_LOCAL << (int)(4L) | typ & 0xfUL, elfshnum, other);
+                ctxt.loader.SetSymLocalElfSym(loader.Sym(x.SymIdx), int32(ctxt.numelfsym));
+                ctxt.numelfsym++;
+                return ;
+
             }
-            else if (bind != elfbind)
+            else if (bind != ctxt.elfbind)
             {
-                return;
+                return ;
             }
-            putelfsyment(ctxt.Out, putelfstr(s), addr, size, bind << (int)(4L) | typ & 0xfUL, elfshnum, other);
-            x.Elfsym = int32(numelfsym);
-            numelfsym++;
+
+            putelfsyment(_addr_ctxt.Out, putelfstr(s), addr, size, bind << (int)(4L) | typ & 0xfUL, elfshnum, other);
+            ctxt.loader.SetSymElfSym(loader.Sym(x.SymIdx), int32(ctxt.numelfsym));
+            ctxt.numelfsym++;
+
         }
 
-        private static void putelfsectionsym(ref OutBuf @out, ref sym.Symbol s, long shndx)
+        private static void putelfsectionsym(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ptr<sym.Symbol> _addr_s, long shndx)
         {
-            putelfsyment(out, 0L, 0L, 0L, STB_LOCAL << (int)(4L) | STT_SECTION, shndx, 0L);
-            s.Elfsym = int32(numelfsym);
-            numelfsym++;
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref OutBuf @out = ref _addr_@out.val;
+            ref sym.Symbol s = ref _addr_s.val;
+
+            putelfsyment(_addr_out, 0L, 0L, 0L, STB_LOCAL << (int)(4L) | STT_SECTION, shndx, 0L);
+            ctxt.loader.SetSymElfSym(loader.Sym(s.SymIdx), int32(ctxt.numelfsym));
+            ctxt.numelfsym++;
         }
 
-        public static void Asmelfsym(ref Link ctxt)
-        { 
+        public static void Asmelfsym(ptr<Link> _addr_ctxt)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+ 
             // the first symbol entry is reserved
-            putelfsyment(ctxt.Out, 0L, 0L, 0L, STB_LOCAL << (int)(4L) | STT_NOTYPE, 0L, 0L);
+            putelfsyment(_addr_ctxt.Out, 0L, 0L, 0L, STB_LOCAL << (int)(4L) | STT_NOTYPE, 0L, 0L);
 
             dwarfaddelfsectionsyms(ctxt); 
 
@@ -231,27 +265,32 @@ namespace @internal
             // Avoid having the working directory inserted into the symbol table.
             // It is added with a name to avoid problems with external linking
             // encountered on some versions of Solaris. See issue #14957.
-            putelfsyment(ctxt.Out, putelfstr("go.go"), 0L, 0L, STB_LOCAL << (int)(4L) | STT_FILE, SHN_ABS, 0L);
-            numelfsym++;
+            putelfsyment(_addr_ctxt.Out, putelfstr("go.go"), 0L, 0L, STB_LOCAL << (int)(4L) | STT_FILE, SHN_ABS, 0L);
+            ctxt.numelfsym++;
 
-            elfbind = STB_LOCAL;
+            ctxt.elfbind = STB_LOCAL;
             genasmsym(ctxt, putelfsym);
 
-            elfbind = STB_GLOBAL;
-            elfglobalsymndx = numelfsym;
+            ctxt.elfbind = STB_GLOBAL;
+            elfglobalsymndx = ctxt.numelfsym;
             genasmsym(ctxt, putelfsym);
+
         }
 
-        private static void putplan9sym(ref Link ctxt, ref sym.Symbol x, @string s, SymbolType typ, long addr, ref sym.Symbol go_)
+        private static void putplan9sym(ptr<Link> _addr_ctxt, ptr<sym.Symbol> _addr_x, @string s, SymbolType typ, long addr)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref sym.Symbol x = ref _addr_x.val;
+
             var t = int(typ);
 
             if (typ == TextSym || typ == DataSym || typ == BSSSym)
             {
-                if (x.Version != 0L)
+                if (x.IsFileLocal())
                 {
                     t += 'a' - 'A';
                 }
+
                 fallthrough = true;
 
             }
@@ -263,6 +302,7 @@ namespace @internal
                     ctxt.Out.Write32b(uint32(addr >> (int)(32L)));
                     l = 8L;
                 }
+
                 ctxt.Out.Write32b(uint32(addr));
                 ctxt.Out.Write8(uint8(t + 0x80UL));                /* 0x80 is variable length */
 
@@ -273,19 +313,20 @@ namespace @internal
                 goto __switch_break0;
             }
             // default: 
-                return;
+                return ;
 
             __switch_break0:;
+
         }
 
-        public static void Asmplan9sym(ref Link ctxt)
+        public static void Asmplan9sym(ptr<Link> _addr_ctxt)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+
             genasmsym(ctxt, putplan9sym);
         }
 
-        private static ref sym.Symbol symt = default;
-
-        private partial struct byPkg // : slice<ref sym.Library>
+        private partial struct byPkg // : slice<ptr<sym.Library>>
         {
         }
 
@@ -303,15 +344,21 @@ namespace @internal
         {
             libs[a] = libs[b];
             libs[b] = libs[a];
+
         }
 
         // Create a table with information on the text sections.
-
-        private static uint textsectionmap(ref Link ctxt)
+        // Return the symbol of the table, and number of sections.
+        private static (loader.Sym, uint) textsectionmap(ptr<Link> _addr_ctxt)
         {
-            var t = ctxt.Syms.Lookup("runtime.textsectionmap", 0L);
-            t.Type = sym.SRODATA;
-            t.Attr |= sym.AttrReachable;
+            loader.Sym _p0 = default;
+            uint _p0 = default;
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            var ldr = ctxt.loader;
+            var t = ldr.CreateSymForUpdate("runtime.textsectionmap", 0L);
+            t.SetType(sym.SRODATA);
+            t.SetReachable(true);
             var nsections = int64(0L);
 
             {
@@ -328,6 +375,7 @@ namespace @internal
                     {
                         break;
                     }
+
                 }
 
                 sect = sect__prev1;
@@ -358,118 +406,141 @@ namespace @internal
                     {
                         break;
                     }
+
                     off = t.SetUint(ctxt.Arch, off, sect.Vaddr - textbase);
                     off = t.SetUint(ctxt.Arch, off, sect.Length);
                     if (n == 0L)
                     {
-                        var s = ctxt.Syms.ROLookup("runtime.text", 0L);
-                        if (s == null)
+                        var s = ldr.Lookup("runtime.text", 0L);
+                        if (s == 0L)
                         {
-                            Errorf(null, "Unable to find symbol runtime.text\n");
+                            ctxt.Errorf(s, "Unable to find symbol runtime.text\n");
                         }
+
                         off = t.SetAddr(ctxt.Arch, off, s);
+
 
                     }
                     else
                     {
-                        s = ctxt.Syms.Lookup(fmt.Sprintf("runtime.text.%d", n), 0L);
-                        if (s == null)
+                        s = ldr.Lookup(fmt.Sprintf("runtime.text.%d", n), 0L);
+                        if (s == 0L)
                         {
-                            Errorf(null, "Unable to find symbol runtime.text.%d\n", n);
+                            ctxt.Errorf(s, "Unable to find symbol runtime.text.%d\n", n);
                         }
+
                         off = t.SetAddr(ctxt.Arch, off, s);
+
                     }
+
                     n++;
+
                 }
 
                 sect = sect__prev1;
             }
 
-            return uint32(n);
+            return (t.Sym(), uint32(n));
+
         }
 
-        private static void symtab(this ref Link ctxt)
+        private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt) => func((_, panic, __) =>
         {
-            dosymtype(ctxt); 
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            var ldr = ctxt.loader;
+
+            if (!ctxt.IsAIX())
+            {
+
+                if (ctxt.BuildMode == BuildModeCArchive || ctxt.BuildMode == BuildModeCShared) 
+                    var s = ldr.Lookup(flagEntrySymbol.val, sym.SymVerABI0);
+                    if (s != 0L)
+                    {
+                        addinitarrdata(ctxt, ldr, s);
+                    }
+
+                            } 
 
             // Define these so that they'll get put into the symbol table.
             // data.c:/^address will provide the actual values.
-            ctxt.xdefine("runtime.text", sym.STEXT, 0L);
-
-            ctxt.xdefine("runtime.etext", sym.STEXT, 0L);
-            ctxt.xdefine("runtime.itablink", sym.SRODATA, 0L);
-            ctxt.xdefine("runtime.eitablink", sym.SRODATA, 0L);
-            ctxt.xdefine("runtime.rodata", sym.SRODATA, 0L);
-            ctxt.xdefine("runtime.erodata", sym.SRODATA, 0L);
-            ctxt.xdefine("runtime.types", sym.SRODATA, 0L);
-            ctxt.xdefine("runtime.etypes", sym.SRODATA, 0L);
-            ctxt.xdefine("runtime.noptrdata", sym.SNOPTRDATA, 0L);
-            ctxt.xdefine("runtime.enoptrdata", sym.SNOPTRDATA, 0L);
-            ctxt.xdefine("runtime.data", sym.SDATA, 0L);
-            ctxt.xdefine("runtime.edata", sym.SDATA, 0L);
-            ctxt.xdefine("runtime.bss", sym.SBSS, 0L);
-            ctxt.xdefine("runtime.ebss", sym.SBSS, 0L);
-            ctxt.xdefine("runtime.noptrbss", sym.SNOPTRBSS, 0L);
-            ctxt.xdefine("runtime.enoptrbss", sym.SNOPTRBSS, 0L);
-            ctxt.xdefine("runtime.end", sym.SBSS, 0L);
-            ctxt.xdefine("runtime.epclntab", sym.SRODATA, 0L);
-            ctxt.xdefine("runtime.esymtab", sym.SRODATA, 0L); 
+            ctxt.xdefine2("runtime.text", sym.STEXT, 0L);
+            ctxt.xdefine2("runtime.etext", sym.STEXT, 0L);
+            ctxt.xdefine2("runtime.itablink", sym.SRODATA, 0L);
+            ctxt.xdefine2("runtime.eitablink", sym.SRODATA, 0L);
+            ctxt.xdefine2("runtime.rodata", sym.SRODATA, 0L);
+            ctxt.xdefine2("runtime.erodata", sym.SRODATA, 0L);
+            ctxt.xdefine2("runtime.types", sym.SRODATA, 0L);
+            ctxt.xdefine2("runtime.etypes", sym.SRODATA, 0L);
+            ctxt.xdefine2("runtime.noptrdata", sym.SNOPTRDATA, 0L);
+            ctxt.xdefine2("runtime.enoptrdata", sym.SNOPTRDATA, 0L);
+            ctxt.xdefine2("runtime.data", sym.SDATA, 0L);
+            ctxt.xdefine2("runtime.edata", sym.SDATA, 0L);
+            ctxt.xdefine2("runtime.bss", sym.SBSS, 0L);
+            ctxt.xdefine2("runtime.ebss", sym.SBSS, 0L);
+            ctxt.xdefine2("runtime.noptrbss", sym.SNOPTRBSS, 0L);
+            ctxt.xdefine2("runtime.enoptrbss", sym.SNOPTRBSS, 0L);
+            ctxt.xdefine2("runtime.end", sym.SBSS, 0L);
+            ctxt.xdefine2("runtime.epclntab", sym.SRODATA, 0L);
+            ctxt.xdefine2("runtime.esymtab", sym.SRODATA, 0L); 
 
             // garbage collection symbols
-            var s = ctxt.Syms.Lookup("runtime.gcdata", 0L);
+            s = ldr.CreateSymForUpdate("runtime.gcdata", 0L);
+            s.SetType(sym.SRODATA);
+            s.SetSize(0L);
+            s.SetReachable(true);
+            ctxt.xdefine2("runtime.egcdata", sym.SRODATA, 0L);
 
-            s.Type = sym.SRODATA;
-            s.Size = 0L;
-            s.Attr |= sym.AttrReachable;
-            ctxt.xdefine("runtime.egcdata", sym.SRODATA, 0L);
-
-            s = ctxt.Syms.Lookup("runtime.gcbss", 0L);
-            s.Type = sym.SRODATA;
-            s.Size = 0L;
-            s.Attr |= sym.AttrReachable;
-            ctxt.xdefine("runtime.egcbss", sym.SRODATA, 0L); 
+            s = ldr.CreateSymForUpdate("runtime.gcbss", 0L);
+            s.SetType(sym.SRODATA);
+            s.SetSize(0L);
+            s.SetReachable(true);
+            ctxt.xdefine2("runtime.egcbss", sym.SRODATA, 0L); 
 
             // pseudo-symbols to mark locations of type, string, and go string data.
-            ref sym.Symbol symtype = default;
-            ref sym.Symbol symtyperel = default;
-            if (ctxt.UseRelro() && (ctxt.BuildMode == BuildModeCArchive || ctxt.BuildMode == BuildModeCShared || ctxt.BuildMode == BuildModePIE))
+            loader.Sym symtype = default;            loader.Sym symtyperel = default;
+
+            if (!ctxt.DynlinkingGo())
             {
-                s = ctxt.Syms.Lookup("type.*", 0L);
+                if (ctxt.UseRelro() && (ctxt.BuildMode == BuildModeCArchive || ctxt.BuildMode == BuildModeCShared || ctxt.BuildMode == BuildModePIE))
+                {
+                    s = ldr.CreateSymForUpdate("type.*", 0L);
+                    s.SetType(sym.STYPE);
+                    s.SetSize(0L);
+                    s.SetReachable(true);
+                    symtype = s.Sym();
 
-                s.Type = sym.STYPE;
-                s.Size = 0L;
-                s.Attr |= sym.AttrReachable;
-                symtype = s;
+                    s = ldr.CreateSymForUpdate("typerel.*", 0L);
+                    s.SetType(sym.STYPERELRO);
+                    s.SetSize(0L);
+                    s.SetReachable(true);
+                    symtyperel = s.Sym();
+                }
+                else
+                {
+                    s = ldr.CreateSymForUpdate("type.*", 0L);
+                    s.SetType(sym.STYPE);
+                    s.SetSize(0L);
+                    s.SetReachable(true);
+                    symtype = s.Sym();
+                    symtyperel = s.Sym();
+                }
 
-                s = ctxt.Syms.Lookup("typerel.*", 0L);
-
-                s.Type = sym.STYPERELRO;
-                s.Size = 0L;
-                s.Attr |= sym.AttrReachable;
-                symtyperel = s;
             }
-            else if (!ctxt.DynlinkingGo())
-            {
-                s = ctxt.Syms.Lookup("type.*", 0L);
 
-                s.Type = sym.STYPE;
-                s.Size = 0L;
-                s.Attr |= sym.AttrReachable;
-                symtype = s;
-                symtyperel = s;
-            }
-            Func<@string, sym.SymKind, ref sym.Symbol> groupSym = (name, t) =>
+            Func<@string, sym.SymKind, loader.Sym> groupSym = (name, t) =>
             {
-                s = ctxt.Syms.Lookup(name, 0L);
-                s.Type = t;
-                s.Size = 0L;
-                s.Attr |= sym.AttrLocal | sym.AttrReachable;
-                return s;
+                s = ldr.CreateSymForUpdate(name, 0L);
+                s.SetType(t);
+                s.SetSize(0L);
+                s.SetLocal(true);
+                s.SetReachable(true);
+                return s.Sym();
             }
 ;
             var symgostring = groupSym("go.string.*", sym.SGOSTRING);            var symgofunc = groupSym("go.func.*", sym.SGOFUNC);            var symgcbits = groupSym("runtime.gcbits.*", sym.SGCBITS);
 
-            ref sym.Symbol symgofuncrel = default;
+            loader.Sym symgofuncrel = default;
             if (!ctxt.DynlinkingGo())
             {
                 if (ctxt.UseRelro())
@@ -480,15 +551,17 @@ namespace @internal
                 {
                     symgofuncrel = symgofunc;
                 }
-            }
-            var symitablink = ctxt.Syms.Lookup("runtime.itablink", 0L);
-            symitablink.Type = sym.SITABLINK;
 
-            symt = ctxt.Syms.Lookup("runtime.symtab", 0L);
-            symt.Attr |= sym.AttrLocal;
-            symt.Type = sym.SSYMTAB;
-            symt.Size = 0L;
-            symt.Attr |= sym.AttrReachable;
+            }
+
+            var symitablink = ldr.CreateSymForUpdate("runtime.itablink", 0L);
+            symitablink.SetType(sym.SITABLINK);
+
+            var symt = ldr.CreateSymForUpdate("runtime.symtab", 0L);
+            symt.SetType(sym.SSYMTAB);
+            symt.SetSize(0L);
+            symt.SetReachable(true);
+            symt.SetLocal(true);
 
             long nitablinks = 0L; 
 
@@ -496,85 +569,102 @@ namespace @internal
             // within a type they sort by size, so the .* symbols
             // just defined above will be first.
             // hide the specific symbols.
+            var nsym = loader.Sym(ldr.NSym());
+            var symGroupType = make_slice<sym.SymKind>(nsym);
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in ctxt.Syms.Allsym)
+                for (s = loader.Sym(1L); s < nsym; s++)
                 {
-                    s = __s;
-                    if (!s.Attr.Reachable() || s.Attr.Special() || s.Type != sym.SRODATA)
+                    var name = ldr.SymName(s);
+                    if (!ctxt.IsExternal() && isStaticTemp(name))
+                    {
+                        ldr.SetAttrNotInSymbolTable(s, true);
+                    }
+
+                    if (!ldr.AttrReachable(s) || ldr.AttrSpecial(s) || (ldr.SymType(s) != sym.SRODATA && ldr.SymType(s) != sym.SGOFUNC))
                     {
                         continue;
                     }
 
-                    if (strings.HasPrefix(s.Name, "type.")) 
+
+                    if (strings.HasPrefix(name, "type.")) 
                         if (!ctxt.DynlinkingGo())
                         {
-                            s.Attr |= sym.AttrNotInSymbolTable;
+                            ldr.SetAttrNotInSymbolTable(s, true);
                         }
+
                         if (ctxt.UseRelro())
                         {
-                            s.Type = sym.STYPERELRO;
-                            s.Outer = symtyperel;
+                            symGroupType[s] = sym.STYPERELRO;
+                            ldr.SetOuterSym(s, symtyperel);
                         }
                         else
                         {
-                            s.Type = sym.STYPE;
-                            s.Outer = symtype;
+                            symGroupType[s] = sym.STYPE;
+                            ldr.SetOuterSym(s, symtype);
                         }
-                    else if (strings.HasPrefix(s.Name, "go.importpath.") && ctxt.UseRelro()) 
+
+                    else if (strings.HasPrefix(name, "go.importpath.") && ctxt.UseRelro()) 
                         // Keep go.importpath symbols in the same section as types and
                         // names, as they can be referred to by a section offset.
-                        s.Type = sym.STYPERELRO;
-                    else if (strings.HasPrefix(s.Name, "go.itablink.")) 
+                        symGroupType[s] = sym.STYPERELRO;
+                    else if (strings.HasPrefix(name, "go.itablink.")) 
                         nitablinks++;
-                        s.Type = sym.SITABLINK;
-                        s.Attr |= sym.AttrNotInSymbolTable;
-                        s.Outer = symitablink;
-                    else if (strings.HasPrefix(s.Name, "go.string.")) 
-                        s.Type = sym.SGOSTRING;
-                        s.Attr |= sym.AttrNotInSymbolTable;
-                        s.Outer = symgostring;
-                    else if (strings.HasPrefix(s.Name, "runtime.gcbits.")) 
-                        s.Type = sym.SGCBITS;
-                        s.Attr |= sym.AttrNotInSymbolTable;
-                        s.Outer = symgcbits;
-                    else if (strings.HasSuffix(s.Name, "·f")) 
+                        symGroupType[s] = sym.SITABLINK;
+                        ldr.SetAttrNotInSymbolTable(s, true);
+                        ldr.SetOuterSym(s, symitablink.Sym());
+                    else if (strings.HasPrefix(name, "go.string.")) 
+                        symGroupType[s] = sym.SGOSTRING;
+                        ldr.SetAttrNotInSymbolTable(s, true);
+                        ldr.SetOuterSym(s, symgostring);
+                    else if (strings.HasPrefix(name, "runtime.gcbits.")) 
+                        symGroupType[s] = sym.SGCBITS;
+                        ldr.SetAttrNotInSymbolTable(s, true);
+                        ldr.SetOuterSym(s, symgcbits);
+                    else if (strings.HasSuffix(name, "·f")) 
                         if (!ctxt.DynlinkingGo())
                         {
-                            s.Attr |= sym.AttrNotInSymbolTable;
+                            ldr.SetAttrNotInSymbolTable(s, true);
                         }
+
                         if (ctxt.UseRelro())
                         {
-                            s.Type = sym.SGOFUNCRELRO;
-                            s.Outer = symgofuncrel;
+                            symGroupType[s] = sym.SGOFUNCRELRO;
+                            ldr.SetOuterSym(s, symgofuncrel);
                         }
                         else
                         {
-                            s.Type = sym.SGOFUNC;
-                            s.Outer = symgofunc;
+                            symGroupType[s] = sym.SGOFUNC;
+                            ldr.SetOuterSym(s, symgofunc);
                         }
-                    else if (strings.HasPrefix(s.Name, "gcargs.") || strings.HasPrefix(s.Name, "gclocals.") || strings.HasPrefix(s.Name, "gclocals·") || strings.HasPrefix(s.Name, "inltree.")) 
-                        s.Type = sym.SGOFUNC;
-                        s.Attr |= sym.AttrNotInSymbolTable;
-                        s.Outer = symgofunc;
-                        s.Align = 4L;
-                        liveness += (s.Size + int64(s.Align) - 1L) & ~(int64(s.Align) - 1L);
-                                    }
+
+                    else if (strings.HasPrefix(name, "gcargs.") || strings.HasPrefix(name, "gclocals.") || strings.HasPrefix(name, "gclocals·") || ldr.SymType(s) == sym.SGOFUNC && s != symgofunc || strings.HasSuffix(name, ".opendefer")) 
+                        symGroupType[s] = sym.SGOFUNC;
+                        ldr.SetAttrNotInSymbolTable(s, true);
+                        ldr.SetOuterSym(s, symgofunc);
+                        const long align = (long)4L;
+
+                        ldr.SetSymAlign(s, align);
+                        liveness += (ldr.SymSize(s) + int64(align) - 1L) & ~(int64(align) - 1L);
+                    
+                }
+
 
                 s = s__prev1;
             }
 
             if (ctxt.BuildMode == BuildModeShared)
             {
-                var abihashgostr = ctxt.Syms.Lookup("go.link.abihash." + filepath.Base(flagOutfile.Value), 0L);
-                abihashgostr.Attr |= sym.AttrReachable;
-                abihashgostr.Type = sym.SRODATA;
-                var hashsym = ctxt.Syms.Lookup("go.link.abihashbytes", 0L);
+                var abihashgostr = ldr.CreateSymForUpdate("go.link.abihash." + filepath.Base(flagOutfile.val), 0L);
+                abihashgostr.SetReachable(true);
+                abihashgostr.SetType(sym.SRODATA);
+                var hashsym = ldr.LookupOrCreateSym("go.link.abihashbytes", 0L);
                 abihashgostr.AddAddr(ctxt.Arch, hashsym);
-                abihashgostr.AddUint(ctxt.Arch, uint64(hashsym.Size));
+                abihashgostr.AddUint(ctxt.Arch, uint64(ldr.SymSize(hashsym)));
             }
-            if (ctxt.BuildMode == BuildModePlugin || ctxt.Syms.ROLookup("plugin.Open", 0L) != null)
+
+            if (ctxt.BuildMode == BuildModePlugin || ctxt.CanUsePlugins())
             {
                 {
                     var l__prev1 = l;
@@ -582,91 +672,113 @@ namespace @internal
                     foreach (var (_, __l) in ctxt.Library)
                     {
                         l = __l;
-                        s = ctxt.Syms.Lookup("go.link.pkghashbytes." + l.Pkg, 0L);
-                        s.Attr |= sym.AttrReachable;
-                        s.Type = sym.SRODATA;
-                        s.Size = int64(len(l.Hash));
-                        s.P = (slice<byte>)l.Hash;
-                        var str = ctxt.Syms.Lookup("go.link.pkghash." + l.Pkg, 0L);
-                        str.Attr |= sym.AttrReachable;
-                        str.Type = sym.SRODATA;
-                        str.AddAddr(ctxt.Arch, s);
+                        s = ldr.CreateSymForUpdate("go.link.pkghashbytes." + l.Pkg, 0L);
+                        s.SetReachable(true);
+                        s.SetType(sym.SRODATA);
+                        s.SetSize(int64(len(l.Hash)));
+                        s.SetData((slice<byte>)l.Hash);
+                        var str = ldr.CreateSymForUpdate("go.link.pkghash." + l.Pkg, 0L);
+                        str.SetReachable(true);
+                        str.SetType(sym.SRODATA);
+                        str.AddAddr(ctxt.Arch, s.Sym());
                         str.AddUint(ctxt.Arch, uint64(len(l.Hash)));
                     }
 
                     l = l__prev1;
                 }
-
             }
-            var nsections = textsectionmap(ctxt); 
+
+            var (textsectionmapSym, nsections) = textsectionmap(_addr_ctxt); 
 
             // Information about the layout of the executable image for the
             // runtime to use. Any changes here must be matched by changes to
             // the definition of moduledata in runtime/symtab.go.
             // This code uses several global variables that are set by pcln.go:pclntab.
-            var moduledata = ctxt.Moduledata; 
+            var moduledata = ldr.MakeSymbolUpdater(ctxt.Moduledata2);
+            var pclntab = ldr.Lookup("runtime.pclntab", 0L); 
             // The pclntab slice
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.pclntab", 0L));
-            moduledata.AddUint(ctxt.Arch, uint64(ctxt.Syms.Lookup("runtime.pclntab", 0L).Size));
-            moduledata.AddUint(ctxt.Arch, uint64(ctxt.Syms.Lookup("runtime.pclntab", 0L).Size)); 
+            moduledata.AddAddr(ctxt.Arch, pclntab);
+            moduledata.AddUint(ctxt.Arch, uint64(ldr.SymSize(pclntab)));
+            moduledata.AddUint(ctxt.Arch, uint64(ldr.SymSize(pclntab))); 
             // The ftab slice
-            moduledata.AddAddrPlus(ctxt.Arch, ctxt.Syms.Lookup("runtime.pclntab", 0L), int64(pclntabPclntabOffset));
+            moduledata.AddAddrPlus(ctxt.Arch, pclntab, int64(pclntabPclntabOffset));
             moduledata.AddUint(ctxt.Arch, uint64(pclntabNfunc + 1L));
             moduledata.AddUint(ctxt.Arch, uint64(pclntabNfunc + 1L)); 
             // The filetab slice
-            moduledata.AddAddrPlus(ctxt.Arch, ctxt.Syms.Lookup("runtime.pclntab", 0L), int64(pclntabFiletabOffset));
-            moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Filesyms)) + 1L);
-            moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Filesyms)) + 1L); 
+            moduledata.AddAddrPlus(ctxt.Arch, pclntab, int64(pclntabFiletabOffset));
+            moduledata.AddUint(ctxt.Arch, uint64(ctxt.NumFilesyms) + 1L);
+            moduledata.AddUint(ctxt.Arch, uint64(ctxt.NumFilesyms) + 1L); 
             // findfunctab
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.findfunctab", 0L)); 
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.findfunctab", 0L)); 
             // minpc, maxpc
             moduledata.AddAddr(ctxt.Arch, pclntabFirstFunc);
-            moduledata.AddAddrPlus(ctxt.Arch, pclntabLastFunc, pclntabLastFunc.Size); 
+            moduledata.AddAddrPlus(ctxt.Arch, pclntabLastFunc, ldr.SymSize(pclntabLastFunc)); 
             // pointers to specific parts of the module
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.text", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.etext", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.noptrdata", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.enoptrdata", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.data", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.edata", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.bss", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.ebss", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.noptrbss", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.enoptrbss", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.end", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.gcdata", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.gcbss", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.types", 0L));
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.etypes", 0L)); 
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.text", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.etext", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.noptrdata", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.enoptrdata", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.data", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.edata", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.bss", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.ebss", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.noptrbss", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.enoptrbss", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.end", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.gcdata", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.gcbss", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.types", 0L));
+            moduledata.AddAddr(ctxt.Arch, ldr.Lookup("runtime.etypes", 0L));
+
+            if (ctxt.IsAIX() && ctxt.IsExternal())
+            { 
+                // Add R_XCOFFREF relocation to prevent ld's garbage collection of
+                // runtime.rodata, runtime.erodata and runtime.epclntab.
+                Action<@string> addRef = name =>
+                {
+                    var (r, _) = moduledata.AddRel(objabi.R_XCOFFREF);
+                    r.SetSym(ldr.Lookup(name, 0L));
+                    r.SetSiz(uint8(ctxt.Arch.PtrSize));
+                }
+;
+                addRef("runtime.rodata");
+                addRef("runtime.erodata");
+                addRef("runtime.epclntab");
+
+            } 
 
             // text section information
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.textsectionmap", 0L));
+            moduledata.AddAddr(ctxt.Arch, textsectionmapSym);
             moduledata.AddUint(ctxt.Arch, uint64(nsections));
             moduledata.AddUint(ctxt.Arch, uint64(nsections)); 
 
             // The typelinks slice
-            var typelinkSym = ctxt.Syms.Lookup("runtime.typelink", 0L);
-            var ntypelinks = uint64(typelinkSym.Size) / 4L;
+            var typelinkSym = ldr.Lookup("runtime.typelink", 0L);
+            var ntypelinks = uint64(ldr.SymSize(typelinkSym)) / 4L;
             moduledata.AddAddr(ctxt.Arch, typelinkSym);
             moduledata.AddUint(ctxt.Arch, ntypelinks);
             moduledata.AddUint(ctxt.Arch, ntypelinks); 
             // The itablinks slice
-            moduledata.AddAddr(ctxt.Arch, ctxt.Syms.Lookup("runtime.itablink", 0L));
+            moduledata.AddAddr(ctxt.Arch, symitablink.Sym());
             moduledata.AddUint(ctxt.Arch, uint64(nitablinks));
             moduledata.AddUint(ctxt.Arch, uint64(nitablinks)); 
             // The ptab slice
             {
-                var ptab = ctxt.Syms.ROLookup("go.plugin.tabs", 0L);
+                var ptab = ldr.Lookup("go.plugin.tabs", 0L);
 
-                if (ptab != null && ptab.Attr.Reachable())
+                if (ptab != 0L && ldr.AttrReachable(ptab))
                 {
-                    ptab.Attr |= sym.AttrLocal;
-                    ptab.Type = sym.SRODATA;
+                    ldr.SetAttrLocal(ptab, true);
+                    if (ldr.SymType(ptab) != sym.SRODATA)
+                    {
+                        panic(fmt.Sprintf("go.plugin.tabs is %v, not SRODATA", ldr.SymType(ptab)));
+                    }
 
-                    var nentries = uint64(len(ptab.P) / 8L); // sizeof(nameOff) + sizeof(typeOff)
+                    var nentries = uint64(len(ldr.Data(ptab)) / 8L); // sizeof(nameOff) + sizeof(typeOff)
                     moduledata.AddAddr(ctxt.Arch, ptab);
                     moduledata.AddUint(ctxt.Arch, nentries);
                     moduledata.AddUint(ctxt.Arch, nentries);
+
                 }
                 else
                 {
@@ -676,14 +788,15 @@ namespace @internal
                 }
 
             }
+
             if (ctxt.BuildMode == BuildModePlugin)
             {
-                addgostring(ctxt, moduledata, "go.link.thispluginpath", objabi.PathToPrefix(flagPluginPath.Value));
+                addgostring(ctxt, ldr, moduledata, "go.link.thispluginpath", objabi.PathToPrefix(flagPluginPath.val));
 
-                var pkghashes = ctxt.Syms.Lookup("go.link.pkghashes", 0L);
-                pkghashes.Attr |= sym.AttrReachable;
-                pkghashes.Attr |= sym.AttrLocal;
-                pkghashes.Type = sym.SRODATA;
+                var pkghashes = ldr.CreateSymForUpdate("go.link.pkghashes", 0L);
+                pkghashes.SetReachable(true);
+                pkghashes.SetLocal(true);
+                pkghashes.SetType(sym.SRODATA);
 
                 {
                     var i__prev1 = i;
@@ -694,12 +807,13 @@ namespace @internal
                         i = __i;
                         l = __l; 
                         // pkghashes[i].name
-                        addgostring(ctxt, pkghashes, fmt.Sprintf("go.link.pkgname.%d", i), l.Pkg); 
+                        addgostring(ctxt, ldr, pkghashes, fmt.Sprintf("go.link.pkgname.%d", i), l.Pkg); 
                         // pkghashes[i].linktimehash
-                        addgostring(ctxt, pkghashes, fmt.Sprintf("go.link.pkglinkhash.%d", i), l.Hash); 
+                        addgostring(ctxt, ldr, pkghashes, fmt.Sprintf("go.link.pkglinkhash.%d", i), l.Hash); 
                         // pkghashes[i].runtimehash
-                        var hash = ctxt.Syms.ROLookup("go.link.pkghash." + l.Pkg, 0L);
+                        var hash = ldr.Lookup("go.link.pkghash." + l.Pkg, 0L);
                         pkghashes.AddAddr(ctxt.Arch, hash);
+
                     }
             else
 
@@ -707,30 +821,33 @@ namespace @internal
                     l = l__prev1;
                 }
 
-                moduledata.AddAddr(ctxt.Arch, pkghashes);
+                moduledata.AddAddr(ctxt.Arch, pkghashes.Sym());
                 moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Library)));
                 moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Library)));
+
             }            {
                 moduledata.AddUint(ctxt.Arch, 0L); // pluginpath
                 moduledata.AddUint(ctxt.Arch, 0L);
                 moduledata.AddUint(ctxt.Arch, 0L); // pkghashes slice
                 moduledata.AddUint(ctxt.Arch, 0L);
                 moduledata.AddUint(ctxt.Arch, 0L);
+
             }
+
             if (len(ctxt.Shlibs) > 0L)
             {
-                var thismodulename = filepath.Base(flagOutfile.Value);
+                var thismodulename = filepath.Base(flagOutfile.val);
 
                 if (ctxt.BuildMode == BuildModeExe || ctxt.BuildMode == BuildModePIE) 
                     // When linking an executable, outfile is just "a.out". Make
                     // it something slightly more comprehensible.
                     thismodulename = "the executable";
-                                addgostring(ctxt, moduledata, "go.link.thismodulename", thismodulename);
+                                addgostring(ctxt, ldr, moduledata, "go.link.thismodulename", thismodulename);
 
-                var modulehashes = ctxt.Syms.Lookup("go.link.abihashes", 0L);
-                modulehashes.Attr |= sym.AttrReachable;
-                modulehashes.Attr |= sym.AttrLocal;
-                modulehashes.Type = sym.SRODATA;
+                var modulehashes = ldr.CreateSymForUpdate("go.link.abihashes", 0L);
+                modulehashes.SetReachable(true);
+                modulehashes.SetLocal(true);
+                modulehashes.SetType(sym.SRODATA);
 
                 {
                     var i__prev1 = i;
@@ -741,15 +858,16 @@ namespace @internal
                         shlib = __shlib; 
                         // modulehashes[i].modulename
                         var modulename = filepath.Base(shlib.Path);
-                        addgostring(ctxt, modulehashes, fmt.Sprintf("go.link.libname.%d", i), modulename); 
+                        addgostring(ctxt, ldr, modulehashes, fmt.Sprintf("go.link.libname.%d", i), modulename); 
 
                         // modulehashes[i].linktimehash
-                        addgostring(ctxt, modulehashes, fmt.Sprintf("go.link.linkhash.%d", i), string(shlib.Hash)); 
+                        addgostring(ctxt, ldr, modulehashes, fmt.Sprintf("go.link.linkhash.%d", i), string(shlib.Hash)); 
 
                         // modulehashes[i].runtimehash
-                        var abihash = ctxt.Syms.Lookup("go.link.abihash." + modulename, 0L);
-                        abihash.Attr |= sym.AttrReachable;
+                        var abihash = ldr.LookupOrCreateSym("go.link.abihash." + modulename, 0L);
+                        ldr.SetAttrReachable(abihash, true);
                         modulehashes.AddAddr(ctxt.Arch, abihash);
+
                     }
             else
 
@@ -757,16 +875,19 @@ namespace @internal
                     i = i__prev1;
                 }
 
-                moduledata.AddAddr(ctxt.Arch, modulehashes);
+                moduledata.AddAddr(ctxt.Arch, modulehashes.Sym());
                 moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Shlibs)));
                 moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Shlibs)));
+
             }            {
                 moduledata.AddUint(ctxt.Arch, 0L); // modulename
                 moduledata.AddUint(ctxt.Arch, 0L);
                 moduledata.AddUint(ctxt.Arch, 0L); // moduleshashes slice
                 moduledata.AddUint(ctxt.Arch, 0L);
                 moduledata.AddUint(ctxt.Arch, 0L);
+
             }
+
             var hasmain = ctxt.BuildMode == BuildModeExe || ctxt.BuildMode == BuildModePIE;
             if (hasmain)
             {
@@ -781,17 +902,38 @@ namespace @internal
             // When linking an object that does not contain the runtime we are
             // creating the moduledata from scratch and it does not have a
             // compiler-provided size, so read it from the type data.
-            var moduledatatype = ctxt.Syms.ROLookup("type.runtime.moduledata", 0L);
-            moduledata.Size = decodetypeSize(ctxt.Arch, moduledatatype);
-            moduledata.Grow(moduledata.Size);
+            var moduledatatype = ldr.Lookup("type.runtime.moduledata", 0L);
+            moduledata.SetSize(decodetypeSize(ctxt.Arch, ldr.Data(moduledatatype)));
+            moduledata.Grow(moduledata.Size());
 
-            var lastmoduledatap = ctxt.Syms.Lookup("runtime.lastmoduledatap", 0L);
-            if (lastmoduledatap.Type != sym.SDYNIMPORT)
+            var lastmoduledatap = ldr.CreateSymForUpdate("runtime.lastmoduledatap", 0L);
+            if (lastmoduledatap.Type() != sym.SDYNIMPORT)
             {
-                lastmoduledatap.Type = sym.SNOPTRDATA;
-                lastmoduledatap.Size = 0L; // overwrite existing value
-                lastmoduledatap.AddAddr(ctxt.Arch, moduledata);
+                lastmoduledatap.SetType(sym.SNOPTRDATA);
+                lastmoduledatap.SetSize(0L); // overwrite existing value
+                lastmoduledatap.SetData(null);
+                lastmoduledatap.AddAddr(ctxt.Arch, moduledata.Sym());
+
             }
+
+            return symGroupType;
+
+        });
+
+        private static bool isStaticTemp(@string name)
+        {
+            {
+                var i = strings.LastIndex(name, "/");
+
+                if (i >= 0L)
+                {
+                    name = name[i..];
+                }
+
+            }
+
+            return strings.Contains(name, "..stmp_");
+
         }
     }
 }}}}

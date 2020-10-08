@@ -1,4 +1,4 @@
-// package pointer -- go2cs converted at 2020 August 29 10:09:23 UTC
+// package pointer -- go2cs converted at 2020 October 08 04:56:22 UTC
 // import "go/internal/gccgoimporter.pointer" ==> using pointer = go.go.@internal.gccgoimporter.pointer_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\pointer.go
 
@@ -10,7 +10,7 @@ namespace @internal
 {
     public static partial class pointer_package
     {
-        public partial struct Int8Ptr // : ref sbyte
+        public partial struct Int8Ptr // : ptr<sbyte>
         {
         }
     }

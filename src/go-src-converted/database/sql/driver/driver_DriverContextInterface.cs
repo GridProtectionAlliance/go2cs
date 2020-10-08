@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Connector, error) OpenConnectorByRef(ref T value, @string name);
+            private delegate (Connector, error) OpenConnectorByPtr(ptr<T> value, @string name);
             private delegate (Connector, error) OpenConnectorByVal(T value, @string name);
 
-            private static readonly OpenConnectorByRef s_OpenConnectorByRef;
+            private static readonly OpenConnectorByPtr s_OpenConnectorByPtr;
             private static readonly OpenConnectorByVal s_OpenConnectorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OpenConnectorByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OpenConnectorByPtr is null || !m_target_is_ptr)
                     return s_OpenConnectorByVal!(target, name);
 
-                return s_OpenConnectorByRef(ref target, name);
+                return s_OpenConnectorByPtr(m_target_ptr, name);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static DriverContext()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("OpenConnector");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("OpenConnector");
 
                 if (!(extensionMethod is null))
-                    s_OpenConnectorByRef = extensionMethod.CreateStaticDelegate(typeof(OpenConnectorByRef)) as OpenConnectorByRef;
+                    s_OpenConnectorByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenConnectorByPtr)) as OpenConnectorByPtr;
 
-                if (s_OpenConnectorByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("OpenConnector");
+                extensionMethod = targetType.GetExtensionMethod("OpenConnector");
 
-                    if (!(extensionMethod is null))
-                        s_OpenConnectorByVal = extensionMethod.CreateStaticDelegate(typeof(OpenConnectorByVal)) as OpenConnectorByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OpenConnectorByVal = extensionMethod.CreateStaticDelegate(typeof(OpenConnectorByVal)) as OpenConnectorByVal;
 
-                if (s_OpenConnectorByRef is null && s_OpenConnectorByVal is null)
+                if (s_OpenConnectorByPtr is null && s_OpenConnectorByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement DriverContext.OpenConnector method", new Exception("OpenConnector"));
             }
 

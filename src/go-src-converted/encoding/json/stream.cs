@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2020 August 29 08:35:54 UTC
+// package json -- go2cs converted at 2020 October 08 03:42:55 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\stream.go
 using bytes = go.bytes_package;
@@ -33,26 +33,28 @@ namespace encoding
         //
         // The decoder introduces its own buffering and may
         // read data from r beyond the JSON values requested.
-        public static ref Decoder NewDecoder(io.Reader r)
+        public static ptr<Decoder> NewDecoder(io.Reader r)
         {
-            return ref new Decoder(r:r);
+            return addr(new Decoder(r:r));
         }
 
         // UseNumber causes the Decoder to unmarshal a number into an interface{} as a
         // Number instead of as a float64.
-        private static void UseNumber(this ref Decoder dec)
+        private static void UseNumber(this ptr<Decoder> _addr_dec)
         {
-            dec.d.useNumber = true;
+            ref Decoder dec = ref _addr_dec.val;
 
+            dec.d.useNumber = true;
         }
 
         // DisallowUnknownFields causes the Decoder to return an error when the destination
         // is a struct and the input contains object keys which do not match any
         // non-ignored, exported fields in the destination.
-        private static void DisallowUnknownFields(this ref Decoder dec)
+        private static void DisallowUnknownFields(this ptr<Decoder> _addr_dec)
         {
-            dec.d.disallowUnknownFields = true;
+            ref Decoder dec = ref _addr_dec.val;
 
+            dec.d.disallowUnknownFields = true;
         }
 
         // Decode reads the next JSON-encoded value from its
@@ -60,33 +62,38 @@ namespace encoding
         //
         // See the documentation for Unmarshal for details about
         // the conversion of JSON into a Go value.
-        private static error Decode(this ref Decoder dec, object v)
+        private static error Decode(this ptr<Decoder> _addr_dec, object v)
         {
+            ref Decoder dec = ref _addr_dec.val;
+
             if (dec.err != null)
             {
-                return error.As(dec.err);
+                return error.As(dec.err)!;
             }
+
             {
                 var err = dec.tokenPrepareForDecode();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
 
+
             if (!dec.tokenValueAllowed())
             {
-                return error.As(ref new SyntaxError(msg:"not at beginning of value",Offset:dec.offset()));
+                return error.As(addr(new SyntaxError(msg:"not at beginning of value",Offset:dec.InputOffset()))!)!;
             } 
 
             // Read whole value into buffer.
             var (n, err) = dec.readValue();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             dec.d.init(dec.buf[dec.scanp..dec.scanp + n]);
             dec.scanp += n; 
 
@@ -98,54 +105,68 @@ namespace encoding
             // fixup token streaming state
             dec.tokenValueEnd();
 
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Buffered returns a reader of the data remaining in the Decoder's
         // buffer. The reader is valid until the next call to Decode.
-        private static io.Reader Buffered(this ref Decoder dec)
+        private static io.Reader Buffered(this ptr<Decoder> _addr_dec)
         {
+            ref Decoder dec = ref _addr_dec.val;
+
             return bytes.NewReader(dec.buf[dec.scanp..]);
         }
 
         // readValue reads a JSON value into dec.buf.
         // It returns the length of the encoding.
-        private static (long, error) readValue(this ref Decoder dec)
+        private static (long, error) readValue(this ptr<Decoder> _addr_dec)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref Decoder dec = ref _addr_dec.val;
+
             dec.scan.reset();
 
             var scanp = dec.scanp;
-            error err = default;
+            error err = default!;
 Input:
-            while (true)
-            { 
+            while (scanp >= 0L)
+            {
                 // Look in the buffer for a new value.
-                foreach (var (i, c) in dec.buf[scanp..])
+                while (scanp < len(dec.buf))
                 {
+                    var c = dec.buf[scanp];
                     dec.scan.bytes++;
-                    var v = dec.scan.step(ref dec.scan, c);
-                    if (v == scanEnd)
-                    {
-                        scanp += i;
+
+                    if (dec.scan.step(_addr_dec.scan, c) == scanEnd) 
+                        // scanEnd is delayed one byte so we decrement
+                        // the scanner bytes count by 1 to ensure that
+                        // this value is correct in the next call of Decode.
+                        dec.scan.bytes--;
                         _breakInput = true;
                         break;
-                    } 
-                    // scanEnd is delayed one byte.
-                    // We might block trying to get that byte from src,
-                    // so instead invent a space byte.
-                    if ((v == scanEndObject || v == scanEndArray) && dec.scan.step(ref dec.scan, ' ') == scanEnd)
-                    {
-                        scanp += i + 1L;
-                        _breakInput = true;
-                        break;
-                    }
-                    if (v == scanError)
-                    {
+                    else if (dec.scan.step(_addr_dec.scan, c) == scanEndObject || dec.scan.step(_addr_dec.scan, c) == scanEndArray) 
+                        // scanEnd is delayed one byte.
+                        // We might block trying to get that byte from src,
+                        // so instead invent a space byte.
+                        if (stateEndValue(_addr_dec.scan, ' ') == scanEnd)
+                        {
+                            scanp++;
+                            _breakInput = true;
+                            break;
+                    scanp++;
+                        }
+
+                    else if (dec.scan.step(_addr_dec.scan, c) == scanError) 
                         dec.err = dec.scan.err;
-                        return (0L, dec.scan.err);
-                    }
-                }
-                scanp = len(dec.buf); 
+                        return (0L, error.As(dec.scan.err)!);
+                    
+                } 
+
+                // Did the last read have an error?
+                // Delayed until now to allow buffer scan.
+ 
 
                 // Did the last read have an error?
                 // Delayed until now to allow buffer scan.
@@ -153,28 +174,37 @@ Input:
                 {
                     if (err == io.EOF)
                     {
-                        if (dec.scan.step(ref dec.scan, ' ') == scanEnd)
+                        if (dec.scan.step(_addr_dec.scan, ' ') == scanEnd)
                         {
                             _breakInput = true;
                             break;
                         }
+
                         if (nonSpace(dec.buf))
                         {
-                            err = error.As(io.ErrUnexpectedEOF);
+                            err = error.As(io.ErrUnexpectedEOF)!;
                         }
+
                     }
+
                     dec.err = err;
-                    return (0L, err);
+                    return (0L, error.As(err)!);
+
                 }
+
                 var n = scanp - dec.scanp;
-                err = error.As(dec.refill());
+                err = error.As(dec.refill())!;
                 scanp = dec.scanp + n;
+
             }
-            return (scanp - dec.scanp, null);
+            return (scanp - dec.scanp, error.As(null!)!);
+
         }
 
-        private static error refill(this ref Decoder dec)
-        { 
+        private static error refill(this ptr<Decoder> _addr_dec)
+        {
+            ref Decoder dec = ref _addr_dec.val;
+ 
             // Make room to read more into the buffer.
             // First slide down data already consumed.
             if (dec.scanp > 0L)
@@ -186,7 +216,7 @@ Input:
             } 
 
             // Grow buffer if not large enough.
-            const long minRead = 512L;
+            const long minRead = (long)512L;
 
             if (cap(dec.buf) - len(dec.buf) < minRead)
             {
@@ -199,7 +229,8 @@ Input:
             var (n, err) = dec.r.Read(dec.buf[len(dec.buf)..cap(dec.buf)]);
             dec.buf = dec.buf[0L..len(dec.buf) + n];
 
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         private static bool nonSpace(slice<byte> b)
@@ -210,8 +241,10 @@ Input:
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
         // An Encoder writes JSON values to an output stream.
@@ -226,9 +259,9 @@ Input:
         }
 
         // NewEncoder returns a new encoder that writes to w.
-        public static ref Encoder NewEncoder(io.Writer w)
+        public static ptr<Encoder> NewEncoder(io.Writer w)
         {
-            return ref new Encoder(w:w,escapeHTML:true);
+            return addr(new Encoder(w:w,escapeHTML:true));
         }
 
         // Encode writes the JSON encoding of v to the stream,
@@ -236,17 +269,20 @@ Input:
         //
         // See the documentation for Marshal for details about the
         // conversion of Go values to JSON.
-        private static error Encode(this ref Encoder enc, object v)
+        private static error Encode(this ptr<Encoder> _addr_enc, object v)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             if (enc.err != null)
             {
-                return error.As(enc.err);
+                return error.As(enc.err)!;
             }
+
             var e = newEncodeState();
             var err = e.marshal(v, new encOpts(escapeHTML:enc.escapeHTML));
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             } 
 
             // Terminate each value with a newline.
@@ -264,29 +300,37 @@ Input:
                 {
                     enc.indentBuf = @new<bytes.Buffer>();
                 }
+
                 enc.indentBuf.Reset();
                 err = Indent(enc.indentBuf, b, enc.indentPrefix, enc.indentValue);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 b = enc.indentBuf.Bytes();
+
             }
+
             _, err = enc.w.Write(b);
 
             if (err != null)
             {
                 enc.err = err;
             }
+
             encodeStatePool.Put(e);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // SetIndent instructs the encoder to format each subsequent encoded
         // value as if indented by the package-level function Indent(dst, src, prefix, indent).
         // Calling SetIndent("", "") disables indentation.
-        private static void SetIndent(this ref Encoder enc, @string prefix, @string indent)
+        private static void SetIndent(this ptr<Encoder> _addr_enc, @string prefix, @string indent)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             enc.indentPrefix = prefix;
             enc.indentValue = indent;
         }
@@ -298,8 +342,10 @@ Input:
         //
         // In non-HTML settings where the escaping interferes with the readability
         // of the output, SetEscapeHTML(false) disables this behavior.
-        private static void SetEscapeHTML(this ref Encoder enc, bool on)
+        private static void SetEscapeHTML(this ptr<Encoder> _addr_enc, bool on)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             enc.escapeHTML = on;
         }
 
@@ -313,26 +359,35 @@ Input:
         // MarshalJSON returns m as the JSON encoding of m.
         public static (slice<byte>, error) MarshalJSON(this RawMessage m)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             if (m == null)
             {
-                return ((slice<byte>)"null", null);
+                return ((slice<byte>)"null", error.As(null!)!);
             }
-            return (m, null);
+
+            return (m, error.As(null!)!);
+
         }
 
         // UnmarshalJSON sets *m to a copy of data.
-        private static error UnmarshalJSON(this ref RawMessage m, slice<byte> data)
+        private static error UnmarshalJSON(this ptr<RawMessage> _addr_m, slice<byte> data)
         {
+            ref RawMessage m = ref _addr_m.val;
+
             if (m == null)
             {
-                return error.As(errors.New("json.RawMessage: UnmarshalJSON on nil pointer"));
+                return error.As(errors.New("json.RawMessage: UnmarshalJSON on nil pointer"))!;
             }
-            m.Value = append((m.Value)[0L..0L], data);
-            return error.As(null);
+
+            m.val = append((m.val)[0L..0L], data);
+            return error.As(null!)!;
+
         }
 
-        private static Marshaler _ = (RawMessage.Value)(null);
-        private static Unmarshaler _ = (RawMessage.Value)(null);
+        private static Marshaler _ = (RawMessage.val)(null);
+        private static Unmarshaler _ = (RawMessage.val)(null);
 
         // A Token holds a value of one of these types:
         //
@@ -347,19 +402,22 @@ Input:
         {
         }
 
-        private static readonly var tokenTopValue = iota;
-        private static readonly var tokenArrayStart = 0;
-        private static readonly var tokenArrayValue = 1;
-        private static readonly var tokenArrayComma = 2;
-        private static readonly var tokenObjectStart = 3;
-        private static readonly var tokenObjectKey = 4;
-        private static readonly var tokenObjectColon = 5;
-        private static readonly var tokenObjectValue = 6;
-        private static readonly var tokenObjectComma = 7;
+        private static readonly var tokenTopValue = (var)iota;
+        private static readonly var tokenArrayStart = (var)0;
+        private static readonly var tokenArrayValue = (var)1;
+        private static readonly var tokenArrayComma = (var)2;
+        private static readonly var tokenObjectStart = (var)3;
+        private static readonly var tokenObjectKey = (var)4;
+        private static readonly var tokenObjectColon = (var)5;
+        private static readonly var tokenObjectValue = (var)6;
+        private static readonly var tokenObjectComma = (var)7;
+
 
         // advance tokenstate from a separator state to a value state
-        private static error tokenPrepareForDecode(this ref Decoder dec)
-        { 
+        private static error tokenPrepareForDecode(this ptr<Decoder> _addr_dec)
+        {
+            ref Decoder dec = ref _addr_dec.val;
+ 
             // Note: Not calling peek before switch, to avoid
             // putting peek into the standard Decode path.
             // peek is only called when using the Token API.
@@ -368,45 +426,56 @@ Input:
                 var (c, err) = dec.peek();
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 if (c != ',')
                 {
-                    return error.As(ref new SyntaxError("expected comma after array element",dec.offset()));
+                    return error.As(addr(new SyntaxError("expected comma after array element",dec.InputOffset()))!)!;
                 }
+
                 dec.scanp++;
                 dec.tokenState = tokenArrayValue;
             else if (dec.tokenState == tokenObjectColon) 
                 (c, err) = dec.peek();
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 if (c != ':')
                 {
-                    return error.As(ref new SyntaxError("expected colon after object key",dec.offset()));
+                    return error.As(addr(new SyntaxError("expected colon after object key",dec.InputOffset()))!)!;
                 }
+
                 dec.scanp++;
                 dec.tokenState = tokenObjectValue;
-                        return error.As(null);
+                        return error.As(null!)!;
+
         }
 
-        private static bool tokenValueAllowed(this ref Decoder dec)
+        private static bool tokenValueAllowed(this ptr<Decoder> _addr_dec)
         {
+            ref Decoder dec = ref _addr_dec.val;
+
 
             if (dec.tokenState == tokenTopValue || dec.tokenState == tokenArrayStart || dec.tokenState == tokenArrayValue || dec.tokenState == tokenObjectValue) 
                 return true;
                         return false;
+
         }
 
-        private static void tokenValueEnd(this ref Decoder dec)
+        private static void tokenValueEnd(this ptr<Decoder> _addr_dec)
         {
+            ref Decoder dec = ref _addr_dec.val;
+
 
             if (dec.tokenState == tokenArrayStart || dec.tokenState == tokenArrayValue) 
                 dec.tokenState = tokenArrayComma;
             else if (dec.tokenState == tokenObjectValue) 
                 dec.tokenState = tokenObjectComma;
-                    }
+            
+        }
 
         // A Delim is a JSON array or object delimiter, one of [ ] { or }.
         public partial struct Delim // : int
@@ -429,15 +498,20 @@ Input:
         // number, and null—along with delimiters [ ] { } of type Delim
         // to mark the start and end of arrays and objects.
         // Commas and colons are elided.
-        private static (Token, error) Token(this ref Decoder dec)
+        private static (Token, error) Token(this ptr<Decoder> _addr_dec)
         {
+            Token _p0 = default;
+            error _p0 = default!;
+            ref Decoder dec = ref _addr_dec.val;
+
             while (true)
             {
                 var (c, err) = dec.peek();
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
 
                 if (c == '[')
                 {
@@ -445,10 +519,11 @@ Input:
                     {
                         return dec.tokenError(c);
                     }
+
                     dec.scanp++;
                     dec.tokenStack = append(dec.tokenStack, dec.tokenState);
                     dec.tokenState = tokenArrayStart;
-                    return (Delim('['), null);
+                    return (Delim('['), error.As(null!)!);
                     goto __switch_break0;
                 }
                 if (c == ']')
@@ -457,11 +532,12 @@ Input:
                     {
                         return dec.tokenError(c);
                     }
+
                     dec.scanp++;
                     dec.tokenState = dec.tokenStack[len(dec.tokenStack) - 1L];
                     dec.tokenStack = dec.tokenStack[..len(dec.tokenStack) - 1L];
                     dec.tokenValueEnd();
-                    return (Delim(']'), null);
+                    return (Delim(']'), error.As(null!)!);
                     goto __switch_break0;
                 }
                 if (c == '{')
@@ -470,10 +546,11 @@ Input:
                     {
                         return dec.tokenError(c);
                     }
+
                     dec.scanp++;
                     dec.tokenStack = append(dec.tokenStack, dec.tokenState);
                     dec.tokenState = tokenObjectStart;
-                    return (Delim('{'), null);
+                    return (Delim('{'), error.As(null!)!);
                     goto __switch_break0;
                 }
                 if (c == '}')
@@ -482,11 +559,12 @@ Input:
                     {
                         return dec.tokenError(c);
                     }
+
                     dec.scanp++;
                     dec.tokenState = dec.tokenStack[len(dec.tokenStack) - 1L];
                     dec.tokenStack = dec.tokenStack[..len(dec.tokenStack) - 1L];
                     dec.tokenValueEnd();
-                    return (Delim('}'), null);
+                    return (Delim('}'), error.As(null!)!);
                     goto __switch_break0;
                 }
                 if (c == ':')
@@ -495,6 +573,7 @@ Input:
                     {
                         return dec.tokenError(c);
                     }
+
                     dec.scanp++;
                     dec.tokenState = tokenObjectValue;
                     continue;
@@ -508,12 +587,14 @@ Input:
                         dec.tokenState = tokenArrayValue;
                         continue;
                     }
+
                     if (dec.tokenState == tokenObjectComma)
                     {
                         dec.scanp++;
                         dec.tokenState = tokenObjectKey;
                         continue;
                     }
+
                     return dec.tokenError(c);
                     goto __switch_break0;
                 }
@@ -521,47 +602,58 @@ Input:
                 {
                     if (dec.tokenState == tokenObjectStart || dec.tokenState == tokenObjectKey)
                     {
-                        @string x = default;
+                        ref @string x = ref heap(out ptr<@string> _addr_x);
                         var old = dec.tokenState;
                         dec.tokenState = tokenTopValue;
-                        var err = dec.Decode(ref x);
+                        var err = dec.Decode(_addr_x);
                         dec.tokenState = old;
                         if (err != null)
                         {
-                            return (null, err);
+                            return (null, error.As(err)!);
                         }
+
                         dec.tokenState = tokenObjectColon;
-                        return (x, null);
+                        return (x, error.As(null!)!);
+
                     }
+
                 }
                 // default: 
                     if (!dec.tokenValueAllowed())
                     {
                         return dec.tokenError(c);
                     }
+
                     x = default;
                     {
                         var err__prev1 = err;
 
-                        err = dec.Decode(ref x);
+                        err = dec.Decode(_addr_x);
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (null, error.As(err)!);
                         }
 
                         err = err__prev1;
 
                     }
-                    return (x, null);
+
+                    return (x, error.As(null!)!);
 
                 __switch_break0:;
+
             }
+
 
         }
 
-        private static (Token, error) tokenError(this ref Decoder dec, byte c)
+        private static (Token, error) tokenError(this ptr<Decoder> _addr_dec, byte c)
         {
+            Token _p0 = default;
+            error _p0 = default!;
+            ref Decoder dec = ref _addr_dec.val;
+
             @string context = default;
 
             if (dec.tokenState == tokenTopValue) 
@@ -576,20 +668,27 @@ Input:
                 context = " after object key";
             else if (dec.tokenState == tokenObjectComma) 
                 context = " after object key:value pair";
-                        return (null, ref new SyntaxError("invalid character "+quoteChar(c)+" "+context,dec.offset()));
+                        return (null, error.As(addr(new SyntaxError("invalid character "+quoteChar(c)+context,dec.InputOffset()))!)!);
+
         }
 
         // More reports whether there is another element in the
         // current array or object being parsed.
-        private static bool More(this ref Decoder dec)
+        private static bool More(this ptr<Decoder> _addr_dec)
         {
+            ref Decoder dec = ref _addr_dec.val;
+
             var (c, err) = dec.peek();
             return err == null && c != ']' && c != '}';
         }
 
-        private static (byte, error) peek(this ref Decoder dec)
+        private static (byte, error) peek(this ptr<Decoder> _addr_dec)
         {
-            error err = default;
+            byte _p0 = default;
+            error _p0 = default!;
+            ref Decoder dec = ref _addr_dec.val;
+
+            error err = default!;
             while (true)
             {
                 for (var i = dec.scanp; i < len(dec.buf); i++)
@@ -599,23 +698,33 @@ Input:
                     {
                         continue;
                     }
+
                     dec.scanp = i;
-                    return (c, null);
+                    return (c, error.As(null!)!);
+
                 } 
                 // buffer has been scanned, now report any error
  
                 // buffer has been scanned, now report any error
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
-                err = error.As(dec.refill());
+
+                err = error.As(dec.refill())!;
+
             }
+
 
         }
 
-        private static long offset(this ref Decoder dec)
+        // InputOffset returns the input stream byte offset of the current decoder position.
+        // The offset gives the location of the end of the most recently returned token
+        // and the beginning of the next token.
+        private static long InputOffset(this ptr<Decoder> _addr_dec)
         {
+            ref Decoder dec = ref _addr_dec.val;
+
             return dec.scanned + int64(dec.scanp);
         }
     }

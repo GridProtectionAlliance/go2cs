@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:27 UTC
+//     Generated on 2020 October 08 04:29:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,21 +15,27 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
+using logopt = go.cmd.compile.@internal.logopt_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
+using bio = go.cmd.@internal.bio_package;
 using dwarf = go.cmd.@internal.dwarf_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
+using goversion = go.@internal.goversion_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
 using path = go.path_package;
+using regexp = go.regexp_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;

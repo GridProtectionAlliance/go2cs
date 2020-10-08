@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:24 UTC
+//     Generated on 2020 October 08 04:31:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using types = go.cmd.compile.@internal.types_package;
-using fmt = go.fmt_package;
+using src = go.cmd.@internal.src_package;
 using sort = go.sort_package;
 using go;
 
@@ -32,13 +32,15 @@ namespace @internal
             public exprSwitch(NilType _)
             {
                 this.exprname = default;
-                this.kind = default;
+                this.done = default;
+                this.clauses = default;
             }
 
-            public exprSwitch(ref ptr<Node> exprname = default, long kind = default)
+            public exprSwitch(ref ptr<Node> exprname = default, Nodes done = default, slice<exprClause> clauses = default)
             {
                 this.exprname = exprname;
-                this.kind = kind;
+                this.done = done;
+                this.clauses = clauses;
             }
 
             // Enable comparisons between nil and exprSwitch struct
@@ -61,7 +63,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static exprSwitch exprSwitch_cast(dynamic value)
         {
-            return new exprSwitch(ref value.exprname, value.kind);
+            return new exprSwitch(ref value.exprname, value.done, value.clauses);
         }
     }
 }}}}

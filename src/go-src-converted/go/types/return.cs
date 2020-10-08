@@ -4,7 +4,7 @@
 
 // This file implements isTerminating.
 
-// package types -- go2cs converted at 2020 August 29 08:47:53 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:41 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\return.go
 using ast = go.go.ast_package;
@@ -19,94 +19,77 @@ namespace go
         // isTerminating reports if s is a terminating statement.
         // If s is labeled, label is the label name; otherwise s
         // is "".
-        private static bool isTerminating(this ref Checker check, ast.Stmt s, @string label)
+        private static bool isTerminating(this ptr<Checker> _addr_check, ast.Stmt s, @string label)
         {
+            ref Checker check = ref _addr_check.val;
+
             switch (s.type())
             {
-                case ref ast.BadStmt s:
+                case ptr<ast.BadStmt> s:
                     break;
-                case ref ast.DeclStmt s:
+                case ptr<ast.DeclStmt> s:
                     break;
-                case ref ast.EmptyStmt s:
+                case ptr<ast.EmptyStmt> s:
                     break;
-                case ref ast.SendStmt s:
+                case ptr<ast.SendStmt> s:
                     break;
-                case ref ast.IncDecStmt s:
+                case ptr<ast.IncDecStmt> s:
                     break;
-                case ref ast.AssignStmt s:
+                case ptr<ast.AssignStmt> s:
                     break;
-                case ref ast.GoStmt s:
+                case ptr<ast.GoStmt> s:
                     break;
-                case ref ast.DeferStmt s:
+                case ptr<ast.DeferStmt> s:
                     break;
-                case ref ast.RangeStmt s:
+                case ptr<ast.RangeStmt> s:
                     break;
-                case ref ast.LabeledStmt s:
+                case ptr<ast.LabeledStmt> s:
                     return check.isTerminating(s.Stmt, s.Label.Name);
                     break;
-                case ref ast.ExprStmt s:
+                case ptr<ast.ExprStmt> s:
                     {
-                        ref ast.CallExpr (call, _) = unparen(s.X)._<ref ast.CallExpr>();
+                        ptr<ast.CallExpr> (call, ok) = unparen(s.X)._<ptr<ast.CallExpr>>();
 
-                        if (call != null)
+                        if (ok && check.isPanic[call])
                         {
-                            {
-                                ref ast.Ident (id, _) = call.Fun._<ref ast.Ident>();
-
-                                if (id != null)
-                                {
-                                    {
-                                        var (_, obj) = check.scope.LookupParent(id.Name, token.NoPos);
-
-                                        if (obj != null)
-                                        {
-                                            {
-                                                ref Builtin (b, _) = obj._<ref Builtin>();
-
-                                                if (b != null && b.id == _Panic)
-                                                {
-                                                    return true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            return true;
                         }
                     }
+
+
                     break;
-                case ref ast.ReturnStmt s:
+                case ptr<ast.ReturnStmt> s:
                     return true;
                     break;
-                case ref ast.BranchStmt s:
+                case ptr<ast.BranchStmt> s:
                     if (s.Tok == token.GOTO || s.Tok == token.FALLTHROUGH)
                     {
                         return true;
                     }
                     break;
-                case ref ast.BlockStmt s:
+                case ptr<ast.BlockStmt> s:
                     return check.isTerminatingList(s.List, "");
                     break;
-                case ref ast.IfStmt s:
+                case ptr<ast.IfStmt> s:
                     if (s.Else != null && check.isTerminating(s.Body, "") && check.isTerminating(s.Else, ""))
                     {
                         return true;
                     }
                     break;
-                case ref ast.SwitchStmt s:
+                case ptr<ast.SwitchStmt> s:
                     return check.isTerminatingSwitch(s.Body, label);
                     break;
-                case ref ast.TypeSwitchStmt s:
+                case ptr<ast.TypeSwitchStmt> s:
                     return check.isTerminatingSwitch(s.Body, label);
                     break;
-                case ref ast.SelectStmt s:
+                case ptr<ast.SelectStmt> s:
                     {
                         var s__prev1 = s;
 
                         foreach (var (_, __s) in s.Body.List)
                         {
                             s = __s;
-                            ref ast.CommClause cc = s._<ref ast.CommClause>();
+                            ptr<ast.CommClause> cc = s._<ptr<ast.CommClause>>();
                             if (!check.isTerminatingList(cc.Body, "") || hasBreakList(cc.Body, label, true))
                             {
                                 return false;
@@ -117,7 +100,7 @@ namespace go
 
                     return true;
                     break;
-                case ref ast.ForStmt s:
+                case ptr<ast.ForStmt> s:
                     if (s.Cond == null && !hasBreak(s.Body, label, true))
                     {
                         return true;
@@ -133,15 +116,18 @@ namespace go
             }
 
             return false;
+
         }
 
-        private static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> list, @string label)
-        { 
+        private static bool isTerminatingList(this ptr<Checker> _addr_check, slice<ast.Stmt> list, @string label)
+        {
+            ref Checker check = ref _addr_check.val;
+ 
             // trailing empty statements are permitted - skip them
             for (var i = len(list) - 1L; i >= 0L; i--)
             {
                 {
-                    ref ast.EmptyStmt (_, ok) = list[i]._<ref ast.EmptyStmt>();
+                    ptr<ast.EmptyStmt> (_, ok) = list[i]._<ptr<ast.EmptyStmt>>();
 
                     if (!ok)
                     {
@@ -149,27 +135,34 @@ namespace go
                     }
 
                 }
+
             }
 
             return false; // all statements are empty
         }
 
-        private static bool isTerminatingSwitch(this ref Checker check, ref ast.BlockStmt body, @string label)
+        private static bool isTerminatingSwitch(this ptr<Checker> _addr_check, ptr<ast.BlockStmt> _addr_body, @string label)
         {
+            ref Checker check = ref _addr_check.val;
+            ref ast.BlockStmt body = ref _addr_body.val;
+
             var hasDefault = false;
             foreach (var (_, s) in body.List)
             {
-                ref ast.CaseClause cc = s._<ref ast.CaseClause>();
+                ptr<ast.CaseClause> cc = s._<ptr<ast.CaseClause>>();
                 if (cc.List == null)
                 {
                     hasDefault = true;
                 }
+
                 if (!check.isTerminatingList(cc.Body, "") || hasBreakList(cc.Body, label, true))
                 {
                     return false;
                 }
+
             }
             return hasDefault;
+
         }
 
         // TODO(gri) For nested breakable statements, the current implementation of hasBreak
@@ -183,86 +176,95 @@ namespace go
         {
             switch (s.type())
             {
-                case ref ast.BadStmt s:
+                case ptr<ast.BadStmt> s:
                     break;
-                case ref ast.DeclStmt s:
+                case ptr<ast.DeclStmt> s:
                     break;
-                case ref ast.EmptyStmt s:
+                case ptr<ast.EmptyStmt> s:
                     break;
-                case ref ast.ExprStmt s:
+                case ptr<ast.ExprStmt> s:
                     break;
-                case ref ast.SendStmt s:
+                case ptr<ast.SendStmt> s:
                     break;
-                case ref ast.IncDecStmt s:
+                case ptr<ast.IncDecStmt> s:
                     break;
-                case ref ast.AssignStmt s:
+                case ptr<ast.AssignStmt> s:
                     break;
-                case ref ast.GoStmt s:
+                case ptr<ast.GoStmt> s:
                     break;
-                case ref ast.DeferStmt s:
+                case ptr<ast.DeferStmt> s:
                     break;
-                case ref ast.ReturnStmt s:
+                case ptr<ast.ReturnStmt> s:
                     break;
-                case ref ast.LabeledStmt s:
+                case ptr<ast.LabeledStmt> s:
                     return hasBreak(s.Stmt, label, implicit);
                     break;
-                case ref ast.BranchStmt s:
+                case ptr<ast.BranchStmt> s:
                     if (s.Tok == token.BREAK)
                     {
                         if (s.Label == null)
                         {
                             return implicit;
                         }
+
                         if (s.Label.Name == label)
                         {
                             return true;
                         }
+
                     }
+
                     break;
-                case ref ast.BlockStmt s:
+                case ptr<ast.BlockStmt> s:
                     return hasBreakList(s.List, label, implicit);
                     break;
-                case ref ast.IfStmt s:
+                case ptr<ast.IfStmt> s:
                     if (hasBreak(s.Body, label, implicit) || s.Else != null && hasBreak(s.Else, label, implicit))
                     {
                         return true;
                     }
+
                     break;
-                case ref ast.CaseClause s:
+                case ptr<ast.CaseClause> s:
                     return hasBreakList(s.Body, label, implicit);
                     break;
-                case ref ast.SwitchStmt s:
+                case ptr<ast.SwitchStmt> s:
                     if (label != "" && hasBreak(s.Body, label, false))
                     {
                         return true;
                     }
+
                     break;
-                case ref ast.TypeSwitchStmt s:
+                case ptr<ast.TypeSwitchStmt> s:
                     if (label != "" && hasBreak(s.Body, label, false))
                     {
                         return true;
                     }
+
                     break;
-                case ref ast.CommClause s:
+                case ptr<ast.CommClause> s:
                     return hasBreakList(s.Body, label, implicit);
                     break;
-                case ref ast.SelectStmt s:
+                case ptr<ast.SelectStmt> s:
                     if (label != "" && hasBreak(s.Body, label, false))
                     {
                         return true;
                     }
+
                     break;
-                case ref ast.ForStmt s:
+                case ptr<ast.ForStmt> s:
                     if (label != "" && hasBreak(s.Body, label, false))
                     {
                         return true;
                     }
+
                     break;
-                case ref ast.RangeStmt s:
+                case ptr<ast.RangeStmt> s:
                     if (label != "" && hasBreak(s.Body, label, false))
                     {
                         return true;
                     }
+
                     break;
                 default:
                 {
@@ -274,6 +276,7 @@ namespace go
             }
 
             return false;
+
         }
 
         private static bool hasBreakList(slice<ast.Stmt> list, @string label, bool @implicit)
@@ -284,8 +287,10 @@ namespace go
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
     }
 }}

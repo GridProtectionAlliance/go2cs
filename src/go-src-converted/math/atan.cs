@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:44 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:10 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\atan.go
 
@@ -62,16 +62,16 @@ namespace go
         // xatan evaluates a series valid in the range [0, 0.66].
         private static double xatan(double x)
         {
-            const float P0 = -8.750608600031904122785e-01F;
-            const float P1 = -1.615753718733365076637e+01F;
-            const float P2 = -7.500855792314704667340e+01F;
-            const float P3 = -1.228866684490136173410e+02F;
-            const float P4 = -6.485021904942025371773e+01F;
-            const float Q0 = +2.485846490142306297962e+01F;
-            const float Q1 = +1.650270098316988542046e+02F;
-            const float Q2 = +4.328810604912902668951e+02F;
-            const float Q3 = +4.853903996359136964868e+02F;
-            const float Q4 = +1.945506571482613964425e+02F;
+            const float P0 = (float)-8.750608600031904122785e-01F;
+            const float P1 = (float)-1.615753718733365076637e+01F;
+            const float P2 = (float)-7.500855792314704667340e+01F;
+            const float P3 = (float)-1.228866684490136173410e+02F;
+            const float P4 = (float)-6.485021904942025371773e+01F;
+            const float Q0 = (float)+2.485846490142306297962e+01F;
+            const float Q1 = (float)+1.650270098316988542046e+02F;
+            const float Q2 = (float)+4.328810604912902668951e+02F;
+            const float Q3 = (float)+4.853903996359136964868e+02F;
+            const float Q4 = (float)+1.945506571482613964425e+02F;
             var z = x * x;
             z = z * ((((P0 * z + P1) * z + P2) * z + P3) * z + P4) / (((((z + Q0) * z + Q1) * z + Q2) * z + Q3) * z + Q4);
             z = x * z + x;
@@ -82,17 +82,20 @@ namespace go
         // to the range [0, 0.66] and calls xatan.
         private static double satan(double x)
         {
-            const float Morebits = 6.123233995736765886130e-17F; // pi/2 = PIO2 + Morebits
-            const float Tan3pio8 = 2.41421356237309504880F; // tan(3*pi/8)
+            const float Morebits = (float)6.123233995736765886130e-17F; // pi/2 = PIO2 + Morebits
+            const float Tan3pio8 = (float)2.41421356237309504880F; // tan(3*pi/8)
             if (x <= 0.66F)
             {
                 return xatan(x);
             }
+
             if (x > Tan3pio8)
             {
                 return Pi / 2L - xatan(1L / x) + Morebits;
             }
+
             return Pi / 4L + xatan((x - 1L) / (x + 1L)) + 0.5F * Morebits;
+
         }
 
         // Atan returns the arctangent, in radians, of x.
@@ -109,11 +112,14 @@ namespace go
             {>>MARKER:FUNCTION_Atan_BLOCK_PREFIX<<
                 return x;
             }
+
             if (x > 0L)
             {
                 return satan(x);
             }
+
             return -satan(-x);
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:52:43 UTC
+//     Generated on 2020 October 08 04:09:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using printer = go.go.printer_package;
 using token = go.go.token_package;
+using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -51,7 +52,7 @@ namespace go
                 this.Edit = default;
             }
 
-            public File(ref ptr<ast.File> AST = default, slice<ref ast.CommentGroup> Comments = default, @string Package = default, @string Preamble = default, slice<ref Ref> Ref = default, slice<ref Call> Calls = default, slice<ref ExpFunc> ExpFunc = default, map<@string, ref Name> Name = default, map<ref Name, token.Pos> NamePos = default, ref ptr<edit.Buffer> Edit = default)
+            public File(ref ptr<ast.File> AST = default, slice<ptr<ast.CommentGroup>> Comments = default, @string Package = default, @string Preamble = default, slice<ptr<Ref>> Ref = default, slice<ptr<Call>> Calls = default, slice<ptr<ExpFunc>> ExpFunc = default, map<@string, ptr<Name>> Name = default, map<ptr<Name>, token.Pos> NamePos = default, ref ptr<edit.Buffer> Edit = default)
             {
                 this.AST = AST;
                 this.Comments = Comments;

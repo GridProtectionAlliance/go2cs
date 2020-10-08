@@ -5,12 +5,12 @@
 // Package flate implements the DEFLATE compressed data format, described in
 // RFC 1951.  The gzip and zlib packages implement access to DEFLATE-based file
 // formats.
-// package flate -- go2cs converted at 2020 August 29 08:23:35 UTC
+// package flate -- go2cs converted at 2020 October 08 03:31:02 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\inflate.go
 using bufio = go.bufio_package;
 using io = go.io_package;
-using mathbits = go.math.bits_package;
+using bits = go.math.bits_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using static go.builtin;
@@ -21,13 +21,13 @@ namespace compress
 {
     public static partial class flate_package
     {
-        private static readonly long maxCodeLen = 16L; // max length of Huffman code
+        private static readonly long maxCodeLen = (long)16L; // max length of Huffman code
         // The next three numbers come from the RFC section 3.2.7, with the
         // additional proviso in section 3.2.5 which implies that distance codes
         // 30 and 31 should never occur in compressed data.
-        private static readonly long maxNumLit = 286L;
-        private static readonly long maxNumDist = 30L;
-        private static readonly long numCodes = 19L; // number of codes in Huffman meta-code
+        private static readonly long maxNumLit = (long)286L;
+        private static readonly long maxNumDist = (long)30L;
+        private static readonly long numCodes = (long)19L; // number of codes in Huffman meta-code
 
         // Initialize the fixedHuffmanDecoder only once upon first use.
         private static sync.Once fixedOnce = default;
@@ -62,8 +62,10 @@ namespace compress
             public error Err; // error returned by underlying Read
         }
 
-        private static @string Error(this ref ReadError e)
+        private static @string Error(this ptr<ReadError> _addr_e)
         {
+            ref ReadError e = ref _addr_e.val;
+
             return "flate: read error at offset " + strconv.FormatInt(e.Offset, 10L) + ": " + e.Err.Error();
         }
 
@@ -76,12 +78,14 @@ namespace compress
             public error Err; // error returned by underlying Write
         }
 
-        private static @string Error(this ref WriteError e)
+        private static @string Error(this ptr<WriteError> _addr_e)
         {
+            ref WriteError e = ref _addr_e.val;
+
             return "flate: write error at offset " + strconv.FormatInt(e.Offset, 10L) + ": " + e.Err.Error();
         }
 
-        // Resetter resets a ReadCloser returned by NewReader or NewReaderDict to
+        // Resetter resets a ReadCloser returned by NewReader or NewReaderDict
         // to switch to a new underlying Reader. This permits reusing a ReadCloser
         // instead of allocating a new one.
         public partial interface Resetter
@@ -104,15 +108,16 @@ namespace compress
         // number of bits.
         //
         // See the following:
-        //    http://www.gzip.org/algorithm.txt
+        //    https://github.com/madler/zlib/raw/master/doc/algorithm.txt
 
         // chunk & 15 is number of bits
         // chunk >> 4 is value, including table link
 
-        private static readonly long huffmanChunkBits = 9L;
-        private static readonly long huffmanNumChunks = 1L << (int)(huffmanChunkBits);
-        private static readonly long huffmanCountMask = 15L;
-        private static readonly long huffmanValueShift = 4L;
+        private static readonly long huffmanChunkBits = (long)9L;
+        private static readonly long huffmanNumChunks = (long)1L << (int)(huffmanChunkBits);
+        private static readonly long huffmanCountMask = (long)15L;
+        private static readonly long huffmanValueShift = (long)4L;
+
 
         private partial struct huffmanDecoder
         {
@@ -127,18 +132,20 @@ namespace compress
         // tree (i.e., neither over-subscribed nor under-subscribed). The exception is a
         // degenerate case where the tree has only a single symbol with length 1. Empty
         // trees are permitted.
-        private static bool init(this ref huffmanDecoder _h, slice<long> bits) => func(_h, (ref huffmanDecoder h, Defer _, Panic panic, Recover __) =>
-        { 
+        private static bool init(this ptr<huffmanDecoder> _addr_h, slice<long> lengths) => func((_, panic, __) =>
+        {
+            ref huffmanDecoder h = ref _addr_h.val;
+ 
             // Sanity enables additional runtime tests during Huffman
             // table construction. It's intended to be used during
             // development to supplement the currently ad-hoc unit tests.
-            const var sanity = false;
+            const var sanity = (var)false;
 
 
 
             if (h.min != 0L)
             {
-                h.Value = new huffmanDecoder();
+                h.val = new huffmanDecoder();
             } 
 
             // Count number of codes of each length,
@@ -149,22 +156,26 @@ namespace compress
             {
                 var n__prev1 = n;
 
-                foreach (var (_, __n) in bits)
+                foreach (var (_, __n) in lengths)
                 {
                     n = __n;
                     if (n == 0L)
                     {
                         continue;
                     }
+
                     if (min == 0L || n < min)
                     {
                         min = n;
                     }
+
                     if (n > max)
                     {
                         max = n;
                     }
+
                     count[n]++;
+
                 } 
 
                 // Empty tree. The decompressor.huffSym function will fail later if the tree
@@ -182,6 +193,7 @@ namespace compress
             {
                 return true;
             }
+
             long code = 0L;
             array<long> nextcode = new array<long>(maxCodeLen);
             {
@@ -213,6 +225,7 @@ namespace compress
             {
                 return false;
             }
+
             h.min = min;
             if (max > huffmanChunkBits)
             {
@@ -227,26 +240,30 @@ namespace compress
 
                     for (var j = uint(link); j < huffmanNumChunks; j++)
                     {
-                        var reverse = int(mathbits.Reverse16(uint16(j)));
+                        var reverse = int(bits.Reverse16(uint16(j)));
                         reverse >>= uint(16L - huffmanChunkBits);
                         var off = j - uint(link);
                         if (sanity && h.chunks[reverse] != 0L)
                         {
                             panic("impossible: overwriting existing chunk");
                         }
+
                         h.chunks[reverse] = uint32(off << (int)(huffmanValueShift) | (huffmanChunkBits + 1L));
                         h.links[off] = make_slice<uint>(numLinks);
+
                     }
 
 
                     j = j__prev1;
                 }
+
             }
+
             {
                 var i__prev1 = i;
                 var n__prev1 = n;
 
-                foreach (var (__i, __n) in bits)
+                foreach (var (__i, __n) in lengths)
                 {
                     i = __i;
                     n = __n;
@@ -254,10 +271,11 @@ namespace compress
                     {
                         continue;
                     }
+
                     code = nextcode[n];
                     nextcode[n]++;
                     var chunk = uint32(i << (int)(huffmanValueShift) | n);
-                    reverse = int(mathbits.Reverse16(uint16(code)));
+                    reverse = int(bits.Reverse16(uint16(code)));
                     reverse >>= uint(16L - n);
                     if (n <= huffmanChunkBits)
                     {
@@ -278,13 +296,16 @@ namespace compress
                                     panic("impossible: overwriting existing chunk");
                                 off += 1L << (int)(uint(n));
                                 }
+
                                 h.chunks[off] = chunk;
+
                             }
                     else
 
 
                             off = off__prev2;
                         }
+
                     }                    {
                         j = reverse & (huffmanNumChunks - 1L);
                         if (sanity && h.chunks[j] & huffmanCountMask != huffmanChunkBits + 1L)
@@ -292,7 +313,9 @@ namespace compress
                             // Longer codes should have been
                             // associated with a link table above.
                             panic("impossible: not an indirect chunk");
+
                         }
+
                         var value = h.chunks[j] >> (int)(huffmanValueShift);
                         var linktab = h.links[value];
                         reverse >>= huffmanChunkBits;
@@ -308,13 +331,17 @@ namespace compress
                                     panic("impossible: overwriting existing chunk");
                                 off += 1L << (int)(uint(n - huffmanChunkBits));
                                 }
+
                                 linktab[off] = chunk;
+
                             }
 
 
                             off = off__prev2;
                         }
+
                     }
+
                 }
 
                 i = i__prev1;
@@ -343,8 +370,11 @@ namespace compress
                             {
                                 continue;
                             }
+
                             panic("impossible: missing chunk");
+
                         }
+
                     }
 
                     i = i__prev1;
@@ -367,18 +397,19 @@ namespace compress
                                 {
                                     panic("impossible: missing chunk");
                                 }
+
                             }
 
                             chunk = chunk__prev2;
                         }
-
                     }
 
                     linktab = linktab__prev1;
                 }
-
             }
+
             return true;
+
         });
 
         // The actual read interface needed by NewReader.
@@ -402,7 +433,7 @@ namespace compress
             public dictDecoder dict; // Temporary buffer (avoids repeated allocation).
             public array<byte> buf; // Next step in the decompression,
 // and decompression state.
-            public Action<ref decompressor> step;
+            public Action<ptr<decompressor>> step;
             public long stepState;
             public bool final;
             public error err;
@@ -413,16 +444,19 @@ namespace compress
             public long copyDist;
         }
 
-        private static void nextBlock(this ref decompressor f)
+        private static void nextBlock(this ptr<decompressor> _addr_f)
         {
+            ref decompressor f = ref _addr_f.val;
+
             while (f.nb < 1L + 2L)
             {
                 f.err = f.moreBits();
 
                 if (f.err != null)
                 {
-                    return;
+                    return ;
                 }
+
             }
 
             f.final = f.b & 1L == 1L;
@@ -437,7 +471,7 @@ namespace compress
                     break;
                 case 1L: 
                     // compressed, fixed Huffman tables
-                    f.hl = ref fixedHuffmanDecoder;
+                    f.hl = _addr_fixedHuffmanDecoder;
                     f.hd = null;
                     f.huffmanBlock();
                     break;
@@ -449,8 +483,9 @@ namespace compress
                     {
                         break;
                     }
-                    f.hl = ref f.h1;
-                    f.hd = ref f.h2;
+
+                    f.hl = _addr_f.h1;
+                    f.hd = _addr_f.h2;
                     f.huffmanBlock();
                     break;
                 default: 
@@ -458,10 +493,15 @@ namespace compress
                     f.err = CorruptInputError(f.roffset);
                     break;
             }
+
         }
 
-        private static (long, error) Read(this ref decompressor f, slice<byte> b)
+        private static (long, error) Read(this ptr<decompressor> _addr_f, slice<byte> b)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref decompressor f = ref _addr_f.val;
+
             while (true)
             {
                 if (len(f.toRead) > 0L)
@@ -470,30 +510,40 @@ namespace compress
                     f.toRead = f.toRead[n..];
                     if (len(f.toRead) == 0L)
                     {
-                        return (n, f.err);
+                        return (n, error.As(f.err)!);
                     }
-                    return (n, null);
+
+                    return (n, error.As(null!)!);
+
                 }
+
                 if (f.err != null)
                 {
-                    return (0L, f.err);
+                    return (0L, error.As(f.err)!);
                 }
+
                 f.step(f);
                 if (f.err != null && len(f.toRead) == 0L)
                 {
                     f.toRead = f.dict.readFlush(); // Flush what's left in case of error
                 }
+
             }
+
 
         }
 
-        private static error Close(this ref decompressor f)
+        private static error Close(this ptr<decompressor> _addr_f)
         {
+            ref decompressor f = ref _addr_f.val;
+
             if (f.err == io.EOF)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
-            return error.As(f.err);
+
+            return error.As(f.err)!;
+
         }
 
         // RFC 1951 section 3.2.7.
@@ -501,8 +551,10 @@ namespace compress
 
         private static array<long> codeOrder = new array<long>(new long[] { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 });
 
-        private static error readHuffman(this ref decompressor f)
-        { 
+        private static error readHuffman(this ptr<decompressor> _addr_f)
+        {
+            ref decompressor f = ref _addr_f.val;
+ 
             // HLIT[5], HDIST[5], HCLEN[4].
             while (f.nb < 5L + 5L + 4L)
             {
@@ -513,25 +565,28 @@ namespace compress
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev1;
 
                 }
+
             }
 
             var nlit = int(f.b & 0x1FUL) + 257L;
             if (nlit > maxNumLit)
             {
-                return error.As(CorruptInputError(f.roffset));
+                return error.As(CorruptInputError(f.roffset))!;
             }
+
             f.b >>= 5L;
             var ndist = int(f.b & 0x1FUL) + 1L;
             if (ndist > maxNumDist)
             {
-                return error.As(CorruptInputError(f.roffset));
+                return error.As(CorruptInputError(f.roffset))!;
             }
+
             f.b >>= 5L;
             var nclen = int(f.b & 0xFUL) + 4L; 
             // numCodes is 19, so nclen is always valid.
@@ -553,17 +608,19 @@ namespace compress
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                     }
 
                     f.codebits[codeOrder[i]] = int(f.b & 0x7UL);
                     f.b >>= 3L;
                     f.nb -= 3L;
+
                 }
 
 
@@ -582,7 +639,7 @@ namespace compress
             }
             if (!f.h1.init(f.codebits[0L..]))
             {
-                return error.As(CorruptInputError(f.roffset));
+                return error.As(CorruptInputError(f.roffset))!;
             } 
 
             // HLIT + 257 code lengths, HDIST + 1 code lengths,
@@ -595,17 +652,19 @@ namespace compress
 
                 while (i < n)
                 {
-                    var (x, err) = f.huffSym(ref f.h1);
+                    var (x, err) = f.huffSym(_addr_f.h1);
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                     if (x < 16L)
                     { 
                         // Actual length.
                         f.bits[i] = x;
                         i++;
                         continue;
+
                     } 
                     // Repeat previous length or zero.
                     long rep = default;
@@ -618,8 +677,9 @@ namespace compress
                             nb = 2L;
                             if (i == 0L)
                             {
-                                return error.As(CorruptInputError(f.roffset));
+                                return error.As(CorruptInputError(f.roffset))!;
                             }
+
                             b = f.bits[i - 1L];
                             break;
                         case 17L: 
@@ -633,7 +693,7 @@ namespace compress
                             b = 0L;
                             break;
                         default: 
-                            return error.As(InternalError("unexpected length code"));
+                            return error.As(InternalError("unexpected length code"))!;
                             break;
                     }
                     while (f.nb < nb)
@@ -645,12 +705,13 @@ namespace compress
 
                             if (err != null)
                             {
-                                return error.As(err);
+                                return error.As(err)!;
                             }
 
                             err = err__prev1;
 
                         }
+
                     }
 
                     rep += int(f.b & uint32(1L << (int)(nb) - 1L));
@@ -658,13 +719,15 @@ namespace compress
                     f.nb -= nb;
                     if (i + rep > n)
                     {
-                        return error.As(CorruptInputError(f.roffset));
+                        return error.As(CorruptInputError(f.roffset))!;
                     }
+
                     for (long j = 0L; j < rep; j++)
                     {
                         f.bits[i] = b;
                         i++;
                     }
+
 
                 }
 
@@ -674,7 +737,7 @@ namespace compress
 
             if (!f.h1.init(f.bits[0L..nlit]) || !f.h2.init(f.bits[nlit..nlit + ndist]))
             {
-                return error.As(CorruptInputError(f.roffset));
+                return error.As(CorruptInputError(f.roffset))!;
             } 
 
             // As an optimization, we can initialize the min bits to read at a time
@@ -685,17 +748,22 @@ namespace compress
             {
                 f.h1.min = f.bits[endBlockMarker];
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Decode a single Huffman block from f.
         // hl and hd are the Huffman states for the lit/length values
         // and the distance values, respectively. If hd == nil, using the
         // fixed distance encoding associated with fixed Huffman blocks.
-        private static void huffmanBlock(this ref decompressor f)
+        private static void huffmanBlock(this ptr<decompressor> _addr_f)
         {
-            const var stateInit = iota; // Zero value must be stateInit
-            const var stateDict = 0;
+            ref decompressor f = ref _addr_f.val;
+
+            const var stateInit = (var)iota; // Zero value must be stateInit
+            const var stateDict = (var)0;
+
 
 
             if (f.stepState == stateInit) 
@@ -709,8 +777,9 @@ namespace compress
                 if (err != null)
                 {
                     f.err = err;
-                    return;
+                    return ;
                 }
+
                 ulong n = default; // number of bits extra
                 long length = default;
 
@@ -719,14 +788,15 @@ namespace compress
                     if (f.dict.availWrite() == 0L)
                     {
                         f.toRead = f.dict.readFlush();
-                        f.step = ref decompressor;
+                        f.step = ptr<decompressor>;
                         f.stepState = stateInit;
-                        return;
+                        return ;
                     }
+
                     goto readLiteral;
                 else if (v == 256L) 
                     f.finishBlock();
-                    return; 
+                    return ; 
                     // otherwise, reference to older data
                 else if (v < 265L) 
                     length = v - (257L - 3L);
@@ -751,7 +821,7 @@ namespace compress
                     n = 0L;
                 else 
                     f.err = CorruptInputError(f.roffset);
-                    return;
+                    return ;
                                 if (n > 0L)
                 {
                     while (f.nb < n)
@@ -761,14 +831,17 @@ namespace compress
                         if (err != null)
                         {
                             f.err = err;
-                            return;
+                            return ;
                         }
+
                     }
 
                     length += int(f.b & uint32(1L << (int)(n) - 1L));
                     f.b >>= n;
                     f.nb -= n;
+
                 }
+
                 long dist = default;
                 if (f.hd == null)
                 {
@@ -779,23 +852,27 @@ namespace compress
                         if (err != null)
                         {
                             f.err = err;
-                            return;
+                            return ;
                         }
+
                     }
                 else
 
-                    dist = int(mathbits.Reverse8(uint8(f.b & 0x1FUL << (int)(3L))));
+                    dist = int(bits.Reverse8(uint8(f.b & 0x1FUL << (int)(3L))));
                     f.b >>= 5L;
                     f.nb -= 5L;
+
                 }                {
                     dist, err = f.huffSym(f.hd);
 
                     if (err != null)
                     {
                         f.err = err;
-                        return;
+                        return ;
                     }
+
                 }
+
 
                 if (dist < 4L) 
                     dist++;
@@ -810,8 +887,9 @@ namespace compress
                         if (err != null)
                         {
                             f.err = err;
-                            return;
+                            return ;
                         }
+
                     }
 
                     extra |= int(f.b & uint32(1L << (int)(nb) - 1L));
@@ -820,16 +898,18 @@ namespace compress
                     dist = 1L << (int)((nb + 1L)) + 1L + extra;
                 else 
                     f.err = CorruptInputError(f.roffset);
-                    return;
+                    return ;
                 // No check on length; encoding can be prescient.
                 if (dist > f.dict.histSize())
                 {
                     f.err = CorruptInputError(f.roffset);
-                    return;
+                    return ;
                 }
+
                 f.copyLen = length;
                 f.copyDist = dist;
                 goto copyHistory;
+
             }
 copyHistory:
             {
@@ -838,22 +918,29 @@ copyHistory:
                 {
                     cnt = f.dict.writeCopy(f.copyDist, f.copyLen);
                 }
+
                 f.copyLen -= cnt;
 
                 if (f.dict.availWrite() == 0L || f.copyLen > 0L)
                 {
                     f.toRead = f.dict.readFlush();
-                    f.step = ref decompressor; // We need to continue this work
+                    f.step = ptr<decompressor>; // We need to continue this work
                     f.stepState = stateDict;
-                    return;
+                    return ;
+
                 }
+
                 goto readLiteral;
+
             }
+
         }
 
         // Copy a single uncompressed data block from input to output.
-        private static void dataBlock(this ref decompressor f)
-        { 
+        private static void dataBlock(this ptr<decompressor> _addr_f)
+        {
+            ref decompressor f = ref _addr_f.val;
+ 
             // Uncompressed.
             // Discard current half-byte.
             f.nb = 0L;
@@ -864,140 +951,180 @@ copyHistory:
             f.roffset += int64(nr);
             if (err != null)
             {
-                if (err == io.EOF)
-                {
-                    err = io.ErrUnexpectedEOF;
-                }
-                f.err = err;
-                return;
+                f.err = noEOF(err);
+                return ;
             }
+
             var n = int(f.buf[0L]) | int(f.buf[1L]) << (int)(8L);
             var nn = int(f.buf[2L]) | int(f.buf[3L]) << (int)(8L);
             if (uint16(nn) != uint16(~n))
             {
                 f.err = CorruptInputError(f.roffset);
-                return;
+                return ;
             }
+
             if (n == 0L)
             {
                 f.toRead = f.dict.readFlush();
                 f.finishBlock();
-                return;
+                return ;
             }
+
             f.copyLen = n;
             f.copyData();
+
         }
 
         // copyData copies f.copyLen bytes from the underlying reader into f.hist.
         // It pauses for reads when f.hist is full.
-        private static void copyData(this ref decompressor f)
+        private static void copyData(this ptr<decompressor> _addr_f)
         {
+            ref decompressor f = ref _addr_f.val;
+
             var buf = f.dict.writeSlice();
             if (len(buf) > f.copyLen)
             {
                 buf = buf[..f.copyLen];
             }
+
             var (cnt, err) = io.ReadFull(f.r, buf);
             f.roffset += int64(cnt);
             f.copyLen -= cnt;
             f.dict.writeMark(cnt);
             if (err != null)
             {
-                if (err == io.EOF)
-                {
-                    err = io.ErrUnexpectedEOF;
-                }
-                f.err = err;
-                return;
+                f.err = noEOF(err);
+                return ;
             }
+
             if (f.dict.availWrite() == 0L || f.copyLen > 0L)
             {
                 f.toRead = f.dict.readFlush();
-                f.step = ref decompressor;
-                return;
+                f.step = ptr<decompressor>;
+                return ;
             }
+
             f.finishBlock();
+
         }
 
-        private static void finishBlock(this ref decompressor f)
+        private static void finishBlock(this ptr<decompressor> _addr_f)
         {
+            ref decompressor f = ref _addr_f.val;
+
             if (f.final)
             {
                 if (f.dict.availRead() > 0L)
                 {
                     f.toRead = f.dict.readFlush();
                 }
+
                 f.err = io.EOF;
+
             }
-            f.step = ref decompressor;
+
+            f.step = ptr<decompressor>;
+
         }
 
-        private static error moreBits(this ref decompressor f)
+        // noEOF returns err, unless err == io.EOF, in which case it returns io.ErrUnexpectedEOF.
+        private static error noEOF(error e)
         {
+            if (e == io.EOF)
+            {
+                return error.As(io.ErrUnexpectedEOF)!;
+            }
+
+            return error.As(e)!;
+
+        }
+
+        private static error moreBits(this ptr<decompressor> _addr_f)
+        {
+            ref decompressor f = ref _addr_f.val;
+
             var (c, err) = f.r.ReadByte();
             if (err != null)
             {
-                if (err == io.EOF)
-                {
-                    err = io.ErrUnexpectedEOF;
-                }
-                return error.As(err);
+                return error.As(noEOF(err))!;
             }
+
             f.roffset++;
             f.b |= uint32(c) << (int)(f.nb);
             f.nb += 8L;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Read the next Huffman-encoded symbol from f according to h.
-        private static (long, error) huffSym(this ref decompressor f, ref huffmanDecoder h)
-        { 
+        private static (long, error) huffSym(this ptr<decompressor> _addr_f, ptr<huffmanDecoder> _addr_h)
+        {
+            long _p0 = default;
+            error _p0 = default!;
+            ref decompressor f = ref _addr_f.val;
+            ref huffmanDecoder h = ref _addr_h.val;
+ 
             // Since a huffmanDecoder can be empty or be composed of a degenerate tree
             // with single element, huffSym must error on these two edge cases. In both
             // cases, the chunks slice will be 0 for the invalid sequence, leading it
             // satisfy the n == 0 check below.
-            var n = uint(h.min);
+            var n = uint(h.min); 
+            // Optimization. Compiler isn't smart enough to keep f.b,f.nb in registers,
+            // but is smart enough to keep local variables in registers, so use nb and b,
+            // inline call to moreBits and reassign b,nb back to f on return.
+            var nb = f.nb;
+            var b = f.b;
             while (true)
             {
-                while (f.nb < n)
+                while (nb < n)
                 {
+                    var (c, err) = f.r.ReadByte();
+                    if (err != null)
                     {
-                        var err = f.moreBits();
-
-                        if (err != null)
-                        {
-                            return (0L, err);
-                        }
-
+                        f.b = b;
+                        f.nb = nb;
+                        return (0L, error.As(noEOF(err))!);
                     }
+
+                    f.roffset++;
+                    b |= uint32(c) << (int)((nb & 31L));
+                    nb += 8L;
+
                 }
 
-                var chunk = h.chunks[f.b & (huffmanNumChunks - 1L)];
+                var chunk = h.chunks[b & (huffmanNumChunks - 1L)];
                 n = uint(chunk & huffmanCountMask);
                 if (n > huffmanChunkBits)
                 {
-                    chunk = h.links[chunk >> (int)(huffmanValueShift)][(f.b >> (int)(huffmanChunkBits)) & h.linkMask];
+                    chunk = h.links[chunk >> (int)(huffmanValueShift)][(b >> (int)(huffmanChunkBits)) & h.linkMask];
                     n = uint(chunk & huffmanCountMask);
                 }
-                if (n <= f.nb)
+
+                if (n <= nb)
                 {
                     if (n == 0L)
                     {
+                        f.b = b;
+                        f.nb = nb;
                         f.err = CorruptInputError(f.roffset);
-                        return (0L, f.err);
+                        return (0L, error.As(f.err)!);
                     }
-                    f.b >>= n;
-                    f.nb -= n;
-                    return (int(chunk >> (int)(huffmanValueShift)), null);
+
+                    f.b = b >> (int)((n & 31L));
+                    f.nb = nb - n;
+                    return (int(chunk >> (int)(huffmanValueShift)), error.As(null!)!);
+
                 }
+
             }
+
 
         }
 
         private static Reader makeReader(io.Reader r)
         {
             {
-                Reader (rr, ok) = r._<Reader>();
+                Reader (rr, ok) = Reader.As(r._<Reader>())!;
 
                 if (ok)
                 {
@@ -1005,7 +1132,9 @@ copyHistory:
                 }
 
             }
+
             return bufio.NewReader(r);
+
         }
 
         private static void fixedHuffmanDecoderInit()
@@ -1059,14 +1188,18 @@ copyHistory:
                     i = i__prev1;
                 }
                 fixedHuffmanDecoder.init(bits[..]);
+
             });
+
         }
 
-        private static error Reset(this ref decompressor f, io.Reader r, slice<byte> dict)
+        private static error Reset(this ptr<decompressor> _addr_f, io.Reader r, slice<byte> dict)
         {
-            f.Value = new decompressor(r:makeReader(r),bits:f.bits,codebits:f.codebits,dict:f.dict,step:(*decompressor).nextBlock,);
+            ref decompressor f = ref _addr_f.val;
+
+            f.val = new decompressor(r:makeReader(r),bits:f.bits,codebits:f.codebits,dict:f.dict,step:(*decompressor).nextBlock,);
             f.dict.init(maxMatchOffset, dict);
-            return error.As(null);
+            return error.As(null!)!;
         }
 
         // NewReader returns a new ReadCloser that can be used
@@ -1081,13 +1214,13 @@ copyHistory:
         {
             fixedHuffmanDecoderInit();
 
-            decompressor f = default;
+            ref decompressor f = ref heap(out ptr<decompressor> _addr_f);
             f.r = makeReader(r);
-            f.bits = @new<array<long>>();
-            f.codebits = @new<array<long>>();
-            f.step = ref decompressor;
+            f.bits = @new<[maxNumLit+maxNumDist]int>();
+            f.codebits = @new<[numCodes]int>();
+            f.step = ptr<decompressor>;
             f.dict.init(maxMatchOffset, null);
-            return ref f;
+            return _addr_f;
         }
 
         // NewReaderDict is like NewReader but initializes the reader
@@ -1101,13 +1234,13 @@ copyHistory:
         {
             fixedHuffmanDecoderInit();
 
-            decompressor f = default;
+            ref decompressor f = ref heap(out ptr<decompressor> _addr_f);
             f.r = makeReader(r);
-            f.bits = @new<array<long>>();
-            f.codebits = @new<array<long>>();
-            f.step = ref decompressor;
+            f.bits = @new<[maxNumLit+maxNumDist]int>();
+            f.codebits = @new<[numCodes]int>();
+            f.step = ptr<decompressor>;
             f.dict.init(maxMatchOffset, dict);
-            return ref f;
+            return _addr_f;
         }
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 August 29 08:36:42 UTC
+// package sync -- go2cs converted at 2020 October 08 01:30:44 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\once.go
 using atomic = go.sync.atomic_package;
@@ -16,8 +16,8 @@ namespace go
         // Once is an object that will perform exactly one action.
         public partial struct Once
         {
-            public Mutex m;
             public uint done;
+            public Mutex m;
         }
 
         // Do calls the function f if and only if Do is being called for the
@@ -38,20 +38,45 @@ namespace go
         // If f panics, Do considers it to have returned; future calls of Do return
         // without calling f.
         //
-        private static void Do(this ref Once _o, Action f) => func(_o, (ref Once o, Defer defer, Panic _, Recover __) =>
+        private static void Do(this ptr<Once> _addr_o, Action f)
         {
-            if (atomic.LoadUint32(ref o.done) == 1L)
-            {
-                return;
-            } 
-            // Slow-path.
+            ref Once o = ref _addr_o.val;
+ 
+            // Note: Here is an incorrect implementation of Do:
+            //
+            //    if atomic.CompareAndSwapUint32(&o.done, 0, 1) {
+            //        f()
+            //    }
+            //
+            // Do guarantees that when it returns, f has finished.
+            // This implementation would not implement that guarantee:
+            // given two simultaneous calls, the winner of the cas would
+            // call f, and the second would return immediately, without
+            // waiting for the first's call to f to complete.
+            // This is why the slow path falls back to a mutex, and why
+            // the atomic.StoreUint32 must be delayed until after f returns.
+
+            if (atomic.LoadUint32(_addr_o.done) == 0L)
+            { 
+                // Outlined slow-path to allow inlining of the fast-path.
+                o.doSlow(f);
+
+            }
+
+        }
+
+        private static void doSlow(this ptr<Once> _addr_o, Action f) => func((defer, _, __) =>
+        {
+            ref Once o = ref _addr_o.val;
+
             o.m.Lock();
             defer(o.m.Unlock());
             if (o.done == 0L)
             {
-                defer(atomic.StoreUint32(ref o.done, 1L));
+                defer(atomic.StoreUint32(_addr_o.done, 1L));
                 f();
             }
+
         });
     }
 }

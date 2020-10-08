@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:56 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:01 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\pprof.go
 // Run a slow C function saving a CPU profile.
 
@@ -26,6 +26,9 @@ void cpuHog() {
     salt2 = foo;
 }
 
+void cpuHog2() {
+}
+
 static int cpuHogCount;
 
 struct cgoTracebackArg {
@@ -37,10 +40,13 @@ struct cgoTracebackArg {
 
 // pprofCgoTraceback is passed to runtime.SetCgoTraceback.
 // For testing purposes it pretends that all CPU hits in C code are in cpuHog.
+// Issue #29034: At least 2 frames are required to verify all frames are captured
+// since runtime/pprof ignores the runtime.goexit base frame if it exists.
 void pprofCgoTraceback(void* parg) {
     struct cgoTracebackArg* arg = (struct cgoTracebackArg*)(parg);
     arg->buf[0] = (uintptr_t)(cpuHog) + 0x10;
-    arg->buf[1] = 0;
+    arg->buf[1] = (uintptr_t)(cpuHog2) + 0x4;
+    arg->buf[2] = 0;
     ++cpuHogCount;
 }
 
@@ -72,6 +78,9 @@ void cpuHog() {
     salt2 = foo;
 }
 
+void cpuHog2() {
+}
+
 static int cpuHogCount;
 
 struct cgoTracebackArg {
@@ -83,10 +92,13 @@ struct cgoTracebackArg {
 
 // pprofCgoTraceback is passed to runtime.SetCgoTraceback.
 // For testing purposes it pretends that all CPU hits in C code are in cpuHog.
+// Issue #29034: At least 2 frames are required to verify all frames are captured
+// since runtime/pprof ignores the runtime.goexit base frame if it exists.
 void pprofCgoTraceback(void* parg) {
     struct cgoTracebackArg* arg = (struct cgoTracebackArg*)(parg);
     arg->buf[0] = (uintptr_t)(cpuHog) + 0x10;
-    arg->buf[1] = 0;
+    arg->buf[1] = (uintptr_t)(cpuHog2) + 0x4;
+    arg->buf[2] = 0;
     ++cpuHogCount;
 }
 
@@ -126,6 +138,7 @@ namespace go
                 fmt.Fprintln(os.Stderr, err);
                 os.Exit(2L);
             }
+
             {
                 var err__prev1 = err;
 
@@ -140,6 +153,7 @@ namespace go
                 err = err__prev1;
 
             }
+
 
             var t0 = time.Now();
             while (C.getCpuHogCount() < 2L && time.Since(t0) < time.Second)
@@ -166,7 +180,9 @@ namespace go
 
             }
 
+
             fmt.Println(name);
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:54 UTC
+//     Generated on 2020 October 08 04:02:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,7 +40,7 @@ namespace go
                 this.InitOrder = default;
             }
 
-            public Info(map<ast.Expr, TypeAndValue> Types = default, map<ref ast.Ident, Object> Defs = default, map<ref ast.Ident, Object> Uses = default, map<ast.Node, Object> Implicits = default, map<ref ast.SelectorExpr, ref Selection> Selections = default, map<ast.Node, ref Scope> Scopes = default, slice<ref Initializer> InitOrder = default)
+            public Info(map<ast.Expr, TypeAndValue> Types = default, map<ptr<ast.Ident>, Object> Defs = default, map<ptr<ast.Ident>, Object> Uses = default, map<ast.Node, Object> Implicits = default, map<ptr<ast.SelectorExpr>, ptr<Selection>> Selections = default, map<ast.Node, ptr<Scope>> Scopes = default, slice<ptr<Initializer>> InitOrder = default)
             {
                 this.Types = Types;
                 this.Defs = Defs;

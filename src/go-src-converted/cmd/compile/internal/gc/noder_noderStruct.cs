@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:39 UTC
+//     Generated on 2020 October 08 04:29:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 using syntax = go.cmd.compile.@internal.syntax_package;
 using types = go.cmd.compile.@internal.types_package;
+using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using go;
@@ -39,20 +40,26 @@ namespace @internal
             // Constructors
             public noder(NilType _)
             {
+                this.basemap = default;
                 this.file = default;
                 this.linknames = default;
                 this.pragcgobuf = default;
                 this.err = default;
                 this.scope = default;
+                this.scopeVars = default;
+                this.lastCloseScopePos = default;
             }
 
-            public noder(ref ptr<syntax.File> file = default, slice<linkname> linknames = default, @string pragcgobuf = default, channel<syntax.Error> err = default, ScopeID scope = default)
+            public noder(map<ptr<syntax.PosBase>, ptr<src.PosBase>> basemap = default, ref ptr<syntax.File> file = default, slice<linkname> linknames = default, slice<slice<@string>> pragcgobuf = default, channel<syntax.Error> err = default, ScopeID scope = default, slice<long> scopeVars = default, syntax.Pos lastCloseScopePos = default)
             {
+                this.basemap = basemap;
                 this.file = file;
                 this.linknames = linknames;
                 this.pragcgobuf = pragcgobuf;
                 this.err = err;
                 this.scope = scope;
+                this.scopeVars = scopeVars;
+                this.lastCloseScopePos = lastCloseScopePos;
             }
 
             // Enable comparisons between nil and noder struct
@@ -75,7 +82,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static noder noder_cast(dynamic value)
         {
-            return new noder(ref value.file, value.linknames, value.pragcgobuf, value.err, value.scope);
+            return new noder(value.basemap, ref value.file, value.linknames, value.pragcgobuf, value.err, value.scope, value.scopeVars, value.lastCloseScopePos);
         }
     }
 }}}}

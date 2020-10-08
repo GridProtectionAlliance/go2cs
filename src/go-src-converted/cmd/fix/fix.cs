@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:00:15 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:16 UTC
 // Original source: C:\Go\src\cmd\fix\fix.go
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -24,7 +24,7 @@ namespace go
         {
             public @string name;
             public @string date; // date that fix was introduced, in YYYY-MM-DD format
-            public Func<ref ast.File, bool> f;
+            public Func<ptr<ast.File>, bool> f;
             public @string desc;
             public bool disabled; // whether this fix should be disabled by default
         }
@@ -42,7 +42,6 @@ namespace go
         {
             f[i] = f[j];
             f[j] = f[i];
-
         }
         private static bool Less(this byName f, long i, long j)
         {
@@ -62,7 +61,6 @@ namespace go
         {
             f[i] = f[j];
             f[j] = f[i];
-
         }
         private static bool Less(this byDate f, long i, long j)
         {
@@ -98,272 +96,277 @@ namespace go
             {
                 case 
                     break;
-                case ref ast.Decl n:
-                    walkBeforeAfter(n.Value, before, after);
+                case ptr<ast.Decl> n:
+                    walkBeforeAfter(n.val, before, after);
                     break;
-                case ref ast.Expr n:
-                    walkBeforeAfter(n.Value, before, after);
+                case ptr<ast.Expr> n:
+                    walkBeforeAfter(n.val, before, after);
                     break;
-                case ref ast.Spec n:
-                    walkBeforeAfter(n.Value, before, after);
+                case ptr<ast.Spec> n:
+                    walkBeforeAfter(n.val, before, after);
                     break;
-                case ref ast.Stmt n:
-                    walkBeforeAfter(n.Value, before, after); 
+                case ptr<ast.Stmt> n:
+                    walkBeforeAfter(n.val, before, after); 
 
                     // pointers to struct pointers
                     break;
                 case ptr<ptr<ast.BlockStmt>> n:
-                    walkBeforeAfter(n.Value, before, after);
+                    walkBeforeAfter(n.val, before, after);
                     break;
                 case ptr<ptr<ast.CallExpr>> n:
-                    walkBeforeAfter(n.Value, before, after);
+                    walkBeforeAfter(n.val, before, after);
                     break;
                 case ptr<ptr<ast.FieldList>> n:
-                    walkBeforeAfter(n.Value, before, after);
+                    walkBeforeAfter(n.val, before, after);
                     break;
                 case ptr<ptr<ast.FuncType>> n:
-                    walkBeforeAfter(n.Value, before, after);
+                    walkBeforeAfter(n.val, before, after);
                     break;
                 case ptr<ptr<ast.Ident>> n:
-                    walkBeforeAfter(n.Value, before, after);
+                    walkBeforeAfter(n.val, before, after);
                     break;
                 case ptr<ptr<ast.BasicLit>> n:
-                    walkBeforeAfter(n.Value, before, after); 
+                    walkBeforeAfter(n.val, before, after); 
 
                     // pointers to slices
                     break;
-                case ref slice<ast.Decl> n:
-                    walkBeforeAfter(n.Value, before, after);
+                case ptr<slice<ast.Decl>> n:
+                    walkBeforeAfter(n.val, before, after);
                     break;
-                case ref slice<ast.Expr> n:
-                    walkBeforeAfter(n.Value, before, after);
+                case ptr<slice<ast.Expr>> n:
+                    walkBeforeAfter(n.val, before, after);
                     break;
-                case ref slice<ref ast.File> n:
-                    walkBeforeAfter(n.Value, before, after);
+                case ptr<slice<ptr<ast.File>>> n:
+                    walkBeforeAfter(n.val, before, after);
                     break;
-                case ref slice<ref ast.Ident> n:
-                    walkBeforeAfter(n.Value, before, after);
+                case ptr<slice<ptr<ast.Ident>>> n:
+                    walkBeforeAfter(n.val, before, after);
                     break;
-                case ref slice<ast.Spec> n:
-                    walkBeforeAfter(n.Value, before, after);
+                case ptr<slice<ast.Spec>> n:
+                    walkBeforeAfter(n.val, before, after);
                     break;
-                case ref slice<ast.Stmt> n:
-                    walkBeforeAfter(n.Value, before, after); 
+                case ptr<slice<ast.Stmt>> n:
+                    walkBeforeAfter(n.val, before, after); 
 
                     // These are ordered and grouped to match ../../go/ast/ast.go
                     break;
-                case ref ast.Field n:
-                    walkBeforeAfter(ref n.Names, before, after);
-                    walkBeforeAfter(ref n.Type, before, after);
-                    walkBeforeAfter(ref n.Tag, before, after);
+                case ptr<ast.Field> n:
+                    walkBeforeAfter(_addr_n.Names, before, after);
+                    walkBeforeAfter(_addr_n.Type, before, after);
+                    walkBeforeAfter(_addr_n.Tag, before, after);
                     break;
-                case ref ast.FieldList n:
+                case ptr<ast.FieldList> n:
                     foreach (var (_, field) in n.List)
                     {
                         walkBeforeAfter(field, before, after);
                     }
                     break;
-                case ref ast.BadExpr n:
+                case ptr<ast.BadExpr> n:
                     break;
-                case ref ast.Ident n:
+                case ptr<ast.Ident> n:
                     break;
-                case ref ast.Ellipsis n:
-                    walkBeforeAfter(ref n.Elt, before, after);
+                case ptr<ast.Ellipsis> n:
+                    walkBeforeAfter(_addr_n.Elt, before, after);
                     break;
-                case ref ast.BasicLit n:
+                case ptr<ast.BasicLit> n:
                     break;
-                case ref ast.FuncLit n:
-                    walkBeforeAfter(ref n.Type, before, after);
-                    walkBeforeAfter(ref n.Body, before, after);
+                case ptr<ast.FuncLit> n:
+                    walkBeforeAfter(_addr_n.Type, before, after);
+                    walkBeforeAfter(_addr_n.Body, before, after);
                     break;
-                case ref ast.CompositeLit n:
-                    walkBeforeAfter(ref n.Type, before, after);
-                    walkBeforeAfter(ref n.Elts, before, after);
+                case ptr<ast.CompositeLit> n:
+                    walkBeforeAfter(_addr_n.Type, before, after);
+                    walkBeforeAfter(_addr_n.Elts, before, after);
                     break;
-                case ref ast.ParenExpr n:
-                    walkBeforeAfter(ref n.X, before, after);
+                case ptr<ast.ParenExpr> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
                     break;
-                case ref ast.SelectorExpr n:
-                    walkBeforeAfter(ref n.X, before, after);
+                case ptr<ast.SelectorExpr> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
                     break;
-                case ref ast.IndexExpr n:
-                    walkBeforeAfter(ref n.X, before, after);
-                    walkBeforeAfter(ref n.Index, before, after);
+                case ptr<ast.IndexExpr> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
+                    walkBeforeAfter(_addr_n.Index, before, after);
                     break;
-                case ref ast.SliceExpr n:
-                    walkBeforeAfter(ref n.X, before, after);
+                case ptr<ast.SliceExpr> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
                     if (n.Low != null)
                     {
-                        walkBeforeAfter(ref n.Low, before, after);
+                        walkBeforeAfter(_addr_n.Low, before, after);
                     }
+
                     if (n.High != null)
                     {
-                        walkBeforeAfter(ref n.High, before, after);
+                        walkBeforeAfter(_addr_n.High, before, after);
                     }
+
                     break;
-                case ref ast.TypeAssertExpr n:
-                    walkBeforeAfter(ref n.X, before, after);
-                    walkBeforeAfter(ref n.Type, before, after);
+                case ptr<ast.TypeAssertExpr> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
+                    walkBeforeAfter(_addr_n.Type, before, after);
                     break;
-                case ref ast.CallExpr n:
-                    walkBeforeAfter(ref n.Fun, before, after);
-                    walkBeforeAfter(ref n.Args, before, after);
+                case ptr<ast.CallExpr> n:
+                    walkBeforeAfter(_addr_n.Fun, before, after);
+                    walkBeforeAfter(_addr_n.Args, before, after);
                     break;
-                case ref ast.StarExpr n:
-                    walkBeforeAfter(ref n.X, before, after);
+                case ptr<ast.StarExpr> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
                     break;
-                case ref ast.UnaryExpr n:
-                    walkBeforeAfter(ref n.X, before, after);
+                case ptr<ast.UnaryExpr> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
                     break;
-                case ref ast.BinaryExpr n:
-                    walkBeforeAfter(ref n.X, before, after);
-                    walkBeforeAfter(ref n.Y, before, after);
+                case ptr<ast.BinaryExpr> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
+                    walkBeforeAfter(_addr_n.Y, before, after);
                     break;
-                case ref ast.KeyValueExpr n:
-                    walkBeforeAfter(ref n.Key, before, after);
-                    walkBeforeAfter(ref n.Value, before, after);
+                case ptr<ast.KeyValueExpr> n:
+                    walkBeforeAfter(_addr_n.Key, before, after);
+                    walkBeforeAfter(_addr_n.Value, before, after);
                     break;
-                case ref ast.ArrayType n:
-                    walkBeforeAfter(ref n.Len, before, after);
-                    walkBeforeAfter(ref n.Elt, before, after);
+                case ptr<ast.ArrayType> n:
+                    walkBeforeAfter(_addr_n.Len, before, after);
+                    walkBeforeAfter(_addr_n.Elt, before, after);
                     break;
-                case ref ast.StructType n:
-                    walkBeforeAfter(ref n.Fields, before, after);
+                case ptr<ast.StructType> n:
+                    walkBeforeAfter(_addr_n.Fields, before, after);
                     break;
-                case ref ast.FuncType n:
-                    walkBeforeAfter(ref n.Params, before, after);
+                case ptr<ast.FuncType> n:
+                    walkBeforeAfter(_addr_n.Params, before, after);
                     if (n.Results != null)
                     {
-                        walkBeforeAfter(ref n.Results, before, after);
+                        walkBeforeAfter(_addr_n.Results, before, after);
                     }
+
                     break;
-                case ref ast.InterfaceType n:
-                    walkBeforeAfter(ref n.Methods, before, after);
+                case ptr<ast.InterfaceType> n:
+                    walkBeforeAfter(_addr_n.Methods, before, after);
                     break;
-                case ref ast.MapType n:
-                    walkBeforeAfter(ref n.Key, before, after);
-                    walkBeforeAfter(ref n.Value, before, after);
+                case ptr<ast.MapType> n:
+                    walkBeforeAfter(_addr_n.Key, before, after);
+                    walkBeforeAfter(_addr_n.Value, before, after);
                     break;
-                case ref ast.ChanType n:
-                    walkBeforeAfter(ref n.Value, before, after);
+                case ptr<ast.ChanType> n:
+                    walkBeforeAfter(_addr_n.Value, before, after);
                     break;
-                case ref ast.BadStmt n:
+                case ptr<ast.BadStmt> n:
                     break;
-                case ref ast.DeclStmt n:
-                    walkBeforeAfter(ref n.Decl, before, after);
+                case ptr<ast.DeclStmt> n:
+                    walkBeforeAfter(_addr_n.Decl, before, after);
                     break;
-                case ref ast.EmptyStmt n:
+                case ptr<ast.EmptyStmt> n:
                     break;
-                case ref ast.LabeledStmt n:
-                    walkBeforeAfter(ref n.Stmt, before, after);
+                case ptr<ast.LabeledStmt> n:
+                    walkBeforeAfter(_addr_n.Stmt, before, after);
                     break;
-                case ref ast.ExprStmt n:
-                    walkBeforeAfter(ref n.X, before, after);
+                case ptr<ast.ExprStmt> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
                     break;
-                case ref ast.SendStmt n:
-                    walkBeforeAfter(ref n.Chan, before, after);
-                    walkBeforeAfter(ref n.Value, before, after);
+                case ptr<ast.SendStmt> n:
+                    walkBeforeAfter(_addr_n.Chan, before, after);
+                    walkBeforeAfter(_addr_n.Value, before, after);
                     break;
-                case ref ast.IncDecStmt n:
-                    walkBeforeAfter(ref n.X, before, after);
+                case ptr<ast.IncDecStmt> n:
+                    walkBeforeAfter(_addr_n.X, before, after);
                     break;
-                case ref ast.AssignStmt n:
-                    walkBeforeAfter(ref n.Lhs, before, after);
-                    walkBeforeAfter(ref n.Rhs, before, after);
+                case ptr<ast.AssignStmt> n:
+                    walkBeforeAfter(_addr_n.Lhs, before, after);
+                    walkBeforeAfter(_addr_n.Rhs, before, after);
                     break;
-                case ref ast.GoStmt n:
-                    walkBeforeAfter(ref n.Call, before, after);
+                case ptr<ast.GoStmt> n:
+                    walkBeforeAfter(_addr_n.Call, before, after);
                     break;
-                case ref ast.DeferStmt n:
-                    walkBeforeAfter(ref n.Call, before, after);
+                case ptr<ast.DeferStmt> n:
+                    walkBeforeAfter(_addr_n.Call, before, after);
                     break;
-                case ref ast.ReturnStmt n:
-                    walkBeforeAfter(ref n.Results, before, after);
+                case ptr<ast.ReturnStmt> n:
+                    walkBeforeAfter(_addr_n.Results, before, after);
                     break;
-                case ref ast.BranchStmt n:
+                case ptr<ast.BranchStmt> n:
                     break;
-                case ref ast.BlockStmt n:
-                    walkBeforeAfter(ref n.List, before, after);
+                case ptr<ast.BlockStmt> n:
+                    walkBeforeAfter(_addr_n.List, before, after);
                     break;
-                case ref ast.IfStmt n:
-                    walkBeforeAfter(ref n.Init, before, after);
-                    walkBeforeAfter(ref n.Cond, before, after);
-                    walkBeforeAfter(ref n.Body, before, after);
-                    walkBeforeAfter(ref n.Else, before, after);
+                case ptr<ast.IfStmt> n:
+                    walkBeforeAfter(_addr_n.Init, before, after);
+                    walkBeforeAfter(_addr_n.Cond, before, after);
+                    walkBeforeAfter(_addr_n.Body, before, after);
+                    walkBeforeAfter(_addr_n.Else, before, after);
                     break;
-                case ref ast.CaseClause n:
-                    walkBeforeAfter(ref n.List, before, after);
-                    walkBeforeAfter(ref n.Body, before, after);
+                case ptr<ast.CaseClause> n:
+                    walkBeforeAfter(_addr_n.List, before, after);
+                    walkBeforeAfter(_addr_n.Body, before, after);
                     break;
-                case ref ast.SwitchStmt n:
-                    walkBeforeAfter(ref n.Init, before, after);
-                    walkBeforeAfter(ref n.Tag, before, after);
-                    walkBeforeAfter(ref n.Body, before, after);
+                case ptr<ast.SwitchStmt> n:
+                    walkBeforeAfter(_addr_n.Init, before, after);
+                    walkBeforeAfter(_addr_n.Tag, before, after);
+                    walkBeforeAfter(_addr_n.Body, before, after);
                     break;
-                case ref ast.TypeSwitchStmt n:
-                    walkBeforeAfter(ref n.Init, before, after);
-                    walkBeforeAfter(ref n.Assign, before, after);
-                    walkBeforeAfter(ref n.Body, before, after);
+                case ptr<ast.TypeSwitchStmt> n:
+                    walkBeforeAfter(_addr_n.Init, before, after);
+                    walkBeforeAfter(_addr_n.Assign, before, after);
+                    walkBeforeAfter(_addr_n.Body, before, after);
                     break;
-                case ref ast.CommClause n:
-                    walkBeforeAfter(ref n.Comm, before, after);
-                    walkBeforeAfter(ref n.Body, before, after);
+                case ptr<ast.CommClause> n:
+                    walkBeforeAfter(_addr_n.Comm, before, after);
+                    walkBeforeAfter(_addr_n.Body, before, after);
                     break;
-                case ref ast.SelectStmt n:
-                    walkBeforeAfter(ref n.Body, before, after);
+                case ptr<ast.SelectStmt> n:
+                    walkBeforeAfter(_addr_n.Body, before, after);
                     break;
-                case ref ast.ForStmt n:
-                    walkBeforeAfter(ref n.Init, before, after);
-                    walkBeforeAfter(ref n.Cond, before, after);
-                    walkBeforeAfter(ref n.Post, before, after);
-                    walkBeforeAfter(ref n.Body, before, after);
+                case ptr<ast.ForStmt> n:
+                    walkBeforeAfter(_addr_n.Init, before, after);
+                    walkBeforeAfter(_addr_n.Cond, before, after);
+                    walkBeforeAfter(_addr_n.Post, before, after);
+                    walkBeforeAfter(_addr_n.Body, before, after);
                     break;
-                case ref ast.RangeStmt n:
-                    walkBeforeAfter(ref n.Key, before, after);
-                    walkBeforeAfter(ref n.Value, before, after);
-                    walkBeforeAfter(ref n.X, before, after);
-                    walkBeforeAfter(ref n.Body, before, after);
+                case ptr<ast.RangeStmt> n:
+                    walkBeforeAfter(_addr_n.Key, before, after);
+                    walkBeforeAfter(_addr_n.Value, before, after);
+                    walkBeforeAfter(_addr_n.X, before, after);
+                    walkBeforeAfter(_addr_n.Body, before, after);
                     break;
-                case ref ast.ImportSpec n:
+                case ptr<ast.ImportSpec> n:
                     break;
-                case ref ast.ValueSpec n:
-                    walkBeforeAfter(ref n.Type, before, after);
-                    walkBeforeAfter(ref n.Values, before, after);
-                    walkBeforeAfter(ref n.Names, before, after);
+                case ptr<ast.ValueSpec> n:
+                    walkBeforeAfter(_addr_n.Type, before, after);
+                    walkBeforeAfter(_addr_n.Values, before, after);
+                    walkBeforeAfter(_addr_n.Names, before, after);
                     break;
-                case ref ast.TypeSpec n:
-                    walkBeforeAfter(ref n.Type, before, after);
+                case ptr<ast.TypeSpec> n:
+                    walkBeforeAfter(_addr_n.Type, before, after);
                     break;
-                case ref ast.BadDecl n:
+                case ptr<ast.BadDecl> n:
                     break;
-                case ref ast.GenDecl n:
-                    walkBeforeAfter(ref n.Specs, before, after);
+                case ptr<ast.GenDecl> n:
+                    walkBeforeAfter(_addr_n.Specs, before, after);
                     break;
-                case ref ast.FuncDecl n:
+                case ptr<ast.FuncDecl> n:
                     if (n.Recv != null)
                     {
-                        walkBeforeAfter(ref n.Recv, before, after);
+                        walkBeforeAfter(_addr_n.Recv, before, after);
                     }
-                    walkBeforeAfter(ref n.Type, before, after);
+
+                    walkBeforeAfter(_addr_n.Type, before, after);
                     if (n.Body != null)
                     {
-                        walkBeforeAfter(ref n.Body, before, after);
+                        walkBeforeAfter(_addr_n.Body, before, after);
                     }
+
                     break;
-                case ref ast.File n:
-                    walkBeforeAfter(ref n.Decls, before, after);
+                case ptr<ast.File> n:
+                    walkBeforeAfter(_addr_n.Decls, before, after);
                     break;
-                case ref ast.Package n:
-                    walkBeforeAfter(ref n.Files, before, after);
+                case ptr<ast.Package> n:
+                    walkBeforeAfter(_addr_n.Files, before, after);
                     break;
-                case slice<ref ast.File> n:
+                case slice<ptr<ast.File>> n:
                     {
                         var i__prev1 = i;
 
                         foreach (var (__i) in n)
                         {
                             i = __i;
-                            walkBeforeAfter(ref n[i], before, after);
+                            walkBeforeAfter(_addr_n[i], before, after);
                         }
 
                         i = i__prev1;
@@ -376,7 +379,7 @@ namespace go
                         foreach (var (__i) in n)
                         {
                             i = __i;
-                            walkBeforeAfter(ref n[i], before, after);
+                            walkBeforeAfter(_addr_n[i], before, after);
                         }
 
                         i = i__prev1;
@@ -389,20 +392,20 @@ namespace go
                         foreach (var (__i) in n)
                         {
                             i = __i;
-                            walkBeforeAfter(ref n[i], before, after);
+                            walkBeforeAfter(_addr_n[i], before, after);
                         }
 
                         i = i__prev1;
                     }
                     break;
-                case slice<ref ast.Ident> n:
+                case slice<ptr<ast.Ident>> n:
                     {
                         var i__prev1 = i;
 
                         foreach (var (__i) in n)
                         {
                             i = __i;
-                            walkBeforeAfter(ref n[i], before, after);
+                            walkBeforeAfter(_addr_n[i], before, after);
                         }
 
                         i = i__prev1;
@@ -415,7 +418,7 @@ namespace go
                         foreach (var (__i) in n)
                         {
                             i = __i;
-                            walkBeforeAfter(ref n[i], before, after);
+                            walkBeforeAfter(_addr_n[i], before, after);
                         }
 
                         i = i__prev1;
@@ -428,7 +431,7 @@ namespace go
                         foreach (var (__i) in n)
                         {
                             i = __i;
-                            walkBeforeAfter(ref n[i], before, after);
+                            walkBeforeAfter(_addr_n[i], before, after);
                         }
 
                         i = i__prev1;
@@ -442,63 +445,79 @@ namespace go
                 }
             }
             after(x);
+
         });
 
         // imports reports whether f imports path.
-        private static bool imports(ref ast.File f, @string path)
+        private static bool imports(ptr<ast.File> _addr_f, @string path)
         {
-            return importSpec(f, path) != null;
+            ref ast.File f = ref _addr_f.val;
+
+            return importSpec(_addr_f, path) != null;
         }
 
         // importSpec returns the import spec if f imports path,
         // or nil otherwise.
-        private static ref ast.ImportSpec importSpec(ref ast.File f, @string path)
+        private static ptr<ast.ImportSpec> importSpec(ptr<ast.File> _addr_f, @string path)
         {
+            ref ast.File f = ref _addr_f.val;
+
             foreach (var (_, s) in f.Imports)
             {
-                if (importPath(s) == path)
+                if (importPath(_addr_s) == path)
                 {
-                    return s;
+                    return _addr_s!;
                 }
+
             }
-            return null;
+            return _addr_null!;
+
         }
 
         // importPath returns the unquoted import path of s,
         // or "" if the path is not properly quoted.
-        private static @string importPath(ref ast.ImportSpec s)
+        private static @string importPath(ptr<ast.ImportSpec> _addr_s)
         {
+            ref ast.ImportSpec s = ref _addr_s.val;
+
             var (t, err) = strconv.Unquote(s.Path.Value);
             if (err == null)
             {
                 return t;
             }
+
             return "";
+
         }
 
         // declImports reports whether gen contains an import of path.
-        private static bool declImports(ref ast.GenDecl gen, @string path)
+        private static bool declImports(ptr<ast.GenDecl> _addr_gen, @string path)
         {
+            ref ast.GenDecl gen = ref _addr_gen.val;
+
             if (gen.Tok != token.IMPORT)
             {
                 return false;
             }
+
             foreach (var (_, spec) in gen.Specs)
             {
-                ref ast.ImportSpec impspec = spec._<ref ast.ImportSpec>();
+                ptr<ast.ImportSpec> impspec = spec._<ptr<ast.ImportSpec>>();
                 if (importPath(impspec) == path)
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
         // isPkgDot reports whether t is the expression "pkg.name"
         // where pkg is an imported identifier.
         private static bool isPkgDot(ast.Expr t, @string pkg, @string name)
         {
-            ref ast.SelectorExpr (sel, ok) = t._<ref ast.SelectorExpr>();
+            ptr<ast.SelectorExpr> (sel, ok) = t._<ptr<ast.SelectorExpr>>();
             return ok && isTopName(sel.X, pkg) && sel.Sel.String() == name;
         }
 
@@ -506,45 +525,48 @@ namespace go
         // where pkg is an imported identifier.
         private static bool isPtrPkgDot(ast.Expr t, @string pkg, @string name)
         {
-            ref ast.StarExpr (ptr, ok) = t._<ref ast.StarExpr>();
+            ptr<ast.StarExpr> (ptr, ok) = t._<ptr<ast.StarExpr>>();
             return ok && isPkgDot(ptr.X, pkg, name);
         }
 
         // isTopName reports whether n is a top-level unresolved identifier with the given name.
         private static bool isTopName(ast.Expr n, @string name)
         {
-            ref ast.Ident (id, ok) = n._<ref ast.Ident>();
+            ptr<ast.Ident> (id, ok) = n._<ptr<ast.Ident>>();
             return ok && id.Name == name && id.Obj == null;
         }
 
         // isName reports whether n is an identifier with the given name.
         private static bool isName(ast.Expr n, @string name)
         {
-            ref ast.Ident (id, ok) = n._<ref ast.Ident>();
+            ptr<ast.Ident> (id, ok) = n._<ptr<ast.Ident>>();
             return ok && id.String() == name;
         }
 
         // isCall reports whether t is a call to pkg.name.
         private static bool isCall(ast.Expr t, @string pkg, @string name)
         {
-            ref ast.CallExpr (call, ok) = t._<ref ast.CallExpr>();
+            ptr<ast.CallExpr> (call, ok) = t._<ptr<ast.CallExpr>>();
             return ok && isPkgDot(call.Fun, pkg, name);
         }
 
         // If n is an *ast.Ident, isIdent returns it; otherwise isIdent returns nil.
-        private static ref ast.Ident isIdent(object n)
+        private static ptr<ast.Ident> isIdent(object n)
         {
-            ref ast.Ident (id, _) = n._<ref ast.Ident>();
-            return id;
+            ptr<ast.Ident> (id, _) = n._<ptr<ast.Ident>>();
+            return _addr_id!;
         }
 
         // refersTo reports whether n is a reference to the same object as x.
-        private static bool refersTo(ast.Node n, ref ast.Ident x)
+        private static bool refersTo(ast.Node n, ptr<ast.Ident> _addr_x)
         {
-            ref ast.Ident (id, ok) = n._<ref ast.Ident>(); 
+            ref ast.Ident x = ref _addr_x.val;
+
+            ptr<ast.Ident> (id, ok) = n._<ptr<ast.Ident>>(); 
             // The test of id.Name == x.Name handles top-level unresolved
             // identifiers, which all have Obj == nil.
             return ok && id.Obj == x.Obj && id.Name == x.Name;
+
         }
 
         // isBlank reports whether n is the blank identifier.
@@ -556,7 +578,7 @@ namespace go
         // isEmptyString reports whether n is an empty string literal.
         private static bool isEmptyString(ast.Expr n)
         {
-            ref ast.BasicLit (lit, ok) = n._<ref ast.BasicLit>();
+            ptr<ast.BasicLit> (lit, ok) = n._<ptr<ast.BasicLit>>();
             return ok && lit.Kind == token.STRING && len(lit.Value) == 2L;
         }
 
@@ -569,12 +591,16 @@ namespace go
                 msg = "%s: " + msg;
                 args = append(arg1, args);
             }
+
             fmt.Fprintf(os.Stderr, msg + "\n", args);
+
         }
 
         // countUses returns the number of uses of the identifier x in scope.
-        private static long countUses(ref ast.Ident x, slice<ast.Stmt> scope)
+        private static long countUses(ptr<ast.Ident> _addr_x, slice<ast.Stmt> scope)
         {
+            ref ast.Ident x = ref _addr_x.val;
+
             long count = 0L;
             Action<object> ff = n =>
             {
@@ -583,7 +609,7 @@ namespace go
 
                     ast.Node (n, ok) = n._<ast.Node>();
 
-                    if (ok && refersTo(n, x))
+                    if (ok && refersTo(n, _addr_x))
                     {
                         count++;
                     }
@@ -591,6 +617,7 @@ namespace go
                     n = n__prev1;
 
                 }
+
             }
 ;
             {
@@ -606,73 +633,86 @@ namespace go
             }
 
             return count;
+
         }
 
         // rewriteUses replaces all uses of the identifier x and !x in scope
         // with f(x.Pos()) and fnot(x.Pos()).
-        private static ast.Expr rewriteUses(ref ast.Ident x, Func<token.Pos, ast.Expr> f, Func<token.Pos, ast.Expr> fnot, slice<ast.Stmt> scope)
+        private static ast.Expr rewriteUses(ptr<ast.Ident> _addr_x, Func<token.Pos, ast.Expr> f, Func<token.Pos, ast.Expr> fnot, slice<ast.Stmt> scope)
         {
+            ref ast.Ident x = ref _addr_x.val;
+
             ast.Expr lastF = default;
             Action<object> ff = n =>
             {
-                ref ast.Expr (ptr, ok) = n._<ref ast.Expr>();
+                ptr<ast.Expr> (ptr, ok) = n._<ptr<ast.Expr>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
-                var nn = ptr.Value; 
+
+                var nn = ptr.val; 
 
                 // The child node was just walked and possibly replaced.
                 // If it was replaced and this is a negation, replace with fnot(p).
-                ref ast.UnaryExpr (not, ok) = nn._<ref ast.UnaryExpr>();
+                ptr<ast.UnaryExpr> (not, ok) = nn._<ptr<ast.UnaryExpr>>();
                 if (ok && not.Op == token.NOT && not.X == lastF)
                 {
-                    ptr.Value = fnot(nn.Pos());
-                    return;
+                    ptr.val = fnot(nn.Pos());
+                    return ;
                 }
-                if (refersTo(nn, x))
+
+                if (refersTo(nn, _addr_x))
                 {
                     lastF = f(nn.Pos());
-                    ptr.Value = lastF;
+                    ptr.val = lastF;
                 }
+
             }
 ;
             foreach (var (_, n) in scope)
             {
                 walk(n, ff);
             }
+
         }
 
         // assignsTo reports whether any of the code in scope assigns to or takes the address of x.
-        private static bool assignsTo(ref ast.Ident x, slice<ast.Stmt> scope)
+        private static bool assignsTo(ptr<ast.Ident> _addr_x, slice<ast.Stmt> scope)
         {
+            ref ast.Ident x = ref _addr_x.val;
+
             var assigned = false;
             Action<object> ff = n =>
             {
                 if (assigned)
                 {
-                    return;
+                    return ;
                 }
+
                 switch (n.type())
                 {
-                    case ref ast.UnaryExpr n:
-                        if (n.Op == token.AND && refersTo(n.X, x))
+                    case ptr<ast.UnaryExpr> n:
+                        if (n.Op == token.AND && refersTo(n.X, _addr_x))
                         {
                             assigned = true;
-                            return;
+                            return ;
                         }
+
                         break;
-                    case ref ast.AssignStmt n:
+                    case ptr<ast.AssignStmt> n:
                         foreach (var (_, l) in n.Lhs)
                         {
-                            if (refersTo(l, x))
+                            if (refersTo(l, _addr_x))
                             {
                                 assigned = true;
-                                return;
+                                return ;
                             }
+
                         }
                         break;
                 }
+
             }
 ;
             {
@@ -685,25 +725,30 @@ namespace go
                     {
                         break;
                     }
+
                     walk(n, ff);
+
                 }
 
                 n = n__prev1;
             }
 
             return assigned;
+
         }
 
         // newPkgDot returns an ast.Expr referring to "pkg.name" at position pos.
         private static ast.Expr newPkgDot(token.Pos pos, @string pkg, @string name)
         {
-            return ref new ast.SelectorExpr(X:&ast.Ident{NamePos:pos,Name:pkg,},Sel:&ast.Ident{NamePos:pos,Name:name,},);
+            return addr(new ast.SelectorExpr(X:&ast.Ident{NamePos:pos,Name:pkg,},Sel:&ast.Ident{NamePos:pos,Name:name,},));
         }
 
         // renameTop renames all references to the top-level name old.
-        // It returns true if it makes any changes.
-        private static bool renameTop(ref ast.File f, @string old, @string @new)
+        // It reports whether it makes any changes.
+        private static bool renameTop(ptr<ast.File> _addr_f, @string old, @string @new)
         {
+            ref ast.File f = ref _addr_f.val;
+
             bool @fixed = default; 
 
             // Rename any conflicting imports
@@ -721,16 +766,19 @@ namespace go
                             s.Name.Name = new;
                             fixed = true;
                         }
+
                     }
                     else
                     {
-                        var (_, thisName) = path.Split(importPath(s));
+                        var (_, thisName) = path.Split(importPath(_addr_s));
                         if (thisName == old)
                         {
                             s.Name = ast.NewIdent(new);
                             fixed = true;
                         }
+
                     }
+
                 } 
 
                 // Rename any top-level declarations.
@@ -746,15 +794,16 @@ namespace go
                     d = __d;
                     switch (d.type())
                     {
-                        case ref ast.FuncDecl d:
+                        case ptr<ast.FuncDecl> d:
                             if (d.Recv == null && d.Name.Name == old)
                             {
                                 d.Name.Name = new;
                                 d.Name.Obj.Name = new;
                                 fixed = true;
                             }
+
                             break;
-                        case ref ast.GenDecl d:
+                        case ptr<ast.GenDecl> d:
                             {
                                 var s__prev2 = s;
 
@@ -763,15 +812,16 @@ namespace go
                                     s = __s;
                                     switch (s.type())
                                     {
-                                        case ref ast.TypeSpec s:
+                                        case ptr<ast.TypeSpec> s:
                                             if (s.Name.Name == old)
                                             {
                                                 s.Name.Name = new;
                                                 s.Name.Obj.Name = new;
                                                 fixed = true;
                                             }
+
                                             break;
-                                        case ref ast.ValueSpec s:
+                                        case ptr<ast.ValueSpec> s:
                                             foreach (var (_, n) in s.Names)
                                             {
                                                 if (n.Name == old)
@@ -780,15 +830,18 @@ namespace go
                                                     n.Obj.Name = new;
                                                     fixed = true;
                                                 }
+
                                             }
                                             break;
                                     }
+
                                 }
 
                                 s = s__prev2;
                             }
                             break;
                     }
+
                 } 
 
                 // Rename top-level old to new, both unresolved names
@@ -800,20 +853,23 @@ namespace go
 
             walk(f, n =>
             {
-                ref ast.Ident (id, ok) = n._<ref ast.Ident>();
+                ptr<ast.Ident> (id, ok) = n._<ptr<ast.Ident>>();
                 if (ok && isTopName(id, old))
                 {
                     id.Name = new;
                     fixed = true;
                 }
+
                 if (ok && id.Obj != null && id.Name == old && id.Obj.Name == new)
                 {
                     id.Name = id.Obj.Name;
                     fixed = true;
                 }
+
             });
 
             return fixed;
+
         }
 
         // matchLen returns the length of the longest prefix shared by x and y.
@@ -826,12 +882,16 @@ namespace go
             }
 
             return i;
+
         }
 
         // addImport adds the import path to the file f, if absent.
-        private static bool addImport(ref ast.File f, @string ipath)
+        private static bool addImport(ptr<ast.File> _addr_f, @string ipath)
         {
-            if (imports(f, ipath))
+            bool added = default;
+            ref ast.File f = ref _addr_f.val;
+
+            if (imports(_addr_f, ipath))
             {
                 return false;
             } 
@@ -841,15 +901,15 @@ namespace go
             var (_, name) = path.Split(ipath); 
 
             // Rename any conflicting top-level references from name to name_.
-            renameTop(f, name, name + "_");
+            renameTop(_addr_f, name, name + "_");
 
-            ast.ImportSpec newImport = ref new ast.ImportSpec(Path:&ast.BasicLit{Kind:token.STRING,Value:strconv.Quote(ipath),},); 
+            ptr<ast.ImportSpec> newImport = addr(new ast.ImportSpec(Path:&ast.BasicLit{Kind:token.STRING,Value:strconv.Quote(ipath),},)); 
 
             // Find an import decl to add to.
-            long bestMatch = -1L;            long lastImport = -1L;            ref ast.GenDecl impDecl = default;            long impIndex = -1L;
+            long bestMatch = -1L;            long lastImport = -1L;            ptr<ast.GenDecl> impDecl;            long impIndex = -1L;
             foreach (var (i, decl) in f.Decls)
             {
-                ref ast.GenDecl (gen, ok) = decl._<ref ast.GenDecl>();
+                ptr<ast.GenDecl> (gen, ok) = decl._<ptr<ast.GenDecl>>();
                 if (ok && gen.Tok == token.IMPORT)
                 {
                     lastImport = i; 
@@ -863,7 +923,7 @@ namespace go
                     // Compute longest shared prefix with imports in this block.
                     foreach (var (j, spec) in gen.Specs)
                     {
-                        ref ast.ImportSpec impspec = spec._<ref ast.ImportSpec>();
+                        ptr<ast.ImportSpec> impspec = spec._<ptr<ast.ImportSpec>>();
                         var n = matchLen(importPath(impspec), ipath);
                         if (n > bestMatch)
                         {
@@ -871,14 +931,17 @@ namespace go
                             impDecl = gen;
                             impIndex = j;
                         }
+
                     }
+
                 }
+
             } 
 
             // If no import decl found, add one after the last import.
             if (impDecl == null)
             {
-                impDecl = ref new ast.GenDecl(Tok:token.IMPORT,);
+                impDecl = addr(new ast.GenDecl(Tok:token.IMPORT,));
                 f.Decls = append(f.Decls, null);
                 copy(f.Decls[lastImport + 2L..], f.Decls[lastImport + 1L..]);
                 f.Decls[lastImport + 1L] = impDecl;
@@ -889,11 +952,13 @@ namespace go
             {
                 impDecl.Lparen = impDecl.Pos();
             }
+
             var insertAt = impIndex + 1L;
             if (insertAt == 0L)
             {
                 insertAt = len(impDecl.Specs);
             }
+
             impDecl.Specs = append(impDecl.Specs, null);
             copy(impDecl.Specs[insertAt + 1L..], impDecl.Specs[insertAt..]);
             impDecl.Specs[insertAt] = newImport;
@@ -904,15 +969,21 @@ namespace go
                 var prev = impDecl.Specs[insertAt - 1L];
                 newImport.Path.ValuePos = prev.Pos();
                 newImport.EndPos = prev.Pos();
+
             }
+
             f.Imports = append(f.Imports, newImport);
             return true;
+
         }
 
         // deleteImport deletes the import path from the file f, if present.
-        private static bool deleteImport(ref ast.File f, @string path)
+        private static bool deleteImport(ptr<ast.File> _addr_f, @string path)
         {
-            var oldImport = importSpec(f, path); 
+            bool deleted = default;
+            ref ast.File f = ref _addr_f.val;
+
+            var oldImport = importSpec(_addr_f, path); 
 
             // Find the import node that imports path, if any.
             {
@@ -922,14 +993,15 @@ namespace go
                 {
                     i = __i;
                     decl = __decl;
-                    ref ast.GenDecl (gen, ok) = decl._<ref ast.GenDecl>();
+                    ptr<ast.GenDecl> (gen, ok) = decl._<ptr<ast.GenDecl>>();
                     if (!ok || gen.Tok != token.IMPORT)
                     {
                         continue;
                     }
+
                     foreach (var (j, spec) in gen.Specs)
                     {
-                        ref ast.ImportSpec impspec = spec._<ref ast.ImportSpec>();
+                        ptr<ast.ImportSpec> impspec = spec._<ptr<ast.ImportSpec>>();
                         if (oldImport != impspec)
                         {
                             continue;
@@ -952,16 +1024,21 @@ namespace go
                         {
                             gen.Lparen = token.NoPos; // drop parens
                         }
+
                         if (j > 0L)
                         { 
                             // We deleted an entry but now there will be
                             // a blank line-sized hole where the import was.
                             // Close the hole by making the previous
                             // import appear to "end" where this one did.
-                            gen.Specs[j - 1L]._<ref ast.ImportSpec>().EndPos = impspec.End();
+                            gen.Specs[j - 1L]._<ptr<ast.ImportSpec>>().EndPos = impspec.End();
+
                         }
+
                         break;
+
                     }
+
                 } 
 
                 // Delete it from f.Imports.
@@ -982,38 +1059,50 @@ namespace go
                         f.Imports = f.Imports[..len(f.Imports) - 1L];
                         break;
                     }
+
                 }
 
                 i = i__prev1;
             }
 
-            return;
+            return ;
+
         }
 
         // rewriteImport rewrites any import of path oldPath to path newPath.
-        private static bool rewriteImport(ref ast.File f, @string oldPath, @string newPath)
+        private static bool rewriteImport(ptr<ast.File> _addr_f, @string oldPath, @string newPath)
         {
+            bool rewrote = default;
+            ref ast.File f = ref _addr_f.val;
+
             foreach (var (_, imp) in f.Imports)
             {
-                if (importPath(imp) == oldPath)
+                if (importPath(_addr_imp) == oldPath)
                 {
                     rewrote = true; 
                     // record old End, because the default is to compute
                     // it using the length of imp.Path.Value.
                     imp.EndPos = imp.End();
                     imp.Path.Value = strconv.Quote(newPath);
+
                 }
+
             }
-            return;
+            return ;
+
         }
 
-        private static bool usesImport(ref ast.File f, @string path)
+        private static bool usesImport(ptr<ast.File> _addr_f, @string path)
         {
-            var spec = importSpec(f, path);
+            bool used = default;
+            ref ast.File f = ref _addr_f.val;
+
+            var spec = importSpec(_addr_f, path);
             if (spec == null)
             {
-                return;
+                return ;
             }
+
             var name = spec.Name.String();
             switch (name)
             {
@@ -1029,6 +1118,7 @@ namespace go
                     {
                         name = path[lastSlash + 1L..];
                     }
+
                     break;
                 case "_": 
                     // Not sure if this import is used - err on the side of caution.
@@ -1041,14 +1131,16 @@ namespace go
 
             walk(f, n =>
             {
-                ref ast.SelectorExpr (sel, ok) = n._<ref ast.SelectorExpr>();
+                ptr<ast.SelectorExpr> (sel, ok) = n._<ptr<ast.SelectorExpr>>();
                 if (ok && isTopName(sel.X, name))
                 {
                     used = true;
                 }
+
             });
 
-            return;
+            return ;
+
         }
 
         private static ast.Expr expr(@string s) => func((_, panic, __) =>
@@ -1061,6 +1153,7 @@ namespace go
             // Remove position information to avoid spurious newlines.
             killPos(reflect.ValueOf(x));
             return x;
+
         });
 
         private static var posType = reflect.TypeOf(token.Pos(0L));
@@ -1073,6 +1166,7 @@ namespace go
                 {
                     killPos(v.Elem());
                 }
+
             else if (v.Kind() == reflect.Slice) 
                 var n = v.Len();
                 {
@@ -1099,13 +1193,16 @@ namespace go
                             f.SetInt(0L);
                             continue;
                         }
+
                         killPos(f);
+
                     }
 
 
                     i = i__prev1;
                 }
-                    }
+            
+        }
 
         // A Rename describes a single renaming.
         private partial struct rename
@@ -1116,84 +1213,104 @@ namespace go
             public @string New; // new name: p.T or *p.T
         }
 
-        private static Func<ref ast.File, bool> renameFix(slice<rename> tab)
+        private static Func<ptr<ast.File>, bool> renameFix(slice<rename> tab)
         {
             return f =>
             {
-                return renameFixTab(f, tab);
-            }
-;
+                return renameFixTab(_addr_f, tab);
+            };
+
         }
 
         private static (bool, @string, @string) parseName(@string s) => func((_, panic, __) =>
         {
+            bool ptr = default;
+            @string pkg = default;
+            @string nam = default;
+
             var i = strings.Index(s, ".");
             if (i < 0L)
             {
                 panic("parseName: invalid name " + s);
             }
+
             if (strings.HasPrefix(s, "*"))
             {
                 ptr = true;
                 s = s[1L..];
                 i--;
             }
+
             pkg = s[..i];
             nam = s[i + 1L..];
-            return;
+            return ;
+
         });
 
-        private static bool renameFixTab(ref ast.File f, slice<rename> tab)
+        private static bool renameFixTab(ptr<ast.File> _addr_f, slice<rename> tab)
         {
+            ref ast.File f = ref _addr_f.val;
+
             var @fixed = false;
             map added = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{};
             map check = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{};
             foreach (var (_, t) in tab)
             {
-                if (!imports(f, t.OldImport))
+                if (!imports(_addr_f, t.OldImport))
                 {
                     continue;
                 }
+
                 var (optr, opkg, onam) = parseName(t.Old);
                 walk(f, n =>
                 {
-                    ref ast.Expr (np, ok) = n._<ref ast.Expr>();
+                    ptr<ast.Expr> (np, ok) = n._<ptr<ast.Expr>>();
                     if (!ok)
                     {
-                        return;
+                        return ;
                     }
-                    var x = np.Value;
+
+                    var x = np.val;
                     if (optr)
                     {
-                        ref ast.StarExpr (p, ok) = x._<ref ast.StarExpr>();
+                        ptr<ast.StarExpr> (p, ok) = x._<ptr<ast.StarExpr>>();
                         if (!ok)
                         {
-                            return;
+                            return ;
                         }
+
                         x = p.X;
+
                     }
+
                     if (!isPkgDot(x, opkg, onam))
                     {
-                        return;
+                        return ;
                     }
+
                     if (t.NewImport != "" && !added[t.NewImport])
                     {
-                        addImport(f, t.NewImport);
+                        addImport(_addr_f, t.NewImport);
                         added[t.NewImport] = true;
                     }
-                    np.Value = expr(t.New);
+
+                    np.val = expr(t.New);
                     check[t.OldImport] = true;
                     fixed = true;
+
                 });
+
             }
             foreach (var (ipath) in check)
             {
-                if (!usesImport(f, ipath))
+                if (!usesImport(_addr_f, ipath))
                 {
-                    deleteImport(f, ipath);
+                    deleteImport(_addr_f, ipath);
                 }
+
             }
             return fixed;
+
         }
     }
 }

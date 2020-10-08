@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build windows
+
 // Package sysdll is an internal leaf package that records and reports
 // which Windows DLL names are used by Go itself. These DLLs are then
 // only loaded from the System32 directory. See Issue 14959.
-// package sysdll -- go2cs converted at 2020 August 29 08:16:21 UTC
+// package sysdll -- go2cs converted at 2020 October 08 00:34:01 UTC
 // import "internal/syscall/windows/sysdll" ==> using sysdll = go.@internal.syscall.windows.sysdll_package
 // Original source: C:\Go\src\internal\syscall\windows\sysdll\sysdll.go
 

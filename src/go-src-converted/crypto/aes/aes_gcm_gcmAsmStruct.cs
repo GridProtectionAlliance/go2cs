@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:31 UTC
+//     Generated on 2020 October 08 03:35:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using cipher = go.crypto.cipher_package;
+using subtleoverlap = go.crypto.@internal.subtle_package;
 using subtle = go.crypto.subtle_package;
 using errors = go.errors_package;
 using go;
@@ -32,13 +33,15 @@ namespace crypto
                 this.ks = default;
                 this.productTable = default;
                 this.nonceSize = default;
+                this.tagSize = default;
             }
 
-            public gcmAsm(slice<uint> ks = default, array<byte> productTable = default, long nonceSize = default)
+            public gcmAsm(slice<uint> ks = default, array<byte> productTable = default, long nonceSize = default, long tagSize = default)
             {
                 this.ks = ks;
                 this.productTable = productTable;
                 this.nonceSize = nonceSize;
+                this.tagSize = tagSize;
             }
 
             // Enable comparisons between nil and gcmAsm struct
@@ -61,7 +64,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static gcmAsm gcmAsm_cast(dynamic value)
         {
-            return new gcmAsm(value.ks, value.productTable, value.nonceSize);
+            return new gcmAsm(value.ks, value.productTable, value.nonceSize, value.tagSize);
         }
     }
 }}

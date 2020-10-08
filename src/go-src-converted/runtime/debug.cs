@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:41 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:20 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\debug.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -20,20 +20,25 @@ namespace go
         // This call will go away when the scheduler improves.
         public static long GOMAXPROCS(long n)
         {
-            lock(ref sched.@lock);
+            if (GOARCH == "wasm" && n > 1L)
+            {
+                n = 1L; // WebAssembly has no threads yet, so only one CPU is possible.
+            }
+            lock(_addr_sched.@lock);
             var ret = int(gomaxprocs);
-            unlock(ref sched.@lock);
+            unlock(_addr_sched.@lock);
             if (n <= 0L || n == ret)
             {
                 return ret;
             }
-            stopTheWorld("GOMAXPROCS"); 
+            stopTheWorldGC("GOMAXPROCS"); 
 
             // newprocs will be processed by startTheWorld
             newprocs = int32(n);
 
-            startTheWorld();
+            startTheWorldGC();
             return ret;
+
         }
 
         // NumCPU returns the number of logical CPUs usable by the current process.
@@ -51,7 +56,7 @@ namespace go
         {
             long n = default;
             {
-                var mp = (m.Value)(atomic.Loadp(@unsafe.Pointer(ref allm)));
+                var mp = (m.val)(atomic.Loadp(@unsafe.Pointer(_addr_allm)));
 
                 while (mp != null)
                 {
@@ -61,12 +66,19 @@ namespace go
 
             }
             return n;
+
         }
 
         // NumGoroutine returns the number of goroutines that currently exist.
         public static long NumGoroutine()
         {
             return int(gcount());
+        }
+
+        //go:linkname debug_modinfo runtime/debug.modinfo
+        private static @string debug_modinfo()
+        {
+            return modinfo;
         }
     }
 }

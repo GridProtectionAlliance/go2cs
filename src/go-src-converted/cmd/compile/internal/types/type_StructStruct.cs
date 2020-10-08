@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:18 UTC
+//     Generated on 2020 October 08 04:09:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,13 +32,15 @@ namespace @internal
             public Struct(NilType _)
             {
                 this.fields = default;
+                this.pkg = default;
                 this.Map = default;
                 this.Funarg = default;
             }
 
-            public Struct(Fields fields = default, ref ptr<Type> Map = default, Funarg Funarg = default)
+            public Struct(Fields fields = default, ref ptr<Pkg> pkg = default, ref ptr<Type> Map = default, Funarg Funarg = default)
             {
                 this.fields = fields;
+                this.pkg = pkg;
                 this.Map = Map;
                 this.Funarg = Funarg;
             }
@@ -63,7 +65,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Struct Struct_cast(dynamic value)
         {
-            return new Struct(value.fields, ref value.Map, value.Funarg);
+            return new Struct(value.fields, ref value.pkg, ref value.Map, value.Funarg);
         }
     }
 }}}}

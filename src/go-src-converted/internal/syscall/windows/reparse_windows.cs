@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package windows -- go2cs converted at 2020 August 29 08:22:31 UTC
+// package windows -- go2cs converted at 2020 October 08 03:32:27 UTC
 // import "internal/syscall/windows" ==> using windows = go.@internal.syscall.windows_package
 // Original source: C:\Go\src\internal\syscall\windows\reparse_windows.go
-
+using syscall = go.syscall_package;
+using @unsafe = go.@unsafe_package;
 using static go.builtin;
 
 namespace go {
@@ -14,14 +15,23 @@ namespace syscall
 {
     public static partial class windows_package
     {
-        public static readonly ulong FSCTL_SET_REPARSE_POINT = 0x000900A4UL;
-        public static readonly ulong IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003UL;
+        public static readonly ulong FSCTL_SET_REPARSE_POINT = (ulong)0x000900A4UL;
+        public static readonly ulong IO_REPARSE_TAG_MOUNT_POINT = (ulong)0xA0000003UL;
 
-        public static readonly long SYMLINK_FLAG_RELATIVE = 1L;
+        public static readonly long SYMLINK_FLAG_RELATIVE = (long)1L;
+
 
         // These structures are described
         // in https://msdn.microsoft.com/en-us/library/cc232007.aspx
         // and https://msdn.microsoft.com/en-us/library/cc232006.aspx.
+
+        public partial struct REPARSE_DATA_BUFFER
+        {
+            public uint ReparseTag;
+            public ushort ReparseDataLength;
+            public ushort Reserved;
+            public byte DUMMYUNIONNAME;
+        }
 
         // REPARSE_DATA_BUFFER_HEADER is a common part of REPARSE_DATA_BUFFER structure.
         public partial struct REPARSE_DATA_BUFFER_HEADER
@@ -47,6 +57,16 @@ namespace syscall
             public array<ushort> PathBuffer;
         }
 
+        // Path returns path stored in rb.
+        private static @string Path(this ptr<SymbolicLinkReparseBuffer> _addr_rb)
+        {
+            ref SymbolicLinkReparseBuffer rb = ref _addr_rb.val;
+
+            var n1 = rb.SubstituteNameOffset / 2L;
+            var n2 = (rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2L;
+            return syscall.UTF16ToString(new ptr<ptr<array<ushort>>>(@unsafe.Pointer(_addr_rb.PathBuffer[0L])).slice(n1, n2, n2));
+        }
+
         public partial struct MountPointReparseBuffer
         {
             public ushort SubstituteNameOffset; // The integer that contains the length, in bytes, of the
@@ -56,6 +76,16 @@ namespace syscall
             public ushort PrintNameOffset; // PrintNameLength is similar to SubstituteNameLength.
             public ushort PrintNameLength;
             public array<ushort> PathBuffer;
+        }
+
+        // Path returns path stored in rb.
+        private static @string Path(this ptr<MountPointReparseBuffer> _addr_rb)
+        {
+            ref MountPointReparseBuffer rb = ref _addr_rb.val;
+
+            var n1 = rb.SubstituteNameOffset / 2L;
+            var n2 = (rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2L;
+            return syscall.UTF16ToString(new ptr<ptr<array<ushort>>>(@unsafe.Pointer(_addr_rb.PathBuffer[0L])).slice(n1, n2, n2));
         }
     }
 }}}

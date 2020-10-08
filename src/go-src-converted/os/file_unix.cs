@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2020 August 29 08:44:02 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:45 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\file_unix.go
 using poll = go.@internal.poll_package;
+using unix = go.@internal.syscall.unix_package;
+using io = go.io_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
 using static go.builtin;
@@ -32,13 +34,16 @@ namespace go
                 // At this point we've determined the newname is bad.
                 // But just in case oldname is also bad, prioritize returning
                 // the oldname error because that's what we did historically.
+                // However, if the old name and new name are not the same, yet
+                // they refer to the same file, it implies a case-only
+                // rename on a case-insensitive filesystem, which is ok.
                 {
-                    var (_, err) = Lstat(oldname);
+                    var (ofi, err) = Lstat(oldname);
 
                     if (err != null)
                     {
                         {
-                            ref PathError (pe, ok) = err._<ref PathError>();
+                            ptr<PathError> (pe, ok) = err._<ptr<PathError>>();
 
                             if (ok)
                             {
@@ -46,18 +51,28 @@ namespace go
                             }
 
                         }
-                        return error.As(ref new LinkError("rename",oldname,newname,err));
+
+                        return error.As(addr(new LinkError("rename",oldname,newname,err))!)!;
+
+                    }
+                    else if (newname == oldname || !SameFile(fi, ofi))
+                    {
+                        return error.As(addr(new LinkError("rename",oldname,newname,syscall.EEXIST))!)!;
                     }
 
+
                 }
-                return error.As(ref new LinkError("rename",oldname,newname,syscall.EEXIST));
+
             }
+
             err = syscall.Rename(oldname, newname);
             if (err != null)
             {
-                return error.As(ref new LinkError("rename",oldname,newname,err));
+                return error.As(addr(new LinkError("rename",oldname,newname,err))!)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // file is the real representation of *File.
@@ -71,13 +86,16 @@ namespace go
             public ptr<dirInfo> dirinfo; // nil unless directory being read
             public bool nonblock; // whether we set nonblocking mode
             public bool stdoutOrErr; // whether this is stdout or stderr
+            public bool appendMode; // whether file is opened for appending
         }
 
         // Fd returns the integer Unix file descriptor referencing the open file.
         // The file descriptor is valid only until f.Close is called or f is garbage collected.
         // On Unix systems this will cause the SetDeadline methods to stop working.
-        private static System.UIntPtr Fd(this ref File f)
+        private static System.UIntPtr Fd(this ptr<File> _addr_f)
         {
+            ref File f = ref _addr_f.val;
+
             if (f == null)
             {
                 return ~(uintptr(0L));
@@ -92,15 +110,31 @@ namespace go
             {
                 f.pfd.SetBlocking();
             }
+
             return uintptr(f.pfd.Sysfd);
+
         }
 
         // NewFile returns a new File with the given file descriptor and
         // name. The returned value will be nil if fd is not a valid file
-        // descriptor.
-        public static ref File NewFile(System.UIntPtr fd, @string name)
+        // descriptor. On Unix systems, if the file descriptor is in
+        // non-blocking mode, NewFile will attempt to return a pollable File
+        // (one for which the SetDeadline methods work).
+        public static ptr<File> NewFile(System.UIntPtr fd, @string name)
         {
-            return newFile(fd, name, kindNewFile);
+            var kind = kindNewFile;
+            {
+                var (nb, err) = unix.IsNonblock(int(fd));
+
+                if (err == null && nb)
+                {
+                    kind = kindNonBlock;
+                }
+
+            }
+
+            return _addr_newFile(fd, name, kind)!;
+
         }
 
         // newFileKind describes the kind of file to newFile.
@@ -108,34 +142,76 @@ namespace go
         {
         }
 
-        private static readonly newFileKind kindNewFile = iota;
-        private static readonly var kindOpenFile = 0;
-        private static readonly var kindPipe = 1;
+        private static readonly newFileKind kindNewFile = (newFileKind)iota;
+        private static readonly var kindOpenFile = (var)0;
+        private static readonly var kindPipe = (var)1;
+        private static readonly var kindNonBlock = (var)2;
+
 
         // newFile is like NewFile, but if called from OpenFile or Pipe
         // (as passed in the kind parameter) it tries to add the file to
         // the runtime poller.
-        private static ref File newFile(System.UIntPtr fd, @string name, newFileKind kind)
+        private static ptr<File> newFile(System.UIntPtr fd, @string name, newFileKind kind)
         {
             var fdi = int(fd);
             if (fdi < 0L)
             {
-                return null;
+                return _addr_null!;
             }
-            File f = ref new File(&file{pfd:poll.FD{Sysfd:fdi,IsStream:true,ZeroReadIsEOF:true,},name:name,stdoutOrErr:fdi==1||fdi==2,}); 
 
-            // Don't try to use kqueue with regular files on FreeBSD.
-            // It crashes the system unpredictably while running all.bash.
-            // Issue 19093.
-            if (runtime.GOOS == "freebsd" && kind == kindOpenFile)
+            ptr<File> f = addr(new File(&file{pfd:poll.FD{Sysfd:fdi,IsStream:true,ZeroReadIsEOF:true,},name:name,stdoutOrErr:fdi==1||fdi==2,}));
+
+            var pollable = kind == kindOpenFile || kind == kindPipe || kind == kindNonBlock; 
+
+            // If the caller passed a non-blocking filedes (kindNonBlock),
+            // we assume they know what they are doing so we allow it to be
+            // used with kqueue.
+            if (kind == kindOpenFile)
             {
-                kind = kindNewFile;
+                switch (runtime.GOOS)
+                {
+                    case "darwin": 
+
+                    case "dragonfly": 
+
+                    case "freebsd": 
+
+                    case "netbsd": 
+
+                    case "openbsd": 
+                        ref syscall.Stat_t st = ref heap(out ptr<syscall.Stat_t> _addr_st);
+                        var err = syscall.Fstat(fdi, _addr_st);
+                        var typ = st.Mode & syscall.S_IFMT; 
+                        // Don't try to use kqueue with regular files on *BSDs.
+                        // On FreeBSD a regular file is always
+                        // reported as ready for writing.
+                        // On Dragonfly, NetBSD and OpenBSD the fd is signaled
+                        // only once as ready (both read and write).
+                        // Issue 19093.
+                        // Also don't add directories to the netpoller.
+                        if (err == null && (typ == syscall.S_IFREG || typ == syscall.S_IFDIR))
+                        {
+                            pollable = false;
+                        } 
+
+                        // In addition to the behavior described above for regular files,
+                        // on Darwin, kqueue does not work properly with fifos:
+                        // closing the last writer does not cause a kqueue event
+                        // for any readers. See issue #24164.
+                        if (runtime.GOOS == "darwin" && typ == syscall.S_IFIFO)
+                        {
+                            pollable = false;
+                        }
+
+                        break;
+                }
+
             }
-            var pollable = kind == kindOpenFile || kind == kindPipe;
+
             {
                 var err__prev1 = err;
 
-                var err = f.pfd.Init("file", pollable);
+                err = f.pfd.Init("file", pollable);
 
                 if (err != null)
                 { 
@@ -163,46 +239,50 @@ namespace go
                         err = err__prev3;
 
                     }
+
                 }
+
 
                 err = err__prev1;
 
             }
 
-            runtime.SetFinalizer(f.file, ref file);
-            return f;
-        }
 
-        // Auxiliary information if the File describes a directory
-        private partial struct dirInfo
-        {
-            public slice<byte> buf; // buffer for directory I/O
-            public long nbuf; // length of buf; return value from Getdirentries
-            public long bufp; // location of next record in buf.
+            runtime.SetFinalizer(f.file, ptr<file>);
+            return _addr_f!;
+
         }
 
         // epipecheck raises SIGPIPE if we get an EPIPE error on standard
         // output or standard error. See the SIGPIPE docs in os/signal, and
         // issue 11845.
-        private static void epipecheck(ref File file, error e)
+        private static void epipecheck(ptr<File> _addr_file, error e)
         {
+            ref File file = ref _addr_file.val;
+
             if (e == syscall.EPIPE && file.stdoutOrErr)
             {
                 sigpipe();
             }
+
         }
 
         // DevNull is the name of the operating system's ``null device.''
         // On Unix-like systems, it is "/dev/null"; on Windows, "NUL".
-        public static readonly @string DevNull = "/dev/null";
+        public static readonly @string DevNull = (@string)"/dev/null";
 
         // openFileNolog is the Unix implementation of OpenFile.
+        // Changes here should be reflected in openFdAt, if relevant.
 
 
         // openFileNolog is the Unix implementation of OpenFile.
-        private static (ref File, error) openFileNolog(@string name, long flag, FileMode perm)
+        // Changes here should be reflected in openFdAt, if relevant.
+        private static (ptr<File>, error) openFileNolog(@string name, long flag, FileMode perm)
         {
-            var chmod = false;
+            ptr<File> _p0 = default!;
+            error _p0 = default!;
+
+            var setSticky = false;
             if (!supportsCreateWithStickyBit && flag & O_CREATE != 0L && perm & ModeSticky != 0L)
             {
                 {
@@ -210,38 +290,40 @@ namespace go
 
                     if (IsNotExist(err))
                     {
-                        chmod = true;
+                        setSticky = true;
                     }
 
                 }
+
             }
+
             long r = default;
             while (true)
             {
-                error e = default;
+                error e = default!;
                 r, e = syscall.Open(name, flag | syscall.O_CLOEXEC, syscallMode(perm));
                 if (e == null)
                 {
                     break;
                 } 
 
-                // On OS X, sigaction(2) doesn't guarantee that SA_RESTART will cause
-                // open(2) to be restarted for regular files. This is easy to reproduce on
-                // fuse file systems (see http://golang.org/issue/11180).
-                if (runtime.GOOS == "darwin" && e == syscall.EINTR)
+                // We have to check EINTR here, per issues 11180 and 39237.
+                if (e == syscall.EINTR)
                 {
                     continue;
                 }
-                return (null, ref new PathError("open",name,e));
+
+                return (_addr_null!, error.As(addr(new PathError("open",name,e))!)!);
+
             } 
 
             // open(2) itself won't handle the sticky bit on *BSD and Solaris
  
 
             // open(2) itself won't handle the sticky bit on *BSD and Solaris
-            if (chmod)
+            if (setSticky)
             {
-                Chmod(name, perm);
+                setStickyBit(name);
             } 
 
             // There's a race here with fork/exec, which we are
@@ -250,27 +332,26 @@ namespace go
             {
                 syscall.CloseOnExec(r);
             }
-            return (newFile(uintptr(r), name, kindOpenFile), null);
+
+            return (_addr_newFile(uintptr(r), name, kindOpenFile)!, error.As(null!)!);
+
         }
 
-        // Close closes the File, rendering it unusable for I/O.
-        // It returns an error, if any.
-        private static error Close(this ref File f)
+        private static error close(this ptr<file> _addr_file)
         {
-            if (f == null)
-            {
-                return error.As(ErrInvalid);
-            }
-            return error.As(f.file.close());
-        }
+            ref file file = ref _addr_file.val;
 
-        private static error close(this ref file file)
-        {
             if (file == null)
             {
-                return error.As(syscall.EINVAL);
+                return error.As(syscall.EINVAL)!;
             }
-            error err = default;
+
+            if (file.dirinfo != null)
+            {
+                file.dirinfo.close();
+            }
+
+            error err = default!;
             {
                 var e = file.pfd.Close();
 
@@ -280,7 +361,9 @@ namespace go
                     {
                         e = ErrClosed;
                     }
-                    err = error.As(ref new PathError("close",file.name,e));
+
+                    err = error.As(addr(new PathError("close",file.name,e)))!;
+
                 } 
 
                 // no need for a finalizer anymore
@@ -289,55 +372,33 @@ namespace go
 
             // no need for a finalizer anymore
             runtime.SetFinalizer(file, null);
-            return error.As(err);
-        }
+            return error.As(err)!;
 
-        // read reads up to len(b) bytes from the File.
-        // It returns the number of bytes read and an error, if any.
-        private static (long, error) read(this ref File f, slice<byte> b)
-        {
-            n, err = f.pfd.Read(b);
-            runtime.KeepAlive(f);
-            return (n, err);
-        }
-
-        // pread reads len(b) bytes from the File starting at byte offset off.
-        // It returns the number of bytes read and the error, if any.
-        // EOF is signaled by a zero count with err set to nil.
-        private static (long, error) pread(this ref File f, slice<byte> b, long off)
-        {
-            n, err = f.pfd.Pread(b, off);
-            runtime.KeepAlive(f);
-            return (n, err);
-        }
-
-        // write writes len(b) bytes to the File.
-        // It returns the number of bytes written and an error, if any.
-        private static (long, error) write(this ref File f, slice<byte> b)
-        {
-            n, err = f.pfd.Write(b);
-            runtime.KeepAlive(f);
-            return (n, err);
-        }
-
-        // pwrite writes len(b) bytes to the File starting at byte offset off.
-        // It returns the number of bytes written and an error, if any.
-        private static (long, error) pwrite(this ref File f, slice<byte> b, long off)
-        {
-            n, err = f.pfd.Pwrite(b, off);
-            runtime.KeepAlive(f);
-            return (n, err);
         }
 
         // seek sets the offset for the next Read or Write on file to offset, interpreted
         // according to whence: 0 means relative to the origin of the file, 1 means
         // relative to the current offset, and 2 means relative to the end.
         // It returns the new offset and an error, if any.
-        private static (long, error) seek(this ref File f, long offset, long whence)
+        private static (long, error) seek(this ptr<File> _addr_f, long offset, long whence)
         {
+            long ret = default;
+            error err = default!;
+            ref File f = ref _addr_f.val;
+
+            if (f.dirinfo != null)
+            { 
+                // Free cached dirinfo, so we allocate a new one if we
+                // access this file as a directory again. See #35767 and #37161.
+                f.dirinfo.close();
+                f.dirinfo = null;
+
+            }
+
             ret, err = f.pfd.Seek(offset, whence);
             runtime.KeepAlive(f);
-            return (ret, err);
+            return (ret, error.As(err)!);
+
         }
 
         // Truncate changes the size of the named file.
@@ -350,14 +411,16 @@ namespace go
 
                 if (e != null)
                 {
-                    return error.As(ref new PathError("truncate",name,e));
+                    return error.As(addr(new PathError("truncate",name,e))!)!;
                 }
 
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        // Remove removes the named file or directory.
+        // Remove removes the named file or (empty) directory.
         // If there is an error, it will be of type *PathError.
         public static error Remove(@string name)
         { 
@@ -368,12 +431,13 @@ namespace go
             var e = syscall.Unlink(name);
             if (e == null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             var e1 = syscall.Rmdir(name);
             if (e1 == null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             } 
 
             // Both failed: figure out which error to return.
@@ -389,7 +453,9 @@ namespace go
             {
                 e = e1;
             }
-            return error.As(ref new PathError("remove",name,e));
+
+            return error.As(addr(new PathError("remove",name,e))!)!;
+
         }
 
         private static @string tempDir()
@@ -405,8 +471,11 @@ namespace go
                 {
                     dir = "/tmp";
                 }
+
             }
+
             return dir;
+
         }
 
         // Link creates newname as a hard link to the oldname file.
@@ -416,9 +485,11 @@ namespace go
             var e = syscall.Link(oldname, newname);
             if (e != null)
             {
-                return error.As(ref new LinkError("link",oldname,newname,e));
+                return error.As(addr(new LinkError("link",oldname,newname,e))!)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Symlink creates newname as a symbolic link to oldname.
@@ -428,9 +499,93 @@ namespace go
             var e = syscall.Symlink(oldname, newname);
             if (e != null)
             {
-                return error.As(ref new LinkError("symlink",oldname,newname,e));
+                return error.As(addr(new LinkError("symlink",oldname,newname,e))!)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
+        }
+
+        private static (slice<FileInfo>, error) readdir(this ptr<File> _addr_f, long n)
+        {
+            slice<FileInfo> fi = default;
+            error err = default!;
+            ref File f = ref _addr_f.val;
+
+            var dirname = f.name;
+            if (dirname == "")
+            {
+                dirname = ".";
+            }
+
+            var (names, err) = f.Readdirnames(n);
+            fi = make_slice<FileInfo>(0L, len(names));
+            foreach (var (_, filename) in names)
+            {
+                var (fip, lerr) = lstat(dirname + "/" + filename);
+                if (IsNotExist(lerr))
+                { 
+                    // File disappeared between readdir + stat.
+                    // Just treat it as if it didn't exist.
+                    continue;
+
+                }
+
+                if (lerr != null)
+                {
+                    return (fi, error.As(lerr)!);
+                }
+
+                fi = append(fi, fip);
+
+            }
+            if (len(fi) == 0L && err == null && n > 0L)
+            { 
+                // Per File.Readdir, the slice must be non-empty or err
+                // must be non-nil if n > 0.
+                err = io.EOF;
+
+            }
+
+            return (fi, error.As(err)!);
+
+        }
+
+        // Readlink returns the destination of the named symbolic link.
+        // If there is an error, it will be of type *PathError.
+        public static (@string, error) Readlink(@string name)
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+
+            {
+                long len = 128L;
+
+                while (>>MARKER:FOREXPRESSION_LEVEL_1<<)
+                {
+                    var b = make_slice<byte>(len);
+                    var (n, e) = fixCount(syscall.Readlink(name, b)); 
+                    // buffer too small
+                    if (runtime.GOOS == "aix" && e == syscall.ERANGE)
+                    {
+                        continue;
+                    len *= 2L;
+                    }
+
+                    if (e != null)
+                    {
+                        return ("", error.As(addr(new PathError("readlink",name,e))!)!);
+                    }
+
+                    if (n < len)
+                    {
+                        return (string(b[0L..n]), error.As(null!)!);
+                    }
+
+                }
+
+            }
+
         }
     }
 }

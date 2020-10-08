@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:44:11 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:53 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\path_windows.go
 
@@ -12,14 +12,15 @@ namespace go
 {
     public static partial class os_package
     {
-        public static readonly char PathSeparator = '\\'; // OS-specific path separator
-        public static readonly char PathListSeparator = ';'; // OS-specific path list separator
+        public static readonly char PathSeparator = (char)'\\'; // OS-specific path separator
+        public static readonly char PathListSeparator = (char)';'; // OS-specific path list separator
 
         // IsPathSeparator reports whether c is a directory separator character.
         public static bool IsPathSeparator(byte c)
         { 
             // NOTE: Windows accept / as path separator.
             return c == '\\' || c == '/';
+
         }
 
         // basename removes trailing slashes and the leading
@@ -35,6 +36,7 @@ namespace go
             {
                 name = name[2L..];
             }
+
             var i = len(name) - 1L; 
             // Remove trailing slashes
             while (i > 0L && (name[i] == '/' || name[i] == '\\'))
@@ -55,28 +57,37 @@ namespace go
                     break;
                 i--;
                 }
+
             }
 
             return name;
+
         }
 
         private static bool isAbs(@string path)
         {
+            bool b = default;
+
             var v = volumeName(path);
             if (v == "")
             {
                 return false;
             }
+
             path = path[len(v)..];
             if (path == "")
             {
                 return false;
             }
+
             return IsPathSeparator(path[0L]);
+
         }
 
         private static @string volumeName(@string path)
         {
+            @string v = default;
+
             if (len(path) < 2L)
             {
                 return "";
@@ -107,6 +118,7 @@ namespace go
                                 {
                                     break;
                                 }
+
                                 while (n < l)
                                 {
                                     if (IsPathSeparator(path[n]))
@@ -114,18 +126,26 @@ namespace go
                                         break;
                                     n++;
                                     }
+
                                 }
 
                                 return path[..n];
+
                             }
+
                             break;
+
                         }
+
                     }
+
 
                 }
 
             }
+
             return "";
+
         }
 
         private static @string fromSlash(@string path)
@@ -141,17 +161,22 @@ namespace go
                     {
                         pathbuf = make_slice<byte>(len(path));
                     }
+
                     copy(pathbuf[lastSlash..], path[lastSlash..i]);
                     pathbuf[i] = '\\';
                     lastSlash = i + 1L;
+
                 }
+
             }
             if (pathbuf == null)
             {
                 return path;
             }
+
             copy(pathbuf[lastSlash..], path[lastSlash..]);
             return string(pathbuf);
+
         }
 
         private static @string dirname(@string path)
@@ -169,11 +194,14 @@ namespace go
             {
                 dir = dir[..last];
             }
+
             if (dir == "")
             {
                 dir = ".";
             }
+
             return vol + dir;
+
         }
 
         // fixLongPath returns the extended-length (\\?\-prefixed) form of
@@ -202,6 +230,7 @@ namespace go
                 // Don't fix. (This is how Go 1.7 and earlier worked,
                 // not automatically generating the \\?\ form)
                 return path;
+
             } 
 
             // The extended form begins with \\?\, as in
@@ -219,13 +248,17 @@ namespace go
             { 
                 // Don't canonicalize UNC paths.
                 return path;
+
             }
+
             if (!isAbs(path))
             { 
                 // Relative path
                 return path;
+
             }
-            const @string prefix = "\\\\?";
+
+            const @string prefix = (@string)"\\\\?";
 
 
 
@@ -255,7 +288,8 @@ namespace go
                         w++;
                         r++;
                     }
-                            } 
+                
+            } 
             // A drive's root directory needs a trailing \
  
             // A drive's root directory needs a trailing \
@@ -264,7 +298,26 @@ namespace go
                 pathbuf[w] = '\\';
                 w++;
             }
+
             return string(pathbuf[..w]);
+
+        }
+
+        // fixRootDirectory fixes a reference to a drive's root directory to
+        // have the required trailing slash.
+        private static @string fixRootDirectory(@string p)
+        {
+            if (len(p) == len("\\\\?\\c:"))
+            {
+                if (IsPathSeparator(p[0L]) && IsPathSeparator(p[1L]) && p[2L] == '?' && IsPathSeparator(p[3L]) && p[5L] == ':')
+                {
+                    return p + "\\";
+                }
+
+            }
+
+            return p;
+
         }
     }
 }

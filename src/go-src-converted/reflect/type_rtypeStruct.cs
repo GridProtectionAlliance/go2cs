@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:13 UTC
+//     Generated on 2020 October 08 03:24:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using runtime = go.runtime_package;
+using unsafeheader = go.@internal.unsafeheader_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using unicode = go.unicode_package;
@@ -37,13 +37,13 @@ namespace go
                 this.align = default;
                 this.fieldAlign = default;
                 this.kind = default;
-                this.alg = default;
+                this.equal = default;
                 this.gcdata = default;
                 this.str = default;
                 this.ptrToThis = default;
             }
 
-            public rtype(System.UIntPtr size = default, System.UIntPtr ptrdata = default, uint hash = default, tflag tflag = default, byte align = default, byte fieldAlign = default, byte kind = default, ref ptr<typeAlg> alg = default, ref ptr<byte> gcdata = default, nameOff str = default, typeOff ptrToThis = default)
+            public rtype(System.UIntPtr size = default, System.UIntPtr ptrdata = default, uint hash = default, tflag tflag = default, byte align = default, byte fieldAlign = default, byte kind = default, Func<unsafe.Pointer, unsafe.Pointer, bool> equal = default, ref ptr<byte> gcdata = default, nameOff str = default, typeOff ptrToThis = default)
             {
                 this.size = size;
                 this.ptrdata = ptrdata;
@@ -52,7 +52,7 @@ namespace go
                 this.align = align;
                 this.fieldAlign = fieldAlign;
                 this.kind = kind;
-                this.alg = alg;
+                this.equal = equal;
                 this.gcdata = gcdata;
                 this.str = str;
                 this.ptrToThis = ptrToThis;
@@ -78,7 +78,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static rtype rtype_cast(dynamic value)
         {
-            return new rtype(value.size, value.ptrdata, value.hash, value.tflag, value.align, value.fieldAlign, value.kind, ref value.alg, ref value.gcdata, value.str, value.ptrToThis);
+            return new rtype(value.size, value.ptrdata, value.hash, value.tflag, value.align, value.fieldAlign, value.kind, value.equal, ref value.gcdata, value.str, value.ptrToThis);
         }
     }
 }

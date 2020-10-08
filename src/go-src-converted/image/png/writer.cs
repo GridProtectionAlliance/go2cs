@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package png -- go2cs converted at 2020 August 29 10:10:30 UTC
+// package png -- go2cs converted at 2020 October 08 04:59:40 UTC
 // import "image/png" ==> using png = go.image.png_package
 // Original source: C:\Go\src\image\png\writer.go
 using bufio = go.bufio_package;
 using zlib = go.compress.zlib_package;
+using binary = go.encoding.binary_package;
 using crc32 = go.hash.crc32_package;
 using image = go.image_package;
 using color = go.image.color_package;
@@ -32,8 +33,8 @@ namespace image
         // when encoding multiple images.
         public partial interface EncoderBufferPool
         {
-            ref EncoderBuffer Get();
-            ref EncoderBuffer Put(ref EncoderBuffer _p0);
+            ptr<EncoderBuffer> Get();
+            ptr<EncoderBuffer> Put(ptr<EncoderBuffer> _p0);
         }
 
         // EncoderBuffer holds the buffers used for encoding PNG images.
@@ -62,22 +63,13 @@ namespace image
         {
         }
 
-        public static readonly CompressionLevel DefaultCompression = 0L;
-        public static readonly CompressionLevel NoCompression = -1L;
-        public static readonly CompressionLevel BestSpeed = -2L;
-        public static readonly CompressionLevel BestCompression = -3L; 
+        public static readonly CompressionLevel DefaultCompression = (CompressionLevel)0L;
+        public static readonly CompressionLevel NoCompression = (CompressionLevel)-1L;
+        public static readonly CompressionLevel BestSpeed = (CompressionLevel)-2L;
+        public static readonly CompressionLevel BestCompression = (CompressionLevel)-3L; 
 
         // Positive CompressionLevel values are reserved to mean a numeric zlib
         // compression level, although that is not implemented yet.
-
-        // Big-endian.
-        private static void writeUint32(slice<byte> b, uint u)
-        {
-            b[0L] = uint8(u >> (int)(24L));
-            b[1L] = uint8(u >> (int)(16L));
-            b[2L] = uint8(u >> (int)(8L));
-            b[3L] = uint8(u >> (int)(0L));
-        }
 
         private partial interface opaquer
         {
@@ -88,7 +80,7 @@ namespace image
         private static bool opaque(image.Image m)
         {
             {
-                opaquer (o, ok) = m._<opaquer>();
+                opaquer (o, ok) = opaquer.As(m._<opaquer>())!;
 
                 if (ok)
                 {
@@ -96,6 +88,7 @@ namespace image
                 }
 
             }
+
             var b = m.Bounds();
             for (var y = b.Min.Y; y < b.Max.Y; y++)
             {
@@ -106,11 +99,14 @@ namespace image
                     {
                         return false;
                     }
+
                 }
+
 
             }
 
             return true;
+
         }
 
         // The absolute value of a byte interpreted as a signed int8.
@@ -120,22 +116,28 @@ namespace image
             {
                 return int(d);
             }
+
             return 256L - int(d);
+
         }
 
-        private static void writeChunk(this ref encoder e, slice<byte> b, @string name)
+        private static void writeChunk(this ptr<encoder> _addr_e, slice<byte> b, @string name)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             var n = uint32(len(b));
             if (int(n) != len(b))
             {
                 e.err = UnsupportedError(name + " chunk is too large: " + strconv.Itoa(len(b)));
-                return;
+                return ;
             }
-            writeUint32(e.header[..4L], n);
+
+            binary.BigEndian.PutUint32(e.header[..4L], n);
             e.header[4L] = name[0L];
             e.header[5L] = name[1L];
             e.header[6L] = name[2L];
@@ -143,26 +145,31 @@ namespace image
             var crc = crc32.NewIEEE();
             crc.Write(e.header[4L..8L]);
             crc.Write(b);
-            writeUint32(e.footer[..4L], crc.Sum32());
+            binary.BigEndian.PutUint32(e.footer[..4L], crc.Sum32());
 
             _, e.err = e.w.Write(e.header[..8L]);
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             _, e.err = e.w.Write(b);
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             _, e.err = e.w.Write(e.footer[..4L]);
+
         }
 
-        private static void writeIHDR(this ref encoder e)
+        private static void writeIHDR(this ptr<encoder> _addr_e)
         {
+            ref encoder e = ref _addr_e.val;
+
             var b = e.m.Bounds();
-            writeUint32(e.tmp[0L..4L], uint32(b.Dx()));
-            writeUint32(e.tmp[4L..8L], uint32(b.Dy())); 
+            binary.BigEndian.PutUint32(e.tmp[0L..4L], uint32(b.Dx()));
+            binary.BigEndian.PutUint32(e.tmp[4L..8L], uint32(b.Dy())); 
             // Set bit depth and color type.
 
             if (e.cb == cbG8) 
@@ -173,6 +180,15 @@ namespace image
                 e.tmp[9L] = ctTrueColor;
             else if (e.cb == cbP8) 
                 e.tmp[8L] = 8L;
+                e.tmp[9L] = ctPaletted;
+            else if (e.cb == cbP4) 
+                e.tmp[8L] = 4L;
+                e.tmp[9L] = ctPaletted;
+            else if (e.cb == cbP2) 
+                e.tmp[8L] = 2L;
+                e.tmp[9L] = ctPaletted;
+            else if (e.cb == cbP1) 
+                e.tmp[8L] = 1L;
                 e.tmp[9L] = ctPaletted;
             else if (e.cb == cbTCA8) 
                 e.tmp[8L] = 8L;
@@ -190,15 +206,19 @@ namespace image
             e.tmp[11L] = 0L; // default filter method
             e.tmp[12L] = 0L; // non-interlaced
             e.writeChunk(e.tmp[..13L], "IHDR");
+
         }
 
-        private static void writePLTEAndTRNS(this ref encoder e, color.Palette p)
+        private static void writePLTEAndTRNS(this ptr<encoder> _addr_e, color.Palette p)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (len(p) < 1L || len(p) > 256L)
             {
                 e.err = FormatError("bad palette length: " + strconv.Itoa(len(p)));
-                return;
+                return ;
             }
+
             long last = -1L;
             foreach (var (i, c) in p)
             {
@@ -210,13 +230,16 @@ namespace image
                 {
                     last = i;
                 }
+
                 e.tmp[3L * 256L + i] = c1.A;
+
             }
             e.writeChunk(e.tmp[..3L * len(p)], "PLTE");
             if (last != -1L)
             {
                 e.writeChunk(e.tmp[3L * 256L..3L * 256L + 1L + last], "tRNS");
             }
+
         }
 
         // An encoder is an io.Writer that satisfies writes by writing PNG IDAT chunks,
@@ -225,20 +248,28 @@ namespace image
         //
         // This method should only be called from writeIDATs (via writeImage).
         // No other code should treat an encoder as an io.Writer.
-        private static (long, error) Write(this ref encoder e, slice<byte> b)
+        private static (long, error) Write(this ptr<encoder> _addr_e, slice<byte> b)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref encoder e = ref _addr_e.val;
+
             e.writeChunk(b, "IDAT");
             if (e.err != null)
             {
-                return (0L, e.err);
+                return (0L, error.As(e.err)!);
             }
-            return (len(b), null);
+
+            return (len(b), error.As(null!)!);
+
         }
 
         // Chooses the filter to use for encoding the current row, and applies it.
         // The return value is the index of the filter and also of the row in cr that has had it applied.
-        private static long filter(ref array<slice<byte>> cr, slice<byte> pr, long bpp)
-        { 
+        private static long filter(ptr<array<slice<byte>>> _addr_cr, slice<byte> pr, long bpp)
+        {
+            ref array<slice<byte>> cr = ref _addr_cr.val;
+ 
             // We try all five filter types, and pick the one that minimizes the sum of absolute differences.
             // This is the same heuristic that libpng uses, although the filters are attempted in order of
             // estimated most likely to be minimal (ftUp, ftPaeth, ftNone, ftSub, ftAverage), rather than
@@ -293,6 +324,7 @@ namespace image
                     {
                         break;
                     }
+
                 }
 
 
@@ -316,6 +348,7 @@ namespace image
                     {
                         break;
                     }
+
                 }
 
 
@@ -352,6 +385,7 @@ namespace image
                     {
                         break;
                     }
+
                 }
 
 
@@ -388,6 +422,7 @@ namespace image
                     {
                         break;
                     }
+
                 }
 
 
@@ -395,10 +430,11 @@ namespace image
             }
             if (sum < best)
             {
-                best = sum;
                 filter = ftAverage;
             }
+
             return filter;
+
         }
 
         private static void zeroMemory(slice<byte> v)
@@ -407,50 +443,62 @@ namespace image
             {
                 v[i] = 0L;
             }
+
         }
 
-        private static error writeImage(this ref encoder _e, io.Writer w, image.Image m, long cb, long level) => func(_e, (ref encoder e, Defer defer, Panic _, Recover __) =>
+        private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Image m, long cb, long level) => func((defer, _, __) =>
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.zw == null || e.zwLevel != level)
             {
                 var (zw, err) = zlib.NewWriterLevel(w, level);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 e.zw = zw;
                 e.zwLevel = level;
+
             }
             else
             {
                 e.zw.Reset(w);
             }
+
             defer(e.zw.Close());
 
-            long bpp = 0L; // Bytes per pixel.
+            long bitsPerPixel = 0L;
 
 
             if (cb == cbG8) 
-                bpp = 1L;
+                bitsPerPixel = 8L;
             else if (cb == cbTC8) 
-                bpp = 3L;
+                bitsPerPixel = 24L;
             else if (cb == cbP8) 
-                bpp = 1L;
+                bitsPerPixel = 8L;
+            else if (cb == cbP4) 
+                bitsPerPixel = 4L;
+            else if (cb == cbP2) 
+                bitsPerPixel = 2L;
+            else if (cb == cbP1) 
+                bitsPerPixel = 1L;
             else if (cb == cbTCA8) 
-                bpp = 4L;
+                bitsPerPixel = 32L;
             else if (cb == cbTC16) 
-                bpp = 6L;
+                bitsPerPixel = 48L;
             else if (cb == cbTCA16) 
-                bpp = 8L;
+                bitsPerPixel = 64L;
             else if (cb == cbG16) 
-                bpp = 2L;
+                bitsPerPixel = 16L;
             // cr[*] and pr are the bytes for the current and previous row.
             // cr[0] is unfiltered (or equivalently, filtered with the ftNone filter).
             // cr[ft], for non-zero filter types ft, are buffers for transforming cr[0] under the
             // other PNG filter types. These buffers are allocated once and re-used for each row.
             // The +1 is for the per-row filter type, which is at cr[*][0].
             var b = m.Bounds();
-            long sz = 1L + bpp * b.Dx();
+            long sz = 1L + (bitsPerPixel * b.Dx() + 7L) / 8L;
             {
                 var i__prev1 = i;
 
@@ -465,13 +513,15 @@ namespace image
                     {
                         e.cr[i] = e.cr[i][..sz];
                     }
+
                     e.cr[i][0L] = uint8(i);
+
                 }
 
                 i = i__prev1;
             }
 
-            var cr = e.cr;
+            ref var cr = ref heap(e.cr, out ptr<var> _addr_cr);
             if (cap(e.pr) < sz)
             {
                 e.pr = make_slice<byte>(sz);
@@ -481,12 +531,13 @@ namespace image
                 e.pr = e.pr[..sz];
                 zeroMemory(e.pr);
             }
+
             var pr = e.pr;
 
-            ref image.Gray (gray, _) = m._<ref image.Gray>();
-            ref image.RGBA (rgba, _) = m._<ref image.RGBA>();
-            ref image.Paletted (paletted, _) = m._<ref image.Paletted>();
-            ref image.NRGBA (nrgba, _) = m._<ref image.NRGBA>();
+            ptr<image.Gray> (gray, _) = m._<ptr<image.Gray>>();
+            ptr<image.RGBA> (rgba, _) = m._<ptr<image.RGBA>>();
+            ptr<image.Paletted> (paletted, _) = m._<ptr<image.Paletted>>();
+            ptr<image.NRGBA> (nrgba, _) = m._<ptr<image.NRGBA>>();
 
             for (var y = b.Min.Y; y < b.Max.Y; y++)
             { 
@@ -514,7 +565,9 @@ namespace image
 
                             x = x__prev2;
                         }
+
                     }
+
                 else if (cb == cbTC8) 
                     // We have previously verified that the alpha value is fully opaque.
                     var cr0 = cr[0L];
@@ -524,12 +577,15 @@ namespace image
                     {
                         stride = rgba.Stride;
                         pix = rgba.Pix;
+
                     }
                     else if (nrgba != null)
                     {
                         stride = nrgba.Stride;
                         pix = nrgba.Pix;
+
                     }
+
                     if (stride != 0L)
                     {
                         var j0 = (y - b.Min.Y) * stride;
@@ -548,6 +604,7 @@ namespace image
                     else
 
                         }
+
                     }                    {
                         {
                             var x__prev2 = x;
@@ -564,7 +621,9 @@ namespace image
 
                             x = x__prev2;
                         }
+
                     }
+
                 else if (cb == cbP8) 
                     if (paletted != null)
                     {
@@ -586,7 +645,47 @@ namespace image
 
                             x = x__prev2;
                         }
+
                     }
+
+                else if (cb == cbP4 || cb == cbP2 || cb == cbP1) 
+                    pi = m._<image.PalettedImage>();
+
+                    byte a = default;
+                    c = default;
+                    long pixelsPerByte = 8L / bitsPerPixel;
+                    {
+                        var x__prev2 = x;
+
+                        for (x = b.Min.X; x < b.Max.X; x++)
+                        {
+                            a = a << (int)(uint(bitsPerPixel)) | pi.ColorIndexAt(x, y);
+                            c++;
+                            if (c == pixelsPerByte)
+                            {
+                                cr[0L][i] = a;
+                                i += 1L;
+                                a = 0L;
+                                c = 0L;
+                            }
+
+                        }
+
+
+                        x = x__prev2;
+                    }
+                    if (c != 0L)
+                    {
+                        while (c != pixelsPerByte)
+                        {
+                            a = a << (int)(uint(bitsPerPixel));
+                            c++;
+                        }
+
+                        cr[0L][i] = a;
+
+                    }
+
                 else if (cb == cbTCA8) 
                     if (nrgba != null)
                     {
@@ -612,7 +711,9 @@ namespace image
 
                             x = x__prev2;
                         }
+
                     }
+
                 else if (cb == cbG16) 
                     {
                         var x__prev2 = x;
@@ -675,9 +776,13 @@ namespace image
                 // "filters are rarely useful on palette images" and will result
                 // in larger files (see http://www.libpng.org/pub/png/book/chapter09.html).
                 var f = ftNone;
-                if (level != zlib.NoCompression && cb != cbP8)
-                {
-                    f = filter(ref cr, pr, bpp);
+                if (level != zlib.NoCompression && cb != cbP8 && cb != cbP4 && cb != cbP2 && cb != cbP1)
+                { 
+                    // Since we skip paletted images we don't have to worry about
+                    // bitsPerPixel not being a multiple of 8
+                    var bpp = bitsPerPixel / 8L;
+                    f = filter(_addr_cr, pr, bpp);
+
                 } 
 
                 // Write the compressed bytes.
@@ -686,7 +791,7 @@ namespace image
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     } 
 
                     // The current row for y is the previous row for y+1.
@@ -696,18 +801,23 @@ namespace image
                 // The current row for y is the previous row for y+1.
                 pr = cr[0L];
                 cr[0L] = pr;
+
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // Write the actual image data to one or more IDAT chunks.
-        private static void writeIDATs(this ref encoder e)
+        private static void writeIDATs(this ptr<encoder> _addr_e)
         {
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             if (e.bw == null)
             {
                 e.bw = bufio.NewWriterSize(e, 1L << (int)(15L));
@@ -716,12 +826,15 @@ namespace image
             {
                 e.bw.Reset(e);
             }
+
             e.err = e.writeImage(e.bw, e.m, e.cb, levelToZlib(e.enc.CompressionLevel));
             if (e.err != null)
             {
-                return;
+                return ;
             }
+
             e.err = e.bw.Flush();
+
         }
 
         // This function is required because we want the zero value of
@@ -739,12 +852,14 @@ namespace image
                 return zlib.BestCompression;
             else 
                 return zlib.DefaultCompression;
-                    }
+            
+        }
 
-        private static void writeIEND(this ref encoder e)
+        private static void writeIEND(this ptr<encoder> _addr_e)
         {
-            e.writeChunk(null, "IEND");
+            ref encoder e = ref _addr_e.val;
 
+            e.writeChunk(null, "IEND");
         }
 
         // Encode writes the Image m to w in PNG format. Any Image may be
@@ -752,12 +867,14 @@ namespace image
         public static error Encode(io.Writer w, image.Image m)
         {
             Encoder e = default;
-            return error.As(e.Encode(w, m));
+            return error.As(e.Encode(w, m))!;
         }
 
         // Encode writes the Image m to w in PNG format.
-        private static error Encode(this ref Encoder _enc, io.Writer w, image.Image m) => func(_enc, (ref Encoder enc, Defer defer, Panic _, Recover __) =>
-        { 
+        private static error Encode(this ptr<Encoder> _addr_enc, io.Writer w, image.Image m) => func((defer, _, __) =>
+        {
+            ref Encoder enc = ref _addr_enc.val;
+ 
             // Obviously, negative widths and heights are invalid. Furthermore, the PNG
             // spec section 11.2.2 says that zero is invalid. Excessively large images are
             // also rejected.
@@ -765,23 +882,26 @@ namespace image
             var mh = int64(m.Bounds().Dy());
             if (mw <= 0L || mh <= 0L || mw >= 1L << (int)(32L) || mh >= 1L << (int)(32L))
             {
-                return error.As(FormatError("invalid image size: " + strconv.FormatInt(mw, 10L) + "x" + strconv.FormatInt(mh, 10L)));
+                return error.As(FormatError("invalid image size: " + strconv.FormatInt(mw, 10L) + "x" + strconv.FormatInt(mh, 10L)))!;
             }
-            ref encoder e = default;
+
+            ptr<encoder> e;
             if (enc.BufferPool != null)
             {
                 var buffer = enc.BufferPool.Get();
-                e = (encoder.Value)(buffer);
-
+                e = (encoder.val)(buffer);
             }
+
             if (e == null)
             {
-                e = ref new encoder();
+                e = addr(new encoder());
             }
+
             if (enc.BufferPool != null)
             {
-                defer(enc.BufferPool.Put((EncoderBuffer.Value)(e)));
+                defer(enc.BufferPool.Put((EncoderBuffer.val)(e)));
             }
+
             e.enc = enc;
             e.w = w;
             e.m = m;
@@ -797,9 +917,26 @@ namespace image
                 }
 
             }
+
             if (pal != null)
             {
-                e.cb = cbP8;
+                if (len(pal) <= 2L)
+                {
+                    e.cb = cbP1;
+                }
+                else if (len(pal) <= 4L)
+                {
+                    e.cb = cbP2;
+                }
+                else if (len(pal) <= 16L)
+                {
+                    e.cb = cbP4;
+                }
+                else
+                {
+                    e.cb = cbP8;
+                }
+
             }
             else
             {
@@ -817,6 +954,7 @@ namespace image
                     {
                         e.cb = cbTCA8;
                     }
+
                 else 
                     if (opaque(m))
                     {
@@ -826,16 +964,20 @@ namespace image
                     {
                         e.cb = cbTCA16;
                     }
+
                             }
+
             _, e.err = io.WriteString(w, pngHeader);
             e.writeIHDR();
             if (pal != null)
             {
                 e.writePLTEAndTRNS(pal);
             }
+
             e.writeIDATs();
             e.writeIEND();
-            return error.As(e.err);
+            return error.As(e.err)!;
+
         });
     }
 }}

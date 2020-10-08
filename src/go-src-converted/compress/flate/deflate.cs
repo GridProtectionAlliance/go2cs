@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 August 29 08:23:11 UTC
+// package flate -- go2cs converted at 2020 October 08 03:30:48 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\deflate.go
 using fmt = go.fmt_package;
@@ -16,10 +16,10 @@ namespace compress
 {
     public static partial class flate_package
     {
-        public static readonly long NoCompression = 0L;
-        public static readonly long BestSpeed = 1L;
-        public static readonly long BestCompression = 9L;
-        public static readonly long DefaultCompression = -1L; 
+        public static readonly long NoCompression = (long)0L;
+        public static readonly long BestSpeed = (long)1L;
+        public static readonly long BestCompression = (long)9L;
+        public static readonly long DefaultCompression = (long)-1L; 
 
         // HuffmanOnly disables Lempel-Ziv match searching and only performs Huffman
         // entropy encoding. This mode is useful in compressing data that has
@@ -30,11 +30,12 @@ namespace compress
         // Note that HuffmanOnly produces a compressed output that is
         // RFC 1951 compliant. That is, any valid DEFLATE decompressor will
         // continue to be able to decompress this output.
-        public static readonly long HuffmanOnly = -2L;
+        public static readonly long HuffmanOnly = (long)-2L;
 
-        private static readonly long logWindowSize = 15L;
-        private static readonly long windowSize = 1L << (int)(logWindowSize);
-        private static readonly var windowMask = windowSize - 1L; 
+
+        private static readonly long logWindowSize = (long)15L;
+        private static readonly long windowSize = (long)1L << (int)(logWindowSize);
+        private static readonly var windowMask = (var)windowSize - 1L; 
 
         // The LZ77 step produces a sequence of literal tokens and <length, offset>
         // pair tokens. The offset is also known as distance. The underlying wire
@@ -42,22 +43,23 @@ namespace compress
         // 256 legitimate lengths: those in the range [3, 258]. This package's
         // compressor uses a higher minimum match length, enabling optimizations
         // such as finding matches via 32-bit loads and compares.
-        private static readonly long baseMatchLength = 3L; // The smallest match length per the RFC section 3.2.5
-        private static readonly long minMatchLength = 4L; // The smallest match length that the compressor actually emits
-        private static readonly long maxMatchLength = 258L; // The largest match length
-        private static readonly long baseMatchOffset = 1L; // The smallest match offset
-        private static readonly long maxMatchOffset = 1L << (int)(15L); // The largest match offset
+        private static readonly long baseMatchLength = (long)3L; // The smallest match length per the RFC section 3.2.5
+        private static readonly long minMatchLength = (long)4L; // The smallest match length that the compressor actually emits
+        private static readonly long maxMatchLength = (long)258L; // The largest match length
+        private static readonly long baseMatchOffset = (long)1L; // The smallest match offset
+        private static readonly long maxMatchOffset = (long)1L << (int)(15L); // The largest match offset
 
         // The maximum number of tokens we put into a single flate block, just to
         // stop things from getting too large.
-        private static readonly long maxFlateBlockTokens = 1L << (int)(14L);
-        private static readonly long maxStoreBlockSize = 65535L;
-        private static readonly long hashBits = 17L; // After 17 performance degrades
-        private static readonly long hashSize = 1L << (int)(hashBits);
-        private static readonly long hashMask = (1L << (int)(hashBits)) - 1L;
-        private static readonly long maxHashOffset = 1L << (int)(24L);
+        private static readonly long maxFlateBlockTokens = (long)1L << (int)(14L);
+        private static readonly long maxStoreBlockSize = (long)65535L;
+        private static readonly long hashBits = (long)17L; // After 17 performance degrades
+        private static readonly long hashSize = (long)1L << (int)(hashBits);
+        private static readonly long hashMask = (long)(1L << (int)(hashBits)) - 1L;
+        private static readonly long maxHashOffset = (long)1L << (int)(24L);
 
-        private static readonly var skipNever = math.MaxInt32;
+        private static readonly var skipNever = (var)math.MaxInt32;
+
 
         private partial struct compressionLevel
         {
@@ -76,8 +78,8 @@ namespace compress
             public ref compressionLevel compressionLevel => ref compressionLevel_val;
             public ptr<huffmanBitWriter> w;
             public Action<slice<byte>, slice<uint>> bulkHasher; // compression algorithm
-            public Func<ref compressor, slice<byte>, long> fill; // copy data to window
-            public Action<ref compressor> step; // process window
+            public Func<ptr<compressor>, slice<byte>, long> fill; // copy data to window
+            public Action<ptr<compressor>> step; // process window
             public bool sync; // requesting flush
             public ptr<deflateFast> bestSpeed; // Encoder for BestSpeed
 
@@ -106,8 +108,10 @@ namespace compress
             public array<uint> hashMatch;
         }
 
-        private static long fillDeflate(this ref compressor d, slice<byte> b)
+        private static long fillDeflate(this ptr<compressor> _addr_d, slice<byte> b)
         {
+            ref compressor d = ref _addr_d.val;
+
             if (d.index >= 2L * windowSize - (minMatchLength + maxMatchLength))
             { 
                 // shift the window by windowSize
@@ -122,6 +126,7 @@ namespace compress
                 {
                     d.blockStart = math.MaxInt32;
                 }
+
                 d.hashOffset += windowSize;
                 if (d.hashOffset > maxHashOffset)
                 {
@@ -147,6 +152,7 @@ namespace compress
                             {
                                 d.hashPrev[i] = 0L;
                             }
+
                         }
 
                         i = i__prev1;
@@ -169,21 +175,26 @@ namespace compress
                             {
                                 d.hashHead[i] = 0L;
                             }
+
                         }
 
                         i = i__prev1;
                         v = v__prev1;
                     }
-
                 }
+
             }
+
             var n = copy(d.window[d.windowEnd..], b);
             d.windowEnd += n;
             return n;
+
         }
 
-        private static error writeBlock(this ref compressor d, slice<token> tokens, long index)
+        private static error writeBlock(this ptr<compressor> _addr_d, slice<token> tokens, long index)
         {
+            ref compressor d = ref _addr_d.val;
+
             if (index > 0L)
             {
                 slice<byte> window = default;
@@ -191,24 +202,31 @@ namespace compress
                 {
                     window = d.window[d.blockStart..index];
                 }
+
                 d.blockStart = index;
                 d.w.writeBlock(tokens, false, window);
-                return error.As(d.w.err);
+                return error.As(d.w.err)!;
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // fillWindow will fill the current window with the supplied
         // dictionary and calculate all hashes.
         // This is much faster than doing a full encode.
         // Should only be used after a reset.
-        private static void fillWindow(this ref compressor _d, slice<byte> b) => func(_d, (ref compressor d, Defer _, Panic panic, Recover __) =>
-        { 
+        private static void fillWindow(this ptr<compressor> _addr_d, slice<byte> b) => func((_, panic, __) =>
+        {
+            ref compressor d = ref _addr_d.val;
+ 
             // Do not fill window if we are in store-only mode.
             if (d.compressionLevel.level < 2L)
             {
-                return;
+                return ;
             }
+
             if (d.index != 0L || d.windowEnd != 0L)
             {
                 panic("internal error: fillWindow called with stale data");
@@ -232,6 +250,7 @@ namespace compress
                 {
                     end = n;
                 }
+
                 var toCheck = d.window[index..end];
                 var dstSize = len(toCheck) - minMatchLength + 1L;
 
@@ -239,6 +258,7 @@ namespace compress
                 {
                     continue;
                 }
+
                 var dst = d.hashMatch[..dstSize];
                 d.bulkHasher(toCheck, dst);
                 uint newH = default;
@@ -246,31 +266,40 @@ namespace compress
                 {
                     var di = i + index;
                     newH = val;
-                    var hh = ref d.hashHead[newH & hashMask]; 
+                    var hh = _addr_d.hashHead[newH & hashMask]; 
                     // Get previous value with the same hash.
                     // Our chain should point to the previous value.
-                    d.hashPrev[di & windowMask] = hh.Value; 
+                    d.hashPrev[di & windowMask] = hh.val; 
                     // Set the head of the hash chain to us.
-                    hh.Value = uint32(di + d.hashOffset);
+                    hh.val = uint32(di + d.hashOffset);
+
                 }
                 d.hash = newH;
+
             } 
             // Update window information.
  
             // Update window information.
             d.windowEnd = n;
             d.index = n;
+
         });
 
         // Try to find a match starting at index whose length is greater than prevSize.
         // We only look at chainCount possibilities before giving up.
-        private static (long, long, bool) findMatch(this ref compressor d, long pos, long prevHead, long prevLength, long lookahead)
+        private static (long, long, bool) findMatch(this ptr<compressor> _addr_d, long pos, long prevHead, long prevLength, long lookahead)
         {
+            long length = default;
+            long offset = default;
+            bool ok = default;
+            ref compressor d = ref _addr_d.val;
+
             var minMatchLook = maxMatchLength;
             if (lookahead < minMatchLook)
             {
                 minMatchLook = lookahead;
             }
+
             var win = d.window[0L..pos + minMatchLook]; 
 
             // We quit when we get a match that's at least nice long
@@ -287,6 +316,7 @@ namespace compress
             {
                 tries >>= 2L;
             }
+
             var wEnd = win[pos + length];
             var wPos = win[pos..];
             var minIndex = pos - windowSize;
@@ -306,38 +336,51 @@ namespace compress
                         { 
                             // The match is good enough that we don't try to find a better one.
                             break;
+
                         }
+
                         wEnd = win[pos + n];
+
                     }
+
                 }
+
                 if (i == minIndex)
                 { 
                     // hashPrev[i & windowMask] has already been overwritten, so stop now.
                     break;
+
                 }
+
                 i = int(d.hashPrev[i & windowMask]) - d.hashOffset;
                 if (i < minIndex || i < 0L)
                 {
                     break;
                 }
+
             }
 
-            return;
+            return ;
+
         }
 
-        private static error writeStoredBlock(this ref compressor d, slice<byte> buf)
+        private static error writeStoredBlock(this ptr<compressor> _addr_d, slice<byte> buf)
         {
+            ref compressor d = ref _addr_d.val;
+
             d.w.writeStoredHeader(len(buf), false);
 
             if (d.w.err != null)
             {
-                return error.As(d.w.err);
+                return error.As(d.w.err)!;
             }
+
             d.w.writeBytes(buf);
-            return error.As(d.w.err);
+            return error.As(d.w.err)!;
+
         }
 
-        private static readonly ulong hashmul = 0x1e35a7bdUL;
+        private static readonly ulong hashmul = (ulong)0x1e35a7bdUL;
 
         // hash4 returns a hash representation of the first 4 bytes
         // of the supplied slice.
@@ -358,8 +401,9 @@ namespace compress
         {
             if (len(b) < minMatchLength)
             {
-                return;
+                return ;
             }
+
             var hb = uint32(b[3L]) | uint32(b[2L]) << (int)(8L) | uint32(b[1L]) << (int)(16L) | uint32(b[0L]) << (int)(24L);
             dst[0L] = (hb * hashmul) >> (int)((32L - hashBits));
             var end = len(b) - minMatchLength + 1L;
@@ -368,6 +412,7 @@ namespace compress
                 hb = (hb << (int)(8L)) | uint32(b[i + 3L]);
                 dst[i] = (hb * hashmul) >> (int)((32L - hashBits));
             }
+
 
         }
 
@@ -384,21 +429,25 @@ namespace compress
                 {
                     return i;
                 }
+
             }
             return max;
+
         }
 
         // encSpeed will compress and store the currently added data,
         // if enough has been accumulated or we at the end of the stream.
         // Any error that occurred will be in d.err
-        private static void encSpeed(this ref compressor d)
-        { 
+        private static void encSpeed(this ptr<compressor> _addr_d)
+        {
+            ref compressor d = ref _addr_d.val;
+ 
             // We only compress if we have maxStoreBlockSize.
             if (d.windowEnd < maxStoreBlockSize)
             {
                 if (!d.sync)
                 {
-                    return;
+                    return ;
                 } 
 
                 // Handle small sizes.
@@ -406,7 +455,7 @@ namespace compress
                 {
 
                     if (d.windowEnd == 0L) 
-                        return;
+                        return ;
                     else if (d.windowEnd <= 16L) 
                         d.err = d.writeStoredBlock(d.window[..d.windowEnd]);
                     else 
@@ -414,8 +463,10 @@ namespace compress
                         d.err = d.w.err;
                                         d.windowEnd = 0L;
                     d.bestSpeed.reset();
-                    return;
+                    return ;
+
                 }
+
             } 
             // Encode the block.
             d.tokens = d.bestSpeed.encode(d.tokens[..0L], d.window[..d.windowEnd]); 
@@ -429,12 +480,16 @@ namespace compress
             {
                 d.w.writeBlockDynamic(d.tokens, false, d.window[..d.windowEnd]);
             }
+
             d.err = d.w.err;
             d.windowEnd = 0L;
+
         }
 
-        private static void initDeflate(this ref compressor d)
+        private static void initDeflate(this ptr<compressor> _addr_d)
         {
+            ref compressor d = ref _addr_d.val;
+
             d.window = make_slice<byte>(2L * windowSize);
             d.hashOffset = 1L;
             d.tokens = make_slice<token>(0L, maxFlateBlockTokens + 1L);
@@ -447,17 +502,21 @@ namespace compress
             d.bulkHasher = bulkHash4;
         }
 
-        private static void deflate(this ref compressor _d) => func(_d, (ref compressor d, Defer _, Panic panic, Recover __) =>
+        private static void deflate(this ptr<compressor> _addr_d) => func((_, panic, __) =>
         {
+            ref compressor d = ref _addr_d.val;
+
             if (d.windowEnd - d.index < minMatchLength + maxMatchLength && !d.sync)
             {
-                return;
+                return ;
             }
+
             d.maxInsertIndex = d.windowEnd - (minMatchLength - 1L);
             if (d.index < d.maxInsertIndex)
             {
                 d.hash = hash4(d.window[d.index..d.index + minMatchLength]);
             }
+
 Loop:
             while (true)
             {
@@ -465,6 +524,7 @@ Loop:
                 {
                     panic("index > windowEnd");
                 }
+
                 var lookahead = d.windowEnd - d.index;
                 if (lookahead < minMatchLength + maxMatchLength)
                 {
@@ -473,10 +533,12 @@ Loop:
                         _breakLoop = true;
                         break;
                     }
+
                     if (d.index > d.windowEnd)
                     {
                         panic("index > windowEnd");
                     }
+
                     if (lookahead == 0L)
                     { 
                         // Flush current output block if any.
@@ -485,30 +547,39 @@ Loop:
                             // There is still one pending token that needs to be flushed
                             d.tokens = append(d.tokens, literalToken(uint32(d.window[d.index - 1L])));
                             d.byteAvailable = false;
+
                         }
+
                         if (len(d.tokens) > 0L)
                         {
                             d.err = d.writeBlock(d.tokens, d.index);
 
                             if (d.err != null)
                             {
-                                return;
+                                return ;
                             }
+
                             d.tokens = d.tokens[..0L];
+
                         }
+
                         _breakLoop = true;
                         break;
                     }
+
                 }
+
                 if (d.index < d.maxInsertIndex)
                 { 
                     // Update the hash
                     d.hash = hash4(d.window[d.index..d.index + minMatchLength]);
-                    var hh = ref d.hashHead[d.hash & hashMask];
-                    d.chainHead = int(hh.Value);
+                    var hh = _addr_d.hashHead[d.hash & hashMask];
+                    d.chainHead = int(hh.val);
                     d.hashPrev[d.index & windowMask] = uint32(d.chainHead);
-                    hh.Value = uint32(d.index + d.hashOffset);
+                    hh.val = uint32(d.index + d.hashOffset);
+
                 }
+
                 var prevLength = d.length;
                 var prevOffset = d.offset;
                 d.length = minMatchLength - 1L;
@@ -518,6 +589,7 @@ Loop:
                 {
                     minIndex = 0L;
                 }
+
                 if (d.chainHead - d.hashOffset >= minIndex && (d.fastSkipHashing != skipNever && lookahead > minMatchLength - 1L || d.fastSkipHashing == skipNever && lookahead > prevLength && prevLength < d.lazy))
                 {
                     {
@@ -530,7 +602,9 @@ Loop:
                         }
 
                     }
+
                 }
+
                 if (d.fastSkipHashing != skipNever && d.length >= minMatchLength || d.fastSkipHashing == skipNever && prevLength >= minMatchLength && d.length <= prevLength)
                 { 
                     // There was a match at the previous step, and the current match is
@@ -558,29 +632,35 @@ Loop:
                         {
                             newIndex = d.index + prevLength - 1L;
                         }
-                        d.index++;
 
-                        while (d.index < newIndex)
+                        var index = d.index;
+                        index++;
+
+                        while (index < newIndex)
                         {
-                            if (d.index < d.maxInsertIndex)
+                            if (index < d.maxInsertIndex)
                             {
-                                d.hash = hash4(d.window[d.index..d.index + minMatchLength]); 
+                                d.hash = hash4(d.window[index..index + minMatchLength]); 
                                 // Get previous value with the same hash.
                                 // Our chain should point to the previous value.
-                                hh = ref d.hashHead[d.hash & hashMask];
-                                d.hashPrev[d.index & windowMask] = hh.Value; 
+                                hh = _addr_d.hashHead[d.hash & hashMask];
+                                d.hashPrev[index & windowMask] = hh.val; 
                                 // Set the head of the hash chain to us.
-                                hh.Value = uint32(d.index + d.hashOffset);
-                            d.index++;
+                                hh.val = uint32(index + d.hashOffset);
+                            index++;
                             }
+
                         }
                     else
+
+                        d.index = index;
 
                         if (d.fastSkipHashing == skipNever)
                         {
                             d.byteAvailable = false;
                             d.length = minMatchLength - 1L;
                         }
+
                     }                    { 
                         // For matches this long, we don't bother inserting each individual
                         // item into the table.
@@ -589,6 +669,7 @@ Loop:
                         {
                             d.hash = hash4(d.window[d.index..d.index + minMatchLength]);
                         }
+
                     }
                 else
                     if (len(d.tokens) == maxFlateBlockTokens)
@@ -598,10 +679,13 @@ Loop:
 
                         if (d.err != null)
                         {
-                            return;
+                            return ;
                         }
+
                         d.tokens = d.tokens[..0L];
+
                     }
+
                 }                {
                     if (d.fastSkipHashing != skipNever || d.byteAvailable)
                     {
@@ -610,6 +694,7 @@ Loop:
                         {
                             i = d.index;
                         }
+
                         d.tokens = append(d.tokens, literalToken(uint32(d.window[i])));
                         if (len(d.tokens) == maxFlateBlockTokens)
                         {
@@ -617,56 +702,77 @@ Loop:
 
                             if (d.err != null)
                             {
-                                return;
+                                return ;
                             }
+
                             d.tokens = d.tokens[..0L];
+
                         }
+
                     }
+
                     d.index++;
                     if (d.fastSkipHashing == skipNever)
                     {
                         d.byteAvailable = true;
                     }
+
                 }
+
             }
+
         });
 
-        private static long fillStore(this ref compressor d, slice<byte> b)
+        private static long fillStore(this ptr<compressor> _addr_d, slice<byte> b)
         {
+            ref compressor d = ref _addr_d.val;
+
             var n = copy(d.window[d.windowEnd..], b);
             d.windowEnd += n;
             return n;
         }
 
-        private static void store(this ref compressor d)
+        private static void store(this ptr<compressor> _addr_d)
         {
+            ref compressor d = ref _addr_d.val;
+
             if (d.windowEnd > 0L && (d.windowEnd == maxStoreBlockSize || d.sync))
             {
                 d.err = d.writeStoredBlock(d.window[..d.windowEnd]);
                 d.windowEnd = 0L;
             }
+
         }
 
         // storeHuff compresses and stores the currently added data
         // when the d.window is full or we are at the end of the stream.
         // Any error that occurred will be in d.err
-        private static void storeHuff(this ref compressor d)
+        private static void storeHuff(this ptr<compressor> _addr_d)
         {
+            ref compressor d = ref _addr_d.val;
+
             if (d.windowEnd < len(d.window) && !d.sync || d.windowEnd == 0L)
             {
-                return;
+                return ;
             }
+
             d.w.writeBlockHuff(false, d.window[..d.windowEnd]);
             d.err = d.w.err;
             d.windowEnd = 0L;
+
         }
 
-        private static (long, error) write(this ref compressor d, slice<byte> b)
+        private static (long, error) write(this ptr<compressor> _addr_d, slice<byte> b)
         {
+            long n = default;
+            error err = default!;
+            ref compressor d = ref _addr_d.val;
+
             if (d.err != null)
             {
-                return (0L, d.err);
+                return (0L, error.As(d.err)!);
             }
+
             n = len(b);
             while (len(b) > 0L)
             {
@@ -674,19 +780,24 @@ Loop:
                 b = b[d.fill(d, b)..];
                 if (d.err != null)
                 {
-                    return (0L, d.err);
+                    return (0L, error.As(d.err)!);
                 }
+
             }
 
-            return (n, null);
+            return (n, error.As(null!)!);
+
         }
 
-        private static error syncFlush(this ref compressor d)
+        private static error syncFlush(this ptr<compressor> _addr_d)
         {
+            ref compressor d = ref _addr_d.val;
+
             if (d.err != null)
             {
-                return error.As(d.err);
+                return error.As(d.err)!;
             }
+
             d.sync = true;
             d.step(d);
             if (d.err == null)
@@ -695,35 +806,40 @@ Loop:
                 d.w.flush();
                 d.err = d.w.err;
             }
+
             d.sync = false;
-            return error.As(d.err);
+            return error.As(d.err)!;
+
         }
 
-        private static error init(this ref compressor d, io.Writer w, long level)
+        private static error init(this ptr<compressor> _addr_d, io.Writer w, long level)
         {
+            error err = default!;
+            ref compressor d = ref _addr_d.val;
+
             d.w = newHuffmanBitWriter(w);
 
 
             if (level == NoCompression)
             {
                 d.window = make_slice<byte>(maxStoreBlockSize);
-                d.fill = ref compressor;
-                d.step = ref compressor;
+                d.fill = ptr<compressor>;
+                d.step = ptr<compressor>;
                 goto __switch_break0;
             }
             if (level == HuffmanOnly)
             {
                 d.window = make_slice<byte>(maxStoreBlockSize);
-                d.fill = ref compressor;
-                d.step = ref compressor;
+                d.fill = ptr<compressor>;
+                d.step = ptr<compressor>;
                 goto __switch_break0;
             }
             if (level == BestSpeed)
             {
                 d.compressionLevel = levels[level];
                 d.window = make_slice<byte>(maxStoreBlockSize);
-                d.fill = ref compressor;
-                d.step = ref compressor;
+                d.fill = ptr<compressor>;
+                d.step = ptr<compressor>;
                 d.bestSpeed = newDeflateFast();
                 d.tokens = make_slice<token>(maxStoreBlockSize);
                 goto __switch_break0;
@@ -737,19 +853,22 @@ Loop:
             {
                 d.compressionLevel = levels[level];
                 d.initDeflate();
-                d.fill = ref compressor;
-                d.step = ref compressor;
+                d.fill = ptr<compressor>;
+                d.step = ptr<compressor>;
                 goto __switch_break0;
             }
             // default: 
-                return error.As(fmt.Errorf("flate: invalid compression level %d: want value in range [-2, 9]", level));
+                return error.As(fmt.Errorf("flate: invalid compression level %d: want value in range [-2, 9]", level))!;
 
             __switch_break0:;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static void reset(this ref compressor d, io.Writer w)
+        private static void reset(this ptr<compressor> _addr_d, io.Writer w)
         {
+            ref compressor d = ref _addr_d.val;
+
             d.w.reset(w);
             d.sync = false;
             d.err = null;
@@ -796,28 +915,35 @@ Loop:
                 d.offset = 0L;
                 d.hash = 0L;
                 d.maxInsertIndex = 0L;
-                    }
+            
+        }
 
-        private static error close(this ref compressor d)
+        private static error close(this ptr<compressor> _addr_d)
         {
+            ref compressor d = ref _addr_d.val;
+
             if (d.err != null)
             {
-                return error.As(d.err);
+                return error.As(d.err)!;
             }
+
             d.sync = true;
             d.step(d);
             if (d.err != null)
             {
-                return error.As(d.err);
+                return error.As(d.err)!;
             }
+
             d.w.writeStoredHeader(0L, true);
 
             if (d.w.err != null)
             {
-                return error.As(d.w.err);
+                return error.As(d.w.err)!;
             }
+
             d.w.flush();
-            return error.As(d.w.err);
+            return error.As(d.w.err)!;
+
         }
 
         // NewWriter returns a new Writer compressing data at the given level.
@@ -832,19 +958,24 @@ Loop:
         //
         // If level is in the range [-2, 9] then the error returned will be nil.
         // Otherwise the error returned will be non-nil.
-        public static (ref Writer, error) NewWriter(io.Writer w, long level)
+        public static (ptr<Writer>, error) NewWriter(io.Writer w, long level)
         {
-            Writer dw = default;
+            ptr<Writer> _p0 = default!;
+            error _p0 = default!;
+
+            ref Writer dw = ref heap(out ptr<Writer> _addr_dw);
             {
                 var err = dw.d.init(w, level);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
-            return (ref dw, null);
+
+            return (_addr__addr_dw!, error.As(null!)!);
+
         }
 
         // NewWriterDict is like NewWriter but initializes the new
@@ -853,17 +984,22 @@ Loop:
         // any compressed output. The compressed data written to w
         // can only be decompressed by a Reader initialized with the
         // same dictionary.
-        public static (ref Writer, error) NewWriterDict(io.Writer w, long level, slice<byte> dict)
+        public static (ptr<Writer>, error) NewWriterDict(io.Writer w, long level, slice<byte> dict)
         {
-            dictWriter dw = ref new dictWriter(w);
+            ptr<Writer> _p0 = default!;
+            error _p0 = default!;
+
+            ptr<dictWriter> dw = addr(new dictWriter(w));
             var (zw, err) = NewWriter(dw, level);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             zw.d.fillWindow(dict);
             zw.dict = append(zw.dict, dict); // duplicate dictionary for Reset method.
-            return (zw, err);
+            return (_addr_zw!, error.As(err)!);
+
         }
 
         private partial struct dictWriter
@@ -871,8 +1007,12 @@ Loop:
             public io.Writer w;
         }
 
-        private static (long, error) Write(this ref dictWriter w, slice<byte> b)
+        private static (long, error) Write(this ptr<dictWriter> _addr_w, slice<byte> b)
         {
+            long n = default;
+            error err = default!;
+            ref dictWriter w = ref _addr_w.val;
+
             return w.w.Write(b);
         }
 
@@ -886,8 +1026,12 @@ Loop:
 
         // Write writes data to w, which will eventually write the
         // compressed form of data to its underlying writer.
-        private static (long, error) Write(this ref Writer w, slice<byte> data)
+        private static (long, error) Write(this ptr<Writer> _addr_w, slice<byte> data)
         {
+            long n = default;
+            error err = default!;
+            ref Writer w = ref _addr_w.val;
+
             return w.d.write(data);
         }
 
@@ -900,26 +1044,33 @@ Loop:
         // If the underlying writer returns an error, Flush returns that error.
         //
         // In the terminology of the zlib library, Flush is equivalent to Z_SYNC_FLUSH.
-        private static error Flush(this ref Writer w)
-        { 
+        private static error Flush(this ptr<Writer> _addr_w)
+        {
+            ref Writer w = ref _addr_w.val;
+ 
             // For more about flushing:
-            // http://www.bolet.org/~pornin/deflate-flush.html
-            return error.As(w.d.syncFlush());
+            // https://www.bolet.org/~pornin/deflate-flush.html
+            return error.As(w.d.syncFlush())!;
+
         }
 
         // Close flushes and closes the writer.
-        private static error Close(this ref Writer w)
+        private static error Close(this ptr<Writer> _addr_w)
         {
-            return error.As(w.d.close());
+            ref Writer w = ref _addr_w.val;
+
+            return error.As(w.d.close())!;
         }
 
         // Reset discards the writer's state and makes it equivalent to
         // the result of NewWriter or NewWriterDict called with dst
         // and w's level and dictionary.
-        private static void Reset(this ref Writer w, io.Writer dst)
+        private static void Reset(this ptr<Writer> _addr_w, io.Writer dst)
         {
+            ref Writer w = ref _addr_w.val;
+
             {
-                ref dictWriter (dw, ok) = w.d.w.writer._<ref dictWriter>();
+                ptr<dictWriter> (dw, ok) = w.d.w.writer._<ptr<dictWriter>>();
 
                 if (ok)
                 { 
@@ -927,14 +1078,17 @@ Loop:
                     dw.w = dst;
                     w.d.reset(dw);
                     w.d.fillWindow(w.dict);
+
                 }
                 else
                 { 
                     // w was created with NewWriter
                     w.d.reset(dst);
+
                 }
 
             }
+
         }
     }
 }}

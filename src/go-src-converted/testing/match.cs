@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2020 August 29 10:05:51 UTC
+// package testing -- go2cs converted at 2020 October 08 04:36:30 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Go\src\testing\match.go
 using fmt = go.fmt_package;
@@ -30,7 +30,7 @@ namespace go
         // eliminate this Mutex.
         private static sync.Mutex matchMutex = default;
 
-        private static ref matcher newMatcher(Func<@string, @string, (bool, error)> matchString, @string patterns, @string name)
+        private static ptr<matcher> newMatcher(Func<@string, @string, (bool, error)> matchString, @string patterns, @string name)
         {
             slice<@string> filter = default;
             if (patterns != "")
@@ -70,18 +70,26 @@ namespace go
                             }
 
                         }
+
                     }
 
                     i = i__prev1;
                     s = s__prev1;
                 }
-
             }
-            return ref new matcher(filter:filter,matchFunc:matchString,subNames:map[string]int64{},);
+
+            return addr(new matcher(filter:filter,matchFunc:matchString,subNames:map[string]int64{},));
+
         }
 
-        private static (@string, bool, bool) fullName(this ref matcher _m, ref common _c, @string subname) => func(_m, _c, (ref matcher m, ref common c, Defer defer, Panic _, Recover __) =>
+        private static (@string, bool, bool) fullName(this ptr<matcher> _addr_m, ptr<common> _addr_c, @string subname) => func((defer, _, __) =>
         {
+            @string name = default;
+            bool ok = default;
+            bool partial = default;
+            ref matcher m = ref _addr_m.val;
+            ref common c = ref _addr_c.val;
+
             name = subname;
 
             m.mu.Lock();
@@ -91,6 +99,7 @@ namespace go
             {
                 name = m.unique(c.name, rewrite(subname));
             }
+
             matchMutex.Lock();
             defer(matchMutex.Unlock()); 
 
@@ -103,6 +112,7 @@ namespace go
                 {
                     break;
                 }
+
                 {
                     var (ok, _) = m.matchFunc(m.filter[i], s);
 
@@ -112,8 +122,10 @@ namespace go
                     }
 
                 }
+
             }
             return (name, true, len(elem) < len(m.filter));
+
         });
 
         private static slice<@string> splitRegexp(@string s)
@@ -137,19 +149,23 @@ namespace go
                             if (cs < 0L)
                             { // An unmatched ']' is legal.
                                 cs = 0L;
+
                             }
+
                             break;
                         case '(': 
                             if (cs == 0L)
                             {
                                 cp++;
                             }
+
                             break;
                         case ')': 
                             if (cs == 0L)
                             {
                                 cp--;
                             }
+
                             break;
                         case '\\': 
                             i++;
@@ -162,19 +178,24 @@ namespace go
                                 i = 0L;
                                 continue;
                             }
+
                             break;
                     }
                     i++;
+
                 }
 
             }
             return append(a, s);
+
         }
 
         // unique creates a unique name for the given parent and subname by affixing it
-        // with one ore more counts, if necessary.
-        private static @string unique(this ref matcher m, @string parent, @string subname)
+        // with one or more counts, if necessary.
+        private static @string unique(this ptr<matcher> _addr_m, @string parent, @string subname)
         {
+            ref matcher m = ref _addr_m.val;
+
             var name = fmt.Sprintf("%s/%s", parent, subname);
             var empty = subname == "";
             while (true)
@@ -184,6 +205,7 @@ namespace go
                 {
                     m.subNames[name] = 1L; // next count is 1
                     return name;
+
                 } 
                 // Name was already used. We increment with the count and append a
                 // string with the count.
@@ -192,7 +214,9 @@ namespace go
                 // Add a count to guarantee uniqueness.
                 name = fmt.Sprintf("%s#%02d", name, next);
                 empty = false;
+
             }
+
 
         }
 
@@ -211,8 +235,10 @@ namespace go
                     b = append(b, s[1L..len(s) - 1L]);
                 else 
                     b = append(b, string(r));
-                            }
+                
+            }
             return string(b);
+
         }
 
         private static bool isSpace(int r)
@@ -242,6 +268,7 @@ namespace go
                         return true;
                         break;
                 }
+
             }
             else
             {
@@ -249,6 +276,7 @@ namespace go
                 {
                     return true;
                 }
+
                 switch (r)
                 {
                     case 0x2028UL: 
@@ -263,8 +291,11 @@ namespace go
                         return true;
                         break;
                 }
+
             }
+
             return false;
+
         }
     }
 }

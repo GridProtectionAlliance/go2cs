@@ -4,7 +4,7 @@
 
 // +build darwin freebsd netbsd
 
-// package tar -- go2cs converted at 2020 August 29 08:45:24 UTC
+// package tar -- go2cs converted at 2020 October 08 03:49:15 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\stat_actime2.go
 using syscall = go.syscall_package;
@@ -16,13 +16,17 @@ namespace archive
 {
     public static partial class tar_package
     {
-        private static time.Time statAtime(ref syscall.Stat_t st)
+        private static time.Time statAtime(ptr<syscall.Stat_t> _addr_st)
         {
+            ref syscall.Stat_t st = ref _addr_st.val;
+
             return time.Unix(st.Atimespec.Unix());
         }
 
-        private static time.Time statCtime(ref syscall.Stat_t st)
+        private static time.Time statCtime(ptr<syscall.Stat_t> _addr_st)
         {
+            ref syscall.Stat_t st = ref _addr_st.val;
+
             return time.Unix(st.Ctimespec.Unix());
         }
     }

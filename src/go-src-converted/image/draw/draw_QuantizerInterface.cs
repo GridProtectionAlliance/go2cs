@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:57 UTC
+//     Generated on 2020 October 08 04:59:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -52,7 +52,7 @@ namespace image
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -66,10 +66,10 @@ namespace image
                 m_target_is_ptr = true;
             }
 
-            private delegate color.Palette QuantizeByRef(ref T value, color.Palette p, image.Image m);
+            private delegate color.Palette QuantizeByPtr(ptr<T> value, color.Palette p, image.Image m);
             private delegate color.Palette QuantizeByVal(T value, color.Palette p, image.Image m);
 
-            private static readonly QuantizeByRef s_QuantizeByRef;
+            private static readonly QuantizeByPtr s_QuantizeByPtr;
             private static readonly QuantizeByVal s_QuantizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,11 +78,12 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_QuantizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_QuantizeByPtr is null || !m_target_is_ptr)
                     return s_QuantizeByVal!(target, p, m);
 
-                return s_QuantizeByRef(ref target, p, m);
+                return s_QuantizeByPtr(m_target_ptr, p, m);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -91,23 +92,20 @@ namespace image
             static Quantizer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Quantize");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Quantize");
 
                 if (!(extensionMethod is null))
-                    s_QuantizeByRef = extensionMethod.CreateStaticDelegate(typeof(QuantizeByRef)) as QuantizeByRef;
+                    s_QuantizeByPtr = extensionMethod.CreateStaticDelegate(typeof(QuantizeByPtr)) as QuantizeByPtr;
 
-                if (s_QuantizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Quantize");
+                extensionMethod = targetType.GetExtensionMethod("Quantize");
 
-                    if (!(extensionMethod is null))
-                        s_QuantizeByVal = extensionMethod.CreateStaticDelegate(typeof(QuantizeByVal)) as QuantizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_QuantizeByVal = extensionMethod.CreateStaticDelegate(typeof(QuantizeByVal)) as QuantizeByVal;
 
-                if (s_QuantizeByRef is null && s_QuantizeByVal is null)
+                if (s_QuantizeByPtr is null && s_QuantizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Quantizer.Quantize method", new Exception("Quantize"));
             }
 

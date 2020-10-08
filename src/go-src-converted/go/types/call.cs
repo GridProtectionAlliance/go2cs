@@ -4,11 +4,13 @@
 
 // This file implements typechecking of call and selector expressions.
 
-// package types -- go2cs converted at 2020 August 29 08:47:23 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:03 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\call.go
 using ast = go.go.ast_package;
 using token = go.go.token_package;
+using strings = go.strings_package;
+using unicode = go.unicode_package;
 using static go.builtin;
 using System;
 
@@ -17,8 +19,12 @@ namespace go
 {
     public static partial class types_package
     {
-        private static exprKind call(this ref Checker check, ref operand x, ref ast.CallExpr e)
+        private static exprKind call(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.CallExpr> _addr_e)
         {
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+            ref ast.CallExpr e = ref _addr_e.val;
+
             check.exprOrType(x, e.Fun);
 
 
@@ -47,6 +53,7 @@ namespace go
                             }
                             break;
                         default: 
+                            check.use(e.Args);
                             check.errorf(e.Args[n - 1L].Pos(), "too many arguments in conversion to %s", T);
                             break;
                     }
@@ -68,7 +75,9 @@ namespace go
                 return predeclaredFuncs[id].kind;
             else 
                 // function/method call
-                ref Signature (sig, _) = x.typ.Underlying()._<ref Signature>();
+                var cgocall = x.mode == cgofunc;
+
+                ptr<Signature> (sig, _) = x.typ.Underlying()._<ptr<Signature>>();
                 if (sig == null)
                 {
                     check.invalidOp(x.pos(), "cannot call non-function %s", x);
@@ -79,7 +88,6 @@ namespace go
                 var (arg, n, _) = unpack((x, i) =>
                 {
                     check.multiExpr(x, e.Args[i]);
-
                 }, len(e.Args), false);
                 if (arg != null)
                 {
@@ -95,7 +103,14 @@ namespace go
                         x.mode = novalue;
                         break;
                     case 1L: 
-                        x.mode = value;
+                        if (cgocall)
+                        {
+                            x.mode = commaerr;
+                        }
+                        else
+                        {
+                            x.mode = value;
+                        }
                         x.typ = sig.results.vars[0L].typ; // unpack tuple
                         break;
                     default: 
@@ -108,42 +123,51 @@ namespace go
                 check.hasCallOrRecv = true;
 
                 return statement;
-                    }
+            
+        }
 
         // use type-checks each argument.
         // Useful to make sure expressions are evaluated
         // (and variables are "used") in the presence of other errors.
         // The arguments may be nil.
-        private static void use(this ref Checker check, params ast.Expr[] arg)
+        private static void use(this ptr<Checker> _addr_check, params ast.Expr[] arg)
         {
-            operand x = default;
+            arg = arg.Clone();
+            ref Checker check = ref _addr_check.val;
+
+            ref operand x = ref heap(out ptr<operand> _addr_x);
             foreach (var (_, e) in arg)
             { 
                 // The nil check below is necessary since certain AST fields
                 // may legally be nil (e.g., the ast.SliceExpr.High field).
                 if (e != null)
                 {
-                    check.rawExpr(ref x, e, null);
+                    check.rawExpr(_addr_x, e, null);
                 }
+
             }
+
         }
 
         // useLHS is like use, but doesn't "use" top-level identifiers.
         // It should be called instead of use if the arguments are
         // expressions on the lhs of an assignment.
         // The arguments must not be nil.
-        private static void useLHS(this ref Checker check, params ast.Expr[] arg)
+        private static void useLHS(this ptr<Checker> _addr_check, params ast.Expr[] arg)
         {
-            operand x = default;
+            arg = arg.Clone();
+            ref Checker check = ref _addr_check.val;
+
+            ref operand x = ref heap(out ptr<operand> _addr_x);
             foreach (var (_, e) in arg)
             { 
                 // If the lhs is an identifier denoting a variable v, this assignment
                 // is not a 'use' of v. Remember current value of v.used and restore
                 // after evaluating the lhs via check.rawExpr.
-                ref Var v = default;
+                ptr<Var> v;
                 bool v_used = default;
                 {
-                    ref ast.Ident (ident, _) = unparen(e)._<ref ast.Ident>();
+                    ptr<ast.Ident> (ident, _) = unparen(e)._<ptr<ast.Ident>>();
 
                     if (ident != null)
                     { 
@@ -152,6 +176,7 @@ namespace go
                         {
                             continue;
                         }
+
                         {
                             var (_, obj) = check.scope.LookupParent(ident.Name, token.NoPos);
 
@@ -161,7 +186,7 @@ namespace go
                                 // from other packages to avoid potential race conditions with
                                 // dot-imported variables.
                                 {
-                                    ref Var (w, _) = obj._<ref Var>();
+                                    ptr<Var> (w, _) = obj._<ptr<Var>>();
 
                                     if (w != null && w.pkg == check.pkg)
                                     {
@@ -170,31 +195,39 @@ namespace go
                                     }
 
                                 }
+
                             }
 
                         }
+
                     }
 
                 }
-                check.rawExpr(ref x, e, null);
+
+                check.rawExpr(_addr_x, e, null);
                 if (v != null)
                 {
                     v.used = v_used; // restore v.used
                 }
+
             }
+
         }
 
         // useGetter is like use, but takes a getter instead of a list of expressions.
         // It should be called instead of use if a getter is present to avoid repeated
         // evaluation of the first argument (since the getter was likely obtained via
         // unpack, which may have evaluated the first argument already).
-        private static void useGetter(this ref Checker check, getter get, long n)
+        private static void useGetter(this ptr<Checker> _addr_check, getter get, long n)
         {
-            operand x = default;
+            ref Checker check = ref _addr_check.val;
+
+            ref operand x = ref heap(out ptr<operand> _addr_x);
             for (long i = 0L; i < n; i++)
             {
-                get(ref x, i);
+                get(_addr_x, i);
             }
+
 
         }
 
@@ -202,7 +235,7 @@ namespace go
         // number of operands (context-specific, and maintained elsewhere). A getter
         // type-checks the i'th operand; the details of the actual check are getter-
         // specific.
-        public delegate void getter(ref operand, long);
+        public delegate void getter(ptr<operand>, long);
 
         // unpack takes a getter get and a number of operands n. If n == 1, unpack
         // calls the incoming getter for the first operand. If that operand is
@@ -223,20 +256,26 @@ namespace go
         //
         private static (getter, long, bool) unpack(getter get, long n, bool allowCommaOk)
         {
+            getter _p0 = default;
+            long _p0 = default;
+            bool _p0 = default;
+
             if (n != 1L)
             { 
                 // zero or multiple values
                 return (get, n, false);
+
             } 
             // possibly result of an n-valued function call or comma,ok value
-            operand x0 = default;
-            get(ref x0, 0L);
+            ref operand x0 = ref heap(out ptr<operand> _addr_x0);
+            get(_addr_x0, 0L);
             if (x0.mode == invalid)
             {
                 return (null, 0L, false);
             }
+
             {
-                ref Tuple (t, ok) = x0.typ._<ref Tuple>();
+                ptr<Tuple> (t, ok) = x0.typ._<ptr<Tuple>>();
 
                 if (ok)
                 { 
@@ -247,24 +286,34 @@ namespace go
                         x.expr = x0.expr;
                         x.typ = t.At(i).typ;
                     }, t.Len(), false);
+
                 }
 
             }
 
-            if (x0.mode == mapindex || x0.mode == commaok)
+
+            if (x0.mode == mapindex || x0.mode == commaok || x0.mode == commaerr)
             { 
                 // comma-ok value
                 if (allowCommaOk)
                 {
                     array<Type> a = new array<Type>(new Type[] { x0.typ, Typ[UntypedBool] });
+                    if (x0.mode == commaerr)
+                    {
+                        a[1L] = universeError;
+                    }
+
                     return ((x, i) =>
                     {
                         x.mode = value;
                         x.expr = x0.expr;
                         x.typ = a[i];
                     }, 2L, true);
+
                 }
+
                 x0.mode = value;
+
             } 
 
             // single value
@@ -274,14 +323,22 @@ namespace go
                 {
                     unreachable();
                 }
-                x.Value = x0;
+
+                x.val = x0;
+
             }, 1L, false);
+
         }
 
         // arguments checks argument passing for the call with the given signature.
         // The arg function provides the operand for the i'th argument.
-        private static void arguments(this ref Checker check, ref operand x, ref ast.CallExpr call, ref Signature sig, getter arg, long n)
+        private static void arguments(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.CallExpr> _addr_call, ptr<Signature> _addr_sig, getter arg, long n)
         {
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+            ref ast.CallExpr call = ref _addr_call.val;
+            ref Signature sig = ref _addr_sig.val;
+
             if (call.Ellipsis.IsValid())
             { 
                 // last argument is of the form x...
@@ -289,18 +346,22 @@ namespace go
                 {
                     check.errorf(call.Ellipsis, "cannot use ... in call to non-variadic %s", call.Fun);
                     check.useGetter(arg, n);
-                    return;
+                    return ;
                 }
+
                 if (len(call.Args) == 1L && n > 1L)
                 { 
                     // f()... is not permitted if f() is multi-valued
                     check.errorf(call.Ellipsis, "cannot use ... with %d-valued %s", n, call.Args[0L]);
                     check.useGetter(arg, n);
-                    return;
+                    return ;
+
                 }
+
             } 
 
             // evaluate arguments
+            var context = check.sprintf("argument to %s", call.Fun);
             for (long i = 0L; i < n; i++)
             {
                 arg(x, i);
@@ -311,8 +372,11 @@ namespace go
                     {
                         ellipsis = call.Ellipsis;
                     }
-                    check.argument(call.Fun, sig, i, x, ellipsis);
+
+                    check.argument(sig, i, x, ellipsis, context);
+
                 }
+
             } 
 
             // check argument count
@@ -324,23 +388,31 @@ namespace go
                 // a variadic function accepts an "empty"
                 // last argument: count one extra
                 n++;
+
             }
+
             if (n < sig.@params.Len())
             {
                 check.errorf(call.Rparen, "too few arguments in call to %s", call.Fun); 
                 // ok to continue
             }
+
         }
 
         // argument checks passing of argument x to the i'th parameter of the given signature.
         // If ellipsis is valid, the argument is followed by ... at that position in the call.
-        private static void argument(this ref Checker check, ast.Expr fun, ref Signature sig, long i, ref operand x, token.Pos ellipsis)
+        private static void argument(this ptr<Checker> _addr_check, ptr<Signature> _addr_sig, long i, ptr<operand> _addr_x, token.Pos ellipsis, @string context)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Signature sig = ref _addr_sig.val;
+            ref operand x = ref _addr_x.val;
+
             check.singleValue(x);
             if (x.mode == invalid)
             {
-                return;
+                return ;
             }
+
             var n = sig.@params.Len(); 
 
             // determine parameter type
@@ -353,47 +425,61 @@ namespace go
                 if (debug)
                 {
                     {
-                        ref Slice (_, ok) = typ._<ref Slice>();
+                        ptr<Slice> (_, ok) = typ._<ptr<Slice>>();
 
                         if (!ok)
                         {
-                            check.dump("%s: expected unnamed slice type, got %s", sig.@params.vars[n - 1L].Pos(), typ);
+                            check.dump("%v: expected unnamed slice type, got %s", sig.@params.vars[n - 1L].Pos(), typ);
                         }
 
                     }
+
                 }
+
             else 
                 check.errorf(x.pos(), "too many arguments");
-                return;
+                return ;
                         if (ellipsis.IsValid())
             { 
                 // argument is of the form x... and x is single-valued
                 if (i != n - 1L)
                 {
                     check.errorf(ellipsis, "can only use ... with matching parameter");
-                    return;
+                    return ;
                 }
+
                 {
-                    (_, ok) = x.typ.Underlying()._<ref Slice>();
+                    (_, ok) = x.typ.Underlying()._<ptr<Slice>>();
 
                     if (!ok && x.typ != Typ[UntypedNil])
                     { // see issue #18268
                         check.errorf(x.pos(), "cannot use %s as parameter of type %s", x, typ);
-                        return;
+                        return ;
+
                     }
 
                 }
+
             }
             else if (sig.variadic && i >= n - 1L)
             { 
                 // use the variadic parameter slice's element type
-                typ = typ._<ref Slice>().elem;
+                typ = typ._<ptr<Slice>>().elem;
+
             }
-            check.assignment(x, typ, check.sprintf("argument to %s", fun));
+
+            check.assignment(x, typ, context);
+
         }
 
-        private static void selector(this ref Checker _check, ref operand _x, ref ast.SelectorExpr _e) => func(_check, _x, _e, (ref Checker check, ref operand x, ref ast.SelectorExpr e, Defer _, Panic panic, Recover __) =>
-        { 
+        private static array<@string> cgoPrefixes = new array<@string>(new @string[] { "_Ciconst_", "_Cfconst_", "_Csconst_", "_Ctype_", "_Cvar_", "_Cfpvar_fp_", "_Cfunc_", "_Cmacro_" });
+
+        private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.SelectorExpr> _addr_e) => func((_, panic, __) =>
+        {
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+            ref ast.SelectorExpr e = ref _addr_e.val;
+ 
             // these must be declared before the "goto Error" statements
             Object obj = default;            slice<long> index = default;            bool indirect = default;
 
@@ -403,13 +489,13 @@ namespace go
             // can only appear in qualified identifiers which are mapped to
             // selector expressions.
             {
-                ref ast.Ident (ident, ok) = e.X._<ref ast.Ident>();
+                ptr<ast.Ident> (ident, ok) = e.X._<ptr<ast.Ident>>();
 
                 if (ok)
                 {
-                    var (_, obj) = check.scope.LookupParent(ident.Name, check.pos);
+                    obj = check.lookup(ident.Name);
                     {
-                        ref PkgName (pname, _) = obj._<ref PkgName>();
+                        ptr<PkgName> (pname, _) = obj._<ptr<PkgName>>();
 
                         if (pname != null)
                         {
@@ -417,45 +503,100 @@ namespace go
                             check.recordUse(ident, pname);
                             pname.used = true;
                             var pkg = pname.imported;
-                            var exp = pkg.scope.Lookup(sel);
-                            if (exp == null)
-                            {
-                                if (!pkg.fake)
+
+                            Object exp = default;
+                            var funcMode = value;
+                            if (pkg.cgo)
+                            { 
+                                // cgo special cases C.malloc: it's
+                                // rewritten to _CMalloc and does not
+                                // support two-result calls.
+                                if (sel == "malloc")
                                 {
-                                    check.errorf(e.Pos(), "%s not declared by package %s", sel, pkg.name);
+                                    sel = "_CMalloc";
                                 }
-                                goto Error;
+                                else
+                                {
+                                    funcMode = cgofunc;
+                                }
+
+                                foreach (var (_, prefix) in cgoPrefixes)
+                                { 
+                                    // cgo objects are part of the current package (in file
+                                    // _cgo_gotypes.go). Use regular lookup.
+                                    _, exp = check.scope.LookupParent(prefix + sel, check.pos);
+                                    if (exp != null)
+                                    {
+                                        break;
+                                    }
+
+                                }
+                            else
+                                if (exp == null)
+                                {
+                                    check.errorf(e.Sel.Pos(), "%s not declared by package C", sel);
+                                    goto Error;
+                                }
+
+                                check.objDecl(exp, null);
+
+                            }                            {
+                                exp = pkg.scope.Lookup(sel);
+                                if (exp == null)
+                                {
+                                    if (!pkg.fake)
+                                    {
+                                        check.errorf(e.Sel.Pos(), "%s not declared by package %s", sel, pkg.name);
+                                    }
+
+                                    goto Error;
+
+                                }
+
+                                if (!exp.Exported())
+                                {
+                                    check.errorf(e.Sel.Pos(), "%s not exported by package %s", sel, pkg.name); 
+                                    // ok to continue
+                                }
+
                             }
-                            if (!exp.Exported())
-                            {
-                                check.errorf(e.Pos(), "%s not exported by package %s", sel, pkg.name); 
-                                // ok to continue
-                            }
+
                             check.recordUse(e.Sel, exp); 
 
                             // Simplified version of the code for *ast.Idents:
                             // - imported objects are always fully initialized
                             switch (exp.type())
                             {
-                                case ref Const exp:
+                                case ptr<Const> exp:
                                     assert(exp.Val() != null);
                                     x.mode = constant_;
                                     x.typ = exp.typ;
                                     x.val = exp.val;
                                     break;
-                                case ref TypeName exp:
+                                case ptr<TypeName> exp:
                                     x.mode = typexpr;
                                     x.typ = exp.typ;
                                     break;
-                                case ref Var exp:
+                                case ptr<Var> exp:
                                     x.mode = variable;
                                     x.typ = exp.typ;
+                                    if (pkg.cgo && strings.HasPrefix(exp.name, "_Cvar_"))
+                                    {
+                                        x.typ = x.typ._<ptr<Pointer>>().@base;
+                                    }
+
                                     break;
-                                case ref Func exp:
-                                    x.mode = value;
+                                case ptr<Func> exp:
+                                    x.mode = funcMode;
                                     x.typ = exp.typ;
+                                    if (pkg.cgo && strings.HasPrefix(exp.name, "_Cmacro_"))
+                                    {
+                                        x.mode = value;
+                                        x.typ = x.typ._<ptr<Signature>>().results.vars[0L].typ;
+                                    }
+
                                     break;
-                                case ref Builtin exp:
+                                case ptr<Builtin> exp:
                                     x.mode = builtin;
                                     x.typ = exp.typ;
                                     x.id = exp.id;
@@ -469,55 +610,111 @@ namespace go
                                 }
                             }
                             x.expr = e;
-                            return;
+                            return ;
+
                         }
 
                     }
+
                 }
 
             }
+
 
             check.exprOrType(x, e.X);
             if (x.mode == invalid)
             {
                 goto Error;
             }
-            obj, index, indirect = LookupFieldOrMethod(x.typ, x.mode == variable, check.pkg, sel);
+
+            obj, index, indirect = check.lookupFieldOrMethod(x.typ, x.mode == variable, check.pkg, sel);
             if (obj == null)
             {
 
                 if (index != null) 
                     // TODO(gri) should provide actual type where the conflict happens
-                    check.invalidOp(e.Pos(), "ambiguous selector %s", sel);
+                    check.errorf(e.Sel.Pos(), "ambiguous selector %s.%s", x.expr, sel);
                 else if (indirect) 
-                    check.invalidOp(e.Pos(), "%s is not in method set of %s", sel, x.typ);
+                    check.errorf(e.Sel.Pos(), "cannot call pointer method %s on %s", sel, x.typ);
                 else 
-                    check.invalidOp(e.Pos(), "%s has no field or method %s", x, sel);
+                    // Check if capitalization of sel matters and provide better error
+                    // message in that case.
+                    if (len(sel) > 0L)
+                    {
+                        @string changeCase = default;
+                        {
+                            var r = rune(sel[0L]);
+
+                            if (unicode.IsUpper(r))
+                            {
+                                changeCase = string(unicode.ToLower(r)) + sel[1L..];
+                            }
+                            else
+                            {
+                                changeCase = string(unicode.ToUpper(r)) + sel[1L..];
+                            }
+
+                        }
+
+                        obj, _, _ = check.lookupFieldOrMethod(x.typ, x.mode == variable, check.pkg, changeCase);
+
+                        if (obj != null)
+                        {
+                            check.errorf(e.Sel.Pos(), "%s.%s undefined (type %s has no field or method %s, but does have %s)", x.expr, sel, x.typ, sel, changeCase);
+                            break;
+                        }
+
+                    }
+
+                    check.errorf(e.Sel.Pos(), "%s.%s undefined (type %s has no field or method %s)", x.expr, sel, x.typ, sel);
                                 goto Error;
+
+            } 
+
+            // methods may not have a fully set up signature yet
+            {
+                ptr<Func> m__prev1 = m;
+
+                ptr<Func> (m, _) = obj._<ptr<Func>>();
+
+                if (m != null)
+                {
+                    check.objDecl(m, null);
+                }
+
+                m = m__prev1;
+
             }
+
+
             if (x.mode == typexpr)
             { 
                 // method expression
-                ref Func (m, _) = obj._<ref Func>();
+                (m, _) = obj._<ptr<Func>>();
                 if (m == null)
-                {
-                    check.invalidOp(e.Pos(), "%s has no method %s", x, sel);
+                { 
+                    // TODO(gri) should check if capitalization of sel matters and provide better error message in that case
+                    check.errorf(e.Sel.Pos(), "%s.%s undefined (type %s has no method %s)", x.expr, sel, x.typ, sel);
                     goto Error;
+
                 }
+
                 check.recordSelection(e, MethodExpr, x.typ, m, index, indirect); 
 
                 // the receiver type becomes the type of the first function
                 // argument of the method expression's function type
-                slice<ref Var> @params = default;
-                ref Signature sig = m.typ._<ref Signature>();
+                slice<ptr<Var>> @params = default;
+                ptr<Signature> sig = m.typ._<ptr<Signature>>();
                 if (sig.@params != null)
                 {
                     params = sig.@params.vars;
                 }
+
                 x.mode = value;
-                x.typ = ref new Signature(params:NewTuple(append([]*Var{NewVar(token.NoPos,check.pkg,"",x.typ)},params...)...),results:sig.results,variadic:sig.variadic,);
+                x.typ = addr(new Signature(params:NewTuple(append([]*Var{NewVar(token.NoPos,check.pkg,"",x.typ)},params...)...),results:sig.results,variadic:sig.variadic,));
 
                 check.addDeclDep(m);
+
 
             }
             else
@@ -525,7 +722,7 @@ namespace go
                 // regular selector
                 switch (obj.type())
                 {
-                    case ref Var obj:
+                    case ptr<Var> obj:
                         check.recordSelection(e, FieldVal, x.typ, obj, index, indirect);
                         if (x.mode == variable || indirect)
                         {
@@ -535,14 +732,19 @@ namespace go
                         {
                             x.mode = value;
                         }
+
                         x.typ = obj.typ;
                         break;
-                    case ref Func obj:
+                    case ptr<Func> obj:
                         check.recordSelection(e, MethodVal, x.typ, obj, index, indirect);
 
                         if (debug)
                         { 
                             // Verify that LookupFieldOrMethod and MethodSet.Lookup agree.
+                            // TODO(gri) This only works because we call LookupFieldOrMethod
+                            // _before_ calling NewMethodSet: LookupFieldOrMethod completes
+                            // any incomplete interfaces so they are available to NewMethodSet
+                            // (which assumes that interfaces have been completed already).
                             var typ = x.typ;
                             if (x.mode == variable)
                             { 
@@ -552,14 +754,15 @@ namespace go
                                 // Variables are addressable, so we can always take their
                                 // address.
                                 {
-                                    ref Pointer (_, ok) = typ._<ref Pointer>();
+                                    ptr<Pointer> (_, ok) = typ._<ptr<Pointer>>();
 
                                     if (!ok && !IsInterface(typ))
                                     {
-                                        typ = ref new Pointer(base:typ);
+                                        typ = addr(new Pointer(base:typ));
                                     }
 
                                 }
+
                             } 
                             // If we created a synthetic pointer type above, we will throw
                             // away the method set computed here after use.
@@ -571,27 +774,35 @@ namespace go
                             // lookup.
                             var mset = NewMethodSet(typ);
                             {
-                                ref Func m__prev3 = m;
+                                ptr<Func> m__prev3 = m;
 
                                 var m = mset.Lookup(check.pkg, sel);
 
                                 if (m == null || m.obj != obj)
                                 {
-                                    check.dump("%s: (%s).%v -> %s", e.Pos(), typ, obj.name, m);
-                                    check.dump("%s\n", mset);
+                                    check.dump("%v: (%s).%v -> %s", e.Pos(), typ, obj.name, m);
+                                    check.dump("%s\n", mset); 
+                                    // Caution: MethodSets are supposed to be used externally
+                                    // only (after all interface types were completed). It's
+                                    // now possible that we get here incorrectly. Not urgent
+                                    // to fix since we only run this code in debug mode.
+                                    // TODO(gri) fix this eventually.
                                     panic("method sets and lookup don't agree");
+
                                 }
 
                                 m = m__prev3;
 
                             }
+
                         }
+
                         x.mode = value; 
 
                         // remove receiver
-                        sig = obj.typ._<ref Signature>().Value;
+                        sig = obj.typ._<ptr<Signature>>().val;
                         sig.recv = null;
-                        x.typ = ref sig;
+                        x.typ = _addr_sig;
 
                         check.addDeclDep(obj);
                         break;
@@ -602,15 +813,17 @@ namespace go
                         break;
                     }
                 }
+
             } 
 
             // everything went well
             x.expr = e;
-            return;
+            return ;
 
 Error:
             x.mode = invalid;
             x.expr = e;
+
         });
     }
 }}

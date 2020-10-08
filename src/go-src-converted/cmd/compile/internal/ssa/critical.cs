@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:33 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:08 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\critical.go
 
@@ -18,10 +18,12 @@ namespace @internal
         // critical splits critical edges (those that go from a block with
         // more than one outedge to a block with more than one inedge).
         // Regalloc wants a critical-edge-free CFG so it can implement phi values.
-        private static void critical(ref Func f)
-        { 
+        private static void critical(ptr<Func> _addr_f)
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // maps from phi arg ID to the new block created for that argument
-            var blocks = make_slice<ref Block>(f.NumValues()); 
+            var blocks = make_slice<ptr<Block>>(f.NumValues()); 
             // need to iterate over f.Blocks without range, as we might
             // need to split critical edges on newly constructed blocks
             for (long j = 0L; j < len(f.Blocks); j++)
@@ -31,7 +33,7 @@ namespace @internal
                 {
                     continue;
                 }
-                ref Value phi = default; 
+                ptr<Value> phi; 
                 // determine if we've only got a single phi in this
                 // block, this is easier to handle than the general
                 // case of a block with multiple phi values.
@@ -49,6 +51,7 @@ namespace @internal
                                 break;
                             }
                             phi = v;
+
                         }
                     }
                     v = v__prev2;
@@ -66,7 +69,6 @@ namespace @internal
                         }
                         v = v__prev2;
                     }
-
                 }
                 {
                     long i = 0L;
@@ -81,7 +83,7 @@ namespace @internal
                             i++;
                             continue; // only single output block
                         }
-                        ref Block d = default; // new block used to remove critical edge
+                        ptr<Block> d; // new block used to remove critical edge
                         var reusedBlock = false; // if true, then this is not the first use of this block
                         if (phi != null)
                         {
@@ -149,10 +151,13 @@ namespace @internal
                             d.Preds = append(d.Preds, new Edge(p,pi));
                             d.Succs = append(d.Succs, new Edge(b,i));
                             i++;
+
                         }
                     }
                 }
+
             }
+
         }
     }
 }}}}

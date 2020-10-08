@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:48 UTC
+//     Generated on 2020 October 08 04:58:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -54,7 +54,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Value, error) ValueByRef(ref T value);
+            private delegate (Value, error) ValueByPtr(ptr<T> value);
             private delegate (Value, error) ValueByVal(T value);
 
-            private static readonly ValueByRef s_ValueByRef;
+            private static readonly ValueByPtr s_ValueByPtr;
             private static readonly ValueByVal s_ValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,11 +80,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ValueByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ValueByPtr is null || !m_target_is_ptr)
                     return s_ValueByVal!(target);
 
-                return s_ValueByRef(ref target);
+                return s_ValueByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -93,23 +94,20 @@ namespace sql
             static Valuer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Value");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Value");
 
                 if (!(extensionMethod is null))
-                    s_ValueByRef = extensionMethod.CreateStaticDelegate(typeof(ValueByRef)) as ValueByRef;
+                    s_ValueByPtr = extensionMethod.CreateStaticDelegate(typeof(ValueByPtr)) as ValueByPtr;
 
-                if (s_ValueByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Value");
+                extensionMethod = targetType.GetExtensionMethod("Value");
 
-                    if (!(extensionMethod is null))
-                        s_ValueByVal = extensionMethod.CreateStaticDelegate(typeof(ValueByVal)) as ValueByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ValueByVal = extensionMethod.CreateStaticDelegate(typeof(ValueByVal)) as ValueByVal;
 
-                if (s_ValueByRef is null && s_ValueByVal is null)
+                if (s_ValueByPtr is null && s_ValueByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Valuer.Value method", new Exception("Value"));
             }
 

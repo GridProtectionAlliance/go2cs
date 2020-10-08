@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:18 UTC
+//     Generated on 2020 October 08 04:09:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,8 +36,6 @@ namespace @internal
                 this.allMethods = default;
                 this.Nod = default;
                 this.Orig = default;
-                this.SliceOf = default;
-                this.PtrBase = default;
                 this.Sym = default;
                 this.Vargen = default;
                 this.Etype = default;
@@ -45,15 +43,13 @@ namespace @internal
                 this.flags = default;
             }
 
-            public Type(long Width = default, Fields methods = default, Fields allMethods = default, ref ptr<Node> Nod = default, ref ptr<Type> Orig = default, ref ptr<Type> SliceOf = default, ref ptr<Type> PtrBase = default, ref ptr<Sym> Sym = default, int Vargen = default, EType Etype = default, byte Align = default, bitset8 flags = default)
+            public Type(long Width = default, Fields methods = default, Fields allMethods = default, ref ptr<Node> Nod = default, ref ptr<Type> Orig = default, ref ptr<Sym> Sym = default, int Vargen = default, EType Etype = default, byte Align = default, bitset8 flags = default)
             {
                 this.Width = Width;
                 this.methods = methods;
                 this.allMethods = allMethods;
                 this.Nod = Nod;
                 this.Orig = Orig;
-                this.SliceOf = SliceOf;
-                this.PtrBase = PtrBase;
                 this.Sym = Sym;
                 this.Vargen = Vargen;
                 this.Etype = Etype;
@@ -81,7 +77,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Type Type_cast(dynamic value)
         {
-            return new Type(value.Width, value.methods, value.allMethods, ref value.Nod, ref value.Orig, ref value.SliceOf, ref value.PtrBase, ref value.Sym, value.Vargen, value.Etype, value.Align, value.flags);
+            return new Type(value.Width, value.methods, value.allMethods, ref value.Nod, ref value.Orig, ref value.Sym, value.Vargen, value.Etype, value.Align, value.flags);
         }
     }
 }}}}

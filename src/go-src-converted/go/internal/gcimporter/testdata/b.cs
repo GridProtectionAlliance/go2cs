@@ -4,7 +4,7 @@
 
 // Input for TestIssue13566
 
-// package b -- go2cs converted at 2020 August 29 10:09:12 UTC
+// package b -- go2cs converted at 2020 October 08 04:56:12 UTC
 // import "go/internal/gcimporter.b" ==> using b = go.go.@internal.gcimporter.b_package
 // Original source: C:\Go\src\go\internal\gcimporter\testdata\b.go
 using a = go...a_package;

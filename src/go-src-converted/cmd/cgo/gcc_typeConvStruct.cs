@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:52:13 UTC
+//     Generated on 2020 October 08 04:08:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
+using xcoff = go.@internal.xcoff_package;
 using math = go.math_package;
 using os = go.os_package;
 using strconv = go.strconv_package;
@@ -69,7 +70,7 @@ namespace go
                 this.intSize = default;
             }
 
-            public typeConv(map<dwarf.Type, ref Type> m = default, map<dwarf.Type, slice<ref Type>> ptrs = default, slice<dwarf.Type> ptrKeys = default, map<@string, bool> getTypeIDs = default, ast.Expr @bool = default, ast.Expr @byte = default, ast.Expr int8 = default, ast.Expr int16 = default, ast.Expr int32 = default, ast.Expr int64 = default, ast.Expr uint8 = default, ast.Expr uint16 = default, ast.Expr uint32 = default, ast.Expr uint64 = default, ast.Expr uintptr = default, ast.Expr float32 = default, ast.Expr float64 = default, ast.Expr complex64 = default, ast.Expr complex128 = default, ast.Expr @void = default, ast.Expr @string = default, ast.Expr goVoid = default, ast.Expr goVoidPtr = default, long ptrSize = default, long intSize = default)
+            public typeConv(map<@string, ptr<Type>> m = default, map<@string, slice<ptr<Type>>> ptrs = default, slice<dwarf.Type> ptrKeys = default, map<@string, bool> getTypeIDs = default, ast.Expr @bool = default, ast.Expr @byte = default, ast.Expr int8 = default, ast.Expr int16 = default, ast.Expr int32 = default, ast.Expr int64 = default, ast.Expr uint8 = default, ast.Expr uint16 = default, ast.Expr uint32 = default, ast.Expr uint64 = default, ast.Expr uintptr = default, ast.Expr float32 = default, ast.Expr float64 = default, ast.Expr complex64 = default, ast.Expr complex128 = default, ast.Expr @void = default, ast.Expr @string = default, ast.Expr goVoid = default, ast.Expr goVoidPtr = default, long ptrSize = default, long intSize = default)
             {
                 this.m = m;
                 this.ptrs = ptrs;

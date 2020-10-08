@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:47:52 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:41 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\resolver.go
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
@@ -23,48 +24,51 @@ namespace go
         private partial struct declInfo
         {
             public ptr<Scope> file; // scope of file containing this declaration
-            public slice<ref Var> lhs; // lhs of n:1 variable declarations, or nil
+            public slice<ptr<Var>> lhs; // lhs of n:1 variable declarations, or nil
             public ast.Expr typ; // type, or nil
             public ast.Expr init; // init/orig expression, or nil
             public ptr<ast.FuncDecl> fdecl; // func declaration, or nil
             public bool alias; // type alias declaration
 
 // The deps field tracks initialization expression dependencies.
-// As a special (overloaded) case, it also tracks dependencies of
-// interface types on embedded interfaces (see ordering.go).
-            public objSet deps; // lazily initialized
-        }
-
-        // An objSet is simply a set of objects.
-        private partial struct objSet // : map<Object, bool>
-        {
+            public map<Object, bool> deps; // lazily initialized
         }
 
         // hasInitializer reports whether the declared object has an initialization
         // expression or function body.
-        private static bool hasInitializer(this ref declInfo d)
+        private static bool hasInitializer(this ptr<declInfo> _addr_d)
         {
+            ref declInfo d = ref _addr_d.val;
+
             return d.init != null || d.fdecl != null && d.fdecl.Body != null;
         }
 
         // addDep adds obj to the set of objects d's init expression depends on.
-        private static void addDep(this ref declInfo d, Object obj)
+        private static void addDep(this ptr<declInfo> _addr_d, Object obj)
         {
+            ref declInfo d = ref _addr_d.val;
+
             var m = d.deps;
             if (m == null)
             {
-                m = make(objSet);
+                m = make_map<Object, bool>();
                 d.deps = m;
             }
+
             m[obj] = true;
+
         }
 
         // arityMatch checks that the lhs and rhs of a const or var decl
         // have the appropriate number of names and init exprs. For const
         // decls, init is the value spec providing the init exprs; for
         // var decls, init is nil (the init exprs are in s in this case).
-        private static void arityMatch(this ref Checker check, ref ast.ValueSpec s, ref ast.ValueSpec init)
+        private static void arityMatch(this ptr<Checker> _addr_check, ptr<ast.ValueSpec> _addr_s, ptr<ast.ValueSpec> _addr_init)
         {
+            ref Checker check = ref _addr_check.val;
+            ref ast.ValueSpec s = ref _addr_s.val;
+            ref ast.ValueSpec init = ref _addr_init.val;
+
             var l = len(s.Names);
             var r = len(s.Values);
             if (init != null)
@@ -72,12 +76,14 @@ namespace go
                 r = len(init.Values);
             }
 
+
             if (init == null && r == 0L) 
                 // var decl w/o init expr
                 if (s.Type == null)
                 {
                     check.errorf(s.Pos(), "missing type or init expr");
                 }
+
             else if (l < r) 
                 if (l < len(s.Values))
                 { 
@@ -92,38 +98,51 @@ namespace go
                     check.errorf(s.Pos(), "extra init expr at %s", check.fset.Position(init.Pos())); 
                     // TODO(gri) avoid declared but not used error here
                 }
+
             else if (l > r && (init != null || r != 1L)) 
                 n = s.Names[r];
                 check.errorf(n.Pos(), "missing init expr for %s", n);
-                    }
+            
+        }
 
         private static (@string, error) validatedImportPath(@string path)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             var (s, err) = strconv.Unquote(path);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             if (s == "")
             {
-                return ("", fmt.Errorf("empty string"));
+                return ("", error.As(fmt.Errorf("empty string"))!);
             }
-            const @string illegalChars = "!\"#$%&\'()*,:;<=>?[\\]^{|}" + "`\uFFFD";
+
+            const @string illegalChars = (@string)"!\"#$%&\'()*,:;<=>?[\\]^{|}" + "`\uFFFD";
 
             foreach (var (_, r) in s)
             {
                 if (!unicode.IsGraphic(r) || unicode.IsSpace(r) || strings.ContainsRune(illegalChars, r))
                 {
-                    return (s, fmt.Errorf("invalid character %#U", r));
+                    return (s, error.As(fmt.Errorf("invalid character %#U", r))!);
                 }
+
             }
-            return (s, null);
+            return (s, error.As(null!)!);
+
         }
 
         // declarePkgObj declares obj in the package scope, records its ident -> obj mapping,
         // and updates check.objMap. The object must not be a function or method.
-        private static void declarePkgObj(this ref Checker check, ref ast.Ident ident, Object obj, ref declInfo d)
+        private static void declarePkgObj(this ptr<Checker> _addr_check, ptr<ast.Ident> _addr_ident, Object obj, ptr<declInfo> _addr_d)
         {
+            ref Checker check = ref _addr_check.val;
+            ref ast.Ident ident = ref _addr_ident.val;
+            ref declInfo d = ref _addr_d.val;
+
             assert(ident.Name == obj.Name()); 
 
             // spec: "A package-scope or file-scope identifier with name init
@@ -131,7 +150,7 @@ namespace go
             if (ident.Name == "init")
             {
                 check.errorf(ident.Pos(), "cannot declare init - must be func");
-                return;
+                return ;
             } 
 
             // spec: "The main package must have package name main and declare
@@ -139,16 +158,20 @@ namespace go
             if (ident.Name == "main" && check.pkg.name == "main")
             {
                 check.errorf(ident.Pos(), "cannot declare main - must be func");
-                return;
+                return ;
             }
+
             check.declare(check.pkg.scope, ident, obj, token.NoPos);
             check.objMap[obj] = d;
             obj.setOrder(uint32(len(check.objMap)));
+
         }
 
         // filename returns a filename suitable for debugging output.
-        private static @string filename(this ref Checker check, long fileNo)
+        private static @string filename(this ptr<Checker> _addr_check, long fileNo)
         {
+            ref Checker check = ref _addr_check.val;
+
             var file = check.files[fileNo];
             {
                 var pos = file.Pos();
@@ -159,11 +182,15 @@ namespace go
                 }
 
             }
+
             return fmt.Sprintf("file[%d]", fileNo);
+
         }
 
-        private static ref Package importPackage(this ref Checker check, token.Pos pos, @string path, @string dir)
-        { 
+        private static ptr<Package> importPackage(this ptr<Checker> _addr_check, token.Pos pos, @string path, @string dir)
+        {
+            ref Checker check = ref _addr_check.val;
+ 
             // If we already have a package for the given (path, dir)
             // pair, use it instead of doing a full import.
             // Checker.impMap only caches packages that are marked Complete
@@ -173,25 +200,27 @@ namespace go
             var imp = check.impMap[key];
             if (imp != null)
             {
-                return imp;
+                return _addr_imp!;
             } 
 
             // no package yet => import it
-            if (path == "C" && check.conf.FakeImportC)
+            if (path == "C" && (check.conf.FakeImportC || check.conf.go115UsesCgo))
             {
                 imp = NewPackage("C", "C");
-                imp.fake = true;
+                imp.fake = true; // package scope is not populated
+                imp.cgo = check.conf.go115UsesCgo;
+
             }
             else
             { 
                 // ordinary import
-                error err = default;
+                error err = default!;
                 {
                     var importer = check.conf.Importer;
 
                     if (importer == null)
                     {
-                        err = error.As(fmt.Errorf("Config.Importer not installed"));
+                        err = error.As(fmt.Errorf("Config.Importer not installed"))!;
                     }                    {
                         ImporterFrom (importerFrom, ok) = importer._<ImporterFrom>();
 
@@ -201,16 +230,18 @@ namespace go
                             imp, err = importerFrom.ImportFrom(path, dir, 0L);
                             if (imp == null && err == null)
                             {
-                                err = error.As(fmt.Errorf("Config.Importer.ImportFrom(%s, %s, 0) returned nil but no error", path, dir));
+                                err = error.As(fmt.Errorf("Config.Importer.ImportFrom(%s, %s, 0) returned nil but no error", path, dir))!;
                             }
+
                         }
                         else
                         {
                             imp, err = importer.Import(path);
                             if (imp == null && err == null)
                             {
-                                err = error.As(fmt.Errorf("Config.Importer.Import(%s) returned nil but no error", path));
+                                err = error.As(fmt.Errorf("Config.Importer.Import(%s) returned nil but no error", path))!;
                             }
+
                         } 
                         // make sure we have a valid package name
                         // (errors here can only happen through manipulation of packages after creation)
@@ -224,9 +255,10 @@ namespace go
                 // (errors here can only happen through manipulation of packages after creation)
                 if (err == null && imp != null && (imp.name == "_" || imp.name == ""))
                 {
-                    err = error.As(fmt.Errorf("invalid package name: %q", imp.name));
+                    err = error.As(fmt.Errorf("invalid package name: %q", imp.name))!;
                     imp = null; // create fake package below
                 }
+
                 if (err != null)
                 {
                     check.errorf(pos, "could not import %s (%s)", path, err);
@@ -248,6 +280,7 @@ namespace go
                             i = i__prev4;
 
                         }
+
                         {
                             var i__prev4 = i;
 
@@ -261,29 +294,36 @@ namespace go
                             i = i__prev4;
 
                         }
+
                         imp = NewPackage(path, name);
+
                     } 
                     // continue to use the package as best as we can
                     imp.fake = true; // avoid follow-up lookup failures
                 }
+
             } 
 
             // package should be complete or marked fake, but be cautious
             if (imp.complete || imp.fake)
             {
                 check.impMap[key] = imp;
-                return imp;
+                check.pkgCnt[imp.name]++;
+                return _addr_imp!;
             } 
 
             // something went wrong (importer may have returned incomplete package without error)
-            return null;
+            return _addr_null!;
+
         }
 
         // collectObjects collects all file and package objects and inserts them
         // into their respective scopes. It also performs imports and associates
         // methods with receiver base type names.
-        private static void collectObjects(this ref Checker check)
+        private static void collectObjects(this ptr<Checker> _addr_check)
         {
+            ref Checker check = ref _addr_check.val;
+
             var pkg = check.pkg; 
 
             // pkgImports is the set of packages already imported by any package file seen
@@ -292,7 +332,7 @@ namespace go
             // Note that pkgImports is keyed by package (and thus package path), not by an
             // importKey value. Two different importKey values may map to the same package
             // which is why we cannot use the check.impMap here.
-            var pkgImports = make_map<ref Package, bool>();
+            var pkgImports = make_map<ptr<Package>, bool>();
             {
                 var imp__prev1 = imp;
 
@@ -305,6 +345,7 @@ namespace go
                 imp = imp__prev1;
             }
 
+            slice<ptr<Func>> methods = default; // list of methods with non-blank _ names
             foreach (var (fileNo, file) in check.files)
             { 
                 // The package identifier denotes the current package,
@@ -317,15 +358,21 @@ namespace go
                 var pos = file.Pos();
                 var end = file.End();
                 {
+                    var f__prev1 = f;
+
                     var f = check.fset.File(file.Pos());
 
                     if (f != null)
                     {
                         pos = token.Pos(f.Base());
                         end = token.Pos(f.Base() + f.Size());
+
                     }
 
+                    f = f__prev1;
+
                 }
+
                 var fileScope = NewScope(check.pkg.scope, pos, end, check.filename(fileNo));
                 check.recordScope(file, fileScope); 
 
@@ -338,21 +385,22 @@ namespace go
                 {
                     switch (decl.type())
                     {
-                        case ref ast.BadDecl d:
+                        case ptr<ast.BadDecl> d:
                             break;
-                        case ref ast.GenDecl d:
-                            ref ast.ValueSpec last = default; // last ValueSpec with type or init exprs seen
+                        case ptr<ast.GenDecl> d:
+                            ptr<ast.ValueSpec> last; // last ValueSpec with type or init exprs seen
                             foreach (var (iota, spec) in d.Specs)
                             {
                                 switch (spec.type())
                                 {
-                                    case ref ast.ImportSpec s:
+                                    case ptr<ast.ImportSpec> s:
                                         var (path, err) = validatedImportPath(s.Path.Value);
                                         if (err != null)
                                         {
                                             check.errorf(s.Path.Pos(), "invalid import path (%s)", err);
                                             continue;
                                         }
+
                                         var imp = check.importPackage(s.Path.Pos(), path, fileDir);
                                         if (imp == null)
                                         {
@@ -378,27 +426,34 @@ namespace go
                                                 // match cmd/compile (not prescribed by spec)
                                                 check.errorf(s.Name.Pos(), "cannot rename import \"C\"");
                                                 continue;
+
                                             }
+
                                             if (name == "init")
                                             {
                                                 check.errorf(s.Name.Pos(), "cannot declare init - must be func");
                                                 continue;
                                             }
+
                                         }
+
                                         var obj = NewPkgName(s.Pos(), pkg, name, imp);
                                         if (s.Name != null)
                                         { 
                                             // in a dot-import, the dot represents the package
                                             check.recordDef(s.Name, obj);
+
                                         }
                                         else
                                         {
                                             check.recordImplicit(s, obj);
                                         }
+
                                         if (path == "C")
                                         { 
                                             // match cmd/compile (not prescribed by spec)
                                             obj.used = true;
+
                                         } 
 
                                         // add import to file scope
@@ -415,16 +470,28 @@ namespace go
                                                     // do not import them!
                                                     if (obj.Exported())
                                                     { 
-                                                        // TODO(gri) When we import a package, we create
-                                                        // a new local package object. We should do the
-                                                        // same for each dot-imported object. That way
-                                                        // they can have correct position information.
-                                                        // (We must not modify their existing position
-                                                        // information because the same package - found
-                                                        // via Config.Packages - may be dot-imported in
-                                                        // another package!)
-                                                        check.declare(fileScope, null, obj, token.NoPos);
+                                                        // declare dot-imported object
+                                                        // (Do not use check.declare because it modifies the object
+                                                        // via Object.setScopePos, which leads to a race condition;
+                                                        // the object may be imported into more than one file scope
+                                                        // concurrently. See issue #32154.)
+                                                        {
+                                                            var alt__prev3 = alt;
+
+                                                            var alt = fileScope.Insert(obj);
+
+                                                            if (alt != null)
+                                                            {
+                                                                check.errorf(s.Name.Pos(), "%s redeclared in this block", obj.Name());
+                                                                check.reportAltDecl(alt);
+                                                            }
+
+                                                            alt = alt__prev3;
+
+                                                        }
+
                                                     }
+
                                                 }
                                         else
  
@@ -435,12 +502,16 @@ namespace go
                                             }
 
                                             check.addUnusedDotImport(fileScope, imp, s.Pos());
+
                                         }                                        { 
                                             // declare imported package object in file scope
+                                            // (no need to provide s.Name since we called check.recordDef earlier)
                                             check.declare(fileScope, null, obj, token.NoPos);
+
                                         }
+
                                         break;
-                                    case ref ast.ValueSpec s:
+                                    case ptr<ast.ValueSpec> s:
 
                                         if (d.Tok == token.CONST) 
                                             // determine which initialization expressions to use
@@ -465,8 +536,10 @@ namespace go
                                                     {
                                                         init = last.Values[i];
                                                     }
-                                                    declInfo d = ref new declInfo(file:fileScope,typ:last.Type,init:init);
+
+                                                    ptr<declInfo> d = addr(new declInfo(file:fileScope,typ:last.Type,init:init));
                                                     check.declarePkgObj(name, obj, d);
+
                                                 }
 
                                                 i = i__prev4;
@@ -475,18 +548,19 @@ namespace go
 
                                             check.arityMatch(s, last);
                                         else if (d.Tok == token.VAR) 
-                                            var lhs = make_slice<ref Var>(len(s.Names)); 
+                                            var lhs = make_slice<ptr<Var>>(len(s.Names)); 
                                             // If there's exactly one rhs initializer, use
                                             // the same declInfo d1 for all lhs variables
                                             // so that each lhs variable depends on the same
                                             // rhs initializer (n:1 var declaration).
-                                            ref declInfo d1 = default;
+                                            ptr<declInfo> d1;
                                             if (len(s.Values) == 1L)
                                             { 
                                                 // The lhs elements are only set up after the for loop below,
                                                 // but that's ok because declareVar only collects the declInfo
                                                 // for a later phase.
-                                                d1 = ref new declInfo(file:fileScope,lhs:lhs,typ:s.Type,init:s.Values[0]);
+                                                d1 = addr(new declInfo(file:fileScope,lhs:lhs,typ:s.Type,init:s.Values[0]));
+
                                             } 
 
                                             // declare all variables
@@ -510,9 +584,13 @@ namespace go
                                                         {
                                                             init = s.Values[i];
                                                         }
-                                                        d = ref new declInfo(file:fileScope,typ:s.Type,init:init);
+
+                                                        d = addr(new declInfo(file:fileScope,typ:s.Type,init:init));
+
                                                     }
+
                                                     check.declarePkgObj(name, obj, d);
+
                                                 }
 
                                                 i = i__prev4;
@@ -523,9 +601,9 @@ namespace go
                                         else 
                                             check.invalidAST(s.Pos(), "invalid token %s", d.Tok);
                                                                                 break;
-                                    case ref ast.TypeSpec s:
+                                    case ptr<ast.TypeSpec> s:
                                         obj = NewTypeName(s.Name.Pos(), pkg, s.Name.Name, null);
-                                        check.declarePkgObj(s.Name, obj, ref new declInfo(file:fileScope,typ:s.Type,alias:s.Assign.IsValid()));
+                                        check.declarePkgObj(s.Name, obj, addr(new declInfo(file:fileScope,typ:s.Type,alias:s.Assign.IsValid())));
                                         break;
                                     default:
                                     {
@@ -534,9 +612,10 @@ namespace go
                                         break;
                                     }
                                 }
+
                             }
                             break;
-                        case ref ast.FuncDecl d:
+                        case ptr<ast.FuncDecl> d:
                             name = d.Name.Name;
                             obj = NewFunc(d.Name.Pos(), pkg, name, null);
                             if (d.Recv == null)
@@ -552,49 +631,34 @@ namespace go
                                     {
                                         check.softErrorf(obj.pos, "missing function body");
                                     }
+
                                 }
                                 else
                                 {
                                     check.declare(pkg.scope, d.Name, obj, token.NoPos);
                                 }
+
                             }
                             else
                             { 
                                 // method
-                                check.recordDef(d.Name, obj); 
-                                // Associate method with receiver base type name, if possible.
-                                // Ignore methods that have an invalid receiver, or a blank _
-                                // receiver name. They will be type-checked later, with regular
-                                // functions.
+                                // (Methods with blank _ names are never found; no need to collect
+                                // them for later type association. They will still be type-checked
+                                // with all the other functions.)
+                                if (name != "_")
                                 {
-                                    var list = d.Recv.List;
-
-                                    if (len(list) > 0L)
-                                    {
-                                        var typ = unparen(list[0L].Type);
-                                        {
-                                            ref ast.StarExpr (ptr, _) = typ._<ref ast.StarExpr>();
-
-                                            if (ptr != null)
-                                            {
-                                                typ = unparen(ptr.X);
-                                            }
-
-                                        }
-                                        {
-                                            ref ast.Ident (base, _) = typ._<ref ast.Ident>();
-
-                                            if (base != null && @base.Name != "_")
-                                            {
-                                                check.assocMethod(@base.Name, obj);
-                                            }
-
-                                        }
-                                    }
-
+                                    methods = append(methods, obj);
                                 }
+
+                                check.recordDef(d.Name, obj);
+
                             }
-                            declInfo info = ref new declInfo(file:fileScope,fdecl:d);
+
+                            ptr<declInfo> info = addr(new declInfo(file:fileScope,fdecl:d)); 
+                            // Methods are not package-level objects but we still track them in the
+                            // object map so that we can handle them like regular functions (if the
+                            // receiver is invalid); also we need their fdecl info when associating
+                            // them with their receiver base type, below.
                             check.objMap[obj] = info;
                             obj.setOrder(uint32(len(check.objMap)));
                             break;
@@ -605,7 +669,9 @@ namespace go
                             break;
                         }
                     }
+
                 }
+
             } 
 
             // verify that objects in package and file scopes have different names
@@ -618,14 +684,16 @@ namespace go
                     {
                         obj = __obj;
                         {
-                            var alt = pkg.scope.Lookup(obj.Name());
+                            var alt__prev1 = alt;
+
+                            alt = pkg.scope.Lookup(obj.Name());
 
                             if (alt != null)
                             {
                                 {
                                     var pkg__prev2 = pkg;
 
-                                    ref PkgName (pkg, ok) = obj._<ref PkgName>();
+                                    ptr<PkgName> (pkg, ok) = obj._<ptr<PkgName>>();
 
                                     if (ok)
                                     {
@@ -637,25 +705,179 @@ namespace go
                                         check.errorf(alt.Pos(), "%s already declared through dot-import of %s", alt.Name(), obj.Pkg()); 
                                         // TODO(gri) dot-imported objects don't have a position; reportAltDecl won't print anything
                                         check.reportAltDecl(obj);
+
                                     }
 
                                     pkg = pkg__prev2;
 
                                 }
+
                             }
 
+                            alt = alt__prev1;
+
                         }
+
                     }
 
                     obj = obj__prev2;
                 }
+            } 
 
+            // Now that we have all package scope objects and all methods,
+            // associate methods with receiver base type name where possible.
+            // Ignore methods that have an invalid receiver. They will be
+            // type-checked later, with regular functions.
+            if (methods == null)
+            {
+                return ; // nothing to do
+            }
+
+            check.methods = make_map<ptr<TypeName>, slice<ptr<Func>>>();
+            {
+                var f__prev1 = f;
+
+                foreach (var (_, __f) in methods)
+                {
+                    f = __f;
+                    var fdecl = check.objMap[f].fdecl;
+                    {
+                        var list = fdecl.Recv.List;
+
+                        if (len(list) > 0L)
+                        { 
+                            // f is a method.
+                            // Determine the receiver base type and associate f with it.
+                            var (ptr, base) = check.resolveBaseTypeName(list[0L].Type);
+                            if (base != null)
+                            {
+                                f.hasPtrRecv = ptr;
+                                check.methods[base] = append(check.methods[base], f);
+                            }
+
+                        }
+
+                    }
+
+                }
+
+                f = f__prev1;
             }
         }
 
-        // packageObjects typechecks all package objects in objList, but not function bodies.
-        private static void packageObjects(this ref Checker check, slice<Object> objList)
-        { 
+        // resolveBaseTypeName returns the non-alias base type name for typ, and whether
+        // there was a pointer indirection to get to it. The base type name must be declared
+        // in package scope, and there can be at most one pointer indirection. If no such type
+        // name exists, the returned base is nil.
+        private static (bool, ptr<TypeName>) resolveBaseTypeName(this ptr<Checker> _addr_check, ast.Expr typ)
+        {
+            bool ptr = default;
+            ptr<TypeName> @base = default!;
+            ref Checker check = ref _addr_check.val;
+ 
+            // Algorithm: Starting from a type expression, which may be a name,
+            // we follow that type through alias declarations until we reach a
+            // non-alias type name. If we encounter anything but pointer types or
+            // parentheses we're done. If we encounter more than one pointer type
+            // we're done.
+            map<ptr<TypeName>, bool> seen = default;
+            while (true)
+            {
+                typ = unparen(typ); 
+
+                // check if we have a pointer type
+                {
+                    ptr<ast.StarExpr> (pexpr, _) = typ._<ptr<ast.StarExpr>>();
+
+                    if (pexpr != null)
+                    { 
+                        // if we've already seen a pointer, we're done
+                        if (ptr)
+                        {
+                            return (false, _addr_null!);
+                        }
+
+                        ptr = true;
+                        typ = unparen(pexpr.X); // continue with pointer base type
+                    } 
+
+                    // typ must be a name
+
+                } 
+
+                // typ must be a name
+                ptr<ast.Ident> (name, _) = typ._<ptr<ast.Ident>>();
+                if (name == null)
+                {
+                    return (false, _addr_null!);
+                } 
+
+                // name must denote an object found in the current package scope
+                // (note that dot-imported objects are not in the package scope!)
+                var obj = check.pkg.scope.Lookup(name.Name);
+                if (obj == null)
+                {
+                    return (false, _addr_null!);
+                } 
+
+                // the object must be a type name...
+                ptr<TypeName> (tname, _) = obj._<ptr<TypeName>>();
+                if (tname == null)
+                {
+                    return (false, _addr_null!);
+                } 
+
+                // ... which we have not seen before
+                if (seen[tname])
+                {
+                    return (false, _addr_null!);
+                } 
+
+                // we're done if tdecl defined tname as a new type
+                // (rather than an alias)
+                var tdecl = check.objMap[tname]; // must exist for objects in package scope
+                if (!tdecl.alias)
+                {
+                    return (ptr, _addr_tname!);
+                } 
+
+                // otherwise, continue resolving
+                typ = tdecl.typ;
+                if (seen == null)
+                {
+                    seen = make_map<ptr<TypeName>, bool>();
+                }
+
+                seen[tname] = true;
+
+            }
+
+
+        }
+
+        // packageObjects typechecks all package objects, but not function bodies.
+        private static void packageObjects(this ptr<Checker> _addr_check)
+        {
+            ref Checker check = ref _addr_check.val;
+ 
+            // process package objects in source order for reproducible results
+            var objList = make_slice<Object>(len(check.objMap));
+            long i = 0L;
+            {
+                var obj__prev1 = obj;
+
+                foreach (var (__obj) in check.objMap)
+                {
+                    obj = __obj;
+                    objList[i] = obj;
+                    i++;
+                }
+
+                obj = obj__prev1;
+            }
+
+            sort.Sort(inSourceOrder(objList)); 
+
             // add new methods to already type-checked types (from a prior Checker.Files call)
             {
                 var obj__prev1 = obj;
@@ -666,7 +888,7 @@ namespace go
                     {
                         var obj__prev1 = obj;
 
-                        ref TypeName (obj, _) = obj._<ref TypeName>();
+                        ptr<TypeName> (obj, _) = obj._<ptr<TypeName>>();
 
                         if (obj != null && obj.typ != null)
                         {
@@ -676,22 +898,55 @@ namespace go
                         obj = obj__prev1;
 
                     }
+
                 } 
 
-                // pre-allocate space for type declaration paths so that the underlying array is reused
+                // We process non-alias declarations first, in order to avoid situations where
+                // the type of an alias declaration is needed before it is available. In general
+                // this is still not enough, as it is possible to create sufficiently convoluted
+                // recursive type definitions that will cause a type alias to be needed before it
+                // is available (see issue #25838 for examples).
+                // As an aside, the cmd/compiler suffers from the same problem (#25838).
 
                 obj = obj__prev1;
             }
 
-            var typePath = make_slice<ref TypeName>(0L, 8L);
-
+            slice<ptr<TypeName>> aliasList = default; 
+            // phase 1
             {
                 var obj__prev1 = obj;
 
                 foreach (var (_, __obj) in objList)
                 {
+                    obj = __obj; 
+                    // If we have a type alias, collect it for the 2nd phase.
+                    {
+                        ptr<TypeName> (tname, _) = obj._<ptr<TypeName>>();
+
+                        if (tname != null && check.objMap[tname].alias)
+                        {
+                            aliasList = append(aliasList, tname);
+                            continue;
+                        }
+
+                    }
+
+
+                    check.objDecl(obj, null);
+
+                } 
+                // phase 2
+
+                obj = obj__prev1;
+            }
+
+            {
+                var obj__prev1 = obj;
+
+                foreach (var (_, __obj) in aliasList)
+                {
                     obj = __obj;
-                    check.objDecl(obj, null, typePath);
+                    check.objDecl(obj, null);
                 } 
 
                 // At this point we may have a non-empty check.methods map; this means that not all
@@ -703,24 +958,37 @@ namespace go
             }
 
             check.methods = null;
+
         }
 
-        // functionBodies typechecks all function bodies.
-        private static void functionBodies(this ref Checker check)
+        // inSourceOrder implements the sort.Sort interface.
+        private partial struct inSourceOrder // : slice<Object>
         {
-            foreach (var (_, f) in check.funcs)
-            {
-                check.funcBody(f.decl, f.name, f.sig, f.body);
-            }
+        }
+
+        private static long Len(this inSourceOrder a)
+        {
+            return len(a);
+        }
+        private static bool Less(this inSourceOrder a, long i, long j)
+        {
+            return a[i].order() < a[j].order();
+        }
+        private static void Swap(this inSourceOrder a, long i, long j)
+        {
+            a[i] = a[j];
+            a[j] = a[i];
         }
 
         // unusedImports checks for unused imports.
-        private static void unusedImports(this ref Checker check)
-        { 
+        private static void unusedImports(this ptr<Checker> _addr_check)
+        {
+            ref Checker check = ref _addr_check.val;
+ 
             // if function bodies are not checked, packages' uses are likely missing - don't check
             if (check.conf.IgnoreFuncBodies)
             {
-                return;
+                return ;
             } 
 
             // spec: "It is illegal (...) to directly import a package without referring to
@@ -739,7 +1007,7 @@ namespace go
                         {
                             var obj__prev1 = obj;
 
-                            ref PkgName (obj, ok) = obj._<ref PkgName>();
+                            ptr<PkgName> (obj, ok) = obj._<ptr<PkgName>>();
 
                             if (ok)
                             { 
@@ -757,17 +1025,19 @@ namespace go
                                     {
                                         check.softErrorf(obj.pos, "%q imported but not used as %s", path, obj.name);
                                     }
+
                                 }
+
                             }
 
                             obj = obj__prev1;
 
                         }
+
                     }
 
                     obj = obj__prev2;
                 }
-
             } 
 
             // check use of dot-imported packages
@@ -777,7 +1047,9 @@ namespace go
                 {
                     check.softErrorf(pos, "%q imported but not used", pkg.path);
                 }
+
             }
+
         }
 
         // pkgName returns the package name (last element) of an import path.
@@ -792,7 +1064,9 @@ namespace go
                 }
 
             }
+
             return path;
+
         }
 
         // dir makes a good-faith attempt to return the directory
@@ -813,6 +1087,7 @@ namespace go
             } 
             // i <= 0
             return ".";
+
         }
     }
 }}

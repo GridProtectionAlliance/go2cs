@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package poll -- go2cs converted at 2020 August 29 08:25:17 UTC
+// package poll -- go2cs converted at 2020 October 08 03:32:11 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fd_io_plan9.go
 using runtime = go.runtime_package;
@@ -40,9 +40,9 @@ namespace @internal
         // newAsyncIO returns a new asyncIO that performs an I/O
         // operation by calling fn, which must do one and only one
         // interruptible system call.
-        private static ref asyncIO newAsyncIO(Func<slice<byte>, (long, error)> fn, slice<byte> b)
+        private static ptr<asyncIO> newAsyncIO(Func<slice<byte>, (long, error)> fn, slice<byte> b)
         {
-            asyncIO aio = ref new asyncIO(res:make(chanresult,0),);
+            ptr<asyncIO> aio = addr(new asyncIO(res:make(chanresult,0),));
             aio.mu.Lock();
             go_(() => () =>
             { 
@@ -64,34 +64,45 @@ namespace @internal
                 aio.mu.Unlock();
 
                 aio.res.Send(new result(n,err));
+
             }());
-            return aio;
+            return _addr_aio!;
+
         }
 
         // Cancel interrupts the I/O operation, causing
         // the Wait function to return.
-        private static void Cancel(this ref asyncIO _aio) => func(_aio, (ref asyncIO aio, Defer defer, Panic _, Recover __) =>
+        private static void Cancel(this ptr<asyncIO> _addr_aio) => func((defer, _, __) =>
         {
+            ref asyncIO aio = ref _addr_aio.val;
+
             aio.mu.Lock();
             defer(aio.mu.Unlock());
             if (aio.pid == -1L)
             {
-                return;
+                return ;
             }
+
             var (f, e) = syscall.Open("/proc/" + itoa(aio.pid) + "/note", syscall.O_WRONLY);
             if (e != null)
             {
-                return;
+                return ;
             }
+
             syscall.Write(f, (slice<byte>)"hangup");
             syscall.Close(f);
+
         });
 
         // Wait for the I/O operation to complete.
-        private static (long, error) Wait(this ref asyncIO aio)
+        private static (long, error) Wait(this ptr<asyncIO> _addr_aio)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref asyncIO aio = ref _addr_aio.val;
+
             var res = aio.res.Receive();
-            return (res.n, res.err);
+            return (res.n, error.As(res.err)!);
         }
 
         // The following functions, provided by the runtime, are used to

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:17 UTC
+//     Generated on 2020 October 08 04:29:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using logopt = go.cmd.compile.@internal.logopt_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using src = go.cmd.@internal.src_package;
@@ -35,12 +36,16 @@ namespace @internal
             {
                 this.budget = default;
                 this.reason = default;
+                this.extraCallCost = default;
+                this.usedLocals = default;
             }
 
-            public hairyVisitor(int budget = default, @string reason = default)
+            public hairyVisitor(int budget = default, @string reason = default, int extraCallCost = default, map<ptr<Node>, bool> usedLocals = default)
             {
                 this.budget = budget;
                 this.reason = reason;
+                this.extraCallCost = extraCallCost;
+                this.usedLocals = usedLocals;
             }
 
             // Enable comparisons between nil and hairyVisitor struct
@@ -63,7 +68,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static hairyVisitor hairyVisitor_cast(dynamic value)
         {
-            return new hairyVisitor(value.budget, value.reason);
+            return new hairyVisitor(value.budget, value.reason, value.extraCallCost, value.usedLocals);
         }
     }
 }}}}

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:38 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:39 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\netpoll_solaris.go
+using atomic = go.runtime.@internal.atomic_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 
@@ -77,41 +78,53 @@ namespace go
         //go:cgo_import_dynamic libc_port_associate port_associate "libc.so"
         //go:cgo_import_dynamic libc_port_dissociate port_dissociate "libc.so"
         //go:cgo_import_dynamic libc_port_getn port_getn "libc.so"
+        //go:cgo_import_dynamic libc_port_alert port_alert "libc.so"
 
         //go:linkname libc_port_create libc_port_create
         //go:linkname libc_port_associate libc_port_associate
         //go:linkname libc_port_dissociate libc_port_dissociate
         //go:linkname libc_port_getn libc_port_getn
-        private static libcFunc libc_port_create = default;        private static libcFunc libc_port_associate = default;        private static libcFunc libc_port_dissociate = default;        private static libcFunc libc_port_getn = default;
+        //go:linkname libc_port_alert libc_port_alert
+        private static libcFunc libc_port_create = default;        private static libcFunc libc_port_associate = default;        private static libcFunc libc_port_dissociate = default;        private static libcFunc libc_port_getn = default;        private static libcFunc libc_port_alert = default;
+        private static uint netpollWakeSig = default;
 
         private static int errno()
         {
-            return getg().m.perrno.Value;
+            return getg().m.perrno.val;
         }
 
-        private static int fcntl(int fd, int cmd, System.UIntPtr arg)
+        private static int fcntl(int fd, int cmd, int arg)
         {
-            return int32(sysvicall3(ref libc_fcntl, uintptr(fd), uintptr(cmd), arg));
+            return int32(sysvicall3(_addr_libc_fcntl, uintptr(fd), uintptr(cmd), uintptr(arg)));
         }
 
         private static int port_create()
         {
-            return int32(sysvicall0(ref libc_port_create));
+            return int32(sysvicall0(_addr_libc_port_create));
         }
 
         private static int port_associate(int port, int source, System.UIntPtr @object, uint events, System.UIntPtr user)
         {
-            return int32(sysvicall5(ref libc_port_associate, uintptr(port), uintptr(source), object, uintptr(events), user));
+            return int32(sysvicall5(_addr_libc_port_associate, uintptr(port), uintptr(source), object, uintptr(events), user));
         }
 
         private static int port_dissociate(int port, int source, System.UIntPtr @object)
         {
-            return int32(sysvicall3(ref libc_port_dissociate, uintptr(port), uintptr(source), object));
+            return int32(sysvicall3(_addr_libc_port_dissociate, uintptr(port), uintptr(source), object));
         }
 
-        private static int port_getn(int port, ref portevent evs, uint max, ref uint nget, ref timespec timeout)
+        private static int port_getn(int port, ptr<portevent> _addr_evs, uint max, ptr<uint> _addr_nget, ptr<timespec> _addr_timeout)
         {
-            return int32(sysvicall5(ref libc_port_getn, uintptr(port), uintptr(@unsafe.Pointer(evs)), uintptr(max), uintptr(@unsafe.Pointer(nget)), uintptr(@unsafe.Pointer(timeout))));
+            ref portevent evs = ref _addr_evs.val;
+            ref uint nget = ref _addr_nget.val;
+            ref timespec timeout = ref _addr_timeout.val;
+
+            return int32(sysvicall5(_addr_libc_port_getn, uintptr(port), uintptr(@unsafe.Pointer(evs)), uintptr(max), uintptr(@unsafe.Pointer(nget)), uintptr(@unsafe.Pointer(timeout))));
+        }
+
+        private static int port_alert(int port, uint flags, uint events, System.UIntPtr user)
+        {
+            return int32(sysvicall4(_addr_libc_port_alert, uintptr(port), uintptr(flags), uintptr(events), user));
         }
 
         private static int portfd = -1L;
@@ -122,20 +135,24 @@ namespace go
             if (portfd >= 0L)
             {
                 fcntl(portfd, _F_SETFD, _FD_CLOEXEC);
-                return;
+                return ;
             }
+
             print("runtime: port_create failed (errno=", errno(), ")\n");
             throw("runtime: netpollinit failed");
+
         }
 
-        private static System.UIntPtr netpolldescriptor()
+        private static bool netpollIsPollDescriptor(System.UIntPtr fd)
         {
-            return uintptr(portfd);
+            return fd == uintptr(portfd);
         }
 
-        private static int netpollopen(System.UIntPtr fd, ref pollDesc pd)
+        private static int netpollopen(System.UIntPtr fd, ptr<pollDesc> _addr_pd)
         {
-            lock(ref pd.@lock); 
+            ref pollDesc pd = ref _addr_pd.val;
+
+            lock(_addr_pd.@lock); 
             // We don't register for any specific type of events yet, that's
             // netpollarm's job. We merely ensure we call port_associate before
             // asynchronous connect/accept completes, so when we actually want
@@ -144,8 +161,9 @@ namespace go
             // because of the I/O readiness notification.
             pd.user = 0L;
             var r = port_associate(portfd, _PORT_SOURCE_FD, fd, 0L, uintptr(@unsafe.Pointer(pd)));
-            unlock(ref pd.@lock);
+            unlock(_addr_pd.@lock);
             return r;
+
         }
 
         private static int netpollclose(System.UIntPtr fd)
@@ -156,86 +174,191 @@ namespace go
         // Updates the association with a new set of interested events. After
         // this call, port_getn will return one and only one event for that
         // particular descriptor, so this function needs to be called again.
-        private static void netpollupdate(ref pollDesc pd, uint set, uint clear)
+        private static void netpollupdate(ptr<pollDesc> _addr_pd, uint set, uint clear)
         {
+            ref pollDesc pd = ref _addr_pd.val;
+
             if (pd.closing)
             {
-                return;
+                return ;
             }
+
             var old = pd.user;
             var events = (old & ~clear) | set;
             if (old == events)
             {
-                return;
+                return ;
             }
+
             if (events != 0L && port_associate(portfd, _PORT_SOURCE_FD, pd.fd, events, uintptr(@unsafe.Pointer(pd))) != 0L)
             {
                 print("runtime: port_associate failed (errno=", errno(), ")\n");
                 throw("runtime: netpollupdate failed");
             }
+
             pd.user = events;
+
         }
 
         // subscribe the fd to the port such that port_getn will return one event.
-        private static void netpollarm(ref pollDesc pd, long mode)
+        private static void netpollarm(ptr<pollDesc> _addr_pd, long mode)
         {
-            lock(ref pd.@lock);
+            ref pollDesc pd = ref _addr_pd.val;
+
+            lock(_addr_pd.@lock);
             switch (mode)
             {
                 case 'r': 
-                    netpollupdate(pd, _POLLIN, 0L);
+                    netpollupdate(_addr_pd, _POLLIN, 0L);
                     break;
                 case 'w': 
-                    netpollupdate(pd, _POLLOUT, 0L);
+                    netpollupdate(_addr_pd, _POLLOUT, 0L);
                     break;
                 default: 
                     throw("runtime: bad mode");
                     break;
             }
-            unlock(ref pd.@lock);
+            unlock(_addr_pd.@lock);
+
         }
 
-        // polls for ready network connections
-        // returns list of goroutines that become runnable
-        private static ref g netpoll(bool block)
+        // netpollBreak interrupts a port_getn wait.
+        private static void netpollBreak()
         {
-            if (portfd == -1L)
-            {
-                return null;
-            }
-            ref timespec wait = default;
-            timespec zero = default;
-            if (!block)
-            {
-                wait = ref zero;
-            }
-            array<portevent> events = new array<portevent>(128L);
-retry:
-            uint n = 1L;
-            if (port_getn(portfd, ref events[0L], uint32(len(events)), ref n, wait) < 0L)
-            {
+            if (atomic.Cas(_addr_netpollWakeSig, 0L, 1L))
+            { 
+                // Use port_alert to put portfd into alert mode.
+                // This will wake up all threads sleeping in port_getn on portfd,
+                // and cause their calls to port_getn to return immediately.
+                // Further, until portfd is taken out of alert mode,
+                // all calls to port_getn will return immediately.
+                if (port_alert(portfd, _PORT_ALERT_UPDATE, _POLLHUP, uintptr(@unsafe.Pointer(_addr_portfd))) < 0L)
                 {
-                    var e = errno();
-
-                    if (e != _EINTR)
                     {
-                        print("runtime: port_getn on fd ", portfd, " failed (errno=", e, ")\n");
-                        throw("runtime: netpoll failed");
+                        var e = errno();
+
+                        if (e != _EBUSY)
+                        {
+                            println("runtime: port_alert failed with", e);
+                            throw("runtime: netpoll: port_alert failed");
+                        }
+
                     }
 
                 }
-                goto retry;
+
             }
-            guintptr gp = default;
+
+        }
+
+        // netpoll checks for ready network connections.
+        // Returns list of goroutines that become runnable.
+        // delay < 0: blocks indefinitely
+        // delay == 0: does not block, just polls
+        // delay > 0: block for up to that many nanoseconds
+        private static gList netpoll(long delay)
+        {
+            if (portfd == -1L)
+            {
+                return new gList();
+            }
+
+            ptr<timespec> wait;
+            ref timespec ts = ref heap(out ptr<timespec> _addr_ts);
+            if (delay < 0L)
+            {
+                wait = null;
+            }
+            else if (delay == 0L)
+            {
+                wait = _addr_ts;
+            }
+            else
+            {
+                ts.setNsec(delay);
+                if (ts.tv_sec > 1e6F)
+                { 
+                    // An arbitrary cap on how long to wait for a timer.
+                    // 1e6 s == ~11.5 days.
+                    ts.tv_sec = 1e6F;
+
+                }
+
+                wait = _addr_ts;
+
+            }
+
+            array<portevent> events = new array<portevent>(128L);
+retry:
+            ref uint n = ref heap(1L, out ptr<uint> _addr_n);
+            var r = port_getn(portfd, _addr_events[0L], uint32(len(events)), _addr_n, wait);
+            var e = errno();
+            if (r < 0L && e == _ETIME && n > 0L)
+            { 
+                // As per port_getn(3C), an ETIME failure does not preclude the
+                // delivery of some number of events.  Treat a timeout failure
+                // with delivered events as a success.
+                r = 0L;
+
+            }
+
+            if (r < 0L)
+            {
+                if (e != _EINTR && e != _ETIME)
+                {
+                    print("runtime: port_getn on fd ", portfd, " failed (errno=", e, ")\n");
+                    throw("runtime: netpoll failed");
+                } 
+                // If a timed sleep was interrupted and there are no events,
+                // just return to recalculate how long we should sleep now.
+                if (delay > 0L)
+                {
+                    return new gList();
+                }
+
+                goto retry;
+
+            }
+
+            ref gList toRun = ref heap(out ptr<gList> _addr_toRun);
             for (long i = 0L; i < int(n); i++)
             {
-                var ev = ref events[i];
+                var ev = _addr_events[i];
+
+                if (ev.portev_source == _PORT_SOURCE_ALERT)
+                {
+                    if (ev.portev_events != _POLLHUP || @unsafe.Pointer(ev.portev_user) != @unsafe.Pointer(_addr_portfd))
+                    {
+                        throw("runtime: netpoll: bad port_alert wakeup");
+                    }
+
+                    if (delay != 0L)
+                    { 
+                        // Now that a blocking call to netpoll
+                        // has seen the alert, take portfd
+                        // back out of alert mode.
+                        // See the comment in netpollBreak.
+                        if (port_alert(portfd, 0L, 0L, 0L) < 0L)
+                        {
+                            e = errno();
+                            println("runtime: port_alert failed with", e);
+                            throw("runtime: netpoll: port_alert failed");
+                        }
+
+                        atomic.Store(_addr_netpollWakeSig, 0L);
+
+                    }
+
+                    continue;
+
+                }
 
                 if (ev.portev_events == 0L)
                 {
                     continue;
                 }
-                var pd = (pollDesc.Value)(@unsafe.Pointer(ev.portev_user));
+
+                var pd = (pollDesc.val)(@unsafe.Pointer(ev.portev_user));
 
                 int mode = default;                int clear = default;
 
@@ -244,6 +367,7 @@ retry:
                     mode += 'r';
                     clear |= _POLLIN;
                 }
+
                 if ((ev.portev_events & (_POLLOUT | _POLLHUP | _POLLERR)) != 0L)
                 {
                     mode += 'w';
@@ -257,22 +381,27 @@ retry:
                 // about the one interested in POLLOUT.
                 if (clear != 0L)
                 {
-                    lock(ref pd.@lock);
-                    netpollupdate(pd, 0L, uint32(clear));
-                    unlock(ref pd.@lock);
+                    lock(_addr_pd.@lock);
+                    netpollupdate(_addr_pd, 0L, uint32(clear));
+                    unlock(_addr_pd.@lock);
                 }
+
                 if (mode != 0L)
-                {
-                    netpollready(ref gp, pd, mode);
+                { 
+                    // TODO(mikio): Consider implementing event
+                    // scanning error reporting once we are sure
+                    // about the event port on SmartOS.
+                    //
+                    // See golang.org/x/issue/30840.
+                    netpollready(_addr_toRun, pd, mode);
+
                 }
+
             }
 
 
-            if (block && gp == 0L)
-            {
-                goto retry;
-            }
-            return gp.ptr();
+            return toRun;
+
         }
     }
 }

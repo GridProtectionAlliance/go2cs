@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2020 August 29 08:43:30 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:16 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\dir_unix.go
 using io = go.io_package;
@@ -16,50 +16,40 @@ namespace go
 {
     public static partial class os_package
     {
-        private static readonly long blockSize = 4096L;
-
-        private static (slice<FileInfo>, error) readdir(this ref File f, long n)
+        // Auxiliary information if the File describes a directory
+        private partial struct dirInfo
         {
-            var dirname = f.name;
-            if (dirname == "")
-            {
-                dirname = ".";
-            }
-            var (names, err) = f.Readdirnames(n);
-            fi = make_slice<FileInfo>(0L, len(names));
-            foreach (var (_, filename) in names)
-            {
-                var (fip, lerr) = lstat(dirname + "/" + filename);
-                if (IsNotExist(lerr))
-                { 
-                    // File disappeared between readdir + stat.
-                    // Just treat it as if it didn't exist.
-                    continue;
-                }
-                if (lerr != null)
-                {
-                    return (fi, lerr);
-                }
-                fi = append(fi, fip);
-            }
-            if (len(fi) == 0L && err == null && n > 0L)
-            { 
-                // Per File.Readdir, the slice must be non-empty or err
-                // must be non-nil if n > 0.
-                err = io.EOF;
-            }
-            return (fi, err);
+            public slice<byte> buf; // buffer for directory I/O
+            public long nbuf; // length of buf; return value from Getdirentries
+            public long bufp; // location of next record in buf.
         }
 
-        private static (slice<@string>, error) readdirnames(this ref File f, long n)
-        { 
+ 
+        // More than 5760 to work around https://golang.org/issue/24015.
+        private static readonly long blockSize = (long)8192L;
+
+
+        private static void close(this ptr<dirInfo> _addr_d)
+        {
+            ref dirInfo d = ref _addr_d.val;
+
+        }
+
+        private static (slice<@string>, error) readdirnames(this ptr<File> _addr_f, long n)
+        {
+            slice<@string> names = default;
+            error err = default!;
+            ref File f = ref _addr_f.val;
+ 
             // If this file has no dirinfo, create one.
             if (f.dirinfo == null)
             {
                 f.dirinfo = @new<dirInfo>(); 
                 // The buffer must be at least a block long.
                 f.dirinfo.buf = make_slice<byte>(blockSize);
+
             }
+
             var d = f.dirinfo;
 
             var size = n;
@@ -68,6 +58,7 @@ namespace go
                 size = 100L;
                 n = -1L;
             }
+
             names = make_slice<@string>(0L, size); // Empty with room to grow.
             while (n != 0L)
             { 
@@ -75,17 +66,19 @@ namespace go
                 if (d.bufp >= d.nbuf)
                 {
                     d.bufp = 0L;
-                    error errno = default;
+                    error errno = default!;
                     d.nbuf, errno = f.pfd.ReadDirent(d.buf);
                     runtime.KeepAlive(f);
                     if (errno != null)
                     {
-                        return (names, wrapSyscallError("readdirent", errno));
+                        return (names, error.As(wrapSyscallError("readdirent", errno))!);
                     }
+
                     if (d.nbuf <= 0L)
                     {
                         break; // EOF
                     }
+
                 } 
 
                 // Drain the buffer
@@ -94,13 +87,16 @@ namespace go
                 nb, nc, names = syscall.ParseDirent(d.buf[d.bufp..d.nbuf], n, names);
                 d.bufp += nb;
                 n -= nc;
+
             }
 
             if (n >= 0L && len(names) == 0L)
             {
-                return (names, io.EOF);
+                return (names, error.As(io.EOF)!);
             }
-            return (names, null);
+
+            return (names, error.As(null!)!);
+
         }
     }
 }

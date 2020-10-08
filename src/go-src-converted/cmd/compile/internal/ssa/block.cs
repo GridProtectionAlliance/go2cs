@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:12 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:09:55 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\block.go
 using src = go.cmd.@internal.src_package;
@@ -32,15 +32,23 @@ namespace @internal
 // The order is significant to Phi nodes in the block.
 // TODO: predecessors is a pain to maintain. Can we somehow order phi
 // arguments by block id and have this field computed explicitly when needed?
-            public slice<Edge> Preds; // A value that determines how the block is exited. Its value depends on the kind
-// of the block. For instance, a BlockIf has a boolean control value and BlockExit
-// has a memory control value.
-            public ptr<Value> Control; // Auxiliary info for the block. Its value depends on the Kind.
-            public slice<ref Value> Values; // The containing function
-            public ptr<Func> Func; // Storage for Succs, Preds, and Values
+            public slice<Edge> Preds; // A list of values that determine how the block is exited. The number
+// and type of control values depends on the Kind of the block. For
+// instance, a BlockIf has a single boolean control value and BlockExit
+// has a single memory control value.
+//
+// The ControlValues() method may be used to get a slice with the non-nil
+// control values that can be ranged over.
+//
+// Controls[1] must be nil if Controls[0] is nil.
+            public array<ptr<Value>> Controls; // Auxiliary info for the block. Its value depends on the Kind.
+            public long AuxInt; // The unordered set of Values that define the operation of this block.
+// After the scheduling pass, this list is ordered.
+            public slice<ptr<Value>> Values; // The containing function
+            public ptr<Func> Func; // Storage for Succs, Preds and Values.
             public array<Edge> succstorage;
             public array<Edge> predstorage;
-            public array<ref Value> valstorage;
+            public array<ptr<Value>> valstorage;
         }
 
         // Edge represents a CFG edge.
@@ -69,81 +77,285 @@ namespace @internal
             public long i;
         }
 
-        public static ref Block Block(this Edge e)
+        public static ptr<Block> Block(this Edge e)
         {
-            return e.b;
+            return _addr_e.b!;
         }
         public static long Index(this Edge e)
         {
             return e.i;
         }
+        public static @string String(this Edge e)
+        {
+            return fmt.Sprintf("{%v,%d}", e.b, e.i);
+        }
 
-        //     kind           control    successors
+        //     kind          controls        successors
         //   ------------------------------------------
-        //     Exit        return mem                []
-        //    Plain               nil            [next]
-        //       If   a boolean Value      [then, else]
-        //    Defer               mem  [nopanic, panic]  (control opcode should be OpStaticCall to runtime.deferproc)
+        //     Exit      [return mem]                []
+        //    Plain                []            [next]
+        //       If   [boolean Value]      [then, else]
+        //    Defer             [mem]  [nopanic, panic]  (control opcode should be OpStaticCall to runtime.deferproc)
         public partial struct BlockKind // : sbyte
         {
         }
 
         // short form print
-        private static @string String(this ref Block b)
+        private static @string String(this ptr<Block> _addr_b)
         {
+            ref Block b = ref _addr_b.val;
+
             return fmt.Sprintf("b%d", b.ID);
         }
 
         // long form print
-        private static @string LongString(this ref Block b)
+        private static @string LongString(this ptr<Block> _addr_b)
         {
+            ref Block b = ref _addr_b.val;
+
             var s = b.Kind.String();
             if (b.Aux != null)
             {
-                s += fmt.Sprintf(" %s", b.Aux);
+                s += fmt.Sprintf(" {%s}", b.Aux);
             }
-            if (b.Control != null)
+
             {
-                s += fmt.Sprintf(" %s", b.Control);
+                var t = b.AuxIntString();
+
+                if (t != "")
+                {
+                    s += fmt.Sprintf(" [%s]", t);
+                }
+
             }
+
+            {
+                var c__prev1 = c;
+
+                foreach (var (_, __c) in b.ControlValues())
+                {
+                    c = __c;
+                    s += fmt.Sprintf(" %s", c);
+                }
+
+                c = c__prev1;
+            }
+
             if (len(b.Succs) > 0L)
             {
                 s += " ->";
-                foreach (var (_, c) in b.Succs)
                 {
-                    s += " " + c.b.String();
+                    var c__prev1 = c;
+
+                    foreach (var (_, __c) in b.Succs)
+                    {
+                        c = __c;
+                        s += " " + c.b.String();
+                    }
+
+                    c = c__prev1;
                 }
             }
+
 
             if (b.Likely == BranchUnlikely) 
                 s += " (unlikely)";
             else if (b.Likely == BranchLikely) 
                 s += " (likely)";
                         return s;
+
         }
 
-        private static void SetControl(this ref Block b, ref Value v)
+        // NumControls returns the number of non-nil control values the
+        // block has.
+        private static long NumControls(this ptr<Block> _addr_b)
         {
-            {
-                var w = b.Control;
+            ref Block b = ref _addr_b.val;
 
-                if (w != null)
-                {
-                    w.Uses--;
-                }
-
-            }
-            b.Control = v;
-            if (v != null)
+            if (b.Controls[0L] == null)
             {
-                v.Uses++;
+                return 0L;
             }
+
+            if (b.Controls[1L] == null)
+            {
+                return 1L;
+            }
+
+            return 2L;
+
+        }
+
+        // ControlValues returns a slice containing the non-nil control
+        // values of the block. The index of each control value will be
+        // the same as it is in the Controls property and can be used
+        // in ReplaceControl calls.
+        private static slice<ptr<Value>> ControlValues(this ptr<Block> _addr_b)
+        {
+            ref Block b = ref _addr_b.val;
+
+            if (b.Controls[0L] == null)
+            {
+                return b.Controls[..0L];
+            }
+
+            if (b.Controls[1L] == null)
+            {
+                return b.Controls[..1L];
+            }
+
+            return b.Controls[..2L];
+
+        }
+
+        // SetControl removes all existing control values and then adds
+        // the control value provided. The number of control values after
+        // a call to SetControl will always be 1.
+        private static void SetControl(this ptr<Block> _addr_b, ptr<Value> _addr_v)
+        {
+            ref Block b = ref _addr_b.val;
+            ref Value v = ref _addr_v.val;
+
+            b.ResetControls();
+            b.Controls[0L] = v;
+            v.Uses++;
+        }
+
+        // ResetControls sets the number of controls for the block to 0.
+        private static void ResetControls(this ptr<Block> _addr_b)
+        {
+            ref Block b = ref _addr_b.val;
+
+            if (b.Controls[0L] != null)
+            {
+                b.Controls[0L].Uses--;
+            }
+
+            if (b.Controls[1L] != null)
+            {
+                b.Controls[1L].Uses--;
+            }
+
+            b.Controls = new array<ptr<Value>>(new ptr<Value>[] {  }); // reset both controls to nil
+        }
+
+        // AddControl appends a control value to the existing list of control values.
+        private static void AddControl(this ptr<Block> _addr_b, ptr<Value> _addr_v)
+        {
+            ref Block b = ref _addr_b.val;
+            ref Value v = ref _addr_v.val;
+
+            var i = b.NumControls();
+            b.Controls[i] = v; // panics if array is full
+            v.Uses++;
+
+        }
+
+        // ReplaceControl exchanges the existing control value at the index provided
+        // for the new value. The index must refer to a valid control value.
+        private static void ReplaceControl(this ptr<Block> _addr_b, long i, ptr<Value> _addr_v)
+        {
+            ref Block b = ref _addr_b.val;
+            ref Value v = ref _addr_v.val;
+
+            b.Controls[i].Uses--;
+            b.Controls[i] = v;
+            v.Uses++;
+        }
+
+        // CopyControls replaces the controls for this block with those from the
+        // provided block. The provided block is not modified.
+        private static void CopyControls(this ptr<Block> _addr_b, ptr<Block> _addr_from)
+        {
+            ref Block b = ref _addr_b.val;
+            ref Block from = ref _addr_from.val;
+
+            if (b == from)
+            {
+                return ;
+            }
+
+            b.ResetControls();
+            foreach (var (_, c) in from.ControlValues())
+            {
+                b.AddControl(c);
+            }
+
+        }
+
+        // Reset sets the block to the provided kind and clears all the blocks control
+        // and auxiliary values. Other properties of the block, such as its successors,
+        // predecessors and values are left unmodified.
+        private static void Reset(this ptr<Block> _addr_b, BlockKind kind)
+        {
+            ref Block b = ref _addr_b.val;
+
+            b.Kind = kind;
+            b.ResetControls();
+            b.Aux = null;
+            b.AuxInt = 0L;
+        }
+
+        // resetWithControl resets b and adds control v.
+        // It is equivalent to b.Reset(kind); b.AddControl(v),
+        // except that it is one call instead of two and avoids a bounds check.
+        // It is intended for use by rewrite rules, where this matters.
+        private static void resetWithControl(this ptr<Block> _addr_b, BlockKind kind, ptr<Value> _addr_v)
+        {
+            ref Block b = ref _addr_b.val;
+            ref Value v = ref _addr_v.val;
+
+            b.Kind = kind;
+            b.ResetControls();
+            b.Aux = null;
+            b.AuxInt = 0L;
+            b.Controls[0L] = v;
+            v.Uses++;
+        }
+
+        // resetWithControl2 resets b and adds controls v and w.
+        // It is equivalent to b.Reset(kind); b.AddControl(v); b.AddControl(w),
+        // except that it is one call instead of three and avoids two bounds checks.
+        // It is intended for use by rewrite rules, where this matters.
+        private static void resetWithControl2(this ptr<Block> _addr_b, BlockKind kind, ptr<Value> _addr_v, ptr<Value> _addr_w)
+        {
+            ref Block b = ref _addr_b.val;
+            ref Value v = ref _addr_v.val;
+            ref Value w = ref _addr_w.val;
+
+            b.Kind = kind;
+            b.ResetControls();
+            b.Aux = null;
+            b.AuxInt = 0L;
+            b.Controls[0L] = v;
+            b.Controls[1L] = w;
+            v.Uses++;
+            w.Uses++;
+        }
+
+        // truncateValues truncates b.Values at the ith element, zeroing subsequent elements.
+        // The values in b.Values after i must already have had their args reset,
+        // to maintain correct value uses counts.
+        private static void truncateValues(this ptr<Block> _addr_b, long i)
+        {
+            ref Block b = ref _addr_b.val;
+
+            var tail = b.Values[i..];
+            foreach (var (j) in tail)
+            {
+                tail[j] = null;
+            }
+            b.Values = b.Values[..i];
+
         }
 
         // AddEdgeTo adds an edge from block b to block c. Used during building of the
         // SSA graph; do not use on an already-completed SSA graph.
-        private static void AddEdgeTo(this ref Block b, ref Block c)
+        private static void AddEdgeTo(this ptr<Block> _addr_b, ptr<Block> _addr_c)
         {
+            ref Block b = ref _addr_b.val;
+            ref Block c = ref _addr_c.val;
+
             var i = len(b.Succs);
             var j = len(c.Preds);
             b.Succs = append(b.Succs, new Edge(c,j));
@@ -154,8 +366,10 @@ namespace @internal
         // removePred removes the ith input edge from b.
         // It is the responsibility of the caller to remove
         // the corresponding successor edge.
-        private static void removePred(this ref Block b, long i)
+        private static void removePred(this ptr<Block> _addr_b, long i)
         {
+            ref Block b = ref _addr_b.val;
+
             var n = len(b.Preds) - 1L;
             if (i != n)
             {
@@ -163,17 +377,22 @@ namespace @internal
                 b.Preds[i] = e; 
                 // Update the other end of the edge we moved.
                 e.b.Succs[e.i].i = i;
+
             }
+
             b.Preds[n] = new Edge();
             b.Preds = b.Preds[..n];
             b.Func.invalidateCFG();
+
         }
 
         // removeSucc removes the ith output edge from b.
         // It is the responsibility of the caller to remove
         // the corresponding predecessor edge.
-        private static void removeSucc(this ref Block b, long i)
+        private static void removeSucc(this ptr<Block> _addr_b, long i)
         {
+            ref Block b = ref _addr_b.val;
+
             var n = len(b.Succs) - 1L;
             if (i != n)
             {
@@ -181,18 +400,24 @@ namespace @internal
                 b.Succs[i] = e; 
                 // Update the other end of the edge we moved.
                 e.b.Preds[e.i].i = i;
+
             }
+
             b.Succs[n] = new Edge();
             b.Succs = b.Succs[..n];
             b.Func.invalidateCFG();
+
         }
 
-        private static void swapSuccessors(this ref Block b)
+        private static void swapSuccessors(this ptr<Block> _addr_b)
         {
+            ref Block b = ref _addr_b.val;
+
             if (len(b.Succs) != 2L)
             {
                 b.Fatalf("swapSuccessors with len(Succs)=%d", len(b.Succs));
             }
+
             var e0 = b.Succs[0L];
             var e1 = b.Succs[1L];
             b.Succs[0L] = e1;
@@ -200,14 +425,17 @@ namespace @internal
             e0.b.Preds[e0.i].i = 1L;
             e1.b.Preds[e1.i].i = 0L;
             b.Likely *= -1L;
+
         }
 
         // LackingPos indicates whether b is a block whose position should be inherited
         // from its successors.  This is true if all the values within it have unreliable positions
         // and if it is "plain", meaning that there is no control flow that is also very likely
         // to correspond to a well-understood source position.
-        private static bool LackingPos(this ref Block b)
-        { 
+        private static bool LackingPos(this ptr<Block> _addr_b)
+        {
+            ref Block b = ref _addr_b.val;
+ 
             // Non-plain predecessors are If or Defer, which both (1) have two successors,
             // which might have different line numbers and (2) correspond to statements
             // in the source code that have positions, so this case ought not occur anyway.
@@ -215,42 +443,76 @@ namespace @internal
             {
                 return false;
             }
+
             if (b.Pos != src.NoXPos)
             {
                 return false;
             }
+
             foreach (var (_, v) in b.Values)
             {
                 if (v.LackingPos())
                 {
                     continue;
                 }
+
                 return false;
+
             }
             return true;
+
         }
 
-        private static void Logf(this ref Block b, @string msg, params object[] args)
+        private static @string AuxIntString(this ptr<Block> _addr_b)
         {
+            ref Block b = ref _addr_b.val;
+
+            switch (b.Kind.AuxIntType())
+            {
+                case "int8": 
+                    return fmt.Sprintf("%v", int8(b.AuxInt));
+                    break;
+                case "uint8": 
+                    return fmt.Sprintf("%v", uint8(b.AuxInt));
+                    break;
+                case "": // no aux int type
+                    return "";
+                    break;
+                default: // type specified but not implemented - print as int64
+                    return fmt.Sprintf("%v", b.AuxInt);
+                    break;
+            }
+
+        }
+
+        private static void Logf(this ptr<Block> _addr_b, @string msg, params object[] args)
+        {
+            args = args.Clone();
+            ref Block b = ref _addr_b.val;
+
             b.Func.Logf(msg, args);
-
         }
-        private static bool Log(this ref Block b)
+        private static bool Log(this ptr<Block> _addr_b)
         {
+            ref Block b = ref _addr_b.val;
+
             return b.Func.Log();
         }
-        private static void Fatalf(this ref Block b, @string msg, params object[] args)
+        private static void Fatalf(this ptr<Block> _addr_b, @string msg, params object[] args)
         {
-            b.Func.Fatalf(msg, args);
+            args = args.Clone();
+            ref Block b = ref _addr_b.val;
 
+            b.Func.Fatalf(msg, args);
         }
 
         public partial struct BranchPrediction // : sbyte
         {
         }
 
-        public static readonly var BranchUnlikely = BranchPrediction(-1L);
-        public static readonly var BranchUnknown = BranchPrediction(0L);
-        public static readonly var BranchLikely = BranchPrediction(+1L);
+        public static readonly var BranchUnlikely = (var)BranchPrediction(-1L);
+        public static readonly var BranchUnknown = (var)BranchPrediction(0L);
+        public static readonly var BranchLikely = (var)BranchPrediction(+1L);
+
     }
 }}}}

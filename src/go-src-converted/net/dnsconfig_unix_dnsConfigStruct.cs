@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:59 UTC
+//     Generated on 2020 October 08 03:31:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytealg = go.@internal.bytealg_package;
 using os = go.os_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -38,9 +39,11 @@ namespace go
                 this.err = default;
                 this.mtime = default;
                 this.soffset = default;
+                this.singleRequest = default;
+                this.useTCP = default;
             }
 
-            public dnsConfig(slice<@string> servers = default, slice<@string> search = default, long ndots = default, time.Duration timeout = default, long attempts = default, bool rotate = default, bool unknownOpt = default, slice<@string> lookup = default, error err = default, time.Time mtime = default, uint soffset = default)
+            public dnsConfig(slice<@string> servers = default, slice<@string> search = default, long ndots = default, time.Duration timeout = default, long attempts = default, bool rotate = default, bool unknownOpt = default, slice<@string> lookup = default, error err = default, time.Time mtime = default, uint soffset = default, bool singleRequest = default, bool useTCP = default)
             {
                 this.servers = servers;
                 this.search = search;
@@ -53,6 +56,8 @@ namespace go
                 this.err = err;
                 this.mtime = mtime;
                 this.soffset = soffset;
+                this.singleRequest = singleRequest;
+                this.useTCP = useTCP;
             }
 
             // Enable comparisons between nil and dnsConfig struct
@@ -75,7 +80,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static dnsConfig dnsConfig_cast(dynamic value)
         {
-            return new dnsConfig(value.servers, value.search, value.ndots, value.timeout, value.attempts, value.rotate, value.unknownOpt, value.lookup, value.err, value.mtime, value.soffset);
+            return new dnsConfig(value.servers, value.search, value.ndots, value.timeout, value.attempts, value.rotate, value.unknownOpt, value.lookup, value.err, value.mtime, value.soffset, value.singleRequest, value.useTCP);
         }
     }
 }

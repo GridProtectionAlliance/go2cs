@@ -49,7 +49,7 @@
 //
 //    {`Multi-line
 //    field`, `comma is ,`}
-// package csv -- go2cs converted at 2020 August 29 08:35:17 UTC
+// package csv -- go2cs converted at 2020 October 08 03:42:29 UTC
 // import "encoding/csv" ==> using csv = go.encoding.csv_package
 // Original source: C:\Go\src\encoding\csv\reader.go
 using bufio = go.bufio_package;
@@ -76,17 +76,29 @@ namespace encoding
             public error Err; // The actual error
         }
 
-        private static @string Error(this ref ParseError e)
+        private static @string Error(this ptr<ParseError> _addr_e)
         {
+            ref ParseError e = ref _addr_e.val;
+
             if (e.Err == ErrFieldCount)
             {
                 return fmt.Sprintf("record on line %d: %v", e.Line, e.Err);
             }
+
             if (e.StartLine != e.Line)
             {
                 return fmt.Sprintf("record on line %d; parse error on line %d, column %d: %v", e.StartLine, e.Line, e.Column, e.Err);
             }
+
             return fmt.Sprintf("parse error on line %d, column %d: %v", e.Line, e.Column, e.Err);
+
+        }
+
+        private static error Unwrap(this ptr<ParseError> _addr_e)
+        {
+            ref ParseError e = ref _addr_e.val;
+
+            return error.As(e.Err)!;
         }
 
         // These are the errors that can be returned in ParseError.Err.
@@ -96,7 +108,7 @@ namespace encoding
 
         private static bool validDelim(int r)
         {
-            return r != 0L && r != '\r' && r != '\n' && utf8.ValidRune(r) && r != utf8.RuneError;
+            return r != 0L && r != '"' && r != '\r' && r != '\n' && utf8.ValidRune(r) && r != utf8.RuneError;
         }
 
         // A Reader reads records from a CSV-encoded file.
@@ -146,9 +158,9 @@ namespace encoding
         }
 
         // NewReader returns a new Reader that reads from r.
-        public static ref Reader NewReader(io.Reader r)
+        public static ptr<Reader> NewReader(io.Reader r)
         {
-            return ref new Reader(Comma:',',r:bufio.NewReader(r),);
+            return addr(new Reader(Comma:',',r:bufio.NewReader(r),));
         }
 
         // Read reads one record (a slice of fields) from r.
@@ -159,8 +171,12 @@ namespace encoding
         // If there is no data left to be read, Read returns nil, io.EOF.
         // If ReuseRecord is true, the returned slice may be shared
         // between multiple calls to Read.
-        private static (slice<@string>, error) Read(this ref Reader r)
+        private static (slice<@string>, error) Read(this ptr<Reader> _addr_r)
         {
+            slice<@string> record = default;
+            error err = default!;
+            ref Reader r = ref _addr_r.val;
+
             if (r.ReuseRecord)
             {
                 record, err = r.readRecord(r.lastRecord);
@@ -170,7 +186,9 @@ namespace encoding
             {
                 record, err = r.readRecord(null);
             }
-            return (record, err);
+
+            return (record, error.As(err)!);
+
         }
 
         // ReadAll reads all the remaining records from r.
@@ -178,21 +196,29 @@ namespace encoding
         // A successful call returns err == nil, not err == io.EOF. Because ReadAll is
         // defined to read until EOF, it does not treat end of file as an error to be
         // reported.
-        private static (slice<slice<@string>>, error) ReadAll(this ref Reader r)
+        private static (slice<slice<@string>>, error) ReadAll(this ptr<Reader> _addr_r)
         {
+            slice<slice<@string>> records = default;
+            error err = default!;
+            ref Reader r = ref _addr_r.val;
+
             while (true)
             {
                 var (record, err) = r.readRecord(null);
                 if (err == io.EOF)
                 {
-                    return (records, null);
+                    return (records, error.As(null!)!);
                 }
+
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
                 records = append(records, record);
+
             }
+
 
         }
 
@@ -200,8 +226,12 @@ namespace encoding
         // If EOF is hit without a trailing endline, it will be omitted.
         // If some bytes were read, then the error is never io.EOF.
         // The result is only valid until the next call to readLine.
-        private static (slice<byte>, error) readLine(this ref Reader r)
+        private static (slice<byte>, error) readLine(this ptr<Reader> _addr_r)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Reader r = ref _addr_r.val;
+
             var (line, err) = r.r.ReadSlice('\n');
             if (err == bufio.ErrBufferFull)
             {
@@ -213,7 +243,9 @@ namespace encoding
                 }
 
                 line = r.rawBuffer;
+
             }
+
             if (len(line) > 0L && err == io.EOF)
             {
                 err = null; 
@@ -222,7 +254,9 @@ namespace encoding
                 {
                     line = line[..len(line) - 1L];
                 }
+
             }
+
             r.numLine++; 
             // Normalize \r\n to \n on all input lines.
             {
@@ -235,7 +269,9 @@ namespace encoding
                 }
 
             }
-            return (line, err);
+
+            return (line, error.As(err)!);
+
         }
 
         // lengthNL reports the number of bytes for the trailing \n.
@@ -245,7 +281,9 @@ namespace encoding
             {
                 return 1L;
             }
+
             return 0L;
+
         }
 
         // nextRune returns the next rune in b or utf8.RuneError.
@@ -255,17 +293,21 @@ namespace encoding
             return r;
         }
 
-        private static (slice<@string>, error) readRecord(this ref Reader r, slice<@string> dst)
+        private static (slice<@string>, error) readRecord(this ptr<Reader> _addr_r, slice<@string> dst)
         {
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref Reader r = ref _addr_r.val;
+
             if (r.Comma == r.Comment || !validDelim(r.Comma) || (r.Comment != 0L && !validDelim(r.Comment)))
             {
-                return (null, errInvalidDelim);
+                return (null, error.As(errInvalidDelim)!);
             } 
 
             // Read line (automatically skipping past empty lines and any comments).
             slice<byte> line = default;            slice<byte> fullLine = default;
 
-            error errRead = default;
+            error errRead = default!;
             while (errRead == null)
             {
                 line, errRead = r.readLine();
@@ -274,23 +316,26 @@ namespace encoding
                     line = null;
                     continue; // Skip comment lines
                 }
+
                 if (errRead == null && len(line) == lengthNL(line))
                 {
                     line = null;
                     continue; // Skip empty lines
                 }
+
                 fullLine = line;
                 break;
+
             }
 
             if (errRead == io.EOF)
             {
-                return (null, errRead);
+                return (null, error.As(errRead)!);
             } 
 
             // Parse each field in the record.
-            error err = default;
-            const var quoteLen = len("\"");
+            error err = default!;
+            const var quoteLen = (var)len("\"");
 
             var commaLen = utf8.RuneLen(r.Comma);
             var recLine = r.numLine; // Starting line for record
@@ -303,6 +348,7 @@ parseField:
                 {
                     line = bytes.TrimLeftFunc(line, unicode.IsSpace);
                 }
+
                 if (len(line) == 0L || line[0L] != '"')
                 { 
                     // Non-quoted string field
@@ -325,13 +371,15 @@ parseField:
                             if (j >= 0L)
                             {
                                 var col = utf8.RuneCount(fullLine[..len(fullLine) - len(line[j..])]);
-                                err = error.As(ref new ParseError(StartLine:recLine,Line:r.numLine,Column:col,Err:ErrBareQuote));
+                                err = error.As(addr(new ParseError(StartLine:recLine,Line:r.numLine,Column:col,Err:ErrBareQuote)))!;
                                 _breakparseField = true;
                                 break;
                             }
 
                         }
+
                     }
+
                     r.recordBuffer = append(r.recordBuffer, field);
                     r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
                     if (i >= 0L)
@@ -340,6 +388,7 @@ parseField:
                         _continueparseField = true;
                         break;
                     }
+
                     _breakparseField = true;
                     break;
                 }
@@ -380,11 +429,12 @@ parseField:
                                 else 
                                     // `"*` sequence (invalid non-escaped quote).
                                     col = utf8.RuneCount(fullLine[..len(fullLine) - len(line) - quoteLen]);
-                                    err = error.As(ref new ParseError(StartLine:recLine,Line:r.numLine,Column:col,Err:ErrQuote));
+                                    err = error.As(addr(new ParseError(StartLine:recLine,Line:r.numLine,Column:col,Err:ErrQuote)))!;
                                     _breakparseField = true;
                                     break;
 
                             }
+
                         }
                         else if (len(line) > 0L)
                         { 
@@ -395,12 +445,15 @@ parseField:
                                 _breakparseField = true;
                                 break;
                             }
+
                             line, errRead = r.readLine();
                             if (errRead == io.EOF)
                             {
-                                errRead = error.As(null);
+                                errRead = error.As(null)!;
                             }
+
                             fullLine = line;
+
                         }
                         else
                         { 
@@ -408,21 +461,25 @@ parseField:
                             if (!r.LazyQuotes && errRead == null)
                             {
                                 col = utf8.RuneCount(fullLine);
-                                err = error.As(ref new ParseError(StartLine:recLine,Line:r.numLine,Column:col,Err:ErrQuote));
+                                err = error.As(addr(new ParseError(StartLine:recLine,Line:r.numLine,Column:col,Err:ErrQuote)))!;
                                 _breakparseField = true;
                                 break;
                             }
+
                             r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
                             _breakparseField = true;
                             break;
                         }
+
                     }
 
+
                 }
+
             }
             if (err == null)
             {
-                err = error.As(errRead);
+                err = error.As(errRead)!;
             } 
 
             // Create a single string and create slices out of it.
@@ -433,6 +490,7 @@ parseField:
             {
                 dst = make_slice<@string>(len(r.fieldIndexes));
             }
+
             dst = dst[..len(r.fieldIndexes)];
             long preIdx = default;
             {
@@ -455,14 +513,17 @@ parseField:
             {
                 if (len(dst) != r.FieldsPerRecord && err == null)
                 {
-                    err = error.As(ref new ParseError(StartLine:recLine,Line:recLine,Err:ErrFieldCount));
+                    err = error.As(addr(new ParseError(StartLine:recLine,Line:recLine,Err:ErrFieldCount)))!;
                 }
+
             }
             else if (r.FieldsPerRecord == 0L)
             {
                 r.FieldsPerRecord = len(dst);
             }
-            return (dst, err);
+
+            return (dst, error.As(err)!);
+
         }
     }
 }}

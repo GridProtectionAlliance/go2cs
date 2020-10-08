@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:29:35 UTC
+//     Generated on 2020 October 08 03:35:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,11 +18,13 @@ using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
 using elliptic = go.crypto.elliptic_package;
+using randutil = go.crypto.@internal.randutil_package;
 using sha512 = go.crypto.sha512_package;
-using asn1 = go.encoding.asn1_package;
 using errors = go.errors_package;
 using io = go.io_package;
 using big = go.math.big_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
+using asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -58,7 +60,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -72,23 +74,24 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate (ref big.Int, ref big.Int) CombinedMultByRef(ref T value, ref big.Int bigX, ref big.Int bigY, slice<byte> baseScalar, slice<byte> scalar);
-            private delegate (ref big.Int, ref big.Int) CombinedMultByVal(T value, ref big.Int bigX, ref big.Int bigY, slice<byte> baseScalar, slice<byte> scalar);
+            private delegate (ptr<big.Int>, ptr<big.Int>) CombinedMultByPtr(ptr<T> value, ptr<big.Int> bigX, ptr<big.Int> bigY, slice<byte> baseScalar, slice<byte> scalar);
+            private delegate (ptr<big.Int>, ptr<big.Int>) CombinedMultByVal(T value, ptr<big.Int> bigX, ptr<big.Int> bigY, slice<byte> baseScalar, slice<byte> scalar);
 
-            private static readonly CombinedMultByRef s_CombinedMultByRef;
+            private static readonly CombinedMultByPtr s_CombinedMultByPtr;
             private static readonly CombinedMultByVal s_CombinedMultByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref big.Int, ref big.Int) CombinedMult(ref big.Int bigX, ref big.Int bigY, slice<byte> baseScalar, slice<byte> scalar)
+            public (ptr<big.Int>, ptr<big.Int>) CombinedMult(ptr<big.Int> bigX, ptr<big.Int> bigY, slice<byte> baseScalar, slice<byte> scalar)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CombinedMultByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CombinedMultByPtr is null || !m_target_is_ptr)
                     return s_CombinedMultByVal!(target, bigX, bigY, baseScalar, scalar);
 
-                return s_CombinedMultByRef(ref target, bigX, bigY, baseScalar, scalar);
+                return s_CombinedMultByPtr(m_target_ptr, bigX, bigY, baseScalar, scalar);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -97,23 +100,20 @@ namespace crypto
             static combinedMult()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CombinedMult");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CombinedMult");
 
                 if (!(extensionMethod is null))
-                    s_CombinedMultByRef = extensionMethod.CreateStaticDelegate(typeof(CombinedMultByRef)) as CombinedMultByRef;
+                    s_CombinedMultByPtr = extensionMethod.CreateStaticDelegate(typeof(CombinedMultByPtr)) as CombinedMultByPtr;
 
-                if (s_CombinedMultByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CombinedMult");
+                extensionMethod = targetType.GetExtensionMethod("CombinedMult");
 
-                    if (!(extensionMethod is null))
-                        s_CombinedMultByVal = extensionMethod.CreateStaticDelegate(typeof(CombinedMultByVal)) as CombinedMultByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CombinedMultByVal = extensionMethod.CreateStaticDelegate(typeof(CombinedMultByVal)) as CombinedMultByVal;
 
-                if (s_CombinedMultByRef is null && s_CombinedMultByVal is null)
+                if (s_CombinedMultByPtr is null && s_CombinedMultByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement combinedMult.CombinedMult method", new Exception("CombinedMult"));
             }
 

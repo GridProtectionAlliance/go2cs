@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:30:44 UTC
+//     Generated on 2020 October 08 03:36:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using subtle = go.crypto.subtle_package;
+using cpu = go.@internal.cpu_package;
 using big = go.math.big_package;
+using @unsafe = go.@unsafe_package;
 using go;
 
 namespace go {

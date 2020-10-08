@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:23:45 UTC
+//     Generated on 2020 October 08 03:40:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using syntax = go.regexp.syntax_package;
+using sync = go.sync_package;
 
 namespace go
 {
@@ -25,20 +26,22 @@ namespace go
             // Constructors
             public bitState(NilType _)
             {
-                this.prog = default;
                 this.end = default;
                 this.cap = default;
+                this.matchcap = default;
                 this.jobs = default;
                 this.visited = default;
+                this.inputs = default;
             }
 
-            public bitState(ref ptr<syntax.Prog> prog = default, long end = default, slice<long> cap = default, slice<job> jobs = default, slice<uint> visited = default)
+            public bitState(long end = default, slice<long> cap = default, slice<long> matchcap = default, slice<job> jobs = default, slice<uint> visited = default, inputs inputs = default)
             {
-                this.prog = prog;
                 this.end = end;
                 this.cap = cap;
+                this.matchcap = matchcap;
                 this.jobs = jobs;
                 this.visited = visited;
+                this.inputs = inputs;
             }
 
             // Enable comparisons between nil and bitState struct
@@ -61,7 +64,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static bitState bitState_cast(dynamic value)
         {
-            return new bitState(ref value.prog, value.end, value.cap, value.jobs, value.visited);
+            return new bitState(value.end, value.cap, value.matchcap, value.jobs, value.visited, value.inputs);
         }
     }
 }

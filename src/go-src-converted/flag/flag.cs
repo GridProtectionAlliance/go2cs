@@ -5,13 +5,13 @@
 /*
     Package flag implements command-line flag parsing.
 
-    Usage:
+    Usage
 
     Define flags using flag.String(), Bool(), Int(), etc.
 
-    This declares an integer flag, -flagname, stored in the pointer ip, with type *int.
+    This declares an integer flag, -n, stored in the pointer nFlag, with type *int:
         import "flag"
-        var ip = flag.Int("flagname", 1234, "help message for flagname")
+        var nFlag = flag.Int("n", 1234, "help message for flag n")
     If you like, you can bind the flag to a variable using the Var() functions.
         var flagvar int
         func init() {
@@ -35,7 +35,10 @@
     slice flag.Args() or individually as flag.Arg(i).
     The arguments are indexed from 0 through flag.NArg()-1.
 
-    Command line flag syntax:
+    Command line flag syntax
+
+    The following forms are permitted:
+
         -flag
         -flag=x
         -flag x  // non-boolean flags only
@@ -62,7 +65,7 @@
     analogous to the top-level functions for the command-line
     flag set.
 */
-// package flag -- go2cs converted at 2020 August 29 08:34:18 UTC
+// package flag -- go2cs converted at 2020 October 08 03:41:30 UTC
 // import "flag" ==> using flag = go.flag_package
 // Original source: C:\Go\src\flag\flag.go
 using errors = go.errors_package;
@@ -85,36 +88,82 @@ namespace go
         // but no such flag is defined.
         public static var ErrHelp = errors.New("flag: help requested");
 
+        // errParse is returned by Set if a flag's value fails to parse, such as with an invalid integer for Int.
+        // It then gets wrapped through failf to provide more information.
+        private static var errParse = errors.New("parse error");
+
+        // errRange is returned by Set if a flag's value is out of range.
+        // It then gets wrapped through failf to provide more information.
+        private static var errRange = errors.New("value out of range");
+
+        private static error numError(error err)
+        {
+            ptr<strconv.NumError> (ne, ok) = err._<ptr<strconv.NumError>>();
+            if (!ok)
+            {
+                return error.As(err)!;
+            }
+
+            if (ne.Err == strconv.ErrSyntax)
+            {
+                return error.As(errParse)!;
+            }
+
+            if (ne.Err == strconv.ErrRange)
+            {
+                return error.As(errRange)!;
+            }
+
+            return error.As(err)!;
+
+        }
+
         // -- bool Value
         private partial struct boolValue // : bool
         {
         }
 
-        private static ref boolValue newBoolValue(bool val, ref bool p)
+        private static ptr<boolValue> newBoolValue(bool val, ptr<bool> _addr_p)
         {
-            p.Value = val;
-            return (boolValue.Value)(p);
+            ref bool p = ref _addr_p.val;
+
+            p = val;
+            return _addr_(boolValue.val)(p)!;
         }
 
-        private static error Set(this ref boolValue b, @string s)
+        private static error Set(this ptr<boolValue> _addr_b, @string s)
         {
+            ref boolValue b = ref _addr_b.val;
+
             var (v, err) = strconv.ParseBool(s);
-            b.Value = boolValue(v);
-            return error.As(err);
+            if (err != null)
+            {
+                err = errParse;
+            }
+
+            b.val = boolValue(v);
+            return error.As(err)!;
+
         }
 
-        private static void Get(this ref boolValue b)
+        private static void Get(this ptr<boolValue> _addr_b)
         {
-            return bool(b.Value);
+            ref boolValue b = ref _addr_b.val;
+
+            return bool(b.val);
         }
 
-        private static @string String(this ref boolValue b)
+        private static @string String(this ptr<boolValue> _addr_b)
         {
-            return strconv.FormatBool(bool(b.Value));
+            ref boolValue b = ref _addr_b.val;
+
+            return strconv.FormatBool(bool(b.val));
         }
 
-        private static bool IsBoolFlag(this ref boolValue b)
+        private static bool IsBoolFlag(this ptr<boolValue> _addr_b)
         {
+            ref boolValue b = ref _addr_b.val;
+
             return true;
         }
 
@@ -130,27 +179,41 @@ namespace go
         {
         }
 
-        private static ref intValue newIntValue(long val, ref long p)
+        private static ptr<intValue> newIntValue(long val, ptr<long> _addr_p)
         {
-            p.Value = val;
-            return (intValue.Value)(p);
+            ref long p = ref _addr_p.val;
+
+            p = val;
+            return _addr_(intValue.val)(p)!;
         }
 
-        private static error Set(this ref intValue i, @string s)
+        private static error Set(this ptr<intValue> _addr_i, @string s)
         {
+            ref intValue i = ref _addr_i.val;
+
             var (v, err) = strconv.ParseInt(s, 0L, strconv.IntSize);
-            i.Value = intValue(v);
-            return error.As(err);
+            if (err != null)
+            {
+                err = numError(err);
+            }
+
+            i.val = intValue(v);
+            return error.As(err)!;
+
         }
 
-        private static void Get(this ref intValue i)
+        private static void Get(this ptr<intValue> _addr_i)
         {
-            return int(i.Value);
+            ref intValue i = ref _addr_i.val;
+
+            return int(i.val);
         }
 
-        private static @string String(this ref intValue i)
+        private static @string String(this ptr<intValue> _addr_i)
         {
-            return strconv.Itoa(int(i.Value));
+            ref intValue i = ref _addr_i.val;
+
+            return strconv.Itoa(int(i.val));
         }
 
         // -- int64 Value
@@ -158,27 +221,41 @@ namespace go
         {
         }
 
-        private static ref int64Value newInt64Value(long val, ref long p)
+        private static ptr<int64Value> newInt64Value(long val, ptr<long> _addr_p)
         {
-            p.Value = val;
-            return (int64Value.Value)(p);
+            ref long p = ref _addr_p.val;
+
+            p = val;
+            return _addr_(int64Value.val)(p)!;
         }
 
-        private static error Set(this ref int64Value i, @string s)
+        private static error Set(this ptr<int64Value> _addr_i, @string s)
         {
+            ref int64Value i = ref _addr_i.val;
+
             var (v, err) = strconv.ParseInt(s, 0L, 64L);
-            i.Value = int64Value(v);
-            return error.As(err);
+            if (err != null)
+            {
+                err = numError(err);
+            }
+
+            i.val = int64Value(v);
+            return error.As(err)!;
+
         }
 
-        private static void Get(this ref int64Value i)
+        private static void Get(this ptr<int64Value> _addr_i)
         {
-            return int64(i.Value);
+            ref int64Value i = ref _addr_i.val;
+
+            return int64(i.val);
         }
 
-        private static @string String(this ref int64Value i)
+        private static @string String(this ptr<int64Value> _addr_i)
         {
-            return strconv.FormatInt(int64(i.Value), 10L);
+            ref int64Value i = ref _addr_i.val;
+
+            return strconv.FormatInt(int64(i.val), 10L);
         }
 
         // -- uint Value
@@ -186,27 +263,41 @@ namespace go
         {
         }
 
-        private static ref uintValue newUintValue(ulong val, ref ulong p)
+        private static ptr<uintValue> newUintValue(ulong val, ptr<ulong> _addr_p)
         {
-            p.Value = val;
-            return (uintValue.Value)(p);
+            ref ulong p = ref _addr_p.val;
+
+            p = val;
+            return _addr_(uintValue.val)(p)!;
         }
 
-        private static error Set(this ref uintValue i, @string s)
+        private static error Set(this ptr<uintValue> _addr_i, @string s)
         {
+            ref uintValue i = ref _addr_i.val;
+
             var (v, err) = strconv.ParseUint(s, 0L, strconv.IntSize);
-            i.Value = uintValue(v);
-            return error.As(err);
+            if (err != null)
+            {
+                err = numError(err);
+            }
+
+            i.val = uintValue(v);
+            return error.As(err)!;
+
         }
 
-        private static void Get(this ref uintValue i)
+        private static void Get(this ptr<uintValue> _addr_i)
         {
-            return uint(i.Value);
+            ref uintValue i = ref _addr_i.val;
+
+            return uint(i.val);
         }
 
-        private static @string String(this ref uintValue i)
+        private static @string String(this ptr<uintValue> _addr_i)
         {
-            return strconv.FormatUint(uint64(i.Value), 10L);
+            ref uintValue i = ref _addr_i.val;
+
+            return strconv.FormatUint(uint64(i.val), 10L);
         }
 
         // -- uint64 Value
@@ -214,27 +305,41 @@ namespace go
         {
         }
 
-        private static ref uint64Value newUint64Value(ulong val, ref ulong p)
+        private static ptr<uint64Value> newUint64Value(ulong val, ptr<ulong> _addr_p)
         {
-            p.Value = val;
-            return (uint64Value.Value)(p);
+            ref ulong p = ref _addr_p.val;
+
+            p = val;
+            return _addr_(uint64Value.val)(p)!;
         }
 
-        private static error Set(this ref uint64Value i, @string s)
+        private static error Set(this ptr<uint64Value> _addr_i, @string s)
         {
+            ref uint64Value i = ref _addr_i.val;
+
             var (v, err) = strconv.ParseUint(s, 0L, 64L);
-            i.Value = uint64Value(v);
-            return error.As(err);
+            if (err != null)
+            {
+                err = numError(err);
+            }
+
+            i.val = uint64Value(v);
+            return error.As(err)!;
+
         }
 
-        private static void Get(this ref uint64Value i)
+        private static void Get(this ptr<uint64Value> _addr_i)
         {
-            return uint64(i.Value);
+            ref uint64Value i = ref _addr_i.val;
+
+            return uint64(i.val);
         }
 
-        private static @string String(this ref uint64Value i)
+        private static @string String(this ptr<uint64Value> _addr_i)
         {
-            return strconv.FormatUint(uint64(i.Value), 10L);
+            ref uint64Value i = ref _addr_i.val;
+
+            return strconv.FormatUint(uint64(i.val), 10L);
         }
 
         // -- string Value
@@ -242,26 +347,34 @@ namespace go
         {
         }
 
-        private static ref stringValue newStringValue(@string val, ref @string p)
+        private static ptr<stringValue> newStringValue(@string val, ptr<@string> _addr_p)
         {
-            p.Value = val;
-            return (stringValue.Value)(p);
+            ref @string p = ref _addr_p.val;
+
+            p = val;
+            return _addr_(stringValue.val)(p)!;
         }
 
-        private static error Set(this ref stringValue s, @string val)
+        private static error Set(this ptr<stringValue> _addr_s, @string val)
         {
-            s.Value = stringValue(val);
-            return error.As(null);
+            ref stringValue s = ref _addr_s.val;
+
+            s.val = stringValue(val);
+            return error.As(null!)!;
         }
 
-        private static void Get(this ref stringValue s)
+        private static void Get(this ptr<stringValue> _addr_s)
         {
-            return string(s.Value);
+            ref stringValue s = ref _addr_s.val;
+
+            return string(s.val);
         }
 
-        private static @string String(this ref stringValue s)
+        private static @string String(this ptr<stringValue> _addr_s)
         {
-            return string(s.Value);
+            ref stringValue s = ref _addr_s.val;
+
+            return string(s.val);
         }
 
         // -- float64 Value
@@ -269,27 +382,41 @@ namespace go
         {
         }
 
-        private static ref float64Value newFloat64Value(double val, ref double p)
+        private static ptr<float64Value> newFloat64Value(double val, ptr<double> _addr_p)
         {
-            p.Value = val;
-            return (float64Value.Value)(p);
+            ref double p = ref _addr_p.val;
+
+            p = val;
+            return _addr_(float64Value.val)(p)!;
         }
 
-        private static error Set(this ref float64Value f, @string s)
+        private static error Set(this ptr<float64Value> _addr_f, @string s)
         {
+            ref float64Value f = ref _addr_f.val;
+
             var (v, err) = strconv.ParseFloat(s, 64L);
-            f.Value = float64Value(v);
-            return error.As(err);
+            if (err != null)
+            {
+                err = numError(err);
+            }
+
+            f.val = float64Value(v);
+            return error.As(err)!;
+
         }
 
-        private static void Get(this ref float64Value f)
+        private static void Get(this ptr<float64Value> _addr_f)
         {
-            return float64(f.Value);
+            ref float64Value f = ref _addr_f.val;
+
+            return float64(f.val);
         }
 
-        private static @string String(this ref float64Value f)
+        private static @string String(this ptr<float64Value> _addr_f)
         {
-            return strconv.FormatFloat(float64(f.Value), 'g', -1L, 64L);
+            ref float64Value f = ref _addr_f.val;
+
+            return strconv.FormatFloat(float64(f.val), 'g', -1L, 64L);
         }
 
         // -- time.Duration Value
@@ -297,27 +424,41 @@ namespace go
         {
         }
 
-        private static ref durationValue newDurationValue(time.Duration val, ref time.Duration p)
+        private static ptr<durationValue> newDurationValue(time.Duration val, ptr<time.Duration> _addr_p)
         {
-            p.Value = val;
-            return (durationValue.Value)(p);
+            ref time.Duration p = ref _addr_p.val;
+
+            p = val;
+            return _addr_(durationValue.val)(p)!;
         }
 
-        private static error Set(this ref durationValue d, @string s)
+        private static error Set(this ptr<durationValue> _addr_d, @string s)
         {
+            ref durationValue d = ref _addr_d.val;
+
             var (v, err) = time.ParseDuration(s);
-            d.Value = durationValue(v);
-            return error.As(err);
+            if (err != null)
+            {
+                err = errParse;
+            }
+
+            d.val = durationValue(v);
+            return error.As(err)!;
+
         }
 
-        private static void Get(this ref durationValue d)
+        private static void Get(this ptr<durationValue> _addr_d)
         {
-            return time.Duration(d.Value);
+            ref durationValue d = ref _addr_d.val;
+
+            return time.Duration(d.val);
         }
 
-        private static @string String(this ref durationValue d)
+        private static @string String(this ptr<durationValue> _addr_d)
         {
-            return (time.Duration.Value)(d).String();
+            ref durationValue d = ref _addr_d.val;
+
+            return (time.Duration.val)(d).String();
         }
 
         // Value is the interface to the dynamic value stored in a flag.
@@ -351,22 +492,25 @@ namespace go
         }
 
         // These constants cause FlagSet.Parse to behave as described if the parse fails.
-        public static readonly ErrorHandling ContinueOnError = iota; // Return a descriptive error.
-        public static readonly var ExitOnError = 0; // Call os.Exit(2).
-        public static readonly var PanicOnError = 1; // Call panic with a descriptive error.
+        public static readonly ErrorHandling ContinueOnError = (ErrorHandling)iota; // Return a descriptive error.
+        public static readonly var ExitOnError = (var)0; // Call os.Exit(2) or for -h/-help Exit(0).
+        public static readonly var PanicOnError = (var)1; // Call panic with a descriptive error.
 
         // A FlagSet represents a set of defined flags. The zero value of a FlagSet
         // has no name and has ContinueOnError error handling.
+        //
+        // Flag names must be unique within a FlagSet. An attempt to define a flag whose
+        // name is already in use will cause a panic.
         public partial struct FlagSet
         {
             public Action Usage;
             public @string name;
             public bool parsed;
-            public map<@string, ref Flag> actual;
-            public map<@string, ref Flag> formal;
+            public map<@string, ptr<Flag>> actual;
+            public map<@string, ptr<Flag>> formal;
             public slice<@string> args; // arguments after flags
             public ErrorHandling errorHandling;
-            public io.Writer output; // nil means stderr; use out() accessor
+            public io.Writer output; // nil means stderr; use Output() accessor
         }
 
         // A Flag represents the state of a flag.
@@ -379,141 +523,157 @@ namespace go
         }
 
         // sortFlags returns the flags as a slice in lexicographical sorted order.
-        private static slice<ref Flag> sortFlags(map<@string, ref Flag> flags)
+        private static slice<ptr<Flag>> sortFlags(map<@string, ptr<Flag>> flags)
         {
-            var list = make(sort.StringSlice, len(flags));
+            var result = make_slice<ptr<Flag>>(len(flags));
             long i = 0L;
             foreach (var (_, f) in flags)
             {
-                list[i] = f.Name;
+                result[i] = f;
                 i++;
             }
-            list.Sort();
-            var result = make_slice<ref Flag>(len(list));
+            sort.Slice(result, (i, j) =>
             {
-                long i__prev1 = i;
-
-                foreach (var (__i, __name) in list)
-                {
-                    i = __i;
-                    name = __name;
-                    result[i] = flags[name];
-                }
-
-                i = i__prev1;
-            }
-
+                return result[i].Name < result[j].Name;
+            });
             return result;
+
         }
 
         // Output returns the destination for usage and error messages. os.Stderr is returned if
         // output was not set or was set to nil.
-        private static io.Writer Output(this ref FlagSet f)
+        private static io.Writer Output(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             if (f.output == null)
             {
                 return os.Stderr;
             }
+
             return f.output;
+
         }
 
         // Name returns the name of the flag set.
-        private static @string Name(this ref FlagSet f)
+        private static @string Name(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             return f.name;
         }
 
         // ErrorHandling returns the error handling behavior of the flag set.
-        private static ErrorHandling ErrorHandling(this ref FlagSet f)
+        private static ErrorHandling ErrorHandling(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             return f.errorHandling;
         }
 
         // SetOutput sets the destination for usage and error messages.
         // If output is nil, os.Stderr is used.
-        private static void SetOutput(this ref FlagSet f, io.Writer output)
+        private static void SetOutput(this ptr<FlagSet> _addr_f, io.Writer output)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             f.output = output;
         }
 
         // VisitAll visits the flags in lexicographical order, calling fn for each.
         // It visits all flags, even those not set.
-        private static void VisitAll(this ref FlagSet f, Action<ref Flag> fn)
+        private static void VisitAll(this ptr<FlagSet> _addr_f, Action<ptr<Flag>> fn)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             foreach (var (_, flag) in sortFlags(f.formal))
             {
                 fn(flag);
             }
+
         }
 
         // VisitAll visits the command-line flags in lexicographical order, calling
         // fn for each. It visits all flags, even those not set.
-        public static void VisitAll(Action<ref Flag> fn)
+        public static void VisitAll(Action<ptr<Flag>> fn)
         {
             CommandLine.VisitAll(fn);
         }
 
         // Visit visits the flags in lexicographical order, calling fn for each.
         // It visits only those flags that have been set.
-        private static void Visit(this ref FlagSet f, Action<ref Flag> fn)
+        private static void Visit(this ptr<FlagSet> _addr_f, Action<ptr<Flag>> fn)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             foreach (var (_, flag) in sortFlags(f.actual))
             {
                 fn(flag);
             }
+
         }
 
         // Visit visits the command-line flags in lexicographical order, calling fn
         // for each. It visits only those flags that have been set.
-        public static void Visit(Action<ref Flag> fn)
+        public static void Visit(Action<ptr<Flag>> fn)
         {
             CommandLine.Visit(fn);
         }
 
         // Lookup returns the Flag structure of the named flag, returning nil if none exists.
-        private static ref Flag Lookup(this ref FlagSet f, @string name)
+        private static ptr<Flag> Lookup(this ptr<FlagSet> _addr_f, @string name)
         {
-            return f.formal[name];
+            ref FlagSet f = ref _addr_f.val;
+
+            return _addr_f.formal[name]!;
         }
 
         // Lookup returns the Flag structure of the named command-line flag,
         // returning nil if none exists.
-        public static ref Flag Lookup(@string name)
+        public static ptr<Flag> Lookup(@string name)
         {
-            return CommandLine.formal[name];
+            return _addr_CommandLine.formal[name]!;
         }
 
         // Set sets the value of the named flag.
-        private static error Set(this ref FlagSet f, @string name, @string value)
+        private static error Set(this ptr<FlagSet> _addr_f, @string name, @string value)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             var (flag, ok) = f.formal[name];
             if (!ok)
             {
-                return error.As(fmt.Errorf("no such flag -%v", name));
+                return error.As(fmt.Errorf("no such flag -%v", name))!;
             }
+
             var err = flag.Value.Set(value);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (f.actual == null)
             {
-                f.actual = make_map<@string, ref Flag>();
+                f.actual = make_map<@string, ptr<Flag>>();
             }
+
             f.actual[name] = flag;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Set sets the value of the named command-line flag.
         public static error Set(@string name, @string value)
         {
-            return error.As(CommandLine.Set(name, value));
+            return error.As(CommandLine.Set(name, value))!;
         }
 
-        // isZeroValue guesses whether the string represents the zero
-        // value for a flag. It is not accurate but in practice works OK.
-        private static bool isZeroValue(ref Flag flag, @string value)
-        { 
+        // isZeroValue determines whether the string represents the zero
+        // value for a flag.
+        private static bool isZeroValue(ptr<Flag> _addr_flag, @string value)
+        {
+            ref Flag flag = ref _addr_flag.val;
+ 
             // Build a zero value of the flag's Value type, and see if the
             // result of calling its String method equals the value passed in.
             // This works unless the Value type is itself an interface type.
@@ -527,21 +687,9 @@ namespace go
             {
                 z = reflect.Zero(typ);
             }
-            if (value == z.Interface()._<Value>().String())
-            {
-                return true;
-            }
-            switch (value)
-            {
-                case "false": 
 
-                case "": 
+            return value == z.Interface()._<Value>().String();
 
-                case "0": 
-                    return true;
-                    break;
-            }
-            return false;
         }
 
         // UnquoteUsage extracts a back-quoted name from the usage
@@ -549,8 +697,12 @@ namespace go
         // Given "a `name` to show" it returns ("name", "a name to show").
         // If there are no back quotes, the name is an educated guess of the
         // type of the flag's value, or the empty string if the flag is boolean.
-        public static (@string, @string) UnquoteUsage(ref Flag flag)
-        { 
+        public static (@string, @string) UnquoteUsage(ptr<Flag> _addr_flag)
+        {
+            @string name = default;
+            @string usage = default;
+            ref Flag flag = ref _addr_flag.val;
+ 
             // Look for a back-quoted name, but avoid the strings package.
             usage = flag.Usage;
             for (long i = 0L; i < len(usage); i++)
@@ -565,10 +717,12 @@ namespace go
                             usage = usage[..i] + name + usage[j + 1L..];
                             return (name, usage);
                         }
+
                     }
 
                     break; // Only one back quote; use type name.
                 }
+
             } 
             // No explicit name, so use type if we can find one.
  
@@ -579,40 +733,43 @@ namespace go
                 case boolFlag _:
                     name = "";
                     break;
-                case ref durationValue _:
+                case ptr<durationValue> _:
                     name = "duration";
                     break;
-                case ref float64Value _:
+                case ptr<float64Value> _:
                     name = "float";
                     break;
-                case ref intValue _:
+                case ptr<intValue> _:
                     name = "int";
                     break;
-                case ref int64Value _:
+                case ptr<int64Value> _:
                     name = "int";
                     break;
-                case ref stringValue _:
+                case ptr<stringValue> _:
                     name = "string";
                     break;
-                case ref uintValue _:
+                case ptr<uintValue> _:
                     name = "uint";
                     break;
-                case ref uint64Value _:
+                case ptr<uint64Value> _:
                     name = "uint";
                     break;
             }
-            return;
+            return ;
+
         }
 
         // PrintDefaults prints, to standard error unless configured otherwise, the
         // default values of all defined command-line flags in the set. See the
         // documentation for the global function PrintDefaults for more information.
-        private static void PrintDefaults(this ref FlagSet f)
+        private static void PrintDefaults(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             f.VisitAll(flag =>
             {
                 var s = fmt.Sprintf("  -%s", flag.Name); // Two spaces before -; see next two comments.
-                var (name, usage) = UnquoteUsage(flag);
+                var (name, usage) = UnquoteUsage(_addr_flag);
                 if (len(name) > 0L)
                 {
                     s += " " + name;
@@ -622,24 +779,28 @@ namespace go
                 if (len(s) <= 4L)
                 { // space, space, '-', 'x'.
                     s += "\t";
+
                 }
                 else
                 { 
                     // Four spaces before the tab triggers good alignment
                     // for both 4- and 8-space tab stops.
                     s += "\n    \t";
-                }
-                s += strings.Replace(usage, "\n", "\n    \t", -1L);
 
-                if (!isZeroValue(flag, flag.DefValue))
+                }
+
+                s += strings.ReplaceAll(usage, "\n", "\n    \t");
+
+                if (!isZeroValue(_addr_flag, flag.DefValue))
                 {
                     {
-                        ref stringValue (_, ok) = flag.Value._<ref stringValue>();
+                        ptr<stringValue> (_, ok) = flag.Value._<ptr<stringValue>>();
 
                         if (ok)
                         { 
                             // put quotes on the value
                             s += fmt.Sprintf(" (default %q)", flag.DefValue);
+
                         }
                         else
                         {
@@ -647,9 +808,13 @@ namespace go
                         }
 
                     }
+
                 }
+
                 fmt.Fprint(f.Output(), s, "\n");
+
             });
+
         }
 
         // PrintDefaults prints, to standard error unless configured otherwise,
@@ -671,14 +836,18 @@ namespace go
         // the output will be
         //    -I directory
         //        search directory for include files.
+        //
+        // To change the destination for flag messages, call CommandLine.SetOutput.
         public static void PrintDefaults()
         {
             CommandLine.PrintDefaults();
         }
 
         // defaultUsage is the default function to print a usage message.
-        private static void defaultUsage(this ref FlagSet f)
+        private static void defaultUsage(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             if (f.name == "")
             {
                 fmt.Fprintf(f.Output(), "Usage:\n");
@@ -687,7 +856,9 @@ namespace go
             {
                 fmt.Fprintf(f.Output(), "Usage of %s:\n", f.name);
             }
+
             f.PrintDefaults();
+
         }
 
         // NOTE: Usage is not just defaultUsage(CommandLine)
@@ -710,8 +881,10 @@ namespace go
         };
 
         // NFlag returns the number of flags that have been set.
-        private static long NFlag(this ref FlagSet f)
+        private static long NFlag(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             return len(f.actual);
         }
 
@@ -724,13 +897,17 @@ namespace go
         // Arg returns the i'th argument. Arg(0) is the first remaining argument
         // after flags have been processed. Arg returns an empty string if the
         // requested element does not exist.
-        private static @string Arg(this ref FlagSet f, long i)
+        private static @string Arg(this ptr<FlagSet> _addr_f, long i)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             if (i < 0L || i >= len(f.args))
             {
                 return "";
             }
+
             return f.args[i];
+
         }
 
         // Arg returns the i'th command-line argument. Arg(0) is the first remaining argument
@@ -742,8 +919,10 @@ namespace go
         }
 
         // NArg is the number of arguments remaining after flags have been processed.
-        private static long NArg(this ref FlagSet f)
+        private static long NArg(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             return len(f.args);
         }
 
@@ -754,8 +933,10 @@ namespace go
         }
 
         // Args returns the non-flag arguments.
-        private static slice<@string> Args(this ref FlagSet f)
+        private static slice<@string> Args(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             return f.args;
         }
 
@@ -767,246 +948,302 @@ namespace go
 
         // BoolVar defines a bool flag with specified name, default value, and usage string.
         // The argument p points to a bool variable in which to store the value of the flag.
-        private static void BoolVar(this ref FlagSet f, ref bool p, @string name, bool value, @string usage)
+        private static void BoolVar(this ptr<FlagSet> _addr_f, ptr<bool> _addr_p, @string name, bool value, @string usage)
         {
-            f.Var(newBoolValue(value, p), name, usage);
+            ref FlagSet f = ref _addr_f.val;
+            ref bool p = ref _addr_p.val;
+
+            f.Var(newBoolValue(value, _addr_p), name, usage);
         }
 
         // BoolVar defines a bool flag with specified name, default value, and usage string.
         // The argument p points to a bool variable in which to store the value of the flag.
-        public static void BoolVar(ref bool p, @string name, bool value, @string usage)
+        public static void BoolVar(ptr<bool> _addr_p, @string name, bool value, @string usage)
         {
-            CommandLine.Var(newBoolValue(value, p), name, usage);
+            ref bool p = ref _addr_p.val;
+
+            CommandLine.Var(newBoolValue(value, _addr_p), name, usage);
         }
 
         // Bool defines a bool flag with specified name, default value, and usage string.
         // The return value is the address of a bool variable that stores the value of the flag.
-        private static ref bool Bool(this ref FlagSet f, @string name, bool value, @string usage)
+        private static ptr<bool> Bool(this ptr<FlagSet> _addr_f, @string name, bool value, @string usage)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             ptr<bool> p = @new<bool>();
             f.BoolVar(p, name, value, usage);
-            return p;
+            return _addr_p!;
         }
 
         // Bool defines a bool flag with specified name, default value, and usage string.
         // The return value is the address of a bool variable that stores the value of the flag.
-        public static ref bool Bool(@string name, bool value, @string usage)
+        public static ptr<bool> Bool(@string name, bool value, @string usage)
         {
-            return CommandLine.Bool(name, value, usage);
+            return _addr_CommandLine.Bool(name, value, usage)!;
         }
 
         // IntVar defines an int flag with specified name, default value, and usage string.
         // The argument p points to an int variable in which to store the value of the flag.
-        private static void IntVar(this ref FlagSet f, ref long p, @string name, long value, @string usage)
+        private static void IntVar(this ptr<FlagSet> _addr_f, ptr<long> _addr_p, @string name, long value, @string usage)
         {
-            f.Var(newIntValue(value, p), name, usage);
+            ref FlagSet f = ref _addr_f.val;
+            ref long p = ref _addr_p.val;
+
+            f.Var(newIntValue(value, _addr_p), name, usage);
         }
 
         // IntVar defines an int flag with specified name, default value, and usage string.
         // The argument p points to an int variable in which to store the value of the flag.
-        public static void IntVar(ref long p, @string name, long value, @string usage)
+        public static void IntVar(ptr<long> _addr_p, @string name, long value, @string usage)
         {
-            CommandLine.Var(newIntValue(value, p), name, usage);
+            ref long p = ref _addr_p.val;
+
+            CommandLine.Var(newIntValue(value, _addr_p), name, usage);
         }
 
         // Int defines an int flag with specified name, default value, and usage string.
         // The return value is the address of an int variable that stores the value of the flag.
-        private static ref long Int(this ref FlagSet f, @string name, long value, @string usage)
+        private static ptr<long> Int(this ptr<FlagSet> _addr_f, @string name, long value, @string usage)
         {
-            ptr<object> p = @new<int>();
+            ref FlagSet f = ref _addr_f.val;
+
+            ptr<int> p = @new<int>();
             f.IntVar(p, name, value, usage);
-            return p;
+            return _addr_p!;
         }
 
         // Int defines an int flag with specified name, default value, and usage string.
         // The return value is the address of an int variable that stores the value of the flag.
-        public static ref long Int(@string name, long value, @string usage)
+        public static ptr<long> Int(@string name, long value, @string usage)
         {
-            return CommandLine.Int(name, value, usage);
+            return _addr_CommandLine.Int(name, value, usage)!;
         }
 
         // Int64Var defines an int64 flag with specified name, default value, and usage string.
         // The argument p points to an int64 variable in which to store the value of the flag.
-        private static void Int64Var(this ref FlagSet f, ref long p, @string name, long value, @string usage)
+        private static void Int64Var(this ptr<FlagSet> _addr_f, ptr<long> _addr_p, @string name, long value, @string usage)
         {
-            f.Var(newInt64Value(value, p), name, usage);
+            ref FlagSet f = ref _addr_f.val;
+            ref long p = ref _addr_p.val;
+
+            f.Var(newInt64Value(value, _addr_p), name, usage);
         }
 
         // Int64Var defines an int64 flag with specified name, default value, and usage string.
         // The argument p points to an int64 variable in which to store the value of the flag.
-        public static void Int64Var(ref long p, @string name, long value, @string usage)
+        public static void Int64Var(ptr<long> _addr_p, @string name, long value, @string usage)
         {
-            CommandLine.Var(newInt64Value(value, p), name, usage);
+            ref long p = ref _addr_p.val;
+
+            CommandLine.Var(newInt64Value(value, _addr_p), name, usage);
         }
 
         // Int64 defines an int64 flag with specified name, default value, and usage string.
         // The return value is the address of an int64 variable that stores the value of the flag.
-        private static ref long Int64(this ref FlagSet f, @string name, long value, @string usage)
+        private static ptr<long> Int64(this ptr<FlagSet> _addr_f, @string name, long value, @string usage)
         {
-            ptr<object> p = @new<int64>();
+            ref FlagSet f = ref _addr_f.val;
+
+            ptr<int64> p = @new<int64>();
             f.Int64Var(p, name, value, usage);
-            return p;
+            return _addr_p!;
         }
 
         // Int64 defines an int64 flag with specified name, default value, and usage string.
         // The return value is the address of an int64 variable that stores the value of the flag.
-        public static ref long Int64(@string name, long value, @string usage)
+        public static ptr<long> Int64(@string name, long value, @string usage)
         {
-            return CommandLine.Int64(name, value, usage);
+            return _addr_CommandLine.Int64(name, value, usage)!;
         }
 
         // UintVar defines a uint flag with specified name, default value, and usage string.
         // The argument p points to a uint variable in which to store the value of the flag.
-        private static void UintVar(this ref FlagSet f, ref ulong p, @string name, ulong value, @string usage)
+        private static void UintVar(this ptr<FlagSet> _addr_f, ptr<ulong> _addr_p, @string name, ulong value, @string usage)
         {
-            f.Var(newUintValue(value, p), name, usage);
+            ref FlagSet f = ref _addr_f.val;
+            ref ulong p = ref _addr_p.val;
+
+            f.Var(newUintValue(value, _addr_p), name, usage);
         }
 
         // UintVar defines a uint flag with specified name, default value, and usage string.
         // The argument p points to a uint variable in which to store the value of the flag.
-        public static void UintVar(ref ulong p, @string name, ulong value, @string usage)
+        public static void UintVar(ptr<ulong> _addr_p, @string name, ulong value, @string usage)
         {
-            CommandLine.Var(newUintValue(value, p), name, usage);
+            ref ulong p = ref _addr_p.val;
+
+            CommandLine.Var(newUintValue(value, _addr_p), name, usage);
         }
 
         // Uint defines a uint flag with specified name, default value, and usage string.
         // The return value is the address of a uint variable that stores the value of the flag.
-        private static ref ulong Uint(this ref FlagSet f, @string name, ulong value, @string usage)
+        private static ptr<ulong> Uint(this ptr<FlagSet> _addr_f, @string name, ulong value, @string usage)
         {
-            ptr<object> p = @new<uint>();
+            ref FlagSet f = ref _addr_f.val;
+
+            ptr<uint> p = @new<uint>();
             f.UintVar(p, name, value, usage);
-            return p;
+            return _addr_p!;
         }
 
         // Uint defines a uint flag with specified name, default value, and usage string.
         // The return value is the address of a uint variable that stores the value of the flag.
-        public static ref ulong Uint(@string name, ulong value, @string usage)
+        public static ptr<ulong> Uint(@string name, ulong value, @string usage)
         {
-            return CommandLine.Uint(name, value, usage);
+            return _addr_CommandLine.Uint(name, value, usage)!;
         }
 
         // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
         // The argument p points to a uint64 variable in which to store the value of the flag.
-        private static void Uint64Var(this ref FlagSet f, ref ulong p, @string name, ulong value, @string usage)
+        private static void Uint64Var(this ptr<FlagSet> _addr_f, ptr<ulong> _addr_p, @string name, ulong value, @string usage)
         {
-            f.Var(newUint64Value(value, p), name, usage);
+            ref FlagSet f = ref _addr_f.val;
+            ref ulong p = ref _addr_p.val;
+
+            f.Var(newUint64Value(value, _addr_p), name, usage);
         }
 
         // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
         // The argument p points to a uint64 variable in which to store the value of the flag.
-        public static void Uint64Var(ref ulong p, @string name, ulong value, @string usage)
+        public static void Uint64Var(ptr<ulong> _addr_p, @string name, ulong value, @string usage)
         {
-            CommandLine.Var(newUint64Value(value, p), name, usage);
+            ref ulong p = ref _addr_p.val;
+
+            CommandLine.Var(newUint64Value(value, _addr_p), name, usage);
         }
 
         // Uint64 defines a uint64 flag with specified name, default value, and usage string.
         // The return value is the address of a uint64 variable that stores the value of the flag.
-        private static ref ulong Uint64(this ref FlagSet f, @string name, ulong value, @string usage)
+        private static ptr<ulong> Uint64(this ptr<FlagSet> _addr_f, @string name, ulong value, @string usage)
         {
-            ptr<object> p = @new<uint64>();
+            ref FlagSet f = ref _addr_f.val;
+
+            ptr<uint64> p = @new<uint64>();
             f.Uint64Var(p, name, value, usage);
-            return p;
+            return _addr_p!;
         }
 
         // Uint64 defines a uint64 flag with specified name, default value, and usage string.
         // The return value is the address of a uint64 variable that stores the value of the flag.
-        public static ref ulong Uint64(@string name, ulong value, @string usage)
+        public static ptr<ulong> Uint64(@string name, ulong value, @string usage)
         {
-            return CommandLine.Uint64(name, value, usage);
+            return _addr_CommandLine.Uint64(name, value, usage)!;
         }
 
         // StringVar defines a string flag with specified name, default value, and usage string.
         // The argument p points to a string variable in which to store the value of the flag.
-        private static void StringVar(this ref FlagSet f, ref @string p, @string name, @string value, @string usage)
+        private static void StringVar(this ptr<FlagSet> _addr_f, ptr<@string> _addr_p, @string name, @string value, @string usage)
         {
-            f.Var(newStringValue(value, p), name, usage);
+            ref FlagSet f = ref _addr_f.val;
+            ref @string p = ref _addr_p.val;
+
+            f.Var(newStringValue(value, _addr_p), name, usage);
         }
 
         // StringVar defines a string flag with specified name, default value, and usage string.
         // The argument p points to a string variable in which to store the value of the flag.
-        public static void StringVar(ref @string p, @string name, @string value, @string usage)
+        public static void StringVar(ptr<@string> _addr_p, @string name, @string value, @string usage)
         {
-            CommandLine.Var(newStringValue(value, p), name, usage);
+            ref @string p = ref _addr_p.val;
+
+            CommandLine.Var(newStringValue(value, _addr_p), name, usage);
         }
 
         // String defines a string flag with specified name, default value, and usage string.
         // The return value is the address of a string variable that stores the value of the flag.
-        private static ref @string String(this ref FlagSet f, @string name, @string value, @string usage)
+        private static ptr<@string> String(this ptr<FlagSet> _addr_f, @string name, @string value, @string usage)
         {
-            ptr<object> p = @new<string>();
+            ref FlagSet f = ref _addr_f.val;
+
+            ptr<string> p = @new<string>();
             f.StringVar(p, name, value, usage);
-            return p;
+            return _addr_p!;
         }
 
         // String defines a string flag with specified name, default value, and usage string.
         // The return value is the address of a string variable that stores the value of the flag.
-        public static ref @string String(@string name, @string value, @string usage)
+        public static ptr<@string> String(@string name, @string value, @string usage)
         {
-            return CommandLine.String(name, value, usage);
+            return _addr_CommandLine.String(name, value, usage)!;
         }
 
         // Float64Var defines a float64 flag with specified name, default value, and usage string.
         // The argument p points to a float64 variable in which to store the value of the flag.
-        private static void Float64Var(this ref FlagSet f, ref double p, @string name, double value, @string usage)
+        private static void Float64Var(this ptr<FlagSet> _addr_f, ptr<double> _addr_p, @string name, double value, @string usage)
         {
-            f.Var(newFloat64Value(value, p), name, usage);
+            ref FlagSet f = ref _addr_f.val;
+            ref double p = ref _addr_p.val;
+
+            f.Var(newFloat64Value(value, _addr_p), name, usage);
         }
 
         // Float64Var defines a float64 flag with specified name, default value, and usage string.
         // The argument p points to a float64 variable in which to store the value of the flag.
-        public static void Float64Var(ref double p, @string name, double value, @string usage)
+        public static void Float64Var(ptr<double> _addr_p, @string name, double value, @string usage)
         {
-            CommandLine.Var(newFloat64Value(value, p), name, usage);
+            ref double p = ref _addr_p.val;
+
+            CommandLine.Var(newFloat64Value(value, _addr_p), name, usage);
         }
 
         // Float64 defines a float64 flag with specified name, default value, and usage string.
         // The return value is the address of a float64 variable that stores the value of the flag.
-        private static ref double Float64(this ref FlagSet f, @string name, double value, @string usage)
+        private static ptr<double> Float64(this ptr<FlagSet> _addr_f, @string name, double value, @string usage)
         {
-            ptr<object> p = @new<float64>();
+            ref FlagSet f = ref _addr_f.val;
+
+            ptr<float64> p = @new<float64>();
             f.Float64Var(p, name, value, usage);
-            return p;
+            return _addr_p!;
         }
 
         // Float64 defines a float64 flag with specified name, default value, and usage string.
         // The return value is the address of a float64 variable that stores the value of the flag.
-        public static ref double Float64(@string name, double value, @string usage)
+        public static ptr<double> Float64(@string name, double value, @string usage)
         {
-            return CommandLine.Float64(name, value, usage);
+            return _addr_CommandLine.Float64(name, value, usage)!;
         }
 
         // DurationVar defines a time.Duration flag with specified name, default value, and usage string.
         // The argument p points to a time.Duration variable in which to store the value of the flag.
         // The flag accepts a value acceptable to time.ParseDuration.
-        private static void DurationVar(this ref FlagSet f, ref time.Duration p, @string name, time.Duration value, @string usage)
+        private static void DurationVar(this ptr<FlagSet> _addr_f, ptr<time.Duration> _addr_p, @string name, time.Duration value, @string usage)
         {
-            f.Var(newDurationValue(value, p), name, usage);
+            ref FlagSet f = ref _addr_f.val;
+            ref time.Duration p = ref _addr_p.val;
+
+            f.Var(newDurationValue(value, _addr_p), name, usage);
         }
 
         // DurationVar defines a time.Duration flag with specified name, default value, and usage string.
         // The argument p points to a time.Duration variable in which to store the value of the flag.
         // The flag accepts a value acceptable to time.ParseDuration.
-        public static void DurationVar(ref time.Duration p, @string name, time.Duration value, @string usage)
+        public static void DurationVar(ptr<time.Duration> _addr_p, @string name, time.Duration value, @string usage)
         {
-            CommandLine.Var(newDurationValue(value, p), name, usage);
+            ref time.Duration p = ref _addr_p.val;
+
+            CommandLine.Var(newDurationValue(value, _addr_p), name, usage);
         }
 
         // Duration defines a time.Duration flag with specified name, default value, and usage string.
         // The return value is the address of a time.Duration variable that stores the value of the flag.
         // The flag accepts a value acceptable to time.ParseDuration.
-        private static ref time.Duration Duration(this ref FlagSet f, @string name, time.Duration value, @string usage)
+        private static ptr<time.Duration> Duration(this ptr<FlagSet> _addr_f, @string name, time.Duration value, @string usage)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             ptr<time.Duration> p = @new<time.Duration>();
             f.DurationVar(p, name, value, usage);
-            return p;
+            return _addr_p!;
         }
 
         // Duration defines a time.Duration flag with specified name, default value, and usage string.
         // The return value is the address of a time.Duration variable that stores the value of the flag.
         // The flag accepts a value acceptable to time.ParseDuration.
-        public static ref time.Duration Duration(@string name, time.Duration value, @string usage)
+        public static ptr<time.Duration> Duration(@string name, time.Duration value, @string usage)
         {
-            return CommandLine.Duration(name, value, usage);
+            return _addr_CommandLine.Duration(name, value, usage)!;
         }
 
         // Var defines a flag with the specified name and usage string. The type and
@@ -1015,10 +1252,12 @@ namespace go
         // caller could create a flag that turns a comma-separated string into a slice
         // of strings by giving the slice the methods of Value; in particular, Set would
         // decompose the comma-separated string into the slice.
-        private static void Var(this ref FlagSet _f, Value value, @string name, @string usage) => func(_f, (ref FlagSet f, Defer _, Panic panic, Recover __) =>
-        { 
+        private static void Var(this ptr<FlagSet> _addr_f, Value value, @string name, @string usage) => func((_, panic, __) =>
+        {
+            ref FlagSet f = ref _addr_f.val;
+ 
             // Remember the default value as a string; it won't change.
-            Flag flag = ref new Flag(name,usage,value,value.String());
+            ptr<Flag> flag = addr(new Flag(name,usage,value,value.String()));
             var (_, alreadythere) = f.formal[name];
             if (alreadythere)
             {
@@ -1031,14 +1270,18 @@ namespace go
                 {
                     msg = fmt.Sprintf("%s flag redefined: %s", f.name, name);
                 }
+
                 fmt.Fprintln(f.Output(), msg);
                 panic(msg); // Happens only if flags are declared with identical names
             }
+
             if (f.formal == null)
             {
-                f.formal = make_map<@string, ref Flag>();
+                f.formal = make_map<@string, ptr<Flag>>();
             }
+
             f.formal[name] = flag;
+
         });
 
         // Var defines a flag with the specified name and usage string. The type and
@@ -1054,18 +1297,23 @@ namespace go
 
         // failf prints to standard error a formatted error and usage message and
         // returns the error.
-        private static error failf(this ref FlagSet f, @string format, params object[] a)
+        private static error failf(this ptr<FlagSet> _addr_f, @string format, params object[] a)
         {
+            a = a.Clone();
+            ref FlagSet f = ref _addr_f.val;
+
             var err = fmt.Errorf(format, a);
             fmt.Fprintln(f.Output(), err);
             f.usage();
-            return error.As(err);
+            return error.As(err)!;
         }
 
         // usage calls the Usage method for the flag set if one is specified,
         // or the appropriate default usage function otherwise.
-        private static void usage(this ref FlagSet f)
+        private static void usage(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             if (f.Usage == null)
             {
                 f.defaultUsage();
@@ -1074,20 +1322,27 @@ namespace go
             {
                 f.Usage();
             }
+
         }
 
         // parseOne parses one flag. It reports whether a flag was seen.
-        private static (bool, error) parseOne(this ref FlagSet f)
+        private static (bool, error) parseOne(this ptr<FlagSet> _addr_f)
         {
+            bool _p0 = default;
+            error _p0 = default!;
+            ref FlagSet f = ref _addr_f.val;
+
             if (len(f.args) == 0L)
             {
-                return (false, null);
+                return (false, error.As(null!)!);
             }
+
             var s = f.args[0L];
             if (len(s) < 2L || s[0L] != '-')
             {
-                return (false, null);
+                return (false, error.As(null!)!);
             }
+
             long numMinuses = 1L;
             if (s[1L] == '-')
             {
@@ -1095,13 +1350,16 @@ namespace go
                 if (len(s) == 2L)
                 { // "--" terminates the flags
                     f.args = f.args[1L..];
-                    return (false, null);
+                    return (false, error.As(null!)!);
+
                 }
+
             }
+
             var name = s[numMinuses..];
             if (len(name) == 0L || name[0L] == '-' || name[0L] == '=')
             {
-                return (false, f.failf("bad flag syntax: %s", s));
+                return (false, error.As(f.failf("bad flag syntax: %s", s))!);
             } 
 
             // it's a flag. does it have an argument?
@@ -1117,6 +1375,7 @@ namespace go
                     name = name[0L..i];
                     break;
                 }
+
             }
 
             var m = f.formal;
@@ -1126,12 +1385,16 @@ namespace go
                 if (name == "help" || name == "h")
                 { // special case for nice help message.
                     f.usage();
-                    return (false, ErrHelp);
+                    return (false, error.As(ErrHelp)!);
+
                 }
-                return (false, f.failf("flag provided but not defined: -%s", name));
+
+                return (false, error.As(f.failf("flag provided but not defined: -%s", name))!);
+
             }
+
             {
-                boolFlag (fv, ok) = flag.Value._<boolFlag>();
+                boolFlag (fv, ok) = boolFlag.As(flag.Value._<boolFlag>())!;
 
                 if (ok && fv.IsBoolFlag())
                 { // special case: doesn't need an arg
@@ -1144,12 +1407,13 @@ namespace go
 
                             if (err != null)
                             {
-                                return (false, f.failf("invalid boolean value %q for -%s: %v", value, name, err));
+                                return (false, error.As(f.failf("invalid boolean value %q for -%s: %v", value, name, err))!);
                             }
 
                             err = err__prev3;
 
                         }
+
                     }
                     else
                     {
@@ -1160,13 +1424,15 @@ namespace go
 
                             if (err != null)
                             {
-                                return (false, f.failf("invalid boolean flag %s: %v", name, err));
+                                return (false, error.As(f.failf("invalid boolean flag %s: %v", name, err))!);
                             }
 
                             err = err__prev3;
 
                         }
+
                     }
+
                 }
                 else
                 { 
@@ -1177,11 +1443,14 @@ namespace go
                         hasValue = true;
                         value = f.args[0L];
                         f.args = f.args[1L..];
+
                     }
+
                     if (!hasValue)
                     {
-                        return (false, f.failf("flag needs an argument: -%s", name));
+                        return (false, error.As(f.failf("flag needs an argument: -%s", name))!);
                     }
+
                     {
                         var err__prev2 = err;
 
@@ -1189,29 +1458,35 @@ namespace go
 
                         if (err != null)
                         {
-                            return (false, f.failf("invalid value %q for flag -%s: %v", value, name, err));
+                            return (false, error.As(f.failf("invalid value %q for flag -%s: %v", value, name, err))!);
                         }
 
                         err = err__prev2;
 
                     }
+
                 }
 
             }
+
             if (f.actual == null)
             {
-                f.actual = make_map<@string, ref Flag>();
+                f.actual = make_map<@string, ptr<Flag>>();
             }
+
             f.actual[name] = flag;
-            return (true, null);
+            return (true, error.As(null!)!);
+
         }
 
         // Parse parses flag definitions from the argument list, which should not
         // include the command name. Must be called after all flags in the FlagSet
         // are defined and before flags are accessed by the program.
         // The return value will be ErrHelp if -help or -h were set but not defined.
-        private static error Parse(this ref FlagSet _f, slice<@string> arguments) => func(_f, (ref FlagSet f, Defer _, Panic panic, Recover __) =>
+        private static error Parse(this ptr<FlagSet> _addr_f, slice<@string> arguments) => func((_, panic, __) =>
         {
+            ref FlagSet f = ref _addr_f.val;
+
             f.parsed = true;
             f.args = arguments;
             while (true)
@@ -1221,25 +1496,36 @@ namespace go
                 {
                     continue;
                 }
+
                 if (err == null)
                 {
                     break;
                 }
 
+
                 if (f.errorHandling == ContinueOnError) 
-                    return error.As(err);
+                    return error.As(err)!;
                 else if (f.errorHandling == ExitOnError) 
+                    if (err == ErrHelp)
+                    {
+                        os.Exit(0L);
+                    }
+
                     os.Exit(2L);
                 else if (f.errorHandling == PanicOnError) 
                     panic(err);
-                            }
+                
+            }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // Parsed reports whether f.Parse has been called.
-        private static bool Parsed(this ref FlagSet f)
+        private static bool Parsed(this ptr<FlagSet> _addr_f)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             return f.parsed;
         }
 
@@ -1249,6 +1535,7 @@ namespace go
         { 
             // Ignore errors; CommandLine is set for ExitOnError.
             CommandLine.Parse(os.Args[1L..]);
+
         }
 
         // Parsed reports whether the command-line flags have been parsed.
@@ -1269,6 +1556,7 @@ namespace go
             // because we want any eventual call to use any updated value of Usage,
             // not the value it has when this line is run.
             CommandLine.Usage = commandLineUsage;
+
         }
 
         private static void commandLineUsage()
@@ -1277,19 +1565,22 @@ namespace go
         }
 
         // NewFlagSet returns a new, empty flag set with the specified name and
-        // error handling property.
-        public static ref FlagSet NewFlagSet(@string name, ErrorHandling errorHandling)
+        // error handling property. If the name is not empty, it will be printed
+        // in the default usage message and in error messages.
+        public static ptr<FlagSet> NewFlagSet(@string name, ErrorHandling errorHandling)
         {
-            FlagSet f = ref new FlagSet(name:name,errorHandling:errorHandling,);
+            ptr<FlagSet> f = addr(new FlagSet(name:name,errorHandling:errorHandling,));
             f.Usage = f.defaultUsage;
-            return f;
+            return _addr_f!;
         }
 
         // Init sets the name and error handling property for a flag set.
         // By default, the zero FlagSet uses an empty name and the
         // ContinueOnError error handling policy.
-        private static void Init(this ref FlagSet f, @string name, ErrorHandling errorHandling)
+        private static void Init(this ptr<FlagSet> _addr_f, @string name, ErrorHandling errorHandling)
         {
+            ref FlagSet f = ref _addr_f.val;
+
             f.name = name;
             f.errorHandling = errorHandling;
         }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:59 UTC
+//     Generated on 2020 October 08 03:24:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,14 +27,16 @@ namespace go
             {
                 this.fn = default;
                 this.stack = default;
+                this.argLen = default;
                 this.method = default;
                 this.rcvr = default;
             }
 
-            public methodValue(System.UIntPtr fn = default, ref ptr<bitVector> stack = default, long method = default, Value rcvr = default)
+            public methodValue(System.UIntPtr fn = default, ref ptr<bitVector> stack = default, System.UIntPtr argLen = default, long method = default, Value rcvr = default)
             {
                 this.fn = fn;
                 this.stack = stack;
+                this.argLen = argLen;
                 this.method = method;
                 this.rcvr = rcvr;
             }
@@ -59,7 +61,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static methodValue methodValue_cast(dynamic value)
         {
-            return new methodValue(value.fn, ref value.stack, value.method, value.rcvr);
+            return new methodValue(value.fn, ref value.stack, value.argLen, value.method, value.rcvr);
         }
     }
 }

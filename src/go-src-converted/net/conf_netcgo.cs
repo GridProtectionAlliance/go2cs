@@ -4,7 +4,7 @@
 
 // +build netcgo
 
-// package net -- go2cs converted at 2020 August 29 08:25:14 UTC
+// package net -- go2cs converted at 2020 October 08 03:31:16 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\conf_netcgo.go
 /*
@@ -24,7 +24,6 @@ namespace go
         private static void init()
         {
             netCgo = true;
-
         }
     }
 }

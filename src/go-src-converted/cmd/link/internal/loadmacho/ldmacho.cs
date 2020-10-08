@@ -3,18 +3,17 @@
 // license that can be found in the LICENSE file.
 
 // Package loadmacho implements a Mach-O file reader.
-// package loadmacho -- go2cs converted at 2020 August 29 10:04:04 UTC
+// package loadmacho -- go2cs converted at 2020 October 08 04:39:05 UTC
 // import "cmd/link/internal/loadmacho" ==> using loadmacho = go.cmd.link.@internal.loadmacho_package
 // Original source: C:\Go\src\cmd\link\internal\loadmacho\ldmacho.go
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
-using io = go.io_package;
-using sort = go.sort_package;
 using static go.builtin;
 using System;
 
@@ -51,14 +50,12 @@ namespace @internal
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         THE SOFTWARE.
         */
-        public static readonly ulong N_EXT = 0x01UL;
-        public static readonly ulong N_TYPE = 0x1eUL;
-        public static readonly ulong N_STAB = 0xe0UL;
 
         // TODO(crawshaw): de-duplicate these symbols with cmd/internal/ld
-        public static readonly long MACHO_X86_64_RELOC_UNSIGNED = 0L;
-        public static readonly long MACHO_X86_64_RELOC_SIGNED = 1L;
-        public static readonly long MACHO_FAKE_GOTPCREL = 100L;
+        public static readonly long MACHO_X86_64_RELOC_UNSIGNED = (long)0L;
+        public static readonly long MACHO_X86_64_RELOC_SIGNED = (long)1L;
+        public static readonly long MACHO_FAKE_GOTPCREL = (long)100L;
+
 
         private partial struct ldMachoObj
         {
@@ -113,7 +110,7 @@ namespace @internal
             public uint flags;
             public uint res1;
             public uint res2;
-            public ptr<sym.Symbol> sym;
+            public loader.Sym sym;
             public slice<ldMachoRel> rel;
         }
 
@@ -147,7 +144,7 @@ namespace @internal
             public ushort desc;
             public sbyte kind;
             public ulong value;
-            public ptr<sym.Symbol> sym;
+            public loader.Sym sym;
         }
 
         private partial struct ldMachoDysymtab
@@ -173,33 +170,48 @@ namespace @internal
             public slice<uint> indir;
         }
 
-        public static readonly long LdMachoCpuVax = 1L;
-        public static readonly long LdMachoCpu68000 = 6L;
-        public static readonly long LdMachoCpu386 = 7L;
-        public static readonly ulong LdMachoCpuAmd64 = 0x1000007UL;
-        public static readonly long LdMachoCpuMips = 8L;
-        public static readonly long LdMachoCpu98000 = 10L;
-        public static readonly long LdMachoCpuHppa = 11L;
-        public static readonly long LdMachoCpuArm = 12L;
-        public static readonly long LdMachoCpu88000 = 13L;
-        public static readonly long LdMachoCpuSparc = 14L;
-        public static readonly long LdMachoCpu860 = 15L;
-        public static readonly long LdMachoCpuAlpha = 16L;
-        public static readonly long LdMachoCpuPower = 18L;
-        public static readonly long LdMachoCmdSegment = 1L;
-        public static readonly long LdMachoCmdSymtab = 2L;
-        public static readonly long LdMachoCmdSymseg = 3L;
-        public static readonly long LdMachoCmdThread = 4L;
-        public static readonly long LdMachoCmdDysymtab = 11L;
-        public static readonly long LdMachoCmdSegment64 = 25L;
-        public static readonly long LdMachoFileObject = 1L;
-        public static readonly long LdMachoFileExecutable = 2L;
-        public static readonly long LdMachoFileFvmlib = 3L;
-        public static readonly long LdMachoFileCore = 4L;
-        public static readonly long LdMachoFilePreload = 5L;
+        // ldMachoSym.type_
+        public static readonly ulong N_EXT = (ulong)0x01UL;
+        public static readonly ulong N_TYPE = (ulong)0x1eUL;
+        public static readonly ulong N_STAB = (ulong)0xe0UL;
 
-        private static long unpackcmd(slice<byte> p, ref ldMachoObj m, ref ldMachoCmd c, ulong type_, ulong sz)
+
+        // ldMachoSym.desc
+        public static readonly ulong N_WEAK_REF = (ulong)0x40UL;
+        public static readonly ulong N_WEAK_DEF = (ulong)0x80UL;
+
+
+        public static readonly long LdMachoCpuVax = (long)1L;
+        public static readonly long LdMachoCpu68000 = (long)6L;
+        public static readonly long LdMachoCpu386 = (long)7L;
+        public static readonly ulong LdMachoCpuAmd64 = (ulong)0x1000007UL;
+        public static readonly long LdMachoCpuMips = (long)8L;
+        public static readonly long LdMachoCpu98000 = (long)10L;
+        public static readonly long LdMachoCpuHppa = (long)11L;
+        public static readonly long LdMachoCpuArm = (long)12L;
+        public static readonly long LdMachoCpu88000 = (long)13L;
+        public static readonly long LdMachoCpuSparc = (long)14L;
+        public static readonly long LdMachoCpu860 = (long)15L;
+        public static readonly long LdMachoCpuAlpha = (long)16L;
+        public static readonly long LdMachoCpuPower = (long)18L;
+        public static readonly long LdMachoCmdSegment = (long)1L;
+        public static readonly long LdMachoCmdSymtab = (long)2L;
+        public static readonly long LdMachoCmdSymseg = (long)3L;
+        public static readonly long LdMachoCmdThread = (long)4L;
+        public static readonly long LdMachoCmdDysymtab = (long)11L;
+        public static readonly long LdMachoCmdSegment64 = (long)25L;
+        public static readonly long LdMachoFileObject = (long)1L;
+        public static readonly long LdMachoFileExecutable = (long)2L;
+        public static readonly long LdMachoFileFvmlib = (long)3L;
+        public static readonly long LdMachoFileCore = (long)4L;
+        public static readonly long LdMachoFilePreload = (long)5L;
+
+
+        private static long unpackcmd(slice<byte> p, ptr<ldMachoObj> _addr_m, ptr<ldMachoCmd> _addr_c, ulong type_, ulong sz)
         {
+            ref ldMachoObj m = ref _addr_m.val;
+            ref ldMachoCmd c = ref _addr_c.val;
+
             var e4 = m.e.Uint32;
             var e8 = m.e.Uint64;
 
@@ -211,6 +223,7 @@ namespace @internal
                 {
                     return -1L;
                 }
+
                 c.seg.name = cstring(p[8L..24L]);
                 c.seg.vmaddr = uint64(e4(p[24L..]));
                 c.seg.vmsize = uint64(e4(p[28L..]));
@@ -225,14 +238,15 @@ namespace @internal
                 {
                     return -1L;
                 }
+
                 p = p[56L..];
-                ref ldMachoSect s = default;
+                ptr<ldMachoSect> s;
                 {
                     long i__prev1 = i;
 
                     for (long i = 0L; uint32(i) < c.seg.nsect; i++)
                     {
-                        s = ref c.seg.sect[i];
+                        s = _addr_c.seg.sect[i];
                         s.name = cstring(p[0L..16L]);
                         s.segname = cstring(p[16L..32L]);
                         s.addr = uint64(e4(p[32L..]));
@@ -255,6 +269,7 @@ namespace @internal
                 {
                     return -1L;
                 }
+
                 c.seg.name = cstring(p[8L..24L]);
                 c.seg.vmaddr = e8(p[24L..]);
                 c.seg.vmsize = e8(p[32L..]);
@@ -269,14 +284,15 @@ namespace @internal
                 {
                     return -1L;
                 }
+
                 p = p[72L..];
-                s = default;
+                s = ;
                 {
                     long i__prev1 = i;
 
                     for (i = 0L; uint32(i) < c.seg.nsect; i++)
                     {
-                        s = ref c.seg.sect[i];
+                        s = _addr_c.seg.sect[i];
                         s.name = cstring(p[0L..16L]);
                         s.segname = cstring(p[16L..32L]);
                         s.addr = e8(p[32L..]);
@@ -291,6 +307,7 @@ namespace @internal
 
                         // p+76 is reserved
                         p = p[80L..];
+
                     }
 
 
@@ -301,6 +318,7 @@ namespace @internal
                 {
                     return -1L;
                 }
+
                 c.sym.symoff = e4(p[8L..]);
                 c.sym.nsym = e4(p[12L..]);
                 c.sym.stroff = e4(p[16L..]);
@@ -310,6 +328,7 @@ namespace @internal
                 {
                     return -1L;
                 }
+
                 c.dsym.ilocalsym = e4(p[8L..]);
                 c.dsym.nlocalsym = e4(p[12L..]);
                 c.dsym.iextdefsym = e4(p[16L..]);
@@ -331,33 +350,30 @@ namespace @internal
             else 
                 return -1L;
                         return 0L;
+
         }
 
-        private static long macholoadrel(ref ldMachoObj m, ref ldMachoSect sect)
+        private static long macholoadrel(ptr<ldMachoObj> _addr_m, ptr<ldMachoSect> _addr_sect)
         {
+            ref ldMachoObj m = ref _addr_m.val;
+            ref ldMachoSect sect = ref _addr_sect.val;
+
             if (sect.rel != null || sect.nreloc == 0L)
             {
                 return 0L;
             }
+
             var rel = make_slice<ldMachoRel>(sect.nreloc);
-            var n = int(sect.nreloc * 8L);
-            var buf = make_slice<byte>(n);
-            if (m.f.Seek(m.@base + int64(sect.reloff), 0L) < 0L)
+            m.f.MustSeek(m.@base + int64(sect.reloff), 0L);
+            var (buf, _, err) = m.f.Slice(uint64(sect.nreloc * 8L));
+            if (err != null)
             {
                 return -1L;
             }
-            {
-                var (_, err) = io.ReadFull(m.f, buf);
 
-                if (err != null)
-                {
-                    return -1L;
-                }
-
-            }
             for (var i = uint32(0L); i < sect.nreloc; i++)
             {
-                var r = ref rel[i];
+                var r = _addr_rel[i];
                 var p = buf[i * 8L..];
                 r.addr = m.e.Uint32(p); 
 
@@ -375,6 +391,7 @@ namespace @internal
                     v >>= 2L;
                     r.pcrel = uint8(v & 1L);
                     r.value = m.e.Uint32(p[4L..]);
+
                 }
                 else
                 {
@@ -389,30 +406,26 @@ namespace @internal
                     v >>= 1L;
                     r.type_ = uint8(v);
                 }
+
             }
 
 
             sect.rel = rel;
             return 0L;
+
         }
 
-        private static long macholoaddsym(ref ldMachoObj m, ref ldMachoDysymtab d)
+        private static long macholoaddsym(ptr<ldMachoObj> _addr_m, ptr<ldMachoDysymtab> _addr_d)
         {
-            var n = int(d.nindirectsyms);
+            ref ldMachoObj m = ref _addr_m.val;
+            ref ldMachoDysymtab d = ref _addr_d.val;
 
-            var p = make_slice<byte>(n * 4L);
-            if (m.f.Seek(m.@base + int64(d.indirectsymoff), 0L) < 0L)
+            var n = int(d.nindirectsyms);
+            m.f.MustSeek(m.@base + int64(d.indirectsymoff), 0L);
+            var (p, _, err) = m.f.Slice(uint64(n * 4L));
+            if (err != null)
             {
                 return -1L;
-            }
-            {
-                var (_, err) = io.ReadFull(m.f, p);
-
-                if (err != null)
-                {
-                    return -1L;
-                }
-
             }
 
             d.indir = make_slice<uint>(n);
@@ -422,27 +435,24 @@ namespace @internal
             }
 
             return 0L;
+
         }
 
-        private static long macholoadsym(ref ldMachoObj m, ref ldMachoSymtab symtab)
+        private static long macholoadsym(ptr<ldMachoObj> _addr_m, ptr<ldMachoSymtab> _addr_symtab)
         {
+            ref ldMachoObj m = ref _addr_m.val;
+            ref ldMachoSymtab symtab = ref _addr_symtab.val;
+
             if (symtab.sym != null)
             {
                 return 0L;
             }
-            var strbuf = make_slice<byte>(symtab.strsize);
-            if (m.f.Seek(m.@base + int64(symtab.stroff), 0L) < 0L)
+
+            m.f.MustSeek(m.@base + int64(symtab.stroff), 0L);
+            var (strbuf, _, err) = m.f.Slice(uint64(symtab.strsize));
+            if (err != null)
             {
                 return -1L;
-            }
-            {
-                var (_, err) = io.ReadFull(m.f, strbuf);
-
-                if (err != null)
-                {
-                    return -1L;
-                }
-
             }
 
             long symsize = 12L;
@@ -450,31 +460,26 @@ namespace @internal
             {
                 symsize = 16L;
             }
+
             var n = int(symtab.nsym * uint32(symsize));
-            var symbuf = make_slice<byte>(n);
-            if (m.f.Seek(m.@base + int64(symtab.symoff), 0L) < 0L)
+            m.f.MustSeek(m.@base + int64(symtab.symoff), 0L);
+            var (symbuf, _, err) = m.f.Slice(uint64(n));
+            if (err != null)
             {
                 return -1L;
             }
-            {
-                (_, err) = io.ReadFull(m.f, symbuf);
 
-                if (err != null)
-                {
-                    return -1L;
-                }
-
-            }
             var sym = make_slice<ldMachoSym>(symtab.nsym);
             var p = symbuf;
             for (var i = uint32(0L); i < symtab.nsym; i++)
             {
-                var s = ref sym[i];
+                var s = _addr_sym[i];
                 var v = m.e.Uint32(p);
                 if (v >= symtab.strsize)
                 {
                     return -1L;
                 }
+
                 s.name = cstring(strbuf[v..]);
                 s.type_ = p[4L];
                 s.sectnum = p[5L];
@@ -487,37 +492,40 @@ namespace @internal
                 {
                     s.value = uint64(m.e.Uint32(p[8L..]));
                 }
+
                 p = p[symsize..];
+
             }
 
 
             symtab.str = strbuf;
             symtab.sym = sym;
             return 0L;
+
         }
 
-        // Load loads the Mach-O file pn from f.
+        // Load the Mach-O file pn from f.
         // Symbols are written into syms, and a slice of the text symbols is returned.
-        public static (slice<ref sym.Symbol>, error) Load(ref sys.Arch arch, ref sym.Symbols syms, ref bio.Reader f, @string pkg, long length, @string pn)
+        public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sys.Arch> _addr_arch, long localSymVersion, ptr<bio.Reader> _addr_f, @string pkg, long length, @string pn)
         {
-            Func<@string, object[], (slice<ref sym.Symbol>, error)> errorf = (str, args) =>
+            slice<loader.Sym> textp = default;
+            error err = default!;
+            ref loader.Loader l = ref _addr_l.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref bio.Reader f = ref _addr_f.val;
+
+            Func<@string, object[], (slice<loader.Sym>, error)> errorf = (str, args) =>
             {
-                return (null, fmt.Errorf("loadmacho: %v: %v", pn, fmt.Sprintf(str, args)));
+                return (null, error.As(fmt.Errorf("loadmacho: %v: %v", pn, fmt.Sprintf(str, args)))!);
             }
 ;
 
-            var localSymVersion = syms.IncVersion();
             var @base = f.Offset();
 
-            array<byte> hdr = new array<byte>(7L * 4L);
+            var (hdr, _, err) = f.Slice(7L * 4L);
+            if (err != null)
             {
-                var (_, err) = io.ReadFull(f, hdr[..]);
-
-                if (err != null)
-                {
-                    return errorf("reading hdr: %v", err);
-                }
-
+                return errorf("reading hdr: %v", err);
             }
 
             binary.ByteOrder e = default;
@@ -533,6 +541,7 @@ namespace @internal
             {
                 return errorf("bad magic - not mach-o file");
             }
+
             var is64 = e.Uint32(hdr[..]) == 0xFEEDFACFUL;
             var ncmd = e.Uint32(hdr[4L * 4L..]);
             var cmdsz = e.Uint32(hdr[5L * 4L..]);
@@ -540,11 +549,13 @@ namespace @internal
             {
                 return errorf("implausible mach-o header ncmd=%d cmdsz=%d", ncmd, cmdsz);
             }
+
             if (is64)
             {
-                f.Seek(4L, 1L); // skip reserved word in header
+                f.MustSeek(4L, 1L); // skip reserved word in header
             }
-            ldMachoObj m = ref new ldMachoObj(f:f,e:e,cputype:uint(e.Uint32(hdr[1*4:])),subcputype:uint(e.Uint32(hdr[2*4:])),filetype:e.Uint32(hdr[3*4:]),ncmd:uint(ncmd),flags:e.Uint32(hdr[6*4:]),is64:is64,base:base,length:length,name:pn,);
+
+            ptr<ldMachoObj> m = addr(new ldMachoObj(f:f,e:e,cputype:uint(e.Uint32(hdr[1*4:])),subcputype:uint(e.Uint32(hdr[2*4:])),filetype:e.Uint32(hdr[3*4:]),ncmd:uint(ncmd),flags:e.Uint32(hdr[6*4:]),is64:is64,base:base,length:length,name:pn,));
 
 
             if (arch.Family == sys.AMD64) 
@@ -552,32 +563,21 @@ namespace @internal
                 {
                     return errorf("mach-o object but not amd64");
                 }
-            else if (arch.Family == sys.I386) 
-                if (e != binary.LittleEndian || m.cputype != LdMachoCpu386)
-                {
-                    return errorf("mach-o object but not 386");
-                }
+
             else 
                 return errorf("mach-o %s unimplemented", arch.Name);
                         m.cmd = make_slice<ldMachoCmd>(ncmd);
-            var cmdp = make_slice<byte>(cmdsz);
+            var (cmdp, _, err) = f.Slice(uint64(cmdsz));
+            if (err != null)
             {
-                (_, err) = io.ReadFull(f, cmdp);
-
-                if (err != null)
-                {
-                    return errorf("reading cmds: %v", err);
-                } 
-
-                // read and parse load commands
-
+                return errorf("reading cmds: %v", err);
             } 
 
             // read and parse load commands
-            ref ldMachoCmd c = default;
+            ptr<ldMachoCmd> c;
 
-            ref ldMachoSymtab symtab = default;
-            ref ldMachoDysymtab dsymtab = default;
+            ptr<ldMachoSymtab> symtab;
+            ptr<ldMachoDysymtab> dsymtab;
 
             var off = uint32(len(hdr));
             {
@@ -588,7 +588,7 @@ namespace @internal
                     var ty = e.Uint32(cmdp);
                     var sz = e.Uint32(cmdp[4L..]);
                     m.cmd[i].off = off;
-                    unpackcmd(cmdp, m, ref m.cmd[i], uint(ty), uint(sz));
+                    unpackcmd(cmdp, _addr_m, _addr_m.cmd[i], uint(ty), uint(sz));
                     cmdp = cmdp[sz..];
                     off += sz;
                     if (ty == LdMachoCmdSymtab)
@@ -597,22 +597,29 @@ namespace @internal
                         {
                             return errorf("multiple symbol tables");
                         }
-                        symtab = ref m.cmd[i].sym;
-                        macholoadsym(m, symtab);
+
+                        symtab = _addr_m.cmd[i].sym;
+                        macholoadsym(_addr_m, symtab);
+
                     }
+
                     if (ty == LdMachoCmdDysymtab)
                     {
-                        dsymtab = ref m.cmd[i].dsym;
-                        macholoaddsym(m, dsymtab);
+                        dsymtab = _addr_m.cmd[i].dsym;
+                        macholoaddsym(_addr_m, dsymtab);
                     }
+
                     if ((is64 && ty == LdMachoCmdSegment64) || (!is64 && ty == LdMachoCmdSegment))
                     {
                         if (c != null)
                         {
                             return errorf("multiple load commands");
                         }
-                        c = ref m.cmd[i];
+
+                        c = _addr_m.cmd[i];
+
                     }
+
                 } 
 
                 // load text and data segments into memory.
@@ -632,28 +639,24 @@ namespace @internal
             {
                 return errorf("no load command");
             }
+
             if (symtab == null)
             { 
                 // our work is done here - no symbols means nothing can refer to this file
-                return;
+                return ;
+
             }
+
             if (int64(c.seg.fileoff + c.seg.filesz) >= length)
             {
                 return errorf("load segment out of range");
             }
-            if (f.Seek(m.@base + int64(c.seg.fileoff), 0L) < 0L)
-            {
-                return errorf("cannot load object data: seek failed");
-            }
-            var dat = make_slice<byte>(c.seg.filesz);
-            {
-                (_, err) = io.ReadFull(f, dat);
 
-                if (err != null)
-                {
-                    return errorf("cannot load object data: %v", err);
-                }
-
+            f.MustSeek(m.@base + int64(c.seg.fileoff), 0L);
+            var (dat, readOnly, err) = f.Slice(uint64(c.seg.filesz));
+            if (err != null)
+            {
+                return errorf("cannot load object data: %v", err);
             }
 
             {
@@ -661,55 +664,66 @@ namespace @internal
 
                 for (i = uint32(0L); i < c.seg.nsect; i++)
                 {
-                    var sect = ref c.seg.sect[i];
+                    var sect = _addr_c.seg.sect[i];
                     if (sect.segname != "__TEXT" && sect.segname != "__DATA")
                     {
                         continue;
                     }
+
                     if (sect.name == "__eh_frame")
                     {
                         continue;
                     }
+
                     var name = fmt.Sprintf("%s(%s/%s)", pkg, sect.segname, sect.name);
-                    var s = syms.Lookup(name, localSymVersion);
-                    if (s.Type != 0L)
+                    var s = l.LookupOrCreateSym(name, localSymVersion);
+                    var bld = l.MakeSymbolUpdater(s);
+                    if (bld.Type() != 0L)
                     {
                         return errorf("duplicate %s/%s", sect.segname, sect.name);
                     }
+
                     if (sect.flags & 0xffUL == 1L)
                     { // S_ZEROFILL
-                        s.P = make_slice<byte>(sect.size);
+                        bld.SetData(make_slice<byte>(sect.size));
+
                     }
                     else
                     {
-                        s.P = dat[sect.addr - c.seg.vmaddr..][..sect.size];
+                        bld.SetReadOnly(readOnly);
+                        bld.SetData(dat[sect.addr - c.seg.vmaddr..][..sect.size]);
                     }
-                    s.Size = int64(len(s.P));
+
+                    bld.SetSize(int64(len(bld.Data())));
 
                     if (sect.segname == "__TEXT")
                     {
                         if (sect.name == "__text")
                         {
-                            s.Type = sym.STEXT;
+                            bld.SetType(sym.STEXT);
                         }
                         else
                         {
-                            s.Type = sym.SRODATA;
+                            bld.SetType(sym.SRODATA);
                         }
+
                     }
                     else
                     {
                         if (sect.name == "__bss")
                         {
-                            s.Type = sym.SNOPTRBSS;
-                            s.P = s.P[..0L];
+                            bld.SetType(sym.SNOPTRBSS);
+                            bld.SetData(null);
                         }
                         else
                         {
-                            s.Type = sym.SNOPTRDATA;
+                            bld.SetType(sym.SNOPTRDATA);
                         }
+
                     }
+
                     sect.sym = s;
+
                 } 
 
                 // enter sub-symbols into symbol table.
@@ -726,7 +740,7 @@ namespace @internal
 
                 for (i = uint32(0L); i < symtab.nsym; i++)
                 {
-                    var machsym = ref symtab.sym[i];
+                    var machsym = _addr_symtab.sym[i];
                     if (machsym.type_ & N_STAB != 0L)
                     {
                         continue;
@@ -739,58 +753,81 @@ namespace @internal
                     {
                         name = name[1L..];
                     }
+
                     long v = 0L;
                     if (machsym.type_ & N_EXT == 0L)
                     {
                         v = localSymVersion;
                     }
-                    s = syms.Lookup(name, v);
+
+                    s = l.LookupOrCreateSym(name, v);
                     if (machsym.type_ & N_EXT == 0L)
                     {
-                        s.Attr |= sym.AttrDuplicateOK;
+                        l.SetAttrDuplicateOK(s, true);
                     }
+
+                    if (machsym.desc & (N_WEAK_REF | N_WEAK_DEF) != 0L)
+                    {
+                        l.SetAttrDuplicateOK(s, true);
+                    }
+
                     machsym.sym = s;
                     if (machsym.sectnum == 0L)
                     { // undefined
                         continue;
+
                     }
+
                     if (uint32(machsym.sectnum) > c.seg.nsect)
                     {
                         return errorf("reference to invalid section %d", machsym.sectnum);
                     }
-                    sect = ref c.seg.sect[machsym.sectnum - 1L];
+
+                    sect = _addr_c.seg.sect[machsym.sectnum - 1L];
+                    bld = l.MakeSymbolUpdater(s);
                     var outer = sect.sym;
-                    if (outer == null)
+                    if (outer == 0L)
                     {
                         continue; // ignore reference to invalid section
                     }
-                    if (s.Outer != null)
+
                     {
-                        if (s.Attr.DuplicateOK())
+                        var osym = l.OuterSym(s);
+
+                        if (osym != 0L)
                         {
-                            continue;
+                            if (l.AttrDuplicateOK(s))
+                            {
+                                continue;
+                            }
+
+                            return errorf("duplicate symbol reference: %s in both %s and %s", l.SymName(s), l.SymName(osym), l.SymName(sect.sym));
+
                         }
-                        return errorf("duplicate symbol reference: %s in both %s and %s", s.Name, s.Outer.Name, sect.sym.Name);
+
                     }
-                    s.Type = outer.Type;
-                    s.Attr |= sym.AttrSubSymbol;
-                    s.Sub = outer.Sub;
-                    outer.Sub = s;
-                    s.Outer = outer;
-                    s.Value = int64(machsym.value - sect.addr);
-                    if (!s.Attr.CgoExportDynamic())
+
+
+                    bld.SetType(l.SymType(outer));
+                    l.PrependSub(outer, s);
+
+                    bld.SetValue(int64(machsym.value - sect.addr));
+                    if (!l.AttrCgoExportDynamic(s))
                     {
-                        s.Dynimplib = ""; // satisfy dynimport
+                        bld.SetDynimplib(""); // satisfy dynimport
                     }
-                    if (outer.Type == sym.STEXT)
+
+                    if (l.SymType(outer) == sym.STEXT)
                     {
-                        if (s.Attr.External() && !s.Attr.DuplicateOK())
+                        if (bld.External() && !bld.DuplicateOK())
                         {
                             return errorf("%v: duplicate symbol definition", s);
                         }
-                        s.Attr |= sym.AttrExternal;
+
+                        bld.SetExternal(true);
+
                     }
-                    machsym.sym = s;
+
                 } 
 
                 // Sort outer lists by address, adding to textp.
@@ -807,67 +844,84 @@ namespace @internal
 
                 for (i = 0L; uint32(i) < c.seg.nsect; i++)
                 {
-                    sect = ref c.seg.sect[i];
+                    sect = _addr_c.seg.sect[i];
                     s = sect.sym;
-                    if (s == null)
+                    if (s == 0L)
                     {
                         continue;
                     }
-                    if (s.Sub != null)
+
+                    bld = l.MakeSymbolUpdater(s);
+                    if (bld.SubSym() != 0L)
                     {
-                        s.Sub = sym.SortSub(s.Sub); 
+                        bld.SortSub(); 
 
                         // assign sizes, now that we know symbols in sorted order.
                         {
                             var s1__prev2 = s1;
 
-                            var s1 = s.Sub;
+                            var s1 = bld.Sub();
 
-                            while (s1 != null)
+                            while (s1 != 0L)
                             {
-                                if (s1.Sub != null)
+                                var s1Bld = l.MakeSymbolUpdater(s1);
                                 {
-                                    s1.Size = s1.Sub.Value - s1.Value;
-                                s1 = s1.Sub;
+                                    var sub = l.SubSym(s1);
+
+                                    if (sub != 0L)
+                                    {
+                                        s1Bld.SetSize(l.SymValue(sub) - l.SymValue(s1));
+                                s1 = l.SubSym(s1);
+                                    }
+                                    else
+                                    {
+                                        var dlen = int64(len(l.Data(s)));
+                                        s1Bld.SetSize(l.SymValue(s) + dlen - l.SymValue(s1));
+                                    }
+
                                 }
-                                else
-                                {
-                                    s1.Size = s.Value + s.Size - s1.Value;
-                                }
+
                             }
 
 
                             s1 = s1__prev2;
                         }
+
                     }
-                    if (s.Type == sym.STEXT)
+
+                    if (bld.Type() == sym.STEXT)
                     {
-                        if (s.Attr.OnList())
+                        if (bld.OnList())
                         {
-                            return errorf("symbol %s listed multiple times", s.Name);
+                            return errorf("symbol %s listed multiple times", bld.Name());
                         }
-                        s.Attr |= sym.AttrOnList;
+
+                        bld.SetOnList(true);
                         textp = append(textp, s);
                         {
                             var s1__prev2 = s1;
 
-                            s1 = s.Sub;
+                            s1 = bld.Sub();
 
-                            while (s1 != null)
+                            while (s1 != 0L)
                             {
-                                if (s1.Attr.OnList())
+                                if (l.AttrOnList(s1))
                                 {
-                                    return errorf("symbol %s listed multiple times", s1.Name);
-                                s1 = s1.Sub;
+                                    return errorf("symbol %s listed multiple times", l.RawSymName(s1));
+                                s1 = l.SubSym(s1);
                                 }
-                                s1.Attr |= sym.AttrOnList;
+
+                                l.SetAttrOnList(s1, true);
                                 textp = append(textp, s1);
+
                             }
 
 
                             s1 = s1__prev2;
                         }
+
                     }
+
                 } 
 
                 // load relocations
@@ -882,122 +936,38 @@ namespace @internal
 
                 for (i = 0L; uint32(i) < c.seg.nsect; i++)
                 {
-                    sect = ref c.seg.sect[i];
+                    sect = _addr_c.seg.sect[i];
                     s = sect.sym;
-                    if (s == null)
+                    if (s == 0L)
                     {
                         continue;
                     }
-                    macholoadrel(m, sect);
+
+                    macholoadrel(_addr_m, _addr_sect);
                     if (sect.rel == null)
                     {
                         continue;
                     }
-                    var r = make_slice<sym.Reloc>(sect.nreloc);
-                    long rpi = 0L;
-Reloc:
 
+                    var sb = l.MakeSymbolUpdater(sect.sym);
                     for (var j = uint32(0L); j < sect.nreloc; j++)
                     {
-                        var rp = ref r[rpi];
-                        var rel = ref sect.rel[j];
+                        int rOff = default;                        byte rSize = default;                        long rAdd = default;                        objabi.RelocType rType = default;                        loader.Sym rSym = default;
+                        var rel = _addr_sect.rel[j];
                         if (rel.scattered != 0L)
-                        {
-                            if (arch.Family != sys.I386)
-                            { 
-                                // mach-o only uses scattered relocation on 32-bit platforms
-                                return errorf("%v: unexpected scattered relocation", s);
-                            } 
+                        { 
+                            // mach-o only uses scattered relocation on 32-bit platforms,
+                            // which are no longer supported.
+                            return errorf("%v: unexpected scattered relocation", s);
 
-                            // on 386, rewrite scattered 4/1 relocation and some
-                            // scattered 2/1 relocation into the pseudo-pc-relative
-                            // reference that it is.
-                            // assume that the second in the pair is in this section
-                            // and use that as the pc-relative base.
-                            if (j + 1L >= sect.nreloc)
-                            {
-                                return errorf("unsupported scattered relocation %d", int(rel.type_));
-                            }
-                            if (sect.rel[j + 1L].scattered == 0L || sect.rel[j + 1L].type_ != 1L || (rel.type_ != 4L && rel.type_ != 2L) || uint64(sect.rel[j + 1L].value) < sect.addr || uint64(sect.rel[j + 1L].value) >= sect.addr + sect.size)
-                            {
-                                return errorf("unsupported scattered relocation %d/%d", int(rel.type_), int(sect.rel[j + 1L].type_));
-                            }
-                            rp.Siz = rel.length;
-                            rp.Off = int32(rel.addr); 
-
-                            // NOTE(rsc): I haven't worked out why (really when)
-                            // we should ignore the addend on a
-                            // scattered relocation, but it seems that the
-                            // common case is we ignore it.
-                            // It's likely that this is not strictly correct
-                            // and that the math should look something
-                            // like the non-scattered case below.
-                            rp.Add = 0L; 
-
-                            // want to make it pc-relative aka relative to rp->off+4
-                            // but the scatter asks for relative to off = sect->rel[j+1].value - sect->addr.
-                            // adjust rp->add accordingly.
-                            rp.Type = objabi.R_PCREL;
-
-                            rp.Add += int64(uint64(int64(rp.Off) + 4L) - (uint64(sect.rel[j + 1L].value) - sect.addr)); 
-
-                            // now consider the desired symbol.
-                            // find the section where it lives.
-                            for (long k = 0L; uint32(k) < c.seg.nsect; k++)
-                            {
-                                var ks = ref c.seg.sect[k];
-                                if (ks.addr <= uint64(rel.value) && uint64(rel.value) < ks.addr + ks.size)
-                                {
-                                    if (ks.sym != null)
-                                    {
-                                        rp.Sym = ks.sym;
-                                        rp.Add += int64(uint64(rel.value) - ks.addr);
-                                    }
-                                    else if (ks.segname == "__IMPORT" && ks.name == "__pointers")
-                                    { 
-                                        // handle reference to __IMPORT/__pointers.
-                                        // how much worse can this get?
-                                        // why are we supporting 386 on the mac anyway?
-                                        rp.Type = 512L + MACHO_FAKE_GOTPCREL; 
-
-                                        // figure out which pointer this is a reference to.
-                                        k = int(uint64(ks.res1) + (uint64(rel.value) - ks.addr) / 4L); 
-
-                                        // load indirect table for __pointers
-                                        // fetch symbol number
-                                        if (dsymtab == null || k < 0L || uint32(k) >= dsymtab.nindirectsyms || dsymtab.indir == null)
-                                        {
-                                            return errorf("invalid scattered relocation: indirect symbol reference out of range");
-                                        }
-                                        k = int(dsymtab.indir[k]);
-                                        if (k < 0L || uint32(k) >= symtab.nsym)
-                                        {
-                                            return errorf("invalid scattered relocation: symbol reference out of range");
-                                        }
-                                        rp.Sym = symtab.sym[k].sym;
-                                    }
-                                    else
-                                    {
-                                        return errorf("unsupported scattered relocation: reference to %s/%s", ks.segname, ks.name);
-                                    }
-                                    rpi++; 
-
-                                    // skip #1 of 2 rel; continue skips #2 of 2.
-                                    j++;
-
-                                    _continueReloc = true;
-                                    break;
-                                }
-                            }
-
-
-                            return errorf("unsupported scattered relocation: invalid address %#x", rel.addr);
                         }
-                        rp.Siz = rel.length;
-                        rp.Type = 512L + (objabi.RelocType(rel.type_) << (int)(1L)) + objabi.RelocType(rel.pcrel);
-                        rp.Off = int32(rel.addr); 
 
-                        // Handle X86_64_RELOC_SIGNED referencing a section (rel->extrn == 0).
+                        rSize = rel.length;
+                        rType = objabi.MachoRelocOffset + (objabi.RelocType(rel.type_) << (int)(1L)) + objabi.RelocType(rel.pcrel);
+                        rOff = int32(rel.addr); 
+
+                        // Handle X86_64_RELOC_SIGNED referencing a section (rel.extrn == 0).
+                        var p = l.Data(s);
                         if (arch.Family == sys.AMD64 && rel.extrn == 0L && rel.type_ == MACHO_X86_64_RELOC_SIGNED)
                         { 
                             // Calculate the addend as the offset into the section.
@@ -1017,11 +987,12 @@ Reloc:
                             // [For future reference, see Darwin's /usr/include/mach-o/x86_64/reloc.h]
                             var secaddr = c.seg.sect[rel.symnum - 1L].addr;
 
-                            rp.Add = int64(uint64(int64(int32(e.Uint32(s.P[rp.Off..]))) + int64(rp.Off) + 4L) - secaddr);
+                            rAdd = int64(uint64(int64(int32(e.Uint32(p[rOff..]))) + int64(rOff) + 4L) - secaddr);
+
                         }
                         else
                         {
-                            rp.Add = int64(int32(e.Uint32(s.P[rp.Off..])));
+                            rAdd = int64(int32(e.Uint32(p[rOff..])));
                         } 
 
                         // An unsigned internal relocation has a value offset
@@ -1029,36 +1000,22 @@ Reloc:
                         if (arch.Family == sys.AMD64 && rel.extrn == 0L && rel.type_ == MACHO_X86_64_RELOC_UNSIGNED)
                         {
                             secaddr = c.seg.sect[rel.symnum - 1L].addr;
-                            rp.Add -= int64(secaddr);
-                        } 
-
-                        // For i386 Mach-O PC-relative, the addend is written such that
-                        // it *is* the PC being subtracted. Use that to make
-                        // it match our version of PC-relative.
-                        if (rel.pcrel != 0L && arch.Family == sys.I386)
-                        {
-                            rp.Add += int64(rp.Off) + int64(rp.Siz);
+                            rAdd -= int64(secaddr);
                         }
+
                         if (rel.extrn == 0L)
                         {
                             if (rel.symnum < 1L || rel.symnum > c.seg.nsect)
                             {
                                 return errorf("invalid relocation: section reference out of range %d vs %d", rel.symnum, c.seg.nsect);
                             }
-                            rp.Sym = c.seg.sect[rel.symnum - 1L].sym;
-                            if (rp.Sym == null)
+
+                            rSym = c.seg.sect[rel.symnum - 1L].sym;
+                            if (rSym == 0L)
                             {
                                 return errorf("invalid relocation: %s", c.seg.sect[rel.symnum - 1L].name);
-                            } 
-
-                            // References to symbols in other sections
-                            // include that information in the addend.
-                            // We only care about the delta from the
-                            // section base.
-                            if (arch.Family == sys.I386)
-                            {
-                                rp.Add -= int64(c.seg.sect[rel.symnum - 1L].addr);
                             }
+
                         }
                         else
                         {
@@ -1066,21 +1023,30 @@ Reloc:
                             {
                                 return errorf("invalid relocation: symbol reference out of range");
                             }
-                            rp.Sym = symtab.sym[rel.symnum].sym;
+
+                            rSym = symtab.sym[rel.symnum].sym;
+
                         }
-                        rpi++;
+
+                        var (r, _) = sb.AddRel(rType);
+                        r.SetOff(rOff);
+                        r.SetSiz(rSize);
+                        r.SetSym(rSym);
+                        r.SetAdd(rAdd);
+
                     }
 
-                    sort.Sort(sym.RelocByOff(r[..rpi]));
-                    s.R = r;
-                    s.R = s.R[..rpi];
+
+                    sb.SortRelocs();
+
                 }
 
 
                 i = i__prev1;
             }
 
-            return (textp, null);
+            return (textp, error.As(null!)!);
+
         }
 
         private static @string cstring(slice<byte> x)
@@ -1090,7 +1056,9 @@ Reloc:
             {
                 x = x[..i];
             }
+
             return string(x);
+
         }
     }
 }}}}

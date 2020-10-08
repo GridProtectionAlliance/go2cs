@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:42 UTC
+//     Generated on 2020 October 08 04:02:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,8 +15,6 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using token = go.go.token_package;
 using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go;
 
 namespace go {
@@ -34,14 +32,16 @@ namespace go
                 this.Lbrace = default;
                 this.Elts = default;
                 this.Rbrace = default;
+                this.Incomplete = default;
             }
 
-            public CompositeLit(Expr Type = default, token.Pos Lbrace = default, slice<Expr> Elts = default, token.Pos Rbrace = default)
+            public CompositeLit(Expr Type = default, token.Pos Lbrace = default, slice<Expr> Elts = default, token.Pos Rbrace = default, bool Incomplete = default)
             {
                 this.Type = Type;
                 this.Lbrace = Lbrace;
                 this.Elts = Elts;
                 this.Rbrace = Rbrace;
+                this.Incomplete = Incomplete;
             }
 
             // Enable comparisons between nil and CompositeLit struct
@@ -64,7 +64,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static CompositeLit CompositeLit_cast(dynamic value)
         {
-            return new CompositeLit(value.Type, value.Lbrace, value.Elts, value.Rbrace);
+            return new CompositeLit(value.Type, value.Lbrace, value.Elts, value.Rbrace, value.Incomplete);
         }
     }
 }}

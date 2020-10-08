@@ -8,7 +8,7 @@
 //
 // See "JSON and Go" for an introduction to this package:
 // https://golang.org/doc/articles/json_and_go.html
-// package json -- go2cs converted at 2020 August 29 08:35:48 UTC
+// package json -- go2cs converted at 2020 October 08 03:42:51 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\encode.go
 using bytes = go.bytes_package;
@@ -17,12 +17,10 @@ using base64 = go.encoding.base64_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using static go.builtin;
@@ -53,11 +51,12 @@ namespace encoding
         //
         // String values encode as JSON strings coerced to valid UTF-8,
         // replacing invalid bytes with the Unicode replacement rune.
-        // The angle brackets "<" and ">" are escaped to "\u003c" and "\u003e"
-        // to keep some browsers from misinterpreting JSON output as HTML.
-        // Ampersand "&" is also escaped to "\u0026" for the same reason.
-        // This escaping can be disabled using an Encoder that had SetEscapeHTML(false)
-        // called on it.
+        // So that the JSON will be safe to embed inside HTML <script> tags,
+        // the string is encoded using HTMLEscape,
+        // which replaces "<", ">", "&", U+2028, and U+2029 are escaped
+        // to "\u003c","\u003e", "\u0026", "\u2028", and "\u2029".
+        // This replacement can be disabled when using an Encoder,
+        // by calling SetEscapeHTML(false).
         //
         // Array and slice values encode as JSON arrays, except that
         // []byte encodes as a base64-encoded string, and a nil slice
@@ -144,7 +143,7 @@ namespace encoding
         // string, an integer type, or implement encoding.TextMarshaler. The map keys
         // are sorted and used as JSON object keys by applying the following rules,
         // subject to the UTF-8 coercion described for string values above:
-        //   - string keys are used directly
+        //   - keys of any string type are used directly
         //   - encoding.TextMarshalers are marshaled
         //   - integer keys are converted to strings
         //
@@ -160,17 +159,26 @@ namespace encoding
         //
         // JSON cannot represent cyclic data structures and Marshal does not
         // handle them. Passing cyclic structures to Marshal will result in
-        // an infinite recursion.
+        // an error.
         //
         public static (slice<byte>, error) Marshal(object v)
         {
-            encodeState e = ref new encodeState();
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
+            var e = newEncodeState();
+
             var err = e.marshal(v, new encOpts(escapeHTML:true));
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (e.Bytes(), null);
+            var buf = append((slice<byte>)null, e.Bytes());
+
+            encodeStatePool.Put(e);
+
+            return (buf, error.As(null!)!);
+
         }
 
         // MarshalIndent is like Marshal but applies Indent to format the output.
@@ -178,18 +186,24 @@ namespace encoding
         // followed by one or more copies of indent according to the indentation nesting.
         public static (slice<byte>, error) MarshalIndent(object v, @string prefix, @string indent)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             var (b, err) = Marshal(v);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            bytes.Buffer buf = default;
-            err = Indent(ref buf, b, prefix, indent);
+
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            err = Indent(_addr_buf, b, prefix, indent);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (buf.Bytes(), null);
+
+            return (buf.Bytes(), error.As(null!)!);
+
         }
 
         // HTMLEscape appends to dst the JSON-encoded src with <, >, &, U+2028 and U+2029
@@ -198,8 +212,10 @@ namespace encoding
         // For historical reasons, web browsers don't honor standard HTML
         // escaping within <script> tags, so an alternative JSON encoding must
         // be used.
-        public static void HTMLEscape(ref bytes.Buffer dst, slice<byte> src)
-        { 
+        public static void HTMLEscape(ptr<bytes.Buffer> _addr_dst, slice<byte> src)
+        {
+            ref bytes.Buffer dst = ref _addr_dst.val;
+ 
             // The characters can only appear in string literals,
             // so just scan the string one byte at a time.
             long start = 0L;
@@ -211,10 +227,12 @@ namespace encoding
                     {
                         dst.Write(src[start..i]);
                     }
+
                     dst.WriteString("\\u00");
                     dst.WriteByte(hex[c >> (int)(4L)]);
                     dst.WriteByte(hex[c & 0xFUL]);
                     start = i + 1L;
+
                 } 
                 // Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).
                 if (c == 0xE2UL && i + 2L < len(src) && src[i + 1L] == 0x80UL && src[i + 2L] & ~1L == 0xA8UL)
@@ -223,15 +241,19 @@ namespace encoding
                     {
                         dst.Write(src[start..i]);
                     }
+
                     dst.WriteString("\\u202");
                     dst.WriteByte(hex[src[i + 2L] & 0xFUL]);
                     start = i + 3L;
+
                 }
+
             }
             if (start < len(src))
             {
                 dst.Write(src[start..]);
             }
+
         }
 
         // Marshaler is the interface implemented by types that
@@ -248,8 +270,10 @@ namespace encoding
             public reflect.Type Type;
         }
 
-        private static @string Error(this ref UnsupportedTypeError e)
+        private static @string Error(this ptr<UnsupportedTypeError> _addr_e)
         {
+            ref UnsupportedTypeError e = ref _addr_e.val;
+
             return "json: unsupported type: " + e.Type.String();
         }
 
@@ -259,8 +283,10 @@ namespace encoding
             public @string Str;
         }
 
-        private static @string Error(this ref UnsupportedValueError e)
+        private static @string Error(this ptr<UnsupportedValueError> _addr_e)
         {
+            ref UnsupportedValueError e = ref _addr_e.val;
+
             return "json: unsupported value: " + e.Str;
         }
 
@@ -275,20 +301,41 @@ namespace encoding
             public @string S; // the whole string value that caused the error
         }
 
-        private static @string Error(this ref InvalidUTF8Error e)
+        private static @string Error(this ptr<InvalidUTF8Error> _addr_e)
         {
+            ref InvalidUTF8Error e = ref _addr_e.val;
+
             return "json: invalid UTF-8 in string: " + strconv.Quote(e.S);
         }
 
+        // A MarshalerError represents an error from calling a MarshalJSON or MarshalText method.
         public partial struct MarshalerError
         {
             public reflect.Type Type;
             public error Err;
+            public @string sourceFunc;
         }
 
-        private static @string Error(this ref MarshalerError e)
+        private static @string Error(this ptr<MarshalerError> _addr_e)
         {
-            return "json: error calling MarshalJSON for type " + e.Type.String() + ": " + e.Err.Error();
+            ref MarshalerError e = ref _addr_e.val;
+
+            var srcFunc = e.sourceFunc;
+            if (srcFunc == "")
+            {
+                srcFunc = "MarshalJSON";
+            }
+
+            return "json: error calling " + srcFunc + " for type " + e.Type.String() + ": " + e.Err.Error();
+
+        }
+
+        // Unwrap returns the underlying error.
+        private static error Unwrap(this ptr<MarshalerError> _addr_e)
+        {
+            ref MarshalerError e = ref _addr_e.val;
+
+            return error.As(e.Err)!;
         }
 
         private static @string hex = "0123456789abcdef";
@@ -297,29 +344,58 @@ namespace encoding
         private partial struct encodeState
         {
             public ref bytes.Buffer Buffer => ref Buffer_val; // accumulated output
-            public array<byte> scratch;
+            public array<byte> scratch; // Keep track of what pointers we've seen in the current recursive call
+// path, to avoid cycles that could lead to a stack overflow. Only do
+// the relatively expensive map operations if ptrLevel is larger than
+// startDetectingCyclesAfter, so that we skip the work if we're within a
+// reasonable amount of nested pointers deep.
+            public ulong ptrLevel;
         }
+
+        private static readonly long startDetectingCyclesAfter = (long)1000L;
+
+
 
         private static sync.Pool encodeStatePool = default;
 
-        private static ref encodeState newEncodeState()
+        private static ptr<encodeState> newEncodeState() => func((_, panic, __) =>
         {
             {
                 var v = encodeStatePool.Get();
 
                 if (v != null)
                 {
-                    ref encodeState e = v._<ref encodeState>();
+                    ptr<encodeState> e = v._<ptr<encodeState>>();
                     e.Reset();
-                    return e;
+                    if (len(e.ptrSeen) > 0L)
+                    {
+                        panic("ptrEncoder.encode should have emptied ptrSeen via defers");
+                    }
+
+                    e.ptrLevel = 0L;
+                    return _addr_e!;
+
                 }
 
             }
-            return @new<encodeState>();
+
+            return addr(new encodeState(ptrSeen:make(map[interface{}]struct{})));
+
+        });
+
+        // jsonError is an error wrapper type for internal use only.
+        // Panics with errors are wrapped in jsonError so that the top-level recover
+        // can distinguish intentional panics from this package.
+        private partial struct jsonError : error
+        {
+            public error error;
         }
 
-        private static error marshal(this ref encodeState _e, object v, encOpts opts) => func(_e, (ref encodeState e, Defer defer, Panic panic, Recover _) =>
+        private static error marshal(this ptr<encodeState> _addr_e, object v, encOpts opts) => func((defer, panic, _) =>
         {
+            error err = default!;
+            ref encodeState e = ref _addr_e.val;
+
             defer(() =>
             {
                 {
@@ -328,35 +404,35 @@ namespace encoding
                     if (r != null)
                     {
                         {
-                            runtime.Error (_, ok) = r._<runtime.Error>();
+                            jsonError (je, ok) = r._<jsonError>();
 
                             if (ok)
+                            {
+                                err = je.error;
+                            }
+                            else
                             {
                                 panic(r);
                             }
 
                         }
-                        {
-                            @string (s, ok) = r._<@string>();
 
-                            if (ok)
-                            {
-                                panic(s);
-                            }
-
-                        }
-                        err = r._<error>();
                     }
 
                 }
+
             }());
             e.reflectValue(reflect.ValueOf(v), opts);
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
-        private static void error(this ref encodeState _e, error err) => func(_e, (ref encodeState e, Defer _, Panic panic, Recover __) =>
+        // error aborts the encoding by panicking with err wrapped in jsonError.
+        private static void error(this ptr<encodeState> _addr_e, error err) => func((_, panic, __) =>
         {
-            panic(err);
+            ref encodeState e = ref _addr_e.val;
+
+            panic(new jsonError(err));
         });
 
         private static bool isEmptyValue(reflect.Value v)
@@ -375,10 +451,13 @@ namespace encoding
             else if (v.Kind() == reflect.Interface || v.Kind() == reflect.Ptr) 
                 return v.IsNil();
                         return false;
+
         }
 
-        private static void reflectValue(this ref encodeState e, reflect.Value v, encOpts opts)
+        private static void reflectValue(this ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             valueEncoder(v)(e, v, opts);
         }
 
@@ -388,7 +467,7 @@ namespace encoding
             public bool escapeHTML;
         }
 
-        public delegate void encoderFunc(ref encodeState, reflect.Value, encOpts);
+        public delegate void encoderFunc(ptr<encodeState>, reflect.Value, encOpts);
 
         private static sync.Map encoderCache = default; // map[reflect.Type]encoderFunc
 
@@ -398,7 +477,9 @@ namespace encoding
             {
                 return invalidValueEncoder;
             }
+
             return typeEncoder(v.Type());
+
         }
 
         private static encoderFunc typeEncoder(reflect.Type t)
@@ -443,36 +524,39 @@ namespace encoding
             wg.Done();
             encoderCache.Store(t, f);
             return f;
+
         }
 
-        private static var marshalerType = reflect.TypeOf(@new<Marshaler>()).Elem();        private static var textMarshalerType = reflect.TypeOf(@new<encoding.TextMarshaler>()).Elem();
+        private static var marshalerType = reflect.TypeOf((Marshaler.val)(null)).Elem();        private static var textMarshalerType = reflect.TypeOf((encoding.TextMarshaler.val)(null)).Elem();
 
         // newTypeEncoder constructs an encoderFunc for a type.
         // The returned encoder only checks CanAddr when allowAddr is true.
         private static encoderFunc newTypeEncoder(reflect.Type t, bool allowAddr)
-        {
+        { 
+            // If we have a non-pointer value whose type implements
+            // Marshaler with a value receiver, then we're better off taking
+            // the address of the value - otherwise we end up with an
+            // allocation as we cast the value to an interface.
+            if (t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(marshalerType))
+            {
+                return newCondAddrEncoder(addrMarshalerEncoder, newTypeEncoder(t, false));
+            }
+
             if (t.Implements(marshalerType))
             {
                 return marshalerEncoder;
             }
-            if (t.Kind() != reflect.Ptr && allowAddr)
+
+            if (t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(textMarshalerType))
             {
-                if (reflect.PtrTo(t).Implements(marshalerType))
-                {
-                    return newCondAddrEncoder(addrMarshalerEncoder, newTypeEncoder(t, false));
-                }
+                return newCondAddrEncoder(addrTextMarshalerEncoder, newTypeEncoder(t, false));
             }
+
             if (t.Implements(textMarshalerType))
             {
                 return textMarshalerEncoder;
             }
-            if (t.Kind() != reflect.Ptr && allowAddr)
-            {
-                if (reflect.PtrTo(t).Implements(textMarshalerType))
-                {
-                    return newCondAddrEncoder(addrTextMarshalerEncoder, newTypeEncoder(t, false));
-                }
-            }
+
 
             if (t.Kind() == reflect.Bool) 
                 return boolEncoder;
@@ -500,98 +584,133 @@ namespace encoding
                 return newPtrEncoder(t);
             else 
                 return unsupportedTypeEncoder;
-                    }
+            
+        }
 
-        private static void invalidValueEncoder(ref encodeState e, reflect.Value v, encOpts _)
+        private static void invalidValueEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts _)
         {
+            ref encodeState e = ref _addr_e.val;
+
             e.WriteString("null");
         }
 
-        private static void marshalerEncoder(ref encodeState e, reflect.Value v, encOpts opts)
+        private static void marshalerEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.Kind() == reflect.Ptr && v.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
-            Marshaler (m, ok) = v.Interface()._<Marshaler>();
+
+            Marshaler (m, ok) = Marshaler.As(v.Interface()._<Marshaler>())!;
             if (!ok)
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
+
             var (b, err) = m.MarshalJSON();
             if (err == null)
             { 
                 // copy JSON into buffer, checking validity.
-                err = compact(ref e.Buffer, b, opts.escapeHTML);
+                err = compact(_addr_e.Buffer, b, opts.escapeHTML);
+
             }
+
             if (err != null)
             {
-                e.error(ref new MarshalerError(v.Type(),err));
+                e.error(addr(new MarshalerError(v.Type(),err,"MarshalJSON")));
             }
+
         }
 
-        private static void addrMarshalerEncoder(ref encodeState e, reflect.Value v, encOpts _)
+        private static void addrMarshalerEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             var va = v.Addr();
             if (va.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
-            Marshaler m = va.Interface()._<Marshaler>();
+
+            Marshaler m = Marshaler.As(va.Interface()._<Marshaler>())!;
             var (b, err) = m.MarshalJSON();
             if (err == null)
             { 
                 // copy JSON into buffer, checking validity.
-                err = compact(ref e.Buffer, b, true);
+                err = compact(_addr_e.Buffer, b, opts.escapeHTML);
+
             }
+
             if (err != null)
             {
-                e.error(ref new MarshalerError(v.Type(),err));
+                e.error(addr(new MarshalerError(v.Type(),err,"MarshalJSON")));
             }
+
         }
 
-        private static void textMarshalerEncoder(ref encodeState e, reflect.Value v, encOpts opts)
+        private static void textMarshalerEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.Kind() == reflect.Ptr && v.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
-            encoding.TextMarshaler m = v.Interface()._<encoding.TextMarshaler>();
+
+            encoding.TextMarshaler (m, ok) = v.Interface()._<encoding.TextMarshaler>();
+            if (!ok)
+            {
+                e.WriteString("null");
+                return ;
+            }
+
             var (b, err) = m.MarshalText();
             if (err != null)
             {
-                e.error(ref new MarshalerError(v.Type(),err));
+                e.error(addr(new MarshalerError(v.Type(),err,"MarshalText")));
             }
+
             e.stringBytes(b, opts.escapeHTML);
+
         }
 
-        private static void addrTextMarshalerEncoder(ref encodeState e, reflect.Value v, encOpts opts)
+        private static void addrTextMarshalerEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             var va = v.Addr();
             if (va.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
+
             encoding.TextMarshaler m = va.Interface()._<encoding.TextMarshaler>();
             var (b, err) = m.MarshalText();
             if (err != null)
             {
-                e.error(ref new MarshalerError(v.Type(),err));
+                e.error(addr(new MarshalerError(v.Type(),err,"MarshalText")));
             }
+
             e.stringBytes(b, opts.escapeHTML);
+
         }
 
-        private static void boolEncoder(ref encodeState e, reflect.Value v, encOpts opts)
+        private static void boolEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (opts.quoted)
             {
                 e.WriteByte('"');
             }
+
             if (v.Bool())
             {
                 e.WriteString("true");
@@ -600,50 +719,62 @@ namespace encoding
             {
                 e.WriteString("false");
             }
+
             if (opts.quoted)
             {
                 e.WriteByte('"');
             }
+
         }
 
-        private static void intEncoder(ref encodeState e, reflect.Value v, encOpts opts)
+        private static void intEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             var b = strconv.AppendInt(e.scratch[..0L], v.Int(), 10L);
             if (opts.quoted)
             {
                 e.WriteByte('"');
             }
+
             e.Write(b);
             if (opts.quoted)
             {
                 e.WriteByte('"');
             }
+
         }
 
-        private static void uintEncoder(ref encodeState e, reflect.Value v, encOpts opts)
+        private static void uintEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             var b = strconv.AppendUint(e.scratch[..0L], v.Uint(), 10L);
             if (opts.quoted)
             {
                 e.WriteByte('"');
             }
+
             e.Write(b);
             if (opts.quoted)
             {
                 e.WriteByte('"');
             }
+
         }
 
         private partial struct floatEncoder // : long
         {
         } // number of bits
 
-        private static void encode(this floatEncoder bits, ref encodeState e, reflect.Value v, encOpts opts)
+        private static void encode(this floatEncoder bits, ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             var f = v.Float();
             if (math.IsInf(f, 0L) || math.IsNaN(f))
             {
-                e.error(ref new UnsupportedValueError(v,strconv.FormatFloat(f,'g',-1,int(bits))));
+                e.error(addr(new UnsupportedValueError(v,strconv.FormatFloat(f,'g',-1,int(bits)))));
             } 
 
             // Convert as if by ES6 number to string conversion.
@@ -661,7 +792,9 @@ namespace encoding
                 {
                     fmt = 'e';
                 }
+
             }
+
             b = strconv.AppendFloat(b, f, fmt, -1L, int(bits));
             if (fmt == 'e')
             { 
@@ -672,22 +805,28 @@ namespace encoding
                     b[n - 2L] = b[n - 1L];
                     b = b[..n - 1L];
                 }
+
             }
+
             if (opts.quoted)
             {
                 e.WriteByte('"');
             }
+
             e.Write(b);
             if (opts.quoted)
             {
                 e.WriteByte('"');
             }
+
         }
 
         private static var float32Encoder = (floatEncoder(32L)).encode;        private static var float64Encoder = (floatEncoder(64L)).encode;
 
-        private static void stringEncoder(ref encodeState e, reflect.Value v, encOpts opts)
+        private static void stringEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.Type() == numberType)
             {
                 var numStr = v.String(); 
@@ -697,84 +836,229 @@ namespace encoding
                 {
                     numStr = "0"; // Number's zero-val
                 }
+
                 if (!isValidNumber(numStr))
                 {
                     e.error(fmt.Errorf("json: invalid number literal %q", numStr));
                 }
+
+                if (opts.quoted)
+                {
+                    e.WriteByte('"');
+                }
+
                 e.WriteString(numStr);
-                return;
+                if (opts.quoted)
+                {
+                    e.WriteByte('"');
+                }
+
+                return ;
+
             }
+
             if (opts.quoted)
             {
-                var (sb, err) = Marshal(v.String());
-                if (err != null)
-                {
-                    e.error(err);
-                }
-                e.@string(string(sb), opts.escapeHTML);
+                var e2 = newEncodeState(); 
+                // Since we encode the string twice, we only need to escape HTML
+                // the first time.
+                e2.@string(v.String(), opts.escapeHTML);
+                e.stringBytes(e2.Bytes(), false);
+                encodeStatePool.Put(e2);
+
             }
             else
             {
                 e.@string(v.String(), opts.escapeHTML);
             }
+
         }
 
-        private static void interfaceEncoder(ref encodeState e, reflect.Value v, encOpts opts)
+        // isValidNumber reports whether s is a valid JSON number literal.
+        private static bool isValidNumber(@string s)
+        { 
+            // This function implements the JSON numbers grammar.
+            // See https://tools.ietf.org/html/rfc7159#section-6
+            // and https://www.json.org/img/number.png
+
+            if (s == "")
+            {
+                return false;
+            } 
+
+            // Optional -
+            if (s[0L] == '-')
+            {
+                s = s[1L..];
+                if (s == "")
+                {
+                    return false;
+                }
+
+            } 
+
+            // Digits
+
+            if (s[0L] == '0') 
+                s = s[1L..];
+            else if ('1' <= s[0L] && s[0L] <= '9') 
+                s = s[1L..];
+                while (len(s) > 0L && '0' <= s[0L] && s[0L] <= '9')
+                {
+                    s = s[1L..];
+                }
+            else 
+                return false;
+            // . followed by 1 or more digits.
+            if (len(s) >= 2L && s[0L] == '.' && '0' <= s[1L] && s[1L] <= '9')
+            {
+                s = s[2L..];
+                while (len(s) > 0L && '0' <= s[0L] && s[0L] <= '9')
+                {
+                    s = s[1L..];
+                }
+
+
+            } 
+
+            // e or E followed by an optional - or + and
+            // 1 or more digits.
+            if (len(s) >= 2L && (s[0L] == 'e' || s[0L] == 'E'))
+            {
+                s = s[1L..];
+                if (s[0L] == '+' || s[0L] == '-')
+                {
+                    s = s[1L..];
+                    if (s == "")
+                    {
+                        return false;
+                    }
+
+                }
+
+                while (len(s) > 0L && '0' <= s[0L] && s[0L] <= '9')
+                {
+                    s = s[1L..];
+                }
+
+
+            } 
+
+            // Make sure we are at the end.
+            return s == "";
+
+        }
+
+        private static void interfaceEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
+
             e.reflectValue(v.Elem(), opts);
+
         }
 
-        private static void unsupportedTypeEncoder(ref encodeState e, reflect.Value v, encOpts _)
+        private static void unsupportedTypeEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts _)
         {
-            e.error(ref new UnsupportedTypeError(v.Type()));
+            ref encodeState e = ref _addr_e.val;
+
+            e.error(addr(new UnsupportedTypeError(v.Type())));
         }
 
         private partial struct structEncoder
         {
-            public slice<field> fields;
-            public slice<encoderFunc> fieldEncs;
+            public structFields fields;
         }
 
-        private static void encode(this ref structEncoder se, ref encodeState e, reflect.Value v, encOpts opts)
+        private partial struct structFields
         {
-            e.WriteByte('{');
-            var first = true;
-            foreach (var (i, f) in se.fields)
+            public slice<field> list;
+            public map<@string, long> nameIndex;
+        }
+
+        private static void encode(this structEncoder se, ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
+        {
+            ref encodeState e = ref _addr_e.val;
+
+            var next = byte('{');
+FieldLoop:
             {
-                var fv = fieldByIndex(v, f.index);
-                if (!fv.IsValid() || f.omitEmpty && isEmptyValue(fv))
+                var i__prev1 = i;
+
+                foreach (var (__i) in se.fields.list)
                 {
-                    continue;
+                    i = __i;
+                    var f = _addr_se.fields.list[i]; 
+
+                    // Find the nested struct field by following f.index.
+                    var fv = v;
+                    {
+                        var i__prev2 = i;
+
+                        foreach (var (_, __i) in f.index)
+                        {
+                            i = __i;
+                            if (fv.Kind() == reflect.Ptr)
+                            {
+                                if (fv.IsNil())
+                                {
+                                    _continueFieldLoop = true;
+                                    break;
+                                }
+
+                                fv = fv.Elem();
+
+                            }
+
+                            fv = fv.Field(i);
+
+                        }
+
+                        i = i__prev2;
+                    }
+
+                    if (f.omitEmpty && isEmptyValue(fv))
+                    {
+                        continue;
+                    }
+
+                    e.WriteByte(next);
+                    next = ',';
+                    if (opts.escapeHTML)
+                    {
+                        e.WriteString(f.nameEscHTML);
+                    }
+                    else
+                    {
+                        e.WriteString(f.nameNonEsc);
+                    }
+
+                    opts.quoted = f.quoted;
+                    f.encoder(e, fv, opts);
+
                 }
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    e.WriteByte(',');
-                }
-                e.@string(f.name, opts.escapeHTML);
-                e.WriteByte(':');
-                opts.quoted = f.quoted;
-                se.fieldEncs[i](e, fv, opts);
+
+                i = i__prev1;
             }
-            e.WriteByte('}');
+            if (next == '{')
+            {
+                e.WriteString("{}");
+            }
+            else
+            {
+                e.WriteByte('}');
+            }
+
         }
 
         private static encoderFunc newStructEncoder(reflect.Type t)
         {
-            var fields = cachedTypeFields(t);
-            structEncoder se = ref new structEncoder(fields:fields,fieldEncs:make([]encoderFunc,len(fields)),);
-            foreach (var (i, f) in fields)
-            {
-                se.fieldEncs[i] = typeEncoder(typeByIndex(t, f.index));
-            }
+            structEncoder se = new structEncoder(fields:cachedTypeFields(t));
             return se.encode;
         }
 
@@ -783,13 +1067,16 @@ namespace encoding
             public encoderFunc elemEnc;
         }
 
-        private static void encode(this ref mapEncoder me, ref encodeState e, reflect.Value v, encOpts opts)
+        private static void encode(this mapEncoder me, ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
+
             e.WriteByte('{'); 
 
             // Extract and sort the keys.
@@ -808,10 +1095,11 @@ namespace encoding
 
                         if (err != null)
                         {
-                            e.error(ref new MarshalerError(v.Type(),err));
+                            e.error(fmt.Errorf("json: encoding error for type %q: %q", v.Type().String(), err.Error()));
                         }
 
                     }
+
                 }
 
                 i = i__prev1;
@@ -830,15 +1118,18 @@ namespace encoding
                     {
                         e.WriteByte(',');
                     }
+
                     e.@string(kv.s, opts.escapeHTML);
                     e.WriteByte(':');
                     me.elemEnc(e, v.MapIndex(kv.v), opts);
+
                 }
 
                 i = i__prev1;
             }
 
             e.WriteByte('}');
+
         }
 
         private static encoderFunc newMapEncoder(reflect.Type t)
@@ -849,35 +1140,55 @@ namespace encoding
                 {
                     return unsupportedTypeEncoder;
                 }
-                        mapEncoder me = ref new mapEncoder(typeEncoder(t.Elem()));
+
+                        mapEncoder me = new mapEncoder(typeEncoder(t.Elem()));
             return me.encode;
+
         }
 
-        private static void encodeByteSlice(ref encodeState e, reflect.Value v, encOpts _)
+        private static void encodeByteSlice(ptr<encodeState> _addr_e, reflect.Value v, encOpts _)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
+
             var s = v.Bytes();
             e.WriteByte('"');
-            if (len(s) < 1024L)
+            var encodedLen = base64.StdEncoding.EncodedLen(len(s));
+            if (encodedLen <= len(e.scratch))
             { 
-                // for small buffers, using Encode directly is much faster.
-                var dst = make_slice<byte>(base64.StdEncoding.EncodedLen(len(s)));
+                // If the encoded bytes fit in e.scratch, avoid an extra
+                // allocation and use the cheaper Encoding.Encode.
+                var dst = e.scratch[..encodedLen];
                 base64.StdEncoding.Encode(dst, s);
                 e.Write(dst);
+
+            }
+            else if (encodedLen <= 1024L)
+            { 
+                // The encoded bytes are short enough to allocate for, and
+                // Encoding.Encode is still cheaper.
+                dst = make_slice<byte>(encodedLen);
+                base64.StdEncoding.Encode(dst, s);
+                e.Write(dst);
+
             }
             else
             { 
-                // for large buffers, avoid unnecessary extra temporary
-                // buffer space.
+                // The encoded bytes are too long to cheaply allocate, and
+                // Encoding.Encode is no longer noticeably cheaper.
                 var enc = base64.NewEncoder(base64.StdEncoding, e);
                 enc.Write(s);
                 enc.Close();
+
             }
+
             e.WriteByte('"');
+
         }
 
         // sliceEncoder just wraps an arrayEncoder, checking to make sure the value isn't nil.
@@ -886,14 +1197,18 @@ namespace encoding
             public encoderFunc arrayEnc;
         }
 
-        private static void encode(this ref sliceEncoder se, ref encodeState e, reflect.Value v, encOpts opts)
+        private static void encode(this sliceEncoder se, ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
+
             se.arrayEnc(e, v, opts);
+
         }
 
         private static encoderFunc newSliceEncoder(reflect.Type t)
@@ -906,9 +1221,12 @@ namespace encoding
                 {
                     return encodeByteSlice;
                 }
+
             }
-            sliceEncoder enc = ref new sliceEncoder(newArrayEncoder(t));
+
+            sliceEncoder enc = new sliceEncoder(newArrayEncoder(t));
             return enc.encode;
+
         }
 
         private partial struct arrayEncoder
@@ -916,8 +1234,10 @@ namespace encoding
             public encoderFunc elemEnc;
         }
 
-        private static void encode(this ref arrayEncoder ae, ref encodeState e, reflect.Value v, encOpts opts)
+        private static void encode(this arrayEncoder ae, ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             e.WriteByte('[');
             var n = v.Len();
             for (long i = 0L; i < n; i++)
@@ -926,15 +1246,18 @@ namespace encoding
                 {
                     e.WriteByte(',');
                 }
+
                 ae.elemEnc(e, v.Index(i), opts);
+
             }
 
             e.WriteByte(']');
+
         }
 
         private static encoderFunc newArrayEncoder(reflect.Type t)
         {
-            arrayEncoder enc = ref new arrayEncoder(typeEncoder(t.Elem()));
+            arrayEncoder enc = new arrayEncoder(typeEncoder(t.Elem()));
             return enc.encode;
         }
 
@@ -943,19 +1266,46 @@ namespace encoding
             public encoderFunc elemEnc;
         }
 
-        private static void encode(this ref ptrEncoder pe, ref encodeState e, reflect.Value v, encOpts opts)
+        private static void encode(this ptrEncoder pe, ptr<encodeState> _addr_e, reflect.Value v, encOpts opts) => func((defer, _, __) =>
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.IsNil())
             {
                 e.WriteString("null");
-                return;
+                return ;
             }
+
+            e.ptrLevel++;
+
+            if (e.ptrLevel > startDetectingCyclesAfter)
+            { 
+                // We're a large number of nested ptrEncoder.encode calls deep;
+                // start checking if we've run into a pointer cycle.
+                var ptr = v.Interface();
+                {
+                    var (_, ok) = e.ptrSeen[ptr];
+
+                    if (ok)
+                    {
+                        e.error(addr(new UnsupportedValueError(v,fmt.Sprintf("encountered a cycle via %s",v.Type()))));
+                    }
+
+                }
+
+                e.ptrSeen[ptr] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
+                defer(delete(e.ptrSeen, ptr));
+
+            }
+
             pe.elemEnc(e, v.Elem(), opts);
-        }
+            e.ptrLevel--;
+
+        });
 
         private static encoderFunc newPtrEncoder(reflect.Type t)
         {
-            ptrEncoder enc = ref new ptrEncoder(typeEncoder(t.Elem()));
+            ptrEncoder enc = new ptrEncoder(typeEncoder(t.Elem()));
             return enc.encode;
         }
 
@@ -965,8 +1315,10 @@ namespace encoding
             public encoderFunc elseEnc;
         }
 
-        private static void encode(this ref condAddrEncoder ce, ref encodeState e, reflect.Value v, encOpts opts)
+        private static void encode(this condAddrEncoder ce, ptr<encodeState> _addr_e, reflect.Value v, encOpts opts)
         {
+            ref encodeState e = ref _addr_e.val;
+
             if (v.CanAddr())
             {
                 ce.canAddrEnc(e, v, opts);
@@ -975,13 +1327,14 @@ namespace encoding
             {
                 ce.elseEnc(e, v, opts);
             }
+
         }
 
         // newCondAddrEncoder returns an encoder that checks whether its value
         // CanAddr and delegates to canAddrEnc if so, else to elseEnc.
         private static encoderFunc newCondAddrEncoder(encoderFunc canAddrEnc, encoderFunc elseEnc)
         {
-            condAddrEncoder enc = ref new condAddrEncoder(canAddrEnc:canAddrEnc,elseEnc:elseEnc);
+            condAddrEncoder enc = new condAddrEncoder(canAddrEnc:canAddrEnc,elseEnc:elseEnc);
             return enc.encode;
         }
 
@@ -991,33 +1344,16 @@ namespace encoding
             {
                 return false;
             }
+
             foreach (var (_, c) in s)
             {
 
-                if (strings.ContainsRune("!#$%&()*+-./:<=>?@[]^_{|}~ ", c))                 else 
-                    if (!unicode.IsLetter(c) && !unicode.IsDigit(c))
-                    {
-                        return false;
-                    }
-                            }
-            return true;
-        }
-
-        private static reflect.Value fieldByIndex(reflect.Value v, slice<long> index)
-        {
-            foreach (var (_, i) in index)
-            {
-                if (v.Kind() == reflect.Ptr)
-                {
-                    if (v.IsNil())
-                    {
-                        return new reflect.Value();
-                    }
-                    v = v.Elem();
-                }
-                v = v.Field(i);
+                if (strings.ContainsRune("!#$%&()*+-./:<=>?@[]^_{|}~ ", c))                 else if (!unicode.IsLetter(c) && !unicode.IsDigit(c)) 
+                    return false;
+                
             }
-            return v;
+            return true;
+
         }
 
         private static reflect.Type typeByIndex(reflect.Type t, slice<long> index)
@@ -1028,9 +1364,12 @@ namespace encoding
                 {
                     t = t.Elem();
                 }
+
                 t = t.Field(i).Type;
+
             }
             return t;
+
         }
 
         private partial struct reflectWithString
@@ -1039,37 +1378,50 @@ namespace encoding
             public @string s;
         }
 
-        private static error resolve(this ref reflectWithString _w) => func(_w, (ref reflectWithString w, Defer _, Panic panic, Recover __) =>
+        private static error resolve(this ptr<reflectWithString> _addr_w) => func((_, panic, __) =>
         {
+            ref reflectWithString w = ref _addr_w.val;
+
             if (w.v.Kind() == reflect.String)
             {
                 w.s = w.v.String();
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             {
                 encoding.TextMarshaler (tm, ok) = w.v.Interface()._<encoding.TextMarshaler>();
 
                 if (ok)
                 {
+                    if (w.v.Kind() == reflect.Ptr && w.v.IsNil())
+                    {
+                        return error.As(null!)!;
+                    }
+
                     var (buf, err) = tm.MarshalText();
                     w.s = string(buf);
-                    return error.As(err);
+                    return error.As(err)!;
+
                 }
 
             }
 
+
             if (w.v.Kind() == reflect.Int || w.v.Kind() == reflect.Int8 || w.v.Kind() == reflect.Int16 || w.v.Kind() == reflect.Int32 || w.v.Kind() == reflect.Int64) 
                 w.s = strconv.FormatInt(w.v.Int(), 10L);
-                return error.As(null);
+                return error.As(null!)!;
             else if (w.v.Kind() == reflect.Uint || w.v.Kind() == reflect.Uint8 || w.v.Kind() == reflect.Uint16 || w.v.Kind() == reflect.Uint32 || w.v.Kind() == reflect.Uint64 || w.v.Kind() == reflect.Uintptr) 
                 w.s = strconv.FormatUint(w.v.Uint(), 10L);
-                return error.As(null);
+                return error.As(null!)!;
                         panic("unexpected map key type");
+
         });
 
         // NOTE: keep in sync with stringBytes below.
-        private static void @string(this ref encodeState e, @string s, bool escapeHTML)
+        private static void @string(this ptr<encodeState> _addr_e, @string s, bool escapeHTML)
         {
+            ref encodeState e = ref _addr_e.val;
+
             e.WriteByte('"');
             long start = 0L;
             {
@@ -1087,28 +1439,27 @@ namespace encoding
                                 i++;
                                 continue;
                             }
+
                             if (start < i)
                             {
                                 e.WriteString(s[start..i]);
                             }
+
+                            e.WriteByte('\\');
                             switch (b)
                             {
                                 case '\\': 
 
                                 case '"': 
-                                    e.WriteByte('\\');
                                     e.WriteByte(b);
                                     break;
                                 case '\n': 
-                                    e.WriteByte('\\');
                                     e.WriteByte('n');
                                     break;
                                 case '\r': 
-                                    e.WriteByte('\\');
                                     e.WriteByte('r');
                                     break;
                                 case '\t': 
-                                    e.WriteByte('\\');
                                     e.WriteByte('t');
                                     break;
                                 default: 
@@ -1117,7 +1468,7 @@ namespace encoding
                                     // because they can lead to security holes when
                                     // user-controlled strings are rendered into JSON
                                     // and served to some browsers.
-                                    e.WriteString("\\u00");
+                                    e.WriteString("u00");
                                     e.WriteByte(hex[b >> (int)(4L)]);
                                     e.WriteByte(hex[b & 0xFUL]);
                                     break;
@@ -1125,9 +1476,11 @@ namespace encoding
                             i++;
                             start = i;
                             continue;
+
                         }
 
                     }
+
                     var (c, size) = utf8.DecodeRuneInString(s[i..]);
                     if (c == utf8.RuneError && size == 1L)
                     {
@@ -1135,10 +1488,12 @@ namespace encoding
                         {
                             e.WriteString(s[start..i]);
                         }
+
                         e.WriteString("\\ufffd");
                         i += size;
                         start = i;
                         continue;
+
                     } 
                     // U+2028 is LINE SEPARATOR.
                     // U+2029 is PARAGRAPH SEPARATOR.
@@ -1153,13 +1508,17 @@ namespace encoding
                         {
                             e.WriteString(s[start..i]);
                         }
+
                         e.WriteString("\\u202");
                         e.WriteByte(hex[c & 0xFUL]);
                         i += size;
                         start = i;
                         continue;
+
                     }
+
                     i += size;
+
                 }
 
             }
@@ -1167,12 +1526,16 @@ namespace encoding
             {
                 e.WriteString(s[start..]);
             }
+
             e.WriteByte('"');
+
         }
 
         // NOTE: keep in sync with string above.
-        private static void stringBytes(this ref encodeState e, slice<byte> s, bool escapeHTML)
+        private static void stringBytes(this ptr<encodeState> _addr_e, slice<byte> s, bool escapeHTML)
         {
+            ref encodeState e = ref _addr_e.val;
+
             e.WriteByte('"');
             long start = 0L;
             {
@@ -1190,28 +1553,27 @@ namespace encoding
                                 i++;
                                 continue;
                             }
+
                             if (start < i)
                             {
                                 e.Write(s[start..i]);
                             }
+
+                            e.WriteByte('\\');
                             switch (b)
                             {
                                 case '\\': 
 
                                 case '"': 
-                                    e.WriteByte('\\');
                                     e.WriteByte(b);
                                     break;
                                 case '\n': 
-                                    e.WriteByte('\\');
                                     e.WriteByte('n');
                                     break;
                                 case '\r': 
-                                    e.WriteByte('\\');
                                     e.WriteByte('r');
                                     break;
                                 case '\t': 
-                                    e.WriteByte('\\');
                                     e.WriteByte('t');
                                     break;
                                 default: 
@@ -1220,7 +1582,7 @@ namespace encoding
                                     // because they can lead to security holes when
                                     // user-controlled strings are rendered into JSON
                                     // and served to some browsers.
-                                    e.WriteString("\\u00");
+                                    e.WriteString("u00");
                                     e.WriteByte(hex[b >> (int)(4L)]);
                                     e.WriteByte(hex[b & 0xFUL]);
                                     break;
@@ -1228,9 +1590,11 @@ namespace encoding
                             i++;
                             start = i;
                             continue;
+
                         }
 
                     }
+
                     var (c, size) = utf8.DecodeRune(s[i..]);
                     if (c == utf8.RuneError && size == 1L)
                     {
@@ -1238,10 +1602,12 @@ namespace encoding
                         {
                             e.Write(s[start..i]);
                         }
+
                         e.WriteString("\\ufffd");
                         i += size;
                         start = i;
                         continue;
+
                     } 
                     // U+2028 is LINE SEPARATOR.
                     // U+2029 is PARAGRAPH SEPARATOR.
@@ -1256,13 +1622,17 @@ namespace encoding
                         {
                             e.Write(s[start..i]);
                         }
+
                         e.WriteString("\\u202");
                         e.WriteByte(hex[c & 0xFUL]);
                         i += size;
                         start = i;
                         continue;
+
                     }
+
                     i += size;
+
                 }
 
             }
@@ -1270,7 +1640,9 @@ namespace encoding
             {
                 e.Write(s[start..]);
             }
+
             e.WriteByte('"');
+
         }
 
         // A field represents a single field found in a struct.
@@ -1280,18 +1652,15 @@ namespace encoding
             public slice<byte> nameBytes; // []byte(name)
             public Func<slice<byte>, slice<byte>, bool> equalFold; // bytes.EqualFold or equivalent
 
+            public @string nameNonEsc; // `"` + name + `":`
+            public @string nameEscHTML; // `"` + HTMLEscape(name) + `":`
+
             public bool tag;
             public slice<long> index;
             public reflect.Type typ;
             public bool omitEmpty;
             public bool quoted;
-        }
-
-        private static field fillField(field f)
-        {
-            f.nameBytes = (slice<byte>)f.name;
-            f.equalFold = foldFunc(f.nameBytes);
-            return f;
+            public encoderFunc encoder;
         }
 
         // byIndex sorts field by index sequence.
@@ -1308,7 +1677,6 @@ namespace encoding
         {
             x[i] = x[j];
             x[j] = x[i];
-
         }
 
         private static bool Less(this byIndex x, long i, long j)
@@ -1319,32 +1687,40 @@ namespace encoding
                 {
                     return false;
                 }
+
                 if (xik != x[j].index[k])
                 {
                     return xik < x[j].index[k];
                 }
+
             }
             return len(x[i].index) < len(x[j].index);
+
         }
 
         // typeFields returns a list of fields that JSON should recognize for the given type.
         // The algorithm is breadth-first search over the set of structs to include - the top struct
         // and then any reachable anonymous structs.
-        private static slice<field> typeFields(reflect.Type t)
+        private static structFields typeFields(reflect.Type t)
         { 
             // Anonymous fields to explore at the current level and the next.
             field current = new slice<field>(new field[] {  });
             field next = new slice<field>(new field[] { {typ:t} }); 
 
             // Count of queued names for current level and the next.
-            map count = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<reflect.Type, long>{};
-            map nextCount = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<reflect.Type, long>{}; 
+            map<reflect.Type, long> count = default;            map<reflect.Type, long> nextCount = default; 
+
+            // Types already visited at an earlier level.
+ 
 
             // Types already visited at an earlier level.
             map visited = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<reflect.Type, bool>{}; 
 
             // Fields found.
-            slice<field> fields = default;
+            slice<field> fields = default; 
+
+            // Buffer to run HTMLEscape on field names.
+            ref bytes.Buffer nameEscBuf = ref heap(out ptr<bytes.Buffer> _addr_nameEscBuf);
 
             while (len(next) > 0L)
             {
@@ -1353,103 +1729,137 @@ namespace encoding
                 count = nextCount;
                 nextCount = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<reflect.Type, long>{};
 
-                foreach (var (_, f) in current)
                 {
-                    if (visited[f.typ])
-                    {
-                        continue;
-                    }
-                    visited[f.typ] = true; 
+                    var f__prev2 = f;
 
-                    // Scan f.typ for fields to include.
+                    foreach (var (_, __f) in current)
                     {
-                        long i__prev3 = i;
-
-                        for (long i = 0L; i < f.typ.NumField(); i++)
+                        f = __f;
+                        if (visited[f.typ])
                         {
-                            var sf = f.typ.Field(i);
-                            var isUnexported = sf.PkgPath != "";
-                            if (sf.Anonymous)
-                            {
-                                var t = sf.Type;
-                                if (t.Kind() == reflect.Ptr)
-                                {
-                                    t = t.Elem();
-                                }
-                                if (isUnexported && t.Kind() != reflect.Struct)
-                                { 
-                                    // Ignore embedded fields of unexported non-struct types.
-                                    continue;
-                                } 
-                                // Do not ignore embedded fields of unexported struct types
-                                // since they may have exported fields.
-                            }
-                            else if (isUnexported)
-                            { 
-                                // Ignore unexported non-embedded fields.
-                                continue;
-                            }
-                            var tag = sf.Tag.Get("json");
-                            if (tag == "-")
-                            {
-                                continue;
-                            }
-                            var (name, opts) = parseTag(tag);
-                            if (!isValidTag(name))
-                            {
-                                name = "";
-                            }
-                            var index = make_slice<long>(len(f.index) + 1L);
-                            copy(index, f.index);
-                            index[len(f.index)] = i;
-
-                            var ft = sf.Type;
-                            if (ft.Name() == "" && ft.Kind() == reflect.Ptr)
-                            { 
-                                // Follow pointer.
-                                ft = ft.Elem();
-                            } 
-
-                            // Only strings, floats, integers, and booleans can be quoted.
-                            var quoted = false;
-                            if (opts.Contains("string"))
-                            {
-
-                                if (ft.Kind() == reflect.Bool || ft.Kind() == reflect.Int || ft.Kind() == reflect.Int8 || ft.Kind() == reflect.Int16 || ft.Kind() == reflect.Int32 || ft.Kind() == reflect.Int64 || ft.Kind() == reflect.Uint || ft.Kind() == reflect.Uint8 || ft.Kind() == reflect.Uint16 || ft.Kind() == reflect.Uint32 || ft.Kind() == reflect.Uint64 || ft.Kind() == reflect.Uintptr || ft.Kind() == reflect.Float32 || ft.Kind() == reflect.Float64 || ft.Kind() == reflect.String) 
-                                    quoted = true;
-                                                            } 
-
-                            // Record found field and index sequence.
-                            if (name != "" || !sf.Anonymous || ft.Kind() != reflect.Struct)
-                            {
-                                var tagged = name != "";
-                                if (name == "")
-                                {
-                                    name = sf.Name;
-                                }
-                                fields = append(fields, fillField(new field(name:name,tag:tagged,index:index,typ:ft,omitEmpty:opts.Contains("omitempty"),quoted:quoted,)));
-                                if (count[f.typ] > 1L)
-                                { 
-                                    // If there were multiple instances, add a second,
-                                    // so that the annihilation code will see a duplicate.
-                                    // It only cares about the distinction between 1 or 2,
-                                    // so don't bother generating any more copies.
-                                    fields = append(fields, fields[len(fields) - 1L]);
-                                }
-                                continue;
-                            } 
-
-                            // Record new anonymous struct to explore in next round.
-                            nextCount[ft]++;
-                            if (nextCount[ft] == 1L)
-                            {
-                                next = append(next, fillField(new field(name:ft.Name(),index:index,typ:ft)));
-                            }
+                            continue;
                         }
 
+                        visited[f.typ] = true; 
 
-                        i = i__prev3;
+                        // Scan f.typ for fields to include.
+                        {
+                            long i__prev3 = i;
+
+                            for (long i = 0L; i < f.typ.NumField(); i++)
+                            {
+                                var sf = f.typ.Field(i);
+                                var isUnexported = sf.PkgPath != "";
+                                if (sf.Anonymous)
+                                {
+                                    var t = sf.Type;
+                                    if (t.Kind() == reflect.Ptr)
+                                    {
+                                        t = t.Elem();
+                                    }
+
+                                    if (isUnexported && t.Kind() != reflect.Struct)
+                                    { 
+                                        // Ignore embedded fields of unexported non-struct types.
+                                        continue;
+
+                                    } 
+                                    // Do not ignore embedded fields of unexported struct types
+                                    // since they may have exported fields.
+                                }
+                                else if (isUnexported)
+                                { 
+                                    // Ignore unexported non-embedded fields.
+                                    continue;
+
+                                }
+
+                                var tag = sf.Tag.Get("json");
+                                if (tag == "-")
+                                {
+                                    continue;
+                                }
+
+                                var (name, opts) = parseTag(tag);
+                                if (!isValidTag(name))
+                                {
+                                    name = "";
+                                }
+
+                                var index = make_slice<long>(len(f.index) + 1L);
+                                copy(index, f.index);
+                                index[len(f.index)] = i;
+
+                                var ft = sf.Type;
+                                if (ft.Name() == "" && ft.Kind() == reflect.Ptr)
+                                { 
+                                    // Follow pointer.
+                                    ft = ft.Elem();
+
+                                } 
+
+                                // Only strings, floats, integers, and booleans can be quoted.
+                                var quoted = false;
+                                if (opts.Contains("string"))
+                                {
+
+                                    if (ft.Kind() == reflect.Bool || ft.Kind() == reflect.Int || ft.Kind() == reflect.Int8 || ft.Kind() == reflect.Int16 || ft.Kind() == reflect.Int32 || ft.Kind() == reflect.Int64 || ft.Kind() == reflect.Uint || ft.Kind() == reflect.Uint8 || ft.Kind() == reflect.Uint16 || ft.Kind() == reflect.Uint32 || ft.Kind() == reflect.Uint64 || ft.Kind() == reflect.Uintptr || ft.Kind() == reflect.Float32 || ft.Kind() == reflect.Float64 || ft.Kind() == reflect.String) 
+                                        quoted = true;
+                                    
+                                } 
+
+                                // Record found field and index sequence.
+                                if (name != "" || !sf.Anonymous || ft.Kind() != reflect.Struct)
+                                {
+                                    var tagged = name != "";
+                                    if (name == "")
+                                    {
+                                        name = sf.Name;
+                                    }
+
+                                    field field = new field(name:name,tag:tagged,index:index,typ:ft,omitEmpty:opts.Contains("omitempty"),quoted:quoted,);
+                                    field.nameBytes = (slice<byte>)field.name;
+                                    field.equalFold = foldFunc(field.nameBytes); 
+
+                                    // Build nameEscHTML and nameNonEsc ahead of time.
+                                    nameEscBuf.Reset();
+                                    nameEscBuf.WriteString("\"");
+                                    HTMLEscape(_addr_nameEscBuf, field.nameBytes);
+                                    nameEscBuf.WriteString("\":");
+                                    field.nameEscHTML = nameEscBuf.String();
+                                    field.nameNonEsc = "\"" + field.name + "\":";
+
+                                    fields = append(fields, field);
+                                    if (count[f.typ] > 1L)
+                                    { 
+                                        // If there were multiple instances, add a second,
+                                        // so that the annihilation code will see a duplicate.
+                                        // It only cares about the distinction between 1 or 2,
+                                        // so don't bother generating any more copies.
+                                        fields = append(fields, fields[len(fields) - 1L]);
+
+                                    }
+
+                                    continue;
+
+                                } 
+
+                                // Record new anonymous struct to explore in next round.
+                                nextCount[ft]++;
+                                if (nextCount[ft] == 1L)
+                                {
+                                    next = append(next, new field(name:ft.Name(),index:index,typ:ft));
+                                }
+
+                            }
+
+
+                            i = i__prev3;
+                        }
+
                     }
+
+                    f = f__prev2;
                 }
             }
 
@@ -1464,15 +1874,19 @@ namespace encoding
                 {
                     return x[i].name < x[j].name;
                 }
+
                 if (len(x[i].index) != len(x[j].index))
                 {
                     return len(x[i].index) < len(x[j].index);
                 }
+
                 if (x[i].tag != x[j].tag)
                 {
                     return x[i].tag;
                 }
+
                 return byIndex(x).Less(i, j);
+
             }); 
 
             // Delete all fields that are hidden by the Go rules for embedded fields,
@@ -1501,6 +1915,7 @@ namespace encoding
                         {
                             break;
                         }
+
                     i += advance;
                     }
 
@@ -1508,12 +1923,15 @@ namespace encoding
                     { // Only one field with this name
                         out = append(out, fi);
                         continue;
+
                     }
+
                     var (dominant, ok) = dominantField(fields[i..i + advance]);
                     if (ok)
                     {
                         out = append(out, dominant);
                     }
+
                 }
 
 
@@ -1523,7 +1941,37 @@ namespace encoding
             fields = out;
             sort.Sort(byIndex(fields));
 
-            return fields;
+            {
+                long i__prev1 = i;
+
+                foreach (var (__i) in fields)
+                {
+                    i = __i;
+                    var f = _addr_fields[i];
+                    f.encoder = typeEncoder(typeByIndex(t, f.index));
+                }
+
+                i = i__prev1;
+            }
+
+            var nameIndex = make_map<@string, long>(len(fields));
+            {
+                long i__prev1 = i;
+                field field__prev1 = field;
+
+                foreach (var (__i, __field) in fields)
+                {
+                    i = __i;
+                    field = __field;
+                    nameIndex[field.name] = i;
+                }
+
+                i = i__prev1;
+                field = field__prev1;
+            }
+
+            return new structFields(fields,nameIndex);
+
         }
 
         // dominantField looks through the fields, all of which are known to
@@ -1533,74 +1981,44 @@ namespace encoding
         // will be false: This condition is an error in Go and we skip all
         // the fields.
         private static (field, bool) dominantField(slice<field> fields)
-        { 
-            // The fields are sorted in increasing index-length order. The winner
-            // must therefore be one with the shortest index length. Drop all
-            // longer entries, which is easy: just truncate the slice.
-            var length = len(fields[0L].index);
-            long tagged = -1L; // Index of first tagged field.
-            foreach (var (i, f) in fields)
-            {
-                if (len(f.index) > length)
-                {
-                    fields = fields[..i];
-                    break;
-                }
-                if (f.tag)
-                {
-                    if (tagged >= 0L)
-                    { 
-                        // Multiple tagged fields at the same level: conflict.
-                        // Return no field.
-                        return (new field(), false);
-                    }
-                    tagged = i;
-                }
-            }
-            if (tagged >= 0L)
-            {
-                return (fields[tagged], true);
-            } 
-            // All remaining fields have the same length. If there's more than one,
-            // we have a conflict (two fields named "X" at the same level) and we
-            // return no field.
-            if (len(fields) > 1L)
+        {
+            field _p0 = default;
+            bool _p0 = default;
+ 
+            // The fields are sorted in increasing index-length order, then by presence of tag.
+            // That means that the first field is the dominant one. We need only check
+            // for error cases: two fields at top level, either both tagged or neither tagged.
+            if (len(fields) > 1L && len(fields[0L].index) == len(fields[1L].index) && fields[0L].tag == fields[1L].tag)
             {
                 return (new field(), false);
             }
+
             return (fields[0L], true);
+
         }
 
-        private static var fieldCache = default;
+        private static sync.Map fieldCache = default; // map[reflect.Type]structFields
 
         // cachedTypeFields is like typeFields but uses a cache to avoid repeated work.
-        private static slice<field> cachedTypeFields(reflect.Type t)
+        private static structFields cachedTypeFields(reflect.Type t)
         {
-            map<reflect.Type, slice<field>> (m, _) = fieldCache.value.Load()._<map<reflect.Type, slice<field>>>();
-            var f = m[t];
-            if (f != null)
             {
-                return f;
-            } 
+                var f__prev1 = f;
 
-            // Compute fields without lock.
-            // Might duplicate effort but won't hold other computations back.
-            f = typeFields(t);
-            if (f == null)
-            {
-                f = new slice<field>(new field[] {  });
+                var (f, ok) = fieldCache.Load(t);
+
+                if (ok)
+                {
+                    return f._<structFields>();
+                }
+
+                f = f__prev1;
+
             }
-            fieldCache.mu.Lock();
-            m, _ = fieldCache.value.Load()._<map<reflect.Type, slice<field>>>();
-            var newM = make_map<reflect.Type, slice<field>>(len(m) + 1L);
-            foreach (var (k, v) in m)
-            {
-                newM[k] = v;
-            }
-            newM[t] = f;
-            fieldCache.value.Store(newM);
-            fieldCache.mu.Unlock();
-            return f;
+
+            var (f, _) = fieldCache.LoadOrStore(t, typeFields(t));
+            return f._<structFields>();
+
         }
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2020 August 29 08:16:04 UTC
+// package strconv -- go2cs converted at 2020 October 08 00:33:49 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\atob.go
 
@@ -17,6 +17,9 @@ namespace go
         // Any other value returns an error.
         public static (bool, error) ParseBool(@string str)
         {
+            bool _p0 = default;
+            error _p0 = default!;
+
             switch (str)
             {
                 case "1": 
@@ -30,7 +33,7 @@ namespace go
                 case "TRUE": 
 
                 case "True": 
-                    return (true, null);
+                    return (true, error.As(null!)!);
                     break;
                 case "0": 
 
@@ -43,20 +46,23 @@ namespace go
                 case "FALSE": 
 
                 case "False": 
-                    return (false, null);
+                    return (false, error.As(null!)!);
                     break;
             }
-            return (false, syntaxError("ParseBool", str));
+            return (false, error.As(syntaxError("ParseBool", str))!);
+
         }
 
-        // FormatBool returns "true" or "false" according to the value of b
+        // FormatBool returns "true" or "false" according to the value of b.
         public static @string FormatBool(bool b)
         {
             if (b)
             {
                 return "true";
             }
+
             return "false";
+
         }
 
         // AppendBool appends "true" or "false", according to the value of b,
@@ -67,7 +73,9 @@ namespace go
             {
                 return append(dst, "true");
             }
+
             return append(dst, "false");
+
         }
     }
 }

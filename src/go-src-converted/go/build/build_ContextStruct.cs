@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:49 UTC
+//     Generated on 2020 October 08 04:02:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,10 +20,12 @@ using ast = go.go.ast_package;
 using doc = go.go.doc_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
+using goroot = go.@internal.goroot_package;
+using goversion = go.@internal.goversion_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
-using log = go.log_package;
 using os = go.os_package;
+using exec = go.os.exec_package;
 using pathpkg = go.path_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
@@ -49,6 +51,7 @@ namespace go
                 this.GOOS = default;
                 this.GOROOT = default;
                 this.GOPATH = default;
+                this.Dir = default;
                 this.CgoEnabled = default;
                 this.UseAllFiles = default;
                 this.Compiler = default;
@@ -64,12 +67,13 @@ namespace go
                 this.OpenFile = default;
             }
 
-            public Context(@string GOARCH = default, @string GOOS = default, @string GOROOT = default, @string GOPATH = default, bool CgoEnabled = default, bool UseAllFiles = default, @string Compiler = default, slice<@string> BuildTags = default, slice<@string> ReleaseTags = default, @string InstallSuffix = default, Func<@string[], @string> JoinPath = default, Func<@string, slice<@string>> SplitPathList = default, Func<@string, bool> IsAbsPath = default, Func<@string, bool> IsDir = default, Func<@string, @string, (@string, bool)> HasSubdir = default, Func<@string, (slice<os.FileInfo>, error)> ReadDir = default, Func<@string, (io.ReadCloser, error)> OpenFile = default)
+            public Context(@string GOARCH = default, @string GOOS = default, @string GOROOT = default, @string GOPATH = default, @string Dir = default, bool CgoEnabled = default, bool UseAllFiles = default, @string Compiler = default, slice<@string> BuildTags = default, slice<@string> ReleaseTags = default, @string InstallSuffix = default, Func<@string[], @string> JoinPath = default, Func<@string, slice<@string>> SplitPathList = default, Func<@string, bool> IsAbsPath = default, Func<@string, bool> IsDir = default, Func<@string, @string, (@string, bool)> HasSubdir = default, Func<@string, (slice<os.FileInfo>, error)> ReadDir = default, Func<@string, (io.ReadCloser, error)> OpenFile = default)
             {
                 this.GOARCH = GOARCH;
                 this.GOOS = GOOS;
                 this.GOROOT = GOROOT;
                 this.GOPATH = GOPATH;
+                this.Dir = Dir;
                 this.CgoEnabled = CgoEnabled;
                 this.UseAllFiles = UseAllFiles;
                 this.Compiler = Compiler;
@@ -105,7 +109,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Context Context_cast(dynamic value)
         {
-            return new Context(value.GOARCH, value.GOOS, value.GOROOT, value.GOPATH, value.CgoEnabled, value.UseAllFiles, value.Compiler, value.BuildTags, value.ReleaseTags, value.InstallSuffix, value.JoinPath, value.SplitPathList, value.IsAbsPath, value.IsDir, value.HasSubdir, value.ReadDir, value.OpenFile);
+            return new Context(value.GOARCH, value.GOOS, value.GOROOT, value.GOPATH, value.Dir, value.CgoEnabled, value.UseAllFiles, value.Compiler, value.BuildTags, value.ReleaseTags, value.InstallSuffix, value.JoinPath, value.SplitPathList, value.IsAbsPath, value.IsDir, value.HasSubdir, value.ReadDir, value.OpenFile);
         }
     }
 }}

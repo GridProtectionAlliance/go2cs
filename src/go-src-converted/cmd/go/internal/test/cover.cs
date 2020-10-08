@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package test -- go2cs converted at 2020 August 29 10:00:40 UTC
+// package test -- go2cs converted at 2020 October 08 04:33:48 UTC
 // import "cmd/go/internal/test" ==> using test = go.cmd.go.@internal.test_package
 // Original source: C:\Go\src\cmd\go\internal\test\cover.go
 using @base = go.cmd.go.@internal.@base_package;
@@ -28,10 +28,11 @@ namespace @internal
         // or in case it doesn't exist and the test is going to fail to create it (or not run).
         private static void initCoverProfile()
         {
-            if (testCoverProfile == "")
+            if (testCoverProfile == "" || testC)
             {
-                return;
+                return ;
             }
+
             if (!filepath.IsAbs(testCoverProfile) && testOutputDir != "")
             {
                 testCoverProfile = filepath.Join(testOutputDir, testCoverProfile);
@@ -43,12 +44,15 @@ namespace @internal
             {
                 @base.Fatalf("%v", err);
             }
+
             _, err = fmt.Fprintf(f, "mode: %s\n", testCoverMode);
             if (err != null)
             {
                 @base.Fatalf("%v", err);
             }
+
             coverMerge.f = f;
+
         }
 
         // mergeCoverProfile merges file into the profile stored in testCoverProfile.
@@ -57,8 +61,9 @@ namespace @internal
         {
             if (coverMerge.f == null)
             {
-                return;
+                return ;
             }
+
             coverMerge.Lock();
             defer(coverMerge.Unlock());
 
@@ -68,33 +73,39 @@ namespace @internal
             if (err != null)
             { 
                 // Test did not create profile, which is OK.
-                return;
+                return ;
+
             }
+
             defer(r.Close());
 
             var (n, err) = io.ReadFull(r, buf);
             if (n == 0L)
             {
-                return;
+                return ;
             }
+
             if (err != null || string(buf) != expect)
             {
                 fmt.Fprintf(ew, "error: test wrote malformed coverage profile.\n");
-                return;
+                return ;
             }
+
             _, err = io.Copy(coverMerge.f, r);
             if (err != null)
             {
                 fmt.Fprintf(ew, "error: saving coverage profile: %v\n", err);
             }
+
         });
 
         private static void closeCoverProfile()
         {
             if (coverMerge.f == null)
             {
-                return;
+                return ;
             }
+
             {
                 var err = coverMerge.f.Close();
 
@@ -104,6 +115,7 @@ namespace @internal
                 }
 
             }
+
         }
     }
 }}}}

@@ -1,4 +1,4 @@
-// package conversions -- go2cs converted at 2020 August 29 10:09:23 UTC
+// package conversions -- go2cs converted at 2020 October 08 04:56:21 UTC
 // import "go/internal/gccgoimporter.conversions" ==> using conversions = go.go.@internal.gccgoimporter.conversions_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\conversions.go
 
@@ -14,7 +14,7 @@ namespace @internal
         {
         }
 
-        public static readonly var Bits = Units("bits");
+        public static readonly var Bits = (var)Units("bits");
 
     }
 }}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:10 UTC
+//     Generated on 2020 October 08 04:29:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
@@ -39,9 +40,11 @@ namespace @internal
                 this.curfn = default;
                 this.progcache = default;
                 this.cacheidx = default;
+                this.nextLive = default;
+                this.prevLive = default;
             }
 
-            public Progs(ref ptr<obj.Prog> Text = default, ref ptr<obj.Prog> next = default, long pc = default, src.XPos pos = default, ref ptr<Node> curfn = default, slice<obj.Prog> progcache = default, long cacheidx = default)
+            public Progs(ref ptr<obj.Prog> Text = default, ref ptr<obj.Prog> next = default, long pc = default, src.XPos pos = default, ref ptr<Node> curfn = default, slice<obj.Prog> progcache = default, long cacheidx = default, LivenessIndex nextLive = default, LivenessIndex prevLive = default)
             {
                 this.Text = Text;
                 this.next = next;
@@ -50,6 +53,8 @@ namespace @internal
                 this.curfn = curfn;
                 this.progcache = progcache;
                 this.cacheidx = cacheidx;
+                this.nextLive = nextLive;
+                this.prevLive = prevLive;
             }
 
             // Enable comparisons between nil and Progs struct
@@ -72,7 +77,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Progs Progs_cast(dynamic value)
         {
-            return new Progs(ref value.Text, ref value.next, value.pc, value.pos, ref value.curfn, value.progcache, value.cacheidx);
+            return new Progs(ref value.Text, ref value.next, value.pc, value.pos, ref value.curfn, value.progcache, value.cacheidx, value.nextLive, value.prevLive);
         }
     }
 }}}}

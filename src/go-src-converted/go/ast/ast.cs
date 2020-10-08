@@ -5,13 +5,11 @@
 // Package ast declares the types used to represent syntax trees for Go
 // packages.
 //
-// package ast -- go2cs converted at 2020 August 29 08:46:42 UTC
+// package ast -- go2cs converted at 2020 October 08 04:02:23 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\ast.go
 using token = go.go.token_package;
 using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 using static go.builtin;
 
 namespace go {
@@ -71,12 +69,16 @@ namespace go
             public @string Text; // comment text (excluding '\n' for //-style comments)
         }
 
-        private static token.Pos Pos(this ref Comment c)
+        private static token.Pos Pos(this ptr<Comment> _addr_c)
         {
+            ref Comment c = ref _addr_c.val;
+
             return c.Slash;
         }
-        private static token.Pos End(this ref Comment c)
+        private static token.Pos End(this ptr<Comment> _addr_c)
         {
+            ref Comment c = ref _addr_c.val;
+
             return token.Pos(int(c.Slash) + len(c.Text));
         }
 
@@ -85,15 +87,19 @@ namespace go
         //
         public partial struct CommentGroup
         {
-            public slice<ref Comment> List; // len(List) > 0
+            public slice<ptr<Comment>> List; // len(List) > 0
         }
 
-        private static token.Pos Pos(this ref CommentGroup g)
+        private static token.Pos Pos(this ptr<CommentGroup> _addr_g)
         {
+            ref CommentGroup g = ref _addr_g.val;
+
             return g.List[0L].Pos();
         }
-        private static token.Pos End(this ref CommentGroup g)
+        private static token.Pos End(this ptr<CommentGroup> _addr_g)
         {
+            ref CommentGroup g = ref _addr_g.val;
+
             return g.List[len(g.List) - 1L].End();
         }
 
@@ -111,20 +117,24 @@ namespace go
             }
 
             return s[0L..i];
+
         }
 
         // Text returns the text of the comment.
         // Comment markers (//, /*, and */), the first space of a line comment, and
-        // leading and trailing empty lines are removed. Multiple empty lines are
-        // reduced to one, and trailing space on lines is trimmed. Unless the result
-        // is empty, it is newline-terminated.
-        //
-        private static @string Text(this ref CommentGroup g)
+        // leading and trailing empty lines are removed.
+        // Comment directives like "//line" and "//go:noinline" are also removed.
+        // Multiple empty lines are reduced to one, and trailing space on lines is trimmed.
+        // Unless the result is empty, it is newline-terminated.
+        private static @string Text(this ptr<CommentGroup> _addr_g)
         {
+            ref CommentGroup g = ref _addr_g.val;
+
             if (g == null)
             {
                 return "";
             }
+
             var comments = make_slice<@string>(len(g.List));
             {
                 var c__prev1 = c;
@@ -152,12 +162,29 @@ namespace go
                     {
                         case '/': 
                             //-style comment (no newline at the end)
-                            c = c[2L..]; 
-                            // strip first space - required for Example tests
-                            if (len(c) > 0L && c[0L] == ' ')
-                            {
-                                c = c[1L..];
+                            c = c[2L..];
+                            if (len(c) == 0L)
+                            { 
+                                // empty line
+                                break;
+
                             }
+
+                            if (c[0L] == ' ')
+                            { 
+                                // strip first space - required for Example tests
+                                c = c[1L..];
+                                break;
+
+                            }
+
+                            if (isDirective(c))
+                            { 
+                                // Ignore //go:noinline, //line, and so on.
+                                continue;
+
+                            }
+
                             break;
                         case '*': 
                             /*-style comment */
@@ -173,6 +200,7 @@ namespace go
                     {
                         lines = append(lines, stripTrailingWhitespace(l));
                     }
+
                 } 
 
                 // Remove leading blank lines; convert runs of
@@ -189,6 +217,7 @@ namespace go
                     lines[n] = line;
                     n++;
                 }
+
             }
             lines = lines[0L..n]; 
 
@@ -197,7 +226,46 @@ namespace go
             {
                 lines = append(lines, "");
             }
+
             return strings.Join(lines, "\n");
+
+        }
+
+        // isDirective reports whether c is a comment directive.
+        private static bool isDirective(@string c)
+        { 
+            // "//line " is a line directive.
+            // (The // has been removed.)
+            if (strings.HasPrefix(c, "line "))
+            {
+                return true;
+            } 
+
+            // "//[a-z0-9]+:[a-z0-9]"
+            // (The // has been removed.)
+            var colon = strings.Index(c, ":");
+            if (colon <= 0L || colon + 1L >= len(c))
+            {
+                return false;
+            }
+
+            for (long i = 0L; i <= colon + 1L; i++)
+            {
+                if (i == colon)
+                {
+                    continue;
+                }
+
+                var b = c[i];
+                if (!('a' <= b && b <= 'z' || '0' <= b && b <= '9'))
+                {
+                    return false;
+                }
+
+            }
+
+            return true;
+
         }
 
         // ----------------------------------------------------------------------------
@@ -206,44 +274,56 @@ namespace go
         // A Field represents a Field declaration list in a struct type,
         // a method list in an interface type, or a parameter/result declaration
         // in a signature.
+        // Field.Names is nil for unnamed parameters (parameter lists which only contain types)
+        // and embedded struct fields. In the latter case, the field name is the type name.
         //
         public partial struct Field
         {
             public ptr<CommentGroup> Doc; // associated documentation; or nil
-            public slice<ref Ident> Names; // field/method/parameter names; or nil if anonymous field
+            public slice<ptr<Ident>> Names; // field/method/parameter names; or nil
             public Expr Type; // field/method/parameter type
             public ptr<BasicLit> Tag; // field tag; or nil
             public ptr<CommentGroup> Comment; // line comments; or nil
         }
 
-        private static token.Pos Pos(this ref Field f)
+        private static token.Pos Pos(this ptr<Field> _addr_f)
         {
+            ref Field f = ref _addr_f.val;
+
             if (len(f.Names) > 0L)
             {
                 return f.Names[0L].Pos();
             }
+
             return f.Type.Pos();
+
         }
 
-        private static token.Pos End(this ref Field f)
+        private static token.Pos End(this ptr<Field> _addr_f)
         {
+            ref Field f = ref _addr_f.val;
+
             if (f.Tag != null)
             {
                 return f.Tag.End();
             }
+
             return f.Type.End();
+
         }
 
         // A FieldList represents a list of Fields, enclosed by parentheses or braces.
         public partial struct FieldList
         {
             public token.Pos Opening; // position of opening parenthesis/brace, if any
-            public slice<ref Field> List; // field list; or nil
+            public slice<ptr<Field>> List; // field list; or nil
             public token.Pos Closing; // position of closing parenthesis/brace, if any
         }
 
-        private static token.Pos Pos(this ref FieldList f)
+        private static token.Pos Pos(this ptr<FieldList> _addr_f)
         {
+            ref FieldList f = ref _addr_f.val;
+
             if (f.Opening.IsValid())
             {
                 return f.Opening;
@@ -254,11 +334,15 @@ namespace go
             {
                 return f.List[0L].Pos();
             }
+
             return token.NoPos;
+
         }
 
-        private static token.Pos End(this ref FieldList f)
+        private static token.Pos End(this ptr<FieldList> _addr_f)
         {
+            ref FieldList f = ref _addr_f.val;
+
             if (f.Closing.IsValid())
             {
                 return f.Closing + 1L;
@@ -274,12 +358,16 @@ namespace go
                 }
 
             }
+
             return token.NoPos;
+
         }
 
-        // NumFields returns the number of (named and anonymous fields) in a FieldList.
-        private static long NumFields(this ref FieldList f)
+        // NumFields returns the number of parameters or struct fields represented by a FieldList.
+        private static long NumFields(this ptr<FieldList> _addr_f)
         {
+            ref FieldList f = ref _addr_f.val;
+
             long n = 0L;
             if (f != null)
             {
@@ -288,20 +376,25 @@ namespace go
                     var m = len(g.Names);
                     if (m == 0L)
                     {
-                        m = 1L; // anonymous field
+                        m = 1L;
                     }
+
                     n += m;
+
                 }
+
             }
+
             return n;
+
         }
 
         // An expression is represented by a tree consisting of one
         // or more of the following concrete expression nodes.
         //
  
-        // A BadExpr node is a placeholder for expressions containing
-        // syntax errors for which no correct expression nodes can be
+        // A BadExpr node is a placeholder for an expression containing
+        // syntax errors for which a correct expression node cannot be
         // created.
         //
         public partial struct BadExpr
@@ -349,6 +442,7 @@ namespace go
             public token.Pos Lbrace; // position of "{"
             public slice<Expr> Elts; // list of composite elements; or nil
             public token.Pos Rbrace; // position of "}"
+            public bool Incomplete; // true if (source) expressions are missing in the Elts list
         } 
 
         // A ParenExpr node represents a parenthesized expression.
@@ -375,7 +469,7 @@ namespace go
             public token.Pos Rbrack; // position of "]"
         } 
 
-        // An SliceExpr node represents an expression followed by slice indices.
+        // A SliceExpr node represents an expression followed by slice indices.
         public partial struct SliceExpr
         {
             public Expr X; // expression
@@ -444,12 +538,14 @@ namespace go
             public Expr Key;
             public token.Pos Colon; // position of ":"
             public Expr Value;
-        }        public partial struct ChanDir // : long
+        }
+        public partial struct ChanDir // : long
         {
         }
 
-        public static readonly ChanDir SEND = 1L << (int)(iota);
-        public static readonly var RECV = 0;
+        public static readonly ChanDir SEND = (ChanDir)1L << (int)(iota);
+        public static readonly var RECV = (var)0;
+
 
         // A type is represented by a tree consisting of one
         // or more of the following type-specific expression
@@ -505,269 +601,409 @@ namespace go
             public token.Pos Arrow; // position of "<-" (token.NoPos if there is no "<-")
             public ChanDir Dir; // channel direction
             public Expr Value; // value type
-        }        private static token.Pos Pos(this ref BadExpr x)
+        }
+        private static token.Pos Pos(this ptr<BadExpr> _addr_x)
         {
+            ref BadExpr x = ref _addr_x.val;
+
             return x.From;
         }
-        private static token.Pos Pos(this ref Ident x)
+        private static token.Pos Pos(this ptr<Ident> _addr_x)
         {
+            ref Ident x = ref _addr_x.val;
+
             return x.NamePos;
         }
-        private static token.Pos Pos(this ref Ellipsis x)
+        private static token.Pos Pos(this ptr<Ellipsis> _addr_x)
         {
+            ref Ellipsis x = ref _addr_x.val;
+
             return x.Ellipsis;
         }
-        private static token.Pos Pos(this ref BasicLit x)
+        private static token.Pos Pos(this ptr<BasicLit> _addr_x)
         {
+            ref BasicLit x = ref _addr_x.val;
+
             return x.ValuePos;
         }
-        private static token.Pos Pos(this ref FuncLit x)
+        private static token.Pos Pos(this ptr<FuncLit> _addr_x)
         {
+            ref FuncLit x = ref _addr_x.val;
+
             return x.Type.Pos();
         }
-        private static token.Pos Pos(this ref CompositeLit x)
+        private static token.Pos Pos(this ptr<CompositeLit> _addr_x)
         {
+            ref CompositeLit x = ref _addr_x.val;
+
             if (x.Type != null)
             {
                 return x.Type.Pos();
             }
+
             return x.Lbrace;
+
         }
-        private static token.Pos Pos(this ref ParenExpr x)
+        private static token.Pos Pos(this ptr<ParenExpr> _addr_x)
         {
+            ref ParenExpr x = ref _addr_x.val;
+
             return x.Lparen;
         }
-        private static token.Pos Pos(this ref SelectorExpr x)
+        private static token.Pos Pos(this ptr<SelectorExpr> _addr_x)
         {
+            ref SelectorExpr x = ref _addr_x.val;
+
             return x.X.Pos();
         }
-        private static token.Pos Pos(this ref IndexExpr x)
+        private static token.Pos Pos(this ptr<IndexExpr> _addr_x)
         {
+            ref IndexExpr x = ref _addr_x.val;
+
             return x.X.Pos();
         }
-        private static token.Pos Pos(this ref SliceExpr x)
+        private static token.Pos Pos(this ptr<SliceExpr> _addr_x)
         {
+            ref SliceExpr x = ref _addr_x.val;
+
             return x.X.Pos();
         }
-        private static token.Pos Pos(this ref TypeAssertExpr x)
+        private static token.Pos Pos(this ptr<TypeAssertExpr> _addr_x)
         {
+            ref TypeAssertExpr x = ref _addr_x.val;
+
             return x.X.Pos();
         }
-        private static token.Pos Pos(this ref CallExpr x)
+        private static token.Pos Pos(this ptr<CallExpr> _addr_x)
         {
+            ref CallExpr x = ref _addr_x.val;
+
             return x.Fun.Pos();
         }
-        private static token.Pos Pos(this ref StarExpr x)
+        private static token.Pos Pos(this ptr<StarExpr> _addr_x)
         {
+            ref StarExpr x = ref _addr_x.val;
+
             return x.Star;
         }
-        private static token.Pos Pos(this ref UnaryExpr x)
+        private static token.Pos Pos(this ptr<UnaryExpr> _addr_x)
         {
+            ref UnaryExpr x = ref _addr_x.val;
+
             return x.OpPos;
         }
-        private static token.Pos Pos(this ref BinaryExpr x)
+        private static token.Pos Pos(this ptr<BinaryExpr> _addr_x)
         {
+            ref BinaryExpr x = ref _addr_x.val;
+
             return x.X.Pos();
         }
-        private static token.Pos Pos(this ref KeyValueExpr x)
+        private static token.Pos Pos(this ptr<KeyValueExpr> _addr_x)
         {
+            ref KeyValueExpr x = ref _addr_x.val;
+
             return x.Key.Pos();
         }
-        private static token.Pos Pos(this ref ArrayType x)
+        private static token.Pos Pos(this ptr<ArrayType> _addr_x)
         {
+            ref ArrayType x = ref _addr_x.val;
+
             return x.Lbrack;
         }
-        private static token.Pos Pos(this ref StructType x)
+        private static token.Pos Pos(this ptr<StructType> _addr_x)
         {
+            ref StructType x = ref _addr_x.val;
+
             return x.Struct;
         }
-        private static token.Pos Pos(this ref FuncType x)
+        private static token.Pos Pos(this ptr<FuncType> _addr_x)
         {
+            ref FuncType x = ref _addr_x.val;
+
             if (x.Func.IsValid() || x.Params == null)
             { // see issue 3870
                 return x.Func;
+
             }
+
             return x.Params.Pos(); // interface method declarations have no "func" keyword
         }
-        private static token.Pos Pos(this ref InterfaceType x)
+        private static token.Pos Pos(this ptr<InterfaceType> _addr_x)
         {
+            ref InterfaceType x = ref _addr_x.val;
+
             return x.Interface;
         }
-        private static token.Pos Pos(this ref MapType x)
+        private static token.Pos Pos(this ptr<MapType> _addr_x)
         {
+            ref MapType x = ref _addr_x.val;
+
             return x.Map;
         }
-        private static token.Pos Pos(this ref ChanType x)
+        private static token.Pos Pos(this ptr<ChanType> _addr_x)
         {
+            ref ChanType x = ref _addr_x.val;
+
             return x.Begin;
         }
 
-        private static token.Pos End(this ref BadExpr x)
+        private static token.Pos End(this ptr<BadExpr> _addr_x)
         {
+            ref BadExpr x = ref _addr_x.val;
+
             return x.To;
         }
-        private static token.Pos End(this ref Ident x)
+        private static token.Pos End(this ptr<Ident> _addr_x)
         {
+            ref Ident x = ref _addr_x.val;
+
             return token.Pos(int(x.NamePos) + len(x.Name));
         }
-        private static token.Pos End(this ref Ellipsis x)
+        private static token.Pos End(this ptr<Ellipsis> _addr_x)
         {
+            ref Ellipsis x = ref _addr_x.val;
+
             if (x.Elt != null)
             {
                 return x.Elt.End();
             }
+
             return x.Ellipsis + 3L; // len("...")
         }
-        private static token.Pos End(this ref BasicLit x)
+        private static token.Pos End(this ptr<BasicLit> _addr_x)
         {
+            ref BasicLit x = ref _addr_x.val;
+
             return token.Pos(int(x.ValuePos) + len(x.Value));
         }
-        private static token.Pos End(this ref FuncLit x)
+        private static token.Pos End(this ptr<FuncLit> _addr_x)
         {
+            ref FuncLit x = ref _addr_x.val;
+
             return x.Body.End();
         }
-        private static token.Pos End(this ref CompositeLit x)
+        private static token.Pos End(this ptr<CompositeLit> _addr_x)
         {
+            ref CompositeLit x = ref _addr_x.val;
+
             return x.Rbrace + 1L;
         }
-        private static token.Pos End(this ref ParenExpr x)
+        private static token.Pos End(this ptr<ParenExpr> _addr_x)
         {
+            ref ParenExpr x = ref _addr_x.val;
+
             return x.Rparen + 1L;
         }
-        private static token.Pos End(this ref SelectorExpr x)
+        private static token.Pos End(this ptr<SelectorExpr> _addr_x)
         {
+            ref SelectorExpr x = ref _addr_x.val;
+
             return x.Sel.End();
         }
-        private static token.Pos End(this ref IndexExpr x)
+        private static token.Pos End(this ptr<IndexExpr> _addr_x)
         {
+            ref IndexExpr x = ref _addr_x.val;
+
             return x.Rbrack + 1L;
         }
-        private static token.Pos End(this ref SliceExpr x)
+        private static token.Pos End(this ptr<SliceExpr> _addr_x)
         {
+            ref SliceExpr x = ref _addr_x.val;
+
             return x.Rbrack + 1L;
         }
-        private static token.Pos End(this ref TypeAssertExpr x)
+        private static token.Pos End(this ptr<TypeAssertExpr> _addr_x)
         {
+            ref TypeAssertExpr x = ref _addr_x.val;
+
             return x.Rparen + 1L;
         }
-        private static token.Pos End(this ref CallExpr x)
+        private static token.Pos End(this ptr<CallExpr> _addr_x)
         {
+            ref CallExpr x = ref _addr_x.val;
+
             return x.Rparen + 1L;
         }
-        private static token.Pos End(this ref StarExpr x)
+        private static token.Pos End(this ptr<StarExpr> _addr_x)
         {
+            ref StarExpr x = ref _addr_x.val;
+
             return x.X.End();
         }
-        private static token.Pos End(this ref UnaryExpr x)
+        private static token.Pos End(this ptr<UnaryExpr> _addr_x)
         {
+            ref UnaryExpr x = ref _addr_x.val;
+
             return x.X.End();
         }
-        private static token.Pos End(this ref BinaryExpr x)
+        private static token.Pos End(this ptr<BinaryExpr> _addr_x)
         {
+            ref BinaryExpr x = ref _addr_x.val;
+
             return x.Y.End();
         }
-        private static token.Pos End(this ref KeyValueExpr x)
+        private static token.Pos End(this ptr<KeyValueExpr> _addr_x)
         {
+            ref KeyValueExpr x = ref _addr_x.val;
+
             return x.Value.End();
         }
-        private static token.Pos End(this ref ArrayType x)
+        private static token.Pos End(this ptr<ArrayType> _addr_x)
         {
+            ref ArrayType x = ref _addr_x.val;
+
             return x.Elt.End();
         }
-        private static token.Pos End(this ref StructType x)
+        private static token.Pos End(this ptr<StructType> _addr_x)
         {
+            ref StructType x = ref _addr_x.val;
+
             return x.Fields.End();
         }
-        private static token.Pos End(this ref FuncType x)
+        private static token.Pos End(this ptr<FuncType> _addr_x)
         {
+            ref FuncType x = ref _addr_x.val;
+
             if (x.Results != null)
             {
                 return x.Results.End();
             }
+
             return x.Params.End();
+
         }
-        private static token.Pos End(this ref InterfaceType x)
+        private static token.Pos End(this ptr<InterfaceType> _addr_x)
         {
+            ref InterfaceType x = ref _addr_x.val;
+
             return x.Methods.End();
         }
-        private static token.Pos End(this ref MapType x)
+        private static token.Pos End(this ptr<MapType> _addr_x)
         {
+            ref MapType x = ref _addr_x.val;
+
             return x.Value.End();
         }
-        private static token.Pos End(this ref ChanType x)
+        private static token.Pos End(this ptr<ChanType> _addr_x)
         {
+            ref ChanType x = ref _addr_x.val;
+
             return x.Value.End();
         }
 
         // exprNode() ensures that only expression/type nodes can be
         // assigned to an Expr.
         //
-        private static void exprNode(this ref BadExpr _p0)
+        private static void exprNode(this ptr<BadExpr> _addr__p0)
         {
+            ref BadExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref Ident _p0)
+        private static void exprNode(this ptr<Ident> _addr__p0)
         {
+            ref Ident _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref Ellipsis _p0)
+        private static void exprNode(this ptr<Ellipsis> _addr__p0)
         {
+            ref Ellipsis _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref BasicLit _p0)
+        private static void exprNode(this ptr<BasicLit> _addr__p0)
         {
+            ref BasicLit _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref FuncLit _p0)
+        private static void exprNode(this ptr<FuncLit> _addr__p0)
         {
+            ref FuncLit _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref CompositeLit _p0)
+        private static void exprNode(this ptr<CompositeLit> _addr__p0)
         {
+            ref CompositeLit _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref ParenExpr _p0)
+        private static void exprNode(this ptr<ParenExpr> _addr__p0)
         {
+            ref ParenExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref SelectorExpr _p0)
+        private static void exprNode(this ptr<SelectorExpr> _addr__p0)
         {
+            ref SelectorExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref IndexExpr _p0)
+        private static void exprNode(this ptr<IndexExpr> _addr__p0)
         {
+            ref IndexExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref SliceExpr _p0)
+        private static void exprNode(this ptr<SliceExpr> _addr__p0)
         {
+            ref SliceExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref TypeAssertExpr _p0)
+        private static void exprNode(this ptr<TypeAssertExpr> _addr__p0)
         {
+            ref TypeAssertExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref CallExpr _p0)
+        private static void exprNode(this ptr<CallExpr> _addr__p0)
         {
+            ref CallExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref StarExpr _p0)
+        private static void exprNode(this ptr<StarExpr> _addr__p0)
         {
+            ref StarExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref UnaryExpr _p0)
+        private static void exprNode(this ptr<UnaryExpr> _addr__p0)
         {
+            ref UnaryExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref BinaryExpr _p0)
+        private static void exprNode(this ptr<BinaryExpr> _addr__p0)
         {
+            ref BinaryExpr _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref KeyValueExpr _p0)
+        private static void exprNode(this ptr<KeyValueExpr> _addr__p0)
         {
+            ref KeyValueExpr _p0 = ref _addr__p0.val;
+
         }
 
-        private static void exprNode(this ref ArrayType _p0)
+        private static void exprNode(this ptr<ArrayType> _addr__p0)
         {
+            ref ArrayType _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref StructType _p0)
+        private static void exprNode(this ptr<StructType> _addr__p0)
         {
+            ref StructType _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref FuncType _p0)
+        private static void exprNode(this ptr<FuncType> _addr__p0)
         {
+            ref FuncType _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref InterfaceType _p0)
+        private static void exprNode(this ptr<InterfaceType> _addr__p0)
         {
+            ref InterfaceType _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref MapType _p0)
+        private static void exprNode(this ptr<MapType> _addr__p0)
         {
+            ref MapType _p0 = ref _addr__p0.val;
+
         }
-        private static void exprNode(this ref ChanType _p0)
+        private static void exprNode(this ptr<ChanType> _addr__p0)
         {
+            ref ChanType _p0 = ref _addr__p0.val;
+
         }
 
         // ----------------------------------------------------------------------------
@@ -776,35 +1012,38 @@ namespace go
         // NewIdent creates a new Ident without position.
         // Useful for ASTs generated by code other than the Go parser.
         //
-        public static ref Ident NewIdent(@string name)
+        public static ptr<Ident> NewIdent(@string name)
         {
-            return ref new Ident(token.NoPos,name,nil);
+            return addr(new Ident(token.NoPos,name,nil));
         }
 
-        // IsExported reports whether name is an exported Go symbol
-        // (that is, whether it begins with an upper-case letter).
+        // IsExported reports whether name starts with an upper-case letter.
         //
         public static bool IsExported(@string name)
         {
-            var (ch, _) = utf8.DecodeRuneInString(name);
-            return unicode.IsUpper(ch);
+            return token.IsExported(name);
         }
 
-        // IsExported reports whether id is an exported Go symbol
-        // (that is, whether it begins with an uppercase letter).
+        // IsExported reports whether id starts with an upper-case letter.
         //
-        private static bool IsExported(this ref Ident id)
+        private static bool IsExported(this ptr<Ident> _addr_id)
         {
-            return IsExported(id.Name);
+            ref Ident id = ref _addr_id.val;
+
+            return token.IsExported(id.Name);
         }
 
-        private static @string String(this ref Ident id)
+        private static @string String(this ptr<Ident> _addr_id)
         {
+            ref Ident id = ref _addr_id.val;
+
             if (id != null)
             {
                 return id.Name;
             }
+
             return "<nil>";
+
         }
 
         // ----------------------------------------------------------------------------
@@ -919,7 +1158,7 @@ namespace go
         {
             public token.Pos Lbrace; // position of "{"
             public slice<Stmt> List;
-            public token.Pos Rbrace; // position of "}"
+            public token.Pos Rbrace; // position of "}", if any (may be absent due to syntax error)
         } 
 
         // An IfStmt node represents an if statement.
@@ -950,7 +1189,7 @@ namespace go
             public ptr<BlockStmt> Body; // CaseClauses only
         } 
 
-        // An TypeSwitchStmt node represents a type switch statement.
+        // A TypeSwitchStmt node represents a type switch statement.
         public partial struct TypeSwitchStmt
         {
             public token.Pos Switch; // position of "switch" keyword
@@ -968,7 +1207,7 @@ namespace go
             public slice<Stmt> Body; // statement list; or nil
         } 
 
-        // An SelectStmt node represents a select statement.
+        // A SelectStmt node represents a select statement.
         public partial struct SelectStmt
         {
             public token.Pos Select; // position of "select" keyword
@@ -995,137 +1234,203 @@ namespace go
             public token.Token Tok; // ILLEGAL if Key == nil, ASSIGN, DEFINE
             public Expr X; // value to range over
             public ptr<BlockStmt> Body;
-        }        private static token.Pos Pos(this ref BadStmt s)
+        }
+        private static token.Pos Pos(this ptr<BadStmt> _addr_s)
         {
+            ref BadStmt s = ref _addr_s.val;
+
             return s.From;
         }
-        private static token.Pos Pos(this ref DeclStmt s)
+        private static token.Pos Pos(this ptr<DeclStmt> _addr_s)
         {
+            ref DeclStmt s = ref _addr_s.val;
+
             return s.Decl.Pos();
         }
-        private static token.Pos Pos(this ref EmptyStmt s)
+        private static token.Pos Pos(this ptr<EmptyStmt> _addr_s)
         {
+            ref EmptyStmt s = ref _addr_s.val;
+
             return s.Semicolon;
         }
-        private static token.Pos Pos(this ref LabeledStmt s)
+        private static token.Pos Pos(this ptr<LabeledStmt> _addr_s)
         {
+            ref LabeledStmt s = ref _addr_s.val;
+
             return s.Label.Pos();
         }
-        private static token.Pos Pos(this ref ExprStmt s)
+        private static token.Pos Pos(this ptr<ExprStmt> _addr_s)
         {
+            ref ExprStmt s = ref _addr_s.val;
+
             return s.X.Pos();
         }
-        private static token.Pos Pos(this ref SendStmt s)
+        private static token.Pos Pos(this ptr<SendStmt> _addr_s)
         {
+            ref SendStmt s = ref _addr_s.val;
+
             return s.Chan.Pos();
         }
-        private static token.Pos Pos(this ref IncDecStmt s)
+        private static token.Pos Pos(this ptr<IncDecStmt> _addr_s)
         {
+            ref IncDecStmt s = ref _addr_s.val;
+
             return s.X.Pos();
         }
-        private static token.Pos Pos(this ref AssignStmt s)
+        private static token.Pos Pos(this ptr<AssignStmt> _addr_s)
         {
+            ref AssignStmt s = ref _addr_s.val;
+
             return s.Lhs[0L].Pos();
         }
-        private static token.Pos Pos(this ref GoStmt s)
+        private static token.Pos Pos(this ptr<GoStmt> _addr_s)
         {
+            ref GoStmt s = ref _addr_s.val;
+
             return s.Go;
         }
-        private static token.Pos Pos(this ref DeferStmt s)
+        private static token.Pos Pos(this ptr<DeferStmt> _addr_s)
         {
+            ref DeferStmt s = ref _addr_s.val;
+
             return s.Defer;
         }
-        private static token.Pos Pos(this ref ReturnStmt s)
+        private static token.Pos Pos(this ptr<ReturnStmt> _addr_s)
         {
+            ref ReturnStmt s = ref _addr_s.val;
+
             return s.Return;
         }
-        private static token.Pos Pos(this ref BranchStmt s)
+        private static token.Pos Pos(this ptr<BranchStmt> _addr_s)
         {
+            ref BranchStmt s = ref _addr_s.val;
+
             return s.TokPos;
         }
-        private static token.Pos Pos(this ref BlockStmt s)
+        private static token.Pos Pos(this ptr<BlockStmt> _addr_s)
         {
+            ref BlockStmt s = ref _addr_s.val;
+
             return s.Lbrace;
         }
-        private static token.Pos Pos(this ref IfStmt s)
+        private static token.Pos Pos(this ptr<IfStmt> _addr_s)
         {
+            ref IfStmt s = ref _addr_s.val;
+
             return s.If;
         }
-        private static token.Pos Pos(this ref CaseClause s)
+        private static token.Pos Pos(this ptr<CaseClause> _addr_s)
         {
+            ref CaseClause s = ref _addr_s.val;
+
             return s.Case;
         }
-        private static token.Pos Pos(this ref SwitchStmt s)
+        private static token.Pos Pos(this ptr<SwitchStmt> _addr_s)
         {
+            ref SwitchStmt s = ref _addr_s.val;
+
             return s.Switch;
         }
-        private static token.Pos Pos(this ref TypeSwitchStmt s)
+        private static token.Pos Pos(this ptr<TypeSwitchStmt> _addr_s)
         {
+            ref TypeSwitchStmt s = ref _addr_s.val;
+
             return s.Switch;
         }
-        private static token.Pos Pos(this ref CommClause s)
+        private static token.Pos Pos(this ptr<CommClause> _addr_s)
         {
+            ref CommClause s = ref _addr_s.val;
+
             return s.Case;
         }
-        private static token.Pos Pos(this ref SelectStmt s)
+        private static token.Pos Pos(this ptr<SelectStmt> _addr_s)
         {
+            ref SelectStmt s = ref _addr_s.val;
+
             return s.Select;
         }
-        private static token.Pos Pos(this ref ForStmt s)
+        private static token.Pos Pos(this ptr<ForStmt> _addr_s)
         {
+            ref ForStmt s = ref _addr_s.val;
+
             return s.For;
         }
-        private static token.Pos Pos(this ref RangeStmt s)
+        private static token.Pos Pos(this ptr<RangeStmt> _addr_s)
         {
+            ref RangeStmt s = ref _addr_s.val;
+
             return s.For;
         }
 
-        private static token.Pos End(this ref BadStmt s)
+        private static token.Pos End(this ptr<BadStmt> _addr_s)
         {
+            ref BadStmt s = ref _addr_s.val;
+
             return s.To;
         }
-        private static token.Pos End(this ref DeclStmt s)
+        private static token.Pos End(this ptr<DeclStmt> _addr_s)
         {
+            ref DeclStmt s = ref _addr_s.val;
+
             return s.Decl.End();
         }
-        private static token.Pos End(this ref EmptyStmt s)
+        private static token.Pos End(this ptr<EmptyStmt> _addr_s)
         {
+            ref EmptyStmt s = ref _addr_s.val;
+
             if (s.Implicit)
             {
                 return s.Semicolon;
             }
+
             return s.Semicolon + 1L; /* len(";") */
         }
-        private static token.Pos End(this ref LabeledStmt s)
+        private static token.Pos End(this ptr<LabeledStmt> _addr_s)
         {
+            ref LabeledStmt s = ref _addr_s.val;
+
             return s.Stmt.End();
         }
-        private static token.Pos End(this ref ExprStmt s)
+        private static token.Pos End(this ptr<ExprStmt> _addr_s)
         {
+            ref ExprStmt s = ref _addr_s.val;
+
             return s.X.End();
         }
-        private static token.Pos End(this ref SendStmt s)
+        private static token.Pos End(this ptr<SendStmt> _addr_s)
         {
+            ref SendStmt s = ref _addr_s.val;
+
             return s.Value.End();
         }
-        private static token.Pos End(this ref IncDecStmt s)
+        private static token.Pos End(this ptr<IncDecStmt> _addr_s)
         {
+            ref IncDecStmt s = ref _addr_s.val;
+
             return s.TokPos + 2L; /* len("++") */
         }
-        private static token.Pos End(this ref AssignStmt s)
+        private static token.Pos End(this ptr<AssignStmt> _addr_s)
         {
+            ref AssignStmt s = ref _addr_s.val;
+
             return s.Rhs[len(s.Rhs) - 1L].End();
         }
-        private static token.Pos End(this ref GoStmt s)
+        private static token.Pos End(this ptr<GoStmt> _addr_s)
         {
+            ref GoStmt s = ref _addr_s.val;
+
             return s.Call.End();
         }
-        private static token.Pos End(this ref DeferStmt s)
+        private static token.Pos End(this ptr<DeferStmt> _addr_s)
         {
+            ref DeferStmt s = ref _addr_s.val;
+
             return s.Call.End();
         }
-        private static token.Pos End(this ref ReturnStmt s)
+        private static token.Pos End(this ptr<ReturnStmt> _addr_s)
         {
+            ref ReturnStmt s = ref _addr_s.val;
+
             {
                 var n = len(s.Results);
 
@@ -1135,30 +1440,59 @@ namespace go
                 }
 
             }
+
             return s.Return + 6L; // len("return")
         }
-        private static token.Pos End(this ref BranchStmt s)
+        private static token.Pos End(this ptr<BranchStmt> _addr_s)
         {
+            ref BranchStmt s = ref _addr_s.val;
+
             if (s.Label != null)
             {
                 return s.Label.End();
             }
+
             return token.Pos(int(s.TokPos) + len(s.Tok.String()));
+
         }
-        private static token.Pos End(this ref BlockStmt s)
+        private static token.Pos End(this ptr<BlockStmt> _addr_s)
         {
-            return s.Rbrace + 1L;
+            ref BlockStmt s = ref _addr_s.val;
+
+            if (s.Rbrace.IsValid())
+            {
+                return s.Rbrace + 1L;
+            }
+
+            {
+                var n = len(s.List);
+
+                if (n > 0L)
+                {
+                    return s.List[n - 1L].End();
+                }
+
+            }
+
+            return s.Lbrace + 1L;
+
         }
-        private static token.Pos End(this ref IfStmt s)
+        private static token.Pos End(this ptr<IfStmt> _addr_s)
         {
+            ref IfStmt s = ref _addr_s.val;
+
             if (s.Else != null)
             {
                 return s.Else.End();
             }
+
             return s.Body.End();
+
         }
-        private static token.Pos End(this ref CaseClause s)
+        private static token.Pos End(this ptr<CaseClause> _addr_s)
         {
+            ref CaseClause s = ref _addr_s.val;
+
             {
                 var n = len(s.Body);
 
@@ -1168,18 +1502,26 @@ namespace go
                 }
 
             }
+
             return s.Colon + 1L;
+
         }
-        private static token.Pos End(this ref SwitchStmt s)
+        private static token.Pos End(this ptr<SwitchStmt> _addr_s)
         {
+            ref SwitchStmt s = ref _addr_s.val;
+
             return s.Body.End();
         }
-        private static token.Pos End(this ref TypeSwitchStmt s)
+        private static token.Pos End(this ptr<TypeSwitchStmt> _addr_s)
         {
+            ref TypeSwitchStmt s = ref _addr_s.val;
+
             return s.Body.End();
         }
-        private static token.Pos End(this ref CommClause s)
+        private static token.Pos End(this ptr<CommClause> _addr_s)
         {
+            ref CommClause s = ref _addr_s.val;
+
             {
                 var n = len(s.Body);
 
@@ -1189,86 +1531,136 @@ namespace go
                 }
 
             }
+
             return s.Colon + 1L;
+
         }
-        private static token.Pos End(this ref SelectStmt s)
+        private static token.Pos End(this ptr<SelectStmt> _addr_s)
         {
+            ref SelectStmt s = ref _addr_s.val;
+
             return s.Body.End();
         }
-        private static token.Pos End(this ref ForStmt s)
+        private static token.Pos End(this ptr<ForStmt> _addr_s)
         {
+            ref ForStmt s = ref _addr_s.val;
+
             return s.Body.End();
         }
-        private static token.Pos End(this ref RangeStmt s)
+        private static token.Pos End(this ptr<RangeStmt> _addr_s)
         {
+            ref RangeStmt s = ref _addr_s.val;
+
             return s.Body.End();
         }
 
         // stmtNode() ensures that only statement nodes can be
         // assigned to a Stmt.
         //
-        private static void stmtNode(this ref BadStmt _p0)
+        private static void stmtNode(this ptr<BadStmt> _addr__p0)
         {
+            ref BadStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref DeclStmt _p0)
+        private static void stmtNode(this ptr<DeclStmt> _addr__p0)
         {
+            ref DeclStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref EmptyStmt _p0)
+        private static void stmtNode(this ptr<EmptyStmt> _addr__p0)
         {
+            ref EmptyStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref LabeledStmt _p0)
+        private static void stmtNode(this ptr<LabeledStmt> _addr__p0)
         {
+            ref LabeledStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref ExprStmt _p0)
+        private static void stmtNode(this ptr<ExprStmt> _addr__p0)
         {
+            ref ExprStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref SendStmt _p0)
+        private static void stmtNode(this ptr<SendStmt> _addr__p0)
         {
+            ref SendStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref IncDecStmt _p0)
+        private static void stmtNode(this ptr<IncDecStmt> _addr__p0)
         {
+            ref IncDecStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref AssignStmt _p0)
+        private static void stmtNode(this ptr<AssignStmt> _addr__p0)
         {
+            ref AssignStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref GoStmt _p0)
+        private static void stmtNode(this ptr<GoStmt> _addr__p0)
         {
+            ref GoStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref DeferStmt _p0)
+        private static void stmtNode(this ptr<DeferStmt> _addr__p0)
         {
+            ref DeferStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref ReturnStmt _p0)
+        private static void stmtNode(this ptr<ReturnStmt> _addr__p0)
         {
+            ref ReturnStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref BranchStmt _p0)
+        private static void stmtNode(this ptr<BranchStmt> _addr__p0)
         {
+            ref BranchStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref BlockStmt _p0)
+        private static void stmtNode(this ptr<BlockStmt> _addr__p0)
         {
+            ref BlockStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref IfStmt _p0)
+        private static void stmtNode(this ptr<IfStmt> _addr__p0)
         {
+            ref IfStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref CaseClause _p0)
+        private static void stmtNode(this ptr<CaseClause> _addr__p0)
         {
+            ref CaseClause _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref SwitchStmt _p0)
+        private static void stmtNode(this ptr<SwitchStmt> _addr__p0)
         {
+            ref SwitchStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref TypeSwitchStmt _p0)
+        private static void stmtNode(this ptr<TypeSwitchStmt> _addr__p0)
         {
+            ref TypeSwitchStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref CommClause _p0)
+        private static void stmtNode(this ptr<CommClause> _addr__p0)
         {
+            ref CommClause _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref SelectStmt _p0)
+        private static void stmtNode(this ptr<SelectStmt> _addr__p0)
         {
+            ref SelectStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref ForStmt _p0)
+        private static void stmtNode(this ptr<ForStmt> _addr__p0)
         {
+            ref ForStmt _p0 = ref _addr__p0.val;
+
         }
-        private static void stmtNode(this ref RangeStmt _p0)
+        private static void stmtNode(this ptr<RangeStmt> _addr__p0)
         {
+            ref RangeStmt _p0 = ref _addr__p0.val;
+
         }
 
         // ----------------------------------------------------------------------------
@@ -1300,7 +1692,7 @@ namespace go
         public partial struct ValueSpec
         {
             public ptr<CommentGroup> Doc; // associated documentation; or nil
-            public slice<ref Ident> Names; // value names (len(Names) > 0)
+            public slice<ptr<Ident>> Names; // value names (len(Names) > 0)
             public Expr Type; // value type; or nil
             public slice<Expr> Values; // initial values; or nil
             public ptr<CommentGroup> Comment; // line comments; or nil
@@ -1314,34 +1706,49 @@ namespace go
             public token.Pos Assign; // position of '=', if any
             public Expr Type; // *Ident, *ParenExpr, *SelectorExpr, *StarExpr, or any of the *XxxTypes
             public ptr<CommentGroup> Comment; // line comments; or nil
-        }        private static token.Pos Pos(this ref ImportSpec s)
+        }
+        private static token.Pos Pos(this ptr<ImportSpec> _addr_s)
         {
+            ref ImportSpec s = ref _addr_s.val;
+
             if (s.Name != null)
             {
                 return s.Name.Pos();
             }
+
             return s.Path.Pos();
+
         }
-        private static token.Pos Pos(this ref ValueSpec s)
+        private static token.Pos Pos(this ptr<ValueSpec> _addr_s)
         {
+            ref ValueSpec s = ref _addr_s.val;
+
             return s.Names[0L].Pos();
         }
-        private static token.Pos Pos(this ref TypeSpec s)
+        private static token.Pos Pos(this ptr<TypeSpec> _addr_s)
         {
+            ref TypeSpec s = ref _addr_s.val;
+
             return s.Name.Pos();
         }
 
-        private static token.Pos End(this ref ImportSpec s)
+        private static token.Pos End(this ptr<ImportSpec> _addr_s)
         {
+            ref ImportSpec s = ref _addr_s.val;
+
             if (s.EndPos != 0L)
             {
                 return s.EndPos;
             }
+
             return s.Path.End();
+
         }
 
-        private static token.Pos End(this ref ValueSpec s)
+        private static token.Pos End(this ptr<ValueSpec> _addr_s)
         {
+            ref ValueSpec s = ref _addr_s.val;
+
             {
                 var n = len(s.Values);
 
@@ -1351,35 +1758,46 @@ namespace go
                 }
 
             }
+
             if (s.Type != null)
             {
                 return s.Type.End();
             }
+
             return s.Names[len(s.Names) - 1L].End();
+
         }
-        private static token.Pos End(this ref TypeSpec s)
+        private static token.Pos End(this ptr<TypeSpec> _addr_s)
         {
+            ref TypeSpec s = ref _addr_s.val;
+
             return s.Type.End();
         }
 
         // specNode() ensures that only spec nodes can be
         // assigned to a Spec.
         //
-        private static void specNode(this ref ImportSpec _p0)
+        private static void specNode(this ptr<ImportSpec> _addr__p0)
         {
+            ref ImportSpec _p0 = ref _addr__p0.val;
+
         }
-        private static void specNode(this ref ValueSpec _p0)
+        private static void specNode(this ptr<ValueSpec> _addr__p0)
         {
+            ref ValueSpec _p0 = ref _addr__p0.val;
+
         }
-        private static void specNode(this ref TypeSpec _p0)
+        private static void specNode(this ptr<TypeSpec> _addr__p0)
         {
+            ref TypeSpec _p0 = ref _addr__p0.val;
+
         }
 
         // A declaration is represented by one of the following declaration nodes.
         //
  
-        // A BadDecl node is a placeholder for declarations containing
-        // syntax errors for which no correct declaration nodes can be
+        // A BadDecl node is a placeholder for a declaration containing
+        // syntax errors for which a correct declaration node cannot be
         // created.
         //
         public partial struct BadDecl
@@ -1417,51 +1835,74 @@ namespace go
             public ptr<Ident> Name; // function/method name
             public ptr<FuncType> Type; // function signature: parameters, results, and position of "func" keyword
             public ptr<BlockStmt> Body; // function body; or nil for external (non-Go) function
-        }        private static token.Pos Pos(this ref BadDecl d)
+        }
+        private static token.Pos Pos(this ptr<BadDecl> _addr_d)
         {
+            ref BadDecl d = ref _addr_d.val;
+
             return d.From;
         }
-        private static token.Pos Pos(this ref GenDecl d)
+        private static token.Pos Pos(this ptr<GenDecl> _addr_d)
         {
+            ref GenDecl d = ref _addr_d.val;
+
             return d.TokPos;
         }
-        private static token.Pos Pos(this ref FuncDecl d)
+        private static token.Pos Pos(this ptr<FuncDecl> _addr_d)
         {
+            ref FuncDecl d = ref _addr_d.val;
+
             return d.Type.Pos();
         }
 
-        private static token.Pos End(this ref BadDecl d)
+        private static token.Pos End(this ptr<BadDecl> _addr_d)
         {
+            ref BadDecl d = ref _addr_d.val;
+
             return d.To;
         }
-        private static token.Pos End(this ref GenDecl d)
+        private static token.Pos End(this ptr<GenDecl> _addr_d)
         {
+            ref GenDecl d = ref _addr_d.val;
+
             if (d.Rparen.IsValid())
             {
                 return d.Rparen + 1L;
             }
+
             return d.Specs[0L].End();
+
         }
-        private static token.Pos End(this ref FuncDecl d)
+        private static token.Pos End(this ptr<FuncDecl> _addr_d)
         {
+            ref FuncDecl d = ref _addr_d.val;
+
             if (d.Body != null)
             {
                 return d.Body.End();
             }
+
             return d.Type.End();
+
         }
 
         // declNode() ensures that only declaration nodes can be
         // assigned to a Decl.
         //
-        private static void declNode(this ref BadDecl _p0)
+        private static void declNode(this ptr<BadDecl> _addr__p0)
         {
+            ref BadDecl _p0 = ref _addr__p0.val;
+
         }
-        private static void declNode(this ref GenDecl _p0)
+        private static void declNode(this ptr<GenDecl> _addr__p0)
         {
+            ref GenDecl _p0 = ref _addr__p0.val;
+
         }
-        private static void declNode(this ref FuncDecl _p0)
+        private static void declNode(this ptr<FuncDecl> _addr__p0)
         {
+            ref FuncDecl _p0 = ref _addr__p0.val;
+
         }
 
         // ----------------------------------------------------------------------------
@@ -1493,17 +1934,21 @@ namespace go
             public ptr<Ident> Name; // package name
             public slice<Decl> Decls; // top-level declarations; or nil
             public ptr<Scope> Scope; // package scope (this file only)
-            public slice<ref ImportSpec> Imports; // imports in this file
-            public slice<ref Ident> Unresolved; // unresolved identifiers in this file
-            public slice<ref CommentGroup> Comments; // list of all comments in the source file
+            public slice<ptr<ImportSpec>> Imports; // imports in this file
+            public slice<ptr<Ident>> Unresolved; // unresolved identifiers in this file
+            public slice<ptr<CommentGroup>> Comments; // list of all comments in the source file
         }
 
-        private static token.Pos Pos(this ref File f)
+        private static token.Pos Pos(this ptr<File> _addr_f)
         {
+            ref File f = ref _addr_f.val;
+
             return f.Package;
         }
-        private static token.Pos End(this ref File f)
+        private static token.Pos End(this ptr<File> _addr_f)
         {
+            ref File f = ref _addr_f.val;
+
             {
                 var n = len(f.Decls);
 
@@ -1513,7 +1958,9 @@ namespace go
                 }
 
             }
+
             return f.Name.End();
+
         }
 
         // A Package node represents a set of source files
@@ -1523,16 +1970,20 @@ namespace go
         {
             public @string Name; // package name
             public ptr<Scope> Scope; // package scope across all files
-            public map<@string, ref Object> Imports; // map of package id -> package object
-            public map<@string, ref File> Files; // Go source files by filename
+            public map<@string, ptr<Object>> Imports; // map of package id -> package object
+            public map<@string, ptr<File>> Files; // Go source files by filename
         }
 
-        private static token.Pos Pos(this ref Package p)
+        private static token.Pos Pos(this ptr<Package> _addr_p)
         {
+            ref Package p = ref _addr_p.val;
+
             return token.NoPos;
         }
-        private static token.Pos End(this ref Package p)
+        private static token.Pos End(this ptr<Package> _addr_p)
         {
+            ref Package p = ref _addr_p.val;
+
             return token.NoPos;
         }
     }

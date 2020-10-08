@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:26 UTC
+//     Generated on 2020 October 08 03:41:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,14 +15,17 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
+using fmt = go.fmt_package;
 using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using http = go.net.http_package;
+using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using time = go.time_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -59,7 +62,7 @@ namespace http
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,10 +76,10 @@ namespace http
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) WriteByRef(ref T value, slice<byte> p);
+            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByRef s_WriteByRef;
+            private static readonly WriteByPtr s_WriteByPtr;
             private static readonly WriteByVal s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,17 +88,18 @@ namespace http
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, p);
 
-                return s_WriteByRef(ref target, p);
+                return s_WriteByPtr(m_target_ptr, p);
             }
 
-            private delegate void FlushByRef(ref T value);
+            private delegate void FlushByPtr(ptr<T> value);
             private delegate void FlushByVal(T value);
 
-            private static readonly FlushByRef s_FlushByRef;
+            private static readonly FlushByPtr s_FlushByPtr;
             private static readonly FlushByVal s_FlushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,14 +108,15 @@ namespace http
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FlushByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FlushByPtr is null || !m_target_is_ptr)
                 {
                     s_FlushByVal!(target);
                     return;
                 }
 
-                s_FlushByRef(ref target);
+                s_FlushByPtr(m_target_ptr);
                 return;
                 
             }
@@ -122,39 +127,33 @@ namespace http
             static writeFlusher()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Write");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
                 if (!(extensionMethod is null))
-                    s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
+                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
-                if (s_WriteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Write");
+                extensionMethod = targetType.GetExtensionMethod("Write");
 
-                    if (!(extensionMethod is null))
-                        s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
-                if (s_WriteByRef is null && s_WriteByVal is null)
+                if (s_WriteByPtr is null && s_WriteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement writeFlusher.Write method", new Exception("Write"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Flush");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Flush");
 
                 if (!(extensionMethod is null))
-                    s_FlushByRef = extensionMethod.CreateStaticDelegate(typeof(FlushByRef)) as FlushByRef;
+                    s_FlushByPtr = extensionMethod.CreateStaticDelegate(typeof(FlushByPtr)) as FlushByPtr;
 
-                if (s_FlushByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Flush");
+                extensionMethod = targetType.GetExtensionMethod("Flush");
 
-                    if (!(extensionMethod is null))
-                        s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
 
-                if (s_FlushByRef is null && s_FlushByVal is null)
+                if (s_FlushByPtr is null && s_FlushByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement writeFlusher.Flush method", new Exception("Flush"));
             }
 

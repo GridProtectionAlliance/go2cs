@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:18 UTC
+//     Generated on 2020 October 08 03:35:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using context = go.context_package;
 using tls = go.crypto.tls_package;
 using base64 = go.encoding.base64_package;
 using errors = go.errors_package;
@@ -22,6 +23,7 @@ using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using url = go.net.url_package;
+using reflect = go.reflect_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -61,7 +63,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -75,23 +77,24 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (ref Response, error) RoundTripByRef(ref T value, ref Request _p0);
-            private delegate (ref Response, error) RoundTripByVal(T value, ref Request _p0);
+            private delegate (ptr<Response>, error) RoundTripByPtr(ptr<T> value, ptr<Request> _p0);
+            private delegate (ptr<Response>, error) RoundTripByVal(T value, ptr<Request> _p0);
 
-            private static readonly RoundTripByRef s_RoundTripByRef;
+            private static readonly RoundTripByPtr s_RoundTripByPtr;
             private static readonly RoundTripByVal s_RoundTripByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref Response, error) RoundTrip(ref Request _p0)
+            public (ptr<Response>, error) RoundTrip(ptr<Request> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_RoundTripByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_RoundTripByPtr is null || !m_target_is_ptr)
                     return s_RoundTripByVal!(target, _p0);
 
-                return s_RoundTripByRef(ref target, _p0);
+                return s_RoundTripByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -100,23 +103,20 @@ namespace net
             static RoundTripper()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("RoundTrip");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("RoundTrip");
 
                 if (!(extensionMethod is null))
-                    s_RoundTripByRef = extensionMethod.CreateStaticDelegate(typeof(RoundTripByRef)) as RoundTripByRef;
+                    s_RoundTripByPtr = extensionMethod.CreateStaticDelegate(typeof(RoundTripByPtr)) as RoundTripByPtr;
 
-                if (s_RoundTripByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("RoundTrip");
+                extensionMethod = targetType.GetExtensionMethod("RoundTrip");
 
-                    if (!(extensionMethod is null))
-                        s_RoundTripByVal = extensionMethod.CreateStaticDelegate(typeof(RoundTripByVal)) as RoundTripByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_RoundTripByVal = extensionMethod.CreateStaticDelegate(typeof(RoundTripByVal)) as RoundTripByVal;
 
-                if (s_RoundTripByRef is null && s_RoundTripByVal is null)
+                if (s_RoundTripByPtr is null && s_RoundTripByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RoundTripper.RoundTrip method", new Exception("RoundTrip"));
             }
 

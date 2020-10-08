@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:26 UTC
+//     Generated on 2020 October 08 03:42:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,7 +42,7 @@ namespace encoding
                 this.err = default;
             }
 
-            public Decoder(sync.Mutex mutex = default, io.Reader r = default, decBuffer buf = default, map<typeId, ref wireType> wireType = default, map<reflect.Type, map<typeId, ptr<ptr<decEngine>>>> decoderCache = default, map<typeId, ptr<ptr<decEngine>>> ignorerCache = default, ref ptr<decoderState> freeList = default, slice<byte> countBuf = default, error err = default)
+            public Decoder(sync.Mutex mutex = default, io.Reader r = default, decBuffer buf = default, map<typeId, ptr<wireType>> wireType = default, map<reflect.Type, map<typeId, ptr<ptr<decEngine>>>> decoderCache = default, map<typeId, ptr<ptr<decEngine>>> ignorerCache = default, ref ptr<decoderState> freeList = default, slice<byte> countBuf = default, error err = default)
             {
                 this.mutex = mutex;
                 this.r = r;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:54:01 UTC
+//     Generated on 2020 October 08 04:10:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,13 +32,15 @@ namespace @internal
             {
                 this.num = default;
                 this.objNum = default;
+                this.gcNum = default;
                 this.name = default;
             }
 
-            public Register(int num = default, short objNum = default, @string name = default)
+            public Register(int num = default, short objNum = default, short gcNum = default, @string name = default)
             {
                 this.num = num;
                 this.objNum = objNum;
+                this.gcNum = gcNum;
                 this.name = name;
             }
 
@@ -62,7 +64,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Register Register_cast(dynamic value)
         {
-            return new Register(value.num, value.objNum, value.name);
+            return new Register(value.num, value.objNum, value.gcNum, value.name);
         }
     }
 }}}}

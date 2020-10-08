@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package buildid -- go2cs converted at 2020 August 29 08:51:57 UTC
+// package buildid -- go2cs converted at 2020 October 08 04:08:23 UTC
 // import "cmd/internal/buildid" ==> using buildid = go.cmd.@internal.buildid_package
 // Original source: C:\Go\src\cmd\internal\buildid\buildid.go
 using bytes = go.bytes_package;
 using elf = go.debug.elf_package;
 using fmt = go.fmt_package;
+using xcoff = go.@internal.xcoff_package;
 using io = go.io_package;
 using os = go.os_package;
 using strconv = go.strconv_package;
@@ -28,11 +29,15 @@ namespace @internal
         // ReadFile reads the build ID from an archive or executable file.
         public static (@string, error) ReadFile(@string name) => func((defer, _, __) =>
         {
+            @string id = default;
+            error err = default!;
+
             var (f, err) = os.Open(name);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             defer(f.Close());
 
             var buf = make_slice<byte>(8L);
@@ -41,13 +46,20 @@ namespace @internal
 
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 }
 
             }
+
             if (string(buf) != "!<arch>\n")
             {
-                return readBinary(name, f);
+                if (string(buf) == "<bigaf>\n")
+                {
+                    return readGccgoBigArchive(name, _addr_f);
+                }
+
+                return readBinary(name, _addr_f);
+
             } 
 
             // Read just enough of the target to fetch the build ID.
@@ -64,11 +76,12 @@ namespace @internal
             var (n, err) = io.ReadFull(f, data);
             if (err != null && n == 0L)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             Func<(@string, error)> tryGccgo = () =>
             {
-                return readGccgoArchive(name, f);
+                return readGccgoArchive(name, _addr_f);
             } 
 
             // Archive header.
@@ -82,6 +95,7 @@ namespace @internal
                 {
                     return tryGccgo();
                 }
+
                 var line = data[..j];
                 data = data[j + 1L..];
                 switch (i)
@@ -91,35 +105,43 @@ namespace @internal
                         {
                             return tryGccgo();
                         }
+
                         break;
                     case 1L: 
                         if (!bytes.HasPrefix(line, pkgdef))
                         {
                             return tryGccgo();
                         }
+
                         break;
                     case 2L: 
                         if (!bytes.HasPrefix(line, goobject))
                         {
                             return tryGccgo();
                         }
+
                         break;
                     case 3L: 
                         if (!bytes.HasPrefix(line, buildid))
                         { 
                             // Found the object header, just doesn't have a build id line.
                             // Treat as successful, with empty build id.
-                            return ("", null);
+                            return ("", error.As(null!)!);
+
                         }
+
                         var (id, err) = strconv.Unquote(string(line[len(buildid)..]));
                         if (err != null)
                         {
                             return tryGccgo();
                         }
-                        return (id, null);
+
+                        return (id, error.As(null!)!);
                         break;
                 }
+
             }
+
 
         });
 
@@ -127,11 +149,15 @@ namespace @internal
         // archive file, and fetch the build ID from the _buildid.o entry.
         // The _buildid.o entry is written by (*Builder).gccgoBuildIDELFFile
         // in cmd/go/internal/work/exec.go.
-        private static (@string, error) readGccgoArchive(@string name, ref os.File f)
+        private static (@string, error) readGccgoArchive(@string name, ptr<os.File> _addr_f)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
             Func<(@string, error)> bad = () =>
             {
-                return ("", ref new os.PathError(Op:"parse",Path:name,Err:errBuildIDMalformed));
+                return ("", error.As(addr(new os.PathError(Op:"parse",Path:name,Err:errBuildIDMalformed))!)!);
             }
 ;
 
@@ -143,7 +169,7 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     } 
 
                     // TODO(iant): Make a debug/ar package, and use it
@@ -162,12 +188,16 @@ namespace @internal
                         if (err == io.EOF)
                         { 
                             // No more entries, no build ID.
-                            return ("", null);
+                            return ("", error.As(null!)!);
+
                         }
-                        return ("", err);
+
+                        return ("", error.As(err)!);
+
                     }
 
                 }
+
                 off += 60L;
 
                 var sizeStr = strings.TrimSpace(string(hdr[48L..58L]));
@@ -176,6 +206,7 @@ namespace @internal
                 {
                     return bad();
                 }
+
                 var name = strings.TrimSpace(string(hdr[..16L]));
                 if (name == "_buildid.o/")
                 {
@@ -185,24 +216,178 @@ namespace @internal
                     {
                         return bad();
                     }
+
                     var s = e.Section(".go.buildid");
                     if (s == null)
                     {
                         return bad();
                     }
+
                     var (data, err) = s.Data();
                     if (err != null)
                     {
                         return bad();
                     }
-                    return (string(data), null);
+
+                    return (string(data), error.As(null!)!);
+
                 }
+
                 off += size;
                 if (off & 1L != 0L)
                 {
                     off++;
                 }
+
             }
+
+
+        }
+
+        // readGccgoBigArchive tries to parse the archive as an AIX big
+        // archive file, and fetch the build ID from the _buildid.o entry.
+        // The _buildid.o entry is written by (*Builder).gccgoBuildIDXCOFFFile
+        // in cmd/go/internal/work/exec.go.
+        private static (@string, error) readGccgoBigArchive(@string name, ptr<os.File> _addr_f)
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            Func<(@string, error)> bad = () =>
+            {
+                return ("", error.As(addr(new os.PathError(Op:"parse",Path:name,Err:errBuildIDMalformed))!)!);
+            } 
+
+            // Read fixed-length header.
+; 
+
+            // Read fixed-length header.
+            {
+                var (_, err) = f.Seek(0L, io.SeekStart);
+
+                if (err != null)
+                {
+                    return ("", error.As(err)!);
+                }
+
+            }
+
+            array<byte> flhdr = new array<byte>(128L);
+            {
+                (_, err) = io.ReadFull(f, flhdr[..]);
+
+                if (err != null)
+                {
+                    return ("", error.As(err)!);
+                } 
+                // Read first member offset.
+
+            } 
+            // Read first member offset.
+            var offStr = strings.TrimSpace(string(flhdr[68L..88L]));
+            var (off, err) = strconv.ParseInt(offStr, 10L, 64L);
+            if (err != null)
+            {
+                return bad();
+            }
+
+            while (true)
+            {
+                if (off == 0L)
+                { 
+                    // No more entries, no build ID.
+                    return ("", error.As(null!)!);
+
+                }
+
+                {
+                    (_, err) = f.Seek(off, io.SeekStart);
+
+                    if (err != null)
+                    {
+                        return ("", error.As(err)!);
+                    } 
+                    // Read member header.
+
+                } 
+                // Read member header.
+                array<byte> hdr = new array<byte>(112L);
+                {
+                    (_, err) = io.ReadFull(f, hdr[..]);
+
+                    if (err != null)
+                    {
+                        return ("", error.As(err)!);
+                    } 
+                    // Read member name length.
+
+                } 
+                // Read member name length.
+                var namLenStr = strings.TrimSpace(string(hdr[108L..112L]));
+                var (namLen, err) = strconv.ParseInt(namLenStr, 10L, 32L);
+                if (err != null)
+                {
+                    return bad();
+                }
+
+                if (namLen == 10L)
+                {
+                    array<byte> nam = new array<byte>(10L);
+                    {
+                        (_, err) = io.ReadFull(f, nam[..]);
+
+                        if (err != null)
+                        {
+                            return ("", error.As(err)!);
+                        }
+
+                    }
+
+                    if (string(nam[..]) == "_buildid.o")
+                    {
+                        var sizeStr = strings.TrimSpace(string(hdr[0L..20L]));
+                        var (size, err) = strconv.ParseInt(sizeStr, 10L, 64L);
+                        if (err != null)
+                        {
+                            return bad();
+                        }
+
+                        off += int64(len(hdr)) + namLen + 2L;
+                        if (off & 1L != 0L)
+                        {
+                            off++;
+                        }
+
+                        var sr = io.NewSectionReader(f, off, size);
+                        var (x, err) = xcoff.NewFile(sr);
+                        if (err != null)
+                        {
+                            return bad();
+                        }
+
+                        var data = x.CSect(".go.buildid");
+                        if (data == null)
+                        {
+                            return bad();
+                        }
+
+                        return (string(data), error.As(null!)!);
+
+                    }
+
+                } 
+
+                // Read next member offset.
+                offStr = strings.TrimSpace(string(hdr[20L..40L]));
+                off, err = strconv.ParseInt(offStr, 10L, 64L);
+                if (err != null)
+                {
+                    return bad();
+                }
+
+            }
+
 
         }
 
@@ -219,8 +404,12 @@ namespace @internal
         // of the text segment, which should appear near the beginning
         // of the file. This is clumsy but fairly portable. Custom locations
         // can be added for other binary types as needed, like we did for ELF.
-        private static (@string, error) readBinary(@string name, ref os.File f)
-        { 
+        private static (@string, error) readBinary(@string name, ptr<os.File> _addr_f)
+        {
+            @string id = default;
+            error err = default!;
+            ref os.File f = ref _addr_f.val;
+ 
             // Read the first 32 kB of the binary file.
             // That should be enough to find the build ID.
             // In ELF files, the build ID is in the leading headers,
@@ -240,45 +429,58 @@ namespace @internal
             {
                 err = null;
             }
+
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             if (bytes.HasPrefix(data, elfPrefix))
             {
                 return readELF(name, f, data);
             }
+
             foreach (var (_, m) in machoPrefixes)
             {
                 if (bytes.HasPrefix(data, m))
                 {
                     return readMacho(name, f, data);
                 }
+
             }
             return readRaw(name, data);
+
         }
 
         // readRaw finds the raw build ID stored in text segment data.
         private static (@string, error) readRaw(@string name, slice<byte> data)
         {
+            @string id = default;
+            error err = default!;
+
             var i = bytes.Index(data, goBuildPrefix);
             if (i < 0L)
             { 
                 // Missing. Treat as successful but build ID empty.
-                return ("", null);
+                return ("", error.As(null!)!);
+
             }
+
             var j = bytes.Index(data[i + len(goBuildPrefix)..], goBuildEnd);
             if (j < 0L)
             {
-                return ("", ref new os.PathError(Op:"parse",Path:name,Err:errBuildIDMalformed));
+                return ("", error.As(addr(new os.PathError(Op:"parse",Path:name,Err:errBuildIDMalformed))!)!);
             }
+
             var quoted = data[i + len(goBuildPrefix) - 1L..i + len(goBuildPrefix) + j + 1L];
             id, err = strconv.Unquote(string(quoted));
             if (err != null)
             {
-                return ("", ref new os.PathError(Op:"parse",Path:name,Err:errBuildIDMalformed));
+                return ("", error.As(addr(new os.PathError(Op:"parse",Path:name,Err:errBuildIDMalformed))!)!);
             }
-            return (id, null);
+
+            return (id, error.As(null!)!);
+
         }
     }
 }}}

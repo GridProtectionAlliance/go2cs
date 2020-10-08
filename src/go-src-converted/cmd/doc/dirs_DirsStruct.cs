@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:02 UTC
+//     Generated on 2020 October 08 04:33:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,12 +13,16 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using build = go.go.build_package;
+using bytes = go.bytes_package;
+using fmt = go.fmt_package;
 using log = go.log_package;
 using os = go.os_package;
-using path = go.path_package;
+using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
+using regexp = go.regexp_package;
 using strings = go.strings_package;
+using sync = go.sync_package;
+using semver = go.golang.org.x.mod.semver_package;
 
 namespace go
 {
@@ -31,14 +35,14 @@ namespace go
             public Dirs(NilType _)
             {
                 this.scan = default;
-                this.paths = default;
+                this.hist = default;
                 this.offset = default;
             }
 
-            public Dirs(channel<@string> scan = default, slice<@string> paths = default, long offset = default)
+            public Dirs(channel<Dir> scan = default, slice<Dir> hist = default, long offset = default)
             {
                 this.scan = scan;
-                this.paths = paths;
+                this.hist = hist;
                 this.offset = offset;
             }
 
@@ -62,7 +66,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Dirs Dirs_cast(dynamic value)
         {
-            return new Dirs(value.scan, value.paths, value.offset);
+            return new Dirs(value.scan, value.hist, value.offset);
         }
     }
 }

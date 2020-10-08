@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:17 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:26 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\print.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -13,7 +13,7 @@ using System;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         // The compiler knows that a print of a value of this type
         // should use printhex instead of printuint (decimal).
@@ -23,12 +23,14 @@ namespace go
 
         private static slice<byte> bytes(@string s)
         {
-            var rp = (slice.Value)(@unsafe.Pointer(ref ret));
-            var sp = stringStructOf(ref s);
+            slice<byte> ret = default;
+
+            var rp = (slice.val)(@unsafe.Pointer(_addr_ret));
+            var sp = stringStructOf(_addr_s);
             rp.array = sp.str;
             rp.len = sp.len;
             rp.cap = sp.len;
-            return;
+            return ;
         }
 
  
@@ -47,7 +49,7 @@ namespace go
         {
             printlock();
 
-            if (atomic.Load(ref panicking) == 0L)
+            if (atomic.Load(_addr_panicking) == 0L)
             { 
                 // Not actively crashing: maintain circular buffer of print output.
                 {
@@ -62,8 +64,11 @@ namespace go
                     }
 
                 }
+
             }
+
             printunlock();
+
         }
 
         private static mutex debuglock = default;
@@ -83,8 +88,9 @@ namespace go
             mp.printlock++;
             if (mp.printlock == 1L)
             {
-                lock(ref debuglock);
+                lock(_addr_debuglock);
             }
+
             mp.locks--; // now we know debuglock is held and holding up mp.locks for us.
         }
 
@@ -94,8 +100,9 @@ namespace go
             mp.printlock--;
             if (mp.printlock == 0L)
             {
-                unlock(ref debuglock);
+                unlock(_addr_debuglock);
             }
+
         }
 
         // write to goroutine-local buffer if diverting output,
@@ -104,17 +111,25 @@ namespace go
         {
             if (len(b) == 0L)
             {
-                return;
+                return ;
             }
+
             recordForPanic(b);
-            var gp = getg();
-            if (gp == null || gp.writebuf == null)
+            var gp = getg(); 
+            // Don't use the writebuf if gp.m is dying. We want anything
+            // written through gwrite to appear in the terminal rather
+            // than be written to in some buffer, if we're in a panicking state.
+            // Note that we can't just clear writebuf in the gp.m.dying case
+            // because a panic isn't allowed to have any write barriers.
+            if (gp == null || gp.writebuf == null || gp.m.dying > 0L)
             {
                 writeErr(b);
-                return;
+                return ;
             }
+
             var n = copy(gp.writebuf[len(gp.writebuf)..cap(gp.writebuf)], b);
             gp.writebuf = gp.writebuf[..len(gp.writebuf) + n];
+
         }
 
         private static void printsp()
@@ -137,6 +152,7 @@ namespace go
             {
                 printstring("false");
             }
+
         }
 
         private static void printfloat(double v)
@@ -144,14 +160,14 @@ namespace go
 
             if (v != v) 
                 printstring("NaN");
-                return;
+                return ;
             else if (v + v == v && v > 0L) 
                 printstring("+Inf");
-                return;
+                return ;
             else if (v + v == v && v < 0L) 
                 printstring("-Inf");
-                return;
-                        const long n = 7L; // digits printed
+                return ;
+                        const long n = (long)7L; // digits printed
  // digits printed
             array<byte> buf = new array<byte>(n + 7L);
             buf[0L] = '+';
@@ -162,6 +178,7 @@ namespace go
                 {
                     buf[0L] = '-';
                 }
+
             }
             else
             {
@@ -206,6 +223,7 @@ namespace go
                     e++;
                     v /= 10L;
                 }
+
             } 
 
             // format +d.dddd+edd
@@ -233,10 +251,12 @@ namespace go
                 e = -e;
                 buf[n + 3L] = '-';
             }
+
             buf[n + 4L] = byte(e / 100L) + '0';
             buf[n + 5L] = byte(e / 10L) % 10L + '0';
             buf[n + 6L] = byte(e % 10L) + '0';
             gwrite(buf[..]);
+
         }
 
         private static void printcomplex(System.Numerics.Complex128 c)
@@ -258,10 +278,13 @@ namespace go
                     break;
                 i--;
                 }
+
                 v /= 10L;
+
             }
 
             gwrite(buf[i..]);
+
         }
 
         private static void printint(long v)
@@ -271,12 +294,14 @@ namespace go
                 printstring("-");
                 v = -v;
             }
+
             printuint(uint64(v));
+
         }
 
         private static void printhex(ulong v)
         {
-            const @string dig = "0123456789abcdef";
+            const @string dig = (@string)"0123456789abcdef";
 
             array<byte> buf = new array<byte>(100L);
             var i = len(buf);
@@ -290,7 +315,9 @@ namespace go
                     break;
                 i--;
                 }
+
                 v /= 16L;
+
             }
 
             i--;
@@ -298,6 +325,7 @@ namespace go
             i--;
             buf[i] = '0';
             gwrite(buf[i..]);
+
         }
 
         private static void printpointer(unsafe.Pointer p)
@@ -312,7 +340,7 @@ namespace go
 
         private static void printslice(slice<byte> s)
         {
-            var sp = (slice.Value)(@unsafe.Pointer(ref s));
+            var sp = (slice.val)(@unsafe.Pointer(_addr_s));
             print("[", len(s), "/", cap(s), "]");
             printpointer(sp.array);
         }
@@ -350,13 +378,16 @@ namespace go
                         {
                             buf[i] = byte(x & 0xFUL) - 10L + 'a';
                         }
+
                         x >>= 4L;
+
                     }
 
 
                     i = i__prev1;
                 }
                 gwrite(buf[..]);
+
             }
 ;
 
@@ -377,9 +408,12 @@ namespace go
                             println();
                     i += sys.PtrSize;
                         }
+
                         p1(p + i);
                         print(": ");
+
                     }
+
                     if (mark != null)
                     {
                         markbuf[0L] = mark(p + i);
@@ -387,9 +421,11 @@ namespace go
                         {
                             markbuf[0L] = ' ';
                         }
+
                     }
+
                     gwrite(markbuf[..]);
-                    *(*System.UIntPtr) val = @unsafe.Pointer(p + i).Value;
+                    ptr<ptr<System.UIntPtr>> val = new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(p + i));
                     p1(val);
                     print(" "); 
 
@@ -399,6 +435,7 @@ namespace go
                     {
                         print("<", funcname(fn), "+", val - fn.entry, "> ");
                     }
+
                 }
 
 
@@ -406,6 +443,7 @@ namespace go
             }
             println();
             printunlock();
+
         }
     }
 }

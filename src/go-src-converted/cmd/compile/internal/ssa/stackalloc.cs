@@ -4,7 +4,7 @@
 
 // TODO: live at start of block instead?
 
-// package ssa -- go2cs converted at 2020 August 29 09:24:23 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:26:43 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\stackalloc.go
 using types = go.cmd.compile.@internal.types_package;
@@ -38,22 +38,29 @@ namespace @internal
             public int nSelfInterfere; // Number of self-interferences
         }
 
-        private static ref stackAllocState newStackAllocState(ref Func f)
+        private static ptr<stackAllocState> newStackAllocState(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             var s = f.Cache.stackAllocState;
             if (s == null)
             {
                 return @new<stackAllocState>();
             }
+
             if (s.f != null)
             {
                 f.fe.Fatalf(src.NoXPos, "newStackAllocState called without previous free");
             }
-            return s;
+
+            return _addr_s!;
+
         }
 
-        private static void putStackAllocState(ref stackAllocState s)
+        private static void putStackAllocState(ptr<stackAllocState> _addr_s)
         {
+            ref stackAllocState s = ref _addr_s.val;
+
             {
                 var i__prev1 = i;
 
@@ -123,6 +130,7 @@ namespace @internal
             s.nReuse = 0L;
             s.nAuto = 0L;
             s.nSelfInterfere = 0L;
+
         }
 
         private partial struct stackValState
@@ -136,27 +144,35 @@ namespace @internal
         // stackalloc allocates storage in the stack frame for
         // all Values that did not get a register.
         // Returns a map from block ID to the stack values live at the end of that block.
-        private static slice<slice<ID>> @stackalloc(ref Func _f, slice<slice<ID>> spillLive) => func(_f, (ref Func f, Defer defer, Panic _, Recover __) =>
+        private static slice<slice<ID>> @stackalloc(ptr<Func> _addr_f, slice<slice<ID>> spillLive) => func((defer, _, __) =>
         {
+            ref Func f = ref _addr_f.val;
+
             if (f.pass.debug > stackDebug)
             {
                 fmt.Println("before stackalloc");
                 fmt.Println(f.String());
             }
-            var s = newStackAllocState(f);
+
+            var s = newStackAllocState(_addr_f);
             s.init(f, spillLive);
-            defer(putStackAllocState(s));
+            defer(putStackAllocState(_addr_s));
 
             s.@stackalloc();
             if (f.pass.stats > 0L)
             {
                 f.LogStat("stack_alloc_stats", s.nArgSlot, "arg_slots", s.nNotNeed, "slot_not_needed", s.nNamedSlot, "named_slots", s.nAuto, "auto_slots", s.nReuse, "reused_slots", s.nSelfInterfere, "self_interfering");
             }
+
             return s.live;
+
         });
 
-        private static void init(this ref stackAllocState s, ref Func f, slice<slice<ID>> spillLive)
+        private static void init(this ptr<stackAllocState> _addr_s, ptr<Func> _addr_f, slice<slice<ID>> spillLive)
         {
+            ref stackAllocState s = ref _addr_s.val;
+            ref Func f = ref _addr_f.val;
+
             s.f = f; 
 
             // Initialize value information.
@@ -173,22 +189,26 @@ namespace @internal
                 }
 
             }
+
             foreach (var (_, b) in f.Blocks)
             {
                 foreach (var (_, v) in b.Values)
                 {
                     s.values[v.ID].typ = v.Type;
-                    s.values[v.ID].needSlot = !v.Type.IsMemory() && !v.Type.IsVoid() && !v.Type.IsFlags() && f.getHome(v.ID) == null && !v.rematerializeable();
+                    s.values[v.ID].needSlot = !v.Type.IsMemory() && !v.Type.IsVoid() && !v.Type.IsFlags() && f.getHome(v.ID) == null && !v.rematerializeable() && !v.OnWasmStack;
                     s.values[v.ID].isArg = v.Op == OpArg;
                     if (f.pass.debug > stackDebug && s.values[v.ID].needSlot)
                     {
                         fmt.Printf("%s needs a stack slot\n", v);
                     }
+
                     if (v.Op == OpStoreReg)
                     {
                         s.values[v.Args[0L].ID].spill = v;
                     }
+
                 }
+
             } 
 
             // Compute liveness info for values needing a slot.
@@ -196,10 +216,13 @@ namespace @internal
 
             // Build interference graph among values needing a slot.
             s.buildInterferenceGraph();
+
         }
 
-        private static void @stackalloc(this ref stackAllocState s)
+        private static void @stackalloc(this ptr<stackAllocState> _addr_s)
         {
+            ref stackAllocState s = ref _addr_s.val;
+
             var f = s.f; 
 
             // Build map from values to their names, if any.
@@ -222,6 +245,7 @@ namespace @internal
                 n = n__prev1;
 
             }
+
             var names = s.names;
             {
                 var name__prev1 = name;
@@ -242,7 +266,6 @@ namespace @internal
 
                         v = v__prev2;
                     }
-
                 } 
 
                 // Allocate args to their assigned locations.
@@ -260,12 +283,15 @@ namespace @internal
                     {
                         continue;
                     }
+
                     LocalSlot loc = new LocalSlot(N:v.Aux.(GCNode),Type:v.Type,Off:v.AuxInt);
                     if (f.pass.debug > stackDebug)
                     {
                         fmt.Printf("stackalloc %s to %s\n", v, loc);
                     }
+
                     f.setHome(v, loc);
+
                 } 
 
                 // For each type, we keep track of all the stack slots we
@@ -277,7 +303,7 @@ namespace @internal
                 v = v__prev1;
             }
 
-            map locations = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref types.Type, slice<LocalSlot>>{}; 
+            map locations = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<types.Type>, slice<LocalSlot>>{}; 
 
             // Each time we assign a stack slot to a value v, we remember
             // the slot we used via an index into locations[v.Type].
@@ -300,6 +326,7 @@ namespace @internal
                 n = n__prev1;
 
             }
+
             {
                 var i__prev1 = i;
 
@@ -333,6 +360,7 @@ namespace @internal
                 n = n__prev1;
 
             }
+
             foreach (var (_, b) in f.Blocks)
             {
                 {
@@ -346,6 +374,7 @@ namespace @internal
                             s.nNotNeed++;
                             continue;
                         }
+
                         if (v.Op == OpArg)
                         {
                             s.nArgSlot++;
@@ -363,6 +392,7 @@ namespace @internal
                         {
                             name = names[v.ID];
                         }
+
                         if (name.N != null && v.Type.Compare(name.Type) == types.CMPeq)
                         {
                             foreach (var (_, id) in s.interfere[v.ID])
@@ -371,19 +401,24 @@ namespace @internal
                                 if (h != null && h._<LocalSlot>().N == name.N && h._<LocalSlot>().Off == name.Off)
                                 { 
                                     // A variable can interfere with itself.
-                                    // It is rare, but but it can happen.
+                                    // It is rare, but it can happen.
                                     s.nSelfInterfere++;
                                     goto noname;
+
                                 }
+
                             }
                             if (f.pass.debug > stackDebug)
                             {
                                 fmt.Printf("stackalloc %s to %s\n", v, name);
                             }
+
                             s.nNamedSlot++;
                             f.setHome(v, name);
                             continue;
+
                         }
+
 noname: 
                         // Mark all positions in locs used by interfering values.
                         var locs = locations[v.Type]; 
@@ -406,6 +441,7 @@ noname:
                             {
                                 used[slot] = true;
                             }
+
                         } 
                         // Find an unused stack slot.
                         i = default;
@@ -416,6 +452,7 @@ noname:
                                 s.nReuse++;
                                 break;
                             }
+
                         } 
                         // If there is no unused stack slot, allocate a new one.
  
@@ -432,14 +469,16 @@ noname:
                         {
                             fmt.Printf("stackalloc %s to %s\n", v, loc);
                         }
+
                         f.setHome(v, loc);
                         slots[v.ID] = i;
+
                     }
 
                     v = v__prev2;
                 }
-
             }
+
         }
 
         // computeLive computes a map from block ID to a list of
@@ -447,10 +486,12 @@ noname:
         // TODO: this could be quadratic if lots of variables are live across lots of
         // basic blocks. Figure out a way to make this function (or, more precisely, the user
         // of this function) require only linear size & time.
-        private static void computeLive(this ref stackAllocState _s, slice<slice<ID>> spillLive) => func(_s, (ref stackAllocState s, Defer defer, Panic _, Recover __) =>
+        private static void computeLive(this ptr<stackAllocState> _addr_s, slice<slice<ID>> spillLive) => func((defer, _, __) =>
         {
+            ref stackAllocState s = ref _addr_s.val;
+
             s.live = make_slice<slice<ID>>(s.f.NumBlocks());
-            slice<ref Value> phis = default;
+            slice<ptr<Value>> phis = default;
             var live = s.f.newSparseSet(s.f.NumValues());
             defer(s.f.retSparseSet(live));
             var t = s.f.newSparseSet(s.f.NumValues());
@@ -491,8 +532,11 @@ noname:
                                     {
                                         phis = append(phis, v);
                                     }
+
                                     continue;
+
                                 }
+
                                 {
                                     var a__prev4 = a;
 
@@ -503,11 +547,11 @@ noname:
                                         {
                                             live.add(a.ID);
                                         }
+
                                     }
 
                                     a = a__prev4;
                                 }
-
                             } 
 
                             // for each predecessor of b, expand its list of live-at-end values
@@ -542,6 +586,7 @@ noname:
                                         {
                                             t.add(a.ID);
                                         }
+
                                         {
                                             var spill = s.values[a.ID].spill;
 
@@ -549,9 +594,11 @@ noname:
                                             { 
                                                 //TODO: remove?  Subsumed by SpillUse?
                                                 t.add(spill.ID);
+
                                             }
 
                                         }
+
                                     }
 
                                     v = v__prev4;
@@ -564,11 +611,11 @@ noname:
                                 // grow p's live set
                                 s.live[p.ID] = append(s.live[p.ID][..0L], t.contents());
                                 changed = true;
+
                             }
 
                             i = i__prev3;
                         }
-
                     }
 
                     b = b__prev2;
@@ -578,6 +625,7 @@ noname:
                 {
                     break;
                 }
+
             }
 
             if (s.f.pass.debug > stackDebug)
@@ -593,31 +641,41 @@ noname:
 
                     b = b__prev1;
                 }
-
             }
+
         });
 
-        private static Location getHome(this ref Func f, ID vid)
+        private static Location getHome(this ptr<Func> _addr_f, ID vid)
         {
+            ref Func f = ref _addr_f.val;
+
             if (int(vid) >= len(f.RegAlloc))
             {
                 return null;
             }
+
             return f.RegAlloc[vid];
+
         }
 
-        private static void setHome(this ref Func f, ref Value v, Location loc)
+        private static void setHome(this ptr<Func> _addr_f, ptr<Value> _addr_v, Location loc)
         {
+            ref Func f = ref _addr_f.val;
+            ref Value v = ref _addr_v.val;
+
             while (v.ID >= ID(len(f.RegAlloc)))
             {
                 f.RegAlloc = append(f.RegAlloc, null);
             }
 
             f.RegAlloc[v.ID] = loc;
+
         }
 
-        private static void buildInterferenceGraph(this ref stackAllocState _s) => func(_s, (ref stackAllocState s, Defer defer, Panic _, Recover __) =>
+        private static void buildInterferenceGraph(this ptr<stackAllocState> _addr_s) => func((defer, _, __) =>
         {
+            ref stackAllocState s = ref _addr_s.val;
+
             var f = s.f;
             {
                 var n = f.NumValues();
@@ -632,6 +690,7 @@ noname:
                 }
 
             }
+
             var live = f.newSparseSet(f.NumValues());
             defer(f.retSparseSet(live));
             foreach (var (_, b) in f.Blocks)
@@ -658,14 +717,18 @@ noname:
                                     s.interfere[v.ID] = append(s.interfere[v.ID], id);
                                     s.interfere[id] = append(s.interfere[id], v.ID);
                                 }
+
                             }
+
                         }
+
                         foreach (var (_, a) in v.Args)
                         {
                             if (s.values[a.ID].needSlot)
                             {
                                 live.add(a.ID);
                             }
+
                         }
                         if (v.Op == OpArg && s.values[v.ID].needSlot)
                         { 
@@ -676,12 +739,15 @@ noname:
                             // values from being allocated to the same slot and clobbering
                             // the input value before we have a chance to load it.
                             live.add(v.ID);
+
                         }
+
                     }
 
 
                     i = i__prev2;
                 }
+
             }
             if (f.pass.debug > stackDebug)
             {
@@ -700,13 +766,15 @@ noname:
                                 fmt.Printf(" v%d", x);
                             }
                             fmt.Println();
+
                         }
+
                     }
 
                     i = i__prev1;
                 }
-
             }
+
         });
     }
 }}}}

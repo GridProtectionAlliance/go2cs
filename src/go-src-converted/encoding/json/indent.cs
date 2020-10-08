@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2020 August 29 08:35:50 UTC
+// package json -- go2cs converted at 2020 October 08 03:42:53 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\indent.go
 using bytes = go.bytes_package;
@@ -15,16 +15,20 @@ namespace encoding
     {
         // Compact appends to dst the JSON-encoded src with
         // insignificant space characters elided.
-        public static error Compact(ref bytes.Buffer dst, slice<byte> src)
+        public static error Compact(ptr<bytes.Buffer> _addr_dst, slice<byte> src)
         {
-            return error.As(compact(dst, src, false));
+            ref bytes.Buffer dst = ref _addr_dst.val;
+
+            return error.As(compact(_addr_dst, src, false))!;
         }
 
-        private static error compact(ref bytes.Buffer dst, slice<byte> src, bool escape)
+        private static error compact(ptr<bytes.Buffer> _addr_dst, slice<byte> src, bool escape) => func((defer, _, __) =>
         {
+            ref bytes.Buffer dst = ref _addr_dst.val;
+
             var origLen = dst.Len();
-            scanner scan = default;
-            scan.reset();
+            var scan = newScanner();
+            defer(freeScanner(scan));
             long start = 0L;
             foreach (var (i, c) in src)
             {
@@ -34,56 +38,71 @@ namespace encoding
                     {
                         dst.Write(src[start..i]);
                     }
+
                     dst.WriteString("\\u00");
                     dst.WriteByte(hex[c >> (int)(4L)]);
                     dst.WriteByte(hex[c & 0xFUL]);
                     start = i + 1L;
+
                 } 
                 // Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).
-                if (c == 0xE2UL && i + 2L < len(src) && src[i + 1L] == 0x80UL && src[i + 2L] & ~1L == 0xA8UL)
+                if (escape && c == 0xE2UL && i + 2L < len(src) && src[i + 1L] == 0x80UL && src[i + 2L] & ~1L == 0xA8UL)
                 {
                     if (start < i)
                     {
                         dst.Write(src[start..i]);
                     }
+
                     dst.WriteString("\\u202");
                     dst.WriteByte(hex[src[i + 2L] & 0xFUL]);
                     start = i + 3L;
+
                 }
-                var v = scan.step(ref scan, c);
+
+                var v = scan.step(scan, c);
                 if (v >= scanSkipSpace)
                 {
                     if (v == scanError)
                     {
                         break;
                     }
+
                     if (start < i)
                     {
                         dst.Write(src[start..i]);
                     }
+
                     start = i + 1L;
+
                 }
+
             }
             if (scan.eof() == scanError)
             {
                 dst.Truncate(origLen);
-                return error.As(scan.err);
+                return error.As(scan.err)!;
             }
+
             if (start < len(src))
             {
                 dst.Write(src[start..]);
             }
-            return error.As(null);
-        }
 
-        private static void newline(ref bytes.Buffer dst, @string prefix, @string indent, long depth)
+            return error.As(null!)!;
+
+        });
+
+        private static void newline(ptr<bytes.Buffer> _addr_dst, @string prefix, @string indent, long depth)
         {
+            ref bytes.Buffer dst = ref _addr_dst.val;
+
             dst.WriteByte('\n');
             dst.WriteString(prefix);
             for (long i = 0L; i < depth; i++)
             {
                 dst.WriteString(indent);
             }
+
 
         }
 
@@ -98,30 +117,34 @@ namespace encoding
         // at the end of src are preserved and copied to dst.
         // For example, if src has no trailing spaces, neither will dst;
         // if src ends in a trailing newline, so will dst.
-        public static error Indent(ref bytes.Buffer dst, slice<byte> src, @string prefix, @string indent)
+        public static error Indent(ptr<bytes.Buffer> _addr_dst, slice<byte> src, @string prefix, @string indent) => func((defer, _, __) =>
         {
+            ref bytes.Buffer dst = ref _addr_dst.val;
+
             var origLen = dst.Len();
-            scanner scan = default;
-            scan.reset();
+            var scan = newScanner();
+            defer(freeScanner(scan));
             var needIndent = false;
             long depth = 0L;
             foreach (var (_, c) in src)
             {
                 scan.bytes++;
-                var v = scan.step(ref scan, c);
+                var v = scan.step(scan, c);
                 if (v == scanSkipSpace)
                 {
                     continue;
                 }
+
                 if (v == scanError)
                 {
                     break;
                 }
+
                 if (needIndent && v != scanEndObject && v != scanEndArray)
                 {
                     needIndent = false;
                     depth++;
-                    newline(dst, prefix, indent, depth);
+                    newline(_addr_dst, prefix, indent, depth);
                 } 
 
                 // Emit semantically uninteresting bytes
@@ -145,7 +168,7 @@ namespace encoding
                         break;
                     case ',': 
                         dst.WriteByte(c);
-                        newline(dst, prefix, indent, depth);
+                        newline(_addr_dst, prefix, indent, depth);
                         break;
                     case ':': 
                         dst.WriteByte(c);
@@ -158,25 +181,30 @@ namespace encoding
                         { 
                             // suppress indent in empty object/array
                             needIndent = false;
+
                         }
                         else
                         {
                             depth--;
-                            newline(dst, prefix, indent, depth);
+                            newline(_addr_dst, prefix, indent, depth);
                         }
+
                         dst.WriteByte(c);
                         break;
                     default: 
                         dst.WriteByte(c);
                         break;
                 }
+
             }
             if (scan.eof() == scanError)
             {
                 dst.Truncate(origLen);
-                return error.As(scan.err);
+                return error.As(scan.err)!;
             }
-            return error.As(null);
-        }
+
+            return error.As(null!)!;
+
+        });
     }
 }}

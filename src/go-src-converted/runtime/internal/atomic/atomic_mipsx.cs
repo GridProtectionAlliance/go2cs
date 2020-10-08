@@ -4,10 +4,17 @@
 
 // +build mips mipsle
 
-// package atomic -- go2cs converted at 2020 August 29 08:16:30 UTC
+// Export some functions via linkname to assembly in sync/atomic.
+//go:linkname Xadd64
+//go:linkname Xchg64
+//go:linkname Cas64
+//go:linkname Load64
+//go:linkname Store64
+
+// package atomic -- go2cs converted at 2020 October 08 03:19:10 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Go\src\runtime\internal\atomic\atomic_mipsx.go
-using sys = go.runtime.@internal.sys_package;
+using cpu = go.@internal.cpu_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 
@@ -21,31 +28,34 @@ namespace @internal
         private static var @lock = default;
 
         //go:noescape
-        private static void spinLock(ref uint state)
+        private static void spinLock(ptr<uint> state)
 ;
 
         //go:noescape
-        private static void spinUnlock(ref uint state)
+        private static void spinUnlock(ptr<uint> state)
 ;
 
         //go:nosplit
-        private static void lockAndCheck(ref ulong addr)
-        { 
-            // ensure 8-byte alignement
+        private static void lockAndCheck(ptr<ulong> _addr_addr)
+        {
+            ref ulong addr = ref _addr_addr.val;
+ 
+            // ensure 8-byte alignment
             if (uintptr(@unsafe.Pointer(addr)) & 7L != 0L)
             {>>MARKER:FUNCTION_spinUnlock_BLOCK_PREFIX<<
                 addr = null;
             } 
             // force dereference before taking lock
-            _ = addr.Value;
+            _ = addr;
 
-            spinLock(ref @lock.state);
+            spinLock(_addr_@lock.state);
+
         }
 
         //go:nosplit
         private static void unlock()
         {
-            spinUnlock(ref @lock.state);
+            spinUnlock(_addr_@lock.state);
         }
 
         //go:nosplit
@@ -55,104 +65,140 @@ namespace @internal
         }
 
         //go:nosplit
-        public static ulong Xadd64(ref ulong addr, long delta)
+        public static ulong Xadd64(ptr<ulong> _addr_addr, long delta)
         {
-            lockAndCheck(addr);
+            ulong @new = default;
+            ref ulong addr = ref _addr_addr.val;
 
-            new = addr + uint64(delta).Value;
-            addr.Value = new;
+            lockAndCheck(_addr_addr);
+
+            new = addr + uint64(delta).val;
+            addr = new;
 
             unlock();
-            return;
+            return ;
         }
 
         //go:nosplit
-        public static ulong Xchg64(ref ulong addr, ulong @new)
+        public static ulong Xchg64(ptr<ulong> _addr_addr, ulong @new)
         {
-            lockAndCheck(addr);
+            ulong old = default;
+            ref ulong addr = ref _addr_addr.val;
 
-            old = addr.Value;
-            addr.Value = new;
+            lockAndCheck(_addr_addr);
+
+            old = addr;
+            addr = new;
 
             unlock();
-            return;
+            return ;
         }
 
         //go:nosplit
-        public static bool Cas64(ref ulong addr, ulong old, ulong @new)
+        public static bool Cas64(ptr<ulong> _addr_addr, ulong old, ulong @new)
         {
-            lockAndCheck(addr);
+            bool swapped = default;
+            ref ulong addr = ref _addr_addr.val;
 
-            if ((addr.Value) == old)
+            lockAndCheck(_addr_addr);
+
+            if ((addr) == old)
             {>>MARKER:FUNCTION_spinLock_BLOCK_PREFIX<<
-                addr.Value = new;
+                addr = new;
                 unlock();
                 return true;
             }
+
             unlockNoFence();
             return false;
+
         }
 
         //go:nosplit
-        public static ulong Load64(ref ulong addr)
+        public static ulong Load64(ptr<ulong> _addr_addr)
         {
-            lockAndCheck(addr);
+            ulong val = default;
+            ref ulong addr = ref _addr_addr.val;
 
-            val = addr.Value;
+            lockAndCheck(_addr_addr);
+
+            val = addr;
 
             unlock();
-            return;
+            return ;
         }
 
         //go:nosplit
-        public static void Store64(ref ulong addr, ulong val)
+        public static void Store64(ptr<ulong> _addr_addr, ulong val)
         {
-            lockAndCheck(addr);
+            ref ulong addr = ref _addr_addr.val;
 
-            addr.Value = val;
+            lockAndCheck(_addr_addr);
+
+            addr = val;
 
             unlock();
-            return;
+            return ;
         }
 
         //go:noescape
-        public static uint Xadd(ref uint ptr, int delta)
+        public static uint Xadd(ptr<uint> ptr, int delta)
 ;
 
         //go:noescape
-        public static System.UIntPtr Xadduintptr(ref System.UIntPtr ptr, System.UIntPtr delta)
+        public static System.UIntPtr Xadduintptr(ptr<System.UIntPtr> ptr, System.UIntPtr delta)
 ;
 
         //go:noescape
-        public static uint Xchg(ref uint ptr, uint @new)
+        public static uint Xchg(ptr<uint> ptr, uint @new)
 ;
 
         //go:noescape
-        public static System.UIntPtr Xchguintptr(ref System.UIntPtr ptr, System.UIntPtr @new)
+        public static System.UIntPtr Xchguintptr(ptr<System.UIntPtr> ptr, System.UIntPtr @new)
 ;
 
         //go:noescape
-        public static uint Load(ref uint ptr)
+        public static uint Load(ptr<uint> ptr)
 ;
 
         //go:noescape
+        public static byte Load8(ptr<byte> ptr)
+;
+
+        // NO go:noescape annotation; *ptr escapes if result escapes (#31525)
         public static unsafe.Pointer Loadp(unsafe.Pointer ptr)
 ;
 
         //go:noescape
-        public static void And8(ref byte ptr, byte val)
+        public static uint LoadAcq(ptr<uint> ptr)
 ;
 
         //go:noescape
-        public static void Or8(ref byte ptr, byte val)
+        public static void And8(ptr<byte> ptr, byte val)
 ;
 
         //go:noescape
-        public static void Store(ref uint ptr, uint val)
+        public static void Or8(ptr<byte> ptr, byte val)
+;
+
+        //go:noescape
+        public static void Store(ptr<uint> ptr, uint val)
+;
+
+        //go:noescape
+        public static void Store8(ptr<byte> ptr, byte val)
 ;
 
         // NO go:noescape annotation; see atomic_pointer.go.
         public static void StorepNoWB(unsafe.Pointer ptr, unsafe.Pointer val)
+;
+
+        //go:noescape
+        public static void StoreRel(ptr<uint> ptr, uint val)
+;
+
+        //go:noescape
+        public static bool CasRel(ptr<uint> addr, uint old, uint @new)
 ;
     }
 }}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:00 UTC
+//     Generated on 2020 October 08 03:42:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -57,7 +57,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -71,23 +71,24 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate error MarshalXMLByRef(ref T value, ref Encoder e, StartElement start);
-            private delegate error MarshalXMLByVal(T value, ref Encoder e, StartElement start);
+            private delegate error MarshalXMLByPtr(ptr<T> value, ptr<Encoder> e, StartElement start);
+            private delegate error MarshalXMLByVal(T value, ptr<Encoder> e, StartElement start);
 
-            private static readonly MarshalXMLByRef s_MarshalXMLByRef;
+            private static readonly MarshalXMLByPtr s_MarshalXMLByPtr;
             private static readonly MarshalXMLByVal s_MarshalXMLByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error MarshalXML(ref Encoder e, StartElement start)
+            public error MarshalXML(ptr<Encoder> e, StartElement start)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MarshalXMLByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MarshalXMLByPtr is null || !m_target_is_ptr)
                     return s_MarshalXMLByVal!(target, e, start);
 
-                return s_MarshalXMLByRef(ref target, e, start);
+                return s_MarshalXMLByPtr(m_target_ptr, e, start);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -96,23 +97,20 @@ namespace encoding
             static Marshaler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("MarshalXML");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MarshalXML");
 
                 if (!(extensionMethod is null))
-                    s_MarshalXMLByRef = extensionMethod.CreateStaticDelegate(typeof(MarshalXMLByRef)) as MarshalXMLByRef;
+                    s_MarshalXMLByPtr = extensionMethod.CreateStaticDelegate(typeof(MarshalXMLByPtr)) as MarshalXMLByPtr;
 
-                if (s_MarshalXMLByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("MarshalXML");
+                extensionMethod = targetType.GetExtensionMethod("MarshalXML");
 
-                    if (!(extensionMethod is null))
-                        s_MarshalXMLByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalXMLByVal)) as MarshalXMLByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MarshalXMLByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalXMLByVal)) as MarshalXMLByVal;
 
-                if (s_MarshalXMLByRef is null && s_MarshalXMLByVal is null)
+                if (s_MarshalXMLByPtr is null && s_MarshalXMLByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Marshaler.MarshalXML method", new Exception("MarshalXML"));
             }
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:33 UTC
+//     Generated on 2020 October 08 03:27:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace go
                 this.ExtraPolicyPara = default;
             }
 
-            public CertChainPolicyPara(uint Size = default, uint Flags = default, System.UIntPtr ExtraPolicyPara = default)
+            public CertChainPolicyPara(uint Size = default, uint Flags = default, Pointer ExtraPolicyPara = default)
             {
                 this.Size = Size;
                 this.Flags = Flags;

@@ -4,9 +4,9 @@
 
 // Support for memory sanitizer. See runtime/cgo/mmap.go.
 
-// +build linux,amd64
+// +build linux,amd64 linux,arm64
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:35 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:13 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\cgo_mmap.go
 using @unsafe = go.@unsafe_package;
@@ -27,8 +27,16 @@ namespace go
         //go:linkname _cgo_munmap _cgo_munmap
         private static unsafe.Pointer _cgo_munmap = default;
 
+        // mmap is used to route the mmap system call through C code when using cgo, to
+        // support sanitizer interceptors. Don't allow stack splits, since this function
+        // (used by sysAlloc) is called in a lot of low-level parts of the runtime and
+        // callers often assume it won't acquire any locks.
+        //go:nosplit
         private static (unsafe.Pointer, long) mmap(unsafe.Pointer addr, System.UIntPtr n, int prot, int flags, int fd, uint off)
         {
+            unsafe.Pointer _p0 = default;
+            long _p0 = default;
+
             if (_cgo_mmap != null)
             { 
                 // Make ret a uintptr so that writing to it in the
@@ -45,9 +53,13 @@ namespace go
                 {
                     return (null, int(ret));
                 }
+
                 return (@unsafe.Pointer(ret), 0L);
+
             }
+
             return sysMmap(addr, n, prot, flags, fd, off);
+
         }
 
         private static void munmap(unsafe.Pointer addr, System.UIntPtr n)
@@ -57,11 +69,13 @@ namespace go
                 systemstack(() =>
                 {
                     callCgoMunmap(addr, n);
-
                 });
-                return;
+                return ;
+
             }
+
             sysMunmap(addr, n);
+
         }
 
         // sysMmap calls the mmap system call. It is implemented in assembly.

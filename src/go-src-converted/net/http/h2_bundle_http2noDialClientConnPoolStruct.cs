@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:17 UTC
+//     Generated on 2020 October 08 03:39:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -50,35 +51,17 @@ namespace net
     public static partial class http_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(http2clientConnPool))]
         private partial struct http2noDialClientConnPool
         {
-            // http2clientConnPool structure promotion - sourced from pointer
-            private readonly ptr<http2clientConnPool> m_http2clientConnPoolRef;
-
-            private ref http2clientConnPool http2clientConnPool_ptr => ref m_http2clientConnPoolRef.Value;
-
-            public ref ptr<http2Transport> t => ref m_http2clientConnPoolRef.Value.t;
-
-            public ref sync.Mutex mu => ref m_http2clientConnPoolRef.Value.mu;
-
-            public ref map<@string, slice<ref http2ClientConn>> conns => ref m_http2clientConnPoolRef.Value.conns;
-
-            public ref map<@string, ref http2dialCall> dialing => ref m_http2clientConnPoolRef.Value.dialing;
-
-            public ref map<ref http2ClientConn, slice<@string>> keys => ref m_http2clientConnPoolRef.Value.keys;
-
-            public ref map<@string, ref http2addConnCall> addConnCalls => ref m_http2clientConnPoolRef.Value.addConnCalls;
-
             // Constructors
             public http2noDialClientConnPool(NilType _)
             {
-                this.m_http2clientConnPoolRef = new ptr<http2clientConnPool>(new http2clientConnPool(nil));
+                this.ptr<http2clientConnPool> = default;
             }
 
-            public http2noDialClientConnPool(ref http2clientConnPool http2clientConnPool = default)
+            public http2noDialClientConnPool(ref ptr<http2clientConnPool> ptr<http2clientConnPool> = default)
             {
-                this.m_http2clientConnPoolRef = new ptr<http2clientConnPool>(ref http2clientConnPool);
+                this.ptr<http2clientConnPool> = ptr<http2clientConnPool>;
             }
 
             // Enable comparisons between nil and http2noDialClientConnPool struct
@@ -101,7 +84,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2noDialClientConnPool http2noDialClientConnPool_cast(dynamic value)
         {
-            return new http2noDialClientConnPool(ref value.http2clientConnPool);
+            return new http2noDialClientConnPool(ref value.ptr<http2clientConnPool>);
         }
     }
 }}

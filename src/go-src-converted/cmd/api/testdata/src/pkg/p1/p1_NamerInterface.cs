@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:37 UTC
+//     Generated on 2020 October 08 04:04:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -54,7 +54,7 @@ namespace pkg
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace pkg
                 m_target_is_ptr = true;
             }
 
-            private delegate @string NameByRef(ref T value);
+            private delegate @string NameByPtr(ptr<T> value);
             private delegate @string NameByVal(T value);
 
-            private static readonly NameByRef s_NameByRef;
+            private static readonly NameByPtr s_NameByPtr;
             private static readonly NameByVal s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,11 +80,12 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByRef(ref target);
+                return s_NameByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -93,23 +94,20 @@ namespace pkg
             static Namer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Name");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
                 if (!(extensionMethod is null))
-                    s_NameByRef = extensionMethod.CreateStaticDelegate(typeof(NameByRef)) as NameByRef;
+                    s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
-                if (s_NameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Name");
+                extensionMethod = targetType.GetExtensionMethod("Name");
 
-                    if (!(extensionMethod is null))
-                        s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
-                if (s_NameByRef is null && s_NameByVal is null)
+                if (s_NameByPtr is null && s_NameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Namer.Name method", new Exception("Name"));
             }
 

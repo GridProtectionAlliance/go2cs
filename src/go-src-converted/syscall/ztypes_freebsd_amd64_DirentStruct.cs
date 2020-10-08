@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:06 UTC
+//     Generated on 2020 October 08 03:30:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,18 +25,24 @@ namespace go
             public Dirent(NilType _)
             {
                 this.Fileno = default;
+                this.Off = default;
                 this.Reclen = default;
                 this.Type = default;
+                this.Pad0 = default;
                 this.Namlen = default;
+                this.Pad1 = default;
                 this.Name = default;
             }
 
-            public Dirent(uint Fileno = default, ushort Reclen = default, byte Type = default, byte Namlen = default, array<sbyte> Name = default)
+            public Dirent(ulong Fileno = default, long Off = default, ushort Reclen = default, byte Type = default, byte Pad0 = default, ushort Namlen = default, ushort Pad1 = default, array<sbyte> Name = default)
             {
                 this.Fileno = Fileno;
+                this.Off = Off;
                 this.Reclen = Reclen;
                 this.Type = Type;
+                this.Pad0 = Pad0;
                 this.Namlen = Namlen;
+                this.Pad1 = Pad1;
                 this.Name = Name;
             }
 
@@ -60,7 +66,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Dirent Dirent_cast(dynamic value)
         {
-            return new Dirent(value.Fileno, value.Reclen, value.Type, value.Namlen, value.Name);
+            return new Dirent(value.Fileno, value.Off, value.Reclen, value.Type, value.Pad0, value.Namlen, value.Pad1, value.Name);
         }
     }
 }

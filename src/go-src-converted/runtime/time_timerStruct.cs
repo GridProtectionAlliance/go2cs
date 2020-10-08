@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:16 UTC
+//     Generated on 2020 October 08 03:24:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 
@@ -26,22 +27,24 @@ namespace go
             // Constructors
             public timer(NilType _)
             {
-                this.tb = default;
-                this.i = default;
+                this.pp = default;
                 this.when = default;
                 this.period = default;
                 this.f = default;
                 this.seq = default;
+                this.nextwhen = default;
+                this.status = default;
             }
 
-            public timer(ref ptr<timersBucket> tb = default, long i = default, long when = default, long period = default, Action<object, System.UIntPtr> f = default, System.UIntPtr seq = default)
+            public timer(puintptr pp = default, long when = default, long period = default, Action<object, System.UIntPtr> f = default, System.UIntPtr seq = default, long nextwhen = default, uint status = default)
             {
-                this.tb = tb;
-                this.i = i;
+                this.pp = pp;
                 this.when = when;
                 this.period = period;
                 this.f = f;
                 this.seq = seq;
+                this.nextwhen = nextwhen;
+                this.status = status;
             }
 
             // Enable comparisons between nil and timer struct
@@ -64,7 +67,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static timer timer_cast(dynamic value)
         {
-            return new timer(ref value.tb, value.i, value.when, value.period, value.f, value.seq);
+            return new timer(value.pp, value.when, value.period, value.f, value.seq, value.nextwhen, value.status);
         }
     }
 }

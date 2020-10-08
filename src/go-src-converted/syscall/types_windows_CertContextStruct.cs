@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:32 UTC
+//     Generated on 2020 October 08 03:27:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace go
                 this.Store = default;
             }
 
-            public CertContext(uint EncodingType = default, ref ptr<byte> EncodedCert = default, uint Length = default, System.UIntPtr CertInfo = default, Handle Store = default)
+            public CertContext(uint EncodingType = default, ref ptr<byte> EncodedCert = default, uint Length = default, ref ptr<CertInfo> CertInfo = default, Handle Store = default)
             {
                 this.EncodingType = EncodingType;
                 this.EncodedCert = EncodedCert;
@@ -60,7 +60,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static CertContext CertContext_cast(dynamic value)
         {
-            return new CertContext(value.EncodingType, ref value.EncodedCert, value.Length, value.CertInfo, value.Store);
+            return new CertContext(value.EncodingType, ref value.EncodedCert, value.Length, ref value.CertInfo, value.Store);
         }
     }
 }

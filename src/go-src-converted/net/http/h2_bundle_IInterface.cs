@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:19 UTC
+//     Generated on 2020 October 08 03:39:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -78,7 +79,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -92,10 +93,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate bool doKeepAlivesByRef(ref T value);
+            private delegate bool doKeepAlivesByPtr(ptr<T> value);
             private delegate bool doKeepAlivesByVal(T value);
 
-            private static readonly doKeepAlivesByRef s_doKeepAlivesByRef;
+            private static readonly doKeepAlivesByPtr s_doKeepAlivesByPtr;
             private static readonly doKeepAlivesByVal s_doKeepAlivesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,11 +105,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_doKeepAlivesByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_doKeepAlivesByPtr is null || !m_target_is_ptr)
                     return s_doKeepAlivesByVal!(target);
 
-                return s_doKeepAlivesByRef(ref target);
+                return s_doKeepAlivesByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -117,23 +119,20 @@ namespace net
             static I()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("doKeepAlives");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("doKeepAlives");
 
                 if (!(extensionMethod is null))
-                    s_doKeepAlivesByRef = extensionMethod.CreateStaticDelegate(typeof(doKeepAlivesByRef)) as doKeepAlivesByRef;
+                    s_doKeepAlivesByPtr = extensionMethod.CreateStaticDelegate(typeof(doKeepAlivesByPtr)) as doKeepAlivesByPtr;
 
-                if (s_doKeepAlivesByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("doKeepAlives");
+                extensionMethod = targetType.GetExtensionMethod("doKeepAlives");
 
-                    if (!(extensionMethod is null))
-                        s_doKeepAlivesByVal = extensionMethod.CreateStaticDelegate(typeof(doKeepAlivesByVal)) as doKeepAlivesByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_doKeepAlivesByVal = extensionMethod.CreateStaticDelegate(typeof(doKeepAlivesByVal)) as doKeepAlivesByVal;
 
-                if (s_doKeepAlivesByRef is null && s_doKeepAlivesByVal is null)
+                if (s_doKeepAlivesByPtr is null && s_doKeepAlivesByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement I.doKeepAlives method", new Exception("doKeepAlives"));
             }
 

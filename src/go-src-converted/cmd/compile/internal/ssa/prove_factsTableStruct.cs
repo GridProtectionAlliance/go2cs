@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:54:46 UTC
+//     Generated on 2020 October 08 04:11:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
 using go;
@@ -30,22 +31,32 @@ namespace @internal
             // Constructors
             public factsTable(NilType _)
             {
+                this.unsat = default;
+                this.unsatDepth = default;
                 this.facts = default;
                 this.stack = default;
+                this.orderS = default;
+                this.orderU = default;
                 this.limits = default;
                 this.limitStack = default;
                 this.lens = default;
                 this.caps = default;
+                this.zero = default;
             }
 
-            public factsTable(map<pair, relation> facts = default, slice<fact> stack = default, map<ID, limit> limits = default, slice<limitFact> limitStack = default, map<ID, ref Value> lens = default, map<ID, ref Value> caps = default)
+            public factsTable(bool unsat = default, long unsatDepth = default, map<pair, relation> facts = default, slice<fact> stack = default, ref ptr<poset> orderS = default, ref ptr<poset> orderU = default, map<ID, limit> limits = default, slice<limitFact> limitStack = default, map<ID, ptr<Value>> lens = default, map<ID, ptr<Value>> caps = default, ref ptr<Value> zero = default)
             {
+                this.unsat = unsat;
+                this.unsatDepth = unsatDepth;
                 this.facts = facts;
                 this.stack = stack;
+                this.orderS = orderS;
+                this.orderU = orderU;
                 this.limits = limits;
                 this.limitStack = limitStack;
                 this.lens = lens;
                 this.caps = caps;
+                this.zero = zero;
             }
 
             // Enable comparisons between nil and factsTable struct
@@ -68,7 +79,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static factsTable factsTable_cast(dynamic value)
         {
-            return new factsTable(value.facts, value.stack, value.limits, value.limitStack, value.lens, value.caps);
+            return new factsTable(value.unsat, value.unsatDepth, value.facts, value.stack, ref value.orderS, ref value.orderU, value.limits, value.limitStack, value.lens, value.caps, ref value.zero);
         }
     }
 }}}}

@@ -8,7 +8,7 @@
     but their descriptions here allow godoc to present documentation
     for the language's special identifiers.
 */
-// package builtin -- go2cs converted at 2020 August 29 08:45:40 UTC
+// package builtin -- go2cs converted at 2020 October 08 03:49:31 UTC
 // import "builtin" ==> using builtin = go.builtin_package
 // Original source: C:\Go\src\builtin\builtin.go
 
@@ -24,8 +24,8 @@ namespace go
         }
 
         // true and false are the two untyped boolean values.
-        private static readonly long true = 0L == 0L; // Untyped bool.
-        private static readonly long false = 0L != 0L; // Untyped bool.
+        private static readonly long true = (long)0L == 0L; // Untyped bool.
+        private static readonly long false = (long)0L != 0L; // Untyped bool.
 
         // uint8 is the set of all unsigned 8-bit integers.
         // Range: 0 through 255.
@@ -138,7 +138,7 @@ namespace go
         // iota is a predeclared identifier representing the untyped integer ordinal
         // number of the current const specification in a (usually parenthesized)
         // const declaration. It is zero-indexed.
-        private static readonly long iota = 0L; // Untyped int.
+        private static readonly long iota = (long)0L; // Untyped int.
 
         // nil is a predeclared identifier representing the zero value for a
         // pointer, channel, func, interface, map, or slice type.
@@ -205,7 +205,10 @@ namespace go
         //    Slice, or map: the number of elements in v; if v is nil, len(v) is zero.
         //    String: the number of bytes in v.
         //    Channel: the number of elements queued (unread) in the channel buffer;
-        //    if v is nil, len(v) is zero.
+        //             if v is nil, len(v) is zero.
+        // For some arguments, such as a string literal or a simple array expression, the
+        // result can be a constant. See the Go language specification's "Length and
+        // capacity" section for details.
         private static long len(Type v)
 ;
 
@@ -216,6 +219,9 @@ namespace go
         //    if v is nil, cap(v) is zero.
         //    Channel: the channel buffer capacity, in units of elements;
         //    if v is nil, cap(v) is zero.
+        // For some arguments, such as a simple array expression, the result can be a
+        // constant. See the Go language specification's "Length and capacity" section for
+        // details.
         private static long cap(Type v)
 ;
 
@@ -242,7 +248,7 @@ namespace go
         // The new built-in function allocates memory. The first argument is a type,
         // not a value, and the value returned is a pointer to a newly
         // allocated zero value of that type.
-        private static ref Type @new(Type _p0)
+        private static ptr<Type> @new(Type _p0)
 ;
 
         // The complex built-in function constructs a complex value from two
@@ -282,10 +288,9 @@ namespace go
         // invocation of F then behaves like a call to panic, terminating G's
         // execution and running any deferred functions. This continues until all
         // functions in the executing goroutine have stopped, in reverse order. At
-        // that point, the program is terminated and the error condition is reported,
-        // including the value of the argument to panic. This termination sequence
-        // is called panicking and can be controlled by the built-in function
-        // recover.
+        // that point, the program is terminated with a non-zero exit code. This
+        // termination sequence is called panicking and can be controlled by the
+        // built-in function recover.
         private static void panic(object v)
 ;
 

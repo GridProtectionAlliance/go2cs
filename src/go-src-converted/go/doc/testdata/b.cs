@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package b -- go2cs converted at 2020 August 29 08:47:10 UTC
+// package b -- go2cs converted at 2020 October 08 04:02:50 UTC
 // import "go/doc.b" ==> using b = go.go.doc.b_package
 // Original source: C:\Go\src\go\doc\testdata\b.go
 using a = go.a_package;
@@ -15,7 +15,7 @@ namespace go
     {
         // ----------------------------------------------------------------------------
         // Basic declarations
-        public static readonly float Pi = 3.14F; // Pi
+        public static readonly float Pi = (float)3.14F; // Pi
  // Pi
         public static long MaxInt = default; // MaxInt
         public partial struct T
@@ -25,8 +25,10 @@ namespace go
         public static long F(long x)
         {
         } // F
-        private static void M(this ref T x)
+        private static void M(this ptr<T> _addr_x)
         {
+            ref T x = ref _addr_x.val;
+
         } // M
 
         // Corner cases: association with (presumed) predeclared types
@@ -58,15 +60,16 @@ namespace go
         {
         }
 
-        public static readonly notExported C = 0L;
+        public static readonly notExported C = (notExported)0L;
 
 
 
-        public static readonly notExported C1 = iota;
-        public static readonly var C2 = 0;
-        private static readonly var c3 = 1;
-        public static readonly var C4 = 2;
-        public static readonly var C5 = 3;
+        public static readonly notExported C1 = (notExported)iota;
+        public static readonly var C2 = (var)0;
+        private static readonly var c3 = (var)1;
+        public static readonly var C4 = (var)2;
+        public static readonly var C5 = (var)3;
+
 
         public static notExported V = default;
         public static notExported V1 = default;        public static notExported V2 = default;        private static notExported v3 = default;        public static notExported V4 = default;        public static notExported V5 = default;

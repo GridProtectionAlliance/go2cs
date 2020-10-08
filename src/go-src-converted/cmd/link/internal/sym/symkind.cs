@@ -1,5 +1,5 @@
 // Derived from Inferno utils/6l/l.h and related files.
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/l.h
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/l.h
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package sym -- go2cs converted at 2020 August 29 10:02:56 UTC
+// package sym -- go2cs converted at 2020 October 08 04:37:54 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Go\src\cmd\link\internal\sym\symkind.go
 
@@ -50,21 +50,21 @@ namespace @internal
         //
         // TODO(rsc): Give idiomatic Go names.
         //go:generate stringer -type=SymKind
-        public static readonly SymKind Sxxx = iota;
-        public static readonly var STEXT = 0;
-        public static readonly var SELFRXSECT = 1; 
+        public static readonly SymKind Sxxx = (SymKind)iota;
+        public static readonly var STEXT = (var)0;
+        public static readonly var SELFRXSECT = (var)1; 
 
         // Read-only sections.
-        public static readonly var STYPE = 2;
-        public static readonly var SSTRING = 3;
-        public static readonly var SGOSTRING = 4;
-        public static readonly var SGOFUNC = 5;
-        public static readonly var SGCBITS = 6;
-        public static readonly var SRODATA = 7;
-        public static readonly var SFUNCTAB = 8;
+        public static readonly var STYPE = (var)2;
+        public static readonly var SSTRING = (var)3;
+        public static readonly var SGOSTRING = (var)4;
+        public static readonly var SGOFUNC = (var)5;
+        public static readonly var SGCBITS = (var)6;
+        public static readonly var SRODATA = (var)7;
+        public static readonly var SFUNCTAB = (var)8;
 
-        public static readonly var SELFROSECT = 9;
-        public static readonly var SMACHOPLT = 10; 
+        public static readonly var SELFROSECT = (var)9;
+        public static readonly var SMACHOPLT = (var)10; 
 
         // Read-only sections with relocations.
         //
@@ -78,49 +78,61 @@ namespace @internal
         // object it checks all objects of the above types and bumps any object that
         // has a relocation to it to the corresponding type below, which are then
         // written to sections with appropriate magic names.
-        public static readonly var STYPERELRO = 11;
-        public static readonly var SSTRINGRELRO = 12;
-        public static readonly var SGOSTRINGRELRO = 13;
-        public static readonly var SGOFUNCRELRO = 14;
-        public static readonly var SGCBITSRELRO = 15;
-        public static readonly var SRODATARELRO = 16;
-        public static readonly var SFUNCTABRELRO = 17; 
+        public static readonly var STYPERELRO = (var)11;
+        public static readonly var SSTRINGRELRO = (var)12;
+        public static readonly var SGOSTRINGRELRO = (var)13;
+        public static readonly var SGOFUNCRELRO = (var)14;
+        public static readonly var SGCBITSRELRO = (var)15;
+        public static readonly var SRODATARELRO = (var)16;
+        public static readonly var SFUNCTABRELRO = (var)17; 
 
         // Part of .data.rel.ro if it exists, otherwise part of .rodata.
-        public static readonly var STYPELINK = 18;
-        public static readonly var SITABLINK = 19;
-        public static readonly var SSYMTAB = 20;
-        public static readonly var SPCLNTAB = 21; 
+        public static readonly var STYPELINK = (var)18;
+        public static readonly var SITABLINK = (var)19;
+        public static readonly var SSYMTAB = (var)20;
+        public static readonly var SPCLNTAB = (var)21; 
 
         // Writable sections.
-        public static readonly var SELFSECT = 22;
-        public static readonly var SMACHO = 23;
-        public static readonly var SMACHOGOT = 24;
-        public static readonly var SWINDOWS = 25;
-        public static readonly var SELFGOT = 26;
-        public static readonly var SNOPTRDATA = 27;
-        public static readonly var SINITARR = 28;
-        public static readonly var SDATA = 29;
-        public static readonly var SBSS = 30;
-        public static readonly var SNOPTRBSS = 31;
-        public static readonly var STLSBSS = 32;
-        public static readonly var SXREF = 33;
-        public static readonly var SMACHOSYMSTR = 34;
-        public static readonly var SMACHOSYMTAB = 35;
-        public static readonly var SMACHOINDIRECTPLT = 36;
-        public static readonly var SMACHOINDIRECTGOT = 37;
-        public static readonly var SFILEPATH = 38;
-        public static readonly var SCONST = 39;
-        public static readonly var SDYNIMPORT = 40;
-        public static readonly var SHOSTOBJ = 41;
-        public static readonly var SDWARFSECT = 42;
-        public static readonly var SDWARFINFO = 43;
-        public static readonly var SDWARFRANGE = 44;
-        public static readonly var SDWARFLOC = 45;
+        public static readonly var SFirstWritable = (var)22;
+        public static readonly var SBUILDINFO = (var)23;
+        public static readonly var SELFSECT = (var)24;
+        public static readonly var SMACHO = (var)25;
+        public static readonly var SMACHOGOT = (var)26;
+        public static readonly var SWINDOWS = (var)27;
+        public static readonly var SELFGOT = (var)28;
+        public static readonly var SNOPTRDATA = (var)29;
+        public static readonly var SINITARR = (var)30;
+        public static readonly var SDATA = (var)31;
+        public static readonly var SXCOFFTOC = (var)32;
+        public static readonly var SBSS = (var)33;
+        public static readonly var SNOPTRBSS = (var)34;
+        public static readonly var SLIBFUZZER_EXTRA_COUNTER = (var)35;
+        public static readonly var STLSBSS = (var)36;
+        public static readonly var SXREF = (var)37;
+        public static readonly var SMACHOSYMSTR = (var)38;
+        public static readonly var SMACHOSYMTAB = (var)39;
+        public static readonly var SMACHOINDIRECTPLT = (var)40;
+        public static readonly var SMACHOINDIRECTGOT = (var)41;
+        public static readonly var SFILEPATH = (var)42;
+        public static readonly var SCONST = (var)43;
+        public static readonly var SDYNIMPORT = (var)44;
+        public static readonly var SHOSTOBJ = (var)45;
+        public static readonly var SUNDEFEXT = (var)46; // Undefined symbol for resolution by external linker
+
+        // Sections for debugging information
+        public static readonly var SDWARFSECT = (var)47;
+        public static readonly var SDWARFINFO = (var)48;
+        public static readonly var SDWARFRANGE = (var)49;
+        public static readonly var SDWARFLOC = (var)50;
+        public static readonly var SDWARFLINES = (var)51; 
+
+        // ABI aliases (these never appear in the output)
+        public static readonly var SABIALIAS = (var)52;
+
 
         // AbiSymKindToSymKind maps values read from object files (which are
         // of type cmd/internal/objabi.SymKind) to values of type SymKind.
-        public static array<SymKind> AbiSymKindToSymKind = new array<SymKind>(new SymKind[] { Sxxx, STEXT, SRODATA, SNOPTRDATA, SDATA, SBSS, SNOPTRBSS, STLSBSS, SDWARFINFO, SDWARFRANGE, SDWARFLOC });
+        public static array<SymKind> AbiSymKindToSymKind = new array<SymKind>(new SymKind[] { Sxxx, STEXT, SRODATA, SNOPTRDATA, SDATA, SBSS, SNOPTRBSS, STLSBSS, SDWARFINFO, SDWARFRANGE, SDWARFLOC, SDWARFLINES, SABIALIAS, SLIBFUZZER_EXTRA_COUNTER });
 
         // ReadOnly are the symbol kinds that form read-only sections. In some
         // cases, if they will require relocations, they are transformed into
@@ -130,5 +142,11 @@ namespace @internal
         // RelROMap describes the transformation of read-only symbols to rel-ro
         // symbols.
         public static map RelROMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<SymKind, SymKind>{STYPE:STYPERELRO,SSTRING:SSTRINGRELRO,SGOSTRING:SGOSTRINGRELRO,SGOFUNC:SGOFUNCRELRO,SGCBITS:SGCBITSRELRO,SRODATA:SRODATARELRO,SFUNCTAB:SFUNCTABRELRO,};
+
+        // IsData returns true if the type is a data type.
+        public static bool IsData(this SymKind t)
+        {
+            return t == SDATA || t == SNOPTRDATA || t == SBSS || t == SNOPTRBSS;
+        }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:37:04 UTC
+//     Generated on 2020 October 08 03:26:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,14 +31,18 @@ namespace go
                 this.CmdLine = default;
                 this.CreationFlags = default;
                 this.Token = default;
+                this.ProcessAttributes = default;
+                this.ThreadAttributes = default;
             }
 
-            public SysProcAttr(bool HideWindow = default, @string CmdLine = default, uint CreationFlags = default, Token Token = default)
+            public SysProcAttr(bool HideWindow = default, @string CmdLine = default, uint CreationFlags = default, Token Token = default, ref ptr<SecurityAttributes> ProcessAttributes = default, ref ptr<SecurityAttributes> ThreadAttributes = default)
             {
                 this.HideWindow = HideWindow;
                 this.CmdLine = CmdLine;
                 this.CreationFlags = CreationFlags;
                 this.Token = Token;
+                this.ProcessAttributes = ProcessAttributes;
+                this.ThreadAttributes = ThreadAttributes;
             }
 
             // Enable comparisons between nil and SysProcAttr struct
@@ -61,7 +65,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static SysProcAttr SysProcAttr_cast(dynamic value)
         {
-            return new SysProcAttr(value.HideWindow, value.CmdLine, value.CreationFlags, value.Token);
+            return new SysProcAttr(value.HideWindow, value.CmdLine, value.CreationFlags, value.Token, ref value.ProcessAttributes, ref value.ThreadAttributes);
         }
     }
 }

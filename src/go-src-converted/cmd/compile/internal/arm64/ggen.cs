@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64 -- go2cs converted at 2020 August 29 09:58:53 UTC
+// package arm64 -- go2cs converted at 2020 October 08 04:32:06 UTC
 // import "cmd/compile/internal/arm64" ==> using arm64 = go.cmd.compile.@internal.arm64_package
 // Original source: C:\Go\src\cmd\compile\internal\arm64\ggen.go
 using gc = go.cmd.compile.@internal.gc_package;
@@ -22,21 +22,28 @@ namespace @internal
 
         private static long padframe(long frame)
         { 
-            // arm64 requires that the frame size (not counting saved LR)
-            // be empty or be 8 mod 16. If not, pad it.
-            if (frame != 0L && frame % 16L != 8L)
+            // arm64 requires that the frame size (not counting saved FP&LR)
+            // be 16 bytes aligned. If not, pad it.
+            if (frame % 16L != 0L)
             {
-                frame += 8L;
+                frame += 16L - (frame % 16L);
             }
+
             return frame;
+
         }
 
-        private static ref obj.Prog zerorange(ref gc.Progs pp, ref obj.Prog p, long off, long cnt, ref uint _)
+        private static ptr<obj.Prog> zerorange(ptr<gc.Progs> _addr_pp, ptr<obj.Prog> _addr_p, long off, long cnt, ptr<uint> _addr__)
         {
+            ref gc.Progs pp = ref _addr_pp.val;
+            ref obj.Prog p = ref _addr_p.val;
+            ref uint _ = ref _addr__.val;
+
             if (cnt == 0L)
             {
-                return p;
+                return _addr_p!;
             }
+
             if (cnt < int64(4L * gc.Widthptr))
             {
                 {
@@ -49,6 +56,7 @@ namespace @internal
                     }
 
                 }
+
             }
             else if (cnt <= int64(128L * gc.Widthptr) && !darwin)
             { // darwin ld64 cannot handle BR26 reloc with non-zero addend
@@ -58,22 +66,29 @@ namespace @internal
                     off += int64(gc.Widthptr);
                     cnt -= int64(gc.Widthptr);
                 }
-                p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_REG, arm64.REGSP, 0L, obj.TYPE_REG, arm64.REGRT1, 0L);
-                p = pp.Appendpp(p, arm64.AADD, obj.TYPE_CONST, 0L, 8L + off, obj.TYPE_REG, arm64.REGRT1, 0L);
-                p.Reg = arm64.REGRT1;
+
+                p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_REG, arm64.REGSP, 0L, obj.TYPE_REG, arm64.REG_R20, 0L);
+                p = pp.Appendpp(p, arm64.AADD, obj.TYPE_CONST, 0L, 8L + off, obj.TYPE_REG, arm64.REG_R20, 0L);
+                p.Reg = arm64.REG_R20;
                 p = pp.Appendpp(p, obj.ADUFFZERO, obj.TYPE_NONE, 0L, 0L, obj.TYPE_MEM, 0L, 0L);
                 p.To.Name = obj.NAME_EXTERN;
                 p.To.Sym = gc.Duffzero;
                 p.To.Offset = 4L * (64L - cnt / (2L * int64(gc.Widthptr)));
+
             }
             else
-            {
-                p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_CONST, 0L, 8L + off - 8L, obj.TYPE_REG, arm64.REGTMP, 0L);
+            { 
+                // Not using REGTMP, so this is async preemptible (async preemption clobbers REGTMP).
+                // We are at the function entry, where no register is live, so it is okay to clobber
+                // other registers
+                const var rtmp = (var)arm64.REG_R20;
+
+                p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_CONST, 0L, 8L + off - 8L, obj.TYPE_REG, rtmp, 0L);
                 p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_REG, arm64.REGSP, 0L, obj.TYPE_REG, arm64.REGRT1, 0L);
-                p = pp.Appendpp(p, arm64.AADD, obj.TYPE_REG, arm64.REGTMP, 0L, obj.TYPE_REG, arm64.REGRT1, 0L);
+                p = pp.Appendpp(p, arm64.AADD, obj.TYPE_REG, rtmp, 0L, obj.TYPE_REG, arm64.REGRT1, 0L);
                 p.Reg = arm64.REGRT1;
-                p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_CONST, 0L, cnt, obj.TYPE_REG, arm64.REGTMP, 0L);
-                p = pp.Appendpp(p, arm64.AADD, obj.TYPE_REG, arm64.REGTMP, 0L, obj.TYPE_REG, arm64.REGRT2, 0L);
+                p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_CONST, 0L, cnt, obj.TYPE_REG, rtmp, 0L);
+                p = pp.Appendpp(p, arm64.AADD, obj.TYPE_REG, rtmp, 0L, obj.TYPE_REG, arm64.REGRT2, 0L);
                 p.Reg = arm64.REGRT1;
                 p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_REG, arm64.REGZERO, 0L, obj.TYPE_MEM, arm64.REGRT1, int64(gc.Widthptr));
                 p.Scond = arm64.C_XPRE;
@@ -82,38 +97,20 @@ namespace @internal
                 p.Reg = arm64.REGRT2;
                 p = pp.Appendpp(p, arm64.ABNE, obj.TYPE_NONE, 0L, 0L, obj.TYPE_BRANCH, 0L, 0L);
                 gc.Patch(p, p1);
-            }
-            return p;
-        }
-
-        private static void zeroAuto(ref gc.Progs pp, ref gc.Node n)
-        { 
-            // Note: this code must not clobber any registers.
-            var sym = n.Sym.Linksym();
-            var size = n.Type.Size();
-            {
-                var i = int64(0L);
-
-                while (i < size)
-                {
-                    var p = pp.Prog(arm64.AMOVD);
-                    p.From.Type = obj.TYPE_REG;
-                    p.From.Reg = arm64.REGZERO;
-                    p.To.Type = obj.TYPE_MEM;
-                    p.To.Name = obj.NAME_AUTO;
-                    p.To.Reg = arm64.REGSP;
-                    p.To.Offset = n.Xoffset + i;
-                    p.To.Sym = sym;
-                    i += 8L;
-                }
 
             }
+
+            return _addr_p!;
+
         }
 
-        private static void ginsnop(ref gc.Progs pp)
+        private static ptr<obj.Prog> ginsnop(ptr<gc.Progs> _addr_pp)
         {
+            ref gc.Progs pp = ref _addr_pp.val;
+
             var p = pp.Prog(arm64.AHINT);
             p.From.Type = obj.TYPE_CONST;
+            return _addr_p!;
         }
     }
 }}}}

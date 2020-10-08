@@ -4,7 +4,7 @@
 
 // This file implements scopes and the objects they contain.
 
-// package ast -- go2cs converted at 2020 August 29 08:48:35 UTC
+// package ast -- go2cs converted at 2020 October 08 04:04:24 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\scope.go
 using bytes = go.bytes_package;
@@ -24,24 +24,29 @@ namespace go
         public partial struct Scope
         {
             public ptr<Scope> Outer;
-            public map<@string, ref Object> Objects;
+            public map<@string, ptr<Object>> Objects;
         }
 
         // NewScope creates a new scope nested in the outer scope.
-        public static ref Scope NewScope(ref Scope outer)
+        public static ptr<Scope> NewScope(ptr<Scope> _addr_outer)
         {
-            const long n = 4L; // initial scope capacity
+            ref Scope outer = ref _addr_outer.val;
+
+            const long n = (long)4L; // initial scope capacity
  // initial scope capacity
-            return ref new Scope(outer,make(map[string]*Object,n));
+            return addr(new Scope(outer,make(map[string]*Object,n)));
+
         }
 
         // Lookup returns the object with the given name if it is
         // found in scope s, otherwise it returns nil. Outer scopes
         // are ignored.
         //
-        private static ref Object Lookup(this ref Scope s, @string name)
+        private static ptr<Object> Lookup(this ptr<Scope> _addr_s, @string name)
         {
-            return s.Objects[name];
+            ref Scope s = ref _addr_s.val;
+
+            return _addr_s.Objects[name]!;
         }
 
         // Insert attempts to insert a named object obj into the scope s.
@@ -49,32 +54,43 @@ namespace go
         // Insert leaves the scope unchanged and returns alt. Otherwise
         // it inserts obj and returns nil.
         //
-        private static ref Object Insert(this ref Scope s, ref Object obj)
+        private static ptr<Object> Insert(this ptr<Scope> _addr_s, ptr<Object> _addr_obj)
         {
+            ptr<Object> alt = default!;
+            ref Scope s = ref _addr_s.val;
+            ref Object obj = ref _addr_obj.val;
+
             alt = s.Objects[obj.Name];
 
             if (alt == null)
             {
                 s.Objects[obj.Name] = obj;
             }
-            return;
+
+            return ;
+
         }
 
         // Debugging support
-        private static @string String(this ref Scope s)
+        private static @string String(this ptr<Scope> _addr_s)
         {
-            bytes.Buffer buf = default;
-            fmt.Fprintf(ref buf, "scope %p {", s);
+            ref Scope s = ref _addr_s.val;
+
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            fmt.Fprintf(_addr_buf, "scope %p {", s);
             if (s != null && len(s.Objects) > 0L)
             {
-                fmt.Fprintln(ref buf);
+                fmt.Fprintln(_addr_buf);
                 foreach (var (_, obj) in s.Objects)
                 {
-                    fmt.Fprintf(ref buf, "\t%s %s\n", obj.Kind, obj.Name);
+                    fmt.Fprintf(_addr_buf, "\t%s %s\n", obj.Kind, obj.Name);
                 }
+
             }
-            fmt.Fprintf(ref buf, "}\n");
+
+            fmt.Fprintf(_addr_buf, "}\n");
             return buf.String();
+
         }
 
         // ----------------------------------------------------------------------------
@@ -96,20 +112,22 @@ namespace go
         }
 
         // NewObj creates a new object of a given kind and name.
-        public static ref Object NewObj(ObjKind kind, @string name)
+        public static ptr<Object> NewObj(ObjKind kind, @string name)
         {
-            return ref new Object(Kind:kind,Name:name);
+            return addr(new Object(Kind:kind,Name:name));
         }
 
         // Pos computes the source position of the declaration of an object name.
         // The result may be an invalid position if it cannot be computed
         // (obj.Decl may be nil or not correct).
-        private static token.Pos Pos(this ref Object obj)
+        private static token.Pos Pos(this ptr<Object> _addr_obj)
         {
+            ref Object obj = ref _addr_obj.val;
+
             var name = obj.Name;
             switch (obj.Decl.type())
             {
-                case ref Field d:
+                case ptr<Field> d:
                     {
                         var n__prev1 = n;
 
@@ -120,19 +138,21 @@ namespace go
                             {
                                 return n.Pos();
                             }
+
                         }
 
                         n = n__prev1;
                     }
                     break;
-                case ref ImportSpec d:
+                case ptr<ImportSpec> d:
                     if (d.Name != null && d.Name.Name == name)
                     {
                         return d.Name.Pos();
                     }
+
                     return d.Path.Pos();
                     break;
-                case ref ValueSpec d:
+                case ptr<ValueSpec> d:
                     {
                         var n__prev1 = n;
 
@@ -143,34 +163,38 @@ namespace go
                             {
                                 return n.Pos();
                             }
+
                         }
 
                         n = n__prev1;
                     }
                     break;
-                case ref TypeSpec d:
+                case ptr<TypeSpec> d:
                     if (d.Name.Name == name)
                     {
                         return d.Name.Pos();
                     }
+
                     break;
-                case ref FuncDecl d:
+                case ptr<FuncDecl> d:
                     if (d.Name.Name == name)
                     {
                         return d.Name.Pos();
                     }
+
                     break;
-                case ref LabeledStmt d:
+                case ptr<LabeledStmt> d:
                     if (d.Label.Name == name)
                     {
                         return d.Label.Pos();
                     }
+
                     break;
-                case ref AssignStmt d:
+                case ptr<AssignStmt> d:
                     foreach (var (_, x) in d.Lhs)
                     {
                         {
-                            ref Ident (ident, isIdent) = x._<ref Ident>();
+                            ptr<Ident> (ident, isIdent) = x._<ptr<Ident>>();
 
                             if (isIdent && ident.Name == name)
                             {
@@ -178,12 +202,14 @@ namespace go
                             }
 
                         }
+
                     }
                     break;
-                case ref Scope d:
+                case ptr<Scope> d:
                     break;
             }
             return token.NoPos;
+
         }
 
         // ObjKind describes what an object represents.
@@ -192,13 +218,13 @@ namespace go
         }
 
         // The list of possible Object kinds.
-        public static readonly ObjKind Bad = iota; // for error handling
-        public static readonly var Pkg = 0; // package
-        public static readonly var Con = 1; // constant
-        public static readonly var Typ = 2; // type
-        public static readonly var Var = 3; // variable
-        public static readonly var Fun = 4; // function or method
-        public static readonly var Lbl = 5; // label
+        public static readonly ObjKind Bad = (ObjKind)iota; // for error handling
+        public static readonly var Pkg = (var)0; // package
+        public static readonly var Con = (var)1; // constant
+        public static readonly var Typ = (var)2; // type
+        public static readonly var Var = (var)3; // variable
+        public static readonly var Fun = (var)4; // function or method
+        public static readonly var Lbl = (var)5; // label
 
         private static array<@string> objKindStrings = new array<@string>(InitKeyedValues<@string>((Bad, "bad"), (Pkg, "package"), (Con, "const"), (Typ, "type"), (Var, "var"), (Fun, "func"), (Lbl, "label")));
 

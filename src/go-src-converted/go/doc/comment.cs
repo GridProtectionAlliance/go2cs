@@ -4,11 +4,12 @@
 
 // Godoc comment extraction and comment -> HTML formatting.
 
-// package doc -- go2cs converted at 2020 August 29 08:46:57 UTC
+// package doc -- go2cs converted at 2020 October 08 04:02:33 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Go\src\go\doc\comment.go
+using bytes = go.bytes_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using io = go.io_package;
-using regexp = go.regexp_package;
 using strings = go.strings_package;
 using template = go.text.template_package; // for HTMLEscape
 using unicode = go.unicode_package;
@@ -21,93 +22,65 @@ namespace go
 {
     public static partial class doc_package
     {
-        private static slice<byte> ldquo = (slice<byte>)"&ldquo;";        private static slice<byte> rdquo = (slice<byte>)"&rdquo;";
+        private static readonly @string ldquo = (@string)"&ldquo;";
+        private static readonly @string rdquo = (@string)"&rdquo;";
+        private static readonly @string ulquo = (@string)"“";
+        private static readonly @string urquo = (@string)"”";
+
+
+        private static var htmlQuoteReplacer = strings.NewReplacer(ulquo, ldquo, urquo, rdquo);        private static var unicodeQuoteReplacer = strings.NewReplacer("``", ulquo, "''", urquo);
 
         // Escape comment text for HTML. If nice is set,
         // also turn `` into &ldquo; and '' into &rdquo;.
         private static void commentEscape(io.Writer w, @string text, bool nice)
         {
-            long last = 0L;
             if (nice)
-            {
-                for (long i = 0L; i < len(text) - 1L; i++)
-                {
-                    var ch = text[i];
-                    if (ch == text[i + 1L] && (ch == '`' || ch == '\''))
-                    {
-                        template.HTMLEscape(w, (slice<byte>)text[last..i]);
-                        last = i + 2L;
-                        switch (ch)
-                        {
-                            case '`': 
-                                w.Write(ldquo);
-                                break;
-                            case '\'': 
-                                w.Write(rdquo);
-                                break;
-                        }
-                        i++; // loop will add one more
-                    }
-                }
+            { 
+                // In the first pass, we convert `` and '' into their unicode equivalents.
+                // This prevents them from being escaped in HTMLEscape.
+                text = convertQuotes(text);
+                ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+                template.HTMLEscape(_addr_buf, (slice<byte>)text); 
+                // Now we convert the unicode quotes to their HTML escaped entities to maintain old behavior.
+                // We need to use a temp buffer to read the string back and do the conversion,
+                // otherwise HTMLEscape will escape & to &amp;
+                htmlQuoteReplacer.WriteString(w, buf.String());
+                return ;
 
             }
-            template.HTMLEscape(w, (slice<byte>)text[last..]);
+
+            template.HTMLEscape(w, (slice<byte>)text);
+
+        }
+
+        private static @string convertQuotes(@string text)
+        {
+            return unicodeQuoteReplacer.Replace(text);
         }
 
  
         // Regexp for Go identifiers
-        private static readonly @string identRx = "[\\pL_][\\pL_0-9]*"; 
+        private static readonly @string identRx = (@string)"[\\pL_][\\pL_0-9]*"; 
 
         // Regexp for URLs
-        // Match parens, and check in pairedParensPrefixLen for balance - see #5043
+        // Match parens, and check later for balance - see #5043, #22285
         // Match .,:;?! within path, but not at end - see #18139, #16565
         // This excludes some rare yet valid urls ending in common punctuation
         // in order to allow sentences ending in URLs.
 
         // protocol (required) e.g. http
-        private static readonly @string protoPart = "(https?|ftp|file|gopher|mailto|nntp)"; 
+        private static readonly @string protoPart = (@string)"(https?|ftp|file|gopher|mailto|nntp)"; 
         // host (required) e.g. www.example.com or [::1]:8080
-        private static readonly @string hostPart = "([a-zA-Z0-9_@\\-.\\[\\]:]+)"; 
+        private static readonly @string hostPart = (@string)"([a-zA-Z0-9_@\\-.\\[\\]:]+)"; 
         // path+query+fragment (optional) e.g. /path/index.html?q=foo#bar
-        private static readonly @string pathPart = "([.,:;?!]*[a-zA-Z0-9$\'()*+&#=@~_/\\-\\[\\]%])*";
+        private static readonly @string pathPart = (@string)"([.,:;?!]*[a-zA-Z0-9$\'()*+&#=@~_/\\-\\[\\]%])*";
 
-        private static readonly var urlRx = protoPart + "://" + hostPart + pathPart;
+        private static readonly var urlRx = (var)protoPart + "://" + hostPart + pathPart;
 
-        private static var matchRx = regexp.MustCompile("(" + urlRx + ")|(" + identRx + ")");
+
+        private static var matchRx = lazyregexp.New("(" + urlRx + ")|(" + identRx + ")");
 
         private static slice<byte> html_a = (slice<byte>)"<a href=\"";        private static slice<byte> html_aq = (slice<byte>)"\">";        private static slice<byte> html_enda = (slice<byte>)"</a>";        private static slice<byte> html_i = (slice<byte>)"<i>";        private static slice<byte> html_endi = (slice<byte>)"</i>";        private static slice<byte> html_p = (slice<byte>)"<p>\n";        private static slice<byte> html_endp = (slice<byte>)"</p>\n";        private static slice<byte> html_pre = (slice<byte>)"<pre>";        private static slice<byte> html_endpre = (slice<byte>)"</pre>\n";        private static slice<byte> html_h = (slice<byte>)"<h3 id=\"";        private static slice<byte> html_hq = (slice<byte>)"\">";        private static slice<byte> html_endh = (slice<byte>)"</h3>\n";
-
-        // pairedParensPrefixLen returns the length of the longest prefix of s containing paired parentheses.
-        private static long pairedParensPrefixLen(@string s)
-        {
-            long parens = 0L;
-            var l = len(s);
-            foreach (var (i, ch) in s)
-            {
-                switch (ch)
-                {
-                    case '(': 
-                        if (parens == 0L)
-                        {
-                            l = i;
-                        }
-                        parens++;
-                        break;
-                    case ')': 
-                        parens--;
-                        if (parens == 0L)
-                        {
-                            l = len(s);
-                        }
-                        else if (parens < 0L)
-                        {
-                            return i;
-                        }
-                        break;
-                }
-            }
-            return l;
-        }
 
         // Emphasize and escape a line of text for HTML. URLs are converted into links;
         // if the URL also appears in the words map, the link is taken from the map (if
@@ -131,20 +104,53 @@ namespace go
                 // write text before match
                 commentEscape(w, line[0L..m[0L]], nice); 
 
-                // adjust match if necessary
+                // adjust match for URLs
                 var match = line[m[0L]..m[1L]];
+                if (strings.Contains(match, "://"))
                 {
-                    var n = pairedParensPrefixLen(match);
+                    var m0 = m[0L];
+                    var m1 = m[1L];
+                    foreach (var (_, s) in new slice<@string>(new @string[] { "()", "{}", "[]" }))
+                    {
+                        var open = s[..1L];
+                        var close = s[1L..]; // E.g., "(" and ")"
+                        // require opening parentheses before closing parentheses (#22285)
+                        {
+                            var i__prev2 = i;
 
-                    if (n < len(match))
+                            var i = strings.Index(match, close);
+
+                            if (i >= 0L && i < strings.Index(match, open))
+                            {
+                                m1 = m0 + i;
+                                match = line[m0..m1];
+                            } 
+                            // require balanced pairs of parentheses (#5043)
+
+                            i = i__prev2;
+
+                        } 
+                        // require balanced pairs of parentheses (#5043)
+                        {
+                            var i__prev3 = i;
+
+                            for (i = 0L; strings.Count(match, open) != strings.Count(match, close) && i < 10L; i++)
+                            {
+                                m1 = strings.LastIndexAny(line[..m1], s);
+                                match = line[m0..m1];
+                            }
+
+
+                            i = i__prev3;
+                        }
+
+                    }
+                    if (m1 != m[1L])
                     { 
-                        // match contains unpaired parentheses (rare);
                         // redo matching with shortened line for correct indices
-                        m = matchRx.FindStringSubmatchIndex(line[..m[0L] + n]);
-                        match = match[..n];
-                    } 
+                        m = matchRx.FindStringSubmatchIndex(line[..m[0L] + len(match)]);
 
-                    // analyze match
+                    }
 
                 } 
 
@@ -155,6 +161,7 @@ namespace go
                 {
                     url, italics = words[match];
                 }
+
                 if (m[2L] >= 0L)
                 { 
                     // match against first parenthesized sub-regexp; must be match against urlRx
@@ -162,7 +169,9 @@ namespace go
                     { 
                         // no alternative URL in words list, use match instead
                         url = match;
+
                     }
+
                     italics = false; // don't italicize URLs
                 } 
 
@@ -173,15 +182,18 @@ namespace go
                     template.HTMLEscape(w, (slice<byte>)url);
                     w.Write(html_aq);
                 }
+
                 if (italics)
                 {
                     w.Write(html_i);
                 }
+
                 commentEscape(w, match, nice);
                 if (italics)
                 {
                     w.Write(html_endi);
                 }
+
                 if (len(url) > 0L)
                 {
                     w.Write(html_enda);
@@ -189,9 +201,11 @@ namespace go
 
                 // advance
                 line = line[m[1L]..];
+
             }
 
             commentEscape(w, line, nice);
+
         }
 
         private static long indentLen(@string s)
@@ -203,6 +217,7 @@ namespace go
             }
 
             return i;
+
         }
 
         private static bool isBlank(@string s)
@@ -219,13 +234,14 @@ namespace go
             }
 
             return a[0L..i];
+
         }
 
         private static void unindent(slice<@string> block)
         {
             if (len(block) == 0L)
             {
-                return;
+                return ;
             } 
 
             // compute maximum common white prefix
@@ -240,6 +256,7 @@ namespace go
                     {
                         prefix = commonPrefix(prefix, line[0L..indentLen(line)]);
                     }
+
                 }
 
                 line = line__prev1;
@@ -259,11 +276,11 @@ namespace go
                     {
                         block[i] = line[n..];
                     }
+
                 }
 
                 line = line__prev1;
             }
-
         }
 
         // heading returns the trimmed line if it passes as a section heading;
@@ -290,14 +307,16 @@ namespace go
                 return "";
             } 
 
-            // exclude lines with illegal characters
-            if (strings.ContainsAny(line, ",.;:!?+*/=()[]{}_^°&§~%#@<\">\\"))
+            // exclude lines with illegal characters. we allow "(),"
+            if (strings.ContainsAny(line, ";:!?+*/=[]{}_^°&§~%#@<\">\\"))
             {
                 return "";
             } 
 
             // allow "'" for possessive "'s" only
             {
+                var b__prev1 = b;
+
                 var b = line;
 
                 while (>>MARKER:FOREXPRESSION_LEVEL_1<<)
@@ -307,25 +326,61 @@ namespace go
                     {
                         break;
                     }
+
                     if (i + 1L >= len(b) || b[i + 1L] != 's' || (i + 2L < len(b) && b[i + 2L] != ' '))
                     {
                         return ""; // not followed by "s "
                     }
+
                     b = b[i + 2L..];
+
+                } 
+
+                // allow "." when followed by non-space
+
+
+                b = b__prev1;
+            } 
+
+            // allow "." when followed by non-space
+            {
+                var b__prev1 = b;
+
+                b = line;
+
+                while (>>MARKER:FOREXPRESSION_LEVEL_1<<)
+                {
+                    i = strings.IndexRune(b, '.');
+                    if (i < 0L)
+                    {
+                        break;
+                    }
+
+                    if (i + 1L >= len(b) || b[i + 1L] == ' ')
+                    {
+                        return ""; // not followed by non-space
+                    }
+
+                    b = b[i + 1L..];
+
                 }
 
+
+                b = b__prev1;
             }
 
             return line;
+
         }
 
         private partial struct op // : long
         {
         }
 
-        private static readonly op opPara = iota;
-        private static readonly var opHead = 0;
-        private static readonly var opPre = 1;
+        private static readonly op opPara = (op)iota;
+        private static readonly var opHead = (var)0;
+        private static readonly var opPre = (var)1;
+
 
         private partial struct block
         {
@@ -333,12 +388,13 @@ namespace go
             public slice<@string> lines;
         }
 
-        private static var nonAlphaNumRx = regexp.MustCompile("[^a-zA-Z0-9]");
+        private static var nonAlphaNumRx = lazyregexp.New("[^a-zA-Z0-9]");
 
         private static @string anchorID(@string line)
         { 
             // Add a "hdr-" prefix to avoid conflicting with IDs used for package symbols.
             return "hdr-" + nonAlphaNumRx.ReplaceAllString(line, "_");
+
         }
 
         // ToHTML converts comment text to formatted HTML.
@@ -351,7 +407,7 @@ namespace go
         // a single paragraph. There is one exception to the rule: a span that
         // consists of a single line, is followed by another paragraph span,
         // begins with a capital letter, and contains no punctuation
-        // is formatted as a heading.
+        // other than parentheses and commas is formatted as a heading.
         //
         // A span of indented lines is converted into a <pre> block,
         // with the common indent prefix removed.
@@ -359,6 +415,9 @@ namespace go
         // URLs in the comment text are converted into links; if the URL also appears
         // in the words map, the link is taken from the map (if the corresponding map
         // value is the empty string, the URL is not converted into a link).
+        //
+        // A pair of (consecutive) backticks (`) is converted to a unicode left quote (“), and a pair of (consecutive)
+        // single quotes (') is converted to a unicode right quote (”).
         //
         // Go identifiers that appear in the words map are italicized; if the corresponding
         // map value is not the empty string, it is considered a URL and the word is converted
@@ -398,7 +457,9 @@ namespace go
                                 w.Write((slice<byte>)id);
                                 w.Write(html_hq);
                             }
+
                             commentEscape(w, line, true);
+
                         }
 
                         line = line__prev2;
@@ -408,6 +469,7 @@ namespace go
                     {
                         w.Write(html_hq);
                     }
+
                     w.Write(html_endh);
                 else if (b.op == opPre) 
                     w.Write(html_pre);
@@ -424,7 +486,9 @@ namespace go
                     }
 
                     w.Write(html_endpre);
-                            }
+                
+            }
+
         }
 
         private static slice<block> blocks(@string text)
@@ -438,6 +502,7 @@ namespace go
                     out = append(out, new block(opPara,para));
                     para = null;
                 }
+
             }
 ;
 
@@ -456,7 +521,9 @@ namespace go
                         i++;
                         lastWasBlank = true;
                         continue;
+
                     }
+
                     if (indentLen(line) > 0L)
                     { 
                         // close paragraph
@@ -485,7 +552,9 @@ namespace go
                         out = append(out, new block(opPre,pre));
                         lastWasHeading = false;
                         continue;
+
                     }
+
                     if (lastWasBlank && !lastWasHeading && i + 2L < len(lines) && isBlank(lines[i + 1L]) && !isBlank(lines[i + 2L]) && indentLen(lines[i + 2L]) == 0L)
                     { 
                         // current line is non-blank, surrounded by blank lines
@@ -504,6 +573,7 @@ namespace go
                             }
 
                         }
+
                     } 
 
                     // open paragraph
@@ -511,18 +581,23 @@ namespace go
                     lastWasHeading = false;
                     para = append(para, lines[i]);
                     i++;
+
                 }
 
             }
             close();
 
             return out;
+
         }
 
         // ToText prepares comment text for presentation in textual output.
         // It wraps paragraphs of text to width or fewer Unicode code points
         // and then prefixes each line with the indent. In preformatted sections
         // (such as program text), it prefixes each non-blank line with preIndent.
+        //
+        // A pair of (consecutive) backticks (`) is converted to a unicode left quote (“), and a pair of (consecutive)
+        // single quotes (') is converted to a unicode right quote (”).
         public static void ToText(io.Writer w, @string text, @string indent, @string preIndent, long width)
         {
             lineWrapper l = new lineWrapper(out:w,width:width,indent:indent,);
@@ -537,6 +612,7 @@ namespace go
                         foreach (var (_, __line) in b.lines)
                         {
                             line = __line;
+                            line = convertQuotes(line);
                             l.write(line);
                         }
 
@@ -552,6 +628,7 @@ namespace go
                         foreach (var (_, __line) in b.lines)
                         {
                             line = __line;
+                            line = convertQuotes(line);
                             l.write(line + "\n");
                         }
 
@@ -576,11 +653,13 @@ namespace go
                                 w.Write((slice<byte>)preIndent);
                                 w.Write((slice<byte>)line);
                             }
+
                         }
 
                         line = line__prev2;
                     }
                             }
+
         }
 
         private partial struct lineWrapper
@@ -595,15 +674,21 @@ namespace go
 
         private static slice<byte> nl = (slice<byte>)"\n";
         private static slice<byte> space = (slice<byte>)" ";
+        private static slice<byte> prefix = (slice<byte>)"// ";
 
-        private static void write(this ref lineWrapper l, @string text)
+        private static void write(this ptr<lineWrapper> _addr_l, @string text)
         {
+            ref lineWrapper l = ref _addr_l.val;
+
             if (l.n == 0L && l.printed)
             {
                 l.@out.Write(nl); // blank line before new paragraph
             }
+
             l.printed = true;
 
+            var needsPrefix = false;
+            var isComment = strings.HasPrefix(text, "//");
             foreach (var (_, f) in strings.Fields(text))
             {
                 var w = utf8.RuneCountInString(f); 
@@ -613,27 +698,42 @@ namespace go
                     l.@out.Write(nl);
                     l.n = 0L;
                     l.pendSpace = 0L;
+                    needsPrefix = isComment;
                 }
+
                 if (l.n == 0L)
                 {
                     l.@out.Write((slice<byte>)l.indent);
                 }
+
+                if (needsPrefix)
+                {
+                    l.@out.Write(prefix);
+                    needsPrefix = false;
+                }
+
                 l.@out.Write(space[..l.pendSpace]);
                 l.@out.Write((slice<byte>)f);
                 l.n += l.pendSpace + w;
                 l.pendSpace = 1L;
+
             }
+
         }
 
-        private static void flush(this ref lineWrapper l)
+        private static void flush(this ptr<lineWrapper> _addr_l)
         {
+            ref lineWrapper l = ref _addr_l.val;
+
             if (l.n == 0L)
             {
-                return;
+                return ;
             }
+
             l.@out.Write(nl);
             l.pendSpace = 0L;
             l.n = 0L;
+
         }
     }
 }}

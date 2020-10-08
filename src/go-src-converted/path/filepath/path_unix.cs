@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package filepath -- go2cs converted at 2020 August 29 08:22:27 UTC
+// package filepath -- go2cs converted at 2020 October 08 03:37:01 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Go\src\path\filepath\path_unix.go
 using strings = go.strings_package;
@@ -43,11 +43,16 @@ namespace path
             {
                 return new slice<@string>(new @string[] {  });
             }
+
             return strings.Split(path, string(ListSeparator));
+
         }
 
         private static (@string, error) abs(@string path)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             return unixAbs(path);
         }
 
@@ -60,8 +65,10 @@ namespace path
                 {
                     return Clean(strings.Join(elem[i..], string(Separator)));
                 }
+
             }
             return "";
+
         }
 
         private static bool sameWord(@string a, @string b)

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package bzip2 implements bzip2 decompression.
-// package bzip2 -- go2cs converted at 2020 August 29 10:10:43 UTC
+// package bzip2 -- go2cs converted at 2020 October 08 04:58:41 UTC
 // import "compress/bzip2" ==> using bzip2 = go.compress.bzip2_package
 // Original source: C:\Go\src\compress\bzip2\bzip2.go
 using io = go.io_package;
@@ -15,7 +15,7 @@ namespace compress
     public static partial class bzip2_package
     {
         // There's no RFC for bzip2. I used the Wikipedia page for reference and a lot
-        // of guessing: http://en.wikipedia.org/wiki/Bzip2
+        // of guessing: https://en.wikipedia.org/wiki/Bzip2
         // The source code to pyflate was useful for debugging:
         // http://www.paul.sladen.org/projects/pyflate
 
@@ -56,58 +56,71 @@ namespace compress
         // the decompressor may read more data than necessary from r.
         public static io.Reader NewReader(io.Reader r)
         {
-            ptr<object> bz2 = @new<reader>();
+            ptr<reader> bz2 = @new<reader>();
             bz2.br = newBitReader(r);
             return bz2;
         }
 
-        private static readonly ulong bzip2FileMagic = 0x425aUL; // "BZ"
+        private static readonly ulong bzip2FileMagic = (ulong)0x425aUL; // "BZ"
  // "BZ"
-        private static readonly ulong bzip2BlockMagic = 0x314159265359UL;
+        private static readonly ulong bzip2BlockMagic = (ulong)0x314159265359UL;
 
-        private static readonly ulong bzip2FinalMagic = 0x177245385090UL;
-
-        // setup parses the bzip2 header.
-
+        private static readonly ulong bzip2FinalMagic = (ulong)0x177245385090UL;
 
         // setup parses the bzip2 header.
-        private static error setup(this ref reader bz2, bool needMagic)
+
+
+        // setup parses the bzip2 header.
+        private static error setup(this ptr<reader> _addr_bz2, bool needMagic)
         {
-            var br = ref bz2.br;
+            ref reader bz2 = ref _addr_bz2.val;
+
+            var br = _addr_bz2.br;
 
             if (needMagic)
             {
                 var magic = br.ReadBits(16L);
                 if (magic != bzip2FileMagic)
                 {
-                    return error.As(StructuralError("bad magic value"));
+                    return error.As(StructuralError("bad magic value"))!;
                 }
+
             }
+
             var t = br.ReadBits(8L);
             if (t != 'h')
             {
-                return error.As(StructuralError("non-Huffman entropy encoding"));
+                return error.As(StructuralError("non-Huffman entropy encoding"))!;
             }
+
             var level = br.ReadBits(8L);
             if (level < '1' || level > '9')
             {
-                return error.As(StructuralError("invalid compression level"));
+                return error.As(StructuralError("invalid compression level"))!;
             }
+
             bz2.fileCRC = 0L;
             bz2.blockSize = 100L * 1000L * (level - '0');
             if (bz2.blockSize > len(bz2.tt))
             {
                 bz2.tt = make_slice<uint>(bz2.blockSize);
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static (long, error) Read(this ref reader bz2, slice<byte> buf)
+        private static (long, error) Read(this ptr<reader> _addr_bz2, slice<byte> buf)
         {
+            long n = default;
+            error err = default!;
+            ref reader bz2 = ref _addr_bz2.val;
+
             if (bz2.eof)
             {
-                return (0L, io.EOF);
+                return (0L, error.As(io.EOF)!);
             }
+
             if (!bz2.setupDone)
             {
                 err = bz2.setup(true);
@@ -116,23 +129,31 @@ namespace compress
                 {
                     err = brErr;
                 }
+
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
+
                 bz2.setupDone = true;
+
             }
+
             n, err = bz2.read(buf);
             brErr = bz2.br.Err();
             if (brErr != null)
             {
                 err = brErr;
             }
-            return;
+
+            return ;
+
         }
 
-        private static long readFromBlock(this ref reader bz2, slice<byte> buf)
-        { 
+        private static long readFromBlock(this ptr<reader> _addr_bz2, slice<byte> buf)
+        {
+            ref reader bz2 = ref _addr_bz2.val;
+ 
             // bzip2 is a block based compressor, except that it has a run-length
             // preprocessing step. The block based nature means that we can
             // preallocate fixed-size buffers and reuse them. However, the RLE
@@ -160,8 +181,11 @@ namespace compress
                     {
                         bz2.lastByte = -1L;
                     }
+
                     continue;
+
                 }
+
                 bz2.tPos = bz2.preRLE[bz2.tPos];
                 var b = byte(bz2.tPos);
                 bz2.tPos >>= 8L;
@@ -173,6 +197,7 @@ namespace compress
                     bz2.byteRepeats = 0L;
                     continue;
                 }
+
                 if (bz2.lastByte == int(b))
                 {
                     bz2.byteRepeats++;
@@ -181,55 +206,64 @@ namespace compress
                 {
                     bz2.byteRepeats = 0L;
                 }
+
                 bz2.lastByte = int(b);
 
                 buf[n] = b;
                 n++;
+
             }
 
 
             return n;
+
         }
 
-        private static (long, error) read(this ref reader bz2, slice<byte> buf)
+        private static (long, error) read(this ptr<reader> _addr_bz2, slice<byte> buf)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref reader bz2 = ref _addr_bz2.val;
+
             while (true)
             {
                 var n = bz2.readFromBlock(buf);
                 if (n > 0L || len(buf) == 0L)
                 {
                     bz2.blockCRC = updateCRC(bz2.blockCRC, buf[..n]);
-                    return (n, null);
+                    return (n, error.As(null!)!);
                 } 
 
                 // End of block. Check CRC.
                 if (bz2.blockCRC != bz2.wantBlockCRC)
                 {
                     bz2.br.err = StructuralError("block checksum mismatch");
-                    return (0L, bz2.br.err);
+                    return (0L, error.As(bz2.br.err)!);
                 } 
 
                 // Find next block.
-                var br = ref bz2.br;
+                var br = _addr_bz2.br;
 
                 if (br.ReadBits64(48L) == bzip2BlockMagic) 
                     // Start of block.
                     var err = bz2.readBlock();
                     if (err != null)
                     {
-                        return (0L, err);
+                        return (0L, error.As(err)!);
                     }
+
                 else if (br.ReadBits64(48L) == bzip2FinalMagic) 
                     // Check end-of-file CRC.
                     var wantFileCRC = uint32(br.ReadBits64(32L));
                     if (br.err != null)
                     {
-                        return (0L, br.err);
+                        return (0L, error.As(br.err)!);
                     }
+
                     if (bz2.fileCRC != wantFileCRC)
                     {
                         br.err = StructuralError("file checksum mismatch");
-                        return (0L, br.err);
+                        return (0L, error.As(br.err)!);
                     } 
 
                     // Skip ahead to byte boundary.
@@ -239,18 +273,21 @@ namespace compress
                     {
                         br.ReadBits(br.bits % 8L);
                     }
+
                     var (b, err) = br.r.ReadByte();
                     if (err == io.EOF)
                     {
                         br.err = io.EOF;
                         bz2.eof = true;
-                        return (0L, io.EOF);
+                        return (0L, error.As(io.EOF)!);
                     }
+
                     if (err != null)
                     {
                         br.err = err;
-                        return (0L, err);
+                        return (0L, error.As(err)!);
                     }
+
                     var (z, err) = br.r.ReadByte();
                     if (err != null)
                     {
@@ -258,13 +295,17 @@ namespace compress
                         {
                             err = io.ErrUnexpectedEOF;
                         }
+
                         br.err = err;
-                        return (0L, err);
+                        return (0L, error.As(err)!);
+
                     }
+
                     if (b != 'B' || z != 'Z')
                     {
-                        return (0L, StructuralError("bad magic value in continuation file"));
+                        return (0L, error.As(StructuralError("bad magic value in continuation file"))!);
                     }
+
                     {
                         var err__prev1 = err;
 
@@ -272,30 +313,37 @@ namespace compress
 
                         if (err != null)
                         {
-                            return (0L, err);
+                            return (0L, error.As(err)!);
                         }
 
                         err = err__prev1;
 
                     }
+
                 else 
-                    return (0L, StructuralError("bad magic value found"));
-                            }
+                    return (0L, error.As(StructuralError("bad magic value found"))!);
+                
+            }
+
 
         }
 
         // readBlock reads a bzip2 block. The magic number should already have been consumed.
-        private static error readBlock(this ref reader bz2)
+        private static error readBlock(this ptr<reader> _addr_bz2)
         {
-            var br = ref bz2.br;
+            error err = default!;
+            ref reader bz2 = ref _addr_bz2.val;
+
+            var br = _addr_bz2.br;
             bz2.wantBlockCRC = uint32(br.ReadBits64(32L)); // skip checksum. TODO: check it if we can figure out what it is.
             bz2.blockCRC = 0L;
             bz2.fileCRC = (bz2.fileCRC << (int)(1L) | bz2.fileCRC >> (int)(31L)) ^ bz2.wantBlockCRC;
             var randomized = br.ReadBits(1L);
             if (randomized != 0L)
             {
-                return error.As(StructuralError("deprecated randomized files"));
+                return error.As(StructuralError("deprecated randomized files"))!;
             }
+
             var origPtr = uint(br.ReadBits(24L)); 
 
             // If not every byte value is used in the block (i.e., it's text) then
@@ -316,23 +364,27 @@ namespace compress
                             symbolPresent[16L * symRange + symbol] = true;
                             numSymbols++;
                         }
+
                     }
 
+
                 }
+
             }
 
 
             if (numSymbols == 0L)
             { 
                 // There must be an EOF symbol.
-                return error.As(StructuralError("no symbols in input"));
+                return error.As(StructuralError("no symbols in input"))!;
+
             } 
 
             // A block uses between two and six different Huffman trees.
             var numHuffmanTrees = br.ReadBits(3L);
             if (numHuffmanTrees < 2L || numHuffmanTrees > 6L)
             {
-                return error.As(StructuralError("invalid number of Huffman trees"));
+                return error.As(StructuralError("invalid number of Huffman trees"))!;
             } 
 
             // The Huffman tree can switch every 50 symbols so there's a list of
@@ -357,14 +409,18 @@ namespace compress
                         {
                             break;
                         }
+
                         c++;
+
                     }
 
                     if (c >= numHuffmanTrees)
                     {
-                        return error.As(StructuralError("tree index too large"));
+                        return error.As(StructuralError("tree index too large"))!;
                     }
+
                     treeIndexes[i] = mtfTreeDecoder.Decode(c);
+
                 } 
 
                 // The list of symbols for the move-to-front transform is taken from
@@ -385,6 +441,7 @@ namespace compress
                         symbols[nextSymbol] = byte(i);
                         nextSymbol++;
                     }
+
                 }
 
 
@@ -411,12 +468,14 @@ namespace compress
                         {
                             if (length < 1L || length > 20L)
                             {
-                                return error.As(StructuralError("Huffman length out of range"));
+                                return error.As(StructuralError("Huffman length out of range"))!;
                             }
+
                             if (!br.ReadBit())
                             {
                                 break;
                             }
+
                             if (br.ReadBit())
                             {
                                 length--;
@@ -425,15 +484,18 @@ namespace compress
                             {
                                 length++;
                             }
+
                         }
 
                         lengths[j] = uint8(length);
+
                     }
                     huffmanTrees[i], err = newHuffmanTree(lengths);
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                 }
 
                 i = i__prev1;
@@ -442,12 +504,14 @@ namespace compress
             long selectorIndex = 1L; // the next tree index to use
             if (len(treeIndexes) == 0L)
             {
-                return error.As(StructuralError("no tree selectors given"));
+                return error.As(StructuralError("no tree selectors given"))!;
             }
+
             if (int(treeIndexes[0L]) >= len(huffmanTrees))
             {
-                return error.As(StructuralError("tree selector out of range"));
+                return error.As(StructuralError("tree selector out of range"))!;
             }
+
             var currentHuffmanTree = huffmanTrees[treeIndexes[0L]];
             long bufIndex = 0L; // indexes bz2.buf, the output buffer.
             // The output of the move-to-front transform is run-length encoded and
@@ -477,16 +541,20 @@ namespace compress
                 {
                     if (selectorIndex >= numSelectors)
                     {
-                        return error.As(StructuralError("insufficient selector indices for number of symbols"));
+                        return error.As(StructuralError("insufficient selector indices for number of symbols"))!;
                     }
+
                     if (int(treeIndexes[selectorIndex]) >= len(huffmanTrees))
                     {
-                        return error.As(StructuralError("tree selector out of range"));
+                        return error.As(StructuralError("tree selector out of range"))!;
                     }
+
                     currentHuffmanTree = huffmanTrees[treeIndexes[selectorIndex]];
                     selectorIndex++;
                     decoded = 0L;
+
                 }
+
                 var v = currentHuffmanTree.Decode(br);
                 decoded++;
 
@@ -497,6 +565,7 @@ namespace compress
                     {
                         repeatPower = 1L;
                     }
+
                     repeat += repeatPower << (int)(v);
                     repeatPower <<= 1L; 
 
@@ -504,18 +573,22 @@ namespace compress
                     // code. It prevents repeat from overflowing.
                     if (repeat > 2L * 1024L * 1024L)
                     {
-                        return error.As(StructuralError("repeat count too large"));
+                        return error.As(StructuralError("repeat count too large"))!;
                     }
+
                     continue;
+
                 }
+
                 if (repeat > 0L)
                 { 
                     // We have decoded a complete run-length so we need to
                     // replicate the last output symbol.
                     if (repeat > bz2.blockSize - bufIndex)
                     {
-                        return error.As(StructuralError("repeats past end of block"));
+                        return error.As(StructuralError("repeats past end of block"))!;
                     }
+
                     {
                         var i__prev2 = i;
 
@@ -531,13 +604,16 @@ namespace compress
                         i = i__prev2;
                     }
                     repeat = 0L;
+
                 }
+
                 if (int(v) == numSymbols - 1L)
                 { 
                     // This is the EOF symbol. Because it's always at the
                     // end of the move-to-front list, and never gets moved
                     // to the front, it has this unique value.
                     break;
+
                 } 
 
                 // Since two metasymbols (RUNA and RUNB) have values 0 and 1,
@@ -549,17 +625,19 @@ namespace compress
                 b = mtf.Decode(int(v - 1L));
                 if (bufIndex >= bz2.blockSize)
                 {
-                    return error.As(StructuralError("data exceeds block size"));
+                    return error.As(StructuralError("data exceeds block size"))!;
                 }
+
                 bz2.tt[bufIndex] = uint32(b);
                 bz2.c[b]++;
                 bufIndex++;
+
             }
 
 
             if (origPtr >= uint(bufIndex))
             {
-                return error.As(StructuralError("origPtr out of bounds"));
+                return error.As(StructuralError("origPtr out of bounds"))!;
             } 
 
             // We have completed the entropy decoding. Now we can perform the
@@ -571,7 +649,8 @@ namespace compress
             bz2.byteRepeats = 0L;
             bz2.repeats = 0L;
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // inverseBWT implements the inverse Burrows-Wheeler transform as described in
@@ -615,6 +694,7 @@ namespace compress
             }
 
             return tt[origPtr] >> (int)(8L);
+
         }
 
         // This is a standard CRC32 like in hash/crc32 except that all the shifts are reversed,
@@ -624,7 +704,7 @@ namespace compress
 
         private static void init()
         {
-            const ulong poly = 0x04C11DB7UL;
+            const ulong poly = (ulong)0x04C11DB7UL;
 
             foreach (var (i) in crctab)
             {
@@ -639,10 +719,13 @@ namespace compress
                     {
                         crc <<= 1L;
                     }
+
                 }
 
                 crctab[i] = crc;
+
             }
+
         }
 
         // updateCRC updates the crc value to incorporate the data in b.
@@ -655,6 +738,7 @@ namespace compress
                 crc = crctab[byte(crc >> (int)(24L)) ^ v] ^ (crc << (int)(8L));
             }
             return ~crc;
+
         }
     }
 }}

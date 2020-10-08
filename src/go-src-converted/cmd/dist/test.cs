@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 09:59:57 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:58 UTC
 // Original source: C:\Go\src\cmd\dist\test.go
 using bytes = go.bytes_package;
-using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
+using path = go.path_package;
 using filepath = go.path.filepath_package;
 using reflect = go.reflect_package;
 using regexp = go.regexp_package;
@@ -33,21 +33,22 @@ namespace go
             gogcflags = os.Getenv("GO_GCFLAGS");
 
             tester t = default;
-            bool noRebuild = default;
-            flag.BoolVar(ref t.listMode, "list", false, "list available tests");
-            flag.BoolVar(ref t.rebuild, "rebuild", false, "rebuild everything first");
-            flag.BoolVar(ref noRebuild, "no-rebuild", false, "overrides -rebuild (historical dreg)");
-            flag.BoolVar(ref t.keepGoing, "k", false, "keep going even when error occurred");
-            flag.BoolVar(ref t.race, "race", false, "run in race builder mode (different set of tests)");
-            flag.BoolVar(ref t.compileOnly, "compile-only", false, "compile tests, but don't run them. This is for some builders. Not all dist tests respect this flag, but most do.");
-            flag.StringVar(ref t.banner, "banner", "##### ", "banner prefix; blank means no section banners");
-            flag.StringVar(ref t.runRxStr, "run", os.Getenv("GOTESTONLY"), "run only those tests matching the regular expression; empty means to run all. " + "Special exception: if the string begins with '!', the match is inverted.");
+            ref bool noRebuild = ref heap(out ptr<bool> _addr_noRebuild);
+            flag.BoolVar(_addr_t.listMode, "list", false, "list available tests");
+            flag.BoolVar(_addr_t.rebuild, "rebuild", false, "rebuild everything first");
+            flag.BoolVar(_addr_noRebuild, "no-rebuild", false, "overrides -rebuild (historical dreg)");
+            flag.BoolVar(_addr_t.keepGoing, "k", false, "keep going even when error occurred");
+            flag.BoolVar(_addr_t.race, "race", false, "run in race builder mode (different set of tests)");
+            flag.BoolVar(_addr_t.compileOnly, "compile-only", false, "compile tests, but don't run them. This is for some builders. Not all dist tests respect this flag, but most do.");
+            flag.StringVar(_addr_t.banner, "banner", "##### ", "banner prefix; blank means no section banners");
+            flag.StringVar(_addr_t.runRxStr, "run", os.Getenv("GOTESTONLY"), "run only those tests matching the regular expression; empty means to run all. " + "Special exception: if the string begins with '!', the match is inverted.");
             xflagparse(-1L); // any number of args
             if (noRebuild)
             {
                 t.rebuild = false;
             }
             t.run();
+
         }
 
         // tester executes cmdtest.
@@ -72,7 +73,7 @@ namespace go
 
             public slice<distTest> tests;
             public long timeoutScale;
-            public slice<ref work> worklist;
+            public slice<ptr<work>> worklist;
         }
 
         private partial struct work
@@ -91,11 +92,13 @@ namespace go
         {
             public @string name; // unique test name; may be filtered with -run flag
             public @string heading; // group section; this header is printed before the test is run.
-            public Func<ref distTest, error> fn;
+            public Func<ptr<distTest>, error> fn;
         }
 
-        private static void run(this ref tester t)
+        private static void run(this ptr<tester> _addr_t)
         {
+            ref tester t = ref _addr_t.val;
+
             timelog("start", "dist test");
 
             @string exeSuffix = default;
@@ -103,6 +106,7 @@ namespace go
             {
                 exeSuffix = ".exe";
             }
+
             {
                 var (_, err) = os.Stat(filepath.Join(gobin, "go" + exeSuffix));
 
@@ -113,16 +117,21 @@ namespace go
 
             }
 
-            var (slurp, err) = exec.Command("go", "env", "CGO_ENABLED").Output();
+
+            var cmd = exec.Command("go", "env", "CGO_ENABLED");
+            cmd.Stderr = @new<bytes.Buffer>();
+            var (slurp, err) = cmd.Output();
             if (err != null)
             {
-                log.Fatalf("Error running go env CGO_ENABLED: %v", err);
+                fatalf("Error running go env CGO_ENABLED: %v\n%s", err, cmd.Stderr);
             }
+
             t.cgoEnabled, _ = strconv.ParseBool(strings.TrimSpace(string(slurp)));
             if (flag.NArg() > 0L && t.runRxStr != "")
             {
-                log.Fatalf("the -run regular expression flag is mutually exclusive with test name arguments");
+                fatalf("the -run regular expression flag is mutually exclusive with test name arguments");
             }
+
             t.runNames = flag.Args();
 
             if (t.hasBash())
@@ -136,12 +145,15 @@ namespace go
                     }
 
                 }
+
             }
+
             if (t.rebuild)
             {
                 t.@out("Building packages and commands."); 
                 // Force rebuild the whole toolchain.
                 goInstall("go", append(new slice<@string>(new @string[] { "-a", "-i" }), toolchain));
+
             } 
 
             // Complete rebuild bootstrap, even with -no-rebuild.
@@ -156,13 +168,18 @@ namespace go
             // to break if we don't automatically refresh things here.
             // Rebuilding is a shortened bootstrap.
             // See cmdbootstrap for a description of the overall process.
-            if (!t.listMode)
+            //
+            // But don't do this if we're running in the Go build system,
+            // where cmd/dist is invoked many times. This just slows that
+            // down (Issue 24300).
+            if (!t.listMode && os.Getenv("GO_BUILDER_NAME") == "")
             {
                 goInstall("go", append(new slice<@string>(new @string[] { "-i" }), toolchain));
                 goInstall("go", append(new slice<@string>(new @string[] { "-i" }), toolchain));
                 goInstall("go", "std", "cmd");
                 checkNotStale("go", "std", "cmd");
             }
+
             t.timeoutScale = 1L;
             switch (goarch)
             {
@@ -187,11 +204,13 @@ namespace go
                     t.timeoutScale, err = strconv.Atoi(s);
                     if (err != null)
                     {
-                        log.Fatalf("failed to parse $GO_TEST_TIMEOUT_SCALE = %q as integer: %v", s, err);
+                        fatalf("failed to parse $GO_TEST_TIMEOUT_SCALE = %q as integer: %v", s, err);
                     }
+
                 }
 
             }
+
 
             if (t.runRxStr != "")
             {
@@ -204,8 +223,11 @@ namespace go
                 {
                     t.runRxWant = true;
                 }
+
                 t.runRx = regexp.MustCompile(t.runRxStr);
+
             }
+
             t.registerTests();
             if (t.listMode)
             {
@@ -213,25 +235,34 @@ namespace go
                 {
                     fmt.Println(tt.name);
                 }
-                return;
-            } 
+                return ;
 
-            // We must unset GOROOT_FINAL before tests, because runtime/debug requires
-            // correct access to source code, so if we have GOROOT_FINAL in effect,
-            // at least runtime/debug test will fail.
-            // If GOROOT_FINAL was set before, then now all the commands will appear stale.
-            // Nothing we can do about that other than not checking them below.
-            // (We call checkNotStale but only with "std" not "cmd".)
-            os.Setenv("GOROOT_FINAL_OLD", os.Getenv("GOROOT_FINAL")); // for cmd/link test
-            os.Unsetenv("GOROOT_FINAL");
+            }
 
             foreach (var (_, name) in t.runNames)
             {
                 if (!t.isRegisteredTestName(name))
                 {
-                    log.Fatalf("unknown test %q", name);
+                    fatalf("unknown test %q", name);
                 }
+
+            } 
+
+            // On a few builders, make GOROOT unwritable to catch tests writing to it.
+            if (strings.HasPrefix(os.Getenv("GO_BUILDER_NAME"), "linux-"))
+            {
+                if (os.Getuid() == 0L)
+                { 
+                    // Don't bother making GOROOT unwritable:
+                    // we're running as root, so permissions would have no effect.
+                }
+                else
+                {
+                    xatexit(t.makeGOROOTUnwritable());
+                }
+
             }
+
             {
                 var dt__prev1 = dt;
 
@@ -243,13 +274,14 @@ namespace go
                         t.partial = true;
                         continue;
                     }
-                    var dt = dt; // dt used in background after this iteration
+
+                    ref var dt = ref heap(dt, out ptr<var> _addr_dt); // dt used in background after this iteration
                     {
-                        var err = dt.fn(ref dt);
+                        var err = dt.fn(_addr_dt);
 
                         if (err != null)
                         {
-                            t.runPending(ref dt); // in case that hasn't been done yet
+                            t.runPending(_addr_dt); // in case that hasn't been done yet
                             t.failed = true;
                             if (t.keepGoing)
                             {
@@ -257,11 +289,13 @@ namespace go
                             }
                             else
                             {
-                                log.Fatalf("Failed: %v", err);
+                                fatalf("Failed: %v", err);
                             }
+
                         }
 
                     }
+
                 }
 
                 dt = dt__prev1;
@@ -269,10 +303,16 @@ namespace go
 
             t.runPending(null);
             timelog("end", "dist test");
+
             if (t.failed)
             {
                 fmt.Println("\nFAILED");
-                os.Exit(1L);
+                xexit(1L);
+            }
+            else if (incomplete[goos + "/" + goarch])
+            {
+                fmt.Println("\nFAILED (incomplete port)");
+                xexit(1L);
             }
             else if (t.partial)
             {
@@ -282,48 +322,108 @@ namespace go
             {
                 fmt.Println("\nALL TESTS PASSED");
             }
+
         }
 
-        private static bool shouldRunTest(this ref tester t, @string name)
+        private static bool shouldRunTest(this ptr<tester> _addr_t, @string name)
         {
+            ref tester t = ref _addr_t.val;
+
             if (t.runRx != null)
             {
                 return t.runRx.MatchString(name) == t.runRxWant;
             }
+
             if (len(t.runNames) == 0L)
             {
                 return true;
             }
+
             foreach (var (_, runName) in t.runNames)
             {
                 if (runName == name)
                 {
                     return true;
                 }
+
             }
             return false;
+
+        }
+
+        // short returns a -short flag to pass to 'go test'.
+        // It returns "-short", unless the environment variable
+        // GO_TEST_SHORT is set to a non-empty, false-ish string.
+        //
+        // This environment variable is meant to be an internal
+        // detail between the Go build system and cmd/dist
+        // and is not intended for use by users.
+        private static @string @short()
+        {
+            {
+                var v = os.Getenv("GO_TEST_SHORT");
+
+                if (v != "")
+                {
+                    var (short, err) = strconv.ParseBool(v);
+                    if (err != null)
+                    {
+                        fatalf("invalid GO_TEST_SHORT %q: %v", v, err);
+                    }
+
+                    if (!short)
+                    {
+                        return "-short=false";
+                    }
+
+                }
+
+            }
+
+            return "-short";
+
         }
 
         // goTest returns the beginning of the go test command line.
         // Callers should use goTest and then pass flags overriding these
         // defaults as later arguments in the command line.
-        private static slice<@string> goTest(this ref tester t)
+        private static slice<@string> goTest(this ptr<tester> _addr_t)
         {
-            return new slice<@string>(new @string[] { "go", "test", "-short", "-count=1", t.tags(), t.runFlag("") });
+            ref tester t = ref _addr_t.val;
+
+            return new slice<@string>(new @string[] { "go", "test", short(), "-count=1", t.tags(), t.runFlag("") });
         }
 
-        private static @string tags(this ref tester t)
+        private static @string tags(this ptr<tester> _addr_t)
         {
+            ref tester t = ref _addr_t.val;
+
             if (t.iOS())
             {
                 return "-tags=lldb";
             }
+
             return "-tags=";
+
         }
 
-        private static @string timeout(this ref tester t, long sec)
+        // timeoutDuration converts the provided number of seconds into a
+        // time.Duration, scaled by the t.timeoutScale factor.
+        private static time.Duration timeoutDuration(this ptr<tester> _addr_t, long sec)
         {
-            return "-timeout=" + fmt.Sprint(time.Duration(sec) * time.Second * time.Duration(t.timeoutScale));
+            ref tester t = ref _addr_t.val;
+
+            return time.Duration(sec) * time.Second * time.Duration(t.timeoutScale);
+        }
+
+        // timeout returns the "-timeout=" string argument to "go test" given
+        // the number of seconds of timeout. It scales it by the
+        // t.timeoutScale factor.
+        private static @string timeout(this ptr<tester> _addr_t, long sec)
+        {
+            ref tester t = ref _addr_t.val;
+
+            return "-timeout=" + t.timeoutDuration(sec).String();
         }
 
         // ranGoTest and stdMatches are state closed over by the stdlib
@@ -334,48 +434,42 @@ namespace go
         // in -race mode.
         private static bool ranGoTest = default;        private static slice<@string> stdMatches = default;        private static bool ranGoBench = default;        private static slice<@string> benchMatches = default;
 
-        private static void registerStdTest(this ref tester _t, @string pkg) => func(_t, (ref tester t, Defer defer, Panic _, Recover __) =>
+        private static void registerStdTest(this ptr<tester> _addr_t, @string pkg) => func((defer, _, __) =>
         {
+            ref tester t = ref _addr_t.val;
+
             @string testName = "go_test:" + pkg;
             if (t.runRx == null || t.runRx.MatchString(testName) == t.runRxWant)
             {
                 stdMatches = append(stdMatches, pkg);
             }
-            long timeoutSec = 180L;
-            if (pkg == "cmd/go")
-            {
-                timeoutSec *= 2L;
-            }
-            t.tests = append(t.tests, new distTest(name:testName,heading:"Testing packages.",fn:func(dt*distTest)error{ifranGoTest{returnnil}t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)ranGoTest=trueargs:=[]string{"test","-short",t.tags(),t.timeout(timeoutSec),"-gcflags=all="+gogcflags,}ift.race{args=append(args,"-race")}ift.compileOnly{args=append(args,"-run=^$")}args=append(args,stdMatches...)cmd:=exec.Command("go",args...)cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrreturncmd.Run()},));
+
+            t.tests = append(t.tests, new distTest(name:testName,heading:"Testing packages.",fn:func(dt*distTest)error{ifranGoTest{returnnil}t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)ranGoTest=truetimeoutSec:=180for_,pkg:=rangestdMatches{ifpkg=="cmd/go"{timeoutSec*=3break}}ift.shouldUsePrecompiledStdTest(){returnt.runPrecompiledStdTest(t.timeoutDuration(timeoutSec))}args:=[]string{"test",short(),t.tags(),t.timeout(timeoutSec),"-gcflags=all="+gogcflags,}ift.race{args=append(args,"-race")}ift.compileOnly{args=append(args,"-run=^$")}args=append(args,stdMatches...)cmd:=exec.Command("go",args...)cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrreturncmd.Run()},));
+
         });
 
-        private static void registerRaceBenchTest(this ref tester _t, @string pkg) => func(_t, (ref tester t, Defer defer, Panic _, Recover __) =>
+        private static void registerRaceBenchTest(this ptr<tester> _addr_t, @string pkg) => func((defer, _, __) =>
         {
+            ref tester t = ref _addr_t.val;
+
             @string testName = "go_test_bench:" + pkg;
             if (t.runRx == null || t.runRx.MatchString(testName) == t.runRxWant)
             {
                 benchMatches = append(benchMatches, pkg);
             }
-            t.tests = append(t.tests, new distTest(name:testName,heading:"Running benchmarks briefly.",fn:func(dt*distTest)error{ifranGoBench{returnnil}t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)ranGoBench=trueargs:=[]string{"test","-short","-race","-run=^$","-benchtime=.1s","-cpu=4",}if!t.compileOnly{args=append(args,"-bench=.*")}args=append(args,benchMatches...)cmd:=exec.Command("go",args...)cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrreturncmd.Run()},));
+
+            t.tests = append(t.tests, new distTest(name:testName,heading:"Running benchmarks briefly.",fn:func(dt*distTest)error{ifranGoBench{returnnil}t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)ranGoBench=trueargs:=[]string{"test",short(),"-race",t.timeout(1200),"-run=^$","-benchtime=.1s","-cpu=4",}if!t.compileOnly{args=append(args,"-bench=.*")}args=append(args,benchMatches...)cmd:=exec.Command("go",args...)cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrreturncmd.Run()},));
+
         });
 
         // stdOutErrAreTerminals is defined in test_linux.go, to report
         // whether stdout & stderr are terminals.
         private static Func<bool> stdOutErrAreTerminals = default;
 
-        private static void registerTests(this ref tester _t) => func(_t, (ref tester t, Defer defer, Panic _, Recover __) =>
+        private static void registerTests(this ptr<tester> _addr_t) => func((defer, _, __) =>
         {
-            if (strings.HasSuffix(os.Getenv("GO_BUILDER_NAME"), "-vetall"))
-            { 
-                // Run vet over std and cmd and call it quits.
-                foreach (var (k) in cgoEnabled)
-                {
-                    var osarch = k;
-                    t.tests = append(t.tests, new distTest(name:"vet/"+osarch,heading:"cmd/vet/all",fn:func(dt*distTest)error{t.addCmd(dt,"src/cmd/vet/all","go","run","main.go","-p="+osarch)returnnil},));
-                }
-                return;
-            } 
-
+            ref tester t = ref _addr_t.val;
+ 
             // Fast path to avoid the ~1 second of `go list std cmd` when
             // the caller lists specific tests to run. (as the continuous
             // build coordinator does).
@@ -387,31 +481,37 @@ namespace go
                     {
                         t.registerStdTest(strings.TrimPrefix(name, "go_test:"));
                     }
+
                     if (strings.HasPrefix(name, "go_test_bench:"))
                     {
                         t.registerRaceBenchTest(strings.TrimPrefix(name, "go_test_bench:"));
                     }
+
                 }
             else
             }            { 
                 // Use a format string to only list packages and commands that have tests.
-                const @string format = "{{if (or .TestGoFiles .XTestGoFiles)}}{{.ImportPath}}{{end}}";
+                const @string format = (@string)"{{if (or .TestGoFiles .XTestGoFiles)}}{{.ImportPath}}{{end}}";
 
                 var cmd = exec.Command("go", "list", "-f", format);
                 if (t.race)
                 {
                     cmd.Args = append(cmd.Args, "-tags=race");
                 }
+
                 cmd.Args = append(cmd.Args, "std");
-                if (!t.race)
+                if (t.shouldTestCmd())
                 {
                     cmd.Args = append(cmd.Args, "cmd");
                 }
+
+                cmd.Stderr = @new<bytes.Buffer>();
                 var (all, err) = cmd.Output();
                 if (err != null)
                 {
-                    log.Fatalf("Error running go list std cmd: %v, %s", err, all);
+                    fatalf("Error running go list std cmd: %v:\n%s", err, cmd.Stderr);
                 }
+
                 var pkgs = strings.Fields(string(all));
                 {
                     var pkg__prev1 = pkg;
@@ -437,23 +537,43 @@ namespace go
                             {
                                 t.registerRaceBenchTest(pkg);
                             }
+
                         }
 
                         pkg = pkg__prev1;
                     }
-
                 }
+
+            } 
+
+            // Test the os/user package in the pure-Go mode too.
+            if (!t.compileOnly)
+            {
+                t.tests = append(t.tests, new distTest(name:"osusergo",heading:"os/user with tag osusergo",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),t.timeout(300),"-tags=osusergo","os/user")returnnil},));
             }
+
+            if (t.iOS() && !t.compileOnly)
+            {
+                t.tests = append(t.tests, new distTest(name:"x509omitbundledroots",heading:"crypto/x509 without bundled roots",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),t.timeout(300),"-tags=x509omitbundledroots","-run=OmitBundledRoots","crypto/x509")returnnil},));
+            } 
+
+            // Test the ios build tag on darwin/amd64 for the iOS simulator.
+            if (goos == "darwin" && !t.iOS())
+            {
+                t.tests = append(t.tests, new distTest(name:"amd64ios",heading:"ios tag on darwin/amd64",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),t.timeout(300),"-tags=ios","-run=SystemRoots","crypto/x509")returnnil},));
+            }
+
             if (t.race)
             {
-                return;
+                return ;
             } 
 
             // Runtime CPU tests.
-            if (!t.compileOnly)
-            {
+            if (!t.compileOnly && goos != "js")
+            { // js can't handle -cpu != 1
                 @string testName = "runtime:cpu124";
                 t.tests = append(t.tests, new distTest(name:testName,heading:"GOMAXPROCS=2 runtime -cpu=1,2,4 -quick",fn:func(dt*distTest)error{cmd:=t.addCmd(dt,"src",t.goTest(),t.timeout(300),"runtime","-cpu=1,2,4","-quick")cmd.Env=append(os.Environ(),"GOMAXPROCS=2")returnnil},));
+
             } 
 
             // This test needs its stdout/stderr to be terminals, so we don't run it from cmd/go's tests.
@@ -466,11 +586,11 @@ namespace go
             // On the builders only, test that a moved GOROOT still works.
             // Fails on iOS because CC_FOR_TARGET refers to clangwrap.sh
             // in the unmoved GOROOT.
-            // Fails on Android with an exec format error.
+            // Fails on Android and js/wasm with an exec format error.
             // Fails on plan9 with "cannot find GOROOT" (issue #21016).
-            if (os.Getenv("GO_BUILDER_NAME") != "" && goos != "android" && !t.iOS() && goos != "plan9")
+            if (os.Getenv("GO_BUILDER_NAME") != "" && goos != "android" && !t.iOS() && goos != "plan9" && goos != "js")
             {
-                t.tests = append(t.tests, new distTest(name:"moved_goroot",heading:"moved GOROOT",fn:func(dt*distTest)error{t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)moved:=goroot+"-moved"iferr:=os.Rename(goroot,moved);err!=nil{ifgoos=="windows"{log.Printf("skipping test on Windows")returnnil}returnerr}cmd:=exec.Command(filepath.Join(moved,"bin","go"),"test","fmt")cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrfor_,e:=rangeos.Environ(){if!strings.HasPrefix(e,"GOROOT=")&&!strings.HasPrefix(e,"GOCACHE="){cmd.Env=append(cmd.Env,e)}}cmd.Env=append(cmd.Env,"GOCACHE=off")err:=cmd.Run()ifrerr:=os.Rename(moved,goroot);rerr!=nil{log.Fatalf("failed to restore GOROOT: %v",rerr)}returnerr},));
+                t.tests = append(t.tests, new distTest(name:"moved_goroot",heading:"moved GOROOT",fn:func(dt*distTest)error{t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)moved:=goroot+"-moved"iferr:=os.Rename(goroot,moved);err!=nil{ifgoos=="windows"{log.Printf("skipping test on Windows")returnnil}returnerr}cmd:=exec.Command(filepath.Join(moved,"bin","go"),"test","fmt")cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrfor_,e:=rangeos.Environ(){if!strings.HasPrefix(e,"GOROOT=")&&!strings.HasPrefix(e,"GOCACHE="){cmd.Env=append(cmd.Env,e)}}err:=cmd.Run()ifrerr:=os.Rename(moved,goroot);rerr!=nil{fatalf("failed to restore GOROOT: %v",rerr)}returnerr},));
             } 
 
             // Test that internal linking of standard packages does not
@@ -493,13 +613,16 @@ namespace go
                     {
                         break;
                     }
+
                     var pkg = pkg;
                     @string run = default;
                     if (pkg == "net")
                     {
                         run = "TestTCPStress";
                     }
-                    t.tests = append(t.tests, new distTest(name:"nolibgcc:"+pkg,heading:"Testing without libgcc.",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"-ldflags=-linkmode=internal -libgcc=none",pkg,t.runFlag(run))returnnil},));
+
+                    t.tests = append(t.tests, new distTest(name:"nolibgcc:"+pkg,heading:"Testing without libgcc.",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"-ldflags=-linkmode=internal -libgcc=none","-run=^Test[^CS]",pkg,t.runFlag(run))returnnil},));
+
                 } 
 
                 // Test internal linking of PIE binaries where it is supported.
@@ -507,56 +630,60 @@ namespace go
                 pkg = pkg__prev1;
             }
 
-            if (goos == "linux" && goarch == "amd64" && !isAlpineLinux())
-            { 
-                // Issue 18243: We don't have a way to set the default
-                // dynamic linker used in internal linking mode. So
-                // this test is skipped on Alpine.
-                t.tests = append(t.tests, new distTest(name:"pie_internal",heading:"internal linking of -buildmode=pie",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"reflect","-buildmode=pie","-ldflags=-linkmode=internal",t.timeout(60))returnnil},));
+            if (t.internalLinkPIE())
+            {
+                t.tests = append(t.tests, new distTest(name:"pie_internal",heading:"internal linking of -buildmode=pie",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"reflect","-buildmode=pie","-ldflags=-linkmode=internal",t.timeout(60))returnnil},)); 
+                // Also test a cgo package.
+                if (t.cgoEnabled && t.internalLink())
+                {
+                    t.tests = append(t.tests, new distTest(name:"pie_internal_cgo",heading:"internal linking of -buildmode=pie",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"os/user","-buildmode=pie","-ldflags=-linkmode=internal",t.timeout(60))returnnil},));
+                }
+
             } 
 
             // sync tests
-            t.tests = append(t.tests, new distTest(name:"sync_cpu",heading:"sync -cpu=10",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"sync",t.timeout(120),"-cpu=10",t.runFlag(""))returnnil},));
+            if (goos != "js")
+            { // js doesn't support -cpu=10
+                t.tests = append(t.tests, new distTest(name:"sync_cpu",heading:"sync -cpu=10",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"sync",t.timeout(120),"-cpu=10",t.runFlag(""))returnnil},));
+
+            }
 
             if (t.raceDetectorSupported())
             {
                 t.tests = append(t.tests, new distTest(name:"race",heading:"Testing race detector",fn:t.raceTest,));
             }
+
             if (t.cgoEnabled && !t.iOS())
             { 
                 // Disabled on iOS. golang.org/issue/15919
-                t.tests = append(t.tests, new distTest(name:"cgo_stdio",heading:"../misc/cgo/stdio",fn:func(dt*distTest)error{t.addCmd(dt,"misc/cgo/stdio","go","run",filepath.Join(os.Getenv("GOROOT"),"test/run.go"),"-",".")returnnil},));
-                t.tests = append(t.tests, new distTest(name:"cgo_life",heading:"../misc/cgo/life",fn:func(dt*distTest)error{t.addCmd(dt,"misc/cgo/life","go","run",filepath.Join(os.Getenv("GOROOT"),"test/run.go"),"-",".")returnnil},));
+                t.registerHostTest("cgo_stdio", "../misc/cgo/stdio", "misc/cgo/stdio", ".");
+                t.registerHostTest("cgo_life", "../misc/cgo/life", "misc/cgo/life", ".");
                 var fortran = os.Getenv("FC");
                 if (fortran == "")
                 {
                     fortran, _ = exec.LookPath("gfortran");
                 }
-                if (t.hasBash() && fortran != "")
+
+                if (t.hasBash() && goos != "android" && fortran != "")
                 {
                     t.tests = append(t.tests, new distTest(name:"cgo_fortran",heading:"../misc/cgo/fortran",fn:func(dt*distTest)error{t.addCmd(dt,"misc/cgo/fortran","./test.bash",fortran)returnnil},));
                 }
+
                 if (t.hasSwig() && goos != "android")
                 {
                     t.tests = append(t.tests, new distTest(name:"swig_stdio",heading:"../misc/swig/stdio",fn:func(dt*distTest)error{t.addCmd(dt,"misc/swig/stdio",t.goTest())returnnil},));
+                    if (t.hasCxx())
                     {
-                        var (cxx, _) = exec.LookPath(compilerEnvLookup(defaultcxx, goos, goarch));
-
-                        if (cxx != "")
-                        {
-                            t.tests = append(t.tests, new distTest(name:"swig_callback",heading:"../misc/swig/callback",fn:func(dt*distTest)error{t.addCmd(dt,"misc/swig/callback",t.goTest())returnnil},));
-                        }
-
+                        t.tests = append(t.tests, new distTest(name:"swig_callback",heading:"../misc/swig/callback",fn:func(dt*distTest)error{t.addCmd(dt,"misc/swig/callback",t.goTest())returnnil},));
                     }
+
                 }
+
             }
+
             if (t.cgoEnabled)
             {
                 t.tests = append(t.tests, new distTest(name:"cgo_test",heading:"../misc/cgo/test",fn:t.cgoTest,));
-            }
-            if (t.hasBash() && t.cgoEnabled && goos != "android" && goos != "darwin")
-            {
-                t.registerTest("testgodefs", "../misc/cgo/testgodefs", "./test.bash");
             } 
 
             // Don't run these tests with $GO_GCFLAGS because most of them
@@ -565,67 +692,95 @@ namespace go
             // special -gcflags, that's not true.
             if (t.cgoEnabled && gogcflags == "")
             {
-                if (t.cgoTestSOSupported())
-                {
-                    t.tests = append(t.tests, new distTest(name:"testso",heading:"../misc/cgo/testso",fn:func(dt*distTest)error{returnt.cgoTestSO(dt,"misc/cgo/testso")},));
-                    t.tests = append(t.tests, new distTest(name:"testsovar",heading:"../misc/cgo/testsovar",fn:func(dt*distTest)error{returnt.cgoTestSO(dt,"misc/cgo/testsovar")},));
-                }
+                t.registerHostTest("testgodefs", "../misc/cgo/testgodefs", "misc/cgo/testgodefs", ".");
+
+                t.registerTest("testso", "../misc/cgo/testso", t.goTest(), t.timeout(600L), ".");
+                t.registerTest("testsovar", "../misc/cgo/testsovar", t.goTest(), t.timeout(600L), ".");
                 if (t.supportedBuildmode("c-archive"))
                 {
-                    t.registerHostTest("testcarchive", "../misc/cgo/testcarchive", "misc/cgo/testcarchive", "carchive_test.go");
+                    t.registerHostTest("testcarchive", "../misc/cgo/testcarchive", "misc/cgo/testcarchive", ".");
                 }
+
                 if (t.supportedBuildmode("c-shared"))
                 {
-                    t.registerHostTest("testcshared", "../misc/cgo/testcshared", "misc/cgo/testcshared", "cshared_test.go");
+                    t.registerHostTest("testcshared", "../misc/cgo/testcshared", "misc/cgo/testcshared", ".");
                 }
+
                 if (t.supportedBuildmode("shared"))
                 {
-                    t.registerTest("testshared", "../misc/cgo/testshared", t.goTest(), t.timeout(600L));
+                    t.registerTest("testshared", "../misc/cgo/testshared", t.goTest(), t.timeout(600L), ".");
                 }
+
                 if (t.supportedBuildmode("plugin"))
                 {
-                    t.registerTest("testplugin", "../misc/cgo/testplugin", "./test.bash");
+                    t.registerTest("testplugin", "../misc/cgo/testplugin", t.goTest(), t.timeout(600L), ".");
                 }
+
                 if (gohostos == "linux" && goarch == "amd64")
                 {
-                    t.registerTest("testasan", "../misc/cgo/testasan", "go", "run", "main.go");
+                    t.registerTest("testasan", "../misc/cgo/testasan", "go", "run", ".");
                 }
-                if (goos == "linux" && goarch == "amd64")
+
+                if (mSanSupported(goos, goarch))
                 {
                     t.registerHostTest("testsanitizers/msan", "../misc/cgo/testsanitizers", "misc/cgo/testsanitizers", ".");
                 }
+
                 if (t.hasBash() && goos != "android" && !t.iOS() && gohostos != "windows")
                 {
                     t.registerHostTest("cgo_errors", "../misc/cgo/errors", "misc/cgo/errors", ".");
                 }
+
                 if (gohostos == "linux" && t.extLink())
                 {
-                    t.registerTest("testsigfwd", "../misc/cgo/testsigfwd", "go", "run", "main.go");
+                    t.registerTest("testsigfwd", "../misc/cgo/testsigfwd", "go", "run", ".");
                 }
+
             } 
 
             // Doc tests only run on builders.
             // They find problems approximately never.
-            if (t.hasBash() && goos != "nacl" && goos != "android" && !t.iOS() && os.Getenv("GO_BUILDER_NAME") != "")
+            if (goos != "js" && goos != "android" && !t.iOS() && os.Getenv("GO_BUILDER_NAME") != "")
             {
-                t.registerTest("doc_progs", "../doc/progs", "time", "go", "run", "run.go");
-                t.registerTest("wiki", "../doc/articles/wiki", "./test.bash");
-                t.registerTest("codewalk", "../doc/codewalk", "time", "./run");
+                t.registerTest("doc_progs", "../doc/progs", "go", "run", "run.go");
+                t.registerTest("wiki", "../doc/articles/wiki", t.goTest(), ".");
+                t.registerTest("codewalk", "../doc/codewalk", t.goTest(), "codewalk_test.go");
             }
+
             if (goos != "android" && !t.iOS())
-            {
-                t.registerTest("bench_go1", "../test/bench/go1", t.goTest(), t.timeout(600L));
+            { 
+                // There are no tests in this directory, only benchmarks.
+                // Check that the test binary builds but don't bother running it.
+                // (It has init-time work to set up for the benchmarks that is not worth doing unnecessarily.)
+                t.registerTest("bench_go1", "../test/bench/go1", t.goTest(), "-c", "-o=" + os.DevNull);
+
             }
+
             if (goos != "android" && !t.iOS())
             { 
                 // Only start multiple test dir shards on builders,
                 // where they get distributed to multiple machines.
-                // See issue 20141.
+                // See issues 20141 and 31834.
                 long nShards = 1L;
                 if (os.Getenv("GO_BUILDER_NAME") != "")
                 {
                     nShards = 10L;
                 }
+
+                {
+                    var err__prev2 = err;
+
+                    var (n, err) = strconv.Atoi(os.Getenv("GO_TEST_SHARDS"));
+
+                    if (err == null)
+                    {
+                        nShards = n;
+                    }
+
+                    err = err__prev2;
+
+                }
+
                 {
                     long shard__prev1 = shard;
 
@@ -638,54 +793,88 @@ namespace go
 
                     shard = shard__prev1;
                 }
-            }
-            if (goos != "nacl" && goos != "android" && !t.iOS())
+
+            } 
+            // Only run the API check on fast development platforms. Android, iOS, and JS
+            // are always cross-compiled, and the filesystems on our only plan9 builders
+            // are too slow to complete in a reasonable timeframe. Every platform checks
+            // the API on every GOOS/GOARCH/CGO_ENABLED combination anyway, so we really
+            // only need to run this check once anywhere to get adequate coverage.
+            if (goos != "android" && !t.iOS() && goos != "js" && goos != "plan9")
             {
-                t.tests = append(t.tests, new distTest(name:"api",heading:"API check",fn:func(dt*distTest)error{ift.compileOnly{t.addCmd(dt,"src","go","build",filepath.Join(goroot,"src/cmd/api/run.go"))returnnil}t.addCmd(dt,"src","go","run",filepath.Join(goroot,"src/cmd/api/run.go"))returnnil},));
+                t.tests = append(t.tests, new distTest(name:"api",heading:"API check",fn:func(dt*distTest)error{ift.compileOnly{t.addCmd(dt,"src","go","build","-o",os.DevNull,filepath.Join(goroot,"src/cmd/api/run.go"))returnnil}t.addCmd(dt,"src","go","run",filepath.Join(goroot,"src/cmd/api/run.go"))returnnil},));
+            } 
+
+            // Ensure that the toolchain can bootstrap itself.
+            // This test adds another ~45s to all.bash if run sequentially, so run it only on the builders.
+            if (os.Getenv("GO_BUILDER_NAME") != "" && goos != "android" && !t.iOS())
+            {
+                t.registerHostTest("reboot", "../misc/reboot", "misc/reboot", ".");
             }
+
         });
 
         // isRegisteredTestName reports whether a test named testName has already
         // been registered.
-        private static bool isRegisteredTestName(this ref tester t, @string testName)
+        private static bool isRegisteredTestName(this ptr<tester> _addr_t, @string testName)
         {
+            ref tester t = ref _addr_t.val;
+
             foreach (var (_, tt) in t.tests)
             {
                 if (tt.name == testName)
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
-        private static void registerTest1(this ref tester _t, bool seq, @string name, @string dirBanner, params object[] cmdline) => func(_t, (ref tester t, Defer defer, Panic panic, Recover _) =>
+        private static void registerTest1(this ptr<tester> _addr_t, bool seq, @string name, @string dirBanner, params object[] cmdline) => func((defer, panic, _) =>
         {
+            cmdline = cmdline.Clone();
+            ref tester t = ref _addr_t.val;
+
             var (bin, args) = flattenCmdline(cmdline);
             if (bin == "time" && !t.haveTime)
             {
                 bin = args[0L];
                 args = args[1L..];
+
             }
+
             if (t.isRegisteredTestName(name))
             {
                 panic("duplicate registered test name " + name);
             }
+
             t.tests = append(t.tests, new distTest(name:name,heading:dirBanner,fn:func(dt*distTest)error{ifseq{t.runPending(dt)timelog("start",name)defertimelog("end",name)returnt.dirCmd(filepath.Join(goroot,"src",dirBanner),bin,args).Run()}t.addCmd(dt,filepath.Join(goroot,"src",dirBanner),bin,args)returnnil},));
+
         });
 
-        private static void registerTest(this ref tester t, @string name, @string dirBanner, params object[] cmdline)
+        private static void registerTest(this ptr<tester> _addr_t, @string name, @string dirBanner, params object[] cmdline)
         {
+            cmdline = cmdline.Clone();
+            ref tester t = ref _addr_t.val;
+
             t.registerTest1(false, name, dirBanner, cmdline);
         }
 
-        private static void registerSeqTest(this ref tester t, @string name, @string dirBanner, params object[] cmdline)
+        private static void registerSeqTest(this ptr<tester> _addr_t, @string name, @string dirBanner, params object[] cmdline)
         {
+            cmdline = cmdline.Clone();
+            ref tester t = ref _addr_t.val;
+
             t.registerTest1(true, name, dirBanner, cmdline);
         }
 
-        private static ref exec.Cmd bgDirCmd(this ref tester t, @string dir, @string bin, params @string[] args)
+        private static ptr<exec.Cmd> bgDirCmd(this ptr<tester> _addr_t, @string dir, @string bin, params @string[] args)
         {
+            args = args.Clone();
+            ref tester t = ref _addr_t.val;
+
             var cmd = exec.Command(bin, args);
             if (filepath.IsAbs(dir))
             {
@@ -695,11 +884,16 @@ namespace go
             {
                 cmd.Dir = filepath.Join(goroot, dir);
             }
-            return cmd;
+
+            return _addr_cmd!;
+
         }
 
-        private static ref exec.Cmd dirCmd(this ref tester t, @string dir, params object[] cmdline)
+        private static ptr<exec.Cmd> dirCmd(this ptr<tester> _addr_t, @string dir, params object[] cmdline)
         {
+            cmdline = cmdline.Clone();
+            ref tester t = ref _addr_t.val;
+
             var (bin, args) = flattenCmdline(cmdline);
             var cmd = t.bgDirCmd(dir, bin, args);
             cmd.Stdout = os.Stdout;
@@ -708,13 +902,18 @@ namespace go
             {
                 errprintf("%s\n", strings.Join(cmd.Args, " "));
             }
-            return cmd;
+
+            return _addr_cmd!;
+
         }
 
         // flattenCmdline flattens a mixture of string and []string as single list
         // and then interprets it as a command line: first element is binary, then args.
         private static (@string, slice<@string>) flattenCmdline(slice<object> cmdline) => func((_, panic, __) =>
         {
+            @string bin = default;
+            slice<@string> args = default;
+
             slice<@string> list = default;
             {
                 var x__prev1 = x;
@@ -737,6 +936,7 @@ namespace go
                             break;
                         }
                     }
+
                 } 
 
                 // The go command is too picky about duplicated flags.
@@ -757,6 +957,7 @@ namespace go
                     {
                         continue;
                     }
+
                     var flag = list[i][..j];
                     switch (flag)
                     {
@@ -767,9 +968,11 @@ namespace go
                             {
                                 drop[have[flag]] = true;
                             }
+
                             have[flag] = i;
                             break;
                     }
+
                 }
 
 
@@ -788,6 +991,7 @@ namespace go
                     {
                         out = append(out, x);
                     }
+
                 }
 
                 i = i__prev1;
@@ -797,38 +1001,55 @@ namespace go
             list = out;
 
             return (list[0L], list[1L..]);
+
         });
 
-        private static ref exec.Cmd addCmd(this ref tester t, ref distTest dt, @string dir, params object[] cmdline)
+        private static ptr<exec.Cmd> addCmd(this ptr<tester> _addr_t, ptr<distTest> _addr_dt, @string dir, params object[] cmdline)
         {
+            cmdline = cmdline.Clone();
+            ref tester t = ref _addr_t.val;
+            ref distTest dt = ref _addr_dt.val;
+
             var (bin, args) = flattenCmdline(cmdline);
-            work w = ref new work(dt:dt,cmd:t.bgDirCmd(dir,bin,args...),);
+            ptr<work> w = addr(new work(dt:dt,cmd:t.bgDirCmd(dir,bin,args...),));
             t.worklist = append(t.worklist, w);
-            return w.cmd;
+            return _addr_w.cmd!;
         }
 
-        private static bool iOS(this ref tester t)
+        private static bool iOS(this ptr<tester> _addr_t)
         {
-            return goos == "darwin" && (goarch == "arm" || goarch == "arm64");
+            ref tester t = ref _addr_t.val;
+
+            return goos == "darwin" && goarch == "arm64";
         }
 
-        private static void @out(this ref tester t, @string v)
+        private static void @out(this ptr<tester> _addr_t, @string v)
         {
+            ref tester t = ref _addr_t.val;
+
             if (t.banner == "")
             {
-                return;
+                return ;
             }
+
             fmt.Println("\n" + t.banner + v);
+
         }
 
-        private static bool extLink(this ref tester t)
+        private static bool extLink(this ptr<tester> _addr_t)
         {
+            ref tester t = ref _addr_t.val;
+
             var pair = gohostos + "-" + goarch;
             switch (pair)
             {
+                case "aix-ppc64": 
+
                 case "android-arm": 
 
-                case "darwin-arm": 
+                case "android-arm64": 
+
+                case "darwin-amd64": 
 
                 case "darwin-arm64": 
 
@@ -873,63 +1094,87 @@ namespace go
                 case "windows-amd64": 
                     return true;
                     break;
-                case "darwin-386": 
-                    // linkmode=external fails on OS X 10.6 and earlier == Darwin
-                    // 10.8 and earlier.
-
-                case "darwin-amd64": 
-                    // linkmode=external fails on OS X 10.6 and earlier == Darwin
-                    // 10.8 and earlier.
-                    var (unameR, err) = exec.Command("uname", "-r").Output();
-                    if (err != null)
-                    {
-                        log.Fatalf("uname -r: %v", err);
-                    }
-                    var (major, _) = strconv.Atoi(string(unameR[..bytes.IndexByte(unameR, '.')]));
-                    return major > 10L;
-                    break;
             }
             return false;
+
         }
 
-        private static bool internalLink(this ref tester t)
+        private static bool internalLink(this ptr<tester> _addr_t)
         {
+            ref tester t = ref _addr_t.val;
+
             if (gohostos == "dragonfly")
             { 
                 // linkmode=internal fails on dragonfly since errno is a TLS relocation.
                 return false;
+
             }
+
             if (gohostarch == "ppc64le")
             { 
                 // linkmode=internal fails on ppc64le because cmd/link doesn't
                 // handle the TOC correctly (issue 15409).
                 return false;
+
             }
+
             if (goos == "android")
             {
                 return false;
             }
-            if (goos == "darwin" && (goarch == "arm" || goarch == "arm64"))
+
+            if (t.iOS())
             {
                 return false;
             } 
             // Internally linking cgo is incomplete on some architectures.
             // https://golang.org/issue/10373
             // https://golang.org/issue/14449
-            if (goarch == "arm64" || goarch == "mips64" || goarch == "mips64le" || goarch == "mips" || goarch == "mipsle")
+            if (goarch == "mips64" || goarch == "mips64le" || goarch == "mips" || goarch == "mipsle")
             {
                 return false;
             }
-            if (isAlpineLinux())
+
+            if (goos == "aix")
             { 
-                // Issue 18243.
+                // linkmode=internal isn't supported.
                 return false;
+
             }
+
             return true;
+
         }
 
-        private static bool supportedBuildmode(this ref tester t, @string mode)
+        private static bool internalLinkPIE(this ptr<tester> _addr_t)
         {
+            ref tester t = ref _addr_t.val;
+
+            switch (goos + "-" + goarch)
+            {
+                case "linux-amd64": 
+
+                case "linux-arm64": 
+
+                case "android-arm64": 
+                    return true;
+                    break;
+                case "windows-amd64": 
+
+                case "windows-386": 
+
+                case "windows-arm": 
+                    return true;
+                    break;
+            }
+            return false;
+
+        }
+
+        private static bool supportedBuildmode(this ptr<tester> _addr_t, @string mode)
+        {
+            ref tester t = ref _addr_t.val;
+
             var pair = goos + "-" + goarch;
             switch (mode)
             {
@@ -938,13 +1183,12 @@ namespace go
                     {
                         return false;
                     }
+
                     switch (pair)
                     {
-                        case "darwin-386": 
+                        case "aix-ppc64": 
 
                         case "darwin-amd64": 
-
-                        case "darwin-arm": 
 
                         case "darwin-arm64": 
 
@@ -955,6 +1199,8 @@ namespace go
                         case "linux-ppc64le": 
 
                         case "linux-s390x": 
+
+                        case "freebsd-amd64": 
 
                         case "windows-amd64": 
 
@@ -981,7 +1227,7 @@ namespace go
 
                         case "darwin-amd64": 
 
-                        case "darwin-386": 
+                        case "freebsd-amd64": 
 
                         case "android-arm": 
 
@@ -1035,12 +1281,17 @@ namespace go
                         case "darwin-amd64": 
                             return true;
                             break;
+                        case "freebsd-amd64": 
+                            return true;
+                            break;
                     }
                     return false;
                     break;
                 case "pie": 
                     switch (pair)
                     {
+                        case "aix/ppc64": 
+
                         case "linux-386": 
 
                         case "linux-amd64": 
@@ -1065,52 +1316,92 @@ namespace go
                         case "darwin-amd64": 
                             return true;
                             break;
+                        case "windows-amd64": 
+
+                        case "windows-386": 
+
+                        case "windows-arm": 
+                            return true;
+                            break;
                     }
                     return false;
                     break;
                 default: 
-                    log.Fatalf("internal error: unknown buildmode %s", mode);
+                    fatalf("internal error: unknown buildmode %s", mode);
                     return false;
                     break;
             }
+
         }
 
-        private static void registerHostTest(this ref tester _t, @string name, @string heading, @string dir, @string pkg) => func(_t, (ref tester t, Defer defer, Panic _, Recover __) =>
+        private static void registerHostTest(this ptr<tester> _addr_t, @string name, @string heading, @string dir, @string pkg) => func((defer, _, __) =>
         {
+            ref tester t = ref _addr_t.val;
+
             t.tests = append(t.tests, new distTest(name:name,heading:heading,fn:func(dt*distTest)error{t.runPending(dt)timelog("start",name)defertimelog("end",name)returnt.runHostTest(dir,pkg)},));
         });
 
-        private static error runHostTest(this ref tester _t, @string dir, @string pkg) => func(_t, (ref tester t, Defer defer, Panic _, Recover __) =>
+        private static error runHostTest(this ptr<tester> _addr_t, @string dir, @string pkg) => func((defer, _, __) =>
         {
-            defer(os.Remove(filepath.Join(goroot, dir, "test.test")));
-            var cmd = t.dirCmd(dir, t.goTest(), "-c", "-o", "test.test", pkg);
+            ref tester t = ref _addr_t.val;
+
+            var (out, err) = exec.Command("go", "env", "GOEXE", "GOTMPDIR").Output();
+            if (err != null)
+            {
+                return error.As(err)!;
+            }
+
+            var parts = strings.Split(string(out), "\n");
+            if (len(parts) < 2L)
+            {
+                return error.As(fmt.Errorf("'go env GOEXE GOTMPDIR' output contains <2 lines"))!;
+            }
+
+            var GOEXE = strings.TrimSpace(parts[0L]);
+            var GOTMPDIR = strings.TrimSpace(parts[1L]);
+
+            var (f, err) = ioutil.TempFile(GOTMPDIR, "test.test-*" + GOEXE);
+            if (err != null)
+            {
+                return error.As(err)!;
+            }
+
+            f.Close();
+            defer(os.Remove(f.Name()));
+
+            var cmd = t.dirCmd(dir, t.goTest(), "-c", "-o", f.Name(), pkg);
             cmd.Env = append(os.Environ(), "GOARCH=" + gohostarch, "GOOS=" + gohostos);
             {
                 var err = cmd.Run();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
-            return error.As(t.dirCmd(dir, "./test.test").Run());
+
+            return error.As(t.dirCmd(dir, f.Name(), "-test.short").Run())!;
+
         });
 
-        private static error cgoTest(this ref tester t, ref distTest dt)
+        private static error cgoTest(this ptr<tester> _addr_t, ptr<distTest> _addr_dt)
         {
-            t.addCmd(dt, "misc/cgo/test", t.goTest(), "-ldflags", "-linkmode=auto");
+            ref tester t = ref _addr_t.val;
+            ref distTest dt = ref _addr_dt.val;
+
+            var cmd = t.addCmd(dt, "misc/cgo/test", t.goTest());
+            cmd.Env = append(os.Environ(), "GOFLAGS=-ldflags=-linkmode=auto");
 
             if (t.internalLink())
             {
-                t.addCmd(dt, "misc/cgo/test", t.goTest(), "-tags=internal", "-ldflags", "-linkmode=internal");
+                cmd = t.addCmd(dt, "misc/cgo/test", t.goTest(), "-tags=internal");
+                cmd.Env = append(os.Environ(), "GOFLAGS=-ldflags=-linkmode=internal");
             }
+
             var pair = gohostos + "-" + goarch;
             switch (pair)
             {
-                case "darwin-386": 
-                    // test linkmode=external, but __thread not supported, so skip testtls.
-
                 case "darwin-amd64": 
                     // test linkmode=external, but __thread not supported, so skip testtls.
 
@@ -1129,10 +1420,19 @@ namespace go
                     {
                         break;
                     }
-                    t.addCmd(dt, "misc/cgo/test", t.goTest(), "-ldflags", "-linkmode=external");
-                    t.addCmd(dt, "misc/cgo/test", t.goTest(), "-ldflags", "-linkmode=external -s");
+
+                    cmd = t.addCmd(dt, "misc/cgo/test", t.goTest());
+                    cmd.Env = append(os.Environ(), "GOFLAGS=-ldflags=-linkmode=external");
+
+                    cmd = t.addCmd(dt, "misc/cgo/test", t.goTest(), "-ldflags", "-linkmode=external -s");
                     break;
+                case "aix-ppc64": 
+
+
                 case "android-arm": 
+
+
+                case "android-arm64": 
 
 
                 case "dragonfly-amd64": 
@@ -1167,12 +1467,21 @@ namespace go
 
                 case "netbsd-amd64": 
 
-                    t.addCmd(dt, "misc/cgo/test", t.goTest(), "-ldflags", "-linkmode=external");
+
+                case "linux-arm64": 
+
+                    cmd = t.addCmd(dt, "misc/cgo/test", t.goTest());
+                    cmd.Env = append(os.Environ(), "GOFLAGS=-ldflags=-linkmode=external"); 
+                    // A -g argument in CGO_CFLAGS should not affect how the test runs.
+                    cmd.Env = append(cmd.Env, "CGO_CFLAGS=-g0");
+
                     t.addCmd(dt, "misc/cgo/testtls", t.goTest(), "-ldflags", "-linkmode=auto");
                     t.addCmd(dt, "misc/cgo/testtls", t.goTest(), "-ldflags", "-linkmode=external");
 
                     switch (pair)
                     {
+                        case "aix-ppc64": 
+
                         case "netbsd-386": 
 
                         case "netbsd-amd64": 
@@ -1180,7 +1489,7 @@ namespace go
                         case "freebsd-arm": 
                             break;
                         default: 
-                            var cmd = t.dirCmd("misc/cgo/test", compilerEnvLookup(defaultcc, goos, goarch), "-xc", "-o", "/dev/null", "-static", "-");
+                            cmd = t.dirCmd("misc/cgo/test", compilerEnvLookup(defaultcc, goos, goarch), "-xc", "-o", "/dev/null", "-static", "-");
                             cmd.Stdin = strings.NewReader("int main() {}");
                             {
                                 var err = cmd.Run();
@@ -1195,28 +1504,46 @@ namespace go
                                     {
                                         t.addCmd(dt, "misc/cgo/testtls", t.goTest(), "-ldflags", "-linkmode=external -extldflags \"-static -pthread\"");
                                     }
+
                                     t.addCmd(dt, "misc/cgo/nocgo", t.goTest());
                                     t.addCmd(dt, "misc/cgo/nocgo", t.goTest(), "-ldflags", "-linkmode=external");
                                     if (goos != "android")
                                     {
                                         t.addCmd(dt, "misc/cgo/nocgo", t.goTest(), "-ldflags", "-linkmode=external -extldflags \"-static -pthread\"");
+                                        t.addCmd(dt, "misc/cgo/test", t.goTest(), "-tags=static", "-ldflags", "-linkmode=external -extldflags \"-static -pthread\""); 
+                                        // -static in CGO_LDFLAGS triggers a different code path
+                                        // than -static in -extldflags, so test both.
+                                        // See issue #16651.
+                                        cmd = t.addCmd(dt, "misc/cgo/test", t.goTest(), "-tags=static");
+                                        cmd.Env = append(os.Environ(), "CGO_LDFLAGS=-static -pthread");
+
                                     }
+
                                 }
 
                             }
 
+
                             if (t.supportedBuildmode("pie"))
                             {
                                 t.addCmd(dt, "misc/cgo/test", t.goTest(), "-buildmode=pie");
+                                if (t.internalLink() && t.internalLinkPIE())
+                                {
+                                    t.addCmd(dt, "misc/cgo/test", t.goTest(), "-buildmode=pie", "-ldflags=-linkmode=internal");
+                                }
+
                                 t.addCmd(dt, "misc/cgo/testtls", t.goTest(), "-buildmode=pie");
                                 t.addCmd(dt, "misc/cgo/nocgo", t.goTest(), "-buildmode=pie");
+
                             }
+
                             break;
                     }
                     break;
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // run pending test commands, in parallel, emitting headers as appropriate.
@@ -1225,8 +1552,11 @@ namespace go
         // A test should call runPending if it wants to make sure that it is not
         // running in parallel with earlier tests, or if it has some other reason
         // for needing the earlier tests to be done.
-        private static void runPending(this ref tester t, ref distTest nextTest)
+        private static void runPending(this ptr<tester> _addr_t, ptr<distTest> _addr_nextTest)
         {
+            ref tester t = ref _addr_t.val;
+            ref distTest nextTest = ref _addr_nextTest.val;
+
             checkNotStale("go", "std");
             var worklist = t.worklist;
             t.worklist = null;
@@ -1249,10 +1579,24 @@ namespace go
                         {
                             timelog("start", w.dt.name);
                             w.@out, w.err = w.cmd.CombinedOutput();
+                            if (w.err != null)
+                            {
+                                if (isUnsupportedVMASize(_addr_w))
+                                {
+                                    timelog("skip", w.dt.name);
+                                    w.@out = (slice<byte>)fmt.Sprintf("skipped due to unsupported VMA\n");
+                                    w.err = null;
+                                }
+
+                            }
+
                         }
+
                         timelog("end", w.dt.name);
                         w.end.Send(true);
+
                     }(w));
+
                 }
 
                 w = w__prev1;
@@ -1260,12 +1604,11 @@ namespace go
 
             long started = 0L;
             long ended = 0L;
-            ref distTest last = default;
+            ptr<distTest> last;
             while (ended < len(worklist))
             {
                 while (started < len(worklist) && started - ended < maxbg)
-                { 
-                    //println("start", started)
+                {
                     var w = worklist[started];
                     started++;
                     w.start.Send(!t.failed || t.keepGoing);
@@ -1278,6 +1621,7 @@ namespace go
                     t.lastHeading = dt.heading;
                     t.@out(dt.heading);
                 }
+
                 if (dt != last)
                 { 
                     // Assumes all the entries for a single dt are in one worklist.
@@ -1286,12 +1630,14 @@ namespace go
                     {
                         fmt.Printf("# go tool dist test -run=^%s$\n", dt.name);
                     }
+
                 }
+
                 if (vflag > 1L)
                 {
                     errprintf("%s\n", strings.Join(w.cmd.Args, " "));
-                } 
-                //println("wait", ended)
+                }
+
                 ended++;
                 w.end.Receive();
                 os.Stdout.Write(w.@out);
@@ -1300,13 +1646,16 @@ namespace go
                     log.Printf("Failed: %v", w.err);
                     t.failed = true;
                 }
+
                 checkNotStale("go", "std");
+
             }
 
             if (t.failed && !t.keepGoing)
             {
-                log.Fatal("FAILED");
+                fatalf("FAILED");
             }
+
             {
                 var dt__prev1 = dt;
 
@@ -1319,132 +1668,24 @@ namespace go
                         t.lastHeading = dt.heading;
                         t.@out(dt.heading);
                     }
+
                     if (vflag > 0L)
                     {
                         fmt.Printf("# go tool dist test -run=^%s$\n", dt.name);
                     }
+
                 }
 
                 dt = dt__prev1;
 
             }
+
         }
 
-        private static bool cgoTestSOSupported(this ref tester t)
+        private static bool hasBash(this ptr<tester> _addr_t)
         {
-            if (goos == "android" || t.iOS())
-            { 
-                // No exec facility on Android or iOS.
-                return false;
-            }
-            if (goarch == "ppc64")
-            { 
-                // External linking not implemented on ppc64 (issue #8912).
-                return false;
-            }
-            if (goarch == "mips64le" || goarch == "mips64")
-            { 
-                // External linking not implemented on mips64.
-                return false;
-            }
-            return true;
-        }
+            ref tester t = ref _addr_t.val;
 
-        private static error cgoTestSO(this ref tester _t, ref distTest _dt, @string testpath) => func(_t, _dt, (ref tester t, ref distTest dt, Defer defer, Panic _, Recover __) =>
-        {
-            t.runPending(dt);
-
-            timelog("start", dt.name);
-            defer(timelog("end", dt.name));
-
-            var dir = filepath.Join(goroot, testpath); 
-
-            // build shared object
-            var (output, err) = exec.Command("go", "env", "CC").Output();
-            if (err != null)
-            {
-                return error.As(fmt.Errorf("Error running go env CC: %v", err));
-            }
-            var cc = strings.TrimSuffix(string(output), "\n");
-            if (cc == "")
-            {
-                return error.As(errors.New("CC environment variable (go env CC) cannot be empty"));
-            }
-            output, err = exec.Command("go", "env", "GOGCCFLAGS").Output();
-            if (err != null)
-            {
-                return error.As(fmt.Errorf("Error running go env GOGCCFLAGS: %v", err));
-            }
-            var gogccflags = strings.Split(strings.TrimSuffix(string(output), "\n"), " ");
-
-            @string ext = "so";
-            var args = append(gogccflags, "-shared");
-            switch (goos)
-            {
-                case "darwin": 
-                    ext = "dylib";
-                    args = append(args, "-undefined", "suppress", "-flat_namespace");
-                    break;
-                case "windows": 
-                    ext = "dll";
-                    args = append(args, "-DEXPORT_DLL");
-                    break;
-            }
-            @string sofname = "libcgosotest." + ext;
-            args = append(args, "-o", sofname, "cgoso_c.c");
-
-            {
-                var err__prev1 = err;
-
-                var err = t.dirCmd(dir, cc, args).Run();
-
-                if (err != null)
-                {
-                    return error.As(err);
-                }
-
-                err = err__prev1;
-
-            }
-            defer(os.Remove(filepath.Join(dir, sofname)));
-
-            {
-                var err__prev1 = err;
-
-                err = t.dirCmd(dir, "go", "build", "-o", "main.exe", "main.go").Run();
-
-                if (err != null)
-                {
-                    return error.As(err);
-                }
-
-                err = err__prev1;
-
-            }
-            defer(os.Remove(filepath.Join(dir, "main.exe")));
-
-            var cmd = t.dirCmd(dir, "./main.exe");
-            if (goos != "windows")
-            {
-                @string s = "LD_LIBRARY_PATH";
-                if (goos == "darwin")
-                {
-                    s = "DYLD_LIBRARY_PATH";
-                }
-                cmd.Env = append(os.Environ(), s + "=."); 
-
-                // On FreeBSD 64-bit architectures, the 32-bit linker looks for
-                // different environment variables.
-                if (goos == "freebsd" && gohostarch == "386")
-                {
-                    cmd.Env = append(cmd.Env, "LD_32_LIBRARY_PATH=.");
-                }
-            }
-            return error.As(cmd.Run());
-        });
-
-        private static bool hasBash(this ref tester t)
-        {
             switch (gohostos)
             {
                 case "windows": 
@@ -1454,10 +1695,21 @@ namespace go
                     break;
             }
             return true;
+
         }
 
-        private static bool hasSwig(this ref tester t)
+        private static bool hasCxx(this ptr<tester> _addr_t)
         {
+            ref tester t = ref _addr_t.val;
+
+            var (cxx, _) = exec.LookPath(compilerEnvLookup(defaultcxx, goos, goarch));
+            return cxx != "";
+        }
+
+        private static bool hasSwig(this ptr<tester> _addr_t)
+        {
+            ref tester t = ref _addr_t.val;
+
             var (swig, err) = exec.LookPath("swig");
             if (err != null)
             {
@@ -1472,6 +1724,7 @@ namespace go
             {
                 return false;
             }
+
             var swigDir = strings.TrimSpace(string(output));
 
             _, err = os.Stat(filepath.Join(swigDir, "go"));
@@ -1487,27 +1740,34 @@ namespace go
             {
                 return false;
             }
+
             var re = regexp.MustCompile("[vV]ersion +([\\d]+)([.][\\d]+)?([.][\\d]+)?");
             var matches = re.FindSubmatch(out);
             if (matches == null)
             { 
                 // Can't find version number; hope for the best.
                 return true;
+
             }
+
             var (major, err) = strconv.Atoi(string(matches[1L]));
             if (err != null)
             { 
                 // Can't find version number; hope for the best.
                 return true;
+
             }
+
             if (major < 3L)
             {
                 return false;
             }
+
             if (major > 3L)
             { 
                 // 4.0 or later
                 return true;
+
             } 
 
             // We have SWIG version 3.x.
@@ -1518,11 +1778,14 @@ namespace go
                 {
                     return true;
                 }
+
                 if (minor > 0L)
                 { 
                     // 3.1 or later
                     return true;
+
                 }
+
             } 
 
             // We have SWIG version 3.0.x.
@@ -1533,38 +1796,53 @@ namespace go
                 {
                     return true;
                 }
+
                 if (patch < 6L)
                 { 
                     // Before 3.0.6.
                     return false;
+
                 }
+
             }
+
             return true;
+
         }
 
-        private static bool raceDetectorSupported(this ref tester t)
+        private static bool raceDetectorSupported(this ptr<tester> _addr_t)
         {
-            switch (gohostos)
+            ref tester t = ref _addr_t.val;
+
+            if (gohostos != goos)
             {
-                case "linux": 
-                    // The race detector doesn't work on Alpine Linux:
-                    // golang.org/issue/14481
-
-                case "darwin": 
-                    // The race detector doesn't work on Alpine Linux:
-                    // golang.org/issue/14481
-
-                case "freebsd": 
-                    // The race detector doesn't work on Alpine Linux:
-                    // golang.org/issue/14481
-
-                case "windows": 
-                    // The race detector doesn't work on Alpine Linux:
-                    // golang.org/issue/14481
-                    return t.cgoEnabled && goarch == "amd64" && gohostos == goos && !isAlpineLinux();
-                    break;
+                return false;
             }
-            return false;
+
+            if (!t.cgoEnabled)
+            {
+                return false;
+            }
+
+            if (!raceDetectorSupported(goos, goarch))
+            {
+                return false;
+            } 
+            // The race detector doesn't work on Alpine Linux:
+            // golang.org/issue/14481
+            if (isAlpineLinux())
+            {
+                return false;
+            } 
+            // NetBSD support is unfinished.
+            // golang.org/issue/26403
+            if (goos == "netbsd")
+            {
+                return false;
+            }
+
+            return true;
+
         }
 
         private static bool isAlpineLinux()
@@ -1573,78 +1851,100 @@ namespace go
             {
                 return false;
             }
+
             var (fi, err) = os.Lstat("/etc/alpine-release");
             return err == null && fi.Mode().IsRegular();
+
         }
 
-        private static @string runFlag(this ref tester t, @string rx)
+        private static @string runFlag(this ptr<tester> _addr_t, @string rx)
         {
+            ref tester t = ref _addr_t.val;
+
             if (t.compileOnly)
             {
                 return "-run=^$";
             }
+
             return "-run=" + rx;
+
         }
 
-        private static error raceTest(this ref tester t, ref distTest dt)
+        private static error raceTest(this ptr<tester> _addr_t, ptr<distTest> _addr_dt)
         {
-            t.addCmd(dt, "src", t.goTest(), "-race", "-i", "runtime/race", "flag", "os", "os/exec");
+            ref tester t = ref _addr_t.val;
+            ref distTest dt = ref _addr_dt.val;
+
             t.addCmd(dt, "src", t.goTest(), "-race", t.runFlag("Output"), "runtime/race");
-            t.addCmd(dt, "src", t.goTest(), "-race", t.runFlag("TestParse|TestEcho|TestStdinCloseRace|TestClosedPipeRace|TestTypeRace"), "flag", "os", "os/exec", "encoding/gob"); 
+            t.addCmd(dt, "src", t.goTest(), "-race", t.runFlag("TestParse|TestEcho|TestStdinCloseRace|TestClosedPipeRace|TestTypeRace|TestFdRace|TestFdReadRace|TestFileCloseRace"), "flag", "net", "os", "os/exec", "encoding/gob"); 
             // We don't want the following line, because it
             // slows down all.bash (by 10 seconds on my laptop).
             // The race builder should catch any error here, but doesn't.
             // TODO(iant): Figure out how to catch this.
             // t.addCmd(dt, "src", t.goTest(),  "-race", "-run=TestParallelTest", "cmd/go")
             if (t.cgoEnabled)
-            {
-                var cmd = t.addCmd(dt, "misc/cgo/test", t.goTest(), "-race");
-                cmd.Env = append(os.Environ(), "GOTRACEBACK=2");
+            { 
+                // Building misc/cgo/test takes a long time.
+                // There are already cgo-enabled packages being tested with the race detector.
+                // We shouldn't need to redo all of misc/cgo/test too.
+                // The race buildler will take care of this.
+                // cmd := t.addCmd(dt, "misc/cgo/test", t.goTest(), "-race")
+                // cmd.Env = append(os.Environ(), "GOTRACEBACK=2")
             }
+
             if (t.extLink())
             { 
                 // Test with external linking; see issue 9133.
                 t.addCmd(dt, "src", t.goTest(), "-race", "-ldflags=-linkmode=external", t.runFlag("TestParse|TestEcho|TestStdinCloseRace"), "flag", "os/exec");
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         private static var runtest = default;
 
-        private static error testDirTest(this ref tester t, ref distTest dt, long shard, long shards)
+        private static error testDirTest(this ptr<tester> _addr_t, ptr<distTest> _addr_dt, long shard, long shards)
         {
+            ref tester t = ref _addr_t.val;
+            ref distTest dt = ref _addr_dt.val;
+
             runtest.Do(() =>
             {
-                const @string exe = "runtest.exe"; // named exe for Windows, but harmless elsewhere
- // named exe for Windows, but harmless elsewhere
-                var cmd = t.dirCmd("test", "go", "build", "-o", exe, "run.go");
-                cmd.Env = append(os.Environ(), "GOOS=" + gohostos, "GOARCH=" + gohostarch);
-                runtest.exe = filepath.Join(cmd.Dir, exe);
+                var (f, err) = ioutil.TempFile("", "runtest-*.exe"); // named exe for Windows, but harmless elsewhere
+                if (err != null)
                 {
-                    var err = cmd.Run();
-
-                    if (err != null)
-                    {
-                        runtest.err = err;
-                        return;
-                    }
-
+                    runtest.err = err;
+                    return ;
                 }
+
+                f.Close();
+
+                runtest.exe = f.Name();
                 xatexit(() =>
                 {
                     os.Remove(runtest.exe);
                 });
+
+                var cmd = t.dirCmd("test", "go", "build", "-o", runtest.exe, "run.go");
+                cmd.Env = append(os.Environ(), "GOOS=" + gohostos, "GOARCH=" + gohostarch);
+                runtest.err = cmd.Run();
+
             });
             if (runtest.err != null)
             {
-                return error.As(runtest.err);
+                return error.As(runtest.err)!;
             }
+
             if (t.compileOnly)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             t.addCmd(dt, "test", runtest.exe, fmt.Sprintf("--shard=%d", shard), fmt.Sprintf("--shards=%d", shards));
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // cgoPackages is the standard packages that use cgo.
@@ -1659,37 +1959,308 @@ namespace go
         // a test in race mode just to discover it has no benchmarks costs a
         // second or two per package, and this function returns false for
         // about 100 packages.
-        private static bool packageHasBenchmarks(this ref tester _t, @string pkg) => func(_t, (ref tester t, Defer defer, Panic _, Recover __) =>
+        private static bool packageHasBenchmarks(this ptr<tester> _addr_t, @string pkg) => func((defer, _, __) =>
         {
+            ref tester t = ref _addr_t.val;
+
             var pkgDir = filepath.Join(goroot, "src", pkg);
             var (d, err) = os.Open(pkgDir);
             if (err != null)
             {
                 return true; // conservatively
             }
+
             defer(d.Close());
             var (names, err) = d.Readdirnames(-1L);
             if (err != null)
             {
                 return true; // conservatively
             }
+
             foreach (var (_, name) in names)
             {
                 if (!strings.HasSuffix(name, "_test.go"))
                 {
                     continue;
                 }
+
                 var (slurp, err) = ioutil.ReadFile(filepath.Join(pkgDir, name));
                 if (err != null)
                 {
                     return true; // conservatively
                 }
+
                 if (bytes.Contains(slurp, funcBenchmark))
                 {
                     return true;
                 }
+
             }
             return false;
+
         });
+
+        // makeGOROOTUnwritable makes all $GOROOT files & directories non-writable to
+        // check that no tests accidentally write to $GOROOT.
+        private static Action makeGOROOTUnwritable(this ptr<tester> _addr_t) => func((_, panic, __) =>
+        {
+            Action undo = default;
+            ref tester t = ref _addr_t.val;
+
+            var dir = os.Getenv("GOROOT");
+            if (dir == "")
+            {
+                panic("GOROOT not set");
+            }
+
+            private partial struct pathMode
+            {
+                public @string path;
+                public os.FileMode mode;
+            }
+            slice<pathMode> dirs = default; // in lexical order
+
+            undo = () =>
+            {
+                {
+                    var i__prev1 = i;
+
+                    foreach (var (__i) in dirs)
+                    {
+                        i = __i;
+                        os.Chmod(dirs[i].path, dirs[i].mode); // best effort
+                    }
+
+                    i = i__prev1;
+                }
+            }
+;
+
+            var gocache = os.Getenv("GOCACHE");
+            if (gocache == "")
+            {
+                panic("GOCACHE not set");
+            }
+
+            var (gocacheSubdir, _) = filepath.Rel(dir, gocache);
+
+            filepath.Walk(dir, (path, info, err) =>
+            {
+                {
+                    var suffix = strings.TrimPrefix(path, dir + string(filepath.Separator));
+
+                    if (suffix != "")
+                    {
+                        if (suffix == gocacheSubdir)
+                        { 
+                            // Leave GOCACHE writable: we may need to write test binaries into it.
+                            return filepath.SkipDir;
+
+                        }
+
+                        if (suffix == ".git")
+                        { 
+                            // Leave Git metadata in whatever state it was in. It may contain a lot
+                            // of files, and it is highly unlikely that a test will try to modify
+                            // anything within that directory.
+                            return filepath.SkipDir;
+
+                        }
+
+                    }
+
+                }
+
+                if (err == null)
+                {
+                    var mode = info.Mode();
+                    if (mode & 0222L != 0L && (mode.IsDir() || mode.IsRegular()))
+                    {
+                        dirs = append(dirs, new pathMode(path,mode));
+                    }
+
+                }
+
+                return null;
+
+            }); 
+
+            // Run over list backward to chmod children before parents.
+            {
+                var i__prev1 = i;
+
+                for (var i = len(dirs) - 1L; i >= 0L; i--)
+                {
+                    var err = os.Chmod(dirs[i].path, dirs[i].mode & ~0222L);
+                    if (err != null)
+                    {
+                        dirs = dirs[i..]; // Only undo what we did so far.
+                        undo();
+                        fatalf("failed to make GOROOT read-only: %v", err);
+
+                    }
+
+                }
+
+
+                i = i__prev1;
+            }
+
+            return undo;
+
+        });
+
+        // shouldUsePrecompiledStdTest reports whether "dist test" should use
+        // a pre-compiled go test binary on disk rather than running "go test"
+        // and compiling it again. This is used by our slow qemu-based builder
+        // that do full processor emulation where we cross-compile the
+        // make.bash step as well as pre-compile each std test binary.
+        //
+        // This only reports true if dist is run with an single go_test:foo
+        // argument (as the build coordinator does with our slow qemu-based
+        // builders), we're in a builder environment ("GO_BUILDER_NAME" is set),
+        // and the pre-built test binary exists.
+        private static bool shouldUsePrecompiledStdTest(this ptr<tester> _addr_t)
+        {
+            ref tester t = ref _addr_t.val;
+
+            var bin = t.prebuiltGoPackageTestBinary();
+            if (bin == "")
+            {
+                return false;
+            }
+
+            var (_, err) = os.Stat(bin);
+            return err == null;
+
+        }
+
+        private static bool shouldTestCmd(this ptr<tester> _addr_t)
+        {
+            ref tester t = ref _addr_t.val;
+
+            if (goos == "js" && goarch == "wasm")
+            { 
+                // Issues 25911, 35220
+                return false;
+
+            }
+
+            return true;
+
+        }
+
+        // prebuiltGoPackageTestBinary returns the path where we'd expect
+        // the pre-built go test binary to be on disk when dist test is run with
+        // a single argument.
+        // It returns an empty string if a pre-built binary should not be used.
+        private static @string prebuiltGoPackageTestBinary(this ptr<tester> _addr_t)
+        {
+            ref tester t = ref _addr_t.val;
+
+            if (len(stdMatches) != 1L || t.race || t.compileOnly || os.Getenv("GO_BUILDER_NAME") == "")
+            {
+                return "";
+            }
+
+            var pkg = stdMatches[0L];
+            return filepath.Join(os.Getenv("GOROOT"), "src", pkg, path.Base(pkg) + ".test");
+
+        }
+
+        // runPrecompiledStdTest runs the pre-compiled standard library package test binary.
+        // See shouldUsePrecompiledStdTest above; it must return true for this to be called.
+        private static error runPrecompiledStdTest(this ptr<tester> _addr_t, time.Duration timeout) => func((defer, _, __) =>
+        {
+            ref tester t = ref _addr_t.val;
+
+            var bin = t.prebuiltGoPackageTestBinary();
+            fmt.Fprintf(os.Stderr, "# %s: using pre-built %s...\n", stdMatches[0L], bin);
+            var cmd = exec.Command(bin, "-test.short", "-test.timeout=" + timeout.String());
+            cmd.Dir = filepath.Dir(bin);
+            cmd.Stdout = os.Stdout;
+            cmd.Stderr = os.Stderr;
+            {
+                var err = cmd.Start();
+
+                if (err != null)
+                {
+                    return error.As(err)!;
+                } 
+                // And start a timer to kill the process if it doesn't kill
+                // itself in the prescribed timeout.
+
+            } 
+            // And start a timer to kill the process if it doesn't kill
+            // itself in the prescribed timeout.
+            const float backupKillFactor = (float)1.05F; // add 5%
+ // add 5%
+            var timer = time.AfterFunc(time.Duration(float64(timeout) * backupKillFactor), () =>
+            {
+                fmt.Fprintf(os.Stderr, "# %s: timeout running %s; killing...\n", stdMatches[0L], bin);
+                cmd.Process.Kill();
+            });
+            defer(timer.Stop());
+            return error.As(cmd.Wait())!;
+
+        });
+
+        // raceDetectorSupported is a copy of the function
+        // cmd/internal/sys.RaceDetectorSupported, which can't be used here
+        // because cmd/dist has to be buildable by Go 1.4.
+        // The race detector only supports 48-bit VMA on arm64. But we don't have
+        // a good solution to check VMA size(See https://golang.org/issue/29948)
+        // raceDetectorSupported will always return true for arm64. But race
+        // detector tests may abort on non 48-bit VMA configuration, the tests
+        // will be marked as "skipped" in this case.
+        private static bool raceDetectorSupported(@string goos, @string goarch)
+        {
+            switch (goos)
+            {
+                case "linux": 
+                    return goarch == "amd64" || goarch == "ppc64le" || goarch == "arm64";
+                    break;
+                case "darwin": 
+
+                case "freebsd": 
+
+                case "netbsd": 
+
+                case "windows": 
+                    return goarch == "amd64";
+                    break;
+                default: 
+                    return false;
+                    break;
+            }
+
+        }
+
+        // mSanSupported is a copy of the function cmd/internal/sys.MSanSupported,
+        // which can't be used here because cmd/dist has to be buildable by Go 1.4.
+        private static bool mSanSupported(@string goos, @string goarch)
+        {
+            switch (goos)
+            {
+                case "linux": 
+                    return goarch == "amd64" || goarch == "arm64";
+                    break;
+                default: 
+                    return false;
+                    break;
+            }
+
+        }
+
+        // isUnsupportedVMASize reports whether the failure is caused by an unsupported
+        // VMA for the race detector (for example, running the race detector on an
+        // arm64 machine configured with 39-bit VMA)
+        private static bool isUnsupportedVMASize(ptr<work> _addr_w)
+        {
+            ref work w = ref _addr_w.val;
+
+            slice<byte> unsupportedVMA = (slice<byte>)"unsupported VMA range";
+            return w.dt.name == "race" && bytes.Contains(w.@out, unsupportedVMA);
+        }
     }
 }

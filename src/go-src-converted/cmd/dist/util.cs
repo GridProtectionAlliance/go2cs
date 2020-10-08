@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:00:01 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:01 UTC
 // Original source: C:\Go\src\cmd\dist\util.go
 using bytes = go.bytes_package;
 using flag = go.flag_package;
@@ -44,8 +44,10 @@ namespace go
                 {
                     out = append(out, x);
                 }
+
             }
             return out;
+
         }
 
         // uniq returns a sorted slice containing the unique elements of list.
@@ -61,13 +63,16 @@ namespace go
                 {
                     keep = append(keep, x);
                 }
+
             }
             return keep;
+
         }
 
-        public static readonly long CheckExit = 1L << (int)(iota);
-        public static readonly var ShowOutput = 0;
-        public static readonly var Background = 1;
+        public static readonly long CheckExit = (long)1L << (int)(iota);
+        public static readonly var ShowOutput = (var)0;
+        public static readonly var Background = (var)1;
+
 
         private static sync.Mutex outputLock = default;
 
@@ -86,10 +91,11 @@ namespace go
             {
                 errprintf("run: %s\n", strings.Join(cmd, " "));
             }
+
             var xcmd = exec.Command(cmd[0L], cmd[1L..]);
             xcmd.Dir = dir;
             slice<byte> data = default;
-            error err = default; 
+            error err = default!; 
 
             // If we want to show command output and this is not
             // a background command, assume it's the only thing
@@ -102,12 +108,13 @@ namespace go
             {
                 xcmd.Stdout = os.Stdout;
                 xcmd.Stderr = os.Stderr;
-                err = error.As(xcmd.Run());
+                err = error.As(xcmd.Run())!;
             }
             else
             {
                 data, err = xcmd.CombinedOutput();
             }
+
             if (err != null && mode & CheckExit != 0L)
             {
                 outputLock.Lock();
@@ -115,26 +122,34 @@ namespace go
                 {
                     xprintf("%s\n", data);
                 }
+
                 outputLock.Unlock();
                 if (mode & Background != 0L)
                 { 
                     // Prevent fatalf from waiting on our own goroutine's
                     // bghelper to exit:
                     bghelpers.Done();
+
                 }
+
                 fatalf("FAILED: %v: %v", strings.Join(cmd, " "), err);
+
             }
+
             if (mode & ShowOutput != 0L)
             {
                 outputLock.Lock();
                 os.Stdout.Write(data);
                 outputLock.Unlock();
             }
+
             if (vflag > 2L)
             {
                 errprintf("run: %s DONE\n", strings.Join(cmd, " "));
             }
+
             return string(data);
+
         }
 
         private static long maxbg = 4L;        /* maximum number of jobs to run at once */
@@ -149,6 +164,7 @@ namespace go
                 go_(() => bghelper());
             }
 
+
         }
 
         private static void bghelper() => func((defer, _, __) =>
@@ -156,19 +172,21 @@ namespace go
             defer(bghelpers.Done());
             while (true)
             {
-                return;
-                return;
+                return ;
+                return ;
                 w();
             }
+
 
         });
 
         // bgrun is like run but runs the command in the background.
         // CheckExit|ShowOutput mode is implied (since output cannot be returned).
         // bgrun adds 1 to wg immediately, and calls Done when the work completes.
-        private static void bgrun(ref sync.WaitGroup _wg, @string dir, params @string[] cmd) => func(_wg, (ref sync.WaitGroup wg, Defer defer, Panic _, Recover __) =>
+        private static void bgrun(ptr<sync.WaitGroup> _addr_wg, @string dir, params @string[] cmd) => func((defer, _, __) =>
         {
             cmd = cmd.Clone();
+            ref sync.WaitGroup wg = ref _addr_wg.val;
 
             wg.Add(1L);
             bgwork.Send(() =>
@@ -177,18 +195,22 @@ namespace go
                 run(dir, CheckExit | ShowOutput | Background, cmd);
             }
 );
+
         });
 
         // bgwait waits for pending bgruns to finish.
         // bgwait must be called from only a single goroutine at a time.
-        private static void bgwait(ref sync.WaitGroup wg)
+        private static void bgwait(ptr<sync.WaitGroup> _addr_wg)
         {
+            ref sync.WaitGroup wg = ref _addr_wg.val;
+
             var done = make_channel<object>();
             go_(() => () =>
             {
                 wg.Wait();
                 close(done);
             }());
+
         }
 
         // xgetwd returns the current directory.
@@ -199,7 +221,9 @@ namespace go
             {
                 fatalf("%s", err);
             }
+
             return wd;
+
         }
 
         // xrealwd returns the 'real' name for the given path.
@@ -220,6 +244,7 @@ namespace go
                 err = err__prev1;
 
             }
+
             var real = xgetwd();
             {
                 var err__prev1 = err;
@@ -234,7 +259,9 @@ namespace go
                 err = err__prev1;
 
             }
+
             return real;
+
         }
 
         // isdir reports whether p names an existing directory.
@@ -259,7 +286,9 @@ namespace go
             {
                 return new time.Time();
             }
+
             return fi.ModTime();
+
         }
 
         // readfile returns the content of the named file.
@@ -270,11 +299,14 @@ namespace go
             {
                 fatalf("%v", err);
             }
+
             return string(data);
+
         }
 
-        private static readonly long writeExec = 1L << (int)(iota);
-        private static readonly var writeSkipSame = 0;
+        private static readonly long writeExec = (long)1L << (int)(iota);
+        private static readonly var writeSkipSame = (var)0;
+
 
         // writefile writes text to the named file, creating it if needed.
         // if exec is non-zero, marks the file as executable.
@@ -288,19 +320,23 @@ namespace go
                 var (old, err) = ioutil.ReadFile(file);
                 if (err == null && bytes.Equal(old, new))
                 {
-                    return;
+                    return ;
                 }
+
             }
+
             var mode = os.FileMode(0666L);
             if (flag & writeExec != 0L)
             {
                 mode = 0777L;
             }
+
             var err = ioutil.WriteFile(file, new, mode);
             if (err != null)
             {
                 fatalf("%v", err);
             }
+
         }
 
         // xmkdir creates the directory p.
@@ -311,6 +347,7 @@ namespace go
             {
                 fatalf("%v", err);
             }
+
         }
 
         // xmkdirall creates the directory p and its parents, as needed.
@@ -321,6 +358,7 @@ namespace go
             {
                 fatalf("%v", err);
             }
+
         }
 
         // xremove removes the file p.
@@ -330,7 +368,9 @@ namespace go
             {
                 errprintf("rm %s\n", p);
             }
+
             os.Remove(p);
+
         }
 
         // xremoveall removes the file or directory tree rooted at p.
@@ -340,7 +380,9 @@ namespace go
             {
                 errprintf("rm -r %s\n", p);
             }
+
             os.RemoveAll(p);
+
         }
 
         // xreaddir replaces dst with a list of the names of the files and subdirectories in dir.
@@ -352,13 +394,16 @@ namespace go
             {
                 fatalf("%v", err);
             }
+
             defer(f.Close());
             var (names, err) = f.Readdirnames(-1L);
             if (err != null)
             {
                 fatalf("reading %s: %v", dir, err);
             }
+
             return names;
+
         });
 
         // xreaddir replaces dst with a list of the names of the files in dir.
@@ -370,12 +415,14 @@ namespace go
             {
                 fatalf("%v", err);
             }
+
             defer(f.Close());
             var (infos, err) = f.Readdir(-1L);
             if (err != null)
             {
                 fatalf("reading %s: %v", dir, err);
             }
+
             slice<@string> names = default;
             foreach (var (_, fi) in infos)
             {
@@ -383,8 +430,10 @@ namespace go
                 {
                     names = append(names, fi.Name());
                 }
+
             }
             return names;
+
         });
 
         // xworkdir creates a new temporary directory to hold object files
@@ -396,7 +445,9 @@ namespace go
             {
                 fatalf("%v", err);
             }
+
             return name;
+
         }
 
         // fatalf prints an error message to standard error and exits.
@@ -409,7 +460,6 @@ namespace go
             dieOnce.Do(() =>
             {
                 close(dying);
-
             }); 
 
             // Wait for background goroutines to finish,
@@ -418,6 +468,7 @@ namespace go
             bghelpers.Wait();
 
             xexit(2L);
+
         }
 
         private static slice<Action> atexits = default;
@@ -431,6 +482,7 @@ namespace go
             }
 
             os.Exit(n);
+
         }
 
         // xatexit schedules the exit-handler f to be run when the program exits.
@@ -464,33 +516,27 @@ namespace go
             {
                 return f1 == f2;
             }
+
             return os.SameFile(fi1, fi2);
+
         }
 
         private static @string xgetgoarm()
         {
-            if (goos == "nacl")
+            if (goos == "android")
             { 
-                // NaCl guarantees VFPv3 and is always cross-compiled.
-                return "7";
-            }
-            if (goos == "darwin")
-            { 
-                // Assume all darwin/arm devices are have VFPv3. This
-                // port is also mostly cross-compiled, so it makes little
+                // Assume all android devices have VFPv3.
+                // These ports are also mostly cross-compiled, so it makes little
                 // sense to auto-detect the setting.
                 return "7";
+
             }
+
             if (gohostarch != "arm" || goos != gohostos)
             { 
                 // Conservative default for cross-compilation.
                 return "5";
-            }
-            if (goos == "freebsd" || goos == "openbsd")
-            { 
-                // FreeBSD has broken VFP support.
-                // OpenBSD currently only supports softfloat.
-                return "5";
+
             } 
 
             // Try to exec ourselves in a mode to detect VFP support.
@@ -504,11 +550,14 @@ namespace go
             {
                 return "7";
             }
+
             if (v1ok)
             {
                 return "6";
             }
+
             return "5";
+
         }
 
         private static long min(long a, long b)
@@ -517,7 +566,9 @@ namespace go
             {
                 return a;
             }
+
             return b;
+
         }
 
         // elfIsLittleEndian detects if the ELF file is little endian.
@@ -530,6 +581,7 @@ namespace go
             {
                 fatalf("failed to open file to determine endianness: %v", err);
             }
+
             defer(file.Close());
             array<byte> hdr = new array<byte>(16L);
             {
@@ -556,6 +608,7 @@ namespace go
                     break;
             }
             panic("unreachable");
+
         });
 
         // count is a flag.Value that is like a flag.Bool and a flag.Int.
@@ -565,46 +618,55 @@ namespace go
         {
         }
 
-        private static @string String(this ref count c)
+        private static @string String(this ptr<count> _addr_c)
         {
-            return fmt.Sprint(int(c.Value));
+            ref count c = ref _addr_c.val;
+
+            return fmt.Sprint(int(c.val));
         }
 
-        private static error Set(this ref count c, @string s)
+        private static error Set(this ptr<count> _addr_c, @string s)
         {
+            ref count c = ref _addr_c.val;
+
             switch (s)
             {
                 case "true": 
-                    c.Value++;
+                    c.val++;
                     break;
                 case "false": 
-                    c.Value = 0L;
+                    c.val = 0L;
                     break;
                 default: 
                     var (n, err) = strconv.Atoi(s);
                     if (err != null)
                     {
-                        return error.As(fmt.Errorf("invalid count %q", s));
+                        return error.As(fmt.Errorf("invalid count %q", s))!;
                     }
-                    c.Value = count(n);
+
+                    c.val = count(n);
                     break;
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static bool IsBoolFlag(this ref count c)
+        private static bool IsBoolFlag(this ptr<count> _addr_c)
         {
+            ref count c = ref _addr_c.val;
+
             return true;
         }
 
         private static void xflagparse(long maxargs)
         {
-            flag.Var((count.Value)(ref vflag), "v", "verbosity");
+            flag.Var((count.val)(_addr_vflag), "v", "verbosity");
             flag.Parse();
             if (maxargs >= 0L && flag.NArg() > maxargs)
             {
                 flag.Usage();
             }
+
         }
     }
 }

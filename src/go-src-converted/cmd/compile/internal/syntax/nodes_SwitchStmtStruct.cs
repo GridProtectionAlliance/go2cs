@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:04 UTC
+//     Generated on 2020 October 08 04:28:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using src = go.cmd.@internal.src_package;
+
 using go;
 
 namespace go {
@@ -42,7 +41,7 @@ namespace @internal
                 this.m_stmtRef = new ptr<stmt>(new stmt(nil));
             }
 
-            public SwitchStmt(SimpleStmt Init = default, Expr Tag = default, slice<ref CaseClause> Body = default, src.Pos Rbrace = default, stmt stmt = default)
+            public SwitchStmt(SimpleStmt Init = default, Expr Tag = default, slice<ptr<CaseClause>> Body = default, Pos Rbrace = default, stmt stmt = default)
             {
                 this.Init = Init;
                 this.Tag = Tag;

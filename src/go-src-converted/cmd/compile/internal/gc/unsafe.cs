@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:29:52 UTC
+// package gc -- go2cs converted at 2020 October 08 04:31:40 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\unsafe.go
 
@@ -16,11 +16,13 @@ namespace @internal
     public static partial class gc_package
     {
         // evalunsafe evaluates a package unsafe operation and returns the result.
-        private static long evalunsafe(ref Node n)
+        private static long evalunsafe(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
 
             if (n.Op == OALIGNOF || n.Op == OSIZEOF) 
-                n.Left = typecheck(n.Left, Erv);
+                n.Left = typecheck(n.Left, ctxExpr);
                 n.Left = defaultlit(n.Left, null);
                 var tr = n.Left.Type;
                 if (tr == null)
@@ -40,10 +42,10 @@ namespace @internal
                     yyerror("invalid expression %v", n);
                     return 0L;
                 }
-                n.Left.Left = typecheck(n.Left.Left, Erv);
+                n.Left.Left = typecheck(n.Left.Left, ctxExpr);
                 var @base = n.Left.Left;
 
-                n.Left = typecheck(n.Left, Erv);
+                n.Left = typecheck(n.Left, ctxExpr);
                 if (n.Left.Type == null)
                 {
                     return 0L;
@@ -88,11 +90,13 @@ namespace @internal
                             Fatalf("impossible %#v node after dot insertion", r.Op);
 
                         __switch_break0:;
+
                     }
                 }
                 return v;
                         Fatalf("unexpected op %v", n.Op);
             return 0L;
+
         }
     }
 }}}}

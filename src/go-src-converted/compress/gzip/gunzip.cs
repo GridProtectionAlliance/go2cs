@@ -4,7 +4,7 @@
 
 // Package gzip implements reading and writing of gzip format compressed files,
 // as specified in RFC 1952.
-// package gzip -- go2cs converted at 2020 August 29 08:23:06 UTC
+// package gzip -- go2cs converted at 2020 October 08 03:30:45 UTC
 // import "compress/gzip" ==> using gzip = go.compress.gzip_package
 // Original source: C:\Go\src\compress\gzip\gunzip.go
 using bufio = go.bufio_package;
@@ -21,14 +21,15 @@ namespace compress
 {
     public static partial class gzip_package
     {
-        private static readonly ulong gzipID1 = 0x1fUL;
-        private static readonly ulong gzipID2 = 0x8bUL;
-        private static readonly long gzipDeflate = 8L;
-        private static readonly long flagText = 1L << (int)(0L);
-        private static readonly long flagHdrCrc = 1L << (int)(1L);
-        private static readonly long flagExtra = 1L << (int)(2L);
-        private static readonly long flagName = 1L << (int)(3L);
-        private static readonly long flagComment = 1L << (int)(4L);
+        private static readonly ulong gzipID1 = (ulong)0x1fUL;
+        private static readonly ulong gzipID2 = (ulong)0x8bUL;
+        private static readonly long gzipDeflate = (long)8L;
+        private static readonly long flagText = (long)1L << (int)(0L);
+        private static readonly long flagHdrCrc = (long)1L << (int)(1L);
+        private static readonly long flagExtra = (long)1L << (int)(2L);
+        private static readonly long flagName = (long)1L << (int)(3L);
+        private static readonly long flagComment = (long)1L << (int)(4L);
+
 
  
         // ErrChecksum is returned when reading GZIP data that has an invalid checksum.
@@ -41,9 +42,11 @@ namespace compress
         {
             if (err == io.EOF)
             {
-                return error.As(io.ErrUnexpectedEOF);
+                return error.As(io.ErrUnexpectedEOF)!;
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
 
         // The gzip file stores a header giving metadata about the compressed file.
@@ -93,27 +96,34 @@ namespace compress
         // It is the caller's responsibility to call Close on the Reader when done.
         //
         // The Reader.Header fields will be valid in the Reader returned.
-        public static (ref Reader, error) NewReader(io.Reader r)
+        public static (ptr<Reader>, error) NewReader(io.Reader r)
         {
+            ptr<Reader> _p0 = default!;
+            error _p0 = default!;
+
             ptr<Reader> z = @new<Reader>();
             {
                 var err = z.Reset(r);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
-            return (z, null);
+
+            return (_addr_z!, error.As(null!)!);
+
         }
 
         // Reset discards the Reader z's state and makes it equivalent to the
         // result of its original state from NewReader, but reading from r instead.
         // This permits reusing a Reader rather than allocating a new one.
-        private static error Reset(this ref Reader z, io.Reader r)
+        private static error Reset(this ptr<Reader> _addr_z, io.Reader r)
         {
-            z.Value = new Reader(decompressor:z.decompressor,multistream:true,);
+            ref Reader z = ref _addr_z.val;
+
+            z.val = new Reader(decompressor:z.decompressor,multistream:true,);
             {
                 flate.Reader (rr, ok) = r._<flate.Reader>();
 
@@ -127,8 +137,10 @@ namespace compress
                 }
 
             }
+
             z.Header, z.err = z.readHeader();
-            return error.As(z.err);
+            return error.As(z.err)!;
+
         }
 
         // Multistream controls whether the reader supports multistream files.
@@ -143,12 +155,14 @@ namespace compress
         // can be useful when reading file formats that distinguish individual gzip
         // data streams or mix gzip data streams with other data streams.
         // In this mode, when the Reader reaches the end of the data stream,
-        // Read returns io.EOF. If the underlying reader implements io.ByteReader,
-        // it will be left positioned just after the gzip stream.
+        // Read returns io.EOF. The underlying reader must implement io.ByteReader
+        // in order to be left positioned just after the gzip stream.
         // To start the next stream, call z.Reset(r) followed by z.Multistream(false).
         // If there is no next stream, z.Reset(r) will return io.EOF.
-        private static void Multistream(this ref Reader z, bool ok)
+        private static void Multistream(this ptr<Reader> _addr_z, bool ok)
         {
+            ref Reader z = ref _addr_z.val;
+
             z.multistream = ok;
         }
 
@@ -156,25 +170,32 @@ namespace compress
         // It treats the bytes read as being encoded as ISO 8859-1 (Latin-1) and
         // will output a string encoded using UTF-8.
         // This method always updates z.digest with the data read.
-        private static (@string, error) readString(this ref Reader z)
+        private static (@string, error) readString(this ptr<Reader> _addr_z)
         {
-            error err = default;
+            @string _p0 = default;
+            error _p0 = default!;
+            ref Reader z = ref _addr_z.val;
+
+            error err = default!;
             var needConv = false;
             for (long i = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
             {
                 if (i >= len(z.buf))
                 {
-                    return ("", ErrHeader);
+                    return ("", error.As(ErrHeader)!);
                 }
+
                 z.buf[i], err = z.r.ReadByte();
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 }
+
                 if (z.buf[i] > 0x7fUL)
                 {
                     needConv = true;
                 }
+
                 if (z.buf[i] == 0L)
                 { 
                     // Digest covers the NUL terminator.
@@ -188,18 +209,27 @@ namespace compress
                         {
                             s = append(s, rune(v));
                         }
-                        return (string(s), null);
+                        return (string(s), error.As(null!)!);
+
                     }
-                    return (string(z.buf[..i]), null);
+
+                    return (string(z.buf[..i]), error.As(null!)!);
+
                 }
+
             }
+
 
         }
 
         // readHeader reads the GZIP header according to section 2.3.1.
         // This method does not set z.err.
-        private static (Header, error) readHeader(this ref Reader z)
+        private static (Header, error) readHeader(this ptr<Reader> _addr_z)
         {
+            Header hdr = default;
+            error err = default!;
+            ref Reader z = ref _addr_z.val;
+
             _, err = io.ReadFull(z.r, z.buf[..10L]);
 
             if (err != null)
@@ -211,12 +241,15 @@ namespace compress
                 // "series" is defined as "one or more" or "zero or more". To err on the
                 // side of caution, Go interprets this to mean "zero or more".
                 // Thus, it is okay to return io.EOF here.
-                return (hdr, err);
+                return (hdr, error.As(err)!);
+
             }
+
             if (z.buf[0L] != gzipID1 || z.buf[1L] != gzipID2 || z.buf[2L] != gzipDeflate)
             {
-                return (hdr, ErrHeader);
+                return (hdr, error.As(ErrHeader)!);
             }
+
             var flg = z.buf[3L];
             {
                 var t = int64(le.Uint32(z.buf[4L..8L]));
@@ -226,6 +259,7 @@ namespace compress
                     // Section 2.3.1, the zero value for MTIME means that the
                     // modified time is not set.
                     hdr.ModTime = time.Unix(t, 0L);
+
                 } 
                 // z.buf[8] is XFL and is currently ignored.
 
@@ -240,19 +274,23 @@ namespace compress
 
                 if (err != null)
                 {
-                    return (hdr, noEOF(err));
+                    return (hdr, error.As(noEOF(err))!);
                 }
+
                 z.digest = crc32.Update(z.digest, crc32.IEEETable, z.buf[..2L]);
                 var data = make_slice<byte>(le.Uint16(z.buf[..2L]));
                 _, err = io.ReadFull(z.r, data);
 
                 if (err != null)
                 {
-                    return (hdr, noEOF(err));
+                    return (hdr, error.As(noEOF(err))!);
                 }
+
                 z.digest = crc32.Update(z.digest, crc32.IEEETable, data);
                 hdr.Extra = data;
+
             }
+
             @string s = default;
             if (flg & flagName != 0L)
             {
@@ -260,34 +298,43 @@ namespace compress
 
                 if (err != null)
                 {
-                    return (hdr, err);
+                    return (hdr, error.As(err)!);
                 }
+
                 hdr.Name = s;
+
             }
+
             if (flg & flagComment != 0L)
             {
                 s, err = z.readString();
 
                 if (err != null)
                 {
-                    return (hdr, err);
+                    return (hdr, error.As(err)!);
                 }
+
                 hdr.Comment = s;
+
             }
+
             if (flg & flagHdrCrc != 0L)
             {
                 _, err = io.ReadFull(z.r, z.buf[..2L]);
 
                 if (err != null)
                 {
-                    return (hdr, noEOF(err));
+                    return (hdr, error.As(noEOF(err))!);
                 }
+
                 var digest = le.Uint16(z.buf[..2L]);
                 if (digest != uint16(z.digest))
                 {
-                    return (hdr, ErrHeader);
+                    return (hdr, error.As(ErrHeader)!);
                 }
+
             }
+
             z.digest = 0L;
             if (z.decompressor == null)
             {
@@ -297,23 +344,31 @@ namespace compress
             {
                 z.decompressor._<flate.Resetter>().Reset(z.r, null);
             }
-            return (hdr, null);
+
+            return (hdr, error.As(null!)!);
+
         }
 
         // Read implements io.Reader, reading uncompressed bytes from its underlying Reader.
-        private static (long, error) Read(this ref Reader z, slice<byte> p)
+        private static (long, error) Read(this ptr<Reader> _addr_z, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref Reader z = ref _addr_z.val;
+
             if (z.err != null)
             {
-                return (0L, z.err);
+                return (0L, error.As(z.err)!);
             }
+
             n, z.err = z.decompressor.Read(p);
             z.digest = crc32.Update(z.digest, crc32.IEEETable, p[..n]);
             z.size += uint32(n);
             if (z.err != io.EOF)
             { 
                 // In the normal case we return here.
-                return (n, z.err);
+                return (n, error.As(z.err)!);
+
             } 
 
             // Finished file; check checksum and size.
@@ -323,48 +378,55 @@ namespace compress
                 if (err != null)
                 {
                     z.err = noEOF(err);
-                    return (n, z.err);
+                    return (n, error.As(z.err)!);
                 }
 
             }
+
             var digest = le.Uint32(z.buf[..4L]);
             var size = le.Uint32(z.buf[4L..8L]);
             if (digest != z.digest || size != z.size)
             {
                 z.err = ErrChecksum;
-                return (n, z.err);
+                return (n, error.As(z.err)!);
             }
+
             z.digest = 0L;
             z.size = 0L; 
 
             // File is ok; check if there is another.
             if (!z.multistream)
             {
-                return (n, io.EOF);
+                return (n, error.As(io.EOF)!);
             }
+
             z.err = null; // Remove io.EOF
 
             _, z.err = z.readHeader();
 
             if (z.err != null)
             {
-                return (n, z.err);
+                return (n, error.As(z.err)!);
             } 
 
             // Read from next file, if necessary.
             if (n > 0L)
             {
-                return (n, null);
+                return (n, error.As(null!)!);
             }
+
             return z.Read(p);
+
         }
 
         // Close closes the Reader. It does not close the underlying io.Reader.
         // In order for the GZIP checksum to be verified, the reader must be
         // fully consumed until the io.EOF.
-        private static error Close(this ref Reader z)
+        private static error Close(this ptr<Reader> _addr_z)
         {
-            return error.As(z.decompressor.Close());
+            ref Reader z = ref _addr_z.val;
+
+            return error.As(z.decompressor.Close())!;
         }
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:02:13 UTC
+// package main -- go2cs converted at 2020 October 08 04:37:05 UTC
 // Original source: C:\Go\src\cmd\link\main.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -13,7 +13,9 @@ using ld = go.cmd.link.@internal.ld_package;
 using mips = go.cmd.link.@internal.mips_package;
 using mips64 = go.cmd.link.@internal.mips64_package;
 using ppc64 = go.cmd.link.@internal.ppc64_package;
+using riscv64 = go.cmd.link.@internal.riscv64_package;
 using s390x = go.cmd.link.@internal.s390x_package;
+using wasm = go.cmd.link.@internal.wasm_package;
 using x86 = go.cmd.link.@internal.x86_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -35,10 +37,10 @@ namespace go
         // Then control flow passes to ld.Main, which parses flags, makes
         // some configuration decisions, and then gives the architecture
         // packages a second chance to modify the linker's configuration
-        // via the ld.Thearch.Archinit function.
+        // via the ld.Arch.Archinit function.
         private static void Main()
         {
-            ref sys.Arch arch = default;
+            ptr<sys.Arch> arch;
             ld.Arch theArch = default;
 
             switch (objabi.GOARCH)
@@ -47,8 +49,6 @@ namespace go
                     arch, theArch = x86.Init();
                     break;
                 case "amd64": 
-
-                case "amd64p32": 
                     arch, theArch = amd64.Init();
                     break;
                 case "arm": 
@@ -72,8 +72,14 @@ namespace go
                 case "ppc64le": 
                     arch, theArch = ppc64.Init();
                     break;
+                case "riscv64": 
+                    arch, theArch = riscv64.Init();
+                    break;
                 case "s390x": 
                     arch, theArch = s390x.Init();
+                    break;
+                case "wasm": 
+                    arch, theArch = wasm.Init();
                     break;
                 default: 
                     fmt.Fprintf(os.Stderr, "link: unknown architecture %q\n", objabi.GOARCH);
@@ -81,6 +87,7 @@ namespace go
                     break;
             }
             ld.Main(arch, theArch);
+
         }
     }
 }

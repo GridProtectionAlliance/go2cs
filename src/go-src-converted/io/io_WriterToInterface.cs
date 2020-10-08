@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:53 UTC
+//     Generated on 2020 October 08 01:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) WriteToByRef(ref T value, Writer w);
+            private delegate (long, error) WriteToByPtr(ptr<T> value, Writer w);
             private delegate (long, error) WriteToByVal(T value, Writer w);
 
-            private static readonly WriteToByRef s_WriteToByRef;
+            private static readonly WriteToByPtr s_WriteToByPtr;
             private static readonly WriteToByVal s_WriteToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,11 +74,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteToByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteToByPtr is null || !m_target_is_ptr)
                     return s_WriteToByVal!(target, w);
 
-                return s_WriteToByRef(ref target, w);
+                return s_WriteToByPtr(m_target_ptr, w);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -87,23 +88,20 @@ namespace go
             static WriterTo()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteTo");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteTo");
 
                 if (!(extensionMethod is null))
-                    s_WriteToByRef = extensionMethod.CreateStaticDelegate(typeof(WriteToByRef)) as WriteToByRef;
+                    s_WriteToByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteToByPtr)) as WriteToByPtr;
 
-                if (s_WriteToByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteTo");
+                extensionMethod = targetType.GetExtensionMethod("WriteTo");
 
-                    if (!(extensionMethod is null))
-                        s_WriteToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteToByVal)) as WriteToByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteToByVal)) as WriteToByVal;
 
-                if (s_WriteToByRef is null && s_WriteToByVal is null)
+                if (s_WriteToByPtr is null && s_WriteToByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement WriterTo.WriteTo method", new Exception("WriteTo"));
             }
 

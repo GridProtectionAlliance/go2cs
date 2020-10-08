@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:25:56 UTC
+// package gc -- go2cs converted at 2020 October 08 04:28:03 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\bv.go
-
+using bits = go.math.bits_package;
 using static go.builtin;
 
 namespace go {
@@ -15,9 +15,10 @@ namespace @internal
 {
     public static partial class gc_package
     {
-        private static readonly long wordBits = 32L;
-        private static readonly var wordMask = wordBits - 1L;
-        private static readonly long wordShift = 5L;
+        private static readonly long wordBits = (long)32L;
+        private static readonly var wordMask = (var)wordBits - 1L;
+        private static readonly long wordShift = (long)5L;
+
 
         // A bvec is a bit vector.
         private partial struct bvec
@@ -47,11 +48,15 @@ namespace @internal
             {
                 Fatalf("bvbulkalloc too big: nbit=%d count=%d nword=%d size=%d", nbit, count, nword, size);
             }
+
             return new bulkBvec(words:make([]uint32,size),nbit:nbit,nword:nword,);
+
         }
 
-        private static bvec next(this ref bulkBvec b)
+        private static bvec next(this ptr<bulkBvec> _addr_b)
         {
+            ref bulkBvec b = ref _addr_b.val;
+
             bvec @out = new bvec(b.nbit,b.words[:b.nword]);
             b.words = b.words[b.nword..];
             return out;
@@ -63,14 +68,17 @@ namespace @internal
             {
                 Fatalf("bvequal: lengths %d and %d are not equal", bv1.n, bv2.n);
             }
+
             foreach (var (i, x) in bv1.b)
             {
                 if (x != bv2.b[i])
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         private static void Copy(this bvec dst, bvec src)
@@ -84,8 +92,10 @@ namespace @internal
             {
                 Fatalf("bvget: index %d is out of bounds with length %d\n", i, bv.n);
             }
+
             var mask = uint32(1L << (int)(uint(i % wordBits)));
             return bv.b[i >> (int)(wordShift)] & mask != 0L;
+
         }
 
         private static void Set(this bvec bv, int i)
@@ -94,8 +104,10 @@ namespace @internal
             {
                 Fatalf("bvset: index %d is out of bounds with length %d\n", i, bv.n);
             }
+
             var mask = uint32(1L << (int)(uint(i % wordBits)));
             bv.b[i / wordBits] |= mask;
+
         }
 
         private static void Unset(this bvec bv, int i)
@@ -104,8 +116,10 @@ namespace @internal
             {
                 Fatalf("bvunset: index %d is out of bounds with length %d\n", i, bv.n);
             }
+
             var mask = uint32(1L << (int)(uint(i % wordBits)));
             bv.b[i / wordBits] &= mask;
+
         }
 
         // bvnext returns the smallest index >= i for which bvget(bv, i) == 1.
@@ -127,7 +141,9 @@ namespace @internal
                     i += wordBits;
                 }
 
+
             }
+
             if (i >= bv.n)
             {
                 return -1L;
@@ -135,44 +151,31 @@ namespace @internal
 
             // Find 1 bit.
             var w = bv.b[i >> (int)(wordShift)] >> (int)(uint(i & wordMask));
-
-            while (w & 1L == 0L)
-            {
-                w >>= 1L;
-                i++;
-            }
-
+            i += int32(bits.TrailingZeros32(w));
 
             return i;
+
         }
 
         private static bool IsEmpty(this bvec bv)
         {
+            foreach (var (_, x) in bv.b)
             {
-                var i = int32(0L);
-
-                while (i < bv.n)
+                if (x != 0L)
                 {
-                    if (bv.b[i >> (int)(wordShift)] != 0L)
-                    {
-                        return false;
-                    i += wordBits;
-                    }
+                    return false;
                 }
 
             }
             return true;
+
         }
 
         private static void Not(this bvec bv)
         {
-            var i = int32(0L);
-            var w = int32(0L);
-            while (i < bv.n)
+            foreach (var (i, x) in bv.b)
             {
-                bv.b[w] = ~bv.b[w];
-                i = i + wordBits;
-            w = w + 1L;
+                bv.b[i] = ~x;
             }
 
         }
@@ -180,28 +183,55 @@ namespace @internal
         // union
         private static void Or(this bvec dst, bvec src1, bvec src2)
         {
+            if (len(src1.b) == 0L)
+            {
+                return ;
+            }
+
+            _ = dst.b[len(src1.b) - 1L];
+            _ = src2.b[len(src1.b) - 1L]; // hoist bounds checks out of the loop
+
             foreach (var (i, x) in src1.b)
             {
                 dst.b[i] = x | src2.b[i];
             }
+
         }
 
         // intersection
         private static void And(this bvec dst, bvec src1, bvec src2)
         {
+            if (len(src1.b) == 0L)
+            {
+                return ;
+            }
+
+            _ = dst.b[len(src1.b) - 1L];
+            _ = src2.b[len(src1.b) - 1L]; // hoist bounds checks out of the loop
+
             foreach (var (i, x) in src1.b)
             {
                 dst.b[i] = x & src2.b[i];
             }
+
         }
 
         // difference
         private static void AndNot(this bvec dst, bvec src1, bvec src2)
         {
+            if (len(src1.b) == 0L)
+            {
+                return ;
+            }
+
+            _ = dst.b[len(src1.b) - 1L];
+            _ = src2.b[len(src1.b) - 1L]; // hoist bounds checks out of the loop
+
             foreach (var (i, x) in src1.b)
             {
                 dst.b[i] = x & ~src2.b[i];
             }
+
         }
 
         private static @string String(this bvec bv)
@@ -215,10 +245,13 @@ namespace @internal
                 {
                     ch = '1';
                 }
+
                 s[2L + i] = ch;
+
             }
 
             return string(s);
+
         }
 
         private static void Clear(this bvec bv)
@@ -227,6 +260,150 @@ namespace @internal
             {
                 bv.b[i] = 0L;
             }
+
+        }
+
+        // FNV-1 hash function constants.
+        public static readonly long H0 = (long)2166136261L;
+        public static readonly long Hp = (long)16777619L;
+
+
+        private static uint hashbitmap(uint h, bvec bv)
+        {
+            var n = int((bv.n + 31L) / 32L);
+            for (long i = 0L; i < n; i++)
+            {
+                var w = bv.b[i];
+                h = (h * Hp) ^ (w & 0xffUL);
+                h = (h * Hp) ^ ((w >> (int)(8L)) & 0xffUL);
+                h = (h * Hp) ^ ((w >> (int)(16L)) & 0xffUL);
+                h = (h * Hp) ^ ((w >> (int)(24L)) & 0xffUL);
+            }
+
+
+            return h;
+
+        }
+
+        // bvecSet is a set of bvecs, in initial insertion order.
+        private partial struct bvecSet
+        {
+            public slice<long> index; // hash -> uniq index. -1 indicates empty slot.
+            public slice<bvec> uniq; // unique bvecs, in insertion order
+        }
+
+        private static void grow(this ptr<bvecSet> _addr_m)
+        {
+            ref bvecSet m = ref _addr_m.val;
+ 
+            // Allocate new index.
+            var n = len(m.index) * 2L;
+            if (n == 0L)
+            {
+                n = 32L;
+            }
+
+            var newIndex = make_slice<long>(n);
+            {
+                var i__prev1 = i;
+
+                foreach (var (__i) in newIndex)
+                {
+                    i = __i;
+                    newIndex[i] = -1L;
+                } 
+
+                // Rehash into newIndex.
+
+                i = i__prev1;
+            }
+
+            {
+                var i__prev1 = i;
+
+                foreach (var (__i, __bv) in m.uniq)
+                {
+                    i = __i;
+                    bv = __bv;
+                    var h = hashbitmap(H0, bv) % uint32(len(newIndex));
+                    while (true)
+                    {
+                        var j = newIndex[h];
+                        if (j < 0L)
+                        {
+                            newIndex[h] = i;
+                            break;
+                        }
+
+                        h++;
+                        if (h == uint32(len(newIndex)))
+                        {
+                            h = 0L;
+                        }
+
+                    }
+
+
+                }
+
+                i = i__prev1;
+            }
+
+            m.index = newIndex;
+
+        }
+
+        // add adds bv to the set and returns its index in m.extractUniqe.
+        // The caller must not modify bv after this.
+        private static long add(this ptr<bvecSet> _addr_m, bvec bv)
+        {
+            ref bvecSet m = ref _addr_m.val;
+
+            if (len(m.uniq) * 4L >= len(m.index))
+            {
+                m.grow();
+            }
+
+            var index = m.index;
+            var h = hashbitmap(H0, bv) % uint32(len(index));
+            while (true)
+            {
+                var j = index[h];
+                if (j < 0L)
+                { 
+                    // New bvec.
+                    index[h] = len(m.uniq);
+                    m.uniq = append(m.uniq, bv);
+                    return len(m.uniq) - 1L;
+
+                }
+
+                var jlive = m.uniq[j];
+                if (bv.Eq(jlive))
+                { 
+                    // Existing bvec.
+                    return j;
+
+                }
+
+                h++;
+                if (h == uint32(len(index)))
+                {
+                    h = 0L;
+                }
+
+            }
+
+
+        }
+
+        // extractUniqe returns this slice of unique bit vectors in m, as
+        // indexed by the result of bvecSet.add.
+        private static slice<bvec> extractUniqe(this ptr<bvecSet> _addr_m)
+        {
+            ref bvecSet m = ref _addr_m.val;
+
+            return m.uniq;
         }
     }
 }}}}

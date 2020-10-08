@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:35 UTC
+//     Generated on 2020 October 08 03:49:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,6 @@ using static go.builtin;
 using bufio = go.bufio_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
-using fmt = go.fmt_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;

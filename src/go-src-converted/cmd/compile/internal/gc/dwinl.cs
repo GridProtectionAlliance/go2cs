@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:26:42 UTC
+// package gc -- go2cs converted at 2020 October 08 04:28:42 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\dwinl.go
 using dwarf = go.cmd.@internal.dwarf_package;
 using obj = go.cmd.@internal.obj_package;
 using src = go.cmd.@internal.src_package;
-using sort = go.sort_package;
 using strings = go.strings_package;
 using static go.builtin;
 
@@ -31,9 +30,11 @@ namespace @internal
         // This is the main entry point for collection of raw material to
         // drive generation of DWARF "inlined subroutine" DIEs. See proposal
         // 22080 for more details and background info.
-        private static dwarf.InlCalls assembleInlines(ref obj.LSym fnsym, ref Node fn, slice<ref dwarf.Var> dwVars)
+        private static dwarf.InlCalls assembleInlines(ptr<obj.LSym> _addr_fnsym, slice<ptr<dwarf.Var>> dwVars)
         {
-            dwarf.InlCalls inlcalls = default;
+            ref obj.LSym fnsym = ref _addr_fnsym.val;
+
+            ref dwarf.InlCalls inlcalls = ref heap(out ptr<dwarf.InlCalls> _addr_inlcalls);
 
             if (Debug_gendwarfinl != 0L)
             {
@@ -57,12 +58,15 @@ namespace @internal
                         continue;
                     p = p.Link;
                     }
+
                     var ii = posInlIndex(p.Pos);
                     if (ii >= 0L)
                     {
-                        insertInlCall(ref inlcalls, ii, imap);
+                        insertInlCall(_addr_inlcalls, ii, imap);
                     }
+
                     prevpos = p.Pos;
+
                 } 
 
                 // This is used to partition DWARF vars by inline index. Vars not
@@ -74,7 +78,7 @@ namespace @internal
 
             // This is used to partition DWARF vars by inline index. Vars not
             // produced by the inliner will wind up in the vmap[0] entry.
-            var vmap = make_map<int, slice<ref dwarf.Var>>(); 
+            var vmap = make_map<int, slice<ptr<dwarf.Var>>>(); 
 
             // Now walk the dwarf vars and partition them based on whether they
             // were produced by the inliner (dwv.InlIndex > 0) or were original
@@ -98,9 +102,12 @@ namespace @internal
                     // We can occasionally encounter a var produced by the
                     // inliner for which there is no remaining prog; add a new
                     // entry to the call list in this scenario.
-                    idx = insertInlCall(ref inlcalls, ii, imap);
+                    idx = insertInlCall(_addr_inlcalls, ii, imap);
+
                 }
+
                 inlcalls.Calls[idx].InlVars = append(inlcalls.Calls[idx].InlVars, dwv);
+
             } 
 
             // Post process the map above to assign child indices to vars.
@@ -129,30 +136,33 @@ namespace @internal
                 {
                     ii = __ii;
                     sl = __sl;
-                    sort.Sort(byClassThenName(sl));
                     map<varPos, long> m = default;
                     if (ii == 0L)
                     {
                         if (!fnsym.WasInlined())
                         {
                             {
-                                long j__prev2 = j;
+                                var v__prev2 = v;
 
-                                for (long j = 0L; j < len(sl); j++)
+                                foreach (var (__j, __v) in sl)
                                 {
-                                    sl[j].ChildIndex = int32(j);
+                                    j = __j;
+                                    v = __v;
+                                    v.ChildIndex = int32(j);
                                 }
 
-
-                                j = j__prev2;
+                                v = v__prev2;
                             }
+
                             continue;
+
                         }
                     else
-                        m = makePreinlineDclMap(fnsym);
+                        m = makePreinlineDclMap(_addr_fnsym);
+
                     }                    {
                         var ifnlsym = Ctxt.InlTree.InlinedFunction(int(ii - 1L));
-                        m = makePreinlineDclMap(ifnlsym);
+                        m = makePreinlineDclMap(_addr_ifnlsym);
                     } 
 
                     // Here we assign child indices to variables based on
@@ -166,13 +176,14 @@ namespace @internal
                     // caller.
                     var synthCount = len(m);
                     {
-                        long j__prev2 = j;
+                        var v__prev2 = v;
 
-                        for (j = 0L; j < len(sl); j++)
+                        foreach (var (_, __v) in sl)
                         {
-                            var canonName = unversion(sl[j].Name);
-                            varPos vp = new varPos(DeclName:canonName,DeclFile:sl[j].DeclFile,DeclLine:sl[j].DeclLine,DeclCol:sl[j].DeclCol,);
-                            var synthesized = strings.HasPrefix(sl[j].Name, "~r") || canonName == "_";
+                            v = __v;
+                            var canonName = unversion(v.Name);
+                            varPos vp = new varPos(DeclName:canonName,DeclFile:v.DeclFile,DeclLine:v.DeclLine,DeclCol:v.DeclCol,);
+                            var synthesized = strings.HasPrefix(v.Name, "~r") || canonName == "_" || strings.HasPrefix(v.Name, "~b");
                             {
                                 var idx__prev1 = idx;
 
@@ -180,9 +191,9 @@ namespace @internal
 
                                 if (found)
                                 {
-                                    sl[j].ChildIndex = int32(idx);
-                                    sl[j].IsInAbstract = !synthesized;
-                                    sl[j].Name = canonName;
+                                    v.ChildIndex = int32(idx);
+                                    v.IsInAbstract = !synthesized;
+                                    v.Name = canonName;
                                 }
                                 else
                                 { 
@@ -192,17 +203,18 @@ namespace @internal
                                     // and we're looking at a piece. We can also see
                                     // return temps (~r%d) that were created during
                                     // lowering, or unnamed params ("_").
-                                    sl[j].ChildIndex = int32(synthCount);
-                                    synthCount += 1L;
+                                    v.ChildIndex = int32(synthCount);
+                                    synthCount++;
+
                                 }
 
                                 idx = idx__prev1;
 
                             }
+
                         }
 
-
-                        j = j__prev2;
+                        v = v__prev2;
                     }
                 } 
 
@@ -212,9 +224,9 @@ namespace @internal
                 ii = ii__prev1;
             }
 
+            var start = int64(-1L);
             long curii = -1L;
-            ref dwarf.Range crange = default;
-            ref obj.Prog prevp = default;
+            ptr<obj.Prog> prevp;
             {
                 var p__prev1 = p;
 
@@ -228,28 +240,29 @@ namespace @internal
                     prevp = p;
                 p = p.Link;
                     }
+
                     ii = posInlIndex(p.Pos);
                     if (ii == curii)
                     {
                         continue;
-                    }
-                    else
-                    { 
-                        // Close out the current range
-                        endRange(crange, prevp); 
+                    } 
+                    // Close out the current range
+                    if (start != -1L)
+                    {
+                        addRange(inlcalls.Calls, start, p.Pc, curii, imap);
+                    } 
+                    // Begin new range
+                    start = p.Pc;
+                    curii = ii;
 
-                        // Begin new range
-                        crange = beginRange(inlcalls.Calls, p, ii, imap);
-                        curii = ii;
-                    }
                 }
 
 
                 p = p__prev1;
             }
-            if (prevp != null)
+            if (start != -1L)
             {
-                endRange(crange, prevp);
+                addRange(inlcalls.Calls, start, fnsym.Size, curii, imap);
             } 
 
             // Debugging
@@ -258,26 +271,33 @@ namespace @internal
                 dumpInlCalls(inlcalls);
                 dumpInlVars(dwVars);
             }
+
             return inlcalls;
+
         }
 
         // Secondary hook for DWARF inlined subroutine generation. This is called
         // late in the compilation when it is determined that we need an
         // abstract function DIE for an inlined routine imported from a
         // previously compiled package.
-        private static void genAbstractFunc(ref obj.LSym fn)
+        private static void genAbstractFunc(ptr<obj.LSym> _addr_fn)
         {
+            ref obj.LSym fn = ref _addr_fn.val;
+
             var ifn = Ctxt.DwFixups.GetPrecursorFunc(fn);
             if (ifn == null)
             {
                 Ctxt.Diag("failed to locate precursor fn for %v", fn);
-                return;
+                return ;
             }
+
             if (Debug_gendwarfinl != 0L)
             {
                 Ctxt.Logf("DwarfAbstractFunc(%v)\n", fn.Name);
             }
+
             Ctxt.DwarfAbstractFunc(ifn, fn, myimportpath);
+
         }
 
         // Undo any versioning performed when a name was written
@@ -293,22 +313,27 @@ namespace @internal
                 }
 
             }
+
             return name;
+
         }
 
         // Given a function that was inlined as part of the compilation, dig
         // up the pre-inlining DCL list for the function and create a map that
         // supports lookup of pre-inline dcl index, based on variable
-        // position/name.
-        private static map<varPos, long> makePreinlineDclMap(ref obj.LSym fnsym)
+        // position/name. NB: the recipe for computing variable pos/file/line
+        // needs to be kept in sync with the similar code in gc.createSimpleVars
+        // and related functions.
+        private static map<varPos, long> makePreinlineDclMap(ptr<obj.LSym> _addr_fnsym)
         {
+            ref obj.LSym fnsym = ref _addr_fnsym.val;
+
             var dcl = preInliningDcls(fnsym);
             var m = make_map<varPos, long>();
-            for (long i = 0L; i < len(dcl); i++)
+            foreach (var (i, n) in dcl)
             {
-                var n = dcl[i];
                 var pos = Ctxt.InnermostPos(n.Pos);
-                varPos vp = new varPos(DeclName:unversion(n.Sym.Name),DeclFile:pos.Base().SymFilename(),DeclLine:pos.Line(),DeclCol:pos.Col(),);
+                varPos vp = new varPos(DeclName:unversion(n.Sym.Name),DeclFile:pos.RelFilename(),DeclLine:pos.RelLine(),DeclCol:pos.Col(),);
                 {
                     var (_, found) = m[vp];
 
@@ -318,14 +343,18 @@ namespace @internal
                     }
 
                 }
-                m[vp] = i;
-            }
 
+                m[vp] = i;
+
+            }
             return m;
+
         }
 
-        private static long insertInlCall(ref dwarf.InlCalls dwcalls, long inlIdx, map<long, long> imap)
+        private static long insertInlCall(ptr<dwarf.InlCalls> _addr_dwcalls, long inlIdx, map<long, long> imap)
         {
+            ref dwarf.InlCalls dwcalls = ref _addr_dwcalls.val;
+
             var (callIdx, found) = imap[inlIdx];
             if (found)
             {
@@ -339,12 +368,12 @@ namespace @internal
             var parInlIdx = Ctxt.InlTree.Parent(inlIdx);
             if (parInlIdx >= 0L)
             {
-                parCallIdx = insertInlCall(dwcalls, parInlIdx, imap);
+                parCallIdx = insertInlCall(_addr_dwcalls, parInlIdx, imap);
             } 
 
             // Create new entry for this inline
-            var inlinedFn = Ctxt.InlTree.InlinedFunction(int(inlIdx));
-            var callXPos = Ctxt.InlTree.CallPos(int(inlIdx));
+            var inlinedFn = Ctxt.InlTree.InlinedFunction(inlIdx);
+            var callXPos = Ctxt.InlTree.CallPos(inlIdx);
             var absFnSym = Ctxt.DwFixups.AbsFuncDwarfSym(inlinedFn);
             var pb = Ctxt.PosTable.Pos(callXPos).Base();
             var callFileSym = Ctxt.Lookup(pb.SymFilename());
@@ -357,8 +386,11 @@ namespace @internal
             { 
                 // Add this inline to parent's child list
                 dwcalls.Calls[parCallIdx].Children = append(dwcalls.Calls[parCallIdx].Children, callIdx);
+
             }
+
             return callIdx;
+
         }
 
         // Given a src.XPos, return its associated inlining index if it
@@ -381,93 +413,55 @@ namespace @internal
                     {
                         return ii;
                     }
+
                 }
 
             }
+
             return -1L;
+
         }
 
-        private static void endRange(ref dwarf.Range crange, ref obj.Prog p)
+        private static void addRange(slice<dwarf.InlCall> calls, long start, long end, long ii, map<long, long> imap) => func((_, panic, __) =>
         {
-            if (crange == null)
+            if (start == -1L)
             {
-                return;
+                panic("bad range start");
             }
-            crange.End = p.Pc;
-        }
 
-        private static ref dwarf.Range beginRange(slice<dwarf.InlCall> calls, ref obj.Prog p, long ii, map<long, long> imap)
-        {
+            if (end == -1L)
+            {
+                panic("bad range end");
+            }
+
             if (ii == -1L)
             {
-                return null;
+                return ;
             }
+
+            if (start == end)
+            {
+                return ;
+            } 
+            // Append range to correct inlined call
             var (callIdx, found) = imap[ii];
             if (!found)
             {
-                Fatalf("internal error: can't find inlIndex %d in imap for prog at %d\n", ii, p.Pc);
+                Fatalf("can't find inlIndex %d in imap for prog at %d\n", ii, start);
             }
-            var call = ref calls[callIdx]; 
 
-            // Set up range and append to correct inlined call
-            call.Ranges = append(call.Ranges, new dwarf.Range(Start:p.Pc,End:-1));
-            return ref call.Ranges[len(call.Ranges) - 1L];
-        }
+            var call = _addr_calls[callIdx];
+            call.Ranges = append(call.Ranges, new dwarf.Range(Start:start,End:end));
 
-        private static bool cmpDwarfVar(ref dwarf.Var a, ref dwarf.Var b)
-        { 
-            // named before artificial
-            long aart = 0L;
-            if (strings.HasPrefix(a.Name, "~r"))
-            {
-                aart = 1L;
-            }
-            long bart = 0L;
-            if (strings.HasPrefix(b.Name, "~r"))
-            {
-                bart = 1L;
-            }
-            if (aart != bart)
-            {
-                return aart < bart;
-            } 
-
-            // otherwise sort by name
-            return a.Name < b.Name;
-        }
-
-        // byClassThenName implements sort.Interface for []*dwarf.Var using cmpDwarfVar.
-        private partial struct byClassThenName // : slice<ref dwarf.Var>
-        {
-        }
-
-        private static long Len(this byClassThenName s)
-        {
-            return len(s);
-        }
-        private static bool Less(this byClassThenName s, long i, long j)
-        {
-            return cmpDwarfVar(s[i], s[j]);
-        }
-        private static void Swap(this byClassThenName s, long i, long j)
-        {
-            s[i] = s[j];
-            s[j] = s[i];
-
-        }
+        });
 
         private static void dumpInlCall(dwarf.InlCalls inlcalls, long idx, long ilevel)
         {
+            for (long i = 0L; i < ilevel; i++)
             {
-                long i = 0L;
-
-                while (i < ilevel)
-                {
-                    Ctxt.Logf("  ");
-                    i += 1L;
-                }
-
+                Ctxt.Logf("  ");
             }
+
             var ic = inlcalls.Calls[idx];
             var callee = Ctxt.InlTree.InlinedFunction(ic.InlIndex);
             Ctxt.Logf("  %d: II:%d (%s) V: (", idx, ic.InlIndex, callee.Name);
@@ -505,28 +499,22 @@ namespace @internal
 
                 k = k__prev1;
             }
-
         }
 
         private static void dumpInlCalls(dwarf.InlCalls inlcalls)
         {
-            var n = len(inlcalls.Calls);
+            foreach (var (k, c) in inlcalls.Calls)
             {
-                long k = 0L;
-
-                while (k < n)
+                if (c.Root)
                 {
-                    if (inlcalls.Calls[k].Root)
-                    {
-                        dumpInlCall(inlcalls, k, 0L);
-                    k += 1L;
-                    }
+                    dumpInlCall(inlcalls, k, 0L);
                 }
 
             }
+
         }
 
-        private static void dumpInlVars(slice<ref dwarf.Var> dwvars)
+        private static void dumpInlVars(slice<ptr<dwarf.Var>> dwvars)
         {
             foreach (var (i, dwv) in dwvars)
             {
@@ -535,13 +523,17 @@ namespace @internal
                 {
                     typ = "param";
                 }
+
                 long ia = 0L;
                 if (dwv.IsInAbstract)
                 {
                     ia = 1L;
                 }
+
                 Ctxt.Logf("V%d: %s CI:%d II:%d IA:%d %s\n", i, dwv.Name, dwv.ChildIndex, dwv.InlIndex - 1L, ia, typ);
+
             }
+
         }
     }
 }}}}

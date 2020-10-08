@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:11 UTC
+//     Generated on 2020 October 08 04:31:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,15 +13,17 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using html = go.html_package;
 using os = go.os_package;
 using sort = go.sort_package;
+using bufio = go.bufio_package;
+using bytes = go.bytes_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using x86 = go.cmd.@internal.obj.x86_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
@@ -49,7 +51,7 @@ namespace @internal
                 this.cutoff = default;
             }
 
-            public f2uCvtTab(ssa.Op ltf = default, ssa.Op cvt2U = default, ssa.Op subf = default, ssa.Op or = default, Func<ref state, ref types.Type, double, ref ssa.Value> floatValue = default, Func<ref state, ref types.Type, long, ref ssa.Value> intValue = default, ulong cutoff = default)
+            public f2uCvtTab(ssa.Op ltf = default, ssa.Op cvt2U = default, ssa.Op subf = default, ssa.Op or = default, Func<ptr<state>, ptr<types.Type>, double, ptr<ssa.Value>> floatValue = default, Func<ptr<state>, ptr<types.Type>, long, ptr<ssa.Value>> intValue = default, ulong cutoff = default)
             {
                 this.ltf = ltf;
                 this.cvt2U = cvt2U;

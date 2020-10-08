@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:12 UTC
+//     Generated on 2020 October 08 03:42:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,14 +13,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using encoding = go.encoding_package;
 using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
 using fmt = go.fmt_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using strconv = go.strconv_package;
+using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf16 = go.unicode.utf16_package;
 using utf8 = go.unicode.utf8_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:45 UTC
+//     Generated on 2020 October 08 04:03:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,6 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
-using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
 using go;
@@ -54,7 +53,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +67,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate token.Pos ParentByRef(ref T value);
+            private delegate token.Pos ParentByPtr(ptr<T> value);
             private delegate token.Pos ParentByVal(T value);
 
-            private static readonly ParentByRef s_ParentByRef;
+            private static readonly ParentByPtr s_ParentByPtr;
             private static readonly ParentByVal s_ParentByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,17 +79,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ParentByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ParentByPtr is null || !m_target_is_ptr)
                     return s_ParentByVal!(target);
 
-                return s_ParentByRef(ref target);
+                return s_ParentByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos PosByRef(ref T value);
+            private delegate token.Pos PosByPtr(ptr<T> value);
             private delegate token.Pos PosByVal(T value);
 
-            private static readonly PosByRef s_PosByRef;
+            private static readonly PosByPtr s_PosByPtr;
             private static readonly PosByVal s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,17 +99,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PosByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PosByPtr is null || !m_target_is_ptr)
                     return s_PosByVal!(target);
 
-                return s_PosByRef(ref target);
+                return s_PosByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos PkgByRef(ref T value);
+            private delegate token.Pos PkgByPtr(ptr<T> value);
             private delegate token.Pos PkgByVal(T value);
 
-            private static readonly PkgByRef s_PkgByRef;
+            private static readonly PkgByPtr s_PkgByPtr;
             private static readonly PkgByVal s_PkgByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,17 +119,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PkgByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PkgByPtr is null || !m_target_is_ptr)
                     return s_PkgByVal!(target);
 
-                return s_PkgByRef(ref target);
+                return s_PkgByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos NameByRef(ref T value);
+            private delegate token.Pos NameByPtr(ptr<T> value);
             private delegate token.Pos NameByVal(T value);
 
-            private static readonly NameByRef s_NameByRef;
+            private static readonly NameByPtr s_NameByPtr;
             private static readonly NameByVal s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -137,17 +139,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByRef(ref target);
+                return s_NameByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos TypeByRef(ref T value);
+            private delegate token.Pos TypeByPtr(ptr<T> value);
             private delegate token.Pos TypeByVal(T value);
 
-            private static readonly TypeByRef s_TypeByRef;
+            private static readonly TypeByPtr s_TypeByPtr;
             private static readonly TypeByVal s_TypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,17 +159,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TypeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TypeByPtr is null || !m_target_is_ptr)
                     return s_TypeByVal!(target);
 
-                return s_TypeByRef(ref target);
+                return s_TypeByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos ExportedByRef(ref T value);
+            private delegate token.Pos ExportedByPtr(ptr<T> value);
             private delegate token.Pos ExportedByVal(T value);
 
-            private static readonly ExportedByRef s_ExportedByRef;
+            private static readonly ExportedByPtr s_ExportedByPtr;
             private static readonly ExportedByVal s_ExportedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -175,17 +179,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ExportedByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ExportedByPtr is null || !m_target_is_ptr)
                     return s_ExportedByVal!(target);
 
-                return s_ExportedByRef(ref target);
+                return s_ExportedByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos IdByRef(ref T value);
+            private delegate token.Pos IdByPtr(ptr<T> value);
             private delegate token.Pos IdByVal(T value);
 
-            private static readonly IdByRef s_IdByRef;
+            private static readonly IdByPtr s_IdByPtr;
             private static readonly IdByVal s_IdByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -194,17 +199,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_IdByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_IdByPtr is null || !m_target_is_ptr)
                     return s_IdByVal!(target);
 
-                return s_IdByRef(ref target);
+                return s_IdByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos StringByRef(ref T value);
+            private delegate token.Pos StringByPtr(ptr<T> value);
             private delegate token.Pos StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -213,17 +219,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos orderByRef(ref T value);
+            private delegate token.Pos orderByPtr(ptr<T> value);
             private delegate token.Pos orderByVal(T value);
 
-            private static readonly orderByRef s_orderByRef;
+            private static readonly orderByPtr s_orderByPtr;
             private static readonly orderByVal s_orderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -232,17 +239,38 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_orderByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_orderByPtr is null || !m_target_is_ptr)
                     return s_orderByVal!(target);
 
-                return s_orderByRef(ref target);
+                return s_orderByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos setOrderByRef(ref T value, uint _p0);
+            private delegate token.Pos colorByPtr(ptr<T> value);
+            private delegate token.Pos colorByVal(T value);
+
+            private static readonly colorByPtr s_colorByPtr;
+            private static readonly colorByVal s_colorByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public token.Pos color()
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_colorByPtr is null || !m_target_is_ptr)
+                    return s_colorByVal!(target);
+
+                return s_colorByPtr(m_target_ptr);
+            }
+
+            private delegate token.Pos setOrderByPtr(ptr<T> value, uint _p0);
             private delegate token.Pos setOrderByVal(T value, uint _p0);
 
-            private static readonly setOrderByRef s_setOrderByRef;
+            private static readonly setOrderByPtr s_setOrderByPtr;
             private static readonly setOrderByVal s_setOrderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -251,55 +279,78 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_setOrderByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_setOrderByPtr is null || !m_target_is_ptr)
                     return s_setOrderByVal!(target, _p0);
 
-                return s_setOrderByRef(ref target, _p0);
+                return s_setOrderByPtr(m_target_ptr, _p0);
             }
 
-            private delegate token.Pos setParentByRef(ref T value, ref Scope _p0);
-            private delegate token.Pos setParentByVal(T value, ref Scope _p0);
+            private delegate token.Pos setColorByPtr(ptr<T> value, color color);
+            private delegate token.Pos setColorByVal(T value, color color);
 
-            private static readonly setParentByRef s_setParentByRef;
+            private static readonly setColorByPtr s_setColorByPtr;
+            private static readonly setColorByVal s_setColorByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public token.Pos setColor(color color)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_setColorByPtr is null || !m_target_is_ptr)
+                    return s_setColorByVal!(target, color);
+
+                return s_setColorByPtr(m_target_ptr, color);
+            }
+
+            private delegate token.Pos setParentByPtr(ptr<T> value, ptr<Scope> _p0);
+            private delegate token.Pos setParentByVal(T value, ptr<Scope> _p0);
+
+            private static readonly setParentByPtr s_setParentByPtr;
             private static readonly setParentByVal s_setParentByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos setParent(ref Scope _p0)
+            public token.Pos setParent(ptr<Scope> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_setParentByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_setParentByPtr is null || !m_target_is_ptr)
                     return s_setParentByVal!(target, _p0);
 
-                return s_setParentByRef(ref target, _p0);
+                return s_setParentByPtr(m_target_ptr, _p0);
             }
 
-            private delegate token.Pos sameIdByRef(ref T value, ref Package pkg, @string name);
-            private delegate token.Pos sameIdByVal(T value, ref Package pkg, @string name);
+            private delegate token.Pos sameIdByPtr(ptr<T> value, ptr<Package> pkg, @string name);
+            private delegate token.Pos sameIdByVal(T value, ptr<Package> pkg, @string name);
 
-            private static readonly sameIdByRef s_sameIdByRef;
+            private static readonly sameIdByPtr s_sameIdByPtr;
             private static readonly sameIdByVal s_sameIdByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos sameId(ref Package pkg, @string name)
+            public token.Pos sameId(ptr<Package> pkg, @string name)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_sameIdByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_sameIdByPtr is null || !m_target_is_ptr)
                     return s_sameIdByVal!(target, pkg, name);
 
-                return s_sameIdByRef(ref target, pkg, name);
+                return s_sameIdByPtr(m_target_ptr, pkg, name);
             }
 
-            private delegate token.Pos scopePosByRef(ref T value);
+            private delegate token.Pos scopePosByPtr(ptr<T> value);
             private delegate token.Pos scopePosByVal(T value);
 
-            private static readonly scopePosByRef s_scopePosByRef;
+            private static readonly scopePosByPtr s_scopePosByPtr;
             private static readonly scopePosByVal s_scopePosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -308,17 +359,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_scopePosByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_scopePosByPtr is null || !m_target_is_ptr)
                     return s_scopePosByVal!(target);
 
-                return s_scopePosByRef(ref target);
+                return s_scopePosByPtr(m_target_ptr);
             }
 
-            private delegate token.Pos setScopePosByRef(ref T value, token.Pos pos);
+            private delegate token.Pos setScopePosByPtr(ptr<T> value, token.Pos pos);
             private delegate token.Pos setScopePosByVal(T value, token.Pos pos);
 
-            private static readonly setScopePosByRef s_setScopePosByRef;
+            private static readonly setScopePosByPtr s_setScopePosByPtr;
             private static readonly setScopePosByVal s_setScopePosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -327,11 +379,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_setScopePosByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_setScopePosByPtr is null || !m_target_is_ptr)
                     return s_setScopePosByVal!(target, pos);
 
-                return s_setScopePosByRef(ref target, pos);
+                return s_setScopePosByPtr(m_target_ptr, pos);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -340,231 +393,215 @@ namespace go
             static Object()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Parent");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Parent");
 
                 if (!(extensionMethod is null))
-                    s_ParentByRef = extensionMethod.CreateStaticDelegate(typeof(ParentByRef)) as ParentByRef;
+                    s_ParentByPtr = extensionMethod.CreateStaticDelegate(typeof(ParentByPtr)) as ParentByPtr;
 
-                if (s_ParentByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Parent");
+                extensionMethod = targetType.GetExtensionMethod("Parent");
 
-                    if (!(extensionMethod is null))
-                        s_ParentByVal = extensionMethod.CreateStaticDelegate(typeof(ParentByVal)) as ParentByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ParentByVal = extensionMethod.CreateStaticDelegate(typeof(ParentByVal)) as ParentByVal;
 
-                if (s_ParentByRef is null && s_ParentByVal is null)
+                if (s_ParentByPtr is null && s_ParentByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.Parent method", new Exception("Parent"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Pos");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Pos");
 
                 if (!(extensionMethod is null))
-                    s_PosByRef = extensionMethod.CreateStaticDelegate(typeof(PosByRef)) as PosByRef;
+                    s_PosByPtr = extensionMethod.CreateStaticDelegate(typeof(PosByPtr)) as PosByPtr;
 
-                if (s_PosByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Pos");
+                extensionMethod = targetType.GetExtensionMethod("Pos");
 
-                    if (!(extensionMethod is null))
-                        s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
 
-                if (s_PosByRef is null && s_PosByVal is null)
+                if (s_PosByPtr is null && s_PosByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.Pos method", new Exception("Pos"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Pkg");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Pkg");
 
                 if (!(extensionMethod is null))
-                    s_PkgByRef = extensionMethod.CreateStaticDelegate(typeof(PkgByRef)) as PkgByRef;
+                    s_PkgByPtr = extensionMethod.CreateStaticDelegate(typeof(PkgByPtr)) as PkgByPtr;
 
-                if (s_PkgByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Pkg");
+                extensionMethod = targetType.GetExtensionMethod("Pkg");
 
-                    if (!(extensionMethod is null))
-                        s_PkgByVal = extensionMethod.CreateStaticDelegate(typeof(PkgByVal)) as PkgByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PkgByVal = extensionMethod.CreateStaticDelegate(typeof(PkgByVal)) as PkgByVal;
 
-                if (s_PkgByRef is null && s_PkgByVal is null)
+                if (s_PkgByPtr is null && s_PkgByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.Pkg method", new Exception("Pkg"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Name");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
                 if (!(extensionMethod is null))
-                    s_NameByRef = extensionMethod.CreateStaticDelegate(typeof(NameByRef)) as NameByRef;
+                    s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
-                if (s_NameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Name");
+                extensionMethod = targetType.GetExtensionMethod("Name");
 
-                    if (!(extensionMethod is null))
-                        s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
-                if (s_NameByRef is null && s_NameByVal is null)
+                if (s_NameByPtr is null && s_NameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.Name method", new Exception("Name"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Type");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Type");
 
                 if (!(extensionMethod is null))
-                    s_TypeByRef = extensionMethod.CreateStaticDelegate(typeof(TypeByRef)) as TypeByRef;
+                    s_TypeByPtr = extensionMethod.CreateStaticDelegate(typeof(TypeByPtr)) as TypeByPtr;
 
-                if (s_TypeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Type");
+                extensionMethod = targetType.GetExtensionMethod("Type");
 
-                    if (!(extensionMethod is null))
-                        s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
 
-                if (s_TypeByRef is null && s_TypeByVal is null)
+                if (s_TypeByPtr is null && s_TypeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.Type method", new Exception("Type"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Exported");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Exported");
 
                 if (!(extensionMethod is null))
-                    s_ExportedByRef = extensionMethod.CreateStaticDelegate(typeof(ExportedByRef)) as ExportedByRef;
+                    s_ExportedByPtr = extensionMethod.CreateStaticDelegate(typeof(ExportedByPtr)) as ExportedByPtr;
 
-                if (s_ExportedByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Exported");
+                extensionMethod = targetType.GetExtensionMethod("Exported");
 
-                    if (!(extensionMethod is null))
-                        s_ExportedByVal = extensionMethod.CreateStaticDelegate(typeof(ExportedByVal)) as ExportedByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ExportedByVal = extensionMethod.CreateStaticDelegate(typeof(ExportedByVal)) as ExportedByVal;
 
-                if (s_ExportedByRef is null && s_ExportedByVal is null)
+                if (s_ExportedByPtr is null && s_ExportedByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.Exported method", new Exception("Exported"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Id");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Id");
 
                 if (!(extensionMethod is null))
-                    s_IdByRef = extensionMethod.CreateStaticDelegate(typeof(IdByRef)) as IdByRef;
+                    s_IdByPtr = extensionMethod.CreateStaticDelegate(typeof(IdByPtr)) as IdByPtr;
 
-                if (s_IdByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Id");
+                extensionMethod = targetType.GetExtensionMethod("Id");
 
-                    if (!(extensionMethod is null))
-                        s_IdByVal = extensionMethod.CreateStaticDelegate(typeof(IdByVal)) as IdByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_IdByVal = extensionMethod.CreateStaticDelegate(typeof(IdByVal)) as IdByVal;
 
-                if (s_IdByRef is null && s_IdByVal is null)
+                if (s_IdByPtr is null && s_IdByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.Id method", new Exception("Id"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("order");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("order");
 
                 if (!(extensionMethod is null))
-                    s_orderByRef = extensionMethod.CreateStaticDelegate(typeof(orderByRef)) as orderByRef;
+                    s_orderByPtr = extensionMethod.CreateStaticDelegate(typeof(orderByPtr)) as orderByPtr;
 
-                if (s_orderByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("order");
+                extensionMethod = targetType.GetExtensionMethod("order");
 
-                    if (!(extensionMethod is null))
-                        s_orderByVal = extensionMethod.CreateStaticDelegate(typeof(orderByVal)) as orderByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_orderByVal = extensionMethod.CreateStaticDelegate(typeof(orderByVal)) as orderByVal;
 
-                if (s_orderByRef is null && s_orderByVal is null)
+                if (s_orderByPtr is null && s_orderByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.order method", new Exception("order"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("setOrder");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("color");
 
                 if (!(extensionMethod is null))
-                    s_setOrderByRef = extensionMethod.CreateStaticDelegate(typeof(setOrderByRef)) as setOrderByRef;
+                    s_colorByPtr = extensionMethod.CreateStaticDelegate(typeof(colorByPtr)) as colorByPtr;
 
-                if (s_setOrderByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("setOrder");
+                extensionMethod = targetType.GetExtensionMethod("color");
 
-                    if (!(extensionMethod is null))
-                        s_setOrderByVal = extensionMethod.CreateStaticDelegate(typeof(setOrderByVal)) as setOrderByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_colorByVal = extensionMethod.CreateStaticDelegate(typeof(colorByVal)) as colorByVal;
 
-                if (s_setOrderByRef is null && s_setOrderByVal is null)
+                if (s_colorByPtr is null && s_colorByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Object.color method", new Exception("color"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("setOrder");
+
+                if (!(extensionMethod is null))
+                    s_setOrderByPtr = extensionMethod.CreateStaticDelegate(typeof(setOrderByPtr)) as setOrderByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("setOrder");
+
+                if (!(extensionMethod is null))
+                    s_setOrderByVal = extensionMethod.CreateStaticDelegate(typeof(setOrderByVal)) as setOrderByVal;
+
+                if (s_setOrderByPtr is null && s_setOrderByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.setOrder method", new Exception("setOrder"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("setParent");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("setColor");
 
                 if (!(extensionMethod is null))
-                    s_setParentByRef = extensionMethod.CreateStaticDelegate(typeof(setParentByRef)) as setParentByRef;
+                    s_setColorByPtr = extensionMethod.CreateStaticDelegate(typeof(setColorByPtr)) as setColorByPtr;
 
-                if (s_setParentByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("setParent");
+                extensionMethod = targetType.GetExtensionMethod("setColor");
 
-                    if (!(extensionMethod is null))
-                        s_setParentByVal = extensionMethod.CreateStaticDelegate(typeof(setParentByVal)) as setParentByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_setColorByVal = extensionMethod.CreateStaticDelegate(typeof(setColorByVal)) as setColorByVal;
 
-                if (s_setParentByRef is null && s_setParentByVal is null)
+                if (s_setColorByPtr is null && s_setColorByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Object.setColor method", new Exception("setColor"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("setParent");
+
+                if (!(extensionMethod is null))
+                    s_setParentByPtr = extensionMethod.CreateStaticDelegate(typeof(setParentByPtr)) as setParentByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("setParent");
+
+                if (!(extensionMethod is null))
+                    s_setParentByVal = extensionMethod.CreateStaticDelegate(typeof(setParentByVal)) as setParentByVal;
+
+                if (s_setParentByPtr is null && s_setParentByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.setParent method", new Exception("setParent"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("sameId");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("sameId");
 
                 if (!(extensionMethod is null))
-                    s_sameIdByRef = extensionMethod.CreateStaticDelegate(typeof(sameIdByRef)) as sameIdByRef;
+                    s_sameIdByPtr = extensionMethod.CreateStaticDelegate(typeof(sameIdByPtr)) as sameIdByPtr;
 
-                if (s_sameIdByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("sameId");
+                extensionMethod = targetType.GetExtensionMethod("sameId");
 
-                    if (!(extensionMethod is null))
-                        s_sameIdByVal = extensionMethod.CreateStaticDelegate(typeof(sameIdByVal)) as sameIdByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_sameIdByVal = extensionMethod.CreateStaticDelegate(typeof(sameIdByVal)) as sameIdByVal;
 
-                if (s_sameIdByRef is null && s_sameIdByVal is null)
+                if (s_sameIdByPtr is null && s_sameIdByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.sameId method", new Exception("sameId"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("scopePos");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("scopePos");
 
                 if (!(extensionMethod is null))
-                    s_scopePosByRef = extensionMethod.CreateStaticDelegate(typeof(scopePosByRef)) as scopePosByRef;
+                    s_scopePosByPtr = extensionMethod.CreateStaticDelegate(typeof(scopePosByPtr)) as scopePosByPtr;
 
-                if (s_scopePosByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("scopePos");
+                extensionMethod = targetType.GetExtensionMethod("scopePos");
 
-                    if (!(extensionMethod is null))
-                        s_scopePosByVal = extensionMethod.CreateStaticDelegate(typeof(scopePosByVal)) as scopePosByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_scopePosByVal = extensionMethod.CreateStaticDelegate(typeof(scopePosByVal)) as scopePosByVal;
 
-                if (s_scopePosByRef is null && s_scopePosByVal is null)
+                if (s_scopePosByPtr is null && s_scopePosByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.scopePos method", new Exception("scopePos"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("setScopePos");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("setScopePos");
 
                 if (!(extensionMethod is null))
-                    s_setScopePosByRef = extensionMethod.CreateStaticDelegate(typeof(setScopePosByRef)) as setScopePosByRef;
+                    s_setScopePosByPtr = extensionMethod.CreateStaticDelegate(typeof(setScopePosByPtr)) as setScopePosByPtr;
 
-                if (s_setScopePosByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("setScopePos");
+                extensionMethod = targetType.GetExtensionMethod("setScopePos");
 
-                    if (!(extensionMethod is null))
-                        s_setScopePosByVal = extensionMethod.CreateStaticDelegate(typeof(setScopePosByVal)) as setScopePosByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_setScopePosByVal = extensionMethod.CreateStaticDelegate(typeof(setScopePosByVal)) as setScopePosByVal;
 
-                if (s_setScopePosByRef is null && s_setScopePosByVal is null)
+                if (s_setScopePosByPtr is null && s_setScopePosByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.setScopePos method", new Exception("setScopePos"));
             }
 

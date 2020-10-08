@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:08 UTC
+//     Generated on 2020 October 08 04:42:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,10 +16,14 @@ using static go.builtin;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using trace = go.@internal.trace_package;
+using io = go.io_package;
 using log = go.log_package;
+using math = go.math_package;
 using http = go.net.http_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
+using debug = go.runtime.debug_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
@@ -29,31 +33,13 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(traceParams))]
         private partial struct traceContext
         {
-            // traceParams structure promotion - sourced from pointer
-            private readonly ptr<traceParams> m_traceParamsRef;
-
-            private ref traceParams traceParams_ptr => ref m_traceParamsRef.Value;
-
-            public ref trace.ParseResult parsed => ref m_traceParamsRef.Value.parsed;
-
-            public ref bool gtrace => ref m_traceParamsRef.Value.gtrace;
-
-            public ref long startTime => ref m_traceParamsRef.Value.startTime;
-
-            public ref long endTime => ref m_traceParamsRef.Value.endTime;
-
-            public ref ulong maing => ref m_traceParamsRef.Value.maing;
-
-            public ref map<ulong, bool> gs => ref m_traceParamsRef.Value.gs;
-
             // Constructors
             public traceContext(NilType _)
             {
-                this.m_traceParamsRef = new ptr<traceParams>(new traceParams(nil));
-                this.data = default;
+                this.ptr<traceParams> = default;
+                this.consumer = default;
                 this.frameTree = default;
                 this.frameSeq = default;
                 this.arrowSeq = default;
@@ -64,12 +50,13 @@ namespace go
                 this.prevThreadStats = default;
                 this.gstates = default;
                 this.prevGstates = default;
+                this.regionID = default;
             }
 
-            public traceContext(ref traceParams traceParams = default, ViewerData data = default, frameNode frameTree = default, long frameSeq = default, ulong arrowSeq = default, ulong gcount = default, heapStats heapStats = default, heapStats prevHeapStats = default, threadStats threadStats = default, threadStats prevThreadStats = default, array<long> gstates = default, array<long> prevGstates = default)
+            public traceContext(ref ptr<traceParams> ptr<traceParams> = default, traceConsumer consumer = default, frameNode frameTree = default, long frameSeq = default, ulong arrowSeq = default, ulong gcount = default, heapStats heapStats = default, heapStats prevHeapStats = default, threadStats threadStats = default, threadStats prevThreadStats = default, array<long> gstates = default, array<long> prevGstates = default, long regionID = default)
             {
-                this.m_traceParamsRef = new ptr<traceParams>(ref traceParams);
-                this.data = data;
+                this.ptr<traceParams> = ptr<traceParams>;
+                this.consumer = consumer;
                 this.frameTree = frameTree;
                 this.frameSeq = frameSeq;
                 this.arrowSeq = arrowSeq;
@@ -80,6 +67,7 @@ namespace go
                 this.prevThreadStats = prevThreadStats;
                 this.gstates = gstates;
                 this.prevGstates = prevGstates;
+                this.regionID = regionID;
             }
 
             // Enable comparisons between nil and traceContext struct
@@ -102,7 +90,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static traceContext traceContext_cast(dynamic value)
         {
-            return new traceContext(ref value.traceParams, value.data, value.frameTree, value.frameSeq, value.arrowSeq, value.gcount, value.heapStats, value.prevHeapStats, value.threadStats, value.prevThreadStats, value.gstates, value.prevGstates);
+            return new traceContext(ref value.ptr<traceParams>, value.consumer, value.frameTree, value.frameSeq, value.arrowSeq, value.gcount, value.heapStats, value.prevHeapStats, value.threadStats, value.prevThreadStats, value.gstates, value.prevGstates, value.regionID);
         }
     }
 }

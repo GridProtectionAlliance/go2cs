@@ -21,7 +21,7 @@ and to read that data back:
     io.Copy(os.Stdout, r)
     r.Close()
 */
-// package zlib -- go2cs converted at 2020 August 29 08:46:03 UTC
+// package zlib -- go2cs converted at 2020 October 08 03:49:52 UTC
 // import "compress/zlib" ==> using zlib = go.compress.zlib_package
 // Original source: C:\Go\src\compress\zlib\reader.go
 using bufio = go.bufio_package;
@@ -37,7 +37,7 @@ namespace compress
 {
     public static partial class zlib_package
     {
-        private static readonly long zlibDeflate = 8L;
+        private static readonly long zlibDeflate = (long)8L;
 
 
 
@@ -54,7 +54,7 @@ namespace compress
             public array<byte> scratch;
         }
 
-        // Resetter resets a ReadCloser returned by NewReader or NewReaderDict to
+        // Resetter resets a ReadCloser returned by NewReader or NewReaderDict
         // to switch to a new underlying Reader. This permits reusing a ReadCloser
         // instead of allocating a new one.
         public partial interface Resetter
@@ -71,6 +71,9 @@ namespace compress
         // The ReadCloser returned by NewReader also implements Resetter.
         public static (io.ReadCloser, error) NewReader(io.Reader r)
         {
+            io.ReadCloser _p0 = default;
+            error _p0 = default!;
+
             return NewReaderDict(r, null);
         }
 
@@ -81,28 +84,39 @@ namespace compress
         // The ReadCloser returned by NewReaderDict also implements Resetter.
         public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict)
         {
-            ptr<object> z = @new<reader>();
+            io.ReadCloser _p0 = default;
+            error _p0 = default!;
+
+            ptr<reader> z = @new<reader>();
             var err = z.Reset(r, dict);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (z, null);
+
+            return (z, error.As(null!)!);
+
         }
 
-        private static (long, error) Read(this ref reader z, slice<byte> p)
+        private static (long, error) Read(this ptr<reader> _addr_z, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref reader z = ref _addr_z.val;
+
             if (z.err != null)
             {
-                return (0L, z.err);
+                return (0L, error.As(z.err)!);
             }
+
             long n = default;
             n, z.err = z.decompressor.Read(p);
             z.digest.Write(p[0L..n]);
             if (z.err != io.EOF)
             { 
                 // In the normal case we return here.
-                return (n, z.err);
+                return (n, error.As(z.err)!);
+
             } 
 
             // Finished file; check checksum.
@@ -115,8 +129,10 @@ namespace compress
                     {
                         err = io.ErrUnexpectedEOF;
                     }
+
                     z.err = err;
-                    return (n, z.err);
+                    return (n, error.As(z.err)!);
+
                 } 
                 // ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
 
@@ -126,27 +142,35 @@ namespace compress
             if (checksum != z.digest.Sum32())
             {
                 z.err = ErrChecksum;
-                return (n, z.err);
+                return (n, error.As(z.err)!);
             }
-            return (n, io.EOF);
+
+            return (n, error.As(io.EOF)!);
+
         }
 
         // Calling Close does not close the wrapped io.Reader originally passed to NewReader.
         // In order for the ZLIB checksum to be verified, the reader must be
         // fully consumed until the io.EOF.
-        private static error Close(this ref reader z)
+        private static error Close(this ptr<reader> _addr_z)
         {
+            ref reader z = ref _addr_z.val;
+
             if (z.err != null && z.err != io.EOF)
             {
-                return error.As(z.err);
+                return error.As(z.err)!;
             }
+
             z.err = z.decompressor.Close();
-            return error.As(z.err);
+            return error.As(z.err)!;
+
         }
 
-        private static error Reset(this ref reader z, io.Reader r, slice<byte> dict)
+        private static error Reset(this ptr<reader> _addr_z, io.Reader r, slice<byte> dict)
         {
-            z.Value = new reader(decompressor:z.decompressor);
+            ref reader z = ref _addr_z.val;
+
+            z.val = new reader(decompressor:z.decompressor);
             {
                 flate.Reader (fr, ok) = r._<flate.Reader>();
 
@@ -171,14 +195,18 @@ namespace compress
                 {
                     z.err = io.ErrUnexpectedEOF;
                 }
-                return error.As(z.err);
+
+                return error.As(z.err)!;
+
             }
+
             var h = uint(z.scratch[0L]) << (int)(8L) | uint(z.scratch[1L]);
             if ((z.scratch[0L] & 0x0fUL != zlibDeflate) || (h % 31L != 0L))
             {
                 z.err = ErrHeader;
-                return error.As(z.err);
+                return error.As(z.err)!;
             }
+
             var haveDict = z.scratch[1L] & 0x20UL != 0L;
             if (haveDict)
             {
@@ -189,15 +217,20 @@ namespace compress
                     {
                         z.err = io.ErrUnexpectedEOF;
                     }
-                    return error.As(z.err);
+
+                    return error.As(z.err)!;
+
                 }
+
                 var checksum = uint32(z.scratch[0L]) << (int)(24L) | uint32(z.scratch[1L]) << (int)(16L) | uint32(z.scratch[2L]) << (int)(8L) | uint32(z.scratch[3L]);
                 if (checksum != adler32.Checksum(dict))
                 {
                     z.err = ErrDictionary;
-                    return error.As(z.err);
+                    return error.As(z.err)!;
                 }
+
             }
+
             if (z.decompressor == null)
             {
                 if (haveDict)
@@ -208,13 +241,16 @@ namespace compress
                 {
                     z.decompressor = flate.NewReader(z.r);
                 }
+
             }
             else
             {
                 z.decompressor._<flate.Resetter>().Reset(z.r, dict);
             }
+
             z.digest = adler32.New();
-            return error.As(null);
+            return error.As(null!)!;
+
         }
     }
 }}

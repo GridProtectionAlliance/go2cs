@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:12 UTC
+//     Generated on 2020 October 08 03:42:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -61,10 +61,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, error) MarshalBinaryByRef(ref T value);
+            private delegate (slice<byte>, error) MarshalBinaryByPtr(ptr<T> value);
             private delegate (slice<byte>, error) MarshalBinaryByVal(T value);
 
-            private static readonly MarshalBinaryByRef s_MarshalBinaryByRef;
+            private static readonly MarshalBinaryByPtr s_MarshalBinaryByPtr;
             private static readonly MarshalBinaryByVal s_MarshalBinaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,11 +73,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MarshalBinaryByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MarshalBinaryByPtr is null || !m_target_is_ptr)
                     return s_MarshalBinaryByVal!(target);
 
-                return s_MarshalBinaryByRef(ref target);
+                return s_MarshalBinaryByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -86,23 +87,20 @@ namespace go
             static BinaryMarshaler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("MarshalBinary");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MarshalBinary");
 
                 if (!(extensionMethod is null))
-                    s_MarshalBinaryByRef = extensionMethod.CreateStaticDelegate(typeof(MarshalBinaryByRef)) as MarshalBinaryByRef;
+                    s_MarshalBinaryByPtr = extensionMethod.CreateStaticDelegate(typeof(MarshalBinaryByPtr)) as MarshalBinaryByPtr;
 
-                if (s_MarshalBinaryByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("MarshalBinary");
+                extensionMethod = targetType.GetExtensionMethod("MarshalBinary");
 
-                    if (!(extensionMethod is null))
-                        s_MarshalBinaryByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalBinaryByVal)) as MarshalBinaryByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MarshalBinaryByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalBinaryByVal)) as MarshalBinaryByVal;
 
-                if (s_MarshalBinaryByRef is null && s_MarshalBinaryByVal is null)
+                if (s_MarshalBinaryByPtr is null && s_MarshalBinaryByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement BinaryMarshaler.MarshalBinary method", new Exception("MarshalBinary"));
             }
 

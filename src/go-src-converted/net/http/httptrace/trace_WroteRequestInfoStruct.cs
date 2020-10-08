@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:22 UTC
+//     Generated on 2020 October 08 03:39:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using context = go.context_package;
 using tls = go.crypto.tls_package;
 using nettrace = go.@internal.nettrace_package;
 using net = go.net_package;
+using textproto = go.net.textproto_package;
 using reflect = go.reflect_package;
 using time = go.time_package;
 using go;

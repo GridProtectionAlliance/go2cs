@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:42 UTC
+//     Generated on 2020 October 08 04:28:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,6 @@ using static go.builtin;
 using dwarf = go.cmd.@internal.dwarf_package;
 using obj = go.cmd.@internal.obj_package;
 using src = go.cmd.@internal.src_package;
-using sort = go.sort_package;
 using strings = go.strings_package;
 using go;
 

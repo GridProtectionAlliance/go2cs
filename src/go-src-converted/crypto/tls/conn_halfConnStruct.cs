@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:11 UTC
+//     Generated on 2020 October 08 03:37:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -52,25 +52,21 @@ namespace crypto
                 this.version = default;
                 this.mac = default;
                 this.seq = default;
-                this.bfree = default;
                 this.additionalData = default;
                 this.nextMac = default;
-                this.inDigestBuf = default;
-                this.outDigestBuf = default;
+                this.trafficSecret = default;
             }
 
-            public halfConn(sync.Mutex Mutex = default, error err = default, ushort version = default, macFunction mac = default, array<byte> seq = default, ref ptr<block> bfree = default, array<byte> additionalData = default, macFunction nextMac = default, slice<byte> inDigestBuf = default, slice<byte> outDigestBuf = default)
+            public halfConn(sync.Mutex Mutex = default, error err = default, ushort version = default, macFunction mac = default, array<byte> seq = default, array<byte> additionalData = default, macFunction nextMac = default, slice<byte> trafficSecret = default)
             {
                 this.m_MutexRef = new ptr<sync.Mutex>(Mutex);
                 this.err = err;
                 this.version = version;
                 this.mac = mac;
                 this.seq = seq;
-                this.bfree = bfree;
                 this.additionalData = additionalData;
                 this.nextMac = nextMac;
-                this.inDigestBuf = inDigestBuf;
-                this.outDigestBuf = outDigestBuf;
+                this.trafficSecret = trafficSecret;
             }
 
             // Enable comparisons between nil and halfConn struct
@@ -93,7 +89,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static halfConn halfConn_cast(dynamic value)
         {
-            return new halfConn(value.Mutex, value.err, value.version, value.mac, value.seq, ref value.bfree, value.additionalData, value.nextMac, value.inDigestBuf, value.outDigestBuf);
+            return new halfConn(value.Mutex, value.err, value.version, value.mac, value.seq, value.additionalData, value.nextMac, value.trafficSecret);
         }
     }
 }}

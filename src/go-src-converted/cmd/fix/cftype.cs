@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:00:11 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:13 UTC
 // Original source: C:\Go\src\cmd\fix\cftype.go
 using ast = go.go.ast_package;
 using token = go.go.token_package;
@@ -28,22 +28,28 @@ namespace go
         //   type CFTypeRef uintptr
         // and similar for other *Ref types.
         // This fix finds nils initializing these types and replaces the nils with 0s.
-        private static bool cftypefix(ref ast.File f)
+        private static bool cftypefix(ptr<ast.File> _addr_f)
         {
-            return typefix(f, s =>
+            ref ast.File f = ref _addr_f.val;
+
+            return typefix(_addr_f, s =>
             {
                 return strings.HasPrefix(s, "C.") && strings.HasSuffix(s, "Ref") && s != "C.CFAllocatorRef";
             });
+
         }
 
         // typefix replaces nil with 0 for all nils whose type, when passed to badType, returns true.
-        private static bool typefix(ref ast.File f, Func<@string, bool> badType)
+        private static bool typefix(ptr<ast.File> _addr_f, Func<@string, bool> badType)
         {
+            ref ast.File f = ref _addr_f.val;
+
             if (!imports(f, "C"))
             {
                 return false;
             }
-            var (typeof, _) = typecheck(ref new TypeConfig(), f);
+
+            var (typeof, _) = typecheck(addr(new TypeConfig()), f);
             var changed = false; 
 
             // step 1: Find all the nils with the offending types.
@@ -51,18 +57,19 @@ namespace go
             walk(f, n =>
             {
                 {
-                    ref ast.Ident i__prev1 = i;
+                    ptr<ast.Ident> i__prev1 = i;
 
-                    ref ast.Ident (i, ok) = n._<ref ast.Ident>();
+                    ptr<ast.Ident> (i, ok) = n._<ptr<ast.Ident>>();
 
                     if (ok && i.Name == "nil" && badType(typeof[n]))
                     {
-                        badNils[n] = ref new ast.BasicLit(ValuePos:i.NamePos,Kind:token.INT,Value:"0");
+                        badNils[n] = addr(new ast.BasicLit(ValuePos:i.NamePos,Kind:token.INT,Value:"0"));
                     }
 
                     i = i__prev1;
 
                 }
+
             }); 
 
             // step 2: find all uses of the bad nils, replace them with 0.
@@ -70,30 +77,34 @@ namespace go
             // we use reflect to find all such references.
             if (len(badNils) > 0L)
             {
-                var exprType = reflect.TypeOf((ast.Expr.Value)(null)).Elem();
+                var exprType = reflect.TypeOf((ast.Expr.val)(null)).Elem();
                 var exprSliceType = reflect.TypeOf((slice<ast.Expr>)null);
                 walk(f, n =>
                 {
                     if (n == null)
                     {
-                        return;
+                        return ;
                     }
+
                     var v = reflect.ValueOf(n);
                     if (v.Type().Kind() != reflect.Ptr)
                     {
-                        return;
+                        return ;
                     }
+
                     if (v.IsNil())
                     {
-                        return;
+                        return ;
                     }
+
                     v = v.Elem();
                     if (v.Type().Kind() != reflect.Struct)
                     {
-                        return;
+                        return ;
                     }
+
                     {
-                        ref ast.Ident i__prev1 = i;
+                        ptr<ast.Ident> i__prev1 = i;
 
                         for (long i = 0L; i < v.NumField(); i++)
                         {
@@ -114,7 +125,9 @@ namespace go
                                     r = r__prev3;
 
                                 }
+
                             }
+
                             if (f.Type() == exprSliceType)
                             {
                                 for (long j = 0L; j < f.Len(); j++)
@@ -134,15 +147,20 @@ namespace go
                                         r = r__prev3;
 
                                     }
+
                                 }
 
+
                             }
+
                         }
 
 
                         i = i__prev1;
                     }
+
                 });
+
             } 
 
             // step 3: fix up invalid casts.
@@ -154,48 +172,56 @@ namespace go
             {
                 if (n == null)
                 {
-                    return;
+                    return ;
                 } 
                 // Find pattern like (*a.b)(x)
-                ref ast.CallExpr (c, ok) = n._<ref ast.CallExpr>();
+                ptr<ast.CallExpr> (c, ok) = n._<ptr<ast.CallExpr>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
+
                 if (len(c.Args) != 1L)
                 {
-                    return;
+                    return ;
                 }
-                ref ast.ParenExpr (p, ok) = c.Fun._<ref ast.ParenExpr>();
+
+                ptr<ast.ParenExpr> (p, ok) = c.Fun._<ptr<ast.ParenExpr>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
-                ref ast.StarExpr (s, ok) = p.X._<ref ast.StarExpr>();
+
+                ptr<ast.StarExpr> (s, ok) = p.X._<ptr<ast.StarExpr>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
-                ref ast.SelectorExpr (t, ok) = s.X._<ref ast.SelectorExpr>();
+
+                ptr<ast.SelectorExpr> (t, ok) = s.X._<ptr<ast.SelectorExpr>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
-                ref ast.Ident (pkg, ok) = t.X._<ref ast.Ident>();
+
+                ptr<ast.Ident> (pkg, ok) = t.X._<ptr<ast.Ident>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
+
                 var dst = pkg.Name + "." + t.Sel.Name;
                 var src = typeof[c.Args[0L]];
                 if (badType(dst) && src == "*unsafe.Pointer" || dst == "unsafe.Pointer" && strings.HasPrefix(src, "*") && badType(src[1L..]))
                 {
-                    c.Args[0L] = ref new ast.CallExpr(Fun:&ast.SelectorExpr{X:&ast.Ident{Name:"unsafe"},Sel:&ast.Ident{Name:"Pointer"}},Args:[]ast.Expr{c.Args[0]},);
+                    c.Args[0L] = addr(new ast.CallExpr(Fun:&ast.SelectorExpr{X:&ast.Ident{Name:"unsafe"},Sel:&ast.Ident{Name:"Pointer"}},Args:[]ast.Expr{c.Args[0]},));
                     changed = true;
                 }
+
             });
 
             return changed;
+
         }
     }
 }

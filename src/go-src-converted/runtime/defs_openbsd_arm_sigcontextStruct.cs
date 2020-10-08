@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:50 UTC
+//     Generated on 2020 October 08 03:19:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -45,9 +45,12 @@ namespace go
                 this.sc_usr_lr = default;
                 this.sc_svc_lr = default;
                 this.sc_pc = default;
+                this.sc_fpused = default;
+                this.sc_fpscr = default;
+                this.sc_fpreg = default;
             }
 
-            public sigcontext(int __sc_unused = default, int sc_mask = default, uint sc_spsr = default, uint sc_r0 = default, uint sc_r1 = default, uint sc_r2 = default, uint sc_r3 = default, uint sc_r4 = default, uint sc_r5 = default, uint sc_r6 = default, uint sc_r7 = default, uint sc_r8 = default, uint sc_r9 = default, uint sc_r10 = default, uint sc_r11 = default, uint sc_r12 = default, uint sc_usr_sp = default, uint sc_usr_lr = default, uint sc_svc_lr = default, uint sc_pc = default)
+            public sigcontext(int __sc_unused = default, int sc_mask = default, uint sc_spsr = default, uint sc_r0 = default, uint sc_r1 = default, uint sc_r2 = default, uint sc_r3 = default, uint sc_r4 = default, uint sc_r5 = default, uint sc_r6 = default, uint sc_r7 = default, uint sc_r8 = default, uint sc_r9 = default, uint sc_r10 = default, uint sc_r11 = default, uint sc_r12 = default, uint sc_usr_sp = default, uint sc_usr_lr = default, uint sc_svc_lr = default, uint sc_pc = default, uint sc_fpused = default, uint sc_fpscr = default, array<ulong> sc_fpreg = default)
             {
                 this.__sc_unused = __sc_unused;
                 this.sc_mask = sc_mask;
@@ -69,6 +72,9 @@ namespace go
                 this.sc_usr_lr = sc_usr_lr;
                 this.sc_svc_lr = sc_svc_lr;
                 this.sc_pc = sc_pc;
+                this.sc_fpused = sc_fpused;
+                this.sc_fpscr = sc_fpscr;
+                this.sc_fpreg = sc_fpreg;
             }
 
             // Enable comparisons between nil and sigcontext struct
@@ -91,7 +97,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static sigcontext sigcontext_cast(dynamic value)
         {
-            return new sigcontext(value.__sc_unused, value.sc_mask, value.sc_spsr, value.sc_r0, value.sc_r1, value.sc_r2, value.sc_r3, value.sc_r4, value.sc_r5, value.sc_r6, value.sc_r7, value.sc_r8, value.sc_r9, value.sc_r10, value.sc_r11, value.sc_r12, value.sc_usr_sp, value.sc_usr_lr, value.sc_svc_lr, value.sc_pc);
+            return new sigcontext(value.__sc_unused, value.sc_mask, value.sc_spsr, value.sc_r0, value.sc_r1, value.sc_r2, value.sc_r3, value.sc_r4, value.sc_r5, value.sc_r6, value.sc_r7, value.sc_r8, value.sc_r9, value.sc_r10, value.sc_r11, value.sc_r12, value.sc_usr_sp, value.sc_usr_lr, value.sc_svc_lr, value.sc_pc, value.sc_fpused, value.sc_fpscr, value.sc_fpreg);
         }
     }
 }

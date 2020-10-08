@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:47:41 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:31 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\labels.go
 using ast = go.go.ast_package;
@@ -16,8 +16,11 @@ namespace go
     public static partial class types_package
     {
         // labels checks correct label use in body.
-        private static void labels(this ref Checker check, ref ast.BlockStmt body)
-        { 
+        private static void labels(this ptr<Checker> _addr_check, ptr<ast.BlockStmt> _addr_body)
+        {
+            ref Checker check = ref _addr_check.val;
+            ref ast.BlockStmt body = ref _addr_body.val;
+ 
             // set of all labels in this body
             var all = NewScope(null, body.Pos(), body.End(), "label");
 
@@ -37,24 +40,27 @@ namespace go
                     if (alt != null)
                     {
                         msg = "goto %s jumps into block";
-                        alt._<ref Label>().used = true; // avoid another error
+                        alt._<ptr<Label>>().used = true; // avoid another error
                     }
                     else
                     {
                         msg = "label %s not declared";
                     }
                 }
+
                 check.errorf(jmp.Label.Pos(), msg, name);
+
             }            foreach (var (_, obj) in all.elems)
             {
                 {
-                    ref Label lbl = obj._<ref Label>();
+                    ptr<Label> lbl = obj._<ptr<Label>>();
 
                     if (!lbl.used)
                     {
                         check.softErrorf(lbl.pos, "label %s declared but not used", lbl.name);
                     }
                 }
+
             }
         }
 
@@ -63,31 +69,39 @@ namespace go
         {
             public ptr<block> parent; // enclosing block
             public ptr<ast.LabeledStmt> lstmt; // labeled statement to which this block belongs, or nil
-            public map<@string, ref ast.LabeledStmt> labels; // allocated lazily
+            public map<@string, ptr<ast.LabeledStmt>> labels; // allocated lazily
         }
 
         // insert records a new label declaration for the current block.
         // The label must not have been declared before in any block.
-        private static void insert(this ref block b, ref ast.LabeledStmt s)
+        private static void insert(this ptr<block> _addr_b, ptr<ast.LabeledStmt> _addr_s)
         {
+            ref block b = ref _addr_b.val;
+            ref ast.LabeledStmt s = ref _addr_s.val;
+
             var name = s.Label.Name;
             if (debug)
             {
                 assert(b.gotoTarget(name) == null);
             }
+
             var labels = b.labels;
             if (labels == null)
             {
-                labels = make_map<@string, ref ast.LabeledStmt>();
+                labels = make_map<@string, ptr<ast.LabeledStmt>>();
                 b.labels = labels;
             }
+
             labels[name] = s;
+
         }
 
         // gotoTarget returns the labeled statement in the current
         // or an enclosing block with the given label name, or nil.
-        private static ref ast.LabeledStmt gotoTarget(this ref block b, @string name)
+        private static ptr<ast.LabeledStmt> gotoTarget(this ptr<block> _addr_b, @string name)
         {
+            ref block b = ref _addr_b.val;
+
             {
                 var s = b;
 
@@ -98,21 +112,25 @@ namespace go
 
                         if (t != null)
                         {
-                            return t;
+                            return _addr_t!;
                     s = s.parent;
                         }
 
                     }
+
                 }
 
             }
-            return null;
+            return _addr_null!;
+
         }
 
         // enclosingTarget returns the innermost enclosing labeled
         // statement with the given label name, or nil.
-        private static ref ast.LabeledStmt enclosingTarget(this ref block b, @string name)
+        private static ptr<ast.LabeledStmt> enclosingTarget(this ptr<block> _addr_b, @string name)
         {
+            ref block b = ref _addr_b.val;
+
             {
                 var s = b;
 
@@ -123,25 +141,32 @@ namespace go
 
                         if (t != null && t.Label.Name == name)
                         {
-                            return t;
+                            return _addr_t!;
                     s = s.parent;
                         }
 
                     }
+
                 }
 
             }
-            return null;
+            return _addr_null!;
+
         }
 
         // blockBranches processes a block's statement list and returns the set of outgoing forward jumps.
         // all is the scope of all declared labels, parent the set of labels declared in the immediately
         // enclosing block, and lstmt is the labeled statement this block is associated with (or nil).
-        private static slice<ref ast.BranchStmt> blockBranches(this ref Checker check, ref Scope all, ref block parent, ref ast.LabeledStmt lstmt, slice<ast.Stmt> list)
+        private static slice<ptr<ast.BranchStmt>> blockBranches(this ptr<Checker> _addr_check, ptr<Scope> _addr_all, ptr<block> _addr_parent, ptr<ast.LabeledStmt> _addr_lstmt, slice<ast.Stmt> list)
         {
-            block b = ref new block(parent:parent,lstmt:lstmt);
+            ref Checker check = ref _addr_check.val;
+            ref Scope all = ref _addr_all.val;
+            ref block parent = ref _addr_parent.val;
+            ref ast.LabeledStmt lstmt = ref _addr_lstmt.val;
 
-            token.Pos varDeclPos = default;            slice<ref ast.BranchStmt> fwdJumps = default;            slice<ref ast.BranchStmt> badJumps = default; 
+            ptr<block> b = addr(new block(parent:parent,lstmt:lstmt));
+
+            token.Pos varDeclPos = default;            slice<ptr<ast.BranchStmt>> fwdJumps = default;            slice<ptr<ast.BranchStmt>> badJumps = default; 
 
             // All forward jumps jumping over a variable declaration are possibly
             // invalid (they may still jump out of the block and be ok).
@@ -153,7 +178,7 @@ namespace go
             }
 ;
 
-            Func<ref ast.BranchStmt, bool> jumpsOverVarDecl = jmp =>
+            Func<ptr<ast.BranchStmt>, bool> jumpsOverVarDecl = jmp =>
             {
                 if (varDeclPos.IsValid())
                 {
@@ -163,17 +188,22 @@ namespace go
                         {
                             return true;
                         }
+
                     }
+
                 }
+
                 return false;
+
             }
 ;
 
-            Action<ref ast.LabeledStmt, slice<ast.Stmt>> blockBranches = (lstmt, list) =>
+            Action<ptr<ast.LabeledStmt>, slice<ast.Stmt>> blockBranches = (lstmt, list) =>
             { 
                 // Unresolved forward jumps inside the nested block
                 // become forward jumps in the current block.
                 fwdJumps = append(fwdJumps, check.blockBranches(all, b, lstmt, list));
+
             }
 ;
 
@@ -182,9 +212,9 @@ namespace go
             {
                 switch (s.type())
                 {
-                    case ref ast.DeclStmt s:
+                    case ptr<ast.DeclStmt> s:
                         {
-                            ref ast.GenDecl (d, _) = s.Decl._<ref ast.GenDecl>();
+                            ptr<ast.GenDecl> (d, _) = s.Decl._<ptr<ast.GenDecl>>();
 
                             if (d != null && d.Tok == token.VAR)
                             {
@@ -192,8 +222,10 @@ namespace go
                             }
 
                         }
+
+
                         break;
-                    case ref ast.LabeledStmt s:
+                    case ptr<ast.LabeledStmt> s:
                         {
                             var name__prev1 = name;
 
@@ -233,27 +265,32 @@ namespace go
                                             check.softErrorf(jmp.Label.Pos(), "goto %s jumps over variable declaration at line %d", name, check.fset.Position(varDeclPos).Line); 
                                             // ok to continue
                                         }
+
                                     }
                                     else
                                     { 
                                         // no match - record new forward jump
                                         fwdJumps[i] = jmp;
                                         i++;
+
                                     }
+
                                 }
                                 fwdJumps = fwdJumps[..i];
                                 lstmt = s;
+
                             }
 
                             name = name__prev1;
 
                         }
+
                         stmtBranches(s.Stmt);
                         break;
-                    case ref ast.BranchStmt s:
+                    case ptr<ast.BranchStmt> s:
                         if (s.Label == null)
                         {
-                            return; // checked in 1st pass (check.stmt)
+                            return ; // checked in 1st pass (check.stmt)
                         } 
 
                         // determine and validate target
@@ -273,32 +310,35 @@ namespace go
                                 {
                                     switch (t.Stmt.type())
                                     {
-                                        case ref ast.SwitchStmt _:
+                                        case ptr<ast.SwitchStmt> _:
                                             valid = true;
                                             break;
-                                        case ref ast.TypeSwitchStmt _:
+                                        case ptr<ast.TypeSwitchStmt> _:
                                             valid = true;
                                             break;
-                                        case ref ast.SelectStmt _:
+                                        case ptr<ast.SelectStmt> _:
                                             valid = true;
                                             break;
-                                        case ref ast.ForStmt _:
+                                        case ptr<ast.ForStmt> _:
                                             valid = true;
                                             break;
-                                        case ref ast.RangeStmt _:
+                                        case ptr<ast.RangeStmt> _:
                                             valid = true;
                                             break;
                                     }
+
                                 }
 
                                 t = t__prev1;
 
                             }
+
                             if (!valid)
                             {
                                 check.errorf(s.Label.Pos(), "invalid break label %s", name);
-                                return;
+                                return ;
                             }
+
                         else if (s.Tok == token.CONTINUE) 
                             // spec: "If there is a label, it must be that of an enclosing
                             // "for" statement, and that is the one whose execution advances."
@@ -312,76 +352,84 @@ namespace go
                                 {
                                     switch (t.Stmt.type())
                                     {
-                                        case ref ast.ForStmt _:
+                                        case ptr<ast.ForStmt> _:
                                             valid = true;
                                             break;
-                                        case ref ast.RangeStmt _:
+                                        case ptr<ast.RangeStmt> _:
                                             valid = true;
                                             break;
                                     }
+
                                 }
 
                                 t = t__prev1;
 
                             }
+
                             if (!valid)
                             {
                                 check.errorf(s.Label.Pos(), "invalid continue label %s", name);
-                                return;
+                                return ;
                             }
+
                         else if (s.Tok == token.GOTO) 
                             if (b.gotoTarget(name) == null)
                             { 
                                 // label may be declared later - add branch to forward jumps
                                 fwdJumps = append(fwdJumps, s);
-                                return;
+                                return ;
+
                             }
+
                         else 
                             check.invalidAST(s.Pos(), "branch statement: %s %s", s.Tok, name);
-                            return;
+                            return ;
                         // record label use
                         var obj = all.Lookup(name);
-                        obj._<ref Label>().used = true;
+                        obj._<ptr<Label>>().used = true;
                         check.recordUse(s.Label, obj);
                         break;
-                    case ref ast.AssignStmt s:
+                    case ptr<ast.AssignStmt> s:
                         if (s.Tok == token.DEFINE)
                         {
                             recordVarDecl(s.Pos());
                         }
+
                         break;
-                    case ref ast.BlockStmt s:
+                    case ptr<ast.BlockStmt> s:
                         blockBranches(lstmt, s.List);
                         break;
-                    case ref ast.IfStmt s:
+                    case ptr<ast.IfStmt> s:
                         stmtBranches(s.Body);
                         if (s.Else != null)
                         {
                             stmtBranches(s.Else);
                         }
+
                         break;
-                    case ref ast.CaseClause s:
+                    case ptr<ast.CaseClause> s:
                         blockBranches(null, s.Body);
                         break;
-                    case ref ast.SwitchStmt s:
+                    case ptr<ast.SwitchStmt> s:
                         stmtBranches(s.Body);
                         break;
-                    case ref ast.TypeSwitchStmt s:
+                    case ptr<ast.TypeSwitchStmt> s:
                         stmtBranches(s.Body);
                         break;
-                    case ref ast.CommClause s:
+                    case ptr<ast.CommClause> s:
                         blockBranches(null, s.Body);
                         break;
-                    case ref ast.SelectStmt s:
+                    case ptr<ast.SelectStmt> s:
                         stmtBranches(s.Body);
                         break;
-                    case ref ast.ForStmt s:
+                    case ptr<ast.ForStmt> s:
                         stmtBranches(s.Body);
                         break;
-                    case ref ast.RangeStmt s:
+                    case ptr<ast.RangeStmt> s:
                         stmtBranches(s.Body);
                         break;
                 }
+
             }
 ;
 
@@ -398,6 +446,7 @@ namespace go
             }
 
             return fwdJumps;
+
         }
     }
 }}

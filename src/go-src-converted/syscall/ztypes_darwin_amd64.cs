@@ -3,7 +3,7 @@
 
 // +build amd64,darwin
 
-// package syscall -- go2cs converted at 2020 August 29 08:42:03 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:30:32 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\ztypes_darwin_amd64.go
 
@@ -13,11 +13,12 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly ulong sizeofPtr = 0x8UL;
-        private static readonly ulong sizeofShort = 0x2UL;
-        private static readonly ulong sizeofInt = 0x4UL;
-        private static readonly ulong sizeofLong = 0x8UL;
-        private static readonly ulong sizeofLongLong = 0x8UL;
+        private static readonly ulong sizeofPtr = (ulong)0x8UL;
+        private static readonly ulong sizeofShort = (ulong)0x2UL;
+        private static readonly ulong sizeofInt = (ulong)0x4UL;
+        private static readonly ulong sizeofLong = (ulong)0x8UL;
+        private static readonly ulong sizeofLongLong = (ulong)0x8UL;
+
 
         private partial struct _C_short // : short
         {
@@ -30,7 +31,8 @@ namespace go
         }
         private partial struct _C_long_long // : long
         {
-        }        public partial struct Timespec
+        }
+        public partial struct Timespec
         {
             public long Sec;
             public long Nsec;
@@ -300,24 +302,26 @@ namespace go
             public array<uint> Filt;
         }
 
-        public static readonly ulong SizeofSockaddrInet4 = 0x10UL;
-        public static readonly ulong SizeofSockaddrInet6 = 0x1cUL;
-        public static readonly ulong SizeofSockaddrAny = 0x6cUL;
-        public static readonly ulong SizeofSockaddrUnix = 0x6aUL;
-        public static readonly ulong SizeofSockaddrDatalink = 0x14UL;
-        public static readonly ulong SizeofLinger = 0x8UL;
-        public static readonly ulong SizeofIPMreq = 0x8UL;
-        public static readonly ulong SizeofIPv6Mreq = 0x14UL;
-        public static readonly ulong SizeofMsghdr = 0x30UL;
-        public static readonly ulong SizeofCmsghdr = 0xcUL;
-        public static readonly ulong SizeofInet4Pktinfo = 0xcUL;
-        public static readonly ulong SizeofInet6Pktinfo = 0x14UL;
-        public static readonly ulong SizeofIPv6MTUInfo = 0x20UL;
-        public static readonly ulong SizeofICMPv6Filter = 0x20UL;
+        public static readonly ulong SizeofSockaddrInet4 = (ulong)0x10UL;
+        public static readonly ulong SizeofSockaddrInet6 = (ulong)0x1cUL;
+        public static readonly ulong SizeofSockaddrAny = (ulong)0x6cUL;
+        public static readonly ulong SizeofSockaddrUnix = (ulong)0x6aUL;
+        public static readonly ulong SizeofSockaddrDatalink = (ulong)0x14UL;
+        public static readonly ulong SizeofLinger = (ulong)0x8UL;
+        public static readonly ulong SizeofIPMreq = (ulong)0x8UL;
+        public static readonly ulong SizeofIPv6Mreq = (ulong)0x14UL;
+        public static readonly ulong SizeofMsghdr = (ulong)0x30UL;
+        public static readonly ulong SizeofCmsghdr = (ulong)0xcUL;
+        public static readonly ulong SizeofInet4Pktinfo = (ulong)0xcUL;
+        public static readonly ulong SizeofInet6Pktinfo = (ulong)0x14UL;
+        public static readonly ulong SizeofIPv6MTUInfo = (ulong)0x20UL;
+        public static readonly ulong SizeofICMPv6Filter = (ulong)0x20UL;
 
-        public static readonly ulong PTRACE_TRACEME = 0x0UL;
-        public static readonly ulong PTRACE_CONT = 0x7UL;
-        public static readonly ulong PTRACE_KILL = 0x8UL;
+
+        public static readonly ulong PTRACE_TRACEME = (ulong)0x0UL;
+        public static readonly ulong PTRACE_CONT = (ulong)0x7UL;
+        public static readonly ulong PTRACE_KILL = (ulong)0x8UL;
+
 
         public partial struct Kevent_t
         {
@@ -334,13 +338,14 @@ namespace go
             public array<int> Bits;
         }
 
-        public static readonly ulong SizeofIfMsghdr = 0x70UL;
-        public static readonly ulong SizeofIfData = 0x60UL;
-        public static readonly ulong SizeofIfaMsghdr = 0x14UL;
-        public static readonly ulong SizeofIfmaMsghdr = 0x10UL;
-        public static readonly ulong SizeofIfmaMsghdr2 = 0x14UL;
-        public static readonly ulong SizeofRtMsghdr = 0x5cUL;
-        public static readonly ulong SizeofRtMetrics = 0x38UL;
+        public static readonly ulong SizeofIfMsghdr = (ulong)0x70UL;
+        public static readonly ulong SizeofIfData = (ulong)0x60UL;
+        public static readonly ulong SizeofIfaMsghdr = (ulong)0x14UL;
+        public static readonly ulong SizeofIfmaMsghdr = (ulong)0x10UL;
+        public static readonly ulong SizeofIfmaMsghdr2 = (ulong)0x14UL;
+        public static readonly ulong SizeofRtMsghdr = (ulong)0x5cUL;
+        public static readonly ulong SizeofRtMetrics = (ulong)0x38UL;
+
 
         public partial struct IfMsghdr
         {
@@ -454,11 +459,12 @@ namespace go
             public array<uint> Filler;
         }
 
-        public static readonly ulong SizeofBpfVersion = 0x4UL;
-        public static readonly ulong SizeofBpfStat = 0x8UL;
-        public static readonly ulong SizeofBpfProgram = 0x10UL;
-        public static readonly ulong SizeofBpfInsn = 0x8UL;
-        public static readonly ulong SizeofBpfHdr = 0x14UL;
+        public static readonly ulong SizeofBpfVersion = (ulong)0x4UL;
+        public static readonly ulong SizeofBpfStat = (ulong)0x8UL;
+        public static readonly ulong SizeofBpfProgram = (ulong)0x10UL;
+        public static readonly ulong SizeofBpfInsn = (ulong)0x8UL;
+        public static readonly ulong SizeofBpfHdr = (ulong)0x14UL;
+
 
         public partial struct BpfVersion
         {
@@ -496,7 +502,8 @@ namespace go
             public array<byte> Pad_cgo_0;
         }
 
-        private static readonly ulong _AT_FDCWD = -0x2UL;
+        private static readonly ulong _AT_FDCWD = (ulong)-0x2UL;
+
 
         public partial struct Termios
         {

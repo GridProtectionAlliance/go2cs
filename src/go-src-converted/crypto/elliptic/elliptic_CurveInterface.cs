@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:29:39 UTC
+//     Generated on 2020 October 08 03:35:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -52,7 +52,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -66,118 +66,124 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate (ref big.Int, ref big.Int) ParamsByRef(ref T value);
-            private delegate (ref big.Int, ref big.Int) ParamsByVal(T value);
+            private delegate (ptr<big.Int>, ptr<big.Int>) ParamsByPtr(ptr<T> value);
+            private delegate (ptr<big.Int>, ptr<big.Int>) ParamsByVal(T value);
 
-            private static readonly ParamsByRef s_ParamsByRef;
+            private static readonly ParamsByPtr s_ParamsByPtr;
             private static readonly ParamsByVal s_ParamsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref big.Int, ref big.Int) Params()
+            public (ptr<big.Int>, ptr<big.Int>) Params()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ParamsByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ParamsByPtr is null || !m_target_is_ptr)
                     return s_ParamsByVal!(target);
 
-                return s_ParamsByRef(ref target);
+                return s_ParamsByPtr(m_target_ptr);
             }
 
-            private delegate (ref big.Int, ref big.Int) IsOnCurveByRef(ref T value, ref big.Int x, ref big.Int y);
-            private delegate (ref big.Int, ref big.Int) IsOnCurveByVal(T value, ref big.Int x, ref big.Int y);
+            private delegate (ptr<big.Int>, ptr<big.Int>) IsOnCurveByPtr(ptr<T> value, ptr<big.Int> x, ptr<big.Int> y);
+            private delegate (ptr<big.Int>, ptr<big.Int>) IsOnCurveByVal(T value, ptr<big.Int> x, ptr<big.Int> y);
 
-            private static readonly IsOnCurveByRef s_IsOnCurveByRef;
+            private static readonly IsOnCurveByPtr s_IsOnCurveByPtr;
             private static readonly IsOnCurveByVal s_IsOnCurveByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref big.Int, ref big.Int) IsOnCurve(ref big.Int x, ref big.Int y)
+            public (ptr<big.Int>, ptr<big.Int>) IsOnCurve(ptr<big.Int> x, ptr<big.Int> y)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_IsOnCurveByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_IsOnCurveByPtr is null || !m_target_is_ptr)
                     return s_IsOnCurveByVal!(target, x, y);
 
-                return s_IsOnCurveByRef(ref target, x, y);
+                return s_IsOnCurveByPtr(m_target_ptr, x, y);
             }
 
-            private delegate (ref big.Int, ref big.Int) AddByRef(ref T value, ref big.Int x1, ref big.Int y1, ref big.Int x2, ref big.Int y2);
-            private delegate (ref big.Int, ref big.Int) AddByVal(T value, ref big.Int x1, ref big.Int y1, ref big.Int x2, ref big.Int y2);
+            private delegate (ptr<big.Int>, ptr<big.Int>) AddByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2);
+            private delegate (ptr<big.Int>, ptr<big.Int>) AddByVal(T value, ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2);
 
-            private static readonly AddByRef s_AddByRef;
+            private static readonly AddByPtr s_AddByPtr;
             private static readonly AddByVal s_AddByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref big.Int, ref big.Int) Add(ref big.Int x1, ref big.Int y1, ref big.Int x2, ref big.Int y2)
+            public (ptr<big.Int>, ptr<big.Int>) Add(ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AddByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AddByPtr is null || !m_target_is_ptr)
                     return s_AddByVal!(target, x1, y1, x2, y2);
 
-                return s_AddByRef(ref target, x1, y1, x2, y2);
+                return s_AddByPtr(m_target_ptr, x1, y1, x2, y2);
             }
 
-            private delegate (ref big.Int, ref big.Int) DoubleByRef(ref T value, ref big.Int x1, ref big.Int y1);
-            private delegate (ref big.Int, ref big.Int) DoubleByVal(T value, ref big.Int x1, ref big.Int y1);
+            private delegate (ptr<big.Int>, ptr<big.Int>) DoubleByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1);
+            private delegate (ptr<big.Int>, ptr<big.Int>) DoubleByVal(T value, ptr<big.Int> x1, ptr<big.Int> y1);
 
-            private static readonly DoubleByRef s_DoubleByRef;
+            private static readonly DoubleByPtr s_DoubleByPtr;
             private static readonly DoubleByVal s_DoubleByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref big.Int, ref big.Int) Double(ref big.Int x1, ref big.Int y1)
+            public (ptr<big.Int>, ptr<big.Int>) Double(ptr<big.Int> x1, ptr<big.Int> y1)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DoubleByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DoubleByPtr is null || !m_target_is_ptr)
                     return s_DoubleByVal!(target, x1, y1);
 
-                return s_DoubleByRef(ref target, x1, y1);
+                return s_DoubleByPtr(m_target_ptr, x1, y1);
             }
 
-            private delegate (ref big.Int, ref big.Int) ScalarMultByRef(ref T value, ref big.Int x1, ref big.Int y1, slice<byte> k);
-            private delegate (ref big.Int, ref big.Int) ScalarMultByVal(T value, ref big.Int x1, ref big.Int y1, slice<byte> k);
+            private delegate (ptr<big.Int>, ptr<big.Int>) ScalarMultByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k);
+            private delegate (ptr<big.Int>, ptr<big.Int>) ScalarMultByVal(T value, ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k);
 
-            private static readonly ScalarMultByRef s_ScalarMultByRef;
+            private static readonly ScalarMultByPtr s_ScalarMultByPtr;
             private static readonly ScalarMultByVal s_ScalarMultByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref big.Int, ref big.Int) ScalarMult(ref big.Int x1, ref big.Int y1, slice<byte> k)
+            public (ptr<big.Int>, ptr<big.Int>) ScalarMult(ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ScalarMultByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ScalarMultByPtr is null || !m_target_is_ptr)
                     return s_ScalarMultByVal!(target, x1, y1, k);
 
-                return s_ScalarMultByRef(ref target, x1, y1, k);
+                return s_ScalarMultByPtr(m_target_ptr, x1, y1, k);
             }
 
-            private delegate (ref big.Int, ref big.Int) ScalarBaseMultByRef(ref T value, slice<byte> k);
-            private delegate (ref big.Int, ref big.Int) ScalarBaseMultByVal(T value, slice<byte> k);
+            private delegate (ptr<big.Int>, ptr<big.Int>) ScalarBaseMultByPtr(ptr<T> value, slice<byte> k);
+            private delegate (ptr<big.Int>, ptr<big.Int>) ScalarBaseMultByVal(T value, slice<byte> k);
 
-            private static readonly ScalarBaseMultByRef s_ScalarBaseMultByRef;
+            private static readonly ScalarBaseMultByPtr s_ScalarBaseMultByPtr;
             private static readonly ScalarBaseMultByVal s_ScalarBaseMultByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref big.Int, ref big.Int) ScalarBaseMult(slice<byte> k)
+            public (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(slice<byte> k)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ScalarBaseMultByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ScalarBaseMultByPtr is null || !m_target_is_ptr)
                     return s_ScalarBaseMultByVal!(target, k);
 
-                return s_ScalarBaseMultByRef(ref target, k);
+                return s_ScalarBaseMultByPtr(m_target_ptr, k);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -186,103 +192,85 @@ namespace crypto
             static Curve()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Params");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Params");
 
                 if (!(extensionMethod is null))
-                    s_ParamsByRef = extensionMethod.CreateStaticDelegate(typeof(ParamsByRef)) as ParamsByRef;
+                    s_ParamsByPtr = extensionMethod.CreateStaticDelegate(typeof(ParamsByPtr)) as ParamsByPtr;
 
-                if (s_ParamsByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Params");
+                extensionMethod = targetType.GetExtensionMethod("Params");
 
-                    if (!(extensionMethod is null))
-                        s_ParamsByVal = extensionMethod.CreateStaticDelegate(typeof(ParamsByVal)) as ParamsByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ParamsByVal = extensionMethod.CreateStaticDelegate(typeof(ParamsByVal)) as ParamsByVal;
 
-                if (s_ParamsByRef is null && s_ParamsByVal is null)
+                if (s_ParamsByPtr is null && s_ParamsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Curve.Params method", new Exception("Params"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("IsOnCurve");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("IsOnCurve");
 
                 if (!(extensionMethod is null))
-                    s_IsOnCurveByRef = extensionMethod.CreateStaticDelegate(typeof(IsOnCurveByRef)) as IsOnCurveByRef;
+                    s_IsOnCurveByPtr = extensionMethod.CreateStaticDelegate(typeof(IsOnCurveByPtr)) as IsOnCurveByPtr;
 
-                if (s_IsOnCurveByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("IsOnCurve");
+                extensionMethod = targetType.GetExtensionMethod("IsOnCurve");
 
-                    if (!(extensionMethod is null))
-                        s_IsOnCurveByVal = extensionMethod.CreateStaticDelegate(typeof(IsOnCurveByVal)) as IsOnCurveByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_IsOnCurveByVal = extensionMethod.CreateStaticDelegate(typeof(IsOnCurveByVal)) as IsOnCurveByVal;
 
-                if (s_IsOnCurveByRef is null && s_IsOnCurveByVal is null)
+                if (s_IsOnCurveByPtr is null && s_IsOnCurveByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Curve.IsOnCurve method", new Exception("IsOnCurve"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Add");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Add");
 
                 if (!(extensionMethod is null))
-                    s_AddByRef = extensionMethod.CreateStaticDelegate(typeof(AddByRef)) as AddByRef;
+                    s_AddByPtr = extensionMethod.CreateStaticDelegate(typeof(AddByPtr)) as AddByPtr;
 
-                if (s_AddByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Add");
+                extensionMethod = targetType.GetExtensionMethod("Add");
 
-                    if (!(extensionMethod is null))
-                        s_AddByVal = extensionMethod.CreateStaticDelegate(typeof(AddByVal)) as AddByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddByVal = extensionMethod.CreateStaticDelegate(typeof(AddByVal)) as AddByVal;
 
-                if (s_AddByRef is null && s_AddByVal is null)
+                if (s_AddByPtr is null && s_AddByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Curve.Add method", new Exception("Add"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Double");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Double");
 
                 if (!(extensionMethod is null))
-                    s_DoubleByRef = extensionMethod.CreateStaticDelegate(typeof(DoubleByRef)) as DoubleByRef;
+                    s_DoubleByPtr = extensionMethod.CreateStaticDelegate(typeof(DoubleByPtr)) as DoubleByPtr;
 
-                if (s_DoubleByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Double");
+                extensionMethod = targetType.GetExtensionMethod("Double");
 
-                    if (!(extensionMethod is null))
-                        s_DoubleByVal = extensionMethod.CreateStaticDelegate(typeof(DoubleByVal)) as DoubleByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DoubleByVal = extensionMethod.CreateStaticDelegate(typeof(DoubleByVal)) as DoubleByVal;
 
-                if (s_DoubleByRef is null && s_DoubleByVal is null)
+                if (s_DoubleByPtr is null && s_DoubleByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Curve.Double method", new Exception("Double"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ScalarMult");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ScalarMult");
 
                 if (!(extensionMethod is null))
-                    s_ScalarMultByRef = extensionMethod.CreateStaticDelegate(typeof(ScalarMultByRef)) as ScalarMultByRef;
+                    s_ScalarMultByPtr = extensionMethod.CreateStaticDelegate(typeof(ScalarMultByPtr)) as ScalarMultByPtr;
 
-                if (s_ScalarMultByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ScalarMult");
+                extensionMethod = targetType.GetExtensionMethod("ScalarMult");
 
-                    if (!(extensionMethod is null))
-                        s_ScalarMultByVal = extensionMethod.CreateStaticDelegate(typeof(ScalarMultByVal)) as ScalarMultByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ScalarMultByVal = extensionMethod.CreateStaticDelegate(typeof(ScalarMultByVal)) as ScalarMultByVal;
 
-                if (s_ScalarMultByRef is null && s_ScalarMultByVal is null)
+                if (s_ScalarMultByPtr is null && s_ScalarMultByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Curve.ScalarMult method", new Exception("ScalarMult"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ScalarBaseMult");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ScalarBaseMult");
 
                 if (!(extensionMethod is null))
-                    s_ScalarBaseMultByRef = extensionMethod.CreateStaticDelegate(typeof(ScalarBaseMultByRef)) as ScalarBaseMultByRef;
+                    s_ScalarBaseMultByPtr = extensionMethod.CreateStaticDelegate(typeof(ScalarBaseMultByPtr)) as ScalarBaseMultByPtr;
 
-                if (s_ScalarBaseMultByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ScalarBaseMult");
+                extensionMethod = targetType.GetExtensionMethod("ScalarBaseMult");
 
-                    if (!(extensionMethod is null))
-                        s_ScalarBaseMultByVal = extensionMethod.CreateStaticDelegate(typeof(ScalarBaseMultByVal)) as ScalarBaseMultByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ScalarBaseMultByVal = extensionMethod.CreateStaticDelegate(typeof(ScalarBaseMultByVal)) as ScalarBaseMultByVal;
 
-                if (s_ScalarBaseMultByRef is null && s_ScalarBaseMultByVal is null)
+                if (s_ScalarBaseMultByPtr is null && s_ScalarBaseMultByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Curve.ScalarBaseMult method", new Exception("ScalarBaseMult"));
             }
 

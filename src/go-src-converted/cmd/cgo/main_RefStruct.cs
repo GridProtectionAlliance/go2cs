@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:52:43 UTC
+//     Generated on 2020 October 08 04:09:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using printer = go.go.printer_package;
 using token = go.go.token_package;
+using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -42,13 +43,15 @@ namespace go
                 this.Name = default;
                 this.Expr = default;
                 this.Context = default;
+                this.Done = default;
             }
 
-            public Ref(ref ptr<Name> Name = default, ref ptr<ast.Expr> Expr = default, astContext Context = default)
+            public Ref(ref ptr<Name> Name = default, ref ptr<ast.Expr> Expr = default, astContext Context = default, bool Done = default)
             {
                 this.Name = Name;
                 this.Expr = Expr;
                 this.Context = Context;
+                this.Done = Done;
             }
 
             // Enable comparisons between nil and Ref struct
@@ -71,7 +74,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Ref Ref_cast(dynamic value)
         {
-            return new Ref(ref value.Name, ref value.Expr, value.Context);
+            return new Ref(ref value.Name, ref value.Expr, value.Context, value.Done);
         }
     }
 }

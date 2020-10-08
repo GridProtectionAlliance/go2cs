@@ -27,6 +27,10 @@ It is a comma-separated list of name=val pairs setting these named variables:
     allocfreetrace: setting allocfreetrace=1 causes every allocation to be
     profiled and a stack trace printed on each object's allocation and free.
 
+    clobberfree: setting clobberfree=1 causes the garbage collector to
+    clobber the memory content of an object with bad content when it frees
+    the object.
+
     cgocheck: setting cgocheck=0 disables all checks for packages
     using cgo to incorrectly pass Go pointers to non-Go code.
     Setting cgocheck=1 (the default) enables relatively cheap
@@ -50,19 +54,13 @@ It is a comma-separated list of name=val pairs setting these named variables:
     gcshrinkstackoff: setting gcshrinkstackoff=1 disables moving goroutines
     onto smaller stacks. In this mode, a goroutine's stack can only grow.
 
-    gcrescanstacks: setting gcrescanstacks=1 enables stack
-    re-scanning during the STW mark termination phase. This is
-    helpful for debugging if objects are being prematurely
-    garbage collected.
-
     gcstoptheworld: setting gcstoptheworld=1 disables concurrent garbage collection,
     making every garbage collection a stop-the-world event. Setting gcstoptheworld=2
     also disables concurrent sweeping after the garbage collection finishes.
 
     gctrace: setting gctrace=1 causes the garbage collector to emit a single line to standard
     error at each collection, summarizing the amount of memory collected and the
-    length of the pause. Setting gctrace=2 emits the same summary but also
-    repeats each collection. The format of this line is subject to change.
+    length of the pause. The format of this line is subject to change.
     Currently, it is:
         gc # @#s #%: #+#+# ms clock, #+#/#/#+# ms cpu, #->#-># MB, # MB goal, # P
     where the fields are as follows:
@@ -80,26 +78,16 @@ It is a comma-separated list of name=val pairs setting these named variables:
     If the line ends with "(forced)", this GC was forced by a
     runtime.GC() call.
 
-    Setting gctrace to any value > 0 also causes the garbage collector
-    to emit a summary when memory is released back to the system.
-    This process of returning memory to the system is called scavenging.
-    The format of this summary is subject to change.
-    Currently it is:
-        scvg#: # MB released  printed only if non-zero
-        scvg#: inuse: # idle: # sys: # released: # consumed: # (MB)
-    where the fields are as follows:
-        scvg#        the scavenge cycle number, incremented at each scavenge
-        inuse: #     MB used or partially used spans
-        idle: #      MB spans pending scavenging
-        sys: #       MB mapped from the system
-        released: #  MB released to the system
-        consumed: #  MB allocated from the system
+    madvdontneed: setting madvdontneed=1 will use MADV_DONTNEED
+    instead of MADV_FREE on Linux when returning memory to the
+    kernel. This is less efficient, but causes RSS numbers to drop
+    more quickly.
 
     memprofilerate: setting memprofilerate=X will update the value of runtime.MemProfileRate.
     When set to 0 memory profiling is disabled.  Refer to the description of
     MemProfileRate for the default value.
 
-    invalidptr: defaults to invalidptr=1, causing the garbage collector and stack
+    invalidptr: invalidptr=1 (the default) causes the garbage collector and stack
     copier to crash the program if an invalid pointer value (for example, 1)
     is found in a pointer-typed location. Setting invalidptr=0 disables this check.
     This should only be used as a temporary workaround to diagnose buggy code.
@@ -111,6 +99,20 @@ It is a comma-separated list of name=val pairs setting these named variables:
 
     scavenge: scavenge=1 enables debugging mode of heap scavenger.
 
+    scavtrace: setting scavtrace=1 causes the runtime to emit a single line to standard
+    error, roughly once per GC cycle, summarizing the amount of work done by the
+    scavenger as well as the total amount of memory returned to the operating system
+    and an estimate of physical memory utilization. The format of this line is subject
+    to change, but currently it is:
+        scav # # KiB work, # KiB total, #% util
+    where the fields are as follows:
+        scav #       the scavenge cycle number
+        # KiB work   the amount of memory returned to the OS since the last line
+        # KiB total  the total amount of memory returned to the OS
+        #% util      the fraction of all unscavenged memory which is in-use
+    If the line ends with "(forced)", then scavenging was forced by a
+    debug.FreeOSMemory() call.
+
     scheddetail: setting schedtrace=X and scheddetail=1 causes the scheduler to emit
     detailed multiline info every X milliseconds, describing state of the scheduler,
     processors, threads and goroutines.
@@ -118,7 +120,20 @@ It is a comma-separated list of name=val pairs setting these named variables:
     schedtrace: setting schedtrace=X causes the scheduler to emit a single line to standard
     error every X milliseconds, summarizing the scheduler state.
 
-The net and net/http packages also refer to debugging variables in GODEBUG.
+    tracebackancestors: setting tracebackancestors=N extends tracebacks with the stacks at
+    which goroutines were created, where N limits the number of ancestor goroutines to
+    report. This also extends the information returned by runtime.Stack. Ancestor's goroutine
+    IDs will refer to the ID of the goroutine at the time of creation; it's possible for this
+    ID to be reused for another goroutine. Setting N to 0 will report no ancestry information.
+
+    asyncpreemptoff: asyncpreemptoff=1 disables signal-based
+    asynchronous goroutine preemption. This makes some loops
+    non-preemptible for long periods, which may delay GC and
+    goroutine scheduling. This is useful for debugging GC issues
+    because it also disables the conservative stack scanning used
+    for asynchronously preempted goroutines.
+
+The net, net/http, and crypto/tls packages also refer to debugging variables in GODEBUG.
 See the documentation for those packages for details.
 
 The GOMAXPROCS variable limits the number of operating system threads that
@@ -126,6 +141,9 @@ can execute user-level Go code simultaneously. There is no limit to the number o
 that can be blocked in system calls on behalf of Go code; those do not count against
 the GOMAXPROCS limit. This package's GOMAXPROCS function queries and changes
 the limit.
+
+The GORACE variable configures the race detector, for programs built using -race.
+See https://golang.org/doc/articles/race_detector.html for details.
 
 The GOTRACEBACK variable controls the amount of output generated when a Go
 program fails due to an unrecovered panic or an unexpected runtime condition.
@@ -155,7 +173,7 @@ GOARCH, GOOS, and GOROOT are recorded at compile time and made available by
 constants or functions in this package, but they do not influence the execution
 of the run-time system.
 */
-// package runtime -- go2cs converted at 2020 August 29 08:16:55 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:43 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\extern.go
 using sys = go.runtime.@internal.sys_package;
@@ -172,30 +190,21 @@ namespace go
         // program counter, file name, and line number within the file of the corresponding
         // call. The boolean ok is false if it was not possible to recover the information.
         public static (System.UIntPtr, @string, long, bool) Caller(long skip)
-        { 
-            // Make room for three PCs: the one we were asked for,
-            // what it called, so that CallersFrames can see if it "called"
-            // sigpanic, and possibly a PC for skipPleaseUseCallersFrames.
-            array<System.UIntPtr> rpc = new array<System.UIntPtr>(3L);
-            if (callers(1L + skip - 1L, rpc[..]) < 2L)
+        {
+            System.UIntPtr pc = default;
+            @string file = default;
+            long line = default;
+            bool ok = default;
+
+            var rpc = make_slice<System.UIntPtr>(1L);
+            var n = callers(skip + 1L, rpc[..]);
+            if (n < 1L)
             {
-                return;
+                return ;
             }
-            stackExpander stackExpander = default;
-            var callers = stackExpander.init(rpc[..]); 
-            // We asked for one extra, so skip that one. If this is sigpanic,
-            // stepping over this frame will set up state in Frames so the
-            // next frame is correct.
-            callers, _, ok = stackExpander.next(callers, true);
-            if (!ok)
-            {
-                return;
-            }
-            var (_, frame, _) = stackExpander.next(callers, true);
-            pc = frame.PC;
-            file = frame.File;
-            line = frame.Line;
-            return;
+            var (frame, _) = CallersFrames(rpc).Next();
+            return (frame.PC, frame.File, frame.Line, frame.PC != 0L);
+
         }
 
         // Callers fills the slice pc with the return program counters of function invocations
@@ -220,7 +229,9 @@ namespace go
             {
                 return 0L;
             }
+
             return callers(skip, pc);
+
         }
 
         // GOROOT returns the root of the Go tree. It uses the
@@ -233,7 +244,9 @@ namespace go
             {
                 return s;
             }
+
             return sys.DefaultGoroot;
+
         }
 
         // Version returns the Go tree's version string.
@@ -246,7 +259,8 @@ namespace go
 
         // GOOS is the running program's operating system target:
         // one of darwin, freebsd, linux, and so on.
-        public static readonly @string GOOS = sys.GOOS;
+        // To view possible combinations of GOOS and GOARCH, run "go tool dist list".
+        public static readonly @string GOOS = (@string)sys.GOOS;
 
         // GOARCH is the running program's architecture target:
         // one of 386, amd64, arm, s390x, and so on.
@@ -254,7 +268,7 @@ namespace go
 
         // GOARCH is the running program's architecture target:
         // one of 386, amd64, arm, s390x, and so on.
-        public static readonly @string GOARCH = sys.GOARCH;
+        public static readonly @string GOARCH = (@string)sys.GOARCH;
 
     }
 }

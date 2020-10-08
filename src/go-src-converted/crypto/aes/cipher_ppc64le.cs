@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package aes -- go2cs converted at 2020 August 29 08:28:46 UTC
+// package aes -- go2cs converted at 2020 October 08 03:35:49 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\cipher_ppc64le.go
 using cipher = go.crypto.cipher_package;
+using subtle = go.crypto.@internal.subtle_package;
 using static go.builtin;
 
 namespace go {
@@ -16,27 +17,23 @@ namespace crypto
         // defined in asm_ppc64le.s
 
         //go:noescape
-        private static long setEncryptKeyAsm(ref byte key, long keylen, ref uint enc)
+        private static long setEncryptKeyAsm(ptr<byte> key, long keylen, ptr<uint> enc)
 ;
 
         //go:noescape
-
-        private static long setDecryptKeyAsm(ref byte key, long keylen, ref uint dec)
+        private static long setDecryptKeyAsm(ptr<byte> key, long keylen, ptr<uint> dec)
 ;
 
         //go:noescape
-
-        private static long doEncryptKeyAsm(ref byte key, long keylen, ref uint dec)
+        private static long doEncryptKeyAsm(ptr<byte> key, long keylen, ptr<uint> dec)
 ;
 
         //go:noescape
-
-        private static void encryptBlockAsm(ref byte dst, ref byte src, ref uint enc)
+        private static void encryptBlockAsm(ptr<byte> dst, ptr<byte> src, ptr<uint> enc)
 ;
 
         //go:noescape
-
-        private static void decryptBlockAsm(ref byte dst, ref byte src, ref uint dec)
+        private static void decryptBlockAsm(ptr<byte> dst, ptr<byte> src, ptr<uint> dec)
 ;
 
         private partial struct aesCipherAsm
@@ -46,58 +43,85 @@ namespace crypto
 
         private static (cipher.Block, error) newCipher(slice<byte> key)
         {
+            cipher.Block _p0 = default;
+            error _p0 = default!;
+
             long n = 64L; // size is fixed for all and round value is stored inside it too
-            aesCipherAsm c = new aesCipherAsm(aesCipher{make([]uint32,n),make([]uint32,n)});
+            ref aesCipherAsm c = ref heap(new aesCipherAsm(aesCipher{make([]uint32,n),make([]uint32,n)}), out ptr<aesCipherAsm> _addr_c);
             var k = len(key);
 
             long ret = 0L;
-            ret += setEncryptKeyAsm(ref key[0L], k * 8L, ref c.enc[0L]);
-            ret += setDecryptKeyAsm(ref key[0L], k * 8L, ref c.dec[0L]);
+            ret += setEncryptKeyAsm(_addr_key[0L], k * 8L, _addr_c.enc[0L]);
+            ret += setDecryptKeyAsm(_addr_key[0L], k * 8L, _addr_c.dec[0L]);
 
             if (ret > 0L)
             {>>MARKER:FUNCTION_decryptBlockAsm_BLOCK_PREFIX<<
-                return (null, KeySizeError(k));
+                return (null, error.As(KeySizeError(k))!);
             }
-            return (ref c, null);
+
+            return (_addr_c, error.As(null!)!);
+
         }
 
-        private static long BlockSize(this ref aesCipherAsm c)
-        {>>MARKER:FUNCTION_encryptBlockAsm_BLOCK_PREFIX<<
+        private static long BlockSize(this ptr<aesCipherAsm> _addr_c)
+        {
+            ref aesCipherAsm c = ref _addr_c.val;
+
             return BlockSize;
         }
 
-        private static void Encrypt(this ref aesCipherAsm _c, slice<byte> dst, slice<byte> src) => func(_c, (ref aesCipherAsm c, Defer _, Panic panic, Recover __) =>
-        {>>MARKER:FUNCTION_doEncryptKeyAsm_BLOCK_PREFIX<<
+        private static void Encrypt(this ptr<aesCipherAsm> _addr_c, slice<byte> dst, slice<byte> src) => func((_, panic, __) =>
+        {
+            ref aesCipherAsm c = ref _addr_c.val;
+
             if (len(src) < BlockSize)
-            {>>MARKER:FUNCTION_setDecryptKeyAsm_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_encryptBlockAsm_BLOCK_PREFIX<<
                 panic("crypto/aes: input not full block");
             }
+
             if (len(dst) < BlockSize)
-            {>>MARKER:FUNCTION_setEncryptKeyAsm_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_doEncryptKeyAsm_BLOCK_PREFIX<<
                 panic("crypto/aes: output not full block");
             }
-            encryptBlockAsm(ref dst[0L], ref src[0L], ref c.enc[0L]);
+
+            if (subtle.InexactOverlap(dst[..BlockSize], src[..BlockSize]))
+            {>>MARKER:FUNCTION_setDecryptKeyAsm_BLOCK_PREFIX<<
+                panic("crypto/aes: invalid buffer overlap");
+            }
+
+            encryptBlockAsm(_addr_dst[0L], _addr_src[0L], _addr_c.enc[0L]);
+
         });
 
-        private static void Decrypt(this ref aesCipherAsm _c, slice<byte> dst, slice<byte> src) => func(_c, (ref aesCipherAsm c, Defer _, Panic panic, Recover __) =>
+        private static void Decrypt(this ptr<aesCipherAsm> _addr_c, slice<byte> dst, slice<byte> src) => func((_, panic, __) =>
         {
+            ref aesCipherAsm c = ref _addr_c.val;
+
             if (len(src) < BlockSize)
-            {
+            {>>MARKER:FUNCTION_setEncryptKeyAsm_BLOCK_PREFIX<<
                 panic("crypto/aes: input not full block");
             }
+
             if (len(dst) < BlockSize)
             {
                 panic("crypto/aes: output not full block");
             }
-            decryptBlockAsm(ref dst[0L], ref src[0L], ref c.dec[0L]);
+
+            if (subtle.InexactOverlap(dst[..BlockSize], src[..BlockSize]))
+            {
+                panic("crypto/aes: invalid buffer overlap");
+            }
+
+            decryptBlockAsm(_addr_dst[0L], _addr_src[0L], _addr_c.dec[0L]);
+
         });
 
         // expandKey is used by BenchmarkExpand to ensure that the asm implementation
         // of key expansion is used for the benchmark when it is available.
         private static void expandKey(slice<byte> key, slice<uint> enc, slice<uint> dec)
         {
-            setEncryptKeyAsm(ref key[0L], len(key) * 8L, ref enc[0L]);
-            setDecryptKeyAsm(ref key[0L], len(key) * 8L, ref dec[0L]);
+            setEncryptKeyAsm(_addr_key[0L], len(key) * 8L, _addr_enc[0L]);
+            setDecryptKeyAsm(_addr_key[0L], len(key) * 8L, _addr_dec[0L]);
         }
     }
 }}

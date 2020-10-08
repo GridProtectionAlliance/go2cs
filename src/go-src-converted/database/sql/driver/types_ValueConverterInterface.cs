@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:48 UTC
+//     Generated on 2020 October 08 04:58:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -54,7 +54,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Value, error) ConvertValueByRef(ref T value, object v);
+            private delegate (Value, error) ConvertValueByPtr(ptr<T> value, object v);
             private delegate (Value, error) ConvertValueByVal(T value, object v);
 
-            private static readonly ConvertValueByRef s_ConvertValueByRef;
+            private static readonly ConvertValueByPtr s_ConvertValueByPtr;
             private static readonly ConvertValueByVal s_ConvertValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,11 +80,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ConvertValueByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ConvertValueByPtr is null || !m_target_is_ptr)
                     return s_ConvertValueByVal!(target, v);
 
-                return s_ConvertValueByRef(ref target, v);
+                return s_ConvertValueByPtr(m_target_ptr, v);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -93,23 +94,20 @@ namespace sql
             static ValueConverter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ConvertValue");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ConvertValue");
 
                 if (!(extensionMethod is null))
-                    s_ConvertValueByRef = extensionMethod.CreateStaticDelegate(typeof(ConvertValueByRef)) as ConvertValueByRef;
+                    s_ConvertValueByPtr = extensionMethod.CreateStaticDelegate(typeof(ConvertValueByPtr)) as ConvertValueByPtr;
 
-                if (s_ConvertValueByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ConvertValue");
+                extensionMethod = targetType.GetExtensionMethod("ConvertValue");
 
-                    if (!(extensionMethod is null))
-                        s_ConvertValueByVal = extensionMethod.CreateStaticDelegate(typeof(ConvertValueByVal)) as ConvertValueByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ConvertValueByVal = extensionMethod.CreateStaticDelegate(typeof(ConvertValueByVal)) as ConvertValueByVal;
 
-                if (s_ConvertValueByRef is null && s_ConvertValueByVal is null)
+                if (s_ConvertValueByPtr is null && s_ConvertValueByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ValueConverter.ConvertValue method", new Exception("ConvertValue"));
             }
 

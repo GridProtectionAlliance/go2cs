@@ -8,7 +8,7 @@
 // are identified by their unique id, instead of their
 // object name.
 
-// package types -- go2cs converted at 2020 August 29 08:47:46 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:35 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\objset.go
 
@@ -29,11 +29,13 @@ namespace go
         // If s already contains an alternative object alt with
         // the same name, insert leaves s unchanged and returns alt.
         // Otherwise it inserts obj and returns nil.
-        private static Object insert(this ref objset s, Object obj)
+        private static Object insert(this ptr<objset> _addr_s, Object obj)
         {
+            ref objset s = ref _addr_s.val;
+
             var id = obj.Id();
             {
-                var alt = (s.Value)[id];
+                var alt = (s.val)[id];
 
                 if (alt != null)
                 {
@@ -41,12 +43,15 @@ namespace go
                 }
 
             }
-            if (s == null.Value)
+
+            if (s == null.val)
             {
-                s.Value = make_map<@string, Object>();
+                s.val = make_map<@string, Object>();
             }
-            (s.Value)[id] = obj;
+
+            (s.val)[id] = obj;
             return null;
+
         }
     }
 }}

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 August 29 08:28:00 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:54 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\tcpsock_posix.go
 using context = go.context_package;
@@ -21,69 +21,121 @@ namespace go
         {
             switch (sa.type())
             {
-                case ref syscall.SockaddrInet4 sa:
-                    return ref new TCPAddr(IP:sa.Addr[0:],Port:sa.Port);
+                case ptr<syscall.SockaddrInet4> sa:
+                    return addr(new TCPAddr(IP:sa.Addr[0:],Port:sa.Port));
                     break;
-                case ref syscall.SockaddrInet6 sa:
-                    return ref new TCPAddr(IP:sa.Addr[0:],Port:sa.Port,Zone:zoneCache.name(int(sa.ZoneId)));
+                case ptr<syscall.SockaddrInet6> sa:
+                    return addr(new TCPAddr(IP:sa.Addr[0:],Port:sa.Port,Zone:zoneCache.name(int(sa.ZoneId))));
                     break;
             }
             return null;
+
         }
 
-        private static long family(this ref TCPAddr a)
+        private static long family(this ptr<TCPAddr> _addr_a)
         {
+            ref TCPAddr a = ref _addr_a.val;
+
             if (a == null || len(a.IP) <= IPv4len)
             {
                 return syscall.AF_INET;
             }
+
             if (a.IP.To4() != null)
             {
                 return syscall.AF_INET;
             }
+
             return syscall.AF_INET6;
+
         }
 
-        private static (syscall.Sockaddr, error) sockaddr(this ref TCPAddr a, long family)
+        private static (syscall.Sockaddr, error) sockaddr(this ptr<TCPAddr> _addr_a, long family)
         {
+            syscall.Sockaddr _p0 = default;
+            error _p0 = default!;
+            ref TCPAddr a = ref _addr_a.val;
+
             if (a == null)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
+
             return ipToSockaddr(family, a.IP, a.Port, a.Zone);
+
         }
 
-        private static sockaddr toLocal(this ref TCPAddr a, @string net)
+        private static sockaddr toLocal(this ptr<TCPAddr> _addr_a, @string net)
         {
-            return ref new TCPAddr(loopbackIP(net),a.Port,a.Zone);
+            ref TCPAddr a = ref _addr_a.val;
+
+            return addr(new TCPAddr(loopbackIP(net),a.Port,a.Zone));
         }
 
-        private static (long, error) readFrom(this ref TCPConn c, io.Reader r)
+        private static (long, error) readFrom(this ptr<TCPConn> _addr_c, io.Reader r)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref TCPConn c = ref _addr_c.val;
+
             {
-                var (n, err, handled) = sendFile(c.fd, r);
+                var n__prev1 = n;
+
+                var (n, err, handled) = splice(c.fd, r);
 
                 if (handled)
                 {
-                    return (n, err);
+                    return (n, error.As(err)!);
                 }
 
+                n = n__prev1;
+
             }
+
+            {
+                var n__prev1 = n;
+
+                (n, err, handled) = sendFile(c.fd, r);
+
+                if (handled)
+                {
+                    return (n, error.As(err)!);
+                }
+
+                n = n__prev1;
+
+            }
+
             return genericReadFrom(c, r);
+
         }
 
-        private static (ref TCPConn, error) dialTCP(context.Context ctx, @string net, ref TCPAddr laddr, ref TCPAddr raddr)
+        private static (ptr<TCPConn>, error) dialTCP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<TCPAddr> _addr_laddr, ptr<TCPAddr> _addr_raddr)
         {
+            ptr<TCPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysDialer sd = ref _addr_sd.val;
+            ref TCPAddr laddr = ref _addr_laddr.val;
+            ref TCPAddr raddr = ref _addr_raddr.val;
+
             if (testHookDialTCP != null)
             {
-                return testHookDialTCP(ctx, net, laddr, raddr);
+                return _addr_testHookDialTCP(ctx, sd.network, laddr, raddr)!;
             }
-            return doDialTCP(ctx, net, laddr, raddr);
+
+            return _addr_sd.doDialTCP(ctx, laddr, raddr)!;
+
         }
 
-        private static (ref TCPConn, error) doDialTCP(context.Context ctx, @string net, ref TCPAddr laddr, ref TCPAddr raddr)
+        private static (ptr<TCPConn>, error) doDialTCP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<TCPAddr> _addr_laddr, ptr<TCPAddr> _addr_raddr)
         {
-            var (fd, err) = internetSocket(ctx, net, laddr, raddr, syscall.SOCK_STREAM, 0L, "dial"); 
+            ptr<TCPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysDialer sd = ref _addr_sd.val;
+            ref TCPAddr laddr = ref _addr_laddr.val;
+            ref TCPAddr raddr = ref _addr_raddr.val;
+
+            var (fd, err) = internetSocket(ctx, sd.network, laddr, raddr, syscall.SOCK_STREAM, 0L, "dial", sd.Dialer.Control); 
 
             // TCP has a rarely used mechanism called a 'simultaneous connection' in
             // which Dial("tcp", addr1, addr2) run on the machine at addr1 can
@@ -101,7 +153,7 @@ namespace go
             // close the fd and try again. If it happens twice more, we relent and
             // use the result. See also:
             //    https://golang.org/issue/2690
-            //    http://stackoverflow.com/questions/4949858/
+            //    https://stackoverflow.com/questions/4949858/
             //
             // The opposite can also happen: if we ask the kernel to pick an appropriate
             // originating local address, sometimes it picks one that is already in use.
@@ -109,25 +161,31 @@ namespace go
             // a different reason.
             //
             // The kernel socket code is no doubt enjoying watching us squirm.
-            for (long i = 0L; i < 2L && (laddr == null || laddr.Port == 0L) && (selfConnect(fd, err) || spuriousENOTAVAIL(err)); i++)
+            for (long i = 0L; i < 2L && (laddr == null || laddr.Port == 0L) && (selfConnect(_addr_fd, err) || spuriousENOTAVAIL(err)); i++)
             {
                 if (err == null)
                 {
                     fd.Close();
                 }
-                fd, err = internetSocket(ctx, net, laddr, raddr, syscall.SOCK_STREAM, 0L, "dial");
+
+                fd, err = internetSocket(ctx, sd.network, laddr, raddr, syscall.SOCK_STREAM, 0L, "dial", sd.Dialer.Control);
+
             }
 
 
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newTCPConn(fd), null);
+
+            return (_addr_newTCPConn(fd)!, error.As(null!)!);
+
         }
 
-        private static bool selfConnect(ref netFD fd, error err)
-        { 
+        private static bool selfConnect(ptr<netFD> _addr_fd, error err)
+        {
+            ref netFD fd = ref _addr_fd.val;
+ 
             // If the connect failed, we clearly didn't connect to ourselves.
             if (err != null)
             {
@@ -146,15 +204,17 @@ namespace go
             {
                 return true;
             }
-            ref TCPAddr l = fd.laddr._<ref TCPAddr>();
-            ref TCPAddr r = fd.raddr._<ref TCPAddr>();
+
+            ptr<TCPAddr> l = fd.laddr._<ptr<TCPAddr>>();
+            ptr<TCPAddr> r = fd.raddr._<ptr<TCPAddr>>();
             return l.Port == r.Port && l.IP.Equal(r.IP);
+
         }
 
         private static bool spuriousENOTAVAIL(error err)
         {
             {
-                ref OpError (op, ok) = err._<ref OpError>();
+                ptr<OpError> (op, ok) = err._<ptr<OpError>>();
 
                 if (ok)
                 {
@@ -162,8 +222,9 @@ namespace go
                 }
 
             }
+
             {
-                ref os.SyscallError (sys, ok) = err._<ref os.SyscallError>();
+                ptr<os.SyscallError> (sys, ok) = err._<ptr<os.SyscallError>>();
 
                 if (ok)
                 {
@@ -171,47 +232,86 @@ namespace go
                 }
 
             }
+
             return err == syscall.EADDRNOTAVAIL;
+
         }
 
-        private static bool ok(this ref TCPListener ln)
+        private static bool ok(this ptr<TCPListener> _addr_ln)
         {
+            ref TCPListener ln = ref _addr_ln.val;
+
             return ln != null && ln.fd != null;
         }
 
-        private static (ref TCPConn, error) accept(this ref TCPListener ln)
+        private static (ptr<TCPConn>, error) accept(this ptr<TCPListener> _addr_ln)
         {
+            ptr<TCPConn> _p0 = default!;
+            error _p0 = default!;
+            ref TCPListener ln = ref _addr_ln.val;
+
             var (fd, err) = ln.fd.accept();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newTCPConn(fd), null);
+
+            var tc = newTCPConn(fd);
+            if (ln.lc.KeepAlive >= 0L)
+            {
+                setKeepAlive(fd, true);
+                var ka = ln.lc.KeepAlive;
+                if (ln.lc.KeepAlive == 0L)
+                {
+                    ka = defaultTCPKeepAlive;
+                }
+
+                setKeepAlivePeriod(fd, ka);
+
+            }
+
+            return (_addr_tc!, error.As(null!)!);
+
         }
 
-        private static error close(this ref TCPListener ln)
+        private static error close(this ptr<TCPListener> _addr_ln)
         {
-            return error.As(ln.fd.Close());
+            ref TCPListener ln = ref _addr_ln.val;
+
+            return error.As(ln.fd.Close())!;
         }
 
-        private static (ref os.File, error) file(this ref TCPListener ln)
+        private static (ptr<os.File>, error) file(this ptr<TCPListener> _addr_ln)
         {
+            ptr<os.File> _p0 = default!;
+            error _p0 = default!;
+            ref TCPListener ln = ref _addr_ln.val;
+
             var (f, err) = ln.fd.dup();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (f, null);
+
+            return (_addr_f!, error.As(null!)!);
+
         }
 
-        private static (ref TCPListener, error) listenTCP(context.Context ctx, @string network, ref TCPAddr laddr)
+        private static (ptr<TCPListener>, error) listenTCP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<TCPAddr> _addr_laddr)
         {
-            var (fd, err) = internetSocket(ctx, network, laddr, null, syscall.SOCK_STREAM, 0L, "listen");
+            ptr<TCPListener> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref TCPAddr laddr = ref _addr_laddr.val;
+
+            var (fd, err) = internetSocket(ctx, sl.network, laddr, null, syscall.SOCK_STREAM, 0L, "listen", sl.ListenConfig.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (ref new TCPListener(fd), null);
+
+            return (addr(new TCPListener(fd:fd,lc:sl.ListenConfig)), error.As(null!)!);
+
         }
     }
 }

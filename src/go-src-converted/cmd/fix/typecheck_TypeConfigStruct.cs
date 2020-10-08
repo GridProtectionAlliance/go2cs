@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:26 UTC
+//     Generated on 2020 October 08 04:33:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace go
                 this.External = default;
             }
 
-            public TypeConfig(map<@string, ref Type> Type = default, map<@string, @string> Var = default, map<@string, @string> Func = default, map<@string, @string> External = default)
+            public TypeConfig(map<@string, ptr<Type>> Type = default, map<@string, @string> Var = default, map<@string, @string> Func = default, map<@string, @string> External = default)
             {
                 this.Type = Type;
                 this.Var = Var;

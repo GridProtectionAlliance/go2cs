@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:45 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:10 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\bits.go
 
@@ -12,15 +12,16 @@ namespace go
 {
     public static partial class math_package
     {
-        private static readonly ulong uvnan = 0x7FF8000000000001UL;
-        private static readonly ulong uvinf = 0x7FF0000000000000UL;
-        private static readonly ulong uvneginf = 0xFFF0000000000000UL;
-        private static readonly ulong uvone = 0x3FF0000000000000UL;
-        private static readonly ulong mask = 0x7FFUL;
-        private static readonly long shift = 64L - 11L - 1L;
-        private static readonly long bias = 1023L;
-        private static readonly long signMask = 1L << (int)(63L);
-        private static readonly long fracMask = 1L << (int)(shift) - 1L;
+        private static readonly ulong uvnan = (ulong)0x7FF8000000000001UL;
+        private static readonly ulong uvinf = (ulong)0x7FF0000000000000UL;
+        private static readonly ulong uvneginf = (ulong)0xFFF0000000000000UL;
+        private static readonly ulong uvone = (ulong)0x3FF0000000000000UL;
+        private static readonly ulong mask = (ulong)0x7FFUL;
+        private static readonly long shift = (long)64L - 11L - 1L;
+        private static readonly long bias = (long)1023L;
+        private static readonly long signMask = (long)1L << (int)(63L);
+        private static readonly long fracMask = (long)1L << (int)(shift) - 1L;
+
 
         // Inf returns positive infinity if sign >= 0, negative infinity if sign < 0.
         public static double Inf(long sign)
@@ -34,7 +35,9 @@ namespace go
             {
                 v = uvneginf;
             }
+
             return Float64frombits(v);
+
         }
 
         // NaN returns an IEEE 754 ``not-a-number'' value.
@@ -45,12 +48,15 @@ namespace go
 
         // IsNaN reports whether f is an IEEE 754 ``not-a-number'' value.
         public static bool IsNaN(double f)
-        { 
+        {
+            bool @is = default;
+ 
             // IEEE 754 says that only NaNs satisfy f != f.
             // To avoid the floating-point hardware, could use:
             //    x := Float64bits(f);
             //    return uint32(x>>shift)&mask == mask && x != uvinf && x != uvneginf
             return f != f;
+
         }
 
         // IsInf reports whether f is an infinity, according to sign.
@@ -64,19 +70,25 @@ namespace go
             //    x := Float64bits(f);
             //    return sign >= 0 && x == uvinf || sign <= 0 && x == uvneginf;
             return sign >= 0L && f > MaxFloat64 || sign <= 0L && f < -MaxFloat64;
+
         }
 
         // normalize returns a normal number y and exponent exp
         // satisfying x == y × 2**exp. It assumes x is finite and non-zero.
         private static (double, long) normalize(double x)
         {
-            const float SmallestNormal = 2.2250738585072014e-308F; // 2**-1022
+            double y = default;
+            long exp = default;
+
+            const float SmallestNormal = (float)2.2250738585072014e-308F; // 2**-1022
  // 2**-1022
             if (Abs(x) < SmallestNormal)
             {
                 return (x * (1L << (int)(52L)), -52L);
             }
+
             return (x, 0L);
+
         }
     }
 }

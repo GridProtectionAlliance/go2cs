@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:17 UTC
+//     Generated on 2020 October 08 03:30:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace go
                 this.Name = default;
             }
 
-            public IfAnnounceMsghdr(ushort Msglen = default, byte Version = default, byte Type = default, ushort Hdrlen = default, ushort Index = default, ushort What = default, array<byte> Name = default)
+            public IfAnnounceMsghdr(ushort Msglen = default, byte Version = default, byte Type = default, ushort Hdrlen = default, ushort Index = default, ushort What = default, array<sbyte> Name = default)
             {
                 this.Msglen = Msglen;
                 this.Version = Version;

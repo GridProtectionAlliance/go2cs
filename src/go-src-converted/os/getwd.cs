@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:44:06 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:49 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\getwd.go
 using runtime = go.runtime_package;
@@ -27,6 +27,9 @@ namespace go
         // Getwd may return any one of them.
         public static (@string, error) Getwd()
         {
+            @string dir = default;
+            error err = default!;
+
             if (runtime.GOOS == "windows" || runtime.GOOS == "plan9")
             {
                 return syscall.Getwd();
@@ -37,16 +40,18 @@ namespace go
             var (dot, err) = statNolog(".");
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             dir = Getenv("PWD");
             if (len(dir) > 0L && dir[0L] == '/')
             {
                 var (d, err) = statNolog(dir);
                 if (err == null && SameFile(dot, d))
                 {
-                    return (dir, null);
+                    return (dir, error.As(null!)!);
                 }
+
             } 
 
             // If the operating system provides a Getwd call, use it.
@@ -56,8 +61,9 @@ namespace go
                 var (s, e) = syscall.Getwd();
                 if (useSyscallwd(e))
                 {
-                    return (s, NewSyscallError("getwd", e));
+                    return (s, error.As(NewSyscallError("getwd", e))!);
                 }
+
             } 
 
             // Apply same kludge but to cached dir instead of $PWD.
@@ -69,8 +75,9 @@ namespace go
                 (d, err) = statNolog(dir);
                 if (err == null && SameFile(dot, d))
                 {
-                    return (dir, null);
+                    return (dir, error.As(null!)!);
                 }
+
             } 
 
             // Root is a special case because it has no parent
@@ -79,11 +86,13 @@ namespace go
             if (err != null)
             { 
                 // Can't stat root - no hope.
-                return ("", err);
+                return ("", error.As(err)!);
+
             }
+
             if (SameFile(root, dot))
             {
-                return ("/", null);
+                return ("/", error.As(null!)!);
             } 
 
             // General algorithm: find name in parent
@@ -97,22 +106,25 @@ namespace go
                 {
                     if (len(parent) >= 1024L)
                     { // Sanity check
-                        return ("", syscall.ENAMETOOLONG);
+                        return ("", error.As(syscall.ENAMETOOLONG)!);
                     parent = "../" + parent;
                     }
+
                     var (fd, err) = openFileNolog(parent, O_RDONLY, 0L);
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     }
+
                     while (true)
                     {
                         var (names, err) = fd.Readdirnames(100L);
                         if (err != null)
                         {
                             fd.Close();
-                            return ("", err);
+                            return ("", error.As(err)!);
                         }
+
                         foreach (var (_, name) in names)
                         {
                             var (d, _) = lstatNolog(parent + "/" + name);
@@ -121,7 +133,9 @@ namespace go
                                 dir = "/" + name + dir;
                                 goto Found;
                             }
+
                         }
+
                     }
 
 
@@ -129,8 +143,9 @@ Found:
                     var (pd, err) = fd.Stat();
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     }
+
                     fd.Close();
                     if (SameFile(pd, root))
                     {
@@ -138,6 +153,7 @@ Found:
                     } 
                     // Set up for next round.
                     dot = pd;
+
                 } 
 
                 // Save answer as hint to avoid the expensive path next time.
@@ -149,7 +165,8 @@ Found:
             getwdCache.dir = dir;
             getwdCache.Unlock();
 
-            return (dir, null);
+            return (dir, error.As(null!)!);
+
         }
     }
 }

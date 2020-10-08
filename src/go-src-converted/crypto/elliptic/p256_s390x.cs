@@ -4,11 +4,13 @@
 
 // +build s390x
 
-// package elliptic -- go2cs converted at 2020 August 29 08:30:44 UTC
+// package elliptic -- go2cs converted at 2020 October 08 03:36:33 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Go\src\crypto\elliptic\p256_s390x.go
 using subtle = go.crypto.subtle_package;
+using cpu = go.@internal.cpu_package;
 using big = go.math.big_package;
+using @unsafe = go.@unsafe_package;
 using static go.builtin;
 
 namespace go {
@@ -16,9 +18,13 @@ namespace crypto
 {
     public static partial class elliptic_package
     {
+        private static readonly var offsetS390xHasVX = (var)@unsafe.Offsetof(cpu.S390X.HasVX);
+        private static readonly var offsetS390xHasVE1 = (var)@unsafe.Offsetof(cpu.S390X.HasVXE);
+
+
         private partial struct p256CurveFast
         {
-            public ref CurveParams CurveParams => ref CurveParams_ptr;
+            public ref ptr<CurveParams> ptr<CurveParams> => ref ptr<CurveParams>_ptr;
         }
 
         private partial struct p256Point
@@ -28,37 +34,59 @@ namespace crypto
             public array<byte> z;
         }
 
-        private static Curve p256 = default;        private static ref array<array<p256Point>> p256PreFast = default;
+        private static Curve p256 = default;        private static ptr<array<array<p256Point>>> p256PreFast;
 
-        // hasVectorFacility reports whether the machine has the z/Architecture
-        // vector facility installed and enabled.
-        private static bool hasVectorFacility()
+        //go:noescape
+        private static void p256MulInternalTrampolineSetup()
 ;
 
-        private static var hasVX = hasVectorFacility();
+        //go:noescape
+        private static void p256SqrInternalTrampolineSetup()
+;
+
+        //go:noescape
+        private static void p256MulInternalVX()
+;
+
+        //go:noescape
+        private static void p256MulInternalVMSL()
+;
+
+        //go:noescape
+        private static void p256SqrInternalVX()
+;
+
+        //go:noescape
+        private static void p256SqrInternalVMSL()
+;
 
         private static void initP256Arch()
         {
-            if (hasVX)
-            {>>MARKER:FUNCTION_hasVectorFacility_BLOCK_PREFIX<<
+            if (cpu.S390X.HasVX)
+            {>>MARKER:FUNCTION_p256SqrInternalVMSL_BLOCK_PREFIX<<
                 p256 = new p256CurveFast(p256Params);
                 initTable();
-                return;
+                return ;
             } 
 
             // No vector support, use pure Go implementation.
             p256 = new p256Curve(p256Params);
-            return;
+            return ;
+
         }
 
-        private static ref CurveParams Params(this p256CurveFast curve)
+        private static ptr<CurveParams> Params(this p256CurveFast curve)
         {
-            return curve.CurveParams;
+            return _addr_curve.CurveParams!;
         }
 
         // Functions implemented in p256_asm_s390x.s
         // Montgomery multiplication modulo P256
         //
+        //go:noescape
+        private static void p256SqrAsm(slice<byte> res, slice<byte> in1)
+;
+
         //go:noescape
         private static void p256MulAsm(slice<byte> res, slice<byte> in1, slice<byte> in2)
 ;
@@ -66,7 +94,7 @@ namespace crypto
         // Montgomery square modulo P256
         private static void p256Sqr(slice<byte> res, slice<byte> @in)
         {
-            p256MulAsm(res, in, in);
+            p256SqrAsm(res, in);
         }
 
         // Montgomery multiplication by 1
@@ -78,23 +106,23 @@ namespace crypto
         // iff cond == 1  val <- -val
         //
         //go:noescape
-        private static void p256NegCond(ref p256Point val, long cond)
+        private static void p256NegCond(ptr<p256Point> val, long cond)
 ;
 
         // if cond == 0 res <- b; else res <- a
         //
         //go:noescape
-        private static void p256MovCond(ref p256Point res, ref p256Point a, ref p256Point b, long cond)
+        private static void p256MovCond(ptr<p256Point> res, ptr<p256Point> a, ptr<p256Point> b, long cond)
 ;
 
         // Constant time table access
         //
         //go:noescape
-        private static void p256Select(ref p256Point point, slice<p256Point> table, long idx)
+        private static void p256Select(ptr<p256Point> point, slice<p256Point> table, long idx)
 ;
 
         //go:noescape
-        private static void p256SelectBase(ref p256Point point, slice<p256Point> table, long idx)
+        private static void p256SelectBase(ptr<p256Point> point, slice<p256Point> table, long idx)
 ;
 
         // Montgomery multiplication modulo Ord(G)
@@ -117,6 +145,7 @@ namespace crypto
                 }
 
             }
+
         }
 
         // Point add with P2 being affine point
@@ -125,33 +154,36 @@ namespace crypto
         // if zero == 0 -> P3 = P2
         //
         //go:noescape
-        private static void p256PointAddAffineAsm(ref p256Point P3, ref p256Point P1, ref p256Point P2, long sign, long sel, long zero)
+        private static void p256PointAddAffineAsm(ptr<p256Point> P3, ptr<p256Point> P1, ptr<p256Point> P2, long sign, long sel, long zero)
 ;
 
         // Point add
         //
         //go:noescape
-        private static long p256PointAddAsm(ref p256Point P3, ref p256Point P1, ref p256Point P2)
+        private static long p256PointAddAsm(ptr<p256Point> P3, ptr<p256Point> P1, ptr<p256Point> P2)
 ;
 
         //go:noescape
-        private static void p256PointDoubleAsm(ref p256Point P3, ref p256Point P1)
+        private static void p256PointDoubleAsm(ptr<p256Point> P3, ptr<p256Point> P1)
 ;
 
-        private static ref big.Int Inverse(this p256CurveFast curve, ref big.Int k)
-        {>>MARKER:FUNCTION_p256PointDoubleAsm_BLOCK_PREFIX<<
+        private static ptr<big.Int> Inverse(this p256CurveFast curve, ptr<big.Int> _addr_k)
+        {
+            ref big.Int k = ref _addr_k.val;
+
             if (k.Cmp(p256Params.N) >= 0L)
-            {>>MARKER:FUNCTION_p256PointAddAsm_BLOCK_PREFIX<< 
+            {>>MARKER:FUNCTION_p256PointDoubleAsm_BLOCK_PREFIX<< 
                 // This should never happen.
                 ptr<big.Int> reducedK = @new<big.Int>().Mod(k, p256Params.N);
                 k = reducedK;
+
             } 
 
             // table will store precomputed powers of x. The 32 bytes at index
             // i store x^(i+1).
             array<array<byte>> table = new array<array<byte>>(15L);
 
-            var x = fromBig(k); 
+            var x = fromBig(_addr_k); 
             // This code operates in the Montgomery domain where R = 2^256 mod n
             // and n is the order of the scalar field. (See initP256 for the
             // value.) Elements in the Montgomery domain take the form a×R and
@@ -170,7 +202,7 @@ namespace crypto
                 long i = 2L;
 
                 while (i < 16L)
-                {>>MARKER:FUNCTION_p256PointAddAffineAsm_BLOCK_PREFIX<<
+                {>>MARKER:FUNCTION_p256PointAddAsm_BLOCK_PREFIX<<
                     p256OrdSqr(table[i - 1L][..], table[(i / 2L) - 1L][..], 1L);
                     p256OrdMul(table[i][..], table[i - 1L][..], table[0L][..]);
                     i += 2L;
@@ -206,7 +238,7 @@ namespace crypto
                 long i__prev1 = i;
 
                 for (i = 0L; i < 32L; i++)
-                {>>MARKER:FUNCTION_p256SelectBase_BLOCK_PREFIX<<
+                {>>MARKER:FUNCTION_p256PointAddAffineAsm_BLOCK_PREFIX<<
                     p256OrdSqr(x, x, 4L);
                     p256OrdMul(x, x, table[expLo[i] - 1L][..]);
                 } 
@@ -224,25 +256,30 @@ namespace crypto
             p256OrdMul(x, x, one);
 
             return @new<big.Int>().SetBytes(x);
+
         }
 
         // fromBig converts a *big.Int into a format used by this code.
-        private static slice<byte> fromBig(ref big.Int big)
-        { 
+        private static slice<byte> fromBig(ptr<big.Int> _addr_big)
+        {
+            ref big.Int big = ref _addr_big.val;
+ 
             // This could be done a lot more efficiently...
             var res = big.Bytes();
             if (32L == len(res))
-            {>>MARKER:FUNCTION_p256Select_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_p256SelectBase_BLOCK_PREFIX<<
                 return res;
             }
+
             var t = make_slice<byte>(32L);
             long offset = 32L - len(res);
             for (var i = len(res) - 1L; i >= 0L; i--)
-            {>>MARKER:FUNCTION_p256MovCond_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_p256Select_BLOCK_PREFIX<<
                 t[i + offset] = res[i];
             }
 
             return t;
+
         }
 
         // p256GetMultiplier makes sure byte array will have 32 byte elements, If the scalar
@@ -252,10 +289,12 @@ namespace crypto
             ptr<big.Int> n = @new<big.Int>().SetBytes(in);
 
             if (n.Cmp(p256Params.N) >= 0L)
-            {>>MARKER:FUNCTION_p256NegCond_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_p256MovCond_BLOCK_PREFIX<<
                 n.Mod(n, p256Params.N);
             }
+
             return fromBig(n);
+
         }
 
         // p256MulAsm operates in a Montgomery domain with R = 2^256 mod p, where p is the
@@ -266,25 +305,34 @@ namespace crypto
         // (This is one, in the Montgomery domain.)
         private static byte one = new slice<byte>(new byte[] { 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 });
 
-        private static ref big.Int maybeReduceModP(ref big.Int @in)
+        private static ptr<big.Int> maybeReduceModP(ptr<big.Int> _addr_@in)
         {
+            ref big.Int @in = ref _addr_@in.val;
+
             if (@in.Cmp(p256Params.P) < 0L)
-            {>>MARKER:FUNCTION_p256FromMont_BLOCK_PREFIX<<
-                return in;
+            {>>MARKER:FUNCTION_p256NegCond_BLOCK_PREFIX<<
+                return _addr_in!;
             }
+
             return @new<big.Int>().Mod(in, p256Params.P);
+
         }
 
-        private static (ref big.Int, ref big.Int) CombinedMult(this p256CurveFast curve, ref big.Int bigX, ref big.Int bigY, slice<byte> baseScalar, slice<byte> scalar)
-        {>>MARKER:FUNCTION_p256MulAsm_BLOCK_PREFIX<<
-            p256Point r1 = default;            p256Point r2 = default;
+        private static (ptr<big.Int>, ptr<big.Int>) CombinedMult(this p256CurveFast curve, ptr<big.Int> _addr_bigX, ptr<big.Int> _addr_bigY, slice<byte> baseScalar, slice<byte> scalar)
+        {
+            ptr<big.Int> x = default!;
+            ptr<big.Int> y = default!;
+            ref big.Int bigX = ref _addr_bigX.val;
+            ref big.Int bigY = ref _addr_bigY.val;
+
+            ref p256Point r1 = ref heap(out ptr<p256Point> _addr_r1);            ref p256Point r2 = ref heap(out ptr<p256Point> _addr_r2);
 
             var scalarReduced = p256GetMultiplier(baseScalar);
             var r1IsInfinity = scalarIsZero(scalarReduced);
             r1.p256BaseMult(scalarReduced);
 
-            copy(r2.x[..], fromBig(maybeReduceModP(bigX)));
-            copy(r2.y[..], fromBig(maybeReduceModP(bigY)));
+            copy(r2.x[..], fromBig(_addr_maybeReduceModP(_addr_bigX)));
+            copy(r2.y[..], fromBig(_addr_maybeReduceModP(_addr_bigY)));
             copy(r2.z[..], one);
             p256MulAsm(r2.x[..], r2.x[..], rr[..]);
             p256MulAsm(r2.y[..], r2.y[..], rr[..]);
@@ -293,33 +341,41 @@ namespace crypto
             var r2IsInfinity = scalarIsZero(scalarReduced);
             r2.p256ScalarMult(p256GetMultiplier(scalar));
 
-            p256Point sum = default;            p256Point @double = default;
+            ref p256Point sum = ref heap(out ptr<p256Point> _addr_sum);            ref p256Point @double = ref heap(out ptr<p256Point> _addr_@double);
 
-            var pointsEqual = p256PointAddAsm(ref sum, ref r1, ref r2);
-            p256PointDoubleAsm(ref double, ref r1);
-            p256MovCond(ref sum, ref double, ref sum, pointsEqual);
-            p256MovCond(ref sum, ref r1, ref sum, r2IsInfinity);
-            p256MovCond(ref sum, ref r2, ref sum, r1IsInfinity);
-            return sum.p256PointToAffine();
+            var pointsEqual = p256PointAddAsm(_addr_sum, _addr_r1, _addr_r2);
+            p256PointDoubleAsm(_addr_double, _addr_r1);
+            p256MovCond(_addr_sum, _addr_double, _addr_sum, pointsEqual);
+            p256MovCond(_addr_sum, _addr_r1, _addr_sum, r2IsInfinity);
+            p256MovCond(_addr_sum, _addr_r2, _addr_sum, r1IsInfinity);
+            return _addr_sum.p256PointToAffine()!;
         }
 
-        private static (ref big.Int, ref big.Int) ScalarBaseMult(this p256CurveFast curve, slice<byte> scalar)
+        private static (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(this p256CurveFast curve, slice<byte> scalar)
         {
+            ptr<big.Int> x = default!;
+            ptr<big.Int> y = default!;
+
             p256Point r = default;
             r.p256BaseMult(p256GetMultiplier(scalar));
-            return r.p256PointToAffine();
+            return _addr_r.p256PointToAffine()!;
         }
 
-        private static (ref big.Int, ref big.Int) ScalarMult(this p256CurveFast curve, ref big.Int bigX, ref big.Int bigY, slice<byte> scalar)
+        private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this p256CurveFast curve, ptr<big.Int> _addr_bigX, ptr<big.Int> _addr_bigY, slice<byte> scalar)
         {
+            ptr<big.Int> x = default!;
+            ptr<big.Int> y = default!;
+            ref big.Int bigX = ref _addr_bigX.val;
+            ref big.Int bigY = ref _addr_bigY.val;
+
             p256Point r = default;
-            copy(r.x[..], fromBig(maybeReduceModP(bigX)));
-            copy(r.y[..], fromBig(maybeReduceModP(bigY)));
+            copy(r.x[..], fromBig(_addr_maybeReduceModP(_addr_bigX)));
+            copy(r.y[..], fromBig(_addr_maybeReduceModP(_addr_bigY)));
             copy(r.z[..], one);
             p256MulAsm(r.x[..], r.x[..], rr[..]);
             p256MulAsm(r.y[..], r.y[..], rr[..]);
             r.p256ScalarMult(p256GetMultiplier(scalar));
-            return r.p256PointToAffine();
+            return _addr_r.p256PointToAffine()!;
         }
 
         // scalarIsZero returns 1 if scalar represents the zero value, and zero
@@ -332,10 +388,15 @@ namespace crypto
                 b |= s;
             }
             return subtle.ConstantTimeByteEq(b, 0L);
+
         }
 
-        private static (ref big.Int, ref big.Int) p256PointToAffine(this ref p256Point p)
+        private static (ptr<big.Int>, ptr<big.Int>) p256PointToAffine(this ptr<p256Point> _addr_p)
         {
+            ptr<big.Int> x = default!;
+            ptr<big.Int> y = default!;
+            ref p256Point p = ref _addr_p.val;
+
             var zInv = make_slice<byte>(32L);
             var zInvSq = make_slice<byte>(32L);
 
@@ -381,7 +442,7 @@ namespace crypto
                 long i__prev1 = i;
 
                 for (long i = 0L; i < 7L; i++)
-                {
+                {>>MARKER:FUNCTION_p256FromMont_BLOCK_PREFIX<<
                     p256Sqr(out, out);
                 }
 
@@ -395,7 +456,7 @@ namespace crypto
                 long i__prev1 = i;
 
                 for (i = 0L; i < 15L; i++)
-                {
+                {>>MARKER:FUNCTION_p256MulAsm_BLOCK_PREFIX<<
                     p256Sqr(out, out);
                 }
 
@@ -410,7 +471,7 @@ namespace crypto
                 long i__prev1 = i;
 
                 for (i = 0L; i < 31L; i++)
-                {
+                {>>MARKER:FUNCTION_p256SqrAsm_BLOCK_PREFIX<<
                     p256Sqr(out, out);
                 }
 
@@ -423,7 +484,7 @@ namespace crypto
                 long i__prev1 = i;
 
                 for (i = 0L; i < 32L * 4L; i++)
-                {
+                {>>MARKER:FUNCTION_p256SqrInternalVX_BLOCK_PREFIX<<
                     p256Sqr(out, out);
                 }
 
@@ -436,7 +497,7 @@ namespace crypto
                 long i__prev1 = i;
 
                 for (i = 0L; i < 32L; i++)
-                {
+                {>>MARKER:FUNCTION_p256MulInternalVMSL_BLOCK_PREFIX<<
                     p256Sqr(out, out);
                 }
 
@@ -449,7 +510,7 @@ namespace crypto
                 long i__prev1 = i;
 
                 for (i = 0L; i < 16L; i++)
-                {
+                {>>MARKER:FUNCTION_p256MulInternalVX_BLOCK_PREFIX<<
                     p256Sqr(out, out);
                 }
 
@@ -462,7 +523,7 @@ namespace crypto
                 long i__prev1 = i;
 
                 for (i = 0L; i < 8L; i++)
-                {
+                {>>MARKER:FUNCTION_p256SqrInternalTrampolineSetup_BLOCK_PREFIX<<
                     p256Sqr(out, out);
                 }
 
@@ -484,10 +545,14 @@ namespace crypto
             p256Sqr(out, out);
             p256Sqr(out, out);
             p256MulAsm(out, out, in);
+
         }
 
         private static (long, long) boothW5(ulong @in)
         {
+            long _p0 = default;
+            long _p0 = default;
+
             ulong s = ~((in >> (int)(5L)) - 1L);
             ulong d = (1L << (int)(6L)) - in - 1L;
             d = (d & s) | (in & (~s));
@@ -497,6 +562,9 @@ namespace crypto
 
         private static (long, long) boothW7(ulong @in)
         {
+            long _p0 = default;
+            long _p0 = default;
+
             ulong s = ~((in >> (int)(7L)) - 1L);
             ulong d = (1L << (int)(8L)) - in - 1L;
             d = (d & s) | (in & (~s));
@@ -506,18 +574,18 @@ namespace crypto
 
         private static void initTable()
         {
-            p256PreFast = @new<array<array<p256Point>>>(); //z coordinate not used
-            p256Point basePoint = new p256Point(x:[32]byte{0x18,0x90,0x5f,0x76,0xa5,0x37,0x55,0xc6,0x79,0xfb,0x73,0x2b,0x77,0x62,0x25,0x10,0x75,0xba,0x95,0xfc,0x5f,0xed,0xb6,0x01,0x79,0xe7,0x30,0xd4,0x18,0xa9,0x14,0x3c},y:[32]byte{0x85,0x71,0xff,0x18,0x25,0x88,0x5d,0x85,0xd2,0xe8,0x86,0x88,0xdd,0x21,0xf3,0x25,0x8b,0x4a,0xb8,0xe4,0xba,0x19,0xe4,0x5c,0xdd,0xf2,0x53,0x57,0xce,0x95,0x56,0x0a},z:[32]byte{0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xfe,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01},);
+            p256PreFast = @new<[37][64]p256Point>(); //z coordinate not used
+            ref p256Point basePoint = ref heap(new p256Point(x:[32]byte{0x18,0x90,0x5f,0x76,0xa5,0x37,0x55,0xc6,0x79,0xfb,0x73,0x2b,0x77,0x62,0x25,0x10,0x75,0xba,0x95,0xfc,0x5f,0xed,0xb6,0x01,0x79,0xe7,0x30,0xd4,0x18,0xa9,0x14,0x3c},y:[32]byte{0x85,0x71,0xff,0x18,0x25,0x88,0x5d,0x85,0xd2,0xe8,0x86,0x88,0xdd,0x21,0xf3,0x25,0x8b,0x4a,0xb8,0xe4,0xba,0x19,0xe4,0x5c,0xdd,0xf2,0x53,0x57,0xce,0x95,0x56,0x0a},z:[32]byte{0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xfe,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01},), out ptr<p256Point> _addr_basePoint);
 
             ptr<p256Point> t1 = @new<p256Point>();
             ptr<p256Point> t2 = @new<p256Point>();
-            t2.Value = basePoint;
+            t2.val = basePoint;
 
             var zInv = make_slice<byte>(32L);
             var zInvSq = make_slice<byte>(32L);
             for (long j = 0L; j < 64L; j++)
-            {
-                t1.Value = t2.Value;
+            {>>MARKER:FUNCTION_p256MulInternalTrampolineSetup_BLOCK_PREFIX<<
+                t1.val = t2.val;
                 for (long i = 0L; i < 37L; i++)
                 { 
                     // The window size is 7 so we need to double 7 times.
@@ -527,6 +595,7 @@ namespace crypto
                         {
                             p256PointDoubleAsm(t1, t1);
                         }
+
 
                     } 
                     // Convert the point to affine form. (Its values are
@@ -542,29 +611,34 @@ namespace crypto
                     // Update the table entry
                     copy(p256PreFast[i][j].x[..], t1.x[..]);
                     copy(p256PreFast[i][j].y[..], t1.y[..]);
+
                 }
 
                 if (j == 0L)
                 {
-                    p256PointDoubleAsm(t2, ref basePoint);
+                    p256PointDoubleAsm(t2, _addr_basePoint);
                 }
                 else
                 {
-                    p256PointAddAsm(t2, t2, ref basePoint);
+                    p256PointAddAsm(t2, t2, _addr_basePoint);
                 }
+
             }
+
 
         }
 
-        private static void p256BaseMult(this ref p256Point p, slice<byte> scalar)
+        private static void p256BaseMult(this ptr<p256Point> _addr_p, slice<byte> scalar)
         {
+            ref p256Point p = ref _addr_p.val;
+
             var wvalue = (uint(scalar[31L]) << (int)(1L)) & 0xffUL;
             var (sel, sign) = boothW7(uint(wvalue));
-            p256SelectBase(p, p256PreFast[0L][..], sel);
-            p256NegCond(p, sign);
+            p256SelectBase(_addr_p, p256PreFast[0L][..], sel);
+            p256NegCond(_addr_p, sign);
 
             copy(p.z[..], one[..]);
-            p256Point t0 = default;
+            ref p256Point t0 = ref heap(out ptr<p256Point> _addr_t0);
 
             copy(t0.z[..], one[..]);
 
@@ -581,63 +655,68 @@ namespace crypto
                 {
                     wvalue = (uint(scalar[31L - index / 8L]) >> (int)((index % 8L))) & 0xffUL;
                 }
+
                 index += 7L;
                 sel, sign = boothW7(uint(wvalue));
-                p256SelectBase(ref t0, p256PreFast[i][..], sel);
-                p256PointAddAffineAsm(p, p, ref t0, sign, sel, zero);
+                p256SelectBase(_addr_t0, p256PreFast[i][..], sel);
+                p256PointAddAffineAsm(_addr_p, _addr_p, _addr_t0, sign, sel, zero);
                 zero |= sel;
+
             }
+
 
         }
 
-        private static void p256ScalarMult(this ref p256Point p, slice<byte> scalar)
-        { 
+        private static void p256ScalarMult(this ptr<p256Point> _addr_p, slice<byte> scalar)
+        {
+            ref p256Point p = ref _addr_p.val;
+ 
             // precomp is a table of precomputed points that stores powers of p
             // from p^1 to p^16.
             array<p256Point> precomp = new array<p256Point>(16L);
-            p256Point t0 = default;            p256Point t1 = default;            p256Point t2 = default;            p256Point t3 = default; 
+            ref p256Point t0 = ref heap(out ptr<p256Point> _addr_t0);            ref p256Point t1 = ref heap(out ptr<p256Point> _addr_t1);            ref p256Point t2 = ref heap(out ptr<p256Point> _addr_t2);            ref p256Point t3 = ref heap(out ptr<p256Point> _addr_t3); 
 
             // Prepare the table
  
 
             // Prepare the table
-            ref precomp[0L].Value = p.Value;
+            _addr_precomp[0L].val = p.val;
 
-            p256PointDoubleAsm(ref t0, p);
-            p256PointDoubleAsm(ref t1, ref t0);
-            p256PointDoubleAsm(ref t2, ref t1);
-            p256PointDoubleAsm(ref t3, ref t2);
-            ref precomp[1L].Value = t0; // 2
-            ref precomp[3L].Value = t1; // 4
-            ref precomp[7L].Value = t2; // 8
-            ref precomp[15L].Value = t3; // 16
+            p256PointDoubleAsm(_addr_t0, _addr_p);
+            p256PointDoubleAsm(_addr_t1, _addr_t0);
+            p256PointDoubleAsm(_addr_t2, _addr_t1);
+            p256PointDoubleAsm(_addr_t3, _addr_t2);
+            _addr_precomp[1L].val = t0; // 2
+            _addr_precomp[3L].val = t1; // 4
+            _addr_precomp[7L].val = t2; // 8
+            _addr_precomp[15L].val = t3; // 16
 
-            p256PointAddAsm(ref t0, ref t0, p);
-            p256PointAddAsm(ref t1, ref t1, p);
-            p256PointAddAsm(ref t2, ref t2, p);
-            ref precomp[2L].Value = t0; // 3
-            ref precomp[4L].Value = t1; // 5
-            ref precomp[8L].Value = t2; // 9
+            p256PointAddAsm(_addr_t0, _addr_t0, _addr_p);
+            p256PointAddAsm(_addr_t1, _addr_t1, _addr_p);
+            p256PointAddAsm(_addr_t2, _addr_t2, _addr_p);
+            _addr_precomp[2L].val = t0; // 3
+            _addr_precomp[4L].val = t1; // 5
+            _addr_precomp[8L].val = t2; // 9
 
-            p256PointDoubleAsm(ref t0, ref t0);
-            p256PointDoubleAsm(ref t1, ref t1);
-            ref precomp[5L].Value = t0; // 6
-            ref precomp[9L].Value = t1; // 10
+            p256PointDoubleAsm(_addr_t0, _addr_t0);
+            p256PointDoubleAsm(_addr_t1, _addr_t1);
+            _addr_precomp[5L].val = t0; // 6
+            _addr_precomp[9L].val = t1; // 10
 
-            p256PointAddAsm(ref t2, ref t0, p);
-            p256PointAddAsm(ref t1, ref t1, p);
-            ref precomp[6L].Value = t2; // 7
-            ref precomp[10L].Value = t1; // 11
+            p256PointAddAsm(_addr_t2, _addr_t0, _addr_p);
+            p256PointAddAsm(_addr_t1, _addr_t1, _addr_p);
+            _addr_precomp[6L].val = t2; // 7
+            _addr_precomp[10L].val = t1; // 11
 
-            p256PointDoubleAsm(ref t0, ref t0);
-            p256PointDoubleAsm(ref t2, ref t2);
-            ref precomp[11L].Value = t0; // 12
-            ref precomp[13L].Value = t2; // 14
+            p256PointDoubleAsm(_addr_t0, _addr_t0);
+            p256PointDoubleAsm(_addr_t2, _addr_t2);
+            _addr_precomp[11L].val = t0; // 12
+            _addr_precomp[13L].val = t2; // 14
 
-            p256PointAddAsm(ref t0, ref t0, p);
-            p256PointAddAsm(ref t2, ref t2, p);
-            ref precomp[12L].Value = t0; // 13
-            ref precomp[14L].Value = t2; // 15
+            p256PointAddAsm(_addr_t0, _addr_t0, _addr_p);
+            p256PointAddAsm(_addr_t2, _addr_t2, _addr_p);
+            _addr_precomp[12L].val = t0; // 13
+            _addr_precomp[14L].val = t2; // 15
 
             // Start scanning the window from top bit
             var index = uint(254L);
@@ -647,17 +726,17 @@ namespace crypto
 
             var wvalue = (uint(scalar[31L - index / 8L]) >> (int)((index % 8L))) & 0x3fUL;
             sel, _ = boothW5(uint(wvalue));
-            p256Select(p, precomp[..], sel);
+            p256Select(_addr_p, precomp[..], sel);
             var zero = sel;
 
             while (index > 4L)
             {
                 index -= 5L;
-                p256PointDoubleAsm(p, p);
-                p256PointDoubleAsm(p, p);
-                p256PointDoubleAsm(p, p);
-                p256PointDoubleAsm(p, p);
-                p256PointDoubleAsm(p, p);
+                p256PointDoubleAsm(_addr_p, _addr_p);
+                p256PointDoubleAsm(_addr_p, _addr_p);
+                p256PointDoubleAsm(_addr_p, _addr_p);
+                p256PointDoubleAsm(_addr_p, _addr_p);
+                p256PointDoubleAsm(_addr_p, _addr_p);
 
                 if (index < 247L)
                 {
@@ -667,31 +746,34 @@ namespace crypto
                 {
                     wvalue = (uint(scalar[31L - index / 8L]) >> (int)((index % 8L))) & 0x3fUL;
                 }
+
                 sel, sign = boothW5(uint(wvalue));
 
-                p256Select(ref t0, precomp[..], sel);
-                p256NegCond(ref t0, sign);
-                p256PointAddAsm(ref t1, p, ref t0);
-                p256MovCond(ref t1, ref t1, p, sel);
-                p256MovCond(p, ref t1, ref t0, zero);
+                p256Select(_addr_t0, precomp[..], sel);
+                p256NegCond(_addr_t0, sign);
+                p256PointAddAsm(_addr_t1, _addr_p, _addr_t0);
+                p256MovCond(_addr_t1, _addr_t1, _addr_p, sel);
+                p256MovCond(_addr_p, _addr_t1, _addr_t0, zero);
                 zero |= sel;
+
             }
 
 
-            p256PointDoubleAsm(p, p);
-            p256PointDoubleAsm(p, p);
-            p256PointDoubleAsm(p, p);
-            p256PointDoubleAsm(p, p);
-            p256PointDoubleAsm(p, p);
+            p256PointDoubleAsm(_addr_p, _addr_p);
+            p256PointDoubleAsm(_addr_p, _addr_p);
+            p256PointDoubleAsm(_addr_p, _addr_p);
+            p256PointDoubleAsm(_addr_p, _addr_p);
+            p256PointDoubleAsm(_addr_p, _addr_p);
 
             wvalue = (uint(scalar[31L]) << (int)(1L)) & 0x3fUL;
             sel, sign = boothW5(uint(wvalue));
 
-            p256Select(ref t0, precomp[..], sel);
-            p256NegCond(ref t0, sign);
-            p256PointAddAsm(ref t1, p, ref t0);
-            p256MovCond(ref t1, ref t1, p, sel);
-            p256MovCond(p, ref t1, ref t0, zero);
+            p256Select(_addr_t0, precomp[..], sel);
+            p256NegCond(_addr_t0, sign);
+            p256PointAddAsm(_addr_t1, _addr_p, _addr_t0);
+            p256MovCond(_addr_t1, _addr_t1, _addr_p, sel);
+            p256MovCond(_addr_p, _addr_t1, _addr_t0, zero);
+
         }
     }
 }}

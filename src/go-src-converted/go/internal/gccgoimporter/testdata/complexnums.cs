@@ -1,4 +1,4 @@
-// package complexnums -- go2cs converted at 2020 August 29 10:09:23 UTC
+// package complexnums -- go2cs converted at 2020 October 08 04:56:21 UTC
 // import "go/internal/gccgoimporter.complexnums" ==> using complexnums = go.go.@internal.gccgoimporter.complexnums_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\complexnums.go
 
@@ -10,13 +10,13 @@ namespace @internal
 {
     public static partial class complexnums_package
     {
-        public static readonly long NN = -1L - 1iUL;
+        public static readonly long NN = (long)-1L - 1iUL;
 
-        public static readonly long NP = -1L + 1iUL;
+        public static readonly long NP = (long)-1L + 1iUL;
 
-        public static readonly long PN = 1L - 1iUL;
+        public static readonly long PN = (long)1L - 1iUL;
 
-        public static readonly long PP = 1L + 1iUL;
+        public static readonly long PP = (long)1L + 1iUL;
 
     }
 }}}

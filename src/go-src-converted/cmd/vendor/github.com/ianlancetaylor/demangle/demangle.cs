@@ -5,7 +5,7 @@
 // Package demangle defines functions that demangle GCC/LLVM C++ symbol names.
 // This package recognizes names that were mangled according to the C++ ABI
 // defined at http://codesourcery.com/cxx-abi/.
-// package demangle -- go2cs converted at 2020 August 29 10:07:05 UTC
+// package demangle -- go2cs converted at 2020 October 08 04:44:06 UTC
 // import "cmd/vendor/github.com/ianlancetaylor/demangle" ==> using demangle = go.cmd.vendor.github.com.ianlancetaylor.demangle_package
 // Original source: C:\Go\src\cmd\vendor\github.com\ianlancetaylor\demangle\demangle.go
 using errors = go.errors_package;
@@ -33,17 +33,18 @@ namespace ianlancetaylor
 
  
         // The NoParams option disables demangling of function parameters.
-        public static readonly Option NoParams = iota; 
+        public static readonly Option NoParams = (Option)iota; 
 
         // The NoTemplateParams option disables demangling of template parameters.
-        public static readonly var NoTemplateParams = 0; 
+        public static readonly var NoTemplateParams = (var)0; 
 
         // The NoClones option disables inclusion of clone suffixes.
         // NoParams implies NoClones.
-        public static readonly var NoClones = 1; 
+        public static readonly var NoClones = (var)1; 
 
         // The Verbose option turns on more verbose demangling.
-        public static readonly var Verbose = 2;
+        public static readonly var Verbose = (var)2;
+
 
         // Filter demangles a C++ symbol name, returning the human-readable C++ name.
         // If any error occurs during demangling, the input string is returned.
@@ -56,7 +57,9 @@ namespace ianlancetaylor
             {
                 return name;
             }
+
             return ret;
+
         }
 
         // ToString demangles a C++ symbol name, returning human-readable C++
@@ -65,14 +68,18 @@ namespace ianlancetaylor
         // error will be ErrNotMangledName.
         public static (@string, error) ToString(@string name, params Option[] options)
         {
+            @string _p0 = default;
+            error _p0 = default!;
             options = options.Clone();
 
             var (a, err) = ToAST(name, options);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
-            return (ASTToString(a, options), null);
+
+            return (ASTToString(a, options), error.As(null!)!);
+
         }
 
         // ToAST demangles a C++ symbol name into an abstract syntax tree
@@ -83,14 +90,17 @@ namespace ianlancetaylor
         // error will be ErrNotMangledName.
         public static (AST, error) ToAST(@string name, params Option[] options)
         {
+            AST _p0 = default;
+            error _p0 = default!;
             options = options.Clone();
 
             if (strings.HasPrefix(name, "_Z"))
             {
                 var (a, err) = doDemangle(name[2L..], options);
-                return (a, adjustErr(err, 2L));
+                return (a, error.As(adjustErr(err, 2L))!);
             }
-            const @string prefix = "_GLOBAL_";
+
+            const @string prefix = (@string)"_GLOBAL_";
 
             if (strings.HasPrefix(name, prefix))
             { 
@@ -107,24 +117,31 @@ namespace ianlancetaylor
                     {
                         i++;
                     }
+
                 }
 
                 (a, err) = globalCDtorName(name[len(prefix)..], options);
-                return (a, adjustErr(err, len(prefix)));
+                return (a, error.As(adjustErr(err, len(prefix)))!);
+
             }
-            return (null, ErrNotMangledName);
+
+            return (null, error.As(ErrNotMangledName)!);
+
         }
 
         // globalCDtorName demangles a global constructor/destructor symbol name.
         // The parameter is the string following the "_GLOBAL_" prefix.
         private static (AST, error) globalCDtorName(@string name, params Option[] options)
         {
+            AST _p0 = default;
+            error _p0 = default!;
             options = options.Clone();
 
             if (len(name) < 4L)
             {
-                return (null, ErrNotMangledName);
+                return (null, error.As(ErrNotMangledName)!);
             }
+
             switch (name[0L])
             {
                 case '.': 
@@ -134,7 +151,7 @@ namespace ianlancetaylor
                 case '$': 
                     break;
                 default: 
-                    return (null, ErrNotMangledName);
+                    return (null, error.As(ErrNotMangledName)!);
                     break;
             }
 
@@ -148,32 +165,38 @@ namespace ianlancetaylor
                     ctor = false;
                     break;
                 default: 
-                    return (null, ErrNotMangledName);
+                    return (null, error.As(ErrNotMangledName)!);
                     break;
             }
 
             if (name[2L] != '_')
             {
-                return (null, ErrNotMangledName);
+                return (null, error.As(ErrNotMangledName)!);
             }
+
             if (!strings.HasPrefix(name[3L..], "_Z"))
             {
-                return (ref new GlobalCDtor(Ctor:ctor,Key:&Name{Name:name}), null);
+                return (addr(new GlobalCDtor(Ctor:ctor,Key:&Name{Name:name})), error.As(null!)!);
             }
             else
             {
                 var (a, err) = doDemangle(name[5L..], options);
                 if (err != null)
                 {
-                    return (null, adjustErr(err, 5L));
+                    return (null, error.As(adjustErr(err, 5L))!);
                 }
-                return (ref new GlobalCDtor(Ctor:ctor,Key:a), null);
+
+                return (addr(new GlobalCDtor(Ctor:ctor,Key:a)), error.As(null!)!);
+
             }
+
         }
 
         // The doDemangle function is the entry point into the demangler proper.
         private static (AST, error) doDemangle(@string name, params Option[] options) => func((defer, panic, _) =>
         {
+            AST ret = default;
+            error err = default!;
             options = options.Clone();
  
             // When the demangling routines encounter an error, they panic
@@ -192,14 +215,17 @@ namespace ianlancetaylor
                             {
                                 ret = null;
                                 err = de;
-                                return;
+                                return ;
                             }
 
                         }
+
                         panic(r);
+
                     }
 
                 }
+
             }());
 
             var @params = true;
@@ -216,10 +242,11 @@ namespace ianlancetaylor
                 else if (o == Verbose) 
                     verbose = true;
                 else 
-                    return (null, fmt.Errorf("unrecognized demangler option %v", o));
-                            }
-            state st = ref new state(str:name,verbose:verbose);
-            var a = st.encoding(params); 
+                    return (null, error.As(fmt.Errorf("unrecognized demangler option %v", o))!);
+                
+            }
+            ptr<state> st = addr(new state(str:name,verbose:verbose));
+            var a = st.encoding(params, notForLocalName); 
 
             // Accept a clone suffix.
             if (clones)
@@ -229,12 +256,16 @@ namespace ianlancetaylor
                     a = st.cloneSuffix(a);
                 }
 
+
             }
+
             if (clones && len(st.str) > 0L)
             {
                 st.fail("unparsed characters at end of mangled name");
             }
-            return (a, null);
+
+            return (a, error.As(null!)!);
+
         });
 
         // A state holds the current state of demangling a string.
@@ -244,54 +275,70 @@ namespace ianlancetaylor
             public bool verbose; // whether to use verbose demangling
             public long off; // offset of str within original string
             public substitutions subs; // substitutions
-            public slice<ref Template> templates; // templates being processed
+            public slice<ptr<Template>> templates; // templates being processed
         }
 
         // copy returns a copy of the current state.
-        private static ref state copy(this ref state st)
+        private static ptr<state> copy(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             ptr<state> n = @new<state>();
-            n.Value = st.Value;
-            return n;
+            n.val = st.val;
+            return _addr_n!;
         }
 
         // fail panics with demangleErr, to be caught in doDemangle.
-        private static void fail(this ref state _st, @string err) => func(_st, (ref state st, Defer _, Panic panic, Recover __) =>
+        private static void fail(this ptr<state> _addr_st, @string err) => func((_, panic, __) =>
         {
+            ref state st = ref _addr_st.val;
+
             panic(new demangleErr(err:err,off:st.off));
         });
 
         // failEarlier is like fail, but decrements the offset to indicate
         // that the point of failure occurred earlier in the string.
-        private static void failEarlier(this ref state _st, @string err, long dec) => func(_st, (ref state st, Defer _, Panic panic, Recover __) =>
+        private static void failEarlier(this ptr<state> _addr_st, @string err, long dec) => func((_, panic, __) =>
         {
+            ref state st = ref _addr_st.val;
+
             if (st.off < dec)
             {
                 panic("internal error");
             }
+
             panic(new demangleErr(err:err,off:st.off-dec));
+
         });
 
         // advance advances the current string offset.
-        private static void advance(this ref state _st, long add) => func(_st, (ref state st, Defer _, Panic panic, Recover __) =>
+        private static void advance(this ptr<state> _addr_st, long add) => func((_, panic, __) =>
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) < add)
             {
                 panic("internal error");
             }
+
             st.str = st.str[add..];
             st.off += add;
+
         });
 
         // checkChar requires that the next character in the string be c, and
         // advances past it.
-        private static void checkChar(this ref state _st, byte c) => func(_st, (ref state st, Defer _, Panic panic, Recover __) =>
+        private static void checkChar(this ptr<state> _addr_st, byte c) => func((_, panic, __) =>
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) == 0L || st.str[0L] != c)
             {
                 panic("internal error");
             }
+
             st.advance(1L);
+
         });
 
         // A demangleErr is an error at a specific offset in the mangled
@@ -314,34 +361,49 @@ namespace ianlancetaylor
         {
             if (err == null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             {
                 demangleErr (de, ok) = err._<demangleErr>();
 
                 if (ok)
                 {
                     de.off += adj;
-                    return error.As(de);
+                    return error.As(de)!;
                 }
 
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
+
+        private partial struct forLocalNameType // : long
+        {
+        }
+
+        private static readonly forLocalNameType forLocalName = (forLocalNameType)iota;
+        private static readonly var notForLocalName = (var)0;
+
 
         // encoding ::= <(function) name> <bare-function-type>
         //              <(data) name>
         //              <special-name>
-        private static AST encoding(this ref state st, bool @params)
+        private static AST encoding(this ptr<state> _addr_st, bool @params, forLocalNameType local)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) < 1L)
             {
                 st.fail("expected encoding");
             }
+
             if (st.str[0L] == 'G' || st.str[0L] == 'T')
             {
                 return st.specialName();
             }
+
             var a = st.name();
             a = simplify(a);
 
@@ -353,9 +415,9 @@ namespace ianlancetaylor
                 // parameter, and are not output by the standard
                 // demangler without parameters.
                 {
-                    ref MethodWithQualifiers mwq__prev2 = mwq;
+                    ptr<MethodWithQualifiers> mwq__prev2 = mwq;
 
-                    ref MethodWithQualifiers (mwq, ok) = a._<ref MethodWithQualifiers>();
+                    ptr<MethodWithQualifiers> (mwq, ok) = a._<ptr<MethodWithQualifiers>>();
 
                     if (ok)
                     {
@@ -378,71 +440,97 @@ namespace ianlancetaylor
                 // parameters.  This can happen when parsing a class
                 // that is local to a function.
                 {
-                    ref Qualified q__prev2 = q;
+                    ptr<Qualified> q__prev2 = q;
 
-                    ref Qualified (q, ok) = a._<ref Qualified>();
+                    ptr<Qualified> (q, ok) = a._<ptr<Qualified>>();
 
                     if (ok && q.LocalName)
                     {
-                        var p = ref q.Name;
+                        var p = _addr_q.Name;
                         {
-                            ref DefaultArg da__prev3 = da;
+                            ptr<DefaultArg> da__prev3 = da;
 
-                            ref DefaultArg (da, ok) = (p.Value)._<ref DefaultArg>();
+                            ptr<DefaultArg> (da, ok) = (p.val)._<ptr<DefaultArg>>();
 
                             if (ok)
                             {
-                                p = ref da.Arg;
+                                p = _addr_da.Arg;
                             }
 
                             da = da__prev3;
 
                         }
-                        {
-                            ref MethodWithQualifiers mwq__prev3 = mwq;
 
-                            (mwq, ok) = (p.Value)._<ref MethodWithQualifiers>();
+                        {
+                            ptr<MethodWithQualifiers> mwq__prev3 = mwq;
+
+                            (mwq, ok) = (p.val)._<ptr<MethodWithQualifiers>>();
 
                             if (ok)
                             {
-                                p.Value = mwq.Method;
+                                p.val = mwq.Method;
                             }
 
                             mwq = mwq__prev3;
 
                         }
+
                     }
 
                     q = q__prev2;
 
                 }
 
+
                 return a;
+
             }
+
             if (len(st.str) == 0L || st.str[0L] == 'E')
             { 
                 // There are no parameters--this is a data symbol, not
                 // a function symbol.
                 return a;
+
             }
+
             var check = a;
-            ref MethodWithQualifiers (mwq, _) = check._<ref MethodWithQualifiers>();
+            ptr<MethodWithQualifiers> (mwq, _) = check._<ptr<MethodWithQualifiers>>();
             if (mwq != null)
             {
                 check = mwq.Method;
             }
-            ref Template (template, _) = check._<ref Template>();
+
+            ptr<Template> (template, _) = check._<ptr<Template>>();
             if (template != null)
             {
                 st.templates = append(st.templates, template);
             }
+
             var ft = st.bareFunctionType(hasReturnType(a));
 
             if (template != null)
             {
                 st.templates = st.templates[..len(st.templates) - 1L];
             }
+
             ft = simplify(ft); 
+
+            // For a local name, discard the return type, so that it
+            // doesn't get confused with the top level return type.
+            if (local == forLocalName)
+            {
+                {
+                    ptr<FunctionType> (functype, ok) = ft._<ptr<FunctionType>>();
+
+                    if (ok)
+                    {
+                        functype.Return = null;
+                    }
+
+                }
+
+            } 
 
             // Any top-level qualifiers belong to the function type.
             if (mwq != null)
@@ -451,35 +539,37 @@ namespace ianlancetaylor
                 mwq.Method = ft;
                 ft = mwq;
             }
-            {
-                ref Qualified q__prev1 = q;
 
-                (q, ok) = a._<ref Qualified>();
+            {
+                ptr<Qualified> q__prev1 = q;
+
+                (q, ok) = a._<ptr<Qualified>>();
 
                 if (ok && q.LocalName)
                 {
-                    p = ref q.Name;
+                    p = _addr_q.Name;
                     {
-                        ref DefaultArg da__prev2 = da;
+                        ptr<DefaultArg> da__prev2 = da;
 
-                        (da, ok) = (p.Value)._<ref DefaultArg>();
+                        (da, ok) = (p.val)._<ptr<DefaultArg>>();
 
                         if (ok)
                         {
-                            p = ref da.Arg;
+                            p = _addr_da.Arg;
                         }
 
                         da = da__prev2;
 
                     }
-                    {
-                        ref MethodWithQualifiers mwq__prev2 = mwq;
 
-                        (mwq, ok) = (p.Value)._<ref MethodWithQualifiers>();
+                    {
+                        ptr<MethodWithQualifiers> mwq__prev2 = mwq;
+
+                        (mwq, ok) = (p.val)._<ptr<MethodWithQualifiers>>();
 
                         if (ok)
                         {
-                            p.Value = mwq.Method;
+                            p.val = mwq.Method;
                             mwq.Method = ft;
                             ft = mwq;
                         }
@@ -487,13 +577,16 @@ namespace ianlancetaylor
                         mwq = mwq__prev2;
 
                     }
+
                 }
 
                 q = q__prev1;
 
             }
 
-            return ref new Typed(Name:a,Type:ft);
+
+            return addr(new Typed(Name:a,Type:ft));
+
         }
 
         // hasReturnType returns whether the mangled form of a will have a
@@ -502,13 +595,13 @@ namespace ianlancetaylor
         {
             switch (a.type())
             {
-                case ref Template a:
+                case ptr<Template> a:
                     return !isCDtorConversion(a.Name);
                     break;
-                case ref TypeWithQualifiers a:
+                case ptr<TypeWithQualifiers> a:
                     return hasReturnType(a.Base);
                     break;
-                case ref MethodWithQualifiers a:
+                case ptr<MethodWithQualifiers> a:
                     return hasReturnType(a.Method);
                     break;
                 default:
@@ -518,6 +611,7 @@ namespace ianlancetaylor
                     break;
                 }
             }
+
         }
 
         // isCDtorConversion returns when an AST is a constructor, a
@@ -526,16 +620,16 @@ namespace ianlancetaylor
         {
             switch (a.type())
             {
-                case ref Qualified a:
+                case ptr<Qualified> a:
                     return isCDtorConversion(a.Name);
                     break;
-                case ref Constructor a:
+                case ptr<Constructor> a:
                     return true;
                     break;
-                case ref Destructor a:
+                case ptr<Destructor> a:
                     return true;
                     break;
-                case ref Cast a:
+                case ptr<Cast> a:
                     return true;
                     break;
                 default:
@@ -545,19 +639,23 @@ namespace ianlancetaylor
                     break;
                 }
             }
+
         }
 
         // <tagged-name> ::= <name> B <source-name>
-        private static AST taggedName(this ref state st, AST a)
+        private static AST taggedName(this ptr<state> _addr_st, AST a)
         {
+            ref state st = ref _addr_st.val;
+
             while (len(st.str) > 0L && st.str[0L] == 'B')
             {
                 st.advance(1L);
                 var tag = st.sourceName();
-                a = ref new TaggedName(Name:a,Tag:tag);
+                a = addr(new TaggedName(Name:a,Tag:tag));
             }
 
             return a;
+
         }
 
         // <name> ::= <nested-name>
@@ -570,12 +668,15 @@ namespace ianlancetaylor
         //
         // <unscoped-template-name> ::= <unscoped-name>
         //                          ::= <substitution>
-        private static AST name(this ref state st)
+        private static AST name(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) < 1L)
             {
                 st.fail("expected name");
             }
+
             switch (st.str[0L])
             {
                 case 'N': 
@@ -590,6 +691,7 @@ namespace ianlancetaylor
                     {
                         st.setTemplate(a, null);
                     }
+
                     return a;
                     break;
                 case 'S': 
@@ -598,6 +700,7 @@ namespace ianlancetaylor
                         st.advance(1L);
                         st.fail("expected substitution index");
                     }
+
                     AST a = default;
                     var isCast = false;
                     var subst = false;
@@ -605,13 +708,14 @@ namespace ianlancetaylor
                     {
                         st.advance(2L);
                         a, isCast = st.unqualifiedName();
-                        a = ref new Qualified(Scope:&Name{Name:"std"},Name:a,LocalName:false);
+                        a = addr(new Qualified(Scope:&Name{Name:"std"},Name:a,LocalName:false));
                     }
                     else
                     {
                         a = st.substitution(false);
                         subst = true;
                     }
+
                     if (len(st.str) > 0L && st.str[0L] == 'I')
                     { 
                         // This can only happen if we saw
@@ -623,20 +727,25 @@ namespace ianlancetaylor
                         {
                             st.subs.add(a);
                         }
+
                         var args = st.templateArgs();
-                        Template tmpl = ref new Template(Name:a,Args:args);
+                        ptr<Template> tmpl = addr(new Template(Name:a,Args:args));
                         if (isCast)
                         {
                             st.setTemplate(a, tmpl);
                             st.clearTemplateArgs(args);
                             isCast = false;
                         }
+
                         a = tmpl;
+
                     }
+
                     if (isCast)
                     {
                         st.setTemplate(a, null);
                     }
+
                     return a;
                     break;
                 default: 
@@ -645,42 +754,52 @@ namespace ianlancetaylor
                     {
                         st.subs.add(a);
                         args = st.templateArgs();
-                        tmpl = ref new Template(Name:a,Args:args);
+                        tmpl = addr(new Template(Name:a,Args:args));
                         if (isCast)
                         {
                             st.setTemplate(a, tmpl);
                             st.clearTemplateArgs(args);
                             isCast = false;
                         }
+
                         a = tmpl;
+
                     }
+
                     if (isCast)
                     {
                         st.setTemplate(a, null);
                     }
+
                     return a;
                     break;
             }
+
         }
 
         // <nested-name> ::= N [<CV-qualifiers>] [<ref-qualifier>] <prefix> <unqualified-name> E
         //               ::= N [<CV-qualifiers>] [<ref-qualifier>] <template-prefix> <template-args> E
-        private static AST nestedName(this ref state st)
+        private static AST nestedName(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('N');
             var q = st.cvQualifiers();
             var r = st.refQualifier();
             var a = st.prefix();
             if (len(q) > 0L || r != "")
             {
-                a = ref new MethodWithQualifiers(Method:a,Qualifiers:q,RefQualifier:r);
+                a = addr(new MethodWithQualifiers(Method:a,Qualifiers:q,RefQualifier:r));
             }
+
             if (len(st.str) == 0L || st.str[0L] != 'E')
             {
                 st.fail("expected E after nested name");
             }
+
             st.advance(1L);
             return a;
+
         }
 
         // <prefix> ::= <prefix> <unqualified-name>
@@ -696,8 +815,10 @@ namespace ianlancetaylor
         //
         // <decltype> ::= Dt <expression> E
         //            ::= DT <expression> E
-        private static AST prefix(this ref state st)
+        private static AST prefix(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             AST a = default; 
 
             // The last name seen, for a constructor/destructor.
@@ -708,24 +829,24 @@ namespace ianlancetaylor
                 while (true)
                 {
                     {
-                        ref Template t__prev1 = t;
+                        ptr<Template> t__prev1 = t;
 
-                        ref Template (t, ok) = a._<ref Template>();
+                        ptr<Template> (t, ok) = a._<ptr<Template>>();
 
                         if (ok)
                         {
                             a = t.Name;
                         }                        {
-                            ref Qualified (q, ok) = a._<ref Qualified>();
+                            ptr<Qualified> (q, ok) = a._<ptr<Qualified>>();
 
 
                             else if (ok)
                             {
                                 a = q.Name;
                             }                            {
-                                ref Template t__prev3 = t;
+                                ptr<Template> t__prev3 = t;
 
-                                (t, ok) = a._<ref TaggedName>();
+                                (t, ok) = a._<ptr<TaggedName>>();
 
 
                                 else if (ok)
@@ -741,12 +862,16 @@ namespace ianlancetaylor
 
                             }
 
+
                         }
+
 
                         t = t__prev1;
 
                     }
+
                 }
+
 
             }
 ;
@@ -758,6 +883,7 @@ namespace ianlancetaylor
                 {
                     st.fail("expected prefix");
                 }
+
                 AST next = default;
 
                 var c = st.str[0L];
@@ -769,22 +895,38 @@ namespace ianlancetaylor
                     {
                         isCast = true;
                     }
+
                 }
                 else
                 {
                     switch (st.str[0L])
                     {
                         case 'C': 
-                            if (len(st.str) < 2L)
+                            var inheriting = false;
+                            st.advance(1L);
+                            if (len(st.str) > 0L && st.str[0L] == 'I')
+                            {
+                                inheriting = true;
+                                st.advance(1L);
+                            }
+
+                            if (len(st.str) < 1L)
                             {
                                 st.fail("expected constructor type");
                             }
+
                             if (last == null)
                             {
                                 st.fail("constructor before name is seen");
                             }
-                            st.advance(2L);
-                            next = ref new Constructor(Name:getLast(last));
+
+                            st.advance(1L);
+                            if (inheriting)
+                            {
+                                last = st.demangleType(false);
+                            }
+
+                            next = addr(new Constructor(Name:getLast(last)));
                             break;
                         case 'D': 
                             if (len(st.str) > 1L && (st.str[1L] == 'T' || st.str[1L] == 't'))
@@ -797,13 +939,17 @@ namespace ianlancetaylor
                                 {
                                     st.fail("expected destructor type");
                                 }
+
                                 if (last == null)
                                 {
                                     st.fail("destructor before name is seen");
                                 }
+
                                 st.advance(2L);
-                                next = ref new Destructor(Name:getLast(last));
+                                next = addr(new Destructor(Name:getLast(last)));
+
                             }
+
                             break;
                         case 'S': 
                             next = st.substitution(true);
@@ -813,15 +959,17 @@ namespace ianlancetaylor
                             {
                                 st.fail("unexpected template arguments");
                             }
+
                             slice<AST> args = default;
                             args = st.templateArgs();
-                            Template tmpl = ref new Template(Name:a,Args:args);
+                            ptr<Template> tmpl = addr(new Template(Name:a,Args:args));
                             if (isCast)
                             {
                                 st.setTemplate(a, tmpl);
                                 st.clearTemplateArgs(args);
                                 isCast = false;
                             }
+
                             a = null;
                             next = tmpl;
                             break;
@@ -833,10 +981,12 @@ namespace ianlancetaylor
                             {
                                 st.fail("expected prefix");
                             }
+
                             if (isCast)
                             {
                                 st.setTemplate(a, null);
                             }
+
                             return a;
                             break;
                         case 'M': 
@@ -856,7 +1006,9 @@ namespace ianlancetaylor
                             st.fail("unrecognized letter in prefix");
                             break;
                     }
+
                 }
+
                 last = next;
                 if (a == null)
                 {
@@ -864,13 +1016,16 @@ namespace ianlancetaylor
                 }
                 else
                 {
-                    a = ref new Qualified(Scope:a,Name:next,LocalName:false);
+                    a = addr(new Qualified(Scope:a,Name:next,LocalName:false));
                 }
+
                 if (c != 'S' && (len(st.str) == 0L || st.str[0L] != 'E'))
                 {
                     st.subs.add(a);
                 }
+
             }
+
 
         }
 
@@ -880,12 +1035,17 @@ namespace ianlancetaylor
         //                    ::= <local-source-name>
         //
         //  <local-source-name>    ::= L <source-name> <discriminator>
-        private static (AST, bool) unqualifiedName(this ref state st)
+        private static (AST, bool) unqualifiedName(this ptr<state> _addr_st)
         {
+            AST r = default;
+            bool isCast = default;
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) < 1L)
             {
                 st.fail("expected unqualified name");
             }
+
             AST a = default;
             isCast = false;
             var c = st.str[0L];
@@ -897,7 +1057,7 @@ namespace ianlancetaylor
             {
                 a, _ = st.operatorName(false);
                 {
-                    ref Cast (_, ok) = a._<ref Cast>();
+                    ptr<Cast> (_, ok) = a._<ptr<Cast>>();
 
                     if (ok)
                     {
@@ -905,16 +1065,18 @@ namespace ianlancetaylor
                     }
 
                 }
+
                 {
-                    ref Operator (op, ok) = a._<ref Operator>();
+                    ptr<Operator> (op, ok) = a._<ptr<Operator>>();
 
                     if (ok && op.Name == "operator\"\" ")
                     {
                         var n = st.sourceName();
-                        a = ref new Unary(Op:op,Expr:n,Suffix:false,SizeofType:false);
+                        a = addr(new Unary(Op:op,Expr:n,Suffix:false,SizeofType:false));
                     }
 
                 }
+
             }
             else
             {
@@ -936,6 +1098,7 @@ namespace ianlancetaylor
                             st.advance(1L);
                             st.fail("expected closure or unnamed type");
                         }
+
                         c = st.str[1L];
                         switch (c)
                         {
@@ -955,33 +1118,41 @@ namespace ianlancetaylor
                         st.fail("expected unqualified name");
                         break;
                 }
+
             }
+
             if (len(st.str) > 0L && st.str[0L] == 'B')
             {
                 a = st.taggedName(a);
             }
+
             return (a, isCast);
+
         }
 
         // <source-name> ::= <(positive length) number> <identifier>
         // identifier ::= <(unqualified source code identifier)>
-        private static AST sourceName(this ref state st)
+        private static AST sourceName(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             var val = st.number();
             if (val <= 0L)
             {
                 st.fail("expected positive number");
             }
+
             if (len(st.str) < val)
             {
                 st.fail("not enough characters for identifier");
             }
+
             var id = st.str[..val];
             st.advance(val); 
 
             // Look for GCC encoding of anonymous namespace, and make it
             // more friendly.
-            const @string anonPrefix = "_GLOBAL_";
+            const @string anonPrefix = (@string)"_GLOBAL_";
 
             if (strings.HasPrefix(id, anonPrefix) && len(id) > len(anonPrefix) + 2L)
             {
@@ -991,24 +1162,31 @@ namespace ianlancetaylor
                 {
                     id = "(anonymous namespace)";
                 }
+
             }
-            Name n = ref new Name(Name:id);
+
+            ptr<Name> n = addr(new Name(Name:id));
             return n;
+
         }
 
         // number ::= [n] <(non-negative decimal integer)>
-        private static long number(this ref state st)
+        private static long number(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             var neg = false;
             if (len(st.str) > 0L && st.str[0L] == 'n')
             {
                 neg = true;
                 st.advance(1L);
             }
+
             if (len(st.str) == 0L || !isDigit(st.str[0L]))
             {
                 st.fail("missing number");
             }
+
             long val = 0L;
             while (len(st.str) > 0L && isDigit(st.str[0L]))
             { 
@@ -1018,15 +1196,19 @@ namespace ianlancetaylor
                 {
                     st.fail("numeric overflow");
                 }
+
                 val = val * 10L + int(st.str[0L] - '0');
                 st.advance(1L);
+
             }
 
             if (neg)
             {
                 val = -val;
             }
+
             return val;
+
         }
 
         // An operator is the demangled name, and the number of arguments it
@@ -1047,18 +1229,23 @@ namespace ianlancetaylor
         //
         // We need to know whether we are in an expression because it affects
         // how we handle template parameters in the type of a cast operator.
-        private static (AST, long) operatorName(this ref state _st, bool inExpression) => func(_st, (ref state st, Defer _, Panic panic, Recover __) =>
+        private static (AST, long) operatorName(this ptr<state> _addr_st, bool inExpression) => func((_, panic, __) =>
         {
+            AST _p0 = default;
+            long _p0 = default;
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) < 2L)
             {
                 st.fail("missing operator code");
             }
+
             var code = st.str[..2L];
             st.advance(2L);
             if (code[0L] == 'v' && isDigit(code[1L]))
             {
                 var name = st.sourceName();
-                return (ref new Operator(Name:name.(*Name).Name), int(code[1L] - '0'));
+                return (addr(new Operator(Name:name.(*Name).Name)), int(code[1L] - '0'));
             }
             else if (code == "cv")
             { 
@@ -1069,20 +1256,23 @@ namespace ianlancetaylor
                 {
                     st.templates = append(st.templates, null);
                 }
+
                 var t = st.demangleType(!inExpression);
 
                 if (!inExpression)
                 {
                     st.templates = st.templates[..len(st.templates) - 1L];
                 }
-                return (ref new Cast(To:t), 1L);
+
+                return (addr(new Cast(To:t)), 1L);
+
             }            {
                 var (op, ok) = operators[code];
 
 
                 else if (ok)
                 {
-                    return (ref new Operator(Name:op.name), op.args);
+                    return (addr(new Operator(Name:op.name)), op.args);
                 }
                 else
                 {
@@ -1091,26 +1281,30 @@ namespace ianlancetaylor
                 }
 
             }
+
         });
 
         // <local-name> ::= Z <(function) encoding> E <(entity) name> [<discriminator>]
         //              ::= Z <(function) encoding> E s [<discriminator>]
         //              ::= Z <(function) encoding> E d [<parameter> number>] _ <entity name>
-        private static AST localName(this ref state st)
+        private static AST localName(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('Z');
-            var fn = st.encoding(true);
+            var fn = st.encoding(true, forLocalName);
             if (len(st.str) == 0L || st.str[0L] != 'E')
             {
                 st.fail("expected E after local name");
             }
+
             st.advance(1L);
             if (len(st.str) > 0L && st.str[0L] == 's')
             {
                 st.advance(1L);
-                AST n = ref new Name(Name:"string literal");
+                AST n = addr(new Name(Name:"string literal"));
                 n = st.discriminator(n);
-                return ref new Qualified(Scope:fn,Name:n,LocalName:true);
+                return addr(new Qualified(Scope:fn,Name:n,LocalName:true));
             }
             else
             {
@@ -1120,36 +1314,46 @@ namespace ianlancetaylor
                     // Default argument scope.
                     st.advance(1L);
                     num = st.compactNumber();
+
                 }
+
                 n = st.name();
                 n = st.discriminator(n);
                 if (num >= 0L)
                 {
-                    n = ref new DefaultArg(Num:num,Arg:n);
+                    n = addr(new DefaultArg(Num:num,Arg:n));
                 }
-                return ref new Qualified(Scope:fn,Name:n,LocalName:true);
+
+                return addr(new Qualified(Scope:fn,Name:n,LocalName:true));
+
             }
+
         }
 
         // Parse a Java resource special-name.
-        private static AST javaResource(this ref state st)
+        private static AST javaResource(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             var off = st.off;
             var ln = st.number();
             if (ln <= 1L)
             {
                 st.failEarlier("java resource length less than 1", st.off - off);
             }
+
             if (len(st.str) == 0L || st.str[0L] != '_')
             {
                 st.fail("expected _ after number");
             }
+
             st.advance(1L);
             ln--;
             if (len(st.str) < ln)
             {
                 st.fail("not enough characters for java resource length");
             }
+
             var str = st.str[..ln];
             @string final = "";
             st.advance(ln);
@@ -1165,17 +1369,22 @@ namespace ianlancetaylor
                     {
                         st.failEarlier("java resource escape at end of string", 1L);
                     }
+
                     i++;
                     map (r, ok) = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<byte, @string>{'S':"/",'_':".",'$':"$",}[str[i]];
                     if (!ok)
                     {
                         st.failEarlier("unrecognized java resource escape", ln - i - 1L);
                     }
+
                     final += r;
+
                 }
+
             }
 
-            return ref new Special(Prefix:"java resource ",Val:&Name{Name:final});
+            return addr(new Special(Prefix:"java resource ",Val:&Name{Name:final}));
+
         }
 
         // <special-name> ::= TV <type>
@@ -1194,8 +1403,10 @@ namespace ianlancetaylor
         //                ::= Gr <resource name>
         //                ::= GTt <encoding>
         //                ::= GTn <encoding>
-        private static AST specialName(this ref state _st) => func(_st, (ref state st, Defer _, Panic panic, Recover __) =>
+        private static AST specialName(this ptr<state> _addr_st) => func((_, panic, __) =>
         {
+            ref state st = ref _addr_st.val;
+
             if (st.str[0L] == 'T')
             {
                 st.advance(1L);
@@ -1203,41 +1414,42 @@ namespace ianlancetaylor
                 {
                     st.fail("expected special name code");
                 }
+
                 var c = st.str[0L];
                 st.advance(1L);
                 switch (c)
                 {
                     case 'V': 
                         var t = st.demangleType(false);
-                        return ref new Special(Prefix:"vtable for ",Val:t);
+                        return addr(new Special(Prefix:"vtable for ",Val:t));
                         break;
                     case 'T': 
                         t = st.demangleType(false);
-                        return ref new Special(Prefix:"VTT for ",Val:t);
+                        return addr(new Special(Prefix:"VTT for ",Val:t));
                         break;
                     case 'I': 
                         t = st.demangleType(false);
-                        return ref new Special(Prefix:"typeinfo for ",Val:t);
+                        return addr(new Special(Prefix:"typeinfo for ",Val:t));
                         break;
                     case 'S': 
                         t = st.demangleType(false);
-                        return ref new Special(Prefix:"typeinfo name for ",Val:t);
+                        return addr(new Special(Prefix:"typeinfo name for ",Val:t));
                         break;
                     case 'h': 
                         st.callOffset('h');
-                        var v = st.encoding(true);
-                        return ref new Special(Prefix:"non-virtual thunk to ",Val:v);
+                        var v = st.encoding(true, notForLocalName);
+                        return addr(new Special(Prefix:"non-virtual thunk to ",Val:v));
                         break;
                     case 'v': 
                         st.callOffset('v');
-                        v = st.encoding(true);
-                        return ref new Special(Prefix:"virtual thunk to ",Val:v);
+                        v = st.encoding(true, notForLocalName);
+                        return addr(new Special(Prefix:"virtual thunk to ",Val:v));
                         break;
                     case 'c': 
                         st.callOffset(0L);
                         st.callOffset(0L);
-                        v = st.encoding(true);
-                        return ref new Special(Prefix:"covariant return thunk to ",Val:v);
+                        v = st.encoding(true, notForLocalName);
+                        return addr(new Special(Prefix:"covariant return thunk to ",Val:v));
                         break;
                     case 'C': 
                         var derived = st.demangleType(false);
@@ -1247,35 +1459,38 @@ namespace ianlancetaylor
                         {
                             st.failEarlier("expected positive offset", st.off - off);
                         }
+
                         if (len(st.str) == 0L || st.str[0L] != '_')
                         {
                             st.fail("expected _ after number");
                         }
+
                         st.advance(1L);
                         var @base = st.demangleType(false);
-                        return ref new Special2(Prefix:"construction vtable for ",Val1:base,Middle:"-in-",Val2:derived);
+                        return addr(new Special2(Prefix:"construction vtable for ",Val1:base,Middle:"-in-",Val2:derived));
                         break;
                     case 'F': 
                         t = st.demangleType(false);
-                        return ref new Special(Prefix:"typeinfo fn for ",Val:t);
+                        return addr(new Special(Prefix:"typeinfo fn for ",Val:t));
                         break;
                     case 'J': 
                         t = st.demangleType(false);
-                        return ref new Special(Prefix:"java Class for ",Val:t);
+                        return addr(new Special(Prefix:"java Class for ",Val:t));
                         break;
                     case 'H': 
                         var n = st.name();
-                        return ref new Special(Prefix:"TLS init function for ",Val:n);
+                        return addr(new Special(Prefix:"TLS init function for ",Val:n));
                         break;
                     case 'W': 
                         n = st.name();
-                        return ref new Special(Prefix:"TLS wrapper function for ",Val:n);
+                        return addr(new Special(Prefix:"TLS wrapper function for ",Val:n));
                         break;
                     default: 
                         st.fail("unrecognized special T name code");
                         panic("not reached");
                         break;
                 }
+
             }
             else
             {
@@ -1284,38 +1499,40 @@ namespace ianlancetaylor
                 {
                     st.fail("expected special name code");
                 }
+
                 c = st.str[0L];
                 st.advance(1L);
                 switch (c)
                 {
                     case 'V': 
                         n = st.name();
-                        return ref new Special(Prefix:"guard variable for ",Val:n);
+                        return addr(new Special(Prefix:"guard variable for ",Val:n));
                         break;
                     case 'R': 
                         n = st.name();
                         var i = st.number();
-                        return ref new Special(Prefix:fmt.Sprintf("reference temporary #%d for ",i),Val:n);
+                        return addr(new Special(Prefix:fmt.Sprintf("reference temporary #%d for ",i),Val:n));
                         break;
                     case 'A': 
-                        v = st.encoding(true);
-                        return ref new Special(Prefix:"hidden alias for ",Val:v);
+                        v = st.encoding(true, notForLocalName);
+                        return addr(new Special(Prefix:"hidden alias for ",Val:v));
                         break;
                     case 'T': 
                         if (len(st.str) == 0L)
                         {
                             st.fail("expected special GT name code");
                         }
+
                         c = st.str[0L];
                         st.advance(1L);
-                        v = st.encoding(true);
+                        v = st.encoding(true, notForLocalName);
                         switch (c)
                         {
                             case 'n': 
-                                return ref new Special(Prefix:"non-transaction clone for ",Val:v);
+                                return addr(new Special(Prefix:"non-transaction clone for ",Val:v));
                                 break;
                             case 't': 
-                                return ref new Special(Prefix:"transaction clone for ",Val:v);
+                                return addr(new Special(Prefix:"transaction clone for ",Val:v));
                                 break;
                             default: 
                                 // The proposal is that different
@@ -1333,7 +1550,9 @@ namespace ianlancetaylor
                         panic("not reached");
                         break;
                 }
+
             }
+
         });
 
         // <call-offset> ::= h <nv-offset> _
@@ -1347,17 +1566,22 @@ namespace ianlancetaylor
         // start of the <call-offset>.
         //
         // We don't display the offset information anywhere.
-        private static void callOffset(this ref state st, byte c)
+        private static void callOffset(this ptr<state> _addr_st, byte c)
         {
+            ref state st = ref _addr_st.val;
+
             if (c == 0L)
             {
                 if (len(st.str) == 0L)
                 {
                     st.fail("missing call offset");
                 }
+
                 c = st.str[0L];
                 st.advance(1L);
+
             }
+
             switch (c)
             {
                 case 'h': 
@@ -1369,6 +1593,7 @@ namespace ianlancetaylor
                     {
                         st.fail("expected _ after number");
                     }
+
                     st.advance(1L);
                     st.number();
                     break;
@@ -1380,7 +1605,9 @@ namespace ianlancetaylor
             {
                 st.fail("expected _ after call offset");
             }
+
             st.advance(1L);
+
         }
 
         // builtinTypes maps the type letter to the type name.
@@ -1404,12 +1631,15 @@ namespace ianlancetaylor
         //
         // <builtin-type> ::= various one letter codes
         //                ::= u <source-name>
-        private static AST demangleType(this ref state st, bool isCast)
+        private static AST demangleType(this ptr<state> _addr_st, bool isCast)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) == 0L)
             {
                 st.fail("expected type");
             }
+
             var addSubst = true;
 
             var q = st.cvQualifiers();
@@ -1427,7 +1657,9 @@ namespace ianlancetaylor
                 {
                     addSubst = false;
                 }
+
             }
+
             AST ret = default; 
 
             // Use correct substitution for a template parameter.
@@ -1438,17 +1670,20 @@ namespace ianlancetaylor
 
                 if (ok)
                 {
-                    ret = ref new BuiltinType(Name:btype);
+                    ret = addr(new BuiltinType(Name:btype));
                     st.advance(1L);
                     if (len(q) > 0L)
                     {
-                        ret = ref new TypeWithQualifiers(Base:ret,Qualifiers:q);
+                        ret = addr(new TypeWithQualifiers(Base:ret,Qualifiers:q));
                         st.subs.add(ret);
                     }
+
                     return ret;
+
                 }
 
             }
+
             var c = st.str[0L];
             switch (c)
             {
@@ -1499,13 +1734,15 @@ namespace ianlancetaylor
                         {
                             st.subs.add(ret);
                             var args = st.templateArgs();
-                            ret = ref new Template(Name:ret,Args:args);
+                            ret = addr(new Template(Name:ret,Args:args));
                         }
                         else
                         {
                             ret = st.demangleCastTemplateArgs(ret, true);
                         }
+
                     }
+
                     break;
                 case 'S': 
                     // If this is a special substitution, then it
@@ -1515,6 +1752,7 @@ namespace ianlancetaylor
                     {
                         c2 = st.str[1L];
                     }
+
                     if (isDigit(c2) || c2 == '_' || isUpper(c2))
                     {
                         ret = st.substitution(false);
@@ -1526,12 +1764,12 @@ namespace ianlancetaylor
                         { 
                             // See the function comment to explain this.
                             {
-                                ref TemplateParam (_, ok) = ret._<ref TemplateParam>();
+                                ptr<TemplateParam> (_, ok) = ret._<ptr<TemplateParam>>();
 
                                 if (!ok || !isCast)
                                 {
                                     args = st.templateArgs();
-                                    ret = ref new Template(Name:ret,Args:args);
+                                    ret = addr(new Template(Name:ret,Args:args));
                                 }
                                 else
                                 {
@@ -1540,11 +1778,15 @@ namespace ianlancetaylor
                                     {
                                         addSubst = false;
                                     }
+
                                     ret = next;
+
                                 }
 
                             }
+
                         }
+
                     }
                     else
                     {
@@ -1556,7 +1798,9 @@ namespace ianlancetaylor
                         {
                             addSubst = false;
                         }
+
                     }
+
                     break;
                 case 'O': 
 
@@ -1572,19 +1816,19 @@ namespace ianlancetaylor
                     switch (c)
                     {
                         case 'O': 
-                            ret = ref new RvalueReferenceType(Base:t);
+                            ret = addr(new RvalueReferenceType(Base:t));
                             break;
                         case 'P': 
-                            ret = ref new PointerType(Base:t);
+                            ret = addr(new PointerType(Base:t));
                             break;
                         case 'R': 
-                            ret = ref new ReferenceType(Base:t);
+                            ret = addr(new ReferenceType(Base:t));
                             break;
                         case 'C': 
-                            ret = ref new ComplexType(Base:t);
+                            ret = addr(new ComplexType(Base:t));
                             break;
                         case 'G': 
-                            ret = ref new ImaginaryType(Base:t);
+                            ret = addr(new ImaginaryType(Base:t));
                             break;
                     }
                     break;
@@ -1593,6 +1837,7 @@ namespace ianlancetaylor
                     {
                         st.fail("expected source name or unnamed type");
                     }
+
                     switch (st.str[1L])
                     {
                         case 'l': 
@@ -1609,10 +1854,11 @@ namespace ianlancetaylor
                             if (len(st.str) > 0L && st.str[0L] == 'I')
                             {
                                 args = st.templateArgs();
-                                n = ref new Template(Name:n,Args:args);
+                                n = addr(new Template(Name:n,Args:args));
                             }
+
                             t = st.demangleType(isCast);
-                            ret = ref new VendorQualifier(Qualifier:n,Type:t);
+                            ret = addr(new VendorQualifier(Qualifier:n,Type:t));
                             break;
                     }
                     break;
@@ -1622,6 +1868,7 @@ namespace ianlancetaylor
                     {
                         st.fail("expected D code for type");
                     }
+
                     addSubst = false;
                     c2 = st.str[0L];
                     st.advance(1L);
@@ -1637,39 +1884,40 @@ namespace ianlancetaylor
                             {
                                 st.fail("expected E after expression in type");
                             }
+
                             st.advance(1L);
-                            ret = ref new Decltype(Expr:ret);
+                            ret = addr(new Decltype(Expr:ret));
                             addSubst = true;
                             break;
                         case 'p': 
                             t = st.demangleType(isCast);
                             var pack = st.findArgumentPack(t);
-                            ret = ref new PackExpansion(Base:t,Pack:pack);
+                            ret = addr(new PackExpansion(Base:t,Pack:pack));
                             addSubst = true;
                             break;
                         case 'a': 
-                            ret = ref new Name(Name:"auto");
+                            ret = addr(new Name(Name:"auto"));
                             break;
                         case 'f': 
-                            ret = ref new BuiltinType(Name:"decimal32");
+                            ret = addr(new BuiltinType(Name:"decimal32"));
                             break;
                         case 'd': 
-                            ret = ref new BuiltinType(Name:"decimal64");
+                            ret = addr(new BuiltinType(Name:"decimal64"));
                             break;
                         case 'e': 
-                            ret = ref new BuiltinType(Name:"decimal128");
+                            ret = addr(new BuiltinType(Name:"decimal128"));
                             break;
                         case 'h': 
-                            ret = ref new BuiltinType(Name:"half");
+                            ret = addr(new BuiltinType(Name:"half"));
                             break;
                         case 's': 
-                            ret = ref new BuiltinType(Name:"char16_t");
+                            ret = addr(new BuiltinType(Name:"char16_t"));
                             break;
                         case 'i': 
-                            ret = ref new BuiltinType(Name:"char32_t");
+                            ret = addr(new BuiltinType(Name:"char32_t"));
                             break;
                         case 'n': 
-                            ret = ref new BuiltinType(Name:"decltype(nullptr)");
+                            ret = addr(new BuiltinType(Name:"decltype(nullptr)"));
                             break;
                         case 'F': 
                             var accum = false;
@@ -1678,13 +1926,17 @@ namespace ianlancetaylor
                                 accum = true; 
                                 // We don't care about the bits.
                                 _ = st.number();
+
                             }
+
                             var @base = st.demangleType(isCast);
                             if (len(st.str) > 0L && isDigit(st.str[0L]))
                             { 
                                 // We don't care about the bits.
                                 st.number();
+
                             }
+
                             var sat = false;
                             if (len(st.str) > 0L)
                             {
@@ -1692,9 +1944,12 @@ namespace ianlancetaylor
                                 {
                                     sat = true;
                                 }
+
                                 st.advance(1L);
+
                             }
-                            ret = ref new FixedType(Base:base,Accum:accum,Sat:sat);
+
+                            ret = addr(new FixedType(Base:base,Accum:accum,Sat:sat));
                             break;
                         case 'v': 
                             ret = st.vectorType(isCast);
@@ -1720,17 +1975,19 @@ namespace ianlancetaylor
                 {
                     st.subs.add(ret);
                 }
+
             }
+
             if (len(q) > 0L)
             {
                 {
-                    (_, ok) = ret._<ref FunctionType>();
+                    (_, ok) = ret._<ptr<FunctionType>>();
 
                     if (ok)
                     {
-                        ret = ref new MethodWithQualifiers(Method:ret,Qualifiers:q,RefQualifier:"");
+                        ret = addr(new MethodWithQualifiers(Method:ret,Qualifiers:q,RefQualifier:""));
                     }                    {
-                        ref MethodWithQualifiers (mwq, ok) = ret._<ref MethodWithQualifiers>();
+                        ptr<MethodWithQualifiers> (mwq, ok) = ret._<ptr<MethodWithQualifiers>>();
 
 
                         else if (ok)
@@ -1739,13 +1996,14 @@ namespace ianlancetaylor
                             // happens with a function with a trailing
                             // ref-qualifier.
                             mwq.Qualifiers = mergeQualifiers(q, mwq.Qualifiers);
+
                         }
                         else
                         { 
                             // Merge adjacent qualifiers.  This case
                             // happens with multi-dimensional array types.
                             {
-                                ref TypeWithQualifiers (qsub, ok) = ret._<ref TypeWithQualifiers>();
+                                ptr<TypeWithQualifiers> (qsub, ok) = ret._<ptr<TypeWithQualifiers>>();
 
                                 if (ok)
                                 {
@@ -1754,15 +2012,22 @@ namespace ianlancetaylor
                                 }
 
                             }
-                            ret = ref new TypeWithQualifiers(Base:ret,Qualifiers:q);
+
+                            ret = addr(new TypeWithQualifiers(Base:ret,Qualifiers:q));
+
                         }
 
                     }
 
+
                 }
+
                 st.subs.add(ret);
+
             }
+
             return ret;
+
         }
 
         // demangleCastTemplateArgs is for a rather hideous parse.  When we
@@ -1800,8 +2065,10 @@ namespace ianlancetaylor
         // whether we see <template-param> <template-args> but there is not
         // another following <template-args>.  In that case, we reset the
         // parse and just return the <template-param>.
-        private static AST demangleCastTemplateArgs(this ref state _st, AST tp, bool addSubst) => func(_st, (ref state st, Defer defer, Panic panic, Recover _) =>
+        private static AST demangleCastTemplateArgs(this ptr<state> _addr_st, AST tp, bool addSubst) => func((defer, panic, _) =>
         {
+            ref state st = ref _addr_st.val;
+
             var save = st.copy();
 
             slice<AST> args = default;
@@ -1828,12 +2095,15 @@ namespace ianlancetaylor
                                 }
 
                             }
+
                         }
 
                     }
+
                 }());
 
                 args = st.templateArgs();
+
             }();
 
             if (!failed && len(st.str) > 0L && st.str[0L] == 'I')
@@ -1842,12 +2112,15 @@ namespace ianlancetaylor
                 {
                     st.subs.add(tp);
                 }
-                return ref new Template(Name:tp,Args:args);
+
+                return addr(new Template(Name:tp,Args:args));
+
             } 
             // Reset back to before we started reading the template arguments.
             // They will be read again by st.prefix.
-            st.Value = save.Value;
+            st.val = save.val;
             return tp;
+
         });
 
         // mergeQualifiers merges two qualifer lists into one.
@@ -1877,12 +2150,14 @@ namespace ianlancetaylor
                         q1 = append(q1, qual);
                         m[qual] = true;
                     }
+
                 }
 
                 qual = qual__prev1;
             }
 
             return q1;
+
         }
 
         // qualifiers maps from the character used in the mangled name to the
@@ -1890,8 +2165,10 @@ namespace ianlancetaylor
         private static map qualifiers = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<byte, @string>{'r':"restrict",'V':"volatile",'K':"const",};
 
         // <CV-qualifiers> ::= [r] [V] [K]
-        private static Qualifiers cvQualifiers(this ref state st)
+        private static Qualifiers cvQualifiers(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             Qualifiers q = default;
             while (len(st.str) > 0L)
             {
@@ -1913,16 +2190,21 @@ namespace ianlancetaylor
                         break;
                     }
 
+
                 }
+
             }
 
             return q;
+
         }
 
         // <ref-qualifier> ::= R
         //                 ::= O
-        private static @string refQualifier(this ref state st)
+        private static @string refQualifier(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) > 0L)
             {
                 switch (st.str[0L])
@@ -1936,13 +2218,18 @@ namespace ianlancetaylor
                         return "&&";
                         break;
                 }
+
             }
+
             return "";
+
         }
 
         // <type>+
-        private static slice<AST> parmlist(this ref state st)
+        private static slice<AST> parmlist(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             slice<AST> ret = default;
             while (true)
             {
@@ -1950,17 +2237,22 @@ namespace ianlancetaylor
                 {
                     break;
                 }
+
                 if (st.str[0L] == 'E' || st.str[0L] == '.')
                 {
                     break;
                 }
+
                 if ((st.str[0L] == 'R' || st.str[0L] == 'O') && len(st.str) > 1L && st.str[1L] == 'E')
                 { 
                     // This is a function ref-qualifier.
                     break;
+
                 }
+
                 var ptype = st.demangleType(false);
                 ret = append(ret, ptype);
+
             } 
 
             // There should always be at least one type.  A function that
@@ -1980,7 +2272,7 @@ namespace ianlancetaylor
             if (len(ret) == 1L)
             {
                 {
-                    ref BuiltinType (bt, ok) = ret[0L]._<ref BuiltinType>();
+                    ptr<BuiltinType> (bt, ok) = ret[0L]._<ptr<BuiltinType>>();
 
                     if (ok && bt.Name == "void")
                     {
@@ -1988,64 +2280,82 @@ namespace ianlancetaylor
                     }
 
                 }
+
             }
+
             return ret;
+
         }
 
         // <function-type> ::= F [Y] <bare-function-type> [<ref-qualifier>] E
-        private static AST functionType(this ref state st)
+        private static AST functionType(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('F');
             if (len(st.str) > 0L && st.str[0L] == 'Y')
             { 
                 // Function has C linkage.  We don't print this.
                 st.advance(1L);
+
             }
+
             var ret = st.bareFunctionType(true);
             var r = st.refQualifier();
             if (r != "")
             {
-                ret = ref new MethodWithQualifiers(Method:ret,Qualifiers:nil,RefQualifier:r);
+                ret = addr(new MethodWithQualifiers(Method:ret,Qualifiers:nil,RefQualifier:r));
             }
+
             if (len(st.str) == 0L || st.str[0L] != 'E')
             {
                 st.fail("expected E after function type");
             }
+
             st.advance(1L);
             return ret;
+
         }
 
         // <bare-function-type> ::= [J]<type>+
-        private static AST bareFunctionType(this ref state st, bool hasReturnType)
+        private static AST bareFunctionType(this ptr<state> _addr_st, bool hasReturnType)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) > 0L && st.str[0L] == 'J')
             {
                 hasReturnType = true;
                 st.advance(1L);
             }
+
             AST returnType = default;
             if (hasReturnType)
             {
                 returnType = st.demangleType(false);
             }
+
             var types = st.parmlist();
-            return ref new FunctionType(Return:returnType,Args:types);
+            return addr(new FunctionType(Return:returnType,Args:types));
+
         }
 
         // <array-type> ::= A <(positive dimension) number> _ <(element) type>
         //              ::= A [<(dimension) expression>] _ <(element) type>
-        private static AST arrayType(this ref state st, bool isCast)
+        private static AST arrayType(this ptr<state> _addr_st, bool isCast)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('A');
 
             if (len(st.str) == 0L)
             {
                 st.fail("missing array dimension");
             }
+
             AST dim = default;
             if (st.str[0L] == '_')
             {
-                dim = ref new Name(Name:"");
+                dim = addr(new Name(Name:""));
             }
             else if (isDigit(st.str[0L]))
             {
@@ -2056,44 +2366,52 @@ namespace ianlancetaylor
                 }
             else
 
-                dim = ref new Name(Name:st.str[:i]);
+                dim = addr(new Name(Name:st.str[:i]));
                 st.advance(i);
+
             }            {
                 dim = st.expression();
             }
+
             if (len(st.str) == 0L || st.str[0L] != '_')
             {
                 st.fail("expected _ after dimension");
             }
+
             st.advance(1L);
 
             var t = st.demangleType(isCast);
 
-            ArrayType arr = ref new ArrayType(Dimension:dim,Element:t); 
+            ptr<ArrayType> arr = addr(new ArrayType(Dimension:dim,Element:t)); 
 
             // Qualifiers on the element of an array type go on the whole
             // array type.
             {
-                ref TypeWithQualifiers (q, ok) = arr.Element._<ref TypeWithQualifiers>();
+                ptr<TypeWithQualifiers> (q, ok) = arr.Element._<ptr<TypeWithQualifiers>>();
 
                 if (ok)
                 {
-                    return ref new TypeWithQualifiers(Base:&ArrayType{Dimension:dim,Element:q.Base},Qualifiers:q.Qualifiers);
+                    return addr(new TypeWithQualifiers(Base:&ArrayType{Dimension:dim,Element:q.Base},Qualifiers:q.Qualifiers));
                 }
 
             }
 
+
             return arr;
+
         }
 
         // <vector-type> ::= Dv <number> _ <type>
         //               ::= Dv _ <expression> _ <type>
-        private static AST vectorType(this ref state st, bool isCast)
+        private static AST vectorType(this ptr<state> _addr_st, bool isCast)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) == 0L)
             {
                 st.fail("expected vector dimension");
             }
+
             AST dim = default;
             if (st.str[0L] == '_')
             {
@@ -2103,22 +2421,27 @@ namespace ianlancetaylor
             else
             {
                 var num = st.number();
-                dim = ref new Name(Name:fmt.Sprintf("%d",num));
+                dim = addr(new Name(Name:fmt.Sprintf("%d",num)));
             }
+
             if (len(st.str) == 0L || st.str[0L] != '_')
             {
                 st.fail("expected _ after vector dimension");
             }
+
             st.advance(1L);
 
             var t = st.demangleType(isCast);
 
-            return ref new VectorType(Dimension:dim,Base:t);
+            return addr(new VectorType(Dimension:dim,Base:t));
+
         }
 
         // <pointer-to-member-type> ::= M <(class) type> <(member) type>
-        private static AST pointerToMemberType(this ref state st, bool isCast)
+        private static AST pointerToMemberType(this ptr<state> _addr_st, bool isCast)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('M');
             var cl = st.demangleType(false); 
 
@@ -2140,16 +2463,20 @@ namespace ianlancetaylor
             // used in a substitution, so putting the wrong type in the
             // substitution table is harmless.
             var mem = st.demangleType(isCast);
-            return ref new PtrMem(Class:cl,Member:mem);
+            return addr(new PtrMem(Class:cl,Member:mem));
+
         }
 
         // <non-negative number> _ */
-        private static long compactNumber(this ref state st)
+        private static long compactNumber(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) == 0L)
             {
                 st.fail("missing index");
             }
+
             if (st.str[0L] == '_')
             {
                 st.advance(1L);
@@ -2159,13 +2486,16 @@ namespace ianlancetaylor
             {
                 st.fail("unexpected negative number");
             }
+
             var n = st.number();
             if (len(st.str) == 0L || st.str[0L] != '_')
             {
                 st.fail("missing underscore after number");
             }
+
             st.advance(1L);
             return n + 1L;
+
         }
 
         // <template-param> ::= T_
@@ -2176,12 +2506,15 @@ namespace ianlancetaylor
         // with the same index in the currently active template, not to
         // whatever the template parameter would be expanded to here.  We sort
         // this out in substitution and simplify.
-        private static AST templateParam(this ref state st)
+        private static AST templateParam(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.templates) == 0L)
             {
                 st.fail("template parameter not in scope of template");
             }
+
             var off = st.off;
 
             st.checkChar('T');
@@ -2194,42 +2527,54 @@ namespace ianlancetaylor
                 // We are parsing a cast operator.  If the cast is
                 // itself a template, then this is a forward
                 // reference.  Fill it in later.
-                return ref new TemplateParam(Index:n,Template:nil);
+                return addr(new TemplateParam(Index:n,Template:nil));
+
             }
+
             if (n >= len(template.Args))
             {
                 st.failEarlier(fmt.Sprintf("template index out of range (%d >= %d)", n, len(template.Args)), st.off - off);
             }
-            return ref new TemplateParam(Index:n,Template:template);
+
+            return addr(new TemplateParam(Index:n,Template:template));
+
         }
 
         // setTemplate sets the Template field of any TemplateParam's in a.
         // This handles the forward referencing template parameters found in
         // cast operators.
-        private static void setTemplate(this ref state st, AST a, ref Template tmpl)
+        private static void setTemplate(this ptr<state> _addr_st, AST a, ptr<Template> _addr_tmpl)
         {
+            ref state st = ref _addr_st.val;
+            ref Template tmpl = ref _addr_tmpl.val;
+
             slice<AST> seen = default;
             a.Traverse(a =>
             {
                 switch (a.type())
                 {
-                    case ref TemplateParam a:
+                    case ptr<TemplateParam> a:
                         if (a.Template != null)
                         {
                             if (tmpl != null)
                             {
                                 st.fail("duplicate template parameters");
                             }
+
                             return false;
+
                         }
+
                         if (tmpl == null)
                         {
                             st.fail("cast template parameter not in scope of template");
                         }
+
                         if (a.Index >= len(tmpl.Args))
                         {
                             st.fail(fmt.Sprintf("cast template index out of range (%d >= %d)", a.Index, len(tmpl.Args)));
                         }
+
                         a.Template = tmpl;
                         return false;
                         break;
@@ -2242,34 +2587,43 @@ namespace ianlancetaylor
                             {
                                 return false;
                             }
+
                         }
                         seen = append(seen, a);
                         return true;
                         break;
                     }
                 }
+
             });
+
         }
 
         // clearTemplateArgs gives an error for any unset Template field in
         // args.  This handles erroneous cases where a cast operator with a
         // forward referenced template is in the scope of another cast
         // operator.
-        private static void clearTemplateArgs(this ref state st, slice<AST> args)
+        private static void clearTemplateArgs(this ptr<state> _addr_st, slice<AST> args)
         {
+            ref state st = ref _addr_st.val;
+
             foreach (var (_, a) in args)
             {
                 st.setTemplate(a, null);
             }
+
         }
 
         // <template-args> ::= I <template-arg>+ E
-        private static slice<AST> templateArgs(this ref state _st) => func(_st, (ref state st, Defer _, Panic panic, Recover __) =>
+        private static slice<AST> templateArgs(this ptr<state> _addr_st) => func((_, panic, __) =>
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) == 0L || (st.str[0L] != 'I' && st.str[0L] != 'J'))
             {
                 panic("internal error");
             }
+
             st.advance(1L);
 
             slice<AST> ret = default;
@@ -2281,17 +2635,21 @@ namespace ianlancetaylor
 
             st.advance(1L);
             return ret;
+
         });
 
         // <template-arg> ::= <type>
         //                ::= X <expression> E
         //                ::= <expr-primary>
-        private static AST templateArg(this ref state st)
+        private static AST templateArg(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) == 0L)
             {
                 st.fail("missing template argument");
             }
+
             switch (st.str[0L])
             {
                 case 'X': 
@@ -2301,6 +2659,7 @@ namespace ianlancetaylor
                     {
                         st.fail("missing end of expression");
                     }
+
                     st.advance(1L);
                     return expr;
                     break;
@@ -2311,22 +2670,26 @@ namespace ianlancetaylor
 
                 case 'J': 
                     var args = st.templateArgs();
-                    return ref new ArgumentPack(Args:args);
+                    return addr(new ArgumentPack(Args:args));
                     break;
                 default: 
                     return st.demangleType(false);
                     break;
             }
+
         }
 
         // exprList parses a sequence of expressions up to a terminating character.
-        private static AST exprList(this ref state st, byte stop)
+        private static AST exprList(this ptr<state> _addr_st, byte stop)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) > 0L && st.str[0L] == stop)
             {
                 st.advance(1L);
-                return ref new ExprList(Exprs:nil);
+                return addr(new ExprList(Exprs:nil));
             }
+
             slice<AST> exprs = default;
             while (true)
             {
@@ -2337,9 +2700,11 @@ namespace ianlancetaylor
                     st.advance(1L);
                     break;
                 }
+
             }
 
-            return ref new ExprList(Exprs:exprs);
+            return addr(new ExprList(Exprs:exprs));
+
         }
 
         // <expression> ::= <(unary) operator-name> <expression>
@@ -2351,12 +2716,15 @@ namespace ianlancetaylor
         //              ::= sr <type> <unqualified-name>
         //              ::= sr <type> <unqualified-name> <template-args>
         //              ::= <expr-primary>
-        private static AST expression(this ref state _st) => func(_st, (ref state st, Defer _, Panic panic, Recover __) =>
+        private static AST expression(this ptr<state> _addr_st) => func((_, panic, __) =>
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) == 0L)
             {
                 st.fail("expected expression");
             }
+
             if (st.str[0L] == 'L')
             {
                 return st.exprPrimary();
@@ -2372,6 +2740,7 @@ namespace ianlancetaylor
                 {
                     st.fail("expected unresolved type");
                 }
+
                 switch (st.str[0L])
                 {
                     case 'T': 
@@ -2381,12 +2750,13 @@ namespace ianlancetaylor
                     case 'S': 
                         var t = st.demangleType(false);
                         var n = st.baseUnresolvedName();
-                        n = ref new Qualified(Scope:t,Name:n,LocalName:false);
+                        n = addr(new Qualified(Scope:t,Name:n,LocalName:false));
                         if (len(st.str) > 0L && st.str[0L] == 'I')
                         {
                             var args = st.templateArgs();
-                            n = ref new Template(Name:n,Args:args);
+                            n = addr(new Template(Name:n,Args:args));
                         }
+
                         return n;
                         break;
                     default: 
@@ -2396,6 +2766,7 @@ namespace ianlancetaylor
                             st.advance(1L);
                             s = st.demangleType(false);
                         }
+
                         while (len(st.str) == 0L || st.str[0L] != 'E')
                         { 
                             // GCC does not seem to follow the ABI here.
@@ -2403,7 +2774,7 @@ namespace ianlancetaylor
                             if (s != null && len(st.str) > 0L && !isDigit(st.str[0L]))
                             {
                                 {
-                                    ref Qualified (q, ok) = s._<ref Qualified>();
+                                    ptr<Qualified> (q, ok) = s._<ptr<Qualified>>();
 
                                     if (ok)
                                     {
@@ -2411,7 +2782,7 @@ namespace ianlancetaylor
                                         {
                                             var t__prev6 = t;
 
-                                            ref Template (t, ok) = a._<ref Template>();
+                                            ptr<Template> (t, ok) = a._<ptr<Template>>();
 
                                             if (ok)
                                             {
@@ -2426,45 +2797,54 @@ namespace ianlancetaylor
                                             t = t__prev6;
 
                                         }
+
                                         return s;
+
                                     }
 
                                 }
+
                             }
+
                             n = st.sourceName();
                             if (len(st.str) > 0L && st.str[0L] == 'I')
                             {
                                 st.subs.add(n);
                                 args = st.templateArgs();
-                                n = ref new Template(Name:n,Args:args);
+                                n = addr(new Template(Name:n,Args:args));
                             }
+
                             if (s == null)
                             {
                                 s = n;
                             }
                             else
                             {
-                                s = ref new Qualified(Scope:s,Name:n,LocalName:false);
+                                s = addr(new Qualified(Scope:s,Name:n,LocalName:false));
                             }
+
                             st.subs.add(s);
+
                         }
 
                         if (s == null)
                         {
                             st.fail("missing scope in unresolved name");
                         }
+
                         st.advance(1L);
                         n = st.baseUnresolvedName();
-                        return ref new Qualified(Scope:s,Name:n,LocalName:false);
+                        return addr(new Qualified(Scope:s,Name:n,LocalName:false));
                         break;
                 }
+
             }
             else if (st.str[0L] == 's' && len(st.str) > 1L && st.str[1L] == 'p')
             {
                 st.advance(2L);
                 var e = st.expression();
                 var pack = st.findArgumentPack(e);
-                return ref new PackExpansion(Base:e,Pack:pack);
+                return addr(new PackExpansion(Base:e,Pack:pack));
             }
             else if (st.str[0L] == 's' && len(st.str) > 1L && st.str[1L] == 'Z')
             {
@@ -2476,7 +2856,9 @@ namespace ianlancetaylor
                 {
                     st.failEarlier("missing argument pack", st.off - off);
                 }
-                return ref new SizeofPack(Pack:ap);
+
+                return addr(new SizeofPack(Pack:ap));
+
             }
             else if (st.str[0L] == 's' && len(st.str) > 1L && st.str[1L] == 'P')
             {
@@ -2489,7 +2871,8 @@ namespace ianlancetaylor
                 }
 
                 st.advance(1L);
-                return ref new SizeofArgs(Args:args);
+                return addr(new SizeofArgs(Args:args));
+
             }
             else if (st.str[0L] == 'f' && len(st.str) > 1L && st.str[1L] == 'p')
             {
@@ -2497,13 +2880,14 @@ namespace ianlancetaylor
                 if (len(st.str) > 0L && st.str[0L] == 'T')
                 {
                     st.advance(1L);
-                    return ref new FunctionParam(Index:0);
+                    return addr(new FunctionParam(Index:0));
                 }
                 else
                 {
                     var index = st.compactNumber();
-                    return ref new FunctionParam(Index:index+1);
+                    return addr(new FunctionParam(Index:index+1));
                 }
+
             }
             else if (isDigit(st.str[0L]) || (st.str[0L] == 'o' && len(st.str) > 1L && st.str[1L] == 'n'))
             {
@@ -2511,14 +2895,18 @@ namespace ianlancetaylor
                 { 
                     // Skip operator function ID.
                     st.advance(2L);
+
                 }
+
                 var (n, _) = st.unqualifiedName();
                 if (len(st.str) > 0L && st.str[0L] == 'I')
                 {
                     args = st.templateArgs();
-                    n = ref new Template(Name:n,Args:args);
+                    n = addr(new Template(Name:n,Args:args));
                 }
+
                 return n;
+
             }
             else if ((st.str[0L] == 'i' || st.str[0L] == 't') && len(st.str) > 1L && st.str[1L] == 'l')
             { 
@@ -2530,14 +2918,16 @@ namespace ianlancetaylor
                 {
                     t = st.demangleType(false);
                 }
+
                 var exprs = st.exprList('E');
-                return ref new InitializerList(Type:t,Exprs:exprs);
+                return addr(new InitializerList(Type:t,Exprs:exprs));
+
             }
             else if (st.str[0L] == 's' && len(st.str) > 1L && st.str[1L] == 't')
             {
                 var (o, _) = st.operatorName(true);
                 t = st.demangleType(false);
-                return ref new Unary(Op:o,Expr:t,Suffix:false,SizeofType:true);
+                return addr(new Unary(Op:o,Expr:t,Suffix:false,SizeofType:true));
             }
             else
             {
@@ -2545,12 +2935,13 @@ namespace ianlancetaylor
                 {
                     st.fail("missing operator code");
                 }
+
                 var code = st.str[..2L];
                 var (o, args) = st.operatorName(true);
                 switch (args)
                 {
                     case 0L: 
-                        return ref new Nullary(Op:o);
+                        return addr(new Nullary(Op:o));
                         break;
                     case 1L: 
                         var suffix = false;
@@ -2564,10 +2955,12 @@ namespace ianlancetaylor
                             {
                                 suffix = true;
                             }
+
                         }
+
                         AST operand = default;
                         {
-                            ref Cast (_, ok) = o._<ref Cast>();
+                            ptr<Cast> (_, ok) = o._<ptr<Cast>>();
 
                             if (ok && len(st.str) > 0L && st.str[0L] == '_')
                             {
@@ -2580,7 +2973,8 @@ namespace ianlancetaylor
                             }
 
                         }
-                        return ref new Unary(Op:o,Expr:operand,Suffix:suffix,SizeofType:false);
+
+                        return addr(new Unary(Op:o,Expr:operand,Suffix:suffix,SizeofType:false));
                         break;
                     case 2L: 
                         AST left = default;                    AST right = default;
@@ -2593,12 +2987,13 @@ namespace ianlancetaylor
                         {
                             left, _ = st.operatorName(true);
                             right = st.expression();
-                            return ref new Fold(Left:code[1]=='l',Op:left,Arg1:right,Arg2:nil);
+                            return addr(new Fold(Left:code[1]=='l',Op:left,Arg1:right,Arg2:nil));
                         }
                         else
                         {
                             left = st.expression();
                         }
+
                         if (code == "cl")
                         {
                             right = st.exprList('E');
@@ -2609,14 +3004,16 @@ namespace ianlancetaylor
                             if (len(st.str) > 0L && st.str[0L] == 'I')
                             {
                                 args = st.templateArgs();
-                                right = ref new Template(Name:right,Args:args);
+                                right = addr(new Template(Name:right,Args:args));
                             }
+
                         }
                         else
                         {
                             right = st.expression();
                         }
-                        return ref new Binary(Op:o,Left:left,Right:right);
+
+                        return addr(new Binary(Op:o,Left:left,Right:right));
                         break;
                     case 3L: 
                         if (code[0L] == 'n')
@@ -2625,11 +3022,13 @@ namespace ianlancetaylor
                             {
                                 panic("internal error");
                             }
+
                             var place = st.exprList('_');
-                            if (place._<ref ExprList>().Exprs == null)
+                            if (place._<ptr<ExprList>>().Exprs == null)
                             {
                                 place = null;
                             }
+
                             t = st.demangleType(false);
                             AST ini = default;
                             if (len(st.str) > 0L && st.str[0L] == 'E')
@@ -2641,39 +3040,46 @@ namespace ianlancetaylor
                                 // Parenthesized initializer.
                                 st.advance(2L);
                                 ini = st.exprList('E');
+
                             }
                             else if (len(st.str) > 1L && st.str[0L] == 'i' && st.str[1L] == 'l')
                             { 
                                 // Initializer list.
                                 ini = st.expression();
+
                             }
                             else
                             {
                                 st.fail("unrecognized new initializer");
                             }
-                            return ref new New(Op:o,Place:place,Type:t,Init:ini);
+
+                            return addr(new New(Op:o,Place:place,Type:t,Init:ini));
+
                         }
                         else if (code[0L] == 'f')
                         {
                             var (first, _) = st.operatorName(true);
                             var second = st.expression();
                             var third = st.expression();
-                            return ref new Fold(Left:code[1]=='L',Op:first,Arg1:second,Arg2:third);
+                            return addr(new Fold(Left:code[1]=='L',Op:first,Arg1:second,Arg2:third));
                         }
                         else
                         {
                             var first = st.expression();
                             second = st.expression();
                             third = st.expression();
-                            return ref new Trinary(Op:o,First:first,Second:second,Third:third);
+                            return addr(new Trinary(Op:o,First:first,Second:second,Third:third));
                         }
+
                         break;
                     default: 
                         st.fail(fmt.Sprintf("unsupported number of operator arguments: %d", args));
                         panic("not reached");
                         break;
                 }
+
             }
+
         });
 
         // <base-unresolved-name> ::= <simple-id>
@@ -2682,8 +3088,10 @@ namespace ianlancetaylor
         //                        ::= dn <destructor-name>
         //
         //<simple-id> ::= <source-name> [ <template-args> ]
-        private static AST baseUnresolvedName(this ref state st)
+        private static AST baseUnresolvedName(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             AST n = default;
             if (len(st.str) >= 2L && st.str[..2L] == "on")
             {
@@ -2701,7 +3109,9 @@ namespace ianlancetaylor
                 {
                     n = st.demangleType(false);
                 }
-                n = ref new Destructor(Name:n);
+
+                n = addr(new Destructor(Name:n));
+
             }
             else if (len(st.str) > 0L && isDigit(st.str[0L]))
             {
@@ -2713,25 +3123,30 @@ namespace ianlancetaylor
                 // an operator name without on.
                 // See https://gcc.gnu.org/PR70182.
                 n, _ = st.operatorName(true);
+
             }
+
             if (len(st.str) > 0L && st.str[0L] == 'I')
             {
                 var args = st.templateArgs();
-                n = ref new Template(Name:n,Args:args);
+                n = addr(new Template(Name:n,Args:args));
             }
+
             return n;
+
         }
 
         // <expr-primary> ::= L <type> <(value) number> E
         //                ::= L <type> <(value) float> E
         //                ::= L <mangled-name> E
-        private static AST exprPrimary(this ref state st)
+        private static AST exprPrimary(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('L');
             if (len(st.str) == 0L)
             {
                 st.fail("expected primary expression");
-
             } 
 
             // Check for 'Z' here because g++ incorrectly omitted the
@@ -2743,12 +3158,15 @@ namespace ianlancetaylor
                 {
                     st.advance(1L);
                 }
+
                 if (len(st.str) == 0L || st.str[0L] != 'Z')
                 {
                     st.fail("expected mangled name");
                 }
+
                 st.advance(1L);
-                ret = st.encoding(true);
+                ret = st.encoding(true, notForLocalName);
+
             }
             else
             {
@@ -2760,6 +3178,12 @@ namespace ianlancetaylor
                     neg = true;
                     st.advance(1L);
                 }
+
+                if (len(st.str) > 0L && st.str[0L] == 'E')
+                {
+                    st.fail("missing literal value");
+                }
+
                 long i = 0L;
                 while (len(st.str) > i && st.str[i] != 'E')
                 {
@@ -2768,23 +3192,30 @@ namespace ianlancetaylor
 
                 var val = st.str[..i];
                 st.advance(i);
-                ret = ref new Literal(Type:t,Val:val,Neg:neg);
+                ret = addr(new Literal(Type:t,Val:val,Neg:neg));
+
             }
+
             if (len(st.str) == 0L || st.str[0L] != 'E')
             {
                 st.fail("expected E after literal");
             }
+
             st.advance(1L);
             return ret;
+
         }
 
         // <discriminator> ::= _ <(non-negative) number>
-        private static AST discriminator(this ref state st, AST a)
+        private static AST discriminator(this ptr<state> _addr_st, AST a)
         {
+            ref state st = ref _addr_st.val;
+
             if (len(st.str) == 0L || st.str[0L] != '_')
             {
                 return a;
             }
+
             var off = st.off;
             st.advance(1L);
             var d = st.number();
@@ -2795,11 +3226,14 @@ namespace ianlancetaylor
             // We don't currently print out the discriminator, so we don't
             // save it.
             return a;
+
         }
 
         // <closure-type-name> ::= Ul <lambda-sig> E [ <nonnegative number> ] _
-        private static AST closureTypeName(this ref state st)
+        private static AST closureTypeName(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('U');
             st.checkChar('l');
             var types = st.parmlist();
@@ -2807,28 +3241,34 @@ namespace ianlancetaylor
             {
                 st.fail("expected E after closure type name");
             }
+
             st.advance(1L);
             var num = st.compactNumber();
-            Closure ret = ref new Closure(Types:types,Num:num);
+            ptr<Closure> ret = addr(new Closure(Types:types,Num:num));
             st.subs.add(ret);
             return ret;
+
         }
 
         // <unnamed-type-name> ::= Ut [ <nonnegative number> ] _
-        private static AST unnamedTypeName(this ref state st)
+        private static AST unnamedTypeName(this ptr<state> _addr_st)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('U');
             st.checkChar('t');
             var num = st.compactNumber();
-            UnnamedType ret = ref new UnnamedType(Num:num);
+            ptr<UnnamedType> ret = addr(new UnnamedType(Num:num));
             st.subs.add(ret);
             return ret;
         }
 
         // Recognize a clone suffix.  These are not part of the mangling API,
         // but are added by GCC when cloning functions.
-        private static AST cloneSuffix(this ref state st, AST a)
+        private static AST cloneSuffix(this ptr<state> _addr_st, AST a)
         {
+            ref state st = ref _addr_st.val;
+
             long i = 0L;
             if (len(st.str) > 1L && st.str[0L] == '.' && (isLower(st.str[1L]) || st.str[1L] == '_'))
             {
@@ -2838,7 +3278,9 @@ namespace ianlancetaylor
                     i++;
                 }
 
+
             }
+
             while (len(st.str) > i + 1L && st.str[i] == '.' && isDigit(st.str[i + 1L]))
             {
                 i += 2L;
@@ -2847,11 +3289,13 @@ namespace ianlancetaylor
                     i++;
                 }
 
+
             }
 
             var suffix = st.str[..i];
             st.advance(i);
-            return ref new Clone(Base:a,Suffix:suffix);
+            return addr(new Clone(Base:a,Suffix:suffix));
+
         }
 
         // substitutions is the list of substitution candidates that may
@@ -2861,9 +3305,11 @@ namespace ianlancetaylor
         }
 
         // add adds a new substitution candidate.
-        private static void add(this ref substitutions subs, AST a)
+        private static void add(this ptr<substitutions> _addr_subs, AST a)
         {
-            subs.Value = append(subs.Value, a);
+            ref substitutions subs = ref _addr_subs.val;
+
+            subs.val = append(subs.val, a);
         }
 
         // subAST maps standard substitution codes to the corresponding AST.
@@ -2883,13 +3329,16 @@ namespace ianlancetaylor
         //                ::= Si
         //                ::= So
         //                ::= Sd
-        private static AST substitution(this ref state st, bool forPrefix)
+        private static AST substitution(this ptr<state> _addr_st, bool forPrefix)
         {
+            ref state st = ref _addr_st.val;
+
             st.checkChar('S');
             if (len(st.str) == 0L)
             {
                 st.fail("missing substitution index");
             }
+
             var c = st.str[0L];
             st.advance(1L);
             long dec = 1L;
@@ -2905,6 +3354,7 @@ namespace ianlancetaylor
                         {
                             st.fail("substitution index overflow");
                         }
+
                         if (isDigit(c))
                         {
                             id = id * 36L + int(c - '0');
@@ -2917,23 +3367,29 @@ namespace ianlancetaylor
                         {
                             st.fail("invalid character in substitution index");
                         }
+
                         if (len(st.str) == 0L)
                         {
                             st.fail("missing end to substitution index");
                         }
+
                         c = st.str[0L];
                         st.advance(1L);
                         dec++;
+
                     }
 
                     id++;
+
                 }
             else
+
 
                 if (id >= len(st.subs))
                 {
                     st.failEarlier(fmt.Sprintf("substitution index out of range (%d >= %d)", id, len(st.subs)), dec);
                 }
+
                 var ret = st.subs[id]; 
 
                 // We need to update any references to template
@@ -2941,34 +3397,40 @@ namespace ianlancetaylor
                 // template.
                 Func<AST, AST> copy = a =>
                 {
-                    ref TemplateParam (tp, ok) = a._<ref TemplateParam>();
+                    ptr<TemplateParam> (tp, ok) = a._<ptr<TemplateParam>>();
                     if (!ok)
                     {
                         return null;
                     }
+
                     if (len(st.templates) == 0L)
                     {
                         st.failEarlier("substituted template parameter not in scope of template", dec);
                     }
+
                     var template = st.templates[len(st.templates) - 1L];
                     if (template == null)
                     { 
                         // This template parameter is within
                         // the scope of a cast operator.
-                        return ref new TemplateParam(Index:tp.Index,Template:nil);
+                        return addr(new TemplateParam(Index:tp.Index,Template:nil));
+
                     }
+
                     if (tp.Index >= len(template.Args))
                     {
                         st.failEarlier(fmt.Sprintf("substituted template index out of range (%d >= %d)", tp.Index, len(template.Args)), dec);
                     }
-                    return ref new TemplateParam(Index:tp.Index,Template:template);
+
+                    return addr(new TemplateParam(Index:tp.Index,Template:template));
+
                 }
 ;
                 slice<AST> seen = default;
                 Func<AST, bool> skip = a =>
                 {
                     {
-                        ref Typed (_, ok) = a._<ref Typed>();
+                        ptr<Typed> (_, ok) = a._<ptr<Typed>>();
 
                         if (ok)
                         {
@@ -2976,15 +3438,18 @@ namespace ianlancetaylor
                         }
 
                     }
+
                     foreach (var (_, v) in seen)
                     {
                         if (v == a)
                         {
                             return true;
                         }
+
                     }
                     seen = append(seen, a);
                     return false;
+
                 }
 ;
                 {
@@ -3001,7 +3466,9 @@ namespace ianlancetaylor
 
                 }
 
+
                 return ret;
+
             }            {
                 var m = subAST;
                 if (st.verbose)
@@ -3014,17 +3481,22 @@ namespace ianlancetaylor
                 {
                     m = verboseAST;
                 }
+
                 var (a, ok) = m[c];
                 if (!ok)
                 {
                     st.failEarlier("unrecognized substitution code", 1L);
                 }
+
                 if (len(st.str) > 0L && st.str[0L] == 'B')
                 {
                     a = st.taggedName(a);
                 }
+
                 return a;
+
             }
+
         }
 
         // isDigit returns whetner c is a digit for demangling purposes.
@@ -3058,9 +3530,11 @@ namespace ianlancetaylor
                     {
                         return true;
                     }
+
                 }
                 seen = append(seen, a);
                 return false;
+
             }
 ;
             {
@@ -3072,7 +3546,9 @@ namespace ianlancetaylor
                 }
 
             }
+
             return a;
+
         }
 
         // simplifyOne simplifies a single AST.  It returns nil if there is
@@ -3081,17 +3557,18 @@ namespace ianlancetaylor
         {
             switch (a.type())
             {
-                case ref TemplateParam a:
+                case ptr<TemplateParam> a:
                     if (a.Template != null && a.Index < len(a.Template.Args))
                     {
                         return a.Template.Args[a.Index];
                     }
-                    break;
-                case ref MethodWithQualifiers a:
-                    {
-                        ref MethodWithQualifiers m__prev1 = m;
 
-                        ref MethodWithQualifiers (m, ok) = a.Method._<ref MethodWithQualifiers>();
+                    break;
+                case ptr<MethodWithQualifiers> a:
+                    {
+                        ptr<MethodWithQualifiers> m__prev1 = m;
+
+                        ptr<MethodWithQualifiers> (m, ok) = a.Method._<ptr<MethodWithQualifiers>>();
 
                         if (ok)
                         {
@@ -3106,69 +3583,77 @@ namespace ianlancetaylor
                                 {
                                     ref = "&";
                                 }
+
                             }
-                            return ref new MethodWithQualifiers(Method:m.Method,Qualifiers:mergeQualifiers(a.Qualifiers,m.Qualifiers),RefQualifier:ref);
+
+                            return addr(new MethodWithQualifiers(Method:m.Method,Qualifiers:mergeQualifiers(a.Qualifiers,m.Qualifiers),RefQualifier:ref));
+
                         }
 
                         m = m__prev1;
 
                     }
-                    {
-                        ref TypeWithQualifiers t__prev1 = t;
 
-                        ref TypeWithQualifiers (t, ok) = a.Method._<ref TypeWithQualifiers>();
+                    {
+                        ptr<TypeWithQualifiers> t__prev1 = t;
+
+                        ptr<TypeWithQualifiers> (t, ok) = a.Method._<ptr<TypeWithQualifiers>>();
 
                         if (ok)
                         {
-                            return ref new MethodWithQualifiers(Method:t.Base,Qualifiers:mergeQualifiers(a.Qualifiers,t.Qualifiers),RefQualifier:a.RefQualifier);
+                            return addr(new MethodWithQualifiers(Method:t.Base,Qualifiers:mergeQualifiers(a.Qualifiers,t.Qualifiers),RefQualifier:a.RefQualifier));
                         }
 
                         t = t__prev1;
 
                     }
+
                     break;
-                case ref TypeWithQualifiers a:
+                case ptr<TypeWithQualifiers> a:
                     {
-                        ref FunctionType (ft, ok) = a.Base._<ref FunctionType>();
+                        ptr<FunctionType> (ft, ok) = a.Base._<ptr<FunctionType>>();
 
                         if (ok)
                         {
-                            return ref new MethodWithQualifiers(Method:ft,Qualifiers:a.Qualifiers,RefQualifier:"");
+                            return addr(new MethodWithQualifiers(Method:ft,Qualifiers:a.Qualifiers,RefQualifier:""));
                         }
 
                     }
-                    {
-                        ref TypeWithQualifiers t__prev1 = t;
 
-                        (t, ok) = a.Base._<ref TypeWithQualifiers>();
+                    {
+                        ptr<TypeWithQualifiers> t__prev1 = t;
+
+                        (t, ok) = a.Base._<ptr<TypeWithQualifiers>>();
 
                         if (ok)
                         {
-                            return ref new TypeWithQualifiers(Base:t.Base,Qualifiers:mergeQualifiers(a.Qualifiers,t.Qualifiers));
+                            return addr(new TypeWithQualifiers(Base:t.Base,Qualifiers:mergeQualifiers(a.Qualifiers,t.Qualifiers)));
                         }
 
                         t = t__prev1;
 
                     }
-                    {
-                        ref MethodWithQualifiers m__prev1 = m;
 
-                        (m, ok) = a.Base._<ref MethodWithQualifiers>();
+                    {
+                        ptr<MethodWithQualifiers> m__prev1 = m;
+
+                        (m, ok) = a.Base._<ptr<MethodWithQualifiers>>();
 
                         if (ok)
                         {
-                            return ref new MethodWithQualifiers(Method:m.Method,Qualifiers:mergeQualifiers(a.Qualifiers,m.Qualifiers),RefQualifier:m.RefQualifier);
+                            return addr(new MethodWithQualifiers(Method:m.Method,Qualifiers:mergeQualifiers(a.Qualifiers,m.Qualifiers),RefQualifier:m.RefQualifier));
                         }
 
                         m = m__prev1;
 
                     }
-                    break;
-                case ref ReferenceType a:
-                    {
-                        ref ReferenceType rt__prev1 = rt;
 
-                        ref ReferenceType (rt, ok) = a.Base._<ref ReferenceType>();
+                    break;
+                case ptr<ReferenceType> a:
+                    {
+                        ptr<ReferenceType> rt__prev1 = rt;
+
+                        ptr<ReferenceType> (rt, ok) = a.Base._<ptr<ReferenceType>>();
 
                         if (ok)
                         {
@@ -3178,25 +3663,27 @@ namespace ianlancetaylor
                         rt = rt__prev1;
 
                     }
-                    {
-                        ref RvalueReferenceType rrt__prev1 = rrt;
 
-                        ref RvalueReferenceType (rrt, ok) = a.Base._<ref RvalueReferenceType>();
+                    {
+                        ptr<RvalueReferenceType> rrt__prev1 = rrt;
+
+                        ptr<RvalueReferenceType> (rrt, ok) = a.Base._<ptr<RvalueReferenceType>>();
 
                         if (ok)
                         {
-                            return ref new ReferenceType(Base:rrt.Base);
+                            return addr(new ReferenceType(Base:rrt.Base));
                         }
 
                         rrt = rrt__prev1;
 
                     }
-                    break;
-                case ref RvalueReferenceType a:
-                    {
-                        ref RvalueReferenceType rrt__prev1 = rrt;
 
-                        (rrt, ok) = a.Base._<ref RvalueReferenceType>();
+                    break;
+                case ptr<RvalueReferenceType> a:
+                    {
+                        ptr<RvalueReferenceType> rrt__prev1 = rrt;
+
+                        (rrt, ok) = a.Base._<ptr<RvalueReferenceType>>();
 
                         if (ok)
                         {
@@ -3206,10 +3693,11 @@ namespace ianlancetaylor
                         rrt = rrt__prev1;
 
                     }
-                    {
-                        ref ReferenceType rt__prev1 = rt;
 
-                        (rt, ok) = a.Base._<ref ReferenceType>();
+                    {
+                        ptr<ReferenceType> rt__prev1 = rt;
+
+                        (rt, ok) = a.Base._<ptr<ReferenceType>>();
 
                         if (ok)
                         {
@@ -3219,19 +3707,21 @@ namespace ianlancetaylor
                         rt = rt__prev1;
 
                     }
+
                     break;
-                case ref ArrayType a:
+                case ptr<ArrayType> a:
                     {
-                        ref TypeWithQualifiers (q, ok) = a.Element._<ref TypeWithQualifiers>();
+                        ptr<TypeWithQualifiers> (q, ok) = a.Element._<ptr<TypeWithQualifiers>>();
 
                         if (ok)
                         {
-                            return ref new TypeWithQualifiers(Base:&ArrayType{Dimension:a.Dimension,Element:q.Base},Qualifiers:q.Qualifiers,);
+                            return addr(new TypeWithQualifiers(Base:&ArrayType{Dimension:a.Dimension,Element:q.Base},Qualifiers:q.Qualifiers,));
                         }
 
                     }
+
                     break;
-                case ref PackExpansion a:
+                case ptr<PackExpansion> a:
                     if (a.Pack != null)
                     {
                         var exprs = make_slice<AST>(len(a.Pack.Args));
@@ -3247,6 +3737,7 @@ namespace ianlancetaylor
                                 } 
                                 // Copy everything else.
                                 return null;
+
                             }
 ;
 
@@ -3256,7 +3747,7 @@ namespace ianlancetaylor
                                 // Don't traverse into another
                                 // pack expansion.
                                 {
-                                    ref PackExpansion (_, ok) = sub._<ref PackExpansion>();
+                                    ptr<PackExpansion> (_, ok) = sub._<ptr<PackExpansion>>();
 
                                     if (ok)
                                     {
@@ -3264,15 +3755,18 @@ namespace ianlancetaylor
                                     }
 
                                 }
+
                                 foreach (var (_, v) in seen)
                                 {
                                     if (v == sub)
                                     {
                                         return true;
                                     }
+
                                 }
                                 seen = append(seen, sub);
                                 return false;
+
                             }
 ;
 
@@ -3281,87 +3775,100 @@ namespace ianlancetaylor
                             {
                                 b = a.Base;
                             }
+
                             exprs[i] = simplify(b);
+
                         }
-                        return ref new ExprList(Exprs:exprs);
+                        return addr(new ExprList(Exprs:exprs));
+
                     }
+
                     break;
             }
             return null;
+
         }
 
         // findArgumentPack walks the AST looking for the argument pack for a
         // pack expansion.  We find it via a template parameter.
-        private static ref ArgumentPack findArgumentPack(this ref state st, AST a)
+        private static ptr<ArgumentPack> findArgumentPack(this ptr<state> _addr_st, AST a)
         {
+            ref state st = ref _addr_st.val;
+
             slice<AST> seen = default;
-            ref ArgumentPack ret = default;
+            ptr<ArgumentPack> ret;
             a.Traverse(a =>
             {
                 if (ret != null)
                 {
-                    return false;
+                    return _addr_false!;
                 }
+
                 switch (a.type())
                 {
-                    case ref TemplateParam a:
+                    case ptr<TemplateParam> a:
                         if (a.Template == null || a.Index >= len(a.Template.Args))
                         {
-                            return true;
+                            return _addr_true!;
                         }
+
                         {
-                            ref ArgumentPack (pack, ok) = a.Template.Args[a.Index]._<ref ArgumentPack>();
+                            ptr<ArgumentPack> (pack, ok) = a.Template.Args[a.Index]._<ptr<ArgumentPack>>();
 
                             if (ok)
                             {
                                 ret = pack;
-                                return false;
+                                return _addr_false!;
                             }
 
                         }
+
                         break;
-                    case ref PackExpansion a:
-                        return false;
+                    case ptr<PackExpansion> a:
+                        return _addr_false!;
                         break;
-                    case ref Closure a:
-                        return false;
+                    case ptr<Closure> a:
+                        return _addr_false!;
                         break;
-                    case ref Name a:
-                        return false;
+                    case ptr<Name> a:
+                        return _addr_false!;
                         break;
-                    case ref TaggedName a:
-                        return false;
+                    case ptr<TaggedName> a:
+                        return _addr_false!;
                         break;
-                    case ref Operator a:
-                        return false;
+                    case ptr<Operator> a:
+                        return _addr_false!;
                         break;
-                    case ref BuiltinType a:
-                        return false;
+                    case ptr<BuiltinType> a:
+                        return _addr_false!;
                         break;
-                    case ref FunctionParam a:
-                        return false;
+                    case ptr<FunctionParam> a:
+                        return _addr_false!;
                         break;
-                    case ref UnnamedType a:
-                        return false;
+                    case ptr<UnnamedType> a:
+                        return _addr_false!;
                         break;
-                    case ref FixedType a:
-                        return false;
+                    case ptr<FixedType> a:
+                        return _addr_false!;
                         break;
-                    case ref DefaultArg a:
-                        return false;
+                    case ptr<DefaultArg> a:
+                        return _addr_false!;
                         break;
                 }
                 foreach (var (_, v) in seen)
                 {
                     if (v == a)
                     {
-                        return false;
+                        return _addr_false!;
                     }
+
                 }
                 seen = append(seen, a);
-                return true;
+                return _addr_true!;
+
             });
-            return ret;
+            return _addr_ret!;
+
         }
     }
 }}}}}

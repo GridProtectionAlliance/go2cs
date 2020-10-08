@@ -4,7 +4,7 @@
 
 // General environment variables.
 
-// package os -- go2cs converted at 2020 August 29 08:43:34 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:19 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\env.go
 using testlog = go.@internal.testlog_package;
@@ -20,21 +20,46 @@ namespace go
         // For example, os.ExpandEnv(s) is equivalent to os.Expand(s, os.Getenv).
         public static @string Expand(@string s, Func<@string, @string> mapping)
         {
-            var buf = make_slice<byte>(0L, 2L * len(s)); 
+            slice<byte> buf = default; 
             // ${} is all ASCII, so bytes are fine for this operation.
             long i = 0L;
             for (long j = 0L; j < len(s); j++)
             {
                 if (s[j] == '$' && j + 1L < len(s))
                 {
+                    if (buf == null)
+                    {
+                        buf = make_slice<byte>(0L, 2L * len(s));
+                    }
                     buf = append(buf, s[i..j]);
                     var (name, w) = getShellName(s[j + 1L..]);
-                    buf = append(buf, mapping(name));
+                    if (name == "" && w > 0L)
+                    { 
+                        // Encountered invalid syntax; eat the
+                        // characters.
+                    }
+                    else if (name == "")
+                    { 
+                        // Valid syntax, but $ was not followed by a
+                        // name. Leave the dollar character untouched.
+                        buf = append(buf, s[j]);
+
+                    }
+                    else
+                    {
+                        buf = append(buf, mapping(name));
+                    }
                     j += w;
                     i = j + 1L;
+
                 }
             }
+            if (buf == null)
+            {
+                return s;
+            }
             return string(buf) + s[i..];
+
         }
 
         // ExpandEnv replaces ${var} or $var in the string according to the values
@@ -88,6 +113,7 @@ namespace go
                     break;
             }
             return false;
+
         }
 
         // isAlphaNum reports whether the byte is an ASCII letter, number, or underscore
@@ -101,6 +127,9 @@ namespace go
         // expansion and two more bytes are needed than the length of the name.
         private static (@string, long) getShellName(@string s)
         {
+            @string _p0 = default;
+            long _p0 = default;
+
 
             if (s[0L] == '{') 
                 if (len(s) > 2L && isShellSpecialVar(s[1L]) && s[2L] == '}')
@@ -115,14 +144,21 @@ namespace go
                     {
                         if (s[i] == '}')
                         {
+                            if (i == 1L)
+                            {
+                                return ("", 2L); // Bad syntax; eat "${}"
+                            }
+
                             return (s[1L..i], i + 1L);
+
                         }
+
                     }
 
 
                     i = i__prev1;
                 }
-                return ("", 1L); // Bad syntax; just eat the brace.
+                return ("", 1L); // Bad syntax; eat "${"
             else if (isShellSpecialVar(s[0L])) 
                 return (s[0L..1L], 1L);
             // Scan alphanumerics.
@@ -132,6 +168,7 @@ namespace go
             }
 
             return (s[..i], i);
+
         }
 
         // Getenv retrieves the value of the environment variable named by the key.
@@ -151,6 +188,9 @@ namespace go
         // be false.
         public static (@string, bool) LookupEnv(@string key)
         {
+            @string _p0 = default;
+            bool _p0 = default;
+
             testlog.Getenv(key);
             return syscall.Getenv(key);
         }
@@ -162,15 +202,17 @@ namespace go
             var err = syscall.Setenv(key, value);
             if (err != null)
             {
-                return error.As(NewSyscallError("setenv", err));
+                return error.As(NewSyscallError("setenv", err))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Unsetenv unsets a single environment variable.
         public static error Unsetenv(@string key)
         {
-            return error.As(syscall.Unsetenv(key));
+            return error.As(syscall.Unsetenv(key))!;
         }
 
         // Clearenv deletes all environment variables.

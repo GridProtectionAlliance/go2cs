@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:52:29 UTC
+//     Generated on 2020 October 08 04:08:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,7 +18,6 @@ using ast = go.go.ast_package;
 using token = go.go.token_package;
 using io = go.io_package;
 using os = go.os_package;
-using strconv = go.strconv_package;
 using strings = go.strings_package;
 using tabwriter = go.text.tabwriter_package;
 using unicode = go.unicode_package;
@@ -38,7 +37,7 @@ namespace go
                 this.Comments = default;
             }
 
-            public CommentedNode(slice<ref ast.CommentGroup> Comments = default)
+            public CommentedNode(slice<ptr<ast.CommentGroup>> Comments = default)
             {
                 this.Comments = Comments;
             }

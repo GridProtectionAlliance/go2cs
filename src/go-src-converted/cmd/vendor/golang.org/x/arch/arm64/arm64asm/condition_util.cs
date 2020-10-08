@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2020 August 29 10:07:20 UTC
+// package arm64asm -- go2cs converted at 2020 October 08 04:44:17 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\condition_util.go
 
@@ -29,22 +29,28 @@ namespace arm64
             {
                 return false;
             }
+
             if ((imms >> (int)(5L) == sf) && (imms & 0x1fUL == 0x1fUL))
             {
                 return false;
             }
+
             if (immr == 0L)
             {
                 if (sf == 0L && (imms == 7L || imms == 15L))
                 {
                     return false;
                 }
+
                 if (sf == 1L && opc1 == 0L && (imms == 7L || imms == 15L || imms == 31L))
                 {
                     return false;
                 }
+
             }
+
             return true;
+
         }
 
         private static bool move_wide_preferred_4(uint sf, uint N, uint imms, uint immr)
@@ -53,40 +59,48 @@ namespace arm64
             {
                 return false;
             }
+
             if (sf == 0L && !(N == 0L && ((imms >> (int)(5L)) & 1L) == 0L))
             {
                 return false;
             }
+
             if (imms < 16L)
             {
                 return (-immr) % 16L <= (15L - imms);
             }
+
             var width = uint32(32L);
             if (sf == 1L)
             {
                 width = uint32(64L);
             }
+
             if (imms >= (width - 15L))
             {
                 return (immr % 16L) <= (imms - (width - 15L));
             }
+
             return false;
+
         }
 
         public partial struct Sys // : byte
         {
         }
 
-        public static readonly Sys Sys_AT = iota;
-        public static readonly var Sys_DC = 0;
-        public static readonly var Sys_IC = 1;
-        public static readonly var Sys_TLBI = 2;
-        public static readonly var Sys_SYS = 3;
+        public static readonly Sys Sys_AT = (Sys)iota;
+        public static readonly var Sys_DC = (var)0;
+        public static readonly var Sys_IC = (var)1;
+        public static readonly var Sys_TLBI = (var)2;
+        public static readonly var Sys_SYS = (var)3;
+
 
         private static Sys sys_op_4(uint op1, uint crn, uint crm, uint op2)
         { 
             // TODO: system instruction
             return Sys_SYS;
+
         }
 
         private static bool is_zero(uint x)
@@ -111,9 +125,11 @@ namespace arm64
                     count++;
                 x >>= 1L;
                 }
+
             }
 
             return count;
+
         }
     }
 }}}}}}}

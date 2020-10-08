@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:02:56 UTC
+//     Generated on 2020 October 08 04:37:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using elf = go.debug.elf_package;
@@ -34,61 +35,35 @@ namespace @internal
             public Symbol(NilType _)
             {
                 this.Name = default;
-                this.Extname = default;
                 this.Type = default;
                 this.Version = default;
                 this.Attr = default;
-                this.Localentry = default;
                 this.Dynid = default;
-                this.Plt = default;
-                this.Got = default;
                 this.Align = default;
-                this.Elfsym = default;
-                this.LocalElfsym = default;
                 this.Value = default;
                 this.Size = default;
-                this.ElfType = default;
-                this.Sub = default;
                 this.Outer = default;
-                this.Gotype = default;
-                this.Reachparent = default;
-                this.File = default;
-                this.Dynimplib = default;
-                this.Dynimpvers = default;
+                this.SymIdx = default;
+                this.auxinfo = default;
                 this.Sect = default;
-                this.FuncInfo = default;
-                this.Lib = default;
                 this.P = default;
                 this.R = default;
             }
 
-            public Symbol(@string Name = default, @string Extname = default, SymKind Type = default, short Version = default, Attribute Attr = default, byte Localentry = default, int Dynid = default, int Plt = default, int Got = default, int Align = default, int Elfsym = default, int LocalElfsym = default, long Value = default, long Size = default, elf.SymType ElfType = default, ref ptr<Symbol> Sub = default, ref ptr<Symbol> Outer = default, ref ptr<Symbol> Gotype = default, ref ptr<Symbol> Reachparent = default, @string File = default, @string Dynimplib = default, @string Dynimpvers = default, ref ptr<Section> Sect = default, ref ptr<FuncInfo> FuncInfo = default, ref ptr<Library> Lib = default, slice<byte> P = default, slice<Reloc> R = default)
+            public Symbol(@string Name = default, SymKind Type = default, short Version = default, Attribute Attr = default, int Dynid = default, int Align = default, long Value = default, long Size = default, ref ptr<Symbol> Outer = default, LoaderSym SymIdx = default, ref ptr<AuxSymbol> auxinfo = default, ref ptr<Section> Sect = default, slice<byte> P = default, slice<Reloc> R = default)
             {
                 this.Name = Name;
-                this.Extname = Extname;
                 this.Type = Type;
                 this.Version = Version;
                 this.Attr = Attr;
-                this.Localentry = Localentry;
                 this.Dynid = Dynid;
-                this.Plt = Plt;
-                this.Got = Got;
                 this.Align = Align;
-                this.Elfsym = Elfsym;
-                this.LocalElfsym = LocalElfsym;
                 this.Value = Value;
                 this.Size = Size;
-                this.ElfType = ElfType;
-                this.Sub = Sub;
                 this.Outer = Outer;
-                this.Gotype = Gotype;
-                this.Reachparent = Reachparent;
-                this.File = File;
-                this.Dynimplib = Dynimplib;
-                this.Dynimpvers = Dynimpvers;
+                this.SymIdx = SymIdx;
+                this.auxinfo = auxinfo;
                 this.Sect = Sect;
-                this.FuncInfo = FuncInfo;
-                this.Lib = Lib;
                 this.P = P;
                 this.R = R;
             }
@@ -113,7 +88,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Symbol Symbol_cast(dynamic value)
         {
-            return new Symbol(value.Name, value.Extname, value.Type, value.Version, value.Attr, value.Localentry, value.Dynid, value.Plt, value.Got, value.Align, value.Elfsym, value.LocalElfsym, value.Value, value.Size, value.ElfType, ref value.Sub, ref value.Outer, ref value.Gotype, ref value.Reachparent, value.File, value.Dynimplib, value.Dynimpvers, ref value.Sect, ref value.FuncInfo, ref value.Lib, value.P, value.R);
+            return new Symbol(value.Name, value.Type, value.Version, value.Attr, value.Dynid, value.Align, value.Value, value.Size, ref value.Outer, value.SymIdx, ref value.auxinfo, ref value.Sect, value.P, value.R);
         }
     }
 }}}}

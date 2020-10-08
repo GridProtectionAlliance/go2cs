@@ -26,7 +26,7 @@
 
 // +build !plan9
 
-// package runtime -- go2cs converted at 2020 August 29 08:20:42 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:23:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\sigqueue.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -50,9 +50,10 @@ namespace go
         // but atomic instructions should minimize it.
         private static var sig = default;
 
-        private static readonly var sigIdle = iota;
-        private static readonly var sigReceiving = 0;
-        private static readonly var sigSending = 1;
+        private static readonly var sigIdle = (var)iota;
+        private static readonly var sigReceiving = (var)0;
+        private static readonly var sigSending = (var)1;
+
 
         // sigsend delivers a signal from sighandler to the internal signal delivery queue.
         // It reports whether the signal was sent. If not, the caller typically crashes the program.
@@ -64,15 +65,16 @@ namespace go
             {
                 return false;
             }
-            atomic.Xadd(ref sig.delivering, 1L); 
+
+            atomic.Xadd(_addr_sig.delivering, 1L); 
             // We are running in the signal handler; defer is not available.
 
             {
-                var w = atomic.Load(ref sig.wanted[s / 32L]);
+                var w = atomic.Load(_addr_sig.wanted[s / 32L]);
 
                 if (w & bit == 0L)
                 {
-                    atomic.Xadd(ref sig.delivering, -1L);
+                    atomic.Xadd(_addr_sig.delivering, -1L);
                     return false;
                 } 
 
@@ -86,13 +88,15 @@ namespace go
                 var mask = sig.mask[s / 32L];
                 if (mask & bit != 0L)
                 {
-                    atomic.Xadd(ref sig.delivering, -1L);
+                    atomic.Xadd(_addr_sig.delivering, -1L);
                     return true; // signal already in queue
                 }
-                if (atomic.Cas(ref sig.mask[s / 32L], mask, mask | bit))
+
+                if (atomic.Cas(_addr_sig.mask[s / 32L], mask, mask | bit))
                 {
                     break;
                 }
+
             } 
 
             // Notify receiver that queue has new bit.
@@ -104,29 +108,40 @@ Send:
             while (true)
             {
 
-                if (atomic.Load(ref sig.state) == sigIdle) 
-                    if (atomic.Cas(ref sig.state, sigIdle, sigSending))
+                if (atomic.Load(_addr_sig.state) == sigIdle) 
+                    if (atomic.Cas(_addr_sig.state, sigIdle, sigSending))
                     {
                         _breakSend = true;
                         break;
                     }
-                else if (atomic.Load(ref sig.state) == sigSending) 
+
+                else if (atomic.Load(_addr_sig.state) == sigSending) 
                     // notification already pending
                     _breakSend = true;
                     break;
-                else if (atomic.Load(ref sig.state) == sigReceiving) 
-                    if (atomic.Cas(ref sig.state, sigReceiving, sigIdle))
+                else if (atomic.Load(_addr_sig.state) == sigReceiving) 
+                    if (atomic.Cas(_addr_sig.state, sigReceiving, sigIdle))
                     {
-                        notewakeup(ref sig.note);
+                        if (GOOS == "darwin")
+                        {
+                            sigNoteWakeup(_addr_sig.note);
+                            _breakSend = true;
+                            break;
+                        }
+
+                        notewakeup(_addr_sig.note);
                         _breakSend = true;
                         break;
                     }
+
                 else 
                     throw("sigsend: inconsistent state");
-                            }
+                
+            }
 
-            atomic.Xadd(ref sig.delivering, -1L);
+            atomic.Xadd(_addr_sig.delivering, -1L);
             return true;
+
         }
 
         // Called to receive the next queued signal.
@@ -147,6 +162,7 @@ Send:
                             sig.recv[i / 32L] &= 1L << (int)((i & 31L));
                             return i;
                         }
+
                     } 
 
                     // Wait for updates to be available from signal sender.
@@ -162,23 +178,33 @@ Receive:
                 while (true)
                 {
 
-                    if (atomic.Load(ref sig.state) == sigIdle) 
-                        if (atomic.Cas(ref sig.state, sigIdle, sigReceiving))
+                    if (atomic.Load(_addr_sig.state) == sigIdle) 
+                        if (atomic.Cas(_addr_sig.state, sigIdle, sigReceiving))
                         {
-                            notetsleepg(ref sig.note, -1L);
-                            noteclear(ref sig.note);
+                            if (GOOS == "darwin")
+                            {
+                                sigNoteSleep(_addr_sig.note);
+                                _breakReceive = true;
+                                break;
+                            }
+
+                            notetsleepg(_addr_sig.note, -1L);
+                            noteclear(_addr_sig.note);
                             _breakReceive = true;
                             break;
                         }
-                    else if (atomic.Load(ref sig.state) == sigSending) 
-                        if (atomic.Cas(ref sig.state, sigSending, sigIdle))
+
+                    else if (atomic.Load(_addr_sig.state) == sigSending) 
+                        if (atomic.Cas(_addr_sig.state, sigSending, sigIdle))
                         {
                             _breakReceive = true;
                             break;
                         }
+
                     else 
                         throw("signal_recv: inconsistent state");
-                                    } 
+                    
+                } 
 
                 // Incorporate updates from sender into local copy.
  
@@ -190,13 +216,13 @@ Receive:
                     foreach (var (__i) in sig.mask)
                     {
                         i = __i;
-                        sig.recv[i] = atomic.Xchg(ref sig.mask[i], 0L);
+                        sig.recv[i] = atomic.Xchg(_addr_sig.mask[i], 0L);
                     }
 
                     i = i__prev2;
                 }
-
             }
+
 
         }
 
@@ -215,7 +241,7 @@ Receive:
             // a signal, has read from sig.wanted, is now updating sig.mask,
             // and has not yet woken up the processor thread. We need to wait
             // until all current signal deliveries have completed.
-            while (atomic.Load(ref sig.delivering) != 0L)
+            while (atomic.Load(_addr_sig.delivering) != 0L)
             {
                 Gosched();
             } 
@@ -228,10 +254,11 @@ Receive:
             // Although WaitUntilIdle seems like the right name for this
             // function, the state we are looking for is sigReceiving, not
             // sigIdle.  The sigIdle state is really more like sigProcessing.
-            while (atomic.Load(ref sig.state) != sigReceiving)
+            while (atomic.Load(_addr_sig.state) != sigReceiving)
             {
                 Gosched();
             }
+
 
         }
 
@@ -241,26 +268,34 @@ Receive:
         {
             if (!sig.inuse)
             { 
-                // The first call to signal_enable is for us
-                // to use for initialization. It does not pass
-                // signal information in m.
+                // This is the first call to signal_enable. Initialize.
                 sig.inuse = true; // enable reception of signals; cannot disable
-                noteclear(ref sig.note);
-                return;
+                if (GOOS == "darwin")
+                {
+                    sigNoteSetup(_addr_sig.note);
+                }
+                else
+                {
+                    noteclear(_addr_sig.note);
+                }
+
             }
+
             if (s >= uint32(len(sig.wanted) * 32L))
             {
-                return;
+                return ;
             }
+
             var w = sig.wanted[s / 32L];
             w |= 1L << (int)((s & 31L));
-            atomic.Store(ref sig.wanted[s / 32L], w);
+            atomic.Store(_addr_sig.wanted[s / 32L], w);
 
             var i = sig.ignored[s / 32L];
             i &= 1L << (int)((s & 31L));
-            atomic.Store(ref sig.ignored[s / 32L], i);
+            atomic.Store(_addr_sig.ignored[s / 32L], i);
 
             sigenable(s);
+
         }
 
         // Must only be called from a single goroutine at a time.
@@ -269,13 +304,15 @@ Receive:
         {
             if (s >= uint32(len(sig.wanted) * 32L))
             {
-                return;
+                return ;
             }
+
             sigdisable(s);
 
             var w = sig.wanted[s / 32L];
             w &= 1L << (int)((s & 31L));
-            atomic.Store(ref sig.wanted[s / 32L], w);
+            atomic.Store(_addr_sig.wanted[s / 32L], w);
+
         }
 
         // Must only be called from a single goroutine at a time.
@@ -284,23 +321,37 @@ Receive:
         {
             if (s >= uint32(len(sig.wanted) * 32L))
             {
-                return;
+                return ;
             }
+
             sigignore(s);
 
             var w = sig.wanted[s / 32L];
             w &= 1L << (int)((s & 31L));
-            atomic.Store(ref sig.wanted[s / 32L], w);
+            atomic.Store(_addr_sig.wanted[s / 32L], w);
 
             var i = sig.ignored[s / 32L];
             i |= 1L << (int)((s & 31L));
-            atomic.Store(ref sig.ignored[s / 32L], i);
+            atomic.Store(_addr_sig.ignored[s / 32L], i);
+
+        }
+
+        // sigInitIgnored marks the signal as already ignored. This is called at
+        // program start by initsig. In a shared library initsig is called by
+        // libpreinit, so the runtime may not be initialized yet.
+        //go:nosplit
+        private static void sigInitIgnored(uint s)
+        {
+            var i = sig.ignored[s / 32L];
+            i |= 1L << (int)((s & 31L));
+            atomic.Store(_addr_sig.ignored[s / 32L], i);
         }
 
         // Checked by signal handlers.
+        //go:linkname signal_ignored os/signal.signal_ignored
         private static bool signal_ignored(uint s)
         {
-            var i = atomic.Load(ref sig.ignored[s / 32L]);
+            var i = atomic.Load(_addr_sig.ignored[s / 32L]);
             return i & (1L << (int)((s & 31L))) != 0L;
         }
     }

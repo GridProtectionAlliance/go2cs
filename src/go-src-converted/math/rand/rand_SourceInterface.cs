@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:54 UTC
+//     Generated on 2020 October 08 03:25:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace math
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +64,10 @@ namespace math
                 m_target_is_ptr = true;
             }
 
-            private delegate long Int63ByRef(ref T value);
+            private delegate long Int63ByPtr(ptr<T> value);
             private delegate long Int63ByVal(T value);
 
-            private static readonly Int63ByRef s_Int63ByRef;
+            private static readonly Int63ByPtr s_Int63ByPtr;
             private static readonly Int63ByVal s_Int63ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,17 +76,18 @@ namespace math
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Int63ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_Int63ByPtr is null || !m_target_is_ptr)
                     return s_Int63ByVal!(target);
 
-                return s_Int63ByRef(ref target);
+                return s_Int63ByPtr(m_target_ptr);
             }
 
-            private delegate long SeedByRef(ref T value, long seed);
+            private delegate long SeedByPtr(ptr<T> value, long seed);
             private delegate long SeedByVal(T value, long seed);
 
-            private static readonly SeedByRef s_SeedByRef;
+            private static readonly SeedByPtr s_SeedByPtr;
             private static readonly SeedByVal s_SeedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,11 +96,12 @@ namespace math
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SeedByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SeedByPtr is null || !m_target_is_ptr)
                     return s_SeedByVal!(target, seed);
 
-                return s_SeedByRef(ref target, seed);
+                return s_SeedByPtr(m_target_ptr, seed);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -108,39 +110,33 @@ namespace math
             static Source()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Int63");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Int63");
 
                 if (!(extensionMethod is null))
-                    s_Int63ByRef = extensionMethod.CreateStaticDelegate(typeof(Int63ByRef)) as Int63ByRef;
+                    s_Int63ByPtr = extensionMethod.CreateStaticDelegate(typeof(Int63ByPtr)) as Int63ByPtr;
 
-                if (s_Int63ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Int63");
+                extensionMethod = targetType.GetExtensionMethod("Int63");
 
-                    if (!(extensionMethod is null))
-                        s_Int63ByVal = extensionMethod.CreateStaticDelegate(typeof(Int63ByVal)) as Int63ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_Int63ByVal = extensionMethod.CreateStaticDelegate(typeof(Int63ByVal)) as Int63ByVal;
 
-                if (s_Int63ByRef is null && s_Int63ByVal is null)
+                if (s_Int63ByPtr is null && s_Int63ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Source.Int63 method", new Exception("Int63"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Seed");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Seed");
 
                 if (!(extensionMethod is null))
-                    s_SeedByRef = extensionMethod.CreateStaticDelegate(typeof(SeedByRef)) as SeedByRef;
+                    s_SeedByPtr = extensionMethod.CreateStaticDelegate(typeof(SeedByPtr)) as SeedByPtr;
 
-                if (s_SeedByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Seed");
+                extensionMethod = targetType.GetExtensionMethod("Seed");
 
-                    if (!(extensionMethod is null))
-                        s_SeedByVal = extensionMethod.CreateStaticDelegate(typeof(SeedByVal)) as SeedByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SeedByVal = extensionMethod.CreateStaticDelegate(typeof(SeedByVal)) as SeedByVal;
 
-                if (s_SeedByRef is null && s_SeedByVal is null)
+                if (s_SeedByPtr is null && s_SeedByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Source.Seed method", new Exception("Seed"));
             }
 

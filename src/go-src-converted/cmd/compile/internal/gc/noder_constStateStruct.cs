@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:39 UTC
+//     Generated on 2020 October 08 04:29:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 using syntax = go.cmd.compile.@internal.syntax_package;
 using types = go.cmd.compile.@internal.types_package;
+using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using go;
@@ -45,7 +46,7 @@ namespace @internal
                 this.iota = default;
             }
 
-            public constState(ref ptr<syntax.Group> group = default, ref ptr<Node> typ = default, slice<ref Node> values = default, long iota = default)
+            public constState(ref ptr<syntax.Group> group = default, ref ptr<Node> typ = default, slice<ptr<Node>> values = default, long iota = default)
             {
                 this.group = group;
                 this.typ = typ;

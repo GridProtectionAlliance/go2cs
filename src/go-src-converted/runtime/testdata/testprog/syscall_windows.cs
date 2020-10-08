@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:42 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:46 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\syscall_windows.go
 using windows = go.@internal.syscall.windows_package;
 using runtime = go.runtime_package;
@@ -26,7 +26,7 @@ namespace go
 
         public static void RaiseException()
         {
-            const long EXCEPTION_NONCONTINUABLE = 1L;
+            const long EXCEPTION_NONCONTINUABLE = (long)1L;
 
             var mod = syscall.MustLoadDLL("kernel32.dll");
             var proc = mod.MustFindProc("RaiseException");
@@ -44,18 +44,24 @@ namespace go
 
         private static (System.UIntPtr, error) getPagefileUsage()
         {
+            System.UIntPtr _p0 = default;
+            error _p0 = default!;
+
             var (p, err) = syscall.GetCurrentProcess();
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
-            windows.PROCESS_MEMORY_COUNTERS m = default;
-            err = windows.GetProcessMemoryInfo(p, ref m, uint32(@unsafe.Sizeof(m)));
+
+            ref windows.PROCESS_MEMORY_COUNTERS m = ref heap(out ptr<windows.PROCESS_MEMORY_COUNTERS> _addr_m);
+            err = windows.GetProcessMemoryInfo(p, _addr_m, uint32(@unsafe.Sizeof(m)));
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
-            return (m.PagefileUsage, null);
+
+            return (m.PagefileUsage, error.As(null!)!);
+
         }
 
         public static void StackMemory() => func((_, panic, __) =>
@@ -65,7 +71,8 @@ namespace go
             {
                 panic(err);
             }
-            const long threadCount = 100L;
+
+            const long threadCount = (long)100L;
 
             sync.WaitGroup wg = default;
             for (long i = 0L; i < threadCount; i++)
@@ -76,6 +83,7 @@ namespace go
                     runtime.LockOSThread();
                     wg.Done();
                 }());
+
             }
 
             wg.Wait();
@@ -84,7 +92,9 @@ namespace go
             {
                 panic(err);
             }
+
             print((mem2 - mem1) / threadCount);
+
         });
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:49 UTC
+//     Generated on 2020 October 08 03:42:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,12 +19,10 @@ using base64 = go.encoding.base64_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go;
@@ -41,13 +39,11 @@ namespace encoding
             public structEncoder(NilType _)
             {
                 this.fields = default;
-                this.fieldEncs = default;
             }
 
-            public structEncoder(slice<field> fields = default, slice<encoderFunc> fieldEncs = default)
+            public structEncoder(structFields fields = default)
             {
                 this.fields = fields;
-                this.fieldEncs = fieldEncs;
             }
 
             // Enable comparisons between nil and structEncoder struct
@@ -70,7 +66,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static structEncoder structEncoder_cast(dynamic value)
         {
-            return new structEncoder(value.fields, value.fieldEncs);
+            return new structEncoder(value.fields);
         }
     }
 }}

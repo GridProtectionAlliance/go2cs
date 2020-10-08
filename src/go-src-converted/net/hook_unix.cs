@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 August 29 08:26:24 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:07 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\hook_unix.go
 using syscall = go.syscall_package;

@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:02 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:04 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_openbsd.go
 using atomic = go.runtime.@internal.atomic_package;
+using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 using System;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         private partial struct mOS
         {
@@ -20,15 +21,15 @@ namespace go
         }
 
         //go:noescape
-        private static void setitimer(int mode, ref itimerval @new, ref itimerval old)
+        private static void setitimer(int mode, ptr<itimerval> @new, ptr<itimerval> old)
 ;
 
         //go:noescape
-        private static void sigaction(uint sig, ref sigactiont @new, ref sigactiont old)
+        private static void sigaction(uint sig, ptr<sigactiont> @new, ptr<sigactiont> old)
 ;
 
         //go:noescape
-        private static void sigaltstack(ref stackt @new, ref stackt old)
+        private static void sigaltstack(ptr<stackt> @new, ptr<stackt> old)
 ;
 
         //go:noescape
@@ -37,35 +38,43 @@ namespace go
 
         //go:nosplit
         //go:nowritebarrierrec
-        private static void sigprocmask(int how, ref sigset @new, ref sigset old)
+        private static void sigprocmask(int how, ptr<sigset> _addr_@new, ptr<sigset> _addr_old)
         {
+            ref sigset @new = ref _addr_@new.val;
+            ref sigset old = ref _addr_old.val;
+
             var n = sigset(0L);
             if (new != null)
             {>>MARKER:FUNCTION_obsdsigprocmask_BLOCK_PREFIX<<
-                n = new.Value;
+                n = new.val;
             }
+
             var r = obsdsigprocmask(how, n);
             if (old != null)
             {>>MARKER:FUNCTION_sigaltstack_BLOCK_PREFIX<<
-                old.Value = r;
+                old = r;
             }
+
         }
 
         //go:noescape
-        private static int sysctl(ref uint mib, uint miblen, ref byte @out, ref System.UIntPtr size, ref byte dst, System.UIntPtr ndst)
+        private static int sysctl(ptr<uint> mib, uint miblen, ptr<byte> @out, ptr<System.UIntPtr> size, ptr<byte> dst, System.UIntPtr ndst)
 ;
 
-        private static void raise(uint sig)
-;
         private static void raiseproc(uint sig)
 ;
 
-        //go:noescape
-        private static int tfork(ref tforkt param, System.UIntPtr psize, ref m mm, ref g gg, System.UIntPtr fn)
+        private static int getthrid()
+;
+        private static void thrkill(int tid, long sig)
 ;
 
         //go:noescape
-        private static int thrsleep(System.UIntPtr ident, int clock_id, ref timespec tsp, System.UIntPtr @lock, ref uint abort)
+        private static int tfork(ptr<tforkt> param, System.UIntPtr psize, ptr<m> mm, ptr<g> gg, System.UIntPtr fn)
+;
+
+        //go:noescape
+        private static int thrsleep(System.UIntPtr ident, int clock_id, ptr<timespec> tsp, System.UIntPtr @lock, ptr<uint> abort)
 ;
 
         //go:noescape
@@ -75,16 +84,32 @@ namespace go
         private static void osyield()
 ;
 
-        private static readonly long _ESRCH = 3L;
-        private static readonly long _EAGAIN = 35L;
-        private static readonly var _EWOULDBLOCK = _EAGAIN;
-        private static readonly long _ENOTSUP = 91L; 
+        private static int kqueue()
+;
+
+        //go:noescape
+        private static int kevent(int kq, ptr<keventt> ch, int nch, ptr<keventt> ev, int nev, ptr<timespec> ts)
+;
+
+        private static (int, int, int) pipe()
+;
+        private static (int, int, int) pipe2(int flags)
+;
+        private static void closeonexec(int fd)
+;
+        private static void setNonblock(int fd)
+;
+
+        private static readonly long _ESRCH = (long)3L;
+        private static readonly var _EWOULDBLOCK = (var)_EAGAIN;
+        private static readonly long _ENOTSUP = (long)91L; 
 
         // From OpenBSD's sys/time.h
-        private static readonly long _CLOCK_REALTIME = 0L;
-        private static readonly long _CLOCK_VIRTUAL = 1L;
-        private static readonly long _CLOCK_PROF = 2L;
-        private static readonly long _CLOCK_MONOTONIC = 3L;
+        private static readonly long _CLOCK_REALTIME = (long)0L;
+        private static readonly long _CLOCK_VIRTUAL = (long)1L;
+        private static readonly long _CLOCK_PROF = (long)2L;
+        private static readonly long _CLOCK_MONOTONIC = (long)3L;
+
 
         private partial struct sigset // : uint
         {
@@ -93,41 +118,106 @@ namespace go
         private static var sigset_all = ~sigset(0L);
 
         // From OpenBSD's <sys/sysctl.h>
-        private static readonly long _CTL_HW = 6L;
-        private static readonly long _HW_NCPU = 3L;
-        private static readonly long _HW_PAGESIZE = 7L;
+        private static readonly long _CTL_KERN = (long)1L;
+        private static readonly long _KERN_OSREV = (long)3L;
+
+        private static readonly long _CTL_HW = (long)6L;
+        private static readonly long _HW_NCPU = (long)3L;
+        private static readonly long _HW_PAGESIZE = (long)7L;
+        private static readonly long _HW_NCPUONLINE = (long)25L;
+
+
+        private static (int, bool) sysctlInt(slice<uint> mib)
+        {
+            int _p0 = default;
+            bool _p0 = default;
+
+            ref int @out = ref heap(out ptr<int> _addr_@out);
+            ref var nout = ref heap(@unsafe.Sizeof(out), out ptr<var> _addr_nout);
+            var ret = sysctl(_addr_mib[0L], uint32(len(mib)), _addr_(byte.val)(@unsafe.Pointer(_addr_out)), _addr_nout, _addr_null, 0L);
+            if (ret < 0L)
+            {>>MARKER:FUNCTION_setNonblock_BLOCK_PREFIX<<
+                return (0L, false);
+            }
+
+            return (out, true);
+
+        }
 
         private static int getncpu()
-        {
-            array<uint> mib = new array<uint>(new uint[] { _CTL_HW, _HW_NCPU });
-            var @out = uint32(0L);
-            var nout = @unsafe.Sizeof(out); 
+        { 
+            // Try hw.ncpuonline first because hw.ncpu would report a number twice as
+            // high as the actual CPUs running on OpenBSD 6.4 with hyperthreading
+            // disabled (hw.smt=0). See https://golang.org/issue/30127
+            {
+                var n__prev1 = n;
 
-            // Fetch hw.ncpu via sysctl.
-            var ret = sysctl(ref mib[0L], 2L, (byte.Value)(@unsafe.Pointer(ref out)), ref nout, null, 0L);
-            if (ret >= 0L)
-            {>>MARKER:FUNCTION_osyield_BLOCK_PREFIX<<
-                return int32(out);
+                var (n, ok) = sysctlInt(new slice<uint>(new uint[] { _CTL_HW, _HW_NCPUONLINE }));
+
+                if (ok)
+                {>>MARKER:FUNCTION_closeonexec_BLOCK_PREFIX<<
+                    return int32(n);
+                }
+
+                n = n__prev1;
+
             }
+
+            {
+                var n__prev1 = n;
+
+                (n, ok) = sysctlInt(new slice<uint>(new uint[] { _CTL_HW, _HW_NCPU }));
+
+                if (ok)
+                {>>MARKER:FUNCTION_pipe2_BLOCK_PREFIX<<
+                    return int32(n);
+                }
+
+                n = n__prev1;
+
+            }
+
             return 1L;
+
         }
 
         private static System.UIntPtr getPageSize()
         {
-            array<uint> mib = new array<uint>(new uint[] { _CTL_HW, _HW_PAGESIZE });
-            var @out = uint32(0L);
-            var nout = @unsafe.Sizeof(out);
-            var ret = sysctl(ref mib[0L], 2L, (byte.Value)(@unsafe.Pointer(ref out)), ref nout, null, 0L);
-            if (ret >= 0L)
-            {>>MARKER:FUNCTION_thrwakeup_BLOCK_PREFIX<<
-                return uintptr(out);
+            {
+                var (ps, ok) = sysctlInt(new slice<uint>(new uint[] { _CTL_HW, _HW_PAGESIZE }));
+
+                if (ok)
+                {>>MARKER:FUNCTION_pipe_BLOCK_PREFIX<<
+                    return uintptr(ps);
+                }
+
             }
+
             return 0L;
+
+        }
+
+        private static long getOSRev()
+        {
+            {
+                var (osrev, ok) = sysctlInt(new slice<uint>(new uint[] { _CTL_KERN, _KERN_OSREV }));
+
+                if (ok)
+                {>>MARKER:FUNCTION_kevent_BLOCK_PREFIX<<
+                    return int(osrev);
+                }
+
+            }
+
+            return 0L;
+
         }
 
         //go:nosplit
-        private static void semacreate(ref m mp)
+        private static void semacreate(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
         }
 
         //go:nosplit
@@ -136,26 +226,26 @@ namespace go
             var _g_ = getg(); 
 
             // Compute sleep deadline.
-            ref timespec tsp = default;
+            ptr<timespec> tsp;
             if (ns >= 0L)
-            {>>MARKER:FUNCTION_thrsleep_BLOCK_PREFIX<<
-                timespec ts = default;
-                int nsec = default;
-                ns += nanotime();
-                ts.set_sec(int64(timediv(ns, 1000000000L, ref nsec)));
-                ts.set_nsec(nsec);
-                tsp = ref ts;
+            {>>MARKER:FUNCTION_kqueue_BLOCK_PREFIX<<
+                ref timespec ts = ref heap(out ptr<timespec> _addr_ts);
+                ts.setNsec(ns + nanotime());
+                tsp = _addr_ts;
             }
+
             while (true)
-            {>>MARKER:FUNCTION_tfork_BLOCK_PREFIX<<
-                var v = atomic.Load(ref _g_.m.waitsemacount);
+            {>>MARKER:FUNCTION_osyield_BLOCK_PREFIX<<
+                var v = atomic.Load(_addr__g_.m.waitsemacount);
                 if (v > 0L)
-                {>>MARKER:FUNCTION_raiseproc_BLOCK_PREFIX<<
-                    if (atomic.Cas(ref _g_.m.waitsemacount, v, v - 1L))
-                    {>>MARKER:FUNCTION_raise_BLOCK_PREFIX<<
+                {>>MARKER:FUNCTION_thrwakeup_BLOCK_PREFIX<<
+                    if (atomic.Cas(_addr__g_.m.waitsemacount, v, v - 1L))
+                    {>>MARKER:FUNCTION_thrsleep_BLOCK_PREFIX<<
                         return 0L; // semaphore acquired
                     }
+
                     continue;
+
                 } 
 
                 // Sleep until woken by semawakeup or timeout; or abort if waitsemacount != 0.
@@ -165,60 +255,76 @@ namespace go
                 // be examined [...] immediately before blocking. If that int
                 // is non-zero then __thrsleep() will immediately return EINTR
                 // without blocking."
-                var ret = thrsleep(uintptr(@unsafe.Pointer(ref _g_.m.waitsemacount)), _CLOCK_MONOTONIC, tsp, 0L, ref _g_.m.waitsemacount);
+                var ret = thrsleep(uintptr(@unsafe.Pointer(_addr__g_.m.waitsemacount)), _CLOCK_MONOTONIC, tsp, 0L, _addr__g_.m.waitsemacount);
                 if (ret == _EWOULDBLOCK)
-                {>>MARKER:FUNCTION_sysctl_BLOCK_PREFIX<<
+                {>>MARKER:FUNCTION_tfork_BLOCK_PREFIX<<
                     return -1L;
                 }
+
             }
+
 
         }
 
         //go:nosplit
-        private static void semawakeup(ref m mp)
+        private static void semawakeup(ptr<m> _addr_mp)
         {
-            atomic.Xadd(ref mp.waitsemacount, 1L);
-            var ret = thrwakeup(uintptr(@unsafe.Pointer(ref mp.waitsemacount)), 1L);
+            ref m mp = ref _addr_mp.val;
+
+            atomic.Xadd(_addr_mp.waitsemacount, 1L);
+            var ret = thrwakeup(uintptr(@unsafe.Pointer(_addr_mp.waitsemacount)), 1L);
             if (ret != 0L && ret != _ESRCH)
-            {>>MARKER:FUNCTION_sigaction_BLOCK_PREFIX<< 
+            {>>MARKER:FUNCTION_thrkill_BLOCK_PREFIX<< 
                 // semawakeup can be called on signal stack.
                 systemstack(() =>
-                {>>MARKER:FUNCTION_setitimer_BLOCK_PREFIX<<
-                    print("thrwakeup addr=", ref mp.waitsemacount, " sem=", mp.waitsemacount, " ret=", ret, "\n");
+                {>>MARKER:FUNCTION_getthrid_BLOCK_PREFIX<<
+                    print("thrwakeup addr=", _addr_mp.waitsemacount, " sem=", mp.waitsemacount, " ret=", ret, "\n");
                 });
+
             }
+
         }
 
         // May run with m.p==nil, so write barriers are not allowed.
         //go:nowritebarrier
-        private static void newosproc(ref m mp, unsafe.Pointer stk)
+        private static void newosproc(ptr<m> _addr_mp)
         {
-            if (false)
-            {
-                print("newosproc stk=", stk, " m=", mp, " g=", mp.g0, " id=", mp.id, " ostk=", ref mp, "\n");
-            }
-            tforkt param = new tforkt(tf_tcb:unsafe.Pointer(&mp.tls[0]),tf_tid:(*int32)(unsafe.Pointer(&mp.procid)),tf_stack:uintptr(stk),);
+            ref m mp = ref _addr_mp.val;
 
-            sigset oset = default;
-            sigprocmask(_SIG_SETMASK, ref sigset_all, ref oset);
-            var ret = tfork(ref param, @unsafe.Sizeof(param), mp, mp.g0, funcPC(mstart));
-            sigprocmask(_SIG_SETMASK, ref oset, null);
+            var stk = @unsafe.Pointer(mp.g0.stack.hi);
+            if (false)
+            {>>MARKER:FUNCTION_raiseproc_BLOCK_PREFIX<<
+                print("newosproc stk=", stk, " m=", mp, " g=", mp.g0, " id=", mp.id, " ostk=", _addr_mp, "\n");
+            } 
+
+            // Stack pointer must point inside stack area (as marked with MAP_STACK),
+            // rather than at the top of it.
+            ref tforkt param = ref heap(new tforkt(tf_tcb:unsafe.Pointer(&mp.tls[0]),tf_tid:nil,tf_stack:uintptr(stk)-sys.PtrSize,), out ptr<tforkt> _addr_param);
+
+            ref sigset oset = ref heap(out ptr<sigset> _addr_oset);
+            sigprocmask(_SIG_SETMASK, _addr_sigset_all, _addr_oset);
+            var ret = tfork(_addr_param, @unsafe.Sizeof(param), _addr_mp, _addr_mp.g0, funcPC(mstart));
+            sigprocmask(_SIG_SETMASK, _addr_oset, _addr_null);
 
             if (ret < 0L)
-            {
+            {>>MARKER:FUNCTION_sysctl_BLOCK_PREFIX<<
                 print("runtime: failed to create new OS thread (have ", mcount() - 1L, " already; errno=", -ret, ")\n");
                 if (ret == -_EAGAIN)
-                {
+                {>>MARKER:FUNCTION_sigaction_BLOCK_PREFIX<<
                     println("runtime: may need to increase max user processes (ulimit -p)");
                 }
+
                 throw("runtime.newosproc");
+
             }
+
         }
 
         private static void osinit()
         {
             ncpu = getncpu();
             physPageSize = getPageSize();
+            haveMapStack = getOSRev() >= 201805L; // OpenBSD 6.3
         }
 
         private static slice<byte> urandom_dev = (slice<byte>)"/dev/urandom\x00";
@@ -226,8 +332,8 @@ namespace go
         //go:nosplit
         private static void getRandomData(slice<byte> r)
         {
-            var fd = open(ref urandom_dev[0L], 0L, 0L);
-            var n = read(fd, @unsafe.Pointer(ref r[0L]), int32(len(r)));
+            var fd = open(_addr_urandom_dev[0L], 0L, 0L);
+            var n = read(fd, @unsafe.Pointer(_addr_r[0L]), int32(len(r)));
             closefd(fd);
             extendRandom(r, int(n));
         }
@@ -239,8 +345,10 @@ namespace go
 
         // Called to initialize a new m (including the bootstrap m).
         // Called on the parent thread (main thread in case of bootstrap), can allocate memory.
-        private static void mpreinit(ref m mp)
+        private static void mpreinit(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
             mp.gsignal = malg(32L * 1024L);
             mp.gsignal.m = mp;
         }
@@ -248,11 +356,8 @@ namespace go
         // Called to initialize a new m (including the bootstrap m).
         // Called on the new thread, can not allocate memory.
         private static void minit()
-        { 
-            // m.procid is a uint64, but tfork writes an int32. Fix it up.
-            var _g_ = getg();
-            _g_.m.procid = uint64(@unsafe.Pointer(ref _g_.m.procid).Value);
-
+        {
+            getg().m.procid = uint64(getthrid());
             minitSignals();
         }
 
@@ -261,11 +366,6 @@ namespace go
         private static void unminit()
         {
             unminitSignals();
-        }
-
-        private static System.UIntPtr memlimit()
-        {
-            return 0L;
         }
 
         private static void sigtramp()
@@ -282,15 +382,17 @@ namespace go
         //go:nowritebarrierrec
         private static void setsig(uint i, System.UIntPtr fn)
         {
-            sigactiont sa = default;
+            ref sigactiont sa = ref heap(out ptr<sigactiont> _addr_sa);
             sa.sa_flags = _SA_SIGINFO | _SA_ONSTACK | _SA_RESTART;
             sa.sa_mask = uint32(sigset_all);
             if (fn == funcPC(sighandler))
             {>>MARKER:FUNCTION_sigtramp_BLOCK_PREFIX<<
                 fn = funcPC(sigtramp);
             }
+
             sa.sa_sigaction = fn;
-            sigaction(i, ref sa, null);
+            sigaction(i, _addr_sa, _addr_null);
+
         }
 
         //go:nosplit
@@ -304,32 +406,102 @@ namespace go
         //go:nowritebarrierrec
         private static System.UIntPtr getsig(uint i)
         {
-            sigactiont sa = default;
-            sigaction(i, null, ref sa);
+            ref sigactiont sa = ref heap(out ptr<sigactiont> _addr_sa);
+            sigaction(i, _addr_null, _addr_sa);
             return sa.sa_sigaction;
         }
 
         // setSignaltstackSP sets the ss_sp field of a stackt.
         //go:nosplit
-        private static void setSignalstackSP(ref stackt s, System.UIntPtr sp)
+        private static void setSignalstackSP(ptr<stackt> _addr_s, System.UIntPtr sp)
         {
+            ref stackt s = ref _addr_s.val;
+
             s.ss_sp = sp;
         }
 
         //go:nosplit
         //go:nowritebarrierrec
-        private static void sigaddset(ref sigset mask, long i)
+        private static void sigaddset(ptr<sigset> _addr_mask, long i)
         {
-            mask.Value |= 1L << (int)((uint32(i) - 1L));
+            ref sigset mask = ref _addr_mask.val;
+
+            mask |= 1L << (int)((uint32(i) - 1L));
         }
 
-        private static void sigdelset(ref sigset mask, long i)
+        private static void sigdelset(ptr<sigset> _addr_mask, long i)
         {
-            mask.Value &= 1L << (int)((uint32(i) - 1L));
+            ref sigset mask = ref _addr_mask.val;
+
+            mask &= 1L << (int)((uint32(i) - 1L));
         }
 
-        private static void fixsigcode(this ref sigctxt c, uint sig)
+        //go:nosplit
+        private static void fixsigcode(this ptr<sigctxt> _addr_c, uint sig)
         {
+            ref sigctxt c = ref _addr_c.val;
+
+        }
+
+        private static var haveMapStack = false;
+
+        private static void osStackAlloc(ptr<mspan> _addr_s)
+        {
+            ref mspan s = ref _addr_s.val;
+ 
+            // OpenBSD 6.4+ requires that stacks be mapped with MAP_STACK.
+            // It will check this on entry to system calls, traps, and
+            // when switching to the alternate system stack.
+            //
+            // This function is called before s is used for any data, so
+            // it's safe to simply re-map it.
+            osStackRemap(_addr_s, _MAP_STACK);
+
+        }
+
+        private static void osStackFree(ptr<mspan> _addr_s)
+        {
+            ref mspan s = ref _addr_s.val;
+ 
+            // Undo MAP_STACK.
+            osStackRemap(_addr_s, 0L);
+
+        }
+
+        private static void osStackRemap(ptr<mspan> _addr_s, int flags)
+        {
+            ref mspan s = ref _addr_s.val;
+
+            if (!haveMapStack)
+            {>>MARKER:FUNCTION_setitimer_BLOCK_PREFIX<< 
+                // OpenBSD prior to 6.3 did not have MAP_STACK and so
+                // the following mmap will fail. But it also didn't
+                // require MAP_STACK (obviously), so there's no need
+                // to do the mmap.
+                return ;
+
+            }
+
+            var (a, err) = mmap(@unsafe.Pointer(s.@base()), s.npages * pageSize, _PROT_READ | _PROT_WRITE, _MAP_PRIVATE | _MAP_ANON | _MAP_FIXED | flags, -1L, 0L);
+            if (err != 0L || uintptr(a) != s.@base())
+            {
+                print("runtime: remapping stack memory ", hex(s.@base()), " ", s.npages * pageSize, " a=", a, " err=", err, "\n");
+                throw("remapping stack memory failed");
+            }
+
+        }
+
+        //go:nosplit
+        private static void raise(uint sig)
+        {
+            thrkill(getthrid(), int(sig));
+        }
+
+        private static void signalM(ptr<m> _addr_mp, long sig)
+        {
+            ref m mp = ref _addr_mp.val;
+
+            thrkill(int32(mp.procid), sig);
         }
     }
 }

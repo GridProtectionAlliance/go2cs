@@ -3,13 +3,13 @@
 // license that can be found in the LICENSE file.
 
 // This file implements multi-precision floating-point numbers.
-// Like in the GNU MPFR library (http://www.mpfr.org/), operands
+// Like in the GNU MPFR library (https://www.mpfr.org/), operands
 // can be of mixed precision. Unlike MPFR, the rounding mode is
 // not specified with each operation, but with each operand. The
 // rounding mode of the result operand determines the rounding
 // mode of an operation. This is a from-scratch implementation.
 
-// package big -- go2cs converted at 2020 August 29 08:29:07 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:30 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\float.go
 using fmt = go.fmt_package;
@@ -22,7 +22,7 @@ namespace math
 {
     public static partial class big_package
     {
-        private static readonly var debugFloat = false; // enable for debugging
+        private static readonly var debugFloat = (var)false; // enable for debugging
 
         // A nonzero finite Float represents a multi-precision floating point number
         //
@@ -48,7 +48,7 @@ namespace math
         // precision of the argument with the largest precision value before any
         // rounding takes place, and the rounding mode remains unchanged. Thus,
         // uninitialized Floats provided as result arguments will have their
-        // precision set to a reasonable value determined by the operands and
+        // precision set to a reasonable value determined by the operands, and
         // their mode is the zero value for RoundingMode (ToNearestEven).
         //
         // By setting the desired precision to 24 or 53 and using matching rounding
@@ -61,6 +61,12 @@ namespace math
         // The zero (uninitialized) value for a Float is ready to use and represents
         // the number +0.0 exactly, with precision 0 and rounding mode ToNearestEven.
         //
+        // Operations always take pointer arguments (*Float) rather
+        // than Float values, and each unique Float value requires
+        // its own unique *Float pointer. To "copy" a Float value,
+        // an existing (or newly allocated) Float must be set to
+        // a new value using the Float.Set method; shallow copies
+        // of Floats are not supported and may lead to errors.
  // enable for debugging
 
         // A nonzero finite Float represents a multi-precision floating point number
@@ -87,7 +93,7 @@ namespace math
         // precision of the argument with the largest precision value before any
         // rounding takes place, and the rounding mode remains unchanged. Thus,
         // uninitialized Floats provided as result arguments will have their
-        // precision set to a reasonable value determined by the operands and
+        // precision set to a reasonable value determined by the operands, and
         // their mode is the zero value for RoundingMode (ToNearestEven).
         //
         // By setting the desired precision to 24 or 53 and using matching rounding
@@ -100,6 +106,12 @@ namespace math
         // The zero (uninitialized) value for a Float is ready to use and represents
         // the number +0.0 exactly, with precision 0 and rounding mode ToNearestEven.
         //
+        // Operations always take pointer arguments (*Float) rather
+        // than Float values, and each unique Float value requires
+        // its own unique *Float pointer. To "copy" a Float value,
+        // an existing (or newly allocated) Float must be set to
+        // a new value using the Float.Set method; shallow copies
+        // of Floats are not supported and may lead to errors.
         public partial struct Float
         {
             public uint prec;
@@ -126,19 +138,21 @@ namespace math
         // NewFloat allocates and returns a new Float set to x,
         // with precision 53 and rounding mode ToNearestEven.
         // NewFloat panics with ErrNaN if x is a NaN.
-        public static ref Float NewFloat(double x) => func((_, panic, __) =>
+        public static ptr<Float> NewFloat(double x) => func((_, panic, __) =>
         {
             if (math.IsNaN(x))
             {
                 panic(new ErrNaN("NewFloat(NaN)"));
             }
+
             return @new<Float>().SetFloat64(x);
+
         });
 
         // Exponent and precision limits.
-        public static readonly var MaxExp = math.MaxInt32; // largest supported exponent
-        public static readonly var MinExp = math.MinInt32; // smallest supported exponent
-        public static readonly var MaxPrec = math.MaxUint32; // largest (theoretically) supported precision; likely memory-limited
+        public static readonly var MaxExp = (var)math.MaxInt32; // largest supported exponent
+        public static readonly var MinExp = (var)math.MinInt32; // smallest supported exponent
+        public static readonly var MaxPrec = (var)math.MaxUint32; // largest (theoretically) supported precision; likely memory-limited
 
         // Internal representation: The mantissa bits x.mant of a nonzero finite
         // Float x are stored in a nat slice long enough to hold up to x.prec bits;
@@ -163,9 +177,10 @@ namespace math
         }
 
         // The form value order is relevant - do not change!
-        private static readonly form zero = iota;
-        private static readonly var finite = 0;
-        private static readonly var inf = 1;
+        private static readonly form zero = (form)iota;
+        private static readonly var finite = (var)0;
+        private static readonly var inf = (var)1;
+
 
         // RoundingMode determines how a Float value is rounded to the
         // desired precision. Rounding may change the Float value; the
@@ -175,12 +190,12 @@ namespace math
         }
 
         // These constants define supported rounding modes.
-        public static readonly RoundingMode ToNearestEven = iota; // == IEEE 754-2008 roundTiesToEven
-        public static readonly var ToNearestAway = 0; // == IEEE 754-2008 roundTiesToAway
-        public static readonly var ToZero = 1; // == IEEE 754-2008 roundTowardZero
-        public static readonly var AwayFromZero = 2; // no IEEE 754-2008 equivalent
-        public static readonly var ToNegativeInf = 3; // == IEEE 754-2008 roundTowardNegative
-        public static readonly var ToPositiveInf = 4; // == IEEE 754-2008 roundTowardPositive
+        public static readonly RoundingMode ToNearestEven = (RoundingMode)iota; // == IEEE 754-2008 roundTiesToEven
+        public static readonly var ToNearestAway = (var)0; // == IEEE 754-2008 roundTiesToAway
+        public static readonly var ToZero = (var)1; // == IEEE 754-2008 roundTowardZero
+        public static readonly var AwayFromZero = (var)2; // no IEEE 754-2008 equivalent
+        public static readonly var ToNegativeInf = (var)3; // == IEEE 754-2008 roundTowardNegative
+        public static readonly var ToPositiveInf = (var)4; // == IEEE 754-2008 roundTowardPositive
 
         //go:generate stringer -type=RoundingMode
 
@@ -191,9 +206,10 @@ namespace math
         }
 
         // Constants describing the Accuracy of a Float.
-        public static readonly Accuracy Below = -1L;
-        public static readonly Accuracy Exact = 0L;
-        public static readonly Accuracy Above = +1L;
+        public static readonly Accuracy Below = (Accuracy)-1L;
+        public static readonly Accuracy Exact = (Accuracy)0L;
+        public static readonly Accuracy Above = (Accuracy)+1L;
+
 
         //go:generate stringer -type=Accuracy
 
@@ -202,8 +218,10 @@ namespace math
         // cannot be represented in prec bits without loss of precision.
         // SetPrec(0) maps all finite values to ±0; infinite values remain unchanged.
         // If prec > MaxPrec, it is set to MaxPrec.
-        private static ref Float SetPrec(this ref Float z, ulong prec)
+        private static ptr<Float> SetPrec(this ptr<Float> _addr_z, ulong prec)
         {
+            ref Float z = ref _addr_z.val;
+
             z.acc = Exact; // optimistically assume no rounding is needed
 
             // special case
@@ -215,8 +233,11 @@ namespace math
                     // truncate z to 0
                     z.acc = makeAcc(z.neg);
                     z.form = zero;
+
                 }
-                return z;
+
+                return _addr_z!;
+
             } 
 
             // general case
@@ -224,13 +245,16 @@ namespace math
             {
                 prec = MaxPrec;
             }
+
             var old = z.prec;
             z.prec = uint32(prec);
             if (z.prec < old)
             {
                 z.round(0L);
             }
-            return z;
+
+            return _addr_z!;
+
         }
 
         private static Accuracy makeAcc(bool above)
@@ -239,47 +263,63 @@ namespace math
             {
                 return Above;
             }
+
             return Below;
+
         }
 
         // SetMode sets z's rounding mode to mode and returns an exact z.
         // z remains unchanged otherwise.
         // z.SetMode(z.Mode()) is a cheap way to set z's accuracy to Exact.
-        private static ref Float SetMode(this ref Float z, RoundingMode mode)
+        private static ptr<Float> SetMode(this ptr<Float> _addr_z, RoundingMode mode)
         {
+            ref Float z = ref _addr_z.val;
+
             z.mode = mode;
             z.acc = Exact;
-            return z;
+            return _addr_z!;
         }
 
         // Prec returns the mantissa precision of x in bits.
         // The result may be 0 for |x| == 0 and |x| == Inf.
-        private static ulong Prec(this ref Float x)
+        private static ulong Prec(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             return uint(x.prec);
         }
 
         // MinPrec returns the minimum precision required to represent x exactly
         // (i.e., the smallest prec before x.SetPrec(prec) would start rounding x).
         // The result is 0 for |x| == 0 and |x| == Inf.
-        private static ulong MinPrec(this ref Float x)
+        private static ulong MinPrec(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             if (x.form != finite)
             {
                 return 0L;
             }
+
             return uint(len(x.mant)) * _W - x.mant.trailingZeroBits();
+
         }
 
         // Mode returns the rounding mode of x.
-        private static RoundingMode Mode(this ref Float x)
+        private static RoundingMode Mode(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             return x.mode;
         }
 
-        // Acc returns the accuracy of x produced by the most recent operation.
-        private static Accuracy Acc(this ref Float x)
+        // Acc returns the accuracy of x produced by the most recent
+        // operation, unless explicitly documented otherwise by that
+        // operation.
+        private static Accuracy Acc(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             return x.acc;
         }
 
@@ -289,21 +329,27 @@ namespace math
         //     0 if x is ±0
         //    +1 if x >   0
         //
-        private static long Sign(this ref Float x)
+        private static long Sign(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
+
             if (x.form == zero)
             {
                 return 0L;
             }
+
             if (x.neg)
             {
                 return -1L;
             }
+
             return 1L;
+
         }
 
         // MantExp breaks x into its mantissa and exponent components
@@ -321,16 +367,22 @@ namespace math
         //
         // x and mant may be the same in which case x is set to its
         // mantissa value.
-        private static long MantExp(this ref Float x, ref Float mant)
+        private static long MantExp(this ptr<Float> _addr_x, ptr<Float> _addr_mant)
         {
+            long exp = default;
+            ref Float x = ref _addr_x.val;
+            ref Float mant = ref _addr_mant.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
+
             if (x.form == finite)
             {
                 exp = int(x.exp);
             }
+
             if (mant != null)
             {
                 mant.Copy(x);
@@ -338,32 +390,42 @@ namespace math
                 {
                     mant.exp = 0L;
                 }
+
             }
-            return;
+
+            return ;
+
         }
 
-        private static void setExpAndRound(this ref Float z, long exp, ulong sbit)
+        private static void setExpAndRound(this ptr<Float> _addr_z, long exp, ulong sbit)
         {
+            ref Float z = ref _addr_z.val;
+
             if (exp < MinExp)
             { 
                 // underflow
                 z.acc = makeAcc(z.neg);
                 z.form = zero;
-                return;
+                return ;
+
             }
+
             if (exp > MaxExp)
             { 
                 // overflow
                 z.acc = makeAcc(!z.neg);
                 z.form = inf;
-                return;
+                return ;
+
             }
+
             z.form = finite;
             z.exp = int32(exp);
             z.round(sbit);
+
         }
 
-        // SetMantExp sets z to mant × 2**exp and and returns z.
+        // SetMantExp sets z to mant × 2**exp and returns z.
         // The result z has the same precision and rounding mode
         // as mant. SetMantExp is an inverse of MantExp but does
         // not require 0.5 <= |mant| < 1.0. Specifically:
@@ -378,38 +440,50 @@ namespace math
         //
         // z and mant may be the same in which case z's exponent
         // is set to exp.
-        private static ref Float SetMantExp(this ref Float z, ref Float mant, long exp)
+        private static ptr<Float> SetMantExp(this ptr<Float> _addr_z, ptr<Float> _addr_mant, long exp)
         {
+            ref Float z = ref _addr_z.val;
+            ref Float mant = ref _addr_mant.val;
+
             if (debugFloat)
             {
                 z.validate();
                 mant.validate();
             }
+
             z.Copy(mant);
             if (z.form != finite)
             {
-                return z;
+                return _addr_z!;
             }
+
             z.setExpAndRound(int64(z.exp) + int64(exp), 0L);
-            return z;
+            return _addr_z!;
+
         }
 
-        // Signbit returns true if x is negative or negative zero.
-        private static bool Signbit(this ref Float x)
+        // Signbit reports whether x is negative or negative zero.
+        private static bool Signbit(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             return x.neg;
         }
 
         // IsInf reports whether x is +Inf or -Inf.
-        private static bool IsInf(this ref Float x)
+        private static bool IsInf(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             return x.form == inf;
         }
 
         // IsInt reports whether x is an integer.
         // ±Inf values are not integers.
-        private static bool IsInt(this ref Float x)
+        private static bool IsInt(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             if (debugFloat)
             {
                 x.validate();
@@ -429,32 +503,40 @@ namespace math
         }
 
         // debugging support
-        private static void validate(this ref Float _x) => func(_x, (ref Float x, Defer _, Panic panic, Recover __) =>
+        private static void validate(this ptr<Float> _addr_x) => func((_, panic, __) =>
         {
+            ref Float x = ref _addr_x.val;
+
             if (!debugFloat)
             { 
                 // avoid performance bugs
                 panic("validate called but debugFloat is not set");
+
             }
+
             if (x.form != finite)
             {
-                return;
+                return ;
             }
+
             var m = len(x.mant);
             if (m == 0L)
             {
                 panic("nonzero finite number with empty mantissa");
             }
-            const long msb = 1L << (int)((_W - 1L));
+
+            const long msb = (long)1L << (int)((_W - 1L));
 
             if (x.mant[m - 1L] & msb == 0L)
             {
                 panic(fmt.Sprintf("msb not set in last word %#x of %s", x.mant[m - 1L], x.Text('p', 0L)));
             }
+
             if (x.prec == 0L)
             {
                 panic("zero precision finite number");
             }
+
         });
 
         // round rounds z according to z.mode to z.prec bits and sets z.acc accordingly.
@@ -465,17 +547,21 @@ namespace math
         // CAUTION: The rounding modes ToNegativeInf, ToPositiveInf are affected by the
         // sign of z. For correct rounding, the sign of z must be set correctly before
         // calling round.
-        private static void round(this ref Float _z, ulong sbit) => func(_z, (ref Float z, Defer _, Panic panic, Recover __) =>
+        private static void round(this ptr<Float> _addr_z, ulong sbit) => func((_, panic, __) =>
         {
+            ref Float z = ref _addr_z.val;
+
             if (debugFloat)
             {
                 z.validate();
             }
+
             z.acc = Exact;
             if (z.form != finite)
             { 
                 // ±0 or ±Inf => nothing left to do
-                return;
+                return ;
+
             } 
             // z.form == finite && len(z.mant) > 0
             // m > 0 implies z.prec > 0 (checked by validate)
@@ -484,7 +570,8 @@ namespace math
             if (bits <= z.prec)
             { 
                 // mantissa fits => nothing to do
-                return;
+                return ;
+
             } 
             // bits > z.prec
 
@@ -509,6 +596,7 @@ namespace math
             {
                 sbit = z.mant.sticky(r);
             }
+
             sbit &= 1L; // be safe and ensure it's a single bit
 
             // cut off extra words
@@ -517,6 +605,7 @@ namespace math
             {
                 copy(z.mant, z.mant[m - n..]); // move n last words to front
                 z.mant = z.mant[..n];
+
             } 
 
             // determine number of trailing zero bits (ntz) and compute lsb mask of mantissa's least-significant word
@@ -558,17 +647,22 @@ namespace math
                         { 
                             // exponent overflow
                             z.form = inf;
-                            return;
+                            return ;
+
                         }
+
                         z.exp++; 
                         // adjust mantissa: divide by 2 to compensate for exponent adjustment
                         shrVU(z.mant, z.mant, 1L); 
                         // set msb == carry == 1 from the mantissa overflow above
-                        const long msb = 1L << (int)((_W - 1L));
+                        const long msb = (long)1L << (int)((_W - 1L));
 
                         z.mant[n - 1L] |= msb;
+
                     }
+
                 }
+
             } 
 
             // zero out trailing bits in least-significant word
@@ -578,20 +672,24 @@ namespace math
             {
                 z.validate();
             }
+
         });
 
-        private static ref Float setBits64(this ref Float z, bool neg, ulong x)
+        private static ptr<Float> setBits64(this ptr<Float> _addr_z, bool neg, ulong x)
         {
+            ref Float z = ref _addr_z.val;
+
             if (z.prec == 0L)
             {
                 z.prec = 64L;
             }
+
             z.acc = Exact;
             z.neg = neg;
             if (x == 0L)
             {
                 z.form = zero;
-                return z;
+                return _addr_z!;
             } 
             // x != 0
             z.form = finite;
@@ -602,22 +700,28 @@ namespace math
             {
                 z.round(0L);
             }
-            return z;
+
+            return _addr_z!;
+
         }
 
         // SetUint64 sets z to the (possibly rounded) value of x and returns z.
         // If z's precision is 0, it is changed to 64 (and rounding will have
         // no effect).
-        private static ref Float SetUint64(this ref Float z, ulong x)
+        private static ptr<Float> SetUint64(this ptr<Float> _addr_z, ulong x)
         {
-            return z.setBits64(false, x);
+            ref Float z = ref _addr_z.val;
+
+            return _addr_z.setBits64(false, x)!;
         }
 
         // SetInt64 sets z to the (possibly rounded) value of x and returns z.
         // If z's precision is 0, it is changed to 64 (and rounding will have
         // no effect).
-        private static ref Float SetInt64(this ref Float z, long x)
+        private static ptr<Float> SetInt64(this ptr<Float> _addr_z, long x)
         {
+            ref Float z = ref _addr_z.val;
+
             var u = x;
             if (u < 0L)
             {
@@ -625,33 +729,39 @@ namespace math
             } 
             // We cannot simply call z.SetUint64(uint64(u)) and change
             // the sign afterwards because the sign affects rounding.
-            return z.setBits64(x < 0L, uint64(u));
+            return _addr_z.setBits64(x < 0L, uint64(u))!;
+
         }
 
         // SetFloat64 sets z to the (possibly rounded) value of x and returns z.
         // If z's precision is 0, it is changed to 53 (and rounding will have
         // no effect). SetFloat64 panics with ErrNaN if x is a NaN.
-        private static ref Float SetFloat64(this ref Float _z, double x) => func(_z, (ref Float z, Defer _, Panic panic, Recover __) =>
+        private static ptr<Float> SetFloat64(this ptr<Float> _addr_z, double x) => func((_, panic, __) =>
         {
+            ref Float z = ref _addr_z.val;
+
             if (z.prec == 0L)
             {
                 z.prec = 53L;
             }
+
             if (math.IsNaN(x))
             {
                 panic(new ErrNaN("Float.SetFloat64(NaN)"));
             }
+
             z.acc = Exact;
             z.neg = math.Signbit(x); // handle -0, -Inf correctly
             if (x == 0L)
             {
                 z.form = zero;
-                return z;
+                return _addr_z!;
             }
+
             if (math.IsInf(x, 0L))
             {
                 z.form = inf;
-                return z;
+                return _addr_z!;
             } 
             // normalized x != 0
             z.form = finite;
@@ -662,7 +772,9 @@ namespace math
             {
                 z.round(0L);
             }
-            return z;
+
+            return _addr_z!;
+
         });
 
         // fnorm normalizes mantissa m by shifting it to the left
@@ -674,6 +786,7 @@ namespace math
             {
                 panic("msw of mantissa is 0");
             }
+
             var s = nlz(m[len(m) - 1L]);
             if (s > 0L)
             {
@@ -682,15 +795,21 @@ namespace math
                 {
                     panic("nlz or shlVU incorrect");
                 }
+
             }
+
             return int64(s);
+
         });
 
         // SetInt sets z to the (possibly rounded) value of x and returns z.
         // If z's precision is 0, it is changed to the larger of x.BitLen()
         // or 64 (and rounding will have no effect).
-        private static ref Float SetInt(this ref Float z, ref Int x)
-        { 
+        private static ptr<Float> SetInt(this ptr<Float> _addr_z, ptr<Int> _addr_x)
+        {
+            ref Float z = ref _addr_z.val;
+            ref Int x = ref _addr_x.val;
+ 
             // TODO(gri) can be more efficient if z.prec > 0
             // but small compared to the size of x, or if there
             // are many trailing 0's.
@@ -699,30 +818,36 @@ namespace math
             {
                 z.prec = umax32(bits, 64L);
             }
+
             z.acc = Exact;
             z.neg = x.neg;
             if (len(x.abs) == 0L)
             {
                 z.form = zero;
-                return z;
+                return _addr_z!;
             } 
             // x != 0
             z.mant = z.mant.set(x.abs);
             fnorm(z.mant);
             z.setExpAndRound(int64(bits), 0L);
-            return z;
+            return _addr_z!;
+
         }
 
         // SetRat sets z to the (possibly rounded) value of x and returns z.
         // If z's precision is 0, it is changed to the largest of a.BitLen(),
         // b.BitLen(), or 64; with x = a/b.
-        private static ref Float SetRat(this ref Float z, ref Rat x)
+        private static ptr<Float> SetRat(this ptr<Float> _addr_z, ptr<Rat> _addr_x)
         {
+            ref Float z = ref _addr_z.val;
+            ref Rat x = ref _addr_x.val;
+
             if (x.IsInt())
             {
-                return z.SetInt(x.Num());
+                return _addr_z.SetInt(x.Num())!;
             }
-            Float a = default;            Float b = default;
+
+            ref Float a = ref heap(out ptr<Float> _addr_a);            ref Float b = ref heap(out ptr<Float> _addr_b);
 
             a.SetInt(x.Num());
             b.SetInt(x.Denom());
@@ -730,19 +855,23 @@ namespace math
             {
                 z.prec = umax32(a.prec, b.prec);
             }
-            return z.Quo(ref a, ref b);
+
+            return _addr_z.Quo(_addr_a, _addr_b)!;
+
         }
 
         // SetInf sets z to the infinite Float -Inf if signbit is
         // set, or +Inf if signbit is not set, and returns z. The
         // precision of z is unchanged and the result is always
         // Exact.
-        private static ref Float SetInf(this ref Float z, bool signbit)
+        private static ptr<Float> SetInf(this ptr<Float> _addr_z, bool signbit)
         {
+            ref Float z = ref _addr_z.val;
+
             z.acc = Exact;
             z.form = inf;
             z.neg = signbit;
-            return z;
+            return _addr_z!;
         }
 
         // Set sets z to the (possibly rounded) value of x and returns z.
@@ -751,12 +880,16 @@ namespace math
         // Rounding is performed according to z's precision and rounding
         // mode; and z's accuracy reports the result error relative to the
         // exact (not rounded) result.
-        private static ref Float Set(this ref Float z, ref Float x)
+        private static ptr<Float> Set(this ptr<Float> _addr_z, ptr<Float> _addr_x)
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
+
             z.acc = Exact;
             if (z != x)
             {
@@ -767,6 +900,7 @@ namespace math
                     z.exp = x.exp;
                     z.mant = z.mant.set(x.mant);
                 }
+
                 if (z.prec == 0L)
                 {
                     z.prec = x.prec;
@@ -775,19 +909,26 @@ namespace math
                 {
                     z.round(0L);
                 }
+
             }
-            return z;
+
+            return _addr_z!;
+
         }
 
         // Copy sets z to x, with the same precision, rounding mode, and
         // accuracy as x, and returns z. x is not changed even if z and
         // x are the same.
-        private static ref Float Copy(this ref Float z, ref Float x)
+        private static ptr<Float> Copy(this ptr<Float> _addr_z, ptr<Float> _addr_x)
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
+
             if (z != x)
             {
                 z.prec = x.prec;
@@ -800,8 +941,11 @@ namespace math
                     z.mant = z.mant.set(x.mant);
                     z.exp = x.exp;
                 }
+
             }
-            return z;
+
+            return _addr_z!;
+
         }
 
         // msb32 returns the 32 most significant bits of x.
@@ -812,10 +956,12 @@ namespace math
             {
                 return 0L;
             }
+
             if (debugFloat && x[i] & (1L << (int)((_W - 1L))) == 0L)
             {
                 panic("x not normalized");
             }
+
             switch (_W)
             {
                 case 32L: 
@@ -826,6 +972,7 @@ namespace math
                     break;
             }
             panic("unreachable");
+
         });
 
         // msb64 returns the 64 most significant bits of x.
@@ -836,10 +983,12 @@ namespace math
             {
                 return 0L;
             }
+
             if (debugFloat && x[i] & (1L << (int)((_W - 1L))) == 0L)
             {
                 panic("x not normalized");
             }
+
             switch (_W)
             {
                 case 32L: 
@@ -848,6 +997,7 @@ namespace math
                     {
                         v |= uint64(x[i - 1L]);
                     }
+
                     return v;
                     break;
                 case 64L: 
@@ -855,6 +1005,7 @@ namespace math
                     break;
             }
             panic("unreachable");
+
         });
 
         // Uint64 returns the unsigned integer resulting from truncating x
@@ -862,12 +1013,17 @@ namespace math
         // if x is an integer and Below otherwise.
         // The result is (0, Above) for x < 0, and (math.MaxUint64, Below)
         // for x > math.MaxUint64.
-        private static (ulong, Accuracy) Uint64(this ref Float _x) => func(_x, (ref Float x, Defer _, Panic panic, Recover __) =>
+        private static (ulong, Accuracy) Uint64(this ptr<Float> _addr_x) => func((_, panic, __) =>
         {
+            ulong _p0 = default;
+            Accuracy _p0 = default;
+            ref Float x = ref _addr_x.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
+
 
             if (x.form == finite) 
                 if (x.neg)
@@ -879,6 +1035,7 @@ namespace math
                 { 
                     // 0 < x < 1
                     return (0L, Below);
+
                 } 
                 // 1 <= x < Inf
                 if (x.exp <= 64L)
@@ -889,6 +1046,7 @@ namespace math
                     {
                         return (u, Exact);
                     }
+
                     return (u, Below); // x truncated
                 } 
                 // x too large
@@ -900,8 +1058,10 @@ namespace math
                 {
                     return (0L, Above);
                 }
+
                 return (math.MaxUint64, Below);
                         panic("unreachable");
+
         });
 
         // Int64 returns the integer resulting from truncating x towards zero.
@@ -909,12 +1069,17 @@ namespace math
         // an integer, and Above (x < 0) or Below (x > 0) otherwise.
         // The result is (math.MinInt64, Above) for x < math.MinInt64,
         // and (math.MaxInt64, Below) for x > math.MaxInt64.
-        private static (long, Accuracy) Int64(this ref Float _x) => func(_x, (ref Float x, Defer _, Panic panic, Recover __) =>
+        private static (long, Accuracy) Int64(this ptr<Float> _addr_x) => func((_, panic, __) =>
         {
+            long _p0 = default;
+            Accuracy _p0 = default;
+            ref Float x = ref _addr_x.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
+
 
             if (x.form == finite) 
                 // 0 < |x| < +Inf
@@ -923,6 +1088,7 @@ namespace math
                 { 
                     // 0 < |x| < 1
                     return (0L, acc);
+
                 } 
                 // x.exp > 0
 
@@ -935,12 +1101,15 @@ namespace math
                     {
                         i = -i;
                     }
+
                     if (x.MinPrec() <= uint(x.exp))
                     {
                         return (i, Exact);
                     }
+
                     return (i, acc); // x truncated
                 }
+
                 if (x.neg)
                 { 
                     // check for special case x == math.MinInt64 (i.e., x == -(0.5 << 64))
@@ -948,7 +1117,9 @@ namespace math
                     {
                         acc = Exact;
                     }
+
                     return (math.MinInt64, acc);
+
                 } 
                 // x too large
                 return (math.MaxInt64, Below);
@@ -959,8 +1130,10 @@ namespace math
                 {
                     return (math.MinInt64, Above);
                 }
+
                 return (math.MaxInt64, Below);
                         panic("unreachable");
+
         });
 
         // Float32 returns the float32 value nearest to x. If x is too small to be
@@ -968,23 +1141,28 @@ namespace math
         // is (0, Below) or (-0, Above), respectively, depending on the sign of x.
         // If x is too large to be represented by a float32 (|x| > math.MaxFloat32),
         // the result is (+Inf, Above) or (-Inf, Below), depending on the sign of x.
-        private static (float, Accuracy) Float32(this ref Float _x) => func(_x, (ref Float x, Defer _, Panic panic, Recover __) =>
+        private static (float, Accuracy) Float32(this ptr<Float> _addr_x) => func((_, panic, __) =>
         {
+            float _p0 = default;
+            Accuracy _p0 = default;
+            ref Float x = ref _addr_x.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
 
+
             if (x.form == finite) 
                 // 0 < |x| < +Inf
 
-                const long fbits = 32L; //        float size
-                const long mbits = 23L; //        mantissa size (excluding implicit msb)
-                const var ebits = fbits - mbits - 1L; //     8  exponent size
-                const long bias = 1L << (int)((ebits - 1L)) - 1L; //   127  exponent bias
-                const long dmin = 1L - bias - mbits; //  -149  smallest unbiased exponent (denormal)
-                const long emin = 1L - bias; //  -126  smallest unbiased exponent (normal)
-                const var emax = bias; //   127  largest unbiased exponent (normal) 
+                const long fbits = (long)32L; //        float size
+                const long mbits = (long)23L; //        mantissa size (excluding implicit msb)
+                const var ebits = (var)fbits - mbits - 1L; //     8  exponent size
+                const long bias = (long)1L << (int)((ebits - 1L)) - 1L; //   127  exponent bias
+                const long dmin = (long)1L - bias - mbits; //  -149  smallest unbiased exponent (denormal)
+                const long emin = (long)1L - bias; //  -126  smallest unbiased exponent (normal)
+                const var emax = (var)bias; //   127  largest unbiased exponent (normal) 
 
                 // Float mantissa m is 0.5 <= m < 1.0; compute exponent e for float32 mantissa.
                 var e = x.exp - 1L; // exponent for normal mantissa m with 1.0 <= m < 2.0
@@ -1013,7 +1191,9 @@ namespace math
                             float z = default;
                             return (-z, Above);
                         }
+
                         return (0.0F, Below);
+
                     } 
                     // otherwise, round up
                     // We handle p == 0 explicitly because it's easy and because
@@ -1024,8 +1204,11 @@ namespace math
                         {
                             return (-math.SmallestNonzeroFloat32, Below);
                         }
+
                         return (math.SmallestNonzeroFloat32, Above);
+
                     }
+
                 } 
                 // p > 0
 
@@ -1045,7 +1228,9 @@ namespace math
                     {
                         return (float32(math.Inf(-1L)), Below);
                     }
+
                     return (float32(math.Inf(+1L)), Above);
+
                 } 
                 // e <= emax
 
@@ -1067,6 +1252,7 @@ namespace math
                     // bexp == 0 for denormals
                     p = mbits + 1L - emin + int(e);
                     mant = msb32(r.mant) >> (int)(uint(fbits - p));
+
                 }
                 else
                 { 
@@ -1074,6 +1260,7 @@ namespace math
                     bexp = uint32(e + bias) << (int)(mbits);
                     mant = msb32(r.mant) >> (int)(ebits) & (1L << (int)(mbits) - 1L); // cut off msb (implicit 1 bit)
                 }
+
                 return (math.Float32frombits(sign | bexp | mant), r.acc);
             else if (x.form == zero) 
                 if (x.neg)
@@ -1081,14 +1268,17 @@ namespace math
                     z = default;
                     return (-z, Exact);
                 }
+
                 return (0.0F, Exact);
             else if (x.form == inf) 
                 if (x.neg)
                 {
                     return (float32(math.Inf(-1L)), Exact);
                 }
+
                 return (float32(math.Inf(+1L)), Exact);
                         panic("unreachable");
+
         });
 
         // Float64 returns the float64 value nearest to x. If x is too small to be
@@ -1096,23 +1286,28 @@ namespace math
         // is (0, Below) or (-0, Above), respectively, depending on the sign of x.
         // If x is too large to be represented by a float64 (|x| > math.MaxFloat64),
         // the result is (+Inf, Above) or (-Inf, Below), depending on the sign of x.
-        private static (double, Accuracy) Float64(this ref Float _x) => func(_x, (ref Float x, Defer _, Panic panic, Recover __) =>
+        private static (double, Accuracy) Float64(this ptr<Float> _addr_x) => func((_, panic, __) =>
         {
+            double _p0 = default;
+            Accuracy _p0 = default;
+            ref Float x = ref _addr_x.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
 
+
             if (x.form == finite) 
                 // 0 < |x| < +Inf
 
-                const long fbits = 64L; //        float size
-                const long mbits = 52L; //        mantissa size (excluding implicit msb)
-                const var ebits = fbits - mbits - 1L; //    11  exponent size
-                const long bias = 1L << (int)((ebits - 1L)) - 1L; //  1023  exponent bias
-                const long dmin = 1L - bias - mbits; // -1074  smallest unbiased exponent (denormal)
-                const long emin = 1L - bias; // -1022  smallest unbiased exponent (normal)
-                const var emax = bias; //  1023  largest unbiased exponent (normal) 
+                const long fbits = (long)64L; //        float size
+                const long mbits = (long)52L; //        mantissa size (excluding implicit msb)
+                const var ebits = (var)fbits - mbits - 1L; //    11  exponent size
+                const long bias = (long)1L << (int)((ebits - 1L)) - 1L; //  1023  exponent bias
+                const long dmin = (long)1L - bias - mbits; // -1074  smallest unbiased exponent (denormal)
+                const long emin = (long)1L - bias; // -1022  smallest unbiased exponent (normal)
+                const var emax = (var)bias; //  1023  largest unbiased exponent (normal) 
 
                 // Float mantissa m is 0.5 <= m < 1.0; compute exponent e for float64 mantissa.
                 var e = x.exp - 1L; // exponent for normal mantissa m with 1.0 <= m < 2.0
@@ -1141,7 +1336,9 @@ namespace math
                             double z = default;
                             return (-z, Above);
                         }
+
                         return (0.0F, Below);
+
                     } 
                     // otherwise, round up
                     // We handle p == 0 explicitly because it's easy and because
@@ -1152,8 +1349,11 @@ namespace math
                         {
                             return (-math.SmallestNonzeroFloat64, Below);
                         }
+
                         return (math.SmallestNonzeroFloat64, Above);
+
                     }
+
                 } 
                 // p > 0
 
@@ -1173,7 +1373,9 @@ namespace math
                     {
                         return (math.Inf(-1L), Below);
                     }
+
                     return (math.Inf(+1L), Above);
+
                 } 
                 // e <= emax
 
@@ -1195,6 +1397,7 @@ namespace math
                     // bexp == 0 for denormals
                     p = mbits + 1L - emin + int(e);
                     mant = msb64(r.mant) >> (int)(uint(fbits - p));
+
                 }
                 else
                 { 
@@ -1202,6 +1405,7 @@ namespace math
                     bexp = uint64(e + bias) << (int)(mbits);
                     mant = msb64(r.mant) >> (int)(ebits) & (1L << (int)(mbits) - 1L); // cut off msb (implicit 1 bit)
                 }
+
                 return (math.Float64frombits(sign | bexp | mant), r.acc);
             else if (x.form == zero) 
                 if (x.neg)
@@ -1209,14 +1413,17 @@ namespace math
                     z = default;
                     return (-z, Exact);
                 }
+
                 return (0.0F, Exact);
             else if (x.form == inf) 
                 if (x.neg)
                 {
                     return (math.Inf(-1L), Exact);
                 }
+
                 return (math.Inf(+1L), Exact);
                         panic("unreachable");
+
         });
 
         // Int returns the result of truncating x towards zero;
@@ -1225,16 +1432,23 @@ namespace math
         // for x > 0, and Above for x < 0.
         // If a non-nil *Int argument z is provided, Int stores
         // the result in z instead of allocating a new Int.
-        private static (ref Int, Accuracy) Int(this ref Float _x, ref Int _z) => func(_x, _z, (ref Float x, ref Int z, Defer _, Panic panic, Recover __) =>
+        private static (ptr<Int>, Accuracy) Int(this ptr<Float> _addr_x, ptr<Int> _addr_z) => func((_, panic, __) =>
         {
+            ptr<Int> _p0 = default!;
+            Accuracy _p0 = default;
+            ref Float x = ref _addr_x.val;
+            ref Int z = ref _addr_z.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
+
             if (z == null && x.form <= finite)
             {
                 z = @new<Int>();
             }
+
 
             if (x.form == finite) 
                 // 0 < |x| < +Inf
@@ -1242,7 +1456,8 @@ namespace math
                 if (x.exp <= 0L)
                 { 
                     // 0 < |x| < 1
-                    return (z.SetInt64(0L), acc);
+                    return (_addr_z.SetInt64(0L)!, acc);
+
                 } 
                 // x.exp > 0
 
@@ -1259,6 +1474,7 @@ namespace math
                 {
                     z = @new<Int>();
                 }
+
                 z.neg = x.neg;
 
                 if (exp > allBits) 
@@ -1267,12 +1483,13 @@ namespace math
                     z.abs = z.abs.shr(x.mant, allBits - exp);
                 else 
                     z.abs = z.abs.set(x.mant);
-                                return (z, acc);
+                                return (_addr_z!, acc);
             else if (x.form == zero) 
-                return (z.SetInt64(0L), Exact);
+                return (_addr_z.SetInt64(0L)!, Exact);
             else if (x.form == inf) 
-                return (null, makeAcc(x.neg));
+                return (_addr_null!, makeAcc(x.neg));
                         panic("unreachable");
+
         });
 
         // Rat returns the rational number corresponding to x;
@@ -1280,16 +1497,23 @@ namespace math
         // The result is Exact if x is not an Inf.
         // If a non-nil *Rat argument z is provided, Rat stores
         // the result in z instead of allocating a new Rat.
-        private static (ref Rat, Accuracy) Rat(this ref Float _x, ref Rat _z) => func(_x, _z, (ref Float x, ref Rat z, Defer _, Panic panic, Recover __) =>
+        private static (ptr<Rat>, Accuracy) Rat(this ptr<Float> _addr_x, ptr<Rat> _addr_z) => func((_, panic, __) =>
         {
+            ptr<Rat> _p0 = default!;
+            Accuracy _p0 = default;
+            ref Float x = ref _addr_x.val;
+            ref Rat z = ref _addr_z.val;
+
             if (debugFloat)
             {
                 x.validate();
             }
+
             if (z == null && x.form <= finite)
             {
                 z = @new<Rat>();
             }
+
 
             if (x.form == finite) 
                 // 0 < |x| < +Inf
@@ -1310,54 +1534,72 @@ namespace math
                     z.a.abs = z.a.abs.set(x.mant);
                     z.b.abs = z.b.abs[..0L]; // == 1 (see Rat)
                     // z already in normal form
-                                return (z, Exact);
+                                return (_addr_z!, Exact);
             else if (x.form == zero) 
-                return (z.SetInt64(0L), Exact);
+                return (_addr_z.SetInt64(0L)!, Exact);
             else if (x.form == inf) 
-                return (null, makeAcc(x.neg));
+                return (_addr_null!, makeAcc(x.neg));
                         panic("unreachable");
+
         });
 
         // Abs sets z to the (possibly rounded) value |x| (the absolute value of x)
         // and returns z.
-        private static ref Float Abs(this ref Float z, ref Float x)
+        private static ptr<Float> Abs(this ptr<Float> _addr_z, ptr<Float> _addr_x)
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+
             z.Set(x);
             z.neg = false;
-            return z;
+            return _addr_z!;
         }
 
         // Neg sets z to the (possibly rounded) value of x with its sign negated,
         // and returns z.
-        private static ref Float Neg(this ref Float z, ref Float x)
+        private static ptr<Float> Neg(this ptr<Float> _addr_z, ptr<Float> _addr_x)
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+
             z.Set(x);
             z.neg = !z.neg;
-            return z;
+            return _addr_z!;
         }
 
-        private static void validateBinaryOperands(ref Float _x, ref Float _y) => func(_x, _y, (ref Float x, ref Float y, Defer _, Panic panic, Recover __) =>
+        private static void validateBinaryOperands(ptr<Float> _addr_x, ptr<Float> _addr_y) => func((_, panic, __) =>
         {
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (!debugFloat)
             { 
                 // avoid performance bugs
                 panic("validateBinaryOperands called but debugFloat is not set");
+
             }
+
             if (len(x.mant) == 0L)
             {
                 panic("empty mantissa for x");
             }
+
             if (len(y.mant) == 0L)
             {
                 panic("empty mantissa for y");
             }
+
         });
 
         // z = x + y, ignoring signs of x and y for the addition
         // but using the sign of z for rounding the result.
         // x and y must have a non-empty mantissa and valid exponent.
-        private static void uadd(this ref Float z, ref Float x, ref Float y)
-        { 
+        private static void uadd(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float> _addr_y)
+        {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+ 
             // Note: This implementation requires 2 shifts most of the
             // time. It is also inefficient if exponents or precisions
             // differ by wide margins. The following article describes
@@ -1370,7 +1612,7 @@ namespace math
 
             if (debugFloat)
             {
-                validateBinaryOperands(x, y);
+                validateBinaryOperands(_addr_x, _addr_y);
             } 
 
             // compute exponents ex, ey for mantissa with "binary point"
@@ -1394,6 +1636,7 @@ namespace math
                     z.mant = z.mant.shl(y.mant, uint(ey - ex));
                     z.mant = z.mant.add(x.mant, z.mant);
                 }
+
             else if (ex > ey) 
                 if (al)
                 {
@@ -1405,6 +1648,7 @@ namespace math
                     z.mant = z.mant.shl(x.mant, uint(ex - ey));
                     z.mant = z.mant.add(z.mant, y.mant);
                 }
+
                 ex = ey;
             else 
                 // ex == ey, no shift needed
@@ -1412,13 +1656,18 @@ namespace math
             // len(z.mant) > 0
 
             z.setExpAndRound(ex + int64(len(z.mant)) * _W - fnorm(z.mant), 0L);
+
         }
 
         // z = x - y for |x| > |y|, ignoring signs of x and y for the subtraction
         // but using the sign of z for rounding the result.
         // x and y must have a non-empty mantissa and valid exponent.
-        private static void usub(this ref Float z, ref Float x, ref Float y)
-        { 
+        private static void usub(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float> _addr_y)
+        {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+ 
             // This code is symmetric to uadd.
             // We have not factored the common code out because
             // eventually uadd (and usub) should be optimized
@@ -1426,8 +1675,9 @@ namespace math
 
             if (debugFloat)
             {
-                validateBinaryOperands(x, y);
+                validateBinaryOperands(_addr_x, _addr_y);
             }
+
             var ex = int64(x.exp) - int64(len(x.mant)) * _W;
             var ey = int64(y.exp) - int64(len(y.mant)) * _W;
 
@@ -1445,6 +1695,7 @@ namespace math
                     z.mant = z.mant.shl(y.mant, uint(ey - ex));
                     z.mant = z.mant.sub(x.mant, z.mant);
                 }
+
             else if (ex > ey) 
                 if (al)
                 {
@@ -1456,6 +1707,7 @@ namespace math
                     z.mant = z.mant.shl(x.mant, uint(ex - ey));
                     z.mant = z.mant.sub(z.mant, y.mant);
                 }
+
                 ex = ey;
             else 
                 // ex == ey, no shift needed
@@ -1466,20 +1718,25 @@ namespace math
                 z.acc = Exact;
                 z.form = zero;
                 z.neg = false;
-                return;
+                return ;
             } 
             // len(z.mant) > 0
             z.setExpAndRound(ex + int64(len(z.mant)) * _W - fnorm(z.mant), 0L);
+
         }
 
         // z = x * y, ignoring signs of x and y for the multiplication
         // but using the sign of z for rounding the result.
         // x and y must have a non-empty mantissa and valid exponent.
-        private static void umul(this ref Float z, ref Float x, ref Float y)
+        private static void umul(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float> _addr_y)
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (debugFloat)
             {
-                validateBinaryOperands(x, y);
+                validateBinaryOperands(_addr_x, _addr_y);
             } 
 
             // Note: This is doing too much work if the precision
@@ -1496,17 +1753,23 @@ namespace math
             {
                 z.mant = z.mant.mul(x.mant, y.mant);
             }
+
             z.setExpAndRound(e - fnorm(z.mant), 0L);
+
         }
 
         // z = x / y, ignoring signs of x and y for the division
         // but using the sign of z for rounding the result.
         // x and y must have a non-empty mantissa and valid exponent.
-        private static void uquo(this ref Float z, ref Float x, ref Float y)
+        private static void uquo(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float> _addr_y)
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (debugFloat)
             {
-                validateBinaryOperands(x, y);
+                validateBinaryOperands(_addr_x, _addr_y);
             } 
 
             // mantissa length in words for desired result precision + 1
@@ -1526,6 +1789,7 @@ namespace math
                     // d extra words needed => add d "0 digits" to x
                     xadj = make(nat, len(x.mant) + d);
                     copy(xadj[d..], x.mant);
+
                 } 
                 // TODO(gri): If we have too many digits (d < 0), we should be able
                 // to shorten x for faster division. But we must be extra careful
@@ -1559,18 +1823,24 @@ namespace math
             {
                 sbit = 1L;
             }
+
             z.setExpAndRound(e - fnorm(z.mant), sbit);
+
         }
 
         // ucmp returns -1, 0, or +1, depending on whether
         // |x| < |y|, |x| == |y|, or |x| > |y|.
         // x and y must have a non-empty mantissa and valid exponent.
-        private static long ucmp(this ref Float x, ref Float y)
+        private static long ucmp(this ptr<Float> _addr_x, ptr<Float> _addr_y)
         {
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (debugFloat)
             {
-                validateBinaryOperands(x, y);
+                validateBinaryOperands(_addr_x, _addr_y);
             }
+
 
             if (x.exp < y.exp) 
                 return -1L;
@@ -1590,20 +1860,24 @@ namespace math
                     i--;
                     xm = x.mant[i];
                 }
+
                 if (j > 0L)
                 {
                     j--;
                     ym = y.mant[j];
                 }
 
+
                 if (xm < ym) 
                     return -1L;
                 else if (xm > ym) 
                     return +1L;
-                            }
+                
+            }
 
 
             return 0L;
+
         }
 
         // Handling of sign bit as defined by IEEE 754-2008, section 6.3:
@@ -1631,19 +1905,23 @@ namespace math
         // z's accuracy reports the result error relative to the exact (not rounded)
         // result. Add panics with ErrNaN if x and y are infinities with opposite
         // signs. The value of z is undefined in that case.
-        //
-        // BUG(gri) When rounding ToNegativeInf, the sign of Float values rounded to 0 is incorrect.
-        private static ref Float Add(this ref Float _z, ref Float _x, ref Float _y) => func(_z, _x, _y, (ref Float z, ref Float x, ref Float y, Defer _, Panic panic, Recover __) =>
+        private static ptr<Float> Add(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float> _addr_y) => func((_, panic, __) =>
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (debugFloat)
             {
                 x.validate();
                 y.validate();
             }
+
             if (z.prec == 0L)
             {
                 z.prec = umax32(x.prec, y.prec);
             }
+
             if (x.form == finite && y.form == finite)
             { 
                 // x + y (common case)
@@ -1661,6 +1939,7 @@ namespace math
                     // x + y == x + y
                     // (-x) + (-y) == -(x + y)
                     z.uadd(x, y);
+
                 }
                 else
                 { 
@@ -1675,9 +1954,18 @@ namespace math
                         z.neg = !z.neg;
                         z.usub(y, x);
                     }
+
                 }
-                return z;
+
+                if (z.form == zero && z.mode == ToNegativeInf && z.acc == Exact)
+                {
+                    z.neg = true;
+                }
+
+                return _addr_z!;
+
             }
+
             if (x.form == inf && y.form == inf && x.neg != y.neg)
             { 
                 // +Inf + -Inf
@@ -1687,42 +1975,54 @@ namespace math
                 z.form = zero;
                 z.neg = false;
                 panic(new ErrNaN("addition of infinities with opposite signs"));
+
             }
+
             if (x.form == zero && y.form == zero)
             { 
                 // ±0 + ±0
                 z.acc = Exact;
                 z.form = zero;
                 z.neg = x.neg && y.neg; // -0 + -0 == -0
-                return z;
+                return _addr_z!;
+
             }
+
             if (x.form == inf || y.form == zero)
             { 
                 // ±Inf + y
                 // x + ±0
-                return z.Set(x);
+                return _addr_z.Set(x)!;
+
             } 
 
             // ±0 + y
             // x + ±Inf
-            return z.Set(y);
+            return _addr_z.Set(y)!;
+
         });
 
         // Sub sets z to the rounded difference x-y and returns z.
         // Precision, rounding, and accuracy reporting are as for Add.
         // Sub panics with ErrNaN if x and y are infinities with equal
         // signs. The value of z is undefined in that case.
-        private static ref Float Sub(this ref Float _z, ref Float _x, ref Float _y) => func(_z, _x, _y, (ref Float z, ref Float x, ref Float y, Defer _, Panic panic, Recover __) =>
+        private static ptr<Float> Sub(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float> _addr_y) => func((_, panic, __) =>
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (debugFloat)
             {
                 x.validate();
                 y.validate();
             }
+
             if (z.prec == 0L)
             {
                 z.prec = umax32(x.prec, y.prec);
             }
+
             if (x.form == finite && y.form == finite)
             { 
                 // x - y (common case)
@@ -1733,6 +2033,7 @@ namespace math
                     // x - (-y) == x + y
                     // (-x) - y == -(x + y)
                     z.uadd(x, y);
+
                 }
                 else
                 { 
@@ -1747,9 +2048,18 @@ namespace math
                         z.neg = !z.neg;
                         z.usub(y, x);
                     }
+
                 }
-                return z;
+
+                if (z.form == zero && z.mode == ToNegativeInf && z.acc == Exact)
+                {
+                    z.neg = true;
+                }
+
+                return _addr_z!;
+
             }
+
             if (x.form == inf && y.form == inf && x.neg == y.neg)
             { 
                 // +Inf - +Inf
@@ -1759,50 +2069,64 @@ namespace math
                 z.form = zero;
                 z.neg = false;
                 panic(new ErrNaN("subtraction of infinities with equal signs"));
+
             }
+
             if (x.form == zero && y.form == zero)
             { 
                 // ±0 - ±0
                 z.acc = Exact;
                 z.form = zero;
                 z.neg = x.neg && !y.neg; // -0 - +0 == -0
-                return z;
+                return _addr_z!;
+
             }
+
             if (x.form == inf || y.form == zero)
             { 
                 // ±Inf - y
                 // x - ±0
-                return z.Set(x);
+                return _addr_z.Set(x)!;
+
             } 
 
             // ±0 - y
             // x - ±Inf
-            return z.Neg(y);
+            return _addr_z.Neg(y)!;
+
         });
 
         // Mul sets z to the rounded product x*y and returns z.
         // Precision, rounding, and accuracy reporting are as for Add.
         // Mul panics with ErrNaN if one operand is zero and the other
         // operand an infinity. The value of z is undefined in that case.
-        private static ref Float Mul(this ref Float _z, ref Float _x, ref Float _y) => func(_z, _x, _y, (ref Float z, ref Float x, ref Float y, Defer _, Panic panic, Recover __) =>
+        private static ptr<Float> Mul(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float> _addr_y) => func((_, panic, __) =>
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (debugFloat)
             {
                 x.validate();
                 y.validate();
             }
+
             if (z.prec == 0L)
             {
                 z.prec = umax32(x.prec, y.prec);
             }
+
             z.neg = x.neg != y.neg;
 
             if (x.form == finite && y.form == finite)
             { 
                 // x * y (common case)
                 z.umul(x, y);
-                return z;
+                return _addr_z!;
+
             }
+
             z.acc = Exact;
             if (x.form == zero && y.form == inf || x.form == inf && y.form == zero)
             { 
@@ -1812,44 +2136,56 @@ namespace math
                 z.form = zero;
                 z.neg = false;
                 panic(new ErrNaN("multiplication of zero with infinity"));
+
             }
+
             if (x.form == inf || y.form == inf)
             { 
                 // ±Inf * y
                 // x * ±Inf
                 z.form = inf;
-                return z;
+                return _addr_z!;
+
             } 
 
             // ±0 * y
             // x * ±0
             z.form = zero;
-            return z;
+            return _addr_z!;
+
         });
 
         // Quo sets z to the rounded quotient x/y and returns z.
         // Precision, rounding, and accuracy reporting are as for Add.
         // Quo panics with ErrNaN if both operands are zero or infinities.
         // The value of z is undefined in that case.
-        private static ref Float Quo(this ref Float _z, ref Float _x, ref Float _y) => func(_z, _x, _y, (ref Float z, ref Float x, ref Float y, Defer _, Panic panic, Recover __) =>
+        private static ptr<Float> Quo(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float> _addr_y) => func((_, panic, __) =>
         {
+            ref Float z = ref _addr_z.val;
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (debugFloat)
             {
                 x.validate();
                 y.validate();
             }
+
             if (z.prec == 0L)
             {
                 z.prec = umax32(x.prec, y.prec);
             }
+
             z.neg = x.neg != y.neg;
 
             if (x.form == finite && y.form == finite)
             { 
                 // x / y (common case)
                 z.uquo(x, y);
-                return z;
+                return _addr_z!;
+
             }
+
             z.acc = Exact;
             if (x.form == zero && y.form == zero || x.form == inf && y.form == inf)
             { 
@@ -1859,19 +2195,23 @@ namespace math
                 z.form = zero;
                 z.neg = false;
                 panic(new ErrNaN("division of zero by zero or infinity by infinity"));
+
             }
+
             if (x.form == zero || y.form == inf)
             { 
                 // ±0 / y
                 // x / ±Inf
                 z.form = zero;
-                return z;
+                return _addr_z!;
+
             } 
 
             // x / ±0
             // ±Inf / y
             z.form = inf;
-            return z;
+            return _addr_z!;
+
         });
 
         // Cmp compares x and y and returns:
@@ -1880,13 +2220,17 @@ namespace math
         //    0 if x == y (incl. -0 == 0, -Inf == -Inf, and +Inf == +Inf)
         //   +1 if x >  y
         //
-        private static long Cmp(this ref Float x, ref Float y)
+        private static long Cmp(this ptr<Float> _addr_x, ptr<Float> _addr_y)
         {
+            ref Float x = ref _addr_x.val;
+            ref Float y = ref _addr_y.val;
+
             if (debugFloat)
             {
                 x.validate();
                 y.validate();
             }
+
             var mx = x.ord();
             var my = y.ord();
 
@@ -1908,6 +2252,7 @@ namespace math
             }
 
             return 0L;
+
         }
 
         // ord classifies x and returns:
@@ -1918,8 +2263,10 @@ namespace math
         //    +1 if 0 < x < +Inf
         //    +2 if x == +Inf
         //
-        private static long ord(this ref Float x)
+        private static long ord(this ptr<Float> _addr_x)
         {
+            ref Float x = ref _addr_x.val;
+
             long m = default;
 
             if (x.form == finite) 
@@ -1932,7 +2279,9 @@ namespace math
             {
                 m = -m;
             }
+
             return m;
+
         }
 
         private static uint umax32(uint x, uint y)
@@ -1941,7 +2290,9 @@ namespace math
             {
                 return x;
             }
+
             return y;
+
         }
     }
 }}

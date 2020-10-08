@@ -4,7 +4,7 @@
 
 // +build !windows
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:45 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:49 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\relax_stub.go
 
@@ -18,7 +18,7 @@ namespace go
         // without performing an osRelax. Since osRelax may reduce the
         // precision of timers, this should be enough larger than the relaxed
         // timer precision to keep the timer error acceptable.
-        private static readonly long osRelaxMinNS = 0L;
+        private static readonly long osRelaxMinNS = (long)0L;
 
         // osRelax is called by the scheduler when transitioning to and from
         // all Ps being idle.

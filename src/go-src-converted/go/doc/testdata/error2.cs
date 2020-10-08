@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package error2 -- go2cs converted at 2020 August 29 08:47:12 UTC
+// package error2 -- go2cs converted at 2020 October 08 04:02:53 UTC
 // import "go/doc.error2" ==> using error2 = go.go.doc.error2_package
 // Original source: C:\Go\src\go\doc\testdata\error2.go
 

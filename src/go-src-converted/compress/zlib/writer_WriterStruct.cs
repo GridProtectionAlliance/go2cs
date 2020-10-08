@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:05 UTC
+//     Generated on 2020 October 08 03:49:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using flate = go.compress.flate_package;
+using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using hash = go.hash_package;
 using adler32 = go.hash.adler32_package;

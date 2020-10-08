@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:50 UTC
+//     Generated on 2020 October 08 03:35:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,23 +64,24 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate (cipher.AEAD, error) NewGCMByRef(ref T value, long size);
-            private delegate (cipher.AEAD, error) NewGCMByVal(T value, long size);
+            private delegate (cipher.AEAD, error) NewGCMByPtr(ptr<T> value, long nonceSize, long tagSize);
+            private delegate (cipher.AEAD, error) NewGCMByVal(T value, long nonceSize, long tagSize);
 
-            private static readonly NewGCMByRef s_NewGCMByRef;
+            private static readonly NewGCMByPtr s_NewGCMByPtr;
             private static readonly NewGCMByVal s_NewGCMByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (cipher.AEAD, error) NewGCM(long size)
+            public (cipher.AEAD, error) NewGCM(long nonceSize, long tagSize)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NewGCMByRef is null)
-                    return s_NewGCMByVal!(target, size);
+                    target = m_target_ptr.val;
 
-                return s_NewGCMByRef(ref target, size);
+                if (s_NewGCMByPtr is null || !m_target_is_ptr)
+                    return s_NewGCMByVal!(target, nonceSize, tagSize);
+
+                return s_NewGCMByPtr(m_target_ptr, nonceSize, tagSize);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -89,23 +90,20 @@ namespace crypto
             static gcmAble()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NewGCM");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NewGCM");
 
                 if (!(extensionMethod is null))
-                    s_NewGCMByRef = extensionMethod.CreateStaticDelegate(typeof(NewGCMByRef)) as NewGCMByRef;
+                    s_NewGCMByPtr = extensionMethod.CreateStaticDelegate(typeof(NewGCMByPtr)) as NewGCMByPtr;
 
-                if (s_NewGCMByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NewGCM");
+                extensionMethod = targetType.GetExtensionMethod("NewGCM");
 
-                    if (!(extensionMethod is null))
-                        s_NewGCMByVal = extensionMethod.CreateStaticDelegate(typeof(NewGCMByVal)) as NewGCMByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NewGCMByVal = extensionMethod.CreateStaticDelegate(typeof(NewGCMByVal)) as NewGCMByVal;
 
-                if (s_NewGCMByRef is null && s_NewGCMByVal is null)
+                if (s_NewGCMByPtr is null && s_NewGCMByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement gcmAble.NewGCM method", new Exception("NewGCM"));
             }
 

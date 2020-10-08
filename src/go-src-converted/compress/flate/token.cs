@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 August 29 08:23:36 UTC
+// package flate -- go2cs converted at 2020 October 08 03:31:03 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\token.go
 
@@ -17,11 +17,12 @@ namespace compress
         // 2 bits:   type   0 = literal  1=EOF  2=Match   3=Unused
         // 8 bits:   xlength = length - MIN_MATCH_LENGTH
         // 22 bits   xoffset = offset - MIN_OFFSET_SIZE, or literal
-        private static readonly long lengthShift = 22L;
-        private static readonly long offsetMask = 1L << (int)(lengthShift) - 1L;
-        private static readonly long typeMask = 3L << (int)(30L);
-        private static readonly long literalType = 0L << (int)(30L);
-        private static readonly long matchType = 1L << (int)(30L);
+        private static readonly long lengthShift = (long)22L;
+        private static readonly long offsetMask = (long)1L << (int)(lengthShift) - 1L;
+        private static readonly long typeMask = (long)3L << (int)(30L);
+        private static readonly long literalType = (long)0L << (int)(30L);
+        private static readonly long matchType = (long)1L << (int)(30L);
+
 
         // The length code for length X (MIN_MATCH_LENGTH <= X <= MAX_MATCH_LENGTH)
         // is lengthCodes[length - MIN_MATCH_LENGTH]
@@ -74,11 +75,14 @@ namespace compress
             {
                 return offsetCodes[off];
             }
+
             if (off >> (int)(7L) < uint32(len(offsetCodes)))
             {
                 return offsetCodes[off >> (int)(7L)] + 14L;
             }
+
             return offsetCodes[off >> (int)(14L)] + 28L;
+
         }
     }
 }}

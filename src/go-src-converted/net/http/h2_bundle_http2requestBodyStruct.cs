@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:19 UTC
+//     Generated on 2020 October 08 03:39:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -55,6 +56,7 @@ namespace net
             // Constructors
             public http2requestBody(NilType _)
             {
+                this._ = default;
                 this.stream = default;
                 this.conn = default;
                 this.closed = default;
@@ -63,8 +65,9 @@ namespace net
                 this.needsContinue = default;
             }
 
-            public http2requestBody(ref ptr<http2stream> stream = default, ref ptr<http2serverConn> conn = default, bool closed = default, bool sawEOF = default, ref ptr<http2pipe> pipe = default, bool needsContinue = default)
+            public http2requestBody(http2incomparable _ = default, ref ptr<http2stream> stream = default, ref ptr<http2serverConn> conn = default, bool closed = default, bool sawEOF = default, ref ptr<http2pipe> pipe = default, bool needsContinue = default)
             {
+                this._ = _;
                 this.stream = stream;
                 this.conn = conn;
                 this.closed = closed;
@@ -93,7 +96,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2requestBody http2requestBody_cast(dynamic value)
         {
-            return new http2requestBody(ref value.stream, ref value.conn, value.closed, value.sawEOF, ref value.pipe, value.needsContinue);
+            return new http2requestBody(value._, ref value.stream, ref value.conn, value.closed, value.sawEOF, ref value.pipe, value.needsContinue);
         }
     }
 }}

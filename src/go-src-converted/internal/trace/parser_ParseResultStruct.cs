@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:58 UTC
+//     Generated on 2020 October 08 04:42:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,7 +42,7 @@ namespace @internal
                 this.Stacks = default;
             }
 
-            public ParseResult(slice<ref Event> Events = default, map<ulong, slice<ref Frame>> Stacks = default)
+            public ParseResult(slice<ptr<Event>> Events = default, map<ulong, slice<ptr<Frame>>> Stacks = default)
             {
                 this.Events = Events;
                 this.Stacks = Stacks;

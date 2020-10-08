@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:17 UTC
+//     Generated on 2020 October 08 03:39:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -78,7 +79,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -92,10 +93,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate http2FrameHeader HeaderByRef(ref T value);
+            private delegate http2FrameHeader HeaderByPtr(ptr<T> value);
             private delegate http2FrameHeader HeaderByVal(T value);
 
-            private static readonly HeaderByRef s_HeaderByRef;
+            private static readonly HeaderByPtr s_HeaderByPtr;
             private static readonly HeaderByVal s_HeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,17 +105,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_HeaderByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_HeaderByPtr is null || !m_target_is_ptr)
                     return s_HeaderByVal!(target);
 
-                return s_HeaderByRef(ref target);
+                return s_HeaderByPtr(m_target_ptr);
             }
 
-            private delegate http2FrameHeader invalidateByRef(ref T value);
+            private delegate http2FrameHeader invalidateByPtr(ptr<T> value);
             private delegate http2FrameHeader invalidateByVal(T value);
 
-            private static readonly invalidateByRef s_invalidateByRef;
+            private static readonly invalidateByPtr s_invalidateByPtr;
             private static readonly invalidateByVal s_invalidateByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,11 +125,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_invalidateByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_invalidateByPtr is null || !m_target_is_ptr)
                     return s_invalidateByVal!(target);
 
-                return s_invalidateByRef(ref target);
+                return s_invalidateByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -136,39 +139,33 @@ namespace net
             static http2Frame()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Header");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Header");
 
                 if (!(extensionMethod is null))
-                    s_HeaderByRef = extensionMethod.CreateStaticDelegate(typeof(HeaderByRef)) as HeaderByRef;
+                    s_HeaderByPtr = extensionMethod.CreateStaticDelegate(typeof(HeaderByPtr)) as HeaderByPtr;
 
-                if (s_HeaderByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Header");
+                extensionMethod = targetType.GetExtensionMethod("Header");
 
-                    if (!(extensionMethod is null))
-                        s_HeaderByVal = extensionMethod.CreateStaticDelegate(typeof(HeaderByVal)) as HeaderByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_HeaderByVal = extensionMethod.CreateStaticDelegate(typeof(HeaderByVal)) as HeaderByVal;
 
-                if (s_HeaderByRef is null && s_HeaderByVal is null)
+                if (s_HeaderByPtr is null && s_HeaderByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2Frame.Header method", new Exception("Header"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("invalidate");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("invalidate");
 
                 if (!(extensionMethod is null))
-                    s_invalidateByRef = extensionMethod.CreateStaticDelegate(typeof(invalidateByRef)) as invalidateByRef;
+                    s_invalidateByPtr = extensionMethod.CreateStaticDelegate(typeof(invalidateByPtr)) as invalidateByPtr;
 
-                if (s_invalidateByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("invalidate");
+                extensionMethod = targetType.GetExtensionMethod("invalidate");
 
-                    if (!(extensionMethod is null))
-                        s_invalidateByVal = extensionMethod.CreateStaticDelegate(typeof(invalidateByVal)) as invalidateByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_invalidateByVal = extensionMethod.CreateStaticDelegate(typeof(invalidateByVal)) as invalidateByVal;
 
-                if (s_invalidateByRef is null && s_invalidateByVal is null)
+                if (s_invalidateByPtr is null && s_invalidateByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2Frame.invalidate method", new Exception("invalidate"));
             }
 

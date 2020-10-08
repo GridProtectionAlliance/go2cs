@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:27:07 UTC
+//     Generated on 2020 October 08 03:34:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,9 +16,9 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
-using poll = go.@internal.poll_package;
 using io = go.io_package;
 using os = go.os_package;
+using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
 
@@ -54,7 +54,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error ReadByRef(ref T value, slice<byte> b);
+            private delegate error ReadByPtr(ptr<T> value, slice<byte> b);
             private delegate error ReadByVal(T value, slice<byte> b);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,17 +80,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, b);
 
-                return s_ReadByRef(ref target, b);
+                return s_ReadByPtr(m_target_ptr, b);
             }
 
-            private delegate error WriteByRef(ref T value, slice<byte> b);
+            private delegate error WriteByPtr(ptr<T> value, slice<byte> b);
             private delegate error WriteByVal(T value, slice<byte> b);
 
-            private static readonly WriteByRef s_WriteByRef;
+            private static readonly WriteByPtr s_WriteByPtr;
             private static readonly WriteByVal s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,17 +100,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, b);
 
-                return s_WriteByRef(ref target, b);
+                return s_WriteByPtr(m_target_ptr, b);
             }
 
-            private delegate error CloseByRef(ref T value);
+            private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,17 +120,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
 
-            private delegate error LocalAddrByRef(ref T value);
+            private delegate error LocalAddrByPtr(ptr<T> value);
             private delegate error LocalAddrByVal(T value);
 
-            private static readonly LocalAddrByRef s_LocalAddrByRef;
+            private static readonly LocalAddrByPtr s_LocalAddrByPtr;
             private static readonly LocalAddrByVal s_LocalAddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -137,17 +140,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LocalAddrByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LocalAddrByPtr is null || !m_target_is_ptr)
                     return s_LocalAddrByVal!(target);
 
-                return s_LocalAddrByRef(ref target);
+                return s_LocalAddrByPtr(m_target_ptr);
             }
 
-            private delegate error RemoteAddrByRef(ref T value);
+            private delegate error RemoteAddrByPtr(ptr<T> value);
             private delegate error RemoteAddrByVal(T value);
 
-            private static readonly RemoteAddrByRef s_RemoteAddrByRef;
+            private static readonly RemoteAddrByPtr s_RemoteAddrByPtr;
             private static readonly RemoteAddrByVal s_RemoteAddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,17 +160,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_RemoteAddrByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_RemoteAddrByPtr is null || !m_target_is_ptr)
                     return s_RemoteAddrByVal!(target);
 
-                return s_RemoteAddrByRef(ref target);
+                return s_RemoteAddrByPtr(m_target_ptr);
             }
 
-            private delegate error SetDeadlineByRef(ref T value, time.Time t);
+            private delegate error SetDeadlineByPtr(ptr<T> value, time.Time t);
             private delegate error SetDeadlineByVal(T value, time.Time t);
 
-            private static readonly SetDeadlineByRef s_SetDeadlineByRef;
+            private static readonly SetDeadlineByPtr s_SetDeadlineByPtr;
             private static readonly SetDeadlineByVal s_SetDeadlineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -175,17 +180,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetDeadlineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetDeadlineByPtr is null || !m_target_is_ptr)
                     return s_SetDeadlineByVal!(target, t);
 
-                return s_SetDeadlineByRef(ref target, t);
+                return s_SetDeadlineByPtr(m_target_ptr, t);
             }
 
-            private delegate error SetReadDeadlineByRef(ref T value, time.Time t);
+            private delegate error SetReadDeadlineByPtr(ptr<T> value, time.Time t);
             private delegate error SetReadDeadlineByVal(T value, time.Time t);
 
-            private static readonly SetReadDeadlineByRef s_SetReadDeadlineByRef;
+            private static readonly SetReadDeadlineByPtr s_SetReadDeadlineByPtr;
             private static readonly SetReadDeadlineByVal s_SetReadDeadlineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -194,17 +200,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetReadDeadlineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetReadDeadlineByPtr is null || !m_target_is_ptr)
                     return s_SetReadDeadlineByVal!(target, t);
 
-                return s_SetReadDeadlineByRef(ref target, t);
+                return s_SetReadDeadlineByPtr(m_target_ptr, t);
             }
 
-            private delegate error SetWriteDeadlineByRef(ref T value, time.Time t);
+            private delegate error SetWriteDeadlineByPtr(ptr<T> value, time.Time t);
             private delegate error SetWriteDeadlineByVal(T value, time.Time t);
 
-            private static readonly SetWriteDeadlineByRef s_SetWriteDeadlineByRef;
+            private static readonly SetWriteDeadlineByPtr s_SetWriteDeadlineByPtr;
             private static readonly SetWriteDeadlineByVal s_SetWriteDeadlineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -213,11 +220,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetWriteDeadlineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetWriteDeadlineByPtr is null || !m_target_is_ptr)
                     return s_SetWriteDeadlineByVal!(target, t);
 
-                return s_SetWriteDeadlineByRef(ref target, t);
+                return s_SetWriteDeadlineByPtr(m_target_ptr, t);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -226,135 +234,111 @@ namespace go
             static Conn()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.Read method", new Exception("Read"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Write");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
                 if (!(extensionMethod is null))
-                    s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
+                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
-                if (s_WriteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Write");
+                extensionMethod = targetType.GetExtensionMethod("Write");
 
-                    if (!(extensionMethod is null))
-                        s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
-                if (s_WriteByRef is null && s_WriteByVal is null)
+                if (s_WriteByPtr is null && s_WriteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.Write method", new Exception("Write"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.Close method", new Exception("Close"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("LocalAddr");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("LocalAddr");
 
                 if (!(extensionMethod is null))
-                    s_LocalAddrByRef = extensionMethod.CreateStaticDelegate(typeof(LocalAddrByRef)) as LocalAddrByRef;
+                    s_LocalAddrByPtr = extensionMethod.CreateStaticDelegate(typeof(LocalAddrByPtr)) as LocalAddrByPtr;
 
-                if (s_LocalAddrByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("LocalAddr");
+                extensionMethod = targetType.GetExtensionMethod("LocalAddr");
 
-                    if (!(extensionMethod is null))
-                        s_LocalAddrByVal = extensionMethod.CreateStaticDelegate(typeof(LocalAddrByVal)) as LocalAddrByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LocalAddrByVal = extensionMethod.CreateStaticDelegate(typeof(LocalAddrByVal)) as LocalAddrByVal;
 
-                if (s_LocalAddrByRef is null && s_LocalAddrByVal is null)
+                if (s_LocalAddrByPtr is null && s_LocalAddrByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.LocalAddr method", new Exception("LocalAddr"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("RemoteAddr");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("RemoteAddr");
 
                 if (!(extensionMethod is null))
-                    s_RemoteAddrByRef = extensionMethod.CreateStaticDelegate(typeof(RemoteAddrByRef)) as RemoteAddrByRef;
+                    s_RemoteAddrByPtr = extensionMethod.CreateStaticDelegate(typeof(RemoteAddrByPtr)) as RemoteAddrByPtr;
 
-                if (s_RemoteAddrByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("RemoteAddr");
+                extensionMethod = targetType.GetExtensionMethod("RemoteAddr");
 
-                    if (!(extensionMethod is null))
-                        s_RemoteAddrByVal = extensionMethod.CreateStaticDelegate(typeof(RemoteAddrByVal)) as RemoteAddrByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_RemoteAddrByVal = extensionMethod.CreateStaticDelegate(typeof(RemoteAddrByVal)) as RemoteAddrByVal;
 
-                if (s_RemoteAddrByRef is null && s_RemoteAddrByVal is null)
+                if (s_RemoteAddrByPtr is null && s_RemoteAddrByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.RemoteAddr method", new Exception("RemoteAddr"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SetDeadline");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SetDeadline");
 
                 if (!(extensionMethod is null))
-                    s_SetDeadlineByRef = extensionMethod.CreateStaticDelegate(typeof(SetDeadlineByRef)) as SetDeadlineByRef;
+                    s_SetDeadlineByPtr = extensionMethod.CreateStaticDelegate(typeof(SetDeadlineByPtr)) as SetDeadlineByPtr;
 
-                if (s_SetDeadlineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SetDeadline");
+                extensionMethod = targetType.GetExtensionMethod("SetDeadline");
 
-                    if (!(extensionMethod is null))
-                        s_SetDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetDeadlineByVal)) as SetDeadlineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetDeadlineByVal)) as SetDeadlineByVal;
 
-                if (s_SetDeadlineByRef is null && s_SetDeadlineByVal is null)
+                if (s_SetDeadlineByPtr is null && s_SetDeadlineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.SetDeadline method", new Exception("SetDeadline"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SetReadDeadline");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SetReadDeadline");
 
                 if (!(extensionMethod is null))
-                    s_SetReadDeadlineByRef = extensionMethod.CreateStaticDelegate(typeof(SetReadDeadlineByRef)) as SetReadDeadlineByRef;
+                    s_SetReadDeadlineByPtr = extensionMethod.CreateStaticDelegate(typeof(SetReadDeadlineByPtr)) as SetReadDeadlineByPtr;
 
-                if (s_SetReadDeadlineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SetReadDeadline");
+                extensionMethod = targetType.GetExtensionMethod("SetReadDeadline");
 
-                    if (!(extensionMethod is null))
-                        s_SetReadDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetReadDeadlineByVal)) as SetReadDeadlineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetReadDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetReadDeadlineByVal)) as SetReadDeadlineByVal;
 
-                if (s_SetReadDeadlineByRef is null && s_SetReadDeadlineByVal is null)
+                if (s_SetReadDeadlineByPtr is null && s_SetReadDeadlineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.SetReadDeadline method", new Exception("SetReadDeadline"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SetWriteDeadline");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SetWriteDeadline");
 
                 if (!(extensionMethod is null))
-                    s_SetWriteDeadlineByRef = extensionMethod.CreateStaticDelegate(typeof(SetWriteDeadlineByRef)) as SetWriteDeadlineByRef;
+                    s_SetWriteDeadlineByPtr = extensionMethod.CreateStaticDelegate(typeof(SetWriteDeadlineByPtr)) as SetWriteDeadlineByPtr;
 
-                if (s_SetWriteDeadlineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SetWriteDeadline");
+                extensionMethod = targetType.GetExtensionMethod("SetWriteDeadline");
 
-                    if (!(extensionMethod is null))
-                        s_SetWriteDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetWriteDeadlineByVal)) as SetWriteDeadlineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetWriteDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetWriteDeadlineByVal)) as SetWriteDeadlineByVal;
 
-                if (s_SetWriteDeadlineByRef is null && s_SetWriteDeadlineByVal is null)
+                if (s_SetWriteDeadlineByPtr is null && s_SetWriteDeadlineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.SetWriteDeadline method", new Exception("SetWriteDeadline"));
             }
 

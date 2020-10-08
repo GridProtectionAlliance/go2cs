@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:02 UTC
+//     Generated on 2020 October 08 04:02:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -57,7 +57,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -71,10 +71,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate @string KindByRef(ref T value);
+            private delegate @string KindByPtr(ptr<T> value);
             private delegate @string KindByVal(T value);
 
-            private static readonly KindByRef s_KindByRef;
+            private static readonly KindByPtr s_KindByPtr;
             private static readonly KindByVal s_KindByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,17 +83,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_KindByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_KindByPtr is null || !m_target_is_ptr)
                     return s_KindByVal!(target);
 
-                return s_KindByRef(ref target);
+                return s_KindByPtr(m_target_ptr);
             }
 
-            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,17 +103,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
 
-            private delegate @string ExactStringByRef(ref T value);
+            private delegate @string ExactStringByPtr(ptr<T> value);
             private delegate @string ExactStringByVal(T value);
 
-            private static readonly ExactStringByRef s_ExactStringByRef;
+            private static readonly ExactStringByPtr s_ExactStringByPtr;
             private static readonly ExactStringByVal s_ExactStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,17 +123,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ExactStringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ExactStringByPtr is null || !m_target_is_ptr)
                     return s_ExactStringByVal!(target);
 
-                return s_ExactStringByRef(ref target);
+                return s_ExactStringByPtr(m_target_ptr);
             }
 
-            private delegate @string implementsValueByRef(ref T value);
+            private delegate @string implementsValueByPtr(ptr<T> value);
             private delegate @string implementsValueByVal(T value);
 
-            private static readonly implementsValueByRef s_implementsValueByRef;
+            private static readonly implementsValueByPtr s_implementsValueByPtr;
             private static readonly implementsValueByVal s_implementsValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,11 +143,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_implementsValueByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_implementsValueByPtr is null || !m_target_is_ptr)
                     return s_implementsValueByVal!(target);
 
-                return s_implementsValueByRef(ref target);
+                return s_implementsValueByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -153,71 +157,59 @@ namespace go
             static Value()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Kind");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Kind");
 
                 if (!(extensionMethod is null))
-                    s_KindByRef = extensionMethod.CreateStaticDelegate(typeof(KindByRef)) as KindByRef;
+                    s_KindByPtr = extensionMethod.CreateStaticDelegate(typeof(KindByPtr)) as KindByPtr;
 
-                if (s_KindByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Kind");
+                extensionMethod = targetType.GetExtensionMethod("Kind");
 
-                    if (!(extensionMethod is null))
-                        s_KindByVal = extensionMethod.CreateStaticDelegate(typeof(KindByVal)) as KindByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_KindByVal = extensionMethod.CreateStaticDelegate(typeof(KindByVal)) as KindByVal;
 
-                if (s_KindByRef is null && s_KindByVal is null)
+                if (s_KindByPtr is null && s_KindByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Value.Kind method", new Exception("Kind"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Value.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ExactString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ExactString");
 
                 if (!(extensionMethod is null))
-                    s_ExactStringByRef = extensionMethod.CreateStaticDelegate(typeof(ExactStringByRef)) as ExactStringByRef;
+                    s_ExactStringByPtr = extensionMethod.CreateStaticDelegate(typeof(ExactStringByPtr)) as ExactStringByPtr;
 
-                if (s_ExactStringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ExactString");
+                extensionMethod = targetType.GetExtensionMethod("ExactString");
 
-                    if (!(extensionMethod is null))
-                        s_ExactStringByVal = extensionMethod.CreateStaticDelegate(typeof(ExactStringByVal)) as ExactStringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ExactStringByVal = extensionMethod.CreateStaticDelegate(typeof(ExactStringByVal)) as ExactStringByVal;
 
-                if (s_ExactStringByRef is null && s_ExactStringByVal is null)
+                if (s_ExactStringByPtr is null && s_ExactStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Value.ExactString method", new Exception("ExactString"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("implementsValue");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("implementsValue");
 
                 if (!(extensionMethod is null))
-                    s_implementsValueByRef = extensionMethod.CreateStaticDelegate(typeof(implementsValueByRef)) as implementsValueByRef;
+                    s_implementsValueByPtr = extensionMethod.CreateStaticDelegate(typeof(implementsValueByPtr)) as implementsValueByPtr;
 
-                if (s_implementsValueByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("implementsValue");
+                extensionMethod = targetType.GetExtensionMethod("implementsValue");
 
-                    if (!(extensionMethod is null))
-                        s_implementsValueByVal = extensionMethod.CreateStaticDelegate(typeof(implementsValueByVal)) as implementsValueByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_implementsValueByVal = extensionMethod.CreateStaticDelegate(typeof(implementsValueByVal)) as implementsValueByVal;
 
-                if (s_implementsValueByRef is null && s_implementsValueByVal is null)
+                if (s_implementsValueByPtr is null && s_implementsValueByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Value.implementsValue method", new Exception("implementsValue"));
             }
 

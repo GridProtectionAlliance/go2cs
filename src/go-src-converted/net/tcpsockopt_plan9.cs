@@ -4,7 +4,7 @@
 
 // TCP socket options for plan9
 
-// package net -- go2cs converted at 2020 August 29 08:27:51 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:45 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\tcpsockopt_plan9.go
 using syscall = go.syscall_package;
@@ -15,17 +15,21 @@ namespace go
 {
     public static partial class net_package
     {
-        private static error setNoDelay(ref netFD fd, bool noDelay)
+        private static error setNoDelay(ptr<netFD> _addr_fd, bool noDelay)
         {
-            return error.As(syscall.EPLAN9);
+            ref netFD fd = ref _addr_fd.val;
+
+            return error.As(syscall.EPLAN9)!;
         }
 
         // Set keep alive period.
-        private static error setKeepAlivePeriod(ref netFD fd, time.Duration d)
+        private static error setKeepAlivePeriod(ptr<netFD> _addr_fd, time.Duration d)
         {
+            ref netFD fd = ref _addr_fd.val;
+
             @string cmd = "keepalive " + itoa(int(d / time.Millisecond));
             var (_, e) = fd.ctl.WriteAt((slice<byte>)cmd, 0L);
-            return error.As(e);
+            return error.As(e)!;
         }
     }
 }

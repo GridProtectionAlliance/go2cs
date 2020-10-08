@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:53 UTC
+//     Generated on 2020 October 08 03:35:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using subtleoverlap = go.crypto.@internal.subtle_package;
 using subtle = go.crypto.subtle_package;
+using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using go;
 
@@ -30,13 +32,15 @@ namespace crypto
             {
                 this.cipher = default;
                 this.nonceSize = default;
+                this.tagSize = default;
                 this.productTable = default;
             }
 
-            public gcm(Block cipher = default, long nonceSize = default, array<gcmFieldElement> productTable = default)
+            public gcm(Block cipher = default, long nonceSize = default, long tagSize = default, array<gcmFieldElement> productTable = default)
             {
                 this.cipher = cipher;
                 this.nonceSize = nonceSize;
+                this.tagSize = tagSize;
                 this.productTable = productTable;
             }
 
@@ -60,7 +64,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static gcm gcm_cast(dynamic value)
         {
-            return new gcm(value.cipher, value.nonceSize, value.productTable);
+            return new gcm(value.cipher, value.nonceSize, value.tagSize, value.productTable);
         }
     }
 }}

@@ -1,4 +1,4 @@
-// package p2 -- go2cs converted at 2020 August 29 08:48:37 UTC
+// package p2 -- go2cs converted at 2020 October 08 04:04:26 UTC
 // import "cmd/api/testdata/src/pkg/p2" ==> using p2 = go.cmd.api.testdata.src.pkg.p2_package
 // Original source: C:\Go\src\cmd\api\testdata\src\pkg\p2\p2.go
 

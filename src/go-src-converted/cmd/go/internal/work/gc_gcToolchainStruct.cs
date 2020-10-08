@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:33 UTC
+//     Generated on 2020 October 08 04:34:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
 using str = go.cmd.go.@internal.str_package;
 using objabi = go.cmd.@internal.objabi_package;
+using sys = go.cmd.@internal.sys_package;
 using sha1 = go.crypto.sha1_package;
 using go;
 

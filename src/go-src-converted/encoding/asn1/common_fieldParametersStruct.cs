@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:29:46 UTC
+//     Generated on 2020 October 08 03:36:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,6 +32,7 @@ namespace encoding
                 this.optional = default;
                 this.@explicit = default;
                 this.application = default;
+                this.@private = default;
                 this.defaultValue = default;
                 this.tag = default;
                 this.stringType = default;
@@ -40,11 +41,12 @@ namespace encoding
                 this.omitEmpty = default;
             }
 
-            public fieldParameters(bool optional = default, bool @explicit = default, bool application = default, ref ptr<long> defaultValue = default, ref ptr<long> tag = default, long stringType = default, long timeType = default, bool set = default, bool omitEmpty = default)
+            public fieldParameters(bool optional = default, bool @explicit = default, bool application = default, bool @private = default, ref ptr<long> defaultValue = default, ref ptr<long> tag = default, long stringType = default, long timeType = default, bool set = default, bool omitEmpty = default)
             {
                 this.optional = optional;
                 this.@explicit = @explicit;
                 this.application = application;
+                this.@private = @private;
                 this.defaultValue = defaultValue;
                 this.tag = tag;
                 this.stringType = stringType;
@@ -73,7 +75,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static fieldParameters fieldParameters_cast(dynamic value)
         {
-            return new fieldParameters(value.optional, value.@explicit, value.application, ref value.defaultValue, ref value.tag, value.stringType, value.timeType, value.set, value.omitEmpty);
+            return new fieldParameters(value.optional, value.@explicit, value.application, value.@private, ref value.defaultValue, ref value.tag, value.stringType, value.timeType, value.set, value.omitEmpty);
         }
     }
 }}

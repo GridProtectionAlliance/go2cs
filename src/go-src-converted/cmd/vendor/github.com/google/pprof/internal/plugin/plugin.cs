@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package plugin defines the plugin implementations that the main pprof driver requires.
-// package plugin -- go2cs converted at 2020 August 29 10:05:42 UTC
+// package plugin -- go2cs converted at 2020 October 08 04:43:17 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/plugin" ==> using plugin = go.cmd.vendor.github.com.google.pprof.@internal.plugin_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\plugin\plugin.go
 using io = go.io_package;
@@ -44,14 +44,15 @@ namespace @internal
             public Symbolizer Sym;
             public ObjTool Obj;
             public UI UI; // HTTPServer is a function that should block serving http requests,
-// including the handlers specfied in args.  If non-nil, pprof will
+// including the handlers specified in args.  If non-nil, pprof will
 // invoke this function if necessary to provide a web interface.
 //
 // If HTTPServer is nil, pprof will use its own internal HTTP server.
 //
 // A common use for a custom HTTPServer is to provide custom
 // authentication checks.
-            public Func<ref HTTPServerArgs, error> HTTPServer;
+            public Func<ptr<HTTPServerArgs>, error> HTTPServer;
+            public http.RoundTripper HTTPTransport;
         }
 
         // Writer provides a mechanism to write data under a certain name,
@@ -68,18 +69,15 @@ namespace @internal
             slice<@string> Bool(@string name, bool def, @string usage);
             slice<@string> Int(@string name, long def, @string usage);
             slice<@string> Float64(@string name, double def, @string usage);
-            slice<@string> String(@string name, @string def, @string usage); // BoolVar, IntVar, Float64Var, and StringVar define new flags referencing
-// a given pointer, like the functions of the same name in package flag.
-            slice<@string> BoolVar(ref bool pointer, @string name, bool def, @string usage);
-            slice<@string> IntVar(ref long pointer, @string name, long def, @string usage);
-            slice<@string> Float64Var(ref double pointer, @string name, double def, @string usage);
-            slice<@string> StringVar(ref @string pointer, @string name, @string def, @string usage); // StringList is similar to String but allows multiple values for a
+            slice<@string> String(@string name, @string def, @string usage); // StringList is similar to String but allows multiple values for a
 // single flag
-            slice<@string> StringList(@string name, @string def, @string usage); // ExtraUsage returns any additional text that should be
-// printed after the standard usage message.
-// The typical use of ExtraUsage is to show any custom flags
-// defined by the specific pprof plugins being used.
-            slice<@string> ExtraUsage(); // Parse initializes the flags with their values for this run
+            slice<@string> StringList(@string name, @string def, @string usage); // ExtraUsage returns any additional text that should be printed after the
+// standard usage message. The extra usage message returned includes all text
+// added with AddExtraUsage().
+// The typical use of ExtraUsage is to show any custom flags defined by the
+// specific pprof plugins being used.
+            slice<@string> ExtraUsage(); // AddExtraUsage appends additional text to the end of the extra usage message.
+            slice<@string> AddExtraUsage(@string eu); // Parse initializes the flags with their values for this run
 // and returns the non-flag command line arguments.
 // If an unknown flag is encountered or there are no arguments,
 // Parse should call usage and return nil.
@@ -95,13 +93,13 @@ namespace @internal
         // error.
         public partial interface Fetcher
         {
-            (ref profile.Profile, @string, error) Fetch(@string src, time.Duration duration, time.Duration timeout);
+            (ptr<profile.Profile>, @string, error) Fetch(@string src, time.Duration duration, time.Duration timeout);
         }
 
         // A Symbolizer introduces symbol information into a profile.
         public partial interface Symbolizer
         {
-            error Symbolize(@string mode, MappingSources srcs, ref profile.Profile prof);
+            error Symbolize(@string mode, MappingSources srcs, ptr<profile.Profile> prof);
         }
 
         // MappingSources map each profile.Mapping to the source of the profile.
@@ -142,7 +140,7 @@ namespace @internal
 // with names matching the regular expression.
 // If addr is not zero, Symbols restricts the list to symbols
 // containing that address.
-            error Symbols(ref regexp.Regexp r, ulong addr); // Close closes the file, releasing associated resources.
+            error Symbols(ptr<regexp.Regexp> r, ulong addr); // Close closes the file, releasing associated resources.
             error Close();
         }
 
@@ -175,7 +173,8 @@ namespace @internal
 // For line-based UI, PrintErr writes to standard error.
             @string PrintErr(params object _p0); // IsTerminal returns whether the UI is known to be tied to an
 // interactive terminal (as opposed to being redirected to a file).
-            @string IsTerminal(); // SetAutoComplete instructs the UI to call complete(cmd) to obtain
+            @string IsTerminal(); // WantBrowser indicates whether a browser should be opened with the -http option.
+            @string WantBrowser(); // SetAutoComplete instructs the UI to call complete(cmd) to obtain
 // the auto-completion of cmd, if the UI supports auto-completion at all.
             @string SetAutoComplete(Func<@string, @string> complete);
         }

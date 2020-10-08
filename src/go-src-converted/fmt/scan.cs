@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fmt -- go2cs converted at 2020 August 29 08:45:17 UTC
+// package fmt -- go2cs converted at 2020 October 08 03:26:07 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Go\src\fmt\scan.go
 using errors = go.errors_package;
@@ -60,6 +60,8 @@ namespace go
         // If that is less than the number of arguments, err will report why.
         public static (long, error) Scan(params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             return Fscan(os.Stdin, a);
@@ -69,6 +71,8 @@ namespace go
         // after the final item there must be a newline or EOF.
         public static (long, error) Scanln(params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             return Fscanln(os.Stdin, a);
@@ -83,6 +87,8 @@ namespace go
         // input, even if it is a space (or tab etc.) or newline.
         public static (long, error) Scanf(@string format, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             return Fscanf(os.Stdin, format, a);
@@ -92,15 +98,21 @@ namespace go
         {
         }
 
-        private static (long, error) Read(this ref stringReader r, slice<byte> b)
+        private static (long, error) Read(this ptr<stringReader> _addr_r, slice<byte> b)
         {
-            n = copy(b, r.Value);
-            r.Value = (r.Value)[n..];
+            long n = default;
+            error err = default!;
+            ref stringReader r = ref _addr_r.val;
+
+            n = copy(b, r.val);
+            r.val = (r.val)[n..];
             if (n == 0L)
             {
                 err = io.EOF;
             }
-            return;
+
+            return ;
+
         }
 
         // Sscan scans the argument string, storing successive space-separated
@@ -109,18 +121,22 @@ namespace go
         // than the number of arguments, err will report why.
         public static (long, error) Sscan(@string str, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
-            return Fscan((stringReader.Value)(ref str), a);
+            return Fscan((stringReader.val)(_addr_str), a);
         }
 
         // Sscanln is similar to Sscan, but stops scanning at a newline and
         // after the final item there must be a newline or EOF.
         public static (long, error) Sscanln(@string str, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
-            return Fscanln((stringReader.Value)(ref str), a);
+            return Fscanln((stringReader.val)(_addr_str), a);
         }
 
         // Sscanf scans the argument string, storing successive space-separated
@@ -129,9 +145,11 @@ namespace go
         // Newlines in the input must match newlines in the format.
         public static (long, error) Sscanf(@string str, @string format, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
-            return Fscanf((stringReader.Value)(ref str), format, a);
+            return Fscanf((stringReader.val)(_addr_str), format, a);
         }
 
         // Fscan scans text read from r, storing successive space-separated
@@ -140,24 +158,28 @@ namespace go
         // than the number of arguments, err will report why.
         public static (long, error) Fscan(io.Reader r, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             var (s, old) = newScanState(r, true, false);
             n, err = s.doScan(a);
             s.free(old);
-            return;
+            return ;
         }
 
         // Fscanln is similar to Fscan, but stops scanning at a newline and
         // after the final item there must be a newline or EOF.
         public static (long, error) Fscanln(io.Reader r, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             var (s, old) = newScanState(r, false, true);
             n, err = s.doScan(a);
             s.free(old);
-            return;
+            return ;
         }
 
         // Fscanf scans text read from r, storing successive space-separated
@@ -166,12 +188,14 @@ namespace go
         // Newlines in the input must match newlines in the format.
         public static (long, error) Fscanf(io.Reader r, @string format, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             var (s, old) = newScanState(r, false, false);
             n, err = s.doScanf(format, a);
             s.free(old);
-            return;
+            return ;
         }
 
         // scanError represents an error generated by the scanning software.
@@ -181,7 +205,7 @@ namespace go
             public error err;
         }
 
-        private static readonly long eof = -1L;
+        private static readonly long eof = (long)-1L;
 
         // ss is the internal implementation of ScanState.
 
@@ -211,18 +235,28 @@ namespace go
         // The Read method is only in ScanState so that ScanState
         // satisfies io.Reader. It will never be called when used as
         // intended, so there is no need to make it actually work.
-        private static (long, error) Read(this ref ss s, slice<byte> buf)
+        private static (long, error) Read(this ptr<ss> _addr_s, slice<byte> buf)
         {
-            return (0L, errors.New("ScanState's Read should not be called. Use ReadRune"));
+            long n = default;
+            error err = default!;
+            ref ss s = ref _addr_s.val;
+
+            return (0L, error.As(errors.New("ScanState's Read should not be called. Use ReadRune"))!);
         }
 
-        private static (int, long, error) ReadRune(this ref ss s)
+        private static (int, long, error) ReadRune(this ptr<ss> _addr_s)
         {
+            int r = default;
+            long size = default;
+            error err = default!;
+            ref ss s = ref _addr_s.val;
+
             if (s.atEOF || s.count >= s.argLimit)
             {
                 err = io.EOF;
-                return;
+                return ;
             }
+
             r, size, err = s.rs.ReadRune();
             if (err == null)
             {
@@ -231,27 +265,39 @@ namespace go
                 {
                     s.atEOF = true;
                 }
+
             }
             else if (err == io.EOF)
             {
                 s.atEOF = true;
             }
-            return;
+
+            return ;
+
         }
 
-        private static (long, bool) Width(this ref ss s)
+        private static (long, bool) Width(this ptr<ss> _addr_s)
         {
+            long wid = default;
+            bool ok = default;
+            ref ss s = ref _addr_s.val;
+
             if (s.maxWid == hugeWid)
             {
                 return (0L, false);
             }
+
             return (s.maxWid, true);
+
         }
 
         // The public method returns an error; this private one panics.
         // If getRune reaches EOF, the return value is EOF (-1).
-        private static int getRune(this ref ss s)
+        private static int getRune(this ptr<ss> _addr_s)
         {
+            int r = default;
+            ref ss s = ref _addr_s.val;
+
             var (r, _, err) = s.ReadRune();
             if (err != null)
             {
@@ -259,44 +305,63 @@ namespace go
                 {
                     return eof;
                 }
+
                 s.error(err);
+
             }
-            return;
+
+            return ;
+
         }
 
         // mustReadRune turns io.EOF into a panic(io.ErrUnexpectedEOF).
         // It is called in cases such as string scanning where an EOF is a
         // syntax error.
-        private static int mustReadRune(this ref ss s)
+        private static int mustReadRune(this ptr<ss> _addr_s)
         {
+            int r = default;
+            ref ss s = ref _addr_s.val;
+
             r = s.getRune();
             if (r == eof)
             {
                 s.error(io.ErrUnexpectedEOF);
             }
-            return;
+
+            return ;
+
         }
 
-        private static error UnreadRune(this ref ss s)
+        private static error UnreadRune(this ptr<ss> _addr_s)
         {
+            ref ss s = ref _addr_s.val;
+
             s.rs.UnreadRune();
             s.atEOF = false;
             s.count--;
-            return error.As(null);
+            return error.As(null!)!;
         }
 
-        private static void error(this ref ss _s, error err) => func(_s, (ref ss s, Defer _, Panic panic, Recover __) =>
+        private static void error(this ptr<ss> _addr_s, error err) => func((_, panic, __) =>
         {
+            ref ss s = ref _addr_s.val;
+
             panic(new scanError(err));
         });
 
-        private static void errorString(this ref ss _s, @string err) => func(_s, (ref ss s, Defer _, Panic panic, Recover __) =>
+        private static void errorString(this ptr<ss> _addr_s, @string err) => func((_, panic, __) =>
         {
+            ref ss s = ref _addr_s.val;
+
             panic(new scanError(errors.New(err)));
         });
 
-        private static (slice<byte>, error) Token(this ref ss _s, bool skipSpace, Func<int, bool> f) => func(_s, (ref ss s, Defer defer, Panic panic, Recover _) =>
+        private static (slice<byte>, error) Token(this ptr<ss> _addr_s, bool skipSpace, Func<int, bool> f) => func((defer, panic, _) =>
         {
+            slice<byte> tok = default;
+            error err = default!;
+            ref ss s = ref _addr_s.val;
+
             defer(() =>
             {
                 {
@@ -317,17 +382,21 @@ namespace go
                             }
 
                         }
+
                     }
 
                 }
+
             }());
             if (f == null)
             {
                 f = notSpace;
             }
+
             s.buf = s.buf[..0L];
             tok = s.token(skipSpace, f);
-            return;
+            return ;
+
         });
 
         // space is a copy of the unicode.White_Space ranges,
@@ -340,6 +409,7 @@ namespace go
             {
                 return false;
             }
+
             var rx = uint16(r);
             foreach (var (_, rng) in space)
             {
@@ -347,12 +417,15 @@ namespace go
                 {
                     return false;
                 }
+
                 if (rx <= rng[1L])
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
         // notSpace is the default scanning function used in Token.
@@ -375,47 +448,63 @@ namespace go
 
         // readByte returns the next byte from the input, which may be
         // left over from a previous read if the UTF-8 was ill-formed.
-        private static (byte, error) readByte(this ref readRune r)
+        private static (byte, error) readByte(this ptr<readRune> _addr_r)
         {
+            byte b = default;
+            error err = default!;
+            ref readRune r = ref _addr_r.val;
+
             if (r.pending > 0L)
             {
                 b = r.pendBuf[0L];
                 copy(r.pendBuf[0L..], r.pendBuf[1L..]);
                 r.pending--;
-                return;
+                return ;
             }
+
             var (n, err) = io.ReadFull(r.reader, r.pendBuf[..1L]);
             if (n != 1L)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
-            return (r.pendBuf[0L], err);
+
+            return (r.pendBuf[0L], error.As(err)!);
+
         }
 
         // ReadRune returns the next UTF-8 encoded code point from the
         // io.Reader inside r.
-        private static (int, long, error) ReadRune(this ref readRune r)
+        private static (int, long, error) ReadRune(this ptr<readRune> _addr_r)
         {
+            int rr = default;
+            long size = default;
+            error err = default!;
+            ref readRune r = ref _addr_r.val;
+
             if (r.peekRune >= 0L)
             {
                 rr = r.peekRune;
                 r.peekRune = ~r.peekRune;
                 size = utf8.RuneLen(rr);
-                return;
+                return ;
             }
+
             r.buf[0L], err = r.readByte();
             if (err != null)
             {
-                return;
+                return ;
             }
+
             if (r.buf[0L] < utf8.RuneSelf)
             { // fast check for common ASCII case
                 rr = rune(r.buf[0L]);
                 size = 1L; // Known to be 1.
                 // Flip the bits of the rune so it's available to UnreadRune.
                 r.peekRune = ~rr;
-                return;
+                return ;
+
             }
+
             long n = default;
             for (n = 1L; !utf8.FullRune(r.buf[..n]); n++)
             {
@@ -427,8 +516,11 @@ namespace go
                         err = null;
                         break;
                     }
-                    return;
+
+                    return ;
+
                 }
+
             }
 
             rr, size = utf8.DecodeRune(r.buf[..n]);
@@ -436,29 +528,37 @@ namespace go
             { // an error, save the bytes for the next read
                 copy(r.pendBuf[r.pending..], r.buf[size..n]);
                 r.pending += n - size;
+
             } 
             // Flip the bits of the rune so it's available to UnreadRune.
             r.peekRune = ~rr;
-            return;
+            return ;
+
         }
 
-        private static error UnreadRune(this ref readRune r)
+        private static error UnreadRune(this ptr<readRune> _addr_r)
         {
+            ref readRune r = ref _addr_r.val;
+
             if (r.peekRune >= 0L)
             {
-                return error.As(errors.New("fmt: scanning called UnreadRune with no rune available"));
+                return error.As(errors.New("fmt: scanning called UnreadRune with no rune available"))!;
             } 
             // Reverse bit flip of previously read rune to obtain valid >=0 state.
             r.peekRune = ~r.peekRune;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         private static sync.Pool ssFree = new sync.Pool(New:func()interface{}{returnnew(ss)},);
 
         // newScanState allocates a new ss struct or grab a cached one.
-        private static (ref ss, ssave) newScanState(io.Reader r, bool nlIsSpace, bool nlIsEnd)
+        private static (ptr<ss>, ssave) newScanState(io.Reader r, bool nlIsSpace, bool nlIsEnd)
         {
-            s = ssFree.Get()._<ref ss>();
+            ptr<ss> s = default!;
+            ssave old = default;
+
+            s = ssFree.Get()._<ptr<ss>>();
             {
                 io.RuneScanner (rs, ok) = r._<io.RuneScanner>();
 
@@ -468,10 +568,11 @@ namespace go
                 }
                 else
                 {
-                    s.rs = ref new readRune(reader:r,peekRune:-1);
+                    s.rs = addr(new readRune(reader:r,peekRune:-1));
                 }
 
             }
+
             s.nlIsSpace = nlIsSpace;
             s.nlIsEnd = nlIsEnd;
             s.atEOF = false;
@@ -480,67 +581,83 @@ namespace go
             s.maxWid = hugeWid;
             s.validSave = true;
             s.count = 0L;
-            return;
+            return ;
+
         }
 
         // free saves used ss structs in ssFree; avoid an allocation per invocation.
-        private static void free(this ref ss s, ssave old)
-        { 
+        private static void free(this ptr<ss> _addr_s, ssave old)
+        {
+            ref ss s = ref _addr_s.val;
+ 
             // If it was used recursively, just restore the old state.
             if (old.validSave)
             {
                 s.ssave = old;
-                return;
+                return ;
             } 
             // Don't hold on to ss structs with large buffers.
             if (cap(s.buf) > 1024L)
             {
-                return;
+                return ;
             }
+
             s.buf = s.buf[..0L];
             s.rs = null;
             ssFree.Put(s);
+
         }
 
         // SkipSpace provides Scan methods the ability to skip space and newline
         // characters in keeping with the current scanning mode set by format strings
         // and Scan/Scanln.
-        private static void SkipSpace(this ref ss s)
+        private static void SkipSpace(this ptr<ss> _addr_s)
         {
+            ref ss s = ref _addr_s.val;
+
             while (true)
             {
                 var r = s.getRune();
                 if (r == eof)
                 {
-                    return;
+                    return ;
                 }
+
                 if (r == '\r' && s.peek("\n"))
                 {
                     continue;
                 }
+
                 if (r == '\n')
                 {
                     if (s.nlIsSpace)
                     {
                         continue;
                     }
+
                     s.errorString("unexpected newline");
-                    return;
+                    return ;
+
                 }
+
                 if (!isSpace(r))
                 {
                     s.UnreadRune();
                     break;
                 }
+
             }
+
 
         }
 
         // token returns the next space-delimited string from the input. It
         // skips white space. For Scanln, it stops at newlines. For Scan,
         // newlines are treated as spaces.
-        private static slice<byte> token(this ref ss s, bool skipSpace, Func<int, bool> f)
+        private static slice<byte> token(this ptr<ss> _addr_s, bool skipSpace, Func<int, bool> f)
         {
+            ref ss s = ref _addr_s.val;
+
             if (skipSpace)
             {
                 s.SkipSpace();
@@ -553,15 +670,19 @@ namespace go
                 {
                     break;
                 }
+
                 if (!f(r))
                 {
                     s.UnreadRune();
                     break;
                 }
-                s.buf.WriteRune(r);
+
+                s.buf.writeRune(r);
+
             }
 
             return s.buf;
+
         }
 
         private static var complexError = errors.New("syntax error scanning complex number");
@@ -575,47 +696,63 @@ namespace go
                 {
                     return i;
                 }
+
             }
             return -1L;
+
         }
 
         // consume reads the next rune in the input and reports whether it is in the ok string.
         // If accept is true, it puts the character into the input token.
-        private static bool consume(this ref ss s, @string ok, bool accept)
+        private static bool consume(this ptr<ss> _addr_s, @string ok, bool accept)
         {
+            ref ss s = ref _addr_s.val;
+
             var r = s.getRune();
             if (r == eof)
             {
                 return false;
             }
+
             if (indexRune(ok, r) >= 0L)
             {
                 if (accept)
                 {
-                    s.buf.WriteRune(r);
+                    s.buf.writeRune(r);
                 }
+
                 return true;
+
             }
+
             if (r != eof && accept)
             {
                 s.UnreadRune();
             }
+
             return false;
+
         }
 
         // peek reports whether the next character is in the ok string, without consuming it.
-        private static bool peek(this ref ss s, @string ok)
+        private static bool peek(this ptr<ss> _addr_s, @string ok)
         {
+            ref ss s = ref _addr_s.val;
+
             var r = s.getRune();
             if (r != eof)
             {
                 s.UnreadRune();
             }
+
             return indexRune(ok, r) >= 0L;
+
         }
 
-        private static void notEOF(this ref ss _s) => func(_s, (ref ss s, Defer _, Panic panic, Recover __) =>
-        { 
+        private static void notEOF(this ptr<ss> _addr_s) => func((_, panic, __) =>
+        {
+            ref ss s = ref _addr_s.val;
+ 
             // Guarantee there is data to be read.
             {
                 var r = s.getRune();
@@ -626,33 +763,43 @@ namespace go
                 }
 
             }
+
             s.UnreadRune();
+
         });
 
         // accept checks the next rune in the input. If it's a byte (sic) in the string, it puts it in the
         // buffer and returns true. Otherwise it return false.
-        private static bool accept(this ref ss s, @string ok)
+        private static bool accept(this ptr<ss> _addr_s, @string ok)
         {
+            ref ss s = ref _addr_s.val;
+
             return s.consume(ok, true);
         }
 
         // okVerb verifies that the verb is present in the list, setting s.err appropriately if not.
-        private static bool okVerb(this ref ss s, int verb, @string okVerbs, @string typ)
+        private static bool okVerb(this ptr<ss> _addr_s, int verb, @string okVerbs, @string typ)
         {
+            ref ss s = ref _addr_s.val;
+
             foreach (var (_, v) in okVerbs)
             {
                 if (v == verb)
                 {
                     return true;
                 }
+
             }
             s.errorString("bad verb '%" + string(verb) + "' for " + typ);
             return false;
+
         }
 
         // scanBool returns the value of the boolean represented by the next token.
-        private static bool scanBool(this ref ss s, int verb)
+        private static bool scanBool(this ptr<ss> _addr_s, int verb)
         {
+            ref ss s = ref _addr_s.val;
+
             s.SkipSpace();
             s.notEOF();
             if (!s.okVerb(verb, "tv", "boolean"))
@@ -675,6 +822,7 @@ namespace go
                     {
                         s.error(boolError);
                     }
+
                     return true;
                     break;
                 case 'f': 
@@ -684,24 +832,31 @@ namespace go
                     {
                         s.error(boolError);
                     }
+
                     return false;
                     break;
             }
             return false;
+
         }
 
         // Numerical elements
-        private static readonly @string binaryDigits = "01";
-        private static readonly @string octalDigits = "01234567";
-        private static readonly @string decimalDigits = "0123456789";
-        private static readonly @string hexadecimalDigits = "0123456789aAbBcCdDeEfF";
-        private static readonly @string sign = "+-";
-        private static readonly @string period = ".";
-        private static readonly @string exponent = "eEp";
+        private static readonly @string binaryDigits = (@string)"01";
+        private static readonly @string octalDigits = (@string)"01234567";
+        private static readonly @string decimalDigits = (@string)"0123456789";
+        private static readonly @string hexadecimalDigits = (@string)"0123456789aAbBcCdDeEfF";
+        private static readonly @string sign = (@string)"+-";
+        private static readonly @string period = (@string)".";
+        private static readonly @string exponent = (@string)"eEpP";
+
 
         // getBase returns the numeric base represented by the verb and its digit string.
-        private static (long, @string) getBase(this ref ss s, int verb)
+        private static (long, @string) getBase(this ptr<ss> _addr_s, int verb)
         {
+            long @base = default;
+            @string digits = default;
+            ref ss s = ref _addr_s.val;
+
             s.okVerb(verb, "bdoUxXv", "integer"); // sets s.err
             base = 10L;
             digits = decimalDigits;
@@ -724,12 +879,15 @@ namespace go
                     digits = hexadecimalDigits;
                     break;
             }
-            return;
+            return ;
+
         }
 
         // scanNumber returns the numerical string with specified digits starting here.
-        private static @string scanNumber(this ref ss s, @string digits, bool haveDigits)
+        private static @string scanNumber(this ptr<ss> _addr_s, @string digits, bool haveDigits)
         {
+            ref ss s = ref _addr_s.val;
+
             if (!haveDigits)
             {
                 s.notEOF();
@@ -737,59 +895,78 @@ namespace go
                 {
                     s.errorString("expected integer");
                 }
+
             }
+
             while (s.accept(digits))
             {
             }
 
             return string(s.buf);
+
         }
 
         // scanRune returns the next rune value in the input.
-        private static long scanRune(this ref ss s, long bitSize)
+        private static long scanRune(this ptr<ss> _addr_s, long bitSize)
         {
+            ref ss s = ref _addr_s.val;
+
             s.notEOF();
-            var r = int64(s.getRune());
+            var r = s.getRune();
             var n = uint(bitSize);
-            var x = (r << (int)((64L - n))) >> (int)((64L - n));
-            if (x != r)
+            var x = (int64(r) << (int)((64L - n))) >> (int)((64L - n));
+            if (x != int64(r))
             {
                 s.errorString("overflow on character value " + string(r));
             }
-            return r;
+
+            return int64(r);
+
         }
 
-        // scanBasePrefix reports whether the integer begins with a 0 or 0x,
+        // scanBasePrefix reports whether the integer begins with a base prefix
         // and returns the base, digit string, and whether a zero was found.
         // It is called only if the verb is %v.
-        private static (long, @string, bool) scanBasePrefix(this ref ss s)
+        private static (long, @string, bool) scanBasePrefix(this ptr<ss> _addr_s)
         {
+            long @base = default;
+            @string digits = default;
+            bool zeroFound = default;
+            ref ss s = ref _addr_s.val;
+
             if (!s.peek("0"))
             {
-                return (10L, decimalDigits, false);
+                return (0L, decimalDigits + "_", false);
             }
-            s.accept("0");
-            found = true; // We've put a digit into the token buffer.
-            // Special cases for '0' && '0x'
-            base = 8L;
-            digits = octalDigits;
-            if (s.peek("xX"))
-            {
-                s.consume("xX", false);
-                base = 16L;
-                digits = hexadecimalDigits;
-            }
-            return;
+
+            s.accept("0"); 
+            // Special cases for 0, 0b, 0o, 0x.
+
+            if (s.peek("bB")) 
+                s.consume("bB", true);
+                return (0L, binaryDigits + "_", true);
+            else if (s.peek("oO")) 
+                s.consume("oO", true);
+                return (0L, octalDigits + "_", true);
+            else if (s.peek("xX")) 
+                s.consume("xX", true);
+                return (0L, hexadecimalDigits + "_", true);
+            else 
+                return (0L, octalDigits + "_", true);
+            
         }
 
         // scanInt returns the value of the integer represented by the next
         // token, checking for overflow. Any error is stored in s.err.
-        private static long scanInt(this ref ss s, int verb, long bitSize)
+        private static long scanInt(this ptr<ss> _addr_s, int verb, long bitSize)
         {
+            ref ss s = ref _addr_s.val;
+
             if (verb == 'c')
             {
                 return s.scanRune(bitSize);
             }
+
             s.SkipSpace();
             s.notEOF();
             var (base, digits) = s.getBase(verb);
@@ -800,6 +977,7 @@ namespace go
                 {
                     s.errorString("bad unicode format ");
                 }
+
             }
             else
             {
@@ -808,30 +986,38 @@ namespace go
                 {
                     base, digits, haveDigits = s.scanBasePrefix();
                 }
+
             }
+
             var tok = s.scanNumber(digits, haveDigits);
             var (i, err) = strconv.ParseInt(tok, base, 64L);
             if (err != null)
             {
                 s.error(err);
             }
+
             var n = uint(bitSize);
             var x = (i << (int)((64L - n))) >> (int)((64L - n));
             if (x != i)
             {
                 s.errorString("integer overflow on token " + tok);
             }
+
             return i;
+
         }
 
         // scanUint returns the value of the unsigned integer represented
         // by the next token, checking for overflow. Any error is stored in s.err.
-        private static ulong scanUint(this ref ss s, int verb, long bitSize)
+        private static ulong scanUint(this ptr<ss> _addr_s, int verb, long bitSize)
         {
+            ref ss s = ref _addr_s.val;
+
             if (verb == 'c')
             {
                 return uint64(s.scanRune(bitSize));
             }
+
             s.SkipSpace();
             s.notEOF();
             var (base, digits) = s.getBase(verb);
@@ -842,31 +1028,38 @@ namespace go
                 {
                     s.errorString("bad unicode format ");
                 }
+
             }
             else if (verb == 'v')
             {
                 base, digits, haveDigits = s.scanBasePrefix();
             }
+
             var tok = s.scanNumber(digits, haveDigits);
             var (i, err) = strconv.ParseUint(tok, base, 64L);
             if (err != null)
             {
                 s.error(err);
             }
+
             var n = uint(bitSize);
             var x = (i << (int)((64L - n))) >> (int)((64L - n));
             if (x != i)
             {
                 s.errorString("unsigned integer overflow on token " + tok);
             }
+
             return i;
+
         }
 
         // floatToken returns the floating-point number starting here, no longer than swid
         // if the width is specified. It's not rigorous about syntax because it doesn't check that
         // we have at least some digits, but Atof will do that.
-        private static @string floatToken(this ref ss s)
+        private static @string floatToken(this ptr<ss> _addr_s)
         {
+            ref ss s = ref _addr_s.val;
+
             s.buf = s.buf[..0L]; 
             // NaN?
             if (s.accept("nN") && s.accept("aA") && s.accept("nN"))
@@ -879,9 +1072,17 @@ namespace go
             if (s.accept("iI") && s.accept("nN") && s.accept("fF"))
             {
                 return string(s.buf);
+            }
+
+            var digits = decimalDigits + "_";
+            var exp = exponent;
+            if (s.accept("0") && s.accept("xX"))
+            {
+                digits = hexadecimalDigits + "_";
+                exp = "pP";
             } 
             // digits?
-            while (s.accept(decimalDigits))
+            while (s.accept(digits))
             {
             } 
             // decimal point?
@@ -890,30 +1091,38 @@ namespace go
             if (s.accept(period))
             { 
                 // fraction?
-                while (s.accept(decimalDigits))
+                while (s.accept(digits))
                 {
                 }
 
+
             } 
             // exponent?
-            if (s.accept(exponent))
+            if (s.accept(exp))
             { 
                 // leading sign?
                 s.accept(sign); 
                 // digits?
-                while (s.accept(decimalDigits))
+                while (s.accept(decimalDigits + "_"))
                 {
                 }
 
+
             }
+
             return string(s.buf);
+
         }
 
         // complexTokens returns the real and imaginary parts of the complex number starting here.
         // The number might be parenthesized and has the format (N+Ni) where N is a floating-point
         // number and there are no spaces within.
-        private static (@string, @string) complexTokens(this ref ss s)
-        { 
+        private static (@string, @string) complexTokens(this ptr<ss> _addr_s)
+        {
+            @string real = default;
+            @string imag = default;
+            ref ss s = ref _addr_s.val;
+ 
             // TODO: accept N and Ni independently?
             var parens = s.accept("(");
             real = s.floatToken();
@@ -930,20 +1139,43 @@ namespace go
             {
                 s.error(complexError);
             }
+
             if (parens && !s.accept(")"))
             {
                 s.error(complexError);
             }
+
             return (real, imagSign + imag);
+
+        }
+
+        private static bool hasX(@string s)
+        {
+            for (long i = 0L; i < len(s); i++)
+            {
+                if (s[i] == 'x' || s[i] == 'X')
+                {
+                    return true;
+                }
+
+            }
+
+            return false;
+
         }
 
         // convertFloat converts the string to a float64value.
-        private static double convertFloat(this ref ss s, @string str, long n)
+        private static double convertFloat(this ptr<ss> _addr_s, @string str, long n)
         {
+            ref ss s = ref _addr_s.val;
+ 
+            // strconv.ParseFloat will handle "+0x1.fp+2",
+            // but we have to implement our non-standard
+            // decimal+binary exponent mix (1.2p4) ourselves.
             {
                 var p = indexRune(str, 'p');
 
-                if (p >= 0L)
+                if (p >= 0L && !hasX(str))
                 { 
                     // Atof doesn't handle power-of-2 exponents,
                     // but they're easy to evaluate.
@@ -952,9 +1184,9 @@ namespace go
                     { 
                         // Put full string into error.
                         {
-                            ref strconv.NumError e__prev3 = e;
+                            ptr<strconv.NumError> e__prev3 = e;
 
-                            ref strconv.NumError (e, ok) = err._<ref strconv.NumError>();
+                            ptr<strconv.NumError> (e, ok) = err._<ptr<strconv.NumError>>();
 
                             if (ok)
                             {
@@ -964,16 +1196,19 @@ namespace go
                             e = e__prev3;
 
                         }
+
                         s.error(err);
+
                     }
+
                     var (m, err) = strconv.Atoi(str[p + 1L..]);
                     if (err != null)
                     { 
                         // Put full string into error.
                         {
-                            ref strconv.NumError e__prev3 = e;
+                            ptr<strconv.NumError> e__prev3 = e;
 
-                            (e, ok) = err._<ref strconv.NumError>();
+                            (e, ok) = err._<ptr<strconv.NumError>>();
 
                             if (ok)
                             {
@@ -983,46 +1218,61 @@ namespace go
                             e = e__prev3;
 
                         }
+
                         s.error(err);
+
                     }
+
                     return math.Ldexp(f, m);
+
                 }
 
             }
+
             (f, err) = strconv.ParseFloat(str, n);
             if (err != null)
             {
                 s.error(err);
             }
+
             return f;
+
         }
 
         // convertComplex converts the next token to a complex128 value.
         // The atof argument is a type-specific reader for the underlying type.
         // If we're reading complex64, atof will parse float32s and convert them
         // to float64's to avoid reproducing this code for each complex type.
-        private static System.Numerics.Complex128 scanComplex(this ref ss s, int verb, long n)
+        private static System.Numerics.Complex128 scanComplex(this ptr<ss> _addr_s, int verb, long n)
         {
+            ref ss s = ref _addr_s.val;
+
             if (!s.okVerb(verb, floatVerbs, "complex"))
             {
                 return 0L;
             }
+
             s.SkipSpace();
             s.notEOF();
             var (sreal, simag) = s.complexTokens();
             var real = s.convertFloat(sreal, n / 2L);
             var imag = s.convertFloat(simag, n / 2L);
             return complex(real, imag);
+
         }
 
         // convertString returns the string represented by the next input characters.
         // The format of the input is determined by the verb.
-        private static @string convertString(this ref ss s, int verb)
+        private static @string convertString(this ptr<ss> _addr_s, int verb)
         {
+            @string str = default;
+            ref ss s = ref _addr_s.val;
+
             if (!s.okVerb(verb, "svqxX", "string"))
             {
                 return "";
             }
+
             s.SkipSpace();
             s.notEOF();
             switch (verb)
@@ -1039,12 +1289,15 @@ namespace go
                     str = string(s.token(true, notSpace)); // %s and %v just return the next word
                     break;
             }
-            return;
+            return ;
+
         }
 
         // quotedString returns the double- or back-quoted string represented by the next input characters.
-        private static @string quotedString(this ref ss s)
+        private static @string quotedString(this ptr<ss> _addr_s)
         {
+            ref ss s = ref _addr_s.val;
+
             s.notEOF();
             var quote = s.getRune();
             switch (quote)
@@ -1058,29 +1311,33 @@ namespace go
                         {
                             break;
                         }
-                        s.buf.WriteRune(r);
+
+                        s.buf.writeRune(r);
+
                     }
 
                     return string(s.buf);
                     break;
                 case '"': 
                     // Double-quoted: Include the quotes and let strconv.Unquote do the backslash escapes.
-                    s.buf.WriteByte('"');
+                    s.buf.writeByte('"');
                     while (true)
                     {
                         r = s.mustReadRune();
-                        s.buf.WriteRune(r);
+                        s.buf.writeRune(r);
                         if (r == '\\')
                         { 
                             // In a legal backslash escape, no matter how long, only the character
                             // immediately after the escape can itself be a backslash or quote.
                             // Thus we only need to protect the first character after the backslash.
-                            s.buf.WriteRune(s.mustReadRune());
+                            s.buf.writeRune(s.mustReadRune());
+
                         }
                         else if (r == '"')
                         {
                             break;
                         }
+
                     }
 
                     var (result, err) = strconv.Unquote(string(s.buf));
@@ -1088,6 +1345,7 @@ namespace go
                     {
                         s.error(err);
                     }
+
                     return result;
                     break;
                 default: 
@@ -1095,11 +1353,15 @@ namespace go
                     break;
             }
             return "";
+
         }
 
         // hexDigit returns the value of the hexadecimal digit.
         private static (long, bool) hexDigit(int d)
         {
+            long _p0 = default;
+            bool _p0 = default;
+
             var digit = int(d);
             switch (digit)
             {
@@ -1152,36 +1414,47 @@ namespace go
                     break;
             }
             return (-1L, false);
+
         }
 
         // hexByte returns the next hex-encoded (two-character) byte from the input.
         // It returns ok==false if the next bytes in the input do not encode a hex byte.
         // If the first byte is hex and the second is not, processing stops.
-        private static (byte, bool) hexByte(this ref ss s)
+        private static (byte, bool) hexByte(this ptr<ss> _addr_s)
         {
+            byte b = default;
+            bool ok = default;
+            ref ss s = ref _addr_s.val;
+
             var rune1 = s.getRune();
             if (rune1 == eof)
             {
-                return;
+                return ;
             }
+
             var (value1, ok) = hexDigit(rune1);
             if (!ok)
             {
                 s.UnreadRune();
-                return;
+                return ;
             }
+
             var (value2, ok) = hexDigit(s.mustReadRune());
             if (!ok)
             {
                 s.errorString("illegal hex digit");
-                return;
+                return ;
             }
+
             return (byte(value1 << (int)(4L) | value2), true);
+
         }
 
         // hexString returns the space-delimited hexpair-encoded string.
-        private static @string hexString(this ref ss s)
+        private static @string hexString(this ptr<ss> _addr_s)
         {
+            ref ss s = ref _addr_s.val;
+
             s.notEOF();
             while (true)
             {
@@ -1190,7 +1463,9 @@ namespace go
                 {
                     break;
                 }
-                s.buf.WriteByte(b);
+
+                s.buf.writeByte(b);
+
             }
 
             if (len(s.buf) == 0L)
@@ -1198,112 +1473,138 @@ namespace go
                 s.errorString("no hex data for %x string");
                 return "";
             }
+
             return string(s.buf);
+
         }
 
-        private static readonly @string floatVerbs = "beEfFgGv";
+        private static readonly @string floatVerbs = (@string)"beEfFgGv";
 
-        private static readonly long hugeWid = 1L << (int)(30L);
+        private static readonly long hugeWid = (long)1L << (int)(30L);
 
-        private static readonly long intBits = 32L << (int)((~uint(0L) >> (int)(63L)));
-        private static readonly long uintptrBits = 32L << (int)((~uintptr(0L) >> (int)(63L)));
+        private static readonly long intBits = (long)32L << (int)((~uint(0L) >> (int)(63L)));
+        private static readonly long uintptrBits = (long)32L << (int)((~uintptr(0L) >> (int)(63L)));
+
+
+        // scanPercent scans a literal percent character.
+        private static void scanPercent(this ptr<ss> _addr_s)
+        {
+            ref ss s = ref _addr_s.val;
+
+            s.SkipSpace();
+            s.notEOF();
+            if (!s.accept("%"))
+            {
+                s.errorString("missing literal %");
+            }
+
+        }
 
         // scanOne scans a single value, deriving the scanner from the type of the argument.
-        private static void scanOne(this ref ss s, int verb, object arg)
+        private static void scanOne(this ptr<ss> _addr_s, int verb, object arg)
         {
+            ref ss s = ref _addr_s.val;
+
             s.buf = s.buf[..0L];
-            error err = default; 
+            error err = default!; 
             // If the parameter has its own Scan method, use that.
             {
                 Scanner v__prev1 = v;
 
-                Scanner (v, ok) = arg._<Scanner>();
+                Scanner (v, ok) = Scanner.As(arg._<Scanner>())!;
 
                 if (ok)
                 {
-                    err = error.As(v.Scan(s, verb));
+                    err = error.As(v.Scan(s, verb))!;
                     if (err != null)
                     {
                         if (err == io.EOF)
                         {
-                            err = error.As(io.ErrUnexpectedEOF);
+                            err = error.As(io.ErrUnexpectedEOF)!;
                         }
+
                         s.error(err);
+
                     }
-                    return;
+
+                    return ;
+
                 }
 
                 v = v__prev1;
 
             }
 
+
             switch (arg.type())
             {
-                case ref bool v:
-                    v.Value = s.scanBool(verb);
+                case ptr<bool> v:
+                    v.val = s.scanBool(verb);
                     break;
-                case ref complex64 v:
-                    v.Value = complex64(s.scanComplex(verb, 64L));
+                case ptr<complex64> v:
+                    v.val = complex64(s.scanComplex(verb, 64L));
                     break;
-                case ref System.Numerics.Complex128 v:
-                    v.Value = s.scanComplex(verb, 128L);
+                case ptr<System.Numerics.Complex128> v:
+                    v.val = s.scanComplex(verb, 128L);
                     break;
-                case ref long v:
-                    v.Value = int(s.scanInt(verb, intBits));
+                case ptr<long> v:
+                    v.val = int(s.scanInt(verb, intBits));
                     break;
-                case ref sbyte v:
-                    v.Value = int8(s.scanInt(verb, 8L));
+                case ptr<sbyte> v:
+                    v.val = int8(s.scanInt(verb, 8L));
                     break;
-                case ref short v:
-                    v.Value = int16(s.scanInt(verb, 16L));
+                case ptr<short> v:
+                    v.val = int16(s.scanInt(verb, 16L));
                     break;
-                case ref int v:
-                    v.Value = int32(s.scanInt(verb, 32L));
+                case ptr<int> v:
+                    v.val = int32(s.scanInt(verb, 32L));
                     break;
-                case ref long v:
-                    v.Value = s.scanInt(verb, 64L);
+                case ptr<long> v:
+                    v.val = s.scanInt(verb, 64L);
                     break;
-                case ref ulong v:
-                    v.Value = uint(s.scanUint(verb, intBits));
+                case ptr<ulong> v:
+                    v.val = uint(s.scanUint(verb, intBits));
                     break;
-                case ref byte v:
-                    v.Value = uint8(s.scanUint(verb, 8L));
+                case ptr<byte> v:
+                    v.val = uint8(s.scanUint(verb, 8L));
                     break;
-                case ref ushort v:
-                    v.Value = uint16(s.scanUint(verb, 16L));
+                case ptr<ushort> v:
+                    v.val = uint16(s.scanUint(verb, 16L));
                     break;
-                case ref uint v:
-                    v.Value = uint32(s.scanUint(verb, 32L));
+                case ptr<uint> v:
+                    v.val = uint32(s.scanUint(verb, 32L));
                     break;
-                case ref ulong v:
-                    v.Value = s.scanUint(verb, 64L);
+                case ptr<ulong> v:
+                    v.val = s.scanUint(verb, 64L);
                     break;
-                case ref System.UIntPtr v:
-                    v.Value = uintptr(s.scanUint(verb, uintptrBits)); 
+                case ptr<System.UIntPtr> v:
+                    v.val = uintptr(s.scanUint(verb, uintptrBits)); 
                     // Floats are tricky because you want to scan in the precision of the result, not
                     // scan in high precision and convert, in order to preserve the correct error condition.
                     break;
-                case ref float v:
+                case ptr<float> v:
                     if (s.okVerb(verb, floatVerbs, "float32"))
                     {
                         s.SkipSpace();
                         s.notEOF();
-                        v.Value = float32(s.convertFloat(s.floatToken(), 32L));
+                        v.val = float32(s.convertFloat(s.floatToken(), 32L));
                     }
+
                     break;
-                case ref double v:
+                case ptr<double> v:
                     if (s.okVerb(verb, floatVerbs, "float64"))
                     {
                         s.SkipSpace();
                         s.notEOF();
-                        v.Value = s.convertFloat(s.floatToken(), 64L);
+                        v.val = s.convertFloat(s.floatToken(), 64L);
                     }
+
                     break;
-                case ref @string v:
-                    v.Value = s.convertString(verb);
+                case ptr<@string> v:
+                    v.val = s.convertString(verb);
                     break;
-                case ref slice<byte> v:
-                    v.Value = (slice<byte>)s.convertString(verb);
+                case ptr<slice<byte>> v:
+                    v.val = (slice<byte>)s.convertString(verb);
                     break;
                 default:
                 {
@@ -1313,8 +1614,9 @@ namespace go
                     if (ptr.Kind() != reflect.Ptr)
                     {
                         s.errorString("type not a pointer: " + val.Type().String());
-                        return;
+                        return ;
                     }
+
                     {
                         Scanner v__prev1 = v;
 
@@ -1336,6 +1638,7 @@ namespace go
                             {
                                 s.errorString("can't scan type: " + val.Type().String());
                             }
+
                             var str = s.convertString(verb);
                             v.Set(reflect.MakeSlice(typ, len(str), len(str)));
                             for (long i = 0L; i < len(str); i++)
@@ -1357,11 +1660,14 @@ namespace go
                     break;
                 }
             }
+
         }
 
         // errorHandler turns local panics into error returns.
-        private static void errorHandler(ref error _errp) => func(_errp, (ref error errp, Defer _, Panic panic, Recover __) =>
+        private static void errorHandler(ptr<error> _addr_errp) => func((_, panic, __) =>
         {
+            ref error errp = ref _addr_errp.val;
+
             {
                 var e = recover();
 
@@ -1372,14 +1678,16 @@ namespace go
 
                         if (ok)
                         { // catch local error
-                            errp.Value = se.err;
+                            errp = error.As(se.err)!;
+
                         }                        {
-                            error (eof, ok) = e._<error>();
+                            error (eof, ok) = error.As(e._<error>())!;
 
 
                             else if (ok && eof == io.EOF)
                             { // out of input
-                                errp.Value = eof;
+                                errp = error.As(eof)!;
+
                             }
                             else
                             {
@@ -1388,16 +1696,23 @@ namespace go
 
                         }
 
+
                     }
+
                 }
 
             }
+
         });
 
         // doScan does the real work for scanning without a format string.
-        private static (long, error) doScan(this ref ss _s, slice<object> a) => func(_s, (ref ss s, Defer defer, Panic _, Recover __) =>
+        private static (long, error) doScan(this ptr<ss> _addr_s, slice<object> a) => func((defer, _, __) =>
         {
-            defer(errorHandler(ref err));
+            long numProcessed = default;
+            error err = default!;
+            ref ss s = ref _addr_s.val;
+
+            defer(errorHandler(_addr_err));
             foreach (var (_, arg) in a)
             {
                 s.scanOne('v', arg);
@@ -1413,15 +1728,20 @@ namespace go
                     {
                         break;
                     }
+
                     if (!isSpace(r))
                     {
                         s.errorString("expected newline");
                         break;
                     }
+
                 }
 
+
             }
-            return;
+
+            return ;
+
         });
 
         // advance determines whether the next characters in the input match
@@ -1432,8 +1752,11 @@ namespace go
         // This routine also handles the %% case. If the return value is zero,
         // either format starts with a % (with no following %) or the input
         // is empty. If it is negative, the input did not match the string.
-        private static long advance(this ref ss s, @string format)
+        private static long advance(this ptr<ss> _addr_s, @string format)
         {
+            long i = default;
+            ref ss s = ref _addr_s.val;
+
             while (i < len(format))
             {
                 var (fmtc, w) = utf8.DecodeRuneInString(format[i..]); 
@@ -1459,8 +1782,10 @@ namespace go
                         {
                             trailingSpace = true;
                         }
+
                         i += w;
                         fmtc, w = utf8.DecodeRuneInString(format[i..]);
+
                     }
 
                     for (long j = 0L; j < newlines; j++)
@@ -1475,6 +1800,7 @@ namespace go
                         {
                             s.errorString("newline in format does not match input");
                         }
+
                     }
 
                     if (trailingSpace)
@@ -1488,11 +1814,14 @@ namespace go
                             {
                                 s.errorString("expected space in input to match format");
                             }
+
                             if (inputc == '\n')
                             {
                                 s.errorString("newline in input does not match format");
                             }
+
                         }
+
                         while (isSpace(inputc) && inputc != '\n')
                         {
                             inputc = s.getRune();
@@ -1502,8 +1831,11 @@ namespace go
                         {
                             s.UnreadRune();
                         }
+
                     }
+
                     continue;
+
                 } 
 
                 // Verbs.
@@ -1518,8 +1850,9 @@ namespace go
                     var (nextc, _) = utf8.DecodeRuneInString(format[i + w..]); // will not match % if string is empty
                     if (nextc != '%')
                     {
-                        return;
+                        return ;
                     }
+
                     i += w; // skip the first %
                 } 
 
@@ -1530,17 +1863,24 @@ namespace go
                     s.UnreadRune();
                     return -1L;
                 }
+
                 i += w;
+
             }
 
-            return;
+            return ;
+
         }
 
         // doScanf does the real work when scanning with a format string.
         // At the moment, it handles only pointers to basic types.
-        private static (long, error) doScanf(this ref ss _s, @string format, slice<object> a) => func(_s, (ref ss s, Defer defer, Panic _, Recover __) =>
+        private static (long, error) doScanf(this ptr<ss> _addr_s, @string format, slice<object> a) => func((defer, _, __) =>
         {
-            defer(errorHandler(ref err));
+            long numProcessed = default;
+            error err = default!;
+            ref ss s = ref _addr_s.val;
+
+            defer(errorHandler(_addr_err));
             var end = len(format) - 1L; 
             // We process one item per non-trivial format
             {
@@ -1564,7 +1904,9 @@ namespace go
                         } 
                         // Otherwise at EOF; "too many operands" error handled below
                         break;
+
                     }
+
                     i++; // % is one byte
 
                     // do we have 20 (width)?
@@ -1574,6 +1916,7 @@ namespace go
                     {
                         s.maxWid = hugeWid;
                     }
+
                     var (c, w) = utf8.DecodeRuneInString(format[i..]);
                     i += w;
 
@@ -1581,6 +1924,13 @@ namespace go
                     {
                         s.SkipSpace();
                     }
+
+                    if (c == '%')
+                    {
+                        s.scanPercent();
+                        continue; // Do not consume an argument.
+                    }
+
                     s.argLimit = s.limit;
                     {
                         var f = s.count + s.maxWid;
@@ -1592,16 +1942,20 @@ namespace go
 
                     }
 
+
                     if (numProcessed >= len(a))
                     { // out of operands
                         s.errorString("too few operands for format '%" + format[i - w..] + "'");
                         break;
+
                     }
+
                     var arg = a[numProcessed];
 
                     s.scanOne(c, arg);
                     numProcessed++;
                     s.argLimit = s.limit;
+
                 }
 
             }
@@ -1609,7 +1963,9 @@ namespace go
             {
                 s.errorString("too many operands");
             }
-            return;
+
+            return ;
+
         });
     }
 }

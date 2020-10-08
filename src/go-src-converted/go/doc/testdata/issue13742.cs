@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue13742 -- go2cs converted at 2020 August 29 08:47:13 UTC
+// package issue13742 -- go2cs converted at 2020 October 08 04:02:54 UTC
 // import "go/doc.issue13742" ==> using issue13742 = go.go.doc.issue13742_package
 // Original source: C:\Go\src\go\doc\testdata\issue13742.go
 using ast = go.go.ast_package;

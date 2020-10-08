@@ -2,19 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2020 August 29 10:05:50 UTC
+// package testing -- go2cs converted at 2020 October 08 04:36:29 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Go\src\testing\example.go
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
-using io = go.io_package;
 using os = go.os_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using time = go.time_package;
 using static go.builtin;
 using System;
-using System.Threading;
 
 namespace go
 {
@@ -28,16 +25,21 @@ namespace go
             public bool Unordered;
         }
 
-        // An internal function but exported because it is cross-package; part of the implementation
-        // of the "go test" command.
+        // RunExamples is an internal function but exported because it is cross-package;
+        // it is part of the implementation of the "go test" command.
         public static bool RunExamples(Func<@string, @string, (bool, error)> matchString, slice<InternalExample> examples)
         {
+            bool ok = default;
+
             _, ok = runExamples(matchString, examples);
             return ok;
         }
 
         private static (bool, bool) runExamples(Func<@string, @string, (bool, error)> matchString, slice<InternalExample> examples)
         {
+            bool ran = default;
+            bool ok = default;
+
             ok = true;
 
             InternalExample eg = default;
@@ -45,24 +47,28 @@ namespace go
             foreach (var (_, __eg) in examples)
             {
                 eg = __eg;
-                var (matched, err) = matchString(match.Value, eg.Name);
+                var (matched, err) = matchString(match.val, eg.Name);
                 if (err != null)
                 {
                     fmt.Fprintf(os.Stderr, "testing: invalid regexp for -test.run: %s\n", err);
                     os.Exit(1L);
                 }
+
                 if (!matched)
                 {
                     continue;
                 }
+
                 ran = true;
                 if (!runExample(eg))
                 {
                     ok = false;
                 }
+
             }
 
             return (ran, ok);
+
         }
 
         private static @string sortLines(@string output)
@@ -72,85 +78,60 @@ namespace go
             return strings.Join(lines, "\n");
         }
 
-        private static bool runExample(InternalExample eg) => func((defer, panic, _) =>
+        // processRunResult computes a summary and status of the result of running an example test.
+        // stdout is the captured output from stdout of the test.
+        // recovered is the result of invoking recover after running the test, in case it panicked.
+        //
+        // If stdout doesn't match the expected output or if recovered is non-nil, it'll print the cause of failure to stdout.
+        // If the test is chatty/verbose, it'll print a success message to stdout.
+        // If recovered is non-nil, it'll panic with that value.
+        private static bool processRunResult(this ptr<InternalExample> _addr_eg, @string stdout, time.Duration timeSpent, object recovered) => func((_, panic, __) =>
         {
-            if (chatty.Value)
-            {
-                fmt.Printf("=== RUN   %s\n", eg.Name);
-            } 
+            bool passed = default;
+            ref InternalExample eg = ref _addr_eg.val;
 
-            // Capture stdout.
-            var stdout = os.Stdout;
-            var (r, w, err) = os.Pipe();
-            if (err != null)
+            passed = true;
+
+            var dstr = fmtDuration(timeSpent);
+            @string fail = default;
+            var got = strings.TrimSpace(stdout);
+            var want = strings.TrimSpace(eg.Output);
+            if (eg.Unordered)
             {
-                fmt.Fprintln(os.Stderr, err);
-                os.Exit(1L);
+                if (sortLines(got) != sortLines(want) && recovered == null)
+                {
+                    fail = fmt.Sprintf("got:\n%s\nwant (unordered):\n%s\n", stdout, eg.Output);
+                }
+
             }
-            os.Stdout = w;
-            var outC = make_channel<@string>();
-            go_(() => () =>
+            else
             {
-                bytes.Buffer buf = default;
-                var (_, err) = io.Copy(ref buf, r);
-                r.Close();
-                if (err != null)
+                if (got != want && recovered == null)
                 {
-                    fmt.Fprintf(os.Stderr, "testing: copying pipe: %v\n", err);
-                    os.Exit(1L);
+                    fail = fmt.Sprintf("got:\n%s\nwant:\n%s\n", got, want);
                 }
-                outC.Send(buf.String());
-            }());
 
-            var start = time.Now();
-            ok = true; 
+            }
 
-            // Clean up in a deferred call so we can recover if the example panics.
-            defer(() =>
+            if (fail != "" || recovered != null)
             {
-                var dstr = fmtDuration(time.Since(start)); 
+                fmt.Printf("--- FAIL: %s (%s)\n%s", eg.Name, dstr, fail);
+                passed = false;
+            }
+            else if (chatty.val)
+            {
+                fmt.Printf("--- PASS: %s (%s)\n", eg.Name, dstr);
+            }
 
-                // Close pipe, restore stdout, get output.
-                w.Close();
-                os.Stdout = stdout;
-                var @out = outC.Receive();
+            if (recovered != null)
+            { 
+                // Propagate the previously recovered result, by panicking.
+                panic(recovered);
 
-                @string fail = default;
-                var err = recover();
-                var got = strings.TrimSpace(out);
-                var want = strings.TrimSpace(eg.Output);
-                if (eg.Unordered)
-                {
-                    if (sortLines(got) != sortLines(want) && err == null)
-                    {
-                        fail = fmt.Sprintf("got:\n%s\nwant (unordered):\n%s\n", out, eg.Output);
-                    }
-                }
-                else
-                {
-                    if (got != want && err == null)
-                    {
-                        fail = fmt.Sprintf("got:\n%s\nwant:\n%s\n", got, want);
-                    }
-                }
-                if (fail != "" || err != null)
-                {
-                    fmt.Printf("--- FAIL: %s (%s)\n%s", eg.Name, dstr, fail);
-                    ok = false;
-                }
-                else if (chatty.Value)
-                {
-                    fmt.Printf("--- PASS: %s (%s)\n", eg.Name, dstr);
-                }
-                if (err != null)
-                {
-                    panic(err);
-                }
-            }()); 
+            }
 
-            // Run example.
-            eg.F();
-            return;
+            return ;
+
         });
     }
 }

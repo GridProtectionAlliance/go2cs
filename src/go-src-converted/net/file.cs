@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:26:14 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:01 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\file.go
 using os = go.os_package;
@@ -12,7 +12,7 @@ namespace go
 {
     public static partial class net_package
     {
-        // BUG(mikio): On NaCl and Windows, the FileConn, FileListener and
+        // BUG(mikio): On JS and Windows, the FileConn, FileListener and
         // FilePacketConn functions are not implemented.
         private partial struct fileAddr // : @string
         {
@@ -31,42 +31,60 @@ namespace go
         // the open file f.
         // It is the caller's responsibility to close f when finished.
         // Closing c does not affect f, and closing f does not affect c.
-        public static (Conn, error) FileConn(ref os.File f)
+        public static (Conn, error) FileConn(ptr<os.File> _addr_f)
         {
+            Conn c = default;
+            error err = default!;
+            ref os.File f = ref _addr_f.val;
+
             c, err = fileConn(f);
             if (err != null)
             {
-                err = ref new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err);
+                err = addr(new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err));
             }
-            return;
+
+            return ;
+
         }
 
         // FileListener returns a copy of the network listener corresponding
         // to the open file f.
         // It is the caller's responsibility to close ln when finished.
         // Closing ln does not affect f, and closing f does not affect ln.
-        public static (Listener, error) FileListener(ref os.File f)
+        public static (Listener, error) FileListener(ptr<os.File> _addr_f)
         {
+            Listener ln = default;
+            error err = default!;
+            ref os.File f = ref _addr_f.val;
+
             ln, err = fileListener(f);
             if (err != null)
             {
-                err = ref new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err);
+                err = addr(new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err));
             }
-            return;
+
+            return ;
+
         }
 
         // FilePacketConn returns a copy of the packet network connection
         // corresponding to the open file f.
         // It is the caller's responsibility to close f when finished.
         // Closing c does not affect f, and closing f does not affect c.
-        public static (PacketConn, error) FilePacketConn(ref os.File f)
+        public static (PacketConn, error) FilePacketConn(ptr<os.File> _addr_f)
         {
+            PacketConn c = default;
+            error err = default!;
+            ref os.File f = ref _addr_f.val;
+
             c, err = filePacketConn(f);
             if (err != null)
             {
-                err = ref new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err);
+                err = addr(new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err));
             }
-            return;
+
+            return ;
+
         }
     }
 }

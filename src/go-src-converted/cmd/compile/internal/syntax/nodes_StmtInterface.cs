@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:03 UTC
+//     Generated on 2020 October 08 04:28:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using src = go.cmd.@internal.src_package;
+
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -52,7 +51,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -66,10 +65,10 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate void aStmtByRef(ref T value);
+            private delegate void aStmtByPtr(ptr<T> value);
             private delegate void aStmtByVal(T value);
 
-            private static readonly aStmtByRef s_aStmtByRef;
+            private static readonly aStmtByPtr s_aStmtByPtr;
             private static readonly aStmtByVal s_aStmtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,54 +77,57 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_aStmtByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_aStmtByPtr is null || !m_target_is_ptr)
                 {
                     s_aStmtByVal!(target);
                     return;
                 }
 
-                s_aStmtByRef(ref target);
+                s_aStmtByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate src.Pos PosByRef(ref T value);
-            private delegate src.Pos PosByVal(T value);
+            private delegate Pos PosByPtr(ptr<T> value);
+            private delegate Pos PosByVal(T value);
 
-            private static readonly PosByRef s_PosByRef;
+            private static readonly PosByPtr s_PosByPtr;
             private static readonly PosByVal s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public src.Pos Pos()
+            public Pos Pos()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PosByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PosByPtr is null || !m_target_is_ptr)
                     return s_PosByVal!(target);
 
-                return s_PosByRef(ref target);
+                return s_PosByPtr(m_target_ptr);
             }
 
-            private delegate src.Pos aNodeByRef(ref T value);
-            private delegate src.Pos aNodeByVal(T value);
+            private delegate Pos aNodeByPtr(ptr<T> value);
+            private delegate Pos aNodeByVal(T value);
 
-            private static readonly aNodeByRef s_aNodeByRef;
+            private static readonly aNodeByPtr s_aNodeByPtr;
             private static readonly aNodeByVal s_aNodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public src.Pos aNode()
+            public Pos aNode()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_aNodeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_aNodeByPtr is null || !m_target_is_ptr)
                     return s_aNodeByVal!(target);
 
-                return s_aNodeByRef(ref target);
+                return s_aNodeByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -134,55 +136,46 @@ namespace @internal
             static Stmt()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("aStmt");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("aStmt");
 
                 if (!(extensionMethod is null))
-                    s_aStmtByRef = extensionMethod.CreateStaticDelegate(typeof(aStmtByRef)) as aStmtByRef;
+                    s_aStmtByPtr = extensionMethod.CreateStaticDelegate(typeof(aStmtByPtr)) as aStmtByPtr;
 
-                if (s_aStmtByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("aStmt");
+                extensionMethod = targetType.GetExtensionMethod("aStmt");
 
-                    if (!(extensionMethod is null))
-                        s_aStmtByVal = extensionMethod.CreateStaticDelegate(typeof(aStmtByVal)) as aStmtByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_aStmtByVal = extensionMethod.CreateStaticDelegate(typeof(aStmtByVal)) as aStmtByVal;
 
-                if (s_aStmtByRef is null && s_aStmtByVal is null)
+                if (s_aStmtByPtr is null && s_aStmtByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stmt.aStmt method", new Exception("aStmt"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Pos");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Pos");
 
                 if (!(extensionMethod is null))
-                    s_PosByRef = extensionMethod.CreateStaticDelegate(typeof(PosByRef)) as PosByRef;
+                    s_PosByPtr = extensionMethod.CreateStaticDelegate(typeof(PosByPtr)) as PosByPtr;
 
-                if (s_PosByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Pos");
+                extensionMethod = targetType.GetExtensionMethod("Pos");
 
-                    if (!(extensionMethod is null))
-                        s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
 
-                if (s_PosByRef is null && s_PosByVal is null)
+                if (s_PosByPtr is null && s_PosByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stmt.Pos method", new Exception("Pos"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("aNode");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("aNode");
 
                 if (!(extensionMethod is null))
-                    s_aNodeByRef = extensionMethod.CreateStaticDelegate(typeof(aNodeByRef)) as aNodeByRef;
+                    s_aNodeByPtr = extensionMethod.CreateStaticDelegate(typeof(aNodeByPtr)) as aNodeByPtr;
 
-                if (s_aNodeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("aNode");
+                extensionMethod = targetType.GetExtensionMethod("aNode");
 
-                    if (!(extensionMethod is null))
-                        s_aNodeByVal = extensionMethod.CreateStaticDelegate(typeof(aNodeByVal)) as aNodeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_aNodeByVal = extensionMethod.CreateStaticDelegate(typeof(aNodeByVal)) as aNodeByVal;
 
-                if (s_aNodeByRef is null && s_aNodeByVal is null)
+                if (s_aNodeByPtr is null && s_aNodeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Stmt.aNode method", new Exception("aNode"));
             }
 

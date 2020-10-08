@@ -14,7 +14,7 @@
 
 // Implements methods to remove frames from profiles.
 
-// package profile -- go2cs converted at 2020 August 29 10:06:35 UTC
+// package profile -- go2cs converted at 2020 October 08 04:43:41 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\prune.go
 using fmt = go.fmt_package;
@@ -32,13 +32,14 @@ namespace pprof
 {
     public static partial class profile_package
     {
-        private static @string reservedNames = new slice<@string>(new @string[] { "(anonymous namespace)", "operator()" });        private static Func<ref regexp.Regexp> bracketRx = () =>
+        private static @string reservedNames = new slice<@string>(new @string[] { "(anonymous namespace)", "operator()" });        private static Func<ptr<regexp.Regexp>> bracketRx = () =>
         {
             private static slice<@string> quotedNames = default;
             foreach (var (_, name) in append(reservedNames, "("))
             {
                 quotedNames = append(quotedNames, regexp.QuoteMeta(name));
             }            return regexp.MustCompile(strings.Join(quotedNames, "|"));
+
         }();
 
         // simplifyFunc does some primitive simplification of function names.
@@ -58,21 +59,28 @@ namespace pprof
                         foundReserved = true;
                         break;
                     }
+
                 }
                 if (!foundReserved)
                 {
                     funcName = funcName[..ind[0L]];
                     break;
                 }
+
             }
             return funcName;
+
         }
 
         // Prune removes all nodes beneath a node matching dropRx, and not
         // matching keepRx. If the root node of a Sample matches, the sample
         // will have an empty stack.
-        private static void Prune(this ref Profile p, ref regexp.Regexp dropRx, ref regexp.Regexp keepRx)
+        private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dropRx, ptr<regexp.Regexp> _addr_keepRx)
         {
+            ref Profile p = ref _addr_p.val;
+            ref regexp.Regexp dropRx = ref _addr_dropRx.val;
+            ref regexp.Regexp keepRx = ref _addr_keepRx.val;
+
             var prune = make_map<ulong, bool>();
             var pruneBeneath = make_map<ulong, bool>();
 
@@ -93,10 +101,13 @@ namespace pprof
                                 {
                                     break;
                                 }
+
                             }
+
                         }
 
                     }
+
                 }
 
 
@@ -110,12 +121,15 @@ namespace pprof
                     { 
                         // Matched the top entry: prune the whole location.
                         prune[loc.ID] = true;
+
                     }
                     else
                     {
                         loc.Line = loc.Line[i + 1L..];
                     }
+
                 }
+
             } 
 
             // Prune locs from each Sample
@@ -136,35 +150,43 @@ namespace pprof
                             foundUser = true;
                             continue;
                         }
+
                         if (!foundUser)
                         {
                             continue;
                         }
+
                         if (prune[id])
                         {
                             sample.Location = sample.Location[i + 1L..];
                             break;
                         }
+
                         if (pruneBeneath[id])
                         {
                             sample.Location = sample.Location[i..];
                             break;
                         }
+
                     }
 
 
                     i = i__prev2;
                 }
+
             }
+
         }
 
         // RemoveUninteresting prunes and elides profiles using built-in
         // tables of uninteresting function names.
-        private static error RemoveUninteresting(this ref Profile p)
+        private static error RemoveUninteresting(this ptr<Profile> _addr_p)
         {
-            ref regexp.Regexp keep = default;            ref regexp.Regexp drop = default;
+            ref Profile p = ref _addr_p.val;
 
-            error err = default;
+            ptr<regexp.Regexp> keep;            ptr<regexp.Regexp> drop;
+
+            error err = default!;
 
             if (p.DropFrames != "")
             {
@@ -172,20 +194,26 @@ namespace pprof
 
                 if (err != null)
                 {
-                    return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.DropFrames, err));
+                    return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.DropFrames, err))!;
                 }
+
                 if (p.KeepFrames != "")
                 {
                     keep, err = regexp.Compile("^(" + p.KeepFrames + ")$");
 
                     if (err != null)
                     {
-                        return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.KeepFrames, err));
+                        return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.KeepFrames, err))!;
                     }
+
                 }
+
                 p.Prune(drop, keep);
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // PruneFrom removes all nodes beneath the lowest node matching dropRx, not including itself.
@@ -200,8 +228,11 @@ namespace pprof
         //
         // PruneFrom(B) returns [B,C,B,D] by removing all nodes beneath the first B when scanning from the bottom.
         // Prune(B, nil) returns [D] because a matching node is found by scanning from the root.
-        private static void PruneFrom(this ref Profile p, ref regexp.Regexp dropRx)
+        private static void PruneFrom(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dropRx)
         {
+            ref Profile p = ref _addr_p.val;
+            ref regexp.Regexp dropRx = ref _addr_dropRx.val;
+
             var pruneBeneath = make_map<ulong, bool>();
 
             {
@@ -227,15 +258,19 @@ namespace pprof
                                         pruneBeneath[loc.ID] = true;
                                         loc.Line = loc.Line[i..];
                                         break;
+
                                     }
+
                                 }
 
                             }
+
                         }
 
 
                         i = i__prev2;
                     }
+
                 } 
 
                 // Prune locs from each Sample
@@ -259,13 +294,14 @@ namespace pprof
                             sample.Location = sample.Location[i..];
                             break;
                         }
+
                     }
 
                     i = i__prev2;
                     loc = loc__prev2;
                 }
-
             }
+
         }
     }
 }}}}}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:58 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:22 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\sqrt.go
 
@@ -125,14 +125,18 @@ namespace go
                 }
 
                 exp++;
+
             }
+
             exp -= bias; // unbias exponent
             ix &= mask << (int)(shift);
             ix |= 1L << (int)(shift);
             if (exp & 1L == 1L)
             { // odd exp, double x to make it even
                 ix <<= 1L;
+
             }
+
             exp >>= 1L; // exp = exp/2, exponent of square root
             // generate sqrt(x) bit by bit
             ix <<= 1L;
@@ -148,8 +152,10 @@ namespace go
                     ix -= t;
                     q += r;
                 }
+
                 ix <<= 1L;
                 r >>= 1L;
+
             } 
             // final rounding
  
@@ -158,8 +164,10 @@ namespace go
             { // remainder, result not exact
                 q += q & 1L; // round according to extra bit
             }
+
             ix = q >> (int)(1L) + uint64(exp - 1L + bias) << (int)(shift); // significand + biased exponent
             return Float64frombits(ix);
+
         }
     }
 }

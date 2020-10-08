@@ -5,7 +5,7 @@
 // Annotate Ref in Prog with C types by parsing gcc debug output.
 // Conversion of debug output to Go types.
 
-// package main -- go2cs converted at 2020 August 29 08:52:13 UTC
+// package main -- go2cs converted at 2020 October 08 04:08:43 UTC
 // Original source: C:\Go\src\cmd\cgo\gcc.go
 using bytes = go.bytes_package;
 using dwarf = go.debug.dwarf_package;
@@ -19,6 +19,7 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
+using xcoff = go.@internal.xcoff_package;
 using math = go.math_package;
 using os = go.os_package;
 using strconv = go.strconv_package;
@@ -53,30 +54,38 @@ namespace go
 
             }
 
+
             if (strings.HasPrefix(s, "struct_"))
             {
                 return "struct " + s[len("struct_")..];
             }
+
             if (strings.HasPrefix(s, "union_"))
             {
                 return "union " + s[len("union_")..];
             }
+
             if (strings.HasPrefix(s, "enum_"))
             {
                 return "enum " + s[len("enum_")..];
             }
+
             if (strings.HasPrefix(s, "sizeof_"))
             {
                 return "sizeof(" + cname(s[len("sizeof_")..]) + ")";
             }
+
             return s;
+
         }
 
         // DiscardCgoDirectives processes the import C preamble, and discards
         // all #cgo CFLAGS and LDFLAGS directives, so they don't make their
         // way into _cgo_export.h.
-        private static void DiscardCgoDirectives(this ref File f)
+        private static void DiscardCgoDirectives(this ptr<File> _addr_f)
         {
+            ref File f = ref _addr_f.val;
+
             var linesIn = strings.Split(f.Preamble, "\n");
             var linesOut = make_slice<@string>(0L, len(linesIn));
             foreach (var (_, line) in linesIn)
@@ -90,20 +99,35 @@ namespace go
                 {
                     linesOut = append(linesOut, "");
                 }
+
             }
             f.Preamble = strings.Join(linesOut, "\n");
+
         }
 
         // addToFlag appends args to flag. All flags are later written out onto the
         // _cgo_flags file for the build system to use.
-        private static void addToFlag(this ref Package p, @string flag, slice<@string> args)
+        private static void addToFlag(this ptr<Package> _addr_p, @string flag, slice<@string> args)
         {
+            ref Package p = ref _addr_p.val;
+
             p.CgoFlags[flag] = append(p.CgoFlags[flag], args);
             if (flag == "CFLAGS")
             { 
                 // We'll also need these when preprocessing for dwarf information.
-                p.GccOptions = append(p.GccOptions, args);
+                // However, discard any -g options: we need to be able
+                // to parse the debug info, so stick to what we expect.
+                foreach (var (_, arg) in args)
+                {
+                    if (!strings.HasPrefix(arg, "-g"))
+                    {
+                        p.GccOptions = append(p.GccOptions, arg);
+                    }
+
+                }
+
             }
+
         }
 
         // splitQuoted splits the string s around each instance of one or more consecutive
@@ -124,6 +148,9 @@ namespace go
         //
         private static (slice<@string>, error) splitQuoted(@string s)
         {
+            slice<@string> r = default;
+            error err = default!;
+
             slice<@string> args = default;
             var arg = make_slice<int>(len(s));
             var escaped = false;
@@ -144,6 +171,7 @@ namespace go
                         quote = 0L;
                         continue;
                     }
+
                 else if (r == '"' || r == '\'') 
                     quoted = true;
                     quote = r;
@@ -155,14 +183,17 @@ namespace go
                         args = append(args, string(arg[..i]));
                         i = 0L;
                     }
+
                     continue;
                                 arg[i] = r;
                 i++;
+
             }
             if (quoted || i > 0L)
             {
                 args = append(args, string(arg[..i]));
             }
+
             if (quote != 0L)
             {
                 err = errors.New("unclosed quote");
@@ -171,37 +202,83 @@ namespace go
             {
                 err = errors.New("unfinished escaping");
             }
-            return (args, err);
+
+            return (args, error.As(err)!);
+
         }
 
         // Translate rewrites f.AST, the original Go input, to remove
         // references to the imported package C, replacing them with
         // references to the equivalent Go types, functions, and variables.
-        private static void Translate(this ref Package p, ref File f)
+        private static void Translate(this ptr<Package> _addr_p, ptr<File> _addr_f)
         {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+
             foreach (var (_, cref) in f.Ref)
             { 
                 // Convert C.ulong to C.unsigned long, etc.
                 cref.Name.C = cname(cref.Name.Go);
+
             }
+            ref typeConv conv = ref heap(out ptr<typeConv> _addr_conv);
+            conv.Init(p.PtrSize, p.IntSize);
+
             p.loadDefines(f);
-            var needType = p.guessKinds(f);
-            if (len(needType) > 0L)
+            p.typedefs = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{};
+            p.typedefList = null;
+            long numTypedefs = -1L;
+            while (len(p.typedefs) > numTypedefs)
             {
-                p.loadDWARF(f, needType);
+                numTypedefs = len(p.typedefs); 
+                // Also ask about any typedefs we've seen so far.
+                foreach (var (_, info) in p.typedefList)
+                {
+                    if (f.Name[info.typedef] != null)
+                    {
+                        continue;
+                    }
+
+                    ptr<Name> n = addr(new Name(Go:info.typedef,C:info.typedef,));
+                    f.Name[info.typedef] = n;
+                    f.NamePos[n] = info.pos;
+
+                }
+                var needType = p.guessKinds(f);
+                if (len(needType) > 0L)
+                {
+                    p.loadDWARF(f, _addr_conv, needType);
+                } 
+
+                // In godefs mode we're OK with the typedefs, which
+                // will presumably also be defined in the file, we
+                // don't want to resolve them to their base types.
+                if (godefs.val)
+                {
+                    break;
+                }
+
             }
+
+            p.prepareNames(f);
             if (p.rewriteCalls(f))
             { 
                 // Add `import _cgo_unsafe "unsafe"` after the package statement.
                 f.Edit.Insert(f.offset(f.AST.Name.End()), "; import _cgo_unsafe \"unsafe\"");
+
             }
+
             p.rewriteRef(f);
+
         }
 
         // loadDefines coerces gcc into spitting out the #defines in use
         // in the file f and saves relevant renamings in f.Name[name].Define.
-        private static void loadDefines(this ref Package p, ref File f)
+        private static void loadDefines(this ptr<Package> _addr_p, ptr<File> _addr_f)
         {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+
             bytes.Buffer b = default;
             b.WriteString(builtinProlog);
             b.WriteString(f.Preamble);
@@ -213,6 +290,7 @@ namespace go
                 {
                     continue;
                 }
+
                 line = strings.TrimSpace(line[8L..]);
 
                 @string key = default;                @string val = default;
@@ -234,36 +312,45 @@ namespace go
                     key = line[0L..tabIndex];
                     val = strings.TrimSpace(line[tabIndex..]);
                 }
+
                 if (key == "__clang__")
                 {
                     p.GccIsClang = true;
                 }
+
                 {
                     var n = f.Name[key];
 
                     if (n != null)
                     {
-                        if (debugDefine.Value)
+                        if (debugDefine.val)
                         {
                             fmt.Fprintf(os.Stderr, "#define %s %s\n", key, val);
                         }
+
                         n.Define = val;
+
                     }
 
                 }
+
             }
+
         }
 
         // guessKinds tricks gcc into revealing the kind of each
         // name xxx for the references C.xxx in the Go input.
         // The kind is either a constant, type, or variable.
-        private static slice<ref Name> guessKinds(this ref Package p, ref File f)
-        { 
+        private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> _addr_f)
+        {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+ 
             // Determine kinds for names we already know about,
             // like #defines or 'struct foo', before bothering with gcc.
-            slice<ref Name> names = default;            slice<ref Name> needType = default;
+            slice<ptr<Name>> names = default;            slice<ptr<Name>> needType = default;
 
-            map optional = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref Name, bool>{};
+            map optional = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<Name>, bool>{};
             foreach (var (_, key) in nameKeys(f.Name))
             {
                 var n = f.Name[key]; 
@@ -284,6 +371,7 @@ namespace go
                             // in the cgo -godefs output half the constants
                             // are in hex and half are in whatever the #define used.
                             n.Const = fmt.Sprintf("%#x", i);
+
                         }
                         else if (n.Define[0L] == '\'')
                         {
@@ -297,6 +385,7 @@ namespace go
                                 }
 
                             }
+
                         }
                         else if (n.Define[0L] == '"')
                         {
@@ -310,16 +399,20 @@ namespace go
                                 }
 
                             }
+
                         }
+
 
                         i = i__prev2;
 
                     }
 
+
                     if (n.IsConst())
                     {
                         continue;
                     }
+
                 } 
 
                 // If this is a struct, union, or enum type name, no need to guess the kind.
@@ -329,17 +422,20 @@ namespace go
                     needType = append(needType, n);
                     continue;
                 }
+
                 if (goos == "darwin" && strings.HasSuffix(n.C, "Ref"))
                 { 
                     // For FooRef, find out if FooGetTypeID exists.
                     var s = n.C[..len(n.C) - 3L] + "GetTypeID";
-                    n = ref new Name(Go:s,C:s);
+                    n = addr(new Name(Go:s,C:s));
                     names = append(names, n);
                     optional[n] = true;
+
                 } 
 
                 // Otherwise, we'll need to find out from gcc.
                 names = append(names, n);
+
             } 
 
             // Bypass gcc if there's nothing left to find out.
@@ -369,14 +465,14 @@ namespace go
             //    void __cgo_f_xxx_5(void) { static const char __cgo_undefined__5[] = (name); }
             //
             // If we see an error at not-declared:xxx, the corresponding name is not declared.
-            // If we see an error at not-type:xxx, the corresponding name is a type.
+            // If we see an error at not-type:xxx, the corresponding name is not a type.
             // If we see an error at not-int-const:xxx, the corresponding name is not an integer constant.
             // If we see an error at not-num-const:xxx, the corresponding name is not a number constant.
             // If we see an error at not-str-lit:xxx, the corresponding name is not a string literal.
             //
             // The specific input forms are chosen so that they are valid C syntax regardless of
             // whether name denotes a type or an expression.
-            bytes.Buffer b = default;
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
             b.WriteString(builtinProlog);
             b.WriteString(f.Preamble);
 
@@ -388,27 +484,29 @@ namespace go
                 {
                     i = __i;
                     n = __n;
-                    fmt.Fprintf(ref b, "#line %d \"not-declared\"\n" + "void __cgo_f_%d_1(void) { __typeof__(%s) *__cgo_undefined__1; }\n" + "#line %d \"not-type\"\n" + "void __cgo_f_%d_2(void) { %s *__cgo_undefined__2; }\n" + "#line %d \"not-int-const\"\n" + "void __cgo_f_%d_3(void) { enum { __cgo_undefined__3 = (%s)*1 }; }\n" + "#line %d \"not-num-const\"\n" + "void __cgo_f_%d_4(void) { static const double __cgo_undefined__4 = (%s); }\n" + "#line %d \"not-str-lit\"\n" + "void __cgo_f_%d_5(void) { static const char __cgo_undefined__5[] = (%s); }\n", i + 1L, i + 1L, n.C, i + 1L, i + 1L, n.C, i + 1L, i + 1L, n.C, i + 1L, i + 1L, n.C, i + 1L, i + 1L, n.C);
+                    fmt.Fprintf(_addr_b, "#line %d \"not-declared\"\n" + "void __cgo_f_%d_1(void) { __typeof__(%s) *__cgo_undefined__1; }\n" + "#line %d \"not-type\"\n" + "void __cgo_f_%d_2(void) { %s *__cgo_undefined__2; }\n" + "#line %d \"not-int-const\"\n" + "void __cgo_f_%d_3(void) { enum { __cgo_undefined__3 = (%s)*1 }; }\n" + "#line %d \"not-num-const\"\n" + "void __cgo_f_%d_4(void) { static const double __cgo_undefined__4 = (%s); }\n" + "#line %d \"not-str-lit\"\n" + "void __cgo_f_%d_5(void) { static const char __cgo_undefined__5[] = (%s); }\n", i + 1L, i + 1L, n.C, i + 1L, i + 1L, n.C, i + 1L, i + 1L, n.C, i + 1L, i + 1L, n.C, i + 1L, i + 1L, n.C);
                 }
 
                 i = i__prev1;
                 n = n__prev1;
             }
 
-            fmt.Fprintf(ref b, "#line 1 \"completed\"\n" + "int __cgo__1 = __cgo__2;\n");
+            fmt.Fprintf(_addr_b, "#line 1 \"completed\"\n" + "int __cgo__1 = __cgo__2;\n");
 
             var stderr = p.gccErrors(b.Bytes());
             if (stderr == "")
             {
                 fatalf("%s produced no output\non input:\n%s", p.gccBaseCmd()[0L], b.Bytes());
             }
+
             var completed = false;
             var sniff = make_slice<long>(len(names));
-            const long notType = 1L << (int)(iota);
-            const var notIntConst = 0;
-            const var notNumConst = 1;
-            const var notStrLiteral = 2;
-            const var notDeclared = 3;
+            const long notType = (long)1L << (int)(iota);
+            const var notIntConst = (var)0;
+            const var notNumConst = (var)1;
+            const var notStrLiteral = (var)2;
+            const var notDeclared = (var)3;
+
             var sawUnmatchedErrors = false;
             foreach (var (_, line) in strings.Split(stderr, "\n"))
             { 
@@ -424,16 +522,19 @@ namespace go
                 {
                     continue;
                 }
+
                 var c1 = strings.Index(line, ":");
                 if (c1 < 0L)
                 {
                     continue;
                 }
+
                 var c2 = strings.Index(line[c1 + 1L..], ":");
                 if (c2 < 0L)
                 {
                     continue;
                 }
+
                 c2 += c1 + 1L;
 
                 var filename = line[..c1];
@@ -445,8 +546,11 @@ namespace go
                     {
                         sawUnmatchedErrors = true;
                     }
+
                     continue;
+
                 }
+
                 switch (filename)
                 {
                     case "completed": 
@@ -476,16 +580,19 @@ namespace go
                         {
                             sawUnmatchedErrors = true;
                         }
+
                         continue;
                         break;
                 }
 
                 sawUnmatchedErrors = false;
+
             }
             if (!completed)
             {
                 fatalf("%s did not produce error at completed:1\non input:\n%s\nfull error output:\n%s", p.gccBaseCmd()[0L], b.Bytes(), stderr);
             }
+
             {
                 var i__prev1 = i;
                 var n__prev1 = n;
@@ -511,9 +618,12 @@ namespace go
                             // Ignore optional undeclared identifiers.
                             // Don't report an error, and skip adding n to the needType array.
                             continue;
+
                         }
+
                         error_(f.NamePos[n], "could not determine kind of name for C.%s", fixGo(n.Go));
                                         needType = append(needType, n);
+
                 }
 
                 i = i__prev1;
@@ -530,16 +640,24 @@ namespace go
                 {
                     error_(token.NoPos, "\n%s errors for preamble:\n%s", p.gccBaseCmd()[0L], preambleErrors);
                 }
+
                 fatalf("unresolved names");
+
             }
+
             return needType;
+
         }
 
         // loadDWARF parses the DWARF debug information generated
         // by gcc to learn the details of the constants, variables, and types
         // being referred to as C.xxx.
-        private static void loadDWARF(this ref Package p, ref File f, slice<ref Name> names)
-        { 
+        private static void loadDWARF(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<typeConv> _addr_conv, slice<ptr<Name>> names)
+        {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+            ref typeConv conv = ref _addr_conv.val;
+ 
             // Extract the types from the DWARF section of an object
             // from a well-formed C program. Gcc only generates DWARF info
             // for symbols in the object file, so it is not enough to print the
@@ -548,7 +666,7 @@ namespace go
             //    __typeof__(names[i]) *__cgo__i;
             // for each entry in names and then dereference the type we
             // learn for __cgo__i.
-            bytes.Buffer b = default;
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
             b.WriteString(builtinProlog);
             b.WriteString(f.Preamble);
             b.WriteString("#line 1 \"cgo-dwarf-inference\"\n");
@@ -560,11 +678,12 @@ namespace go
                 {
                     i = __i;
                     n = __n;
-                    fmt.Fprintf(ref b, "__typeof__(%s) *__cgo__%d;\n", n.C, i);
+                    fmt.Fprintf(_addr_b, "__typeof__(%s) *__cgo__%d;\n", n.C, i);
                     if (n.Kind == "iconst")
                     {
-                        fmt.Fprintf(ref b, "enum { __cgo_enum__%d = %s };\n", i, n.C);
+                        fmt.Fprintf(_addr_b, "enum { __cgo_enum__%d = %s };\n", i, n.C);
                     }
+
                 } 
 
                 // We create a data block initialized with the values,
@@ -574,7 +693,7 @@ namespace go
                 n = n__prev1;
             }
 
-            fmt.Fprintf(ref b, "long long __cgodebug_ints[] = {\n");
+            fmt.Fprintf(_addr_b, "long long __cgodebug_ints[] = {\n");
             {
                 var n__prev1 = n;
 
@@ -583,12 +702,13 @@ namespace go
                     n = __n;
                     if (n.Kind == "iconst")
                     {
-                        fmt.Fprintf(ref b, "\t%s,\n", n.C);
+                        fmt.Fprintf(_addr_b, "\t%s,\n", n.C);
                     }
                     else
                     {
-                        fmt.Fprintf(ref b, "\t0,\n");
+                        fmt.Fprintf(_addr_b, "\t0,\n");
                     }
+
                 } 
                 // for the last entry, we cannot use 0, otherwise
                 // in case all __cgodebug_data is zero initialized,
@@ -599,11 +719,11 @@ namespace go
                 n = n__prev1;
             }
 
-            fmt.Fprintf(ref b, "\t1\n");
-            fmt.Fprintf(ref b, "};\n"); 
+            fmt.Fprintf(_addr_b, "\t1\n");
+            fmt.Fprintf(_addr_b, "};\n"); 
 
             // do the same work for floats.
-            fmt.Fprintf(ref b, "double __cgodebug_floats[] = {\n");
+            fmt.Fprintf(_addr_b, "double __cgodebug_floats[] = {\n");
             {
                 var n__prev1 = n;
 
@@ -612,19 +732,20 @@ namespace go
                     n = __n;
                     if (n.Kind == "fconst")
                     {
-                        fmt.Fprintf(ref b, "\t%s,\n", n.C);
+                        fmt.Fprintf(_addr_b, "\t%s,\n", n.C);
                     }
                     else
                     {
-                        fmt.Fprintf(ref b, "\t0,\n");
+                        fmt.Fprintf(_addr_b, "\t0,\n");
                     }
+
                 }
 
                 n = n__prev1;
             }
 
-            fmt.Fprintf(ref b, "\t1\n");
-            fmt.Fprintf(ref b, "};\n"); 
+            fmt.Fprintf(_addr_b, "\t1\n");
+            fmt.Fprintf(_addr_b, "};\n"); 
 
             // do the same work for strings.
             {
@@ -637,9 +758,10 @@ namespace go
                     n = __n;
                     if (n.Kind == "sconst")
                     {
-                        fmt.Fprintf(ref b, "const char __cgodebug_str__%d[] = %s;\n", i, n.C);
-                        fmt.Fprintf(ref b, "const unsigned long long __cgodebug_strlen__%d = sizeof(%s)-1;\n", i, n.C);
+                        fmt.Fprintf(_addr_b, "const char __cgodebug_str__%d[] = %s;\n", i, n.C);
+                        fmt.Fprintf(_addr_b, "const unsigned long long __cgodebug_strlen__%d = sizeof(%s)-1;\n", i, n.C);
                     }
+
                 }
 
                 i = i__prev1;
@@ -658,10 +780,12 @@ namespace go
                 {
                     fatalf("reading DWARF entry: %s", err);
                 }
+
                 if (e == null)
                 {
                     break;
                 }
+
 
                 if (e.Tag == dwarf.TagVariable) 
                     @string (name, _) = e.Val(dwarf.AttrName)._<@string>();
@@ -673,41 +797,49 @@ namespace go
                             // Since we are reading all the DWARF,
                             // assume we will see the variable elsewhere.
                             break;
+
                         }
+
                         fatalf("malformed DWARF TagVariable entry");
+
                     }
+
                     if (!strings.HasPrefix(name, "__cgo__"))
                     {
                         break;
                     }
+
                     var (typ, err) = d.Type(typOff);
                     if (err != null)
                     {
                         fatalf("loading DWARF type: %s", err);
                     }
-                    ref dwarf.PtrType (t, ok) = typ._<ref dwarf.PtrType>();
+
+                    ptr<dwarf.PtrType> (t, ok) = typ._<ptr<dwarf.PtrType>>();
                     if (!ok || t == null)
                     {
                         fatalf("internal error: %s has non-pointer type", name);
                     }
+
                     var (i, err) = strconv.Atoi(name[7L..]);
                     if (err != null)
                     {
                         fatalf("malformed __cgo__ name: %s", name);
                     }
+
                     types[i] = t.Type;
+                    p.recordTypedefs(t.Type, f.NamePos[names[i]]);
                                 if (e.Tag != dwarf.TagCompileUnit)
                 {
                     r.SkipChildren();
                 }
+
             } 
 
             // Record types and typedef information.
  
 
             // Record types and typedef information.
-            typeConv conv = default;
-            conv.Init(p.PtrSize, p.IntSize);
             {
                 var i__prev1 = i;
                 var n__prev1 = n;
@@ -720,6 +852,7 @@ namespace go
                     {
                         conv.getTypeIDs[n.Go[..len(n.Go) - 9L]] = true;
                     }
+
                 }
 
                 i = i__prev1;
@@ -738,8 +871,9 @@ namespace go
                     {
                         continue;
                     }
+
                     var pos = f.NamePos[n];
-                    ref dwarf.FuncType (f, fok) = types[i]._<ref dwarf.FuncType>();
+                    ptr<dwarf.FuncType> (f, fok) = types[i]._<ptr<dwarf.FuncType>>();
                     if (n.Kind != "type" && fok)
                     {
                         n.Kind = "func";
@@ -754,7 +888,7 @@ namespace go
                                 if (i < len(ints))
                                 {
                                     {
-                                        ref dwarf.UintType (_, ok) = types[i]._<ref dwarf.UintType>();
+                                        ptr<dwarf.UintType> (_, ok) = types[i]._<ptr<dwarf.UintType>>();
 
                                         if (ok)
                                         {
@@ -766,12 +900,29 @@ namespace go
                                         }
 
                                     }
+
                                 }
+
                                 break;
                             case "fconst": 
-                                if (i < len(floats))
+                                if (i >= len(floats))
                                 {
-                                    n.Const = fmt.Sprintf("%f", floats[i]);
+                                    break;
+                                }
+
+                                switch (base(types[i]).type())
+                                {
+                                    case ptr<dwarf.IntType> _:
+                                        n.Kind = "var";
+                                        break;
+                                    case ptr<dwarf.UintType> _:
+                                        n.Kind = "var";
+                                        break;
+                                    default:
+                                    {
+                                        n.Const = fmt.Sprintf("%f", floats[i]);
+                                        break;
+                                    }
                                 }
                                 break;
                             case "sconst": 
@@ -779,14 +930,117 @@ namespace go
                                 {
                                     n.Const = fmt.Sprintf("%q", strs[i]);
                                 }
+
                                 break;
                         }
+
                     }
+
                     conv.FinishType(pos);
+
                 }
 
                 i = i__prev1;
                 n = n__prev1;
+            }
+        }
+
+        // recordTypedefs remembers in p.typedefs all the typedefs used in dtypes and its children.
+        private static void recordTypedefs(this ptr<Package> _addr_p, dwarf.Type dtype, token.Pos pos)
+        {
+            ref Package p = ref _addr_p.val;
+
+            p.recordTypedefs1(dtype, pos, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<dwarf.Type, bool>{});
+        }
+
+        private static void recordTypedefs1(this ptr<Package> _addr_p, dwarf.Type dtype, token.Pos pos, map<dwarf.Type, bool> visited)
+        {
+            ref Package p = ref _addr_p.val;
+
+            if (dtype == null)
+            {
+                return ;
+            }
+
+            if (visited[dtype])
+            {
+                return ;
+            }
+
+            visited[dtype] = true;
+            switch (dtype.type())
+            {
+                case ptr<dwarf.TypedefType> dt:
+                    if (strings.HasPrefix(dt.Name, "__builtin"))
+                    { 
+                        // Don't look inside builtin types. There be dragons.
+                        return ;
+
+                    }
+
+                    if (!p.typedefs[dt.Name])
+                    {
+                        p.typedefs[dt.Name] = true;
+                        p.typedefList = append(p.typedefList, new typedefInfo(dt.Name,pos));
+                        p.recordTypedefs1(dt.Type, pos, visited);
+                    }
+
+                    break;
+                case ptr<dwarf.PtrType> dt:
+                    p.recordTypedefs1(dt.Type, pos, visited);
+                    break;
+                case ptr<dwarf.ArrayType> dt:
+                    p.recordTypedefs1(dt.Type, pos, visited);
+                    break;
+                case ptr<dwarf.QualType> dt:
+                    p.recordTypedefs1(dt.Type, pos, visited);
+                    break;
+                case ptr<dwarf.FuncType> dt:
+                    p.recordTypedefs1(dt.ReturnType, pos, visited);
+                    foreach (var (_, a) in dt.ParamType)
+                    {
+                        p.recordTypedefs1(a, pos, visited);
+                    }
+                    break;
+                case ptr<dwarf.StructType> dt:
+                    foreach (var (_, f) in dt.Field)
+                    {
+                        p.recordTypedefs1(f.Type, pos, visited);
+                    }
+                    break;
+            }
+
+        }
+
+        // prepareNames finalizes the Kind field of not-type names and sets
+        // the mangled name of all names.
+        private static void prepareNames(this ptr<Package> _addr_p, ptr<File> _addr_f)
+        {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+
+            foreach (var (_, n) in f.Name)
+            {
+                if (n.Kind == "not-type")
+                {
+                    if (n.Define == "")
+                    {
+                        n.Kind = "var";
+                    }
+                    else
+                    {
+                        n.Kind = "macro";
+                        n.FuncType = addr(new FuncType(Result:n.Type,Go:&ast.FuncType{Results:&ast.FieldList{List:[]*ast.Field{{Type:n.Type.Go}}},},));
+                    }
+
+                }
+
+                p.mangleName(n);
+                if (n.Kind == "type" && typedef[n.Mangle] == null)
+                {
+                    typedef[n.Mangle] = n.Type;
+                }
+
             }
 
         }
@@ -794,75 +1048,149 @@ namespace go
         // mangleName does name mangling to translate names
         // from the original Go source files to the names
         // used in the final Go files generated by cgo.
-        private static void mangleName(this ref Package p, ref Name n)
-        { 
+        private static void mangleName(this ptr<Package> _addr_p, ptr<Name> _addr_n)
+        {
+            ref Package p = ref _addr_p.val;
+            ref Name n = ref _addr_n.val;
+ 
             // When using gccgo variables have to be
             // exported so that they become global symbols
             // that the C code can refer to.
             @string prefix = "_C";
-            if (gccgo && n.IsVar().Value)
+            if (gccgo && n.IsVar().val)
             {
                 prefix = "C";
             }
+
             n.Mangle = prefix + n.Kind + "_" + n.Go;
+
+        }
+
+        private static bool isMangledName(this ptr<File> _addr_f, @string s)
+        {
+            ref File f = ref _addr_f.val;
+
+            @string prefix = "_C";
+            if (strings.HasPrefix(s, prefix))
+            {
+                var t = s[len(prefix)..];
+                foreach (var (_, k) in nameKinds)
+                {
+                    if (strings.HasPrefix(t, k + "_"))
+                    {
+                        return true;
+                    }
+
+                }
+
+            }
+
+            return false;
+
         }
 
         // rewriteCalls rewrites all calls that pass pointers to check that
         // they follow the rules for passing pointers between Go and C.
-        // This returns whether the package needs to import unsafe as _cgo_unsafe.
-        private static bool rewriteCalls(this ref Package p, ref File f)
+        // This reports whether the package needs to import unsafe as _cgo_unsafe.
+        private static bool rewriteCalls(this ptr<Package> _addr_p, ptr<File> _addr_f)
         {
-            var needsUnsafe = false;
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+
+            var needsUnsafe = false; 
+            // Walk backward so that in C.f1(C.f2()) we rewrite C.f2 first.
             foreach (var (_, call) in f.Calls)
-            { 
-                // This is a call to C.xxx; set goname to "xxx".
-                ref ast.SelectorExpr goname = call.Call.Fun._<ref ast.SelectorExpr>().Sel.Name;
-                if (goname == "malloc")
+            {
+                if (call.Done)
                 {
                     continue;
                 }
-                var name = f.Name[goname];
-                if (name.Kind != "func")
-                { 
-                    // Probably a type conversion.
-                    continue;
-                }
-                if (p.rewriteCall(f, call, name))
+
+                var start = f.offset(call.Call.Pos());
+                var end = f.offset(call.Call.End());
+                var (str, nu) = p.rewriteCall(f, call);
+                if (str != "")
                 {
-                    needsUnsafe = true;
+                    f.Edit.Replace(start, end, str);
+                    if (nu)
+                    {
+                        needsUnsafe = true;
+                    }
+
                 }
+
             }
             return needsUnsafe;
+
         }
 
         // rewriteCall rewrites one call to add pointer checks.
         // If any pointer checks are required, we rewrite the call into a
         // function literal that calls _cgoCheckPointer for each pointer
         // argument and then calls the original function.
-        // This returns whether the package needs to import unsafe as _cgo_unsafe.
-        private static bool rewriteCall(this ref Package p, ref File f, ref Call call, ref Name name)
-        { 
-            // Avoid a crash if the number of arguments is
-            // less than the number of parameters.
-            // This will be caught when the generated file is compiled.
-            if (len(call.Call.Args) < len(name.FuncType.Params))
+        // This returns the rewritten call and whether the package needs to
+        // import unsafe as _cgo_unsafe.
+        // If it returns the empty string, the call did not need to be rewritten.
+        private static (@string, bool) rewriteCall(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<Call> _addr_call)
+        {
+            @string _p0 = default;
+            bool _p0 = default;
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+            ref Call call = ref _addr_call.val;
+ 
+            // This is a call to C.xxx; set goname to "xxx".
+            // It may have already been mangled by rewriteName.
+            @string goname = default;
+            switch (call.Call.Fun.type())
             {
-                return false;
+                case ptr<ast.SelectorExpr> fun:
+                    goname = fun.Sel.Name;
+                    break;
+                case ptr<ast.Ident> fun:
+                    goname = strings.TrimPrefix(fun.Name, "_C2func_");
+                    goname = strings.TrimPrefix(goname, "_Cfunc_");
+                    break;
             }
+            if (goname == "" || goname == "malloc")
+            {
+                return ("", false);
+            }
+
+            var name = f.Name[goname];
+            if (name == null || name.Kind != "func")
+            { 
+                // Probably a type conversion.
+                return ("", false);
+
+            }
+
+            var @params = name.FuncType.Params;
+            var args = call.Call.Args; 
+
+            // Avoid a crash if the number of arguments doesn't match
+            // the number of parameters.
+            // This will be caught when the generated file is compiled.
+            if (len(args) != len(params))
+            {
+                return ("", false);
+            }
+
             var any = false;
             {
                 var i__prev1 = i;
                 var param__prev1 = param;
 
-                foreach (var (__i, __param) in name.FuncType.Params)
+                foreach (var (__i, __param) in params)
                 {
                     i = __i;
                     param = __param;
-                    if (p.needsPointerCheck(f, param.Go, call.Call.Args[i]))
+                    if (p.needsPointerCheck(f, param.Go, args[i]))
                     {
                         any = true;
                         break;
                     }
+
                 }
 
                 i = i__prev1;
@@ -871,134 +1199,229 @@ namespace go
 
             if (!any)
             {
-                return false;
+                return ("", false);
             } 
 
             // We need to rewrite this call.
             //
-            // We are going to rewrite C.f(p) to
-            //    func (_cgo0 ptype) {
-            //            _cgoCheckPointer(_cgo0)
+            // Rewrite C.f(p) to
+            //    func() {
+            //            _cgo0 := p
+            //            _cgoCheckPointer(_cgo0, nil)
             //            C.f(_cgo0)
-            //    }(p)
-            // Using a function literal like this lets us do correct
-            // argument type checking, and works correctly if the call is
-            // deferred.
+            //    }()
+            // Using a function literal like this lets us evaluate the
+            // function arguments only once while doing pointer checks.
+            // This is particularly useful when passing additional arguments
+            // to _cgoCheckPointer, as done in checkIndex and checkAddr.
+            //
+            // When the function argument is a conversion to unsafe.Pointer,
+            // we unwrap the conversion before checking the pointer,
+            // and then wrap again when calling C.f. This lets us check
+            // the real type of the pointer in some cases. See issue #25941.
+            //
+            // When the call to C.f is deferred, we use an additional function
+            // literal to evaluate the arguments at the right time.
+            //    defer func() func() {
+            //            _cgo0 := p
+            //            return func() {
+            //                    _cgoCheckPointer(_cgo0, nil)
+            //                    C.f(_cgo0)
+            //            }
+            //    }()()
+            // This works because the defer statement evaluates the first
+            // function literal in order to get the function to call.
+            ref bytes.Buffer sb = ref heap(out ptr<bytes.Buffer> _addr_sb);
+            sb.WriteString("func() ");
+            if (call.Deferred)
+            {
+                sb.WriteString("func() ");
+            }
+
             var needsUnsafe = false;
-            var @params = make_slice<ref ast.Field>(len(name.FuncType.Params));
-            var nargs = make_slice<ast.Expr>(len(name.FuncType.Params));
-            slice<ast.Stmt> stmts = default;
+            var result = false;
+            var twoResults = false;
+            if (!call.Deferred)
+            { 
+                // Check whether this call expects two results.
+                foreach (var (_, ref) in f.Ref)
+                {
+                    if (@ref.Expr != _addr_call.Call.Fun)
+                    {
+                        continue;
+                    }
+
+                    if (@ref.Context == ctxCall2)
+                    {
+                        sb.WriteString("(");
+                        result = true;
+                        twoResults = true;
+                    }
+
+                    break;
+
+                } 
+
+                // Add the result type, if any.
+                if (name.FuncType.Result != null)
+                {
+                    var rtype = p.rewriteUnsafe(name.FuncType.Result.Go);
+                    if (rtype != name.FuncType.Result.Go)
+                    {
+                        needsUnsafe = true;
+                    }
+
+                    sb.WriteString(gofmtLine(rtype));
+                    result = true;
+
+                } 
+
+                // Add the second result type, if any.
+                if (twoResults)
+                {
+                    if (name.FuncType.Result == null)
+                    { 
+                        // An explicit void result looks odd but it
+                        // seems to be how cgo has worked historically.
+                        sb.WriteString("_Ctype_void");
+
+                    }
+
+                    sb.WriteString(", error)");
+
+                }
+
+            }
+
+            sb.WriteString("{ "); 
+
+            // Define _cgoN for each argument value.
+            // Write _cgoCheckPointer calls to sbCheck.
+            ref bytes.Buffer sbCheck = ref heap(out ptr<bytes.Buffer> _addr_sbCheck);
             {
                 var i__prev1 = i;
                 var param__prev1 = param;
 
-                foreach (var (__i, __param) in name.FuncType.Params)
+                foreach (var (__i, __param) in params)
                 {
                     i = __i;
-                    param = __param; 
-                    // params is going to become the parameters of the
-                    // function literal.
-                    // nargs is going to become the list of arguments made
-                    // by the call within the function literal.
-                    // nparam is the parameter of the function literal that
-                    // corresponds to param.
-
-                    var origArg = call.Call.Args[i];
-                    var nparam = ast.NewIdent(fmt.Sprintf("_cgo%d", i));
-                    nargs[i] = nparam; 
-
-                    // The Go version of the C type might use unsafe.Pointer,
-                    // but the file might not import unsafe.
-                    // Rewrite the Go type if necessary to use _cgo_unsafe.
-                    var ptype = p.rewriteUnsafe(param.Go);
-                    if (ptype != param.Go)
+                    param = __param;
+                    var origArg = args[i];
+                    var (arg, nu) = p.mangle(f, _addr_args[i]);
+                    if (nu)
                     {
                         needsUnsafe = true;
-                    }
-                    params[i] = ref new ast.Field(Names:[]*ast.Ident{nparam},Type:ptype,);
+                    } 
 
-                    if (!p.needsPointerCheck(f, param.Go, origArg))
+                    // Use "var x T = ..." syntax to explicitly convert untyped
+                    // constants to the parameter type, to avoid a type mismatch.
+                    var ptype = p.rewriteUnsafe(param.Go);
+
+                    if (!p.needsPointerCheck(f, param.Go, args[i]) || param.BadPointer)
+                    {
+                        if (ptype != param.Go)
+                        {
+                            needsUnsafe = true;
+                        }
+
+                        fmt.Fprintf(_addr_sb, "var _cgo%d %s = %s; ", i, gofmtLine(ptype), gofmtPos(arg, origArg.Pos()));
+                        continue;
+
+                    } 
+
+                    // Check for &a[i].
+                    if (p.checkIndex(_addr_sb, _addr_sbCheck, arg, i))
                     {
                         continue;
                     } 
 
-                    // Run the cgo pointer checks on nparam.
+                    // Check for &x.
+                    if (p.checkAddr(_addr_sb, _addr_sbCheck, arg, i))
+                    {
+                        continue;
+                    }
 
-                    // Change the function literal to call the real function
-                    // with the parameter passed through _cgoCheckPointer.
-                    ast.CallExpr c = ref new ast.CallExpr(Fun:ast.NewIdent("_cgoCheckPointer"),Args:[]ast.Expr{nparam,},); 
+                    fmt.Fprintf(_addr_sb, "_cgo%d := %s; ", i, gofmtPos(arg, origArg.Pos()));
+                    fmt.Fprintf(_addr_sbCheck, "_cgoCheckPointer(_cgo%d, nil); ", i);
 
-                    // Add optional additional arguments for an address
-                    // expression.
-                    c.Args = p.checkAddrArgs(f, c.Args, origArg);
-
-                    ast.ExprStmt stmt = ref new ast.ExprStmt(X:c,);
-                    stmts = append(stmts, stmt);
                 }
 
                 i = i__prev1;
                 param = param__prev1;
             }
 
-            const @string cgoMarker = "__cgo__###__marker__";
-
-            ast.CallExpr fcall = ref new ast.CallExpr(Fun:ast.NewIdent(cgoMarker),Args:nargs,);
-            ast.FuncType ftype = ref new ast.FuncType(Params:&ast.FieldList{List:params,},);
-            if (name.FuncType.Result != null)
+            if (call.Deferred)
             {
-                var rtype = p.rewriteUnsafe(name.FuncType.Result.Go);
-                if (rtype != name.FuncType.Result.Go)
-                {
-                    needsUnsafe = true;
-                }
-                ftype.Results = ref new ast.FieldList(List:[]*ast.Field{&ast.Field{Type:rtype,},},);
+                sb.WriteString("return func() { ");
             } 
 
-            // If this call expects two results, we have to
-            // adjust the results of the function we generated.
-            foreach (var (_, ref) in f.Ref)
-            {
-                if (@ref.Expr == ref call.Call.Fun && @ref.Context == ctxCall2)
-                {
-                    if (ftype.Results == null)
-                    { 
-                        // An explicit void argument
-                        // looks odd but it seems to
-                        // be how cgo has worked historically.
-                        ftype.Results = ref new ast.FieldList(List:[]*ast.Field{&ast.Field{Type:ast.NewIdent("_Ctype_void"),},},);
-                    }
-                    ftype.Results.List = append(ftype.Results.List, ref new ast.Field(Type:ast.NewIdent("error"),));
-                }
-            }
-            ast.Stmt fbody = default;
-            if (ftype.Results == null)
-            {
-                fbody = ref new ast.ExprStmt(X:fcall,);
-            }
-            else
-            {
-                fbody = ref new ast.ReturnStmt(Results:[]ast.Expr{fcall},);
-            }
-            ast.FuncLit lit = ref new ast.FuncLit(Type:ftype,Body:&ast.BlockStmt{List:append(stmts,fbody),},);
-            var text = strings.Replace(gofmt(lit), "\n", ";", -1L);
-            var repl = strings.Split(text, cgoMarker);
-            f.Edit.Insert(f.offset(call.Call.Fun.Pos()), repl[0L]);
-            f.Edit.Insert(f.offset(call.Call.Fun.End()), repl[1L]);
+            // Write out the calls to _cgoCheckPointer.
+            sb.WriteString(sbCheck.String());
 
-            return needsUnsafe;
+            if (result)
+            {
+                sb.WriteString("return ");
+            }
+
+            var (m, nu) = p.mangle(f, _addr_call.Call.Fun);
+            if (nu)
+            {
+                needsUnsafe = true;
+            }
+
+            sb.WriteString(gofmtLine(m));
+
+            sb.WriteString("(");
+            {
+                var i__prev1 = i;
+
+                foreach (var (__i) in params)
+                {
+                    i = __i;
+                    if (i > 0L)
+                    {
+                        sb.WriteString(", ");
+                    }
+
+                    fmt.Fprintf(_addr_sb, "_cgo%d", i);
+
+                }
+
+                i = i__prev1;
+            }
+
+            sb.WriteString("); ");
+            if (call.Deferred)
+            {
+                sb.WriteString("}");
+            }
+
+            sb.WriteString("}");
+            if (call.Deferred)
+            {
+                sb.WriteString("()");
+            }
+
+            sb.WriteString("()");
+
+            return (sb.String(), needsUnsafe);
+
         }
 
-        // needsPointerCheck returns whether the type t needs a pointer check.
+        // needsPointerCheck reports whether the type t needs a pointer check.
         // This is true if t is a pointer and if the value to which it points
         // might contain a pointer.
-        private static bool needsPointerCheck(this ref Package p, ref File f, ast.Expr t, ast.Expr arg)
-        { 
+        private static bool needsPointerCheck(this ptr<Package> _addr_p, ptr<File> _addr_f, ast.Expr t, ast.Expr arg)
+        {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+ 
             // An untyped nil does not need a pointer check, and when
             // _cgoCheckPointer returns the untyped nil the type assertion we
             // are going to insert will fail.  Easier to just skip nil arguments.
             // TODO: Note that this fails if nil is shadowed.
             {
-                ref ast.Ident (id, ok) = arg._<ref ast.Ident>();
+                ptr<ast.Ident> (id, ok) = arg._<ptr<ast.Ident>>();
 
                 if (ok && id.Name == "nil")
                 {
@@ -1007,39 +1430,48 @@ namespace go
 
             }
 
+
             return p.hasPointer(f, t, true);
+
         }
 
         // hasPointer is used by needsPointerCheck. If top is true it returns
         // whether t is or contains a pointer that might point to a pointer.
-        // If top is false it returns whether t is or contains a pointer.
+        // If top is false it reports whether t is or contains a pointer.
         // f may be nil.
-        private static bool hasPointer(this ref Package p, ref File f, ast.Expr t, bool top)
+        private static bool hasPointer(this ptr<Package> _addr_p, ptr<File> _addr_f, ast.Expr t, bool top)
         {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+
             switch (t.type())
             {
-                case ref ast.ArrayType t:
+                case ptr<ast.ArrayType> t:
                     if (t.Len == null)
                     {
                         if (!top)
                         {
                             return true;
                         }
+
                         return p.hasPointer(f, t.Elt, false);
+
                     }
+
                     return p.hasPointer(f, t.Elt, top);
                     break;
-                case ref ast.StructType t:
+                case ptr<ast.StructType> t:
                     foreach (var (_, field) in t.Fields.List)
                     {
                         if (p.hasPointer(f, field.Type, top))
                         {
                             return true;
                         }
+
                     }
                     return false;
                     break;
-                case ref ast.StarExpr t:
+                case ptr<ast.StarExpr> t:
                     if (!top)
                     {
                         return true;
@@ -1050,40 +1482,45 @@ namespace go
                     {
                         return true;
                     }
+
                     return p.hasPointer(f, t.X, false);
                     break;
-                case ref ast.FuncType t:
+                case ptr<ast.FuncType> t:
                     return true;
                     break;
-                case ref ast.InterfaceType t:
+                case ptr<ast.InterfaceType> t:
                     return true;
                     break;
-                case ref ast.MapType t:
+                case ptr<ast.MapType> t:
                     return true;
                     break;
-                case ref ast.ChanType t:
+                case ptr<ast.ChanType> t:
                     return true;
                     break;
-                case ref ast.Ident t:
+                case ptr<ast.Ident> t:
                     foreach (var (_, d) in p.Decl)
                     {
-                        ref ast.GenDecl (gd, ok) = d._<ref ast.GenDecl>();
+                        ptr<ast.GenDecl> (gd, ok) = d._<ptr<ast.GenDecl>>();
                         if (!ok || gd.Tok != token.TYPE)
                         {
                             continue;
                         }
+
                         foreach (var (_, spec) in gd.Specs)
                         {
-                            ref ast.TypeSpec (ts, ok) = spec._<ref ast.TypeSpec>();
+                            ptr<ast.TypeSpec> (ts, ok) = spec._<ptr<ast.TypeSpec>>();
                             if (!ok)
                             {
                                 continue;
                             }
+
                             if (ts.Name.Name == t.Name)
                             {
                                 return p.hasPointer(f, ts.Type, top);
                             }
+
                         }
+
                     }
                     {
                         var def = typedef[t.Name];
@@ -1094,14 +1531,17 @@ namespace go
                         }
 
                     }
+
                     if (t.Name == "string")
                     {
                         return !top;
                     }
+
                     if (t.Name == "error")
                     {
                         return true;
                     }
+
                     if (goTypes[t.Name] != null)
                     {
                         return false;
@@ -1110,9 +1550,9 @@ namespace go
                     // approach is to assume it has a pointer.
                     return true;
                     break;
-                case ref ast.SelectorExpr t:
+                case ptr<ast.SelectorExpr> t:
                     {
-                        ref ast.Ident (l, ok) = t.X._<ref ast.Ident>();
+                        ptr<ast.Ident> (l, ok) = t.X._<ptr<ast.Ident>>();
 
                         if (!ok || l.Name != "C")
                         { 
@@ -1120,14 +1560,18 @@ namespace go
                             // Conservative approach is to assume it has a
                             // pointer.
                             return true;
+
                         }
 
                     }
+
                     if (f == null)
                     { 
                         // Conservative approach: assume pointer.
                         return true;
+
                     }
+
                     var name = f.Name[t.Sel.Name];
                     if (name != null && name.Kind == "type" && name.Type != null && name.Type.Go != null)
                     {
@@ -1145,96 +1589,246 @@ namespace go
                     break;
                 }
             }
+
         }
 
-        // checkAddrArgs tries to add arguments to the call of
-        // _cgoCheckPointer when the argument is an address expression. We
-        // pass true to mean that the argument is an address operation of
-        // something other than a slice index, which means that it's only
-        // necessary to check the specific element pointed to, not the entire
-        // object. This is for &s.f, where f is a field in a struct. We can
-        // pass a slice or array, meaning that we should check the entire
-        // slice or array but need not check any other part of the object.
-        // This is for &s.a[i], where we need to check all of a. However, we
-        // only pass the slice or array if we can refer to it without side
-        // effects.
-        private static slice<ast.Expr> checkAddrArgs(this ref Package p, ref File f, slice<ast.Expr> args, ast.Expr x)
-        { 
+        // mangle replaces references to C names in arg with the mangled names,
+        // rewriting calls when it finds them.
+        // It removes the corresponding references in f.Ref and f.Calls, so that we
+        // don't try to do the replacement again in rewriteRef or rewriteCall.
+        private static (ast.Expr, bool) mangle(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<ast.Expr> _addr_arg)
+        {
+            ast.Expr _p0 = default;
+            bool _p0 = default;
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+            ref ast.Expr arg = ref _addr_arg.val;
+
+            var needsUnsafe = false;
+            f.walk(arg, ctxExpr, (f, arg, context) =>
+            {
+                ptr<ast.Expr> (px, ok) = arg._<ptr<ast.Expr>>();
+                if (!ok)
+                {
+                    return ;
+                }
+
+                ptr<ast.SelectorExpr> (sel, ok) = (px.val)._<ptr<ast.SelectorExpr>>();
+                if (ok)
+                {
+                    {
+                        ptr<ast.Ident> (l, ok) = sel.X._<ptr<ast.Ident>>();
+
+                        if (!ok || l.Name != "C")
+                        {
+                            return ;
+                        }
+
+                    }
+
+
+                    foreach (var (_, r) in f.Ref)
+                    {
+                        if (r.Expr == px)
+                        {
+                            px.val = p.rewriteName(f, r);
+                            r.Done = true;
+                            break;
+                        }
+
+                    }
+                    return ;
+
+                }
+
+                ptr<ast.CallExpr> (call, ok) = (px.val)._<ptr<ast.CallExpr>>();
+                if (!ok)
+                {
+                    return ;
+                }
+
+                foreach (var (_, c) in f.Calls)
+                {
+                    if (!c.Done && c.Call.Lparen == call.Lparen)
+                    {
+                        var (cstr, nu) = p.rewriteCall(f, c);
+                        if (cstr != "")
+                        { 
+                            // Smuggle the rewritten call through an ident.
+                            px.val = ast.NewIdent(cstr);
+                            if (nu)
+                            {
+                                needsUnsafe = true;
+                            }
+
+                            c.Done = true;
+
+                        }
+
+                    }
+
+                }
+
+            });
+            return (arg, needsUnsafe);
+
+        }
+
+        // checkIndex checks whether arg has the form &a[i], possibly inside
+        // type conversions. If so, then in the general case it writes
+        //    _cgoIndexNN := a
+        //    _cgoNN := &cgoIndexNN[i] // with type conversions, if any
+        // to sb, and writes
+        //    _cgoCheckPointer(_cgoNN, _cgoIndexNN)
+        // to sbCheck, and returns true. If a is a simple variable or field reference,
+        // it writes
+        //    _cgoIndexNN := &a
+        // and dereferences the uses of _cgoIndexNN. Taking the address avoids
+        // making a copy of an array.
+        //
+        // This tells _cgoCheckPointer to check the complete contents of the
+        // slice or array being indexed, but no other part of the memory allocation.
+        private static bool checkIndex(this ptr<Package> _addr_p, ptr<bytes.Buffer> _addr_sb, ptr<bytes.Buffer> _addr_sbCheck, ast.Expr arg, long i)
+        {
+            ref Package p = ref _addr_p.val;
+            ref bytes.Buffer sb = ref _addr_sb.val;
+            ref bytes.Buffer sbCheck = ref _addr_sbCheck.val;
+ 
             // Strip type conversions.
+            var x = arg;
             while (true)
             {
-                ref ast.CallExpr (c, ok) = x._<ref ast.CallExpr>();
+                ptr<ast.CallExpr> (c, ok) = x._<ptr<ast.CallExpr>>();
                 if (!ok || len(c.Args) != 1L || !p.isType(c.Fun))
                 {
                     break;
                 }
+
                 x = c.Args[0L];
+
             }
 
-            ref ast.UnaryExpr (u, ok) = x._<ref ast.UnaryExpr>();
+            ptr<ast.UnaryExpr> (u, ok) = x._<ptr<ast.UnaryExpr>>();
             if (!ok || u.Op != token.AND)
             {
-                return args;
+                return false;
             }
-            ref ast.IndexExpr (index, ok) = u.X._<ref ast.IndexExpr>();
+
+            ptr<ast.IndexExpr> (index, ok) = u.X._<ptr<ast.IndexExpr>>();
             if (!ok)
-            { 
-                // This is the address of something that is not an
-                // index expression. We only need to examine the
-                // single value to which it points.
-                // TODO: what if true is shadowed?
-                return append(args, ast.NewIdent("true"));
-            }
-            if (!p.hasSideEffects(f, index.X))
-            { 
-                // Examine the entire slice.
-                return append(args, index.X);
-            } 
-            // Treat the pointer as unknown.
-            return args;
-        }
-
-        // hasSideEffects returns whether the expression x has any side
-        // effects.  x is an expression, not a statement, so the only side
-        // effect is a function call.
-        private static bool hasSideEffects(this ref Package p, ref File f, ast.Expr x)
-        {
-            var found = false;
-            f.walk(x, ctxExpr, (f, x, context) =>
             {
-                switch (x.type())
-                {
-                    case ref ast.CallExpr _:
-                        found = true;
-                        break;
-                }
-            });
-            return found;
+                return false;
+            }
+
+            @string addr = "";
+            @string deref = "";
+            if (p.isVariable(index.X))
+            {
+                addr = "&";
+                deref = "*";
+            }
+
+            fmt.Fprintf(sb, "_cgoIndex%d := %s%s; ", i, addr, gofmtPos(index.X, index.X.Pos()));
+            var origX = index.X;
+            index.X = ast.NewIdent(fmt.Sprintf("_cgoIndex%d", i));
+            if (deref == "*")
+            {
+                index.X = addr(new ast.StarExpr(X:index.X));
+            }
+
+            fmt.Fprintf(sb, "_cgo%d := %s; ", i, gofmtPos(arg, arg.Pos()));
+            index.X = origX;
+
+            fmt.Fprintf(sbCheck, "_cgoCheckPointer(_cgo%d, %s_cgoIndex%d); ", i, deref, i);
+
+            return true;
+
         }
 
-        // isType returns whether the expression is definitely a type.
-        // This is conservative--it returns false for an unknown identifier.
-        private static bool isType(this ref Package p, ast.Expr t)
+        // checkAddr checks whether arg has the form &x, possibly inside type
+        // conversions. If so, it writes
+        //    _cgoBaseNN := &x
+        //    _cgoNN := _cgoBaseNN // with type conversions, if any
+        // to sb, and writes
+        //    _cgoCheckPointer(_cgoBaseNN, true)
+        // to sbCheck, and returns true. This tells _cgoCheckPointer to check
+        // just the contents of the pointer being passed, not any other part
+        // of the memory allocation. This is run after checkIndex, which looks
+        // for the special case of &a[i], which requires different checks.
+        private static bool checkAddr(this ptr<Package> _addr_p, ptr<bytes.Buffer> _addr_sb, ptr<bytes.Buffer> _addr_sbCheck, ast.Expr arg, long i)
         {
+            ref Package p = ref _addr_p.val;
+            ref bytes.Buffer sb = ref _addr_sb.val;
+            ref bytes.Buffer sbCheck = ref _addr_sbCheck.val;
+ 
+            // Strip type conversions.
+            var px = _addr_arg;
+            while (true)
+            {
+                ptr<ast.CallExpr> (c, ok) = (px.val)._<ptr<ast.CallExpr>>();
+                if (!ok || len(c.Args) != 1L || !p.isType(c.Fun))
+                {
+                    break;
+                }
+
+                px = _addr_c.Args[0L];
+
+            }
+
+            {
+                ptr<ast.UnaryExpr> (u, ok) = (px.val)._<ptr<ast.UnaryExpr>>();
+
+                if (!ok || u.Op != token.AND)
+                {
+                    return false;
+                }
+
+            }
+
+
+            fmt.Fprintf(sb, "_cgoBase%d := %s; ", i, gofmtPos(px.val, ptr<px>()));
+
+            var origX = px.val;
+            px.val = ast.NewIdent(fmt.Sprintf("_cgoBase%d", i));
+            fmt.Fprintf(sb, "_cgo%d := %s; ", i, gofmtPos(arg, arg.Pos()));
+            px.val = origX; 
+
+            // Use "0 == 0" to do the right thing in the unlikely event
+            // that "true" is shadowed.
+            fmt.Fprintf(sbCheck, "_cgoCheckPointer(_cgoBase%d, 0 == 0); ", i);
+
+            return true;
+
+        }
+
+        // isType reports whether the expression is definitely a type.
+        // This is conservative--it returns false for an unknown identifier.
+        private static bool isType(this ptr<Package> _addr_p, ast.Expr t)
+        {
+            ref Package p = ref _addr_p.val;
+
             switch (t.type())
             {
-                case ref ast.SelectorExpr t:
-                    ref ast.Ident (id, ok) = t.X._<ref ast.Ident>();
+                case ptr<ast.SelectorExpr> t:
+                    ptr<ast.Ident> (id, ok) = t.X._<ptr<ast.Ident>>();
                     if (!ok)
                     {
                         return false;
                     }
+
                     if (id.Name == "unsafe" && t.Sel.Name == "Pointer")
                     {
                         return true;
                     }
+
                     if (id.Name == "C" && typedef["_Ctype_" + t.Sel.Name] != null)
                     {
                         return true;
                     }
+
                     return false;
                     break;
-                case ref ast.Ident t:
+                case ptr<ast.Ident> t:
                     switch (t.Name)
                     {
                         case "unsafe.Pointer": 
@@ -1302,56 +1896,90 @@ namespace go
                             return true;
                             break;
                     }
+                    if (strings.HasPrefix(t.Name, "_Ctype_"))
+                    {
+                        return true;
+                    }
+
                     break;
-                case ref ast.StarExpr t:
+                case ptr<ast.ParenExpr> t:
                     return p.isType(t.X);
                     break;
-                case ref ast.ArrayType t:
+                case ptr<ast.StarExpr> t:
+                    return p.isType(t.X);
+                    break;
+                case ptr<ast.ArrayType> t:
                     return true;
                     break;
-                case ref ast.StructType t:
+                case ptr<ast.StructType> t:
                     return true;
                     break;
-                case ref ast.FuncType t:
+                case ptr<ast.FuncType> t:
                     return true;
                     break;
-                case ref ast.InterfaceType t:
+                case ptr<ast.InterfaceType> t:
                     return true;
                     break;
-                case ref ast.MapType t:
+                case ptr<ast.MapType> t:
                     return true;
                     break;
-                case ref ast.ChanType t:
+                case ptr<ast.ChanType> t:
                     return true;
                     break;
             }
             return false;
+
+        }
+
+        // isVariable reports whether x is a variable, possibly with field references.
+        private static bool isVariable(this ptr<Package> _addr_p, ast.Expr x)
+        {
+            ref Package p = ref _addr_p.val;
+
+            switch (x.type())
+            {
+                case ptr<ast.Ident> x:
+                    return true;
+                    break;
+                case ptr<ast.SelectorExpr> x:
+                    return p.isVariable(x.X);
+                    break;
+                case ptr<ast.IndexExpr> x:
+                    return true;
+                    break;
+            }
+            return false;
+
         }
 
         // rewriteUnsafe returns a version of t with references to unsafe.Pointer
         // rewritten to use _cgo_unsafe.Pointer instead.
-        private static ast.Expr rewriteUnsafe(this ref Package p, ast.Expr t)
+        private static ast.Expr rewriteUnsafe(this ptr<Package> _addr_p, ast.Expr t)
         {
+            ref Package p = ref _addr_p.val;
+
             switch (t.type())
             {
-                case ref ast.Ident t:
+                case ptr<ast.Ident> t:
                     if (t.Name == "unsafe.Pointer")
                     {
                         return ast.NewIdent("_cgo_unsafe.Pointer");
                     }
+
                     break;
-                case ref ast.ArrayType t:
+                case ptr<ast.ArrayType> t:
                     var t1 = p.rewriteUnsafe(t.Elt);
                     if (t1 != t.Elt)
                     {
-                        var r = t.Value;
+                        ref var r = ref heap(t.val, out ptr<var> _addr_r);
                         r.Elt = t1;
-                        return ref r;
+                        return _addr_r;
                     }
+
                     break;
-                case ref ast.StructType t:
+                case ptr<ast.StructType> t:
                     var changed = false;
-                    var fields = t.Fields.Value;
+                    ref var fields = ref heap(t.Fields.val, out ptr<var> _addr_fields);
                     fields.List = null;
                     foreach (var (_, f) in t.Fields.List)
                     {
@@ -1362,202 +1990,92 @@ namespace go
                         }
                         else
                         {
-                            var fn = f.Value;
+                            ref var fn = ref heap(f.val, out ptr<var> _addr_fn);
                             fn.Type = ft;
-                            fields.List = append(fields.List, ref fn);
+                            fields.List = append(fields.List, _addr_fn);
                             changed = true;
                         }
+
                     }
                     if (changed)
                     {
-                        r = t.Value;
-                        r.Fields = ref fields;
-                        return ref r;
+                        r = t.val;
+                        _addr_r.Fields = _addr_fields;
+                        r.Fields = ref _addr_r.Fields.val;
+                        return _addr_r;
+
                     }
+
                     break;
-                case ref ast.StarExpr t:
+                case ptr<ast.StarExpr> t:
                     var x1 = p.rewriteUnsafe(t.X);
                     if (x1 != t.X)
                     {
-                        r = t.Value;
+                        r = t.val;
                         r.X = x1;
-                        return ref r;
+                        return _addr_r;
                     }
+
                     break;
             }
             return t;
+
         }
 
         // rewriteRef rewrites all the C.xxx references in f.AST to refer to the
         // Go equivalents, now that we have figured out the meaning of all
         // the xxx. In *godefs mode, rewriteRef replaces the names
         // with full definitions instead of mangled names.
-        private static void rewriteRef(this ref Package p, ref File f)
-        { 
+        private static void rewriteRef(this ptr<Package> _addr_p, ptr<File> _addr_f)
+        {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+ 
             // Keep a list of all the functions, to remove the ones
             // only used as expressions and avoid generating bridge
             // code for them.
-            var functions = make_map<@string, bool>(); 
+            var functions = make_map<@string, bool>();
 
-            // Assign mangled names.
+            foreach (var (_, n) in f.Name)
             {
-                var n__prev1 = n;
-
-                foreach (var (_, __n) in f.Name)
+                if (n.Kind == "func")
                 {
-                    n = __n;
-                    if (n.Kind == "not-type")
-                    {
-                        if (n.Define == "")
-                        {
-                            n.Kind = "var";
-                        }
-                        else
-                        {
-                            n.Kind = "macro";
-                            n.FuncType = ref new FuncType(Result:n.Type,Go:&ast.FuncType{Results:&ast.FieldList{List:[]*ast.Field{{Type:n.Type.Go}}},},);
-                        }
-                    }
-                    if (n.Mangle == "")
-                    {
-                        p.mangleName(n);
-                    }
-                    if (n.Kind == "func")
-                    {
-                        functions[n.Go] = false;
-                    }
-                } 
+                    functions[n.Go] = false;
+                }
 
-                // Now that we have all the name types filled in,
-                // scan through the Refs to identify the ones that
-                // are trying to do a ,err call. Also check that
-                // functions are only used in calls.
+            } 
 
-                n = n__prev1;
-            }
-
+            // Now that we have all the name types filled in,
+            // scan through the Refs to identify the ones that
+            // are trying to do a ,err call. Also check that
+            // functions are only used in calls.
             foreach (var (_, r) in f.Ref)
             {
                 if (r.Name.IsConst() && r.Name.Const == "")
                 {
                     error_(r.Pos(), "unable to find value of constant C.%s", fixGo(r.Name.Go));
                 }
-                ast.Expr expr = ast.NewIdent(r.Name.Mangle); // default
 
-                if (r.Context == ctxCall || r.Context == ctxCall2) 
-                    if (r.Name.Kind != "func")
-                    {
-                        if (r.Name.Kind == "type")
-                        {
-                            r.Context = ctxType;
-                            if (r.Name.Type == null)
-                            {
-                                error_(r.Pos(), "invalid conversion to C.%s: undefined C type '%s'", fixGo(r.Name.Go), r.Name.C);
-                                break;
-                            }
-                            expr = r.Name.Type.Go;
-                            break;
-                        }
-                        error_(r.Pos(), "call of non-function C.%s", fixGo(r.Name.Go));
-                        break;
-                    }
-                    functions[r.Name.Go] = true;
-                    if (r.Context == ctxCall2)
-                    {
-                        if (r.Name.Go == "_CMalloc")
-                        {
-                            error_(r.Pos(), "no two-result form for C.malloc");
-                            break;
-                        } 
-                        // Invent new Name for the two-result function.
-                        var n = f.Name["2" + r.Name.Go];
-                        if (n == null)
-                        {
-                            n = @new<Name>();
-                            n.Value = r.Name.Value;
-                            n.AddError = true;
-                            n.Mangle = "_C2func_" + n.Go;
-                            f.Name["2" + r.Name.Go] = n;
-                        }
-                        expr = ast.NewIdent(n.Mangle);
-                        r.Name = n;
-                        break;
-                    }
-                else if (r.Context == ctxExpr) 
-                    switch (r.Name.Kind)
-                    {
-                        case "func": 
-                            if (builtinDefs[r.Name.C] != "")
-                            {
-                                error_(r.Pos(), "use of builtin '%s' not in function call", fixGo(r.Name.C));
-                            } 
+                if (r.Name.Kind == "func")
+                {
 
-                            // Function is being used in an expression, to e.g. pass around a C function pointer.
-                            // Create a new Name for this Ref which causes the variable to be declared in Go land.
-                            @string fpName = "fp_" + r.Name.Go;
-                            var name = f.Name[fpName];
-                            if (name == null)
-                            {
-                                name = ref new Name(Go:fpName,C:r.Name.C,Kind:"fpvar",Type:&Type{Size:p.PtrSize,Align:p.PtrSize,C:c("void*"),Go:ast.NewIdent("unsafe.Pointer")},);
-                                p.mangleName(name);
-                                f.Name[fpName] = name;
-                            }
-                            r.Name = name; 
-                            // Rewrite into call to _Cgo_ptr to prevent assignments. The _Cgo_ptr
-                            // function is defined in out.go and simply returns its argument. See
-                            // issue 7757.
-                            expr = ref new ast.CallExpr(Fun:&ast.Ident{NamePos:(*r.Expr).Pos(),Name:"_Cgo_ptr"},Args:[]ast.Expr{ast.NewIdent(name.Mangle)},);
-                            break;
-                        case "type": 
-                            // Okay - might be new(T)
-                            if (r.Name.Type == null)
-                            {
-                                error_(r.Pos(), "expression C.%s: undefined C type '%s'", fixGo(r.Name.Go), r.Name.C);
-                                break;
-                            }
-                            expr = r.Name.Type.Go;
-                            break;
-                        case "var": 
-                            expr = ref new ast.StarExpr(Star:(*r.Expr).Pos(),X:expr);
-                            break;
-                        case "macro": 
-                            expr = ref new ast.CallExpr(Fun:expr);
-                            break;
-                    }
-                else if (r.Context == ctxSelector) 
-                    if (r.Name.Kind == "var")
-                    {
-                        expr = ref new ast.StarExpr(Star:(*r.Expr).Pos(),X:expr);
-                    }
-                    else
-                    {
-                        error_(r.Pos(), "only C variables allowed in selector expression %s", fixGo(r.Name.Go));
-                    }
-                else if (r.Context == ctxType) 
-                    if (r.Name.Kind != "type")
-                    {
-                        error_(r.Pos(), "expression C.%s used as type", fixGo(r.Name.Go));
-                    }
-                    else if (r.Name.Type == null)
-                    { 
-                        // Use of C.enum_x, C.struct_x or C.union_x without C definition.
-                        // GCC won't raise an error when using pointers to such unknown types.
-                        error_(r.Pos(), "type C.%s: undefined C type '%s'", fixGo(r.Name.Go), r.Name.C);
-                    }
-                    else
+                    if (r.Context == ctxCall || r.Context == ctxCall2) 
+                        functions[r.Name.Go] = true;
+                    
+                }
+
+                var expr = p.rewriteName(f, r);
+
+                if (godefs.val)
+                { 
+                    // Substitute definition for mangled type name.
+                    if (r.Name.Type != null && r.Name.Kind == "type")
                     {
                         expr = r.Name.Type.Go;
                     }
-                else 
-                    if (r.Name.Kind == "func")
+
                     {
-                        error_(r.Pos(), "must call C.%s", fixGo(r.Name.Go));
-                    }
-                                if (godefs.Value)
-                { 
-                    // Substitute definition for mangled type name.
-                    {
-                        ref ast.Ident (id, ok) = expr._<ref ast.Ident>();
+                        ptr<ast.Ident> (id, ok) = expr._<ptr<ast.Ident>>();
 
                         if (ok)
                         {
@@ -1570,60 +2088,224 @@ namespace go
                                 }
 
                             }
+
                             if (id.Name == r.Name.Mangle && r.Name.Const != "")
                             {
                                 expr = ast.NewIdent(r.Name.Const);
                             }
+
                         }
 
                     }
+
                 } 
 
                 // Copy position information from old expr into new expr,
                 // in case expression being replaced is first on line.
                 // See golang.org/issue/6563.
-                object pos = ref r.Expr();
-                switch (expr.type())
+                object pos = ptr<r.Expr>();
                 {
-                    case ref ast.Ident x:
-                        expr = ref new ast.Ident(NamePos:pos,Name:x.Name);
-                        break; 
+                    ptr<ast.Ident> (x, ok) = expr._<ptr<ast.Ident>>();
+
+                    if (ok)
+                    {
+                        expr = addr(new ast.Ident(NamePos:pos,Name:x.Name));
+                    } 
 
                     // Change AST, because some later processing depends on it,
                     // and also because -godefs mode still prints the AST.
+
                 } 
 
                 // Change AST, because some later processing depends on it,
                 // and also because -godefs mode still prints the AST.
-                var old = r.Expr.Value;
-                r.Expr.Value = expr; 
+                var old = r.Expr.val;
+                r.Expr.val = expr; 
 
                 // Record source-level edit for cgo output.
-                var repl = gofmt(expr);
-                if (r.Name.Kind != "type")
-                {
-                    repl = "(" + repl + ")";
+                if (!r.Done)
+                { 
+                    // Prepend a space in case the earlier code ends
+                    // with '/', which would give us a "//" comment.
+                    @string repl = " " + gofmtPos(expr, old.Pos());
+                    var end = fset.Position(old.End()); 
+                    // Subtract 1 from the column if we are going to
+                    // append a close parenthesis. That will set the
+                    // correct column for the following characters.
+                    long sub = 0L;
+                    if (r.Name.Kind != "type")
+                    {
+                        sub = 1L;
+                    }
+
+                    if (end.Column > sub)
+                    {
+                        repl = fmt.Sprintf("%s /*line :%d:%d*/", repl, end.Line, end.Column - sub);
+                    }
+
+                    if (r.Name.Kind != "type")
+                    {
+                        repl = "(" + repl + ")";
+                    }
+
+                    f.Edit.Replace(f.offset(old.Pos()), f.offset(old.End()), repl);
+
                 }
-                f.Edit.Replace(f.offset(old.Pos()), f.offset(old.End()), repl);
+
             } 
 
             // Remove functions only used as expressions, so their respective
             // bridge functions are not generated.
+            foreach (var (name, used) in functions)
             {
-                var name__prev1 = name;
-
-                foreach (var (__name, __used) in functions)
+                if (!used)
                 {
-                    name = __name;
-                    used = __used;
-                    if (!used)
-                    {
-                        delete(f.Name, name);
-                    }
+                    delete(f.Name, name);
                 }
 
-                name = name__prev1;
             }
+
+        }
+
+        // rewriteName returns the expression used to rewrite a reference.
+        private static ast.Expr rewriteName(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<Ref> _addr_r)
+        {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+            ref Ref r = ref _addr_r.val;
+
+            ast.Expr expr = ast.NewIdent(r.Name.Mangle); // default
+
+            if (r.Context == ctxCall || r.Context == ctxCall2) 
+                if (r.Name.Kind != "func")
+                {
+                    if (r.Name.Kind == "type")
+                    {
+                        r.Context = ctxType;
+                        if (r.Name.Type == null)
+                        {
+                            error_(r.Pos(), "invalid conversion to C.%s: undefined C type '%s'", fixGo(r.Name.Go), r.Name.C);
+                        }
+
+                        break;
+
+                    }
+
+                    error_(r.Pos(), "call of non-function C.%s", fixGo(r.Name.Go));
+                    break;
+
+                }
+
+                if (r.Context == ctxCall2)
+                {
+                    if (r.Name.Go == "_CMalloc")
+                    {
+                        error_(r.Pos(), "no two-result form for C.malloc");
+                        break;
+                    } 
+                    // Invent new Name for the two-result function.
+                    var n = f.Name["2" + r.Name.Go];
+                    if (n == null)
+                    {
+                        n = @new<Name>();
+                        n.val = r.Name.val;
+                        n.AddError = true;
+                        n.Mangle = "_C2func_" + n.Go;
+                        f.Name["2" + r.Name.Go] = n;
+                    }
+
+                    expr = ast.NewIdent(n.Mangle);
+                    r.Name = n;
+                    break;
+
+                }
+
+            else if (r.Context == ctxExpr) 
+                switch (r.Name.Kind)
+                {
+                    case "func": 
+                        if (builtinDefs[r.Name.C] != "")
+                        {
+                            error_(r.Pos(), "use of builtin '%s' not in function call", fixGo(r.Name.C));
+                        } 
+
+                        // Function is being used in an expression, to e.g. pass around a C function pointer.
+                        // Create a new Name for this Ref which causes the variable to be declared in Go land.
+                        @string fpName = "fp_" + r.Name.Go;
+                        var name = f.Name[fpName];
+                        if (name == null)
+                        {
+                            name = addr(new Name(Go:fpName,C:r.Name.C,Kind:"fpvar",Type:&Type{Size:p.PtrSize,Align:p.PtrSize,C:c("void*"),Go:ast.NewIdent("unsafe.Pointer")},));
+                            p.mangleName(name);
+                            f.Name[fpName] = name;
+                        }
+
+                        r.Name = name; 
+                        // Rewrite into call to _Cgo_ptr to prevent assignments. The _Cgo_ptr
+                        // function is defined in out.go and simply returns its argument. See
+                        // issue 7757.
+                        expr = addr(new ast.CallExpr(Fun:&ast.Ident{NamePos:(*r.Expr).Pos(),Name:"_Cgo_ptr"},Args:[]ast.Expr{ast.NewIdent(name.Mangle)},));
+                        break;
+                    case "type": 
+                        // Okay - might be new(T)
+                        if (r.Name.Type == null)
+                        {
+                            error_(r.Pos(), "expression C.%s: undefined C type '%s'", fixGo(r.Name.Go), r.Name.C);
+                        }
+
+                        break;
+                    case "var": 
+                        expr = addr(new ast.StarExpr(Star:(*r.Expr).Pos(),X:expr));
+                        break;
+                    case "macro": 
+                        expr = addr(new ast.CallExpr(Fun:expr));
+                        break;
+                }
+            else if (r.Context == ctxSelector) 
+                if (r.Name.Kind == "var")
+                {
+                    expr = addr(new ast.StarExpr(Star:(*r.Expr).Pos(),X:expr));
+                }
+                else
+                {
+                    error_(r.Pos(), "only C variables allowed in selector expression %s", fixGo(r.Name.Go));
+                }
+
+            else if (r.Context == ctxType) 
+                if (r.Name.Kind != "type")
+                {
+                    error_(r.Pos(), "expression C.%s used as type", fixGo(r.Name.Go));
+                }
+                else if (r.Name.Type == null)
+                { 
+                    // Use of C.enum_x, C.struct_x or C.union_x without C definition.
+                    // GCC won't raise an error when using pointers to such unknown types.
+                    error_(r.Pos(), "type C.%s: undefined C type '%s'", fixGo(r.Name.Go), r.Name.C);
+
+                }
+
+            else 
+                if (r.Name.Kind == "func")
+                {
+                    error_(r.Pos(), "must call C.%s", fixGo(r.Name.Go));
+                }
+
+                        return expr;
+
+        }
+
+        // gofmtPos returns the gofmt-formatted string for an AST node,
+        // with a comment setting the position before the node.
+        private static @string gofmtPos(ast.Expr n, token.Pos pos)
+        {
+            var s = gofmtLine(n);
+            var p = fset.Position(pos);
+            if (p.Column == 0L)
+            {
+                return s;
+            }
+
+            return fmt.Sprintf("/*line :%d:%d*/%s", p.Line, p.Column, s);
 
         }
 
@@ -1631,8 +2313,10 @@ namespace go
         // It uses $CC if set, or else $GCC, or else the compiler recorded
         // during the initial build as defaultCC.
         // defaultCC is defined in zdefaultcc.go, written by cmd/dist.
-        private static slice<@string> gccBaseCmd(this ref Package p)
-        { 
+        private static slice<@string> gccBaseCmd(this ptr<Package> _addr_p)
+        {
+            ref Package p = ref _addr_p.val;
+ 
             // Use $CC if set, since that's what the build uses.
             {
                 var ret__prev1 = ret;
@@ -1662,12 +2346,16 @@ namespace go
                 ret = ret__prev1;
 
             }
+
             return strings.Fields(defaultCC(goos, goarch));
+
         }
 
         // gccMachine returns the gcc -m flag to use, either "-m32", "-m64" or "-marm".
-        private static slice<@string> gccMachine(this ref Package p)
+        private static slice<@string> gccMachine(this ptr<Package> _addr_p)
         {
+            ref Package p = ref _addr_p.val;
+
             switch (goarch)
             {
                 case "amd64": 
@@ -1697,44 +2385,63 @@ namespace go
                     break;
             }
             return null;
+
         }
 
         private static @string gccTmp()
         {
-            return objDir + "_cgo_.o".Value;
+            return objDir + "_cgo_.o".val;
         }
 
         // gccCmd returns the gcc command line to use for compiling
         // the input.
-        private static slice<@string> gccCmd(this ref Package p)
+        private static slice<@string> gccCmd(this ptr<Package> _addr_p)
         {
+            ref Package p = ref _addr_p.val;
+
             var c = append(p.gccBaseCmd(), "-w", "-Wno-error", "-o" + gccTmp(), "-gdwarf-2", "-c", "-xc");
             if (p.GccIsClang)
             {
                 c = append(c, "-ferror-limit=0", "-Wno-unknown-warning-option", "-Wno-unneeded-internal-declaration", "-Wno-unused-function", "-Qunused-arguments", "-fno-builtin");
             }
+
             c = append(c, p.GccOptions);
             c = append(c, p.gccMachine());
+            if (goos == "aix")
+            {
+                c = append(c, "-maix64");
+                c = append(c, "-mcmodel=large");
+            }
+
             c = append(c, "-"); //read input from standard input
             return c;
+
         }
 
         // gccDebug runs gcc -gdwarf-2 over the C program stdin and
         // returns the corresponding DWARF data and, if present, debug data block.
-        private static (ref dwarf.Data, slice<long>, slice<double>, slice<@string>) gccDebug(this ref Package _p, slice<byte> stdin, long nnames) => func(_p, (ref Package p, Defer defer, Panic panic, Recover _) =>
+        private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gccDebug(this ptr<Package> _addr_p, slice<byte> stdin, long nnames) => func((defer, panic, _) =>
         {
+            ptr<dwarf.Data> d = default!;
+            slice<long> ints = default;
+            slice<double> floats = default;
+            slice<@string> strs = default;
+            ref Package p = ref _addr_p.val;
+
             runGcc(stdin, p.gccCmd());
 
             Func<@string, bool> isDebugInts = s =>
             { 
                 // Some systems use leading _ to denote non-assembly symbols.
-                return s == "__cgodebug_ints" || s == "___cgodebug_ints";
+                return _addr_s == "__cgodebug_ints" || s == "___cgodebug_ints"!;
+
             }
 ;
             Func<@string, bool> isDebugFloats = s =>
             { 
                 // Some systems use leading _ to denote non-assembly symbols.
-                return s == "__cgodebug_floats" || s == "___cgodebug_floats";
+                return _addr_s == "__cgodebug_floats" || s == "___cgodebug_floats"!;
+
             }
 ;
             Func<@string, long> indexOfDebugStr = s =>
@@ -1744,6 +2451,7 @@ namespace go
                 {
                     s = s[1L..];
                 }
+
                 if (strings.HasPrefix(s, "__cgodebug_str__"))
                 {
                     {
@@ -1753,14 +2461,17 @@ namespace go
 
                         if (err == null)
                         {
-                            return n;
+                            return _addr_n!;
                         }
 
                         n = n__prev2;
 
                     }
+
                 }
-                return -1L;
+
+                return _addr_-1L!;
+
             }
 ;
             Func<@string, long> indexOfDebugStrlen = s =>
@@ -1770,6 +2481,7 @@ namespace go
                 {
                     s = s[1L..];
                 }
+
                 if (strings.HasPrefix(s, "__cgodebug_strlen__"))
                 {
                     {
@@ -1779,14 +2491,17 @@ namespace go
 
                         if (err == null)
                         {
-                            return n;
+                            return _addr_n!;
                         }
 
                         n = n__prev2;
 
                     }
+
                 }
-                return -1L;
+
+                return _addr_-1L!;
+
             }
 ;
 
@@ -1810,13 +2525,14 @@ namespace go
                         {
                             fatalf("invalid string literal");
                         }
-                        strs[n] = string(data[..strlen]);
+
+                        strs[n] = data[..strlen];
+
                     }
 
                     n = n__prev1;
                     strlen = strlen__prev1;
                 }
-
             }
 ;
 
@@ -1833,6 +2549,7 @@ namespace go
                     {
                         fatalf("cannot load DWARF output from %s: %v", gccTmp(), err);
                     }
+
                     var bo = f.ByteOrder;
                     if (f.Symtab != null)
                     {
@@ -1842,7 +2559,7 @@ namespace go
                             foreach (var (__i) in f.Symtab.Syms)
                             {
                                 i = __i;
-                                var s = ref f.Symtab.Syms[i];
+                                var s = _addr_f.Symtab.Syms[i];
 
                                 if (isDebugInts(s.Name)) 
                                     // Found it. Now find data section.
@@ -1876,18 +2593,20 @@ namespace go
 
                                                             i = i__prev2;
                                                         }
-
                                                     }
 
                                                     sdat = sdat__prev5;
 
                                                 }
+
                                             }
+
                                         }
 
                                         i = i__prev3;
 
                                     }
+
                                 else if (isDebugFloats(s.Name)) 
                                     // Found it. Now find data section.
                                     {
@@ -1920,18 +2639,20 @@ namespace go
 
                                                             i = i__prev2;
                                                         }
-
                                                     }
 
                                                     sdat = sdat__prev5;
 
                                                 }
+
                                             }
+
                                         }
 
                                         i = i__prev3;
 
                                     }
+
                                 else 
                                     {
                                         var n__prev3 = n;
@@ -1965,18 +2686,23 @@ namespace go
                                                             sdat = sdat__prev6;
 
                                                         }
+
                                                     }
+
                                                 }
 
                                                 i = i__prev4;
 
                                             }
+
                                             break;
+
                                         }
 
                                         n = n__prev3;
 
                                     }
+
                                     {
                                         var n__prev3 = n;
 
@@ -2007,38 +2733,50 @@ namespace go
                                                                 if (strlen > (1L << (int)((uint(p.IntSize * 8L) - 1L)) - 1L))
                                                                 { // greater than MaxInt?
                                                                     fatalf("string literal too big");
+
                                                                 }
+
                                                                 strlens[n] = int(strlen);
+
                                                             }
 
                                                             sdat = sdat__prev6;
 
                                                         }
+
                                                     }
+
                                                 }
 
                                                 i = i__prev4;
 
                                             }
+
                                             break;
+
                                         }
 
                                         n = n__prev3;
 
                                     }
+
                                                             }
 
                             i = i__prev1;
                         }
 
                         buildStrings();
+
                     }
-                    return (d, ints, floats, strs);
+
+                    return (_addr_d!, ints, floats, strs);
+
                 }
 
                 f = f__prev1;
 
             }
+
 
             {
                 var f__prev1 = f;
@@ -2053,6 +2791,7 @@ namespace go
                     {
                         fatalf("cannot load DWARF output from %s: %v", gccTmp(), err);
                     }
+
                     bo = f.ByteOrder;
                     var (symtab, err) = f.Symbols();
                     if (err == null)
@@ -2063,7 +2802,7 @@ namespace go
                             foreach (var (__i) in symtab)
                             {
                                 i = __i;
-                                s = ref symtab[i];
+                                s = _addr_symtab[i];
 
                                 if (isDebugInts(s.Name)) 
                                     // Found it. Now find data section.
@@ -2097,18 +2836,20 @@ namespace go
 
                                                             i = i__prev2;
                                                         }
-
                                                     }
 
                                                     sdat = sdat__prev5;
 
                                                 }
+
                                             }
+
                                         }
 
                                         i = i__prev3;
 
                                     }
+
                                 else if (isDebugFloats(s.Name)) 
                                     // Found it. Now find data section.
                                     {
@@ -2141,18 +2882,20 @@ namespace go
 
                                                             i = i__prev2;
                                                         }
-
                                                     }
 
                                                     sdat = sdat__prev5;
 
                                                 }
+
                                             }
+
                                         }
 
                                         i = i__prev3;
 
                                     }
+
                                 else 
                                     {
                                         var n__prev3 = n;
@@ -2186,18 +2929,23 @@ namespace go
                                                             sdat = sdat__prev6;
 
                                                         }
+
                                                     }
+
                                                 }
 
                                                 i = i__prev4;
 
                                             }
+
                                             break;
+
                                         }
 
                                         n = n__prev3;
 
                                     }
+
                                     {
                                         var n__prev3 = n;
 
@@ -2228,38 +2976,50 @@ namespace go
                                                                 if (strlen > (1L << (int)((uint(p.IntSize * 8L) - 1L)) - 1L))
                                                                 { // greater than MaxInt?
                                                                     fatalf("string literal too big");
+
                                                                 }
+
                                                                 strlens[n] = int(strlen);
+
                                                             }
 
                                                             sdat = sdat__prev6;
 
                                                         }
+
                                                     }
+
                                                 }
 
                                                 i = i__prev4;
 
                                             }
+
                                             break;
+
                                         }
 
                                         n = n__prev3;
 
                                     }
+
                                                             }
 
                             i = i__prev1;
                         }
 
                         buildStrings();
+
                     }
-                    return (d, ints, floats, strs);
+
+                    return (_addr_d!, ints, floats, strs);
+
                 }
 
                 f = f__prev1;
 
             }
+
 
             {
                 var f__prev1 = f;
@@ -2274,6 +3034,7 @@ namespace go
                     {
                         fatalf("cannot load DWARF output from %s: %v", gccTmp(), err);
                     }
+
                     bo = binary.LittleEndian;
                     {
                         var s__prev1 = s;
@@ -2313,18 +3074,20 @@ namespace go
 
                                                         i = i__prev2;
                                                     }
-
                                                 }
 
                                                 sdat = sdat__prev4;
 
                                             }
+
                                         }
+
                                     }
 
                                     i = i__prev2;
 
                                 }
+
                             else if (isDebugFloats(s.Name)) 
                                 {
                                     var i__prev2 = i;
@@ -2356,18 +3119,20 @@ namespace go
 
                                                         i = i__prev2;
                                                     }
-
                                                 }
 
                                                 sdat = sdat__prev4;
 
                                             }
+
                                         }
+
                                     }
 
                                     i = i__prev2;
 
                                 }
+
                             else 
                                 {
                                     var n__prev2 = n;
@@ -2400,18 +3165,23 @@ namespace go
                                                         sdat = sdat__prev5;
 
                                                     }
+
                                                 }
+
                                             }
 
                                             i = i__prev3;
 
                                         }
+
                                         break;
+
                                     }
 
                                     n = n__prev2;
 
                                 }
+
                                 {
                                     var n__prev2 = n;
 
@@ -2441,25 +3211,33 @@ namespace go
                                                             if (strlen > (1L << (int)((uint(p.IntSize * 8L) - 1L)) - 1L))
                                                             { // greater than MaxInt?
                                                                 fatalf("string literal too big");
+
                                                             }
+
                                                             strlens[n] = int(strlen);
+
                                                         }
 
                                                         sdat = sdat__prev5;
 
                                                     }
+
                                                 }
+
                                             }
 
                                             i = i__prev3;
 
                                         }
+
                                         break;
+
                                     }
 
                                     n = n__prev2;
 
                                 }
+
                                                     }
 
                         s = s__prev1;
@@ -2467,23 +3245,259 @@ namespace go
 
                     buildStrings();
 
-                    return (d, ints, floats, strs);
+                    return (_addr_d!, ints, floats, strs);
+
                 }
 
                 f = f__prev1;
 
             }
 
-            fatalf("cannot parse gcc output %s as ELF, Mach-O, PE object", gccTmp());
+
+            {
+                var f__prev1 = f;
+
+                (f, err) = xcoff.Open(gccTmp());
+
+                if (err == null)
+                {
+                    defer(f.Close());
+                    (d, err) = f.DWARF();
+                    if (err != null)
+                    {
+                        fatalf("cannot load DWARF output from %s: %v", gccTmp(), err);
+                    }
+
+                    bo = binary.BigEndian;
+                    {
+                        var s__prev1 = s;
+
+                        foreach (var (_, __s) in f.Symbols)
+                        {
+                            s = __s;
+
+                            if (isDebugInts(s.Name)) 
+                                {
+                                    var i__prev2 = i;
+
+                                    i = int(s.SectionNumber) - 1L;
+
+                                    if (0L <= i && i < len(f.Sections))
+                                    {
+                                        sect = f.Sections[i];
+                                        if (s.Value < sect.Size)
+                                        {
+                                            {
+                                                var sdat__prev4 = sdat;
+
+                                                (sdat, err) = sect.Data();
+
+                                                if (err == null)
+                                                {
+                                                    data = sdat[s.Value..];
+                                                    ints = make_slice<long>(len(data) / 8L);
+                                                    {
+                                                        var i__prev2 = i;
+
+                                                        foreach (var (__i) in ints)
+                                                        {
+                                                            i = __i;
+                                                            ints[i] = int64(bo.Uint64(data[i * 8L..]));
+                                                        }
+
+                                                        i = i__prev2;
+                                                    }
+                                                }
+
+                                                sdat = sdat__prev4;
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                    i = i__prev2;
+
+                                }
+
+                            else if (isDebugFloats(s.Name)) 
+                                {
+                                    var i__prev2 = i;
+
+                                    i = int(s.SectionNumber) - 1L;
+
+                                    if (0L <= i && i < len(f.Sections))
+                                    {
+                                        sect = f.Sections[i];
+                                        if (s.Value < sect.Size)
+                                        {
+                                            {
+                                                var sdat__prev4 = sdat;
+
+                                                (sdat, err) = sect.Data();
+
+                                                if (err == null)
+                                                {
+                                                    data = sdat[s.Value..];
+                                                    floats = make_slice<double>(len(data) / 8L);
+                                                    {
+                                                        var i__prev2 = i;
+
+                                                        foreach (var (__i) in floats)
+                                                        {
+                                                            i = __i;
+                                                            floats[i] = math.Float64frombits(bo.Uint64(data[i * 8L..]));
+                                                        }
+
+                                                        i = i__prev2;
+                                                    }
+                                                }
+
+                                                sdat = sdat__prev4;
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                    i = i__prev2;
+
+                                }
+
+                            else 
+                                {
+                                    var n__prev2 = n;
+
+                                    n = indexOfDebugStr(s.Name);
+
+                                    if (n != -1L)
+                                    {
+                                        {
+                                            var i__prev3 = i;
+
+                                            i = int(s.SectionNumber) - 1L;
+
+                                            if (0L <= i && i < len(f.Sections))
+                                            {
+                                                sect = f.Sections[i];
+                                                if (s.Value < sect.Size)
+                                                {
+                                                    {
+                                                        var sdat__prev5 = sdat;
+
+                                                        (sdat, err) = sect.Data();
+
+                                                        if (err == null)
+                                                        {
+                                                            data = sdat[s.Value..];
+                                                            strdata[n] = string(data);
+                                                        }
+
+                                                        sdat = sdat__prev5;
+
+                                                    }
+
+                                                }
+
+                                            }
+
+                                            i = i__prev3;
+
+                                        }
+
+                                        break;
+
+                                    }
+
+                                    n = n__prev2;
+
+                                }
+
+                                {
+                                    var n__prev2 = n;
+
+                                    n = indexOfDebugStrlen(s.Name);
+
+                                    if (n != -1L)
+                                    {
+                                        {
+                                            var i__prev3 = i;
+
+                                            i = int(s.SectionNumber) - 1L;
+
+                                            if (0L <= i && i < len(f.Sections))
+                                            {
+                                                sect = f.Sections[i];
+                                                if (s.Value < sect.Size)
+                                                {
+                                                    {
+                                                        var sdat__prev5 = sdat;
+
+                                                        (sdat, err) = sect.Data();
+
+                                                        if (err == null)
+                                                        {
+                                                            data = sdat[s.Value..];
+                                                            strlen = bo.Uint64(data[..8L]);
+                                                            if (strlen > (1L << (int)((uint(p.IntSize * 8L) - 1L)) - 1L))
+                                                            { // greater than MaxInt?
+                                                                fatalf("string literal too big");
+
+                                                            }
+
+                                                            strlens[n] = int(strlen);
+
+                                                        }
+
+                                                        sdat = sdat__prev5;
+
+                                                    }
+
+                                                }
+
+                                            }
+
+                                            i = i__prev3;
+
+                                        }
+
+                                        break;
+
+                                    }
+
+                                    n = n__prev2;
+
+                                }
+
+                                                    }
+
+                        s = s__prev1;
+                    }
+
+                    buildStrings();
+                    return (_addr_d!, ints, floats, strs);
+
+                }
+
+                f = f__prev1;
+
+            }
+
+            fatalf("cannot parse gcc output %s as ELF, Mach-O, PE, XCOFF object", gccTmp());
             panic("not reached");
+
         });
 
         // gccDefines runs gcc -E -dM -xc - over the C program stdin
         // and returns the corresponding standard output, which is the
         // #defines that gcc encountered while processing the input
         // and its included files.
-        private static @string gccDefines(this ref Package p, slice<byte> stdin)
+        private static @string gccDefines(this ptr<Package> _addr_p, slice<byte> stdin)
         {
+            ref Package p = ref _addr_p.val;
+
             var @base = append(p.gccBaseCmd(), "-E", "-dM", "-xc");
             base = append(base, p.gccMachine());
             var (stdout, _) = runGcc(stdin, append(append(base, p.GccOptions), "-"));
@@ -2493,8 +3507,10 @@ namespace go
         // gccErrors runs gcc over the C program stdin and returns
         // the errors that gcc prints. That is, this function expects
         // gcc to fail.
-        private static @string gccErrors(this ref Package p, slice<byte> stdin)
-        { 
+        private static @string gccErrors(this ptr<Package> _addr_p, slice<byte> stdin)
+        {
+            ref Package p = ref _addr_p.val;
+ 
             // TODO(rsc): require failure
             var args = p.gccCmd(); 
 
@@ -2506,20 +3522,31 @@ namespace go
                 {
                     nargs = append(nargs, arg);
                 }
-            }
-            if (debugGcc.Value)
+
+            } 
+
+            // Force -O0 optimization but keep the trailing "-" at the end.
+            nargs = append(nargs, "-O0");
+            var nl = len(nargs);
+            nargs[nl - 2L] = nargs[nl - 1L];
+            nargs[nl - 1L] = nargs[nl - 2L];
+
+            if (debugGcc.val)
             {
                 fmt.Fprintf(os.Stderr, "$ %s <<EOF\n", strings.Join(nargs, " "));
                 os.Stderr.Write(stdin);
                 fmt.Fprint(os.Stderr, "EOF\n");
             }
+
             var (stdout, stderr, _) = run(stdin, nargs);
-            if (debugGcc.Value)
+            if (debugGcc.val)
             {
                 os.Stderr.Write(stdout);
                 os.Stderr.Write(stderr);
             }
+
             return string(stderr);
+
         }
 
         // runGcc runs the gcc command line args with stdin on standard input.
@@ -2530,32 +3557,40 @@ namespace go
         // on standard error, but for those uses gcc must still exit 0.
         private static (@string, @string) runGcc(slice<byte> stdin, slice<@string> args)
         {
-            if (debugGcc.Value)
+            @string _p0 = default;
+            @string _p0 = default;
+
+            if (debugGcc.val)
             {
                 fmt.Fprintf(os.Stderr, "$ %s <<EOF\n", strings.Join(args, " "));
                 os.Stderr.Write(stdin);
                 fmt.Fprint(os.Stderr, "EOF\n");
             }
+
             var (stdout, stderr, ok) = run(stdin, args);
-            if (debugGcc.Value)
+            if (debugGcc.val)
             {
                 os.Stderr.Write(stdout);
                 os.Stderr.Write(stderr);
             }
+
             if (!ok)
             {
                 os.Stderr.Write(stderr);
                 os.Exit(2L);
             }
+
             return (string(stdout), string(stderr));
+
         }
 
         // A typeConv is a translator from dwarf types to Go types
         // with equivalent memory layout.
         private partial struct typeConv
         {
-            public map<dwarf.Type, ref Type> m; // Map from types to incomplete pointers to those types.
-            public map<dwarf.Type, slice<ref Type>> ptrs; // Keys of ptrs in insertion order (deterministic worklist)
+            public map<@string, ptr<Type>> m; // Map from types to incomplete pointers to those types.
+            public map<@string, slice<ptr<Type>>> ptrs; // Keys of ptrs in insertion order (deterministic worklist)
+// ptrKeys contains exactly the keys in ptrs.
             public slice<dwarf.Type> ptrKeys; // Type names X for which there exists an XGetTypeID function with type func() CFTypeID.
             public map<@string, bool> getTypeIDs; // Predeclared types.
             public ast.Expr @bool;
@@ -2583,19 +3618,25 @@ namespace go
         }
 
         private static long tagGen = default;
-        private static var typedef = make_map<@string, ref Type>();
-        private static var goIdent = make_map<@string, ref ast.Ident>();
+        private static var typedef = make_map<@string, ptr<Type>>();
+        private static var goIdent = make_map<@string, ptr<ast.Ident>>();
 
         // unionWithPointer is true for a Go type that represents a C union (or class)
         // that may contain a pointer. This is used for cgo pointer checking.
         private static var unionWithPointer = make_map<ast.Expr, bool>();
 
-        private static void Init(this ref typeConv c, long ptrSize, long intSize)
+        // anonymousStructTag provides a consistent tag for an anonymous struct.
+        // The same dwarf.StructType pointer will always get the same tag.
+        private static var anonymousStructTag = make_map<ptr<dwarf.StructType>, @string>();
+
+        private static void Init(this ptr<typeConv> _addr_c, long ptrSize, long intSize)
         {
+            ref typeConv c = ref _addr_c.val;
+
             c.ptrSize = ptrSize;
             c.intSize = intSize;
-            c.m = make_map<dwarf.Type, ref Type>();
-            c.ptrs = make_map<dwarf.Type, slice<ref Type>>();
+            c.m = make_map<@string, ptr<Type>>();
+            c.ptrs = make_map<@string, slice<ptr<Type>>>();
             c.getTypeIDs = make_map<@string, bool>();
             c.@bool = c.Ident("bool");
             c.@byte = c.Ident("byte");
@@ -2618,14 +3659,15 @@ namespace go
 
             // Normally cgo translates void* to unsafe.Pointer,
             // but for historical reasons -godefs uses *byte instead.
-            if (godefs.Value)
+            if (godefs.val)
             {
-                c.goVoidPtr = ref new ast.StarExpr(X:c.byte);
+                c.goVoidPtr = addr(new ast.StarExpr(X:c.byte));
             }
             else
             {
                 c.goVoidPtr = c.Ident("unsafe.Pointer");
             }
+
         }
 
         // base strips away qualifiers and typedefs to get the underlying type
@@ -2634,9 +3676,9 @@ namespace go
             while (true)
             {
                 {
-                    ref dwarf.QualType d__prev1 = d;
+                    ptr<dwarf.QualType> d__prev1 = d;
 
-                    ref dwarf.QualType (d, ok) = dt._<ref dwarf.QualType>();
+                    ptr<dwarf.QualType> (d, ok) = dt._<ptr<dwarf.QualType>>();
 
                     if (ok)
                     {
@@ -2647,10 +3689,11 @@ namespace go
                     d = d__prev1;
 
                 }
+
                 {
-                    ref dwarf.QualType d__prev1 = d;
+                    ptr<dwarf.QualType> d__prev1 = d;
 
-                    (d, ok) = dt._<ref dwarf.TypedefType>();
+                    (d, ok) = dt._<ptr<dwarf.TypedefType>>();
 
                     if (ok)
                     {
@@ -2661,10 +3704,13 @@ namespace go
                     d = d__prev1;
 
                 }
+
                 break;
+
             }
 
             return dt;
+
         }
 
         // unqual strips away qualifiers from a DWARF type.
@@ -2674,7 +3720,7 @@ namespace go
             while (true)
             {
                 {
-                    ref dwarf.QualType (d, ok) = dt._<ref dwarf.QualType>();
+                    ptr<dwarf.QualType> (d, ok) = dt._<ptr<dwarf.QualType>>();
 
                     if (ok)
                     {
@@ -2686,15 +3732,17 @@ namespace go
                     }
 
                 }
+
             }
 
             return dt;
+
         }
 
         // Map from dwarf text names to aliases we use in package "C".
         private static map dwarfToName = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{"long int":"long","long unsigned int":"ulong","unsigned int":"uint","short unsigned int":"ushort","unsigned short":"ushort","short int":"short","long long int":"longlong","long long unsigned int":"ulonglong","signed char":"schar","unsigned char":"uchar",};
 
-        private static readonly long signedDelta = 64L;
+        private static readonly long signedDelta = (long)64L;
 
         // String returns the current type representation. Format arguments
         // are assembled within this method so that any changes in mutable
@@ -2704,135 +3752,194 @@ namespace go
         // String returns the current type representation. Format arguments
         // are assembled within this method so that any changes in mutable
         // values are taken into account.
-        private static @string String(this ref TypeRepr tr)
+        private static @string String(this ptr<TypeRepr> _addr_tr)
         {
+            ref TypeRepr tr = ref _addr_tr.val;
+
             if (len(tr.Repr) == 0L)
             {
                 return "";
             }
+
             if (len(tr.FormatArgs) == 0L)
             {
                 return tr.Repr;
             }
+
             return fmt.Sprintf(tr.Repr, tr.FormatArgs);
+
         }
 
         // Empty reports whether the result of String would be "".
-        private static bool Empty(this ref TypeRepr tr)
+        private static bool Empty(this ptr<TypeRepr> _addr_tr)
         {
+            ref TypeRepr tr = ref _addr_tr.val;
+
             return len(tr.Repr) == 0L;
         }
 
         // Set modifies the type representation.
         // If fargs are provided, repr is used as a format for fmt.Sprintf.
         // Otherwise, repr is used unprocessed as the type representation.
-        private static void Set(this ref TypeRepr tr, @string repr, params object[] fargs)
+        private static void Set(this ptr<TypeRepr> _addr_tr, @string repr, params object[] fargs)
         {
+            fargs = fargs.Clone();
+            ref TypeRepr tr = ref _addr_tr.val;
+
             tr.Repr = repr;
             tr.FormatArgs = fargs;
         }
 
         // FinishType completes any outstanding type mapping work.
         // In particular, it resolves incomplete pointer types.
-        private static void FinishType(this ref typeConv c, token.Pos pos)
-        { 
+        private static void FinishType(this ptr<typeConv> _addr_c, token.Pos pos)
+        {
+            ref typeConv c = ref _addr_c.val;
+ 
             // Completing one pointer type might produce more to complete.
             // Keep looping until they're all done.
             while (len(c.ptrKeys) > 0L)
             {
                 var dtype = c.ptrKeys[0L];
-                c.ptrKeys = c.ptrKeys[1L..]; 
+                var dtypeKey = dtype.String();
+                c.ptrKeys = c.ptrKeys[1L..];
+                var ptrs = c.ptrs[dtypeKey];
+                delete(c.ptrs, dtypeKey); 
 
-                // Note Type might invalidate c.ptrs[dtype].
+                // Note Type might invalidate c.ptrs[dtypeKey].
                 var t = c.Type(dtype, pos);
-                foreach (var (_, ptr) in c.ptrs[dtype])
+                foreach (var (_, ptr) in ptrs)
                 {
-                    ptr.Go._<ref ast.StarExpr>().X = t.Go;
+                    ptr.Go._<ptr<ast.StarExpr>>().X = t.Go;
                     ptr.C.Set("%s*", t.C);
                 }
-                c.ptrs[dtype] = null; // retain the map key
+
             }
+
 
         }
 
         // Type returns a *Type with the same memory layout as
         // dtype when used as the type of a variable or a struct field.
-        private static ref Type Type(this ref typeConv c, dwarf.Type dtype, token.Pos pos)
+        private static ptr<Type> Type(this ptr<typeConv> _addr_c, dwarf.Type dtype, token.Pos pos)
         {
+            ref typeConv c = ref _addr_c.val;
+
+            return _addr_c.loadType(dtype, pos, "")!;
+        }
+
+        // loadType recursively loads the requested dtype and its dependency graph.
+        private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, token.Pos pos, @string parent)
+        {
+            ref typeConv c = ref _addr_c.val;
+ 
+            // Always recompute bad pointer typedefs, as the set of such
+            // typedefs changes as we see more types.
+            var checkCache = true;
             {
-                var t__prev1 = t;
+                ptr<dwarf.TypedefType> (dtt, ok) = dtype._<ptr<dwarf.TypedefType>>();
 
-                var (t, ok) = c.m[dtype];
-
-                if (ok)
+                if (ok && c.badPointerTypedef(dtt))
                 {
-                    if (t.Go == null)
-                    {
-                        fatalf("%s: type conversion loop at %s", lineno(pos), dtype);
-                    }
-                    return t;
-                }
+                    checkCache = false;
+                } 
 
-                t = t__prev1;
+                // The cache key should be relative to its parent.
+                // See issue https://golang.org/issue/31891
+
+            } 
+
+            // The cache key should be relative to its parent.
+            // See issue https://golang.org/issue/31891
+            var key = parent + " > " + dtype.String();
+
+            if (checkCache)
+            {
+                {
+                    var t__prev2 = t;
+
+                    var (t, ok) = c.m[key];
+
+                    if (ok)
+                    {
+                        if (t.Go == null)
+                        {
+                            fatalf("%s: type conversion loop at %s", lineno(pos), dtype);
+                        }
+
+                        return _addr_t!;
+
+                    }
+
+                    t = t__prev2;
+
+                }
 
             }
 
             ptr<Type> t = @new<Type>();
             t.Size = dtype.Size(); // note: wrong for array of pointers, corrected below
             t.Align = -1L;
-            t.C = ref new TypeRepr(Repr:dtype.Common().Name);
-            c.m[dtype] = t;
+            t.C = addr(new TypeRepr(Repr:dtype.Common().Name));
+            c.m[key] = t;
 
             switch (dtype.type())
             {
-                case ref dwarf.AddrType dt:
+                case ptr<dwarf.AddrType> dt:
                     if (t.Size != c.ptrSize)
                     {
                         fatalf("%s: unexpected: %d-byte address type - %s", lineno(pos), t.Size, dtype);
                     }
+
                     t.Go = c.uintptr;
                     t.Align = t.Size;
                     break;
-                case ref dwarf.ArrayType dt:
+                case ptr<dwarf.ArrayType> dt:
                     if (dt.StrideBitSize > 0L)
                     { 
                         // Cannot represent bit-sized elements in Go.
                         t.Go = c.Opaque(t.Size);
                         break;
+
                     }
+
                     var count = dt.Count;
                     if (count == -1L)
                     { 
                         // Indicates flexible array member, which Go doesn't support.
                         // Translate to zero-length array instead.
                         count = 0L;
+
                     }
+
                     var sub = c.Type(dt.Type, pos);
                     t.Align = sub.Align;
-                    t.Go = ref new ast.ArrayType(Len:c.intExpr(count),Elt:sub.Go,); 
+                    t.Go = addr(new ast.ArrayType(Len:c.intExpr(count),Elt:sub.Go,)); 
                     // Recalculate t.Size now that we know sub.Size.
                     t.Size = count * sub.Size;
                     t.C.Set("__typeof__(%s[%d])", sub.C, dt.Count);
                     break;
-                case ref dwarf.BoolType dt:
+                case ptr<dwarf.BoolType> dt:
                     t.Go = c.@bool;
                     t.Align = 1L;
                     break;
-                case ref dwarf.CharType dt:
+                case ptr<dwarf.CharType> dt:
                     if (t.Size != 1L)
                     {
                         fatalf("%s: unexpected: %d-byte char type - %s", lineno(pos), t.Size, dtype);
                     }
+
                     t.Go = c.int8;
                     t.Align = 1L;
                     break;
-                case ref dwarf.EnumType dt:
+                case ptr<dwarf.EnumType> dt:
                     t.Align = t.Size;
 
                     if (t.Align >= c.ptrSize)
                     {
                         t.Align = c.ptrSize;
                     }
+
                     t.C.Set("enum " + dt.EnumName);
                     long signed = 0L;
                     t.EnumValues = make_map<@string, long>();
@@ -2843,6 +3950,7 @@ namespace go
                         {
                             signed = signedDelta;
                         }
+
                     }
                     switch (t.Size + int64(signed))
                     {
@@ -2875,7 +3983,7 @@ namespace go
                             break;
                     }
                     break;
-                case ref dwarf.FloatType dt:
+                case ptr<dwarf.FloatType> dt:
                     switch (t.Size)
                     {
                         case 4L: 
@@ -2894,8 +4002,9 @@ namespace go
                     {
                         t.Align = c.ptrSize;
                     }
+
                     break;
-                case ref dwarf.ComplexType dt:
+                case ptr<dwarf.ComplexType> dt:
                     switch (t.Size)
                     {
                         case 8L: 
@@ -2914,16 +4023,18 @@ namespace go
                     {
                         t.Align = c.ptrSize;
                     }
+
                     break;
-                case ref dwarf.FuncType dt:
+                case ptr<dwarf.FuncType> dt:
                     t.Go = c.uintptr;
                     t.Align = c.ptrSize;
                     break;
-                case ref dwarf.IntType dt:
+                case ptr<dwarf.IntType> dt:
                     if (dt.BitSize > 0L)
                     {
                         fatalf("%s: unexpected: %d-bit int type - %s", lineno(pos), dt.BitSize, dtype);
                     }
+
                     switch (t.Size)
                     {
                         case 1L: 
@@ -2939,7 +4050,7 @@ namespace go
                             t.Go = c.int64;
                             break;
                         case 16L: 
-                            t.Go = ref new ast.ArrayType(Len:c.intExpr(t.Size),Elt:c.uint8,);
+                            t.Go = addr(new ast.ArrayType(Len:c.intExpr(t.Size),Elt:c.uint8,));
                             break;
                         default: 
                             fatalf("%s: unexpected: %d-byte int type - %s", lineno(pos), t.Size, dtype);
@@ -2951,17 +4062,19 @@ namespace go
                     {
                         t.Align = c.ptrSize;
                     }
+
                     break;
-                case ref dwarf.PtrType dt:
+                case ptr<dwarf.PtrType> dt:
                     if (t.Size != c.ptrSize && t.Size != -1L)
                     {
                         fatalf("%s: unexpected: %d-byte pointer type - %s", lineno(pos), t.Size, dtype);
                     }
+
                     t.Size = c.ptrSize;
                     t.Align = c.ptrSize;
 
                     {
-                        ref dwarf.VoidType (_, ok) = base(dt.Type)._<ref dwarf.VoidType>();
+                        ptr<dwarf.VoidType> (_, ok) = base(dt.Type)._<ptr<dwarf.VoidType>>();
 
                         if (ok)
                         {
@@ -2971,7 +4084,7 @@ namespace go
                             while (true)
                             {
                                 {
-                                    ref dwarf.QualType (d, ok) = dq._<ref dwarf.QualType>();
+                                    ptr<dwarf.QualType> (d, ok) = dq._<ptr<dwarf.QualType>>();
 
                                     if (ok)
                                     {
@@ -2984,9 +4097,11 @@ namespace go
                                     }
 
                                 }
+
                             }
 
                             break;
+
                         } 
 
                         // Placeholder initialization; completed in FinishType.
@@ -2994,10 +4109,11 @@ namespace go
                     } 
 
                     // Placeholder initialization; completed in FinishType.
-                    t.Go = ref new ast.StarExpr();
+                    t.Go = addr(new ast.StarExpr());
                     t.C.Set("<incomplete>*");
+                    key = dt.Type.String();
                     {
-                        (_, ok) = c.ptrs[dt.Type];
+                        (_, ok) = c.ptrs[key];
 
                         if (!ok)
                         {
@@ -3005,9 +4121,10 @@ namespace go
                         }
 
                     }
-                    c.ptrs[dt.Type] = append(c.ptrs[dt.Type], t);
+
+                    c.ptrs[key] = append(c.ptrs[key], t);
                     break;
-                case ref dwarf.QualType dt:
+                case ptr<dwarf.QualType> dt:
                     var t1 = c.Type(dt.Type, pos);
                     t.Size = t1.Size;
                     t.Align = t1.Align;
@@ -3016,26 +4133,36 @@ namespace go
                     {
                         unionWithPointer[t.Go] = true;
                     }
+
                     t.EnumValues = null;
                     t.Typedef = "";
                     t.C.Set("%s " + dt.Qual, t1.C);
-                    return t;
+                    return _addr_t!;
                     break;
-                case ref dwarf.StructType dt:
+                case ptr<dwarf.StructType> dt:
                     var tag = dt.StructName;
                     if (dt.ByteSize < 0L && tag == "")
                     { // opaque unnamed struct - should not be possible
                         break;
+
                     }
+
                     if (tag == "")
                     {
-                        tag = "__" + strconv.Itoa(tagGen);
-                        tagGen++;
+                        tag = anonymousStructTag[dt];
+                        if (tag == "")
+                        {
+                            tag = "__" + strconv.Itoa(tagGen);
+                            tagGen++;
+                            anonymousStructTag[dt] = tag;
+                        }
+
                     }
                     else if (t.C.Empty())
                     {
                         t.C.Set(dt.Kind + " " + tag);
                     }
+
                     var name = c.Ident("_Ctype_" + dt.Kind + "_" + tag);
                     t.Go = name; // publish before recursive calls
                     goIdent[name.Name] = name;
@@ -3044,12 +4171,15 @@ namespace go
                         // Size calculation in c.Struct/c.Opaque will die with size=-1 (unknown),
                         // so execute the basic things that the struct case would do
                         // other than try to determine a Go representation.
-                        var tt = t.Value;
-                        tt.C = ref new TypeRepr("%s %s",[]interface{}{dt.Kind,tag});
+                        ref var tt = ref heap(t.val, out ptr<var> _addr_tt);
+                        tt.C = addr(new TypeRepr("%s %s",[]interface{}{dt.Kind,tag}));
                         tt.Go = c.Ident("struct{}");
-                        typedef[name.Name] = ref tt;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
                         break;
+
                     }
+
                     switch (dt.Kind)
                     {
                         case "class": 
@@ -3060,10 +4190,12 @@ namespace go
                             {
                                 unionWithPointer[t.Go] = true;
                             }
+
                             if (t.C.Empty())
                             {
                                 t.C.Set("__typeof__(unsigned char[%d])", t.Size);
                             }
+
                             t.Align = 1L; // TODO: should probably base this on field alignment.
                             typedef[name.Name] = t;
                             break;
@@ -3073,18 +4205,21 @@ namespace go
                             {
                                 t.C.Set(csyntax);
                             }
+
                             t.Align = align;
-                            tt = t.Value;
+                            tt = t.val;
                             if (tag != "")
                             {
-                                tt.C = ref new TypeRepr("struct %s",[]interface{}{tag});
+                                tt.C = addr(new TypeRepr("struct %s",[]interface{}{tag}));
                             }
+
                             tt.Go = g;
-                            typedef[name.Name] = ref tt;
+                            _addr_typedef[name.Name] = _addr_tt;
+                            typedef[name.Name] = ref _addr_typedef[name.Name].val;
                             break;
                     }
                     break;
-                case ref dwarf.TypedefType dt:
+                case ptr<dwarf.TypedefType> dt:
                     if (dt.Name == "_GoString_")
                     { 
                         // Special C name for Go string type.
@@ -3094,7 +4229,9 @@ namespace go
                         t.Size = c.ptrSize * 2L;
                         t.Align = c.ptrSize;
                         break;
+
                     }
+
                     if (dt.Name == "_GoBytes_")
                     { 
                         // Special C name for Go []byte type.
@@ -3103,44 +4240,80 @@ namespace go
                         t.Size = c.ptrSize + 4L + 4L;
                         t.Align = c.ptrSize;
                         break;
+
                     }
+
                     name = c.Ident("_Ctype_" + dt.Name);
                     goIdent[name.Name] = name;
-                    sub = c.Type(dt.Type, pos);
+                    @string akey = "";
+                    if (c.anonymousStructTypedef(dt))
+                    { 
+                        // only load type recursively for typedefs of anonymous
+                        // structs, see issues 37479 and 37621.
+                        akey = key;
+
+                    }
+
+                    sub = c.loadType(dt.Type, pos, akey);
                     if (c.badPointerTypedef(dt))
                     { 
                         // Treat this typedef as a uintptr.
-                        var s = sub.Value;
+                        ref var s = ref heap(sub.val, out ptr<var> _addr_s);
                         s.Go = c.uintptr;
-                        sub = ref s;
+                        s.BadPointer = true;
+                        _addr_sub = _addr_s;
+                        sub = ref _addr_sub.val; 
+                        // Make sure we update any previously computed type.
+                        {
+                            var oldType__prev2 = oldType;
+
+                            var oldType = typedef[name.Name];
+
+                            if (oldType != null)
+                            {
+                                oldType.Go = sub.Go;
+                                oldType.BadPointer = true;
+                            }
+
+                            oldType = oldType__prev2;
+
+                        }
+
                     }
+
                     t.Go = name;
+                    t.BadPointer = sub.BadPointer;
                     if (unionWithPointer[sub.Go])
                     {
                         unionWithPointer[t.Go] = true;
                     }
+
                     t.Size = sub.Size;
                     t.Align = sub.Align;
-                    var oldType = typedef[name.Name];
+                    oldType = typedef[name.Name];
                     if (oldType == null)
                     {
-                        tt = t.Value;
+                        tt = t.val;
                         tt.Go = sub.Go;
-                        typedef[name.Name] = ref tt;
+                        tt.BadPointer = sub.BadPointer;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+
                     } 
 
                     // If sub.Go.Name is "_Ctype_struct_foo" or "_Ctype_union_foo" or "_Ctype_class_foo",
                     // use that as the Go form for this typedef too, so that the typedef will be interchangeable
                     // with the base type.
                     // In -godefs mode, do this for all typedefs.
-                    if (isStructUnionClass(sub.Go) || godefs.Value)
+                    if (isStructUnionClass(sub.Go) || godefs.val)
                     {
                         t.Go = sub.Go;
 
                         if (isStructUnionClass(sub.Go))
                         { 
                             // Use the typedef name for C code.
-                            typedef[sub.Go._<ref ast.Ident>().Name].C = t.C;
+                            typedef[sub.Go._<ptr<ast.Ident>>().Name].C = t.C;
+
                         } 
 
                         // If we've seen this typedef before, and it
@@ -3152,21 +4325,25 @@ namespace go
                         {
                             t.Go = oldType.Go;
                         }
+
                     }
+
                     break;
-                case ref dwarf.UcharType dt:
+                case ptr<dwarf.UcharType> dt:
                     if (t.Size != 1L)
                     {
                         fatalf("%s: unexpected: %d-byte uchar type - %s", lineno(pos), t.Size, dtype);
                     }
+
                     t.Go = c.uint8;
                     t.Align = 1L;
                     break;
-                case ref dwarf.UintType dt:
+                case ptr<dwarf.UintType> dt:
                     if (dt.BitSize > 0L)
                     {
                         fatalf("%s: unexpected: %d-bit uint type - %s", lineno(pos), dt.BitSize, dtype);
                     }
+
                     switch (t.Size)
                     {
                         case 1L: 
@@ -3182,7 +4359,7 @@ namespace go
                             t.Go = c.uint64;
                             break;
                         case 16L: 
-                            t.Go = ref new ast.ArrayType(Len:c.intExpr(t.Size),Elt:c.uint8,);
+                            t.Go = addr(new ast.ArrayType(Len:c.intExpr(t.Size),Elt:c.uint8,));
                             break;
                         default: 
                             fatalf("%s: unexpected: %d-byte uint type - %s", lineno(pos), t.Size, dtype);
@@ -3194,8 +4371,9 @@ namespace go
                     {
                         t.Align = c.ptrSize;
                     }
+
                     break;
-                case ref dwarf.VoidType dt:
+                case ptr<dwarf.VoidType> dt:
                     t.Go = c.goVoid;
                     t.C.Set("void");
                     t.Align = 1L;
@@ -3211,7 +4389,7 @@ namespace go
 
             switch (dtype.type())
             {
-                case ref dwarf.AddrType _:
+                case ptr<dwarf.AddrType> _:
                     s = dtype.Common().Name;
                     if (s != "")
                     {
@@ -3224,17 +4402,21 @@ namespace go
                             }
 
                         }
+
                         s = strings.Replace(s, " ", "", -1L);
                         name = c.Ident("_Ctype_" + s);
-                        tt = t.Value;
-                        typedef[name.Name] = ref tt;
-                        if (!godefs.Value)
+                        tt = t.val;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+                        if (!godefs.val)
                         {
                             t.Go = name;
                         }
+
                     }
+
                     break;
-                case ref dwarf.BoolType _:
+                case ptr<dwarf.BoolType> _:
                     s = dtype.Common().Name;
                     if (s != "")
                     {
@@ -3247,17 +4429,21 @@ namespace go
                             }
 
                         }
+
                         s = strings.Replace(s, " ", "", -1L);
                         name = c.Ident("_Ctype_" + s);
-                        tt = t.Value;
-                        typedef[name.Name] = ref tt;
-                        if (!godefs.Value)
+                        tt = t.val;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+                        if (!godefs.val)
                         {
                             t.Go = name;
                         }
+
                     }
+
                     break;
-                case ref dwarf.CharType _:
+                case ptr<dwarf.CharType> _:
                     s = dtype.Common().Name;
                     if (s != "")
                     {
@@ -3270,17 +4456,21 @@ namespace go
                             }
 
                         }
+
                         s = strings.Replace(s, " ", "", -1L);
                         name = c.Ident("_Ctype_" + s);
-                        tt = t.Value;
-                        typedef[name.Name] = ref tt;
-                        if (!godefs.Value)
+                        tt = t.val;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+                        if (!godefs.val)
                         {
                             t.Go = name;
                         }
+
                     }
+
                     break;
-                case ref dwarf.ComplexType _:
+                case ptr<dwarf.ComplexType> _:
                     s = dtype.Common().Name;
                     if (s != "")
                     {
@@ -3293,17 +4483,21 @@ namespace go
                             }
 
                         }
+
                         s = strings.Replace(s, " ", "", -1L);
                         name = c.Ident("_Ctype_" + s);
-                        tt = t.Value;
-                        typedef[name.Name] = ref tt;
-                        if (!godefs.Value)
+                        tt = t.val;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+                        if (!godefs.val)
                         {
                             t.Go = name;
                         }
+
                     }
+
                     break;
-                case ref dwarf.IntType _:
+                case ptr<dwarf.IntType> _:
                     s = dtype.Common().Name;
                     if (s != "")
                     {
@@ -3316,17 +4510,21 @@ namespace go
                             }
 
                         }
+
                         s = strings.Replace(s, " ", "", -1L);
                         name = c.Ident("_Ctype_" + s);
-                        tt = t.Value;
-                        typedef[name.Name] = ref tt;
-                        if (!godefs.Value)
+                        tt = t.val;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+                        if (!godefs.val)
                         {
                             t.Go = name;
                         }
+
                     }
+
                     break;
-                case ref dwarf.FloatType _:
+                case ptr<dwarf.FloatType> _:
                     s = dtype.Common().Name;
                     if (s != "")
                     {
@@ -3339,17 +4537,21 @@ namespace go
                             }
 
                         }
+
                         s = strings.Replace(s, " ", "", -1L);
                         name = c.Ident("_Ctype_" + s);
-                        tt = t.Value;
-                        typedef[name.Name] = ref tt;
-                        if (!godefs.Value)
+                        tt = t.val;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+                        if (!godefs.val)
                         {
                             t.Go = name;
                         }
+
                     }
+
                     break;
-                case ref dwarf.UcharType _:
+                case ptr<dwarf.UcharType> _:
                     s = dtype.Common().Name;
                     if (s != "")
                     {
@@ -3362,17 +4564,21 @@ namespace go
                             }
 
                         }
+
                         s = strings.Replace(s, " ", "", -1L);
                         name = c.Ident("_Ctype_" + s);
-                        tt = t.Value;
-                        typedef[name.Name] = ref tt;
-                        if (!godefs.Value)
+                        tt = t.val;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+                        if (!godefs.val)
                         {
                             t.Go = name;
                         }
+
                     }
+
                     break;
-                case ref dwarf.UintType _:
+                case ptr<dwarf.UintType> _:
                     s = dtype.Common().Name;
                     if (s != "")
                     {
@@ -3385,15 +4591,19 @@ namespace go
                             }
 
                         }
+
                         s = strings.Replace(s, " ", "", -1L);
                         name = c.Ident("_Ctype_" + s);
-                        tt = t.Value;
-                        typedef[name.Name] = ref tt;
-                        if (!godefs.Value)
+                        tt = t.val;
+                        _addr_typedef[name.Name] = _addr_tt;
+                        typedef[name.Name] = ref _addr_typedef[name.Name].val;
+                        if (!godefs.val)
                         {
                             t.Go = name;
                         }
+
                     }
+
                     break;
 
             }
@@ -3406,13 +4616,14 @@ namespace go
                 t.Size = 0L;
                 switch (dtype.type())
                 {
-                    case ref dwarf.TypedefType dt:
+                    case ptr<dwarf.TypedefType> dt:
                         break;
-                    case ref dwarf.StructType dt:
+                    case ptr<dwarf.StructType> dt:
                         if (dt.StructName != "")
                         {
                             break;
                         }
+
                         t.Go = c.Opaque(0L);
                         break;
                     default:
@@ -3426,49 +4637,57 @@ namespace go
                 {
                     t.C.Set("void");
                 }
+
             }
+
             if (t.C.Empty())
             {
                 fatalf("%s: internal error: did not create C name for %s", lineno(pos), dtype);
             }
-            return t;
+
+            return _addr_t!;
+
         }
 
         // isStructUnionClass reports whether the type described by the Go syntax x
         // is a struct, union, or class with a tag.
         private static bool isStructUnionClass(ast.Expr x)
         {
-            ref ast.Ident (id, ok) = x._<ref ast.Ident>();
+            ptr<ast.Ident> (id, ok) = x._<ptr<ast.Ident>>();
             if (!ok)
             {
                 return false;
             }
+
             var name = id.Name;
             return strings.HasPrefix(name, "_Ctype_struct_") || strings.HasPrefix(name, "_Ctype_union_") || strings.HasPrefix(name, "_Ctype_class_");
+
         }
 
         // FuncArg returns a Go type with the same memory layout as
         // dtype when used as the type of a C function argument.
-        private static ref Type FuncArg(this ref typeConv c, dwarf.Type dtype, token.Pos pos)
+        private static ptr<Type> FuncArg(this ptr<typeConv> _addr_c, dwarf.Type dtype, token.Pos pos)
         {
+            ref typeConv c = ref _addr_c.val;
+
             var t = c.Type(unqual(dtype), pos);
             switch (dtype.type())
             {
-                case ref dwarf.ArrayType dt:
-                    TypeRepr tr = ref new TypeRepr();
+                case ptr<dwarf.ArrayType> dt:
+                    ptr<TypeRepr> tr = addr(new TypeRepr());
                     tr.Set("%s*", t.C);
-                    return ref new Type(Size:c.ptrSize,Align:c.ptrSize,Go:&ast.StarExpr{X:t.Go},C:tr,);
+                    return addr(new Type(Size:c.ptrSize,Align:c.ptrSize,Go:&ast.StarExpr{X:t.Go},C:tr,));
                     break;
-                case ref dwarf.TypedefType dt:
+                case ptr<dwarf.TypedefType> dt:
                     {
-                        ref dwarf.PtrType (ptr, ok) = base(dt.Type)._<ref dwarf.PtrType>();
+                        ptr<dwarf.PtrType> (ptr, ok) = base(dt.Type)._<ptr<dwarf.PtrType>>();
 
                         if (ok)
                         { 
                             // Unless the typedef happens to point to void* since
                             // Go has special rules around using unsafe.Pointer.
                             {
-                                ref dwarf.VoidType (_, void) = base(ptr.Type)._<ref dwarf.VoidType>();
+                                ptr<dwarf.VoidType> (_, void) = base(ptr.Type)._<ptr<dwarf.VoidType>>();
 
                                 if (void)
                                 {
@@ -3480,14 +4699,15 @@ namespace go
                             } 
                             // ...or the typedef is one in which we expect bad pointers.
                             // It will be a uintptr instead of *X.
-                            if (c.badPointerTypedef(dt))
+                            if (c.baseBadPointerTypedef(dt))
                             {
                                 break;
                             }
+
                             t = c.Type(ptr, pos);
                             if (t == null)
                             {
-                                return null;
+                                return _addr_null!;
                             } 
 
                             // For a struct/union/class, remember the C spelling,
@@ -3497,20 +4717,26 @@ namespace go
                             {
                                 t.Typedef = dt.Name;
                             }
+
                         }
 
                     }
+
                     break;
             }
-            return t;
+            return _addr_t!;
+
         }
 
         // FuncType returns the Go type analogous to dtype.
         // There is no guarantee about matching memory layout.
-        private static ref FuncType FuncType(this ref typeConv c, ref dwarf.FuncType dtype, token.Pos pos)
+        private static ptr<FuncType> FuncType(this ptr<typeConv> _addr_c, ptr<dwarf.FuncType> _addr_dtype, token.Pos pos)
         {
-            var p = make_slice<ref Type>(len(dtype.ParamType));
-            var gp = make_slice<ref ast.Field>(len(dtype.ParamType));
+            ref typeConv c = ref _addr_c.val;
+            ref dwarf.FuncType dtype = ref _addr_dtype.val;
+
+            var p = make_slice<ptr<Type>>(len(dtype.ParamType));
+            var gp = make_slice<ptr<ast.Field>>(len(dtype.ParamType));
             foreach (var (i, f) in dtype.ParamType)
             { 
                 // gcc's DWARF generator outputs a single DotDotDotType parameter for
@@ -3519,76 +4745,98 @@ namespace go
                 // invalid according to ISO C anyway (i.e. void (*__cgo_1)(...) is not
                 // legal).
                 {
-                    ref dwarf.DotDotDotType (_, ok) = f._<ref dwarf.DotDotDotType>();
+                    ptr<dwarf.DotDotDotType> (_, ok) = f._<ptr<dwarf.DotDotDotType>>();
 
                     if (ok && i == 0L)
                     {
                         p = null;
                         gp = null;
                         break;
+
                     }
 
                 }
+
                 p[i] = c.FuncArg(f, pos);
-                gp[i] = ref new ast.Field(Type:p[i].Go);
+                gp[i] = addr(new ast.Field(Type:p[i].Go));
+
             }
-            ref Type r = default;
-            slice<ref ast.Field> gr = default;
+            ptr<Type> r;
+            slice<ptr<ast.Field>> gr = default;
             {
-                (_, ok) = base(dtype.ReturnType)._<ref dwarf.VoidType>();
+                (_, ok) = base(dtype.ReturnType)._<ptr<dwarf.VoidType>>();
 
                 if (ok)
                 {
-                    gr = new slice<ref ast.Field>(new ref ast.Field[] { {Type:c.goVoid} });
+                    gr = new slice<ptr<ast.Field>>(new ptr<ast.Field>[] { {Type:c.goVoid} });
                 }
                 else if (dtype.ReturnType != null)
                 {
                     r = c.Type(unqual(dtype.ReturnType), pos);
-                    gr = new slice<ref ast.Field>(new ref ast.Field[] { {Type:r.Go} });
+                    gr = new slice<ptr<ast.Field>>(new ptr<ast.Field>[] { {Type:r.Go} });
                 }
 
+
             }
-            return ref new FuncType(Params:p,Result:r,Go:&ast.FuncType{Params:&ast.FieldList{List:gp},Results:&ast.FieldList{List:gr},},);
+
+            return addr(new FuncType(Params:p,Result:r,Go:&ast.FuncType{Params:&ast.FieldList{List:gp},Results:&ast.FieldList{List:gr},},));
+
         }
 
         // Identifier
-        private static ref ast.Ident Ident(this ref typeConv c, @string s)
+        private static ptr<ast.Ident> Ident(this ptr<typeConv> _addr_c, @string s)
         {
-            return ast.NewIdent(s);
+            ref typeConv c = ref _addr_c.val;
+
+            return _addr_ast.NewIdent(s)!;
         }
 
         // Opaque type of n bytes.
-        private static ast.Expr Opaque(this ref typeConv c, long n)
+        private static ast.Expr Opaque(this ptr<typeConv> _addr_c, long n)
         {
-            return ref new ast.ArrayType(Len:c.intExpr(n),Elt:c.byte,);
+            ref typeConv c = ref _addr_c.val;
+
+            return addr(new ast.ArrayType(Len:c.intExpr(n),Elt:c.byte,));
         }
 
         // Expr for integer n.
-        private static ast.Expr intExpr(this ref typeConv c, long n)
+        private static ast.Expr intExpr(this ptr<typeConv> _addr_c, long n)
         {
-            return ref new ast.BasicLit(Kind:token.INT,Value:strconv.FormatInt(n,10),);
+            ref typeConv c = ref _addr_c.val;
+
+            return addr(new ast.BasicLit(Kind:token.INT,Value:strconv.FormatInt(n,10),));
         }
 
         // Add padding of given size to fld.
-        private static (slice<ref ast.Field>, slice<long>) pad(this ref typeConv c, slice<ref ast.Field> fld, slice<long> sizes, long size)
+        private static (slice<ptr<ast.Field>>, slice<long>) pad(this ptr<typeConv> _addr_c, slice<ptr<ast.Field>> fld, slice<long> sizes, long size)
         {
+            slice<ptr<ast.Field>> _p0 = default;
+            slice<long> _p0 = default;
+            ref typeConv c = ref _addr_c.val;
+
             var n = len(fld);
             fld = fld[0L..n + 1L];
-            fld[n] = ref new ast.Field(Names:[]*ast.Ident{c.Ident("_")},Type:c.Opaque(size));
+            fld[n] = addr(new ast.Field(Names:[]*ast.Ident{c.Ident("_")},Type:c.Opaque(size)));
             sizes = sizes[0L..n + 1L];
             sizes[n] = size;
             return (fld, sizes);
         }
 
         // Struct conversion: return Go and (gc) C syntax for type.
-        private static (ref ast.StructType, @string, long) Struct(this ref typeConv c, ref dwarf.StructType dt, token.Pos pos)
-        { 
+        private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _addr_c, ptr<dwarf.StructType> _addr_dt, token.Pos pos)
+        {
+            ptr<ast.StructType> expr = default!;
+            @string csyntax = default;
+            long align = default;
+            ref typeConv c = ref _addr_c.val;
+            ref dwarf.StructType dt = ref _addr_dt.val;
+ 
             // Minimum alignment for a struct is 1 byte.
             align = 1L;
 
             bytes.Buffer buf = default;
             buf.WriteString("struct {");
-            var fld = make_slice<ref ast.Field>(0L, 2L * len(dt.Field) + 1L); // enough for padding around every field
+            var fld = make_slice<ptr<ast.Field>>(0L, 2L * len(dt.Field) + 1L); // enough for padding around every field
             var sizes = make_slice<long>(0L, 2L * len(dt.Field) + 1L);
             var off = int64(0L); 
 
@@ -3613,7 +4861,7 @@ namespace go
                 f = f__prev1;
             }
 
-            if (!godefs.Value)
+            if (!godefs.val)
             {
                 foreach (var (cid, goid) in ident)
                 {
@@ -3636,9 +4884,13 @@ namespace go
 
                         used[goid] = true;
                         ident[cid] = goid;
+
                     }
+
                 }
+
             }
+
             long anon = 0L;
             {
                 var f__prev1 = f;
@@ -3646,11 +4898,6 @@ namespace go
                 foreach (var (_, __f) in dt.Field)
                 {
                     f = __f;
-                    if (f.ByteOffset > off)
-                    {
-                        fld, sizes = c.pad(fld, sizes, f.ByteOffset - off);
-                        off = f.ByteOffset;
-                    }
                     var name = f.Name;
                     var ft = f.Type; 
 
@@ -3659,10 +4906,10 @@ namespace go
                     // union as the field in the struct. This handles
                     // cases like the glibc <sys/resource.h> file; see
                     // issue 6677.
-                    if (godefs.Value)
+                    if (godefs.val)
                     {
                         {
-                            ref dwarf.StructType (st, ok) = f.Type._<ref dwarf.StructType>();
+                            ptr<dwarf.StructType> (st, ok) = f.Type._<ptr<dwarf.StructType>>();
 
                             if (ok && name == "" && st.Kind == "union" && len(st.Field) > 0L && !used[st.Field[0L].Name])
                             {
@@ -3672,6 +4919,7 @@ namespace go
                             }
 
                         }
+
                     } 
 
                     // TODO: Handle fields that are anonymous structs by
@@ -3697,7 +4945,7 @@ namespace go
                                 break;
                         }
                         size = f.BitSize / 8L;
-                        name = tgo._<ref ast.Ident>().String();
+                        name = tgo._<ptr<ast.Ident>>().String();
                         if (strings.HasPrefix(name, "int"))
                         {
                             name = "int";
@@ -3706,9 +4954,12 @@ namespace go
                         {
                             name = "uint";
                         }
+
                         tgo = ast.NewIdent(name + fmt.Sprint(f.BitSize));
                         talign = size;
+
                     }
+
                     if (talign > 0L && f.ByteOffset % talign != 0L)
                     { 
                         // Drop misaligned fields, the same way we drop integer bit fields.
@@ -3717,7 +4968,25 @@ namespace go
                         // makes the whole program not compile. Much of the time these
                         // structs are in system headers that cannot be corrected.
                         continue;
+
+                    } 
+
+                    // Round off up to talign, assumed to be a power of 2.
+                    off = (off + talign - 1L) & ~(talign - 1L);
+
+                    if (f.ByteOffset > off)
+                    {
+                        fld, sizes = c.pad(fld, sizes, f.ByteOffset - off);
+                        off = f.ByteOffset;
                     }
+
+                    if (f.ByteOffset < off)
+                    { 
+                        // Drop a packed field that we can't represent.
+                        continue;
+
+                    }
+
                     var n = len(fld);
                     fld = fld[0L..n + 1L];
                     if (name == "")
@@ -3726,7 +4995,8 @@ namespace go
                         anon++;
                         ident[name] = name;
                     }
-                    fld[n] = ref new ast.Field(Names:[]*ast.Ident{c.Ident(ident[name])},Type:tgo);
+
+                    fld[n] = addr(new ast.Field(Names:[]*ast.Ident{c.Ident(ident[name])},Type:tgo));
                     sizes = sizes[0L..n + 1L];
                     sizes[n] = size;
                     off += size;
@@ -3738,6 +5008,7 @@ namespace go
                     {
                         align = talign;
                     }
+
                 }
 
                 f = f__prev1;
@@ -3767,79 +5038,86 @@ namespace go
             {
                 fatalf("%s: struct size calculation error off=%d bytesize=%d", lineno(pos), off, dt.ByteSize);
             }
+
             buf.WriteString("}");
             csyntax = buf.String();
 
-            if (godefs.Value)
+            if (godefs.val)
             {
                 godefsFields(fld);
             }
-            expr = ref new ast.StructType(Fields:&ast.FieldList{List:fld});
-            return;
+
+            expr = addr(new ast.StructType(Fields:&ast.FieldList{List:fld}));
+            return ;
+
         }
 
-        // dwarfHasPointer returns whether the DWARF type dt contains a pointer.
-        private static bool dwarfHasPointer(this ref typeConv c, dwarf.Type dt, token.Pos pos)
+        // dwarfHasPointer reports whether the DWARF type dt contains a pointer.
+        private static bool dwarfHasPointer(this ptr<typeConv> _addr_c, dwarf.Type dt, token.Pos pos)
         {
+            ref typeConv c = ref _addr_c.val;
+
             switch (dt.type())
             {
-                case ref dwarf.AddrType dt:
+                case ptr<dwarf.AddrType> dt:
                     return false;
                     break;
-                case ref dwarf.BoolType dt:
+                case ptr<dwarf.BoolType> dt:
                     return false;
                     break;
-                case ref dwarf.CharType dt:
+                case ptr<dwarf.CharType> dt:
                     return false;
                     break;
-                case ref dwarf.EnumType dt:
+                case ptr<dwarf.EnumType> dt:
                     return false;
                     break;
-                case ref dwarf.FloatType dt:
+                case ptr<dwarf.FloatType> dt:
                     return false;
                     break;
-                case ref dwarf.ComplexType dt:
+                case ptr<dwarf.ComplexType> dt:
                     return false;
                     break;
-                case ref dwarf.FuncType dt:
+                case ptr<dwarf.FuncType> dt:
                     return false;
                     break;
-                case ref dwarf.IntType dt:
+                case ptr<dwarf.IntType> dt:
                     return false;
                     break;
-                case ref dwarf.UcharType dt:
+                case ptr<dwarf.UcharType> dt:
                     return false;
                     break;
-                case ref dwarf.UintType dt:
+                case ptr<dwarf.UintType> dt:
                     return false;
                     break;
-                case ref dwarf.VoidType dt:
+                case ptr<dwarf.VoidType> dt:
                     return false;
                     break;
-                case ref dwarf.ArrayType dt:
+                case ptr<dwarf.ArrayType> dt:
                     return c.dwarfHasPointer(dt.Type, pos);
                     break;
-                case ref dwarf.PtrType dt:
+                case ptr<dwarf.PtrType> dt:
                     return true;
                     break;
-                case ref dwarf.QualType dt:
+                case ptr<dwarf.QualType> dt:
                     return c.dwarfHasPointer(dt.Type, pos);
                     break;
-                case ref dwarf.StructType dt:
+                case ptr<dwarf.StructType> dt:
                     foreach (var (_, f) in dt.Field)
                     {
                         if (c.dwarfHasPointer(f.Type, pos))
                         {
                             return true;
                         }
+
                     }
                     return false;
                     break;
-                case ref dwarf.TypedefType dt:
+                case ptr<dwarf.TypedefType> dt:
                     if (dt.Name == "_GoString_" || dt.Name == "_GoBytes_")
                     {
                         return true;
                     }
+
                     return c.dwarfHasPointer(dt.Type, pos);
                     break;
                 default:
@@ -3850,6 +5128,7 @@ namespace go
                     break;
                 }
             }
+
         }
 
         private static @string upper(@string s)
@@ -3858,19 +5137,22 @@ namespace go
             {
                 return "";
             }
+
             var (r, size) = utf8.DecodeRuneInString(s);
             if (r == '_')
             {
                 return "X" + s;
             }
+
             return string(unicode.ToUpper(r)) + s[size..];
+
         }
 
         // godefsFields rewrites field names for use in Go or C definitions.
         // It strips leading common prefixes (like tv_ in tv_sec, tv_usec)
         // converts names to upper case, and rewrites _ into Pad_godefs_n,
         // so that all fields are exported.
-        private static void godefsFields(slice<ref ast.Field> fld)
+        private static void godefsFields(slice<ptr<ast.Field>> fld)
         {
             var prefix = fieldPrefix(fld);
             long npad = 0L;
@@ -3882,15 +5164,21 @@ namespace go
                     {
                         n.Name = strings.TrimPrefix(n.Name, prefix);
                     }
+
                     if (n.Name == "_")
                     { 
                         // Use exported name instead.
                         n.Name = "Pad_cgo_" + strconv.Itoa(npad);
                         npad++;
+
                     }
+
                     n.Name = upper(n.Name);
+
                 }
+
             }
+
         }
 
         // fieldPrefix returns the prefix that should be removed from all the
@@ -3899,7 +5187,7 @@ namespace go
         // people are used to seeing in C.  For generated Go code, such as
         // package syscall's data structures, we drop a common prefix
         // (so sec, usec, which will get turned into Sec, Usec for exporting).
-        private static @string fieldPrefix(slice<ref ast.Field> fld)
+        private static @string fieldPrefix(slice<ptr<ast.Field>> fld)
         {
             @string prefix = "";
             foreach (var (_, f) in fld)
@@ -3918,11 +5206,13 @@ namespace go
                     {
                         continue;
                     }
+
                     var i = strings.Index(n.Name, "_");
                     if (i < 0L)
                     {
                         continue;
                     }
+
                     if (prefix == "")
                     {
                         prefix = n.Name[..i + 1L];
@@ -3931,30 +5221,87 @@ namespace go
                     {
                         return "";
                     }
+
                 }
+
             }
             return prefix;
+
         }
 
-        // badPointerTypedef reports whether t is a C typedef that should not be considered a pointer in Go.
-        // A typedef is bad if C code sometimes stores non-pointers in this type.
+        // anonymousStructTypedef reports whether dt is a C typedef for an anonymous
+        // struct.
+        private static bool anonymousStructTypedef(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _addr_dt)
+        {
+            ref typeConv c = ref _addr_c.val;
+            ref dwarf.TypedefType dt = ref _addr_dt.val;
+
+            ptr<dwarf.StructType> (st, ok) = dt.Type._<ptr<dwarf.StructType>>();
+            return ok && st.StructName == "";
+        }
+
+        // badPointerTypedef reports whether dt is a C typedef that should not be
+        // considered a pointer in Go. A typedef is bad if C code sometimes stores
+        // non-pointers in this type.
         // TODO: Currently our best solution is to find these manually and list them as
         // they come up. A better solution is desired.
-        private static bool badPointerTypedef(this ref typeConv c, ref dwarf.TypedefType dt)
+        private static bool badPointerTypedef(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _addr_dt)
         {
+            ref typeConv c = ref _addr_c.val;
+            ref dwarf.TypedefType dt = ref _addr_dt.val;
+
             if (c.badCFType(dt))
             {
                 return true;
             }
+
             if (c.badJNI(dt))
             {
                 return true;
             }
+
+            if (c.badEGLType(dt))
+            {
+                return true;
+            }
+
             return false;
+
         }
 
-        private static bool badCFType(this ref typeConv c, ref dwarf.TypedefType dt)
-        { 
+        // baseBadPointerTypedef reports whether the base of a chain of typedefs is a bad typedef
+        // as badPointerTypedef reports.
+        private static bool baseBadPointerTypedef(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _addr_dt)
+        {
+            ref typeConv c = ref _addr_c.val;
+            ref dwarf.TypedefType dt = ref _addr_dt.val;
+
+            while (true)
+            {
+                {
+                    ptr<dwarf.TypedefType> (t, ok) = dt.Type._<ptr<dwarf.TypedefType>>();
+
+                    if (ok)
+                    {
+                        dt = t;
+                        continue;
+                    }
+
+                }
+
+                break;
+
+            }
+
+            return c.badPointerTypedef(dt);
+
+        }
+
+        private static bool badCFType(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _addr_dt)
+        {
+            ref typeConv c = ref _addr_c.val;
+            ref dwarf.TypedefType dt = ref _addr_dt.val;
+ 
             // The real bad types are CFNumberRef and CFDateRef.
             // Sometimes non-pointers are stored in these types.
             // CFTypeRef is a supertype of those, so it can have bad pointers in it as well.
@@ -3966,20 +5313,24 @@ namespace go
             {
                 return false;
             }
+
             var s = dt.Name;
             if (!strings.HasSuffix(s, "Ref"))
             {
                 return false;
             }
+
             s = s[..len(s) - 3L];
             if (s == "CFType")
             {
                 return true;
             }
+
             if (c.getTypeIDs[s])
             {
                 return true;
             }
+
             {
                 var i = strings.Index(s, "Mutable");
 
@@ -3987,10 +5338,13 @@ namespace go
                 { 
                     // Mutable and immutable variants share a type ID.
                     return true;
+
                 }
 
             }
+
             return false;
+
         }
 
         // Comment from Darwin's CFInternal.h
@@ -4028,8 +5382,11 @@ namespace go
         };
         */
 
-        private static bool badJNI(this ref typeConv c, ref dwarf.TypedefType dt)
-        { 
+        private static bool badJNI(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _addr_dt)
+        {
+            ref typeConv c = ref _addr_c.val;
+            ref dwarf.TypedefType dt = ref _addr_dt.val;
+ 
             // In Dalvik and ART, the jobject type in the JNI interface of the JVM has the
             // property that it is sometimes (always?) a small integer instead of a real pointer.
             // Note: although only the android JVMs are bad in this respect, we declare the JNI types
@@ -4047,55 +5404,124 @@ namespace go
                     var w = dt;
                     while (parent != "")
                     {
-                        ref dwarf.TypedefType (t, ok) = w.Type._<ref dwarf.TypedefType>();
+                        ptr<dwarf.TypedefType> (t, ok) = w.Type._<ptr<dwarf.TypedefType>>();
                         if (!ok || t.Name != parent)
                         {
                             return false;
                         }
+
                         w = t;
                         parent, ok = jniTypes[w.Name];
                         if (!ok)
                         {
                             return false;
                         }
+
                     } 
 
-                    // Check that the typedef is:
-                    //     struct _jobject;
-                    //     typedef struct _jobject *jobject;
+                    // Check that the typedef is either:
+                    // 1:
+                    //         struct _jobject;
+                    //         typedef struct _jobject *jobject;
+                    // 2: (in NDK16 in C++)
+                    //         class _jobject {};
+                    //         typedef _jobject* jobject;
+                    // 3: (in NDK16 in C)
+                    //         typedef void* jobject;
  
 
-                    // Check that the typedef is:
-                    //     struct _jobject;
-                    //     typedef struct _jobject *jobject;
+                    // Check that the typedef is either:
+                    // 1:
+                    //         struct _jobject;
+                    //         typedef struct _jobject *jobject;
+                    // 2: (in NDK16 in C++)
+                    //         class _jobject {};
+                    //         typedef _jobject* jobject;
+                    // 3: (in NDK16 in C)
+                    //         typedef void* jobject;
                     {
-                        ref dwarf.PtrType (ptr, ok) = w.Type._<ref dwarf.PtrType>();
+                        ptr<dwarf.PtrType> (ptr, ok) = w.Type._<ptr<dwarf.PtrType>>();
 
                         if (ok)
                         {
+                            switch (ptr.Type.type())
                             {
-                                ref dwarf.StructType (str, ok) = ptr.Type._<ref dwarf.StructType>();
-
-                                if (ok)
-                                {
-                                    if (str.StructName == "_jobject" && str.Kind == "struct" && len(str.Field) == 0L && str.Incomplete)
+                                case ptr<dwarf.VoidType> v:
+                                    return true;
+                                    break;
+                                case ptr<dwarf.StructType> v:
+                                    if (v.StructName == "_jobject" && len(v.Field) == 0L)
                                     {
-                                        return true;
-                                    }
-                                }
+                                        switch (v.Kind)
+                                        {
+                                            case "struct": 
+                                                if (v.Incomplete)
+                                                {
+                                                    return true;
+                                                }
 
+                                                break;
+                                            case "class": 
+                                                if (!v.Incomplete)
+                                                {
+                                                    return true;
+                                                }
+
+                                                break;
+                                        }
+
+                                    }
+
+                                    break;
                             }
+
                         }
 
                     }
+
                 }
 
             }
+
             return false;
+
+        }
+
+        private static bool badEGLType(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _addr_dt)
+        {
+            ref typeConv c = ref _addr_c.val;
+            ref dwarf.TypedefType dt = ref _addr_dt.val;
+
+            if (dt.Name != "EGLDisplay" && dt.Name != "EGLConfig")
+            {
+                return false;
+            } 
+            // Check that the typedef is "typedef void *<name>".
+            {
+                ptr<dwarf.PtrType> (ptr, ok) = dt.Type._<ptr<dwarf.PtrType>>();
+
+                if (ok)
+                {
+                    {
+                        ptr<dwarf.VoidType> (_, ok) = ptr.Type._<ptr<dwarf.VoidType>>();
+
+                        if (ok)
+                        {
+                            return true;
+                        }
+
+                    }
+
+                }
+
+            }
+
+            return false;
+
         }
 
         // jniTypes maps from JNI types that we want to be uintptrs, to the underlying type to which
-        // they are mapped.  The base "jobject" maps to the empty string.
+        // they are mapped. The base "jobject" maps to the empty string.
         private static map jniTypes = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{"jobject":"","jclass":"jobject","jthrowable":"jobject","jstring":"jobject","jarray":"jobject","jbooleanArray":"jarray","jbyteArray":"jarray","jcharArray":"jarray","jshortArray":"jarray","jintArray":"jarray","jlongArray":"jarray","jfloatArray":"jarray","jdoubleArray":"jarray","jobjectArray":"jarray","jweak":"jobject",};
     }
 }

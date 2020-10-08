@@ -8,7 +8,7 @@
 // launch with `go run cmpConstGen.go` a file called cmpConst.go
 // will be written into the parent directory containing the tests
 
-// package main -- go2cs converted at 2020 August 29 09:58:46 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:02 UTC
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\gen\cmpConstGen.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
@@ -24,23 +24,27 @@ namespace go
 {
     public static partial class main_package
     {
-        private static readonly long maxU64 = (1L << (int)(64L)) - 1L;
-        private static readonly long maxU32 = (1L << (int)(32L)) - 1L;
-        private static readonly long maxU16 = (1L << (int)(16L)) - 1L;
-        private static readonly long maxU8 = (1L << (int)(8L)) - 1L;
+        private static readonly long maxU64 = (long)(1L << (int)(64L)) - 1L;
+        private static readonly long maxU32 = (long)(1L << (int)(32L)) - 1L;
+        private static readonly long maxU16 = (long)(1L << (int)(16L)) - 1L;
+        private static readonly long maxU8 = (long)(1L << (int)(8L)) - 1L;
 
-        private static readonly long maxI64 = (1L << (int)(63L)) - 1L;
-        private static readonly long maxI32 = (1L << (int)(31L)) - 1L;
-        private static readonly long maxI16 = (1L << (int)(15L)) - 1L;
-        private static readonly long maxI8 = (1L << (int)(7L)) - 1L;
+        private static readonly long maxI64 = (long)(1L << (int)(63L)) - 1L;
+        private static readonly long maxI32 = (long)(1L << (int)(31L)) - 1L;
+        private static readonly long maxI16 = (long)(1L << (int)(15L)) - 1L;
+        private static readonly long maxI8 = (long)(1L << (int)(7L)) - 1L;
 
-        private static readonly long minI64 = -(1L << (int)(63L));
-        private static readonly long minI32 = -(1L << (int)(31L));
-        private static readonly long minI16 = -(1L << (int)(15L));
-        private static readonly long minI8 = -(1L << (int)(7L));
+        private static readonly long minI64 = (long)-(1L << (int)(63L));
+        private static readonly long minI32 = (long)-(1L << (int)(31L));
+        private static readonly long minI16 = (long)-(1L << (int)(15L));
+        private static readonly long minI8 = (long)-(1L << (int)(7L));
 
-        private static bool cmp(ref big.Int _left, @string op, ref big.Int _right) => func(_left, _right, (ref big.Int left, ref big.Int right, Defer _, Panic panic, Recover __) =>
+
+        private static bool cmp(ptr<big.Int> _addr_left, @string op, ptr<big.Int> _addr_right) => func((_, panic, __) =>
         {
+            ref big.Int left = ref _addr_left.val;
+            ref big.Int right = ref _addr_right.val;
+
             switch (left.Cmp(right))
             {
                 case -1L: // less than
@@ -54,12 +58,15 @@ namespace go
                     break;
             }
             panic("unexpected comparison value");
+
         });
 
-        private static bool inRange(@string typ, ref big.Int _val) => func(_val, (ref big.Int val, Defer _, Panic panic, Recover __) =>
+        private static bool inRange(@string typ, ptr<big.Int> _addr_val) => func((_, panic, __) =>
         {
-            big.Int min = ref new big.Int();
-            big.Int max = ref new big.Int();
+            ref big.Int val = ref _addr_val.val;
+
+            ptr<big.Int> min = addr(new big.Int());
+            ptr<big.Int> max = addr(new big.Int());
             switch (typ)
             {
                 case "uint64": 
@@ -94,36 +101,44 @@ namespace go
                     panic("unexpected type");
                     break;
             }
-            return cmp(min, "<=", val) && cmp(val, "<=", max);
+            return cmp(_addr_min, "<=", _addr_val) && cmp(_addr_val, "<=", _addr_max);
+
         });
 
-        private static slice<ref big.Int> getValues(@string typ)
+        private static slice<ptr<big.Int>> getValues(@string typ)
         {
-            Func<ulong, ref big.Int> Uint = v => big.NewInt(0L).SetUint64(v);
-            Func<long, ref big.Int> Int = v => big.NewInt(0L).SetInt64(v);
-            ref big.Int values = new slice<ref big.Int>(new ref big.Int[] { Uint(maxU64), Uint(maxU64-1), Uint(maxI64+1), Uint(maxI64), Uint(maxI64-1), Uint(maxU32+1), Uint(maxU32), Uint(maxU32-1), Uint(maxI32+1), Uint(maxI32), Uint(maxI32-1), Uint(maxU16+1), Uint(maxU16), Uint(maxU16-1), Uint(maxI16+1), Uint(maxI16), Uint(maxI16-1), Uint(maxU8+1), Uint(maxU8), Uint(maxU8-1), Uint(maxI8+1), Uint(maxI8), Uint(maxI8-1), Uint(0), Int(minI8+1), Int(minI8), Int(minI8-1), Int(minI16+1), Int(minI16), Int(minI16-1), Int(minI32+1), Int(minI32), Int(minI32-1), Int(minI64+1), Int(minI64), Uint(1), Int(-1), Uint(0xff<<56), Uint(0xff<<32), Uint(0xff<<24) });
+            Func<ulong, ptr<big.Int>> Uint = v => big.NewInt(0L).SetUint64(v);
+            Func<long, ptr<big.Int>> Int = v => big.NewInt(0L).SetInt64(v);
+            ptr<big.Int> values = new slice<ptr<big.Int>>(new ptr<big.Int>[] { Uint(maxU64), Uint(maxU64-1), Uint(maxI64+1), Uint(maxI64), Uint(maxI64-1), Uint(maxU32+1), Uint(maxU32), Uint(maxU32-1), Uint(maxI32+1), Uint(maxI32), Uint(maxI32-1), Uint(maxU16+1), Uint(maxU16), Uint(maxU16-1), Uint(maxI16+1), Uint(maxI16), Uint(maxI16-1), Uint(maxU8+1), Uint(maxU8), Uint(maxU8-1), Uint(maxI8+1), Uint(maxI8), Uint(maxI8-1), Uint(0), Int(minI8+1), Int(minI8), Int(minI8-1), Int(minI16+1), Int(minI16), Int(minI16-1), Int(minI32+1), Int(minI32), Int(minI32-1), Int(minI64+1), Int(minI64), Uint(1), Int(-1), Uint(0xff<<56), Uint(0xff<<32), Uint(0xff<<24) });
             sort.Slice(values, (i, j) => values[i].Cmp(values[j]) == -1L);
-            slice<ref big.Int> ret = default;
+            slice<ptr<big.Int>> ret = default;
             foreach (var (_, val) in values)
             {
-                if (!inRange(typ, val))
+                if (!inRange(typ, _addr_val))
                 {
                     continue;
                 }
+
                 ret = append(ret, val);
+
             }
             return ret;
+
         }
 
-        private static @string sigString(ref big.Int v)
+        private static @string sigString(ptr<big.Int> _addr_v)
         {
+            ref big.Int v = ref _addr_v.val;
+
             big.Int t = default;
             t.Abs(v);
             if (v.Sign() == -1L)
             {
                 return "neg" + t.String();
             }
+
             return t.String();
+
         }
 
         private static void Main() => func((_, panic, __) =>
@@ -131,10 +146,9 @@ namespace go
             @string types = new slice<@string>(new @string[] { "uint64", "uint32", "uint16", "uint8", "int64", "int32", "int16", "int8" });
 
             ptr<object> w = @new<bytes.Buffer>();
-            fmt.Fprintf(w, "// run\n");
             fmt.Fprintf(w, "// Code generated by gen/cmpConstGen.go. DO NOT EDIT.\n\n");
             fmt.Fprintf(w, "package main;\n");
-            fmt.Fprintf(w, "import (\"fmt\"; \"reflect\"; \"runtime\";)\n");
+            fmt.Fprintf(w, "import (\"testing\"; \"reflect\"; \"runtime\";)\n");
             fmt.Fprintf(w, "// results show the expected result for the elements left of, equal to and right of the index.\n");
             fmt.Fprintf(w, "type result struct{l, e, r bool}\n");
             fmt.Fprintf(w, "var (\n");
@@ -170,7 +184,7 @@ namespace go
                         {
                             r = __r; 
                             // TODO: could also test constant on lhs.
-                            var sig = sigString(r);
+                            var sig = sigString(_addr_r);
                             {
                                 var op__prev3 = op;
 
@@ -179,11 +193,11 @@ namespace go
                                     op = __op; 
                                     // no need for go:noinline because the function is called indirectly
                                     fmt.Fprintf(w, "func %v_%v_%v(x %v) bool { return x %v %v; }\n", op.name, sig, typ, typ, op.op, r.String());
+
                                 }
 
                                 op = op__prev3;
                             }
-
                         } 
 
                         // generate a table of test cases
@@ -203,7 +217,7 @@ namespace go
                         {
                             i = __i;
                             r = __r;
-                            sig = sigString(r);
+                            sig = sigString(_addr_r);
                             {
                                 var op__prev3 = op;
 
@@ -217,13 +231,13 @@ namespace go
 
                                 op = op__prev3;
                             }
-
                         }
 
                         r = r__prev2;
                     }
 
                     fmt.Fprintf(w, "}\n");
+
                 } 
 
                 // emit the main function, looping over all test cases
@@ -231,7 +245,8 @@ namespace go
                 typ = typ__prev1;
             }
 
-            fmt.Fprintf(w, "func main() {\n");
+            fmt.Fprintf(w, "// TestComparisonsConst tests results for comparison operations against constants.\n");
+            fmt.Fprintf(w, "func TestComparisonsConst(t *testing.T) {\n");
             {
                 var typ__prev1 = typ;
 
@@ -245,8 +260,7 @@ namespace go
                     fmt.Fprintf(w, "		else if j > test.idx {\nwant = test.exp.r\n}\n");
                     fmt.Fprintf(w, "		if test.fn(x) != want {\n");
                     fmt.Fprintf(w, "			fn := runtime.FuncForPC(reflect.ValueOf(test.fn).Pointer()).Name()\n");
-                    fmt.Fprintf(w, "			msg := fmt.Sprintf(\"test failed: %%v(%%v) != %%v [type=%v i=%%v j=%%v idx=%%v]\", fn, x, want, i, j, test.idx)\n", typ);
-                    fmt.Fprintf(w, "			panic(msg)\n");
+                    fmt.Fprintf(w, "			t.Errorf(\"test failed: %%v(%%v) != %%v [type=%v i=%%v j=%%v idx=%%v]\", fn, x, want, i, j, test.idx)\n", typ);
                     fmt.Fprintf(w, "		}\n");
                     fmt.Fprintf(w, "	}\n");
                     fmt.Fprintf(w, "}\n");
@@ -267,11 +281,12 @@ namespace go
             } 
 
             // write to file
-            err = ioutil.WriteFile("../cmpConst.go", src, 0666L);
+            err = ioutil.WriteFile("../cmpConst_test.go", src, 0666L);
             if (err != null)
             {
                 log.Fatalf("can't write output: %v\n", err);
             }
+
         });
     }
 }

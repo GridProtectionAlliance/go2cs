@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:09 UTC
+//     Generated on 2020 October 08 04:28:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,13 +41,13 @@ namespace @internal
                 this.PadFrame = default;
                 this.ZeroRange = default;
                 this.Ginsnop = default;
+                this.Ginsnopdefer = default;
                 this.SSAMarkMoves = default;
                 this.SSAGenValue = default;
                 this.SSAGenBlock = default;
-                this.ZeroAuto = default;
             }
 
-            public Arch(ref ptr<obj.LinkArch> LinkArch = default, long REGSP = default, long MAXWIDTH = default, bool Use387 = default, bool SoftFloat = default, Func<long, long> PadFrame = default, Func<ref Progs, ref obj.Prog, long, long, ref uint, ref obj.Prog> ZeroRange = default, Action<ref Progs> Ginsnop = default, Action<ref SSAGenState, ref ssa.Block> SSAMarkMoves = default, Action<ref SSAGenState, ref ssa.Value> SSAGenValue = default, Action<ref SSAGenState, ref ssa.Block, ref ssa.Block> SSAGenBlock = default, Action<ref Progs, ref Node> ZeroAuto = default)
+            public Arch(ref ptr<obj.LinkArch> LinkArch = default, long REGSP = default, long MAXWIDTH = default, bool Use387 = default, bool SoftFloat = default, Func<long, long> PadFrame = default, Func<ptr<Progs>, ptr<obj.Prog>, long, long, ptr<uint>, ptr<obj.Prog>> ZeroRange = default, Func<ptr<Progs>, ptr<obj.Prog>> Ginsnop = default, Func<ptr<Progs>, ptr<obj.Prog>> Ginsnopdefer = default, Action<ptr<SSAGenState>, ptr<ssa.Block>> SSAMarkMoves = default, Action<ptr<SSAGenState>, ptr<ssa.Value>> SSAGenValue = default, Action<ptr<SSAGenState>, ptr<ssa.Block>, ptr<ssa.Block>> SSAGenBlock = default)
             {
                 this.LinkArch = LinkArch;
                 this.REGSP = REGSP;
@@ -57,10 +57,10 @@ namespace @internal
                 this.PadFrame = PadFrame;
                 this.ZeroRange = ZeroRange;
                 this.Ginsnop = Ginsnop;
+                this.Ginsnopdefer = Ginsnopdefer;
                 this.SSAMarkMoves = SSAMarkMoves;
                 this.SSAGenValue = SSAGenValue;
                 this.SSAGenBlock = SSAGenBlock;
-                this.ZeroAuto = ZeroAuto;
             }
 
             // Enable comparisons between nil and Arch struct
@@ -83,7 +83,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Arch Arch_cast(dynamic value)
         {
-            return new Arch(ref value.LinkArch, value.REGSP, value.MAXWIDTH, value.Use387, value.SoftFloat, value.PadFrame, value.ZeroRange, value.Ginsnop, value.SSAMarkMoves, value.SSAGenValue, value.SSAGenBlock, value.ZeroAuto);
+            return new Arch(ref value.LinkArch, value.REGSP, value.MAXWIDTH, value.Use387, value.SoftFloat, value.PadFrame, value.ZeroRange, value.Ginsnop, value.Ginsnopdefer, value.SSAMarkMoves, value.SSAGenValue, value.SSAGenBlock);
         }
     }
 }}}}

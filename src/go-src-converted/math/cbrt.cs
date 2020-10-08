@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:45 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:10 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\cbrt.go
 
@@ -35,14 +35,14 @@ namespace go
 
         private static double cbrt(double x)
         {
-            const long B1 = 715094163L; // (682-0.03306235651)*2**20
-            const long B2 = 696219795L; // (664-0.03306235651)*2**20
-            const float C = 5.42857142857142815906e-01F; // 19/35     = 0x3FE15F15F15F15F1
-            const float D = -7.05306122448979611050e-01F; // -864/1225 = 0xBFE691DE2532C834
-            const float E = 1.41428571428571436819e+00F; // 99/70     = 0x3FF6A0EA0EA0EA0F
-            const float F = 1.60714285714285720630e+00F; // 45/28     = 0x3FF9B6DB6DB6DB6E
-            const float G = 3.57142857142857150787e-01F; // 5/14      = 0x3FD6DB6DB6DB6DB7
-            const float SmallestNormal = 2.22507385850720138309e-308F; // 2**-1022  = 0x0010000000000000 
+            const long B1 = (long)715094163L; // (682-0.03306235651)*2**20
+            const long B2 = (long)696219795L; // (664-0.03306235651)*2**20
+            const float C = (float)5.42857142857142815906e-01F; // 19/35     = 0x3FE15F15F15F15F1
+            const float D = (float)-7.05306122448979611050e-01F; // -864/1225 = 0xBFE691DE2532C834
+            const float E = (float)1.41428571428571436819e+00F; // 99/70     = 0x3FF6A0EA0EA0EA0F
+            const float F = (float)1.60714285714285720630e+00F; // 45/28     = 0x3FF9B6DB6DB6DB6E
+            const float G = (float)3.57142857142857150787e-01F; // 5/14      = 0x3FD6DB6DB6DB6DB7
+            const float SmallestNormal = (float)2.22507385850720138309e-308F; // 2**-1022  = 0x0010000000000000 
             // special cases
 
             if (x == 0L || IsNaN(x) || IsInf(x, 0L)) 
@@ -62,6 +62,7 @@ namespace go
                 t = float64(1L << (int)(54L)); // set t= 2**54
                 t *= x;
                 t = Float64frombits(Float64bits(t) / 3L + B2 << (int)(32L));
+
             } 
 
             // new cbrt to 23 bits
@@ -84,7 +85,9 @@ namespace go
             {
                 t = -t;
             }
+
             return t;
+
         }
     }
 }

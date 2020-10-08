@@ -4,7 +4,7 @@
 
 // +build 386 amd64 s390x ppc64le
 
-// package sha256 -- go2cs converted at 2020 August 29 08:31:01 UTC
+// package sha256 -- go2cs converted at 2020 October 08 03:36:43 UTC
 // import "crypto/sha256" ==> using sha256 = go.crypto.sha256_package
 // Original source: C:\Go\src\crypto\sha256\sha256block_decl.go
 
@@ -16,7 +16,7 @@ namespace crypto
     public static partial class sha256_package
     {
         //go:noescape
-        private static void block(ref digest dig, slice<byte> p)
+        private static void block(ptr<digest> dig, slice<byte> p)
 ;
     }
 }}

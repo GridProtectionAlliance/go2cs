@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:02 UTC
+//     Generated on 2020 October 08 00:33:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -58,7 +58,7 @@ namespace archive
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -72,10 +72,10 @@ namespace archive
                 m_target_is_ptr = true;
             }
 
-            private delegate long LogicalRemainingByRef(ref T value);
+            private delegate long LogicalRemainingByPtr(ptr<T> value);
             private delegate long LogicalRemainingByVal(T value);
 
-            private static readonly LogicalRemainingByRef s_LogicalRemainingByRef;
+            private static readonly LogicalRemainingByPtr s_LogicalRemainingByPtr;
             private static readonly LogicalRemainingByVal s_LogicalRemainingByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,17 +84,18 @@ namespace archive
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LogicalRemainingByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LogicalRemainingByPtr is null || !m_target_is_ptr)
                     return s_LogicalRemainingByVal!(target);
 
-                return s_LogicalRemainingByRef(ref target);
+                return s_LogicalRemainingByPtr(m_target_ptr);
             }
 
-            private delegate long PhysicalRemainingByRef(ref T value);
+            private delegate long PhysicalRemainingByPtr(ptr<T> value);
             private delegate long PhysicalRemainingByVal(T value);
 
-            private static readonly PhysicalRemainingByRef s_PhysicalRemainingByRef;
+            private static readonly PhysicalRemainingByPtr s_PhysicalRemainingByPtr;
             private static readonly PhysicalRemainingByVal s_PhysicalRemainingByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,11 +104,12 @@ namespace archive
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PhysicalRemainingByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PhysicalRemainingByPtr is null || !m_target_is_ptr)
                     return s_PhysicalRemainingByVal!(target);
 
-                return s_PhysicalRemainingByRef(ref target);
+                return s_PhysicalRemainingByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -116,39 +118,33 @@ namespace archive
             static fileState()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("LogicalRemaining");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("LogicalRemaining");
 
                 if (!(extensionMethod is null))
-                    s_LogicalRemainingByRef = extensionMethod.CreateStaticDelegate(typeof(LogicalRemainingByRef)) as LogicalRemainingByRef;
+                    s_LogicalRemainingByPtr = extensionMethod.CreateStaticDelegate(typeof(LogicalRemainingByPtr)) as LogicalRemainingByPtr;
 
-                if (s_LogicalRemainingByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("LogicalRemaining");
+                extensionMethod = targetType.GetExtensionMethod("LogicalRemaining");
 
-                    if (!(extensionMethod is null))
-                        s_LogicalRemainingByVal = extensionMethod.CreateStaticDelegate(typeof(LogicalRemainingByVal)) as LogicalRemainingByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LogicalRemainingByVal = extensionMethod.CreateStaticDelegate(typeof(LogicalRemainingByVal)) as LogicalRemainingByVal;
 
-                if (s_LogicalRemainingByRef is null && s_LogicalRemainingByVal is null)
+                if (s_LogicalRemainingByPtr is null && s_LogicalRemainingByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement fileState.LogicalRemaining method", new Exception("LogicalRemaining"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PhysicalRemaining");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PhysicalRemaining");
 
                 if (!(extensionMethod is null))
-                    s_PhysicalRemainingByRef = extensionMethod.CreateStaticDelegate(typeof(PhysicalRemainingByRef)) as PhysicalRemainingByRef;
+                    s_PhysicalRemainingByPtr = extensionMethod.CreateStaticDelegate(typeof(PhysicalRemainingByPtr)) as PhysicalRemainingByPtr;
 
-                if (s_PhysicalRemainingByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PhysicalRemaining");
+                extensionMethod = targetType.GetExtensionMethod("PhysicalRemaining");
 
-                    if (!(extensionMethod is null))
-                        s_PhysicalRemainingByVal = extensionMethod.CreateStaticDelegate(typeof(PhysicalRemainingByVal)) as PhysicalRemainingByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PhysicalRemainingByVal = extensionMethod.CreateStaticDelegate(typeof(PhysicalRemainingByVal)) as PhysicalRemainingByVal;
 
-                if (s_PhysicalRemainingByRef is null && s_PhysicalRemainingByVal is null)
+                if (s_PhysicalRemainingByPtr is null && s_PhysicalRemainingByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement fileState.PhysicalRemaining method", new Exception("PhysicalRemaining"));
             }
 

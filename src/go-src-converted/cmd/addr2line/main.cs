@@ -15,7 +15,7 @@
 //
 // This tool is intended for use only by pprof; its interface may change or
 // it may be deleted entirely in future releases.
-// package main -- go2cs converted at 2020 August 29 08:45:41 UTC
+// package main -- go2cs converted at 2020 October 08 03:49:32 UTC
 // Original source: C:\Go\src\cmd\addr2line\main.go
 using bufio = go.bufio_package;
 using flag = go.flag_package;
@@ -32,8 +32,10 @@ namespace go
 {
     public static partial class main_package
     {
-        private static void printUsage(ref os.File w)
+        private static void printUsage(ptr<os.File> _addr_w)
         {
+            ref os.File w = ref _addr_w.val;
+
             fmt.Fprintf(w, "usage: addr2line binary\n");
             fmt.Fprintf(w, "reads addresses from standard input and writes two lines for each:\n");
             fmt.Fprintf(w, "\tfunction name\n");
@@ -42,11 +44,11 @@ namespace go
 
         private static void usage()
         {
-            printUsage(os.Stderr);
+            printUsage(_addr_os.Stderr);
             os.Exit(2L);
         }
 
-        private static void Main()
+        private static void Main() => func((defer, _, __) =>
         {
             log.SetFlags(0L);
             log.SetPrefix("addr2line: "); 
@@ -54,25 +56,31 @@ namespace go
             // pprof expects this behavior when checking for addr2line
             if (len(os.Args) > 1L && os.Args[1L] == "--help")
             {
-                printUsage(os.Stdout);
+                printUsage(_addr_os.Stdout);
                 os.Exit(0L);
             }
+
             flag.Usage = usage;
             flag.Parse();
             if (flag.NArg() != 1L)
             {
                 usage();
             }
+
             var (f, err) = objfile.Open(flag.Arg(0L));
             if (err != null)
             {
                 log.Fatal(err);
             }
+
+            defer(f.Close());
+
             var (tab, err) = f.PCLineTable();
             if (err != null)
             {
                 log.Fatalf("reading %s: %v", flag.Arg(0L), err);
             }
+
             var stdin = bufio.NewScanner(os.Stdin);
             var stdout = bufio.NewWriter(os.Stdout);
 
@@ -87,7 +95,9 @@ namespace go
                     // We don't have an implementation.
                     fmt.Fprintf(stdout, "!reverse translation not implemented\n");
                     continue;
+
                 }
+
                 var (pc, _) = strconv.ParseUint(strings.TrimPrefix(p, "0x"), 16L, 64L);
                 var (file, line, fn) = tab.PCToLine(pc);
                 @string name = "?";
@@ -100,10 +110,13 @@ namespace go
                     file = "?";
                     line = 0L;
                 }
+
                 fmt.Fprintf(stdout, "%s\n%s:%d\n", name, file, line);
+
             }
 
             stdout.Flush();
-        }
+
+        });
     }
 }

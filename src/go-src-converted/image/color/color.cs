@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package color implements a basic color library.
-// package color -- go2cs converted at 2020 August 29 10:09:40 UTC
+// package color -- go2cs converted at 2020 October 08 04:59:06 UTC
 // import "image/color" ==> using color = go.image.color_package
 // Original source: C:\Go\src\image\color\color.go
 
@@ -37,6 +37,11 @@ namespace image
 
         public static (uint, uint, uint, uint) RGBA(this RGBA c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+
             r = uint32(c.R);
             r |= r << (int)(8L);
             g = uint32(c.G);
@@ -45,7 +50,7 @@ namespace image
             b |= b << (int)(8L);
             a = uint32(c.A);
             a |= a << (int)(8L);
-            return;
+            return ;
         }
 
         // RGBA64 represents a 64-bit alpha-premultiplied color, having 16 bits for
@@ -63,6 +68,11 @@ namespace image
 
         public static (uint, uint, uint, uint) RGBA(this RGBA64 c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+
             return (uint32(c.R), uint32(c.G), uint32(c.B), uint32(c.A));
         }
 
@@ -77,6 +87,11 @@ namespace image
 
         public static (uint, uint, uint, uint) RGBA(this NRGBA c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+
             r = uint32(c.R);
             r |= r << (int)(8L);
             r *= uint32(c.A);
@@ -91,7 +106,7 @@ namespace image
             b /= 0xffUL;
             a = uint32(c.A);
             a |= a << (int)(8L);
-            return;
+            return ;
         }
 
         // NRGBA64 represents a non-alpha-premultiplied 64-bit color,
@@ -106,6 +121,11 @@ namespace image
 
         public static (uint, uint, uint, uint) RGBA(this NRGBA64 c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+
             r = uint32(c.R);
             r *= uint32(c.A);
             r /= 0xffffUL;
@@ -116,7 +136,7 @@ namespace image
             b *= uint32(c.A);
             b /= 0xffffUL;
             a = uint32(c.A);
-            return;
+            return ;
         }
 
         // Alpha represents an 8-bit alpha color.
@@ -127,6 +147,11 @@ namespace image
 
         public static (uint, uint, uint, uint) RGBA(this Alpha c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+
             a = uint32(c.A);
             a |= a << (int)(8L);
             return (a, a, a, a);
@@ -140,6 +165,11 @@ namespace image
 
         public static (uint, uint, uint, uint) RGBA(this Alpha16 c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+
             a = uint32(c.A);
             return (a, a, a, a);
         }
@@ -152,6 +182,11 @@ namespace image
 
         public static (uint, uint, uint, uint) RGBA(this Gray c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+
             var y = uint32(c.Y);
             y |= y << (int)(8L);
             return (y, y, y, 0xffffUL);
@@ -165,6 +200,11 @@ namespace image
 
         public static (uint, uint, uint, uint) RGBA(this Gray16 c)
         {
+            uint r = default;
+            uint g = default;
+            uint b = default;
+            uint a = default;
+
             var y = uint32(c.Y);
             return (y, y, y, 0xffffUL);
         }
@@ -184,7 +224,8 @@ namespace image
             // like m == RGBAModel. This is not possible if
             // we use the func value directly, because funcs
             // are no longer comparable.
-            return ref new modelFunc(f);
+            return addr(new modelFunc(f));
+
         }
 
         private partial struct modelFunc
@@ -192,13 +233,15 @@ namespace image
             public Func<Color, Color> f;
         }
 
-        private static Color Convert(this ref modelFunc m, Color c)
+        private static Color Convert(this ptr<modelFunc> _addr_m, Color c)
         {
+            ref modelFunc m = ref _addr_m.val;
+
             return m.f(c);
         }
 
         // Models for the standard color types.
-        public static Model RGBAModel = Model.As(ModelFunc(rgbaModel));        public static Model RGBA64Model = Model.As(ModelFunc(rgba64Model));        public static Model NRGBAModel = Model.As(ModelFunc(nrgbaModel));        public static Model NRGBA64Model = Model.As(ModelFunc(nrgba64Model));        public static Model AlphaModel = Model.As(ModelFunc(alphaModel));        public static Model Alpha16Model = Model.As(ModelFunc(alpha16Model));        public static Model GrayModel = Model.As(ModelFunc(grayModel));        public static Model Gray16Model = Model.As(ModelFunc(gray16Model));
+        public static Model RGBAModel = Model.As(ModelFunc(rgbaModel))!;        public static Model RGBA64Model = Model.As(ModelFunc(rgba64Model))!;        public static Model NRGBAModel = Model.As(ModelFunc(nrgbaModel))!;        public static Model NRGBA64Model = Model.As(ModelFunc(nrgba64Model))!;        public static Model AlphaModel = Model.As(ModelFunc(alphaModel))!;        public static Model Alpha16Model = Model.As(ModelFunc(alpha16Model))!;        public static Model GrayModel = Model.As(ModelFunc(grayModel))!;        public static Model Gray16Model = Model.As(ModelFunc(gray16Model))!;
 
         private static Color rgbaModel(Color c)
         {
@@ -211,8 +254,10 @@ namespace image
                 }
 
             }
+
             var (r, g, b, a) = c.RGBA();
             return new RGBA(uint8(r>>8),uint8(g>>8),uint8(b>>8),uint8(a>>8));
+
         }
 
         private static Color rgba64Model(Color c)
@@ -226,8 +271,10 @@ namespace image
                 }
 
             }
+
             var (r, g, b, a) = c.RGBA();
             return new RGBA64(uint16(r),uint16(g),uint16(b),uint16(a));
+
         }
 
         private static Color nrgbaModel(Color c)
@@ -241,11 +288,13 @@ namespace image
                 }
 
             }
+
             var (r, g, b, a) = c.RGBA();
             if (a == 0xffffUL)
             {
                 return new NRGBA(uint8(r>>8),uint8(g>>8),uint8(b>>8),0xff);
             }
+
             if (a == 0L)
             {
                 return new NRGBA(0,0,0,0);
@@ -255,6 +304,7 @@ namespace image
             g = (g * 0xffffUL) / a;
             b = (b * 0xffffUL) / a;
             return new NRGBA(uint8(r>>8),uint8(g>>8),uint8(b>>8),uint8(a>>8));
+
         }
 
         private static Color nrgba64Model(Color c)
@@ -268,11 +318,13 @@ namespace image
                 }
 
             }
+
             var (r, g, b, a) = c.RGBA();
             if (a == 0xffffUL)
             {
                 return new NRGBA64(uint16(r),uint16(g),uint16(b),0xffff);
             }
+
             if (a == 0L)
             {
                 return new NRGBA64(0,0,0,0);
@@ -282,6 +334,7 @@ namespace image
             g = (g * 0xffffUL) / a;
             b = (b * 0xffffUL) / a;
             return new NRGBA64(uint16(r),uint16(g),uint16(b),uint16(a));
+
         }
 
         private static Color alphaModel(Color c)
@@ -295,8 +348,10 @@ namespace image
                 }
 
             }
+
             var (_, _, _, a) = c.RGBA();
             return new Alpha(uint8(a>>8));
+
         }
 
         private static Color alpha16Model(Color c)
@@ -310,8 +365,10 @@ namespace image
                 }
 
             }
+
             var (_, _, _, a) = c.RGBA();
             return new Alpha16(uint16(a));
+
         }
 
         private static Color grayModel(Color c)
@@ -325,6 +382,7 @@ namespace image
                 }
 
             }
+
             var (r, g, b, _) = c.RGBA(); 
 
             // These coefficients (the fractions 0.299, 0.587 and 0.114) are the same
@@ -338,6 +396,7 @@ namespace image
             long y = (19595L * r + 38470L * g + 7471L * b + 1L << (int)(15L)) >> (int)(24L);
 
             return new Gray(uint8(y));
+
         }
 
         private static Color gray16Model(Color c)
@@ -351,6 +410,7 @@ namespace image
                 }
 
             }
+
             var (r, g, b, _) = c.RGBA(); 
 
             // These coefficients (the fractions 0.299, 0.587 and 0.114) are the same
@@ -361,6 +421,7 @@ namespace image
             long y = (19595L * r + 38470L * g + 7471L * b + 1L << (int)(15L)) >> (int)(16L);
 
             return new Gray16(uint16(y));
+
         }
 
         // Palette is a palette of colors.
@@ -375,7 +436,9 @@ namespace image
             {
                 return null;
             }
+
             return p[p.Index(c)];
+
         }
 
         // Index returns the index of the palette color closest to c in Euclidean
@@ -397,11 +460,15 @@ namespace image
                     {
                         return i;
                     }
+
                     ret = i;
                     bestSum = sum;
+
                 }
+
             }
             return ret;
+
         }
 
         // sqDiff returns the squared-difference of x and y, shifted by 2 so that
@@ -434,6 +501,7 @@ namespace image
             // which is slightly faster. See TestSqDiff for correctness check.
             var d = x - y;
             return (d * d) >> (int)(2L);
+
         }
 
         // Standard colors.

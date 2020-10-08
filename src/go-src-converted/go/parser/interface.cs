@@ -4,7 +4,7 @@
 
 // This file contains the exported entry points for invoking the parser.
 
-// package parser -- go2cs converted at 2020 August 29 08:46:51 UTC
+// package parser -- go2cs converted at 2020 October 08 04:02:30 UTC
 // import "go/parser" ==> using parser = go.go.parser_package
 // Original source: C:\Go\src\go\parser\interface.go
 using bytes = go.bytes_package;
@@ -30,38 +30,34 @@ namespace go
         //
         private static (slice<byte>, error) readSource(@string filename, object src)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             if (src != null)
             {
                 switch (src.type())
                 {
                     case @string s:
-                        return ((slice<byte>)s, null);
+                        return ((slice<byte>)s, error.As(null!)!);
                         break;
                     case slice<byte> s:
-                        return (s, null);
+                        return (s, error.As(null!)!);
                         break;
-                    case ref bytes.Buffer s:
+                    case ptr<bytes.Buffer> s:
                         if (s != null)
                         {
-                            return (s.Bytes(), null);
+                            return (s.Bytes(), error.As(null!)!);
                         }
                         break;
                     case io.Reader s:
-                        bytes.Buffer buf = default;
-                        {
-                            var (_, err) = io.Copy(ref buf, s);
-
-                            if (err != null)
-                            {
-                                return (null, err);
-                            }
-                        }
-                        return (buf.Bytes(), null);
+                        return ioutil.ReadAll(s);
                         break;
                 }
-                return (null, errors.New("invalid source"));
+                return (null, error.As(errors.New("invalid source"))!);
+
             }
             return ioutil.ReadFile(filename);
+
         }
 
         // A Mode value is a set of flags (or 0).
@@ -72,12 +68,12 @@ namespace go
         {
         }
 
-        public static readonly Mode PackageClauseOnly = 1L << (int)(iota); // stop parsing after package clause
-        public static readonly var ImportsOnly = 0; // stop parsing after import declarations
-        public static readonly var ParseComments = 1; // parse comments and add them to AST
-        public static readonly var Trace = 2; // print a trace of parsed productions
-        public static readonly var DeclarationErrors = 3; // report declaration errors
-        public static readonly AllErrors SpuriousErrors = SpuriousErrors; // report all errors (not just the first 10 on different lines)
+        public static readonly Mode PackageClauseOnly = (Mode)1L << (int)(iota); // stop parsing after package clause
+        public static readonly var ImportsOnly = (var)0; // stop parsing after import declarations
+        public static readonly var ParseComments = (var)1; // parse comments and add them to AST
+        public static readonly var Trace = (var)2; // print a trace of parsed productions
+        public static readonly var DeclarationErrors = (var)3; // report declaration errors
+        public static readonly AllErrors SpuriousErrors = (AllErrors)SpuriousErrors; // report all errors (not just the first 10 on different lines)
 
         // ParseFile parses the source code of a single Go source file and returns
         // the corresponding ast.File node. The source code may be provided via
@@ -96,10 +92,14 @@ namespace go
         // indicates the specific failure. If the source was read but syntax
         // errors were found, the result is a partial AST (with ast.Bad* nodes
         // representing the fragments of erroneous source code). Multiple errors
-        // are returned via a scanner.ErrorList which is sorted by file position.
+        // are returned via a scanner.ErrorList which is sorted by source position.
         //
-        public static (ref ast.File, error) ParseFile(ref token.FileSet _fset, @string filename, object src, Mode mode) => func(_fset, (ref token.FileSet fset, Defer defer, Panic panic, Recover _) =>
+        public static (ptr<ast.File>, error) ParseFile(ptr<token.FileSet> _addr_fset, @string filename, object src, Mode mode) => func((defer, panic, _) =>
         {
+            ptr<ast.File> f = default!;
+            error err = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
+
             if (fset == null)
             {
                 panic("parser.ParseFile: no token.FileSet provided (fset == nil)");
@@ -109,8 +109,9 @@ namespace go
             var (text, err) = readSource(filename, src);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             parser p = default;
             defer(() =>
             {
@@ -129,6 +130,7 @@ namespace go
                             }
 
                         }
+
                     } 
 
                     // set result values
@@ -141,17 +143,21 @@ namespace go
                     // source is not a valid Go source file - satisfy
                     // ParseFile API and return a valid (but) empty
                     // *ast.File
-                    f = ref new ast.File(Name:new(ast.Ident),Scope:ast.NewScope(nil),);
+                    f = addr(new ast.File(Name:new(ast.Ident),Scope:ast.NewScope(nil),));
+
                 }
+
                 p.errors.Sort();
                 err = p.errors.Err();
+
             }()); 
 
             // parse source
             p.init(fset, filename, text, mode);
             f = p.parseFile();
 
-            return;
+            return ;
+
         });
 
         // ParseDir calls ParseFile for all files with names ending in ".go" in the
@@ -167,28 +173,26 @@ namespace go
         // returned. If a parse error occurred, a non-nil but incomplete map and the
         // first error encountered are returned.
         //
-        public static (map<@string, ref ast.Package>, error) ParseDir(ref token.FileSet _fset, @string path, Func<os.FileInfo, bool> filter, Mode mode) => func(_fset, (ref token.FileSet fset, Defer defer, Panic _, Recover __) =>
+        public static (map<@string, ptr<ast.Package>>, error) ParseDir(ptr<token.FileSet> _addr_fset, @string path, Func<os.FileInfo, bool> filter, Mode mode)
         {
-            var (fd, err) = os.Open(path);
-            if (err != null)
-            {
-                return (null, err);
-            }
-            defer(fd.Close());
+            map<@string, ptr<ast.Package>> pkgs = default;
+            error first = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
 
-            var (list, err) = fd.Readdir(-1L);
+            var (list, err) = ioutil.ReadDir(path);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            pkgs = make_map<@string, ref ast.Package>();
+
+            pkgs = make_map<@string, ptr<ast.Package>>();
             foreach (var (_, d) in list)
             {
                 if (strings.HasSuffix(d.Name(), ".go") && (filter == null || filter(d)))
                 {
                     var filename = filepath.Join(path, d.Name());
                     {
-                        var (src, err) = ParseFile(fset, filename, null, mode);
+                        var (src, err) = ParseFile(_addr_fset, filename, null, mode);
 
                         if (err == null)
                         {
@@ -196,29 +200,45 @@ namespace go
                             var (pkg, found) = pkgs[name];
                             if (!found)
                             {
-                                pkg = ref new ast.Package(Name:name,Files:make(map[string]*ast.File),);
+                                pkg = addr(new ast.Package(Name:name,Files:make(map[string]*ast.File),));
                                 pkgs[name] = pkg;
                             }
+
                             pkg.Files[filename] = src;
+
                         }
                         else if (first == null)
                         {
                             first = err;
                         }
 
+
                     }
+
                 }
+
             }
-            return;
-        });
+            return ;
+
+        }
 
         // ParseExprFrom is a convenience function for parsing an expression.
         // The arguments have the same meaning as for ParseFile, but the source must
         // be a valid Go (type or value) expression. Specifically, fset must not
         // be nil.
         //
-        public static (ast.Expr, error) ParseExprFrom(ref token.FileSet _fset, @string filename, object src, Mode mode) => func(_fset, (ref token.FileSet fset, Defer defer, Panic panic, Recover _) =>
+        // If the source couldn't be read, the returned AST is nil and the error
+        // indicates the specific failure. If the source was read but syntax
+        // errors were found, the result is a partial AST (with ast.Bad* nodes
+        // representing the fragments of erroneous source code). Multiple errors
+        // are returned via a scanner.ErrorList which is sorted by source position.
+        //
+        public static (ast.Expr, error) ParseExprFrom(ptr<token.FileSet> _addr_fset, @string filename, object src, Mode mode) => func((defer, panic, _) =>
         {
+            ast.Expr expr = default;
+            error err = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
+
             if (fset == null)
             {
                 panic("parser.ParseExprFrom: no token.FileSet provided (fset == nil)");
@@ -228,14 +248,13 @@ namespace go
             var (text, err) = readSource(filename, src);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             parser p = default;
             defer(() =>
             {
                 {
-                    var e__prev1 = e;
-
                     var e = recover();
 
                     if (e != null)
@@ -250,13 +269,14 @@ namespace go
                             }
 
                         }
+
                     }
 
-                    e = e__prev1;
-
                 }
+
                 p.errors.Sort();
                 err = p.errors.Err();
+
             }()); 
 
             // parse expr
@@ -267,7 +287,7 @@ namespace go
             // in case of an erroneous x.
             p.openScope();
             p.pkgScope = p.topScope;
-            e = p.parseRhsOrType();
+            expr = p.parseRhsOrType();
             p.closeScope();
             assert(p.topScope == null, "unbalanced scopes"); 
 
@@ -277,23 +297,27 @@ namespace go
             {
                 p.next();
             }
+
             p.expect(token.EOF);
 
-            if (p.errors.Len() > 0L)
-            {
-                p.errors.Sort();
-                return (null, p.errors.Err());
-            }
-            return (e, null);
+            return ;
+
         });
 
         // ParseExpr is a convenience function for obtaining the AST of an expression x.
         // The position information recorded in the AST is undefined. The filename used
         // in error messages is the empty string.
         //
+        // If syntax errors were found, the result is a partial AST (with ast.Bad* nodes
+        // representing the fragments of erroneous source code). Multiple errors are
+        // returned via a scanner.ErrorList which is sorted by source position.
+        //
         public static (ast.Expr, error) ParseExpr(@string x)
         {
-            return ParseExprFrom(token.NewFileSet(), "", (slice<byte>)x, 0L);
+            ast.Expr _p0 = default;
+            error _p0 = default!;
+
+            return ParseExprFrom(_addr_token.NewFileSet(), "", (slice<byte>)x, 0L);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:05 UTC
+//     Generated on 2020 October 08 03:23:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,13 +27,13 @@ namespace go
             // Constructors
             public funcInfo(NilType _)
             {
-                this._func = default;
+                this.ptr<_func> = default;
                 this.datap = default;
             }
 
-            public funcInfo(ref _func _func = default, ref ptr<moduledata> datap = default)
+            public funcInfo(ref ptr<_func> ptr<_func> = default, ref ptr<moduledata> datap = default)
             {
-                this._func = _func;
+                this.ptr<_func> = ptr<_func>;
                 this.datap = datap;
             }
 
@@ -57,7 +57,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static funcInfo funcInfo_cast(dynamic value)
         {
-            return new funcInfo(ref value._func, ref value.datap);
+            return new funcInfo(ref value.ptr<_func>, ref value.datap);
         }
     }
 }

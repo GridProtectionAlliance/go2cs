@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:39 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:41 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\net_plan9.go
 using _@unsafe_ = go.@unsafe_package;
@@ -24,17 +24,22 @@ namespace go
             getg().m.ignoreHangup = false;
         }
 
-        private static bool ignoredNote(ref byte note)
+        private static bool ignoredNote(ptr<byte> _addr_note)
         {
+            ref byte note = ref _addr_note.val;
+
             if (note == null)
             {
                 return false;
             }
+
             if (gostringnocopy(note) != "hangup")
             {
                 return false;
             }
+
             return getg().m.ignoreHangup;
+
         }
     }
 }

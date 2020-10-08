@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:58 UTC
+//     Generated on 2020 October 08 04:36:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,13 +13,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using singleflight = go.@internal.singleflight_package;
 using log = go.log_package;
-using url = go.net.url_package;
+using urlpkg = go.net.url_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
@@ -28,6 +28,7 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using load = go.cmd.go.@internal.load_package;
 using web = go.cmd.go.@internal.web_package;
 using go;
 
@@ -58,7 +59,7 @@ namespace @internal
                 this.resolveRepo = default;
             }
 
-            public vcsCmd(@string name = default, @string cmd = default, slice<@string> createCmd = default, slice<@string> downloadCmd = default, slice<tagCmd> tagCmd = default, slice<tagCmd> tagLookupCmd = default, slice<@string> tagSyncCmd = default, slice<@string> tagSyncDefault = default, slice<@string> scheme = default, @string pingCmd = default, Func<ref vcsCmd, @string, (@string, error)> remoteRepo = default, Func<ref vcsCmd, @string, @string, (@string, error)> resolveRepo = default)
+            public vcsCmd(@string name = default, @string cmd = default, slice<@string> createCmd = default, slice<@string> downloadCmd = default, slice<tagCmd> tagCmd = default, slice<tagCmd> tagLookupCmd = default, slice<@string> tagSyncCmd = default, slice<@string> tagSyncDefault = default, slice<@string> scheme = default, @string pingCmd = default, Func<ptr<vcsCmd>, @string, (@string, error)> remoteRepo = default, Func<ptr<vcsCmd>, @string, @string, (@string, error)> resolveRepo = default)
             {
                 this.name = name;
                 this.cmd = cmd;

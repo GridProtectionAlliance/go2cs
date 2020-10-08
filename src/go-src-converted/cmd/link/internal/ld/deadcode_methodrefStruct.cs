@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:03:17 UTC
+//     Generated on 2020 October 08 04:38:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,11 +13,14 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using heap = go.container.heap_package;
 using fmt = go.fmt_package;
-using strings = go.strings_package;
 using unicode = go.unicode_package;
 using go;
 
@@ -39,7 +42,7 @@ namespace @internal
                 this.r = default;
             }
 
-            public methodref(methodsig m = default, ref ptr<sym.Symbol> src = default, array<ref sym.Reloc> r = default)
+            public methodref(methodsig m = default, loader.Sym src = default, long r = default)
             {
                 this.m = m;
                 this.src = src;
@@ -66,7 +69,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static methodref methodref_cast(dynamic value)
         {
-            return new methodref(value.m, ref value.src, value.r);
+            return new methodref(value.m, value.src, value.r);
         }
     }
 }}}}

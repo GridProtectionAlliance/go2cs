@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 August 29 08:45:01 UTC
+// package cmplx -- go2cs converted at 2020 October 08 03:25:55 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\sin.go
 using math = go.math_package;
@@ -59,9 +59,27 @@ namespace math
         // Sin returns the sine of x.
         public static System.Numerics.Complex128 Sin(System.Numerics.Complex128 x)
         {
+            {
+                var re = real(x);
+                var im = imag(x);
+
+
+                if (im == 0L && (math.IsInf(re, 0L) || math.IsNaN(re))) 
+                    return complex(math.NaN(), im);
+                else if (math.IsInf(im, 0L)) 
+
+                    if (re == 0L) 
+                        return x;
+                    else if (math.IsInf(re, 0L) || math.IsNaN(re)) 
+                        return complex(math.NaN(), im);
+                                    else if (re == 0L && math.IsNaN(im)) 
+                    return x;
+
+            }
             var (s, c) = math.Sincos(real(x));
             var (sh, ch) = sinhcosh(imag(x));
             return complex(s * ch, c * sh);
+
         }
 
         // Complex hyperbolic sine
@@ -80,9 +98,27 @@ namespace math
         // Sinh returns the hyperbolic sine of x.
         public static System.Numerics.Complex128 Sinh(System.Numerics.Complex128 x)
         {
+            {
+                var re = real(x);
+                var im = imag(x);
+
+
+                if (re == 0L && (math.IsInf(im, 0L) || math.IsNaN(im))) 
+                    return complex(re, math.NaN());
+                else if (math.IsInf(re, 0L)) 
+
+                    if (im == 0L) 
+                        return complex(re, im);
+                    else if (math.IsInf(im, 0L) || math.IsNaN(im)) 
+                        return complex(re, math.NaN());
+                                    else if (im == 0L && math.IsNaN(re)) 
+                    return complex(math.NaN(), im);
+
+            }
             var (s, c) = math.Sincos(imag(x));
             var (sh, ch) = sinhcosh(real(x));
             return complex(c * sh, s * ch);
+
         }
 
         // Complex circular cosine
@@ -106,9 +142,27 @@ namespace math
         // Cos returns the cosine of x.
         public static System.Numerics.Complex128 Cos(System.Numerics.Complex128 x)
         {
+            {
+                var re = real(x);
+                var im = imag(x);
+
+
+                if (im == 0L && (math.IsInf(re, 0L) || math.IsNaN(re))) 
+                    return complex(math.NaN(), -im * math.Copysign(0L, re));
+                else if (math.IsInf(im, 0L)) 
+
+                    if (re == 0L) 
+                        return complex(math.Inf(1L), -re * math.Copysign(0L, im));
+                    else if (math.IsInf(re, 0L) || math.IsNaN(re)) 
+                        return complex(math.Inf(1L), math.NaN());
+                                    else if (re == 0L && math.IsNaN(im)) 
+                    return complex(math.NaN(), 0L);
+
+            }
             var (s, c) = math.Sincos(real(x));
             var (sh, ch) = sinhcosh(imag(x));
             return complex(c * ch, -s * sh);
+
         }
 
         // Complex hyperbolic cosine
@@ -126,22 +180,45 @@ namespace math
         // Cosh returns the hyperbolic cosine of x.
         public static System.Numerics.Complex128 Cosh(System.Numerics.Complex128 x)
         {
+            {
+                var re = real(x);
+                var im = imag(x);
+
+
+                if (re == 0L && (math.IsInf(im, 0L) || math.IsNaN(im))) 
+                    return complex(math.NaN(), re * math.Copysign(0L, im));
+                else if (math.IsInf(re, 0L)) 
+
+                    if (im == 0L) 
+                        return complex(math.Inf(1L), im * math.Copysign(0L, re));
+                    else if (math.IsInf(im, 0L) || math.IsNaN(im)) 
+                        return complex(math.Inf(1L), math.NaN());
+                                    else if (im == 0L && math.IsNaN(re)) 
+                    return complex(math.NaN(), im);
+
+            }
             var (s, c) = math.Sincos(imag(x));
             var (sh, ch) = sinhcosh(real(x));
             return complex(c * ch, s * sh);
+
         }
 
         // calculate sinh and cosh
         private static (double, double) sinhcosh(double x)
         {
+            double sh = default;
+            double ch = default;
+
             if (math.Abs(x) <= 0.5F)
             {
                 return (math.Sinh(x), math.Cosh(x));
             }
+
             var e = math.Exp(x);
             float ei = 0.5F / e;
             e *= 0.5F;
             return (e - ei, e + ei);
+
         }
     }
 }}

@@ -4,7 +4,7 @@
 
 // Type conversions for Scan.
 
-// package sql -- go2cs converted at 2020 August 29 10:10:47 UTC
+// package sql -- go2cs converted at 2020 October 08 04:58:46 UTC
 // import "database/sql" ==> using sql = go.database.sql_package
 // Original source: C:\Go\src\database\sql\convert.go
 using driver = go.database.sql.driver_package;
@@ -16,6 +16,7 @@ using time = go.time_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace database
@@ -24,27 +25,34 @@ namespace database
     {
         private static var errNilPtr = errors.New("destination pointer is nil"); // embedded in descriptive error
 
-        private static @string describeNamedValue(ref driver.NamedValue nv)
+        private static @string describeNamedValue(ptr<driver.NamedValue> _addr_nv)
         {
+            ref driver.NamedValue nv = ref _addr_nv.val;
+
             if (len(nv.Name) == 0L)
             {
                 return fmt.Sprintf("$%d", nv.Ordinal);
             }
+
             return fmt.Sprintf("with name %q", nv.Name);
+
         }
 
         private static error validateNamedValueName(@string name)
         {
             if (len(name) == 0L)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             var (r, _) = utf8.DecodeRuneInString(name);
             if (unicode.IsLetter(r))
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
-            return error.As(fmt.Errorf("name %q does not begin with a letter", name));
+
+            return error.As(fmt.Errorf("name %q does not begin with a letter", name))!;
+
         }
 
         // ccChecker wraps the driver.ColumnConverter and allows it to be used
@@ -56,11 +64,13 @@ namespace database
             public long want;
         }
 
-        private static error CheckNamedValue(this ccChecker c, ref driver.NamedValue nv)
+        private static error CheckNamedValue(this ccChecker c, ptr<driver.NamedValue> _addr_nv)
         {
+            ref driver.NamedValue nv = ref _addr_nv.val;
+
             if (c.cci == null)
             {
-                return error.As(driver.ErrSkip);
+                return error.As(driver.ErrSkip)!;
             } 
             // The column converter shouldn't be called on any index
             // it isn't expecting. The final error will be thrown
@@ -68,7 +78,7 @@ namespace database
             var index = nv.Ordinal - 1L;
             if (c.want <= index)
             {
-                return error.As(null);
+                return error.As(null!)!;
             } 
 
             // First, see if the value itself knows how to convert
@@ -82,13 +92,16 @@ namespace database
                     var (sv, err) = callValuerValue(vr);
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                     if (!driver.IsValue(sv))
                     {
-                        return error.As(fmt.Errorf("non-subset type %T returned from Value", sv));
+                        return error.As(fmt.Errorf("non-subset type %T returned from Value", sv))!;
                     }
+
                     nv.Value = sv;
+
                 } 
 
                 // Second, ask the column to sanity check itself. For
@@ -108,35 +121,47 @@ namespace database
             // truncated), or that a nil can't go into a NOT NULL
             // column before going across the network to get the
             // same error.
-            error err = default;
+            error err = default!;
             var arg = nv.Value;
             nv.Value, err = c.cci.ColumnConverter(index).ConvertValue(arg);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (!driver.IsValue(nv.Value))
             {
-                return error.As(fmt.Errorf("driver ColumnConverter error converted %T to unsupported type %T", arg, nv.Value));
+                return error.As(fmt.Errorf("driver ColumnConverter error converted %T to unsupported type %T", arg, nv.Value))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // defaultCheckNamedValue wraps the default ColumnConverter to have the same
         // function signature as the CheckNamedValue in the driver.NamedValueChecker
         // interface.
-        private static error defaultCheckNamedValue(ref driver.NamedValue nv)
+        private static error defaultCheckNamedValue(ptr<driver.NamedValue> _addr_nv)
         {
+            error err = default!;
+            ref driver.NamedValue nv = ref _addr_nv.val;
+
             nv.Value, err = driver.DefaultParameterConverter.ConvertValue(nv.Value);
-            return error.As(err);
+            return error.As(err)!;
         }
 
-        // driverArgs converts arguments from callers of Stmt.Exec and
+        // driverArgsConnLocked converts arguments from callers of Stmt.Exec and
         // Stmt.Query into driver Values.
         //
         // The statement ds may be nil, if no statement is available.
-        private static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Conn ci, ref driverStmt ds, slice<object> args)
+        //
+        // ci must be locked.
+        private static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Conn ci, ptr<driverStmt> _addr_ds, slice<object> args)
         {
+            slice<driver.NamedValue> _p0 = default;
+            error _p0 = default!;
+            ref driverStmt ds = ref _addr_ds.val;
+
             var nvargs = make_slice<driver.NamedValue>(len(args)); 
 
             // -1 means the driver doesn't know how to count the number of
@@ -162,6 +187,7 @@ namespace database
             {
                 nvc, ok = ci._<driver.NamedValueChecker>();
             }
+
             driver.ColumnConverter (cci, ok) = si._<driver.ColumnConverter>();
             if (ok)
             {
@@ -173,27 +199,30 @@ namespace database
             // and continue. However if driver.ErrRemoveArgument
             // is returned the argument is not included in the query
             // argument list.
-            error err = default;
+            error err = default!;
             long n = default;
             foreach (var (_, arg) in args)
             {
-                var nv = ref nvargs[n];
+                var nv = _addr_nvargs[n];
                 {
                     NamedArg (np, ok) = arg._<NamedArg>();
 
                     if (ok)
                     {
-                        err = error.As(validateNamedValueName(np.Name));
+                        err = error.As(validateNamedValueName(np.Name))!;
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (null, error.As(err)!);
                         }
+
                         arg = np.Value;
                         nv.Name = np.Name;
+
                     }
 
                 }
+
                 nv.Ordinal = n + 1L;
                 nv.Value = arg; 
 
@@ -217,7 +246,7 @@ namespace database
                 else if (cci != null) 
                     checker = cc.CheckNamedValue;
                 nextCheck:
-                err = error.As(checker(nv));
+                err = error.As(checker(nv))!;
 
                 if (err == null) 
                     n++;
@@ -235,121 +264,153 @@ namespace database
                     {
                         checker = defaultCheckNamedValue;
                     }
+
                     goto nextCheck;
                 else 
-                    return (null, fmt.Errorf("sql: converting argument %s type: %v", describeNamedValue(nv), err));
-                            } 
+                    return (null, error.As(fmt.Errorf("sql: converting argument %s type: %v", describeNamedValue(_addr_nv), err))!);
+                
+            } 
 
             // Check the length of arguments after conversion to allow for omitted
             // arguments.
             if (want != -1L && len(nvargs) != want)
             {
-                return (null, fmt.Errorf("sql: expected %d arguments, got %d", want, len(nvargs)));
+                return (null, error.As(fmt.Errorf("sql: expected %d arguments, got %d", want, len(nvargs)))!);
             }
-            return (nvargs, null);
+
+            return (nvargs, error.As(null!)!);
+
 
         }
 
-        // convertAssign copies to dest the value in src, converting it if possible.
-        // An error is returned if the copy would result in loss of information.
-        // dest should be a pointer type.
+        // convertAssign is the same as convertAssignRows, but without the optional
+        // rows argument.
         private static error convertAssign(object dest, object src)
-        { 
+        {
+            return error.As(convertAssignRows(dest, src, _addr_null))!;
+        }
+
+        // convertAssignRows copies to dest the value in src, converting it if possible.
+        // An error is returned if the copy would result in loss of information.
+        // dest should be a pointer type. If rows is passed in, the rows will
+        // be used as the parent for any cursor values converted from a
+        // driver.Rows to a *Rows.
+        private static error convertAssignRows(object dest, object src, ptr<Rows> _addr_rows)
+        {
+            ref Rows rows = ref _addr_rows.val;
+ 
             // Common cases, without reflect.
             switch (src.type())
             {
                 case @string s:
                     switch (dest.type())
                     {
-                        case ref @string d:
+                        case ptr<@string> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = s;
-                            return error.As(null);
+
+                            d.val = s;
+                            return error.As(null!)!;
                             break;
-                        case ref slice<byte> d:
+                        case ptr<slice<byte>> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = (slice<byte>)s;
-                            return error.As(null);
+
+                            d.val = (slice<byte>)s;
+                            return error.As(null!)!;
                             break;
-                        case ref RawBytes d:
+                        case ptr<RawBytes> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = append((d.Value)[..0L], s);
-                            return error.As(null);
+
+                            d.val = append((d.val)[..0L], s);
+                            return error.As(null!)!;
                             break;
                     }
                     break;
                 case slice<byte> s:
                     switch (dest.type())
                     {
-                        case ref @string d:
+                        case ptr<@string> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = string(s);
-                            return error.As(null);
+
+                            d.val = string(s);
+                            return error.As(null!)!;
                             break;
                         case 
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = cloneBytes(s);
-                            return error.As(null);
+
+                            d.val = cloneBytes(s);
+                            return error.As(null!)!;
                             break;
-                        case ref slice<byte> d:
+                        case ptr<slice<byte>> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = cloneBytes(s);
-                            return error.As(null);
+
+                            d.val = cloneBytes(s);
+                            return error.As(null!)!;
                             break;
-                        case ref RawBytes d:
+                        case ptr<RawBytes> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = s;
-                            return error.As(null);
+
+                            d.val = s;
+                            return error.As(null!)!;
                             break;
                     }
                     break;
                 case time.Time s:
                     switch (dest.type())
                     {
-                        case ref time.Time d:
-                            d.Value = s;
-                            return error.As(null);
+                        case ptr<time.Time> d:
+                            d.val = s;
+                            return error.As(null!)!;
                             break;
-                        case ref @string d:
-                            d.Value = s.Format(time.RFC3339Nano);
-                            return error.As(null);
+                        case ptr<@string> d:
+                            d.val = s.Format(time.RFC3339Nano);
+                            return error.As(null!)!;
                             break;
-                        case ref slice<byte> d:
+                        case ptr<slice<byte>> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = (slice<byte>)s.Format(time.RFC3339Nano);
-                            return error.As(null);
+
+                            d.val = (slice<byte>)s.Format(time.RFC3339Nano);
+                            return error.As(null!)!;
                             break;
-                        case ref RawBytes d:
+                        case ptr<RawBytes> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = s.AppendFormat((d.Value)[..0L], time.RFC3339Nano);
-                            return error.As(null);
+
+                            d.val = s.AppendFormat((d.val)[..0L], time.RFC3339Nano);
+                            return error.As(null!)!;
+                            break;
+                    }
+                    break;
+                case decimalDecompose s:
+                    switch (dest.type())
+                    {
+                        case decimalCompose d:
+                            return error.As(d.Compose(s.Decompose(null)))!;
                             break;
                     }
                     break;
@@ -359,26 +420,66 @@ namespace database
                         case 
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = null;
-                            return error.As(null);
+
+                            d.val = null;
+                            return error.As(null!)!;
                             break;
-                        case ref slice<byte> d:
+                        case ptr<slice<byte>> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = null;
-                            return error.As(null);
+
+                            d.val = null;
+                            return error.As(null!)!;
                             break;
-                        case ref RawBytes d:
+                        case ptr<RawBytes> d:
                             if (d == null)
                             {
-                                return error.As(errNilPtr);
+                                return error.As(errNilPtr)!;
                             }
-                            d.Value = null;
-                            return error.As(null);
+
+                            d.val = null;
+                            return error.As(null!)!;
+                            break; 
+                        // The driver is returning a cursor the client may iterate over.
+                    } 
+                    // The driver is returning a cursor the client may iterate over.
+                    break;
+                case driver.Rows s:
+                    switch (dest.type())
+                    {
+                        case ptr<Rows> d:
+                            if (d == null)
+                            {
+                                return error.As(errNilPtr)!;
+                            }
+
+                            if (rows == null)
+                            {
+                                return error.As(errors.New("invalid context to convert cursor rows, missing parent *Rows"))!;
+                            }
+
+                            rows.closemu.Lock();
+                            d.val = new Rows(dc:rows.dc,releaseConn:func(error){},rowsi:s,); 
+                            // Chain the cancel function.
+                            var parentCancel = rows.cancel;
+                            rows.cancel = () =>
+                            { 
+                                // When Rows.cancel is called, the closemu will be locked as well.
+                                // So we can access rs.lasterr.
+                                d.close(rows.lasterr);
+                                if (parentCancel != null)
+                                {
+                                    parentCancel();
+                                }
+
+                            }
+;
+                            rows.closemu.Unlock();
+                            return error.As(null!)!;
                             break;
                     }
                     break;
@@ -389,14 +490,14 @@ namespace database
 
             switch (dest.type())
             {
-                case ref @string d:
+                case ptr<@string> d:
                     sv = reflect.ValueOf(src);
 
                     if (sv.Kind() == reflect.Bool || sv.Kind() == reflect.Int || sv.Kind() == reflect.Int8 || sv.Kind() == reflect.Int16 || sv.Kind() == reflect.Int32 || sv.Kind() == reflect.Int64 || sv.Kind() == reflect.Uint || sv.Kind() == reflect.Uint8 || sv.Kind() == reflect.Uint16 || sv.Kind() == reflect.Uint32 || sv.Kind() == reflect.Uint64 || sv.Kind() == reflect.Float32 || sv.Kind() == reflect.Float64) 
-                        d.Value = asString(src);
-                        return error.As(null);
+                        d.val = asString(src);
+                        return error.As(null!)!;
                                         break;
-                case ref slice<byte> d:
+                case ptr<slice<byte>> d:
                     sv = reflect.ValueOf(src);
                     {
                         var b__prev1 = b;
@@ -405,42 +506,45 @@ namespace database
 
                         if (ok)
                         {
-                            d.Value = b;
-                            return error.As(null);
+                            d.val = b;
+                            return error.As(null!)!;
                         }
 
                         b = b__prev1;
 
                     }
+
                     break;
-                case ref RawBytes d:
+                case ptr<RawBytes> d:
                     sv = reflect.ValueOf(src);
                     {
                         var b__prev1 = b;
 
-                        (b, ok) = asBytes((slice<byte>)d.Value[..0L], sv);
+                        (b, ok) = asBytes((slice<byte>)d.val[..0L], sv);
 
                         if (ok)
                         {
-                            d.Value = RawBytes(b);
-                            return error.As(null);
+                            d.val = RawBytes(b);
+                            return error.As(null!)!;
                         }
 
                         b = b__prev1;
 
                     }
+
                     break;
-                case ref bool d:
+                case ptr<bool> d:
                     var (bv, err) = driver.Bool.ConvertValue(src);
                     if (err == null)
                     {
-                        d.Value = bv._<bool>();
+                        d.val = bv._<bool>();
                     }
-                    return error.As(err);
+
+                    return error.As(err)!;
                     break;
                 case 
-                    d.Value = src;
-                    return error.As(null);
+                    d.val = src;
+                    return error.As(null!)!;
                     break;
 
             }
@@ -450,24 +554,28 @@ namespace database
 
                 if (ok)
                 {
-                    return error.As(scanner.Scan(src));
+                    return error.As(scanner.Scan(src))!;
                 }
 
             }
 
+
             var dpv = reflect.ValueOf(dest);
             if (dpv.Kind() != reflect.Ptr)
             {
-                return error.As(errors.New("destination not a pointer"));
+                return error.As(errors.New("destination not a pointer"))!;
             }
+
             if (dpv.IsNil())
             {
-                return error.As(errNilPtr);
+                return error.As(errNilPtr)!;
             }
+
             if (!sv.IsValid())
             {
                 sv = reflect.ValueOf(src);
             }
+
             var dv = reflect.Indirect(dpv);
             if (sv.IsValid() && sv.Type().AssignableTo(dv.Type()))
             {
@@ -483,12 +591,14 @@ namespace database
                         break;
                     }
                 }
-                return error.As(null);
+                return error.As(null!)!;
+
             }
+
             if (dv.Kind() == sv.Kind() && sv.Type().ConvertibleTo(dv.Type()))
             {
                 dv.Set(sv.Convert(dv.Type()));
-                return error.As(null);
+                return error.As(null!)!;
             } 
 
             // The following conversions use a string value as an intermediate representation
@@ -501,70 +611,94 @@ namespace database
                 if (src == null)
                 {
                     dv.Set(reflect.Zero(dv.Type()));
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
-                else
-                {
-                    dv.Set(reflect.New(dv.Type().Elem()));
-                    return error.As(convertAssign(dv.Interface(), src));
-                }
+
+                dv.Set(reflect.New(dv.Type().Elem()));
+                return error.As(convertAssignRows(dv.Interface(), src, _addr_rows))!;
             else if (dv.Kind() == reflect.Int || dv.Kind() == reflect.Int8 || dv.Kind() == reflect.Int16 || dv.Kind() == reflect.Int32 || dv.Kind() == reflect.Int64) 
+                if (src == null)
+                {
+                    return error.As(fmt.Errorf("converting NULL to %s is unsupported", dv.Kind()))!;
+                }
+
                 var s = asString(src);
                 var (i64, err) = strconv.ParseInt(s, 10L, dv.Type().Bits());
                 if (err != null)
                 {
                     err = strconvErr(err);
-                    return error.As(fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v", src, s, dv.Kind(), err));
+                    return error.As(fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v", src, s, dv.Kind(), err))!;
                 }
+
                 dv.SetInt(i64);
-                return error.As(null);
+                return error.As(null!)!;
             else if (dv.Kind() == reflect.Uint || dv.Kind() == reflect.Uint8 || dv.Kind() == reflect.Uint16 || dv.Kind() == reflect.Uint32 || dv.Kind() == reflect.Uint64) 
+                if (src == null)
+                {
+                    return error.As(fmt.Errorf("converting NULL to %s is unsupported", dv.Kind()))!;
+                }
+
                 s = asString(src);
                 var (u64, err) = strconv.ParseUint(s, 10L, dv.Type().Bits());
                 if (err != null)
                 {
                     err = strconvErr(err);
-                    return error.As(fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v", src, s, dv.Kind(), err));
+                    return error.As(fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v", src, s, dv.Kind(), err))!;
                 }
+
                 dv.SetUint(u64);
-                return error.As(null);
+                return error.As(null!)!;
             else if (dv.Kind() == reflect.Float32 || dv.Kind() == reflect.Float64) 
+                if (src == null)
+                {
+                    return error.As(fmt.Errorf("converting NULL to %s is unsupported", dv.Kind()))!;
+                }
+
                 s = asString(src);
                 var (f64, err) = strconv.ParseFloat(s, dv.Type().Bits());
                 if (err != null)
                 {
                     err = strconvErr(err);
-                    return error.As(fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v", src, s, dv.Kind(), err));
+                    return error.As(fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v", src, s, dv.Kind(), err))!;
                 }
+
                 dv.SetFloat(f64);
-                return error.As(null);
+                return error.As(null!)!;
             else if (dv.Kind() == reflect.String) 
+                if (src == null)
+                {
+                    return error.As(fmt.Errorf("converting NULL to %s is unsupported", dv.Kind()))!;
+                }
+
                 switch (src.type())
                 {
                     case @string v:
                         dv.SetString(v);
-                        return error.As(null);
+                        return error.As(null!)!;
                         break;
                     case slice<byte> v:
                         dv.SetString(string(v));
-                        return error.As(null);
+                        return error.As(null!)!;
                         break;
                 }
-                        return error.As(fmt.Errorf("unsupported Scan, storing driver.Value type %T into type %T", src, dest));
+                        return error.As(fmt.Errorf("unsupported Scan, storing driver.Value type %T into type %T", src, dest))!;
+
         }
 
         private static error strconvErr(error err)
         {
             {
-                ref strconv.NumError (ne, ok) = err._<ref strconv.NumError>();
+                ptr<strconv.NumError> (ne, ok) = err._<ptr<strconv.NumError>>();
 
                 if (ok)
                 {
-                    return error.As(ne.Err);
+                    return error.As(ne.Err)!;
                 }
 
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
 
         private static slice<byte> cloneBytes(slice<byte> b)
@@ -573,12 +707,11 @@ namespace database
             {
                 return null;
             }
-            else
-            {
-                var c = make_slice<byte>(len(b));
-                copy(c, b);
-                return c;
-            }
+
+            var c = make_slice<byte>(len(b));
+            copy(c, b);
+            return c;
+
         }
 
         private static @string asString(object src)
@@ -605,10 +738,14 @@ namespace database
             else if (rv.Kind() == reflect.Bool) 
                 return strconv.FormatBool(rv.Bool());
                         return fmt.Sprintf("%v", src);
+
         }
 
         private static (slice<byte>, bool) asBytes(slice<byte> buf, reflect.Value rv)
         {
+            slice<byte> b = default;
+            bool ok = default;
+
 
             if (rv.Kind() == reflect.Int || rv.Kind() == reflect.Int8 || rv.Kind() == reflect.Int16 || rv.Kind() == reflect.Int32 || rv.Kind() == reflect.Int64) 
                 return (strconv.AppendInt(buf, rv.Int(), 10L), true);
@@ -623,10 +760,11 @@ namespace database
             else if (rv.Kind() == reflect.String) 
                 var s = rv.String();
                 return (append(buf, s), true);
-                        return;
+                        return ;
+
         }
 
-        private static var valuerReflectType = reflect.TypeOf((driver.Valuer.Value)(null)).Elem();
+        private static var valuerReflectType = reflect.TypeOf((driver.Valuer.val)(null)).Elem();
 
         // callValuerValue returns vr.Value(), with one exception:
         // If vr.Value is an auto-generated method on a pointer type and the
@@ -641,16 +779,56 @@ namespace database
         // This function is mirrored in the database/sql/driver package.
         private static (driver.Value, error) callValuerValue(driver.Valuer vr)
         {
+            driver.Value v = default;
+            error err = default!;
+
             {
                 var rv = reflect.ValueOf(vr);
 
                 if (rv.Kind() == reflect.Ptr && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType))
                 {
-                    return (null, null);
+                    return (null, error.As(null!)!);
                 }
 
             }
+
             return vr.Value();
+
+        }
+
+        // decimal composes or decomposes a decimal value to and from individual parts.
+        // There are four parts: a boolean negative flag, a form byte with three possible states
+        // (finite=0, infinite=1, NaN=2), a base-2 big-endian integer
+        // coefficient (also known as a significand) as a []byte, and an int32 exponent.
+        // These are composed into a final value as "decimal = (neg) (form=finite) coefficient * 10 ^ exponent".
+        // A zero length coefficient is a zero value.
+        // The big-endian integer coefficient stores the most significant byte first (at coefficient[0]).
+        // If the form is not finite the coefficient and exponent should be ignored.
+        // The negative parameter may be set to true for any form, although implementations are not required
+        // to respect the negative parameter in the non-finite form.
+        //
+        // Implementations may choose to set the negative parameter to true on a zero or NaN value,
+        // but implementations that do not differentiate between negative and positive
+        // zero or NaN values should ignore the negative parameter without error.
+        // If an implementation does not support Infinity it may be converted into a NaN without error.
+        // If a value is set that is larger than what is supported by an implementation,
+        // an error must be returned.
+        // Implementations must return an error if a NaN or Infinity is attempted to be set while neither
+        // are supported.
+        //
+        // NOTE(kardianos): This is an experimental interface. See https://golang.org/issue/30870
+        private partial interface @decimal : decimalDecompose, decimalCompose
+        {
+        }
+
+        private partial interface decimalDecompose
+        {
+            (byte, bool, slice<byte>, int) Decompose(slice<byte> buf);
+        }
+
+        private partial interface decimalCompose
+        {
+            error Compose(byte form, bool negative, slice<byte> coefficient, int exponent);
         }
     }
 }}

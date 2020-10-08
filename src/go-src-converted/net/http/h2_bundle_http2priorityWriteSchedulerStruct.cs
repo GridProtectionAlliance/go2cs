@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:21 UTC
+//     Generated on 2020 October 08 03:39:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -68,7 +69,7 @@ namespace net
                 this.queuePool = default;
             }
 
-            public http2priorityWriteScheduler(http2priorityNode root = default, map<uint, ref http2priorityNode> nodes = default, uint maxID = default, slice<ref http2priorityNode> closedNodes = default, slice<ref http2priorityNode> idleNodes = default, long maxClosedNodesInTree = default, long maxIdleNodesInTree = default, int writeThrottleLimit = default, bool enableWriteThrottle = default, slice<ref http2priorityNode> tmp = default, http2writeQueuePool queuePool = default)
+            public http2priorityWriteScheduler(http2priorityNode root = default, map<uint, ptr<http2priorityNode>> nodes = default, uint maxID = default, slice<ptr<http2priorityNode>> closedNodes = default, slice<ptr<http2priorityNode>> idleNodes = default, long maxClosedNodesInTree = default, long maxIdleNodesInTree = default, int writeThrottleLimit = default, bool enableWriteThrottle = default, slice<ptr<http2priorityNode>> tmp = default, http2writeQueuePool queuePool = default)
             {
                 this.root = root;
                 this.nodes = nodes;

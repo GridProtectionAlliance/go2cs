@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2020 August 29 08:37:17 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:26:48 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\net.go
 
@@ -28,7 +28,7 @@ namespace go
             error Write(Func<System.UIntPtr, bool> f);
         }
 
-        // Conn is implemented by some types in the net package to provide
+        // Conn is implemented by some types in the net and os packages to provide
         // access to the underlying file descriptor or handle.
         public partial interface Conn
         {

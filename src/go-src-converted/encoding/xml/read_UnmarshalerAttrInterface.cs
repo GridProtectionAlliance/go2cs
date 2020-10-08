@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:03 UTC
+//     Generated on 2020 October 08 03:43:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -56,7 +56,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -70,10 +70,10 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate error UnmarshalXMLAttrByRef(ref T value, Attr attr);
+            private delegate error UnmarshalXMLAttrByPtr(ptr<T> value, Attr attr);
             private delegate error UnmarshalXMLAttrByVal(T value, Attr attr);
 
-            private static readonly UnmarshalXMLAttrByRef s_UnmarshalXMLAttrByRef;
+            private static readonly UnmarshalXMLAttrByPtr s_UnmarshalXMLAttrByPtr;
             private static readonly UnmarshalXMLAttrByVal s_UnmarshalXMLAttrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -82,11 +82,12 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnmarshalXMLAttrByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnmarshalXMLAttrByPtr is null || !m_target_is_ptr)
                     return s_UnmarshalXMLAttrByVal!(target, attr);
 
-                return s_UnmarshalXMLAttrByRef(ref target, attr);
+                return s_UnmarshalXMLAttrByPtr(m_target_ptr, attr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -95,23 +96,20 @@ namespace encoding
             static UnmarshalerAttr()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UnmarshalXMLAttr");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UnmarshalXMLAttr");
 
                 if (!(extensionMethod is null))
-                    s_UnmarshalXMLAttrByRef = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLAttrByRef)) as UnmarshalXMLAttrByRef;
+                    s_UnmarshalXMLAttrByPtr = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLAttrByPtr)) as UnmarshalXMLAttrByPtr;
 
-                if (s_UnmarshalXMLAttrByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UnmarshalXMLAttr");
+                extensionMethod = targetType.GetExtensionMethod("UnmarshalXMLAttr");
 
-                    if (!(extensionMethod is null))
-                        s_UnmarshalXMLAttrByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLAttrByVal)) as UnmarshalXMLAttrByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnmarshalXMLAttrByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLAttrByVal)) as UnmarshalXMLAttrByVal;
 
-                if (s_UnmarshalXMLAttrByRef is null && s_UnmarshalXMLAttrByVal is null)
+                if (s_UnmarshalXMLAttrByPtr is null && s_UnmarshalXMLAttrByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement UnmarshalerAttr.UnmarshalXMLAttr method", new Exception("UnmarshalXMLAttr"));
             }
 

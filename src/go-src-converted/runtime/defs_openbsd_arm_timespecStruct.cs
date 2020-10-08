@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:50 UTC
+//     Generated on 2020 October 08 03:19:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,12 +27,14 @@ namespace go
             {
                 this.tv_sec = default;
                 this.tv_nsec = default;
+                this.pad_cgo_0 = default;
             }
 
-            public timespec(long tv_sec = default, int tv_nsec = default)
+            public timespec(long tv_sec = default, int tv_nsec = default, array<byte> pad_cgo_0 = default)
             {
                 this.tv_sec = tv_sec;
                 this.tv_nsec = tv_nsec;
+                this.pad_cgo_0 = pad_cgo_0;
             }
 
             // Enable comparisons between nil and timespec struct
@@ -55,7 +57,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static timespec timespec_cast(dynamic value)
         {
-            return new timespec(value.tv_sec, value.tv_nsec);
+            return new timespec(value.tv_sec, value.tv_nsec, value.pad_cgo_0);
         }
     }
 }

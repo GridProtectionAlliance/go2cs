@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:58 UTC
+//     Generated on 2020 October 08 04:42:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,13 +41,15 @@ namespace @internal
                 this.off = default;
                 this.typ = default;
                 this.args = default;
+                this.sargs = default;
             }
 
-            public rawEvent(long off = default, byte typ = default, slice<ulong> args = default)
+            public rawEvent(long off = default, byte typ = default, slice<ulong> args = default, slice<@string> sargs = default)
             {
                 this.off = off;
                 this.typ = typ;
                 this.args = args;
+                this.sargs = sargs;
             }
 
             // Enable comparisons between nil and rawEvent struct
@@ -70,7 +72,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static rawEvent rawEvent_cast(dynamic value)
         {
-            return new rawEvent(value.off, value.typ, value.args);
+            return new rawEvent(value.off, value.typ, value.args, value.sargs);
         }
     }
 }}

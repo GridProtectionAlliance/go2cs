@@ -4,7 +4,7 @@
 
 // Package blank is a go/doc test for the handling of _.
 // See issue 5397.
-// package blank -- go2cs converted at 2020 August 29 08:47:12 UTC
+// package blank -- go2cs converted at 2020 October 08 04:02:52 UTC
 // import "go/doc.blank" ==> using blank = go.go.doc.blank_package
 // Original source: C:\Go\src\go\doc\testdata\blank.go
 using os = go.os_package;
@@ -20,41 +20,47 @@ namespace go
         }
 
         // T constants counting from a blank constant.
-        private static readonly T _ = iota;
-        public static readonly var T1 = 0;
-        public static readonly var T2 = 1;
+        private static readonly T _ = (T)iota;
+        public static readonly var T1 = (var)0;
+        public static readonly var T2 = (var)1;
+
 
         // T constants counting from unexported constants.
-        private static readonly T tweedledee = iota;
-        private static readonly var tweedledum = 0;
-        public static readonly var C1 = 1;
-        public static readonly var C2 = 2;
-        private static readonly var alice = 3;
-        public static readonly var C3 = 4;
-        private static readonly long redQueen = iota;
-        public static readonly var C4 = 5;
+        private static readonly T tweedledee = (T)iota;
+        private static readonly var tweedledum = (var)0;
+        public static readonly var C1 = (var)1;
+        public static readonly var C2 = (var)2;
+        private static readonly var alice = (var)3;
+        public static readonly var C3 = (var)4;
+        private static readonly long redQueen = (long)iota;
+        public static readonly var C4 = (var)5;
+
 
         // Constants with a single type that is not propagated.
-        private static readonly os.FileMode zero = 0L;
-        public static readonly long Default = 0644L;
-        public static readonly long Useless = 0312L;
-        public static readonly long WideOpen = 0777L;
+        private static readonly os.FileMode zero = (os.FileMode)0L;
+        public static readonly long Default = (long)0644L;
+        public static readonly long Useless = (long)0312L;
+        public static readonly long WideOpen = (long)0777L;
+
 
         // Constants with an imported type that is propagated.
-        private static readonly os.FileMode zero = 0L;
-        public static readonly var M1 = 0;
-        public static readonly var M2 = 1;
-        public static readonly var M3 = 2;
+        private static readonly os.FileMode zero = (os.FileMode)0L;
+        public static readonly var M1 = (var)0;
+        public static readonly var M2 = (var)1;
+        public static readonly var M3 = (var)2;
+
 
         // Package constants.
-        private static readonly long _ = iota;
-        public static readonly var I1 = 0;
-        public static readonly var I2 = 1;
+        private static readonly long _ = (long)iota;
+        public static readonly var I1 = (var)0;
+        public static readonly var I2 = (var)1;
+
 
         // Unexported constants counting from blank iota.
         // See issue 9615.
-        private static readonly var _ = iota;
-        private static readonly var one = iota + 1L;
+        private static readonly var _ = (var)iota;
+        private static readonly var one = (var)iota + 1L;
+
 
         // Blanks not in doc output:
 

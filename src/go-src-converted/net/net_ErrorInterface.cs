@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:27:07 UTC
+//     Generated on 2020 October 08 03:34:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,9 +16,9 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
-using poll = go.@internal.poll_package;
 using io = go.io_package;
 using os = go.os_package;
+using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
 
@@ -54,7 +54,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate bool TimeoutByRef(ref T value);
+            private delegate bool TimeoutByPtr(ptr<T> value);
             private delegate bool TimeoutByVal(T value);
 
-            private static readonly TimeoutByRef s_TimeoutByRef;
+            private static readonly TimeoutByPtr s_TimeoutByPtr;
             private static readonly TimeoutByVal s_TimeoutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,17 +80,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TimeoutByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TimeoutByPtr is null || !m_target_is_ptr)
                     return s_TimeoutByVal!(target);
 
-                return s_TimeoutByRef(ref target);
+                return s_TimeoutByPtr(m_target_ptr);
             }
 
-            private delegate bool TemporaryByRef(ref T value);
+            private delegate bool TemporaryByPtr(ptr<T> value);
             private delegate bool TemporaryByVal(T value);
 
-            private static readonly TemporaryByRef s_TemporaryByRef;
+            private static readonly TemporaryByPtr s_TemporaryByPtr;
             private static readonly TemporaryByVal s_TemporaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,17 +100,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TemporaryByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TemporaryByPtr is null || !m_target_is_ptr)
                     return s_TemporaryByVal!(target);
 
-                return s_TemporaryByRef(ref target);
+                return s_TemporaryByPtr(m_target_ptr);
             }
 
-            private delegate @string ErrorByRef(ref T value);
+            private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByRef s_ErrorByRef;
+            private static readonly ErrorByPtr s_ErrorByPtr;
             private static readonly ErrorByVal s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,11 +120,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ErrorByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ErrorByPtr is null || !m_target_is_ptr)
                     return s_ErrorByVal!(target);
 
-                return s_ErrorByRef(ref target);
+                return s_ErrorByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -131,55 +134,46 @@ namespace go
             static Error()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Timeout");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Timeout");
 
                 if (!(extensionMethod is null))
-                    s_TimeoutByRef = extensionMethod.CreateStaticDelegate(typeof(TimeoutByRef)) as TimeoutByRef;
+                    s_TimeoutByPtr = extensionMethod.CreateStaticDelegate(typeof(TimeoutByPtr)) as TimeoutByPtr;
 
-                if (s_TimeoutByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Timeout");
+                extensionMethod = targetType.GetExtensionMethod("Timeout");
 
-                    if (!(extensionMethod is null))
-                        s_TimeoutByVal = extensionMethod.CreateStaticDelegate(typeof(TimeoutByVal)) as TimeoutByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TimeoutByVal = extensionMethod.CreateStaticDelegate(typeof(TimeoutByVal)) as TimeoutByVal;
 
-                if (s_TimeoutByRef is null && s_TimeoutByVal is null)
+                if (s_TimeoutByPtr is null && s_TimeoutByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Error.Timeout method", new Exception("Timeout"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Temporary");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Temporary");
 
                 if (!(extensionMethod is null))
-                    s_TemporaryByRef = extensionMethod.CreateStaticDelegate(typeof(TemporaryByRef)) as TemporaryByRef;
+                    s_TemporaryByPtr = extensionMethod.CreateStaticDelegate(typeof(TemporaryByPtr)) as TemporaryByPtr;
 
-                if (s_TemporaryByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Temporary");
+                extensionMethod = targetType.GetExtensionMethod("Temporary");
 
-                    if (!(extensionMethod is null))
-                        s_TemporaryByVal = extensionMethod.CreateStaticDelegate(typeof(TemporaryByVal)) as TemporaryByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TemporaryByVal = extensionMethod.CreateStaticDelegate(typeof(TemporaryByVal)) as TemporaryByVal;
 
-                if (s_TemporaryByRef is null && s_TemporaryByVal is null)
+                if (s_TemporaryByPtr is null && s_TemporaryByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Error.Temporary method", new Exception("Temporary"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Error");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 
                 if (!(extensionMethod is null))
-                    s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
+                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
 
-                if (s_ErrorByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Error");
+                extensionMethod = targetType.GetExtensionMethod("Error");
 
-                    if (!(extensionMethod is null))
-                        s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
 
-                if (s_ErrorByRef is null && s_ErrorByVal is null)
+                if (s_ErrorByPtr is null && s_ErrorByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Error.Error method", new Exception("Error"));
             }
 

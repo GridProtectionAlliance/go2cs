@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:23 UTC
+//     Generated on 2020 October 08 03:27:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using oserror = go.@internal.oserror_package;
 using race = go.@internal.race_package;
+using unsafeheader = go.@internal.unsafeheader_package;
 using runtime = go.runtime_package;
 using sync = go.sync_package;
 using @unsafe = go.@unsafe_package;
@@ -51,7 +53,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -65,10 +67,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (unsafe.Pointer, _Socklen, error) sockaddrByRef(ref T value);
+            private delegate (unsafe.Pointer, _Socklen, error) sockaddrByPtr(ptr<T> value);
             private delegate (unsafe.Pointer, _Socklen, error) sockaddrByVal(T value);
 
-            private static readonly sockaddrByRef s_sockaddrByRef;
+            private static readonly sockaddrByPtr s_sockaddrByPtr;
             private static readonly sockaddrByVal s_sockaddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,11 +79,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_sockaddrByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_sockaddrByPtr is null || !m_target_is_ptr)
                     return s_sockaddrByVal!(target);
 
-                return s_sockaddrByRef(ref target);
+                return s_sockaddrByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -90,23 +93,20 @@ namespace go
             static Sockaddr()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("sockaddr");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("sockaddr");
 
                 if (!(extensionMethod is null))
-                    s_sockaddrByRef = extensionMethod.CreateStaticDelegate(typeof(sockaddrByRef)) as sockaddrByRef;
+                    s_sockaddrByPtr = extensionMethod.CreateStaticDelegate(typeof(sockaddrByPtr)) as sockaddrByPtr;
 
-                if (s_sockaddrByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("sockaddr");
+                extensionMethod = targetType.GetExtensionMethod("sockaddr");
 
-                    if (!(extensionMethod is null))
-                        s_sockaddrByVal = extensionMethod.CreateStaticDelegate(typeof(sockaddrByVal)) as sockaddrByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_sockaddrByVal = extensionMethod.CreateStaticDelegate(typeof(sockaddrByVal)) as sockaddrByVal;
 
-                if (s_sockaddrByRef is null && s_sockaddrByVal is null)
+                if (s_sockaddrByPtr is null && s_sockaddrByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Sockaddr.sockaddr method", new Exception("sockaddr"));
             }
 

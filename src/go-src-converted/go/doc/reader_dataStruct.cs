@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:09 UTC
+//     Generated on 2020 October 08 04:02:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
-using regexp = go.regexp_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using go;

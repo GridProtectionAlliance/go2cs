@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:18 UTC
+//     Generated on 2020 October 08 03:39:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -78,6 +79,7 @@ namespace net
                 this.sawFirstSettings = default;
                 this.needToSendSettingsAck = default;
                 this.unackedSettings = default;
+                this.queuedControlFrames = default;
                 this.clientMaxStreams = default;
                 this.advMaxStreams = default;
                 this.curClientStreams = default;
@@ -104,7 +106,7 @@ namespace net
                 this.shutdownOnce = default;
             }
 
-            public http2serverConn(ref ptr<http2Server> srv = default, ref ptr<Server> hs = default, net.Conn conn = default, ref ptr<http2bufferedWriter> bw = default, Handler handler = default, http2contextContext baseCtx = default, ref ptr<http2Framer> framer = default, channel<object> doneServing = default, channel<http2readFrameResult> readFrameCh = default, channel<http2FrameWriteRequest> wantWriteFrameCh = default, channel<http2frameWriteResult> wroteFrameCh = default, channel<http2bodyReadMsg> bodyReadCh = default, channel<object> serveMsgCh = default, http2flow flow = default, http2flow inflow = default, ref ptr<tls.ConnectionState> tlsState = default, @string remoteAddrStr = default, http2WriteScheduler writeSched = default, http2goroutineLock serveG = default, bool pushEnabled = default, bool sawFirstSettings = default, bool needToSendSettingsAck = default, long unackedSettings = default, uint clientMaxStreams = default, uint advMaxStreams = default, uint curClientStreams = default, uint curPushedStreams = default, uint maxClientStreamID = default, uint maxPushPromiseID = default, map<uint, ref http2stream> streams = default, int initialStreamSendWindowSize = default, int maxFrameSize = default, uint headerTableSize = default, uint peerMaxHeaderListSize = default, map<@string, @string> canonHeader = default, bool writingFrame = default, bool writingFrameAsync = default, bool needsFrameFlush = default, bool inGoAway = default, bool inFrameScheduleLoop = default, bool needToSendGoAway = default, http2ErrCode goAwayCode = default, ref ptr<time.Timer> shutdownTimer = default, ref ptr<time.Timer> idleTimer = default, bytes.Buffer headerWriteBuf = default, ref ptr<hpack.Encoder> hpackEncoder = default, sync.Once shutdownOnce = default)
+            public http2serverConn(ref ptr<http2Server> srv = default, ref ptr<Server> hs = default, net.Conn conn = default, ref ptr<http2bufferedWriter> bw = default, Handler handler = default, context.Context baseCtx = default, ref ptr<http2Framer> framer = default, channel<object> doneServing = default, channel<http2readFrameResult> readFrameCh = default, channel<http2FrameWriteRequest> wantWriteFrameCh = default, channel<http2frameWriteResult> wroteFrameCh = default, channel<http2bodyReadMsg> bodyReadCh = default, channel<object> serveMsgCh = default, http2flow flow = default, http2flow inflow = default, ref ptr<tls.ConnectionState> tlsState = default, @string remoteAddrStr = default, http2WriteScheduler writeSched = default, http2goroutineLock serveG = default, bool pushEnabled = default, bool sawFirstSettings = default, bool needToSendSettingsAck = default, long unackedSettings = default, long queuedControlFrames = default, uint clientMaxStreams = default, uint advMaxStreams = default, uint curClientStreams = default, uint curPushedStreams = default, uint maxClientStreamID = default, uint maxPushPromiseID = default, map<uint, ptr<http2stream>> streams = default, int initialStreamSendWindowSize = default, int maxFrameSize = default, uint headerTableSize = default, uint peerMaxHeaderListSize = default, map<@string, @string> canonHeader = default, bool writingFrame = default, bool writingFrameAsync = default, bool needsFrameFlush = default, bool inGoAway = default, bool inFrameScheduleLoop = default, bool needToSendGoAway = default, http2ErrCode goAwayCode = default, ref ptr<time.Timer> shutdownTimer = default, ref ptr<time.Timer> idleTimer = default, bytes.Buffer headerWriteBuf = default, ref ptr<hpack.Encoder> hpackEncoder = default, sync.Once shutdownOnce = default)
             {
                 this.srv = srv;
                 this.hs = hs;
@@ -129,6 +131,7 @@ namespace net
                 this.sawFirstSettings = sawFirstSettings;
                 this.needToSendSettingsAck = needToSendSettingsAck;
                 this.unackedSettings = unackedSettings;
+                this.queuedControlFrames = queuedControlFrames;
                 this.clientMaxStreams = clientMaxStreams;
                 this.advMaxStreams = advMaxStreams;
                 this.curClientStreams = curClientStreams;
@@ -175,7 +178,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2serverConn http2serverConn_cast(dynamic value)
         {
-            return new http2serverConn(ref value.srv, ref value.hs, value.conn, ref value.bw, value.handler, value.baseCtx, ref value.framer, value.doneServing, value.readFrameCh, value.wantWriteFrameCh, value.wroteFrameCh, value.bodyReadCh, value.serveMsgCh, value.flow, value.inflow, ref value.tlsState, value.remoteAddrStr, value.writeSched, value.serveG, value.pushEnabled, value.sawFirstSettings, value.needToSendSettingsAck, value.unackedSettings, value.clientMaxStreams, value.advMaxStreams, value.curClientStreams, value.curPushedStreams, value.maxClientStreamID, value.maxPushPromiseID, value.streams, value.initialStreamSendWindowSize, value.maxFrameSize, value.headerTableSize, value.peerMaxHeaderListSize, value.canonHeader, value.writingFrame, value.writingFrameAsync, value.needsFrameFlush, value.inGoAway, value.inFrameScheduleLoop, value.needToSendGoAway, value.goAwayCode, ref value.shutdownTimer, ref value.idleTimer, value.headerWriteBuf, ref value.hpackEncoder, value.shutdownOnce);
+            return new http2serverConn(ref value.srv, ref value.hs, value.conn, ref value.bw, value.handler, value.baseCtx, ref value.framer, value.doneServing, value.readFrameCh, value.wantWriteFrameCh, value.wroteFrameCh, value.bodyReadCh, value.serveMsgCh, value.flow, value.inflow, ref value.tlsState, value.remoteAddrStr, value.writeSched, value.serveG, value.pushEnabled, value.sawFirstSettings, value.needToSendSettingsAck, value.unackedSettings, value.queuedControlFrames, value.clientMaxStreams, value.advMaxStreams, value.curClientStreams, value.curPushedStreams, value.maxClientStreamID, value.maxPushPromiseID, value.streams, value.initialStreamSendWindowSize, value.maxFrameSize, value.headerTableSize, value.peerMaxHeaderListSize, value.canonHeader, value.writingFrame, value.writingFrameAsync, value.needsFrameFlush, value.inGoAway, value.inFrameScheduleLoop, value.needToSendGoAway, value.goAwayCode, ref value.shutdownTimer, ref value.idleTimer, value.headerWriteBuf, ref value.hpackEncoder, value.shutdownOnce);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:07 UTC
+//     Generated on 2020 October 08 03:41:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,6 +40,7 @@ namespace http
                 this.Value = default;
                 this.Domain = default;
                 this.Path = default;
+                this.SameSite = default;
                 this.Secure = default;
                 this.HttpOnly = default;
                 this.Persistent = default;
@@ -50,12 +51,13 @@ namespace http
                 this.seqNum = default;
             }
 
-            public entry(@string Name = default, @string Value = default, @string Domain = default, @string Path = default, bool Secure = default, bool HttpOnly = default, bool Persistent = default, bool HostOnly = default, time.Time Expires = default, time.Time Creation = default, time.Time LastAccess = default, ulong seqNum = default)
+            public entry(@string Name = default, @string Value = default, @string Domain = default, @string Path = default, @string SameSite = default, bool Secure = default, bool HttpOnly = default, bool Persistent = default, bool HostOnly = default, time.Time Expires = default, time.Time Creation = default, time.Time LastAccess = default, ulong seqNum = default)
             {
                 this.Name = Name;
                 this.Value = Value;
                 this.Domain = Domain;
                 this.Path = Path;
+                this.SameSite = SameSite;
                 this.Secure = Secure;
                 this.HttpOnly = HttpOnly;
                 this.Persistent = Persistent;
@@ -86,7 +88,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static entry entry_cast(dynamic value)
         {
-            return new entry(value.Name, value.Value, value.Domain, value.Path, value.Secure, value.HttpOnly, value.Persistent, value.HostOnly, value.Expires, value.Creation, value.LastAccess, value.seqNum);
+            return new entry(value.Name, value.Value, value.Domain, value.Path, value.SameSite, value.Secure, value.HttpOnly, value.Persistent, value.HostOnly, value.Expires, value.Creation, value.LastAccess, value.seqNum);
         }
     }
 }}}

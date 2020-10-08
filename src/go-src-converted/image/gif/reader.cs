@@ -4,8 +4,8 @@
 
 // Package gif implements a GIF image decoder and encoder.
 //
-// The GIF specification is at http://www.w3.org/Graphics/GIF/spec-gif89a.txt.
-// package gif -- go2cs converted at 2020 August 29 10:10:02 UTC
+// The GIF specification is at https://www.w3.org/Graphics/GIF/spec-gif89a.txt.
+// package gif -- go2cs converted at 2020 October 08 04:59:21 UTC
 // import "image/gif" ==> using gif = go.image.gif_package
 // Original source: C:\Go\src\image\gif\reader.go
 using bufio = go.bufio_package;
@@ -32,29 +32,32 @@ namespace image
         // Masks etc.
  
         // Fields.
-        private static readonly long fColorTable = 1L << (int)(7L);
-        private static readonly long fInterlace = 1L << (int)(6L);
-        private static readonly long fColorTableBitsMask = 7L; 
+        private static readonly long fColorTable = (long)1L << (int)(7L);
+        private static readonly long fInterlace = (long)1L << (int)(6L);
+        private static readonly long fColorTableBitsMask = (long)7L; 
 
         // Graphic control flags.
-        private static readonly long gcTransparentColorSet = 1L << (int)(0L);
-        private static readonly long gcDisposalMethodMask = 7L << (int)(2L);
+        private static readonly long gcTransparentColorSet = (long)1L << (int)(0L);
+        private static readonly long gcDisposalMethodMask = (long)7L << (int)(2L);
+
 
         // Disposal Methods.
-        public static readonly ulong DisposalNone = 0x01UL;
-        public static readonly ulong DisposalBackground = 0x02UL;
-        public static readonly ulong DisposalPrevious = 0x03UL;
+        public static readonly ulong DisposalNone = (ulong)0x01UL;
+        public static readonly ulong DisposalBackground = (ulong)0x02UL;
+        public static readonly ulong DisposalPrevious = (ulong)0x03UL;
+
 
         // Section indicators.
-        private static readonly ulong sExtension = 0x21UL;
-        private static readonly ulong sImageDescriptor = 0x2CUL;
-        private static readonly ulong sTrailer = 0x3BUL;
+        private static readonly ulong sExtension = (ulong)0x21UL;
+        private static readonly ulong sImageDescriptor = (ulong)0x2CUL;
+        private static readonly ulong sTrailer = (ulong)0x3BUL;
+
 
         // Extensions.
-        private static readonly ulong eText = 0x01UL; // Plain Text
-        private static readonly ulong eGraphicControl = 0xF9UL; // Graphic Control
-        private static readonly ulong eComment = 0xFEUL; // Comment
-        private static readonly ulong eApplication = 0xFFUL; // Application
+        private static readonly ulong eText = (ulong)0x01UL; // Plain Text
+        private static readonly ulong eGraphicControl = (ulong)0xF9UL; // Graphic Control
+        private static readonly ulong eComment = (ulong)0xFEUL; // Comment
+        private static readonly ulong eApplication = (ulong)0xFFUL; // Application
 
         private static error readFull(io.Reader r, slice<byte> b)
         {
@@ -63,17 +66,24 @@ namespace image
             {
                 err = io.ErrUnexpectedEOF;
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
 
         private static (byte, error) readByte(io.ByteReader r)
         {
+            byte _p0 = default;
+            error _p0 = default!;
+
             var (b, err) = r.ReadByte();
             if (err == io.EOF)
             {
                 err = io.ErrUnexpectedEOF;
             }
-            return (b, err);
+
+            return (b, error.As(err)!);
+
         }
 
         // decoder is the type used to decode a GIF file.
@@ -93,7 +103,7 @@ namespace image
             public color.Palette globalColorTable; // Used when decoding.
             public slice<long> delay;
             public slice<byte> disposal;
-            public slice<ref image.Paletted> image;
+            public slice<ptr<image.Paletted>> image;
             public array<byte> tmp; // must be at least 768 so we can read color table
         }
 
@@ -113,63 +123,84 @@ namespace image
             public error err;
         }
 
-        private static void fill(this ref blockReader b)
+        private static void fill(this ptr<blockReader> _addr_b)
         {
+            ref blockReader b = ref _addr_b.val;
+
             if (b.err != null)
             {
-                return;
+                return ;
             }
+
             b.j, b.err = readByte(b.d.r);
             if (b.j == 0L && b.err == null)
             {
                 b.err = io.EOF;
             }
+
             if (b.err != null)
             {
-                return;
+                return ;
             }
+
             b.i = 0L;
             b.err = readFull(b.d.r, b.d.tmp[..b.j]);
             if (b.err != null)
             {
                 b.j = 0L;
             }
+
         }
 
-        private static (byte, error) ReadByte(this ref blockReader b)
+        private static (byte, error) ReadByte(this ptr<blockReader> _addr_b)
         {
+            byte _p0 = default;
+            error _p0 = default!;
+            ref blockReader b = ref _addr_b.val;
+
             if (b.i == b.j)
             {
                 b.fill();
                 if (b.err != null)
                 {
-                    return (0L, b.err);
+                    return (0L, error.As(b.err)!);
                 }
+
             }
+
             var c = b.d.tmp[b.i];
             b.i++;
-            return (c, null);
+            return (c, error.As(null!)!);
+
         }
 
         // blockReader must implement io.Reader, but its Read shouldn't ever actually
         // be called in practice. The compress/lzw package will only call ReadByte.
-        private static (long, error) Read(this ref blockReader b, slice<byte> p)
+        private static (long, error) Read(this ptr<blockReader> _addr_b, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref blockReader b = ref _addr_b.val;
+
             if (len(p) == 0L || b.err != null)
             {
-                return (0L, b.err);
+                return (0L, error.As(b.err)!);
             }
+
             if (b.i == b.j)
             {
                 b.fill();
                 if (b.err != null)
                 {
-                    return (0L, b.err);
+                    return (0L, error.As(b.err)!);
                 }
+
             }
+
             var n = copy(p, b.d.tmp[b.i..b.j]);
             b.i += uint8(n);
-            return (n, null);
+            return (n, error.As(null!)!);
+
         }
 
         // close primarily detects whether or not a block terminator was encountered
@@ -178,20 +209,25 @@ namespace image
         // following the end of LZW data, the very next sub-block must be the block
         // terminator. If the very end of LZW data happened to fill one sub-block, at
         // most one more sub-block of length 1 may exist before the block-terminator.
-        // These accomodations allow us to support GIFs created by less strict encoders.
+        // These accommodations allow us to support GIFs created by less strict encoders.
         // See https://golang.org/issue/16146.
-        private static error close(this ref blockReader b)
+        private static error close(this ptr<blockReader> _addr_b)
         {
+            ref blockReader b = ref _addr_b.val;
+
             if (b.err == io.EOF)
             { 
                 // A clean block-sequence terminator was encountered while reading.
-                return error.As(null);
+                return error.As(null!)!;
+
             }
             else if (b.err != null)
             { 
                 // Some other error was encountered while reading.
-                return error.As(b.err);
+                return error.As(b.err)!;
+
             }
+
             if (b.i == b.j)
             { 
                 // We reached the end of a sub block reading LZW data. We'll allow at
@@ -199,16 +235,17 @@ namespace image
                 b.fill();
                 if (b.err == io.EOF)
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
                 else if (b.err != null)
                 {
-                    return error.As(b.err);
+                    return error.As(b.err)!;
                 }
                 else if (b.j > 1L)
                 {
-                    return error.As(errTooMuch);
+                    return error.As(errTooMuch)!;
                 }
+
             } 
 
             // Part of a sub-block remains buffered. We expect that the next attempt to
@@ -216,21 +253,25 @@ namespace image
             b.fill();
             if (b.err == io.EOF)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
             else if (b.err != null)
             {
-                return error.As(b.err);
+                return error.As(b.err)!;
             }
-            return error.As(errTooMuch);
+
+            return error.As(errTooMuch)!;
+
         }
 
         // decode reads a GIF image from r and stores the result in d.
-        private static error decode(this ref decoder d, io.Reader r, bool configOnly, bool keepAllFrames)
-        { 
+        private static error decode(this ptr<decoder> _addr_d, io.Reader r, bool configOnly, bool keepAllFrames)
+        {
+            ref decoder d = ref _addr_d.val;
+ 
             // Add buffering if r does not provide ReadByte.
             {
-                reader (rr, ok) = r._<reader>();
+                reader (rr, ok) = reader.As(r._<reader>())!;
 
                 if (ok)
                 {
@@ -243,61 +284,76 @@ namespace image
 
             }
 
+
+            d.loopCount = -1L;
+
             var err = d.readHeaderAndScreenDescriptor();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (configOnly)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             while (true)
             {
                 var (c, err) = readByte(d.r);
                 if (err != null)
                 {
-                    return error.As(fmt.Errorf("gif: reading frames: %v", err));
+                    return error.As(fmt.Errorf("gif: reading frames: %v", err))!;
                 }
+
 
                 if (c == sExtension) 
                     err = d.readExtension();
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                 else if (c == sImageDescriptor) 
                     err = d.readImageDescriptor(keepAllFrames);
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                 else if (c == sTrailer) 
                     if (len(d.image) == 0L)
                     {
-                        return error.As(fmt.Errorf("gif: missing image data"));
+                        return error.As(fmt.Errorf("gif: missing image data"))!;
                     }
-                    return error.As(null);
+
+                    return error.As(null!)!;
                 else 
-                    return error.As(fmt.Errorf("gif: unknown block type: 0x%.2x", c));
-                            }
+                    return error.As(fmt.Errorf("gif: unknown block type: 0x%.2x", c))!;
+                
+            }
+
 
         }
 
-        private static error readHeaderAndScreenDescriptor(this ref decoder d)
+        private static error readHeaderAndScreenDescriptor(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             var err = readFull(d.r, d.tmp[..13L]);
             if (err != null)
             {
-                return error.As(fmt.Errorf("gif: reading header: %v", err));
+                return error.As(fmt.Errorf("gif: reading header: %v", err))!;
             }
+
             d.vers = string(d.tmp[..6L]);
             if (d.vers != "GIF87a" && d.vers != "GIF89a")
             {
-                return error.As(fmt.Errorf("gif: can't recognize format %q", d.vers));
+                return error.As(fmt.Errorf("gif: can't recognize format %q", d.vers))!;
             }
+
             d.width = int(d.tmp[6L]) + int(d.tmp[7L]) << (int)(8L);
             d.height = int(d.tmp[8L]) + int(d.tmp[9L]) << (int)(8L);
             {
@@ -311,24 +367,31 @@ namespace image
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                 } 
                 // d.tmp[12] is the Pixel Aspect Ratio, which is ignored.
 
             } 
             // d.tmp[12] is the Pixel Aspect Ratio, which is ignored.
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static (color.Palette, error) readColorTable(this ref decoder d, byte fields)
+        private static (color.Palette, error) readColorTable(this ptr<decoder> _addr_d, byte fields)
         {
+            color.Palette _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             long n = 1L << (int)((1L + uint(fields & fColorTableBitsMask)));
             var err = readFull(d.r, d.tmp[..3L * n]);
             if (err != null)
             {
-                return (null, fmt.Errorf("gif: reading color table: %s", err));
+                return (null, error.As(fmt.Errorf("gif: reading color table: %s", err))!);
             }
+
             long j = 0L;
             var p = make(color.Palette, n);
             foreach (var (i) in p)
@@ -336,32 +399,36 @@ namespace image
                 p[i] = new color.RGBA(d.tmp[j+0],d.tmp[j+1],d.tmp[j+2],0xFF);
                 j += 3L;
             }
-            return (p, null);
+            return (p, error.As(null!)!);
+
         }
 
-        private static error readExtension(this ref decoder d)
+        private static error readExtension(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             var (extension, err) = readByte(d.r);
             if (err != null)
             {
-                return error.As(fmt.Errorf("gif: reading extension: %v", err));
+                return error.As(fmt.Errorf("gif: reading extension: %v", err))!;
             }
+
             long size = 0L;
 
             if (extension == eText) 
                 size = 13L;
             else if (extension == eGraphicControl) 
-                return error.As(d.readGraphicControl());
+                return error.As(d.readGraphicControl())!;
             else if (extension == eComment)             else if (extension == eApplication) 
                 var (b, err) = readByte(d.r);
                 if (err != null)
                 {
-                    return error.As(fmt.Errorf("gif: reading extension: %v", err));
+                    return error.As(fmt.Errorf("gif: reading extension: %v", err))!;
                 } 
                 // The spec requires size be 11, but Adobe sometimes uses 10.
                 size = int(b);
             else 
-                return error.As(fmt.Errorf("gif: unknown extension 0x%.2x", extension));
+                return error.As(fmt.Errorf("gif: unknown extension 0x%.2x", extension))!;
                         if (size > 0L)
             {
                 {
@@ -369,10 +436,11 @@ namespace image
 
                     if (err != null)
                     {
-                        return error.As(fmt.Errorf("gif: reading extension: %v", err));
+                        return error.As(fmt.Errorf("gif: reading extension: %v", err))!;
                     }
 
                 }
+
             } 
 
             // Application Extension with "NETSCAPE2.0" as string and 1 in data means
@@ -382,47 +450,58 @@ namespace image
                 var (n, err) = d.readBlock();
                 if (err != null)
                 {
-                    return error.As(fmt.Errorf("gif: reading extension: %v", err));
+                    return error.As(fmt.Errorf("gif: reading extension: %v", err))!;
                 }
+
                 if (n == 0L)
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
                 if (n == 3L && d.tmp[0L] == 1L)
                 {
                     d.loopCount = int(d.tmp[1L]) | int(d.tmp[2L]) << (int)(8L);
                 }
+
             }
+
             while (true)
             {
                 (n, err) = d.readBlock();
                 if (err != null)
                 {
-                    return error.As(fmt.Errorf("gif: reading extension: %v", err));
+                    return error.As(fmt.Errorf("gif: reading extension: %v", err))!;
                 }
+
                 if (n == 0L)
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
             }
+
 
         }
 
-        private static error readGraphicControl(this ref decoder d)
+        private static error readGraphicControl(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             {
                 var err = readFull(d.r, d.tmp[..6L]);
 
                 if (err != null)
                 {
-                    return error.As(fmt.Errorf("gif: can't read graphic control: %s", err));
+                    return error.As(fmt.Errorf("gif: can't read graphic control: %s", err))!;
                 }
 
             }
+
             if (d.tmp[0L] != 4L)
             {
-                return error.As(fmt.Errorf("gif: invalid graphic control extension block size: %d", d.tmp[0L]));
+                return error.As(fmt.Errorf("gif: invalid graphic control extension block size: %d", d.tmp[0L]))!;
             }
+
             var flags = d.tmp[1L];
             d.disposalMethod = (flags & gcDisposalMethodMask) >> (int)(2L);
             d.delayTime = int(d.tmp[2L]) | int(d.tmp[3L]) << (int)(8L);
@@ -431,44 +510,56 @@ namespace image
                 d.transparentIndex = d.tmp[4L];
                 d.hasTransparentIndex = true;
             }
+
             if (d.tmp[5L] != 0L)
             {
-                return error.As(fmt.Errorf("gif: invalid graphic control extension block terminator: %d", d.tmp[5L]));
+                return error.As(fmt.Errorf("gif: invalid graphic control extension block terminator: %d", d.tmp[5L]))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static error readImageDescriptor(this ref decoder _d, bool keepAllFrames) => func(_d, (ref decoder d, Defer defer, Panic _, Recover __) =>
+        private static error readImageDescriptor(this ptr<decoder> _addr_d, bool keepAllFrames) => func((defer, _, __) =>
         {
+            ref decoder d = ref _addr_d.val;
+
             var (m, err) = d.newImageFromDescriptor();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var useLocalColorTable = d.imageFields & fColorTable != 0L;
             if (useLocalColorTable)
             {
                 m.Palette, err = d.readColorTable(d.imageFields);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
             else
             {
                 if (d.globalColorTable == null)
                 {
-                    return error.As(errors.New("gif: no color table"));
+                    return error.As(errors.New("gif: no color table"))!;
                 }
+
                 m.Palette = d.globalColorTable;
+
             }
+
             if (d.hasTransparentIndex)
             {
                 if (!useLocalColorTable)
                 { 
                     // Clone the global color table.
                     m.Palette = append(color.Palette(null), d.globalColorTable);
+
                 }
+
                 {
                     var ti = int(d.transparentIndex);
 
@@ -490,21 +581,25 @@ namespace image
                         }
 
                         m.Palette = p;
+
                     }
 
                 }
+
             }
+
             var (litWidth, err) = readByte(d.r);
             if (err != null)
             {
-                return error.As(fmt.Errorf("gif: reading image data: %v", err));
+                return error.As(fmt.Errorf("gif: reading image data: %v", err))!;
             }
+
             if (litWidth < 2L || litWidth > 8L)
             {
-                return error.As(fmt.Errorf("gif: pixel size in decode out of range: %d", litWidth));
+                return error.As(fmt.Errorf("gif: pixel size in decode out of range: %d", litWidth))!;
             } 
             // A wonderfully Go-like piece of magic.
-            blockReader br = ref new blockReader(d:d);
+            ptr<blockReader> br = addr(new blockReader(d:d));
             var lzwr = lzw.NewReader(br, lzw.LSB, int(litWidth));
             defer(lzwr.Close());
             err = readFull(lzwr, m.Pix);
@@ -513,9 +608,11 @@ namespace image
             {
                 if (err != io.ErrUnexpectedEOF)
                 {
-                    return error.As(fmt.Errorf("gif: reading image data: %v", err));
+                    return error.As(fmt.Errorf("gif: reading image data: %v", err))!;
                 }
-                return error.As(errNotEnough);
+
+                return error.As(errNotEnough)!;
+
             } 
             // In theory, both lzwr and br should be exhausted. Reading from them
             // should yield (0, io.EOF).
@@ -535,9 +632,11 @@ namespace image
                 {
                     if (err != null)
                     {
-                        return error.As(fmt.Errorf("gif: reading image data: %v", err));
+                        return error.As(fmt.Errorf("gif: reading image data: %v", err))!;
                     }
-                    return error.As(errTooMuch);
+
+                    return error.As(errTooMuch)!;
+
                 } 
 
                 // In practice, some GIFs have an extra byte in the data sub-block
@@ -552,11 +651,11 @@ namespace image
 
                 if (err == errTooMuch)
                 {
-                    return error.As(errTooMuch);
+                    return error.As(errTooMuch)!;
                 }
                 else if (err != null)
                 {
-                    return error.As(fmt.Errorf("gif: reading image data: %v", err));
+                    return error.As(fmt.Errorf("gif: reading image data: %v", err))!;
                 } 
 
                 // Check that the color indexes are inside the palette.
@@ -570,16 +669,19 @@ namespace image
                 {
                     if (int(pixel) >= len(m.Palette))
                     {
-                        return error.As(errBadPixel);
+                        return error.As(errBadPixel)!;
                     }
+
                 }
+
             } 
 
             // Undo the interlacing if necessary.
             if (d.imageFields & fInterlace != 0L)
             {
-                uninterlace(m);
+                uninterlace(_addr_m);
             }
+
             if (keepAllFrames || len(d.image) == 0L)
             {
                 d.image = append(d.image, m);
@@ -591,20 +693,26 @@ namespace image
             // to follow." We therefore reset the GCE fields to zero.
             d.delayTime = 0L;
             d.hasTransparentIndex = false;
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
-        private static (ref image.Paletted, error) newImageFromDescriptor(this ref decoder d)
+        private static (ptr<image.Paletted>, error) newImageFromDescriptor(this ptr<decoder> _addr_d)
         {
+            ptr<image.Paletted> _p0 = default!;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             {
                 var err = readFull(d.r, d.tmp[..9L]);
 
                 if (err != null)
                 {
-                    return (null, fmt.Errorf("gif: can't read image descriptor: %s", err));
+                    return (_addr_null!, error.As(fmt.Errorf("gif: can't read image descriptor: %s", err))!);
                 }
 
             }
+
             var left = int(d.tmp[0L]) + int(d.tmp[1L]) << (int)(8L);
             var top = int(d.tmp[2L]) + int(d.tmp[3L]) << (int)(8L);
             var width = int(d.tmp[4L]) + int(d.tmp[5L]) << (int)(8L);
@@ -629,28 +737,37 @@ namespace image
             // against imageBounds.Min (0, 0).
             if (left + width > d.width || top + height > d.height)
             {
-                return (null, errors.New("gif: frame bounds larger than image bounds"));
+                return (_addr_null!, error.As(errors.New("gif: frame bounds larger than image bounds"))!);
             }
-            return (image.NewPaletted(new image.Rectangle(Min:image.Point{left,top},Max:image.Point{left+width,top+height},), null), null);
+
+            return (_addr_image.NewPaletted(new image.Rectangle(Min:image.Point{left,top},Max:image.Point{left+width,top+height},), null)!, error.As(null!)!);
+
         }
 
-        private static (long, error) readBlock(this ref decoder d)
+        private static (long, error) readBlock(this ptr<decoder> _addr_d)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             var (n, err) = readByte(d.r);
             if (n == 0L || err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             {
                 var err = readFull(d.r, d.tmp[..n]);
 
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
 
             }
-            return (int(n), null);
+
+            return (int(n), error.As(null!)!);
+
         }
 
         // interlaceScan defines the ordering for a pass of the interlace algorithm.
@@ -664,8 +781,10 @@ namespace image
         private static interlaceScan interlacing = new slice<interlaceScan>(new interlaceScan[] { {8,0}, {8,4}, {4,2}, {2,1} });
 
         // uninterlace rearranges the pixels in m to account for interlaced input.
-        private static void uninterlace(ref image.Paletted m)
+        private static void uninterlace(ptr<image.Paletted> _addr_m)
         {
+            ref image.Paletted m = ref _addr_m.val;
+
             slice<byte> nPix = default;
             var dx = m.Bounds().Dx();
             var dy = m.Bounds().Dy();
@@ -686,34 +805,45 @@ namespace image
                     }
 
                 }
+
             }
             m.Pix = nPix;
+
         }
 
         // Decode reads a GIF image from r and returns the first embedded
         // image as an image.Image.
         public static (image.Image, error) Decode(io.Reader r)
         {
+            image.Image _p0 = default;
+            error _p0 = default!;
+
             decoder d = default;
             {
                 var err = d.decode(r, false, false);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
             }
-            return (d.image[0L], null);
+
+            return (d.image[0L], error.As(null!)!);
+
         }
 
         // GIF represents the possibly multiple images stored in a GIF file.
         public partial struct GIF
         {
-            public slice<ref image.Paletted> Image; // The successive images.
+            public slice<ptr<image.Paletted>> Image; // The successive images.
             public slice<long> Delay; // The successive delay times, one per frame, in 100ths of a second.
-            public long LoopCount; // The loop count.
-// Disposal is the successive disposal methods, one per frame. For
+// LoopCount controls the number of times an animation will be
+// restarted during display.
+// A LoopCount of 0 means to loop forever.
+// A LoopCount of -1 means to show each frame only once.
+// Otherwise, the animation is looped LoopCount+1 times.
+            public long LoopCount; // Disposal is the successive disposal methods, one per frame. For
 // backwards compatibility, a nil Disposal is valid to pass to EncodeAll,
 // and implies that each frame's disposal method is 0 (no disposal
 // specified).
@@ -733,37 +863,47 @@ namespace image
 
         // DecodeAll reads a GIF image from r and returns the sequential frames
         // and timing information.
-        public static (ref GIF, error) DecodeAll(io.Reader r)
+        public static (ptr<GIF>, error) DecodeAll(io.Reader r)
         {
+            ptr<GIF> _p0 = default!;
+            error _p0 = default!;
+
             decoder d = default;
             {
                 var err = d.decode(r, false, true);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
-            GIF gif = ref new GIF(Image:d.image,LoopCount:d.loopCount,Delay:d.delay,Disposal:d.disposal,Config:image.Config{ColorModel:d.globalColorTable,Width:d.width,Height:d.height,},BackgroundIndex:d.backgroundIndex,);
-            return (gif, null);
+
+            ptr<GIF> gif = addr(new GIF(Image:d.image,LoopCount:d.loopCount,Delay:d.delay,Disposal:d.disposal,Config:image.Config{ColorModel:d.globalColorTable,Width:d.width,Height:d.height,},BackgroundIndex:d.backgroundIndex,));
+            return (_addr_gif!, error.As(null!)!);
+
         }
 
         // DecodeConfig returns the global color model and dimensions of a GIF image
         // without decoding the entire image.
         public static (image.Config, error) DecodeConfig(io.Reader r)
         {
+            image.Config _p0 = default;
+            error _p0 = default!;
+
             decoder d = default;
             {
                 var err = d.decode(r, true, false);
 
                 if (err != null)
                 {
-                    return (new image.Config(), err);
+                    return (new image.Config(), error.As(err)!);
                 }
 
             }
-            return (new image.Config(ColorModel:d.globalColorTable,Width:d.width,Height:d.height,), null);
+
+            return (new image.Config(ColorModel:d.globalColorTable,Width:d.width,Height:d.height,), error.As(null!)!);
+
         }
 
         private static void init()

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:05 UTC
+//     Generated on 2020 October 08 04:58:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace compress
                 this.table = default;
             }
 
-            public encoder(writer w = default, Order order = default, Func<ref encoder, uint, error> write = default, uint bits = default, ulong nBits = default, ulong width = default, ulong litWidth = default, uint hi = default, uint overflow = default, uint savedCode = default, error err = default, array<uint> table = default)
+            public encoder(writer w = default, Order order = default, Func<ptr<encoder>, uint, error> write = default, uint bits = default, ulong nBits = default, ulong width = default, ulong litWidth = default, uint hi = default, uint overflow = default, uint savedCode = default, error err = default, array<uint> table = default)
             {
                 this.w = w;
                 this.order = order;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:32 UTC
+//     Generated on 2020 October 08 03:43:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -57,7 +57,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -71,48 +71,50 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate error WriteRequestByRef(ref T value, ref Request _p0, object _p0);
-            private delegate error WriteRequestByVal(T value, ref Request _p0, object _p0);
+            private delegate error WriteRequestByPtr(ptr<T> value, ptr<Request> _p0, object _p0);
+            private delegate error WriteRequestByVal(T value, ptr<Request> _p0, object _p0);
 
-            private static readonly WriteRequestByRef s_WriteRequestByRef;
+            private static readonly WriteRequestByPtr s_WriteRequestByPtr;
             private static readonly WriteRequestByVal s_WriteRequestByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error WriteRequest(ref Request _p0, object _p0)
+            public error WriteRequest(ptr<Request> _p0, object _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteRequestByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteRequestByPtr is null || !m_target_is_ptr)
                     return s_WriteRequestByVal!(target, _p0, _p0);
 
-                return s_WriteRequestByRef(ref target, _p0, _p0);
+                return s_WriteRequestByPtr(m_target_ptr, _p0, _p0);
             }
 
-            private delegate error ReadResponseHeaderByRef(ref T value, ref Response _p0);
-            private delegate error ReadResponseHeaderByVal(T value, ref Response _p0);
+            private delegate error ReadResponseHeaderByPtr(ptr<T> value, ptr<Response> _p0);
+            private delegate error ReadResponseHeaderByVal(T value, ptr<Response> _p0);
 
-            private static readonly ReadResponseHeaderByRef s_ReadResponseHeaderByRef;
+            private static readonly ReadResponseHeaderByPtr s_ReadResponseHeaderByPtr;
             private static readonly ReadResponseHeaderByVal s_ReadResponseHeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error ReadResponseHeader(ref Response _p0)
+            public error ReadResponseHeader(ptr<Response> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadResponseHeaderByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadResponseHeaderByPtr is null || !m_target_is_ptr)
                     return s_ReadResponseHeaderByVal!(target, _p0);
 
-                return s_ReadResponseHeaderByRef(ref target, _p0);
+                return s_ReadResponseHeaderByPtr(m_target_ptr, _p0);
             }
 
-            private delegate error ReadResponseBodyByRef(ref T value, object _p0);
+            private delegate error ReadResponseBodyByPtr(ptr<T> value, object _p0);
             private delegate error ReadResponseBodyByVal(T value, object _p0);
 
-            private static readonly ReadResponseBodyByRef s_ReadResponseBodyByRef;
+            private static readonly ReadResponseBodyByPtr s_ReadResponseBodyByPtr;
             private static readonly ReadResponseBodyByVal s_ReadResponseBodyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,17 +123,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadResponseBodyByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadResponseBodyByPtr is null || !m_target_is_ptr)
                     return s_ReadResponseBodyByVal!(target, _p0);
 
-                return s_ReadResponseBodyByRef(ref target, _p0);
+                return s_ReadResponseBodyByPtr(m_target_ptr, _p0);
             }
 
-            private delegate error CloseByRef(ref T value);
+            private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,11 +143,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -153,71 +157,59 @@ namespace net
             static ClientCodec()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteRequest");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteRequest");
 
                 if (!(extensionMethod is null))
-                    s_WriteRequestByRef = extensionMethod.CreateStaticDelegate(typeof(WriteRequestByRef)) as WriteRequestByRef;
+                    s_WriteRequestByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteRequestByPtr)) as WriteRequestByPtr;
 
-                if (s_WriteRequestByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteRequest");
+                extensionMethod = targetType.GetExtensionMethod("WriteRequest");
 
-                    if (!(extensionMethod is null))
-                        s_WriteRequestByVal = extensionMethod.CreateStaticDelegate(typeof(WriteRequestByVal)) as WriteRequestByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteRequestByVal = extensionMethod.CreateStaticDelegate(typeof(WriteRequestByVal)) as WriteRequestByVal;
 
-                if (s_WriteRequestByRef is null && s_WriteRequestByVal is null)
+                if (s_WriteRequestByPtr is null && s_WriteRequestByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ClientCodec.WriteRequest method", new Exception("WriteRequest"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadResponseHeader");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadResponseHeader");
 
                 if (!(extensionMethod is null))
-                    s_ReadResponseHeaderByRef = extensionMethod.CreateStaticDelegate(typeof(ReadResponseHeaderByRef)) as ReadResponseHeaderByRef;
+                    s_ReadResponseHeaderByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadResponseHeaderByPtr)) as ReadResponseHeaderByPtr;
 
-                if (s_ReadResponseHeaderByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadResponseHeader");
+                extensionMethod = targetType.GetExtensionMethod("ReadResponseHeader");
 
-                    if (!(extensionMethod is null))
-                        s_ReadResponseHeaderByVal = extensionMethod.CreateStaticDelegate(typeof(ReadResponseHeaderByVal)) as ReadResponseHeaderByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadResponseHeaderByVal = extensionMethod.CreateStaticDelegate(typeof(ReadResponseHeaderByVal)) as ReadResponseHeaderByVal;
 
-                if (s_ReadResponseHeaderByRef is null && s_ReadResponseHeaderByVal is null)
+                if (s_ReadResponseHeaderByPtr is null && s_ReadResponseHeaderByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ClientCodec.ReadResponseHeader method", new Exception("ReadResponseHeader"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadResponseBody");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadResponseBody");
 
                 if (!(extensionMethod is null))
-                    s_ReadResponseBodyByRef = extensionMethod.CreateStaticDelegate(typeof(ReadResponseBodyByRef)) as ReadResponseBodyByRef;
+                    s_ReadResponseBodyByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadResponseBodyByPtr)) as ReadResponseBodyByPtr;
 
-                if (s_ReadResponseBodyByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadResponseBody");
+                extensionMethod = targetType.GetExtensionMethod("ReadResponseBody");
 
-                    if (!(extensionMethod is null))
-                        s_ReadResponseBodyByVal = extensionMethod.CreateStaticDelegate(typeof(ReadResponseBodyByVal)) as ReadResponseBodyByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadResponseBodyByVal = extensionMethod.CreateStaticDelegate(typeof(ReadResponseBodyByVal)) as ReadResponseBodyByVal;
 
-                if (s_ReadResponseBodyByRef is null && s_ReadResponseBodyByVal is null)
+                if (s_ReadResponseBodyByPtr is null && s_ReadResponseBodyByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ClientCodec.ReadResponseBody method", new Exception("ReadResponseBody"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ClientCodec.Close method", new Exception("Close"));
             }
 

@@ -4,7 +4,7 @@
 
 // +build plan9 windows
 
-// package @base -- go2cs converted at 2020 August 29 10:01:59 UTC
+// package @base -- go2cs converted at 2020 October 08 04:36:58 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Go\src\cmd\go\internal\base\signal_notunix.go
 using os = go.os_package;

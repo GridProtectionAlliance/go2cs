@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tar -- go2cs converted at 2020 August 29 08:45:19 UTC
+// package tar -- go2cs converted at 2020 October 08 01:30:41 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\format.go
 using strings = go.strings_package;
@@ -57,13 +57,13 @@ namespace archive
         // Constants to identify various tar formats.
  
         // Deliberately hide the meaning of constants from public API.
-        private static readonly Format _ = (1L << (int)(iota)) / 4L; // Sequence of 0, 0, 1, 2, 4, 8, etc...
+        private static readonly Format _ = (Format)(1L << (int)(iota)) / 4L; // Sequence of 0, 0, 1, 2, 4, 8, etc...
 
         // FormatUnknown indicates that the format is unknown.
-        public static readonly var FormatUnknown = 0; 
+        public static readonly var FormatUnknown = (var)0; 
 
         // The format of the original Unix V7 tar tool prior to standardization.
-        private static readonly var formatV7 = 1; 
+        private static readonly var formatV7 = (var)1; 
 
         // FormatUSTAR represents the USTAR header format defined in POSIX.1-1988.
         //
@@ -74,7 +74,7 @@ namespace archive
         //
         // Reference:
         //    http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06
-        public static readonly var FormatUSTAR = 2; 
+        public static readonly var FormatUSTAR = (var)2; 
 
         // FormatPAX represents the PAX header format defined in POSIX.1-2001.
         //
@@ -90,7 +90,7 @@ namespace archive
         //
         // Reference:
         //    http://pubs.opengroup.org/onlinepubs/009695399/utilities/pax.html
-        public static readonly var FormatPAX = 3; 
+        public static readonly var FormatPAX = (var)3; 
 
         // FormatGNU represents the GNU header format.
         //
@@ -103,34 +103,38 @@ namespace archive
         // application can only parse GNU formatted archives.
         //
         // Reference:
-        //    http://www.gnu.org/software/tar/manual/html_node/Standard.html
-        public static readonly var FormatGNU = 4; 
+        //    https://www.gnu.org/software/tar/manual/html_node/Standard.html
+        public static readonly var FormatGNU = (var)4; 
 
         // Schily's tar format, which is incompatible with USTAR.
         // This does not cover STAR extensions to the PAX format; these fall under
         // the PAX format.
-        private static readonly var formatSTAR = 5;
+        private static readonly var formatSTAR = (var)5;
 
-        private static readonly var formatMax = 6;
+        private static readonly var formatMax = (var)6;
+
 
         public static bool has(this Format f, Format f2)
         {
             return f & f2 != 0L;
         }
-        private static void mayBe(this ref Format f, Format f2)
+        private static void mayBe(this ptr<Format> _addr_f, Format f2)
         {
-            f.Value |= f2;
+            ref Format f = ref _addr_f.val;
 
+            f.val |= f2;
         }
-        private static void mayOnlyBe(this ref Format f, Format f2)
+        private static void mayOnlyBe(this ptr<Format> _addr_f, Format f2)
         {
-            f.Value &= f2;
+            ref Format f = ref _addr_f.val;
 
+            f.val &= f2;
         }
-        private static void mustNotBe(this ref Format f, Format f2)
+        private static void mustNotBe(this ptr<Format> _addr_f, Format f2)
         {
-            f.Value &= f2;
+            ref Format f = ref _addr_f.val;
 
+            f.val &= f2;
         }
 
         private static map formatNames = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<Format, @string>{formatV7:"V7",FormatUSTAR:"USTAR",FormatPAX:"PAX",FormatGNU:"GNU",formatSTAR:"STAR",};
@@ -148,6 +152,7 @@ namespace archive
                         ss = append(ss, formatNames[f2]);
                     f2 <<= 1L;
                     }
+
                 }
 
             }
@@ -163,24 +168,28 @@ namespace archive
                     return "(" + strings.Join(ss, " | ") + ")";
                     break;
             }
+
         }
 
         // Magics used to identify various formats.
-        private static readonly @string magicGNU = "ustar ";
-        private static readonly @string versionGNU = " \x00";
-        private static readonly @string magicUSTAR = "ustar\x00";
-        private static readonly @string versionUSTAR = "00";
-        private static readonly @string trailerSTAR = "tar\x00";
+        private static readonly @string magicGNU = (@string)"ustar ";
+        private static readonly @string versionGNU = (@string)" \x00";
+        private static readonly @string magicUSTAR = (@string)"ustar\x00";
+        private static readonly @string versionUSTAR = (@string)"00";
+        private static readonly @string trailerSTAR = (@string)"tar\x00";
+
 
         // Size constants from various tar specifications.
-        private static readonly long blockSize = 512L; // Size of each block in a tar stream
-        private static readonly long nameSize = 100L; // Max length of the name field in USTAR format
-        private static readonly long prefixSize = 155L; // Max length of the prefix field in USTAR format
+        private static readonly long blockSize = (long)512L; // Size of each block in a tar stream
+        private static readonly long nameSize = (long)100L; // Max length of the name field in USTAR format
+        private static readonly long prefixSize = (long)155L; // Max length of the prefix field in USTAR format
 
         // blockPadding computes the number of bytes needed to pad offset up to the
         // nearest block edge where 0 <= n < blockSize.
         private static long blockPadding(long offset)
         {
+            long n = default;
+
             return -offset & (blockSize - 1L);
         }
 
@@ -191,32 +200,44 @@ namespace archive
         }
 
         // Convert block to any number of formats.
-        private static ref headerV7 V7(this ref block b)
+        private static ptr<headerV7> V7(this ptr<block> _addr_b)
         {
-            return (headerV7.Value)(b);
+            ref block b = ref _addr_b.val;
+
+            return _addr_(headerV7.val)(b)!;
         }
-        private static ref headerGNU GNU(this ref block b)
+        private static ptr<headerGNU> GNU(this ptr<block> _addr_b)
         {
-            return (headerGNU.Value)(b);
+            ref block b = ref _addr_b.val;
+
+            return _addr_(headerGNU.val)(b)!;
         }
-        private static ref headerSTAR STAR(this ref block b)
+        private static ptr<headerSTAR> STAR(this ptr<block> _addr_b)
         {
-            return (headerSTAR.Value)(b);
+            ref block b = ref _addr_b.val;
+
+            return _addr_(headerSTAR.val)(b)!;
         }
-        private static ref headerUSTAR USTAR(this ref block b)
+        private static ptr<headerUSTAR> USTAR(this ptr<block> _addr_b)
         {
-            return (headerUSTAR.Value)(b);
+            ref block b = ref _addr_b.val;
+
+            return _addr_(headerUSTAR.val)(b)!;
         }
-        private static sparseArray Sparse(this ref block b)
+        private static sparseArray Sparse(this ptr<block> _addr_b)
         {
-            return (sparseArray)(b[..]);
+            ref block b = ref _addr_b.val;
+
+            return sparseArray(b[..]);
         }
 
         // GetFormat checks that the block is a valid tar header based on the checksum.
         // It then attempts to guess the specific format based on magic values.
         // If the checksum fails, then FormatUnknown is returned.
-        private static Format GetFormat(this ref block b)
-        { 
+        private static Format GetFormat(this ptr<block> _addr_b)
+        {
+            ref block b = ref _addr_b.val;
+ 
             // Verify checksum.
             parser p = default;
             var value = p.parseOctal(b.V7().Chksum());
@@ -239,12 +260,15 @@ namespace archive
                 return FormatGNU;
             else 
                 return formatV7;
-                    }
+            
+        }
 
         // SetFormat writes the magic values necessary for specified format
         // and then updates the checksum accordingly.
-        private static void SetFormat(this ref block _b, Format format) => func(_b, (ref block b, Defer _, Panic panic, Recover __) =>
-        { 
+        private static void SetFormat(this ptr<block> _addr_b, Format format) => func((_, panic, __) =>
+        {
+            ref block b = ref _addr_b.val;
+ 
             // Set the magic values.
 
             if (format.has(formatV7))             else if (format.has(FormatGNU)) 
@@ -266,70 +290,98 @@ namespace archive
             var (chksum, _) = b.ComputeChecksum(); // Possible values are 256..128776
             f.formatOctal(field[..7L], chksum); // Never fails since 128776 < 262143
             field[7L] = ' ';
+
         });
 
         // ComputeChecksum computes the checksum for the header block.
         // POSIX specifies a sum of the unsigned byte values, but the Sun tar used
         // signed byte values.
         // We compute and return both.
-        private static (long, long) ComputeChecksum(this ref block b)
+        private static (long, long) ComputeChecksum(this ptr<block> _addr_b)
         {
+            long unsigned = default;
+            long signed = default;
+            ref block b = ref _addr_b.val;
+
             foreach (var (i, c) in b)
             {
                 if (148L <= i && i < 156L)
                 {
                     c = ' '; // Treat the checksum field itself as all spaces.
                 }
+
                 unsigned += int64(c);
                 signed += int64(int8(c));
+
             }
             return (unsigned, signed);
+
         }
 
         // Reset clears the block with all zeros.
-        private static void Reset(this ref block b)
+        private static void Reset(this ptr<block> _addr_b)
         {
-            b.Value = new block();
+            ref block b = ref _addr_b.val;
+
+            b.val = new block();
         }
 
         private partial struct headerV7 // : array<byte>
         {
         }
 
-        private static slice<byte> Name(this ref headerV7 h)
+        private static slice<byte> Name(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[000L..][..100L];
         }
-        private static slice<byte> Mode(this ref headerV7 h)
+        private static slice<byte> Mode(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[100L..][..8L];
         }
-        private static slice<byte> UID(this ref headerV7 h)
+        private static slice<byte> UID(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[108L..][..8L];
         }
-        private static slice<byte> GID(this ref headerV7 h)
+        private static slice<byte> GID(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[116L..][..8L];
         }
-        private static slice<byte> Size(this ref headerV7 h)
+        private static slice<byte> Size(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[124L..][..12L];
         }
-        private static slice<byte> ModTime(this ref headerV7 h)
+        private static slice<byte> ModTime(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[136L..][..12L];
         }
-        private static slice<byte> Chksum(this ref headerV7 h)
+        private static slice<byte> Chksum(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[148L..][..8L];
         }
-        private static slice<byte> TypeFlag(this ref headerV7 h)
+        private static slice<byte> TypeFlag(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[156L..][..1L];
         }
-        private static slice<byte> LinkName(this ref headerV7 h)
+        private static slice<byte> LinkName(this ptr<headerV7> _addr_h)
         {
+            ref headerV7 h = ref _addr_h.val;
+
             return h[157L..][..100L];
         }
 
@@ -337,48 +389,70 @@ namespace archive
         {
         }
 
-        private static ref headerV7 V7(this ref headerGNU h)
+        private static ptr<headerV7> V7(this ptr<headerGNU> _addr_h)
         {
-            return (headerV7.Value)(h);
+            ref headerGNU h = ref _addr_h.val;
+
+            return _addr_(headerV7.val)(h)!;
         }
-        private static slice<byte> Magic(this ref headerGNU h)
+        private static slice<byte> Magic(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[257L..][..6L];
         }
-        private static slice<byte> Version(this ref headerGNU h)
+        private static slice<byte> Version(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[263L..][..2L];
         }
-        private static slice<byte> UserName(this ref headerGNU h)
+        private static slice<byte> UserName(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[265L..][..32L];
         }
-        private static slice<byte> GroupName(this ref headerGNU h)
+        private static slice<byte> GroupName(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[297L..][..32L];
         }
-        private static slice<byte> DevMajor(this ref headerGNU h)
+        private static slice<byte> DevMajor(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[329L..][..8L];
         }
-        private static slice<byte> DevMinor(this ref headerGNU h)
+        private static slice<byte> DevMinor(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[337L..][..8L];
         }
-        private static slice<byte> AccessTime(this ref headerGNU h)
+        private static slice<byte> AccessTime(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[345L..][..12L];
         }
-        private static slice<byte> ChangeTime(this ref headerGNU h)
+        private static slice<byte> ChangeTime(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[357L..][..12L];
         }
-        private static sparseArray Sparse(this ref headerGNU h)
+        private static sparseArray Sparse(this ptr<headerGNU> _addr_h)
         {
-            return (sparseArray)(h[386L..][..24L * 4L + 1L]);
+            ref headerGNU h = ref _addr_h.val;
+
+            return sparseArray(h[386L..][..24L * 4L + 1L]);
         }
-        private static slice<byte> RealSize(this ref headerGNU h)
+        private static slice<byte> RealSize(this ptr<headerGNU> _addr_h)
         {
+            ref headerGNU h = ref _addr_h.val;
+
             return h[483L..][..12L];
         }
 
@@ -386,48 +460,70 @@ namespace archive
         {
         }
 
-        private static ref headerV7 V7(this ref headerSTAR h)
+        private static ptr<headerV7> V7(this ptr<headerSTAR> _addr_h)
         {
-            return (headerV7.Value)(h);
+            ref headerSTAR h = ref _addr_h.val;
+
+            return _addr_(headerV7.val)(h)!;
         }
-        private static slice<byte> Magic(this ref headerSTAR h)
+        private static slice<byte> Magic(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[257L..][..6L];
         }
-        private static slice<byte> Version(this ref headerSTAR h)
+        private static slice<byte> Version(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[263L..][..2L];
         }
-        private static slice<byte> UserName(this ref headerSTAR h)
+        private static slice<byte> UserName(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[265L..][..32L];
         }
-        private static slice<byte> GroupName(this ref headerSTAR h)
+        private static slice<byte> GroupName(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[297L..][..32L];
         }
-        private static slice<byte> DevMajor(this ref headerSTAR h)
+        private static slice<byte> DevMajor(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[329L..][..8L];
         }
-        private static slice<byte> DevMinor(this ref headerSTAR h)
+        private static slice<byte> DevMinor(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[337L..][..8L];
         }
-        private static slice<byte> Prefix(this ref headerSTAR h)
+        private static slice<byte> Prefix(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[345L..][..131L];
         }
-        private static slice<byte> AccessTime(this ref headerSTAR h)
+        private static slice<byte> AccessTime(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[476L..][..12L];
         }
-        private static slice<byte> ChangeTime(this ref headerSTAR h)
+        private static slice<byte> ChangeTime(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[488L..][..12L];
         }
-        private static slice<byte> Trailer(this ref headerSTAR h)
+        private static slice<byte> Trailer(this ptr<headerSTAR> _addr_h)
         {
+            ref headerSTAR h = ref _addr_h.val;
+
             return h[508L..][..4L];
         }
 
@@ -435,36 +531,52 @@ namespace archive
         {
         }
 
-        private static ref headerV7 V7(this ref headerUSTAR h)
+        private static ptr<headerV7> V7(this ptr<headerUSTAR> _addr_h)
         {
-            return (headerV7.Value)(h);
+            ref headerUSTAR h = ref _addr_h.val;
+
+            return _addr_(headerV7.val)(h)!;
         }
-        private static slice<byte> Magic(this ref headerUSTAR h)
+        private static slice<byte> Magic(this ptr<headerUSTAR> _addr_h)
         {
+            ref headerUSTAR h = ref _addr_h.val;
+
             return h[257L..][..6L];
         }
-        private static slice<byte> Version(this ref headerUSTAR h)
+        private static slice<byte> Version(this ptr<headerUSTAR> _addr_h)
         {
+            ref headerUSTAR h = ref _addr_h.val;
+
             return h[263L..][..2L];
         }
-        private static slice<byte> UserName(this ref headerUSTAR h)
+        private static slice<byte> UserName(this ptr<headerUSTAR> _addr_h)
         {
+            ref headerUSTAR h = ref _addr_h.val;
+
             return h[265L..][..32L];
         }
-        private static slice<byte> GroupName(this ref headerUSTAR h)
+        private static slice<byte> GroupName(this ptr<headerUSTAR> _addr_h)
         {
+            ref headerUSTAR h = ref _addr_h.val;
+
             return h[297L..][..32L];
         }
-        private static slice<byte> DevMajor(this ref headerUSTAR h)
+        private static slice<byte> DevMajor(this ptr<headerUSTAR> _addr_h)
         {
+            ref headerUSTAR h = ref _addr_h.val;
+
             return h[329L..][..8L];
         }
-        private static slice<byte> DevMinor(this ref headerUSTAR h)
+        private static slice<byte> DevMinor(this ptr<headerUSTAR> _addr_h)
         {
+            ref headerUSTAR h = ref _addr_h.val;
+
             return h[337L..][..8L];
         }
-        private static slice<byte> Prefix(this ref headerUSTAR h)
+        private static slice<byte> Prefix(this ptr<headerUSTAR> _addr_h)
         {
+            ref headerUSTAR h = ref _addr_h.val;
+
             return h[345L..][..155L];
         }
 
@@ -474,7 +586,7 @@ namespace archive
 
         private static sparseElem Entry(this sparseArray s, long i)
         {
-            return (sparseElem)(s[i * 24L..]);
+            return sparseElem(s[i * 24L..]);
         }
         private static slice<byte> IsExtended(this sparseArray s)
         {

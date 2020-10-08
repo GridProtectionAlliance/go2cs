@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:17:42 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:20:31 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mcache.go
+using atomic = go.runtime.@internal.atomic_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
 using System;
@@ -22,7 +23,7 @@ namespace go
         //go:notinheap
         private partial struct mcache
         {
-            public int next_sample; // trigger heap sample after allocating this many bytes
+            public System.UIntPtr next_sample; // trigger heap sample after allocating this many bytes
             public System.UIntPtr local_scan; // bytes of scannable heap allocated
 
 // Allocator cache for tiny objects w/o pointers.
@@ -40,13 +41,18 @@ namespace go
 
 // The rest is not accessed on every malloc.
 
-            public array<ref mspan> alloc; // spans to allocate from, indexed by spanClass
+            public array<ptr<mspan>> alloc; // spans to allocate from, indexed by spanClass
 
             public array<stackfreelist> stackcache; // Local allocator stats, flushed during GC.
-            public System.UIntPtr local_nlookup; // number of pointer lookups
             public System.UIntPtr local_largefree; // bytes freed for large objects (>maxsmallsize)
             public System.UIntPtr local_nlargefree; // number of frees for large objects (>maxsmallsize)
             public array<System.UIntPtr> local_nsmallfree; // number of frees for small objects (<=maxsmallsize)
+
+// flushGen indicates the sweepgen during which this mcache
+// was last flushed. If flushGen != mheap_.sweepgen, the spans
+// in this mcache are stale and need to the flushed so they
+// can be swept. This is done in acquirep.
+            public uint flushGen;
         }
 
         // A gclink is a node in a linked list of blocks, like mlink,
@@ -69,9 +75,9 @@ namespace go
         // ptr returns the *gclink form of p.
         // The result should be used for accessing fields, not stored
         // in other data structures.
-        private static ref gclink ptr(this gclinkptr p)
+        private static ptr<gclink> ptr(this gclinkptr p)
         {
-            return (gclink.Value)(@unsafe.Pointer(p));
+            return _addr_(gclink.val)(@unsafe.Pointer(p))!;
         }
 
         private partial struct stackfreelist
@@ -80,24 +86,32 @@ namespace go
             public System.UIntPtr size; // total size of stacks in list
         }
 
-        // dummy MSpan that contains no free objects.
+        // dummy mspan that contains no free objects.
         private static mspan emptymspan = default;
 
-        private static ref mcache allocmcache()
+        private static ptr<mcache> allocmcache()
         {
-            lock(ref mheap_.@lock);
-            var c = (mcache.Value)(mheap_.cachealloc.alloc());
-            unlock(ref mheap_.@lock);
+            ptr<mcache> c;
+            systemstack(() =>
+            {
+                lock(_addr_mheap_.@lock);
+                c = (mcache.val)(mheap_.cachealloc.alloc());
+                c.flushGen = mheap_.sweepgen;
+                unlock(_addr_mheap_.@lock);
+            });
             foreach (var (i) in c.alloc)
             {
-                c.alloc[i] = ref emptymspan;
+                c.alloc[i] = _addr_emptymspan;
             }
             c.next_sample = nextSample();
-            return c;
+            return _addr_c!;
+
         }
 
-        private static void freemcache(ref mcache c)
+        private static void freemcache(ptr<mcache> _addr_c)
         {
+            ref mcache c = ref _addr_c.val;
+
             systemstack(() =>
             {
                 c.releaseAll();
@@ -108,20 +122,24 @@ namespace go
                 // a race where the workbuf is double-freed.
                 // gcworkbuffree(c.gcworkbuf)
 
-                lock(ref mheap_.@lock);
+                lock(_addr_mheap_.@lock);
                 purgecachedstats(c);
                 mheap_.cachealloc.free(@unsafe.Pointer(c));
-                unlock(ref mheap_.@lock);
+                unlock(_addr_mheap_.@lock);
+
             });
+
         }
 
-        // Gets a span that has a free object in it and assigns it
-        // to be the cached span for the given sizeclass. Returns this span.
-        private static void refill(this ref mcache c, spanClass spc)
+        // refill acquires a new span of span class spc for c. This span will
+        // have at least one free object. The current span in c must be full.
+        //
+        // Must run in a non-preemptible context since otherwise the owner of
+        // c could change.
+        private static void refill(this ptr<mcache> _addr_c, spanClass spc)
         {
-            var _g_ = getg();
-
-            _g_.m.locks++; 
+            ref mcache c = ref _addr_c.val;
+ 
             // Return the current cached span to the central lists.
             var s = c.alloc[spc];
 
@@ -129,9 +147,24 @@ namespace go
             {
                 throw("refill of span with free space remaining");
             }
-            if (s != ref emptymspan)
-            {
-                s.incache = false;
+
+            if (s != _addr_emptymspan)
+            { 
+                // Mark this span as no longer cached.
+                if (s.sweepgen != mheap_.sweepgen + 3L)
+                {
+                    throw("bad sweepgen in refill");
+                }
+
+                if (go115NewMCentralImpl)
+                {
+                    mheap_.central[spc].mcentral.uncacheSpan(s);
+                }
+                else
+                {
+                    atomic.Store(_addr_s.sweepgen, mheap_.sweepgen);
+                }
+
             } 
 
             // Get a new cached span from the central lists.
@@ -140,28 +173,68 @@ namespace go
             {
                 throw("out of memory");
             }
+
             if (uintptr(s.allocCount) == s.nelems)
             {
                 throw("span has no free space");
-            }
+            } 
+
+            // Indicate that this span is cached and prevent asynchronous
+            // sweeping in the next sweep phase.
+            s.sweepgen = mheap_.sweepgen + 3L;
+
             c.alloc[spc] = s;
-            _g_.m.locks--;
+
         }
 
-        private static void releaseAll(this ref mcache c)
+        private static void releaseAll(this ptr<mcache> _addr_c)
         {
+            ref mcache c = ref _addr_c.val;
+
             foreach (var (i) in c.alloc)
             {
                 var s = c.alloc[i];
-                if (s != ref emptymspan)
+                if (s != _addr_emptymspan)
                 {
                     mheap_.central[i].mcentral.uncacheSpan(s);
-                    c.alloc[i] = ref emptymspan;
+                    c.alloc[i] = _addr_emptymspan;
                 }
+
             } 
             // Clear tinyalloc pool.
             c.tiny = 0L;
             c.tinyoffset = 0L;
+
+        }
+
+        // prepareForSweep flushes c if the system has entered a new sweep phase
+        // since c was populated. This must happen between the sweep phase
+        // starting and the first allocation from c.
+        private static void prepareForSweep(this ptr<mcache> _addr_c)
+        {
+            ref mcache c = ref _addr_c.val;
+ 
+            // Alternatively, instead of making sure we do this on every P
+            // between starting the world and allocating on that P, we
+            // could leave allocate-black on, allow allocation to continue
+            // as usual, use a ragged barrier at the beginning of sweep to
+            // ensure all cached spans are swept, and then disable
+            // allocate-black. However, with this approach it's difficult
+            // to avoid spilling mark bits into the *next* GC cycle.
+            var sg = mheap_.sweepgen;
+            if (c.flushGen == sg)
+            {
+                return ;
+            }
+            else if (c.flushGen != sg - 2L)
+            {
+                println("bad flushGen", c.flushGen, "in prepareForSweep; sweepgen", sg);
+                throw("bad flushGen");
+            }
+
+            c.releaseAll();
+            stackcache_clear(c);
+            atomic.Store(_addr_c.flushGen, mheap_.sweepgen); // Synchronizes with gcStart
         }
     }
 }

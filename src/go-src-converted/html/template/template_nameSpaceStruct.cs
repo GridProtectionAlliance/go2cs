@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:14 UTC
+//     Generated on 2020 October 08 03:43:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace html
                 this.esc = default;
             }
 
-            public nameSpace(sync.Mutex mu = default, map<@string, ref Template> set = default, bool escaped = default, escaper esc = default)
+            public nameSpace(sync.Mutex mu = default, map<@string, ptr<Template>> set = default, bool escaped = default, escaper esc = default)
             {
                 this.mu = mu;
                 this.set = set;

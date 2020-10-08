@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:03 UTC
+//     Generated on 2020 October 08 03:37:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,16 +14,20 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
 using list = go.container.list_package;
 using crypto = go.crypto_package;
-using cipherhw = go.crypto.@internal.cipherhw_package;
+using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
+using elliptic = go.crypto.elliptic_package;
 using rand = go.crypto.rand_package;
+using rsa = go.crypto.rsa_package;
 using sha512 = go.crypto.sha512_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using cpu = go.@internal.cpu_package;
 using io = go.io_package;
-using big = go.math.big_package;
 using net = go.net_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -63,7 +67,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -77,42 +81,44 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate (ref ClientSessionState, bool) GetByRef(ref T value, @string sessionKey);
-            private delegate (ref ClientSessionState, bool) GetByVal(T value, @string sessionKey);
+            private delegate (ptr<ClientSessionState>, bool) GetByPtr(ptr<T> value, @string sessionKey);
+            private delegate (ptr<ClientSessionState>, bool) GetByVal(T value, @string sessionKey);
 
-            private static readonly GetByRef s_GetByRef;
+            private static readonly GetByPtr s_GetByPtr;
             private static readonly GetByVal s_GetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref ClientSessionState, bool) Get(@string sessionKey)
+            public (ptr<ClientSessionState>, bool) Get(@string sessionKey)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GetByPtr is null || !m_target_is_ptr)
                     return s_GetByVal!(target, sessionKey);
 
-                return s_GetByRef(ref target, sessionKey);
+                return s_GetByPtr(m_target_ptr, sessionKey);
             }
 
-            private delegate (ref ClientSessionState, bool) PutByRef(ref T value, @string sessionKey, ref ClientSessionState cs);
-            private delegate (ref ClientSessionState, bool) PutByVal(T value, @string sessionKey, ref ClientSessionState cs);
+            private delegate (ptr<ClientSessionState>, bool) PutByPtr(ptr<T> value, @string sessionKey, ptr<ClientSessionState> cs);
+            private delegate (ptr<ClientSessionState>, bool) PutByVal(T value, @string sessionKey, ptr<ClientSessionState> cs);
 
-            private static readonly PutByRef s_PutByRef;
+            private static readonly PutByPtr s_PutByPtr;
             private static readonly PutByVal s_PutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref ClientSessionState, bool) Put(@string sessionKey, ref ClientSessionState cs)
+            public (ptr<ClientSessionState>, bool) Put(@string sessionKey, ptr<ClientSessionState> cs)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PutByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PutByPtr is null || !m_target_is_ptr)
                     return s_PutByVal!(target, sessionKey, cs);
 
-                return s_PutByRef(ref target, sessionKey, cs);
+                return s_PutByPtr(m_target_ptr, sessionKey, cs);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -121,39 +127,33 @@ namespace crypto
             static ClientSessionCache()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Get");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Get");
 
                 if (!(extensionMethod is null))
-                    s_GetByRef = extensionMethod.CreateStaticDelegate(typeof(GetByRef)) as GetByRef;
+                    s_GetByPtr = extensionMethod.CreateStaticDelegate(typeof(GetByPtr)) as GetByPtr;
 
-                if (s_GetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Get");
+                extensionMethod = targetType.GetExtensionMethod("Get");
 
-                    if (!(extensionMethod is null))
-                        s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
 
-                if (s_GetByRef is null && s_GetByVal is null)
+                if (s_GetByPtr is null && s_GetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ClientSessionCache.Get method", new Exception("Get"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Put");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Put");
 
                 if (!(extensionMethod is null))
-                    s_PutByRef = extensionMethod.CreateStaticDelegate(typeof(PutByRef)) as PutByRef;
+                    s_PutByPtr = extensionMethod.CreateStaticDelegate(typeof(PutByPtr)) as PutByPtr;
 
-                if (s_PutByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Put");
+                extensionMethod = targetType.GetExtensionMethod("Put");
 
-                    if (!(extensionMethod is null))
-                        s_PutByVal = extensionMethod.CreateStaticDelegate(typeof(PutByVal)) as PutByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PutByVal = extensionMethod.CreateStaticDelegate(typeof(PutByVal)) as PutByVal;
 
-                if (s_PutByRef is null && s_PutByVal is null)
+                if (s_PutByPtr is null && s_PutByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ClientSessionCache.Put method", new Exception("Put"));
             }
 

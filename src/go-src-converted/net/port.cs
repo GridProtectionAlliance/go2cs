@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:27:14 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:08 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\port.go
 
@@ -22,14 +22,19 @@ namespace go
         // numbers are parsed in full and rejected if invalid.
         private static (long, bool) parsePort(@string service)
         {
+            long port = default;
+            bool needsLookup = default;
+
             if (service == "")
             { 
                 // Lock in the legacy behavior that an empty string
                 // means port 0. See golang.org/issue/13610.
                 return (0L, false);
+
             }
-            const var max = uint32(1L << (int)(32L) - 1L);
-            const var cutoff = uint32(1L << (int)(30L));
+            const var max = (var)uint32(1L << (int)(32L) - 1L);
+            const var cutoff = (var)uint32(1L << (int)(30L));
+
             var neg = false;
             if (service[0L] == '+')
             {
@@ -64,6 +69,7 @@ namespace go
                     break;
                 }
                 n = nn;
+
             }            if (!neg && n >= cutoff)
             {
                 port = int(cutoff - 1L);
@@ -81,6 +87,7 @@ namespace go
                 port = -port;
             }
             return (port, false);
+
         }
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:49 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:16 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\gamma.go
 
@@ -83,12 +83,17 @@ namespace go
         // masks any imprecision in the polynomial.
         private static (double, double) stirling(double x)
         {
+            double _p0 = default;
+            double _p0 = default;
+
             if (x > 200L)
             {
                 return (Inf(1L), 1L);
             }
-            const float SqrtTwoPi = 2.506628274631000502417F;
-            const float MaxStirling = 143.01608F;
+
+            const float SqrtTwoPi = (float)2.506628274631000502417F;
+            const float MaxStirling = (float)143.01608F;
+
             long w = 1L / x;
             w = 1L + w * ((((_gamS[0L] * w + _gamS[1L]) * w + _gamS[2L]) * w + _gamS[3L]) * w + _gamS[4L]);
             var y1 = Exp(x);
@@ -98,12 +103,15 @@ namespace go
                 var v = Pow(x, 0.5F * x - 0.25F);
                 y1 = v;
                 y2 = v / y1;
+
             }
             else
             {
                 y1 = Pow(x, x - 0.5F) / y1;
             }
+
             return (y1, SqrtTwoPi * w * y2);
+
         }
 
         // Gamma returns the Gamma function of x.
@@ -117,7 +125,7 @@ namespace go
         //    Gamma(NaN) = NaN
         public static double Gamma(double x)
         {
-            const float Euler = 0.57721566490153286060651209008240243104215933593992F; // A001620
+            const float Euler = (float)0.57721566490153286060651209008240243104215933593992F; // A001620
             // special cases
  // A001620
             // special cases
@@ -131,6 +139,7 @@ namespace go
                 {
                     return Inf(-1L);
                 }
+
                 return Inf(1L);
                         var q = Abs(x);
             var p = Floor(q);
@@ -154,17 +163,20 @@ namespace go
                     }
 
                 }
+
                 var z = q - p;
                 if (z > 0.5F)
                 {
                     p = p + 1L;
                     z = q - p;
                 }
+
                 z = q * Sin(Pi * z);
                 if (z == 0L)
                 {
                     return Inf(signgam);
                 }
+
                 var (sq1, sq2) = stirling(q);
                 var absz = Abs(z);
                 var d = absz * sq1 * sq2;
@@ -176,7 +188,9 @@ namespace go
                 {
                     z = Pi / d;
                 }
+
                 return float64(signgam) * z;
+
             } 
 
             // Reduce argument
@@ -193,8 +207,10 @@ namespace go
                 {
                     goto small;
                 }
+
                 z = z / x;
                 x = x + 1L;
+
             }
 
             while (x < 2L)
@@ -203,8 +219,10 @@ namespace go
                 {
                     goto small;
                 }
+
                 z = z / x;
                 x = x + 1L;
+
             }
 
 
@@ -212,6 +230,7 @@ namespace go
             {
                 return z;
             }
+
             x = x - 2L;
             p = (((((x * _gamP[0L] + _gamP[1L]) * x + _gamP[2L]) * x + _gamP[3L]) * x + _gamP[4L]) * x + _gamP[5L]) * x + _gamP[6L];
             q = ((((((x * _gamQ[0L] + _gamQ[1L]) * x + _gamQ[2L]) * x + _gamQ[3L]) * x + _gamQ[4L]) * x + _gamQ[5L]) * x + _gamQ[6L]) * x + _gamQ[7L];
@@ -222,7 +241,9 @@ small:
             {
                 return Inf(1L);
             }
+
             return z / ((1L + Euler * x) * x);
+
         }
 
         private static bool isNegInt(double x)
@@ -232,7 +253,9 @@ small:
                 var (_, xf) = Modf(x);
                 return xf == 0L;
             }
+
             return false;
+
         }
     }
 }

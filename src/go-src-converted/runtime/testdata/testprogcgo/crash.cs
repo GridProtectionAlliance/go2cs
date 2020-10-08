@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:47 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:51 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\crash.go
 using fmt = go.fmt_package;
 using runtime = go.runtime_package;
@@ -32,12 +32,15 @@ namespace go
                     }
 
                 }
+
                 fmt.Printf(" done\n");
+
             }());
             fmt.Printf("%s:", name);
-            ref @string s = default;
-            _ = s.Value;
+            ptr<@string> s;
+            _ = s.val;
             fmt.Print("SHOULD NOT BE HERE");
+
         });
 
         private static void testInNewThread(@string name)
@@ -50,6 +53,7 @@ namespace go
                 c.Send(true);
             }());
             c.Receive();
+
         }
 
         public static void Crash()

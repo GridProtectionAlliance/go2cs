@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 August 29 08:24:45 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:50 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\catchpanic.go
 /*
 #include <signal.h>
@@ -79,7 +79,9 @@ namespace go
                 }
 
             }
+
             panic("catch me");
+
         });
     }
 }

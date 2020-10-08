@@ -1,5 +1,5 @@
 // Inferno utils/include/ar.h
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/include/ar.h
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/include/ar.h
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 August 29 10:02:30 UTC
+// package ld -- go2cs converted at 2020 October 08 04:37:21 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\ar.go
 using bio = go.cmd.@internal.bio_package;
@@ -47,10 +47,12 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        public static readonly long SARMAG = 8L;
-        public static readonly long SAR_HDR = 16L + 44L;
+        public static readonly long SARMAG = (long)8L;
+        public static readonly long SAR_HDR = (long)16L + 44L;
 
-        public static readonly @string ARMAG = "!<arch>\n";
+
+        public static readonly @string ARMAG = (@string)"!<arch>\n";
+
 
         public partial struct ArHdr
         {
@@ -68,8 +70,10 @@ namespace @internal
         // file, but it has an armap listing symbols and the objects that
         // define them. This is used for the compiler support library
         // libgcc.a.
-        private static void hostArchive(ref Link _ctxt, @string name) => func(_ctxt, (ref Link ctxt, Defer defer, Panic _, Recover __) =>
+        private static void hostArchive(ptr<Link> _addr_ctxt, @string name) => func((defer, _, __) =>
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+
             var (f, err) = bio.Open(name);
             if (err != null)
             {
@@ -80,10 +84,15 @@ namespace @internal
                     {
                         ctxt.Logf("skipping libgcc file: %v\n", err);
                     }
-                    return;
+
+                    return ;
+
                 }
+
                 Exitf("cannot open file %s: %v", name, err);
+
             }
+
             defer(f.Close());
 
             array<byte> magbuf = new array<byte>(len(ARMAG));
@@ -97,52 +106,54 @@ namespace @internal
 
             }
 
+
             if (string(magbuf[..]) != ARMAG)
             {
                 Exitf("%s is not an archive file", name);
             }
-            ArHdr arhdr = default;
-            var l = nextar(f, f.Offset(), ref arhdr);
+
+            ref ArHdr arhdr = ref heap(out ptr<ArHdr> _addr_arhdr);
+            var l = nextar(f, f.Offset(), _addr_arhdr);
             if (l <= 0L)
             {
                 Exitf("%s missing armap", name);
             }
+
             archiveMap armap = default;
             if (arhdr.name == "/" || arhdr.name == "/SYM64/")
             {
-                armap = readArmap(name, f, arhdr);
+                armap = readArmap(name, _addr_f, arhdr);
             }
             else
             {
                 Exitf("%s missing armap", name);
             }
+
             var loaded = make_map<ulong, bool>();
             var any = true;
             while (any)
             {
                 slice<ulong> load = default;
-                foreach (var (_, s) in ctxt.Syms.Allsym)
+                long returnAllUndefs = -1L;
+                var undefs = ctxt.loader.UndefinedRelocTargets(returnAllUndefs);
+                foreach (var (_, symIdx) in undefs)
                 {
-                    foreach (var (_, r) in s.R)
+                    var name = ctxt.loader.SymName(symIdx);
                     {
-                        if (r.Sym != null && r.Sym.Type == sym.SXREF)
+                        var off__prev1 = off;
+
+                        var off = armap[name];
+
+                        if (off != 0L && !loaded[off])
                         {
-                            {
-                                var off__prev2 = off;
-
-                                var off = armap[r.Sym.Name];
-
-                                if (off != 0L && !loaded[off])
-                                {
-                                    load = append(load, off);
-                                    loaded[off] = true;
-                                }
-
-                                off = off__prev2;
-
-                            }
+                            load = append(load, off);
+                            loaded[off] = true;
                         }
+
+                        off = off__prev1;
+
                     }
+
                 }
                 {
                     var off__prev2 = off;
@@ -150,25 +161,29 @@ namespace @internal
                     foreach (var (_, __off) in load)
                     {
                         off = __off;
-                        l = nextar(f, int64(off), ref arhdr);
+                        l = nextar(f, int64(off), _addr_arhdr);
                         if (l <= 0L)
                         {
                             Exitf("%s missing archive entry at offset %d", name, off);
                         }
+
                         var pname = fmt.Sprintf("%s(%s)", name, arhdr.name);
                         l = atolwhex(arhdr.size);
 
-                        sym.Library libgcc = new sym.Library(Pkg:"libgcc");
-                        var h = ldobj(ctxt, f, ref libgcc, l, pname, name, ArchiveObj);
-                        f.Seek(h.off, 0L);
+                        ref sym.Library libgcc = ref heap(new sym.Library(Pkg:"libgcc"), out ptr<sym.Library> _addr_libgcc);
+                        var h = ldobj(ctxt, f, _addr_libgcc, l, pname, name);
+                        f.MustSeek(h.off, 0L);
                         h.ld(ctxt, f, h.pkg, h.length, h.pn);
+
                     }
 
                     off = off__prev2;
                 }
 
                 any = len(load) > 0L;
+
             }
+
 
         });
 
@@ -179,14 +194,17 @@ namespace @internal
         }
 
         // readArmap reads the archive symbol map.
-        private static archiveMap readArmap(@string filename, ref bio.Reader f, ArHdr arhdr)
+        private static archiveMap readArmap(@string filename, ptr<bio.Reader> _addr_f, ArHdr arhdr)
         {
+            ref bio.Reader f = ref _addr_f.val;
+
             var is64 = arhdr.name == "/SYM64/";
             long wordSize = 4L;
             if (is64)
             {
                 wordSize = 8L;
             }
+
             var contents = make_slice<byte>(atolwhex(arhdr.size));
             {
                 var (_, err) = io.ReadFull(f, contents);
@@ -198,6 +216,7 @@ namespace @internal
 
             }
 
+
             ulong c = default;
             if (is64)
             {
@@ -207,6 +226,7 @@ namespace @internal
             {
                 c = uint64(binary.BigEndian.Uint32(contents));
             }
+
             contents = contents[wordSize..];
 
             var ret = make(archiveMap);
@@ -231,7 +251,9 @@ namespace @internal
                     {
                         name = name[1L..];
                     }
+
                 }
+
                 ulong off = default;
                 if (is64)
                 {
@@ -241,13 +263,16 @@ namespace @internal
                 {
                     off = uint64(binary.BigEndian.Uint32(contents));
                 }
+
                 contents = contents[wordSize..];
 
                 ret[name] = off;
+
             }
 
 
             return ret;
+
         }
     }
 }}}}

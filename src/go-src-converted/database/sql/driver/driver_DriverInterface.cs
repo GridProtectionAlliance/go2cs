@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Conn, error) OpenByRef(ref T value, @string name);
+            private delegate (Conn, error) OpenByPtr(ptr<T> value, @string name);
             private delegate (Conn, error) OpenByVal(T value, @string name);
 
-            private static readonly OpenByRef s_OpenByRef;
+            private static readonly OpenByPtr s_OpenByPtr;
             private static readonly OpenByVal s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OpenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OpenByPtr is null || !m_target_is_ptr)
                     return s_OpenByVal!(target, name);
 
-                return s_OpenByRef(ref target, name);
+                return s_OpenByPtr(m_target_ptr, name);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static Driver()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Open");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
                 if (!(extensionMethod is null))
-                    s_OpenByRef = extensionMethod.CreateStaticDelegate(typeof(OpenByRef)) as OpenByRef;
+                    s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
-                if (s_OpenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Open");
+                extensionMethod = targetType.GetExtensionMethod("Open");
 
-                    if (!(extensionMethod is null))
-                        s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
-                if (s_OpenByRef is null && s_OpenByVal is null)
+                if (s_OpenByPtr is null && s_OpenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Driver.Open method", new Exception("Open"));
             }
 

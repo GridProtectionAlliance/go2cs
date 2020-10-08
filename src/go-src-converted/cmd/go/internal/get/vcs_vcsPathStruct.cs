@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:58 UTC
+//     Generated on 2020 October 08 04:36:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,13 +13,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using singleflight = go.@internal.singleflight_package;
 using log = go.log_package;
-using url = go.net.url_package;
+using urlpkg = go.net.url_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
@@ -28,6 +28,7 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using load = go.cmd.go.@internal.load_package;
 using web = go.cmd.go.@internal.web_package;
 using go;
 
@@ -45,23 +46,21 @@ namespace @internal
             public vcsPath(NilType _)
             {
                 this.prefix = default;
-                this.re = default;
+                this.regexp = default;
                 this.repo = default;
                 this.vcs = default;
                 this.check = default;
-                this.ping = default;
-                this.regexp = default;
+                this.schemelessRepo = default;
             }
 
-            public vcsPath(@string prefix = default, @string re = default, @string repo = default, @string vcs = default, Func<map<@string, @string>, error> check = default, bool ping = default, ref ptr<regexp.Regexp> regexp = default)
+            public vcsPath(@string prefix = default, ref ptr<lazyregexp.Regexp> regexp = default, @string repo = default, @string vcs = default, Func<map<@string, @string>, error> check = default, bool schemelessRepo = default)
             {
                 this.prefix = prefix;
-                this.re = re;
+                this.regexp = regexp;
                 this.repo = repo;
                 this.vcs = vcs;
                 this.check = check;
-                this.ping = ping;
-                this.regexp = regexp;
+                this.schemelessRepo = schemelessRepo;
             }
 
             // Enable comparisons between nil and vcsPath struct
@@ -84,7 +83,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static vcsPath vcsPath_cast(dynamic value)
         {
-            return new vcsPath(value.prefix, value.re, value.repo, value.vcs, value.check, value.ping, ref value.regexp);
+            return new vcsPath(value.prefix, ref value.regexp, value.repo, value.vcs, value.check, value.schemelessRepo);
         }
     }
 }}}}

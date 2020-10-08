@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !cgo,!windows,!plan9 android
+// +build !cgo,!windows,!plan9 android osusergo,!windows,!plan9
 
-// package user -- go2cs converted at 2020 August 29 08:31:51 UTC
+// package user -- go2cs converted at 2020 October 08 03:45:33 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\lookup_stubs.go
 using errors = go.errors_package;
@@ -24,57 +24,79 @@ namespace os
             groupImplemented = false;
         }
 
-        private static (ref User, error) current()
+        private static (ptr<User>, error) current()
         {
-            User u = ref new User(Uid:currentUID(),Gid:currentGID(),Username:os.Getenv("USER"),Name:"",HomeDir:os.Getenv("HOME"),); 
-            // On NaCL and Android, return a dummy user instead of failing.
+            ptr<User> _p0 = default!;
+            error _p0 = default!;
+
+            var uid = currentUID(); 
+            // $USER and /etc/passwd may disagree; prefer the latter if we can get it.
+            // See issue 27524 for more information.
+            var (u, err) = lookupUserId(uid);
+            if (err == null)
+            {
+                return (_addr_u!, error.As(null!)!);
+            }
+
+            var (homeDir, _) = os.UserHomeDir();
+            u = addr(new User(Uid:uid,Gid:currentGID(),Username:os.Getenv("USER"),Name:"",HomeDir:homeDir,)); 
+            // On Android, return a dummy user instead of failing.
             switch (runtime.GOOS)
             {
-                case "nacl": 
-                    if (u.Uid == "")
-                    {
-                        u.Uid = "1";
-                    }
-                    if (u.Username == "")
-                    {
-                        u.Username = "nacl";
-                    }
-                    if (u.HomeDir == "")
-                    {
-                        u.HomeDir = "/";
-                    }
-                    break;
                 case "android": 
                     if (u.Uid == "")
                     {
                         u.Uid = "1";
                     }
+
                     if (u.Username == "")
                     {
                         u.Username = "android";
                     }
-                    if (u.HomeDir == "")
-                    {
-                        u.HomeDir = "/sdcard";
-                    }
+
                     break;
             } 
             // cgo isn't available, but if we found the minimum information
             // without it, use it:
             if (u.Uid != "" && u.Username != "" && u.HomeDir != "")
             {
-                return (u, null);
+                return (_addr_u!, error.As(null!)!);
             }
-            return (u, fmt.Errorf("user: Current not implemented on %s/%s", runtime.GOOS, runtime.GOARCH));
+
+            @string missing = default;
+            if (u.Username == "")
+            {
+                missing = "$USER";
+            }
+
+            if (u.HomeDir == "")
+            {
+                if (missing != "")
+                {
+                    missing += ", ";
+                }
+
+                missing += "$HOME";
+
+            }
+
+            return (_addr_u!, error.As(fmt.Errorf("user: Current requires cgo or %s set in environment", missing))!);
+
         }
 
-        private static (slice<@string>, error) listGroups(ref User _p0)
+        private static (slice<@string>, error) listGroups(ptr<User> _addr__p0)
         {
-            if (runtime.GOOS == "android")
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref User _p0 = ref _addr__p0.val;
+
+            if (runtime.GOOS == "android" || runtime.GOOS == "aix")
             {
-                return (null, errors.New("user: GroupIds not implemented on Android"));
+                return (null, error.As(fmt.Errorf("user: GroupIds not implemented on %s", runtime.GOOS))!);
             }
-            return (null, errors.New("user: GroupIds requires cgo"));
+
+            return (null, error.As(errors.New("user: GroupIds requires cgo"))!);
+
         }
 
         private static @string currentUID()
@@ -95,6 +117,7 @@ namespace os
             // Windows anyway, so this empty return path shouldn't be
             // used.
             return "";
+
         }
 
         private static @string currentGID()
@@ -108,7 +131,9 @@ namespace os
                 }
 
             }
+
             return "";
+
         }
     }
 }}

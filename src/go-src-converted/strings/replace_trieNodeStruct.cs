@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:41 UTC
+//     Generated on 2020 October 08 03:48:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using sync = go.sync_package;
 
 namespace go
 {
@@ -32,7 +33,7 @@ namespace go
                 this.table = default;
             }
 
-            public trieNode(@string value = default, long priority = default, @string prefix = default, ref ptr<trieNode> next = default, slice<ref trieNode> table = default)
+            public trieNode(@string value = default, long priority = default, @string prefix = default, ref ptr<trieNode> next = default, slice<ptr<trieNode>> table = default)
             {
                 this.value = value;
                 this.priority = priority;

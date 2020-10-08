@@ -1,6 +1,6 @@
 // nothing to see here
 
-// package syscall -- go2cs converted at 2020 August 29 08:42:02 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:30:32 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsysnum_windows_386.go
     }

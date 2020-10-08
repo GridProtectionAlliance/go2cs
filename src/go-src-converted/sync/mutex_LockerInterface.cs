@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:24 UTC
+//     Generated on 2020 October 08 00:34:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +64,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void LockByRef(ref T value);
+            private delegate void LockByPtr(ptr<T> value);
             private delegate void LockByVal(T value);
 
-            private static readonly LockByRef s_LockByRef;
+            private static readonly LockByPtr s_LockByPtr;
             private static readonly LockByVal s_LockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,22 +76,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LockByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LockByPtr is null || !m_target_is_ptr)
                 {
                     s_LockByVal!(target);
                     return;
                 }
 
-                s_LockByRef(ref target);
+                s_LockByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void UnlockByRef(ref T value);
+            private delegate void UnlockByPtr(ptr<T> value);
             private delegate void UnlockByVal(T value);
 
-            private static readonly UnlockByRef s_UnlockByRef;
+            private static readonly UnlockByPtr s_UnlockByPtr;
             private static readonly UnlockByVal s_UnlockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,14 +101,15 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnlockByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnlockByPtr is null || !m_target_is_ptr)
                 {
                     s_UnlockByVal!(target);
                     return;
                 }
 
-                s_UnlockByRef(ref target);
+                s_UnlockByPtr(m_target_ptr);
                 return;
                 
             }
@@ -118,39 +120,33 @@ namespace go
             static Locker()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Lock");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Lock");
 
                 if (!(extensionMethod is null))
-                    s_LockByRef = extensionMethod.CreateStaticDelegate(typeof(LockByRef)) as LockByRef;
+                    s_LockByPtr = extensionMethod.CreateStaticDelegate(typeof(LockByPtr)) as LockByPtr;
 
-                if (s_LockByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Lock");
+                extensionMethod = targetType.GetExtensionMethod("Lock");
 
-                    if (!(extensionMethod is null))
-                        s_LockByVal = extensionMethod.CreateStaticDelegate(typeof(LockByVal)) as LockByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LockByVal = extensionMethod.CreateStaticDelegate(typeof(LockByVal)) as LockByVal;
 
-                if (s_LockByRef is null && s_LockByVal is null)
+                if (s_LockByPtr is null && s_LockByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Locker.Lock method", new Exception("Lock"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Unlock");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Unlock");
 
                 if (!(extensionMethod is null))
-                    s_UnlockByRef = extensionMethod.CreateStaticDelegate(typeof(UnlockByRef)) as UnlockByRef;
+                    s_UnlockByPtr = extensionMethod.CreateStaticDelegate(typeof(UnlockByPtr)) as UnlockByPtr;
 
-                if (s_UnlockByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Unlock");
+                extensionMethod = targetType.GetExtensionMethod("Unlock");
 
-                    if (!(extensionMethod is null))
-                        s_UnlockByVal = extensionMethod.CreateStaticDelegate(typeof(UnlockByVal)) as UnlockByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnlockByVal = extensionMethod.CreateStaticDelegate(typeof(UnlockByVal)) as UnlockByVal;
 
-                if (s_UnlockByRef is null && s_UnlockByVal is null)
+                if (s_UnlockByPtr is null && s_UnlockByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Locker.Unlock method", new Exception("Unlock"));
             }
 

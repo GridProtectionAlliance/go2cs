@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:32 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:08 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\copyelim.go
 
@@ -17,8 +17,10 @@ namespace @internal
     {
         // copyelim removes all uses of OpCopy values from f.
         // A subsequent deadcode pass is needed to actually remove the copies.
-        private static void copyelim(ref Func f)
-        { 
+        private static void copyelim(ptr<Func> _addr_f)
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // Modify all values so no arg (including args
             // of OpCopy) is a copy.
             {
@@ -33,11 +35,10 @@ namespace @internal
                         foreach (var (_, __v) in b.Values)
                         {
                             v = __v;
-                            copyelimValue(v);
+                            copyelimValue(_addr_v);
                         }
                         v = v__prev2;
                     }
-
                 }
                 b = b__prev1;
             }
@@ -49,16 +50,20 @@ namespace @internal
                 {
                     b = __b;
                     {
-                        var v__prev1 = v;
+                        var i__prev2 = i;
+                        var v__prev2 = v;
 
-                        var v = b.Control;
-
-                        if (v != null && v.Op == OpCopy)
+                        foreach (var (__i, __v) in b.ControlValues())
                         {
-                            b.SetControl(v.Args[0L]);
+                            i = __i;
+                            v = __v;
+                            if (v.Op == OpCopy)
+                            {
+                                b.ReplaceControl(i, v.Args[0L]);
+                            }
                         }
-                        v = v__prev1;
-
+                        i = i__prev2;
+                        v = v__prev2;
                     }
                 }
                 b = b__prev1;
@@ -68,6 +73,7 @@ namespace @internal
             {
                 var values = f.NamedValues[name];
                 {
+                    var i__prev2 = i;
                     var v__prev2 = v;
 
                     foreach (var (__i, __v) in values)
@@ -79,16 +85,18 @@ namespace @internal
                             values[i] = v.Args[0L];
                         }
                     }
+                    i = i__prev2;
                     v = v__prev2;
                 }
-
             }
         }
 
         // copySource returns the (non-copy) op which is the
         // ultimate source of v.  v must be a copy op.
-        private static ref Value copySource(ref Value v)
+        private static ptr<Value> copySource(ptr<Value> _addr_v)
         {
+            ref Value v = ref _addr_v.val;
+
             var w = v.Args[0L]; 
 
             // This loop is just:
@@ -109,11 +117,14 @@ namespace @internal
                     w.reset(OpUnknown);
                     break;
                 }
+
                 if (advance)
                 {
                     slow = slow.Args[0L];
                 }
+
                 advance = !advance;
+
             } 
 
             // The answer is w.  Update all the copies we saw
@@ -133,19 +144,24 @@ namespace @internal
                 v = x;
             }
 
-            return w;
+            return _addr_w!;
+
         }
 
         // copyelimValue ensures that no args of v are copies.
-        private static void copyelimValue(ref Value v)
+        private static void copyelimValue(ptr<Value> _addr_v)
         {
+            ref Value v = ref _addr_v.val;
+
             foreach (var (i, a) in v.Args)
             {
                 if (a.Op == OpCopy)
                 {
-                    v.SetArg(i, copySource(a));
+                    v.SetArg(i, copySource(_addr_a));
                 }
+
             }
+
         }
     }
 }}}}

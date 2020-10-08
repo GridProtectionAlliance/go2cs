@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:22:44 UTC
+//     Generated on 2020 October 08 03:26:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,9 +15,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using errors = go.errors_package;
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
+using reflectlite = go.@internal.reflectlite_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
 
 #pragma warning disable CS0660, CS0661
@@ -52,7 +52,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -66,10 +66,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void DeadlineByRef(ref T value);
+            private delegate void DeadlineByPtr(ptr<T> value);
             private delegate void DeadlineByVal(T value);
 
-            private static readonly DeadlineByRef s_DeadlineByRef;
+            private static readonly DeadlineByPtr s_DeadlineByPtr;
             private static readonly DeadlineByVal s_DeadlineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,22 +78,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DeadlineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DeadlineByPtr is null || !m_target_is_ptr)
                 {
                     s_DeadlineByVal!(target);
                     return;
                 }
 
-                s_DeadlineByRef(ref target);
+                s_DeadlineByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void DoneByRef(ref T value);
+            private delegate void DoneByPtr(ptr<T> value);
             private delegate void DoneByVal(T value);
 
-            private static readonly DoneByRef s_DoneByRef;
+            private static readonly DoneByPtr s_DoneByPtr;
             private static readonly DoneByVal s_DoneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,22 +103,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DoneByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DoneByPtr is null || !m_target_is_ptr)
                 {
                     s_DoneByVal!(target);
                     return;
                 }
 
-                s_DoneByRef(ref target);
+                s_DoneByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void ErrByRef(ref T value);
+            private delegate void ErrByPtr(ptr<T> value);
             private delegate void ErrByVal(T value);
 
-            private static readonly ErrByRef s_ErrByRef;
+            private static readonly ErrByPtr s_ErrByPtr;
             private static readonly ErrByVal s_ErrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,22 +128,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ErrByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ErrByPtr is null || !m_target_is_ptr)
                 {
                     s_ErrByVal!(target);
                     return;
                 }
 
-                s_ErrByRef(ref target);
+                s_ErrByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void ValueByRef(ref T value, object key);
+            private delegate void ValueByPtr(ptr<T> value, object key);
             private delegate void ValueByVal(T value, object key);
 
-            private static readonly ValueByRef s_ValueByRef;
+            private static readonly ValueByPtr s_ValueByPtr;
             private static readonly ValueByVal s_ValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -150,14 +153,15 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ValueByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ValueByPtr is null || !m_target_is_ptr)
                 {
                     s_ValueByVal!(target, key);
                     return;
                 }
 
-                s_ValueByRef(ref target, key);
+                s_ValueByPtr(m_target_ptr, key);
                 return;
                 
             }
@@ -168,71 +172,59 @@ namespace go
             static Context()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Deadline");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Deadline");
 
                 if (!(extensionMethod is null))
-                    s_DeadlineByRef = extensionMethod.CreateStaticDelegate(typeof(DeadlineByRef)) as DeadlineByRef;
+                    s_DeadlineByPtr = extensionMethod.CreateStaticDelegate(typeof(DeadlineByPtr)) as DeadlineByPtr;
 
-                if (s_DeadlineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Deadline");
+                extensionMethod = targetType.GetExtensionMethod("Deadline");
 
-                    if (!(extensionMethod is null))
-                        s_DeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(DeadlineByVal)) as DeadlineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(DeadlineByVal)) as DeadlineByVal;
 
-                if (s_DeadlineByRef is null && s_DeadlineByVal is null)
+                if (s_DeadlineByPtr is null && s_DeadlineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.Deadline method", new Exception("Deadline"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Done");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Done");
 
                 if (!(extensionMethod is null))
-                    s_DoneByRef = extensionMethod.CreateStaticDelegate(typeof(DoneByRef)) as DoneByRef;
+                    s_DoneByPtr = extensionMethod.CreateStaticDelegate(typeof(DoneByPtr)) as DoneByPtr;
 
-                if (s_DoneByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Done");
+                extensionMethod = targetType.GetExtensionMethod("Done");
 
-                    if (!(extensionMethod is null))
-                        s_DoneByVal = extensionMethod.CreateStaticDelegate(typeof(DoneByVal)) as DoneByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DoneByVal = extensionMethod.CreateStaticDelegate(typeof(DoneByVal)) as DoneByVal;
 
-                if (s_DoneByRef is null && s_DoneByVal is null)
+                if (s_DoneByPtr is null && s_DoneByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.Done method", new Exception("Done"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Err");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Err");
 
                 if (!(extensionMethod is null))
-                    s_ErrByRef = extensionMethod.CreateStaticDelegate(typeof(ErrByRef)) as ErrByRef;
+                    s_ErrByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrByPtr)) as ErrByPtr;
 
-                if (s_ErrByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Err");
+                extensionMethod = targetType.GetExtensionMethod("Err");
 
-                    if (!(extensionMethod is null))
-                        s_ErrByVal = extensionMethod.CreateStaticDelegate(typeof(ErrByVal)) as ErrByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ErrByVal = extensionMethod.CreateStaticDelegate(typeof(ErrByVal)) as ErrByVal;
 
-                if (s_ErrByRef is null && s_ErrByVal is null)
+                if (s_ErrByPtr is null && s_ErrByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.Err method", new Exception("Err"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Value");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Value");
 
                 if (!(extensionMethod is null))
-                    s_ValueByRef = extensionMethod.CreateStaticDelegate(typeof(ValueByRef)) as ValueByRef;
+                    s_ValueByPtr = extensionMethod.CreateStaticDelegate(typeof(ValueByPtr)) as ValueByPtr;
 
-                if (s_ValueByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Value");
+                extensionMethod = targetType.GetExtensionMethod("Value");
 
-                    if (!(extensionMethod is null))
-                        s_ValueByVal = extensionMethod.CreateStaticDelegate(typeof(ValueByVal)) as ValueByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ValueByVal = extensionMethod.CreateStaticDelegate(typeof(ValueByVal)) as ValueByVal;
 
-                if (s_ValueByRef is null && s_ValueByVal is null)
+                if (s_ValueByPtr is null && s_ValueByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.Value method", new Exception("Value"));
             }
 

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package rand -- go2cs converted at 2020 August 29 08:30:48 UTC
+// package rand -- go2cs converted at 2020 October 08 03:35:29 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\eagain.go
 using os = go.os_package;
@@ -26,7 +26,7 @@ namespace crypto
         private static bool unixIsEAGAIN(error err)
         {
             {
-                ref os.PathError (pe, ok) = err._<ref os.PathError>();
+                ptr<os.PathError> (pe, ok) = err._<ptr<os.PathError>>();
 
                 if (ok)
                 {
@@ -39,10 +39,13 @@ namespace crypto
                         }
 
                     }
+
                 }
 
             }
+
             return false;
+
         }
     }
 }}

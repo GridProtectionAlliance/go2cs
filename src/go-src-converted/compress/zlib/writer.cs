@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zlib -- go2cs converted at 2020 August 29 08:46:05 UTC
+// package zlib -- go2cs converted at 2020 October 08 03:49:52 UTC
 // import "compress/zlib" ==> using zlib = go.compress.zlib_package
 // Original source: C:\Go\src\compress\zlib\writer.go
 using flate = go.compress.flate_package;
+using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using hash = go.hash_package;
 using adler32 = go.hash.adler32_package;
@@ -19,11 +20,12 @@ namespace compress
     {
         // These constants are copied from the flate package, so that code that imports
         // "compress/zlib" does not also have to import "compress/flate".
-        public static readonly var NoCompression = flate.NoCompression;
-        public static readonly var BestSpeed = flate.BestSpeed;
-        public static readonly var BestCompression = flate.BestCompression;
-        public static readonly var DefaultCompression = flate.DefaultCompression;
-        public static readonly var HuffmanOnly = flate.HuffmanOnly;
+        public static readonly var NoCompression = (var)flate.NoCompression;
+        public static readonly var BestSpeed = (var)flate.BestSpeed;
+        public static readonly var BestCompression = (var)flate.BestCompression;
+        public static readonly var DefaultCompression = (var)flate.DefaultCompression;
+        public static readonly var HuffmanOnly = (var)flate.HuffmanOnly;
+
 
         // A Writer takes data written to it and writes the compressed
         // form of that data to an underlying writer (see NewWriter).
@@ -42,12 +44,12 @@ namespace compress
         // NewWriter creates a new Writer.
         // Writes to the returned Writer are compressed and written to w.
         //
-        // It is the caller's responsibility to call Close on the WriteCloser when done.
+        // It is the caller's responsibility to call Close on the Writer when done.
         // Writes may be buffered and not flushed until Close.
-        public static ref Writer NewWriter(io.Writer w)
+        public static ptr<Writer> NewWriter(io.Writer w)
         {
             var (z, _) = NewWriterLevelDict(w, DefaultCompression, null);
-            return z;
+            return _addr_z!;
         }
 
         // NewWriterLevel is like NewWriter but specifies the compression level instead
@@ -56,9 +58,12 @@ namespace compress
         // The compression level can be DefaultCompression, NoCompression, HuffmanOnly
         // or any integer value between BestSpeed and BestCompression inclusive.
         // The error returned will be nil if the level is valid.
-        public static (ref Writer, error) NewWriterLevel(io.Writer w, long level)
+        public static (ptr<Writer>, error) NewWriterLevel(io.Writer w, long level)
         {
-            return NewWriterLevelDict(w, level, null);
+            ptr<Writer> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_NewWriterLevelDict(w, level, null)!;
         }
 
         // NewWriterLevelDict is like NewWriterLevel but specifies a dictionary to
@@ -66,38 +71,51 @@ namespace compress
         //
         // The dictionary may be nil. If not, its contents should not be modified until
         // the Writer is closed.
-        public static (ref Writer, error) NewWriterLevelDict(io.Writer w, long level, slice<byte> dict)
+        public static (ptr<Writer>, error) NewWriterLevelDict(io.Writer w, long level, slice<byte> dict)
         {
+            ptr<Writer> _p0 = default!;
+            error _p0 = default!;
+
             if (level < HuffmanOnly || level > BestCompression)
             {
-                return (null, fmt.Errorf("zlib: invalid compression level: %d", level));
+                return (_addr_null!, error.As(fmt.Errorf("zlib: invalid compression level: %d", level))!);
             }
-            return (ref new Writer(w:w,level:level,dict:dict,), null);
+
+            return (addr(new Writer(w:w,level:level,dict:dict,)), error.As(null!)!);
+
         }
 
         // Reset clears the state of the Writer z such that it is equivalent to its
         // initial state from NewWriterLevel or NewWriterLevelDict, but instead writing
         // to w.
-        private static void Reset(this ref Writer z, io.Writer w)
+        private static void Reset(this ptr<Writer> _addr_z, io.Writer w)
         {
+            ref Writer z = ref _addr_z.val;
+
             z.w = w; 
             // z.level and z.dict left unchanged.
             if (z.compressor != null)
             {
                 z.compressor.Reset(w);
             }
+
             if (z.digest != null)
             {
                 z.digest.Reset();
             }
+
             z.err = null;
             z.scratch = new array<byte>(new byte[] {  });
             z.wroteHeader = false;
+
         }
 
         // writeHeader writes the ZLIB header.
-        private static error writeHeader(this ref Writer _z) => func(_z, (ref Writer z, Defer _, Panic panic, Recover __) =>
+        private static error writeHeader(this ptr<Writer> _addr_z) => func((_, panic, __) =>
         {
+            error err = default!;
+            ref Writer z = ref _addr_z.val;
+
             z.wroteHeader = true; 
             // ZLIB has a two-byte header (as documented in RFC 1950).
             // The first four bits is the CINFO (compression info), which is 7 for the default deflate window size.
@@ -145,28 +163,28 @@ namespace compress
             {
                 z.scratch[1L] |= 1L << (int)(5L);
             }
+
             z.scratch[1L] += uint8(31L - (uint16(z.scratch[0L]) << (int)(8L) + uint16(z.scratch[1L])) % 31L);
             _, err = z.w.Write(z.scratch[0L..2L]);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (z.dict != null)
             { 
                 // The next four bytes are the Adler-32 checksum of the dictionary.
-                var checksum = adler32.Checksum(z.dict);
-                z.scratch[0L] = uint8(checksum >> (int)(24L));
-                z.scratch[1L] = uint8(checksum >> (int)(16L));
-                z.scratch[2L] = uint8(checksum >> (int)(8L));
-                z.scratch[3L] = uint8(checksum >> (int)(0L));
+                binary.BigEndian.PutUint32(z.scratch[..], adler32.Checksum(z.dict));
                 _, err = z.w.Write(z.scratch[0L..4L]);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
+
             if (z.compressor == null)
             { 
                 // Initialize deflater unless the Writer is being reused
@@ -174,80 +192,101 @@ namespace compress
                 z.compressor, err = flate.NewWriterDict(z.w, z.level, z.dict);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 z.digest = adler32.New();
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         });
 
         // Write writes a compressed form of p to the underlying io.Writer. The
         // compressed bytes are not necessarily flushed until the Writer is closed or
         // explicitly flushed.
-        private static (long, error) Write(this ref Writer z, slice<byte> p)
+        private static (long, error) Write(this ptr<Writer> _addr_z, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref Writer z = ref _addr_z.val;
+
             if (!z.wroteHeader)
             {
                 z.err = z.writeHeader();
             }
+
             if (z.err != null)
             {
-                return (0L, z.err);
+                return (0L, error.As(z.err)!);
             }
+
             if (len(p) == 0L)
             {
-                return (0L, null);
+                return (0L, error.As(null!)!);
             }
+
             n, err = z.compressor.Write(p);
             if (err != null)
             {
                 z.err = err;
-                return;
+                return ;
             }
+
             z.digest.Write(p);
-            return;
+            return ;
+
         }
 
         // Flush flushes the Writer to its underlying io.Writer.
-        private static error Flush(this ref Writer z)
+        private static error Flush(this ptr<Writer> _addr_z)
         {
+            ref Writer z = ref _addr_z.val;
+
             if (!z.wroteHeader)
             {
                 z.err = z.writeHeader();
             }
+
             if (z.err != null)
             {
-                return error.As(z.err);
+                return error.As(z.err)!;
             }
+
             z.err = z.compressor.Flush();
-            return error.As(z.err);
+            return error.As(z.err)!;
+
         }
 
         // Close closes the Writer, flushing any unwritten data to the underlying
         // io.Writer, but does not close the underlying io.Writer.
-        private static error Close(this ref Writer z)
+        private static error Close(this ptr<Writer> _addr_z)
         {
+            ref Writer z = ref _addr_z.val;
+
             if (!z.wroteHeader)
             {
                 z.err = z.writeHeader();
             }
+
             if (z.err != null)
             {
-                return error.As(z.err);
+                return error.As(z.err)!;
             }
+
             z.err = z.compressor.Close();
             if (z.err != null)
             {
-                return error.As(z.err);
+                return error.As(z.err)!;
             }
+
             var checksum = z.digest.Sum32(); 
             // ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
-            z.scratch[0L] = uint8(checksum >> (int)(24L));
-            z.scratch[1L] = uint8(checksum >> (int)(16L));
-            z.scratch[2L] = uint8(checksum >> (int)(8L));
-            z.scratch[3L] = uint8(checksum >> (int)(0L));
+            binary.BigEndian.PutUint32(z.scratch[..], checksum);
             _, z.err = z.w.Write(z.scratch[0L..4L]);
-            return error.As(z.err);
+            return error.As(z.err)!;
+
         }
     }
 }}

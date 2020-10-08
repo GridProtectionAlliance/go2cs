@@ -6,9 +6,9 @@
 //   xxhash: https://code.google.com/p/xxhash/
 // cityhash: https://code.google.com/p/cityhash/
 
-// +build amd64 amd64p32 arm64 mips64 mips64le ppc64 ppc64le s390x
+// +build amd64 arm64 mips64 mips64le ppc64 ppc64le riscv64 s390x wasm
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:59 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:47 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\hash64.go
 using @unsafe = go.@unsafe_package;
@@ -16,29 +16,26 @@ using static go.builtin;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
  
         // Constants for multiplication: four random odd 64-bit numbers.
-        private static readonly ulong m1 = 16877499708836156737UL;
-        private static readonly long m2 = 2820277070424839065L;
-        private static readonly ulong m3 = 9497967016996688599UL;
-        private static readonly ulong m4 = 15839092249703872147UL;
+        private static readonly ulong m1 = (ulong)16877499708836156737UL;
+        private static readonly long m2 = (long)2820277070424839065L;
+        private static readonly ulong m3 = (ulong)9497967016996688599UL;
+        private static readonly ulong m4 = (ulong)15839092249703872147UL;
 
-        private static System.UIntPtr memhash(unsafe.Pointer p, System.UIntPtr seed, System.UIntPtr s)
+
+        private static System.UIntPtr memhashFallback(unsafe.Pointer p, System.UIntPtr seed, System.UIntPtr s)
         {
-            if (GOARCH == "amd64" && GOOS != "nacl" && useAeshash)
-            {
-                return aeshash(p, seed, s);
-            }
             var h = uint64(seed + s * hashkey[0L]);
 tail:
 
 
             if (s == 0L)             else if (s < 4L) 
-                h ^= uint64(p.Value);
-                h ^= uint64(add(p, s >> (int)(1L)).Value) << (int)(8L);
-                h ^= uint64(add(p, s - 1L).Value) << (int)(16L);
+                h ^= uint64(new ptr<ptr<ptr<byte>>>(p));
+                h ^= uint64(new ptr<ptr<ptr<byte>>>(add(p, s >> (int)(1L)))) << (int)(8L);
+                h ^= uint64(new ptr<ptr<ptr<byte>>>(add(p, s - 1L))) << (int)(16L);
                 h = rotl_31(h * m1) * m2;
             else if (s <= 8L) 
                 h ^= uint64(readUnaligned32(p));
@@ -86,9 +83,10 @@ tail:
             h *= m3;
             h ^= h >> (int)(32L);
             return uintptr(h);
+
         }
 
-        private static System.UIntPtr memhash32(unsafe.Pointer p, System.UIntPtr seed)
+        private static System.UIntPtr memhash32Fallback(unsafe.Pointer p, System.UIntPtr seed)
         {
             var h = uint64(seed + 4L * hashkey[0L]);
             var v = uint64(readUnaligned32(p));
@@ -101,7 +99,7 @@ tail:
             return uintptr(h);
         }
 
-        private static System.UIntPtr memhash64(unsafe.Pointer p, System.UIntPtr seed)
+        private static System.UIntPtr memhash64Fallback(unsafe.Pointer p, System.UIntPtr seed)
         {
             var h = uint64(seed + 8L * hashkey[0L]);
             h ^= uint64(readUnaligned32(p)) | uint64(readUnaligned32(add(p, 4L))) << (int)(32L);

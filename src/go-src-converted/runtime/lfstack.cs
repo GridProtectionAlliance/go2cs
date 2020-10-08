@@ -4,7 +4,7 @@
 
 // Lock-free stack.
 
-// package runtime -- go2cs converted at 2020 August 29 08:17:23 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:54 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\lfstack.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -28,8 +28,11 @@ namespace go
         {
         }
 
-        private static void push(this ref lfstack head, ref lfnode node)
+        private static void push(this ptr<lfstack> _addr_head, ptr<lfnode> _addr_node)
         {
+            ref lfstack head = ref _addr_head.val;
+            ref lfnode node = ref _addr_node.val;
+
             node.pushcnt++;
             var @new = lfstackPack(node, node.pushcnt);
             {
@@ -42,40 +45,65 @@ namespace go
                 }
 
             }
+
             while (true)
             {
-                var old = atomic.Load64((uint64.Value)(head));
+                var old = atomic.Load64((uint64.val)(head));
                 node.next = old;
-                if (atomic.Cas64((uint64.Value)(head), old, new))
+                if (atomic.Cas64((uint64.val)(head), old, new))
                 {
                     break;
                 }
+
             }
+
 
         }
 
-        private static unsafe.Pointer pop(this ref lfstack head)
+        private static unsafe.Pointer pop(this ptr<lfstack> _addr_head)
         {
+            ref lfstack head = ref _addr_head.val;
+
             while (true)
             {
-                var old = atomic.Load64((uint64.Value)(head));
+                var old = atomic.Load64((uint64.val)(head));
                 if (old == 0L)
                 {
                     return null;
                 }
+
                 var node = lfstackUnpack(old);
-                var next = atomic.Load64(ref node.next);
-                if (atomic.Cas64((uint64.Value)(head), old, next))
+                var next = atomic.Load64(_addr_node.next);
+                if (atomic.Cas64((uint64.val)(head), old, next))
                 {
                     return @unsafe.Pointer(node);
                 }
+
             }
+
 
         }
 
-        private static bool empty(this ref lfstack head)
+        private static bool empty(this ptr<lfstack> _addr_head)
         {
-            return atomic.Load64((uint64.Value)(head)) == 0L;
+            ref lfstack head = ref _addr_head.val;
+
+            return atomic.Load64((uint64.val)(head)) == 0L;
+        }
+
+        // lfnodeValidate panics if node is not a valid address for use with
+        // lfstack.push. This only needs to be called when node is allocated.
+        private static void lfnodeValidate(ptr<lfnode> _addr_node)
+        {
+            ref lfnode node = ref _addr_node.val;
+
+            if (lfstackUnpack(lfstackPack(node, ~uintptr(0L))) != node)
+            {
+                printlock();
+                println("runtime: bad lfnode address", hex(uintptr(@unsafe.Pointer(node))));
+                throw("bad lfnode address");
+            }
+
         }
     }
 }

@@ -5,10 +5,13 @@
 // +build !plan9
 // +build !solaris
 // +build !windows
-// +build !nacl
 // +build !linux !amd64
+// +build !linux !arm64
+// +build !js
+// +build !darwin
+// +build !aix
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:23 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:15 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mmap.go
 using @unsafe = go.@unsafe_package;

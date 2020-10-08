@@ -4,7 +4,7 @@
 
 // This file implements typechecking of builtin function calls.
 
-// package types -- go2cs converted at 2020 August 29 08:47:21 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:00 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\builtins.go
 using ast = go.go.ast_package;
@@ -19,19 +19,24 @@ namespace go
     public static partial class types_package
     {
         // builtin type-checks a call to the built-in specified by id and
-        // returns true if the call is valid, with *x holding the result;
+        // reports whether the call is valid, with *x holding the result;
         // but x.expr is not set. If the call is invalid, the result is
         // false, and *x is undefined.
         //
-        private static bool builtin(this ref Checker _check, ref operand _x, ref ast.CallExpr _call, builtinId id) => func(_check, _x, _call, (ref Checker check, ref operand x, ref ast.CallExpr call, Defer defer, Panic _, Recover __) =>
-        { 
+        private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.CallExpr> _addr_call, builtinId id) => func((defer, _, __) =>
+        {
+            bool _ = default;
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+            ref ast.CallExpr call = ref _addr_call.val;
+ 
             // append is the only built-in that permits the use of ... for the last argument
             var bin = predeclaredFuncs[id];
             if (call.Ellipsis.IsValid() && id != _Append)
             {
                 check.invalidOp(call.Ellipsis, "invalid use of ... with built-in %s", bin.name);
                 check.use(call.Args);
-                return;
+                return ;
             }
             if (id == _Len || id == _Cap)
             {
@@ -40,6 +45,7 @@ namespace go
                     check.hasCallOrRecv = b;
                 }(check.hasCallOrRecv));
                 check.hasCallOrRecv = false;
+
             }
             getter arg = default;
             var nargs = len(call.Args);
@@ -49,18 +55,17 @@ namespace go
                 arg, nargs, _ = unpack((x, i) =>
                 {
                     check.multiExpr(x, call.Args[i]);
-
                 }, nargs, false);
                 if (arg == null)
                 {
-                    return;
+                    return ;
                 }
                 if (nargs > 0L)
                 {
                     arg(x, 0L);
                     if (x.mode == invalid)
                     {
-                        return;
+                        return ;
                     }
                 }
             // check argument count
@@ -77,7 +82,7 @@ namespace go
                 if (msg != "")
                 {
                     check.invalidOp(call.Rparen, "%s arguments for %s (expected %d, found %d)", msg, call, bin.nargs, nargs);
-                    return;
+                    return ;
                 }
             }
             if (id == _Append) 
@@ -89,9 +94,7 @@ namespace go
                 var S = x.typ;
                 Type T = default;
                 {
-                    ref Slice s__prev1 = s;
-
-                    ref Slice (s, _) = S.Underlying()._<ref Slice>();
+                    ptr<Slice> (s, _) = S.Underlying()._<ptr<Slice>>();
 
                     if (s != null)
                     {
@@ -100,10 +103,8 @@ namespace go
                     else
                     {
                         check.invalidArg(x.pos(), "%s is not a slice", x);
-                        return;
+                        return ;
                     }
-                    s = s__prev1;
-
                 } 
 
                 // remember arguments that have been evaluated already
@@ -112,12 +113,12 @@ namespace go
                 // spec: "As a special case, append also accepts a first argument assignable
                 // to type []byte with a second argument of string type followed by ... .
                 // This form appends the bytes of the string.
-                if (nargs == 2L && call.Ellipsis.IsValid() && x.assignableTo(check.conf, NewSlice(universeByte), null))
+                if (nargs == 2L && call.Ellipsis.IsValid() && x.assignableTo(check, NewSlice(universeByte), null))
                 {
                     arg(x, 1L);
                     if (x.mode == invalid)
                     {
-                        return;
+                        return ;
                     }
                     if (isString(x.typ))
                     {
@@ -130,8 +131,9 @@ namespace go
                         x.mode = value;
                         x.typ = S;
                         break;
+
                     }
-                    alist = append(alist, x.Value); 
+                    alist = append(alist, x); 
                     // fallthrough
                 }
                 sig = makeSig(S, S, NewSlice(T)); // []T required for variadic signature
@@ -141,10 +143,11 @@ namespace go
                     // only evaluate arguments that have not been evaluated before
                     if (i < len(alist))
                     {
-                        x.Value = alist[i];
-                        return;
+                        x = alist[i];
+                        return ;
                     }
                     arg(x, i);
+
                 }, nargs); 
                 // ok to continue even if check.arguments reported errors
 
@@ -164,7 +167,7 @@ namespace go
 
                 switch (typ.type())
                 {
-                    case ref Basic t:
+                    case ptr<Basic> t:
                         if (isString(t) && id == _Len)
                         {
                             if (x.mode == constant_)
@@ -178,7 +181,7 @@ namespace go
                             }
                         }
                         break;
-                    case ref Array t:
+                    case ptr<Array> t:
                         mode = value; 
                         // spec: "The expressions len(s) and cap(s) are constants
                         // if the type of s is an array or pointer to an array and
@@ -187,16 +190,23 @@ namespace go
                         if (!check.hasCallOrRecv)
                         {
                             mode = constant_;
-                            val = constant.MakeInt64(t.len);
+                            if (t.len >= 0L)
+                            {
+                                val = constant.MakeInt64(t.len);
+                            }
+                            else
+                            {
+                                val = constant.MakeUnknown();
+                            }
                         }
                         break;
-                    case ref Slice t:
+                    case ptr<Slice> t:
                         mode = value;
                         break;
-                    case ref Chan t:
+                    case ptr<Chan> t:
                         mode = value;
                         break;
-                    case ref Map t:
+                    case ptr<Map> t:
                         if (id == _Len)
                         {
                             mode = value;
@@ -205,10 +215,10 @@ namespace go
 
                 }
 
-                if (mode == invalid)
+                if (mode == invalid && typ != Typ[Invalid])
                 {
                     check.invalidArg(x.pos(), "%s for %s", x, bin.name);
-                    return;
+                    return ;
                 }
                 x.mode = mode;
                 x.typ = Typ[Int];
@@ -219,16 +229,16 @@ namespace go
                 }
             else if (id == _Close) 
                 // close(c)
-                ref Chan (c, _) = x.typ.Underlying()._<ref Chan>();
+                ptr<Chan> (c, _) = x.typ.Underlying()._<ptr<Chan>>();
                 if (c == null)
                 {
                     check.invalidArg(x.pos(), "%s is not a channel", x);
-                    return;
+                    return ;
                 }
                 if (c.dir == RecvOnly)
                 {
                     check.invalidArg(x.pos(), "%s must not be a receive-only channel", x);
-                    return;
+                    return ;
                 }
                 x.mode = novalue;
                 if (check.Types != null)
@@ -237,11 +247,11 @@ namespace go
                 }
             else if (id == _Complex) 
                 // complex(x, y floatT) complexT
-                operand y = default;
-                arg(ref y, 1L);
+                ref operand y = ref heap(out ptr<operand> _addr_y);
+                arg(_addr_y, 1L);
                 if (y.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
                 long d = 0L;
                 if (isUntyped(x.typ))
@@ -262,7 +272,7 @@ namespace go
                         break;
                     case 2L: 
                         // only y is untyped => convert to type of x
-                        check.convertUntyped(ref y, x.typ);
+                        check.convertUntyped(_addr_y, x.typ);
                         break;
                     case 3L: 
                         // x and y are untyped =>
@@ -275,7 +285,7 @@ namespace go
                         //    because shifts of floats are not permitted)
                                             if (x.mode == constant_ && y.mode == constant_)
                                             {
-                                                Action<ref operand> toFloat = x =>
+                                                Action<ptr<operand>> toFloat = x =>
                                                 {
                                                     if (isNumeric(x.typ) && constant.Sign(constant.Imag(x.val)) == 0L)
                                                     {
@@ -285,10 +295,11 @@ namespace go
                                             else
                         ;
                                                 toFloat(x);
-                                                toFloat(ref y);
+                                                toFloat(_addr_y);
+
                                             }                    {
                                                 check.convertUntyped(x, Typ[Float64]);
-                                                check.convertUntyped(ref y, Typ[Float64]); 
+                                                check.convertUntyped(_addr_y, Typ[Float64]); 
                                                 // x and y should be invalid now, but be conservative
                                                 // and check below
                                             }
@@ -296,17 +307,17 @@ namespace go
                 }
                 if (x.mode == invalid || y.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
-                if (!Identical(x.typ, y.typ))
+                if (!check.identical(x.typ, y.typ))
                 {
                     check.invalidArg(x.pos(), "mismatched types %s and %s", x.typ, y.typ);
-                    return;
+                    return ;
                 }
                 if (!isFloat(x.typ))
                 {
                     check.invalidArg(x.pos(), "arguments have type %s, expected floating-point", x.typ);
-                    return;
+                    return ;
                 }
                 if (x.mode == constant_ && y.mode == constant_)
                 {
@@ -318,11 +329,11 @@ namespace go
                 }
                 BasicKind res = default;
 
-                if (x.typ.Underlying()._<ref Basic>().kind == Float32) 
+                if (x.typ.Underlying()._<ptr<Basic>>().kind == Float32) 
                     res = Complex64;
-                else if (x.typ.Underlying()._<ref Basic>().kind == Float64) 
+                else if (x.typ.Underlying()._<ptr<Basic>>().kind == Float64) 
                     res = Complex128;
-                else if (x.typ.Underlying()._<ref Basic>().kind == UntypedFloat) 
+                else if (x.typ.Underlying()._<ptr<Basic>>().kind == UntypedFloat) 
                     res = UntypedComplex;
                 else 
                     unreachable();
@@ -339,7 +350,7 @@ namespace go
                 {
                     var t__prev1 = t;
 
-                    ref Slice (t, _) = x.typ.Underlying()._<ref Slice>();
+                    ptr<Slice> (t, _) = x.typ.Underlying()._<ptr<Slice>>();
 
                     if (t != null)
                     {
@@ -349,22 +360,23 @@ namespace go
 
                 }
 
+
                 y = default;
-                arg(ref y, 1L);
+                arg(_addr_y, 1L);
                 if (y.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
                 Type src = default;
                 switch (y.typ.Underlying().type())
                 {
-                    case ref Basic t:
+                    case ptr<Basic> t:
                         if (isString(y.typ))
                         {
                             src = universeByte;
                         }
                         break;
-                    case ref Slice t:
+                    case ptr<Slice> t:
                         src = t.elem;
                         break;
 
@@ -372,13 +384,13 @@ namespace go
 
                 if (dst == null || src == null)
                 {
-                    check.invalidArg(x.pos(), "copy expects slice arguments; found %s and %s", x, ref y);
-                    return;
+                    check.invalidArg(x.pos(), "copy expects slice arguments; found %s and %s", x, _addr_y);
+                    return ;
                 }
-                if (!Identical(dst, src))
+                if (!check.identical(dst, src))
                 {
-                    check.invalidArg(x.pos(), "arguments to copy %s and %s have different element types %s and %s", x, ref y, dst, src);
-                    return;
+                    check.invalidArg(x.pos(), "arguments to copy %s and %s have different element types %s and %s", x, _addr_y, dst, src);
+                    return ;
                 }
                 if (check.Types != null)
                 {
@@ -388,21 +400,21 @@ namespace go
                 x.typ = Typ[Int];
             else if (id == _Delete) 
                 // delete(m, k)
-                ref Map (m, _) = x.typ.Underlying()._<ref Map>();
+                ptr<Map> (m, _) = x.typ.Underlying()._<ptr<Map>>();
                 if (m == null)
                 {
                     check.invalidArg(x.pos(), "%s is not a map", x);
-                    return;
+                    return ;
                 }
                 arg(x, 1L); // k
                 if (x.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
-                if (!x.assignableTo(check.conf, m.key, null))
+                if (!x.assignableTo(check, m.key, null))
                 {
                     check.invalidArg(x.pos(), "%s is not assignable to %s", x, m.key);
-                    return;
+                    return ;
                 }
                 x.mode = novalue;
                 if (check.Types != null)
@@ -418,7 +430,7 @@ namespace go
                 {
                     if (x.mode == constant_)
                     { 
-                        // an untyped constant number can alway be considered
+                        // an untyped constant number can always be considered
                         // as a complex constant
                         if (isNumeric(x.typ))
                         {
@@ -435,14 +447,14 @@ namespace go
                         // x should be invalid now, but be conservative and check
                         if (x.mode == invalid)
                         {
-                            return;
+                            return ;
                         }
                     }
                 }
                 if (!isComplex(x.typ))
                 {
                     check.invalidArg(x.pos(), "argument has type %s, expected complex type", x.typ);
-                    return;
+                    return ;
                 }
                 if (x.mode == constant_)
                 {
@@ -461,11 +473,11 @@ namespace go
                 }
                 res = default;
 
-                if (x.typ.Underlying()._<ref Basic>().kind == Complex64) 
+                if (x.typ.Underlying()._<ptr<Basic>>().kind == Complex64) 
                     res = Float32;
-                else if (x.typ.Underlying()._<ref Basic>().kind == Complex128) 
+                else if (x.typ.Underlying()._<ptr<Basic>>().kind == Complex128) 
                     res = Float64;
-                else if (x.typ.Underlying()._<ref Basic>().kind == UntypedComplex) 
+                else if (x.typ.Underlying()._<ptr<Basic>>().kind == UntypedComplex) 
                     res = UntypedFloat;
                 else 
                     unreachable();
@@ -484,32 +496,33 @@ namespace go
                 T = check.typ(arg0);
                 if (T == Typ[Invalid])
                 {
-                    return;
+                    return ;
                 }
                 long min = default; // minimum number of arguments
                 switch (T.Underlying().type())
                 {
-                    case ref Slice _:
+                    case ptr<Slice> _:
                         min = 2L;
                         break;
-                    case ref Map _:
+                    case ptr<Map> _:
                         min = 1L;
                         break;
-                    case ref Chan _:
+                    case ptr<Chan> _:
                         min = 1L;
                         break;
                     default:
                     {
                         check.invalidArg(arg0.Pos(), "cannot make %s; type must be slice, map, or channel", arg0);
-                        return;
+                        return ;
                         break;
                     }
                 }
                 if (nargs < min || min + 1L < nargs)
                 {
                     check.errorf(call.Pos(), "%v expects %d or %d arguments; found %d", call, min, min + 1L, nargs);
-                    return;
+                    return ;
                 }
+                Type types = new slice<Type>(new Type[] { T });
                 slice<long> sizes = default; // constant integer arguments, if any
                 {
                     getter arg__prev1 = arg;
@@ -517,17 +530,11 @@ namespace go
                     foreach (var (_, __arg) in call.Args[1L..])
                     {
                         arg = __arg;
+                        var (typ, size) = check.index(arg, -1L); // ok to continue with typ == Typ[Invalid]
+                        types = append(types, typ);
+                        if (size >= 0L)
                         {
-                            ref Slice s__prev1 = s;
-
-                            var (s, ok) = check.index(arg, -1L);
-
-                            if (ok && s >= 0L)
-                            {
-                                sizes = append(sizes, s);
-                            }
-                            s = s__prev1;
-
+                            sizes = append(sizes, size);
                         }
                     }
                     arg = arg__prev1;
@@ -542,8 +549,7 @@ namespace go
                 x.typ = T;
                 if (check.Types != null)
                 {
-                    array<Type> @params = new array<Type>(new Type[] { T, Typ[Int], Typ[Int] });
-                    check.recordBuiltinType(call.Fun, makeSig(x.typ, params[..1L + len(sizes)]));
+                    check.recordBuiltinType(call.Fun, makeSig(x.typ, types));
                 }
             else if (id == _New) 
                 // new(T)
@@ -551,30 +557,46 @@ namespace go
                 T = check.typ(call.Args[0L]);
                 if (T == Typ[Invalid])
                 {
-                    return;
+                    return ;
                 }
                 x.mode = value;
-                x.typ = ref new Pointer(base:T);
+                x.typ = addr(new Pointer(base:T));
                 if (check.Types != null)
                 {
                     check.recordBuiltinType(call.Fun, makeSig(x.typ, T));
                 }
             else if (id == _Panic) 
                 // panic(x)
-                check.assignment(x, ref emptyInterface, "argument to panic");
+                // record panic call if inside a function with result parameters
+                // (for use in Checker.isTerminating)
+                if (check.sig != null && check.sig.results.Len() > 0L)
+                { 
+                    // function has result parameters
+                    var p = check.isPanic;
+                    if (p == null)
+                    { 
+                        // allocate lazily
+                        p = make_map<ptr<ast.CallExpr>, bool>();
+                        check.isPanic = p;
+
+                    }
+                    p[call] = true;
+
+                }
+                check.assignment(x, _addr_emptyInterface, "argument to panic");
                 if (x.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
                 x.mode = novalue;
                 if (check.Types != null)
                 {
-                    check.recordBuiltinType(call.Fun, makeSig(null, ref emptyInterface));
+                    check.recordBuiltinType(call.Fun, makeSig(null, _addr_emptyInterface));
                 }
             else if (id == _Print || id == _Println) 
                 // print(x, y, ...)
                 // println(x, y, ...)
-                @params = default;
+                slice<Type> @params = default;
                 if (nargs > 0L)
                 {
                     params = make_slice<Type>(nargs);
@@ -588,10 +610,13 @@ namespace go
                         if (x.mode == invalid)
                         { 
                             // TODO(gri) "use" all arguments?
-                            return;
+                            return ;
+
                         }
                         params[i] = x.typ;
+
                     }
+
                 }
                 x.mode = novalue;
                 if (check.Types != null)
@@ -601,7 +626,7 @@ namespace go
             else if (id == _Recover) 
                 // recover() interface{}
                 x.mode = value;
-                x.typ = ref emptyInterface;
+                x.typ = _addr_emptyInterface;
                 if (check.Types != null)
                 {
                     check.recordBuiltinType(call.Fun, makeSig(x.typ));
@@ -611,7 +636,7 @@ namespace go
                 check.assignment(x, null, "argument to unsafe.Alignof");
                 if (x.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
                 x.mode = constant_;
                 x.val = constant.MakeInt64(check.conf.alignof(x.typ));
@@ -621,36 +646,36 @@ namespace go
                 // unsafe.Offsetof(x T) uintptr, where x must be a selector
                 // (no argument evaluated yet)
                 arg0 = call.Args[0L];
-                ref ast.SelectorExpr (selx, _) = unparen(arg0)._<ref ast.SelectorExpr>();
+                ptr<ast.SelectorExpr> (selx, _) = unparen(arg0)._<ptr<ast.SelectorExpr>>();
                 if (selx == null)
                 {
                     check.invalidArg(arg0.Pos(), "%s is not a selector expression", arg0);
                     check.use(arg0);
-                    return;
+                    return ;
                 }
                 check.expr(x, selx.X);
                 if (x.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
                 var @base = derefStructPtr(x.typ);
                 var sel = selx.Sel.Name;
-                var (obj, index, indirect) = LookupFieldOrMethod(base, false, check.pkg, sel);
+                var (obj, index, indirect) = check.lookupFieldOrMethod(base, false, check.pkg, sel);
                 switch (obj.type())
                 {
                     case 
                         check.invalidArg(x.pos(), "%s has no single field %s", base, sel);
-                        return;
+                        return ;
                         break;
-                    case ref Func _:
+                    case ptr<Func> _:
                         check.invalidArg(arg0.Pos(), "%s is a method value", arg0);
-                        return;
+                        return ;
                         break;
                 }
                 if (indirect)
                 {
                     check.invalidArg(x.pos(), "field %s is embedded via a pointer in %s", sel, base);
-                    return;
+                    return ;
                 }
                 check.recordSelection(selx, FieldVal, base, obj, index, false);
 
@@ -664,7 +689,7 @@ namespace go
                 check.assignment(x, null, "argument to unsafe.Sizeof");
                 if (x.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
                 x.mode = constant_;
                 x.val = constant.MakeInt64(check.conf.@sizeof(x.typ));
@@ -677,12 +702,12 @@ namespace go
                 if (x.mode != constant_ || !isBoolean(x.typ))
                 {
                     check.invalidArg(x.pos(), "%s is not a boolean constant", x);
-                    return;
+                    return ;
                 }
                 if (x.val.Kind() != constant.Bool)
                 {
                     check.errorf(x.pos(), "internal error: value of %s should be a boolean constant", x);
-                    return;
+                    return ;
                 }
                 if (!constant.BoolVal(x.val))
                 {
@@ -697,11 +722,11 @@ namespace go
                 // (no argument evaluated yet)
                 if (nargs == 0L)
                 {
-                    check.dump("%s: trace() without arguments", call.Pos());
+                    check.dump("%v: trace() without arguments", call.Pos());
                     x.mode = novalue;
                     break;
                 }
-                operand t = default;
+                ref operand t = ref heap(out ptr<operand> _addr_t);
                 var x1 = x;
                 {
                     getter arg__prev1 = arg;
@@ -710,35 +735,39 @@ namespace go
                     {
                         arg = __arg;
                         check.rawExpr(x1, arg, null); // permit trace for types, e.g.: new(trace(T))
-                        check.dump("%s: %s", x1.pos(), x1);
-                        x1 = ref t; // use incoming x only for first argument
+                        check.dump("%v: %s", x1.pos(), x1);
+                        _addr_x1 = _addr_t;
+                        x1 = ref _addr_x1.val; // use incoming x only for first argument
                     }
                     arg = arg__prev1;
                 }
             else 
                 unreachable();
                         return true;
+
         });
 
         // makeSig makes a signature for the given argument and result types.
         // Default types are used for untyped arguments, and res may be nil.
-        private static ref Signature makeSig(Type res, params Type[] args)
+        private static ptr<Signature> makeSig(Type res, params Type[] args)
         {
             args = args.Clone();
 
-            var list = make_slice<ref Var>(len(args));
+            var list = make_slice<ptr<Var>>(len(args));
             foreach (var (i, param) in args)
             {
                 list[i] = NewVar(token.NoPos, null, "", Default(param));
             }
             var @params = NewTuple(list);
-            ref Tuple result = default;
+            ptr<Tuple> result;
             if (res != null)
             {
                 assert(!isUntyped(res));
                 result = NewTuple(NewVar(token.NoPos, null, "", res));
             }
-            return ref new Signature(params:params,results:result);
+
+            return addr(new Signature(params:params,results:result));
+
         }
 
         // implicitArrayDeref returns A if typ is of the form *A and A is an array;
@@ -747,12 +776,12 @@ namespace go
         private static Type implicitArrayDeref(Type typ)
         {
             {
-                ref Pointer (p, ok) = typ._<ref Pointer>();
+                ptr<Pointer> (p, ok) = typ._<ptr<Pointer>>();
 
                 if (ok)
                 {
                     {
-                        ref Array (a, ok) = p.@base.Underlying()._<ref Array>();
+                        ptr<Array> (a, ok) = p.@base.Underlying()._<ptr<Array>>();
 
                         if (ok)
                         {
@@ -760,10 +789,13 @@ namespace go
                         }
 
                     }
+
                 }
 
             }
+
             return typ;
+
         }
 
         // unparen returns e with any enclosing parentheses stripped.
@@ -771,13 +803,16 @@ namespace go
         {
             while (true)
             {
-                ref ast.ParenExpr (p, ok) = e._<ref ast.ParenExpr>();
+                ptr<ast.ParenExpr> (p, ok) = e._<ptr<ast.ParenExpr>>();
                 if (!ok)
                 {
                     return e;
                 }
+
                 e = p.X;
+
             }
+
 
         }
     }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:53 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:18 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\jn.go
 
@@ -60,8 +60,8 @@ namespace go
         //    Jn(n, NaN) = NaN
         public static double Jn(long n, double x)
         {
-            const float TwoM29 = 1.0F / (1L << (int)(29L)); // 2**-29 0x3e10000000000000
-            const long Two302 = 1L << (int)(302L); // 2**302 0x52D0000000000000 
+            const float TwoM29 = (float)1.0F / (1L << (int)(29L)); // 2**-29 0x3e10000000000000
+            const long Two302 = (long)1L << (int)(302L); // 2**302 0x52D0000000000000 
             // special cases
 
             if (IsNaN(x)) 
@@ -83,6 +83,7 @@ namespace go
             {
                 n = -n;
                 x = -x;
+
             }
             if (n == 1L)
             {
@@ -118,22 +119,27 @@ namespace go
                     //                 3     s+c             c-s
 
                     double temp = default;
-                    switch (n & 3L)
                     {
-                        case 0L: 
-                            temp = Cos(x) + Sin(x);
-                            break;
-                        case 1L: 
-                            temp = -Cos(x) + Sin(x);
-                            break;
-                        case 2L: 
-                            temp = -Cos(x) - Sin(x);
-                            break;
-                        case 3L: 
-                            temp = Cos(x) - Sin(x);
-                            break;
+                        var (s, c) = Sincos(x);
+
+                        switch (n & 3L)
+                        {
+                            case 0L: 
+                                temp = c + s;
+                                break;
+                            case 1L: 
+                                temp = -c + s;
+                                break;
+                            case 2L: 
+                                temp = -c - s;
+                                break;
+                            case 3L: 
+                                temp = c - s;
+                                break;
+                        }
                     }
                     b = (1L / SqrtPi) * temp / Sqrt(x);
+
                 }
                 else
                 {
@@ -152,6 +158,7 @@ namespace go
                         i = i__prev1;
                         a = a__prev1;
                     }
+
                 }
             else
             }            {
@@ -163,6 +170,7 @@ namespace go
                     if (n > 33L)
                     { // underflow
                         b = 0L;
+
                     }
                     else
                     {
@@ -181,6 +189,7 @@ namespace go
                             i = i__prev1;
                         }
                         b /= a;
+
                     }
                 else
                 }                { 
@@ -225,6 +234,7 @@ namespace go
                         z += h;
                         q0 = q1;
                         q1 = z * q1 - q0;
+
                     }
                     var m = n + n;
                     float t = 0.0F;
@@ -264,12 +274,14 @@ namespace go
                                 var di = float64(i + i);
                                 a = b;
                                 b = b * di / x - a;
+
                             }
                     else
 
 
                             i = i__prev1;
                         }
+
                     }                    {
                         {
                             long i__prev1 = i;
@@ -290,8 +302,10 @@ namespace go
 
                             i = i__prev1;
                         }
+
                     }
                     b = t * J0(x) / b;
+
                 }
             }
             if (sign)
@@ -299,6 +313,7 @@ namespace go
                 return -b;
             }
             return b;
+
         }
 
         // Yn returns the order-n Bessel function of the second kind.
@@ -311,7 +326,7 @@ namespace go
         //    Yn(n, NaN) = NaN
         public static double Yn(long n, double x)
         {
-            const long Two302 = 1L << (int)(302L); // 2**302 0x52D0000000000000
+            const long Two302 = (long)1L << (int)(302L); // 2**302 0x52D0000000000000
             // special cases
  // 2**302 0x52D0000000000000
             // special cases
@@ -324,14 +339,18 @@ namespace go
             {
                 return Y0(x);
             }
+
             if (x == 0L)
             {
                 if (n < 0L && n & 1L == 1L)
                 {
                     return Inf(1L);
                 }
+
                 return Inf(-1L);
+
             }
+
             var sign = false;
             if (n < 0L)
             {
@@ -340,15 +359,20 @@ namespace go
                 {
                     sign = true; // sign true if n < 0 && |n| odd
                 }
+
             }
+
             if (n == 1L)
             {
                 if (sign)
                 {
                     return -Y1(x);
                 }
+
                 return Y1(x);
+
             }
+
             double b = default;
             if (x >= Two302)
             { // x > 2**302
@@ -366,22 +390,27 @@ namespace go
                 //           3     s+c         c-s
 
                 double temp = default;
-                switch (n & 3L)
                 {
-                    case 0L: 
-                        temp = Sin(x) - Cos(x);
-                        break;
-                    case 1L: 
-                        temp = -Sin(x) - Cos(x);
-                        break;
-                    case 2L: 
-                        temp = -Sin(x) + Cos(x);
-                        break;
-                    case 3L: 
-                        temp = Sin(x) + Cos(x);
-                        break;
+                    var (s, c) = Sincos(x);
+
+                    switch (n & 3L)
+                    {
+                        case 0L: 
+                            temp = s - c;
+                            break;
+                        case 1L: 
+                            temp = -s - c;
+                            break;
+                        case 2L: 
+                            temp = -s + c;
+                            break;
+                        case 3L: 
+                            temp = s + c;
+                            break;
+                    }
                 }
                 b = (1L / SqrtPi) * temp / Sqrt(x);
+
             }
             else
             {
@@ -392,14 +421,19 @@ namespace go
                 {
                     a = b;
                     b = (float64(i + i) / x) * b - a;
+
                 }
 
+
             }
+
             if (sign)
             {
                 return -b;
             }
+
             return b;
+
         }
     }
 }

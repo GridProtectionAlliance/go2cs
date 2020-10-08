@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:02:56 UTC
+//     Generated on 2020 October 08 04:37:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,16 +28,16 @@ namespace @internal
             // Constructors
             public Symbols(NilType _)
             {
-                this.symbolBatch = default;
-                this.hash = default;
-                this.Allsym = default;
+                this.versions = default;
+                this.Lookup = default;
+                this.ROLookup = default;
             }
 
-            public Symbols(slice<Symbol> symbolBatch = default, slice<map<@string, ref Symbol>> hash = default, slice<ref Symbol> Allsym = default)
+            public Symbols(long versions = default, Func<@string, long, ptr<Symbol>> Lookup = default, Func<@string, long, ptr<Symbol>> ROLookup = default)
             {
-                this.symbolBatch = symbolBatch;
-                this.hash = hash;
-                this.Allsym = Allsym;
+                this.versions = versions;
+                this.Lookup = Lookup;
+                this.ROLookup = ROLookup;
             }
 
             // Enable comparisons between nil and Symbols struct
@@ -60,7 +60,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Symbols Symbols_cast(dynamic value)
         {
-            return new Symbols(value.symbolBatch, value.hash, value.Allsym);
+            return new Symbols(value.versions, value.Lookup, value.ROLookup);
         }
     }
 }}}}

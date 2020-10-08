@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:18 UTC
+//     Generated on 2020 October 08 03:39:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -78,7 +79,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -92,10 +93,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate bool HeadersEndedByRef(ref T value);
+            private delegate bool HeadersEndedByPtr(ptr<T> value);
             private delegate bool HeadersEndedByVal(T value);
 
-            private static readonly HeadersEndedByRef s_HeadersEndedByRef;
+            private static readonly HeadersEndedByPtr s_HeadersEndedByPtr;
             private static readonly HeadersEndedByVal s_HeadersEndedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,11 +105,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_HeadersEndedByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_HeadersEndedByPtr is null || !m_target_is_ptr)
                     return s_HeadersEndedByVal!(target);
 
-                return s_HeadersEndedByRef(ref target);
+                return s_HeadersEndedByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -117,23 +119,20 @@ namespace net
             static http2headersEnder()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("HeadersEnded");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("HeadersEnded");
 
                 if (!(extensionMethod is null))
-                    s_HeadersEndedByRef = extensionMethod.CreateStaticDelegate(typeof(HeadersEndedByRef)) as HeadersEndedByRef;
+                    s_HeadersEndedByPtr = extensionMethod.CreateStaticDelegate(typeof(HeadersEndedByPtr)) as HeadersEndedByPtr;
 
-                if (s_HeadersEndedByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("HeadersEnded");
+                extensionMethod = targetType.GetExtensionMethod("HeadersEnded");
 
-                    if (!(extensionMethod is null))
-                        s_HeadersEndedByVal = extensionMethod.CreateStaticDelegate(typeof(HeadersEndedByVal)) as HeadersEndedByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_HeadersEndedByVal = extensionMethod.CreateStaticDelegate(typeof(HeadersEndedByVal)) as HeadersEndedByVal;
 
-                if (s_HeadersEndedByRef is null && s_HeadersEndedByVal is null)
+                if (s_HeadersEndedByPtr is null && s_HeadersEndedByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2headersEnder.HeadersEnded method", new Exception("HeadersEnded"));
             }
 

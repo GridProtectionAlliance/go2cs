@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 09:59:45 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:47 UTC
 // Original source: C:\Go\src\cmd\dist\main.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
-using strconv = go.strconv_package;
 using strings = go.strings_package;
 using static go.builtin;
 using System;
@@ -51,30 +50,27 @@ All commands take -v flags to emit extra information.
                 useARMv6K(); // might fail with SIGILL
                 println("ARMv6K supported.");
                 os.Exit(0L);
+
             }
+
             gohostos = runtime.GOOS;
             switch (gohostos)
             {
+                case "aix": 
+                    // uname -m doesn't work under AIX
+                    gohostarch = "ppc64";
+                    break;
                 case "darwin": 
-                    // Even on 64-bit platform, darwin uname -m prints i386.
-                    // We don't support any of the OS X versions that run on 32-bit-only hardware anymore.
-                    gohostarch = "amd64";
+                    // macOS 10.9 and later require clang
+                    defaultclang = true;
                     break;
                 case "freebsd": 
                     // Since FreeBSD 10 gcc is no longer part of the base system.
                     defaultclang = true;
                     break;
-                case "solaris": 
-                    // Even on 64-bit platform, solaris uname -m prints i86pc.
-                    var @out = run("", CheckExit, "isainfo", "-n");
-                    if (strings.Contains(out, "amd64"))
-                    {
-                        gohostarch = "amd64";
-                    }
-                    if (strings.Contains(out, "i386"))
-                    {
-                        gohostarch = "386";
-                    }
+                case "openbsd": 
+                    // OpenBSD ships with GCC 4.2, which is now quite old.
+                    defaultclang = true;
                     break;
                 case "plan9": 
                     gohostarch = os.Getenv("objtype");
@@ -82,6 +78,30 @@ All commands take -v flags to emit extra information.
                     {
                         fatalf("$objtype is unset");
                     }
+
+                    break;
+                case "solaris": 
+                    // Solaris and illumos systems have multi-arch userlands, and
+                    // "uname -m" reports the machine hardware name; e.g.,
+                    // "i86pc" on both 32- and 64-bit x86 systems.  Check for the
+                    // native (widest) instruction set on the running kernel:
+
+                case "illumos": 
+                    // Solaris and illumos systems have multi-arch userlands, and
+                    // "uname -m" reports the machine hardware name; e.g.,
+                    // "i86pc" on both 32- and 64-bit x86 systems.  Check for the
+                    // native (widest) instruction set on the running kernel:
+                    var @out = run("", CheckExit, "isainfo", "-n");
+                    if (strings.Contains(out, "amd64"))
+                    {
+                        gohostarch = "amd64";
+                    }
+
+                    if (strings.Contains(out, "i386"))
+                    {
+                        gohostarch = "386";
+                    }
+
                     break;
                 case "windows": 
                     exe = ".exe";
@@ -99,10 +119,18 @@ All commands take -v flags to emit extra information.
                     gohostarch = "amd64";
                 else if (strings.Contains(out, "86")) 
                     gohostarch = "386";
+                    if (gohostos == "darwin")
+                    { 
+                        // Even on 64-bit platform, some versions of macOS uname -m prints i386.
+                        // We don't support any of the OS X versions that run on 32-bit-only hardware anymore.
+                        gohostarch = "amd64";
+
+                    }
+
+                else if (strings.Contains(out, "aarch64") || strings.Contains(out, "arm64")) 
+                    gohostarch = "arm64";
                 else if (strings.Contains(out, "arm")) 
                     gohostarch = "arm";
-                else if (strings.Contains(out, "aarch64")) 
-                    gohostarch = "arm64";
                 else if (strings.Contains(out, "ppc64le")) 
                     gohostarch = "ppc64le";
                 else if (strings.Contains(out, "ppc64")) 
@@ -113,59 +141,36 @@ All commands take -v flags to emit extra information.
                     {
                         gohostarch = "mips64le";
                     }
+
                 else if (strings.Contains(out, "mips")) 
                     gohostarch = "mips";
                     if (elfIsLittleEndian(os.Args[0L]))
                     {
                         gohostarch = "mipsle";
                     }
+
+                else if (strings.Contains(out, "riscv64")) 
+                    gohostarch = "riscv64";
                 else if (strings.Contains(out, "s390x")) 
                     gohostarch = "s390x";
                 else if (gohostos == "darwin") 
-                    if (strings.Contains(run("", CheckExit, "uname", "-v"), "RELEASE_ARM_"))
+                    if (strings.Contains(run("", CheckExit, "uname", "-v"), "RELEASE_ARM64_"))
                     {
-                        gohostarch = "arm";
+                        gohostarch = "arm64";
                     }
+
                 else 
                     fatalf("unknown architecture: %s", out);
-                            }
+                
+            }
+
             if (gohostarch == "arm" || gohostarch == "mips64" || gohostarch == "mips64le")
             {
                 maxbg = min(maxbg, runtime.NumCPU());
             }
-            bginit(); 
 
-            // The OS X 10.6 linker does not support external linking mode.
-            // See golang.org/issue/5130.
-            //
-            // OS X 10.6 does not work with clang either, but OS X 10.9 requires it.
-            // It seems to work with OS X 10.8, so we default to clang for 10.8 and later.
-            // See golang.org/issue/5822.
-            //
-            // Roughly, OS X 10.N shows up as uname release (N+4),
-            // so OS X 10.6 is uname version 10 and OS X 10.8 is uname version 12.
-            if (gohostos == "darwin")
-            {
-                var rel = run("", CheckExit, "uname", "-r");
-                {
-                    var i = strings.Index(rel, ".");
+            bginit();
 
-                    if (i >= 0L)
-                    {
-                        rel = rel[..i];
-                    }
-
-                }
-                var (osx, _) = strconv.Atoi(rel);
-                if (osx <= 6L + 4L)
-                {
-                    goextlinkenabled = "0";
-                }
-                if (osx >= 8L + 4L)
-                {
-                    defaultclang = true;
-                }
-            }
             if (len(os.Args) > 1L && os.Args[1L] == "-check-goarm")
             {
                 useVFPv1(); // might fail with SIGILL
@@ -173,10 +178,13 @@ All commands take -v flags to emit extra information.
                 useVFPv3(); // might fail with SIGILL
                 println("VFPv3 OK.");
                 os.Exit(0L);
+
             }
+
             xinit();
             xmain();
             xexit(0L);
+
         }
 
         // The OS-specific main calls into the portable code here.
@@ -186,6 +194,7 @@ All commands take -v flags to emit extra information.
             {
                 usage();
             }
+
             var cmd = os.Args[1L];
             os.Args = os.Args[1L..]; // for flag parsing during cmd
             flag.Usage = () =>
@@ -209,6 +218,7 @@ All commands take -v flags to emit extra information.
                 }
 
             }
+
         }
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package aes -- go2cs converted at 2020 August 29 08:28:50 UTC
+// package aes -- go2cs converted at 2020 October 08 03:35:52 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\modes.go
 using cipher = go.crypto.cipher_package;
@@ -18,7 +18,7 @@ namespace crypto
         // See crypto/cipher/gcm.go.
         private partial interface gcmAble
         {
-            (cipher.AEAD, error) NewGCM(long size);
+            (cipher.AEAD, error) NewGCM(long nonceSize, long tagSize);
         }
 
         // cbcEncAble is implemented by cipher.Blocks that can provide an optimized

@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 08:53:03 UTC
+// package gc -- go2cs converted at 2020 October 08 04:09:33 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\alg.go
 using types = go.cmd.compile.@internal.types_package;
+using obj = go.cmd.@internal.obj_package;
 using fmt = go.fmt_package;
+using sort = go.sort_package;
 using static go.builtin;
 using System;
 
@@ -23,61 +25,100 @@ namespace @internal
         {
         }
 
+        //go:generate stringer -type AlgKind -trimprefix A
+
  
         // These values are known by runtime.
-        public static readonly AlgKind ANOEQ = iota;
-        public static readonly var AMEM0 = 0;
-        public static readonly var AMEM8 = 1;
-        public static readonly var AMEM16 = 2;
-        public static readonly var AMEM32 = 3;
-        public static readonly var AMEM64 = 4;
-        public static readonly var AMEM128 = 5;
-        public static readonly var ASTRING = 6;
-        public static readonly var AINTER = 7;
-        public static readonly var ANILINTER = 8;
-        public static readonly var AFLOAT32 = 9;
-        public static readonly var AFLOAT64 = 10;
-        public static readonly var ACPLX64 = 11;
-        public static readonly var ACPLX128 = 12; 
+        public static readonly AlgKind ANOEQ = (AlgKind)iota;
+        public static readonly var AMEM0 = (var)0;
+        public static readonly var AMEM8 = (var)1;
+        public static readonly var AMEM16 = (var)2;
+        public static readonly var AMEM32 = (var)3;
+        public static readonly var AMEM64 = (var)4;
+        public static readonly var AMEM128 = (var)5;
+        public static readonly var ASTRING = (var)6;
+        public static readonly var AINTER = (var)7;
+        public static readonly var ANILINTER = (var)8;
+        public static readonly var AFLOAT32 = (var)9;
+        public static readonly var AFLOAT64 = (var)10;
+        public static readonly var ACPLX64 = (var)11;
+        public static readonly var ACPLX128 = (var)12; 
 
         // Type can be compared/hashed as regular memory.
-        public static readonly AlgKind AMEM = 100L; 
+        public static readonly AlgKind AMEM = (AlgKind)100L; 
 
         // Type needs special comparison/hashing functions.
-        public static readonly AlgKind ASPECIAL = -1L;
+        public static readonly AlgKind ASPECIAL = (AlgKind)-1L;
+
 
         // IsComparable reports whether t is a comparable type.
-        public static bool IsComparable(ref types.Type t)
+        public static bool IsComparable(ptr<types.Type> _addr_t)
         {
-            var (a, _) = algtype1(t);
+            ref types.Type t = ref _addr_t.val;
+
+            var (a, _) = algtype1(_addr_t);
             return a != ANOEQ;
         }
 
         // IsRegularMemory reports whether t can be compared/hashed as regular memory.
-        public static bool IsRegularMemory(ref types.Type t)
+        public static bool IsRegularMemory(ptr<types.Type> _addr_t)
         {
-            var (a, _) = algtype1(t);
+            ref types.Type t = ref _addr_t.val;
+
+            var (a, _) = algtype1(_addr_t);
             return a == AMEM;
         }
 
         // IncomparableField returns an incomparable Field of struct Type t, if any.
-        public static ref types.Field IncomparableField(ref types.Type t)
+        public static ptr<types.Field> IncomparableField(ptr<types.Type> _addr_t)
         {
+            ref types.Type t = ref _addr_t.val;
+
             foreach (var (_, f) in t.FieldSlice())
             {
-                if (!IsComparable(f.Type))
+                if (!IsComparable(_addr_f.Type))
                 {
-                    return f;
+                    return _addr_f!;
                 }
+
             }
-            return null;
+            return _addr_null!;
+
+        }
+
+        // EqCanPanic reports whether == on type t could panic (has an interface somewhere).
+        // t must be comparable.
+        public static bool EqCanPanic(ptr<types.Type> _addr_t)
+        {
+            ref types.Type t = ref _addr_t.val;
+
+
+            if (t.Etype == TINTER) 
+                return true;
+            else if (t.Etype == TARRAY) 
+                return EqCanPanic(_addr_t.Elem());
+            else if (t.Etype == TSTRUCT) 
+                foreach (var (_, f) in t.FieldSlice())
+                {
+                    if (!f.Sym.IsBlank() && EqCanPanic(_addr_f.Type))
+                    {
+                        return true;
+                    }
+
+                }
+                return false;
+            else 
+                return false;
+            
         }
 
         // algtype is like algtype1, except it returns the fixed-width AMEMxx variants
         // instead of the general AMEM kind when possible.
-        private static AlgKind algtype(ref types.Type t)
+        private static AlgKind algtype(ptr<types.Type> _addr_t)
         {
-            var (a, _) = algtype1(t);
+            ref types.Type t = ref _addr_t.val;
+
+            var (a, _) = algtype1(_addr_t);
             if (a == AMEM)
             {
                 switch (t.Width)
@@ -101,134 +142,226 @@ namespace @internal
                         return AMEM128;
                         break;
                 }
+
             }
+
             return a;
+
         }
 
         // algtype1 returns the AlgKind used for comparing and hashing Type t.
         // If it returns ANOEQ, it also returns the component type of t that
         // makes it incomparable.
-        private static (AlgKind, ref types.Type) algtype1(ref types.Type t)
+        private static (AlgKind, ptr<types.Type>) algtype1(ptr<types.Type> _addr_t)
         {
+            AlgKind _p0 = default;
+            ptr<types.Type> _p0 = default!;
+            ref types.Type t = ref _addr_t.val;
+
             if (t.Broke())
             {
-                return (AMEM, null);
+                return (AMEM, _addr_null!);
             }
+
             if (t.Noalg())
             {
-                return (ANOEQ, t);
+                return (ANOEQ, _addr_t!);
             }
+
 
             if (t.Etype == TANY || t.Etype == TFORW) 
                 // will be defined later.
-                return (ANOEQ, t);
-            else if (t.Etype == TINT8 || t.Etype == TUINT8 || t.Etype == TINT16 || t.Etype == TUINT16 || t.Etype == TINT32 || t.Etype == TUINT32 || t.Etype == TINT64 || t.Etype == TUINT64 || t.Etype == TINT || t.Etype == TUINT || t.Etype == TUINTPTR || t.Etype == TBOOL || t.Etype == TPTR32 || t.Etype == TPTR64 || t.Etype == TCHAN || t.Etype == TUNSAFEPTR) 
-                return (AMEM, null);
+                return (ANOEQ, _addr_t!);
+            else if (t.Etype == TINT8 || t.Etype == TUINT8 || t.Etype == TINT16 || t.Etype == TUINT16 || t.Etype == TINT32 || t.Etype == TUINT32 || t.Etype == TINT64 || t.Etype == TUINT64 || t.Etype == TINT || t.Etype == TUINT || t.Etype == TUINTPTR || t.Etype == TBOOL || t.Etype == TPTR || t.Etype == TCHAN || t.Etype == TUNSAFEPTR) 
+                return (AMEM, _addr_null!);
             else if (t.Etype == TFUNC || t.Etype == TMAP) 
-                return (ANOEQ, t);
+                return (ANOEQ, _addr_t!);
             else if (t.Etype == TFLOAT32) 
-                return (AFLOAT32, null);
+                return (AFLOAT32, _addr_null!);
             else if (t.Etype == TFLOAT64) 
-                return (AFLOAT64, null);
+                return (AFLOAT64, _addr_null!);
             else if (t.Etype == TCOMPLEX64) 
-                return (ACPLX64, null);
+                return (ACPLX64, _addr_null!);
             else if (t.Etype == TCOMPLEX128) 
-                return (ACPLX128, null);
+                return (ACPLX128, _addr_null!);
             else if (t.Etype == TSTRING) 
-                return (ASTRING, null);
+                return (ASTRING, _addr_null!);
             else if (t.Etype == TINTER) 
                 if (t.IsEmptyInterface())
                 {
-                    return (ANILINTER, null);
+                    return (ANILINTER, _addr_null!);
                 }
-                return (AINTER, null);
+
+                return (AINTER, _addr_null!);
             else if (t.Etype == TSLICE) 
-                return (ANOEQ, t);
+                return (ANOEQ, _addr_t!);
             else if (t.Etype == TARRAY) 
-                var (a, bad) = algtype1(t.Elem());
+                var (a, bad) = algtype1(_addr_t.Elem());
 
                 if (a == AMEM) 
-                    return (AMEM, null);
+                    return (AMEM, _addr_null!);
                 else if (a == ANOEQ) 
-                    return (ANOEQ, bad);
+                    return (ANOEQ, _addr_bad!);
                                 switch (t.NumElem())
                 {
                     case 0L: 
                         // We checked above that the element type is comparable.
-                        return (AMEM, null);
+                        return (AMEM, _addr_null!);
                         break;
                     case 1L: 
                         // Single-element array is same as its lone element.
-                        return (a, null);
+                        return (a, _addr_null!);
                         break;
                 }
 
-                return (ASPECIAL, null);
+                return (ASPECIAL, _addr_null!);
             else if (t.Etype == TSTRUCT) 
                 var fields = t.FieldSlice(); 
 
                 // One-field struct is same as that one field alone.
                 if (len(fields) == 1L && !fields[0L].Sym.IsBlank())
                 {
-                    return algtype1(fields[0L].Type);
+                    return algtype1(_addr_fields[0L].Type);
                 }
+
                 var ret = AMEM;
                 foreach (var (i, f) in fields)
                 { 
                     // All fields must be comparable.
-                    (a, bad) = algtype1(f.Type);
+                    (a, bad) = algtype1(_addr_f.Type);
                     if (a == ANOEQ)
                     {
-                        return (ANOEQ, bad);
+                        return (ANOEQ, _addr_bad!);
                     } 
 
                     // Blank fields, padded fields, fields with non-memory
                     // equality need special compare.
-                    if (a != AMEM || f.Sym.IsBlank() || ispaddedfield(t, i))
+                    if (a != AMEM || f.Sym.IsBlank() || ispaddedfield(_addr_t, i))
                     {
                         ret = ASPECIAL;
                     }
+
                 }
-                return (ret, null);
+                return (ret, _addr_null!);
                         Fatalf("algtype1: unexpected type %v", t);
-            return (0L, null);
+            return (0L, _addr_null!);
+
         }
 
-        // Generate a helper function to compute the hash of a value of type t.
-        private static void genhash(ref types.Sym sym, ref types.Type t)
+        // genhash returns a symbol which is the closure used to compute
+        // the hash of a value of type t.
+        // Note: the generated function must match runtime.typehash exactly.
+        private static ptr<obj.LSym> genhash(ptr<types.Type> _addr_t)
         {
+            ref types.Type t = ref _addr_t.val;
+
+
+            if (algtype(_addr_t) == AMEM0) 
+                return _addr_sysClosure("memhash0")!;
+            else if (algtype(_addr_t) == AMEM8) 
+                return _addr_sysClosure("memhash8")!;
+            else if (algtype(_addr_t) == AMEM16) 
+                return _addr_sysClosure("memhash16")!;
+            else if (algtype(_addr_t) == AMEM32) 
+                return _addr_sysClosure("memhash32")!;
+            else if (algtype(_addr_t) == AMEM64) 
+                return _addr_sysClosure("memhash64")!;
+            else if (algtype(_addr_t) == AMEM128) 
+                return _addr_sysClosure("memhash128")!;
+            else if (algtype(_addr_t) == ASTRING) 
+                return _addr_sysClosure("strhash")!;
+            else if (algtype(_addr_t) == AINTER) 
+                return _addr_sysClosure("interhash")!;
+            else if (algtype(_addr_t) == ANILINTER) 
+                return _addr_sysClosure("nilinterhash")!;
+            else if (algtype(_addr_t) == AFLOAT32) 
+                return _addr_sysClosure("f32hash")!;
+            else if (algtype(_addr_t) == AFLOAT64) 
+                return _addr_sysClosure("f64hash")!;
+            else if (algtype(_addr_t) == ACPLX64) 
+                return _addr_sysClosure("c64hash")!;
+            else if (algtype(_addr_t) == ACPLX128) 
+                return _addr_sysClosure("c128hash")!;
+            else if (algtype(_addr_t) == AMEM) 
+                // For other sizes of plain memory, we build a closure
+                // that calls memhash_varlen. The size of the memory is
+                // encoded in the first slot of the closure.
+                var closure = typeLookup(fmt.Sprintf(".hashfunc%d", t.Width)).Linksym();
+                if (len(closure.P) > 0L)
+                { // already generated
+                    return _addr_closure!;
+
+                }
+
+                if (memhashvarlen == null)
+                {
+                    memhashvarlen = sysfunc("memhash_varlen");
+                }
+
+                long ot = 0L;
+                ot = dsymptr(closure, ot, memhashvarlen, 0L);
+                ot = duintptr(closure, ot, uint64(t.Width)); // size encoded in closure
+                ggloblsym(closure, int32(ot), obj.DUPOK | obj.RODATA);
+                return _addr_closure!;
+            else if (algtype(_addr_t) == ASPECIAL) 
+                break;
+            else 
+                // genhash is only called for types that have equality
+                Fatalf("genhash %v", t);
+                        closure = typesymprefix(".hashfunc", t).Linksym();
+            if (len(closure.P) > 0L)
+            { // already generated
+                return _addr_closure!;
+
+            } 
+
+            // Generate hash functions for subtypes.
+            // There are cases where we might not use these hashes,
+            // but in that case they will get dead-code eliminated.
+            // (And the closure generated by genhash will also get
+            // dead-code eliminated, as we call the subtype hashers
+            // directly.)
+
+            if (t.Etype == types.TARRAY) 
+                genhash(_addr_t.Elem());
+            else if (t.Etype == types.TSTRUCT) 
+                {
+                    var f__prev1 = f;
+
+                    foreach (var (_, __f) in t.FieldSlice())
+                    {
+                        f = __f;
+                        genhash(_addr_f.Type);
+                    }
+
+                    f = f__prev1;
+                }
+                        var sym = typesymprefix(".hash", t);
             if (Debug['r'] != 0L)
             {
-                fmt.Printf("genhash %v %v\n", sym, t);
+                fmt.Printf("genhash %v %v %v\n", closure, sym, t);
             }
+
             lineno = autogeneratedPos; // less confusing than end of input
-            dclcontext = PEXTERN;
-            types.Markdcl(); 
+            dclcontext = PEXTERN; 
 
             // func sym(p *T, h uintptr) uintptr
             var tfn = nod(OTFUNC, null, null);
-            var n = namedfield("p", types.NewPtr(t));
-            tfn.List.Append(n);
-            var np = n.Left;
-            n = namedfield("h", types.Types[TUINTPTR]);
-            tfn.List.Append(n);
-            var nh = n.Left;
-            n = anonfield(types.Types[TUINTPTR]); // return value
-            tfn.Rlist.Append(n);
+            tfn.List.Set2(namedfield("p", types.NewPtr(t)), namedfield("h", types.Types[TUINTPTR]));
+            tfn.Rlist.Set1(anonfield(types.Types[TUINTPTR]));
 
-            var fn = dclfunc(sym, tfn); 
+            var fn = dclfunc(sym, tfn);
+            var np = asNode(tfn.Type.Params().Field(0L).Nname);
+            var nh = asNode(tfn.Type.Params().Field(1L).Nname);
 
-            // genhash is only called for types that have equality but
-            // cannot be handled by the standard algorithms,
-            // so t must be either an array or a struct.
 
             if (t.Etype == types.TARRAY) 
                 // An array of pure memory would be handled by the
                 // standard algorithm, so the element type must not be
                 // pure memory.
-                var hashel = hashfor(t.Elem());
+                var hashel = hashfor(_addr_t.Elem());
 
-                n = nod(ORANGE, null, nod(OIND, np, null));
+                var n = nod(ORANGE, null, nod(ODEREF, np, null));
                 var ni = newname(lookup("i"));
                 ni.Type = types.Types[TINT];
                 n.List.Set1(ni);
@@ -242,7 +375,6 @@ namespace @internal
                 var nx = nod(OINDEX, np, ni);
                 nx.SetBounded(true);
                 var na = nod(OADDR, nx, null);
-                na.Etype = 1L; // no escape to heap
                 call.List.Append(na);
                 call.List.Append(nh);
                 n.Nbody.Append(nod(OAS, nh, call));
@@ -267,40 +399,38 @@ namespace @internal
                         } 
 
                         // Hash non-memory fields with appropriate hash function.
-                        if (!IsRegularMemory(f.Type))
+                        if (!IsRegularMemory(_addr_f.Type))
                         {
-                            hashel = hashfor(f.Type);
+                            hashel = hashfor(_addr_f.Type);
                             call = nod(OCALL, hashel, null);
                             nx = nodSym(OXDOT, np, f.Sym); // TODO: fields from other packages?
                             na = nod(OADDR, nx, null);
-                            na.Etype = 1L; // no escape to heap
                             call.List.Append(na);
                             call.List.Append(nh);
                             fn.Nbody.Append(nod(OAS, nh, call));
                             i++;
                             continue;
+
                         } 
 
                         // Otherwise, hash a maximal length run of raw memory.
-                        var (size, next) = memrun(t, i); 
+                        var (size, next) = memrun(_addr_t, i); 
 
                         // h = hashel(&p.first, size, h)
                         hashel = hashmem(f.Type);
                         call = nod(OCALL, hashel, null);
                         nx = nodSym(OXDOT, np, f.Sym); // TODO: fields from other packages?
                         na = nod(OADDR, nx, null);
-                        na.Etype = 1L; // no escape to heap
                         call.List.Append(na);
                         call.List.Append(nh);
                         call.List.Append(nodintconst(size));
                         fn.Nbody.Append(nod(OAS, nh, call));
 
                         i = next;
+
                     }
 
                 }
-            else 
-                Fatalf("genhash %v", t);
                         var r = nod(ORETURN, null, null);
             r.List.Append(nh);
             fn.Nbody.Append(r);
@@ -309,38 +439,41 @@ namespace @internal
             {
                 dumplist("genhash body", fn.Nbody);
             }
+
             funcbody();
-            Curfn = fn;
+
             fn.Func.SetDupok(true);
-            fn = typecheck(fn, Etop);
-            typecheckslice(fn.Nbody.Slice(), Etop);
+            fn = typecheck(fn, ctxStmt);
+
+            Curfn = fn;
+            typecheckslice(fn.Nbody.Slice(), ctxStmt);
             Curfn = null;
-            types.Popdcl();
+
             if (debug_dclstack != 0L)
             {
                 testdclstack();
-            } 
-
-            // Disable safemode while compiling this code: the code we
-            // generate internally can refer to unsafe.Pointer.
-            // In this case it can happen if we need to generate an ==
-            // for a struct containing a reflect.Value, which itself has
-            // an unexported field of type unsafe.Pointer.
-            var old_safemode = safemode;
-            safemode = false;
+            }
 
             fn.Func.SetNilCheckDisabled(true);
-            funccompile(fn);
+            funccompile(fn); 
 
-            safemode = old_safemode;
+            // Build closure. It doesn't close over any variables, so
+            // it contains just the function pointer.
+            dsymptr(closure, 0L, sym.Linksym(), 0L);
+            ggloblsym(closure, int32(Widthptr), obj.DUPOK | obj.RODATA);
+
+            return _addr_closure!;
+
         }
 
-        private static ref Node hashfor(ref types.Type t)
+        private static ptr<Node> hashfor(ptr<types.Type> _addr_t)
         {
-            ref types.Sym sym = default;
+            ref types.Type t = ref _addr_t.val;
+
+            ptr<types.Sym> sym;
 
             {
-                var (a, _) = algtype1(t);
+                var (a, _) = algtype1(_addr_t);
 
 
                 if (a == AMEM) 
@@ -360,94 +493,270 @@ namespace @internal
                 else if (a == ACPLX128) 
                     sym = Runtimepkg.Lookup("c128hash");
                 else 
+                    // Note: the caller of hashfor ensured that this symbol
+                    // exists and has a body by calling genhash for t.
                     sym = typesymprefix(".hash", t);
 
             }
 
             var n = newname(sym);
             n.SetClass(PFUNC);
-            var tfn = nod(OTFUNC, null, null);
-            tfn.List.Append(anonfield(types.NewPtr(t)));
-            tfn.List.Append(anonfield(types.Types[TUINTPTR]));
-            tfn.Rlist.Append(anonfield(types.Types[TUINTPTR]));
-            tfn = typecheck(tfn, Etype);
-            n.Type = tfn.Type;
-            return n;
+            n.Sym.SetFunc(true);
+            n.Type = functype(null, new slice<ptr<Node>>(new ptr<Node>[] { anonfield(types.NewPtr(t)), anonfield(types.Types[TUINTPTR]) }), new slice<ptr<Node>>(new ptr<Node>[] { anonfield(types.Types[TUINTPTR]) }));
+            return _addr_n!;
+
         }
 
-        // geneq generates a helper function to
-        // check equality of two values of type t.
-        private static void geneq(ref types.Sym sym, ref types.Type t)
+        // sysClosure returns a closure which will call the
+        // given runtime function (with no closed-over variables).
+        private static ptr<obj.LSym> sysClosure(@string name)
         {
+            var s = sysvar(name + "·f");
+            if (len(s.P) == 0L)
+            {
+                var f = sysfunc(name);
+                dsymptr(s, 0L, f, 0L);
+                ggloblsym(s, int32(Widthptr), obj.DUPOK | obj.RODATA);
+            }
+
+            return _addr_s!;
+
+        }
+
+        // geneq returns a symbol which is the closure used to compute
+        // equality for two objects of type t.
+        private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t)
+        {
+            ref types.Type t = ref _addr_t.val;
+
+
+            if (algtype(_addr_t) == ANOEQ) 
+                // The runtime will panic if it tries to compare
+                // a type with a nil equality function.
+                return _addr_null!;
+            else if (algtype(_addr_t) == AMEM0) 
+                return _addr_sysClosure("memequal0")!;
+            else if (algtype(_addr_t) == AMEM8) 
+                return _addr_sysClosure("memequal8")!;
+            else if (algtype(_addr_t) == AMEM16) 
+                return _addr_sysClosure("memequal16")!;
+            else if (algtype(_addr_t) == AMEM32) 
+                return _addr_sysClosure("memequal32")!;
+            else if (algtype(_addr_t) == AMEM64) 
+                return _addr_sysClosure("memequal64")!;
+            else if (algtype(_addr_t) == AMEM128) 
+                return _addr_sysClosure("memequal128")!;
+            else if (algtype(_addr_t) == ASTRING) 
+                return _addr_sysClosure("strequal")!;
+            else if (algtype(_addr_t) == AINTER) 
+                return _addr_sysClosure("interequal")!;
+            else if (algtype(_addr_t) == ANILINTER) 
+                return _addr_sysClosure("nilinterequal")!;
+            else if (algtype(_addr_t) == AFLOAT32) 
+                return _addr_sysClosure("f32equal")!;
+            else if (algtype(_addr_t) == AFLOAT64) 
+                return _addr_sysClosure("f64equal")!;
+            else if (algtype(_addr_t) == ACPLX64) 
+                return _addr_sysClosure("c64equal")!;
+            else if (algtype(_addr_t) == ACPLX128) 
+                return _addr_sysClosure("c128equal")!;
+            else if (algtype(_addr_t) == AMEM) 
+                // make equality closure. The size of the type
+                // is encoded in the closure.
+                var closure = typeLookup(fmt.Sprintf(".eqfunc%d", t.Width)).Linksym();
+                if (len(closure.P) != 0L)
+                {
+                    return _addr_closure!;
+                }
+
+                if (memequalvarlen == null)
+                {
+                    memequalvarlen = sysvar("memequal_varlen"); // asm func
+                }
+
+                long ot = 0L;
+                ot = dsymptr(closure, ot, memequalvarlen, 0L);
+                ot = duintptr(closure, ot, uint64(t.Width));
+                ggloblsym(closure, int32(ot), obj.DUPOK | obj.RODATA);
+                return _addr_closure!;
+            else if (algtype(_addr_t) == ASPECIAL) 
+                break;
+                        closure = typesymprefix(".eqfunc", t).Linksym();
+            if (len(closure.P) > 0L)
+            { // already generated
+                return _addr_closure!;
+
+            }
+
+            var sym = typesymprefix(".eq", t);
             if (Debug['r'] != 0L)
             {
-                fmt.Printf("geneq %v %v\n", sym, t);
-            }
+                fmt.Printf("geneq %v\n", t);
+            } 
+
+            // Autogenerate code for equality of structs and arrays.
             lineno = autogeneratedPos; // less confusing than end of input
-            dclcontext = PEXTERN;
-            types.Markdcl(); 
+            dclcontext = PEXTERN; 
 
             // func sym(p, q *T) bool
             var tfn = nod(OTFUNC, null, null);
-            var n = namedfield("p", types.NewPtr(t));
-            tfn.List.Append(n);
-            var np = n.Left;
-            n = namedfield("q", types.NewPtr(t));
-            tfn.List.Append(n);
-            var nq = n.Left;
-            n = anonfield(types.Types[TBOOL]);
-            tfn.Rlist.Append(n);
+            tfn.List.Set2(namedfield("p", types.NewPtr(t)), namedfield("q", types.NewPtr(t)));
+            tfn.Rlist.Set1(namedfield("r", types.Types[TBOOL]));
 
-            var fn = dclfunc(sym, tfn); 
+            var fn = dclfunc(sym, tfn);
+            var np = asNode(tfn.Type.Params().Field(0L).Nname);
+            var nq = asNode(tfn.Type.Params().Field(1L).Nname); 
 
-            // geneq is only called for types that have equality but
+            // We reach here only for types that have equality but
             // cannot be handled by the standard algorithms,
             // so t must be either an array or a struct.
 
             if (t.Etype == TARRAY) 
-                // An array of pure memory would be handled by the
-                // standard memequal, so the element type must not be
-                // pure memory. Even if we unrolled the range loop,
-                // each iteration would be a function call, so don't bother
-                // unrolling.
-                var nrange = nod(ORANGE, null, nod(OIND, np, null));
+                var nelem = t.NumElem(); 
 
-                var ni = newname(lookup("i"));
-                ni.Type = types.Types[TINT];
-                nrange.List.Set1(ni);
-                nrange.SetColas(true);
-                colasdefn(nrange.List.Slice(), nrange);
-                ni = nrange.List.First(); 
+                // checkAll generates code to check the equality of all array elements.
+                // If unroll is greater than nelem, checkAll generates:
+                //
+                // if eq(p[0], q[0]) && eq(p[1], q[1]) && ... {
+                // } else {
+                //   return
+                // }
+                //
+                // And so on.
+                //
+                // Otherwise it generates:
+                //
+                // for i := 0; i < nelem; i++ {
+                //   if eq(p[i], q[i]) {
+                //   } else {
+                //     return
+                //   }
+                // }
+                //
+                // TODO(josharian): consider doing some loop unrolling
+                // for larger nelem as well, processing a few elements at a time in a loop.
+                Func<long, Func<ptr<Node>, ptr<Node>, ptr<Node>>, ptr<Node>> checkAll = (unroll, eq) =>
+                { 
+                    // checkIdx generates a node to check for equality at index i.
+                    Func<ptr<Node>, ptr<Node>> checkIdx = i =>
+                    { 
+                        // pi := p[i]
+                        var pi = nod(OINDEX, np, i);
+                        pi.SetBounded(true);
+                        pi.Type = t.Elem(); 
+                        // qi := q[i]
+                        var qi = nod(OINDEX, nq, i);
+                        qi.SetBounded(true);
+                        qi.Type = t.Elem();
+                        return _addr_eq(pi, qi)!;
 
-                // if p[i] != q[i] { return false }
-                var nx = nod(OINDEX, np, ni);
+                    }
+;
 
-                nx.SetBounded(true);
-                var ny = nod(OINDEX, nq, ni);
-                ny.SetBounded(true);
+                    if (nelem <= unroll)
+                    { 
+                        // Generate a series of checks.
+                        ptr<Node> cond;
+                        {
+                            var i__prev1 = i;
 
-                var nif = nod(OIF, null, null);
-                nif.Left = nod(ONE, nx, ny);
-                var r = nod(ORETURN, null, null);
-                r.List.Append(nodbool(false));
-                nif.Nbody.Append(r);
-                nrange.Nbody.Append(nif);
-                fn.Nbody.Append(nrange); 
+                            for (var i = int64(0L); i < nelem; i++)
+                            {
+                                var c = nodintconst(i);
+                                var check = checkIdx(c);
+                                if (cond == null)
+                                {
+                                    cond = check;
+                                    continue;
+                                }
 
+                                cond = nod(OANDAND, cond, check);
+
+                            }
+
+
+                            i = i__prev1;
+                        }
+                        var nif = nod(OIF, cond, null);
+                        nif.Rlist.Append(nod(ORETURN, null, null));
+                        fn.Nbody.Append(nif);
+                        return ;
+
+                    } 
+
+                    // Generate a for loop.
+                    // for i := 0; i < nelem; i++
+                    i = temp(types.Types[TINT]);
+                    var init = nod(OAS, i, nodintconst(0L));
+                    cond = nod(OLT, i, nodintconst(nelem));
+                    var post = nod(OAS, i, nod(OADD, i, nodintconst(1L)));
+                    var loop = nod(OFOR, cond, post);
+                    loop.Ninit.Append(init); 
+                    // if eq(pi, qi) {} else { return }
+                    check = checkIdx(i);
+                    nif = nod(OIF, check, null);
+                    nif.Rlist.Append(nod(ORETURN, null, null));
+                    loop.Nbody.Append(nif);
+                    fn.Nbody.Append(loop);
+
+                }
+;
+
+
+                if (t.Elem().Etype == TSTRING) 
+                    // Do two loops. First, check that all the lengths match (cheap).
+                    // Second, check that all the contents match (expensive).
+                    // TODO: when the array size is small, unroll the length match checks.
+                    checkAll(3L, (pi, qi) =>
+                    { 
+                        // Compare lengths.
+                        var (eqlen, _) = eqstring(_addr_pi, _addr_qi);
+                        return _addr_eqlen!;
+
+                    });
+                    checkAll(1L, (pi, qi) =>
+                    { 
+                        // Compare contents.
+                        var (_, eqmem) = eqstring(_addr_pi, _addr_qi);
+                        return _addr_eqmem!;
+
+                    });
+                else if (t.Elem().Etype == TFLOAT32 || t.Elem().Etype == TFLOAT64) 
+                    checkAll(2L, (pi, qi) =>
+                    { 
+                        // p[i] == q[i]
+                        return _addr_nod(OEQ, pi, qi)!;
+
+                    }); 
+                    // TODO: pick apart structs, do them piecemeal too
+                else 
+                    checkAll(1L, (pi, qi) =>
+                    { 
+                        // p[i] == q[i]
+                        return _addr_nod(OEQ, pi, qi)!;
+
+                    });
                 // return true
                 var ret = nod(ORETURN, null, null);
                 ret.List.Append(nodbool(true));
                 fn.Nbody.Append(ret);
             else if (t.Etype == TSTRUCT) 
-                ref Node cond = default;
-                Action<ref Node> and = n =>
+                // Build a list of conditions to satisfy.
+                // The conditions are a list-of-lists. Conditions are reorderable
+                // within each inner list. The outer lists must be evaluated in order.
+                // Even within each inner list, track their order so that we can preserve
+                // aspects of that order. (TODO: latter part needed?)
+                private partial struct nodeIdx
                 {
-                    if (cond == null)
-                    {
-                        cond = n;
-                        return;
-                    }
-                    cond = nod(OANDAND, cond, n);
+                    public ptr<Node> n;
+                    public long idx;
+                }
+                slice<slice<nodeIdx>> conds = default;
+                conds = append(conds, new slice<nodeIdx>(new nodeIdx[] {  }));
+                Action<ptr<Node>> and = n =>
+                {
+                    i = len(conds) - 1L;
+                    conds[i] = append(conds[i], new nodeIdx(n:n,idx:len(conds[i])));
                 } 
 
                 // Walk the struct using memequal for runs of AMEM
@@ -457,7 +766,9 @@ namespace @internal
                 // Walk the struct using memequal for runs of AMEM
                 // and calling specific equality tests for the others.
                 {
-                    long i = 0L;
+                    var i__prev1 = i;
+
+                    i = 0L;
                     var fields = t.FieldSlice();
 
                     while (i < len(fields))
@@ -472,15 +783,38 @@ namespace @internal
                         } 
 
                         // Compare non-memory fields with field equality.
-                        if (!IsRegularMemory(f.Type))
+                        if (!IsRegularMemory(_addr_f.Type))
                         {
-                            and(eqfield(np, nq, f.Sym));
+                            if (EqCanPanic(_addr_f.Type))
+                            { 
+                                // Enforce ordering by starting a new set of reorderable conditions.
+                                conds = append(conds, new slice<nodeIdx>(new nodeIdx[] {  }));
+
+                            }
+
+                            var p = nodSym(OXDOT, np, f.Sym);
+                            var q = nodSym(OXDOT, nq, f.Sym);
+
+                            if (f.Type.IsString()) 
+                                var (eqlen, eqmem) = eqstring(_addr_p, _addr_q);
+                                and(eqlen);
+                                and(eqmem);
+                            else 
+                                and(nod(OEQ, p, q));
+                                                        if (EqCanPanic(_addr_f.Type))
+                            { 
+                                // Also enforce ordering after something that can panic.
+                                conds = append(conds, new slice<nodeIdx>(new nodeIdx[] {  }));
+
+                            }
+
                             i++;
                             continue;
+
                         } 
 
                         // Find maximal length run of memory-only fields.
-                        var (size, next) = memrun(t, i); 
+                        var (size, next) = memrun(_addr_t, i); 
 
                         // TODO(rsc): All the calls to newname are wrong for
                         // cross-package unexported fields.
@@ -496,28 +830,80 @@ namespace @internal
                                     foreach (var (_, __f) in s)
                                     {
                                         f = __f;
-                                        and(eqfield(np, nq, f.Sym));
+                                        and(eqfield(_addr_np, _addr_nq, _addr_f.Sym));
                                     }
                             else
 
                                     f = f__prev2;
                                 }
-
                             }                            { 
                                 // More than two fields: use memequal.
-                                and(eqmem(np, nq, f.Sym, size));
+                                and(eqmem(_addr_np, _addr_nq, _addr_f.Sym, size));
+
                             }
 
                         }
+
                         i = next;
+
+                    } 
+
+                    // Sort conditions to put runtime calls last.
+                    // Preserve the rest of the ordering.
+
+
+                    i = i__prev1;
+                } 
+
+                // Sort conditions to put runtime calls last.
+                // Preserve the rest of the ordering.
+                slice<nodeIdx> flatConds = default;
+                {
+                    var c__prev1 = c;
+
+                    foreach (var (_, __c) in conds)
+                    {
+                        c = __c;
+                        sort.SliceStable(c, (i, j) =>
+                        {
+                            var x = c[i];
+                            var y = c[j];
+                            if ((x.n.Op != OCALL) == (y.n.Op != OCALL))
+                            {
+                                return _addr_x.idx < y.idx!;
+                            }
+
+                            return _addr_x.n.Op != OCALL!;
+
+                        });
+                        flatConds = append(flatConds, c);
+
                     }
 
+                    c = c__prev1;
                 }
 
-                if (cond == null)
+                cond = ;
+                if (len(flatConds) == 0L)
                 {
                     cond = nodbool(true);
                 }
+                else
+                {
+                    cond = flatConds[0L].n;
+                    {
+                        var c__prev1 = c;
+
+                        foreach (var (_, __c) in flatConds[1L..])
+                        {
+                            c = __c;
+                            cond = nod(OANDAND, cond, c.n);
+                        }
+
+                        c = c__prev1;
+                    }
+                }
+
                 ret = nod(ORETURN, null, null);
                 ret.List.Append(cond);
                 fn.Nbody.Append(ret);
@@ -527,58 +913,144 @@ namespace @internal
             {
                 dumplist("geneq body", fn.Nbody);
             }
+
             funcbody();
-            Curfn = fn;
+
             fn.Func.SetDupok(true);
-            fn = typecheck(fn, Etop);
-            typecheckslice(fn.Nbody.Slice(), Etop);
+            fn = typecheck(fn, ctxStmt);
+
+            Curfn = fn;
+            typecheckslice(fn.Nbody.Slice(), ctxStmt);
             Curfn = null;
-            types.Popdcl();
+
             if (debug_dclstack != 0L)
             {
                 testdclstack();
             } 
-
-            // Disable safemode while compiling this code: the code we
-            // generate internally can refer to unsafe.Pointer.
-            // In this case it can happen if we need to generate an ==
-            // for a struct containing a reflect.Value, which itself has
-            // an unexported field of type unsafe.Pointer.
-            var old_safemode = safemode;
-            safemode = false; 
 
             // Disable checknils while compiling this code.
             // We are comparing a struct or an array,
             // neither of which can be nil, and our comparisons
             // are shallow.
             fn.Func.SetNilCheckDisabled(true);
-            funccompile(fn);
+            funccompile(fn); 
 
-            safemode = old_safemode;
+            // Generate a closure which points at the function we just generated.
+            dsymptr(closure, 0L, sym.Linksym(), 0L);
+            ggloblsym(closure, int32(Widthptr), obj.DUPOK | obj.RODATA);
+            return _addr_closure!;
+
         }
 
         // eqfield returns the node
         //     p.field == q.field
-        private static ref Node eqfield(ref Node p, ref Node q, ref types.Sym field)
+        private static ptr<Node> eqfield(ptr<Node> _addr_p, ptr<Node> _addr_q, ptr<types.Sym> _addr_field)
         {
+            ref Node p = ref _addr_p.val;
+            ref Node q = ref _addr_q.val;
+            ref types.Sym field = ref _addr_field.val;
+
             var nx = nodSym(OXDOT, p, field);
             var ny = nodSym(OXDOT, q, field);
             var ne = nod(OEQ, nx, ny);
-            return ne;
+            return _addr_ne!;
+        }
+
+        // eqstring returns the nodes
+        //   len(s) == len(t)
+        // and
+        //   memequal(s.ptr, t.ptr, len(s))
+        // which can be used to construct string equality comparison.
+        // eqlen must be evaluated before eqmem, and shortcircuiting is required.
+        private static (ptr<Node>, ptr<Node>) eqstring(ptr<Node> _addr_s, ptr<Node> _addr_t)
+        {
+            ptr<Node> eqlen = default!;
+            ptr<Node> eqmem = default!;
+            ref Node s = ref _addr_s.val;
+            ref Node t = ref _addr_t.val;
+
+            s = conv(s, types.Types[TSTRING]);
+            t = conv(t, types.Types[TSTRING]);
+            var sptr = nod(OSPTR, s, null);
+            var tptr = nod(OSPTR, t, null);
+            var slen = conv(nod(OLEN, s, null), types.Types[TUINTPTR]);
+            var tlen = conv(nod(OLEN, t, null), types.Types[TUINTPTR]);
+
+            var fn = syslook("memequal");
+            fn = substArgTypes(fn, types.Types[TUINT8], types.Types[TUINT8]);
+            var call = nod(OCALL, fn, null);
+            call.List.Append(sptr, tptr, slen.copy());
+            call = typecheck(call, ctxExpr | ctxMultiOK);
+
+            var cmp = nod(OEQ, slen, tlen);
+            cmp = typecheck(cmp, ctxExpr);
+            cmp.Type = types.Types[TBOOL];
+            return (_addr_cmp!, _addr_call!);
+        }
+
+        // eqinterface returns the nodes
+        //   s.tab == t.tab (or s.typ == t.typ, as appropriate)
+        // and
+        //   ifaceeq(s.tab, s.data, t.data) (or efaceeq(s.typ, s.data, t.data), as appropriate)
+        // which can be used to construct interface equality comparison.
+        // eqtab must be evaluated before eqdata, and shortcircuiting is required.
+        private static (ptr<Node>, ptr<Node>) eqinterface(ptr<Node> _addr_s, ptr<Node> _addr_t)
+        {
+            ptr<Node> eqtab = default!;
+            ptr<Node> eqdata = default!;
+            ref Node s = ref _addr_s.val;
+            ref Node t = ref _addr_t.val;
+
+            if (!types.Identical(s.Type, t.Type))
+            {
+                Fatalf("eqinterface %v %v", s.Type, t.Type);
+            } 
+            // func ifaceeq(tab *uintptr, x, y unsafe.Pointer) (ret bool)
+            // func efaceeq(typ *uintptr, x, y unsafe.Pointer) (ret bool)
+            ptr<Node> fn;
+            if (s.Type.IsEmptyInterface())
+            {
+                fn = syslook("efaceeq");
+            }
+            else
+            {
+                fn = syslook("ifaceeq");
+            }
+
+            var stab = nod(OITAB, s, null);
+            var ttab = nod(OITAB, t, null);
+            var sdata = nod(OIDATA, s, null);
+            var tdata = nod(OIDATA, t, null);
+            sdata.Type = types.Types[TUNSAFEPTR];
+            tdata.Type = types.Types[TUNSAFEPTR];
+            sdata.SetTypecheck(1L);
+            tdata.SetTypecheck(1L);
+
+            var call = nod(OCALL, fn, null);
+            call.List.Append(stab, sdata, tdata);
+            call = typecheck(call, ctxExpr | ctxMultiOK);
+
+            var cmp = nod(OEQ, stab, ttab);
+            cmp = typecheck(cmp, ctxExpr);
+            cmp.Type = types.Types[TBOOL];
+            return (_addr_cmp!, _addr_call!);
+
         }
 
         // eqmem returns the node
         //     memequal(&p.field, &q.field [, size])
-        private static ref Node eqmem(ref Node p, ref Node q, ref types.Sym field, long size)
+        private static ptr<Node> eqmem(ptr<Node> _addr_p, ptr<Node> _addr_q, ptr<types.Sym> _addr_field, long size)
         {
-            var nx = nod(OADDR, nodSym(OXDOT, p, field), null);
-            nx.Etype = 1L; // does not escape
-            var ny = nod(OADDR, nodSym(OXDOT, q, field), null);
-            ny.Etype = 1L; // does not escape
-            nx = typecheck(nx, Erv);
-            ny = typecheck(ny, Erv);
+            ref Node p = ref _addr_p.val;
+            ref Node q = ref _addr_q.val;
+            ref types.Sym field = ref _addr_field.val;
 
-            var (fn, needsize) = eqmemfunc(size, nx.Type.Elem());
+            var nx = nod(OADDR, nodSym(OXDOT, p, field), null);
+            var ny = nod(OADDR, nodSym(OXDOT, q, field), null);
+            nx = typecheck(nx, ctxExpr);
+            ny = typecheck(ny, ctxExpr);
+
+            var (fn, needsize) = eqmemfunc(size, _addr_nx.Type.Elem());
             var call = nod(OCALL, fn, null);
             call.List.Append(nx);
             call.List.Append(ny);
@@ -586,11 +1058,17 @@ namespace @internal
             {
                 call.List.Append(nodintconst(size));
             }
-            return call;
+
+            return _addr_call!;
+
         }
 
-        private static (ref Node, bool) eqmemfunc(long size, ref types.Type t)
+        private static (ptr<Node>, bool) eqmemfunc(long size, ptr<types.Type> _addr_t)
         {
+            ptr<Node> fn = default!;
+            bool needsize = default;
+            ref types.Type t = ref _addr_t.val;
+
             switch (size)
             {
                 case 1L: 
@@ -612,15 +1090,20 @@ namespace @internal
             }
 
             fn = substArgTypes(fn, t, t);
-            return (fn, needsize);
+            return (_addr_fn!, needsize);
+
         }
 
         // memrun finds runs of struct fields for which memory-only algs are appropriate.
         // t is the parent struct type, and start is the field index at which to start the run.
         // size is the length in bytes of the memory included in the run.
         // next is the index just after the end of the memory run.
-        private static (long, long) memrun(ref types.Type t, long start)
+        private static (long, long) memrun(ptr<types.Type> _addr_t, long start)
         {
+            long size = default;
+            long next = default;
+            ref types.Type t = ref _addr_t.val;
+
             next = start;
             while (true)
             {
@@ -630,7 +1113,7 @@ namespace @internal
                     break;
                 } 
                 // Stop run after a padded field.
-                if (ispaddedfield(t, next - 1L))
+                if (ispaddedfield(_addr_t, next - 1L))
                 {
                     break;
                 } 
@@ -638,31 +1121,38 @@ namespace @internal
                 {
                     var f = t.Field(next);
 
-                    if (f.Sym.IsBlank() || !IsRegularMemory(f.Type))
+                    if (f.Sym.IsBlank() || !IsRegularMemory(_addr_f.Type))
                     {
                         break;
                     }
 
                 }
+
             }
 
             return (t.Field(next - 1L).End() - t.Field(start).Offset, next);
+
         }
 
         // ispaddedfield reports whether the i'th field of struct type t is followed
         // by padding.
-        private static bool ispaddedfield(ref types.Type t, long i)
+        private static bool ispaddedfield(ptr<types.Type> _addr_t, long i)
         {
+            ref types.Type t = ref _addr_t.val;
+
             if (!t.IsStruct())
             {
                 Fatalf("ispaddedfield called non-struct %v", t);
             }
+
             var end = t.Width;
             if (i + 1L < t.NumFields())
             {
                 end = t.Field(i + 1L).Offset;
             }
+
             return t.Field(i).End() != end;
+
         }
     }
 }}}}

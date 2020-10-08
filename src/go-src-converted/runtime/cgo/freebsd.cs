@@ -4,7 +4,7 @@
 
 // +build freebsd
 
-// package cgo -- go2cs converted at 2020 August 29 08:21:41 UTC
+// package cgo -- go2cs converted at 2020 October 08 03:24:26 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Go\src\runtime\cgo\freebsd.go
 using _@unsafe_ = go.@unsafe_package;

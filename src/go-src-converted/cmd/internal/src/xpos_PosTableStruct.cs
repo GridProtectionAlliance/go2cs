@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:52 UTC
+//     Generated on 2020 October 08 03:49:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,12 +29,14 @@ namespace @internal
             {
                 this.baseList = default;
                 this.indexMap = default;
+                this.nameMap = default;
             }
 
-            public PosTable(slice<ref PosBase> baseList = default, map<ref PosBase, long> indexMap = default)
+            public PosTable(slice<ptr<PosBase>> baseList = default, map<ptr<PosBase>, long> indexMap = default, map<@string, long> nameMap = default)
             {
                 this.baseList = baseList;
                 this.indexMap = indexMap;
+                this.nameMap = nameMap;
             }
 
             // Enable comparisons between nil and PosTable struct
@@ -57,7 +59,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static PosTable PosTable_cast(dynamic value)
         {
-            return new PosTable(value.baseList, value.indexMap);
+            return new PosTable(value.baseList, value.indexMap, value.nameMap);
         }
     }
 }}}

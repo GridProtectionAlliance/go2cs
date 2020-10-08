@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:14 UTC
+//     Generated on 2020 October 08 03:24:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using runtime = go.runtime_package;
+using unsafeheader = go.@internal.unsafeheader_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using unicode = go.unicode_package;
@@ -44,7 +44,7 @@ namespace go
                 this.args = default;
             }
 
-            public funcTypeFixed8(funcType funcType = default, array<ref rtype> args = default)
+            public funcTypeFixed8(funcType funcType = default, array<ptr<rtype>> args = default)
             {
                 this.m_funcTypeRef = new ptr<funcType>(funcType);
                 this.args = args;

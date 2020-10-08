@@ -33,12 +33,17 @@ Flags:
         Dump instructions as they are parsed.
     -dynlink
         Support references to Go symbols defined in other shared libraries.
+    -gensymabis
+        Write symbol ABI information to output file. Don't assemble.
     -o file
         Write output to file. The default is foo.o for /a/b/c/foo.s.
     -shared
         Generate code that can be linked into a shared library.
+    -spectre list
+        Enable spectre mitigations in list (all, ret).
     -trimpath prefix
         Remove prefix from recorded source file paths.
+
 Input language:
 
 The assembler uses mostly the same syntax for all architectures,
@@ -48,7 +53,7 @@ run through a simplified C preprocessor that implements #include,
 
 For more information, see https://golang.org/doc/asm.
 */
-// package main -- go2cs converted at 2020 August 29 08:48:37 UTC
+// package main -- go2cs converted at 2020 October 08 04:04:26 UTC
 // Original source: C:\Go\src\cmd\asm\doc.go
     }
 

@@ -4,7 +4,7 @@
 
 // +build !plan9
 
-// package socktest -- go2cs converted at 2020 August 29 08:36:18 UTC
+// package socktest -- go2cs converted at 2020 October 08 03:43:12 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Go\src\net\internal\socktest\switch_posix.go
 using fmt = go.fmt_package;
@@ -28,7 +28,8 @@ namespace @internal
                 return "local";
             else 
                 return fmt.Sprintf("%d", family);
-                    }
+            
+        }
 
         private static @string typeString(long sotype)
         {
@@ -53,7 +54,9 @@ namespace @internal
                 }
 
             }
+
             return s;
+
         }
 
         private static @string protocolString(long proto)
@@ -67,6 +70,7 @@ namespace @internal
                 return "udp";
             else 
                 return fmt.Sprintf("%d", proto);
-                    }
+            
+        }
     }
 }}}

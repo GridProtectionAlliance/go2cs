@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:23:13 UTC
+//     Generated on 2020 October 08 03:30:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate uint Sum32ByRef(ref T value);
+            private delegate uint Sum32ByPtr(ptr<T> value);
             private delegate uint Sum32ByVal(T value);
 
-            private static readonly Sum32ByRef s_Sum32ByRef;
+            private static readonly Sum32ByPtr s_Sum32ByPtr;
             private static readonly Sum32ByVal s_Sum32ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,17 +74,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Sum32ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_Sum32ByPtr is null || !m_target_is_ptr)
                     return s_Sum32ByVal!(target);
 
-                return s_Sum32ByRef(ref target);
+                return s_Sum32ByPtr(m_target_ptr);
             }
 
-            private delegate long SumByRef(ref T value, slice<byte> b);
+            private delegate long SumByPtr(ptr<T> value, slice<byte> b);
             private delegate long SumByVal(T value, slice<byte> b);
 
-            private static readonly SumByRef s_SumByRef;
+            private static readonly SumByPtr s_SumByPtr;
             private static readonly SumByVal s_SumByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,17 +94,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SumByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SumByPtr is null || !m_target_is_ptr)
                     return s_SumByVal!(target, b);
 
-                return s_SumByRef(ref target, b);
+                return s_SumByPtr(m_target_ptr, b);
             }
 
-            private delegate long ResetByRef(ref T value);
+            private delegate long ResetByPtr(ptr<T> value);
             private delegate long ResetByVal(T value);
 
-            private static readonly ResetByRef s_ResetByRef;
+            private static readonly ResetByPtr s_ResetByPtr;
             private static readonly ResetByVal s_ResetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -112,17 +114,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ResetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ResetByPtr is null || !m_target_is_ptr)
                     return s_ResetByVal!(target);
 
-                return s_ResetByRef(ref target);
+                return s_ResetByPtr(m_target_ptr);
             }
 
-            private delegate long SizeByRef(ref T value);
+            private delegate long SizeByPtr(ptr<T> value);
             private delegate long SizeByVal(T value);
 
-            private static readonly SizeByRef s_SizeByRef;
+            private static readonly SizeByPtr s_SizeByPtr;
             private static readonly SizeByVal s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -131,17 +134,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SizeByPtr is null || !m_target_is_ptr)
                     return s_SizeByVal!(target);
 
-                return s_SizeByRef(ref target);
+                return s_SizeByPtr(m_target_ptr);
             }
 
-            private delegate long BlockSizeByRef(ref T value);
+            private delegate long BlockSizeByPtr(ptr<T> value);
             private delegate long BlockSizeByVal(T value);
 
-            private static readonly BlockSizeByRef s_BlockSizeByRef;
+            private static readonly BlockSizeByPtr s_BlockSizeByPtr;
             private static readonly BlockSizeByVal s_BlockSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -150,17 +154,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BlockSizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BlockSizeByPtr is null || !m_target_is_ptr)
                     return s_BlockSizeByVal!(target);
 
-                return s_BlockSizeByRef(ref target);
+                return s_BlockSizeByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) WriteByRef(ref T value, slice<byte> p);
+            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByRef s_WriteByRef;
+            private static readonly WriteByPtr s_WriteByPtr;
             private static readonly WriteByVal s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -169,11 +174,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, p);
 
-                return s_WriteByRef(ref target, p);
+                return s_WriteByPtr(m_target_ptr, p);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -182,103 +188,85 @@ namespace go
             static Hash32()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Sum32");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Sum32");
 
                 if (!(extensionMethod is null))
-                    s_Sum32ByRef = extensionMethod.CreateStaticDelegate(typeof(Sum32ByRef)) as Sum32ByRef;
+                    s_Sum32ByPtr = extensionMethod.CreateStaticDelegate(typeof(Sum32ByPtr)) as Sum32ByPtr;
 
-                if (s_Sum32ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Sum32");
+                extensionMethod = targetType.GetExtensionMethod("Sum32");
 
-                    if (!(extensionMethod is null))
-                        s_Sum32ByVal = extensionMethod.CreateStaticDelegate(typeof(Sum32ByVal)) as Sum32ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_Sum32ByVal = extensionMethod.CreateStaticDelegate(typeof(Sum32ByVal)) as Sum32ByVal;
 
-                if (s_Sum32ByRef is null && s_Sum32ByVal is null)
+                if (s_Sum32ByPtr is null && s_Sum32ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Hash32.Sum32 method", new Exception("Sum32"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Sum");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Sum");
 
                 if (!(extensionMethod is null))
-                    s_SumByRef = extensionMethod.CreateStaticDelegate(typeof(SumByRef)) as SumByRef;
+                    s_SumByPtr = extensionMethod.CreateStaticDelegate(typeof(SumByPtr)) as SumByPtr;
 
-                if (s_SumByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Sum");
+                extensionMethod = targetType.GetExtensionMethod("Sum");
 
-                    if (!(extensionMethod is null))
-                        s_SumByVal = extensionMethod.CreateStaticDelegate(typeof(SumByVal)) as SumByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SumByVal = extensionMethod.CreateStaticDelegate(typeof(SumByVal)) as SumByVal;
 
-                if (s_SumByRef is null && s_SumByVal is null)
+                if (s_SumByPtr is null && s_SumByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Hash32.Sum method", new Exception("Sum"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Reset");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Reset");
 
                 if (!(extensionMethod is null))
-                    s_ResetByRef = extensionMethod.CreateStaticDelegate(typeof(ResetByRef)) as ResetByRef;
+                    s_ResetByPtr = extensionMethod.CreateStaticDelegate(typeof(ResetByPtr)) as ResetByPtr;
 
-                if (s_ResetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Reset");
+                extensionMethod = targetType.GetExtensionMethod("Reset");
 
-                    if (!(extensionMethod is null))
-                        s_ResetByVal = extensionMethod.CreateStaticDelegate(typeof(ResetByVal)) as ResetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ResetByVal = extensionMethod.CreateStaticDelegate(typeof(ResetByVal)) as ResetByVal;
 
-                if (s_ResetByRef is null && s_ResetByVal is null)
+                if (s_ResetByPtr is null && s_ResetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Hash32.Reset method", new Exception("Reset"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Size");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Size");
 
                 if (!(extensionMethod is null))
-                    s_SizeByRef = extensionMethod.CreateStaticDelegate(typeof(SizeByRef)) as SizeByRef;
+                    s_SizeByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeByPtr)) as SizeByPtr;
 
-                if (s_SizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Size");
+                extensionMethod = targetType.GetExtensionMethod("Size");
 
-                    if (!(extensionMethod is null))
-                        s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
 
-                if (s_SizeByRef is null && s_SizeByVal is null)
+                if (s_SizeByPtr is null && s_SizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Hash32.Size method", new Exception("Size"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("BlockSize");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("BlockSize");
 
                 if (!(extensionMethod is null))
-                    s_BlockSizeByRef = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByRef)) as BlockSizeByRef;
+                    s_BlockSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByPtr)) as BlockSizeByPtr;
 
-                if (s_BlockSizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("BlockSize");
+                extensionMethod = targetType.GetExtensionMethod("BlockSize");
 
-                    if (!(extensionMethod is null))
-                        s_BlockSizeByVal = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByVal)) as BlockSizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BlockSizeByVal = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByVal)) as BlockSizeByVal;
 
-                if (s_BlockSizeByRef is null && s_BlockSizeByVal is null)
+                if (s_BlockSizeByPtr is null && s_BlockSizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Hash32.BlockSize method", new Exception("BlockSize"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Write");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
                 if (!(extensionMethod is null))
-                    s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
+                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
-                if (s_WriteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Write");
+                extensionMethod = targetType.GetExtensionMethod("Write");
 
-                    if (!(extensionMethod is null))
-                        s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
-                if (s_WriteByRef is null && s_WriteByVal is null)
+                if (s_WriteByPtr is null && s_WriteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Hash32.Write method", new Exception("Write"));
             }
 

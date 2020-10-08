@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:22 UTC
+//     Generated on 2020 October 08 03:39:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using context = go.context_package;
 using tls = go.crypto.tls_package;
 using nettrace = go.@internal.nettrace_package;
 using net = go.net_package;
+using textproto = go.net.textproto_package;
 using reflect = go.reflect_package;
 using time = go.time_package;
 using go;
@@ -38,30 +39,34 @@ namespace http
                 this.PutIdleConn = default;
                 this.GotFirstResponseByte = default;
                 this.Got100Continue = default;
+                this.Got1xxResponse = default;
                 this.DNSStart = default;
                 this.DNSDone = default;
                 this.ConnectStart = default;
                 this.ConnectDone = default;
                 this.TLSHandshakeStart = default;
                 this.TLSHandshakeDone = default;
+                this.WroteHeaderField = default;
                 this.WroteHeaders = default;
                 this.Wait100Continue = default;
                 this.WroteRequest = default;
             }
 
-            public ClientTrace(Action<@string> GetConn = default, Action<GotConnInfo> GotConn = default, Action<error> PutIdleConn = default, Action GotFirstResponseByte = default, Action Got100Continue = default, Action<DNSStartInfo> DNSStart = default, Action<DNSDoneInfo> DNSDone = default, Action<@string, @string> ConnectStart = default, Action<@string, @string, error> ConnectDone = default, Action TLSHandshakeStart = default, Action<tls.ConnectionState, error> TLSHandshakeDone = default, Action WroteHeaders = default, Action Wait100Continue = default, Action<WroteRequestInfo> WroteRequest = default)
+            public ClientTrace(Action<@string> GetConn = default, Action<GotConnInfo> GotConn = default, Action<error> PutIdleConn = default, Action GotFirstResponseByte = default, Action Got100Continue = default, Func<long, textproto.MIMEHeader, error> Got1xxResponse = default, Action<DNSStartInfo> DNSStart = default, Action<DNSDoneInfo> DNSDone = default, Action<@string, @string> ConnectStart = default, Action<@string, @string, error> ConnectDone = default, Action TLSHandshakeStart = default, Action<tls.ConnectionState, error> TLSHandshakeDone = default, Action<@string, slice<@string>> WroteHeaderField = default, Action WroteHeaders = default, Action Wait100Continue = default, Action<WroteRequestInfo> WroteRequest = default)
             {
                 this.GetConn = GetConn;
                 this.GotConn = GotConn;
                 this.PutIdleConn = PutIdleConn;
                 this.GotFirstResponseByte = GotFirstResponseByte;
                 this.Got100Continue = Got100Continue;
+                this.Got1xxResponse = Got1xxResponse;
                 this.DNSStart = DNSStart;
                 this.DNSDone = DNSDone;
                 this.ConnectStart = ConnectStart;
                 this.ConnectDone = ConnectDone;
                 this.TLSHandshakeStart = TLSHandshakeStart;
                 this.TLSHandshakeDone = TLSHandshakeDone;
+                this.WroteHeaderField = WroteHeaderField;
                 this.WroteHeaders = WroteHeaders;
                 this.Wait100Continue = Wait100Continue;
                 this.WroteRequest = WroteRequest;
@@ -87,7 +92,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ClientTrace ClientTrace_cast(dynamic value)
         {
-            return new ClientTrace(value.GetConn, value.GotConn, value.PutIdleConn, value.GotFirstResponseByte, value.Got100Continue, value.DNSStart, value.DNSDone, value.ConnectStart, value.ConnectDone, value.TLSHandshakeStart, value.TLSHandshakeDone, value.WroteHeaders, value.Wait100Continue, value.WroteRequest);
+            return new ClientTrace(value.GetConn, value.GotConn, value.PutIdleConn, value.GotFirstResponseByte, value.Got100Continue, value.Got1xxResponse, value.DNSStart, value.DNSDone, value.ConnectStart, value.ConnectDone, value.TLSHandshakeStart, value.TLSHandshakeDone, value.WroteHeaderField, value.WroteHeaders, value.Wait100Continue, value.WroteRequest);
         }
     }
 }}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:42 UTC
+//     Generated on 2020 October 08 03:42:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace template
                 this.treeSet = default;
             }
 
-            public Tree(@string Name = default, @string ParseName = default, ref ptr<ListNode> Root = default, @string text = default, slice<object> funcs = default, ref ptr<lexer> lex = default, array<item> token = default, long peekCount = default, slice<@string> vars = default, map<@string, ref Tree> treeSet = default)
+            public Tree(@string Name = default, @string ParseName = default, ref ptr<ListNode> Root = default, @string text = default, slice<object> funcs = default, ref ptr<lexer> lex = default, array<item> token = default, long peekCount = default, slice<@string> vars = default, map<@string, ptr<Tree>> treeSet = default)
             {
                 this.Name = Name;
                 this.ParseName = ParseName;

@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
 // Fork, exec, wait, etc.
 
-// package syscall -- go2cs converted at 2020 August 29 08:37:02 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:26:33 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\exec_unix.go
+using errorspkg = go.errors_package;
+using bytealg = go.@internal.bytealg_package;
 using runtime = go.runtime_package;
 using sync = go.sync_package;
 using @unsafe = go.@unsafe_package;
@@ -72,9 +74,9 @@ namespace go
         // this function panics instead of returning an error.
         //
         // Deprecated: Use SlicePtrFromStrings instead.
-        public static slice<ref byte> StringSlicePtr(slice<@string> ss)
+        public static slice<ptr<byte>> StringSlicePtr(slice<@string> ss)
         {
-            var bb = make_slice<ref byte>(len(ss) + 1L);
+            var bb = make_slice<ptr<byte>>(len(ss) + 1L);
             for (long i = 0L; i < len(ss); i++)
             {
                 bb[i] = StringBytePtr(ss[i]);
@@ -82,41 +84,72 @@ namespace go
 
             bb[len(ss)] = null;
             return bb;
+
         }
 
         // SlicePtrFromStrings converts a slice of strings to a slice of
         // pointers to NUL-terminated byte arrays. If any string contains
         // a NUL byte, it returns (nil, EINVAL).
-        public static (slice<ref byte>, error) SlicePtrFromStrings(slice<@string> ss)
+        public static (slice<ptr<byte>>, error) SlicePtrFromStrings(slice<@string> ss)
         {
-            error err = default;
-            var bb = make_slice<ref byte>(len(ss) + 1L);
-            for (long i = 0L; i < len(ss); i++)
+            slice<ptr<byte>> _p0 = default;
+            error _p0 = default!;
+
+            long n = 0L;
             {
-                bb[i], err = BytePtrFromString(ss[i]);
-                if (err != null)
+                var s__prev1 = s;
+
+                foreach (var (_, __s) in ss)
                 {
-                    return (null, err);
+                    s = __s;
+                    if (bytealg.IndexByteString(s, 0L) != -1L)
+                    {
+                        return (null, error.As(EINVAL)!);
+                    }
+
+                    n += len(s) + 1L; // +1 for NUL
                 }
+
+                s = s__prev1;
             }
 
-            bb[len(ss)] = null;
-            return (bb, null);
+            var bb = make_slice<ptr<byte>>(len(ss) + 1L);
+            var b = make_slice<byte>(n);
+            n = 0L;
+            {
+                var s__prev1 = s;
+
+                foreach (var (__i, __s) in ss)
+                {
+                    i = __i;
+                    s = __s;
+                    bb[i] = _addr_b[n];
+                    copy(b[n..], s);
+                    n += len(s) + 1L;
+                }
+
+                s = s__prev1;
+            }
+
+            return (bb, error.As(null!)!);
+
         }
 
         public static void CloseOnExec(long fd)
         {
             fcntl(fd, F_SETFD, FD_CLOEXEC);
-
         }
 
         public static error SetNonblock(long fd, bool nonblocking)
         {
+            error err = default!;
+
             var (flag, err) = fcntl(fd, F_GETFL, 0L);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (nonblocking)
             {
                 flag |= O_NONBLOCK;
@@ -125,8 +158,10 @@ namespace go
             {
                 flag &= O_NONBLOCK;
             }
+
             _, err = fcntl(fd, F_SETFL, flag);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Credential holds user and group identities to be assumed
@@ -152,22 +187,28 @@ namespace go
         private static ProcAttr zeroProcAttr = default;
         private static SysProcAttr zeroSysProcAttr = default;
 
-        private static (long, error) forkExec(@string argv0, slice<@string> argv, ref ProcAttr attr)
+        private static (long, error) forkExec(@string argv0, slice<@string> argv, ptr<ProcAttr> _addr_attr)
         {
+            long pid = default;
+            error err = default!;
+            ref ProcAttr attr = ref _addr_attr.val;
+
             array<long> p = new array<long>(2L);
             long n = default;
-            Errno err1 = default;
-            WaitStatus wstatus = default;
+            ref Errno err1 = ref heap(out ptr<Errno> _addr_err1);
+            ref WaitStatus wstatus = ref heap(out ptr<WaitStatus> _addr_wstatus);
 
             if (attr == null)
             {
-                attr = ref zeroProcAttr;
+                attr = _addr_zeroProcAttr;
             }
+
             var sys = attr.Sys;
             if (sys == null)
             {
-                sys = ref zeroSysProcAttr;
+                sys = _addr_zeroSysProcAttr;
             }
+
             p[0L] = -1L;
             p[1L] = -1L; 
 
@@ -175,39 +216,58 @@ namespace go
             var (argv0p, err) = BytePtrFromString(argv0);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             var (argvp, err) = SlicePtrFromStrings(argv);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             var (envvp, err) = SlicePtrFromStrings(attr.Env);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             if ((runtime.GOOS == "freebsd" || runtime.GOOS == "dragonfly") && len(argv[0L]) > len(argv0))
             {
                 argvp[0L] = argv0p;
             }
-            ref byte chroot = default;
+
+            ptr<byte> chroot;
             if (sys.Chroot != "")
             {
                 chroot, err = BytePtrFromString(sys.Chroot);
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
+
             }
-            ref byte dir = default;
+
+            ptr<byte> dir;
             if (attr.Dir != "")
             {
                 dir, err = BytePtrFromString(attr.Dir);
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
+
+            } 
+
+            // Both Setctty and Foreground use the Ctty field,
+            // but they give it slightly different meanings.
+            if (sys.Setctty && sys.Foreground)
+            {
+                return (0L, error.As(errorspkg.New("both Setctty and Foreground set in SysProcAttr"))!);
+            }
+
+            if (sys.Setctty && sys.Ctty >= len(attr.Files))
+            {
+                return (0L, error.As(errorspkg.New("Setctty set but Ctty not valid in child"))!);
             } 
 
             // Acquire the fork lock so that no other threads
@@ -230,11 +290,21 @@ namespace go
                 err = Errno(err1);
                 goto error;
             }
+
             ForkLock.Unlock(); 
 
             // Read child error status from pipe.
             Close(p[1L]);
-            n, err = readlen(p[0L], (byte.Value)(@unsafe.Pointer(ref err1)), int(@unsafe.Sizeof(err1)));
+            while (true)
+            {
+                n, err = readlen(p[0L], (byte.val)(@unsafe.Pointer(_addr_err1)), int(@unsafe.Sizeof(err1)));
+                if (err != EINTR)
+                {
+                    break;
+                }
+
+            }
+
             Close(p[0L]);
             if (err != null || n != 0L)
             {
@@ -242,6 +312,7 @@ namespace go
                 {
                     err = Errno(err1);
                 }
+
                 if (err == null)
                 {
                     err = EPIPE;
@@ -249,17 +320,18 @@ namespace go
 
                 // Child failed; wait for it to exit, to make sure
                 // the zombies don't accumulate.
-                var (_, err1) = Wait4(pid, ref wstatus, 0L, null);
+                var (_, err1) = Wait4(pid, _addr_wstatus, 0L, null);
                 while (err1 == EINTR)
                 {
-                    _, err1 = Wait4(pid, ref wstatus, 0L, null);
+                    _, err1 = Wait4(pid, _addr_wstatus, 0L, null);
                 }
 
-                return (0L, err);
+                return (0L, error.As(err)!);
+
             } 
 
             // Read got EOF, so pipe closed on exec, so exec succeeded.
-            return (pid, null);
+            return (pid, error.As(null!)!);
 
 error:
             if (p[0L] >= 0L)
@@ -267,21 +339,32 @@ error:
                 Close(p[0L]);
                 Close(p[1L]);
             }
+
             ForkLock.Unlock();
-            return (0L, err);
+            return (0L, error.As(err)!);
+
         }
 
         // Combination of fork and exec, careful to be thread safe.
-        public static (long, error) ForkExec(@string argv0, slice<@string> argv, ref ProcAttr attr)
+        public static (long, error) ForkExec(@string argv0, slice<@string> argv, ptr<ProcAttr> _addr_attr)
         {
-            return forkExec(argv0, argv, attr);
+            long pid = default;
+            error err = default!;
+            ref ProcAttr attr = ref _addr_attr.val;
+
+            return forkExec(argv0, argv, _addr_attr);
         }
 
         // StartProcess wraps ForkExec for package os.
-        public static (long, System.UIntPtr, error) StartProcess(@string argv0, slice<@string> argv, ref ProcAttr attr)
+        public static (long, System.UIntPtr, error) StartProcess(@string argv0, slice<@string> argv, ptr<ProcAttr> _addr_attr)
         {
-            pid, err = forkExec(argv0, argv, attr);
-            return (pid, 0L, err);
+            long pid = default;
+            System.UIntPtr handle = default;
+            error err = default!;
+            ref ProcAttr attr = ref _addr_attr.val;
+
+            pid, err = forkExec(argv0, argv, _addr_attr);
+            return (pid, 0L, error.As(err)!);
         }
 
         // Implemented in runtime package.
@@ -290,42 +373,57 @@ error:
         private static void runtime_AfterExec()
 ;
 
-        // execveSolaris is non-nil on Solaris, set to execve in exec_solaris.go; this
+        // execveLibc is non-nil on OS using libc syscall, set to execve in exec_libc.go; this
         // avoids a build dependency for other platforms.
-        private static Func<System.UIntPtr, System.UIntPtr, System.UIntPtr, Errno> execveSolaris = default;
+        private static Func<System.UIntPtr, System.UIntPtr, System.UIntPtr, Errno> execveLibc = default;
+        private static Func<ptr<byte>, ptr<ptr<byte>>, ptr<ptr<byte>>, error> execveDarwin = default;
 
         // Exec invokes the execve(2) system call.
         public static error Exec(@string argv0, slice<@string> argv, slice<@string> envv)
         {
+            error err = default!;
+
             var (argv0p, err) = BytePtrFromString(argv0);
             if (err != null)
             {>>MARKER:FUNCTION_runtime_AfterExec_BLOCK_PREFIX<<
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var (argvp, err) = SlicePtrFromStrings(argv);
             if (err != null)
             {>>MARKER:FUNCTION_runtime_BeforeExec_BLOCK_PREFIX<<
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var (envvp, err) = SlicePtrFromStrings(envv);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             runtime_BeforeExec();
 
-            Errno err1 = default;
-            if (runtime.GOOS == "solaris")
+            error err1 = default!;
+            if (runtime.GOOS == "solaris" || runtime.GOOS == "illumos" || runtime.GOOS == "aix")
             { 
-                // RawSyscall should never be used on Solaris.
-                err1 = execveSolaris(uintptr(@unsafe.Pointer(argv0p)), uintptr(@unsafe.Pointer(ref argvp[0L])), uintptr(@unsafe.Pointer(ref envvp[0L])));
+                // RawSyscall should never be used on Solaris, illumos, or AIX.
+                err1 = error.As(execveLibc(uintptr(@unsafe.Pointer(argv0p)), uintptr(@unsafe.Pointer(_addr_argvp[0L])), uintptr(@unsafe.Pointer(_addr_envvp[0L]))))!;
+
+            }
+            else if (runtime.GOOS == "darwin")
+            { 
+                // Similarly on Darwin.
+                err1 = error.As(execveDarwin(argv0p, _addr_argvp[0L], _addr_envvp[0L]))!;
+
             }
             else
             {
-                _, _, err1 = RawSyscall(SYS_EXECVE, uintptr(@unsafe.Pointer(argv0p)), uintptr(@unsafe.Pointer(ref argvp[0L])), uintptr(@unsafe.Pointer(ref envvp[0L])));
+                _, _, err1 = RawSyscall(SYS_EXECVE, uintptr(@unsafe.Pointer(argv0p)), uintptr(@unsafe.Pointer(_addr_argvp[0L])), uintptr(@unsafe.Pointer(_addr_envvp[0L])));
             }
+
             runtime_AfterExec();
-            return error.As(err1);
+            return error.As(err1)!;
+
         }
     }
 }

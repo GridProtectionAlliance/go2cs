@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:43 UTC
+//     Generated on 2020 October 08 03:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,12 +28,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {
@@ -47,13 +48,15 @@ namespace net
             // Constructors
             public readResult(NilType _)
             {
+                this._ = default;
                 this.n = default;
                 this.err = default;
                 this.b = default;
             }
 
-            public readResult(long n = default, error err = default, byte b = default)
+            public readResult(incomparable _ = default, long n = default, error err = default, byte b = default)
             {
+                this._ = _;
                 this.n = n;
                 this.err = err;
                 this.b = b;
@@ -79,7 +82,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static readResult readResult_cast(dynamic value)
         {
-            return new readResult(value.n, value.err, value.b);
+            return new readResult(value._, value.n, value.err, value.b);
         }
     }
 }}

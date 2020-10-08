@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:32 UTC
+//     Generated on 2020 October 08 03:27:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace go
                 this.RevocationFreshnessTime = default;
             }
 
-            public CertSimpleChain(uint Size = default, CertTrustStatus TrustStatus = default, uint NumElements = default, ref ptr<ptr<CertChainElement>> Elements = default, System.UIntPtr TrustListInfo = default, uint HasRevocationFreshnessTime = default, uint RevocationFreshnessTime = default)
+            public CertSimpleChain(uint Size = default, CertTrustStatus TrustStatus = default, uint NumElements = default, ref ptr<ptr<CertChainElement>> Elements = default, ref ptr<CertTrustListInfo> TrustListInfo = default, uint HasRevocationFreshnessTime = default, uint RevocationFreshnessTime = default)
             {
                 this.Size = Size;
                 this.TrustStatus = TrustStatus;
@@ -64,7 +64,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static CertSimpleChain CertSimpleChain_cast(dynamic value)
         {
-            return new CertSimpleChain(value.Size, value.TrustStatus, value.NumElements, ref value.Elements, value.TrustListInfo, value.HasRevocationFreshnessTime, value.RevocationFreshnessTime);
+            return new CertSimpleChain(value.Size, value.TrustStatus, value.NumElements, ref value.Elements, ref value.TrustListInfo, value.HasRevocationFreshnessTime, value.RevocationFreshnessTime);
         }
     }
 }

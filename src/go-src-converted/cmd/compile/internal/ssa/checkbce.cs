@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:26 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:02 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\checkbce.go
-
+using logopt = go.cmd.compile.@internal.logopt_package;
 using static go.builtin;
 
 namespace go {
@@ -19,11 +19,13 @@ namespace @internal
         // Useful to find regressions. checkbce is only activated when with
         // corresponding debug options, so it's off by default.
         // See test/checkbce.go
-        private static void checkbce(ref Func f)
+        private static void checkbce(ptr<Func> _addr_f)
         {
-            if (f.pass.debug <= 0L)
+            ref Func f = ref _addr_f.val;
+
+            if (f.pass.debug <= 0L && !logopt.Enabled())
             {
-                return;
+                return ;
             }
             foreach (var (_, b) in f.Blocks)
             {
@@ -31,7 +33,21 @@ namespace @internal
                 {
                     if (v.Op == OpIsInBounds || v.Op == OpIsSliceInBounds)
                     {
-                        f.Warnl(v.Pos, "Found %v", v.Op);
+                        if (f.pass.debug > 0L)
+                        {
+                            f.Warnl(v.Pos, "Found %v", v.Op);
+                        }
+                        if (logopt.Enabled())
+                        {
+                            if (v.Op == OpIsInBounds)
+                            {
+                                logopt.LogOpt(v.Pos, "isInBounds", "checkbce", f.Name);
+                            }
+                            if (v.Op == OpIsSliceInBounds)
+                            {
+                                logopt.LogOpt(v.Pos, "isSliceInBounds", "checkbce", f.Name);
+                            }
+                        }
                     }
                 }
             }

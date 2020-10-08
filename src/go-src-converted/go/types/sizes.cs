@@ -4,7 +4,7 @@
 
 // This file implements Sizes.
 
-// package types -- go2cs converted at 2020 August 29 08:47:55 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:43 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\sizes.go
 
@@ -20,7 +20,7 @@ namespace go
         {
             long Alignof(Type T); // Offsetsof returns the offsets of the given struct fields, in bytes.
 // Offsetsof must implement the offset guarantees required by the spec.
-            long Offsetsof(slice<ref Var> fields); // Sizeof returns the size of a variable of type T.
+            long Offsetsof(slice<ptr<Var>> fields); // Sizeof returns the size of a variable of type T.
 // Sizeof must implement the size guarantees required by the spec.
             long Sizeof(Type T);
         }
@@ -50,16 +50,18 @@ namespace go
             public long MaxAlign; // maximum alignment in bytes - must be >= 1
         }
 
-        private static long Alignof(this ref StdSizes s, Type T)
-        { 
+        private static long Alignof(this ptr<StdSizes> _addr_s, Type T)
+        {
+            ref StdSizes s = ref _addr_s.val;
+ 
             // For arrays and structs, alignment is defined in terms
             // of alignment of the elements and fields, respectively.
             switch (T.Underlying().type())
             {
-                case ref Array t:
+                case ptr<Array> t:
                     return s.Alignof(t.elem);
                     break;
-                case ref Struct t:
+                case ptr<Struct> t:
                     var max = int64(1L);
                     foreach (var (_, f) in t.fields)
                     {
@@ -76,20 +78,22 @@ namespace go
                             a = a__prev1;
 
                         }
+
                     }
                     return max;
                     break;
-                case ref Slice t:
+                case ptr<Slice> t:
                     return s.WordSize;
                     break;
-                case ref Interface t:
+                case ptr<Interface> t:
                     return s.WordSize;
                     break;
-                case ref Basic t:
+                case ptr<Basic> t:
                     if (t.Info() & IsString != 0L)
                     {
                         return s.WordSize;
                     }
+
                     break;
             }
             a = s.Sizeof(T); // may be 0
@@ -103,15 +107,20 @@ namespace go
             {
                 a /= 2L;
             }
+
             if (a > s.MaxAlign)
             {
                 return s.MaxAlign;
             }
+
             return a;
+
         }
 
-        private static slice<long> Offsetsof(this ref StdSizes s, slice<ref Var> fields)
+        private static slice<long> Offsetsof(this ptr<StdSizes> _addr_s, slice<ptr<Var>> fields)
         {
+            ref StdSizes s = ref _addr_s.val;
+
             var offsets = make_slice<long>(len(fields));
             long o = default;
             foreach (var (i, f) in fields)
@@ -122,15 +131,18 @@ namespace go
                 o += s.Sizeof(f.typ);
             }
             return offsets;
+
         }
 
         private static array<byte> basicSizes = new array<byte>(InitKeyedValues<byte>((Bool, 1), (Int8, 1), (Int16, 2), (Int32, 4), (Int64, 8), (Uint8, 1), (Uint16, 2), (Uint32, 4), (Uint64, 8), (Float32, 4), (Float64, 8), (Complex64, 8), (Complex128, 16)));
 
-        private static long Sizeof(this ref StdSizes s, Type T)
+        private static long Sizeof(this ptr<StdSizes> _addr_s, Type T)
         {
+            ref StdSizes s = ref _addr_s.val;
+
             switch (T.Underlying().type())
             {
-                case ref Basic t:
+                case ptr<Basic> t:
                     assert(isTyped(T));
                     var k = t.kind;
                     if (int(k) < len(basicSizes))
@@ -144,35 +156,40 @@ namespace go
                             }
 
                         }
+
                     }
+
                     if (k == String)
                     {
                         return s.WordSize * 2L;
                     }
+
                     break;
-                case ref Array t:
+                case ptr<Array> t:
                     var n = t.len;
-                    if (n == 0L)
+                    if (n <= 0L)
                     {
                         return 0L;
-                    }
+                    } 
+                    // n > 0
                     var a = s.Alignof(t.elem);
                     var z = s.Sizeof(t.elem);
                     return align(z, a) * (n - 1L) + z;
                     break;
-                case ref Slice t:
+                case ptr<Slice> t:
                     return s.WordSize * 3L;
                     break;
-                case ref Struct t:
+                case ptr<Struct> t:
                     n = t.NumFields();
                     if (n == 0L)
                     {
                         return 0L;
                     }
+
                     var offsets = s.Offsetsof(t.fields);
                     return offsets[n - 1L] + s.Sizeof(t.fields[n - 1L].typ);
                     break;
-                case ref Interface t:
+                case ptr<Interface> t:
                     return s.WordSize * 2L;
                     break;
             }
@@ -180,33 +197,46 @@ namespace go
         }
 
         // common architecture word sizes and alignments
-        private static map gcArchSizes = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, ref StdSizes>{"386":{4,4},"arm":{4,4},"arm64":{8,8},"amd64":{8,8},"amd64p32":{4,8},"mips":{4,4},"mipsle":{4,4},"mips64":{8,8},"mips64le":{8,8},"ppc64":{8,8},"ppc64le":{8,8},"s390x":{8,8},};
+        private static map gcArchSizes = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, ptr<StdSizes>>{"386":{4,4},"arm":{4,4},"arm64":{8,8},"amd64":{8,8},"amd64p32":{4,8},"mips":{4,4},"mipsle":{4,4},"mips64":{8,8},"mips64le":{8,8},"ppc64":{8,8},"ppc64le":{8,8},"riscv64":{8,8},"s390x":{8,8},"sparc64":{8,8},"wasm":{8,8},};
 
         // SizesFor returns the Sizes used by a compiler for an architecture.
         // The result is nil if a compiler/architecture pair is not known.
         //
         // Supported architectures for compiler "gc":
         // "386", "arm", "arm64", "amd64", "amd64p32", "mips", "mipsle",
-        // "mips64", "mips64le", "ppc64", "ppc64le", "s390x".
+        // "mips64", "mips64le", "ppc64", "ppc64le", "riscv64", "s390x", "sparc64", "wasm".
         public static Sizes SizesFor(@string compiler, @string arch)
         {
-            if (compiler != "gc")
+            map<@string, ptr<StdSizes>> m = default;
+            switch (compiler)
             {
-                return null;
+                case "gc": 
+                    m = gcArchSizes;
+                    break;
+                case "gccgo": 
+                    m = gccgoArchSizes;
+                    break;
+                default: 
+                    return null;
+                    break;
             }
-            var (s, ok) = gcArchSizes[arch];
+            var (s, ok) = m[arch];
             if (!ok)
             {
                 return null;
             }
+
             return s;
+
         }
 
         // stdSizes is used if Config.Sizes == nil.
         private static var stdSizes = SizesFor("gc", "amd64");
 
-        private static long alignof(this ref Config _conf, Type T) => func(_conf, (ref Config conf, Defer _, Panic panic, Recover __) =>
+        private static long alignof(this ptr<Config> _addr_conf, Type T) => func((_, panic, __) =>
         {
+            ref Config conf = ref _addr_conf.val;
+
             {
                 var s = conf.Sizes;
 
@@ -221,15 +251,22 @@ namespace go
                         }
 
                     }
+
                     panic("Config.Sizes.Alignof returned an alignment < 1");
+
                 }
 
             }
+
             return stdSizes.Alignof(T);
+
         });
 
-        private static slice<long> offsetsof(this ref Config _conf, ref Struct _T) => func(_conf, _T, (ref Config conf, ref Struct T, Defer _, Panic panic, Recover __) =>
+        private static slice<long> offsetsof(this ptr<Config> _addr_conf, ptr<Struct> _addr_T) => func((_, panic, __) =>
         {
+            ref Config conf = ref _addr_conf.val;
+            ref Struct T = ref _addr_T.val;
+
             slice<long> offsets = default;
             if (T.NumFields() > 0L)
             { 
@@ -245,12 +282,14 @@ namespace go
                         {
                             panic("Config.Sizes.Offsetsof returned the wrong number of offsets");
                         }
+
                         foreach (var (_, o) in offsets)
                         {
                             if (o < 0L)
                             {
                                 panic("Config.Sizes.Offsetsof returned an offset < 0");
                             }
+
                         }
                     else
                     }                    {
@@ -258,27 +297,35 @@ namespace go
                     }
 
                 }
+
             }
+
             return offsets;
+
         });
 
         // offsetof returns the offset of the field specified via
         // the index sequence relative to typ. All embedded fields
         // must be structs (rather than pointer to structs).
-        private static long offsetof(this ref Config conf, Type typ, slice<long> index)
+        private static long offsetof(this ptr<Config> _addr_conf, Type typ, slice<long> index)
         {
+            ref Config conf = ref _addr_conf.val;
+
             long o = default;
             foreach (var (_, i) in index)
             {
-                ref Struct s = typ.Underlying()._<ref Struct>();
+                ptr<Struct> s = typ.Underlying()._<ptr<Struct>>();
                 o += conf.offsetsof(s)[i];
                 typ = s.fields[i].typ;
             }
             return o;
+
         }
 
-        private static long @sizeof(this ref Config _conf, Type T) => func(_conf, (ref Config conf, Defer _, Panic panic, Recover __) =>
+        private static long @sizeof(this ptr<Config> _addr_conf, Type T) => func((_, panic, __) =>
         {
+            ref Config conf = ref _addr_conf.val;
+
             {
                 var s = conf.Sizes;
 
@@ -293,11 +340,15 @@ namespace go
                         }
 
                     }
+
                     panic("Config.Sizes.Sizeof returned a size < 0");
+
                 }
 
             }
+
             return stdSizes.Sizeof(T);
+
         });
 
         // align returns the smallest y >= x such that y % a == 0.

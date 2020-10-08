@@ -1,7 +1,7 @@
 // created by cgo -cdefs and then converted to Go
 // cgo -cdefs defs_darwin.go
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:44 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:29 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\defs_darwin_arm64.go
 using @unsafe = go.@unsafe_package;
@@ -11,157 +11,101 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly ulong _EINTR = 0x4UL;
-        private static readonly ulong _EFAULT = 0xeUL;
+        private static readonly ulong _EINTR = (ulong)0x4UL;
+        private static readonly ulong _EFAULT = (ulong)0xeUL;
+        private static readonly ulong _EAGAIN = (ulong)0x23UL;
+        private static readonly ulong _ETIMEDOUT = (ulong)0x3cUL;
 
-        private static readonly ulong _PROT_NONE = 0x0UL;
-        private static readonly ulong _PROT_READ = 0x1UL;
-        private static readonly ulong _PROT_WRITE = 0x2UL;
-        private static readonly ulong _PROT_EXEC = 0x4UL;
+        private static readonly ulong _PROT_NONE = (ulong)0x0UL;
+        private static readonly ulong _PROT_READ = (ulong)0x1UL;
+        private static readonly ulong _PROT_WRITE = (ulong)0x2UL;
+        private static readonly ulong _PROT_EXEC = (ulong)0x4UL;
 
-        private static readonly ulong _MAP_ANON = 0x1000UL;
-        private static readonly ulong _MAP_PRIVATE = 0x2UL;
-        private static readonly ulong _MAP_FIXED = 0x10UL;
+        private static readonly ulong _MAP_ANON = (ulong)0x1000UL;
+        private static readonly ulong _MAP_PRIVATE = (ulong)0x2UL;
+        private static readonly ulong _MAP_FIXED = (ulong)0x10UL;
 
-        private static readonly ulong _MADV_DONTNEED = 0x4UL;
-        private static readonly ulong _MADV_FREE = 0x5UL;
+        private static readonly ulong _MADV_DONTNEED = (ulong)0x4UL;
+        private static readonly ulong _MADV_FREE = (ulong)0x5UL;
+        private static readonly ulong _MADV_FREE_REUSABLE = (ulong)0x7UL;
+        private static readonly ulong _MADV_FREE_REUSE = (ulong)0x8UL;
 
-        private static readonly ulong _MACH_MSG_TYPE_MOVE_RECEIVE = 0x10UL;
-        private static readonly ulong _MACH_MSG_TYPE_MOVE_SEND = 0x11UL;
-        private static readonly ulong _MACH_MSG_TYPE_MOVE_SEND_ONCE = 0x12UL;
-        private static readonly ulong _MACH_MSG_TYPE_COPY_SEND = 0x13UL;
-        private static readonly ulong _MACH_MSG_TYPE_MAKE_SEND = 0x14UL;
-        private static readonly ulong _MACH_MSG_TYPE_MAKE_SEND_ONCE = 0x15UL;
-        private static readonly ulong _MACH_MSG_TYPE_COPY_RECEIVE = 0x16UL;
+        private static readonly ulong _SA_SIGINFO = (ulong)0x40UL;
+        private static readonly ulong _SA_RESTART = (ulong)0x2UL;
+        private static readonly ulong _SA_ONSTACK = (ulong)0x1UL;
+        private static readonly ulong _SA_USERTRAMP = (ulong)0x100UL;
+        private static readonly ulong _SA_64REGSET = (ulong)0x200UL;
 
-        private static readonly ulong _MACH_MSG_PORT_DESCRIPTOR = 0x0UL;
-        private static readonly ulong _MACH_MSG_OOL_DESCRIPTOR = 0x1UL;
-        private static readonly ulong _MACH_MSG_OOL_PORTS_DESCRIPTOR = 0x2UL;
-        private static readonly ulong _MACH_MSG_OOL_VOLATILE_DESCRIPTOR = 0x3UL;
+        private static readonly ulong _SIGHUP = (ulong)0x1UL;
+        private static readonly ulong _SIGINT = (ulong)0x2UL;
+        private static readonly ulong _SIGQUIT = (ulong)0x3UL;
+        private static readonly ulong _SIGILL = (ulong)0x4UL;
+        private static readonly ulong _SIGTRAP = (ulong)0x5UL;
+        private static readonly ulong _SIGABRT = (ulong)0x6UL;
+        private static readonly ulong _SIGEMT = (ulong)0x7UL;
+        private static readonly ulong _SIGFPE = (ulong)0x8UL;
+        private static readonly ulong _SIGKILL = (ulong)0x9UL;
+        private static readonly ulong _SIGBUS = (ulong)0xaUL;
+        private static readonly ulong _SIGSEGV = (ulong)0xbUL;
+        private static readonly ulong _SIGSYS = (ulong)0xcUL;
+        private static readonly ulong _SIGPIPE = (ulong)0xdUL;
+        private static readonly ulong _SIGALRM = (ulong)0xeUL;
+        private static readonly ulong _SIGTERM = (ulong)0xfUL;
+        private static readonly ulong _SIGURG = (ulong)0x10UL;
+        private static readonly ulong _SIGSTOP = (ulong)0x11UL;
+        private static readonly ulong _SIGTSTP = (ulong)0x12UL;
+        private static readonly ulong _SIGCONT = (ulong)0x13UL;
+        private static readonly ulong _SIGCHLD = (ulong)0x14UL;
+        private static readonly ulong _SIGTTIN = (ulong)0x15UL;
+        private static readonly ulong _SIGTTOU = (ulong)0x16UL;
+        private static readonly ulong _SIGIO = (ulong)0x17UL;
+        private static readonly ulong _SIGXCPU = (ulong)0x18UL;
+        private static readonly ulong _SIGXFSZ = (ulong)0x19UL;
+        private static readonly ulong _SIGVTALRM = (ulong)0x1aUL;
+        private static readonly ulong _SIGPROF = (ulong)0x1bUL;
+        private static readonly ulong _SIGWINCH = (ulong)0x1cUL;
+        private static readonly ulong _SIGINFO = (ulong)0x1dUL;
+        private static readonly ulong _SIGUSR1 = (ulong)0x1eUL;
+        private static readonly ulong _SIGUSR2 = (ulong)0x1fUL;
 
-        private static readonly ulong _MACH_MSGH_BITS_COMPLEX = 0x80000000UL;
+        private static readonly ulong _FPE_INTDIV = (ulong)0x7UL;
+        private static readonly ulong _FPE_INTOVF = (ulong)0x8UL;
+        private static readonly ulong _FPE_FLTDIV = (ulong)0x1UL;
+        private static readonly ulong _FPE_FLTOVF = (ulong)0x2UL;
+        private static readonly ulong _FPE_FLTUND = (ulong)0x3UL;
+        private static readonly ulong _FPE_FLTRES = (ulong)0x4UL;
+        private static readonly ulong _FPE_FLTINV = (ulong)0x5UL;
+        private static readonly ulong _FPE_FLTSUB = (ulong)0x6UL;
 
-        private static readonly ulong _MACH_SEND_MSG = 0x1UL;
-        private static readonly ulong _MACH_RCV_MSG = 0x2UL;
-        private static readonly ulong _MACH_RCV_LARGE = 0x4UL;
+        private static readonly ulong _BUS_ADRALN = (ulong)0x1UL;
+        private static readonly ulong _BUS_ADRERR = (ulong)0x2UL;
+        private static readonly ulong _BUS_OBJERR = (ulong)0x3UL;
 
-        private static readonly ulong _MACH_SEND_TIMEOUT = 0x10UL;
-        private static readonly ulong _MACH_SEND_INTERRUPT = 0x40UL;
-        private static readonly ulong _MACH_SEND_ALWAYS = 0x10000UL;
-        private static readonly ulong _MACH_SEND_TRAILER = 0x20000UL;
-        private static readonly ulong _MACH_RCV_TIMEOUT = 0x100UL;
-        private static readonly ulong _MACH_RCV_NOTIFY = 0x200UL;
-        private static readonly ulong _MACH_RCV_INTERRUPT = 0x400UL;
-        private static readonly ulong _MACH_RCV_OVERWRITE = 0x1000UL;
+        private static readonly ulong _SEGV_MAPERR = (ulong)0x1UL;
+        private static readonly ulong _SEGV_ACCERR = (ulong)0x2UL;
 
-        private static readonly ulong _NDR_PROTOCOL_2_0 = 0x0UL;
-        private static readonly ulong _NDR_INT_BIG_ENDIAN = 0x0UL;
-        private static readonly ulong _NDR_INT_LITTLE_ENDIAN = 0x1UL;
-        private static readonly ulong _NDR_FLOAT_IEEE = 0x0UL;
-        private static readonly ulong _NDR_CHAR_ASCII = 0x0UL;
+        private static readonly ulong _ITIMER_REAL = (ulong)0x0UL;
+        private static readonly ulong _ITIMER_VIRTUAL = (ulong)0x1UL;
+        private static readonly ulong _ITIMER_PROF = (ulong)0x2UL;
 
-        private static readonly ulong _SA_SIGINFO = 0x40UL;
-        private static readonly ulong _SA_RESTART = 0x2UL;
-        private static readonly ulong _SA_ONSTACK = 0x1UL;
-        private static readonly ulong _SA_USERTRAMP = 0x100UL;
-        private static readonly ulong _SA_64REGSET = 0x200UL;
+        private static readonly ulong _EV_ADD = (ulong)0x1UL;
+        private static readonly ulong _EV_DELETE = (ulong)0x2UL;
+        private static readonly ulong _EV_CLEAR = (ulong)0x20UL;
+        private static readonly ulong _EV_RECEIPT = (ulong)0x40UL;
+        private static readonly ulong _EV_ERROR = (ulong)0x4000UL;
+        private static readonly ulong _EV_EOF = (ulong)0x8000UL;
+        private static readonly ulong _EVFILT_READ = (ulong)-0x1UL;
+        private static readonly ulong _EVFILT_WRITE = (ulong)-0x2UL;
 
-        private static readonly ulong _SIGHUP = 0x1UL;
-        private static readonly ulong _SIGINT = 0x2UL;
-        private static readonly ulong _SIGQUIT = 0x3UL;
-        private static readonly ulong _SIGILL = 0x4UL;
-        private static readonly ulong _SIGTRAP = 0x5UL;
-        private static readonly ulong _SIGABRT = 0x6UL;
-        private static readonly ulong _SIGEMT = 0x7UL;
-        private static readonly ulong _SIGFPE = 0x8UL;
-        private static readonly ulong _SIGKILL = 0x9UL;
-        private static readonly ulong _SIGBUS = 0xaUL;
-        private static readonly ulong _SIGSEGV = 0xbUL;
-        private static readonly ulong _SIGSYS = 0xcUL;
-        private static readonly ulong _SIGPIPE = 0xdUL;
-        private static readonly ulong _SIGALRM = 0xeUL;
-        private static readonly ulong _SIGTERM = 0xfUL;
-        private static readonly ulong _SIGURG = 0x10UL;
-        private static readonly ulong _SIGSTOP = 0x11UL;
-        private static readonly ulong _SIGTSTP = 0x12UL;
-        private static readonly ulong _SIGCONT = 0x13UL;
-        private static readonly ulong _SIGCHLD = 0x14UL;
-        private static readonly ulong _SIGTTIN = 0x15UL;
-        private static readonly ulong _SIGTTOU = 0x16UL;
-        private static readonly ulong _SIGIO = 0x17UL;
-        private static readonly ulong _SIGXCPU = 0x18UL;
-        private static readonly ulong _SIGXFSZ = 0x19UL;
-        private static readonly ulong _SIGVTALRM = 0x1aUL;
-        private static readonly ulong _SIGPROF = 0x1bUL;
-        private static readonly ulong _SIGWINCH = 0x1cUL;
-        private static readonly ulong _SIGINFO = 0x1dUL;
-        private static readonly ulong _SIGUSR1 = 0x1eUL;
-        private static readonly ulong _SIGUSR2 = 0x1fUL;
+        private static readonly ulong _PTHREAD_CREATE_DETACHED = (ulong)0x2UL;
 
-        private static readonly ulong _FPE_INTDIV = 0x7UL;
-        private static readonly ulong _FPE_INTOVF = 0x8UL;
-        private static readonly ulong _FPE_FLTDIV = 0x1UL;
-        private static readonly ulong _FPE_FLTOVF = 0x2UL;
-        private static readonly ulong _FPE_FLTUND = 0x3UL;
-        private static readonly ulong _FPE_FLTRES = 0x4UL;
-        private static readonly ulong _FPE_FLTINV = 0x5UL;
-        private static readonly ulong _FPE_FLTSUB = 0x6UL;
+        private static readonly ulong _F_SETFD = (ulong)0x2UL;
+        private static readonly ulong _F_GETFL = (ulong)0x3UL;
+        private static readonly ulong _F_SETFL = (ulong)0x4UL;
+        private static readonly ulong _FD_CLOEXEC = (ulong)0x1UL;
 
-        private static readonly ulong _BUS_ADRALN = 0x1UL;
-        private static readonly ulong _BUS_ADRERR = 0x2UL;
-        private static readonly ulong _BUS_OBJERR = 0x3UL;
+        private static readonly long _O_NONBLOCK = (long)4L;
 
-        private static readonly ulong _SEGV_MAPERR = 0x1UL;
-        private static readonly ulong _SEGV_ACCERR = 0x2UL;
-
-        private static readonly ulong _ITIMER_REAL = 0x0UL;
-        private static readonly ulong _ITIMER_VIRTUAL = 0x1UL;
-        private static readonly ulong _ITIMER_PROF = 0x2UL;
-
-        private static readonly ulong _EV_ADD = 0x1UL;
-        private static readonly ulong _EV_DELETE = 0x2UL;
-        private static readonly ulong _EV_CLEAR = 0x20UL;
-        private static readonly ulong _EV_RECEIPT = 0x40UL;
-        private static readonly ulong _EV_ERROR = 0x4000UL;
-        private static readonly ulong _EV_EOF = 0x8000UL;
-        private static readonly ulong _EVFILT_READ = -0x1UL;
-        private static readonly ulong _EVFILT_WRITE = -0x2UL;
-
-        private partial struct machbody
-        {
-            public uint msgh_descriptor_count;
-        }
-
-        private partial struct machheader
-        {
-            public uint msgh_bits;
-            public uint msgh_size;
-            public uint msgh_remote_port;
-            public uint msgh_local_port;
-            public uint msgh_reserved;
-            public int msgh_id;
-        }
-
-        private partial struct machndr
-        {
-            public byte mig_vers;
-            public byte if_vers;
-            public byte reserved1;
-            public byte mig_encoding;
-            public byte int_rep;
-            public byte char_rep;
-            public byte float_rep;
-            public byte reserved2;
-        }
-
-        private partial struct machport
-        {
-            public uint name;
-            public uint pad1;
-            public ushort pad2;
-            public byte disposition;
-            public byte _type;
-        }
 
         private partial struct stackt
         {
@@ -207,8 +151,10 @@ namespace go
             public array<byte> pad_cgo_0;
         }
 
-        private static void set_usec(this ref timeval tv, int x)
+        private static void set_usec(this ptr<timeval> _addr_tv, int x)
         {
+            ref timeval tv = ref _addr_tv.val;
+
             tv.tv_usec = x;
         }
 
@@ -222,6 +168,15 @@ namespace go
         {
             public long tv_sec;
             public long tv_nsec;
+        }
+
+        //go:nosplit
+        private static void setNsec(this ptr<timespec> _addr_ts, long ns)
+        {
+            ref timespec ts = ref _addr_ts.val;
+
+            ts.tv_sec = ns / 1e9F;
+            ts.tv_nsec = ns % 1e9F;
         }
 
         private partial struct exceptionstate64
@@ -274,6 +229,41 @@ namespace go
             public uint fflags;
             public long data;
             public ptr<byte> udata;
+        }
+
+        private partial struct pthread // : System.UIntPtr
+        {
+        }
+        private partial struct pthreadattr
+        {
+            public long X__sig;
+            public array<sbyte> X__opaque;
+        }
+        private partial struct pthreadmutex
+        {
+            public long X__sig;
+            public array<sbyte> X__opaque;
+        }
+        private partial struct pthreadmutexattr
+        {
+            public long X__sig;
+            public array<sbyte> X__opaque;
+        }
+        private partial struct pthreadcond
+        {
+            public long X__sig;
+            public array<sbyte> X__opaque;
+        }
+        private partial struct pthreadcondattr
+        {
+            public long X__sig;
+            public array<sbyte> X__opaque;
+        }
+
+        private partial struct machTimebaseInfo
+        {
+            public uint numer;
+            public uint denom;
         }
     }
 }

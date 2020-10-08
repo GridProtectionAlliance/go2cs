@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2020 August 29 08:48:33 UTC
+// package ast -- go2cs converted at 2020 October 08 04:04:22 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\import.go
 using token = go.go.token_package;
@@ -18,85 +18,104 @@ namespace go
     {
         // SortImports sorts runs of consecutive import lines in import blocks in f.
         // It also removes duplicate imports when it is possible to do so without data loss.
-        public static void SortImports(ref token.FileSet fset, ref File f)
+        public static void SortImports(ptr<token.FileSet> _addr_fset, ptr<File> _addr_f)
         {
+            ref token.FileSet fset = ref _addr_fset.val;
+            ref File f = ref _addr_f.val;
+
             {
                 var d__prev1 = d;
 
                 foreach (var (_, __d) in f.Decls)
                 {
                     d = __d;
-                    ref GenDecl (d, ok) = d._<ref GenDecl>();
+                    ptr<GenDecl> (d, ok) = d._<ptr<GenDecl>>();
                     if (!ok || d.Tok != token.IMPORT)
                     { 
                         // Not an import declaration, so we're done.
                         // Imports are always first.
                         break;
+
                     }
                     if (!d.Lparen.IsValid())
                     { 
                         // Not a block: sorted by default.
                         continue;
+
                     }
                     long i = 0L;
                     var specs = d.Specs[..0L];
                     foreach (var (j, s) in d.Specs)
                     {
-                        if (j > i && fset.Position(s.Pos()).Line > 1L + fset.Position(d.Specs[j - 1L].End()).Line)
+                        if (j > i && lineAt(_addr_fset, s.Pos()) > 1L + lineAt(_addr_fset, d.Specs[j - 1L].End()))
                         { 
                             // j begins a new run. End this one.
-                            specs = append(specs, sortSpecs(fset, f, d.Specs[i..j]));
+                            specs = append(specs, sortSpecs(_addr_fset, _addr_f, d.Specs[i..j]));
                             i = j;
+
                         }
-                    }                    specs = append(specs, sortSpecs(fset, f, d.Specs[i..]));
+                    }                    specs = append(specs, sortSpecs(_addr_fset, _addr_f, d.Specs[i..]));
                     d.Specs = specs; 
 
                     // Deduping can leave a blank line before the rparen; clean that up.
                     if (len(d.Specs) > 0L)
                     {
                         var lastSpec = d.Specs[len(d.Specs) - 1L];
-                        var lastLine = fset.Position(lastSpec.Pos()).Line;
-                        var rParenLine = fset.Position(d.Rparen).Line;
+                        var lastLine = lineAt(_addr_fset, lastSpec.Pos());
+                        var rParenLine = lineAt(_addr_fset, d.Rparen);
                         while (rParenLine > lastLine + 1L)
                         {
                             rParenLine--;
                             fset.File(d.Rparen).MergeLine(rParenLine);
                         }
+
                     }
                 }
                 d = d__prev1;
             }
+        }
 
+        private static long lineAt(ptr<token.FileSet> _addr_fset, token.Pos pos)
+        {
+            ref token.FileSet fset = ref _addr_fset.val;
+
+            return fset.PositionFor(pos, false).Line;
         }
 
         private static @string importPath(Spec s)
         {
-            var (t, err) = strconv.Unquote(s._<ref ImportSpec>().Path.Value);
+            var (t, err) = strconv.Unquote(s._<ptr<ImportSpec>>().Path.Value);
             if (err == null)
             {
                 return t;
             }
+
             return "";
+
         }
 
         private static @string importName(Spec s)
         {
-            ref ImportSpec n = s._<ref ImportSpec>().Name;
+            ptr<ImportSpec> n = s._<ptr<ImportSpec>>().Name;
             if (n == null)
             {
                 return "";
             }
+
             return n.Name;
+
         }
 
         private static @string importComment(Spec s)
         {
-            ref ImportSpec c = s._<ref ImportSpec>().Comment;
+            ptr<ImportSpec> c = s._<ptr<ImportSpec>>().Comment;
             if (c == null)
             {
                 return "";
             }
+
             return c.Text();
+
         }
 
         // collapse indicates whether prev may be removed, leaving only next.
@@ -106,7 +125,9 @@ namespace go
             {
                 return false;
             }
-            return prev._<ref ImportSpec>().Comment == null;
+
+            return prev._<ptr<ImportSpec>>().Comment == null;
+
         }
 
         private partial struct posSpan
@@ -115,8 +136,17 @@ namespace go
             public token.Pos End;
         }
 
-        private static slice<Spec> sortSpecs(ref token.FileSet fset, ref File f, slice<Spec> specs)
-        { 
+        private partial struct cgPos
+        {
+            public bool left; // true if comment is to the left of the spec, false otherwise.
+            public ptr<CommentGroup> cg;
+        }
+
+        private static slice<Spec> sortSpecs(ptr<token.FileSet> _addr_fset, ptr<File> _addr_f, slice<Spec> specs)
+        {
+            ref token.FileSet fset = ref _addr_fset.val;
+            ref File f = ref _addr_f.val;
+ 
             // Can't short-circuit here even if specs are already sorted,
             // since they might yet need deduplication.
             // A lone import, however, may be safely ignored.
@@ -139,15 +169,28 @@ namespace go
                 } 
 
                 // Identify comments in this range.
-                // Any comment from pos[0].Start to the final line counts.
 
                 i = i__prev1;
                 s = s__prev1;
             }
 
-            var lastLine = fset.Position(pos[len(pos) - 1L].End).Line;
-            var cstart = len(f.Comments);
-            var cend = len(f.Comments);
+            var begSpecs = pos[0L].Start;
+            var endSpecs = pos[len(pos) - 1L].End;
+            var beg = fset.File(begSpecs).LineStart(lineAt(_addr_fset, begSpecs));
+            var endLine = lineAt(_addr_fset, endSpecs);
+            var endFile = fset.File(endSpecs);
+            token.Pos end = default;
+            if (endLine == endFile.LineCount())
+            {
+                end = endSpecs;
+            }
+            else
+            {
+                end = endFile.LineStart(endLine + 1L); // beginning of next line
+            }
+
+            var first = len(f.Comments);
+            long last = -1L;
             {
                 var i__prev1 = i;
                 var g__prev1 = g;
@@ -156,29 +199,40 @@ namespace go
                 {
                     i = __i;
                     g = __g;
-                    if (g.Pos() < pos[0L].Start)
+                    if (g.End() >= end)
                     {
-                        continue;
-                    }
-                    if (i < cstart)
-                    {
-                        cstart = i;
-                    }
-                    if (fset.Position(g.End()).Line > lastLine)
-                    {
-                        cend = i;
                         break;
+                    } 
+                    // g.End() < end
+                    if (beg <= g.Pos())
+                    { 
+                        // comment is within the range [beg, end[ of import declarations
+                        if (i < first)
+                        {
+                            first = i;
+                        }
+
+                        if (i > last)
+                        {
+                            last = i;
+                        }
+
                     }
+
                 }
 
                 i = i__prev1;
                 g = g__prev1;
             }
 
-            var comments = f.Comments[cstart..cend]; 
+            slice<ptr<CommentGroup>> comments = default;
+            if (last >= 0L)
+            {
+                comments = f.Comments[first..last + 1L];
+            } 
 
-            // Assign each comment to the import spec preceding it.
-            map importComments = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref ImportSpec, slice<ref CommentGroup>>{};
+            // Assign each comment to the import spec on the same line.
+            map importComments = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<ImportSpec>, slice<cgPos>>{};
             long specIndex = 0L;
             {
                 var g__prev1 = g;
@@ -191,14 +245,27 @@ namespace go
                         specIndex++;
                     }
 
-                    ref ImportSpec s = specs[specIndex]._<ref ImportSpec>();
-                    importComments[s] = append(importComments[s], g);
+                    bool left = default; 
+                    // A block comment can appear before the first import spec.
+                    if (specIndex == 0L && pos[specIndex].Start > g.Pos())
+                    {
+                        left = true;
+                    }
+                    else if (specIndex + 1L < len(specs) && lineAt(_addr_fset, pos[specIndex].Start) + 1L == lineAt(_addr_fset, g.Pos()))
+                    {
+                        specIndex++;
+                        left = true;
+                    }
+
+                    ptr<ImportSpec> s = specs[specIndex]._<ptr<ImportSpec>>();
+                    importComments[s] = append(importComments[s], new cgPos(left:left,cg:g));
+
                 } 
 
                 // Sort the import specs by import path.
                 // Remove duplicates, when possible without data loss.
                 // Reassign the import paths to have the same position sequence.
-                // Reassign each comment to abut the end of its spec.
+                // Reassign each comment to the spec on the same line.
                 // Sort the comments by new position.
 
                 g = g__prev1;
@@ -212,13 +279,16 @@ namespace go
                 {
                     return ipath < jpath;
                 }
+
                 var iname = importName(specs[i]);
                 var jname = importName(specs[j]);
                 if (iname != jname)
                 {
                     return iname < jname;
                 }
+
                 return importComment(specs[i]) < importComment(specs[j]);
+
             }); 
 
             // Dedup. Thanks to our sorting, we can just consider
@@ -239,8 +309,9 @@ namespace go
                     else
                     {
                         var p = s.Pos();
-                        fset.File(p).MergeLine(fset.Position(p).Line);
+                        fset.File(p).MergeLine(lineAt(_addr_fset, p));
                     }
+
                 }
 
                 i = i__prev1;
@@ -258,11 +329,12 @@ namespace go
                 {
                     i = __i;
                     s = __s;
-                    s = s._<ref ImportSpec>();
+                    s = s._<ptr<ImportSpec>>();
                     if (s.Name != null)
                     {
                         s.Name.NamePos = pos[i].Start;
                     }
+
                     s.Path.ValuePos = pos[i].Start;
                     s.EndPos = pos[i].End;
                     {
@@ -271,15 +343,28 @@ namespace go
                         foreach (var (_, __g) in importComments[s])
                         {
                             g = __g;
-                            foreach (var (_, c) in g.List)
+                            foreach (var (_, c) in g.cg.List)
                             {
-                                c.Slash = pos[i].End;
+                                if (g.left)
+                                {
+                                    c.Slash = pos[i].Start - 1L;
+                                }
+                                else
+                                { 
+                                    // An import spec can have both block comment and a line comment
+                                    // to its right. In that case, both of them will have the same pos.
+                                    // But while formatting the AST, the line comment gets moved to
+                                    // after the block comment.
+                                    c.Slash = pos[i].End;
+
+                                }
+
                             }
+
                         }
 
                         g = g__prev2;
                     }
-
                 }
 
                 i = i__prev1;
@@ -292,6 +377,7 @@ namespace go
             });
 
             return specs;
+
         }
     }
 }}

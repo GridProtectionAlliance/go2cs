@@ -3,13 +3,14 @@
 // license that can be found in the LICENSE file.
 
 // Package clean implements the ``go clean'' command.
-// package clean -- go2cs converted at 2020 August 29 10:00:32 UTC
+// package clean -- go2cs converted at 2020 October 08 04:33:33 UTC
 // import "cmd/go/internal/clean" ==> using clean = go.cmd.go.@internal.clean_package
 // Original source: C:\Go\src\cmd\go\internal\clean\clean.go
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
 
@@ -17,6 +18,9 @@ using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
+using lockedfile = go.cmd.go.@internal.lockedfile_package;
+using modfetch = go.cmd.go.@internal.modfetch_package;
+using modload = go.cmd.go.@internal.modload_package;
 using work = go.cmd.go.@internal.work_package;
 using static go.builtin;
 using System;
@@ -28,13 +32,14 @@ namespace @internal
 {
     public static partial class clean_package
     {
-        public static base.Command CmdClean = ref new base.Command(UsageLine:"clean [-i] [-r] [-n] [-x] [-cache] [-testcache] [build flags] [packages]",Short:"remove object files and cached files",Long:`
+        public static ptr<base.Command> CmdClean = addr(new base.Command(UsageLine:"go clean [clean flags] [build flags] [packages]",Short:"remove object files and cached files",Long:`
 Clean removes object files from package source directories.
 The go command builds most objects in a temporary directory,
 so go clean is mainly concerned with object files left by other
 tools or by manual invocations of go build.
 
-Specifically, clean removes the following files from each of the
+If a package argument is given or the -i or -r flag is set,
+clean removes the following files from each of the
 source directories corresponding to the import paths:
 
 	_obj/            old object directory, left from Makefiles
@@ -70,40 +75,63 @@ The -cache flag causes clean to remove the entire go build cache.
 The -testcache flag causes clean to expire all test results in the
 go build cache.
 
+The -modcache flag causes clean to remove the entire module
+download cache, including unpacked source code of versioned
+dependencies.
+
 For more about build flags, see 'go help build'.
 
 For more about specifying packages, see 'go help packages'.
-	`,);
+	`,));
 
-        private static bool cleanI = default;        private static bool cleanR = default;        private static bool cleanCache = default;        private static bool cleanTestcache = default;
+        private static bool cleanI = default;        private static bool cleanR = default;        private static bool cleanCache = default;        private static bool cleanModcache = default;        private static bool cleanTestcache = default;
 
         private static void init()
         { 
             // break init cycle
             CmdClean.Run = runClean;
 
-            CmdClean.Flag.BoolVar(ref cleanI, "i", false, "");
-            CmdClean.Flag.BoolVar(ref cleanR, "r", false, "");
-            CmdClean.Flag.BoolVar(ref cleanCache, "cache", false, "");
-            CmdClean.Flag.BoolVar(ref cleanTestcache, "testcache", false, ""); 
+            CmdClean.Flag.BoolVar(_addr_cleanI, "i", false, "");
+            CmdClean.Flag.BoolVar(_addr_cleanR, "r", false, "");
+            CmdClean.Flag.BoolVar(_addr_cleanCache, "cache", false, "");
+            CmdClean.Flag.BoolVar(_addr_cleanModcache, "modcache", false, "");
+            CmdClean.Flag.BoolVar(_addr_cleanTestcache, "testcache", false, ""); 
 
             // -n and -x are important enough to be
             // mentioned explicitly in the docs but they
             // are part of the build flags.
 
-            work.AddBuildFlags(CmdClean);
+            work.AddBuildFlags(CmdClean, work.DefaultBuildFlags);
+
         }
 
-        private static void runClean(ref base.Command cmd, slice<@string> args)
+        private static void runClean(ptr<base.Command> _addr_cmd, slice<@string> args)
         {
-            foreach (var (_, pkg) in load.PackagesAndErrors(args))
+            ref base.Command cmd = ref _addr_cmd.val;
+ 
+            // golang.org/issue/29925: only load packages before cleaning if
+            // either the flags and arguments explicitly imply a package,
+            // or no other target (such as a cache) was requested to be cleaned.
+            var cleanPkg = len(args) > 0L || cleanI || cleanR;
+            if ((!modload.Enabled() || modload.HasModRoot()) && !cleanCache && !cleanModcache && !cleanTestcache)
             {
-                clean(pkg);
+                cleanPkg = true;
             }
+
+            if (cleanPkg)
+            {
+                foreach (var (_, pkg) in load.PackagesAndErrors(args))
+                {
+                    clean(_addr_pkg);
+                }
+
+            }
+
+            work.Builder b = default;
+            b.Print = fmt.Print;
+
             if (cleanCache)
             {
-                work.Builder b = default;
-                b.Print = fmt.Print;
                 var dir = cache.DefaultDir();
                 if (dir != "off")
                 { 
@@ -112,35 +140,70 @@ For more about specifying packages, see 'go help packages'.
                     // and not something that we want to remove. Also, we'd like to preserve
                     // the access log for future analysis, even if the cache is cleared.
                     var (subdirs, _) = filepath.Glob(filepath.Join(dir, "[0-9a-f][0-9a-f]"));
+                    var printedErrors = false;
                     if (len(subdirs) > 0L)
                     {
                         if (cfg.BuildN || cfg.BuildX)
                         {
                             b.Showcmd("", "rm -r %s", strings.Join(subdirs, " "));
                         }
-                        var printedErrors = false;
-                        foreach (var (_, d) in subdirs)
-                        { 
-                            // Only print the first error - there may be many.
-                            // This also mimics what os.RemoveAll(dir) would do.
-                            {
-                                var err__prev4 = err;
 
-                                var err = os.RemoveAll(d);
-
-                                if (err != null && !printedErrors)
+                        if (!cfg.BuildN)
+                        {
+                            foreach (var (_, d) in subdirs)
+                            { 
+                                // Only print the first error - there may be many.
+                                // This also mimics what os.RemoveAll(dir) would do.
                                 {
-                                    printedErrors = true;
-                                    @base.Errorf("go clean -cache: %v", err);
+                                    var err__prev5 = err;
+
+                                    var err = os.RemoveAll(d);
+
+                                    if (err != null && !printedErrors)
+                                    {
+                                        printedErrors = true;
+                                        @base.Errorf("go clean -cache: %v", err);
+                                    }
+
+                                    err = err__prev5;
+
                                 }
 
-                                err = err__prev4;
-
                             }
+
                         }
+
                     }
+
+                    var logFile = filepath.Join(dir, "log.txt");
+                    if (cfg.BuildN || cfg.BuildX)
+                    {
+                        b.Showcmd("", "rm -f %s", logFile);
+                    }
+
+                    if (!cfg.BuildN)
+                    {
+                        {
+                            var err__prev4 = err;
+
+                            err = os.RemoveAll(logFile);
+
+                            if (err != null && !printedErrors)
+                            {
+                                printedErrors = true;
+                                @base.Errorf("go clean -cache: %v", err);
+                            }
+
+                            err = err__prev4;
+
+                        }
+
+                    }
+
                 }
+
             }
+
             if (cleanTestcache && !cleanCache)
             { 
                 // Instead of walking through the entire cache looking for test results,
@@ -149,16 +212,94 @@ For more about specifying packages, see 'go help packages'.
                 dir = cache.DefaultDir();
                 if (dir != "off")
                 {
-                    err = ioutil.WriteFile(filepath.Join(dir, "testexpire.txt"), (slice<byte>)fmt.Sprintf("%d\n", time.Now().UnixNano()), 0666L);
+                    var (f, err) = lockedfile.Edit(filepath.Join(dir, "testexpire.txt"));
+                    if (err == null)
+                    {
+                        var now = time.Now().UnixNano();
+                        var (buf, _) = ioutil.ReadAll(f);
+                        var (prev, _) = strconv.ParseInt(strings.TrimSpace(string(buf)), 10L, 64L);
+                        if (now > prev)
+                        {
+                            err = f.Truncate(0L);
+
+                            if (err == null)
+                            {
+                                _, err = f.Seek(0L, 0L);
+
+                                if (err == null)
+                                {
+                                    _, err = fmt.Fprintf(f, "%d\n", now);
+                                }
+
+                            }
+
+                        }
+
+                        {
+                            var closeErr = f.Close();
+
+                            if (err == null)
+                            {
+                                err = closeErr;
+                            }
+
+                        }
+
+                    }
+
                     if (err != null)
                     {
-                        @base.Errorf("go clean -testcache: %v", err);
+                        {
+                            var (_, statErr) = os.Stat(dir);
+
+                            if (!os.IsNotExist(statErr))
+                            {
+                                @base.Errorf("go clean -testcache: %v", err);
+                            }
+
+                        }
+
                     }
+
                 }
+
             }
+
+            if (cleanModcache)
+            {
+                if (cfg.GOMODCACHE == "")
+                {
+                    @base.Fatalf("go clean -modcache: no module cache");
+                }
+
+                if (cfg.BuildN || cfg.BuildX)
+                {
+                    b.Showcmd("", "rm -rf %s", cfg.GOMODCACHE);
+                }
+
+                if (!cfg.BuildN)
+                {
+                    {
+                        var err__prev3 = err;
+
+                        err = modfetch.RemoveAll(cfg.GOMODCACHE);
+
+                        if (err != null)
+                        {
+                            @base.Errorf("go clean -modcache: %v", err);
+                        }
+
+                        err = err__prev3;
+
+                    }
+
+                }
+
+            }
+
         }
 
-        private static map cleaned = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref load.Package, bool>{};
+        private static map cleaned = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<load.Package>, bool>{};
 
         // TODO: These are dregs left by Makefile-based builds.
         // Eventually, can stop deleting these.
@@ -168,25 +309,30 @@ For more about specifying packages, see 'go help packages'.
 
         private static map cleanExt = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{".5":true,".6":true,".8":true,".a":true,".o":true,".so":true,};
 
-        private static void clean(ref load.Package p)
+        private static void clean(ptr<load.Package> _addr_p)
         {
+            ref load.Package p = ref _addr_p.val;
+
             if (cleaned[p])
             {
-                return;
+                return ;
             }
+
             cleaned[p] = true;
 
             if (p.Dir == "")
             {
-                @base.Errorf("can't load package: %v", p.Error);
-                return;
+                @base.Errorf("%v", p.Error);
+                return ;
             }
+
             var (dirs, err) = ioutil.ReadDir(p.Dir);
             if (err != null)
             {
                 @base.Errorf("go clean %s: %v", p.Dir, err);
-                return;
+                return ;
             }
+
             work.Builder b = default;
             b.Print = fmt.Print;
 
@@ -201,13 +347,16 @@ For more about specifying packages, see 'go help packages'.
                     {
                         packageFile[f] = true;
                     }
+
                 }
 ;
                 keep(p.GoFiles);
                 keep(p.CgoFiles);
                 keep(p.TestGoFiles);
                 keep(p.XTestGoFiles);
+
             }
+
             var (_, elem) = filepath.Split(p.Dir);
             slice<@string> allRemove = default; 
 
@@ -233,6 +382,7 @@ For more about specifying packages, see 'go help packages'.
                     {
                         continue;
                     }
+
                     if (!dir.IsDir() && strings.HasSuffix(name, ".go"))
                     { 
                         // TODO(adg,rsc): check that this .go file is actually
@@ -240,7 +390,9 @@ For more about specifying packages, see 'go help packages'.
                         // to an executable file.
                         var @base = name[..len(name) - len(".go")];
                         allRemove = append(allRemove, base, base + ".exe");
+
                     }
+
                 }
 
                 dir = dir__prev1;
@@ -250,6 +402,7 @@ For more about specifying packages, see 'go help packages'.
             {
                 b.Showcmd(p.Dir, "rm -f %s", strings.Join(allRemove, " "));
             }
+
             map toRemove = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{};
             {
                 var name__prev1 = name;
@@ -282,7 +435,9 @@ For more about specifying packages, see 'go help packages'.
                                 {
                                     continue;
                                 }
+
                             }
+
                             {
                                 var err = os.RemoveAll(filepath.Join(p.Dir, name));
 
@@ -292,17 +447,23 @@ For more about specifying packages, see 'go help packages'.
                                 }
 
                             }
+
                         }
+
                         continue;
+
                     }
+
                     if (cfg.BuildN)
                     {
                         continue;
                     }
+
                     if (cleanFile[name] || cleanExt[filepath.Ext(name)] || toRemove[name])
                     {
                         removeFile(filepath.Join(p.Dir, name));
                     }
+
                 }
 
                 dir = dir__prev1;
@@ -314,18 +475,23 @@ For more about specifying packages, see 'go help packages'.
                 {
                     b.Showcmd("", "rm -f %s", p.Target);
                 }
+
                 if (!cfg.BuildN)
                 {
                     removeFile(p.Target);
                 }
+
             }
+
             if (cleanR)
             {
                 foreach (var (_, p1) in p.Internal.Imports)
                 {
-                    clean(p1);
+                    clean(_addr_p1);
                 }
+
             }
+
         }
 
         // removeFile tries to remove file f, if error other than file doesn't exist
@@ -335,7 +501,7 @@ For more about specifying packages, see 'go help packages'.
             var err = os.Remove(f);
             if (err == null || os.IsNotExist(err))
             {
-                return;
+                return ;
             } 
             // Windows does not allow deletion of a binary file while it is executing.
             if (@base.ToolIsWindows)
@@ -362,12 +528,15 @@ For more about specifying packages, see 'go help packages'.
                     if (err2 == null)
                     {
                         os.Remove(f + "~");
-                        return;
+                        return ;
                     }
 
                 }
+
             }
+
             @base.Errorf("go clean: %v", err);
+
         }
     }
 }}}}

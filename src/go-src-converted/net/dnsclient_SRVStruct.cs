@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:51 UTC
+//     Generated on 2020 October 08 03:31:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using rand = go.math.rand_package;
 using sort = go.sort_package;
+using dnsmessage = go.golang.org.x.net.dns.dnsmessage_package;
 
 namespace go
 {

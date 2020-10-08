@@ -13,7 +13,7 @@
 // Some external packages provide more functionality. See:
 //
 //   https://godoc.org/?q=smtp
-// package smtp -- go2cs converted at 2020 August 29 08:36:39 UTC
+// package smtp -- go2cs converted at 2020 October 08 03:43:30 UTC
 // import "net/smtp" ==> using smtp = go.net.smtp_package
 // Original source: C:\Go\src\net\smtp\smtp.go
 using tls = go.crypto.tls_package;
@@ -49,42 +49,56 @@ namespace net
 
         // Dial returns a new Client connected to an SMTP server at addr.
         // The addr must include a port, as in "mail.example.com:smtp".
-        public static (ref Client, error) Dial(@string addr)
+        public static (ptr<Client>, error) Dial(@string addr)
         {
+            ptr<Client> _p0 = default!;
+            error _p0 = default!;
+
             var (conn, err) = net.Dial("tcp", addr);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var (host, _, _) = net.SplitHostPort(addr);
-            return NewClient(conn, host);
+            return _addr_NewClient(conn, host)!;
+
         }
 
         // NewClient returns a new Client using an existing connection and host as a
         // server name to be used when authenticating.
-        public static (ref Client, error) NewClient(net.Conn conn, @string host)
+        public static (ptr<Client>, error) NewClient(net.Conn conn, @string host)
         {
+            ptr<Client> _p0 = default!;
+            error _p0 = default!;
+
             var text = textproto.NewConn(conn);
             var (_, _, err) = text.ReadResponse(220L);
             if (err != null)
             {
                 text.Close();
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            Client c = ref new Client(Text:text,conn:conn,serverName:host,localName:"localhost");
-            _, c.tls = conn._<ref tls.Conn>();
-            return (c, null);
+
+            ptr<Client> c = addr(new Client(Text:text,conn:conn,serverName:host,localName:"localhost"));
+            _, c.tls = conn._<ptr<tls.Conn>>();
+            return (_addr_c!, error.As(null!)!);
+
         }
 
         // Close closes the connection.
-        private static error Close(this ref Client c)
+        private static error Close(this ptr<Client> _addr_c)
         {
-            return error.As(c.Text.Close());
+            ref Client c = ref _addr_c.val;
+
+            return error.As(c.Text.Close())!;
         }
 
         // hello runs a hello exchange if needed.
-        private static error hello(this ref Client c)
+        private static error hello(this ptr<Client> _addr_c)
         {
+            ref Client c = ref _addr_c.val;
+
             if (!c.didHello)
             {
                 c.didHello = true;
@@ -93,8 +107,11 @@ namespace net
                 {
                     c.helloError = c.helo();
                 }
+
             }
-            return error.As(c.helloError);
+
+            return error.As(c.helloError)!;
+
         }
 
         // Hello sends a HELO or EHLO to the server as the given host name.
@@ -102,57 +119,75 @@ namespace net
         // over the host name used. The client will introduce itself as "localhost"
         // automatically otherwise. If Hello is called, it must be called before
         // any of the other methods.
-        private static error Hello(this ref Client c, @string localName)
+        private static error Hello(this ptr<Client> _addr_c, @string localName)
         {
+            ref Client c = ref _addr_c.val;
+
             {
                 var err = validateLine(localName);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             if (c.didHello)
             {
-                return error.As(errors.New("smtp: Hello called after other methods"));
+                return error.As(errors.New("smtp: Hello called after other methods"))!;
             }
+
             c.localName = localName;
-            return error.As(c.hello());
+            return error.As(c.hello())!;
+
         }
 
         // cmd is a convenience function that sends a command and returns the response
-        private static (long, @string, error) cmd(this ref Client _c, long expectCode, @string format, params object[] args) => func(_c, (ref Client c, Defer defer, Panic _, Recover __) =>
+        private static (long, @string, error) cmd(this ptr<Client> _addr_c, long expectCode, @string format, params object[] args) => func((defer, _, __) =>
         {
+            long _p0 = default;
+            @string _p0 = default;
+            error _p0 = default!;
+            args = args.Clone();
+            ref Client c = ref _addr_c.val;
+
             var (id, err) = c.Text.Cmd(format, args);
             if (err != null)
             {
-                return (0L, "", err);
+                return (0L, "", error.As(err)!);
             }
+
             c.Text.StartResponse(id);
             defer(c.Text.EndResponse(id));
             var (code, msg, err) = c.Text.ReadResponse(expectCode);
-            return (code, msg, err);
+            return (code, msg, error.As(err)!);
+
         });
 
         // helo sends the HELO greeting to the server. It should be used only when the
         // server does not support ehlo.
-        private static error helo(this ref Client c)
+        private static error helo(this ptr<Client> _addr_c)
         {
+            ref Client c = ref _addr_c.val;
+
             c.ext = null;
             var (_, _, err) = c.cmd(250L, "HELO %s", c.localName);
-            return error.As(err);
+            return error.As(err)!;
         }
 
         // ehlo sends the EHLO (extended hello) greeting to the server. It
         // should be the preferred greeting for servers that support it.
-        private static error ehlo(this ref Client c)
+        private static error ehlo(this ptr<Client> _addr_c)
         {
+            ref Client c = ref _addr_c.val;
+
             var (_, msg, err) = c.cmd(250L, "EHLO %s", c.localName);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var ext = make_map<@string, @string>();
             var extList = strings.Split(msg, "\n");
             if (len(extList) > 1L)
@@ -169,8 +204,11 @@ namespace net
                     {
                         ext[args[0L]] = "";
                     }
+
                 }
+
             }
+
             {
                 var (mechs, ok) = ext["AUTH"];
 
@@ -180,53 +218,69 @@ namespace net
                 }
 
             }
+
             c.ext = ext;
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // StartTLS sends the STARTTLS command and encrypts all further communication.
         // Only servers that advertise the STARTTLS extension support this function.
-        private static error StartTLS(this ref Client c, ref tls.Config config)
+        private static error StartTLS(this ptr<Client> _addr_c, ptr<tls.Config> _addr_config)
         {
+            ref Client c = ref _addr_c.val;
+            ref tls.Config config = ref _addr_config.val;
+
             {
                 var err = c.hello();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var (_, _, err) = c.cmd(220L, "STARTTLS");
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             c.conn = tls.Client(c.conn, config);
             c.Text = textproto.NewConn(c.conn);
             c.tls = true;
-            return error.As(c.ehlo());
+            return error.As(c.ehlo())!;
+
         }
 
         // TLSConnectionState returns the client's TLS connection state.
         // The return values are their zero values if StartTLS did
         // not succeed.
-        private static (tls.ConnectionState, bool) TLSConnectionState(this ref Client c)
+        private static (tls.ConnectionState, bool) TLSConnectionState(this ptr<Client> _addr_c)
         {
-            ref tls.Conn (tc, ok) = c.conn._<ref tls.Conn>();
+            tls.ConnectionState state = default;
+            bool ok = default;
+            ref Client c = ref _addr_c.val;
+
+            ptr<tls.Conn> (tc, ok) = c.conn._<ptr<tls.Conn>>();
             if (!ok)
             {
-                return;
+                return ;
             }
+
             return (tc.ConnectionState(), true);
+
         }
 
         // Verify checks the validity of an email address on the server.
         // If Verify returns nil, the address is valid. A non-nil return
         // does not necessarily indicate an invalid address. Many servers
         // will not verify addresses for security reasons.
-        private static error Verify(this ref Client c, @string addr)
+        private static error Verify(this ptr<Client> _addr_c, @string addr)
         {
+            ref Client c = ref _addr_c.val;
+
             {
                 var err__prev1 = err;
 
@@ -234,12 +288,13 @@ namespace net
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
             {
                 var err__prev1 = err;
 
@@ -247,37 +302,43 @@ namespace net
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
             var (_, _, err) = c.cmd(250L, "VRFY %s", addr);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Auth authenticates a client using the provided authentication mechanism.
         // A failed authentication closes the connection.
         // Only servers that advertise the AUTH extension support this function.
-        private static error Auth(this ref Client c, Auth a)
+        private static error Auth(this ptr<Client> _addr_c, Auth a)
         {
+            ref Client c = ref _addr_c.val;
+
             {
                 var err = c.hello();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var encoding = base64.StdEncoding;
-            var (mech, resp, err) = a.Start(ref new ServerInfo(c.serverName,c.tls,c.auth));
+            var (mech, resp, err) = a.Start(addr(new ServerInfo(c.serverName,c.tls,c.auth)));
             if (err != null)
             {
                 c.Quit();
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var resp64 = make_slice<byte>(encoding.EncodedLen(len(resp)));
             encoding.Encode(resp64, resp);
             var (code, msg64, err) = c.cmd(0L, strings.TrimSpace(fmt.Sprintf("AUTH %s %s", mech, resp64)));
@@ -294,38 +355,46 @@ namespace net
                         msg = (slice<byte>)msg64;
                         break;
                     default: 
-                        err = ref new textproto.Error(Code:code,Msg:msg64);
+                        err = addr(new textproto.Error(Code:code,Msg:msg64));
                         break;
                 }
                 if (err == null)
                 {
                     resp, err = a.Next(msg, code == 334L);
                 }
+
                 if (err != null)
                 { 
                     // abort the AUTH
                     c.cmd(501L, "*");
                     c.Quit();
                     break;
+
                 }
+
                 if (resp == null)
                 {
                     break;
                 }
+
                 resp64 = make_slice<byte>(encoding.EncodedLen(len(resp)));
                 encoding.Encode(resp64, resp);
                 code, msg64, err = c.cmd(0L, string(resp64));
+
             }
 
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Mail issues a MAIL command to the server using the provided email address.
         // If the server supports the 8BITMIME extension, Mail adds the BODY=8BITMIME
         // parameter.
         // This initiates a mail transaction and is followed by one or more Rcpt calls.
-        private static error Mail(this ref Client c, @string from)
+        private static error Mail(this ptr<Client> _addr_c, @string from)
         {
+            ref Client c = ref _addr_c.val;
+
             {
                 var err__prev1 = err;
 
@@ -333,12 +402,13 @@ namespace net
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
             {
                 var err__prev1 = err;
 
@@ -346,12 +416,13 @@ namespace net
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
             @string cmdStr = "MAIL FROM:<%s>";
             if (c.ext != null)
             {
@@ -364,27 +435,34 @@ namespace net
                     }
 
                 }
+
             }
+
             var (_, _, err) = c.cmd(250L, cmdStr, from);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Rcpt issues a RCPT command to the server using the provided email address.
         // A call to Rcpt must be preceded by a call to Mail and may be followed by
         // a Data call or another Rcpt call.
-        private static error Rcpt(this ref Client c, @string to)
+        private static error Rcpt(this ptr<Client> _addr_c, @string to)
         {
+            ref Client c = ref _addr_c.val;
+
             {
                 var err = validateLine(to);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var (_, _, err) = c.cmd(25L, "RCPT TO:<%s>", to);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         private partial struct dataCloser : io.WriteCloser
@@ -393,28 +471,36 @@ namespace net
             public ref io.WriteCloser WriteCloser => ref WriteCloser_val;
         }
 
-        private static error Close(this ref dataCloser d)
+        private static error Close(this ptr<dataCloser> _addr_d)
         {
+            ref dataCloser d = ref _addr_d.val;
+
             d.WriteCloser.Close();
             var (_, _, err) = d.c.Text.ReadResponse(250L);
-            return error.As(err);
+            return error.As(err)!;
         }
 
         // Data issues a DATA command to the server and returns a writer that
         // can be used to write the mail headers and body. The caller should
         // close the writer before calling any more methods on c. A call to
         // Data must be preceded by one or more calls to Rcpt.
-        private static (io.WriteCloser, error) Data(this ref Client c)
+        private static (io.WriteCloser, error) Data(this ptr<Client> _addr_c)
         {
+            io.WriteCloser _p0 = default;
+            error _p0 = default!;
+            ref Client c = ref _addr_c.val;
+
             var (_, _, err) = c.cmd(354L, "DATA");
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (ref new dataCloser(c,c.Text.DotWriter()), null);
+
+            return (addr(new dataCloser(c,c.Text.DotWriter())), error.As(null!)!);
+
         }
 
-        private static Action<ref tls.Config> testHookStartTLS = default; // nil, except for tests
+        private static Action<ptr<tls.Config>> testHookStartTLS = default; // nil, except for tests
 
         // SendMail connects to the server at addr, switches to TLS if
         // possible, authenticates with the optional mechanism a if possible,
@@ -445,12 +531,13 @@ namespace net
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
             foreach (var (_, recp) in to)
             {
                 {
@@ -460,100 +547,120 @@ namespace net
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev1;
 
                 }
+
             }
             var (c, err) = Dial(addr);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             defer(c.Close());
             err = c.hello();
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             {
                 var (ok, _) = c.Extension("STARTTLS");
 
                 if (ok)
                 {
-                    tls.Config config = ref new tls.Config(ServerName:c.serverName);
+                    ptr<tls.Config> config = addr(new tls.Config(ServerName:c.serverName));
                     if (testHookStartTLS != null)
                     {
                         testHookStartTLS(config);
                     }
+
                     err = c.StartTLS(config);
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
+
                 }
 
             }
+
             if (a != null && c.ext != null)
             {
                 {
                     var (_, ok) = c.ext["AUTH"];
 
-                    if (ok)
+                    if (!ok)
                     {
-                        err = c.Auth(a);
-
-                        if (err != null)
-                        {
-                            return error.As(err);
-                        }
+                        return error.As(errors.New("smtp: server doesn't support AUTH"))!;
                     }
 
                 }
+
+                err = c.Auth(a);
+
+                if (err != null)
+                {
+                    return error.As(err)!;
+                }
+
             }
+
             err = c.Mail(from);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             foreach (var (_, addr) in to)
             {
                 err = c.Rcpt(addr);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
             var (w, err) = c.Data();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             _, err = w.Write(msg);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             err = w.Close();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(c.Quit());
+
+            return error.As(c.Quit())!;
+
         });
 
         // Extension reports whether an extension is support by the server.
         // The extension name is case-insensitive. If the extension is supported,
         // Extension also returns a string that contains any parameters the
         // server specifies for the extension.
-        private static (bool, @string) Extension(this ref Client c, @string ext)
+        private static (bool, @string) Extension(this ptr<Client> _addr_c, @string ext)
         {
+            bool _p0 = default;
+            @string _p0 = default;
+            ref Client c = ref _addr_c.val;
+
             {
                 var err = c.hello();
 
@@ -563,67 +670,83 @@ namespace net
                 }
 
             }
+
             if (c.ext == null)
             {
                 return (false, "");
             }
+
             ext = strings.ToUpper(ext);
             var (param, ok) = c.ext[ext];
             return (ok, param);
+
         }
 
         // Reset sends the RSET command to the server, aborting the current mail
         // transaction.
-        private static error Reset(this ref Client c)
+        private static error Reset(this ptr<Client> _addr_c)
         {
+            ref Client c = ref _addr_c.val;
+
             {
                 var err = c.hello();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var (_, _, err) = c.cmd(250L, "RSET");
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Noop sends the NOOP command to the server. It does nothing but check
         // that the connection to the server is okay.
-        private static error Noop(this ref Client c)
+        private static error Noop(this ptr<Client> _addr_c)
         {
+            ref Client c = ref _addr_c.val;
+
             {
                 var err = c.hello();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var (_, _, err) = c.cmd(250L, "NOOP");
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Quit sends the QUIT command and closes the connection to the server.
-        private static error Quit(this ref Client c)
+        private static error Quit(this ptr<Client> _addr_c)
         {
+            ref Client c = ref _addr_c.val;
+
             {
                 var err = c.hello();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             var (_, _, err) = c.cmd(221L, "QUIT");
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            return error.As(c.Text.Close());
+
+            return error.As(c.Text.Close())!;
+
         }
 
         // validateLine checks to see if a line has CR or LF as per RFC 5321
@@ -631,9 +754,11 @@ namespace net
         {
             if (strings.ContainsAny(line, "\n\r"))
             {
-                return error.As(errors.New("smtp: A line must not contain CR or LF"));
+                return error.As(errors.New("smtp: A line must not contain CR or LF"))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
     }
 }}

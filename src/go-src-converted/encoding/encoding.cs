@@ -9,7 +9,7 @@
 // interface once can make a type useful in multiple encodings.
 // Standard types that implement these interfaces include time.Time and net.IP.
 // The interfaces come in pairs that produce and consume encoded data.
-// package encoding -- go2cs converted at 2020 August 29 08:35:12 UTC
+// package encoding -- go2cs converted at 2020 October 08 03:42:25 UTC
 // import "encoding" ==> using encoding = go.encoding_package
 // Original source: C:\Go\src\encoding\encoding.go
 

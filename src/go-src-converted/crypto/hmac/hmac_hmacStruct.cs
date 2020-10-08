@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:34 UTC
+//     Generated on 2020 October 08 03:36:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,22 +28,20 @@ namespace crypto
             // Constructors
             public hmac(NilType _)
             {
-                this.size = default;
-                this.blocksize = default;
                 this.opad = default;
                 this.ipad = default;
                 this.outer = default;
                 this.inner = default;
+                this.marshaled = default;
             }
 
-            public hmac(long size = default, long blocksize = default, slice<byte> opad = default, slice<byte> ipad = default, hash.Hash outer = default, hash.Hash inner = default)
+            public hmac(slice<byte> opad = default, slice<byte> ipad = default, hash.Hash outer = default, hash.Hash inner = default, bool marshaled = default)
             {
-                this.size = size;
-                this.blocksize = blocksize;
                 this.opad = opad;
                 this.ipad = ipad;
                 this.outer = outer;
                 this.inner = inner;
+                this.marshaled = marshaled;
             }
 
             // Enable comparisons between nil and hmac struct
@@ -66,7 +64,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static hmac hmac_cast(dynamic value)
         {
-            return new hmac(value.size, value.blocksize, value.opad, value.ipad, value.outer, value.inner);
+            return new hmac(value.opad, value.ipad, value.outer, value.inner, value.marshaled);
         }
     }
 }}

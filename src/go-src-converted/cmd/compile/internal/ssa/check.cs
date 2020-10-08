@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:24 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:01 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\check.go
+using s390x = go.cmd.@internal.obj.s390x_package;
 using math = go.math_package;
+using bits = go.math.bits_package;
 using static go.builtin;
 
 namespace go {
@@ -16,8 +18,10 @@ namespace @internal
     public static partial class ssa_package
     {
         // checkFunc checks invariants of f.
-        private static void checkFunc(ref Func f)
+        private static void checkFunc(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             var blockMark = make_slice<bool>(f.NumBlocks());
             var valueMark = make_slice<bool>(f.NumValues());
 
@@ -52,6 +56,7 @@ namespace @internal
                                     f.Fatalf("block pred/succ not crosslinked correctly %d:%s %d:%s", i, b, se.i, se.b);
                                 }
                             }
+
                         }
                         i = i__prev2;
                         e = e__prev2;
@@ -73,6 +78,7 @@ namespace @internal
                                     f.Fatalf("block succ/pred not crosslinked correctly %d:%s %d:%s", i, b, pe.i, pe.b);
                                 }
                             }
+
                         }
                         i = i__prev2;
                         e = e__prev2;
@@ -84,39 +90,39 @@ namespace @internal
                         {
                             f.Fatalf("exit block %s has successors", b);
                         }
-                        if (b.Control == null)
+                        if (b.NumControls() != 1L)
                         {
                             f.Fatalf("exit block %s has no control value", b);
                         }
-                        if (!b.Control.Type.IsMemory())
+                        if (!b.Controls[0L].Type.IsMemory())
                         {
-                            f.Fatalf("exit block %s has non-memory control value %s", b, b.Control.LongString());
+                            f.Fatalf("exit block %s has non-memory control value %s", b, b.Controls[0L].LongString());
                         }
                     else if (b.Kind == BlockRet) 
                         if (len(b.Succs) != 0L)
                         {
                             f.Fatalf("ret block %s has successors", b);
                         }
-                        if (b.Control == null)
+                        if (b.NumControls() != 1L)
                         {
                             f.Fatalf("ret block %s has nil control", b);
                         }
-                        if (!b.Control.Type.IsMemory())
+                        if (!b.Controls[0L].Type.IsMemory())
                         {
-                            f.Fatalf("ret block %s has non-memory control value %s", b, b.Control.LongString());
+                            f.Fatalf("ret block %s has non-memory control value %s", b, b.Controls[0L].LongString());
                         }
                     else if (b.Kind == BlockRetJmp) 
                         if (len(b.Succs) != 0L)
                         {
                             f.Fatalf("retjmp block %s len(Succs)==%d, want 0", b, len(b.Succs));
                         }
-                        if (b.Control == null)
+                        if (b.NumControls() != 1L)
                         {
                             f.Fatalf("retjmp block %s has nil control", b);
                         }
-                        if (!b.Control.Type.IsMemory())
+                        if (!b.Controls[0L].Type.IsMemory())
                         {
-                            f.Fatalf("retjmp block %s has non-memory control value %s", b, b.Control.LongString());
+                            f.Fatalf("retjmp block %s has non-memory control value %s", b, b.Controls[0L].LongString());
                         }
                         if (b.Aux == null)
                         {
@@ -127,46 +133,46 @@ namespace @internal
                         {
                             f.Fatalf("plain block %s len(Succs)==%d, want 1", b, len(b.Succs));
                         }
-                        if (b.Control != null)
+                        if (b.NumControls() != 0L)
                         {
-                            f.Fatalf("plain block %s has non-nil control %s", b, b.Control.LongString());
+                            f.Fatalf("plain block %s has non-nil control %s", b, b.Controls[0L].LongString());
                         }
                     else if (b.Kind == BlockIf) 
                         if (len(b.Succs) != 2L)
                         {
                             f.Fatalf("if block %s len(Succs)==%d, want 2", b, len(b.Succs));
                         }
-                        if (b.Control == null)
+                        if (b.NumControls() != 1L)
                         {
                             f.Fatalf("if block %s has no control value", b);
                         }
-                        if (!b.Control.Type.IsBoolean())
+                        if (!b.Controls[0L].Type.IsBoolean())
                         {
-                            f.Fatalf("if block %s has non-bool control value %s", b, b.Control.LongString());
+                            f.Fatalf("if block %s has non-bool control value %s", b, b.Controls[0L].LongString());
                         }
                     else if (b.Kind == BlockDefer) 
                         if (len(b.Succs) != 2L)
                         {
                             f.Fatalf("defer block %s len(Succs)==%d, want 2", b, len(b.Succs));
                         }
-                        if (b.Control == null)
+                        if (b.NumControls() != 1L)
                         {
                             f.Fatalf("defer block %s has no control value", b);
                         }
-                        if (!b.Control.Type.IsMemory())
+                        if (!b.Controls[0L].Type.IsMemory())
                         {
-                            f.Fatalf("defer block %s has non-memory control value %s", b, b.Control.LongString());
+                            f.Fatalf("defer block %s has non-memory control value %s", b, b.Controls[0L].LongString());
                         }
                     else if (b.Kind == BlockFirst) 
                         if (len(b.Succs) != 2L)
                         {
                             f.Fatalf("plain/dead block %s len(Succs)==%d, want 2", b, len(b.Succs));
                         }
-                        if (b.Control != null)
+                        if (b.NumControls() != 0L)
                         {
                             f.Fatalf("plain/dead block %s has a control value", b);
                         }
-                                        if (len(b.Succs) > 2L && b.Likely != BranchUnknown)
+                                        if (len(b.Succs) != 2L && b.Likely != BranchUnknown)
                     {
                         f.Fatalf("likeliness prediction %d for block %s with %d successors", b.Likely, b, len(b.Succs));
                     }
@@ -184,7 +190,8 @@ namespace @internal
                                 f.Fatalf("value %s has %d args, expected %d", v.LongString(), len(v.Args), nArgs);
                             }
                             var canHaveAux = false;
-                            var canHaveAuxInt = false;
+                            var canHaveAuxInt = false; 
+                            // TODO: enforce types of Aux in this switch (like auxString does below)
 
                             if (opcodeTable[v.Op].auxType == auxNone)                             else if (opcodeTable[v.Op].auxType == auxBool) 
                                 if (v.AuxInt < 0L || v.AuxInt > 1L)
@@ -210,26 +217,79 @@ namespace @internal
                                     f.Fatalf("bad int32 AuxInt value for %v", v);
                                 }
                                 canHaveAuxInt = true;
-                            else if (opcodeTable[v.Op].auxType == auxInt64 || opcodeTable[v.Op].auxType == auxFloat64) 
+                            else if (opcodeTable[v.Op].auxType == auxInt64 || opcodeTable[v.Op].auxType == auxARM64BitField) 
                                 canHaveAuxInt = true;
                             else if (opcodeTable[v.Op].auxType == auxInt128)                             else if (opcodeTable[v.Op].auxType == auxFloat32) 
                                 canHaveAuxInt = true;
-                                if (!isExactFloat32(v))
+                                if (math.IsNaN(v.AuxFloat()))
+                                {
+                                    f.Fatalf("value %v has an AuxInt that encodes a NaN", v);
+                                }
+                                if (!isExactFloat32(v.AuxFloat()))
                                 {
                                     f.Fatalf("value %v has an AuxInt value that is not an exact float32", v);
                                 }
-                            else if (opcodeTable[v.Op].auxType == auxString || opcodeTable[v.Op].auxType == auxSym || opcodeTable[v.Op].auxType == auxTyp) 
+                            else if (opcodeTable[v.Op].auxType == auxFloat64) 
+                                canHaveAuxInt = true;
+                                if (math.IsNaN(v.AuxFloat()))
+                                {
+                                    f.Fatalf("value %v has an AuxInt that encodes a NaN", v);
+                                }
+                            else if (opcodeTable[v.Op].auxType == auxString) 
+                                {
+                                    @string (_, ok) = v.Aux._<@string>();
+
+                                    if (!ok)
+                                    {
+                                        f.Fatalf("value %v has Aux type %T, want string", v, v.Aux);
+                                    }
+                                }
+
+                                canHaveAux = true;
+                            else if (opcodeTable[v.Op].auxType == auxSym || opcodeTable[v.Op].auxType == auxTyp) 
                                 canHaveAux = true;
                             else if (opcodeTable[v.Op].auxType == auxSymOff || opcodeTable[v.Op].auxType == auxSymValAndOff || opcodeTable[v.Op].auxType == auxTypSize) 
                                 canHaveAuxInt = true;
                                 canHaveAux = true;
-                            else if (opcodeTable[v.Op].auxType == auxSymInt32) 
-                                if (v.AuxInt != int64(int32(v.AuxInt)))
+                            else if (opcodeTable[v.Op].auxType == auxCCop) 
                                 {
-                                    f.Fatalf("bad int32 AuxInt value for %v", v);
+                                    (_, ok) = v.Aux._<Op>();
+
+                                    if (!ok)
+                                    {
+                                        f.Fatalf("bad type %T for CCop in %v", v.Aux, v);
+                                    }
+                                }
+
+                                canHaveAux = true;
+                            else if (opcodeTable[v.Op].auxType == auxS390XCCMask) 
+                                {
+                                    (_, ok) = v.Aux._<s390x.CCMask>();
+
+                                    if (!ok)
+                                    {
+                                        f.Fatalf("bad type %T for S390XCCMask in %v", v.Aux, v);
+                                    }
+                                }
+
+                                canHaveAux = true;
+                            else if (opcodeTable[v.Op].auxType == auxS390XRotateParams) 
+                                {
+                                    (_, ok) = v.Aux._<s390x.RotateParams>();
+
+                                    if (!ok)
+                                    {
+                                        f.Fatalf("bad type %T for S390XRotateParams in %v", v.Aux, v);
+                                    }
+                                }
+
+                                canHaveAux = true;
+                            else if (opcodeTable[v.Op].auxType == auxFlagConstant) 
+                                if (v.AuxInt < 0L || v.AuxInt > 15L)
+                                {
+                                    f.Fatalf("bad FlagConstant AuxInt value for %v", v);
                                 }
                                 canHaveAuxInt = true;
-                                canHaveAux = true;
                             else 
                                 f.Fatalf("unknown aux type for %s", v.Op);
                                                         if (!canHaveAux && v.Aux != null)
@@ -285,19 +345,50 @@ namespace @internal
                                 {
                                     f.Fatalf("no args for OpAddr %s", v.LongString());
                                 }
-                                if (v.Args[0L].Op != OpSP && v.Args[0L].Op != OpSB)
+                                if (v.Args[0L].Op != OpSB)
                                 {
                                     f.Fatalf("bad arg to OpAddr %v", v);
+                                }
+                            }
+                            if (v.Op == OpLocalAddr)
+                            {
+                                if (len(v.Args) != 2L)
+                                {
+                                    f.Fatalf("wrong # of args for OpLocalAddr %s", v.LongString());
+                                }
+                                if (v.Args[0L].Op != OpSP)
+                                {
+                                    f.Fatalf("bad arg 0 to OpLocalAddr %v", v);
+                                }
+                                if (!v.Args[1L].Type.IsMemory())
+                                {
+                                    f.Fatalf("bad arg 1 to OpLocalAddr %v", v);
                                 }
                             }
                             if (f.RegAlloc != null && f.Config.SoftFloat && v.Type.IsFloat())
                             {
                                 f.Fatalf("unexpected floating-point type %v", v.LongString());
                             }
+                            {
+                                var c__prev1 = c;
+
+                                var c = f.Config;
+
+
+                                if (v.Op == OpSP || v.Op == OpSB) 
+                                    if (v.Type != c.Types.Uintptr)
+                                    {
+                                        f.Fatalf("bad %s type: want uintptr, have %s", v.Op, v.Type.String());
+                                    }
+
+
+                                c = c__prev1;
+                            } 
+
+                            // TODO: check for cycles in values
                         }
                         v = v__prev2;
                     }
-
                 }
                 b = b__prev1;
             }
@@ -339,7 +430,6 @@ namespace @internal
                         }
                         c = c__prev2;
                     }
-
                 }
                 b = b__prev1;
             }
@@ -376,14 +466,22 @@ namespace @internal
                                 i = i__prev3;
                                 a = a__prev3;
                             }
-
                         }
                         v = v__prev2;
                     }
 
-                    if (b.Control != null && !valueMark[b.Control.ID])
                     {
-                        f.Fatalf("control value for %s is missing: %v", b, b.Control);
+                        var c__prev2 = c;
+
+                        foreach (var (_, __c) in b.ControlValues())
+                        {
+                            c = __c;
+                            if (!valueMark[c.ID])
+                            {
+                                f.Fatalf("control value for %s is missing: %v", b, c);
+                            }
+                        }
+                        c = c__prev2;
                     }
                 }
                 b = b__prev1;
@@ -427,7 +525,7 @@ namespace @internal
             { 
                 // Note: regalloc introduces non-dominating args.
                 // See TODO in regalloc.go.
-                var sdom = f.sdom();
+                var sdom = f.Sdom();
                 {
                     var b__prev1 = b;
 
@@ -454,7 +552,7 @@ namespace @internal
                                         {
                                             y = b.Preds[i].b;
                                         }
-                                        if (!domCheck(f, sdom, x, y))
+                                        if (!domCheck(_addr_f, sdom, _addr_x, _addr_y))
                                         {
                                             f.Fatalf("arg %d of value %s does not dominate, arg=%s", i, v.LongString(), arg.LongString());
                                         }
@@ -462,19 +560,26 @@ namespace @internal
                                     i = i__prev3;
                                     arg = arg__prev3;
                                 }
-
                             }
                             v = v__prev2;
                         }
 
-                        if (b.Control != null && !domCheck(f, sdom, b.Control.Block, b))
                         {
-                            f.Fatalf("control value %s for %s doesn't dominate", b.Control, b);
+                            var c__prev2 = c;
+
+                            foreach (var (_, __c) in b.ControlValues())
+                            {
+                                c = __c;
+                                if (!domCheck(_addr_f, sdom, _addr_c.Block, _addr_b))
+                                {
+                                    f.Fatalf("control value %s for %s doesn't dominate", c, b);
+                                }
+                            }
+                            c = c__prev2;
                         }
                     }
                     b = b__prev1;
                 }
-
             }
             if (f.RegAlloc == null && f.pass != null)
             { // non-nil pass allows better-targeted debug printing
@@ -503,7 +608,6 @@ namespace @internal
                         }
                         b = b__prev1;
                     }
-
                 }
             }
             var uses = make_slice<int>(f.NumValues());
@@ -529,14 +633,19 @@ namespace @internal
                                 }
                                 a = a__prev3;
                             }
-
                         }
                         v = v__prev2;
                     }
 
-                    if (b.Control != null)
                     {
-                        uses[b.Control.ID]++;
+                        var c__prev2 = c;
+
+                        foreach (var (_, __c) in b.ControlValues())
+                        {
+                            c = __c;
+                            uses[c.ID]++;
+                        }
+                        c = c__prev2;
                     }
                 }
                 b = b__prev1;
@@ -561,16 +670,18 @@ namespace @internal
                         }
                         v = v__prev2;
                     }
-
                 }
                 b = b__prev1;
             }
 
-            memCheck(f);
+            memCheck(_addr_f);
+
         }
 
-        private static void memCheck(ref Func f)
-        { 
+        private static void memCheck(ptr<Func> _addr_f)
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // Check that if a tuple has a memory type, it is second.
             {
                 var b__prev1 = b;
@@ -588,11 +699,11 @@ namespace @internal
                             {
                                 f.Fatalf("memory is first in a tuple: %s\n", v.LongString());
                             }
+
                         }
 
                         v = v__prev2;
                     }
-
                 } 
 
                 // Single live memory checks.
@@ -618,8 +729,9 @@ namespace @internal
                             v = __v;
                             if ((v.Op == OpCopy || v.Uses == 0L) && v.Type.IsMemory())
                             {
-                                return;
+                                return ;
                             }
+
                         }
 
                         v = v__prev2;
@@ -627,8 +739,9 @@ namespace @internal
 
                     if (b != f.Entry && len(b.Preds) == 0L)
                     {
-                        return;
+                        return ;
                     }
+
                 } 
 
                 // Compute live memory at the end of each block.
@@ -636,7 +749,7 @@ namespace @internal
                 b = b__prev1;
             }
 
-            var lastmem = make_slice<ref Value>(f.NumBlocks());
+            var lastmem = make_slice<ptr<Value>>(f.NumBlocks());
             var ss = newSparseSet(f.NumValues());
             {
                 var b__prev1 = b;
@@ -657,6 +770,7 @@ namespace @internal
                             {
                                 continue;
                             }
+
                             {
                                 var m__prev1 = m;
 
@@ -670,6 +784,7 @@ namespace @internal
                                 m = m__prev1;
 
                             }
+
                         } 
                         // There should be at most one remaining unoverwritten memory value.
 
@@ -686,15 +801,19 @@ namespace @internal
                             {
                                 continue;
                             }
+
                             if (ss.contains(v.ID))
                             {
                                 continue;
                             }
+
                             if (lastmem[b.ID] != null)
                             {
                                 f.Fatalf("two live memory values in %s: %s and %s", b, lastmem[b.ID], v);
                             }
+
                             lastmem[b.ID] = v;
+
                         } 
                         // If there is no remaining memory value, that means there was no memory update.
                         // Take any memory arg.
@@ -714,22 +833,26 @@ namespace @internal
                                 {
                                     continue;
                                 }
+
                                 m = v.MemoryArg();
                                 if (m == null)
                                 {
                                     continue;
                                 }
+
                                 if (lastmem[b.ID] != null && lastmem[b.ID] != m)
                                 {
                                     f.Fatalf("two live memory values in %s: %s and %s", b, lastmem[b.ID], m);
                                 }
+
                                 lastmem[b.ID] = m;
+
                             }
 
                             v = v__prev2;
                         }
-
                     }
+
                 } 
                 // Propagate last live memory through storeless blocks.
 
@@ -749,6 +872,7 @@ namespace @internal
                         {
                             continue;
                         }
+
                         foreach (var (_, e) in b.Preds)
                         {
                             var p = e.b;
@@ -758,7 +882,9 @@ namespace @internal
                                 changed = true;
                                 break;
                             }
+
                         }
+
                     }
 
                     b = b__prev2;
@@ -768,6 +894,7 @@ namespace @internal
                 {
                     break;
                 }
+
             } 
             // Check merge points.
  
@@ -797,17 +924,17 @@ namespace @internal
                                         {
                                             f.Fatalf("inconsistent memory phi %s %d %s %s", v.LongString(), i, a, lastmem[b.Preds[i].b.ID]);
                                         }
+
                                     }
 
                                     a = a__prev3;
                                 }
-
                             }
+
                         }
 
                         v = v__prev2;
                     }
-
                 } 
 
                 // Check that only one memory is live at any point.
@@ -823,7 +950,7 @@ namespace @internal
                     foreach (var (_, __b) in f.Blocks)
                     {
                         b = __b;
-                        ref Value mem = default; // the current live memory in the block
+                        ptr<Value> mem; // the current live memory in the block
                         {
                             var v__prev2 = v;
 
@@ -836,13 +963,18 @@ namespace @internal
                                     {
                                         mem = v;
                                     }
+
                                     continue;
+
                                 }
+
                                 if (mem == null && len(b.Preds) > 0L)
                                 { 
                                     // If no mem phi, take mem of any predecessor.
                                     mem = lastmem[b.Preds[0L].b.ID];
+
                                 }
+
                                 {
                                     var a__prev3 = a;
 
@@ -853,6 +985,7 @@ namespace @internal
                                         {
                                             f.Fatalf("two live mems @ %s: %s and %s", v, mem, a);
                                         }
+
                                     }
 
                                     a = a__prev3;
@@ -862,16 +995,15 @@ namespace @internal
                                 {
                                     mem = v;
                                 }
+
                             }
 
                             v = v__prev2;
                         }
-
                     }
 
                     b = b__prev1;
                 }
-
             } 
 
             // Check that after scheduling, phis are always first in the block.
@@ -896,42 +1028,51 @@ namespace @internal
                                     {
                                         f.Fatalf("phi after non-phi @ %s: %s", b, v);
                                     }
-                                else if (v.Op == OpRegKill) 
-                                    if (f.RegAlloc == null)
-                                    {
-                                        f.Fatalf("RegKill seen before register allocation @ %s: %s", b, v);
-                                    }
+
                                 else 
                                     seenNonPhi = true;
-                                                            }
+                                
+                            }
 
                             v = v__prev2;
                         }
-
                     }
 
                     b = b__prev1;
                 }
-
             }
+
         }
 
         // domCheck reports whether x dominates y (including x==y).
-        private static bool domCheck(ref Func f, SparseTree sdom, ref Block x, ref Block y)
+        private static bool domCheck(ptr<Func> _addr_f, SparseTree sdom, ptr<Block> _addr_x, ptr<Block> _addr_y)
         {
-            if (!sdom.isAncestorEq(f.Entry, y))
+            ref Func f = ref _addr_f.val;
+            ref Block x = ref _addr_x.val;
+            ref Block y = ref _addr_y.val;
+
+            if (!sdom.IsAncestorEq(f.Entry, y))
             { 
                 // unreachable - ignore
                 return true;
+
             }
-            return sdom.isAncestorEq(x, y);
+
+            return sdom.IsAncestorEq(x, y);
+
         }
 
-        // isExactFloat32 reports whether v has an AuxInt that can be exactly represented as a float32.
-        private static bool isExactFloat32(ref Value v)
-        {
-            var x = v.AuxFloat();
-            return math.Float64bits(x) == math.Float64bits(float64(float32(x)));
+        // isExactFloat32 reports whether x can be exactly represented as a float32.
+        private static bool isExactFloat32(double x)
+        { 
+            // Check the mantissa is in range.
+            if (bits.TrailingZeros64(math.Float64bits(x)) < 52L - 23L)
+            {
+                return false;
+            } 
+            // Check the exponent is in range. The mantissa check above is sufficient for NaN values.
+            return math.IsNaN(x) || x == float64(float32(x));
+
         }
     }
 }}}}

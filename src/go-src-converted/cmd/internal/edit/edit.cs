@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package edit implements buffered position-based editing of byte slices.
-// package edit -- go2cs converted at 2020 August 29 08:52:44 UTC
+// package edit -- go2cs converted at 2020 October 08 04:09:12 UTC
 // import "cmd/internal/edit" ==> using edit = go.cmd.@internal.edit_package
 // Original source: C:\Go\src\cmd\internal\edit\edit.go
 using fmt = go.fmt_package;
@@ -44,7 +44,6 @@ namespace @internal
         {
             x[i] = x[j];
             x[j] = x[i];
-
         }
         private static bool Less(this edits x, long i, long j)
         {
@@ -52,48 +51,64 @@ namespace @internal
             {
                 return x[i].start < x[j].start;
             }
+
             return x[i].end < x[j].end;
+
         }
 
         // NewBuffer returns a new buffer to accumulate changes to an initial data slice.
         // The returned buffer maintains a reference to the data, so the caller must ensure
         // the data is not modified until after the Buffer is done being used.
-        public static ref Buffer NewBuffer(slice<byte> data)
+        public static ptr<Buffer> NewBuffer(slice<byte> data)
         {
-            return ref new Buffer(old:data);
+            return addr(new Buffer(old:data));
         }
 
-        private static void Insert(this ref Buffer _b, long pos, @string @new) => func(_b, (ref Buffer b, Defer _, Panic panic, Recover __) =>
+        private static void Insert(this ptr<Buffer> _addr_b, long pos, @string @new) => func((_, panic, __) =>
         {
+            ref Buffer b = ref _addr_b.val;
+
             if (pos < 0L || pos > len(b.old))
             {
                 panic("invalid edit position");
             }
+
             b.q = append(b.q, new edit(pos,pos,new));
+
         });
 
-        private static void Delete(this ref Buffer _b, long start, long end) => func(_b, (ref Buffer b, Defer _, Panic panic, Recover __) =>
+        private static void Delete(this ptr<Buffer> _addr_b, long start, long end) => func((_, panic, __) =>
         {
+            ref Buffer b = ref _addr_b.val;
+
             if (end < start || start < 0L || end > len(b.old))
             {
                 panic("invalid edit position");
             }
+
             b.q = append(b.q, new edit(start,end,""));
+
         });
 
-        private static void Replace(this ref Buffer _b, long start, long end, @string @new) => func(_b, (ref Buffer b, Defer _, Panic panic, Recover __) =>
+        private static void Replace(this ptr<Buffer> _addr_b, long start, long end, @string @new) => func((_, panic, __) =>
         {
+            ref Buffer b = ref _addr_b.val;
+
             if (end < start || start < 0L || end > len(b.old))
             {
                 panic("invalid edit position");
             }
+
             b.q = append(b.q, new edit(start,end,new));
+
         });
 
         // Bytes returns a new byte slice containing the original data
         // with the queued edits applied.
-        private static slice<byte> Bytes(this ref Buffer _b) => func(_b, (ref Buffer b, Defer _, Panic panic, Recover __) =>
-        { 
+        private static slice<byte> Bytes(this ptr<Buffer> _addr_b) => func((_, panic, __) =>
+        {
+            ref Buffer b = ref _addr_b.val;
+ 
             // Sort edits by starting position and then by ending position.
             // Breaking ties by ending position allows insertions at point x
             // to be applied before a replacement of the text at [x, y).
@@ -108,18 +123,23 @@ namespace @internal
                     var e0 = b.q[i - 1L];
                     panic(fmt.Sprintf("overlapping edits: [%d,%d)->%q, [%d,%d)->%q", e0.start, e0.end, e0.@new, e.start, e.end, e.@new));
                 }
+
                 new = append(new, b.old[offset..e.start]);
                 offset = e.end;
                 new = append(new, e.@new);
+
             }
             new = append(new, b.old[offset..]);
             return new;
+
         });
 
         // String returns a string containing the original data
         // with the queued edits applied.
-        private static @string String(this ref Buffer b)
+        private static @string String(this ptr<Buffer> _addr_b)
         {
+            ref Buffer b = ref _addr_b.val;
+
             return string(b.Bytes());
         }
     }

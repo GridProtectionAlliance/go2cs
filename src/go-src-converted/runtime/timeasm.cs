@@ -3,12 +3,10 @@
 // license that can be found in the LICENSE file.
 
 // Declarations for operating systems implementing time.now directly in assembly.
-// Those systems are also expected to have nanotime subtract startNano,
-// so that time.now and nanotime return the same monotonic clock readings.
 
-// +build darwin,amd64 darwin,386 windows
+// +build windows
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:16 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:24:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\timeasm.go
 using _@unsafe_ = go.@unsafe_package;

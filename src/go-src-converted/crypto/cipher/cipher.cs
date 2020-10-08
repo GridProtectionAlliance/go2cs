@@ -4,9 +4,9 @@
 
 // Package cipher implements standard block cipher modes that can be wrapped
 // around low-level block cipher implementations.
-// See http://csrc.nist.gov/groups/ST/toolkit/BCM/current_modes.html
+// See https://csrc.nist.gov/groups/ST/toolkit/BCM/current_modes.html
 // and NIST Special Publication 800-38A.
-// package cipher -- go2cs converted at 2020 August 29 08:28:50 UTC
+// package cipher -- go2cs converted at 2020 October 08 03:35:44 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\cipher.go
 

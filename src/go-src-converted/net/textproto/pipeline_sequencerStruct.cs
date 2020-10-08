@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:28 UTC
+//     Generated on 2020 October 08 03:38:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace net
                 this.wait = default;
             }
 
-            public sequencer(sync.Mutex mu = default, ulong id = default, map<ulong, channel<ulong>> wait = default)
+            public sequencer(sync.Mutex mu = default, ulong id = default, map<ulong, channel<object>> wait = default)
             {
                 this.mu = mu;
                 this.id = id;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:12 UTC
+//     Generated on 2020 October 08 03:43:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -58,7 +58,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -72,10 +72,10 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate (Token, error) TokenByRef(ref T value);
+            private delegate (Token, error) TokenByPtr(ptr<T> value);
             private delegate (Token, error) TokenByVal(T value);
 
-            private static readonly TokenByRef s_TokenByRef;
+            private static readonly TokenByPtr s_TokenByPtr;
             private static readonly TokenByVal s_TokenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,11 +84,12 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TokenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TokenByPtr is null || !m_target_is_ptr)
                     return s_TokenByVal!(target);
 
-                return s_TokenByRef(ref target);
+                return s_TokenByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -97,23 +98,20 @@ namespace encoding
             static TokenReader()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Token");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Token");
 
                 if (!(extensionMethod is null))
-                    s_TokenByRef = extensionMethod.CreateStaticDelegate(typeof(TokenByRef)) as TokenByRef;
+                    s_TokenByPtr = extensionMethod.CreateStaticDelegate(typeof(TokenByPtr)) as TokenByPtr;
 
-                if (s_TokenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Token");
+                extensionMethod = targetType.GetExtensionMethod("Token");
 
-                    if (!(extensionMethod is null))
-                        s_TokenByVal = extensionMethod.CreateStaticDelegate(typeof(TokenByVal)) as TokenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TokenByVal = extensionMethod.CreateStaticDelegate(typeof(TokenByVal)) as TokenByVal;
 
-                if (s_TokenByRef is null && s_TokenByVal is null)
+                if (s_TokenByPtr is null && s_TokenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement TokenReader.Token method", new Exception("Token"));
             }
 

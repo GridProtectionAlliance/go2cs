@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2020 August 29 08:42:41 UTC
+// package strings -- go2cs converted at 2020 October 08 03:48:21 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Go\src\strings\replace.go
 using io = go.io_package;
+using sync = go.sync_package;
 using static go.builtin;
 
 namespace go
@@ -16,7 +17,9 @@ namespace go
         // It is safe for concurrent use by multiple goroutines.
         public partial struct Replacer
         {
+            public sync.Once once; // guards buildOnce method
             public replacer r;
+            public slice<@string> oldnew;
         }
 
         // replacer is the interface that a replacement algorithm needs to implement.
@@ -26,9 +29,13 @@ namespace go
             (long, error) WriteString(io.Writer w, @string s);
         }
 
-        // NewReplacer returns a new Replacer from a list of old, new string pairs.
-        // Replacements are performed in order, without overlapping matches.
-        public static ref Replacer NewReplacer(params @string[] oldnew) => func((_, panic, __) =>
+        // NewReplacer returns a new Replacer from a list of old, new string
+        // pairs. Replacements are performed in the order they appear in the
+        // target string, without overlapping matches. The old string
+        // comparisons are done in argument order.
+        //
+        // NewReplacer panics if given an odd number of arguments.
+        public static ptr<Replacer> NewReplacer(params @string[] oldnew) => func((_, panic, __) =>
         {
             oldnew = oldnew.Clone();
 
@@ -36,10 +43,29 @@ namespace go
             {
                 panic("strings.NewReplacer: odd argument count");
             }
+
+            return addr(new Replacer(oldnew:append([]string(nil),oldnew...)));
+
+        });
+
+        private static void buildOnce(this ptr<Replacer> _addr_r)
+        {
+            ref Replacer r = ref _addr_r.val;
+
+            r.r = r.build();
+            r.oldnew = null;
+        }
+
+        private static replacer build(this ptr<Replacer> _addr_b)
+        {
+            ref Replacer b = ref _addr_b.val;
+
+            var oldnew = b.oldnew;
             if (len(oldnew) == 2L && len(oldnew[0L]) > 1L)
             {
-                return ref new Replacer(r:makeSingleStringReplacer(oldnew[0],oldnew[1]));
+                return makeSingleStringReplacer(oldnew[0L], oldnew[1L]);
             }
+
             var allNewBytes = true;
             {
                 long i__prev1 = i;
@@ -50,13 +76,15 @@ namespace go
                 {
                     if (len(oldnew[i]) != 1L)
                     {
-                        return ref new Replacer(r:makeGenericReplacer(oldnew));
+                        return makeGenericReplacer(oldnew);
                     i += 2L;
                     }
+
                     if (len(oldnew[i + 1L]) != 1L)
                     {
                         allNewBytes = false;
                     }
+
                 }
 
 
@@ -65,7 +93,7 @@ namespace go
 
             if (allNewBytes)
             {
-                byteReplacer r = new byteReplacer();
+                ref byteReplacer r = ref heap(new byteReplacer(), out ptr<byteReplacer> _addr_r);
                 {
                     long i__prev1 = i;
 
@@ -96,9 +124,11 @@ namespace go
 
                     i = i__prev1;
                 }
-                return ref new Replacer(r:&r);
+                return _addr_r;
+
             }
-            r = new byteStringReplacer(); 
+
+            r = new byteStringReplacer(toReplace:make([]string,0,len(oldnew)/2)); 
             // The first occurrence of old->new map takes precedence
             // over the others with the same old string.
             {
@@ -109,26 +139,46 @@ namespace go
                 while (i >= 0L)
                 {
                     o = oldnew[i][0L];
-                    n = oldnew[i + 1L];
-                    r[o] = (slice<byte>)n;
+                    n = oldnew[i + 1L]; 
+                    // To avoid counting repetitions multiple times.
+                    if (r.replacements[o] == null)
+                    { 
+                        // We need to use string([]byte{o}) instead of string(o),
+                        // to avoid utf8 encoding of o.
+                        // E. g. byte(150) produces string of length 2.
+                        r.toReplace = append(r.toReplace, string(new slice<byte>(new byte[] { o })));
                     i -= 2L;
+                    }
+
+                    r.replacements[o] = (slice<byte>)n;
+
+
                 }
 
 
                 i = i__prev1;
             }
-            return ref new Replacer(r:&r);
-        });
+            return _addr_r;
+
+        }
 
         // Replace returns a copy of s with all replacements performed.
-        private static @string Replace(this ref Replacer r, @string s)
+        private static @string Replace(this ptr<Replacer> _addr_r, @string s)
         {
+            ref Replacer r = ref _addr_r.val;
+
+            r.once.Do(r.buildOnce);
             return r.r.Replace(s);
         }
 
         // WriteString writes s to w with all replacements performed.
-        private static (long, error) WriteString(this ref Replacer r, io.Writer w, @string s)
+        private static (long, error) WriteString(this ptr<Replacer> _addr_r, io.Writer w, @string s)
         {
+            long n = default;
+            error err = default!;
+            ref Replacer r = ref _addr_r.val;
+
+            r.once.Do(r.buildOnce);
             return r.r.WriteString(w, s);
         }
 
@@ -175,11 +225,14 @@ namespace go
 // genericReplacer.tableSize will be 5. Node n0's table will be
 // []*trieNode{ 0:n1, 1:n4, 3:n6 }, where the 0, 1 and 3 are the remapped
 // 'a', 'b' and 'x'.
-            public slice<ref trieNode> table;
+            public slice<ptr<trieNode>> table;
         }
 
-        private static void add(this ref trieNode t, @string key, @string val, long priority, ref genericReplacer r)
+        private static void add(this ptr<trieNode> _addr_t, @string key, @string val, long priority, ptr<genericReplacer> _addr_r)
         {
+            ref trieNode t = ref _addr_t.val;
+            ref genericReplacer r = ref _addr_r.val;
+
             if (key == "")
             {
                 if (t.priority == 0L)
@@ -187,8 +240,11 @@ namespace go
                     t.value = val;
                     t.priority = priority;
                 }
-                return;
+
+                return ;
+
             }
+
             if (t.prefix != "")
             { 
                 // Need to split the prefix among multiple nodes.
@@ -200,6 +256,7 @@ namespace go
                         break;
                     n++;
                     }
+
                 }
 
                 if (n == len(t.prefix))
@@ -211,31 +268,35 @@ namespace go
                     // First byte differs, start a new lookup table here. Looking up
                     // what is currently t.prefix[0] will lead to prefixNode, and
                     // looking up key[0] will lead to keyNode.
-                    ref trieNode prefixNode = default;
+                    ptr<trieNode> prefixNode;
                     if (len(t.prefix) == 1L)
                     {
                         prefixNode = t.next;
                     }
                     else
                     {
-                        prefixNode = ref new trieNode(prefix:t.prefix[1:],next:t.next,);
+                        prefixNode = addr(new trieNode(prefix:t.prefix[1:],next:t.next,));
                     }
+
                     ptr<trieNode> keyNode = @new<trieNode>();
-                    t.table = make_slice<ref trieNode>(r.tableSize);
+                    t.table = make_slice<ptr<trieNode>>(r.tableSize);
                     t.table[r.mapping[t.prefix[0L]]] = prefixNode;
                     t.table[r.mapping[key[0L]]] = keyNode;
                     t.prefix = "";
                     t.next = null;
                     keyNode.add(key[1L..], val, priority, r);
+
                 }
                 else
                 { 
                     // Insert new node after the common section of the prefix.
-                    trieNode next = ref new trieNode(prefix:t.prefix[n:],next:t.next,);
+                    ptr<trieNode> next = addr(new trieNode(prefix:t.prefix[n:],next:t.next,));
                     t.prefix = t.prefix[..n];
                     t.next = next;
                     next.add(key[n..], val, priority, r);
+
                 }
+
             }
             else if (t.table != null)
             { 
@@ -245,7 +306,9 @@ namespace go
                 {
                     t.table[m] = @new<trieNode>();
                 }
+
                 t.table[m].add(key[1L..], val, priority, r);
+
             }
             else
             {
@@ -253,28 +316,36 @@ namespace go
                 t.next = @new<trieNode>();
                 t.next.add("", val, priority, r);
             }
+
         }
 
-        private static (@string, long, bool) lookup(this ref genericReplacer r, @string s, bool ignoreRoot)
-        { 
+        private static (@string, long, bool) lookup(this ptr<genericReplacer> _addr_r, @string s, bool ignoreRoot)
+        {
+            @string val = default;
+            long keylen = default;
+            bool found = default;
+            ref genericReplacer r = ref _addr_r.val;
+ 
             // Iterate down the trie to the end, and grab the value and keylen with
             // the highest priority.
             long bestPriority = 0L;
-            var node = ref r.root;
+            var node = _addr_r.root;
             long n = 0L;
             while (node != null)
             {
-                if (node.priority > bestPriority && !(ignoreRoot && node == ref r.root))
+                if (node.priority > bestPriority && !(ignoreRoot && node == _addr_r.root))
                 {
                     bestPriority = node.priority;
                     val = node.value;
                     keylen = n;
                     found = true;
                 }
+
                 if (s == "")
                 {
                     break;
                 }
+
                 if (node.table != null)
                 {
                     var index = r.mapping[s[0L]];
@@ -282,9 +353,11 @@ namespace go
                     {
                         break;
                     }
+
                     node = node.table[index];
                     s = s[1L..];
                     n++;
+
                 }
                 else if (node.prefix != "" && HasPrefix(s, node.prefix))
                 {
@@ -296,9 +369,11 @@ namespace go
                 {
                     break;
                 }
+
             }
 
-            return;
+            return ;
+
         }
 
         // genericReplacer is the fully generic algorithm.
@@ -311,7 +386,7 @@ namespace go
             public array<byte> mapping;
         }
 
-        private static ref genericReplacer makeGenericReplacer(slice<@string> oldnew)
+        private static ptr<genericReplacer> makeGenericReplacer(slice<@string> oldnew)
         {
             ptr<genericReplacer> r = @new<genericReplacer>(); 
             // Find each byte used, then assign them each an index.
@@ -365,6 +440,7 @@ namespace go
                         r.mapping[i] = index;
                         index++;
                     }
+
                 } 
                 // Ensure root node uses a lookup table (for performance).
 
@@ -372,7 +448,7 @@ namespace go
                 b = b__prev1;
             }
 
-            r.root.table = make_slice<ref trieNode>(r.tableSize);
+            r.root.table = make_slice<ptr<trieNode>>(r.tableSize);
 
             {
                 long i__prev1 = i;
@@ -388,7 +464,8 @@ namespace go
 
                 i = i__prev1;
             }
-            return r;
+            return _addr_r!;
+
         }
 
         private partial struct appendSliceWriter // : slice<byte>
@@ -396,22 +473,25 @@ namespace go
         }
 
         // Write writes to the buffer to satisfy io.Writer.
-        private static (long, error) Write(this ref appendSliceWriter w, slice<byte> p)
+        private static (long, error) Write(this ptr<appendSliceWriter> _addr_w, slice<byte> p)
         {
-            w.Value = append(w.Value, p);
-            return (len(p), null);
+            long _p0 = default;
+            error _p0 = default!;
+            ref appendSliceWriter w = ref _addr_w.val;
+
+            w.val = append(w.val, p);
+            return (len(p), error.As(null!)!);
         }
 
         // WriteString writes to the buffer without string->[]byte->string allocations.
-        private static (long, error) WriteString(this ref appendSliceWriter w, @string s)
+        private static (long, error) WriteString(this ptr<appendSliceWriter> _addr_w, @string s)
         {
-            w.Value = append(w.Value, s);
-            return (len(s), null);
-        }
+            long _p0 = default;
+            error _p0 = default!;
+            ref appendSliceWriter w = ref _addr_w.val;
 
-        private partial interface stringWriterIface
-        {
-            (long, error) WriteString(@string _p0);
+            w.val = append(w.val, s);
+            return (len(s), error.As(null!)!);
         }
 
         private partial struct stringWriter
@@ -421,28 +501,39 @@ namespace go
 
         private static (long, error) WriteString(this stringWriter w, @string s)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             return w.w.Write((slice<byte>)s);
         }
 
-        private static stringWriterIface getStringWriter(io.Writer w)
+        private static io.StringWriter getStringWriter(io.Writer w)
         {
-            stringWriterIface (sw, ok) = w._<stringWriterIface>();
+            io.StringWriter (sw, ok) = w._<io.StringWriter>();
             if (!ok)
             {
                 sw = new stringWriter(w);
             }
+
             return sw;
+
         }
 
-        private static @string Replace(this ref genericReplacer r, @string s)
+        private static @string Replace(this ptr<genericReplacer> _addr_r, @string s)
         {
-            var buf = make(appendSliceWriter, 0L, len(s));
-            r.WriteString(ref buf, s);
+            ref genericReplacer r = ref _addr_r.val;
+
+            ref var buf = ref heap(make(appendSliceWriter, 0L, len(s)), out ptr<var> _addr_buf);
+            r.WriteString(_addr_buf, s);
             return string(buf);
         }
 
-        private static (long, error) WriteString(this ref genericReplacer r, io.Writer w, @string s)
+        private static (long, error) WriteString(this ptr<genericReplacer> _addr_r, io.Writer w, @string s)
         {
+            long n = default;
+            error err = default!;
+            ref genericReplacer r = ref _addr_r.val;
+
             var sw = getStringWriter(w);
             long last = default;            long wn = default;
 
@@ -461,6 +552,7 @@ namespace go
                             i++;
                             continue;
                         }
+
                     } 
 
                     // Ignore the empty match iff the previous loop found the empty match.
@@ -472,19 +564,24 @@ namespace go
                         n += wn;
                         if (err != null)
                         {
-                            return;
+                            return ;
                         }
+
                         wn, err = sw.WriteString(val);
                         n += wn;
                         if (err != null)
                         {
-                            return;
+                            return ;
                         }
+
                         i += keylen;
                         last = i;
                         continue;
+
                     }
+
                     i++;
+
                 }
 
             }
@@ -493,7 +590,9 @@ namespace go
                 wn, err = sw.WriteString(s[last..]);
                 n += wn;
             }
-            return;
+
+            return ;
+
         }
 
         // singleStringReplacer is the implementation that's used when there is only
@@ -504,13 +603,15 @@ namespace go
             public @string value;
         }
 
-        private static ref singleStringReplacer makeSingleStringReplacer(@string pattern, @string value)
+        private static ptr<singleStringReplacer> makeSingleStringReplacer(@string pattern, @string value)
         {
-            return ref new singleStringReplacer(finder:makeStringFinder(pattern),value:value);
+            return addr(new singleStringReplacer(finder:makeStringFinder(pattern),value:value));
         }
 
-        private static @string Replace(this ref singleStringReplacer r, @string s)
+        private static @string Replace(this ptr<singleStringReplacer> _addr_r, @string s)
         {
+            ref singleStringReplacer r = ref _addr_r.val;
+
             slice<byte> buf = default;
             long i = 0L;
             var matched = false;
@@ -521,22 +622,30 @@ namespace go
                 {
                     break;
                 }
+
                 matched = true;
                 buf = append(buf, s[i..i + match]);
                 buf = append(buf, r.value);
                 i += match + len(r.finder.pattern);
+
             }
 
             if (!matched)
             {
                 return s;
             }
+
             buf = append(buf, s[i..]);
             return string(buf);
+
         }
 
-        private static (long, error) WriteString(this ref singleStringReplacer r, io.Writer w, @string s)
+        private static (long, error) WriteString(this ptr<singleStringReplacer> _addr_r, io.Writer w, @string s)
         {
+            long n = default;
+            error err = default!;
+            ref singleStringReplacer r = ref _addr_r.val;
+
             var sw = getStringWriter(w);
             long i = default;            long wn = default;
 
@@ -547,24 +656,29 @@ namespace go
                 {
                     break;
                 }
+
                 wn, err = sw.WriteString(s[i..i + match]);
                 n += wn;
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
                 wn, err = sw.WriteString(r.value);
                 n += wn;
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
                 i += match + len(r.finder.pattern);
+
             }
 
             wn, err = sw.WriteString(s[i..]);
             n += wn;
-            return;
+            return ;
+
         }
 
         // byteReplacer is the implementation that's used when all the "old"
@@ -574,8 +688,10 @@ namespace go
         {
         }
 
-        private static @string Replace(this ref byteReplacer r, @string s)
+        private static @string Replace(this ptr<byteReplacer> _addr_r, @string s)
         {
+            ref byteReplacer r = ref _addr_r.val;
+
             slice<byte> buf = default; // lazily allocated
             for (long i = 0L; i < len(s); i++)
             {
@@ -586,30 +702,40 @@ namespace go
                     {
                         buf = (slice<byte>)s;
                     }
+
                     buf[i] = r[b];
+
                 }
+
             }
 
             if (buf == null)
             {
                 return s;
             }
+
             return string(buf);
+
         }
 
-        private static (long, error) WriteString(this ref byteReplacer r, io.Writer w, @string s)
-        { 
+        private static (long, error) WriteString(this ptr<byteReplacer> _addr_r, io.Writer w, @string s)
+        {
+            long n = default;
+            error err = default!;
+            ref byteReplacer r = ref _addr_r.val;
+ 
             // TODO(bradfitz): use io.WriteString with slices of s, avoiding allocation.
             long bufsize = 32L << (int)(10L);
             if (len(s) < bufsize)
             {
                 bufsize = len(s);
             }
+
             var buf = make_slice<byte>(bufsize);
 
             while (len(s) > 0L)
             {
-                var ncopy = copy(buf, s[..]);
+                var ncopy = copy(buf, s);
                 s = s[ncopy..];
                 foreach (var (i, b) in buf[..ncopy])
                 {
@@ -619,99 +745,153 @@ namespace go
                 n += wn;
                 if (err != null)
                 {
-                    return (n, err);
+                    return (n, error.As(err)!);
                 }
+
             }
 
-            return (n, null);
+            return (n, error.As(null!)!);
+
         }
 
         // byteStringReplacer is the implementation that's used when all the
         // "old" values are single ASCII bytes but the "new" values vary in size.
-        // The array contains replacement byte slices indexed by old byte.
-        // A nil []byte means that the old byte should not be replaced.
-        private partial struct byteStringReplacer // : array<slice<byte>>
+        private partial struct byteStringReplacer
         {
+            public array<slice<byte>> replacements; // toReplace keeps a list of bytes to replace. Depending on length of toReplace
+// and length of target string it may be faster to use Count, or a plain loop.
+// We store single byte as a string, because Count takes a string.
+            public slice<@string> toReplace;
         }
 
-        private static @string Replace(this ref byteStringReplacer r, @string s)
-        {
-            var newSize = len(s);
-            var anyChanges = false;
-            {
-                long i__prev1 = i;
+        // countCutOff controls the ratio of a string length to a number of replacements
+        // at which (*byteStringReplacer).Replace switches algorithms.
+        // For strings with higher ration of length to replacements than that value,
+        // we call Count, for each replacement from toReplace.
+        // For strings, with a lower ratio we use simple loop, because of Count overhead.
+        // countCutOff is an empirically determined overhead multiplier.
+        // TODO(tocarip) revisit once we have register-based abi/mid-stack inlining.
+        private static readonly long countCutOff = (long)8L;
 
-                for (long i = 0L; i < len(s); i++)
+
+
+        private static @string Replace(this ptr<byteStringReplacer> _addr_r, @string s)
+        {
+            ref byteStringReplacer r = ref _addr_r.val;
+
+            var newSize = len(s);
+            var anyChanges = false; 
+            // Is it faster to use Count?
+            if (len(r.toReplace) * countCutOff <= len(s))
+            {
+                foreach (var (_, x) in r.toReplace)
                 {
-                    var b = s[i];
-                    if (r[b] != null)
                     {
-                        anyChanges = true; 
-                        // The -1 is because we are replacing 1 byte with len(r[b]) bytes.
-                        newSize += len(r[b]) - 1L;
+                        var c = Count(s, x);
+
+                        if (c != 0L)
+                        { 
+                            // The -1 is because we are replacing 1 byte with len(replacements[b]) bytes.
+                            newSize += c * (len(r.replacements[x[0L]]) - 1L);
+                            anyChanges = true;
+
+                        }
+
                     }
+
+
+                }
+            else
+            }            {
+                {
+                    long i__prev1 = i;
+
+                    for (long i = 0L; i < len(s); i++)
+                    {
+                        var b = s[i];
+                        if (r.replacements[b] != null)
+                        { 
+                            // See above for explanation of -1
+                            newSize += len(r.replacements[b]) - 1L;
+                            anyChanges = true;
+
+                        }
+
+                    }
+
+
+                    i = i__prev1;
                 }
 
-
-                i = i__prev1;
             }
+
             if (!anyChanges)
             {
                 return s;
             }
+
             var buf = make_slice<byte>(newSize);
-            var bi = buf;
+            long j = 0L;
             {
                 long i__prev1 = i;
 
                 for (i = 0L; i < len(s); i++)
                 {
                     b = s[i];
-                    if (r[b] != null)
+                    if (r.replacements[b] != null)
                     {
-                        var n = copy(bi, r[b]);
-                        bi = bi[n..];
+                        j += copy(buf[j..], r.replacements[b]);
                     }
                     else
                     {
-                        bi[0L] = b;
-                        bi = bi[1L..];
+                        buf[j] = b;
+                        j++;
                     }
+
                 }
 
 
                 i = i__prev1;
             }
             return string(buf);
+
         }
 
-        private static (long, error) WriteString(this ref byteStringReplacer r, io.Writer w, @string s)
+        private static (long, error) WriteString(this ptr<byteStringReplacer> _addr_r, io.Writer w, @string s)
         {
+            long n = default;
+            error err = default!;
+            ref byteStringReplacer r = ref _addr_r.val;
+
             var sw = getStringWriter(w);
             long last = 0L;
             for (long i = 0L; i < len(s); i++)
             {
                 var b = s[i];
-                if (r[b] == null)
+                if (r.replacements[b] == null)
                 {
                     continue;
                 }
+
                 if (last != i)
                 {
                     var (nw, err) = sw.WriteString(s[last..i]);
                     n += nw;
                     if (err != null)
                     {
-                        return (n, err);
+                        return (n, error.As(err)!);
                     }
+
                 }
+
                 last = i + 1L;
-                (nw, err) = w.Write(r[b]);
+                (nw, err) = w.Write(r.replacements[b]);
                 n += nw;
                 if (err != null)
                 {
-                    return (n, err);
+                    return (n, error.As(err)!);
                 }
+
             }
 
             if (last != len(s))
@@ -720,7 +900,9 @@ namespace go
                 nw, err = sw.WriteString(s[last..]);
                 n += nw;
             }
-            return;
+
+            return ;
+
         }
     }
 }

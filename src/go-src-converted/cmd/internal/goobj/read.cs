@@ -6,11 +6,12 @@
 //
 // TODO(rsc): Decide where this package should live. (golang.org/issue/6932)
 // TODO(rsc): Decide the appropriate integer types for various fields.
-// package goobj -- go2cs converted at 2020 August 29 08:46:18 UTC
+// package goobj -- go2cs converted at 2020 October 08 03:50:07 UTC
 // import "cmd/internal/goobj" ==> using goobj = go.cmd.@internal.goobj_package
 // Original source: C:\Go\src\cmd\internal\goobj\read.go
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -57,7 +58,9 @@ namespace @internal
             {
                 return s.Name;
             }
+
             return fmt.Sprintf("%s<%d>", s.Name, s.Version);
+
         }
 
         // A Data is a reference to data stored in an object file.
@@ -98,8 +101,10 @@ namespace @internal
         {
             public long Args; // size in bytes of argument frame: inputs and outputs
             public long Frame; // size in bytes of local variable frame
+            public uint Align; // alignment requirement in bytes for the address of the function
             public bool Leaf; // function omits save of link register (ARM)
             public bool NoSplit; // function omits stack split prologue
+            public bool TopFrame; // function is the top of the call stack
             public slice<Var> Var; // detail about local variables
             public Data PCSP; // PC → SP offset map
             public Data PCFile; // PC → file number map (index into File)
@@ -128,6 +133,7 @@ namespace @internal
             public @string File;
             public long Line;
             public SymID Func;
+            public long ParentPC;
         }
 
         // A Package is a parsed Go object file or archive defining a Go package.
@@ -136,10 +142,11 @@ namespace @internal
             public @string ImportPath; // import path denoting this package
             public slice<@string> Imports; // packages imported by this package
             public slice<SymID> SymRefs; // list of symbol names and versions referred to by this pack
-            public slice<ref Sym> Syms; // symbols defined by this package
+            public slice<ptr<Sym>> Syms; // symbols defined by this package
             public long MaxVersion; // maximum Version in any SymID in Syms
             public @string Arch; // architecture
-            public slice<ref NativeReader> Native; // native object data (e.g. ELF)
+            public slice<ptr<NativeReader>> Native; // native object data (e.g. ELF)
+            public slice<@string> DWARFFileList; // List of files for the DWARF .debug_lines section
         }
 
         public partial struct NativeReader : io.ReaderAt
@@ -165,8 +172,12 @@ namespace @internal
         }
 
         // init initializes r to read package p from f.
-        private static void init(this ref objReader r, ref os.File f, ref Package p)
+        private static void init(this ptr<objReader> _addr_r, ptr<os.File> _addr_f, ptr<Package> _addr_p)
         {
+            ref objReader r = ref _addr_r.val;
+            ref os.File f = ref _addr_f.val;
+            ref Package p = ref _addr_p.val;
+
             r.f = f;
             r.p = p;
             r.offset, _ = f.Seek(0L, io.SeekCurrent);
@@ -180,32 +191,43 @@ namespace @internal
         // It returns only the first error, so that an error
         // caused by an earlier error does not discard information
         // about the earlier error.
-        private static error error(this ref objReader r, error err)
+        private static error error(this ptr<objReader> _addr_r, error err)
         {
+            ref objReader r = ref _addr_r.val;
+
             if (r.err == null)
             {
                 if (err == io.EOF)
                 {
                     err = io.ErrUnexpectedEOF;
                 }
+
                 r.err = err;
+
             } 
             // panic("corrupt") // useful for debugging
-            return error.As(r.err);
+            return error.As(r.err)!;
+
         }
 
         // peek returns the next n bytes without advancing the reader.
-        private static (slice<byte>, error) peek(this ref objReader r, long n)
+        private static (slice<byte>, error) peek(this ptr<objReader> _addr_r, long n)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref objReader r = ref _addr_r.val;
+
             if (r.err != null)
             {
-                return (null, r.err);
+                return (null, error.As(r.err)!);
             }
+
             if (r.offset >= r.limit)
             {
                 r.error(io.ErrUnexpectedEOF);
-                return (null, r.err);
+                return (null, error.As(r.err)!);
             }
+
             var (b, err) = r.b.Peek(n);
             if (err != null)
             {
@@ -213,8 +235,11 @@ namespace @internal
                 {
                     r.error(err);
                 }
+
             }
-            return (b, err);
+
+            return (b, error.As(err)!);
+
         }
 
         // readByte reads and returns a byte from the input file.
@@ -222,17 +247,21 @@ namespace @internal
         // A sequence of 0 bytes will eventually terminate any
         // parsing state in the object file. In particular, it ends the
         // reading of a varint.
-        private static byte readByte(this ref objReader r)
+        private static byte readByte(this ptr<objReader> _addr_r)
         {
+            ref objReader r = ref _addr_r.val;
+
             if (r.err != null)
             {
                 return 0L;
             }
+
             if (r.offset >= r.limit)
             {
                 r.error(io.ErrUnexpectedEOF);
                 return 0L;
             }
+
             var (b, err) = r.b.ReadByte();
             if (err != null)
             {
@@ -240,42 +269,54 @@ namespace @internal
                 {
                     err = io.ErrUnexpectedEOF;
                 }
+
                 r.error(err);
                 b = 0L;
+
             }
             else
             {
                 r.offset++;
             }
+
             return b;
+
         }
 
         // read reads exactly len(b) bytes from the input file.
         // If an error occurs, read returns the error but also
         // records it, so it is safe for callers to ignore the result
         // as long as delaying the report is not a problem.
-        private static error readFull(this ref objReader r, slice<byte> b)
+        private static error readFull(this ptr<objReader> _addr_r, slice<byte> b)
         {
+            ref objReader r = ref _addr_r.val;
+
             if (r.err != null)
             {
-                return error.As(r.err);
+                return error.As(r.err)!;
             }
+
             if (r.offset + int64(len(b)) > r.limit)
             {
-                return error.As(r.error(io.ErrUnexpectedEOF));
+                return error.As(r.error(io.ErrUnexpectedEOF))!;
             }
+
             var (n, err) = io.ReadFull(r.b, b);
             r.offset += int64(n);
             if (err != null)
             {
-                return error.As(r.error(err));
+                return error.As(r.error(err))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // readInt reads a zigzag varint from the input file.
-        private static long readInt(this ref objReader r)
+        private static long readInt(this ptr<objReader> _addr_r)
         {
+            ref objReader r = ref _addr_r.val;
+
             ulong u = default;
 
             {
@@ -289,22 +330,27 @@ namespace @internal
                         return 0L;
                     shift += 7L;
                     }
+
                     var c = r.readByte();
                     u |= uint64(c & 0x7FUL) << (int)(shift);
                     if (c & 0x80UL == 0L)
                     {
                         break;
                     }
+
                 }
 
             }
 
             return int64(u >> (int)(1L)) ^ (int64(u) << (int)(63L) >> (int)(63L));
+
         }
 
         // readString reads a length-delimited string from the input file.
-        private static @string readString(this ref objReader r)
+        private static @string readString(this ptr<objReader> _addr_r)
         {
+            ref objReader r = ref _addr_r.val;
+
             var n = r.readInt();
             var buf = make_slice<byte>(n);
             r.readFull(buf);
@@ -312,36 +358,58 @@ namespace @internal
         }
 
         // readSymID reads a SymID from the input file.
-        private static SymID readSymID(this ref objReader r)
+        private static SymID readSymID(this ptr<objReader> _addr_r)
         {
+            ref objReader r = ref _addr_r.val;
+
             var i = r.readInt();
             return r.p.SymRefs[i];
         }
 
-        private static void readRef(this ref objReader r)
+        private static void readRef(this ptr<objReader> _addr_r)
         {
+            ref objReader r = ref _addr_r.val;
+
             var name = r.readString();
-            var vers = r.readInt(); 
+            var abiOrStatic = r.readInt(); 
 
             // In a symbol name in an object file, "". denotes the
             // prefix for the package in which the object file has been found.
             // Expand it.
-            name = strings.Replace(name, "\"\".", r.pkgprefix, -1L); 
+            name = strings.ReplaceAll(name, "\"\".", r.pkgprefix); 
 
-            // An individual object file only records version 0 (extern) or 1 (static).
-            // To make static symbols unique across all files being read, we
-            // replace version 1 with the version corresponding to the current
-            // file number. The number is incremented on each call to parseObject.
-            if (vers != 0L)
-            {
+            // The ABI field records either the ABI or -1 for static symbols.
+            //
+            // To distinguish different static symbols with the same name,
+            // we use the symbol "version". Version 0 corresponds to
+            // global symbols, and each file has a unique version > 0 for
+            // all of its static symbols. The version is incremented on
+            // each call to parseObject.
+            //
+            // For global symbols, we currently ignore the ABI.
+            //
+            // TODO(austin): Record the ABI in SymID. Since this is a
+            // public API, we'll have to keep Version as 0 and record the
+            // ABI in a new field (which differs from how the linker does
+            // this, but that's okay). Show the ABI in things like
+            // objdump.
+            long vers = default;
+            if (abiOrStatic == -1L)
+            { 
+                // Static symbol
                 vers = r.p.MaxVersion;
+
             }
+
             r.p.SymRefs = append(r.p.SymRefs, new SymID(name,vers));
+
         }
 
         // readData reads a data reference from the input file.
-        private static Data readData(this ref objReader r)
+        private static Data readData(this ptr<objReader> _addr_r)
         {
+            ref objReader r = ref _addr_r.val;
+
             var n = r.readInt();
             Data d = new Data(Offset:r.dataOffset,Size:n);
             r.dataOffset += n;
@@ -349,17 +417,21 @@ namespace @internal
         }
 
         // skip skips n bytes in the input.
-        private static void skip(this ref objReader r, long n)
+        private static void skip(this ptr<objReader> _addr_r, long n)
         {
+            ref objReader r = ref _addr_r.val;
+
             if (n < 0L)
             {
                 r.error(fmt.Errorf("debug/goobj: internal error: misuse of skip"));
             }
+
             if (n < int64(len(r.tmp)))
             { 
                 // Since the data is so small, a just reading from the buffered
                 // reader is better than flushing the buffer and seeking.
                 r.readFull(r.tmp[..n]);
+
             }
             else if (n <= int64(r.b.Buffered()))
             { 
@@ -373,6 +445,7 @@ namespace @internal
             else
 
                 r.readFull(r.tmp[..n]);
+
             }            { 
                 // Seek, giving up buffered data.
                 var (_, err) = r.f.Seek(r.offset + n, io.SeekStart);
@@ -380,19 +453,27 @@ namespace @internal
                 {
                     r.error(err);
                 }
+
                 r.offset += n;
                 r.b.Reset(r.f);
+
             }
+
         }
 
         // Parse parses an object file or archive from f,
         // assuming that its import path is pkgpath.
-        public static (ref Package, error) Parse(ref os.File f, @string pkgpath)
+        public static (ptr<Package>, error) Parse(ptr<os.File> _addr_f, @string pkgpath)
         {
+            ptr<Package> _p0 = default!;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
             if (pkgpath == "")
             {
                 pkgpath = "\"\"";
             }
+
             ptr<Package> p = @new<Package>();
             p.ImportPath = pkgpath;
 
@@ -405,8 +486,11 @@ namespace @internal
                 {
                     err = io.ErrUnexpectedEOF;
                 }
-                return (null, err);
+
+                return (_addr_null!, error.As(err)!);
+
             }
+
 
             if (bytes.Equal(rd.tmp[..8L], archiveHeader)) 
                 {
@@ -416,12 +500,13 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                     err = err__prev1;
 
                 }
+
             else if (bytes.Equal(rd.tmp[..8L], goobjHeader)) 
                 {
                     var err__prev1 = err;
@@ -430,15 +515,17 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
 
                     err = err__prev1;
 
                 }
+
             else 
-                return (null, errNotObject);
-                        return (p, null);
+                return (_addr_null!, error.As(errNotObject)!);
+                        return (_addr_p!, error.As(null!)!);
+
         }
 
         // trimSpace removes trailing spaces from b and returns the corresponding string.
@@ -449,8 +536,10 @@ namespace @internal
         }
 
         // parseArchive parses a Unix archive of Go object files.
-        private static error parseArchive(this ref objReader r)
+        private static error parseArchive(this ptr<objReader> _addr_r)
         {
+            ref objReader r = ref _addr_r.val;
+
             while (r.offset < r.limit)
             {
                 {
@@ -460,12 +549,13 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev1;
 
                 }
+
                 var data = r.tmp[..60L]; 
 
                 // Each file is preceded by this text header (slice indices in first column):
@@ -486,24 +576,28 @@ namespace @internal
                 // if size is odd, an extra padding byte is inserted betw the next header.
                 if (len(data) < 60L)
                 {
-                    return error.As(errTruncatedArchive);
+                    return error.As(errTruncatedArchive)!;
                 }
+
                 if (!bytes.Equal(data[58L..60L], archiveMagic))
                 {
-                    return error.As(errCorruptArchive);
+                    return error.As(errCorruptArchive)!;
                 }
+
                 var name = trimSpace(data[0L..16L]);
                 var (size, err) = strconv.ParseInt(trimSpace(data[48L..58L]), 10L, 64L);
                 if (err != null)
                 {
-                    return error.As(errCorruptArchive);
+                    return error.As(errCorruptArchive)!;
                 }
+
                 data = data[60L..];
                 var fsize = size + size & 1L;
                 if (fsize < 0L || fsize < size)
                 {
-                    return error.As(errCorruptArchive);
+                    return error.As(errCorruptArchive)!;
                 }
+
                 switch (name)
                 {
                     case "__.PKGDEF": 
@@ -516,8 +610,9 @@ namespace @internal
                         var (p, err) = r.peek(8L);
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
+
                         if (bytes.Equal(p, goobjHeader))
                         {
                             {
@@ -527,17 +622,19 @@ namespace @internal
 
                                 if (err != null)
                                 {
-                                    return error.As(fmt.Errorf("parsing archive member %q: %v", name, err));
+                                    return error.As(fmt.Errorf("parsing archive member %q: %v", name, err))!;
                                 }
 
                                 err = err__prev2;
 
                             }
+
                         }
                         else
                         {
-                            r.p.Native = append(r.p.Native, ref new NativeReader(Name:name,ReaderAt:io.NewSectionReader(r.f,r.offset,size),));
+                            r.p.Native = append(r.p.Native, addr(new NativeReader(Name:name,ReaderAt:io.NewSectionReader(r.f,r.offset,size),)));
                         }
+
                         r.skip(r.limit - r.offset);
                         r.limit = oldLimit;
                         break;
@@ -546,9 +643,11 @@ namespace @internal
                 {
                     r.skip(1L);
                 }
+
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // parseObject parses a single Go object file.
@@ -558,8 +657,10 @@ namespace @internal
         // and then the part we want to parse begins.
         // The format of that part is defined in a comment at the top
         // of src/liblink/objfile.c.
-        private static error parseObject(this ref objReader r, slice<byte> prefix)
+        private static error parseObject(this ptr<objReader> _addr_r, slice<byte> prefix)
         {
+            ref objReader r = ref _addr_r.val;
+
             r.p.MaxVersion++;
             var h = make_slice<byte>(0L, 256L);
             h = append(h, prefix);
@@ -575,12 +676,14 @@ namespace @internal
                 // Don't consider them errors, only look for r.err != nil.
                 if (r.err != null)
                 {
-                    return error.As(errCorruptObject);
+                    return error.As(errCorruptObject)!;
                 }
+
                 if (c1 == '\n' && c2 == '!' && c3 == '\n')
                 {
                     break;
                 }
+
             }
 
 
@@ -590,15 +693,28 @@ namespace @internal
                 r.p.Arch = hs[3L];
             } 
             // TODO: extract OS + build ID if/when we need it
-            r.readFull(r.tmp[..8L]);
-            if (!bytes.Equal(r.tmp[..8L], (slice<byte>)"\x00\x00go19ld"))
+            var (p, err) = r.peek(8L);
+            if (err != null)
             {
-                return error.As(r.error(errCorruptObject));
+                return error.As(err)!;
             }
+
+            if (bytes.Equal(p, (slice<byte>)goobj2.Magic))
+            {
+                r.readNew();
+                return error.As(null!)!;
+            }
+
+            r.readFull(r.tmp[..8L]);
+            if (!bytes.Equal(r.tmp[..8L], (slice<byte>)"\x00go114ld"))
+            {
+                return error.As(r.error(errCorruptObject))!;
+            }
+
             var b = r.readByte();
             if (b != 1L)
             {
-                return error.As(r.error(errCorruptObject));
+                return error.As(r.error(errCorruptObject))!;
             } 
 
             // Direct package dependencies.
@@ -609,9 +725,27 @@ namespace @internal
                 {
                     break;
                 }
-                r.p.Imports = append(r.p.Imports, s);
-            }
 
+                r.p.Imports = append(r.p.Imports, s);
+
+            } 
+
+            // Read filenames for dwarf info.
+ 
+
+            // Read filenames for dwarf info.
+            var count = r.readInt();
+            {
+                var i__prev1 = i;
+
+                for (var i = int64(0L); i < count; i++)
+                {
+                    r.p.DWARFFileList = append(r.p.DWARFFileList, r.readString());
+                }
+
+
+                i = i__prev1;
+            }
 
             r.p.SymRefs = new slice<SymID>(new SymID[] { {"",0} });
             while (true)
@@ -625,16 +759,20 @@ namespace @internal
                     {
                         if (b != 0xffUL)
                         {
-                            return error.As(r.error(errCorruptObject));
+                            return error.As(r.error(errCorruptObject))!;
                         }
+
                         break;
+
                     }
 
                     b = b__prev1;
 
                 }
 
+
                 r.readRef();
+
             }
 
 
@@ -660,17 +798,20 @@ namespace @internal
                     {
                         if (b != 0xffUL)
                         {
-                            return error.As(r.error(errCorruptObject));
+                            return error.As(r.error(errCorruptObject))!;
                         }
+
                         break;
+
                     }
 
                     b = b__prev1;
 
                 }
 
+
                 var typ = r.readByte();
-                s = ref new Sym(SymID:r.readSymID());
+                s = addr(new Sym(SymID:r.readSymID()));
                 r.p.Syms = append(r.p.Syms, s);
                 s.Kind = objabi.SymKind(typ);
                 var flags = r.readInt();
@@ -685,7 +826,7 @@ namespace @internal
                     foreach (var (__i) in s.Reloc)
                     {
                         i = __i;
-                        var rel = ref s.Reloc[i];
+                        var rel = _addr_s.Reloc[i];
                         rel.Offset = r.readInt();
                         rel.Size = r.readInt();
                         rel.Type = objabi.RelocType(r.readInt());
@@ -702,8 +843,10 @@ namespace @internal
                     s.Func = f;
                     f.Args = r.readInt();
                     f.Frame = r.readInt();
+                    f.Align = uint32(r.readInt());
                     flags = r.readInt();
                     f.Leaf = flags & (1L << (int)(0L)) != 0L;
+                    f.TopFrame = flags & (1L << (int)(4L)) != 0L;
                     f.NoSplit = r.readInt() != 0L;
                     f.Var = make_slice<Var>(r.readInt());
                     {
@@ -712,7 +855,7 @@ namespace @internal
                         foreach (var (__i) in f.Var)
                         {
                             i = __i;
-                            var v = ref f.Var[i];
+                            var v = _addr_f.Var[i];
                             v.Name = r.readSymID().Name;
                             v.Offset = r.readInt();
                             v.Kind = r.readInt();
@@ -758,7 +901,7 @@ namespace @internal
                         foreach (var (__i) in f.FuncData)
                         {
                             i = __i;
-                            f.FuncData[i].Offset = int64(r.readInt()); // TODO
+                            f.FuncData[i].Offset = r.readInt(); // TODO
                         }
 
                         i = i__prev2;
@@ -788,25 +931,30 @@ namespace @internal
                             f.InlTree[i].File = r.readSymID().Name;
                             f.InlTree[i].Line = r.readInt();
                             f.InlTree[i].Func = r.readSymID();
+                            f.InlTree[i].ParentPC = r.readInt();
                         }
 
                         i = i__prev2;
                     }
-
                 }
+
             }
 
 
             r.readFull(r.tmp[..7L]);
-            if (!bytes.Equal(r.tmp[..7L], (slice<byte>)"\xffgo19ld"))
+            if (!bytes.Equal(r.tmp[..7L], (slice<byte>)"go114ld"))
             {
-                return error.As(r.error(errCorruptObject));
+                return error.As(r.error(errCorruptObject))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static @string String(this ref Reloc r, ulong insnOffset)
+        private static @string String(this ptr<Reloc> _addr_r, ulong insnOffset)
         {
+            ref Reloc r = ref _addr_r.val;
+
             var delta = r.Offset - int64(insnOffset);
             var s = fmt.Sprintf("[%d:%d]%s", delta, delta + r.Size, r.Type);
             if (r.Sym.Name != "")
@@ -815,13 +963,18 @@ namespace @internal
                 {
                     return fmt.Sprintf("%s:%s+%d", s, r.Sym.Name, r.Add);
                 }
+
                 return fmt.Sprintf("%s:%s", s, r.Sym.Name);
+
             }
+
             if (r.Add != 0L)
             {
                 return fmt.Sprintf("%s:%d", s, r.Add);
             }
+
             return s;
+
         }
     }
 }}}

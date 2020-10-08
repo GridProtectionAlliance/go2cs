@@ -4,7 +4,7 @@
 
 // This file implements type-checking of identifiers and type expressions.
 
-// package types -- go2cs converted at 2020 August 29 08:48:07 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:56 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\typexpr.go
 using ast = go.go.ast_package;
@@ -22,13 +22,21 @@ namespace go
     {
         // ident type-checks identifier e and initializes x with the value or type of e.
         // If an error occurred, x.mode is set to invalid.
-        // For the meaning of def and path, see check.typ, below.
+        // For the meaning of def, see Checker.definedType, below.
+        // If wantType is set, the identifier e is expected to denote a type.
         //
-        private static void ident(this ref Checker check, ref operand x, ref ast.Ident e, ref Named def, slice<ref TypeName> path)
+        private static void ident(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.Ident> _addr_e, ptr<Named> _addr_def, bool wantType)
         {
-            x.mode = invalid;
-            x.expr = e;
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+            ref ast.Ident e = ref _addr_e.val;
+            ref Named def = ref _addr_def.val;
 
+            x.mode = invalid;
+            x.expr = e; 
+
+            // Note that we cannot use check.lookup here because the returned scope
+            // may be different from obj.Parent(). See also Scope.LookupParent doc.
             var (scope, obj) = check.scope.LookupParent(e.Name, check.pos);
             if (obj == null)
             {
@@ -40,12 +48,30 @@ namespace go
                 {
                     check.errorf(e.Pos(), "undeclared name: %s", e.Name);
                 }
-                return;
-            }
-            check.recordUse(e, obj);
+                return ;
 
-            check.objDecl(obj, def, path);
+            }
+            check.recordUse(e, obj); 
+
+            // Type-check the object.
+            // Only call Checker.objDecl if the object doesn't have a type yet
+            // (in which case we must actually determine it) or the object is a
+            // TypeName and we also want a type (in which case we might detect
+            // a cycle which needs to be reported). Otherwise we can skip the
+            // call and avoid a possible cycle error in favor of the more
+            // informative "not a type/value" error that this function's caller
+            // will issue (see issue #25790).
             var typ = obj.Type();
+            {
+                ptr<TypeName> (_, gotType) = obj._<ptr<TypeName>>();
+
+                if (typ == null || gotType && wantType)
+                {
+                    check.objDecl(obj, def);
+                    typ = obj.Type(); // type must have been assigned by Checker.objDecl
+                }
+            }
+
             assert(typ != null); 
 
             // The object may be dot-imported: If so, remove its package from
@@ -61,26 +87,28 @@ namespace go
                 }
             }
 
+
             switch (obj.type())
             {
-                case ref PkgName obj:
+                case ptr<PkgName> obj:
                     check.errorf(e.Pos(), "use of package %s not in selector", obj.name);
-                    return;
+                    return ;
                     break;
-                case ref Const obj:
+                case ptr<Const> obj:
                     check.addDeclDep(obj);
                     if (typ == Typ[Invalid])
                     {
-                        return;
+                        return ;
                     }
                     if (obj == universeIota)
                     {
                         if (check.iota == null)
                         {
                             check.errorf(e.Pos(), "cannot use iota outside constant declaration");
-                            return;
+                            return ;
                         }
                         x.val = check.iota;
+
                     }
                     else
                     {
@@ -89,34 +117,10 @@ namespace go
                     assert(x.val != null);
                     x.mode = constant_;
                     break;
-                case ref TypeName obj:
-                    x.mode = typexpr; 
-                    // check for cycle
-                    // (it's ok to iterate forward because each named type appears at most once in path)
-                    foreach (var (i, prev) in path)
-                    {
-                        if (prev == obj)
-                        {
-                            check.errorf(obj.pos, "illegal cycle in declaration of %s", obj.name); 
-                            // print cycle
-                            {
-                                var obj__prev2 = obj;
-
-                                foreach (var (_, __obj) in path[i..])
-                                {
-                                    obj = __obj;
-                                    check.errorf(obj.Pos(), "\t%s refers to", obj.Name()); // secondary error, \t indented
-                                }
-                                obj = obj__prev2;
-                            }
-
-                            check.errorf(obj.Pos(), "\t%s", obj.Name()); 
-                            // maintain x.mode == typexpr despite error
-                            typ = Typ[Invalid];
-                            break;
-                        }
-                    }                    break;
-                case ref Var obj:
+                case ptr<TypeName> obj:
+                    x.mode = typexpr;
+                    break;
+                case ptr<Var> obj:
                     if (obj.pkg == check.pkg)
                     {
                         obj.used = true;
@@ -124,19 +128,19 @@ namespace go
                     check.addDeclDep(obj);
                     if (typ == Typ[Invalid])
                     {
-                        return;
+                        return ;
                     }
                     x.mode = variable;
                     break;
-                case ref Func obj:
+                case ptr<Func> obj:
                     check.addDeclDep(obj);
                     x.mode = value;
                     break;
-                case ref Builtin obj:
+                case ptr<Builtin> obj:
                     x.id = obj.id;
                     x.mode = builtin;
                     break;
-                case ref Nil obj:
+                case ptr<Nil> obj:
                     x.mode = value;
                     break;
                 default:
@@ -149,16 +153,28 @@ namespace go
             }
 
             x.typ = typ;
+
         }
 
-        // typExpr type-checks the type expression e and returns its type, or Typ[Invalid].
-        // If def != nil, e is the type specification for the named type def, declared
-        // in a type declaration, and def.underlying will be set to the type of e before
-        // any components of e are type-checked. Path contains the path of named types
-        // referring to this type.
-        //
-        private static Type typExpr(this ref Checker _check, ast.Expr e, ref Named _def, slice<ref TypeName> path) => func(_check, _def, (ref Checker check, ref Named def, Defer defer, Panic _, Recover __) =>
+        // typ type-checks the type expression e and returns its type, or Typ[Invalid].
+        private static Type typ(this ptr<Checker> _addr_check, ast.Expr e)
         {
+            ref Checker check = ref _addr_check.val;
+
+            return check.definedType(e, null);
+        }
+
+        // definedType is like typ but also accepts a type name def.
+        // If def != nil, e is the type specification for the defined type def, declared
+        // in a type declaration, and def.underlying will be set to the type of e before
+        // any components of e are type-checked.
+        //
+        private static Type definedType(this ptr<Checker> _addr_check, ast.Expr e, ptr<Named> _addr_def) => func((defer, _, __) =>
+        {
+            Type T = default;
+            ref Checker check = ref _addr_check.val;
+            ref Named def = ref _addr_def.val;
+
             if (trace)
             {
                 check.trace(e.Pos(), "%s", e);
@@ -168,22 +184,25 @@ namespace go
                     check.indent--;
                     check.trace(e.Pos(), "=> %s", T);
                 }());
+
             }
-            T = check.typExprInternal(e, def, path);
+
+            T = check.typInternal(e, def);
             assert(isTyped(T));
             check.recordTypeAndValue(e, typexpr, T, null);
 
-            return;
+            return ;
+
         });
 
-        private static Type typ(this ref Checker check, ast.Expr e)
-        {
-            return check.typExpr(e, null, null);
-        }
-
         // funcType type-checks a function or method type.
-        private static void funcType(this ref Checker check, ref Signature sig, ref ast.FieldList recvPar, ref ast.FuncType ftyp)
+        private static void funcType(this ptr<Checker> _addr_check, ptr<Signature> _addr_sig, ptr<ast.FieldList> _addr_recvPar, ptr<ast.FuncType> _addr_ftyp)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Signature sig = ref _addr_sig.val;
+            ref ast.FieldList recvPar = ref _addr_recvPar.val;
+            ref ast.FuncType ftyp = ref _addr_ftyp.val;
+
             var scope = NewScope(check.scope, token.NoPos, token.NoPos, "function");
             scope.isFunc = true;
             check.recordScope(ftyp, scope);
@@ -197,7 +216,7 @@ namespace go
                 // recv parameter list present (may be empty)
                 // spec: "The receiver is specified via an extra parameter section preceding the
                 // method name. That parameter section must declare a single parameter, the receiver."
-                ref Var recv = default;
+                ptr<Var> recv;
                 switch (len(recvList))
                 {
                     case 0L: 
@@ -221,7 +240,7 @@ namespace go
                     {
                         @string err = default;
                         {
-                            ref Named (T, _) = t._<ref Named>();
+                            ptr<Named> (T, _) = t._<ptr<Named>>();
 
                             if (T != null)
                             { 
@@ -237,20 +256,23 @@ namespace go
                                     // TODO(gri) This is not correct if the underlying type is unknown yet.
                                     switch (T.underlying.type())
                                     {
-                                        case ref Basic u:
+                                        case ptr<Basic> u:
                                             if (u.kind == UnsafePointer)
                                             {
                                                 err = "unsafe.Pointer";
                                             }
+
                                             break;
-                                        case ref Pointer u:
+                                        case ptr<Pointer> u:
                                             err = "pointer or interface type";
                                             break;
-                                        case ref Interface u:
+                                        case ptr<Interface> u:
                                             err = "pointer or interface type";
                                             break;
                                     }
+
                                 }
+
                             }
                             else
                             {
@@ -258,34 +280,43 @@ namespace go
                             }
 
                         }
+
                         if (err != "")
                         {
                             check.errorf(recv.pos, "invalid receiver %s (%s)", recv.typ, err); 
                             // ok to continue
                         }
+
                     }
 
                 }
+
                 sig.recv = recv;
+
             }
+
             sig.scope = scope;
             sig.@params = NewTuple(params);
             sig.results = NewTuple(results);
             sig.variadic = variadic;
+
         }
 
-        // typExprInternal drives type checking of types.
-        // Must only be called by typExpr.
+        // typInternal drives type checking of types.
+        // Must only be called by definedType.
         //
-        private static Type typExprInternal(this ref Checker check, ast.Expr e, ref Named def, slice<ref TypeName> path)
+        private static Type typInternal(this ptr<Checker> _addr_check, ast.Expr e, ptr<Named> _addr_def)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Named def = ref _addr_def.val;
+
             switch (e.type())
             {
-                case ref ast.BadExpr e:
+                case ptr<ast.BadExpr> e:
                     break;
-                case ref ast.Ident e:
-                    operand x = default;
-                    check.ident(ref x, e, def, path);
+                case ptr<ast.Ident> e:
+                    ref operand x = ref heap(out ptr<operand> _addr_x);
+                    check.ident(_addr_x, e, def, true);
 
 
                     if (x.mode == typexpr) 
@@ -293,13 +324,13 @@ namespace go
                         def.setUnderlying(typ);
                         return typ;
                     else if (x.mode == invalid)                     else if (x.mode == novalue) 
-                        check.errorf(x.pos(), "%s used as type", ref x);
+                        check.errorf(x.pos(), "%s used as type", _addr_x);
                     else 
-                        check.errorf(x.pos(), "%s is not a type", ref x);
+                        check.errorf(x.pos(), "%s is not a type", _addr_x);
                                         break;
-                case ref ast.SelectorExpr e:
+                case ptr<ast.SelectorExpr> e:
                     x = default;
-                    check.selector(ref x, e);
+                    check.selector(_addr_x, e);
 
 
                     if (x.mode == typexpr) 
@@ -307,22 +338,21 @@ namespace go
                         def.setUnderlying(typ);
                         return typ;
                     else if (x.mode == invalid)                     else if (x.mode == novalue) 
-                        check.errorf(x.pos(), "%s used as type", ref x);
+                        check.errorf(x.pos(), "%s used as type", _addr_x);
                     else 
-                        check.errorf(x.pos(), "%s is not a type", ref x);
+                        check.errorf(x.pos(), "%s is not a type", _addr_x);
                                         break;
-                case ref ast.ParenExpr e:
-                    return check.typExpr(e.X, def, path);
+                case ptr<ast.ParenExpr> e:
+                    return check.definedType(e.X, def);
                     break;
-                case ref ast.ArrayType e:
+                case ptr<ast.ArrayType> e:
                     if (e.Len != null)
                     {
                         typ = @new<Array>();
                         def.setUnderlying(typ);
                         typ.len = check.arrayLength(e.Len);
-                        typ.elem = check.typExpr(e.Elt, null, path);
+                        typ.elem = check.typ(e.Elt);
                         return typ;
-
                     }
                     else
                     {
@@ -331,32 +361,33 @@ namespace go
                         typ.elem = check.typ(e.Elt);
                         return typ;
                     }
+
                     break;
-                case ref ast.StructType e:
+                case ptr<ast.StructType> e:
                     typ = @new<Struct>();
                     def.setUnderlying(typ);
-                    check.structType(typ, e, path);
+                    check.structType(typ, e);
                     return typ;
                     break;
-                case ref ast.StarExpr e:
+                case ptr<ast.StarExpr> e:
                     typ = @new<Pointer>();
                     def.setUnderlying(typ);
                     typ.@base = check.typ(e.X);
                     return typ;
                     break;
-                case ref ast.FuncType e:
+                case ptr<ast.FuncType> e:
                     typ = @new<Signature>();
                     def.setUnderlying(typ);
                     check.funcType(typ, null, e);
                     return typ;
                     break;
-                case ref ast.InterfaceType e:
+                case ptr<ast.InterfaceType> e:
                     typ = @new<Interface>();
                     def.setUnderlying(typ);
-                    check.interfaceType(typ, e, def, path);
+                    check.interfaceType(typ, e, def);
                     return typ;
                     break;
-                case ref ast.MapType e:
+                case ptr<ast.MapType> e:
                     typ = @new<Map>();
                     def.setUnderlying(typ);
 
@@ -369,17 +400,18 @@ namespace go
                     //
                     // Delay this check because it requires fully setup types;
                     // it is safe to continue in any case (was issue 6667).
-                    check.delay(() =>
+                    check.atEnd(() =>
                     {
                         if (!Comparable(typ.key))
                         {
                             check.errorf(e.Key.Pos(), "invalid map key type %s", typ.key);
                         }
+
                     });
 
                     return typ;
                     break;
-                case ref ast.ChanType e:
+                case ptr<ast.ChanType> e:
                     typ = @new<Chan>();
                     def.setUnderlying(typ);
 
@@ -408,16 +440,19 @@ namespace go
             typ = Typ[Invalid];
             def.setUnderlying(typ);
             return typ;
+
         }
 
         // typeOrNil type-checks the type expression (or nil value) e
         // and returns the typ of e, or nil.
         // If e is neither a type nor nil, typOrNil returns Typ[Invalid].
         //
-        private static Type typOrNil(this ref Checker check, ast.Expr e)
+        private static Type typOrNil(this ptr<Checker> _addr_check, ast.Expr e)
         {
-            operand x = default;
-            check.rawExpr(ref x, e, null);
+            ref Checker check = ref _addr_check.val;
+
+            ref operand x = ref heap(out ptr<operand> _addr_x);
+            check.rawExpr(_addr_x, e, null);
 
             if (x.mode == invalid)
             {
@@ -425,7 +460,7 @@ namespace go
             }
             if (x.mode == novalue)
             {
-                check.errorf(x.pos(), "%s used as type", ref x);
+                check.errorf(x.pos(), "%s used as type", _addr_x);
                 goto __switch_break0;
             }
             if (x.mode == typexpr)
@@ -439,26 +474,36 @@ namespace go
                 {
                     return null;
                 }
+
             }
             // default: 
-                check.errorf(x.pos(), "%s is not a type", ref x);
+                check.errorf(x.pos(), "%s is not a type", _addr_x);
 
             __switch_break0:;
             return Typ[Invalid];
+
         }
 
-        private static long arrayLength(this ref Checker check, ast.Expr e)
+        // arrayLength type-checks the array length expression e
+        // and returns the constant length >= 0, or a value < 0
+        // to indicate an error (and thus an unknown length).
+        private static long arrayLength(this ptr<Checker> _addr_check, ast.Expr e)
         {
-            operand x = default;
-            check.expr(ref x, e);
+            ref Checker check = ref _addr_check.val;
+
+            ref operand x = ref heap(out ptr<operand> _addr_x);
+            check.expr(_addr_x, e);
             if (x.mode != constant_)
             {
                 if (x.mode != invalid)
                 {
-                    check.errorf(x.pos(), "array length %s must be constant", ref x);
+                    check.errorf(x.pos(), "array length %s must be constant", _addr_x);
                 }
-                return 0L;
+
+                return -1L;
+
             }
+
             if (isUntyped(x.typ) || isInteger(x.typ))
             {
                 {
@@ -466,7 +511,7 @@ namespace go
 
                     if (val.Kind() == constant.Int)
                     {
-                        if (representableConst(val, check.conf, Typ[Int], null))
+                        if (representableConst(val, check, Typ[Int], null))
                         {
                             {
                                 var (n, ok) = constant.Int64Val(val);
@@ -477,46 +522,61 @@ namespace go
                                 }
 
                             }
-                            check.errorf(x.pos(), "invalid array length %s", ref x);
-                            return 0L;
+
+                            check.errorf(x.pos(), "invalid array length %s", _addr_x);
+                            return -1L;
+
                         }
+
                     }
 
                 }
+
             }
-            check.errorf(x.pos(), "array length %s must be integer", ref x);
-            return 0L;
+
+            check.errorf(x.pos(), "array length %s must be integer", _addr_x);
+            return -1L;
+
         }
 
-        private static (slice<ref Var>, bool) collectParams(this ref Checker check, ref Scope scope, ref ast.FieldList list, bool variadicOk)
+        private static (slice<ptr<Var>>, bool) collectParams(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope, ptr<ast.FieldList> _addr_list, bool variadicOk)
         {
+            slice<ptr<Var>> @params = default;
+            bool variadic = default;
+            ref Checker check = ref _addr_check.val;
+            ref Scope scope = ref _addr_scope.val;
+            ref ast.FieldList list = ref _addr_list.val;
+
             if (list == null)
             {
-                return;
+                return ;
             }
+
             bool named = default;            bool anonymous = default;
 
             foreach (var (i, field) in list.List)
             {
                 var ftype = field.Type;
                 {
-                    ref ast.Ellipsis (t, _) = ftype._<ref ast.Ellipsis>();
+                    ptr<ast.Ellipsis> (t, _) = ftype._<ptr<ast.Ellipsis>>();
 
                     if (t != null)
                     {
                         ftype = t.Elt;
-                        if (variadicOk && i == len(list.List) - 1L)
+                        if (variadicOk && i == len(list.List) - 1L && len(field.Names) <= 1L)
                         {
                             variadic = true;
                         }
                         else
                         {
-                            check.invalidAST(field.Pos(), "... not permitted"); 
+                            check.softErrorf(t.Pos(), "can only use ... with final parameter in list"); 
                             // ignore ... and continue
                         }
+
                     }
 
                 }
+
                 var typ = check.typ(ftype); 
                 // The parser ensures that f.Tag is nil and we don't
                 // care if a constructed AST contains a non-nil tag.
@@ -530,19 +590,24 @@ namespace go
                             check.invalidAST(name.Pos(), "anonymous parameter"); 
                             // ok to continue
                         }
+
                         var par = NewParam(name.Pos(), check.pkg, name.Name, typ);
                         check.declare(scope, name, par, scope.pos);
                         params = append(params, par);
+
                     }
                 else
                     named = true;
+
                 }                { 
                     // anonymous parameter
                     par = NewParam(ftype.Pos(), check.pkg, "", typ);
                     check.recordImplicit(field, par);
                     params = append(params, par);
                     anonymous = true;
+
                 }
+
             }
             if (named && anonymous)
             {
@@ -551,16 +616,24 @@ namespace go
             } 
 
             // For a variadic function, change the last parameter's type from T to []T.
-            if (variadic && len(params) > 0L)
+            // Since we type-checked T rather than ...T, we also need to retro-actively
+            // record the type for ...T.
+            if (variadic)
             {
                 var last = params[len(params) - 1L];
-                last.typ = ref new Slice(elem:last.typ);
+                last.typ = addr(new Slice(elem:last.typ));
+                check.recordTypeAndValue(list.List[len(list.List) - 1L].Type, typexpr, last.typ, null);
             }
-            return;
+
+            return ;
+
         }
 
-        private static bool declareInSet(this ref Checker check, ref objset oset, token.Pos pos, Object obj)
+        private static bool declareInSet(this ptr<Checker> _addr_check, ptr<objset> _addr_oset, token.Pos pos, Object obj)
         {
+            ref Checker check = ref _addr_check.val;
+            ref objset oset = ref _addr_oset.val;
+
             {
                 var alt = oset.insert(obj);
 
@@ -572,178 +645,248 @@ namespace go
                 }
 
             }
+
             return true;
+
         }
 
-        private static void interfaceType(this ref Checker check, ref Interface iface, ref ast.InterfaceType ityp, ref Named def, slice<ref TypeName> path)
-        { 
-            // empty interface: common case
-            if (ityp.Methods == null)
-            {
-                return;
-            } 
+        private static void interfaceType(this ptr<Checker> _addr_check, ptr<Interface> _addr_ityp, ptr<ast.InterfaceType> _addr_iface, ptr<Named> _addr_def)
+        {
+            ref Checker check = ref _addr_check.val;
+            ref Interface ityp = ref _addr_ityp.val;
+            ref ast.InterfaceType iface = ref _addr_iface.val;
+            ref Named def = ref _addr_def.val;
 
-            // The parser ensures that field tags are nil and we don't
-            // care if a constructed AST contains non-nil tags.
-
-            // use named receiver type if available (for better error messages)
-            Type recvTyp = iface;
-            if (def != null)
-            {
-                recvTyp = def;
-            } 
-
-            // Phase 1: Collect explicitly declared methods, the corresponding
-            //          signature (AST) expressions, and the list of embedded
-            //          type (AST) expressions. Do not resolve signatures or
-            //          embedded types yet to avoid cycles referring to this
-            //          interface.
-            objset mset = default;            slice<ast.Expr> signatures = default;            slice<ast.Expr> embedded = default;
-            foreach (var (_, f) in ityp.Methods.List)
+            foreach (var (_, f) in iface.Methods.List)
             {
                 if (len(f.Names) > 0L)
                 { 
-                    // The parser ensures that there's only one method
-                    // and we don't care if a constructed AST has more.
+                    // We have a method with name f.Names[0].
+                    // (The parser ensures that there's only one method
+                    // and we don't care if a constructed AST has more.)
                     var name = f.Names[0L];
-                    var pos = name.Pos(); 
-                    // spec: "As with all method sets, in an interface type,
-                    // each method must have a unique non-blank name."
                     if (name.Name == "_")
                     {
-                        check.errorf(pos, "invalid method name _");
-                        continue;
-                    } 
-                    // Don't type-check signature yet - use an
-                    // empty signature now and update it later.
-                    // Since we know the receiver, set it up now
-                    // (required to avoid crash in ptrRecv; see
-                    // e.g. test case for issue 6638).
-                    // TODO(gri) Consider marking methods signatures
-                    // as incomplete, for better error messages. See
-                    // also the T4 and T5 tests in testdata/cycles2.src.
-                    ptr<Signature> sig = @new<Signature>();
-                    sig.recv = NewVar(pos, check.pkg, "", recvTyp);
-                    var m = NewFunc(pos, check.pkg, name.Name, sig);
-                    if (check.declareInSet(ref mset, pos, m))
-                    {
-                        iface.methods = append(iface.methods, m);
-                        iface.allMethods = append(iface.allMethods, m);
-                        signatures = append(signatures, f.Type);
-                        check.recordDef(name, m);
-                    }
-                }
-                else
-                { 
-                    // embedded type
-                    embedded = append(embedded, f.Type);
-                }
-            } 
-
-            // Phase 2: Resolve embedded interfaces. Because an interface must not
-            //          embed itself (directly or indirectly), each embedded interface
-            //          can be fully resolved without depending on any method of this
-            //          interface (if there is a cycle or another error, the embedded
-            //          type resolves to an invalid type and is ignored).
-            //          In particular, the list of methods for each embedded interface
-            //          must be complete (it cannot depend on this interface), and so
-            //          those methods can be added to the list of all methods of this
-            //          interface.
-            foreach (var (_, e) in embedded)
-            {
-                pos = e.Pos();
-                var typ = check.typExpr(e, null, path); 
-                // Determine underlying embedded (possibly incomplete) type
-                // by following its forward chain.
-                ref Named (named, _) = typ._<ref Named>();
-                var under = underlying(named);
-                ref Interface (embed, _) = under._<ref Interface>();
-                if (embed == null)
-                {
-                    if (typ != Typ[Invalid])
-                    {
-                        check.errorf(pos, "%s is not an interface", typ);
-                    }
-                    continue;
-                }
-                iface.embeddeds = append(iface.embeddeds, named); 
-                // collect embedded methods
-                if (embed.allMethods == null)
-                {
-                    check.errorf(pos, "internal error: incomplete embedded interface %s (issue #18395)", named);
-                }
-                {
-                    var m__prev2 = m;
-
-                    foreach (var (_, __m) in embed.allMethods)
-                    {
-                        m = __m;
-                        if (check.declareInSet(ref mset, pos, m))
-                        {
-                            iface.allMethods = append(iface.allMethods, m);
-                        }
+                        check.errorf(name.Pos(), "invalid method name _");
+                        continue; // ignore
                     }
 
-                    m = m__prev2;
-                }
-
-            } 
-
-            // Phase 3: At this point all methods have been collected for this interface.
-            //          It is now safe to type-check the signatures of all explicitly
-            //          declared methods, even if they refer to this interface via a cycle
-            //          and embed the methods of this interface in a parameter of interface
-            //          type.
-            {
-                var m__prev1 = m;
-
-                foreach (var (__i, __m) in iface.methods)
-                {
-                    i = __i;
-                    m = __m;
-                    var expr = signatures[i];
-                    typ = check.typ(expr);
-                    ref Signature (sig, _) = typ._<ref Signature>();
+                    var typ = check.typ(f.Type);
+                    ptr<Signature> (sig, _) = typ._<ptr<Signature>>();
                     if (sig == null)
                     {
                         if (typ != Typ[Invalid])
                         {
-                            check.invalidAST(expr.Pos(), "%s is not a method signature", typ);
+                            check.invalidAST(f.Type.Pos(), "%s is not a method signature", typ);
                         }
-                        continue; // keep method with empty method signature
-                    } 
-                    // update signature, but keep recv that was set up before
-                    ref Signature old = m.typ._<ref Signature>();
-                    sig.recv = old.recv;
-                    old.Value = sig.Value; // update signature (don't replace it!)
-                } 
 
-                // TODO(gri) The list of explicit methods is only sorted for now to
-                // produce the same Interface as NewInterface. We may be able to
-                // claim source order in the future. Revisit.
+                        continue; // ignore
+                    } 
+
+                    // use named receiver type if available (for better error messages)
+                    Type recvTyp = ityp;
+                    if (def != null)
+                    {
+                        recvTyp = def;
+                    }
+
+                    sig.recv = NewVar(name.Pos(), check.pkg, "", recvTyp);
+
+                    var m = NewFunc(name.Pos(), check.pkg, name.Name, sig);
+                    check.recordDef(name, m);
+                    ityp.methods = append(ityp.methods, m);
+
+                }
+                else
+                { 
+                    // We have an embedded interface and f.Type is its
+                    // (possibly qualified) embedded type name. Collect
+                    // it if it's a valid interface.
+                    typ = check.typ(f.Type);
+
+                    var utyp = check.underlying(typ);
+                    {
+                        ptr<Interface> (_, ok) = utyp._<ptr<Interface>>();
+
+                        if (!ok)
+                        {
+                            if (utyp != Typ[Invalid])
+                            {
+                                check.errorf(f.Type.Pos(), "%s is not an interface", typ);
+                            }
+
+                            continue;
+
+                        }
+
+                    }
+
+
+                    ityp.embeddeds = append(ityp.embeddeds, typ);
+                    check.posMap[ityp] = append(check.posMap[ityp], f.Type.Pos());
+
+                }
+
+            }
+            if (len(ityp.methods) == 0L && len(ityp.embeddeds) == 0L)
+            { 
+                // empty interface
+                ityp.allMethods = markComplete;
+                return ;
+
+            } 
+
+            // sort for API stability
+            sort.Sort(byUniqueMethodName(ityp.methods));
+            sort.Stable(byUniqueTypeName(ityp.embeddeds));
+
+            check.later(() =>
+            {
+                check.completeInterface(ityp);
+            });
+
+        }
+
+        private static void completeInterface(this ptr<Checker> _addr_check, ptr<Interface> _addr_ityp) => func((defer, panic, _) =>
+        {
+            ref Checker check = ref _addr_check.val;
+            ref Interface ityp = ref _addr_ityp.val;
+
+            if (ityp.allMethods != null)
+            {
+                return ;
+            } 
+
+            // completeInterface may be called via the LookupFieldOrMethod,
+            // MissingMethod, Identical, or IdenticalIgnoreTags external API
+            // in which case check will be nil. In this case, type-checking
+            // must be finished and all interfaces should have been completed.
+            if (check == null)
+            {
+                panic("internal error: incomplete interface");
+            }
+
+            if (trace)
+            {
+                check.trace(token.NoPos, "complete %s", ityp);
+                check.indent++;
+                defer(() =>
+                {
+                    check.indent--;
+                    check.trace(token.NoPos, "=> %s", ityp);
+                }());
+
+            } 
+
+            // An infinitely expanding interface (due to a cycle) is detected
+            // elsewhere (Checker.validType), so here we simply assume we only
+            // have valid interfaces. Mark the interface as complete to avoid
+            // infinite recursion if the validType check occurs later for some
+            // reason.
+            ityp.allMethods = markComplete; 
+
+            // Methods of embedded interfaces are collected unchanged; i.e., the identity
+            // of a method I.m's Func Object of an interface I is the same as that of
+            // the method m in an interface that embeds interface I. On the other hand,
+            // if a method is embedded via multiple overlapping embedded interfaces, we
+            // don't provide a guarantee which "original m" got chosen for the embedding
+            // interface. See also issue #34421.
+            //
+            // If we don't care to provide this identity guarantee anymore, instead of
+            // reusing the original method in embeddings, we can clone the method's Func
+            // Object and give it the position of a corresponding embedded interface. Then
+            // we can get rid of the mpos map below and simply use the cloned method's
+            // position.
+
+            objset seen = default;
+            slice<ptr<Func>> methods = default;
+            var mpos = make_map<ptr<Func>, token.Pos>(); // method specification or method embedding position, for good error messages
+            Action<token.Pos, ptr<Func>, bool> addMethod = (pos, m, @explicit) =>
+            {
+                {
+                    var other = seen.insert(m);
+
+
+                    if (other == null) 
+                        methods = append(methods, m);
+                        mpos[m] = pos;
+                    else if (explicit) 
+                        check.errorf(pos, "duplicate method %s", m.name);
+                        check.errorf(mpos[other._<ptr<Func>>()], "\tother declaration of %s", m.name); // secondary error, \t indented
+                    else 
+                        // check method signatures after all types are computed (issue #33656)
+                        check.atEnd(() =>
+                        {
+                            if (!check.identical(m.typ, other.Type()))
+                            {
+                                check.errorf(pos, "duplicate method %s", m.name);
+                                check.errorf(mpos[other._<ptr<Func>>()], "\tother declaration of %s", m.name); // secondary error, \t indented
+                            }
+
+                        });
+
+                }
+
+            }
+;
+
+            {
+                var m__prev1 = m;
+
+                foreach (var (_, __m) in ityp.methods)
+                {
+                    m = __m;
+                    addMethod(m.pos, m, true);
+                }
 
                 m = m__prev1;
             }
 
-            sort.Sort(byUniqueMethodName(iface.methods)); 
-
-            // TODO(gri) The list of embedded types is only sorted for now to
-            // produce the same Interface as NewInterface. We may be able to
-            // claim source order in the future. Revisit.
-            sort.Sort(byUniqueTypeName(iface.embeddeds));
-
-            if (iface.allMethods == null)
+            var posList = check.posMap[ityp];
             {
-                iface.allMethods = make_slice<ref Func>(0L); // mark interface as complete
+                var typ__prev1 = typ;
+
+                foreach (var (__i, __typ) in ityp.embeddeds)
+                {
+                    i = __i;
+                    typ = __typ;
+                    var pos = posList[i]; // embedding position
+                    ptr<Interface> (typ, ok) = check.underlying(typ)._<ptr<Interface>>();
+                    if (!ok)
+                    { 
+                        // An error was reported when collecting the embedded types.
+                        // Ignore it.
+                        continue;
+
+                    }
+
+                    check.completeInterface(typ);
+                    {
+                        var m__prev2 = m;
+
+                        foreach (var (_, __m) in typ.allMethods)
+                        {
+                            m = __m;
+                            addMethod(pos, m, false); // use embedding position pos rather than m.pos
+                        }
+
+                        m = m__prev2;
+                    }
+                }
+
+                typ = typ__prev1;
             }
-            else
+
+            if (methods != null)
             {
-                sort.Sort(byUniqueMethodName(iface.allMethods));
+                sort.Sort(byUniqueMethodName(methods));
+                ityp.allMethods = methods;
             }
-        }
+
+        });
 
         // byUniqueTypeName named type lists can be sorted by their unique type names.
-        private partial struct byUniqueTypeName // : slice<ref Named>
+        private partial struct byUniqueTypeName // : slice<Type>
         {
         }
 
@@ -753,17 +896,32 @@ namespace go
         }
         private static bool Less(this byUniqueTypeName a, long i, long j)
         {
-            return a[i].obj.Id() < a[j].obj.Id();
+            return sortName(a[i]) < sortName(a[j]);
         }
         private static void Swap(this byUniqueTypeName a, long i, long j)
         {
             a[i] = a[j];
             a[j] = a[i];
+        }
+
+        private static @string sortName(Type t)
+        {
+            {
+                ptr<Named> (named, _) = t._<ptr<Named>>();
+
+                if (named != null)
+                {
+                    return named.obj.Id();
+                }
+
+            }
+
+            return "";
 
         }
 
         // byUniqueMethodName method lists can be sorted by their unique method names.
-        private partial struct byUniqueMethodName // : slice<ref Func>
+        private partial struct byUniqueMethodName // : slice<ptr<Func>>
         {
         }
 
@@ -779,11 +937,13 @@ namespace go
         {
             a[i] = a[j];
             a[j] = a[i];
-
         }
 
-        private static @string tag(this ref Checker check, ref ast.BasicLit t)
+        private static @string tag(this ptr<Checker> _addr_check, ptr<ast.BasicLit> _addr_t)
         {
+            ref Checker check = ref _addr_check.val;
+            ref ast.BasicLit t = ref _addr_t.val;
+
             if (t != null)
             {
                 if (t.Kind == token.STRING)
@@ -797,54 +957,83 @@ namespace go
                         }
 
                     }
+
                 }
+
                 check.invalidAST(t.Pos(), "incorrect tag syntax: %q", t.Value);
+
             }
+
             return "";
+
         }
 
-        private static void structType(this ref Checker check, ref Struct styp, ref ast.StructType e, slice<ref TypeName> path)
+        private static void structType(this ptr<Checker> _addr_check, ptr<Struct> _addr_styp, ptr<ast.StructType> _addr_e)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Struct styp = ref _addr_styp.val;
+            ref ast.StructType e = ref _addr_e.val;
+
             var list = e.Fields;
             if (list == null)
             {
-                return;
+                return ;
             } 
 
             // struct fields and tags
-            slice<ref Var> fields = default;
+            slice<ptr<Var>> fields = default;
             slice<@string> tags = default; 
 
             // for double-declaration checks
-            objset fset = default; 
+            ref objset fset = ref heap(out ptr<objset> _addr_fset); 
 
             // current field typ and tag
             Type typ = default;
             @string tag = default;
-            Action<ref ast.Ident, bool, token.Pos> add = (ident, anonymous, pos) =>
+            Action<ptr<ast.Ident>, bool, token.Pos> add = (ident, embedded, pos) =>
             {
                 if (tag != "" && tags == null)
                 {
                     tags = make_slice<@string>(len(fields));
                 }
+
                 if (tags != null)
                 {
                     tags = append(tags, tag);
                 }
+
                 var name = ident.Name;
-                var fld = NewField(pos, check.pkg, name, typ, anonymous); 
+                var fld = NewField(pos, check.pkg, name, typ, embedded); 
                 // spec: "Within a struct, non-blank field names must be unique."
-                if (name == "_" || check.declareInSet(ref fset, pos, fld))
+                if (name == "_" || check.declareInSet(_addr_fset, pos, fld))
                 {
                     fields = append(fields, fld);
                     check.recordDef(ident, fld);
                 }
+
+            } 
+
+            // addInvalid adds an embedded field of invalid type to the struct for
+            // fields with errors; this keeps the number of struct fields in sync
+            // with the source as long as the fields are _ or have different names
+            // (issue #25627).
+; 
+
+            // addInvalid adds an embedded field of invalid type to the struct for
+            // fields with errors; this keeps the number of struct fields in sync
+            // with the source as long as the fields are _ or have different names
+            // (issue #25627).
+            Action<ptr<ast.Ident>, token.Pos> addInvalid = (ident, pos) =>
+            {
+                typ = Typ[Invalid];
+                tag = "";
+                add(ident, true, pos);
             }
 ;
 
             foreach (var (_, f) in list.List)
             {
-                typ = check.typExpr(f.Type, null, path);
+                typ = check.typ(f.Type);
                 tag = check.tag(f.Tag);
                 if (len(f.Names) > 0L)
                 { 
@@ -861,79 +1050,93 @@ namespace go
 
                         name = name__prev2;
                     }
-
                 }                { 
-                    // anonymous field
+                    // embedded field
                     // spec: "An embedded type must be specified as a type name T or as a pointer
                     // to a non-interface type name *T, and T itself may not be a pointer type."
                     var pos = f.Type.Pos();
-                    name = anonymousFieldIdent(f.Type);
+                    name = embeddedFieldIdent(f.Type);
                     if (name == null)
                     {
-                        check.invalidAST(pos, "anonymous field type %s has no name", f.Type);
+                        check.invalidAST(pos, "embedded field type %s has no name", f.Type);
+                        name = ast.NewIdent("_");
+                        name.NamePos = pos;
+                        addInvalid(name, pos);
                         continue;
                     }
+
                     var (t, isPtr) = deref(typ); 
                     // Because we have a name, typ must be of the form T or *T, where T is the name
                     // of a (named or alias) type, and t (= deref(typ)) must be the type of T.
                     switch (t.Underlying().type())
                     {
-                        case ref Basic t:
+                        case ptr<Basic> t:
                             if (t == Typ[Invalid])
                             { 
                                 // error was reported before
+                                addInvalid(name, pos);
                                 continue;
+
                             } 
 
                             // unsafe.Pointer is treated like a regular pointer
                             if (t.kind == UnsafePointer)
                             {
-                                check.errorf(pos, "anonymous field type cannot be unsafe.Pointer");
+                                check.errorf(pos, "embedded field type cannot be unsafe.Pointer");
+                                addInvalid(name, pos);
                                 continue;
                             }
+
                             break;
-                        case ref Pointer t:
-                            check.errorf(pos, "anonymous field type cannot be a pointer");
+                        case ptr<Pointer> t:
+                            check.errorf(pos, "embedded field type cannot be a pointer");
+                            addInvalid(name, pos);
                             continue;
                             break;
-                        case ref Interface t:
+                        case ptr<Interface> t:
                             if (isPtr)
                             {
-                                check.errorf(pos, "anonymous field type cannot be a pointer to an interface");
+                                check.errorf(pos, "embedded field type cannot be a pointer to an interface");
+                                addInvalid(name, pos);
                                 continue;
                             }
+
                             break;
                     }
                     add(name, true, pos);
+
                 }
+
             }
             styp.fields = fields;
             styp.tags = tags;
+
         }
 
-        private static ref ast.Ident anonymousFieldIdent(ast.Expr e)
+        private static ptr<ast.Ident> embeddedFieldIdent(ast.Expr e)
         {
             switch (e.type())
             {
-                case ref ast.Ident e:
-                    return e;
+                case ptr<ast.Ident> e:
+                    return _addr_e!;
                     break;
-                case ref ast.StarExpr e:
+                case ptr<ast.StarExpr> e:
                     {
-                        ref ast.StarExpr (_, ok) = e.X._<ref ast.StarExpr>();
+                        ptr<ast.StarExpr> (_, ok) = e.X._<ptr<ast.StarExpr>>();
 
                         if (!ok)
                         {
-                            return anonymousFieldIdent(e.X);
+                            return _addr_embeddedFieldIdent(e.X)!;
                         }
 
                     }
+
                     break;
-                case ref ast.SelectorExpr e:
-                    return e.Sel;
+                case ptr<ast.SelectorExpr> e:
+                    return _addr_e.Sel!;
                     break;
             }
-            return null; // invalid anonymous field
+            return _addr_null!; // invalid embedded field
         }
     }
 }}

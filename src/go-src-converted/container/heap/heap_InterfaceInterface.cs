@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:39 UTC
+//     Generated on 2020 October 08 04:03:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace container
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +64,10 @@ namespace container
                 m_target_is_ptr = true;
             }
 
-            private delegate void PushByRef(ref T value, object x);
+            private delegate void PushByPtr(ptr<T> value, object x);
             private delegate void PushByVal(T value, object x);
 
-            private static readonly PushByRef s_PushByRef;
+            private static readonly PushByPtr s_PushByPtr;
             private static readonly PushByVal s_PushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,22 +76,23 @@ namespace container
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PushByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PushByPtr is null || !m_target_is_ptr)
                 {
                     s_PushByVal!(target, x);
                     return;
                 }
 
-                s_PushByRef(ref target, x);
+                s_PushByPtr(m_target_ptr, x);
                 return;
                 
             }
 
-            private delegate void PopByRef(ref T value);
+            private delegate void PopByPtr(ptr<T> value);
             private delegate void PopByVal(T value);
 
-            private static readonly PopByRef s_PopByRef;
+            private static readonly PopByPtr s_PopByPtr;
             private static readonly PopByVal s_PopByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,22 +101,23 @@ namespace container
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PopByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PopByPtr is null || !m_target_is_ptr)
                 {
                     s_PopByVal!(target);
                     return;
                 }
 
-                s_PopByRef(ref target);
+                s_PopByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate bool LenByRef(ref T value);
+            private delegate bool LenByPtr(ptr<T> value);
             private delegate bool LenByVal(T value);
 
-            private static readonly LenByRef s_LenByRef;
+            private static readonly LenByPtr s_LenByPtr;
             private static readonly LenByVal s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -124,17 +126,18 @@ namespace container
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByRef(ref target);
+                return s_LenByPtr(m_target_ptr);
             }
 
-            private delegate bool LessByRef(ref T value, long i, long j);
+            private delegate bool LessByPtr(ptr<T> value, long i, long j);
             private delegate bool LessByVal(T value, long i, long j);
 
-            private static readonly LessByRef s_LessByRef;
+            private static readonly LessByPtr s_LessByPtr;
             private static readonly LessByVal s_LessByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -143,17 +146,18 @@ namespace container
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LessByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LessByPtr is null || !m_target_is_ptr)
                     return s_LessByVal!(target, i, j);
 
-                return s_LessByRef(ref target, i, j);
+                return s_LessByPtr(m_target_ptr, i, j);
             }
 
-            private delegate bool SwapByRef(ref T value, long i, long j);
+            private delegate bool SwapByPtr(ptr<T> value, long i, long j);
             private delegate bool SwapByVal(T value, long i, long j);
 
-            private static readonly SwapByRef s_SwapByRef;
+            private static readonly SwapByPtr s_SwapByPtr;
             private static readonly SwapByVal s_SwapByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -162,11 +166,12 @@ namespace container
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SwapByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SwapByPtr is null || !m_target_is_ptr)
                     return s_SwapByVal!(target, i, j);
 
-                return s_SwapByRef(ref target, i, j);
+                return s_SwapByPtr(m_target_ptr, i, j);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -175,87 +180,72 @@ namespace container
             static Interface()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Push");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Push");
 
                 if (!(extensionMethod is null))
-                    s_PushByRef = extensionMethod.CreateStaticDelegate(typeof(PushByRef)) as PushByRef;
+                    s_PushByPtr = extensionMethod.CreateStaticDelegate(typeof(PushByPtr)) as PushByPtr;
 
-                if (s_PushByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Push");
+                extensionMethod = targetType.GetExtensionMethod("Push");
 
-                    if (!(extensionMethod is null))
-                        s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
 
-                if (s_PushByRef is null && s_PushByVal is null)
+                if (s_PushByPtr is null && s_PushByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Push method", new Exception("Push"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Pop");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Pop");
 
                 if (!(extensionMethod is null))
-                    s_PopByRef = extensionMethod.CreateStaticDelegate(typeof(PopByRef)) as PopByRef;
+                    s_PopByPtr = extensionMethod.CreateStaticDelegate(typeof(PopByPtr)) as PopByPtr;
 
-                if (s_PopByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Pop");
+                extensionMethod = targetType.GetExtensionMethod("Pop");
 
-                    if (!(extensionMethod is null))
-                        s_PopByVal = extensionMethod.CreateStaticDelegate(typeof(PopByVal)) as PopByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PopByVal = extensionMethod.CreateStaticDelegate(typeof(PopByVal)) as PopByVal;
 
-                if (s_PopByRef is null && s_PopByVal is null)
+                if (s_PopByPtr is null && s_PopByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Pop method", new Exception("Pop"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Len");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
                 if (!(extensionMethod is null))
-                    s_LenByRef = extensionMethod.CreateStaticDelegate(typeof(LenByRef)) as LenByRef;
+                    s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
-                if (s_LenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Len");
+                extensionMethod = targetType.GetExtensionMethod("Len");
 
-                    if (!(extensionMethod is null))
-                        s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
-                if (s_LenByRef is null && s_LenByVal is null)
+                if (s_LenByPtr is null && s_LenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Len method", new Exception("Len"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Less");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Less");
 
                 if (!(extensionMethod is null))
-                    s_LessByRef = extensionMethod.CreateStaticDelegate(typeof(LessByRef)) as LessByRef;
+                    s_LessByPtr = extensionMethod.CreateStaticDelegate(typeof(LessByPtr)) as LessByPtr;
 
-                if (s_LessByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Less");
+                extensionMethod = targetType.GetExtensionMethod("Less");
 
-                    if (!(extensionMethod is null))
-                        s_LessByVal = extensionMethod.CreateStaticDelegate(typeof(LessByVal)) as LessByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LessByVal = extensionMethod.CreateStaticDelegate(typeof(LessByVal)) as LessByVal;
 
-                if (s_LessByRef is null && s_LessByVal is null)
+                if (s_LessByPtr is null && s_LessByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Less method", new Exception("Less"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Swap");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Swap");
 
                 if (!(extensionMethod is null))
-                    s_SwapByRef = extensionMethod.CreateStaticDelegate(typeof(SwapByRef)) as SwapByRef;
+                    s_SwapByPtr = extensionMethod.CreateStaticDelegate(typeof(SwapByPtr)) as SwapByPtr;
 
-                if (s_SwapByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Swap");
+                extensionMethod = targetType.GetExtensionMethod("Swap");
 
-                    if (!(extensionMethod is null))
-                        s_SwapByVal = extensionMethod.CreateStaticDelegate(typeof(SwapByVal)) as SwapByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SwapByVal = extensionMethod.CreateStaticDelegate(typeof(SwapByVal)) as SwapByVal;
 
-                if (s_SwapByRef is null && s_SwapByVal is null)
+                if (s_SwapByPtr is null && s_SwapByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Swap method", new Exception("Swap"));
             }
 

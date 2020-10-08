@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:04 UTC
+//     Generated on 2020 October 08 04:02:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,8 +15,8 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using path = go.path_package;
-using regexp = go.regexp_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -36,6 +36,7 @@ namespace go
             public Example(NilType _)
             {
                 this.Name = default;
+                this.Suffix = default;
                 this.Doc = default;
                 this.Code = default;
                 this.Play = default;
@@ -46,9 +47,10 @@ namespace go
                 this.Order = default;
             }
 
-            public Example(@string Name = default, @string Doc = default, ast.Node Code = default, ref ptr<ast.File> Play = default, slice<ref ast.CommentGroup> Comments = default, @string Output = default, bool Unordered = default, bool EmptyOutput = default, long Order = default)
+            public Example(@string Name = default, @string Suffix = default, @string Doc = default, ast.Node Code = default, ref ptr<ast.File> Play = default, slice<ptr<ast.CommentGroup>> Comments = default, @string Output = default, bool Unordered = default, bool EmptyOutput = default, long Order = default)
             {
                 this.Name = Name;
+                this.Suffix = Suffix;
                 this.Doc = Doc;
                 this.Code = Code;
                 this.Play = Play;
@@ -79,7 +81,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Example Example_cast(dynamic value)
         {
-            return new Example(value.Name, value.Doc, value.Code, ref value.Play, value.Comments, value.Output, value.Unordered, value.EmptyOutput, value.Order);
+            return new Example(value.Name, value.Suffix, value.Doc, value.Code, ref value.Play, value.Comments, value.Output, value.Unordered, value.EmptyOutput, value.Order);
         }
     }
 }}

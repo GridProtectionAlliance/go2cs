@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:18 UTC
+//     Generated on 2020 October 08 04:09:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,11 +32,13 @@ namespace @internal
             public Interface(NilType _)
             {
                 this.Fields = default;
+                this.pkg = default;
             }
 
-            public Interface(Fields Fields = default)
+            public Interface(Fields Fields = default, ref ptr<Pkg> pkg = default)
             {
                 this.Fields = Fields;
+                this.pkg = pkg;
             }
 
             // Enable comparisons between nil and Interface struct
@@ -59,7 +61,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Interface Interface_cast(dynamic value)
         {
-            return new Interface(value.Fields);
+            return new Interface(value.Fields, ref value.pkg);
         }
     }
 }}}}

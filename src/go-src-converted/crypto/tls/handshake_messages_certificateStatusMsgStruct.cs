@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:25 UTC
+//     Generated on 2020 October 08 03:38:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
+using fmt = go.fmt_package;
 using strings = go.strings_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using go;
 
 namespace go {
@@ -29,14 +30,12 @@ namespace crypto
             public certificateStatusMsg(NilType _)
             {
                 this.raw = default;
-                this.statusType = default;
                 this.response = default;
             }
 
-            public certificateStatusMsg(slice<byte> raw = default, byte statusType = default, slice<byte> response = default)
+            public certificateStatusMsg(slice<byte> raw = default, slice<byte> response = default)
             {
                 this.raw = raw;
-                this.statusType = statusType;
                 this.response = response;
             }
 
@@ -60,7 +59,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static certificateStatusMsg certificateStatusMsg_cast(dynamic value)
         {
-            return new certificateStatusMsg(value.raw, value.statusType, value.response);
+            return new certificateStatusMsg(value.raw, value.response);
         }
     }
 }}

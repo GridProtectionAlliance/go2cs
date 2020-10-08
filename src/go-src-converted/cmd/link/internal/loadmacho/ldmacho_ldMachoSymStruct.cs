@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:04 UTC
+//     Generated on 2020 October 08 04:39:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,11 +17,10 @@ using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
-using io = go.io_package;
-using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -46,7 +45,7 @@ namespace @internal
                 this.sym = default;
             }
 
-            public ldMachoSym(@string name = default, byte type_ = default, byte sectnum = default, ushort desc = default, sbyte kind = default, ulong value = default, ref ptr<sym.Symbol> sym = default)
+            public ldMachoSym(@string name = default, byte type_ = default, byte sectnum = default, ushort desc = default, sbyte kind = default, ulong value = default, loader.Sym sym = default)
             {
                 this.name = name;
                 this.type_ = type_;
@@ -77,7 +76,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static ldMachoSym ldMachoSym_cast(dynamic value)
         {
-            return new ldMachoSym(value.name, value.type_, value.sectnum, value.desc, value.kind, value.value, ref value.sym);
+            return new ldMachoSym(value.name, value.type_, value.sectnum, value.desc, value.kind, value.value, value.sym);
         }
     }
 }}}}

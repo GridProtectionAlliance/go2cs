@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:27 UTC
+//     Generated on 2020 October 08 03:50:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
                 this.entries = default;
             }
 
-            public File(ref ptr<os.File> r = default, slice<ref Entry> entries = default)
+            public File(ref ptr<os.File> r = default, slice<ptr<Entry>> entries = default)
             {
                 this.r = r;
                 this.entries = entries;

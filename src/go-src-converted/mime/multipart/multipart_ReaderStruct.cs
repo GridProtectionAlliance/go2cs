@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:33 UTC
+//     Generated on 2020 October 08 03:38:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using ioutil = go.io.ioutil_package;
 using mime = go.mime_package;
 using quotedprintable = go.mime.quotedprintable_package;
 using textproto = go.net.textproto_package;
+using strings = go.strings_package;
 using go;
 
 namespace go {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:35 UTC
+//     Generated on 2020 October 08 04:59:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using static go.builtin;
 using bufio = go.bufio_package;
 using errors = go.errors_package;
 using io = go.io_package;
+using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 
 #pragma warning disable CS0660, CS0661
 
@@ -50,7 +52,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +66,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, error) PeekByRef(ref T value, long _p0);
+            private delegate (slice<byte>, error) PeekByPtr(ptr<T> value, long _p0);
             private delegate (slice<byte>, error) PeekByVal(T value, long _p0);
 
-            private static readonly PeekByRef s_PeekByRef;
+            private static readonly PeekByPtr s_PeekByPtr;
             private static readonly PeekByVal s_PeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,17 +78,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PeekByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PeekByPtr is null || !m_target_is_ptr)
                     return s_PeekByVal!(target, _p0);
 
-                return s_PeekByRef(ref target, _p0);
+                return s_PeekByPtr(m_target_ptr, _p0);
             }
 
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,11 +98,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, p);
 
-                return s_ReadByRef(ref target, p);
+                return s_ReadByPtr(m_target_ptr, p);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -108,39 +112,33 @@ namespace go
             static reader()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Peek");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Peek");
 
                 if (!(extensionMethod is null))
-                    s_PeekByRef = extensionMethod.CreateStaticDelegate(typeof(PeekByRef)) as PeekByRef;
+                    s_PeekByPtr = extensionMethod.CreateStaticDelegate(typeof(PeekByPtr)) as PeekByPtr;
 
-                if (s_PeekByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Peek");
+                extensionMethod = targetType.GetExtensionMethod("Peek");
 
-                    if (!(extensionMethod is null))
-                        s_PeekByVal = extensionMethod.CreateStaticDelegate(typeof(PeekByVal)) as PeekByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PeekByVal = extensionMethod.CreateStaticDelegate(typeof(PeekByVal)) as PeekByVal;
 
-                if (s_PeekByRef is null && s_PeekByVal is null)
+                if (s_PeekByPtr is null && s_PeekByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement reader.Peek method", new Exception("Peek"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement reader.Read method", new Exception("Read"));
             }
 

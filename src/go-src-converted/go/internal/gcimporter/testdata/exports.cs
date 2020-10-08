@@ -5,7 +5,7 @@
 // This file is used to generate an object file which
 // serves as test file for gcimporter_test.go.
 
-// package exports -- go2cs converted at 2020 August 29 10:09:13 UTC
+// package exports -- go2cs converted at 2020 October 08 04:56:12 UTC
 // import "go/internal/gcimporter.exports" ==> using exports = go.go.@internal.gcimporter.exports_package
 // Original source: C:\Go\src\go\internal\gcimporter\testdata\exports.go
 using ast = go.go.ast_package;
@@ -19,7 +19,7 @@ namespace @internal
     public static partial class exports_package
     {
         // Issue 3682: Correctly read dotted identifiers from export data.
-        private static readonly long init1 = 0L;
+        private static readonly long init1 = (long)0L;
 
 
 
@@ -28,13 +28,14 @@ namespace @internal
         }
 
         public static readonly long C0 = 0L;
-        public static readonly float C1 = 3.14159265F;
-        public static readonly ulong C2 = 2.718281828iUL;
-        public static readonly float C3 = -123.456e-789F;
-        public static readonly float C4 = +123.456E+789F;
-        public static readonly ulong C5 = 1234iUL;
-        public static readonly @string C6 = "foo\n";
-        public static readonly @string C7 = "bar\\n";
+        public static readonly float C1 = (float)3.14159265F;
+        public static readonly ulong C2 = (ulong)2.718281828iUL;
+        public static readonly float C3 = (float)-123.456e-789F;
+        public static readonly float C4 = (float)+123.456e+789F;
+        public static readonly ulong C5 = (ulong)1234iUL;
+        public static readonly @string C6 = (@string)"foo\n";
+        public static readonly @string C7 = (@string)"bar\\n";
+
 
         public partial struct T1 // : long
         {
@@ -45,7 +46,7 @@ namespace @internal
         public partial struct T3 // : slice<long>
         {
         }
-        public partial struct T4 // : ref long
+        public partial struct T4 // : ptr<long>
         {
         }
         public partial struct T5 // : channel<long>
@@ -60,7 +61,7 @@ namespace @internal
         public partial struct T6c // : channel<channel<long>>
         {
         }
-        public partial struct T7 // : channel<ref ast.File>
+        public partial struct T7 // : channel<ptr<ast.File>>
         {
         }
         public partial struct T8
@@ -113,19 +114,20 @@ namespace @internal
         {
             public ptr<T22> link;
         }
-        public partial struct T24 // : ref T24
+        public partial struct T24 // : ptr<T24>
         {
         }
-        public partial struct T25 // : ref T26
+        public partial struct T25 // : ptr<T26>
         {
         }
-        public partial struct T26 // : ref T27
+        public partial struct T26 // : ptr<T27>
         {
         }
-        public partial struct T27 // : ref T25
+        public partial struct T27 // : ptr<T25>
         {
         }
-        public delegate  T28 T28(T28);        public static long V0 = default;        public static float V1 = -991.0F;        public static float V2 = 1.2F;
+        public delegate  T28 T28(T28);
+        public static long V0 = default;        public static float V1 = -991.0F;        public static float V2 = 1.2F;
 
         public static void F1()
         {
@@ -144,7 +146,7 @@ namespace @internal
         public static (channel<T10>, channel<T10>, channel<T10>) F5(long a, long b, long c, object u, object v, object w, params object[] more)
 ;
 
-        private static void M1(this ref T1 p)
+        private static void M1(this ptr<T1> _addr_p)
 
     }
 }}}

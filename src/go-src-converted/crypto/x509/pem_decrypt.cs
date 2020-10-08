@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 August 29 08:31:40 UTC
+// package x509 -- go2cs converted at 2020 October 08 03:36:47 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\pem_decrypt.go
 // RFC 1423 describes the encryption of PEM blocks. The algorithm used to
@@ -31,12 +31,13 @@ namespace crypto
         }
 
         // Possible values for the EncryptPEMBlock encryption algorithm.
-        private static readonly PEMCipher _ = iota;
-        public static readonly var PEMCipherDES = 0;
-        public static readonly var PEMCipher3DES = 1;
-        public static readonly var PEMCipherAES128 = 2;
-        public static readonly var PEMCipherAES192 = 3;
-        public static readonly var PEMCipherAES256 = 4;
+        private static readonly PEMCipher _ = (PEMCipher)iota;
+        public static readonly var PEMCipherDES = (var)0;
+        public static readonly var PEMCipher3DES = (var)1;
+        public static readonly var PEMCipherAES128 = (var)2;
+        public static readonly var PEMCipherAES192 = (var)3;
+        public static readonly var PEMCipherAES256 = (var)4;
+
 
         // rfc1423Algo holds a method for enciphering a PEM block.
         private partial struct rfc1423Algo
@@ -77,11 +78,14 @@ namespace crypto
 
             }
             return out;
+
         }
 
         // IsEncryptedPEMBlock returns if the PEM block is password encrypted.
-        public static bool IsEncryptedPEMBlock(ref pem.Block b)
+        public static bool IsEncryptedPEMBlock(ptr<pem.Block> _addr_b)
         {
+            ref pem.Block b = ref _addr_b.val;
+
             var (_, ok) = b.Headers["DEK-Info"];
             return ok;
         }
@@ -97,33 +101,41 @@ namespace crypto
         // in the encrypted-PEM format, it's not always possible to detect an incorrect
         // password. In these cases no error will be returned but the decrypted DER
         // bytes will be random noise.
-        public static (slice<byte>, error) DecryptPEMBlock(ref pem.Block b, slice<byte> password)
+        public static (slice<byte>, error) DecryptPEMBlock(ptr<pem.Block> _addr_b, slice<byte> password)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref pem.Block b = ref _addr_b.val;
+
             var (dek, ok) = b.Headers["DEK-Info"];
             if (!ok)
             {
-                return (null, errors.New("x509: no DEK-Info header in block"));
+                return (null, error.As(errors.New("x509: no DEK-Info header in block"))!);
             }
+
             var idx = strings.Index(dek, ",");
             if (idx == -1L)
             {
-                return (null, errors.New("x509: malformed DEK-Info header"));
+                return (null, error.As(errors.New("x509: malformed DEK-Info header"))!);
             }
+
             var mode = dek[..idx];
             var hexIV = dek[idx + 1L..];
             var ciph = cipherByName(mode);
             if (ciph == null)
             {
-                return (null, errors.New("x509: unknown encryption mode"));
+                return (null, error.As(errors.New("x509: unknown encryption mode"))!);
             }
+
             var (iv, err) = hex.DecodeString(hexIV);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             if (len(iv) != ciph.blockSize)
             {
-                return (null, errors.New("x509: incorrect IV size"));
+                return (null, error.As(errors.New("x509: incorrect IV size"))!);
             } 
 
             // Based on the OpenSSL implementation. The salt is the first 8 bytes
@@ -132,12 +144,14 @@ namespace crypto
             var (block, err) = ciph.cipherFunc(key);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             if (len(b.Bytes) % block.BlockSize() != 0L)
             {
-                return (null, errors.New("x509: encrypted PEM data is not a multiple of the block size"));
+                return (null, error.As(errors.New("x509: encrypted PEM data is not a multiple of the block size"))!);
             }
+
             var data = make_slice<byte>(len(b.Bytes));
             var dec = cipher.NewCBCDecrypter(block, iv);
             dec.CryptBlocks(data, b.Bytes); 
@@ -151,44 +165,53 @@ namespace crypto
             var dlen = len(data);
             if (dlen == 0L || dlen % ciph.blockSize != 0L)
             {
-                return (null, errors.New("x509: invalid padding"));
+                return (null, error.As(errors.New("x509: invalid padding"))!);
             }
+
             var last = int(data[dlen - 1L]);
             if (dlen < last)
             {
-                return (null, IncorrectPasswordError);
+                return (null, error.As(IncorrectPasswordError)!);
             }
+
             if (last == 0L || last > ciph.blockSize)
             {
-                return (null, IncorrectPasswordError);
+                return (null, error.As(IncorrectPasswordError)!);
             }
+
             foreach (var (_, val) in data[dlen - last..])
             {
                 if (int(val) != last)
                 {
-                    return (null, IncorrectPasswordError);
+                    return (null, error.As(IncorrectPasswordError)!);
                 }
+
             }
-            return (data[..dlen - last], null);
+            return (data[..dlen - last], error.As(null!)!);
+
         }
 
         // EncryptPEMBlock returns a PEM block of the specified type holding the
         // given DER-encoded data encrypted with the specified algorithm and
         // password.
-        public static (ref pem.Block, error) EncryptPEMBlock(io.Reader rand, @string blockType, slice<byte> data, slice<byte> password, PEMCipher alg)
+        public static (ptr<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blockType, slice<byte> data, slice<byte> password, PEMCipher alg)
         {
+            ptr<pem.Block> _p0 = default!;
+            error _p0 = default!;
+
             var ciph = cipherByKey(alg);
             if (ciph == null)
             {
-                return (null, errors.New("x509: unknown encryption mode"));
+                return (_addr_null!, error.As(errors.New("x509: unknown encryption mode"))!);
             }
+
             var iv = make_slice<byte>(ciph.blockSize);
             {
                 var (_, err) = io.ReadFull(rand, iv);
 
                 if (err != null)
                 {
-                    return (null, errors.New("x509: cannot generate IV: " + err.Error()));
+                    return (_addr_null!, error.As(errors.New("x509: cannot generate IV: " + err.Error()))!);
                 } 
                 // The salt is the first 8 bytes of the initialization vector,
                 // matching the key derivation in DecryptPEMBlock.
@@ -200,8 +223,9 @@ namespace crypto
             var (block, err) = ciph.cipherFunc(key);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var enc = cipher.NewCBCEncrypter(block, iv);
             var pad = ciph.blockSize - len(data) % ciph.blockSize;
             var encrypted = make_slice<byte>(len(data), len(data) + pad); 
@@ -209,7 +233,7 @@ namespace crypto
             // the data separately, but it doesn't seem worth the additional
             // code.
             copy(encrypted, data); 
-            // See RFC 1423, section 1.1
+            // See RFC 1423, Section 1.1.
             for (long i = 0L; i < pad; i++)
             {
                 encrypted = append(encrypted, byte(pad));
@@ -217,33 +241,38 @@ namespace crypto
 
             enc.CryptBlocks(encrypted, encrypted);
 
-            return (ref new pem.Block(Type:blockType,Headers:map[string]string{"Proc-Type":"4,ENCRYPTED","DEK-Info":ciph.name+","+hex.EncodeToString(iv),},Bytes:encrypted,), null);
+            return (addr(new pem.Block(Type:blockType,Headers:map[string]string{"Proc-Type":"4,ENCRYPTED","DEK-Info":ciph.name+","+hex.EncodeToString(iv),},Bytes:encrypted,)), error.As(null!)!);
+
         }
 
-        private static ref rfc1423Algo cipherByName(@string name)
+        private static ptr<rfc1423Algo> cipherByName(@string name)
         {
             foreach (var (i) in rfc1423Algos)
             {
-                var alg = ref rfc1423Algos[i];
+                var alg = _addr_rfc1423Algos[i];
                 if (alg.name == name)
                 {
-                    return alg;
+                    return _addr_alg!;
                 }
+
             }
-            return null;
+            return _addr_null!;
+
         }
 
-        private static ref rfc1423Algo cipherByKey(PEMCipher key)
+        private static ptr<rfc1423Algo> cipherByKey(PEMCipher key)
         {
             foreach (var (i) in rfc1423Algos)
             {
-                var alg = ref rfc1423Algos[i];
+                var alg = _addr_rfc1423Algos[i];
                 if (alg.cipher == key)
                 {
-                    return alg;
+                    return _addr_alg!;
                 }
+
             }
-            return null;
+            return _addr_null!;
+
         }
     }
 }}

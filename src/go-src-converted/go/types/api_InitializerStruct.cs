@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:54 UTC
+//     Generated on 2020 October 08 04:02:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace go
                 this.Rhs = default;
             }
 
-            public Initializer(slice<ref Var> Lhs = default, ast.Expr Rhs = default)
+            public Initializer(slice<ptr<Var>> Lhs = default, ast.Expr Rhs = default)
             {
                 this.Lhs = Lhs;
                 this.Rhs = Rhs;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:35 UTC
+//     Generated on 2020 October 08 03:41:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,26 +35,30 @@ namespace template
                 this.input = default;
                 this.leftDelim = default;
                 this.rightDelim = default;
+                this.trimRightDelim = default;
                 this.pos = default;
                 this.start = default;
                 this.width = default;
                 this.items = default;
                 this.parenDepth = default;
                 this.line = default;
+                this.startLine = default;
             }
 
-            public lexer(@string name = default, @string input = default, @string leftDelim = default, @string rightDelim = default, Pos pos = default, Pos start = default, Pos width = default, channel<item> items = default, long parenDepth = default, long line = default)
+            public lexer(@string name = default, @string input = default, @string leftDelim = default, @string rightDelim = default, @string trimRightDelim = default, Pos pos = default, Pos start = default, Pos width = default, channel<item> items = default, long parenDepth = default, long line = default, long startLine = default)
             {
                 this.name = name;
                 this.input = input;
                 this.leftDelim = leftDelim;
                 this.rightDelim = rightDelim;
+                this.trimRightDelim = trimRightDelim;
                 this.pos = pos;
                 this.start = start;
                 this.width = width;
                 this.items = items;
                 this.parenDepth = parenDepth;
                 this.line = line;
+                this.startLine = startLine;
             }
 
             // Enable comparisons between nil and lexer struct
@@ -77,7 +81,7 @@ namespace template
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static lexer lexer_cast(dynamic value)
         {
-            return new lexer(value.name, value.input, value.leftDelim, value.rightDelim, value.pos, value.start, value.width, value.items, value.parenDepth, value.line);
+            return new lexer(value.name, value.input, value.leftDelim, value.rightDelim, value.trimRightDelim, value.pos, value.start, value.width, value.items, value.parenDepth, value.line, value.startLine);
         }
     }
 }}}

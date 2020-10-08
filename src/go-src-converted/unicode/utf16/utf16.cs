@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package utf16 implements encoding and decoding of UTF-16 sequences.
-// package utf16 -- go2cs converted at 2020 August 29 08:22:20 UTC
+// package utf16 -- go2cs converted at 2020 October 08 03:24:58 UTC
 // import "unicode/utf16" ==> using utf16 = go.unicode.utf16_package
 // Original source: C:\Go\src\unicode\utf16\utf16.go
 
@@ -17,18 +17,19 @@ namespace unicode
         // The conditions replacementChar==unicode.ReplacementChar and
         // maxRune==unicode.MaxRune are verified in the tests.
         // Defining them locally avoids this package depending on package unicode.
-        private static readonly char replacementChar = '\uFFFD'; // Unicode replacement character
-        private static readonly char maxRune = '\U0010FFFF'; // Maximum valid Unicode code point.
+        private static readonly char replacementChar = (char)'\uFFFD'; // Unicode replacement character
+        private static readonly char maxRune = (char)'\U0010FFFF'; // Maximum valid Unicode code point.
 
  
         // 0xd800-0xdc00 encodes the high 10 bits of a pair.
         // 0xdc00-0xe000 encodes the low 10 bits of a pair.
         // the value is those 20 bits plus 0x10000.
-        private static readonly ulong surr1 = 0xd800UL;
-        private static readonly ulong surr2 = 0xdc00UL;
-        private static readonly ulong surr3 = 0xe000UL;
+        private static readonly ulong surr1 = (ulong)0xd800UL;
+        private static readonly ulong surr2 = (ulong)0xdc00UL;
+        private static readonly ulong surr3 = (ulong)0xe000UL;
 
-        private static readonly ulong surrSelf = 0x10000UL;
+        private static readonly ulong surrSelf = (ulong)0x10000UL;
+
 
         // IsSurrogate reports whether the specified Unicode code point
         // can appear in a surrogate pair.
@@ -46,7 +47,9 @@ namespace unicode
             {
                 return (r1 - surr1) << (int)(10L) | (r2 - surr2) + surrSelf;
             }
+
             return replacementChar;
+
         }
 
         // EncodeRune returns the UTF-16 surrogate pair r1, r2 for the given rune.
@@ -54,12 +57,17 @@ namespace unicode
         // EncodeRune returns U+FFFD, U+FFFD.
         public static (int, int) EncodeRune(int r)
         {
+            int r1 = default;
+            int r2 = default;
+
             if (r < surrSelf || r > maxRune)
             {
                 return (replacementChar, replacementChar);
             }
+
             r -= surrSelf;
             return (surr1 + (r >> (int)(10L)) & 0x3ffUL, surr2 + r & 0x3ffUL);
+
         }
 
         // Encode returns the UTF-16 encoding of the Unicode code point sequence s.
@@ -76,6 +84,7 @@ namespace unicode
                     {
                         n++;
                     }
+
                 }
 
                 v = v__prev1;
@@ -103,12 +112,14 @@ namespace unicode
                     else 
                         a[n] = uint16(replacementChar);
                         n++;
-                                    }
+                    
+                }
 
                 v = v__prev1;
             }
 
             return a[..n];
+
         }
 
         // Decode returns the Unicode code point sequence represented
@@ -136,9 +147,11 @@ namespace unicode
 
                 }
                 n++;
+
             }
 
             return a[..n];
+
         }
     }
 }}

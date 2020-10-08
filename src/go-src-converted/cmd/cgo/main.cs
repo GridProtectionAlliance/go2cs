@@ -8,7 +8,7 @@
 //    Emit correct line number annotations.
 //    Make gc understand the annotations.
 
-// package main -- go2cs converted at 2020 August 29 08:52:43 UTC
+// package main -- go2cs converted at 2020 October 08 04:09:11 UTC
 // Original source: C:\Go\src\cmd\cgo\main.go
 using md5 = go.crypto.md5_package;
 using flag = go.flag_package;
@@ -16,6 +16,7 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using printer = go.go.printer_package;
 using token = go.go.token_package;
+using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -43,35 +44,47 @@ namespace go
             public bool GccIsClang;
             public map<@string, slice<@string>> CgoFlags; // #cgo flags (CFLAGS, LDFLAGS)
             public map<@string, bool> Written;
-            public map<@string, ref Name> Name; // accumulated Name from Files
-            public slice<ref ExpFunc> ExpFunc; // accumulated ExpFunc from Files
+            public map<@string, ptr<Name>> Name; // accumulated Name from Files
+            public slice<ptr<ExpFunc>> ExpFunc; // accumulated ExpFunc from Files
             public slice<ast.Decl> Decl;
             public slice<@string> GoFiles; // list of Go files
             public slice<@string> GccFiles; // list of gcc output files
             public @string Preamble; // collected preamble for _cgo_export.h
+            public map<@string, bool> typedefs; // type names that appear in the types of the objects we're interested in
+            public slice<typedefInfo> typedefList;
+        }
+
+        // A typedefInfo is an element on Package.typedefList: a typedef name
+        // and the position where it was required.
+        private partial struct typedefInfo
+        {
+            public @string typedef;
+            public token.Pos pos;
         }
 
         // A File collects information about a single Go input file.
         public partial struct File
         {
             public ptr<ast.File> AST; // parsed AST
-            public slice<ref ast.CommentGroup> Comments; // comments from file
+            public slice<ptr<ast.CommentGroup>> Comments; // comments from file
             public @string Package; // Package name
             public @string Preamble; // C preamble (doc comment on import "C")
-            public slice<ref Ref> Ref; // all references to C.xxx in AST
-            public slice<ref Call> Calls; // all calls to C.xxx in AST
-            public slice<ref ExpFunc> ExpFunc; // exported functions for this file
-            public map<@string, ref Name> Name; // map from Go name to Name
-            public map<ref Name, token.Pos> NamePos; // map from Name to position of the first reference
+            public slice<ptr<Ref>> Ref; // all references to C.xxx in AST
+            public slice<ptr<Call>> Calls; // all calls to C.xxx in AST
+            public slice<ptr<ExpFunc>> ExpFunc; // exported functions for this file
+            public map<@string, ptr<Name>> Name; // map from Go name to Name
+            public map<ptr<Name>, token.Pos> NamePos; // map from Name to position of the first reference
             public ptr<edit.Buffer> Edit;
         }
 
-        private static long offset(this ref File f, token.Pos p)
+        private static long offset(this ptr<File> _addr_f, token.Pos p)
         {
+            ref File f = ref _addr_f.val;
+
             return fset.Position(p).Offset;
         }
 
-        private static slice<@string> nameKeys(map<@string, ref Name> m)
+        private static slice<@string> nameKeys(map<@string, ptr<Name>> m)
         {
             slice<@string> ks = default;
             foreach (var (k) in m)
@@ -80,6 +93,7 @@ namespace go
             }
             sort.Strings(ks);
             return ks;
+
         }
 
         // A Call refers to a call of a C.xxx function in the AST.
@@ -87,6 +101,7 @@ namespace go
         {
             public ptr<ast.CallExpr> Call;
             public bool Deferred;
+            public bool Done;
         }
 
         // A Ref refers to an expression of the form C.xxx in the AST.
@@ -95,12 +110,17 @@ namespace go
             public ptr<Name> Name;
             public ptr<ast.Expr> Expr;
             public astContext Context;
+            public bool Done;
         }
 
-        private static token.Pos Pos(this ref Ref r)
+        private static token.Pos Pos(this ptr<Ref> _addr_r)
         {
-            return ref r.Expr();
+            ref Ref r = ref _addr_r.val;
+
+            return ptr<r.Expr>();
         }
+
+        private static @string nameKinds = new slice<@string>(new @string[] { "iconst", "fconst", "sconst", "type", "var", "fpvar", "func", "macro", "not-type" });
 
         // A Name collects information about C.xxx.
         public partial struct Name
@@ -109,7 +129,7 @@ namespace go
             public @string Mangle; // name used in generated Go
             public @string C; // name used in C
             public @string Define; // #define expansion
-            public @string Kind; // "iconst", "fconst", "sconst", "type", "var", "fpvar", "func", "macro", "not-type"
+            public @string Kind; // one of the nameKinds
             public ptr<Type> Type; // the type of xxx
             public ptr<FuncType> FuncType;
             public bool AddError;
@@ -117,14 +137,18 @@ namespace go
         }
 
         // IsVar reports whether Kind is either "var" or "fpvar"
-        private static bool IsVar(this ref Name n)
+        private static bool IsVar(this ptr<Name> _addr_n)
         {
+            ref Name n = ref _addr_n.val;
+
             return n.Kind == "var" || n.Kind == "fpvar";
         }
 
         // IsConst reports whether Kind is either "iconst", "fconst" or "sconst"
-        private static bool IsConst(this ref Name n)
+        private static bool IsConst(this ptr<Name> _addr_n)
         {
+            ref Name n = ref _addr_n.val;
+
             return strings.HasSuffix(n.Kind, "const");
         }
 
@@ -154,12 +178,13 @@ namespace go
             public ast.Expr Go;
             public map<@string, long> EnumValues;
             public @string Typedef;
+            public bool BadPointer;
         }
 
         // A FuncType collects information about a function type in both the C and Go worlds.
         public partial struct FuncType
         {
-            public slice<ref Type> Params;
+            public slice<ptr<Type>> Params;
             public ptr<Type> Result;
             public ptr<ast.FuncType> Go;
         }
@@ -171,9 +196,9 @@ namespace go
             os.Exit(2L);
         }
 
-        private static map ptrSizeMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, long>{"386":4,"amd64":8,"arm":4,"arm64":8,"mips":4,"mipsle":4,"mips64":8,"mips64le":8,"ppc64":8,"ppc64le":8,"s390":4,"s390x":8,};
+        private static map ptrSizeMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, long>{"386":4,"amd64":8,"arm":4,"arm64":8,"mips":4,"mipsle":4,"mips64":8,"mips64le":8,"ppc64":8,"ppc64le":8,"riscv64":8,"s390":4,"s390x":8,"sparc64":8,};
 
-        private static map intSizeMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, long>{"386":4,"amd64":8,"arm":4,"arm64":8,"mips":4,"mipsle":4,"mips64":8,"mips64le":8,"ppc64":8,"ppc64le":8,"s390":4,"s390x":8,};
+        private static map intSizeMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, long>{"386":4,"amd64":8,"arm":4,"arm64":8,"mips":4,"mipsle":4,"mips64":8,"mips64le":8,"ppc64":8,"ppc64le":8,"riscv64":8,"s390":4,"s390x":8,"sparc64":8,};
 
         private static @string cPrefix = default;
 
@@ -197,6 +222,8 @@ namespace go
         private static var gccgo = flag.Bool("gccgo", false, "generate files for use with gccgo");
         private static var gccgoprefix = flag.String("gccgoprefix", "", "-fgo-prefix option used with gccgo");
         private static var gccgopkgpath = flag.String("gccgopkgpath", "", "-fgo-pkgpath option used with gccgo");
+        private static bool gccgoMangleCheckDone = default;
+        private static bool gccgoNewmanglingInEffect = default;
         private static var importRuntimeCgo = flag.Bool("import_runtime_cgo", true, "import runtime/cgo in generated code");
         private static var importSyscall = flag.Bool("import_syscall", true, "import syscall in generated code");
         private static @string goarch = default;        private static @string goos = default;
@@ -209,7 +236,7 @@ namespace go
             flag.Usage = usage;
             flag.Parse();
 
-            if (dynobj != "".Value)
+            if (dynobj != "".val)
             { 
                 // cgo -dynimport is essentially a separate helper command
                 // built into the cgo binary. It scans a gcc-produced executable
@@ -219,16 +246,20 @@ namespace go
                 // instead of needing to make the linkers duplicate all the
                 // specialized knowledge gcc has about where to look for imported
                 // symbols and which ones to use.
-                dynimport(dynobj.Value);
-                return;
+                dynimport(dynobj.val);
+                return ;
+
             }
-            if (godefs.Value)
+
+            if (godefs.val)
             { 
                 // Generating definitions pulled from header files,
                 // to be checked into Go repositories.
                 // Line numbers are just noise.
                 conf.Mode &= printer.SourcePos;
+
             }
+
             var args = flag.Args();
             if (len(args) < 1L)
             {
@@ -244,12 +275,14 @@ namespace go
                 {
                     break;
                 }
+
             }
 
             if (i == len(args))
             {
                 usage();
             }
+
             var goFiles = args[i..];
 
             foreach (var (_, arg) in args[..i])
@@ -258,6 +291,12 @@ namespace go
                 {
                     tsanProlog = yesTsanProlog;
                 }
+
+                if (arg == "-fsanitize=memory")
+                {
+                    msanProlog = yesMsanProlog;
+                }
+
             }
             var p = newPackage(args[..i]); 
 
@@ -272,7 +311,9 @@ namespace go
                     {
                         fatalf("bad CGO_LDFLAGS: %q (%s)", ldflags, err);
                     }
+
                     p.addToFlag("LDFLAGS", args);
+
                 } 
 
                 // Need a unique prefix for the global C symbols that
@@ -289,7 +330,8 @@ namespace go
             // concern is other cgo wrappers for the same functions.
             // Use the beginning of the md5 of the input to disambiguate.
             var h = md5.New();
-            var fs = make_slice<ref File>(len(goFiles));
+            io.WriteString(h, importPath.val);
+            var fs = make_slice<ptr<File>>(len(goFiles));
             {
                 long i__prev1 = i;
                 var input__prev1 = input;
@@ -298,26 +340,30 @@ namespace go
                 {
                     i = __i;
                     input = __input;
-                    if (srcDir != "".Value)
+                    if (srcDir != "".val)
                     {
-                        input = filepath.Join(srcDir.Value, input);
+                        input = filepath.Join(srcDir.val, input);
                     }
+
                     var (b, err) = ioutil.ReadFile(input);
                     if (err != null)
                     {
                         fatalf("%s", err);
                     }
+
                     _, err = h.Write(b);
 
                     if (err != null)
                     {
                         fatalf("%s", err);
                     }
+
                     ptr<File> f = @new<File>();
                     f.Edit = edit.NewBuffer(b);
                     f.ParseGo(input, b);
                     f.DiscardCgoDirectives();
                     fs[i] = f;
+
                 }
 
                 i = i__prev1;
@@ -326,14 +372,16 @@ namespace go
 
             cPrefix = fmt.Sprintf("_%x", h.Sum(null)[0L..6L]);
 
-            if (objDir == "".Value)
+            if (objDir == "".val)
             { 
                 // make sure that _obj directory exists, so that we can write
                 // all the output files there.
                 os.Mkdir("_obj", 0777L);
-                objDir.Value = "_obj";
+                objDir.val = "_obj";
+
             }
-            objDir.Value += string(filepath.Separator);
+
+            objDir.val += string(filepath.Separator);
 
             {
                 long i__prev1 = i;
@@ -353,17 +401,20 @@ namespace go
                             {
                                 break;
                             }
-                            var old = cref.Expr.Value;
-                            cref.Expr.Value = cref.Name.Type.Go;
+
+                            var old = cref.Expr.val;
+                            cref.Expr.val = cref.Name.Type.Go;
                             f.Edit.Replace(f.offset(old.Pos()), f.offset(old.End()), gofmt(cref.Name.Type.Go));
-                                            }
+                        
+                    }
                     if (nerrors > 0L)
                     {
                         os.Exit(2L);
                     }
+
                     p.PackagePath = f.Package;
                     p.Record(f);
-                    if (godefs.Value)
+                    if (godefs.val)
                     {
                         os.Stdout.WriteString(p.godefs(f, input));
                     }
@@ -371,25 +422,28 @@ namespace go
                     {
                         p.writeOutput(f, input);
                     }
+
                 }
 
                 i = i__prev1;
                 input = input__prev1;
             }
 
-            if (!godefs.Value)
+            if (!godefs.val)
             {
                 p.writeDefs();
             }
+
             if (nerrors > 0L)
             {
                 os.Exit(2L);
             }
+
         }
 
         // newPackage returns a new Package that will invoke
         // gcc with the additional arguments specified in args.
-        private static ref Package newPackage(slice<@string> args)
+        private static ptr<Package> newPackage(slice<@string> args)
         {
             goarch = runtime.GOARCH;
             {
@@ -405,6 +459,7 @@ namespace go
                 s = s__prev1;
 
             }
+
             goos = runtime.GOOS;
             {
                 var s__prev1 = s;
@@ -419,11 +474,13 @@ namespace go
                 s = s__prev1;
 
             }
+
             var ptrSize = ptrSizeMap[goarch];
             if (ptrSize == 0L)
             {
                 fatalf("unknown ptrSize for $GOARCH %q", goarch);
             }
+
             var intSize = intSizeMap[goarch];
             if (intSize == 0L)
             {
@@ -434,14 +491,18 @@ namespace go
             os.Setenv("LANG", "en_US.UTF-8");
             os.Setenv("LC_ALL", "C");
 
-            Package p = ref new Package(PtrSize:ptrSize,IntSize:intSize,CgoFlags:make(map[string][]string),Written:make(map[string]bool),);
+            ptr<Package> p = addr(new Package(PtrSize:ptrSize,IntSize:intSize,CgoFlags:make(map[string][]string),Written:make(map[string]bool),));
             p.addToFlag("CFLAGS", args);
-            return p;
+            return _addr_p!;
+
         }
 
         // Record what needs to be recorded about f.
-        private static void Record(this ref Package p, ref File f)
+        private static void Record(this ptr<Package> _addr_p, ptr<File> _addr_f)
         {
+            ref Package p = ref _addr_p.val;
+            ref File f = ref _addr_f.val;
+
             if (p.PackageName == "")
             {
                 p.PackageName = f.Package;
@@ -450,6 +511,7 @@ namespace go
             {
                 error_(token.NoPos, "inconsistent package names: %s, %s", p.PackageName, f.Package);
             }
+
             if (p.Name == null)
             {
                 p.Name = f.Name;
@@ -462,18 +524,53 @@ namespace go
                     {
                         p.Name[k] = v;
                     }
-                    else if (!reflect.DeepEqual(p.Name[k], v))
+                    else if (p.incompleteTypedef(p.Name[k].Type))
                     {
-                        error_(token.NoPos, "inconsistent definitions for C.%s", fixGo(k));
+                        p.Name[k] = v;
                     }
+                    else if (p.incompleteTypedef(v.Type))
+                    { 
+                        // Nothing to do.
+                    }                    {
+                        var (_, ok) = nameToC[k];
+
+
+                        else if (ok)
+                        { 
+                            // Names we predefine may appear inconsistent
+                            // if some files typedef them and some don't.
+                            // Issue 26743.
+                        }
+                        else if (!reflect.DeepEqual(p.Name[k], v))
+                        {
+                            error_(token.NoPos, "inconsistent definitions for C.%s", fixGo(k));
+                        }
+
+
+                    }
+
                 }
+
             }
+
             if (f.ExpFunc != null)
             {
                 p.ExpFunc = append(p.ExpFunc, f.ExpFunc);
                 p.Preamble += "\n" + f.Preamble;
             }
+
             p.Decl = append(p.Decl, f.AST.Decls);
+
+        }
+
+        // incompleteTypedef reports whether t appears to be an incomplete
+        // typedef definition.
+        private static bool incompleteTypedef(this ptr<Package> _addr_p, ptr<Type> _addr_t)
+        {
+            ref Package p = ref _addr_p.val;
+            ref Type t = ref _addr_t.val;
+
+            return t == null || (t.Size == 0L && t.Align == -1L);
         }
     }
 }

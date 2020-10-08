@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:02:54 UTC
+//     Generated on 2020 October 08 04:37:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace @internal
                 this.Sections = default;
             }
 
-            public Segment(byte Rwx = default, ulong Vaddr = default, ulong Length = default, ulong Fileoff = default, ulong Filelen = default, slice<ref Section> Sections = default)
+            public Segment(byte Rwx = default, ulong Vaddr = default, ulong Length = default, ulong Fileoff = default, ulong Filelen = default, slice<ptr<Section>> Sections = default)
             {
                 this.Rwx = Rwx;
                 this.Vaddr = Vaddr;

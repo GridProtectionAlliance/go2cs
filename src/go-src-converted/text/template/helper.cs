@@ -4,7 +4,7 @@
 
 // Helper functions to make constructing templates easier.
 
-// package template -- go2cs converted at 2020 August 29 08:35:00 UTC
+// package template -- go2cs converted at 2020 October 08 03:42:15 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Go\src\text\template\helper.go
 using fmt = go.fmt_package;
@@ -23,13 +23,16 @@ namespace text
         // and panics if the error is non-nil. It is intended for use in variable
         // initializations such as
         //    var t = template.Must(template.New("name").Parse("text"))
-        public static ref Template Must(ref Template _t, error err) => func(_t, (ref Template t, Defer _, Panic panic, Recover __) =>
+        public static ptr<Template> Must(ptr<Template> _addr_t, error err) => func((_, panic, __) =>
         {
+            ref Template t = ref _addr_t.val;
+
             if (err != null)
             {
                 panic(err);
             }
-            return t;
+            return _addr_t!;
+
         });
 
         // ParseFiles creates a new Template and parses the template definitions from
@@ -41,11 +44,13 @@ namespace text
         // the last one mentioned will be the one that results.
         // For instance, ParseFiles("a/foo", "b/foo") stores "b/foo" as the template
         // named "foo", while "a/foo" is unavailable.
-        public static (ref Template, error) ParseFiles(params @string[] filenames)
+        public static (ptr<Template>, error) ParseFiles(params @string[] filenames)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
             filenames = filenames.Clone();
 
-            return parseFiles(null, filenames);
+            return _addr_parseFiles(_addr_null, filenames)!;
         }
 
         // ParseFiles parses the named files and associates the resulting templates with
@@ -59,30 +64,41 @@ namespace text
         //
         // When parsing multiple files with the same name in different directories,
         // the last one mentioned will be the one that results.
-        private static (ref Template, error) ParseFiles(this ref Template t, params @string[] filenames)
+        private static (ptr<Template>, error) ParseFiles(this ptr<Template> _addr_t, params @string[] filenames)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            filenames = filenames.Clone();
+            ref Template t = ref _addr_t.val;
+
             t.init();
-            return parseFiles(t, filenames);
+            return _addr_parseFiles(_addr_t, filenames)!;
         }
 
         // parseFiles is the helper for the method and function. If the argument
         // template is nil, it is created from the first file.
-        private static (ref Template, error) parseFiles(ref Template t, params @string[] filenames)
+        private static (ptr<Template>, error) parseFiles(ptr<Template> _addr_t, params @string[] filenames)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
             filenames = filenames.Clone();
+            ref Template t = ref _addr_t.val;
 
             if (len(filenames) == 0L)
             { 
                 // Not really a problem, but be consistent.
-                return (null, fmt.Errorf("template: no files named in call to ParseFiles"));
+                return (_addr_null!, error.As(fmt.Errorf("template: no files named in call to ParseFiles"))!);
+
             }
+
             foreach (var (_, filename) in filenames)
             {
                 var (b, err) = ioutil.ReadFile(filename);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
                 var s = string(b);
                 var name = filepath.Base(filename); 
                 // First template becomes return value if not already defined,
@@ -91,11 +107,12 @@ namespace text
                 // as t, this file becomes the contents of t, so
                 //  t, err := New(name).Funcs(xxx).ParseFiles(name)
                 // works. Otherwise we create a new template associated with t.
-                ref Template tmpl = default;
+                ptr<Template> tmpl;
                 if (t == null)
                 {
                     t = New(name);
                 }
+
                 if (name == t.Name())
                 {
                     tmpl = t;
@@ -104,55 +121,73 @@ namespace text
                 {
                     tmpl = t.New(name);
                 }
+
                 _, err = tmpl.Parse(s);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
             }
-            return (t, null);
+            return (_addr_t!, error.As(null!)!);
+
         }
 
-        // ParseGlob creates a new Template and parses the template definitions from the
-        // files identified by the pattern, which must match at least one file. The
-        // returned template will have the (base) name and (parsed) contents of the
+        // ParseGlob creates a new Template and parses the template definitions from
+        // the files identified by the pattern. The files are matched according to the
+        // semantics of filepath.Match, and the pattern must match at least one file.
+        // The returned template will have the (base) name and (parsed) contents of the
         // first file matched by the pattern. ParseGlob is equivalent to calling
         // ParseFiles with the list of files matched by the pattern.
         //
         // When parsing multiple files with the same name in different directories,
         // the last one mentioned will be the one that results.
-        public static (ref Template, error) ParseGlob(@string pattern)
+        public static (ptr<Template>, error) ParseGlob(@string pattern)
         {
-            return parseGlob(null, pattern);
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_parseGlob(_addr_null, pattern)!;
         }
 
         // ParseGlob parses the template definitions in the files identified by the
-        // pattern and associates the resulting templates with t. The pattern is
-        // processed by filepath.Glob and must match at least one file. ParseGlob is
-        // equivalent to calling t.ParseFiles with the list of files matched by the
-        // pattern.
+        // pattern and associates the resulting templates with t. The files are matched
+        // according to the semantics of filepath.Match, and the pattern must match at
+        // least one file. ParseGlob is equivalent to calling t.ParseFiles with the
+        // list of files matched by the pattern.
         //
         // When parsing multiple files with the same name in different directories,
         // the last one mentioned will be the one that results.
-        private static (ref Template, error) ParseGlob(this ref Template t, @string pattern)
+        private static (ptr<Template>, error) ParseGlob(this ptr<Template> _addr_t, @string pattern)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+
             t.init();
-            return parseGlob(t, pattern);
+            return _addr_parseGlob(_addr_t, pattern)!;
         }
 
         // parseGlob is the implementation of the function and method ParseGlob.
-        private static (ref Template, error) parseGlob(ref Template t, @string pattern)
+        private static (ptr<Template>, error) parseGlob(ptr<Template> _addr_t, @string pattern)
         {
+            ptr<Template> _p0 = default!;
+            error _p0 = default!;
+            ref Template t = ref _addr_t.val;
+
             var (filenames, err) = filepath.Glob(pattern);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             if (len(filenames) == 0L)
             {
-                return (null, fmt.Errorf("template: pattern matches no files: %#q", pattern));
+                return (_addr_null!, error.As(fmt.Errorf("template: pattern matches no files: %#q", pattern))!);
             }
-            return parseFiles(t, filenames);
+
+            return _addr_parseFiles(_addr_t, filenames)!;
+
         }
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:55 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:20 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\logb.go
 
@@ -29,6 +29,7 @@ namespace go
             else if (IsNaN(x)) 
                 return x;
                         return float64(ilogb(x));
+
         }
 
         // Ilogb returns the binary exponent of x as an integer.
@@ -48,6 +49,7 @@ namespace go
             else if (IsInf(x, 0L)) 
                 return MaxInt32;
                         return ilogb(x);
+
         }
 
         // logb returns the binary exponent of x. It assumes x is finite and

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package ring implements operations on circular lists.
-// package ring -- go2cs converted at 2020 August 29 10:10:44 UTC
+// package ring -- go2cs converted at 2020 October 08 04:58:44 UTC
 // import "container/ring" ==> using ring = go.container.ring_package
 // Original source: C:\Go\src\container\ring\ring.go
 
@@ -27,42 +27,55 @@ namespace container
             public ptr<Ring> prev;
         }
 
-        private static ref Ring init(this ref Ring r)
+        private static ptr<Ring> init(this ptr<Ring> _addr_r)
         {
+            ref Ring r = ref _addr_r.val;
+
             r.next = r;
             r.prev = r;
-            return r;
+            return _addr_r!;
         }
 
         // Next returns the next ring element. r must not be empty.
-        private static ref Ring Next(this ref Ring r)
+        private static ptr<Ring> Next(this ptr<Ring> _addr_r)
         {
+            ref Ring r = ref _addr_r.val;
+
             if (r.next == null)
             {
-                return r.init();
+                return _addr_r.init()!;
             }
-            return r.next;
+
+            return _addr_r.next!;
+
         }
 
         // Prev returns the previous ring element. r must not be empty.
-        private static ref Ring Prev(this ref Ring r)
+        private static ptr<Ring> Prev(this ptr<Ring> _addr_r)
         {
+            ref Ring r = ref _addr_r.val;
+
             if (r.next == null)
             {
-                return r.init();
+                return _addr_r.init()!;
             }
-            return r.prev;
+
+            return _addr_r.prev!;
+
         }
 
         // Move moves n % r.Len() elements backward (n < 0) or forward (n >= 0)
         // in the ring and returns that ring element. r must not be empty.
         //
-        private static ref Ring Move(this ref Ring r, long n)
+        private static ptr<Ring> Move(this ptr<Ring> _addr_r, long n)
         {
+            ref Ring r = ref _addr_r.val;
+
             if (r.next == null)
             {
-                return r.init();
+                return _addr_r.init()!;
             }
+
 
             if (n < 0L) 
                 while (n < 0L)
@@ -76,27 +89,30 @@ namespace container
                     r = r.next;
                     n--;
                 }
-                        return r;
+                        return _addr_r!;
+
         }
 
         // New creates a ring of n elements.
-        public static ref Ring New(long n)
+        public static ptr<Ring> New(long n)
         {
             if (n <= 0L)
             {
-                return null;
+                return _addr_null!;
             }
+
             ptr<Ring> r = @new<Ring>();
             var p = r;
             for (long i = 1L; i < n; i++)
             {
-                p.next = ref new Ring(prev:p);
+                p.next = addr(new Ring(prev:p));
                 p = p.next;
             }
 
             p.next = r;
             r.prev = p;
-            return r;
+            return _addr_r!;
+
         }
 
         // Link connects ring r with ring s such that r.Next()
@@ -115,8 +131,11 @@ namespace container
         // after r. The result points to the element following the
         // last element of s after insertion.
         //
-        private static ref Ring Link(this ref Ring r, ref Ring s)
+        private static ptr<Ring> Link(this ptr<Ring> _addr_r, ptr<Ring> _addr_s)
         {
+            ref Ring r = ref _addr_r.val;
+            ref Ring s = ref _addr_s.val;
+
             var n = r.Next();
             if (s != null)
             {
@@ -127,28 +146,37 @@ namespace container
                 s.prev = r;
                 n.prev = p;
                 p.next = n;
+
             }
-            return n;
+
+            return _addr_n!;
+
         }
 
         // Unlink removes n % r.Len() elements from the ring r, starting
         // at r.Next(). If n % r.Len() == 0, r remains unchanged.
         // The result is the removed subring. r must not be empty.
         //
-        private static ref Ring Unlink(this ref Ring r, long n)
+        private static ptr<Ring> Unlink(this ptr<Ring> _addr_r, long n)
         {
+            ref Ring r = ref _addr_r.val;
+
             if (n <= 0L)
             {
-                return null;
+                return _addr_null!;
             }
-            return r.Link(r.Move(n + 1L));
+
+            return _addr_r.Link(r.Move(n + 1L))!;
+
         }
 
         // Len computes the number of elements in ring r.
         // It executes in time proportional to the number of elements.
         //
-        private static long Len(this ref Ring r)
+        private static long Len(this ptr<Ring> _addr_r)
         {
+            ref Ring r = ref _addr_r.val;
+
             long n = 0L;
             if (r != null)
             {
@@ -163,14 +191,19 @@ namespace container
                     }
 
                 }
+
             }
+
             return n;
+
         }
 
         // Do calls function f on each element of the ring, in forward order.
         // The behavior of Do is undefined if f changes *r.
-        private static void Do(this ref Ring r, Action<object> f)
+        private static void Do(this ptr<Ring> _addr_r, Action<object> f)
         {
+            ref Ring r = ref _addr_r.val;
+
             if (r != null)
             {
                 f(r.Value);
@@ -184,7 +217,9 @@ namespace container
                     }
 
                 }
+
             }
+
         }
     }
 }}

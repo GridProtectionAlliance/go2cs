@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:48 UTC
+//     Generated on 2020 October 08 04:42:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,13 +14,11 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using log = go.log_package;
 using os = go.os_package;
+using filepath = go.path.filepath_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
@@ -58,7 +56,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -72,10 +70,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error NameByRef(ref T value);
+            private delegate error NameByPtr(ptr<T> value);
             private delegate error NameByVal(T value);
 
-            private static readonly NameByRef s_NameByRef;
+            private static readonly NameByPtr s_NameByPtr;
             private static readonly NameByVal s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,17 +82,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByRef(ref target);
+                return s_NameByPtr(m_target_ptr);
             }
 
-            private delegate error StatByRef(ref T value);
+            private delegate error StatByPtr(ptr<T> value);
             private delegate error StatByVal(T value);
 
-            private static readonly StatByRef s_StatByRef;
+            private static readonly StatByPtr s_StatByPtr;
             private static readonly StatByVal s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,17 +102,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StatByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StatByPtr is null || !m_target_is_ptr)
                     return s_StatByVal!(target);
 
-                return s_StatByRef(ref target);
+                return s_StatByPtr(m_target_ptr);
             }
 
-            private delegate error ReadByRef(ref T value, slice<byte> _p0);
+            private delegate error ReadByPtr(ptr<T> value, slice<byte> _p0);
             private delegate error ReadByVal(T value, slice<byte> _p0);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -122,17 +122,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, _p0);
 
-                return s_ReadByRef(ref target, _p0);
+                return s_ReadByPtr(m_target_ptr, _p0);
             }
 
-            private delegate error CloseByRef(ref T value);
+            private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,11 +142,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -154,71 +156,59 @@ namespace go
             static FileLike()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Name");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
                 if (!(extensionMethod is null))
-                    s_NameByRef = extensionMethod.CreateStaticDelegate(typeof(NameByRef)) as NameByRef;
+                    s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
-                if (s_NameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Name");
+                extensionMethod = targetType.GetExtensionMethod("Name");
 
-                    if (!(extensionMethod is null))
-                        s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
-                if (s_NameByRef is null && s_NameByVal is null)
+                if (s_NameByPtr is null && s_NameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileLike.Name method", new Exception("Name"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Stat");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
                 if (!(extensionMethod is null))
-                    s_StatByRef = extensionMethod.CreateStaticDelegate(typeof(StatByRef)) as StatByRef;
+                    s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
-                if (s_StatByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Stat");
+                extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                    if (!(extensionMethod is null))
-                        s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
-                if (s_StatByRef is null && s_StatByVal is null)
+                if (s_StatByPtr is null && s_StatByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileLike.Stat method", new Exception("Stat"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileLike.Read method", new Exception("Read"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileLike.Close method", new Exception("Close"));
             }
 

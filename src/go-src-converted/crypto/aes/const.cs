@@ -11,7 +11,7 @@
 // extensions and s390x systems using Message-Security-Assist extensions.
 // On such systems, when the result of NewCipher is passed to cipher.NewGCM,
 // the GHASH operation used by GCM is also constant-time.
-// package aes -- go2cs converted at 2020 August 29 08:28:48 UTC
+// package aes -- go2cs converted at 2020 October 08 03:35:50 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\const.go
 
@@ -24,14 +24,14 @@ namespace crypto
     {
         // This file contains AES constants - 8720 bytes of initialized data.
 
-        // http://www.csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+        // https://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 
         // AES is based on the mathematical behavior of binary polynomials
         // (polynomials over GF(2)) modulo the irreducible polynomial x⁸ + x⁴ + x³ + x + 1.
         // Addition of these binary polynomials corresponds to binary xor.
         // Reducing mod poly corresponds to binary xor with poly every
         // time a 0x100 bit appears.
-        private static readonly long poly = 1L << (int)(8L) | 1L << (int)(4L) | 1L << (int)(3L) | 1L << (int)(1L) | 1L << (int)(0L); // x⁸ + x⁴ + x³ + x + 1
+        private static readonly long poly = (long)1L << (int)(8L) | 1L << (int)(4L) | 1L << (int)(3L) | 1L << (int)(1L) | 1L << (int)(0L); // x⁸ + x⁴ + x³ + x + 1
 
         // Powers of x mod poly in GF(2).
  // x⁸ + x⁴ + x³ + x + 1

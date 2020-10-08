@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:20 UTC
+//     Generated on 2020 October 08 04:39:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,11 +14,14 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using benchmark = go.cmd.link.@internal.benchmark_package;
 using flag = go.flag_package;
 using log = go.log_package;
 using os = go.os_package;
+using exec = go.os.exec_package;
 using runtime = go.runtime_package;
 using pprof = go.runtime.pprof_package;
 using strings = go.strings_package;

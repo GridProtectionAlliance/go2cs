@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package tool implements the ``go tool'' command.
-// package tool -- go2cs converted at 2020 August 29 10:00:41 UTC
+// package tool -- go2cs converted at 2020 October 08 04:33:48 UTC
 // import "cmd/go/internal/tool" ==> using tool = go.cmd.go.@internal.tool_package
 // Original source: C:\Go\src\cmd\go\internal\tool\tool.go
 using fmt = go.fmt_package;
@@ -23,7 +23,7 @@ namespace @internal
 {
     public static partial class tool_package
     {
-        public static base.Command CmdTool = ref new base.Command(Run:runTool,UsageLine:"tool [-n] command [args...]",Short:"run specified go tool",Long:`
+        public static ptr<base.Command> CmdTool = addr(new base.Command(Run:runTool,UsageLine:"go tool [-n] command [args...]",Short:"run specified go tool",Long:`
 Tool runs the go tool command identified by the arguments.
 With no arguments it prints the list of known tools.
 
@@ -31,22 +31,48 @@ The -n flag causes tool to print the command that would be
 executed but not execute it.
 
 For more about each tool command, see 'go doc cmd/<command>'.
-`,);
+`,));
 
         private static bool toolN = default;
 
-        private static void init()
+        // Return whether tool can be expected in the gccgo tool directory.
+        // Other binaries could be in the same directory so don't
+        // show those with the 'go tool' command.
+        private static bool isGccgoTool(@string tool)
         {
-            CmdTool.Flag.BoolVar(ref toolN, "n", false, "");
+            switch (tool)
+            {
+                case "cgo": 
+
+                case "fix": 
+
+                case "cover": 
+
+                case "godoc": 
+
+                case "vet": 
+                    return true;
+                    break;
+            }
+            return false;
+
         }
 
-        private static void runTool(ref base.Command cmd, slice<@string> args)
+        private static void init()
         {
+            CmdTool.Flag.BoolVar(_addr_toolN, "n", false, "");
+        }
+
+        private static void runTool(ptr<base.Command> _addr_cmd, slice<@string> args)
+        {
+            ref base.Command cmd = ref _addr_cmd.val;
+
             if (len(args) == 0L)
             {
                 listTools();
-                return;
+                return ;
             }
+
             var toolName = args[0L]; 
             // The tool name must be lower-case letters, numbers or underscores.
             foreach (var (_, c) in toolName)
@@ -55,13 +81,15 @@ For more about each tool command, see 'go doc cmd/<command>'.
                 if ('a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '_')                 else 
                     fmt.Fprintf(os.Stderr, "go tool: bad tool name %q\n", toolName);
                     @base.SetExitStatus(2L);
-                    return;
-                            }
+                    return ;
+                
+            }
             var toolPath = @base.Tool(toolName);
             if (toolPath == "")
             {
-                return;
+                return ;
             }
+
             if (toolN)
             {
                 var cmd = toolPath;
@@ -69,11 +97,14 @@ For more about each tool command, see 'go doc cmd/<command>'.
                 {
                     cmd += " " + strings.Join(args[1L..], " ");
                 }
+
                 fmt.Printf("%s\n", cmd);
-                return;
+                return ;
+
             }
+
             args[0L] = toolPath; // in case the tool wants to re-exec itself, e.g. cmd/dist
-            exec.Cmd toolCmd = ref new exec.Cmd(Path:toolPath,Args:args,Stdin:os.Stdin,Stdout:os.Stdout,Stderr:os.Stderr,Env:base.MergeEnvLists([]string{"GOROOT="+cfg.GOROOT},os.Environ()),);
+            ptr<exec.Cmd> toolCmd = addr(new exec.Cmd(Path:toolPath,Args:args,Stdin:os.Stdin,Stdout:os.Stdout,Stderr:os.Stderr,));
             var err = toolCmd.Run();
             if (err != null)
             { 
@@ -83,7 +114,7 @@ For more about each tool command, see 'go doc cmd/<command>'.
                 // Assume if command exited cleanly (even with non-zero status)
                 // it printed any messages it wanted to print.
                 {
-                    ref exec.ExitError (e, ok) = err._<ref exec.ExitError>();
+                    ptr<exec.ExitError> (e, ok) = err._<ptr<exec.ExitError>>();
 
                     if (!ok || !e.Exited() || cfg.BuildX)
                     {
@@ -91,9 +122,12 @@ For more about each tool command, see 'go doc cmd/<command>'.
                     }
 
                 }
+
                 @base.SetExitStatus(1L);
-                return;
+                return ;
+
             }
+
         }
 
         // listTools prints a list of the available tools in the tools directory.
@@ -104,16 +138,18 @@ For more about each tool command, see 'go doc cmd/<command>'.
             {
                 fmt.Fprintf(os.Stderr, "go tool: no tool directory: %s\n", err);
                 @base.SetExitStatus(2L);
-                return;
+                return ;
             }
+
             defer(f.Close());
             var (names, err) = f.Readdirnames(-1L);
             if (err != null)
             {
                 fmt.Fprintf(os.Stderr, "go tool: can't read directory: %s\n", err);
                 @base.SetExitStatus(2L);
-                return;
+                return ;
             }
+
             sort.Strings(names);
             foreach (var (_, name) in names)
             { 
@@ -123,9 +159,18 @@ For more about each tool command, see 'go doc cmd/<command>'.
                 if (@base.ToolIsWindows && strings.HasSuffix(name, @base.ToolWindowsExtension))
                 {
                     name = name[..len(name) - len(@base.ToolWindowsExtension)];
+                } 
+                // The tool directory used by gccgo will have other binaries
+                // in addition to go tools. Only display go tools here.
+                if (cfg.BuildToolchainName == "gccgo" && !isGccgoTool(name))
+                {
+                    continue;
                 }
+
                 fmt.Println(name);
+
             }
+
         });
     }
 }}}}

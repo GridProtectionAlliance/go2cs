@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:39 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:18 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\complex.go
 
@@ -22,6 +22,7 @@ namespace go
                 g = 1.0F;
             }
             return copysign(g, f);
+
         }
 
         private static System.Numerics.Complex128 complex128div(System.Numerics.Complex128 n, System.Numerics.Complex128 m)
@@ -48,6 +49,7 @@ namespace go
                 e = (real(n) * ratio + imag(n)) / denom;
                 f = (imag(n) * ratio - real(n)) / denom;
             }
+
             if (isNaN(e) && isNaN(f))
             { 
                 // Correct final result to infinities and zeros if applicable.
@@ -72,8 +74,11 @@ namespace go
                     d = inf2one(d);
                     e = 0L * (a * c + b * d);
                     f = 0L * (b * c - a * d);
-                            }
+                
+            }
+
             return complex(e, f);
+
         }
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:46 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:50 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\cgo.go
 /*
 void foo1(void) {}
@@ -49,8 +49,9 @@ namespace go
                         if (done)
                         {
                             ping.Send(true);
-                            return;
+                            return ;
                         }
+
                         ping.Send(true);
                         () =>
                         {
@@ -58,15 +59,18 @@ namespace go
                             {
                                 recover();
                             }());
-                            ref @string s = default;
-                            s.Value = "";
+                            ptr<@string> s;
+                            s.val = "";
                             fmt.Printf("continued after expected panic\n");
+
                         }();
+
                     }
 
 
                     i = i__prev1;
                 }
+
             }());
             time.Sleep(time.Millisecond);
             var start = time.Now();
@@ -76,6 +80,7 @@ namespace go
             {
                 n = 16L;
             }
+
             {
                 long i__prev1 = i;
 
@@ -93,7 +98,8 @@ namespace go
                     ping.Send(false);
                     times = append(times, time.Since(start));
                     fmt.Printf("HANG 1 %v\n", times);
-                    return;
+                    return ;
+
                 }
 
 
@@ -101,8 +107,9 @@ namespace go
             }
             ping.Send(true);
             fmt.Printf("HANG 2 %v\n", times);
-            return;
+            return ;
             fmt.Printf("OK\n");
+
         });
 
         public static void CgoTraceback()
@@ -120,16 +127,19 @@ namespace go
             {
                 try = 1L;
             }
+
             var b = make_slice<byte>(1e6F * try);
             var start = time.Now();
             for (long i = 0L; i < 1e3F * try; i++)
             {
-                C.foo2(@unsafe.Pointer(ref b[0L]));
+                C.foo2(@unsafe.Pointer(_addr_b[0L]));
                 if (time.Since(start) > time.Second)
                 {
                     break;
                 }
+
             }
+
 
         }
     }

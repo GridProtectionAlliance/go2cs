@@ -5,12 +5,14 @@
 // Package dsa implements the Digital Signature Algorithm, as defined in FIPS 186-3.
 //
 // The DSA operations in this package are not implemented using constant-time algorithms.
-// package dsa -- go2cs converted at 2020 August 29 08:28:57 UTC
+// package dsa -- go2cs converted at 2020 October 08 03:36:37 UTC
 // import "crypto/dsa" ==> using dsa = go.crypto.dsa_package
 // Original source: C:\Go\src\crypto\dsa\dsa.go
 using errors = go.errors_package;
 using io = go.io_package;
 using big = go.math.big_package;
+
+using randutil = go.crypto.@internal.randutil_package;
 using static go.builtin;
 
 namespace go {
@@ -53,14 +55,15 @@ namespace crypto
         {
         }
 
-        public static readonly ParameterSizes L1024N160 = iota;
-        public static readonly var L2048N224 = 0;
-        public static readonly var L2048N256 = 1;
-        public static readonly var L3072N256 = 2;
+        public static readonly ParameterSizes L1024N160 = (ParameterSizes)iota;
+        public static readonly var L2048N224 = (var)0;
+        public static readonly var L2048N256 = (var)1;
+        public static readonly var L3072N256 = (var)2;
+
 
         // numMRTests is the number of Miller-Rabin primality tests that we perform. We
         // pick the largest recommended number from table C.1 of FIPS 186-3.
-        private static readonly long numMRTests = 64L;
+        private static readonly long numMRTests = (long)64L;
 
         // GenerateParameters puts a random, valid set of DSA parameters into params.
         // This function can take many seconds, even on fast machines.
@@ -68,8 +71,10 @@ namespace crypto
 
         // GenerateParameters puts a random, valid set of DSA parameters into params.
         // This function can take many seconds, even on fast machines.
-        public static error GenerateParameters(ref Parameters @params, io.Reader rand, ParameterSizes sizes)
-        { 
+        public static error GenerateParameters(ptr<Parameters> _addr_@params, io.Reader rand, ParameterSizes sizes)
+        {
+            ref Parameters @params = ref _addr_@params.val;
+ 
             // This function doesn't follow FIPS 186-3 exactly in that it doesn't
             // use a verification seed to generate the primes. The verification
             // seed doesn't appear to be exported or used by other code and
@@ -91,7 +96,7 @@ namespace crypto
                 L = 3072L;
                 N = 256L;
             else 
-                return error.As(errors.New("crypto/dsa: invalid ParameterSizes"));
+                return error.As(errors.New("crypto/dsa: invalid ParameterSizes"))!;
                         var qBytes = make_slice<byte>(N / 8L);
             var pBytes = make_slice<byte>(L / 8L);
 
@@ -110,10 +115,11 @@ GeneratePrimes:
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
 
                 qBytes[len(qBytes) - 1L] |= 1L;
                 qBytes[0L] |= 0x80UL;
@@ -123,6 +129,7 @@ GeneratePrimes:
                 {
                     continue;
                 }
+
                 for (long i = 0L; i < 4L * L; i++)
                 {
                     {
@@ -130,10 +137,11 @@ GeneratePrimes:
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                     }
+
 
                     pBytes[len(pBytes) - 1L] |= 1L;
                     pBytes[0L] |= 0x80UL;
@@ -146,15 +154,18 @@ GeneratePrimes:
                     {
                         continue;
                     }
+
                     if (!p.ProbablyPrime(numMRTests))
                     {
                         continue;
                     }
+
                     @params.P = p;
                     @params.Q = q;
                     _breakGeneratePrimes = true;
                     break;
                 }
+
 
             }
 
@@ -173,20 +184,26 @@ GeneratePrimes:
                     h.Add(h, one);
                     continue;
                 }
+
                 @params.G = g;
-                return error.As(null);
+                return error.As(null!)!;
+
             }
+
 
         }
 
         // GenerateKey generates a public&private key pair. The Parameters of the
         // PrivateKey must already be valid (see GenerateParameters).
-        public static error GenerateKey(ref PrivateKey priv, io.Reader rand)
+        public static error GenerateKey(ptr<PrivateKey> _addr_priv, io.Reader rand)
         {
+            ref PrivateKey priv = ref _addr_priv.val;
+
             if (priv.P == null || priv.Q == null || priv.G == null)
             {
-                return error.As(errors.New("crypto/dsa: parameters not set up before generating key"));
+                return error.As(errors.New("crypto/dsa: parameters not set up before generating key"))!;
             }
+
             ptr<big.Int> x = @new<big.Int>();
             var xBytes = make_slice<byte>(priv.Q.BitLen() / 8L);
 
@@ -195,28 +212,34 @@ GeneratePrimes:
                 var (_, err) = io.ReadFull(rand, xBytes);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 x.SetBytes(xBytes);
                 if (x.Sign() != 0L && x.Cmp(priv.Q) < 0L)
                 {
                     break;
                 }
+
             }
 
 
             priv.X = x;
             priv.Y = @new<big.Int>();
             priv.Y.Exp(priv.G, x, priv.P);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // fermatInverse calculates the inverse of k in GF(P) using Fermat's method.
         // This has better constant-time properties than Euclid's method (implemented
         // in math/big.Int.ModInverse) although math/big itself isn't strictly
         // constant-time so it's not perfect.
-        private static ref big.Int fermatInverse(ref big.Int k, ref big.Int P)
+        private static ptr<big.Int> fermatInverse(ptr<big.Int> _addr_k, ptr<big.Int> _addr_P)
         {
+            ref big.Int k = ref _addr_k.val;
+            ref big.Int P = ref _addr_P.val;
+
             var two = big.NewInt(2L);
             ptr<big.Int> pMinus2 = @new<big.Int>().Sub(P, two);
             return @new<big.Int>().Exp(k, pMinus2, P);
@@ -233,16 +256,24 @@ GeneratePrimes:
         //
         // Be aware that calling Sign with an attacker-controlled PrivateKey may
         // require an arbitrary amount of CPU.
-        public static (ref big.Int, ref big.Int, error) Sign(io.Reader rand, ref PrivateKey priv, slice<byte> hash)
-        { 
+        public static (ptr<big.Int>, ptr<big.Int>, error) Sign(io.Reader rand, ptr<PrivateKey> _addr_priv, slice<byte> hash)
+        {
+            ptr<big.Int> r = default!;
+            ptr<big.Int> s = default!;
+            error err = default!;
+            ref PrivateKey priv = ref _addr_priv.val;
+
+            randutil.MaybeReadByte(rand); 
+
             // FIPS 186-3, section 4.6
 
             var n = priv.Q.BitLen();
-            if (priv.Q.Sign() <= 0L || priv.P.Sign() <= 0L || priv.G.Sign() <= 0L || priv.X.Sign() <= 0L || n & 7L != 0L)
+            if (priv.Q.Sign() <= 0L || priv.P.Sign() <= 0L || priv.G.Sign() <= 0L || priv.X.Sign() <= 0L || n % 8L != 0L)
             {
                 err = ErrInvalidPublicKey;
-                return;
+                return ;
             }
+
             n >>= 3L;
 
             long attempts = default;
@@ -255,8 +286,9 @@ GeneratePrimes:
                     _, err = io.ReadFull(rand, buf);
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
+
                     k.SetBytes(buf); 
                     // priv.Q must be >= 128 because the test above
                     // requires it to be > 0 and that
@@ -266,10 +298,11 @@ GeneratePrimes:
                     {
                         break;
                     }
+
                 }
 
 
-                var kInv = fermatInverse(k, priv.Q);
+                var kInv = fermatInverse(k, _addr_priv.Q);
 
                 r = @new<big.Int>().Exp(priv.G, k, priv.P);
                 r.Mod(r, priv.Q);
@@ -278,6 +311,7 @@ GeneratePrimes:
                 {
                     continue;
                 }
+
                 var z = k.SetBytes(hash);
 
                 s = @new<big.Int>().Mul(priv.X, r);
@@ -290,6 +324,7 @@ GeneratePrimes:
                 {
                     break;
                 }
+
             } 
 
             // Only degenerate private keys will require more than a handful of
@@ -300,9 +335,11 @@ GeneratePrimes:
             // attempts.
             if (attempts == 0L)
             {
-                return (null, null, ErrInvalidPublicKey);
+                return (_addr_null!, _addr_null!, error.As(ErrInvalidPublicKey)!);
             }
-            return;
+
+            return ;
+
         }
 
         // Verify verifies the signature in r, s of hash using the public key, pub. It
@@ -311,29 +348,41 @@ GeneratePrimes:
         // Note that FIPS 186-3 section 4.6 specifies that the hash should be truncated
         // to the byte-length of the subgroup. This function does not perform that
         // truncation itself.
-        public static bool Verify(ref PublicKey pub, slice<byte> hash, ref big.Int r, ref big.Int s)
-        { 
+        public static bool Verify(ptr<PublicKey> _addr_pub, slice<byte> hash, ptr<big.Int> _addr_r, ptr<big.Int> _addr_s)
+        {
+            ref PublicKey pub = ref _addr_pub.val;
+            ref big.Int r = ref _addr_r.val;
+            ref big.Int s = ref _addr_s.val;
+ 
             // FIPS 186-3, section 4.7
 
             if (pub.P.Sign() == 0L)
             {
                 return false;
             }
+
             if (r.Sign() < 1L || r.Cmp(pub.Q) >= 0L)
             {
                 return false;
             }
+
             if (s.Sign() < 1L || s.Cmp(pub.Q) >= 0L)
             {
                 return false;
             }
-            ptr<big.Int> w = @new<big.Int>().ModInverse(s, pub.Q);
 
-            var n = pub.Q.BitLen();
-            if (n & 7L != 0L)
+            ptr<big.Int> w = @new<big.Int>().ModInverse(s, pub.Q);
+            if (w == null)
             {
                 return false;
             }
+
+            var n = pub.Q.BitLen();
+            if (n % 8L != 0L)
+            {
+                return false;
+            }
+
             ptr<big.Int> z = @new<big.Int>().SetBytes(hash);
 
             ptr<big.Int> u1 = @new<big.Int>().Mul(z, w);
@@ -347,6 +396,7 @@ GeneratePrimes:
             v.Mod(v, pub.Q);
 
             return v.Cmp(r) == 0L;
+
         }
     }
 }}

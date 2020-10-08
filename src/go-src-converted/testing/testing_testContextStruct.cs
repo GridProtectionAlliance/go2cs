@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:57 UTC
+//     Generated on 2020 October 08 04:36:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
+using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -40,6 +41,7 @@ namespace go
             public testContext(NilType _)
             {
                 this.match = default;
+                this.deadline = default;
                 this.mu = default;
                 this.startParallel = default;
                 this.running = default;
@@ -47,9 +49,10 @@ namespace go
                 this.maxParallel = default;
             }
 
-            public testContext(ref ptr<matcher> match = default, sync.Mutex mu = default, channel<bool> startParallel = default, long running = default, long numWaiting = default, long maxParallel = default)
+            public testContext(ref ptr<matcher> match = default, time.Time deadline = default, sync.Mutex mu = default, channel<bool> startParallel = default, long running = default, long numWaiting = default, long maxParallel = default)
             {
                 this.match = match;
+                this.deadline = deadline;
                 this.mu = mu;
                 this.startParallel = startParallel;
                 this.running = running;
@@ -77,7 +80,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static testContext testContext_cast(dynamic value)
         {
-            return new testContext(ref value.match, value.mu, value.startParallel, value.running, value.numWaiting, value.maxParallel);
+            return new testContext(ref value.match, value.deadline, value.mu, value.startParallel, value.running, value.numWaiting, value.maxParallel);
         }
     }
 }

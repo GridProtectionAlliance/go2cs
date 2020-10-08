@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:35 UTC
+//     Generated on 2020 October 08 04:04:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace go
                 this.Objects = default;
             }
 
-            public Scope(ref ptr<Scope> Outer = default, map<@string, ref Object> Objects = default)
+            public Scope(ref ptr<Scope> Outer = default, map<@string, ptr<Object>> Objects = default)
             {
                 this.Outer = Outer;
                 this.Objects = Objects;

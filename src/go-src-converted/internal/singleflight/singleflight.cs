@@ -4,7 +4,7 @@
 
 // Package singleflight provides a duplicate function call suppression
 // mechanism.
-// package singleflight -- go2cs converted at 2020 August 29 08:26:56 UTC
+// package singleflight -- go2cs converted at 2020 October 08 03:33:52 UTC
 // import "internal/singleflight" ==> using singleflight = go.@internal.singleflight_package
 // Original source: C:\Go\src\internal\singleflight\singleflight.go
 using sync = go.sync_package;
@@ -34,7 +34,7 @@ namespace @internal
         public partial struct Group
         {
             public sync.Mutex mu; // protects m
-            public map<@string, ref call> m; // lazily initialized
+            public map<@string, ptr<call>> m; // lazily initialized
         }
 
         // Result holds the results of Do, so they can be passed
@@ -50,13 +50,19 @@ namespace @internal
         // time. If a duplicate comes in, the duplicate caller waits for the
         // original to complete and receives the same results.
         // The return value shared indicates whether v was given to multiple callers.
-        private static (object, error, bool) Do(this ref Group g, @string key, Func<(object, error)> fn)
+        private static (object, error, bool) Do(this ptr<Group> _addr_g, @string key, Func<(object, error)> fn)
         {
+            object v = default;
+            error err = default!;
+            bool shared = default;
+            ref Group g = ref _addr_g.val;
+
             g.mu.Lock();
             if (g.m == null)
             {
-                g.m = make_map<@string, ref call>();
+                g.m = make_map<@string, ptr<call>>();
             }
+
             {
                 var c__prev1 = c;
 
@@ -67,33 +73,40 @@ namespace @internal
                     c.dups++;
                     g.mu.Unlock();
                     c.wg.Wait();
-                    return (c.val, c.err, true);
+                    return (c.val, error.As(c.err)!, true);
                 }
 
                 c = c__prev1;
 
             }
+
             ptr<call> c = @new<call>();
             c.wg.Add(1L);
             g.m[key] = c;
             g.mu.Unlock();
 
             g.doCall(c, key, fn);
-            return (c.val, c.err, c.dups > 0L);
+            return (c.val, error.As(c.err)!, c.dups > 0L);
+
         }
 
         // DoChan is like Do but returns a channel that will receive the
         // results when they are ready. The second result is true if the function
         // will eventually be called, false if it will not (because there is
         // a pending request with this key).
-        private static (channel<Result>, bool) DoChan(this ref Group g, @string key, Func<(object, error)> fn)
+        private static (channel<Result>, bool) DoChan(this ptr<Group> _addr_g, @string key, Func<(object, error)> fn)
         {
+            channel<Result> _p0 = default;
+            bool _p0 = default;
+            ref Group g = ref _addr_g.val;
+
             var ch = make_channel<Result>(1L);
             g.mu.Lock();
             if (g.m == null)
             {
-                g.m = make_map<@string, ref call>();
+                g.m = make_map<@string, ptr<call>>();
             }
+
             {
                 var c__prev1 = c;
 
@@ -110,7 +123,8 @@ namespace @internal
                 c = c__prev1;
 
             }
-            call c = ref new call(chans:[]chan<-Result{ch});
+
+            ptr<call> c = addr(new call(chans:[]chan<-Result{ch}));
             c.wg.Add(1L);
             g.m[key] = c;
             g.mu.Unlock();
@@ -118,11 +132,17 @@ namespace @internal
             go_(() => g.doCall(c, key, fn));
 
             return (ch, true);
+
         }
 
         // doCall handles the single call for a key.
-        private static (object, error) doCall(this ref Group g, ref call c, @string key, Func<(object, error)> fn)
+        private static (object, error) doCall(this ptr<Group> _addr_g, ptr<call> _addr_c, @string key, Func<(object, error)> fn)
         {
+            object _p0 = default;
+            error _p0 = default!;
+            ref Group g = ref _addr_g.val;
+            ref call c = ref _addr_c.val;
+
             c.val, c.err = fn();
             c.wg.Done();
 
@@ -133,6 +153,7 @@ namespace @internal
                 ch.Send(new Result(c.val,c.err,c.dups>0));
             }
             g.mu.Unlock();
+
         }
 
         // ForgetUnshared tells the singleflight to forget about a key if it is not
@@ -140,8 +161,10 @@ namespace @internal
         // will call the function rather than waiting for an earlier call to complete.
         // Returns whether the key was forgotten or unknown--that is, whether no
         // other goroutines are waiting for the result.
-        private static bool ForgetUnshared(this ref Group _g, @string key) => func(_g, (ref Group g, Defer defer, Panic _, Recover __) =>
+        private static bool ForgetUnshared(this ptr<Group> _addr_g, @string key) => func((defer, _, __) =>
         {
+            ref Group g = ref _addr_g.val;
+
             g.mu.Lock();
             defer(g.mu.Unlock());
             var (c, ok) = g.m[key];
@@ -149,12 +172,15 @@ namespace @internal
             {
                 return true;
             }
+
             if (c.dups == 0L)
             {
                 delete(g.m, key);
                 return true;
             }
+
             return false;
+
         });
     }
 }}

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 August 29 09:26:03 UTC
+// package syntax -- go2cs converted at 2020 October 08 04:28:07 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\nodes.go
-using src = go.cmd.@internal.src_package;
+
 using static go.builtin;
 
 namespace go {
@@ -19,21 +19,25 @@ namespace @internal
         // Nodes
         public partial interface Node
         {
-            src.Pos Pos();
-            src.Pos aNode();
+            Pos Pos();
+            Pos aNode();
         }
 
         private partial struct node
         {
-            public src.Pos pos;
+            public Pos pos;
         }
 
-        private static src.Pos Pos(this ref node n)
+        private static Pos Pos(this ptr<node> _addr_n)
         {
+            ref node n = ref _addr_n.val;
+
             return n.pos;
         }
-        private static void aNode(this ref node _p0)
+        private static void aNode(this ptr<node> _addr__p0)
         {
+            ref node _p0 = ref _addr__p0.val;
+
         }
 
         // ----------------------------------------------------------------------------
@@ -42,6 +46,7 @@ namespace @internal
         // package PkgName; DeclList[0], DeclList[1], ...
         public partial struct File
         {
+            public Pragma Pragma;
             public ptr<Name> PkgName;
             public slice<Decl> DeclList;
             public ulong Lines;
@@ -60,9 +65,10 @@ namespace @internal
         // LocalPkgName Path
         public partial struct ImportDecl
         {
+            public ptr<Group> Group; // nil means not part of a group
+            public Pragma Pragma;
             public ptr<Name> LocalPkgName; // including "."; nil means no rename present
             public ptr<BasicLit> Path;
-            public ptr<Group> Group; // nil means not part of a group
             public ref decl decl => ref decl_val;
         } 
 
@@ -71,21 +77,22 @@ namespace @internal
         // NameList Type = Values
         public partial struct ConstDecl
         {
-            public slice<ref Name> NameList;
+            public ptr<Group> Group; // nil means not part of a group
+            public Pragma Pragma;
+            public slice<ptr<Name>> NameList;
             public Expr Type; // nil means no type
             public Expr Values; // nil means no values
-            public ptr<Group> Group; // nil means not part of a group
             public ref decl decl => ref decl_val;
         } 
 
         // Name Type
         public partial struct TypeDecl
         {
+            public ptr<Group> Group; // nil means not part of a group
+            public Pragma Pragma;
             public ptr<Name> Name;
             public bool Alias;
             public Expr Type;
-            public ptr<Group> Group; // nil means not part of a group
-            public Pragma Pragma;
             public ref decl decl => ref decl_val;
         } 
 
@@ -94,10 +101,11 @@ namespace @internal
         // NameList      = Values
         public partial struct VarDecl
         {
-            public slice<ref Name> NameList;
+            public ptr<Group> Group; // nil means not part of a group
+            public Pragma Pragma;
+            public slice<ptr<Name>> NameList;
             public Expr Type; // nil means no type
             public Expr Values; // nil means no values
-            public ptr<Group> Group; // nil means not part of a group
             public ref decl decl => ref decl_val;
         } 
 
@@ -107,20 +115,22 @@ namespace @internal
         // func Receiver Name Type
         public partial struct FuncDecl
         {
-            public map<@string, bool> Attr; // go:attr map
+            public Pragma Pragma;
             public ptr<Field> Recv; // nil means regular function
             public ptr<Name> Name;
             public ptr<FuncType> Type;
             public ptr<BlockStmt> Body; // nil means no body (forward declaration)
-            public Pragma Pragma; // TODO(mdempsky): Cleaner solution.
             public ref decl decl => ref decl_val;
-        }        private partial struct decl
+        }
+        private partial struct decl
         {
             public ref node node => ref node_val;
         }
 
-        private static void aDecl(this ref decl _p0)
+        private static void aDecl(this ptr<decl> _addr__p0)
         {
+            ref decl _p0 = ref _addr__p0.val;
+
         }
 
         // All declarations belonging to the same group point to the same Group node.
@@ -156,6 +166,7 @@ namespace @internal
         {
             public @string Value;
             public LitKind Kind;
+            public bool Bad; // true means the literal Value has syntax errors
             public ref expr expr => ref expr_val;
         } 
 
@@ -165,7 +176,7 @@ namespace @internal
             public Expr Type; // nil means no literal type
             public slice<Expr> ElemList;
             public long NKeys; // number of elements with keys
-            public src.Pos Rbrace;
+            public Pos Rbrace;
             public ref expr expr => ref expr_val;
         } 
 
@@ -223,8 +234,17 @@ namespace @internal
         // X.(Type)
         public partial struct AssertExpr
         {
-            public Expr X; // TODO(gri) consider using Name{"..."} instead of nil (permits attaching of comments)
+            public Expr X;
             public Expr Type;
+            public ref expr expr => ref expr_val;
+        } 
+
+        // X.(type)
+        // Lhs := X.(type)
+        public partial struct TypeSwitchGuard
+        {
+            public ptr<Name> Lhs; // nil means no Lhs :=
+            public Expr X; // X.(type)
             public ref expr expr => ref expr_val;
         }
 
@@ -240,7 +260,7 @@ namespace @internal
         public partial struct CallExpr
         {
             public Expr Fun;
-            public slice<Expr> ArgList;
+            public slice<Expr> ArgList; // nil means no arguments
             public bool HasDots; // last argument is followed by ...
             public ref expr expr => ref expr_val;
         } 
@@ -277,8 +297,8 @@ namespace @internal
         // struct { FieldList[0] TagList[0]; FieldList[1] TagList[1]; ... }
         public partial struct StructType
         {
-            public slice<ref Field> FieldList;
-            public slice<ref BasicLit> TagList; // i >= len(TagList) || TagList[i] == nil means no tag for field i
+            public slice<ptr<Field>> FieldList;
+            public slice<ptr<BasicLit>> TagList; // i >= len(TagList) || TagList[i] == nil means no tag for field i
             public ref expr expr => ref expr_val;
         } 
 
@@ -294,14 +314,14 @@ namespace @internal
         // interface { MethodList[0]; MethodList[1]; ... }
         public partial struct InterfaceType
         {
-            public slice<ref Field> MethodList;
+            public slice<ptr<Field>> MethodList;
             public ref expr expr => ref expr_val;
         }
 
         public partial struct FuncType
         {
-            public slice<ref Field> ParamList;
-            public slice<ref Field> ResultList;
+            public slice<ptr<Field>> ParamList;
+            public slice<ptr<Field>> ResultList;
             public ref expr expr => ref expr_val;
         } 
 
@@ -321,22 +341,26 @@ namespace @internal
             public ChanDir Dir; // 0 means no direction
             public Expr Elem;
             public ref expr expr => ref expr_val;
-        }        private partial struct expr
+        }
+        private partial struct expr
         {
             public ref node node => ref node_val;
         }
 
-        private static void aExpr(this ref expr _p0)
+        private static void aExpr(this ptr<expr> _addr__p0)
         {
+            ref expr _p0 = ref _addr__p0.val;
+
         }
 
         public partial struct ChanDir // : ulong
         {
         }
 
-        private static readonly ChanDir _ = iota;
-        public static readonly var SendOnly = 0;
-        public static readonly var RecvOnly = 1;
+        private static readonly ChanDir _ = (ChanDir)iota;
+        public static readonly var SendOnly = (var)0;
+        public static readonly var RecvOnly = (var)1;
+
 
         // ----------------------------------------------------------------------------
         // Statements
@@ -366,7 +390,7 @@ namespace @internal
         public partial struct BlockStmt
         {
             public slice<Stmt> List;
-            public src.Pos Rbrace;
+            public Pos Rbrace;
             public ref stmt stmt => ref stmt_val;
         }
 
@@ -427,7 +451,7 @@ namespace @internal
             public SimpleStmt Init;
             public Expr Cond;
             public ptr<BlockStmt> Then;
-            public Stmt Else; // either *IfStmt or *BlockStmt
+            public Stmt Else; // either nil, *IfStmt, or *BlockStmt
             public ref stmt stmt => ref stmt_val;
         }
 
@@ -443,18 +467,19 @@ namespace @internal
         public partial struct SwitchStmt
         {
             public SimpleStmt Init;
-            public Expr Tag;
-            public slice<ref CaseClause> Body;
-            public src.Pos Rbrace;
+            public Expr Tag; // incl. *TypeSwitchGuard
+            public slice<ptr<CaseClause>> Body;
+            public Pos Rbrace;
             public ref stmt stmt => ref stmt_val;
         }
 
         public partial struct SelectStmt
         {
-            public slice<ref CommClause> Body;
-            public src.Pos Rbrace;
+            public slice<ptr<CommClause>> Body;
+            public Pos Rbrace;
             public ref stmt stmt => ref stmt_val;
-        }        public partial struct RangeClause
+        }
+        public partial struct RangeClause
         {
             public Expr Lhs; // nil means no Lhs = or Lhs :=
             public bool Def; // means :=
@@ -462,18 +487,11 @@ namespace @internal
             public ref simpleStmt simpleStmt => ref simpleStmt_val;
         }
 
-        public partial struct TypeSwitchGuard
-        {
-            public ptr<Name> Lhs; // nil means no Lhs :=
-            public Expr X; // X.(type)
-            public ref expr expr => ref expr_val;
-        }
-
         public partial struct CaseClause
         {
             public Expr Cases; // nil means default clause
             public slice<Stmt> Body;
-            public src.Pos Colon;
+            public Pos Colon;
             public ref node node => ref node_val;
         }
 
@@ -481,9 +499,10 @@ namespace @internal
         {
             public SimpleStmt Comm; // send or receive stmt; nil means default clause
             public slice<Stmt> Body;
-            public src.Pos Colon;
+            public Pos Colon;
             public ref node node => ref node_val;
-        }        private partial struct stmt
+        }
+        private partial struct stmt
         {
             public ref node node => ref node_val;
         }
@@ -510,10 +529,11 @@ namespace @internal
         {
         }
 
-        public static readonly CommentKind Above = iota;
-        public static readonly var Below = 0;
-        public static readonly var Left = 1;
-        public static readonly var Right = 2;
+        public static readonly CommentKind Above = (CommentKind)iota;
+        public static readonly var Below = (var)0;
+        public static readonly var Left = (var)1;
+        public static readonly var Right = (var)2;
+
 
         public partial struct Comment
         {

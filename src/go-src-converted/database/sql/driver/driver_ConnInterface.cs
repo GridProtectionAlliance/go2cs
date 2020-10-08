@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Tx, error) PrepareByRef(ref T value, @string query);
+            private delegate (Tx, error) PrepareByPtr(ptr<T> value, @string query);
             private delegate (Tx, error) PrepareByVal(T value, @string query);
 
-            private static readonly PrepareByRef s_PrepareByRef;
+            private static readonly PrepareByPtr s_PrepareByPtr;
             private static readonly PrepareByVal s_PrepareByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +79,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PrepareByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PrepareByPtr is null || !m_target_is_ptr)
                     return s_PrepareByVal!(target, query);
 
-                return s_PrepareByRef(ref target, query);
+                return s_PrepareByPtr(m_target_ptr, query);
             }
 
-            private delegate (Tx, error) CloseByRef(ref T value);
+            private delegate (Tx, error) CloseByPtr(ptr<T> value);
             private delegate (Tx, error) CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,17 +99,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
 
-            private delegate (Tx, error) BeginByRef(ref T value);
+            private delegate (Tx, error) BeginByPtr(ptr<T> value);
             private delegate (Tx, error) BeginByVal(T value);
 
-            private static readonly BeginByRef s_BeginByRef;
+            private static readonly BeginByPtr s_BeginByPtr;
             private static readonly BeginByVal s_BeginByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -117,11 +119,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BeginByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BeginByPtr is null || !m_target_is_ptr)
                     return s_BeginByVal!(target);
 
-                return s_BeginByRef(ref target);
+                return s_BeginByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -130,55 +133,46 @@ namespace sql
             static Conn()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Prepare");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Prepare");
 
                 if (!(extensionMethod is null))
-                    s_PrepareByRef = extensionMethod.CreateStaticDelegate(typeof(PrepareByRef)) as PrepareByRef;
+                    s_PrepareByPtr = extensionMethod.CreateStaticDelegate(typeof(PrepareByPtr)) as PrepareByPtr;
 
-                if (s_PrepareByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Prepare");
+                extensionMethod = targetType.GetExtensionMethod("Prepare");
 
-                    if (!(extensionMethod is null))
-                        s_PrepareByVal = extensionMethod.CreateStaticDelegate(typeof(PrepareByVal)) as PrepareByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PrepareByVal = extensionMethod.CreateStaticDelegate(typeof(PrepareByVal)) as PrepareByVal;
 
-                if (s_PrepareByRef is null && s_PrepareByVal is null)
+                if (s_PrepareByPtr is null && s_PrepareByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.Prepare method", new Exception("Prepare"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.Close method", new Exception("Close"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Begin");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Begin");
 
                 if (!(extensionMethod is null))
-                    s_BeginByRef = extensionMethod.CreateStaticDelegate(typeof(BeginByRef)) as BeginByRef;
+                    s_BeginByPtr = extensionMethod.CreateStaticDelegate(typeof(BeginByPtr)) as BeginByPtr;
 
-                if (s_BeginByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Begin");
+                extensionMethod = targetType.GetExtensionMethod("Begin");
 
-                    if (!(extensionMethod is null))
-                        s_BeginByVal = extensionMethod.CreateStaticDelegate(typeof(BeginByVal)) as BeginByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BeginByVal = extensionMethod.CreateStaticDelegate(typeof(BeginByVal)) as BeginByVal;
 
-                if (s_BeginByRef is null && s_BeginByVal is null)
+                if (s_BeginByPtr is null && s_BeginByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.Begin method", new Exception("Begin"));
             }
 

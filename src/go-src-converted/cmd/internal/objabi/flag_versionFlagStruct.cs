@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:19 UTC
+//     Generated on 2020 October 08 03:50:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,9 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
+using io = go.io_package;
+using ioutil = go.io.ioutil_package;
+using log = go.log_package;
 using os = go.os_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;

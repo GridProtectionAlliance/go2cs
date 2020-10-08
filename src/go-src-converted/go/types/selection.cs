@@ -4,7 +4,7 @@
 
 // This file implements Selections.
 
-// package types -- go2cs converted at 2020 August 29 08:47:54 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:42 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\selection.go
 using bytes = go.bytes_package;
@@ -22,9 +22,9 @@ namespace go
         {
         }
 
-        public static readonly SelectionKind FieldVal = iota; // x.f is a struct field selector
-        public static readonly var MethodVal = 0; // x.f is a method selector
-        public static readonly var MethodExpr = 1; // x.f is a method expression
+        public static readonly SelectionKind FieldVal = (SelectionKind)iota; // x.f is a struct field selector
+        public static readonly var MethodVal = (var)0; // x.f is a method selector
+        public static readonly var MethodExpr = (var)1; // x.f is a method expression
 
         // A Selection describes a selector expression x.f.
         // For the declarations:
@@ -36,11 +36,11 @@ namespace go
         //
         // the following relations exist:
         //
-        //    Selector    Kind          Recv    Obj    Type               Index     Indirect
+        //    Selector    Kind          Recv    Obj    Type       Index     Indirect
         //
-        //    p.x         FieldVal      T       x      int                {0}       true
-        //    p.m         MethodVal     *T      m      func (e *T) m()    {1, 0}    true
-        //    T.m         MethodExpr    T       m      func m(_ T)        {1, 0}    false
+        //    p.x         FieldVal      T       x      int        {0}       true
+        //    p.m         MethodVal     *T      m      func()     {1, 0}    true
+        //    T.m         MethodExpr    T       m      func(T)    {1, 0}    false
         //
         public partial struct Selection
         {
@@ -52,55 +52,66 @@ namespace go
         }
 
         // Kind returns the selection kind.
-        private static SelectionKind Kind(this ref Selection s)
+        private static SelectionKind Kind(this ptr<Selection> _addr_s)
         {
+            ref Selection s = ref _addr_s.val;
+
             return s.kind;
         }
 
         // Recv returns the type of x in x.f.
-        private static Type Recv(this ref Selection s)
+        private static Type Recv(this ptr<Selection> _addr_s)
         {
+            ref Selection s = ref _addr_s.val;
+
             return s.recv;
         }
 
         // Obj returns the object denoted by x.f; a *Var for
         // a field selection, and a *Func in all other cases.
-        private static Object Obj(this ref Selection s)
+        private static Object Obj(this ptr<Selection> _addr_s)
         {
+            ref Selection s = ref _addr_s.val;
+
             return s.obj;
         }
 
         // Type returns the type of x.f, which may be different from the type of f.
         // See Selection for more information.
-        private static Type Type(this ref Selection s)
+        private static Type Type(this ptr<Selection> _addr_s)
         {
+            ref Selection s = ref _addr_s.val;
+
 
             if (s.kind == MethodVal) 
                 // The type of x.f is a method with its receiver type set
                 // to the type of x.
-                ref Signature sig = s.obj._<ref Func>().typ._<ref Signature>().Value;
-                var recv = sig.recv.Value;
+                ptr<Signature> sig = s.obj._<ptr<Func>>().typ._<ptr<Signature>>().val;
+                ref var recv = ref heap(sig.recv.val, out ptr<var> _addr_recv);
                 recv.typ = s.recv;
-                sig.recv = ref recv;
-                return ref sig;
+                _addr_sig.recv = _addr_recv;
+                sig.recv = ref _addr_sig.recv.val;
+                return _addr_sig;
             else if (s.kind == MethodExpr) 
                 // The type of x.f is a function (without receiver)
                 // and an additional first argument with the same type as x.
                 // TODO(gri) Similar code is already in call.go - factor!
                 // TODO(gri) Compute this eagerly to avoid allocations.
-                sig = s.obj._<ref Func>().typ._<ref Signature>().Value;
-                var arg0 = sig.recv.Value;
+                sig = s.obj._<ptr<Func>>().typ._<ptr<Signature>>().val;
+                ref var arg0 = ref heap(sig.recv.val, out ptr<var> _addr_arg0);
                 sig.recv = null;
                 arg0.typ = s.recv;
-                slice<ref Var> @params = default;
+                slice<ptr<Var>> @params = default;
                 if (sig.@params != null)
                 {
                     params = sig.@params.vars;
                 }
-                sig.@params = NewTuple(append(new slice<ref Var>(new ref Var[] { &arg0 }), params));
-                return ref sig;
+
+                sig.@params = NewTuple(append(new slice<ptr<Var>>(new ptr<Var>[] { &arg0 }), params));
+                return _addr_sig;
             // In all other cases, the type of x.f is the type of x.
             return s.obj.Type();
+
         }
 
         // Index describes the path from x to f in x.f.
@@ -113,21 +124,27 @@ namespace go
         //
         // The earlier index entries are the indices of the embedded fields implicitly
         // traversed to get from (the type of) x to f, starting at embedding depth 0.
-        private static slice<long> Index(this ref Selection s)
+        private static slice<long> Index(this ptr<Selection> _addr_s)
         {
+            ref Selection s = ref _addr_s.val;
+
             return s.index;
         }
 
         // Indirect reports whether any pointer indirection was required to get from
         // x to f in x.f.
-        private static bool Indirect(this ref Selection s)
+        private static bool Indirect(this ptr<Selection> _addr_s)
         {
+            ref Selection s = ref _addr_s.val;
+
             return s.indirect;
         }
 
-        private static @string String(this ref Selection s)
+        private static @string String(this ptr<Selection> _addr_s)
         {
-            return SelectionString(s, null);
+            ref Selection s = ref _addr_s.val;
+
+            return SelectionString(_addr_s, null);
         }
 
         // SelectionString returns the string form of s.
@@ -139,8 +156,10 @@ namespace go
         //    "method (T) f(X) Y"
         //    "method expr (T) f(X) Y"
         //
-        public static @string SelectionString(ref Selection s, Qualifier qf)
+        public static @string SelectionString(ptr<Selection> _addr_s, Qualifier qf)
         {
+            ref Selection s = ref _addr_s.val;
+
             @string k = default;
 
             if (s.kind == FieldVal) 
@@ -151,26 +170,28 @@ namespace go
                 k = "method expr ";
             else 
                 unreachable();
-                        bytes.Buffer buf = default;
+                        ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
             buf.WriteString(k);
             buf.WriteByte('(');
-            WriteType(ref buf, s.Recv(), qf);
-            fmt.Fprintf(ref buf, ") %s", s.obj.Name());
+            WriteType(_addr_buf, s.Recv(), qf);
+            fmt.Fprintf(_addr_buf, ") %s", s.obj.Name());
             {
                 var T = s.Type();
 
                 if (s.kind == FieldVal)
                 {
                     buf.WriteByte(' ');
-                    WriteType(ref buf, T, qf);
+                    WriteType(_addr_buf, T, qf);
                 }
                 else
                 {
-                    WriteSignature(ref buf, T._<ref Signature>(), qf);
+                    WriteSignature(_addr_buf, T._<ptr<Signature>>(), qf);
                 }
 
             }
+
             return buf.String();
+
         }
     }
 }}

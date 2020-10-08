@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:59:58 UTC
+//     Generated on 2020 October 08 04:32:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,13 +14,13 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytes = go.bytes_package;
-using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
+using path = go.path_package;
 using filepath = go.path.filepath_package;
 using reflect = go.reflect_package;
 using regexp = go.regexp_package;
@@ -60,7 +60,7 @@ namespace go
                 this.worklist = default;
             }
 
-            public tester(bool race = default, bool listMode = default, bool rebuild = default, bool failed = default, bool keepGoing = default, bool compileOnly = default, @string runRxStr = default, ref ptr<regexp.Regexp> runRx = default, bool runRxWant = default, slice<@string> runNames = default, @string banner = default, @string lastHeading = default, bool cgoEnabled = default, bool partial = default, bool haveTime = default, slice<distTest> tests = default, long timeoutScale = default, slice<ref work> worklist = default)
+            public tester(bool race = default, bool listMode = default, bool rebuild = default, bool failed = default, bool keepGoing = default, bool compileOnly = default, @string runRxStr = default, ref ptr<regexp.Regexp> runRx = default, bool runRxWant = default, slice<@string> runNames = default, @string banner = default, @string lastHeading = default, bool cgoEnabled = default, bool partial = default, bool haveTime = default, slice<distTest> tests = default, long timeoutScale = default, slice<ptr<work>> worklist = default)
             {
                 this.race = race;
                 this.listMode = listMode;

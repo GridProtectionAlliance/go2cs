@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:26:56 UTC
+//     Generated on 2020 October 08 03:33:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
                 this.m = default;
             }
 
-            public Group(sync.Mutex mu = default, map<@string, ref call> m = default)
+            public Group(sync.Mutex mu = default, map<@string, ptr<call>> m = default)
             {
                 this.mu = mu;
                 this.m = m;

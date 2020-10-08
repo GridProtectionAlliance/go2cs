@@ -4,10 +4,10 @@
 
 // CFB (Cipher Feedback) Mode.
 
-// package cipher -- go2cs converted at 2020 August 29 08:28:50 UTC
+// package cipher -- go2cs converted at 2020 October 08 03:35:43 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\cfb.go
-
+using subtle = go.crypto.@internal.subtle_package;
 using static go.builtin;
 
 namespace go {
@@ -24,8 +24,20 @@ namespace crypto
             public bool decrypt;
         }
 
-        private static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> src)
+        private static void XORKeyStream(this ptr<cfb> _addr_x, slice<byte> dst, slice<byte> src) => func((_, panic, __) =>
         {
+            ref cfb x = ref _addr_x.val;
+
+            if (len(dst) < len(src))
+            {
+                panic("crypto/cipher: output smaller than input");
+            }
+
+            if (subtle.InexactOverlap(dst[..len(src)], src))
+            {
+                panic("crypto/cipher: invalid buffer overlap");
+            }
+
             while (len(src) > 0L)
             {
                 if (x.outUsed == len(x.@out))
@@ -33,6 +45,7 @@ namespace crypto
                     x.b.Encrypt(x.@out, x.next);
                     x.outUsed = 0L;
                 }
+
                 if (x.decrypt)
                 { 
                     // We can precompute a larger segment of the
@@ -40,18 +53,23 @@ namespace crypto
                     // larger batches for xor, and we should be
                     // able to match CTR/OFB performance.
                     copy(x.next[x.outUsed..], src);
+
                 }
+
                 var n = xorBytes(dst, src, x.@out[x.outUsed..]);
                 if (!x.decrypt)
                 {
                     copy(x.next[x.outUsed..], dst);
                 }
+
                 dst = dst[n..];
                 src = src[n..];
                 x.outUsed += n;
+
             }
 
-        }
+
+        });
 
         // NewCFBEncrypter returns a Stream which encrypts with cipher feedback mode,
         // using the given Block. The iv must be the same length as the Block's block
@@ -76,11 +94,14 @@ namespace crypto
             { 
                 // stack trace will indicate whether it was de or encryption
                 panic("cipher.newCFB: IV length must equal block size");
+
             }
-            cfb x = ref new cfb(b:block,out:make([]byte,blockSize),next:make([]byte,blockSize),outUsed:blockSize,decrypt:decrypt,);
+
+            ptr<cfb> x = addr(new cfb(b:block,out:make([]byte,blockSize),next:make([]byte,blockSize),outUsed:blockSize,decrypt:decrypt,));
             copy(x.next, iv);
 
             return x;
+
         });
     }
 }}

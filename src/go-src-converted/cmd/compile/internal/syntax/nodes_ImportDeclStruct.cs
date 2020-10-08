@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:03 UTC
+//     Generated on 2020 October 08 04:28:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using src = go.cmd.@internal.src_package;
+
 using go;
 
 namespace go {
@@ -35,17 +34,19 @@ namespace @internal
             // Constructors
             public ImportDecl(NilType _)
             {
+                this.Group = default;
+                this.Pragma = default;
                 this.LocalPkgName = default;
                 this.Path = default;
-                this.Group = default;
                 this.m_declRef = new ptr<decl>(new decl(nil));
             }
 
-            public ImportDecl(ref ptr<Name> LocalPkgName = default, ref ptr<BasicLit> Path = default, ref ptr<Group> Group = default, decl decl = default)
+            public ImportDecl(ref ptr<Group> Group = default, Pragma Pragma = default, ref ptr<Name> LocalPkgName = default, ref ptr<BasicLit> Path = default, decl decl = default)
             {
+                this.Group = Group;
+                this.Pragma = Pragma;
                 this.LocalPkgName = LocalPkgName;
                 this.Path = Path;
-                this.Group = Group;
                 this.m_declRef = new ptr<decl>(decl);
             }
 
@@ -69,7 +70,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ImportDecl ImportDecl_cast(dynamic value)
         {
-            return new ImportDecl(ref value.LocalPkgName, ref value.Path, ref value.Group, value.decl);
+            return new ImportDecl(ref value.Group, value.Pragma, ref value.LocalPkgName, ref value.Path, value.decl);
         }
     }
 }}}}

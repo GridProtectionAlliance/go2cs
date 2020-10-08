@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:53 UTC
+//     Generated on 2020 October 08 01:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error UnreadByteByRef(ref T value);
+            private delegate error UnreadByteByPtr(ptr<T> value);
             private delegate error UnreadByteByVal(T value);
 
-            private static readonly UnreadByteByRef s_UnreadByteByRef;
+            private static readonly UnreadByteByPtr s_UnreadByteByPtr;
             private static readonly UnreadByteByVal s_UnreadByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,17 +74,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnreadByteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnreadByteByPtr is null || !m_target_is_ptr)
                     return s_UnreadByteByVal!(target);
 
-                return s_UnreadByteByRef(ref target);
+                return s_UnreadByteByPtr(m_target_ptr);
             }
 
-            private delegate (byte, error) ReadByteByRef(ref T value);
+            private delegate (byte, error) ReadByteByPtr(ptr<T> value);
             private delegate (byte, error) ReadByteByVal(T value);
 
-            private static readonly ReadByteByRef s_ReadByteByRef;
+            private static readonly ReadByteByPtr s_ReadByteByPtr;
             private static readonly ReadByteByVal s_ReadByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,11 +94,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByteByPtr is null || !m_target_is_ptr)
                     return s_ReadByteByVal!(target);
 
-                return s_ReadByteByRef(ref target);
+                return s_ReadByteByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -106,39 +108,33 @@ namespace go
             static ByteScanner()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UnreadByte");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UnreadByte");
 
                 if (!(extensionMethod is null))
-                    s_UnreadByteByRef = extensionMethod.CreateStaticDelegate(typeof(UnreadByteByRef)) as UnreadByteByRef;
+                    s_UnreadByteByPtr = extensionMethod.CreateStaticDelegate(typeof(UnreadByteByPtr)) as UnreadByteByPtr;
 
-                if (s_UnreadByteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UnreadByte");
+                extensionMethod = targetType.GetExtensionMethod("UnreadByte");
 
-                    if (!(extensionMethod is null))
-                        s_UnreadByteByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadByteByVal)) as UnreadByteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnreadByteByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadByteByVal)) as UnreadByteByVal;
 
-                if (s_UnreadByteByRef is null && s_UnreadByteByVal is null)
+                if (s_UnreadByteByPtr is null && s_UnreadByteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteScanner.UnreadByte method", new Exception("UnreadByte"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadByte");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadByte");
 
                 if (!(extensionMethod is null))
-                    s_ReadByteByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByteByRef)) as ReadByteByRef;
+                    s_ReadByteByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByteByPtr)) as ReadByteByPtr;
 
-                if (s_ReadByteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadByte");
+                extensionMethod = targetType.GetExtensionMethod("ReadByte");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByteByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByteByVal)) as ReadByteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByteByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByteByVal)) as ReadByteByVal;
 
-                if (s_ReadByteByRef is null && s_ReadByteByVal is null)
+                if (s_ReadByteByPtr is null && s_ReadByteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteScanner.ReadByte method", new Exception("ReadByte"));
             }
 

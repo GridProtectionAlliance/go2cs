@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:05 UTC
+//     Generated on 2020 October 08 04:58:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace compress
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace compress
                 m_target_is_ptr = true;
             }
 
-            private delegate error FlushByRef(ref T value);
+            private delegate error FlushByPtr(ptr<T> value);
             private delegate error FlushByVal(T value);
 
-            private static readonly FlushByRef s_FlushByRef;
+            private static readonly FlushByPtr s_FlushByPtr;
             private static readonly FlushByVal s_FlushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +79,18 @@ namespace compress
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FlushByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FlushByPtr is null || !m_target_is_ptr)
                     return s_FlushByVal!(target);
 
-                return s_FlushByRef(ref target);
+                return s_FlushByPtr(m_target_ptr);
             }
 
-            private delegate error WriteByteByRef(ref T value, byte c);
+            private delegate error WriteByteByPtr(ptr<T> value, byte c);
             private delegate error WriteByteByVal(T value, byte c);
 
-            private static readonly WriteByteByRef s_WriteByteByRef;
+            private static readonly WriteByteByPtr s_WriteByteByPtr;
             private static readonly WriteByteByVal s_WriteByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,11 +99,12 @@ namespace compress
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteByteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteByteByPtr is null || !m_target_is_ptr)
                     return s_WriteByteByVal!(target, c);
 
-                return s_WriteByteByRef(ref target, c);
+                return s_WriteByteByPtr(m_target_ptr, c);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -111,39 +113,33 @@ namespace compress
             static writer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Flush");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Flush");
 
                 if (!(extensionMethod is null))
-                    s_FlushByRef = extensionMethod.CreateStaticDelegate(typeof(FlushByRef)) as FlushByRef;
+                    s_FlushByPtr = extensionMethod.CreateStaticDelegate(typeof(FlushByPtr)) as FlushByPtr;
 
-                if (s_FlushByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Flush");
+                extensionMethod = targetType.GetExtensionMethod("Flush");
 
-                    if (!(extensionMethod is null))
-                        s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
 
-                if (s_FlushByRef is null && s_FlushByVal is null)
+                if (s_FlushByPtr is null && s_FlushByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement writer.Flush method", new Exception("Flush"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteByte");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteByte");
 
                 if (!(extensionMethod is null))
-                    s_WriteByteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByteByRef)) as WriteByteByRef;
+                    s_WriteByteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByteByPtr)) as WriteByteByPtr;
 
-                if (s_WriteByteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteByte");
+                extensionMethod = targetType.GetExtensionMethod("WriteByte");
 
-                    if (!(extensionMethod is null))
-                        s_WriteByteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByteByVal)) as WriteByteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteByteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByteByVal)) as WriteByteByVal;
 
-                if (s_WriteByteByRef is null && s_WriteByteByVal is null)
+                if (s_WriteByteByPtr is null && s_WriteByteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement writer.WriteByte method", new Exception("WriteByte"));
             }
 

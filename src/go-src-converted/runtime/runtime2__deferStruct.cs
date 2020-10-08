@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:19:50 UTC
+//     Generated on 2020 October 08 03:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -29,22 +30,32 @@ namespace go
             {
                 this.siz = default;
                 this.started = default;
+                this.heap = default;
+                this.openDefer = default;
                 this.sp = default;
                 this.pc = default;
                 this.fn = default;
                 this._panic = default;
                 this.link = default;
+                this.fd = default;
+                this.varp = default;
+                this.framepc = default;
             }
 
-            public _defer(int siz = default, bool started = default, System.UIntPtr sp = default, System.UIntPtr pc = default, ref ptr<funcval> fn = default, ref ptr<_panic> _panic = default, ref ptr<_defer> link = default)
+            public _defer(int siz = default, bool started = default, bool heap = default, bool openDefer = default, System.UIntPtr sp = default, System.UIntPtr pc = default, ref ptr<funcval> fn = default, ref ptr<_panic> _panic = default, ref ptr<_defer> link = default, unsafe.Pointer fd = default, System.UIntPtr varp = default, System.UIntPtr framepc = default)
             {
                 this.siz = siz;
                 this.started = started;
+                this.heap = heap;
+                this.openDefer = openDefer;
                 this.sp = sp;
                 this.pc = pc;
                 this.fn = fn;
                 this._panic = _panic;
                 this.link = link;
+                this.fd = fd;
+                this.varp = varp;
+                this.framepc = framepc;
             }
 
             // Enable comparisons between nil and _defer struct
@@ -67,7 +78,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static _defer _defer_cast(dynamic value)
         {
-            return new _defer(value.siz, value.started, value.sp, value.pc, ref value.fn, ref value._panic, ref value.link);
+            return new _defer(value.siz, value.started, value.heap, value.openDefer, value.sp, value.pc, ref value.fn, ref value._panic, ref value.link, value.fd, value.varp, value.framepc);
         }
     }
 }

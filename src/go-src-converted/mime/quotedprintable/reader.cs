@@ -4,7 +4,7 @@
 
 // Package quotedprintable implements quoted-printable encoding as specified by
 // RFC 2045.
-// package quotedprintable -- go2cs converted at 2020 August 29 08:32:34 UTC
+// package quotedprintable -- go2cs converted at 2020 October 08 03:38:32 UTC
 // import "mime/quotedprintable" ==> using quotedprintable = go.mime.quotedprintable_package
 // Original source: C:\Go\src\mime\quotedprintable\reader.go
 using bufio = go.bufio_package;
@@ -27,45 +27,56 @@ namespace mime
         }
 
         // NewReader returns a quoted-printable reader, decoding from r.
-        public static ref Reader NewReader(io.Reader r)
+        public static ptr<Reader> NewReader(io.Reader r)
         {
-            return ref new Reader(br:bufio.NewReader(r),);
+            return addr(new Reader(br:bufio.NewReader(r),));
         }
 
         private static (byte, error) fromHex(byte b)
         {
+            byte _p0 = default;
+            error _p0 = default!;
+
 
             if (b >= '0' && b <= '9') 
-                return (b - '0', null);
+                return (b - '0', error.As(null!)!);
             else if (b >= 'A' && b <= 'F') 
-                return (b - 'A' + 10L, null); 
+                return (b - 'A' + 10L, error.As(null!)!); 
                 // Accept badly encoded bytes.
             else if (b >= 'a' && b <= 'f') 
-                return (b - 'a' + 10L, null);
-                        return (0L, fmt.Errorf("quotedprintable: invalid hex byte 0x%02x", b));
+                return (b - 'a' + 10L, error.As(null!)!);
+                        return (0L, error.As(fmt.Errorf("quotedprintable: invalid hex byte 0x%02x", b))!);
+
         }
 
         private static (byte, error) readHexByte(slice<byte> v)
         {
+            byte b = default;
+            error err = default!;
+
             if (len(v) < 2L)
             {
-                return (0L, io.ErrUnexpectedEOF);
+                return (0L, error.As(io.ErrUnexpectedEOF)!);
             }
+
             byte hb = default;            byte lb = default;
 
             hb, err = fromHex(v[0L]);
 
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             lb, err = fromHex(v[1L]);
 
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
-            return (hb << (int)(4L) | lb, null);
+
+            return (hb << (int)(4L) | lb, error.As(null!)!);
+
         }
 
         private static bool isQPDiscardWhitespace(int r)
@@ -83,13 +94,18 @@ namespace mime
                     break;
             }
             return false;
+
         }
 
         private static slice<byte> crlf = (slice<byte>)"\r\n";        private static slice<byte> lf = (slice<byte>)"\n";        private static slice<byte> softSuffix = (slice<byte>)"=";
 
         // Read reads and decodes quoted-printable data from the underlying reader.
-        private static (long, error) Read(this ref Reader r, slice<byte> p)
-        { 
+        private static (long, error) Read(this ptr<Reader> _addr_r, slice<byte> p)
+        {
+            long n = default;
+            error err = default!;
+            ref Reader r = ref _addr_r.val;
+ 
             // Deviations from RFC 2045:
             // 1. in addition to "=\r\n", "=\n" is also treated as soft line break.
             // 2. it will pass through a '\r' or '\n' not preceded by '=', consistent
@@ -105,8 +121,9 @@ namespace mime
                 {
                     if (r.rerr != null)
                     {
-                        return (n, r.rerr);
+                        return (n, error.As(r.rerr)!);
                     }
+
                     r.line, r.rerr = r.br.ReadSlice('\n'); 
 
                     // Does the line end in CRLF instead of just LF?
@@ -122,6 +139,7 @@ namespace mime
                         {
                             r.rerr = fmt.Errorf("quotedprintable: invalid bytes after =: %q", rightStripped);
                         }
+
                     }
                     else if (hasLF)
                     {
@@ -133,9 +151,13 @@ namespace mime
                         {
                             r.line = append(r.line, '\n');
                         }
+
                     }
+
                     continue;
+
                 }
+
                 var b = r.line[0L];
 
 
@@ -148,21 +170,31 @@ namespace mime
                             // Take the = as a literal =.
                             b = '=';
                             break;
+
                         }
-                        return (n, err);
+
+                        return (n, error.As(err)!);
+
                     }
+
                     r.line = r.line[2L..]; // 2 of the 3; other 1 is done below
                 else if (b == '\t' || b == '\r' || b == '\n') 
                     break;
+                else if (b >= 0x80UL) 
+                    // As an extension to RFC 2045, we accept
+                    // values >= 0x80 without complaint. Issue 22597.
+                    break;
                 else if (b < ' ' || b > '~') 
-                    return (n, fmt.Errorf("quotedprintable: invalid unescaped byte 0x%02x in body", b));
+                    return (n, error.As(fmt.Errorf("quotedprintable: invalid unescaped byte 0x%02x in body", b))!);
                                 p[0L] = b;
                 p = p[1L..];
                 r.line = r.line[1L..];
                 n++;
+
             }
 
-            return (n, null);
+            return (n, error.As(null!)!);
+
         }
     }
 }}

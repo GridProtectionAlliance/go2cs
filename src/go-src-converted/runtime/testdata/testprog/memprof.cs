@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:29 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:39 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\memprof.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
@@ -25,10 +25,13 @@ namespace go
         private static @string memProfStr = default;
 
         public static void MemProf()
-        {
-            for (long i = 0L; i < 1000L; i++)
+        { 
+            // Force heap sampling for determinism.
+            runtime.MemProfileRate = 1L;
+
+            for (long i = 0L; i < 10L; i++)
             {
-                fmt.Fprintf(ref memProfBuf, "%*d\n", i, i);
+                fmt.Fprintf(_addr_memProfBuf, "%*d\n", i, i);
             }
 
             memProfStr = memProfBuf.String();
@@ -41,6 +44,7 @@ namespace go
                 fmt.Fprintln(os.Stderr, err);
                 os.Exit(2L);
             }
+
             {
                 var err__prev1 = err;
 
@@ -55,6 +59,7 @@ namespace go
                 err = err__prev1;
 
             }
+
 
             var name = f.Name();
             {
@@ -72,7 +77,9 @@ namespace go
 
             }
 
+
             fmt.Println(name);
+
         }
     }
 }

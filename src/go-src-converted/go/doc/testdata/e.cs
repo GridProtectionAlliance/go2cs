@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // The package e is a go/doc test for embedded methods.
-// package e -- go2cs converted at 2020 August 29 08:47:12 UTC
+// package e -- go2cs converted at 2020 October 08 04:02:53 UTC
 // import "go/doc.e" ==> using e = go.go.doc.e_package
 // Original source: C:\Go\src\go\doc\testdata\e.go
 
@@ -102,8 +102,10 @@ namespace go
         }
 
         // T4.M should appear as method of T5 only if AllMethods is set.
-        private static void M(this ref T4 _p0)
+        private static void M(this ptr<T4> _addr__p0)
         {
+            ref T4 _p0 = ref _addr__p0.val;
+
         }
 
         public partial struct T5
@@ -116,47 +118,55 @@ namespace go
 
         public partial struct U1
         {
-            public ref U1 U1 => ref U1_ptr;
+            public ref ptr<U1> ptr<U1> => ref ptr<U1>_ptr;
         }
 
         // U1.M should appear as method of U1.
-        private static void M(this ref U1 _p0)
+        private static void M(this ptr<U1> _addr__p0)
         {
+            ref U1 _p0 = ref _addr__p0.val;
+
         }
 
         public partial struct U2
         {
-            public ref U3 U3 => ref U3_ptr;
+            public ref ptr<U3> ptr<U3> => ref ptr<U3>_ptr;
         }
 
         // U2.M should appear as method of U2 and as method of U3 only if AllMethods is set.
-        private static void M(this ref U2 _p0)
+        private static void M(this ptr<U2> _addr__p0)
         {
+            ref U2 _p0 = ref _addr__p0.val;
+
         }
 
         public partial struct U3
         {
-            public ref U2 U2 => ref U2_ptr;
+            public ref ptr<U2> ptr<U2> => ref ptr<U2>_ptr;
         }
 
         // U3.N should appear as method of U3 and as method of U2 only if AllMethods is set.
-        private static void N(this ref U3 _p0)
+        private static void N(this ptr<U3> _addr__p0)
         {
+            ref U3 _p0 = ref _addr__p0.val;
+
         }
 
         public partial struct U4
         {
-            public ref u5 u5 => ref u5_ptr;
+            public ref ptr<u5> ptr<u5> => ref ptr<u5>_ptr;
         }
 
         // U4.M should appear as method of U4.
-        private static void M(this ref U4 _p0)
+        private static void M(this ptr<U4> _addr__p0)
         {
+            ref U4 _p0 = ref _addr__p0.val;
+
         }
 
         private partial struct u5
         {
-            public ref U4 U4 => ref U4_ptr;
+            public ref ptr<U4> ptr<U4> => ref ptr<U4>_ptr;
         }
 
         // ----------------------------------------------------------------------------
@@ -165,28 +175,28 @@ namespace go
 
         public partial struct V1
         {
-            public ref V2 V2 => ref V2_ptr;
-            public ref V5 V5 => ref V5_ptr;
+            public ref ptr<V2> ptr<V2> => ref ptr<V2>_ptr;
+            public ref ptr<V5> ptr<V5> => ref ptr<V5>_ptr;
         }
 
         public partial struct V2
         {
-            public ref V3 V3 => ref V3_ptr;
+            public ref ptr<V3> ptr<V3> => ref ptr<V3>_ptr;
         }
 
         public partial struct V3
         {
-            public ref V4 V4 => ref V4_ptr;
+            public ref ptr<V4> ptr<V4> => ref ptr<V4>_ptr;
         }
 
         public partial struct V4
         {
-            public ref V5 V5 => ref V5_ptr;
+            public ref ptr<V5> ptr<V5> => ref ptr<V5>_ptr;
         }
 
         public partial struct V5
         {
-            public ref V6 V6 => ref V6_ptr;
+            public ref ptr<V6> ptr<V6> => ref ptr<V6>_ptr;
         }
 
         public partial struct V6
@@ -194,13 +204,17 @@ namespace go
         }
 
         // V4.M should appear as method of V2 and V3 if AllMethods is set.
-        private static void M(this ref V4 _p0)
+        private static void M(this ptr<V4> _addr__p0)
         {
+            ref V4 _p0 = ref _addr__p0.val;
+
         }
 
         // V6.M should appear as method of V1 and V5 if AllMethods is set.
-        private static void M(this ref V6 _p0)
+        private static void M(this ptr<V6> _addr__p0)
         {
+            ref V6 _p0 = ref _addr__p0.val;
+
         }
     }
 }}

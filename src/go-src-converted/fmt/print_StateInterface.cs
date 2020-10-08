@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:11 UTC
+//     Generated on 2020 October 08 03:26:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using errors = go.errors_package;
+using fmtsort = go.@internal.fmtsort_package;
 using io = go.io_package;
 using os = go.os_package;
 using reflect = go.reflect_package;
@@ -53,7 +53,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate bool WriteByRef(ref T value, slice<byte> b);
+            private delegate bool WriteByPtr(ptr<T> value, slice<byte> b);
             private delegate bool WriteByVal(T value, slice<byte> b);
 
-            private static readonly WriteByRef s_WriteByRef;
+            private static readonly WriteByPtr s_WriteByPtr;
             private static readonly WriteByVal s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +79,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, b);
 
-                return s_WriteByRef(ref target, b);
+                return s_WriteByPtr(m_target_ptr, b);
             }
 
-            private delegate bool WidthByRef(ref T value);
+            private delegate bool WidthByPtr(ptr<T> value);
             private delegate bool WidthByVal(T value);
 
-            private static readonly WidthByRef s_WidthByRef;
+            private static readonly WidthByPtr s_WidthByPtr;
             private static readonly WidthByVal s_WidthByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,17 +99,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WidthByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WidthByPtr is null || !m_target_is_ptr)
                     return s_WidthByVal!(target);
 
-                return s_WidthByRef(ref target);
+                return s_WidthByPtr(m_target_ptr);
             }
 
-            private delegate bool PrecisionByRef(ref T value);
+            private delegate bool PrecisionByPtr(ptr<T> value);
             private delegate bool PrecisionByVal(T value);
 
-            private static readonly PrecisionByRef s_PrecisionByRef;
+            private static readonly PrecisionByPtr s_PrecisionByPtr;
             private static readonly PrecisionByVal s_PrecisionByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -117,17 +119,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PrecisionByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PrecisionByPtr is null || !m_target_is_ptr)
                     return s_PrecisionByVal!(target);
 
-                return s_PrecisionByRef(ref target);
+                return s_PrecisionByPtr(m_target_ptr);
             }
 
-            private delegate bool FlagByRef(ref T value, long c);
+            private delegate bool FlagByPtr(ptr<T> value, long c);
             private delegate bool FlagByVal(T value, long c);
 
-            private static readonly FlagByRef s_FlagByRef;
+            private static readonly FlagByPtr s_FlagByPtr;
             private static readonly FlagByVal s_FlagByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,11 +139,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FlagByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FlagByPtr is null || !m_target_is_ptr)
                     return s_FlagByVal!(target, c);
 
-                return s_FlagByRef(ref target, c);
+                return s_FlagByPtr(m_target_ptr, c);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -149,71 +153,59 @@ namespace go
             static State()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Write");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
                 if (!(extensionMethod is null))
-                    s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
+                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
-                if (s_WriteByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Write");
+                extensionMethod = targetType.GetExtensionMethod("Write");
 
-                    if (!(extensionMethod is null))
-                        s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
-                if (s_WriteByRef is null && s_WriteByVal is null)
+                if (s_WriteByPtr is null && s_WriteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement State.Write method", new Exception("Write"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Width");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Width");
 
                 if (!(extensionMethod is null))
-                    s_WidthByRef = extensionMethod.CreateStaticDelegate(typeof(WidthByRef)) as WidthByRef;
+                    s_WidthByPtr = extensionMethod.CreateStaticDelegate(typeof(WidthByPtr)) as WidthByPtr;
 
-                if (s_WidthByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Width");
+                extensionMethod = targetType.GetExtensionMethod("Width");
 
-                    if (!(extensionMethod is null))
-                        s_WidthByVal = extensionMethod.CreateStaticDelegate(typeof(WidthByVal)) as WidthByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WidthByVal = extensionMethod.CreateStaticDelegate(typeof(WidthByVal)) as WidthByVal;
 
-                if (s_WidthByRef is null && s_WidthByVal is null)
+                if (s_WidthByPtr is null && s_WidthByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement State.Width method", new Exception("Width"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Precision");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Precision");
 
                 if (!(extensionMethod is null))
-                    s_PrecisionByRef = extensionMethod.CreateStaticDelegate(typeof(PrecisionByRef)) as PrecisionByRef;
+                    s_PrecisionByPtr = extensionMethod.CreateStaticDelegate(typeof(PrecisionByPtr)) as PrecisionByPtr;
 
-                if (s_PrecisionByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Precision");
+                extensionMethod = targetType.GetExtensionMethod("Precision");
 
-                    if (!(extensionMethod is null))
-                        s_PrecisionByVal = extensionMethod.CreateStaticDelegate(typeof(PrecisionByVal)) as PrecisionByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PrecisionByVal = extensionMethod.CreateStaticDelegate(typeof(PrecisionByVal)) as PrecisionByVal;
 
-                if (s_PrecisionByRef is null && s_PrecisionByVal is null)
+                if (s_PrecisionByPtr is null && s_PrecisionByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement State.Precision method", new Exception("Precision"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Flag");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Flag");
 
                 if (!(extensionMethod is null))
-                    s_FlagByRef = extensionMethod.CreateStaticDelegate(typeof(FlagByRef)) as FlagByRef;
+                    s_FlagByPtr = extensionMethod.CreateStaticDelegate(typeof(FlagByPtr)) as FlagByPtr;
 
-                if (s_FlagByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Flag");
+                extensionMethod = targetType.GetExtensionMethod("Flag");
 
-                    if (!(extensionMethod is null))
-                        s_FlagByVal = extensionMethod.CreateStaticDelegate(typeof(FlagByVal)) as FlagByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FlagByVal = extensionMethod.CreateStaticDelegate(typeof(FlagByVal)) as FlagByVal;
 
-                if (s_FlagByRef is null && s_FlagByVal is null)
+                if (s_FlagByPtr is null && s_FlagByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement State.Flag method", new Exception("Flag"));
             }
 

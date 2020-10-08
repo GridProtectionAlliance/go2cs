@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zip -- go2cs converted at 2020 August 29 08:45:36 UTC
+// package zip -- go2cs converted at 2020 October 08 03:49:27 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Go\src\archive\zip\register.go
 using flate = go.compress.flate_package;
@@ -36,7 +36,7 @@ namespace archive
 
         private static io.WriteCloser newFlateWriter(io.Writer w)
         {
-            ref flate.Writer (fw, ok) = flateWriterPool.Get()._<ref flate.Writer>();
+            ptr<flate.Writer> (fw, ok) = flateWriterPool.Get()._<ptr<flate.Writer>>();
             if (ok)
             {
                 fw.Reset(w);
@@ -45,7 +45,9 @@ namespace archive
             {
                 fw, _ = flate.NewWriter(w, 5L);
             }
-            return ref new pooledFlateWriter(fw:fw);
+
+            return addr(new pooledFlateWriter(fw:fw));
+
         }
 
         private partial struct pooledFlateWriter
@@ -54,29 +56,39 @@ namespace archive
             public ptr<flate.Writer> fw;
         }
 
-        private static (long, error) Write(this ref pooledFlateWriter _w, slice<byte> p) => func(_w, (ref pooledFlateWriter w, Defer defer, Panic _, Recover __) =>
+        private static (long, error) Write(this ptr<pooledFlateWriter> _addr_w, slice<byte> p) => func((defer, _, __) =>
         {
+            long n = default;
+            error err = default!;
+            ref pooledFlateWriter w = ref _addr_w.val;
+
             w.mu.Lock();
             defer(w.mu.Unlock());
             if (w.fw == null)
             {
-                return (0L, errors.New("Write after Close"));
+                return (0L, error.As(errors.New("Write after Close"))!);
             }
+
             return w.fw.Write(p);
+
         });
 
-        private static error Close(this ref pooledFlateWriter _w) => func(_w, (ref pooledFlateWriter w, Defer defer, Panic _, Recover __) =>
+        private static error Close(this ptr<pooledFlateWriter> _addr_w) => func((defer, _, __) =>
         {
+            ref pooledFlateWriter w = ref _addr_w.val;
+
             w.mu.Lock();
             defer(w.mu.Unlock());
-            error err = default;
+            error err = default!;
             if (w.fw != null)
             {
-                err = error.As(w.fw.Close());
+                err = error.As(w.fw.Close())!;
                 flateWriterPool.Put(w.fw);
                 w.fw = null;
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         });
 
         private static sync.Pool flateReaderPool = default;
@@ -92,7 +104,9 @@ namespace archive
             {
                 fr = flate.NewReader(r);
             }
-            return ref new pooledFlateReader(fr:fr);
+
+            return addr(new pooledFlateReader(fr:fr));
+
         }
 
         private partial struct pooledFlateReader
@@ -101,36 +115,46 @@ namespace archive
             public io.ReadCloser fr;
         }
 
-        private static (long, error) Read(this ref pooledFlateReader _r, slice<byte> p) => func(_r, (ref pooledFlateReader r, Defer defer, Panic _, Recover __) =>
+        private static (long, error) Read(this ptr<pooledFlateReader> _addr_r, slice<byte> p) => func((defer, _, __) =>
         {
+            long n = default;
+            error err = default!;
+            ref pooledFlateReader r = ref _addr_r.val;
+
             r.mu.Lock();
             defer(r.mu.Unlock());
             if (r.fr == null)
             {
-                return (0L, errors.New("Read after Close"));
+                return (0L, error.As(errors.New("Read after Close"))!);
             }
+
             return r.fr.Read(p);
+
         });
 
-        private static error Close(this ref pooledFlateReader _r) => func(_r, (ref pooledFlateReader r, Defer defer, Panic _, Recover __) =>
+        private static error Close(this ptr<pooledFlateReader> _addr_r) => func((defer, _, __) =>
         {
+            ref pooledFlateReader r = ref _addr_r.val;
+
             r.mu.Lock();
             defer(r.mu.Unlock());
-            error err = default;
+            error err = default!;
             if (r.fr != null)
             {
-                err = error.As(r.fr.Close());
+                err = error.As(r.fr.Close())!;
                 flateReaderPool.Put(r.fr);
                 r.fr = null;
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         });
 
         private static sync.Map compressors = default;        private static sync.Map decompressors = default;
 
         private static void init()
         {
-            compressors.Store(Store, Compressor(w => (ref new nopCloser(w), null)));
+            compressors.Store(Store, Compressor(w => (addr(new nopCloser(w)), null)));
             compressors.Store(Deflate, Compressor(w => (newFlateWriter(w), null)));
 
             decompressors.Store(Store, Decompressor(ioutil.NopCloser));
@@ -150,6 +174,7 @@ namespace archive
                 }
 
             }
+
         });
 
         // RegisterCompressor registers custom compressors for a specified method ID.
@@ -165,6 +190,7 @@ namespace archive
                 }
 
             }
+
         });
 
         private static Compressor compressor(ushort method)
@@ -174,7 +200,9 @@ namespace archive
             {
                 return null;
             }
+
             return ci._<Compressor>();
+
         }
 
         private static Decompressor decompressor(ushort method)
@@ -184,7 +212,9 @@ namespace archive
             {
                 return null;
             }
+
             return di._<Decompressor>();
+
         }
     }
 }}

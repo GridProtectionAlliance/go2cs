@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:11 UTC
+//     Generated on 2020 October 08 04:31:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,15 +13,17 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using html = go.html_package;
 using os = go.os_package;
 using sort = go.sort_package;
+using bufio = go.bufio_package;
+using bytes = go.bytes_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using x86 = go.cmd.@internal.obj.x86_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
@@ -46,10 +48,13 @@ namespace @internal
                 this.SSEto387 = default;
                 this.ScratchFpMem = default;
                 this.maxarg = default;
-                this.stackMapIndex = default;
+                this.livenessMap = default;
+                this.lineRunStart = default;
+                this.OnWasmStackSkipped = default;
+                this.lastDeferLiveness = default;
             }
 
-            public SSAGenState(ref ptr<Progs> pp = default, slice<Branch> Branches = default, slice<ref obj.Prog> bstart = default, map<short, short> SSEto387 = default, ref ptr<Node> ScratchFpMem = default, long maxarg = default, map<ref ssa.Value, long> stackMapIndex = default)
+            public SSAGenState(ref ptr<Progs> pp = default, slice<Branch> Branches = default, slice<ptr<obj.Prog>> bstart = default, map<short, short> SSEto387 = default, ref ptr<Node> ScratchFpMem = default, long maxarg = default, LivenessMap livenessMap = default, ref ptr<obj.Prog> lineRunStart = default, long OnWasmStackSkipped = default, LivenessIndex lastDeferLiveness = default)
             {
                 this.pp = pp;
                 this.Branches = Branches;
@@ -57,7 +62,10 @@ namespace @internal
                 this.SSEto387 = SSEto387;
                 this.ScratchFpMem = ScratchFpMem;
                 this.maxarg = maxarg;
-                this.stackMapIndex = stackMapIndex;
+                this.livenessMap = livenessMap;
+                this.lineRunStart = lineRunStart;
+                this.OnWasmStackSkipped = OnWasmStackSkipped;
+                this.lastDeferLiveness = lastDeferLiveness;
             }
 
             // Enable comparisons between nil and SSAGenState struct
@@ -80,7 +88,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static SSAGenState SSAGenState_cast(dynamic value)
         {
-            return new SSAGenState(ref value.pp, value.Branches, value.bstart, value.SSEto387, ref value.ScratchFpMem, value.maxarg, value.stackMapIndex);
+            return new SSAGenState(ref value.pp, value.Branches, value.bstart, value.SSEto387, ref value.ScratchFpMem, value.maxarg, value.livenessMap, ref value.lineRunStart, value.OnWasmStackSkipped, value.lastDeferLiveness);
         }
     }
 }}}}

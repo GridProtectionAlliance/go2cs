@@ -3,8 +3,9 @@
 // license that can be found in the LICENSE file.
 
 // Package cmplx provides basic constants and mathematical functions for
-// complex numbers.
-// package cmplx -- go2cs converted at 2020 August 29 08:44:59 UTC
+// complex numbers. Special case handling conforms to the C99 standard
+// Annex G IEC 60559-compatible complex arithmetic.
+// package cmplx -- go2cs converted at 2020 October 08 03:25:53 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\abs.go
 using math = go.math_package;

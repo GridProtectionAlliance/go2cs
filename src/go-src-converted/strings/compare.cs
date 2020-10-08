@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2020 August 29 08:42:38 UTC
+// package strings -- go2cs converted at 2020 October 08 01:30:41 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Go\src\strings\compare.go
 
@@ -36,6 +36,7 @@ namespace go
                 return -1L;
             }
             return +1L;
+
         }
     }
 }

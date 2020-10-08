@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:02 UTC
+//     Generated on 2020 October 08 04:02:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
+using strings = go.strings_package;
 using go;
 
 namespace go {
@@ -39,9 +41,10 @@ namespace go
                 this.Types = default;
                 this.Vars = default;
                 this.Funcs = default;
+                this.Examples = default;
             }
 
-            public Package(@string Doc = default, @string Name = default, @string ImportPath = default, slice<@string> Imports = default, slice<@string> Filenames = default, map<@string, slice<ref Note>> Notes = default, slice<@string> Bugs = default, slice<ref Value> Consts = default, slice<ref Type> Types = default, slice<ref Value> Vars = default, slice<ref Func> Funcs = default)
+            public Package(@string Doc = default, @string Name = default, @string ImportPath = default, slice<@string> Imports = default, slice<@string> Filenames = default, map<@string, slice<ptr<Note>>> Notes = default, slice<@string> Bugs = default, slice<ptr<Value>> Consts = default, slice<ptr<Type>> Types = default, slice<ptr<Value>> Vars = default, slice<ptr<Func>> Funcs = default, slice<ptr<Example>> Examples = default)
             {
                 this.Doc = Doc;
                 this.Name = Name;
@@ -54,6 +57,7 @@ namespace go
                 this.Types = Types;
                 this.Vars = Vars;
                 this.Funcs = Funcs;
+                this.Examples = Examples;
             }
 
             // Enable comparisons between nil and Package struct
@@ -76,7 +80,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Package Package_cast(dynamic value)
         {
-            return new Package(value.Doc, value.Name, value.ImportPath, value.Imports, value.Filenames, value.Notes, value.Bugs, value.Consts, value.Types, value.Vars, value.Funcs);
+            return new Package(value.Doc, value.Name, value.ImportPath, value.Imports, value.Filenames, value.Notes, value.Bugs, value.Consts, value.Types, value.Vars, value.Funcs, value.Examples);
         }
     }
 }}

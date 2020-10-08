@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux,!android netbsd openbsd
+// +build aix darwin dragonfly freebsd linux,!android netbsd openbsd
 // +build cgo
 
 // Package pty is a simple pseudo-terminal package for Unix systems,
 // implemented by calling C functions via cgo.
 // This is only used for testing the os/signal package.
-// package pty -- go2cs converted at 2020 August 29 08:24:53 UTC
+// package pty -- go2cs converted at 2020 October 08 03:43:59 UTC
 // import "os/signal/internal/pty" ==> using pty = go.os.signal.@internal.pty_package
 // Original source: C:\Go\src\os\signal\internal\pty\pty.go
 /*
@@ -44,46 +44,63 @@ namespace @internal
             public syscall.Errno Errno;
         }
 
-        private static ref PtyError ptyError(@string name, error err)
+        private static ptr<PtyError> ptyError(@string name, error err)
         {
-            return ref new PtyError(name,err.Error(),err.(syscall.Errno));
+            return addr(new PtyError(name,err.Error(),err.(syscall.Errno)));
         }
 
-        private static @string Error(this ref PtyError e)
+        private static @string Error(this ptr<PtyError> _addr_e)
         {
+            ref PtyError e = ref _addr_e.val;
+
             return fmt.Sprintf("%s: %s", e.FuncName, e.ErrorString);
         }
 
-        // Open returns a master pty and the name of the linked slave tty.
-        public static (ref os.File, @string, error) Open()
+        private static error Unwrap(this ptr<PtyError> _addr_e)
         {
+            ref PtyError e = ref _addr_e.val;
+
+            return error.As(e.Errno)!;
+        }
+
+        // Open returns a control pty and the name of the linked process tty.
+        public static (ptr<os.File>, @string, error) Open()
+        {
+            ptr<os.File> pty = default!;
+            @string processTTY = default;
+            error err = default!;
+
             var (m, err) = C.posix_openpt(C.O_RDWR);
             if (err != null)
             {
-                return (null, "", ptyError("posix_openpt", err));
+                return (_addr_null!, "", error.As(ptyError("posix_openpt", err))!);
             }
+
             {
                 var (_, err) = C.grantpt(m);
 
                 if (err != null)
                 {
                     C.close(m);
-                    return (null, "", ptyError("grantpt", err));
+                    return (_addr_null!, "", error.As(ptyError("grantpt", err))!);
                 }
 
             }
+
             {
                 (_, err) = C.unlockpt(m);
 
                 if (err != null)
                 {
                     C.close(m);
-                    return (null, "", ptyError("unlockpt", err));
+                    return (_addr_null!, "", error.As(ptyError("unlockpt", err))!);
                 }
 
             }
-            slave = C.GoString(C.ptsname(m));
-            return (os.NewFile(uintptr(m), "pty-master"), slave, null);
+
+            processTTY = C.GoString(C.ptsname(m));
+            return (_addr_os.NewFile(uintptr(m), "pty")!, processTTY, error.As(null!)!);
+
         }
     }
 }}}}

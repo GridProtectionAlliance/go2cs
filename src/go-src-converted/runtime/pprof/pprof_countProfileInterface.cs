@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:22:50 UTC
+//     Generated on 2020 October 08 03:26:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -60,7 +60,7 @@ namespace runtime
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -74,42 +74,64 @@ namespace runtime
                 m_target_is_ptr = true;
             }
 
-            private delegate slice<System.UIntPtr> LenByRef(ref T value);
-            private delegate slice<System.UIntPtr> LenByVal(T value);
+            private delegate ptr<labelMap> LenByPtr(ptr<T> value);
+            private delegate ptr<labelMap> LenByVal(T value);
 
-            private static readonly LenByRef s_LenByRef;
+            private static readonly LenByPtr s_LenByPtr;
             private static readonly LenByVal s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<System.UIntPtr> Len()
+            public ptr<labelMap> Len()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByRef(ref target);
+                return s_LenByPtr(m_target_ptr);
             }
 
-            private delegate slice<System.UIntPtr> StackByRef(ref T value, long i);
-            private delegate slice<System.UIntPtr> StackByVal(T value, long i);
+            private delegate ptr<labelMap> StackByPtr(ptr<T> value, long i);
+            private delegate ptr<labelMap> StackByVal(T value, long i);
 
-            private static readonly StackByRef s_StackByRef;
+            private static readonly StackByPtr s_StackByPtr;
             private static readonly StackByVal s_StackByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<System.UIntPtr> Stack(long i)
+            public ptr<labelMap> Stack(long i)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StackByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StackByPtr is null || !m_target_is_ptr)
                     return s_StackByVal!(target, i);
 
-                return s_StackByRef(ref target, i);
+                return s_StackByPtr(m_target_ptr, i);
+            }
+
+            private delegate ptr<labelMap> LabelByPtr(ptr<T> value, long i);
+            private delegate ptr<labelMap> LabelByVal(T value, long i);
+
+            private static readonly LabelByPtr s_LabelByPtr;
+            private static readonly LabelByVal s_LabelByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public ptr<labelMap> Label(long i)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_LabelByPtr is null || !m_target_is_ptr)
+                    return s_LabelByVal!(target, i);
+
+                return s_LabelByPtr(m_target_ptr, i);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -118,40 +140,47 @@ namespace runtime
             static countProfile()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Len");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
                 if (!(extensionMethod is null))
-                    s_LenByRef = extensionMethod.CreateStaticDelegate(typeof(LenByRef)) as LenByRef;
+                    s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
-                if (s_LenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Len");
+                extensionMethod = targetType.GetExtensionMethod("Len");
 
-                    if (!(extensionMethod is null))
-                        s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
-                if (s_LenByRef is null && s_LenByVal is null)
+                if (s_LenByPtr is null && s_LenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement countProfile.Len method", new Exception("Len"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Stack");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Stack");
 
                 if (!(extensionMethod is null))
-                    s_StackByRef = extensionMethod.CreateStaticDelegate(typeof(StackByRef)) as StackByRef;
+                    s_StackByPtr = extensionMethod.CreateStaticDelegate(typeof(StackByPtr)) as StackByPtr;
 
-                if (s_StackByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Stack");
+                extensionMethod = targetType.GetExtensionMethod("Stack");
 
-                    if (!(extensionMethod is null))
-                        s_StackByVal = extensionMethod.CreateStaticDelegate(typeof(StackByVal)) as StackByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StackByVal = extensionMethod.CreateStaticDelegate(typeof(StackByVal)) as StackByVal;
 
-                if (s_StackByRef is null && s_StackByVal is null)
+                if (s_StackByPtr is null && s_StackByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement countProfile.Stack method", new Exception("Stack"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Label");
+
+                if (!(extensionMethod is null))
+                    s_LabelByPtr = extensionMethod.CreateStaticDelegate(typeof(LabelByPtr)) as LabelByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("Label");
+
+                if (!(extensionMethod is null))
+                    s_LabelByVal = extensionMethod.CreateStaticDelegate(typeof(LabelByVal)) as LabelByVal;
+
+                if (s_LabelByPtr is null && s_LabelByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement countProfile.Label method", new Exception("Label"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

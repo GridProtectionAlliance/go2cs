@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:23 UTC
+//     Generated on 2020 October 08 04:56:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using io = go.io_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using scanner = go.text.scanner_package;
+using utf8 = go.unicode.utf8_package;
 using go;
 
 namespace go {

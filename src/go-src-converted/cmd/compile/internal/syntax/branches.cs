@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 August 29 09:26:01 UTC
+// package syntax -- go2cs converted at 2020 October 08 04:28:06 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\branches.go
-using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using static go.builtin;
 using System;
@@ -26,13 +25,15 @@ namespace @internal
         //    - bad labeled breaks and continues
         //    - invalid, unused, duplicate, and missing labels
         //    - gotos jumping over variable declarations and into blocks
-        private static void checkBranches(ref BlockStmt body, ErrorHandler errh)
+        private static void checkBranches(ptr<BlockStmt> _addr_body, ErrorHandler errh)
         {
+            ref BlockStmt body = ref _addr_body.val;
+
             if (body == null)
             {
-                return;
+                return ;
             }
-            labelScope ls = ref new labelScope(errh:errh);
+            ptr<labelScope> ls = addr(new labelScope(errh:errh));
             var fwdGotos = ls.blockBranches(null, new targets(), null, body.Pos(), body.List); 
 
             // If there are any forward gotos left, no matching label was
@@ -50,6 +51,7 @@ namespace @internal
                     {
                         l.used = true; // avoid "defined and not used" error
                         ls.err(fwd.Label.Pos(), "goto %s jumps into block starting at %s", name, l.parent.start);
+
                     }
                     else
                     {
@@ -58,6 +60,7 @@ namespace @internal
                     l = l__prev1;
 
                 }
+
             }            {
                 var l__prev1 = l;
 
@@ -72,13 +75,12 @@ namespace @internal
                 }
                 l = l__prev1;
             }
-
         }
 
         private partial struct labelScope
         {
             public ErrorHandler errh;
-            public map<@string, ref label> labels; // all label declarations inside the function; allocated lazily
+            public map<@string, ptr<label>> labels; // all label declarations inside the function; allocated lazily
         }
 
         private partial struct label
@@ -91,25 +93,32 @@ namespace @internal
         private partial struct block
         {
             public ptr<block> parent; // immediately enclosing block, or nil
-            public src.Pos start; // start of block
+            public Pos start; // start of block
             public ptr<LabeledStmt> lstmt; // labeled statement associated with this block, or nil
         }
 
-        private static void err(this ref labelScope ls, src.Pos pos, @string format, params object[] args)
+        private static void err(this ptr<labelScope> _addr_ls, Pos pos, @string format, params object[] args)
         {
+            args = args.Clone();
+            ref labelScope ls = ref _addr_ls.val;
+
             ls.errh(new Error(pos,fmt.Sprintf(format,args...)));
         }
 
         // declare declares the label introduced by s in block b and returns
         // the new label. If the label was already declared, declare reports
         // and error and the existing label is returned instead.
-        private static ref label declare(this ref labelScope ls, ref block b, ref LabeledStmt s)
+        private static ptr<label> declare(this ptr<labelScope> _addr_ls, ptr<block> _addr_b, ptr<LabeledStmt> _addr_s)
         {
+            ref labelScope ls = ref _addr_ls.val;
+            ref block b = ref _addr_b.val;
+            ref LabeledStmt s = ref _addr_s.val;
+
             var name = s.Label.Value;
             var labels = ls.labels;
             if (labels == null)
             {
-                labels = make_map<@string, ref label>();
+                labels = make_map<@string, ptr<label>>();
                 ls.labels = labels;
             }            {
                 var alt = labels[name];
@@ -117,21 +126,26 @@ namespace @internal
 
                 else if (alt != null)
                 {
-                    ls.err(s.Pos(), "label %s already defined at %s", name, alt.lstmt.Label.Pos().String());
-                    return alt;
+                    ls.err(s.Label.Pos(), "label %s already defined at %s", name, alt.lstmt.Label.Pos().String());
+                    return _addr_alt!;
                 }
 
             }
-            label l = ref new label(b,s,false);
+
+            ptr<label> l = addr(new label(b,s,false));
             labels[name] = l;
-            return l;
+            return _addr_l!;
+
         }
 
         // gotoTarget returns the labeled statement matching the given name and
         // declared in block b or any of its enclosing blocks. The result is nil
         // if the label is not defined, or doesn't match a valid labeled statement.
-        private static ref LabeledStmt gotoTarget(this ref labelScope ls, ref block b, @string name)
+        private static ptr<LabeledStmt> gotoTarget(this ptr<labelScope> _addr_ls, ptr<block> _addr_b, @string name)
         {
+            ref labelScope ls = ref _addr_ls.val;
+            ref block b = ref _addr_b.val;
+
             {
                 var l = ls.labels[name];
 
@@ -142,15 +156,19 @@ namespace @internal
                     {
                         if (l.parent == b)
                         {
-                            return l.lstmt;
+                            return _addr_l.lstmt!;
                         b = b.parent;
                         }
+
                     }
+
 
                 }
 
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
         private static ptr<LabeledStmt> invalid = @new<LabeledStmt>(); // singleton to signal invalid enclosing target
@@ -158,8 +176,11 @@ namespace @internal
         // enclosingTarget returns the innermost enclosing labeled statement matching
         // the given name. The result is nil if the label is not defined, and invalid
         // if the label is defined but doesn't label a valid labeled statement.
-        private static ref LabeledStmt enclosingTarget(this ref labelScope ls, ref block b, @string name)
+        private static ptr<LabeledStmt> enclosingTarget(this ptr<labelScope> _addr_ls, ptr<block> _addr_b, @string name)
         {
+            ref labelScope ls = ref _addr_ls.val;
+            ref block b = ref _addr_b.val;
+
             {
                 var l = ls.labels[name];
 
@@ -170,16 +191,20 @@ namespace @internal
                     {
                         if (l.lstmt == b.lstmt)
                         {
-                            return l.lstmt;
+                            return _addr_l.lstmt!;
                         b = b.parent;
                         }
+
                     }
 
-                    return invalid;
+                    return _addr_invalid!;
+
                 }
 
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
         // targets describes the target statements within which break
@@ -194,17 +219,21 @@ namespace @internal
         // list of unresolved (forward) gotos. parent is the immediately enclosing
         // block (or nil), ctxt provides information about the enclosing statements,
         // and lstmt is the labeled statement associated with this block, or nil.
-        private static slice<ref BranchStmt> blockBranches(this ref labelScope _ls, ref block _parent, targets ctxt, ref LabeledStmt _lstmt, src.Pos start, slice<Stmt> body) => func(_ls, _parent, _lstmt, (ref labelScope ls, ref block parent, ref LabeledStmt lstmt, Defer _, Panic panic, Recover __) =>
+        private static slice<ptr<BranchStmt>> blockBranches(this ptr<labelScope> _addr_ls, ptr<block> _addr_parent, targets ctxt, ptr<LabeledStmt> _addr_lstmt, Pos start, slice<Stmt> body) => func((_, panic, __) =>
         {
-            block b = ref new block(parent:parent,start:start,lstmt:lstmt);
+            ref labelScope ls = ref _addr_ls.val;
+            ref block parent = ref _addr_parent.val;
+            ref LabeledStmt lstmt = ref _addr_lstmt.val;
 
-            src.Pos varPos = default;
+            ptr<block> b = addr(new block(parent:parent,start:start,lstmt:lstmt));
+
+            Pos varPos = default;
             Expr varName = default;
-            slice<ref BranchStmt> fwdGotos = default;            slice<ref BranchStmt> badGotos = default;
+            slice<ptr<BranchStmt>> fwdGotos = default;            slice<ptr<BranchStmt>> badGotos = default;
 
 
 
-            Action<src.Pos, Expr> recordVarDecl = (pos, name) =>
+            Action<Pos, Expr> recordVarDecl = (pos, name) =>
             {
                 varPos = pos;
                 varName = name; 
@@ -213,10 +242,11 @@ namespace @internal
                 // of the block and be ok, but we don't know that yet.
                 // Remember all forward gotos as potential bad gotos.
                 badGotos = append(badGotos[..0L], fwdGotos);
+
             }
 ;
 
-            Func<ref BranchStmt, bool> jumpsOverVarDecl = fwd =>
+            Func<ptr<BranchStmt>, bool> jumpsOverVarDecl = fwd =>
             {
                 if (varPos.IsKnown())
                 {
@@ -226,17 +256,22 @@ namespace @internal
                         {
                             return true;
                         }
+
                     }
+
                 }
+
                 return false;
+
             }
 ;
 
-            Action<targets, src.Pos, slice<Stmt>> innerBlock = (ctxt, start, body) =>
+            Action<targets, Pos, slice<Stmt>> innerBlock = (ctxt, start, body) =>
             { 
                 // Unresolved forward gotos from the inner block
                 // become forward gotos for the current block.
                 fwdGotos = append(fwdGotos, ls.blockBranches(b, ctxt, lstmt, start, body));
+
             }
 ;
 
@@ -246,11 +281,11 @@ namespace @internal
 L:
                 switch (stmt.type())
                 {
-                    case ref DeclStmt s:
+                    case ptr<DeclStmt> s:
                         foreach (var (_, d) in s.DeclList)
                         {
                             {
-                                ref VarDecl (v, ok) = d._<ref VarDecl>();
+                                ptr<VarDecl> (v, ok) = d._<ptr<VarDecl>>();
 
                                 if (ok)
                                 {
@@ -259,9 +294,10 @@ L:
                                 }
 
                             }
+
                         }
                         break;
-                    case ref LabeledStmt s:
+                    case ptr<LabeledStmt> s:
                         {
                             var name__prev1 = name;
 
@@ -282,16 +318,20 @@ L:
                                         {
                                             ls.err(fwd.Label.Pos(), "goto %s jumps over declaration of %s at %s", name, String(varName), varPos);
                                         }
+
                                     }
                                     else
                                     { 
                                         // no match - keep forward goto
                                         fwdGotos[i] = fwd;
                                         i++;
+
                                     }
+
                                 }
                                 fwdGotos = fwdGotos[..i];
                                 lstmt = s;
+
                             } 
                             // process labeled statement
 
@@ -302,7 +342,7 @@ L:
                         stmt = s.Stmt;
                         goto L;
                         break;
-                    case ref BranchStmt s:
+                    case ptr<BranchStmt> s:
                         if (s.Label == null)
                         {
 
@@ -325,6 +365,7 @@ L:
                                     t = t__prev2;
 
                                 }
+
                                 goto __switch_break0;
                             }
                             if (s.Tok == _Continue)
@@ -346,6 +387,7 @@ L:
                                     t = t__prev2;
 
                                 }
+
                                 goto __switch_break0;
                             }
                             if (s.Tok == _Fallthrough)
@@ -360,6 +402,7 @@ L:
 
                             __switch_break0:;
                             break;
+
                         } 
 
                         // labeled branch statement
@@ -379,13 +422,13 @@ L:
                                 {
                                     switch (t.Stmt.type())
                                     {
-                                        case ref SwitchStmt t:
+                                        case ptr<SwitchStmt> t:
                                             s.Target = t;
                                             break;
-                                        case ref SelectStmt t:
+                                        case ptr<SelectStmt> t:
                                             s.Target = t;
                                             break;
-                                        case ref ForStmt t:
+                                        case ptr<ForStmt> t:
                                             s.Target = t;
                                             break;
                                         default:
@@ -395,6 +438,7 @@ L:
                                             break;
                                         }
                                     }
+
                                 }
                                 else
                                 {
@@ -404,6 +448,8 @@ L:
                                 t = t__prev1;
 
                             }
+
+
                             goto __switch_break1;
                         }
                         if (s.Tok == _Continue) 
@@ -420,7 +466,7 @@ L:
                                     {
                                         var t__prev2 = t;
 
-                                        ref ForStmt (t, ok) = t.Stmt._<ref ForStmt>();
+                                        ptr<ForStmt> (t, ok) = t.Stmt._<ptr<ForStmt>>();
 
                                         if (ok)
                                         {
@@ -434,6 +480,7 @@ L:
                                         t = t__prev2;
 
                                     }
+
                                 }
                                 else
                                 {
@@ -443,6 +490,8 @@ L:
                                 t = t__prev1;
 
                             }
+
+
                             goto __switch_break1;
                         }
                         if (s.Tok == _Goto)
@@ -460,11 +509,14 @@ L:
                                 { 
                                     // label may be declared later - add goto to forward gotos
                                     fwdGotos = append(fwdGotos, s);
+
                                 }
 
                                 t = t__prev1;
 
                             }
+
+
                             goto __switch_break1;
                         }
                         if (s.Tok == _Fallthrough)
@@ -475,26 +527,28 @@ L:
 
                         __switch_break1:;
                         break;
-                    case ref AssignStmt s:
+                    case ptr<AssignStmt> s:
                         if (s.Op == Def)
                         {
                             recordVarDecl(s.Pos(), s.Lhs);
                         }
+
                         break;
-                    case ref BlockStmt s:
+                    case ptr<BlockStmt> s:
                         innerBlock(ctxt, s.Pos(), s.List);
                         break;
-                    case ref IfStmt s:
+                    case ptr<IfStmt> s:
                         innerBlock(ctxt, s.Then.Pos(), s.Then.List);
                         if (s.Else != null)
                         {
                             innerBlock(ctxt, s.Else.Pos(), new slice<Stmt>(new Stmt[] { s.Else }));
                         }
+
                         break;
-                    case ref ForStmt s:
+                    case ptr<ForStmt> s:
                         innerBlock(new targets(s,s), s.Body.Pos(), s.Body.List);
                         break;
-                    case ref SwitchStmt s:
+                    case ptr<SwitchStmt> s:
                         targets inner = new targets(s,ctxt.continues);
                         {
                             var cc__prev2 = cc;
@@ -508,7 +562,7 @@ L:
                             cc = cc__prev2;
                         }
                         break;
-                    case ref SelectStmt s:
+                    case ptr<SelectStmt> s:
                         inner = new targets(s,ctxt.continues);
                         {
                             var cc__prev2 = cc;
@@ -523,8 +577,10 @@ L:
                         }
                         break;
                 }
+
             }
             return fwdGotos;
+
         });
     }
 }}}}

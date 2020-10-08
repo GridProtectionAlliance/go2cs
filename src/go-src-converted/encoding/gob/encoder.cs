@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2020 August 29 08:35:35 UTC
+// package gob -- go2cs converted at 2020 October 08 03:42:41 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\encoder.go
 using errors = go.errors_package;
@@ -17,7 +17,8 @@ namespace encoding
     public static partial class gob_package
     {
         // An Encoder manages the transmission of type and data information to the
-        // other side of a connection.
+        // other side of a connection.  It is safe for concurrent use by multiple
+        // goroutines.
         public partial struct Encoder
         {
             public sync.Mutex mutex; // each item must be sent atomically
@@ -32,49 +33,62 @@ namespace encoding
         // Before we encode a message, we reserve space at the head of the
         // buffer in which to encode its length. This means we can use the
         // buffer to assemble the message without another allocation.
-        private static readonly long maxLength = 9L; // Maximum size of an encoded length.
+        private static readonly long maxLength = (long)9L; // Maximum size of an encoded length.
  // Maximum size of an encoded length.
         private static var spaceForLength = make_slice<byte>(maxLength);
 
         // NewEncoder returns a new encoder that will transmit on the io.Writer.
-        public static ref Encoder NewEncoder(io.Writer w)
+        public static ptr<Encoder> NewEncoder(io.Writer w)
         {
             ptr<Encoder> enc = @new<Encoder>();
             enc.w = new slice<io.Writer>(new io.Writer[] { w });
             enc.sent = make_map<reflect.Type, typeId>();
             enc.countState = enc.newEncoderState(@new<encBuffer>());
-            return enc;
+            return _addr_enc!;
         }
 
         // writer() returns the innermost writer the encoder is using
-        private static io.Writer writer(this ref Encoder enc)
+        private static io.Writer writer(this ptr<Encoder> _addr_enc)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             return enc.w[len(enc.w) - 1L];
         }
 
         // pushWriter adds a writer to the encoder.
-        private static void pushWriter(this ref Encoder enc, io.Writer w)
+        private static void pushWriter(this ptr<Encoder> _addr_enc, io.Writer w)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             enc.w = append(enc.w, w);
         }
 
         // popWriter pops the innermost writer.
-        private static void popWriter(this ref Encoder enc)
+        private static void popWriter(this ptr<Encoder> _addr_enc)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             enc.w = enc.w[0L..len(enc.w) - 1L];
         }
 
-        private static void setError(this ref Encoder enc, error err)
+        private static void setError(this ptr<Encoder> _addr_enc, error err)
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             if (enc.err == null)
             { // remember the first.
                 enc.err = err;
+
             }
+
         }
 
         // writeMessage sends the data item preceded by a unsigned count of its length.
-        private static void writeMessage(this ref Encoder enc, io.Writer w, ref encBuffer b)
-        { 
+        private static void writeMessage(this ptr<Encoder> _addr_enc, io.Writer w, ptr<encBuffer> _addr_b)
+        {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+ 
             // Space has been reserved for the length at the head of the message.
             // This is a little dirty: we grab the slice from the bytes.Buffer and massage
             // it by hand.
@@ -84,7 +98,7 @@ namespace encoding
             if (messageLen >= tooBig)
             {
                 enc.setError(errors.New("gob: encoder: message too big"));
-                return;
+                return ;
             } 
             // Encode the length.
             enc.countState.b.Reset();
@@ -101,12 +115,18 @@ namespace encoding
             {
                 enc.setError(err);
             }
+
         }
 
         // sendActualType sends the requested type, without further investigation, unless
         // it's been sent before.
-        private static bool sendActualType(this ref Encoder enc, io.Writer w, ref encoderState state, ref userTypeInfo ut, reflect.Type actual)
+        private static bool sendActualType(this ptr<Encoder> _addr_enc, io.Writer w, ptr<encoderState> _addr_state, ptr<userTypeInfo> _addr_ut, reflect.Type actual)
         {
+            bool sent = default;
+            ref Encoder enc = ref _addr_enc.val;
+            ref encoderState state = ref _addr_state.val;
+            ref userTypeInfo ut = ref _addr_ut.val;
+
             {
                 var (_, alreadySent) = enc.sent[actual];
 
@@ -116,11 +136,12 @@ namespace encoding
                 }
 
             }
+
             var (info, err) = getTypeInfo(ut);
             if (err != null)
             {
                 enc.setError(err);
-                return;
+                return ;
             } 
             // Send the pair (-id, type)
             // Id:
@@ -130,7 +151,7 @@ namespace encoding
             enc.writeMessage(w, state.b);
             if (enc.err != null)
             {
-                return;
+                return ;
             } 
 
             // Remember we've sent this type, both what the user gave us and the base type.
@@ -151,6 +172,7 @@ namespace encoding
                         {
                             enc.sendType(w, state, st.Field(i).Type);
                         }
+
                     }
                 else if (st.Kind() == reflect.Array || st.Kind() == reflect.Slice) 
                     enc.sendType(w, state, st.Elem());
@@ -160,17 +182,23 @@ namespace encoding
 
             }
             return true;
+
         }
 
         // sendType sends the type info to the other side, if necessary.
-        private static bool sendType(this ref Encoder enc, io.Writer w, ref encoderState state, reflect.Type origt)
+        private static bool sendType(this ptr<Encoder> _addr_enc, io.Writer w, ptr<encoderState> _addr_state, reflect.Type origt)
         {
+            bool sent = default;
+            ref Encoder enc = ref _addr_enc.val;
+            ref encoderState state = ref _addr_state.val;
+
             var ut = userType(origt);
             if (ut.externalEnc != 0L)
             { 
                 // The rules are different: regardless of the underlying type's representation,
                 // we need to tell the other side that the base type is a GobEncoder.
                 return enc.sendActualType(w, state, ut, ut.@base);
+
             } 
 
             // It's a concrete value, so drill down to the base type.
@@ -182,7 +210,7 @@ namespace encoding
                     // If it's []uint8, don't send; it's considered basic.
                     if (rt.Elem().Kind() == reflect.Uint8)
                     {
-                        return;
+                        return ;
                     } 
                     // Otherwise we do send.
                     break;
@@ -197,29 +225,36 @@ namespace encoding
                     break;
                 else if (rt.Kind() == reflect.Chan || rt.Kind() == reflect.Func) 
                     // If we get here, it's a field of a struct; ignore it.
-                    return;
+                    return ;
                 else 
                     // Basic types and interfaces do not need to be described.
-                    return;
+                    return ;
 
             }
 
             return enc.sendActualType(w, state, ut, ut.@base);
+
         }
 
         // Encode transmits the data item represented by the empty interface value,
         // guaranteeing that all necessary type information has been transmitted first.
         // Passing a nil pointer to Encoder will panic, as they cannot be transmitted by gob.
-        private static error Encode(this ref Encoder enc, object e)
+        private static error Encode(this ptr<Encoder> _addr_enc, object e)
         {
-            return error.As(enc.EncodeValue(reflect.ValueOf(e)));
+            ref Encoder enc = ref _addr_enc.val;
+
+            return error.As(enc.EncodeValue(reflect.ValueOf(e)))!;
         }
 
         // sendTypeDescriptor makes sure the remote side knows about this type.
         // It will send a descriptor if this is the first time the type has been
         // sent.
-        private static void sendTypeDescriptor(this ref Encoder enc, io.Writer w, ref encoderState state, ref userTypeInfo ut)
-        { 
+        private static void sendTypeDescriptor(this ptr<Encoder> _addr_enc, io.Writer w, ptr<encoderState> _addr_state, ptr<userTypeInfo> _addr_ut)
+        {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encoderState state = ref _addr_state.val;
+            ref userTypeInfo ut = ref _addr_ut.val;
+ 
             // Make sure the type is known to the other side.
             // First, have we already sent this type?
             var rt = ut.@base;
@@ -227,6 +262,7 @@ namespace encoding
             {
                 rt = ut.user;
             }
+
             {
                 var (_, alreadySent) = enc.sent[rt];
 
@@ -236,7 +272,7 @@ namespace encoding
                     var sent = enc.sendType(w, state, rt);
                     if (enc.err != null)
                     {
-                        return;
+                        return ;
                     } 
                     // If the type info has still not been transmitted, it means we have
                     // a singleton basic type (int, []byte etc.) at top level. We don't
@@ -247,31 +283,43 @@ namespace encoding
                         if (err != null)
                         {
                             enc.setError(err);
-                            return;
+                            return ;
                         }
+
                         enc.sent[rt] = info.id;
+
                     }
+
                 }
 
             }
+
         }
 
         // sendTypeId sends the id, which must have already been defined.
-        private static void sendTypeId(this ref Encoder enc, ref encoderState state, ref userTypeInfo ut)
-        { 
+        private static void sendTypeId(this ptr<Encoder> _addr_enc, ptr<encoderState> _addr_state, ptr<userTypeInfo> _addr_ut)
+        {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encoderState state = ref _addr_state.val;
+            ref userTypeInfo ut = ref _addr_ut.val;
+ 
             // Identify the type of this top-level value.
             state.encodeInt(int64(enc.sent[ut.@base]));
+
         }
 
         // EncodeValue transmits the data item represented by the reflection value,
         // guaranteeing that all necessary type information has been transmitted first.
         // Passing a nil pointer to EncodeValue will panic, as they cannot be transmitted by gob.
-        private static error EncodeValue(this ref Encoder _enc, reflect.Value value) => func(_enc, (ref Encoder enc, Defer defer, Panic panic, Recover _) =>
+        private static error EncodeValue(this ptr<Encoder> _addr_enc, reflect.Value value) => func((defer, panic, _) =>
         {
+            ref Encoder enc = ref _addr_enc.val;
+
             if (value.Kind() == reflect.Invalid)
             {
-                return error.As(errors.New("gob: cannot encode nil value"));
+                return error.As(errors.New("gob: cannot encode nil value"))!;
             }
+
             if (value.Kind() == reflect.Ptr && value.IsNil())
             {
                 panic("gob: cannot encode nil pointer of type " + value.Type().String());
@@ -288,18 +336,19 @@ namespace encoding
             var (ut, err) = validUserType(value.Type());
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             enc.err = null;
             enc.byteBuf.Reset();
             enc.byteBuf.Write(spaceForLength);
-            var state = enc.newEncoderState(ref enc.byteBuf);
+            var state = enc.newEncoderState(_addr_enc.byteBuf);
 
             enc.sendTypeDescriptor(enc.writer(), state, ut);
             enc.sendTypeId(state, ut);
             if (enc.err != null)
             {
-                return error.As(enc.err);
+                return error.As(enc.err)!;
             } 
 
             // Encode the object.
@@ -308,8 +357,10 @@ namespace encoding
             {
                 enc.writeMessage(enc.writer(), state.b);
             }
+
             enc.freeEncoderState(state);
-            return error.As(enc.err);
+            return error.As(enc.err)!;
+
         });
     }
 }}

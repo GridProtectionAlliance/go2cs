@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:37:17 UTC
+//     Generated on 2020 October 08 03:26:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -61,10 +61,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (RawConn, error) SyscallConnByRef(ref T value);
+            private delegate (RawConn, error) SyscallConnByPtr(ptr<T> value);
             private delegate (RawConn, error) SyscallConnByVal(T value);
 
-            private static readonly SyscallConnByRef s_SyscallConnByRef;
+            private static readonly SyscallConnByPtr s_SyscallConnByPtr;
             private static readonly SyscallConnByVal s_SyscallConnByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,11 +73,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SyscallConnByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SyscallConnByPtr is null || !m_target_is_ptr)
                     return s_SyscallConnByVal!(target);
 
-                return s_SyscallConnByRef(ref target);
+                return s_SyscallConnByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -86,23 +87,20 @@ namespace go
             static Conn()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SyscallConn");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SyscallConn");
 
                 if (!(extensionMethod is null))
-                    s_SyscallConnByRef = extensionMethod.CreateStaticDelegate(typeof(SyscallConnByRef)) as SyscallConnByRef;
+                    s_SyscallConnByPtr = extensionMethod.CreateStaticDelegate(typeof(SyscallConnByPtr)) as SyscallConnByPtr;
 
-                if (s_SyscallConnByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SyscallConn");
+                extensionMethod = targetType.GetExtensionMethod("SyscallConn");
 
-                    if (!(extensionMethod is null))
-                        s_SyscallConnByVal = extensionMethod.CreateStaticDelegate(typeof(SyscallConnByVal)) as SyscallConnByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SyscallConnByVal = extensionMethod.CreateStaticDelegate(typeof(SyscallConnByVal)) as SyscallConnByVal;
 
-                if (s_SyscallConnByRef is null && s_SyscallConnByVal is null)
+                if (s_SyscallConnByPtr is null && s_SyscallConnByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Conn.SyscallConn method", new Exception("SyscallConn"));
             }
 

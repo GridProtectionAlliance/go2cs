@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:36:17 UTC
+// package template -- go2cs converted at 2020 October 08 03:43:11 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\url.go
 using bytes = go.bytes_package;
@@ -46,16 +46,17 @@ namespace html
             {
                 return s;
             }
-            if (!isSafeUrl(s))
+            if (!isSafeURL(s))
             {
                 return "#" + filterFailsafe;
             }
             return s;
+
         }
 
-        // isSafeUrl is true if s is a relative URL or if URL has a protocol in
+        // isSafeURL is true if s is a relative URL or if URL has a protocol in
         // (http, https, mailto).
-        private static bool isSafeUrl(@string s)
+        private static bool isSafeURL(@string s)
         {
             {
                 var i = strings.IndexRune(s, ':');
@@ -67,10 +68,13 @@ namespace html
                     {
                         return false;
                     }
+
                 }
 
             }
+
             return true;
+
         }
 
         // urlEscaper produces an output that can be embedded in a URL query.
@@ -105,19 +109,24 @@ namespace html
             {
                 norm = true;
             }
-            bytes.Buffer b = default;
-            if (processUrlOnto(s, norm, ref b))
+
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
+            if (processURLOnto(s, norm, _addr_b))
             {
                 return b.String();
             }
+
             return s;
+
         }
 
-        // processUrlOnto appends a normalized URL corresponding to its input to b
-        // and returns true if the appended content differs from s.
-        private static bool processUrlOnto(@string s, bool norm, ref bytes.Buffer b)
+        // processURLOnto appends a normalized URL corresponding to its input to b
+        // and reports whether the appended content differs from s.
+        private static bool processURLOnto(@string s, bool norm, ptr<bytes.Buffer> _addr_b)
         {
-            b.Grow(b.Cap() + len(s) + 16L);
+            ref bytes.Buffer b = ref _addr_b.val;
+
+            b.Grow(len(s) + 16L);
             long written = 0L; 
             // The byte loop below assumes that all URLs use UTF-8 as the
             // content-encoding. This is similar to the URI to IRI encoding scheme
@@ -191,6 +200,7 @@ namespace html
                         {
                             continue;
                         }
+
                         break;
                     default: 
                         // Unreserved according to RFC 3986 sec 2.3
@@ -198,23 +208,28 @@ namespace html
                         {
                             continue;
                         }
+
                         if ('A' <= c && c <= 'Z')
                         {
                             continue;
                         }
+
                         if ('0' <= c && c <= '9')
                         {
                             continue;
                         }
+
                         break;
                 }
                 b.WriteString(s[written..i]);
                 fmt.Fprintf(b, "%%%02x", c);
                 written = i + 1L;
+
             }
 
             b.WriteString(s[written..]);
             return written != 0L;
+
         }
 
         // Filters and normalizes srcset values which are comma separated
@@ -230,54 +245,58 @@ namespace html
             else if (t == contentTypeURL) 
                 // Normalizing gets rid of all HTML whitespace
                 // which separate the image URL from its metadata.
-                bytes.Buffer b = default;
-                if (processUrlOnto(s, true, ref b))
+                ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
+                if (processURLOnto(s, true, _addr_b))
                 {
                     s = b.String();
                 } 
                 // Additionally, commas separate one source from another.
-                return strings.Replace(s, ",", "%2c", -1L);
+                return strings.ReplaceAll(s, ",", "%2c");
                         b = default;
             long written = 0L;
             for (long i = 0L; i < len(s); i++)
             {
                 if (s[i] == ',')
                 {
-                    filterSrcsetElement(s, written, i, ref b);
+                    filterSrcsetElement(s, written, i, _addr_b);
                     b.WriteString(",");
                     written = i + 1L;
                 }
+
             }
 
-            filterSrcsetElement(s, written, len(s), ref b);
+            filterSrcsetElement(s, written, len(s), _addr_b);
             return b.String();
+
         }
 
         // Derived from https://play.golang.org/p/Dhmj7FORT5
-        private static readonly @string htmlSpaceAndAsciiAlnumBytes = "\x00\x36\x00\x00\x01\x00\xff\x03\xfe\xff\xff\x07\xfe\xff\xff\x07";
+        private static readonly @string htmlSpaceAndASCIIAlnumBytes = (@string)"\x00\x36\x00\x00\x01\x00\xff\x03\xfe\xff\xff\x07\xfe\xff\xff\x07";
 
-        // isHtmlSpace is true iff c is a whitespace character per
+        // isHTMLSpace is true iff c is a whitespace character per
         // https://infra.spec.whatwg.org/#ascii-whitespace
 
 
-        // isHtmlSpace is true iff c is a whitespace character per
+        // isHTMLSpace is true iff c is a whitespace character per
         // https://infra.spec.whatwg.org/#ascii-whitespace
-        private static bool isHtmlSpace(byte c)
+        private static bool isHTMLSpace(byte c)
         {
-            return (c <= 0x20UL) && 0L != (htmlSpaceAndAsciiAlnumBytes[c >> (int)(3L)] & (1L << (int)(uint(c & 0x7UL))));
+            return (c <= 0x20UL) && 0L != (htmlSpaceAndASCIIAlnumBytes[c >> (int)(3L)] & (1L << (int)(uint(c & 0x7UL))));
         }
 
-        private static bool isHtmlSpaceOrAsciiAlnum(byte c)
+        private static bool isHTMLSpaceOrASCIIAlnum(byte c)
         {
-            return (c < 0x80UL) && 0L != (htmlSpaceAndAsciiAlnumBytes[c >> (int)(3L)] & (1L << (int)(uint(c & 0x7UL))));
+            return (c < 0x80UL) && 0L != (htmlSpaceAndASCIIAlnumBytes[c >> (int)(3L)] & (1L << (int)(uint(c & 0x7UL))));
         }
 
-        private static void filterSrcsetElement(@string s, long left, long right, ref bytes.Buffer b)
+        private static void filterSrcsetElement(@string s, long left, long right, ptr<bytes.Buffer> _addr_b)
         {
+            ref bytes.Buffer b = ref _addr_b.val;
+
             var start = left;
-            while (start < right && isHtmlSpace(s[start]))
+            while (start < right && isHTMLSpace(s[start]))
             {
-                start += 1L;
+                start++;
             }
 
             var end = right;
@@ -286,11 +305,12 @@ namespace html
 
                 for (var i = start; i < right; i++)
                 {
-                    if (isHtmlSpace(s[i]))
+                    if (isHTMLSpace(s[i]))
                     {
                         end = i;
                         break;
                     }
+
                 }
 
 
@@ -299,7 +319,7 @@ namespace html
             {
                 var url = s[start..end];
 
-                if (isSafeUrl(url))
+                if (isSafeURL(url))
                 { 
                     // If image metadata is only spaces or alnums then
                     // we don't need to URL normalize it.
@@ -309,11 +329,12 @@ namespace html
 
                         for (i = end; i < right; i++)
                         {
-                            if (!isHtmlSpaceOrAsciiAlnum(s[i]))
+                            if (!isHTMLSpaceOrASCIIAlnum(s[i]))
                             {
                                 metadataOk = false;
                                 break;
                             }
+
                         }
 
 
@@ -322,15 +343,18 @@ namespace html
                     if (metadataOk)
                     {
                         b.WriteString(s[left..start]);
-                        processUrlOnto(url, true, b);
+                        processURLOnto(url, true, _addr_b);
                         b.WriteString(s[end..right]);
-                        return;
+                        return ;
                     }
+
                 }
 
             }
+
             b.WriteString("#");
             b.WriteString(filterFailsafe);
+
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:52 UTC
+//     Generated on 2020 October 08 03:24:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using errors = go.errors_package;
 using io = go.io_package;
 using math = go.math_package;
 using reflect = go.reflect_package;
+using sync = go.sync_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -53,7 +54,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +68,10 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate @string Uint16ByRef(ref T value, slice<byte> _p0);
+            private delegate @string Uint16ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate @string Uint16ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint16ByRef s_Uint16ByRef;
+            private static readonly Uint16ByPtr s_Uint16ByPtr;
             private static readonly Uint16ByVal s_Uint16ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +80,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Uint16ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_Uint16ByPtr is null || !m_target_is_ptr)
                     return s_Uint16ByVal!(target, _p0);
 
-                return s_Uint16ByRef(ref target, _p0);
+                return s_Uint16ByPtr(m_target_ptr, _p0);
             }
 
-            private delegate @string Uint32ByRef(ref T value, slice<byte> _p0);
+            private delegate @string Uint32ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate @string Uint32ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint32ByRef s_Uint32ByRef;
+            private static readonly Uint32ByPtr s_Uint32ByPtr;
             private static readonly Uint32ByVal s_Uint32ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,17 +100,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Uint32ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_Uint32ByPtr is null || !m_target_is_ptr)
                     return s_Uint32ByVal!(target, _p0);
 
-                return s_Uint32ByRef(ref target, _p0);
+                return s_Uint32ByPtr(m_target_ptr, _p0);
             }
 
-            private delegate @string Uint64ByRef(ref T value, slice<byte> _p0);
+            private delegate @string Uint64ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate @string Uint64ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint64ByRef s_Uint64ByRef;
+            private static readonly Uint64ByPtr s_Uint64ByPtr;
             private static readonly Uint64ByVal s_Uint64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -117,17 +120,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Uint64ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_Uint64ByPtr is null || !m_target_is_ptr)
                     return s_Uint64ByVal!(target, _p0);
 
-                return s_Uint64ByRef(ref target, _p0);
+                return s_Uint64ByPtr(m_target_ptr, _p0);
             }
 
-            private delegate @string PutUint16ByRef(ref T value, slice<byte> _p0, ushort _p0);
+            private delegate @string PutUint16ByPtr(ptr<T> value, slice<byte> _p0, ushort _p0);
             private delegate @string PutUint16ByVal(T value, slice<byte> _p0, ushort _p0);
 
-            private static readonly PutUint16ByRef s_PutUint16ByRef;
+            private static readonly PutUint16ByPtr s_PutUint16ByPtr;
             private static readonly PutUint16ByVal s_PutUint16ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,17 +140,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PutUint16ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PutUint16ByPtr is null || !m_target_is_ptr)
                     return s_PutUint16ByVal!(target, _p0, _p0);
 
-                return s_PutUint16ByRef(ref target, _p0, _p0);
+                return s_PutUint16ByPtr(m_target_ptr, _p0, _p0);
             }
 
-            private delegate @string PutUint32ByRef(ref T value, slice<byte> _p0, uint _p0);
+            private delegate @string PutUint32ByPtr(ptr<T> value, slice<byte> _p0, uint _p0);
             private delegate @string PutUint32ByVal(T value, slice<byte> _p0, uint _p0);
 
-            private static readonly PutUint32ByRef s_PutUint32ByRef;
+            private static readonly PutUint32ByPtr s_PutUint32ByPtr;
             private static readonly PutUint32ByVal s_PutUint32ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -155,17 +160,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PutUint32ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PutUint32ByPtr is null || !m_target_is_ptr)
                     return s_PutUint32ByVal!(target, _p0, _p0);
 
-                return s_PutUint32ByRef(ref target, _p0, _p0);
+                return s_PutUint32ByPtr(m_target_ptr, _p0, _p0);
             }
 
-            private delegate @string PutUint64ByRef(ref T value, slice<byte> _p0, ulong _p0);
+            private delegate @string PutUint64ByPtr(ptr<T> value, slice<byte> _p0, ulong _p0);
             private delegate @string PutUint64ByVal(T value, slice<byte> _p0, ulong _p0);
 
-            private static readonly PutUint64ByRef s_PutUint64ByRef;
+            private static readonly PutUint64ByPtr s_PutUint64ByPtr;
             private static readonly PutUint64ByVal s_PutUint64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -174,17 +180,18 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PutUint64ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PutUint64ByPtr is null || !m_target_is_ptr)
                     return s_PutUint64ByVal!(target, _p0, _p0);
 
-                return s_PutUint64ByRef(ref target, _p0, _p0);
+                return s_PutUint64ByPtr(m_target_ptr, _p0, _p0);
             }
 
-            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -193,11 +200,12 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -206,119 +214,98 @@ namespace encoding
             static ByteOrder()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Uint16");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint16");
 
                 if (!(extensionMethod is null))
-                    s_Uint16ByRef = extensionMethod.CreateStaticDelegate(typeof(Uint16ByRef)) as Uint16ByRef;
+                    s_Uint16ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint16ByPtr)) as Uint16ByPtr;
 
-                if (s_Uint16ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Uint16");
+                extensionMethod = targetType.GetExtensionMethod("Uint16");
 
-                    if (!(extensionMethod is null))
-                        s_Uint16ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint16ByVal)) as Uint16ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_Uint16ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint16ByVal)) as Uint16ByVal;
 
-                if (s_Uint16ByRef is null && s_Uint16ByVal is null)
+                if (s_Uint16ByPtr is null && s_Uint16ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteOrder.Uint16 method", new Exception("Uint16"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Uint32");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint32");
 
                 if (!(extensionMethod is null))
-                    s_Uint32ByRef = extensionMethod.CreateStaticDelegate(typeof(Uint32ByRef)) as Uint32ByRef;
+                    s_Uint32ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint32ByPtr)) as Uint32ByPtr;
 
-                if (s_Uint32ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Uint32");
+                extensionMethod = targetType.GetExtensionMethod("Uint32");
 
-                    if (!(extensionMethod is null))
-                        s_Uint32ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint32ByVal)) as Uint32ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_Uint32ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint32ByVal)) as Uint32ByVal;
 
-                if (s_Uint32ByRef is null && s_Uint32ByVal is null)
+                if (s_Uint32ByPtr is null && s_Uint32ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteOrder.Uint32 method", new Exception("Uint32"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Uint64");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint64");
 
                 if (!(extensionMethod is null))
-                    s_Uint64ByRef = extensionMethod.CreateStaticDelegate(typeof(Uint64ByRef)) as Uint64ByRef;
+                    s_Uint64ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint64ByPtr)) as Uint64ByPtr;
 
-                if (s_Uint64ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Uint64");
+                extensionMethod = targetType.GetExtensionMethod("Uint64");
 
-                    if (!(extensionMethod is null))
-                        s_Uint64ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint64ByVal)) as Uint64ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_Uint64ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint64ByVal)) as Uint64ByVal;
 
-                if (s_Uint64ByRef is null && s_Uint64ByVal is null)
+                if (s_Uint64ByPtr is null && s_Uint64ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteOrder.Uint64 method", new Exception("Uint64"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PutUint16");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PutUint16");
 
                 if (!(extensionMethod is null))
-                    s_PutUint16ByRef = extensionMethod.CreateStaticDelegate(typeof(PutUint16ByRef)) as PutUint16ByRef;
+                    s_PutUint16ByPtr = extensionMethod.CreateStaticDelegate(typeof(PutUint16ByPtr)) as PutUint16ByPtr;
 
-                if (s_PutUint16ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PutUint16");
+                extensionMethod = targetType.GetExtensionMethod("PutUint16");
 
-                    if (!(extensionMethod is null))
-                        s_PutUint16ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint16ByVal)) as PutUint16ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PutUint16ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint16ByVal)) as PutUint16ByVal;
 
-                if (s_PutUint16ByRef is null && s_PutUint16ByVal is null)
+                if (s_PutUint16ByPtr is null && s_PutUint16ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteOrder.PutUint16 method", new Exception("PutUint16"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PutUint32");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PutUint32");
 
                 if (!(extensionMethod is null))
-                    s_PutUint32ByRef = extensionMethod.CreateStaticDelegate(typeof(PutUint32ByRef)) as PutUint32ByRef;
+                    s_PutUint32ByPtr = extensionMethod.CreateStaticDelegate(typeof(PutUint32ByPtr)) as PutUint32ByPtr;
 
-                if (s_PutUint32ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PutUint32");
+                extensionMethod = targetType.GetExtensionMethod("PutUint32");
 
-                    if (!(extensionMethod is null))
-                        s_PutUint32ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint32ByVal)) as PutUint32ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PutUint32ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint32ByVal)) as PutUint32ByVal;
 
-                if (s_PutUint32ByRef is null && s_PutUint32ByVal is null)
+                if (s_PutUint32ByPtr is null && s_PutUint32ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteOrder.PutUint32 method", new Exception("PutUint32"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PutUint64");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PutUint64");
 
                 if (!(extensionMethod is null))
-                    s_PutUint64ByRef = extensionMethod.CreateStaticDelegate(typeof(PutUint64ByRef)) as PutUint64ByRef;
+                    s_PutUint64ByPtr = extensionMethod.CreateStaticDelegate(typeof(PutUint64ByPtr)) as PutUint64ByPtr;
 
-                if (s_PutUint64ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PutUint64");
+                extensionMethod = targetType.GetExtensionMethod("PutUint64");
 
-                    if (!(extensionMethod is null))
-                        s_PutUint64ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint64ByVal)) as PutUint64ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PutUint64ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint64ByVal)) as PutUint64ByVal;
 
-                if (s_PutUint64ByRef is null && s_PutUint64ByVal is null)
+                if (s_PutUint64ByPtr is null && s_PutUint64ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteOrder.PutUint64 method", new Exception("PutUint64"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteOrder.String method", new Exception("String"));
             }
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:57 UTC
+//     Generated on 2020 October 08 04:36:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
+using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -46,9 +47,10 @@ namespace go
                 this.timer = default;
                 this.afterOnce = default;
                 this.numRun = default;
+                this.exitCode = default;
             }
 
-            public M(testDeps deps = default, slice<InternalTest> tests = default, slice<InternalBenchmark> benchmarks = default, slice<InternalExample> examples = default, ref ptr<time.Timer> timer = default, sync.Once afterOnce = default, long numRun = default)
+            public M(testDeps deps = default, slice<InternalTest> tests = default, slice<InternalBenchmark> benchmarks = default, slice<InternalExample> examples = default, ref ptr<time.Timer> timer = default, sync.Once afterOnce = default, long numRun = default, long exitCode = default)
             {
                 this.deps = deps;
                 this.tests = tests;
@@ -57,6 +59,7 @@ namespace go
                 this.timer = timer;
                 this.afterOnce = afterOnce;
                 this.numRun = numRun;
+                this.exitCode = exitCode;
             }
 
             // Enable comparisons between nil and M struct
@@ -79,7 +82,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static M M_cast(dynamic value)
         {
-            return new M(value.deps, value.tests, value.benchmarks, value.examples, ref value.timer, value.afterOnce, value.numRun);
+            return new M(value.deps, value.tests, value.benchmarks, value.examples, ref value.timer, value.afterOnce, value.numRun, value.exitCode);
         }
     }
 }

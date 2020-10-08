@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:18:33 UTC
+//     Generated on 2020 October 08 03:21:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 
@@ -29,13 +30,15 @@ namespace go
                 this.next = default;
                 this.end = default;
                 this.buf = default;
+                this.debugGen = default;
             }
 
-            public wbBuf(System.UIntPtr next = default, System.UIntPtr end = default, array<System.UIntPtr> buf = default)
+            public wbBuf(System.UIntPtr next = default, System.UIntPtr end = default, array<System.UIntPtr> buf = default, uint debugGen = default)
             {
                 this.next = next;
                 this.end = end;
                 this.buf = buf;
+                this.debugGen = debugGen;
             }
 
             // Enable comparisons between nil and wbBuf struct
@@ -58,7 +61,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static wbBuf wbBuf_cast(dynamic value)
         {
-            return new wbBuf(value.next, value.end, value.buf);
+            return new wbBuf(value.next, value.end, value.buf, value.debugGen);
         }
     }
 }

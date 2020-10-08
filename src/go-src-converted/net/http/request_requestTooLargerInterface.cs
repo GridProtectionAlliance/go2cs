@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:29 UTC
+//     Generated on 2020 October 08 03:40:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ using url = go.net.url_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using idna = go.golang_org.x.net.idna_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -68,7 +68,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -82,10 +82,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate void requestTooLargeByRef(ref T value);
+            private delegate void requestTooLargeByPtr(ptr<T> value);
             private delegate void requestTooLargeByVal(T value);
 
-            private static readonly requestTooLargeByRef s_requestTooLargeByRef;
+            private static readonly requestTooLargeByPtr s_requestTooLargeByPtr;
             private static readonly requestTooLargeByVal s_requestTooLargeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -94,14 +94,15 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_requestTooLargeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_requestTooLargeByPtr is null || !m_target_is_ptr)
                 {
                     s_requestTooLargeByVal!(target);
                     return;
                 }
 
-                s_requestTooLargeByRef(ref target);
+                s_requestTooLargeByPtr(m_target_ptr);
                 return;
                 
             }
@@ -112,23 +113,20 @@ namespace net
             static requestTooLarger()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("requestTooLarge");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("requestTooLarge");
 
                 if (!(extensionMethod is null))
-                    s_requestTooLargeByRef = extensionMethod.CreateStaticDelegate(typeof(requestTooLargeByRef)) as requestTooLargeByRef;
+                    s_requestTooLargeByPtr = extensionMethod.CreateStaticDelegate(typeof(requestTooLargeByPtr)) as requestTooLargeByPtr;
 
-                if (s_requestTooLargeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("requestTooLarge");
+                extensionMethod = targetType.GetExtensionMethod("requestTooLarge");
 
-                    if (!(extensionMethod is null))
-                        s_requestTooLargeByVal = extensionMethod.CreateStaticDelegate(typeof(requestTooLargeByVal)) as requestTooLargeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_requestTooLargeByVal = extensionMethod.CreateStaticDelegate(typeof(requestTooLargeByVal)) as requestTooLargeByVal;
 
-                if (s_requestTooLargeByRef is null && s_requestTooLargeByVal is null)
+                if (s_requestTooLargeByPtr is null && s_requestTooLargeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement requestTooLarger.requestTooLarge method", new Exception("requestTooLarge"));
             }
 

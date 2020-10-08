@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:18 UTC
+//     Generated on 2020 October 08 03:50:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
+using goobj2 = go.cmd.@internal.goobj2_package;
 using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -40,14 +41,16 @@ namespace @internal
                 this.File = default;
                 this.Line = default;
                 this.Func = default;
+                this.ParentPC = default;
             }
 
-            public InlinedCall(long Parent = default, @string File = default, long Line = default, SymID Func = default)
+            public InlinedCall(long Parent = default, @string File = default, long Line = default, SymID Func = default, long ParentPC = default)
             {
                 this.Parent = Parent;
                 this.File = File;
                 this.Line = Line;
                 this.Func = Func;
+                this.ParentPC = ParentPC;
             }
 
             // Enable comparisons between nil and InlinedCall struct
@@ -70,7 +73,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static InlinedCall InlinedCall_cast(dynamic value)
         {
-            return new InlinedCall(value.Parent, value.File, value.Line, value.Func);
+            return new InlinedCall(value.Parent, value.File, value.Line, value.Func, value.ParentPC);
         }
     }
 }}}

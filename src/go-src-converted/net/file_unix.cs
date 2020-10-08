@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 August 29 08:26:20 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:04 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\file_unix.go
 using poll = go.@internal.poll_package;
@@ -16,12 +16,21 @@ namespace go
 {
     public static partial class net_package
     {
-        private static (long, error) dupSocket(ref os.File f)
+        private static (long, error) dupSocket(ptr<os.File> _addr_f)
         {
-            var (s, err) = dupCloseOnExec(int(f.Fd()));
+            long _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            var (s, call, err) = poll.DupCloseOnExec(int(f.Fd()));
             if (err != null)
             {
-                return (-1L, err);
+                if (call != "")
+                {
+                    err = os.NewSyscallError(call, err);
+                }
+                return (-1L, error.As(err)!);
+
             }
             {
                 var err = syscall.SetNonblock(s, true);
@@ -29,43 +38,51 @@ namespace go
                 if (err != null)
                 {
                     poll.CloseFunc(s);
-                    return (-1L, os.NewSyscallError("setnonblock", err));
+                    return (-1L, error.As(os.NewSyscallError("setnonblock", err))!);
                 }
             }
-            return (s, null);
+
+            return (s, error.As(null!)!);
+
         }
 
-        private static (ref netFD, error) newFileFD(ref os.File f)
+        private static (ptr<netFD>, error) newFileFD(ptr<os.File> _addr_f)
         {
-            var (s, err) = dupSocket(f);
+            ptr<netFD> _p0 = default!;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            var (s, err) = dupSocket(_addr_f);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var family = syscall.AF_UNSPEC;
             var (sotype, err) = syscall.GetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_TYPE);
             if (err != null)
             {
                 poll.CloseFunc(s);
-                return (null, os.NewSyscallError("getsockopt", err));
+                return (_addr_null!, error.As(os.NewSyscallError("getsockopt", err))!);
             }
+
             var (lsa, _) = syscall.Getsockname(s);
             var (rsa, _) = syscall.Getpeername(s);
             switch (lsa.type())
             {
-                case ref syscall.SockaddrInet4 _:
+                case ptr<syscall.SockaddrInet4> _:
                     family = syscall.AF_INET;
                     break;
-                case ref syscall.SockaddrInet6 _:
+                case ptr<syscall.SockaddrInet6> _:
                     family = syscall.AF_INET6;
                     break;
-                case ref syscall.SockaddrUnix _:
+                case ptr<syscall.SockaddrUnix> _:
                     family = syscall.AF_UNIX;
                     break;
                 default:
                 {
                     poll.CloseFunc(s);
-                    return (null, syscall.EPROTONOSUPPORT);
+                    return (_addr_null!, error.As(syscall.EPROTONOSUPPORT)!);
                     break;
                 }
             }
@@ -73,8 +90,9 @@ namespace go
             if (err != null)
             {
                 poll.CloseFunc(s);
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var laddr = fd.addrFunc()(lsa);
             var raddr = fd.addrFunc()(rsa);
             fd.net = laddr.Network();
@@ -84,81 +102,101 @@ namespace go
                 if (err != null)
                 {
                     fd.Close();
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
             }
+
             fd.setAddr(laddr, raddr);
-            return (fd, null);
+            return (_addr_fd!, error.As(null!)!);
+
         }
 
-        private static (Conn, error) fileConn(ref os.File f)
+        private static (Conn, error) fileConn(ptr<os.File> _addr_f)
         {
-            var (fd, err) = newFileFD(f);
+            Conn _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            var (fd, err) = newFileFD(_addr_f);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             switch (fd.laddr.type())
             {
-                case ref TCPAddr _:
-                    return (newTCPConn(fd), null);
+                case ptr<TCPAddr> _:
+                    return (newTCPConn(fd), error.As(null!)!);
                     break;
-                case ref UDPAddr _:
-                    return (newUDPConn(fd), null);
+                case ptr<UDPAddr> _:
+                    return (newUDPConn(fd), error.As(null!)!);
                     break;
-                case ref IPAddr _:
-                    return (newIPConn(fd), null);
+                case ptr<IPAddr> _:
+                    return (newIPConn(fd), error.As(null!)!);
                     break;
-                case ref UnixAddr _:
-                    return (newUnixConn(fd), null);
+                case ptr<UnixAddr> _:
+                    return (newUnixConn(fd), error.As(null!)!);
                     break;
             }
             fd.Close();
-            return (null, syscall.EINVAL);
+            return (null, error.As(syscall.EINVAL)!);
+
         }
 
-        private static (Listener, error) fileListener(ref os.File f)
+        private static (Listener, error) fileListener(ptr<os.File> _addr_f)
         {
-            var (fd, err) = newFileFD(f);
+            Listener _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            var (fd, err) = newFileFD(_addr_f);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             switch (fd.laddr.type())
             {
-                case ref TCPAddr laddr:
-                    return (ref new TCPListener(fd), null);
+                case ptr<TCPAddr> laddr:
+                    return (addr(new TCPListener(fd:fd)), error.As(null!)!);
                     break;
-                case ref UnixAddr laddr:
-                    return (ref new UnixListener(fd:fd,path:laddr.Name,unlink:false), null);
+                case ptr<UnixAddr> laddr:
+                    return (addr(new UnixListener(fd:fd,path:laddr.Name,unlink:false)), error.As(null!)!);
                     break;
             }
             fd.Close();
-            return (null, syscall.EINVAL);
+            return (null, error.As(syscall.EINVAL)!);
+
         }
 
-        private static (PacketConn, error) filePacketConn(ref os.File f)
+        private static (PacketConn, error) filePacketConn(ptr<os.File> _addr_f)
         {
-            var (fd, err) = newFileFD(f);
+            PacketConn _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            var (fd, err) = newFileFD(_addr_f);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             switch (fd.laddr.type())
             {
-                case ref UDPAddr _:
-                    return (newUDPConn(fd), null);
+                case ptr<UDPAddr> _:
+                    return (newUDPConn(fd), error.As(null!)!);
                     break;
-                case ref IPAddr _:
-                    return (newIPConn(fd), null);
+                case ptr<IPAddr> _:
+                    return (newIPConn(fd), error.As(null!)!);
                     break;
-                case ref UnixAddr _:
-                    return (newUnixConn(fd), null);
+                case ptr<UnixAddr> _:
+                    return (newUnixConn(fd), error.As(null!)!);
                     break;
             }
             fd.Close();
-            return (null, syscall.EINVAL);
+            return (null, error.As(syscall.EINVAL)!);
+
         }
     }
 }

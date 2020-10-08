@@ -3,7 +3,7 @@
 
 // +build arm,netbsd
 
-// package syscall -- go2cs converted at 2020 August 29 08:42:15 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:30:40 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\ztypes_netbsd_arm.go
 
@@ -13,11 +13,12 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly ulong sizeofPtr = 0x4UL;
-        private static readonly ulong sizeofShort = 0x2UL;
-        private static readonly ulong sizeofInt = 0x4UL;
-        private static readonly ulong sizeofLong = 0x4UL;
-        private static readonly ulong sizeofLongLong = 0x8UL;
+        private static readonly ulong sizeofPtr = (ulong)0x4UL;
+        private static readonly ulong sizeofShort = (ulong)0x2UL;
+        private static readonly ulong sizeofInt = (ulong)0x4UL;
+        private static readonly ulong sizeofLong = (ulong)0x4UL;
+        private static readonly ulong sizeofLongLong = (ulong)0x8UL;
+
 
         private partial struct _C_short // : short
         {
@@ -30,7 +31,8 @@ namespace go
         }
         private partial struct _C_long_long // : long
         {
-        }        public partial struct Timespec
+        }
+        public partial struct Timespec
         {
             public long Sec;
             public int Nsec;
@@ -125,6 +127,9 @@ namespace go
         {
             public array<int> X__fsid_val;
         }
+
+        private static readonly ulong pathMax = (ulong)0x400UL;
+
 
         public partial struct RawSockaddrInet4
         {
@@ -240,23 +245,25 @@ namespace go
             public array<uint> Filt;
         }
 
-        public static readonly ulong SizeofSockaddrInet4 = 0x10UL;
-        public static readonly ulong SizeofSockaddrInet6 = 0x1cUL;
-        public static readonly ulong SizeofSockaddrAny = 0x6cUL;
-        public static readonly ulong SizeofSockaddrUnix = 0x6aUL;
-        public static readonly ulong SizeofSockaddrDatalink = 0x14UL;
-        public static readonly ulong SizeofLinger = 0x8UL;
-        public static readonly ulong SizeofIPMreq = 0x8UL;
-        public static readonly ulong SizeofIPv6Mreq = 0x14UL;
-        public static readonly ulong SizeofMsghdr = 0x1cUL;
-        public static readonly ulong SizeofCmsghdr = 0xcUL;
-        public static readonly ulong SizeofInet6Pktinfo = 0x14UL;
-        public static readonly ulong SizeofIPv6MTUInfo = 0x20UL;
-        public static readonly ulong SizeofICMPv6Filter = 0x20UL;
+        public static readonly ulong SizeofSockaddrInet4 = (ulong)0x10UL;
+        public static readonly ulong SizeofSockaddrInet6 = (ulong)0x1cUL;
+        public static readonly ulong SizeofSockaddrAny = (ulong)0x6cUL;
+        public static readonly ulong SizeofSockaddrUnix = (ulong)0x6aUL;
+        public static readonly ulong SizeofSockaddrDatalink = (ulong)0x14UL;
+        public static readonly ulong SizeofLinger = (ulong)0x8UL;
+        public static readonly ulong SizeofIPMreq = (ulong)0x8UL;
+        public static readonly ulong SizeofIPv6Mreq = (ulong)0x14UL;
+        public static readonly ulong SizeofMsghdr = (ulong)0x1cUL;
+        public static readonly ulong SizeofCmsghdr = (ulong)0xcUL;
+        public static readonly ulong SizeofInet6Pktinfo = (ulong)0x14UL;
+        public static readonly ulong SizeofIPv6MTUInfo = (ulong)0x20UL;
+        public static readonly ulong SizeofICMPv6Filter = (ulong)0x20UL;
 
-        public static readonly ulong PTRACE_TRACEME = 0x0UL;
-        public static readonly ulong PTRACE_CONT = 0x7UL;
-        public static readonly ulong PTRACE_KILL = 0x8UL;
+
+        public static readonly ulong PTRACE_TRACEME = (ulong)0x0UL;
+        public static readonly ulong PTRACE_CONT = (ulong)0x7UL;
+        public static readonly ulong PTRACE_KILL = (ulong)0x8UL;
+
 
         public partial struct Kevent_t
         {
@@ -274,12 +281,13 @@ namespace go
             public array<uint> Bits;
         }
 
-        public static readonly ulong SizeofIfMsghdr = 0x98UL;
-        public static readonly ulong SizeofIfData = 0x88UL;
-        public static readonly ulong SizeofIfaMsghdr = 0x18UL;
-        public static readonly ulong SizeofIfAnnounceMsghdr = 0x18UL;
-        public static readonly ulong SizeofRtMsghdr = 0x78UL;
-        public static readonly ulong SizeofRtMetrics = 0x50UL;
+        public static readonly ulong SizeofIfMsghdr = (ulong)0x98UL;
+        public static readonly ulong SizeofIfData = (ulong)0x88UL;
+        public static readonly ulong SizeofIfaMsghdr = (ulong)0x18UL;
+        public static readonly ulong SizeofIfAnnounceMsghdr = (ulong)0x18UL;
+        public static readonly ulong SizeofRtMsghdr = (ulong)0x78UL;
+        public static readonly ulong SizeofRtMetrics = (ulong)0x50UL;
+
 
         public partial struct IfMsghdr
         {
@@ -375,11 +383,12 @@ namespace go
         {
         }
 
-        public static readonly ulong SizeofBpfVersion = 0x4UL;
-        public static readonly ulong SizeofBpfStat = 0x80UL;
-        public static readonly ulong SizeofBpfProgram = 0x8UL;
-        public static readonly ulong SizeofBpfInsn = 0x8UL;
-        public static readonly ulong SizeofBpfHdr = 0x14UL;
+        public static readonly ulong SizeofBpfVersion = (ulong)0x4UL;
+        public static readonly ulong SizeofBpfStat = (ulong)0x80UL;
+        public static readonly ulong SizeofBpfProgram = (ulong)0x8UL;
+        public static readonly ulong SizeofBpfInsn = (ulong)0x8UL;
+        public static readonly ulong SizeofBpfHdr = (ulong)0x14UL;
+
 
         public partial struct BpfVersion
         {
@@ -424,7 +433,8 @@ namespace go
             public int Usec;
         }
 
-        private static readonly ulong _AT_FDCWD = -0x64UL;
+        private static readonly ulong _AT_FDCWD = (ulong)-0x64UL;
+
 
         public partial struct Termios
         {
@@ -449,6 +459,11 @@ namespace go
             public array<byte> X_sysctl_func;
             public array<byte> X_sysctl_parent;
             public array<byte> X_sysctl_desc;
+        }
+
+        private partial struct sigset
+        {
+            public array<uint> X__bits;
         }
     }
 }

@@ -5,14 +5,19 @@
 // Package dwarf generates DWARF debugging information.
 // DWARF generation is split between the compiler and the linker,
 // this package contains the shared code.
-// package dwarf -- go2cs converted at 2020 August 29 08:51:31 UTC
+// package dwarf -- go2cs converted at 2020 October 08 04:07:48 UTC
 // import "cmd/internal/dwarf" ==> using dwarf = go.cmd.@internal.dwarf_package
 // Original source: C:\Go\src\cmd\internal\dwarf\dwarf.go
+using bytes = go.bytes_package;
+using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using exec = go.os.exec_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace cmd {
@@ -20,20 +25,29 @@ namespace @internal
 {
     public static partial class dwarf_package
     {
+        // TODO(go115newobj): clean up. Some constant prefixes here are no longer
+        // needed in the new object files.
+
         // InfoPrefix is the prefix for all the symbols containing DWARF info entries.
-        public static readonly @string InfoPrefix = "go.info.";
+        public static readonly @string InfoPrefix = (@string)"go.info.";
 
         // RangePrefix is the prefix for all the symbols containing DWARF location lists.
 
 
         // RangePrefix is the prefix for all the symbols containing DWARF location lists.
-        public static readonly @string LocPrefix = "go.loc.";
+        public static readonly @string LocPrefix = (@string)"go.loc.";
 
         // RangePrefix is the prefix for all the symbols containing DWARF range lists.
 
 
         // RangePrefix is the prefix for all the symbols containing DWARF range lists.
-        public static readonly @string RangePrefix = "go.range.";
+        public static readonly @string RangePrefix = (@string)"go.range.";
+
+        // DebugLinesPrefix is the prefix for all the symbols containing DWARF debug_line information from the compiler.
+
+
+        // DebugLinesPrefix is the prefix for all the symbols containing DWARF debug_line information from the compiler.
+        public static readonly @string DebugLinesPrefix = (@string)"go.debuglines.";
 
         // ConstInfoPrefix is the prefix for all symbols containing DWARF info
         // entries that contain constants.
@@ -41,7 +55,7 @@ namespace @internal
 
         // ConstInfoPrefix is the prefix for all symbols containing DWARF info
         // entries that contain constants.
-        public static readonly @string ConstInfoPrefix = "go.constinfo.";
+        public static readonly @string ConstInfoPrefix = (@string)"go.constinfo.";
 
         // CUInfoPrefix is the prefix for symbols containing information to
         // populate the DWARF compilation unit info entries.
@@ -49,7 +63,7 @@ namespace @internal
 
         // CUInfoPrefix is the prefix for symbols containing information to
         // populate the DWARF compilation unit info entries.
-        public static readonly @string CUInfoPrefix = "go.cuinfo.";
+        public static readonly @string CUInfoPrefix = (@string)"go.cuinfo.";
 
         // Used to form the symbol name assigned to the DWARF 'abstract subprogram"
         // info entry for a function
@@ -57,7 +71,7 @@ namespace @internal
 
         // Used to form the symbol name assigned to the DWARF 'abstract subprogram"
         // info entry for a function
-        public static readonly @string AbstractFuncSuffix = "$abstract";
+        public static readonly @string AbstractFuncSuffix = (@string)"$abstract";
 
         // Controls logging/debugging for selected aspects of DWARF subprogram
         // generation (functions, scopes).
@@ -70,27 +84,7 @@ namespace @internal
         // Sym represents a symbol.
         public partial interface Sym
         {
-            long Len();
-        }
-
-        // A Location represents a variable's location at a particular PC range.
-        // It becomes a location list entry in the DWARF.
-        public partial struct Location
-        {
-            public long StartPC;
-            public long EndPC;
-            public slice<Piece> Pieces;
-        }
-
-        // A Piece represents the location of a particular part of a variable.
-        // It becomes part of a location list entry (a DW_OP_piece) in the DWARF.
-        public partial struct Piece
-        {
-            public long Length;
-            public int StackOffset;
-            public short RegNum;
-            public bool Missing;
-            public bool OnStack; // if true, RegNum is unset.
+            long Length(object dwarfContext);
         }
 
         // A Var represents a local variable or a function parameter.
@@ -100,8 +94,9 @@ namespace @internal
             public long Abbrev; // Either DW_ABRV_AUTO[_LOCLIST] or DW_ABRV_PARAM[_LOCLIST]
             public bool IsReturnValue;
             public bool IsInlFormal;
-            public int StackOffset;
-            public slice<Location> LocationList;
+            public int StackOffset; // This package can't use the ssa package, so it can't mention ssa.FuncDebug,
+// so indirect through a closure.
+            public Action<Sym, Sym> PutLocationList;
             public int Scope;
             public Sym Type;
             public @string DeclFile;
@@ -122,7 +117,7 @@ namespace @internal
         {
             public int Parent;
             public slice<Range> Ranges;
-            public slice<ref Var> Vars;
+            public slice<ptr<Var>> Vars;
         }
 
         // A Range represents a half-open interval [Start, End).
@@ -148,6 +143,7 @@ namespace @internal
             public bool External;
             public slice<Scope> Scopes;
             public InlCalls InlCalls;
+            public bool UseBASEntries;
         }
 
         public static void EnableLogging(bool doit)
@@ -156,8 +152,11 @@ namespace @internal
         }
 
         // UnifyRanges merges the list of ranges of c into the list of ranges of s
-        private static void UnifyRanges(this ref Scope s, ref Scope c)
+        private static void UnifyRanges(this ptr<Scope> _addr_s, ptr<Scope> _addr_c)
         {
+            ref Scope s = ref _addr_s.val;
+            ref Scope c = ref _addr_c.val;
+
             var @out = make_slice<Range>(0L, len(s.Ranges) + len(c.Ranges));
 
             long i = 0L;
@@ -177,6 +176,7 @@ namespace @internal
                         cur = c.Ranges[j];
                         j++;
                     }
+
                 }
                 else if (i < len(s.Ranges))
                 {
@@ -192,6 +192,7 @@ namespace @internal
                 {
                     break;
                 }
+
                 {
                     var n = len(out);
 
@@ -205,10 +206,34 @@ namespace @internal
                     }
 
                 }
+
             }
 
 
             s.Ranges = out;
+
+        }
+
+        // AppendRange adds r to s, if r is non-empty.
+        // If possible, it extends the last Range in s.Ranges; if not, it creates a new one.
+        private static void AppendRange(this ptr<Scope> _addr_s, Range r)
+        {
+            ref Scope s = ref _addr_s.val;
+
+            if (r.End <= r.Start)
+            {
+                return ;
+            }
+
+            var i = len(s.Ranges);
+            if (i > 0L && s.Ranges[i - 1L].End == r.Start)
+            {
+                s.Ranges[i - 1L].End = r.End;
+                return ;
+            }
+
+            s.Ranges = append(s.Ranges, r);
+
         }
 
         public partial struct InlCalls
@@ -224,7 +249,7 @@ namespace @internal
             public Sym AbsFunSym; // Indices of child inlines within Calls array above.
             public slice<long> Children; // entries in this list are PAUTO's created by the inliner to
 // capture the promoted formals and locals of the inlined callee.
-            public slice<ref Var> InlVars; // PC ranges for this inlined call.
+            public slice<ptr<Var>> InlVars; // PC ranges for this inlined call.
             public slice<Range> Ranges; // Root call (not a child of some other call).
             public bool Root;
         }
@@ -238,9 +263,10 @@ namespace @internal
             void AddAddress(Sym s, object t, long ofs);
             void AddCURelativeAddress(Sym s, object t, long ofs);
             void AddSectionOffset(Sym s, long size, object t, long ofs);
+            void AddDWARFAddrSectionOffset(Sym s, object t, long ofs);
             void CurrentOffset(Sym s);
             void RecordDclReference(Sym from, Sym to, long dclIdx, long inlIndex);
-            void RecordChildDieOffsets(Sym s, slice<ref Var> vars, slice<int> offsets);
+            void RecordChildDieOffsets(Sym s, slice<ptr<Var>> vars, slice<int> offsets);
             void AddString(Sym s, @string v);
             void AddFileRef(Sym s, object f);
             void Logf(@string format, params object[] args);
@@ -257,14 +283,17 @@ namespace @internal
                 {
                     c |= 0x80UL;
                 }
+
                 b = append(b, c);
                 if (c & 0x80UL == 0L)
                 {
                     break;
                 }
+
             }
 
             return b;
+
         }
 
         // AppendSleb128 appends v to b using DWARF's signed LEB128 encoding.
@@ -279,14 +308,17 @@ namespace @internal
                 {
                     c |= 0x80UL;
                 }
+
                 b = append(b, c);
                 if (c & 0x80UL == 0L)
                 {
                     break;
                 }
+
             }
 
             return b;
+
         }
 
         // sevenbits contains all unsigned seven bit numbers, indexed by their value.
@@ -300,7 +332,9 @@ namespace @internal
             {
                 return sevenbits[v..v + 1L];
             }
+
             return null;
+
         }
 
         // sevenBitS returns the signed LEB128 encoding of v if v is seven bits and nil otherwise.
@@ -311,11 +345,14 @@ namespace @internal
             {
                 return sevenbits[v..v + 1L];
             }
+
             if (uint64(-v) <= 64L)
             {
                 return sevenbits[128L + v..128L + v + 1L];
             }
+
             return null;
+
         }
 
         // Uleb128put appends v to s using DWARF's unsigned LEB128 encoding.
@@ -327,7 +364,9 @@ namespace @internal
                 array<byte> encbuf = new array<byte>(20L);
                 b = AppendUleb128(encbuf[..0L], uint64(v));
             }
+
             ctxt.AddBytes(s, b);
+
         }
 
         // Sleb128put appends v to s using DWARF's signed LEB128 encoding.
@@ -339,14 +378,18 @@ namespace @internal
                 array<byte> encbuf = new array<byte>(20L);
                 b = AppendSleb128(encbuf[..0L], v);
             }
+
             ctxt.AddBytes(s, b);
+
         }
 
         /*
-         * Defining Abbrevs.  This is hardcoded, and there will be
-         * only a handful of them.  The DWARF spec places no restriction on
-         * the ordering of attributes in the Abbrevs and DIEs, and we will
-         * always write them out in the order of declaration in the abbrev.
+         * Defining Abbrevs. This is hardcoded on a per-platform basis (that is,
+         * each platform will see a fixed abbrev table for all objects); the number
+         * of abbrev entries is fairly small (compared to C++ objects).  The DWARF
+         * spec places no restriction on the ordering of attributes in the
+         * Abbrevs and DIEs, and we will always write them out in the order
+         * of declaration in the abbrev.
          */
         private partial struct dwAttrForm
         {
@@ -355,57 +398,62 @@ namespace @internal
         }
 
         // Go-specific type attributes.
-        public static readonly ulong DW_AT_go_kind = 0x2900UL;
-        public static readonly ulong DW_AT_go_key = 0x2901UL;
-        public static readonly ulong DW_AT_go_elem = 0x2902UL; 
+        public static readonly ulong DW_AT_go_kind = (ulong)0x2900UL;
+        public static readonly ulong DW_AT_go_key = (ulong)0x2901UL;
+        public static readonly ulong DW_AT_go_elem = (ulong)0x2902UL; 
         // Attribute for DW_TAG_member of a struct type.
         // Nonzero value indicates the struct field is an embedded field.
-        public static readonly ulong DW_AT_go_embedded_field = 0x2903UL;
+        public static readonly ulong DW_AT_go_embedded_field = (ulong)0x2903UL;
+        public static readonly ulong DW_AT_go_runtime_type = (ulong)0x2904UL;
 
-        public static readonly long DW_AT_internal_location = 253L; // params and locals; not emitted
+        public static readonly ulong DW_AT_go_package_name = (ulong)0x2905UL; // Attribute for DW_TAG_compile_unit
+
+        public static readonly long DW_AT_internal_location = (long)253L; // params and locals; not emitted
 
         // Index into the abbrevs table below.
         // Keep in sync with ispubname() and ispubtype() in ld/dwarf.go.
         // ispubtype considers >= NULLTYPE public
-        public static readonly var DW_ABRV_NULL = iota;
-        public static readonly var DW_ABRV_COMPUNIT = 0;
-        public static readonly var DW_ABRV_FUNCTION = 1;
-        public static readonly var DW_ABRV_FUNCTION_ABSTRACT = 2;
-        public static readonly var DW_ABRV_FUNCTION_CONCRETE = 3;
-        public static readonly var DW_ABRV_INLINED_SUBROUTINE = 4;
-        public static readonly var DW_ABRV_INLINED_SUBROUTINE_RANGES = 5;
-        public static readonly var DW_ABRV_VARIABLE = 6;
-        public static readonly var DW_ABRV_INT_CONSTANT = 7;
-        public static readonly var DW_ABRV_AUTO = 8;
-        public static readonly var DW_ABRV_AUTO_LOCLIST = 9;
-        public static readonly var DW_ABRV_AUTO_ABSTRACT = 10;
-        public static readonly var DW_ABRV_AUTO_CONCRETE = 11;
-        public static readonly var DW_ABRV_AUTO_CONCRETE_LOCLIST = 12;
-        public static readonly var DW_ABRV_PARAM = 13;
-        public static readonly var DW_ABRV_PARAM_LOCLIST = 14;
-        public static readonly var DW_ABRV_PARAM_ABSTRACT = 15;
-        public static readonly var DW_ABRV_PARAM_CONCRETE = 16;
-        public static readonly var DW_ABRV_PARAM_CONCRETE_LOCLIST = 17;
-        public static readonly var DW_ABRV_LEXICAL_BLOCK_RANGES = 18;
-        public static readonly var DW_ABRV_LEXICAL_BLOCK_SIMPLE = 19;
-        public static readonly var DW_ABRV_STRUCTFIELD = 20;
-        public static readonly var DW_ABRV_FUNCTYPEPARAM = 21;
-        public static readonly var DW_ABRV_DOTDOTDOT = 22;
-        public static readonly var DW_ABRV_ARRAYRANGE = 23;
-        public static readonly var DW_ABRV_NULLTYPE = 24;
-        public static readonly var DW_ABRV_BASETYPE = 25;
-        public static readonly var DW_ABRV_ARRAYTYPE = 26;
-        public static readonly var DW_ABRV_CHANTYPE = 27;
-        public static readonly var DW_ABRV_FUNCTYPE = 28;
-        public static readonly var DW_ABRV_IFACETYPE = 29;
-        public static readonly var DW_ABRV_MAPTYPE = 30;
-        public static readonly var DW_ABRV_PTRTYPE = 31;
-        public static readonly var DW_ABRV_BARE_PTRTYPE = 32; // only for void*, no DW_AT_type attr to please gdb 6.
-        public static readonly var DW_ABRV_SLICETYPE = 33;
-        public static readonly var DW_ABRV_STRINGTYPE = 34;
-        public static readonly var DW_ABRV_STRUCTTYPE = 35;
-        public static readonly var DW_ABRV_TYPEDECL = 36;
-        public static readonly var DW_NABRV = 37;
+        public static readonly var DW_ABRV_NULL = (var)iota;
+        public static readonly var DW_ABRV_COMPUNIT = (var)0;
+        public static readonly var DW_ABRV_COMPUNIT_TEXTLESS = (var)1;
+        public static readonly var DW_ABRV_FUNCTION = (var)2;
+        public static readonly var DW_ABRV_FUNCTION_ABSTRACT = (var)3;
+        public static readonly var DW_ABRV_FUNCTION_CONCRETE = (var)4;
+        public static readonly var DW_ABRV_INLINED_SUBROUTINE = (var)5;
+        public static readonly var DW_ABRV_INLINED_SUBROUTINE_RANGES = (var)6;
+        public static readonly var DW_ABRV_VARIABLE = (var)7;
+        public static readonly var DW_ABRV_INT_CONSTANT = (var)8;
+        public static readonly var DW_ABRV_AUTO = (var)9;
+        public static readonly var DW_ABRV_AUTO_LOCLIST = (var)10;
+        public static readonly var DW_ABRV_AUTO_ABSTRACT = (var)11;
+        public static readonly var DW_ABRV_AUTO_CONCRETE = (var)12;
+        public static readonly var DW_ABRV_AUTO_CONCRETE_LOCLIST = (var)13;
+        public static readonly var DW_ABRV_PARAM = (var)14;
+        public static readonly var DW_ABRV_PARAM_LOCLIST = (var)15;
+        public static readonly var DW_ABRV_PARAM_ABSTRACT = (var)16;
+        public static readonly var DW_ABRV_PARAM_CONCRETE = (var)17;
+        public static readonly var DW_ABRV_PARAM_CONCRETE_LOCLIST = (var)18;
+        public static readonly var DW_ABRV_LEXICAL_BLOCK_RANGES = (var)19;
+        public static readonly var DW_ABRV_LEXICAL_BLOCK_SIMPLE = (var)20;
+        public static readonly var DW_ABRV_STRUCTFIELD = (var)21;
+        public static readonly var DW_ABRV_FUNCTYPEPARAM = (var)22;
+        public static readonly var DW_ABRV_DOTDOTDOT = (var)23;
+        public static readonly var DW_ABRV_ARRAYRANGE = (var)24;
+        public static readonly var DW_ABRV_NULLTYPE = (var)25;
+        public static readonly var DW_ABRV_BASETYPE = (var)26;
+        public static readonly var DW_ABRV_ARRAYTYPE = (var)27;
+        public static readonly var DW_ABRV_CHANTYPE = (var)28;
+        public static readonly var DW_ABRV_FUNCTYPE = (var)29;
+        public static readonly var DW_ABRV_IFACETYPE = (var)30;
+        public static readonly var DW_ABRV_MAPTYPE = (var)31;
+        public static readonly var DW_ABRV_PTRTYPE = (var)32;
+        public static readonly var DW_ABRV_BARE_PTRTYPE = (var)33; // only for void*, no DW_AT_type attr to please gdb 6.
+        public static readonly var DW_ABRV_SLICETYPE = (var)34;
+        public static readonly var DW_ABRV_STRINGTYPE = (var)35;
+        public static readonly var DW_ABRV_STRUCTTYPE = (var)36;
+        public static readonly var DW_ABRV_TYPEDECL = (var)37;
+        public static readonly var DW_NABRV = (var)38;
+
 
         private partial struct dwAbbrev
         {
@@ -414,27 +462,84 @@ namespace @internal
             public slice<dwAttrForm> attr;
         }
 
-        private static array<dwAbbrev> abbrevs = new array<dwAbbrev>(new dwAbbrev[] { {0,0,[]dwAttrForm{}}, {DW_TAG_compile_unit,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_language,DW_FORM_data1},{DW_AT_stmt_list,DW_FORM_sec_offset},{DW_AT_low_pc,DW_FORM_addr},{DW_AT_ranges,DW_FORM_sec_offset},{DW_AT_comp_dir,DW_FORM_string},{DW_AT_producer,DW_FORM_string},},}, {DW_TAG_subprogram,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_low_pc,DW_FORM_addr},{DW_AT_high_pc,DW_FORM_addr},{DW_AT_frame_base,DW_FORM_block1},{DW_AT_decl_file,DW_FORM_data4},{DW_AT_external,DW_FORM_flag},},}, {DW_TAG_subprogram,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_inline,DW_FORM_data1},{DW_AT_external,DW_FORM_flag},},}, {DW_TAG_subprogram,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_low_pc,DW_FORM_addr},{DW_AT_high_pc,DW_FORM_addr},{DW_AT_frame_base,DW_FORM_block1},},}, {DW_TAG_inlined_subroutine,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_low_pc,DW_FORM_addr},{DW_AT_high_pc,DW_FORM_addr},{DW_AT_call_file,DW_FORM_data4},{DW_AT_call_line,DW_FORM_udata},},}, {DW_TAG_inlined_subroutine,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_ranges,DW_FORM_sec_offset},{DW_AT_call_file,DW_FORM_data4},{DW_AT_call_line,DW_FORM_udata},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_location,DW_FORM_block1},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_external,DW_FORM_flag},},}, {DW_TAG_constant,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_const_value,DW_FORM_sdata},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_block1},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_sec_offset},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_block1},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_sec_offset},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_variable_parameter,DW_FORM_flag},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_block1},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_variable_parameter,DW_FORM_flag},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_sec_offset},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_variable_parameter,DW_FORM_flag},{DW_AT_type,DW_FORM_ref_addr},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_block1},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_sec_offset},},}, {DW_TAG_lexical_block,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_ranges,DW_FORM_sec_offset},},}, {DW_TAG_lexical_block,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_low_pc,DW_FORM_addr},{DW_AT_high_pc,DW_FORM_addr},},}, {DW_TAG_member,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_data_member_location,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_embedded_field,DW_FORM_flag},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_type,DW_FORM_ref_addr},},}, {DW_TAG_unspecified_parameters,DW_CHILDREN_no,[]dwAttrForm{},}, {DW_TAG_subrange_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_type,DW_FORM_ref_addr},{DW_AT_count,DW_FORM_udata},},}, {DW_TAG_unspecified_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},},}, {DW_TAG_base_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_encoding,DW_FORM_data1},{DW_AT_byte_size,DW_FORM_data1},{DW_AT_go_kind,DW_FORM_data1},},}, {DW_TAG_array_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},},}, {DW_TAG_typedef,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_elem,DW_FORM_ref_addr},},}, {DW_TAG_subroutine_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},},}, {DW_TAG_typedef,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_kind,DW_FORM_data1},},}, {DW_TAG_typedef,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_key,DW_FORM_ref_addr},{DW_AT_go_elem,DW_FORM_ref_addr},},}, {DW_TAG_pointer_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_kind,DW_FORM_data1},},}, {DW_TAG_pointer_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},},}, {DW_TAG_structure_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_elem,DW_FORM_ref_addr},},}, {DW_TAG_structure_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},},}, {DW_TAG_structure_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},},}, {DW_TAG_typedef,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},},} });
+        private static bool abbrevsFinalized = default;
+
+        // expandPseudoForm takes an input DW_FORM_xxx value and translates it
+        // into a platform-appropriate concrete form. Existing concrete/real
+        // DW_FORM values are left untouched. For the moment the only
+        // pseudo-form is DW_FORM_udata_pseudo, which gets expanded to
+        // DW_FORM_data4 on Darwin and DW_FORM_udata everywhere else. See
+        // issue #31459 for more context.
+        private static byte expandPseudoForm(byte form)
+        { 
+            // Is this a pseudo-form?
+            if (form != DW_FORM_udata_pseudo)
+            {
+                return form;
+            }
+
+            var expandedForm = DW_FORM_udata;
+            if (objabi.GOOS == "darwin")
+            {
+                expandedForm = DW_FORM_data4;
+            }
+
+            return uint8(expandedForm);
+
+        }
+
+        // Abbrevs() returns the finalized abbrev array for the platform,
+        // expanding any DW_FORM pseudo-ops to real values.
+        public static array<dwAbbrev> Abbrevs()
+        {
+            if (abbrevsFinalized)
+            {
+                return abbrevs;
+            }
+
+            for (long i = 1L; i < DW_NABRV; i++)
+            {
+                for (long j = 0L; j < len(abbrevs[i].attr); j++)
+                {
+                    abbrevs[i].attr[j].form = expandPseudoForm(abbrevs[i].attr[j].form);
+                }
+
+
+            }
+
+            abbrevsFinalized = true;
+            return abbrevs;
+
+        }
+
+        // abbrevs is a raw table of abbrev entries; it needs to be post-processed
+        // by the Abbrevs() function above prior to being consumed, to expand
+        // the 'pseudo-form' entries below to real DWARF form values.
+
+        private static array<dwAbbrev> abbrevs = new array<dwAbbrev>(new dwAbbrev[] { {0,0,[]dwAttrForm{}}, {DW_TAG_compile_unit,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_language,DW_FORM_data1},{DW_AT_stmt_list,DW_FORM_sec_offset},{DW_AT_low_pc,DW_FORM_addr},{DW_AT_ranges,DW_FORM_sec_offset},{DW_AT_comp_dir,DW_FORM_string},{DW_AT_producer,DW_FORM_string},{DW_AT_go_package_name,DW_FORM_string},},}, {DW_TAG_compile_unit,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_language,DW_FORM_data1},{DW_AT_comp_dir,DW_FORM_string},{DW_AT_producer,DW_FORM_string},{DW_AT_go_package_name,DW_FORM_string},},}, {DW_TAG_subprogram,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_low_pc,DW_FORM_addr},{DW_AT_high_pc,DW_FORM_addr},{DW_AT_frame_base,DW_FORM_block1},{DW_AT_decl_file,DW_FORM_data4},{DW_AT_external,DW_FORM_flag},},}, {DW_TAG_subprogram,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_inline,DW_FORM_data1},{DW_AT_external,DW_FORM_flag},},}, {DW_TAG_subprogram,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_low_pc,DW_FORM_addr},{DW_AT_high_pc,DW_FORM_addr},{DW_AT_frame_base,DW_FORM_block1},},}, {DW_TAG_inlined_subroutine,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_low_pc,DW_FORM_addr},{DW_AT_high_pc,DW_FORM_addr},{DW_AT_call_file,DW_FORM_data4},{DW_AT_call_line,DW_FORM_udata_pseudo},},}, {DW_TAG_inlined_subroutine,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_ranges,DW_FORM_sec_offset},{DW_AT_call_file,DW_FORM_data4},{DW_AT_call_line,DW_FORM_udata_pseudo},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_location,DW_FORM_block1},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_external,DW_FORM_flag},},}, {DW_TAG_constant,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_const_value,DW_FORM_sdata},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_block1},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_sec_offset},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_block1},},}, {DW_TAG_variable,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_sec_offset},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_variable_parameter,DW_FORM_flag},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_block1},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_variable_parameter,DW_FORM_flag},{DW_AT_decl_line,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_sec_offset},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_variable_parameter,DW_FORM_flag},{DW_AT_type,DW_FORM_ref_addr},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_block1},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_abstract_origin,DW_FORM_ref_addr},{DW_AT_location,DW_FORM_sec_offset},},}, {DW_TAG_lexical_block,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_ranges,DW_FORM_sec_offset},},}, {DW_TAG_lexical_block,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_low_pc,DW_FORM_addr},{DW_AT_high_pc,DW_FORM_addr},},}, {DW_TAG_member,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_data_member_location,DW_FORM_udata},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_embedded_field,DW_FORM_flag},},}, {DW_TAG_formal_parameter,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_type,DW_FORM_ref_addr},},}, {DW_TAG_unspecified_parameters,DW_CHILDREN_no,[]dwAttrForm{},}, {DW_TAG_subrange_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_type,DW_FORM_ref_addr},{DW_AT_count,DW_FORM_udata},},}, {DW_TAG_unspecified_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},},}, {DW_TAG_base_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_encoding,DW_FORM_data1},{DW_AT_byte_size,DW_FORM_data1},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},},}, {DW_TAG_array_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},},}, {DW_TAG_typedef,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},{DW_AT_go_elem,DW_FORM_ref_addr},},}, {DW_TAG_subroutine_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},},}, {DW_TAG_typedef,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},},}, {DW_TAG_typedef,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},{DW_AT_go_key,DW_FORM_ref_addr},{DW_AT_go_elem,DW_FORM_ref_addr},},}, {DW_TAG_pointer_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},},}, {DW_TAG_pointer_type,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},},}, {DW_TAG_structure_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},{DW_AT_go_elem,DW_FORM_ref_addr},},}, {DW_TAG_structure_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},},}, {DW_TAG_structure_type,DW_CHILDREN_yes,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_byte_size,DW_FORM_udata},{DW_AT_go_kind,DW_FORM_data1},{DW_AT_go_runtime_type,DW_FORM_addr},},}, {DW_TAG_typedef,DW_CHILDREN_no,[]dwAttrForm{{DW_AT_name,DW_FORM_string},{DW_AT_type,DW_FORM_ref_addr},},} });
 
         // GetAbbrev returns the contents of the .debug_abbrev section.
         public static slice<byte> GetAbbrev()
         {
+            var abbrevs = Abbrevs();
             slice<byte> buf = default;
             for (long i = 1L; i < DW_NABRV; i++)
             { 
                 // See section 7.5.3
                 buf = AppendUleb128(buf, uint64(i));
                 buf = AppendUleb128(buf, uint64(abbrevs[i].tag));
-                buf = append(buf, byte(abbrevs[i].children));
+                buf = append(buf, abbrevs[i].children);
                 foreach (var (_, f) in abbrevs[i].attr)
                 {
                     buf = AppendUleb128(buf, uint64(f.attr));
                     buf = AppendUleb128(buf, uint64(f.form));
                 }
                 buf = append(buf, 0L, 0L);
+
             }
 
             return append(buf, 0L);
+
         }
 
         /*
@@ -470,6 +575,19 @@ namespace @internal
 
             if (form == DW_FORM_addr) // address
             {
+                // Allow nil addresses for DW_AT_go_runtime_type.
+                if (data == null && value == 0L)
+                {
+                    ctxt.AddInt(s, ctxt.PtrSize(), 0L);
+                    break;
+                }
+
+                if (cls == DW_CLS_GO_TYPEREF)
+                {
+                    ctxt.AddSectionOffset(s, ctxt.PtrSize(), data, value);
+                    break;
+                }
+
                 ctxt.AddAddress(s, data, value);
                 goto __switch_break0;
             }
@@ -482,6 +600,7 @@ namespace @internal
                     ctxt.AddAddress(s, data, 0L);
                     break;
                 }
+
                 value &= 0xffUL;
                 ctxt.AddInt(s, 1L, value);
                 slice<byte> p = data._<slice<byte>>()[..value];
@@ -528,9 +647,11 @@ namespace @internal
             {
                 if (cls == DW_CLS_PTR)
                 { // DW_AT_stmt_list and DW_AT_ranges
-                    ctxt.AddSectionOffset(s, 4L, data, value);
+                    ctxt.AddDWARFAddrSectionOffset(s, data, value);
                     break;
+
                 }
+
                 ctxt.AddInt(s, 4L, value);
                 goto __switch_break0;
             }
@@ -584,27 +705,32 @@ namespace @internal
             {
                 if (data == null)
                 {
-                    return error.As(fmt.Errorf("dwarf: null reference in %d", abbrev));
+                    return error.As(fmt.Errorf("dwarf: null reference in %d", abbrev))!;
                 }
-                ctxt.AddSectionOffset(s, 4L, data, value);
+
+                ctxt.AddDWARFAddrSectionOffset(s, data, value);
                 goto __switch_break0;
             }
             if (form == DW_FORM_ref1 || form == DW_FORM_ref2 || form == DW_FORM_ref4 || form == DW_FORM_ref8 || form == DW_FORM_ref_udata || form == DW_FORM_strp || form == DW_FORM_indirect) // (see Section 7.5.3)
             {
             }
             // default: 
-                return error.As(fmt.Errorf("dwarf: unsupported attribute form %d / class %d", form, cls));
+                return error.As(fmt.Errorf("dwarf: unsupported attribute form %d / class %d", form, cls))!;
 
             __switch_break0:;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // PutAttrs writes the attributes for a DIE to symbol 's'.
         //
         // Note that we can (and do) add arbitrary attributes to a DIE, but
         // only the ones actually listed in the Abbrev will be written out.
-        public static void PutAttrs(Context ctxt, Sym s, long abbrev, ref DWAttr attr)
+        public static void PutAttrs(Context ctxt, Sym s, long abbrev, ptr<DWAttr> _addr_attr)
         {
+            ref DWAttr attr = ref _addr_attr.val;
+
+            var abbrevs = Abbrevs();
 Outer:
             foreach (var (_, f) in abbrevs[abbrev].attr)
             {
@@ -620,17 +746,23 @@ Outer:
                             break;
                         ap = ap.Link;
                         }
+
                     }
 
                 }
 
                 putattr(ctxt, s, abbrev, int(f.form), 0L, 0L, null);
+
             }
+
         }
 
-        // HasChildren returns true if 'die' uses an abbrev that supports children.
-        public static bool HasChildren(ref DWDie die)
+        // HasChildren reports whether 'die' uses an abbrev that supports children.
+        public static bool HasChildren(ptr<DWDie> _addr_die)
         {
+            ref DWDie die = ref _addr_die.val;
+
+            var abbrevs = Abbrevs();
             return abbrevs[die.Abbrev].children != 0L;
         }
 
@@ -643,69 +775,99 @@ Outer:
             putattr(ctxt, info, DW_ABRV_INT_CONSTANT, DW_FORM_sdata, DW_CLS_CONSTANT, val, null);
         }
 
-        // PutRanges writes a range table to sym. All addresses in ranges are
-        // relative to some base address. If base is not nil, then they're
-        // relative to the start of base. If base is nil, then the caller must
-        // arrange a base address some other way (such as a DW_AT_low_pc
-        // attribute).
-        public static void PutRanges(Context ctxt, Sym sym, Sym @base, slice<Range> ranges)
+        // PutBasedRanges writes a range table to sym. All addresses in ranges are
+        // relative to some base address, which must be arranged by the caller
+        // (e.g., with a DW_AT_low_pc attribute, or in a BASE-prefixed range).
+        public static void PutBasedRanges(Context ctxt, Sym sym, slice<Range> ranges)
         {
             var ps = ctxt.PtrSize(); 
             // Write ranges.
-            // We do not emit base address entries here, even though they would reduce
-            // the number of relocations, because dsymutil (which is used on macOS when
-            // linking externally) does not support them.
             foreach (var (_, r) in ranges)
             {
-                if (base == null)
-                {
-                    ctxt.AddInt(sym, ps, r.Start);
-                    ctxt.AddInt(sym, ps, r.End);
-                }
-                else
-                {
-                    ctxt.AddCURelativeAddress(sym, base, r.Start);
-                    ctxt.AddCURelativeAddress(sym, base, r.End);
-                }
+                ctxt.AddInt(sym, ps, r.Start);
+                ctxt.AddInt(sym, ps, r.End);
             } 
             // Write trailer.
             ctxt.AddInt(sym, ps, 0L);
             ctxt.AddInt(sym, ps, 0L);
+
+        }
+
+        // PutRanges writes a range table to s.Ranges.
+        // All addresses in ranges are relative to s.base.
+        private static void PutRanges(this ptr<FnState> _addr_s, Context ctxt, slice<Range> ranges)
+        {
+            ref FnState s = ref _addr_s.val;
+
+            var ps = ctxt.PtrSize();
+            var sym = s.Ranges;
+            var @base = s.StartPC;
+
+            if (s.UseBASEntries)
+            { 
+                // Using a Base Address Selection Entry reduces the number of relocations, but
+                // this is not done on macOS because it is not supported by dsymutil/dwarfdump/lldb
+                ctxt.AddInt(sym, ps, -1L);
+                ctxt.AddAddress(sym, base, 0L);
+                PutBasedRanges(ctxt, sym, ranges);
+                return ;
+
+            } 
+
+            // Write ranges full of relocations
+            foreach (var (_, r) in ranges)
+            {
+                ctxt.AddCURelativeAddress(sym, base, r.Start);
+                ctxt.AddCURelativeAddress(sym, base, r.End);
+            } 
+            // Write trailer.
+            ctxt.AddInt(sym, ps, 0L);
+            ctxt.AddInt(sym, ps, 0L);
+
         }
 
         // Return TRUE if the inlined call in the specified slot is empty,
         // meaning it has a zero-length range (no instructions), and all
         // of its children are empty.
-        private static bool isEmptyInlinedCall(long slot, ref InlCalls calls)
+        private static bool isEmptyInlinedCall(long slot, ptr<InlCalls> _addr_calls)
         {
-            var ic = ref calls.Calls[slot];
+            ref InlCalls calls = ref _addr_calls.val;
+
+            var ic = _addr_calls.Calls[slot];
             if (ic.InlIndex == -2L)
             {
                 return true;
             }
+
             var live = false;
             foreach (var (_, k) in ic.Children)
             {
-                if (!isEmptyInlinedCall(k, calls))
+                if (!isEmptyInlinedCall(k, _addr_calls))
                 {
                     live = true;
                 }
+
             }
             if (len(ic.Ranges) > 0L)
             {
                 live = true;
             }
+
             if (!live)
             {
                 ic.InlIndex = -2L;
             }
+
             return !live;
+
         }
 
         // Slot -1:    return top-level inlines
         // Slot >= 0:  return children of that slot
-        private static slice<long> inlChildren(long slot, ref InlCalls calls)
+        private static slice<long> inlChildren(long slot, ptr<InlCalls> _addr_calls)
         {
+            ref InlCalls calls = ref _addr_calls.val;
+
             slice<long> kids = default;
             if (slot != -1L)
             {
@@ -715,16 +877,16 @@ Outer:
                     foreach (var (_, __k) in calls.Calls[slot].Children)
                     {
                         k = __k;
-                        if (!isEmptyInlinedCall(k, calls))
+                        if (!isEmptyInlinedCall(k, _addr_calls))
                         {
                             kids = append(kids, k);
                         }
+
                     }
             else
 
                     k = k__prev1;
                 }
-
             }            {
                 {
                     var k__prev1 = k;
@@ -733,31 +895,39 @@ Outer:
 
                     while (k < len(calls.Calls))
                     {
-                        if (calls.Calls[k].Root && !isEmptyInlinedCall(k, calls))
+                        if (calls.Calls[k].Root && !isEmptyInlinedCall(k, _addr_calls))
                         {
                             kids = append(kids, k);
                         k += 1L;
                         }
+
                     }
 
 
                     k = k__prev1;
                 }
+
             }
+
             return kids;
+
         }
 
-        private static map<ref Var, bool> inlinedVarTable(ref InlCalls inlcalls)
+        private static map<ptr<Var>, bool> inlinedVarTable(ptr<InlCalls> _addr_inlcalls)
         {
-            var vars = make_map<ref Var, bool>();
+            ref InlCalls inlcalls = ref _addr_inlcalls.val;
+
+            var vars = make_map<ptr<Var>, bool>();
             foreach (var (_, ic) in inlcalls.Calls)
             {
                 foreach (var (_, v) in ic.InlVars)
                 {
                     vars[v] = true;
                 }
+
             }
             return vars;
+
         }
 
         // The s.Scopes slice contains variables were originally part of the
@@ -766,14 +936,17 @@ Outer:
         // function prunes out any variables from the latter category (since
         // they will be emitted as part of DWARF inlined_subroutine DIEs) and
         // then generates scopes for vars in the former category.
-        private static error putPrunedScopes(Context ctxt, ref FnState s, long fnabbrev)
+        private static error putPrunedScopes(Context ctxt, ptr<FnState> _addr_s, long fnabbrev)
         {
+            ref FnState s = ref _addr_s.val;
+
             if (len(s.Scopes) == 0L)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             var scopes = make_slice<Scope>(len(s.Scopes), len(s.Scopes));
-            var pvars = inlinedVarTable(ref s.InlCalls);
+            var pvars = inlinedVarTable(_addr_s.InlCalls);
             foreach (var (k, s) in s.Scopes)
             {
                 Scope pruned = new Scope(Parent:s.Parent,Ranges:s.Ranges);
@@ -784,17 +957,21 @@ Outer:
                     {
                         pruned.Vars = append(pruned.Vars, s.Vars[i]);
                     }
+
                 }
 
                 sort.Sort(byChildIndex(pruned.Vars));
                 scopes[k] = pruned;
+
             }
             array<byte> encbuf = new array<byte>(20L);
-            if (putscope(ctxt, s, scopes, 0L, fnabbrev, encbuf[..0L]) < int32(len(scopes)))
+            if (putscope(ctxt, _addr_s, scopes, 0L, fnabbrev, encbuf[..0L]) < int32(len(scopes)))
             {
-                return error.As(errors.New("multiple toplevel scopes"));
+                return error.As(errors.New("multiple toplevel scopes"))!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Emit DWARF attributes and child DIEs for an 'abstract' subprogram.
@@ -804,12 +981,15 @@ Outer:
         // 'concrete' instance) will contain a pointer back to this abstract
         // DIE (as a space-saving measure, so that name/type etc doesn't have
         // to be repeated for each inlined copy).
-        public static error PutAbstractFunc(Context ctxt, ref FnState s)
+        public static error PutAbstractFunc(Context ctxt, ptr<FnState> _addr_s)
         {
+            ref FnState s = ref _addr_s.val;
+
             if (logDwarf)
             {
                 ctxt.Logf("PutAbstractFunc(%v)\n", s.Absfn);
             }
+
             var abbrev = DW_ABRV_FUNCTION_ABSTRACT;
             Uleb128put(ctxt, s.Absfn, int64(abbrev));
 
@@ -823,8 +1003,10 @@ Outer:
                 // be rewritten, since it would change the offsets of the
                 // child DIEs (which we're relying on in order for abstract
                 // origin references to work).
-                fullname = s.Importpath + "." + s.Name[3L..];
+                fullname = objabi.PathToPrefix(s.Importpath) + "." + s.Name[3L..];
+
             }
+
             putattr(ctxt, s.Absfn, abbrev, DW_FORM_string, DW_CLS_STRING, int64(len(fullname)), fullname); 
 
             // DW_AT_inlined value
@@ -835,10 +1017,11 @@ Outer:
             {
                 ev = 1L;
             }
+
             putattr(ctxt, s.Absfn, abbrev, DW_FORM_flag, DW_CLS_FLAG, ev, 0L); 
 
             // Child variables (may be empty)
-            slice<ref Var> flattened = default; 
+            slice<ptr<Var>> flattened = default; 
 
             // This slice will hold the offset in bytes for each child var DIE
             // with respect to the start of the parent subprogram DIE.
@@ -850,7 +1033,7 @@ Outer:
                 // For abstract subprogram DIEs we want to flatten out scope info:
                 // lexical scope DIEs contain range and/or hi/lo PC attributes,
                 // which we explicitly don't want for the abstract subprogram DIE.
-                var pvars = inlinedVarTable(ref s.InlCalls);
+                var pvars = inlinedVarTable(_addr_s.InlCalls);
                 foreach (var (_, scope) in s.Scopes)
                 {
                     {
@@ -863,12 +1046,15 @@ Outer:
                             {
                                 continue;
                             }
+
                             flattened = append(flattened, scope.Vars[i]);
+
                         }
 
 
                         i = i__prev2;
                     }
+
                 }
                 if (len(flattened) > 0L)
                 {
@@ -893,6 +1079,7 @@ Outer:
                         }
 
                         ctxt.Logf("\n");
+
                     } 
 
                     // This slice will hold the offset in bytes for each child
@@ -905,18 +1092,20 @@ Outer:
                         {
                             v = __v;
                             offsets = append(offsets, int32(ctxt.CurrentOffset(s.Absfn)));
-                            putAbstractVar(ctxt, s.Absfn, v);
+                            putAbstractVar(ctxt, s.Absfn, _addr_v);
                         }
 
                         v = v__prev1;
                     }
-
                 }
+
             }
+
             ctxt.RecordChildDieOffsets(s.Absfn, flattened, offsets);
 
             Uleb128put(ctxt, s.Absfn, 0L);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Emit DWARF attributes and child DIEs for an inlined subroutine. The
@@ -924,8 +1113,10 @@ Outer:
         // its corresponding 'abstract' DIE (containing location-independent
         // attributes such as name, type, etc). Inlined subroutine DIEs can
         // have other inlined subroutine DIEs as children.
-        public static error PutInlinedFunc(Context ctxt, ref FnState s, Sym callersym, long callIdx)
+        public static error PutInlinedFunc(Context ctxt, ptr<FnState> _addr_s, Sym callersym, long callIdx)
         {
+            ref FnState s = ref _addr_s.val;
+
             var ic = s.InlCalls.Calls[callIdx];
             var callee = ic.AbsFunSym;
 
@@ -934,6 +1125,7 @@ Outer:
             {
                 abbrev = DW_ABRV_INLINED_SUBROUTINE;
             }
+
             Uleb128put(ctxt, s.Info, int64(abbrev));
 
             if (logDwarf)
@@ -946,8 +1138,8 @@ Outer:
 
             if (abbrev == DW_ABRV_INLINED_SUBROUTINE_RANGES)
             {
-                putattr(ctxt, s.Info, abbrev, DW_FORM_sec_offset, DW_CLS_PTR, s.Ranges.Len(), s.Ranges);
-                PutRanges(ctxt, s.Ranges, s.StartPC, ic.Ranges);
+                putattr(ctxt, s.Info, abbrev, DW_FORM_sec_offset, DW_CLS_PTR, s.Ranges.Length(ctxt), s.Ranges);
+                s.PutRanges(ctxt, ic.Ranges);
             }
             else
             {
@@ -959,7 +1151,8 @@ Outer:
 
             // Emit call file, line attrs.
             ctxt.AddFileRef(s.Info, ic.CallFile);
-            putattr(ctxt, s.Info, abbrev, DW_FORM_udata, DW_CLS_CONSTANT, int64(ic.CallLine), null); 
+            var form = int(expandPseudoForm(DW_FORM_udata_pseudo));
+            putattr(ctxt, s.Info, abbrev, form, DW_CLS_CONSTANT, int64(ic.CallLine), null); 
 
             // Variables associated with this inlined routine instance.
             var vars = ic.InlVars;
@@ -972,21 +1165,25 @@ Outer:
                 {
                     continue;
                 }
-                putvar(ctxt, s, v, callee, abbrev, inlIndex, encbuf[..0L]);
+
+                putvar(ctxt, _addr_s, _addr_v, callee, abbrev, inlIndex, encbuf[..0L]);
+
             } 
 
             // Children of this inline.
-            foreach (var (_, sib) in inlChildren(callIdx, ref s.InlCalls))
+            foreach (var (_, sib) in inlChildren(callIdx, _addr_s.InlCalls))
             {
                 var absfn = s.InlCalls.Calls[sib].AbsFunSym;
-                var err = PutInlinedFunc(ctxt, s, absfn, sib);
+                var err = PutInlinedFunc(ctxt, _addr_s, absfn, sib);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
             Uleb128put(ctxt, s.Info, 0L);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Emit DWARF attributes and child DIEs for a 'concrete' subprogram,
@@ -996,12 +1193,15 @@ Outer:
         // for the function (which holds location-independent attributes such
         // as name, type), then the remainder of the attributes are specific
         // to this instance (location, frame base, etc).
-        public static error PutConcreteFunc(Context ctxt, ref FnState s)
+        public static error PutConcreteFunc(Context ctxt, ptr<FnState> _addr_s)
         {
+            ref FnState s = ref _addr_s.val;
+
             if (logDwarf)
             {
                 ctxt.Logf("PutConcreteFunc(%v)\n", s.Info);
             }
+
             var abbrev = DW_ABRV_FUNCTION_CONCRETE;
             Uleb128put(ctxt, s.Info, int64(abbrev)); 
 
@@ -1019,11 +1219,11 @@ Outer:
             {
                 var err__prev1 = err;
 
-                var err = putPrunedScopes(ctxt, s, abbrev);
+                var err = putPrunedScopes(ctxt, _addr_s, abbrev);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // Inlined subroutines.
@@ -1033,17 +1233,19 @@ Outer:
             } 
 
             // Inlined subroutines.
-            foreach (var (_, sib) in inlChildren(-1L, ref s.InlCalls))
+            foreach (var (_, sib) in inlChildren(-1L, _addr_s.InlCalls))
             {
                 var absfn = s.InlCalls.Calls[sib].AbsFunSym;
-                err = PutInlinedFunc(ctxt, s, absfn, sib);
+                err = PutInlinedFunc(ctxt, _addr_s, absfn, sib);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
             Uleb128put(ctxt, s.Info, 0L);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Emit DWARF attributes and child DIEs for a subprogram. Here
@@ -1051,16 +1253,26 @@ Outer:
         // when its containing package was compiled (hence there is no need to
         // emit an abstract version for it to use as a base for inlined
         // routine records).
-        public static error PutDefaultFunc(Context ctxt, ref FnState s)
+        public static error PutDefaultFunc(Context ctxt, ptr<FnState> _addr_s)
         {
+            ref FnState s = ref _addr_s.val;
+
             if (logDwarf)
             {
                 ctxt.Logf("PutDefaultFunc(%v)\n", s.Info);
             }
-            var abbrev = DW_ABRV_FUNCTION;
-            Uleb128put(ctxt, s.Info, int64(abbrev));
 
-            putattr(ctxt, s.Info, DW_ABRV_FUNCTION, DW_FORM_string, DW_CLS_STRING, int64(len(s.Name)), s.Name);
+            var abbrev = DW_ABRV_FUNCTION;
+            Uleb128put(ctxt, s.Info, int64(abbrev)); 
+
+            // Expand '"".' to import path.
+            var name = s.Name;
+            if (s.Importpath != "")
+            {
+                name = strings.Replace(name, "\"\".", objabi.PathToPrefix(s.Importpath) + ".", -1L);
+            }
+
+            putattr(ctxt, s.Info, DW_ABRV_FUNCTION, DW_FORM_string, DW_CLS_STRING, int64(len(name)), name);
             putattr(ctxt, s.Info, abbrev, DW_FORM_addr, DW_CLS_ADDRESS, 0L, s.StartPC);
             putattr(ctxt, s.Info, abbrev, DW_FORM_addr, DW_CLS_ADDRESS, s.Size, s.StartPC);
             putattr(ctxt, s.Info, abbrev, DW_FORM_block1, DW_CLS_BLOCK, 1L, new slice<byte>(new byte[] { DW_OP_call_frame_cfa }));
@@ -1071,17 +1283,18 @@ Outer:
             {
                 ev = 1L;
             }
+
             putattr(ctxt, s.Info, abbrev, DW_FORM_flag, DW_CLS_FLAG, ev, 0L); 
 
             // Scopes
             {
                 var err__prev1 = err;
 
-                var err = putPrunedScopes(ctxt, s, abbrev);
+                var err = putPrunedScopes(ctxt, _addr_s, abbrev);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // Inlined subroutines.
@@ -1091,21 +1304,25 @@ Outer:
             } 
 
             // Inlined subroutines.
-            foreach (var (_, sib) in inlChildren(-1L, ref s.InlCalls))
+            foreach (var (_, sib) in inlChildren(-1L, _addr_s.InlCalls))
             {
                 var absfn = s.InlCalls.Calls[sib].AbsFunSym;
-                err = PutInlinedFunc(ctxt, s, absfn, sib);
+                err = PutInlinedFunc(ctxt, _addr_s, absfn, sib);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
             Uleb128put(ctxt, s.Info, 0L);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static int putscope(Context ctxt, ref FnState s, slice<Scope> scopes, int curscope, long fnabbrev, slice<byte> encbuf)
+        private static int putscope(Context ctxt, ptr<FnState> _addr_s, slice<Scope> scopes, int curscope, long fnabbrev, slice<byte> encbuf)
         {
+            ref FnState s = ref _addr_s.val;
+
             if (logDwarf)
             {
                 ctxt.Logf("putscope(%v,%d): vars:", s.Info, curscope);
@@ -1123,14 +1340,16 @@ Outer:
                 }
 
                 ctxt.Logf("\n");
+
             }
+
             {
                 var v__prev1 = v;
 
                 foreach (var (_, __v) in scopes[curscope].Vars)
                 {
                     v = __v;
-                    putvar(ctxt, s, v, s.Absfn, fnabbrev, -1L, encbuf);
+                    putvar(ctxt, _addr_s, _addr_v, s.Absfn, fnabbrev, -1L, encbuf);
                 }
 
                 v = v__prev1;
@@ -1145,6 +1364,13 @@ Outer:
                 {
                     return curscope;
                 }
+
+                if (len(scopes[curscope].Vars) == 0L)
+                {
+                    curscope = putscope(ctxt, _addr_s, scopes, curscope, fnabbrev, encbuf);
+                    continue;
+                }
+
                 if (len(scope.Ranges) == 1L)
                 {
                     Uleb128put(ctxt, s.Info, DW_ABRV_LEXICAL_BLOCK_SIMPLE);
@@ -1154,15 +1380,19 @@ Outer:
                 else
                 {
                     Uleb128put(ctxt, s.Info, DW_ABRV_LEXICAL_BLOCK_RANGES);
-                    putattr(ctxt, s.Info, DW_ABRV_LEXICAL_BLOCK_RANGES, DW_FORM_sec_offset, DW_CLS_PTR, s.Ranges.Len(), s.Ranges);
+                    putattr(ctxt, s.Info, DW_ABRV_LEXICAL_BLOCK_RANGES, DW_FORM_sec_offset, DW_CLS_PTR, s.Ranges.Length(ctxt), s.Ranges);
 
-                    PutRanges(ctxt, s.Ranges, s.StartPC, scope.Ranges);
+                    s.PutRanges(ctxt, scope.Ranges);
                 }
-                curscope = putscope(ctxt, s, scopes, curscope, fnabbrev, encbuf);
+
+                curscope = putscope(ctxt, _addr_s, scopes, curscope, fnabbrev, encbuf);
+
                 Uleb128put(ctxt, s.Info, 0L);
+
             }
 
             return curscope;
+
         }
 
         // Given a default var abbrev code, select corresponding concrete code.
@@ -1179,21 +1409,27 @@ Outer:
                 return DW_ABRV_PARAM_CONCRETE_LOCLIST;
             else 
                 panic("should never happen");
-                    });
+            
+        });
 
         // Pick the correct abbrev code for variable or parameter DIE.
-        private static (long, bool, bool) determineVarAbbrev(ref Var _v, long fnabbrev) => func(_v, (ref Var v, Defer _, Panic panic, Recover __) =>
+        private static (long, bool, bool) determineVarAbbrev(ptr<Var> _addr_v, long fnabbrev) => func((_, panic, __) =>
         {
+            long _p0 = default;
+            bool _p0 = default;
+            bool _p0 = default;
+            ref Var v = ref _addr_v.val;
+
             var abbrev = v.Abbrev; 
 
             // If the variable was entirely optimized out, don't emit a location list;
             // convert to an inline abbreviation and emit an empty location.
             var missing = false;
 
-            if (abbrev == DW_ABRV_AUTO_LOCLIST && len(v.LocationList) == 0L) 
+            if (abbrev == DW_ABRV_AUTO_LOCLIST && v.PutLocationList == null) 
                 missing = true;
                 abbrev = DW_ABRV_AUTO;
-            else if (abbrev == DW_ABRV_PARAM_LOCLIST && len(v.LocationList) == 0L) 
+            else if (abbrev == DW_ABRV_PARAM_LOCLIST && v.PutLocationList == null) 
                 missing = true;
                 abbrev = DW_ABRV_PARAM;
             // Determine whether to use a concrete variable or regular variable DIE.
@@ -1210,6 +1446,7 @@ Outer:
                 {
                     concrete = false;
                 }
+
             else if (fnabbrev == DW_ABRV_INLINED_SUBROUTINE || fnabbrev == DW_ABRV_INLINED_SUBROUTINE_RANGES)             else 
                 panic("should never happen");
             // Select proper abbrev based on concrete/non-concrete
@@ -1217,7 +1454,9 @@ Outer:
             {
                 abbrev = concreteVarAbbrev(abbrev);
             }
+
             return (abbrev, missing, concrete);
+
         });
 
         private static bool abbrevUsesLoclist(long abbrev)
@@ -1227,11 +1466,14 @@ Outer:
                 return true;
             else 
                 return false;
-                    }
+            
+        }
 
         // Emit DWARF attributes for a variable belonging to an 'abstract' subprogram.
-        private static void putAbstractVar(Context ctxt, Sym info, ref Var v)
-        { 
+        private static void putAbstractVar(Context ctxt, Sym info, ptr<Var> _addr_v)
+        {
+            ref Var v = ref _addr_v.val;
+ 
             // Remap abbrev
             var abbrev = v.Abbrev;
 
@@ -1250,7 +1492,9 @@ Outer:
                 {
                     isReturn = 1L;
                 }
+
                 putattr(ctxt, info, abbrev, DW_FORM_flag, DW_CLS_FLAG, isReturn, null);
+
             } 
 
             // Line
@@ -1258,6 +1502,7 @@ Outer:
             { 
                 // See issue 23374 for more on why decl line is skipped for abs params.
                 putattr(ctxt, info, abbrev, DW_FORM_udata, DW_CLS_CONSTANT, int64(v.DeclLine), null);
+
             } 
 
             // Type
@@ -1266,10 +1511,13 @@ Outer:
             // Var has no children => no terminator
         }
 
-        private static void putvar(Context ctxt, ref FnState s, ref Var v, Sym absfn, long fnabbrev, long inlIndex, slice<byte> encbuf)
-        { 
+        private static void putvar(Context ctxt, ptr<FnState> _addr_s, ptr<Var> _addr_v, Sym absfn, long fnabbrev, long inlIndex, slice<byte> encbuf)
+        {
+            ref FnState s = ref _addr_s.val;
+            ref Var v = ref _addr_v.val;
+ 
             // Remap abbrev according to parent DIE abbrev
-            var (abbrev, missing, concrete) = determineVarAbbrev(v, fnabbrev);
+            var (abbrev, missing, concrete) = determineVarAbbrev(_addr_v, fnabbrev);
 
             Uleb128put(ctxt, s.Info, int64(abbrev)); 
 
@@ -1282,6 +1530,7 @@ Outer:
                 // the child DIE reference.
                 putattr(ctxt, s.Info, abbrev, DW_FORM_ref_addr, DW_CLS_REFERENCE, 0L, absfn);
                 ctxt.RecordDclReference(s.Info, absfn, int(v.ChildIndex), inlIndex);
+
             }
             else
             { 
@@ -1295,15 +1544,20 @@ Outer:
                     {
                         isReturn = 1L;
                     }
+
                     putattr(ctxt, s.Info, abbrev, DW_FORM_flag, DW_CLS_FLAG, isReturn, null);
+
                 }
+
                 putattr(ctxt, s.Info, abbrev, DW_FORM_udata, DW_CLS_CONSTANT, int64(v.DeclLine), null);
                 putattr(ctxt, s.Info, abbrev, DW_FORM_ref_addr, DW_CLS_REFERENCE, 0L, v.Type);
+
             }
+
             if (abbrevUsesLoclist(abbrev))
             {
-                putattr(ctxt, s.Info, abbrev, DW_FORM_sec_offset, DW_CLS_PTR, int64(s.Loc.Len()), s.Loc);
-                addLocList(ctxt, s.Loc, s.StartPC, v, encbuf);
+                putattr(ctxt, s.Info, abbrev, DW_FORM_sec_offset, DW_CLS_PTR, s.Loc.Length(ctxt), s.Loc);
+                v.PutLocationList(s.Loc, s.StartPC);
             }
             else
             {
@@ -1317,67 +1571,15 @@ Outer:
                     loc = append(loc, DW_OP_fbreg);
                     loc = AppendSleb128(loc, int64(v.StackOffset));
                                 putattr(ctxt, s.Info, abbrev, DW_FORM_block1, DW_CLS_BLOCK, int64(len(loc)), loc);
+
             } 
 
             // Var has no children => no terminator
         }
 
-        private static void addLocList(Context ctxt, Sym listSym, Sym startPC, ref Var v, slice<byte> encbuf)
-        { 
-            // Base address entry: max ptr followed by the base address.
-            ctxt.AddInt(listSym, ctxt.PtrSize(), ~0L);
-            ctxt.AddAddress(listSym, startPC, 0L);
-            foreach (var (_, entry) in v.LocationList)
-            {
-                ctxt.AddInt(listSym, ctxt.PtrSize(), entry.StartPC);
-                ctxt.AddInt(listSym, ctxt.PtrSize(), entry.EndPC);
-                var locBuf = encbuf[..0L];
-                foreach (var (_, piece) in entry.Pieces)
-                {
-                    if (!piece.Missing)
-                    {
-                        if (piece.OnStack)
-                        {
-                            if (piece.StackOffset == 0L)
-                            {
-                                locBuf = append(locBuf, DW_OP_call_frame_cfa);
-                            }
-                            else
-                            {
-                                locBuf = append(locBuf, DW_OP_fbreg);
-                                locBuf = AppendSleb128(locBuf, int64(piece.StackOffset));
-                            }
-                        }
-                        else
-                        {
-                            if (piece.RegNum < 32L)
-                            {
-                                locBuf = append(locBuf, DW_OP_reg0 + byte(piece.RegNum));
-                            }
-                            else
-                            {
-                                locBuf = append(locBuf, DW_OP_regx);
-                                locBuf = AppendUleb128(locBuf, uint64(piece.RegNum));
-                            }
-                        }
-                    }
-                    if (len(entry.Pieces) > 1L)
-                    {
-                        locBuf = append(locBuf, DW_OP_piece);
-                        locBuf = AppendUleb128(locBuf, uint64(piece.Length));
-                    }
-                }
-                ctxt.AddInt(listSym, 2L, int64(len(locBuf)));
-                ctxt.AddBytes(listSym, locBuf);
-            } 
-            // End list
-            ctxt.AddInt(listSym, ctxt.PtrSize(), 0L);
-            ctxt.AddInt(listSym, ctxt.PtrSize(), 0L);
-        }
-
         // VarsByOffset attaches the methods of sort.Interface to []*Var,
         // sorting in increasing StackOffset.
-        public partial struct VarsByOffset // : slice<ref Var>
+        public partial struct VarsByOffset // : slice<ptr<Var>>
         {
         }
 
@@ -1393,11 +1595,10 @@ Outer:
         {
             s[i] = s[j];
             s[j] = s[i];
-
         }
 
         // byChildIndex implements sort.Interface for []*dwarf.Var by child index.
-        private partial struct byChildIndex // : slice<ref Var>
+        private partial struct byChildIndex // : slice<ptr<Var>>
         {
         }
 
@@ -1413,6 +1614,93 @@ Outer:
         {
             s[i] = s[j];
             s[j] = s[i];
+        }
+
+        // IsDWARFEnabledOnAIX returns true if DWARF is possible on the
+        // current extld.
+        // AIX ld doesn't support DWARF with -bnoobjreorder with version
+        // prior to 7.2.2.
+        public static (bool, error) IsDWARFEnabledOnAIXLd(@string extld)
+        {
+            bool _p0 = default;
+            error _p0 = default!;
+
+            var (out, err) = exec.Command(extld, "-Wl,-V").CombinedOutput();
+            if (err != null)
+            { 
+                // The normal output should display ld version and
+                // then fails because ".main" is not defined:
+                // ld: 0711-317 ERROR: Undefined symbol: .main
+                if (!bytes.Contains(out, (slice<byte>)"0711-317"))
+                {
+                    return (false, error.As(fmt.Errorf("%s -Wl,-V failed: %v\n%s", extld, err, out))!);
+                }
+
+            } 
+            // gcc -Wl,-V output should be:
+            //   /usr/bin/ld: LD X.X.X(date)
+            //   ...
+            out = bytes.TrimPrefix(out, (slice<byte>)"/usr/bin/ld: LD ");
+            var vers = string(bytes.Split(out, (slice<byte>)"(")[0L]);
+            var subvers = strings.Split(vers, ".");
+            if (len(subvers) != 3L)
+            {
+                return (false, error.As(fmt.Errorf("cannot parse %s -Wl,-V (%s): %v\n", extld, out, err))!);
+            }
+
+            {
+                var v__prev1 = v;
+
+                var (v, err) = strconv.Atoi(subvers[0L]);
+
+                if (err != null || v < 7L)
+                {
+                    return (false, error.As(null!)!);
+                }
+                else if (v > 7L)
+                {
+                    return (true, error.As(null!)!);
+                }
+
+
+                v = v__prev1;
+
+            }
+
+            {
+                var v__prev1 = v;
+
+                (v, err) = strconv.Atoi(subvers[1L]);
+
+                if (err != null || v < 2L)
+                {
+                    return (false, error.As(null!)!);
+                }
+                else if (v > 2L)
+                {
+                    return (true, error.As(null!)!);
+                }
+
+
+                v = v__prev1;
+
+            }
+
+            {
+                var v__prev1 = v;
+
+                (v, err) = strconv.Atoi(subvers[2L]);
+
+                if (err != null || v < 2L)
+                {
+                    return (false, error.As(null!)!);
+                }
+
+                v = v__prev1;
+
+            }
+
+            return (true, error.As(null!)!);
 
         }
     }

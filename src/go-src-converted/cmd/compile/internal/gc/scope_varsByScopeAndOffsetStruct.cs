@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:28:23 UTC
+//     Generated on 2020 October 08 04:30:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace @internal
                 this.scopes = default;
             }
 
-            public varsByScopeAndOffset(slice<ref dwarf.Var> vars = default, slice<ScopeID> scopes = default)
+            public varsByScopeAndOffset(slice<ptr<dwarf.Var>> vars = default, slice<ScopeID> scopes = default)
             {
                 this.vars = vars;
                 this.scopes = scopes;

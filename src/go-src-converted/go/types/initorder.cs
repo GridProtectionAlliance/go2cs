@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:47:39 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:26 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\initorder.go
 using heap = go.container.heap_package;
@@ -15,18 +15,20 @@ namespace go
     public static partial class types_package
     {
         // initOrder computes the Info.InitOrder for package variables.
-        private static void initOrder(this ref Checker check)
-        { 
+        private static void initOrder(this ptr<Checker> _addr_check)
+        {
+            ref Checker check = ref _addr_check.val;
+ 
             // An InitOrder may already have been computed if a package is
             // built from several calls to (*Checker).Files. Clear it.
             check.Info.InitOrder = check.Info.InitOrder[..0L]; 
 
             // Compute the object dependency graph and initialize
             // a priority queue with the list of graph nodes.
-            var pq = nodeQueue(dependencyGraph(check.objMap));
-            heap.Init(ref pq);
+            ref var pq = ref heap(nodeQueue(dependencyGraph(check.objMap)), out ptr<var> _addr_pq);
+            heap.Init(_addr_pq);
 
-            const var debug = false;
+            const var debug = (var)false;
 
             if (debug)
             {
@@ -43,7 +45,7 @@ namespace go
                         {
                             var obj__prev2 = obj;
 
-                            dependency (obj, _) = obj._<dependency>();
+                            dependency (obj, _) = dependency.As(obj._<dependency>())!;
 
                             if (obj != null)
                             {
@@ -62,6 +64,7 @@ namespace go
                             obj = obj__prev2;
 
                         }
+
                     }
                     obj = obj__prev1;
                 }
@@ -86,7 +89,6 @@ namespace go
                             }
                             p = p__prev2;
                         }
-
                     }
                     n = n__prev1;
                 }
@@ -94,12 +96,13 @@ namespace go
                 fmt.Println();
 
                 fmt.Println("Processing nodes:");
+
             }
-            var emitted = make_map<ref declInfo, bool>();
+            var emitted = make_map<ptr<declInfo>, bool>();
             while (len(pq) > 0L)
             { 
                 // get the next node
-                ref graphNode n = heap.Pop(ref pq)._<ref graphNode>();
+                ptr<graphNode> n = heap.Pop(_addr_pq)._<ptr<graphNode>>();
 
                 if (debug)
                 {
@@ -107,7 +110,7 @@ namespace go
                 }
                 if (n.ndeps > 0L)
                 {
-                    var cycle = findPath(check.objMap, n.obj, n.obj, make(objSet)); 
+                    var cycle = findPath(check.objMap, n.obj, n.obj, make_map<Object, bool>()); 
                     // If n.obj is not part of the cycle (e.g., n.obj->b->c->d->c),
                     // cycle will be nil. Don't report anything in that case since
                     // the cycle is reported when the algorithm gets to an object
@@ -128,12 +131,12 @@ namespace go
                     {
                         p = __p;
                         p.ndeps--;
-                        heap.Fix(ref pq, p.index);
+                        heap.Fix(_addr_pq, p.index);
                     }
                     p = p__prev2;
                 }
 
-                ref Var (v, _) = n.obj._<ref Var>();
+                ptr<Var> (v, _) = n.obj._<ptr<Var>>();
                 var info = check.objMap[v];
                 if (v == null || !info.hasInitializer())
                 {
@@ -148,10 +151,11 @@ namespace go
                 var infoLhs = info.lhs; // possibly nil (see declInfo.lhs field comment)
                 if (infoLhs == null)
                 {
-                    infoLhs = new slice<ref Var>(new ref Var[] { v });
+                    infoLhs = new slice<ptr<Var>>(new ptr<Var>[] { v });
                 }
-                Initializer init = ref new Initializer(infoLhs,info.init);
+                ptr<Initializer> init = addr(new Initializer(infoLhs,info.init));
                 check.Info.InitOrder = append(check.Info.InitOrder, init);
+
             }
 
             if (debug)
@@ -170,19 +174,21 @@ namespace go
                 }
 
                 fmt.Println();
+
             }
         }
 
         // findPath returns the (reversed) list of objects []Object{to, ... from}
         // such that there is a path of object dependencies from 'from' to 'to'.
         // If there is no such path, the result is nil.
-        private static slice<Object> findPath(map<Object, ref declInfo> objMap, Object from, Object to, objSet visited)
+        private static slice<Object> findPath(map<Object, ptr<declInfo>> objMap, Object from, Object to, map<Object, bool> seen)
         {
-            if (visited[from])
+            if (seen[from])
             {
-                return null; // node already seen
+                return null;
             }
-            visited[from] = true;
+
+            seen[from] = true;
 
             foreach (var (d) in objMap[from].deps)
             {
@@ -190,8 +196,9 @@ namespace go
                 {
                     return new slice<Object>(new Object[] { d });
                 }
+
                 {
-                    var P = findPath(objMap, d, to, visited);
+                    var P = findPath(objMap, d, to, seen);
 
                     if (P != null)
                     {
@@ -199,13 +206,17 @@ namespace go
                     }
 
                 }
+
             }
             return null;
+
         }
 
         // reportCycle reports an error for the given cycle.
-        private static void reportCycle(this ref Checker check, slice<Object> cycle)
+        private static void reportCycle(this ptr<Checker> _addr_check, slice<Object> cycle)
         {
+            ref Checker check = ref _addr_check.val;
+
             var obj = cycle[0L];
             check.errorf(obj.Pos(), "initialization cycle for %s", obj.Name()); 
             // subtle loop: print cycle[i] for i = 0, n-1, n-2, ... 1 for len(cycle) = n
@@ -213,11 +224,13 @@ namespace go
             {
                 check.errorf(obj.Pos(), "\t%s refers to", obj.Name()); // secondary error, \t indented
                 obj = cycle[i];
+
             } 
             // print cycle[0] again to close the cycle
  
             // print cycle[0] again to close the cycle
             check.errorf(obj.Pos(), "\t%s", obj.Name());
+
         }
 
         // ----------------------------------------------------------------------------
@@ -245,26 +258,31 @@ namespace go
             public long ndeps; // number of outstanding dependencies before this object can be initialized
         }
 
-        private partial struct nodeSet // : map<ref graphNode, bool>
+        private partial struct nodeSet // : map<ptr<graphNode>, bool>
         {
         }
 
-        private static void add(this ref nodeSet s, ref graphNode p)
+        private static void add(this ptr<nodeSet> _addr_s, ptr<graphNode> _addr_p)
         {
-            if (s == null.Value)
+            ref nodeSet s = ref _addr_s.val;
+            ref graphNode p = ref _addr_p.val;
+
+            if (s == null.val)
             {
-                s.Value = make(nodeSet);
+                s.val = make(nodeSet);
             }
-            (s.Value)[p] = true;
+
+            (s.val)[p] = true;
+
         }
 
         // dependencyGraph computes the object dependency graph from the given objMap,
         // with any function nodes removed. The resulting graph contains only constants
         // and variables.
-        private static slice<ref graphNode> dependencyGraph(map<Object, ref declInfo> objMap)
+        private static slice<ptr<graphNode>> dependencyGraph(map<Object, ptr<declInfo>> objMap)
         { 
             // M is the dependency (Object) -> graphNode mapping
-            var M = make_map<dependency, ref graphNode>();
+            var M = make_map<dependency, ptr<graphNode>>();
             {
                 var obj__prev1 = obj;
 
@@ -275,16 +293,17 @@ namespace go
                     {
                         var obj__prev1 = obj;
 
-                        dependency (obj, _) = obj._<dependency>();
+                        dependency (obj, _) = dependency.As(obj._<dependency>())!;
 
                         if (obj != null)
                         {
-                            M[obj] = ref new graphNode(obj:obj);
+                            M[obj] = addr(new graphNode(obj:obj));
                         }
 
                         obj = obj__prev1;
 
                     }
+
                 } 
 
                 // compute edges for graph M
@@ -313,7 +332,7 @@ namespace go
                             {
                                 var d__prev1 = d;
 
-                                dependency (d, _) = d._<dependency>();
+                                dependency (d, _) = dependency.As(d._<dependency>())!;
 
                                 if (d != null)
                                 {
@@ -325,11 +344,11 @@ namespace go
                                 d = d__prev1;
 
                             }
+
                         }
 
                         d = d__prev2;
                     }
-
                 } 
 
                 // remove function nodes and collect remaining graph nodes in G
@@ -342,7 +361,7 @@ namespace go
                 n = n__prev1;
             }
 
-            slice<ref graphNode> G = default;
+            slice<ptr<graphNode>> G = default;
             {
                 var obj__prev1 = obj;
                 var n__prev1 = n;
@@ -352,7 +371,7 @@ namespace go
                     obj = __obj;
                     n = __n;
                     {
-                        ref Func (_, ok) = obj._<ref Func>();
+                        ptr<Func> (_, ok) = obj._<ptr<Func>>();
 
                         if (ok)
                         { 
@@ -374,17 +393,21 @@ namespace go
                                             s.pred.add(p);
                                             delete(s.pred, n); // remove edge to n
                                         }
+
                                     }
                                     delete(p.succ, n); // remove edge to n
                                 }
                         else
                             }
+
                         }                        { 
                             // collect non-function nodes
                             G = append(G, n);
+
                         }
 
                     }
+
                 } 
 
                 // fill in index and ndeps fields
@@ -408,6 +431,7 @@ namespace go
             }
 
             return G;
+
         }
 
         // ----------------------------------------------------------------------------
@@ -415,7 +439,7 @@ namespace go
 
         // nodeQueue implements the container/heap interface;
         // a nodeQueue may be used as a priority queue.
-        private partial struct nodeQueue // : slice<ref graphNode>
+        private partial struct nodeQueue // : slice<ptr<graphNode>>
         {
         }
 
@@ -432,6 +456,7 @@ namespace go
             a[j] = x;
             x.index = j;
             y.index = i;
+
         }
 
         private static bool Less(this nodeQueue a, long i, long j)
@@ -441,20 +466,26 @@ namespace go
             // nodes are prioritized by number of incoming dependencies (1st key)
             // and source order (2nd key)
             return x.ndeps < y.ndeps || x.ndeps == y.ndeps && x.obj.order() < y.obj.order();
+
         }
 
-        private static void Push(this ref nodeQueue _a, object x) => func(_a, (ref nodeQueue a, Defer _, Panic panic, Recover __) =>
+        private static void Push(this ptr<nodeQueue> _addr_a, object x) => func((_, panic, __) =>
         {
+            ref nodeQueue a = ref _addr_a.val;
+
             panic("unreachable");
         });
 
-        private static void Pop(this ref nodeQueue a)
+        private static void Pop(this ptr<nodeQueue> _addr_a)
         {
-            var n = len(a.Value);
-            var x = (a.Value)[n - 1L];
+            ref nodeQueue a = ref _addr_a.val;
+
+            var n = len(a.val);
+            var x = (a.val)[n - 1L];
             x.index = -1L; // for safety
-            a.Value = (a.Value)[..n - 1L];
+            a.val = (a.val)[..n - 1L];
             return x;
+
         }
     }
 }}

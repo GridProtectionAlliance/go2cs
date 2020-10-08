@@ -6,7 +6,7 @@
 // It is used by cmd/test2json and cmd/go.
 //
 // See the cmd/test2json documentation for details of the JSON encoding.
-// package test2json -- go2cs converted at 2020 August 29 10:01:48 UTC
+// package test2json -- go2cs converted at 2020 October 08 04:35:14 UTC
 // import "cmd/internal/test2json" ==> using test2json = go.cmd.@internal.test2json_package
 // Original source: C:\Go\src\cmd\internal\test2json\test2json.go
 using bytes = go.bytes_package;
@@ -33,7 +33,7 @@ namespace @internal
         {
         }
 
-        public static readonly Mode Timestamp = 1L << (int)(iota); // include Time in events
+        public static readonly Mode Timestamp = (Mode)1L << (int)(iota); // include Time in events
 
         // event is the JSON struct we emit.
         private partial struct @event
@@ -61,20 +61,23 @@ namespace @internal
 
         private static (slice<byte>, error) MarshalText(this textBytes b)
         {
-            return (b, null);
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
+            return (b, error.As(null!)!);
         }
 
-        // A converter holds the state of a test-to-JSON conversion.
+        // A Converter holds the state of a test-to-JSON conversion.
         // It implements io.WriteCloser; the caller writes test output in,
         // and the converter writes JSON output to w.
-        private partial struct converter
+        public partial struct Converter
         {
             public io.Writer w; // JSON output stream
             public @string pkg; // package to name in events
             public Mode mode; // mode bits
             public time.Time start; // time converter started
             public @string testName; // name of current test, for output attribution
-            public slice<ref event> report; // pending test result reports (nested for subtests)
+            public slice<ptr<event>> report; // pending test result reports (nested for subtests)
             public @string result; // overall test result if seen
             public lineBuffer input; // input buffer
             public lineBuffer output; // output buffer
@@ -117,29 +120,53 @@ namespace @internal
         //
         // The pkg string, if present, specifies the import path to
         // report in the JSON stream.
-        public static io.WriteCloser NewConverter(io.Writer w, @string pkg, Mode mode)
+        public static ptr<Converter> NewConverter(io.Writer w, @string pkg, Mode mode)
         {
-            ptr<object> c = @new<converter>();
-            c.Value = new converter(w:w,pkg:pkg,mode:mode,start:time.Now(),input:lineBuffer{b:make([]byte,0,inBuffer),line:c.handleInputLine,part:c.output.write,},output:lineBuffer{b:make([]byte,0,outBuffer),line:c.writeOutputEvent,part:c.writeOutputEvent,},);
-            return c;
+            ptr<Converter> c = @new<Converter>();
+            c.val = new Converter(w:w,pkg:pkg,mode:mode,start:time.Now(),input:lineBuffer{b:make([]byte,0,inBuffer),line:c.handleInputLine,part:c.output.write,},output:lineBuffer{b:make([]byte,0,outBuffer),line:c.writeOutputEvent,part:c.writeOutputEvent,},);
+            return _addr_c!;
         }
 
         // Write writes the test input to the converter.
-        private static (long, error) Write(this ref converter c, slice<byte> b)
+        private static (long, error) Write(this ptr<Converter> _addr_c, slice<byte> b)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref Converter c = ref _addr_c.val;
+
             c.input.write(b);
-            return (len(b), null);
+            return (len(b), error.As(null!)!);
         }
 
-        private static slice<byte> bigPass = (slice<byte>)"PASS\n";        private static slice<byte> bigFail = (slice<byte>)"FAIL\n";        private static slice<byte> updates = new slice<slice<byte>>(new slice<byte>[] { []byte("=== RUN   "), []byte("=== PAUSE "), []byte("=== CONT  ") });        private static slice<byte> reports = new slice<slice<byte>>(new slice<byte>[] { []byte("--- PASS: "), []byte("--- FAIL: "), []byte("--- SKIP: "), []byte("--- BENCH: ") });        private static slice<byte> fourSpace = (slice<byte>)"    ";        private static slice<byte> skipLinePrefix = (slice<byte>)"?   \t";        private static slice<byte> skipLineSuffix = (slice<byte>)"\t[no test files]\n";
+        // Exited marks the test process as having exited with the given error.
+        private static void Exited(this ptr<Converter> _addr_c, error err)
+        {
+            ref Converter c = ref _addr_c.val;
+
+            if (err == null)
+            {
+                c.result = "pass";
+            }
+            else
+            {
+                c.result = "fail";
+            }
+
+        }
+
+ 
+        // printed by test on successful run.
+        private static slice<byte> bigPass = (slice<byte>)"PASS\n";        private static slice<byte> bigFail = (slice<byte>)"FAIL\n";        private static slice<byte> bigFailErrorPrefix = (slice<byte>)"FAIL\t";        private static slice<byte> updates = new slice<slice<byte>>(new slice<byte>[] { []byte("=== RUN   "), []byte("=== PAUSE "), []byte("=== CONT  ") });        private static slice<byte> reports = new slice<slice<byte>>(new slice<byte>[] { []byte("--- PASS: "), []byte("--- FAIL: "), []byte("--- SKIP: "), []byte("--- BENCH: ") });        private static slice<byte> fourSpace = (slice<byte>)"    ";        private static slice<byte> skipLinePrefix = (slice<byte>)"?   \t";        private static slice<byte> skipLineSuffix = (slice<byte>)"\t[no test files]\n";
 
         // handleInputLine handles a single whole test output line.
         // It must write the line to c.output but may choose to do so
         // before or after emitting other events.
-        private static void handleInputLine(this ref converter c, slice<byte> line)
-        { 
+        private static void handleInputLine(this ptr<Converter> _addr_c, slice<byte> line)
+        {
+            ref Converter c = ref _addr_c.val;
+ 
             // Final PASS or FAIL.
-            if (bytes.Equal(line, bigPass) || bytes.Equal(line, bigFail))
+            if (bytes.Equal(line, bigPass) || bytes.Equal(line, bigFail) || bytes.HasPrefix(line, bigFailErrorPrefix))
             {
                 c.flushReport(0L);
                 c.output.write(line);
@@ -151,7 +178,9 @@ namespace @internal
                 {
                     c.result = "fail";
                 }
-                return;
+
+                return ;
+
             } 
 
             // Special case for entirely skipped test binary: "?   \tpkgname\t[no test files]\n" is only line.
@@ -164,6 +193,7 @@ namespace @internal
             // "=== RUN   "
             // "=== PAUSE "
             // "=== CONT  "
+            var actionColon = false;
             var origLine = line;
             var ok = false;
             long indent = 0L;
@@ -178,6 +208,7 @@ namespace @internal
                         ok = true;
                         break;
                     }
+
                 }
 
                 magic = magic__prev1;
@@ -204,37 +235,58 @@ namespace @internal
                         magic = __magic;
                         if (bytes.HasPrefix(line, magic))
                         {
+                            actionColon = true;
                             ok = true;
                             break;
                         }
+
                     }
 
                     magic = magic__prev1;
                 }
+            } 
 
-            }
+            // Not a special test output line.
             if (!ok)
             { 
-                // Not a special test output line.
+                // Lookup the name of the test which produced the output using the
+                // indentation of the output as an index into the stack of the current
+                // subtests.
+                // If the indentation is greater than the number of current subtests
+                // then the output must have included extra indentation. We can't
+                // determine which subtest produced this output, so we default to the
+                // old behaviour of assuming the most recently run subtest produced it.
+                if (indent > 0L && indent <= len(c.report))
+                {
+                    c.testName = c.report[indent - 1L].Test;
+                }
+
                 c.output.write(origLine);
-                return;
+                return ;
+
             } 
 
             // Parse out action and test name.
-            var i = bytes.IndexByte(line, ':') + 1L;
+            long i = 0L;
+            if (actionColon)
+            {
+                i = bytes.IndexByte(line, ':') + 1L;
+            }
+
             if (i == 0L)
             {
                 i = len(updates[0L]);
             }
+
             var action = strings.ToLower(strings.TrimSuffix(strings.TrimSpace(string(line[4L..i])), ":"));
             var name = strings.TrimSpace(string(line[i..]));
 
-            event e = ref new event(Action:action);
+            ptr<event> e = addr(new event(Action:action));
             if (line[0L] == '-')
             { // PASS or FAIL report
                 // Parse out elapsed time.
                 {
-                    var i__prev2 = i;
+                    long i__prev2 = i;
 
                     i = strings.Index(name, " (");
 
@@ -247,22 +299,28 @@ namespace @internal
                             {
                                 if (c.mode & Timestamp != 0L)
                                 {
-                                    e.Elapsed = ref t;
+                                    e.Elapsed = _addr_t;
                                 }
+
                             }
+
                         }
+
                         name = name[..i];
+
                     }
 
                     i = i__prev2;
 
                 }
+
                 if (len(c.report) < indent)
                 { 
                     // Nested deeper than expected.
                     // Treat this line as plain output.
                     c.output.write(origLine);
-                    return;
+                    return ;
+
                 } 
                 // Flush reports at this indentation level or deeper.
                 c.flushReport(indent);
@@ -270,7 +328,8 @@ namespace @internal
                 c.testName = name;
                 c.report = append(c.report, e);
                 c.output.write(origLine);
-                return;
+                return ;
+
             } 
             // === update.
             // Finish any pending PASS/FAIL reports.
@@ -283,18 +342,24 @@ namespace @internal
                 // delivering the pause event, just so it doesn't look like the test
                 // is generating output immediately after being paused.
                 c.output.write(origLine);
+
             }
+
             c.writeEvent(e);
             if (action != "pause")
             {
                 c.output.write(origLine);
             }
-            return;
+
+            return ;
+
         }
 
         // flushReport flushes all pending PASS/FAIL reports at levels >= depth.
-        private static void flushReport(this ref converter c, long depth)
+        private static void flushReport(this ptr<Converter> _addr_c, long depth)
         {
+            ref Converter c = ref _addr_c.val;
+
             c.testName = "";
             while (len(c.report) > depth)
             {
@@ -303,58 +368,78 @@ namespace @internal
                 c.writeEvent(e);
             }
 
+
         }
 
         // Close marks the end of the go test output.
         // It flushes any pending input and then output (only partial lines at this point)
         // and then emits the final overall package-level pass/fail event.
-        private static error Close(this ref converter c)
+        private static error Close(this ptr<Converter> _addr_c)
         {
+            ref Converter c = ref _addr_c.val;
+
             c.input.flush();
             c.output.flush();
-            event e = ref new event(Action:"fail");
             if (c.result != "")
             {
-                e.Action = c.result;
+                ptr<event> e = addr(new event(Action:c.result));
+                if (c.mode & Timestamp != 0L)
+                {
+                    ref var dt = ref heap(time.Since(c.start).Round(1L * time.Millisecond).Seconds(), out ptr<var> _addr_dt);
+                    _addr_e.Elapsed = _addr_dt;
+                    e.Elapsed = ref _addr_e.Elapsed.val;
+
+                }
+
+                c.writeEvent(e);
+
             }
-            if (c.mode & Timestamp != 0L)
-            {
-                var dt = time.Since(c.start).Round(1L * time.Millisecond).Seconds();
-                e.Elapsed = ref dt;
-            }
-            c.writeEvent(e);
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // writeOutputEvent writes a single output event with the given bytes.
-        private static void writeOutputEvent(this ref converter c, slice<byte> @out)
+        private static void writeOutputEvent(this ptr<Converter> _addr_c, slice<byte> @out)
         {
-            c.writeEvent(ref new event(Action:"output",Output:(*textBytes)(&out),));
+            ref Converter c = ref _addr_c.val;
+
+            c.writeEvent(addr(new event(Action:"output",Output:(*textBytes)(&out),)));
         }
 
         // writeEvent writes a single event.
         // It adds the package, time (if requested), and test name (if needed).
-        private static void writeEvent(this ref converter c, ref event e)
+        private static void writeEvent(this ptr<Converter> _addr_c, ptr<event> _addr_e)
         {
+            ref Converter c = ref _addr_c.val;
+            ref event e = ref _addr_e.val;
+
             e.Package = c.pkg;
             if (c.mode & Timestamp != 0L)
             {
-                var t = time.Now();
-                e.Time = ref t;
+                ref var t = ref heap(time.Now(), out ptr<var> _addr_t);
+                _addr_e.Time = _addr_t;
+                e.Time = ref _addr_e.Time.val;
+
             }
+
             if (e.Test == "")
             {
                 e.Test = c.testName;
             }
+
             var (js, err) = json.Marshal(e);
             if (err != null)
             { 
                 // Should not happen - event is valid for json.Marshal.
                 c.w.Write((slice<byte>)fmt.Sprintf("testjson internal error: %v\n", err));
-                return;
+                return ;
+
             }
+
             js = append(js, '\n');
             c.w.Write(js);
+
         }
 
         // A lineBuffer is an I/O buffer that reacts to writes by invoking
@@ -376,8 +461,10 @@ namespace @internal
         }
 
         // write writes b to the buffer.
-        private static void write(this ref lineBuffer l, slice<byte> b)
+        private static void write(this ptr<lineBuffer> _addr_l, slice<byte> b)
         {
+            ref lineBuffer l = ref _addr_l.val;
+
             while (len(b) > 0L)
             { 
                 // Copy what we can into b.
@@ -407,27 +494,36 @@ namespace @internal
                                         l.mid = true;
                                         i += j + 1L;
                                     }
+
                                 }
 
                                 j = j__prev3;
 
                             }
+
                         }
+
                         break;
+
                     }
+
                     var e = i + j + 1L;
                     if (l.mid)
                     { 
                         // Found the end of a partial line.
                         l.part(l.b[i..e]);
                         l.mid = false;
+
                     }
                     else
                     { 
                         // Found a whole line.
                         l.line(l.b[i..e]);
+
                     }
+
                     i = e;
+
                 } 
 
                 // Whatever's left in l.b is a line fragment.
@@ -442,6 +538,7 @@ namespace @internal
                     l.part(l.b[..t]);
                     l.b = l.b[..copy(l.b, l.b[t..])];
                     l.mid = true;
+
                 } 
 
                 // There's room for more input.
@@ -450,19 +547,25 @@ namespace @internal
                 {
                     l.b = l.b[..copy(l.b, l.b[i..])];
                 }
+
             }
+
 
         }
 
         // flush flushes the line buffer.
-        private static void flush(this ref lineBuffer l)
+        private static void flush(this ptr<lineBuffer> _addr_l)
         {
+            ref lineBuffer l = ref _addr_l.val;
+
             if (len(l.b) > 0L)
             { 
                 // Must be a line without a \n, so a partial line.
                 l.part(l.b);
                 l.b = l.b[..0L];
+
             }
+
         }
 
         private static slice<byte> benchmark = (slice<byte>)"Benchmark";
@@ -475,12 +578,16 @@ namespace @internal
             {
                 return false;
             }
+
             if (len(b) == len(benchmark))
             { // just "Benchmark"
                 return true;
+
             }
+
             var (r, _) = utf8.DecodeRune(b[len(benchmark)..]);
             return !unicode.IsLower(r);
+
         }
 
         // trimUTF8 returns a length t as close to len(b) as possible such that b[:t]
@@ -504,23 +611,29 @@ namespace @internal
                             {
                                 return len(b) - i;
                             }
+
                         else if (c & 0xf0UL == 0xe0UL) 
                             if (i < 3L)
                             {
                                 return len(b) - i;
                             }
+
                         else if (c & 0xf8UL == 0xf0UL) 
                             if (i < 4L)
                             {
                                 return len(b) - i;
                             }
+
                                                 break;
+
                     }
 
                 }
+
             }
 
             return len(b);
+
         }
     }
 }}}

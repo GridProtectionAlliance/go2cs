@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:09 UTC
+//     Generated on 2020 October 08 04:42:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using http = go.net.http_package;
 using regexp = go.regexp_package;
 using time = go.time_package;
 using internaldriver = go.github.com.google.pprof.@internal.driver_package;
@@ -42,9 +43,11 @@ namespace pprof
                 this.Sym = default;
                 this.Obj = default;
                 this.UI = default;
+                this.HTTPServer = default;
+                this.HTTPTransport = default;
             }
 
-            public Options(Writer Writer = default, FlagSet Flagset = default, Fetcher Fetch = default, Symbolizer Sym = default, ObjTool Obj = default, UI UI = default)
+            public Options(Writer Writer = default, FlagSet Flagset = default, Fetcher Fetch = default, Symbolizer Sym = default, ObjTool Obj = default, UI UI = default, Func<ptr<HTTPServerArgs>, error> HTTPServer = default, http.RoundTripper HTTPTransport = default)
             {
                 this.Writer = Writer;
                 this.Flagset = Flagset;
@@ -52,6 +55,8 @@ namespace pprof
                 this.Sym = Sym;
                 this.Obj = Obj;
                 this.UI = UI;
+                this.HTTPServer = HTTPServer;
+                this.HTTPTransport = HTTPTransport;
             }
 
             // Enable comparisons between nil and Options struct
@@ -74,7 +79,7 @@ namespace pprof
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Options Options_cast(dynamic value)
         {
-            return new Options(value.Writer, value.Flagset, value.Fetch, value.Sym, value.Obj, value.UI);
+            return new Options(value.Writer, value.Flagset, value.Fetch, value.Sym, value.Obj, value.UI, value.HTTPServer, value.HTTPTransport);
         }
     }
 }}}}}}

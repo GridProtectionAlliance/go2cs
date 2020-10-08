@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2020 August 29 09:24:39 UTC
+// package main -- go2cs converted at 2020 October 08 04:27:09 UTC
 // Original source: C:\Go\src\cmd\compile\internal\ssa\testdata\i22600.go
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -17,11 +17,22 @@ namespace go
                 os.Exit(1L);
             }
             fmt.Println(pwd);
+
         }
 
         private static void Main()
         {
+            growstack(); // Use stack early to prevent growth during test, which confuses gdb
             test();
+
+        }
+
+        private static @string snk = default;
+
+        //go:noinline
+        private static void growstack()
+        {
+            snk = fmt.Sprintf("%#v,%#v,%#v", 1L, true, "cat");
         }
     }
 }

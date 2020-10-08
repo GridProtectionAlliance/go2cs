@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:11 UTC
+//     Generated on 2020 October 08 03:41:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,33 +28,19 @@ namespace http
     public static partial class fcgi_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(bufio.Writer))]
         private partial struct bufWriter
         {
-            // Writer structure promotion - sourced from pointer
-            private readonly ptr<Writer> m_WriterRef;
-
-            private ref Writer Writer_ptr => ref m_WriterRef.Value;
-
-            public ref error err => ref m_WriterRef.Value.err;
-
-            public ref slice<byte> buf => ref m_WriterRef.Value.buf;
-
-            public ref long n => ref m_WriterRef.Value.n;
-
-            public ref io.Writer wr => ref m_WriterRef.Value.wr;
-
             // Constructors
             public bufWriter(NilType _)
             {
                 this.closer = default;
-                this.m_WriterRef = new ptr<bufio.Writer>(new bufio.Writer(nil));
+                this.Writer> = default;
             }
 
-            public bufWriter(io.Closer closer = default, ref bufio.Writer Writer = default)
+            public bufWriter(io.Closer closer = default, ref ptr<bufio.Writer> Writer> = default)
             {
                 this.closer = closer;
-                this.m_WriterRef = new ptr<bufio.Writer>(ref Writer);
+                this.Writer> = Writer>;
             }
 
             // Enable comparisons between nil and bufWriter struct
@@ -77,7 +63,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static bufWriter bufWriter_cast(dynamic value)
         {
-            return new bufWriter(value.closer, ref value.Writer);
+            return new bufWriter(value.closer, ref value.Writer>);
         }
     }
 }}}

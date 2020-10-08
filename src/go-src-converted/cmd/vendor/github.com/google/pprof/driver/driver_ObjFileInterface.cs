@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:09 UTC
+//     Generated on 2020 October 08 04:42:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using http = go.net.http_package;
 using regexp = go.regexp_package;
 using time = go.time_package;
 using internaldriver = go.github.com.google.pprof.@internal.driver_package;
@@ -59,7 +60,7 @@ namespace pprof
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,10 +74,10 @@ namespace pprof
                 m_target_is_ptr = true;
             }
 
-            private delegate error NameByRef(ref T value);
+            private delegate error NameByPtr(ptr<T> value);
             private delegate error NameByVal(T value);
 
-            private static readonly NameByRef s_NameByRef;
+            private static readonly NameByPtr s_NameByPtr;
             private static readonly NameByVal s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,17 +86,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByRef(ref target);
+                return s_NameByPtr(m_target_ptr);
             }
 
-            private delegate error BaseByRef(ref T value);
+            private delegate error BaseByPtr(ptr<T> value);
             private delegate error BaseByVal(T value);
 
-            private static readonly BaseByRef s_BaseByRef;
+            private static readonly BaseByPtr s_BaseByPtr;
             private static readonly BaseByVal s_BaseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,17 +106,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BaseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BaseByPtr is null || !m_target_is_ptr)
                     return s_BaseByVal!(target);
 
-                return s_BaseByRef(ref target);
+                return s_BaseByPtr(m_target_ptr);
             }
 
-            private delegate error BuildIDByRef(ref T value);
+            private delegate error BuildIDByPtr(ptr<T> value);
             private delegate error BuildIDByVal(T value);
 
-            private static readonly BuildIDByRef s_BuildIDByRef;
+            private static readonly BuildIDByPtr s_BuildIDByPtr;
             private static readonly BuildIDByVal s_BuildIDByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,17 +126,18 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BuildIDByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BuildIDByPtr is null || !m_target_is_ptr)
                     return s_BuildIDByVal!(target);
 
-                return s_BuildIDByRef(ref target);
+                return s_BuildIDByPtr(m_target_ptr);
             }
 
-            private delegate error SourceLineByRef(ref T value, ulong addr);
+            private delegate error SourceLineByPtr(ptr<T> value, ulong addr);
             private delegate error SourceLineByVal(T value, ulong addr);
 
-            private static readonly SourceLineByRef s_SourceLineByRef;
+            private static readonly SourceLineByPtr s_SourceLineByPtr;
             private static readonly SourceLineByVal s_SourceLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,36 +146,38 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SourceLineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SourceLineByPtr is null || !m_target_is_ptr)
                     return s_SourceLineByVal!(target, addr);
 
-                return s_SourceLineByRef(ref target, addr);
+                return s_SourceLineByPtr(m_target_ptr, addr);
             }
 
-            private delegate error SymbolsByRef(ref T value, ref regexp.Regexp r, ulong addr);
-            private delegate error SymbolsByVal(T value, ref regexp.Regexp r, ulong addr);
+            private delegate error SymbolsByPtr(ptr<T> value, ptr<regexp.Regexp> r, ulong addr);
+            private delegate error SymbolsByVal(T value, ptr<regexp.Regexp> r, ulong addr);
 
-            private static readonly SymbolsByRef s_SymbolsByRef;
+            private static readonly SymbolsByPtr s_SymbolsByPtr;
             private static readonly SymbolsByVal s_SymbolsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Symbols(ref regexp.Regexp r, ulong addr)
+            public error Symbols(ptr<regexp.Regexp> r, ulong addr)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SymbolsByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SymbolsByPtr is null || !m_target_is_ptr)
                     return s_SymbolsByVal!(target, r, addr);
 
-                return s_SymbolsByRef(ref target, r, addr);
+                return s_SymbolsByPtr(m_target_ptr, r, addr);
             }
 
-            private delegate error CloseByRef(ref T value);
+            private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -180,11 +186,12 @@ namespace pprof
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -193,103 +200,85 @@ namespace pprof
             static ObjFile()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Name");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
                 if (!(extensionMethod is null))
-                    s_NameByRef = extensionMethod.CreateStaticDelegate(typeof(NameByRef)) as NameByRef;
+                    s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
-                if (s_NameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Name");
+                extensionMethod = targetType.GetExtensionMethod("Name");
 
-                    if (!(extensionMethod is null))
-                        s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
-                if (s_NameByRef is null && s_NameByVal is null)
+                if (s_NameByPtr is null && s_NameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.Name method", new Exception("Name"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Base");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Base");
 
                 if (!(extensionMethod is null))
-                    s_BaseByRef = extensionMethod.CreateStaticDelegate(typeof(BaseByRef)) as BaseByRef;
+                    s_BaseByPtr = extensionMethod.CreateStaticDelegate(typeof(BaseByPtr)) as BaseByPtr;
 
-                if (s_BaseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Base");
+                extensionMethod = targetType.GetExtensionMethod("Base");
 
-                    if (!(extensionMethod is null))
-                        s_BaseByVal = extensionMethod.CreateStaticDelegate(typeof(BaseByVal)) as BaseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BaseByVal = extensionMethod.CreateStaticDelegate(typeof(BaseByVal)) as BaseByVal;
 
-                if (s_BaseByRef is null && s_BaseByVal is null)
+                if (s_BaseByPtr is null && s_BaseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.Base method", new Exception("Base"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("BuildID");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("BuildID");
 
                 if (!(extensionMethod is null))
-                    s_BuildIDByRef = extensionMethod.CreateStaticDelegate(typeof(BuildIDByRef)) as BuildIDByRef;
+                    s_BuildIDByPtr = extensionMethod.CreateStaticDelegate(typeof(BuildIDByPtr)) as BuildIDByPtr;
 
-                if (s_BuildIDByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("BuildID");
+                extensionMethod = targetType.GetExtensionMethod("BuildID");
 
-                    if (!(extensionMethod is null))
-                        s_BuildIDByVal = extensionMethod.CreateStaticDelegate(typeof(BuildIDByVal)) as BuildIDByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BuildIDByVal = extensionMethod.CreateStaticDelegate(typeof(BuildIDByVal)) as BuildIDByVal;
 
-                if (s_BuildIDByRef is null && s_BuildIDByVal is null)
+                if (s_BuildIDByPtr is null && s_BuildIDByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.BuildID method", new Exception("BuildID"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SourceLine");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SourceLine");
 
                 if (!(extensionMethod is null))
-                    s_SourceLineByRef = extensionMethod.CreateStaticDelegate(typeof(SourceLineByRef)) as SourceLineByRef;
+                    s_SourceLineByPtr = extensionMethod.CreateStaticDelegate(typeof(SourceLineByPtr)) as SourceLineByPtr;
 
-                if (s_SourceLineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SourceLine");
+                extensionMethod = targetType.GetExtensionMethod("SourceLine");
 
-                    if (!(extensionMethod is null))
-                        s_SourceLineByVal = extensionMethod.CreateStaticDelegate(typeof(SourceLineByVal)) as SourceLineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SourceLineByVal = extensionMethod.CreateStaticDelegate(typeof(SourceLineByVal)) as SourceLineByVal;
 
-                if (s_SourceLineByRef is null && s_SourceLineByVal is null)
+                if (s_SourceLineByPtr is null && s_SourceLineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.SourceLine method", new Exception("SourceLine"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Symbols");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Symbols");
 
                 if (!(extensionMethod is null))
-                    s_SymbolsByRef = extensionMethod.CreateStaticDelegate(typeof(SymbolsByRef)) as SymbolsByRef;
+                    s_SymbolsByPtr = extensionMethod.CreateStaticDelegate(typeof(SymbolsByPtr)) as SymbolsByPtr;
 
-                if (s_SymbolsByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Symbols");
+                extensionMethod = targetType.GetExtensionMethod("Symbols");
 
-                    if (!(extensionMethod is null))
-                        s_SymbolsByVal = extensionMethod.CreateStaticDelegate(typeof(SymbolsByVal)) as SymbolsByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SymbolsByVal = extensionMethod.CreateStaticDelegate(typeof(SymbolsByVal)) as SymbolsByVal;
 
-                if (s_SymbolsByRef is null && s_SymbolsByVal is null)
+                if (s_SymbolsByPtr is null && s_SymbolsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.Symbols method", new Exception("Symbols"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.Close method", new Exception("Close"));
             }
 

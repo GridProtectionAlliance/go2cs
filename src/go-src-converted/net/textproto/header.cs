@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2020 August 29 08:32:28 UTC
+// package textproto -- go2cs converted at 2020 October 08 03:38:27 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Go\src\net\textproto\header.go
 
@@ -39,20 +39,38 @@ namespace net
         // It is case insensitive; CanonicalMIMEHeaderKey is used
         // to canonicalize the provided key.
         // If there are no values associated with the key, Get returns "".
-        // To access multiple values of a key, or to use non-canonical keys,
-        // access the map directly.
+        // To use non-canonical keys, access the map directly.
         public static @string Get(this MIMEHeader h, @string key)
         {
             if (h == null)
             {
                 return "";
             }
+
             var v = h[CanonicalMIMEHeaderKey(key)];
             if (len(v) == 0L)
             {
                 return "";
             }
+
             return v[0L];
+
+        }
+
+        // Values returns all values associated with the given key.
+        // It is case insensitive; CanonicalMIMEHeaderKey is
+        // used to canonicalize the provided key. To use non-canonical
+        // keys, access the map directly.
+        // The returned slice is not a copy.
+        public static slice<@string> Values(this MIMEHeader h, @string key)
+        {
+            if (h == null)
+            {
+                return null;
+            }
+
+            return h[CanonicalMIMEHeaderKey(key)];
+
         }
 
         // Del deletes the values associated with key.

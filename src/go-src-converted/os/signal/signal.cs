@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package signal -- go2cs converted at 2020 August 29 08:24:50 UTC
+// package signal -- go2cs converted at 2020 October 08 03:43:56 UTC
 // import "os/signal" ==> using signal = go.os.signal_package
 // Original source: C:\Go\src\os\signal\signal.go
 using os = go.os_package;
 using sync = go.sync_package;
 using static go.builtin;
 using System;
+using System.Threading;
 
 namespace go {
 namespace os
@@ -28,18 +29,24 @@ namespace os
             public array<uint> mask;
         }
 
-        private static bool want(this ref handler h, long sig)
+        private static bool want(this ptr<handler> _addr_h, long sig)
         {
+            ref handler h = ref _addr_h.val;
+
             return (h.mask[sig / 32L] >> (int)(uint(sig & 31L))) & 1L != 0L;
         }
 
-        private static void set(this ref handler h, long sig)
+        private static void set(this ptr<handler> _addr_h, long sig)
         {
+            ref handler h = ref _addr_h.val;
+
             h.mask[sig / 32L] |= 1L << (int)(uint(sig & 31L));
         }
 
-        private static void clear(this ref handler h, long sig)
+        private static void clear(this ptr<handler> _addr_h, long sig)
         {
+            ref handler h = ref _addr_h.val;
+
             h.mask[sig / 32L] &= 1L << (int)(uint(sig & 31L));
         }
 
@@ -65,9 +72,12 @@ namespace os
                         {
                             delete(handlers.m, c);
                         }
+
                     }
+
                 }
                 action(n);
+
             }
 ;
 
@@ -79,12 +89,15 @@ namespace os
                 }
             else
 
+
             }            {
                 foreach (var (_, s) in sigs)
                 {
                     remove(signum(s));
                 }
+
             }
+
         });
 
         // Ignore causes the provided signals to be ignored. If they are received by
@@ -97,6 +110,20 @@ namespace os
 
             cancel(sig, ignoreSignal);
         }
+
+        // Ignored reports whether sig is currently ignored.
+        public static bool Ignored(os.Signal sig)
+        {
+            var sn = signum(sig);
+            return sn >= 0L && signalIgnored(sn);
+        }
+
+ 
+        // watchSignalLoopOnce guards calling the conditionally
+        // initialized watchSignalLoop. If watchSignalLoop is non-nil,
+        // it will be run in a goroutine lazily once Notify is invoked.
+        // See Issue 21576.
+        private static sync.Once watchSignalLoopOnce = default;        private static Action watchSignalLoop = default;
 
         // Notify causes package signal to relay incoming signals to c.
         // If no signals are provided, all incoming signals will be relayed to c.
@@ -122,6 +149,7 @@ namespace os
             {
                 panic("os/signal: Notify using nil channel");
             }
+
             handlers.Lock();
             defer(handlers.Unlock());
 
@@ -130,26 +158,45 @@ namespace os
             {
                 if (handlers.m == null)
                 {
-                    handlers.m = make_map<channel<os.Signal>, ref handler>();
+                    handlers.m = make_map<channel<os.Signal>, ptr<handler>>();
                 }
+
                 h = @new<handler>();
                 handlers.m[c] = h;
+
             }
+
             Action<long> add = n =>
             {
                 if (n < 0L)
                 {
-                    return;
+                    return ;
                 }
+
                 if (!h.want(n))
                 {
                     h.set(n);
                     if (handlers.@ref[n] == 0L)
                     {
-                        enableSignal(n);
+                        enableSignal(n); 
+
+                        // The runtime requires that we enable a
+                        // signal before starting the watcher.
+                        watchSignalLoopOnce.Do(() =>
+                        {
+                            if (watchSignalLoop != null)
+                            {
+                                go_(() => watchSignalLoop());
+                            }
+
+                        });
+
                     }
+
                     handlers.@ref[n]++;
+
                 }
+
             }
 ;
 
@@ -161,12 +208,15 @@ namespace os
                 }
             else
 
+
             }            {
                 foreach (var (_, s) in sig)
                 {
                     add(signum(s));
                 }
+
             }
+
         });
 
         // Reset undoes the effect of any prior calls to Notify for the provided
@@ -190,8 +240,9 @@ namespace os
             if (h == null)
             {
                 handlers.Unlock();
-                return;
+                return ;
             }
+
             delete(handlers.m, c);
 
             for (long n = 0L; n < numSig; n++)
@@ -203,7 +254,9 @@ namespace os
                     {
                         disableSignal(n);
                     }
+
                 }
+
             } 
 
             // Signals will no longer be delivered to the channel.
@@ -244,8 +297,10 @@ namespace os
                     handlers.stopping = append(handlers.stopping[..i], handlers.stopping[i + 1L..]);
                     break;
                 }
+
             }
             handlers.Unlock();
+
         }
 
         // Wait until there are no more signals waiting to be delivered.
@@ -258,8 +313,9 @@ namespace os
             var n = signum(sig);
             if (n < 0L)
             {>>MARKER:FUNCTION_signalWaitUntilIdle_BLOCK_PREFIX<<
-                return;
+                return ;
             }
+
             handlers.Lock();
             defer(handlers.Unlock());
 
@@ -269,6 +325,7 @@ namespace os
                 { 
                     // send but do not block for it
                 }
+
             } 
 
             // Avoid the race mentioned in Stop.
@@ -277,7 +334,9 @@ namespace os
                 if (d.h.want(n))
                 {
                 }
+
             }
+
         });
     }
 }}

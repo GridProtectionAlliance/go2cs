@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:50 UTC
+//     Generated on 2020 October 08 03:35:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -64,10 +64,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate cipher.BlockMode NewCBCDecrypterByRef(ref T value, slice<byte> iv);
+            private delegate cipher.BlockMode NewCBCDecrypterByPtr(ptr<T> value, slice<byte> iv);
             private delegate cipher.BlockMode NewCBCDecrypterByVal(T value, slice<byte> iv);
 
-            private static readonly NewCBCDecrypterByRef s_NewCBCDecrypterByRef;
+            private static readonly NewCBCDecrypterByPtr s_NewCBCDecrypterByPtr;
             private static readonly NewCBCDecrypterByVal s_NewCBCDecrypterByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,11 +76,12 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NewCBCDecrypterByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NewCBCDecrypterByPtr is null || !m_target_is_ptr)
                     return s_NewCBCDecrypterByVal!(target, iv);
 
-                return s_NewCBCDecrypterByRef(ref target, iv);
+                return s_NewCBCDecrypterByPtr(m_target_ptr, iv);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -89,23 +90,20 @@ namespace crypto
             static cbcDecAble()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NewCBCDecrypter");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NewCBCDecrypter");
 
                 if (!(extensionMethod is null))
-                    s_NewCBCDecrypterByRef = extensionMethod.CreateStaticDelegate(typeof(NewCBCDecrypterByRef)) as NewCBCDecrypterByRef;
+                    s_NewCBCDecrypterByPtr = extensionMethod.CreateStaticDelegate(typeof(NewCBCDecrypterByPtr)) as NewCBCDecrypterByPtr;
 
-                if (s_NewCBCDecrypterByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NewCBCDecrypter");
+                extensionMethod = targetType.GetExtensionMethod("NewCBCDecrypter");
 
-                    if (!(extensionMethod is null))
-                        s_NewCBCDecrypterByVal = extensionMethod.CreateStaticDelegate(typeof(NewCBCDecrypterByVal)) as NewCBCDecrypterByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NewCBCDecrypterByVal = extensionMethod.CreateStaticDelegate(typeof(NewCBCDecrypterByVal)) as NewCBCDecrypterByVal;
 
-                if (s_NewCBCDecrypterByRef is null && s_NewCBCDecrypterByVal is null)
+                if (s_NewCBCDecrypterByPtr is null && s_NewCBCDecrypterByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement cbcDecAble.NewCBCDecrypter method", new Exception("NewCBCDecrypter"));
             }
 

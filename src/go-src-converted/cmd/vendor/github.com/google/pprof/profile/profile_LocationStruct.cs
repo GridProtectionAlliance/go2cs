@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:32 UTC
+//     Generated on 2020 October 08 04:43:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -45,15 +45,17 @@ namespace pprof
                 this.Mapping = default;
                 this.Address = default;
                 this.Line = default;
+                this.IsFolded = default;
                 this.mappingIDX = default;
             }
 
-            public Location(ulong ID = default, ref ptr<Mapping> Mapping = default, ulong Address = default, slice<Line> Line = default, ulong mappingIDX = default)
+            public Location(ulong ID = default, ref ptr<Mapping> Mapping = default, ulong Address = default, slice<Line> Line = default, bool IsFolded = default, ulong mappingIDX = default)
             {
                 this.ID = ID;
                 this.Mapping = Mapping;
                 this.Address = Address;
                 this.Line = Line;
+                this.IsFolded = IsFolded;
                 this.mappingIDX = mappingIDX;
             }
 
@@ -77,7 +79,7 @@ namespace pprof
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Location Location_cast(dynamic value)
         {
-            return new Location(value.ID, ref value.Mapping, value.Address, value.Line, value.mappingIDX);
+            return new Location(value.ID, ref value.Mapping, value.Address, value.Line, value.IsFolded, value.mappingIDX);
         }
     }
 }}}}}}

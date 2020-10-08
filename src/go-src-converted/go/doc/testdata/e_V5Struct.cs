@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:12 UTC
+//     Generated on 2020 October 08 04:02:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,23 +21,17 @@ namespace go
     public static partial class e_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(V6))]
         public partial struct V5
         {
-            // V6 structure promotion - sourced from pointer
-            private readonly ptr<V6> m_V6Ref;
-
-            private ref V6 V6_ptr => ref m_V6Ref.Value;
-
             // Constructors
             public V5(NilType _)
             {
-                this.m_V6Ref = new ptr<V6>(new V6(nil));
+                this.ptr<V6> = default;
             }
 
-            public V5(ref V6 V6 = default)
+            public V5(ref ptr<V6> ptr<V6> = default)
             {
-                this.m_V6Ref = new ptr<V6>(ref V6);
+                this.ptr<V6> = ptr<V6>;
             }
 
             // Enable comparisons between nil and V5 struct
@@ -60,7 +54,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static V5 V5_cast(dynamic value)
         {
-            return new V5(ref value.V6);
+            return new V5(ref value.ptr<V6>);
         }
     }
 }}

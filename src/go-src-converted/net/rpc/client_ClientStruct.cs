@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:32 UTC
+//     Generated on 2020 October 08 03:43:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace net
                 this.shutdown = default;
             }
 
-            public Client(ClientCodec codec = default, sync.Mutex reqMutex = default, Request request = default, sync.Mutex mutex = default, ulong seq = default, map<ulong, ref Call> pending = default, bool closing = default, bool shutdown = default)
+            public Client(ClientCodec codec = default, sync.Mutex reqMutex = default, Request request = default, sync.Mutex mutex = default, ulong seq = default, map<ulong, ptr<Call>> pending = default, bool closing = default, bool shutdown = default)
             {
                 this.codec = codec;
                 this.reqMutex = reqMutex;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:37 UTC
+//     Generated on 2020 October 08 03:43:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace rpc
                 this.pending = default;
             }
 
-            public serverCodec(ref ptr<json.Decoder> dec = default, ref ptr<json.Encoder> enc = default, io.Closer c = default, serverRequest req = default, sync.Mutex mutex = default, ulong seq = default, map<ulong, ref json.RawMessage> pending = default)
+            public serverCodec(ref ptr<json.Decoder> dec = default, ref ptr<json.Encoder> enc = default, io.Closer c = default, serverRequest req = default, sync.Mutex mutex = default, ulong seq = default, map<ulong, ptr<json.RawMessage>> pending = default)
             {
                 this.dec = dec;
                 this.enc = enc;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:04 UTC
+//     Generated on 2020 October 08 03:40:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using http = go.net.http_package;
+using textproto = go.net.textproto_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
@@ -26,6 +27,7 @@ using regexp = go.regexp_package;
 using runtime = go.runtime_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {

@@ -9,7 +9,7 @@
 // invoke the Go 1.4 go command to build those sources,
 // and then copy the binaries back.
 
-// package main -- go2cs converted at 2020 August 29 09:59:42 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:45 UTC
 // Original source: C:\Go\src\cmd\dist\buildtool.go
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -17,6 +17,7 @@ using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;
 using static go.builtin;
+using System;
 
 namespace go
 {
@@ -32,7 +33,7 @@ namespace go
         // if a newer copy needs to be substituted for the Go 1.4 copy when used
         // by the command packages.
         // These will be imported during bootstrap as bootstrap/name, like bootstrap/math/big.
-        private static @string bootstrapDirs = new slice<@string>(new @string[] { "cmd/asm", "cmd/asm/internal/arch", "cmd/asm/internal/asm", "cmd/asm/internal/flags", "cmd/asm/internal/lex", "cmd/cgo", "cmd/compile", "cmd/compile/internal/amd64", "cmd/compile/internal/arm", "cmd/compile/internal/arm64", "cmd/compile/internal/gc", "cmd/compile/internal/mips", "cmd/compile/internal/mips64", "cmd/compile/internal/ppc64", "cmd/compile/internal/types", "cmd/compile/internal/s390x", "cmd/compile/internal/ssa", "cmd/compile/internal/syntax", "cmd/compile/internal/x86", "cmd/internal/bio", "cmd/internal/gcprog", "cmd/internal/dwarf", "cmd/internal/edit", "cmd/internal/objabi", "cmd/internal/obj", "cmd/internal/obj/arm", "cmd/internal/obj/arm64", "cmd/internal/obj/mips", "cmd/internal/obj/ppc64", "cmd/internal/obj/s390x", "cmd/internal/obj/x86", "cmd/internal/src", "cmd/internal/sys", "cmd/link", "cmd/link/internal/amd64", "cmd/link/internal/arm", "cmd/link/internal/arm64", "cmd/link/internal/ld", "cmd/link/internal/loadelf", "cmd/link/internal/loadmacho", "cmd/link/internal/loadpe", "cmd/link/internal/mips", "cmd/link/internal/mips64", "cmd/link/internal/objfile", "cmd/link/internal/ppc64", "cmd/link/internal/s390x", "cmd/link/internal/sym", "cmd/link/internal/x86", "container/heap", "debug/dwarf", "debug/elf", "debug/macho", "debug/pe", "math/big", "math/bits", "sort" });
+        private static @string bootstrapDirs = new slice<@string>(new @string[] { "cmd/asm", "cmd/asm/internal/arch", "cmd/asm/internal/asm", "cmd/asm/internal/flags", "cmd/asm/internal/lex", "cmd/cgo", "cmd/compile", "cmd/compile/internal/amd64", "cmd/compile/internal/arm", "cmd/compile/internal/arm64", "cmd/compile/internal/gc", "cmd/compile/internal/logopt", "cmd/compile/internal/mips", "cmd/compile/internal/mips64", "cmd/compile/internal/ppc64", "cmd/compile/internal/riscv64", "cmd/compile/internal/s390x", "cmd/compile/internal/ssa", "cmd/compile/internal/syntax", "cmd/compile/internal/types", "cmd/compile/internal/x86", "cmd/compile/internal/wasm", "cmd/internal/bio", "cmd/internal/gcprog", "cmd/internal/dwarf", "cmd/internal/edit", "cmd/internal/goobj2", "cmd/internal/objabi", "cmd/internal/obj", "cmd/internal/obj/arm", "cmd/internal/obj/arm64", "cmd/internal/obj/mips", "cmd/internal/obj/ppc64", "cmd/internal/obj/riscv", "cmd/internal/obj/s390x", "cmd/internal/obj/x86", "cmd/internal/obj/wasm", "cmd/internal/src", "cmd/internal/sys", "cmd/link", "cmd/link/internal/amd64", "cmd/link/internal/arm", "cmd/link/internal/arm64", "cmd/link/internal/benchmark", "cmd/link/internal/ld", "cmd/link/internal/loadelf", "cmd/link/internal/loader", "cmd/link/internal/loadmacho", "cmd/link/internal/loadpe", "cmd/link/internal/loadxcoff", "cmd/link/internal/mips", "cmd/link/internal/mips64", "cmd/link/internal/ppc64", "cmd/link/internal/riscv64", "cmd/link/internal/s390x", "cmd/link/internal/sym", "cmd/link/internal/x86", "compress/flate", "compress/zlib", "cmd/link/internal/wasm", "container/heap", "debug/dwarf", "debug/elf", "debug/macho", "debug/pe", "internal/goversion", "internal/race", "internal/unsafeheader", "internal/xcoff", "math/big", "math/bits", "sort" });
 
         // File prefixes that are ignored by go/build anyway, and cause
         // problems with editor generated temporary files (#18931).
@@ -40,7 +41,7 @@ namespace go
 
         // File suffixes that use build tags introduced since Go 1.4.
         // These must not be copied into the bootstrap build directory.
-        private static @string ignoreSuffixes = new slice<@string>(new @string[] { "_arm64.s", "_arm64.go" });
+        private static @string ignoreSuffixes = new slice<@string>(new @string[] { "_arm64.s", "_arm64_test.s", "_arm64.go", "_riscv64.s", "_riscv64.go", "_wasm.s", "_wasm.go" });
 
         private static void bootstrapBuildTools() => func((defer, _, __) =>
         {
@@ -49,6 +50,7 @@ namespace go
             {
                 goroot_bootstrap = pathf("%s/go1.4", os.Getenv("HOME"));
             }
+
             xprintf("Building Go toolchain1 using %s.\n", goroot_bootstrap);
 
             mkzbootstrap(pathf("%s/src/cmd/internal/objabi/zbootstrap.go", goroot)); 
@@ -60,10 +62,15 @@ namespace go
             // but it is easier to debug on failure if the files are in a known location.
             var workspace = pathf("%s/pkg/bootstrap", goroot);
             xremoveall(workspace);
+            xatexit(() =>
+            {
+                xremoveall(workspace);
+            });
             var @base = pathf("%s/src/bootstrap", workspace);
             xmkdirall(base); 
 
             // Copy source code into $GOROOT/pkg/bootstrap and rewrite import paths.
+            writefile("module bootstrap\n", pathf("%s/%s", base, "go.mod"), 0L);
             foreach (var (_, dir) in bootstrapDirs)
             {
                 var src = pathf("%s/src/%s", goroot, dir);
@@ -74,7 +81,9 @@ namespace go
                     // Write to src because we need the file both for bootstrap
                     // and for later in the main build.
                     mkzdefaultcc("", pathf("%s/zdefaultcc.go", src));
+
                 }
+
 Dir:
                 {
                     var name__prev2 = name;
@@ -89,6 +98,7 @@ Dir:
                                 _continueDir = true;
                                 break;
                             }
+
                         }
                         foreach (var (_, suf) in ignoreSuffixes)
                         {
@@ -97,11 +107,13 @@ Dir:
                                 _continueDir = true;
                                 break;
                             }
+
                         }
                         var srcFile = pathf("%s/%s", src, name);
                         var dstFile = pathf("%s/%s", dst, name);
                         var text = bootstrapRewriteFile(srcFile);
                         writefile(text, dstFile, 0L);
+
                     }
 
                     name = name__prev2;
@@ -144,6 +156,7 @@ Dir:
             {
                 cmd = append(cmd, "-v");
             }
+
             {
                 var tool = os.Getenv("GOBOOTSTRAP_TOOLEXEC");
 
@@ -153,8 +166,9 @@ Dir:
                 }
 
             }
+
             cmd = append(cmd, "bootstrap/cmd/...");
-            run(workspace, ShowOutput | CheckExit, cmd); 
+            run(base, ShowOutput | CheckExit, cmd); 
 
             // Copy binaries into tool binary directory.
             {
@@ -167,11 +181,13 @@ Dir:
                     {
                         continue;
                     }
+
                     name = name[len("cmd/")..];
                     if (!strings.Contains(name, "/"))
                     {
                         copyfile(pathf("%s/%s%s", tooldir, name, exe), pathf("%s/bin/%s%s", workspace, name, exe), writeExec);
                     }
+
                 }
 
                 name = name__prev1;
@@ -181,6 +197,7 @@ Dir:
             {
                 xprintf("\n");
             }
+
         });
 
         private static var ssaRewriteFileSubstring = filepath.FromSlash("src/cmd/compile/internal/ssa/rewrite");
@@ -193,31 +210,46 @@ Dir:
         // the "rewrite" prefix or ".go" suffix: AMD64, 386, ARM, ARM64, etc.
         private static (@string, bool) isUnneededSSARewriteFile(@string srcFile)
         {
+            @string archCaps = default;
+            bool unneeded = default;
+
             if (!strings.Contains(srcFile, ssaRewriteFileSubstring))
             {
                 return ("", false);
             }
+
             var fileArch = strings.TrimSuffix(strings.TrimPrefix(filepath.Base(srcFile), "rewrite"), ".go");
             if (fileArch == "")
             {
                 return ("", false);
             }
+
             var b = fileArch[0L];
             if (b == '_' || ('a' <= b && b <= 'z'))
             {
                 return ("", false);
             }
+
             archCaps = fileArch;
             fileArch = strings.ToLower(fileArch);
+            fileArch = strings.TrimSuffix(fileArch, "splitload");
+            if (fileArch == os.Getenv("GOHOSTARCH"))
+            {
+                return ("", false);
+            }
+
             if (fileArch == strings.TrimSuffix(runtime.GOARCH, "le"))
             {
                 return ("", false);
             }
+
             if (fileArch == strings.TrimSuffix(os.Getenv("GOARCH"), "le"))
             {
                 return ("", false);
             }
+
             return (archCaps, true);
+
         }
 
         private static @string bootstrapRewriteFile(@string srcFile)
@@ -234,11 +266,14 @@ Dir:
                     return fmt.Sprintf("// Code generated by go tool dist; DO NOT EDIT.\n\npackage ssa\n\nfunc rewriteValue%s" +
     "(v *Value) bool { panic(\"unused during bootstrap\") }\nfunc rewriteBlock%s(b *Bloc" +
     "k) bool { panic(\"unused during bootstrap\") }\n", archCaps, archCaps);
+
                 }
 
             }
 
+
             return bootstrapFixImports(srcFile);
+
         }
 
         private static @string bootstrapFixImports(@string srcFile)
@@ -252,11 +287,13 @@ Dir:
                     inBlock = true;
                     continue;
                 }
+
                 if (inBlock && strings.HasPrefix(line, ")"))
                 {
                     inBlock = false;
                     continue;
                 }
+
                 if (strings.HasPrefix(line, "import \"") || strings.HasPrefix(line, "import . \"") || inBlock && (strings.HasPrefix(line, "\t\"") || strings.HasPrefix(line, "\t. \"")))
                 {
                     line = strings.Replace(line, "\"cmd/", "\"bootstrap/cmd/", -1L);
@@ -266,14 +303,19 @@ Dir:
                         {
                             continue;
                         }
+
                         line = strings.Replace(line, "\"" + dir + "\"", "\"bootstrap/" + dir + "\"", -1L);
+
                     }
                     lines[i] = line;
+
                 }
+
             }
             lines[0L] = "// Code generated by go tool dist; DO NOT EDIT.\n// This is a bootstrap copy of " + srcFile + "\n\n//line " + srcFile + ":1\n" + lines[0L];
 
             return strings.Join(lines, "");
+
         }
     }
 }

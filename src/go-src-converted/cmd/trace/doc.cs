@@ -32,7 +32,7 @@ Note that while the various profiles available when launching
 (the 'view trace' page) comes from the Chrome/Chromium project
 and is only actively tested on that browser.
 */
-// package main -- go2cs converted at 2020 August 29 10:04:50 UTC
+// package main -- go2cs converted at 2020 October 08 04:42:32 UTC
 // Original source: C:\Go\src\cmd\trace\doc.go
     }
 

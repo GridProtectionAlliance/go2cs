@@ -4,7 +4,7 @@
 
 // +build !cgo netgo
 
-// package net -- go2cs converted at 2020 August 29 08:25:08 UTC
+// package net -- go2cs converted at 2020 October 08 03:31:12 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\cgo_stub.go
 using context = go.context_package;
@@ -17,7 +17,6 @@ namespace go
         private static void init()
         {
             netGo = true;
-
         }
 
         private partial struct addrinfoErrno // : long
@@ -39,27 +38,47 @@ namespace go
 
         private static (slice<@string>, error, bool) cgoLookupHost(context.Context ctx, @string name)
         {
-            return (null, null, false);
+            slice<@string> addrs = default;
+            error err = default!;
+            bool completed = default;
+
+            return (null, error.As(null!)!, false);
         }
 
         private static (long, error, bool) cgoLookupPort(context.Context ctx, @string network, @string service)
         {
-            return (0L, null, false);
+            long port = default;
+            error err = default!;
+            bool completed = default;
+
+            return (0L, error.As(null!)!, false);
         }
 
-        private static (slice<IPAddr>, error, bool) cgoLookupIP(context.Context ctx, @string name)
+        private static (slice<IPAddr>, error, bool) cgoLookupIP(context.Context ctx, @string network, @string name)
         {
-            return (null, null, false);
+            slice<IPAddr> addrs = default;
+            error err = default!;
+            bool completed = default;
+
+            return (null, error.As(null!)!, false);
         }
 
         private static (@string, error, bool) cgoLookupCNAME(context.Context ctx, @string name)
         {
-            return ("", null, false);
+            @string cname = default;
+            error err = default!;
+            bool completed = default;
+
+            return ("", error.As(null!)!, false);
         }
 
         private static (slice<@string>, error, bool) cgoLookupPTR(context.Context ctx, @string addr)
         {
-            return (null, null, false);
+            slice<@string> ptrs = default;
+            error err = default!;
+            bool completed = default;
+
+            return (null, error.As(null!)!, false);
         }
     }
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2020 August 29 10:05:27 UTC
+// package driver -- go2cs converted at 2020 October 08 04:43:06 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\tempfile.go
 using fmt = go.fmt_package;
@@ -32,8 +32,11 @@ namespace @internal
     public static partial class driver_package
     {
         // newTempFile returns a new output file in dir with the provided prefix and suffix.
-        private static (ref os.File, error) newTempFile(@string dir, @string prefix, @string suffix)
+        private static (ptr<os.File>, error) newTempFile(@string dir, @string prefix, @string suffix)
         {
+            ptr<os.File> _p0 = default!;
+            error _p0 = default!;
+
             for (long index = 1L; index < 10000L; index++)
             {
                 var path = filepath.Join(dir, fmt.Sprintf("%s%03d%s", prefix, index, suffix));
@@ -42,12 +45,14 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return os.Create(path);
+                        return _addr_os.Create(path)!;
                     }
                 }
+
             } 
             // Give up
-            return (null, fmt.Errorf("could not create file of the form %s%03d%s", prefix, 1L, suffix));
+            return (_addr_null!, error.As(fmt.Errorf("could not create file of the form %s%03d%s", prefix, 1L, suffix))!);
+
         }
 
         private static slice<@string> tempFiles = default;
@@ -71,6 +76,7 @@ namespace @internal
             }
             tempFiles = null;
             tempFilesMu.Unlock();
+
         }
     }
 }}}}}}}

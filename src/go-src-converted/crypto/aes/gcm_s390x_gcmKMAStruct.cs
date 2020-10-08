@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:50 UTC
+//     Generated on 2020 October 08 03:35:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,8 +14,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using cipher = go.crypto.cipher_package;
+using subtleoverlap = go.crypto.@internal.subtle_package;
 using subtle = go.crypto.subtle_package;
+using binary = go.encoding.binary_package;
 using errors = go.errors_package;
+using cpu = go.@internal.cpu_package;
 using go;
 
 namespace go {
@@ -37,6 +40,8 @@ namespace crypto
             public ref gcmHashKey hashKey => ref m_gcmAsmRef.Value.hashKey;
 
             public ref long nonceSize => ref m_gcmAsmRef.Value.nonceSize;
+
+            public ref long tagSize => ref m_gcmAsmRef.Value.tagSize;
 
             // Constructors
             public gcmKMA(NilType _)

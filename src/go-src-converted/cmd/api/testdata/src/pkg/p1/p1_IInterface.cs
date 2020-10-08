@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:37 UTC
+//     Generated on 2020 October 08 04:04:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -54,7 +54,7 @@ namespace pkg
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace pkg
                 m_target_is_ptr = true;
             }
 
-            private delegate long SetByRef(ref T value, @string name, long balance);
+            private delegate long SetByPtr(ptr<T> value, @string name, long balance);
             private delegate long SetByVal(T value, @string name, long balance);
 
-            private static readonly SetByRef s_SetByRef;
+            private static readonly SetByPtr s_SetByPtr;
             private static readonly SetByVal s_SetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,17 +80,18 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetByPtr is null || !m_target_is_ptr)
                     return s_SetByVal!(target, name, balance);
 
-                return s_SetByRef(ref target, name, balance);
+                return s_SetByPtr(m_target_ptr, name, balance);
             }
 
-            private delegate long GetByRef(ref T value, @string _p0);
+            private delegate long GetByPtr(ptr<T> value, @string _p0);
             private delegate long GetByVal(T value, @string _p0);
 
-            private static readonly GetByRef s_GetByRef;
+            private static readonly GetByPtr s_GetByPtr;
             private static readonly GetByVal s_GetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,17 +100,18 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GetByPtr is null || !m_target_is_ptr)
                     return s_GetByVal!(target, _p0);
 
-                return s_GetByRef(ref target, _p0);
+                return s_GetByPtr(m_target_ptr, _p0);
             }
 
-            private delegate long GetNamedByRef(ref T value, @string _p0);
+            private delegate long GetNamedByPtr(ptr<T> value, @string _p0);
             private delegate long GetNamedByVal(T value, @string _p0);
 
-            private static readonly GetNamedByRef s_GetNamedByRef;
+            private static readonly GetNamedByPtr s_GetNamedByPtr;
             private static readonly GetNamedByVal s_GetNamedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,17 +120,18 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GetNamedByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GetNamedByPtr is null || !m_target_is_ptr)
                     return s_GetNamedByVal!(target, _p0);
 
-                return s_GetNamedByRef(ref target, _p0);
+                return s_GetNamedByPtr(m_target_ptr, _p0);
             }
 
-            private delegate long privateByRef(ref T value);
+            private delegate long privateByPtr(ptr<T> value);
             private delegate long privateByVal(T value);
 
-            private static readonly privateByRef s_privateByRef;
+            private static readonly privateByPtr s_privateByPtr;
             private static readonly privateByVal s_privateByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -137,17 +140,18 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_privateByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_privateByPtr is null || !m_target_is_ptr)
                     return s_privateByVal!(target);
 
-                return s_privateByRef(ref target);
+                return s_privateByPtr(m_target_ptr);
             }
 
-            private delegate @string NameByRef(ref T value);
+            private delegate @string NameByPtr(ptr<T> value);
             private delegate @string NameByVal(T value);
 
-            private static readonly NameByRef s_NameByRef;
+            private static readonly NameByPtr s_NameByPtr;
             private static readonly NameByVal s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,11 +160,12 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByRef(ref target);
+                return s_NameByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -169,87 +174,72 @@ namespace pkg
             static I()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Set");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Set");
 
                 if (!(extensionMethod is null))
-                    s_SetByRef = extensionMethod.CreateStaticDelegate(typeof(SetByRef)) as SetByRef;
+                    s_SetByPtr = extensionMethod.CreateStaticDelegate(typeof(SetByPtr)) as SetByPtr;
 
-                if (s_SetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Set");
+                extensionMethod = targetType.GetExtensionMethod("Set");
 
-                    if (!(extensionMethod is null))
-                        s_SetByVal = extensionMethod.CreateStaticDelegate(typeof(SetByVal)) as SetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetByVal = extensionMethod.CreateStaticDelegate(typeof(SetByVal)) as SetByVal;
 
-                if (s_SetByRef is null && s_SetByVal is null)
+                if (s_SetByPtr is null && s_SetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement I.Set method", new Exception("Set"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Get");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Get");
 
                 if (!(extensionMethod is null))
-                    s_GetByRef = extensionMethod.CreateStaticDelegate(typeof(GetByRef)) as GetByRef;
+                    s_GetByPtr = extensionMethod.CreateStaticDelegate(typeof(GetByPtr)) as GetByPtr;
 
-                if (s_GetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Get");
+                extensionMethod = targetType.GetExtensionMethod("Get");
 
-                    if (!(extensionMethod is null))
-                        s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
 
-                if (s_GetByRef is null && s_GetByVal is null)
+                if (s_GetByPtr is null && s_GetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement I.Get method", new Exception("Get"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("GetNamed");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("GetNamed");
 
                 if (!(extensionMethod is null))
-                    s_GetNamedByRef = extensionMethod.CreateStaticDelegate(typeof(GetNamedByRef)) as GetNamedByRef;
+                    s_GetNamedByPtr = extensionMethod.CreateStaticDelegate(typeof(GetNamedByPtr)) as GetNamedByPtr;
 
-                if (s_GetNamedByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("GetNamed");
+                extensionMethod = targetType.GetExtensionMethod("GetNamed");
 
-                    if (!(extensionMethod is null))
-                        s_GetNamedByVal = extensionMethod.CreateStaticDelegate(typeof(GetNamedByVal)) as GetNamedByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GetNamedByVal = extensionMethod.CreateStaticDelegate(typeof(GetNamedByVal)) as GetNamedByVal;
 
-                if (s_GetNamedByRef is null && s_GetNamedByVal is null)
+                if (s_GetNamedByPtr is null && s_GetNamedByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement I.GetNamed method", new Exception("GetNamed"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("private");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("private");
 
                 if (!(extensionMethod is null))
-                    s_privateByRef = extensionMethod.CreateStaticDelegate(typeof(privateByRef)) as privateByRef;
+                    s_privateByPtr = extensionMethod.CreateStaticDelegate(typeof(privateByPtr)) as privateByPtr;
 
-                if (s_privateByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("private");
+                extensionMethod = targetType.GetExtensionMethod("private");
 
-                    if (!(extensionMethod is null))
-                        s_privateByVal = extensionMethod.CreateStaticDelegate(typeof(privateByVal)) as privateByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_privateByVal = extensionMethod.CreateStaticDelegate(typeof(privateByVal)) as privateByVal;
 
-                if (s_privateByRef is null && s_privateByVal is null)
+                if (s_privateByPtr is null && s_privateByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement I.private method", new Exception("private"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Name");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
                 if (!(extensionMethod is null))
-                    s_NameByRef = extensionMethod.CreateStaticDelegate(typeof(NameByRef)) as NameByRef;
+                    s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
-                if (s_NameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Name");
+                extensionMethod = targetType.GetExtensionMethod("Name");
 
-                    if (!(extensionMethod is null))
-                        s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
-                if (s_NameByRef is null && s_NameByVal is null)
+                if (s_NameByPtr is null && s_NameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement I.Name method", new Exception("Name"));
             }
 

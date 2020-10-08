@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:45 UTC
+//     Generated on 2020 October 08 03:40:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -65,10 +65,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate @string matchByRef(ref T value, slice<byte> data, long firstNonWS);
+            private delegate @string matchByPtr(ptr<T> value, slice<byte> data, long firstNonWS);
             private delegate @string matchByVal(T value, slice<byte> data, long firstNonWS);
 
-            private static readonly matchByRef s_matchByRef;
+            private static readonly matchByPtr s_matchByPtr;
             private static readonly matchByVal s_matchByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,11 +77,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_matchByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_matchByPtr is null || !m_target_is_ptr)
                     return s_matchByVal!(target, data, firstNonWS);
 
-                return s_matchByRef(ref target, data, firstNonWS);
+                return s_matchByPtr(m_target_ptr, data, firstNonWS);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -90,23 +91,20 @@ namespace net
             static sniffSig()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("match");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("match");
 
                 if (!(extensionMethod is null))
-                    s_matchByRef = extensionMethod.CreateStaticDelegate(typeof(matchByRef)) as matchByRef;
+                    s_matchByPtr = extensionMethod.CreateStaticDelegate(typeof(matchByPtr)) as matchByPtr;
 
-                if (s_matchByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("match");
+                extensionMethod = targetType.GetExtensionMethod("match");
 
-                    if (!(extensionMethod is null))
-                        s_matchByVal = extensionMethod.CreateStaticDelegate(typeof(matchByVal)) as matchByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_matchByVal = extensionMethod.CreateStaticDelegate(typeof(matchByVal)) as matchByVal;
 
-                if (s_matchByRef is null && s_matchByVal is null)
+                if (s_matchByPtr is null && s_matchByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement sniffSig.match method", new Exception("match"));
             }
 

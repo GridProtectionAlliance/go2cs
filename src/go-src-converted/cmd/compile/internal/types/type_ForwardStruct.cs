@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:18 UTC
+//     Generated on 2020 October 08 04:09:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace @internal
                 this.Embedlineno = default;
             }
 
-            public Forward(slice<ref Node> Copyto = default, src.XPos Embedlineno = default)
+            public Forward(slice<ptr<Type>> Copyto = default, src.XPos Embedlineno = default)
             {
                 this.Copyto = Copyto;
                 this.Embedlineno = Embedlineno;

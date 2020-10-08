@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:13 UTC
+//     Generated on 2020 October 08 04:09:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,22 +35,24 @@ namespace @internal
             {
                 this.Path = default;
                 this.Name = default;
-                this.Pathsym = default;
                 this.Prefix = default;
+                this.Syms = default;
+                this.Pathsym = default;
+                this.Height = default;
                 this.Imported = default;
                 this.Direct = default;
-                this.Syms = default;
             }
 
-            public Pkg(@string Path = default, @string Name = default, ref ptr<obj.LSym> Pathsym = default, @string Prefix = default, bool Imported = default, bool Direct = default, map<@string, ref Sym> Syms = default)
+            public Pkg(@string Path = default, @string Name = default, @string Prefix = default, map<@string, ptr<Sym>> Syms = default, ref ptr<obj.LSym> Pathsym = default, long Height = default, bool Imported = default, bool Direct = default)
             {
                 this.Path = Path;
                 this.Name = Name;
-                this.Pathsym = Pathsym;
                 this.Prefix = Prefix;
+                this.Syms = Syms;
+                this.Pathsym = Pathsym;
+                this.Height = Height;
                 this.Imported = Imported;
                 this.Direct = Direct;
-                this.Syms = Syms;
             }
 
             // Enable comparisons between nil and Pkg struct
@@ -73,7 +75,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Pkg Pkg_cast(dynamic value)
         {
-            return new Pkg(value.Path, value.Name, ref value.Pathsym, value.Prefix, value.Imported, value.Direct, value.Syms);
+            return new Pkg(value.Path, value.Name, value.Prefix, value.Syms, ref value.Pathsym, value.Height, value.Imported, value.Direct);
         }
     }
 }}}}

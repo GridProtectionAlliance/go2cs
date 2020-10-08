@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:53:13 UTC
+// package types -- go2cs converted at 2020 October 08 04:09:47 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Go\src\cmd\compile\internal\types\scope.go
 using src = go.cmd.@internal.src_package;
@@ -35,8 +35,10 @@ namespace @internal
 
         // Pushdcl pushes the current declaration for symbol s (if any) so that
         // it can be shadowed by a new declaration within a nested block scope.
-        public static void Pushdcl(ref Sym s)
+        public static void Pushdcl(ptr<Sym> _addr_s)
         {
+            ref Sym s = ref _addr_s.val;
+
             dclstack = append(dclstack, new dsym(sym:s,def:s.Def,block:s.Block,lastlineno:s.Lastlineno,));
         }
 
@@ -46,15 +48,17 @@ namespace @internal
         {
             for (var i = len(dclstack); i > 0L; i--)
             {
-                var d = ref dclstack[i - 1L];
+                var d = _addr_dclstack[i - 1L];
                 var s = d.sym;
                 if (s == null)
                 { 
                     // pop stack mark
                     Block = d.block;
                     dclstack = dclstack[..i - 1L];
-                    return;
+                    return ;
+
                 }
+
                 s.Def = d.def;
                 s.Block = d.block;
                 s.Lastlineno = d.lastlineno; 
@@ -62,9 +66,11 @@ namespace @internal
                 // Clear dead pointer fields.
                 d.sym = null;
                 d.def = null;
+
             }
 
             Fatalf("popdcl: no stack mark");
+
         }
 
         // Markdcl records the start of a new block scope for declarations.
@@ -83,8 +89,48 @@ namespace @internal
                 {
                     return false;
                 }
+
             }
             return true;
+
+        }
+
+        // PkgDef returns the definition associated with s at package scope.
+        private static ptr<Node> PkgDef(this ptr<Sym> _addr_s)
+        {
+            ref Sym s = ref _addr_s.val;
+
+            return _addr_s.pkgDefPtr().val!;
+        }
+
+        // SetPkgDef sets the definition associated with s at package scope.
+        private static void SetPkgDef(this ptr<Sym> _addr_s, ptr<Node> _addr_n)
+        {
+            ref Sym s = ref _addr_s.val;
+            ref Node n = ref _addr_n.val;
+
+            s.pkgDefPtr().val = n;
+        }
+
+        private static ptr<ptr<Node>> pkgDefPtr(this ptr<Sym> _addr_s)
+        {
+            ref Sym s = ref _addr_s.val;
+ 
+            // Look for outermost saved declaration, which must be the
+            // package scope definition, if present.
+            foreach (var (_, d) in dclstack)
+            {
+                if (s == d.sym)
+                {
+                    return _addr__addr_d.def!;
+                }
+
+            } 
+
+            // Otherwise, the declaration hasn't been shadowed within a
+            // function scope.
+            return _addr__addr_s.Def!;
+
         }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:48 UTC
+//     Generated on 2020 October 08 04:36:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,11 +16,17 @@ using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
+using io = go.io_package;
+using math = go.math_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
+using strconv = go.strconv_package;
+using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
+using unicode = go.unicode_package;
 
 namespace go
 {
@@ -50,9 +56,10 @@ namespace go
                 this.startBytes = default;
                 this.netAllocs = default;
                 this.netBytes = default;
+                this.extra = default;
             }
 
-            public B(common common = default, @string importPath = default, ref ptr<benchContext> context = default, long N = default, long previousN = default, time.Duration previousDuration = default, Action<ref B> benchFunc = default, time.Duration benchTime = default, long bytes = default, bool missingBytes = default, bool timerOn = default, bool showAllocResult = default, BenchmarkResult result = default, long parallelism = default, ulong startAllocs = default, ulong startBytes = default, ulong netAllocs = default, ulong netBytes = default)
+            public B(common common = default, @string importPath = default, ref ptr<benchContext> context = default, long N = default, long previousN = default, time.Duration previousDuration = default, Action<ptr<B>> benchFunc = default, benchTimeFlag benchTime = default, long bytes = default, bool missingBytes = default, bool timerOn = default, bool showAllocResult = default, BenchmarkResult result = default, long parallelism = default, ulong startAllocs = default, ulong startBytes = default, ulong netAllocs = default, ulong netBytes = default, map<@string, double> extra = default)
             {
                 this.common = common;
                 this.importPath = importPath;
@@ -72,6 +79,7 @@ namespace go
                 this.startBytes = startBytes;
                 this.netAllocs = netAllocs;
                 this.netBytes = netBytes;
+                this.extra = extra;
             }
 
             // Enable comparisons between nil and B struct
@@ -94,7 +102,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static B B_cast(dynamic value)
         {
-            return new B(value.common, value.importPath, ref value.context, value.N, value.previousN, value.previousDuration, value.benchFunc, value.benchTime, value.bytes, value.missingBytes, value.timerOn, value.showAllocResult, value.result, value.parallelism, value.startAllocs, value.startBytes, value.netAllocs, value.netBytes);
+            return new B(value.common, value.importPath, ref value.context, value.N, value.previousN, value.previousDuration, value.benchFunc, value.benchTime, value.bytes, value.missingBytes, value.timerOn, value.showAllocResult, value.result, value.parallelism, value.startAllocs, value.startBytes, value.netAllocs, value.netBytes, value.extra);
         }
     }
 }

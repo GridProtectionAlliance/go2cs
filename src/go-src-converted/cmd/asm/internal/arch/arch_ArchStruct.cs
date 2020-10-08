@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:42 UTC
+//     Generated on 2020 October 08 04:04:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,7 +18,9 @@ using arm = go.cmd.@internal.obj.arm_package;
 using arm64 = go.cmd.@internal.obj.arm64_package;
 using mips = go.cmd.@internal.obj.mips_package;
 using ppc64 = go.cmd.@internal.obj.ppc64_package;
+using riscv = go.cmd.@internal.obj.riscv_package;
 using s390x = go.cmd.@internal.obj.s390x_package;
+using wasm = go.cmd.@internal.obj.wasm_package;
 using x86 = go.cmd.@internal.obj.x86_package;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
@@ -32,30 +34,12 @@ namespace @internal
     public static partial class arch_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(obj.LinkArch))]
         public partial struct Arch
         {
-            // LinkArch structure promotion - sourced from pointer
-            private readonly ptr<LinkArch> m_LinkArchRef;
-
-            private ref LinkArch LinkArch_ptr => ref m_LinkArchRef.Value;
-
-            public ref Action<ref Link> Init => ref m_LinkArchRef.Value.Init;
-
-            public ref Action<ref Link, ref LSym, ProgAlloc> Preprocess => ref m_LinkArchRef.Value.Preprocess;
-
-            public ref Action<ref Link, ref LSym, ProgAlloc> Assemble => ref m_LinkArchRef.Value.Assemble;
-
-            public ref Action<ref Link, ref Prog, ProgAlloc> Progedit => ref m_LinkArchRef.Value.Progedit;
-
-            public ref map<As, bool> UnaryDst => ref m_LinkArchRef.Value.UnaryDst;
-
-            public ref map<short, short> DWARFRegisters => ref m_LinkArchRef.Value.DWARFRegisters;
-
             // Constructors
             public Arch(NilType _)
             {
-                this.m_LinkArchRef = new ptr<obj.LinkArch>(new obj.LinkArch(nil));
+                this.LinkArch> = default;
                 this.Instructions = default;
                 this.Register = default;
                 this.RegisterPrefix = default;
@@ -63,9 +47,9 @@ namespace @internal
                 this.IsJump = default;
             }
 
-            public Arch(ref obj.LinkArch LinkArch = default, map<@string, obj.As> Instructions = default, map<@string, short> Register = default, map<@string, bool> RegisterPrefix = default, Func<@string, short, (short, bool)> RegisterNumber = default, Func<@string, bool> IsJump = default)
+            public Arch(ref ptr<obj.LinkArch> LinkArch> = default, map<@string, obj.As> Instructions = default, map<@string, short> Register = default, map<@string, bool> RegisterPrefix = default, Func<@string, short, (short, bool)> RegisterNumber = default, Func<@string, bool> IsJump = default)
             {
-                this.m_LinkArchRef = new ptr<obj.LinkArch>(ref LinkArch);
+                this.LinkArch> = LinkArch>;
                 this.Instructions = Instructions;
                 this.Register = Register;
                 this.RegisterPrefix = RegisterPrefix;
@@ -93,7 +77,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Arch Arch_cast(dynamic value)
         {
-            return new Arch(ref value.LinkArch, value.Instructions, value.Register, value.RegisterPrefix, value.RegisterNumber, value.IsJump);
+            return new Arch(ref value.LinkArch>, value.Instructions, value.Register, value.RegisterPrefix, value.RegisterNumber, value.IsJump);
         }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:48 UTC
+//     Generated on 2020 October 08 03:42:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,12 +20,10 @@ using base64 = go.encoding.base64_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go;
@@ -63,7 +61,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -77,10 +75,10 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, error) MarshalJSONByRef(ref T value);
+            private delegate (slice<byte>, error) MarshalJSONByPtr(ptr<T> value);
             private delegate (slice<byte>, error) MarshalJSONByVal(T value);
 
-            private static readonly MarshalJSONByRef s_MarshalJSONByRef;
+            private static readonly MarshalJSONByPtr s_MarshalJSONByPtr;
             private static readonly MarshalJSONByVal s_MarshalJSONByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -89,11 +87,12 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MarshalJSONByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MarshalJSONByPtr is null || !m_target_is_ptr)
                     return s_MarshalJSONByVal!(target);
 
-                return s_MarshalJSONByRef(ref target);
+                return s_MarshalJSONByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -102,23 +101,20 @@ namespace encoding
             static Marshaler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("MarshalJSON");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MarshalJSON");
 
                 if (!(extensionMethod is null))
-                    s_MarshalJSONByRef = extensionMethod.CreateStaticDelegate(typeof(MarshalJSONByRef)) as MarshalJSONByRef;
+                    s_MarshalJSONByPtr = extensionMethod.CreateStaticDelegate(typeof(MarshalJSONByPtr)) as MarshalJSONByPtr;
 
-                if (s_MarshalJSONByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("MarshalJSON");
+                extensionMethod = targetType.GetExtensionMethod("MarshalJSON");
 
-                    if (!(extensionMethod is null))
-                        s_MarshalJSONByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalJSONByVal)) as MarshalJSONByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MarshalJSONByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalJSONByVal)) as MarshalJSONByVal;
 
-                if (s_MarshalJSONByRef is null && s_MarshalJSONByVal is null)
+                if (s_MarshalJSONByPtr is null && s_MarshalJSONByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Marshaler.MarshalJSON method", new Exception("MarshalJSON"));
             }
 

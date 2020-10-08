@@ -8,7 +8,7 @@
 // must not import anything (like net, but also like os/signal)
 // that kicks off background goroutines during init.
 
-// package main -- go2cs converted at 2020 August 29 08:36:41 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:10 UTC
 // Original source: C:\Go\src\runtime\testdata\testprognet\signalexec.go
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -35,7 +35,7 @@ namespace go
         {
             var pgrp = syscall.Getpgrp();
 
-            const long tries = 10L;
+            const long tries = (long)10L;
 
 
 
@@ -49,6 +49,7 @@ namespace go
                 foreach (>>MARKER:FORRANGEEXPRESSIONS_LEVEL_1<< in c)
                 {>>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_1<<
                 }
+
             }());
 
             for (long i = 0L; i < tries; i++)
@@ -70,12 +71,14 @@ namespace go
                         }
 
                     }
+
                 }());
                 go_(() => () =>
                 {
                     defer(wg.Done());
                     syscall.Kill(-pgrp, syscall.SIGWINCH);
                 }());
+
             }
 
 
@@ -84,6 +87,7 @@ namespace go
             wg.Wait();
 
             fmt.Println("OK");
+
         });
 
         public static void Nop()

@@ -4,7 +4,7 @@
 
 // This file implements runtime support for signal handling.
 
-// package runtime -- go2cs converted at 2020 August 29 08:20:43 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:23:34 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\sigqueue_plan9.go
 using _@unsafe_ = go.@unsafe_package;
@@ -14,7 +14,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly long qsize = 64L;
+        private static readonly long qsize = (long)64L;
 
 
 
@@ -36,14 +36,18 @@ namespace go
         }
 
         // It is not allowed to allocate memory in the signal handler.
-        private static bool push(this ref noteQueue q, ref byte item)
+        private static bool push(this ptr<noteQueue> _addr_q, ptr<byte> _addr_item)
         {
-            lock(ref q.@lock);
+            ref noteQueue q = ref _addr_q.val;
+            ref byte item = ref _addr_item.val;
+
+            lock(_addr_q.@lock);
             if (q.full)
             {
-                unlock(ref q.@lock);
+                unlock(_addr_q.@lock);
                 return false;
             }
+
             var s = gostringnocopy(item);
             copy(q.data[q.wi].s[..], s);
             q.data[q.wi].n = len(s);
@@ -52,38 +56,48 @@ namespace go
             {
                 q.wi = 0L;
             }
+
             if (q.wi == q.ri)
             {
                 q.full = true;
             }
-            unlock(ref q.@lock);
+
+            unlock(_addr_q.@lock);
             return true;
+
         }
 
-        private static @string pop(this ref noteQueue q)
+        private static @string pop(this ptr<noteQueue> _addr_q)
         {
-            lock(ref q.@lock);
+            ref noteQueue q = ref _addr_q.val;
+
+            lock(_addr_q.@lock);
             q.full = false;
             if (q.ri == q.wi)
             {
-                unlock(ref q.@lock);
+                unlock(_addr_q.@lock);
                 return "";
             }
-            var note = ref q.data[q.ri];
+
+            var note = _addr_q.data[q.ri];
             var item = string(note.s[..note.n]);
             q.ri++;
             if (q.ri == qsize)
             {
                 q.ri = 0L;
             }
-            unlock(ref q.@lock);
+
+            unlock(_addr_q.@lock);
             return item;
+
         }
 
         // Called from sighandler to send a signal back out of the signal handling thread.
         // Reports whether the signal was sent. If not, the caller typically crashes the program.
-        private static bool sendNote(ref byte s)
+        private static bool sendNote(ptr<byte> _addr_s)
         {
+            ref byte s = ref _addr_s.val;
+
             if (!sig.inuse)
             {
                 return false;
@@ -94,15 +108,18 @@ namespace go
             {
                 return false;
             }
-            lock(ref sig.@lock);
+
+            lock(_addr_sig.@lock);
             if (sig.sleeping)
             {
                 sig.sleeping = false;
-                notewakeup(ref sig.note);
+                notewakeup(_addr_sig.note);
             }
-            unlock(ref sig.@lock);
+
+            unlock(_addr_sig.@lock);
 
             return true;
+
         }
 
         // Called to receive the next queued signal.
@@ -117,12 +134,15 @@ namespace go
                 {
                     return note;
                 }
-                lock(ref sig.@lock);
+
+                lock(_addr_sig.@lock);
                 sig.sleeping = true;
-                noteclear(ref sig.note);
-                unlock(ref sig.@lock);
-                notetsleepg(ref sig.note, -1L);
+                noteclear(_addr_sig.note);
+                unlock(_addr_sig.@lock);
+                notetsleepg(_addr_sig.note, -1L);
+
             }
+
 
         }
 
@@ -138,15 +158,18 @@ namespace go
         {
             while (true)
             {
-                lock(ref sig.@lock);
+                lock(_addr_sig.@lock);
                 var sleeping = sig.sleeping;
-                unlock(ref sig.@lock);
+                unlock(_addr_sig.@lock);
                 if (sleeping)
                 {
-                    return;
+                    return ;
                 }
+
                 Gosched();
+
             }
+
 
         }
 
@@ -156,13 +179,12 @@ namespace go
         {
             if (!sig.inuse)
             { 
-                // The first call to signal_enable is for us
-                // to use for initialization. It does not pass
-                // signal information in m.
+                // This is the first call to signal_enable. Initialize.
                 sig.inuse = true; // enable reception of signals; cannot disable
-                noteclear(ref sig.note);
-                return;
+                noteclear(_addr_sig.note);
+
             }
+
         }
 
         // Must only be called from a single goroutine at a time.
@@ -175,6 +197,12 @@ namespace go
         //go:linkname signal_ignore os/signal.signal_ignore
         private static void signal_ignore(uint s)
         {
+        }
+
+        //go:linkname signal_ignored os/signal.signal_ignored
+        private static bool signal_ignored(uint s)
+        {
+            return false;
         }
     }
 }

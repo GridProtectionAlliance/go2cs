@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:12 UTC
+//     Generated on 2020 October 08 03:26:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using errors = go.errors_package;
+using fmtsort = go.@internal.fmtsort_package;
 using io = go.io_package;
 using os = go.os_package;
 using reflect = go.reflect_package;
@@ -37,9 +37,11 @@ namespace go
                 this.goodArgNum = default;
                 this.panicking = default;
                 this.erroring = default;
+                this.wrapErrs = default;
+                this.wrappedErr = default;
             }
 
-            public pp(buffer buf = default, reflect.Value value = default, fmt fmt = default, bool reordered = default, bool goodArgNum = default, bool panicking = default, bool erroring = default)
+            public pp(buffer buf = default, reflect.Value value = default, fmt fmt = default, bool reordered = default, bool goodArgNum = default, bool panicking = default, bool erroring = default, bool wrapErrs = default, error wrappedErr = default)
             {
                 this.buf = buf;
                 this.value = value;
@@ -48,6 +50,8 @@ namespace go
                 this.goodArgNum = goodArgNum;
                 this.panicking = panicking;
                 this.erroring = erroring;
+                this.wrapErrs = wrapErrs;
+                this.wrappedErr = wrappedErr;
             }
 
             // Enable comparisons between nil and pp struct
@@ -70,7 +74,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static pp pp_cast(dynamic value)
         {
-            return new pp(value.buf, value.value, value.fmt, value.reordered, value.goodArgNum, value.panicking, value.erroring);
+            return new pp(value.buf, value.value, value.fmt, value.reordered, value.goodArgNum, value.panicking, value.erroring, value.wrapErrs, value.wrappedErr);
         }
     }
 }

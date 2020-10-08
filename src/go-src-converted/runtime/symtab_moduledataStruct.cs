@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:05 UTC
+//     Generated on 2020 October 08 03:23:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -64,7 +64,7 @@ namespace go
                 this.next = default;
             }
 
-            public moduledata(slice<byte> pclntable = default, slice<functab> ftab = default, slice<uint> filetab = default, System.UIntPtr findfunctab = default, System.UIntPtr minpc = default, System.UIntPtr maxpc = default, System.UIntPtr text = default, System.UIntPtr etext = default, System.UIntPtr noptrdata = default, System.UIntPtr enoptrdata = default, System.UIntPtr data = default, System.UIntPtr edata = default, System.UIntPtr bss = default, System.UIntPtr ebss = default, System.UIntPtr noptrbss = default, System.UIntPtr enoptrbss = default, System.UIntPtr end = default, System.UIntPtr gcdata = default, System.UIntPtr gcbss = default, System.UIntPtr types = default, System.UIntPtr etypes = default, slice<textsect> textsectmap = default, slice<int> typelinks = default, slice<ref itab> itablinks = default, slice<ptabEntry> ptab = default, @string pluginpath = default, slice<modulehash> pkghashes = default, @string modulename = default, slice<modulehash> modulehashes = default, byte hasmain = default, bitvector gcdatamask = default, bitvector gcbssmask = default, map<typeOff, ref _type> typemap = default, bool bad = default, ref ptr<moduledata> next = default)
+            public moduledata(slice<byte> pclntable = default, slice<functab> ftab = default, slice<uint> filetab = default, System.UIntPtr findfunctab = default, System.UIntPtr minpc = default, System.UIntPtr maxpc = default, System.UIntPtr text = default, System.UIntPtr etext = default, System.UIntPtr noptrdata = default, System.UIntPtr enoptrdata = default, System.UIntPtr data = default, System.UIntPtr edata = default, System.UIntPtr bss = default, System.UIntPtr ebss = default, System.UIntPtr noptrbss = default, System.UIntPtr enoptrbss = default, System.UIntPtr end = default, System.UIntPtr gcdata = default, System.UIntPtr gcbss = default, System.UIntPtr types = default, System.UIntPtr etypes = default, slice<textsect> textsectmap = default, slice<int> typelinks = default, slice<ptr<itab>> itablinks = default, slice<ptabEntry> ptab = default, @string pluginpath = default, slice<modulehash> pkghashes = default, @string modulename = default, slice<modulehash> modulehashes = default, byte hasmain = default, bitvector gcdatamask = default, bitvector gcbssmask = default, map<typeOff, ptr<_type>> typemap = default, bool bad = default, ref ptr<moduledata> next = default)
             {
                 this.pclntable = pclntable;
                 this.ftab = ftab;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:48 UTC
+//     Generated on 2020 October 08 03:42:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,12 +19,10 @@ using base64 = go.encoding.base64_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go;
@@ -47,8 +45,6 @@ namespace encoding
 
             public ref long off => ref m_BufferRef.Value.off;
 
-            public ref array<byte> bootstrap => ref m_BufferRef.Value.bootstrap;
-
             public ref readOp lastRead => ref m_BufferRef.Value.lastRead;
 
             // Constructors
@@ -56,12 +52,14 @@ namespace encoding
             {
                 this.m_BufferRef = new ptr<bytes.Buffer>(new bytes.Buffer(nil));
                 this.scratch = default;
+                this.ptrLevel = default;
             }
 
-            public encodeState(bytes.Buffer Buffer = default, array<byte> scratch = default)
+            public encodeState(bytes.Buffer Buffer = default, array<byte> scratch = default, ulong ptrLevel = default)
             {
                 this.m_BufferRef = new ptr<bytes.Buffer>(Buffer);
                 this.scratch = scratch;
+                this.ptrLevel = ptrLevel;
             }
 
             // Enable comparisons between nil and encodeState struct
@@ -84,7 +82,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static encodeState encodeState_cast(dynamic value)
         {
-            return new encodeState(value.Buffer, value.scratch);
+            return new encodeState(value.Buffer, value.scratch, value.ptrLevel);
         }
     }
 }}

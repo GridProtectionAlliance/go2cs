@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:02 UTC
+//     Generated on 2020 October 08 04:02:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
+using strings = go.strings_package;
 using go;
 
 namespace go {
@@ -35,9 +37,10 @@ namespace go
                 this.Vars = default;
                 this.Funcs = default;
                 this.Methods = default;
+                this.Examples = default;
             }
 
-            public Type(@string Doc = default, @string Name = default, ref ptr<ast.GenDecl> Decl = default, slice<ref Value> Consts = default, slice<ref Value> Vars = default, slice<ref Func> Funcs = default, slice<ref Func> Methods = default)
+            public Type(@string Doc = default, @string Name = default, ref ptr<ast.GenDecl> Decl = default, slice<ptr<Value>> Consts = default, slice<ptr<Value>> Vars = default, slice<ptr<Func>> Funcs = default, slice<ptr<Func>> Methods = default, slice<ptr<Example>> Examples = default)
             {
                 this.Doc = Doc;
                 this.Name = Name;
@@ -46,6 +49,7 @@ namespace go
                 this.Vars = Vars;
                 this.Funcs = Funcs;
                 this.Methods = Methods;
+                this.Examples = Examples;
             }
 
             // Enable comparisons between nil and Type struct
@@ -68,7 +72,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Type Type_cast(dynamic value)
         {
-            return new Type(value.Doc, value.Name, ref value.Decl, value.Consts, value.Vars, value.Funcs, value.Methods);
+            return new Type(value.Doc, value.Name, ref value.Decl, value.Consts, value.Vars, value.Funcs, value.Methods, value.Examples);
         }
     }
 }}

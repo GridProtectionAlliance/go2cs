@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:48 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:12 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\floor.go
 
@@ -27,6 +27,7 @@ namespace go
             {>>MARKER:FUNCTION_Floor_BLOCK_PREFIX<<
                 return x;
             }
+
             if (x < 0L)
             {
                 var (d, fract) = Modf(-x);
@@ -34,10 +35,14 @@ namespace go
                 {
                     d = d + 1L;
                 }
+
                 return -d;
+
             }
+
             var (d, _) = Modf(x);
             return d;
+
         }
 
         // Ceil returns the least integer value greater than or equal to x.
@@ -69,8 +74,10 @@ namespace go
             {>>MARKER:FUNCTION_Trunc_BLOCK_PREFIX<<
                 return x;
             }
+
             var (d, _) = Modf(x);
             return d;
+
         }
 
         // Round returns the nearest integer, rounding half away from zero.
@@ -100,6 +107,7 @@ namespace go
                 {
                     bits |= uvone; // +-1
                 }
+
             }
             else if (e < bias + shift)
             { 
@@ -107,13 +115,16 @@ namespace go
                 //
                 // Numbers with larger exponents are returned unchanged since they
                 // must be either an integer, infinity, or NaN.
-                const long half = 1L << (int)((shift - 1L));
+                const long half = (long)1L << (int)((shift - 1L));
 
                 e -= bias;
                 bits += half >> (int)(e);
                 bits &= fracMask >> (int)(e);
+
             }
+
             return Float64frombits(bits);
+
         }
 
         // RoundToEven returns the nearest integer, rounding ties to even.
@@ -142,11 +153,12 @@ namespace go
                 // - Large numbers without fractional components, infinity, and NaN are unchanged.
                 // - Add 0.499.. or 0.5 before truncating depending on whether the truncated
                 //   number is even or odd (respectively).
-                const long halfMinusULP = (1L << (int)((shift - 1L))) - 1L;
+                const long halfMinusULP = (long)(1L << (int)((shift - 1L))) - 1L;
 
                 e -= bias;
                 bits += (halfMinusULP + (bits >> (int)((shift - e))) & 1L) >> (int)(e);
                 bits &= fracMask >> (int)(e);
+
             }
             else if (e == bias - 1L && bits & fracMask != 0L)
             { 
@@ -158,7 +170,9 @@ namespace go
                 // Round abs(x) <= 0.5 including denormals.
                 bits &= signMask; // +-0
             }
+
             return Float64frombits(bits);
+
         }
     }
 }

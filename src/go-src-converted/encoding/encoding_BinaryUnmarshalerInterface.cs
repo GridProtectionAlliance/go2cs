@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:12 UTC
+//     Generated on 2020 October 08 03:42:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -61,10 +61,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate error UnmarshalBinaryByRef(ref T value, slice<byte> data);
+            private delegate error UnmarshalBinaryByPtr(ptr<T> value, slice<byte> data);
             private delegate error UnmarshalBinaryByVal(T value, slice<byte> data);
 
-            private static readonly UnmarshalBinaryByRef s_UnmarshalBinaryByRef;
+            private static readonly UnmarshalBinaryByPtr s_UnmarshalBinaryByPtr;
             private static readonly UnmarshalBinaryByVal s_UnmarshalBinaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,11 +73,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnmarshalBinaryByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnmarshalBinaryByPtr is null || !m_target_is_ptr)
                     return s_UnmarshalBinaryByVal!(target, data);
 
-                return s_UnmarshalBinaryByRef(ref target, data);
+                return s_UnmarshalBinaryByPtr(m_target_ptr, data);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -86,23 +87,20 @@ namespace go
             static BinaryUnmarshaler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UnmarshalBinary");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UnmarshalBinary");
 
                 if (!(extensionMethod is null))
-                    s_UnmarshalBinaryByRef = extensionMethod.CreateStaticDelegate(typeof(UnmarshalBinaryByRef)) as UnmarshalBinaryByRef;
+                    s_UnmarshalBinaryByPtr = extensionMethod.CreateStaticDelegate(typeof(UnmarshalBinaryByPtr)) as UnmarshalBinaryByPtr;
 
-                if (s_UnmarshalBinaryByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UnmarshalBinary");
+                extensionMethod = targetType.GetExtensionMethod("UnmarshalBinary");
 
-                    if (!(extensionMethod is null))
-                        s_UnmarshalBinaryByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalBinaryByVal)) as UnmarshalBinaryByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnmarshalBinaryByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalBinaryByVal)) as UnmarshalBinaryByVal;
 
-                if (s_UnmarshalBinaryByRef is null && s_UnmarshalBinaryByVal is null)
+                if (s_UnmarshalBinaryByPtr is null && s_UnmarshalBinaryByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement BinaryUnmarshaler.UnmarshalBinary method", new Exception("UnmarshalBinary"));
             }
 

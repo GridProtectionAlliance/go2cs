@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:48 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:15 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\frexp.go
 
@@ -25,7 +25,10 @@ namespace go
 ;
 
         private static (double, long) frexp(double f)
-        { 
+        {
+            double frac = default;
+            long exp = default;
+ 
             // special cases
 
             if (f == 0L) 
@@ -38,7 +41,8 @@ namespace go
             x &= mask << (int)(shift);
             x |= (-1L + bias) << (int)(shift);
             frac = Float64frombits(x);
-            return;
+            return ;
+
         }
     }
 }

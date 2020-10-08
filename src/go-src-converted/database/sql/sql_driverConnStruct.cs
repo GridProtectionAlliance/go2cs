@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:11:00 UTC
+//     Generated on 2020 October 08 04:58:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using io = go.io_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -51,26 +52,28 @@ namespace database
                 this.createdAt = default;
                 this.m_MutexRef = new ptr<sync.Mutex>(new sync.Mutex(nil));
                 this.ci = default;
+                this.needReset = default;
                 this.closed = default;
                 this.finalClosed = default;
                 this.openStmt = default;
-                this.lastErr = default;
                 this.inUse = default;
+                this.returnedAt = default;
                 this.onPut = default;
                 this.dbmuClosed = default;
             }
 
-            public driverConn(ref ptr<DB> db = default, time.Time createdAt = default, sync.Mutex Mutex = default, driver.Conn ci = default, bool closed = default, bool finalClosed = default, map<ref driverStmt, bool> openStmt = default, error lastErr = default, bool inUse = default, slice<Action> onPut = default, bool dbmuClosed = default)
+            public driverConn(ref ptr<DB> db = default, time.Time createdAt = default, sync.Mutex Mutex = default, driver.Conn ci = default, bool needReset = default, bool closed = default, bool finalClosed = default, map<ptr<driverStmt>, bool> openStmt = default, bool inUse = default, time.Time returnedAt = default, slice<Action> onPut = default, bool dbmuClosed = default)
             {
                 this.db = db;
                 this.createdAt = createdAt;
                 this.m_MutexRef = new ptr<sync.Mutex>(Mutex);
                 this.ci = ci;
+                this.needReset = needReset;
                 this.closed = closed;
                 this.finalClosed = finalClosed;
                 this.openStmt = openStmt;
-                this.lastErr = lastErr;
                 this.inUse = inUse;
+                this.returnedAt = returnedAt;
                 this.onPut = onPut;
                 this.dbmuClosed = dbmuClosed;
             }
@@ -95,7 +98,7 @@ namespace database
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static driverConn driverConn_cast(dynamic value)
         {
-            return new driverConn(ref value.db, value.createdAt, value.Mutex, value.ci, value.closed, value.finalClosed, value.openStmt, value.lastErr, value.inUse, value.onPut, value.dbmuClosed);
+            return new driverConn(ref value.db, value.createdAt, value.Mutex, value.ci, value.needReset, value.closed, value.finalClosed, value.openStmt, value.inUse, value.returnedAt, value.onPut, value.dbmuClosed);
         }
     }
 }}

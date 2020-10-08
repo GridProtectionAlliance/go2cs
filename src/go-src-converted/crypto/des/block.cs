@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package des -- go2cs converted at 2020 August 29 08:28:33 UTC
+// package des -- go2cs converted at 2020 October 08 03:36:35 UTC
 // import "crypto/des" ==> using des = go.crypto.des_package
 // Original source: C:\Go\src\crypto\des\block.go
 using binary = go.encoding.binary_package;
+using sync = go.sync_package;
 using static go.builtin;
 
 namespace go {
@@ -37,6 +38,7 @@ namespace crypto
 
                     i = i__prev1;
                 }
+
             }            {
                 {
                     long i__prev1 = i;
@@ -48,6 +50,7 @@ namespace crypto
 
                     i = i__prev1;
                 }
+
             }
             left = (left << (int)(31L)) | (left >> (int)(1L));
             right = (right << (int)(31L)) | (right >> (int)(1L)); 
@@ -55,6 +58,7 @@ namespace crypto
             // switch left & right and perform final permutation
             var preOutput = (uint64(right) << (int)(32L)) | uint64(left);
             binary.BigEndian.PutUint64(dst, permuteFinalBlock(preOutput));
+
         }
 
         // Encrypt one block from src into dst, using the subkeys.
@@ -69,9 +73,13 @@ namespace crypto
             cryptBlock(subkeys, dst, src, true);
         }
 
-        // DES Feistel function
+        // DES Feistel function. feistelBox must be initialized via
+        // feistelBoxOnce.Do(initFeistelBox) first.
         private static (uint, uint) feistel(uint l, uint r, ulong k0, ulong k1)
         {
+            uint lout = default;
+            uint rout = default;
+
             uint t = default;
 
             t = r ^ uint32(k0 >> (int)(32L));
@@ -93,18 +101,23 @@ namespace crypto
         // for sBoxes[s][i][j] << 4*(7-s)
         private static array<array<uint>> feistelBox = new array<array<uint>>(8L);
 
+        private static sync.Once feistelBoxOnce = default;
+
         // general purpose function to perform DES block permutations
         private static ulong permuteBlock(ulong src, slice<byte> permutation)
         {
+            ulong block = default;
+
             foreach (var (position, n) in permutation)
             {
                 var bit = (src >> (int)(n)) & 1L;
                 block |= bit << (int)(uint((len(permutation) - 1L) - position));
             }
-            return;
+            return ;
+
         }
 
-        private static void init()
+        private static void initFeistelBox()
         {
             foreach (var (s) in sBoxes)
             {
@@ -125,11 +138,15 @@ namespace crypto
                         f = (f << (int)(1L)) | (f >> (int)(31L));
 
                         feistelBox[s][t] = uint32(f);
+
                     }
+
 
                 }
 
+
             }
+
         }
 
         // permuteInitialBlock is equivalent to the permutation defined
@@ -199,6 +216,7 @@ namespace crypto
             // 3 11 19 27 35 43 51 59
             // 1  9 17 25 33 41 49 57
             return block;
+
         }
 
         // permuteInitialBlock is equivalent to the permutation defined
@@ -226,12 +244,15 @@ namespace crypto
             b2 = block << (int)(48L);
             block ^= b1 ^ b2 ^ b1 << (int)(48L) ^ b2 >> (int)(48L);
             return block;
+
         }
 
         // creates 16 28-bit blocks rotated according
         // to the rotation schedule
         private static slice<uint> ksRotate(uint @in)
         {
+            slice<uint> @out = default;
+
             out = make_slice<uint>(16L);
             var last = in;
             for (long i = 0L; i < 16L; i++)
@@ -241,14 +262,20 @@ namespace crypto
                 var right = (last << (int)(4L)) >> (int)((32L - ksRotations[i]));
                 out[i] = left | right;
                 last = out[i];
+
             }
 
-            return;
+            return ;
+
         }
 
         // creates 16 56-bit subkeys from the original key
-        private static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes)
-        { 
+        private static void generateSubkeys(this ptr<desCipher> _addr_c, slice<byte> keyBytes)
+        {
+            ref desCipher c = ref _addr_c.val;
+
+            feistelBoxOnce.Do(initFeistelBox); 
+
             // apply PC1 permutation to key
             var key = binary.BigEndian.Uint64(keyBytes);
             var permutedKey = permuteBlock(key, permutedChoice1[..]); 
@@ -264,7 +291,9 @@ namespace crypto
                 var pc2Input = uint64(leftRotations[i]) << (int)(28L) | uint64(rightRotations[i]); 
                 // apply PC2 permutation to 7 byte input
                 c.subkeys[i] = unpack(permuteBlock(pc2Input, permutedChoice2[..]));
+
             }
+
 
         }
 

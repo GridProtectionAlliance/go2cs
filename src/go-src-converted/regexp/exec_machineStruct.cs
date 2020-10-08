@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:24:03 UTC
+//     Generated on 2020 October 08 03:41:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
 using syntax = go.regexp.syntax_package;
+using sync = go.sync_package;
 
 namespace go
 {
@@ -28,34 +29,24 @@ namespace go
             {
                 this.re = default;
                 this.p = default;
-                this.op = default;
-                this.maxBitStateLen = default;
-                this.b = default;
                 this.q0 = default;
                 this.q1 = default;
                 this.pool = default;
                 this.matched = default;
                 this.matchcap = default;
-                this.inputBytes = default;
-                this.inputString = default;
-                this.inputReader = default;
+                this.inputs = default;
             }
 
-            public machine(ref ptr<Regexp> re = default, ref ptr<syntax.Prog> p = default, ref ptr<onePassProg> op = default, long maxBitStateLen = default, ref ptr<bitState> b = default, queue q0 = default, queue q1 = default, slice<ref thread> pool = default, bool matched = default, slice<long> matchcap = default, inputBytes inputBytes = default, inputString inputString = default, inputReader inputReader = default)
+            public machine(ref ptr<Regexp> re = default, ref ptr<syntax.Prog> p = default, queue q0 = default, queue q1 = default, slice<ptr<thread>> pool = default, bool matched = default, slice<long> matchcap = default, inputs inputs = default)
             {
                 this.re = re;
                 this.p = p;
-                this.op = op;
-                this.maxBitStateLen = maxBitStateLen;
-                this.b = b;
                 this.q0 = q0;
                 this.q1 = q1;
                 this.pool = pool;
                 this.matched = matched;
                 this.matchcap = matchcap;
-                this.inputBytes = inputBytes;
-                this.inputString = inputString;
-                this.inputReader = inputReader;
+                this.inputs = inputs;
             }
 
             // Enable comparisons between nil and machine struct
@@ -78,7 +69,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static machine machine_cast(dynamic value)
         {
-            return new machine(ref value.re, ref value.p, ref value.op, value.maxBitStateLen, ref value.b, value.q0, value.q1, value.pool, value.matched, value.matchcap, value.inputBytes, value.inputString, value.inputReader);
+            return new machine(ref value.re, ref value.p, value.q0, value.q1, value.pool, value.matched, value.matchcap, value.inputs);
         }
     }
 }

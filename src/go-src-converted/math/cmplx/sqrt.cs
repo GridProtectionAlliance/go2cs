@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 August 29 08:45:02 UTC
+// package cmplx -- go2cs converted at 2020 October 08 03:25:55 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\sqrt.go
 using math = go.math_package;
@@ -47,7 +47,7 @@ namespace math
         //                       1/2
         // Im w  =  [ (r - x)/2 ]   .
         //
-        // Cancelation error in r-x or r+x is avoided by using the
+        // Cancellation error in r-x or r+x is avoided by using the
         // identity  2 Re w Im w  =  y.
         //
         // Note that -w is also a square root of z. The root chosen
@@ -76,6 +76,11 @@ namespace math
                     return complex(0L, math.Copysign(math.Sqrt(-real(x)), imag(x)));
                 }
                 return complex(math.Sqrt(real(x)), imag(x));
+
+            }
+            else if (math.IsInf(imag(x), 0L))
+            {
+                return complex(math.Inf(1.0F), imag(x));
             }
             if (real(x) == 0L)
             {
@@ -86,6 +91,7 @@ namespace math
                 }
                 r = math.Sqrt(0.5F * imag(x));
                 return complex(r, r);
+
             }
             var a = real(x);
             var b = imag(x);
@@ -122,6 +128,7 @@ namespace math
                 return complex(t, -r);
             }
             return complex(t, r);
+
         }
     }
 }}

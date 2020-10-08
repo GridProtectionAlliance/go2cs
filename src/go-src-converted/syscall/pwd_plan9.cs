@@ -9,7 +9,7 @@
 // Instead, track a Go process-wide intent of the current working directory,
 // and switch to it at important points.
 
-// package syscall -- go2cs converted at 2020 August 29 08:37:24 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:26:50 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\pwd_plan9.go
 using sync = go.sync_package;
@@ -32,58 +32,88 @@ namespace go
         {
             if (!wdSet)
             {
-                return;
+                return ;
             } 
             // always call chdir when getwd returns an error
             var (wd, _) = getwd();
             if (wd == wdStr)
             {
-                return;
+                return ;
             }
+
             {
                 var err = chdir(wdStr);
 
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
 
             }
+
+        }
+
+        private static void fixwd(params @string[] paths)
+        {
+            paths = paths.Clone();
+
+            foreach (var (_, path) in paths)
+            {
+                if (path != "" && path[0L] != '/' && path[0L] != '#')
+                {
+                    Fixwd();
+                    return ;
+                }
+
+            }
+
         }
 
         // goroutine-specific getwd
         private static (@string, error) getwd() => func((defer, _, __) =>
         {
+            @string wd = default;
+            error err = default!;
+
             var (fd, err) = open(".", O_RDONLY);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             defer(Close(fd));
             return Fd2path(fd);
+
         });
 
         public static (@string, error) Getwd() => func((defer, _, __) =>
         {
+            @string wd = default;
+            error err = default!;
+
             wdmu.Lock();
             defer(wdmu.Unlock());
 
             if (wdSet)
             {
-                return (wdStr, null);
+                return (wdStr, error.As(null!)!);
             }
+
             wd, err = getwd();
             if (err != null)
             {
-                return;
+                return ;
             }
+
             wdSet = true;
             wdStr = wd;
-            return (wd, null);
+            return (wd, error.As(null!)!);
+
         });
 
         public static error Chdir(@string path) => func((defer, _, __) =>
         {
+            fixwd(path);
             wdmu.Lock();
             defer(wdmu.Unlock());
 
@@ -92,19 +122,22 @@ namespace go
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
 
+
             var (wd, err) = getwd();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             wdSet = true;
             wdStr = wd;
-            return error.As(null);
+            return error.As(null!)!;
+
         });
     }
 }

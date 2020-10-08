@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd
+// +build dragonfly freebsd linux netbsd openbsd
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:59 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:59 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\signal_386.go
 using sys = go.runtime.@internal.sys_package;
@@ -13,10 +13,12 @@ using static go.builtin;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
-        private static void dumpregs(ref sigctxt c)
+        private static void dumpregs(ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             print("eax    ", hex(c.eax()), "\n");
             print("ebx    ", hex(c.ebx()), "\n");
             print("ecx    ", hex(c.ecx()), "\n");
@@ -34,78 +36,66 @@ namespace go
 
         //go:nosplit
         //go:nowritebarrierrec
-        private static System.UIntPtr sigpc(this ref sigctxt c)
+        private static System.UIntPtr sigpc(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.eip());
         }
 
-        private static System.UIntPtr sigsp(this ref sigctxt c)
+        private static System.UIntPtr sigsp(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.esp());
         }
-        private static System.UIntPtr siglr(this ref sigctxt c)
+        private static System.UIntPtr siglr(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return 0L;
         }
-        private static System.UIntPtr fault(this ref sigctxt c)
+        private static System.UIntPtr fault(this ptr<sigctxt> _addr_c)
         {
+            ref sigctxt c = ref _addr_c.val;
+
             return uintptr(c.sigaddr());
         }
 
         // preparePanic sets up the stack to look like a call to sigpanic.
-        private static void preparePanic(this ref sigctxt c, uint sig, ref g gp)
+        private static void preparePanic(this ptr<sigctxt> _addr_c, uint sig, ptr<g> _addr_gp)
         {
-            if (GOOS == "darwin")
+            ref sigctxt c = ref _addr_c.val;
+            ref g gp = ref _addr_gp.val;
+
+            var pc = uintptr(c.eip());
+            var sp = uintptr(c.esp());
+
+            if (shouldPushSigpanic(gp, pc, new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(sp))))
+            {
+                c.pushCall(funcPC(sigpanic), pc);
+            }
+            else
             { 
-                // Work around Leopard bug that doesn't set FPE_INTDIV.
-                // Look at instruction to see if it is a divide.
-                // Not necessary in Snow Leopard (si_code will be != 0).
-                if (sig == _SIGFPE && gp.sigcode0 == 0L)
-                {
-                    ref array<byte> pc = new ptr<ref array<byte>>(@unsafe.Pointer(gp.sigpc));
-                    long i = 0L;
-                    if (pc[i] == 0x66UL)
-                    { // 16-bit instruction prefix
-                        i++;
-                    }
-                    if (pc[i] == 0xF6UL || pc[i] == 0xF7UL)
-                    {
-                        gp.sigcode0 = _FPE_INTDIV;
-                    }
-                }
+                // Not safe to push the call. Just clobber the frame.
+                c.set_eip(uint32(funcPC(sigpanic)));
+
             }
-            pc = uintptr(c.eip());
-            var sp = uintptr(c.esp()); 
 
-            // If we don't recognize the PC as code
-            // but we do recognize the top pointer on the stack as code,
-            // then assume this was a call to non-code and treat like
-            // pc == 0, to make unwinding show the context.
-            if (pc != 0L && !findfunc(pc).valid() && findfunc(@unsafe.Pointer(sp).Value).valid())
-            {
-                pc = 0L;
-            } 
+        }
 
-            // Only push runtime.sigpanic if pc != 0.
-            // If pc == 0, probably panicked because of a
-            // call to a nil func. Not pushing that onto sp will
-            // make the trace look like a call to runtime.sigpanic instead.
-            // (Otherwise the trace will end at runtime.sigpanic and we
-            // won't get to see who faulted.)
-            if (pc != 0L)
-            {
-                if (sys.RegSize > sys.PtrSize)
-                {
-                    sp -= sys.PtrSize * (uintptr.Value)(@unsafe.Pointer(sp));
+        private static void pushCall(this ptr<sigctxt> _addr_c, System.UIntPtr targetPC, System.UIntPtr resumePC)
+        {
+            ref sigctxt c = ref _addr_c.val;
+ 
+            // Make it look like we called target at resumePC.
+            var sp = uintptr(c.esp());
+            sp -= sys.PtrSize * (uintptr.val)(@unsafe.Pointer(sp));
 
-                    0L;
-                }
-                sp -= sys.PtrSize * (uintptr.Value)(@unsafe.Pointer(sp));
+            resumePC;
+            c.set_esp(uint32(sp));
+            c.set_eip(uint32(targetPC));
 
-                pc;
-                c.set_esp(uint32(sp));
-            }
-            c.set_eip(uint32(funcPC(sigpanic)));
         }
     }
 }

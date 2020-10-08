@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 August 29 09:26:27 UTC
+// package syntax -- go2cs converted at 2020 October 08 04:28:31 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\syntax.go
-using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -25,12 +24,12 @@ namespace @internal
         }
 
         // Modes supported by the parser.
-        public static readonly Mode CheckBranches = 1L << (int)(iota); // check correct use of labels, break, continue, and goto statements
+        public static readonly Mode CheckBranches = (Mode)1L << (int)(iota); // check correct use of labels, break, continue, and goto statements
 
         // Error describes a syntax error. Error implements the error interface.
         public partial struct Error
         {
-            public src.Pos Pos;
+            public Pos Pos;
             public @string Msg;
         }
 
@@ -39,44 +38,50 @@ namespace @internal
             return fmt.Sprintf("%s: %s", err.Pos, err.Msg);
         }
 
-        private static error _ = error.As(new Error()); // verify that Error implements error
+        private static error _ = error.As(new Error())!; // verify that Error implements error
 
         // An ErrorHandler is called for each error encountered reading a .go file.
         public delegate void ErrorHandler(error);
 
-        // A Pragma value is a set of flags that augment a function or
-        // type declaration. Callers may assign meaning to the flags as
-        // appropriate.
-        public partial struct Pragma // : ushort
+        // A Pragma value augments a package, import, const, func, type, or var declaration.
+        // Its meaning is entirely up to the PragmaHandler,
+        // except that nil is used to mean “no pragma seen.”
+        public partial interface Pragma
         {
         }
 
-        // A PragmaHandler is used to process //go: directives as
-        // they're scanned. The returned Pragma value will be unioned into the
-        // next FuncDecl node.
-        public delegate  Pragma PragmaHandler(src.Pos,  @string);
-
-        // A FilenameHandler is used to process each filename encountered
-        // in //line directives. The returned value is used as the absolute filename.
-        public delegate  @string FilenameHandler(@string);
+        // A PragmaHandler is used to process //go: directives while scanning.
+        // It is passed the current pragma value, which starts out being nil,
+        // and it returns an updated pragma value.
+        // The text is the directive, with the "//" prefix stripped.
+        // The current pragma is saved at each package, import, const, func, type, or var
+        // declaration, into the File, ImportDecl, ConstDecl, FuncDecl, TypeDecl, or VarDecl node.
+        //
+        // If text is the empty string, the pragma is being returned
+        // to the handler unused, meaning it appeared before a non-declaration.
+        // The handler may wish to report an error. In this case, pos is the
+        // current parser position, not the position of the pragma itself.
+        // Blank specifies whether the line is blank before the pragma.
+        public delegate  Pragma PragmaHandler(Pos,  bool,  @string,  Pragma);
 
         // Parse parses a single Go source file from src and returns the corresponding
         // syntax tree. If there are errors, Parse will return the first error found,
-        // and a possibly partially constructed syntax tree, or nil if no correct package
-        // clause was found. The base argument is only used for position information.
+        // and a possibly partially constructed syntax tree, or nil.
         //
         // If errh != nil, it is called with each error encountered, and Parse will
-        // process as much source as possible. If errh is nil, Parse will terminate
-        // immediately upon encountering an error.
+        // process as much source as possible. In this case, the returned syntax tree
+        // is only nil if no correct package clause was found.
+        // If errh is nil, Parse will terminate immediately upon encountering the first
+        // error, and the returned syntax tree is nil.
         //
-        // If a PragmaHandler is provided, it is called with each pragma encountered.
+        // If pragh != nil, it is called with each pragma encountered.
         //
-        // If a FilenameHandler is provided, it is called to process each filename
-        // encountered in //line directives.
-        //
-        // The Mode argument is currently ignored.
-        public static (ref File, error) Parse(ref src.PosBase _@base, io.Reader src, ErrorHandler errh, PragmaHandler pragh, FilenameHandler fileh, Mode mode) => func(_@base, (ref src.PosBase @base, Defer defer, Panic panic, Recover _) =>
+        public static (ptr<File>, error) Parse(ptr<PosBase> _addr_@base, io.Reader src, ErrorHandler errh, PragmaHandler pragh, Mode mode) => func((defer, panic, _) =>
         {
+            ptr<File> _ = default!;
+            error first = default!;
+            ref PosBase @base = ref _addr_@base.val;
+
             defer(() =>
             {
                 {
@@ -92,49 +97,34 @@ namespace @internal
                             if (ok)
                             {
                                 first = err;
-                                return;
+                                return ;
                             }
 
                         }
+
                         panic(p);
+
                     }
 
                     p = p__prev1;
 
                 }
+
             }());
 
             p = default;
-            p.init(base, src, errh, pragh, fileh, mode);
+            p.init(base, src, errh, pragh, mode);
             p.next();
-            return (p.fileOrNil(), p.first);
+            return (_addr_p.fileOrNil()!, error.As(p.first)!);
+
         });
 
-        // ParseBytes behaves like Parse but it reads the source from the []byte slice provided.
-        public static (ref File, error) ParseBytes(ref src.PosBase @base, slice<byte> src, ErrorHandler errh, PragmaHandler pragh, FilenameHandler fileh, Mode mode)
-        {
-            return Parse(base, ref new bytesReader(src), errh, pragh, fileh, mode);
-        }
-
-        private partial struct bytesReader
-        {
-            public slice<byte> data;
-        }
-
-        private static (long, error) Read(this ref bytesReader r, slice<byte> p)
-        {
-            if (len(r.data) > 0L)
-            {
-                var n = copy(p, r.data);
-                r.data = r.data[n..];
-                return (n, null);
-            }
-            return (0L, io.EOF);
-        }
-
         // ParseFile behaves like Parse but it reads the source from the named file.
-        public static (ref File, error) ParseFile(@string filename, ErrorHandler errh, PragmaHandler pragh, Mode mode) => func((defer, _, __) =>
+        public static (ptr<File>, error) ParseFile(@string filename, ErrorHandler errh, PragmaHandler pragh, Mode mode) => func((defer, _, __) =>
         {
+            ptr<File> _p0 = default!;
+            error _p0 = default!;
+
             var (f, err) = os.Open(filename);
             if (err != null)
             {
@@ -142,10 +132,14 @@ namespace @internal
                 {
                     errh(err);
                 }
-                return (null, err);
+
+                return (_addr_null!, error.As(err)!);
+
             }
+
             defer(f.Close());
-            return Parse(src.NewFileBase(filename, filename), f, errh, pragh, null, mode);
+            return _addr_Parse(_addr_NewFileBase(filename), f, errh, pragh, mode)!;
+
         });
     }
 }}}}

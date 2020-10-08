@@ -14,7 +14,7 @@
 
 // Package profile provides a representation of profile.proto and
 // methods to encode/decode profiles in this format.
-// package profile -- go2cs converted at 2020 August 29 10:06:32 UTC
+// package profile -- go2cs converted at 2020 October 08 04:43:39 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\profile.go
 using bytes = go.bytes_package;
@@ -43,12 +43,12 @@ namespace pprof
         // Profile is an in-memory representation of profile.proto.
         public partial struct Profile
         {
-            public slice<ref ValueType> SampleType;
+            public slice<ptr<ValueType>> SampleType;
             public @string DefaultSampleType;
-            public slice<ref Sample> Sample;
-            public slice<ref Mapping> Mapping;
-            public slice<ref Location> Location;
-            public slice<ref Function> Function;
+            public slice<ptr<Sample>> Sample;
+            public slice<ptr<Mapping>> Mapping;
+            public slice<ptr<Location>> Location;
+            public slice<ptr<Function>> Function;
             public slice<@string> Comments;
             public @string DropFrames;
             public @string KeepFrames;
@@ -78,7 +78,7 @@ namespace pprof
         // Sample corresponds to Profile.Sample
         public partial struct Sample
         {
-            public slice<ref Location> Location;
+            public slice<ptr<Location>> Location;
             public slice<long> Value;
             public map<@string, slice<@string>> Label;
             public map<@string, slice<long>> NumLabel;
@@ -121,6 +121,7 @@ namespace pprof
             public ptr<Mapping> Mapping;
             public ulong Address;
             public slice<Line> Line;
+            public bool IsFolded;
             public ulong mappingIDX;
         }
 
@@ -148,22 +149,30 @@ namespace pprof
         // Parse parses a profile and checks for its validity. The input
         // may be a gzip-compressed encoded protobuf or one of many legacy
         // profile formats which may be unsupported in the future.
-        public static (ref Profile, error) Parse(io.Reader r)
+        public static (ptr<Profile>, error) Parse(io.Reader r)
         {
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
             var (data, err) = ioutil.ReadAll(r);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return ParseData(data);
+
+            return _addr_ParseData(data)!;
+
         }
 
         // ParseData parses a profile from a buffer and checks for its
         // validity.
-        public static (ref Profile, error) ParseData(slice<byte> data)
+        public static (ptr<Profile>, error) ParseData(slice<byte> data)
         {
-            ref Profile p = default;
-            error err = default;
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
+            ptr<Profile> p;
+            error err = default!;
             if (len(data) >= 2L && data[0L] == 0x1fUL && data[1L] == 0x8bUL)
             {
                 var (gz, err) = gzip.NewReader(bytes.NewBuffer(data));
@@ -171,21 +180,26 @@ namespace pprof
                 {
                     data, err = ioutil.ReadAll(gz);
                 }
+
                 if (err != null)
                 {
-                    return (null, fmt.Errorf("decompressing profile: %v", err));
+                    return (_addr_null!, error.As(fmt.Errorf("decompressing profile: %v", err))!);
                 }
+
             }
+
             p, err = ParseUncompressed(data);
 
-            if (err != null && err != errNoData)
+            if (err != null && err != errNoData && err != errConcatProfile)
             {
                 p, err = parseLegacy(data);
             }
+
             if (err != null)
             {
-                return (null, fmt.Errorf("parsing profile: %v", err));
+                return (_addr_null!, error.As(fmt.Errorf("parsing profile: %v", err))!);
             }
+
             {
                 error err__prev1 = err;
 
@@ -193,22 +207,28 @@ namespace pprof
 
                 if (err != null)
                 {
-                    return (null, fmt.Errorf("malformed profile: %v", err));
+                    return (_addr_null!, error.As(fmt.Errorf("malformed profile: %v", err))!);
                 }
 
                 err = err__prev1;
 
             }
-            return (p, null);
+
+            return (_addr_p!, error.As(null!)!);
+
         }
 
         private static var errUnrecognized = fmt.Errorf("unrecognized profile format");
         private static var errMalformed = fmt.Errorf("malformed profile format");
         private static var errNoData = fmt.Errorf("empty input file");
+        private static var errConcatProfile = fmt.Errorf("concatenated profiles detected");
 
-        private static (ref Profile, error) parseLegacy(slice<byte> data)
+        private static (ptr<Profile>, error) parseLegacy(slice<byte> data)
         {
-            Func<slice<byte>, (ref Profile, error)> parsers = new slice<Func<slice<byte>, (ref Profile, error)>>(new Func<slice<byte>, (ref Profile, error)>[] { parseCPU, parseHeap, parseGoCount, parseThread, parseContention, parseJavaProfile });
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
+            Func<slice<byte>, (ptr<Profile>, error)> parsers = new slice<Func<slice<byte>, (ptr<Profile>, error)>>(new Func<slice<byte>, (ptr<Profile>, error)>[] { parseCPU, parseHeap, parseGoCount, parseThread, parseContention, parseJavaProfile });
 
             foreach (var (_, parser) in parsers)
             {
@@ -216,24 +236,31 @@ namespace pprof
                 if (err == null)
                 {
                     p.addLegacyFrameInfo();
-                    return (p, null);
+                    return (_addr_p!, error.As(null!)!);
                 }
+
                 if (err != errUnrecognized)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
             }
-            return (null, errUnrecognized);
+            return (_addr_null!, error.As(errUnrecognized)!);
+
         }
 
         // ParseUncompressed parses an uncompressed protobuf into a profile.
-        public static (ref Profile, error) ParseUncompressed(slice<byte> data)
+        public static (ptr<Profile>, error) ParseUncompressed(slice<byte> data)
         {
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
             if (len(data) == 0L)
             {
-                return (null, errNoData);
+                return (_addr_null!, error.As(errNoData)!);
             }
-            Profile p = ref new Profile();
+
+            ptr<Profile> p = addr(new Profile());
             {
                 var err__prev1 = err;
 
@@ -241,12 +268,13 @@ namespace pprof
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
 
             {
                 var err__prev1 = err;
@@ -255,26 +283,30 @@ namespace pprof
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
 
-            return (p, null);
+
+            return (_addr_p!, error.As(null!)!);
+
         }
 
         private static var libRx = regexp.MustCompile("([.]so$|[.]so[._][0-9]+)");
 
         // massageMappings applies heuristic-based changes to the profile
         // mappings to account for quirks of some environments.
-        private static void massageMappings(this ref Profile p)
-        { 
+        private static void massageMappings(this ptr<Profile> _addr_p)
+        {
+            ref Profile p = ref _addr_p.val;
+ 
             // Merge adjacent regions with matching names, checking that the offsets match
             if (len(p.Mapping) > 1L)
             {
-                ref Mapping mappings = new slice<ref Mapping>(new ref Mapping[] { p.Mapping[0] });
+                ptr<Mapping> mappings = new slice<ptr<Mapping>>(new ptr<Mapping>[] { p.Mapping[0] });
                 {
                     var m__prev1 = m;
 
@@ -282,27 +314,33 @@ namespace pprof
                     {
                         m = __m;
                         var lm = mappings[len(mappings) - 1L];
-                        if (adjacent(lm, m))
+                        if (adjacent(_addr_lm, _addr_m))
                         {
                             lm.Limit = m.Limit;
                             if (m.File != "")
                             {
                                 lm.File = m.File;
                             }
+
                             if (m.BuildID != "")
                             {
                                 lm.BuildID = m.BuildID;
                             }
+
                             p.updateLocationMapping(m, lm);
                             continue;
+
                         }
+
                         mappings = append(mappings, m);
+
                     }
 
                     m = m__prev1;
                 }
 
                 p.Mapping = mappings;
+
             } 
 
             // Use heuristics to identify main binary and move it to the top of the list of mappings
@@ -319,10 +357,12 @@ namespace pprof
                     {
                         continue;
                     }
+
                     if (len(libRx.FindStringSubmatch(file)) > 0L)
                     {
                         continue;
                     }
+
                     if (file[0L] == '[')
                     {
                         continue;
@@ -331,6 +371,7 @@ namespace pprof
                     p.Mapping[0L] = p.Mapping[i];
                     p.Mapping[i] = p.Mapping[0L];
                     break;
+
                 } 
 
                 // Keep the mapping IDs neatly sorted
@@ -353,32 +394,39 @@ namespace pprof
                 i = i__prev1;
                 m = m__prev1;
             }
-
         }
 
         // adjacent returns whether two mapping entries represent the same
         // mapping that has been split into two. Check that their addresses are adjacent,
         // and if the offsets match, if they are available.
-        private static bool adjacent(ref Mapping m1, ref Mapping m2)
+        private static bool adjacent(ptr<Mapping> _addr_m1, ptr<Mapping> _addr_m2)
         {
+            ref Mapping m1 = ref _addr_m1.val;
+            ref Mapping m2 = ref _addr_m2.val;
+
             if (m1.File != "" && m2.File != "")
             {
                 if (m1.File != m2.File)
                 {
                     return false;
                 }
+
             }
+
             if (m1.BuildID != "" && m2.BuildID != "")
             {
                 if (m1.BuildID != m2.BuildID)
                 {
                     return false;
                 }
+
             }
+
             if (m1.Limit != m2.Start)
             {
                 return false;
             }
+
             if (m1.Offset != 0L && m2.Offset != 0L)
             {
                 var offset = m1.Offset + (m1.Limit - m1.Start);
@@ -386,23 +434,34 @@ namespace pprof
                 {
                     return false;
                 }
+
             }
+
             return true;
+
         }
 
-        private static void updateLocationMapping(this ref Profile p, ref Mapping from, ref Mapping to)
+        private static void updateLocationMapping(this ptr<Profile> _addr_p, ptr<Mapping> _addr_from, ptr<Mapping> _addr_to)
         {
+            ref Profile p = ref _addr_p.val;
+            ref Mapping from = ref _addr_from.val;
+            ref Mapping to = ref _addr_to.val;
+
             foreach (var (_, l) in p.Location)
             {
                 if (l.Mapping == from)
                 {
                     l.Mapping = to;
                 }
+
             }
+
         }
 
-        private static slice<byte> serialize(ref Profile p)
+        private static slice<byte> serialize(ptr<Profile> _addr_p)
         {
+            ref Profile p = ref _addr_p.val;
+
             p.encodeMu.Lock();
             p.preEncode();
             var b = marshal(p);
@@ -411,43 +470,52 @@ namespace pprof
         }
 
         // Write writes the profile as a gzip-compressed marshaled protobuf.
-        private static error Write(this ref Profile _p, io.Writer w) => func(_p, (ref Profile p, Defer defer, Panic _, Recover __) =>
+        private static error Write(this ptr<Profile> _addr_p, io.Writer w) => func((defer, _, __) =>
         {
+            ref Profile p = ref _addr_p.val;
+
             var zw = gzip.NewWriter(w);
             defer(zw.Close());
-            var (_, err) = zw.Write(serialize(p));
-            return error.As(err);
+            var (_, err) = zw.Write(serialize(_addr_p));
+            return error.As(err)!;
         });
 
         // WriteUncompressed writes the profile as a marshaled protobuf.
-        private static error WriteUncompressed(this ref Profile p, io.Writer w)
+        private static error WriteUncompressed(this ptr<Profile> _addr_p, io.Writer w)
         {
-            var (_, err) = w.Write(serialize(p));
-            return error.As(err);
+            ref Profile p = ref _addr_p.val;
+
+            var (_, err) = w.Write(serialize(_addr_p));
+            return error.As(err)!;
         }
 
         // CheckValid tests whether the profile is valid. Checks include, but are
         // not limited to:
         //   - len(Profile.Sample[n].value) == len(Profile.value_unit)
         //   - Sample.id has a corresponding Profile.Location
-        private static error CheckValid(this ref Profile p)
-        { 
+        private static error CheckValid(this ptr<Profile> _addr_p)
+        {
+            ref Profile p = ref _addr_p.val;
+ 
             // Check that sample values are consistent
             var sampleLen = len(p.SampleType);
             if (sampleLen == 0L && len(p.Sample) != 0L)
             {
-                return error.As(fmt.Errorf("missing sample type information"));
+                return error.As(fmt.Errorf("missing sample type information"))!;
             }
+
             foreach (var (_, s) in p.Sample)
             {
                 if (s == null)
                 {
-                    return error.As(fmt.Errorf("profile has nil sample"));
+                    return error.As(fmt.Errorf("profile has nil sample"))!;
                 }
+
                 if (len(s.Value) != sampleLen)
                 {
-                    return error.As(fmt.Errorf("mismatch: sample has %d values vs. %d types", len(s.Value), len(p.SampleType)));
+                    return error.As(fmt.Errorf("mismatch: sample has %d values vs. %d types", len(s.Value), len(p.SampleType)))!;
                 }
+
                 {
                     var l__prev2 = l;
 
@@ -456,18 +524,18 @@ namespace pprof
                         l = __l;
                         if (l == null)
                         {
-                            return error.As(fmt.Errorf("sample has nil location"));
+                            return error.As(fmt.Errorf("sample has nil location"))!;
                         }
+
                     }
 
                     l = l__prev2;
                 }
-
             } 
 
             // Check that all mappings/locations/functions are in the tables
             // Check that there are no duplicate ids
-            var mappings = make_map<ulong, ref Mapping>(len(p.Mapping));
+            var mappings = make_map<ulong, ptr<Mapping>>(len(p.Mapping));
             {
                 var m__prev1 = m;
 
@@ -476,23 +544,27 @@ namespace pprof
                     m = __m;
                     if (m == null)
                     {
-                        return error.As(fmt.Errorf("profile has nil mapping"));
+                        return error.As(fmt.Errorf("profile has nil mapping"))!;
                     }
+
                     if (m.ID == 0L)
                     {
-                        return error.As(fmt.Errorf("found mapping with reserved ID=0"));
+                        return error.As(fmt.Errorf("found mapping with reserved ID=0"))!;
                     }
+
                     if (mappings[m.ID] != null)
                     {
-                        return error.As(fmt.Errorf("multiple mappings with same id: %d", m.ID));
+                        return error.As(fmt.Errorf("multiple mappings with same id: %d", m.ID))!;
                     }
+
                     mappings[m.ID] = m;
+
                 }
 
                 m = m__prev1;
             }
 
-            var functions = make_map<ulong, ref Function>(len(p.Function));
+            var functions = make_map<ulong, ptr<Function>>(len(p.Function));
             {
                 var f__prev1 = f;
 
@@ -501,23 +573,27 @@ namespace pprof
                     f = __f;
                     if (f == null)
                     {
-                        return error.As(fmt.Errorf("profile has nil function"));
+                        return error.As(fmt.Errorf("profile has nil function"))!;
                     }
+
                     if (f.ID == 0L)
                     {
-                        return error.As(fmt.Errorf("found function with reserved ID=0"));
+                        return error.As(fmt.Errorf("found function with reserved ID=0"))!;
                     }
+
                     if (functions[f.ID] != null)
                     {
-                        return error.As(fmt.Errorf("multiple functions with same id: %d", f.ID));
+                        return error.As(fmt.Errorf("multiple functions with same id: %d", f.ID))!;
                     }
+
                     functions[f.ID] = f;
+
                 }
 
                 f = f__prev1;
             }
 
-            var locations = make_map<ulong, ref Location>(len(p.Location));
+            var locations = make_map<ulong, ptr<Location>>(len(p.Location));
             {
                 var l__prev1 = l;
 
@@ -526,16 +602,19 @@ namespace pprof
                     l = __l;
                     if (l == null)
                     {
-                        return error.As(fmt.Errorf("profile has nil location"));
+                        return error.As(fmt.Errorf("profile has nil location"))!;
                     }
+
                     if (l.ID == 0L)
                     {
-                        return error.As(fmt.Errorf("found location with reserved id=0"));
+                        return error.As(fmt.Errorf("found location with reserved id=0"))!;
                     }
+
                     if (locations[l.ID] != null)
                     {
-                        return error.As(fmt.Errorf("multiple locations with same id: %d", l.ID));
+                        return error.As(fmt.Errorf("multiple locations with same id: %d", l.ID))!;
                     }
+
                     locations[l.ID] = l;
                     {
                         var m__prev1 = m;
@@ -546,13 +625,15 @@ namespace pprof
                         {
                             if (m.ID == 0L || mappings[m.ID] != m)
                             {
-                                return error.As(fmt.Errorf("inconsistent mapping %p: %d", m, m.ID));
+                                return error.As(fmt.Errorf("inconsistent mapping %p: %d", m, m.ID))!;
                             }
+
                         }
 
                         m = m__prev1;
 
                     }
+
                     foreach (var (_, ln) in l.Line)
                     {
                         {
@@ -564,27 +645,33 @@ namespace pprof
                             {
                                 if (f.ID == 0L || functions[f.ID] != f)
                                 {
-                                    return error.As(fmt.Errorf("inconsistent function %p: %d", f, f.ID));
+                                    return error.As(fmt.Errorf("inconsistent function %p: %d", f, f.ID))!;
                                 }
+
                             }
 
                             f = f__prev1;
 
                         }
+
                     }
+
                 }
 
                 l = l__prev1;
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Aggregate merges the locations in the profile into equivalence
         // classes preserving the request attributes. It also updates the
         // samples to point to the merged locations.
-        private static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address)
+        private static error Aggregate(this ptr<Profile> _addr_p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address)
         {
+            ref Profile p = ref _addr_p.val;
+
             foreach (var (_, m) in p.Mapping)
             {
                 m.HasInlineFrames = m.HasInlineFrames && inlineFrame;
@@ -603,11 +690,14 @@ namespace pprof
                         f.Name = "";
                         f.SystemName = "";
                     }
+
                     if (!filename)
                     {
                         f.Filename = "";
                     }
+
                 }
+
             } 
 
             // Aggregate locations
@@ -619,20 +709,27 @@ namespace pprof
                     {
                         l.Line = l.Line[len(l.Line) - 1L..];
                     }
+
                     if (!linenumber)
                     {
                         foreach (var (i) in l.Line)
                         {
                             l.Line[i].Line = 0L;
                         }
+
                     }
+
                     if (!address)
                     {
                         l.Address = 0L;
                     }
+
                 }
+
             }
-            return error.As(p.CheckValid());
+
+            return error.As(p.CheckValid())!;
+
         }
 
         // NumLabelUnits returns a map of numeric label keys to the units
@@ -644,8 +741,12 @@ namespace pprof
         // in map of ignored units.
         // If no units are encountered for a particular key, the unit is then inferred
         // based on the key.
-        private static (map<@string, @string>, map<@string, slice<@string>>) NumLabelUnits(this ref Profile p)
+        private static (map<@string, @string>, map<@string, slice<@string>>) NumLabelUnits(this ptr<Profile> _addr_p)
         {
+            map<@string, @string> _p0 = default;
+            map<@string, slice<@string>> _p0 = default;
+            ref Profile p = ref _addr_p.val;
+
             map numLabelUnits = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{};
             map ignoredUnits = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, map<@string, bool>>{};
             map encounteredKeys = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{}; 
@@ -666,6 +767,7 @@ namespace pprof
                             {
                                 continue;
                             }
+
                             {
                                 var (wantUnit, ok) = numLabelUnits[k];
 
@@ -688,15 +790,18 @@ namespace pprof
                                         }
 
                                     }
+
                                 }
 
+
                             }
+
                         }
 
                         unit = unit__prev3;
                     }
-
                 }
+
             } 
             // Infer units for keys without any units associated with
             // numeric tag values.
@@ -720,7 +825,9 @@ namespace pprof
                                 numLabelUnits[key] = key;
                                 break;
                         }
+
                     }
+
                 } 
 
                 // Copy ignored units into more readable format
@@ -753,18 +860,22 @@ namespace pprof
 
                     sort.Strings(units);
                     unitsIgnored[key] = units;
+
                 }
 
                 key = key__prev1;
             }
 
             return (numLabelUnits, unitsIgnored);
+
         }
 
         // String dumps a text representation of a profile. Intended mainly
         // for debugging purposes.
-        private static @string String(this ref Profile p)
+        private static @string String(this ptr<Profile> _addr_p)
         {
+            ref Profile p = ref _addr_p.val;
+
             var ss = make_slice<@string>(0L, len(p.Comments) + len(p.Sample) + len(p.Mapping) + len(p.Location));
             foreach (var (_, c) in p.Comments)
             {
@@ -779,15 +890,18 @@ namespace pprof
                 }
 
             }
+
             ss = append(ss, fmt.Sprintf("Period: %d", p.Period));
             if (p.TimeNanos != 0L)
             {
                 ss = append(ss, fmt.Sprintf("Time: %v", time.Unix(0L, p.TimeNanos)));
             }
+
             if (p.DurationNanos != 0L)
             {
                 ss = append(ss, fmt.Sprintf("Duration: %.4v", time.Duration(p.DurationNanos)));
             }
+
             ss = append(ss, "Samples:");
             @string sh1 = default;
             {
@@ -801,7 +915,9 @@ namespace pprof
                     {
                         dflt = "[dflt]";
                     }
+
                     sh1 = sh1 + fmt.Sprintf("%s/%s%s ", s.Type, s.Unit, dflt);
+
                 }
 
                 s = s__prev1;
@@ -831,36 +947,46 @@ namespace pprof
                 ss = append(ss, m.@string());
             }
             return strings.Join(ss, "\n") + "\n";
+
         }
 
         // string dumps a text representation of a mapping. Intended mainly
         // for debugging purposes.
-        private static @string @string(this ref Mapping m)
+        private static @string @string(this ptr<Mapping> _addr_m)
         {
+            ref Mapping m = ref _addr_m.val;
+
             @string bits = "";
             if (m.HasFunctions)
             {
                 bits = bits + "[FN]";
             }
+
             if (m.HasFilenames)
             {
                 bits = bits + "[FL]";
             }
+
             if (m.HasLineNumbers)
             {
                 bits = bits + "[LN]";
             }
+
             if (m.HasInlineFrames)
             {
                 bits = bits + "[IN]";
             }
+
             return fmt.Sprintf("%d: %#x/%#x/%#x %s %s %s", m.ID, m.Start, m.Limit, m.Offset, m.File, m.BuildID, bits);
+
         }
 
         // string dumps a text representation of a location. Intended mainly
         // for debugging purposes.
-        private static @string @string(this ref Location l)
+        private static @string @string(this ptr<Location> _addr_l)
         {
+            ref Location l = ref _addr_l.val;
+
             @string ss = new slice<@string>(new @string[] {  });
             var locStr = fmt.Sprintf("%6d: %#x ", l.ID, l.Address);
             {
@@ -872,10 +998,17 @@ namespace pprof
                 }
 
             }
+
+            if (l.IsFolded)
+            {
+                locStr = locStr + "[F] ";
+            }
+
             if (len(l.Line) == 0L)
             {
                 ss = append(ss, locStr);
             }
+
             foreach (var (li) in l.Line)
             {
                 @string lnStr = "??";
@@ -889,20 +1022,26 @@ namespace pprof
                         {
                             lnStr = lnStr + "(" + fn.SystemName + ")";
                         }
+
                     }
 
                 }
+
                 ss = append(ss, locStr + lnStr); 
                 // Do not print location details past the first line
                 locStr = "             ";
+
             }
             return strings.Join(ss, "\n");
+
         }
 
         // string dumps a text representation of a sample. Intended mainly
         // for debugging purposes.
-        private static @string @string(this ref Sample s)
+        private static @string @string(this ptr<Sample> _addr_s)
         {
+            ref Sample s = ref _addr_s.val;
+
             @string ss = new slice<@string>(new @string[] {  });
             @string sv = default;
             foreach (var (_, v) in s.Value)
@@ -915,17 +1054,20 @@ namespace pprof
                 sv = sv + fmt.Sprintf("%d ", l.ID);
             }
             ss = append(ss, sv);
-            const @string labelHeader = "                ";
+            const @string labelHeader = (@string)"                ";
 
             if (len(s.Label) > 0L)
             {
                 ss = append(ss, labelHeader + labelsToString(s.Label));
             }
+
             if (len(s.NumLabel) > 0L)
             {
                 ss = append(ss, labelHeader + numLabelsToString(s.NumLabel, s.NumUnit));
             }
+
             return strings.Join(ss, "\n");
+
         }
 
         // labelsToString returns a string representation of a
@@ -939,9 +1081,10 @@ namespace pprof
             }
             sort.Strings(ls);
             return strings.Join(ls, " ");
+
         }
 
-        // numLablesToString returns a string representation of a map
+        // numLabelsToString returns a string representation of a map
         // representing numeric labels.
         private static @string numLabelsToString(map<@string, slice<long>> numLabels, map<@string, slice<@string>> numUnits)
         {
@@ -959,37 +1102,108 @@ namespace pprof
                     }
                 else
                     labelString = fmt.Sprintf("%s:%v", k, values);
+
                 }                {
                     labelString = fmt.Sprintf("%s:%v", k, v);
                 }
+
                 ls = append(ls, labelString);
+
             }
             sort.Strings(ls);
             return strings.Join(ls, " ");
+
+        }
+
+        // SetLabel sets the specified key to the specified value for all samples in the
+        // profile.
+        private static void SetLabel(this ptr<Profile> _addr_p, @string key, slice<@string> value)
+        {
+            ref Profile p = ref _addr_p.val;
+
+            foreach (var (_, sample) in p.Sample)
+            {
+                if (sample.Label == null)
+                {
+                    sample.Label = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<@string>>{key:value};
+                }
+                else
+                {
+                    sample.Label[key] = value;
+                }
+
+            }
+
+        }
+
+        // RemoveLabel removes all labels associated with the specified key for all
+        // samples in the profile.
+        private static void RemoveLabel(this ptr<Profile> _addr_p, @string key)
+        {
+            ref Profile p = ref _addr_p.val;
+
+            foreach (var (_, sample) in p.Sample)
+            {
+                delete(sample.Label, key);
+            }
+
+        }
+
+        // HasLabel returns true if a sample has a label with indicated key and value.
+        private static bool HasLabel(this ptr<Sample> _addr_s, @string key, @string value)
+        {
+            ref Sample s = ref _addr_s.val;
+
+            foreach (var (_, v) in s.Label[key])
+            {
+                if (v == value)
+                {
+                    return true;
+                }
+
+            }
+            return false;
+
+        }
+
+        // DiffBaseSample returns true if a sample belongs to the diff base and false
+        // otherwise.
+        private static bool DiffBaseSample(this ptr<Sample> _addr_s)
+        {
+            ref Sample s = ref _addr_s.val;
+
+            return s.HasLabel("pprof::base", "true");
         }
 
         // Scale multiplies all sample values in a profile by a constant.
-        private static void Scale(this ref Profile p, double ratio)
+        private static void Scale(this ptr<Profile> _addr_p, double ratio)
         {
+            ref Profile p = ref _addr_p.val;
+
             if (ratio == 1L)
             {
-                return;
+                return ;
             }
+
             var ratios = make_slice<double>(len(p.SampleType));
             foreach (var (i) in p.SampleType)
             {
                 ratios[i] = ratio;
             }
             p.ScaleN(ratios);
+
         }
 
         // ScaleN multiplies each sample values in a sample by a different amount.
-        private static error ScaleN(this ref Profile p, slice<double> ratios)
+        private static error ScaleN(this ptr<Profile> _addr_p, slice<double> ratios)
         {
+            ref Profile p = ref _addr_p.val;
+
             if (len(p.SampleType) != len(ratios))
             {
-                return error.As(fmt.Errorf("mismatched scale ratios, got %d, want %d", len(ratios), len(p.SampleType)));
+                return error.As(fmt.Errorf("mismatched scale ratios, got %d, want %d", len(ratios), len(p.SampleType)))!;
             }
+
             var allOnes = true;
             foreach (var (_, r) in ratios)
             {
@@ -998,11 +1212,13 @@ namespace pprof
                     allOnes = false;
                     break;
                 }
+
             }
             if (allOnes)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             foreach (var (_, s) in p.Sample)
             {
                 foreach (var (i, v) in s.Value)
@@ -1011,56 +1227,71 @@ namespace pprof
                     {
                         s.Value[i] = int64(float64(v) * ratios[i]);
                     }
+
                 }
+
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // HasFunctions determines if all locations in this profile have
         // symbolized function information.
-        private static bool HasFunctions(this ref Profile p)
+        private static bool HasFunctions(this ptr<Profile> _addr_p)
         {
+            ref Profile p = ref _addr_p.val;
+
             foreach (var (_, l) in p.Location)
             {
                 if (l.Mapping != null && !l.Mapping.HasFunctions)
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         // HasFileLines determines if all locations in this profile have
         // symbolized file and line number information.
-        private static bool HasFileLines(this ref Profile p)
+        private static bool HasFileLines(this ptr<Profile> _addr_p)
         {
+            ref Profile p = ref _addr_p.val;
+
             foreach (var (_, l) in p.Location)
             {
                 if (l.Mapping != null && (!l.Mapping.HasFilenames || !l.Mapping.HasLineNumbers))
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         // Unsymbolizable returns true if a mapping points to a binary for which
         // locations can't be symbolized in principle, at least now. Examples are
         // "[vdso]", [vsyscall]" and some others, see the code.
-        private static bool Unsymbolizable(this ref Mapping m)
+        private static bool Unsymbolizable(this ptr<Mapping> _addr_m)
         {
+            ref Mapping m = ref _addr_m.val;
+
             var name = filepath.Base(m.File);
             return strings.HasPrefix(name, "[") || strings.HasPrefix(name, "linux-vdso") || strings.HasPrefix(m.File, "/dev/dri/");
         }
 
         // Copy makes a fully independent copy of a profile.
-        private static ref Profile Copy(this ref Profile _p) => func(_p, (ref Profile p, Defer _, Panic panic, Recover __) =>
+        private static ptr<Profile> Copy(this ptr<Profile> _addr_p) => func((_, panic, __) =>
         {
-            Profile pp = ref new Profile();
+            ref Profile p = ref _addr_p.val;
+
+            ptr<Profile> pp = addr(new Profile());
             {
                 var err__prev1 = err;
 
-                var err = unmarshal(serialize(p), pp);
+                var err = unmarshal(serialize(_addr_p), pp);
 
                 if (err != null)
                 {
@@ -1070,6 +1301,7 @@ namespace pprof
                 err = err__prev1;
 
             }
+
             {
                 var err__prev1 = err;
 
@@ -1084,7 +1316,9 @@ namespace pprof
 
             }
 
-            return pp;
+
+            return _addr_pp!;
+
         });
     }
 }}}}}}

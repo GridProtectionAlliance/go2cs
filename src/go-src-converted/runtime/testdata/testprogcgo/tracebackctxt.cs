@@ -4,7 +4,7 @@
 
 // The __attribute__((weak)) used below doesn't seem to work on Windows.
 
-// package main -- go2cs converted at 2020 August 29 08:25:03 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:08 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\tracebackctxt.go
 // Test the context argument to SetCgoTraceback.
 // Use fake context, traceback, and symbolizer functions.
@@ -62,10 +62,12 @@ namespace go
                 }
 
             }
+
             if (tracebackOK)
             {
                 fmt.Println("OK");
             }
+
         }
 
         //export G1
@@ -89,6 +91,7 @@ namespace go
                 {
                     break;
                 }
+
             }
 
 
@@ -107,10 +110,12 @@ wantLoop:
                             ok = false;
                     i++;
                         }
+
                         i++;
                         _continuewantLoop = true;
                         break;
                     }
+
                 }
 
                 fmt.Printf("did not find function %s in\n", w.function);
@@ -120,6 +125,7 @@ wantLoop:
                 }
                 ok = false;
                 break;
+
             }
             tracebackOK = ok;
             {
@@ -132,6 +138,7 @@ wantLoop:
                 }
 
             }
+
         }
     }
 }

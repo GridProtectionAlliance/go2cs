@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:44:35 UTC
+// package os -- go2cs converted at 2020 October 08 03:45:21 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\types.go
 using syscall = go.syscall_package;
@@ -22,7 +22,7 @@ namespace go
         // File represents an open file descriptor.
         public partial struct File
         {
-            public ref file file => ref file_ptr; // os specific
+            public ref ptr<file> ptr<file> => ref ptr<file>_ptr; // os specific
         }
 
         // A FileInfo describes a file and is returned by Stat and Lstat.
@@ -53,24 +53,25 @@ namespace go
  
         // The single letters are the abbreviations
         // used by the String method's formatting.
-        public static readonly FileMode ModeDir = 1L << (int)((32L - 1L - iota)); // d: is a directory
-        public static readonly var ModeAppend = 0; // a: append-only
-        public static readonly var ModeExclusive = 1; // l: exclusive use
-        public static readonly var ModeTemporary = 2; // T: temporary file; Plan 9 only
-        public static readonly var ModeSymlink = 3; // L: symbolic link
-        public static readonly var ModeDevice = 4; // D: device file
-        public static readonly var ModeNamedPipe = 5; // p: named pipe (FIFO)
-        public static readonly var ModeSocket = 6; // S: Unix domain socket
-        public static readonly var ModeSetuid = 7; // u: setuid
-        public static readonly var ModeSetgid = 8; // g: setgid
-        public static readonly var ModeCharDevice = 9; // c: Unix character device, when ModeDevice is set
-        public static readonly ModeType ModeSticky = ModeDir | ModeSymlink | ModeNamedPipe | ModeSocket | ModeDevice;
+        public static readonly FileMode ModeDir = (FileMode)1L << (int)((32L - 1L - iota)); // d: is a directory
+        public static readonly var ModeAppend = (var)0; // a: append-only
+        public static readonly var ModeExclusive = (var)1; // l: exclusive use
+        public static readonly var ModeTemporary = (var)2; // T: temporary file; Plan 9 only
+        public static readonly var ModeSymlink = (var)3; // L: symbolic link
+        public static readonly var ModeDevice = (var)4; // D: device file
+        public static readonly var ModeNamedPipe = (var)5; // p: named pipe (FIFO)
+        public static readonly var ModeSocket = (var)6; // S: Unix domain socket
+        public static readonly var ModeSetuid = (var)7; // u: setuid
+        public static readonly var ModeSetgid = (var)8; // g: setgid
+        public static readonly var ModeCharDevice = (var)9; // c: Unix character device, when ModeDevice is set
+        public static readonly var ModeSticky = (var)10; // t: sticky
+        public static readonly ModeType ModeIrregular = (ModeType)ModeDir | ModeSymlink | ModeNamedPipe | ModeSocket | ModeDevice | ModeCharDevice | ModeIrregular;
 
-        public static readonly FileMode ModePerm = 0777L; // Unix permission bits
+        public static readonly FileMode ModePerm = (FileMode)0777L; // Unix permission bits
 
         public static @string String(this FileMode m)
         {
-            const @string str = "dalTLDpSugct";
+            const @string str = (@string)"dalTLDpSugct?";
 
             array<byte> buf = new array<byte>(32L); // Mode is uint32.
             long w = 0L;
@@ -87,6 +88,7 @@ namespace go
                         buf[w] = byte(c);
                         w++;
                     }
+
                 }
 
                 i = i__prev1;
@@ -98,7 +100,8 @@ namespace go
                 buf[w] = '-';
                 w++;
             }
-            const @string rwx = "rwxrwxrwx";
+
+            const @string rwx = (@string)"rwxrwxrwx";
 
             {
                 var i__prev1 = i;
@@ -116,7 +119,9 @@ namespace go
                     {
                         buf[w] = '-';
                     }
+
                     w++;
+
                 }
 
                 i = i__prev1;
@@ -124,6 +129,7 @@ namespace go
             }
 
             return string(buf[..w]);
+
         }
 
         // IsDir reports whether m describes a directory.
@@ -146,12 +152,16 @@ namespace go
             return m & ModePerm;
         }
 
-        private static @string Name(this ref fileStat fs)
+        private static @string Name(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.name;
         }
-        private static bool IsDir(this ref fileStat fs)
+        private static bool IsDir(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.Mode().IsDir();
         }
 
@@ -163,13 +173,15 @@ namespace go
         // It returns false in other cases.
         public static bool SameFile(FileInfo fi1, FileInfo fi2)
         {
-            ref fileStat (fs1, ok1) = fi1._<ref fileStat>();
-            ref fileStat (fs2, ok2) = fi2._<ref fileStat>();
+            ptr<fileStat> (fs1, ok1) = fi1._<ptr<fileStat>>();
+            ptr<fileStat> (fs2, ok2) = fi2._<ptr<fileStat>>();
             if (!ok1 || !ok2)
             {
                 return false;
             }
+
             return sameFile(fs1, fs2);
+
         }
     }
 }

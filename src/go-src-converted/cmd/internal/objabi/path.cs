@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2020 August 29 08:46:20 UTC
+// package objabi -- go2cs converted at 2020 October 08 03:50:14 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Go\src\cmd\internal\objabi\path.go
 using strings = go.strings_package;
@@ -41,6 +41,7 @@ namespace @internal
                         c = c__prev1;
 
                     }
+
                 }
 
                 r = r__prev1;
@@ -51,7 +52,7 @@ namespace @internal
             {
                 return s;
             }
-            const @string hex = "0123456789abcdef";
+            const @string hex = (@string)"0123456789abcdef";
 
             var p = make_slice<byte>(0L, len(s) + 2L * n);
             {
@@ -75,12 +76,14 @@ namespace @internal
                         c = c__prev1;
 
                     }
+
                 }
 
                 r = r__prev1;
             }
 
             return string(p);
+
         }
     }
 }}}

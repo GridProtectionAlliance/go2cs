@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:42 UTC
+//     Generated on 2020 October 08 03:36:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,10 +13,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using strings = go.strings_package;
 using go;
 
 namespace go {
@@ -35,15 +35,17 @@ namespace encoding
                 this.buf = default;
                 this.used = default;
                 this.n = default;
+                this.closed = default;
             }
 
-            public dumper(io.Writer w = default, array<byte> rightChars = default, array<byte> buf = default, long used = default, ulong n = default)
+            public dumper(io.Writer w = default, array<byte> rightChars = default, array<byte> buf = default, long used = default, ulong n = default, bool closed = default)
             {
                 this.w = w;
                 this.rightChars = rightChars;
                 this.buf = buf;
                 this.used = used;
                 this.n = n;
+                this.closed = closed;
             }
 
             // Enable comparisons between nil and dumper struct
@@ -66,7 +68,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static dumper dumper_cast(dynamic value)
         {
-            return new dumper(value.w, value.rightChars, value.buf, value.used, value.n);
+            return new dumper(value.w, value.rightChars, value.buf, value.used, value.n, value.closed);
         }
     }
 }}

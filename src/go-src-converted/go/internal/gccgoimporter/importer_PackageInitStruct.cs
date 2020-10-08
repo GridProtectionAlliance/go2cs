@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:09:17 UTC
+//     Generated on 2020 October 08 04:56:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,9 +17,9 @@ using bytes = go.bytes_package;
 using elf = go.debug.elf_package;
 using fmt = go.fmt_package;
 using types = go.go.types_package;
+using xcoff = go.@internal.xcoff_package;
 using io = go.io_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using strings = go.strings_package;
 using go;

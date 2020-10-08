@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rpc -- go2cs converted at 2020 August 29 08:36:32 UTC
+// package rpc -- go2cs converted at 2020 October 08 03:43:23 UTC
 // import "net/rpc" ==> using rpc = go.net.rpc_package
 // Original source: C:\Go\src\net\rpc\debug.go
 /*
@@ -22,7 +22,7 @@ namespace net
 {
     public static partial class rpc_package
     {
-        private static readonly @string debugText = @"<html>
+        private static readonly @string debugText = (@string)@"<html>
 	<body>
 	<title>Services</title>
 	{{range .}}
@@ -82,7 +82,6 @@ namespace net
         {
             s[i] = s[j];
             s[j] = s[i];
-
         }
 
         private static long Len(this methodArray m)
@@ -97,22 +96,23 @@ namespace net
         {
             m[i] = m[j];
             m[j] = m[i];
-
         }
 
         private partial struct debugHTTP
         {
-            public ref Server Server => ref Server_ptr;
+            public ref ptr<Server> ptr<Server> => ref ptr<Server>_ptr;
         }
 
         // Runs at /debug/rpc
-        private static void ServeHTTP(this debugHTTP server, http.ResponseWriter w, ref http.Request req)
-        { 
+        private static void ServeHTTP(this debugHTTP server, http.ResponseWriter w, ptr<http.Request> _addr_req)
+        {
+            ref http.Request req = ref _addr_req.val;
+ 
             // Build a sorted version of the data.
             serviceArray services = default;
             server.serviceMap.Range((snamei, svci) =>
             {
-                ref service svc = svci._<ref service>();
+                ptr<service> svc = svci._<ptr<service>>();
                 debugService ds = new debugService(svc,snamei.(string),make(methodArray,0,len(svc.method)));
                 foreach (var (mname, method) in svc.method)
                 {
@@ -121,6 +121,7 @@ namespace net
                 sort.Sort(ds.Method);
                 services = append(services, ds);
                 return true;
+
             });
             sort.Sort(services);
             var err = debug.Execute(w, services);
@@ -128,6 +129,7 @@ namespace net
             {
                 fmt.Fprintln(w, "rpc: error executing template:", err.Error());
             }
+
         }
     }
 }}

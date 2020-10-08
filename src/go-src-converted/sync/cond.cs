@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 August 29 08:16:21 UTC
+// package sync -- go2cs converted at 2020 October 08 00:34:01 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\cond.go
 using atomic = go.sync.atomic_package;
@@ -31,9 +31,9 @@ namespace go
         }
 
         // NewCond returns a new Cond with Locker l.
-        public static ref Cond NewCond(Locker l)
+        public static ptr<Cond> NewCond(Locker l)
         {
-            return ref new Cond(L:l);
+            return addr(new Cond(L:l));
         }
 
         // Wait atomically unlocks c.L and suspends execution
@@ -52,12 +52,14 @@ namespace go
         //    ... make use of condition ...
         //    c.L.Unlock()
         //
-        private static void Wait(this ref Cond c)
+        private static void Wait(this ptr<Cond> _addr_c)
         {
+            ref Cond c = ref _addr_c.val;
+
             c.checker.check();
-            var t = runtime_notifyListAdd(ref c.notify);
+            var t = runtime_notifyListAdd(_addr_c.notify);
             c.L.Unlock();
-            runtime_notifyListWait(ref c.notify, t);
+            runtime_notifyListWait(_addr_c.notify, t);
             c.L.Lock();
         }
 
@@ -65,20 +67,24 @@ namespace go
         //
         // It is allowed but not required for the caller to hold c.L
         // during the call.
-        private static void Signal(this ref Cond c)
+        private static void Signal(this ptr<Cond> _addr_c)
         {
+            ref Cond c = ref _addr_c.val;
+
             c.checker.check();
-            runtime_notifyListNotifyOne(ref c.notify);
+            runtime_notifyListNotifyOne(_addr_c.notify);
         }
 
         // Broadcast wakes all goroutines waiting on c.
         //
         // It is allowed but not required for the caller to hold c.L
         // during the call.
-        private static void Broadcast(this ref Cond c)
+        private static void Broadcast(this ptr<Cond> _addr_c)
         {
+            ref Cond c = ref _addr_c.val;
+
             c.checker.check();
-            runtime_notifyListNotifyAll(ref c.notify);
+            runtime_notifyListNotifyAll(_addr_c.notify);
         }
 
         // copyChecker holds back pointer to itself to detect object copying.
@@ -86,12 +92,15 @@ namespace go
         {
         }
 
-        private static void check(this ref copyChecker _c) => func(_c, (ref copyChecker c, Defer _, Panic panic, Recover __) =>
+        private static void check(this ptr<copyChecker> _addr_c) => func((_, panic, __) =>
         {
-            if (uintptr(c.Value) != uintptr(@unsafe.Pointer(c)) && !atomic.CompareAndSwapUintptr((uintptr.Value)(c), 0L, uintptr(@unsafe.Pointer(c))) && uintptr(c.Value) != uintptr(@unsafe.Pointer(c)))
+            ref copyChecker c = ref _addr_c.val;
+
+            if (uintptr(c.val) != uintptr(@unsafe.Pointer(c)) && !atomic.CompareAndSwapUintptr((uintptr.val)(c), 0L, uintptr(@unsafe.Pointer(c))) && uintptr(c.val) != uintptr(@unsafe.Pointer(c)))
             {
                 panic("sync.Cond is copied");
             }
+
         });
 
         // noCopy may be embedded into structs which must not be copied
@@ -104,8 +113,15 @@ namespace go
         }
 
         // Lock is a no-op used by -copylocks checker from `go vet`.
-        private static void Lock(this ref noCopy _p0)
+        private static void Lock(this ptr<noCopy> _addr__p0)
         {
+            ref noCopy _p0 = ref _addr__p0.val;
+
+        }
+        private static void Unlock(this ptr<noCopy> _addr__p0)
+        {
+            ref noCopy _p0 = ref _addr__p0.val;
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:26:56 UTC
+//     Generated on 2020 October 08 03:33:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,13 +31,15 @@ namespace go
                 this.PreferGo = default;
                 this.StrictErrors = default;
                 this.Dial = default;
+                this.lookupGroup = default;
             }
 
-            public Resolver(bool PreferGo = default, bool StrictErrors = default, Func<context.Context, @string, @string, (Conn, error)> Dial = default)
+            public Resolver(bool PreferGo = default, bool StrictErrors = default, Func<context.Context, @string, @string, (Conn, error)> Dial = default, singleflight.Group lookupGroup = default)
             {
                 this.PreferGo = PreferGo;
                 this.StrictErrors = StrictErrors;
                 this.Dial = Dial;
+                this.lookupGroup = lookupGroup;
             }
 
             // Enable comparisons between nil and Resolver struct
@@ -60,7 +62,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Resolver Resolver_cast(dynamic value)
         {
-            return new Resolver(value.PreferGo, value.StrictErrors, value.Dial);
+            return new Resolver(value.PreferGo, value.StrictErrors, value.Dial, value.lookupGroup);
         }
     }
 }

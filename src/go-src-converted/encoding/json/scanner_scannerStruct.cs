@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:52 UTC
+//     Generated on 2020 October 08 03:42:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using strconv = go.strconv_package;
+using sync = go.sync_package;
 using go;
 
 namespace go {
@@ -31,21 +32,15 @@ namespace encoding
                 this.endTop = default;
                 this.parseState = default;
                 this.err = default;
-                this.redo = default;
-                this.redoCode = default;
-                this.redoState = default;
                 this.bytes = default;
             }
 
-            public scanner(Func<ref scanner, byte, long> step = default, bool endTop = default, slice<long> parseState = default, error err = default, bool redo = default, long redoCode = default, Func<ref scanner, byte, long> redoState = default, long bytes = default)
+            public scanner(Func<ptr<scanner>, byte, long> step = default, bool endTop = default, slice<long> parseState = default, error err = default, long bytes = default)
             {
                 this.step = step;
                 this.endTop = endTop;
                 this.parseState = parseState;
                 this.err = err;
-                this.redo = redo;
-                this.redoCode = redoCode;
-                this.redoState = redoState;
                 this.bytes = bytes;
             }
 
@@ -69,7 +64,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static scanner scanner_cast(dynamic value)
         {
-            return new scanner(value.step, value.endTop, value.parseState, value.err, value.redo, value.redoCode, value.redoState, value.bytes);
+            return new scanner(value.step, value.endTop, value.parseState, value.err, value.bytes);
         }
     }
 }}

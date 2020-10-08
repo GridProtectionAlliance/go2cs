@@ -31,13 +31,13 @@
 //
 // See FIPS 197 for specification, and see Daemen and Rijmen's Rijndael submission
 // for implementation details.
-//    http://www.csrc.nist.gov/publications/fips/fips197/fips-197.pdf
-//    http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf
+//    https://csrc.nist.gov/csrc/media/publications/fips/197/final/documents/fips-197.pdf
+//    https://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf
 
-// package aes -- go2cs converted at 2020 August 29 08:28:44 UTC
+// package aes -- go2cs converted at 2020 October 08 03:35:47 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\block.go
-
+using binary = go.encoding.binary_package;
 using static go.builtin;
 
 namespace go {
@@ -48,14 +48,11 @@ namespace crypto
         // Encrypt one block from src into dst, using the expanded key xk.
         private static void encryptBlockGo(slice<uint> xk, slice<byte> dst, slice<byte> src)
         {
-            uint s0 = default;            uint s1 = default;            uint s2 = default;            uint s3 = default;            uint t0 = default;            uint t1 = default;            uint t2 = default;            uint t3 = default;
-
-
-
-            s0 = uint32(src[0L]) << (int)(24L) | uint32(src[1L]) << (int)(16L) | uint32(src[2L]) << (int)(8L) | uint32(src[3L]);
-            s1 = uint32(src[4L]) << (int)(24L) | uint32(src[5L]) << (int)(16L) | uint32(src[6L]) << (int)(8L) | uint32(src[7L]);
-            s2 = uint32(src[8L]) << (int)(24L) | uint32(src[9L]) << (int)(16L) | uint32(src[10L]) << (int)(8L) | uint32(src[11L]);
-            s3 = uint32(src[12L]) << (int)(24L) | uint32(src[13L]) << (int)(16L) | uint32(src[14L]) << (int)(8L) | uint32(src[15L]); 
+            _ = src[15L]; // early bounds check
+            var s0 = binary.BigEndian.Uint32(src[0L..4L]);
+            var s1 = binary.BigEndian.Uint32(src[4L..8L]);
+            var s2 = binary.BigEndian.Uint32(src[8L..12L]);
+            var s3 = binary.BigEndian.Uint32(src[12L..16L]); 
 
             // First round just XORs input with key.
             s0 ^= xk[0L];
@@ -67,6 +64,8 @@ namespace crypto
             // Number of rounds is set by length of expanded key.
             var nr = len(xk) / 4L - 2L; // - 2: one above, one more below
             long k = 4L;
+            uint t0 = default;            uint t1 = default;            uint t2 = default;            uint t3 = default;
+
             for (long r = 0L; r < nr; r++)
             {
                 t0 = xk[k + 0L] ^ te0[uint8(s0 >> (int)(24L))] ^ te1[uint8(s1 >> (int)(16L))] ^ te2[uint8(s2 >> (int)(8L))] ^ te3[uint8(s3)];
@@ -78,6 +77,7 @@ namespace crypto
                 s1 = t1;
                 s2 = t2;
                 s3 = t3;
+
             } 
 
             // Last round uses s-box directly and XORs to produce output.
@@ -91,35 +91,22 @@ namespace crypto
             s2 ^= xk[k + 2L];
             s3 ^= xk[k + 3L];
 
-            dst[0L] = byte(s0 >> (int)(24L));
-            dst[1L] = byte(s0 >> (int)(16L));
-            dst[2L] = byte(s0 >> (int)(8L));
-            dst[3L] = byte(s0);
-            dst[4L] = byte(s1 >> (int)(24L));
-            dst[5L] = byte(s1 >> (int)(16L));
-            dst[6L] = byte(s1 >> (int)(8L));
-            dst[7L] = byte(s1);
-            dst[8L] = byte(s2 >> (int)(24L));
-            dst[9L] = byte(s2 >> (int)(16L));
-            dst[10L] = byte(s2 >> (int)(8L));
-            dst[11L] = byte(s2);
-            dst[12L] = byte(s3 >> (int)(24L));
-            dst[13L] = byte(s3 >> (int)(16L));
-            dst[14L] = byte(s3 >> (int)(8L));
-            dst[15L] = byte(s3);
+            _ = dst[15L]; // early bounds check
+            binary.BigEndian.PutUint32(dst[0L..4L], s0);
+            binary.BigEndian.PutUint32(dst[4L..8L], s1);
+            binary.BigEndian.PutUint32(dst[8L..12L], s2);
+            binary.BigEndian.PutUint32(dst[12L..16L], s3);
+
         }
 
         // Decrypt one block from src into dst, using the expanded key xk.
         private static void decryptBlockGo(slice<uint> xk, slice<byte> dst, slice<byte> src)
         {
-            uint s0 = default;            uint s1 = default;            uint s2 = default;            uint s3 = default;            uint t0 = default;            uint t1 = default;            uint t2 = default;            uint t3 = default;
-
-
-
-            s0 = uint32(src[0L]) << (int)(24L) | uint32(src[1L]) << (int)(16L) | uint32(src[2L]) << (int)(8L) | uint32(src[3L]);
-            s1 = uint32(src[4L]) << (int)(24L) | uint32(src[5L]) << (int)(16L) | uint32(src[6L]) << (int)(8L) | uint32(src[7L]);
-            s2 = uint32(src[8L]) << (int)(24L) | uint32(src[9L]) << (int)(16L) | uint32(src[10L]) << (int)(8L) | uint32(src[11L]);
-            s3 = uint32(src[12L]) << (int)(24L) | uint32(src[13L]) << (int)(16L) | uint32(src[14L]) << (int)(8L) | uint32(src[15L]); 
+            _ = src[15L]; // early bounds check
+            var s0 = binary.BigEndian.Uint32(src[0L..4L]);
+            var s1 = binary.BigEndian.Uint32(src[4L..8L]);
+            var s2 = binary.BigEndian.Uint32(src[8L..12L]);
+            var s3 = binary.BigEndian.Uint32(src[12L..16L]); 
 
             // First round just XORs input with key.
             s0 ^= xk[0L];
@@ -131,6 +118,8 @@ namespace crypto
             // Number of rounds is set by length of expanded key.
             var nr = len(xk) / 4L - 2L; // - 2: one above, one more below
             long k = 4L;
+            uint t0 = default;            uint t1 = default;            uint t2 = default;            uint t3 = default;
+
             for (long r = 0L; r < nr; r++)
             {
                 t0 = xk[k + 0L] ^ td0[uint8(s0 >> (int)(24L))] ^ td1[uint8(s3 >> (int)(16L))] ^ td2[uint8(s2 >> (int)(8L))] ^ td3[uint8(s1)];
@@ -142,6 +131,7 @@ namespace crypto
                 s1 = t1;
                 s2 = t2;
                 s3 = t3;
+
             } 
 
             // Last round uses s-box directly and XORs to produce output.
@@ -158,22 +148,12 @@ namespace crypto
             s2 ^= xk[k + 2L];
             s3 ^= xk[k + 3L];
 
-            dst[0L] = byte(s0 >> (int)(24L));
-            dst[1L] = byte(s0 >> (int)(16L));
-            dst[2L] = byte(s0 >> (int)(8L));
-            dst[3L] = byte(s0);
-            dst[4L] = byte(s1 >> (int)(24L));
-            dst[5L] = byte(s1 >> (int)(16L));
-            dst[6L] = byte(s1 >> (int)(8L));
-            dst[7L] = byte(s1);
-            dst[8L] = byte(s2 >> (int)(24L));
-            dst[9L] = byte(s2 >> (int)(16L));
-            dst[10L] = byte(s2 >> (int)(8L));
-            dst[11L] = byte(s2);
-            dst[12L] = byte(s3 >> (int)(24L));
-            dst[13L] = byte(s3 >> (int)(16L));
-            dst[14L] = byte(s3 >> (int)(8L));
-            dst[15L] = byte(s3);
+            _ = dst[15L]; // early bounds check
+            binary.BigEndian.PutUint32(dst[0L..4L], s0);
+            binary.BigEndian.PutUint32(dst[4L..8L], s1);
+            binary.BigEndian.PutUint32(dst[8L..12L], s2);
+            binary.BigEndian.PutUint32(dst[12L..16L], s3);
+
         }
 
         // Apply sbox0 to each byte in w.
@@ -197,7 +177,7 @@ namespace crypto
             var nk = len(key) / 4L;
             for (i = 0L; i < nk; i++)
             {
-                enc[i] = uint32(key[4L * i]) << (int)(24L) | uint32(key[4L * i + 1L]) << (int)(16L) | uint32(key[4L * i + 2L]) << (int)(8L) | uint32(key[4L * i + 3L]);
+                enc[i] = binary.BigEndian.Uint32(key[4L * i..]);
             }
 
             while (i < len(enc))
@@ -212,7 +192,9 @@ namespace crypto
                 {
                     t = subw(t);
                 }
+
                 enc[i] = enc[i - nk] ^ t;
+
             } 
 
             // Derive decryption key from encryption key.
@@ -225,8 +207,9 @@ namespace crypto
             // All sets but the first and last get the MixColumn transform applied.
             if (dec == null)
             {
-                return;
+                return ;
             }
+
             var n = len(enc);
             {
                 long i__prev1 = i;
@@ -243,15 +226,18 @@ namespace crypto
                         {
                             x = td0[sbox0[x >> (int)(24L)]] ^ td1[sbox0[x >> (int)(16L) & 0xffUL]] ^ td2[sbox0[x >> (int)(8L) & 0xffUL]] ^ td3[sbox0[x & 0xffUL]];
                         }
+
                         dec[i + j] = x;
                     i += 4L;
                     }
+
 
                 }
 
 
                 i = i__prev1;
             }
+
         }
     }
 }}

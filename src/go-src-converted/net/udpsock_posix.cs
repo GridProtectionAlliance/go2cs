@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 August 29 08:28:06 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:59 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\udpsock_posix.go
 using context = go.context_package;
@@ -19,138 +19,207 @@ namespace go
         {
             switch (sa.type())
             {
-                case ref syscall.SockaddrInet4 sa:
-                    return ref new UDPAddr(IP:sa.Addr[0:],Port:sa.Port);
+                case ptr<syscall.SockaddrInet4> sa:
+                    return addr(new UDPAddr(IP:sa.Addr[0:],Port:sa.Port));
                     break;
-                case ref syscall.SockaddrInet6 sa:
-                    return ref new UDPAddr(IP:sa.Addr[0:],Port:sa.Port,Zone:zoneCache.name(int(sa.ZoneId)));
+                case ptr<syscall.SockaddrInet6> sa:
+                    return addr(new UDPAddr(IP:sa.Addr[0:],Port:sa.Port,Zone:zoneCache.name(int(sa.ZoneId))));
                     break;
             }
             return null;
+
         }
 
-        private static long family(this ref UDPAddr a)
+        private static long family(this ptr<UDPAddr> _addr_a)
         {
+            ref UDPAddr a = ref _addr_a.val;
+
             if (a == null || len(a.IP) <= IPv4len)
             {
                 return syscall.AF_INET;
             }
+
             if (a.IP.To4() != null)
             {
                 return syscall.AF_INET;
             }
+
             return syscall.AF_INET6;
+
         }
 
-        private static (syscall.Sockaddr, error) sockaddr(this ref UDPAddr a, long family)
+        private static (syscall.Sockaddr, error) sockaddr(this ptr<UDPAddr> _addr_a, long family)
         {
+            syscall.Sockaddr _p0 = default;
+            error _p0 = default!;
+            ref UDPAddr a = ref _addr_a.val;
+
             if (a == null)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
+
             return ipToSockaddr(family, a.IP, a.Port, a.Zone);
+
         }
 
-        private static sockaddr toLocal(this ref UDPAddr a, @string net)
+        private static sockaddr toLocal(this ptr<UDPAddr> _addr_a, @string net)
         {
-            return ref new UDPAddr(loopbackIP(net),a.Port,a.Zone);
+            ref UDPAddr a = ref _addr_a.val;
+
+            return addr(new UDPAddr(loopbackIP(net),a.Port,a.Zone));
         }
 
-        private static (long, ref UDPAddr, error) readFrom(this ref UDPConn c, slice<byte> b)
+        private static (long, ptr<UDPAddr>, error) readFrom(this ptr<UDPConn> _addr_c, slice<byte> b)
         {
-            ref UDPAddr addr = default;
+            long _p0 = default;
+            ptr<UDPAddr> _p0 = default!;
+            error _p0 = default!;
+            ref UDPConn c = ref _addr_c.val;
+
+            ptr<UDPAddr> addr;
             var (n, sa, err) = c.fd.readFrom(b);
             switch (sa.type())
             {
-                case ref syscall.SockaddrInet4 sa:
-                    addr = ref new UDPAddr(IP:sa.Addr[0:],Port:sa.Port);
+                case ptr<syscall.SockaddrInet4> sa:
+                    addr = addr(new UDPAddr(IP:sa.Addr[0:],Port:sa.Port));
                     break;
-                case ref syscall.SockaddrInet6 sa:
-                    addr = ref new UDPAddr(IP:sa.Addr[0:],Port:sa.Port,Zone:zoneCache.name(int(sa.ZoneId)));
+                case ptr<syscall.SockaddrInet6> sa:
+                    addr = addr(new UDPAddr(IP:sa.Addr[0:],Port:sa.Port,Zone:zoneCache.name(int(sa.ZoneId))));
                     break;
             }
-            return (n, addr, err);
+            return (n, _addr_addr!, error.As(err)!);
+
         }
 
-        private static (long, long, long, ref UDPAddr, error) readMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob)
+        private static (long, long, long, ptr<UDPAddr>, error) readMsg(this ptr<UDPConn> _addr_c, slice<byte> b, slice<byte> oob)
         {
+            long n = default;
+            long oobn = default;
+            long flags = default;
+            ptr<UDPAddr> addr = default!;
+            error err = default!;
+            ref UDPConn c = ref _addr_c.val;
+
             syscall.Sockaddr sa = default;
             n, oobn, flags, sa, err = c.fd.readMsg(b, oob);
             switch (sa.type())
             {
-                case ref syscall.SockaddrInet4 sa:
-                    addr = ref new UDPAddr(IP:sa.Addr[0:],Port:sa.Port);
+                case ptr<syscall.SockaddrInet4> sa:
+                    addr = addr(new UDPAddr(IP:sa.Addr[0:],Port:sa.Port));
                     break;
-                case ref syscall.SockaddrInet6 sa:
-                    addr = ref new UDPAddr(IP:sa.Addr[0:],Port:sa.Port,Zone:zoneCache.name(int(sa.ZoneId)));
+                case ptr<syscall.SockaddrInet6> sa:
+                    addr = addr(new UDPAddr(IP:sa.Addr[0:],Port:sa.Port,Zone:zoneCache.name(int(sa.ZoneId))));
                     break;
             }
-            return;
+            return ;
+
         }
 
-        private static (long, error) writeTo(this ref UDPConn c, slice<byte> b, ref UDPAddr addr)
+        private static (long, error) writeTo(this ptr<UDPConn> _addr_c, slice<byte> b, ptr<UDPAddr> _addr_addr)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref UDPConn c = ref _addr_c.val;
+            ref UDPAddr addr = ref _addr_addr.val;
+
             if (c.fd.isConnected)
             {
-                return (0L, ErrWriteToConnected);
+                return (0L, error.As(ErrWriteToConnected)!);
             }
+
             if (addr == null)
             {
-                return (0L, errMissingAddress);
+                return (0L, error.As(errMissingAddress)!);
             }
+
             var (sa, err) = addr.sockaddr(c.fd.family);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             return c.fd.writeTo(b, sa);
+
         }
 
-        private static (long, long, error) writeMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob, ref UDPAddr addr)
+        private static (long, long, error) writeMsg(this ptr<UDPConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<UDPAddr> _addr_addr)
         {
+            long n = default;
+            long oobn = default;
+            error err = default!;
+            ref UDPConn c = ref _addr_c.val;
+            ref UDPAddr addr = ref _addr_addr.val;
+
             if (c.fd.isConnected && addr != null)
             {
-                return (0L, 0L, ErrWriteToConnected);
+                return (0L, 0L, error.As(ErrWriteToConnected)!);
             }
+
             if (!c.fd.isConnected && addr == null)
             {
-                return (0L, 0L, errMissingAddress);
+                return (0L, 0L, error.As(errMissingAddress)!);
             }
+
             var (sa, err) = addr.sockaddr(c.fd.family);
             if (err != null)
             {
-                return (0L, 0L, err);
+                return (0L, 0L, error.As(err)!);
             }
+
             return c.fd.writeMsg(b, oob, sa);
+
         }
 
-        private static (ref UDPConn, error) dialUDP(context.Context ctx, @string net, ref UDPAddr laddr, ref UDPAddr raddr)
+        private static (ptr<UDPConn>, error) dialUDP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<UDPAddr> _addr_laddr, ptr<UDPAddr> _addr_raddr)
         {
-            var (fd, err) = internetSocket(ctx, net, laddr, raddr, syscall.SOCK_DGRAM, 0L, "dial");
+            ptr<UDPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysDialer sd = ref _addr_sd.val;
+            ref UDPAddr laddr = ref _addr_laddr.val;
+            ref UDPAddr raddr = ref _addr_raddr.val;
+
+            var (fd, err) = internetSocket(ctx, sd.network, laddr, raddr, syscall.SOCK_DGRAM, 0L, "dial", sd.Dialer.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newUDPConn(fd), null);
+
+            return (_addr_newUDPConn(fd)!, error.As(null!)!);
+
         }
 
-        private static (ref UDPConn, error) listenUDP(context.Context ctx, @string network, ref UDPAddr laddr)
+        private static (ptr<UDPConn>, error) listenUDP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<UDPAddr> _addr_laddr)
         {
-            var (fd, err) = internetSocket(ctx, network, laddr, null, syscall.SOCK_DGRAM, 0L, "listen");
+            ptr<UDPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref UDPAddr laddr = ref _addr_laddr.val;
+
+            var (fd, err) = internetSocket(ctx, sl.network, laddr, null, syscall.SOCK_DGRAM, 0L, "listen", sl.ListenConfig.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newUDPConn(fd), null);
+
+            return (_addr_newUDPConn(fd)!, error.As(null!)!);
+
         }
 
-        private static (ref UDPConn, error) listenMulticastUDP(context.Context ctx, @string network, ref Interface ifi, ref UDPAddr gaddr)
+        private static (ptr<UDPConn>, error) listenMulticastUDP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<Interface> _addr_ifi, ptr<UDPAddr> _addr_gaddr)
         {
-            var (fd, err) = internetSocket(ctx, network, gaddr, null, syscall.SOCK_DGRAM, 0L, "listen");
+            ptr<UDPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref Interface ifi = ref _addr_ifi.val;
+            ref UDPAddr gaddr = ref _addr_gaddr.val;
+
+            var (fd, err) = internetSocket(ctx, sl.network, gaddr, null, syscall.SOCK_DGRAM, 0L, "listen", sl.ListenConfig.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var c = newUDPConn(fd);
             {
                 var ip4 = gaddr.IP.To4();
@@ -160,42 +229,49 @@ namespace go
                     {
                         var err__prev2 = err;
 
-                        var err = listenIPv4MulticastUDP(c, ifi, ip4);
+                        var err = listenIPv4MulticastUDP(_addr_c, _addr_ifi, ip4);
 
                         if (err != null)
                         {
                             c.Close();
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
 
                         err = err__prev2;
 
                     }
+
                 }
                 else
                 {
                     {
                         var err__prev2 = err;
 
-                        err = listenIPv6MulticastUDP(c, ifi, gaddr.IP);
+                        err = listenIPv6MulticastUDP(_addr_c, _addr_ifi, gaddr.IP);
 
                         if (err != null)
                         {
                             c.Close();
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
 
                         err = err__prev2;
 
                     }
+
                 }
 
             }
-            return (c, null);
+
+            return (_addr_c!, error.As(null!)!);
+
         }
 
-        private static error listenIPv4MulticastUDP(ref UDPConn c, ref Interface ifi, IP ip)
+        private static error listenIPv4MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface> _addr_ifi, IP ip)
         {
+            ref UDPConn c = ref _addr_c.val;
+            ref Interface ifi = ref _addr_ifi.val;
+
             if (ifi != null)
             {
                 {
@@ -205,13 +281,15 @@ namespace go
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
             }
+
             {
                 var err__prev1 = err;
 
@@ -219,12 +297,13 @@ namespace go
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
             {
                 var err__prev1 = err;
 
@@ -232,17 +311,22 @@ namespace go
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static error listenIPv6MulticastUDP(ref UDPConn c, ref Interface ifi, IP ip)
+        private static error listenIPv6MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface> _addr_ifi, IP ip)
         {
+            ref UDPConn c = ref _addr_c.val;
+            ref Interface ifi = ref _addr_ifi.val;
+
             if (ifi != null)
             {
                 {
@@ -252,13 +336,15 @@ namespace go
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
             }
+
             {
                 var err__prev1 = err;
 
@@ -266,12 +352,13 @@ namespace go
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
+
             {
                 var err__prev1 = err;
 
@@ -279,13 +366,15 @@ namespace go
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
                 err = err__prev1;
 
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
     }
 }

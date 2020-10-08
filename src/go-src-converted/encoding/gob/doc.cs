@@ -193,10 +193,14 @@ pair (-type id, encoded-type) where encoded-type is the gob encoding of a wireTy
 description, constructed from these types:
 
     type wireType struct {
-        ArrayT  *ArrayType
-        SliceT  *SliceType
-        StructT *StructType
-        MapT    *MapType
+        ArrayT           *ArrayType
+        SliceT           *SliceType
+        StructT          *StructType
+        MapT             *MapType
+        GobEncoderT      *gobEncoderType
+        BinaryMarshalerT *gobEncoderType
+        TextMarshalerT   *gobEncoderType
+
     }
     type arrayType struct {
         CommonType
@@ -223,6 +227,9 @@ description, constructed from these types:
         CommonType
         Key  typeId
         Elem typeId
+    }
+    type gobEncoderType struct {
+        CommonType
     }
 
 If there are nested type ids, the types for all inner type ids must be defined
@@ -270,7 +277,7 @@ document for background: https://golang.org/doc/go1compat
 See "Gobs of data" for a design discussion of the gob wire format:
 https://blog.golang.org/gobs-of-data
 */
-// package gob -- go2cs converted at 2020 August 29 08:35:29 UTC
+// package gob -- go2cs converted at 2020 October 08 03:42:37 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\doc.go
     }

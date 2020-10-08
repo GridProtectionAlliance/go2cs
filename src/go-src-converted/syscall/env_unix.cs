@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris plan9
 
 // Unix environment variables.
 
-// package syscall -- go2cs converted at 2020 August 29 08:36:48 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:26:21 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\env_unix.go
+using runtime = go.runtime_package;
 using sync = go.sync_package;
 using static go.builtin;
 
@@ -54,14 +55,20 @@ namespace go
                                 // worrying about unshadowing a later one,
                                 // which might be a security problem.
                                 envs[i] = "";
+
                             }
 
                         }
+
                         break;
+
                     }
+
                 }
 
+
             }
+
         }
 
         public static error Unsetenv(@string key) => func((defer, _, __) =>
@@ -81,17 +88,23 @@ namespace go
                 }
 
             }
+
             unsetenv_c(key);
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         public static (@string, bool) Getenv(@string key) => func((defer, _, __) =>
         {
+            @string value = default;
+            bool found = default;
+
             envOnce.Do(copyenv);
             if (len(key) == 0L)
             {
                 return ("", false);
             }
+
             envLock.RLock();
             defer(envLock.RUnlock());
 
@@ -100,6 +113,7 @@ namespace go
             {
                 return ("", false);
             }
+
             var s = envs[i];
             {
                 var i__prev1 = i;
@@ -110,12 +124,14 @@ namespace go
                     {
                         return (s[i + 1L..], true);
                     }
+
                 }
 
 
                 i = i__prev1;
             }
             return ("", false);
+
         });
 
         public static error Setenv(@string key, @string value) => func((defer, _, __) =>
@@ -123,8 +139,9 @@ namespace go
             envOnce.Do(copyenv);
             if (len(key) == 0L)
             {
-                return error.As(EINVAL);
+                return error.As(EINVAL)!;
             }
+
             {
                 long i__prev1 = i;
 
@@ -132,26 +149,34 @@ namespace go
                 {
                     if (key[i] == '=' || key[i] == 0L)
                     {
-                        return error.As(EINVAL);
+                        return error.As(EINVAL)!;
                     }
-                }
+
+                } 
+                // On Plan 9, null is used as a separator, eg in $path.
 
 
                 i = i__prev1;
-            }
+            } 
+            // On Plan 9, null is used as a separator, eg in $path.
+            if (runtime.GOOS != "plan9")
             {
-                long i__prev1 = i;
-
-                for (i = 0L; i < len(value); i++)
                 {
-                    if (value[i] == 0L)
+                    long i__prev1 = i;
+
+                    for (i = 0L; i < len(value); i++)
                     {
-                        return error.As(EINVAL);
+                        if (value[i] == 0L)
+                        {
+                            return error.As(EINVAL)!;
+                        }
+
                     }
+
+
+                    i = i__prev1;
                 }
 
-
-                i = i__prev1;
             }
 
             envLock.Lock();
@@ -168,9 +193,11 @@ namespace go
                 i = len(envs);
                 envs = append(envs, kv);
             }
+
             env[key] = i;
             setenv_c(key, value);
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         public static void Clearenv() => func((defer, _, __) =>
@@ -186,6 +213,7 @@ namespace go
             }
             env = make_map<@string, long>();
             envs = new slice<@string>(new @string[] {  });
+
         });
 
         public static slice<@string> Environ() => func((defer, _, __) =>
@@ -200,8 +228,10 @@ namespace go
                 {
                     a = append(a, env);
                 }
+
             }
             return a;
+
         });
     }
 }

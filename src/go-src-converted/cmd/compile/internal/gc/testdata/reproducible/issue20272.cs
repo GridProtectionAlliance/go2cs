@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package p -- go2cs converted at 2020 August 29 09:58:52 UTC
+// package p -- go2cs converted at 2020 October 08 04:32:05 UTC
 // import "cmd/compile/internal/gc/testdata.p" ==> using p = go.cmd.compile.@internal.gc.testdata.p_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\reproducible\issue20272.go
 
@@ -16,6 +16,6 @@ namespace gc
 {
     public static partial class p_package
     {
-        private static byte i0 = default;        private static byte b0 = default;        private static ref byte i1 = default;        private static ref byte b1 = default;        private static ptr<ptr<byte>> i2 = default;        private static ptr<ptr<byte>> b2 = default;        private static ptr<ptr<ptr<ptr<ptr<byte>>>>> i3 = default;        private static ptr<ptr<ptr<ptr<ptr<byte>>>>> b3 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>> i4 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>> b4 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>>>>>>> i5 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>>>>>>> b5 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>>>>>>>>>>>>> i6 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>>>>>>>>>>>>> b6 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>>>>>>>>>>>>>>>>>>>> i7 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>>>>>>>>>>>>>>>>>>>> b7 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i8 = default;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> b8 = default;
+        private static byte i0 = default;        private static byte b0 = default;        private static ptr<byte> i1;        private static ptr<byte> b1;        private static ptr<ptr<byte>> i2;        private static ptr<ptr<byte>> b2;        private static ptr<ptr<ptr<byte>>> i3;        private static ptr<ptr<ptr<byte>>> b3;        private static ptr<ptr<ptr<ptr<byte>>>> i4;        private static ptr<ptr<ptr<ptr<byte>>>> b4;        private static ptr<ptr<ptr<ptr<ptr<byte>>>>> i5;        private static ptr<ptr<ptr<ptr<ptr<byte>>>>> b5;        private static ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>> i6;        private static ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>> b6;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>> i7;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>> b7;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>> i8;        private static ptr<ptr<ptr<ptr<ptr<ptr<ptr<ptr<byte>>>>>>>> b8;
     }
 }}}}}

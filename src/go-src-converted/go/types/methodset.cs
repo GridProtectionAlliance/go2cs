@@ -4,12 +4,12 @@
 
 // This file implements method sets.
 
-// package types -- go2cs converted at 2020 August 29 08:47:43 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:33 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\methodset.go
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
+using strings = go.strings_package;
 using static go.builtin;
 using System;
 
@@ -23,67 +23,87 @@ namespace go
         // The zero value for a MethodSet is a ready-to-use empty method set.
         public partial struct MethodSet
         {
-            public slice<ref Selection> list;
+            public slice<ptr<Selection>> list;
         }
 
-        private static @string String(this ref MethodSet s)
+        private static @string String(this ptr<MethodSet> _addr_s)
         {
+            ref MethodSet s = ref _addr_s.val;
+
             if (s.Len() == 0L)
             {
                 return "MethodSet {}";
             }
-            bytes.Buffer buf = default;
-            fmt.Fprintln(ref buf, "MethodSet {");
+
+            ref strings.Builder buf = ref heap(out ptr<strings.Builder> _addr_buf);
+            fmt.Fprintln(_addr_buf, "MethodSet {");
             foreach (var (_, f) in s.list)
             {
-                fmt.Fprintf(ref buf, "\t%s\n", f);
+                fmt.Fprintf(_addr_buf, "\t%s\n", f);
             }
-            fmt.Fprintln(ref buf, "}");
+            fmt.Fprintln(_addr_buf, "}");
             return buf.String();
+
         }
 
         // Len returns the number of methods in s.
-        private static long Len(this ref MethodSet s)
+        private static long Len(this ptr<MethodSet> _addr_s)
         {
+            ref MethodSet s = ref _addr_s.val;
+
             return len(s.list);
         }
 
         // At returns the i'th method in s for 0 <= i < s.Len().
-        private static ref Selection At(this ref MethodSet s, long i)
+        private static ptr<Selection> At(this ptr<MethodSet> _addr_s, long i)
         {
-            return s.list[i];
+            ref MethodSet s = ref _addr_s.val;
+
+            return _addr_s.list[i]!;
         }
 
         // Lookup returns the method with matching package and name, or nil if not found.
-        private static ref Selection Lookup(this ref MethodSet s, ref Package pkg, @string name)
+        private static ptr<Selection> Lookup(this ptr<MethodSet> _addr_s, ptr<Package> _addr_pkg, @string name)
         {
+            ref MethodSet s = ref _addr_s.val;
+            ref Package pkg = ref _addr_pkg.val;
+
             if (s.Len() == 0L)
             {
-                return null;
+                return _addr_null!;
             }
+
             var key = Id(pkg, name);
             var i = sort.Search(len(s.list), i =>
             {
                 var m = s.list[i];
-                return m.obj.Id() >= key;
+                return _addr_m.obj.Id() >= key!;
             });
             if (i < len(s.list))
             {
                 m = s.list[i];
                 if (m.obj.Id() == key)
                 {
-                    return m;
+                    return _addr_m!;
                 }
+
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
         // Shared empty method set.
         private static MethodSet emptyMethodSet = default;
 
+        // Note: NewMethodSet is intended for external use only as it
+        //       requires interfaces to be complete. If may be used
+        //       internally if LookupFieldOrMethod completed the same
+        //       interfaces beforehand.
+
         // NewMethodSet returns the method set for the given type T.
         // It always returns a non-nil method set, even if it is empty.
-        public static ref MethodSet NewMethodSet(Type T)
+        public static ptr<MethodSet> NewMethodSet(Type T)
         { 
             // WARNING: The code in this function is extremely subtle - do not modify casually!
             //          This function and lookupFieldOrMethod should be kept in sync.
@@ -96,7 +116,7 @@ namespace go
             // *typ where typ is an interface has no methods.
             if (isPtr && IsInterface(typ))
             {
-                return ref emptyMethodSet;
+                return _addr__addr_emptyMethodSet!;
             } 
 
             // Start with typ as single entry at shallowest depth.
@@ -109,15 +129,15 @@ namespace go
             // (If we ever allow type aliases to construct recursive types,
             // we must use type identity rather than pointer equality for
             // the map key comparison, as we do in consolidateMultiples.)
-            map<ref Named, bool> seen = default; 
+            map<ptr<Named>, bool> seen = default; 
 
             // collect methods at current depth
             while (len(current) > 0L)
             {
                 slice<embeddedType> next = default; // embedded types found at current depth
 
-                // field and method sets at current depth, allocated lazily
-                fieldSet fset = default;
+                // field and method sets at current depth, indexed by names (Id's), and allocated lazily
+                map<@string, bool> fset = default; // we only care about the field names
                 methodSet mset = default;
 
                 foreach (var (_, e) in current)
@@ -127,7 +147,7 @@ namespace go
                     // If we have a named type, we may have associated methods.
                     // Look for those first.
                     {
-                        ref Named (named, _) = typ._<ref Named>();
+                        ptr<Named> (named, _) = typ._<ptr<Named>>();
 
                         if (named != null)
                         {
@@ -139,54 +159,59 @@ namespace go
                                 // this same type at the current depth, so we can ignore
                                 // this one.
                                 continue;
+
                             }
+
                             if (seen == null)
                             {
-                                seen = make_map<ref Named, bool>();
+                                seen = make_map<ptr<Named>, bool>();
                             }
+
                             seen[named] = true;
 
                             mset = mset.add(named.methods, e.index, e.indirect, e.multiples); 
 
                             // continue with underlying type
                             typ = named.underlying;
+
                         }
 
                     }
 
+
                     switch (typ.type())
                     {
-                        case ref Struct t:
+                        case ptr<Struct> t:
+                            foreach (var (i, f) in t.fields)
                             {
-                                var f__prev3 = f;
-
-                                foreach (var (__i, __f) in t.fields)
+                                if (fset == null)
                                 {
-                                    i = __i;
-                                    f = __f;
-                                    fset = fset.add(f, e.multiples); 
-
-                                    // Embedded fields are always of the form T or *T where
-                                    // T is a type name. If typ appeared multiple times at
-                                    // this depth, f.Type appears multiple times at the next
-                                    // depth.
-                                    if (f.anonymous)
-                                    {
-                                        (typ, isPtr) = deref(f.typ); 
-                                        // TODO(gri) optimization: ignore types that can't
-                                        // have fields or methods (only Named, Struct, and
-                                        // Interface types need to be considered).
-                                        next = append(next, new embeddedType(typ,concat(e.index,i),e.indirect||isPtr,e.multiples));
-                                    }
+                                    fset = make_map<@string, bool>();
                                 }
 
-                                f = f__prev3;
+                                fset[f.Id()] = true; 
+
+                                // Embedded fields are always of the form T or *T where
+                                // T is a type name. If typ appeared multiple times at
+                                // this depth, f.Type appears multiple times at the next
+                                // depth.
+                                if (f.embedded)
+                                {
+                                    (typ, isPtr) = deref(f.typ); 
+                                    // TODO(gri) optimization: ignore types that can't
+                                    // have fields or methods (only Named, Struct, and
+                                    // Interface types need to be considered).
+                                    next = append(next, new embeddedType(typ,concat(e.index,i),e.indirect||isPtr,e.multiples));
+
+                                }
+
                             }
                             break;
-                        case ref Interface t:
+                        case ptr<Interface> t:
                             mset = mset.add(t.allMethods, e.index, true, e.multiples);
                             break;
                     }
+
                 } 
 
                 // Add methods and collisions at this depth to base if no entries with matching
@@ -205,28 +230,26 @@ namespace go
                             if (!found)
                             { 
                                 // Fields collide with methods of the same name at this depth.
+                                if (fset[k])
                                 {
-                                    (_, found) = fset[k];
-
-                                    if (found)
-                                    {
-                                        m = null; // collision
-                                    }
-
+                                    m = null; // collision
                                 }
+
                                 if (base == null)
                                 {
                                     base = make(methodSet);
                                 }
+
                                 base[k] = m;
+
                             }
 
                         }
+
                     } 
 
-                    // Multiple fields with matching names collide at this depth and shadow all
-                    // entries further down; add them as collisions to base if no entries with
-                    // matching names exist already.
+                    // Add all (remaining) fields at this depth as collisions (since they will
+                    // hide any method further down) if no entries with matching names exist already.
 
                     k = k__prev2;
                     m = m__prev2;
@@ -234,45 +257,48 @@ namespace go
 
                 {
                     var k__prev2 = k;
-                    var f__prev2 = f;
 
-                    foreach (var (__k, __f) in fset)
+                    foreach (var (__k) in fset)
                     {
                         k = __k;
-                        f = __f;
-                        if (f == null)
                         {
-                            {
-                                (_, found) = base[k];
+                            (_, found) = base[k];
 
-                                if (!found)
+                            if (!found)
+                            {
+                                if (base == null)
                                 {
-                                    if (base == null)
-                                    {
-                                        base = make(methodSet);
-                                    }
-                                    base[k] = null; // collision
+                                    base = make(methodSet);
                                 }
 
+                                base[k] = null; // collision
                             }
+
                         }
-                    }
+
+                    } 
+
+                    // It's ok to call consolidateMultiples with a nil *Checker because
+                    // MethodSets are not used internally (outside debug mode). When used
+                    // externally, interfaces are expected to be completed and then we do
+                    // not need a *Checker to complete them when (indirectly) calling
+                    // Checker.identical via consolidateMultiples.
 
                     k = k__prev2;
-                    f = f__prev2;
                 }
 
-                current = consolidateMultiples(next);
+                current = (Checker.val)(null).consolidateMultiples(next);
+
             }
 
 
             if (len(base) == 0L)
             {
-                return ref emptyMethodSet;
+                return _addr__addr_emptyMethodSet!;
             } 
 
             // collect methods
-            slice<ref Selection> list = default;
+            slice<ptr<Selection>> list = default;
             {
                 var m__prev1 = m;
 
@@ -284,6 +310,7 @@ namespace go
                         m.recv = T;
                         list = append(list, m);
                     }
+
                 } 
                 // sort by unique name
 
@@ -292,66 +319,34 @@ namespace go
 
             sort.Slice(list, (i, j) =>
             {
-                return list[i].obj.Id() < list[j].obj.Id();
+                return _addr_list[i].obj.Id() < list[j].obj.Id()!;
             });
-            return ref new MethodSet(list);
-        }
+            return addr(new MethodSet(list));
 
-        // A fieldSet is a set of fields and name collisions.
-        // A collision indicates that multiple fields with the
-        // same unique id appeared.
-        private partial struct fieldSet // : map<@string, ref Var>
-        {
-        } // a nil entry indicates a name collision
-
-        // Add adds field f to the field set s.
-        // If multiples is set, f appears multiple times
-        // and is treated as a collision.
-        private static fieldSet add(this fieldSet s, ref Var f, bool multiples)
-        {
-            if (s == null)
-            {
-                s = make(fieldSet);
-            }
-            var key = f.Id(); 
-            // if f is not in the set, add it
-            if (!multiples)
-            {
-                {
-                    var (_, found) = s[key];
-
-                    if (!found)
-                    {
-                        s[key] = f;
-                        return s;
-                    }
-
-                }
-            }
-            s[key] = null; // collision
-            return s;
         }
 
         // A methodSet is a set of methods and name collisions.
         // A collision indicates that multiple methods with the
-        // same unique id appeared.
-        private partial struct methodSet // : map<@string, ref Selection>
+        // same unique id, or a field with that id appeared.
+        private partial struct methodSet // : map<@string, ptr<Selection>>
         {
         } // a nil entry indicates a name collision
 
         // Add adds all functions in list to the method set s.
         // If multiples is set, every function in list appears multiple times
         // and is treated as a collision.
-        private static methodSet add(this methodSet s, slice<ref Func> list, slice<long> index, bool indirect, bool multiples)
+        private static methodSet add(this methodSet s, slice<ptr<Func>> list, slice<long> index, bool indirect, bool multiples)
         {
             if (len(list) == 0L)
             {
                 return s;
             }
+
             if (s == null)
             {
                 s = make(methodSet);
             }
+
             foreach (var (i, f) in list)
             {
                 var key = f.Id(); 
@@ -365,25 +360,55 @@ namespace go
                     {
                         var (_, found) = s[key];
 
-                        if (!found && (indirect || !ptrRecv(f)))
+                        if (!found && (indirect || !ptrRecv(_addr_f)))
                         {
-                            s[key] = ref new Selection(MethodVal,nil,f,concat(index,i),indirect);
+                            s[key] = addr(new Selection(MethodVal,nil,f,concat(index,i),indirect));
                             continue;
                         }
 
                     }
+
                 }
+
                 s[key] = null; // collision
             }
             return s;
+
         }
 
         // ptrRecv reports whether the receiver is of the form *T.
-        // The receiver must exist.
-        private static bool ptrRecv(ref Func f)
+        private static bool ptrRecv(ptr<Func> _addr_f)
         {
-            var (_, isPtr) = deref(f.typ._<ref Signature>().recv.typ);
-            return isPtr;
+            ref Func f = ref _addr_f.val;
+ 
+            // If a method's receiver type is set, use that as the source of truth for the receiver.
+            // Caution: Checker.funcDecl (decl.go) marks a function by setting its type to an empty
+            // signature. We may reach here before the signature is fully set up: we must explicitly
+            // check if the receiver is set (we cannot just look for non-nil f.typ).
+            {
+                ptr<Signature> (sig, _) = f.typ._<ptr<Signature>>();
+
+                if (sig != null && sig.recv != null)
+                {
+                    var (_, isPtr) = deref(sig.recv.typ);
+                    return isPtr;
+                } 
+
+                // If a method's type is not set it may be a method/function that is:
+                // 1) client-supplied (via NewFunc with no signature), or
+                // 2) internally created but not yet type-checked.
+                // For case 1) we can't do anything; the client must know what they are doing.
+                // For case 2) we can use the information gathered by the resolver.
+
+            } 
+
+            // If a method's type is not set it may be a method/function that is:
+            // 1) client-supplied (via NewFunc with no signature), or
+            // 2) internally created but not yet type-checked.
+            // For case 1) we can't do anything; the client must know what they are doing.
+            // For case 2) we can use the information gathered by the resolver.
+            return f.hasPtrRecv;
+
         }
     }
 }}

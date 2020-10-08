@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2020 August 29 08:31:30 UTC
+// package tls -- go2cs converted at 2020 October 08 03:38:12 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Go\src\crypto\tls\handshake_server.go
 using crypto = go.crypto_package;
 using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
 using rsa = go.crypto.rsa_package;
 using subtle = go.crypto.subtle_package;
 using x509 = go.crypto.x509_package;
-using asn1 = go.encoding.asn1_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using atomic = go.sync.atomic_package;
+using time = go.time_package;
 using static go.builtin;
-using System;
 
 namespace go {
 namespace crypto
@@ -30,55 +31,80 @@ namespace crypto
             public ptr<clientHelloMsg> clientHello;
             public ptr<serverHelloMsg> hello;
             public ptr<cipherSuite> suite;
-            public bool ellipticOk;
-            public bool ecdsaOk;
+            public bool ecdheOk;
+            public bool ecSignOk;
             public bool rsaDecryptOk;
             public bool rsaSignOk;
             public ptr<sessionState> sessionState;
             public finishedHash finishedHash;
             public slice<byte> masterSecret;
-            public slice<slice<byte>> certsFromClient;
             public ptr<Certificate> cert;
-            public ptr<ClientHelloInfo> cachedClientHelloInfo;
         }
 
         // serverHandshake performs a TLS handshake as a server.
-        // c.out.Mutex <= L; c.handshakeMutex <= L.
-        private static error serverHandshake(this ref Conn c)
-        { 
-            // If this is the first server handshake, we generate a random key to
-            // encrypt the tickets with.
-            c.config.serverInitOnce.Do(() =>
-            {
-                c.config.serverInit(null);
+        private static error serverHandshake(this ptr<Conn> _addr_c)
+        {
+            ref Conn c = ref _addr_c.val;
 
-            });
-
-            serverHandshakeState hs = new serverHandshakeState(c:c,);
-            var (isResume, err) = hs.readClientHello();
+            var (clientHello, err) = c.readClientHello();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
+            }
+
+            if (c.vers == VersionTLS13)
+            {
+                serverHandshakeStateTLS13 hs = new serverHandshakeStateTLS13(c:c,clientHello:clientHello,);
+                return error.As(hs.handshake())!;
+            }
+
+            hs = new serverHandshakeState(c:c,clientHello:clientHello,);
+            return error.As(hs.handshake())!;
+
+        }
+
+        private static error handshake(this ptr<serverHandshakeState> _addr_hs)
+        {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
+            var c = hs.c;
+
+            {
+                var err__prev1 = err;
+
+                var err = hs.processClientHello();
+
+                if (err != null)
+                {
+                    return error.As(err)!;
+                } 
+
+                // For an overview of TLS handshaking, see RFC 5246, Section 7.3.
+
+                err = err__prev1;
+
             } 
 
-            // For an overview of TLS handshaking, see https://tools.ietf.org/html/rfc5246#section-7.3
+            // For an overview of TLS handshaking, see RFC 5246, Section 7.3.
             c.buffering = true;
-            if (isResume)
+            if (hs.checkForResumption())
             { 
                 // The client has included a session ticket and so we do an abbreviated handshake.
+                c.didResume = true;
                 {
                     var err__prev2 = err;
 
-                    var err = hs.doResumeHandshake();
+                    err = hs.doResumeHandshake();
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
                 {
                     var err__prev2 = err;
 
@@ -86,34 +112,27 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
-                    } 
-                    // ticketSupported is set in a resumption handshake if the
-                    // ticket from the client was encrypted with an old session
-                    // ticket key and thus a refreshed ticket should be sent.
+                        return error.As(err)!;
+                    }
 
                     err = err__prev2;
 
-                } 
-                // ticketSupported is set in a resumption handshake if the
-                // ticket from the client was encrypted with an old session
-                // ticket key and thus a refreshed ticket should be sent.
-                if (hs.hello.ticketSupported)
-                {
-                    {
-                        var err__prev3 = err;
-
-                        err = hs.sendSessionTicket();
-
-                        if (err != null)
-                        {
-                            return error.As(err);
-                        }
-
-                        err = err__prev3;
-
-                    }
                 }
+
+                {
+                    var err__prev2 = err;
+
+                    err = hs.sendSessionTicket();
+
+                    if (err != null)
+                    {
+                        return error.As(err)!;
+                    }
+
+                    err = err__prev2;
+
+                }
+
                 {
                     var err__prev2 = err;
 
@@ -121,12 +140,13 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
                 {
                     var err__prev2 = err;
 
@@ -134,12 +154,13 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
                 c.clientFinishedIsFirst = false;
                 {
                     var err__prev2 = err;
@@ -148,13 +169,13 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
-                c.didResume = true;
+
             }
             else
             { 
@@ -163,16 +184,31 @@ namespace crypto
                 {
                     var err__prev2 = err;
 
-                    err = hs.doFullHandshake();
+                    err = hs.pickCipherSuite();
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
+                {
+                    var err__prev2 = err;
+
+                    err = hs.doFullHandshake();
+
+                    if (err != null)
+                    {
+                        return error.As(err)!;
+                    }
+
+                    err = err__prev2;
+
+                }
+
                 {
                     var err__prev2 = err;
 
@@ -180,12 +216,13 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
                 {
                     var err__prev2 = err;
 
@@ -193,12 +230,13 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
                 c.clientFinishedIsFirst = true;
                 c.buffering = true;
                 {
@@ -208,12 +246,13 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
                 {
                     var err__prev2 = err;
 
@@ -221,12 +260,13 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
                 {
                     var err__prev2 = err;
 
@@ -234,94 +274,92 @@ namespace crypto
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
-            }
-            c.handshakeComplete = true;
 
-            return error.As(null);
+            }
+
+            c.ekm = ekmFromMasterSecret(c.vers, hs.suite, hs.masterSecret, hs.clientHello.random, hs.hello.random);
+            atomic.StoreUint32(_addr_c.handshakeStatus, 1L);
+
+            return error.As(null!)!;
+
         }
 
-        // readClientHello reads a ClientHello message from the client and decides
-        // whether we will perform session resumption.
-        private static (bool, error) readClientHello(this ref serverHandshakeState hs)
+        // readClientHello reads a ClientHello message and selects the protocol version.
+        private static (ptr<clientHelloMsg>, error) readClientHello(this ptr<Conn> _addr_c)
         {
-            var c = hs.c;
+            ptr<clientHelloMsg> _p0 = default!;
+            error _p0 = default!;
+            ref Conn c = ref _addr_c.val;
 
             var (msg, err) = c.readHandshake();
             if (err != null)
             {
-                return (false, err);
+                return (_addr_null!, error.As(err)!);
             }
-            bool ok = default;
-            hs.clientHello, ok = msg._<ref clientHelloMsg>();
+
+            ptr<clientHelloMsg> (clientHello, ok) = msg._<ptr<clientHelloMsg>>();
             if (!ok)
             {
                 c.sendAlert(alertUnexpectedMessage);
-                return (false, unexpectedMessageError(hs.clientHello, msg));
+                return (_addr_null!, error.As(unexpectedMessageError(clientHello, msg))!);
             }
+
+            ptr<Config> configForClient;
+            var originalConfig = c.config;
             if (c.config.GetConfigForClient != null)
             {
+                var chi = clientHelloInfo(_addr_c, clientHello);
+                configForClient, err = c.config.GetConfigForClient(chi);
+
+                if (err != null)
                 {
-                    var (newConfig, err) = c.config.GetConfigForClient(hs.clientHelloInfo());
-
-                    if (err != null)
-                    {
-                        c.sendAlert(alertInternalError);
-                        return (false, err);
-                    }
-                    else if (newConfig != null)
-                    {
-                        newConfig.serverInitOnce.Do(() =>
-                        {
-                            newConfig.serverInit(c.config);
-
-                        });
-                        c.config = newConfig;
-                    }
-
+                    c.sendAlert(alertInternalError);
+                    return (_addr_null!, error.As(err)!);
                 }
+                else if (configForClient != null)
+                {
+                    c.config = configForClient;
+                }
+
             }
-            c.vers, ok = c.config.mutualVersion(hs.clientHello.vers);
+
+            c.ticketKeys = originalConfig.ticketKeys(configForClient);
+
+            var clientVersions = clientHello.supportedVersions;
+            if (len(clientHello.supportedVersions) == 0L)
+            {
+                clientVersions = supportedVersionsFromMax(clientHello.vers);
+            }
+
+            c.vers, ok = c.config.mutualVersion(clientVersions);
             if (!ok)
             {
                 c.sendAlert(alertProtocolVersion);
-                return (false, fmt.Errorf("tls: client offered an unsupported, maximum protocol version of %x", hs.clientHello.vers));
+                return (_addr_null!, error.As(fmt.Errorf("tls: client offered only unsupported versions: %x", clientVersions))!);
             }
+
             c.haveVers = true;
+            c.@in.version = c.vers;
+            c.@out.version = c.vers;
+
+            return (_addr_clientHello!, error.As(null!)!);
+
+        }
+
+        private static error processClientHello(this ptr<serverHandshakeState> _addr_hs)
+        {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
+            var c = hs.c;
 
             hs.hello = @new<serverHelloMsg>();
-
-            var supportedCurve = false;
-            var preferredCurves = c.config.curvePreferences();
-Curves:
-
-            foreach (var (_, curve) in hs.clientHello.supportedCurves)
-            {
-                foreach (var (_, supported) in preferredCurves)
-                {
-                    if (supported == curve)
-                    {
-                        supportedCurve = true;
-                        _breakCurves = true;
-                        break;
-                    }
-                }
-            }
-            var supportedPointFormat = false;
-            foreach (var (_, pointFormat) in hs.clientHello.supportedPoints)
-            {
-                if (pointFormat == pointFormatUncompressed)
-                {
-                    supportedPointFormat = true;
-                    break;
-                }
-            }
-            hs.ellipticOk = supportedCurve && supportedPointFormat;
+            hs.hello.vers = c.vers;
 
             var foundCompression = false; 
             // We only support null compression, so check that the client offered it.
@@ -332,31 +370,53 @@ Curves:
                     foundCompression = true;
                     break;
                 }
+
             }
             if (!foundCompression)
             {
                 c.sendAlert(alertHandshakeFailure);
-                return (false, errors.New("tls: client does not support uncompressed connections"));
+                return error.As(errors.New("tls: client does not support uncompressed connections"))!;
             }
-            hs.hello.vers = c.vers;
+
             hs.hello.random = make_slice<byte>(32L);
-            _, err = io.ReadFull(c.config.rand(), hs.hello.random);
+            var serverRandom = hs.hello.random; 
+            // Downgrade protection canaries. See RFC 8446, Section 4.1.3.
+            var maxVers = c.config.maxSupportedVersion();
+            if (maxVers >= VersionTLS12 && c.vers < maxVers || testingOnlyForceDowngradeCanary)
+            {
+                if (c.vers == VersionTLS12)
+                {
+                    copy(serverRandom[24L..], downgradeCanaryTLS12);
+                }
+                else
+                {
+                    copy(serverRandom[24L..], downgradeCanaryTLS11);
+                }
+
+                serverRandom = serverRandom[..24L];
+
+            }
+
+            var (_, err) = io.ReadFull(c.config.rand(), serverRandom);
             if (err != null)
             {
                 c.sendAlert(alertInternalError);
-                return (false, err);
+                return error.As(err)!;
             }
+
             if (len(hs.clientHello.secureRenegotiation) != 0L)
             {
                 c.sendAlert(alertHandshakeFailure);
-                return (false, errors.New("tls: initial handshake had non-empty renegotiation extension"));
+                return error.As(errors.New("tls: initial handshake had non-empty renegotiation extension"))!;
             }
+
             hs.hello.secureRenegotiationSupported = hs.clientHello.secureRenegotiationSupported;
             hs.hello.compressionMethod = compressionNone;
             if (len(hs.clientHello.serverName) > 0L)
             {
                 c.serverName = hs.clientHello.serverName;
             }
+
             if (len(hs.clientHello.alpnProtocols) > 0L)
             {
                 {
@@ -369,29 +429,43 @@ Curves:
                     }
 
                 }
+
             }
-            else
-            { 
-                // Although sending an empty NPN extension is reasonable, Firefox has
-                // had a bug around this. Best to send nothing at all if
-                // c.config.NextProtos is empty. See
-                // https://golang.org/issue/5445.
-                if (hs.clientHello.nextProtoNeg && len(c.config.NextProtos) > 0L)
-                {
-                    hs.hello.nextProtoNeg = true;
-                    hs.hello.nextProtos = c.config.NextProtos;
-                }
-            }
-            hs.cert, err = c.config.getCertificate(hs.clientHelloInfo());
+
+            hs.cert, err = c.config.getCertificate(clientHelloInfo(_addr_c, _addr_hs.clientHello));
             if (err != null)
             {
-                c.sendAlert(alertInternalError);
-                return (false, err);
+                if (err == errNoCertificates)
+                {
+                    c.sendAlert(alertUnrecognizedName);
+                }
+                else
+                {
+                    c.sendAlert(alertInternalError);
+                }
+
+                return error.As(err)!;
+
             }
+
             if (hs.clientHello.scts)
             {
                 hs.hello.scts = hs.cert.SignedCertificateTimestamps;
             }
+
+            hs.ecdheOk = supportsECDHE(_addr_c.config, hs.clientHello.supportedCurves, hs.clientHello.supportedPoints);
+
+            if (hs.ecdheOk)
+            { 
+                // Although omitting the ec_point_formats extension is permitted, some
+                // old OpenSSL version will refuse to handshake if not present.
+                //
+                // Per RFC 4492, section 5.1.2, implementations MUST support the
+                // uncompressed point format. See golang.org/issue/31943.
+                hs.hello.supportedPoints = new slice<byte>(new byte[] { pointFormatUncompressed });
+
+            }
+
             {
                 crypto.Signer priv__prev1 = priv;
 
@@ -401,24 +475,29 @@ Curves:
                 {
                     switch (priv.Public().type())
                     {
-                        case ref ecdsa.PublicKey _:
-                            hs.ecdsaOk = true;
+                        case ptr<ecdsa.PublicKey> _:
+                            hs.ecSignOk = true;
                             break;
-                        case ref rsa.PublicKey _:
+                        case ed25519.PublicKey _:
+                            hs.ecSignOk = true;
+                            break;
+                        case ptr<rsa.PublicKey> _:
                             hs.rsaSignOk = true;
                             break;
                         default:
                         {
                             c.sendAlert(alertInternalError);
-                            return (false, fmt.Errorf("tls: unsupported signing key type (%T)", priv.Public()));
+                            return error.As(fmt.Errorf("tls: unsupported signing key type (%T)", priv.Public()))!;
                             break;
                         }
                     }
+
                 }
 
                 priv = priv__prev1;
 
             }
+
             {
                 crypto.Signer priv__prev1 = priv;
 
@@ -428,26 +507,64 @@ Curves:
                 {
                     switch (priv.Public().type())
                     {
-                        case ref rsa.PublicKey _:
+                        case ptr<rsa.PublicKey> _:
                             hs.rsaDecryptOk = true;
                             break;
                         default:
                         {
                             c.sendAlert(alertInternalError);
-                            return (false, fmt.Errorf("tls: unsupported decryption key type (%T)", priv.Public()));
+                            return error.As(fmt.Errorf("tls: unsupported decryption key type (%T)", priv.Public()))!;
                             break;
                         }
                     }
+
                 }
 
                 priv = priv__prev1;
 
             }
 
-            if (hs.checkForResumption())
+
+            return error.As(null!)!;
+
+        }
+
+        // supportsECDHE returns whether ECDHE key exchanges can be used with this
+        // pre-TLS 1.3 client.
+        private static bool supportsECDHE(ptr<Config> _addr_c, slice<CurveID> supportedCurves, slice<byte> supportedPoints)
+        {
+            ref Config c = ref _addr_c.val;
+
+            var supportsCurve = false;
+            foreach (var (_, curve) in supportedCurves)
             {
-                return (true, null);
+                if (c.supportsCurve(curve))
+                {
+                    supportsCurve = true;
+                    break;
+                }
+
             }
+            var supportsPointFormat = false;
+            foreach (var (_, pointFormat) in supportedPoints)
+            {
+                if (pointFormat == pointFormatUncompressed)
+                {
+                    supportsPointFormat = true;
+                    break;
+                }
+
+            }
+            return supportsCurve && supportsPointFormat;
+
+        }
+
+        private static error pickCipherSuite(this ptr<serverHandshakeState> _addr_hs)
+        {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
+            var c = hs.c;
+
             slice<ushort> preferenceList = default;            slice<ushort> supportedList = default;
 
             if (c.config.PreferServerCipherSuites)
@@ -460,66 +577,103 @@ Curves:
                 preferenceList = hs.clientHello.cipherSuites;
                 supportedList = c.config.cipherSuites();
             }
-            {
-                var id__prev1 = id;
 
-                foreach (var (_, __id) in preferenceList)
-                {
-                    id = __id;
-                    if (hs.setCipherSuite(id, supportedList, c.vers))
-                    {
-                        break;
-                    }
-                }
-
-                id = id__prev1;
-            }
-
+            hs.suite = selectCipherSuite(preferenceList, supportedList, hs.cipherSuiteOk);
             if (hs.suite == null)
             {
                 c.sendAlert(alertHandshakeFailure);
-                return (false, errors.New("tls: no cipher suite supported by both client and server"));
-            } 
-
-            // See https://tools.ietf.org/html/rfc7507.
-            {
-                var id__prev1 = id;
-
-                foreach (var (_, __id) in hs.clientHello.cipherSuites)
-                {
-                    id = __id;
-                    if (id == TLS_FALLBACK_SCSV)
-                    { 
-                        // The client is doing a fallback connection.
-                        if (hs.clientHello.vers < c.config.maxVersion())
-                        {
-                            c.sendAlert(alertInappropriateFallback);
-                            return (false, errors.New("tls: client using inappropriate protocol fallback"));
-                        }
-                        break;
-                    }
-                }
-
-                id = id__prev1;
+                return error.As(errors.New("tls: no cipher suite supported by both client and server"))!;
             }
 
-            return (false, null);
+            c.cipherSuite = hs.suite.id;
+
+            foreach (var (_, id) in hs.clientHello.cipherSuites)
+            {
+                if (id == TLS_FALLBACK_SCSV)
+                { 
+                    // The client is doing a fallback connection. See RFC 7507.
+                    if (hs.clientHello.vers < c.config.maxSupportedVersion())
+                    {
+                        c.sendAlert(alertInappropriateFallback);
+                        return error.As(errors.New("tls: client using inappropriate protocol fallback"))!;
+                    }
+
+                    break;
+
+                }
+
+            }
+            return error.As(null!)!;
+
+        }
+
+        private static bool cipherSuiteOk(this ptr<serverHandshakeState> _addr_hs, ptr<cipherSuite> _addr_c)
+        {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+            ref cipherSuite c = ref _addr_c.val;
+
+            if (c.flags & suiteECDHE != 0L)
+            {
+                if (!hs.ecdheOk)
+                {
+                    return false;
+                }
+
+                if (c.flags & suiteECSign != 0L)
+                {
+                    if (!hs.ecSignOk)
+                    {
+                        return false;
+                    }
+
+                }
+                else if (!hs.rsaSignOk)
+                {
+                    return false;
+                }
+
+            }
+            else if (!hs.rsaDecryptOk)
+            {
+                return false;
+            }
+
+            if (hs.c.vers < VersionTLS12 && c.flags & suiteTLS12 != 0L)
+            {
+                return false;
+            }
+
+            return true;
+
         }
 
         // checkForResumption reports whether we should perform resumption on this connection.
-        private static bool checkForResumption(this ref serverHandshakeState hs)
+        private static bool checkForResumption(this ptr<serverHandshakeState> _addr_hs)
         {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
             var c = hs.c;
 
             if (c.config.SessionTicketsDisabled)
             {
                 return false;
             }
-            bool ok = default;
-            var sessionTicket = append(new slice<byte>(new byte[] {  }), hs.clientHello.sessionTicket);
-            hs.sessionState, ok = c.decryptTicket(sessionTicket);
 
+            var (plaintext, usedOldKey) = c.decryptTicket(hs.clientHello.sessionTicket);
+            if (plaintext == null)
+            {
+                return false;
+            }
+
+            hs.sessionState = addr(new sessionState(usedOldKey:usedOldKey));
+            var ok = hs.sessionState.unmarshal(plaintext);
             if (!ok)
+            {
+                return false;
+            }
+
+            var createdAt = time.Unix(int64(hs.sessionState.createdAt), 0L);
+            if (c.config.time().Sub(createdAt) > maxSessionTicketLifetime)
             {
                 return false;
             } 
@@ -529,6 +683,7 @@ Curves:
             {
                 return false;
             }
+
             var cipherSuiteOk = false; 
             // Check that the client is still offering the ciphersuite in the session.
             foreach (var (_, id) in hs.clientHello.cipherSuites)
@@ -538,6 +693,7 @@ Curves:
                     cipherSuiteOk = true;
                     break;
                 }
+
             }
             if (!cipherSuiteOk)
             {
@@ -545,28 +701,36 @@ Curves:
             } 
 
             // Check that we also support the ciphersuite from the session.
-            if (!hs.setCipherSuite(hs.sessionState.cipherSuite, c.config.cipherSuites(), hs.sessionState.vers))
+            hs.suite = selectCipherSuite(new slice<ushort>(new ushort[] { hs.sessionState.cipherSuite }), c.config.cipherSuites(), hs.cipherSuiteOk);
+            if (hs.suite == null)
             {
                 return false;
             }
+
             var sessionHasClientCerts = len(hs.sessionState.certificates) != 0L;
-            var needClientCerts = c.config.ClientAuth == RequireAnyClientCert || c.config.ClientAuth == RequireAndVerifyClientCert;
+            var needClientCerts = requiresClientCert(c.config.ClientAuth);
             if (needClientCerts && !sessionHasClientCerts)
             {
                 return false;
             }
+
             if (sessionHasClientCerts && c.config.ClientAuth == NoClientCert)
             {
                 return false;
             }
+
             return true;
+
         }
 
-        private static error doResumeHandshake(this ref serverHandshakeState hs)
+        private static error doResumeHandshake(this ptr<serverHandshakeState> _addr_hs)
         {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
             var c = hs.c;
 
-            hs.hello.cipherSuite = hs.suite.id; 
+            hs.hello.cipherSuite = hs.suite.id;
+            c.cipherSuite = hs.suite.id; 
             // We echo the client's session ID in the ServerHello to let it know
             // that we're doing a resumption.
             hs.hello.sessionId = hs.clientHello.sessionId;
@@ -576,40 +740,71 @@ Curves:
             hs.finishedHash.Write(hs.clientHello.marshal());
             hs.finishedHash.Write(hs.hello.marshal());
             {
+                var err__prev1 = err;
+
                 var (_, err) = c.writeRecord(recordTypeHandshake, hs.hello.marshal());
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
+                err = err__prev1;
 
             }
 
-            if (len(hs.sessionState.certificates) > 0L)
+
+            {
+                var err__prev1 = err;
+
+                var err = c.processCertsFromClient(new Certificate(Certificate:hs.sessionState.certificates,));
+
+                if (err != null)
+                {
+                    return error.As(err)!;
+                }
+
+                err = err__prev1;
+
+            }
+
+
+            if (c.config.VerifyConnection != null)
             {
                 {
-                    (_, err) = hs.processCertsFromClient(hs.sessionState.certificates);
+                    var err__prev2 = err;
+
+                    err = c.config.VerifyConnection(c.connectionStateLocked());
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        c.sendAlert(alertBadCertificate);
+                        return error.As(err)!;
                     }
 
+                    err = err__prev2;
+
                 }
+
             }
+
             hs.masterSecret = hs.sessionState.masterSecret;
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error doFullHandshake(this ref serverHandshakeState hs)
+        private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs)
         {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
             var c = hs.c;
 
             if (hs.clientHello.ocspStapling && len(hs.cert.OCSPStaple) > 0L)
             {
                 hs.hello.ocspStapling = true;
             }
+
             hs.hello.ticketSupported = hs.clientHello.ticketSupported && !c.config.SessionTicketsDisabled;
             hs.hello.cipherSuite = hs.suite.id;
 
@@ -619,76 +814,101 @@ Curves:
                 // No need to keep a full record of the handshake if client
                 // certificates won't be used.
                 hs.finishedHash.discardHandshakeBuffer();
+
             }
+
             hs.finishedHash.Write(hs.clientHello.marshal());
             hs.finishedHash.Write(hs.hello.marshal());
             {
+                var err__prev1 = err;
+
                 var (_, err) = c.writeRecord(recordTypeHandshake, hs.hello.marshal());
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
+                err = err__prev1;
+
             }
+
 
             ptr<object> certMsg = @new<certificateMsg>();
             certMsg.certificates = hs.cert.Certificate;
             hs.finishedHash.Write(certMsg.marshal());
             {
+                var err__prev1 = err;
+
                 (_, err) = c.writeRecord(recordTypeHandshake, certMsg.marshal());
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
+                err = err__prev1;
+
             }
+
 
             if (hs.hello.ocspStapling)
             {
                 ptr<object> certStatus = @new<certificateStatusMsg>();
-                certStatus.statusType = statusTypeOCSP;
                 certStatus.response = hs.cert.OCSPStaple;
                 hs.finishedHash.Write(certStatus.marshal());
                 {
+                    var err__prev2 = err;
+
                     (_, err) = c.writeRecord(recordTypeHandshake, certStatus.marshal());
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
+                    err = err__prev2;
+
                 }
+
             }
+
             var keyAgreement = hs.suite.ka(c.vers);
             var (skx, err) = keyAgreement.generateServerKeyExchange(c.config, hs.cert, hs.clientHello, hs.hello);
             if (err != null)
             {
                 c.sendAlert(alertHandshakeFailure);
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (skx != null)
             {
                 hs.finishedHash.Write(skx.marshal());
                 {
+                    var err__prev2 = err;
+
                     (_, err) = c.writeRecord(recordTypeHandshake, skx.marshal());
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
+                    err = err__prev2;
+
                 }
+
             }
+
+            ptr<certificateRequestMsg> certReq;
             if (c.config.ClientAuth >= RequestClientCert)
             { 
                 // Request a client certificate
-                ptr<object> certReq = @new<certificateRequestMsg>();
+                certReq = @new<certificateRequestMsg>();
                 certReq.certificateTypes = new slice<byte>(new byte[] { byte(certTypeRSASign), byte(certTypeECDSASign) });
                 if (c.vers >= VersionTLS12)
                 {
-                    certReq.hasSignatureAndHash = true;
+                    certReq.hasSignatureAlgorithm = true;
                     certReq.supportedSignatureAlgorithms = supportedSignatureAlgorithms;
                 } 
 
@@ -701,103 +921,150 @@ Curves:
                 {
                     certReq.certificateAuthorities = c.config.ClientCAs.Subjects();
                 }
+
                 hs.finishedHash.Write(certReq.marshal());
                 {
+                    var err__prev2 = err;
+
                     (_, err) = c.writeRecord(recordTypeHandshake, certReq.marshal());
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
+                    err = err__prev2;
+
                 }
+
             }
+
             ptr<object> helloDone = @new<serverHelloDoneMsg>();
             hs.finishedHash.Write(helloDone.marshal());
             {
+                var err__prev1 = err;
+
                 (_, err) = c.writeRecord(recordTypeHandshake, helloDone.marshal());
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
+                err = err__prev1;
 
             }
 
+
             {
+                var err__prev1 = err;
+
                 (_, err) = c.flush();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
+                err = err__prev1;
+
             }
+
 
             crypto.PublicKey pub = default; // public key for client auth, if any
 
             var (msg, err) = c.readHandshake();
             if (err != null)
             {
-                return error.As(err);
-            }
-            bool ok = default; 
+                return error.As(err)!;
+            } 
+
             // If we requested a client certificate, then the client must send a
             // certificate message, even if it's empty.
             if (c.config.ClientAuth >= RequestClientCert)
             {
-                certMsg, ok = msg._<ref certificateMsg>();
-
+                ptr<certificateMsg> (certMsg, ok) = msg._<ptr<certificateMsg>>();
                 if (!ok)
                 {
                     c.sendAlert(alertUnexpectedMessage);
-                    return error.As(unexpectedMessageError(certMsg, msg));
+                    return error.As(unexpectedMessageError(certMsg, msg))!;
                 }
+
                 hs.finishedHash.Write(certMsg.marshal());
 
-                if (len(certMsg.certificates) == 0L)
-                { 
-                    // The client didn't actually send a certificate
-
-                    if (c.config.ClientAuth == RequireAnyClientCert || c.config.ClientAuth == RequireAndVerifyClientCert) 
-                        c.sendAlert(alertBadCertificate);
-                        return error.As(errors.New("tls: client didn't provide a certificate"));
-                                    }
-                pub, err = hs.processCertsFromClient(certMsg.certificates);
-                if (err != null)
                 {
-                    return error.As(err);
+                    var err__prev2 = err;
+
+                    var err = c.processCertsFromClient(new Certificate(Certificate:certMsg.certificates,));
+
+                    if (err != null)
+                    {
+                        return error.As(err)!;
+                    }
+
+                    err = err__prev2;
+
                 }
+
+                if (len(certMsg.certificates) != 0L)
+                {
+                    pub = c.peerCertificates[0L].PublicKey;
+                }
+
                 msg, err = c.readHandshake();
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
+            }
+
+            if (c.config.VerifyConnection != null)
+            {
+                {
+                    var err__prev2 = err;
+
+                    err = c.config.VerifyConnection(c.connectionStateLocked());
+
+                    if (err != null)
+                    {
+                        c.sendAlert(alertBadCertificate);
+                        return error.As(err)!;
+                    }
+
+                    err = err__prev2;
+
+                }
+
             } 
 
             // Get client key exchange
-            ref clientKeyExchangeMsg (ckx, ok) = msg._<ref clientKeyExchangeMsg>();
+            ptr<clientKeyExchangeMsg> (ckx, ok) = msg._<ptr<clientKeyExchangeMsg>>();
             if (!ok)
             {
                 c.sendAlert(alertUnexpectedMessage);
-                return error.As(unexpectedMessageError(ckx, msg));
+                return error.As(unexpectedMessageError(ckx, msg))!;
             }
+
             hs.finishedHash.Write(ckx.marshal());
 
             var (preMasterSecret, err) = keyAgreement.processClientKeyExchange(c.config, hs.cert, ckx, c.vers);
             if (err != null)
             {
                 c.sendAlert(alertHandshakeFailure);
-                return error.As(err);
+                return error.As(err)!;
             }
+
             hs.masterSecret = masterFromPreMasterSecret(c.vers, hs.suite, preMasterSecret, hs.clientHello.random, hs.hello.random);
             {
-                var err = c.config.writeKeyLog(hs.clientHello.random, hs.masterSecret);
+                var err__prev1 = err;
+
+                err = c.config.writeKeyLog(keyLogLabelTLS12, hs.clientHello.random, hs.masterSecret);
 
                 if (err != null)
                 {
                     c.sendAlert(alertInternalError);
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // If we received a client cert in response to our certificate request message,
@@ -806,6 +1073,8 @@ Curves:
                 // handshake-layer messages that is signed using the private key corresponding
                 // to the client's certificate. This allows us to verify that the client is in
                 // possession of the private key of the certificate.
+
+                err = err__prev1;
 
             } 
 
@@ -820,106 +1089,75 @@ Curves:
                 msg, err = c.readHandshake();
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
-                ref certificateVerifyMsg (certVerify, ok) = msg._<ref certificateVerifyMsg>();
+
+                ptr<certificateVerifyMsg> (certVerify, ok) = msg._<ptr<certificateVerifyMsg>>();
                 if (!ok)
                 {
                     c.sendAlert(alertUnexpectedMessage);
-                    return error.As(unexpectedMessageError(certVerify, msg));
-                } 
+                    return error.As(unexpectedMessageError(certVerify, msg))!;
+                }
 
-                // Determine the signature type.
-                SignatureScheme signatureAlgorithm = default;
                 byte sigType = default;
-                if (certVerify.hasSignatureAndHash)
+                crypto.Hash sigHash = default;
+                if (c.vers >= VersionTLS12)
                 {
-                    signatureAlgorithm = certVerify.signatureAlgorithm;
-                    if (!isSupportedSignatureAlgorithm(signatureAlgorithm, supportedSignatureAlgorithms))
+                    if (!isSupportedSignatureAlgorithm(certVerify.signatureAlgorithm, certReq.supportedSignatureAlgorithms))
                     {
-                        return error.As(errors.New("tls: unsupported hash function for client certificate"));
+                        c.sendAlert(alertIllegalParameter);
+                        return error.As(errors.New("tls: client certificate used with invalid signature algorithm"))!;
                     }
-                    sigType = signatureFromSignatureScheme(signatureAlgorithm);
+
+                    sigType, sigHash, err = typeAndHashFromSignatureScheme(certVerify.signatureAlgorithm);
+                    if (err != null)
+                    {
+                        return error.As(c.sendAlert(alertInternalError))!;
+                    }
+
                 }
                 else
-                { 
-                    // Before TLS 1.2 the signature algorithm was implicit
-                    // from the key type, and only one hash per signature
-                    // algorithm was possible. Leave signatureAlgorithm
-                    // unset.
-                    switch (pub.type())
+                {
+                    sigType, sigHash, err = legacyTypeAndHashFromPublicKey(pub);
+                    if (err != null)
                     {
-                        case ref ecdsa.PublicKey _:
-                            sigType = signatureECDSA;
-                            break;
-                        case ref rsa.PublicKey _:
-                            sigType = signatureRSA;
-                            break;
+                        c.sendAlert(alertIllegalParameter);
+                        return error.As(err)!;
                     }
+
                 }
-                switch (pub.type())
+
+                var signed = hs.finishedHash.hashForClientCertificate(sigType, sigHash, hs.masterSecret);
                 {
-                    case ref ecdsa.PublicKey key:
-                        if (sigType != signatureECDSA)
-                        {
-                            err = errors.New("tls: bad signature type for client's ECDSA certificate");
-                            break;
-                        }
-                        ptr<object> ecdsaSig = @new<ecdsaSignature>();
-                        _, err = asn1.Unmarshal(certVerify.signature, ecdsaSig);
+                    var err__prev2 = err;
 
-                        if (err != null)
-                        {
-                            break;
-                        }
-                        if (ecdsaSig.R.Sign() <= 0L || ecdsaSig.S.Sign() <= 0L)
-                        {
-                            err = errors.New("tls: ECDSA signature contained zero or negative values");
-                            break;
-                        }
-                        slice<byte> digest = default;
-                        digest, _, err = hs.finishedHash.hashForClientCertificate(sigType, signatureAlgorithm, hs.masterSecret);
+                    err = verifyHandshakeSignature(sigType, pub, sigHash, signed, certVerify.signature);
 
-                        if (err != null)
-                        {
-                            break;
-                        }
-                        if (!ecdsa.Verify(key, digest, ecdsaSig.R, ecdsaSig.S))
-                        {
-                            err = errors.New("tls: ECDSA verification failure");
-                        }
-                        break;
-                    case ref rsa.PublicKey key:
-                        if (sigType != signatureRSA)
-                        {
-                            err = errors.New("tls: bad signature type for client's RSA certificate");
-                            break;
-                        }
-                        digest = default;
-                        crypto.Hash hashFunc = default;
-                        digest, hashFunc, err = hs.finishedHash.hashForClientCertificate(sigType, signatureAlgorithm, hs.masterSecret);
+                    if (err != null)
+                    {
+                        c.sendAlert(alertDecryptError);
+                        return error.As(errors.New("tls: invalid signature by the client certificate: " + err.Error()))!;
+                    }
 
-                        if (err != null)
-                        {
-                            break;
-                        }
-                        err = rsa.VerifyPKCS1v15(key, hashFunc, digest, certVerify.signature);
-                        break;
+                    err = err__prev2;
+
                 }
-                if (err != null)
-                {
-                    c.sendAlert(alertBadCertificate);
-                    return error.As(errors.New("tls: could not validate signature of connection nonces: " + err.Error()));
-                }
+
+
                 hs.finishedHash.Write(certVerify.marshal());
+
             }
+
             hs.finishedHash.discardHandshakeBuffer();
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error establishKeys(this ref serverHandshakeState hs)
+        private static error establishKeys(this ptr<serverHandshakeState> _addr_hs)
         {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
             var c = hs.c;
 
             var (clientMAC, serverMAC, clientKey, serverKey, clientIV, serverIV) = keysFromMasterSecret(c.vers, hs.suite, hs.masterSecret, hs.clientHello.random, hs.hello.random, hs.suite.macLen, hs.suite.keyLen, hs.suite.ivLen);
@@ -942,91 +1180,114 @@ Curves:
                 clientCipher = hs.suite.aead(clientKey, clientIV);
                 serverCipher = hs.suite.aead(serverKey, serverIV);
             }
+
             c.@in.prepareCipherSpec(c.vers, clientCipher, clientHash);
             c.@out.prepareCipherSpec(c.vers, serverCipher, serverHash);
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error readFinished(this ref serverHandshakeState hs, slice<byte> @out)
+        private static error readFinished(this ptr<serverHandshakeState> _addr_hs, slice<byte> @out)
         {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
             var c = hs.c;
 
-            c.readRecord(recordTypeChangeCipherSpec);
-            if (c.@in.err != null)
             {
-                return error.As(c.@in.err);
-            }
-            if (hs.hello.nextProtoNeg)
-            {
-                var (msg, err) = c.readHandshake();
+                var err = c.readChangeCipherSpec();
+
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
-                ref nextProtoMsg (nextProto, ok) = msg._<ref nextProtoMsg>();
-                if (!ok)
-                {
-                    c.sendAlert(alertUnexpectedMessage);
-                    return error.As(unexpectedMessageError(nextProto, msg));
-                }
-                hs.finishedHash.Write(nextProto.marshal());
-                c.clientProtocol = nextProto.proto;
+
             }
-            (msg, err) = c.readHandshake();
+
+
+            var (msg, err) = c.readHandshake();
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            ref finishedMsg (clientFinished, ok) = msg._<ref finishedMsg>();
+
+            ptr<finishedMsg> (clientFinished, ok) = msg._<ptr<finishedMsg>>();
             if (!ok)
             {
                 c.sendAlert(alertUnexpectedMessage);
-                return error.As(unexpectedMessageError(clientFinished, msg));
+                return error.As(unexpectedMessageError(clientFinished, msg))!;
             }
+
             var verify = hs.finishedHash.clientSum(hs.masterSecret);
             if (len(verify) != len(clientFinished.verifyData) || subtle.ConstantTimeCompare(verify, clientFinished.verifyData) != 1L)
             {
                 c.sendAlert(alertHandshakeFailure);
-                return error.As(errors.New("tls: client's Finished message is incorrect"));
+                return error.As(errors.New("tls: client's Finished message is incorrect"))!;
             }
+
             hs.finishedHash.Write(clientFinished.marshal());
             copy(out, verify);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error sendSessionTicket(this ref serverHandshakeState hs)
+        private static error sendSessionTicket(this ptr<serverHandshakeState> _addr_hs)
         {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+ 
+            // ticketSupported is set in a resumption handshake if the
+            // ticket from the client was encrypted with an old session
+            // ticket key and thus a refreshed ticket should be sent.
             if (!hs.hello.ticketSupported)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             var c = hs.c;
             ptr<object> m = @new<newSessionTicketMsg>();
 
-            error err = default;
-            sessionState state = new sessionState(vers:c.vers,cipherSuite:hs.suite.id,masterSecret:hs.masterSecret,certificates:hs.certsFromClient,);
-            m.ticket, err = c.encryptTicket(ref state);
+            var createdAt = uint64(c.config.time().Unix());
+            if (hs.sessionState != null)
+            { 
+                // If this is re-wrapping an old key, then keep
+                // the original time it was created.
+                createdAt = hs.sessionState.createdAt;
+
+            }
+
+            slice<slice<byte>> certsFromClient = default;
+            foreach (var (_, cert) in c.peerCertificates)
+            {
+                certsFromClient = append(certsFromClient, cert.Raw);
+            }
+            sessionState state = new sessionState(vers:c.vers,cipherSuite:hs.suite.id,createdAt:createdAt,masterSecret:hs.masterSecret,certificates:certsFromClient,);
+            error err = default!;
+            m.ticket, err = c.encryptTicket(state.marshal());
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             hs.finishedHash.Write(m.marshal());
             {
                 var (_, err) = c.writeRecord(recordTypeHandshake, m.marshal());
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
 
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static error sendFinished(this ref serverHandshakeState hs, slice<byte> @out)
+        private static error sendFinished(this ptr<serverHandshakeState> _addr_hs, slice<byte> @out)
         {
+            ref serverHandshakeState hs = ref _addr_hs.val;
+
             var c = hs.c;
 
             {
@@ -1034,10 +1295,11 @@ Curves:
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
 
             ptr<finishedMsg> finished = @new<finishedMsg>();
             finished.verifyData = hs.finishedHash.serverSum(hs.masterSecret);
@@ -1047,27 +1309,28 @@ Curves:
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
 
-            c.cipherSuite = hs.suite.id;
+
             copy(out, finished.verifyData);
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // processCertsFromClient takes a chain of client certificates either from a
         // Certificates message or from a sessionState and verifies them. It returns
         // the public key of the leaf certificate.
-        private static (crypto.PublicKey, error) processCertsFromClient(this ref serverHandshakeState hs, slice<slice<byte>> certificates)
+        private static error processCertsFromClient(this ptr<Conn> _addr_c, Certificate certificate)
         {
-            var c = hs.c;
+            ref Conn c = ref _addr_c.val;
 
-            hs.certsFromClient = certificates;
-            var certs = make_slice<ref x509.Certificate>(len(certificates));
-            error err = default;
+            var certificates = certificate.Certificate;
+            var certs = make_slice<ptr<x509.Certificate>>(len(certificates));
+            error err = default!;
             foreach (var (i, asn1Data) in certificates)
             {
                 certs[i], err = x509.ParseCertificate(asn1Data);
@@ -1075,9 +1338,16 @@ Curves:
                 if (err != null)
                 {
                     c.sendAlert(alertBadCertificate);
-                    return (null, errors.New("tls: failed to parse client certificate: " + err.Error()));
+                    return error.As(errors.New("tls: failed to parse client certificate: " + err.Error()))!;
                 }
+
             }
+            if (len(certs) == 0L && requiresClientCert(c.config.ClientAuth))
+            {
+                c.sendAlert(alertBadCertificate);
+                return error.As(errors.New("tls: client didn't provide a certificate"))!;
+            }
+
             if (c.config.ClientAuth >= VerifyClientCertIfGiven && len(certs) > 0L)
             {
                 x509.VerifyOptions opts = new x509.VerifyOptions(Roots:c.config.ClientCAs,CurrentTime:c.config.time(),Intermediates:x509.NewCertPool(),KeyUsages:[]x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},);
@@ -1090,10 +1360,37 @@ Curves:
                 if (err != null)
                 {
                     c.sendAlert(alertBadCertificate);
-                    return (null, errors.New("tls: failed to verify client's certificate: " + err.Error()));
+                    return error.As(errors.New("tls: failed to verify client certificate: " + err.Error()))!;
                 }
+
                 c.verifiedChains = chains;
+
             }
+
+            c.peerCertificates = certs;
+            c.ocspResponse = certificate.OCSPStaple;
+            c.scts = certificate.SignedCertificateTimestamps;
+
+            if (len(certs) > 0L)
+            {
+                switch (certs[0L].PublicKey.type())
+                {
+                    case ptr<ecdsa.PublicKey> _:
+                        break;
+                    case ptr<rsa.PublicKey> _:
+                        break;
+                    case ed25519.PublicKey _:
+                        break;
+                    default:
+                    {
+                        c.sendAlert(alertUnsupportedCertificate);
+                        return error.As(fmt.Errorf("tls: client certificate contains an unsupported public key of type %T", certs[0L].PublicKey))!;
+                        break;
+                    }
+                }
+
+            }
+
             if (c.config.VerifyPeerCertificate != null)
             {
                 {
@@ -1104,117 +1401,32 @@ Curves:
                     if (err != null)
                     {
                         c.sendAlert(alertBadCertificate);
-                        return (null, err);
+                        return error.As(err)!;
                     }
 
                     err = err__prev2;
 
                 }
+
             }
-            if (len(certs) == 0L)
-            {
-                return (null, null);
-            }
-            crypto.PublicKey pub = default;
-            switch (certs[0L].PublicKey.type())
-            {
-                case ref ecdsa.PublicKey key:
-                    pub = key;
-                    break;
-                case ref rsa.PublicKey key:
-                    pub = key;
-                    break;
-                default:
-                {
-                    var key = certs[0L].PublicKey.type();
-                    c.sendAlert(alertUnsupportedCertificate);
-                    return (null, fmt.Errorf("tls: client's certificate contains an unsupported public key of type %T", certs[0L].PublicKey));
-                    break;
-                }
-            }
-            c.peerCertificates = certs;
-            return (pub, null);
+
+            return error.As(null!)!;
+
         }
 
-        // setCipherSuite sets a cipherSuite with the given id as the serverHandshakeState
-        // suite if that cipher suite is acceptable to use.
-        // It returns a bool indicating if the suite was set.
-        private static bool setCipherSuite(this ref serverHandshakeState hs, ushort id, slice<ushort> supportedCipherSuites, ushort version)
+        private static ptr<ClientHelloInfo> clientHelloInfo(ptr<Conn> _addr_c, ptr<clientHelloMsg> _addr_clientHello)
         {
-            foreach (var (_, supported) in supportedCipherSuites)
-            {
-                if (id == supported)
-                {
-                    ref cipherSuite candidate = default;
+            ref Conn c = ref _addr_c.val;
+            ref clientHelloMsg clientHello = ref _addr_clientHello.val;
 
-                    foreach (var (_, s) in cipherSuites)
-                    {
-                        if (s.id == id)
-                        {
-                            candidate = s;
-                            break;
-                        }
-                    }
-                    if (candidate == null)
-                    {
-                        continue;
-                    } 
-                    // Don't select a ciphersuite which we can't
-                    // support for this client.
-                    if (candidate.flags & suiteECDHE != 0L)
-                    {
-                        if (!hs.ellipticOk)
-                        {
-                            continue;
-                        }
-                        if (candidate.flags & suiteECDSA != 0L)
-                        {
-                            if (!hs.ecdsaOk)
-                            {
-                                continue;
-                            }
-                        }
-                        else if (!hs.rsaSignOk)
-                        {
-                            continue;
-                        }
-                    }
-                    else if (!hs.rsaDecryptOk)
-                    {
-                        continue;
-                    }
-                    if (version < VersionTLS12 && candidate.flags & suiteTLS12 != 0L)
-                    {
-                        continue;
-                    }
-                    hs.suite = candidate;
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // suppVersArray is the backing array of ClientHelloInfo.SupportedVersions
-        private static array<ushort> suppVersArray = new array<ushort>(new ushort[] { VersionTLS12, VersionTLS11, VersionTLS10, VersionSSL30 });
-
-        private static ref ClientHelloInfo clientHelloInfo(this ref serverHandshakeState hs)
-        {
-            if (hs.cachedClientHelloInfo != null)
+            var supportedVersions = clientHello.supportedVersions;
+            if (len(clientHello.supportedVersions) == 0L)
             {
-                return hs.cachedClientHelloInfo;
+                supportedVersions = supportedVersionsFromMax(clientHello.vers);
             }
-            slice<ushort> supportedVersions = default;
-            if (hs.clientHello.vers > VersionTLS12)
-            {
-                supportedVersions = suppVersArray[..];
-            }
-            else if (hs.clientHello.vers >= VersionSSL30)
-            {
-                supportedVersions = suppVersArray[VersionTLS12 - hs.clientHello.vers..];
-            }
-            hs.cachedClientHelloInfo = ref new ClientHelloInfo(CipherSuites:hs.clientHello.cipherSuites,ServerName:hs.clientHello.serverName,SupportedCurves:hs.clientHello.supportedCurves,SupportedPoints:hs.clientHello.supportedPoints,SignatureSchemes:hs.clientHello.supportedSignatureAlgorithms,SupportedProtos:hs.clientHello.alpnProtocols,SupportedVersions:supportedVersions,Conn:hs.c.conn,);
 
-            return hs.cachedClientHelloInfo;
+            return addr(new ClientHelloInfo(CipherSuites:clientHello.cipherSuites,ServerName:clientHello.serverName,SupportedCurves:clientHello.supportedCurves,SupportedPoints:clientHello.supportedPoints,SignatureSchemes:clientHello.supportedSignatureAlgorithms,SupportedProtos:clientHello.alpnProtocols,SupportedVersions:supportedVersions,Conn:c.conn,config:c.config,));
+
         }
     }
 }}

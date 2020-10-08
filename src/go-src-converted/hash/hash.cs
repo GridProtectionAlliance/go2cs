@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package hash provides interfaces for hash functions.
-// package hash -- go2cs converted at 2020 August 29 08:23:12 UTC
+// package hash -- go2cs converted at 2020 October 08 03:30:48 UTC
 // import "hash" ==> using hash = go.hash_package
 // Original source: C:\Go\src\hash\hash.go
 using io = go.io_package;

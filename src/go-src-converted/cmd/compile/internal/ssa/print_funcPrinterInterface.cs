@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:54:43 UTC
+//     Generated on 2020 October 08 04:11:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytes = go.bytes_package;
+using sha256 = go.crypto.sha256_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using go;
@@ -54,7 +55,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,106 +69,110 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate void headerByRef(ref T value, ref Func f);
-            private delegate void headerByVal(T value, ref Func f);
+            private delegate void headerByPtr(ptr<T> value, ptr<Func> f);
+            private delegate void headerByVal(T value, ptr<Func> f);
 
-            private static readonly headerByRef s_headerByRef;
+            private static readonly headerByPtr s_headerByPtr;
             private static readonly headerByVal s_headerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void header(ref Func f)
+            public void header(ptr<Func> f)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_headerByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_headerByPtr is null || !m_target_is_ptr)
                 {
                     s_headerByVal!(target, f);
                     return;
                 }
 
-                s_headerByRef(ref target, f);
+                s_headerByPtr(m_target_ptr, f);
                 return;
                 
             }
 
-            private delegate void startBlockByRef(ref T value, ref Block b, bool reachable);
-            private delegate void startBlockByVal(T value, ref Block b, bool reachable);
+            private delegate void startBlockByPtr(ptr<T> value, ptr<Block> b, bool reachable);
+            private delegate void startBlockByVal(T value, ptr<Block> b, bool reachable);
 
-            private static readonly startBlockByRef s_startBlockByRef;
+            private static readonly startBlockByPtr s_startBlockByPtr;
             private static readonly startBlockByVal s_startBlockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void startBlock(ref Block b, bool reachable)
+            public void startBlock(ptr<Block> b, bool reachable)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_startBlockByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_startBlockByPtr is null || !m_target_is_ptr)
                 {
                     s_startBlockByVal!(target, b, reachable);
                     return;
                 }
 
-                s_startBlockByRef(ref target, b, reachable);
+                s_startBlockByPtr(m_target_ptr, b, reachable);
                 return;
                 
             }
 
-            private delegate void endBlockByRef(ref T value, ref Block b);
-            private delegate void endBlockByVal(T value, ref Block b);
+            private delegate void endBlockByPtr(ptr<T> value, ptr<Block> b);
+            private delegate void endBlockByVal(T value, ptr<Block> b);
 
-            private static readonly endBlockByRef s_endBlockByRef;
+            private static readonly endBlockByPtr s_endBlockByPtr;
             private static readonly endBlockByVal s_endBlockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void endBlock(ref Block b)
+            public void endBlock(ptr<Block> b)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_endBlockByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_endBlockByPtr is null || !m_target_is_ptr)
                 {
                     s_endBlockByVal!(target, b);
                     return;
                 }
 
-                s_endBlockByRef(ref target, b);
+                s_endBlockByPtr(m_target_ptr, b);
                 return;
                 
             }
 
-            private delegate void valueByRef(ref T value, ref Value v, bool live);
-            private delegate void valueByVal(T value, ref Value v, bool live);
+            private delegate void valueByPtr(ptr<T> value, ptr<Value> v, bool live);
+            private delegate void valueByVal(T value, ptr<Value> v, bool live);
 
-            private static readonly valueByRef s_valueByRef;
+            private static readonly valueByPtr s_valueByPtr;
             private static readonly valueByVal s_valueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void value(ref Value v, bool live)
+            public void value(ptr<Value> v, bool live)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_valueByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_valueByPtr is null || !m_target_is_ptr)
                 {
                     s_valueByVal!(target, v, live);
                     return;
                 }
 
-                s_valueByRef(ref target, v, live);
+                s_valueByPtr(m_target_ptr, v, live);
                 return;
                 
             }
 
-            private delegate void startDepCycleByRef(ref T value);
+            private delegate void startDepCycleByPtr(ptr<T> value);
             private delegate void startDepCycleByVal(T value);
 
-            private static readonly startDepCycleByRef s_startDepCycleByRef;
+            private static readonly startDepCycleByPtr s_startDepCycleByPtr;
             private static readonly startDepCycleByVal s_startDepCycleByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -176,22 +181,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_startDepCycleByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_startDepCycleByPtr is null || !m_target_is_ptr)
                 {
                     s_startDepCycleByVal!(target);
                     return;
                 }
 
-                s_startDepCycleByRef(ref target);
+                s_startDepCycleByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void endDepCycleByRef(ref T value);
+            private delegate void endDepCycleByPtr(ptr<T> value);
             private delegate void endDepCycleByVal(T value);
 
-            private static readonly endDepCycleByRef s_endDepCycleByRef;
+            private static readonly endDepCycleByPtr s_endDepCycleByPtr;
             private static readonly endDepCycleByVal s_endDepCycleByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -200,38 +206,40 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_endDepCycleByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_endDepCycleByPtr is null || !m_target_is_ptr)
                 {
                     s_endDepCycleByVal!(target);
                     return;
                 }
 
-                s_endDepCycleByRef(ref target);
+                s_endDepCycleByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void namedByRef(ref T value, LocalSlot n, slice<ref Value> vals);
-            private delegate void namedByVal(T value, LocalSlot n, slice<ref Value> vals);
+            private delegate void namedByPtr(ptr<T> value, LocalSlot n, slice<ptr<Value>> vals);
+            private delegate void namedByVal(T value, LocalSlot n, slice<ptr<Value>> vals);
 
-            private static readonly namedByRef s_namedByRef;
+            private static readonly namedByPtr s_namedByPtr;
             private static readonly namedByVal s_namedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void named(LocalSlot n, slice<ref Value> vals)
+            public void named(LocalSlot n, slice<ptr<Value>> vals)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_namedByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_namedByPtr is null || !m_target_is_ptr)
                 {
                     s_namedByVal!(target, n, vals);
                     return;
                 }
 
-                s_namedByRef(ref target, n, vals);
+                s_namedByPtr(m_target_ptr, n, vals);
                 return;
                 
             }
@@ -242,119 +250,98 @@ namespace @internal
             static funcPrinter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("header");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("header");
 
                 if (!(extensionMethod is null))
-                    s_headerByRef = extensionMethod.CreateStaticDelegate(typeof(headerByRef)) as headerByRef;
+                    s_headerByPtr = extensionMethod.CreateStaticDelegate(typeof(headerByPtr)) as headerByPtr;
 
-                if (s_headerByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("header");
+                extensionMethod = targetType.GetExtensionMethod("header");
 
-                    if (!(extensionMethod is null))
-                        s_headerByVal = extensionMethod.CreateStaticDelegate(typeof(headerByVal)) as headerByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_headerByVal = extensionMethod.CreateStaticDelegate(typeof(headerByVal)) as headerByVal;
 
-                if (s_headerByRef is null && s_headerByVal is null)
+                if (s_headerByPtr is null && s_headerByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement funcPrinter.header method", new Exception("header"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("startBlock");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("startBlock");
 
                 if (!(extensionMethod is null))
-                    s_startBlockByRef = extensionMethod.CreateStaticDelegate(typeof(startBlockByRef)) as startBlockByRef;
+                    s_startBlockByPtr = extensionMethod.CreateStaticDelegate(typeof(startBlockByPtr)) as startBlockByPtr;
 
-                if (s_startBlockByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("startBlock");
+                extensionMethod = targetType.GetExtensionMethod("startBlock");
 
-                    if (!(extensionMethod is null))
-                        s_startBlockByVal = extensionMethod.CreateStaticDelegate(typeof(startBlockByVal)) as startBlockByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_startBlockByVal = extensionMethod.CreateStaticDelegate(typeof(startBlockByVal)) as startBlockByVal;
 
-                if (s_startBlockByRef is null && s_startBlockByVal is null)
+                if (s_startBlockByPtr is null && s_startBlockByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement funcPrinter.startBlock method", new Exception("startBlock"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("endBlock");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("endBlock");
 
                 if (!(extensionMethod is null))
-                    s_endBlockByRef = extensionMethod.CreateStaticDelegate(typeof(endBlockByRef)) as endBlockByRef;
+                    s_endBlockByPtr = extensionMethod.CreateStaticDelegate(typeof(endBlockByPtr)) as endBlockByPtr;
 
-                if (s_endBlockByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("endBlock");
+                extensionMethod = targetType.GetExtensionMethod("endBlock");
 
-                    if (!(extensionMethod is null))
-                        s_endBlockByVal = extensionMethod.CreateStaticDelegate(typeof(endBlockByVal)) as endBlockByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_endBlockByVal = extensionMethod.CreateStaticDelegate(typeof(endBlockByVal)) as endBlockByVal;
 
-                if (s_endBlockByRef is null && s_endBlockByVal is null)
+                if (s_endBlockByPtr is null && s_endBlockByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement funcPrinter.endBlock method", new Exception("endBlock"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("value");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("value");
 
                 if (!(extensionMethod is null))
-                    s_valueByRef = extensionMethod.CreateStaticDelegate(typeof(valueByRef)) as valueByRef;
+                    s_valueByPtr = extensionMethod.CreateStaticDelegate(typeof(valueByPtr)) as valueByPtr;
 
-                if (s_valueByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("value");
+                extensionMethod = targetType.GetExtensionMethod("value");
 
-                    if (!(extensionMethod is null))
-                        s_valueByVal = extensionMethod.CreateStaticDelegate(typeof(valueByVal)) as valueByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_valueByVal = extensionMethod.CreateStaticDelegate(typeof(valueByVal)) as valueByVal;
 
-                if (s_valueByRef is null && s_valueByVal is null)
+                if (s_valueByPtr is null && s_valueByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement funcPrinter.value method", new Exception("value"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("startDepCycle");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("startDepCycle");
 
                 if (!(extensionMethod is null))
-                    s_startDepCycleByRef = extensionMethod.CreateStaticDelegate(typeof(startDepCycleByRef)) as startDepCycleByRef;
+                    s_startDepCycleByPtr = extensionMethod.CreateStaticDelegate(typeof(startDepCycleByPtr)) as startDepCycleByPtr;
 
-                if (s_startDepCycleByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("startDepCycle");
+                extensionMethod = targetType.GetExtensionMethod("startDepCycle");
 
-                    if (!(extensionMethod is null))
-                        s_startDepCycleByVal = extensionMethod.CreateStaticDelegate(typeof(startDepCycleByVal)) as startDepCycleByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_startDepCycleByVal = extensionMethod.CreateStaticDelegate(typeof(startDepCycleByVal)) as startDepCycleByVal;
 
-                if (s_startDepCycleByRef is null && s_startDepCycleByVal is null)
+                if (s_startDepCycleByPtr is null && s_startDepCycleByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement funcPrinter.startDepCycle method", new Exception("startDepCycle"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("endDepCycle");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("endDepCycle");
 
                 if (!(extensionMethod is null))
-                    s_endDepCycleByRef = extensionMethod.CreateStaticDelegate(typeof(endDepCycleByRef)) as endDepCycleByRef;
+                    s_endDepCycleByPtr = extensionMethod.CreateStaticDelegate(typeof(endDepCycleByPtr)) as endDepCycleByPtr;
 
-                if (s_endDepCycleByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("endDepCycle");
+                extensionMethod = targetType.GetExtensionMethod("endDepCycle");
 
-                    if (!(extensionMethod is null))
-                        s_endDepCycleByVal = extensionMethod.CreateStaticDelegate(typeof(endDepCycleByVal)) as endDepCycleByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_endDepCycleByVal = extensionMethod.CreateStaticDelegate(typeof(endDepCycleByVal)) as endDepCycleByVal;
 
-                if (s_endDepCycleByRef is null && s_endDepCycleByVal is null)
+                if (s_endDepCycleByPtr is null && s_endDepCycleByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement funcPrinter.endDepCycle method", new Exception("endDepCycle"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("named");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("named");
 
                 if (!(extensionMethod is null))
-                    s_namedByRef = extensionMethod.CreateStaticDelegate(typeof(namedByRef)) as namedByRef;
+                    s_namedByPtr = extensionMethod.CreateStaticDelegate(typeof(namedByPtr)) as namedByPtr;
 
-                if (s_namedByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("named");
+                extensionMethod = targetType.GetExtensionMethod("named");
 
-                    if (!(extensionMethod is null))
-                        s_namedByVal = extensionMethod.CreateStaticDelegate(typeof(namedByVal)) as namedByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_namedByVal = extensionMethod.CreateStaticDelegate(typeof(namedByVal)) as namedByVal;
 
-                if (s_namedByRef is null && s_namedByVal is null)
+                if (s_namedByPtr is null && s_namedByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement funcPrinter.named method", new Exception("named"));
             }
 

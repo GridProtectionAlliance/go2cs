@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:04 UTC
+//     Generated on 2020 October 08 03:34:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,31 +21,17 @@ namespace go
     public static partial class net_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(conn))]
         public partial struct UDPConn
         {
-            // conn structure promotion - sourced from value copy
-            private readonly ptr<conn> m_connRef;
-
-            private ref conn conn_val => ref m_connRef.Value;
-
-            public ref ptr<byteq> rd => ref m_connRef.Value.rd;
-
-            public ref ptr<byteq> wr => ref m_connRef.Value.wr;
-
-            public ref addr local => ref m_connRef.Value.local;
-
-            public ref addr remote => ref m_connRef.Value.remote;
-
             // Constructors
             public UDPConn(NilType _)
             {
-                this.m_connRef = new ptr<conn>(new conn(nil));
+                this.conn = default;
             }
 
             public UDPConn(conn conn = default)
             {
-                this.m_connRef = new ptr<conn>(conn);
+                this.conn = conn;
             }
 
             // Enable comparisons between nil and UDPConn struct

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:00 UTC
+//     Generated on 2020 October 08 03:42:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -57,7 +57,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -71,10 +71,10 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate (Attr, error) MarshalXMLAttrByRef(ref T value, Name name);
+            private delegate (Attr, error) MarshalXMLAttrByPtr(ptr<T> value, Name name);
             private delegate (Attr, error) MarshalXMLAttrByVal(T value, Name name);
 
-            private static readonly MarshalXMLAttrByRef s_MarshalXMLAttrByRef;
+            private static readonly MarshalXMLAttrByPtr s_MarshalXMLAttrByPtr;
             private static readonly MarshalXMLAttrByVal s_MarshalXMLAttrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,11 +83,12 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MarshalXMLAttrByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MarshalXMLAttrByPtr is null || !m_target_is_ptr)
                     return s_MarshalXMLAttrByVal!(target, name);
 
-                return s_MarshalXMLAttrByRef(ref target, name);
+                return s_MarshalXMLAttrByPtr(m_target_ptr, name);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -96,23 +97,20 @@ namespace encoding
             static MarshalerAttr()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("MarshalXMLAttr");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MarshalXMLAttr");
 
                 if (!(extensionMethod is null))
-                    s_MarshalXMLAttrByRef = extensionMethod.CreateStaticDelegate(typeof(MarshalXMLAttrByRef)) as MarshalXMLAttrByRef;
+                    s_MarshalXMLAttrByPtr = extensionMethod.CreateStaticDelegate(typeof(MarshalXMLAttrByPtr)) as MarshalXMLAttrByPtr;
 
-                if (s_MarshalXMLAttrByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("MarshalXMLAttr");
+                extensionMethod = targetType.GetExtensionMethod("MarshalXMLAttr");
 
-                    if (!(extensionMethod is null))
-                        s_MarshalXMLAttrByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalXMLAttrByVal)) as MarshalXMLAttrByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MarshalXMLAttrByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalXMLAttrByVal)) as MarshalXMLAttrByVal;
 
-                if (s_MarshalXMLAttrByRef is null && s_MarshalXMLAttrByVal is null)
+                if (s_MarshalXMLAttrByPtr is null && s_MarshalXMLAttrByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement MarshalerAttr.MarshalXMLAttr method", new Exception("MarshalXMLAttr"));
             }
 

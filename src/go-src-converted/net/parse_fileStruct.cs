@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:27:12 UTC
+//     Generated on 2020 October 08 03:34:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,10 +13,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytealg = go.@internal.bytealg_package;
 using io = go.io_package;
 using os = go.os_package;
 using time = go.time_package;
-using _@unsafe_ = go.@unsafe_package;
 
 namespace go
 {

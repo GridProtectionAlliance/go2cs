@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:47:27 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:10 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\decl.go
 using ast = go.go.ast_package;
@@ -16,8 +16,10 @@ namespace go
 {
     public static partial class types_package
     {
-        private static void reportAltDecl(this ref Checker check, Object obj)
+        private static void reportAltDecl(this ptr<Checker> _addr_check, Object obj)
         {
+            ref Checker check = ref _addr_check.val;
+
             {
                 var pos = obj.Pos();
 
@@ -29,10 +31,15 @@ namespace go
                     check.errorf(pos, "\tother declaration of %s", obj.Name()); // secondary error, \t indented
                 }
             }
+
         }
 
-        private static void declare(this ref Checker check, ref Scope scope, ref ast.Ident id, Object obj, token.Pos pos)
-        { 
+        private static void declare(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope, ptr<ast.Ident> _addr_id, Object obj, token.Pos pos)
+        {
+            ref Checker check = ref _addr_check.val;
+            ref Scope scope = ref _addr_scope.val;
+            ref ast.Ident id = ref _addr_id.val;
+ 
             // spec: "The blank identifier, represented by the underscore
             // character _, may be used in a declaration like any other
             // identifier but the declaration does not introduce a new
@@ -46,40 +53,173 @@ namespace go
                     {
                         check.errorf(obj.Pos(), "%s redeclared in this block", obj.Name());
                         check.reportAltDecl(alt);
-                        return;
+                        return ;
                     }
 
                 }
+
                 obj.setScopePos(pos);
+
             }
+
             if (id != null)
             {
                 check.recordDef(id, obj);
             }
+
+        }
+
+        // pathString returns a string of the form a->b-> ... ->g for a path [a, b, ... g].
+        private static @string pathString(slice<Object> path)
+        {
+            @string s = default;
+            foreach (var (i, p) in path)
+            {
+                if (i > 0L)
+                {
+                    s += "->";
+                }
+
+                s += p.Name();
+
+            }
+            return s;
+
         }
 
         // objDecl type-checks the declaration of obj in its respective (file) context.
-        // See check.typ for the details on def and path.
-        private static void objDecl(this ref Checker _check, Object obj, ref Named _def, slice<ref TypeName> path) => func(_check, _def, (ref Checker check, ref Named def, Defer defer, Panic _, Recover __) =>
+        // For the meaning of def, see Checker.definedType, in typexpr.go.
+        private static void objDecl(this ptr<Checker> _addr_check, Object obj, ptr<Named> _addr_def) => func((defer, _, __) =>
         {
-            if (obj.Type() != null)
-            {
-                return; // already checked - nothing to do
-            }
+            ref Checker check = ref _addr_check.val;
+            ref Named def = ref _addr_def.val;
+
             if (trace)
             {
-                check.trace(obj.Pos(), "-- declaring %s", obj.Name());
+                check.trace(obj.Pos(), "-- checking %s (%s, objPath = %s)", obj, obj.color(), pathString(check.objPath));
                 check.indent++;
                 defer(() =>
                 {
                     check.indent--;
-                    check.trace(obj.Pos(), "=> %s", obj);
+                    check.trace(obj.Pos(), "=> %s (%s)", obj, obj.color());
                 }());
+
+            } 
+
+            // Checking the declaration of obj means inferring its type
+            // (and possibly its value, for constants).
+            // An object's type (and thus the object) may be in one of
+            // three states which are expressed by colors:
+            //
+            // - an object whose type is not yet known is painted white (initial color)
+            // - an object whose type is in the process of being inferred is painted grey
+            // - an object whose type is fully inferred is painted black
+            //
+            // During type inference, an object's color changes from white to grey
+            // to black (pre-declared objects are painted black from the start).
+            // A black object (i.e., its type) can only depend on (refer to) other black
+            // ones. White and grey objects may depend on white and black objects.
+            // A dependency on a grey object indicates a cycle which may or may not be
+            // valid.
+            //
+            // When objects turn grey, they are pushed on the object path (a stack);
+            // they are popped again when they turn black. Thus, if a grey object (a
+            // cycle) is encountered, it is on the object path, and all the objects
+            // it depends on are the remaining objects on that path. Color encoding
+            // is such that the color value of a grey object indicates the index of
+            // that object in the object path.
+
+            // During type-checking, white objects may be assigned a type without
+            // traversing through objDecl; e.g., when initializing constants and
+            // variables. Update the colors of those objects here (rather than
+            // everywhere where we set the type) to satisfy the color invariants.
+            if (obj.color() == white && obj.Type() != null)
+            {
+                obj.setColor(black);
+                return ;
             }
-            var d = check.objMap[obj];
+
+
+            if (obj.color() == white) 
+                assert(obj.Type() == null); 
+                // All color values other than white and black are considered grey.
+                // Because black and white are < grey, all values >= grey are grey.
+                // Use those values to encode the object's index into the object path.
+                obj.setColor(grey + color(check.push(obj)));
+                defer(() =>
+                {
+                    check.pop().setColor(black);
+                }());
+            else if (obj.color() == black) 
+                assert(obj.Type() != null);
+                return ;
+            else if (obj.color() == grey) 
+                // We have a cycle.
+                // In the existing code, this is marked by a non-nil type
+                // for the object except for constants and variables whose
+                // type may be non-nil (known), or nil if it depends on the
+                // not-yet known initialization value.
+                // In the former case, set the type to Typ[Invalid] because
+                // we have an initialization cycle. The cycle error will be
+                // reported later, when determining initialization order.
+                // TODO(gri) Report cycle here and simplify initialization
+                // order code.
+                switch (obj.type())
+                {
+                    case ptr<Const> obj:
+                        if (check.cycle(obj) || obj.typ == null)
+                        {
+                            obj.typ = Typ[Invalid];
+                        }
+
+                        break;
+                    case ptr<Var> obj:
+                        if (check.cycle(obj) || obj.typ == null)
+                        {
+                            obj.typ = Typ[Invalid];
+                        }
+
+                        break;
+                    case ptr<TypeName> obj:
+                        if (check.cycle(obj))
+                        { 
+                            // break cycle
+                            // (without this, calling underlying()
+                            // below may lead to an endless loop
+                            // if we have a cycle for a defined
+                            // (*Named) type)
+                            obj.typ = Typ[Invalid];
+
+                        }
+
+                        break;
+                    case ptr<Func> obj:
+                        if (check.cycle(obj))
+                        { 
+                            // Don't set obj.typ to Typ[Invalid] here
+                            // because plenty of code type-asserts that
+                            // functions have a *Signature type. Grey
+                            // functions have their type set to an empty
+                            // signature which makes it impossible to
+                            // initialize a variable with the function.
+                        }
+
+                        break;
+                    default:
+                    {
+                        var obj = obj.type();
+                        unreachable();
+                        break;
+                    }
+                }
+                assert(obj.Type() != null);
+                return ;
+            else 
+                // Color values other than white or black are considered grey.
+                        var d = check.objMap[obj];
             if (d == null)
             {
-                check.dump("%s: %s should have been declared", obj.Pos(), obj.Name());
+                check.dump("%v: %s should have been declared", obj.Pos(), obj);
                 unreachable();
             } 
 
@@ -97,18 +237,18 @@ namespace go
             // check.decl.
             switch (obj.type())
             {
-                case ref Const obj:
+                case ptr<Const> obj:
                     check.decl = d; // new package-level const decl
                     check.constDecl(obj, d.typ, d.init);
                     break;
-                case ref Var obj:
+                case ptr<Var> obj:
                     check.decl = d; // new package-level var decl
                     check.varDecl(obj, d.lhs, d.typ, d.init);
                     break;
-                case ref TypeName obj:
-                    check.typeDecl(obj, d.typ, def, path, d.alias);
+                case ptr<TypeName> obj:
+                    check.typeDecl(obj, d.typ, def, d.alias);
                     break;
-                case ref Func obj:
+                case ptr<Func> obj:
                     check.funcDecl(obj, d);
                     break;
                 default:
@@ -118,27 +258,274 @@ namespace go
                     break;
                 }
             }
+
         });
 
-        private static void constDecl(this ref Checker _check, ref Const _obj, ast.Expr typ, ast.Expr init) => func(_check, _obj, (ref Checker check, ref Const obj, Defer defer, Panic _, Recover __) =>
+        // cycle checks if the cycle starting with obj is valid and
+        // reports an error if it is not.
+        private static bool cycle(this ptr<Checker> _addr_check, Object obj) => func((defer, _, __) =>
         {
-            assert(obj.typ == null);
-
-            if (obj.visited)
+            bool isCycle = default;
+            ref Checker check = ref _addr_check.val;
+ 
+            // The object map contains the package scope objects and the non-interface methods.
+            if (debug)
             {
-                obj.typ = Typ[Invalid];
-                return;
+                var info = check.objMap[obj];
+                var inObjMap = info != null && (info.fdecl == null || info.fdecl.Recv == null); // exclude methods
+                var isPkgObj = obj.Parent() == check.pkg.scope;
+                if (isPkgObj != inObjMap)
+                {
+                    check.dump("%v: inconsistent object map for %s (isPkgObj = %v, inObjMap = %v)", obj.Pos(), obj, isPkgObj, inObjMap);
+                    unreachable();
+                }
+
+            } 
+
+            // Count cycle objects.
+            assert(obj.color() >= grey);
+            var start = obj.color() - grey; // index of obj in objPath
+            var cycle = check.objPath[start..];
+            long nval = 0L; // number of (constant or variable) values in the cycle
+            long ndef = 0L; // number of type definitions in the cycle
+            {
+                var obj__prev1 = obj;
+
+                foreach (var (_, __obj) in cycle)
+                {
+                    obj = __obj;
+                    switch (obj.type())
+                    {
+                        case ptr<Const> obj:
+                            nval++;
+                            break;
+                        case ptr<Var> obj:
+                            nval++;
+                            break;
+                        case ptr<TypeName> obj:
+                            bool alias = default;
+                            {
+                                var d = check.objMap[obj];
+
+                                if (d != null)
+                                {
+                                    alias = d.alias; // package-level object
+                                }
+                                else
+                                {
+                                    alias = obj.IsAlias(); // function local object
+                                }
+
+                            }
+
+                            if (!alias)
+                            {
+                                ndef++;
+                            }
+
+                            break;
+                        case ptr<Func> obj:
+                            break;
+                        default:
+                        {
+                            var obj = obj.type();
+                            unreachable();
+                            break;
+                        }
+                    }
+
+                }
+
+                obj = obj__prev1;
             }
-            obj.visited = true; 
+
+            if (trace)
+            {
+                check.trace(obj.Pos(), "## cycle detected: objPath = %s->%s (len = %d)", pathString(cycle), obj.Name(), len(cycle));
+                check.trace(obj.Pos(), "## cycle contains: %d values, %d type definitions", nval, ndef);
+                defer(() =>
+                {
+                    if (isCycle)
+                    {
+                        check.trace(obj.Pos(), "=> error: cycle is invalid");
+                    }
+
+                }());
+
+            } 
+
+            // A cycle involving only constants and variables is invalid but we
+            // ignore them here because they are reported via the initialization
+            // cycle check.
+            if (nval == len(cycle))
+            {
+                return false;
+            } 
+
+            // A cycle involving only types (and possibly functions) must have at least
+            // one type definition to be permitted: If there is no type definition, we
+            // have a sequence of alias type names which will expand ad infinitum.
+            if (nval == 0L && ndef > 0L)
+            {
+                return false; // cycle is permitted
+            }
+
+            check.cycleError(cycle);
+
+            return true;
+
+        });
+
+        private partial struct typeInfo // : ulong
+        {
+        }
+
+        // validType verifies that the given type does not "expand" infinitely
+        // producing a cycle in the type graph. Cycles are detected by marking
+        // defined types.
+        // (Cycles involving alias types, as in "type A = [10]A" are detected
+        // earlier, via the objDecl cycle detection mechanism.)
+        private static typeInfo validType(this ptr<Checker> _addr_check, Type typ, slice<Object> path) => func((_, panic, __) =>
+        {
+            ref Checker check = ref _addr_check.val;
+
+            const typeInfo unknown = (typeInfo)iota;
+            const var marked = (var)0;
+            const var valid = (var)1;
+            const var invalid = (var)2;
+
+            switch (typ.type())
+            {
+                case ptr<Array> t:
+                    return check.validType(t.elem, path);
+                    break;
+                case ptr<Struct> t:
+                    foreach (var (_, f) in t.fields)
+                    {
+                        if (check.validType(f.typ, path) == invalid)
+                        {
+                            return invalid;
+                        }
+
+                    }
+                    break;
+                case ptr<Interface> t:
+                    foreach (var (_, etyp) in t.embeddeds)
+                    {
+                        if (check.validType(etyp, path) == invalid)
+                        {
+                            return invalid;
+                        }
+
+                    }
+                    break;
+                case ptr<Named> t:
+                    if (t.obj.pkg != check.pkg)
+                    {
+                        return valid;
+                    } 
+
+                    // don't report a 2nd error if we already know the type is invalid
+                    // (e.g., if a cycle was detected earlier, via Checker.underlying).
+                    if (t.underlying == Typ[Invalid])
+                    {
+                        t.info = invalid;
+                        return invalid;
+                    }
+
+
+                    if (t.info == unknown) 
+                        t.info = marked;
+                        t.info = check.validType(t.orig, append(path, t.obj)); // only types of current package added to path
+                    else if (t.info == marked) 
+                        // cycle detected
+                        foreach (var (i, tn) in path)
+                        {
+                            if (t.obj.pkg != check.pkg)
+                            {
+                                panic("internal error: type cycle via package-external type");
+                            }
+
+                            if (tn == t.obj)
+                            {
+                                check.cycleError(path[i..]);
+                                t.info = invalid;
+                                t.underlying = Typ[Invalid];
+                                return t.info;
+                            }
+
+                        }
+                        panic("internal error: cycle start not found");
+                                        return t.info;
+                    break;
+
+            }
+
+            return valid;
+
+        });
+
+        // cycleError reports a declaration cycle starting with
+        // the object in cycle that is "first" in the source.
+        private static void cycleError(this ptr<Checker> _addr_check, slice<Object> cycle)
+        {
+            ref Checker check = ref _addr_check.val;
+ 
+            // TODO(gri) Should we start with the last (rather than the first) object in the cycle
+            //           since that is the earliest point in the source where we start seeing the
+            //           cycle? That would be more consistent with other error messages.
+            var i = firstInSrc(cycle);
+            var obj = cycle[i];
+            check.errorf(obj.Pos(), "illegal cycle in declaration of %s", obj.Name());
+            foreach (>>MARKER:FORRANGEEXPRESSIONS_LEVEL_1<< in cycle)
+            {>>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_1<<
+                check.errorf(obj.Pos(), "\t%s refers to", obj.Name()); // secondary error, \t indented
+                i++;
+                if (i >= len(cycle))
+                {
+                    i = 0L;
+                }
+
+                obj = cycle[i];
+
+            }
+            check.errorf(obj.Pos(), "\t%s", obj.Name());
+
+        }
+
+        // firstInSrc reports the index of the object with the "smallest"
+        // source position in path. path must not be empty.
+        private static long firstInSrc(slice<Object> path)
+        {
+            long fst = 0L;
+            var pos = path[0L].Pos();
+            foreach (var (i, t) in path[1L..])
+            {
+                if (t.Pos() < pos)
+                {
+                    fst = i + 1L;
+                    pos = t.Pos();
+
+                }
+
+            }
+            return fst;
+
+        }
+
+        private static void constDecl(this ptr<Checker> _addr_check, ptr<Const> _addr_obj, ast.Expr typ, ast.Expr init) => func((defer, _, __) =>
+        {
+            ref Checker check = ref _addr_check.val;
+            ref Const obj = ref _addr_obj.val;
+
+            assert(obj.typ == null); 
 
             // use the correct value of iota
-            assert(check.iota == null);
-            check.iota = obj.val;
-            defer(() =>
+            defer(iota =>
             {
-                check.iota = null;
-
-            }()); 
+                check.iota = iota;
+            }(check.iota));
+            check.iota = obj.val; 
 
             // provide valid constant value under all circumstances
             obj.val = constant.MakeUnknown(); 
@@ -155,34 +542,33 @@ namespace go
                     {
                         check.errorf(typ.Pos(), "invalid constant type %s", t);
                     }
+
                     obj.typ = Typ[Invalid];
-                    return;
+                    return ;
+
                 }
+
                 obj.typ = t;
+
             } 
 
             // check initialization
-            operand x = default;
+            ref operand x = ref heap(out ptr<operand> _addr_x);
             if (init != null)
             {
-                check.expr(ref x, init);
+                check.expr(_addr_x, init);
             }
-            check.initConst(obj, ref x);
+
+            check.initConst(obj, _addr_x);
+
         });
 
-        private static void varDecl(this ref Checker _check, ref Var _obj, slice<ref Var> lhs, ast.Expr typ, ast.Expr init) => func(_check, _obj, (ref Checker check, ref Var obj, Defer _, Panic panic, Recover __) =>
+        private static void varDecl(this ptr<Checker> _addr_check, ptr<Var> _addr_obj, slice<ptr<Var>> lhs, ast.Expr typ, ast.Expr init) => func((_, panic, __) =>
         {
-            assert(obj.typ == null);
+            ref Checker check = ref _addr_check.val;
+            ref Var obj = ref _addr_obj.val;
 
-            if (obj.visited)
-            {
-                obj.typ = Typ[Invalid];
-                return;
-            }
-            obj.visited = true; 
-
-            // var declarations cannot use iota
-            assert(check.iota == null); 
+            assert(obj.typ == null); 
 
             // determine type, if any
             if (typ != null)
@@ -205,17 +591,22 @@ namespace go
                 { 
                     // error reported before by arityMatch
                     obj.typ = Typ[Invalid];
+
                 }
-                return;
+
+                return ;
+
             }
+
             if (lhs == null || len(lhs) == 1L)
             {
                 assert(lhs == null || lhs[0L] == obj);
-                operand x = default;
-                check.expr(ref x, init);
-                check.initVar(obj, ref x, "variable declaration");
-                return;
+                ref operand x = ref heap(out ptr<operand> _addr_x);
+                check.expr(_addr_x, init);
+                check.initVar(obj, _addr_x, "variable declaration");
+                return ;
             }
+
             if (debug)
             { 
                 // obj must be one of lhs
@@ -231,6 +622,7 @@ namespace go
                             found = true;
                             break;
                         }
+
                     }
 
                     lhs = lhs__prev1;
@@ -240,6 +632,7 @@ namespace go
                 {
                     panic("inconsistent lhs");
                 }
+
             } 
 
             // We have multiple variables on the lhs and one init expr.
@@ -259,58 +652,136 @@ namespace go
 
                     lhs = lhs__prev1;
                 }
-
             }
+
             check.initVars(lhs, new slice<ast.Expr>(new ast.Expr[] { init }), token.NoPos);
+
         });
 
         // underlying returns the underlying type of typ; possibly by following
         // forward chains of named types. Such chains only exist while named types
-        // are incomplete.
-        private static Type underlying(Type typ)
+        // are incomplete. If an underlying type is found, resolve the chain by
+        // setting the underlying type for each defined type in the chain before
+        // returning it.
+        //
+        // If no underlying type is found, a cycle error is reported and Typ[Invalid]
+        // is used as underlying type for each defined type in the chain and returned
+        // as result.
+        private static Type underlying(this ptr<Checker> _addr_check, Type typ) => func((_, panic, __) =>
         {
+            ref Checker check = ref _addr_check.val;
+ 
+            // If typ is not a defined type, its underlying type is itself.
+            ptr<Named> (n0, _) = typ._<ptr<Named>>();
+            if (n0 == null)
+            {
+                return typ; // nothing to do
+            } 
+
+            // If the underlying type of a defined type is not a defined
+            // type, then that is the desired underlying type.
+            typ = n0.underlying;
+            ptr<Named> (n, _) = typ._<ptr<Named>>();
+            if (n == null)
+            {
+                return typ; // common case
+            } 
+
+            // Otherwise, follow the forward chain.
+            map seen = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<Named>, long>{n0:0};
+            Object path = new slice<Object>(new Object[] { n0.obj });
             while (true)
             {
-                ref Named (n, _) = typ._<ref Named>();
-                if (n == null)
-                {
-                    break;
-                }
                 typ = n.underlying;
+                ptr<Named> (n1, _) = typ._<ptr<Named>>();
+                if (n1 == null)
+                {
+                    break; // end of chain
+                }
+
+                seen[n] = len(seen);
+                path = append(path, n.obj);
+                n = n1;
+
+                {
+                    var (i, ok) = seen[n];
+
+                    if (ok)
+                    { 
+                        // cycle
+                        check.cycleError(path[i..]);
+                        typ = Typ[Invalid];
+                        break;
+
+                    }
+
+                }
+
+            }
+
+
+            {
+                ptr<Named> n__prev1 = n;
+
+                foreach (var (__n) in seen)
+                {
+                    n = __n; 
+                    // We should never have to update the underlying type of an imported type;
+                    // those underlying types should have been resolved during the import.
+                    // Also, doing so would lead to a race condition (was issue #31749).
+                    if (n.obj.pkg != check.pkg)
+                    {
+                        panic("internal error: imported type with unresolved underlying type");
+                    }
+
+                    n.underlying = typ;
+
+                }
+
+                n = n__prev1;
             }
 
             return typ;
-        }
 
-        private static void setUnderlying(this ref Named n, Type typ)
+        });
+
+        private static void setUnderlying(this ptr<Named> _addr_n, Type typ)
         {
+            ref Named n = ref _addr_n.val;
+
             if (n != null)
             {
                 n.underlying = typ;
             }
+
         }
 
-        private static void typeDecl(this ref Checker check, ref TypeName obj, ast.Expr typ, ref Named def, slice<ref TypeName> path, bool alias)
+        private static void typeDecl(this ptr<Checker> _addr_check, ptr<TypeName> _addr_obj, ast.Expr typ, ptr<Named> _addr_def, bool alias)
         {
-            assert(obj.typ == null); 
+            ref Checker check = ref _addr_check.val;
+            ref TypeName obj = ref _addr_obj.val;
+            ref Named def = ref _addr_def.val;
 
-            // type declarations cannot use iota
-            assert(check.iota == null);
+            assert(obj.typ == null);
+
+            check.later(() =>
+            {
+                check.validType(obj.typ, null);
+            });
 
             if (alias)
             {
                 obj.typ = Typ[Invalid];
-                obj.typ = check.typExpr(typ, null, append(path, obj));
-
+                obj.typ = check.typ(typ);
             }
             else
             {
-                Named named = ref new Named(obj:obj);
+                ptr<Named> named = addr(new Named(obj:obj));
                 def.setUnderlying(named);
                 obj.typ = named; // make sure recursive type declarations terminate
 
                 // determine underlying type of named
-                check.typExpr(typ, named, append(path, obj)); 
+                named.orig = check.definedType(typ, named); 
 
                 // The underlying type of named may be itself a named type that is
                 // incomplete:
@@ -324,39 +795,44 @@ namespace go
                 // The type of C is the (named) type of A which is incomplete,
                 // and which has as its underlying type the named type B.
                 // Determine the (final, unnamed) underlying type by resolving
-                // any forward chain (they always end in an unnamed type).
-                named.underlying = underlying(named.underlying);
+                // any forward chain.
+                named.underlying = check.underlying(named);
 
-            } 
 
-            // check and add associated methods
-            // TODO(gri) It's easy to create pathological cases where the
-            // current approach is incorrect: In general we need to know
-            // and add all methods _before_ type-checking the type.
-            // See https://play.golang.org/p/WMpE0q2wK8
+            }
+
             check.addMethodDecls(obj);
+
         }
 
-        private static void addMethodDecls(this ref Checker check, ref TypeName obj)
-        { 
+        private static void addMethodDecls(this ptr<Checker> _addr_check, ptr<TypeName> _addr_obj)
+        {
+            ref Checker check = ref _addr_check.val;
+            ref TypeName obj = ref _addr_obj.val;
+ 
             // get associated methods
-            var methods = check.methods[obj.name];
-            if (len(methods) == 0L)
+            // (Checker.collectObjects only collects methods with non-blank names;
+            // Checker.resolveBaseTypeName ensures that obj is not an alias name
+            // if it has attached methods.)
+            var methods = check.methods[obj];
+            if (methods == null)
             {
-                return; // no methods
+                return ;
             }
-            delete(check.methods, obj.name); 
+
+            delete(check.methods, obj);
+            assert(!check.objMap[obj].alias); // don't use TypeName.IsAlias (requires fully set up object)
 
             // use an objset to check for name conflicts
             objset mset = default; 
 
             // spec: "If the base type is a struct type, the non-blank method
             // and field names must be distinct."
-            ref Named (base, _) = obj.typ._<ref Named>(); // nil if receiver base type is type alias
+            ptr<Named> (base, _) = obj.typ._<ptr<Named>>(); // shouldn't fail but be conservative
             if (base != null)
             {
                 {
-                    ref Struct (t, _) = @base.underlying._<ref Struct>();
+                    ptr<Struct> (t, _) = @base.underlying._<ptr<Struct>>();
 
                     if (t != null)
                     {
@@ -366,7 +842,9 @@ namespace go
                             {
                                 assert(mset.insert(fld) == null);
                             }
+
                         }
+
                     } 
 
                     // Checker.Files may be called multiple times; additional package files
@@ -390,10 +868,9 @@ namespace go
 
                     m = m__prev1;
                 }
-
             } 
 
-            // type-check methods
+            // add valid methods
             {
                 var m__prev1 = m;
 
@@ -402,51 +879,51 @@ namespace go
                     m = __m; 
                     // spec: "For a base type, the non-blank names of methods bound
                     // to it must be unique."
-                    if (m.name != "_")
+                    assert(m.name != "_");
                     {
-                        {
-                            var alt = mset.insert(m);
+                        var alt = mset.insert(m);
 
-                            if (alt != null)
+                        if (alt != null)
+                        {
+                            switch (alt.type())
                             {
-                                switch (alt.type())
+                                case ptr<Var> _:
+                                    check.errorf(m.pos, "field and method with the same name %s", m.name);
+                                    break;
+                                case ptr<Func> _:
+                                    check.errorf(m.pos, "method %s already declared for %s", m.name, obj);
+                                    break;
+                                default:
                                 {
-                                    case ref Var _:
-                                        check.errorf(m.pos, "field and method with the same name %s", m.name);
-                                        break;
-                                    case ref Func _:
-                                        check.errorf(m.pos, "method %s already declared for %s", m.name, obj);
-                                        break;
-                                    default:
-                                    {
-                                        unreachable();
-                                        break;
-                                    }
+                                    unreachable();
+                                    break;
                                 }
-                                check.reportAltDecl(alt);
-                                continue;
                             }
+                            check.reportAltDecl(alt);
+                            continue;
 
                         }
-                    } 
 
-                    // type-check
-                    check.objDecl(m, null, null); 
+                    }
 
-                    // methods with blank _ names cannot be found - don't keep them
-                    if (base != null && m.name != "_")
+
+                    if (base != null)
                     {
                         @base.methods = append(@base.methods, m);
                     }
+
                 }
 
                 m = m__prev1;
             }
-
         }
 
-        private static void funcDecl(this ref Checker check, ref Func obj, ref declInfo decl)
+        private static void funcDecl(this ptr<Checker> _addr_check, ptr<Func> _addr_obj, ptr<declInfo> _addr_decl)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Func obj = ref _addr_obj.val;
+            ref declInfo decl = ref _addr_decl.val;
+
             assert(obj.typ == null); 
 
             // func declarations cannot use iota
@@ -466,27 +943,36 @@ namespace go
             // (functions implemented elsewhere have no body)
             if (!check.conf.IgnoreFuncBodies && fdecl.Body != null)
             {
-                check.later(obj.name, decl, sig, fdecl.Body);
+                check.later(() =>
+                {
+                    check.funcBody(decl, obj.name, sig, fdecl.Body, null);
+                });
+
             }
+
         }
 
-        private static void declStmt(this ref Checker check, ast.Decl decl)
+        private static void declStmt(this ptr<Checker> _addr_check, ast.Decl decl)
         {
+            ref Checker check = ref _addr_check.val;
+
             var pkg = check.pkg;
 
             switch (decl.type())
             {
-                case ref ast.BadDecl d:
+                case ptr<ast.BadDecl> d:
                     break;
-                case ref ast.GenDecl d:
-                    ref ast.ValueSpec last = default; // last ValueSpec with type or init exprs seen
+                case ptr<ast.GenDecl> d:
+                    ptr<ast.ValueSpec> last; // last ValueSpec with type or init exprs seen
                     foreach (var (iota, spec) in d.Specs)
                     {
                         switch (spec.type())
                         {
-                            case ref ast.ValueSpec s:
+                            case ptr<ast.ValueSpec> s:
 
                                 if (d.Tok == token.CONST) 
+                                    var top = len(check.delayed); 
+
                                     // determine which init exprs to use
 
                                     if (s.Type != null || len(s.Values) > 0L) 
@@ -494,7 +980,7 @@ namespace go
                                     else if (last == null) 
                                         last = @new<ast.ValueSpec>(); // make sure last exists
                                     // declare all constants
-                                    var lhs = make_slice<ref Const>(len(s.Names));
+                                    var lhs = make_slice<ptr<Const>>(len(s.Names));
                                     {
                                         var i__prev2 = i;
                                         var name__prev2 = name;
@@ -511,7 +997,9 @@ namespace go
                                             {
                                                 init = last.Values[i];
                                             }
+
                                             check.constDecl(obj, last.Type, init);
+
                                         }
 
                                         i = i__prev2;
@@ -519,6 +1007,9 @@ namespace go
                                     }
 
                                     check.arityMatch(s, last); 
+
+                                    // process function literals in init expressions before scope changes
+                                    check.processDelayed(top); 
 
                                     // spec: "The scope of a constant or variable identifier declared
                                     // inside a function begins at the end of the ConstSpec or VarSpec
@@ -540,7 +1031,9 @@ namespace go
                                         name = name__prev2;
                                     }
                                 else if (d.Tok == token.VAR) 
-                                    var lhs0 = make_slice<ref Var>(len(s.Names));
+                                    top = len(check.delayed);
+
+                                    var lhs0 = make_slice<ptr<Var>>(len(s.Names));
                                     {
                                         var i__prev2 = i;
                                         var name__prev2 = name;
@@ -581,6 +1074,7 @@ namespace go
                                                 {
                                                     init = s.Values[i];
                                                 }
+
                                                                                         check.varDecl(obj, lhs, s.Type, init);
                                             if (len(s.Values) == 1L)
                                             { 
@@ -602,10 +1096,12 @@ namespace go
 
                                                         obj = obj__prev3;
                                                     }
-
                                                 }
+
                                                 break;
+
                                             }
+
                                         }
 
                                         i = i__prev2;
@@ -613,6 +1109,9 @@ namespace go
                                     }
 
                                     check.arityMatch(s, null); 
+
+                                    // process function literals in init expressions before scope changes
+                                    check.processDelayed(top); 
 
                                     // declare all variables
                                     // (only at this point are the variable scopes (parents) set)
@@ -627,6 +1126,7 @@ namespace go
                                             name = __name; 
                                             // see constant declarations
                                             check.declare(check.scope, name, lhs0[i], scopePos);
+
                                         }
 
                                         i = i__prev2;
@@ -635,14 +1135,17 @@ namespace go
                                 else 
                                     check.invalidAST(s.Pos(), "invalid token %s", d.Tok);
                                                                 break;
-                            case ref ast.TypeSpec s:
+                            case ptr<ast.TypeSpec> s:
                                 obj = NewTypeName(s.Name.Pos(), pkg, s.Name.Name, null); 
                                 // spec: "The scope of a type identifier declared inside a function
                                 // begins at the identifier in the TypeSpec and ends at the end of
                                 // the innermost containing block."
                                 scopePos = s.Name.Pos();
-                                check.declare(check.scope, s.Name, obj, scopePos);
-                                check.typeDecl(obj, s.Type, null, null, s.Assign.IsValid());
+                                check.declare(check.scope, s.Name, obj, scopePos); 
+                                // mark and unmark type before calling typeDecl; its type is still nil (see Checker.objDecl)
+                                obj.setColor(grey + color(check.push(obj)));
+                                check.typeDecl(obj, s.Type, null, s.Assign.IsValid());
+                                check.pop().setColor(black);
                                 break;
                             default:
                             {
@@ -651,6 +1154,7 @@ namespace go
                                 break;
                             }
                         }
+
                     }
                     break;
                 default:
@@ -660,6 +1164,7 @@ namespace go
                     break;
                 }
             }
+
         }
     }
 }}

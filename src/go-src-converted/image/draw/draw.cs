@@ -6,7 +6,7 @@
 //
 // See "The Go image/draw package" for an introduction to this package:
 // https://golang.org/doc/articles/image_draw.html
-// package draw -- go2cs converted at 2020 August 29 10:09:57 UTC
+// package draw -- go2cs converted at 2020 October 08 04:59:18 UTC
 // import "image/draw" ==> using draw = go.image.draw_package
 // Original source: C:\Go\src\image\draw\draw.go
 using image = go.image_package;
@@ -21,7 +21,7 @@ namespace image
     public static partial class draw_package
     {
         // m is the maximum color value returned by image.Color.RGBA.
-        private static readonly long m = 1L << (int)(16L) - 1L;
+        private static readonly long m = (long)1L << (int)(16L) - 1L;
 
         // Image is an image.Image with a Set method to change a single pixel.
 
@@ -45,9 +45,10 @@ namespace image
 
  
         // Over specifies ``(src in mask) over dst''.
-        public static readonly Op Over = iota; 
+        public static readonly Op Over = (Op)iota; 
         // Src specifies ``src in mask''.
-        public static readonly var Src = 0;
+        public static readonly var Src = (var)0;
+
 
         // Draw implements the Drawer interface by calling the Draw function with this
         // Op.
@@ -64,7 +65,7 @@ namespace image
 
         // FloydSteinberg is a Drawer that is the Src Op with Floyd-Steinberg error
         // diffusion.
-        public static Drawer FloydSteinberg = Drawer.As(new floydSteinberg());
+        public static Drawer FloydSteinberg = Drawer.As(new floydSteinberg())!;
 
         private partial struct floydSteinberg
         {
@@ -72,32 +73,40 @@ namespace image
 
         private static void Draw(this floydSteinberg _p0, Image dst, image.Rectangle r, image.Image src, image.Point sp)
         {
-            clip(dst, ref r, src, ref sp, null, null);
+            clip(dst, _addr_r, src, _addr_sp, null, _addr_null);
             if (r.Empty())
             {
-                return;
+                return ;
             }
+
             drawPaletted(dst, r, src, sp, true);
+
         }
 
         // clip clips r against each image's bounds (after translating into the
         // destination image's coordinate space) and shifts the points sp and mp by
         // the same amount as the change in r.Min.
-        private static void clip(Image dst, ref image.Rectangle r, image.Image src, ref image.Point sp, image.Image mask, ref image.Point mp)
+        private static void clip(Image dst, ptr<image.Rectangle> _addr_r, image.Image src, ptr<image.Point> _addr_sp, image.Image mask, ptr<image.Point> _addr_mp)
         {
+            ref image.Rectangle r = ref _addr_r.val;
+            ref image.Point sp = ref _addr_sp.val;
+            ref image.Point mp = ref _addr_mp.val;
+
             var orig = r.Min;
-            r.Value = r.Intersect(dst.Bounds());
-            r.Value = r.Intersect(src.Bounds().Add(orig.Sub(sp.Value)));
+            r = r.Intersect(dst.Bounds());
+            r = r.Intersect(src.Bounds().Add(orig.Sub(sp)));
             if (mask != null)
             {
-                r.Value = r.Intersect(mask.Bounds().Add(orig.Sub(mp.Value)));
+                r = r.Intersect(mask.Bounds().Add(orig.Sub(mp)));
             }
+
             var dx = r.Min.X - orig.X;
             var dy = r.Min.Y - orig.Y;
             if (dx == 0L && dy == 0L)
             {
-                return;
+                return ;
             }
+
             sp.X += dx;
             sp.Y += dy;
             if (mp != null)
@@ -105,11 +114,12 @@ namespace image
                 mp.X += dx;
                 mp.Y += dy;
             }
+
         }
 
-        private static bool processBackward(Image dst, image.Rectangle r, image.Image src, image.Point sp)
+        private static bool processBackward(image.Image dst, image.Rectangle r, image.Image src, image.Point sp)
         {
-            return image.Image(dst) == src && r.Overlaps(r.Add(sp.Sub(r.Min))) && (sp.Y < r.Min.Y || (sp.Y == r.Min.Y && sp.X < r.Min.X));
+            return dst == src && r.Overlaps(r.Add(sp.Sub(r.Min))) && (sp.Y < r.Min.Y || (sp.Y == r.Min.Y && sp.X < r.Min.X));
         }
 
         // Draw calls DrawMask with a nil mask.
@@ -122,73 +132,78 @@ namespace image
         // in dst with the result of a Porter-Duff composition. A nil mask is treated as opaque.
         public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image.Point sp, image.Image mask, image.Point mp, Op op)
         {
-            clip(dst, ref r, src, ref sp, mask, ref mp);
+            clip(dst, _addr_r, src, _addr_sp, mask, _addr_mp);
             if (r.Empty())
             {
-                return;
+                return ;
             } 
 
             // Fast paths for special cases. If none of them apply, then we fall back to a general but slow implementation.
             switch (dst.type())
             {
-                case ref image.RGBA dst0:
+                case ptr<image.RGBA> dst0:
                     if (op == Over)
                     {
                         if (mask == null)
                         {
                             switch (src.type())
                             {
-                                case ref image.Uniform src0:
+                                case ptr<image.Uniform> src0:
                                     var (sr, sg, sb, sa) = src0.RGBA();
                                     if (sa == 0xffffUL)
                                     {
-                                        drawFillSrc(dst0, r, sr, sg, sb, sa);
+                                        drawFillSrc(_addr_dst0, r, sr, sg, sb, sa);
                                     }
                                     else
                                     {
-                                        drawFillOver(dst0, r, sr, sg, sb, sa);
+                                        drawFillOver(_addr_dst0, r, sr, sg, sb, sa);
                                     }
-                                    return;
+
+                                    return ;
                                     break;
-                                case ref image.RGBA src0:
-                                    drawCopyOver(dst0, r, src0, sp);
-                                    return;
+                                case ptr<image.RGBA> src0:
+                                    drawCopyOver(_addr_dst0, r, _addr_src0, sp);
+                                    return ;
                                     break;
-                                case ref image.NRGBA src0:
-                                    drawNRGBAOver(dst0, r, src0, sp);
-                                    return;
+                                case ptr<image.NRGBA> src0:
+                                    drawNRGBAOver(_addr_dst0, r, _addr_src0, sp);
+                                    return ;
                                     break;
-                                case ref image.YCbCr src0:
+                                case ptr<image.YCbCr> src0:
                                     if (imageutil.DrawYCbCr(dst0, r, src0, sp))
                                     {
-                                        return;
+                                        return ;
                                     }
+
                                     break;
-                                case ref image.Gray src0:
-                                    drawGray(dst0, r, src0, sp);
-                                    return;
+                                case ptr<image.Gray> src0:
+                                    drawGray(_addr_dst0, r, _addr_src0, sp);
+                                    return ;
                                     break;
-                                case ref image.CMYK src0:
-                                    drawCMYK(dst0, r, src0, sp);
-                                    return;
+                                case ptr<image.CMYK> src0:
+                                    drawCMYK(_addr_dst0, r, _addr_src0, sp);
+                                    return ;
                                     break;
                             }
+
                         }                        {
-                            ref image.Alpha (mask0, ok) = mask._<ref image.Alpha>();
+                            ptr<image.Alpha> (mask0, ok) = mask._<ptr<image.Alpha>>();
 
 
                             else if (ok)
                             {
                                 switch (src.type())
                                 {
-                                    case ref image.Uniform src0:
-                                        drawGlyphOver(dst0, r, src0, mask0, mp);
-                                        return;
+                                    case ptr<image.Uniform> src0:
+                                        drawGlyphOver(_addr_dst0, r, _addr_src0, mask0, mp);
+                                        return ;
                                         break;
                                 }
+
                             }
 
                         }
+
                     }
                     else
                     {
@@ -196,45 +211,91 @@ namespace image
                         {
                             switch (src.type())
                             {
-                                case ref image.Uniform src0:
+                                case ptr<image.Uniform> src0:
                                     (sr, sg, sb, sa) = src0.RGBA();
-                                    drawFillSrc(dst0, r, sr, sg, sb, sa);
-                                    return;
+                                    drawFillSrc(_addr_dst0, r, sr, sg, sb, sa);
+                                    return ;
                                     break;
-                                case ref image.RGBA src0:
-                                    drawCopySrc(dst0, r, src0, sp);
-                                    return;
+                                case ptr<image.RGBA> src0:
+                                    drawCopySrc(_addr_dst0, r, _addr_src0, sp);
+                                    return ;
                                     break;
-                                case ref image.NRGBA src0:
-                                    drawNRGBASrc(dst0, r, src0, sp);
-                                    return;
+                                case ptr<image.NRGBA> src0:
+                                    drawNRGBASrc(_addr_dst0, r, _addr_src0, sp);
+                                    return ;
                                     break;
-                                case ref image.YCbCr src0:
+                                case ptr<image.YCbCr> src0:
                                     if (imageutil.DrawYCbCr(dst0, r, src0, sp))
                                     {
-                                        return;
+                                        return ;
                                     }
+
                                     break;
-                                case ref image.Gray src0:
-                                    drawGray(dst0, r, src0, sp);
-                                    return;
+                                case ptr<image.Gray> src0:
+                                    drawGray(_addr_dst0, r, _addr_src0, sp);
+                                    return ;
                                     break;
-                                case ref image.CMYK src0:
-                                    drawCMYK(dst0, r, src0, sp);
-                                    return;
+                                case ptr<image.CMYK> src0:
+                                    drawCMYK(_addr_dst0, r, _addr_src0, sp);
+                                    return ;
                                     break;
                             }
+
                         }
+
                     }
-                    drawRGBA(dst0, r, src, sp, mask, mp, op);
-                    return;
+
+                    drawRGBA(_addr_dst0, r, src, sp, mask, mp, op);
+                    return ;
                     break;
-                case ref image.Paletted dst0:
-                    if (op == Src && mask == null && !processBackward(dst, r, src, sp))
+                case ptr<image.Paletted> dst0:
+                    if (op == Src && mask == null)
                     {
-                        drawPaletted(dst0, r, src, sp, false);
-                        return;
+                        {
+                            var src0__prev2 = src0;
+
+                            ptr<image.Uniform> (src0, ok) = src._<ptr<image.Uniform>>();
+
+                            if (ok)
+                            {
+                                var colorIndex = uint8(dst0.Palette.Index(src0.C));
+                                var i0 = dst0.PixOffset(r.Min.X, r.Min.Y);
+                                var i1 = i0 + r.Dx();
+                                for (var i = i0; i < i1; i++)
+                                {
+                                    dst0.Pix[i] = colorIndex;
+                                }
+
+                                var firstRow = dst0.Pix[i0..i1];
+                                {
+                                    var y__prev1 = y;
+
+                                    for (var y = r.Min.Y + 1L; y < r.Max.Y; y++)
+                                    {
+                                        i0 += dst0.Stride;
+                                        i1 += dst0.Stride;
+                                        copy(dst0.Pix[i0..i1], firstRow);
+                                    }
+
+
+                                    y = y__prev1;
+                                }
+                                return ;
+
+                            }
+                            else if (!processBackward(dst, r, src, sp))
+                            {
+                                drawPaletted(dst0, r, src, sp, false);
+                                return ;
+                            }
+
+
+                            src0 = src0__prev2;
+
+                        }
+
                     }
+
                     break;
 
             }
@@ -253,12 +314,16 @@ namespace image
                 y0 = y1 - 1L;
                 y1 = y0 - 1L;
                 dy = -1L;
+
             }
-            color.RGBA64 @out = default;
+
+            ref color.RGBA64 @out = ref heap(out ptr<color.RGBA64> _addr_@out);
             var sy = sp.Y + y0 - r.Min.Y;
             var my = mp.Y + y0 - r.Min.Y;
             {
-                var y = y0;
+                var y__prev1 = y;
+
+                y = y0;
 
                 while (y != y1)
                 {
@@ -278,6 +343,7 @@ namespace image
                         mx = mx + dx;
                             }
 
+
                             if (ma == 0L) 
                                 if (op == Over)
                                 { 
@@ -290,6 +356,7 @@ namespace image
                                 {
                                     dst.Set(x, y, color.Transparent);
                                 }
+
                             else if (ma == m && op == Src) 
                                 dst.Set(x, y, src.At(sx, sy));
                             else 
@@ -314,17 +381,24 @@ namespace image
                                 // declared outside of the inner loop) to avoid the implicit
                                 // conversion to color.Color here allocating memory in the
                                 // inner loop if sizeof(color.RGBA64) > sizeof(uintptr).
-                                dst.Set(x, y, ref out);
-                                                    }
+                                dst.Set(x, y, _addr_out);
+                            
+                        }
 
                     }
+
                 }
 
+
+                y = y__prev1;
             }
+
         }
 
-        private static void drawFillOver(ref image.RGBA dst, image.Rectangle r, uint sr, uint sg, uint sb, uint sa)
-        { 
+        private static void drawFillOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, uint sr, uint sg, uint sb, uint sa)
+        {
+            ref image.RGBA dst = ref _addr_dst.val;
+ 
             // The 0x101 is here for the same reason as in drawRGBA.
             var a = (m - sa) * 0x101UL;
             var i0 = dst.PixOffset(r.Min.X, r.Min.Y);
@@ -336,27 +410,31 @@ namespace image
 
                     while (i < i1)
                     {
-                        var dr = ref dst.Pix[i + 0L];
-                        var dg = ref dst.Pix[i + 1L];
-                        var db = ref dst.Pix[i + 2L];
-                        var da = ref dst.Pix[i + 3L];
+                        var dr = _addr_dst.Pix[i + 0L];
+                        var dg = _addr_dst.Pix[i + 1L];
+                        var db = _addr_dst.Pix[i + 2L];
+                        var da = _addr_dst.Pix[i + 3L];
 
-                        dr.Value = uint8((uint32(dr.Value) * a / m + sr) >> (int)(8L));
-                        dg.Value = uint8((uint32(dg.Value) * a / m + sg) >> (int)(8L));
-                        db.Value = uint8((uint32(db.Value) * a / m + sb) >> (int)(8L));
-                        da.Value = uint8((uint32(da.Value) * a / m + sa) >> (int)(8L));
+                        dr.val = uint8((uint32(dr.val) * a / m + sr) >> (int)(8L));
+                        dg.val = uint8((uint32(dg.val) * a / m + sg) >> (int)(8L));
+                        db.val = uint8((uint32(db.val) * a / m + sb) >> (int)(8L));
+                        da.val = uint8((uint32(da.val) * a / m + sa) >> (int)(8L));
                         i += 4L;
                     }
 
                 }
                 i0 += dst.Stride;
                 i1 += dst.Stride;
+
             }
+
 
         }
 
-        private static void drawFillSrc(ref image.RGBA dst, image.Rectangle r, uint sr, uint sg, uint sb, uint sa)
+        private static void drawFillSrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, uint sr, uint sg, uint sb, uint sa)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+
             var sr8 = uint8(sr >> (int)(8L));
             var sg8 = uint8(sg >> (int)(8L));
             var sb8 = uint8(sb >> (int)(8L));
@@ -387,16 +465,21 @@ namespace image
                 copy(dst.Pix[i0..i1], firstRow);
             }
 
+
         }
 
-        private static void drawCopyOver(ref image.RGBA dst, image.Rectangle r, ref image.RGBA src, image.Point sp)
+        private static void drawCopyOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.RGBA> _addr_src, image.Point sp)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+            ref image.RGBA src = ref _addr_src.val;
+
             var dx = r.Dx();
             var dy = r.Dy();
             var d0 = dst.PixOffset(r.Min.X, r.Min.Y);
             var s0 = src.PixOffset(sp.X, sp.Y);
             long ddelta = default;            long sdelta = default;
             long i0 = default;            long i1 = default;            long idelta = default;
+
             if (r.Min.Y < sp.Y || r.Min.Y == sp.Y && r.Min.X <= sp.X)
             {
                 ddelta = dst.Stride;
@@ -404,6 +487,7 @@ namespace image
                 i0 = 0L;
                 i1 = dx * 4L;
                 idelta = +4L;
+
             }
             else
             { 
@@ -416,7 +500,9 @@ namespace image
                 i0 = (dx - 1L) * 4L;
                 i1 = -4L;
                 idelta = -4L;
+
             }
+
             while (dy > 0L)
             {
                 var dpix = dst.Pix[d0..];
@@ -426,23 +512,20 @@ namespace image
 
                     while (i != i1)
                     {
-                        var sr = uint32(spix[i + 0L]) * 0x101UL;
-                        var sg = uint32(spix[i + 1L]) * 0x101UL;
-                        var sb = uint32(spix[i + 2L]) * 0x101UL;
-                        var sa = uint32(spix[i + 3L]) * 0x101UL;
-
-                        var dr = ref dpix[i + 0L];
-                        var dg = ref dpix[i + 1L];
-                        var db = ref dpix[i + 2L];
-                        var da = ref dpix[i + 3L]; 
+                        var s = spix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                        var sr = uint32(s[0L]) * 0x101UL;
+                        var sg = uint32(s[1L]) * 0x101UL;
+                        var sb = uint32(s[2L]) * 0x101UL;
+                        var sa = uint32(s[3L]) * 0x101UL; 
 
                         // The 0x101 is here for the same reason as in drawRGBA.
                         var a = (m - sa) * 0x101UL;
 
-                        dr.Value = uint8((uint32(dr.Value) * a / m + sr) >> (int)(8L));
-                        dg.Value = uint8((uint32(dg.Value) * a / m + sg) >> (int)(8L));
-                        db.Value = uint8((uint32(db.Value) * a / m + sb) >> (int)(8L));
-                        da.Value = uint8((uint32(da.Value) * a / m + sa) >> (int)(8L));
+                        var d = dpix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                        d[0L] = uint8((uint32(d[0L]) * a / m + sr) >> (int)(8L));
+                        d[1L] = uint8((uint32(d[1L]) * a / m + sg) >> (int)(8L));
+                        d[2L] = uint8((uint32(d[2L]) * a / m + sb) >> (int)(8L));
+                        d[3L] = uint8((uint32(d[3L]) * a / m + sa) >> (int)(8L));
                         i += idelta;
                     }
 
@@ -452,10 +535,14 @@ namespace image
                 dy--;
             }
 
+
         }
 
-        private static void drawCopySrc(ref image.RGBA dst, image.Rectangle r, ref image.RGBA src, image.Point sp)
+        private static void drawCopySrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.RGBA> _addr_src, image.Point sp)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+            ref image.RGBA src = ref _addr_src.val;
+
             long n = 4L * r.Dx();
             var dy = r.Dy();
             var d0 = dst.PixOffset(r.Min.X, r.Min.Y);
@@ -478,7 +565,9 @@ namespace image
                 s0 += (dy - 1L) * src.Stride;
                 ddelta = -dst.Stride;
                 sdelta = -src.Stride;
+
             }
+
             while (dy > 0L)
             {
                 copy(dst.Pix[d0..d0 + n], src.Pix[s0..s0 + n]);
@@ -487,10 +576,14 @@ namespace image
                 dy--;
             }
 
+
         }
 
-        private static void drawNRGBAOver(ref image.RGBA dst, image.Rectangle r, ref image.NRGBA src, image.Point sp)
+        private static void drawNRGBAOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.NRGBA> _addr_src, image.Point sp)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+            ref image.NRGBA src = ref _addr_src.val;
+
             var i0 = (r.Min.X - dst.Rect.Min.X) * 4L;
             var i1 = (r.Max.X - dst.Rect.Min.X) * 4L;
             var si0 = (sp.X - src.Rect.Min.X) * 4L;
@@ -510,23 +603,25 @@ namespace image
                     while (i < i1)
                     { 
                         // Convert from non-premultiplied color to pre-multiplied color.
-                        var sa = uint32(spix[si + 3L]) * 0x101UL;
-                        var sr = uint32(spix[si + 0L]) * sa / 0xffUL;
-                        var sg = uint32(spix[si + 1L]) * sa / 0xffUL;
-                        var sb = uint32(spix[si + 2L]) * sa / 0xffUL;
+                        var s = spix.slice(si, si + 4L, si + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                        var sa = uint32(s[3L]) * 0x101UL;
+                        var sr = uint32(s[0L]) * sa / 0xffUL;
+                        var sg = uint32(s[1L]) * sa / 0xffUL;
+                        var sb = uint32(s[2L]) * sa / 0xffUL;
 
-                        var dr = uint32(dpix[i + 0L]);
-                        var dg = uint32(dpix[i + 1L]);
-                        var db = uint32(dpix[i + 2L]);
-                        var da = uint32(dpix[i + 3L]); 
+                        var d = dpix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                        var dr = uint32(d[0L]);
+                        var dg = uint32(d[1L]);
+                        var db = uint32(d[2L]);
+                        var da = uint32(d[3L]); 
 
                         // The 0x101 is here for the same reason as in drawRGBA.
                         var a = (m - sa) * 0x101UL;
 
-                        dpix[i + 0L] = uint8((dr * a / m + sr) >> (int)(8L));
-                        dpix[i + 1L] = uint8((dg * a / m + sg) >> (int)(8L));
-                        dpix[i + 2L] = uint8((db * a / m + sb) >> (int)(8L));
-                        dpix[i + 3L] = uint8((da * a / m + sa) >> (int)(8L));
+                        d[0L] = uint8((dr * a / m + sr) >> (int)(8L));
+                        d[1L] = uint8((dg * a / m + sg) >> (int)(8L));
+                        d[2L] = uint8((db * a / m + sb) >> (int)(8L));
+                        d[3L] = uint8((da * a / m + sa) >> (int)(8L));
                         i = i + 4L;
                     si = si + 4L;
                     }
@@ -536,10 +631,14 @@ namespace image
             sy = sy + 1L;
             }
 
+
         }
 
-        private static void drawNRGBASrc(ref image.RGBA dst, image.Rectangle r, ref image.NRGBA src, image.Point sp)
+        private static void drawNRGBASrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.NRGBA> _addr_src, image.Point sp)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+            ref image.NRGBA src = ref _addr_src.val;
+
             var i0 = (r.Min.X - dst.Rect.Min.X) * 4L;
             var i1 = (r.Max.X - dst.Rect.Min.X) * 4L;
             var si0 = (sp.X - src.Rect.Min.X) * 4L;
@@ -559,15 +658,17 @@ namespace image
                     while (i < i1)
                     { 
                         // Convert from non-premultiplied color to pre-multiplied color.
-                        var sa = uint32(spix[si + 3L]) * 0x101UL;
-                        var sr = uint32(spix[si + 0L]) * sa / 0xffUL;
-                        var sg = uint32(spix[si + 1L]) * sa / 0xffUL;
-                        var sb = uint32(spix[si + 2L]) * sa / 0xffUL;
+                        var s = spix.slice(si, si + 4L, si + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                        var sa = uint32(s[3L]) * 0x101UL;
+                        var sr = uint32(s[0L]) * sa / 0xffUL;
+                        var sg = uint32(s[1L]) * sa / 0xffUL;
+                        var sb = uint32(s[2L]) * sa / 0xffUL;
 
-                        dpix[i + 0L] = uint8(sr >> (int)(8L));
-                        dpix[i + 1L] = uint8(sg >> (int)(8L));
-                        dpix[i + 2L] = uint8(sb >> (int)(8L));
-                        dpix[i + 3L] = uint8(sa >> (int)(8L));
+                        var d = dpix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                        d[0L] = uint8(sr >> (int)(8L));
+                        d[1L] = uint8(sg >> (int)(8L));
+                        d[2L] = uint8(sb >> (int)(8L));
+                        d[3L] = uint8(sa >> (int)(8L));
                         i = i + 4L;
                     si = si + 4L;
                     }
@@ -577,10 +678,14 @@ namespace image
             sy = sy + 1L;
             }
 
+
         }
 
-        private static void drawGray(ref image.RGBA dst, image.Rectangle r, ref image.Gray src, image.Point sp)
+        private static void drawGray(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.Gray> _addr_src, image.Point sp)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+            ref image.Gray src = ref _addr_src.val;
+
             var i0 = (r.Min.X - dst.Rect.Min.X) * 4L;
             var i1 = (r.Max.X - dst.Rect.Min.X) * 4L;
             var si0 = (sp.X - src.Rect.Min.X) * 1L;
@@ -600,10 +705,11 @@ namespace image
                     while (i < i1)
                     {
                         var p = spix[si];
-                        dpix[i + 0L] = p;
-                        dpix[i + 1L] = p;
-                        dpix[i + 2L] = p;
-                        dpix[i + 3L] = 255L;
+                        var d = dpix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                        d[0L] = p;
+                        d[1L] = p;
+                        d[2L] = p;
+                        d[3L] = 255L;
                         i = i + 4L;
                     si = si + 1L;
                     }
@@ -613,10 +719,14 @@ namespace image
             sy = sy + 1L;
             }
 
+
         }
 
-        private static void drawCMYK(ref image.RGBA dst, image.Rectangle r, ref image.CMYK src, image.Point sp)
+        private static void drawCMYK(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.CMYK> _addr_src, image.Point sp)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+            ref image.CMYK src = ref _addr_src.val;
+
             var i0 = (r.Min.X - dst.Rect.Min.X) * 4L;
             var i1 = (r.Max.X - dst.Rect.Min.X) * 4L;
             var si0 = (sp.X - src.Rect.Min.X) * 4L;
@@ -635,8 +745,10 @@ namespace image
 
                     while (i < i1)
                     {
-                        dpix[i + 0L], dpix[i + 1L], dpix[i + 2L] = color.CMYKToRGB(spix[si + 0L], spix[si + 1L], spix[si + 2L], spix[si + 3L]);
-                        dpix[i + 3L] = 255L;
+                        var s = spix.slice(si, si + 4L, si + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                        var d = dpix.slice(i, i + 4L, i + 4L);
+                        d[0L], d[1L], d[2L] = color.CMYKToRGB(s[0L], s[1L], s[2L], s[3L]);
+                        d[3L] = 255L;
                         i = i + 4L;
                     si = si + 4L;
                     }
@@ -646,10 +758,15 @@ namespace image
             sy = sy + 1L;
             }
 
+
         }
 
-        private static void drawGlyphOver(ref image.RGBA dst, image.Rectangle r, ref image.Uniform src, ref image.Alpha mask, image.Point mp)
+        private static void drawGlyphOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.Uniform> _addr_src, ptr<image.Alpha> _addr_mask, image.Point mp)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+            ref image.Uniform src = ref _addr_src.val;
+            ref image.Alpha mask = ref _addr_mask.val;
+
             var i0 = dst.PixOffset(r.Min.X, r.Min.Y);
             var i1 = i0 + r.Dx() * 4L;
             var mi0 = mask.PixOffset(mp.X, mp.Y);
@@ -673,20 +790,17 @@ namespace image
                             i = i + 4L;
                         mi = mi + 1L;
                             }
-                            ma |= ma << (int)(8L);
 
-                            var dr = ref dst.Pix[i + 0L];
-                            var dg = ref dst.Pix[i + 1L];
-                            var db = ref dst.Pix[i + 2L];
-                            var da = ref dst.Pix[i + 3L]; 
+                            ma |= ma << (int)(8L); 
 
                             // The 0x101 is here for the same reason as in drawRGBA.
                             var a = (m - (sa * ma / m)) * 0x101UL;
 
-                            dr.Value = uint8((uint32(dr.Value) * a + sr * ma) / m >> (int)(8L));
-                            dg.Value = uint8((uint32(dg.Value) * a + sg * ma) / m >> (int)(8L));
-                            db.Value = uint8((uint32(db.Value) * a + sb * ma) / m >> (int)(8L));
-                            da.Value = uint8((uint32(da.Value) * a + sa * ma) / m >> (int)(8L));
+                            var d = dst.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
+                            d[0L] = uint8((uint32(d[0L]) * a + sr * ma) / m >> (int)(8L));
+                            d[1L] = uint8((uint32(d[1L]) * a + sg * ma) / m >> (int)(8L));
+                            d[2L] = uint8((uint32(d[2L]) * a + sb * ma) / m >> (int)(8L));
+                            d[3L] = uint8((uint32(d[3L]) * a + sa * ma) / m >> (int)(8L));
                     y = y + 1L;
                 my = my + 1L;
                         }
@@ -695,13 +809,17 @@ namespace image
                     i0 += dst.Stride;
                     i1 += dst.Stride;
                     mi0 += mask.Stride;
+
                 }
 
             }
+
         }
 
-        private static void drawRGBA(ref image.RGBA dst, image.Rectangle r, image.Image src, image.Point sp, image.Image mask, image.Point mp, Op op)
+        private static void drawRGBA(ptr<image.RGBA> _addr_dst, image.Rectangle r, image.Image src, image.Point sp, image.Image mask, image.Point mp, Op op)
         {
+            ref image.RGBA dst = ref _addr_dst.val;
+
             var x0 = r.Min.X;
             var x1 = r.Max.X;
             long dx = 1L;
@@ -718,8 +836,11 @@ namespace image
                     y0 = y1 - 1L;
                     y1 = y0 - 1L;
                     dy = -1L;
+
                 }
+
             }
+
             var sy = sp.Y + y0 - r.Min.Y;
             var my = mp.Y + y0 - r.Min.Y;
             var sx0 = sp.X + x0 - r.Min.X;
@@ -747,13 +868,15 @@ namespace image
                         sx = sx + dx;
                         mx = mx + dx;
                             }
+
                             var (sr, sg, sb, sa) = src.At(sx, sy).RGBA();
+                            var d = dst.Pix.slice(i, i + 4L, i + 4L); // Small cap improves performance, see https://golang.org/issue/27857
                             if (op == Over)
                             {
-                                var dr = uint32(dst.Pix[i + 0L]);
-                                var dg = uint32(dst.Pix[i + 1L]);
-                                var db = uint32(dst.Pix[i + 2L]);
-                                var da = uint32(dst.Pix[i + 3L]); 
+                                var dr = uint32(d[0L]);
+                                var dg = uint32(d[1L]);
+                                var db = uint32(d[2L]);
+                                var da = uint32(d[3L]); 
 
                                 // dr, dg, db and da are all 8-bit color at the moment, ranging in [0,255].
                                 // We work in 16-bit color, and so would normally do:
@@ -763,10 +886,10 @@ namespace image
                                 // This yields the same result, but is fewer arithmetic operations.
                                 var a = (m - (sa * ma / m)) * 0x101UL;
 
-                                dst.Pix[i + 0L] = uint8((dr * a + sr * ma) / m >> (int)(8L));
-                                dst.Pix[i + 1L] = uint8((dg * a + sg * ma) / m >> (int)(8L));
-                                dst.Pix[i + 2L] = uint8((db * a + sb * ma) / m >> (int)(8L));
-                                dst.Pix[i + 3L] = uint8((da * a + sa * ma) / m >> (int)(8L));
+                                d[0L] = uint8((dr * a + sr * ma) / m >> (int)(8L));
+                                d[1L] = uint8((dg * a + sg * ma) / m >> (int)(8L));
+                                d[2L] = uint8((db * a + sb * ma) / m >> (int)(8L));
+                                d[3L] = uint8((da * a + sa * ma) / m >> (int)(8L));
 
                     y = y + dy;
                 sy = sy + dy;
@@ -774,18 +897,21 @@ namespace image
                             }
                             else
                             {
-                                dst.Pix[i + 0L] = uint8(sr * ma / m >> (int)(8L));
-                                dst.Pix[i + 1L] = uint8(sg * ma / m >> (int)(8L));
-                                dst.Pix[i + 2L] = uint8(sb * ma / m >> (int)(8L));
-                                dst.Pix[i + 3L] = uint8(sa * ma / m >> (int)(8L));
+                                d[0L] = uint8(sr * ma / m >> (int)(8L));
+                                d[1L] = uint8(sg * ma / m >> (int)(8L));
+                                d[2L] = uint8(sb * ma / m >> (int)(8L));
+                                d[3L] = uint8(sa * ma / m >> (int)(8L));
                             }
+
                         }
 
                     }
                     i0 += dy * dst.Stride;
+
                 }
 
             }
+
         }
 
         // clamp clamps i to the interval [0, 0xffff].
@@ -795,11 +921,14 @@ namespace image
             {
                 return 0L;
             }
+
             if (i > 0xffffUL)
             {
                 return 0xffffUL;
             }
+
             return i;
+
         }
 
         // sqDiff returns the squared-difference of x and y, shifted by 2 so that
@@ -813,6 +942,7 @@ namespace image
             // spec. See sqDiff from the image/color package for more details.
             var d = uint32(x - y);
             return (d * d) >> (int)(2L);
+
         }
 
         private static void drawPaletted(Image dst, image.Rectangle r, image.Image src, image.Point sp, bool floydSteinberg)
@@ -829,9 +959,9 @@ namespace image
             slice<byte> pix = (slice<byte>)null;
             long stride = 0L;
             {
-                ref image.Paletted p__prev1 = p;
+                ptr<image.Paletted> p__prev1 = p;
 
-                ref image.Paletted (p, ok) = dst._<ref image.Paletted>();
+                ptr<image.Paletted> (p, ok) = dst._<ptr<image.Paletted>>();
 
                 if (ok)
                 {
@@ -855,6 +985,7 @@ namespace image
 
                     pix = p.Pix[p.PixOffset(r.Min.X, r.Min.Y)..];
                     stride = p.Stride;
+
                 } 
 
                 // quantErrorCurr and quantErrorNext are the Floyd-Steinberg quantization
@@ -875,6 +1006,7 @@ namespace image
                 quantErrorCurr = make_slice<array<int>>(r.Dx() + 2L);
                 quantErrorNext = make_slice<array<int>>(r.Dx() + 2L);
             }
+
             Func<long, long, (uint, uint, uint, uint)> pxRGBA = (x, y) => src.At(x, y).RGBA();
             } 
             // Fast paths for special cases to avoid excessive use of the color.Color
@@ -885,13 +1017,13 @@ namespace image
             // each pixel on r. See also https://golang.org/issues/15759.
             switch (src.type())
             {
-                case ref image.RGBA src0:
+                case ptr<image.RGBA> src0:
                     pxRGBA = (x, y) => src0.RGBAAt(x, y).RGBA();
                     break;
-                case ref image.NRGBA src0:
+                case ptr<image.NRGBA> src0:
                     pxRGBA = (x, y) => src0.NRGBAAt(x, y).RGBA();
                     break;
-                case ref image.YCbCr src0:
+                case ptr<image.YCbCr> src0:
                     pxRGBA = (x, y) => src0.YCbCrAt(x, y).RGBA();
                     break; 
 
@@ -899,7 +1031,7 @@ namespace image
             } 
 
             // Loop over each source pixel.
-            color.RGBA64 @out = new color.RGBA64(A:0xffff);
+            ref color.RGBA64 @out = ref heap(new color.RGBA64(A:0xffff), out ptr<color.RGBA64> _addr_@out);
             for (long y = 0L; y != r.Dy(); y++)
             {
                 for (long x = 0L; x != r.Dx(); x++)
@@ -918,6 +1050,7 @@ namespace image
                         eb = clamp(eb + quantErrorCurr[x + 1L][2L] / 16L);
                         ea = clamp(ea + quantErrorCurr[x + 1L][3L] / 16L);
                     }
+
                     if (palette != null)
                     { 
                         // Find the closest palette color in Euclidean R,G,B,A space:
@@ -926,7 +1059,7 @@ namespace image
                         long bestIndex = 0L;
                         var bestSum = uint32(1L << (int)(32L) - 1L);
                         {
-                            ref image.Paletted p__prev3 = p;
+                            ptr<image.Paletted> p__prev3 = p;
 
                             foreach (var (__index, __p) in palette)
                             {
@@ -941,7 +1074,9 @@ namespace image
                                     {
                                         break;
                                     }
+
                                 }
+
                             }
                     else
 
@@ -954,10 +1089,12 @@ namespace image
                         {
                             continue;
                         }
+
                         er -= palette[bestIndex][0L];
                         eg -= palette[bestIndex][1L];
                         eb -= palette[bestIndex][2L];
                         ea -= palette[bestIndex][3L];
+
 
                     }                    {
                         @out.R = uint16(er);
@@ -968,17 +1105,19 @@ namespace image
                         // declared outside of the inner loop) to avoid the implicit
                         // conversion to color.Color here allocating memory in the
                         // inner loop if sizeof(color.RGBA64) > sizeof(uintptr).
-                        dst.Set(r.Min.X + x, r.Min.Y + y, ref out);
+                        dst.Set(r.Min.X + x, r.Min.Y + y, _addr_out);
 
                         if (!floydSteinberg)
                         {
                             continue;
                         }
+
                         sr, sg, sb, sa = dst.At(r.Min.X + x, r.Min.Y + y).RGBA();
                         er -= int32(sr);
                         eg -= int32(sg);
                         eb -= int32(sb);
                         ea -= int32(sa);
+
                     } 
 
                     // Propagate the Floyd-Steinberg quantization error.
@@ -998,6 +1137,7 @@ namespace image
                     quantErrorCurr[x + 2L][1L] += eg * 7L;
                     quantErrorCurr[x + 2L][2L] += eb * 7L;
                     quantErrorCurr[x + 2L][3L] += ea * 7L;
+
                 } 
 
                 // Recycle the quantization error buffers.
@@ -1019,9 +1159,10 @@ namespace image
 
                         i = i__prev2;
                     }
-
                 }
+
             }
+
 
         }
     }

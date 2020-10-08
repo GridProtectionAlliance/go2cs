@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:01 UTC
+//     Generated on 2020 October 08 04:34:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,19 +13,28 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using json = go.encoding.json_package;
+using errors = go.errors_package;
 using fmt = go.fmt_package;
 using build = go.go.build_package;
+using scanner = go.go.scanner_package;
 using token = go.go.token_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using pathpkg = go.path_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using modinfo = go.cmd.go.@internal.modinfo_package;
+using par = go.cmd.go.@internal.par_package;
+using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
 using go;
 
@@ -47,15 +56,17 @@ namespace @internal
                 this.Err = default;
                 this.IsImportCycle = default;
                 this.Hard = default;
+                this.alwaysPrintStack = default;
             }
 
-            public PackageError(slice<@string> ImportStack = default, @string Pos = default, @string Err = default, bool IsImportCycle = default, bool Hard = default)
+            public PackageError(slice<@string> ImportStack = default, @string Pos = default, error Err = default, bool IsImportCycle = default, bool Hard = default, bool alwaysPrintStack = default)
             {
                 this.ImportStack = ImportStack;
                 this.Pos = Pos;
                 this.Err = Err;
                 this.IsImportCycle = IsImportCycle;
                 this.Hard = Hard;
+                this.alwaysPrintStack = alwaysPrintStack;
             }
 
             // Enable comparisons between nil and PackageError struct
@@ -78,7 +89,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static PackageError PackageError_cast(dynamic value)
         {
-            return new PackageError(value.ImportStack, value.Pos, value.Err, value.IsImportCycle, value.Hard);
+            return new PackageError(value.ImportStack, value.Pos, value.Err, value.IsImportCycle, value.Hard, value.alwaysPrintStack);
         }
     }
 }}}}

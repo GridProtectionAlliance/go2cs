@@ -9,7 +9,7 @@
 //        // do something with e.Value
 //    }
 //
-// package list -- go2cs converted at 2020 August 29 08:31:04 UTC
+// package list -- go2cs converted at 2020 October 08 03:37:25 UTC
 // import "container/list" ==> using list = go.container.list_package
 // Original source: C:\Go\src\container\list\list.go
 
@@ -29,33 +29,41 @@ namespace container
         }
 
         // Next returns the next list element or nil.
-        private static ref Element Next(this ref Element e)
+        private static ptr<Element> Next(this ptr<Element> _addr_e)
         {
+            ref Element e = ref _addr_e.val;
+
             {
                 var p = e.next;
 
-                if (e.list != null && p != ref e.list.root)
+                if (e.list != null && p != _addr_e.list.root)
                 {
-                    return p;
+                    return _addr_p!;
                 }
 
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
         // Prev returns the previous list element or nil.
-        private static ref Element Prev(this ref Element e)
+        private static ptr<Element> Prev(this ptr<Element> _addr_e)
         {
+            ref Element e = ref _addr_e.val;
+
             {
                 var p = e.prev;
 
-                if (e.list != null && p != ref e.list.root)
+                if (e.list != null && p != _addr_e.list.root)
                 {
-                    return p;
+                    return _addr_p!;
                 }
 
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
         // List represents a doubly linked list.
@@ -67,195 +75,285 @@ namespace container
         }
 
         // Init initializes or clears list l.
-        private static ref List Init(this ref List l)
+        private static ptr<List> Init(this ptr<List> _addr_l)
         {
-            l.root.next = ref l.root;
-            l.root.prev = ref l.root;
+            ref List l = ref _addr_l.val;
+
+            l.root.next = _addr_l.root;
+            l.root.prev = _addr_l.root;
             l.len = 0L;
-            return l;
+            return _addr_l!;
         }
 
         // New returns an initialized list.
-        public static ref List New()
+        public static ptr<List> New()
         {
             return @new<List>().Init();
         }
 
         // Len returns the number of elements of list l.
         // The complexity is O(1).
-        private static long Len(this ref List l)
+        private static long Len(this ptr<List> _addr_l)
         {
+            ref List l = ref _addr_l.val;
+
             return l.len;
         }
 
         // Front returns the first element of list l or nil if the list is empty.
-        private static ref Element Front(this ref List l)
+        private static ptr<Element> Front(this ptr<List> _addr_l)
         {
+            ref List l = ref _addr_l.val;
+
             if (l.len == 0L)
             {
-                return null;
+                return _addr_null!;
             }
-            return l.root.next;
+
+            return _addr_l.root.next!;
+
         }
 
         // Back returns the last element of list l or nil if the list is empty.
-        private static ref Element Back(this ref List l)
+        private static ptr<Element> Back(this ptr<List> _addr_l)
         {
+            ref List l = ref _addr_l.val;
+
             if (l.len == 0L)
             {
-                return null;
+                return _addr_null!;
             }
-            return l.root.prev;
+
+            return _addr_l.root.prev!;
+
         }
 
         // lazyInit lazily initializes a zero List value.
-        private static void lazyInit(this ref List l)
+        private static void lazyInit(this ptr<List> _addr_l)
         {
+            ref List l = ref _addr_l.val;
+
             if (l.root.next == null)
             {
                 l.Init();
             }
+
         }
 
         // insert inserts e after at, increments l.len, and returns e.
-        private static ref Element insert(this ref List l, ref Element e, ref Element at)
+        private static ptr<Element> insert(this ptr<List> _addr_l, ptr<Element> _addr_e, ptr<Element> _addr_at)
         {
-            var n = at.next;
-            at.next = e;
+            ref List l = ref _addr_l.val;
+            ref Element e = ref _addr_e.val;
+            ref Element at = ref _addr_at.val;
+
             e.prev = at;
-            e.next = n;
-            n.prev = e;
+            e.next = at.next;
+            e.prev.next = e;
+            e.next.prev = e;
             e.list = l;
             l.len++;
-            return e;
+            return _addr_e!;
         }
 
         // insertValue is a convenience wrapper for insert(&Element{Value: v}, at).
-        private static ref Element insertValue(this ref List l, object v, ref Element at)
+        private static ptr<Element> insertValue(this ptr<List> _addr_l, object v, ptr<Element> _addr_at)
         {
-            return l.insert(ref new Element(Value:v), at);
+            ref List l = ref _addr_l.val;
+            ref Element at = ref _addr_at.val;
+
+            return _addr_l.insert(addr(new Element(Value:v)), at)!;
         }
 
         // remove removes e from its list, decrements l.len, and returns e.
-        private static ref Element remove(this ref List l, ref Element e)
+        private static ptr<Element> remove(this ptr<List> _addr_l, ptr<Element> _addr_e)
         {
+            ref List l = ref _addr_l.val;
+            ref Element e = ref _addr_e.val;
+
             e.prev.next = e.next;
             e.next.prev = e.prev;
             e.next = null; // avoid memory leaks
             e.prev = null; // avoid memory leaks
             e.list = null;
             l.len--;
-            return e;
+            return _addr_e!;
+
+        }
+
+        // move moves e to next to at and returns e.
+        private static ptr<Element> move(this ptr<List> _addr_l, ptr<Element> _addr_e, ptr<Element> _addr_at)
+        {
+            ref List l = ref _addr_l.val;
+            ref Element e = ref _addr_e.val;
+            ref Element at = ref _addr_at.val;
+
+            if (e == at)
+            {
+                return _addr_e!;
+            }
+
+            e.prev.next = e.next;
+            e.next.prev = e.prev;
+
+            e.prev = at;
+            e.next = at.next;
+            e.prev.next = e;
+            e.next.prev = e;
+
+            return _addr_e!;
+
         }
 
         // Remove removes e from l if e is an element of list l.
         // It returns the element value e.Value.
         // The element must not be nil.
-        private static void Remove(this ref List l, ref Element e)
+        private static void Remove(this ptr<List> _addr_l, ptr<Element> _addr_e)
         {
+            ref List l = ref _addr_l.val;
+            ref Element e = ref _addr_e.val;
+
             if (e.list == l)
             { 
                 // if e.list == l, l must have been initialized when e was inserted
                 // in l or l == nil (e is a zero Element) and l.remove will crash
                 l.remove(e);
+
             }
+
             return e.Value;
+
         }
 
         // PushFront inserts a new element e with value v at the front of list l and returns e.
-        private static ref Element PushFront(this ref List l, object v)
+        private static ptr<Element> PushFront(this ptr<List> _addr_l, object v)
         {
+            ref List l = ref _addr_l.val;
+
             l.lazyInit();
-            return l.insertValue(v, ref l.root);
+            return _addr_l.insertValue(v, _addr_l.root)!;
         }
 
         // PushBack inserts a new element e with value v at the back of list l and returns e.
-        private static ref Element PushBack(this ref List l, object v)
+        private static ptr<Element> PushBack(this ptr<List> _addr_l, object v)
         {
+            ref List l = ref _addr_l.val;
+
             l.lazyInit();
-            return l.insertValue(v, l.root.prev);
+            return _addr_l.insertValue(v, l.root.prev)!;
         }
 
         // InsertBefore inserts a new element e with value v immediately before mark and returns e.
         // If mark is not an element of l, the list is not modified.
         // The mark must not be nil.
-        private static ref Element InsertBefore(this ref List l, object v, ref Element mark)
+        private static ptr<Element> InsertBefore(this ptr<List> _addr_l, object v, ptr<Element> _addr_mark)
         {
+            ref List l = ref _addr_l.val;
+            ref Element mark = ref _addr_mark.val;
+
             if (mark.list != l)
             {
-                return null;
+                return _addr_null!;
             } 
             // see comment in List.Remove about initialization of l
-            return l.insertValue(v, mark.prev);
+            return _addr_l.insertValue(v, mark.prev)!;
+
         }
 
         // InsertAfter inserts a new element e with value v immediately after mark and returns e.
         // If mark is not an element of l, the list is not modified.
         // The mark must not be nil.
-        private static ref Element InsertAfter(this ref List l, object v, ref Element mark)
+        private static ptr<Element> InsertAfter(this ptr<List> _addr_l, object v, ptr<Element> _addr_mark)
         {
+            ref List l = ref _addr_l.val;
+            ref Element mark = ref _addr_mark.val;
+
             if (mark.list != l)
             {
-                return null;
+                return _addr_null!;
             } 
             // see comment in List.Remove about initialization of l
-            return l.insertValue(v, mark);
+            return _addr_l.insertValue(v, mark)!;
+
         }
 
         // MoveToFront moves element e to the front of list l.
         // If e is not an element of l, the list is not modified.
         // The element must not be nil.
-        private static void MoveToFront(this ref List l, ref Element e)
+        private static void MoveToFront(this ptr<List> _addr_l, ptr<Element> _addr_e)
         {
+            ref List l = ref _addr_l.val;
+            ref Element e = ref _addr_e.val;
+
             if (e.list != l || l.root.next == e)
             {
-                return;
+                return ;
             } 
             // see comment in List.Remove about initialization of l
-            l.insert(l.remove(e), ref l.root);
+            l.move(e, _addr_l.root);
+
         }
 
         // MoveToBack moves element e to the back of list l.
         // If e is not an element of l, the list is not modified.
         // The element must not be nil.
-        private static void MoveToBack(this ref List l, ref Element e)
+        private static void MoveToBack(this ptr<List> _addr_l, ptr<Element> _addr_e)
         {
+            ref List l = ref _addr_l.val;
+            ref Element e = ref _addr_e.val;
+
             if (e.list != l || l.root.prev == e)
             {
-                return;
+                return ;
             } 
             // see comment in List.Remove about initialization of l
-            l.insert(l.remove(e), l.root.prev);
+            l.move(e, l.root.prev);
+
         }
 
         // MoveBefore moves element e to its new position before mark.
         // If e or mark is not an element of l, or e == mark, the list is not modified.
         // The element and mark must not be nil.
-        private static void MoveBefore(this ref List l, ref Element e, ref Element mark)
+        private static void MoveBefore(this ptr<List> _addr_l, ptr<Element> _addr_e, ptr<Element> _addr_mark)
         {
+            ref List l = ref _addr_l.val;
+            ref Element e = ref _addr_e.val;
+            ref Element mark = ref _addr_mark.val;
+
             if (e.list != l || e == mark || mark.list != l)
             {
-                return;
+                return ;
             }
-            l.insert(l.remove(e), mark.prev);
+
+            l.move(e, mark.prev);
+
         }
 
         // MoveAfter moves element e to its new position after mark.
         // If e or mark is not an element of l, or e == mark, the list is not modified.
         // The element and mark must not be nil.
-        private static void MoveAfter(this ref List l, ref Element e, ref Element mark)
+        private static void MoveAfter(this ptr<List> _addr_l, ptr<Element> _addr_e, ptr<Element> _addr_mark)
         {
+            ref List l = ref _addr_l.val;
+            ref Element e = ref _addr_e.val;
+            ref Element mark = ref _addr_mark.val;
+
             if (e.list != l || e == mark || mark.list != l)
             {
-                return;
+                return ;
             }
-            l.insert(l.remove(e), mark);
+
+            l.move(e, mark);
+
         }
 
-        // PushBackList inserts a copy of an other list at the back of list l.
+        // PushBackList inserts a copy of another list at the back of list l.
         // The lists l and other may be the same. They must not be nil.
-        private static void PushBackList(this ref List l, ref List other)
+        private static void PushBackList(this ptr<List> _addr_l, ptr<List> _addr_other)
         {
+            ref List l = ref _addr_l.val;
+            ref List other = ref _addr_other.val;
+
             l.lazyInit();
             {
                 var i = other.Len();
@@ -269,12 +367,16 @@ namespace container
                 }
 
             }
+
         }
 
-        // PushFrontList inserts a copy of an other list at the front of list l.
+        // PushFrontList inserts a copy of another list at the front of list l.
         // The lists l and other may be the same. They must not be nil.
-        private static void PushFrontList(this ref List l, ref List other)
+        private static void PushFrontList(this ptr<List> _addr_l, ptr<List> _addr_other)
         {
+            ref List l = ref _addr_l.val;
+            ref List other = ref _addr_other.val;
+
             l.lazyInit();
             {
                 var i = other.Len();
@@ -282,12 +384,13 @@ namespace container
 
                 while (i > 0L)
                 {
-                    l.insertValue(e.Value, ref l.root);
+                    l.insertValue(e.Value, _addr_l.root);
                     i = i - 1L;
                 e = e.Prev();
                 }
 
             }
+
         }
     }
 }}

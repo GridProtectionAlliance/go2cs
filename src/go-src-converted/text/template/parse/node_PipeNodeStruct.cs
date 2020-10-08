@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:38 UTC
+//     Generated on 2020 October 08 03:41:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -35,16 +34,18 @@ namespace template
                 this.Pos = default;
                 this.tr = default;
                 this.Line = default;
+                this.IsAssign = default;
                 this.Decl = default;
                 this.Cmds = default;
             }
 
-            public PipeNode(NodeType NodeType = default, Pos Pos = default, ref ptr<Tree> tr = default, long Line = default, slice<ref VariableNode> Decl = default, slice<ref CommandNode> Cmds = default)
+            public PipeNode(NodeType NodeType = default, Pos Pos = default, ref ptr<Tree> tr = default, long Line = default, bool IsAssign = default, slice<ptr<VariableNode>> Decl = default, slice<ptr<CommandNode>> Cmds = default)
             {
                 this.NodeType = NodeType;
                 this.Pos = Pos;
                 this.tr = tr;
                 this.Line = Line;
+                this.IsAssign = IsAssign;
                 this.Decl = Decl;
                 this.Cmds = Cmds;
             }
@@ -69,7 +70,7 @@ namespace template
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static PipeNode PipeNode_cast(dynamic value)
         {
-            return new PipeNode(value.NodeType, value.Pos, ref value.tr, value.Line, value.Decl, value.Cmds);
+            return new PipeNode(value.NodeType, value.Pos, ref value.tr, value.Line, value.IsAssign, value.Decl, value.Cmds);
         }
     }
 }}}

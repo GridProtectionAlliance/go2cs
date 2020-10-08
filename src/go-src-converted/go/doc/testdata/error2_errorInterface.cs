@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:12 UTC
+//     Generated on 2020 October 08 04:02:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +63,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate @string ErrorByRef(ref T value);
+            private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByRef s_ErrorByRef;
+            private static readonly ErrorByPtr s_ErrorByPtr;
             private static readonly ErrorByVal s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,11 +75,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ErrorByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ErrorByPtr is null || !m_target_is_ptr)
                     return s_ErrorByVal!(target);
 
-                return s_ErrorByRef(ref target);
+                return s_ErrorByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -88,23 +89,20 @@ namespace go
             static error()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Error");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 
                 if (!(extensionMethod is null))
-                    s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
+                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
 
-                if (s_ErrorByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Error");
+                extensionMethod = targetType.GetExtensionMethod("Error");
 
-                    if (!(extensionMethod is null))
-                        s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
 
-                if (s_ErrorByRef is null && s_ErrorByVal is null)
+                if (s_ErrorByPtr is null && s_ErrorByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement error.Error method", new Exception("Error"));
             }
 

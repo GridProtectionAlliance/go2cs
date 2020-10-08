@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:28 UTC
+//     Generated on 2020 October 08 04:34:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,9 +18,11 @@ using bytes = go.bytes_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
+using rand = go.math.rand_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
@@ -72,7 +74,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -86,124 +88,150 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate @string gcByRef(ref T value, ref Builder b, ref Action a, @string archive, slice<byte> importcfg, bool asmhdr, slice<@string> gofiles);
-            private delegate @string gcByVal(T value, ref Builder b, ref Action a, @string archive, slice<byte> importcfg, bool asmhdr, slice<@string> gofiles);
+            private delegate @string gcByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles);
+            private delegate @string gcByVal(T value, ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles);
 
-            private static readonly gcByRef s_gcByRef;
+            private static readonly gcByPtr s_gcByPtr;
             private static readonly gcByVal s_gcByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string gc(ref Builder b, ref Action a, @string archive, slice<byte> importcfg, bool asmhdr, slice<@string> gofiles)
+            public @string gc(ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_gcByRef is null)
-                    return s_gcByVal!(target, b, a, archive, importcfg, asmhdr, gofiles);
+                    target = m_target_ptr.val;
 
-                return s_gcByRef(ref target, b, a, archive, importcfg, asmhdr, gofiles);
+                if (s_gcByPtr is null || !m_target_is_ptr)
+                    return s_gcByVal!(target, b, a, archive, importcfg, symabis, asmhdr, gofiles);
+
+                return s_gcByPtr(m_target_ptr, b, a, archive, importcfg, symabis, asmhdr, gofiles);
             }
 
-            private delegate @string ccByRef(ref T value, ref Builder b, ref Action a, @string ofile, @string cfile);
-            private delegate @string ccByVal(T value, ref Builder b, ref Action a, @string ofile, @string cfile);
+            private delegate @string ccByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string ofile, @string cfile);
+            private delegate @string ccByVal(T value, ptr<Builder> b, ptr<Action> a, @string ofile, @string cfile);
 
-            private static readonly ccByRef s_ccByRef;
+            private static readonly ccByPtr s_ccByPtr;
             private static readonly ccByVal s_ccByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string cc(ref Builder b, ref Action a, @string ofile, @string cfile)
+            public @string cc(ptr<Builder> b, ptr<Action> a, @string ofile, @string cfile)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ccByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ccByPtr is null || !m_target_is_ptr)
                     return s_ccByVal!(target, b, a, ofile, cfile);
 
-                return s_ccByRef(ref target, b, a, ofile, cfile);
+                return s_ccByPtr(m_target_ptr, b, a, ofile, cfile);
             }
 
-            private delegate @string asmByRef(ref T value, ref Builder b, ref Action a, slice<@string> sfiles);
-            private delegate @string asmByVal(T value, ref Builder b, ref Action a, slice<@string> sfiles);
+            private delegate @string asmByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
+            private delegate @string asmByVal(T value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
 
-            private static readonly asmByRef s_asmByRef;
+            private static readonly asmByPtr s_asmByPtr;
             private static readonly asmByVal s_asmByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string asm(ref Builder b, ref Action a, slice<@string> sfiles)
+            public @string asm(ptr<Builder> b, ptr<Action> a, slice<@string> sfiles)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_asmByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_asmByPtr is null || !m_target_is_ptr)
                     return s_asmByVal!(target, b, a, sfiles);
 
-                return s_asmByRef(ref target, b, a, sfiles);
+                return s_asmByPtr(m_target_ptr, b, a, sfiles);
             }
 
-            private delegate @string packByRef(ref T value, ref Builder b, ref Action a, @string afile, slice<@string> ofiles);
-            private delegate @string packByVal(T value, ref Builder b, ref Action a, @string afile, slice<@string> ofiles);
+            private delegate @string symabisByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
+            private delegate @string symabisByVal(T value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
 
-            private static readonly packByRef s_packByRef;
+            private static readonly symabisByPtr s_symabisByPtr;
+            private static readonly symabisByVal s_symabisByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public @string symabis(ptr<Builder> b, ptr<Action> a, slice<@string> sfiles)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_symabisByPtr is null || !m_target_is_ptr)
+                    return s_symabisByVal!(target, b, a, sfiles);
+
+                return s_symabisByPtr(m_target_ptr, b, a, sfiles);
+            }
+
+            private delegate @string packByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string afile, slice<@string> ofiles);
+            private delegate @string packByVal(T value, ptr<Builder> b, ptr<Action> a, @string afile, slice<@string> ofiles);
+
+            private static readonly packByPtr s_packByPtr;
             private static readonly packByVal s_packByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string pack(ref Builder b, ref Action a, @string afile, slice<@string> ofiles)
+            public @string pack(ptr<Builder> b, ptr<Action> a, @string afile, slice<@string> ofiles)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_packByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_packByPtr is null || !m_target_is_ptr)
                     return s_packByVal!(target, b, a, afile, ofiles);
 
-                return s_packByRef(ref target, b, a, afile, ofiles);
+                return s_packByPtr(m_target_ptr, b, a, afile, ofiles);
             }
 
-            private delegate @string ldByRef(ref T value, ref Builder b, ref Action root, @string @out, @string importcfg, @string mainpkg);
-            private delegate @string ldByVal(T value, ref Builder b, ref Action root, @string @out, @string importcfg, @string mainpkg);
+            private delegate @string ldByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> root, @string @out, @string importcfg, @string mainpkg);
+            private delegate @string ldByVal(T value, ptr<Builder> b, ptr<Action> root, @string @out, @string importcfg, @string mainpkg);
 
-            private static readonly ldByRef s_ldByRef;
+            private static readonly ldByPtr s_ldByPtr;
             private static readonly ldByVal s_ldByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string ld(ref Builder b, ref Action root, @string @out, @string importcfg, @string mainpkg)
+            public @string ld(ptr<Builder> b, ptr<Action> root, @string @out, @string importcfg, @string mainpkg)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ldByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ldByPtr is null || !m_target_is_ptr)
                     return s_ldByVal!(target, b, root, @out, importcfg, mainpkg);
 
-                return s_ldByRef(ref target, b, root, @out, importcfg, mainpkg);
+                return s_ldByPtr(m_target_ptr, b, root, @out, importcfg, mainpkg);
             }
 
-            private delegate @string ldSharedByRef(ref T value, ref Builder b, ref Action root, slice<ref Action> toplevelactions, @string @out, @string importcfg, slice<ref Action> allactions);
-            private delegate @string ldSharedByVal(T value, ref Builder b, ref Action root, slice<ref Action> toplevelactions, @string @out, @string importcfg, slice<ref Action> allactions);
+            private delegate @string ldSharedByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions);
+            private delegate @string ldSharedByVal(T value, ptr<Builder> b, ptr<Action> root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions);
 
-            private static readonly ldSharedByRef s_ldSharedByRef;
+            private static readonly ldSharedByPtr s_ldSharedByPtr;
             private static readonly ldSharedByVal s_ldSharedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string ldShared(ref Builder b, ref Action root, slice<ref Action> toplevelactions, @string @out, @string importcfg, slice<ref Action> allactions)
+            public @string ldShared(ptr<Builder> b, ptr<Action> root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ldSharedByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ldSharedByPtr is null || !m_target_is_ptr)
                     return s_ldSharedByVal!(target, b, root, toplevelactions, @out, importcfg, allactions);
 
-                return s_ldSharedByRef(ref target, b, root, toplevelactions, @out, importcfg, allactions);
+                return s_ldSharedByPtr(m_target_ptr, b, root, toplevelactions, @out, importcfg, allactions);
             }
 
-            private delegate @string compilerByRef(ref T value);
+            private delegate @string compilerByPtr(ptr<T> value);
             private delegate @string compilerByVal(T value);
 
-            private static readonly compilerByRef s_compilerByRef;
+            private static readonly compilerByPtr s_compilerByPtr;
             private static readonly compilerByVal s_compilerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -212,17 +240,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_compilerByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_compilerByPtr is null || !m_target_is_ptr)
                     return s_compilerByVal!(target);
 
-                return s_compilerByRef(ref target);
+                return s_compilerByPtr(m_target_ptr);
             }
 
-            private delegate @string linkerByRef(ref T value);
+            private delegate @string linkerByPtr(ptr<T> value);
             private delegate @string linkerByVal(T value);
 
-            private static readonly linkerByRef s_linkerByRef;
+            private static readonly linkerByPtr s_linkerByPtr;
             private static readonly linkerByVal s_linkerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -231,11 +260,12 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_linkerByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_linkerByPtr is null || !m_target_is_ptr)
                     return s_linkerByVal!(target);
 
-                return s_linkerByRef(ref target);
+                return s_linkerByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -244,135 +274,124 @@ namespace @internal
             static toolchain()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("gc");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("gc");
 
                 if (!(extensionMethod is null))
-                    s_gcByRef = extensionMethod.CreateStaticDelegate(typeof(gcByRef)) as gcByRef;
+                    s_gcByPtr = extensionMethod.CreateStaticDelegate(typeof(gcByPtr)) as gcByPtr;
 
-                if (s_gcByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("gc");
+                extensionMethod = targetType.GetExtensionMethod("gc");
 
-                    if (!(extensionMethod is null))
-                        s_gcByVal = extensionMethod.CreateStaticDelegate(typeof(gcByVal)) as gcByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_gcByVal = extensionMethod.CreateStaticDelegate(typeof(gcByVal)) as gcByVal;
 
-                if (s_gcByRef is null && s_gcByVal is null)
+                if (s_gcByPtr is null && s_gcByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.gc method", new Exception("gc"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("cc");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("cc");
 
                 if (!(extensionMethod is null))
-                    s_ccByRef = extensionMethod.CreateStaticDelegate(typeof(ccByRef)) as ccByRef;
+                    s_ccByPtr = extensionMethod.CreateStaticDelegate(typeof(ccByPtr)) as ccByPtr;
 
-                if (s_ccByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("cc");
+                extensionMethod = targetType.GetExtensionMethod("cc");
 
-                    if (!(extensionMethod is null))
-                        s_ccByVal = extensionMethod.CreateStaticDelegate(typeof(ccByVal)) as ccByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ccByVal = extensionMethod.CreateStaticDelegate(typeof(ccByVal)) as ccByVal;
 
-                if (s_ccByRef is null && s_ccByVal is null)
+                if (s_ccByPtr is null && s_ccByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.cc method", new Exception("cc"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("asm");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("asm");
 
                 if (!(extensionMethod is null))
-                    s_asmByRef = extensionMethod.CreateStaticDelegate(typeof(asmByRef)) as asmByRef;
+                    s_asmByPtr = extensionMethod.CreateStaticDelegate(typeof(asmByPtr)) as asmByPtr;
 
-                if (s_asmByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("asm");
+                extensionMethod = targetType.GetExtensionMethod("asm");
 
-                    if (!(extensionMethod is null))
-                        s_asmByVal = extensionMethod.CreateStaticDelegate(typeof(asmByVal)) as asmByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_asmByVal = extensionMethod.CreateStaticDelegate(typeof(asmByVal)) as asmByVal;
 
-                if (s_asmByRef is null && s_asmByVal is null)
+                if (s_asmByPtr is null && s_asmByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.asm method", new Exception("asm"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("pack");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("symabis");
 
                 if (!(extensionMethod is null))
-                    s_packByRef = extensionMethod.CreateStaticDelegate(typeof(packByRef)) as packByRef;
+                    s_symabisByPtr = extensionMethod.CreateStaticDelegate(typeof(symabisByPtr)) as symabisByPtr;
 
-                if (s_packByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("pack");
+                extensionMethod = targetType.GetExtensionMethod("symabis");
 
-                    if (!(extensionMethod is null))
-                        s_packByVal = extensionMethod.CreateStaticDelegate(typeof(packByVal)) as packByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_symabisByVal = extensionMethod.CreateStaticDelegate(typeof(symabisByVal)) as symabisByVal;
 
-                if (s_packByRef is null && s_packByVal is null)
+                if (s_symabisByPtr is null && s_symabisByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.symabis method", new Exception("symabis"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("pack");
+
+                if (!(extensionMethod is null))
+                    s_packByPtr = extensionMethod.CreateStaticDelegate(typeof(packByPtr)) as packByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("pack");
+
+                if (!(extensionMethod is null))
+                    s_packByVal = extensionMethod.CreateStaticDelegate(typeof(packByVal)) as packByVal;
+
+                if (s_packByPtr is null && s_packByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.pack method", new Exception("pack"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ld");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ld");
 
                 if (!(extensionMethod is null))
-                    s_ldByRef = extensionMethod.CreateStaticDelegate(typeof(ldByRef)) as ldByRef;
+                    s_ldByPtr = extensionMethod.CreateStaticDelegate(typeof(ldByPtr)) as ldByPtr;
 
-                if (s_ldByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ld");
+                extensionMethod = targetType.GetExtensionMethod("ld");
 
-                    if (!(extensionMethod is null))
-                        s_ldByVal = extensionMethod.CreateStaticDelegate(typeof(ldByVal)) as ldByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ldByVal = extensionMethod.CreateStaticDelegate(typeof(ldByVal)) as ldByVal;
 
-                if (s_ldByRef is null && s_ldByVal is null)
+                if (s_ldByPtr is null && s_ldByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.ld method", new Exception("ld"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ldShared");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ldShared");
 
                 if (!(extensionMethod is null))
-                    s_ldSharedByRef = extensionMethod.CreateStaticDelegate(typeof(ldSharedByRef)) as ldSharedByRef;
+                    s_ldSharedByPtr = extensionMethod.CreateStaticDelegate(typeof(ldSharedByPtr)) as ldSharedByPtr;
 
-                if (s_ldSharedByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ldShared");
+                extensionMethod = targetType.GetExtensionMethod("ldShared");
 
-                    if (!(extensionMethod is null))
-                        s_ldSharedByVal = extensionMethod.CreateStaticDelegate(typeof(ldSharedByVal)) as ldSharedByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ldSharedByVal = extensionMethod.CreateStaticDelegate(typeof(ldSharedByVal)) as ldSharedByVal;
 
-                if (s_ldSharedByRef is null && s_ldSharedByVal is null)
+                if (s_ldSharedByPtr is null && s_ldSharedByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.ldShared method", new Exception("ldShared"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("compiler");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("compiler");
 
                 if (!(extensionMethod is null))
-                    s_compilerByRef = extensionMethod.CreateStaticDelegate(typeof(compilerByRef)) as compilerByRef;
+                    s_compilerByPtr = extensionMethod.CreateStaticDelegate(typeof(compilerByPtr)) as compilerByPtr;
 
-                if (s_compilerByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("compiler");
+                extensionMethod = targetType.GetExtensionMethod("compiler");
 
-                    if (!(extensionMethod is null))
-                        s_compilerByVal = extensionMethod.CreateStaticDelegate(typeof(compilerByVal)) as compilerByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_compilerByVal = extensionMethod.CreateStaticDelegate(typeof(compilerByVal)) as compilerByVal;
 
-                if (s_compilerByRef is null && s_compilerByVal is null)
+                if (s_compilerByPtr is null && s_compilerByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.compiler method", new Exception("compiler"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("linker");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("linker");
 
                 if (!(extensionMethod is null))
-                    s_linkerByRef = extensionMethod.CreateStaticDelegate(typeof(linkerByRef)) as linkerByRef;
+                    s_linkerByPtr = extensionMethod.CreateStaticDelegate(typeof(linkerByPtr)) as linkerByPtr;
 
-                if (s_linkerByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("linker");
+                extensionMethod = targetType.GetExtensionMethod("linker");
 
-                    if (!(extensionMethod is null))
-                        s_linkerByVal = extensionMethod.CreateStaticDelegate(typeof(linkerByVal)) as linkerByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_linkerByVal = extensionMethod.CreateStaticDelegate(typeof(linkerByVal)) as linkerByVal;
 
-                if (s_linkerByRef is null && s_linkerByVal is null)
+                if (s_linkerByPtr is null && s_linkerByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement toolchain.linker method", new Exception("linker"));
             }
 

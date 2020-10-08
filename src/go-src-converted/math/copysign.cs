@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:45 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:10 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\copysign.go
 
@@ -16,7 +16,7 @@ namespace go
         // of x and the sign of y.
         public static double Copysign(double x, double y)
         {
-            const long sign = 1L << (int)(63L);
+            const long sign = (long)1L << (int)(63L);
 
             return Float64frombits(Float64bits(x) & ~sign | Float64bits(y) & sign);
         }

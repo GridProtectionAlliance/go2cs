@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:53 UTC
+//     Generated on 2020 October 08 03:43:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,13 +32,15 @@ namespace go
                 this.Offset = default;
                 this.Filename = default;
                 this.Line = default;
+                this.Column = default;
             }
 
-            public lineInfo(long Offset = default, @string Filename = default, long Line = default)
+            public lineInfo(long Offset = default, @string Filename = default, long Line = default, long Column = default)
             {
                 this.Offset = Offset;
                 this.Filename = Filename;
                 this.Line = Line;
+                this.Column = Column;
             }
 
             // Enable comparisons between nil and lineInfo struct
@@ -61,7 +63,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static lineInfo lineInfo_cast(dynamic value)
         {
-            return new lineInfo(value.Offset, value.Filename, value.Line);
+            return new lineInfo(value.Offset, value.Filename, value.Line, value.Column);
         }
     }
 }}

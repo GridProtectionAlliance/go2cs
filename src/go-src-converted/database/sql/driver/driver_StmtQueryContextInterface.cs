@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Rows, error) QueryContextByRef(ref T value, context.Context ctx, slice<NamedValue> args);
+            private delegate (Rows, error) QueryContextByPtr(ptr<T> value, context.Context ctx, slice<NamedValue> args);
             private delegate (Rows, error) QueryContextByVal(T value, context.Context ctx, slice<NamedValue> args);
 
-            private static readonly QueryContextByRef s_QueryContextByRef;
+            private static readonly QueryContextByPtr s_QueryContextByPtr;
             private static readonly QueryContextByVal s_QueryContextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_QueryContextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_QueryContextByPtr is null || !m_target_is_ptr)
                     return s_QueryContextByVal!(target, ctx, args);
 
-                return s_QueryContextByRef(ref target, ctx, args);
+                return s_QueryContextByPtr(m_target_ptr, ctx, args);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static StmtQueryContext()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("QueryContext");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("QueryContext");
 
                 if (!(extensionMethod is null))
-                    s_QueryContextByRef = extensionMethod.CreateStaticDelegate(typeof(QueryContextByRef)) as QueryContextByRef;
+                    s_QueryContextByPtr = extensionMethod.CreateStaticDelegate(typeof(QueryContextByPtr)) as QueryContextByPtr;
 
-                if (s_QueryContextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("QueryContext");
+                extensionMethod = targetType.GetExtensionMethod("QueryContext");
 
-                    if (!(extensionMethod is null))
-                        s_QueryContextByVal = extensionMethod.CreateStaticDelegate(typeof(QueryContextByVal)) as QueryContextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_QueryContextByVal = extensionMethod.CreateStaticDelegate(typeof(QueryContextByVal)) as QueryContextByVal;
 
-                if (s_QueryContextByRef is null && s_QueryContextByVal is null)
+                if (s_QueryContextByPtr is null && s_QueryContextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement StmtQueryContext.QueryContext method", new Exception("QueryContext"));
             }
 

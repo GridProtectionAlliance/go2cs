@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:29 UTC
+//     Generated on 2020 October 08 04:43:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,13 +37,15 @@ namespace pprof
                 this.addr = default;
                 this.mappingID = default;
                 this.lines = default;
+                this.isFolded = default;
             }
 
-            public locationKey(ulong addr = default, ulong mappingID = default, @string lines = default)
+            public locationKey(ulong addr = default, ulong mappingID = default, @string lines = default, bool isFolded = default)
             {
                 this.addr = addr;
                 this.mappingID = mappingID;
                 this.lines = lines;
+                this.isFolded = isFolded;
             }
 
             // Enable comparisons between nil and locationKey struct
@@ -66,7 +68,7 @@ namespace pprof
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static locationKey locationKey_cast(dynamic value)
         {
-            return new locationKey(value.addr, value.mappingID, value.lines);
+            return new locationKey(value.addr, value.mappingID, value.lines, value.isFolded);
         }
     }
 }}}}}}

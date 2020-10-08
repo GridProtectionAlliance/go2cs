@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:41 UTC
+//     Generated on 2020 October 08 03:48:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
+using sync = go.sync_package;
 
 #pragma warning disable CS0660, CS0661
 
@@ -48,7 +49,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +63,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ReplaceByRef(ref T value, @string s);
+            private delegate (long, error) ReplaceByPtr(ptr<T> value, @string s);
             private delegate (long, error) ReplaceByVal(T value, @string s);
 
-            private static readonly ReplaceByRef s_ReplaceByRef;
+            private static readonly ReplaceByPtr s_ReplaceByPtr;
             private static readonly ReplaceByVal s_ReplaceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,17 +75,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReplaceByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReplaceByPtr is null || !m_target_is_ptr)
                     return s_ReplaceByVal!(target, s);
 
-                return s_ReplaceByRef(ref target, s);
+                return s_ReplaceByPtr(m_target_ptr, s);
             }
 
-            private delegate (long, error) WriteStringByRef(ref T value, io.Writer w, @string s);
+            private delegate (long, error) WriteStringByPtr(ptr<T> value, io.Writer w, @string s);
             private delegate (long, error) WriteStringByVal(T value, io.Writer w, @string s);
 
-            private static readonly WriteStringByRef s_WriteStringByRef;
+            private static readonly WriteStringByPtr s_WriteStringByPtr;
             private static readonly WriteStringByVal s_WriteStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,11 +95,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteStringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteStringByPtr is null || !m_target_is_ptr)
                     return s_WriteStringByVal!(target, w, s);
 
-                return s_WriteStringByRef(ref target, w, s);
+                return s_WriteStringByPtr(m_target_ptr, w, s);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -106,39 +109,33 @@ namespace go
             static replacer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Replace");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Replace");
 
                 if (!(extensionMethod is null))
-                    s_ReplaceByRef = extensionMethod.CreateStaticDelegate(typeof(ReplaceByRef)) as ReplaceByRef;
+                    s_ReplaceByPtr = extensionMethod.CreateStaticDelegate(typeof(ReplaceByPtr)) as ReplaceByPtr;
 
-                if (s_ReplaceByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Replace");
+                extensionMethod = targetType.GetExtensionMethod("Replace");
 
-                    if (!(extensionMethod is null))
-                        s_ReplaceByVal = extensionMethod.CreateStaticDelegate(typeof(ReplaceByVal)) as ReplaceByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReplaceByVal = extensionMethod.CreateStaticDelegate(typeof(ReplaceByVal)) as ReplaceByVal;
 
-                if (s_ReplaceByRef is null && s_ReplaceByVal is null)
+                if (s_ReplaceByPtr is null && s_ReplaceByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement replacer.Replace method", new Exception("Replace"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteString");
 
                 if (!(extensionMethod is null))
-                    s_WriteStringByRef = extensionMethod.CreateStaticDelegate(typeof(WriteStringByRef)) as WriteStringByRef;
+                    s_WriteStringByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteStringByPtr)) as WriteStringByPtr;
 
-                if (s_WriteStringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteString");
+                extensionMethod = targetType.GetExtensionMethod("WriteString");
 
-                    if (!(extensionMethod is null))
-                        s_WriteStringByVal = extensionMethod.CreateStaticDelegate(typeof(WriteStringByVal)) as WriteStringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteStringByVal = extensionMethod.CreateStaticDelegate(typeof(WriteStringByVal)) as WriteStringByVal;
 
-                if (s_WriteStringByRef is null && s_WriteStringByVal is null)
+                if (s_WriteStringByPtr is null && s_WriteStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement replacer.WriteString method", new Exception("WriteString"));
             }
 

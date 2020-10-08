@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mips64 -- go2cs converted at 2020 August 29 09:25:10 UTC
+// package mips64 -- go2cs converted at 2020 October 08 04:27:42 UTC
 // import "cmd/compile/internal/mips64" ==> using mips64 = go.cmd.compile.@internal.mips64_package
 // Original source: C:\Go\src\cmd\compile\internal\mips64\ggen.go
 using gc = go.cmd.compile.@internal.gc_package;
@@ -17,11 +17,15 @@ namespace @internal
 {
     public static partial class mips64_package
     {
-        private static ref obj.Prog zerorange(ref gc.Progs pp, ref obj.Prog p, long off, long cnt, ref uint _)
+        private static ptr<obj.Prog> zerorange(ptr<gc.Progs> _addr_pp, ptr<obj.Prog> _addr_p, long off, long cnt, ptr<uint> _addr__)
         {
+            ref gc.Progs pp = ref _addr_pp.val;
+            ref obj.Prog p = ref _addr_p.val;
+            ref uint _ = ref _addr__.val;
+
             if (cnt == 0L)
             {
-                return p;
+                return _addr_p!;
             }
             if (cnt < int64(4L * gc.Widthptr))
             {
@@ -34,6 +38,7 @@ namespace @internal
                         i += int64(gc.Widthptr);
                     }
                 }
+
             }
             else if (cnt <= int64(128L * gc.Widthptr))
             {
@@ -62,41 +67,22 @@ namespace @internal
                 p = pp.Appendpp(p, mips.ABNE, obj.TYPE_REG, mips.REGRT1, 0L, obj.TYPE_BRANCH, 0L, 0L);
                 p.Reg = mips.REGRT2;
                 gc.Patch(p, p1);
-            }
-            return p;
-        }
-
-        private static void zeroAuto(ref gc.Progs pp, ref gc.Node n)
-        { 
-            // Note: this code must not clobber any registers.
-            var sym = n.Sym.Linksym();
-            var size = n.Type.Size();
-            {
-                var i = int64(0L);
-
-                while (i < size)
-                {
-                    var p = pp.Prog(mips.AMOVV);
-                    p.From.Type = obj.TYPE_REG;
-                    p.From.Reg = mips.REGZERO;
-                    p.To.Type = obj.TYPE_MEM;
-                    p.To.Name = obj.NAME_AUTO;
-                    p.To.Reg = mips.REGSP;
-                    p.To.Offset = n.Xoffset + i;
-                    p.To.Sym = sym;
-                    i += 8L;
-                }
 
             }
+            return _addr_p!;
+
         }
 
-        private static void ginsnop(ref gc.Progs pp)
+        private static ptr<obj.Prog> ginsnop(ptr<gc.Progs> _addr_pp)
         {
+            ref gc.Progs pp = ref _addr_pp.val;
+
             var p = pp.Prog(mips.ANOR);
             p.From.Type = obj.TYPE_REG;
             p.From.Reg = mips.REG_R0;
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = mips.REG_R0;
+            return _addr_p!;
         }
     }
 }}}}

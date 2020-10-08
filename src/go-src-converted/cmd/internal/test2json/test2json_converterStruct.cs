@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:48 UTC
+//     Generated on 2020 October 08 04:35:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,10 +31,10 @@ namespace @internal
     public static partial class test2json_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct converter
+        public partial struct Converter
         {
             // Constructors
-            public converter(NilType _)
+            public Converter(NilType _)
             {
                 this.w = default;
                 this.pkg = default;
@@ -47,7 +47,7 @@ namespace @internal
                 this.output = default;
             }
 
-            public converter(io.Writer w = default, @string pkg = default, Mode mode = default, time.Time start = default, @string testName = default, slice<ref event> report = default, @string result = default, lineBuffer input = default, lineBuffer output = default)
+            public Converter(io.Writer w = default, @string pkg = default, Mode mode = default, time.Time start = default, @string testName = default, slice<ptr<event>> report = default, @string result = default, lineBuffer input = default, lineBuffer output = default)
             {
                 this.w = w;
                 this.pkg = pkg;
@@ -60,27 +60,27 @@ namespace @internal
                 this.output = output;
             }
 
-            // Enable comparisons between nil and converter struct
+            // Enable comparisons between nil and Converter struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(converter value, NilType nil) => value.Equals(default(converter));
+            public static bool operator ==(Converter value, NilType nil) => value.Equals(default(Converter));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(converter value, NilType nil) => !(value == nil);
+            public static bool operator !=(Converter value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, converter value) => value == nil;
+            public static bool operator ==(NilType nil, Converter value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, converter value) => value != nil;
+            public static bool operator !=(NilType nil, Converter value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator converter(NilType nil) => default(converter);
+            public static implicit operator Converter(NilType nil) => default(Converter);
         }
 
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private static converter converter_cast(dynamic value)
+        public static Converter Converter_cast(dynamic value)
         {
-            return new converter(value.w, value.pkg, value.mode, value.start, value.testName, value.report, value.result, value.input, value.output);
+            return new Converter(value.w, value.pkg, value.mode, value.start, value.testName, value.report, value.result, value.input, value.output);
         }
     }
 }}}

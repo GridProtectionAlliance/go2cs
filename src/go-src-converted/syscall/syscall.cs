@@ -18,16 +18,13 @@
 // err is an operating system error describing the failure.
 // On most systems, that error has type syscall.Errno.
 //
-// NOTE: This package is locked down. Code outside the standard
-// Go repository should be migrated to use the corresponding
-// package in the golang.org/x/sys repository. That is also where updates
-// required by new systems or versions should be applied.
-// Signal, Errno and SysProcAttr are not yet available in
-// golang.org/x/sys and must still be referenced from the
-// syscall package. See https://golang.org/s/go1.4-syscall
-// for more information.
+// Deprecated: this package is locked down. Callers should use the
+// corresponding package in the golang.org/x/sys repository instead.
+// That is also where updates required by new systems or versions
+// should be applied. See https://golang.org/s/go1.4-syscall for more
+// information.
 //
-// package syscall -- go2cs converted at 2020 August 29 08:37:42 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:27:06 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall.go
 
@@ -37,7 +34,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        //go:generate go run mksyscall_windows.go -systemdll -output zsyscall_windows.go syscall_windows.go security_windows.go
+        //go:generate go run golang.org/x/sys/windows/mkwinsyscall -systemdll -output zsyscall_windows.go syscall_windows.go security_windows.go
 
         // StringByteSlice converts a string to a NUL-terminated []byte,
         // If s contains a NUL byte this function panics instead of
@@ -52,6 +49,7 @@ namespace go
                 panic("syscall: string with NUL passed to StringByteSlice");
             }
             return a;
+
         });
 
         // ByteSliceFromString returns a NUL-terminated slice of bytes
@@ -59,17 +57,22 @@ namespace go
         // location, it returns (nil, EINVAL).
         public static (slice<byte>, error) ByteSliceFromString(@string s)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             for (long i = 0L; i < len(s); i++)
             {
                 if (s[i] == 0L)
                 {
-                    return (null, EINVAL);
+                    return (null, error.As(EINVAL)!);
                 }
+
             }
 
             var a = make_slice<byte>(len(s) + 1L);
             copy(a, s);
-            return (a, null);
+            return (a, error.As(null!)!);
+
         }
 
         // StringBytePtr returns a pointer to a NUL-terminated array of bytes.
@@ -77,22 +80,27 @@ namespace go
         // an error.
         //
         // Deprecated: Use BytePtrFromString instead.
-        public static ref byte StringBytePtr(@string s)
+        public static ptr<byte> StringBytePtr(@string s)
         {
-            return ref StringByteSlice(s)[0L];
+            return _addr__addr_StringByteSlice(s)[0L]!;
         }
 
         // BytePtrFromString returns a pointer to a NUL-terminated array of
         // bytes containing the text of s. If s contains a NUL byte at any
         // location, it returns (nil, EINVAL).
-        public static (ref byte, error) BytePtrFromString(@string s)
+        public static (ptr<byte>, error) BytePtrFromString(@string s)
         {
+            ptr<byte> _p0 = default!;
+            error _p0 = default!;
+
             var (a, err) = ByteSliceFromString(s);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (ref a[0L], null);
+
+            return (_addr__addr_a[0L]!, error.As(null!)!);
+
         }
 
         // Single-word zero for use when we need a valid pointer to 0 bytes.
@@ -101,27 +109,39 @@ namespace go
 
         // Unix returns ts as the number of seconds and nanoseconds elapsed since the
         // Unix epoch.
-        private static (long, long) Unix(this ref Timespec ts)
+        private static (long, long) Unix(this ptr<Timespec> _addr_ts)
         {
+            long sec = default;
+            long nsec = default;
+            ref Timespec ts = ref _addr_ts.val;
+
             return (int64(ts.Sec), int64(ts.Nsec));
         }
 
         // Unix returns tv as the number of seconds and nanoseconds elapsed since the
         // Unix epoch.
-        private static (long, long) Unix(this ref Timeval tv)
+        private static (long, long) Unix(this ptr<Timeval> _addr_tv)
         {
+            long sec = default;
+            long nsec = default;
+            ref Timeval tv = ref _addr_tv.val;
+
             return (int64(tv.Sec), int64(tv.Usec) * 1000L);
         }
 
         // Nano returns ts as the number of nanoseconds elapsed since the Unix epoch.
-        private static long Nano(this ref Timespec ts)
+        private static long Nano(this ptr<Timespec> _addr_ts)
         {
+            ref Timespec ts = ref _addr_ts.val;
+
             return int64(ts.Sec) * 1e9F + int64(ts.Nsec);
         }
 
         // Nano returns tv as the number of nanoseconds elapsed since the Unix epoch.
-        private static long Nano(this ref Timeval tv)
+        private static long Nano(this ptr<Timeval> _addr_tv)
         {
+            ref Timeval tv = ref _addr_tv.val;
+
             return int64(tv.Sec) * 1e9F + int64(tv.Usec) * 1000L;
         }
 

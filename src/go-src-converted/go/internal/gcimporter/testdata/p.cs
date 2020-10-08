@@ -4,7 +4,7 @@
 
 // Input for TestIssue15517
 
-// package p -- go2cs converted at 2020 August 29 10:09:14 UTC
+// package p -- go2cs converted at 2020 October 08 04:56:12 UTC
 // import "go/internal/gcimporter.p" ==> using p = go.go.@internal.gcimporter.p_package
 // Original source: C:\Go\src\go\internal\gcimporter\testdata\p.go
 
@@ -16,7 +16,7 @@ namespace @internal
 {
     public static partial class p_package
     {
-        public static readonly long C = 0L;
+        public static readonly long C = (long)0L;
 
 
 

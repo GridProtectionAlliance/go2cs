@@ -10,7 +10,7 @@
 // it in our own nicer implementation, either here or in
 // syscall_bsd.go or syscall_unix.go.
 
-// package syscall -- go2cs converted at 2020 August 29 08:38:13 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:27:37 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_netbsd.go
 using @unsafe = go.@unsafe_package;
@@ -38,35 +38,43 @@ namespace go
 
         private static (slice<Sysctlnode>, error) sysctlNodes(slice<_C_int> mib)
         {
-            System.UIntPtr olen = default; 
+            slice<Sysctlnode> nodes = default;
+            error err = default!;
+
+            ref System.UIntPtr olen = ref heap(out ptr<System.UIntPtr> _addr_olen); 
 
             // Get a list of all sysctl nodes below the given MIB by performing
             // a sysctl for the given MIB with CTL_QUERY appended.
             mib = append(mib, CTL_QUERY);
-            Sysctlnode qnode = new Sysctlnode(Flags:SYSCTL_VERS_1);
-            var qp = (byte.Value)(@unsafe.Pointer(ref qnode));
+            ref Sysctlnode qnode = ref heap(new Sysctlnode(Flags:SYSCTL_VERS_1), out ptr<Sysctlnode> _addr_qnode);
+            var qp = (byte.val)(@unsafe.Pointer(_addr_qnode));
             var sz = @unsafe.Sizeof(qnode);
-            err = sysctl(mib, null, ref olen, qp, sz);
+            err = sysctl(mib, null, _addr_olen, qp, sz);
 
             if (err != null)
             {>>MARKER:FUNCTION_Syscall9_BLOCK_PREFIX<<
-                return (null, err);
+                return (null, error.As(err)!);
             } 
 
             // Now that we know the size, get the actual nodes.
             nodes = make_slice<Sysctlnode>(olen / sz);
-            var np = (byte.Value)(@unsafe.Pointer(ref nodes[0L]));
-            err = sysctl(mib, np, ref olen, qp, sz);
+            var np = (byte.val)(@unsafe.Pointer(_addr_nodes[0L]));
+            err = sysctl(mib, np, _addr_olen, qp, sz);
 
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (nodes, null);
+
+            return (nodes, error.As(null!)!);
+
         }
 
         private static (slice<_C_int>, error) nametomib(@string name)
         {
+            slice<_C_int> mib = default;
+            error err = default!;
+ 
             // Split name into components.
             slice<@string> parts = default;
             long last = 0L;
@@ -80,6 +88,7 @@ namespace go
                         parts = append(parts, name[last..i]);
                         last = i + 1L;
                     }
+
                 }
 
 
@@ -93,8 +102,9 @@ namespace go
                 var (nodes, err) = sysctlNodes(mib);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
                 foreach (var (_, node) in nodes)
                 {
                     var n = make_slice<byte>(0L);
@@ -108,6 +118,7 @@ namespace go
                             {
                                 n = append(n, byte(node.Name[i]));
                             }
+
                         }
 
                         i = i__prev3;
@@ -118,57 +129,121 @@ namespace go
                         mib = append(mib, _C_int(node.Num));
                         break;
                     }
+
                 }
                 if (len(mib) != partno + 1L)
                 {
-                    return (null, EINVAL);
+                    return (null, error.As(EINVAL)!);
                 }
+
             }
-            return (mib, null);
+            return (mib, error.As(null!)!);
+
         }
 
         private static (ulong, bool) direntIno(slice<byte> buf)
         {
+            ulong _p0 = default;
+            bool _p0 = default;
+
             return readInt(buf, @unsafe.Offsetof(new Dirent().Fileno), @unsafe.Sizeof(new Dirent().Fileno));
         }
 
         private static (ulong, bool) direntReclen(slice<byte> buf)
         {
+            ulong _p0 = default;
+            bool _p0 = default;
+
             return readInt(buf, @unsafe.Offsetof(new Dirent().Reclen), @unsafe.Sizeof(new Dirent().Reclen));
         }
 
         private static (ulong, bool) direntNamlen(slice<byte> buf)
         {
+            ulong _p0 = default;
+            bool _p0 = default;
+
             return readInt(buf, @unsafe.Offsetof(new Dirent().Namlen), @unsafe.Sizeof(new Dirent().Namlen));
         }
 
-        //sysnb pipe() (fd1 int, fd2 int, err error)
         public static error Pipe(slice<long> p)
+        {
+            error err = default!;
+
+            return error.As(Pipe2(p, 0L))!;
+        }
+
+        //sysnb pipe2(p *[2]_C_int, flags int) (err error)
+        public static error Pipe2(slice<long> p, long flags)
         {
             if (len(p) != 2L)
             {
-                return error.As(EINVAL);
+                return error.As(EINVAL)!;
             }
-            p[0L], p[1L], err = pipe();
-            return;
+
+            ref array<_C_int> pp = ref heap(new array<_C_int>(2L), out ptr<array<_C_int>> _addr_pp);
+            var err = pipe2(_addr_pp, flags);
+            p[0L] = int(pp[0L]);
+            p[1L] = int(pp[1L]);
+            return error.As(err)!;
+
         }
 
-        //sys getdents(fd int, buf []byte) (n int, err error)
-        public static (long, error) Getdirentries(long fd, slice<byte> buf, ref System.UIntPtr basep)
+        //sys paccept(fd int, rsa *RawSockaddrAny, addrlen *_Socklen, sigmask *sigset, flags int) (nfd int, err error)
+        public static (long, Sockaddr, error) Accept4(long fd, long flags) => func((_, panic, __) =>
         {
+            long nfd = default;
+            Sockaddr sa = default;
+            error err = default!;
+
+            ref RawSockaddrAny rsa = ref heap(out ptr<RawSockaddrAny> _addr_rsa);
+            ref _Socklen len = ref heap(SizeofSockaddrAny, out ptr<_Socklen> _addr_len);
+            nfd, err = paccept(fd, _addr_rsa, _addr_len, null, flags);
+            if (err != null)
+            {
+                return ;
+            }
+
+            if (len > SizeofSockaddrAny)
+            {
+                panic("RawSockaddrAny too small");
+            }
+
+            sa, err = anyToSockaddr(_addr_rsa);
+            if (err != null)
+            {
+                Close(nfd);
+                nfd = 0L;
+            }
+
+            return ;
+
+        });
+
+        //sys getdents(fd int, buf []byte) (n int, err error)
+        public static (long, error) Getdirentries(long fd, slice<byte> buf, ptr<System.UIntPtr> _addr_basep)
+        {
+            long n = default;
+            error err = default!;
+            ref System.UIntPtr basep = ref _addr_basep.val;
+
             return getdents(fd, buf);
         }
 
-        // TODO
-        private static (long, error) sendfile(long outfd, long infd, ref long offset, long count)
+        // TODO, see golang.org/issue/5847
+        private static (long, error) sendfile(long outfd, long infd, ptr<long> _addr_offset, long count)
         {
-            return (-1L, ENOSYS);
+            long written = default;
+            error err = default!;
+            ref long offset = ref _addr_offset.val;
+
+            return (-1L, error.As(ENOSYS)!);
         }
 
         private static error setattrlistTimes(@string path, slice<Timespec> times)
         { 
             // used on Darwin for UtimesNano
-            return error.As(ENOSYS);
+            return error.As(ENOSYS)!;
+
         }
 
         /*
@@ -252,274 +327,7 @@ namespace go
         //sys    readlen(fd int, buf *byte, nbuf int) (n int, err error) = SYS_READ
         //sys    writelen(fd int, buf *byte, nbuf int) (n int, err error) = SYS_WRITE
         //sys    utimensat(dirfd int, path string, times *[2]Timespec, flag int) (err error)
-
-        /*
-         * Unimplemented
-         */
-        // ____semctl13
-        // __clone
-        // __fhopen40
-        // __fhstat40
-        // __fhstatvfs140
-        // __fstat30
-        // __getcwd
-        // __getfh30
-        // __getlogin
-        // __lstat30
-        // __mount50
-        // __msgctl13
-        // __msync13
-        // __ntp_gettime30
-        // __posix_chown
-        // __posix_fadvise50
-        // __posix_fchown
-        // __posix_lchown
-        // __posix_rename
-        // __setlogin
-        // __shmctl13
-        // __sigaction_sigtramp
-        // __sigaltstack14
-        // __sigpending14
-        // __sigprocmask14
-        // __sigsuspend14
-        // __sigtimedwait
-        // __stat30
-        // __syscall
-        // __vfork14
-        // _ksem_close
-        // _ksem_destroy
-        // _ksem_getvalue
-        // _ksem_init
-        // _ksem_open
-        // _ksem_post
-        // _ksem_trywait
-        // _ksem_unlink
-        // _ksem_wait
-        // _lwp_continue
-        // _lwp_create
-        // _lwp_ctl
-        // _lwp_detach
-        // _lwp_exit
-        // _lwp_getname
-        // _lwp_getprivate
-        // _lwp_kill
-        // _lwp_park
-        // _lwp_self
-        // _lwp_setname
-        // _lwp_setprivate
-        // _lwp_suspend
-        // _lwp_unpark
-        // _lwp_unpark_all
-        // _lwp_wait
-        // _lwp_wakeup
-        // _pset_bind
-        // _sched_getaffinity
-        // _sched_getparam
-        // _sched_setaffinity
-        // _sched_setparam
-        // acct
-        // aio_cancel
-        // aio_error
-        // aio_fsync
-        // aio_read
-        // aio_return
-        // aio_suspend
-        // aio_write
-        // break
-        // clock_getres
-        // clock_gettime
-        // clock_settime
-        // compat_09_ogetdomainname
-        // compat_09_osetdomainname
-        // compat_09_ouname
-        // compat_10_omsgsys
-        // compat_10_osemsys
-        // compat_10_oshmsys
-        // compat_12_fstat12
-        // compat_12_getdirentries
-        // compat_12_lstat12
-        // compat_12_msync
-        // compat_12_oreboot
-        // compat_12_oswapon
-        // compat_12_stat12
-        // compat_13_sigaction13
-        // compat_13_sigaltstack13
-        // compat_13_sigpending13
-        // compat_13_sigprocmask13
-        // compat_13_sigreturn13
-        // compat_13_sigsuspend13
-        // compat_14___semctl
-        // compat_14_msgctl
-        // compat_14_shmctl
-        // compat_16___sigaction14
-        // compat_16___sigreturn14
-        // compat_20_fhstatfs
-        // compat_20_fstatfs
-        // compat_20_getfsstat
-        // compat_20_statfs
-        // compat_30___fhstat30
-        // compat_30___fstat13
-        // compat_30___lstat13
-        // compat_30___stat13
-        // compat_30_fhopen
-        // compat_30_fhstat
-        // compat_30_fhstatvfs1
-        // compat_30_getdents
-        // compat_30_getfh
-        // compat_30_ntp_gettime
-        // compat_30_socket
-        // compat_40_mount
-        // compat_43_fstat43
-        // compat_43_lstat43
-        // compat_43_oaccept
-        // compat_43_ocreat
-        // compat_43_oftruncate
-        // compat_43_ogetdirentries
-        // compat_43_ogetdtablesize
-        // compat_43_ogethostid
-        // compat_43_ogethostname
-        // compat_43_ogetkerninfo
-        // compat_43_ogetpagesize
-        // compat_43_ogetpeername
-        // compat_43_ogetrlimit
-        // compat_43_ogetsockname
-        // compat_43_okillpg
-        // compat_43_olseek
-        // compat_43_ommap
-        // compat_43_oquota
-        // compat_43_orecv
-        // compat_43_orecvfrom
-        // compat_43_orecvmsg
-        // compat_43_osend
-        // compat_43_osendmsg
-        // compat_43_osethostid
-        // compat_43_osethostname
-        // compat_43_osetrlimit
-        // compat_43_osigblock
-        // compat_43_osigsetmask
-        // compat_43_osigstack
-        // compat_43_osigvec
-        // compat_43_otruncate
-        // compat_43_owait
-        // compat_43_stat43
-        // execve
-        // extattr_delete_fd
-        // extattr_delete_file
-        // extattr_delete_link
-        // extattr_get_fd
-        // extattr_get_file
-        // extattr_get_link
-        // extattr_list_fd
-        // extattr_list_file
-        // extattr_list_link
-        // extattr_set_fd
-        // extattr_set_file
-        // extattr_set_link
-        // extattrctl
-        // fchroot
-        // fdatasync
-        // fgetxattr
-        // fktrace
-        // flistxattr
-        // fork
-        // fremovexattr
-        // fsetxattr
-        // fstatvfs1
-        // fsync_range
-        // getcontext
-        // getitimer
-        // getvfsstat
-        // getxattr
-        // ioctl
-        // ktrace
-        // lchflags
-        // lchmod
-        // lfs_bmapv
-        // lfs_markv
-        // lfs_segclean
-        // lfs_segwait
-        // lgetxattr
-        // lio_listio
-        // listxattr
-        // llistxattr
-        // lremovexattr
-        // lseek
-        // lsetxattr
-        // lutimes
-        // madvise
-        // mincore
-        // minherit
-        // mlock
-        // mlockall
-        // modctl
-        // mprotect
-        // mq_close
-        // mq_getattr
-        // mq_notify
-        // mq_open
-        // mq_receive
-        // mq_send
-        // mq_setattr
-        // mq_timedreceive
-        // mq_timedsend
-        // mq_unlink
-        // mremap
-        // msgget
-        // msgrcv
-        // msgsnd
-        // munlock
-        // munlockall
-        // nfssvc
-        // ntp_adjtime
-        // pmc_control
-        // pmc_get_info
-        // poll
-        // pollts
-        // preadv
-        // profil
-        // pselect
-        // pset_assign
-        // pset_create
-        // pset_destroy
-        // ptrace
-        // pwritev
-        // quotactl
-        // rasctl
-        // readv
-        // reboot
-        // removexattr
-        // sa_enable
-        // sa_preempt
-        // sa_register
-        // sa_setconcurrency
-        // sa_stacks
-        // sa_yield
-        // sbrk
-        // sched_yield
-        // semconfig
-        // semget
-        // semop
-        // setcontext
-        // setitimer
-        // setxattr
-        // shmat
-        // shmdt
-        // shmget
-        // sstk
-        // statvfs1
-        // swapctl
-        // sysarch
-        // syscall
-        // timer_create
-        // timer_delete
-        // timer_getoverrun
-        // timer_gettime
-        // timer_settime
-        // undelete
-        // utrace
-        // uuidgen
-        // vadvise
-        // vfork
-        // writev
+        //sys    getcwd(buf []byte) (n int, err error) = SYS___GETCWD
+        //sys    sysctl(mib []_C_int, old *byte, oldlen *uintptr, new *byte, newlen uintptr) (err error) = SYS___SYSCTL
     }
 }

@@ -1,6 +1,6 @@
 // Test data - not compiled.
 
-// package test_package -- go2cs converted at 2020 August 29 08:48:28 UTC
+// package test_package -- go2cs converted at 2020 October 08 04:04:17 UTC
 // import "go/build/testdata.test_package" ==> using test_package = go.go.build.testdata.test_package_package
 // Original source: C:\Go\src\go\build\testdata\multi\file_appengine.go
 

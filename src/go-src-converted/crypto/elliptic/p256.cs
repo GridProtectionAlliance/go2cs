@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !amd64
+// +build !amd64,!arm64
 
-// package elliptic -- go2cs converted at 2020 August 29 08:30:37 UTC
+// package elliptic -- go2cs converted at 2020 October 08 03:36:27 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Go\src\crypto\elliptic\p256.go
 // This file contains a constant-time, 32-bit implementation of P256.
@@ -19,15 +19,15 @@ namespace crypto
     {
         private partial struct p256Curve
         {
-            public ref CurveParams CurveParams => ref CurveParams_ptr;
+            public ref ptr<CurveParams> ptr<CurveParams> => ref ptr<CurveParams>_ptr;
         }
 
-        private static ref CurveParams p256Params = default;        private static ref big.Int p256RInverse = default;
+        private static ptr<CurveParams> p256Params;        private static ptr<big.Int> p256RInverse;
 
         private static void initP256()
         { 
             // See FIPS 186-3, section D.2.3
-            p256Params = ref new CurveParams(Name:"P-256");
+            p256Params = addr(new CurveParams(Name:"P-256"));
             p256Params.P, _ = @new<big.Int>().SetString("115792089210356248762697446949407573530086143415290314195533631308867097853951", 10L);
             p256Params.N, _ = @new<big.Int>().SetString("115792089210356248762697446949407573529996955224135760342422259061068512044369", 10L);
             p256Params.B, _ = @new<big.Int>().SetString("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16L);
@@ -39,18 +39,21 @@ namespace crypto
 
             // Arch-specific initialization, i.e. let a platform dynamically pick a P256 implementation
             initP256Arch();
+
         }
 
-        private static ref CurveParams Params(this p256Curve curve)
+        private static ptr<CurveParams> Params(this p256Curve curve)
         {
-            return curve.CurveParams;
+            return _addr_curve.CurveParams!;
         }
 
         // p256GetScalar endian-swaps the big-endian scalar value from in and writes it
         // to out. If the scalar is equal or greater than the order of the group, it's
         // reduced modulo that order.
-        private static void p256GetScalar(ref array<byte> @out, slice<byte> @in)
+        private static void p256GetScalar(ptr<array<byte>> _addr_@out, slice<byte> @in)
         {
+            ref array<byte> @out = ref _addr_@out.val;
+
             ptr<big.Int> n = @new<big.Int>().SetBytes(in);
             slice<byte> scalarBytes = default;
 
@@ -63,39 +66,49 @@ namespace crypto
             {
                 scalarBytes = in;
             }
+
             foreach (var (i, v) in scalarBytes)
             {
                 out[len(scalarBytes) - (1L + i)] = v;
             }
+
         }
 
-        private static (ref big.Int, ref big.Int) ScalarBaseMult(this p256Curve _p0, slice<byte> scalar)
+        private static (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(this p256Curve _p0, slice<byte> scalar)
         {
-            array<byte> scalarReversed = new array<byte>(32L);
-            p256GetScalar(ref scalarReversed, scalar);
+            ptr<big.Int> x = default!;
+            ptr<big.Int> y = default!;
 
-            array<uint> x1 = new array<uint>(p256Limbs);            array<uint> y1 = new array<uint>(p256Limbs);            array<uint> z1 = new array<uint>(p256Limbs);
+            ref array<byte> scalarReversed = ref heap(new array<byte>(32L), out ptr<array<byte>> _addr_scalarReversed);
+            p256GetScalar(_addr_scalarReversed, scalar);
 
-            p256ScalarBaseMult(ref x1, ref y1, ref z1, ref scalarReversed);
-            return p256ToAffine(ref x1, ref y1, ref z1);
+            ref array<uint> x1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_x1);            ref array<uint> y1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_y1);            ref array<uint> z1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_z1);
+
+            p256ScalarBaseMult(_addr_x1, _addr_y1, _addr_z1, _addr_scalarReversed);
+            return _addr_p256ToAffine(_addr_x1, _addr_y1, _addr_z1)!;
         }
 
-        private static (ref big.Int, ref big.Int) ScalarMult(this p256Curve _p0, ref big.Int bigX, ref big.Int bigY, slice<byte> scalar)
+        private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this p256Curve _p0, ptr<big.Int> _addr_bigX, ptr<big.Int> _addr_bigY, slice<byte> scalar)
         {
-            array<byte> scalarReversed = new array<byte>(32L);
-            p256GetScalar(ref scalarReversed, scalar);
+            ptr<big.Int> x = default!;
+            ptr<big.Int> y = default!;
+            ref big.Int bigX = ref _addr_bigX.val;
+            ref big.Int bigY = ref _addr_bigY.val;
 
-            array<uint> px = new array<uint>(p256Limbs);            array<uint> py = new array<uint>(p256Limbs);            array<uint> x1 = new array<uint>(p256Limbs);            array<uint> y1 = new array<uint>(p256Limbs);            array<uint> z1 = new array<uint>(p256Limbs);
+            ref array<byte> scalarReversed = ref heap(new array<byte>(32L), out ptr<array<byte>> _addr_scalarReversed);
+            p256GetScalar(_addr_scalarReversed, scalar);
 
-            p256FromBig(ref px, bigX);
-            p256FromBig(ref py, bigY);
-            p256ScalarMult(ref x1, ref y1, ref z1, ref px, ref py, ref scalarReversed);
-            return p256ToAffine(ref x1, ref y1, ref z1);
+            ref array<uint> px = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_px);            ref array<uint> py = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_py);            ref array<uint> x1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_x1);            ref array<uint> y1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_y1);            ref array<uint> z1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_z1);
+
+            p256FromBig(_addr_px, _addr_bigX);
+            p256FromBig(_addr_py, _addr_bigY);
+            p256ScalarMult(_addr_x1, _addr_y1, _addr_z1, _addr_px, _addr_py, _addr_scalarReversed);
+            return _addr_p256ToAffine(_addr_x1, _addr_y1, _addr_z1)!;
         }
 
         // Field elements are represented as nine, unsigned 32-bit words.
         //
-        // The value of an field element is:
+        // The value of a field element is:
         //   x[0] + (x[1] * 2**29) + (x[2] * 2**57) + ... + (x[8] * 2**228)
         //
         // That is, each limb is alternately 29 or 28-bits wide in little-endian
@@ -110,8 +123,9 @@ namespace crypto
         // value |y| is stored as (y*R) mod p, where p is the P-256 prime and R is
         // 2**257.
 
-        private static readonly long p256Limbs = 9L;
-        private static readonly ulong bottom29Bits = 0x1fffffffUL;
+        private static readonly long p256Limbs = (long)9L;
+        private static readonly ulong bottom29Bits = (ulong)0x1fffffffUL;
+
 
  
         // p256One is the number 1 as a field element.
@@ -163,8 +177,10 @@ namespace crypto
         //
         // On entry: carry < 2**3, inout[0,2,...] < 2**29, inout[1,3,...] < 2**28.
         // On exit: inout[0,2,..] < 2**30, inout[1,3,...] < 2**29.
-        private static void p256ReduceCarry(ref array<uint> inout, uint carry)
+        private static void p256ReduceCarry(ptr<array<uint>> _addr_inout, uint carry)
         {
+            ref array<uint> inout = ref _addr_inout.val;
+
             var carry_mask = nonZeroToAllOnes(carry);
 
             inout[0L] += carry << (int)(1L);
@@ -180,14 +196,19 @@ namespace crypto
             // next line.
             inout[7L] -= 1L & carry_mask;
             inout[7L] += carry << (int)(25L);
+
         }
 
         // p256Sum sets out = in+in2.
         //
         // On entry, in[i]+in2[i] must not overflow a 32-bit word.
         // On exit: out[0,2,...] < 2**30, out[1,3,...] < 2**29
-        private static void p256Sum(ref array<uint> @out, ref array<uint> @in, ref array<uint> in2)
+        private static void p256Sum(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_@in, ptr<array<uint>> _addr_in2)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+            ref array<uint> @in = ref _addr_@in.val;
+            ref array<uint> in2 = ref _addr_in2.val;
+
             var carry = uint32(0L);
             for (long i = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
             {
@@ -201,21 +222,25 @@ namespace crypto
                 {
                     break;
                 }
+
                 out[i] = in[i] + in2[i];
                 out[i] += carry;
                 carry = out[i] >> (int)(28L);
                 out[i] &= bottom28Bits;
+
             }
 
 
-            p256ReduceCarry(out, carry);
+            p256ReduceCarry(_addr_out, carry);
+
         }
 
-        private static readonly long two30m2 = 1L << (int)(30L) - 1L << (int)(2L);
-        private static readonly long two30p13m2 = 1L << (int)(30L) + 1L << (int)(13L) - 1L << (int)(2L);
-        private static readonly long two31m2 = 1L << (int)(31L) - 1L << (int)(2L);
-        private static readonly long two31p24m2 = 1L << (int)(31L) + 1L << (int)(24L) - 1L << (int)(2L);
-        private static readonly long two30m27m2 = 1L << (int)(30L) - 1L << (int)(27L) - 1L << (int)(2L);
+        private static readonly long two30m2 = (long)1L << (int)(30L) - 1L << (int)(2L);
+        private static readonly long two30p13m2 = (long)1L << (int)(30L) + 1L << (int)(13L) - 1L << (int)(2L);
+        private static readonly long two31m2 = (long)1L << (int)(31L) - 1L << (int)(2L);
+        private static readonly long two31p24m2 = (long)1L << (int)(31L) + 1L << (int)(24L) - 1L << (int)(2L);
+        private static readonly long two30m27m2 = (long)1L << (int)(30L) - 1L << (int)(27L) - 1L << (int)(2L);
+
 
         // p256Zero31 is 0 mod p.
         private static array<uint> p256Zero31 = new array<uint>(new uint[] { two31m3, two30m2, two31m2, two30p13m2, two31m2, two30m2, two31p24m2, two30m27m2, two31m2 });
@@ -225,8 +250,12 @@ namespace crypto
         // On entry: in[0,2,...] < 2**30, in[1,3,...] < 2**29 and
         //           in2[0,2,...] < 2**30, in2[1,3,...] < 2**29.
         // On exit: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
-        private static void p256Diff(ref array<uint> @out, ref array<uint> @in, ref array<uint> in2)
+        private static void p256Diff(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_@in, ptr<array<uint>> _addr_in2)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+            ref array<uint> @in = ref _addr_@in.val;
+            ref array<uint> in2 = ref _addr_in2.val;
+
             uint carry = default;
 
             for (long i = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
@@ -242,19 +271,22 @@ namespace crypto
                 {
                     break;
                 }
+
                 out[i] = in[i] - in2[i];
                 out[i] += p256Zero31[i];
                 out[i] += carry;
                 carry = out[i] >> (int)(28L);
                 out[i] &= bottom28Bits;
+
             }
 
 
-            p256ReduceCarry(out, carry);
+            p256ReduceCarry(_addr_out, carry);
+
         }
 
         // p256ReduceDegree sets out = tmp/R mod p where tmp contains 64-bit words with
-        // the same 29,28,... bit positions as an field element.
+        // the same 29,28,... bit positions as a field element.
         //
         // The values in field elements are in Montgomery form: x*R mod p where R =
         // 2**257. Since we just multiplied two Montgomery values together, the result
@@ -263,9 +295,10 @@ namespace crypto
         //
         // On entry: tmp[i] < 2**64
         // On exit: out[0,2,...] < 2**30, out[1,3,...] < 2**29
-        private static void p256ReduceDegree(ref array<uint> @out, array<ulong> tmp)
+        private static void p256ReduceDegree(ptr<array<uint>> _addr_@out, array<ulong> tmp)
         {
             tmp = tmp.Clone();
+            ref array<uint> @out = ref _addr_@out.val;
  
             // The following table may be helpful when reading this code:
             //
@@ -312,6 +345,7 @@ namespace crypto
                     {
                         break;
                     }
+
                     tmp2[i] = uint32(tmp[i - 2L] >> (int)(32L)) >> (int)(25L);
                     tmp2[i] += uint32(tmp[i - 1L]) >> (int)(29L);
                     tmp2[i] += ((uint32(tmp[i - 1L] >> (int)(32L))) << (int)(3L)) & bottom28Bits;
@@ -319,6 +353,7 @@ namespace crypto
                     tmp2[i] += carry;
                     carry = tmp2[i] >> (int)(28L);
                     tmp2[i] &= bottom28Bits;
+
                 }
 
 
@@ -418,6 +453,7 @@ namespace crypto
                         break;
                     i += 2L;
                     }
+
                     tmp2[i + 2L] += tmp2[i + 1L] >> (int)(28L);
                     x = tmp2[i + 1L] & bottom28Bits;
                     xMask = nonZeroToAllOnes(x);
@@ -441,6 +477,7 @@ namespace crypto
                     tmp2[i + 9L] += 0x10000000UL & xMask;
                     tmp2[i + 9L] -= x;
                     tmp2[i + 10L] += (x - 1L) & xMask;
+
                 } 
 
                 // We merge the right shift with a carry chain. The words above 2**257 have
@@ -472,6 +509,7 @@ namespace crypto
                     out[i] += carry;
                     carry = out[i] >> (int)(28L);
                     out[i] &= bottom28Bits;
+
                 }
 
 
@@ -483,15 +521,19 @@ namespace crypto
             carry = out[8L] >> (int)(29L);
             out[8L] &= bottom29Bits;
 
-            p256ReduceCarry(out, carry);
+            p256ReduceCarry(_addr_out, carry);
+
         }
 
         // p256Square sets out=in*in.
         //
         // On entry: in[0,2,...] < 2**30, in[1,3,...] < 2**29.
         // On exit: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
-        private static void p256Square(ref array<uint> @out, ref array<uint> @in)
+        private static void p256Square(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_@in)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+            ref array<uint> @in = ref _addr_@in.val;
+
             array<ulong> tmp = new array<ulong>(17L);
 
             tmp[0L] = uint64(in[0L]) * uint64(in[0L]);
@@ -514,7 +556,8 @@ namespace crypto
             tmp[15L] = uint64(in[7L]) * (uint64(in[8L]) << (int)(1L));
             tmp[16L] = uint64(in[8L]) * uint64(in[8L]);
 
-            p256ReduceDegree(out, tmp);
+            p256ReduceDegree(_addr_out, tmp);
+
         }
 
         // p256Mul sets out=in*in2.
@@ -522,8 +565,12 @@ namespace crypto
         // On entry: in[0,2,...] < 2**30, in[1,3,...] < 2**29 and
         //           in2[0,2,...] < 2**30, in2[1,3,...] < 2**29.
         // On exit: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
-        private static void p256Mul(ref array<uint> @out, ref array<uint> @in, ref array<uint> in2)
+        private static void p256Mul(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_@in, ptr<array<uint>> _addr_in2)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+            ref array<uint> @in = ref _addr_@in.val;
+            ref array<uint> in2 = ref _addr_in2.val;
+
             array<ulong> tmp = new array<ulong>(17L);
 
             tmp[0L] = uint64(in[0L]) * uint64(in2[0L]);
@@ -546,12 +593,16 @@ namespace crypto
             tmp[15L] = uint64(in[7L]) * (uint64(in2[8L]) << (int)(0L)) + uint64(in[8L]) * (uint64(in2[7L]) << (int)(0L));
             tmp[16L] = uint64(in[8L]) * (uint64(in2[8L]) << (int)(0L));
 
-            p256ReduceDegree(out, tmp);
+            p256ReduceDegree(_addr_out, tmp);
+
         }
 
-        private static void p256Assign(ref array<uint> @out, ref array<uint> @in)
+        private static void p256Assign(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_@in)
         {
-            out.Value = in.Value;
+            ref array<uint> @out = ref _addr_@out.val;
+            ref array<uint> @in = ref _addr_@in.val;
+
+            out.val = in.val;
         }
 
         // p256Invert calculates |out| = |in|^{-1}
@@ -560,135 +611,140 @@ namespace crypto
         //   a^p = a (mod p)
         //   a^{p-1} = 1 (mod p)
         //   a^{p-2} = a^{-1} (mod p)
-        private static void p256Invert(ref array<uint> @out, ref array<uint> @in)
+        private static void p256Invert(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_@in)
         {
-            array<uint> ftmp = new array<uint>(p256Limbs);            array<uint> ftmp2 = new array<uint>(p256Limbs); 
+            ref array<uint> @out = ref _addr_@out.val;
+            ref array<uint> @in = ref _addr_@in.val;
+
+            ref array<uint> ftmp = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_ftmp);            ref array<uint> ftmp2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_ftmp2); 
 
             // each e_I will hold |in|^{2^I - 1}
  
 
             // each e_I will hold |in|^{2^I - 1}
-            array<uint> e2 = new array<uint>(p256Limbs);            array<uint> e4 = new array<uint>(p256Limbs);            array<uint> e8 = new array<uint>(p256Limbs);            array<uint> e16 = new array<uint>(p256Limbs);            array<uint> e32 = new array<uint>(p256Limbs);            array<uint> e64 = new array<uint>(p256Limbs);
+            ref array<uint> e2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_e2);            ref array<uint> e4 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_e4);            ref array<uint> e8 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_e8);            ref array<uint> e16 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_e16);            ref array<uint> e32 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_e32);            ref array<uint> e64 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_e64);
 
 
 
-            p256Square(ref ftmp, in); // 2^1
-            p256Mul(ref ftmp, in, ref ftmp); // 2^2 - 2^0
-            p256Assign(ref e2, ref ftmp);
-            p256Square(ref ftmp, ref ftmp); // 2^3 - 2^1
-            p256Square(ref ftmp, ref ftmp); // 2^4 - 2^2
-            p256Mul(ref ftmp, ref ftmp, ref e2); // 2^4 - 2^0
-            p256Assign(ref e4, ref ftmp);
-            p256Square(ref ftmp, ref ftmp); // 2^5 - 2^1
-            p256Square(ref ftmp, ref ftmp); // 2^6 - 2^2
-            p256Square(ref ftmp, ref ftmp); // 2^7 - 2^3
-            p256Square(ref ftmp, ref ftmp); // 2^8 - 2^4
-            p256Mul(ref ftmp, ref ftmp, ref e4); // 2^8 - 2^0
-            p256Assign(ref e8, ref ftmp);
+            p256Square(_addr_ftmp, _addr_in); // 2^1
+            p256Mul(_addr_ftmp, _addr_in, _addr_ftmp); // 2^2 - 2^0
+            p256Assign(_addr_e2, _addr_ftmp);
+            p256Square(_addr_ftmp, _addr_ftmp); // 2^3 - 2^1
+            p256Square(_addr_ftmp, _addr_ftmp); // 2^4 - 2^2
+            p256Mul(_addr_ftmp, _addr_ftmp, _addr_e2); // 2^4 - 2^0
+            p256Assign(_addr_e4, _addr_ftmp);
+            p256Square(_addr_ftmp, _addr_ftmp); // 2^5 - 2^1
+            p256Square(_addr_ftmp, _addr_ftmp); // 2^6 - 2^2
+            p256Square(_addr_ftmp, _addr_ftmp); // 2^7 - 2^3
+            p256Square(_addr_ftmp, _addr_ftmp); // 2^8 - 2^4
+            p256Mul(_addr_ftmp, _addr_ftmp, _addr_e4); // 2^8 - 2^0
+            p256Assign(_addr_e8, _addr_ftmp);
             {
                 long i__prev1 = i;
 
                 for (long i = 0L; i < 8L; i++)
                 {
-                    p256Square(ref ftmp, ref ftmp);
+                    p256Square(_addr_ftmp, _addr_ftmp);
                 } // 2^16 - 2^8
 
 
                 i = i__prev1;
             } // 2^16 - 2^8
-            p256Mul(ref ftmp, ref ftmp, ref e8); // 2^16 - 2^0
-            p256Assign(ref e16, ref ftmp);
+            p256Mul(_addr_ftmp, _addr_ftmp, _addr_e8); // 2^16 - 2^0
+            p256Assign(_addr_e16, _addr_ftmp);
             {
                 long i__prev1 = i;
 
                 for (i = 0L; i < 16L; i++)
                 {
-                    p256Square(ref ftmp, ref ftmp);
+                    p256Square(_addr_ftmp, _addr_ftmp);
                 } // 2^32 - 2^16
 
 
                 i = i__prev1;
             } // 2^32 - 2^16
-            p256Mul(ref ftmp, ref ftmp, ref e16); // 2^32 - 2^0
-            p256Assign(ref e32, ref ftmp);
+            p256Mul(_addr_ftmp, _addr_ftmp, _addr_e16); // 2^32 - 2^0
+            p256Assign(_addr_e32, _addr_ftmp);
             {
                 long i__prev1 = i;
 
                 for (i = 0L; i < 32L; i++)
                 {
-                    p256Square(ref ftmp, ref ftmp);
+                    p256Square(_addr_ftmp, _addr_ftmp);
                 } // 2^64 - 2^32
 
 
                 i = i__prev1;
             } // 2^64 - 2^32
-            p256Assign(ref e64, ref ftmp);
-            p256Mul(ref ftmp, ref ftmp, in); // 2^64 - 2^32 + 2^0
+            p256Assign(_addr_e64, _addr_ftmp);
+            p256Mul(_addr_ftmp, _addr_ftmp, _addr_in); // 2^64 - 2^32 + 2^0
             {
                 long i__prev1 = i;
 
                 for (i = 0L; i < 192L; i++)
                 {
-                    p256Square(ref ftmp, ref ftmp);
+                    p256Square(_addr_ftmp, _addr_ftmp);
                 } // 2^256 - 2^224 + 2^192
 
 
                 i = i__prev1;
             } // 2^256 - 2^224 + 2^192
 
-            p256Mul(ref ftmp2, ref e64, ref e32); // 2^64 - 2^0
+            p256Mul(_addr_ftmp2, _addr_e64, _addr_e32); // 2^64 - 2^0
             {
                 long i__prev1 = i;
 
                 for (i = 0L; i < 16L; i++)
                 {
-                    p256Square(ref ftmp2, ref ftmp2);
+                    p256Square(_addr_ftmp2, _addr_ftmp2);
                 } // 2^80 - 2^16
 
 
                 i = i__prev1;
             } // 2^80 - 2^16
-            p256Mul(ref ftmp2, ref ftmp2, ref e16); // 2^80 - 2^0
+            p256Mul(_addr_ftmp2, _addr_ftmp2, _addr_e16); // 2^80 - 2^0
             {
                 long i__prev1 = i;
 
                 for (i = 0L; i < 8L; i++)
                 {
-                    p256Square(ref ftmp2, ref ftmp2);
+                    p256Square(_addr_ftmp2, _addr_ftmp2);
                 } // 2^88 - 2^8
 
 
                 i = i__prev1;
             } // 2^88 - 2^8
-            p256Mul(ref ftmp2, ref ftmp2, ref e8); // 2^88 - 2^0
+            p256Mul(_addr_ftmp2, _addr_ftmp2, _addr_e8); // 2^88 - 2^0
             {
                 long i__prev1 = i;
 
                 for (i = 0L; i < 4L; i++)
                 {
-                    p256Square(ref ftmp2, ref ftmp2);
+                    p256Square(_addr_ftmp2, _addr_ftmp2);
                 } // 2^92 - 2^4
 
 
                 i = i__prev1;
             } // 2^92 - 2^4
-            p256Mul(ref ftmp2, ref ftmp2, ref e4); // 2^92 - 2^0
-            p256Square(ref ftmp2, ref ftmp2); // 2^93 - 2^1
-            p256Square(ref ftmp2, ref ftmp2); // 2^94 - 2^2
-            p256Mul(ref ftmp2, ref ftmp2, ref e2); // 2^94 - 2^0
-            p256Square(ref ftmp2, ref ftmp2); // 2^95 - 2^1
-            p256Square(ref ftmp2, ref ftmp2); // 2^96 - 2^2
-            p256Mul(ref ftmp2, ref ftmp2, in); // 2^96 - 3
+            p256Mul(_addr_ftmp2, _addr_ftmp2, _addr_e4); // 2^92 - 2^0
+            p256Square(_addr_ftmp2, _addr_ftmp2); // 2^93 - 2^1
+            p256Square(_addr_ftmp2, _addr_ftmp2); // 2^94 - 2^2
+            p256Mul(_addr_ftmp2, _addr_ftmp2, _addr_e2); // 2^94 - 2^0
+            p256Square(_addr_ftmp2, _addr_ftmp2); // 2^95 - 2^1
+            p256Square(_addr_ftmp2, _addr_ftmp2); // 2^96 - 2^2
+            p256Mul(_addr_ftmp2, _addr_ftmp2, _addr_in); // 2^96 - 3
 
-            p256Mul(out, ref ftmp2, ref ftmp); // 2^256 - 2^224 + 2^192 + 2^96 - 3
+            p256Mul(_addr_out, _addr_ftmp2, _addr_ftmp); // 2^256 - 2^224 + 2^192 + 2^96 - 3
         }
 
         // p256Scalar3 sets out=3*out.
         //
         // On entry: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
         // On exit: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
-        private static void p256Scalar3(ref array<uint> @out)
+        private static void p256Scalar3(ptr<array<uint>> _addr_@out)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+
             uint carry = default;
 
             for (long i = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
@@ -703,22 +759,27 @@ namespace crypto
                 {
                     break;
                 }
+
                 out[i] *= 3L;
                 out[i] += carry;
                 carry = out[i] >> (int)(28L);
                 out[i] &= bottom28Bits;
+
             }
 
 
-            p256ReduceCarry(out, carry);
+            p256ReduceCarry(_addr_out, carry);
+
         }
 
         // p256Scalar4 sets out=4*out.
         //
         // On entry: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
         // On exit: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
-        private static void p256Scalar4(ref array<uint> @out)
+        private static void p256Scalar4(ptr<array<uint>> _addr_@out)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+
             uint carry = default;            uint nextCarry = default;
 
 
@@ -737,24 +798,29 @@ namespace crypto
                 {
                     break;
                 }
+
                 nextCarry = out[i] >> (int)(26L);
                 out[i] <<= 2L;
                 out[i] &= bottom28Bits;
                 out[i] += carry;
                 carry = nextCarry + (out[i] >> (int)(28L));
                 out[i] &= bottom28Bits;
+
             }
 
 
-            p256ReduceCarry(out, carry);
+            p256ReduceCarry(_addr_out, carry);
+
         }
 
         // p256Scalar8 sets out=8*out.
         //
         // On entry: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
         // On exit: out[0,2,...] < 2**30, out[1,3,...] < 2**29.
-        private static void p256Scalar8(ref array<uint> @out)
+        private static void p256Scalar8(ptr<array<uint>> _addr_@out)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+
             uint carry = default;            uint nextCarry = default;
 
 
@@ -773,16 +839,19 @@ namespace crypto
                 {
                     break;
                 }
+
                 nextCarry = out[i] >> (int)(25L);
                 out[i] <<= 3L;
                 out[i] &= bottom28Bits;
                 out[i] += carry;
                 carry = nextCarry + (out[i] >> (int)(28L));
                 out[i] &= bottom28Bits;
+
             }
 
 
-            p256ReduceCarry(out, carry);
+            p256ReduceCarry(_addr_out, carry);
+
         }
 
         // Group operations:
@@ -793,144 +862,177 @@ namespace crypto
 
         // p256PointDouble sets {xOut,yOut,zOut} = 2*{x,y,z}.
         //
-        // See http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l
-        private static void p256PointDouble(ref array<uint> xOut, ref array<uint> yOut, ref array<uint> zOut, ref array<uint> x, ref array<uint> y, ref array<uint> z)
+        // See https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l
+        private static void p256PointDouble(ptr<array<uint>> _addr_xOut, ptr<array<uint>> _addr_yOut, ptr<array<uint>> _addr_zOut, ptr<array<uint>> _addr_x, ptr<array<uint>> _addr_y, ptr<array<uint>> _addr_z)
         {
-            array<uint> delta = new array<uint>(p256Limbs);            array<uint> gamma = new array<uint>(p256Limbs);            array<uint> alpha = new array<uint>(p256Limbs);            array<uint> beta = new array<uint>(p256Limbs);            array<uint> tmp = new array<uint>(p256Limbs);            array<uint> tmp2 = new array<uint>(p256Limbs);
+            ref array<uint> xOut = ref _addr_xOut.val;
+            ref array<uint> yOut = ref _addr_yOut.val;
+            ref array<uint> zOut = ref _addr_zOut.val;
+            ref array<uint> x = ref _addr_x.val;
+            ref array<uint> y = ref _addr_y.val;
+            ref array<uint> z = ref _addr_z.val;
+
+            ref array<uint> delta = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_delta);            ref array<uint> gamma = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_gamma);            ref array<uint> alpha = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_alpha);            ref array<uint> beta = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_beta);            ref array<uint> tmp = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_tmp);            ref array<uint> tmp2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_tmp2);
 
 
 
-            p256Square(ref delta, z);
-            p256Square(ref gamma, y);
-            p256Mul(ref beta, x, ref gamma);
+            p256Square(_addr_delta, _addr_z);
+            p256Square(_addr_gamma, _addr_y);
+            p256Mul(_addr_beta, _addr_x, _addr_gamma);
 
-            p256Sum(ref tmp, x, ref delta);
-            p256Diff(ref tmp2, x, ref delta);
-            p256Mul(ref alpha, ref tmp, ref tmp2);
-            p256Scalar3(ref alpha);
+            p256Sum(_addr_tmp, _addr_x, _addr_delta);
+            p256Diff(_addr_tmp2, _addr_x, _addr_delta);
+            p256Mul(_addr_alpha, _addr_tmp, _addr_tmp2);
+            p256Scalar3(_addr_alpha);
 
-            p256Sum(ref tmp, y, z);
-            p256Square(ref tmp, ref tmp);
-            p256Diff(ref tmp, ref tmp, ref gamma);
-            p256Diff(zOut, ref tmp, ref delta);
+            p256Sum(_addr_tmp, _addr_y, _addr_z);
+            p256Square(_addr_tmp, _addr_tmp);
+            p256Diff(_addr_tmp, _addr_tmp, _addr_gamma);
+            p256Diff(_addr_zOut, _addr_tmp, _addr_delta);
 
-            p256Scalar4(ref beta);
-            p256Square(xOut, ref alpha);
-            p256Diff(xOut, xOut, ref beta);
-            p256Diff(xOut, xOut, ref beta);
+            p256Scalar4(_addr_beta);
+            p256Square(_addr_xOut, _addr_alpha);
+            p256Diff(_addr_xOut, _addr_xOut, _addr_beta);
+            p256Diff(_addr_xOut, _addr_xOut, _addr_beta);
 
-            p256Diff(ref tmp, ref beta, xOut);
-            p256Mul(ref tmp, ref alpha, ref tmp);
-            p256Square(ref tmp2, ref gamma);
-            p256Scalar8(ref tmp2);
-            p256Diff(yOut, ref tmp, ref tmp2);
+            p256Diff(_addr_tmp, _addr_beta, _addr_xOut);
+            p256Mul(_addr_tmp, _addr_alpha, _addr_tmp);
+            p256Square(_addr_tmp2, _addr_gamma);
+            p256Scalar8(_addr_tmp2);
+            p256Diff(_addr_yOut, _addr_tmp, _addr_tmp2);
         }
 
         // p256PointAddMixed sets {xOut,yOut,zOut} = {x1,y1,z1} + {x2,y2,1}.
         // (i.e. the second point is affine.)
         //
-        // See http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
+        // See https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
         //
         // Note that this function does not handle P+P, infinity+P nor P+infinity
         // correctly.
-        private static void p256PointAddMixed(ref array<uint> xOut, ref array<uint> yOut, ref array<uint> zOut, ref array<uint> x1, ref array<uint> y1, ref array<uint> z1, ref array<uint> x2, ref array<uint> y2)
+        private static void p256PointAddMixed(ptr<array<uint>> _addr_xOut, ptr<array<uint>> _addr_yOut, ptr<array<uint>> _addr_zOut, ptr<array<uint>> _addr_x1, ptr<array<uint>> _addr_y1, ptr<array<uint>> _addr_z1, ptr<array<uint>> _addr_x2, ptr<array<uint>> _addr_y2)
         {
-            array<uint> z1z1 = new array<uint>(p256Limbs);            array<uint> z1z1z1 = new array<uint>(p256Limbs);            array<uint> s2 = new array<uint>(p256Limbs);            array<uint> u2 = new array<uint>(p256Limbs);            array<uint> h = new array<uint>(p256Limbs);            array<uint> i = new array<uint>(p256Limbs);            array<uint> j = new array<uint>(p256Limbs);            array<uint> r = new array<uint>(p256Limbs);            array<uint> rr = new array<uint>(p256Limbs);            array<uint> v = new array<uint>(p256Limbs);            array<uint> tmp = new array<uint>(p256Limbs);
+            ref array<uint> xOut = ref _addr_xOut.val;
+            ref array<uint> yOut = ref _addr_yOut.val;
+            ref array<uint> zOut = ref _addr_zOut.val;
+            ref array<uint> x1 = ref _addr_x1.val;
+            ref array<uint> y1 = ref _addr_y1.val;
+            ref array<uint> z1 = ref _addr_z1.val;
+            ref array<uint> x2 = ref _addr_x2.val;
+            ref array<uint> y2 = ref _addr_y2.val;
+
+            ref array<uint> z1z1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_z1z1);            ref array<uint> z1z1z1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_z1z1z1);            ref array<uint> s2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_s2);            ref array<uint> u2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_u2);            ref array<uint> h = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_h);            ref array<uint> i = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_i);            ref array<uint> j = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_j);            ref array<uint> r = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_r);            ref array<uint> rr = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_rr);            ref array<uint> v = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_v);            ref array<uint> tmp = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_tmp);
 
 
 
-            p256Square(ref z1z1, z1);
-            p256Sum(ref tmp, z1, z1);
+            p256Square(_addr_z1z1, _addr_z1);
+            p256Sum(_addr_tmp, _addr_z1, _addr_z1);
 
-            p256Mul(ref u2, x2, ref z1z1);
-            p256Mul(ref z1z1z1, z1, ref z1z1);
-            p256Mul(ref s2, y2, ref z1z1z1);
-            p256Diff(ref h, ref u2, x1);
-            p256Sum(ref i, ref h, ref h);
-            p256Square(ref i, ref i);
-            p256Mul(ref j, ref h, ref i);
-            p256Diff(ref r, ref s2, y1);
-            p256Sum(ref r, ref r, ref r);
-            p256Mul(ref v, x1, ref i);
+            p256Mul(_addr_u2, _addr_x2, _addr_z1z1);
+            p256Mul(_addr_z1z1z1, _addr_z1, _addr_z1z1);
+            p256Mul(_addr_s2, _addr_y2, _addr_z1z1z1);
+            p256Diff(_addr_h, _addr_u2, _addr_x1);
+            p256Sum(_addr_i, _addr_h, _addr_h);
+            p256Square(_addr_i, _addr_i);
+            p256Mul(_addr_j, _addr_h, _addr_i);
+            p256Diff(_addr_r, _addr_s2, _addr_y1);
+            p256Sum(_addr_r, _addr_r, _addr_r);
+            p256Mul(_addr_v, _addr_x1, _addr_i);
 
-            p256Mul(zOut, ref tmp, ref h);
-            p256Square(ref rr, ref r);
-            p256Diff(xOut, ref rr, ref j);
-            p256Diff(xOut, xOut, ref v);
-            p256Diff(xOut, xOut, ref v);
+            p256Mul(_addr_zOut, _addr_tmp, _addr_h);
+            p256Square(_addr_rr, _addr_r);
+            p256Diff(_addr_xOut, _addr_rr, _addr_j);
+            p256Diff(_addr_xOut, _addr_xOut, _addr_v);
+            p256Diff(_addr_xOut, _addr_xOut, _addr_v);
 
-            p256Diff(ref tmp, ref v, xOut);
-            p256Mul(yOut, ref tmp, ref r);
-            p256Mul(ref tmp, y1, ref j);
-            p256Diff(yOut, yOut, ref tmp);
-            p256Diff(yOut, yOut, ref tmp);
+            p256Diff(_addr_tmp, _addr_v, _addr_xOut);
+            p256Mul(_addr_yOut, _addr_tmp, _addr_r);
+            p256Mul(_addr_tmp, _addr_y1, _addr_j);
+            p256Diff(_addr_yOut, _addr_yOut, _addr_tmp);
+            p256Diff(_addr_yOut, _addr_yOut, _addr_tmp);
         }
 
         // p256PointAdd sets {xOut,yOut,zOut} = {x1,y1,z1} + {x2,y2,z2}.
         //
-        // See http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
+        // See https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
         //
         // Note that this function does not handle P+P, infinity+P nor P+infinity
         // correctly.
-        private static void p256PointAdd(ref array<uint> xOut, ref array<uint> yOut, ref array<uint> zOut, ref array<uint> x1, ref array<uint> y1, ref array<uint> z1, ref array<uint> x2, ref array<uint> y2, ref array<uint> z2)
+        private static void p256PointAdd(ptr<array<uint>> _addr_xOut, ptr<array<uint>> _addr_yOut, ptr<array<uint>> _addr_zOut, ptr<array<uint>> _addr_x1, ptr<array<uint>> _addr_y1, ptr<array<uint>> _addr_z1, ptr<array<uint>> _addr_x2, ptr<array<uint>> _addr_y2, ptr<array<uint>> _addr_z2)
         {
-            array<uint> z1z1 = new array<uint>(p256Limbs);            array<uint> z1z1z1 = new array<uint>(p256Limbs);            array<uint> z2z2 = new array<uint>(p256Limbs);            array<uint> z2z2z2 = new array<uint>(p256Limbs);            array<uint> s1 = new array<uint>(p256Limbs);            array<uint> s2 = new array<uint>(p256Limbs);            array<uint> u1 = new array<uint>(p256Limbs);            array<uint> u2 = new array<uint>(p256Limbs);            array<uint> h = new array<uint>(p256Limbs);            array<uint> i = new array<uint>(p256Limbs);            array<uint> j = new array<uint>(p256Limbs);            array<uint> r = new array<uint>(p256Limbs);            array<uint> rr = new array<uint>(p256Limbs);            array<uint> v = new array<uint>(p256Limbs);            array<uint> tmp = new array<uint>(p256Limbs);
+            ref array<uint> xOut = ref _addr_xOut.val;
+            ref array<uint> yOut = ref _addr_yOut.val;
+            ref array<uint> zOut = ref _addr_zOut.val;
+            ref array<uint> x1 = ref _addr_x1.val;
+            ref array<uint> y1 = ref _addr_y1.val;
+            ref array<uint> z1 = ref _addr_z1.val;
+            ref array<uint> x2 = ref _addr_x2.val;
+            ref array<uint> y2 = ref _addr_y2.val;
+            ref array<uint> z2 = ref _addr_z2.val;
+
+            ref array<uint> z1z1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_z1z1);            ref array<uint> z1z1z1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_z1z1z1);            ref array<uint> z2z2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_z2z2);            ref array<uint> z2z2z2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_z2z2z2);            ref array<uint> s1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_s1);            ref array<uint> s2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_s2);            ref array<uint> u1 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_u1);            ref array<uint> u2 = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_u2);            ref array<uint> h = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_h);            ref array<uint> i = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_i);            ref array<uint> j = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_j);            ref array<uint> r = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_r);            ref array<uint> rr = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_rr);            ref array<uint> v = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_v);            ref array<uint> tmp = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_tmp);
 
 
 
-            p256Square(ref z1z1, z1);
-            p256Square(ref z2z2, z2);
-            p256Mul(ref u1, x1, ref z2z2);
+            p256Square(_addr_z1z1, _addr_z1);
+            p256Square(_addr_z2z2, _addr_z2);
+            p256Mul(_addr_u1, _addr_x1, _addr_z2z2);
 
-            p256Sum(ref tmp, z1, z2);
-            p256Square(ref tmp, ref tmp);
-            p256Diff(ref tmp, ref tmp, ref z1z1);
-            p256Diff(ref tmp, ref tmp, ref z2z2);
+            p256Sum(_addr_tmp, _addr_z1, _addr_z2);
+            p256Square(_addr_tmp, _addr_tmp);
+            p256Diff(_addr_tmp, _addr_tmp, _addr_z1z1);
+            p256Diff(_addr_tmp, _addr_tmp, _addr_z2z2);
 
-            p256Mul(ref z2z2z2, z2, ref z2z2);
-            p256Mul(ref s1, y1, ref z2z2z2);
+            p256Mul(_addr_z2z2z2, _addr_z2, _addr_z2z2);
+            p256Mul(_addr_s1, _addr_y1, _addr_z2z2z2);
 
-            p256Mul(ref u2, x2, ref z1z1);
-            p256Mul(ref z1z1z1, z1, ref z1z1);
-            p256Mul(ref s2, y2, ref z1z1z1);
-            p256Diff(ref h, ref u2, ref u1);
-            p256Sum(ref i, ref h, ref h);
-            p256Square(ref i, ref i);
-            p256Mul(ref j, ref h, ref i);
-            p256Diff(ref r, ref s2, ref s1);
-            p256Sum(ref r, ref r, ref r);
-            p256Mul(ref v, ref u1, ref i);
+            p256Mul(_addr_u2, _addr_x2, _addr_z1z1);
+            p256Mul(_addr_z1z1z1, _addr_z1, _addr_z1z1);
+            p256Mul(_addr_s2, _addr_y2, _addr_z1z1z1);
+            p256Diff(_addr_h, _addr_u2, _addr_u1);
+            p256Sum(_addr_i, _addr_h, _addr_h);
+            p256Square(_addr_i, _addr_i);
+            p256Mul(_addr_j, _addr_h, _addr_i);
+            p256Diff(_addr_r, _addr_s2, _addr_s1);
+            p256Sum(_addr_r, _addr_r, _addr_r);
+            p256Mul(_addr_v, _addr_u1, _addr_i);
 
-            p256Mul(zOut, ref tmp, ref h);
-            p256Square(ref rr, ref r);
-            p256Diff(xOut, ref rr, ref j);
-            p256Diff(xOut, xOut, ref v);
-            p256Diff(xOut, xOut, ref v);
+            p256Mul(_addr_zOut, _addr_tmp, _addr_h);
+            p256Square(_addr_rr, _addr_r);
+            p256Diff(_addr_xOut, _addr_rr, _addr_j);
+            p256Diff(_addr_xOut, _addr_xOut, _addr_v);
+            p256Diff(_addr_xOut, _addr_xOut, _addr_v);
 
-            p256Diff(ref tmp, ref v, xOut);
-            p256Mul(yOut, ref tmp, ref r);
-            p256Mul(ref tmp, ref s1, ref j);
-            p256Diff(yOut, yOut, ref tmp);
-            p256Diff(yOut, yOut, ref tmp);
+            p256Diff(_addr_tmp, _addr_v, _addr_xOut);
+            p256Mul(_addr_yOut, _addr_tmp, _addr_r);
+            p256Mul(_addr_tmp, _addr_s1, _addr_j);
+            p256Diff(_addr_yOut, _addr_yOut, _addr_tmp);
+            p256Diff(_addr_yOut, _addr_yOut, _addr_tmp);
         }
 
         // p256CopyConditional sets out=in if mask = 0xffffffff in constant time.
         //
         // On entry: mask is either 0 or 0xffffffff.
-        private static void p256CopyConditional(ref array<uint> @out, ref array<uint> @in, uint mask)
+        private static void p256CopyConditional(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_@in, uint mask)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+            ref array<uint> @in = ref _addr_@in.val;
+
             for (long i = 0L; i < p256Limbs; i++)
             {
                 var tmp = mask & (in[i] ^ out[i]);
                 out[i] ^= tmp;
             }
 
+
         }
 
         // p256SelectAffinePoint sets {out_x,out_y} to the index'th entry of table.
         // On entry: index < 16, table[0] must be zero.
-        private static void p256SelectAffinePoint(ref array<uint> xOut, ref array<uint> yOut, slice<uint> table, uint index)
+        private static void p256SelectAffinePoint(ptr<array<uint>> _addr_xOut, ptr<array<uint>> _addr_yOut, slice<uint> table, uint index)
         {
+            ref array<uint> xOut = ref _addr_xOut.val;
+            ref array<uint> yOut = ref _addr_yOut.val;
+
             {
                 var i__prev1 = i;
 
@@ -990,19 +1092,24 @@ namespace crypto
 
                         j = j__prev2;
                     }
-
                 }
 
 
                 i = i__prev1;
             }
+
         }
 
         // p256SelectJacobianPoint sets {out_x,out_y,out_z} to the index'th entry of
         // table.
         // On entry: index < 16, table[0] must be zero.
-        private static void p256SelectJacobianPoint(ref array<uint> xOut, ref array<uint> yOut, ref array<uint> zOut, ref array<array<array<uint>>> table, uint index)
+        private static void p256SelectJacobianPoint(ptr<array<uint>> _addr_xOut, ptr<array<uint>> _addr_yOut, ptr<array<uint>> _addr_zOut, ptr<array<array<array<uint>>>> _addr_table, uint index)
         {
+            ref array<uint> xOut = ref _addr_xOut.val;
+            ref array<uint> yOut = ref _addr_yOut.val;
+            ref array<uint> zOut = ref _addr_zOut.val;
+            ref array<array<array<uint>>> table = ref _addr_table.val;
+
             {
                 var i__prev1 = i;
 
@@ -1087,29 +1194,36 @@ namespace crypto
 
                         j = j__prev2;
                     }
-
                 }
 
 
                 i = i__prev1;
             }
+
         }
 
         // p256GetBit returns the bit'th bit of scalar.
-        private static uint p256GetBit(ref array<byte> scalar, ulong bit)
+        private static uint p256GetBit(ptr<array<byte>> _addr_scalar, ulong bit)
         {
+            ref array<byte> scalar = ref _addr_scalar.val;
+
             return uint32(((scalar[bit >> (int)(3L)]) >> (int)((bit & 7L))) & 1L);
         }
 
         // p256ScalarBaseMult sets {xOut,yOut,zOut} = scalar*G where scalar is a
         // little-endian number. Note that the value of scalar must be less than the
         // order of the group.
-        private static void p256ScalarBaseMult(ref array<uint> xOut, ref array<uint> yOut, ref array<uint> zOut, ref array<byte> scalar)
+        private static void p256ScalarBaseMult(ptr<array<uint>> _addr_xOut, ptr<array<uint>> _addr_yOut, ptr<array<uint>> _addr_zOut, ptr<array<byte>> _addr_scalar)
         {
+            ref array<uint> xOut = ref _addr_xOut.val;
+            ref array<uint> yOut = ref _addr_yOut.val;
+            ref array<uint> zOut = ref _addr_zOut.val;
+            ref array<byte> scalar = ref _addr_scalar.val;
+
             var nIsInfinityMask = ~uint32(0L);
             uint pIsNoninfiniteMask = default;            uint mask = default;            uint tableOffset = default;
 
-            array<uint> px = new array<uint>(p256Limbs);            array<uint> py = new array<uint>(p256Limbs);            array<uint> tx = new array<uint>(p256Limbs);            array<uint> ty = new array<uint>(p256Limbs);            array<uint> tz = new array<uint>(p256Limbs);
+            ref array<uint> px = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_px);            ref array<uint> py = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_py);            ref array<uint> tx = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_tx);            ref array<uint> ty = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_ty);            ref array<uint> tz = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_tz);
 
 
 
@@ -1159,94 +1273,116 @@ namespace crypto
                 {
                     if (i != 0L)
                     {
-                        p256PointDouble(xOut, yOut, zOut, xOut, yOut, zOut);
+                        p256PointDouble(_addr_xOut, _addr_yOut, _addr_zOut, _addr_xOut, _addr_yOut, _addr_zOut);
                     }
+
                     tableOffset = 0L;
                     {
                         var j = uint(0L);
 
                         while (j <= 32L)
                         {
-                            var bit0 = p256GetBit(scalar, 31L - i + j);
-                            var bit1 = p256GetBit(scalar, 95L - i + j);
-                            var bit2 = p256GetBit(scalar, 159L - i + j);
-                            var bit3 = p256GetBit(scalar, 223L - i + j);
+                            var bit0 = p256GetBit(_addr_scalar, 31L - i + j);
+                            var bit1 = p256GetBit(_addr_scalar, 95L - i + j);
+                            var bit2 = p256GetBit(_addr_scalar, 159L - i + j);
+                            var bit3 = p256GetBit(_addr_scalar, 223L - i + j);
                             var index = bit0 | (bit1 << (int)(1L)) | (bit2 << (int)(2L)) | (bit3 << (int)(3L));
 
-                            p256SelectAffinePoint(ref px, ref py, p256Precomputed[tableOffset..], index);
+                            p256SelectAffinePoint(_addr_px, _addr_py, p256Precomputed[tableOffset..], index);
                             tableOffset += 30L * p256Limbs; 
 
                             // Since scalar is less than the order of the group, we know that
                             // {xOut,yOut,zOut} != {px,py,1}, unless both are zero, which we handle
                             // below.
-                            p256PointAddMixed(ref tx, ref ty, ref tz, xOut, yOut, zOut, ref px, ref py); 
+                            p256PointAddMixed(_addr_tx, _addr_ty, _addr_tz, _addr_xOut, _addr_yOut, _addr_zOut, _addr_px, _addr_py); 
                             // The result of pointAddMixed is incorrect if {xOut,yOut,zOut} is zero
                             // (a.k.a.  the point at infinity). We handle that situation by
                             // copying the point from the table.
-                            p256CopyConditional(xOut, ref px, nIsInfinityMask);
-                            p256CopyConditional(yOut, ref py, nIsInfinityMask);
-                            p256CopyConditional(zOut, ref p256One, nIsInfinityMask); 
+                            p256CopyConditional(_addr_xOut, _addr_px, nIsInfinityMask);
+                            p256CopyConditional(_addr_yOut, _addr_py, nIsInfinityMask);
+                            p256CopyConditional(_addr_zOut, _addr_p256One, nIsInfinityMask); 
 
                             // Equally, the result is also wrong if the point from the table is
                             // zero, which happens when the index is zero. We handle that by
                             // only copying from {tx,ty,tz} to {xOut,yOut,zOut} if index != 0.
                             pIsNoninfiniteMask = nonZeroToAllOnes(index);
                             mask = pIsNoninfiniteMask & ~nIsInfinityMask;
-                            p256CopyConditional(xOut, ref tx, mask);
-                            p256CopyConditional(yOut, ref ty, mask);
-                            p256CopyConditional(zOut, ref tz, mask); 
+                            p256CopyConditional(_addr_xOut, _addr_tx, mask);
+                            p256CopyConditional(_addr_yOut, _addr_ty, mask);
+                            p256CopyConditional(_addr_zOut, _addr_tz, mask); 
                             // If p was not zero, then n is now non-zero.
                             nIsInfinityMask &= pIsNoninfiniteMask;
                             j += 32L;
                         }
 
                     }
+
                 }
 
 
                 i = i__prev1;
             }
+
         }
 
         // p256PointToAffine converts a Jacobian point to an affine point. If the input
         // is the point at infinity then it returns (0, 0) in constant time.
-        private static void p256PointToAffine(ref array<uint> xOut, ref array<uint> yOut, ref array<uint> x, ref array<uint> y, ref array<uint> z)
+        private static void p256PointToAffine(ptr<array<uint>> _addr_xOut, ptr<array<uint>> _addr_yOut, ptr<array<uint>> _addr_x, ptr<array<uint>> _addr_y, ptr<array<uint>> _addr_z)
         {
-            array<uint> zInv = new array<uint>(p256Limbs);            array<uint> zInvSq = new array<uint>(p256Limbs);
+            ref array<uint> xOut = ref _addr_xOut.val;
+            ref array<uint> yOut = ref _addr_yOut.val;
+            ref array<uint> x = ref _addr_x.val;
+            ref array<uint> y = ref _addr_y.val;
+            ref array<uint> z = ref _addr_z.val;
+
+            ref array<uint> zInv = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_zInv);            ref array<uint> zInvSq = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_zInvSq);
 
 
 
-            p256Invert(ref zInv, z);
-            p256Square(ref zInvSq, ref zInv);
-            p256Mul(xOut, x, ref zInvSq);
-            p256Mul(ref zInv, ref zInv, ref zInvSq);
-            p256Mul(yOut, y, ref zInv);
+            p256Invert(_addr_zInv, _addr_z);
+            p256Square(_addr_zInvSq, _addr_zInv);
+            p256Mul(_addr_xOut, _addr_x, _addr_zInvSq);
+            p256Mul(_addr_zInv, _addr_zInv, _addr_zInvSq);
+            p256Mul(_addr_yOut, _addr_y, _addr_zInv);
         }
 
         // p256ToAffine returns a pair of *big.Int containing the affine representation
         // of {x,y,z}.
-        private static (ref big.Int, ref big.Int) p256ToAffine(ref array<uint> x, ref array<uint> y, ref array<uint> z)
+        private static (ptr<big.Int>, ptr<big.Int>) p256ToAffine(ptr<array<uint>> _addr_x, ptr<array<uint>> _addr_y, ptr<array<uint>> _addr_z)
         {
-            array<uint> xx = new array<uint>(p256Limbs);            array<uint> yy = new array<uint>(p256Limbs);
+            ptr<big.Int> xOut = default!;
+            ptr<big.Int> yOut = default!;
+            ref array<uint> x = ref _addr_x.val;
+            ref array<uint> y = ref _addr_y.val;
+            ref array<uint> z = ref _addr_z.val;
 
-            p256PointToAffine(ref xx, ref yy, x, y, z);
-            return (p256ToBig(ref xx), p256ToBig(ref yy));
+            ref array<uint> xx = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_xx);            ref array<uint> yy = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_yy);
+
+            p256PointToAffine(_addr_xx, _addr_yy, _addr_x, _addr_y, _addr_z);
+            return (_addr_p256ToBig(_addr_xx)!, _addr_p256ToBig(_addr_yy)!);
         }
 
         // p256ScalarMult sets {xOut,yOut,zOut} = scalar*{x,y}.
-        private static void p256ScalarMult(ref array<uint> xOut, ref array<uint> yOut, ref array<uint> zOut, ref array<uint> x, ref array<uint> y, ref array<byte> scalar)
+        private static void p256ScalarMult(ptr<array<uint>> _addr_xOut, ptr<array<uint>> _addr_yOut, ptr<array<uint>> _addr_zOut, ptr<array<uint>> _addr_x, ptr<array<uint>> _addr_y, ptr<array<byte>> _addr_scalar)
         {
-            array<uint> px = new array<uint>(p256Limbs);            array<uint> py = new array<uint>(p256Limbs);            array<uint> pz = new array<uint>(p256Limbs);            array<uint> tx = new array<uint>(p256Limbs);            array<uint> ty = new array<uint>(p256Limbs);            array<uint> tz = new array<uint>(p256Limbs);
+            ref array<uint> xOut = ref _addr_xOut.val;
+            ref array<uint> yOut = ref _addr_yOut.val;
+            ref array<uint> zOut = ref _addr_zOut.val;
+            ref array<uint> x = ref _addr_x.val;
+            ref array<uint> y = ref _addr_y.val;
+            ref array<byte> scalar = ref _addr_scalar.val;
 
-            array<array<array<uint>>> precomp = new array<array<array<uint>>>(16L);
+            ref array<uint> px = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_px);            ref array<uint> py = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_py);            ref array<uint> pz = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_pz);            ref array<uint> tx = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_tx);            ref array<uint> ty = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_ty);            ref array<uint> tz = ref heap(new array<uint>(p256Limbs), out ptr<array<uint>> _addr_tz);
+
+            ref array<array<array<uint>>> precomp = ref heap(new array<array<array<uint>>>(16L), out ptr<array<array<array<uint>>>> _addr_precomp);
             uint nIsInfinityMask = default;            uint index = default;            uint pIsNoninfiniteMask = default;            uint mask = default; 
 
             // We precompute 0,1,2,... times {x,y}.
  
 
             // We precompute 0,1,2,... times {x,y}.
-            precomp[1L][0L] = x.Value;
-            precomp[1L][1L] = y.Value;
+            precomp[1L][0L] = x;
+            precomp[1L][1L] = y;
             precomp[1L][2L] = p256One;
 
             {
@@ -1256,8 +1392,8 @@ namespace crypto
 
                 while (i < 16L)
                 {
-                    p256PointDouble(ref precomp[i][0L], ref precomp[i][1L], ref precomp[i][2L], ref precomp[i / 2L][0L], ref precomp[i / 2L][1L], ref precomp[i / 2L][2L]);
-                    p256PointAddMixed(ref precomp[i + 1L][0L], ref precomp[i + 1L][1L], ref precomp[i + 1L][2L], ref precomp[i][0L], ref precomp[i][1L], ref precomp[i][2L], x, y);
+                    p256PointDouble(_addr_precomp[i][0L], _addr_precomp[i][1L], _addr_precomp[i][2L], _addr_precomp[i / 2L][0L], _addr_precomp[i / 2L][1L], _addr_precomp[i / 2L][2L]);
+                    p256PointAddMixed(_addr_precomp[i + 1L][0L], _addr_precomp[i + 1L][1L], _addr_precomp[i + 1L][2L], _addr_precomp[i][0L], _addr_precomp[i][1L], _addr_precomp[i][2L], _addr_x, _addr_y);
                     i += 2L;
                 }
 
@@ -1311,11 +1447,12 @@ namespace crypto
                 {
                     if (i != 0L)
                     {
-                        p256PointDouble(xOut, yOut, zOut, xOut, yOut, zOut);
-                        p256PointDouble(xOut, yOut, zOut, xOut, yOut, zOut);
-                        p256PointDouble(xOut, yOut, zOut, xOut, yOut, zOut);
-                        p256PointDouble(xOut, yOut, zOut, xOut, yOut, zOut);
+                        p256PointDouble(_addr_xOut, _addr_yOut, _addr_zOut, _addr_xOut, _addr_yOut, _addr_zOut);
+                        p256PointDouble(_addr_xOut, _addr_yOut, _addr_zOut, _addr_xOut, _addr_yOut, _addr_zOut);
+                        p256PointDouble(_addr_xOut, _addr_yOut, _addr_zOut, _addr_xOut, _addr_yOut, _addr_zOut);
+                        p256PointDouble(_addr_xOut, _addr_yOut, _addr_zOut, _addr_xOut, _addr_yOut, _addr_zOut);
                     }
+
                     index = uint32(scalar[31L - i / 2L]);
                     if ((i & 1L) == 1L)
                     {
@@ -1327,28 +1464,33 @@ namespace crypto
                     } 
 
                     // See the comments in scalarBaseMult about handling infinities.
-                    p256SelectJacobianPoint(ref px, ref py, ref pz, ref precomp, index);
-                    p256PointAdd(ref tx, ref ty, ref tz, xOut, yOut, zOut, ref px, ref py, ref pz);
-                    p256CopyConditional(xOut, ref px, nIsInfinityMask);
-                    p256CopyConditional(yOut, ref py, nIsInfinityMask);
-                    p256CopyConditional(zOut, ref pz, nIsInfinityMask);
+                    p256SelectJacobianPoint(_addr_px, _addr_py, _addr_pz, _addr_precomp, index);
+                    p256PointAdd(_addr_tx, _addr_ty, _addr_tz, _addr_xOut, _addr_yOut, _addr_zOut, _addr_px, _addr_py, _addr_pz);
+                    p256CopyConditional(_addr_xOut, _addr_px, nIsInfinityMask);
+                    p256CopyConditional(_addr_yOut, _addr_py, nIsInfinityMask);
+                    p256CopyConditional(_addr_zOut, _addr_pz, nIsInfinityMask);
 
                     pIsNoninfiniteMask = nonZeroToAllOnes(index);
                     mask = pIsNoninfiniteMask & ~nIsInfinityMask;
-                    p256CopyConditional(xOut, ref tx, mask);
-                    p256CopyConditional(yOut, ref ty, mask);
-                    p256CopyConditional(zOut, ref tz, mask);
+                    p256CopyConditional(_addr_xOut, _addr_tx, mask);
+                    p256CopyConditional(_addr_yOut, _addr_ty, mask);
+                    p256CopyConditional(_addr_zOut, _addr_tz, mask);
                     nIsInfinityMask &= pIsNoninfiniteMask;
+
                 }
 
 
                 i = i__prev1;
             }
+
         }
 
         // p256FromBig sets out = R*in.
-        private static void p256FromBig(ref array<uint> @out, ref big.Int @in)
+        private static void p256FromBig(ptr<array<uint>> _addr_@out, ptr<big.Int> _addr_@in)
         {
+            ref array<uint> @out = ref _addr_@out.val;
+            ref big.Int @in = ref _addr_@in.val;
+
             ptr<big.Int> tmp = @new<big.Int>().Lsh(in, 257L);
             tmp.Mod(tmp, p256Params.P);
 
@@ -1371,6 +1513,7 @@ namespace crypto
                     bits = bits__prev1;
 
                 }
+
                 tmp.Rsh(tmp, 29L);
 
                 i++;
@@ -1378,6 +1521,7 @@ namespace crypto
                 {
                     break;
                 }
+
                 {
                     var bits__prev1 = bits;
 
@@ -1395,14 +1539,19 @@ namespace crypto
                     bits = bits__prev1;
 
                 }
+
                 tmp.Rsh(tmp, 28L);
+
             }
+
 
         }
 
         // p256ToBig returns a *big.Int containing the value of in.
-        private static ref big.Int p256ToBig(ref array<uint> @in)
+        private static ptr<big.Int> p256ToBig(ptr<array<uint>> _addr_@in)
         {
+            ref array<uint> @in = ref _addr_@in.val;
+
             ptr<big.Int> result = @new<big.Int>();
             ptr<big.Int> tmp = @new<big.Int>();
 
@@ -1417,14 +1566,17 @@ namespace crypto
                 {
                     result.Lsh(result, 28L);
                 }
+
                 tmp.SetInt64(int64(in[i]));
                 result.Add(result, tmp);
+
             }
 
 
             result.Mul(result, p256RInverse);
             result.Mod(result, p256Params.P);
-            return result;
+            return _addr_result!;
+
         }
     }
 }}

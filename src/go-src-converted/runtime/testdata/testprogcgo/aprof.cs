@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:44 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:48 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\aprof.go
 // Test that SIGPROF received in C code does not crash the process
 // looking for the C code's func pointer.
@@ -57,20 +57,25 @@ namespace go
                         {
                             break;
                         }
+
                     }
+
                     C.GoNop();
+
                 }
 
                 c.Send(true);
+
             }());
 
-            bytes.Buffer buf = default;
-            pprof.StartCPUProfile(ref buf);
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            pprof.StartCPUProfile(_addr_buf);
             c.Send(true);
             c.Receive();
             pprof.StopCPUProfile();
 
             fmt.Println("OK");
+
         }
     }
 }

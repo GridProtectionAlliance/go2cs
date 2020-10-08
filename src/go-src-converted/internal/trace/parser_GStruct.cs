@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:58 UTC
+//     Generated on 2020 October 08 04:42:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,7 +42,7 @@ namespace @internal
                 this.wakeup = default;
             }
 
-            public G(bool futile = default, slice<ref Event> wakeup = default)
+            public G(bool futile = default, slice<ptr<Event>> wakeup = default)
             {
                 this.futile = futile;
                 this.wakeup = wakeup;

@@ -4,7 +4,7 @@
 
 //go:generate ./mkalldocs.sh
 
-// package main -- go2cs converted at 2020 August 29 10:00:27 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:28 UTC
 // Original source: C:\Go\src\cmd\go\main.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;
@@ -26,6 +26,10 @@ using generate = go.cmd.go.@internal.generate_package;
 using get = go.cmd.go.@internal.get_package;
 using help = go.cmd.go.@internal.help_package;
 using list = go.cmd.go.@internal.list_package;
+using modcmd = go.cmd.go.@internal.modcmd_package;
+using modfetch = go.cmd.go.@internal.modfetch_package;
+using modget = go.cmd.go.@internal.modget_package;
+using modload = go.cmd.go.@internal.modload_package;
 using run = go.cmd.go.@internal.run_package;
 using test = go.cmd.go.@internal.test_package;
 using tool = go.cmd.go.@internal.tool_package;
@@ -41,7 +45,7 @@ namespace go
     {
         private static void init()
         {
-            @base.Commands = new slice<ref base.Command>(new ref base.Command[] { work.CmdBuild, clean.CmdClean, doc.CmdDoc, envcmd.CmdEnv, bug.CmdBug, fix.CmdFix, fmtcmd.CmdFmt, generate.CmdGenerate, get.CmdGet, work.CmdInstall, list.CmdList, run.CmdRun, test.CmdTest, tool.CmdTool, version.CmdVersion, vet.CmdVet, help.HelpC, help.HelpBuildmode, help.HelpCache, help.HelpFileType, help.HelpGopath, help.HelpEnvironment, help.HelpImportPath, help.HelpPackages, test.HelpTestflag, test.HelpTestfunc });
+            @base.Go.Commands = new slice<ptr<base.Command>>(new ptr<base.Command>[] { bug.CmdBug, work.CmdBuild, clean.CmdClean, doc.CmdDoc, envcmd.CmdEnv, fix.CmdFix, fmtcmd.CmdFmt, generate.CmdGenerate, modget.CmdGet, work.CmdInstall, list.CmdList, modcmd.CmdMod, run.CmdRun, test.CmdTest, tool.CmdTool, version.CmdVersion, vet.CmdVet, help.HelpBuildConstraint, help.HelpBuildmode, help.HelpC, help.HelpCache, help.HelpEnvironment, help.HelpFileType, modload.HelpGoMod, help.HelpGopath, get.HelpGopathGet, modfetch.HelpGoproxy, help.HelpImportPath, modload.HelpModules, modget.HelpModuleGet, modfetch.HelpModuleAuth, modfetch.HelpModulePrivate, help.HelpPackages, test.HelpTestflag, test.HelpTestfunc });
         }
 
         private static void Main()
@@ -56,11 +60,23 @@ namespace go
             {
                 @base.Usage();
             }
+
+            if (args[0L] == "get" || args[0L] == "help")
+            {
+                if (!modload.WillBeEnabled())
+                { 
+                    // Replace module-aware get with GOPATH get if appropriate.
+                    modget.CmdGet.val = get.CmdGet.val;
+
+                }
+
+            }
+
             cfg.CmdName = args[0L]; // for error messages
             if (args[0L] == "help")
             {
-                help.Help(args[1L..]);
-                return;
+                help.Help(os.Stdout, args[1L..]);
+                return ;
             } 
 
             // Diagnose common mistake: GOPATH==GOROOT.
@@ -91,15 +107,30 @@ namespace go
                             fmt.Fprintf(os.Stderr, "go: GOPATH entry cannot start with shell metacharacter '~': %q\n", p);
                             os.Exit(2L);
                         }
+
                         if (!filepath.IsAbs(p))
                         {
-                            fmt.Fprintf(os.Stderr, "go: GOPATH entry is relative; must be absolute path: %q.\nFor more details see: 'go help gopath'\n", p);
-                            os.Exit(2L);
+                            if (cfg.Getenv("GOPATH") == "")
+                            { 
+                                // We inferred $GOPATH from $HOME and did a bad job at it.
+                                // Instead of dying, uninfer it.
+                                cfg.BuildContext.GOPATH = "";
+
+                            }
+                            else
+                            {
+                                fmt.Fprintf(os.Stderr, "go: GOPATH entry is relative; must be absolute path: %q.\nFor more details see: 'go help gopath'\n", p);
+                                os.Exit(2L);
+                            }
+
                         }
+
                     }
+
                 }
 
             }
+
 
             {
                 var (fi, err) = os.Stat(cfg.GOROOT);
@@ -131,34 +162,90 @@ namespace go
                 {
                     os.Setenv(env.Name, env.Value);
                 }
+
             }
-            foreach (var (_, cmd) in @base.Commands)
+BigCmdLoop:
             {
-                if (cmd.Name() == args[0L] && cmd.Runnable())
+                var bigCmd = @base.Go;
+
+                while (>>MARKER:FOREXPRESSION_LEVEL_1<<)
                 {
-                    cmd.Flag.Usage = () =>
+                    foreach (var (_, cmd) in bigCmd.Commands)
                     {
-                        cmd.Usage();
+                        if (cmd.Name() != args[0L])
+                        {
+                            continue;
+                        }
+
+                        if (len(cmd.Commands) > 0L)
+                        {
+                            bigCmd = cmd;
+                            args = args[1L..];
+                            if (len(args) == 0L)
+                            {
+                                help.PrintUsage(os.Stderr, bigCmd);
+                                @base.SetExitStatus(2L);
+                                @base.Exit();
+                            }
+
+                            if (args[0L] == "help")
+                            { 
+                                // Accept 'go mod help' and 'go mod help foo' for 'go help mod' and 'go help mod foo'.
+                                help.Help(os.Stdout, append(strings.Split(cfg.CmdName, " "), args[1L..]));
+                                return ;
+
+                            }
+
+                            cfg.CmdName += " " + args[0L];
+                            _continueBigCmdLoop = true;
+                            break;
+                        }
+
+                        if (!cmd.Runnable())
+                        {
+                            continue;
+                        }
+
+                        cmd.Flag.Usage = () =>
+                        {
+                            cmd.Usage();
+                        }
+;
+                        if (cmd.CustomFlags)
+                        {
+                            args = args[1L..];
+                        }
+                        else
+                        {
+                            @base.SetFromGOFLAGS(_addr_cmd.Flag);
+                            cmd.Flag.Parse(args[1L..]);
+                            args = cmd.Flag.Args();
+                        }
+
+                        cmd.Run(cmd, args);
+                        @base.Exit();
+                        return ;
 
                     }
-;
-                    if (cmd.CustomFlags)
+                    @string helpArg = "";
                     {
-                        args = args[1L..];
+                        var i = strings.LastIndex(cfg.CmdName, " ");
+
+                        if (i >= 0L)
+                        {
+                            helpArg = " " + cfg.CmdName[..i];
+                        }
+
                     }
-                    else
-                    {
-                        cmd.Flag.Parse(args[1L..]);
-                        args = cmd.Flag.Args();
-                    }
-                    cmd.Run(cmd, args);
+
+                    fmt.Fprintf(os.Stderr, "go %s: unknown command\nRun 'go help%s' for usage.\n", cfg.CmdName, helpArg);
+                    @base.SetExitStatus(2L);
                     @base.Exit();
-                    return;
+
                 }
+
             }
-            fmt.Fprintf(os.Stderr, "go: unknown subcommand %q\nRun 'go help' for usage.\n", args[0L]);
-            @base.SetExitStatus(2L);
-            @base.Exit();
+
         }
 
         private static void init()
@@ -167,13 +254,8 @@ namespace go
         }
 
         private static void mainUsage()
-        { 
-            // special case "go test -h"
-            if (len(os.Args) > 1L && os.Args[1L] == "test")
-            {
-                test.Usage();
-            }
-            help.PrintUsage(os.Stderr);
+        {
+            help.PrintUsage(os.Stderr, @base.Go);
             os.Exit(2L);
         }
     }

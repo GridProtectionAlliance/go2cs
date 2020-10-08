@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:11 UTC
+//     Generated on 2020 October 08 03:26:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using errors = go.errors_package;
+using fmtsort = go.@internal.fmtsort_package;
 using io = go.io_package;
 using os = go.os_package;
 using reflect = go.reflect_package;
@@ -53,7 +53,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void FormatByRef(ref T value, State f, int c);
+            private delegate void FormatByPtr(ptr<T> value, State f, int c);
             private delegate void FormatByVal(T value, State f, int c);
 
-            private static readonly FormatByRef s_FormatByRef;
+            private static readonly FormatByPtr s_FormatByPtr;
             private static readonly FormatByVal s_FormatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,14 +79,15 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FormatByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FormatByPtr is null || !m_target_is_ptr)
                 {
                     s_FormatByVal!(target, f, c);
                     return;
                 }
 
-                s_FormatByRef(ref target, f, c);
+                s_FormatByPtr(m_target_ptr, f, c);
                 return;
                 
             }
@@ -97,23 +98,20 @@ namespace go
             static Formatter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Format");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Format");
 
                 if (!(extensionMethod is null))
-                    s_FormatByRef = extensionMethod.CreateStaticDelegate(typeof(FormatByRef)) as FormatByRef;
+                    s_FormatByPtr = extensionMethod.CreateStaticDelegate(typeof(FormatByPtr)) as FormatByPtr;
 
-                if (s_FormatByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Format");
+                extensionMethod = targetType.GetExtensionMethod("Format");
 
-                    if (!(extensionMethod is null))
-                        s_FormatByVal = extensionMethod.CreateStaticDelegate(typeof(FormatByVal)) as FormatByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FormatByVal = extensionMethod.CreateStaticDelegate(typeof(FormatByVal)) as FormatByVal;
 
-                if (s_FormatByRef is null && s_FormatByVal is null)
+                if (s_FormatByPtr is null && s_FormatByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Formatter.Format method", new Exception("Format"));
             }
 

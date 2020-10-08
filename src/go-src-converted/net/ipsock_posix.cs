@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 August 29 08:26:53 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:49 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\ipsock_posix.go
 using context = go.context_package;
@@ -12,6 +12,7 @@ using poll = go.@internal.poll_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
 using static go.builtin;
+using System;
 
 namespace go
 {
@@ -27,8 +28,10 @@ namespace go
         // the IPv6 interface. That simplifies our code and is most
         // general. Unfortunately, we need to run on kernels built without
         // IPv6 support too. So probe the kernel to figure it out.
-        private static void probe(this ref ipStackCapabilities _p) => func(_p, (ref ipStackCapabilities p, Defer defer, Panic _, Recover __) =>
+        private static void probe(this ptr<ipStackCapabilities> _addr_p) => func((defer, _, __) =>
         {
+            ref ipStackCapabilities p = ref _addr_p.val;
+
             var (s, err) = sysSocket(syscall.AF_INET, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
 
             if (err == syscall.EAFNOSUPPORT || err == syscall.EPROTONOSUPPORT)             else if (err == null) 
@@ -71,6 +74,7 @@ namespace go
                         continue;
                     }
                 }
+
                 if (i == 0L)
                 {
                     p.ipv6Enabled = true;
@@ -123,6 +127,9 @@ namespace go
         // IPV6_V6ONLY socket option setting.
         private static (long, bool) favoriteAddrFamily(@string network, sockaddr laddr, sockaddr raddr, @string mode)
         {
+            long family = default;
+            bool ipv6only = default;
+
             switch (network[len(network) - 1L])
             {
                 case '4': 
@@ -139,45 +146,61 @@ namespace go
                 {
                     return (syscall.AF_INET6, false);
                 }
+
                 if (laddr == null)
                 {
                     return (syscall.AF_INET, false);
                 }
+
                 return (laddr.family(), false);
+
             }
+
             if ((laddr == null || laddr.family() == syscall.AF_INET) && (raddr == null || raddr.family() == syscall.AF_INET))
             {
                 return (syscall.AF_INET, false);
             }
+
             return (syscall.AF_INET6, false);
+
         }
 
-        private static (ref netFD, error) internetSocket(context.Context ctx, @string net, sockaddr laddr, sockaddr raddr, long sotype, long proto, @string mode)
+        private static (ptr<netFD>, error) internetSocket(context.Context ctx, @string net, sockaddr laddr, sockaddr raddr, long sotype, long proto, @string mode, Func<@string, @string, syscall.RawConn, error> ctrlFn)
         {
-            if ((runtime.GOOS == "windows" || runtime.GOOS == "openbsd" || runtime.GOOS == "nacl") && mode == "dial" && raddr.isWildcard())
+            ptr<netFD> fd = default!;
+            error err = default!;
+
+            if ((runtime.GOOS == "aix" || runtime.GOOS == "windows" || runtime.GOOS == "openbsd") && mode == "dial" && raddr.isWildcard())
             {
                 raddr = raddr.toLocal(net);
             }
+
             var (family, ipv6only) = favoriteAddrFamily(net, laddr, raddr, mode);
-            return socket(ctx, net, family, sotype, proto, ipv6only, laddr, raddr);
+            return _addr_socket(ctx, net, family, sotype, proto, ipv6only, laddr, raddr, ctrlFn)!;
+
         }
 
         private static (syscall.Sockaddr, error) ipToSockaddr(long family, IP ip, long port, @string zone)
         {
+            syscall.Sockaddr _p0 = default;
+            error _p0 = default!;
+
 
             if (family == syscall.AF_INET) 
                 if (len(ip) == 0L)
                 {
                     ip = IPv4zero;
                 }
+
                 var ip4 = ip.To4();
                 if (ip4 == null)
                 {
-                    return (null, ref new AddrError(Err:"non-IPv4 address",Addr:ip.String()));
+                    return (null, error.As(addr(new AddrError(Err:"non-IPv4 address",Addr:ip.String()))!)!);
                 }
-                syscall.SockaddrInet4 sa = ref new syscall.SockaddrInet4(Port:port);
+
+                ptr<syscall.SockaddrInet4> sa = addr(new syscall.SockaddrInet4(Port:port));
                 copy(sa.Addr[..], ip4);
-                return (sa, null);
+                return (sa, error.As(null!)!);
             else if (family == syscall.AF_INET6) 
                 // In general, an IP wildcard address, which is either
                 // "0.0.0.0" or "::", means the entire IP addressing
@@ -186,7 +209,7 @@ namespace go
                 // of IP node.
                 //
                 // When the IP node supports IPv4-mapped IPv6 address,
-                // we allow an listener to listen to the wildcard
+                // we allow a listener to listen to the wildcard
                 // address of both IP addressing spaces by specifying
                 // IPv6 wildcard address.
                 if (len(ip) == 0L || ip.Equal(IPv4zero))
@@ -198,12 +221,14 @@ namespace go
                 var ip6 = ip.To16();
                 if (ip6 == null)
                 {
-                    return (null, ref new AddrError(Err:"non-IPv6 address",Addr:ip.String()));
+                    return (null, error.As(addr(new AddrError(Err:"non-IPv6 address",Addr:ip.String()))!)!);
                 }
-                sa = ref new syscall.SockaddrInet6(Port:port,ZoneId:uint32(zoneCache.index(zone)));
+
+                sa = addr(new syscall.SockaddrInet6(Port:port,ZoneId:uint32(zoneCache.index(zone))));
                 copy(sa.Addr[..], ip6);
-                return (sa, null);
-                        return (null, ref new AddrError(Err:"invalid address family",Addr:ip.String()));
+                return (sa, error.As(null!)!);
+                        return (null, error.As(addr(new AddrError(Err:"invalid address family",Addr:ip.String()))!)!);
+
         }
     }
 }

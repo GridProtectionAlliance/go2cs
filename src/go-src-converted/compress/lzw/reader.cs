@@ -13,7 +13,7 @@
 // The TIFF file format uses a similar but incompatible version of the LZW
 // algorithm. See the golang.org/x/image/tiff/lzw package for an
 // implementation.
-// package lzw -- go2cs converted at 2020 August 29 10:10:03 UTC
+// package lzw -- go2cs converted at 2020 October 08 04:58:43 UTC
 // import "compress/lzw" ==> using lzw = go.compress.lzw_package
 // Original source: C:\Go\src\compress\lzw\reader.go
 // TODO(nigeltao): check that PDF uses LZW in the same way as GIF,
@@ -38,14 +38,16 @@ namespace compress
 
  
         // LSB means Least Significant Bits first, as used in the GIF file format.
-        public static readonly Order LSB = iota; 
+        public static readonly Order LSB = (Order)iota; 
         // MSB means Most Significant Bits first, as used in the TIFF and PDF
         // file formats.
-        public static readonly var MSB = 0;
+        public static readonly var MSB = (var)0;
 
-        private static readonly long maxWidth = 12L;
-        private static readonly ulong decoderInvalidCode = 0xffffUL;
-        private static readonly long flushBuffer = 1L << (int)(maxWidth);
+
+        private static readonly long maxWidth = (long)12L;
+        private static readonly ulong decoderInvalidCode = (ulong)0xffffUL;
+        private static readonly long flushBuffer = (long)1L << (int)(maxWidth);
+
 
         // decoder is the state from which the readXxx method converts a byte
         // stream into a code stream.
@@ -55,7 +57,7 @@ namespace compress
             public uint bits;
             public ulong nBits;
             public ulong width;
-            public Func<ref decoder, (ushort, error)> read; // readLSB or readMSB
+            public Func<ptr<decoder>, (ushort, error)> read; // readLSB or readMSB
             public long litWidth; // width in bits of literal codes
             public error err; // The first 1<<litWidth codes are literal codes.
 // The next two codes mean clear and EOF.
@@ -67,8 +69,7 @@ namespace compress
 //
 // last is the most recently seen code, or decoderInvalidCode.
 //
-// An invariant is that
-// (hi < overflow) || (hi == overflow && last == decoderInvalidCode)
+// An invariant is that hi < overflow.
             public ushort clear; // Each code c in [lo, hi] expands to two or more bytes. For c != hi:
 //   suffix[c] is the last of these bytes.
 //   prefix[c] is the code for all but the last byte.
@@ -108,69 +109,93 @@ namespace compress
         }
 
         // readLSB returns the next code for "Least Significant Bits first" data.
-        private static (ushort, error) readLSB(this ref decoder d)
+        private static (ushort, error) readLSB(this ptr<decoder> _addr_d)
         {
+            ushort _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             while (d.nBits < d.width)
             {
                 var (x, err) = d.r.ReadByte();
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
+
                 d.bits |= uint32(x) << (int)(d.nBits);
                 d.nBits += 8L;
+
             }
 
             var code = uint16(d.bits & (1L << (int)(d.width) - 1L));
             d.bits >>= d.width;
             d.nBits -= d.width;
-            return (code, null);
+            return (code, error.As(null!)!);
+
         }
 
         // readMSB returns the next code for "Most Significant Bits first" data.
-        private static (ushort, error) readMSB(this ref decoder d)
+        private static (ushort, error) readMSB(this ptr<decoder> _addr_d)
         {
+            ushort _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             while (d.nBits < d.width)
             {
                 var (x, err) = d.r.ReadByte();
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
+
                 d.bits |= uint32(x) << (int)((24L - d.nBits));
                 d.nBits += 8L;
+
             }
 
             var code = uint16(d.bits >> (int)((32L - d.width)));
             d.bits <<= d.width;
             d.nBits -= d.width;
-            return (code, null);
+            return (code, error.As(null!)!);
+
         }
 
-        private static (long, error) Read(this ref decoder d, slice<byte> b)
+        private static (long, error) Read(this ptr<decoder> _addr_d, slice<byte> b)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref decoder d = ref _addr_d.val;
+
             while (true)
             {
                 if (len(d.toRead) > 0L)
                 {
                     var n = copy(b, d.toRead);
                     d.toRead = d.toRead[n..];
-                    return (n, null);
+                    return (n, error.As(null!)!);
                 }
+
                 if (d.err != null)
                 {
-                    return (0L, d.err);
+                    return (0L, error.As(d.err)!);
                 }
+
                 d.decode();
+
             }
+
 
         }
 
         // decode decompresses bytes from r and leaves them in d.toRead.
         // read specifies how to decode bytes into codes.
         // litWidth is the width in bits of literal codes.
-        private static void decode(this ref decoder d)
-        { 
+        private static void decode(this ptr<decoder> _addr_d) => func((_, panic, __) =>
+        {
+            ref decoder d = ref _addr_d.val;
+ 
             // Loop over the code stream, converting codes into decompressed bytes.
 loop: 
             // Flush pending output.
@@ -183,9 +208,12 @@ loop:
                     {
                         err = io.ErrUnexpectedEOF;
                     }
+
                     d.err = err;
                     break;
+
                 }
+
 
                 if (code < d.clear) 
                     // We have a literal code.
@@ -196,7 +224,9 @@ loop:
                         // Save what the hi code expands to.
                         d.suffix[d.hi] = uint8(code);
                         d.prefix[d.hi] = d.last;
+
                     }
+
                 else if (code == d.clear) 
                     d.width = 1L + uint(d.litWidth);
                     d.hi = d.eof;
@@ -224,6 +254,7 @@ loop:
                         d.output[i] = uint8(c);
                         i--;
                         c = d.last;
+
                     } 
                     // Copy the suffix chain into output and then write that to w.
                     while (c >= d.clear)
@@ -240,7 +271,9 @@ loop:
                         // Save what the hi code expands to.
                         d.suffix[d.hi] = uint8(c);
                         d.prefix[d.hi] = d.last;
+
                     }
+
                 else 
                     d.err = errors.New("lzw: invalid code");
                     _breakloop = true;
@@ -249,38 +282,51 @@ loop:
                 d.hi = d.hi + 1L;
                 if (d.hi >= d.overflow)
                 {
+                    if (d.hi > d.overflow)
+                    {
+                        panic("unreachable");
+                    }
+
                     if (d.width == maxWidth)
                     {
                         d.last = decoderInvalidCode; 
                         // Undo the d.hi++ a few lines above, so that (1) we maintain
-                        // the invariant that d.hi <= d.overflow, and (2) d.hi does not
+                        // the invariant that d.hi < d.overflow, and (2) d.hi does not
                         // eventually overflow a uint16.
                         d.hi--;
+
                     }
                     else
                     {
                         d.width++;
-                        d.overflow <<= 1L;
+                        d.overflow = 1L << (int)(d.width);
                     }
+
                 }
+
                 if (d.o >= flushBuffer)
                 {
                     break;
                 }
+
             } 
             // Flush pending output.
  
             // Flush pending output.
             d.toRead = d.output[..d.o];
             d.o = 0L;
-        }
+
+        });
 
         private static var errClosed = errors.New("lzw: reader/writer is closed");
 
-        private static error Close(this ref decoder d)
+        private static error Close(this ptr<decoder> _addr_d)
         {
+            ref decoder d = ref _addr_d.val;
+
             d.err = errClosed; // in case any Reads come along
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // NewReader creates a new io.ReadCloser.
@@ -297,9 +343,9 @@ loop:
             ptr<decoder> d = @new<decoder>();
 
             if (order == LSB) 
-                d.read = ref decoder;
+                d.read = ptr<decoder>;
             else if (order == MSB) 
-                d.read = ref decoder;
+                d.read = ptr<decoder>;
             else 
                 d.err = errors.New("lzw: unknown order");
                 return d;
@@ -308,6 +354,7 @@ loop:
                 d.err = fmt.Errorf("lzw: litWidth %d out of range", litWidth);
                 return d;
             }
+
             {
                 io.ByteReader (br, ok) = r._<io.ByteReader>();
 
@@ -321,6 +368,7 @@ loop:
                 }
 
             }
+
             d.litWidth = litWidth;
             d.width = 1L + uint(litWidth);
             d.clear = uint16(1L) << (int)(uint(litWidth));
@@ -330,6 +378,7 @@ loop:
             d.last = decoderInvalidCode;
 
             return d;
+
         }
     }
 }}

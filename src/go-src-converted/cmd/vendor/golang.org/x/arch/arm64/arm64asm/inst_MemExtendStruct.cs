@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:07:41 UTC
+//     Generated on 2020 October 08 04:44:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,16 +37,16 @@ namespace arm64
                 this.Index = default;
                 this.Extend = default;
                 this.Amount = default;
-                this.Absent = default;
+                this.ShiftMustBeZero = default;
             }
 
-            public MemExtend(RegSP Base = default, Reg Index = default, ExtShift Extend = default, byte Amount = default, bool Absent = default)
+            public MemExtend(RegSP Base = default, Reg Index = default, ExtShift Extend = default, byte Amount = default, bool ShiftMustBeZero = default)
             {
                 this.Base = Base;
                 this.Index = Index;
                 this.Extend = Extend;
                 this.Amount = Amount;
-                this.Absent = Absent;
+                this.ShiftMustBeZero = ShiftMustBeZero;
             }
 
             // Enable comparisons between nil and MemExtend struct
@@ -69,7 +69,7 @@ namespace arm64
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static MemExtend MemExtend_cast(dynamic value)
         {
-            return new MemExtend(value.Base, value.Index, value.Extend, value.Amount, value.Absent);
+            return new MemExtend(value.Base, value.Index, value.Extend, value.Amount, value.ShiftMustBeZero);
         }
     }
 }}}}}}}

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin nacl netbsd openbsd plan9 solaris windows
+// +build aix darwin netbsd openbsd plan9 solaris windows
 
-// package runtime -- go2cs converted at 2020 August 29 08:17:27 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:20:02 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\lock_sema.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -28,26 +28,38 @@ namespace go
         //    func semawakeup(mp *m)
         //        Wake up mp, which is or will soon be sleeping on its semaphore.
         //
-        private static readonly System.UIntPtr locked = 1L;
+        private static readonly System.UIntPtr locked = (System.UIntPtr)1L;
 
-        private static readonly long active_spin = 4L;
-        private static readonly long active_spin_cnt = 30L;
-        private static readonly long passive_spin = 1L;
+        private static readonly long active_spin = (long)4L;
+        private static readonly long active_spin_cnt = (long)30L;
+        private static readonly long passive_spin = (long)1L;
 
-        private static void @lock(ref mutex l)
+
+        private static void @lock(ptr<mutex> _addr_l)
         {
+            ref mutex l = ref _addr_l.val;
+
+            lockWithRank(l, getLockRank(l));
+        }
+
+        private static void lock2(ptr<mutex> _addr_l)
+        {
+            ref mutex l = ref _addr_l.val;
+
             var gp = getg();
             if (gp.m.locks < 0L)
             {
                 throw("runtime·lock: lock count");
             }
+
             gp.m.locks++; 
 
             // Speculative grab for lock.
-            if (atomic.Casuintptr(ref l.key, 0L, locked))
+            if (atomic.Casuintptr(_addr_l.key, 0L, locked))
             {
-                return;
+                return ;
             }
+
             semacreate(gp.m); 
 
             // On uniprocessor's, no point spinning.
@@ -57,19 +69,23 @@ namespace go
             {
                 spin = active_spin;
             }
+
 Loop:
             for (long i = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
             {
-                var v = atomic.Loaduintptr(ref l.key);
+                var v = atomic.Loaduintptr(_addr_l.key);
                 if (v & locked == 0L)
                 { 
                     // Unlocked. Try to lock.
-                    if (atomic.Casuintptr(ref l.key, v, v | locked))
+                    if (atomic.Casuintptr(_addr_l.key, v, v | locked))
                     {
-                        return;
+                        return ;
                     }
+
                     i = 0L;
+
                 }
+
                 if (i < spin)
                 {
                     procyield(active_spin_cnt);
@@ -87,16 +103,18 @@ Loop:
                     while (true)
                     {
                         gp.m.nextwaitm = muintptr(v & ~locked);
-                        if (atomic.Casuintptr(ref l.key, v, uintptr(@unsafe.Pointer(gp.m)) | locked))
+                        if (atomic.Casuintptr(_addr_l.key, v, uintptr(@unsafe.Pointer(gp.m)) | locked))
                         {
                             break;
                         }
-                        v = atomic.Loaduintptr(ref l.key);
+
+                        v = atomic.Loaduintptr(_addr_l.key);
                         if (v & locked == 0L)
                         {
                             _continueLoop = true;
                             break;
                         }
+
                     }
 
                     if (v & locked != 0L)
@@ -104,39 +122,56 @@ Loop:
                         // Queued. Wait.
                         semasleep(-1L);
                         i = 0L;
+
                     }
+
                 }
+
             }
+
+        }
+
+        private static void unlock(ptr<mutex> _addr_l)
+        {
+            ref mutex l = ref _addr_l.val;
+
+            unlockWithRank(l);
         }
 
         //go:nowritebarrier
         // We might not be holding a p in this code.
-        private static void unlock(ref mutex l)
+        private static void unlock2(ptr<mutex> _addr_l)
         {
+            ref mutex l = ref _addr_l.val;
+
             var gp = getg();
-            ref m mp = default;
+            ptr<m> mp;
             while (true)
             {
-                var v = atomic.Loaduintptr(ref l.key);
+                var v = atomic.Loaduintptr(_addr_l.key);
                 if (v == locked)
                 {
-                    if (atomic.Casuintptr(ref l.key, locked, 0L))
+                    if (atomic.Casuintptr(_addr_l.key, locked, 0L))
                     {
                         break;
                     }
+
                 }
                 else
                 { 
                     // Other M's are waiting for the lock.
                     // Dequeue an M.
                     mp = muintptr(v & ~locked).ptr();
-                    if (atomic.Casuintptr(ref l.key, v, uintptr(mp.nextwaitm)))
+                    if (atomic.Casuintptr(_addr_l.key, v, uintptr(mp.nextwaitm)))
                     { 
                         // Dequeued an M.  Wake it.
                         semawakeup(mp);
                         break;
+
                     }
+
                 }
+
             }
 
             gp.m.locks--;
@@ -144,28 +179,47 @@ Loop:
             {
                 throw("runtime·unlock: lock count");
             }
+
             if (gp.m.locks == 0L && gp.preempt)
             { // restore the preemption request in case we've cleared it in newstack
                 gp.stackguard0 = stackPreempt;
+
             }
+
         }
 
         // One-time notifications.
-        private static void noteclear(ref note n)
+        private static void noteclear(ptr<note> _addr_n)
         {
-            n.key = 0L;
+            ref note n = ref _addr_n.val;
+
+            if (GOOS == "aix")
+            { 
+                // On AIX, semaphores might not synchronize the memory in some
+                // rare cases. See issue #30189.
+                atomic.Storeuintptr(_addr_n.key, 0L);
+
+            }
+            else
+            {
+                n.key = 0L;
+            }
+
         }
 
-        private static void notewakeup(ref note n)
+        private static void notewakeup(ptr<note> _addr_n)
         {
+            ref note n = ref _addr_n.val;
+
             System.UIntPtr v = default;
             while (true)
             {
-                v = atomic.Loaduintptr(ref n.key);
-                if (atomic.Casuintptr(ref n.key, v, locked))
+                v = atomic.Loaduintptr(_addr_n.key);
+                if (atomic.Casuintptr(_addr_n.key, v, locked))
                 {
                     break;
                 }
+
             } 
 
             // Successfully set waitm to locked.
@@ -180,50 +234,62 @@ Loop:
                 throw("notewakeup - double wakeup");
             else 
                 // Must be the waiting m. Wake it up.
-                semawakeup((m.Value)(@unsafe.Pointer(v)));
-                    }
+                semawakeup((m.val)(@unsafe.Pointer(v)));
+            
+        }
 
-        private static void notesleep(ref note n)
+        private static void notesleep(ptr<note> _addr_n)
         {
+            ref note n = ref _addr_n.val;
+
             var gp = getg();
             if (gp != gp.m.g0)
             {
                 throw("notesleep not on g0");
             }
+
             semacreate(gp.m);
-            if (!atomic.Casuintptr(ref n.key, 0L, uintptr(@unsafe.Pointer(gp.m))))
+            if (!atomic.Casuintptr(_addr_n.key, 0L, uintptr(@unsafe.Pointer(gp.m))))
             { 
                 // Must be locked (got wakeup).
                 if (n.key != locked)
                 {
                     throw("notesleep - waitm out of sync");
                 }
-                return;
+
+                return ;
+
             } 
             // Queued. Sleep.
             gp.m.blocked = true;
-            if (cgo_yield == null.Value)
+            if (cgo_yield == null.val)
             {
                 semasleep(-1L);
             }
             else
             { 
                 // Sleep for an arbitrary-but-moderate interval to poll libc interceptors.
-                const float ns = 10e6F;
+                const float ns = (float)10e6F;
 
-                while (atomic.Loaduintptr(ref n.key) == 0L)
+                while (atomic.Loaduintptr(_addr_n.key) == 0L)
                 {
                     semasleep(ns);
-                    asmcgocall(cgo_yield.Value, null);
+                    asmcgocall(cgo_yield.val, null);
                 }
 
+
             }
+
             gp.m.blocked = false;
+
         }
 
         //go:nosplit
-        private static bool notetsleep_internal(ref note n, long ns, ref g gp, long deadline)
-        { 
+        private static bool notetsleep_internal(ptr<note> _addr_n, long ns, ptr<g> _addr_gp, long deadline)
+        {
+            ref note n = ref _addr_n.val;
+            ref g gp = ref _addr_gp.val;
+ 
             // gp and deadline are logically local variables, but they are written
             // as parameters so that the stack space they require is charged
             // to the caller.
@@ -231,57 +297,68 @@ Loop:
             gp = getg(); 
 
             // Register for wakeup on n->waitm.
-            if (!atomic.Casuintptr(ref n.key, 0L, uintptr(@unsafe.Pointer(gp.m))))
+            if (!atomic.Casuintptr(_addr_n.key, 0L, uintptr(@unsafe.Pointer(gp.m))))
             { 
                 // Must be locked (got wakeup).
                 if (n.key != locked)
                 {
                     throw("notetsleep - waitm out of sync");
                 }
+
                 return true;
+
             }
+
             if (ns < 0L)
             { 
                 // Queued. Sleep.
                 gp.m.blocked = true;
-                if (cgo_yield == null.Value)
+                if (cgo_yield == null.val)
                 {
                     semasleep(-1L);
                 }
                 else
                 { 
                     // Sleep in arbitrary-but-moderate intervals to poll libc interceptors.
-                    const float ns = 10e6F;
+                    const float ns = (float)10e6F;
 
                     while (semasleep(ns) < 0L)
                     {
-                        asmcgocall(cgo_yield.Value, null);
+                        asmcgocall(cgo_yield.val, null);
                     }
 
+
                 }
+
                 gp.m.blocked = false;
                 return true;
+
             }
+
             deadline = nanotime() + ns;
             while (true)
             { 
                 // Registered. Sleep.
                 gp.m.blocked = true;
-                if (cgo_yield != null && ns > 10e6F.Value)
+                if (cgo_yield != null && ns > 10e6F.val)
                 {
                     ns = 10e6F;
                 }
+
                 if (semasleep(ns) >= 0L)
                 {
                     gp.m.blocked = false; 
                     // Acquired semaphore, semawakeup unregistered us.
                     // Done.
                     return true;
+
                 }
-                if (cgo_yield != null.Value)
+
+                if (cgo_yield != null.val)
                 {
-                    asmcgocall(cgo_yield.Value, null);
+                    asmcgocall(cgo_yield.val, null);
                 }
+
                 gp.m.blocked = false; 
                 // Interrupted or timed out. Still registered. Semaphore not acquired.
                 ns = deadline - nanotime();
@@ -304,14 +381,15 @@ Loop:
             // try to grant us the semaphore when we don't expect it.
             while (true)
             {
-                var v = atomic.Loaduintptr(ref n.key);
+                var v = atomic.Loaduintptr(_addr_n.key);
 
                 if (v == uintptr(@unsafe.Pointer(gp.m))) 
                     // No wakeup yet; unregister if possible.
-                    if (atomic.Casuintptr(ref n.key, v, 0L))
+                    if (atomic.Casuintptr(_addr_n.key, v, 0L))
                     {
                         return false;
                     }
+
                 else if (v == locked) 
                     // Wakeup happened so semaphore is available.
                     // Grab it to avoid getting out of sync.
@@ -320,39 +398,62 @@ Loop:
                     {
                         throw("runtime: unable to acquire - semaphore out of sync");
                     }
+
                     gp.m.blocked = false;
                     return true;
                 else 
                     throw("runtime: unexpected waitm - semaphore out of sync");
-                            }
+                
+            }
+
 
         }
 
-        private static bool notetsleep(ref note n, long ns)
+        private static bool notetsleep(ptr<note> _addr_n, long ns)
         {
+            ref note n = ref _addr_n.val;
+
             var gp = getg();
-            if (gp != gp.m.g0 && gp.m.preemptoff != "")
+            if (gp != gp.m.g0)
             {
                 throw("notetsleep not on g0");
             }
+
             semacreate(gp.m);
-            return notetsleep_internal(n, ns, null, 0L);
+            return notetsleep_internal(_addr_n, ns, _addr_null, 0L);
+
         }
 
         // same as runtime·notetsleep, but called on user g (not g0)
         // calls only nosplit functions between entersyscallblock/exitsyscall
-        private static bool notetsleepg(ref note n, long ns)
+        private static bool notetsleepg(ptr<note> _addr_n, long ns)
         {
+            ref note n = ref _addr_n.val;
+
             var gp = getg();
             if (gp == gp.m.g0)
             {
                 throw("notetsleepg on g0");
             }
+
             semacreate(gp.m);
-            entersyscallblock(0L);
-            var ok = notetsleep_internal(n, ns, null, 0L);
-            exitsyscall(0L);
+            entersyscallblock();
+            var ok = notetsleep_internal(_addr_n, ns, _addr_null, 0L);
+            exitsyscall();
             return ok;
+
+        }
+
+        private static (ptr<g>, bool) beforeIdle(long _p0)
+        {
+            ptr<g> _p0 = default!;
+            bool _p0 = default;
+
+            return (_addr_null!, false);
+        }
+
+        private static void checkTimeouts()
+        {
         }
     }
 }

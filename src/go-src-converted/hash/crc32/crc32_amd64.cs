@@ -6,7 +6,7 @@
 // description of the interface that each architecture-specific file
 // implements.
 
-// package crc32 -- go2cs converted at 2020 August 29 08:23:15 UTC
+// package crc32 -- go2cs converted at 2020 October 08 03:30:49 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
 // Original source: C:\Go\src\hash\crc32\crc32_amd64.go
 using cpu = go.@internal.cpu_package;
@@ -39,9 +39,9 @@ namespace hash
         private static uint ieeeCLMUL(uint crc, slice<byte> p)
 ;
 
-        private static readonly long castagnoliK1 = 168L;
+        private static readonly long castagnoliK1 = (long)168L;
 
-        private static readonly long castagnoliK2 = 1344L;
+        private static readonly long castagnoliK2 = (long)1344L;
 
 
 
@@ -49,8 +49,8 @@ namespace hash
         {
         }
 
-        private static ref sse42Table castagnoliSSE42TableK1 = default;
-        private static ref sse42Table castagnoliSSE42TableK2 = default;
+        private static ptr<sse42Table> castagnoliSSE42TableK1;
+        private static ptr<sse42Table> castagnoliSSE42TableK2;
 
         private static bool archAvailableCastagnoli()
         {
@@ -63,6 +63,7 @@ namespace hash
             {>>MARKER:FUNCTION_ieeeCLMUL_BLOCK_PREFIX<<
                 panic("arch-specific Castagnoli not available");
             }
+
             castagnoliSSE42TableK1 = @new<sse42Table>();
             castagnoliSSE42TableK2 = @new<sse42Table>(); 
             // See description in updateCastagnoli.
@@ -81,15 +82,19 @@ namespace hash
                     castagnoliSSE42TableK2[b][i] = castagnoliSSE42(val, tmp[..]);
                 }
 
+
             }
+
 
         });
 
         // castagnoliShift computes the CRC32-C of K1 or K2 zeroes (depending on the
         // table given) with the given initial crc value. This corresponds to
         // CRC(crc, O) in the description in updateCastagnoli.
-        private static uint castagnoliShift(ref sse42Table table, uint crc)
+        private static uint castagnoliShift(ptr<sse42Table> _addr_table, uint crc)
         {
+            ref sse42Table table = ref _addr_table.val;
+
             return table[3L][crc >> (int)(24L)] ^ table[2L][(crc >> (int)(16L)) & 0xFFUL] ^ table[1L][(crc >> (int)(8L)) & 0xFFUL] ^ table[0L][crc & 0xFFUL];
         }
 
@@ -163,13 +168,14 @@ namespace hash
             // bytes to align the buffer to an 8 byte boundary (if necessary).
             if (len(p) >= castagnoliK1 * 3L)
             {
-                var delta = int(uintptr(@unsafe.Pointer(ref p[0L])) & 7L);
+                var delta = int(uintptr(@unsafe.Pointer(_addr_p[0L])) & 7L);
                 if (delta != 0L)
                 {
                     delta = 8L - delta;
                     crc = castagnoliSSE42(crc, p[..delta]);
                     p = p[delta..];
                 }
+
             } 
 
             // Process 3*K2 at a time.
@@ -179,10 +185,11 @@ namespace hash
                 var (crcA, crcB, crcC) = castagnoliSSE42Triple(crc, 0L, 0L, p, p[castagnoliK2..], p[castagnoliK2 * 2L..], castagnoliK2 / 24L); 
 
                 // CRC(I, AB) = CRC(CRC(I, A), O) xor CRC(0, B)
-                var crcAB = castagnoliShift(castagnoliSSE42TableK2, crcA) ^ crcB; 
+                var crcAB = castagnoliShift(_addr_castagnoliSSE42TableK2, crcA) ^ crcB; 
                 // CRC(I, ABC) = CRC(CRC(I, AB), O) xor CRC(0, C)
-                crc = castagnoliShift(castagnoliSSE42TableK2, crcAB) ^ crcC;
+                crc = castagnoliShift(_addr_castagnoliSSE42TableK2, crcAB) ^ crcC;
                 p = p[castagnoliK2 * 3L..];
+
             } 
 
             // Process 3*K1 at a time.
@@ -195,10 +202,11 @@ namespace hash
                 (crcA, crcB, crcC) = castagnoliSSE42Triple(crc, 0L, 0L, p, p[castagnoliK1..], p[castagnoliK1 * 2L..], castagnoliK1 / 24L); 
 
                 // CRC(I, AB) = CRC(CRC(I, A), O) xor CRC(0, B)
-                crcAB = castagnoliShift(castagnoliSSE42TableK1, crcA) ^ crcB; 
+                crcAB = castagnoliShift(_addr_castagnoliSSE42TableK1, crcA) ^ crcB; 
                 // CRC(I, ABC) = CRC(CRC(I, AB), O) xor CRC(0, C)
-                crc = castagnoliShift(castagnoliSSE42TableK1, crcAB) ^ crcC;
+                crc = castagnoliShift(_addr_castagnoliSSE42TableK1, crcAB) ^ crcC;
                 p = p[castagnoliK1 * 3L..];
+
             } 
 
             // Use the simple implementation for what's left.
@@ -207,6 +215,7 @@ namespace hash
             // Use the simple implementation for what's left.
             crc = castagnoliSSE42(crc, p);
             return ~crc;
+
         });
 
         private static bool archAvailableIEEE()
@@ -214,7 +223,7 @@ namespace hash
             return cpu.X86.HasPCLMULQDQ && cpu.X86.HasSSE41;
         }
 
-        private static ref slicing8Table archIeeeTable8 = default;
+        private static ptr<slicing8Table> archIeeeTable8;
 
         private static void archInitIEEE() => func((_, panic, __) =>
         {
@@ -224,6 +233,7 @@ namespace hash
             } 
             // We still use slicing-by-8 for small buffers.
             archIeeeTable8 = slicingMakeTable(IEEE);
+
         });
 
         private static uint archUpdateIEEE(uint crc, slice<byte> p) => func((_, panic, __) =>
@@ -232,6 +242,7 @@ namespace hash
             {
                 panic("not available");
             }
+
             if (len(p) >= 64L)
             {
                 var left = len(p) & 15L;
@@ -239,11 +250,14 @@ namespace hash
                 crc = ~ieeeCLMUL(~crc, p[..do]);
                 p = p[do..];
             }
+
             if (len(p) == 0L)
             {
                 return crc;
             }
+
             return slicingUpdate(crc, archIeeeTable8, p);
+
         });
     }
 }}

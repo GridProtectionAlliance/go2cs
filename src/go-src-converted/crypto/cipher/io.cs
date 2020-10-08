@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cipher -- go2cs converted at 2020 August 29 08:28:53 UTC
+// package cipher -- go2cs converted at 2020 October 08 03:35:45 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\io.go
 using io = go.io_package;
@@ -26,9 +26,12 @@ namespace crypto
 
         public static (long, error) Read(this StreamReader r, slice<byte> dst)
         {
+            long n = default;
+            error err = default!;
+
             n, err = r.R.Read(dst);
             r.S.XORKeyStream(dst[..n], dst[..n]);
-            return;
+            return ;
         }
 
         // StreamWriter wraps a Stream into an io.Writer. It calls XORKeyStream
@@ -45,14 +48,20 @@ namespace crypto
 
         public static (long, error) Write(this StreamWriter w, slice<byte> src)
         {
+            long n = default;
+            error err = default!;
+
             var c = make_slice<byte>(len(src));
             w.S.XORKeyStream(c, src);
             n, err = w.W.Write(c);
             if (n != len(src) && err == null)
             { // should never happen
                 err = io.ErrShortWrite;
+
             }
-            return;
+
+            return ;
+
         }
 
         // Close closes the underlying Writer and returns its Close return value, if the Writer
@@ -64,11 +73,13 @@ namespace crypto
 
                 if (ok)
                 {
-                    return error.As(c.Close());
+                    return error.As(c.Close())!;
                 }
 
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
     }
 }}

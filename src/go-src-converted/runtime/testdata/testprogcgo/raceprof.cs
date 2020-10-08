@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build linux,amd64
+// +build linux,amd64 freebsd,amd64
 
-// package main -- go2cs converted at 2020 August 29 08:24:57 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:02 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\raceprof.go
 // Test that we can collect a lot of colliding profiling signals from
 // an external C thread. This used to fail when built with the race
@@ -122,8 +122,8 @@ namespace go
         {
             runtime.SetCgoTraceback(0L, @unsafe.Pointer(C.raceprofTraceback), null, null);
 
-            bytes.Buffer buf = default;
-            pprof.StartCPUProfile(ref buf);
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            pprof.StartCPUProfile(_addr_buf);
 
             C.runRaceprofThread();
             fmt.Println("OK");

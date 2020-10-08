@@ -7,7 +7,7 @@
 // from Monotone Discrete Distributions"
 // http://eeyore.wu-wien.ac.at/papers/96-04-04.wh-der.ps.gz
 
-// package rand -- go2cs converted at 2020 August 29 08:25:55 UTC
+// package rand -- go2cs converted at 2020 October 08 03:25:40 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Go\src\math\rand\zipf.go
 using math = go.math_package;
@@ -32,13 +32,17 @@ namespace math
             public double hx0minusHxm;
         }
 
-        private static double h(this ref Zipf z, double x)
+        private static double h(this ptr<Zipf> _addr_z, double x)
         {
+            ref Zipf z = ref _addr_z.val;
+
             return math.Exp(z.oneminusQ * math.Log(z.v + x)) * z.oneminusQinv;
         }
 
-        private static double hinv(this ref Zipf z, double x)
+        private static double hinv(this ptr<Zipf> _addr_z, double x)
         {
+            ref Zipf z = ref _addr_z.val;
+
             return math.Exp(z.oneminusQinv * math.Log(z.oneminusQ * x)) - z.v;
         }
 
@@ -46,13 +50,16 @@ namespace math
         // The generator generates values k ∈ [0, imax]
         // such that P(k) is proportional to (v + k) ** (-s).
         // Requirements: s > 1 and v >= 1.
-        public static ref Zipf NewZipf(ref Rand r, double s, double v, ulong imax)
+        public static ptr<Zipf> NewZipf(ptr<Rand> _addr_r, double s, double v, ulong imax)
         {
+            ref Rand r = ref _addr_r.val;
+
             ptr<Zipf> z = @new<Zipf>();
             if (s <= 1.0F || v < 1L)
             {
-                return null;
+                return _addr_null!;
             }
+
             z.r = r;
             z.imax = float64(imax);
             z.v = v;
@@ -62,17 +69,21 @@ namespace math
             z.hxm = z.h(z.imax + 0.5F);
             z.hx0minusHxm = z.h(0.5F) - math.Exp(math.Log(z.v) * (-z.q)) - z.hxm;
             z.s = 1L - z.hinv(z.h(1.5F) - math.Exp(-z.q * math.Log(z.v + 1.0F)));
-            return z;
+            return _addr_z!;
+
         }
 
         // Uint64 returns a value drawn from the Zipf distribution described
         // by the Zipf object.
-        private static ulong Uint64(this ref Zipf _z) => func(_z, (ref Zipf z, Defer _, Panic panic, Recover __) =>
+        private static ulong Uint64(this ptr<Zipf> _addr_z) => func((_, panic, __) =>
         {
+            ref Zipf z = ref _addr_z.val;
+
             if (z == null)
             {
                 panic("rand: nil Zipf");
             }
+
             float k = 0.0F;
 
             while (true)
@@ -85,13 +96,16 @@ namespace math
                 {
                     break;
                 }
+
                 if (ur >= z.h(k + 0.5F) - math.Exp(-math.Log(k + z.v) * z.q))
                 {
                     break;
                 }
+
             }
 
             return uint64(k);
+
         });
     }
 }}

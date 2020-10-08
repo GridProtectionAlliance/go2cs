@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:01 UTC
+//     Generated on 2020 October 08 03:42:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,65 +24,23 @@ namespace text
     public static partial class template_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(parse.Tree))]
-        [PromotedStruct(typeof(common))]
         public partial struct Template
         {
-            // Tree structure promotion - sourced from pointer
-            private readonly ptr<Tree> m_TreeRef;
-
-            private ref Tree Tree_ptr => ref m_TreeRef.Value;
-
-            public ref @string Name => ref m_TreeRef.Value.Name;
-
-            public ref @string ParseName => ref m_TreeRef.Value.ParseName;
-
-            public ref ptr<ListNode> Root => ref m_TreeRef.Value.Root;
-
-            public ref @string text => ref m_TreeRef.Value.text;
-
-            public ref slice<object> funcs => ref m_TreeRef.Value.funcs;
-
-            public ref ptr<lexer> lex => ref m_TreeRef.Value.lex;
-
-            public ref array<item> token => ref m_TreeRef.Value.token;
-
-            public ref long peekCount => ref m_TreeRef.Value.peekCount;
-
-            public ref slice<@string> vars => ref m_TreeRef.Value.vars;
-
-            public ref map<@string, ref Tree> treeSet => ref m_TreeRef.Value.treeSet;
-
-            // common structure promotion - sourced from pointer
-            private readonly ptr<common> m_commonRef;
-
-            private ref common common_ptr => ref m_commonRef.Value;
-
-            public ref map<@string, ref Template> tmpl => ref m_commonRef.Value.tmpl;
-
-            public ref option option => ref m_commonRef.Value.option;
-
-            public ref sync.RWMutex muFuncs => ref m_commonRef.Value.muFuncs;
-
-            public ref FuncMap parseFuncs => ref m_commonRef.Value.parseFuncs;
-
-            public ref map<@string, reflect.Value> execFuncs => ref m_commonRef.Value.execFuncs;
-
             // Constructors
             public Template(NilType _)
             {
                 this.name = default;
-                this.m_TreeRef = new ptr<parse.Tree>(new parse.Tree(nil));
-                this.m_commonRef = new ptr<common>(new common(nil));
+                this.Tree> = default;
+                this.ptr<common> = default;
                 this.leftDelim = default;
                 this.rightDelim = default;
             }
 
-            public Template(@string name = default, ref parse.Tree Tree = default, ref common common = default, @string leftDelim = default, @string rightDelim = default)
+            public Template(@string name = default, ref ptr<parse.Tree> Tree> = default, ref ptr<common> ptr<common> = default, @string leftDelim = default, @string rightDelim = default)
             {
                 this.name = name;
-                this.m_TreeRef = new ptr<parse.Tree>(ref Tree);
-                this.m_commonRef = new ptr<common>(ref common);
+                this.Tree> = Tree>;
+                this.ptr<common> = ptr<common>;
                 this.leftDelim = leftDelim;
                 this.rightDelim = rightDelim;
             }
@@ -107,7 +65,7 @@ namespace text
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Template Template_cast(dynamic value)
         {
-            return new Template(value.name, ref value.Tree, ref value.common, value.leftDelim, value.rightDelim);
+            return new Template(value.name, ref value.Tree>, ref value.ptr<common>, value.leftDelim, value.rightDelim);
         }
     }
 }}

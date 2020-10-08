@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:29:29 UTC
+// package gc -- go2cs converted at 2020 October 08 04:31:21 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\timings.go
 using fmt = go.fmt_package;
@@ -25,7 +25,7 @@ namespace @internal
         public partial struct Timings
         {
             public slice<timestamp> list;
-            public map<long, slice<ref event>> events; // lazily allocated
+            public map<long, slice<ptr<event>>> events; // lazily allocated
         }
 
         private partial struct timestamp
@@ -41,22 +41,30 @@ namespace @internal
             public @string unit; // unit of size measure (count, MB, lines, funcs, ...)
         }
 
-        private static void append(this ref Timings t, slice<@string> labels, bool start)
+        private static void append(this ptr<Timings> _addr_t, slice<@string> labels, bool start)
         {
+            ref Timings t = ref _addr_t.val;
+
             t.list = append(t.list, new timestamp(time.Now(),strings.Join(labels,":"),start));
         }
 
         // Start marks the beginning of a new phase and implicitly stops the previous phase.
         // The phase name is the colon-separated concatenation of the labels.
-        private static void Start(this ref Timings t, params @string[] labels)
+        private static void Start(this ptr<Timings> _addr_t, params @string[] labels)
         {
+            labels = labels.Clone();
+            ref Timings t = ref _addr_t.val;
+
             t.append(labels, true);
         }
 
         // Stop marks the end of a phase and implicitly starts a new phase.
         // The labels are added to the labels of the ended phase.
-        private static void Stop(this ref Timings t, params @string[] labels)
+        private static void Stop(this ptr<Timings> _addr_t, params @string[] labels)
         {
+            labels = labels.Clone();
+            ref Timings t = ref _addr_t.val;
+
             t.append(labels, false);
         }
 
@@ -64,26 +72,33 @@ namespace @internal
         // with the most recently started or stopped phase; or the very first
         // phase if Start or Stop hasn't been called yet. The unit specifies
         // the unit of measurement (e.g., MB, lines, no. of funcs, etc.).
-        private static void AddEvent(this ref Timings t, long size, @string unit)
+        private static void AddEvent(this ptr<Timings> _addr_t, long size, @string unit)
         {
+            ref Timings t = ref _addr_t.val;
+
             var m = t.events;
             if (m == null)
             {
-                m = make_map<long, slice<ref event>>();
+                m = make_map<long, slice<ptr<event>>>();
                 t.events = m;
             }
+
             var i = len(t.list);
             if (i > 0L)
             {
                 i--;
             }
-            m[i] = append(m[i], ref new event(size,unit));
+
+            m[i] = append(m[i], addr(new event(size,unit)));
+
         }
 
         // Write prints the phase times to w.
         // The prefix is printed at the start of each line.
-        private static void Write(this ref Timings t, io.Writer w, @string prefix)
+        private static void Write(this ptr<Timings> _addr_t, io.Writer w, @string prefix)
         {
+            ref Timings t = ref _addr_t.val;
+
             if (len(t.list) > 0L)
             {
                 lines lines = default; 
@@ -95,15 +110,15 @@ namespace @internal
                 time.Duration unaccounted = default; 
 
                 // process Start/Stop timestamps
-                var pt = ref t.list[0L]; // previous timestamp
+                var pt = _addr_t.list[0L]; // previous timestamp
                 var tot = t.list[len(t.list) - 1L].time.Sub(pt.time);
                 for (long i = 1L; i < len(t.list); i++)
                 {
-                    var qt = ref t.list[i]; // current timestamp
+                    var qt = _addr_t.list[i]; // current timestamp
                     var dt = qt.time.Sub(pt.time);
 
                     @string label = default;
-                    slice<ref event> events = default;
+                    slice<ptr<event>> events = default;
                     if (pt.start)
                     { 
                         // previous phase started
@@ -130,7 +145,9 @@ namespace @internal
                                 }
 
                             }
+
                         }
+
                     }
                     else
                     { 
@@ -139,14 +156,18 @@ namespace @internal
                         { 
                             // between a stopped and started phase; unaccounted time
                             unaccounted += dt;
+
                         }
                         else
                         { 
                             // previous stop implicitly started current phase
                             label = qt.label;
                             events = t.events[i];
+
                         }
+
                     }
+
                     if (label != "")
                     { 
                         // add phase to existing group, or start a new group
@@ -157,6 +178,7 @@ namespace @internal
                             group.label = l;
                             group.tot += dt;
                             group.size++;
+
                         }
                         else
                         { 
@@ -165,15 +187,20 @@ namespace @internal
                             {
                                 lines.add(prefix + group.label + "subtotal", 1L, group.tot, tot, null);
                             }
+
                             group.label = label;
                             group.tot = dt;
                             group.size = 1L;
+
                         } 
 
                         // write phase
                         lines.add(prefix + label, 1L, dt, tot, events);
+
                     }
+
                     pt = qt;
+
                 }
 
 
@@ -181,14 +208,18 @@ namespace @internal
                 {
                     lines.add(prefix + group.label + "subtotal", 1L, group.tot, tot, null);
                 }
+
                 if (unaccounted != 0L)
                 {
                     lines.add(prefix + "unaccounted", 1L, unaccounted, tot, null);
                 }
+
                 lines.add(prefix + "total", 1L, tot, tot, null);
 
                 lines.write(w);
+
             }
+
         }
 
         private static @string commonPrefix(@string a, @string b)
@@ -200,14 +231,17 @@ namespace @internal
             }
 
             return a[..i];
+
         }
 
         private partial struct lines // : slice<slice<@string>>
         {
         }
 
-        private static void add(this ref lines lines, @string label, long n, time.Duration dt, time.Duration tot, slice<ref event> events)
+        private static void add(this ptr<lines> _addr_lines, @string label, long n, time.Duration dt, time.Duration tot, slice<ptr<event>> events)
         {
+            ref lines lines = ref _addr_lines.val;
+
             slice<@string> line = default;
             Action<@string, object[]> add = (format, args) =>
             {
@@ -227,7 +261,8 @@ namespace @internal
                 add("    %d", int64(float64(e.size) / dt.Seconds() + 0.5F));
                 add(" %s/s", e.unit);
             }
-            lines.Value = append(lines.Value, line);
+            lines.val = append(lines.val, line);
+
         }
 
         private static void write(this lines lines, io.Writer w)
@@ -255,18 +290,19 @@ namespace @internal
                                 {
                                     widths[i] = len(col);
                                 }
+
                             }
                             else
                             {
                                 widths = append(widths, len(col));
                                 number = append(number, isnumber(col)); // first line determines column contents
                             }
+
                         }
 
                         i = i__prev2;
                         col = col__prev2;
                     }
-
                 } 
 
                 // make column widths a multiple of align for more stable output
@@ -274,7 +310,7 @@ namespace @internal
                 line = line__prev1;
             }
 
-            const long align = 1L; // set to a value > 1 to enable
+            const long align = (long)1L; // set to a value > 1 to enable
  // set to a value > 1 to enable
             if (align > 1L)
             {
@@ -291,7 +327,6 @@ namespace @internal
 
                     i = i__prev1;
                 }
-
             } 
 
             // print lines taking column widths and contents into account
@@ -314,7 +349,9 @@ namespace @internal
                             {
                                 format = "%*s"; // numbers are right-aligned
                             }
+
                             fmt.Fprintf(w, format, widths[i], col);
+
                         }
 
                         i = i__prev2;
@@ -322,11 +359,11 @@ namespace @internal
                     }
 
                     fmt.Fprintln(w);
+
                 }
 
                 line = line__prev1;
             }
-
         }
 
         private static bool isnumber(@string s)
@@ -337,9 +374,12 @@ namespace @internal
                 {
                     continue; // ignore leading whitespace
                 }
+
                 return '0' <= ch && ch <= '9' || ch == '.' || ch == '-' || ch == '+';
+
             }
             return false;
+
         }
     }
 }}}}

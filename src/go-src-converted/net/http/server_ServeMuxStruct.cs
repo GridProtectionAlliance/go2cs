@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:44 UTC
+//     Generated on 2020 October 08 03:40:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,12 +28,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {
@@ -49,13 +50,15 @@ namespace net
             {
                 this.mu = default;
                 this.m = default;
+                this.es = default;
                 this.hosts = default;
             }
 
-            public ServeMux(sync.RWMutex mu = default, map<@string, muxEntry> m = default, bool hosts = default)
+            public ServeMux(sync.RWMutex mu = default, map<@string, muxEntry> m = default, slice<muxEntry> es = default, bool hosts = default)
             {
                 this.mu = mu;
                 this.m = m;
+                this.es = es;
                 this.hosts = hosts;
             }
 
@@ -79,7 +82,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ServeMux ServeMux_cast(dynamic value)
         {
-            return new ServeMux(value.mu, value.m, value.hosts);
+            return new ServeMux(value.mu, value.m, value.es, value.hosts);
         }
     }
 }}

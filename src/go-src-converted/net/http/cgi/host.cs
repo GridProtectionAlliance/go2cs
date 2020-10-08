@@ -12,7 +12,7 @@
 // request, which is typically less efficient than using a
 // long-running server. This package is intended primarily for
 // compatibility with existing systems.
-// package cgi -- go2cs converted at 2020 August 29 08:34:04 UTC
+// package cgi -- go2cs converted at 2020 October 08 03:40:51 UTC
 // import "net/http/cgi" ==> using cgi = go.net.http.cgi_package
 // Original source: C:\Go\src\net\http\cgi\host.go
 using bufio = go.bufio_package;
@@ -21,6 +21,7 @@ using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using http = go.net.http_package;
+using textproto = go.net.textproto_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
@@ -28,6 +29,8 @@ using regexp = go.regexp_package;
 using runtime = go.runtime_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
+
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using static go.builtin;
 using System;
 
@@ -39,7 +42,36 @@ namespace http
     {
         private static var trailingPort = regexp.MustCompile(":([0-9]+)$");
 
-        private static map osDefaultInheritEnv = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<@string>>{"darwin":{"DYLD_LIBRARY_PATH"},"freebsd":{"LD_LIBRARY_PATH"},"hpux":{"LD_LIBRARY_PATH","SHLIB_PATH"},"irix":{"LD_LIBRARY_PATH","LD_LIBRARYN32_PATH","LD_LIBRARY64_PATH"},"linux":{"LD_LIBRARY_PATH"},"openbsd":{"LD_LIBRARY_PATH"},"solaris":{"LD_LIBRARY_PATH","LD_LIBRARY_PATH_32","LD_LIBRARY_PATH_64"},"windows":{"SystemRoot","COMSPEC","PATHEXT","WINDIR"},};
+        private static Func<slice<@string>> osDefaultInheritEnv = () =>
+        {
+            switch (runtime.GOOS)
+            {
+                case "darwin": 
+                    return new slice<@string>(new @string[] { "DYLD_LIBRARY_PATH" });
+                    break;
+                case "linux": 
+
+                case "freebsd": 
+
+                case "openbsd": 
+                    return new slice<@string>(new @string[] { "LD_LIBRARY_PATH" });
+                    break;
+                case "hpux": 
+                    return new slice<@string>(new @string[] { "LD_LIBRARY_PATH", "SHLIB_PATH" });
+                    break;
+                case "irix": 
+                    return new slice<@string>(new @string[] { "LD_LIBRARY_PATH", "LD_LIBRARYN32_PATH", "LD_LIBRARY64_PATH" });
+                    break;
+                case "solaris": 
+                    return new slice<@string>(new @string[] { "LD_LIBRARY_PATH", "LD_LIBRARY_PATH_32", "LD_LIBRARY_PATH_64" });
+                    break;
+                case "windows": 
+                    return new slice<@string>(new @string[] { "SystemRoot", "COMSPEC", "PATHEXT", "WINDIR" });
+                    break;
+            }
+            return null;
+
+        }();
 
         // Handler runs an executable in a subprocess with a CGI environment.
         public partial struct Handler
@@ -69,13 +101,17 @@ namespace http
             public http.Handler PathLocationHandler;
         }
 
-        private static io.Writer stderr(this ref Handler h)
+        private static io.Writer stderr(this ptr<Handler> _addr_h)
         {
+            ref Handler h = ref _addr_h.val;
+
             if (h.Stderr != null)
             {
                 return h.Stderr;
             }
+
             return os.Stderr;
+
         }
 
         // removeLeadingDuplicates remove leading duplicate in environments.
@@ -86,6 +122,8 @@ namespace http
         //    }
         private static slice<@string> removeLeadingDuplicates(slice<@string> env)
         {
+            slice<@string> ret = default;
+
             foreach (var (i, e) in env)
             {
                 var found = false;
@@ -102,36 +140,47 @@ namespace http
                                 found = true;
                                 break;
                             }
+
                         }
+
                     }
 
                 }
+
                 if (!found)
                 {
                     ret = append(ret, e);
                 }
+
             }
-            return;
+            return ;
+
         }
 
-        private static void ServeHTTP(this ref Handler _h, http.ResponseWriter rw, ref http.Request _req) => func(_h, _req, (ref Handler h, ref http.Request req, Defer defer, Panic _, Recover __) =>
+        private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw, ptr<http.Request> _addr_req) => func((defer, _, __) =>
         {
+            ref Handler h = ref _addr_h.val;
+            ref http.Request req = ref _addr_req.val;
+
             var root = h.Root;
             if (root == "")
             {
                 root = "/";
             }
+
             if (len(req.TransferEncoding) > 0L && req.TransferEncoding[0L] == "chunked")
             {
                 rw.WriteHeader(http.StatusBadRequest);
                 rw.Write((slice<byte>)"Chunked request bodies are not supported by CGI.");
-                return;
+                return ;
             }
+
             var pathInfo = req.URL.Path;
             if (root != "/" && strings.HasPrefix(pathInfo, root))
             {
                 pathInfo = pathInfo[len(root)..];
             }
+
             @string port = "80";
             {
                 var matches = trailingPort.FindStringSubmatch(req.Host);
@@ -142,6 +191,7 @@ namespace http
                 }
 
             }
+
 
             @string env = new slice<@string>(new @string[] { "SERVER_SOFTWARE=go", "SERVER_NAME="+req.Host, "SERVER_PROTOCOL=HTTP/1.1", "HTTP_HOST="+req.Host, "GATEWAY_INTERFACE=CGI/1.1", "REQUEST_METHOD="+req.Method, "QUERY_STRING="+req.URL.RawQuery, "REQUEST_URI="+req.URL.RequestURI(), "PATH_INFO="+pathInfo, "SCRIPT_NAME="+root, "SCRIPT_FILENAME="+h.Path, "SERVER_PORT="+port });
 
@@ -156,14 +206,17 @@ namespace http
                 { 
                     // could not parse ip:port, let's use whole RemoteAddr and leave REMOTE_PORT undefined
                     env = append(env, "REMOTE_ADDR=" + req.RemoteAddr, "REMOTE_HOST=" + req.RemoteAddr);
+
                 }
 
             }
+
 
             if (req.TLS != null)
             {
                 env = append(env, "HTTPS=on");
             }
+
             {
                 var k__prev1 = k;
                 var v__prev1 = v;
@@ -177,13 +230,17 @@ namespace http
                     { 
                         // See Issue 16405
                         continue;
+
                     }
+
                     @string joinStr = ", ";
                     if (k == "COOKIE")
                     {
                         joinStr = "; ";
                     }
+
                     env = append(env, "HTTP_" + k + "=" + strings.Join(v, joinStr));
+
                 }
 
                 k = k__prev1;
@@ -194,6 +251,7 @@ namespace http
             {
                 env = append(env, fmt.Sprintf("CONTENT_LENGTH=%d", req.ContentLength));
             }
+
             {
                 var ctype = req.Header.Get("Content-Type");
 
@@ -204,11 +262,13 @@ namespace http
 
             }
 
+
             var envPath = os.Getenv("PATH");
             if (envPath == "")
             {
                 envPath = "/bin:/usr/bin:/usr/ucb:/usr/bsd:/usr/local/bin";
             }
+
             env = append(env, "PATH=" + envPath);
 
             {
@@ -230,6 +290,7 @@ namespace http
                         v = v__prev1;
 
                     }
+
                 }
 
                 e = e__prev1;
@@ -238,7 +299,7 @@ namespace http
             {
                 var e__prev1 = e;
 
-                foreach (var (_, __e) in osDefaultInheritEnv[runtime.GOOS])
+                foreach (var (_, __e) in osDefaultInheritEnv)
                 {
                     e = __e;
                     {
@@ -254,6 +315,7 @@ namespace http
                         v = v__prev1;
 
                     }
+
                 }
 
                 e = e__prev1;
@@ -263,6 +325,7 @@ namespace http
             {
                 env = append(env, h.Env);
             }
+
             env = removeLeadingDuplicates(env);
 
             @string cwd = default;            @string path = default;
@@ -276,10 +339,12 @@ namespace http
             {
                 cwd, path = filepath.Split(h.Path);
             }
+
             if (cwd == "")
             {
                 cwd = ".";
             }
+
             Action<error> internalError = err =>
             {
                 rw.WriteHeader(http.StatusInternalServerError);
@@ -287,23 +352,26 @@ namespace http
             }
 ;
 
-            exec.Cmd cmd = ref new exec.Cmd(Path:path,Args:append([]string{h.Path},h.Args...),Dir:cwd,Env:env,Stderr:h.stderr(),);
+            ptr<exec.Cmd> cmd = addr(new exec.Cmd(Path:path,Args:append([]string{h.Path},h.Args...),Dir:cwd,Env:env,Stderr:h.stderr(),));
             if (req.ContentLength != 0L)
             {
                 cmd.Stdin = req.Body;
             }
+
             var (stdoutRead, err) = cmd.StdoutPipe();
             if (err != null)
             {
                 internalError(err);
-                return;
+                return ;
             }
+
             err = cmd.Start();
             if (err != null)
             {
                 internalError(err);
-                return;
+                return ;
             }
+
             {
                 var hook = testHookStartProcess;
 
@@ -313,6 +381,7 @@ namespace http
                 }
 
             }
+
             defer(cmd.Wait());
             defer(stdoutRead.Close());
 
@@ -328,23 +397,27 @@ namespace http
                 {
                     rw.WriteHeader(http.StatusInternalServerError);
                     h.printf("cgi: long header line from subprocess.");
-                    return;
+                    return ;
                 }
+
                 if (err == io.EOF)
                 {
                     break;
                 }
+
                 if (err != null)
                 {
                     rw.WriteHeader(http.StatusInternalServerError);
                     h.printf("cgi: error reading headers: %v", err);
-                    return;
+                    return ;
                 }
+
                 if (len(line) == 0L)
                 {
                     sawBlankLine = true;
                     break;
                 }
+
                 headerLines++;
                 var parts = strings.SplitN(string(line), ":", 2L);
                 if (len(parts) < 2L)
@@ -352,35 +425,45 @@ namespace http
                     h.printf("cgi: bogus header line: %s", string(line));
                     continue;
                 }
+
                 var header = parts[0L];
                 var val = parts[1L];
-                header = strings.TrimSpace(header);
-                val = strings.TrimSpace(val);
+                if (!httpguts.ValidHeaderFieldName(header))
+                {
+                    h.printf("cgi: invalid header name: %q", header);
+                    continue;
+                }
+
+                val = textproto.TrimString(val);
 
                 if (header == "Status") 
                     if (len(val) < 3L)
                     {
                         h.printf("cgi: bogus status (short): %q", val);
-                        return;
+                        return ;
                     }
+
                     var (code, err) = strconv.Atoi(val[0L..3L]);
                     if (err != null)
                     {
                         h.printf("cgi: bogus status: %q", val);
                         h.printf("cgi: line was %q", line);
-                        return;
+                        return ;
                     }
+
                     statusCode = code;
                 else 
                     headers.Add(header, val);
-                            }
+                
+            }
 
             if (headerLines == 0L || !sawBlankLine)
             {
                 rw.WriteHeader(http.StatusInternalServerError);
                 h.printf("cgi: no headers");
-                return;
+                return ;
             }
+
             {
                 var loc = headers.Get("Location");
 
@@ -389,22 +472,26 @@ namespace http
                     if (strings.HasPrefix(loc, "/") && h.PathLocationHandler != null)
                     {
                         h.handleInternalRedirect(rw, req, loc);
-                        return;
+                        return ;
                     }
+
                     if (statusCode == 0L)
                     {
                         statusCode = http.StatusFound;
                     }
+
                 }
 
             }
+
 
             if (statusCode == 0L && headers.Get("Content-Type") == "")
             {
                 rw.WriteHeader(http.StatusInternalServerError);
                 h.printf("cgi: missing required Content-Type in headers");
-                return;
+                return ;
             }
+
             if (statusCode == 0L)
             {
                 statusCode = http.StatusOK;
@@ -431,7 +518,6 @@ namespace http
 
                         v = v__prev2;
                     }
-
                 }
 
                 k = k__prev1;
@@ -450,11 +536,16 @@ namespace http
                 // kill of an already-dead process is harmless (the PID
                 // won't be reused until the Wait above).
                 cmd.Process.Kill();
+
             }
+
         });
 
-        private static void printf(this ref Handler h, @string format, params object[] v)
+        private static void printf(this ptr<Handler> _addr_h, @string format, params object[] v)
         {
+            v = v.Clone();
+            ref Handler h = ref _addr_h.val;
+
             if (h.Logger != null)
             {
                 h.Logger.Printf(format, v);
@@ -463,16 +554,20 @@ namespace http
             {
                 log.Printf(format, v);
             }
+
         }
 
-        private static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ref http.Request req, @string path)
+        private static void handleInternalRedirect(this ptr<Handler> _addr_h, http.ResponseWriter rw, ptr<http.Request> _addr_req, @string path)
         {
+            ref Handler h = ref _addr_h.val;
+            ref http.Request req = ref _addr_req.val;
+
             var (url, err) = req.URL.Parse(path);
             if (err != null)
             {
                 rw.WriteHeader(http.StatusInternalServerError);
                 h.printf("cgi: error resolving local URI path %q: %v", path, err);
-                return;
+                return ;
             } 
             // TODO: RFC 3875 isn't clear if only GET is supported, but it
             // suggests so: "Note that any message-body attached to the
@@ -483,8 +578,9 @@ namespace http
             // method or just GET? What about incoming headers?
             // (e.g. Cookies) Which headers, if any, are copied into the
             // second request?
-            http.Request newReq = ref new http.Request(Method:"GET",URL:url,Proto:"HTTP/1.1",ProtoMajor:1,ProtoMinor:1,Header:make(http.Header),Host:url.Host,RemoteAddr:req.RemoteAddr,TLS:req.TLS,);
+            ptr<http.Request> newReq = addr(new http.Request(Method:"GET",URL:url,Proto:"HTTP/1.1",ProtoMajor:1,ProtoMinor:1,Header:make(http.Header),Host:url.Host,RemoteAddr:req.RemoteAddr,TLS:req.TLS,));
             h.PathLocationHandler.ServeHTTP(rw, newReq);
+
         }
 
         private static int upperCaseAndUnderscore(int r)
@@ -501,8 +597,9 @@ namespace http
                 return '_';
             // TODO: other transformations in spec or practice?
             return r;
+
         }
 
-        private static Action<ref os.Process> testHookStartProcess = default; // nil except for some tests
+        private static Action<ptr<os.Process>> testHookStartProcess = default; // nil except for some tests
     }
 }}}

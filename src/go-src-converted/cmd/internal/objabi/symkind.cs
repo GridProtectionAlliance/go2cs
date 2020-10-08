@@ -1,5 +1,5 @@
 // Derived from Inferno utils/6l/l.h and related files.
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/l.h
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/l.h
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2020 August 29 08:46:20 UTC
+// package objabi -- go2cs converted at 2020 October 08 03:50:15 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Go\src\cmd\internal\objabi\symkind.go
 
@@ -46,29 +46,42 @@ namespace @internal
         }
 
         // Defined SymKind values.
+        // These are used to index into cmd/link/internal/sym/AbiSymKindToSymKind
         //
         // TODO(rsc): Give idiomatic Go names.
         //go:generate stringer -type=SymKind
  
         // An otherwise invalid zero value for the type
-        public static readonly SymKind Sxxx = iota; 
+        public static readonly SymKind Sxxx = (SymKind)iota; 
         // Executable instructions
-        public static readonly var STEXT = 0; 
+        public static readonly var STEXT = (var)0; 
         // Read only static data
-        public static readonly var SRODATA = 1; 
+        public static readonly var SRODATA = (var)1; 
         // Static data that does not contain any pointers
-        public static readonly var SNOPTRDATA = 2; 
+        public static readonly var SNOPTRDATA = (var)2; 
         // Static data
-        public static readonly var SDATA = 3; 
+        public static readonly var SDATA = (var)3; 
         // Statically data that is initially all 0s
-        public static readonly var SBSS = 4; 
+        public static readonly var SBSS = (var)4; 
         // Statically data that is initially all 0s and does not contain pointers
-        public static readonly var SNOPTRBSS = 5; 
+        public static readonly var SNOPTRBSS = (var)5; 
         // Thread-local data that is initially all 0s
-        public static readonly var STLSBSS = 6; 
+        public static readonly var STLSBSS = (var)6; 
         // Debugging data
-        public static readonly var SDWARFINFO = 7;
-        public static readonly var SDWARFRANGE = 8;
-        public static readonly var SDWARFLOC = 9;
+        public static readonly var SDWARFINFO = (var)7;
+        public static readonly var SDWARFRANGE = (var)8;
+        public static readonly var SDWARFLOC = (var)9;
+        public static readonly var SDWARFLINES = (var)10; 
+        // ABI alias. An ABI alias symbol is an empty symbol with a
+        // single relocation with 0 size that references the native
+        // function implementation symbol.
+        //
+        // TODO(austin): Remove this and all uses once the compiler
+        // generates real ABI wrappers rather than symbol aliases.
+        public static readonly var SABIALIAS = (var)11; 
+        // Coverage instrumentation counter for libfuzzer.
+        public static readonly var SLIBFUZZER_EXTRA_COUNTER = (var)12; 
+        // Update cmd/link/internal/sym/AbiSymKindToSymKind for new SymKind values.
+
     }
 }}}

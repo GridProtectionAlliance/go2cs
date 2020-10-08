@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package color -- go2cs converted at 2020 August 29 10:09:42 UTC
+// package color -- go2cs converted at 2020 October 08 04:59:07 UTC
 // import "image/color" ==> using color = go.image.color_package
 // Original source: C:\Go\src\image\color\ycbcr.go
 
@@ -15,12 +15,16 @@ namespace image
     {
         // RGBToYCbCr converts an RGB triple to a Y'CbCr triple.
         public static (byte, byte, byte) RGBToYCbCr(byte r, byte g, byte b)
-        { 
+        {
+            byte _p0 = default;
+            byte _p0 = default;
+            byte _p0 = default;
+ 
             // The JFIF specification says:
             //    Y' =  0.2990*R + 0.5870*G + 0.1140*B
             //    Cb = -0.1687*R - 0.3313*G + 0.5000*B + 128
             //    Cr =  0.5000*R - 0.4187*G - 0.0813*B + 128
-            // http://www.w3.org/Graphics/JPEG/jfif3.pdf says Y but means Y'.
+            // https://www.w3.org/Graphics/JPEG/jfif3.pdf says Y but means Y'.
 
             var r1 = int32(r);
             var g1 = int32(g);
@@ -65,16 +69,21 @@ namespace image
                 cr = ~(cr >> (int)(31L));
             }
             return (uint8(yy), uint8(cb), uint8(cr));
+
         }
 
         // YCbCrToRGB converts a Y'CbCr triple to an RGB triple.
         public static (byte, byte, byte) YCbCrToRGB(byte y, byte cb, byte cr)
-        { 
+        {
+            byte _p0 = default;
+            byte _p0 = default;
+            byte _p0 = default;
+ 
             // The JFIF specification says:
             //    R = Y' + 1.40200*(Cr-128)
             //    G = Y' - 0.34414*(Cb-128) - 0.71414*(Cr-128)
             //    B = Y' + 1.77200*(Cb-128)
-            // http://www.w3.org/Graphics/JPEG/jfif3.pdf says Y but means Y'.
+            // https://www.w3.org/Graphics/JPEG/jfif3.pdf says Y but means Y'.
             //
             // Those formulae use non-integer multiplication factors. When computing,
             // integer math is generally faster than floating point math. We multiply
@@ -152,6 +161,7 @@ namespace image
             {
                 r = ~(r >> (int)(31L));
             }
+
             var g = yy1 - 22554L * cb1 - 46802L * cr1;
             if (uint32(g) & 0xff000000UL == 0L)
             {
@@ -161,6 +171,7 @@ namespace image
             {
                 g = ~(g >> (int)(31L));
             }
+
             var b = yy1 + 116130L * cb1;
             if (uint32(b) & 0xff000000UL == 0L)
             {
@@ -170,7 +181,9 @@ namespace image
             {
                 b = ~(b >> (int)(31L));
             }
+
             return (uint8(r), uint8(g), uint8(b));
+
         }
 
         // YCbCr represents a fully opaque 24-bit Y'CbCr color, having 8 bits each for
@@ -183,7 +196,7 @@ namespace image
         //
         // Conversion between RGB and Y'CbCr is lossy and there are multiple, slightly
         // different formulae for converting between the two. This package follows
-        // the JFIF specification at http://www.w3.org/Graphics/JPEG/jfif3.pdf.
+        // the JFIF specification at https://www.w3.org/Graphics/JPEG/jfif3.pdf.
         public partial struct YCbCr
         {
             public byte Y;
@@ -192,7 +205,12 @@ namespace image
         }
 
         public static (uint, uint, uint, uint) RGBA(this YCbCr c)
-        { 
+        {
+            uint _p0 = default;
+            uint _p0 = default;
+            uint _p0 = default;
+            uint _p0 = default;
+ 
             // This code is a copy of the YCbCrToRGB function above, except that it
             // returns values in the range [0, 0xffff] instead of [0, 0xff]. There is a
             // subtle difference between doing this and having YCbCr satisfy the Color
@@ -234,6 +252,7 @@ namespace image
             {
                 r = ~(r >> (int)(31L)) & 0xffffUL;
             }
+
             var g = yy1 - 22554L * cb1 - 46802L * cr1;
             if (uint32(g) & 0xff000000UL == 0L)
             {
@@ -243,6 +262,7 @@ namespace image
             {
                 g = ~(g >> (int)(31L)) & 0xffffUL;
             }
+
             var b = yy1 + 116130L * cb1;
             if (uint32(b) & 0xff000000UL == 0L)
             {
@@ -252,7 +272,9 @@ namespace image
             {
                 b = ~(b >> (int)(31L)) & 0xffffUL;
             }
+
             return (uint32(r), uint32(g), uint32(b), 0xffffUL);
+
         }
 
         // YCbCrModel is the Model for Y'CbCr colors.
@@ -269,9 +291,11 @@ namespace image
                 }
 
             }
+
             var (r, g, b, _) = c.RGBA();
             var (y, u, v) = RGBToYCbCr(uint8(r >> (int)(8L)), uint8(g >> (int)(8L)), uint8(b >> (int)(8L)));
             return new YCbCr(y,u,v);
+
         }
 
         // NYCbCrA represents a non-alpha-premultiplied Y'CbCr-with-alpha color, having
@@ -283,7 +307,12 @@ namespace image
         }
 
         public static (uint, uint, uint, uint) RGBA(this NYCbCrA c)
-        { 
+        {
+            uint _p0 = default;
+            uint _p0 = default;
+            uint _p0 = default;
+            uint _p0 = default;
+ 
             // The first part of this method is the same as YCbCr.RGBA.
             var yy1 = int32(c.Y) * 0x10101UL;
             var cb1 = int32(c.Cb) - 128L;
@@ -309,6 +338,7 @@ namespace image
             {
                 r = ~(r >> (int)(31L)) & 0xffffUL;
             }
+
             var g = yy1 - 22554L * cb1 - 46802L * cr1;
             if (uint32(g) & 0xff000000UL == 0L)
             {
@@ -318,6 +348,7 @@ namespace image
             {
                 g = ~(g >> (int)(31L)) & 0xffffUL;
             }
+
             var b = yy1 + 116130L * cb1;
             if (uint32(b) & 0xff000000UL == 0L)
             {
@@ -331,6 +362,7 @@ namespace image
             // The second part of this method applies the alpha.
             var a = uint32(c.A) * 0x101UL;
             return (uint32(r) * a / 0xffffUL, uint32(g) * a / 0xffffUL, uint32(b) * a / 0xffffUL, a);
+
         }
 
         // NYCbCrAModel is the Model for non-alpha-premultiplied Y'CbCr-with-alpha
@@ -357,13 +389,20 @@ namespace image
                 g = (g * 0xffffUL) / a;
                 b = (b * 0xffffUL) / a;
             }
+
             var (y, u, v) = RGBToYCbCr(uint8(r >> (int)(8L)), uint8(g >> (int)(8L)), uint8(b >> (int)(8L)));
             return new NYCbCrA(YCbCr{Y:y,Cb:u,Cr:v},uint8(a>>8));
+
         }
 
         // RGBToCMYK converts an RGB triple to a CMYK quadruple.
         public static (byte, byte, byte, byte) RGBToCMYK(byte r, byte g, byte b)
         {
+            byte _p0 = default;
+            byte _p0 = default;
+            byte _p0 = default;
+            byte _p0 = default;
+
             var rr = uint32(r);
             var gg = uint32(g);
             var bb = uint32(b);
@@ -372,23 +411,31 @@ namespace image
             {
                 w = gg;
             }
+
             if (w < bb)
             {
                 w = bb;
             }
+
             if (w == 0L)
             {
                 return (0L, 0L, 0L, 0xffUL);
             }
+
             var c = (w - rr) * 0xffUL / w;
             var m = (w - gg) * 0xffUL / w;
             var y = (w - bb) * 0xffUL / w;
             return (uint8(c), uint8(m), uint8(y), uint8(0xffUL - w));
+
         }
 
         // CMYKToRGB converts a CMYK quadruple to an RGB triple.
         public static (byte, byte, byte) CMYKToRGB(byte c, byte m, byte y, byte k)
         {
+            byte _p0 = default;
+            byte _p0 = default;
+            byte _p0 = default;
+
             ulong w = 0xffffUL - uint32(k) * 0x101UL;
             ulong r = (0xffffUL - uint32(c) * 0x101UL) * w / 0xffffUL;
             ulong g = (0xffffUL - uint32(m) * 0x101UL) * w / 0xffffUL;
@@ -409,7 +456,12 @@ namespace image
         }
 
         public static (uint, uint, uint, uint) RGBA(this CMYK c)
-        { 
+        {
+            uint _p0 = default;
+            uint _p0 = default;
+            uint _p0 = default;
+            uint _p0 = default;
+ 
             // This code is a copy of the CMYKToRGB function above, except that it
             // returns values in the range [0, 0xffff] instead of [0, 0xff].
 
@@ -418,6 +470,7 @@ namespace image
             ulong g = (0xffffUL - uint32(c.M) * 0x101UL) * w / 0xffffUL;
             ulong b = (0xffffUL - uint32(c.Y) * 0x101UL) * w / 0xffffUL;
             return (r, g, b, 0xffffUL);
+
         }
 
         // CMYKModel is the Model for CMYK colors.
@@ -434,9 +487,11 @@ namespace image
                 }
 
             }
+
             var (r, g, b, _) = c.RGBA();
             var (cc, mm, yy, kk) = RGBToCMYK(uint8(r >> (int)(8L)), uint8(g >> (int)(8L)), uint8(b >> (int)(8L)));
             return new CMYK(cc,mm,yy,kk);
+
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:12 UTC
+//     Generated on 2020 October 08 03:45:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,22 +24,24 @@ namespace go
             // Constructors
             public runtimeTimer(NilType _)
             {
-                this.tb = default;
-                this.i = default;
+                this.pp = default;
                 this.when = default;
                 this.period = default;
                 this.f = default;
                 this.seq = default;
+                this.nextwhen = default;
+                this.status = default;
             }
 
-            public runtimeTimer(System.UIntPtr tb = default, long i = default, long when = default, long period = default, Action<object, System.UIntPtr> f = default, System.UIntPtr seq = default)
+            public runtimeTimer(System.UIntPtr pp = default, long when = default, long period = default, Action<object, System.UIntPtr> f = default, System.UIntPtr seq = default, long nextwhen = default, uint status = default)
             {
-                this.tb = tb;
-                this.i = i;
+                this.pp = pp;
                 this.when = when;
                 this.period = period;
                 this.f = f;
                 this.seq = seq;
+                this.nextwhen = nextwhen;
+                this.status = status;
             }
 
             // Enable comparisons between nil and runtimeTimer struct
@@ -62,7 +64,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static runtimeTimer runtimeTimer_cast(dynamic value)
         {
-            return new runtimeTimer(value.tb, value.i, value.when, value.period, value.f, value.seq);
+            return new runtimeTimer(value.pp, value.when, value.period, value.f, value.seq, value.nextwhen, value.status);
         }
     }
 }

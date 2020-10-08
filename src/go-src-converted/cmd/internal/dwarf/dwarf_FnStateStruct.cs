@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:51:31 UTC
+//     Generated on 2020 October 08 04:07:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using exec = go.os.exec_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -43,9 +47,10 @@ namespace @internal
                 this.External = default;
                 this.Scopes = default;
                 this.InlCalls = default;
+                this.UseBASEntries = default;
             }
 
-            public FnState(@string Name = default, @string Importpath = default, Sym Info = default, Sym Filesym = default, Sym Loc = default, Sym Ranges = default, Sym Absfn = default, Sym StartPC = default, long Size = default, bool External = default, slice<Scope> Scopes = default, InlCalls InlCalls = default)
+            public FnState(@string Name = default, @string Importpath = default, Sym Info = default, Sym Filesym = default, Sym Loc = default, Sym Ranges = default, Sym Absfn = default, Sym StartPC = default, long Size = default, bool External = default, slice<Scope> Scopes = default, InlCalls InlCalls = default, bool UseBASEntries = default)
             {
                 this.Name = Name;
                 this.Importpath = Importpath;
@@ -59,6 +64,7 @@ namespace @internal
                 this.External = External;
                 this.Scopes = Scopes;
                 this.InlCalls = InlCalls;
+                this.UseBASEntries = UseBASEntries;
             }
 
             // Enable comparisons between nil and FnState struct
@@ -81,7 +87,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static FnState FnState_cast(dynamic value)
         {
-            return new FnState(value.Name, value.Importpath, value.Info, value.Filesym, value.Loc, value.Ranges, value.Absfn, value.StartPC, value.Size, value.External, value.Scopes, value.InlCalls);
+            return new FnState(value.Name, value.Importpath, value.Info, value.Filesym, value.Loc, value.Ranges, value.Absfn, value.StartPC, value.Size, value.External, value.Scopes, value.InlCalls, value.UseBASEntries);
         }
     }
 }}}

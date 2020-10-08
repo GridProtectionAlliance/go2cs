@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:42 UTC
+//     Generated on 2020 October 08 01:30:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,14 +25,14 @@ namespace go
             // Constructors
             public Once(NilType _)
             {
-                this.m = default;
                 this.done = default;
+                this.m = default;
             }
 
-            public Once(Mutex m = default, uint done = default)
+            public Once(uint done = default, Mutex m = default)
             {
-                this.m = m;
                 this.done = done;
+                this.m = m;
             }
 
             // Enable comparisons between nil and Once struct
@@ -55,7 +55,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Once Once_cast(dynamic value)
         {
-            return new Once(value.m, value.done);
+            return new Once(value.done, value.m);
         }
     }
 }

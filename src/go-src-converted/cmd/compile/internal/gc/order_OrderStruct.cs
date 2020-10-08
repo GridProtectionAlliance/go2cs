@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:27:49 UTC
+//     Generated on 2020 October 08 04:29:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,12 +33,14 @@ namespace @internal
             {
                 this.@out = default;
                 this.temp = default;
+                this.free = default;
             }
 
-            public Order(slice<ref Node> @out = default, slice<ref Node> temp = default)
+            public Order(slice<ptr<Node>> @out = default, slice<ptr<Node>> temp = default, map<@string, slice<ptr<Node>>> free = default)
             {
                 this.@out = @out;
                 this.temp = temp;
+                this.free = free;
             }
 
             // Enable comparisons between nil and Order struct
@@ -61,7 +63,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Order Order_cast(dynamic value)
         {
-            return new Order(value.@out, value.temp);
+            return new Order(value.@out, value.temp, value.free);
         }
     }
 }}}}

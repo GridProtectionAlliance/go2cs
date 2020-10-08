@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2020 August 29 10:02:00 UTC
+// package @base -- go2cs converted at 2020 October 08 04:36:59 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Go\src\cmd\go\internal\base\tool.go
 using fmt = go.fmt_package;
@@ -24,7 +24,7 @@ namespace @internal
         // Configuration for finding tool binaries.
         public static var ToolGOOS = runtime.GOOS;        public static var ToolGOARCH = runtime.GOARCH;        public static var ToolIsWindows = ToolGOOS == "windows";        public static var ToolDir = build.ToolDir;
 
-        public static readonly @string ToolWindowsExtension = ".exe";
+        public static readonly @string ToolWindowsExtension = (@string)".exe";
 
         // Tool returns the path to the named tool (for example, "vet").
         // If the tool cannot be found, Tool exits the process.
@@ -39,6 +39,7 @@ namespace @internal
             {
                 toolPath += ToolWindowsExtension;
             }
+
             if (len(cfg.BuildToolexec) > 0L)
             {
                 return toolPath;
@@ -55,7 +56,9 @@ namespace @internal
                 }
 
             }
+
             return toolPath;
+
         }
     }
 }}}}

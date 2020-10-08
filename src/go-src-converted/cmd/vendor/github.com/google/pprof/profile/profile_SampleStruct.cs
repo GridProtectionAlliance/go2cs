@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:32 UTC
+//     Generated on 2020 October 08 04:43:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace pprof
                 this.labelX = default;
             }
 
-            public Sample(slice<ref Location> Location = default, slice<long> Value = default, map<@string, slice<@string>> Label = default, map<@string, slice<long>> NumLabel = default, map<@string, slice<@string>> NumUnit = default, slice<ulong> locationIDX = default, slice<label> labelX = default)
+            public Sample(slice<ptr<Location>> Location = default, slice<long> Value = default, map<@string, slice<@string>> Label = default, map<@string, slice<long>> NumLabel = default, map<@string, slice<@string>> NumUnit = default, slice<ulong> locationIDX = default, slice<label> labelX = default)
             {
                 this.Location = Location;
                 this.Value = Value;

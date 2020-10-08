@@ -4,7 +4,7 @@
 
 // +build amd64,solaris
 
-// package syscall -- go2cs converted at 2020 August 29 08:42:02 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:30:32 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsysnum_solaris_amd64.go
 
@@ -15,7 +15,8 @@ namespace go
     public static partial class syscall_package
     {
         // TODO(aram): remove these before Go 1.3.
-        public static readonly long SYS_EXECVE = 59L;
-        public static readonly long SYS_FCNTL = 62L;
+        public static readonly long SYS_EXECVE = (long)59L;
+        public static readonly long SYS_FCNTL = (long)62L;
+
     }
 }

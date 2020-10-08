@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:43 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:09 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\arith_s390x.go
-
+using cpu = go.@internal.cpu_package;
 using static go.builtin;
 
 namespace go
@@ -122,11 +122,8 @@ namespace go
         private static double powAsm(double x, double y)
 ;
 
-        // hasVectorFacility reports whether the machine has the z/Architecture
+        // hasVX reports whether the machine has the z/Architecture
         // vector facility installed and enabled.
-        private static bool hasVectorFacility()
-;
-
-        private static var hasVX = hasVectorFacility();
+        private static var hasVX = cpu.S390X.HasVX;
     }
 }

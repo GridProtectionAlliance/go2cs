@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:39 UTC
+//     Generated on 2020 October 08 04:33:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using template = go.text.template_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @base = go.cmd.go.@internal.@base_package;
+using modload = go.cmd.go.@internal.modload_package;
 using go;
 
 namespace go {

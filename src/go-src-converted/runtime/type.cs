@@ -4,11 +4,12 @@
 
 // Runtime type representation.
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:30 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:24:19 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\type.go
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
+using System;
 
 namespace go
 {
@@ -20,17 +21,20 @@ namespace go
         //    cmd/compile/internal/gc/reflect.go
         //    cmd/link/internal/ld/decodesym.go
         //    reflect/type.go
+        //      internal/reflectlite/type.go
         private partial struct tflag // : byte
         {
         }
 
-        private static readonly tflag tflagUncommon = 1L << (int)(0L);
-        private static readonly tflag tflagExtraStar = 1L << (int)(1L);
-        private static readonly tflag tflagNamed = 1L << (int)(2L);
+        private static readonly tflag tflagUncommon = (tflag)1L << (int)(0L);
+        private static readonly tflag tflagExtraStar = (tflag)1L << (int)(1L);
+        private static readonly tflag tflagNamed = (tflag)1L << (int)(2L);
+        private static readonly tflag tflagRegularMemory = (tflag)1L << (int)(3L); // equal and hash can treat values of this type as a single region of t.size bytes
 
         // Needs to be in sync with ../cmd/link/internal/ld/decodesym.go:/^func.commonsize,
         // ../cmd/compile/internal/gc/reflect.go:/^func.dcommontype and
         // ../reflect/type.go:/^type.rtype.
+        // ../internal/reflectlite/type.go:/^type.rtype.
         private partial struct _type
         {
             public System.UIntPtr size;
@@ -38,9 +42,10 @@ namespace go
             public uint hash;
             public tflag tflag;
             public byte align;
-            public byte fieldalign;
-            public byte kind;
-            public ptr<typeAlg> alg; // gcdata stores the GC type data for the garbage collector.
+            public byte fieldAlign;
+            public byte kind; // function for comparing objects of this type
+// (ptr to object A, ptr to object B) -> ==?
+            public Func<unsafe.Pointer, unsafe.Pointer, bool> equal; // gcdata stores the GC type data for the garbage collector.
 // If the KindGCProg bit is set in kind, gcdata is a GC program.
 // Otherwise it is a ptrmask bitmap. See mbitmap.go for details.
             public ptr<byte> gcdata;
@@ -48,22 +53,29 @@ namespace go
             public typeOff ptrToThis;
         }
 
-        private static @string @string(this ref _type t)
+        private static @string @string(this ptr<_type> _addr_t)
         {
+            ref _type t = ref _addr_t.val;
+
             var s = t.nameOff(t.str).name();
             if (t.tflag & tflagExtraStar != 0L)
             {
                 return s[1L..];
             }
+
             return s;
+
         }
 
-        private static ref uncommontype uncommon(this ref _type t)
+        private static ptr<uncommontype> uncommon(this ptr<_type> _addr_t)
         {
+            ref _type t = ref _addr_t.val;
+
             if (t.tflag & tflagUncommon == 0L)
             {
-                return null;
+                return _addr_null!;
             }
+
 
             if (t.kind & kindMask == kindStruct) 
                 private partial struct u
@@ -71,88 +83,113 @@ namespace go
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.kind & kindMask == kindPtr) 
                 private partial struct u
                 {
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.kind & kindMask == kindFunc) 
                 private partial struct u
                 {
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.kind & kindMask == kindSlice) 
                 private partial struct u
                 {
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.kind & kindMask == kindArray) 
                 private partial struct u
                 {
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.kind & kindMask == kindChan) 
                 private partial struct u
                 {
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.kind & kindMask == kindMap) 
                 private partial struct u
                 {
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else if (t.kind & kindMask == kindInterface) 
                 private partial struct u
                 {
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
             else 
                 private partial struct u
                 {
                     public ref structtype structtype => ref structtype_val;
                     public uncommontype u;
                 }
-                return ref (u.Value)(@unsafe.Pointer(t)).u;
-                    }
-
-        private static bool hasPrefix(@string s, @string prefix)
-        {
-            return len(s) >= len(prefix) && s[..len(prefix)] == prefix;
+                return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
+            
         }
 
-        private static @string name(this ref _type t)
+        private static @string name(this ptr<_type> _addr_t)
         {
+            ref _type t = ref _addr_t.val;
+
             if (t.tflag & tflagNamed == 0L)
             {
                 return "";
             }
+
             var s = t.@string();
             var i = len(s) - 1L;
-            while (i >= 0L)
+            while (i >= 0L && s[i] != '.')
             {
-                if (s[i] == '.')
-                {
-                    break;
-                }
                 i--;
             }
 
             return s[i + 1L..];
+
+        }
+
+        // pkgpath returns the path of the package where t was defined, if
+        // available. This is not the same as the reflect package's PkgPath
+        // method, in that it returns the package path for struct and interface
+        // types, not just named types.
+        private static @string pkgpath(this ptr<_type> _addr_t)
+        {
+            ref _type t = ref _addr_t.val;
+
+            {
+                var u = t.uncommon();
+
+                if (u != null)
+                {
+                    return t.nameOff(u.pkgpath).name();
+                }
+
+            }
+
+
+            if (t.kind & kindMask == kindStruct) 
+                var st = (structtype.val)(@unsafe.Pointer(t));
+                return st.pkgPath.name();
+            else if (t.kind & kindMask == kindInterface) 
+                var it = (interfacetype.val)(@unsafe.Pointer(t));
+                return it.pkgpath.name();
+                        return "";
+
         }
 
         // reflectOffs holds type offsets defined at run time by the reflect package.
@@ -172,20 +209,23 @@ namespace go
 
         private static void reflectOffsLock()
         {
-            lock(ref reflectOffs.@lock);
+            lock(_addr_reflectOffs.@lock);
             if (raceenabled)
             {
-                raceacquire(@unsafe.Pointer(ref reflectOffs.@lock));
+                raceacquire(@unsafe.Pointer(_addr_reflectOffs.@lock));
             }
+
         }
 
         private static void reflectOffsUnlock()
         {
             if (raceenabled)
             {
-                racerelease(@unsafe.Pointer(ref reflectOffs.@lock));
+                racerelease(@unsafe.Pointer(_addr_reflectOffs.@lock));
             }
-            unlock(ref reflectOffs.@lock);
+
+            unlock(_addr_reflectOffs.@lock);
+
         }
 
         private static name resolveNameOff(unsafe.Pointer ptrInModule, nameOff off)
@@ -194,9 +234,10 @@ namespace go
             {
                 return new name();
             }
+
             var @base = uintptr(ptrInModule);
             {
-                var md = ref firstmoduledata;
+                var md = _addr_firstmoduledata;
 
                 while (md != null)
                 {
@@ -209,8 +250,11 @@ namespace go
                             throw("runtime: name offset out of range");
                     md = md.next;
                         }
+
                         return new name((*byte)(unsafe.Pointer(res)));
+
                     }
+
                 } 
 
                 // No module found. see if it is a run time name.
@@ -225,7 +269,7 @@ namespace go
             {
                 println("runtime: nameOff", hex(off), "base", hex(base), "not in ranges:");
                 {
-                    var next = ref firstmoduledata;
+                    var next = _addr_firstmoduledata;
 
                     while (next != null)
                     {
@@ -235,27 +279,33 @@ namespace go
 
                 }
                 throw("runtime: name offset base pointer out of range");
+
             }
+
             return new name((*byte)(res));
+
         }
 
-        private static name nameOff(this ref _type t, nameOff off)
+        private static name nameOff(this ptr<_type> _addr_t, nameOff off)
         {
+            ref _type t = ref _addr_t.val;
+
             return resolveNameOff(@unsafe.Pointer(t), off);
         }
 
-        private static ref _type resolveTypeOff(unsafe.Pointer ptrInModule, typeOff off)
+        private static ptr<_type> resolveTypeOff(unsafe.Pointer ptrInModule, typeOff off)
         {
             if (off == 0L)
             {
-                return null;
+                return _addr_null!;
             }
+
             var @base = uintptr(ptrInModule);
-            ref moduledata md = default;
+            ptr<moduledata> md;
             {
                 var next__prev1 = next;
 
-                var next = ref firstmoduledata;
+                var next = _addr_firstmoduledata;
 
                 while (next != null)
                 {
@@ -265,6 +315,7 @@ namespace go
                         break;
                     next = next.next;
                     }
+
                 }
 
 
@@ -281,7 +332,7 @@ namespace go
                     {
                         var next__prev1 = next;
 
-                        next = ref firstmoduledata;
+                        next = _addr_firstmoduledata;
 
                         while (next != null)
                         {
@@ -293,40 +344,51 @@ namespace go
                         next = next__prev1;
                     }
                     throw("runtime: type offset base pointer out of range");
+
                 }
-                return (_type.Value)(res);
+
+                return _addr_(_type.val)(res)!;
+
             }
+
             {
                 var t = md.typemap[off];
 
                 if (t != null)
                 {
-                    return t;
+                    return _addr_t!;
                 }
 
             }
+
             res = md.types + uintptr(off);
             if (res > md.etypes)
             {
                 println("runtime: typeOff", hex(off), "out of range", hex(md.types), "-", hex(md.etypes));
                 throw("runtime: type offset out of range");
             }
-            return (_type.Value)(@unsafe.Pointer(res));
+
+            return _addr_(_type.val)(@unsafe.Pointer(res))!;
+
         }
 
-        private static ref _type typeOff(this ref _type t, typeOff off)
+        private static ptr<_type> typeOff(this ptr<_type> _addr_t, typeOff off)
         {
-            return resolveTypeOff(@unsafe.Pointer(t), off);
+            ref _type t = ref _addr_t.val;
+
+            return _addr_resolveTypeOff(@unsafe.Pointer(t), off)!;
         }
 
-        private static unsafe.Pointer textOff(this ref _type t, textOff off)
+        private static unsafe.Pointer textOff(this ptr<_type> _addr_t, textOff off)
         {
+            ref _type t = ref _addr_t.val;
+
             var @base = uintptr(@unsafe.Pointer(t));
-            ref moduledata md = default;
+            ptr<moduledata> md;
             {
                 var next__prev1 = next;
 
-                var next = ref firstmoduledata;
+                var next = _addr_firstmoduledata;
 
                 while (next != null)
                 {
@@ -336,6 +398,7 @@ namespace go
                         break;
                     next = next.next;
                     }
+
                 }
 
 
@@ -352,7 +415,7 @@ namespace go
                     {
                         var next__prev1 = next;
 
-                        next = ref firstmoduledata;
+                        next = _addr_firstmoduledata;
 
                         while (next != null)
                         {
@@ -364,9 +427,13 @@ namespace go
                         next = next__prev1;
                     }
                     throw("runtime: text offset base pointer out of range");
+
                 }
+
                 return res;
+
             }
+
             res = uintptr(0L); 
 
             // The text, or instruction stream is generated as one large buffer.  The off (offset) for a method is
@@ -383,50 +450,66 @@ namespace go
                 {
                     var sectaddr = md.textsectmap[i].vaddr;
                     var sectlen = md.textsectmap[i].length;
-                    if (uintptr(off) >= sectaddr && uintptr(off) <= sectaddr + sectlen)
+                    if (uintptr(off) >= sectaddr && uintptr(off) < sectaddr + sectlen)
                     {
                         res = md.textsectmap[i].baseaddr + uintptr(off) - uintptr(md.textsectmap[i].vaddr);
                         break;
                     }
+
                 }
             else
             }            { 
                 // single text section
                 res = md.text + uintptr(off);
+
             }
-            if (res > md.etext)
-            {
+
+            if (res > md.etext && GOARCH != "wasm")
+            { // on wasm, functions do not live in the same address space as the linear memory
                 println("runtime: textOff", hex(off), "out of range", hex(md.text), "-", hex(md.etext));
                 throw("runtime: text offset out of range");
+
             }
+
             return @unsafe.Pointer(res);
+
         }
 
-        private static slice<ref _type> @in(this ref functype t)
-        { 
-            // See funcType in reflect/type.go for details on data layout.
-            var uadd = uintptr(@unsafe.Sizeof(new functype()));
-            if (t.typ.tflag & tflagUncommon != 0L)
-            {
-                uadd += @unsafe.Sizeof(new uncommontype());
-            }
-            return new ptr<ref array<ref _type>>(add(@unsafe.Pointer(t), uadd))[..t.inCount];
-        }
-
-        private static slice<ref _type> @out(this ref functype t)
-        { 
-            // See funcType in reflect/type.go for details on data layout.
-            var uadd = uintptr(@unsafe.Sizeof(new functype()));
-            if (t.typ.tflag & tflagUncommon != 0L)
-            {
-                uadd += @unsafe.Sizeof(new uncommontype());
-            }
-            var outCount = t.outCount & (1L << (int)(15L) - 1L);
-            return new ptr<ref array<ref _type>>(add(@unsafe.Pointer(t), uadd))[t.inCount..t.inCount + outCount];
-        }
-
-        private static bool dotdotdot(this ref functype t)
+        private static slice<ptr<_type>> @in(this ptr<functype> _addr_t)
         {
+            ref functype t = ref _addr_t.val;
+ 
+            // See funcType in reflect/type.go for details on data layout.
+            var uadd = uintptr(@unsafe.Sizeof(new functype()));
+            if (t.typ.tflag & tflagUncommon != 0L)
+            {
+                uadd += @unsafe.Sizeof(new uncommontype());
+            }
+
+            return new ptr<ptr<array<ptr<_type>>>>(add(@unsafe.Pointer(t), uadd))[..t.inCount];
+
+        }
+
+        private static slice<ptr<_type>> @out(this ptr<functype> _addr_t)
+        {
+            ref functype t = ref _addr_t.val;
+ 
+            // See funcType in reflect/type.go for details on data layout.
+            var uadd = uintptr(@unsafe.Sizeof(new functype()));
+            if (t.typ.tflag & tflagUncommon != 0L)
+            {
+                uadd += @unsafe.Sizeof(new uncommontype());
+            }
+
+            var outCount = t.outCount & (1L << (int)(15L) - 1L);
+            return new ptr<ptr<array<ptr<_type>>>>(add(@unsafe.Pointer(t), uadd))[t.inCount..t.inCount + outCount];
+
+        }
+
+        private static bool dotdotdot(this ptr<functype> _addr_t)
+        {
+            ref functype t = ref _addr_t.val;
+
             return t.outCount & (1L << (int)(15L)) != 0L;
         }
 
@@ -452,7 +535,7 @@ namespace go
         {
             public nameOff pkgpath;
             public ushort mcount; // number of methods
-            public ushort _; // unused
+            public ushort xcount; // number of exported methods
             public uint moff; // offset from this uncommontype to [mcount]method
             public uint _; // unused
         }
@@ -476,14 +559,50 @@ namespace go
             public ptr<_type> key;
             public ptr<_type> elem;
             public ptr<_type> bucket; // internal type representing a hash bucket
-            public ptr<_type> hmap; // internal type representing a hmap
+// function for hashing keys (ptr to key, seed) -> hash
+            public Func<unsafe.Pointer, System.UIntPtr, System.UIntPtr> hasher;
             public byte keysize; // size of key slot
-            public bool indirectkey; // store ptr to key instead of key itself
-            public byte valuesize; // size of value slot
-            public bool indirectvalue; // store ptr to value instead of value itself
+            public byte elemsize; // size of elem slot
             public ushort bucketsize; // size of bucket
-            public bool reflexivekey; // true if k==k for all keys
-            public bool needkeyupdate; // true if we need to update key on an overwrite
+            public uint flags;
+        }
+
+        // Note: flag values must match those used in the TMAP case
+        // in ../cmd/compile/internal/gc/reflect.go:dtypesym.
+        private static bool indirectkey(this ptr<maptype> _addr_mt)
+        {
+            ref maptype mt = ref _addr_mt.val;
+ // store ptr to key instead of key itself
+            return mt.flags & 1L != 0L;
+
+        }
+        private static bool indirectelem(this ptr<maptype> _addr_mt)
+        {
+            ref maptype mt = ref _addr_mt.val;
+ // store ptr to elem instead of elem itself
+            return mt.flags & 2L != 0L;
+
+        }
+        private static bool reflexivekey(this ptr<maptype> _addr_mt)
+        {
+            ref maptype mt = ref _addr_mt.val;
+ // true if k==k for all keys
+            return mt.flags & 4L != 0L;
+
+        }
+        private static bool needkeyupdate(this ptr<maptype> _addr_mt)
+        {
+            ref maptype mt = ref _addr_mt.val;
+ // true if we need to update key on an overwrite
+            return mt.flags & 8L != 0L;
+
+        }
+        private static bool hashMightPanic(this ptr<maptype> _addr_mt)
+        {
+            ref maptype mt = ref _addr_mt.val;
+ // true if hash function might panic
+            return mt.flags & 16L != 0L;
+
         }
 
         private partial struct arraytype
@@ -527,8 +646,10 @@ namespace go
             public System.UIntPtr offsetAnon;
         }
 
-        private static System.UIntPtr offset(this ref structfield f)
+        private static System.UIntPtr offset(this ptr<structfield> _addr_f)
         {
+            ref structfield f = ref _addr_f.val;
+
             return f.offsetAnon >> (int)(1L);
         }
 
@@ -546,68 +667,80 @@ namespace go
             public ptr<byte> bytes;
         }
 
-        private static ref byte data(this name n, long off)
+        private static ptr<byte> data(this name n, long off)
         {
-            return (byte.Value)(add(@unsafe.Pointer(n.bytes), uintptr(off)));
+            return _addr_(byte.val)(add(@unsafe.Pointer(n.bytes), uintptr(off)))!;
         }
 
         private static bool isExported(this name n)
         {
-            return (n.bytes.Value) & (1L << (int)(0L)) != 0L;
+            return (n.bytes.val) & (1L << (int)(0L)) != 0L;
         }
 
         private static long nameLen(this name n)
         {
-            return int(uint16(new ptr<ref n.data>(1L)) << (int)(8L) | uint16(new ptr<ref n.data>(2L)));
+            return int(uint16(new ptr<ptr<n.data>>(1L)) << (int)(8L) | uint16(new ptr<ptr<n.data>>(2L)));
         }
 
         private static long tagLen(this name n)
         {
-            if (new ptr<ref n.data>(0L) & (1L << (int)(1L)) == 0L)
+            if (new ptr<ptr<n.data>>(0L) & (1L << (int)(1L)) == 0L)
             {
                 return 0L;
             }
+
             long off = 3L + n.nameLen();
-            return int(uint16(new ptr<ref n.data>(off)) << (int)(8L) | uint16(new ptr<ref n.data>(off + 1L)));
+            return int(uint16(new ptr<ptr<n.data>>(off)) << (int)(8L) | uint16(new ptr<ptr<n.data>>(off + 1L)));
+
         }
 
         private static @string name(this name n)
         {
+            @string s = default;
+
             if (n.bytes == null)
             {
                 return "";
             }
+
             var nl = n.nameLen();
             if (nl == 0L)
             {
                 return "";
             }
-            var hdr = (stringStruct.Value)(@unsafe.Pointer(ref s));
+
+            var hdr = (stringStruct.val)(@unsafe.Pointer(_addr_s));
             hdr.str = @unsafe.Pointer(n.data(3L));
             hdr.len = nl;
             return s;
+
         }
 
         private static @string tag(this name n)
         {
+            @string s = default;
+
             var tl = n.tagLen();
             if (tl == 0L)
             {
                 return "";
             }
+
             var nl = n.nameLen();
-            var hdr = (stringStruct.Value)(@unsafe.Pointer(ref s));
+            var hdr = (stringStruct.val)(@unsafe.Pointer(_addr_s));
             hdr.str = @unsafe.Pointer(n.data(3L + nl + 2L));
             hdr.len = tl;
             return s;
+
         }
 
         private static @string pkgPath(this name n)
         {
-            if (n.bytes == null || new ptr<ref n.data>(0L) & (1L << (int)(2L)) == 0L)
+            if (n.bytes == null || new ptr<ptr<n.data>>(0L) & (1L << (int)(2L)) == 0L)
             {
                 return "";
             }
+
             long off = 3L + n.nameLen();
             {
                 var tl = n.tagLen();
@@ -618,10 +751,28 @@ namespace go
                 }
 
             }
-            nameOff nameOff = default;
-            copy(new ptr<ref array<byte>>(@unsafe.Pointer(ref nameOff))[..], new ptr<ref array<byte>>(@unsafe.Pointer(n.data(off)))[..]);
+
+            ref nameOff nameOff = ref heap(out ptr<nameOff> _addr_nameOff);
+            copy(new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_nameOff))[..], new ptr<ptr<array<byte>>>(@unsafe.Pointer(n.data(off)))[..]);
             var pkgPathName = resolveNameOff(@unsafe.Pointer(n.bytes), nameOff);
             return pkgPathName.name();
+
+        }
+
+        private static bool isBlank(this name n)
+        {
+            if (n.bytes == null)
+            {
+                return false;
+            }
+
+            if (n.nameLen() != 1L)
+            {
+                return false;
+            }
+
+            return new ptr<ptr<n.data>>(3L) == '_';
+
         }
 
         // typelinksinit scans the types from extra modules and builds the
@@ -630,9 +781,10 @@ namespace go
         {
             if (firstmoduledata.next == null)
             {
-                return;
+                return ;
             }
-            var typehash = make_map<uint, slice<ref _type>>(len(firstmoduledata.typelinks));
+
+            var typehash = make_map<uint, slice<ptr<_type>>>(len(firstmoduledata.typelinks));
 
             var modules = activeModules();
             var prev = modules[0L];
@@ -647,10 +799,10 @@ collect:
                     foreach (var (_, __tl) in prev.typelinks)
                     {
                         tl = __tl;
-                        ref _type t = default;
+                        ptr<_type> t;
                         if (prev.typemap == null)
                         {
-                            t = (_type.Value)(@unsafe.Pointer(prev.types + uintptr(tl)));
+                            t = (_type.val)(@unsafe.Pointer(prev.types + uintptr(tl)));
                         }
                         else
                         {
@@ -665,8 +817,10 @@ collect:
                                 _continuecollect = true;
                                 break;
                             }
+
                         }
                         typehash[t.hash] = append(tlist, t);
+
                     }
 
                     tl = tl__prev2;
@@ -676,7 +830,7 @@ collect:
                     // If any of this module's typelinks match a type from a
                     // prior module, prefer that prior type by adding the offset
                     // to this module's typemap.
-                    var tm = make_map<typeOff, ref _type>(len(md.typelinks));
+                    var tm = make_map<typeOff, ptr<_type>>(len(md.typelinks));
                     pinnedTypemaps = append(pinnedTypemaps, tm);
                     md.typemap = tm;
                     {
@@ -685,24 +839,28 @@ collect:
                         foreach (var (_, __tl) in md.typelinks)
                         {
                             tl = __tl;
-                            t = (_type.Value)(@unsafe.Pointer(md.types + uintptr(tl)));
+                            t = (_type.val)(@unsafe.Pointer(md.types + uintptr(tl)));
                             foreach (var (_, candidate) in typehash[t.hash])
                             {
-                                if (typesEqual(t, candidate, seen))
+                                if (typesEqual(t, _addr_candidate, seen))
                                 {
                                     t = candidate;
                                     break;
                                 }
+
                             }
                             md.typemap[typeOff(tl)] = t;
+
                         }
 
                         tl = tl__prev2;
                     }
-
                 }
+
                 prev = md;
+
             }
+
         }
 
         private partial struct _typePair
@@ -723,8 +881,11 @@ collect:
         // back into earlier ones.
         //
         // Only typelinksinit needs this function.
-        private static bool typesEqual(ref _type t, ref _type v, object seen)
+        private static bool typesEqual(ptr<_type> _addr_t, ptr<_type> _addr_v, object seen)
         {
+            ref _type t = ref _addr_t.val;
+            ref _type v = ref _addr_v.val;
+
             _typePair tp = new _typePair(t,v);
             {
                 var (_, ok) = seen[tp];
@@ -749,15 +910,18 @@ collect:
             {
                 return true;
             }
+
             var kind = t.kind & kindMask;
             if (kind != v.kind & kindMask)
             {
                 return false;
             }
+
             if (t.@string() != v.@string())
             {
                 return false;
             }
+
             var ut = t.uncommon();
             var uv = v.uncommon();
             if (ut != null || uv != null)
@@ -766,35 +930,40 @@ collect:
                 {
                     return false;
                 }
+
                 var pkgpatht = t.nameOff(ut.pkgpath).name();
                 var pkgpathv = v.nameOff(uv.pkgpath).name();
                 if (pkgpatht != pkgpathv)
                 {
                     return false;
                 }
+
             }
+
             if (kindBool <= kind && kind <= kindComplex128)
             {
                 return true;
             }
 
+
             if (kind == kindString || kind == kindUnsafePointer) 
                 return true;
             else if (kind == kindArray) 
-                var at = (arraytype.Value)(@unsafe.Pointer(t));
-                var av = (arraytype.Value)(@unsafe.Pointer(v));
-                return typesEqual(at.elem, av.elem, seen) && at.len == av.len;
+                var at = (arraytype.val)(@unsafe.Pointer(t));
+                var av = (arraytype.val)(@unsafe.Pointer(v));
+                return typesEqual(_addr_at.elem, _addr_av.elem, seen) && at.len == av.len;
             else if (kind == kindChan) 
-                var ct = (chantype.Value)(@unsafe.Pointer(t));
-                var cv = (chantype.Value)(@unsafe.Pointer(v));
-                return ct.dir == cv.dir && typesEqual(ct.elem, cv.elem, seen);
+                var ct = (chantype.val)(@unsafe.Pointer(t));
+                var cv = (chantype.val)(@unsafe.Pointer(v));
+                return ct.dir == cv.dir && typesEqual(_addr_ct.elem, _addr_cv.elem, seen);
             else if (kind == kindFunc) 
-                var ft = (functype.Value)(@unsafe.Pointer(t));
-                var fv = (functype.Value)(@unsafe.Pointer(v));
+                var ft = (functype.val)(@unsafe.Pointer(t));
+                var fv = (functype.val)(@unsafe.Pointer(v));
                 if (ft.outCount != fv.outCount || ft.inCount != fv.inCount)
                 {
                     return false;
                 }
+
                 var tin = ft.@in();
                 var vin = fv.@in();
                 {
@@ -802,10 +971,11 @@ collect:
 
                     for (long i = 0L; i < len(tin); i++)
                     {
-                        if (!typesEqual(tin[i], vin[i], seen))
+                        if (!typesEqual(_addr_tin[i], _addr_vin[i], seen))
                         {
                             return false;
                         }
+
                     }
 
 
@@ -818,10 +988,11 @@ collect:
 
                     for (i = 0L; i < len(tout); i++)
                     {
-                        if (!typesEqual(tout[i], vout[i], seen))
+                        if (!typesEqual(_addr_tout[i], _addr_vout[i], seen))
                         {
                             return false;
                         }
+
                     }
 
 
@@ -829,24 +1000,26 @@ collect:
                 }
                 return true;
             else if (kind == kindInterface) 
-                var it = (interfacetype.Value)(@unsafe.Pointer(t));
-                var iv = (interfacetype.Value)(@unsafe.Pointer(v));
+                var it = (interfacetype.val)(@unsafe.Pointer(t));
+                var iv = (interfacetype.val)(@unsafe.Pointer(v));
                 if (it.pkgpath.name() != iv.pkgpath.name())
                 {
                     return false;
                 }
+
                 if (len(it.mhdr) != len(iv.mhdr))
                 {
                     return false;
                 }
+
                 {
                     long i__prev1 = i;
 
                     foreach (var (__i) in it.mhdr)
                     {
                         i = __i;
-                        var tm = ref it.mhdr[i];
-                        var vm = ref iv.mhdr[i]; 
+                        var tm = _addr_it.mhdr[i];
+                        var vm = _addr_iv.mhdr[i]; 
                         // Note the mhdr array can be relocated from
                         // another module. See #17724.
                         var tname = resolveNameOff(@unsafe.Pointer(tm), tm.name);
@@ -855,16 +1028,19 @@ collect:
                         {
                             return false;
                         }
+
                         if (tname.pkgPath() != vname.pkgPath())
                         {
                             return false;
                         }
+
                         var tityp = resolveTypeOff(@unsafe.Pointer(tm), tm.ityp);
                         var vityp = resolveTypeOff(@unsafe.Pointer(vm), vm.ityp);
-                        if (!typesEqual(tityp, vityp, seen))
+                        if (!typesEqual(_addr_tityp, _addr_vityp, seen))
                         {
                             return false;
                         }
+
                     }
 
                     i = i__prev1;
@@ -872,52 +1048,58 @@ collect:
 
                 return true;
             else if (kind == kindMap) 
-                var mt = (maptype.Value)(@unsafe.Pointer(t));
-                var mv = (maptype.Value)(@unsafe.Pointer(v));
-                return typesEqual(mt.key, mv.key, seen) && typesEqual(mt.elem, mv.elem, seen);
+                var mt = (maptype.val)(@unsafe.Pointer(t));
+                var mv = (maptype.val)(@unsafe.Pointer(v));
+                return typesEqual(_addr_mt.key, _addr_mv.key, seen) && typesEqual(_addr_mt.elem, _addr_mv.elem, seen);
             else if (kind == kindPtr) 
-                var pt = (ptrtype.Value)(@unsafe.Pointer(t));
-                var pv = (ptrtype.Value)(@unsafe.Pointer(v));
-                return typesEqual(pt.elem, pv.elem, seen);
+                var pt = (ptrtype.val)(@unsafe.Pointer(t));
+                var pv = (ptrtype.val)(@unsafe.Pointer(v));
+                return typesEqual(_addr_pt.elem, _addr_pv.elem, seen);
             else if (kind == kindSlice) 
-                var st = (slicetype.Value)(@unsafe.Pointer(t));
-                var sv = (slicetype.Value)(@unsafe.Pointer(v));
-                return typesEqual(st.elem, sv.elem, seen);
+                var st = (slicetype.val)(@unsafe.Pointer(t));
+                var sv = (slicetype.val)(@unsafe.Pointer(v));
+                return typesEqual(_addr_st.elem, _addr_sv.elem, seen);
             else if (kind == kindStruct) 
-                st = (structtype.Value)(@unsafe.Pointer(t));
-                sv = (structtype.Value)(@unsafe.Pointer(v));
+                st = (structtype.val)(@unsafe.Pointer(t));
+                sv = (structtype.val)(@unsafe.Pointer(v));
                 if (len(st.fields) != len(sv.fields))
                 {
                     return false;
                 }
+
                 if (st.pkgPath.name() != sv.pkgPath.name())
                 {
                     return false;
                 }
+
                 {
                     long i__prev1 = i;
 
                     foreach (var (__i) in st.fields)
                     {
                         i = __i;
-                        var tf = ref st.fields[i];
-                        var vf = ref sv.fields[i];
+                        var tf = _addr_st.fields[i];
+                        var vf = _addr_sv.fields[i];
                         if (tf.name.name() != vf.name.name())
                         {
                             return false;
                         }
-                        if (!typesEqual(tf.typ, vf.typ, seen))
+
+                        if (!typesEqual(_addr_tf.typ, _addr_vf.typ, seen))
                         {
                             return false;
                         }
+
                         if (tf.name.tag() != vf.name.tag())
                         {
                             return false;
                         }
+
                         if (tf.offsetAnon != vf.offsetAnon)
                         {
                             return false;
                         }
+
                     }
 
                     i = i__prev1;
@@ -928,6 +1110,7 @@ collect:
                 println("runtime: impossible type kind", kind);
                 throw("runtime: impossible type kind");
                 return false;
-                    }
+            
+        }
     }
 }

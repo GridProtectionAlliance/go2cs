@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:12 UTC
+//     Generated on 2020 October 08 04:02:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,31 +21,19 @@ namespace go
     public static partial class e_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(V2))]
-        [PromotedStruct(typeof(V5))]
         public partial struct V1
         {
-            // V2 structure promotion - sourced from pointer
-            private readonly ptr<V2> m_V2Ref;
-
-            private ref V2 V2_ptr => ref m_V2Ref.Value;
-
-            // V5 structure promotion - sourced from pointer
-            private readonly ptr<V5> m_V5Ref;
-
-            private ref V5 V5_ptr => ref m_V5Ref.Value;
-
             // Constructors
             public V1(NilType _)
             {
-                this.m_V2Ref = new ptr<V2>(new V2(nil));
-                this.m_V5Ref = new ptr<V5>(new V5(nil));
+                this.ptr<V2> = default;
+                this.ptr<V5> = default;
             }
 
-            public V1(ref V2 V2 = default, ref V5 V5 = default)
+            public V1(ref ptr<V2> ptr<V2> = default, ref ptr<V5> ptr<V5> = default)
             {
-                this.m_V2Ref = new ptr<V2>(ref V2);
-                this.m_V5Ref = new ptr<V5>(ref V5);
+                this.ptr<V2> = ptr<V2>;
+                this.ptr<V5> = ptr<V5>;
             }
 
             // Enable comparisons between nil and V1 struct
@@ -68,7 +56,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static V1 V1_cast(dynamic value)
         {
-            return new V1(ref value.V2, ref value.V5);
+            return new V1(ref value.ptr<V2>, ref value.ptr<V5>);
         }
     }
 }}

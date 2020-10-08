@@ -4,7 +4,7 @@
 
 // +build 386
 
-// package atomic -- go2cs converted at 2020 August 29 08:16:28 UTC
+// package atomic -- go2cs converted at 2020 October 08 01:30:47 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Go\src\runtime\internal\atomic\atomic_386.go
 using @unsafe = go.@unsafe_package;
@@ -14,90 +14,106 @@ namespace go {
 namespace runtime {
 namespace @internal
 {
-    public static unsafe partial class atomic_package
+    public static partial class atomic_package
     {
+        // Export some functions via linkname to assembly in sync/atomic.
+        //go:linkname Load
+        //go:linkname Loadp
+
         //go:nosplit
         //go:noinline
-        public static uint Load(ref uint ptr)
+        public static uint Load(ptr<uint> _addr_ptr)
         {
-            return ptr.Value;
+            ref uint ptr = ref _addr_ptr.val;
+
+            return ptr;
         }
 
         //go:nosplit
         //go:noinline
         public static unsafe.Pointer Loadp(unsafe.Pointer ptr)
         {
-            return ptr.Value;
+            return new ptr<ptr<ptr<unsafe.Pointer>>>(ptr);
         }
 
         //go:nosplit
-        public static ulong Xadd64(ref ulong ptr, long delta)
+        //go:noinline
+        public static uint LoadAcq(ptr<uint> _addr_ptr)
         {
-            while (true)
-            {
-                var old = ptr.Value;
-                if (Cas64(ptr, old, old + uint64(delta)))
-                {
-                    return old + uint64(delta);
-                }
-            }
+            ref uint ptr = ref _addr_ptr.val;
 
+            return ptr;
         }
 
         //go:noescape
-        public static System.UIntPtr Xadduintptr(ref System.UIntPtr ptr, System.UIntPtr delta)
+        public static ulong Xadd64(ptr<ulong> ptr, long delta)
+;
+
+        //go:noescape
+        public static System.UIntPtr Xadduintptr(ptr<System.UIntPtr> ptr, System.UIntPtr delta)
+;
+
+        //go:noescape
+        public static uint Xadd(ptr<uint> ptr, int delta)
+;
+
+        //go:noescape
+        public static ulong Xchg64(ptr<ulong> ptr, ulong @new)
+;
+
+        //go:noescape
+        public static uint Xchg(ptr<uint> ptr, uint @new)
+;
+
+        //go:noescape
+        public static System.UIntPtr Xchguintptr(ptr<System.UIntPtr> ptr, System.UIntPtr @new)
+;
+
+        //go:noescape
+        public static ulong Load64(ptr<ulong> ptr)
 ;
 
         //go:nosplit
-        public static ulong Xchg64(ref ulong ptr, ulong @new)
+        //go:noinline
+        public static byte Load8(ptr<byte> _addr_ptr)
         {
-            while (true)
-            {>>MARKER:FUNCTION_Xadduintptr_BLOCK_PREFIX<<
-                var old = ptr.Value;
-                if (Cas64(ptr, old, new))
-                {
-                    return old;
-                }
-            }
+            ref byte ptr = ref _addr_ptr.val;
 
+            return ptr;
         }
 
         //go:noescape
-        public static uint Xadd(ref uint ptr, int delta)
+        public static void And8(ptr<byte> ptr, byte val)
 ;
 
         //go:noescape
-        public static uint Xchg(ref uint ptr, uint @new)
-;
-
-        //go:noescape
-        public static System.UIntPtr Xchguintptr(ref System.UIntPtr ptr, System.UIntPtr @new)
-;
-
-        //go:noescape
-        public static ulong Load64(ref ulong ptr)
-;
-
-        //go:noescape
-        public static void And8(ref byte ptr, byte val)
-;
-
-        //go:noescape
-        public static void Or8(ref byte ptr, byte val)
+        public static void Or8(ptr<byte> ptr, byte val)
 ;
 
         // NOTE: Do not add atomicxor8 (XOR is not idempotent).
 
         //go:noescape
-        public static bool Cas64(ref ulong ptr, ulong old, ulong @new)
+        public static bool Cas64(ptr<ulong> ptr, ulong old, ulong @new)
 ;
 
         //go:noescape
-        public static void Store(ref uint ptr, uint val)
+        public static bool CasRel(ptr<uint> ptr, uint old, uint @new)
 ;
 
         //go:noescape
-        public static void Store64(ref ulong ptr, ulong val)
+        public static void Store(ptr<uint> ptr, uint val)
+;
+
+        //go:noescape
+        public static void Store8(ptr<byte> ptr, byte val)
+;
+
+        //go:noescape
+        public static void Store64(ptr<ulong> ptr, ulong val)
+;
+
+        //go:noescape
+        public static void StoreRel(ptr<uint> ptr, uint val)
 ;
 
         // NO go:noescape annotation; see atomic_pointer.go.

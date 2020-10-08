@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:05 UTC
+//     Generated on 2020 October 08 03:23:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,15 +28,15 @@ namespace go
             public Frames(NilType _)
             {
                 this.callers = default;
-                this.stackExpander = default;
-                this.elideWrapper = default;
+                this.frames = default;
+                this.frameStore = default;
             }
 
-            public Frames(slice<System.UIntPtr> callers = default, stackExpander stackExpander = default, bool elideWrapper = default)
+            public Frames(slice<System.UIntPtr> callers = default, slice<Frame> frames = default, array<Frame> frameStore = default)
             {
                 this.callers = callers;
-                this.stackExpander = stackExpander;
-                this.elideWrapper = elideWrapper;
+                this.frames = frames;
+                this.frameStore = frameStore;
             }
 
             // Enable comparisons between nil and Frames struct
@@ -59,7 +59,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Frames Frames_cast(dynamic value)
         {
-            return new Frames(value.callers, value.stackExpander, value.elideWrapper);
+            return new Frames(value.callers, value.frames, value.frameStore);
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:28 UTC
+//     Generated on 2020 October 08 04:31:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,10 +14,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using ssa = go.cmd.compile.@internal.ssa_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -36,19 +37,17 @@ namespace @internal
                 this.Ntype = default;
                 this.Heapaddr = default;
                 this.Stackcopy = default;
-                this.Field = default;
                 this.Innermost = default;
                 this.Outer = default;
                 this.Pragma = default;
                 this.Alias = default;
             }
 
-            public Param(ref ptr<Node> Ntype = default, ref ptr<Node> Heapaddr = default, ref ptr<Node> Stackcopy = default, ref ptr<types.Field> Field = default, ref ptr<Node> Innermost = default, ref ptr<Node> Outer = default, syntax.Pragma Pragma = default, bool Alias = default)
+            public Param(ref ptr<Node> Ntype = default, ref ptr<Node> Heapaddr = default, ref ptr<Node> Stackcopy = default, ref ptr<Node> Innermost = default, ref ptr<Node> Outer = default, PragmaFlag Pragma = default, bool Alias = default)
             {
                 this.Ntype = Ntype;
                 this.Heapaddr = Heapaddr;
                 this.Stackcopy = Stackcopy;
-                this.Field = Field;
                 this.Innermost = Innermost;
                 this.Outer = Outer;
                 this.Pragma = Pragma;
@@ -75,7 +74,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Param Param_cast(dynamic value)
         {
-            return new Param(ref value.Ntype, ref value.Heapaddr, ref value.Stackcopy, ref value.Field, ref value.Innermost, ref value.Outer, value.Pragma, value.Alias);
+            return new Param(ref value.Ntype, ref value.Heapaddr, ref value.Stackcopy, ref value.Innermost, ref value.Outer, value.Pragma, value.Alias);
         }
     }
 }}}}

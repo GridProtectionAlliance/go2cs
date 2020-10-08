@@ -6,7 +6,7 @@
 
 // Package sort provides primitives for sorting slices and user-defined
 // collections.
-// package sort -- go2cs converted at 2020 August 29 08:21:45 UTC
+// package sort -- go2cs converted at 2020 October 08 03:44:12 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Go\src\sort\sort.go
 
@@ -38,7 +38,9 @@ namespace go
                     data.Swap(j, j - 1L);
                 }
 
+
             }
+
 
         }
 
@@ -54,17 +56,22 @@ namespace go
                 {
                     break;
                 }
+
                 if (child + 1L < hi && data.Less(first + child, first + child + 1L))
                 {
                     child++;
                 }
+
                 if (!data.Less(first + root, first + child))
                 {
-                    return;
+                    return ;
                 }
+
                 data.Swap(first + root, first + child);
                 root = child;
+
             }
+
 
         }
 
@@ -102,6 +109,7 @@ namespace go
 
                 i = i__prev1;
             }
+
         }
 
         // Quicksort, loosely following Bentley and McIlroy,
@@ -124,6 +132,7 @@ namespace go
                 {
                     data.Swap(m1, m0);
                 }
+
             } 
             // now data[m0] <= data[m1] <= data[m2]
         }
@@ -135,10 +144,14 @@ namespace go
                 data.Swap(a + i, b + i);
             }
 
+
         }
 
         private static (long, long) doPivot(Interface data, long lo, long hi)
         {
+            long midlo = default;
+            long midhi = default;
+
             var m = int(uint(lo + hi) >> (int)(1L)); // Written like this to avoid integer overflow.
             if (hi - lo > 40L)
             { 
@@ -147,7 +160,9 @@ namespace go
                 medianOfThree(data, lo, lo + s, lo + 2L * s);
                 medianOfThree(data, m, m - s, m + s);
                 medianOfThree(data, hi - 1L, hi - 1L - s, hi - 1L - 2L * s);
+
             }
+
             medianOfThree(data, lo, m, hi - 1L); 
 
             // Invariants are:
@@ -187,12 +202,13 @@ namespace go
                 data.Swap(b, c - 1L);
                 b++;
                 c--;
+
             } 
             // If hi-c<3 then there are duplicates (by property of median of nine).
-            // Let be a bit more conservative, and set border to 5.
+            // Let's be a bit more conservative, and set border to 5.
  
             // If hi-c<3 then there are duplicates (by property of median of nine).
-            // Let be a bit more conservative, and set border to 5.
+            // Let's be a bit more conservative, and set border to 5.
             var protect = hi - c < 5L;
             if (!protect && hi - c < (hi - lo) / 4L)
             { 
@@ -203,11 +219,14 @@ namespace go
                     data.Swap(c, hi - 1L);
                     c++;
                     dups++;
+
                 }
+
                 if (!data.Less(b - 1L, pivot))
                 { // data[b-1] = pivot
                     b--;
                     dups++;
+
                 } 
                 // m-lo = (hi-lo)/2 > 6
                 // b-lo > (hi-lo)*3/4-1 > 8
@@ -217,10 +236,13 @@ namespace go
                     data.Swap(m, b - 1L);
                     b--;
                     dups++;
+
                 } 
                 // if at least 2 points are equal to pivot, assume skewed distribution
                 protect = dups > 1L;
+
             }
+
             if (protect)
             { 
                 // Protect against a lot of duplicates
@@ -247,12 +269,15 @@ namespace go
                     data.Swap(a, b - 1L);
                     a++;
                     b--;
+
                 }
+
 
             } 
             // Swap pivot into middle
             data.Swap(pivot, b - 1L);
             return (b - 1L, c);
+
         }
 
         private static void quickSort(Interface data, long a, long b, long maxDepth)
@@ -262,8 +287,9 @@ namespace go
                 if (maxDepth == 0L)
                 {
                     heapSort(data, a, b);
-                    return;
+                    return ;
                 }
+
                 maxDepth--;
                 var (mlo, mhi) = doPivot(data, a, b); 
                 // Avoiding recursion on the larger subproblem guarantees
@@ -278,6 +304,7 @@ namespace go
                     quickSort(data, mhi, b, maxDepth);
                     b = mlo; // i.e., quickSort(data, a, mlo)
                 }
+
             }
 
             if (b - a > 1L)
@@ -290,10 +317,13 @@ namespace go
                     {
                         data.Swap(i, i - 6L);
                     }
+
                 }
 
                 insertionSort(data, a, b);
+
             }
+
         }
 
         // Sort sorts data.
@@ -321,6 +351,7 @@ namespace go
 
             }
             return depth * 2L;
+
         }
 
         // lessSwap is a pair of Less and Swap function for use with the
@@ -346,7 +377,7 @@ namespace go
         // Reverse returns the reverse order for data.
         public static Interface Reverse(Interface data)
         {
-            return ref new reverse(data);
+            return addr(new reverse(data));
         }
 
         // IsSorted reports whether data is sorted.
@@ -359,9 +390,11 @@ namespace go
                 {
                     return false;
                 }
+
             }
 
             return true;
+
         }
 
         // Convenience types for common cases
@@ -383,14 +416,12 @@ namespace go
         {
             p[i] = p[j];
             p[j] = p[i];
-
         }
 
         // Sort is a convenience method.
         public static void Sort(this IntSlice p)
         {
             Sort(p);
-
         }
 
         // Float64Slice attaches the methods of Interface to []float64, sorting in increasing order
@@ -411,7 +442,6 @@ namespace go
         {
             p[i] = p[j];
             p[j] = p[i];
-
         }
 
         // isNaN is a copy of math.IsNaN to avoid a dependency on the math package.
@@ -424,7 +454,6 @@ namespace go
         public static void Sort(this Float64Slice p)
         {
             Sort(p);
-
         }
 
         // StringSlice attaches the methods of Interface to []string, sorting in increasing order.
@@ -444,14 +473,12 @@ namespace go
         {
             p[i] = p[j];
             p[j] = p[i];
-
         }
 
         // Sort is a convenience method.
         public static void Sort(this StringSlice p)
         {
             Sort(p);
-
         }
 
         // Convenience wrappers for common cases
@@ -460,7 +487,6 @@ namespace go
         public static void Ints(slice<long> a)
         {
             Sort(IntSlice(a));
-
         }
 
         // Float64s sorts a slice of float64s in increasing order
@@ -468,14 +494,12 @@ namespace go
         public static void Float64s(slice<double> a)
         {
             Sort(Float64Slice(a));
-
         }
 
         // Strings sorts a slice of strings in increasing order.
         public static void Strings(slice<@string> a)
         {
             Sort(StringSlice(a));
-
         }
 
         // IntsAreSorted tests whether a slice of ints is sorted in increasing order.
@@ -566,8 +590,11 @@ namespace go
                     }
 
                 }
+
                 blockSize *= 2L;
+
             }
+
 
         }
 
@@ -613,6 +640,7 @@ namespace go
                     {
                         j = h;
                     }
+
                 } 
                 // Swap values until data[a] reaches the position before i.
  
@@ -628,7 +656,8 @@ namespace go
 
                     k = k__prev1;
                 }
-                return;
+                return ;
+
             } 
 
             // Avoid unnecessary recursions of symMerge
@@ -652,6 +681,7 @@ namespace go
                     {
                         j = h;
                     }
+
                 } 
                 // Swap values until data[m] reaches the position i.
  
@@ -667,8 +697,10 @@ namespace go
 
                     k = k__prev1;
                 }
-                return;
+                return ;
+
             }
+
             var mid = int(uint(a + b) >> (int)(1L));
             var n = mid + m;
             long start = default;            long r = default;
@@ -683,6 +715,7 @@ namespace go
                 start = a;
                 r = m;
             }
+
             var p = n - 1L;
 
             while (start < r)
@@ -696,6 +729,7 @@ namespace go
                 {
                     r = c;
                 }
+
             }
 
 
@@ -704,17 +738,20 @@ namespace go
             {
                 rotate(data, start, m, end);
             }
+
             if (a < start && start < mid)
             {
                 symMerge(data, a, start, mid);
             }
+
             if (mid < end && end < b)
             {
                 symMerge(data, mid, end, b);
             }
+
         }
 
-        // Rotate two consecutives blocks u = data[a:m] and v = data[m:b] in data:
+        // Rotate two consecutive blocks u = data[a:m] and v = data[m:b] in data:
         // Data of the form 'x u v y' is changed to 'x v u y'.
         // Rotate performs at most b-a many calls to data.Swap.
         // Rotate assumes non-degenerate arguments: a < m && m < b.
@@ -735,11 +772,13 @@ namespace go
                     swapRange(data, m - i, m + j - i, i);
                     j -= i;
                 }
+
             } 
             // i == j
  
             // i == j
             swapRange(data, m - i, m, i);
+
         }
 
         /*

@@ -1,6 +1,6 @@
 // Derived from Inferno utils/6l/obj.c and utils/6l/span.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/obj.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/span.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/obj.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/span.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -29,9 +29,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 August 29 10:03:44 UTC
+// package ld -- go2cs converted at 2020 October 08 04:38:46 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\ld.go
+using goobj2 = go.cmd.@internal.goobj2_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
@@ -49,8 +51,10 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        private static void readImportCfg(this ref Link ctxt, @string file)
+        private static void readImportCfg(this ptr<Link> _addr_ctxt, @string file)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+
             ctxt.PackageFile = make_map<@string, @string>();
             ctxt.PackageShlib = make_map<@string, @string>();
             var (data, err) = ioutil.ReadFile(file);
@@ -85,10 +89,12 @@ namespace @internal
                     {
                         verb = line[..i];
                         args = strings.TrimSpace(line[i + 1L..]);
+
                     }
                     i = i__prev1;
 
                 }
+
                 @string before = default;                @string after = default;
 
                 {
@@ -100,10 +106,12 @@ namespace @internal
                     {
                         before = args[..i];
                         after = args[i + 1L..];
+
                     }
                     i = i__prev1;
 
                 }
+
                 switch (verb)
                 {
                     case "packagefile": 
@@ -124,11 +132,14 @@ namespace @internal
                         log.Fatalf("%s:%d: unknown directive %q", file, lineNum, verb);
                         break;
                 }
+
             }
         }
 
-        private static @string pkgname(ref Link ctxt, @string lib)
+        private static @string pkgname(ptr<Link> _addr_ctxt, @string lib)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+
             var name = path.Clean(lib); 
 
             // When using importcfg, we have the final package name.
@@ -143,11 +154,17 @@ namespace @internal
             {
                 pkg = pkg[..len(pkg) - 2L];
             }
+
             return pkg;
+
         }
 
-        private static (@string, bool) findlib(ref Link ctxt, @string lib)
+        private static (@string, bool) findlib(ptr<Link> _addr_ctxt, @string lib)
         {
+            @string _p0 = default;
+            bool _p0 = default;
+            ref Link ctxt = ref _addr_ctxt.val;
+
             var name = path.Clean(lib);
 
             @string pname = default;
@@ -166,6 +183,7 @@ namespace @internal
                     ctxt.Logf("cannot find package %s (using -importcfg)\n", name);
                     return ("", false);
                 }
+
             }
             else
             {
@@ -175,7 +193,7 @@ namespace @internal
                 }
                 else
                 {
-                    var pkg = pkgname(ctxt, lib); 
+                    var pkg = pkgname(_addr_ctxt, lib); 
                     // Add .a if needed; the new -importcfg modes
                     // do not put .a into the package name anymore.
                     // This only matters when people try to mix
@@ -192,7 +210,7 @@ namespace @internal
                     {
                         if (ctxt.linkShared)
                         {
-                            pname = dir + "/" + pkg + ".shlibname";
+                            pname = filepath.Join(dir, pkg + ".shlibname");
                             {
                                 var (_, err) = os.Stat(pname);
 
@@ -203,8 +221,10 @@ namespace @internal
                                 }
 
                             }
+
                         }
-                        pname = dir + "/" + name;
+
+                        pname = filepath.Join(dir, name);
                         {
                             (_, err) = os.Stat(pname);
 
@@ -214,39 +234,58 @@ namespace @internal
                             }
 
                         }
+
                     }
+
                 }
-                pname = path.Clean(pname);
+
+                pname = filepath.Clean(pname);
+
             }
+
             return (pname, isshlib);
+
         }
 
-        private static ref sym.Library addlib(ref Link ctxt, @string src, @string obj, @string lib)
+        private static ptr<sym.Library> addlib(ptr<Link> _addr_ctxt, @string src, @string obj, @string lib, goobj2.FingerprintType fingerprint)
         {
-            var pkg = pkgname(ctxt, lib); 
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            var pkg = pkgname(_addr_ctxt, lib); 
 
             // already loaded?
             {
                 var l = ctxt.LibraryByPkg[pkg];
 
-                if (l != null)
-                {
-                    return l;
+                if (l != null && !l.Fingerprint.IsZero())
+                { 
+                    // Normally, packages are loaded in dependency order, and if l != nil
+                    // l is already loaded with the actual fingerprint. In shared build mode,
+                    // however, packages may be added not in dependency order, and it is
+                    // possible that l's fingerprint is not yet loaded -- exclude it in
+                    // checking.
+                    checkFingerprint(l, l.Fingerprint, src, fingerprint);
+                    return _addr_l!;
+
                 }
 
             }
 
-            var (pname, isshlib) = findlib(ctxt, lib);
+
+            var (pname, isshlib) = findlib(_addr_ctxt, lib);
 
             if (ctxt.Debugvlog > 1L)
             {
-                ctxt.Logf("%5.2f addlib: %s %s pulls in %s isshlib %v\n", elapsed(), obj, src, pname, isshlib);
+                ctxt.Logf("addlib: %s %s pulls in %s isshlib %v\n", obj, src, pname, isshlib);
             }
+
             if (isshlib)
             {
-                return addlibpath(ctxt, src, obj, "", pkg, pname);
+                return _addr_addlibpath(_addr_ctxt, src, obj, "", pkg, pname, fingerprint)!;
             }
-            return addlibpath(ctxt, src, obj, pname, pkg, "");
+
+            return _addr_addlibpath(_addr_ctxt, src, obj, pname, pkg, "", fingerprint)!;
+
         }
 
         /*
@@ -256,9 +295,13 @@ namespace @internal
          *    file: object file, e.g., /home/rsc/go/pkg/container/vector.a
          *    pkg: package import path, e.g. container/vector
          *    shlib: path to shared library, or .shlibname file holding path
+         *    fingerprint: if not 0, expected fingerprint for import from srcref
+         *                 fingerprint is 0 if the library is not imported (e.g. main)
          */
-        private static ref sym.Library addlibpath(ref Link ctxt, @string srcref, @string objref, @string file, @string pkg, @string shlib)
+        private static ptr<sym.Library> addlibpath(ptr<Link> _addr_ctxt, @string srcref, @string objref, @string file, @string pkg, @string shlib, goobj2.FingerprintType fingerprint)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+
             {
                 var l__prev1 = l;
 
@@ -266,24 +309,27 @@ namespace @internal
 
                 if (l != null)
                 {
-                    return l;
+                    return _addr_l!;
                 }
 
                 l = l__prev1;
 
             }
 
+
             if (ctxt.Debugvlog > 1L)
             {
-                ctxt.Logf("%5.2f addlibpath: srcref: %s objref: %s file: %s pkg: %s shlib: %s\n", Cputime(), srcref, objref, file, pkg, shlib);
+                ctxt.Logf("addlibpath: srcref: %s objref: %s file: %s pkg: %s shlib: %s fingerprint: %x\n", srcref, objref, file, pkg, shlib, fingerprint);
             }
-            l = ref new sym.Library();
+
+            l = addr(new sym.Library());
             ctxt.LibraryByPkg[pkg] = l;
             ctxt.Library = append(ctxt.Library, l);
             l.Objref = objref;
             l.Srcref = srcref;
             l.File = file;
             l.Pkg = pkg;
+            l.Fingerprint = fingerprint;
             if (shlib != "")
             {
                 if (strings.HasSuffix(shlib, ".shlibname"))
@@ -293,17 +339,79 @@ namespace @internal
                     {
                         Errorf(null, "cannot read %s: %v", shlib, err);
                     }
+
                     shlib = strings.TrimSpace(string(data));
+
                 }
+
                 l.Shlib = shlib;
+
             }
-            return l;
+
+            return _addr_l!;
+
         }
 
         private static long atolwhex(@string s)
         {
             var (n, _) = strconv.ParseInt(s, 0L, 64L);
             return n;
+        }
+
+        // PrepareAddmoduledata returns a symbol builder that target-specific
+        // code can use to build up the linker-generated go.link.addmoduledata
+        // function, along with the sym for runtime.addmoduledata itself. If
+        // this function is not needed (for example in cases where we're
+        // linking a module that contains the runtime) the returned builder
+        // will be nil.
+        public static (ptr<loader.SymbolBuilder>, loader.Sym) PrepareAddmoduledata(ptr<Link> _addr_ctxt)
+        {
+            ptr<loader.SymbolBuilder> _p0 = default!;
+            loader.Sym _p0 = default;
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            if (!ctxt.DynlinkingGo())
+            {
+                return (_addr_null!, 0L);
+            }
+
+            var amd = ctxt.loader.LookupOrCreateSym("runtime.addmoduledata", 0L);
+            if (ctxt.loader.SymType(amd) == sym.STEXT && ctxt.BuildMode != BuildModePlugin)
+            { 
+                // we're linking a module containing the runtime -> no need for
+                // an init function
+                return (_addr_null!, 0L);
+
+            }
+
+            ctxt.loader.SetAttrReachable(amd, true); 
+
+            // Create a new init func text symbol. Caller will populate this
+            // sym with arch-specific content.
+            var ifs = ctxt.loader.LookupOrCreateSym("go.link.addmoduledata", 0L);
+            var initfunc = ctxt.loader.MakeSymbolUpdater(ifs);
+            ctxt.loader.SetAttrReachable(ifs, true);
+            ctxt.loader.SetAttrLocal(ifs, true);
+            initfunc.SetType(sym.STEXT); 
+
+            // Add the init func and/or addmoduledata to Textp2.
+            if (ctxt.BuildMode == BuildModePlugin)
+            {
+                ctxt.Textp2 = append(ctxt.Textp2, amd);
+            }
+
+            ctxt.Textp2 = append(ctxt.Textp2, initfunc.Sym()); 
+
+            // Create an init array entry
+            var amdi = ctxt.loader.LookupOrCreateSym("go.link.addmoduledatainit", 0L);
+            var initarray_entry = ctxt.loader.MakeSymbolUpdater(amdi);
+            ctxt.loader.SetAttrReachable(amdi, true);
+            ctxt.loader.SetAttrLocal(amdi, true);
+            initarray_entry.SetType(sym.SINITARR);
+            initarray_entry.AddAddr(ctxt.Arch, ifs);
+
+            return (_addr_initfunc!, amd);
+
         }
     }
 }}}}

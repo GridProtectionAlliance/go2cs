@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:00:20 UTC
+// package main -- go2cs converted at 2020 October 08 04:33:20 UTC
 // Original source: C:\Go\src\cmd\fix\netipv6zone.go
 using ast = go.go.ast_package;
 using static go.builtin;
@@ -22,29 +22,35 @@ namespace go
 https://codereview.appspot.com/6849045/
 `,);
 
-        private static bool netipv6zone(ref ast.File f)
+        private static bool netipv6zone(ptr<ast.File> _addr_f)
         {
+            ref ast.File f = ref _addr_f.val;
+
             if (!imports(f, "net"))
             {
                 return false;
             }
+
             var @fixed = false;
             walk(f, n =>
             {
-                ref ast.CompositeLit (cl, ok) = n._<ref ast.CompositeLit>();
+                ptr<ast.CompositeLit> (cl, ok) = n._<ptr<ast.CompositeLit>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
-                ref ast.SelectorExpr (se, ok) = cl.Type._<ref ast.SelectorExpr>();
+
+                ptr<ast.SelectorExpr> (se, ok) = cl.Type._<ptr<ast.SelectorExpr>>();
                 if (!ok)
                 {
-                    return;
+                    return ;
                 }
+
                 if (!isTopName(se.X, "net") || se.Sel == null)
                 {
-                    return;
+                    return ;
                 }
+
                 {
                     var ss = se.Sel.String();
 
@@ -58,7 +64,7 @@ https://codereview.appspot.com/6849045/
                             foreach (var (i, e) in cl.Elts)
                             {
                                 {
-                                    ref ast.KeyValueExpr (_, ok) = e._<ref ast.KeyValueExpr>();
+                                    ptr<ast.KeyValueExpr> (_, ok) = e._<ptr<ast.KeyValueExpr>>();
 
                                     if (ok)
                                     {
@@ -66,14 +72,15 @@ https://codereview.appspot.com/6849045/
                                     }
 
                                 }
+
                                 switch (i)
                                 {
                                     case 0L: 
-                                        cl.Elts[i] = ref new ast.KeyValueExpr(Key:ast.NewIdent("IP"),Value:e,);
+                                        cl.Elts[i] = addr(new ast.KeyValueExpr(Key:ast.NewIdent("IP"),Value:e,));
                                         break;
                                     case 1L: 
                                         {
-                                            ref ast.BasicLit (elit, ok) = e._<ref ast.BasicLit>();
+                                            ptr<ast.BasicLit> (elit, ok) = e._<ptr<ast.BasicLit>>();
 
                                             if (ok && elit.Value == "0")
                                             {
@@ -81,19 +88,23 @@ https://codereview.appspot.com/6849045/
                                             }
                                             else
                                             {
-                                                cl.Elts[i] = ref new ast.KeyValueExpr(Key:ast.NewIdent("Port"),Value:e,);
+                                                cl.Elts[i] = addr(new ast.KeyValueExpr(Key:ast.NewIdent("Port"),Value:e,));
                                             }
 
                                         }
+
                                         break;
                                 }
                                 fixed = true;
+
                             }
                             break;
                     }
                 }
+
             });
             return fixed;
+
         }
     }
 }

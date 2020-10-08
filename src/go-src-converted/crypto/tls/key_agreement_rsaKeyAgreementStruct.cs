@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:33 UTC
+//     Generated on 2020 October 08 03:38:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,17 +14,13 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using crypto = go.crypto_package;
-using ecdsa = go.crypto.ecdsa_package;
-using elliptic = go.crypto.elliptic_package;
 using md5 = go.crypto.md5_package;
 using rsa = go.crypto.rsa_package;
 using sha1 = go.crypto.sha1_package;
 using x509 = go.crypto.x509_package;
-using asn1 = go.encoding.asn1_package;
 using errors = go.errors_package;
+using fmt = go.fmt_package;
 using io = go.io_package;
-using big = go.math.big_package;
-using curve25519 = go.golang_org.x.crypto.curve25519_package;
 using go;
 
 namespace go {

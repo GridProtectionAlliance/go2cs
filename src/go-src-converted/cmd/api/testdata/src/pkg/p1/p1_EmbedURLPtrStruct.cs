@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:37 UTC
+//     Generated on 2020 October 08 04:04:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,23 +26,17 @@ namespace pkg
     public static partial class p1_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(URL))]
         public partial struct EmbedURLPtr
         {
-            // URL structure promotion - sourced from pointer
-            private readonly ptr<URL> m_URLRef;
-
-            private ref URL URL_ptr => ref m_URLRef.Value;
-
             // Constructors
             public EmbedURLPtr(NilType _)
             {
-                this.m_URLRef = new ptr<URL>(new URL(nil));
+                this.ptr<URL> = default;
             }
 
-            public EmbedURLPtr(ref URL URL = default)
+            public EmbedURLPtr(ref ptr<URL> ptr<URL> = default)
             {
-                this.m_URLRef = new ptr<URL>(ref URL);
+                this.ptr<URL> = ptr<URL>;
             }
 
             // Enable comparisons between nil and EmbedURLPtr struct
@@ -65,7 +59,7 @@ namespace pkg
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static EmbedURLPtr EmbedURLPtr_cast(dynamic value)
         {
-            return new EmbedURLPtr(ref value.URL);
+            return new EmbedURLPtr(ref value.ptr<URL>);
         }
     }
 }}}}}}

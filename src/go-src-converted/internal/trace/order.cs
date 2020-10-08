@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2020 August 29 10:04:54 UTC
+// package trace -- go2cs converted at 2020 October 08 04:42:26 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Go\src\internal\trace\order.go
 using fmt = go.fmt_package;
@@ -16,7 +16,7 @@ namespace @internal
     {
         private partial struct eventBatch
         {
-            public slice<ref Event> events;
+            public slice<ptr<Event>> events;
             public bool selected;
         }
 
@@ -39,13 +39,14 @@ namespace @internal
             public gStatus status;
         }
 
-        private static readonly gStatus gDead = iota;
-        private static readonly var gRunnable = 0;
-        private static readonly var gRunning = 1;
-        private static readonly unordered gWaiting = ~uint64(0L);
-        private static readonly var garbage = ~uint64(0L) - 1L;
-        private static readonly var noseq = ~uint64(0L);
-        private static readonly var seqinc = ~uint64(0L) - 1L;
+        private static readonly gStatus gDead = (gStatus)iota;
+        private static readonly var gRunnable = (var)0;
+        private static readonly var gRunning = (var)1;
+        private static readonly unordered gWaiting = (unordered)~uint64(0L);
+        private static readonly var garbage = (var)~uint64(0L) - 1L;
+        private static readonly var noseq = (var)~uint64(0L);
+        private static readonly var seqinc = (var)~uint64(0L) - 1L;
+
 
         // order1007 merges a set of per-P event batches into a single, consistent stream.
         // The high level idea is as follows. Events within an individual batch are in
@@ -56,14 +57,17 @@ namespace @internal
         // event with the lowest timestamp from the subset, merge it and repeat.
         // This approach ensures that we form a consistent stream even if timestamps are
         // incorrect (condition observed on some machines).
-        private static (slice<ref Event>, error) order1007(map<long, slice<ref Event>> m) => func((_, panic, __) =>
+        private static (slice<ptr<Event>>, error) order1007(map<long, slice<ptr<Event>>> m) => func((_, panic, __) =>
         {
+            slice<ptr<Event>> events = default;
+            error err = default!;
+
             long pending = 0L;
-            slice<ref eventBatch> batches = default;
+            slice<ptr<eventBatch>> batches = default;
             foreach (var (_, v) in m)
             {
                 pending += len(v);
-                batches = append(batches, ref new eventBatch(v,false));
+                batches = append(batches, addr(new eventBatch(v,false)));
             }
             var gs = make_map<ulong, gState>();
             slice<orderEvent> frontier = default;
@@ -75,13 +79,15 @@ namespace @internal
                     {
                         continue;
                     }
+
                     var ev = b.events[0L];
-                    var (g, init, next) = stateTransition(ev);
+                    var (g, init, next) = stateTransition(_addr_ev);
                     if (!transitionReady(g, gs[g], init))
                     {
                         continue;
                 pending--;
                     }
+
                     frontier = append(frontier, new orderEvent(ev,i,g,init,next));
                     b.events = b.events[1L..];
                     b.selected = true; 
@@ -93,11 +99,13 @@ namespace @internal
                         ev.Type = EvGoUnblock;
                     else if (ev.Type == EvGoSysExitLocal) 
                         ev.Type = EvGoSysExit;
-                                    }
+                    
+                }
                 if (len(frontier) == 0L)
                 {
-                    return (null, fmt.Errorf("no consistent ordering of events possible"));
+                    return (null, error.As(fmt.Errorf("no consistent ordering of events possible"))!);
                 }
+
                 sort.Sort(orderEventList(frontier));
                 var f = frontier[0L];
                 frontier[0L] = frontier[len(frontier) - 1L];
@@ -108,7 +116,9 @@ namespace @internal
                 {
                     panic("frontier batch is not selected");
                 }
+
                 batches[f.batch].selected = false;
+
             } 
 
             // At this point we have a consistent stream of events.
@@ -121,7 +131,7 @@ namespace @internal
             // The tests will skip (not fail) the test case if they see this error.
             if (!sort.IsSorted(eventList(events)))
             {
-                return (null, ErrTimeOrder);
+                return (null, error.As(ErrTimeOrder)!);
             } 
 
             // The last part is giving correct timestamps to EvGoSysExit events.
@@ -149,30 +159,40 @@ namespace @internal
                         {
                             continue;
                         }
+
                         var block = lastSysBlock[ev.G];
                         if (block == 0L)
                         {
-                            return (null, fmt.Errorf("stray syscall exit"));
+                            return (null, error.As(fmt.Errorf("stray syscall exit"))!);
                         }
+
                         if (ts < block)
                         {
-                            return (null, ErrTimeOrder);
+                            return (null, error.As(ErrTimeOrder)!);
                         }
+
                         ev.Ts = ts;
-                                    }
+                    
+                }
 
                 ev = ev__prev1;
             }
 
             sort.Stable(eventList(events));
 
-            return;
+            return ;
+
         });
 
         // stateTransition returns goroutine state (sequence and status) when the event
         // becomes ready for merging (init) and the goroutine state after the event (next).
-        private static (ulong, gState, gState) stateTransition(ref Event ev)
+        private static (ulong, gState, gState) stateTransition(ptr<Event> _addr_ev)
         {
+            ulong g = default;
+            gState init = default;
+            gState next = default;
+            ref Event ev = ref _addr_ev.val;
+
 
             if (ev.Type == EvGoCreate) 
                 g = ev.Args[0L];
@@ -219,7 +239,8 @@ namespace @internal
             else 
                 // no ordering requirements
                 g = unordered;
-                        return;
+                        return ;
+
         }
 
         private static bool transitionReady(ulong g, gState curr, gState init)
@@ -231,24 +252,30 @@ namespace @internal
         {
             if (g == unordered)
             {
-                return;
+                return ;
             }
+
             var curr = gs[g];
             if (!transitionReady(g, curr, init))
             {
                 panic("event sequences are broken");
             }
 
+
             if (next.seq == noseq) 
                 next.seq = curr.seq;
             else if (next.seq == seqinc) 
                 next.seq = curr.seq + 1L;
                         gs[g] = next;
+
         });
 
         // order1005 merges a set of per-P event batches into a single, consistent stream.
-        private static (slice<ref Event>, error) order1005(map<long, slice<ref Event>> m)
+        private static (slice<ptr<Event>>, error) order1005(map<long, slice<ptr<Event>>> m)
         {
+            slice<ptr<Event>> events = default;
+            error err = default!;
+
             foreach (var (_, batch) in m)
             {
                 events = append(events, batch);
@@ -264,14 +291,18 @@ namespace @internal
                     {
                         ev.Ts = int64(ev.Args[2L]);
                     }
+
                 }
+
             }
             sort.Sort(eventSeqList(events));
             if (!sort.IsSorted(eventList(events)))
             {
-                return (null, ErrTimeOrder);
+                return (null, error.As(ErrTimeOrder)!);
             }
-            return;
+
+            return ;
+
         }
 
         private partial struct orderEventList // : slice<orderEvent>
@@ -292,9 +323,10 @@ namespace @internal
         {
             l[i] = l[j];
             l[j] = l[i];
+
         }
 
-        private partial struct eventList // : slice<ref Event>
+        private partial struct eventList // : slice<ptr<Event>>
         {
         }
 
@@ -312,9 +344,10 @@ namespace @internal
         {
             l[i] = l[j];
             l[j] = l[i];
+
         }
 
-        private partial struct eventSeqList // : slice<ref Event>
+        private partial struct eventSeqList // : slice<ptr<Event>>
         {
         }
 
@@ -332,6 +365,7 @@ namespace @internal
         {
             l[i] = l[j];
             l[j] = l[i];
+
         }
     }
 }}

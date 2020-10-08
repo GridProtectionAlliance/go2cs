@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:21 UTC
+//     Generated on 2020 October 08 03:39:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -78,7 +79,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -92,10 +93,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (http2FrameWriteRequest, bool) OpenStreamByRef(ref T value, uint streamID, http2OpenStreamOptions options);
+            private delegate (http2FrameWriteRequest, bool) OpenStreamByPtr(ptr<T> value, uint streamID, http2OpenStreamOptions options);
             private delegate (http2FrameWriteRequest, bool) OpenStreamByVal(T value, uint streamID, http2OpenStreamOptions options);
 
-            private static readonly OpenStreamByRef s_OpenStreamByRef;
+            private static readonly OpenStreamByPtr s_OpenStreamByPtr;
             private static readonly OpenStreamByVal s_OpenStreamByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,17 +105,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OpenStreamByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OpenStreamByPtr is null || !m_target_is_ptr)
                     return s_OpenStreamByVal!(target, streamID, options);
 
-                return s_OpenStreamByRef(ref target, streamID, options);
+                return s_OpenStreamByPtr(m_target_ptr, streamID, options);
             }
 
-            private delegate (http2FrameWriteRequest, bool) CloseStreamByRef(ref T value, uint streamID);
+            private delegate (http2FrameWriteRequest, bool) CloseStreamByPtr(ptr<T> value, uint streamID);
             private delegate (http2FrameWriteRequest, bool) CloseStreamByVal(T value, uint streamID);
 
-            private static readonly CloseStreamByRef s_CloseStreamByRef;
+            private static readonly CloseStreamByPtr s_CloseStreamByPtr;
             private static readonly CloseStreamByVal s_CloseStreamByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,17 +125,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseStreamByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseStreamByPtr is null || !m_target_is_ptr)
                     return s_CloseStreamByVal!(target, streamID);
 
-                return s_CloseStreamByRef(ref target, streamID);
+                return s_CloseStreamByPtr(m_target_ptr, streamID);
             }
 
-            private delegate (http2FrameWriteRequest, bool) AdjustStreamByRef(ref T value, uint streamID, http2PriorityParam priority);
+            private delegate (http2FrameWriteRequest, bool) AdjustStreamByPtr(ptr<T> value, uint streamID, http2PriorityParam priority);
             private delegate (http2FrameWriteRequest, bool) AdjustStreamByVal(T value, uint streamID, http2PriorityParam priority);
 
-            private static readonly AdjustStreamByRef s_AdjustStreamByRef;
+            private static readonly AdjustStreamByPtr s_AdjustStreamByPtr;
             private static readonly AdjustStreamByVal s_AdjustStreamByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,17 +145,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AdjustStreamByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AdjustStreamByPtr is null || !m_target_is_ptr)
                     return s_AdjustStreamByVal!(target, streamID, priority);
 
-                return s_AdjustStreamByRef(ref target, streamID, priority);
+                return s_AdjustStreamByPtr(m_target_ptr, streamID, priority);
             }
 
-            private delegate (http2FrameWriteRequest, bool) PushByRef(ref T value, http2FrameWriteRequest wr);
+            private delegate (http2FrameWriteRequest, bool) PushByPtr(ptr<T> value, http2FrameWriteRequest wr);
             private delegate (http2FrameWriteRequest, bool) PushByVal(T value, http2FrameWriteRequest wr);
 
-            private static readonly PushByRef s_PushByRef;
+            private static readonly PushByPtr s_PushByPtr;
             private static readonly PushByVal s_PushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,17 +165,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PushByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PushByPtr is null || !m_target_is_ptr)
                     return s_PushByVal!(target, wr);
 
-                return s_PushByRef(ref target, wr);
+                return s_PushByPtr(m_target_ptr, wr);
             }
 
-            private delegate (http2FrameWriteRequest, bool) PopByRef(ref T value);
+            private delegate (http2FrameWriteRequest, bool) PopByPtr(ptr<T> value);
             private delegate (http2FrameWriteRequest, bool) PopByVal(T value);
 
-            private static readonly PopByRef s_PopByRef;
+            private static readonly PopByPtr s_PopByPtr;
             private static readonly PopByVal s_PopByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -180,11 +185,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PopByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PopByPtr is null || !m_target_is_ptr)
                     return s_PopByVal!(target);
 
-                return s_PopByRef(ref target);
+                return s_PopByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -193,87 +199,72 @@ namespace net
             static http2WriteScheduler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("OpenStream");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("OpenStream");
 
                 if (!(extensionMethod is null))
-                    s_OpenStreamByRef = extensionMethod.CreateStaticDelegate(typeof(OpenStreamByRef)) as OpenStreamByRef;
+                    s_OpenStreamByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenStreamByPtr)) as OpenStreamByPtr;
 
-                if (s_OpenStreamByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("OpenStream");
+                extensionMethod = targetType.GetExtensionMethod("OpenStream");
 
-                    if (!(extensionMethod is null))
-                        s_OpenStreamByVal = extensionMethod.CreateStaticDelegate(typeof(OpenStreamByVal)) as OpenStreamByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OpenStreamByVal = extensionMethod.CreateStaticDelegate(typeof(OpenStreamByVal)) as OpenStreamByVal;
 
-                if (s_OpenStreamByRef is null && s_OpenStreamByVal is null)
+                if (s_OpenStreamByPtr is null && s_OpenStreamByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2WriteScheduler.OpenStream method", new Exception("OpenStream"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CloseStream");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CloseStream");
 
                 if (!(extensionMethod is null))
-                    s_CloseStreamByRef = extensionMethod.CreateStaticDelegate(typeof(CloseStreamByRef)) as CloseStreamByRef;
+                    s_CloseStreamByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseStreamByPtr)) as CloseStreamByPtr;
 
-                if (s_CloseStreamByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CloseStream");
+                extensionMethod = targetType.GetExtensionMethod("CloseStream");
 
-                    if (!(extensionMethod is null))
-                        s_CloseStreamByVal = extensionMethod.CreateStaticDelegate(typeof(CloseStreamByVal)) as CloseStreamByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseStreamByVal = extensionMethod.CreateStaticDelegate(typeof(CloseStreamByVal)) as CloseStreamByVal;
 
-                if (s_CloseStreamByRef is null && s_CloseStreamByVal is null)
+                if (s_CloseStreamByPtr is null && s_CloseStreamByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2WriteScheduler.CloseStream method", new Exception("CloseStream"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AdjustStream");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AdjustStream");
 
                 if (!(extensionMethod is null))
-                    s_AdjustStreamByRef = extensionMethod.CreateStaticDelegate(typeof(AdjustStreamByRef)) as AdjustStreamByRef;
+                    s_AdjustStreamByPtr = extensionMethod.CreateStaticDelegate(typeof(AdjustStreamByPtr)) as AdjustStreamByPtr;
 
-                if (s_AdjustStreamByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AdjustStream");
+                extensionMethod = targetType.GetExtensionMethod("AdjustStream");
 
-                    if (!(extensionMethod is null))
-                        s_AdjustStreamByVal = extensionMethod.CreateStaticDelegate(typeof(AdjustStreamByVal)) as AdjustStreamByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AdjustStreamByVal = extensionMethod.CreateStaticDelegate(typeof(AdjustStreamByVal)) as AdjustStreamByVal;
 
-                if (s_AdjustStreamByRef is null && s_AdjustStreamByVal is null)
+                if (s_AdjustStreamByPtr is null && s_AdjustStreamByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2WriteScheduler.AdjustStream method", new Exception("AdjustStream"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Push");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Push");
 
                 if (!(extensionMethod is null))
-                    s_PushByRef = extensionMethod.CreateStaticDelegate(typeof(PushByRef)) as PushByRef;
+                    s_PushByPtr = extensionMethod.CreateStaticDelegate(typeof(PushByPtr)) as PushByPtr;
 
-                if (s_PushByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Push");
+                extensionMethod = targetType.GetExtensionMethod("Push");
 
-                    if (!(extensionMethod is null))
-                        s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
 
-                if (s_PushByRef is null && s_PushByVal is null)
+                if (s_PushByPtr is null && s_PushByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2WriteScheduler.Push method", new Exception("Push"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Pop");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Pop");
 
                 if (!(extensionMethod is null))
-                    s_PopByRef = extensionMethod.CreateStaticDelegate(typeof(PopByRef)) as PopByRef;
+                    s_PopByPtr = extensionMethod.CreateStaticDelegate(typeof(PopByPtr)) as PopByPtr;
 
-                if (s_PopByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Pop");
+                extensionMethod = targetType.GetExtensionMethod("Pop");
 
-                    if (!(extensionMethod is null))
-                        s_PopByVal = extensionMethod.CreateStaticDelegate(typeof(PopByVal)) as PopByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PopByVal = extensionMethod.CreateStaticDelegate(typeof(PopByVal)) as PopByVal;
 
-                if (s_PopByRef is null && s_PopByVal is null)
+                if (s_PopByPtr is null && s_PopByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2WriteScheduler.Pop method", new Exception("Pop"));
             }
 

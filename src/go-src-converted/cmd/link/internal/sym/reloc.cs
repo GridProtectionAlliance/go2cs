@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sym -- go2cs converted at 2020 August 29 10:02:54 UTC
+// package sym -- go2cs converted at 2020 October 08 04:37:53 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Go\src\cmd\link\internal\sym\reloc.go
 using objabi = go.cmd.@internal.objabi_package;
@@ -33,12 +33,30 @@ namespace @internal
             public int Off; // offset to rewrite
             public byte Siz; // number of bytes to rewrite, 1, 2, or 4
             public bool Done; // set to true when relocation is complete
-            public RelocVariant Variant; // variation on Type
             public objabi.RelocType Type; // the relocation type
             public long Add; // addend
-            public long Xadd; // addend passed to external linker
             public ptr<Symbol> Sym; // symbol the relocation addresses
+            public ref ptr<RelocExt> ptr<RelocExt> => ref ptr<RelocExt>_ptr; // extra fields (see below), may be nil, call InitExt before use
+        }
+
+        // relocExt contains extra fields in Reloc that are used only in
+        // certain cases.
+        public partial struct RelocExt
+        {
+            public long Xadd; // addend passed to external linker
             public ptr<Symbol> Xsym; // symbol passed to external linker
+            public RelocVariant Variant; // variation on Type, currently used only on PPC64 and S390X
+        }
+
+        private static void InitExt(this ptr<Reloc> _addr_r)
+        {
+            ref Reloc r = ref _addr_r.val;
+
+            if (r.RelocExt == null)
+            {
+                r.RelocExt = @new<RelocExt>();
+            }
+
         }
 
         // RelocVariant is a linker-internal variation on a relocation.
@@ -46,28 +64,31 @@ namespace @internal
         {
         }
 
-        public static readonly RelocVariant RV_NONE = iota;
-        public static readonly var RV_POWER_LO = 0;
-        public static readonly var RV_POWER_HI = 1;
-        public static readonly var RV_POWER_HA = 2;
-        public static readonly var RV_POWER_DS = 3; 
+        public static readonly RelocVariant RV_NONE = (RelocVariant)iota;
+        public static readonly var RV_POWER_LO = (var)0;
+        public static readonly var RV_POWER_HI = (var)1;
+        public static readonly var RV_POWER_HA = (var)2;
+        public static readonly var RV_POWER_DS = (var)3; 
 
         // RV_390_DBL is a s390x-specific relocation variant that indicates that
         // the value to be placed into the relocatable field should first be
         // divided by 2.
-        public static readonly var RV_390_DBL = 4;
+        public static readonly var RV_390_DBL = (var)4;
 
-        public static readonly RelocVariant RV_CHECK_OVERFLOW = 1L << (int)(7L);
-        public static readonly RelocVariant RV_TYPE_MASK = RV_CHECK_OVERFLOW - 1L;
+        public static readonly RelocVariant RV_CHECK_OVERFLOW = (RelocVariant)1L << (int)(7L);
+        public static readonly RelocVariant RV_TYPE_MASK = (RelocVariant)RV_CHECK_OVERFLOW - 1L;
 
-        public static @string RelocName(ref sys.Arch _arch, objabi.RelocType r) => func(_arch, (ref sys.Arch arch, Defer _, Panic panic, Recover __) =>
-        { 
+
+        public static @string RelocName(ptr<sys.Arch> _addr_arch, objabi.RelocType r) => func((_, panic, __) =>
+        {
+            ref sys.Arch arch = ref _addr_arch.val;
+ 
             // We didn't have some relocation types at Go1.4.
             // Uncomment code when we include those in bootstrap code.
 
 
-            if (r >= 512L)             else if (r >= 256L) // ELF
-                var nr = r - 256L;
+            if (r >= objabi.MachoRelocOffset)             else if (r >= objabi.ElfRelocOffset) // ELF
+                var nr = r - objabi.ElfRelocOffset;
 
                 if (arch.Family == sys.AMD64) 
                     return elf.R_X86_64(nr).String();
@@ -77,9 +98,16 @@ namespace @internal
                     return elf.R_AARCH64(nr).String();
                 else if (arch.Family == sys.I386) 
                     return elf.R_386(nr).String();
-                else if (arch.Family == sys.MIPS || arch.Family == sys.MIPS64)                 else if (arch.Family == sys.PPC64)                 else if (arch.Family == sys.S390X)                 else 
+                else if (arch.Family == sys.MIPS || arch.Family == sys.MIPS64) 
+                    return elf.R_MIPS(nr).String();
+                else if (arch.Family == sys.PPC64) 
+                    return elf.R_PPC64(nr).String();
+                else if (arch.Family == sys.S390X) 
+                    return elf.R_390(nr).String();
+                else 
                     panic("unreachable");
                                         return r.String();
+
         });
 
         // RelocByOff implements sort.Interface for sorting relocations by offset.
@@ -96,22 +124,24 @@ namespace @internal
         {
             x[i] = x[j];
             x[j] = x[i];
-
         }
 
         public static bool Less(this RelocByOff x, long i, long j)
         {
-            var a = ref x[i];
-            var b = ref x[j];
+            var a = _addr_x[i];
+            var b = _addr_x[j];
             if (a.Off < b.Off)
             {
                 return true;
             }
+
             if (a.Off > b.Off)
             {
                 return false;
             }
+
             return false;
+
         }
     }
 }}}}

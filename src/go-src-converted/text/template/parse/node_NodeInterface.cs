@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:38 UTC
+//     Generated on 2020 October 08 03:41:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -54,7 +53,7 @@ namespace template
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,99 +67,124 @@ namespace template
                 m_target_is_ptr = true;
             }
 
-            private delegate ref Tree TypeByRef(ref T value);
-            private delegate ref Tree TypeByVal(T value);
+            private delegate ptr<Tree> TypeByPtr(ptr<T> value);
+            private delegate ptr<Tree> TypeByVal(T value);
 
-            private static readonly TypeByRef s_TypeByRef;
+            private static readonly TypeByPtr s_TypeByPtr;
             private static readonly TypeByVal s_TypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref Tree Type()
+            public ptr<Tree> Type()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TypeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TypeByPtr is null || !m_target_is_ptr)
                     return s_TypeByVal!(target);
 
-                return s_TypeByRef(ref target);
+                return s_TypeByPtr(m_target_ptr);
             }
 
-            private delegate ref Tree StringByRef(ref T value);
-            private delegate ref Tree StringByVal(T value);
+            private delegate ptr<Tree> StringByPtr(ptr<T> value);
+            private delegate ptr<Tree> StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref Tree String()
+            public ptr<Tree> String()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
 
-            private delegate ref Tree CopyByRef(ref T value);
-            private delegate ref Tree CopyByVal(T value);
+            private delegate ptr<Tree> CopyByPtr(ptr<T> value);
+            private delegate ptr<Tree> CopyByVal(T value);
 
-            private static readonly CopyByRef s_CopyByRef;
+            private static readonly CopyByPtr s_CopyByPtr;
             private static readonly CopyByVal s_CopyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref Tree Copy()
+            public ptr<Tree> Copy()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CopyByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CopyByPtr is null || !m_target_is_ptr)
                     return s_CopyByVal!(target);
 
-                return s_CopyByRef(ref target);
+                return s_CopyByPtr(m_target_ptr);
             }
 
-            private delegate ref Tree PositionByRef(ref T value);
-            private delegate ref Tree PositionByVal(T value);
+            private delegate ptr<Tree> PositionByPtr(ptr<T> value);
+            private delegate ptr<Tree> PositionByVal(T value);
 
-            private static readonly PositionByRef s_PositionByRef;
+            private static readonly PositionByPtr s_PositionByPtr;
             private static readonly PositionByVal s_PositionByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref Tree Position()
+            public ptr<Tree> Position()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PositionByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PositionByPtr is null || !m_target_is_ptr)
                     return s_PositionByVal!(target);
 
-                return s_PositionByRef(ref target);
+                return s_PositionByPtr(m_target_ptr);
             }
 
-            private delegate ref Tree treeByRef(ref T value);
-            private delegate ref Tree treeByVal(T value);
+            private delegate ptr<Tree> treeByPtr(ptr<T> value);
+            private delegate ptr<Tree> treeByVal(T value);
 
-            private static readonly treeByRef s_treeByRef;
+            private static readonly treeByPtr s_treeByPtr;
             private static readonly treeByVal s_treeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref Tree tree()
+            public ptr<Tree> tree()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_treeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_treeByPtr is null || !m_target_is_ptr)
                     return s_treeByVal!(target);
 
-                return s_treeByRef(ref target);
+                return s_treeByPtr(m_target_ptr);
+            }
+
+            private delegate ptr<Tree> writeToByPtr(ptr<T> value, ptr<strings.Builder> _p0);
+            private delegate ptr<Tree> writeToByVal(T value, ptr<strings.Builder> _p0);
+
+            private static readonly writeToByPtr s_writeToByPtr;
+            private static readonly writeToByVal s_writeToByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public ptr<Tree> writeTo(ptr<strings.Builder> _p0)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_writeToByPtr is null || !m_target_is_ptr)
+                    return s_writeToByVal!(target, _p0);
+
+                return s_writeToByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -169,88 +193,86 @@ namespace template
             static Node()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Type");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Type");
 
                 if (!(extensionMethod is null))
-                    s_TypeByRef = extensionMethod.CreateStaticDelegate(typeof(TypeByRef)) as TypeByRef;
+                    s_TypeByPtr = extensionMethod.CreateStaticDelegate(typeof(TypeByPtr)) as TypeByPtr;
 
-                if (s_TypeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Type");
+                extensionMethod = targetType.GetExtensionMethod("Type");
 
-                    if (!(extensionMethod is null))
-                        s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
 
-                if (s_TypeByRef is null && s_TypeByVal is null)
+                if (s_TypeByPtr is null && s_TypeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Node.Type method", new Exception("Type"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Node.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Copy");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Copy");
 
                 if (!(extensionMethod is null))
-                    s_CopyByRef = extensionMethod.CreateStaticDelegate(typeof(CopyByRef)) as CopyByRef;
+                    s_CopyByPtr = extensionMethod.CreateStaticDelegate(typeof(CopyByPtr)) as CopyByPtr;
 
-                if (s_CopyByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Copy");
+                extensionMethod = targetType.GetExtensionMethod("Copy");
 
-                    if (!(extensionMethod is null))
-                        s_CopyByVal = extensionMethod.CreateStaticDelegate(typeof(CopyByVal)) as CopyByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CopyByVal = extensionMethod.CreateStaticDelegate(typeof(CopyByVal)) as CopyByVal;
 
-                if (s_CopyByRef is null && s_CopyByVal is null)
+                if (s_CopyByPtr is null && s_CopyByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Node.Copy method", new Exception("Copy"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Position");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Position");
 
                 if (!(extensionMethod is null))
-                    s_PositionByRef = extensionMethod.CreateStaticDelegate(typeof(PositionByRef)) as PositionByRef;
+                    s_PositionByPtr = extensionMethod.CreateStaticDelegate(typeof(PositionByPtr)) as PositionByPtr;
 
-                if (s_PositionByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Position");
+                extensionMethod = targetType.GetExtensionMethod("Position");
 
-                    if (!(extensionMethod is null))
-                        s_PositionByVal = extensionMethod.CreateStaticDelegate(typeof(PositionByVal)) as PositionByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PositionByVal = extensionMethod.CreateStaticDelegate(typeof(PositionByVal)) as PositionByVal;
 
-                if (s_PositionByRef is null && s_PositionByVal is null)
+                if (s_PositionByPtr is null && s_PositionByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Node.Position method", new Exception("Position"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("tree");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("tree");
 
                 if (!(extensionMethod is null))
-                    s_treeByRef = extensionMethod.CreateStaticDelegate(typeof(treeByRef)) as treeByRef;
+                    s_treeByPtr = extensionMethod.CreateStaticDelegate(typeof(treeByPtr)) as treeByPtr;
 
-                if (s_treeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("tree");
+                extensionMethod = targetType.GetExtensionMethod("tree");
 
-                    if (!(extensionMethod is null))
-                        s_treeByVal = extensionMethod.CreateStaticDelegate(typeof(treeByVal)) as treeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_treeByVal = extensionMethod.CreateStaticDelegate(typeof(treeByVal)) as treeByVal;
 
-                if (s_treeByRef is null && s_treeByVal is null)
+                if (s_treeByPtr is null && s_treeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Node.tree method", new Exception("tree"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("writeTo");
+
+                if (!(extensionMethod is null))
+                    s_writeToByPtr = extensionMethod.CreateStaticDelegate(typeof(writeToByPtr)) as writeToByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("writeTo");
+
+                if (!(extensionMethod is null))
+                    s_writeToByVal = extensionMethod.CreateStaticDelegate(typeof(writeToByVal)) as writeToByVal;
+
+                if (s_writeToByPtr is null && s_writeToByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Node.writeTo method", new Exception("writeTo"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

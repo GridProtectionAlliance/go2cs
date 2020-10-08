@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:44 UTC
+//     Generated on 2020 October 08 03:40:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,12 +28,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {
@@ -58,8 +59,10 @@ namespace net
                 this.TLSNextProto = default;
                 this.ConnState = default;
                 this.ErrorLog = default;
-                this.disableKeepAlives = default;
+                this.BaseContext = default;
+                this.ConnContext = default;
                 this.inShutdown = default;
+                this.disableKeepAlives = default;
                 this.nextProtoOnce = default;
                 this.nextProtoErr = default;
                 this.mu = default;
@@ -67,7 +70,7 @@ namespace net
                 this.onShutdown = default;
             }
 
-            public Server(@string Addr = default, Handler Handler = default, ref ptr<tls.Config> TLSConfig = default, time.Duration ReadTimeout = default, time.Duration ReadHeaderTimeout = default, time.Duration WriteTimeout = default, time.Duration IdleTimeout = default, long MaxHeaderBytes = default, map<@string, Action<ref Server, ref tls.Conn, Handler>> TLSNextProto = default, Action<net.Conn, ConnState> ConnState = default, ref ptr<log.Logger> ErrorLog = default, int disableKeepAlives = default, int inShutdown = default, sync.Once nextProtoOnce = default, error nextProtoErr = default, sync.Mutex mu = default, channel<object> doneChan = default, slice<Action> onShutdown = default)
+            public Server(@string Addr = default, Handler Handler = default, ref ptr<tls.Config> TLSConfig = default, time.Duration ReadTimeout = default, time.Duration ReadHeaderTimeout = default, time.Duration WriteTimeout = default, time.Duration IdleTimeout = default, long MaxHeaderBytes = default, map<@string, Action<ptr<Server>, ptr<tls.Conn>, Handler>> TLSNextProto = default, Action<net.Conn, ConnState> ConnState = default, ref ptr<log.Logger> ErrorLog = default, Func<net.Listener, context.Context> BaseContext = default, Func<context.Context, net.Conn, context.Context> ConnContext = default, atomicBool inShutdown = default, int disableKeepAlives = default, sync.Once nextProtoOnce = default, error nextProtoErr = default, sync.Mutex mu = default, channel<object> doneChan = default, slice<Action> onShutdown = default)
             {
                 this.Addr = Addr;
                 this.Handler = Handler;
@@ -80,8 +83,10 @@ namespace net
                 this.TLSNextProto = TLSNextProto;
                 this.ConnState = ConnState;
                 this.ErrorLog = ErrorLog;
-                this.disableKeepAlives = disableKeepAlives;
+                this.BaseContext = BaseContext;
+                this.ConnContext = ConnContext;
                 this.inShutdown = inShutdown;
+                this.disableKeepAlives = disableKeepAlives;
                 this.nextProtoOnce = nextProtoOnce;
                 this.nextProtoErr = nextProtoErr;
                 this.mu = mu;
@@ -109,7 +114,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Server Server_cast(dynamic value)
         {
-            return new Server(value.Addr, value.Handler, ref value.TLSConfig, value.ReadTimeout, value.ReadHeaderTimeout, value.WriteTimeout, value.IdleTimeout, value.MaxHeaderBytes, value.TLSNextProto, value.ConnState, ref value.ErrorLog, value.disableKeepAlives, value.inShutdown, value.nextProtoOnce, value.nextProtoErr, value.mu, value.doneChan, value.onShutdown);
+            return new Server(value.Addr, value.Handler, ref value.TLSConfig, value.ReadTimeout, value.ReadHeaderTimeout, value.WriteTimeout, value.IdleTimeout, value.MaxHeaderBytes, value.TLSNextProto, value.ConnState, ref value.ErrorLog, value.BaseContext, value.ConnContext, value.inShutdown, value.disableKeepAlives, value.nextProtoOnce, value.nextProtoErr, value.mu, value.doneChan, value.onShutdown);
         }
     }
 }}

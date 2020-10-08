@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:11 UTC
+//     Generated on 2020 October 08 04:43:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using filepath = go.path.filepath_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using graph = go.github.com.google.pprof.@internal.graph_package;
+using measurement = go.github.com.google.pprof.@internal.measurement_package;
 using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using go;
 
@@ -42,13 +43,15 @@ namespace @internal
             public sourceReader(NilType _)
             {
                 this.searchPath = default;
+                this.trimPath = default;
                 this.files = default;
                 this.errors = default;
             }
 
-            public sourceReader(@string searchPath = default, map<@string, slice<@string>> files = default, map<@string, error> errors = default)
+            public sourceReader(@string searchPath = default, @string trimPath = default, map<@string, slice<@string>> files = default, map<@string, error> errors = default)
             {
                 this.searchPath = searchPath;
+                this.trimPath = trimPath;
                 this.files = files;
                 this.errors = errors;
             }
@@ -73,7 +76,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static sourceReader sourceReader_cast(dynamic value)
         {
-            return new sourceReader(value.searchPath, value.files, value.errors);
+            return new sourceReader(value.searchPath, value.trimPath, value.files, value.errors);
         }
     }
 }}}}}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:30:37 UTC
+//     Generated on 2020 October 08 03:36:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,12 +27,12 @@ namespace crypto
             // Constructors
             public p256Curve(NilType _)
             {
-                this.CurveParams = default;
+                this.ptr<CurveParams> = default;
             }
 
-            public p256Curve(ref CurveParams CurveParams = default)
+            public p256Curve(ref ptr<CurveParams> ptr<CurveParams> = default)
             {
-                this.CurveParams = CurveParams;
+                this.ptr<CurveParams> = ptr<CurveParams>;
             }
 
             // Enable comparisons between nil and p256Curve struct
@@ -55,7 +55,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static p256Curve p256Curve_cast(dynamic value)
         {
-            return new p256Curve(ref value.CurveParams);
+            return new p256Curve(ref value.ptr<CurveParams>);
         }
     }
 }}

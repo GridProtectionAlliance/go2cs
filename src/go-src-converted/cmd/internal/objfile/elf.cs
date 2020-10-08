@@ -4,7 +4,7 @@
 
 // Parsing of ELF executables (Linux, FreeBSD, and so on).
 
-// package objfile -- go2cs converted at 2020 August 29 08:45:52 UTC
+// package objfile -- go2cs converted at 2020 October 08 03:49:41 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\elf.go
 using dwarf = go.debug.dwarf_package;
@@ -27,21 +27,31 @@ namespace @internal
 
         private static (rawFile, error) openElf(io.ReaderAt r)
         {
+            rawFile _p0 = default;
+            error _p0 = default!;
+
             var (f, err) = elf.NewFile(r);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (ref new elfFile(f), null);
+
+            return (addr(new elfFile(f)), error.As(null!)!);
+
         }
 
-        private static (slice<Sym>, error) symbols(this ref elfFile f)
+        private static (slice<Sym>, error) symbols(this ptr<elfFile> _addr_f)
         {
+            slice<Sym> _p0 = default;
+            error _p0 = default!;
+            ref elfFile f = ref _addr_f.val;
+
             var (elfSyms, err) = f.elf.Symbols();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             slice<Sym> syms = default;
             foreach (var (_, s) in elfSyms)
             {
@@ -57,6 +67,7 @@ namespace @internal
                     {
                         break;
                     }
+
                     var sect = f.elf.Sections[i];
 
                     if (sect.Flags & (elf.SHF_WRITE | elf.SHF_ALLOC | elf.SHF_EXECINSTR) == elf.SHF_ALLOC | elf.SHF_EXECINSTR) 
@@ -69,13 +80,22 @@ namespace @internal
                 {
                     sym.Code += 'a' - 'A';
                 }
+
                 syms = append(syms, sym);
+
             }
-            return (syms, null);
+            return (syms, error.As(null!)!);
+
         }
 
-        private static (ulong, slice<byte>, slice<byte>, error) pcln(this ref elfFile f)
+        private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<elfFile> _addr_f)
         {
+            ulong textStart = default;
+            slice<byte> symtab = default;
+            slice<byte> pclntab = default;
+            error err = default!;
+            ref elfFile f = ref _addr_f.val;
+
             {
                 var sect__prev1 = sect;
 
@@ -89,6 +109,7 @@ namespace @internal
                 sect = sect__prev1;
 
             }
+
             {
                 var sect__prev1 = sect;
 
@@ -100,13 +121,15 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return (0L, null, null, err);
+                        return (0L, null, null, error.As(err)!);
                     }
+
                 }
 
                 sect = sect__prev1;
 
             }
+
             {
                 var sect__prev1 = sect;
 
@@ -118,30 +141,42 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return (0L, null, null, err);
+                        return (0L, null, null, error.As(err)!);
                     }
+
                 }
 
                 sect = sect__prev1;
 
             }
-            return (textStart, symtab, pclntab, null);
+
+            return (textStart, symtab, pclntab, error.As(null!)!);
+
         }
 
-        private static (ulong, slice<byte>, error) text(this ref elfFile f)
+        private static (ulong, slice<byte>, error) text(this ptr<elfFile> _addr_f)
         {
+            ulong textStart = default;
+            slice<byte> text = default;
+            error err = default!;
+            ref elfFile f = ref _addr_f.val;
+
             var sect = f.elf.Section(".text");
             if (sect == null)
             {
-                return (0L, null, fmt.Errorf("text section not found"));
+                return (0L, null, error.As(fmt.Errorf("text section not found"))!);
             }
+
             textStart = sect.Addr;
             text, err = sect.Data();
-            return;
+            return ;
+
         }
 
-        private static @string goarch(this ref elfFile f)
+        private static @string goarch(this ptr<elfFile> _addr_f)
         {
+            ref elfFile f = ref _addr_f.val;
+
 
             if (f.elf.Machine == elf.EM_386) 
                 return "386";
@@ -156,27 +191,39 @@ namespace @internal
                 {
                     return "ppc64le";
                 }
+
                 return "ppc64";
             else if (f.elf.Machine == elf.EM_S390) 
                 return "s390x";
                         return "";
+
         }
 
-        private static (ulong, error) loadAddress(this ref elfFile f)
+        private static (ulong, error) loadAddress(this ptr<elfFile> _addr_f)
         {
+            ulong _p0 = default;
+            error _p0 = default!;
+            ref elfFile f = ref _addr_f.val;
+
             foreach (var (_, p) in f.elf.Progs)
             {
-                if (p.Type == elf.PT_LOAD)
+                if (p.Type == elf.PT_LOAD && p.Flags & elf.PF_X != 0L)
                 {
-                    return (p.Vaddr, null);
+                    return (p.Vaddr, error.As(null!)!);
                 }
+
             }
-            return (0L, fmt.Errorf("unknown load address"));
+            return (0L, error.As(fmt.Errorf("unknown load address"))!);
+
         }
 
-        private static (ref dwarf.Data, error) dwarf(this ref elfFile f)
+        private static (ptr<dwarf.Data>, error) dwarf(this ptr<elfFile> _addr_f)
         {
-            return f.elf.DWARF();
+            ptr<dwarf.Data> _p0 = default!;
+            error _p0 = default!;
+            ref elfFile f = ref _addr_f.val;
+
+            return _addr_f.elf.DWARF()!;
         }
     }
 }}}

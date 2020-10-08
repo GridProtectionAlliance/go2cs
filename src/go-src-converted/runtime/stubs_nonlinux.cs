@@ -4,7 +4,7 @@
 
 // +build !linux
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:02 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:23:48 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\stubs_nonlinux.go
 

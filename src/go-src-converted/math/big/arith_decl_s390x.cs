@@ -4,10 +4,10 @@
 
 // +build !math_big_pure_go
 
-// package big -- go2cs converted at 2020 August 29 08:28:58 UTC
+// package big -- go2cs converted at 2020 October 08 03:25:24 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\arith_decl_s390x.go
-
+using cpu = go.@internal.cpu_package;
 using static go.builtin;
 
 namespace go {
@@ -27,21 +27,7 @@ namespace math
 ;
         private static Word subVV_novec(slice<Word> z, slice<Word> x, slice<Word> y)
 ;
-        private static Word addVW_check(slice<Word> z, slice<Word> x, Word y)
-;
-        private static Word addVW_vec(slice<Word> z, slice<Word> x, Word y)
-;
-        private static Word addVW_novec(slice<Word> z, slice<Word> x, Word y)
-;
-        private static Word subVW_check(slice<Word> z, slice<Word> x, Word y)
-;
-        private static Word subVW_vec(slice<Word> z, slice<Word> x, Word y)
-;
-        private static Word subVW_novec(slice<Word> z, slice<Word> x, Word y)
-;
-        private static bool hasVectorFacility()
-;
 
-        private static var hasVX = hasVectorFacility();
+        private static var hasVX = cpu.S390X.HasVX;
     }
 }}

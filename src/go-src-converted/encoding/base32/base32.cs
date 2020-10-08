@@ -3,15 +3,12 @@
 // license that can be found in the LICENSE file.
 
 // Package base32 implements base32 encoding as specified by RFC 4648.
-// package base32 -- go2cs converted at 2020 August 29 08:35:16 UTC
+// package base32 -- go2cs converted at 2020 October 08 03:42:28 UTC
 // import "encoding/base32" ==> using base32 = go.encoding.base32_package
 // Original source: C:\Go\src\encoding\base32\base32.go
-using bytes = go.bytes_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
-using strings = go.strings_package;
 using static go.builtin;
-using System;
 
 namespace go {
 namespace encoding
@@ -28,28 +25,33 @@ namespace encoding
         // The alternate "base32hex" encoding is used in DNSSEC.
         public partial struct Encoding
         {
-            public @string encode;
+            public array<byte> encode;
             public array<byte> decodeMap;
             public int padChar;
         }
 
-        public static readonly int StdPadding = '='; // Standard padding character
-        public static readonly int NoPadding = -1L; // No padding
+        public static readonly int StdPadding = (int)'='; // Standard padding character
+        public static readonly int NoPadding = (int)-1L; // No padding
 
-        private static readonly @string encodeStd = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+        private static readonly @string encodeStd = (@string)"ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
-        private static readonly @string encodeHex = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
-
-        // NewEncoding returns a new Encoding defined by the given alphabet,
-        // which must be a 32-byte string.
-
+        private static readonly @string encodeHex = (@string)"0123456789ABCDEFGHIJKLMNOPQRSTUV";
 
         // NewEncoding returns a new Encoding defined by the given alphabet,
         // which must be a 32-byte string.
-        public static ref Encoding NewEncoding(@string encoder)
+
+
+        // NewEncoding returns a new Encoding defined by the given alphabet,
+        // which must be a 32-byte string.
+        public static ptr<Encoding> NewEncoding(@string encoder) => func((_, panic, __) =>
         {
+            if (len(encoder) != 32L)
+            {
+                panic("encoding alphabet is not 32-bytes long");
+            }
+
             ptr<Encoding> e = @new<Encoding>();
-            e.encode = encoder;
+            copy(e.encode[..], encoder);
             e.padChar = StdPadding;
 
             {
@@ -74,8 +76,9 @@ namespace encoding
 
                 i = i__prev1;
             }
-            return e;
-        }
+            return _addr_e!;
+
+        });
 
         // StdEncoding is the standard base32 encoding, as defined in
         // RFC 4648.
@@ -85,37 +88,31 @@ namespace encoding
         // It is typically used in DNS.
         public static var HexEncoding = NewEncoding(encodeHex);
 
-        private static Func<int, int> removeNewlinesMapper = r =>
-        {
-            if (r == '\r' || r == '\n')
-            {
-                return -1L;
-            }
-            return r;
-        };
-
         // WithPadding creates a new encoding identical to enc except
         // with a specified padding character, or NoPadding to disable padding.
         // The padding character must not be '\r' or '\n', must not
         // be contained in the encoding's alphabet and must be a rune equal or
         // below '\xff'.
-        public static ref Encoding WithPadding(this Encoding enc, int padding) => func((_, panic, __) =>
+        public static ptr<Encoding> WithPadding(this Encoding enc, int padding) => func((_, panic, __) =>
         {
             if (padding == '\r' || padding == '\n' || padding > 0xffUL)
             {
                 panic("invalid padding");
             }
+
             for (long i = 0L; i < len(enc.encode); i++)
             {
                 if (rune(enc.encode[i]) == padding)
                 {
                     panic("padding contained in alphabet");
                 }
+
             }
 
 
             enc.padChar = padding;
-            return ref enc;
+            return _addr__addr_enc!;
+
         });
 
         /*
@@ -128,12 +125,10 @@ namespace encoding
         // The encoding pads the output to a multiple of 8 bytes,
         // so Encode is not appropriate for use on individual blocks
         // of a large data stream. Use NewEncoder() instead.
-        private static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src)
+        private static void Encode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<byte> src)
         {
-            if (len(src) == 0L)
-            {
-                return;
-            }
+            ref Encoding enc = ref _addr_enc.val;
+
             while (len(src) > 0L)
             {
                 array<byte> b = new array<byte>(8L); 
@@ -178,21 +173,23 @@ namespace encoding
                 if (size >= 8L)
                 { 
                     // Common case, unrolled for extra performance
-                    dst[0L] = enc.encode[b[0L]];
-                    dst[1L] = enc.encode[b[1L]];
-                    dst[2L] = enc.encode[b[2L]];
-                    dst[3L] = enc.encode[b[3L]];
-                    dst[4L] = enc.encode[b[4L]];
-                    dst[5L] = enc.encode[b[5L]];
-                    dst[6L] = enc.encode[b[6L]];
-                    dst[7L] = enc.encode[b[7L]];
+                    dst[0L] = enc.encode[b[0L] & 31L];
+                    dst[1L] = enc.encode[b[1L] & 31L];
+                    dst[2L] = enc.encode[b[2L] & 31L];
+                    dst[3L] = enc.encode[b[3L] & 31L];
+                    dst[4L] = enc.encode[b[4L] & 31L];
+                    dst[5L] = enc.encode[b[5L] & 31L];
+                    dst[6L] = enc.encode[b[6L] & 31L];
+                    dst[7L] = enc.encode[b[7L] & 31L];
+
                 }
                 else
                 {
                     for (long i = 0L; i < size; i++)
                     {
-                        dst[i] = enc.encode[b[i]];
+                        dst[i] = enc.encode[b[i] & 31L];
                     }
+
 
                 } 
 
@@ -203,6 +200,7 @@ namespace encoding
                     {
                         break;
                     }
+
                     dst[7L] = byte(enc.padChar);
                     if (len(src) < 4L)
                     {
@@ -216,19 +214,28 @@ namespace encoding
                                 dst[3L] = byte(enc.padChar);
                                 dst[2L] = byte(enc.padChar);
                             }
+
                         }
+
                     }
+
                     break;
+
                 }
+
                 src = src[5L..];
                 dst = dst[8L..];
+
             }
+
 
         }
 
         // EncodeToString returns the base32 encoding of src.
-        private static @string EncodeToString(this ref Encoding enc, slice<byte> src)
+        private static @string EncodeToString(this ptr<Encoding> _addr_enc, slice<byte> src)
         {
+            ref Encoding enc = ref _addr_enc.val;
+
             var buf = make_slice<byte>(enc.EncodedLen(len(src)));
             enc.Encode(buf, src);
             return string(buf);
@@ -244,11 +251,15 @@ namespace encoding
             public array<byte> @out; // output buffer
         }
 
-        private static (long, error) Write(this ref encoder e, slice<byte> p)
+        private static (long, error) Write(this ptr<encoder> _addr_e, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref encoder e = ref _addr_e.val;
+
             if (e.err != null)
             {
-                return (0L, e.err);
+                return (0L, error.As(e.err)!);
             } 
 
             // Leading fringe.
@@ -265,16 +276,19 @@ namespace encoding
                 p = p[i..];
                 if (e.nbuf < 5L)
                 {
-                    return;
+                    return ;
                 }
+
                 e.enc.Encode(e.@out[0L..], e.buf[0L..]);
                 _, e.err = e.w.Write(e.@out[0L..8L]);
 
                 if (e.err != null)
                 {
-                    return (n, e.err);
+                    return (n, error.As(e.err)!);
                 }
+
                 e.nbuf = 0L;
+
             } 
 
             // Large interior chunks.
@@ -286,15 +300,18 @@ namespace encoding
                     nn = len(p);
                     nn -= nn % 5L;
                 }
+
                 e.enc.Encode(e.@out[0L..], p[0L..nn]);
                 _, e.err = e.w.Write(e.@out[0L..nn / 5L * 8L]);
 
                 if (e.err != null)
                 {
-                    return (n, e.err);
+                    return (n, error.As(e.err)!);
                 }
+
                 n += nn;
                 p = p[nn..];
+
             } 
 
             // Trailing fringe.
@@ -314,21 +331,27 @@ namespace encoding
             }
             e.nbuf = len(p);
             n += len(p);
-            return;
+            return ;
+
         }
 
         // Close flushes any pending output from the encoder.
         // It is an error to call Write after calling Close.
-        private static error Close(this ref encoder e)
-        { 
+        private static error Close(this ptr<encoder> _addr_e)
+        {
+            ref encoder e = ref _addr_e.val;
+ 
             // If there's anything left in the buffer, flush it out
             if (e.err == null && e.nbuf > 0L)
             {
                 e.enc.Encode(e.@out[0L..], e.buf[0L..e.nbuf]);
+                var encodedLen = e.enc.EncodedLen(e.nbuf);
                 e.nbuf = 0L;
-                _, e.err = e.w.Write(e.@out[0L..8L]);
+                _, e.err = e.w.Write(e.@out[0L..encodedLen]);
             }
-            return error.As(e.err);
+
+            return error.As(e.err)!;
+
         }
 
         // NewEncoder returns a new base32 stream encoder. Data written to
@@ -336,20 +359,26 @@ namespace encoding
         // Base32 encodings operate in 5-byte blocks; when finished
         // writing, the caller must Close the returned encoder to flush any
         // partially written blocks.
-        public static io.WriteCloser NewEncoder(ref Encoding enc, io.Writer w)
+        public static io.WriteCloser NewEncoder(ptr<Encoding> _addr_enc, io.Writer w)
         {
-            return ref new encoder(enc:enc,w:w);
+            ref Encoding enc = ref _addr_enc.val;
+
+            return addr(new encoder(enc:enc,w:w));
         }
 
         // EncodedLen returns the length in bytes of the base32 encoding
         // of an input buffer of length n.
-        private static long EncodedLen(this ref Encoding enc, long n)
+        private static long EncodedLen(this ptr<Encoding> _addr_enc, long n)
         {
+            ref Encoding enc = ref _addr_enc.val;
+
             if (enc.padChar == NoPadding)
             {
                 return (n * 8L + 4L) / 5L;
             }
+
             return (n + 4L) / 5L * 8L;
+
         }
 
         /*
@@ -369,9 +398,19 @@ namespace encoding
         // indicates if end-of-message padding was encountered and thus any
         // additional data is an error. This method assumes that src has been
         // stripped of all supported whitespace ('\r' and '\n').
-        private static (long, bool, error) decode(this ref Encoding enc, slice<byte> dst, slice<byte> src)
+        private static (long, bool, error) decode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<byte> src)
         {
+            long n = default;
+            bool end = default;
+            error err = default!;
+            ref Encoding enc = ref _addr_enc.val;
+ 
+            // Lift the nil check outside of the loop.
+            _ = enc.decodeMap;
+
+            long dsti = 0L;
             var olen = len(src);
+
             while (len(src) > 0L && !end)
             { 
                 // Decode quantum using the base32 alphabet
@@ -383,19 +422,21 @@ namespace encoding
 
                     while (j < 8L)
                     {
-                        // We have reached the end and are missing padding
-                        if (len(src) == 0L && enc.padChar != NoPadding)
+                        if (len(src) == 0L)
                         {
-                            return (n, false, CorruptInputError(olen - len(src) - j));
-                        } 
+                            if (enc.padChar != NoPadding)
+                            { 
+                                // We have reached the end and are missing padding
+                                return (n, false, error.As(CorruptInputError(olen - len(src) - j))!);
 
-                        // We have reached the end and are not expecing any padding
-                        if (len(src) == 0L && enc.padChar == NoPadding)
-                        {
+                            } 
+                            // We have reached the end and are not expecting any padding
                             dlen = j;
                             end = true;
                             break;
+
                         }
+
                         var @in = src[0L];
                         src = src[1L..];
                         if (in == byte(enc.padChar) && j >= 2L && len(src) < 8L)
@@ -404,15 +445,19 @@ namespace encoding
                             if (len(src) + j < 8L - 1L)
                             { 
                                 // not enough padding
-                                return (n, false, CorruptInputError(olen));
+                                return (n, false, error.As(CorruptInputError(olen))!);
+
                             }
+
                             for (long k = 0L; k < 8L - 1L - j; k++)
                             {
                                 if (len(src) > k && src[k] != byte(enc.padChar))
                                 { 
                                     // incorrect padding
-                                    return (n, false, CorruptInputError(olen - len(src) + k - 1L));
+                                    return (n, false, error.As(CorruptInputError(olen - len(src) + k - 1L))!);
+
                                 }
+
                             }
 
                             dlen = j;
@@ -424,16 +469,21 @@ namespace encoding
                             // src bytes do not yield enough information to decode a dst byte.
                             if (dlen == 1L || dlen == 3L || dlen == 6L)
                             {
-                                return (n, false, CorruptInputError(olen - len(src) - 1L));
+                                return (n, false, error.As(CorruptInputError(olen - len(src) - 1L))!);
                             }
+
                             break;
+
                         }
+
                         dbuf[j] = enc.decodeMap[in];
                         if (dbuf[j] == 0xFFUL)
                         {
-                            return (n, false, CorruptInputError(olen - len(src) - 1L));
+                            return (n, false, error.As(CorruptInputError(olen - len(src) - 1L))!);
                         }
+
                         j++;
+
                     } 
 
                     // Pack 8x 5-bit source blocks into 5 byte destination
@@ -446,57 +496,42 @@ namespace encoding
 
                 if (dlen == 8L)
                 {
-                    dst[4L] = dbuf[6L] << (int)(5L) | dbuf[7L];
+                    dst[dsti + 4L] = dbuf[6L] << (int)(5L) | dbuf[7L];
+                    n++;
                     fallthrough = true;
                 }
                 if (fallthrough || dlen == 7L)
                 {
-                    dst[3L] = dbuf[4L] << (int)(7L) | dbuf[5L] << (int)(2L) | dbuf[6L] >> (int)(3L);
+                    dst[dsti + 3L] = dbuf[4L] << (int)(7L) | dbuf[5L] << (int)(2L) | dbuf[6L] >> (int)(3L);
+                    n++;
                     fallthrough = true;
                 }
                 if (fallthrough || dlen == 5L)
                 {
-                    dst[2L] = dbuf[3L] << (int)(4L) | dbuf[4L] >> (int)(1L);
+                    dst[dsti + 2L] = dbuf[3L] << (int)(4L) | dbuf[4L] >> (int)(1L);
+                    n++;
                     fallthrough = true;
                 }
                 if (fallthrough || dlen == 4L)
                 {
-                    dst[1L] = dbuf[1L] << (int)(6L) | dbuf[2L] << (int)(1L) | dbuf[3L] >> (int)(4L);
+                    dst[dsti + 1L] = dbuf[1L] << (int)(6L) | dbuf[2L] << (int)(1L) | dbuf[3L] >> (int)(4L);
+                    n++;
                     fallthrough = true;
                 }
                 if (fallthrough || dlen == 2L)
                 {
-                    dst[0L] = dbuf[0L] << (int)(3L) | dbuf[1L] >> (int)(2L);
+                    dst[dsti + 0L] = dbuf[0L] << (int)(3L) | dbuf[1L] >> (int)(2L);
+                    n++;
                     goto __switch_break1;
                 }
 
                 __switch_break1:;
+                dsti += 5L;
 
-                if (!end)
-                {
-                    dst = dst[5L..];
-                }
-                switch (dlen)
-                {
-                    case 2L: 
-                        n += 1L;
-                        break;
-                    case 4L: 
-                        n += 2L;
-                        break;
-                    case 5L: 
-                        n += 3L;
-                        break;
-                    case 7L: 
-                        n += 4L;
-                        break;
-                    case 8L: 
-                        n += 5L;
-                        break;
-                }
             }
 
-            return (n, end, null);
+            return (n, end, error.As(null!)!);
+
         }
 
         // Decode decodes src using the encoding enc. It writes at most
@@ -504,20 +539,29 @@ namespace encoding
         // written. If src contains invalid base32 data, it will return the
         // number of bytes successfully written and CorruptInputError.
         // New line characters (\r and \n) are ignored.
-        private static (long, error) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src)
+        private static (long, error) Decode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<byte> src)
         {
-            src = bytes.Map(removeNewlinesMapper, src);
-            n, _, err = enc.decode(dst, src);
-            return;
+            long n = default;
+            error err = default!;
+            ref Encoding enc = ref _addr_enc.val;
+
+            var buf = make_slice<byte>(len(src));
+            var l = stripNewlines(buf, src);
+            n, _, err = enc.decode(dst, buf[..l]);
+            return ;
         }
 
         // DecodeString returns the bytes represented by the base32 string s.
-        private static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s)
+        private static (slice<byte>, error) DecodeString(this ptr<Encoding> _addr_enc, @string s)
         {
-            s = strings.Map(removeNewlinesMapper, s);
-            var dbuf = make_slice<byte>(enc.DecodedLen(len(s)));
-            var (n, _, err) = enc.decode(dbuf, (slice<byte>)s);
-            return (dbuf[..n], err);
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Encoding enc = ref _addr_enc.val;
+
+            slice<byte> buf = (slice<byte>)s;
+            var l = stripNewlines(buf, buf);
+            var (n, _, err) = enc.decode(buf, buf[..l]);
+            return (buf[..n], error.As(err)!);
         }
 
         private partial struct decoder
@@ -532,24 +576,42 @@ namespace encoding
             public array<byte> outbuf;
         }
 
-        private static (long, error) readEncodedData(io.Reader r, slice<byte> buf, long min)
+        private static (long, error) readEncodedData(io.Reader r, slice<byte> buf, long min, bool expectsPadding)
         {
+            long n = default;
+            error err = default!;
+
             while (n < min && err == null)
             {
                 long nn = default;
                 nn, err = r.Read(buf[n..]);
                 n += nn;
-            }
-
+            } 
+            // data was read, less than min bytes could be read
+ 
+            // data was read, less than min bytes could be read
             if (n < min && n > 0L && err == io.EOF)
             {
                 err = io.ErrUnexpectedEOF;
+            } 
+            // no data was read, the buffer already contains some data
+            // when padding is disabled this is not an error, as the message can be of
+            // any length
+            if (expectsPadding && min < 8L && n == 0L && err == io.EOF)
+            {
+                err = io.ErrUnexpectedEOF;
             }
-            return;
+
+            return ;
+
         }
 
-        private static (long, error) Read(this ref decoder d, slice<byte> p)
-        { 
+        private static (long, error) Read(this ptr<decoder> _addr_d, slice<byte> p)
+        {
+            long n = default;
+            error err = default!;
+            ref decoder d = ref _addr_d.val;
+ 
             // Use leftover decoded output from last read.
             if (len(d.@out) > 0L)
             {
@@ -557,13 +619,16 @@ namespace encoding
                 d.@out = d.@out[n..];
                 if (len(d.@out) == 0L)
                 {
-                    return (n, d.err);
+                    return (n, error.As(d.err)!);
                 }
-                return (n, null);
+
+                return (n, error.As(null!)!);
+
             }
+
             if (d.err != null)
             {
-                return (0L, d.err);
+                return (0L, error.As(d.err)!);
             } 
 
             // Read a chunk.
@@ -572,20 +637,46 @@ namespace encoding
             {
                 nn = 8L;
             }
+
             if (nn > len(d.buf))
             {
                 nn = len(d.buf);
-            }
-            nn, d.err = readEncodedData(d.r, d.buf[d.nbuf..nn], 8L - d.nbuf);
-            d.nbuf += nn;
-            if (d.nbuf < 8L)
+            } 
+
+            // Minimum amount of bytes that needs to be read each cycle
+            long min = default;
+            bool expectsPadding = default;
+            if (d.enc.padChar == NoPadding)
             {
-                return (0L, d.err);
+                min = 1L;
+                expectsPadding = false;
+            }
+            else
+            {
+                min = 8L - d.nbuf;
+                expectsPadding = true;
+            }
+
+            nn, d.err = readEncodedData(d.r, d.buf[d.nbuf..nn], min, expectsPadding);
+            d.nbuf += nn;
+            if (d.nbuf < min)
+            {
+                return (0L, error.As(d.err)!);
             } 
 
             // Decode chunk into p, or d.out and then p if p is too small.
-            var nr = d.nbuf / 8L * 8L;
-            var nw = d.nbuf / 8L * 5L;
+            long nr = default;
+            if (d.enc.padChar == NoPadding)
+            {
+                nr = d.nbuf;
+            }
+            else
+            {
+                nr = d.nbuf / 8L * 8L;
+            }
+
+            var nw = d.enc.DecodedLen(d.nbuf);
+
             if (nw > len(p))
             {
                 nw, d.end, err = d.enc.decode(d.outbuf[0L..], d.buf[0L..nr]);
@@ -597,6 +688,7 @@ namespace encoding
             {
                 n, d.end, err = d.enc.decode(p, d.buf[0L..nr]);
             }
+
             d.nbuf -= nr;
             for (long i = 0L; i < d.nbuf; i++)
             {
@@ -608,15 +700,19 @@ namespace encoding
             {
                 d.err = err;
             }
+
             if (len(d.@out) > 0L)
             { 
                 // We cannot return all the decoded bytes to the caller in this
                 // invocation of Read, so we return a nil error to ensure that Read
                 // will be called again.  The error stored in d.err, if any, will be
                 // returned with the last set of decoded bytes.
-                return (n, null);
+                return (n, error.As(null!)!);
+
             }
-            return (n, d.err);
+
+            return (n, error.As(d.err)!);
+
         }
 
         private partial struct newlineFilteringReader
@@ -624,49 +720,71 @@ namespace encoding
             public io.Reader wrapped;
         }
 
-        private static (long, error) Read(this ref newlineFilteringReader r, slice<byte> p)
+        // stripNewlines removes newline characters and returns the number
+        // of non-newline characters copied to dst.
+        private static long stripNewlines(slice<byte> dst, slice<byte> src)
         {
+            long offset = 0L;
+            foreach (var (_, b) in src)
+            {
+                if (b == '\r' || b == '\n')
+                {
+                    continue;
+                }
+
+                dst[offset] = b;
+                offset++;
+
+            }
+            return offset;
+
+        }
+
+        private static (long, error) Read(this ptr<newlineFilteringReader> _addr_r, slice<byte> p)
+        {
+            long _p0 = default;
+            error _p0 = default!;
+            ref newlineFilteringReader r = ref _addr_r.val;
+
             var (n, err) = r.wrapped.Read(p);
             while (n > 0L)
             {
-                long offset = 0L;
-                foreach (var (i, b) in p[0L..n])
-                {
-                    if (b != '\r' && b != '\n')
-                    {
-                        if (i != offset)
-                        {
-                            p[offset] = b;
-                        }
-                        offset++;
-                    }
-                }
+                var s = p[0L..n];
+                var offset = stripNewlines(s, s);
                 if (err != null || offset > 0L)
                 {
-                    return (offset, err);
+                    return (offset, error.As(err)!);
                 } 
                 // Previous buffer entirely whitespace, read again
                 n, err = r.wrapped.Read(p);
+
             }
 
-            return (n, err);
+            return (n, error.As(err)!);
+
         }
 
         // NewDecoder constructs a new base32 stream decoder.
-        public static io.Reader NewDecoder(ref Encoding enc, io.Reader r)
+        public static io.Reader NewDecoder(ptr<Encoding> _addr_enc, io.Reader r)
         {
-            return ref new decoder(enc:enc,r:&newlineFilteringReader{r});
+            ref Encoding enc = ref _addr_enc.val;
+
+            return addr(new decoder(enc:enc,r:&newlineFilteringReader{r}));
         }
 
         // DecodedLen returns the maximum length in bytes of the decoded data
         // corresponding to n bytes of base32-encoded data.
-        private static long DecodedLen(this ref Encoding enc, long n)
+        private static long DecodedLen(this ptr<Encoding> _addr_enc, long n)
         {
+            ref Encoding enc = ref _addr_enc.val;
+
             if (enc.padChar == NoPadding)
             {
                 return n * 5L / 8L;
             }
+
             return n / 8L * 5L;
+
         }
     }
 }}

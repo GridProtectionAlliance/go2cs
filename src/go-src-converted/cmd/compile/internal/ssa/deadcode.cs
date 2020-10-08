@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:37 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:11 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\deadcode.go
-
+using src = go.cmd.@internal.src_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace cmd {
@@ -16,19 +17,29 @@ namespace @internal
     public static partial class ssa_package
     {
         // findlive returns the reachable blocks and live values in f.
-        private static (slice<bool>, slice<bool>) findlive(ref Func f)
+        // The caller should call f.retDeadcodeLive(live) when it is done with it.
+        private static (slice<bool>, slice<bool>) findlive(ptr<Func> _addr_f)
         {
-            reachable = ReachableBlocks(f);
-            live = liveValues(f, reachable);
-            return;
+            slice<bool> reachable = default;
+            slice<bool> live = default;
+            ref Func f = ref _addr_f.val;
+
+            reachable = ReachableBlocks(_addr_f);
+            slice<ptr<Value>> order = default;
+            live, order = liveValues(_addr_f, reachable);
+            f.retDeadcodeLiveOrderStmts(order);
+            return ;
         }
 
         // ReachableBlocks returns the reachable blocks in f.
-        public static slice<bool> ReachableBlocks(ref Func f)
+        public static slice<bool> ReachableBlocks(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             var reachable = make_slice<bool>(f.NumBlocks());
             reachable[f.Entry.ID] = true;
-            ref Block p = new slice<ref Block>(new ref Block[] { f.Entry }); // stack-like worklist
+            var p = make_slice<ptr<Block>>(0L, 64L); // stack-like worklist
+            p = append(p, f.Entry);
             while (len(p) > 0L)
             { 
                 // Pop a reachable block
@@ -40,25 +51,64 @@ namespace @internal
                 {
                     s = s[..1L];
                 }
+
                 foreach (var (_, e) in s)
                 {
                     var c = e.b;
+                    if (int(c.ID) >= len(reachable))
+                    {
+                        f.Fatalf("block %s >= f.NumBlocks()=%d?", c, len(reachable));
+                    }
+
                     if (!reachable[c.ID])
                     {
                         reachable[c.ID] = true;
                         p = append(p, c); // push
                     }
+
                 }
+
             }
 
             return reachable;
+
         }
 
-        // liveValues returns the live values in f.
+        // liveValues returns the live values in f and a list of values that are eligible
+        // to be statements in reversed data flow order.
+        // The second result is used to help conserve statement boundaries for debugging.
         // reachable is a map from block ID to whether the block is reachable.
-        private static slice<bool> liveValues(ref Func f, slice<bool> reachable)
+        // The caller should call f.retDeadcodeLive(live) and f.retDeadcodeLiveOrderStmts(liveOrderStmts)
+        // when they are done with the return values.
+        private static (slice<bool>, slice<ptr<Value>>) liveValues(ptr<Func> _addr_f, slice<bool> reachable) => func((defer, _, __) =>
         {
-            var live = make_slice<bool>(f.NumValues()); 
+            slice<bool> live = default;
+            slice<ptr<Value>> liveOrderStmts = default;
+            ref Func f = ref _addr_f.val;
+
+            live = f.newDeadcodeLive();
+            if (cap(live) < f.NumValues())
+            {
+                live = make_slice<bool>(f.NumValues());
+            }
+            else
+            {
+                live = live[..f.NumValues()];
+                {
+                    var i__prev1 = i;
+
+                    foreach (var (__i) in live)
+                    {
+                        i = __i;
+                        live[i] = false;
+                    }
+
+                    i = i__prev1;
+                }
+            }
+
+            liveOrderStmts = f.newDeadcodeLiveOrderStmts();
+            liveOrderStmts = liveOrderStmts[..0L]; 
 
             // After regalloc, consider all values to be live.
             // See the comment at the top of regalloc.go and in deadcode for details.
@@ -76,63 +126,158 @@ namespace @internal
                     i = i__prev1;
                 }
 
-                return live;
+                return ;
+
             } 
 
-            // Find all live values
-            slice<ref Value> q = default; // stack-like worklist of unscanned values
+            // Record all the inline indexes we need
+            map<long, bool> liveInlIdx = default;
+            var pt = f.Config.ctxt.PosTable;
+            {
+                var b__prev1 = b;
+
+                foreach (var (_, __b) in f.Blocks)
+                {
+                    b = __b;
+                    {
+                        var v__prev2 = v;
+
+                        foreach (var (_, __v) in b.Values)
+                        {
+                            v = __v;
+                            var i = pt.Pos(v.Pos).Base().InliningIndex();
+                            if (i < 0L)
+                            {
+                                continue;
+                            }
+
+                            if (liveInlIdx == null)
+                            {
+                                liveInlIdx = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<long, bool>{};
+                            }
+
+                            liveInlIdx[i] = true;
+
+                        }
+
+                        v = v__prev2;
+                    }
+
+                    i = pt.Pos(b.Pos).Base().InliningIndex();
+                    if (i < 0L)
+                    {
+                        continue;
+                    }
+
+                    if (liveInlIdx == null)
+                    {
+                        liveInlIdx = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<long, bool>{};
+                    }
+
+                    liveInlIdx[i] = true;
+
+                } 
+
+                // Find all live values
+
+                b = b__prev1;
+            }
+
+            var q = f.Cache.deadcode.q[..0L];
+            defer(() =>
+            {
+                f.Cache.deadcode.q = q;
+            }()); 
 
             // Starting set: all control values of reachable blocks are live.
             // Calls are live (because callee can observe the memory state).
-            foreach (var (_, b) in f.Blocks)
             {
-                if (!reachable[b.ID])
-                {
-                    continue;
-                }
-                {
-                    var v__prev1 = v;
+                var b__prev1 = b;
 
-                    var v = b.Control;
-
-                    if (v != null && !live[v.ID])
+                foreach (var (_, __b) in f.Blocks)
+                {
+                    b = __b;
+                    if (!reachable[b.ID])
                     {
-                        live[v.ID] = true;
-                        q = append(q, v);
+                        continue;
                     }
 
-                    v = v__prev1;
-
-                }
-                {
-                    var v__prev2 = v;
-
-                    foreach (var (_, __v) in b.Values)
                     {
-                        v = __v;
-                        if ((opcodeTable[v.Op].call || opcodeTable[v.Op].hasSideEffects) && !live[v.ID])
+                        var v__prev2 = v;
+
+                        foreach (var (_, __v) in b.ControlValues())
                         {
-                            live[v.ID] = true;
-                            q = append(q, v);
+                            v = __v;
+                            if (!live[v.ID])
+                            {
+                                live[v.ID] = true;
+                                q = append(q, v);
+                                if (v.Pos.IsStmt() != src.PosNotStmt)
+                                {
+                                    liveOrderStmts = append(liveOrderStmts, v);
+                                }
+
+                            }
+
                         }
-                        if (v.Type.IsVoid() && !live[v.ID])
-                        { 
-                            // The only Void ops are nil checks.  We must keep these.
-                            live[v.ID] = true;
-                            q = append(q, v);
-                        }
+
+                        v = v__prev2;
                     }
 
-                    v = v__prev2;
-                }
+                    {
+                        var v__prev2 = v;
 
-            } 
+                        foreach (var (_, __v) in b.Values)
+                        {
+                            v = __v;
+                            if ((opcodeTable[v.Op].call || opcodeTable[v.Op].hasSideEffects) && !live[v.ID])
+                            {
+                                live[v.ID] = true;
+                                q = append(q, v);
+                                if (v.Pos.IsStmt() != src.PosNotStmt)
+                                {
+                                    liveOrderStmts = append(liveOrderStmts, v);
+                                }
 
-            // Compute transitive closure of live values.
+                            }
+
+                            if (v.Type.IsVoid() && !live[v.ID])
+                            { 
+                                // The only Void ops are nil checks and inline marks.  We must keep these.
+                                if (v.Op == OpInlMark && !liveInlIdx[int(v.AuxInt)])
+                                { 
+                                    // We don't need marks for bodies that
+                                    // have been completely optimized away.
+                                    // TODO: save marks only for bodies which
+                                    // have a faulting instruction or a call?
+                                    continue;
+
+                                }
+
+                                live[v.ID] = true;
+                                q = append(q, v);
+                                if (v.Pos.IsStmt() != src.PosNotStmt)
+                                {
+                                    liveOrderStmts = append(liveOrderStmts, v);
+                                }
+
+                            }
+
+                        }
+
+                        v = v__prev2;
+                    }
+                } 
+
+                // Compute transitive closure of live values.
+
+                b = b__prev1;
+            }
+
             while (len(q) > 0L)
             { 
                 // pop a reachable value
-                v = q[len(q) - 1L];
+                var v = q[len(q) - 1L];
                 q = q[..len(q) - 1L];
                 {
                     var i__prev2 = i;
@@ -145,25 +290,34 @@ namespace @internal
                         {
                             continue;
                         }
+
                         if (!live[x.ID])
                         {
                             live[x.ID] = true;
                             q = append(q, x); // push
+                            if (x.Pos.IsStmt() != src.PosNotStmt)
+                            {
+                                liveOrderStmts = append(liveOrderStmts, x);
+                            }
+
                         }
+
                     }
 
                     i = i__prev2;
                 }
-
             }
 
 
-            return live;
-        }
+            return ;
+
+        });
 
         // deadcode removes dead code from f.
-        private static void deadcode(ref Func _f) => func(_f, (ref Func f, Defer defer, Panic _, Recover __) =>
-        { 
+        private static void deadcode(ptr<Func> _addr_f) => func((defer, _, __) =>
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // deadcode after regalloc is forbidden for now. Regalloc
             // doesn't quite generate legal SSA which will lead to some
             // required moves being eliminated. See the comment at the
@@ -174,7 +328,7 @@ namespace @internal
             } 
 
             // Find reachable blocks.
-            var reachable = ReachableBlocks(f); 
+            var reachable = ReachableBlocks(_addr_f); 
 
             // Get rid of edges from dead to live code.
             {
@@ -187,6 +341,7 @@ namespace @internal
                     {
                         continue;
                     }
+
                     {
                         long i__prev2 = i;
 
@@ -203,11 +358,13 @@ namespace @internal
                             {
                                 i++;
                             }
+
                         }
 
 
                         i = i__prev2;
                     }
+
                 } 
 
                 // Get rid of dead edges from live code.
@@ -225,13 +382,16 @@ namespace @internal
                     {
                         continue;
                     }
+
                     if (b.Kind != BlockFirst)
                     {
                         continue;
                     }
+
                     b.removeEdge(1L);
                     b.Kind = BlockPlain;
                     b.Likely = BranchUnknown;
+
                 } 
 
                 // Splice out any copies introduced during dead block removal.
@@ -242,7 +402,9 @@ namespace @internal
             copyelim(f); 
 
             // Find live values.
-            var live = liveValues(f, reachable); 
+            var (live, order) = liveValues(_addr_f, reachable);
+            defer(f.retDeadcodeLive(live));
+            defer(f.retDeadcodeLiveOrderStmts(order)); 
 
             // Remove dead & duplicate entries from namedValues map.
             var s = f.newSparseSet(f.NumValues());
@@ -265,6 +427,7 @@ namespace @internal
                             j++;
                             s.add(v.ID);
                         }
+
                     }
 
                     v = v__prev2;
@@ -278,44 +441,50 @@ namespace @internal
                 {
                     f.Names[i] = name;
                     i++;
+                    for (var k = len(values) - 1L; k >= j; k--)
                     {
-                        var k__prev2 = k;
-
-                        for (var k = len(values) - 1L; k >= j; k--)
-                        {
-                            values[k] = null;
-                        }
-
-
-                        k = k__prev2;
+                        values[k] = null;
                     }
+
                     f.NamedValues[name] = values[..j];
-                }
-            }
-            {
-                var k__prev1 = k;
 
-                for (k = len(f.Names) - 1L; k >= i; k--)
+                }
+
+            }
+            var clearNames = f.Names[i..];
+            {
+                long j__prev1 = j;
+
+                foreach (var (__j) in clearNames)
                 {
-                    f.Names[k] = new LocalSlot();
+                    j = __j;
+                    clearNames[j] = new LocalSlot();
                 }
 
-
-                k = k__prev1;
+                j = j__prev1;
             }
-            f.Names = f.Names[..i]; 
 
-            // Unlink values.
+            f.Names = f.Names[..i];
+
+            var pendingLines = f.cachedLineStarts; // Holds statement boundaries that need to be moved to a new value/block
+            pendingLines.clear(); 
+
+            // Unlink values and conserve statement boundaries
             {
+                long i__prev1 = i;
                 var b__prev1 = b;
 
-                foreach (var (_, __b) in f.Blocks)
+                foreach (var (__i, __b) in f.Blocks)
                 {
+                    i = __i;
                     b = __b;
                     if (!reachable[b.ID])
-                    {
-                        b.SetControl(null);
+                    { 
+                        // TODO what if control is statement boundary? Too late here.
+                        b.ResetControls();
+
                     }
+
                     {
                         var v__prev2 = v;
 
@@ -325,20 +494,67 @@ namespace @internal
                             if (!live[v.ID])
                             {
                                 v.resetArgs();
+                                if (v.Pos.IsStmt() == src.PosIsStmt && reachable[b.ID])
+                                {
+                                    pendingLines.set(v.Pos, int32(i)); // TODO could be more than one pos for a line
+                                }
+
                             }
+
                         }
 
                         v = v__prev2;
                     }
-
                 } 
 
-                // Remove dead values from blocks' value list. Return dead
-                // values to the allocator.
+                // Find new homes for lost lines -- require earliest in data flow with same line that is also in same block
 
+                i = i__prev1;
                 b = b__prev1;
             }
 
+            {
+                long i__prev1 = i;
+
+                for (i = len(order) - 1L; i >= 0L; i--)
+                {
+                    var w = order[i];
+                    {
+                        long j__prev1 = j;
+
+                        j = pendingLines.get(w.Pos);
+
+                        if (j > -1L && f.Blocks[j] == w.Block)
+                        {
+                            w.Pos = w.Pos.WithIsStmt();
+                            pendingLines.remove(w.Pos);
+                        }
+
+                        j = j__prev1;
+
+                    }
+
+                } 
+
+                // Any boundary that failed to match a live value can move to a block end
+
+
+                i = i__prev1;
+            } 
+
+            // Any boundary that failed to match a live value can move to a block end
+            pendingLines.foreachEntry((j, l, bi) =>
+            {
+                var b = f.Blocks[bi];
+                if (b.Pos.Line() == l && b.Pos.FileIndex() == j)
+                {
+                    b.Pos = b.Pos.WithIsStmt();
+                }
+
+            }); 
+
+            // Remove dead values from blocks' value list. Return dead
+            // values to the allocator.
             {
                 var b__prev1 = b;
 
@@ -361,33 +577,55 @@ namespace @internal
                             {
                                 f.freeValue(v);
                             }
-                        } 
-                        // aid GC
+
+                        }
 
                         v = v__prev2;
                     }
 
-                    var tail = b.Values[i..];
-                    {
-                        long j__prev2 = j;
+                    b.truncateValues(i);
 
-                        foreach (var (__j) in tail)
-                        {
-                            j = __j;
-                            tail[j] = null;
-                        }
-
-                        j = j__prev2;
-                    }
-
-                    b.Values = b.Values[..i];
                 } 
 
-                // Remove unreachable blocks. Return dead blocks to allocator.
+                // Remove dead blocks from WBLoads list.
 
                 b = b__prev1;
             }
 
+            i = 0L;
+            {
+                var b__prev1 = b;
+
+                foreach (var (_, __b) in f.WBLoads)
+                {
+                    b = __b;
+                    if (reachable[b.ID])
+                    {
+                        f.WBLoads[i] = b;
+                        i++;
+                    }
+
+                }
+
+                b = b__prev1;
+            }
+
+            var clearWBLoads = f.WBLoads[i..];
+            {
+                long j__prev1 = j;
+
+                foreach (var (__j) in clearWBLoads)
+                {
+                    j = __j;
+                    clearWBLoads[j] = null;
+                }
+
+                j = j__prev1;
+            }
+
+            f.WBLoads = f.WBLoads[..i]; 
+
+            // Remove unreachable blocks. Return dead blocks to allocator.
             i = 0L;
             {
                 var b__prev1 = b;
@@ -406,15 +644,18 @@ namespace @internal
                         {
                             b.Fatalf("live values in unreachable block %v: %v", b, b.Values);
                         }
+
                         f.freeBlock(b);
+
                     }
+
                 } 
                 // zero remainder to help GC
 
                 b = b__prev1;
             }
 
-            tail = f.Blocks[i..];
+            var tail = f.Blocks[i..];
             {
                 long j__prev1 = j;
 
@@ -428,12 +669,15 @@ namespace @internal
             }
 
             f.Blocks = f.Blocks[..i];
+
         });
 
         // removeEdge removes the i'th outgoing edge from b (and
         // the corresponding incoming edge from b.Succs[i].b).
-        private static void removeEdge(this ref Block b, long i)
+        private static void removeEdge(this ptr<Block> _addr_b, long i)
         {
+            ref Block b = ref _addr_b.val;
+
             var e = b.Succs[i];
             var c = e.b;
             var j = e.i; 
@@ -452,6 +696,7 @@ namespace @internal
                 {
                     continue;
                 }
+
                 v.Args[j].Uses--;
                 v.Args[j] = v.Args[n];
                 v.Args[n] = null;
@@ -489,6 +734,7 @@ namespace @internal
                 // "dominates" as reflexive).  Cycles in the dominator
                 // graph can only happen in an unreachable cycle.
             }
+
         }
     }
 }}}}

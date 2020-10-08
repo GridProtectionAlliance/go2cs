@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:59 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:22 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\tan.go
 
@@ -68,8 +68,8 @@ namespace go
         //   moshier@na-net.ornl.gov
 
         // tan coefficients
-        private static array<double> _tanP = new array<double>(new double[] { -1.30936939181383777646E4, 1.15351664838587416140E6, -1.79565251976484877988E7 });
-        private static array<double> _tanQ = new array<double>(new double[] { 1.00000000000000000000E0, 1.36812963470692954678E4, -1.32089234440210967447E6, 2.50083801823357915839E7, -5.38695755929454629881E7 });
+        private static array<double> _tanP = new array<double>(new double[] { -1.30936939181383777646e4, 1.15351664838587416140e6, -1.79565251976484877988e7 });
+        private static array<double> _tanQ = new array<double>(new double[] { 1.00000000000000000000e0, 1.36812963470692954678e4, -1.32089234440210967447e6, 2.50083801823357915839e7, -5.38695755929454629881e7 });
 
         // Tan returns the tangent of the radian argument x.
         //
@@ -82,10 +82,9 @@ namespace go
 
         private static double tan(double x)
         {
-            const float PI4A = 7.85398125648498535156E-1F; // 0x3fe921fb40000000, Pi/4 split into three parts
-            const float PI4B = 3.77489470793079817668E-8F; // 0x3e64442d00000000,
-            const float PI4C = 2.69515142907905952645E-15F; // 0x3ce8469898cc5170,
-            const float M4PI = 1.273239544735162542821171882678754627704620361328125F; // 4/pi 
+            const float PI4A = (float)7.85398125648498535156e-1F; // 0x3fe921fb40000000, Pi/4 split into three parts
+            const float PI4B = (float)3.77489470793079817668e-8F; // 0x3e64442d00000000,
+            const float PI4C = (float)2.69515142907905952645e-15F; // 0x3ce8469898cc5170, 
             // special cases
 
             if (x == 0L || IsNaN(x)) 
@@ -99,16 +98,30 @@ namespace go
                 x = -x;
                 sign = true;
             }
-            var j = int64(x * M4PI); // integer part of x/(Pi/4), as integer for tests on the phase angle
-            var y = float64(j); // integer part of x/(Pi/4), as float
 
-            /* map zeros and singularities to origin */
-            if (j & 1L == 1L)
+            ulong j = default;
+            double y = default;            double z = default;
+
+            if (x >= reduceThreshold)
             {
-                j++;
-                y++;
+                j, z = trigReduce(x);
             }
-            var z = ((x - y * PI4A) - y * PI4B) - y * PI4C;
+            else
+            {
+                j = uint64(x * (4L / Pi)); // integer part of x/(Pi/4), as integer for tests on the phase angle
+                y = float64(j); // integer part of x/(Pi/4), as float
+
+                /* map zeros and singularities to origin */
+                if (j & 1L == 1L)
+                {
+                    j++;
+                    y++;
+                }
+
+                z = ((x - y * PI4A) - y * PI4B) - y * PI4C;
+
+            }
+
             var zz = z * z;
 
             if (zz > 1e-14F)
@@ -119,15 +132,19 @@ namespace go
             {
                 y = z;
             }
+
             if (j & 2L == 2L)
             {
                 y = -1L / y;
             }
+
             if (sign)
             {
                 y = -y;
             }
+
             return y;
+
         }
     }
 }

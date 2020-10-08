@@ -8,7 +8,7 @@
 // +build !plan9,!windows
 // +build threadprof
 
-// package main -- go2cs converted at 2020 August 29 08:25:02 UTC
+// package main -- go2cs converted at 2020 October 08 03:44:07 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\threadprof.go
 /*
 #include <stdint.h>
@@ -102,13 +102,14 @@ namespace go
             // This test intends to test that sending SIGPROF to foreign threads
             // before we make any cgo call will not abort the whole process, so
             // we cannot make any cgo call here. See https://golang.org/issue/9456.
-            atomic.StoreInt32((int32.Value)(@unsafe.Pointer(ref C.spinlock)), 1L);
-            while (atomic.LoadInt32((int32.Value)(@unsafe.Pointer(ref C.spinlock))) == 1L)
+            atomic.StoreInt32((int32.val)(@unsafe.Pointer(_addr_C.spinlock)), 1L);
+            while (atomic.LoadInt32((int32.val)(@unsafe.Pointer(_addr_C.spinlock))) == 1L)
             {
                 runtime.Gosched();
             }
 
             println("OK");
+
         }
 
         public static void CgoExternalThreadSignal()
@@ -120,15 +121,18 @@ namespace go
                 {
                     fmt.Println("pthread_create failed:", i); 
                     // Exit with 0 because parent expects us to crash.
-                    return;
+                    return ;
+
                 } 
 
                 // We should crash immediately, but give it plenty of
                 // time before failing (by exiting 0) in case we are
                 // running on a slow system.
                 time.Sleep(5L * time.Second);
-                return;
+                return ;
+
             }
+
             var (out, err) = exec.Command(os.Args[0L], "CgoExternalThreadSignal", "crash").CombinedOutput();
             if (err == null)
             {
@@ -136,7 +140,9 @@ namespace go
                 fmt.Printf("\n%s\n", out);
                 os.Exit(1L);
             }
+
             fmt.Println("OK");
+
         }
     }
 }

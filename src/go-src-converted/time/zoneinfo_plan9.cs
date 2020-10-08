@@ -4,7 +4,7 @@
 
 // Parse Plan 9 timezone(2) files.
 
-// package time -- go2cs converted at 2020 August 29 08:42:30 UTC
+// package time -- go2cs converted at 2020 October 08 03:45:54 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\zoneinfo_plan9.go
 using runtime = go.runtime_package;
@@ -40,6 +40,7 @@ namespace go
                     {
                         n++;
                     }
+
                 } 
 
                 // Now create them.
@@ -65,11 +66,13 @@ namespace go
                             na++;
                             fieldStart = -1L;
                         }
+
                     }
                     else if (fieldStart == -1L)
                     {
                         fieldStart = i;
                     }
+
                 }
 
                 rune = rune__prev1;
@@ -78,37 +81,48 @@ namespace go
             if (fieldStart >= 0L)
             { // Last field might end at EOF.
                 a[na] = s[fieldStart..];
+
             }
+
             return a;
+
         }
 
-        private static (ref Location, error) loadZoneDataPlan9(@string s)
+        private static (ptr<Location>, error) loadZoneDataPlan9(@string s)
         {
+            ptr<Location> l = default!;
+            error err = default!;
+
             var f = fields(s);
             if (len(f) < 4L)
             {
                 if (len(f) == 2L && f[0L] == "GMT")
                 {
-                    return (UTC, null);
+                    return (_addr_UTC!, error.As(null!)!);
                 }
-                return (null, badData);
+
+                return (_addr_null!, error.As(badData)!);
+
             }
+
             array<zone> zones = new array<zone>(2L); 
 
             // standard timezone offset
             var (o, err) = atoi(f[1L]);
             if (err != null)
             {
-                return (null, badData);
+                return (_addr_null!, error.As(badData)!);
             }
+
             zones[0L] = new zone(name:f[0],offset:o,isDST:false); 
 
             // alternate timezone offset
             o, err = atoi(f[3L]);
             if (err != null)
             {
-                return (null, badData);
+                return (_addr_null!, error.As(badData)!);
             }
+
             zones[1L] = new zone(name:f[2],offset:o,isDST:true); 
 
             // transition time pairs
@@ -124,13 +138,16 @@ namespace go
                     {
                         zi = 1L;
                     }
+
                     var (t, err) = atoi(f[i]);
                     if (err != null)
                     {
-                        return (null, badData);
+                        return (_addr_null!, error.As(badData)!);
                     }
+
                     t -= zones[0L].offset;
                     tx = append(tx, new zoneTrans(when:int64(t),index:uint8(zi)));
+
                 } 
 
                 // Committed to succeed.
@@ -140,7 +157,7 @@ namespace go
             } 
 
             // Committed to succeed.
-            l = ref new Location(zone:zones[:],tx:tx); 
+            l = addr(new Location(zone:zones[:],tx:tx)); 
 
             // Fill in the cache with information about right now,
             // since that will be the most common lookup.
@@ -159,24 +176,33 @@ namespace go
                         {
                             l.cacheEnd = tx[i + 1L].when;
                         }
-                        l.cacheZone = ref l.zone[tx[i].index];
+
+                        l.cacheZone = _addr_l.zone[tx[i].index];
+
                     }
+
                 }
 
                 i = i__prev1;
             }
 
-            return (l, null);
+            return (_addr_l!, error.As(null!)!);
+
         }
 
-        private static (ref Location, error) loadZoneFilePlan9(@string name)
+        private static (ptr<Location>, error) loadZoneFilePlan9(@string name)
         {
+            ptr<Location> _p0 = default!;
+            error _p0 = default!;
+
             var (b, err) = readFile(name);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return loadZoneDataPlan9(string(b));
+
+            return _addr_loadZoneDataPlan9(string(b))!;
+
         }
 
         private static void initLocal()
@@ -191,13 +217,14 @@ namespace go
 
                     if (err == null)
                     {
-                        localLoc = z.Value;
-                        return;
+                        localLoc = z.val;
+                        return ;
                     }
 
                     z = z__prev2;
 
                 }
+
             }
             else
             {
@@ -208,18 +235,20 @@ namespace go
 
                     if (err == null)
                     {
-                        localLoc = z.Value;
+                        localLoc = z.val;
                         localLoc.name = "Local";
-                        return;
+                        return ;
                     }
 
                     z = z__prev2;
 
                 }
+
             } 
 
             // Fall back to UTC.
             localLoc.name = "UTC";
+
         }
     }
 }

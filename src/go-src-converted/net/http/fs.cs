@@ -4,7 +4,7 @@
 
 // HTTP file system request handler
 
-// package http -- go2cs converted at 2020 August 29 08:32:21 UTC
+// package http -- go2cs converted at 2020 October 08 03:38:41 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\fs.go
 using errors = go.errors_package;
@@ -37,11 +37,13 @@ namespace net
         // value is a filename on the native file system, not a URL, so it is separated
         // by filepath.Separator, which isn't necessarily '/'.
         //
-        // Note that Dir will allow access to files and directories starting with a
-        // period, which could expose sensitive directories like a .git directory or
-        // sensitive files like .htpasswd. To exclude files with a leading period,
-        // remove the files/directories from the server or create a custom FileSystem
-        // implementation.
+        // Note that Dir could expose sensitive files and directories. Dir will follow
+        // symlinks pointing out of the directory tree, which can be especially dangerous
+        // if serving from a directory in which users are able to create arbitrary symlinks.
+        // Dir will also allow access to files and directories starting with a period,
+        // which could expose sensitive directories like .git or sensitive files like
+        // .htpasswd. To exclude files with a leading period, remove the files/directories
+        // from the server or create a custom FileSystem implementation.
         //
         // An empty Dir is treated as ".".
         public partial struct Dir // : @string
@@ -55,8 +57,9 @@ namespace net
         {
             if (os.IsNotExist(originalErr) || os.IsPermission(originalErr))
             {
-                return error.As(originalErr);
+                return error.As(originalErr)!;
             }
+
             var parts = strings.Split(name, string(filepath.Separator));
             foreach (var (i) in parts)
             {
@@ -64,37 +67,50 @@ namespace net
                 {
                     continue;
                 }
+
                 var (fi, err) = os.Stat(strings.Join(parts[..i + 1L], string(filepath.Separator)));
                 if (err != null)
                 {
-                    return error.As(originalErr);
+                    return error.As(originalErr)!;
                 }
+
                 if (!fi.IsDir())
                 {
-                    return error.As(os.ErrNotExist);
+                    return error.As(os.ErrNotExist)!;
                 }
+
             }
-            return error.As(originalErr);
+            return error.As(originalErr)!;
+
         }
 
+        // Open implements FileSystem using os.Open, opening files for reading rooted
+        // and relative to the directory d.
         public static (File, error) Open(this Dir d, @string name)
         {
+            File _p0 = default;
+            error _p0 = default!;
+
             if (filepath.Separator != '/' && strings.ContainsRune(name, filepath.Separator))
             {
-                return (null, errors.New("http: invalid character in file path"));
+                return (null, error.As(errors.New("http: invalid character in file path"))!);
             }
+
             var dir = string(d);
             if (dir == "")
             {
                 dir = ".";
             }
+
             var fullName = filepath.Join(dir, filepath.FromSlash(path.Clean("/" + name)));
             var (f, err) = os.Open(fullName);
             if (err != null)
             {
-                return (null, mapDirOpenError(err, fullName));
+                return (null, error.As(mapDirOpenError(err, fullName))!);
             }
-            return (f, null);
+
+            return (f, error.As(null!)!);
+
         }
 
         // A FileSystem implements access to a collection of named files.
@@ -115,15 +131,18 @@ namespace net
             (os.FileInfo, error) Stat();
         }
 
-        private static void dirList(ResponseWriter w, ref Request r, File f)
+        private static void dirList(ResponseWriter w, ptr<Request> _addr_r, File f)
         {
+            ref Request r = ref _addr_r.val;
+
             var (dirs, err) = f.Readdir(-1L);
             if (err != null)
             {
                 logf(r, "http: error reading directory: %v", err);
                 Error(w, "Error reading directory", StatusInternalServerError);
-                return;
+                return ;
             }
+
             sort.Slice(dirs, (i, j) => dirs[i].Name() < dirs[j].Name());
 
             w.Header().Set("Content-Type", "text/html; charset=utf-8");
@@ -140,8 +159,10 @@ namespace net
                 // string or fragment.
                 url.URL url = new url.URL(Path:name);
                 fmt.Fprintf(w, "<a href=\"%s\">%s</a>\n", url.String(), htmlReplacer.Replace(name));
+
             }
             fmt.Fprintf(w, "</pre>\n");
+
         }
 
         // ServeContent replies to the request using the content in the
@@ -169,8 +190,10 @@ namespace net
         // ServeContent uses it to handle requests using If-Match, If-None-Match, or If-Range.
         //
         // Note that *os.File implements the io.ReadSeeker interface.
-        public static void ServeContent(ResponseWriter w, ref Request req, @string name, time.Time modtime, io.ReadSeeker content)
+        public static void ServeContent(ResponseWriter w, ptr<Request> _addr_req, @string name, time.Time modtime, io.ReadSeeker content)
         {
+            ref Request req = ref _addr_req.val;
+
             Func<(long, error)> sizeFunc = () =>
             {
                 var (size, err) = content.Seek(0L, io.SeekEnd);
@@ -178,15 +201,19 @@ namespace net
                 {
                     return (0L, errSeeker);
                 }
+
                 _, err = content.Seek(0L, io.SeekStart);
                 if (err != null)
                 {
                     return (0L, errSeeker);
                 }
+
                 return (size, null);
+
             }
 ;
-            serveContent(w, req, name, modtime, sizeFunc, content);
+            serveContent(w, _addr_req, name, modtime, sizeFunc, content);
+
         }
 
         // errSeeker is returned by ServeContent's sizeFunc when the content
@@ -203,14 +230,19 @@ namespace net
         // if modtime.IsZero(), modtime is unknown.
         // content must be seeked to the beginning of the file.
         // The sizeFunc is called at most once. Its error, if any, is sent in the HTTP response.
-        private static (long, error) serveContent(ResponseWriter w, ref Request _r, @string name, time.Time modtime, Func<(long, error)> sizeFunc, io.ReadSeeker content) => func(_r, (ref Request r, Defer defer, Panic _, Recover __) =>
+        private static (long, error) serveContent(ResponseWriter w, ptr<Request> _addr_r, @string name, time.Time modtime, Func<(long, error)> sizeFunc, io.ReadSeeker content) => func((defer, _, __) =>
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref Request r = ref _addr_r.val;
+
             setLastModified(w, modtime);
-            var (done, rangeReq) = checkPreconditions(w, r, modtime);
+            var (done, rangeReq) = checkPreconditions(w, _addr_r, modtime);
             if (done)
             {
-                return;
+                return ;
             }
+
             var code = StatusOK; 
 
             // If Content-Type isn't set, use the file's extension to find it, but
@@ -230,20 +262,24 @@ namespace net
                     if (err != null)
                     {
                         Error(w, "seeker can't seek", StatusInternalServerError);
-                        return;
+                        return ;
                     }
+
                 }
+
                 w.Header().Set("Content-Type", ctype);
+
             }
             else if (len(ctypes) > 0L)
             {
                 ctype = ctypes[0L];
             }
+
             var (size, err) = sizeFunc();
             if (err != null)
             {
                 Error(w, err.Error(), StatusInternalServerError);
-                return;
+                return ;
             } 
 
             // handle Content-Range header.
@@ -258,9 +294,12 @@ namespace net
                     {
                         w.Header().Set("Content-Range", fmt.Sprintf("bytes */%d", size));
                     }
+
                     Error(w, err.Error(), StatusRequestedRangeNotSatisfiable);
-                    return;
+                    return ;
+
                 }
+
                 if (sumRangesSize(ranges) > size)
                 { 
                     // The total number of bytes in all the ranges
@@ -268,20 +307,22 @@ namespace net
                     // itself, so this is probably an attack, or a
                     // dumb client. Ignore the range request.
                     ranges = null;
+
                 }
 
+
                 if (len(ranges) == 1L) 
-                    // RFC 2616, Section 14.16:
-                    // "When an HTTP message includes the content of a single
-                    // range (for example, a response to a request for a
-                    // single range, or to a request for a set of ranges
-                    // that overlap without any holes), this content is
-                    // transmitted with a Content-Range header, and a
-                    // Content-Length header showing the number of bytes
-                    // actually transferred.
+                    // RFC 7233, Section 4.1:
+                    // "If a single part is being transferred, the server
+                    // generating the 206 response MUST generate a
+                    // Content-Range header field, describing what range
+                    // of the selected representation is enclosed, and a
+                    // payload consisting of the range.
                     // ...
-                    // A response to a request for a single range MUST NOT
-                    // be sent using the multipart/byteranges media type."
+                    // A server MUST NOT generate a multipart response to
+                    // a request for a single range, since a client that
+                    // does not request multiple parts might not support
+                    // multipart responses."
                     var ra = ranges[0L];
                     {
                         (_, err) = content.Seek(ra.start, io.SeekStart);
@@ -289,10 +330,11 @@ namespace net
                         if (err != null)
                         {
                             Error(w, err.Error(), StatusRequestedRangeNotSatisfiable);
-                            return;
+                            return ;
                         }
 
                     }
+
                     sendSize = ra.length;
                     code = StatusPartialContent;
                     w.Header().Set("Content-Range", ra.contentRange(size));
@@ -317,28 +359,31 @@ namespace net
                                 if (err != null)
                                 {
                                     pw.CloseWithError(err);
-                                    return;
+                                    return ;
                                 }
+
                                 {
                                     (_, err) = content.Seek(ra.start, io.SeekStart);
 
                                     if (err != null)
                                     {
                                         pw.CloseWithError(err);
-                                        return;
+                                        return ;
                                     }
 
                                 }
+
                                 {
                                     (_, err) = io.CopyN(part, content, ra.length);
 
                                     if (err != null)
                                     {
                                         pw.CloseWithError(err);
-                                        return;
+                                        return ;
                                     }
 
                                 }
+
                             }
 
                             ra = ra__prev1;
@@ -346,19 +391,23 @@ namespace net
 
                         mw.Close();
                         pw.Close();
+
                     }());
                                 w.Header().Set("Accept-Ranges", "bytes");
                 if (w.Header().Get("Content-Encoding") == "")
                 {
                     w.Header().Set("Content-Length", strconv.FormatInt(sendSize, 10L));
                 }
+
             }
+
             w.WriteHeader(code);
 
             if (r.Method != "HEAD")
             {
                 io.CopyN(w, sendContent, sendSize);
             }
+
         });
 
         // scanETag determines if a syntactically valid ETag is present at s. If so,
@@ -366,12 +415,16 @@ namespace net
         // it returns "", "".
         private static (@string, @string) scanETag(@string s)
         {
+            @string etag = default;
+            @string remain = default;
+
             s = textproto.TrimString(s);
             long start = 0L;
             if (strings.HasPrefix(s, "W/"))
             {
                 start = 2L;
             }
+
             if (len(s[start..]) < 2L || s[start] != '"')
             {
                 return ("", "");
@@ -387,9 +440,11 @@ namespace net
                     return (s[..i + 1L], s[i + 1L..]);
                 else 
                     return ("", "");
-                            }
+                
+            }
 
             return ("", "");
+
         }
 
         // etagStrongMatch reports whether a and b match using strong ETag comparison.
@@ -412,17 +467,21 @@ namespace net
         {
         }
 
-        private static readonly condResult condNone = iota;
-        private static readonly var condTrue = 0;
-        private static readonly var condFalse = 1;
+        private static readonly condResult condNone = (condResult)iota;
+        private static readonly var condTrue = (var)0;
+        private static readonly var condFalse = (var)1;
 
-        private static condResult checkIfMatch(ResponseWriter w, ref Request r)
+
+        private static condResult checkIfMatch(ResponseWriter w, ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             var im = r.Header.Get("If-Match");
             if (im == "")
             {
                 return condNone;
             }
+
             while (true)
             {
                 im = textproto.TrimString(im);
@@ -430,63 +489,76 @@ namespace net
                 {
                     break;
                 }
+
                 if (im[0L] == ',')
                 {
                     im = im[1L..];
                     continue;
                 }
+
                 if (im[0L] == '*')
                 {
                     return condTrue;
                 }
+
                 var (etag, remain) = scanETag(im);
                 if (etag == "")
                 {
                     break;
                 }
+
                 if (etagStrongMatch(etag, w.Header().get("Etag")))
                 {
                     return condTrue;
                 }
+
                 im = remain;
+
             }
 
 
             return condFalse;
+
         }
 
-        private static condResult checkIfUnmodifiedSince(ref Request r, time.Time modtime)
+        private static condResult checkIfUnmodifiedSince(ptr<Request> _addr_r, time.Time modtime)
         {
+            ref Request r = ref _addr_r.val;
+
             var ius = r.Header.Get("If-Unmodified-Since");
             if (ius == "" || isZeroTime(modtime))
             {
                 return condNone;
             }
+
+            var (t, err) = ParseTime(ius);
+            if (err != null)
             {
-                var (t, err) = ParseTime(ius);
+                return condNone;
+            } 
 
-                if (err == null)
-                { 
-                    // The Date-Modified header truncates sub-second precision, so
-                    // use mtime < t+1s instead of mtime <= t to check for unmodified.
-                    if (modtime.Before(t.Add(1L * time.Second)))
-                    {
-                        return condTrue;
-                    }
-                    return condFalse;
-                }
-
+            // The Last-Modified header truncates sub-second precision so
+            // the modtime needs to be truncated too.
+            modtime = modtime.Truncate(time.Second);
+            if (modtime.Before(t) || modtime.Equal(t))
+            {
+                return condTrue;
             }
-            return condNone;
+
+            return condFalse;
+
         }
 
-        private static condResult checkIfNoneMatch(ResponseWriter w, ref Request r)
+        private static condResult checkIfNoneMatch(ResponseWriter w, ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             var inm = r.Header.get("If-None-Match");
             if (inm == "")
             {
                 return condNone;
             }
+
             var buf = inm;
             while (true)
             {
@@ -495,65 +567,84 @@ namespace net
                 {
                     break;
                 }
+
                 if (buf[0L] == ',')
                 {
                     buf = buf[1L..];
+                    continue;
                 }
+
                 if (buf[0L] == '*')
                 {
                     return condFalse;
                 }
+
                 var (etag, remain) = scanETag(buf);
                 if (etag == "")
                 {
                     break;
                 }
+
                 if (etagWeakMatch(etag, w.Header().get("Etag")))
                 {
                     return condFalse;
                 }
+
                 buf = remain;
+
             }
 
             return condTrue;
+
         }
 
-        private static condResult checkIfModifiedSince(ref Request r, time.Time modtime)
+        private static condResult checkIfModifiedSince(ptr<Request> _addr_r, time.Time modtime)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.Method != "GET" && r.Method != "HEAD")
             {
                 return condNone;
             }
+
             var ims = r.Header.Get("If-Modified-Since");
             if (ims == "" || isZeroTime(modtime))
             {
                 return condNone;
             }
+
             var (t, err) = ParseTime(ims);
             if (err != null)
             {
                 return condNone;
             } 
-            // The Date-Modified header truncates sub-second precision, so
-            // use mtime < t+1s instead of mtime <= t to check for unmodified.
-            if (modtime.Before(t.Add(1L * time.Second)))
+            // The Last-Modified header truncates sub-second precision so
+            // the modtime needs to be truncated too.
+            modtime = modtime.Truncate(time.Second);
+            if (modtime.Before(t) || modtime.Equal(t))
             {
                 return condFalse;
             }
+
             return condTrue;
+
         }
 
-        private static condResult checkIfRange(ResponseWriter w, ref Request r, time.Time modtime)
+        private static condResult checkIfRange(ResponseWriter w, ptr<Request> _addr_r, time.Time modtime)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.Method != "GET" && r.Method != "HEAD")
             {
                 return condNone;
             }
+
             var ir = r.Header.get("If-Range");
             if (ir == "")
             {
                 return condNone;
             }
+
             var (etag, _) = scanETag(ir);
             if (etag != "")
             {
@@ -565,6 +656,7 @@ namespace net
                 {
                     return condFalse;
                 }
+
             } 
             // The If-Range value is typically the ETag value, but it may also be
             // the modtime date. See golang.org/issue/8367.
@@ -572,16 +664,20 @@ namespace net
             {
                 return condFalse;
             }
+
             var (t, err) = ParseTime(ir);
             if (err != null)
             {
                 return condFalse;
             }
+
             if (t.Unix() == modtime.Unix())
             {
                 return condTrue;
             }
+
             return condFalse;
+
         }
 
         private static var unixEpochTime = time.Unix(0L, 0L);
@@ -598,6 +694,7 @@ namespace net
             {
                 w.Header().Set("Last-Modified", modtime.UTC().Format(TimeFormat));
             }
+
         }
 
         private static void writeNotModified(ResponseWriter w)
@@ -614,26 +711,34 @@ namespace net
             {
                 delete(h, "Last-Modified");
             }
+
             w.WriteHeader(StatusNotModified);
+
         }
 
         // checkPreconditions evaluates request preconditions and reports whether a precondition
         // resulted in sending StatusNotModified or StatusPreconditionFailed.
-        private static (bool, @string) checkPreconditions(ResponseWriter w, ref Request r, time.Time modtime)
-        { 
+        private static (bool, @string) checkPreconditions(ResponseWriter w, ptr<Request> _addr_r, time.Time modtime)
+        {
+            bool done = default;
+            @string rangeHeader = default;
+            ref Request r = ref _addr_r.val;
+ 
             // This function carefully follows RFC 7232 section 6.
-            var ch = checkIfMatch(w, r);
+            var ch = checkIfMatch(w, _addr_r);
             if (ch == condNone)
             {
-                ch = checkIfUnmodifiedSince(r, modtime);
+                ch = checkIfUnmodifiedSince(_addr_r, modtime);
             }
+
             if (ch == condFalse)
             {
                 w.WriteHeader(StatusPreconditionFailed);
                 return (true, "");
             }
 
-            if (checkIfNoneMatch(w, r) == condFalse) 
+
+            if (checkIfNoneMatch(w, _addr_r) == condFalse) 
                 if (r.Method == "GET" || r.Method == "HEAD")
                 {
                     writeNotModified(w);
@@ -644,24 +749,30 @@ namespace net
                     w.WriteHeader(StatusPreconditionFailed);
                     return (true, "");
                 }
-            else if (checkIfNoneMatch(w, r) == condNone) 
-                if (checkIfModifiedSince(r, modtime) == condFalse)
+
+            else if (checkIfNoneMatch(w, _addr_r) == condNone) 
+                if (checkIfModifiedSince(_addr_r, modtime) == condFalse)
                 {
                     writeNotModified(w);
                     return (true, "");
                 }
+
                         rangeHeader = r.Header.get("Range");
-            if (rangeHeader != "" && checkIfRange(w, r, modtime) == condFalse)
+            if (rangeHeader != "" && checkIfRange(w, _addr_r, modtime) == condFalse)
             {
                 rangeHeader = "";
             }
+
             return (false, rangeHeader);
+
         }
 
         // name is '/'-separated, not filepath.Separator.
-        private static void serveFile(ResponseWriter w, ref Request _r, FileSystem fs, @string name, bool redirect) => func(_r, (ref Request r, Defer defer, Panic _, Recover __) =>
+        private static void serveFile(ResponseWriter w, ptr<Request> _addr_r, FileSystem fs, @string name, bool redirect) => func((defer, _, __) =>
         {
-            const @string indexPage = "/index.html"; 
+            ref Request r = ref _addr_r.val;
+
+            const @string indexPage = (@string)"/index.html"; 
 
             // redirect .../index.html to .../
             // can't use Redirect() because that would make the path absolute,
@@ -673,16 +784,18 @@ namespace net
             // which would be a problem running under StripPrefix
             if (strings.HasSuffix(r.URL.Path, indexPage))
             {
-                localRedirect(w, r, "./");
-                return;
+                localRedirect(w, _addr_r, "./");
+                return ;
             }
+
             var (f, err) = fs.Open(name);
             if (err != null)
             {
                 var (msg, code) = toHTTPError(err);
                 Error(w, msg, code);
-                return;
+                return ;
             }
+
             defer(f.Close());
 
             var (d, err) = f.Stat();
@@ -690,8 +803,9 @@ namespace net
             {
                 (msg, code) = toHTTPError(err);
                 Error(w, msg, code);
-                return;
+                return ;
             }
+
             if (redirect)
             { 
                 // redirect to canonical path: / at end of directory url
@@ -701,34 +815,34 @@ namespace net
                 {
                     if (url[len(url) - 1L] != '/')
                     {
-                        localRedirect(w, r, path.Base(url) + "/");
-                        return;
+                        localRedirect(w, _addr_r, path.Base(url) + "/");
+                        return ;
                     }
+
                 }
                 else
                 {
                     if (url[len(url) - 1L] == '/')
                     {
-                        localRedirect(w, r, "../" + path.Base(url));
-                        return;
+                        localRedirect(w, _addr_r, "../" + path.Base(url));
+                        return ;
                     }
-                }
-            } 
 
-            // redirect if the directory name doesn't end in a slash
+                }
+
+            }
+
             if (d.IsDir())
             {
-                url = r.URL.Path;
-                if (url[len(url) - 1L] != '/')
+                url = r.URL.Path; 
+                // redirect if the directory name doesn't end in a slash
+                if (url == "" || url[len(url) - 1L] != '/')
                 {
-                    localRedirect(w, r, path.Base(url) + "/");
-                    return;
-                }
-            } 
+                    localRedirect(w, _addr_r, path.Base(url) + "/");
+                    return ;
+                } 
 
-            // use contents of index.html for directory, if present
-            if (d.IsDir())
-            {
+                // use contents of index.html for directory, if present
                 var index = strings.TrimSuffix(name, "/") + indexPage;
                 var (ff, err) = fs.Open(index);
                 if (err == null)
@@ -741,25 +855,30 @@ namespace net
                         d = dd;
                         f = ff;
                     }
+
                 }
+
             } 
 
             // Still a directory? (we didn't find an index.html file)
             if (d.IsDir())
             {
-                if (checkIfModifiedSince(r, d.ModTime()) == condFalse)
+                if (checkIfModifiedSince(_addr_r, d.ModTime()) == condFalse)
                 {
                     writeNotModified(w);
-                    return;
+                    return ;
                 }
-                w.Header().Set("Last-Modified", d.ModTime().UTC().Format(TimeFormat));
-                dirList(w, r, f);
-                return;
+
+                setLastModified(w, d.ModTime());
+                dirList(w, _addr_r, f);
+                return ;
+
             } 
 
             // serveContent will check modification time
             Func<(long, error)> sizeFunc = () => (d.Size(), null);
-            serveContent(w, r, d.Name(), d.ModTime(), sizeFunc, f);
+            serveContent(w, _addr_r, d.Name(), d.ModTime(), sizeFunc, f);
+
         });
 
         // toHTTPError returns a non-specific HTTP error message and status code
@@ -769,22 +888,29 @@ namespace net
         // all errors. We don't want to start leaking information in error messages.
         private static (@string, long) toHTTPError(error err)
         {
+            @string msg = default;
+            long httpStatus = default;
+
             if (os.IsNotExist(err))
             {
                 return ("404 page not found", StatusNotFound);
             }
+
             if (os.IsPermission(err))
             {
                 return ("403 Forbidden", StatusForbidden);
             } 
             // Default:
             return ("500 Internal Server Error", StatusInternalServerError);
+
         }
 
         // localRedirect gives a Moved Permanently response.
         // It does not convert relative paths to absolute paths like Redirect does.
-        private static void localRedirect(ResponseWriter w, ref Request r, @string newPath)
+        private static void localRedirect(ResponseWriter w, ptr<Request> _addr_r, @string newPath)
         {
+            ref Request r = ref _addr_r.val;
+
             {
                 var q = r.URL.RawQuery;
 
@@ -794,25 +920,37 @@ namespace net
                 }
 
             }
+
             w.Header().Set("Location", newPath);
             w.WriteHeader(StatusMovedPermanently);
+
         }
 
         // ServeFile replies to the request with the contents of the named
         // file or directory.
         //
         // If the provided file or directory name is a relative path, it is
-        // interpreted relative to the current directory and may ascend to parent
-        // directories. If the provided name is constructed from user input, it
-        // should be sanitized before calling ServeFile. As a precaution, ServeFile
-        // will reject requests where r.URL.Path contains a ".." path element.
+        // interpreted relative to the current directory and may ascend to
+        // parent directories. If the provided name is constructed from user
+        // input, it should be sanitized before calling ServeFile.
         //
-        // As a special case, ServeFile redirects any request where r.URL.Path
+        // As a precaution, ServeFile will reject requests where r.URL.Path
+        // contains a ".." path element; this protects against callers who
+        // might unsafely use filepath.Join on r.URL.Path without sanitizing
+        // it and then use that filepath.Join result as the name argument.
+        //
+        // As another special case, ServeFile redirects any request where r.URL.Path
         // ends in "/index.html" to the same path, without the final
         // "index.html". To avoid such redirects either modify the path or
         // use ServeContent.
-        public static void ServeFile(ResponseWriter w, ref Request r, @string name)
+        //
+        // Outside of those two special cases, ServeFile does not use
+        // r.URL.Path for selecting the file or directory to serve; only the
+        // file or directory provided in the name argument is used.
+        public static void ServeFile(ResponseWriter w, ptr<Request> _addr_r, @string name)
         {
+            ref Request r = ref _addr_r.val;
+
             if (containsDotDot(r.URL.Path))
             { 
                 // Too many programs use r.URL.Path to construct the argument to
@@ -821,10 +959,13 @@ namespace net
                 // Note that name might not contain "..", for example if code (still
                 // incorrectly) used filepath.Join(myDir, r.URL.Path).
                 Error(w, "invalid URL path", StatusBadRequest);
-                return;
+                return ;
+
             }
+
             var (dir, file) = filepath.Split(name);
-            serveFile(w, r, Dir(dir), file, false);
+            serveFile(w, _addr_r, Dir(dir), file, false);
+
         }
 
         private static bool containsDotDot(@string v)
@@ -833,14 +974,17 @@ namespace net
             {
                 return false;
             }
+
             foreach (var (_, ent) in strings.FieldsFunc(v, isSlashRune))
             {
                 if (ent == "..")
                 {
                     return true;
                 }
+
             }
             return false;
+
         }
 
         private static bool isSlashRune(int r)
@@ -866,18 +1010,23 @@ namespace net
         // "index.html".
         public static Handler FileServer(FileSystem root)
         {
-            return ref new fileHandler(root);
+            return addr(new fileHandler(root));
         }
 
-        private static void ServeHTTP(this ref fileHandler f, ResponseWriter w, ref Request r)
+        private static void ServeHTTP(this ptr<fileHandler> _addr_f, ResponseWriter w, ptr<Request> _addr_r)
         {
+            ref fileHandler f = ref _addr_f.val;
+            ref Request r = ref _addr_r.val;
+
             var upath = r.URL.Path;
             if (!strings.HasPrefix(upath, "/"))
             {
                 upath = "/" + upath;
                 r.URL.Path = upath;
             }
-            serveFile(w, r, f.root, path.Clean(upath), true);
+
+            serveFile(w, _addr_r, f.root, path.Clean(upath), true);
+
         }
 
         // httpRange specifies the byte range to be sent to the client.
@@ -897,36 +1046,43 @@ namespace net
             return new textproto.MIMEHeader("Content-Range":{r.contentRange(size)},"Content-Type":{contentType},);
         }
 
-        // parseRange parses a Range header string as per RFC 2616.
+        // parseRange parses a Range header string as per RFC 7233.
         // errNoOverlap is returned if none of the ranges overlap.
         private static (slice<httpRange>, error) parseRange(@string s, long size)
         {
+            slice<httpRange> _p0 = default;
+            error _p0 = default!;
+
             if (s == "")
             {
-                return (null, null); // header not present
+                return (null, error.As(null!)!); // header not present
             }
-            const @string b = "bytes=";
+
+            const @string b = (@string)"bytes=";
 
             if (!strings.HasPrefix(s, b))
             {
-                return (null, errors.New("invalid range"));
+                return (null, error.As(errors.New("invalid range"))!);
             }
+
             slice<httpRange> ranges = default;
             var noOverlap = false;
             foreach (var (_, ra) in strings.Split(s[len(b)..], ","))
             {
-                ra = strings.TrimSpace(ra);
+                ra = textproto.TrimString(ra);
                 if (ra == "")
                 {
                     continue;
                 }
+
                 var i = strings.Index(ra, "-");
                 if (i < 0L)
                 {
-                    return (null, errors.New("invalid range"));
+                    return (null, error.As(errors.New("invalid range"))!);
                 }
-                var start = strings.TrimSpace(ra[..i]);
-                var end = strings.TrimSpace(ra[i + 1L..]);
+
+                var start = textproto.TrimString(ra[..i]);
+                var end = textproto.TrimString(ra[i + 1L..]);
                 httpRange r = default;
                 if (start == "")
                 { 
@@ -935,57 +1091,73 @@ namespace net
                     var (i, err) = strconv.ParseInt(end, 10L, 64L);
                     if (err != null)
                     {
-                        return (null, errors.New("invalid range"));
+                        return (null, error.As(errors.New("invalid range"))!);
                     }
+
                     if (i > size)
                     {
                         i = size;
                     }
+
                     r.start = size - i;
                     r.length = size - r.start;
+
                 }
                 else
                 {
                     (i, err) = strconv.ParseInt(start, 10L, 64L);
                     if (err != null || i < 0L)
                     {
-                        return (null, errors.New("invalid range"));
+                        return (null, error.As(errors.New("invalid range"))!);
                     }
+
                     if (i >= size)
                     { 
                         // If the range begins after the size of the content,
                         // then it does not overlap.
                         noOverlap = true;
                         continue;
+
                     }
+
                     r.start = i;
                     if (end == "")
                     { 
                         // If no end is specified, range extends to end of the file.
                         r.length = size - r.start;
+
                     }
                     else
                     {
                         (i, err) = strconv.ParseInt(end, 10L, 64L);
                         if (err != null || r.start > i)
                         {
-                            return (null, errors.New("invalid range"));
+                            return (null, error.As(errors.New("invalid range"))!);
                         }
+
                         if (i >= size)
                         {
                             i = size - 1L;
                         }
+
                         r.length = i - r.start + 1L;
+
                     }
+
                 }
+
                 ranges = append(ranges, r);
+
             }
             if (noOverlap && len(ranges) == 0L)
             { 
                 // The specified ranges did not overlap with the content.
-                return (null, errNoOverlap);
+                return (null, error.As(errNoOverlap)!);
+
             }
-            return (ranges, null);
+
+            return (ranges, error.As(null!)!);
+
         }
 
         // countingWriter counts how many bytes have been written to it.
@@ -993,18 +1165,24 @@ namespace net
         {
         }
 
-        private static (long, error) Write(this ref countingWriter w, slice<byte> p)
+        private static (long, error) Write(this ptr<countingWriter> _addr_w, slice<byte> p)
         {
-            w.Value += countingWriter(len(p));
-            return (len(p), null);
+            long n = default;
+            error err = default!;
+            ref countingWriter w = ref _addr_w.val;
+
+            w.val += countingWriter(len(p));
+            return (len(p), error.As(null!)!);
         }
 
         // rangesMIMESize returns the number of bytes it takes to encode the
         // provided ranges as a multipart response.
         private static long rangesMIMESize(slice<httpRange> ranges, @string contentType, long contentSize)
         {
-            countingWriter w = default;
-            var mw = multipart.NewWriter(ref w);
+            long encSize = default;
+
+            ref countingWriter w = ref heap(out ptr<countingWriter> _addr_w);
+            var mw = multipart.NewWriter(_addr_w);
             foreach (var (_, ra) in ranges)
             {
                 mw.CreatePart(ra.mimeHeader(contentType, contentSize));
@@ -1012,16 +1190,20 @@ namespace net
             }
             mw.Close();
             encSize += int64(w);
-            return;
+            return ;
+
         }
 
         private static long sumRangesSize(slice<httpRange> ranges)
         {
+            long size = default;
+
             foreach (var (_, ra) in ranges)
             {
                 size += ra.length;
             }
-            return;
+            return ;
+
         }
     }
 }}

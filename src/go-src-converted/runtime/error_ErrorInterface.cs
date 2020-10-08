@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:55 UTC
+//     Generated on 2020 October 08 03:19:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using _@unsafe_ = go.@unsafe_package;
+using bytealg = go.@internal.bytealg_package;
 
 #pragma warning disable CS0660, CS0661
 
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void RuntimeErrorByRef(ref T value);
+            private delegate void RuntimeErrorByPtr(ptr<T> value);
             private delegate void RuntimeErrorByVal(T value);
 
-            private static readonly RuntimeErrorByRef s_RuntimeErrorByRef;
+            private static readonly RuntimeErrorByPtr s_RuntimeErrorByPtr;
             private static readonly RuntimeErrorByVal s_RuntimeErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,22 +74,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_RuntimeErrorByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_RuntimeErrorByPtr is null || !m_target_is_ptr)
                 {
                     s_RuntimeErrorByVal!(target);
                     return;
                 }
 
-                s_RuntimeErrorByRef(ref target);
+                s_RuntimeErrorByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate @string ErrorByRef(ref T value);
+            private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByRef s_ErrorByRef;
+            private static readonly ErrorByPtr s_ErrorByPtr;
             private static readonly ErrorByVal s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,11 +99,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ErrorByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ErrorByPtr is null || !m_target_is_ptr)
                     return s_ErrorByVal!(target);
 
-                return s_ErrorByRef(ref target);
+                return s_ErrorByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -111,39 +113,33 @@ namespace go
             static Error()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("RuntimeError");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("RuntimeError");
 
                 if (!(extensionMethod is null))
-                    s_RuntimeErrorByRef = extensionMethod.CreateStaticDelegate(typeof(RuntimeErrorByRef)) as RuntimeErrorByRef;
+                    s_RuntimeErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(RuntimeErrorByPtr)) as RuntimeErrorByPtr;
 
-                if (s_RuntimeErrorByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("RuntimeError");
+                extensionMethod = targetType.GetExtensionMethod("RuntimeError");
 
-                    if (!(extensionMethod is null))
-                        s_RuntimeErrorByVal = extensionMethod.CreateStaticDelegate(typeof(RuntimeErrorByVal)) as RuntimeErrorByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_RuntimeErrorByVal = extensionMethod.CreateStaticDelegate(typeof(RuntimeErrorByVal)) as RuntimeErrorByVal;
 
-                if (s_RuntimeErrorByRef is null && s_RuntimeErrorByVal is null)
+                if (s_RuntimeErrorByPtr is null && s_RuntimeErrorByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Error.RuntimeError method", new Exception("RuntimeError"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Error");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 
                 if (!(extensionMethod is null))
-                    s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
+                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
 
-                if (s_ErrorByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Error");
+                extensionMethod = targetType.GetExtensionMethod("Error");
 
-                    if (!(extensionMethod is null))
-                        s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
 
-                if (s_ErrorByRef is null && s_ErrorByVal is null)
+                if (s_ErrorByPtr is null && s_ErrorByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Error.Error method", new Exception("Error"));
             }
 

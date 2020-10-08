@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:59 UTC
+//     Generated on 2020 October 08 04:10:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,7 +40,7 @@ namespace @internal
                 this.initializedExits = default;
             }
 
-            public loopnest(ref ptr<Func> f = default, slice<ref loop> b2l = default, slice<ref Block> po = default, SparseTree sdom = default, slice<ref loop> loops = default, bool hasIrreducible = default, bool initializedChildren = default, bool initializedDepth = default, bool initializedExits = default)
+            public loopnest(ref ptr<Func> f = default, slice<ptr<loop>> b2l = default, slice<ptr<Block>> po = default, SparseTree sdom = default, slice<ptr<loop>> loops = default, bool hasIrreducible = default, bool initializedChildren = default, bool initializedDepth = default, bool initializedExits = default)
             {
                 this.f = f;
                 this.b2l = b2l;

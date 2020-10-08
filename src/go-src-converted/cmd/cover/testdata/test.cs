@@ -8,7 +8,7 @@
 // The word LINE is replaced by the line number in this file. When the file is executed,
 // the coverage processing has changed the line numbers, so we can't use runtime.Caller.
 
-// package main -- go2cs converted at 2020 August 29 09:59:32 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:37 UTC
 // Original source: C:\Go\src\cmd\cover\testdata\test.go
 using _@unsafe_ = go.@unsafe_package;
 using static go.builtin;
@@ -21,7 +21,7 @@ namespace go
     { // for go:linkname
 
         //go:linkname some_name some_name
-        private static readonly float anything = 1e9F; // Just some unlikely value that means "we got here, don't care how often"
+        private static readonly float anything = (float)1e9F; // Just some unlikely value that means "we got here, don't care how often"
 
  // Just some unlikely value that means "we got here, don't care how often"
 
@@ -43,7 +43,7 @@ namespace go
         }
 
         // The indexes of the counters in testPanic are known to main.go
-        private static readonly long panicIndex = 3L;
+        private static readonly long panicIndex = (long)3L;
 
         // This test appears first because the index of its counters is known to main.go
 
@@ -78,6 +78,7 @@ namespace go
             {
                 check(LINE, 0L);
             }
+
             if (false)
             {
                 check(LINE, 0L);
@@ -86,6 +87,7 @@ namespace go
             {
                 check(LINE, 1L);
             }
+
             {
                 long i__prev1 = i;
 
@@ -95,14 +97,17 @@ namespace go
                     {
                         check(LINE, 3L);
                     }
+
                     if (checkVal(LINE, 3L, i) <= 1L)
                     {
                         check(LINE, 2L);
                     }
+
                     if (checkVal(LINE, 3L, i) <= 0L)
                     {
                         check(LINE, 1L);
                     }
+
                 }
 
 
@@ -121,6 +126,7 @@ namespace go
                     {
                         check(LINE, 1L);
                     }
+
                 }
 
 
@@ -147,6 +153,7 @@ namespace go
                     {
                         check(LINE, 0L);
                     }
+
                 }
 
 
@@ -156,6 +163,7 @@ namespace go
             {
                 check(LINE, 1L);
             }
+
         }
 
         private static void testFor()
@@ -165,11 +173,11 @@ namespace go
                 i++;
 
                 check(LINE, 10L);
-
             }())
             {
                 check(LINE, 10L);
             }
+
 
         }
 
@@ -180,6 +188,7 @@ namespace go
                 f();
                 check(LINE, 1L);
             }
+
         }
 
         private static void testBlockRun()
@@ -208,9 +217,12 @@ namespace go
                 i++;
 
                 check(LINE, 5L);
-
             }())
             {
+                goto label2;
+label1:
+                goto label1;
+label2:
                 switch (i)
                 {
                     case 0L: 
@@ -226,7 +238,9 @@ namespace go
                         check(LINE, 2L);
                         break;
                 }
+
             }
+
 
         }
 
@@ -238,7 +252,6 @@ namespace go
                     () =>
                     {
                         check(LINE, 3L);
-
                     }();
 
                 switch (v.type())
@@ -261,7 +274,9 @@ namespace go
                         break;
                     }
                 }
+
             }
+
         }
 
         private static void testSelect1()
@@ -274,14 +289,16 @@ namespace go
                     c.Send(i);
                 }
 
+
             }());
             while (true)
             {
                 check(LINE, anything);
                 check(LINE, anything);
                 check(LINE, 1L);
-                return;
+                return ;
             }
+
 
         }
 
@@ -300,8 +317,9 @@ namespace go
                 check(LINE, 1000L);
                 check(LINE, 1000L);
                 check(LINE, 1L);
-                return;
+                return ;
             }
+
 
         }
 
@@ -330,6 +348,7 @@ namespace go
             }());
             c.Receive();
             check(LINE, 1L);
+
         }
 
         private static void testFunctionLiteral() => func((_, panic, __) =>
@@ -368,6 +387,7 @@ namespace go
 
             }
 
+
             switch (b(() =>
             {
                 check(LINE, 2L);
@@ -400,7 +420,8 @@ namespace go
                 }()) 
                 check(LINE, 0L);
                 panic("2=3");
-                    });
+            
+        });
 
         private static void testGoto()
         {
@@ -410,9 +431,11 @@ namespace go
                 {
                     goto Label;
                 }
+
                 check(LINE, 1L);
 Label:
                 check(LINE, 2L);
+
             } 
             // Now test that we don't inject empty statements
             // between a label and a loop.
@@ -426,6 +449,7 @@ loop:
                 _breakloop = true;
                 break;
             }
+
         }
 
         // This comment didn't appear in generated go code.
@@ -433,6 +457,7 @@ loop:
         { 
             // Needed for cover to add counter increment here.
             _ = 42L;
+
         }
 
         // Some someFunction.

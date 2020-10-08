@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2020 August 29 08:47:13 UTC
+// package testing -- go2cs converted at 2020 October 08 04:02:53 UTC
 // import "go/doc.testing" ==> using testing = go.go.doc.testing_package
 // Original source: C:\Go\src\go\doc\testdata\example.go
 using bytes = go.bytes_package;
@@ -29,6 +29,8 @@ namespace go
 
         public static bool RunExamples(slice<InternalExample> examples) => func((defer, _, __) =>
         {
+            bool ok = default;
+
             ok = true;
 
             InternalExample eg = default;
@@ -53,12 +55,13 @@ namespace go
                     e = e__prev1;
 
                 }
+
             }());
 
             foreach (var (_, __eg) in examples)
             {
                 eg = __eg;
-                if (chatty.Value)
+                if (chatty.val)
                 {
                     fmt.Printf("=== RUN: %s\n", eg.Name);
                 } 
@@ -70,6 +73,7 @@ namespace go
                     fmt.Fprintln(os.Stderr, err);
                     os.Exit(1L);
                 }
+
                 os.Stdout = w;
                 os.Stderr = w;
                 var outC = make_channel<@string>();
@@ -82,7 +86,9 @@ namespace go
                         fmt.Fprintf(stderr, "testing: copying pipe: %v\n", err);
                         os.Exit(1L);
                     }
+
                     outC.Send(buf.String());
+
                 }()); 
 
                 // run example
@@ -109,17 +115,20 @@ namespace go
                         fmt.Printf("--- FAIL: %s %s\ngot:\n%s\nwant:\n%s\n", eg.Name, tstr, g, e);
                         ok = false;
                     }
-                    else if (chatty.Value)
+                    else if (chatty.val)
                     {
                         fmt.Printf("--- PASS: %s %s\n", eg.Name, tstr);
                     }
 
+
                     e = e__prev1;
 
                 }
+
             }
 
-            return;
+            return ;
+
         });
     }
 }}

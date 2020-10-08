@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Result, error) ExecContextByRef(ref T value, context.Context ctx, @string query, slice<NamedValue> args);
+            private delegate (Result, error) ExecContextByPtr(ptr<T> value, context.Context ctx, @string query, slice<NamedValue> args);
             private delegate (Result, error) ExecContextByVal(T value, context.Context ctx, @string query, slice<NamedValue> args);
 
-            private static readonly ExecContextByRef s_ExecContextByRef;
+            private static readonly ExecContextByPtr s_ExecContextByPtr;
             private static readonly ExecContextByVal s_ExecContextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ExecContextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ExecContextByPtr is null || !m_target_is_ptr)
                     return s_ExecContextByVal!(target, ctx, query, args);
 
-                return s_ExecContextByRef(ref target, ctx, query, args);
+                return s_ExecContextByPtr(m_target_ptr, ctx, query, args);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static ExecerContext()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ExecContext");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ExecContext");
 
                 if (!(extensionMethod is null))
-                    s_ExecContextByRef = extensionMethod.CreateStaticDelegate(typeof(ExecContextByRef)) as ExecContextByRef;
+                    s_ExecContextByPtr = extensionMethod.CreateStaticDelegate(typeof(ExecContextByPtr)) as ExecContextByPtr;
 
-                if (s_ExecContextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ExecContext");
+                extensionMethod = targetType.GetExtensionMethod("ExecContext");
 
-                    if (!(extensionMethod is null))
-                        s_ExecContextByVal = extensionMethod.CreateStaticDelegate(typeof(ExecContextByVal)) as ExecContextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ExecContextByVal = extensionMethod.CreateStaticDelegate(typeof(ExecContextByVal)) as ExecContextByVal;
 
-                if (s_ExecContextByRef is null && s_ExecContextByVal is null)
+                if (s_ExecContextByPtr is null && s_ExecContextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ExecerContext.ExecContext method", new Exception("ExecContext"));
             }
 

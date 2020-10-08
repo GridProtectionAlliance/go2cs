@@ -4,7 +4,7 @@
 
 // This file sets up the universe scope and the unsafe package.
 
-// package types -- go2cs converted at 2020 August 29 08:48:08 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:57 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\universe.go
 using constant = go.go.constant_package;
@@ -17,7 +17,15 @@ namespace go
 {
     public static partial class types_package
     {
-        public static ref Scope Universe = default;        public static ref Package Unsafe = default;        private static ref Const universeIota = default;        private static ref Basic universeByte = default;        private static ref Basic universeRune = default;
+        // The Universe scope contains all predeclared objects of Go.
+        // It is the outermost scope of any chain of nested scopes.
+        public static ptr<Scope> Universe;
+
+        // The Unsafe package is the package returned by an importer
+        // for the import path "unsafe".
+        public static ptr<Package> Unsafe;
+
+        private static ptr<Const> universeIota;        private static ptr<Basic> universeByte;        private static ptr<Basic> universeRune;        private static ptr<Named> universeError;
 
         // Typ contains the predeclared *Basic types indexed by their
         // corresponding BasicKind.
@@ -25,9 +33,9 @@ namespace go
         // The *Basic type for Typ[Byte] will have the name "uint8".
         // Use Universe.Lookup("byte").Type() to obtain the specific
         // alias basic type named "byte" (and analogous for "rune").
-        public static ref Basic Typ = new slice<ref Basic>(InitKeyedValues<ref Basic>((Invalid, {Invalid,0,"invalid type"}), (Bool, {Bool,IsBoolean,"bool"}), (Int, {Int,IsInteger,"int"}), (Int8, {Int8,IsInteger,"int8"}), (Int16, {Int16,IsInteger,"int16"}), (Int32, {Int32,IsInteger,"int32"}), (Int64, {Int64,IsInteger,"int64"}), (Uint, {Uint,IsInteger|IsUnsigned,"uint"}), (Uint8, {Uint8,IsInteger|IsUnsigned,"uint8"}), (Uint16, {Uint16,IsInteger|IsUnsigned,"uint16"}), (Uint32, {Uint32,IsInteger|IsUnsigned,"uint32"}), (Uint64, {Uint64,IsInteger|IsUnsigned,"uint64"}), (Uintptr, {Uintptr,IsInteger|IsUnsigned,"uintptr"}), (Float32, {Float32,IsFloat,"float32"}), (Float64, {Float64,IsFloat,"float64"}), (Complex64, {Complex64,IsComplex,"complex64"}), (Complex128, {Complex128,IsComplex,"complex128"}), (String, {String,IsString,"string"}), (UnsafePointer, {UnsafePointer,0,"Pointer"}), (UntypedBool, {UntypedBool,IsBoolean|IsUntyped,"untyped bool"}), (UntypedInt, {UntypedInt,IsInteger|IsUntyped,"untyped int"}), (UntypedRune, {UntypedRune,IsInteger|IsUntyped,"untyped rune"}), (UntypedFloat, {UntypedFloat,IsFloat|IsUntyped,"untyped float"}), (UntypedComplex, {UntypedComplex,IsComplex|IsUntyped,"untyped complex"}), (UntypedString, {UntypedString,IsString|IsUntyped,"untyped string"}), (UntypedNil, {UntypedNil,IsUntyped,"untyped nil"})));
+        public static ptr<Basic> Typ = new slice<ptr<Basic>>(InitKeyedValues<ptr<Basic>>((Invalid, {Invalid,0,"invalid type"}), (Bool, {Bool,IsBoolean,"bool"}), (Int, {Int,IsInteger,"int"}), (Int8, {Int8,IsInteger,"int8"}), (Int16, {Int16,IsInteger,"int16"}), (Int32, {Int32,IsInteger,"int32"}), (Int64, {Int64,IsInteger,"int64"}), (Uint, {Uint,IsInteger|IsUnsigned,"uint"}), (Uint8, {Uint8,IsInteger|IsUnsigned,"uint8"}), (Uint16, {Uint16,IsInteger|IsUnsigned,"uint16"}), (Uint32, {Uint32,IsInteger|IsUnsigned,"uint32"}), (Uint64, {Uint64,IsInteger|IsUnsigned,"uint64"}), (Uintptr, {Uintptr,IsInteger|IsUnsigned,"uintptr"}), (Float32, {Float32,IsFloat,"float32"}), (Float64, {Float64,IsFloat,"float64"}), (Complex64, {Complex64,IsComplex,"complex64"}), (Complex128, {Complex128,IsComplex,"complex128"}), (String, {String,IsString,"string"}), (UnsafePointer, {UnsafePointer,0,"Pointer"}), (UntypedBool, {UntypedBool,IsBoolean|IsUntyped,"untyped bool"}), (UntypedInt, {UntypedInt,IsInteger|IsUntyped,"untyped int"}), (UntypedRune, {UntypedRune,IsInteger|IsUntyped,"untyped rune"}), (UntypedFloat, {UntypedFloat,IsFloat|IsUntyped,"untyped float"}), (UntypedComplex, {UntypedComplex,IsComplex|IsUntyped,"untyped complex"}), (UntypedString, {UntypedString,IsString|IsUntyped,"untyped string"}), (UntypedNil, {UntypedNil,IsUntyped,"untyped nil"})));
 
-        private static array<ref Basic> aliases = new array<ref Basic>(new ref Basic[] { {Byte,IsInteger|IsUnsigned,"byte"}, {Rune,IsInteger,"rune"} });
+        private static array<ptr<Basic>> aliases = new array<ptr<Basic>>(new ptr<Basic>[] { {Byte,IsInteger|IsUnsigned,"byte"}, {Rune,IsInteger,"rune"} });
 
         private static void defPredeclaredTypes()
         {
@@ -58,11 +66,12 @@ namespace go
             }
 
             var res = NewVar(token.NoPos, null, "", Typ[String]);
-            Signature sig = ref new Signature(results:NewTuple(res));
+            ptr<Signature> sig = addr(new Signature(results:NewTuple(res)));
             var err = NewFunc(token.NoPos, null, "Error", sig);
-            Named typ = ref new Named(underlying:NewInterface([]*Func{err},nil).Complete());
+            ptr<Named> typ = addr(new Named(underlying:NewInterfaceType([]*Func{err},nil).Complete()));
             sig.recv = NewVar(token.NoPos, null, "", typ);
             def(NewTypeName(token.NoPos, null, "error", typ));
+
         }
 
 
@@ -73,11 +82,12 @@ namespace go
             {
                 def(NewConst(token.NoPos, null, c.name, Typ[c.kind], c.val));
             }
+
         }
 
         private static void defPredeclaredNil()
         {
-            def(ref new Nil(object{name:"nil",typ:Typ[UntypedNil]}));
+            def(addr(new Nil(object{name:"nil",typ:Typ[UntypedNil],color_:black})));
         }
 
         // A builtinId is the id of a builtin function.
@@ -87,30 +97,31 @@ namespace go
 
  
         // universe scope
-        private static readonly builtinId _Append = iota;
-        private static readonly var _Cap = 0;
-        private static readonly var _Close = 1;
-        private static readonly var _Complex = 2;
-        private static readonly var _Copy = 3;
-        private static readonly var _Delete = 4;
-        private static readonly var _Imag = 5;
-        private static readonly var _Len = 6;
-        private static readonly var _Make = 7;
-        private static readonly var _New = 8;
-        private static readonly var _Panic = 9;
-        private static readonly var _Print = 10;
-        private static readonly var _Println = 11;
-        private static readonly var _Real = 12;
-        private static readonly var _Recover = 13; 
+        private static readonly builtinId _Append = (builtinId)iota;
+        private static readonly var _Cap = (var)0;
+        private static readonly var _Close = (var)1;
+        private static readonly var _Complex = (var)2;
+        private static readonly var _Copy = (var)3;
+        private static readonly var _Delete = (var)4;
+        private static readonly var _Imag = (var)5;
+        private static readonly var _Len = (var)6;
+        private static readonly var _Make = (var)7;
+        private static readonly var _New = (var)8;
+        private static readonly var _Panic = (var)9;
+        private static readonly var _Print = (var)10;
+        private static readonly var _Println = (var)11;
+        private static readonly var _Real = (var)12;
+        private static readonly var _Recover = (var)13; 
 
         // package unsafe
-        private static readonly var _Alignof = 14;
-        private static readonly var _Offsetof = 15;
-        private static readonly var _Sizeof = 16; 
+        private static readonly var _Alignof = (var)14;
+        private static readonly var _Offsetof = (var)15;
+        private static readonly var _Sizeof = (var)16; 
 
         // testing support
-        private static readonly var _Assert = 17;
-        private static readonly var _Trace = 18;
+        private static readonly var _Assert = (var)17;
+        private static readonly var _Trace = (var)18;
+
 
 
 
@@ -123,8 +134,11 @@ namespace go
                 {
                     continue; // only define these in testing environment
                 }
+
                 def(newBuiltin(id));
+
             }
+
         }
 
         // DefPredeclaredTestFuncs defines the assert and trace built-ins.
@@ -134,10 +148,12 @@ namespace go
         {
             if (Universe.Lookup("assert") != null)
             {
-                return; // already defined
+                return ; // already defined
             }
+
             def(newBuiltin(_Assert));
             def(newBuiltin(_Trace));
+
         }
 
         private static void init()
@@ -151,9 +167,10 @@ namespace go
             defPredeclaredNil();
             defPredeclaredFuncs();
 
-            universeIota = Universe.Lookup("iota")._<ref Const>();
-            universeByte = Universe.Lookup("byte")._<ref TypeName>().typ._<ref Basic>();
-            universeRune = Universe.Lookup("rune")._<ref TypeName>().typ._<ref Basic>();
+            universeIota = Universe.Lookup("iota")._<ptr<Const>>();
+            universeByte = Universe.Lookup("byte")._<ptr<TypeName>>().typ._<ptr<Basic>>();
+            universeRune = Universe.Lookup("rune")._<ptr<TypeName>>().typ._<ptr<Basic>>();
+            universeError = Universe.Lookup("error")._<ptr<TypeName>>().typ._<ptr<Named>>();
         }
 
         // Objects with names containing blanks are internal and not entered into
@@ -162,18 +179,19 @@ namespace go
         //
         private static void def(Object obj) => func((_, panic, __) =>
         {
+            assert(obj.color() == black);
             var name = obj.Name();
             if (strings.Contains(name, " "))
             {
-                return; // nothing to do
+                return ; // nothing to do
             } 
             // fix Obj link for named types
             {
-                ref Named (typ, ok) = obj.Type()._<ref Named>();
+                ptr<Named> (typ, ok) = obj.Type()._<ptr<Named>>();
 
                 if (ok)
                 {
-                    typ.obj = obj._<ref TypeName>();
+                    typ.obj = obj._<ptr<TypeName>>();
                 } 
                 // exported identifiers go into package unsafe
 
@@ -186,10 +204,10 @@ namespace go
                 // set Pkg field
                 switch (obj.type())
                 {
-                    case ref TypeName obj:
+                    case ptr<TypeName> obj:
                         obj.pkg = Unsafe;
                         break;
-                    case ref Builtin obj:
+                    case ptr<Builtin> obj:
                         obj.pkg = Unsafe;
                         break;
                     default:
@@ -199,11 +217,14 @@ namespace go
                         break;
                     }
                 }
+
             }
+
             if (scope.Insert(obj) != null)
             {
                 panic("internal error: double declaration");
             }
+
         });
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:54:41 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:11:22 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\phielim.go
 
@@ -27,8 +27,10 @@ namespace @internal
         //   v = phi(v, w, x)
         //   w = phi(v, w, x)
         // and would that be useful?
-        private static void phielim(ref Func f)
+        private static void phielim(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             while (true)
             {
                 var change = false;
@@ -37,18 +39,21 @@ namespace @internal
                     foreach (var (_, v) in b.Values)
                     {
                         copyelimValue(v);
-                        change = phielimValue(v) || change;
+                        change = phielimValue(_addr_v) || change;
                     }
                 }                if (!change)
                 {
                     break;
                 }
             }
+
         }
 
         // phielimValue tries to convert the phi v to a copy.
-        private static bool phielimValue(ref Value v)
+        private static bool phielimValue(ptr<Value> _addr_v)
         {
+            ref Value v = ref _addr_v.val;
+
             if (v.Op != OpPhi)
             {
                 return false;
@@ -57,29 +62,35 @@ namespace @internal
             // If there are two distinct args of v which
             // are not v itself, then the phi must remain.
             // Otherwise, we can replace it with a copy.
-            ref Value w = default;
+            ptr<Value> w;
             foreach (var (_, x) in v.Args)
             {
                 if (x == v)
                 {
                     continue;
                 }
+
                 if (x == w)
                 {
                     continue;
                 }
+
                 if (w != null)
                 {
                     return false;
                 }
+
                 w = x;
+
             }
             if (w == null)
             { 
                 // v references only itself. It must be in
                 // a dead code loop. Don't bother modifying it.
                 return false;
+
             }
+
             v.Op = OpCopy;
             v.SetArgs1(w);
             var f = v.Block.Func;
@@ -87,7 +98,9 @@ namespace @internal
             {
                 f.Warnl(v.Pos, "eliminated phi");
             }
+
             return true;
+
         }
     }
 }}}}

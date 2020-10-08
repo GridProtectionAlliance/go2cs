@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:53 UTC
+//     Generated on 2020 October 08 01:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ReadFromByRef(ref T value, Reader r);
+            private delegate (long, error) ReadFromByPtr(ptr<T> value, Reader r);
             private delegate (long, error) ReadFromByVal(T value, Reader r);
 
-            private static readonly ReadFromByRef s_ReadFromByRef;
+            private static readonly ReadFromByPtr s_ReadFromByPtr;
             private static readonly ReadFromByVal s_ReadFromByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,11 +74,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadFromByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadFromByPtr is null || !m_target_is_ptr)
                     return s_ReadFromByVal!(target, r);
 
-                return s_ReadFromByRef(ref target, r);
+                return s_ReadFromByPtr(m_target_ptr, r);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -87,23 +88,20 @@ namespace go
             static ReaderFrom()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadFrom");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadFrom");
 
                 if (!(extensionMethod is null))
-                    s_ReadFromByRef = extensionMethod.CreateStaticDelegate(typeof(ReadFromByRef)) as ReadFromByRef;
+                    s_ReadFromByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadFromByPtr)) as ReadFromByPtr;
 
-                if (s_ReadFromByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadFrom");
+                extensionMethod = targetType.GetExtensionMethod("ReadFrom");
 
-                    if (!(extensionMethod is null))
-                        s_ReadFromByVal = extensionMethod.CreateStaticDelegate(typeof(ReadFromByVal)) as ReadFromByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadFromByVal = extensionMethod.CreateStaticDelegate(typeof(ReadFromByVal)) as ReadFromByVal;
 
-                if (s_ReadFromByRef is null && s_ReadFromByVal is null)
+                if (s_ReadFromByPtr is null && s_ReadFromByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ReaderFrom.ReadFrom method", new Exception("ReadFrom"));
             }
 

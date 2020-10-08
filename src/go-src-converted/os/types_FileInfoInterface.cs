@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:44:36 UTC
+//     Generated on 2020 October 08 03:45:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +63,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void NameByRef(ref T value);
+            private delegate void NameByPtr(ptr<T> value);
             private delegate void NameByVal(T value);
 
-            private static readonly NameByRef s_NameByRef;
+            private static readonly NameByPtr s_NameByPtr;
             private static readonly NameByVal s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,22 +75,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NameByPtr is null || !m_target_is_ptr)
                 {
                     s_NameByVal!(target);
                     return;
                 }
 
-                s_NameByRef(ref target);
+                s_NameByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void SizeByRef(ref T value);
+            private delegate void SizeByPtr(ptr<T> value);
             private delegate void SizeByVal(T value);
 
-            private static readonly SizeByRef s_SizeByRef;
+            private static readonly SizeByPtr s_SizeByPtr;
             private static readonly SizeByVal s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,22 +100,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SizeByPtr is null || !m_target_is_ptr)
                 {
                     s_SizeByVal!(target);
                     return;
                 }
 
-                s_SizeByRef(ref target);
+                s_SizeByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void ModeByRef(ref T value);
+            private delegate void ModeByPtr(ptr<T> value);
             private delegate void ModeByVal(T value);
 
-            private static readonly ModeByRef s_ModeByRef;
+            private static readonly ModeByPtr s_ModeByPtr;
             private static readonly ModeByVal s_ModeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,22 +125,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ModeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ModeByPtr is null || !m_target_is_ptr)
                 {
                     s_ModeByVal!(target);
                     return;
                 }
 
-                s_ModeByRef(ref target);
+                s_ModeByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void ModTimeByRef(ref T value);
+            private delegate void ModTimeByPtr(ptr<T> value);
             private delegate void ModTimeByVal(T value);
 
-            private static readonly ModTimeByRef s_ModTimeByRef;
+            private static readonly ModTimeByPtr s_ModTimeByPtr;
             private static readonly ModTimeByVal s_ModTimeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -147,22 +150,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ModTimeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ModTimeByPtr is null || !m_target_is_ptr)
                 {
                     s_ModTimeByVal!(target);
                     return;
                 }
 
-                s_ModTimeByRef(ref target);
+                s_ModTimeByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void IsDirByRef(ref T value);
+            private delegate void IsDirByPtr(ptr<T> value);
             private delegate void IsDirByVal(T value);
 
-            private static readonly IsDirByRef s_IsDirByRef;
+            private static readonly IsDirByPtr s_IsDirByPtr;
             private static readonly IsDirByVal s_IsDirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -171,22 +175,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_IsDirByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_IsDirByPtr is null || !m_target_is_ptr)
                 {
                     s_IsDirByVal!(target);
                     return;
                 }
 
-                s_IsDirByRef(ref target);
+                s_IsDirByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void SysByRef(ref T value);
+            private delegate void SysByPtr(ptr<T> value);
             private delegate void SysByVal(T value);
 
-            private static readonly SysByRef s_SysByRef;
+            private static readonly SysByPtr s_SysByPtr;
             private static readonly SysByVal s_SysByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -195,14 +200,15 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SysByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SysByPtr is null || !m_target_is_ptr)
                 {
                     s_SysByVal!(target);
                     return;
                 }
 
-                s_SysByRef(ref target);
+                s_SysByPtr(m_target_ptr);
                 return;
                 
             }
@@ -213,103 +219,85 @@ namespace go
             static FileInfo()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Name");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
                 if (!(extensionMethod is null))
-                    s_NameByRef = extensionMethod.CreateStaticDelegate(typeof(NameByRef)) as NameByRef;
+                    s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
-                if (s_NameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Name");
+                extensionMethod = targetType.GetExtensionMethod("Name");
 
-                    if (!(extensionMethod is null))
-                        s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
-                if (s_NameByRef is null && s_NameByVal is null)
+                if (s_NameByPtr is null && s_NameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileInfo.Name method", new Exception("Name"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Size");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Size");
 
                 if (!(extensionMethod is null))
-                    s_SizeByRef = extensionMethod.CreateStaticDelegate(typeof(SizeByRef)) as SizeByRef;
+                    s_SizeByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeByPtr)) as SizeByPtr;
 
-                if (s_SizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Size");
+                extensionMethod = targetType.GetExtensionMethod("Size");
 
-                    if (!(extensionMethod is null))
-                        s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
 
-                if (s_SizeByRef is null && s_SizeByVal is null)
+                if (s_SizeByPtr is null && s_SizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileInfo.Size method", new Exception("Size"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Mode");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Mode");
 
                 if (!(extensionMethod is null))
-                    s_ModeByRef = extensionMethod.CreateStaticDelegate(typeof(ModeByRef)) as ModeByRef;
+                    s_ModeByPtr = extensionMethod.CreateStaticDelegate(typeof(ModeByPtr)) as ModeByPtr;
 
-                if (s_ModeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Mode");
+                extensionMethod = targetType.GetExtensionMethod("Mode");
 
-                    if (!(extensionMethod is null))
-                        s_ModeByVal = extensionMethod.CreateStaticDelegate(typeof(ModeByVal)) as ModeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ModeByVal = extensionMethod.CreateStaticDelegate(typeof(ModeByVal)) as ModeByVal;
 
-                if (s_ModeByRef is null && s_ModeByVal is null)
+                if (s_ModeByPtr is null && s_ModeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileInfo.Mode method", new Exception("Mode"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ModTime");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ModTime");
 
                 if (!(extensionMethod is null))
-                    s_ModTimeByRef = extensionMethod.CreateStaticDelegate(typeof(ModTimeByRef)) as ModTimeByRef;
+                    s_ModTimeByPtr = extensionMethod.CreateStaticDelegate(typeof(ModTimeByPtr)) as ModTimeByPtr;
 
-                if (s_ModTimeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ModTime");
+                extensionMethod = targetType.GetExtensionMethod("ModTime");
 
-                    if (!(extensionMethod is null))
-                        s_ModTimeByVal = extensionMethod.CreateStaticDelegate(typeof(ModTimeByVal)) as ModTimeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ModTimeByVal = extensionMethod.CreateStaticDelegate(typeof(ModTimeByVal)) as ModTimeByVal;
 
-                if (s_ModTimeByRef is null && s_ModTimeByVal is null)
+                if (s_ModTimeByPtr is null && s_ModTimeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileInfo.ModTime method", new Exception("ModTime"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("IsDir");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("IsDir");
 
                 if (!(extensionMethod is null))
-                    s_IsDirByRef = extensionMethod.CreateStaticDelegate(typeof(IsDirByRef)) as IsDirByRef;
+                    s_IsDirByPtr = extensionMethod.CreateStaticDelegate(typeof(IsDirByPtr)) as IsDirByPtr;
 
-                if (s_IsDirByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("IsDir");
+                extensionMethod = targetType.GetExtensionMethod("IsDir");
 
-                    if (!(extensionMethod is null))
-                        s_IsDirByVal = extensionMethod.CreateStaticDelegate(typeof(IsDirByVal)) as IsDirByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_IsDirByVal = extensionMethod.CreateStaticDelegate(typeof(IsDirByVal)) as IsDirByVal;
 
-                if (s_IsDirByRef is null && s_IsDirByVal is null)
+                if (s_IsDirByPtr is null && s_IsDirByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileInfo.IsDir method", new Exception("IsDir"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Sys");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Sys");
 
                 if (!(extensionMethod is null))
-                    s_SysByRef = extensionMethod.CreateStaticDelegate(typeof(SysByRef)) as SysByRef;
+                    s_SysByPtr = extensionMethod.CreateStaticDelegate(typeof(SysByPtr)) as SysByPtr;
 
-                if (s_SysByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Sys");
+                extensionMethod = targetType.GetExtensionMethod("Sys");
 
-                    if (!(extensionMethod is null))
-                        s_SysByVal = extensionMethod.CreateStaticDelegate(typeof(SysByVal)) as SysByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SysByVal = extensionMethod.CreateStaticDelegate(typeof(SysByVal)) as SysByVal;
 
-                if (s_SysByRef is null && s_SysByVal is null)
+                if (s_SysByPtr is null && s_SysByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement FileInfo.Sys method", new Exception("Sys"));
             }
 

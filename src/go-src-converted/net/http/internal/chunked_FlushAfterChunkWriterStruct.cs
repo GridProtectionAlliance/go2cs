@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:50 UTC
+//     Generated on 2020 October 08 03:40:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,31 +27,17 @@ namespace http
     public static partial class @internal_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(bufio.Writer))]
         public partial struct FlushAfterChunkWriter
         {
-            // Writer structure promotion - sourced from pointer
-            private readonly ptr<Writer> m_WriterRef;
-
-            private ref Writer Writer_ptr => ref m_WriterRef.Value;
-
-            public ref error err => ref m_WriterRef.Value.err;
-
-            public ref slice<byte> buf => ref m_WriterRef.Value.buf;
-
-            public ref long n => ref m_WriterRef.Value.n;
-
-            public ref io.Writer wr => ref m_WriterRef.Value.wr;
-
             // Constructors
             public FlushAfterChunkWriter(NilType _)
             {
-                this.m_WriterRef = new ptr<bufio.Writer>(new bufio.Writer(nil));
+                this.Writer> = default;
             }
 
-            public FlushAfterChunkWriter(ref bufio.Writer Writer = default)
+            public FlushAfterChunkWriter(ref ptr<bufio.Writer> Writer> = default)
             {
-                this.m_WriterRef = new ptr<bufio.Writer>(ref Writer);
+                this.Writer> = Writer>;
             }
 
             // Enable comparisons between nil and FlushAfterChunkWriter struct
@@ -74,7 +60,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static FlushAfterChunkWriter FlushAfterChunkWriter_cast(dynamic value)
         {
-            return new FlushAfterChunkWriter(ref value.Writer);
+            return new FlushAfterChunkWriter(ref value.Writer>);
         }
     }
 }}}

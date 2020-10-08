@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:52:29 UTC
+//     Generated on 2020 October 08 04:08:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,7 +18,6 @@ using ast = go.go.ast_package;
 using token = go.go.token_package;
 using io = go.io_package;
 using os = go.os_package;
-using strconv = go.strconv_package;
 using strings = go.strings_package;
 using tabwriter = go.text.tabwriter_package;
 using unicode = go.unicode_package;
@@ -67,6 +66,7 @@ namespace go
                 this.indent = default;
                 this.level = default;
                 this.mode = default;
+                this.endAlignment = default;
                 this.impliedSemi = default;
                 this.lastTok = default;
                 this.prevOpen = default;
@@ -83,7 +83,7 @@ namespace go
                 this.cachedLine = default;
             }
 
-            public printer(Config Config = default, ref ptr<token.FileSet> fset = default, slice<byte> output = default, long indent = default, long level = default, pmode mode = default, bool impliedSemi = default, token.Token lastTok = default, token.Token prevOpen = default, slice<whiteSpace> wsbuf = default, token.Position pos = default, token.Position @out = default, token.Position last = default, ref ptr<long> linePtr = default, slice<ref ast.CommentGroup> comments = default, bool useNodeComments = default, commentInfo commentInfo = default, map<ast.Node, long> nodeSizes = default, token.Pos cachedPos = default, long cachedLine = default)
+            public printer(Config Config = default, ref ptr<token.FileSet> fset = default, slice<byte> output = default, long indent = default, long level = default, pmode mode = default, bool endAlignment = default, bool impliedSemi = default, token.Token lastTok = default, token.Token prevOpen = default, slice<whiteSpace> wsbuf = default, token.Position pos = default, token.Position @out = default, token.Position last = default, ref ptr<long> linePtr = default, slice<ptr<ast.CommentGroup>> comments = default, bool useNodeComments = default, commentInfo commentInfo = default, map<ast.Node, long> nodeSizes = default, token.Pos cachedPos = default, long cachedLine = default)
             {
                 this.m_ConfigRef = new ptr<Config>(Config);
                 this.fset = fset;
@@ -91,6 +91,7 @@ namespace go
                 this.indent = indent;
                 this.level = level;
                 this.mode = mode;
+                this.endAlignment = endAlignment;
                 this.impliedSemi = impliedSemi;
                 this.lastTok = lastTok;
                 this.prevOpen = prevOpen;
@@ -127,7 +128,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static printer printer_cast(dynamic value)
         {
-            return new printer(value.Config, ref value.fset, value.output, value.indent, value.level, value.mode, value.impliedSemi, value.lastTok, value.prevOpen, value.wsbuf, value.pos, value.@out, value.last, ref value.linePtr, value.comments, value.useNodeComments, value.commentInfo, value.nodeSizes, value.cachedPos, value.cachedLine);
+            return new printer(value.Config, ref value.fset, value.output, value.indent, value.level, value.mode, value.endAlignment, value.impliedSemi, value.lastTok, value.prevOpen, value.wsbuf, value.pos, value.@out, value.last, ref value.linePtr, value.comments, value.useNodeComments, value.commentInfo, value.nodeSizes, value.cachedPos, value.cachedLine);
         }
     }
 }}

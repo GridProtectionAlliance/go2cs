@@ -4,7 +4,7 @@
 
 // +build windows
 
-// package registry -- go2cs converted at 2020 August 29 08:22:38 UTC
+// package registry -- go2cs converted at 2020 October 08 03:32:33 UTC
 // import "internal/syscall/windows/registry" ==> using registry = go.@internal.syscall.windows.registry_package
 // Original source: C:\Go\src\internal\syscall\windows\registry\syscall.go
 using syscall = go.syscall_package;
@@ -17,16 +17,17 @@ namespace windows
 {
     public static partial class registry_package
     {
-        private static readonly long _REG_OPTION_NON_VOLATILE = 0L;
+        private static readonly long _REG_OPTION_NON_VOLATILE = (long)0L;
 
-        private static readonly long _REG_CREATED_NEW_KEY = 1L;
-        private static readonly long _REG_OPENED_EXISTING_KEY = 2L;
+        private static readonly long _REG_CREATED_NEW_KEY = (long)1L;
+        private static readonly long _REG_OPENED_EXISTING_KEY = (long)2L;
 
-        private static readonly syscall.Errno _ERROR_NO_MORE_ITEMS = 259L;
+        private static readonly syscall.Errno _ERROR_NO_MORE_ITEMS = (syscall.Errno)259L;
+
 
         public static error LoadRegLoadMUIString()
         {
-            return error.As(procRegLoadMUIStringW.Find());
+            return error.As(procRegLoadMUIStringW.Find())!;
         }
 
         //sys    regCreateKeyEx(key syscall.Handle, subkey *uint16, reserved uint32, class *uint16, options uint32, desired uint32, sa *syscall.SecurityAttributes, result *syscall.Handle, disposition *uint32) (regerrno error) = advapi32.RegCreateKeyExW

@@ -4,10 +4,9 @@
 
 // This file implements typechecking of statements.
 
-// package types -- go2cs converted at 2020 August 29 08:48:00 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:49 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\stmt.go
-using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
@@ -20,16 +19,21 @@ namespace go
 {
     public static partial class types_package
     {
-        private static void funcBody(this ref Checker _check, ref declInfo _decl, @string name, ref Signature _sig, ref ast.BlockStmt _body) => func(_check, _decl, _sig, _body, (ref Checker check, ref declInfo decl, ref Signature sig, ref ast.BlockStmt body, Defer defer, Panic _, Recover __) =>
+        private static void funcBody(this ptr<Checker> _addr_check, ptr<declInfo> _addr_decl, @string name, ptr<Signature> _addr_sig, ptr<ast.BlockStmt> _addr_body, constant.Value iota) => func((defer, _, __) =>
         {
+            ref Checker check = ref _addr_check.val;
+            ref declInfo decl = ref _addr_decl.val;
+            ref Signature sig = ref _addr_sig.val;
+            ref ast.BlockStmt body = ref _addr_body.val;
+
             if (trace)
             {
-                if (name == "")
+                check.trace(body.Pos(), "--- %s: %s", name, sig);
+                defer(() =>
                 {
-                    name = "<function literal>";
-                }
-                fmt.Printf("--- %s: %s {\n", name, sig);
-                defer(fmt.Println("--- <end>"));
+                    check.trace(body.End(), "--- <end>");
+                }());
+
             }
             sig.scope.pos = body.Pos();
             sig.scope.end = body.End(); 
@@ -41,7 +45,7 @@ namespace go
                 check.context = ctxt;
                 check.indent = indent;
             }(check.context, check.indent));
-            check.context = new context(decl:decl,scope:sig.scope,sig:sig,);
+            check.context = new context(decl:decl,scope:sig.scope,iota:iota,sig:sig,);
             check.indent = 0L;
 
             check.stmtList(0L, body.List);
@@ -55,17 +59,21 @@ namespace go
                 check.error(body.Rbrace, "missing return");
             }
             check.usage(sig.scope);
+
         });
 
-        private static void usage(this ref Checker check, ref Scope scope)
+        private static void usage(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope)
         {
-            slice<ref Var> unused = default;
+            ref Checker check = ref _addr_check.val;
+            ref Scope scope = ref _addr_scope.val;
+
+            slice<ptr<Var>> unused = default;
             foreach (var (_, elem) in scope.elems)
             {
                 {
-                    ref Var v__prev1 = v;
+                    ptr<Var> v__prev1 = v;
 
-                    ref Var (v, _) = elem._<ref Var>();
+                    ptr<Var> (v, _) = elem._<ptr<Var>>();
 
                     if (v != null && !v.used)
                     {
@@ -75,13 +83,14 @@ namespace go
                     v = v__prev1;
 
                 }
+
             }
             sort.Slice(unused, (i, j) =>
             {
                 return unused[i].pos < unused[j].pos;
             });
             {
-                ref Var v__prev1 = v;
+                ptr<Var> v__prev1 = v;
 
                 foreach (var (_, __v) in unused)
                 {
@@ -94,13 +103,15 @@ namespace go
 
             foreach (var (_, scope) in scope.children)
             { 
-                // Don't go inside closure scopes a second time;
+                // Don't go inside function literal scopes a second time;
                 // they are handled explicitly by funcBody.
                 if (!scope.isFunc)
                 {
                     check.usage(scope);
                 }
+
             }
+
         }
 
         // stmtContext is a bitset describing which
@@ -113,19 +124,23 @@ namespace go
 
  
         // permissible control-flow statements
-        private static readonly stmtContext breakOk = 1L << (int)(iota);
-        private static readonly var continueOk = 0;
-        private static readonly var fallthroughOk = 1; 
+        private static readonly stmtContext breakOk = (stmtContext)1L << (int)(iota);
+        private static readonly var continueOk = (var)0;
+        private static readonly var fallthroughOk = (var)1; 
 
         // additional context information
-        private static readonly var finalSwitchCase = 2;
+        private static readonly var finalSwitchCase = (var)2;
 
-        private static void simpleStmt(this ref Checker check, ast.Stmt s)
+
+        private static void simpleStmt(this ptr<Checker> _addr_check, ast.Stmt s)
         {
+            ref Checker check = ref _addr_check.val;
+
             if (s != null)
             {
                 check.stmt(0L, s);
             }
+
         }
 
         private static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list)
@@ -133,7 +148,7 @@ namespace go
             for (var i = len(list); i > 0L; i--)
             {
                 {
-                    ref ast.EmptyStmt (_, ok) = list[i - 1L]._<ref ast.EmptyStmt>();
+                    ptr<ast.EmptyStmt> (_, ok) = list[i - 1L]._<ptr<ast.EmptyStmt>>();
 
                     if (!ok)
                     {
@@ -141,13 +156,17 @@ namespace go
                     }
 
                 }
+
             }
 
             return null;
+
         }
 
-        private static void stmtList(this ref Checker check, stmtContext ctxt, slice<ast.Stmt> list)
+        private static void stmtList(this ptr<Checker> _addr_check, stmtContext ctxt, slice<ast.Stmt> list)
         {
+            ref Checker check = ref _addr_check.val;
+
             var ok = ctxt & fallthroughOk != 0L;
             var inner = ctxt & ~fallthroughOk;
             list = trimTrailingEmptyStmts(list); // trailing empty statements are "invisible" to fallthrough analysis
@@ -158,29 +177,36 @@ namespace go
                 {
                     inner |= fallthroughOk;
                 }
+
                 check.stmt(inner, s);
+
             }
+
         }
 
-        private static void multipleDefaults(this ref Checker check, slice<ast.Stmt> list)
+        private static void multipleDefaults(this ptr<Checker> _addr_check, slice<ast.Stmt> list)
         {
+            ref Checker check = ref _addr_check.val;
+
             ast.Stmt first = default;
             foreach (var (_, s) in list)
             {
                 ast.Stmt d = default;
                 switch (s.type())
                 {
-                    case ref ast.CaseClause c:
+                    case ptr<ast.CaseClause> c:
                         if (len(c.List) == 0L)
                         {
                             d = s;
                         }
+
                         break;
-                    case ref ast.CommClause c:
+                    case ptr<ast.CommClause> c:
                         if (c.Comm == null)
                         {
                             d = s;
                         }
+
                         break;
                     default:
                     {
@@ -199,19 +225,26 @@ namespace go
                     {
                         first = d;
                     }
+
                 }
+
             }
+
         }
 
-        private static void openScope(this ref Checker check, ast.Stmt s, @string comment)
+        private static void openScope(this ptr<Checker> _addr_check, ast.Stmt s, @string comment)
         {
+            ref Checker check = ref _addr_check.val;
+
             var scope = NewScope(check.scope, s.Pos(), s.End(), comment);
             check.recordScope(s, scope);
             check.scope = scope;
         }
 
-        private static void closeScope(this ref Checker check)
+        private static void closeScope(this ptr<Checker> _addr_check)
         {
+            ref Checker check = ref _addr_check.val;
+
             check.scope = check.scope.Parent();
         }
 
@@ -222,23 +255,29 @@ namespace go
             {
                 return op + (token.ADD - token.ADD_ASSIGN);
             }
+
             return token.ILLEGAL;
+
         }
 
-        private static void suspendedCall(this ref Checker check, @string keyword, ref ast.CallExpr call)
+        private static void suspendedCall(this ptr<Checker> _addr_check, @string keyword, ptr<ast.CallExpr> _addr_call)
         {
-            operand x = default;
+            ref Checker check = ref _addr_check.val;
+            ref ast.CallExpr call = ref _addr_call.val;
+
+            ref operand x = ref heap(out ptr<operand> _addr_x);
             @string msg = default;
 
-            if (check.rawExpr(ref x, call, null) == conversion) 
+            if (check.rawExpr(_addr_x, call, null) == conversion) 
                 msg = "requires function call, not conversion";
-            else if (check.rawExpr(ref x, call, null) == expression) 
+            else if (check.rawExpr(_addr_x, call, null) == expression) 
                 msg = "discards result of";
-            else if (check.rawExpr(ref x, call, null) == statement) 
-                return;
+            else if (check.rawExpr(_addr_x, call, null) == statement) 
+                return ;
             else 
                 unreachable();
-                        check.errorf(x.pos(), "%s %s %s", keyword, msg, ref x);
+                        check.errorf(x.pos(), "%s %s %s", keyword, msg, _addr_x);
+
         }
 
         // goVal returns the Go value for val, or nil.
@@ -268,6 +307,7 @@ namespace go
                     x = x__prev1;
 
                 }
+
                 {
                     var x__prev1 = x;
 
@@ -281,6 +321,7 @@ namespace go
                     x = x__prev1;
 
                 }
+
             else if (val.Kind() == constant.Float) 
                 {
                     var x__prev1 = x;
@@ -295,9 +336,11 @@ namespace go
                     x = x__prev1;
 
                 }
+
             else if (val.Kind() == constant.String) 
                 return constant.StringVal(val);
                         return null;
+
         }
 
         // A valueMap maps a case value (of a basic Go type) to a list of positions
@@ -310,32 +353,38 @@ namespace go
         {
             public token.Pos pos;
             public Type typ;
-        }        private static void caseValues(this ref Checker check, ref operand x, slice<ast.Expr> values, valueMap seen)
+        }
+        private static void caseValues(this ptr<Checker> _addr_check, ptr<operand> _addr_x, slice<ast.Expr> values, valueMap seen)
         {
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+
 L:
             foreach (var (_, e) in values)
             {
-                operand v = default;
-                check.expr(ref v, e);
+                ref operand v = ref heap(out ptr<operand> _addr_v);
+                check.expr(_addr_v, e);
                 if (x.mode == invalid || v.mode == invalid)
                 {
                     _continueL = true;
                     break;
                 }
-                check.convertUntyped(ref v, x.typ);
+
+                check.convertUntyped(_addr_v, x.typ);
                 if (v.mode == invalid)
                 {
                     _continueL = true;
                     break;
                 } 
                 // Order matters: By comparing v against x, error positions are at the case values.
-                var res = v; // keep original v unchanged
-                check.comparison(ref res, x, token.EQL);
+                ref var res = ref heap(v, out ptr<var> _addr_res); // keep original v unchanged
+                check.comparison(_addr_res, x, token.EQL);
                 if (res.mode == invalid)
                 {
                     _continueL = true;
                     break;
                 }
+
                 if (v.mode != constant_)
                 {
                     _continueL = true; // we're done
@@ -351,23 +400,32 @@ L:
                         // (quadratic algorithm, but these lists tend to be very short)
                         foreach (var (_, vt) in seen[val])
                         {
-                            if (Identical(v.typ, vt.typ))
+                            if (check.identical(v.typ, vt.typ))
                             {
-                                check.errorf(v.pos(), "duplicate case %s in expression switch", ref v);
+                                check.errorf(v.pos(), "duplicate case %s in expression switch", _addr_v);
                                 check.error(vt.pos, "\tprevious case"); // secondary error, \t indented
                                 _continueL = true;
                                 break;
                             }
+
                         }
                         seen[val] = append(seen[val], new valueType(v.pos(),v.typ));
+
                     }
 
                 }
+
             }
+
         }
 
-        private static Type caseTypes(this ref Checker check, ref operand x, ref Interface xtyp, slice<ast.Expr> types, map<Type, token.Pos> seen)
+        private static Type caseTypes(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<Interface> _addr_xtyp, slice<ast.Expr> types, map<Type, token.Pos> seen)
         {
+            Type T = default;
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+            ref Interface xtyp = ref _addr_xtyp.val;
+
 L:
             foreach (var (_, e) in types)
             {
@@ -381,7 +439,7 @@ L:
                 // (quadratic algorithm, but type switches tend to be reasonably small)
                 foreach (var (t, pos) in seen)
                 {
-                    if (T == null && t == null || T != null && t != null && Identical(T, t))
+                    if (T == null && t == null || T != null && t != null && check.identical(T, t))
                     { 
                         // talk about "case" rather than "type" because of nil case
                         @string Ts = "nil";
@@ -389,28 +447,30 @@ L:
                         {
                             Ts = T.String();
                         }
+
                         check.errorf(e.Pos(), "duplicate case %s in type switch", Ts);
                         check.error(pos, "\tprevious case"); // secondary error, \t indented
                         _continueL = true;
                         break;
                     }
+
                 }
                 seen[T] = e.Pos();
                 if (T != null)
                 {
                     check.typeAssertion(e.Pos(), x, xtyp, T);
                 }
+
             }
-            return;
+            return ;
+
         }
 
         // stmt typechecks statement s.
-        private static void stmt(this ref Checker _check, stmtContext ctxt, ast.Stmt s) => func(_check, (ref Checker check, Defer defer, Panic panic, Recover _) =>
-        { 
-            // statements cannot use iota in general
-            // (constant declarations set it explicitly)
-            assert(check.iota == null); 
-
+        private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.Stmt s) => func((defer, panic, _) =>
+        {
+            ref Checker check = ref _addr_check.val;
+ 
             // statements must end with the same top scope as they started with
             if (debug)
             {
@@ -426,26 +486,33 @@ L:
                         }
 
                     }
+
                     assert(scope == check.scope);
+
                 }(check.scope));
-            }
+
+            } 
+
+            // process collected function literals before scope changes
+            defer(check.processDelayed(len(check.delayed)));
+
             var inner = ctxt & ~(fallthroughOk | finalSwitchCase);
             switch (s.type())
             {
-                case ref ast.BadStmt s:
+                case ptr<ast.BadStmt> s:
                     break;
-                case ref ast.EmptyStmt s:
+                case ptr<ast.EmptyStmt> s:
                     break;
-                case ref ast.DeclStmt s:
+                case ptr<ast.DeclStmt> s:
                     check.declStmt(s.Decl);
                     break;
-                case ref ast.LabeledStmt s:
+                case ptr<ast.LabeledStmt> s:
                     check.hasLabel = true;
                     check.stmt(ctxt, s.Stmt);
                     break;
-                case ref ast.ExprStmt s:
-                    operand x = default;
-                    var kind = check.rawExpr(ref x, s.X, null);
+                case ptr<ast.ExprStmt> s:
+                    ref operand x = ref heap(out ptr<operand> _addr_x);
+                    var kind = check.rawExpr(_addr_x, s.X, null);
                     @string msg = default;
 
                     if (x.mode == builtin) 
@@ -455,34 +522,38 @@ L:
                     else 
                         if (kind == statement)
                         {
-                            return;
+                            return ;
                         }
-                        msg = "is not used";
-                                        check.errorf(x.pos(), "%s %s", ref x, msg);
-                    break;
-                case ref ast.SendStmt s:
-                    operand ch = default;                    x = default;
 
-                    check.expr(ref ch, s.Chan);
-                    check.expr(ref x, s.Value);
+                        msg = "is not used";
+                                        check.errorf(x.pos(), "%s %s", _addr_x, msg);
+                    break;
+                case ptr<ast.SendStmt> s:
+                    ref operand ch = ref heap(out ptr<operand> _addr_ch);                    x = default;
+
+                    check.expr(_addr_ch, s.Chan);
+                    check.expr(_addr_x, s.Value);
                     if (ch.mode == invalid || x.mode == invalid)
                     {
-                        return;
+                        return ;
                     }
-                    ref Chan (tch, ok) = ch.typ.Underlying()._<ref Chan>();
+
+                    ptr<Chan> (tch, ok) = ch.typ.Underlying()._<ptr<Chan>>();
                     if (!ok)
                     {
                         check.invalidOp(s.Arrow, "cannot send to non-chan type %s", ch.typ);
-                        return;
+                        return ;
                     }
+
                     if (tch.dir == RecvOnly)
                     {
                         check.invalidOp(s.Arrow, "cannot send to receive-only type %s", tch);
-                        return;
+                        return ;
                     }
-                    check.assignment(ref x, tch.elem, "send");
+
+                    check.assignment(_addr_x, tch.elem, "send");
                     break;
-                case ref ast.IncDecStmt s:
+                case ptr<ast.IncDecStmt> s:
                     token.Token op = default;
 
                     if (s.Tok == token.INC) 
@@ -491,34 +562,38 @@ L:
                         op = token.SUB;
                     else 
                         check.invalidAST(s.TokPos, "unknown inc/dec operation %s", s.Tok);
-                        return;
+                        return ;
                                         x = default;
-                    check.expr(ref x, s.X);
+                    check.expr(_addr_x, s.X);
                     if (x.mode == invalid)
                     {
-                        return;
+                        return ;
                     }
+
                     if (!isNumeric(x.typ))
                     {
                         check.invalidOp(s.X.Pos(), "%s%s (non-numeric type %s)", s.X, s.Tok, x.typ);
-                        return;
+                        return ;
                     }
-                    ast.BasicLit Y = ref new ast.BasicLit(ValuePos:s.X.Pos(),Kind:token.INT,Value:"1"); // use x's position
-                    check.binary(ref x, null, s.X, Y, op);
+
+                    ptr<ast.BasicLit> Y = addr(new ast.BasicLit(ValuePos:s.X.Pos(),Kind:token.INT,Value:"1")); // use x's position
+                    check.binary(_addr_x, null, s.X, Y, op);
                     if (x.mode == invalid)
                     {
-                        return;
+                        return ;
                     }
-                    check.assignVar(s.X, ref x);
+
+                    check.assignVar(s.X, _addr_x);
                     break;
-                case ref ast.AssignStmt s:
+                case ptr<ast.AssignStmt> s:
 
                     if (s.Tok == token.ASSIGN || s.Tok == token.DEFINE) 
                         if (len(s.Lhs) == 0L)
                         {
                             check.invalidAST(s.Pos(), "missing lhs in assignment");
-                            return;
+                            return ;
                         }
+
                         if (s.Tok == token.DEFINE)
                         {
                             check.shortVarDecl(s.TokPos, s.Lhs, s.Rhs);
@@ -527,35 +602,40 @@ L:
                         { 
                             // regular assignment
                             check.assignVars(s.Lhs, s.Rhs);
+
                         }
+
                     else 
                         // assignment operations
                         if (len(s.Lhs) != 1L || len(s.Rhs) != 1L)
                         {
                             check.errorf(s.TokPos, "assignment operation %s requires single-valued expressions", s.Tok);
-                            return;
+                            return ;
                         }
+
                         op = assignOp(s.Tok);
                         if (op == token.ILLEGAL)
                         {
                             check.invalidAST(s.TokPos, "unknown assignment operation %s", s.Tok);
-                            return;
+                            return ;
                         }
+
                         x = default;
-                        check.binary(ref x, null, s.Lhs[0L], s.Rhs[0L], op);
+                        check.binary(_addr_x, null, s.Lhs[0L], s.Rhs[0L], op);
                         if (x.mode == invalid)
                         {
-                            return;
+                            return ;
                         }
-                        check.assignVar(s.Lhs[0L], ref x);
+
+                        check.assignVar(s.Lhs[0L], _addr_x);
                                         break;
-                case ref ast.GoStmt s:
+                case ptr<ast.GoStmt> s:
                     check.suspendedCall("go", s.Call);
                     break;
-                case ref ast.DeferStmt s:
+                case ptr<ast.DeferStmt> s:
                     check.suspendedCall("defer", s.Call);
                     break;
-                case ref ast.ReturnStmt s:
+                case ptr<ast.ReturnStmt> s:
                     var res = check.sig.results;
                     if (res.Len() > 0L)
                     { 
@@ -573,7 +653,7 @@ L:
                                 {
                                     obj = __obj;
                                     {
-                                        var (_, alt) = check.scope.LookupParent(obj.name, check.pos);
+                                        var alt = check.lookup(obj.name);
 
                                         if (alt != null && alt != obj)
                                         {
@@ -583,40 +663,46 @@ L:
                                         }
 
                                     }
+
                                 }
                         else
 
                                 obj = obj__prev1;
                             }
-
                         }                        { 
                             // return has results or result parameters are unnamed
                             check.initVars(res.vars, s.Results, s.Return);
+
                         }
+
                     }
                     else if (len(s.Results) > 0L)
                     {
                         check.error(s.Results[0L].Pos(), "no result values expected");
                         check.use(s.Results);
                     }
+
                     break;
-                case ref ast.BranchStmt s:
+                case ptr<ast.BranchStmt> s:
                     if (s.Label != null)
                     {
                         check.hasLabel = true;
-                        return; // checked in 2nd pass (check.labels)
+                        return ; // checked in 2nd pass (check.labels)
                     }
+
 
                     if (s.Tok == token.BREAK) 
                         if (ctxt & breakOk == 0L)
                         {
                             check.error(s.Pos(), "break not in for, switch, or select statement");
                         }
+
                     else if (s.Tok == token.CONTINUE) 
                         if (ctxt & continueOk == 0L)
                         {
                             check.error(s.Pos(), "continue not in for statement");
                         }
+
                     else if (s.Tok == token.FALLTHROUGH) 
                         if (ctxt & fallthroughOk == 0L)
                         {
@@ -625,39 +711,43 @@ L:
                             {
                                 msg = "cannot fallthrough final case in switch";
                             }
+
                             check.error(s.Pos(), msg);
+
                         }
+
                     else 
                         check.invalidAST(s.Pos(), "branch statement: %s", s.Tok);
                                         break;
-                case ref ast.BlockStmt s:
+                case ptr<ast.BlockStmt> s:
                     check.openScope(s, "block");
                     defer(check.closeScope());
 
                     check.stmtList(inner, s.List);
                     break;
-                case ref ast.IfStmt s:
+                case ptr<ast.IfStmt> s:
                     check.openScope(s, "if");
                     defer(check.closeScope());
 
                     check.simpleStmt(s.Init);
                     x = default;
-                    check.expr(ref x, s.Cond);
+                    check.expr(_addr_x, s.Cond);
                     if (x.mode != invalid && !isBoolean(x.typ))
                     {
                         check.error(s.Cond.Pos(), "non-boolean condition in if statement");
                     }
+
                     check.stmt(inner, s.Body); 
                     // The parser produces a correct AST but if it was modified
                     // elsewhere the else branch may be invalid. Check again.
                     switch (s.Else.type())
                     {
-                        case ref ast.BadStmt _:
+                        case ptr<ast.BadStmt> _:
                             break;
-                        case ref ast.IfStmt _:
+                        case ptr<ast.IfStmt> _:
                             check.stmt(inner, s.Else);
                             break;
-                        case ref ast.BlockStmt _:
+                        case ptr<ast.BlockStmt> _:
                             check.stmt(inner, s.Else);
                             break;
                         default:
@@ -668,7 +758,7 @@ L:
 
                     }
                     break;
-                case ref ast.SwitchStmt s:
+                case ptr<ast.SwitchStmt> s:
                     inner |= breakOk;
                     check.openScope(s, "switch");
                     defer(check.closeScope());
@@ -677,10 +767,11 @@ L:
                     x = default;
                     if (s.Tag != null)
                     {
-                        check.expr(ref x, s.Tag); 
+                        check.expr(_addr_x, s.Tag); 
                         // By checking assignment of x to an invisible temporary
                         // (as a compiler would), we get all the relevant checks.
-                        check.assignment(ref x, null, "switch expression");
+                        check.assignment(_addr_x, null, "switch expression");
+
                     }
                     else
                     { 
@@ -689,8 +780,10 @@ L:
                         x.mode = constant_;
                         x.typ = Typ[Bool];
                         x.val = constant.MakeBool(true);
-                        x.expr = ref new ast.Ident(NamePos:s.Body.Lbrace,Name:"true");
+                        x.expr = addr(new ast.Ident(NamePos:s.Body.Lbrace,Name:"true"));
+
                     }
+
                     check.multipleDefaults(s.Body.List);
 
                     var seen = make(valueMap); // map of seen case values to positions and types
@@ -701,13 +794,14 @@ L:
                         {
                             i = __i;
                             c = __c;
-                            ref ast.CaseClause (clause, _) = c._<ref ast.CaseClause>();
+                            ptr<ast.CaseClause> (clause, _) = c._<ptr<ast.CaseClause>>();
                             if (clause == null)
                             {
                                 check.invalidAST(c.Pos(), "incorrect expression switch case");
                                 continue;
                             }
-                            check.caseValues(ref x, clause.List, seen);
+
+                            check.caseValues(_addr_x, clause.List, seen);
                             check.openScope(clause, "case");
                             inner = inner;
                             if (i + 1L < len(s.Body.List))
@@ -718,14 +812,16 @@ L:
                             {
                                 inner |= finalSwitchCase;
                             }
+
                             check.stmtList(inner, clause.Body);
                             check.closeScope();
+
                         }
 
                         i = i__prev1;
                     }
                     break;
-                case ref ast.TypeSwitchStmt s:
+                case ptr<ast.TypeSwitchStmt> s:
                     inner |= breakOk;
                     check.openScope(s, "type switch");
                     defer(check.closeScope());
@@ -740,25 +836,27 @@ L:
                     // remaining syntactic errors are considered AST errors here.
                     // TODO(gri) better factoring of error handling (invalid ASTs)
                     //
-                    ref ast.Ident lhs = default; // lhs identifier or nil
+                    ptr<ast.Ident> lhs; // lhs identifier or nil
                     ast.Expr rhs = default;
                     switch (s.Assign.type())
                     {
-                        case ref ast.ExprStmt guard:
+                        case ptr<ast.ExprStmt> guard:
                             rhs = guard.X;
                             break;
-                        case ref ast.AssignStmt guard:
+                        case ptr<ast.AssignStmt> guard:
                             if (len(guard.Lhs) != 1L || guard.Tok != token.DEFINE || len(guard.Rhs) != 1L)
                             {
                                 check.invalidAST(s.Pos(), "incorrect form of type switch guard");
-                                return;
+                                return ;
                             }
-                            lhs, _ = guard.Lhs[0L]._<ref ast.Ident>();
+
+                            lhs, _ = guard.Lhs[0L]._<ptr<ast.Ident>>();
                             if (lhs == null)
                             {
                                 check.invalidAST(s.Pos(), "incorrect form of type switch guard");
-                                return;
+                                return ;
                             }
+
                             if (lhs.Name == "_")
                             { 
                                 // _ := x.(type) is an invalid short variable declaration
@@ -769,13 +867,14 @@ L:
                             {
                                 check.recordDef(lhs, null); // lhs variable is implicitly declared in each cause clause
                             }
+
                             rhs = guard.Rhs[0L];
                             break;
                         default:
                         {
                             var guard = s.Assign.type();
                             check.invalidAST(s.Pos(), "incorrect form of type switch guard");
-                            return;
+                            return ;
                             break;
                         } 
 
@@ -783,27 +882,30 @@ L:
                     } 
 
                     // rhs must be of the form: expr.(type) and expr must be an interface
-                    ref ast.TypeAssertExpr (expr, _) = rhs._<ref ast.TypeAssertExpr>();
+                    ptr<ast.TypeAssertExpr> (expr, _) = rhs._<ptr<ast.TypeAssertExpr>>();
                     if (expr == null || expr.Type != null)
                     {
                         check.invalidAST(s.Pos(), "incorrect form of type switch guard");
-                        return;
+                        return ;
                     }
+
                     x = default;
-                    check.expr(ref x, expr.X);
+                    check.expr(_addr_x, expr.X);
                     if (x.mode == invalid)
                     {
-                        return;
+                        return ;
                     }
-                    ref Interface (xtyp, _) = x.typ.Underlying()._<ref Interface>();
+
+                    ptr<Interface> (xtyp, _) = x.typ.Underlying()._<ptr<Interface>>();
                     if (xtyp == null)
                     {
-                        check.errorf(x.pos(), "%s is not an interface", ref x);
-                        return;
+                        check.errorf(x.pos(), "%s is not an interface", _addr_x);
+                        return ;
                     }
+
                     check.multipleDefaults(s.Body.List);
 
-                    slice<ref Var> lhsVars = default; // list of implicitly declared lhs variables
+                    slice<ptr<Var>> lhsVars = default; // list of implicitly declared lhs variables
                     seen = make_map<Type, token.Pos>(); // map of seen types to positions
                     {
                         var s__prev1 = s;
@@ -811,14 +913,14 @@ L:
                         foreach (var (_, __s) in s.Body.List)
                         {
                             s = __s;
-                            (clause, _) = s._<ref ast.CaseClause>();
+                            (clause, _) = s._<ptr<ast.CaseClause>>();
                             if (clause == null)
                             {
                                 check.invalidAST(s.Pos(), "incorrect type switch case");
                                 continue;
                             } 
                             // Check each type in this type switch case.
-                            var T = check.caseTypes(ref x, xtyp, clause.List, seen);
+                            var T = check.caseTypes(_addr_x, xtyp, clause.List, seen);
                             check.openScope(clause, "case"); 
                             // If lhs exists, declare a corresponding variable in the case-local scope.
                             if (lhs != null)
@@ -832,6 +934,7 @@ L:
                                 {
                                     T = x.typ;
                                 }
+
                                 var obj = NewVar(lhs.Pos(), check.pkg, lhs.Name, T);
                                 var scopePos = clause.Pos() + token.Pos(len("default")); // for default clause (len(List) == 0)
                                 {
@@ -843,15 +946,19 @@ L:
                                     }
 
                                 }
+
                                 check.declare(check.scope, null, obj, scopePos);
                                 check.recordImplicit(clause, obj); 
                                 // For the "declared but not used" error, all lhs variables act as
                                 // one; i.e., if any one of them is 'used', all of them are 'used'.
                                 // Collect them for later analysis.
                                 lhsVars = append(lhsVars, obj);
+
                             }
+
                             check.stmtList(inner, clause.Body);
                             check.closeScope();
+
                         } 
 
                         // If lhs exists, we must have at least one lhs variable that was used.
@@ -868,15 +975,18 @@ L:
                             {
                                 used = true;
                             }
+
                             v.used = true; // avoid usage error when checking entire function
                         }
                         if (!used)
                         {
                             check.softErrorf(lhs.Pos(), "%s declared but not used", lhs.Name);
                         }
+
                     }
+
                     break;
-                case ref ast.SelectStmt s:
+                case ptr<ast.SelectStmt> s:
                     inner |= breakOk;
 
                     check.multipleDefaults(s.Body.List);
@@ -887,7 +997,7 @@ L:
                         foreach (var (_, __s) in s.Body.List)
                         {
                             s = __s;
-                            (clause, _) = s._<ref ast.CommClause>();
+                            (clause, _) = s._<ptr<ast.CommClause>>();
                             if (clause == null)
                             {
                                 continue; // error reported before
@@ -898,16 +1008,17 @@ L:
                             rhs = default; // rhs of RecvStmt, or nil
                             switch (clause.Comm.type())
                             {
-                                case ref ast.SendStmt s:
+                                case ptr<ast.SendStmt> s:
                                     valid = true;
                                     break;
-                                case ref ast.AssignStmt s:
+                                case ptr<ast.AssignStmt> s:
                                     if (len(s.Rhs) == 1L)
                                     {
                                         rhs = s.Rhs[0L];
                                     }
+
                                     break;
-                                case ref ast.ExprStmt s:
+                                case ptr<ast.ExprStmt> s:
                                     rhs = s.X;
                                     break; 
 
@@ -920,7 +1031,7 @@ L:
                                 {
                                     operand x__prev2 = x;
 
-                                    ref ast.UnaryExpr (x, _) = unparen(rhs)._<ref ast.UnaryExpr>();
+                                    ptr<ast.UnaryExpr> (x, _) = unparen(rhs)._<ptr<ast.UnaryExpr>>();
 
                                     if (x != null && x.Op == token.ARROW)
                                     {
@@ -930,25 +1041,30 @@ L:
                                     x = x__prev2;
 
                                 }
+
                             }
+
                             if (!valid)
                             {
                                 check.error(clause.Comm.Pos(), "select case must be send or receive (possibly with assignment)");
                                 continue;
                             }
+
                             check.openScope(s, "case");
                             if (clause.Comm != null)
                             {
                                 check.stmt(inner, clause.Comm);
                             }
+
                             check.stmtList(inner, clause.Body);
                             check.closeScope();
+
                         }
 
                         s = s__prev1;
                     }
                     break;
-                case ref ast.ForStmt s:
+                case ptr<ast.ForStmt> s:
                     inner |= breakOk | continueOk;
                     check.openScope(s, "for");
                     defer(check.closeScope());
@@ -957,19 +1073,21 @@ L:
                     if (s.Cond != null)
                     {
                         x = default;
-                        check.expr(ref x, s.Cond);
+                        check.expr(_addr_x, s.Cond);
                         if (x.mode != invalid && !isBoolean(x.typ))
                         {
                             check.error(s.Cond.Pos(), "non-boolean condition in for statement");
                         }
+
                     }
+
                     check.simpleStmt(s.Post); 
                     // spec: "The init statement may be a short variable
                     // declaration, but the post statement must not."
                     {
                         var s__prev1 = s;
 
-                        ref ast.AssignStmt (s, _) = s.Post._<ref ast.AssignStmt>();
+                        ptr<ast.AssignStmt> (s, _) = s.Post._<ptr<ast.AssignStmt>>();
 
                         if (s != null && s.Tok == token.DEFINE)
                         {
@@ -983,16 +1101,17 @@ L:
                         s = s__prev1;
 
                     }
+
                     check.stmt(inner, s.Body);
                     break;
-                case ref ast.RangeStmt s:
+                case ptr<ast.RangeStmt> s:
                     inner |= breakOk | continueOk;
                     check.openScope(s, "for");
                     defer(check.closeScope()); 
 
                     // check expression to iterate over
                     x = default;
-                    check.expr(ref x, s.X); 
+                    check.expr(_addr_x, s.X); 
 
                     // determine key/value types
                     Type key = default;                    Type val = default;
@@ -1001,26 +1120,27 @@ L:
                     {
                         switch (x.typ.Underlying().type())
                         {
-                            case ref Basic typ:
+                            case ptr<Basic> typ:
                                 if (isString(typ))
                                 {
                                     key = Typ[Int];
                                     val = universeRune; // use 'rune' name
                                 }
+
                                 break;
-                            case ref Array typ:
+                            case ptr<Array> typ:
                                 key = Typ[Int];
                                 val = typ.elem;
                                 break;
-                            case ref Slice typ:
+                            case ptr<Slice> typ:
                                 key = Typ[Int];
                                 val = typ.elem;
                                 break;
-                            case ref Pointer typ:
+                            case ptr<Pointer> typ:
                                 {
                                     var typ__prev2 = typ;
 
-                                    ref Array (typ, _) = typ.@base.Underlying()._<ref Array>();
+                                    ptr<Array> (typ, _) = typ.@base.Underlying()._<ptr<Array>>();
 
                                     if (typ != null)
                                     {
@@ -1031,30 +1151,35 @@ L:
                                     typ = typ__prev2;
 
                                 }
+
                                 break;
-                            case ref Map typ:
+                            case ptr<Map> typ:
                                 key = typ.key;
                                 val = typ.elem;
                                 break;
-                            case ref Chan typ:
+                            case ptr<Chan> typ:
                                 key = typ.elem;
                                 val = Typ[Invalid];
                                 if (typ.dir == SendOnly)
                                 {
-                                    check.errorf(x.pos(), "cannot range over send-only channel %s", ref x); 
+                                    check.errorf(x.pos(), "cannot range over send-only channel %s", _addr_x); 
                                     // ok to continue
                                 }
+
                                 if (s.Value != null)
                                 {
-                                    check.errorf(s.Value.Pos(), "iteration over %s permits only one iteration variable", ref x); 
+                                    check.errorf(s.Value.Pos(), "iteration over %s permits only one iteration variable", _addr_x); 
                                     // ok to continue
                                 }
+
                                 break;
                         }
+
                     }
+
                     if (key == null)
                     {
-                        check.errorf(x.pos(), "cannot range over %s", ref x); 
+                        check.errorf(x.pos(), "cannot range over %s", _addr_x); 
                         // ok to continue
                     } 
 
@@ -1070,10 +1195,10 @@ L:
                         // short variable declaration; variable scope starts after the range clause
                         // (the for loop opens a new scope, so variables on the lhs never redeclare
                         // previously declared variables)
-                        slice<ref Var> vars = default;
+                        slice<ptr<Var>> vars = default;
                         {
                             var i__prev1 = i;
-                            ref ast.Ident lhs__prev1 = lhs;
+                            ptr<ast.Ident> lhs__prev1 = lhs;
 
                             foreach (var (__i, __lhs) in lhs)
                             {
@@ -1085,9 +1210,9 @@ L:
                                 } 
 
                                 // determine lhs variable
-                                obj = default;
+                                obj = ;
                                 {
-                                    ref ast.Ident (ident, _) = lhs._<ref ast.Ident>();
+                                    ptr<ast.Ident> (ident, _) = lhs._<ptr<ast.Ident>>();
 
                                     if (ident != null)
                                     { 
@@ -1100,6 +1225,7 @@ L:
                                         {
                                             vars = append(vars, obj);
                                         }
+
                                     }
                                     else
                                     {
@@ -1122,7 +1248,8 @@ L:
                                         x.mode = value;
                                         x.expr = lhs; // we don't have a better rhs expression to use here
                                         x.typ = typ;
-                                        check.initVar(obj, ref x, "range clause");
+                                        check.initVar(obj, _addr_x, "range clause");
+
                                     }
                                     else
                                     {
@@ -1133,6 +1260,7 @@ L:
                                     typ = typ__prev2;
 
                                 }
+
                             }
                     else
  
@@ -1157,20 +1285,21 @@ L:
                                     // for short variable declarations) and ends at the end of the innermost
                                     // containing block."
                                     check.declare(check.scope, null, obj, scopePos);
+
                                 }
                         else
 
                                 obj = obj__prev1;
                             }
-
                         }                        {
                             check.error(s.TokPos, "no new variables on left side of :=");
                         }
+
                     }                    { 
                         // ordinary assignment
                         {
                             var i__prev1 = i;
-                            ref ast.Ident lhs__prev1 = lhs;
+                            ptr<ast.Ident> lhs__prev1 = lhs;
 
                             foreach (var (__i, __lhs) in lhs)
                             {
@@ -1180,6 +1309,7 @@ L:
                                 {
                                     continue;
                                 }
+
                                 {
                                     var typ__prev2 = typ;
 
@@ -1190,19 +1320,21 @@ L:
                                         x.mode = value;
                                         x.expr = lhs; // we don't have a better rhs expression to use here
                                         x.typ = typ;
-                                        check.assignVar(lhs, ref x);
+                                        check.assignVar(lhs, _addr_x);
+
                                     }
 
                                     typ = typ__prev2;
 
                                 }
+
                             }
 
                             i = i__prev1;
                             lhs = lhs__prev1;
                         }
-
                     }
+
                     check.stmt(inner, s.Body);
                     break;
                 default:
@@ -1212,6 +1344,7 @@ L:
                     break;
                 }
             }
+
         });
     }
 }}

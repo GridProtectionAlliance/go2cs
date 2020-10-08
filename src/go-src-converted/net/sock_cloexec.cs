@@ -5,9 +5,9 @@
 // This file implements sysSocket and accept for platforms that
 // provide a fast path for setting SetNonblock and CloseOnExec.
 
-// +build dragonfly freebsd linux
+// +build dragonfly freebsd linux netbsd openbsd
 
-// package net -- go2cs converted at 2020 August 29 08:27:38 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:32 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sock_cloexec.go
 using poll = go.@internal.poll_package;
@@ -23,6 +23,9 @@ namespace go
         // descriptor as nonblocking and close-on-exec.
         private static (long, error) sysSocket(long family, long sotype, long proto)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             var (s, err) = socketFunc(family, sotype | syscall.SOCK_NONBLOCK | syscall.SOCK_CLOEXEC, proto); 
             // On Linux the SOCK_NONBLOCK and SOCK_CLOEXEC flags were
             // introduced in 2.6.27 kernel and on FreeBSD both flags were
@@ -31,9 +34,9 @@ namespace go
             // socket without them.
 
             if (err == null) 
-                return (s, null);
+                return (s, error.As(null!)!);
             else if (err == syscall.EPROTONOSUPPORT || err == syscall.EINVAL)             else 
-                return (-1L, os.NewSyscallError("socket", err));
+                return (-1L, error.As(os.NewSyscallError("socket", err))!);
             // See ../syscall/exec_unix.go for description of ForkLock.
             syscall.ForkLock.RLock();
             s, err = socketFunc(family, sotype, proto);
@@ -44,16 +47,17 @@ namespace go
             syscall.ForkLock.RUnlock();
             if (err != null)
             {
-                return (-1L, os.NewSyscallError("socket", err));
+                return (-1L, error.As(os.NewSyscallError("socket", err))!);
             }
             err = syscall.SetNonblock(s, true);
 
             if (err != null)
             {
                 poll.CloseFunc(s);
-                return (-1L, os.NewSyscallError("setnonblock", err));
+                return (-1L, error.As(os.NewSyscallError("setnonblock", err))!);
             }
-            return (s, null);
+            return (s, error.As(null!)!);
+
         }
     }
 }

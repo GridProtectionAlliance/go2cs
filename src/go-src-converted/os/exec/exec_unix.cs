@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package exec -- go2cs converted at 2020 August 29 08:24:38 UTC
+// package exec -- go2cs converted at 2020 October 08 03:41:17 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Go\src\os\exec\exec_unix.go
 using os = go.os_package;
@@ -24,9 +24,11 @@ namespace os
                 // Ignore EPIPE errors copying to stdin if the program
                 // completed successfully otherwise.
                 // See Issue 9173.
-                ref os.PathError (pe, ok) = err._<ref os.PathError>();
+                ptr<os.PathError> (pe, ok) = err._<ptr<os.PathError>>();
                 return ok && pe.Op == "write" && pe.Path == "|1" && pe.Err == syscall.EPIPE;
+
             };
+
         }
     }
 }}

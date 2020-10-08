@@ -8,7 +8,7 @@
 // This failed to be true on arm and arm64, which was the root cause
 // of issue 13881.
 
-// package main -- go2cs converted at 2020 August 29 08:24:48 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:51 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\dropm.go
 /*
 #include <stddef.h>
@@ -78,6 +78,7 @@ namespace go
                 fmt.Printf("m == %x want %x\n", m, savedM);
                 os.Exit(1L);
             }
+
         }
 
         public static void EnsureDropM()

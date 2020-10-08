@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:33 UTC
+//     Generated on 2020 October 08 03:27:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace go
                 this.Next = default;
             }
 
-            public AddrinfoW(int Flags = default, int Family = default, int Socktype = default, int Protocol = default, System.UIntPtr Addrlen = default, ref ptr<ushort> Canonname = default, System.UIntPtr Addr = default, ref ptr<AddrinfoW> Next = default)
+            public AddrinfoW(int Flags = default, int Family = default, int Socktype = default, int Protocol = default, System.UIntPtr Addrlen = default, ref ptr<ushort> Canonname = default, Pointer Addr = default, ref ptr<AddrinfoW> Next = default)
             {
                 this.Flags = Flags;
                 this.Family = Family;

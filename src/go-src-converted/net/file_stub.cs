@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build nacl
+// +build js,wasm
 
-// package net -- go2cs converted at 2020 August 29 08:26:17 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:03 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\file_stub.go
 using os = go.os_package;
@@ -15,17 +15,29 @@ namespace go
 {
     public static partial class net_package
     {
-        private static (Conn, error) fileConn(ref os.File f)
+        private static (Conn, error) fileConn(ptr<os.File> _addr_f)
         {
-            return (null, syscall.ENOPROTOOPT);
+            Conn _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            return (null, error.As(syscall.ENOPROTOOPT)!);
         }
-        private static (Listener, error) fileListener(ref os.File f)
+        private static (Listener, error) fileListener(ptr<os.File> _addr_f)
         {
-            return (null, syscall.ENOPROTOOPT);
+            Listener _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            return (null, error.As(syscall.ENOPROTOOPT)!);
         }
-        private static (PacketConn, error) filePacketConn(ref os.File f)
+        private static (PacketConn, error) filePacketConn(ptr<os.File> _addr_f)
         {
-            return (null, syscall.ENOPROTOOPT);
+            PacketConn _p0 = default;
+            error _p0 = default!;
+            ref os.File f = ref _addr_f.val;
+
+            return (null, error.As(syscall.ENOPROTOOPT)!);
         }
     }
 }

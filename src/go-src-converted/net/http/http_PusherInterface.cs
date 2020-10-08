@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:24 UTC
+//     Generated on 2020 October 08 03:40:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,7 +19,7 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -55,7 +55,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,23 +69,24 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate error PushByRef(ref T value, @string target, ref PushOptions opts);
-            private delegate error PushByVal(T value, @string target, ref PushOptions opts);
+            private delegate error PushByPtr(ptr<T> value, @string target, ptr<PushOptions> opts);
+            private delegate error PushByVal(T value, @string target, ptr<PushOptions> opts);
 
-            private static readonly PushByRef s_PushByRef;
+            private static readonly PushByPtr s_PushByPtr;
             private static readonly PushByVal s_PushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Push(@string target, ref PushOptions opts)
+            public error Push(@string target, ptr<PushOptions> opts)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PushByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PushByPtr is null || !m_target_is_ptr)
                     return s_PushByVal!(target, target, opts);
 
-                return s_PushByRef(ref target, target, opts);
+                return s_PushByPtr(m_target_ptr, target, opts);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -94,23 +95,20 @@ namespace net
             static Pusher()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Push");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Push");
 
                 if (!(extensionMethod is null))
-                    s_PushByRef = extensionMethod.CreateStaticDelegate(typeof(PushByRef)) as PushByRef;
+                    s_PushByPtr = extensionMethod.CreateStaticDelegate(typeof(PushByPtr)) as PushByPtr;
 
-                if (s_PushByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Push");
+                extensionMethod = targetType.GetExtensionMethod("Push");
 
-                    if (!(extensionMethod is null))
-                        s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
 
-                if (s_PushByRef is null && s_PushByVal is null)
+                if (s_PushByPtr is null && s_PushByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Pusher.Push method", new Exception("Push"));
             }
 

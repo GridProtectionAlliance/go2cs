@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:20 UTC
+//     Generated on 2020 October 08 04:09:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using obj = go.cmd.@internal.obj_package;
 using sort = go.sort_package;
 using go;
 
@@ -32,23 +33,29 @@ namespace @internal
                 this.values = default;
                 this.blocks = default;
                 this.locs = default;
-                this.varLocs = default;
-                this.curVarLoc = default;
                 this.stackAllocState = default;
                 this.domblockstore = default;
-                this.scrSparse = default;
+                this.scrSparseSet = default;
+                this.scrSparseMap = default;
+                this.scrPoset = default;
+                this.regallocValues = default;
+                this.ValueToProgAfter = default;
+                this.debugState = default;
             }
 
-            public Cache(array<Value> values = default, array<Block> blocks = default, array<Location> locs = default, slice<VarLoc> varLocs = default, long curVarLoc = default, ref ptr<stackAllocState> stackAllocState = default, slice<ID> domblockstore = default, slice<ref sparseSet> scrSparse = default)
+            public Cache(array<Value> values = default, array<Block> blocks = default, array<Location> locs = default, ref ptr<stackAllocState> stackAllocState = default, slice<ID> domblockstore = default, slice<ptr<sparseSet>> scrSparseSet = default, slice<ptr<sparseMap>> scrSparseMap = default, slice<ptr<poset>> scrPoset = default, slice<valState> regallocValues = default, slice<ptr<obj.Prog>> ValueToProgAfter = default, debugState debugState = default)
             {
                 this.values = values;
                 this.blocks = blocks;
                 this.locs = locs;
-                this.varLocs = varLocs;
-                this.curVarLoc = curVarLoc;
                 this.stackAllocState = stackAllocState;
                 this.domblockstore = domblockstore;
-                this.scrSparse = scrSparse;
+                this.scrSparseSet = scrSparseSet;
+                this.scrSparseMap = scrSparseMap;
+                this.scrPoset = scrPoset;
+                this.regallocValues = regallocValues;
+                this.ValueToProgAfter = ValueToProgAfter;
+                this.debugState = debugState;
             }
 
             // Enable comparisons between nil and Cache struct
@@ -71,7 +78,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Cache Cache_cast(dynamic value)
         {
-            return new Cache(value.values, value.blocks, value.locs, value.varLocs, value.curVarLoc, ref value.stackAllocState, value.domblockstore, value.scrSparse);
+            return new Cache(value.values, value.blocks, value.locs, ref value.stackAllocState, value.domblockstore, value.scrSparseSet, value.scrSparseMap, value.scrPoset, value.regallocValues, value.ValueToProgAfter, value.debugState);
         }
     }
 }}}}

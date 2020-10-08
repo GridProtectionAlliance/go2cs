@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:19 UTC
+//     Generated on 2020 October 08 04:31:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,13 +43,11 @@ namespace @internal
             public Symlink(NilType _)
             {
                 this.field = default;
-                this.followptr = default;
             }
 
-            public Symlink(ref ptr<types.Field> field = default, bool followptr = default)
+            public Symlink(ref ptr<types.Field> field = default)
             {
                 this.field = field;
-                this.followptr = followptr;
             }
 
             // Enable comparisons between nil and Symlink struct
@@ -72,7 +70,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Symlink Symlink_cast(dynamic value)
         {
-            return new Symlink(ref value.field, value.followptr);
+            return new Symlink(ref value.field);
         }
     }
 }}}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2020 August 29 08:32:18 UTC
+// package http -- go2cs converted at 2020 October 08 03:38:38 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\filetransport.go
 using fmt = go.fmt_package;
@@ -40,8 +40,12 @@ namespace net
             return new fileTransport(fileHandler{fs});
         }
 
-        private static (ref Response, error) RoundTrip(this fileTransport t, ref Request req)
-        { 
+        private static (ptr<Response>, error) RoundTrip(this fileTransport t, ptr<Request> _addr_req)
+        {
+            ptr<Response> resp = default!;
+            error err = default!;
+            ref Request req = ref _addr_req.val;
+ 
             // We start ServeHTTP in a goroutine, which may take a long
             // time if the file is large. The newPopulateResponseWriter
             // call returns a channel which either ServeHTTP or finish()
@@ -54,14 +58,18 @@ namespace net
                 t.fh.ServeHTTP(rw, req);
                 rw.finish();
             }());
-            return (resc.Receive(), null);
+            return (_addr_resc.Receive()!, error.As(null!)!);
+
         }
 
-        private static (ref populateResponse, channel<ref Response>) newPopulateResponseWriter()
+        private static (ptr<populateResponse>, channel<ptr<Response>>) newPopulateResponseWriter()
         {
+            ptr<populateResponse> _p0 = default!;
+            channel<ptr<Response>> _p0 = default;
+
             var (pr, pw) = io.Pipe();
-            populateResponse rw = ref new populateResponse(ch:make(chan*Response),pw:pw,res:&Response{Proto:"HTTP/1.0",ProtoMajor:1,Header:make(Header),Close:true,Body:pr,},);
-            return (rw, rw.ch);
+            ptr<populateResponse> rw = addr(new populateResponse(ch:make(chan*Response),pw:pw,res:&Response{Proto:"HTTP/1.0",ProtoMajor:1,Header:make(Header),Close:true,Body:pr,},));
+            return (_addr_rw!, rw.ch);
         }
 
         // populateResponse is a ResponseWriter that populates the *Response
@@ -71,70 +79,93 @@ namespace net
         private partial struct populateResponse
         {
             public ptr<Response> res;
-            public channel<ref Response> ch;
+            public channel<ptr<Response>> ch;
             public bool wroteHeader;
             public bool hasContent;
             public bool sentResponse;
             public ptr<io.PipeWriter> pw;
         }
 
-        private static void finish(this ref populateResponse pr)
+        private static void finish(this ptr<populateResponse> _addr_pr)
         {
+            ref populateResponse pr = ref _addr_pr.val;
+
             if (!pr.wroteHeader)
             {
                 pr.WriteHeader(500L);
             }
+
             if (!pr.sentResponse)
             {
                 pr.sendResponse();
             }
+
             pr.pw.Close();
+
         }
 
-        private static void sendResponse(this ref populateResponse pr)
+        private static void sendResponse(this ptr<populateResponse> _addr_pr)
         {
+            ref populateResponse pr = ref _addr_pr.val;
+
             if (pr.sentResponse)
             {
-                return;
+                return ;
             }
+
             pr.sentResponse = true;
 
             if (pr.hasContent)
             {
                 pr.res.ContentLength = -1L;
             }
+
             pr.ch.Send(pr.res);
+
         }
 
-        private static Header Header(this ref populateResponse pr)
+        private static Header Header(this ptr<populateResponse> _addr_pr)
         {
+            ref populateResponse pr = ref _addr_pr.val;
+
             return pr.res.Header;
         }
 
-        private static void WriteHeader(this ref populateResponse pr, long code)
+        private static void WriteHeader(this ptr<populateResponse> _addr_pr, long code)
         {
+            ref populateResponse pr = ref _addr_pr.val;
+
             if (pr.wroteHeader)
             {
-                return;
+                return ;
             }
+
             pr.wroteHeader = true;
 
             pr.res.StatusCode = code;
             pr.res.Status = fmt.Sprintf("%d %s", code, StatusText(code));
+
         }
 
-        private static (long, error) Write(this ref populateResponse pr, slice<byte> p)
+        private static (long, error) Write(this ptr<populateResponse> _addr_pr, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref populateResponse pr = ref _addr_pr.val;
+
             if (!pr.wroteHeader)
             {
                 pr.WriteHeader(StatusOK);
             }
+
             pr.hasContent = true;
             if (!pr.sentResponse)
             {
                 pr.sendResponse();
             }
+
             return pr.pw.Write(p);
+
         }
     }
 }}

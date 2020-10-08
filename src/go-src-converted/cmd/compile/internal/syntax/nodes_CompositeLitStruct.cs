@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:03 UTC
+//     Generated on 2020 October 08 04:28:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using src = go.cmd.@internal.src_package;
+
 using go;
 
 namespace go {
@@ -42,7 +41,7 @@ namespace @internal
                 this.m_exprRef = new ptr<expr>(new expr(nil));
             }
 
-            public CompositeLit(Expr Type = default, slice<Expr> ElemList = default, long NKeys = default, src.Pos Rbrace = default, expr expr = default)
+            public CompositeLit(Expr Type = default, slice<Expr> ElemList = default, long NKeys = default, Pos Rbrace = default, expr expr = default)
             {
                 this.Type = Type;
                 this.ElemList = ElemList;

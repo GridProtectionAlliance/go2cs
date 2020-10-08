@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:19 UTC
+//     Generated on 2020 October 08 03:39:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -61,12 +62,13 @@ namespace net
                 this.DisableCompression = default;
                 this.AllowHTTP = default;
                 this.MaxHeaderListSize = default;
+                this.StrictMaxConcurrentStreams = default;
                 this.t1 = default;
                 this.connPoolOnce = default;
                 this.connPoolOrDef = default;
             }
 
-            public http2Transport(Func<@string, @string, ref tls.Config, (net.Conn, error)> DialTLS = default, ref ptr<tls.Config> TLSClientConfig = default, http2ClientConnPool ConnPool = default, bool DisableCompression = default, bool AllowHTTP = default, uint MaxHeaderListSize = default, ref ptr<Transport> t1 = default, sync.Once connPoolOnce = default, http2ClientConnPool connPoolOrDef = default)
+            public http2Transport(Func<@string, @string, ptr<tls.Config>, (net.Conn, error)> DialTLS = default, ref ptr<tls.Config> TLSClientConfig = default, http2ClientConnPool ConnPool = default, bool DisableCompression = default, bool AllowHTTP = default, uint MaxHeaderListSize = default, bool StrictMaxConcurrentStreams = default, ref ptr<Transport> t1 = default, sync.Once connPoolOnce = default, http2ClientConnPool connPoolOrDef = default)
             {
                 this.DialTLS = DialTLS;
                 this.TLSClientConfig = TLSClientConfig;
@@ -74,6 +76,7 @@ namespace net
                 this.DisableCompression = DisableCompression;
                 this.AllowHTTP = AllowHTTP;
                 this.MaxHeaderListSize = MaxHeaderListSize;
+                this.StrictMaxConcurrentStreams = StrictMaxConcurrentStreams;
                 this.t1 = t1;
                 this.connPoolOnce = connPoolOnce;
                 this.connPoolOrDef = connPoolOrDef;
@@ -99,7 +102,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2Transport http2Transport_cast(dynamic value)
         {
-            return new http2Transport(value.DialTLS, ref value.TLSClientConfig, value.ConnPool, value.DisableCompression, value.AllowHTTP, value.MaxHeaderListSize, ref value.t1, value.connPoolOnce, value.connPoolOrDef);
+            return new http2Transport(value.DialTLS, ref value.TLSClientConfig, value.ConnPool, value.DisableCompression, value.AllowHTTP, value.MaxHeaderListSize, value.StrictMaxConcurrentStreams, ref value.t1, value.connPoolOnce, value.connPoolOrDef);
         }
     }
 }}

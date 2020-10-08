@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:28 UTC
+//     Generated on 2020 October 08 04:10:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,13 +13,17 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
+using crc32 = go.hash.crc32_package;
 using log = go.log_package;
+using rand = go.math.rand_package;
 using os = go.os_package;
 using regexp = go.regexp_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strings = go.strings_package;
 using time = go.time_package;
 using go;

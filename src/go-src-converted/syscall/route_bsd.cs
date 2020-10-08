@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package syscall -- go2cs converted at 2020 August 29 08:37:26 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:26:51 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\route_bsd.go
 using runtime = go.runtime_package;
@@ -26,12 +26,14 @@ namespace go
                 // Darwin kernels require 32-bit aligned access to
                 // routing facilities.
                 salign = 4L;
+
             }
             else if (netbsd32Bit)
             { 
                 // NetBSD 6 and beyond kernels require 64-bit aligned
                 // access to routing facilities.
                 salign = 8L;
+
             }
             else if (runtime.GOOS == "freebsd")
             { 
@@ -43,37 +45,51 @@ namespace go
                 {
                     salign = 8L;
                 }
+
             }
+
             if (salen == 0L)
             {
                 return salign;
             }
+
             return (salen + salign - 1L) & ~(salign - 1L);
+
         }
 
         // parseSockaddrLink parses b as a datalink socket address.
-        private static (ref SockaddrDatalink, error) parseSockaddrLink(slice<byte> b)
+        private static (ptr<SockaddrDatalink>, error) parseSockaddrLink(slice<byte> b)
         {
+            ptr<SockaddrDatalink> _p0 = default!;
+            error _p0 = default!;
+
             if (len(b) < 8L)
             {
-                return (null, EINVAL);
+                return (_addr_null!, error.As(EINVAL)!);
             }
+
             var (sa, _, err) = parseLinkLayerAddr(b[4L..]);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            var rsa = (RawSockaddrDatalink.Value)(@unsafe.Pointer(ref b[0L]));
+
+            var rsa = (RawSockaddrDatalink.val)(@unsafe.Pointer(_addr_b[0L]));
             sa.Len = rsa.Len;
             sa.Family = rsa.Family;
             sa.Index = rsa.Index;
-            return (sa, null);
+            return (_addr_sa!, error.As(null!)!);
+
         }
 
         // parseLinkLayerAddr parses b as a datalink socket address in
         // conventional BSD kernel form.
-        private static (ref SockaddrDatalink, long, error) parseLinkLayerAddr(slice<byte> b)
-        { 
+        private static (ptr<SockaddrDatalink>, long, error) parseLinkLayerAddr(slice<byte> b)
+        {
+            ptr<SockaddrDatalink> _p0 = default!;
+            long _p0 = default;
+            error _p0 = default!;
+ 
             // The encoding looks like the following:
             // +----------------------------+
             // | Type             (1 octet) |
@@ -93,51 +109,63 @@ namespace go
                 public byte Alen;
                 public byte Slen;
             }
-            var lla = (linkLayerAddr.Value)(@unsafe.Pointer(ref b[0L]));
+            var lla = (linkLayerAddr.val)(@unsafe.Pointer(_addr_b[0L]));
             long l = 4L + int(lla.Nlen) + int(lla.Alen) + int(lla.Slen);
             if (len(b) < l)
             {
-                return (null, 0L, EINVAL);
+                return (_addr_null!, 0L, error.As(EINVAL)!);
             }
+
             b = b[4L..];
-            SockaddrDatalink sa = ref new SockaddrDatalink(Type:lla.Type,Nlen:lla.Nlen,Alen:lla.Alen,Slen:lla.Slen);
+            ptr<SockaddrDatalink> sa = addr(new SockaddrDatalink(Type:lla.Type,Nlen:lla.Nlen,Alen:lla.Alen,Slen:lla.Slen));
             for (long i = 0L; len(sa.Data) > i && i < l - 4L; i++)
             {
                 sa.Data[i] = int8(b[i]);
             }
 
-            return (sa, rsaAlignOf(l), null);
+            return (_addr_sa!, rsaAlignOf(l), error.As(null!)!);
+
         }
 
         // parseSockaddrInet parses b as an internet socket address.
         private static (Sockaddr, error) parseSockaddrInet(slice<byte> b, byte family)
         {
+            Sockaddr _p0 = default;
+            error _p0 = default!;
+
 
             if (family == AF_INET) 
                 if (len(b) < SizeofSockaddrInet4)
                 {
-                    return (null, EINVAL);
+                    return (null, error.As(EINVAL)!);
                 }
-                var rsa = (RawSockaddrAny.Value)(@unsafe.Pointer(ref b[0L]));
+
+                var rsa = (RawSockaddrAny.val)(@unsafe.Pointer(_addr_b[0L]));
                 return anyToSockaddr(rsa);
             else if (family == AF_INET6) 
                 if (len(b) < SizeofSockaddrInet6)
                 {
-                    return (null, EINVAL);
+                    return (null, error.As(EINVAL)!);
                 }
-                rsa = (RawSockaddrAny.Value)(@unsafe.Pointer(ref b[0L]));
+
+                rsa = (RawSockaddrAny.val)(@unsafe.Pointer(_addr_b[0L]));
                 return anyToSockaddr(rsa);
             else 
-                return (null, EINVAL);
-                    }
+                return (null, error.As(EINVAL)!);
+            
+        }
 
-        private static readonly var offsetofInet4 = int(@unsafe.Offsetof(new RawSockaddrInet4().Addr));
-        private static readonly var offsetofInet6 = int(@unsafe.Offsetof(new RawSockaddrInet6().Addr));
+        private static readonly var offsetofInet4 = (var)int(@unsafe.Offsetof(new RawSockaddrInet4().Addr));
+        private static readonly var offsetofInet6 = (var)int(@unsafe.Offsetof(new RawSockaddrInet6().Addr));
+
 
         // parseNetworkLayerAddr parses b as an internet socket address in
         // conventional BSD kernel form.
         private static (Sockaddr, error) parseNetworkLayerAddr(slice<byte> b, byte family)
-        { 
+        {
+            Sockaddr _p0 = default;
+            error _p0 = default!;
+ 
             // The encoding looks similar to the NLRI encoding.
             // +----------------------------+
             // | Length           (1 octet) |
@@ -160,17 +188,17 @@ namespace go
             var l = int(rsaAlignOf(int(b[0L])));
             if (len(b) < l)
             {
-                return (null, EINVAL);
+                return (null, error.As(EINVAL)!);
             } 
             // Don't reorder case expressions.
             // The case expressions for IPv6 must come first.
 
             if (b[0L] == SizeofSockaddrInet6) 
-                SockaddrInet6 sa = ref new SockaddrInet6();
+                ptr<SockaddrInet6> sa = addr(new SockaddrInet6());
                 copy(sa.Addr[..], b[offsetofInet6..]);
-                return (sa, null);
+                return (sa, error.As(null!)!);
             else if (family == AF_INET6) 
-                sa = ref new SockaddrInet6();
+                sa = addr(new SockaddrInet6());
                 if (l - 1L < offsetofInet6)
                 {
                     copy(sa.Addr[..], b[1L..l]);
@@ -179,13 +207,14 @@ namespace go
                 {
                     copy(sa.Addr[..], b[l - offsetofInet6..l]);
                 }
-                return (sa, null);
+
+                return (sa, error.As(null!)!);
             else if (b[0L] == SizeofSockaddrInet4) 
-                sa = ref new SockaddrInet4();
+                sa = addr(new SockaddrInet4());
                 copy(sa.Addr[..], b[offsetofInet4..]);
-                return (sa, null);
+                return (sa, error.As(null!)!);
             else // an old fashion, AF_UNSPEC or unknown means AF_INET
-                sa = ref new SockaddrInet4();
+                sa = addr(new SockaddrInet4());
                 if (l - 1L < offsetofInet4)
                 {
                     copy(sa.Addr[..], b[1L..l]);
@@ -194,8 +223,10 @@ namespace go
                 {
                     copy(sa.Addr[..], b[l - offsetofInet4..l]);
                 }
-                return (sa, null);
-                    }
+
+                return (sa, error.As(null!)!);
+            
+        }
 
         // RouteRIB returns routing information base, as known as RIB,
         // which consists of network facility information, states and
@@ -204,41 +235,48 @@ namespace go
         // Deprecated: Use golang.org/x/net/route instead.
         public static (slice<byte>, error) RouteRIB(long facility, long param)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             _C_int mib = new slice<_C_int>(new _C_int[] { CTL_NET, AF_ROUTE, 0, 0, _C_int(facility), _C_int(param) }); 
             // Find size.
-            var n = uintptr(0L);
+            ref var n = ref heap(uintptr(0L), out ptr<var> _addr_n);
             {
                 var err__prev1 = err;
 
-                var err = sysctl(mib, null, ref n, null, 0L);
+                var err = sysctl(mib, null, _addr_n, null, 0L);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
             if (n == 0L)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
+
             var tab = make_slice<byte>(n);
             {
                 var err__prev1 = err;
 
-                err = sysctl(mib, ref tab[0L], ref n, null, 0L);
+                err = sysctl(mib, _addr_tab[0L], _addr_n, null, 0L);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
-            return (tab[..n], null);
+
+            return (tab[..n], error.As(null!)!);
+
         }
 
         // RoutingMessage represents a routing message.
@@ -249,7 +287,7 @@ namespace go
             (slice<Sockaddr>, error) sockaddr();
         }
 
-        private static readonly var anyMessageLen = int(@unsafe.Sizeof(new anyMessage()));
+        private static readonly var anyMessageLen = (var)int(@unsafe.Sizeof(new anyMessage()));
 
 
 
@@ -270,8 +308,12 @@ namespace go
             public slice<byte> Data;
         }
 
-        private static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m)
+        private static (slice<Sockaddr>, error) sockaddr(this ptr<RouteMessage> _addr_m)
         {
+            slice<Sockaddr> _p0 = default;
+            error _p0 = default!;
+            ref RouteMessage m = ref _addr_m.val;
+
             array<Sockaddr> sas = new array<Sockaddr>(RTAX_MAX);
             var b = m.Data[..];
             var family = uint8(AF_UNSPEC);
@@ -281,22 +323,25 @@ namespace go
                 {
                     continue;
                 }
-                var rsa = (RawSockaddr.Value)(@unsafe.Pointer(ref b[0L]));
+
+                var rsa = (RawSockaddr.val)(@unsafe.Pointer(_addr_b[0L]));
 
                 if (rsa.Family == AF_LINK) 
                     var (sa, err) = parseSockaddrLink(b);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     sas[i] = sa;
                     b = b[rsaAlignOf(int(rsa.Len))..];
                 else if (rsa.Family == AF_INET || rsa.Family == AF_INET6) 
                     (sa, err) = parseSockaddrInet(b, rsa.Family);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     sas[i] = sa;
                     b = b[rsaAlignOf(int(rsa.Len))..];
                     family = rsa.Family;
@@ -304,13 +349,16 @@ namespace go
                     (sa, err) = parseNetworkLayerAddr(b, family);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     sas[i] = sa;
                     b = b[rsaAlignOf(int(b[0L]))..];
-                            }
+                
+            }
 
-            return (sas[..], null);
+            return (sas[..], error.As(null!)!);
+
         }
 
         // InterfaceMessage represents a routing message containing
@@ -323,20 +371,27 @@ namespace go
             public slice<byte> Data;
         }
 
-        private static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m)
+        private static (slice<Sockaddr>, error) sockaddr(this ptr<InterfaceMessage> _addr_m)
         {
+            slice<Sockaddr> _p0 = default;
+            error _p0 = default!;
+            ref InterfaceMessage m = ref _addr_m.val;
+
             array<Sockaddr> sas = new array<Sockaddr>(RTAX_MAX);
             if (m.Header.Addrs & RTA_IFP == 0L)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
+
             var (sa, err) = parseSockaddrLink(m.Data[..]);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             sas[RTAX_IFP] = sa;
-            return (sas[..], null);
+            return (sas[..], error.As(null!)!);
+
         }
 
         // InterfaceAddrMessage represents a routing message containing
@@ -349,8 +404,12 @@ namespace go
             public slice<byte> Data;
         }
 
-        private static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage m)
+        private static (slice<Sockaddr>, error) sockaddr(this ptr<InterfaceAddrMessage> _addr_m)
         {
+            slice<Sockaddr> _p0 = default;
+            error _p0 = default!;
+            ref InterfaceAddrMessage m = ref _addr_m.val;
+
             array<Sockaddr> sas = new array<Sockaddr>(RTAX_MAX);
             var b = m.Data[..];
             var family = uint8(AF_UNSPEC);
@@ -360,22 +419,25 @@ namespace go
                 {
                     continue;
                 }
-                var rsa = (RawSockaddr.Value)(@unsafe.Pointer(ref b[0L]));
+
+                var rsa = (RawSockaddr.val)(@unsafe.Pointer(_addr_b[0L]));
 
                 if (rsa.Family == AF_LINK) 
                     var (sa, err) = parseSockaddrLink(b);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     sas[i] = sa;
                     b = b[rsaAlignOf(int(rsa.Len))..];
                 else if (rsa.Family == AF_INET || rsa.Family == AF_INET6) 
                     (sa, err) = parseSockaddrInet(b, rsa.Family);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     sas[i] = sa;
                     b = b[rsaAlignOf(int(rsa.Len))..];
                     family = rsa.Family;
@@ -383,13 +445,16 @@ namespace go
                     (sa, err) = parseNetworkLayerAddr(b, family);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     sas[i] = sa;
                     b = b[rsaAlignOf(int(b[0L]))..];
-                            }
+                
+            }
 
-            return (sas[..], null);
+            return (sas[..], error.As(null!)!);
+
         }
 
         // ParseRoutingMessage parses b as routing messages and returns the
@@ -398,17 +463,21 @@ namespace go
         // Deprecated: Use golang.org/x/net/route instead.
         public static (slice<RoutingMessage>, error) ParseRoutingMessage(slice<byte> b)
         {
+            slice<RoutingMessage> msgs = default;
+            error err = default!;
+
             long nmsgs = 0L;
             long nskips = 0L;
             while (len(b) >= anyMessageLen)
             {
                 nmsgs++;
-                var any = (anyMessage.Value)(@unsafe.Pointer(ref b[0L]));
+                var any = (anyMessage.val)(@unsafe.Pointer(_addr_b[0L]));
                 if (any.Version != RTM_VERSION)
                 {
                     b = b[any.Msglen..];
                     continue;
                 }
+
                 {
                     var m = any.toRoutingMessage(b);
 
@@ -422,16 +491,20 @@ namespace go
                     }
 
                 }
+
                 b = b[any.Msglen..];
+
             } 
             // We failed to parse any of the messages - version mismatch?
  
             // We failed to parse any of the messages - version mismatch?
             if (nmsgs != len(msgs) + nskips)
             {
-                return (null, EINVAL);
+                return (null, error.As(EINVAL)!);
             }
-            return (msgs, null);
+
+            return (msgs, error.As(null!)!);
+
         }
 
         // ParseRoutingSockaddr parses msg's payload as raw sockaddrs and
@@ -440,12 +513,17 @@ namespace go
         // Deprecated: Use golang.org/x/net/route instead.
         public static (slice<Sockaddr>, error) ParseRoutingSockaddr(RoutingMessage msg)
         {
+            slice<Sockaddr> _p0 = default;
+            error _p0 = default!;
+
             var (sas, err) = msg.sockaddr();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (sas, null);
+
+            return (sas, error.As(null!)!);
+
         }
     }
 }

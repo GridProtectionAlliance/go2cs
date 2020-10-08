@@ -4,7 +4,7 @@
 
 // Package unicode provides data and functions to test some properties of
 // Unicode code points.
-// package unicode -- go2cs converted at 2020 August 29 08:22:03 UTC
+// package unicode -- go2cs converted at 2020 October 08 03:24:47 UTC
 // import "unicode" ==> using unicode = go.unicode_package
 // Original source: C:\Go\src\unicode\letter.go
 
@@ -14,12 +14,10 @@ namespace go
 {
     public static partial class unicode_package
     {
-        // Tables are regenerated each time we update the Unicode version.
-        //go:generate go run maketables.go -tables=all -output tables.go
-        public static readonly char MaxRune = '\U0010FFFF'; // Maximum valid Unicode code point.
-        public static readonly char ReplacementChar = '\uFFFD'; // Represents invalid code points.
-        public static readonly char MaxASCII = '\u007F'; // maximum ASCII value.
-        public static readonly char MaxLatin1 = '\u00FF'; // maximum Latin-1 value.
+        public static readonly char MaxRune = (char)'\U0010FFFF'; // Maximum valid Unicode code point.
+        public static readonly char ReplacementChar = (char)'\uFFFD'; // Represents invalid code points.
+        public static readonly char MaxASCII = (char)'\u007F'; // maximum ASCII value.
+        public static readonly char MaxLatin1 = (char)'\u00FF'; // maximum Latin-1 value.
 
         // RangeTable defines a set of Unicode code points by listing the ranges of
         // code points within the set. The ranges are listed in two slices
@@ -79,10 +77,11 @@ namespace go
         // characters that involve multiple runes in the input or output.
 
         // Indices into the Delta arrays inside CaseRanges for case mapping.
-        public static readonly var UpperCase = iota;
-        public static readonly var LowerCase = 0;
-        public static readonly var TitleCase = 1;
-        public static readonly var MaxCase = 2;
+        public static readonly var UpperCase = (var)iota;
+        public static readonly var LowerCase = (var)0;
+        public static readonly var TitleCase = (var)1;
+        public static readonly var MaxCase = (var)2;
+
 
         private partial struct d // : array<int>
         {
@@ -91,11 +90,11 @@ namespace go
         // If the Delta field of a CaseRange is UpperLower, it means
         // this CaseRange represents a sequence of the form (say)
         // Upper Lower Upper Lower.
-        public static readonly var UpperLower = MaxRune + 1L; // (Cannot be a valid delta.)
+        public static readonly var UpperLower = (var)MaxRune + 1L; // (Cannot be a valid delta.)
 
         // linearMax is the maximum size table for linear search for non-Latin1 rune.
         // Derived by running 'go test -calibrate'.
-        private static readonly long linearMax = 18L;
+        private static readonly long linearMax = (long)18L;
 
         // is16 reports whether r is in the sorted slice of 16-bit ranges.
 
@@ -107,17 +106,20 @@ namespace go
             {
                 foreach (var (i) in ranges)
                 {
-                    var range_ = ref ranges[i];
+                    var range_ = _addr_ranges[i];
                     if (r < range_.Lo)
                     {
                         return false;
                     }
+
                     if (r <= range_.Hi)
                     {
                         return range_.Stride == 1L || (r - range_.Lo) % range_.Stride == 0L;
                     }
+
                 }
                 return false;
+
             } 
 
             // binary search over ranges
@@ -126,11 +128,12 @@ namespace go
             while (lo < hi)
             {
                 var m = lo + (hi - lo) / 2L;
-                range_ = ref ranges[m];
+                range_ = _addr_ranges[m];
                 if (range_.Lo <= r && r <= range_.Hi)
                 {
                     return range_.Stride == 1L || (r - range_.Lo) % range_.Stride == 0L;
                 }
+
                 if (r < range_.Lo)
                 {
                     hi = m;
@@ -139,9 +142,11 @@ namespace go
                 {
                     lo = m + 1L;
                 }
+
             }
 
             return false;
+
         }
 
         // is32 reports whether r is in the sorted slice of 32-bit ranges.
@@ -151,17 +156,20 @@ namespace go
             {
                 foreach (var (i) in ranges)
                 {
-                    var range_ = ref ranges[i];
+                    var range_ = _addr_ranges[i];
                     if (r < range_.Lo)
                     {
                         return false;
                     }
+
                     if (r <= range_.Hi)
                     {
                         return range_.Stride == 1L || (r - range_.Lo) % range_.Stride == 0L;
                     }
+
                 }
                 return false;
+
             } 
 
             // binary search over ranges
@@ -175,6 +183,7 @@ namespace go
                 {
                     return range_.Stride == 1L || (r - range_.Lo) % range_.Stride == 0L;
                 }
+
                 if (r < range_.Lo)
                 {
                     hi = m;
@@ -183,29 +192,38 @@ namespace go
                 {
                     lo = m + 1L;
                 }
+
             }
 
             return false;
+
         }
 
         // Is reports whether the rune is in the specified table of ranges.
-        public static bool Is(ref RangeTable rangeTab, int r)
+        public static bool Is(ptr<RangeTable> _addr_rangeTab, int r)
         {
+            ref RangeTable rangeTab = ref _addr_rangeTab.val;
+
             var r16 = rangeTab.R16;
             if (len(r16) > 0L && r <= rune(r16[len(r16) - 1L].Hi))
             {
                 return is16(r16, uint16(r));
             }
+
             var r32 = rangeTab.R32;
             if (len(r32) > 0L && r >= rune(r32[0L].Lo))
             {
                 return is32(r32, uint32(r));
             }
+
             return false;
+
         }
 
-        private static bool isExcludingLatin(ref RangeTable rangeTab, int r)
+        private static bool isExcludingLatin(ptr<RangeTable> _addr_rangeTab, int r)
         {
+            ref RangeTable rangeTab = ref _addr_rangeTab.val;
+
             var r16 = rangeTab.R16;
             {
                 var off = rangeTab.LatinOffset;
@@ -216,12 +234,15 @@ namespace go
                 }
 
             }
+
             var r32 = rangeTab.R32;
             if (len(r32) > 0L && r >= rune(r32[0L].Lo))
             {
                 return is32(r32, uint32(r));
             }
+
             return false;
+
         }
 
         // IsUpper reports whether the rune is an upper case letter.
@@ -232,7 +253,9 @@ namespace go
             {
                 return properties[uint8(r)] & pLmask == pLu;
             }
-            return isExcludingLatin(Upper, r);
+
+            return isExcludingLatin(_addr_Upper, r);
+
         }
 
         // IsLower reports whether the rune is a lower case letter.
@@ -243,7 +266,9 @@ namespace go
             {
                 return properties[uint8(r)] & pLmask == pLl;
             }
-            return isExcludingLatin(Lower, r);
+
+            return isExcludingLatin(_addr_Lower, r);
+
         }
 
         // IsTitle reports whether the rune is a title case letter.
@@ -253,15 +278,21 @@ namespace go
             {
                 return false;
             }
-            return isExcludingLatin(Title, r);
+
+            return isExcludingLatin(_addr_Title, r);
+
         }
 
         // to maps the rune using the specified case mapping.
-        private static int to(long _case, int r, slice<CaseRange> caseRange)
+        // It additionally reports whether caseRange contained a mapping for r.
+        private static (int, bool) to(long _case, int r, slice<CaseRange> caseRange)
         {
+            int mappedRune = default;
+            bool foundMapping = default;
+
             if (_case < 0L || MaxCase <= _case)
             {
-                return ReplacementChar; // as reasonable an error as any
+                return (ReplacementChar, false); // as reasonable an error as any
             } 
             // binary search over ranges
             long lo = 0L;
@@ -285,10 +316,14 @@ namespace go
                         // bit in the sequence offset.
                         // The constants UpperCase and TitleCase are even while LowerCase
                         // is odd so we take the low bit from _case.
-                        return rune(cr.Lo) + ((r - rune(cr.Lo)) & ~1L | rune(_case & 1L));
+                        return (rune(cr.Lo) + ((r - rune(cr.Lo)) & ~1L | rune(_case & 1L)), true);
+
                     }
-                    return r + delta;
+
+                    return (r + delta, true);
+
                 }
+
                 if (r < rune(cr.Lo))
                 {
                     hi = m;
@@ -297,15 +332,18 @@ namespace go
                 {
                     lo = m + 1L;
                 }
+
             }
 
-            return r;
+            return (r, false);
+
         }
 
         // To maps the rune to the specified case: UpperCase, LowerCase, or TitleCase.
         public static int To(long _case, int r)
         {
-            return to(_case, r, CaseRanges);
+            r, _ = to(_case, r, CaseRanges);
+            return r;
         }
 
         // ToUpper maps the rune to upper case.
@@ -317,9 +355,13 @@ namespace go
                 {
                     r -= 'a' - 'A';
                 }
+
                 return r;
+
             }
+
             return To(UpperCase, r);
+
         }
 
         // ToLower maps the rune to lower case.
@@ -331,9 +373,13 @@ namespace go
                 {
                     r += 'a' - 'A';
                 }
+
                 return r;
+
             }
+
             return To(LowerCase, r);
+
         }
 
         // ToTitle maps the rune to title case.
@@ -344,43 +390,54 @@ namespace go
                 if ('a' <= r && r <= 'z')
                 { // title case is upper case for ASCII
                     r -= 'a' - 'A';
+
                 }
+
                 return r;
+
             }
+
             return To(TitleCase, r);
+
         }
 
         // ToUpper maps the rune to upper case giving priority to the special mapping.
         public static int ToUpper(this SpecialCase special, int r)
         {
-            var r1 = to(UpperCase, r, (slice<CaseRange>)special);
-            if (r1 == r)
+            var (r1, hadMapping) = to(UpperCase, r, (slice<CaseRange>)special);
+            if (r1 == r && !hadMapping)
             {
                 r1 = ToUpper(r);
             }
+
             return r1;
+
         }
 
         // ToTitle maps the rune to title case giving priority to the special mapping.
         public static int ToTitle(this SpecialCase special, int r)
         {
-            var r1 = to(TitleCase, r, (slice<CaseRange>)special);
-            if (r1 == r)
+            var (r1, hadMapping) = to(TitleCase, r, (slice<CaseRange>)special);
+            if (r1 == r && !hadMapping)
             {
                 r1 = ToTitle(r);
             }
+
             return r1;
+
         }
 
         // ToLower maps the rune to lower case giving priority to the special mapping.
         public static int ToLower(this SpecialCase special, int r)
         {
-            var r1 = to(LowerCase, r, (slice<CaseRange>)special);
-            if (r1 == r)
+            var (r1, hadMapping) = to(LowerCase, r, (slice<CaseRange>)special);
+            if (r1 == r && !hadMapping)
             {
                 r1 = ToLower(r);
             }
+
             return r1;
+
         }
 
         // caseOrbit is defined in tables.go as []foldPair. Right now all the
@@ -417,6 +474,7 @@ namespace go
             {
                 return r;
             }
+
             if (int(r) < len(asciiFold))
             {
                 return rune(asciiFold[r]);
@@ -436,6 +494,7 @@ namespace go
                 {
                     hi = m;
                 }
+
             }
 
             if (lo < len(caseOrbit) && rune(caseOrbit[lo].From) == r)
@@ -455,7 +514,9 @@ namespace go
                 }
 
             }
+
             return ToUpper(r);
+
         }
     }
 }

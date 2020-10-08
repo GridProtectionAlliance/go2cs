@@ -4,7 +4,7 @@
 
 // +build race
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:43 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:47 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\race.go
 using @unsafe = go.@unsafe_package;
@@ -26,8 +26,8 @@ namespace go
 
         public static long RaceErrors()
         {
-            ulong n = default;
-            racecall(ref __tsan_report_count, uintptr(@unsafe.Pointer(ref n)), 0L, 0L, 0L);
+            ref ulong n = ref heap(out ptr<ulong> _addr_n);
+            racecall(_addr___tsan_report_count, uintptr(@unsafe.Pointer(_addr_n)), 0L, 0L, 0L);
             return int(n);
         }
 
@@ -81,9 +81,11 @@ namespace go
             var _g_ = getg();
             if (_g_.raceignore == 0L)
             {>>MARKER:FUNCTION_RaceWriteRange_BLOCK_PREFIX<<
-                racecall(ref __tsan_go_ignore_sync_begin, _g_.racectx, 0L, 0L, 0L);
+                racecall(_addr___tsan_go_ignore_sync_begin, _g_.racectx, 0L, 0L, 0L);
             }
+
             _g_.raceignore++;
+
         }
 
         //go:nosplit
@@ -95,13 +97,14 @@ namespace go
             _g_.raceignore--;
             if (_g_.raceignore == 0L)
             {>>MARKER:FUNCTION_RaceReadRange_BLOCK_PREFIX<<
-                racecall(ref __tsan_go_ignore_sync_end, _g_.racectx, 0L, 0L, 0L);
+                racecall(_addr___tsan_go_ignore_sync_end, _g_.racectx, 0L, 0L, 0L);
             }
+
         }
 
         // Private interface for the runtime.
 
-        private static readonly var raceenabled = true;
+        private static readonly var raceenabled = (var)true;
 
         // For all functions accepting callerpc and pc,
         // callerpc is a return PC of the function that calls this function,
@@ -111,38 +114,48 @@ namespace go
         // For all functions accepting callerpc and pc,
         // callerpc is a return PC of the function that calls this function,
         // pc is start PC of the function that calls this function.
-        private static void raceReadObjectPC(ref _type t, unsafe.Pointer addr, System.UIntPtr callerpc, System.UIntPtr pc)
+        private static void raceReadObjectPC(ptr<_type> _addr_t, unsafe.Pointer addr, System.UIntPtr callerpc, System.UIntPtr pc)
         {
+            ref _type t = ref _addr_t.val;
+
             var kind = t.kind & kindMask;
             if (kind == kindArray || kind == kindStruct)
             {>>MARKER:FUNCTION_RaceWrite_BLOCK_PREFIX<< 
                 // for composite objects we have to read every address
                 // because a write might happen to any subobject.
                 racereadrangepc(addr, t.size, callerpc, pc);
+
             }
             else
             {>>MARKER:FUNCTION_RaceRead_BLOCK_PREFIX<< 
                 // for non-composite objects we can read just the start
                 // address, as any write must write the first byte.
                 racereadpc(addr, callerpc, pc);
+
             }
+
         }
 
-        private static void raceWriteObjectPC(ref _type t, unsafe.Pointer addr, System.UIntPtr callerpc, System.UIntPtr pc)
+        private static void raceWriteObjectPC(ptr<_type> _addr_t, unsafe.Pointer addr, System.UIntPtr callerpc, System.UIntPtr pc)
         {
+            ref _type t = ref _addr_t.val;
+
             var kind = t.kind & kindMask;
             if (kind == kindArray || kind == kindStruct)
             { 
                 // for composite objects we have to write every address
                 // because a write might happen to any subobject.
                 racewriterangepc(addr, t.size, callerpc, pc);
+
             }
             else
             { 
                 // for non-composite objects we can write just the start
                 // address, as any write must write the first byte.
                 racewritepc(addr, callerpc, pc);
+
             }
+
         }
 
         //go:noescape
@@ -166,9 +179,10 @@ namespace go
         private static array<byte> qq = new array<byte>(new byte[] { '?', '?', 0 });
         private static array<byte> dash = new array<byte>(new byte[] { '-', 0 });
 
-        private static readonly var raceGetProcCmd = iota;
-        private static readonly var raceSymbolizeCodeCmd = 0;
-        private static readonly var raceSymbolizeDataCmd = 1;
+        private static readonly var raceGetProcCmd = (var)iota;
+        private static readonly var raceSymbolizeCodeCmd = (var)0;
+        private static readonly var raceSymbolizeDataCmd = (var)1;
+
 
         // Callback from C into Go, runs on g0.
         private static void racecallback(System.UIntPtr cmd, unsafe.Pointer ctx)
@@ -177,34 +191,94 @@ namespace go
             if (cmd == raceGetProcCmd) 
                 throw("should have been handled by racecallbackthunk");
             else if (cmd == raceSymbolizeCodeCmd) 
-                raceSymbolizeCode((symbolizeCodeContext.Value)(ctx));
+                raceSymbolizeCode(_addr_(symbolizeCodeContext.val)(ctx));
             else if (cmd == raceSymbolizeDataCmd) 
-                raceSymbolizeData((symbolizeDataContext.Value)(ctx));
+                raceSymbolizeData(_addr_(symbolizeDataContext.val)(ctx));
             else 
                 throw("unknown command");
-                    }
+            
+        }
 
-        private static void raceSymbolizeCode(ref symbolizeCodeContext ctx)
+        // raceSymbolizeCode reads ctx.pc and populates the rest of *ctx with
+        // information about the code at that pc.
+        //
+        // The race detector has already subtracted 1 from pcs, so they point to the last
+        // byte of call instructions (including calls to runtime.racewrite and friends).
+        //
+        // If the incoming pc is part of an inlined function, *ctx is populated
+        // with information about the inlined function, and on return ctx.pc is set
+        // to a pc in the logically containing function. (The race detector should call this
+        // function again with that pc.)
+        //
+        // If the incoming pc is not part of an inlined function, the return pc is unchanged.
+        private static void raceSymbolizeCode(ptr<symbolizeCodeContext> _addr_ctx)
         {
-            var f = FuncForPC(ctx.pc);
+            ref symbolizeCodeContext ctx = ref _addr_ctx.val;
+
+            var pc = ctx.pc;
+            var fi = findfunc(pc);
+            var f = fi._Func();
             if (f != null)
             {>>MARKER:FUNCTION_racewritepc_BLOCK_PREFIX<<
-                var (file, line) = f.FileLine(ctx.pc);
+                var (file, line) = f.FileLine(pc);
                 if (line != 0L)
                 {>>MARKER:FUNCTION_racereadpc_BLOCK_PREFIX<<
-                    ctx.fn = cfuncname(f.funcInfo());
+                    {
+                        var inldata = funcdata(fi, _FUNCDATA_InlTree);
+
+                        if (inldata != null)
+                        {
+                            ptr<array<inlinedCall>> inltree = new ptr<ptr<array<inlinedCall>>>(inldata);
+                            while (true)
+                            {
+                                var ix = pcdatavalue(fi, _PCDATA_InlTreeIndex, pc, null);
+                                if (ix >= 0L)
+                                {
+                                    if (inltree[ix].funcID == funcID_wrapper)
+                                    { 
+                                        // ignore wrappers
+                                        // Back up to an instruction in the "caller".
+                                        pc = f.Entry() + uintptr(inltree[ix].parentPc);
+                                        continue;
+
+                                    }
+
+                                    ctx.pc = f.Entry() + uintptr(inltree[ix].parentPc); // "caller" pc
+                                    ctx.fn = cfuncnameFromNameoff(fi, inltree[ix].func_);
+                                    ctx.line = uintptr(line);
+                                    ctx.file = _addr_bytes(file)[0L]; // assume NUL-terminated
+                                    ctx.off = pc - f.Entry();
+                                    ctx.res = 1L;
+                                    return ;
+
+                                }
+
+                                break;
+
+                            }
+
+
+                        }
+
+                    }
+
+                    ctx.fn = cfuncname(fi);
                     ctx.line = uintptr(line);
-                    ctx.file = ref bytes(file)[0L]; // assume NUL-terminated
-                    ctx.off = ctx.pc - f.Entry();
+                    ctx.file = _addr_bytes(file)[0L]; // assume NUL-terminated
+                    ctx.off = pc - f.Entry();
                     ctx.res = 1L;
-                    return;
+                    return ;
+
                 }
+
             }
-            ctx.fn = ref qq[0L];
-            ctx.file = ref dash[0L];
+
+            ctx.fn = _addr_qq[0L];
+            ctx.file = _addr_dash[0L];
             ctx.line = 0L;
             ctx.off = ctx.pc;
             ctx.res = 1L;
+
         }
 
         private partial struct symbolizeDataContext
@@ -219,20 +293,23 @@ namespace go
             public System.UIntPtr res;
         }
 
-        private static void raceSymbolizeData(ref symbolizeDataContext ctx)
+        private static void raceSymbolizeData(ptr<symbolizeDataContext> _addr_ctx)
         {
-            {
-                var (_, x, n) = findObject(@unsafe.Pointer(ctx.addr));
+            ref symbolizeDataContext ctx = ref _addr_ctx.val;
 
-                if (x != null)
+            {
+                var (base, span, _) = findObject(ctx.addr, 0L, 0L);
+
+                if (base != 0L)
                 {
                     ctx.heap = 1L;
-                    ctx.start = uintptr(x);
-                    ctx.size = n;
+                    ctx.start = base;
+                    ctx.size = span.elemsize;
                     ctx.res = 1L;
                 }
 
             }
+
         }
 
         // Race runtime functions called via runtime·racecall.
@@ -331,20 +408,30 @@ namespace go
         private static System.UIntPtr racearenastart = default;
         private static System.UIntPtr racearenaend = default;
 
-        private static void racefuncenter(System.UIntPtr _p0)
+        private static void racefuncenter(System.UIntPtr callpc)
+;
+        private static void racefuncenterfp(System.UIntPtr fp)
 ;
         private static void racefuncexit()
 ;
-        private static void racereadrangepc1(System.UIntPtr _p0, System.UIntPtr _p0, System.UIntPtr _p0)
+        private static void raceread(System.UIntPtr addr)
 ;
-        private static void racewriterangepc1(System.UIntPtr _p0, System.UIntPtr _p0, System.UIntPtr _p0)
+        private static void racewrite(System.UIntPtr addr)
+;
+        private static void racereadrange(System.UIntPtr addr, System.UIntPtr size)
+;
+        private static void racewriterange(System.UIntPtr addr, System.UIntPtr size)
+;
+        private static void racereadrangepc1(System.UIntPtr addr, System.UIntPtr size, System.UIntPtr pc)
+;
+        private static void racewriterangepc1(System.UIntPtr addr, System.UIntPtr size, System.UIntPtr pc)
 ;
         private static void racecallbackthunk(System.UIntPtr _p0)
 ;
 
         // racecall allows calling an arbitrary function f from C race runtime
         // with up to 4 uintptr arguments.
-        private static void racecall(ref byte _p0, System.UIntPtr _p0, System.UIntPtr _p0, System.UIntPtr _p0, System.UIntPtr _p0)
+        private static void racecall(ptr<byte> fn, System.UIntPtr arg0, System.UIntPtr arg1, System.UIntPtr arg2, System.UIntPtr arg3)
 ;
 
         // checks if the address has shadow (i.e. heap or data/bss)
@@ -356,13 +443,17 @@ namespace go
 
         //go:nosplit
         private static (System.UIntPtr, System.UIntPtr) raceinit()
-        { 
+        {
+            System.UIntPtr gctx = default;
+            System.UIntPtr pctx = default;
+ 
             // cgo is required to initialize libc, which is used by race runtime
             if (!iscgo)
             {>>MARKER:FUNCTION_racecall_BLOCK_PREFIX<<
                 throw("raceinit: race build must use cgo");
             }
-            racecall(ref __tsan_init, uintptr(@unsafe.Pointer(ref gctx)), uintptr(@unsafe.Pointer(ref pctx)), funcPC(racecallbackthunk), 0L); 
+
+            racecall(_addr___tsan_init, uintptr(@unsafe.Pointer(_addr_gctx)), uintptr(@unsafe.Pointer(_addr_pctx)), funcPC(racecallbackthunk), 0L); 
 
             // Round data segment to page boundaries, because it's used in mmap().
             var start = ~uintptr(0L);
@@ -371,40 +462,49 @@ namespace go
             {>>MARKER:FUNCTION_racecallbackthunk_BLOCK_PREFIX<<
                 start = firstmoduledata.noptrdata;
             }
+
             if (start > firstmoduledata.data)
             {>>MARKER:FUNCTION_racewriterangepc1_BLOCK_PREFIX<<
                 start = firstmoduledata.data;
             }
+
             if (start > firstmoduledata.noptrbss)
             {>>MARKER:FUNCTION_racereadrangepc1_BLOCK_PREFIX<<
                 start = firstmoduledata.noptrbss;
             }
+
             if (start > firstmoduledata.bss)
-            {>>MARKER:FUNCTION_racefuncexit_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_racewriterange_BLOCK_PREFIX<<
                 start = firstmoduledata.bss;
             }
+
             if (end < firstmoduledata.enoptrdata)
-            {>>MARKER:FUNCTION_racefuncenter_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_racereadrange_BLOCK_PREFIX<<
                 end = firstmoduledata.enoptrdata;
             }
+
             if (end < firstmoduledata.edata)
-            {
+            {>>MARKER:FUNCTION_racewrite_BLOCK_PREFIX<<
                 end = firstmoduledata.edata;
             }
+
             if (end < firstmoduledata.enoptrbss)
-            {
+            {>>MARKER:FUNCTION_raceread_BLOCK_PREFIX<<
                 end = firstmoduledata.enoptrbss;
             }
+
             if (end < firstmoduledata.ebss)
-            {
+            {>>MARKER:FUNCTION_racefuncexit_BLOCK_PREFIX<<
                 end = firstmoduledata.ebss;
             }
-            var size = round(end - start, _PageSize);
-            racecall(ref __tsan_map_shadow, start, size, 0L, 0L);
+
+            var size = alignUp(end - start, _PageSize);
+            racecall(_addr___tsan_map_shadow, start, size, 0L, 0L);
             racedatastart = start;
             racedataend = start + size;
 
-            return;
+            return ;
+
         }
 
         private static mutex raceFiniLock = default;
@@ -417,55 +517,62 @@ namespace go
             // undefined behavior if called more than once. If the lock is
             // already held it's assumed that the first caller exits the program
             // so other calls can hang forever without an issue.
-            lock(ref raceFiniLock);
-            racecall(ref __tsan_fini, 0L, 0L, 0L, 0L);
+            lock(_addr_raceFiniLock); 
+            // We're entering external code that may call ExitProcess on
+            // Windows.
+            osPreemptExtEnter(getg().m);
+            racecall(_addr___tsan_fini, 0L, 0L, 0L, 0L);
+
         }
 
         //go:nosplit
         private static System.UIntPtr raceproccreate()
         {
-            System.UIntPtr ctx = default;
-            racecall(ref __tsan_proc_create, uintptr(@unsafe.Pointer(ref ctx)), 0L, 0L, 0L);
+            ref System.UIntPtr ctx = ref heap(out ptr<System.UIntPtr> _addr_ctx);
+            racecall(_addr___tsan_proc_create, uintptr(@unsafe.Pointer(_addr_ctx)), 0L, 0L, 0L);
             return ctx;
         }
 
         //go:nosplit
         private static void raceprocdestroy(System.UIntPtr ctx)
         {
-            racecall(ref __tsan_proc_destroy, ctx, 0L, 0L, 0L);
+            racecall(_addr___tsan_proc_destroy, ctx, 0L, 0L, 0L);
         }
 
         //go:nosplit
         private static void racemapshadow(unsafe.Pointer addr, System.UIntPtr size)
         {
             if (racearenastart == 0L)
-            {
+            {>>MARKER:FUNCTION_racefuncenterfp_BLOCK_PREFIX<<
                 racearenastart = uintptr(addr);
             }
+
             if (racearenaend < uintptr(addr) + size)
-            {
+            {>>MARKER:FUNCTION_racefuncenter_BLOCK_PREFIX<<
                 racearenaend = uintptr(addr) + size;
             }
-            racecall(ref __tsan_map_shadow, uintptr(addr), size, 0L, 0L);
+
+            racecall(_addr___tsan_map_shadow, uintptr(addr), size, 0L, 0L);
+
         }
 
         //go:nosplit
         private static void racemalloc(unsafe.Pointer p, System.UIntPtr sz)
         {
-            racecall(ref __tsan_malloc, 0L, 0L, uintptr(p), sz);
+            racecall(_addr___tsan_malloc, 0L, 0L, uintptr(p), sz);
         }
 
         //go:nosplit
         private static void racefree(unsafe.Pointer p, System.UIntPtr sz)
         {
-            racecall(ref __tsan_free, uintptr(p), sz, 0L, 0L);
+            racecall(_addr___tsan_free, uintptr(p), sz, 0L, 0L);
         }
 
         //go:nosplit
         private static System.UIntPtr racegostart(System.UIntPtr pc)
         {
             var _g_ = getg();
-            ref g spawng = default;
+            ptr<g> spawng;
             if (_g_.m.curg != null)
             {
                 spawng = _g_.m.curg;
@@ -474,15 +581,23 @@ namespace go
             {
                 spawng = _g_;
             }
-            System.UIntPtr racectx = default;
-            racecall(ref __tsan_go_start, spawng.racectx, uintptr(@unsafe.Pointer(ref racectx)), pc, 0L);
+
+            ref System.UIntPtr racectx = ref heap(out ptr<System.UIntPtr> _addr_racectx);
+            racecall(_addr___tsan_go_start, spawng.racectx, uintptr(@unsafe.Pointer(_addr_racectx)), pc, 0L);
             return racectx;
+
         }
 
         //go:nosplit
         private static void racegoend()
         {
-            racecall(ref __tsan_go_end, getg().racectx, 0L, 0L, 0L);
+            racecall(_addr___tsan_go_end, getg().racectx, 0L, 0L, 0L);
+        }
+
+        //go:nosplit
+        private static void racectxend(System.UIntPtr racectx)
+        {
+            racecall(_addr___tsan_go_end, racectx, 0L, 0L, 0L);
         }
 
         //go:nosplit
@@ -493,17 +608,21 @@ namespace go
             { 
                 // The call is coming from manual instrumentation of Go code running on g0/gsignal.
                 // Not interesting.
-                return;
+                return ;
+
             }
+
             if (callpc != 0L)
             {
                 racefuncenter(callpc);
             }
+
             racewriterangepc1(uintptr(addr), sz, pc);
             if (callpc != 0L)
             {
                 racefuncexit();
             }
+
         }
 
         //go:nosplit
@@ -514,71 +633,195 @@ namespace go
             { 
                 // The call is coming from manual instrumentation of Go code running on g0/gsignal.
                 // Not interesting.
-                return;
+                return ;
+
             }
+
             if (callpc != 0L)
             {
                 racefuncenter(callpc);
             }
+
             racereadrangepc1(uintptr(addr), sz, pc);
             if (callpc != 0L)
             {
                 racefuncexit();
             }
+
         }
 
         //go:nosplit
         private static void raceacquire(unsafe.Pointer addr)
         {
-            raceacquireg(getg(), addr);
+            raceacquireg(_addr_getg(), addr);
         }
 
         //go:nosplit
-        private static void raceacquireg(ref g gp, unsafe.Pointer addr)
+        private static void raceacquireg(ptr<g> _addr_gp, unsafe.Pointer addr)
         {
+            ref g gp = ref _addr_gp.val;
+
             if (getg().raceignore != 0L || !isvalidaddr(addr))
             {
-                return;
+                return ;
             }
-            racecall(ref __tsan_acquire, gp.racectx, uintptr(addr), 0L, 0L);
+
+            racecall(_addr___tsan_acquire, gp.racectx, uintptr(addr), 0L, 0L);
+
+        }
+
+        //go:nosplit
+        private static void raceacquirectx(System.UIntPtr racectx, unsafe.Pointer addr)
+        {
+            if (!isvalidaddr(addr))
+            {
+                return ;
+            }
+
+            racecall(_addr___tsan_acquire, racectx, uintptr(addr), 0L, 0L);
+
         }
 
         //go:nosplit
         private static void racerelease(unsafe.Pointer addr)
         {
-            racereleaseg(getg(), addr);
+            racereleaseg(_addr_getg(), addr);
         }
 
         //go:nosplit
-        private static void racereleaseg(ref g gp, unsafe.Pointer addr)
+        private static void racereleaseg(ptr<g> _addr_gp, unsafe.Pointer addr)
         {
+            ref g gp = ref _addr_gp.val;
+
             if (getg().raceignore != 0L || !isvalidaddr(addr))
             {
-                return;
+                return ;
             }
-            racecall(ref __tsan_release, gp.racectx, uintptr(addr), 0L, 0L);
+
+            racecall(_addr___tsan_release, gp.racectx, uintptr(addr), 0L, 0L);
+
         }
 
         //go:nosplit
         private static void racereleasemerge(unsafe.Pointer addr)
         {
-            racereleasemergeg(getg(), addr);
+            racereleasemergeg(_addr_getg(), addr);
         }
 
         //go:nosplit
-        private static void racereleasemergeg(ref g gp, unsafe.Pointer addr)
+        private static void racereleasemergeg(ptr<g> _addr_gp, unsafe.Pointer addr)
         {
+            ref g gp = ref _addr_gp.val;
+
             if (getg().raceignore != 0L || !isvalidaddr(addr))
             {
-                return;
+                return ;
             }
-            racecall(ref __tsan_release_merge, gp.racectx, uintptr(addr), 0L, 0L);
+
+            racecall(_addr___tsan_release_merge, gp.racectx, uintptr(addr), 0L, 0L);
+
         }
 
         //go:nosplit
         private static void racefingo()
         {
-            racecall(ref __tsan_finalizer_goroutine, getg().racectx, 0L, 0L, 0L);
+            racecall(_addr___tsan_finalizer_goroutine, getg().racectx, 0L, 0L, 0L);
         }
+
+        // The declarations below generate ABI wrappers for functions
+        // implemented in assembly in this package but declared in another
+        // package.
+
+        //go:linkname abigen_sync_atomic_LoadInt32 sync/atomic.LoadInt32
+        private static int abigen_sync_atomic_LoadInt32(ptr<int> addr)
+;
+
+        //go:linkname abigen_sync_atomic_LoadInt64 sync/atomic.LoadInt64
+        private static long abigen_sync_atomic_LoadInt64(ptr<long> addr)
+;
+
+        //go:linkname abigen_sync_atomic_LoadUint32 sync/atomic.LoadUint32
+        private static uint abigen_sync_atomic_LoadUint32(ptr<uint> addr)
+;
+
+        //go:linkname abigen_sync_atomic_LoadUint64 sync/atomic.LoadUint64
+        private static ulong abigen_sync_atomic_LoadUint64(ptr<ulong> addr)
+;
+
+        //go:linkname abigen_sync_atomic_LoadUintptr sync/atomic.LoadUintptr
+        private static System.UIntPtr abigen_sync_atomic_LoadUintptr(ptr<System.UIntPtr> addr)
+;
+
+        //go:linkname abigen_sync_atomic_LoadPointer sync/atomic.LoadPointer
+        private static unsafe.Pointer abigen_sync_atomic_LoadPointer(ptr<unsafe.Pointer> addr)
+;
+
+        //go:linkname abigen_sync_atomic_StoreInt32 sync/atomic.StoreInt32
+        private static void abigen_sync_atomic_StoreInt32(ptr<int> addr, int val)
+;
+
+        //go:linkname abigen_sync_atomic_StoreInt64 sync/atomic.StoreInt64
+        private static void abigen_sync_atomic_StoreInt64(ptr<long> addr, long val)
+;
+
+        //go:linkname abigen_sync_atomic_StoreUint32 sync/atomic.StoreUint32
+        private static void abigen_sync_atomic_StoreUint32(ptr<uint> addr, uint val)
+;
+
+        //go:linkname abigen_sync_atomic_StoreUint64 sync/atomic.StoreUint64
+        private static void abigen_sync_atomic_StoreUint64(ptr<ulong> addr, ulong val)
+;
+
+        //go:linkname abigen_sync_atomic_SwapInt32 sync/atomic.SwapInt32
+        private static int abigen_sync_atomic_SwapInt32(ptr<int> addr, int @new)
+;
+
+        //go:linkname abigen_sync_atomic_SwapInt64 sync/atomic.SwapInt64
+        private static long abigen_sync_atomic_SwapInt64(ptr<long> addr, long @new)
+;
+
+        //go:linkname abigen_sync_atomic_SwapUint32 sync/atomic.SwapUint32
+        private static uint abigen_sync_atomic_SwapUint32(ptr<uint> addr, uint @new)
+;
+
+        //go:linkname abigen_sync_atomic_SwapUint64 sync/atomic.SwapUint64
+        private static ulong abigen_sync_atomic_SwapUint64(ptr<ulong> addr, ulong @new)
+;
+
+        //go:linkname abigen_sync_atomic_AddInt32 sync/atomic.AddInt32
+        private static int abigen_sync_atomic_AddInt32(ptr<int> addr, int delta)
+;
+
+        //go:linkname abigen_sync_atomic_AddUint32 sync/atomic.AddUint32
+        private static uint abigen_sync_atomic_AddUint32(ptr<uint> addr, uint delta)
+;
+
+        //go:linkname abigen_sync_atomic_AddInt64 sync/atomic.AddInt64
+        private static long abigen_sync_atomic_AddInt64(ptr<long> addr, long delta)
+;
+
+        //go:linkname abigen_sync_atomic_AddUint64 sync/atomic.AddUint64
+        private static ulong abigen_sync_atomic_AddUint64(ptr<ulong> addr, ulong delta)
+;
+
+        //go:linkname abigen_sync_atomic_AddUintptr sync/atomic.AddUintptr
+        private static System.UIntPtr abigen_sync_atomic_AddUintptr(ptr<System.UIntPtr> addr, System.UIntPtr delta)
+;
+
+        //go:linkname abigen_sync_atomic_CompareAndSwapInt32 sync/atomic.CompareAndSwapInt32
+        private static bool abigen_sync_atomic_CompareAndSwapInt32(ptr<int> addr, int old, int @new)
+;
+
+        //go:linkname abigen_sync_atomic_CompareAndSwapInt64 sync/atomic.CompareAndSwapInt64
+        private static bool abigen_sync_atomic_CompareAndSwapInt64(ptr<long> addr, long old, long @new)
+;
+
+        //go:linkname abigen_sync_atomic_CompareAndSwapUint32 sync/atomic.CompareAndSwapUint32
+        private static bool abigen_sync_atomic_CompareAndSwapUint32(ptr<uint> addr, uint old, uint @new)
+;
+
+        //go:linkname abigen_sync_atomic_CompareAndSwapUint64 sync/atomic.CompareAndSwapUint64
+        private static bool abigen_sync_atomic_CompareAndSwapUint64(ptr<ulong> addr, ulong old, ulong @new)
+;
     }
 }

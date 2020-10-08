@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:11 UTC
+//     Generated on 2020 October 08 03:37:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,12 +39,14 @@ namespace crypto
             {
                 this.Msg = default;
                 this.RecordHeader = default;
+                this.Conn = default;
             }
 
-            public RecordHeaderError(@string Msg = default, array<byte> RecordHeader = default)
+            public RecordHeaderError(@string Msg = default, array<byte> RecordHeader = default, net.Conn Conn = default)
             {
                 this.Msg = Msg;
                 this.RecordHeader = RecordHeader;
+                this.Conn = Conn;
             }
 
             // Enable comparisons between nil and RecordHeaderError struct
@@ -67,7 +69,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static RecordHeaderError RecordHeaderError_cast(dynamic value)
         {
-            return new RecordHeaderError(value.Msg, value.RecordHeader);
+            return new RecordHeaderError(value.Msg, value.RecordHeader, value.Conn);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:21 UTC
+//     Generated on 2020 October 08 03:38:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -63,7 +63,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -77,10 +77,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (os.FileInfo, error) ReaddirByRef(ref T value, long count);
+            private delegate (os.FileInfo, error) ReaddirByPtr(ptr<T> value, long count);
             private delegate (os.FileInfo, error) ReaddirByVal(T value, long count);
 
-            private static readonly ReaddirByRef s_ReaddirByRef;
+            private static readonly ReaddirByPtr s_ReaddirByPtr;
             private static readonly ReaddirByVal s_ReaddirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -89,17 +89,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReaddirByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReaddirByPtr is null || !m_target_is_ptr)
                     return s_ReaddirByVal!(target, count);
 
-                return s_ReaddirByRef(ref target, count);
+                return s_ReaddirByPtr(m_target_ptr, count);
             }
 
-            private delegate (os.FileInfo, error) StatByRef(ref T value);
+            private delegate (os.FileInfo, error) StatByPtr(ptr<T> value);
             private delegate (os.FileInfo, error) StatByVal(T value);
 
-            private static readonly StatByRef s_StatByRef;
+            private static readonly StatByPtr s_StatByPtr;
             private static readonly StatByVal s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -108,17 +109,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StatByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StatByPtr is null || !m_target_is_ptr)
                     return s_StatByVal!(target);
 
-                return s_StatByRef(ref target);
+                return s_StatByPtr(m_target_ptr);
             }
 
-            private delegate error CloseByRef(ref T value);
+            private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByRef s_CloseByRef;
+            private static readonly CloseByPtr s_CloseByPtr;
             private static readonly CloseByVal s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,17 +129,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByRef(ref target);
+                return s_CloseByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -146,17 +149,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, p);
 
-                return s_ReadByRef(ref target, p);
+                return s_ReadByPtr(m_target_ptr, p);
             }
 
-            private delegate (long, error) SeekByRef(ref T value, long offset, long whence);
+            private delegate (long, error) SeekByPtr(ptr<T> value, long offset, long whence);
             private delegate (long, error) SeekByVal(T value, long offset, long whence);
 
-            private static readonly SeekByRef s_SeekByRef;
+            private static readonly SeekByPtr s_SeekByPtr;
             private static readonly SeekByVal s_SeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,11 +169,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SeekByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SeekByPtr is null || !m_target_is_ptr)
                     return s_SeekByVal!(target, offset, whence);
 
-                return s_SeekByRef(ref target, offset, whence);
+                return s_SeekByPtr(m_target_ptr, offset, whence);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -178,87 +183,72 @@ namespace net
             static File()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Readdir");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Readdir");
 
                 if (!(extensionMethod is null))
-                    s_ReaddirByRef = extensionMethod.CreateStaticDelegate(typeof(ReaddirByRef)) as ReaddirByRef;
+                    s_ReaddirByPtr = extensionMethod.CreateStaticDelegate(typeof(ReaddirByPtr)) as ReaddirByPtr;
 
-                if (s_ReaddirByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Readdir");
+                extensionMethod = targetType.GetExtensionMethod("Readdir");
 
-                    if (!(extensionMethod is null))
-                        s_ReaddirByVal = extensionMethod.CreateStaticDelegate(typeof(ReaddirByVal)) as ReaddirByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReaddirByVal = extensionMethod.CreateStaticDelegate(typeof(ReaddirByVal)) as ReaddirByVal;
 
-                if (s_ReaddirByRef is null && s_ReaddirByVal is null)
+                if (s_ReaddirByPtr is null && s_ReaddirByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Readdir method", new Exception("Readdir"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Stat");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
                 if (!(extensionMethod is null))
-                    s_StatByRef = extensionMethod.CreateStaticDelegate(typeof(StatByRef)) as StatByRef;
+                    s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
-                if (s_StatByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Stat");
+                extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                    if (!(extensionMethod is null))
-                        s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
-                if (s_StatByRef is null && s_StatByVal is null)
+                if (s_StatByPtr is null && s_StatByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Stat method", new Exception("Stat"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Close");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
                 if (!(extensionMethod is null))
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
+                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
-                if (s_CloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Close");
+                extensionMethod = targetType.GetExtensionMethod("Close");
 
-                    if (!(extensionMethod is null))
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
-                if (s_CloseByRef is null && s_CloseByVal is null)
+                if (s_CloseByPtr is null && s_CloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Close method", new Exception("Close"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Read method", new Exception("Read"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Seek");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Seek");
 
                 if (!(extensionMethod is null))
-                    s_SeekByRef = extensionMethod.CreateStaticDelegate(typeof(SeekByRef)) as SeekByRef;
+                    s_SeekByPtr = extensionMethod.CreateStaticDelegate(typeof(SeekByPtr)) as SeekByPtr;
 
-                if (s_SeekByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Seek");
+                extensionMethod = targetType.GetExtensionMethod("Seek");
 
-                    if (!(extensionMethod is null))
-                        s_SeekByVal = extensionMethod.CreateStaticDelegate(typeof(SeekByVal)) as SeekByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SeekByVal = extensionMethod.CreateStaticDelegate(typeof(SeekByVal)) as SeekByVal;
 
-                if (s_SeekByRef is null && s_SeekByVal is null)
+                if (s_SeekByPtr is null && s_SeekByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Seek method", new Exception("Seek"));
             }
 

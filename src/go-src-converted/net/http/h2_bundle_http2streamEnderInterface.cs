@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:18 UTC
+//     Generated on 2020 October 08 03:39:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -78,7 +79,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -92,10 +93,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate bool StreamEndedByRef(ref T value);
+            private delegate bool StreamEndedByPtr(ptr<T> value);
             private delegate bool StreamEndedByVal(T value);
 
-            private static readonly StreamEndedByRef s_StreamEndedByRef;
+            private static readonly StreamEndedByPtr s_StreamEndedByPtr;
             private static readonly StreamEndedByVal s_StreamEndedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,11 +105,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StreamEndedByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StreamEndedByPtr is null || !m_target_is_ptr)
                     return s_StreamEndedByVal!(target);
 
-                return s_StreamEndedByRef(ref target);
+                return s_StreamEndedByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -117,23 +119,20 @@ namespace net
             static http2streamEnder()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StreamEnded");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("StreamEnded");
 
                 if (!(extensionMethod is null))
-                    s_StreamEndedByRef = extensionMethod.CreateStaticDelegate(typeof(StreamEndedByRef)) as StreamEndedByRef;
+                    s_StreamEndedByPtr = extensionMethod.CreateStaticDelegate(typeof(StreamEndedByPtr)) as StreamEndedByPtr;
 
-                if (s_StreamEndedByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StreamEnded");
+                extensionMethod = targetType.GetExtensionMethod("StreamEnded");
 
-                    if (!(extensionMethod is null))
-                        s_StreamEndedByVal = extensionMethod.CreateStaticDelegate(typeof(StreamEndedByVal)) as StreamEndedByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StreamEndedByVal = extensionMethod.CreateStaticDelegate(typeof(StreamEndedByVal)) as StreamEndedByVal;
 
-                if (s_StreamEndedByRef is null && s_StreamEndedByVal is null)
+                if (s_StreamEndedByPtr is null && s_StreamEndedByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2streamEnder.StreamEnded method", new Exception("StreamEnded"));
             }
 

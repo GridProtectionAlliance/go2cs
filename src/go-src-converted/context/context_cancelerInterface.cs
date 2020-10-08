@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:22:44 UTC
+//     Generated on 2020 October 08 03:26:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,9 +15,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using errors = go.errors_package;
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
+using reflectlite = go.@internal.reflectlite_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
 
 #pragma warning disable CS0660, CS0661
@@ -52,7 +52,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -66,10 +66,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate channel<object> cancelByRef(ref T value, bool removeFromParent, error err);
+            private delegate channel<object> cancelByPtr(ptr<T> value, bool removeFromParent, error err);
             private delegate channel<object> cancelByVal(T value, bool removeFromParent, error err);
 
-            private static readonly cancelByRef s_cancelByRef;
+            private static readonly cancelByPtr s_cancelByPtr;
             private static readonly cancelByVal s_cancelByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,17 +78,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_cancelByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_cancelByPtr is null || !m_target_is_ptr)
                     return s_cancelByVal!(target, removeFromParent, err);
 
-                return s_cancelByRef(ref target, removeFromParent, err);
+                return s_cancelByPtr(m_target_ptr, removeFromParent, err);
             }
 
-            private delegate channel<object> DoneByRef(ref T value);
+            private delegate channel<object> DoneByPtr(ptr<T> value);
             private delegate channel<object> DoneByVal(T value);
 
-            private static readonly DoneByRef s_DoneByRef;
+            private static readonly DoneByPtr s_DoneByPtr;
             private static readonly DoneByVal s_DoneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,11 +98,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DoneByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DoneByPtr is null || !m_target_is_ptr)
                     return s_DoneByVal!(target);
 
-                return s_DoneByRef(ref target);
+                return s_DoneByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -110,39 +112,33 @@ namespace go
             static canceler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("cancel");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("cancel");
 
                 if (!(extensionMethod is null))
-                    s_cancelByRef = extensionMethod.CreateStaticDelegate(typeof(cancelByRef)) as cancelByRef;
+                    s_cancelByPtr = extensionMethod.CreateStaticDelegate(typeof(cancelByPtr)) as cancelByPtr;
 
-                if (s_cancelByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("cancel");
+                extensionMethod = targetType.GetExtensionMethod("cancel");
 
-                    if (!(extensionMethod is null))
-                        s_cancelByVal = extensionMethod.CreateStaticDelegate(typeof(cancelByVal)) as cancelByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_cancelByVal = extensionMethod.CreateStaticDelegate(typeof(cancelByVal)) as cancelByVal;
 
-                if (s_cancelByRef is null && s_cancelByVal is null)
+                if (s_cancelByPtr is null && s_cancelByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement canceler.cancel method", new Exception("cancel"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Done");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Done");
 
                 if (!(extensionMethod is null))
-                    s_DoneByRef = extensionMethod.CreateStaticDelegate(typeof(DoneByRef)) as DoneByRef;
+                    s_DoneByPtr = extensionMethod.CreateStaticDelegate(typeof(DoneByPtr)) as DoneByPtr;
 
-                if (s_DoneByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Done");
+                extensionMethod = targetType.GetExtensionMethod("Done");
 
-                    if (!(extensionMethod is null))
-                        s_DoneByVal = extensionMethod.CreateStaticDelegate(typeof(DoneByVal)) as DoneByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DoneByVal = extensionMethod.CreateStaticDelegate(typeof(DoneByVal)) as DoneByVal;
 
-                if (s_DoneByRef is null && s_DoneByVal is null)
+                if (s_DoneByPtr is null && s_DoneByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement canceler.Done method", new Exception("Done"));
             }
 

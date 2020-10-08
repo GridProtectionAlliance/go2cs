@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:54 UTC
+//     Generated on 2020 October 08 04:03:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace go
                 this.isFunc = default;
             }
 
-            public Scope(ref ptr<Scope> parent = default, slice<ref Scope> children = default, map<@string, Object> elems = default, token.Pos pos = default, token.Pos end = default, @string comment = default, bool isFunc = default)
+            public Scope(ref ptr<Scope> parent = default, slice<ptr<Scope>> children = default, map<@string, Object> elems = default, token.Pos pos = default, token.Pos end = default, @string comment = default, bool isFunc = default)
             {
                 this.parent = parent;
                 this.children = children;

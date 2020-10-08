@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:18:47 UTC
+//     Generated on 2020 October 08 03:21:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,14 +25,18 @@ namespace go
             // Constructors
             public mOS(NilType _)
             {
-                this.machport = default;
-                this.waitsema = default;
+                this.initialized = default;
+                this.mutex = default;
+                this.cond = default;
+                this.count = default;
             }
 
-            public mOS(uint machport = default, uint waitsema = default)
+            public mOS(bool initialized = default, pthreadmutex mutex = default, pthreadcond cond = default, long count = default)
             {
-                this.machport = machport;
-                this.waitsema = waitsema;
+                this.initialized = initialized;
+                this.mutex = mutex;
+                this.cond = cond;
+                this.count = count;
             }
 
             // Enable comparisons between nil and mOS struct
@@ -55,7 +59,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mOS mOS_cast(dynamic value)
         {
-            return new mOS(value.machport, value.waitsema);
+            return new mOS(value.initialized, value.mutex, value.cond, value.count);
         }
     }
 }

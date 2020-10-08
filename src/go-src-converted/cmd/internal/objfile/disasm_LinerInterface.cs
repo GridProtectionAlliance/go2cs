@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:44 UTC
+//     Generated on 2020 October 08 03:49:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -69,7 +69,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -83,23 +83,24 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate (@string, long, ref gosym.Func) PCToLineByRef(ref T value, ulong _p0);
-            private delegate (@string, long, ref gosym.Func) PCToLineByVal(T value, ulong _p0);
+            private delegate (@string, long, ptr<gosym.Func>) PCToLineByPtr(ptr<T> value, ulong _p0);
+            private delegate (@string, long, ptr<gosym.Func>) PCToLineByVal(T value, ulong _p0);
 
-            private static readonly PCToLineByRef s_PCToLineByRef;
+            private static readonly PCToLineByPtr s_PCToLineByPtr;
             private static readonly PCToLineByVal s_PCToLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (@string, long, ref gosym.Func) PCToLine(ulong _p0)
+            public (@string, long, ptr<gosym.Func>) PCToLine(ulong _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PCToLineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PCToLineByPtr is null || !m_target_is_ptr)
                     return s_PCToLineByVal!(target, _p0);
 
-                return s_PCToLineByRef(ref target, _p0);
+                return s_PCToLineByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -108,23 +109,20 @@ namespace @internal
             static Liner()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PCToLine");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PCToLine");
 
                 if (!(extensionMethod is null))
-                    s_PCToLineByRef = extensionMethod.CreateStaticDelegate(typeof(PCToLineByRef)) as PCToLineByRef;
+                    s_PCToLineByPtr = extensionMethod.CreateStaticDelegate(typeof(PCToLineByPtr)) as PCToLineByPtr;
 
-                if (s_PCToLineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PCToLine");
+                extensionMethod = targetType.GetExtensionMethod("PCToLine");
 
-                    if (!(extensionMethod is null))
-                        s_PCToLineByVal = extensionMethod.CreateStaticDelegate(typeof(PCToLineByVal)) as PCToLineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PCToLineByVal = extensionMethod.CreateStaticDelegate(typeof(PCToLineByVal)) as PCToLineByVal;
 
-                if (s_PCToLineByRef is null && s_PCToLineByVal is null)
+                if (s_PCToLineByPtr is null && s_PCToLineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Liner.PCToLine method", new Exception("PCToLine"));
             }
 

@@ -2,15 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2020 August 29 10:04:26 UTC
+// package ld -- go2cs converted at 2020 October 08 04:39:32 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\pcln.go
+using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using binary = go.encoding.binary_package;
+using fmt = go.fmt_package;
 using log = go.log_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
+using strings = go.strings_package;
 using static go.builtin;
 using System;
 
@@ -21,210 +27,169 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        // iteration over encoded pcdata tables.
-        private static uint getvarint(ref slice<byte> pp)
+        // pclnState holds state information used during pclntab generation.
+        // Here 'ldr' is just a pointer to the context's loader, 'container'
+        // is a bitmap holding whether a given symbol index is an outer or
+        // container symbol, 'deferReturnSym' is the index for the symbol
+        // "runtime.deferreturn", 'nameToOffset' is a helper function for
+        // capturing function names, 'numberedFiles' records the file number
+        // assigned to a given file symbol, 'filepaths' is a slice of
+        // expanded paths (indexed by file number).
+        private partial struct pclnState
         {
-            var v = uint32(0L);
-            var p = pp.Value;
-            {
-                long shift = 0L;
-
-                while (>>MARKER:FOREXPRESSION_LEVEL_1<<)
-                {
-                    v |= uint32(p[0L] & 0x7FUL) << (int)(uint(shift));
-                    var tmp4 = p;
-                    p = p[1L..];
-                    if (tmp4[0L] & 0x80UL == 0L)
-                    {
-                        break;
-                    shift += 7L;
-                    }
-                }
-            }
-
-            pp.Value = p;
-            return v;
+            public ptr<loader.Loader> ldr;
+            public loader.Bitmap container;
+            public loader.Sym deferReturnSym;
+            public Func<@string, int> nameToOffset;
+            public map<loader.Sym, long> numberedFiles;
+            public slice<@string> filepaths;
         }
 
-        private static void pciternext(ref Pciter it)
+        private static pclnState makepclnState(ptr<Link> _addr_ctxt)
         {
-            it.pc = it.nextpc;
-            if (it.done != 0L)
-            {
-                return;
-            }
-            if (-cap(it.p) >= -cap(it.d.P[len(it.d.P)..]))
-            {
-                it.done = 1L;
-                return;
-            } 
+            ref Link ctxt = ref _addr_ctxt.val;
 
-            // value delta
-            var v = getvarint(ref it.p);
-
-            if (v == 0L && it.start == 0L)
-            {
-                it.done = 1L;
-                return;
-            }
-            it.start = 0L;
-            var dv = int32(v >> (int)(1L)) ^ (int32(v << (int)(31L)) >> (int)(31L));
-            it.value += dv; 
-
-            // pc delta
-            v = getvarint(ref it.p);
-
-            it.nextpc = it.pc + v * it.pcscale;
+            var ldr = ctxt.loader;
+            var drs = ldr.Lookup("runtime.deferreturn", sym.SymVerABIInternal);
+            return new pclnState(container:loader.MakeBitmap(ldr.NSym()),ldr:ldr,deferReturnSym:drs,numberedFiles:make(map[loader.Sym]int64),filepaths:[]string{""},);
         }
 
-        private static void pciterinit(ref Link ctxt, ref Pciter it, ref sym.Pcdata d)
+        private static int ftabaddstring(this ptr<pclnState> _addr_state, ptr<loader.SymbolBuilder> _addr_ftab, @string s)
         {
-            it.d = d.Value;
-            it.p = it.d.P;
-            it.pc = 0L;
-            it.nextpc = 0L;
-            it.value = -1L;
-            it.start = 1L;
-            it.done = 0L;
-            it.pcscale = uint32(ctxt.Arch.MinLC);
-            pciternext(it);
-        }
+            ref pclnState state = ref _addr_state.val;
+            ref loader.SymbolBuilder ftab = ref _addr_ftab.val;
 
-        private static void addvarint(ref sym.Pcdata d, uint val)
-        {
-            var n = int32(0L);
-            {
-                var v__prev1 = v;
+            var start = len(ftab.Data());
+            ftab.Grow(int64(start + len(s) + 1L)); // make room for s plus trailing NUL
+            var ftd = ftab.Data();
+            copy(ftd[start..], s);
+            return int32(start);
 
-                var v = val;
-
-                while (v >= 0x80UL)
-                {
-                    n++;
-                    v >>= 7L;
-                }
-
-
-                v = v__prev1;
-            }
-            n++;
-
-            var old = len(d.P);
-            while (cap(d.P) < len(d.P) + int(n))
-            {
-                d.P = append(d.P[..cap(d.P)], 0L);
-            }
-
-            d.P = d.P[..old + int(n)];
-
-            var p = d.P[old..];
-            v = default;
-            v = val;
-
-            while (v >= 0x80UL)
-            {
-                p[0L] = byte(v | 0x80UL);
-                p = p[1L..];
-                v >>= 7L;
-            }
-
-            p[0L] = byte(v);
-        }
-
-        private static int addpctab(ref Link ctxt, ref sym.Symbol ftab, int off, ref sym.Pcdata d)
-        {
-            int start = default;
-            if (len(d.P) > 0L)
-            {
-                start = int32(len(ftab.P));
-                ftab.AddBytes(d.P);
-            }
-            return int32(ftab.SetUint32(ctxt.Arch, int64(off), uint32(start)));
-        }
-
-        private static int ftabaddstring(ref Link ctxt, ref sym.Symbol ftab, @string s)
-        {
-            var n = int32(len(s)) + 1L;
-            var start = int32(len(ftab.P));
-            ftab.Grow(int64(start) + int64(n) + 1L);
-            copy(ftab.P[start..], s);
-            return start;
         }
 
         // numberfile assigns a file number to the file if it hasn't been assigned already.
-        private static void numberfile(ref Link ctxt, ref sym.Symbol file)
+        private static long numberfile(this ptr<pclnState> _addr_state, loader.Sym file)
         {
-            if (file.Type != sym.SFILEPATH)
+            ref pclnState state = ref _addr_state.val;
+
             {
-                ctxt.Filesyms = append(ctxt.Filesyms, file);
-                file.Value = int64(len(ctxt.Filesyms));
-                file.Type = sym.SFILEPATH;
-                var path = file.Name[len(src.FileSymPrefix)..];
-                file.Name = expandGoroot(path);
+                var val__prev1 = val;
+
+                var (val, ok) = state.numberedFiles[file];
+
+                if (ok)
+                {
+                    return val;
+                }
+
+                val = val__prev1;
+
             }
+
+            var sn = state.ldr.SymName(file);
+            var path = sn[len(src.FileSymPrefix)..];
+            var val = int64(len(state.filepaths));
+            state.numberedFiles[file] = val;
+            state.filepaths = append(state.filepaths, expandGoroot(path));
+            return val;
+
         }
 
-        private static void renumberfiles(ref Link ctxt, slice<ref sym.Symbol> files, ref sym.Pcdata d)
+        private static long fileVal(this ptr<pclnState> _addr_state, loader.Sym file) => func((_, panic, __) =>
         {
-            ref sym.Symbol f = default; 
+            ref pclnState state = ref _addr_state.val;
 
-            // Give files numbers.
-            for (long i = 0L; i < len(files); i++)
             {
-                f = files[i];
-                numberfile(ctxt, f);
+                var (val, ok) = state.numberedFiles[file];
+
+                if (ok)
+                {
+                    return val;
+                }
+
+            }
+
+            panic("should have been numbered first");
+
+        });
+
+        private static void renumberfiles(this ptr<pclnState> _addr_state, ptr<Link> _addr_ctxt, loader.FuncInfo fi, ptr<sym.Pcdata> _addr_d)
+        {
+            ref pclnState state = ref _addr_state.val;
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref sym.Pcdata d = ref _addr_d.val;
+ 
+            // Give files numbers.
+            var nf = fi.NumFile();
+            for (var i = uint32(0L); i < nf; i++)
+            {
+                state.numberfile(fi.File(int(i)));
             }
 
 
+            var buf = make_slice<byte>(binary.MaxVarintLen32);
             var newval = int32(-1L);
             sym.Pcdata @out = default;
-            Pciter it = default;
-            pciterinit(ctxt, ref it, d);
+            var it = obj.NewPCIter(uint32(ctxt.Arch.MinLC));
+            it.Init(d.P);
 
-            while (it.done == 0L)
+            while (!it.Done)
             { 
                 // value delta
-                var oldval = it.value;
+                var oldval = it.Value;
 
                 int val = default;
                 if (oldval == -1L)
                 {
                     val = -1L;
-                pciternext(ref it);
+                it.Next();
                 }
                 else
                 {
-                    if (oldval < 0L || oldval >= int32(len(files)))
+                    if (oldval < 0L || oldval >= int32(nf))
                     {
                         log.Fatalf("bad pcdata %d", oldval);
                     }
-                    val = int32(files[oldval].Value);
+
+                    val = int32(state.fileVal(fi.File(int(oldval))));
+
                 }
+
                 var dv = val - newval;
-                newval = val;
-                var v = (uint32(dv) << (int)(1L)) ^ uint32(dv >> (int)(31L));
-                addvarint(ref out, v); 
+                newval = val; 
+
+                // value
+                var n = binary.PutVarint(buf, int64(dv));
+                @out.P = append(@out.P, buf[..n]); 
 
                 // pc delta
-                addvarint(ref out, (it.nextpc - it.pc) / it.pcscale);
+                var pc = (it.NextPC - it.PC) / it.PCScale;
+                n = binary.PutUvarint(buf, uint64(pc));
+                @out.P = append(@out.P, buf[..n]);
+
             } 
 
             // terminating value delta
+            // we want to write varint-encoded 0, which is just 0
  
 
             // terminating value delta
-            addvarint(ref out, 0L);
+            // we want to write varint-encoded 0, which is just 0
+            @out.P = append(@out.P, 0L);
 
-            d.Value = out;
+            d = out;
+
         }
 
-        // onlycsymbol reports whether this is a cgo symbol provided by the
-        // runtime and only used from C code.
-        private static bool onlycsymbol(ref sym.Symbol s)
+        // onlycsymbol looks at a symbol's name to report whether this is a
+        // symbol that is referenced by C code
+        private static bool onlycsymbol(@string sname)
         {
-            switch (s.Name)
+            switch (sname)
             {
                 case "_cgo_topofstack": 
+
+                case "__cgo_topofstack": 
 
                 case "_cgo_panic": 
 
@@ -232,46 +197,158 @@ namespace @internal
                     return true;
                     break;
             }
-            return false;
-        }
-
-        private static bool emitPcln(ref Link ctxt, ref sym.Symbol s)
-        {
-            if (s == null)
+            if (strings.HasPrefix(sname, "_cgoexp_"))
             {
                 return true;
             }
-            if (ctxt.BuildMode == BuildModePlugin && ctxt.HeadType == objabi.Hdarwin && onlycsymbol(s))
+
+            return false;
+
+        }
+
+        private static bool emitPcln(ptr<Link> _addr_ctxt, loader.Sym s, loader.Bitmap container)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            if (ctxt.BuildMode == BuildModePlugin && ctxt.HeadType == objabi.Hdarwin && onlycsymbol(ctxt.loader.SymName(s)))
             {
                 return false;
             } 
-            // We want to generate func table entries only for the "lowest level" symbols,
-            // not containers of subsymbols.
-            if (s.Attr.Container())
+            // We want to generate func table entries only for the "lowest
+            // level" symbols, not containers of subsymbols.
+            return !container.Has(s);
+
+        }
+
+        private static uint computeDeferReturn(this ptr<pclnState> _addr_state, ptr<Target> _addr_target, loader.Sym s) => func((_, panic, __) =>
+        {
+            ref pclnState state = ref _addr_state.val;
+            ref Target target = ref _addr_target.val;
+
+            var deferreturn = uint32(0L);
+            var lastWasmAddr = uint32(0L);
+
+            var relocs = state.ldr.Relocs(s);
+            for (long ri = 0L; ri < relocs.Count(); ri++)
             {
-                return true;
+                var r = relocs.At2(ri);
+                if (target.IsWasm() && r.Type() == objabi.R_ADDR)
+                { 
+                    // Wasm does not have a live variable set at the deferreturn
+                    // call itself. Instead it has one identified by the
+                    // resumption point immediately preceding the deferreturn.
+                    // The wasm code has a R_ADDR relocation which is used to
+                    // set the resumption point to PC_B.
+                    lastWasmAddr = uint32(r.Add());
+
+                }
+
+                if (r.Type().IsDirectCall() && (r.Sym() == state.deferReturnSym || state.ldr.IsDeferReturnTramp(r.Sym())))
+                {
+                    if (target.IsWasm())
+                    {
+                        deferreturn = lastWasmAddr - 1L;
+                    }
+                    else
+                    { 
+                        // Note: the relocation target is in the call instruction, but
+                        // is not necessarily the whole instruction (for instance, on
+                        // x86 the relocation applies to bytes [1:5] of the 5 byte call
+                        // instruction).
+                        deferreturn = uint32(r.Off());
+
+                        if (target.Arch.Family == sys.AMD64 || target.Arch.Family == sys.I386) 
+                            deferreturn--;
+                        else if (target.Arch.Family == sys.PPC64 || target.Arch.Family == sys.ARM || target.Arch.Family == sys.ARM64 || target.Arch.Family == sys.MIPS || target.Arch.Family == sys.MIPS64)                         else if (target.Arch.Family == sys.RISCV64) 
+                            // TODO(jsing): The JALR instruction is marked with
+                            // R_CALLRISCV, whereas the actual reloc is currently
+                            // one instruction earlier starting with the AUIPC.
+                            deferreturn -= 4L;
+                        else if (target.Arch.Family == sys.S390X) 
+                            deferreturn -= 2L;
+                        else 
+                            panic(fmt.Sprint("Unhandled architecture:", target.Arch.Family));
+                        
+                    }
+
+                    break; // only need one
+                }
+
             }
-            return true;
+
+            return deferreturn;
+
+        });
+
+        // genInlTreeSym generates the InlTree sym for a function with the
+        // specified FuncInfo.
+        private static loader.Sym genInlTreeSym(this ptr<pclnState> _addr_state, loader.FuncInfo fi, ptr<sys.Arch> _addr_arch)
+        {
+            ref pclnState state = ref _addr_state.val;
+            ref sys.Arch arch = ref _addr_arch.val;
+
+            var ldr = state.ldr;
+            var its = ldr.CreateExtSym("", 0L);
+            var inlTreeSym = ldr.MakeSymbolUpdater(its); 
+            // Note: the generated symbol is given a type of sym.SGOFUNC, as a
+            // signal to the symtab() phase that it needs to be grouped in with
+            // other similar symbols (gcdata, etc); the dodata() phase will
+            // eventually switch the type back to SRODATA.
+            inlTreeSym.SetType(sym.SGOFUNC);
+            ldr.SetAttrReachable(its, true);
+            var ninl = fi.NumInlTree();
+            for (long i = 0L; i < int(ninl); i++)
+            {
+                var call = fi.InlTree(i); 
+                // Usually, call.File is already numbered since the file
+                // shows up in the Pcfile table. However, two inlined calls
+                // might overlap exactly so that only the innermost file
+                // appears in the Pcfile table. In that case, this assigns
+                // the outer file a number.
+                var val = state.numberfile(call.File);
+                var fn = ldr.SymName(call.Func);
+                var nameoff = state.nameToOffset(fn);
+
+                inlTreeSym.SetUint16(arch, int64(i * 20L + 0L), uint16(call.Parent));
+                inlTreeSym.SetUint8(arch, int64(i * 20L + 2L), uint8(objabi.GetFuncID(fn, ""))); 
+                // byte 3 is unused
+                inlTreeSym.SetUint32(arch, int64(i * 20L + 4L), uint32(val));
+                inlTreeSym.SetUint32(arch, int64(i * 20L + 8L), uint32(call.Line));
+                inlTreeSym.SetUint32(arch, int64(i * 20L + 12L), uint32(nameoff));
+                inlTreeSym.SetUint32(arch, int64(i * 20L + 16L), uint32(call.ParentPC));
+
+            }
+
+            return its;
+
         }
 
         // pclntab initializes the pclntab symbol with
         // runtime function and file name information.
 
-        private static sym.FuncInfo pclntabZpcln = default;
-
         // These variables are used to initialize runtime.firstmoduledata, see symtab.go:symtab.
         private static int pclntabNfunc = default;
         private static int pclntabFiletabOffset = default;
         private static int pclntabPclntabOffset = default;
-        private static ref sym.Symbol pclntabFirstFunc = default;
-        private static ref sym.Symbol pclntabLastFunc = default;
+        private static loader.Sym pclntabFirstFunc = default;
+        private static loader.Sym pclntabLastFunc = default;
 
-        private static void pclntab(this ref Link ctxt)
+        // pclntab generates the pcln table for the link output. Return value
+        // is a bitmap indexed by global symbol that marks 'container' text
+        // symbols, e.g. the set of all symbols X such that Outer(S) = X for
+        // some other text symbol S.
+        private static loader.Bitmap pclntab(this ptr<Link> _addr_ctxt)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+
             var funcdataBytes = int64(0L);
-            var ftab = ctxt.Syms.Lookup("runtime.pclntab", 0L);
-            ftab.Type = sym.SPCLNTAB;
-            ftab.Attr |= sym.AttrReachable; 
+            var ldr = ctxt.loader;
+            var ftabsym = ldr.LookupOrCreateSym("runtime.pclntab", 0L);
+            var ftab = ldr.MakeSymbolUpdater(ftabsym);
+            ftab.SetType(sym.SPCLNTAB);
+            ldr.SetAttrReachable(ftabsym, true);
+
+            var state = makepclnState(_addr_ctxt); 
 
             // See golang.org/s/go12symtab for the format. Briefly:
             //    8-byte header
@@ -279,34 +356,59 @@ namespace @internal
             //    function table, alternating PC and offset to func struct [each entry thearch.ptrsize bytes]
             //    end PC [thearch.ptrsize bytes]
             //    offset to file table [4 bytes]
-            var nfunc = int32(0L); 
 
             // Find container symbols and mark them as such.
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in ctxt.Textp)
+                foreach (var (_, __s) in ctxt.Textp2)
                 {
                     s = __s;
-                    if (s.Outer != null)
+                    var outer = ldr.OuterSym(s);
+                    if (outer != 0L)
                     {
-                        s.Outer.Attr |= sym.AttrContainer;
+                        state.container.Set(outer);
                     }
-                }
+
+                } 
+
+                // Gather some basic stats and info.
 
                 s = s__prev1;
             }
 
+            int nfunc = default;
+            var prevSect = ldr.SymSect(ctxt.Textp2[0L]);
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in ctxt.Textp)
+                foreach (var (_, __s) in ctxt.Textp2)
                 {
                     s = __s;
-                    if (emitPcln(ctxt, s))
+                    if (!emitPcln(_addr_ctxt, s, state.container))
                     {
-                        nfunc++;
+                        continue;
                     }
+
+                    nfunc++;
+                    if (pclntabFirstFunc == 0L)
+                    {
+                        pclntabFirstFunc = s;
+                    }
+
+                    var ss = ldr.SymSect(s);
+                    if (ss != prevSect)
+                    { 
+                        // With multiple text sections, the external linker may
+                        // insert functions between the sections, which are not
+                        // known by Go. This leaves holes in the PC range covered
+                        // by the func table. We need to generate an entry to mark
+                        // the hole.
+                        nfunc++;
+                        prevSect = ss;
+
+                    }
+
                 }
 
                 s = s__prev1;
@@ -320,65 +422,181 @@ namespace @internal
             ftab.SetUint(ctxt.Arch, 8L, uint64(nfunc));
             pclntabPclntabOffset = int32(8L + ctxt.Arch.PtrSize);
 
-            var funcnameoff = make_map<@string, int>();
+            var szHint = len(ctxt.Textp2) * 2L;
+            var funcnameoff = make_map<@string, int>(szHint);
             Func<@string, int> nameToOffset = name =>
             {
                 var (nameoff, ok) = funcnameoff[name];
                 if (!ok)
                 {
-                    nameoff = ftabaddstring(ctxt, ftab, name);
+                    nameoff = state.ftabaddstring(ftab, name);
                     funcnameoff[name] = nameoff;
                 }
+
                 return nameoff;
+
+            }
+;
+            state.nameToOffset = nameToOffset;
+
+            var pctaboff = make_map<@string, uint>(szHint);
+            Func<int, slice<byte>, int> writepctab = (off, p) =>
+            {
+                var (start, ok) = pctaboff[string(p)];
+                if (!ok)
+                {
+                    if (len(p) > 0L)
+                    {
+                        start = uint32(len(ftab.Data()));
+                        ftab.AddBytes(p);
+                    }
+
+                    pctaboff[string(p)] = start;
+
+                }
+
+                var newoff = int32(ftab.SetUint32(ctxt.Arch, int64(off), start));
+                return newoff;
+
             }
 ;
 
-            nfunc = 0L;
-            ref sym.Symbol last = default;
+            object setAddr = ptr<loader.SymbolBuilder>;
+            if (ctxt.IsExe() && ctxt.IsInternal() && !ctxt.DynlinkingGo())
+            { 
+                // Internal linking static executable. At this point the function
+                // addresses are known, so we can just use them instead of emitting
+                // relocations.
+                // For other cases we are generating a relocatable binary so we
+                // still need to emit relocations.
+                //
+                // Also not do this optimization when using plugins (DynlinkingGo),
+                // as on darwin it does weird things with runtime.etext symbol.
+                // TODO: remove the weird thing and remove this condition.
+                setAddr = (s, arch, off, tgt, add) =>
+                {
+                    {
+                        var v = ldr.SymValue(tgt);
+
+                        if (v != 0L)
+                        {
+                            return s.SetUint(arch, off, uint64(v + add));
+                        }
+
+                    }
+
+                    return s.SetAddrPlus(arch, off, tgt, add);
+
+                }
+;
+
+            }
+
+            sym.Pcdata pcsp = new sym.Pcdata();
+            ref sym.Pcdata pcfile = ref heap(new sym.Pcdata(), out ptr<sym.Pcdata> _addr_pcfile);
+            sym.Pcdata pcline = new sym.Pcdata();
+            sym.Pcdata pcdata = new slice<sym.Pcdata>(new sym.Pcdata[] {  });
+            loader.Sym funcdata = new slice<loader.Sym>(new loader.Sym[] {  });
+            long funcdataoff = new slice<long>(new long[] {  });
+
+            nfunc = 0L; // repurpose nfunc as a running index
+            var prevFunc = ctxt.Textp2[0L];
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in ctxt.Textp)
+                foreach (var (_, __s) in ctxt.Textp2)
                 {
                     s = __s;
-                    last = s;
-                    if (!emitPcln(ctxt, s))
+                    if (!emitPcln(_addr_ctxt, s, state.container))
                     {
                         continue;
                     }
-                    var pcln = s.FuncInfo;
-                    if (pcln == null)
-                    {
-                        pcln = ref pclntabZpcln;
+
+                    var thisSect = ldr.SymSect(s);
+                    prevSect = ldr.SymSect(prevFunc);
+                    if (thisSect != prevSect)
+                    { 
+                        // With multiple text sections, there may be a hole here
+                        // in the address space (see the comment above). We use an
+                        // invalid funcoff value to mark the hole. See also
+                        // runtime/symtab.go:findfunc
+                        var prevFuncSize = int64(ldr.SymSize(prevFunc));
+                        setAddr(ftab, ctxt.Arch, 8L + int64(ctxt.Arch.PtrSize) + int64(nfunc) * 2L * int64(ctxt.Arch.PtrSize), prevFunc, prevFuncSize);
+                        ftab.SetUint(ctxt.Arch, 8L + int64(ctxt.Arch.PtrSize) + int64(nfunc) * 2L * int64(ctxt.Arch.PtrSize) + int64(ctxt.Arch.PtrSize), ~uint64(0L));
+                        nfunc++;
+
                     }
-                    if (pclntabFirstFunc == null)
+
+                    prevFunc = s;
+
+                    pcsp.P = pcsp.P[..0L];
+                    pcline.P = pcline.P[..0L];
+                    pcfile.P = pcfile.P[..0L];
+                    pcdata = pcdata[..0L];
+                    funcdataoff = funcdataoff[..0L];
+                    funcdata = funcdata[..0L];
+                    var fi = ldr.FuncInfo(s);
+                    if (fi.Valid())
                     {
-                        pclntabFirstFunc = s;
+                        fi.Preload();
+                        var npc = fi.NumPcdata();
+                        {
+                            var i__prev2 = i;
+
+                            for (var i = uint32(0L); i < npc; i++)
+                            {
+                                pcdata = append(pcdata, new sym.Pcdata(P:fi.Pcdata(int(i))));
+                            }
+
+
+                            i = i__prev2;
+                        }
+                        var nfd = fi.NumFuncdataoff();
+                        {
+                            var i__prev2 = i;
+
+                            for (i = uint32(0L); i < nfd; i++)
+                            {
+                                funcdataoff = append(funcdataoff, fi.Funcdataoff(int(i)));
+                            }
+
+
+                            i = i__prev2;
+                        }
+                        funcdata = fi.Funcdata(funcdata);
+
                     }
-                    if (len(pcln.InlTree) > 0L)
+
+                    if (fi.Valid() && fi.NumInlTree() > 0L)
                     {
-                        if (len(pcln.Pcdata) <= objabi.PCDATA_InlTreeIndex)
+                        if (len(pcdata) <= objabi.PCDATA_InlTreeIndex)
                         { 
                             // Create inlining pcdata table.
-                            var pcdata = make_slice<sym.Pcdata>(objabi.PCDATA_InlTreeIndex + 1L);
-                            copy(pcdata, pcln.Pcdata);
-                            pcln.Pcdata = pcdata;
+                            var newpcdata = make_slice<sym.Pcdata>(objabi.PCDATA_InlTreeIndex + 1L);
+                            copy(newpcdata, pcdata);
+                            pcdata = newpcdata;
+
                         }
-                        if (len(pcln.Funcdataoff) <= objabi.FUNCDATA_InlTree)
+
+                        if (len(funcdataoff) <= objabi.FUNCDATA_InlTree)
                         { 
                             // Create inline tree funcdata.
-                            var funcdata = make_slice<ref sym.Symbol>(objabi.FUNCDATA_InlTree + 1L);
-                            var funcdataoff = make_slice<long>(objabi.FUNCDATA_InlTree + 1L);
-                            copy(funcdata, pcln.Funcdata);
-                            copy(funcdataoff, pcln.Funcdataoff);
-                            pcln.Funcdata = funcdata;
-                            pcln.Funcdataoff = funcdataoff;
-                        }
-                    }
-                    var funcstart = int32(len(ftab.P));
-                    funcstart += int32(-len(ftab.P)) & (int32(ctxt.Arch.PtrSize) - 1L);
+                            var newfuncdata = make_slice<loader.Sym>(objabi.FUNCDATA_InlTree + 1L);
+                            var newfuncdataoff = make_slice<long>(objabi.FUNCDATA_InlTree + 1L);
+                            copy(newfuncdata, funcdata);
+                            copy(newfuncdataoff, funcdataoff);
+                            funcdata = newfuncdata;
+                            funcdataoff = newfuncdataoff;
 
-                    ftab.SetAddr(ctxt.Arch, 8L + int64(ctxt.Arch.PtrSize) + int64(nfunc) * 2L * int64(ctxt.Arch.PtrSize), s);
+                        }
+
+                    }
+
+                    var dSize = len(ftab.Data());
+                    var funcstart = int32(dSize);
+                    funcstart += int32(-dSize) & (int32(ctxt.Arch.PtrSize) - 1L); // align to ptrsize
+
+                    setAddr(ftab, ctxt.Arch, 8L + int64(ctxt.Arch.PtrSize) + int64(nfunc) * 2L * int64(ctxt.Arch.PtrSize), s, 0L);
                     ftab.SetUint(ctxt.Arch, 8L + int64(ctxt.Arch.PtrSize) + int64(nfunc) * 2L * int64(ctxt.Arch.PtrSize) + int64(ctxt.Arch.PtrSize), uint64(funcstart)); 
 
                     // Write runtime._func. Keep in sync with ../../../../runtime/runtime2.go:/_func
@@ -387,242 +605,194 @@ namespace @internal
                     // fixed size of struct, checked below
                     var off = funcstart;
 
-                    var end = funcstart + int32(ctxt.Arch.PtrSize) + 3L * 4L + 5L * 4L + int32(len(pcln.Pcdata)) * 4L + int32(len(pcln.Funcdata)) * int32(ctxt.Arch.PtrSize);
-                    if (len(pcln.Funcdata) > 0L && (end & int32(ctxt.Arch.PtrSize - 1L) != 0L))
+                    var end = funcstart + int32(ctxt.Arch.PtrSize) + 3L * 4L + 5L * 4L + int32(len(pcdata)) * 4L + int32(len(funcdata)) * int32(ctxt.Arch.PtrSize);
+                    if (len(funcdata) > 0L && (end & int32(ctxt.Arch.PtrSize - 1L) != 0L))
                     {
                         end += 4L;
                     }
+
                     ftab.Grow(int64(end)); 
 
                     // entry uintptr
-                    off = int32(ftab.SetAddr(ctxt.Arch, int64(off), s)); 
+                    off = int32(setAddr(ftab, ctxt.Arch, int64(off), s, 0L)); 
 
                     // name int32
-                    var nameoff = nameToOffset(s.Name);
+                    var sn = ldr.SymName(s);
+                    var nameoff = nameToOffset(sn);
                     off = int32(ftab.SetUint32(ctxt.Arch, int64(off), uint32(nameoff))); 
 
                     // args int32
                     // TODO: Move into funcinfo.
                     var args = uint32(0L);
-                    if (s.FuncInfo != null)
+                    if (fi.Valid())
                     {
-                        args = uint32(s.FuncInfo.Args);
+                        args = uint32(fi.Args());
                     }
+
                     off = int32(ftab.SetUint32(ctxt.Arch, int64(off), args)); 
 
-                    // funcID uint32
-                    var funcID = objabi.FuncID_normal;
-                    switch (s.Name)
-                    {
-                        case "runtime.goexit": 
-                            funcID = objabi.FuncID_goexit;
-                            break;
-                        case "runtime.jmpdefer": 
-                            funcID = objabi.FuncID_jmpdefer;
-                            break;
-                        case "runtime.mcall": 
-                            funcID = objabi.FuncID_mcall;
-                            break;
-                        case "runtime.morestack": 
-                            funcID = objabi.FuncID_morestack;
-                            break;
-                        case "runtime.mstart": 
-                            funcID = objabi.FuncID_mstart;
-                            break;
-                        case "runtime.rt0_go": 
-                            funcID = objabi.FuncID_rt0_go;
-                            break;
-                        case "runtime.asmcgocall": 
-                            funcID = objabi.FuncID_asmcgocall;
-                            break;
-                        case "runtime.sigpanic": 
-                            funcID = objabi.FuncID_sigpanic;
-                            break;
-                        case "runtime.runfinq": 
-                            funcID = objabi.FuncID_runfinq;
-                            break;
-                        case "runtime.bgsweep": 
-                            funcID = objabi.FuncID_bgsweep;
-                            break;
-                        case "runtime.forcegchelper": 
-                            funcID = objabi.FuncID_forcegchelper;
-                            break;
-                        case "runtime.timerproc": 
-                            funcID = objabi.FuncID_timerproc;
-                            break;
-                        case "runtime.gcBgMarkWorker": 
-                            funcID = objabi.FuncID_gcBgMarkWorker;
-                            break;
-                        case "runtime.systemstack_switch": 
-                            funcID = objabi.FuncID_systemstack_switch;
-                            break;
-                        case "runtime.systemstack": 
-                            funcID = objabi.FuncID_systemstack;
-                            break;
-                        case "runtime.cgocallback_gofunc": 
-                            funcID = objabi.FuncID_cgocallback_gofunc;
-                            break;
-                        case "runtime.gogo": 
-                            funcID = objabi.FuncID_gogo;
-                            break;
-                        case "runtime.externalthreadhandler": 
-                            funcID = objabi.FuncID_externalthreadhandler;
-                            break;
-                    }
-                    off = int32(ftab.SetUint32(ctxt.Arch, int64(off), uint32(funcID)));
+                    // deferreturn
+                    var deferreturn = state.computeDeferReturn(_addr_ctxt.Target, s);
+                    off = int32(ftab.SetUint32(ctxt.Arch, int64(off), deferreturn));
 
-                    if (pcln != ref pclntabZpcln)
+                    if (fi.Valid())
                     {
-                        renumberfiles(ctxt, pcln.File, ref pcln.Pcfile);
+                        pcsp = new sym.Pcdata(P:fi.Pcsp());
+                        pcfile = new sym.Pcdata(P:fi.Pcfile());
+                        pcline = new sym.Pcdata(P:fi.Pcline());
+                        state.renumberfiles(ctxt, fi, _addr_pcfile);
                         if (false)
                         { 
                             // Sanity check the new numbering
-                            Pciter it = default;
-                            pciterinit(ctxt, ref it, ref pcln.Pcfile);
+                            var it = obj.NewPCIter(uint32(ctxt.Arch.MinLC));
+                            it.Init(pcfile.P);
 
-                            while (it.done == 0L)
+                            while (!it.Done)
                             {
-                                if (it.value < 1L || it.value > int32(len(ctxt.Filesyms)))
+                                if (it.Value < 1L || it.Value > int32(len(state.numberedFiles)))
                                 {
-                                    Errorf(s, "bad file number in pcfile: %d not in range [1, %d]\n", it.value, len(ctxt.Filesyms));
+                                    ctxt.Errorf(s, "bad file number in pcfile: %d not in range [1, %d]\n", it.Value, len(state.numberedFiles));
                                     errorexit();
-                                pciternext(ref it);
+                                it.Next();
                                 }
+
                             }
 
+
                         }
+
                     }
-                    if (len(pcln.InlTree) > 0L)
+
+                    if (fi.Valid() && fi.NumInlTree() > 0L)
                     {
-                        var inlTreeSym = ctxt.Syms.Lookup("inltree." + s.Name, 0L);
-                        inlTreeSym.Type = sym.SRODATA;
-                        inlTreeSym.Attr |= sym.AttrReachable | sym.AttrDuplicateOK;
-
-                        {
-                            var i__prev2 = i;
-
-                            foreach (var (__i, __call) in pcln.InlTree)
-                            {
-                                i = __i;
-                                call = __call; 
-                                // Usually, call.File is already numbered since the file
-                                // shows up in the Pcfile table. However, two inlined calls
-                                // might overlap exactly so that only the innermost file
-                                // appears in the Pcfile table. In that case, this assigns
-                                // the outer file a number.
-                                numberfile(ctxt, call.File);
-                                nameoff = nameToOffset(call.Func.Name);
-
-                                inlTreeSym.SetUint32(ctxt.Arch, int64(i * 16L + 0L), uint32(call.Parent));
-                                inlTreeSym.SetUint32(ctxt.Arch, int64(i * 16L + 4L), uint32(call.File.Value));
-                                inlTreeSym.SetUint32(ctxt.Arch, int64(i * 16L + 8L), uint32(call.Line));
-                                inlTreeSym.SetUint32(ctxt.Arch, int64(i * 16L + 12L), uint32(nameoff));
-                            }
-
-                            i = i__prev2;
-                        }
-
-                        pcln.Funcdata[objabi.FUNCDATA_InlTree] = inlTreeSym;
-                        pcln.Pcdata[objabi.PCDATA_InlTreeIndex] = pcln.Pcinline;
+                        var its = state.genInlTreeSym(fi, ctxt.Arch);
+                        funcdata[objabi.FUNCDATA_InlTree] = its;
+                        pcdata[objabi.PCDATA_InlTreeIndex] = new sym.Pcdata(P:fi.Pcinline());
                     } 
 
                     // pcdata
-                    off = addpctab(ctxt, ftab, off, ref pcln.Pcsp);
+                    off = writepctab(off, pcsp.P);
+                    off = writepctab(off, pcfile.P);
+                    off = writepctab(off, pcline.P);
+                    off = int32(ftab.SetUint32(ctxt.Arch, int64(off), uint32(len(pcdata)))); 
 
-                    off = addpctab(ctxt, ftab, off, ref pcln.Pcfile);
-                    off = addpctab(ctxt, ftab, off, ref pcln.Pcline);
-                    off = int32(ftab.SetUint32(ctxt.Arch, int64(off), uint32(len(pcln.Pcdata))));
-                    off = int32(ftab.SetUint32(ctxt.Arch, int64(off), uint32(len(pcln.Funcdata))));
+                    // funcID uint8
+                    @string file = default;
+                    if (fi.Valid() && fi.NumFile() > 0L)
+                    {
+                        var filesymname = ldr.SymName(fi.File(0L));
+                        file = filesymname[len(src.FileSymPrefix)..];
+                    }
+
+                    var funcID = objabi.GetFuncID(sn, file);
+
+                    off = int32(ftab.SetUint8(ctxt.Arch, int64(off), uint8(funcID))); 
+
+                    // unused
+                    off += 2L; 
+
+                    // nfuncdata must be the final entry.
+                    off = int32(ftab.SetUint8(ctxt.Arch, int64(off), uint8(len(funcdata))));
                     {
                         var i__prev2 = i;
 
-                        for (long i = 0L; i < len(pcln.Pcdata); i++)
+                        foreach (var (__i) in pcdata)
                         {
-                            off = addpctab(ctxt, ftab, off, ref pcln.Pcdata[i]);
+                            i = __i;
+                            off = writepctab(off, pcdata[i].P);
                         } 
 
                         // funcdata, must be pointer-aligned and we're only int32-aligned.
                         // Missing funcdata will be 0 (nil pointer).
 
-
                         i = i__prev2;
-                    } 
+                    }
 
-                    // funcdata, must be pointer-aligned and we're only int32-aligned.
-                    // Missing funcdata will be 0 (nil pointer).
-                    if (len(pcln.Funcdata) > 0L)
+                    if (len(funcdata) > 0L)
                     {
                         if (off & int32(ctxt.Arch.PtrSize - 1L) != 0L)
                         {
                             off += 4L;
                         }
+
                         {
                             var i__prev2 = i;
 
-                            for (i = 0L; i < len(pcln.Funcdata); i++)
+                            foreach (var (__i) in funcdata)
                             {
-                                if (pcln.Funcdata[i] == null)
+                                i = __i;
+                                var dataoff = int64(off) + int64(ctxt.Arch.PtrSize) * int64(i);
+                                if (funcdata[i] == 0L)
                                 {
-                                    ftab.SetUint(ctxt.Arch, int64(off) + int64(ctxt.Arch.PtrSize) * int64(i), uint64(pcln.Funcdataoff[i]));
-                                }
-                                else
-                                { 
-                                    // TODO: Dedup.
-                                    funcdataBytes += pcln.Funcdata[i].Size;
+                                    ftab.SetUint(ctxt.Arch, dataoff, uint64(funcdataoff[i]));
+                                    continue;
+                                } 
+                                // TODO: Dedup.
+                                funcdataBytes += int64(len(ldr.Data(funcdata[i])));
+                                setAddr(ftab, ctxt.Arch, dataoff, funcdata[i], funcdataoff[i]);
 
-                                    ftab.SetAddrPlus(ctxt.Arch, int64(off) + int64(ctxt.Arch.PtrSize) * int64(i), pcln.Funcdata[i], pcln.Funcdataoff[i]);
-                                }
                             }
-
 
                             i = i__prev2;
                         }
 
-                        off += int32(len(pcln.Funcdata)) * int32(ctxt.Arch.PtrSize);
+                        off += int32(len(funcdata)) * int32(ctxt.Arch.PtrSize);
+
                     }
+
                     if (off != end)
                     {
-                        Errorf(s, "bad math in functab: funcstart=%d off=%d but end=%d (npcdata=%d nfuncdata=%d ptrsize=%d)", funcstart, off, end, len(pcln.Pcdata), len(pcln.Funcdata), ctxt.Arch.PtrSize);
+                        ctxt.Errorf(s, "bad math in functab: funcstart=%d off=%d but end=%d (npcdata=%d nfuncdata=%d ptrsize=%d)", funcstart, off, end, len(pcdata), len(funcdata), ctxt.Arch.PtrSize);
                         errorexit();
                     }
+
                     nfunc++;
+
                 }
 
                 s = s__prev1;
             }
 
+            var last = ctxt.Textp2[len(ctxt.Textp2) - 1L];
             pclntabLastFunc = last; 
             // Final entry of table is just end pc.
-            ftab.SetAddrPlus(ctxt.Arch, 8L + int64(ctxt.Arch.PtrSize) + int64(nfunc) * 2L * int64(ctxt.Arch.PtrSize), last, last.Size); 
+            setAddr(ftab, ctxt.Arch, 8L + int64(ctxt.Arch.PtrSize) + int64(nfunc) * 2L * int64(ctxt.Arch.PtrSize), last, ldr.SymSize(last)); 
 
             // Start file table.
-            var start = int32(len(ftab.P));
-
-            start += int32(-len(ftab.P)) & (int32(ctxt.Arch.PtrSize) - 1L);
+            dSize = len(ftab.Data());
+            var start = int32(dSize);
+            start += int32(-dSize) & (int32(ctxt.Arch.PtrSize) - 1L);
             pclntabFiletabOffset = start;
             ftab.SetUint32(ctxt.Arch, 8L + int64(ctxt.Arch.PtrSize) + int64(nfunc) * 2L * int64(ctxt.Arch.PtrSize) + int64(ctxt.Arch.PtrSize), uint32(start));
 
-            ftab.Grow(int64(start) + (int64(len(ctxt.Filesyms)) + 1L) * 4L);
-            ftab.SetUint32(ctxt.Arch, int64(start), uint32(len(ctxt.Filesyms) + 1L));
+            var nf = len(state.numberedFiles);
+            ftab.Grow(int64(start) + int64((nf + 1L) * 4L));
+            ftab.SetUint32(ctxt.Arch, int64(start), uint32(nf + 1L));
             {
                 var i__prev1 = i;
 
-                for (i = len(ctxt.Filesyms) - 1L; i >= 0L; i--)
+                for (i = nf; i > 0L; i--)
                 {
-                    var s = ctxt.Filesyms[i];
-                    ftab.SetUint32(ctxt.Arch, int64(start) + s.Value * 4L, uint32(ftabaddstring(ctxt, ftab, s.Name)));
+                    var path = state.filepaths[i];
+                    var val = int64(i);
+                    ftab.SetUint32(ctxt.Arch, int64(start) + val * 4L, uint32(state.ftabaddstring(ftab, path)));
                 }
 
 
                 i = i__prev1;
             }
 
-            ftab.Size = int64(len(ftab.P));
+            ftab.SetSize(int64(len(ftab.Data())));
+
+            ctxt.NumFilesyms = len(state.numberedFiles);
 
             if (ctxt.Debugvlog != 0L)
             {
-                ctxt.Logf("%5.2f pclntab=%d bytes, funcdata total %d bytes\n", Cputime(), ftab.Size, funcdataBytes);
+                ctxt.Logf("pclntab=%d bytes, funcdata total %d bytes\n", ftab.Size(), funcdataBytes);
             }
+
+            return state.container;
+
         }
 
         private static @string gorootFinal()
@@ -637,52 +807,52 @@ namespace @internal
                 }
 
             }
+
             return root;
+
         }
 
         private static @string expandGoroot(@string s)
         {
-            const var n = len("$GOROOT");
+            const var n = (var)len("$GOROOT");
 
             if (len(s) >= n + 1L && s[..n] == "$GOROOT" && (s[n] == '/' || s[n] == '\\'))
             {
                 return filepath.ToSlash(filepath.Join(gorootFinal(), s[n..]));
             }
+
             return s;
+
         }
 
-        public static readonly long BUCKETSIZE = 256L * MINFUNC;
-        public static readonly long SUBBUCKETS = 16L;
-        public static readonly var SUBBUCKETSIZE = BUCKETSIZE / SUBBUCKETS;
-        public static readonly ulong NOIDX = 0x7fffffffUL;
+        public static readonly long BUCKETSIZE = (long)256L * MINFUNC;
+        public static readonly long SUBBUCKETS = (long)16L;
+        public static readonly var SUBBUCKETSIZE = (var)BUCKETSIZE / SUBBUCKETS;
+        public static readonly ulong NOIDX = (ulong)0x7fffffffUL;
+
 
         // findfunctab generates a lookup table to quickly find the containing
         // function for a pc. See src/runtime/symtab.go:findfunc for details.
-        private static void findfunctab(this ref Link ctxt)
+        // 'container' is a bitmap indexed by global symbol holding whether
+        // a given text symbols is a container (outer sym).
+        private static void findfunctab(this ptr<Link> _addr_ctxt, loader.Bitmap container)
         {
-            var t = ctxt.Syms.Lookup("runtime.findfunctab", 0L);
-            t.Type = sym.SRODATA;
-            t.Attr |= sym.AttrReachable;
-            t.Attr |= sym.AttrLocal; 
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            var ldr = ctxt.loader;
+            var tsym = ldr.LookupOrCreateSym("runtime.findfunctab", 0L);
+            var t = ldr.MakeSymbolUpdater(tsym);
+            t.SetType(sym.SRODATA);
+            ldr.SetAttrReachable(tsym, true);
+            ldr.SetAttrLocal(tsym, true); 
 
             // find min and max address
-            var min = ctxt.Textp[0L].Value;
-            var max = int64(0L);
-            {
-                var s__prev1 = s;
+            var min = ldr.SymValue(ctxt.Textp2[0L]);
+            var lastp = ctxt.Textp2[len(ctxt.Textp2) - 1L];
+            var max = ldr.SymValue(lastp) + ldr.SymSize(lastp); 
 
-                foreach (var (_, __s) in ctxt.Textp)
-                {
-                    s = __s;
-                    max = s.Value + s.Size;
-                } 
-
-                // for each subbucket, compute the minimum of all symbol indexes
-                // that map to that subbucket.
-
-                s = s__prev1;
-            }
-
+            // for each subbucket, compute the minimum of all symbol indexes
+            // that map to that subbucket.
             var n = int32((max - min + SUBBUCKETSIZE - 1L) / SUBBUCKETSIZE);
 
             var indexes = make_slice<int>(n);
@@ -700,33 +870,34 @@ namespace @internal
             var idx = int32(0L);
             {
                 var i__prev1 = i;
-                var s__prev1 = s;
 
-                foreach (var (__i, __s) in ctxt.Textp)
+                foreach (var (__i, __s) in ctxt.Textp2)
                 {
                     i = __i;
                     s = __s;
-                    if (!emitPcln(ctxt, s))
+                    if (!emitPcln(_addr_ctxt, s, container))
                     {
                         continue;
                     }
-                    var p = s.Value;
-                    ref sym.Symbol e = default;
+
+                    var p = ldr.SymValue(s);
+                    loader.Sym e = default;
                     i++;
-                    if (i < len(ctxt.Textp))
+                    if (i < len(ctxt.Textp2))
                     {
-                        e = ctxt.Textp[i];
+                        e = ctxt.Textp2[i];
                     }
-                    while (!emitPcln(ctxt, e) && i < len(ctxt.Textp))
+
+                    while (e != 0L && !emitPcln(_addr_ctxt, e, container) && i < len(ctxt.Textp2))
                     {
-                        e = ctxt.Textp[i];
+                        e = ctxt.Textp2[i];
                         i++;
                     }
 
                     var q = max;
-                    if (e != null)
+                    if (e != 0L)
                     {
-                        q = e.Value;
+                        q = ldr.SymValue(e);
                     } 
 
                     //print("%d: [%lld %lld] %s\n", idx, p, q, s->name);
@@ -738,6 +909,7 @@ namespace @internal
                             indexes[i] = idx;
                         p += SUBBUCKETSIZE;
                         }
+
                     }
 
 
@@ -746,13 +918,14 @@ namespace @internal
                     {
                         indexes[i] = idx;
                     }
+
                     idx++;
+
                 } 
 
                 // allocate table
 
                 i = i__prev1;
-                s = s__prev1;
             }
 
             var nbuckets = int32((max - min + BUCKETSIZE - 1L) / BUCKETSIZE);
@@ -770,6 +943,7 @@ namespace @internal
                     {
                         Errorf(null, "hole in findfunctab");
                     }
+
                     t.SetUint32(ctxt.Arch, int64(i) * (4L + SUBBUCKETS), uint32(base));
                     for (var j = int32(0L); j < SUBBUCKETS && i * SUBBUCKETS + j < n; j++)
                     {
@@ -778,18 +952,23 @@ namespace @internal
                         {
                             Errorf(null, "hole in findfunctab");
                         }
+
                         if (idx - base >= 256L)
                         {
                             Errorf(null, "too many functions in a findfunc bucket! %d/%d %d %d", i, nbuckets, j, idx - base);
                         }
+
                         t.SetUint8(ctxt.Arch, int64(i) * (4L + SUBBUCKETS) + 4L + int64(j), uint8(idx - base));
+
                     }
+
 
                 }
 
 
                 i = i__prev1;
             }
+
         }
     }
 }}}}

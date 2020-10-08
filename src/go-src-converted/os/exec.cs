@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:43:40 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:23 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\exec.go
 using testlog = go.@internal.testlog_package;
@@ -26,21 +26,25 @@ namespace go
             public sync.RWMutex sigMu; // avoid race between wait and signal
         }
 
-        private static ref Process newProcess(long pid, System.UIntPtr handle)
+        private static ptr<Process> newProcess(long pid, System.UIntPtr handle)
         {
-            Process p = ref new Process(Pid:pid,handle:handle);
-            runtime.SetFinalizer(p, ref Process);
-            return p;
+            ptr<Process> p = addr(new Process(Pid:pid,handle:handle));
+            runtime.SetFinalizer(p, ptr<Process>);
+            return _addr_p!;
         }
 
-        private static void setDone(this ref Process p)
+        private static void setDone(this ptr<Process> _addr_p)
         {
-            atomic.StoreUint32(ref p.isdone, 1L);
+            ref Process p = ref _addr_p.val;
+
+            atomic.StoreUint32(_addr_p.isdone, 1L);
         }
 
-        private static bool done(this ref Process p)
+        private static bool done(this ptr<Process> _addr_p)
         {
-            return atomic.LoadUint32(ref p.isdone) > 0L;
+            ref Process p = ref _addr_p.val;
+
+            return atomic.LoadUint32(_addr_p.isdone) > 0L;
         }
 
         // ProcAttr holds the attributes that will be applied to a new process
@@ -55,7 +59,7 @@ namespace go
 // standard error. An implementation may support additional entries,
 // depending on the underlying operating system. A nil entry corresponds
 // to that file being closed when the process starts.
-            public slice<ref File> Files; // Operating system-specific process creation attributes.
+            public slice<ptr<File>> Files; // Operating system-specific process creation attributes.
 // Note that setting this field means that your program
 // may not execute properly or even compile on some
 // operating systems.
@@ -90,9 +94,12 @@ namespace go
         //
         // On Unix systems, FindProcess always succeeds and returns a Process
         // for the given pid, regardless of whether the process exists.
-        public static (ref Process, error) FindProcess(long pid)
+        public static (ptr<Process>, error) FindProcess(long pid)
         {
-            return findProcess(pid);
+            ptr<Process> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_findProcess(pid)!;
         }
 
         // StartProcess starts a new process with the program, arguments and attributes
@@ -108,24 +115,34 @@ namespace go
         // higher-level interfaces.
         //
         // If there is an error, it will be of type *PathError.
-        public static (ref Process, error) StartProcess(@string name, slice<@string> argv, ref ProcAttr attr)
+        public static (ptr<Process>, error) StartProcess(@string name, slice<@string> argv, ptr<ProcAttr> _addr_attr)
         {
+            ptr<Process> _p0 = default!;
+            error _p0 = default!;
+            ref ProcAttr attr = ref _addr_attr.val;
+
             testlog.Open(name);
-            return startProcess(name, argv, attr);
+            return _addr_startProcess(name, argv, attr)!;
         }
 
         // Release releases any resources associated with the Process p,
         // rendering it unusable in the future.
         // Release only needs to be called if Wait is not.
-        private static error Release(this ref Process p)
+        private static error Release(this ptr<Process> _addr_p)
         {
-            return error.As(p.release());
+            ref Process p = ref _addr_p.val;
+
+            return error.As(p.release())!;
         }
 
-        // Kill causes the Process to exit immediately.
-        private static error Kill(this ref Process p)
+        // Kill causes the Process to exit immediately. Kill does not wait until
+        // the Process has actually exited. This only kills the Process itself,
+        // not any other processes it may have started.
+        private static error Kill(this ptr<Process> _addr_p)
         {
-            return error.As(p.kill());
+            ref Process p = ref _addr_p.val;
+
+            return error.As(p.kill())!;
         }
 
         // Wait waits for the Process to exit, and then returns a
@@ -133,48 +150,64 @@ namespace go
         // Wait releases any resources associated with the Process.
         // On most operating systems, the Process must be a child
         // of the current process or an error will be returned.
-        private static (ref ProcessState, error) Wait(this ref Process p)
+        private static (ptr<ProcessState>, error) Wait(this ptr<Process> _addr_p)
         {
-            return p.wait();
+            ptr<ProcessState> _p0 = default!;
+            error _p0 = default!;
+            ref Process p = ref _addr_p.val;
+
+            return _addr_p.wait()!;
         }
 
         // Signal sends a signal to the Process.
         // Sending Interrupt on Windows is not implemented.
-        private static error Signal(this ref Process p, Signal sig)
+        private static error Signal(this ptr<Process> _addr_p, Signal sig)
         {
-            return error.As(p.signal(sig));
+            ref Process p = ref _addr_p.val;
+
+            return error.As(p.signal(sig))!;
         }
 
         // UserTime returns the user CPU time of the exited process and its children.
-        private static time.Duration UserTime(this ref ProcessState p)
+        private static time.Duration UserTime(this ptr<ProcessState> _addr_p)
         {
+            ref ProcessState p = ref _addr_p.val;
+
             return p.userTime();
         }
 
         // SystemTime returns the system CPU time of the exited process and its children.
-        private static time.Duration SystemTime(this ref ProcessState p)
+        private static time.Duration SystemTime(this ptr<ProcessState> _addr_p)
         {
+            ref ProcessState p = ref _addr_p.val;
+
             return p.systemTime();
         }
 
         // Exited reports whether the program has exited.
-        private static bool Exited(this ref ProcessState p)
+        private static bool Exited(this ptr<ProcessState> _addr_p)
         {
+            ref ProcessState p = ref _addr_p.val;
+
             return p.exited();
         }
 
         // Success reports whether the program exited successfully,
         // such as with exit status 0 on Unix.
-        private static bool Success(this ref ProcessState p)
+        private static bool Success(this ptr<ProcessState> _addr_p)
         {
+            ref ProcessState p = ref _addr_p.val;
+
             return p.success();
         }
 
         // Sys returns system-dependent exit information about
         // the process. Convert it to the appropriate underlying
         // type, such as syscall.WaitStatus on Unix, to access its contents.
-        private static void Sys(this ref ProcessState p)
+        private static void Sys(this ptr<ProcessState> _addr_p)
         {
+            ref ProcessState p = ref _addr_p.val;
+
             return p.sys();
         }
 
@@ -183,8 +216,10 @@ namespace go
         // type, such as *syscall.Rusage on Unix, to access its contents.
         // (On Unix, *syscall.Rusage matches struct rusage as defined in the
         // getrusage(2) manual page.)
-        private static void SysUsage(this ref ProcessState p)
+        private static void SysUsage(this ptr<ProcessState> _addr_p)
         {
+            ref ProcessState p = ref _addr_p.val;
+
             return p.sysUsage();
         }
     }

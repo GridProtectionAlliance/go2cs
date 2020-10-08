@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package ioutil implements some I/O utility functions.
-// package ioutil -- go2cs converted at 2020 August 29 08:21:55 UTC
+// package ioutil -- go2cs converted at 2020 October 08 03:18:56 UTC
 // import "io/ioutil" ==> using ioutil = go.io.ioutil_package
 // Original source: C:\Go\src\io\ioutil\ioutil.go
 using bytes = go.bytes_package;
@@ -23,6 +23,9 @@ namespace io
         // from the internal buffer allocated with a specified capacity.
         private static (slice<byte>, error) readAll(io.Reader r, long capacity) => func((defer, panic, _) =>
         {
+            slice<byte> b = default;
+            error err = default!;
+
             bytes.Buffer buf = default; 
             // If the buffer overflows, we will get bytes.ErrTooLarge.
             // Return that as an error. Any other panic remains.
@@ -31,10 +34,10 @@ namespace io
                 var e = recover();
                 if (e == null)
                 {
-                    return;
+                    return ;
                 }
                 {
-                    error (panicErr, ok) = e._<error>();
+                    error (panicErr, ok) = error.As(e._<error>())!;
 
                     if (ok && panicErr == bytes.ErrTooLarge)
                     {
@@ -45,13 +48,15 @@ namespace io
                         panic(e);
                     }
                 }
+
             }());
             if (int64(int(capacity)) == capacity)
             {
                 buf.Grow(int(capacity));
             }
             _, err = buf.ReadFrom(r);
-            return (buf.Bytes(), err);
+            return (buf.Bytes(), error.As(err)!);
+
         });
 
         // ReadAll reads from r until an error or EOF and returns the data it read.
@@ -60,6 +65,9 @@ namespace io
         // as an error to be reported.
         public static (slice<byte>, error) ReadAll(io.Reader r)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             return readAll(r, bytes.MinRead);
         }
 
@@ -69,11 +77,15 @@ namespace io
         // to be reported.
         public static (slice<byte>, error) ReadFile(@string filename) => func((defer, _, __) =>
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             var (f, err) = os.Open(filename);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             defer(f.Close()); 
             // It's a good but not certain bet that FileInfo will tell us exactly how much to
             // read, so let's try it but be prepared for the answer to be wrong.
@@ -99,27 +111,27 @@ namespace io
                         }
 
                     }
+
                 }
 
             }
+
             return readAll(f, n);
+
         });
 
         // WriteFile writes data to a file named by filename.
-        // If the file does not exist, WriteFile creates it with permissions perm;
-        // otherwise WriteFile truncates it before writing.
+        // If the file does not exist, WriteFile creates it with permissions perm
+        // (before umask); otherwise WriteFile truncates it before writing, without changing permissions.
         public static error WriteFile(@string filename, slice<byte> data, os.FileMode perm)
         {
             var (f, err) = os.OpenFile(filename, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, perm);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            var (n, err) = f.Write(data);
-            if (err == null && n < len(data))
-            {
-                err = io.ErrShortWrite;
-            }
+
+            _, err = f.Write(data);
             {
                 var err1 = f.Close();
 
@@ -129,26 +141,34 @@ namespace io
                 }
 
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
 
         // ReadDir reads the directory named by dirname and returns
         // a list of directory entries sorted by filename.
         public static (slice<os.FileInfo>, error) ReadDir(@string dirname)
         {
+            slice<os.FileInfo> _p0 = default;
+            error _p0 = default!;
+
             var (f, err) = os.Open(dirname);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             var (list, err) = f.Readdir(-1L);
             f.Close();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             sort.Slice(list, (i, j) => list[i].Name() < list[j].Name());
-            return (list, null);
+            return (list, error.As(null!)!);
+
         }
 
         private partial struct nopCloser : io.Reader
@@ -158,7 +178,7 @@ namespace io
 
         private static error Close(this nopCloser _p0)
         {
-            return error.As(null);
+            return error.As(null!)!;
         }
 
         // NopCloser returns a ReadCloser with a no-op Close method wrapping
@@ -178,34 +198,47 @@ namespace io
 
         private static (long, error) Write(this devNull _p0, slice<byte> p)
         {
-            return (len(p), null);
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (len(p), error.As(null!)!);
         }
 
         private static (long, error) WriteString(this devNull _p0, @string s)
         {
-            return (len(s), null);
+            long _p0 = default;
+            error _p0 = default!;
+
+            return (len(s), error.As(null!)!);
         }
 
         private static sync.Pool blackHolePool = new sync.Pool(New:func()interface{}{b:=make([]byte,8192)return&b},);
 
         private static (long, error) ReadFrom(this devNull _p0, io.Reader r)
         {
-            ref slice<byte> bufp = blackHolePool.Get()._<ref slice<byte>>();
+            long n = default;
+            error err = default!;
+
+            ptr<slice<byte>> bufp = blackHolePool.Get()._<ptr<slice<byte>>>();
             long readSize = 0L;
             while (true)
             {
-                readSize, err = r.Read(bufp.Value);
+                readSize, err = r.Read(bufp.val);
                 n += int64(readSize);
                 if (err != null)
                 {
                     blackHolePool.Put(bufp);
                     if (err == io.EOF)
                     {
-                        return (n, null);
+                        return (n, error.As(null!)!);
                     }
-                    return;
+
+                    return ;
+
                 }
+
             }
+
 
         }
 

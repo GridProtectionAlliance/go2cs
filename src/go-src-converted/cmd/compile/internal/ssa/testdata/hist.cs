@@ -8,7 +8,7 @@
 // step is time-consuming, the tests for different bugs are all accumulated here
 // so that their cost is only the time to "n" through the additional code.
 
-// package main -- go2cs converted at 2020 August 29 09:24:39 UTC
+// package main -- go2cs converted at 2020 October 08 04:27:09 UTC
 // Original source: C:\Go\src\cmd\compile\internal\ssa\testdata\hist.go
 using bufio = go.bufio_package;
 using fmt = go.fmt_package;
@@ -50,6 +50,7 @@ namespace go
             }
 
             return sl;
+
         }
 
         private static @string cannedInput = "1\n1\n1\n2\n2\n2\n4\n4\n5\n";
@@ -67,14 +68,16 @@ namespace go
             io.Reader reader = strings.NewReader(cannedInput); //gdb-dbg=(hist/A) // TODO cannedInput/A is missing if this code is in 'test' instead of 'main'
             if (len(os.Args) > 1L)
             {
-                error err = default;
+                error err = default!;
                 reader, err = os.Open(os.Args[1L]);
                 if (err != null)
                 {
                     fmt.Fprintf(os.Stderr, "There was an error opening %s: %v\n", os.Args[1L], err);
-                    return;
+                    return ;
                 }
+
             }
+
             var scanner = bufio.NewScanner(reader);
             while (scanner.Scan())
             { //gdb-opt=(scanner/A)
@@ -83,10 +86,13 @@ namespace go
                 if (err != null)
                 { //gdb-dbg=(i) //gdb-opt=(err,hist,i)
                     fmt.Fprintf(os.Stderr, "There was an error: %v\n", err);
-                    return;
+                    return ;
+
                 }
+
                 hist = ensure(int(i), hist);
                 hist[int(i)]++;
+
             }
 
             long t = 0L;
@@ -101,7 +107,9 @@ namespace go
                     if (a == 0L)
                     { //gdb-opt=(a,n,t)
                         continue;
+
                     }
+
                     t += i * a;
                     n += a;
                     fmt.Fprintf(os.Stderr, "%d\t%d\t%d\t%d\t%d\n", i, a, n, i * a, t); //gdb-dbg=(n,i,t)
@@ -109,12 +117,21 @@ namespace go
 
                 i = i__prev1;
             }
-
         }
 
         private static void Main()
         {
+            growstack(); // Use stack early to prevent growth during test, which confuses gdb
             test();
+
+        }
+
+        private static @string snk = default;
+
+        //go:noinline
+        private static void growstack()
+        {
+            snk = fmt.Sprintf("%#v,%#v,%#v", 1L, true, "cat");
         }
     }
 }

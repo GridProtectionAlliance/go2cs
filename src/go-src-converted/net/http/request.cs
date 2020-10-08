@@ -4,7 +4,7 @@
 
 // HTTP Request reading and parsing.
 
-// package http -- go2cs converted at 2020 August 29 08:33:29 UTC
+// package http -- go2cs converted at 2020 October 08 03:40:16 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\request.go
 using bufio = go.bufio_package;
@@ -22,11 +22,12 @@ using net = go.net_package;
 using httptrace = go.net.http.httptrace_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
+using url = go.net.url_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 
-using idna = go.golang_org.x.net.idna_package;
+using idna = go.golang.org.x.net.idna_package;
 using static go.builtin;
 using System;
 
@@ -35,7 +36,7 @@ namespace net
 {
     public static partial class http_package
     {
-        private static readonly long defaultMaxMemory = 32L << (int)(20L); // 32 MB
+        private static readonly long defaultMaxMemory = (long)32L << (int)(20L); // 32 MB
 
         // ErrMissingFile is returned by FormFile when the provided file field name
         // is either not present in the request or not a file field.
@@ -50,8 +51,10 @@ namespace net
             public @string ErrorString;
         }
 
-        private static @string Error(this ref ProtocolError pe)
+        private static @string Error(this ptr<ProtocolError> _addr_pe)
         {
+            ref ProtocolError pe = ref _addr_pe.val;
+
             return pe.ErrorString;
         }
 
@@ -59,17 +62,11 @@ namespace net
         // ErrNotSupported is returned by the Push method of Pusher
         // implementations to indicate that HTTP/2 Push support is not
         // available.
-        public static ProtocolError ErrNotSupported = ref new ProtocolError("feature not supported");        public static ProtocolError ErrUnexpectedTrailer = ref new ProtocolError("trailer header without chunked transfer encoding");        public static ProtocolError ErrMissingBoundary = ref new ProtocolError("no multipart boundary param in Content-Type");        public static ProtocolError ErrNotMultipart = ref new ProtocolError("request Content-Type isn't multipart/form-data");        public static ProtocolError ErrHeaderTooLong = ref new ProtocolError("header too long");        public static ProtocolError ErrShortBody = ref new ProtocolError("entity body too short");        public static ProtocolError ErrMissingContentLength = ref new ProtocolError("missing ContentLength in HEAD response");
+        public static ptr<ProtocolError> ErrNotSupported = addr(new ProtocolError("feature not supported"));        public static ptr<ProtocolError> ErrUnexpectedTrailer = addr(new ProtocolError("trailer header without chunked transfer encoding"));        public static ptr<ProtocolError> ErrMissingBoundary = addr(new ProtocolError("no multipart boundary param in Content-Type"));        public static ptr<ProtocolError> ErrNotMultipart = addr(new ProtocolError("request Content-Type isn't multipart/form-data"));        public static ptr<ProtocolError> ErrHeaderTooLong = addr(new ProtocolError("header too long"));        public static ptr<ProtocolError> ErrShortBody = addr(new ProtocolError("entity body too short"));        public static ptr<ProtocolError> ErrMissingContentLength = addr(new ProtocolError("missing ContentLength in HEAD response"));
 
-        private partial struct badStringError
+        private static error badStringError(@string what, @string val)
         {
-            public @string what;
-            public @string str;
-        }
-
-        private static @string Error(this ref badStringError e)
-        {
-            return fmt.Sprintf("%s %q", e.what, e.str);
+            return error.As(fmt.Errorf("%s %q", what, val))!;
         }
 
         // Headers that Request.Write handles itself and should be skipped.
@@ -86,10 +83,10 @@ namespace net
             public @string Method; // URL specifies either the URI being requested (for server
 // requests) or the URL to access (for client requests).
 //
-// For server requests the URL is parsed from the URI
+// For server requests, the URL is parsed from the URI
 // supplied on the Request-Line as stored in RequestURI.  For
 // most requests, fields other than Path and RawQuery will be
-// empty. (See RFC 2616, Section 5.1.2)
+// empty. (See RFC 7230, Section 5.3)
 //
 // For client requests, the URL's Host specifies the server to
 // connect to, while the Request's Host field optionally
@@ -97,7 +94,7 @@ namespace net
 // request.
             public ptr<url.URL> URL; // The protocol version for incoming server requests.
 //
-// For client requests these fields are ignored. The HTTP
+// For client requests, these fields are ignored. The HTTP
 // client code always uses either HTTP/1.1 or HTTP/2.
 // See the docs on Transport for details.
             public @string Proto; // "HTTP/1.0"
@@ -137,11 +134,11 @@ namespace net
 // for the Request.Write method.
             public Header Header; // Body is the request's body.
 //
-// For client requests a nil body means the request has no
+// For client requests, a nil body means the request has no
 // body, such as a GET request. The HTTP Client's Transport
 // is responsible for calling the Close method.
 //
-// For server requests the Request Body is always non-nil
+// For server requests, the Request Body is always non-nil
 // but will return EOF immediately when no body is present.
 // The Server will close the request body. The ServeHTTP
 // Handler does not need to.
@@ -150,11 +147,12 @@ namespace net
 // reading the body more than once. Use of GetBody still
 // requires setting Body.
 //
-// For server requests it is unused.
+// For server requests, it is unused.
             public Func<(io.ReadCloser, error)> GetBody; // ContentLength records the length of the associated content.
 // The value -1 indicates that the length is unknown.
 // Values >= 0 indicate that the given number of bytes may
 // be read from Body.
+//
 // For client requests, a value of 0 with a non-nil Body is
 // also treated as unknown.
             public long ContentLength; // TransferEncoding lists the transfer encodings from outermost to
@@ -172,23 +170,30 @@ namespace net
 // For client requests, setting this field prevents re-use of
 // TCP connections between requests to the same hosts, as if
 // Transport.DisableKeepAlives were set.
-            public bool Close; // For server requests Host specifies the host on which the
-// URL is sought. Per RFC 2616, this is either the value of
-// the "Host" header or the host name given in the URL itself.
+            public bool Close; // For server requests, Host specifies the host on which the
+// URL is sought. For HTTP/1 (per RFC 7230, section 5.4), this
+// is either the value of the "Host" header or the host name
+// given in the URL itself. For HTTP/2, it is the value of the
+// ":authority" pseudo-header field.
 // It may be of the form "host:port". For international domain
 // names, Host may be in Punycode or Unicode form. Use
 // golang.org/x/net/idna to convert it to either format if
 // needed.
+// To prevent DNS rebinding attacks, server Handlers should
+// validate that the Host header has a value for which the
+// Handler considers itself authoritative. The included
+// ServeMux supports patterns registered to particular host
+// names and thus protects its registered Handlers.
 //
-// For client requests Host optionally overrides the Host
+// For client requests, Host optionally overrides the Host
 // header to send. If empty, the Request.Write method uses
 // the value of URL.Host. Host may contain an international
 // domain name.
             public @string Host; // Form contains the parsed form data, including both the URL
-// field's query parameters and the POST or PUT form data.
+// field's query parameters and the PATCH, POST, or PUT form data.
 // This field is only available after ParseForm is called.
 // The HTTP client ignores Form and uses Body instead.
-            public url.Values Form; // PostForm contains the parsed form data from POST, PATCH,
+            public url.Values Form; // PostForm contains the parsed form data from PATCH, POST
 // or PUT body parameters.
 //
 // This field is only available after ParseForm is called.
@@ -199,14 +204,14 @@ namespace net
             public ptr<multipart.Form> MultipartForm; // Trailer specifies additional headers that are sent after the request
 // body.
 //
-// For server requests the Trailer map initially contains only the
+// For server requests, the Trailer map initially contains only the
 // trailer keys, with nil values. (The client declares which trailers it
 // will later send.)  While the handler is reading from Body, it must
 // not reference Trailer. After reading from Body returns EOF, Trailer
 // can be read again and will contain non-nil values, if they were sent
 // by the client.
 //
-// For client requests Trailer must be initialized to a map containing
+// For client requests, Trailer must be initialized to a map containing
 // the trailer keys to later send. The values may be nil or their final
 // values. The ContentLength must be 0 or -1, to send a chunked request.
 // After the HTTP request is sent the map values can be updated while
@@ -221,8 +226,8 @@ namespace net
 // sets RemoteAddr to an "IP:port" address before invoking a
 // handler.
 // This field is ignored by the HTTP client.
-            public @string RemoteAddr; // RequestURI is the unmodified Request-URI of the
-// Request-Line (RFC 2616, Section 5.1) as sent by the client
+            public @string RemoteAddr; // RequestURI is the unmodified request-target of the
+// Request-Line (RFC 7230, Section 3.1.1) as sent by the client
 // to a server. Usually the URL field should be used instead.
 // It is an error to set this field in an HTTP client request.
             public @string RequestURI; // TLS allows HTTP servers and other software to record
@@ -238,7 +243,7 @@ namespace net
 //
 // For server requests, this field is not applicable.
 //
-// Deprecated: Use the Context and WithContext methods
+// Deprecated: Set the Request's context with NewRequestWithContext
 // instead. If a Request's Cancel field and context are both
 // set, it is undefined whether Cancel is respected.
             public channel<object> Cancel; // Response is the redirect response which caused this request
@@ -257,60 +262,122 @@ namespace net
         // The returned context is always non-nil; it defaults to the
         // background context.
         //
-        // For outgoing client requests, the context controls cancelation.
+        // For outgoing client requests, the context controls cancellation.
         //
         // For incoming server requests, the context is canceled when the
         // client's connection closes, the request is canceled (with HTTP/2),
         // or when the ServeHTTP method returns.
-        private static context.Context Context(this ref Request r)
+        private static context.Context Context(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.ctx != null)
             {
                 return r.ctx;
             }
+
             return context.Background();
+
         }
 
         // WithContext returns a shallow copy of r with its context changed
         // to ctx. The provided ctx must be non-nil.
-        private static ref Request WithContext(this ref Request _r, context.Context ctx) => func(_r, (ref Request r, Defer _, Panic panic, Recover __) =>
+        //
+        // For outgoing client request, the context controls the entire
+        // lifetime of a request and its response: obtaining a connection,
+        // sending the request, and reading the response headers and body.
+        //
+        // To create a new request with a context, use NewRequestWithContext.
+        // To change the context of a request, such as an incoming request you
+        // want to modify before sending back out, use Request.Clone. Between
+        // those two uses, it's rare to need WithContext.
+        private static ptr<Request> WithContext(this ptr<Request> _addr_r, context.Context ctx) => func((_, panic, __) =>
         {
+            ref Request r = ref _addr_r.val;
+
             if (ctx == null)
             {
                 panic("nil context");
             }
-            ptr<Request> r2 = @new<Request>();
-            r2.Value = r.Value;
-            r2.ctx = ctx; 
 
-            // Deep copy the URL because it isn't
-            // a map and the URL is mutable by users
-            // of WithContext.
-            if (r.URL != null)
+            ptr<Request> r2 = @new<Request>();
+            r2.val = r.val;
+            r2.ctx = ctx;
+            r2.URL = cloneURL(r.URL); // legacy behavior; TODO: try to remove. Issue 23544
+            return _addr_r2!;
+
+        });
+
+        // Clone returns a deep copy of r with its context changed to ctx.
+        // The provided ctx must be non-nil.
+        //
+        // For an outgoing client request, the context controls the entire
+        // lifetime of a request and its response: obtaining a connection,
+        // sending the request, and reading the response headers and body.
+        private static ptr<Request> Clone(this ptr<Request> _addr_r, context.Context ctx) => func((_, panic, __) =>
+        {
+            ref Request r = ref _addr_r.val;
+
+            if (ctx == null)
             {
-                ptr<url.URL> r2URL = @new<url.URL>();
-                r2URL.Value = r.URL.Value;
-                r2.URL = r2URL;
+                panic("nil context");
             }
-            return r2;
+
+            ptr<Request> r2 = @new<Request>();
+            r2.val = r.val;
+            r2.ctx = ctx;
+            r2.URL = cloneURL(r.URL);
+            if (r.Header != null)
+            {
+                r2.Header = r.Header.Clone();
+            }
+
+            if (r.Trailer != null)
+            {
+                r2.Trailer = r.Trailer.Clone();
+            }
+
+            {
+                var s = r.TransferEncoding;
+
+                if (s != null)
+                {
+                    var s2 = make_slice<@string>(len(s));
+                    copy(s2, s);
+                    r2.TransferEncoding = s;
+                }
+
+            }
+
+            r2.Form = cloneURLValues(r.Form);
+            r2.PostForm = cloneURLValues(r.PostForm);
+            r2.MultipartForm = cloneMultipartForm(r.MultipartForm);
+            return _addr_r2!;
+
         });
 
         // ProtoAtLeast reports whether the HTTP protocol used
         // in the request is at least major.minor.
-        private static bool ProtoAtLeast(this ref Request r, long major, long minor)
+        private static bool ProtoAtLeast(this ptr<Request> _addr_r, long major, long minor)
         {
+            ref Request r = ref _addr_r.val;
+
             return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
         }
 
         // UserAgent returns the client's User-Agent, if sent in the request.
-        private static @string UserAgent(this ref Request r)
+        private static @string UserAgent(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             return r.Header.Get("User-Agent");
         }
 
         // Cookies parses and returns the HTTP cookies sent with the request.
-        private static slice<ref Cookie> Cookies(this ref Request r)
+        private static slice<ptr<Cookie>> Cookies(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             return readCookies(r.Header, "");
         }
 
@@ -321,21 +388,31 @@ namespace net
         // ErrNoCookie if not found.
         // If multiple cookies match the given name, only one cookie will
         // be returned.
-        private static (ref Cookie, error) Cookie(this ref Request r, @string name)
+        private static (ptr<Cookie>, error) Cookie(this ptr<Request> _addr_r, @string name)
         {
+            ptr<Cookie> _p0 = default!;
+            error _p0 = default!;
+            ref Request r = ref _addr_r.val;
+
             foreach (var (_, c) in readCookies(r.Header, name))
             {
-                return (c, null);
+                return (_addr_c!, error.As(null!)!);
             }
-            return (null, ErrNoCookie);
+            return (_addr_null!, error.As(ErrNoCookie)!);
+
         }
 
         // AddCookie adds a cookie to the request. Per RFC 6265 section 5.4,
         // AddCookie does not attach more than one Cookie header field. That
         // means all cookies, if any, are written into the same line,
         // separated by semicolon.
-        private static void AddCookie(this ref Request r, ref Cookie c)
+        // AddCookie only sanitizes c's name and value, and does not sanitize
+        // a Cookie header already present in the request.
+        private static void AddCookie(this ptr<Request> _addr_r, ptr<Cookie> _addr_c)
         {
+            ref Request r = ref _addr_r.val;
+            ref Cookie c = ref _addr_c.val;
+
             var s = fmt.Sprintf("%s=%s", sanitizeCookieName(c.Name), sanitizeCookieValue(c.Value));
             {
                 var c = r.Header.Get("Cookie");
@@ -350,6 +427,7 @@ namespace net
                 }
 
             }
+
         }
 
         // Referer returns the referring URL, if sent in the request.
@@ -360,58 +438,77 @@ namespace net
         // as a method is that the compiler can diagnose programs that use the
         // alternate (correct English) spelling req.Referrer() but cannot
         // diagnose programs that use Header["Referrer"].
-        private static @string Referer(this ref Request r)
+        private static @string Referer(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             return r.Header.Get("Referer");
         }
 
         // multipartByReader is a sentinel value.
         // Its presence in Request.MultipartForm indicates that parsing of the request
-        // body has been handed off to a MultipartReader instead of ParseMultipartFrom.
-        private static multipart.Form multipartByReader = ref new multipart.Form(Value:make(map[string][]string),File:make(map[string][]*multipart.FileHeader),);
+        // body has been handed off to a MultipartReader instead of ParseMultipartForm.
+        private static ptr<multipart.Form> multipartByReader = addr(new multipart.Form(Value:make(map[string][]string),File:make(map[string][]*multipart.FileHeader),));
 
         // MultipartReader returns a MIME multipart reader if this is a
-        // multipart/form-data POST request, else returns nil and an error.
+        // multipart/form-data or a multipart/mixed POST request, else returns nil and an error.
         // Use this function instead of ParseMultipartForm to
         // process the request body as a stream.
-        private static (ref multipart.Reader, error) MultipartReader(this ref Request r)
+        private static (ptr<multipart.Reader>, error) MultipartReader(this ptr<Request> _addr_r)
         {
+            ptr<multipart.Reader> _p0 = default!;
+            error _p0 = default!;
+            ref Request r = ref _addr_r.val;
+
             if (r.MultipartForm == multipartByReader)
             {
-                return (null, errors.New("http: MultipartReader called twice"));
+                return (_addr_null!, error.As(errors.New("http: MultipartReader called twice"))!);
             }
+
             if (r.MultipartForm != null)
             {
-                return (null, errors.New("http: multipart handled by ParseMultipartForm"));
+                return (_addr_null!, error.As(errors.New("http: multipart handled by ParseMultipartForm"))!);
             }
+
             r.MultipartForm = multipartByReader;
-            return r.multipartReader();
+            return _addr_r.multipartReader(true)!;
+
         }
 
-        private static (ref multipart.Reader, error) multipartReader(this ref Request r)
+        private static (ptr<multipart.Reader>, error) multipartReader(this ptr<Request> _addr_r, bool allowMixed)
         {
+            ptr<multipart.Reader> _p0 = default!;
+            error _p0 = default!;
+            ref Request r = ref _addr_r.val;
+
             var v = r.Header.Get("Content-Type");
             if (v == "")
             {
-                return (null, ErrNotMultipart);
+                return (_addr_null!, error.As(ErrNotMultipart)!);
             }
+
             var (d, params, err) = mime.ParseMediaType(v);
-            if (err != null || d != "multipart/form-data")
+            if (err != null || !(d == "multipart/form-data" || allowMixed && d == "multipart/mixed"))
             {
-                return (null, ErrNotMultipart);
+                return (_addr_null!, error.As(ErrNotMultipart)!);
             }
+
             var (boundary, ok) = params["boundary"];
             if (!ok)
             {
-                return (null, ErrMissingBoundary);
+                return (_addr_null!, error.As(ErrMissingBoundary)!);
             }
-            return (multipart.NewReader(r.Body, boundary), null);
+
+            return (_addr_multipart.NewReader(r.Body, boundary)!, error.As(null!)!);
+
         }
 
         // isH2Upgrade reports whether r represents the http2 "client preface"
         // magic string.
-        private static bool isH2Upgrade(this ref Request r)
+        private static bool isH2Upgrade(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             return r.Method == "PRI" && len(r.Header) == 0L && r.URL.Path == "*" && r.Proto == "HTTP/2.0";
         }
 
@@ -422,14 +519,16 @@ namespace net
             {
                 return value;
             }
+
             return def;
+
         }
 
         // NOTE: This is not intended to reflect the actual Go version being used.
         // It was changed at the time of Go 1.1 release because the former User-Agent
-        // had ended up on a blacklist for some intrusion detection systems.
+        // had ended up blocked by some intrusion detection systems.
         // See https://codereview.appspot.com/7532043.
-        private static readonly @string defaultUserAgent = "Go-http-client/1.1";
+        private static readonly @string defaultUserAgent = (@string)"Go-http-client/1.1";
 
         // Write writes an HTTP/1.1 request, which is the header and body, in wire format.
         // This method consults the following fields of the request:
@@ -459,20 +558,24 @@ namespace net
         // If Body is present, Content-Length is <= 0 and TransferEncoding
         // hasn't been set to "identity", Write adds "Transfer-Encoding:
         // chunked" to the header. Body is closed after it is sent.
-        private static error Write(this ref Request r, io.Writer w)
+        private static error Write(this ptr<Request> _addr_r, io.Writer w)
         {
-            return error.As(r.write(w, false, null, null));
+            ref Request r = ref _addr_r.val;
+
+            return error.As(r.write(w, false, null, null))!;
         }
 
         // WriteProxy is like Write but writes the request in the form
         // expected by an HTTP proxy. In particular, WriteProxy writes the
         // initial Request-URI line of the request with an absolute URI, per
-        // section 5.1.2 of RFC 2616, including the scheme and host.
+        // section 5.3 of RFC 7230, including the scheme and host.
         // In either case, WriteProxy also writes a Host header, using
         // either r.Host or r.URL.Host.
-        private static error WriteProxy(this ref Request r, io.Writer w)
+        private static error WriteProxy(this ptr<Request> _addr_r, io.Writer w)
         {
-            return error.As(r.write(w, true, null, null));
+            ref Request r = ref _addr_r.val;
+
+            return error.As(r.write(w, true, null, null))!;
         }
 
         // errMissingHost is returned by Write when there is no Host or URL present in
@@ -481,8 +584,11 @@ namespace net
 
         // extraHeaders may be nil
         // waitForContinue may be nil
-        private static error write(this ref Request _r, io.Writer w, bool usingProxy, Header extraHeaders, Func<bool> waitForContinue) => func(_r, (ref Request r, Defer defer, Panic _, Recover __) =>
+        private static error write(this ptr<Request> _addr_r, io.Writer w, bool usingProxy, Header extraHeaders, Func<bool> waitForContinue) => func((defer, _, __) =>
         {
+            error err = default!;
+            ref Request r = ref _addr_r.val;
+
             var trace = httptrace.ContextClientTrace(r.Context());
             if (trace != null && trace.WroteRequest != null)
             {
@@ -490,6 +596,7 @@ namespace net
                 {
                     trace.WroteRequest(new httptrace.WroteRequestInfo(Err:err,));
                 }());
+
             } 
 
             // Find the target host. Prefer the Host: header, but if that
@@ -501,9 +608,11 @@ namespace net
             {
                 if (r.URL == null)
                 {
-                    return error.As(errMissingHost);
+                    return error.As(errMissingHost)!;
                 }
+
                 host = cleanHost(r.URL.Host);
+
             } 
 
             // According to RFC 6874, an HTTP client, proxy, or other
@@ -520,14 +629,26 @@ namespace net
             { 
                 // CONNECT requests normally give just the host and port, not a full URL.
                 ruri = host;
+                if (r.URL.Opaque != "")
+                {
+                    ruri = r.URL.Opaque;
+                }
+
+            }
+
+            if (stringContainsCTLByte(ruri))
+            {
+                return error.As(errors.New("net/http: can't write control character in Request.URL"))!;
             } 
-            // TODO(bradfitz): escape at least newlines in ruri?
+            // TODO: validate r.Method too? At least it's less likely to
+            // come from an attacker (more likely to be a constant in
+            // code).
 
             // Wrap the writer in a bufio Writer if it's not already buffered.
             // Don't always call NewWriter, as that forces a bytes.Buffer
             // and other small bufio Writers to have a minimum 4k buffer
             // size.
-            ref bufio.Writer bw = default;
+            ptr<bufio.Writer> bw;
             {
                 io.ByteWriter (_, ok) = w._<io.ByteWriter>();
 
@@ -539,69 +660,83 @@ namespace net
 
             }
 
+
             _, err = fmt.Fprintf(w, "%s %s HTTP/1.1\r\n", valueOrDefault(r.Method, "GET"), ruri);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             } 
 
             // Header lines
             _, err = fmt.Fprintf(w, "Host: %s\r\n", host);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
+            }
+
+            if (trace != null && trace.WroteHeaderField != null)
+            {
+                trace.WroteHeaderField("Host", new slice<@string>(new @string[] { host }));
             } 
 
             // Use the defaultUserAgent unless the Header contains one, which
             // may be blank to not send the header.
             var userAgent = defaultUserAgent;
+            if (r.Header.has("User-Agent"))
             {
-                (_, ok) = r.Header["User-Agent"];
-
-                if (ok)
-                {
-                    userAgent = r.Header.Get("User-Agent");
-                }
-
+                userAgent = r.Header.Get("User-Agent");
             }
+
             if (userAgent != "")
             {
                 _, err = fmt.Fprintf(w, "User-Agent: %s\r\n", userAgent);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
+                if (trace != null && trace.WroteHeaderField != null)
+                {
+                    trace.WroteHeaderField("User-Agent", new slice<@string>(new @string[] { userAgent }));
+                }
+
             } 
 
             // Process Body,ContentLength,Close,Trailer
             var (tw, err) = newTransferWriter(r);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            err = tw.WriteHeader(w);
+
+            err = tw.writeHeader(w, trace);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            err = r.Header.WriteSubset(w, reqWriteExcludeHeader);
+
+            err = r.Header.writeSubset(w, reqWriteExcludeHeader, trace);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (extraHeaders != null)
             {
-                err = extraHeaders.Write(w);
+                err = extraHeaders.write(w, trace);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
+
             _, err = io.WriteString(w, "\r\n");
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (trace != null && trace.WroteHeaders != null)
             {
                 trace.WroteHeaders();
@@ -611,36 +746,41 @@ namespace net
             if (waitForContinue != null)
             {
                 {
-                    ref bufio.Writer bw__prev2 = bw;
+                    ptr<bufio.Writer> bw__prev2 = bw;
 
-                    ref bufio.Writer (bw, ok) = w._<ref bufio.Writer>();
+                    ptr<bufio.Writer> (bw, ok) = w._<ptr<bufio.Writer>>();
 
                     if (ok)
                     {
                         err = bw.Flush();
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
+
                     }
 
                     bw = bw__prev2;
 
                 }
+
                 if (trace != null && trace.Wait100Continue != null)
                 {
                     trace.Wait100Continue();
                 }
+
                 if (!waitForContinue())
                 {
                     r.closeBody();
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
-            }
-            {
-                ref bufio.Writer bw__prev1 = bw;
 
-                (bw, ok) = w._<ref bufio.Writer>();
+            }
+
+            {
+                ptr<bufio.Writer> bw__prev1 = bw;
+
+                (bw, ok) = w._<ptr<bufio.Writer>>();
 
                 if (ok && tw.FlushHeaders)
                 {
@@ -649,10 +789,11 @@ namespace net
 
                         if (err != null)
                         {
-                            return error.As(err);
+                            return error.As(err)!;
                         }
 
                     }
+
                 } 
 
                 // Write body and trailer
@@ -662,20 +803,25 @@ namespace net
             } 
 
             // Write body and trailer
-            err = tw.WriteBody(w);
+            err = tw.writeBody(w);
             if (err != null)
             {
                 if (tw.bodyReadError == err)
                 {
                     err = new requestBodyReadError(err);
                 }
-                return error.As(err);
+
+                return error.As(err)!;
+
             }
+
             if (bw != null)
             {
-                return error.As(bw.Flush());
+                return error.As(bw.Flush())!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         });
 
         // requestBodyReadError wraps an error from (*Request).write to indicate
@@ -687,7 +833,10 @@ namespace net
         }
 
         private static (@string, error) idnaASCII(@string v)
-        { 
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+ 
             // TODO: Consider removing this check after verifying performance is okay.
             // Right now punycode verification, length checks, context checks, and the
             // permissible character tests are all omitted. It also prevents the ToASCII
@@ -699,9 +848,11 @@ namespace net
             // work, but it will not cause an allocation.
             if (isASCII(v))
             {
-                return (v, null);
+                return (v, error.As(null!)!);
             }
+
             return idna.Lookup.ToASCII(v);
+
         }
 
         // cleanHost cleans up the host sent in request's Host header.
@@ -728,6 +879,7 @@ namespace net
                 }
 
             }
+
             var (host, port, err) = net.SplitHostPort(in);
             if (err != null)
             { // input was just a host
@@ -736,14 +888,19 @@ namespace net
                 {
                     return in; // garbage in, garbage out
                 }
+
                 return a;
+
             }
+
             (a, err) = idnaASCII(host);
             if (err != null)
             {
                 return in; // garbage in, garbage out
             }
+
             return net.JoinHostPort(a, port);
+
         }
 
         // removeZone removes IPv6 zone identifier from host.
@@ -754,24 +911,32 @@ namespace net
             {
                 return host;
             }
+
             var i = strings.LastIndex(host, "]");
             if (i < 0L)
             {
                 return host;
             }
+
             var j = strings.LastIndex(host[..i], "%");
             if (j < 0L)
             {
                 return host;
             }
+
             return host[..j] + host[i..];
+
         }
 
-        // ParseHTTPVersion parses a HTTP version string.
+        // ParseHTTPVersion parses an HTTP version string.
         // "HTTP/1.0" returns (1, 0, true).
         public static (long, long, bool) ParseHTTPVersion(@string vers)
         {
-            const long Big = 1000000L; // arbitrary upper bound
+            long major = default;
+            long minor = default;
+            bool ok = default;
+
+            const long Big = (long)1000000L; // arbitrary upper bound
  // arbitrary upper bound
             switch (vers)
             {
@@ -786,22 +951,27 @@ namespace net
             {
                 return (0L, 0L, false);
             }
+
             var dot = strings.Index(vers, ".");
             if (dot < 0L)
             {
                 return (0L, 0L, false);
             }
+
             var (major, err) = strconv.Atoi(vers[5L..dot]);
             if (err != null || major < 0L || major > Big)
             {
                 return (0L, 0L, false);
             }
+
             minor, err = strconv.Atoi(vers[dot + 1L..]);
             if (err != null || minor < 0L || minor > Big)
             {
                 return (0L, 0L, false);
             }
+
             return (major, minor, true);
+
         }
 
         private static bool validMethod(@string method)
@@ -820,44 +990,70 @@ namespace net
                      token          = 1*<any CHAR except CTLs or separators>
                 */
             return len(method) > 0L && strings.IndexFunc(method, isNotToken) == -1L;
+
         }
 
-        // NewRequest returns a new Request given a method, URL, and optional body.
+        // NewRequest wraps NewRequestWithContext using the background context.
+        public static (ptr<Request>, error) NewRequest(@string method, @string url, io.Reader body)
+        {
+            ptr<Request> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_NewRequestWithContext(context.Background(), method, url, body)!;
+        }
+
+        // NewRequestWithContext returns a new Request given a method, URL, and
+        // optional body.
         //
         // If the provided body is also an io.Closer, the returned
         // Request.Body is set to body and will be closed by the Client
         // methods Do, Post, and PostForm, and Transport.RoundTrip.
         //
-        // NewRequest returns a Request suitable for use with Client.Do or
-        // Transport.RoundTrip. To create a request for use with testing a
-        // Server Handler, either use the NewRequest function in the
+        // NewRequestWithContext returns a Request suitable for use with
+        // Client.Do or Transport.RoundTrip. To create a request for use with
+        // testing a Server Handler, either use the NewRequest function in the
         // net/http/httptest package, use ReadRequest, or manually update the
-        // Request fields. See the Request type's documentation for the
-        // difference between inbound and outbound request fields.
+        // Request fields. For an outgoing client request, the context
+        // controls the entire lifetime of a request and its response:
+        // obtaining a connection, sending the request, and reading the
+        // response headers and body. See the Request type's documentation for
+        // the difference between inbound and outbound request fields.
         //
         // If body is of type *bytes.Buffer, *bytes.Reader, or
         // *strings.Reader, the returned request's ContentLength is set to its
         // exact value (instead of -1), GetBody is populated (so 307 and 308
         // redirects can replay the body), and Body is set to NoBody if the
         // ContentLength is 0.
-        public static (ref Request, error) NewRequest(@string method, @string url, io.Reader body)
+        public static (ptr<Request>, error) NewRequestWithContext(context.Context ctx, @string method, @string url, io.Reader body)
         {
+            ptr<Request> _p0 = default!;
+            error _p0 = default!;
+
             if (method == "")
             { 
                 // We document that "" means "GET" for Request.Method, and people have
                 // relied on that from NewRequest, so keep that working.
                 // We still enforce validMethod for non-empty methods.
                 method = "GET";
+
             }
+
             if (!validMethod(method))
             {
-                return (null, fmt.Errorf("net/http: invalid method %q", method));
+                return (_addr_null!, error.As(fmt.Errorf("net/http: invalid method %q", method))!);
             }
-            var (u, err) = parseURL(url); // Just url.Parse (url is shadowed for godoc).
+
+            if (ctx == null)
+            {
+                return (_addr_null!, error.As(errors.New("net/http: nil Context"))!);
+            }
+
+            var (u, err) = urlpkg.Parse(url);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             io.ReadCloser (rc, ok) = body._<io.ReadCloser>();
             if (!ok && body != null)
             {
@@ -865,38 +1061,38 @@ namespace net
             } 
             // The host's colon:port should be normalized. See Issue 14836.
             u.Host = removeEmptyPort(u.Host);
-            Request req = ref new Request(Method:method,URL:u,Proto:"HTTP/1.1",ProtoMajor:1,ProtoMinor:1,Header:make(Header),Body:rc,Host:u.Host,);
+            ptr<Request> req = addr(new Request(ctx:ctx,Method:method,URL:u,Proto:"HTTP/1.1",ProtoMajor:1,ProtoMinor:1,Header:make(Header),Body:rc,Host:u.Host,));
             if (body != null)
             {
                 switch (body.type())
                 {
-                    case ref bytes.Buffer v:
+                    case ptr<bytes.Buffer> v:
                         req.ContentLength = int64(v.Len());
                         var buf = v.Bytes();
                         req.GetBody = () =>
                         {
-                            var r = bytes.NewReader(buf);
-                            return (ioutil.NopCloser(r), null);
+                            ref var r = ref heap(bytes.NewReader(buf), out ptr<var> _addr_r);
+                            return (_addr_ioutil.NopCloser(r)!, error.As(null!)!);
                         }
 ;
                         break;
-                    case ref bytes.Reader v:
+                    case ptr<bytes.Reader> v:
                         req.ContentLength = int64(v.Len());
-                        var snapshot = v.Value;
+                        var snapshot = v.val;
                         req.GetBody = () =>
                         {
                             r = snapshot;
-                            return (ioutil.NopCloser(ref r), null);
+                            return (_addr_ioutil.NopCloser(_addr_r)!, error.As(null!)!);
                         }
 ;
                         break;
-                    case ref strings.Reader v:
+                    case ptr<strings.Reader> v:
                         req.ContentLength = int64(v.Len());
-                        snapshot = v.Value;
+                        snapshot = v.val;
                         req.GetBody = () =>
                         {
                             r = snapshot;
-                            return (ioutil.NopCloser(ref r), null);
+                            return (_addr_ioutil.NopCloser(_addr_r)!, error.As(null!)!);
                         }
 ;
                         break;
@@ -925,47 +1121,67 @@ namespace net
                 if (req.GetBody != null && req.ContentLength == 0L)
                 {
                     req.Body = NoBody;
-                    req.GetBody = () => (NoBody, null);
+                    req.GetBody = () => (_addr_NoBody!, error.As(null!)!);
                 }
+
             }
-            return (req, null);
+
+            return (_addr_req!, error.As(null!)!);
+
         }
 
         // BasicAuth returns the username and password provided in the request's
         // Authorization header, if the request uses HTTP Basic Authentication.
         // See RFC 2617, Section 2.
-        private static (@string, @string, bool) BasicAuth(this ref Request r)
+        private static (@string, @string, bool) BasicAuth(this ptr<Request> _addr_r)
         {
+            @string username = default;
+            @string password = default;
+            bool ok = default;
+            ref Request r = ref _addr_r.val;
+
             var auth = r.Header.Get("Authorization");
             if (auth == "")
             {
-                return;
+                return ;
             }
+
             return parseBasicAuth(auth);
+
         }
 
         // parseBasicAuth parses an HTTP Basic Authentication string.
         // "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==" returns ("Aladdin", "open sesame", true).
         private static (@string, @string, bool) parseBasicAuth(@string auth)
         {
-            const @string prefix = "Basic ";
+            @string username = default;
+            @string password = default;
+            bool ok = default;
 
-            if (!strings.HasPrefix(auth, prefix))
+            const @string prefix = (@string)"Basic "; 
+            // Case insensitive prefix match. See Issue 22736.
+ 
+            // Case insensitive prefix match. See Issue 22736.
+            if (len(auth) < len(prefix) || !strings.EqualFold(auth[..len(prefix)], prefix))
             {
-                return;
+                return ;
             }
+
             var (c, err) = base64.StdEncoding.DecodeString(auth[len(prefix)..]);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             var cs = string(c);
             var s = strings.IndexByte(cs, ':');
             if (s < 0L)
             {
-                return;
+                return ;
             }
+
             return (cs[..s], cs[s + 1L..], true);
+
         }
 
         // SetBasicAuth sets the request's Authorization header to use HTTP
@@ -973,61 +1189,94 @@ namespace net
         //
         // With HTTP Basic Authentication the provided username and password
         // are not encrypted.
-        private static void SetBasicAuth(this ref Request r, @string username, @string password)
+        //
+        // Some protocols may impose additional requirements on pre-escaping the
+        // username and password. For instance, when used with OAuth2, both arguments
+        // must be URL encoded first with url.QueryEscape.
+        private static void SetBasicAuth(this ptr<Request> _addr_r, @string username, @string password)
         {
+            ref Request r = ref _addr_r.val;
+
             r.Header.Set("Authorization", "Basic " + basicAuth(username, password));
         }
 
         // parseRequestLine parses "GET /foo HTTP/1.1" into its three parts.
         private static (@string, @string, @string, bool) parseRequestLine(@string line)
         {
+            @string method = default;
+            @string requestURI = default;
+            @string proto = default;
+            bool ok = default;
+
             var s1 = strings.Index(line, " ");
             var s2 = strings.Index(line[s1 + 1L..], " ");
             if (s1 < 0L || s2 < 0L)
             {
-                return;
+                return ;
             }
+
             s2 += s1 + 1L;
             return (line[..s1], line[s1 + 1L..s2], line[s2 + 1L..], true);
+
         }
 
         private static sync.Pool textprotoReaderPool = default;
 
-        private static ref textproto.Reader newTextprotoReader(ref bufio.Reader br)
+        private static ptr<textproto.Reader> newTextprotoReader(ptr<bufio.Reader> _addr_br)
         {
+            ref bufio.Reader br = ref _addr_br.val;
+
             {
                 var v = textprotoReaderPool.Get();
 
                 if (v != null)
                 {
-                    ref textproto.Reader tr = v._<ref textproto.Reader>();
+                    ptr<textproto.Reader> tr = v._<ptr<textproto.Reader>>();
                     tr.R = br;
-                    return tr;
+                    return _addr_tr!;
                 }
 
             }
-            return textproto.NewReader(br);
+
+            return _addr_textproto.NewReader(br)!;
+
         }
 
-        private static void putTextprotoReader(ref textproto.Reader r)
+        private static void putTextprotoReader(ptr<textproto.Reader> _addr_r)
         {
+            ref textproto.Reader r = ref _addr_r.val;
+
             r.R = null;
             textprotoReaderPool.Put(r);
         }
 
         // ReadRequest reads and parses an incoming request from b.
-        public static (ref Request, error) ReadRequest(ref bufio.Reader b)
+        //
+        // ReadRequest is a low-level function and should only be used for
+        // specialized applications; most code should use the Server to read
+        // requests and handle them via the Handler interface. ReadRequest
+        // only supports HTTP/1.x requests. For HTTP/2, use golang.org/x/net/http2.
+        public static (ptr<Request>, error) ReadRequest(ptr<bufio.Reader> _addr_b)
         {
-            return readRequest(b, deleteHostHeader);
+            ptr<Request> _p0 = default!;
+            error _p0 = default!;
+            ref bufio.Reader b = ref _addr_b.val;
+
+            return _addr_readRequest(_addr_b, deleteHostHeader)!;
         }
 
         // Constants for readRequest's deleteHostHeader parameter.
-        private static readonly var deleteHostHeader = true;
-        private static readonly var keepHostHeader = false;
+        private static readonly var deleteHostHeader = (var)true;
+        private static readonly var keepHostHeader = (var)false;
 
-        private static (ref Request, error) readRequest(ref bufio.Reader _b, bool deleteHostHeader) => func(_b, (ref bufio.Reader b, Defer defer, Panic _, Recover __) =>
+
+        private static (ptr<Request>, error) readRequest(ptr<bufio.Reader> _addr_b, bool deleteHostHeader) => func((defer, _, __) =>
         {
-            var tp = newTextprotoReader(b);
+            ptr<Request> req = default!;
+            error err = default!;
+            ref bufio.Reader b = ref _addr_b.val;
+
+            var tp = newTextprotoReader(_addr_b);
             req = @new<Request>(); 
 
             // First line: GET /index.html HTTP/1.0
@@ -1036,33 +1285,37 @@ namespace net
 
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             defer(() =>
             {
-                putTextprotoReader(tp);
+                putTextprotoReader(_addr_tp);
                 if (err == io.EOF)
                 {
                     err = io.ErrUnexpectedEOF;
                 }
+
             }());
 
             bool ok = default;
             req.Method, req.RequestURI, req.Proto, ok = parseRequestLine(s);
             if (!ok)
             {
-                return (null, ref new badStringError("malformed HTTP request",s));
+                return (_addr_null!, error.As(badStringError("malformed HTTP request", s))!);
             }
+
             if (!validMethod(req.Method))
             {
-                return (null, ref new badStringError("invalid method",req.Method));
+                return (_addr_null!, error.As(badStringError("invalid method", req.Method))!);
             }
+
             var rawurl = req.RequestURI;
             req.ProtoMajor, req.ProtoMinor, ok = ParseHTTPVersion(req.Proto);
 
             if (!ok)
             {
-                return (null, ref new badStringError("malformed HTTP version",req.Proto));
+                return (_addr_null!, error.As(badStringError("malformed HTTP version", req.Proto))!);
             } 
 
             // CONNECT requests are used two different ways, and neither uses a full URL:
@@ -1079,27 +1332,31 @@ namespace net
             {
                 rawurl = "http://" + rawurl;
             }
+
             req.URL, err = url.ParseRequestURI(rawurl);
 
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             if (justAuthority)
             { 
                 // Strip the bogus "http://" back off.
                 req.URL.Scheme = "";
+
             } 
 
             // Subsequent lines: Key: value.
             var (mimeHeader, err) = tp.ReadMIMEHeader();
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             req.Header = Header(mimeHeader); 
 
-            // RFC 2616: Must treat
+            // RFC 7230, section 5.3: Must treat
             //    GET /index.html HTTP/1.1
             //    Host: www.google.com
             // and
@@ -1111,10 +1368,12 @@ namespace net
             {
                 req.Host = req.Header.get("Host");
             }
+
             if (deleteHostHeader)
             {
                 delete(req.Header, "Host");
             }
+
             fixPragmaCacheControl(req.Header);
 
             req.Close = shouldClose(req.ProtoMajor, req.ProtoMinor, req.Header, false);
@@ -1122,8 +1381,9 @@ namespace net
             err = readTransfer(req, b);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             if (req.isH2Upgrade())
             { 
                 // Because it's neither chunked, nor declared:
@@ -1134,8 +1394,11 @@ namespace net
                 // dealing with the connection further if it's not
                 // hijacked. Set Close to ensure that:
                 req.Close = true;
+
             }
-            return (req, null);
+
+            return (_addr_req!, error.As(null!)!);
+
         });
 
         // MaxBytesReader is similar to io.LimitReader but is intended for
@@ -1148,7 +1411,7 @@ namespace net
         // sending a large request and wasting server resources.
         public static io.ReadCloser MaxBytesReader(ResponseWriter w, io.ReadCloser r, long n)
         {
-            return ref new maxBytesReader(w:w,r:r,n:n);
+            return addr(new maxBytesReader(w:w,r:r,n:n));
         }
 
         private partial struct maxBytesReader
@@ -1159,15 +1422,20 @@ namespace net
             public error err; // sticky error
         }
 
-        private static (long, error) Read(this ref maxBytesReader l, slice<byte> p)
+        private static (long, error) Read(this ptr<maxBytesReader> _addr_l, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref maxBytesReader l = ref _addr_l.val;
+
             if (l.err != null)
             {
-                return (0L, l.err);
+                return (0L, error.As(l.err)!);
             }
+
             if (len(p) == 0L)
             {
-                return (0L, null);
+                return (0L, error.As(null!)!);
             } 
             // If they asked for a 32KB byte read but only 5 bytes are
             // remaining, no need to read 32KB. 6 bytes will answer the
@@ -1176,14 +1444,16 @@ namespace net
             {
                 p = p[..l.n + 1L];
             }
+
             n, err = l.r.Read(p);
 
             if (int64(n) <= l.n)
             {
                 l.n -= int64(n);
                 l.err = err;
-                return (n, err);
+                return (n, error.As(err)!);
             }
+
             n = int(l.n);
             l.n = 0L; 
 
@@ -1199,7 +1469,7 @@ namespace net
                 void requestTooLarge();
             }
             {
-                requestTooLarger (res, ok) = l.w._<requestTooLarger>();
+                requestTooLarger (res, ok) = requestTooLarger.As(l.w._<requestTooLarger>())!;
 
                 if (ok)
                 {
@@ -1207,55 +1477,65 @@ namespace net
                 }
 
             }
+
             l.err = errors.New("http: request body too large");
-            return (n, l.err);
+            return (n, error.As(l.err)!);
+
         }
 
-        private static error Close(this ref maxBytesReader l)
+        private static error Close(this ptr<maxBytesReader> _addr_l)
         {
-            return error.As(l.r.Close());
+            ref maxBytesReader l = ref _addr_l.val;
+
+            return error.As(l.r.Close())!;
         }
 
         private static void copyValues(url.Values dst, url.Values src)
         {
             foreach (var (k, vs) in src)
             {
-                foreach (var (_, value) in vs)
-                {
-                    dst.Add(k, value);
-                }
+                dst[k] = append(dst[k], vs);
             }
+
         }
 
-        private static (url.Values, error) parsePostForm(ref Request r)
+        private static (url.Values, error) parsePostForm(ptr<Request> _addr_r)
         {
+            url.Values vs = default;
+            error err = default!;
+            ref Request r = ref _addr_r.val;
+
             if (r.Body == null)
             {
                 err = errors.New("missing form body");
-                return;
+                return ;
             }
+
             var ct = r.Header.Get("Content-Type"); 
-            // RFC 2616, section 7.2.1 - empty type
-            //   SHOULD be treated as application/octet-stream
+            // RFC 7231, section 3.1.1.5 - empty type
+            //   MAY be treated as application/octet-stream
             if (ct == "")
             {
                 ct = "application/octet-stream";
             }
+
             ct, _, err = mime.ParseMediaType(ct);
 
             if (ct == "application/x-www-form-urlencoded") 
                 io.Reader reader = r.Body;
                 var maxFormSize = int64(1L << (int)(63L) - 1L);
                 {
-                    ref maxBytesReader (_, ok) = r.Body._<ref maxBytesReader>();
+                    ptr<maxBytesReader> (_, ok) = r.Body._<ptr<maxBytesReader>>();
 
                     if (!ok)
                     {
                         maxFormSize = int64(10L << (int)(20L)); // 10 MB is a lot of text.
                         reader = io.LimitReader(r.Body, maxFormSize + 1L);
+
                     }
 
                 }
+
                 var (b, e) = ioutil.ReadAll(reader);
                 if (e != null)
                 {
@@ -1263,19 +1543,25 @@ namespace net
                     {
                         err = e;
                     }
+
                     break;
+
                 }
+
                 if (int64(len(b)) > maxFormSize)
                 {
                     err = errors.New("http: POST too large");
-                    return;
+                    return ;
                 }
+
                 vs, e = url.ParseQuery(string(b));
                 if (err == null)
                 {
                     err = e;
                 }
-            else if (ct == "multipart/form-data")                         return;
+
+            else if (ct == "multipart/form-data")                         return ;
+
         }
 
         // ParseForm populates r.Form and r.PostForm.
@@ -1283,33 +1569,38 @@ namespace net
         // For all requests, ParseForm parses the raw query from the URL and updates
         // r.Form.
         //
-        // For POST, PUT, and PATCH requests, it also parses the request body as a form
-        // and puts the results into both r.PostForm and r.Form. Request body parameters
-        // take precedence over URL query string values in r.Form.
+        // For POST, PUT, and PATCH requests, it also reads the request body, parses it
+        // as a form and puts the results into both r.PostForm and r.Form. Request body
+        // parameters take precedence over URL query string values in r.Form.
+        //
+        // If the request Body's size has not already been limited by MaxBytesReader,
+        // the size is capped at 10MB.
         //
         // For other HTTP methods, or when the Content-Type is not
         // application/x-www-form-urlencoded, the request Body is not read, and
         // r.PostForm is initialized to a non-nil, empty value.
         //
-        // If the request Body's size has not already been limited by MaxBytesReader,
-        // the size is capped at 10MB.
-        //
         // ParseMultipartForm calls ParseForm automatically.
         // ParseForm is idempotent.
-        private static error ParseForm(this ref Request r)
+        private static error ParseForm(this ptr<Request> _addr_r)
         {
-            error err = default;
+            ref Request r = ref _addr_r.val;
+
+            error err = default!;
             if (r.PostForm == null)
             {
                 if (r.Method == "POST" || r.Method == "PUT" || r.Method == "PATCH")
                 {
-                    r.PostForm, err = parsePostForm(r);
+                    r.PostForm, err = parsePostForm(_addr_r);
                 }
+
                 if (r.PostForm == null)
                 {
                     r.PostForm = make(url.Values);
                 }
+
             }
+
             if (r.Form == null)
             {
                 if (len(r.PostForm) > 0L)
@@ -1317,20 +1608,24 @@ namespace net
                     r.Form = make(url.Values);
                     copyValues(r.Form, r.PostForm);
                 }
+
                 url.Values newValues = default;
                 if (r.URL != null)
                 {
-                    error e = default;
+                    error e = default!;
                     newValues, e = url.ParseQuery(r.URL.RawQuery);
                     if (err == null)
                     {
-                        err = error.As(e);
+                        err = error.As(e)!;
                     }
+
                 }
+
                 if (newValues == null)
                 {
                     newValues = make(url.Values);
                 }
+
                 if (r.Form == null)
                 {
                     r.Form = newValues;
@@ -1339,8 +1634,11 @@ namespace net
                 {
                     copyValues(r.Form, newValues);
                 }
+
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
 
         // ParseMultipartForm parses a request body as multipart/form-data.
@@ -1349,47 +1647,58 @@ namespace net
         // disk in temporary files.
         // ParseMultipartForm calls ParseForm if necessary.
         // After one call to ParseMultipartForm, subsequent calls have no effect.
-        private static error ParseMultipartForm(this ref Request r, long maxMemory)
+        private static error ParseMultipartForm(this ptr<Request> _addr_r, long maxMemory)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.MultipartForm == multipartByReader)
             {
-                return error.As(errors.New("http: multipart handled by MultipartReader"));
+                return error.As(errors.New("http: multipart handled by MultipartReader"))!;
             }
+
             if (r.Form == null)
             {
                 var err = r.ParseForm();
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
             }
+
             if (r.MultipartForm != null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
-            var (mr, err) = r.multipartReader();
+
+            var (mr, err) = r.multipartReader(false);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var (f, err) = mr.ReadForm(maxMemory);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (r.PostForm == null)
             {
                 r.PostForm = make(url.Values);
             }
+
             foreach (var (k, v) in f.Value)
             {
                 r.Form[k] = append(r.Form[k], v); 
                 // r.PostForm should also be populated. See Issue 9305.
                 r.PostForm[k] = append(r.PostForm[k], v);
+
             }
             r.MultipartForm = f;
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // FormValue returns the first value for the named component of the query.
@@ -1399,12 +1708,15 @@ namespace net
         // If key is not present, FormValue returns the empty string.
         // To access multiple values of the same key, call ParseForm and
         // then inspect Request.Form directly.
-        private static @string FormValue(this ref Request r, @string key)
+        private static @string FormValue(this ptr<Request> _addr_r, @string key)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.Form == null)
             {
                 r.ParseMultipartForm(defaultMaxMemory);
             }
+
             {
                 var vs = r.Form[key];
 
@@ -1414,20 +1726,25 @@ namespace net
                 }
 
             }
+
             return "";
+
         }
 
-        // PostFormValue returns the first value for the named component of the POST
-        // or PUT request body. URL query parameters are ignored.
+        // PostFormValue returns the first value for the named component of the POST,
+        // PATCH, or PUT request body. URL query parameters are ignored.
         // PostFormValue calls ParseMultipartForm and ParseForm if necessary and ignores
         // any errors returned by these functions.
         // If key is not present, PostFormValue returns the empty string.
-        private static @string PostFormValue(this ref Request r, @string key)
+        private static @string PostFormValue(this ptr<Request> _addr_r, @string key)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.PostForm == null)
             {
                 r.ParseMultipartForm(defaultMaxMemory);
             }
+
             {
                 var vs = r.PostForm[key];
 
@@ -1437,25 +1754,35 @@ namespace net
                 }
 
             }
+
             return "";
+
         }
 
         // FormFile returns the first file for the provided form key.
         // FormFile calls ParseMultipartForm and ParseForm if necessary.
-        private static (multipart.File, ref multipart.FileHeader, error) FormFile(this ref Request r, @string key)
+        private static (multipart.File, ptr<multipart.FileHeader>, error) FormFile(this ptr<Request> _addr_r, @string key)
         {
+            multipart.File _p0 = default;
+            ptr<multipart.FileHeader> _p0 = default!;
+            error _p0 = default!;
+            ref Request r = ref _addr_r.val;
+
             if (r.MultipartForm == multipartByReader)
             {
-                return (null, null, errors.New("http: multipart handled by MultipartReader"));
+                return (null, _addr_null!, error.As(errors.New("http: multipart handled by MultipartReader"))!);
             }
+
             if (r.MultipartForm == null)
             {
                 var err = r.ParseMultipartForm(defaultMaxMemory);
                 if (err != null)
                 {
-                    return (null, null, err);
+                    return (null, _addr_null!, error.As(err)!);
                 }
+
             }
+
             if (r.MultipartForm != null && r.MultipartForm.File != null)
             {
                 {
@@ -1464,43 +1791,65 @@ namespace net
                     if (len(fhs) > 0L)
                     {
                         var (f, err) = fhs[0L].Open();
-                        return (f, fhs[0L], err);
+                        return (f, _addr_fhs[0L]!, error.As(err)!);
                     }
 
                 }
+
             }
-            return (null, null, ErrMissingFile);
+
+            return (null, _addr_null!, error.As(ErrMissingFile)!);
+
         }
 
-        private static bool expectsContinue(this ref Request r)
+        private static bool expectsContinue(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             return hasToken(r.Header.get("Expect"), "100-continue");
         }
 
-        private static bool wantsHttp10KeepAlive(this ref Request r)
+        private static bool wantsHttp10KeepAlive(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.ProtoMajor != 1L || r.ProtoMinor != 0L)
             {
                 return false;
             }
+
             return hasToken(r.Header.get("Connection"), "keep-alive");
+
         }
 
-        private static bool wantsClose(this ref Request r)
+        private static bool wantsClose(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
+            if (r.Close)
+            {
+                return true;
+            }
+
             return hasToken(r.Header.get("Connection"), "close");
+
         }
 
-        private static void closeBody(this ref Request r)
+        private static void closeBody(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.Body != null)
             {
                 r.Body.Close();
             }
+
         }
 
-        private static bool isReplayable(this ref Request r)
+        private static bool isReplayable(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.Body == null || r.Body == NoBody || r.GetBody != null)
             {
                 switch (valueOrDefault(r.Method, "GET"))
@@ -1514,24 +1863,39 @@ namespace net
                     case "TRACE": 
                         return true;
                         break;
+                } 
+                // The Idempotency-Key, while non-standard, is widely used to
+                // mean a POST or other request is idempotent. See
+                // https://golang.org/issue/19943#issuecomment-421092421
+                if (r.Header.has("Idempotency-Key") || r.Header.has("X-Idempotency-Key"))
+                {
+                    return true;
                 }
+
             }
+
             return false;
+
         }
 
         // outgoingLength reports the Content-Length of this outgoing (Client) request.
         // It maps 0 into -1 (unknown) when the Body is non-nil.
-        private static long outgoingLength(this ref Request r)
+        private static long outgoingLength(this ptr<Request> _addr_r)
         {
+            ref Request r = ref _addr_r.val;
+
             if (r.Body == null || r.Body == NoBody)
             {
                 return 0L;
             }
+
             if (r.ContentLength != 0L)
             {
                 return r.ContentLength;
             }
+
             return -1L;
+
         }
 
         // requestMethodUsuallyLacksBody reports whether the given request
@@ -1560,6 +1924,16 @@ namespace net
                     break;
             }
             return false;
+
+        }
+
+        // requiresHTTP1 reports whether this request requires being sent on
+        // an HTTP/1 connection.
+        private static bool requiresHTTP1(this ptr<Request> _addr_r)
+        {
+            ref Request r = ref _addr_r.val;
+
+            return hasToken(r.Header.Get("Connection"), "upgrade") && strings.EqualFold(r.Header.Get("Upgrade"), "websocket");
         }
     }
 }}

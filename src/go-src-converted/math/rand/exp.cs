@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2020 August 29 08:25:52 UTC
+// package rand -- go2cs converted at 2020 October 08 03:25:38 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Go\src\math\rand\exp.go
 using math = go.math_package;
@@ -18,9 +18,10 @@ namespace math
          *
          * See "The Ziggurat Method for Generating Random Variables"
          * (Marsaglia & Tsang, 2000)
-         * http://www.jstatsoft.org/v05/i08/paper [pdf]
+         * https://www.jstatsoft.org/v05/i08/paper [pdf]
          */
-        private static readonly float re = 7.69711747013104972F;
+        private static readonly float re = (float)7.69711747013104972F;
+
 
         // ExpFloat64 returns an exponentially distributed float64 in the range
         // (0, +math.MaxFloat64] with an exponential distribution whose rate parameter
@@ -30,8 +31,10 @@ namespace math
         //
         //  sample = ExpFloat64() / desiredRateParameter
         //
-        private static double ExpFloat64(this ref Rand r)
+        private static double ExpFloat64(this ptr<Rand> _addr_r)
         {
+            ref Rand r = ref _addr_r.val;
+
             while (true)
             {
                 var j = r.Uint32();
@@ -41,15 +44,19 @@ namespace math
                 {
                     return x;
                 }
+
                 if (i == 0L)
                 {
                     return re - math.Log(r.Float64());
                 }
+
                 if (fe[i] + float32(r.Float64()) * (fe[i - 1L] - fe[i]) < float32(math.Exp(-x)))
                 {
                     return x;
                 }
+
             }
+
 
         }
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:30 UTC
+//     Generated on 2020 October 08 04:04:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace go
                 this.end = default;
             }
 
-            public commentListReader(ref ptr<token.FileSet> fset = default, slice<ref CommentGroup> list = default, long index = default, ref ptr<CommentGroup> comment = default, token.Position pos = default, token.Position end = default)
+            public commentListReader(ref ptr<token.FileSet> fset = default, slice<ptr<CommentGroup>> list = default, long index = default, ref ptr<CommentGroup> comment = default, token.Position pos = default, token.Position end = default)
             {
                 this.fset = fset;
                 this.list = list;

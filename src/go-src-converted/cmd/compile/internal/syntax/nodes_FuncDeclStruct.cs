@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:03 UTC
+//     Generated on 2020 October 08 04:28:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using src = go.cmd.@internal.src_package;
+
 using go;
 
 namespace go {
@@ -35,23 +34,21 @@ namespace @internal
             // Constructors
             public FuncDecl(NilType _)
             {
-                this.Attr = default;
+                this.Pragma = default;
                 this.Recv = default;
                 this.Name = default;
                 this.Type = default;
                 this.Body = default;
-                this.Pragma = default;
                 this.m_declRef = new ptr<decl>(new decl(nil));
             }
 
-            public FuncDecl(map<@string, bool> Attr = default, ref ptr<Field> Recv = default, ref ptr<Name> Name = default, ref ptr<FuncType> Type = default, ref ptr<BlockStmt> Body = default, Pragma Pragma = default, decl decl = default)
+            public FuncDecl(Pragma Pragma = default, ref ptr<Field> Recv = default, ref ptr<Name> Name = default, ref ptr<FuncType> Type = default, ref ptr<BlockStmt> Body = default, decl decl = default)
             {
-                this.Attr = Attr;
+                this.Pragma = Pragma;
                 this.Recv = Recv;
                 this.Name = Name;
                 this.Type = Type;
                 this.Body = Body;
-                this.Pragma = Pragma;
                 this.m_declRef = new ptr<decl>(decl);
             }
 
@@ -75,7 +72,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static FuncDecl FuncDecl_cast(dynamic value)
         {
-            return new FuncDecl(value.Attr, ref value.Recv, ref value.Name, ref value.Type, ref value.Body, value.Pragma, value.decl);
+            return new FuncDecl(value.Pragma, ref value.Recv, ref value.Name, ref value.Type, ref value.Body, value.decl);
         }
     }
 }}}}

@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:55 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:42 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\error.go
-using _@unsafe_ = go.@unsafe_package;
+using bytealg = go.@internal.bytealg_package;
 using static go.builtin;
 
 namespace go
 {
     public static partial class runtime_package
-    { // for go:linkname
-
+    {
         // The Error interface identifies a run time error.
         public partial interface Error : error
         {
@@ -22,32 +21,77 @@ namespace go
         // A TypeAssertionError explains a failed type assertion.
         public partial struct TypeAssertionError
         {
-            public @string interfaceString;
-            public @string concreteString;
-            public @string assertedString;
+            public ptr<_type> _interface;
+            public ptr<_type> concrete;
+            public ptr<_type> asserted;
             public @string missingMethod; // one method needed by Interface, missing from Concrete
         }
 
-        private static void RuntimeError(this ref TypeAssertionError _p0)
+        private static void RuntimeError(this ptr<TypeAssertionError> _addr__p0)
         {
+            ref TypeAssertionError _p0 = ref _addr__p0.val;
+
         }
 
-        private static @string Error(this ref TypeAssertionError e)
+        private static @string Error(this ptr<TypeAssertionError> _addr_e)
         {
-            var inter = e.interfaceString;
-            if (inter == "")
+            ref TypeAssertionError e = ref _addr_e.val;
+
+            @string inter = "interface";
+            if (e._interface != null)
             {
-                inter = "interface";
+                inter = e._interface.@string();
             }
-            if (e.concreteString == "")
+
+            var @as = e.asserted.@string();
+            if (e.concrete == null)
             {
-                return "interface conversion: " + inter + " is nil, not " + e.assertedString;
+                return "interface conversion: " + inter + " is nil, not " + as;
             }
+
+            var cs = e.concrete.@string();
             if (e.missingMethod == "")
             {
-                return "interface conversion: " + inter + " is " + e.concreteString + ", not " + e.assertedString;
+                @string msg = "interface conversion: " + inter + " is " + cs + ", not " + as;
+                if (cs == as)
+                { 
+                    // provide slightly clearer error message
+                    if (e.concrete.pkgpath() != e.asserted.pkgpath())
+                    {
+                        msg += " (types from different packages)";
+                    }
+                    else
+                    {
+                        msg += " (types from different scopes)";
+                    }
+
+                }
+
+                return msg;
+
             }
-            return "interface conversion: " + e.concreteString + " is not " + e.assertedString + ": missing method " + e.missingMethod;
+
+            return "interface conversion: " + cs + " is not " + as + ": missing method " + e.missingMethod;
+
+        }
+
+        //go:nosplit
+        // itoa converts val to a decimal representation. The result is
+        // written somewhere within buf and the location of the result is returned.
+        // buf must be at least 20 bytes.
+        private static slice<byte> itoa(slice<byte> buf, ulong val)
+        {
+            var i = len(buf) - 1L;
+            while (val >= 10L)
+            {
+                buf[i] = byte(val % 10L + '0');
+                i--;
+                val /= 10L;
+            }
+
+            buf[i] = byte(val + '0');
+            return buf[i..];
+
         }
 
         // An errorString represents a runtime error described by a single string.
@@ -80,15 +124,101 @@ namespace go
             return string(e);
         }
 
+        // A boundsError represents an indexing or slicing operation gone wrong.
+        private partial struct boundsError
+        {
+            public long x;
+            public long y; // Values in an index or slice expression can be signed or unsigned.
+// That means we'd need 65 bits to encode all possible indexes, from -2^63 to 2^64-1.
+// Instead, we keep track of whether x should be interpreted as signed or unsigned.
+// y is known to be nonnegative and to fit in an int.
+            public bool signed;
+            public boundsErrorCode code;
+        }
+
+        private partial struct boundsErrorCode // : byte
+        {
+        }
+
+        private static readonly boundsErrorCode boundsIndex = (boundsErrorCode)iota; // s[x], 0 <= x < len(s) failed
+
+        private static readonly var boundsSliceAlen = (var)0; // s[?:x], 0 <= x <= len(s) failed
+        private static readonly var boundsSliceAcap = (var)1; // s[?:x], 0 <= x <= cap(s) failed
+        private static readonly var boundsSliceB = (var)2; // s[x:y], 0 <= x <= y failed (but boundsSliceA didn't happen)
+
+        private static readonly var boundsSlice3Alen = (var)3; // s[?:?:x], 0 <= x <= len(s) failed
+        private static readonly var boundsSlice3Acap = (var)4; // s[?:?:x], 0 <= x <= cap(s) failed
+        private static readonly var boundsSlice3B = (var)5; // s[?:x:y], 0 <= x <= y failed (but boundsSlice3A didn't happen)
+        private static readonly var boundsSlice3C = (var)6; // s[x:y:?], 0 <= x <= y failed (but boundsSlice3A/B didn't happen)
+
+        // Note: in the above, len(s) and cap(s) are stored in y
+
+        // boundsErrorFmts provide error text for various out-of-bounds panics.
+        // Note: if you change these strings, you should adjust the size of the buffer
+        // in boundsError.Error below as well.
+        private static array<@string> boundsErrorFmts = new array<@string>(InitKeyedValues<@string>((boundsIndex, "index out of range [%x] with length %y"), (boundsSliceAlen, "slice bounds out of range [:%x] with length %y"), (boundsSliceAcap, "slice bounds out of range [:%x] with capacity %y"), (boundsSliceB, "slice bounds out of range [%x:%y]"), (boundsSlice3Alen, "slice bounds out of range [::%x] with length %y"), (boundsSlice3Acap, "slice bounds out of range [::%x] with capacity %y"), (boundsSlice3B, "slice bounds out of range [:%x:%y]"), (boundsSlice3C, "slice bounds out of range [%x:%y:]")));
+
+        // boundsNegErrorFmts are overriding formats if x is negative. In this case there's no need to report y.
+        private static array<@string> boundsNegErrorFmts = new array<@string>(InitKeyedValues<@string>((boundsIndex, "index out of range [%x]"), (boundsSliceAlen, "slice bounds out of range [:%x]"), (boundsSliceAcap, "slice bounds out of range [:%x]"), (boundsSliceB, "slice bounds out of range [%x:]"), (boundsSlice3Alen, "slice bounds out of range [::%x]"), (boundsSlice3Acap, "slice bounds out of range [::%x]"), (boundsSlice3B, "slice bounds out of range [:%x:]"), (boundsSlice3C, "slice bounds out of range [%x::]")));
+
+        private static void RuntimeError(this boundsError e)
+        {
+        }
+
+        private static slice<byte> appendIntStr(slice<byte> b, long v, bool signed)
+        {
+            if (signed && v < 0L)
+            {
+                b = append(b, '-');
+                v = -v;
+            }
+
+            array<byte> buf = new array<byte>(20L);
+            b = append(b, itoa(buf[..], uint64(v)));
+            return b;
+
+        }
+
+        private static @string Error(this boundsError e)
+        {
+            var fmt = boundsErrorFmts[e.code];
+            if (e.signed && e.x < 0L)
+            {
+                fmt = boundsNegErrorFmts[e.code];
+            } 
+            // max message length is 99: "runtime error: slice bounds out of range [::%x] with capacity %y"
+            // x can be at most 20 characters. y can be at most 19.
+            var b = make_slice<byte>(0L, 100L);
+            b = append(b, "runtime error: ");
+            for (long i = 0L; i < len(fmt); i++)
+            {
+                var c = fmt[i];
+                if (c != '%')
+                {
+                    b = append(b, c);
+                    continue;
+                }
+
+                i++;
+                switch (fmt[i])
+                {
+                    case 'x': 
+                        b = appendIntStr(b, e.x, e.signed);
+                        break;
+                    case 'y': 
+                        b = appendIntStr(b, int64(e.y), true);
+                        break;
+                }
+
+            }
+
+            return string(b);
+
+        }
+
         private partial interface stringer
         {
             @string String();
-        }
-
-        private static @string typestring(object x)
-        {
-            var e = efaceOf(ref x);
-            return e._type.@string();
         }
 
         // printany prints an argument passed to panic.
@@ -155,17 +285,57 @@ namespace go
                 default:
                 {
                     var v = i.type();
-                    print("(", typestring(i), ") ", i);
+                    printanycustomtype(i);
                     break;
                 }
             }
+
         }
 
-        // strings.IndexByte is implemented in runtime/asm_$goarch.s
-        // but amusingly we need go:linkname to get access to it here in the runtime.
-        //go:linkname stringsIndexByte strings.IndexByte
-        private static long stringsIndexByte(@string s, byte c)
-;
+        private static void printanycustomtype(object i)
+        {
+            var eface = efaceOf(_addr_i);
+            var typestring = eface._type.@string();
+
+
+            if (eface._type.kind == kindString) 
+                print(typestring, "(\"", new ptr<ptr<ptr<@string>>>(eface.data), "\")");
+            else if (eface._type.kind == kindBool) 
+                print(typestring, "(", new ptr<ptr<ptr<bool>>>(eface.data), ")");
+            else if (eface._type.kind == kindInt) 
+                print(typestring, "(", new ptr<ptr<ptr<long>>>(eface.data), ")");
+            else if (eface._type.kind == kindInt8) 
+                print(typestring, "(", new ptr<ptr<ptr<sbyte>>>(eface.data), ")");
+            else if (eface._type.kind == kindInt16) 
+                print(typestring, "(", new ptr<ptr<ptr<short>>>(eface.data), ")");
+            else if (eface._type.kind == kindInt32) 
+                print(typestring, "(", new ptr<ptr<ptr<int>>>(eface.data), ")");
+            else if (eface._type.kind == kindInt64) 
+                print(typestring, "(", new ptr<ptr<ptr<long>>>(eface.data), ")");
+            else if (eface._type.kind == kindUint) 
+                print(typestring, "(", new ptr<ptr<ptr<ulong>>>(eface.data), ")");
+            else if (eface._type.kind == kindUint8) 
+                print(typestring, "(", new ptr<ptr<ptr<byte>>>(eface.data), ")");
+            else if (eface._type.kind == kindUint16) 
+                print(typestring, "(", new ptr<ptr<ptr<ushort>>>(eface.data), ")");
+            else if (eface._type.kind == kindUint32) 
+                print(typestring, "(", new ptr<ptr<ptr<uint>>>(eface.data), ")");
+            else if (eface._type.kind == kindUint64) 
+                print(typestring, "(", new ptr<ptr<ptr<ulong>>>(eface.data), ")");
+            else if (eface._type.kind == kindUintptr) 
+                print(typestring, "(", new ptr<ptr<ptr<System.UIntPtr>>>(eface.data), ")");
+            else if (eface._type.kind == kindFloat32) 
+                print(typestring, "(", new ptr<ptr<ptr<float>>>(eface.data), ")");
+            else if (eface._type.kind == kindFloat64) 
+                print(typestring, "(", new ptr<ptr<ptr<double>>>(eface.data), ")");
+            else if (eface._type.kind == kindComplex64) 
+                print(typestring, new ptr<ptr<ptr<complex64>>>(eface.data));
+            else if (eface._type.kind == kindComplex128) 
+                print(typestring, new ptr<ptr<ptr<System.Numerics.Complex128>>>(eface.data));
+            else 
+                print("(", typestring, ") ", eface.data);
+            
+        }
 
         // panicwrap generates a panic for a call to a wrapped value method
         // with a nil pointer receiver.
@@ -178,29 +348,34 @@ namespace go
             // name is something like "main.(*T).F".
             // We want to extract pkg ("main"), typ ("T"), and meth ("F").
             // Do it by finding the parens.
-            var i = stringsIndexByte(name, '(');
+            var i = bytealg.IndexByteString(name, '(');
             if (i < 0L)
-            {>>MARKER:FUNCTION_stringsIndexByte_BLOCK_PREFIX<<
+            {
                 throw("panicwrap: no ( in " + name);
             }
+
             var pkg = name[..i - 1L];
             if (i + 2L >= len(name) || name[i - 1L..i + 2L] != ".(*")
             {
                 throw("panicwrap: unexpected string after package name: " + name);
             }
+
             name = name[i + 2L..];
-            i = stringsIndexByte(name, ')');
+            i = bytealg.IndexByteString(name, ')');
             if (i < 0L)
             {
                 throw("panicwrap: no ) in " + name);
             }
+
             if (i + 2L >= len(name) || name[i..i + 2L] != ").")
             {
                 throw("panicwrap: unexpected string after type name: " + name);
             }
+
             var typ = name[..i];
             var meth = name[i + 2L..];
             panic(plainError("value method " + pkg + "." + typ + "." + meth + " called using nil *" + typ + " pointer"));
+
         });
     }
 }

@@ -1,5 +1,5 @@
 // Derived from Inferno utils/6l/l.h and related files.
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/l.h
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/l.h
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2020 August 29 08:46:19 UTC
+// package objabi -- go2cs converted at 2020 October 08 03:50:07 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Go\src\cmd\internal\objabi\autotype.go
 
@@ -41,8 +41,9 @@ namespace @internal
     public static partial class objabi_package
     {
         // Auto.name
-        public static readonly long A_AUTO = 1L + iota;
-        public static readonly var A_PARAM = 0;
-        public static readonly var A_DELETED_AUTO = 1;
+        public static readonly long A_AUTO = (long)1L + iota;
+        public static readonly var A_PARAM = (var)0;
+        public static readonly var A_DELETED_AUTO = (var)1;
+
     }
 }}}

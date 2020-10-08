@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 August 29 08:26:06 UTC
+// package net -- go2cs converted at 2020 October 08 03:31:42 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\error_posix.go
 using os = go.os_package;
@@ -27,7 +27,9 @@ namespace go
                     err = os.NewSyscallError(name, err);
                 }
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
     }
 }

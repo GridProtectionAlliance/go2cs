@@ -1,6 +1,6 @@
 // Derived from Inferno utils/6l/obj.c and utils/6l/span.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/obj.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/span.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/obj.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/span.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -29,13 +29,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 August 29 10:03:15 UTC
+// package ld -- go2cs converted at 2020 October 08 04:38:13 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\data.go
+using bytes = go.bytes_package;
 using gcprog = go.cmd.@internal.gcprog_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using zlib = go.compress.zlib_package;
+using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using log = go.log_package;
 using os = go.os_package;
@@ -54,188 +58,297 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        // isRuntimeDepPkg returns whether pkg is the runtime package or its dependency
+        // isRuntimeDepPkg reports whether pkg is the runtime package or its dependency
         private static bool isRuntimeDepPkg(@string pkg)
         {
             switch (pkg)
             {
-                case "runtime": // runtime may call to sync/atomic, due to go:linkname
+                case "runtime": // for cpu features
 
-                case "sync/atomic": // runtime may call to sync/atomic, due to go:linkname
+                case "sync/atomic": // for cpu features
+
+                case "internal/bytealg": // for cpu features
+
+                case "internal/cpu": // for cpu features
                     return true;
                     break;
             }
             return strings.HasPrefix(pkg, "runtime/internal/") && !strings.HasSuffix(pkg, "_test");
+
         }
 
         // Estimate the max size needed to hold any new trampolines created for this function. This
         // is used to determine when the section can be split if it becomes too large, to ensure that
         // the trampolines are in the same section as the function that uses them.
-        private static ulong maxSizeTrampolinesPPC64(ref sym.Symbol s, bool isTramp)
-        { 
-            // If Thearch.Trampoline is nil, then trampoline support is not available on this arch.
+        private static ulong maxSizeTrampolinesPPC64(ptr<loader.Loader> _addr_ldr, loader.Sym s, bool isTramp)
+        {
+            ref loader.Loader ldr = ref _addr_ldr.val;
+ 
+            // If thearch.Trampoline is nil, then trampoline support is not available on this arch.
             // A trampoline does not need any dependent trampolines.
-            if (Thearch.Trampoline == null || isTramp)
+            if (thearch.Trampoline == null || isTramp)
             {
                 return 0L;
             }
+
             var n = uint64(0L);
-            foreach (var (ri) in s.R)
+            var relocs = ldr.Relocs(s);
+            for (long ri = 0L; ri < relocs.Count(); ri++)
             {
-                var r = ref s.R[ri];
-                if (r.Type.IsDirectJump())
+                var r = relocs.At2(ri);
+                if (r.Type().IsDirectCallOrJump())
                 {
                     n++;
                 }
+
             } 
             // Trampolines in ppc64 are 4 instructions.
+ 
+            // Trampolines in ppc64 are 4 instructions.
             return n * 16L;
+
         }
 
         // detect too-far jumps in function s, and add trampolines if necessary
         // ARM, PPC64 & PPC64LE support trampoline insertion for internal and external linking
         // On PPC64 & PPC64LE the text sections might be split but will still insert trampolines
         // where necessary.
-        private static void trampoline(ref Link ctxt, ref sym.Symbol s)
+        private static void trampoline(ptr<Link> _addr_ctxt, loader.Sym s)
         {
-            if (Thearch.Trampoline == null)
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            if (thearch.Trampoline == null)
             {
-                return; // no need or no support of trampolines on this arch
+                return ; // no need or no support of trampolines on this arch
             }
-            foreach (var (ri) in s.R)
+
+            var ldr = ctxt.loader;
+            var relocs = ldr.Relocs(s);
+            for (long ri = 0L; ri < relocs.Count(); ri++)
             {
-                var r = ref s.R[ri];
-                if (!r.Type.IsDirectJump())
+                var r = relocs.At2(ri);
+                if (!r.Type().IsDirectCallOrJump())
                 {
                     continue;
                 }
-                if (Symaddr(r.Sym) == 0L && r.Sym.Type != sym.SDYNIMPORT)
+
+                var rs = r.Sym();
+                if (!ldr.AttrReachable(rs) || ldr.SymType(rs) == sym.Sxxx)
                 {
-                    if (r.Sym.File != s.File)
+                    continue; // something is wrong. skip it here and we'll emit a better error later
+                }
+
+                rs = ldr.ResolveABIAlias(rs);
+                if (ldr.SymValue(rs) == 0L && (ldr.SymType(rs) != sym.SDYNIMPORT && ldr.SymType(rs) != sym.SUNDEFEXT))
+                {
+                    if (ldr.SymPkg(rs) != ldr.SymPkg(s))
                     {
-                        if (!isRuntimeDepPkg(s.File) || !isRuntimeDepPkg(r.Sym.File))
+                        if (!isRuntimeDepPkg(ldr.SymPkg(s)) || !isRuntimeDepPkg(ldr.SymPkg(rs)))
                         {
-                            Errorf(s, "unresolved inter-package jump to %s(%s)", r.Sym, r.Sym.File);
+                            ctxt.Errorf(s, "unresolved inter-package jump to %s(%s) from %s", ldr.SymName(rs), ldr.SymPkg(rs), ldr.SymPkg(s));
                         } 
                         // runtime and its dependent packages may call to each other.
                         // they are fine, as they will be laid down together.
                     }
+
                     continue;
+
                 }
-                Thearch.Trampoline(ctxt, r, s);
+
+                thearch.Trampoline(ctxt, ldr, ri, rs, s);
+
             }
+
+
+
         }
 
-        // resolve relocations in s.
-        private static void relocsym(ref Link ctxt, ref sym.Symbol s)
+        // foldSubSymbolOffset computes the offset of symbol s to its top-level outer
+        // symbol. Returns the top-level symbol and the offset.
+        // This is used in generating external relocations.
+        private static (loader.Sym, long) foldSubSymbolOffset(ptr<loader.Loader> _addr_ldr, loader.Sym s)
         {
-            for (var ri = int32(0L); ri < int32(len(s.R)); ri++)
+            loader.Sym _p0 = default;
+            long _p0 = default;
+            ref loader.Loader ldr = ref _addr_ldr.val;
+
+            var outer = ldr.OuterSym(s);
+            var off = int64(0L);
+            while (outer != 0L)
             {
-                var r = ref s.R[ri];
-                if (r.Done)
-                { 
-                    // Relocation already processed by an earlier phase.
-                    continue;
-                }
-                r.Done = true;
-                var off = r.Off;
-                var siz = int32(r.Siz);
-                if (off < 0L || off + siz > int32(len(s.P)))
+                off += ldr.SymValue(s) - ldr.SymValue(outer);
+                s = outer;
+                outer = ldr.OuterSym(s);
+            }
+
+            return (s, off);
+
+        }
+
+        // relocsym resolve relocations in "s", updating the symbol's content
+        // in "P".
+        // The main loop walks through the list of relocations attached to "s"
+        // and resolves them where applicable. Relocations are often
+        // architecture-specific, requiring calls into the 'archreloc' and/or
+        // 'archrelocvariant' functions for the architecture. When external
+        // linking is in effect, it may not be  possible to completely resolve
+        // the address/offset for a symbol, in which case the goal is to lay
+        // the groundwork for turning a given relocation into an external reloc
+        // (to be applied by the external linker). For more on how relocations
+        // work in general, see
+        //
+        //  "Linkers and Loaders", by John R. Levine (Morgan Kaufmann, 1999), ch. 7
+        //
+        // This is a performance-critical function for the linker; be careful
+        // to avoid introducing unnecessary allocations in the main loop.
+        private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, slice<byte> P) => func((_, panic, __) =>
+        {
+            ref relocSymState st = ref _addr_st.val;
+
+            var ldr = st.ldr;
+            var relocs = ldr.Relocs(s);
+            if (relocs.Count() == 0L)
+            {
+                return ;
+            }
+
+            var target = st.target;
+            var syms = st.syms;
+            slice<loader.ExtReloc> extRelocs = default;
+            if (target.IsExternal())
+            { 
+                // preallocate a slice conservatively assuming that all
+                // relocs will require an external reloc
+                extRelocs = st.preallocExtRelocSlice(relocs.Count());
+
+            }
+
+            for (long ri = 0L; ri < relocs.Count(); ri++)
+            {
+                var r = relocs.At2(ri);
+                var off = r.Off();
+                var siz = int32(r.Siz());
+                var rs = r.Sym();
+                rs = ldr.ResolveABIAlias(rs);
+                var rt = r.Type();
+                if (off < 0L || off + siz > int32(len(P)))
                 {
                     @string rname = "";
-                    if (r.Sym != null)
+                    if (rs != 0L)
                     {
-                        rname = r.Sym.Name;
+                        rname = ldr.SymName(rs);
                     }
-                    Errorf(s, "invalid relocation %s: %d+%d not in [%d,%d)", rname, off, siz, 0L, len(s.P));
+
+                    st.err.Errorf(s, "invalid relocation %s: %d+%d not in [%d,%d)", rname, off, siz, 0L, len(P));
                     continue;
+
                 }
-                if (r.Sym != null && ((r.Sym.Type == 0L && !r.Sym.Attr.VisibilityHidden()) || r.Sym.Type == sym.SXREF))
+
+                sym.SymKind rst = default;
+                if (rs != 0L)
+                {
+                    rst = ldr.SymType(rs);
+                }
+
+                if (rs != 0L && ((rst == sym.Sxxx && !ldr.AttrVisibilityHidden(rs)) || rst == sym.SXREF))
                 { 
                     // When putting the runtime but not main into a shared library
                     // these symbols are undefined and that's OK.
-                    if (ctxt.BuildMode == BuildModeShared)
+                    if (target.IsShared() || target.IsPlugin())
                     {
-                        if (r.Sym.Name == "main.main" || r.Sym.Name == "main.init")
+                        if (ldr.SymName(rs) == "main.main" || (!target.IsPlugin() && ldr.SymName(rs) == "main..inittask"))
                         {
-                            r.Sym.Type = sym.SDYNIMPORT;
+                            var sb = ldr.MakeSymbolUpdater(rs);
+                            sb.SetType(sym.SDYNIMPORT);
                         }
-                        else if (strings.HasPrefix(r.Sym.Name, "go.info."))
+                        else if (strings.HasPrefix(ldr.SymName(rs), "go.info."))
                         { 
                             // Skip go.info symbols. They are only needed to communicate
                             // DWARF info between the compiler and linker.
                             continue;
+
                         }
+
                     }
                     else
                     {
-                        Errorf(s, "relocation target %s not defined", r.Sym.Name);
+                        st.err.errorUnresolved(ldr, s, rs);
                         continue;
                     }
+
                 }
-                if (r.Type >= 256L)
+
+                if (rt >= objabi.ElfRelocOffset)
                 {
                     continue;
                 }
-                if (r.Siz == 0L)
+
+                if (siz == 0L)
                 { // informational relocation - no work to do
                     continue;
-                }
-                if (r.Type == objabi.R_DWARFFILEREF)
-                { 
-                    // These should have been processed previously during
-                    // line table writing.
-                    Errorf(s, "orphan R_DWARFFILEREF reloc to %v", r.Sym.Name);
-                    continue;
+
                 } 
 
                 // We need to be able to reference dynimport symbols when linking against
-                // shared libraries, and Solaris needs it always
-                if (ctxt.HeadType != objabi.Hsolaris && r.Sym != null && r.Sym.Type == sym.SDYNIMPORT && !ctxt.DynlinkingGo() && !r.Sym.Attr.SubSymbol())
+                // shared libraries, and Solaris, Darwin and AIX need it always
+                if (!target.IsSolaris() && !target.IsDarwin() && !target.IsAIX() && rs != 0L && rst == sym.SDYNIMPORT && !target.IsDynlinkingGo() && !ldr.AttrSubSymbol(rs))
                 {
-                    if (!(ctxt.Arch.Family == sys.PPC64 && ctxt.LinkMode == LinkExternal && r.Sym.Name == ".TOC."))
+                    if (!(target.IsPPC64() && target.IsExternal() && ldr.SymName(rs) == ".TOC."))
                     {
-                        Errorf(s, "unhandled relocation for %s (type %d (%s) rtype %d (%s))", r.Sym.Name, r.Sym.Type, r.Sym.Type, r.Type, sym.RelocName(ctxt.Arch, r.Type));
+                        st.err.Errorf(s, "unhandled relocation for %s (type %d (%s) rtype %d (%s))", ldr.SymName(rs), rst, rst, rt, sym.RelocName(target.Arch, rt));
                     }
+
                 }
-                if (r.Sym != null && r.Sym.Type != sym.STLSBSS && r.Type != objabi.R_WEAKADDROFF && !r.Sym.Attr.Reachable())
+
+                if (rs != 0L && rst != sym.STLSBSS && rt != objabi.R_WEAKADDROFF && rt != objabi.R_METHODOFF && !ldr.AttrReachable(rs))
                 {
-                    Errorf(s, "unreachable sym in relocation: %s", r.Sym.Name);
+                    st.err.Errorf(s, "unreachable sym in relocation: %s", ldr.SymName(rs));
+                }
+
+                loader.ExtReloc rr = default;
+                var needExtReloc = false; // will set to true below in case it is needed
+                if (target.IsExternal())
+                {
+                    rr.Idx = ri;
                 } 
 
                 // TODO(mundaym): remove this special case - see issue 14218.
-                if (ctxt.Arch.Family == sys.S390X)
-                {
-
-                    if (r.Type == objabi.R_PCRELDBL) 
-                        r.Type = objabi.R_PCREL;
-                        r.Variant = sym.RV_390_DBL;
-                    else if (r.Type == objabi.R_CALL) 
-                        r.Variant = sym.RV_390_DBL;
-                                    }
+                //if target.IsS390X() {
+                //    switch r.Type {
+                //    case objabi.R_PCRELDBL:
+                //        r.InitExt()
+                //        r.Type = objabi.R_PCREL
+                //        r.Variant = sym.RV_390_DBL
+                //    case objabi.R_CALL:
+                //        r.InitExt()
+                //        r.Variant = sym.RV_390_DBL
+                //    }
+                //}
                 long o = default;
 
-                if (r.Type == objabi.R_TLS_LE)
+                if (rt == objabi.R_TLS_LE)
                 {
-                    var isAndroidX86 = objabi.GOOS == "android" && (ctxt.Arch.InFamily(sys.AMD64, sys.I386));
-
-                    if (ctxt.LinkMode == LinkExternal && ctxt.IsELF && !isAndroidX86)
+                    if (target.IsExternal() && target.IsElf())
                     {
-                        r.Done = false;
-                        if (r.Sym == null)
+                        needExtReloc = true;
+                        rr.Xsym = rs;
+                        if (rr.Xsym == 0L)
                         {
-                            r.Sym = ctxt.Tlsg;
+                            rr.Xsym = syms.Tlsg2;
                         }
-                        r.Xsym = r.Sym;
-                        r.Xadd = r.Add;
+
+                        rr.Xadd = r.Add();
                         o = 0L;
-                        if (ctxt.Arch.Family != sys.AMD64)
+                        if (!target.IsAMD64())
                         {
-                            o = r.Add;
+                            o = r.Add();
                         }
+
                         break;
+
                     }
-                    if (ctxt.IsELF && ctxt.Arch.Family == sys.ARM)
+
+                    if (target.IsElf() && target.IsARM())
                     { 
                         // On ELF ARM, the thread pointer is 8 bytes before
                         // the start of the thread-local data block, so add 8
@@ -244,544 +357,822 @@ namespace @internal
                         // ELF on ARM (or maybe Glibc on ARM); it is not
                         // related to the fact that our own TLS storage happens
                         // to take up 8 bytes.
-                        o = 8L + r.Sym.Value;
+                        o = 8L + ldr.SymValue(rs);
+
                     }
-                    else if (ctxt.IsELF || ctxt.HeadType == objabi.Hplan9 || ctxt.HeadType == objabi.Hdarwin || isAndroidX86)
+                    else if (target.IsElf() || target.IsPlan9() || target.IsDarwin())
                     {
-                        o = int64(ctxt.Tlsoffset) + r.Add;
+                        o = int64(syms.Tlsoffset) + r.Add();
                     }
-                    else if (ctxt.HeadType == objabi.Hwindows)
+                    else if (target.IsWindows())
                     {
-                        o = r.Add;
+                        o = r.Add();
                     }
                     else
                     {
-                        log.Fatalf("unexpected R_TLS_LE relocation for %v", ctxt.HeadType);
+                        log.Fatalf("unexpected R_TLS_LE relocation for %v", target.HeadType);
                     }
+
                     goto __switch_break0;
                 }
-                if (r.Type == objabi.R_TLS_IE)
+                if (rt == objabi.R_TLS_IE)
                 {
-                    isAndroidX86 = objabi.GOOS == "android" && (ctxt.Arch.InFamily(sys.AMD64, sys.I386));
-
-                    if (ctxt.LinkMode == LinkExternal && ctxt.IsELF && !isAndroidX86)
+                    if (target.IsExternal() && target.IsElf())
                     {
-                        r.Done = false;
-                        if (r.Sym == null)
+                        needExtReloc = true;
+                        rr.Xsym = rs;
+                        if (rr.Xsym == 0L)
                         {
-                            r.Sym = ctxt.Tlsg;
+                            rr.Xsym = syms.Tlsg2;
                         }
-                        r.Xsym = r.Sym;
-                        r.Xadd = r.Add;
+
+                        rr.Xadd = r.Add();
                         o = 0L;
-                        if (ctxt.Arch.Family != sys.AMD64)
+                        if (!target.IsAMD64())
                         {
-                            o = r.Add;
+                            o = r.Add();
                         }
+
                         break;
+
                     }
-                    if (ctxt.BuildMode == BuildModePIE && ctxt.IsELF)
+
+                    if (target.IsPIE() && target.IsElf())
                     { 
                         // We are linking the final executable, so we
                         // can optimize any TLS IE relocation to LE.
-                        if (Thearch.TLSIEtoLE == null)
+                        if (thearch.TLSIEtoLE == null)
                         {
-                            log.Fatalf("internal linking of TLS IE not supported on %v", ctxt.Arch.Family);
+                            log.Fatalf("internal linking of TLS IE not supported on %v", target.Arch.Family);
                         }
-                        Thearch.TLSIEtoLE(s, int(off), int(r.Siz));
-                        o = int64(ctxt.Tlsoffset); 
-                        // TODO: o += r.Add when ctxt.Arch.Family != sys.AMD64?
-                        // Why do we treat r.Add differently on AMD64?
-                        // Is the external linker using Xadd at all?
+
+                        thearch.TLSIEtoLE(P, int(off), int(siz));
+                        o = int64(syms.Tlsoffset);
+
                     }
                     else
                     {
-                        log.Fatalf("cannot handle R_TLS_IE (sym %s) when linking internally", s.Name);
+                        log.Fatalf("cannot handle R_TLS_IE (sym %s) when linking internally", ldr.SymName(s));
                     }
+
                     goto __switch_break0;
                 }
-                if (r.Type == objabi.R_ADDR)
+                if (rt == objabi.R_ADDR)
                 {
-                    if (ctxt.LinkMode == LinkExternal && r.Sym.Type != sym.SCONST)
+                    if (target.IsExternal() && rst != sym.SCONST)
                     {
-                        r.Done = false; 
+                        needExtReloc = true; 
 
                         // set up addend for eventual relocation via outer symbol.
-                        var rs = r.Sym;
-
-                        r.Xadd = r.Add;
-                        while (rs.Outer != null)
+                        rs = rs;
+                        var (rs, off) = foldSubSymbolOffset(_addr_ldr, rs);
+                        rr.Xadd = r.Add() + off;
+                        rst = ldr.SymType(rs);
+                        if (rst != sym.SHOSTOBJ && rst != sym.SDYNIMPORT && rst != sym.SUNDEFEXT && ldr.SymSect(rs) == null)
                         {
-                            r.Xadd += Symaddr(rs) - Symaddr(rs.Outer);
-                            rs = rs.Outer;
+                            st.err.Errorf(s, "missing section for relocation target %s", ldr.SymName(rs));
                         }
 
+                        rr.Xsym = rs;
 
-                        if (rs.Type != sym.SHOSTOBJ && rs.Type != sym.SDYNIMPORT && rs.Sect == null)
+                        o = rr.Xadd;
+                        if (target.IsElf())
                         {
-                            Errorf(s, "missing section for relocation target %s", rs.Name);
-                        }
-                        r.Xsym = rs;
-
-                        o = r.Xadd;
-                        if (ctxt.IsELF)
-                        {
-                            if (ctxt.Arch.Family == sys.AMD64)
+                            if (target.IsAMD64())
                             {
                                 o = 0L;
                             }
+
                         }
-                        else if (ctxt.HeadType == objabi.Hdarwin)
-                        { 
-                            // ld64 for arm64 has a bug where if the address pointed to by o exists in the
-                            // symbol table (dynid >= 0), or is inside a symbol that exists in the symbol
-                            // table, then it will add o twice into the relocated value.
-                            // The workaround is that on arm64 don't ever add symaddr to o and always use
-                            // extern relocation by requiring rs->dynid >= 0.
-                            if (rs.Type != sym.SHOSTOBJ)
+                        else if (target.IsDarwin())
+                        {
+                            if (ldr.SymType(rs) != sym.SHOSTOBJ)
                             {
-                                if (ctxt.Arch.Family == sys.ARM64 && rs.Dynid < 0L)
-                                {
-                                    Errorf(s, "R_ADDR reloc to %s+%d is not supported on darwin/arm64", rs.Name, o);
-                                }
-                                if (ctxt.Arch.Family != sys.ARM64)
-                                {
-                                    o += Symaddr(rs);
-                                }
+                                o += ldr.SymValue(rs);
                             }
+
                         }
-                        else if (ctxt.HeadType == objabi.Hwindows)
+                        else if (target.IsWindows())
                         { 
                             // nothing to do
                         }
+                        else if (target.IsAIX())
+                        {
+                            o = ldr.SymValue(rs) + r.Add();
+                        }
                         else
                         {
-                            Errorf(s, "unhandled pcrel relocation to %s on %v", rs.Name, ctxt.HeadType);
+                            st.err.Errorf(s, "unhandled pcrel relocation to %s on %v", ldr.SymName(rs), target.HeadType);
                         }
+
                         break;
+
+                    } 
+
+                    // On AIX, a second relocation must be done by the loader,
+                    // as section addresses can change once loaded.
+                    // The "default" symbol address is still needed by the loader so
+                    // the current relocation can't be skipped.
+                    if (target.IsAIX() && rst != sym.SDYNIMPORT)
+                    { 
+                        // It's not possible to make a loader relocation in a
+                        // symbol which is not inside .data section.
+                        // FIXME: It should be forbidden to have R_ADDR from a
+                        // symbol which isn't in .data. However, as .text has the
+                        // same address once loaded, this is possible.
+                        if (ldr.SymSect(s).Seg == _addr_Segdata)
+                        {
+                            panic("not implemented"); 
+                            //Xcoffadddynrel(target, ldr, err, s, &r) // XXX
+                        }
+
                     }
-                    o = Symaddr(r.Sym) + r.Add; 
+
+                    o = ldr.SymValue(rs) + r.Add(); 
 
                     // On amd64, 4-byte offsets will be sign-extended, so it is impossible to
                     // access more than 2GB of static data; fail at link time is better than
                     // fail at runtime. See https://golang.org/issue/7980.
                     // Instead of special casing only amd64, we treat this as an error on all
                     // 64-bit architectures so as to be future-proof.
-                    if (int32(o) < 0L && ctxt.Arch.PtrSize > 4L && siz == 4L)
+                    if (int32(o) < 0L && target.Arch.PtrSize > 4L && siz == 4L)
                     {
-                        Errorf(s, "non-pc-relative relocation address for %s is too big: %#x (%#x + %#x)", r.Sym.Name, uint64(o), Symaddr(r.Sym), r.Add);
+                        st.err.Errorf(s, "non-pc-relative relocation address for %s is too big: %#x (%#x + %#x)", ldr.SymName(rs), uint64(o), ldr.SymValue(rs), r.Add());
                         errorexit();
                     }
+
                     goto __switch_break0;
                 }
-                if (r.Type == objabi.R_DWARFSECREF)
+                if (rt == objabi.R_DWARFSECREF)
                 {
-                    if (r.Sym.Sect == null)
+                    if (ldr.SymSect(rs) == null)
                     {
-                        Errorf(s, "missing DWARF section for relocation target %s", r.Sym.Name);
+                        st.err.Errorf(s, "missing DWARF section for relocation target %s", ldr.SymName(rs));
                     }
-                    if (ctxt.LinkMode == LinkExternal)
+
+                    if (target.IsExternal())
                     {
-                        r.Done = false; 
+                        needExtReloc = true; 
 
                         // On most platforms, the external linker needs to adjust DWARF references
                         // as it combines DWARF sections. However, on Darwin, dsymutil does the
                         // DWARF linking, and it understands how to follow section offsets.
                         // Leaving in the relocation records confuses it (see
                         // https://golang.org/issue/22068) so drop them for Darwin.
-                        if (ctxt.HeadType == objabi.Hdarwin)
+                        if (target.IsDarwin())
                         {
-                            r.Done = true;
-                        } 
-
-                        // PE code emits IMAGE_REL_I386_SECREL and IMAGE_REL_AMD64_SECREL
-                        // for R_DWARFSECREF relocations, while R_ADDR is replaced with
-                        // IMAGE_REL_I386_DIR32, IMAGE_REL_AMD64_ADDR64 and IMAGE_REL_AMD64_ADDR32.
-                        // Do not replace R_DWARFSECREF with R_ADDR for windows -
-                        // let PE code emit correct relocations.
-                        if (ctxt.HeadType != objabi.Hwindows)
-                        {
-                            r.Type = objabi.R_ADDR;
+                            needExtReloc = false;
                         }
-                        r.Xsym = ctxt.Syms.ROLookup(r.Sym.Sect.Name, 0L);
-                        r.Xadd = r.Add + Symaddr(r.Sym) - int64(r.Sym.Sect.Vaddr);
 
-                        o = r.Xadd;
-                        if (ctxt.IsELF && ctxt.Arch.Family == sys.AMD64)
+                        rr.Xsym = loader.Sym(ldr.SymSect(rs).Sym2);
+                        rr.Xadd = r.Add() + ldr.SymValue(rs) - int64(ldr.SymSect(rs).Vaddr);
+
+                        o = rr.Xadd;
+                        if (target.IsElf() && target.IsAMD64())
                         {
                             o = 0L;
                         }
+
                         break;
+
                     }
-                    o = Symaddr(r.Sym) + r.Add - int64(r.Sym.Sect.Vaddr);
+
+                    o = ldr.SymValue(rs) + r.Add() - int64(ldr.SymSect(rs).Vaddr);
                     goto __switch_break0;
                 }
-                if (r.Type == objabi.R_WEAKADDROFF)
+                if (rt == objabi.R_WEAKADDROFF || rt == objabi.R_METHODOFF)
                 {
-                    if (!r.Sym.Attr.Reachable())
+                    if (!ldr.AttrReachable(rs))
                     {
                         continue;
                     }
+
                     fallthrough = true;
                 }
-                if (fallthrough || r.Type == objabi.R_ADDROFF) 
+                if (fallthrough || rt == objabi.R_ADDROFF) 
                 {
                     // The method offset tables using this relocation expect the offset to be relative
                     // to the start of the first text section, even if there are multiple.
-
-                    if (r.Sym.Sect.Name == ".text")
+                    if (ldr.SymSect(rs).Name == ".text")
                     {
-                        o = Symaddr(r.Sym) - int64(Segtext.Sections[0L].Vaddr) + r.Add;
+                        o = ldr.SymValue(rs) - int64(Segtext.Sections[0L].Vaddr) + r.Add();
                     }
                     else
                     {
-                        o = Symaddr(r.Sym) - int64(r.Sym.Sect.Vaddr) + r.Add;
+                        o = ldr.SymValue(rs) - int64(ldr.SymSect(rs).Vaddr) + r.Add();
                     }
+
                     goto __switch_break0;
                 }
-                if (r.Type == objabi.R_ADDRCUOFF) 
+                if (rt == objabi.R_ADDRCUOFF) 
                 {
                     // debug_range and debug_loc elements use this relocation type to get an
                     // offset from the start of the compile unit.
-                    o = Symaddr(r.Sym) + r.Add - Symaddr(r.Sym.Lib.Textp[0L]); 
+                    o = ldr.SymValue(rs) + r.Add() - ldr.SymValue(loader.Sym(ldr.SymUnit(rs).Textp2[0L])); 
 
-                    // r->sym can be null when CALL $(constant) is transformed from absolute PC to relative PC call.
+                    // r.Sym() can be 0 when CALL $(constant) is transformed from absolute PC to relative PC call.
                     goto __switch_break0;
                 }
-                if (r.Type == objabi.R_GOTPCREL)
+                if (rt == objabi.R_GOTPCREL)
                 {
-                    if (ctxt.DynlinkingGo() && ctxt.HeadType == objabi.Hdarwin && r.Sym != null && r.Sym.Type != sym.SCONST)
+                    if (target.IsDynlinkingGo() && target.IsDarwin() && rs != 0L && rst != sym.SCONST)
                     {
-                        r.Done = false;
-                        r.Xadd = r.Add;
-                        r.Xadd -= int64(r.Siz); // relative to address after the relocated chunk
-                        r.Xsym = r.Sym;
+                        needExtReloc = true;
+                        rr.Xadd = r.Add();
+                        rr.Xadd -= int64(siz); // relative to address after the relocated chunk
+                        rr.Xsym = rs;
 
-                        o = r.Xadd;
-                        o += int64(r.Siz);
+                        o = rr.Xadd;
+                        o += int64(siz);
                         break;
+
                     }
+
                     fallthrough = true;
                 }
-                if (fallthrough || r.Type == objabi.R_CALL || r.Type == objabi.R_PCREL)
+                if (fallthrough || rt == objabi.R_CALL || rt == objabi.R_PCREL)
                 {
-                    if (ctxt.LinkMode == LinkExternal && r.Sym != null && r.Sym.Type != sym.SCONST && (r.Sym.Sect != s.Sect || r.Type == objabi.R_GOTPCREL))
+                    if (target.IsExternal() && rs != 0L && rst == sym.SUNDEFEXT)
+                    { 
+                        // pass through to the external linker.
+                        needExtReloc = true;
+                        rr.Xadd = 0L;
+                        if (target.IsElf())
+                        {
+                            rr.Xadd -= int64(siz);
+                        }
+
+                        rr.Xsym = rs;
+                        o = 0L;
+                        break;
+
+                    }
+
+                    if (target.IsExternal() && rs != 0L && rst != sym.SCONST && (ldr.SymSect(rs) != ldr.SymSect(s) || rt == objabi.R_GOTPCREL))
                     {
-                        r.Done = false; 
+                        needExtReloc = true; 
 
                         // set up addend for eventual relocation via outer symbol.
-                        rs = r.Sym;
-
-                        r.Xadd = r.Add;
-                        while (rs.Outer != null)
+                        rs = rs;
+                        (rs, off) = foldSubSymbolOffset(_addr_ldr, rs);
+                        rr.Xadd = r.Add() + off;
+                        rr.Xadd -= int64(siz); // relative to address after the relocated chunk
+                        rst = ldr.SymType(rs);
+                        if (rst != sym.SHOSTOBJ && rst != sym.SDYNIMPORT && ldr.SymSect(rs) == null)
                         {
-                            r.Xadd += Symaddr(rs) - Symaddr(rs.Outer);
-                            rs = rs.Outer;
+                            st.err.Errorf(s, "missing section for relocation target %s", ldr.SymName(rs));
                         }
 
+                        rr.Xsym = rs;
 
-                        r.Xadd -= int64(r.Siz); // relative to address after the relocated chunk
-                        if (rs.Type != sym.SHOSTOBJ && rs.Type != sym.SDYNIMPORT && rs.Sect == null)
+                        o = rr.Xadd;
+                        if (target.IsElf())
                         {
-                            Errorf(s, "missing section for relocation target %s", rs.Name);
-                        }
-                        r.Xsym = rs;
-
-                        o = r.Xadd;
-                        if (ctxt.IsELF)
-                        {
-                            if (ctxt.Arch.Family == sys.AMD64)
+                            if (target.IsAMD64())
                             {
                                 o = 0L;
                             }
+
                         }
-                        else if (ctxt.HeadType == objabi.Hdarwin)
+                        else if (target.IsDarwin())
                         {
-                            if (r.Type == objabi.R_CALL)
+                            if (rt == objabi.R_CALL)
                             {
-                                if (rs.Type != sym.SHOSTOBJ)
+                                if (target.IsExternal() && rst == sym.SDYNIMPORT)
                                 {
-                                    o += int64(uint64(Symaddr(rs)) - rs.Sect.Vaddr);
+                                    if (target.IsAMD64())
+                                    { 
+                                        // AMD64 dynamic relocations are relative to the end of the relocation.
+                                        o += int64(siz);
+
+                                    }
+
                                 }
-                                o -= int64(r.Off); // relative to section offset, not symbol
-                            }
-                            else if (ctxt.Arch.Family == sys.ARM)
-                            { 
-                                // see ../arm/asm.go:/machoreloc1
-                                o += Symaddr(rs) - int64(s.Value) - int64(r.Off);
+                                else
+                                {
+                                    if (rst != sym.SHOSTOBJ)
+                                    {
+                                        o += int64(uint64(ldr.SymValue(rs)) - ldr.SymSect(rs).Vaddr);
+                                    }
+
+                                    o -= int64(off); // relative to section offset, not symbol
+                                }
+
                             }
                             else
                             {
-                                o += int64(r.Siz);
+                                o += int64(siz);
                             }
+
                         }
-                        else if (ctxt.HeadType == objabi.Hwindows && ctxt.Arch.Family == sys.AMD64)
+                        else if (target.IsWindows() && target.IsAMD64())
                         { // only amd64 needs PCREL
                             // PE/COFF's PC32 relocation uses the address after the relocated
                             // bytes as the base. Compensate by skewing the addend.
-                            o += int64(r.Siz);
+                            o += int64(siz);
+
                         }
                         else
                         {
-                            Errorf(s, "unhandled pcrel relocation to %s on %v", rs.Name, ctxt.HeadType);
+                            st.err.Errorf(s, "unhandled pcrel relocation to %s on %v", ldr.SymName(rs), target.HeadType);
                         }
+
                         break;
+
                     }
+
                     o = 0L;
-                    if (r.Sym != null)
+                    if (rs != 0L)
                     {
-                        o += Symaddr(r.Sym);
+                        o = ldr.SymValue(rs);
                     }
-                    o += r.Add - (s.Value + int64(r.Off) + int64(r.Siz));
+
+                    o += r.Add() - (ldr.SymValue(s) + int64(off) + int64(siz));
                     goto __switch_break0;
                 }
-                if (r.Type == objabi.R_SIZE)
+                if (rt == objabi.R_SIZE)
                 {
-                    o = r.Sym.Size + r.Add;
+                    o = ldr.SymSize(rs) + r.Add();
+                    goto __switch_break0;
+                }
+                if (rt == objabi.R_XCOFFREF)
+                {
+                    if (!target.IsAIX())
+                    {
+                        st.err.Errorf(s, "find XCOFF R_REF on non-XCOFF files");
+                    }
+
+                    if (!target.IsExternal())
+                    {
+                        st.err.Errorf(s, "find XCOFF R_REF with internal linking");
+                    }
+
+                    needExtReloc = true;
+                    rr.Xsym = rs;
+                    rr.Xadd = r.Add(); 
+
+                    // This isn't a real relocation so it must not update
+                    // its offset value.
+                    continue;
+                    goto __switch_break0;
+                }
+                if (rt == objabi.R_DWARFFILEREF) 
+                {
+                    // We don't renumber files in dwarf.go:writelines anymore.
+                    continue;
+                    goto __switch_break0;
+                }
+                if (rt == objabi.R_CONST)
+                {
+                    o = r.Add();
+                    goto __switch_break0;
+                }
+                if (rt == objabi.R_GOTOFF)
+                {
+                    o = ldr.SymValue(rs) + r.Add() - ldr.SymValue(syms.GOT2);
                     goto __switch_break0;
                 }
                 // default: 
                     switch (siz)
                     {
                         case 1L: 
-                            o = int64(s.P[off]);
+                            o = int64(P[off]);
                             break;
                         case 2L: 
-                            o = int64(ctxt.Arch.ByteOrder.Uint16(s.P[off..]));
+                            o = int64(target.Arch.ByteOrder.Uint16(P[off..]));
                             break;
                         case 4L: 
-                            o = int64(ctxt.Arch.ByteOrder.Uint32(s.P[off..]));
+                            o = int64(target.Arch.ByteOrder.Uint32(P[off..]));
                             break;
                         case 8L: 
-                            o = int64(ctxt.Arch.ByteOrder.Uint64(s.P[off..]));
+                            o = int64(target.Arch.ByteOrder.Uint64(P[off..]));
                             break;
                         default: 
-                            Errorf(s, "bad reloc size %#x for %s", uint32(siz), r.Sym.Name);
+                            st.err.Errorf(s, "bad reloc size %#x for %s", uint32(siz), ldr.SymName(rs));
                             break;
                     }
-                    if (!Thearch.Archreloc(ctxt, r, s, ref o))
-                    {
-                        Errorf(s, "unknown reloc to %v: %d (%s)", r.Sym.Name, r.Type, sym.RelocName(ctxt.Arch, r.Type));
+                    ptr<loader.ExtReloc> rp;
+                    if (target.IsExternal())
+                    { 
+                        // Don't pass &rr directly to Archreloc2, which will escape rr
+                        // even if this case is not taken. Instead, as Archreloc2 will
+                        // likely return true, we speculatively add rr to extRelocs
+                        // and use that space to pass to Archreloc2.
+                        extRelocs = append(extRelocs, rr);
+                        rp = _addr_extRelocs[len(extRelocs) - 1L];
+
                     }
 
-                __switch_break0:;
+                    var (out, needExtReloc1, ok) = thearch.Archreloc2(target, ldr, syms, r, rp, s, o);
+                    if (target.IsExternal() && !needExtReloc1)
+                    { 
+                        // Speculation failed. Undo the append.
+                        extRelocs = extRelocs[..len(extRelocs) - 1L];
 
-                if (r.Variant != sym.RV_NONE)
-                {
-                    o = Thearch.Archrelocvariant(ctxt, r, s, o);
-                }
-                if (false)
-                {
-                    @string nam = "<nil>";
-                    if (r.Sym != null)
-                    {
-                        nam = r.Sym.Name;
                     }
-                    fmt.Printf("relocate %s %#x (%#x+%#x, size %d) => %s %#x +%#x [type %d (%s)/%d, %x]\n", s.Name, s.Value + int64(off), s.Value, r.Off, r.Siz, nam, Symaddr(r.Sym), r.Add, r.Type, sym.RelocName(ctxt.Arch, r.Type), r.Variant, o);
-                }
+
+                    needExtReloc = false; // already appended
+                    if (ok)
+                    {
+                        o = out;
+                    }
+                    else
+                    {
+                        st.err.Errorf(s, "unknown reloc to %v: %d (%s)", ldr.SymName(rs), rt, sym.RelocName(target.Arch, rt));
+                    }
+
+
+                __switch_break0:; 
+
+                //if target.IsPPC64() || target.IsS390X() {
+                //    r.InitExt()
+                //    if r.Variant != sym.RV_NONE {
+                //        o = thearch.Archrelocvariant(ldr, target, syms, &r, s, o)
+                //    }
+                //}
+
                 switch (siz)
                 {
                     case 1L: 
-                        s.P[off] = byte(int8(o));
+                        P[off] = byte(int8(o));
                         break;
                     case 2L: 
                         if (o != int64(int16(o)))
                         {
-                            Errorf(s, "relocation address for %s is too big: %#x", r.Sym.Name, o);
+                            st.err.Errorf(s, "relocation address for %s is too big: %#x", ldr.SymName(rs), o);
                         }
-                        var i16 = int16(o);
-                        ctxt.Arch.ByteOrder.PutUint16(s.P[off..], uint16(i16));
+
+                        target.Arch.ByteOrder.PutUint16(P[off..], uint16(o));
                         break;
                     case 4L: 
-                        if (r.Type == objabi.R_PCREL || r.Type == objabi.R_CALL)
+                        if (rt == objabi.R_PCREL || rt == objabi.R_CALL)
                         {
                             if (o != int64(int32(o)))
                             {
-                                Errorf(s, "pc-relative relocation address for %s is too big: %#x", r.Sym.Name, o);
+                                st.err.Errorf(s, "pc-relative relocation address for %s is too big: %#x", ldr.SymName(rs), o);
                             }
+
                         }
                         else
                         {
                             if (o != int64(int32(o)) && o != int64(uint32(o)))
                             {
-                                Errorf(s, "non-pc-relative relocation address for %s is too big: %#x", r.Sym.Name, uint64(o));
+                                st.err.Errorf(s, "non-pc-relative relocation address for %s is too big: %#x", ldr.SymName(rs), uint64(o));
                             }
+
                         }
-                        var fl = int32(o);
-                        ctxt.Arch.ByteOrder.PutUint32(s.P[off..], uint32(fl));
+
+                        target.Arch.ByteOrder.PutUint32(P[off..], uint32(o));
                         break;
                     case 8L: 
-                        ctxt.Arch.ByteOrder.PutUint64(s.P[off..], uint64(o));
+                        target.Arch.ByteOrder.PutUint64(P[off..], uint64(o));
                         break;
                     default: 
-                        Errorf(s, "bad reloc size %#x for %s", uint32(siz), r.Sym.Name);
+                        st.err.Errorf(s, "bad reloc size %#x for %s", uint32(siz), ldr.SymName(rs));
                         break;
                 }
+
+                if (needExtReloc)
+                {
+                    extRelocs = append(extRelocs, rr);
+                }
+
             }
+
+            if (len(extRelocs) != 0L)
+            {
+                st.finalizeExtRelocSlice(extRelocs);
+                ldr.SetExtRelocs(s, extRelocs);
+            }
+
+        });
+
+        private static readonly long extRelocSlabSize = (long)2048L;
+
+        // relocSymState hold state information needed when making a series of
+        // successive calls to relocsym(). The items here are invariant
+        // (meaning that they are set up once initially and then don't change
+        // during the execution of relocsym), with the exception of a slice
+        // used to facilitate batch allocation of external relocations. Calls
+        // to relocsym happen in parallel; the assumption is that each
+        // parallel thread will have its own state object.
+
+
+        // relocSymState hold state information needed when making a series of
+        // successive calls to relocsym(). The items here are invariant
+        // (meaning that they are set up once initially and then don't change
+        // during the execution of relocsym), with the exception of a slice
+        // used to facilitate batch allocation of external relocations. Calls
+        // to relocsym happen in parallel; the assumption is that each
+        // parallel thread will have its own state object.
+        private partial struct relocSymState
+        {
+            public ptr<Target> target;
+            public ptr<loader.Loader> ldr;
+            public ptr<ErrorReporter> err;
+            public ptr<ArchSyms> syms;
+            public slice<loader.ExtReloc> batch;
+        }
+
+        // preallocExtRelocs returns a subslice from an internally allocated
+        // slab owned by the state object. Client requests a slice of size
+        // 'sz', however it may be that fewer relocs are needed; the
+        // assumption is that the final size is set in a [required] subsequent
+        // call to 'finalizeExtRelocSlice'.
+        private static slice<loader.ExtReloc> preallocExtRelocSlice(this ptr<relocSymState> _addr_st, long sz)
+        {
+            ref relocSymState st = ref _addr_st.val;
+
+            if (len(st.batch) < sz)
+            {
+                var slabSize = extRelocSlabSize;
+                if (sz > extRelocSlabSize)
+                {
+                    slabSize = sz;
+                }
+
+                st.batch = make_slice<loader.ExtReloc>(slabSize);
+
+            }
+
+            var rval = st.batch.slice(-1, sz, sz);
+            return rval[..0L];
 
         }
 
-        private static void reloc(this ref Link ctxt)
+        // finalizeExtRelocSlice takes a slice returned from preallocExtRelocSlice,
+        // from which it determines how many of the pre-allocated relocs were
+        // actually needed; it then carves that number off the batch slice.
+        private static void finalizeExtRelocSlice(this ptr<relocSymState> _addr_st, slice<loader.ExtReloc> finalsl) => func((_, panic, __) =>
         {
-            if (ctxt.Debugvlog != 0L)
-            {
-                ctxt.Logf("%5.2f reloc\n", Cputime());
-            }
-            {
-                var s__prev1 = s;
+            ref relocSymState st = ref _addr_st.val;
 
-                foreach (var (_, __s) in ctxt.Textp)
-                {
-                    s = __s;
-                    relocsym(ctxt, s);
+            if (_addr_st.batch[0L] != _addr_finalsl[0L])
+            {
+                panic("preallocExtRelocSlice size invariant violation");
+            }
+
+            st.batch = st.batch[len(finalsl)..];
+
+        });
+
+        // makeRelocSymState creates a relocSymState container object to
+        // pass to relocsym(). If relocsym() calls happen in parallel,
+        // each parallel thread should have its own state object.
+        private static ptr<relocSymState> makeRelocSymState(this ptr<Link> _addr_ctxt)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            return addr(new relocSymState(target:&ctxt.Target,ldr:ctxt.loader,err:&ctxt.ErrorReporter,syms:&ctxt.ArchSyms,));
+        }
+
+        private static void reloc(this ptr<Link> _addr_ctxt)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            sync.WaitGroup wg = default;
+            var ldr = ctxt.loader;
+            if (ctxt.IsExternal())
+            {
+                ldr.InitExtRelocs();
+            }
+
+            wg.Add(3L);
+            go_(() => () =>
+            {
+                if (!ctxt.IsWasm())
+                { // On Wasm, text relocations are applied in Asmb2.
+                    var st = ctxt.makeRelocSymState();
+                    {
+                        var s__prev1 = s;
+
+                        foreach (var (_, __s) in ctxt.Textp2)
+                        {
+                            s = __s;
+                            st.relocsym(s, ldr.OutData(s));
+                        }
+
+                        s = s__prev1;
+                    }
                 }
 
-                s = s__prev1;
-            }
+                wg.Done();
 
+            }());
+            go_(() => () =>
             {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in datap)
+                st = ctxt.makeRelocSymState();
                 {
-                    s = __s;
-                    relocsym(ctxt, s);
+                    var s__prev1 = s;
+
+                    foreach (var (_, __s) in ctxt.datap2)
+                    {
+                        s = __s;
+                        st.relocsym(s, ldr.OutData(s));
+                    }
+
+                    s = s__prev1;
                 }
 
-                s = s__prev1;
-            }
+                wg.Done();
 
+            }());
+            go_(() => () =>
             {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in dwarfp)
+                st = ctxt.makeRelocSymState();
+                foreach (var (_, si) in dwarfp2)
                 {
-                    s = __s;
-                    relocsym(ctxt, s);
-                }
+                    {
+                        var s__prev2 = s;
 
-                s = s__prev1;
-            }
+                        foreach (var (_, __s) in si.syms)
+                        {
+                            s = __s;
+                            st.relocsym(s, ldr.OutData(s));
+                        }
+
+                        s = s__prev2;
+                    }
+                }
+                wg.Done();
+
+            }());
+            wg.Wait();
 
         }
 
-        private static void windynrelocsym(ref Link ctxt, ref sym.Symbol s)
+        private static void windynrelocsym(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_rel, loader.Sym s)
         {
-            var rel = ctxt.Syms.Lookup(".rel", 0L);
-            if (s == rel)
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref loader.SymbolBuilder rel = ref _addr_rel.val;
+
+            ptr<loader.SymbolBuilder> su;
+            var relocs = ctxt.loader.Relocs(s);
+            for (long ri = 0L; ri < relocs.Count(); ri++)
             {
-                return;
-            }
-            for (long ri = 0L; ri < len(s.R); ri++)
-            {
-                var r = ref s.R[ri];
-                var targ = r.Sym;
-                if (targ == null)
+                var r = relocs.At2(ri);
+                var targ = r.Sym();
+                if (targ == 0L)
                 {
                     continue;
                 }
-                if (!targ.Attr.Reachable())
+
+                var rt = r.Type();
+                if (!ctxt.loader.AttrReachable(targ))
                 {
-                    if (r.Type == objabi.R_WEAKADDROFF)
+                    if (rt == objabi.R_WEAKADDROFF)
                     {
                         continue;
                     }
-                    Errorf(s, "dynamic relocation to unreachable symbol %s", targ.Name);
+
+                    ctxt.Errorf(s, "dynamic relocation to unreachable symbol %s", ctxt.loader.SymName(targ));
+
                 }
-                if (r.Sym.Plt == -2L && r.Sym.Got != -2L)
+
+                var tplt = ctxt.loader.SymPlt(targ);
+                var tgot = ctxt.loader.SymGot(targ);
+                if (tplt == -2L && tgot != -2L)
                 { // make dynimport JMP table for PE object files.
-                    targ.Plt = int32(rel.Size);
-                    r.Sym = rel;
-                    r.Add = int64(targ.Plt); 
+                    tplt = int32(rel.Size());
+                    ctxt.loader.SetPlt(targ, tplt);
+
+                    if (su == null)
+                    {
+                        su = ctxt.loader.MakeSymbolUpdater(s);
+                    }
+
+                    r.SetSym(rel.Sym());
+                    r.SetAdd(int64(tplt)); 
 
                     // jmp *addr
-                    if (ctxt.Arch.Family == sys.I386)
-                    {
+
+                    if (ctxt.Arch.Family == sys.I386) 
                         rel.AddUint8(0xffUL);
                         rel.AddUint8(0x25UL);
-                        rel.AddAddr(ctxt.Arch, targ);
+                        rel.AddAddrPlus(ctxt.Arch, targ, 0L);
                         rel.AddUint8(0x90UL);
                         rel.AddUint8(0x90UL);
-                    }
-                    else
-                    {
+                    else if (ctxt.Arch.Family == sys.AMD64) 
                         rel.AddUint8(0xffUL);
                         rel.AddUint8(0x24UL);
                         rel.AddUint8(0x25UL);
-                        rel.AddAddrPlus4(targ, 0L);
+                        rel.AddAddrPlus4(ctxt.Arch, targ, 0L);
                         rel.AddUint8(0x90UL);
-                    }
+                    else 
+                        ctxt.Errorf(s, "unsupported arch %v", ctxt.Arch.Family);
+                        return ;
+                    
                 }
-                else if (r.Sym.Plt >= 0L)
+                else if (tplt >= 0L)
                 {
-                    r.Sym = rel;
-                    r.Add = int64(targ.Plt);
+                    if (su == null)
+                    {
+                        su = ctxt.loader.MakeSymbolUpdater(s);
+                    }
+
+                    r.SetSym(rel.Sym());
+                    r.SetAdd(int64(tplt));
+
                 }
+
             }
+
 
         }
 
-        private static void dynrelocsym(ref Link ctxt, ref sym.Symbol s)
+        // windynrelocsyms generates jump table to C library functions that will be
+        // added later. windynrelocsyms writes the table into .rel symbol.
+        private static void windynrelocsyms(this ptr<Link> _addr_ctxt)
         {
-            if (ctxt.HeadType == objabi.Hwindows)
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            if (!(ctxt.IsWindows() && iscgo && ctxt.IsInternal()))
             {
-                if (ctxt.LinkMode == LinkInternal)
-                {
-                    windynrelocsym(ctxt, s);
-                }
-                return;
+                return ;
             }
-            for (long ri = 0L; ri < len(s.R); ri++)
+
+            var rel = ctxt.loader.LookupOrCreateSym(".rel", 0L);
+            var relu = ctxt.loader.MakeSymbolUpdater(rel);
+            relu.SetType(sym.STEXT);
+
+            foreach (var (_, s) in ctxt.Textp2)
             {
-                var r = ref s.R[ri];
+                windynrelocsym(_addr_ctxt, _addr_relu, s);
+            }
+            ctxt.Textp2 = append(ctxt.Textp2, rel);
+
+        }
+
+        private static void dynrelocsym2(ptr<Link> _addr_ctxt, loader.Sym s)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            var target = _addr_ctxt.Target;
+            var ldr = ctxt.loader;
+            var syms = _addr_ctxt.ArchSyms;
+            var relocs = ldr.Relocs(s);
+            for (long ri = 0L; ri < relocs.Count(); ri++)
+            {
+                var r = relocs.At2(ri);
                 if (ctxt.BuildMode == BuildModePIE && ctxt.LinkMode == LinkInternal)
                 { 
                     // It's expected that some relocations will be done
                     // later by relocsym (R_TLS_LE, R_ADDROFF), so
                     // don't worry if Adddynrel returns false.
-                    Thearch.Adddynrel(ctxt, s, r);
+                    thearch.Adddynrel2(target, ldr, syms, s, r, ri);
                     continue;
+
                 }
-                if (r.Sym != null && r.Sym.Type == sym.SDYNIMPORT || r.Type >= 256L)
+
+                var rSym = r.Sym();
+                if (rSym != 0L && ldr.SymType(rSym) == sym.SDYNIMPORT || r.Type() >= objabi.ElfRelocOffset)
                 {
-                    if (r.Sym != null && !r.Sym.Attr.Reachable())
+                    if (rSym != 0L && !ldr.AttrReachable(rSym))
                     {
-                        Errorf(s, "dynamic relocation to unreachable symbol %s", r.Sym.Name);
+                        ctxt.Errorf(s, "dynamic relocation to unreachable symbol %s", ldr.SymName(rSym));
                     }
-                    if (!Thearch.Adddynrel(ctxt, s, r))
+
+                    if (!thearch.Adddynrel2(target, ldr, syms, s, r, ri))
                     {
-                        Errorf(s, "unsupported dynamic relocation for symbol %s (type=%d (%s) stype=%d (%s))", r.Sym.Name, r.Type, sym.RelocName(ctxt.Arch, r.Type), r.Sym.Type, r.Sym.Type);
+                        ctxt.Errorf(s, "unsupported dynamic relocation for symbol %s (type=%d (%s) stype=%d (%s))", ldr.SymName(rSym), r.Type(), sym.RelocName(ctxt.Arch, r.Type()), ldr.SymType(rSym), ldr.SymType(rSym));
                     }
+
                 }
+
             }
+
 
         }
 
-        private static void dynreloc(ref Link ctxt, ref array<slice<ref sym.Symbol>> data)
-        { 
+        private static void dynreloc2(this ptr<dodataState> _addr_state, ptr<Link> _addr_ctxt)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            if (ctxt.HeadType == objabi.Hwindows)
+            {
+                return ;
+            } 
             // -d suppresses dynamic loader format, so we may as well not
             // compute these sections or mark their symbols as reachable.
-            if (FlagD && ctxt.HeadType != objabi.Hwindows.Value)
+            if (FlagD.val)
             {
-                return;
+                return ;
             }
-            if (ctxt.Debugvlog != 0L)
-            {
-                ctxt.Logf("%5.2f dynreloc\n", Cputime());
-            }
+
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in ctxt.Textp)
+                foreach (var (_, __s) in ctxt.Textp2)
                 {
                     s = __s;
-                    dynrelocsym(ctxt, s);
+                    dynrelocsym2(_addr_ctxt, s);
                 }
 
                 s = s__prev1;
             }
 
-            foreach (var (_, syms) in data)
+            foreach (var (_, syms) in state.data2)
             {
                 {
                     var s__prev2 = s;
@@ -789,325 +1180,402 @@ namespace @internal
                     foreach (var (_, __s) in syms)
                     {
                         s = __s;
-                        dynrelocsym(ctxt, s);
+                        dynrelocsym2(_addr_ctxt, s);
                     }
 
                     s = s__prev2;
                 }
-
             }
             if (ctxt.IsELF)
             {
-                elfdynhash(ctxt);
+                elfdynhash2(ctxt);
             }
+
         }
 
-        public static void Codeblk(ref Link ctxt, long addr, long size)
+        public static void Codeblk(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, long addr, long size)
         {
-            CodeblkPad(ctxt, addr, size, zeros[..]);
-        }
-        public static void CodeblkPad(ref Link ctxt, long addr, long size, slice<byte> pad)
-        {
-            if (flagA.Value)
-            {
-                ctxt.Logf("codeblk [%#x,%#x) at offset %#x\n", addr, addr + size, ctxt.Out.Offset());
-            }
-            blk(ctxt, ctxt.Textp, addr, size, pad); 
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref OutBuf @out = ref _addr_@out.val;
 
-            /* again for printing */
-            if (!flagA.Value)
-            {
-                return;
-            }
-            var syms = ctxt.Textp;
-            {
-                var s__prev1 = s;
-
-                foreach (var (__i, __s) in syms)
-                {
-                    i = __i;
-                    s = __s;
-                    if (!s.Attr.Reachable())
-                    {
-                        continue;
-                    }
-                    if (s.Value >= addr)
-                    {
-                        syms = syms[i..];
-                        break;
-                    }
-                }
-
-                s = s__prev1;
-            }
-
-            var eaddr = addr + size;
-            slice<byte> q = default;
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in syms)
-                {
-                    s = __s;
-                    if (!s.Attr.Reachable())
-                    {
-                        continue;
-                    }
-                    if (s.Value >= eaddr)
-                    {
-                        break;
-                    }
-                    if (addr < s.Value)
-                    {
-                        ctxt.Logf("%-20s %.8x|", "_", uint64(addr));
-                        while (addr < s.Value)
-                        {
-                            ctxt.Logf(" %.2x", 0L);
-                            addr++;
-                        }
-
-                        ctxt.Logf("\n");
-                    }
-                    ctxt.Logf("%.6x\t%-20s\n", uint64(addr), s.Name);
-                    q = s.P;
-
-                    while (len(q) >= 16L)
-                    {
-                        ctxt.Logf("%.6x\t% x\n", uint64(addr), q[..16L]);
-                        addr += 16L;
-                        q = q[16L..];
-                    }
-
-
-                    if (len(q) > 0L)
-                    {
-                        ctxt.Logf("%.6x\t% x\n", uint64(addr), q);
-                        addr += int64(len(q));
-                    }
-                }
-
-                s = s__prev1;
-            }
-
-            if (addr < eaddr)
-            {
-                ctxt.Logf("%-20s %.8x|", "_", uint64(addr));
-                while (addr < eaddr)
-                {
-                    ctxt.Logf(" %.2x", 0L);
-                    addr++;
-                }
-
-            }
+            CodeblkPad(_addr_ctxt, _addr_out, addr, size, zeros[..]);
         }
 
-        private static void blk(ref Link ctxt, slice<ref sym.Symbol> syms, long addr, long size, slice<byte> pad)
+        public static void CodeblkPad(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, long addr, long size, slice<byte> pad)
         {
-            {
-                var s__prev1 = s;
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref OutBuf @out = ref _addr_@out.val;
 
-                foreach (var (__i, __s) in syms)
-                {
-                    i = __i;
-                    s = __s;
-                    if (!s.Attr.SubSymbol() && s.Value >= addr)
-                    {
-                        syms = syms[i..];
-                        break;
-                    }
-                }
-
-                s = s__prev1;
-            }
-
-            var eaddr = addr + size;
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in syms)
-                {
-                    s = __s;
-                    if (s.Attr.SubSymbol())
-                    {
-                        continue;
-                    }
-                    if (s.Value >= eaddr)
-                    {
-                        break;
-                    }
-                    if (s.Value < addr)
-                    {
-                        Errorf(s, "phase error: addr=%#x but sym=%#x type=%d", addr, s.Value, s.Type);
-                        errorexit();
-                    }
-                    if (addr < s.Value)
-                    {
-                        ctxt.Out.WriteStringPad("", int(s.Value - addr), pad);
-                        addr = s.Value;
-                    }
-                    ctxt.Out.Write(s.P);
-                    addr += int64(len(s.P));
-                    if (addr < s.Value + s.Size)
-                    {
-                        ctxt.Out.WriteStringPad("", int(s.Value + s.Size - addr), pad);
-                        addr = s.Value + s.Size;
-                    }
-                    if (addr != s.Value + s.Size)
-                    {
-                        Errorf(s, "phase error: addr=%#x value+size=%#x", addr, s.Value + s.Size);
-                        errorexit();
-                    }
-                    if (s.Value + s.Size >= eaddr)
-                    {
-                        break;
-                    }
-                }
-
-                s = s__prev1;
-            }
-
-            if (addr < eaddr)
-            {
-                ctxt.Out.WriteStringPad("", int(eaddr - addr), pad);
-            }
-            ctxt.Out.Flush();
+            writeBlocks(_addr_out, ctxt.outSem, _addr_ctxt.loader, ctxt.Textp2, addr, size, pad);
         }
 
-        public static void Datblk(ref Link ctxt, long addr, long size)
-        {
-            if (flagA.Value)
-            {
-                ctxt.Logf("datblk [%#x,%#x) at offset %#x\n", addr, addr + size, ctxt.Out.Offset());
-            }
-            blk(ctxt, datap, addr, size, zeros[..]); 
+        private static readonly long blockSize = (long)1L << (int)(20L); // 1MB chunks written at a time.
 
-            /* again for printing */
-            if (!flagA.Value)
-            {
-                return;
-            }
-            var syms = datap;
+        // writeBlocks writes a specified chunk of symbols to the output buffer. It
+        // breaks the write up into ≥blockSize chunks to write them out, and schedules
+        // as many goroutines as necessary to accomplish this task. This call then
+        // blocks, waiting on the writes to complete. Note that we use the sem parameter
+        // to limit the number of concurrent writes taking place.
+ // 1MB chunks written at a time.
+
+        // writeBlocks writes a specified chunk of symbols to the output buffer. It
+        // breaks the write up into ≥blockSize chunks to write them out, and schedules
+        // as many goroutines as necessary to accomplish this task. This call then
+        // blocks, waiting on the writes to complete. Note that we use the sem parameter
+        // to limit the number of concurrent writes taking place.
+        private static void writeBlocks(ptr<OutBuf> _addr_@out, channel<long> sem, ptr<loader.Loader> _addr_ldr, slice<loader.Sym> syms, long addr, long size, slice<byte> pad)
+        {
+            ref OutBuf @out = ref _addr_@out.val;
+            ref loader.Loader ldr = ref _addr_ldr.val;
+
             {
                 var i__prev1 = i;
-                var sym__prev1 = sym;
+                var s__prev1 = s;
 
-                foreach (var (__i, __sym) in syms)
+                foreach (var (__i, __s) in syms)
                 {
                     i = __i;
-                    sym = __sym;
-                    if (sym.Value >= addr)
+                    s = __s;
+                    if (ldr.SymValue(s) >= addr && !ldr.AttrSubSymbol(s))
                     {
                         syms = syms[i..];
                         break;
                     }
+
                 }
 
                 i = i__prev1;
-                sym = sym__prev1;
+                s = s__prev1;
+            }
+
+            sync.WaitGroup wg = default;
+            var max = int64(blockSize);
+            var lastAddr = addr + size;
+            var written = int64(0L);
+            while (addr < lastAddr)
+            { 
+                // Find the last symbol we'd write.
+                long idx = -1L;
+                {
+                    var i__prev2 = i;
+                    var s__prev2 = s;
+
+                    foreach (var (__i, __s) in syms)
+                    {
+                        i = __i;
+                        s = __s;
+                        if (ldr.AttrSubSymbol(s))
+                        {
+                            continue;
+                        } 
+
+                        // If the next symbol's size would put us out of bounds on the total length,
+                        // stop looking.
+                        var end = ldr.SymValue(s) + ldr.SymSize(s);
+                        if (end > lastAddr)
+                        {
+                            break;
+                        } 
+
+                        // We're gonna write this symbol.
+                        idx = i; 
+
+                        // If we cross over the max size, we've got enough symbols.
+                        if (end > addr + max)
+                        {
+                            break;
+                        }
+
+                    } 
+
+                    // If we didn't find any symbols to write, we're done here.
+
+                    i = i__prev2;
+                    s = s__prev2;
+                }
+
+                if (idx < 0L)
+                {
+                    break;
+                } 
+
+                // Compute the length to write, including padding.
+                // We need to write to the end address (lastAddr), or the next symbol's
+                // start address, whichever comes first. If there is no more symbols,
+                // just write to lastAddr. This ensures we don't leave holes between the
+                // blocks or at the end.
+                var length = int64(0L);
+                if (idx + 1L < len(syms))
+                { 
+                    // Find the next top-level symbol.
+                    // Skip over sub symbols so we won't split a containter symbol
+                    // into two blocks.
+                    var next = syms[idx + 1L];
+                    while (ldr.AttrSubSymbol(next))
+                    {
+                        idx++;
+                        next = syms[idx + 1L];
+                    }
+
+                    length = ldr.SymValue(next) - addr;
+
+                }
+
+                if (length == 0L || length > lastAddr - addr)
+                {
+                    length = lastAddr - addr;
+                } 
+
+                // Start the block output operator.
+                {
+                    var (o, err) = @out.View(uint64(@out.Offset() + written));
+
+                    if (err == null)
+                    {
+                        sem.Send(1L);
+                        wg.Add(1L);
+                        go_(() => (o, ldr, syms, addr, size, pad) =>
+                        {
+                            writeBlock(_addr_o, _addr_ldr, syms, addr, size, pad);
+                            wg.Done().Send(sem);
+                        }
+                    else
+(o, ldr, syms, addr, length, pad));
+
+                    }                    { // output not mmaped, don't parallelize.
+                        writeBlock(_addr_out, _addr_ldr, syms, addr, length, pad);
+
+                    } 
+
+                    // Prepare for the next loop.
+
+                } 
+
+                // Prepare for the next loop.
+                if (idx != -1L)
+                {
+                    syms = syms[idx + 1L..];
+                }
+
+                written += length;
+                addr += length;
+
+            }
+
+            wg.Wait();
+
+        }
+
+        private static void writeBlock(ptr<OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, slice<loader.Sym> syms, long addr, long size, slice<byte> pad)
+        {
+            ref OutBuf @out = ref _addr_@out.val;
+            ref loader.Loader ldr = ref _addr_ldr.val;
+
+            {
+                var s__prev1 = s;
+
+                foreach (var (__i, __s) in syms)
+                {
+                    i = __i;
+                    s = __s;
+                    if (ldr.SymValue(s) >= addr && !ldr.AttrSubSymbol(s))
+                    {
+                        syms = syms[i..];
+                        break;
+                    }
+
+                } 
+
+                // This doesn't distinguish the memory size from the file
+                // size, and it lays out the file based on Symbol.Value, which
+                // is the virtual address. DWARF compression changes file sizes,
+                // so dwarfcompress will fix this up later if necessary.
+
+                s = s__prev1;
             }
 
             var eaddr = addr + size;
             {
-                var sym__prev1 = sym;
+                var s__prev1 = s;
 
-                foreach (var (_, __sym) in syms)
+                foreach (var (_, __s) in syms)
                 {
-                    sym = __sym;
-                    if (sym.Value >= eaddr)
-                    {
-                        break;
-                    }
-                    if (addr < sym.Value)
-                    {
-                        ctxt.Logf("\t%.8x| 00 ...\n", uint64(addr));
-                        addr = sym.Value;
-                    }
-                    ctxt.Logf("%s\n\t%.8x|", sym.Name, uint64(addr));
-                    {
-                        var i__prev2 = i;
-
-                        foreach (var (__i, __b) in sym.P)
-                        {
-                            i = __i;
-                            b = __b;
-                            if (i > 0L && i % 16L == 0L)
-                            {
-                                ctxt.Logf("\n\t%.8x|", uint64(addr) + uint64(i));
-                            }
-                            ctxt.Logf(" %.2x", b);
-                        }
-
-                        i = i__prev2;
-                    }
-
-                    addr += int64(len(sym.P));
-                    while (addr < sym.Value + sym.Size)
-                    {
-                        ctxt.Logf(" %.2x", 0L);
-                        addr++;
-                    }
-
-                    ctxt.Logf("\n");
-
-                    if (ctxt.LinkMode != LinkExternal)
+                    s = __s;
+                    if (ldr.AttrSubSymbol(s))
                     {
                         continue;
                     }
-                    foreach (var (_, r) in sym.R)
-                    {
-                        @string rsname = "";
-                        if (r.Sym != null)
-                        {
-                            rsname = r.Sym.Name;
-                        }
-                        @string typ = "?";
 
-                        if (r.Type == objabi.R_ADDR) 
-                            typ = "addr";
-                        else if (r.Type == objabi.R_PCREL) 
-                            typ = "pcrel";
-                        else if (r.Type == objabi.R_CALL) 
-                            typ = "call";
-                                                ctxt.Logf("\treloc %.8x/%d %s %s+%#x [%#x]\n", uint(sym.Value + int64(r.Off)), r.Siz, typ, rsname, r.Add, r.Sym.Value + r.Add);
+                    var val = ldr.SymValue(s);
+                    if (val >= eaddr)
+                    {
+                        break;
                     }
+
+                    if (val < addr)
+                    {
+                        ldr.Errorf(s, "phase error: addr=%#x but sym=%#x type=%d", addr, val, ldr.SymType(s));
+                        errorexit();
+                    }
+
+                    if (addr < val)
+                    {
+                        @out.WriteStringPad("", int(val - addr), pad);
+                        addr = val;
+                    }
+
+                    @out.WriteSym(ldr, s);
+                    addr += int64(len(ldr.Data(s)));
+                    var siz = ldr.SymSize(s);
+                    if (addr < val + siz)
+                    {
+                        @out.WriteStringPad("", int(val + siz - addr), pad);
+                        addr = val + siz;
+                    }
+
+                    if (addr != val + siz)
+                    {
+                        ldr.Errorf(s, "phase error: addr=%#x value+size=%#x", addr, val + siz);
+                        errorexit();
+                    }
+
+                    if (val + siz >= eaddr)
+                    {
+                        break;
+                    }
+
                 }
 
-                sym = sym__prev1;
+                s = s__prev1;
             }
 
             if (addr < eaddr)
             {
-                ctxt.Logf("\t%.8x| 00 ...\n", uint(addr));
+                @out.WriteStringPad("", int(eaddr - addr), pad);
             }
-            ctxt.Logf("\t%.8x|\n", uint(eaddr));
+
         }
 
-        public static void Dwarfblk(ref Link ctxt, long addr, long size)
+        public delegate void writeFn(ptr<Link>, ptr<OutBuf>, long, long);
+
+        // WriteParallel handles scheduling parallel execution of data write functions.
+        public static void WriteParallel(ptr<sync.WaitGroup> _addr_wg, writeFn fn, ptr<Link> _addr_ctxt, ulong seek, ulong vaddr, ulong length) => func((defer, _, __) =>
         {
-            if (flagA.Value)
+            ref sync.WaitGroup wg = ref _addr_wg.val;
+            ref Link ctxt = ref _addr_ctxt.val;
+
             {
-                ctxt.Logf("dwarfblk [%#x,%#x) at offset %#x\n", addr, addr + size, ctxt.Out.Offset());
+                var (out, err) = ctxt.Out.View(seek);
+
+                if (err != null)
+                {
+                    ctxt.Out.SeekSet(int64(seek));
+                    fn(ctxt, ctxt.Out, int64(vaddr), int64(length));
+                }
+                else
+                {
+                    wg.Add(1L);
+                    go_(() => () =>
+                    {
+                        defer(wg.Done());
+                        fn(ctxt, out, int64(vaddr), int64(length));
+                    }());
+
+                }
+
             }
-            blk(ctxt, dwarfp, addr, size, zeros[..]);
+
+        });
+
+        public static void Datblk(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, long addr, long size)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref OutBuf @out = ref _addr_@out.val;
+
+            writeDatblkToOutBuf(_addr_ctxt, _addr_out, addr, size);
+        }
+
+        // Used only on Wasm for now.
+        public static slice<byte> DatblkBytes(ptr<Link> _addr_ctxt, long addr, long size)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            var buf = make_slice<byte>(size);
+            ptr<OutBuf> @out = addr(new OutBuf(heap:buf));
+            writeDatblkToOutBuf(_addr_ctxt, _addr_out, addr, size);
+            return buf;
+        }
+
+        private static void writeDatblkToOutBuf(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, long addr, long size)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref OutBuf @out = ref _addr_@out.val;
+
+            writeBlocks(_addr_out, ctxt.outSem, _addr_ctxt.loader, ctxt.datap2, addr, size, zeros[..]);
+        }
+
+        public static void Dwarfblk(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, long addr, long size)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref OutBuf @out = ref _addr_@out.val;
+ 
+            // Concatenate the section symbol lists into a single list to pass
+            // to writeBlocks.
+            //
+            // NB: ideally we would do a separate writeBlocks call for each
+            // section, but this would run the risk of undoing any file offset
+            // adjustments made during layout.
+            long n = 0L;
+            {
+                var i__prev1 = i;
+
+                foreach (var (__i) in dwarfp2)
+                {
+                    i = __i;
+                    n += len(dwarfp2[i].syms);
+                }
+
+                i = i__prev1;
+            }
+
+            var syms = make_slice<loader.Sym>(0L, n);
+            {
+                var i__prev1 = i;
+
+                foreach (var (__i) in dwarfp2)
+                {
+                    i = __i;
+                    syms = append(syms, dwarfp2[i].syms);
+                }
+
+                i = i__prev1;
+            }
+
+            writeBlocks(_addr_out, ctxt.outSem, _addr_ctxt.loader, syms, addr, size, zeros[..]);
+
         }
 
         private static array<byte> zeros = new array<byte>(512L);
 
         private static var strdata = make_map<@string, @string>();        private static slice<@string> strnames = default;
 
-        private static void addstrdata1(ref Link ctxt, @string arg)
+        private static void addstrdata1(ptr<Link> _addr_ctxt, @string arg)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+
             var eq = strings.Index(arg, "=");
             var dot = strings.LastIndex(arg[..eq + 1L], ".");
             if (eq < 0L || dot < 0L)
             {
                 Exitf("-X flag requires argument of the form importpath.name=value");
             }
+
             var pkg = arg[..dot];
             if (ctxt.BuildMode == BuildModePlugin && pkg == "main")
             {
-                pkg = flagPluginPath.Value;
+                pkg = flagPluginPath.val;
             }
+
             pkg = objabi.PathToPrefix(pkg);
             var name = pkg + arg[dot..eq];
             var value = arg[eq + 1L..];
@@ -1120,198 +1588,228 @@ namespace @internal
                 }
 
             }
+
             strdata[name] = value;
+
         }
 
-        private static void addstrdata(ref Link ctxt, @string name, @string value)
+        // addstrdata sets the initial value of the string variable name to value.
+        private static void addstrdata(ptr<sys.Arch> _addr_arch, ptr<loader.Loader> _addr_l, @string name, @string value)
         {
-            var s = ctxt.Syms.ROLookup(name, 0L);
-            if (s == null || s.Gotype == null)
-            { 
-                // Not defined in the loaded packages.
-                return;
-            }
-            if (s.Gotype.Name != "type.string")
+            ref sys.Arch arch = ref _addr_arch.val;
+            ref loader.Loader l = ref _addr_l.val;
+
+            var s = l.Lookup(name, 0L);
+            if (s == 0L)
             {
-                Errorf(s, "cannot set with -X: not a var of type string (%s)", s.Gotype.Name);
-                return;
+                return ;
             }
-            if (s.Type == sym.SBSS)
+
             {
-                s.Type = sym.SDATA;
+                var goType = l.SymGoType(s);
+
+                if (goType == 0L)
+                {
+                    return ;
+                }                {
+                    var typeName = l.SymName(goType);
+
+
+                    else if (typeName != "type.string")
+                    {
+                        Errorf(null, "%s: cannot set with -X: not a var of type string (%s)", name, typeName);
+                        return ;
+                    }
+
+                }
+
+
             }
-            var p = fmt.Sprintf("%s.str", s.Name);
-            var sp = ctxt.Syms.Lookup(p, 0L);
 
-            Addstring(sp, value);
-            sp.Type = sym.SRODATA;
+            if (!l.AttrReachable(s))
+            {
+                return ; // don't bother setting unreachable variable
+            }
 
-            s.Size = 0L;
-            s.P = s.P[..0L];
-            s.R = s.R[..0L];
-            var reachable = s.Attr.Reachable();
-            s.AddAddr(ctxt.Arch, sp);
-            s.AddUint(ctxt.Arch, uint64(len(value))); 
+            var bld = l.MakeSymbolUpdater(s);
+            if (bld.Type() == sym.SBSS)
+            {
+                bld.SetType(sym.SDATA);
+            }
 
-            // addstring, addaddr, etc., mark the symbols as reachable.
-            // In this case that is not necessarily true, so stick to what
-            // we know before entering this function.
-            s.Attr.Set(sym.AttrReachable, reachable);
+            var p = fmt.Sprintf("%s.str", name);
+            var sp = l.LookupOrCreateSym(p, 0L);
+            var sbld = l.MakeSymbolUpdater(sp);
 
-            sp.Attr.Set(sym.AttrReachable, reachable);
+            sbld.Addstring(value);
+            sbld.SetType(sym.SRODATA);
+
+            bld.SetSize(0L);
+            bld.SetData(make_slice<byte>(0L, arch.PtrSize * 2L));
+            bld.SetReadOnly(false);
+            bld.SetRelocs(null);
+            bld.AddAddrPlus(arch, sp, 0L);
+            bld.AddUint(arch, uint64(len(value)));
+
         }
 
-        private static void dostrdata(this ref Link ctxt)
+        private static void dostrdata(this ptr<Link> _addr_ctxt)
         {
+            ref Link ctxt = ref _addr_ctxt.val;
+
             foreach (var (_, name) in strnames)
             {
-                addstrdata(ctxt, name, strdata[name]);
+                addstrdata(_addr_ctxt.Arch, _addr_ctxt.loader, name, strdata[name]);
             }
-        }
 
-        public static long Addstring(ref sym.Symbol s, @string str)
-        {
-            if (s.Type == 0L)
-            {
-                s.Type = sym.SNOPTRDATA;
-            }
-            s.Attr |= sym.AttrReachable;
-            var r = s.Size;
-            if (s.Name == ".shstrtab")
-            {
-                elfsetstring(s, str, int(r));
-            }
-            s.P = append(s.P, str);
-            s.P = append(s.P, 0L);
-            s.Size = int64(len(s.P));
-            return r;
         }
 
         // addgostring adds str, as a Go string value, to s. symname is the name of the
         // symbol used to define the string data and must be unique per linked object.
-        private static void addgostring(ref Link ctxt, ref sym.Symbol s, @string symname, @string str)
+        private static void addgostring(ptr<Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr, ptr<loader.SymbolBuilder> _addr_s, @string symname, @string str)
         {
-            var sdata = ctxt.Syms.Lookup(symname, 0L);
-            if (sdata.Type != sym.Sxxx)
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref loader.Loader ldr = ref _addr_ldr.val;
+            ref loader.SymbolBuilder s = ref _addr_s.val;
+
+            var sdata = ldr.CreateSymForUpdate(symname, 0L);
+            if (sdata.Type() != sym.Sxxx)
             {
-                Errorf(s, "duplicate symname in addgostring: %s", symname);
+                ctxt.Errorf(s.Sym(), "duplicate symname in addgostring: %s", symname);
             }
-            sdata.Attr |= sym.AttrReachable;
-            sdata.Attr |= sym.AttrLocal;
-            sdata.Type = sym.SRODATA;
-            sdata.Size = int64(len(str));
-            sdata.P = (slice<byte>)str;
-            s.AddAddr(ctxt.Arch, sdata);
+
+            sdata.SetReachable(true);
+            sdata.SetLocal(true);
+            sdata.SetType(sym.SRODATA);
+            sdata.SetSize(int64(len(str)));
+            sdata.SetData((slice<byte>)str);
+            s.AddAddr(ctxt.Arch, sdata.Sym());
             s.AddUint(ctxt.Arch, uint64(len(str)));
+
         }
 
-        private static void addinitarrdata(ref Link ctxt, ref sym.Symbol s)
+        private static void addinitarrdata(ptr<Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr, loader.Sym s)
         {
-            var p = s.Name + ".ptr";
-            var sp = ctxt.Syms.Lookup(p, 0L);
-            sp.Type = sym.SINITARR;
-            sp.Size = 0L;
-            sp.Attr |= sym.AttrDuplicateOK;
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref loader.Loader ldr = ref _addr_ldr.val;
+
+            var p = ldr.SymName(s) + ".ptr";
+            var sp = ldr.CreateSymForUpdate(p, 0L);
+            sp.SetType(sym.SINITARR);
+            sp.SetSize(0L);
+            sp.SetDuplicateOK(true);
             sp.AddAddr(ctxt.Arch, s);
         }
 
-        private static void dosymtype(ref Link ctxt)
-        {
-
-            if (ctxt.BuildMode == BuildModeCArchive || ctxt.BuildMode == BuildModeCShared) 
-                foreach (var (_, s) in ctxt.Syms.Allsym)
-                { 
-                    // Create a new entry in the .init_array section that points to the
-                    // library initializer function.
-                    if (s.Name == flagEntrySymbol.Value)
-                    {
-                        addinitarrdata(ctxt, s);
-                    }
-                }
-                    }
-
         // symalign returns the required alignment for the given symbol s.
-        private static int symalign(ref sym.Symbol s)
+        private static int symalign2(this ptr<dodataState> _addr_state, loader.Sym s)
         {
-            var min = int32(Thearch.Minalign);
-            if (s.Align >= min)
+            ref dodataState state = ref _addr_state.val;
+
+            var min = int32(thearch.Minalign);
+            var ldr = state.ctxt.loader;
+            var align = ldr.SymAlign(s);
+            if (align >= min)
             {
-                return s.Align;
+                return align;
             }
-            else if (s.Align != 0L)
+            else if (align != 0L)
             {
                 return min;
-            }
-            if (strings.HasPrefix(s.Name, "go.string.") || strings.HasPrefix(s.Name, "type..namedata."))
+            } 
+            // FIXME: figure out a way to avoid checking by name here.
+            var sname = ldr.SymName(s);
+            if (strings.HasPrefix(sname, "go.string.") || strings.HasPrefix(sname, "type..namedata."))
             { 
                 // String data is just bytes.
                 // If we align it, we waste a lot of space to padding.
                 return min;
+
             }
-            var align = int32(Thearch.Maxalign);
-            while (int64(align) > s.Size && align > min)
+
+            align = int32(thearch.Maxalign);
+            var ssz = ldr.SymSize(s);
+            while (int64(align) > ssz && align > min)
             {
                 align >>= 1L;
             }
 
+            ldr.SetSymAlign(s, align);
             return align;
+
         }
 
-        private static long aligndatsize(long datsize, ref sym.Symbol s)
+        private static long aligndatsize2(ptr<dodataState> _addr_state, long datsize, loader.Sym s)
         {
-            return Rnd(datsize, int64(symalign(s)));
+            ref dodataState state = ref _addr_state.val;
+
+            return Rnd(datsize, int64(state.symalign2(s)));
         }
 
-        private static readonly var debugGCProg = false;
+        private static readonly var debugGCProg = (var)false;
 
 
 
-        public partial struct GCProg
+        public partial struct GCProg2
         {
             public ptr<Link> ctxt;
-            public ptr<sym.Symbol> sym;
+            public ptr<loader.SymbolBuilder> sym;
             public gcprog.Writer w;
         }
 
-        private static void Init(this ref GCProg p, ref Link ctxt, @string name)
+        private static void Init(this ptr<GCProg2> _addr_p, ptr<Link> _addr_ctxt, @string name)
         {
+            ref GCProg2 p = ref _addr_p.val;
+            ref Link ctxt = ref _addr_ctxt.val;
+
             p.ctxt = ctxt;
-            p.sym = ctxt.Syms.Lookup(name, 0L);
-            p.w.Init(p.writeByte(ctxt));
+            var symIdx = ctxt.loader.LookupOrCreateSym(name, 0L);
+            p.sym = ctxt.loader.MakeSymbolUpdater(symIdx);
+            p.w.Init(p.writeByte());
             if (debugGCProg)
             {
                 fmt.Fprintf(os.Stderr, "ld: start GCProg %s\n", name);
                 p.w.Debug(os.Stderr);
             }
+
         }
 
-        private static Action<byte> writeByte(this ref GCProg p, ref Link ctxt)
+        private static Action<byte> writeByte(this ptr<GCProg2> _addr_p)
         {
+            ref GCProg2 p = ref _addr_p.val;
+
             return x =>
             {
                 p.sym.AddUint8(x);
-            }
-;
+            };
+
         }
 
-        private static void End(this ref GCProg p, long size)
+        private static void End(this ptr<GCProg2> _addr_p, long size)
         {
+            ref GCProg2 p = ref _addr_p.val;
+
             p.w.ZeroUntil(size / int64(p.ctxt.Arch.PtrSize));
             p.w.End();
             if (debugGCProg)
             {
                 fmt.Fprintf(os.Stderr, "ld: end GCProg\n");
             }
+
         }
 
-        private static void AddSym(this ref GCProg p, ref sym.Symbol s)
+        private static void AddSym(this ptr<GCProg2> _addr_p, loader.Sym s)
         {
-            var typ = s.Gotype; 
+            ref GCProg2 p = ref _addr_p.val;
+
+            var ldr = p.ctxt.loader;
+            var typ = ldr.SymGoType(s); 
+
             // Things without pointers should be in sym.SNOPTRDATA or sym.SNOPTRBSS;
             // everything we see should have pointers and should therefore have a type.
-            if (typ == null)
+            if (typ == 0L)
             {
-                switch (s.Name)
+                switch (ldr.SymName(s))
                 {
                     case "runtime.data": 
                         // Ignore special symbols that are sometimes laid out
@@ -1332,20 +1830,25 @@ namespace @internal
                         // Ignore special symbols that are sometimes laid out
                         // as real symbols. See comment about dyld on darwin in
                         // the address function.
-                        return;
+                        return ;
                         break;
                 }
-                Errorf(s, "missing Go type information for global symbol: size %d", s.Size);
-                return;
+                p.ctxt.Errorf(p.sym.Sym(), "missing Go type information for global symbol %s: size %d", ldr.SymName(s), ldr.SymSize(s));
+                return ;
+
             }
+
             var ptrsize = int64(p.ctxt.Arch.PtrSize);
-            var nptr = decodetypePtrdata(p.ctxt.Arch, typ) / ptrsize;
+            var typData = ldr.Data(typ);
+            var nptr = decodetypePtrdata(p.ctxt.Arch, typData) / ptrsize;
 
             if (debugGCProg)
             {
-                fmt.Fprintf(os.Stderr, "gcprog sym: %s at %d (ptr=%d+%d)\n", s.Name, s.Value, s.Value / ptrsize, nptr);
+                fmt.Fprintf(os.Stderr, "gcprog sym: %s at %d (ptr=%d+%d)\n", ldr.SymName(s), ldr.SymValue(s), ldr.SymValue(s) / ptrsize, nptr);
             }
-            if (decodetypeUsegcprog(p.ctxt.Arch, typ) == 0L)
+
+            var sval = ldr.SymValue(s);
+            if (decodetypeUsegcprog(p.ctxt.Arch, typData) == 0L)
             { 
                 // Copy pointers from mask into program.
                 var mask = decodetypeGcmask(p.ctxt, typ);
@@ -1353,135 +1856,340 @@ namespace @internal
                 {
                     if ((mask[i / 8L] >> (int)(uint(i % 8L))) & 1L != 0L)
                     {
-                        p.w.Ptr(s.Value / ptrsize + i);
+                        p.w.Ptr(sval / ptrsize + i);
                     }
+
                 }
 
-                return;
+                return ;
+
             } 
 
             // Copy program.
             var prog = decodetypeGcprog(p.ctxt, typ);
-            p.w.ZeroUntil(s.Value / ptrsize);
+            p.w.ZeroUntil(sval / ptrsize);
             p.w.Append(prog[4L..], nptr);
-        }
 
-        // dataSortKey is used to sort a slice of data symbol *sym.Symbol pointers.
-        // The sort keys are kept inline to improve cache behavior while sorting.
-        private partial struct dataSortKey
-        {
-            public long size;
-            public @string name;
-            public ptr<sym.Symbol> sym;
-        }
-
-        private partial struct bySizeAndName // : slice<dataSortKey>
-        {
-        }
-
-        private static long Len(this bySizeAndName d)
-        {
-            return len(d);
-        }
-        private static void Swap(this bySizeAndName d, long i, long j)
-        {
-            d[i] = d[j];
-            d[j] = d[i];
-
-        }
-        private static bool Less(this bySizeAndName d, long i, long j)
-        {
-            var s1 = d[i];
-            var s2 = d[j];
-            if (s1.size != s2.size)
-            {
-                return s1.size < s2.size;
-            }
-            return s1.name < s2.name;
         }
 
         // cutoff is the maximum data section size permitted by the linker
         // (see issue #9862).
-        private static readonly float cutoff = 2e9F; // 2 GB (or so; looks better in errors than 2^31)
+        private static readonly float cutoff = (float)2e9F; // 2 GB (or so; looks better in errors than 2^31)
 
  // 2 GB (or so; looks better in errors than 2^31)
 
-        private static void checkdatsize(ref Link ctxt, long datsize, sym.SymKind symn)
+        private static void checkdatsize(this ptr<dodataState> _addr_state, sym.SymKind symn)
         {
-            if (datsize > cutoff)
+            ref dodataState state = ref _addr_state.val;
+
+            if (state.datsize > cutoff)
             {
                 Errorf(null, "too much data in section %v (over %v bytes)", symn, cutoff);
             }
+
         }
 
-        // datap is a collection of reachable data symbols in address order.
-        // Generated by dodata.
-        private static slice<ref sym.Symbol> datap = default;
-
-        private static void dodata(this ref Link ctxt)
+        // fixZeroSizedSymbols gives a few special symbols with zero size some space.
+        private static void fixZeroSizedSymbols2(ptr<Link> _addr_ctxt)
         {
-            if (ctxt.Debugvlog != 0L)
+            ref Link ctxt = ref _addr_ctxt.val;
+ 
+            // The values in moduledata are filled out by relocations
+            // pointing to the addresses of these special symbols.
+            // Typically these symbols have no size and are not laid
+            // out with their matching section.
+            //
+            // However on darwin, dyld will find the special symbol
+            // in the first loaded module, even though it is local.
+            //
+            // (An hypothesis, formed without looking in the dyld sources:
+            // these special symbols have no size, so their address
+            // matches a real symbol. The dynamic linker assumes we
+            // want the normal symbol with the same address and finds
+            // it in the other module.)
+            //
+            // To work around this we lay out the symbls whose
+            // addresses are vital for multi-module programs to work
+            // as normal symbols, and give them a little size.
+            //
+            // On AIX, as all DATA sections are merged together, ld might not put
+            // these symbols at the beginning of their respective section if there
+            // aren't real symbols, their alignment might not match the
+            // first symbol alignment. Therefore, there are explicitly put at the
+            // beginning of their section with the same alignment.
+            if (!(ctxt.DynlinkingGo() && ctxt.HeadType == objabi.Hdarwin) && !(ctxt.HeadType == objabi.Haix && ctxt.LinkMode == LinkExternal))
             {
-                ctxt.Logf("%5.2f dodata\n", Cputime());
+                return ;
             }
-            if (ctxt.DynlinkingGo() && ctxt.HeadType == objabi.Hdarwin)
+
+            var ldr = ctxt.loader;
+            var bss = ldr.CreateSymForUpdate("runtime.bss", 0L);
+            bss.SetSize(8L);
+            ldr.SetAttrSpecial(bss.Sym(), false);
+
+            var ebss = ldr.CreateSymForUpdate("runtime.ebss", 0L);
+            ldr.SetAttrSpecial(ebss.Sym(), false);
+
+            var data = ldr.CreateSymForUpdate("runtime.data", 0L);
+            data.SetSize(8L);
+            ldr.SetAttrSpecial(data.Sym(), false);
+
+            var edata = ldr.CreateSymForUpdate("runtime.edata", 0L);
+            ldr.SetAttrSpecial(edata.Sym(), false);
+
+            if (ctxt.HeadType == objabi.Haix)
             { 
-                // The values in moduledata are filled out by relocations
-                // pointing to the addresses of these special symbols.
-                // Typically these symbols have no size and are not laid
-                // out with their matching section.
-                //
-                // However on darwin, dyld will find the special symbol
-                // in the first loaded module, even though it is local.
-                //
-                // (An hypothesis, formed without looking in the dyld sources:
-                // these special symbols have no size, so their address
-                // matches a real symbol. The dynamic linker assumes we
-                // want the normal symbol with the same address and finds
-                // it in the other module.)
-                //
-                // To work around this we lay out the symbls whose
-                // addresses are vital for multi-module programs to work
-                // as normal symbols, and give them a little size.
-                var bss = ctxt.Syms.Lookup("runtime.bss", 0L);
-                bss.Size = 8L;
-                bss.Attr.Set(sym.AttrSpecial, false);
+                // XCOFFTOC symbols are part of .data section.
+                edata.SetType(sym.SXCOFFTOC);
 
-                ctxt.Syms.Lookup("runtime.ebss", 0L).Attr.Set(sym.AttrSpecial, false);
+            }
 
-                var data = ctxt.Syms.Lookup("runtime.data", 0L);
-                data.Size = 8L;
-                data.Attr.Set(sym.AttrSpecial, false);
+            var types = ldr.CreateSymForUpdate("runtime.types", 0L);
+            types.SetType(sym.STYPE);
+            types.SetSize(8L);
+            ldr.SetAttrSpecial(types.Sym(), false);
 
-                ctxt.Syms.Lookup("runtime.edata", 0L).Attr.Set(sym.AttrSpecial, false);
+            var etypes = ldr.CreateSymForUpdate("runtime.etypes", 0L);
+            etypes.SetType(sym.SFUNCTAB);
+            ldr.SetAttrSpecial(etypes.Sym(), false);
 
-                var types = ctxt.Syms.Lookup("runtime.types", 0L);
-                types.Type = sym.STYPE;
-                types.Size = 8L;
-                types.Attr.Set(sym.AttrSpecial, false);
+            if (ctxt.HeadType == objabi.Haix)
+            {
+                var rodata = ldr.CreateSymForUpdate("runtime.rodata", 0L);
+                rodata.SetType(sym.SSTRING);
+                rodata.SetSize(8L);
+                ldr.SetAttrSpecial(rodata.Sym(), false);
 
-                var etypes = ctxt.Syms.Lookup("runtime.etypes", 0L);
-                etypes.Type = sym.SFUNCTAB;
-                etypes.Attr.Set(sym.AttrSpecial, false);
+                var erodata = ldr.CreateSymForUpdate("runtime.erodata", 0L);
+                ldr.SetAttrSpecial(erodata.Sym(), false);
+            }
+
+        }
+
+        // makeRelroForSharedLib creates a section of readonly data if necessary.
+        private static void makeRelroForSharedLib2(this ptr<dodataState> _addr_state, ptr<Link> _addr_target)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref Link target = ref _addr_target.val;
+
+            if (!target.UseRelro())
+            {
+                return ;
             } 
 
+            // "read only" data with relocations needs to go in its own section
+            // when building a shared library. We do this by boosting objects of
+            // type SXXX with relocations to type SXXXRELRO.
+            var ldr = target.loader;
+            foreach (var (_, symnro) in sym.ReadOnly)
+            {
+                var symnrelro = sym.RelROMap[symnro];
+
+                loader.Sym ro = new slice<loader.Sym>(new loader.Sym[] {  });
+                var relro = state.data2[symnrelro];
+
+                {
+                    var s__prev2 = s;
+
+                    foreach (var (_, __s) in state.data2[symnro])
+                    {
+                        s = __s;
+                        var relocs = ldr.Relocs(s);
+                        var isRelro = relocs.Count() > 0L;
+
+                        if (state.symType(s) == sym.STYPE || state.symType(s) == sym.STYPERELRO || state.symType(s) == sym.SGOFUNCRELRO) 
+                            // Symbols are not sorted yet, so it is possible
+                            // that an Outer symbol has been changed to a
+                            // relro Type before it reaches here.
+                            isRelro = true;
+                        else if (state.symType(s) == sym.SFUNCTAB) 
+                            if (target.IsAIX() && ldr.SymName(s) == "runtime.etypes")
+                            { 
+                                // runtime.etypes must be at the end of
+                                // the relro datas.
+                                isRelro = true;
+
+                            }
+
+                                                if (isRelro)
+                        {
+                            state.setSymType(s, symnrelro);
+                            {
+                                var outer__prev2 = outer;
+
+                                var outer = ldr.OuterSym(s);
+
+                                if (outer != 0L)
+                                {
+                                    state.setSymType(outer, symnrelro);
+                                }
+
+                                outer = outer__prev2;
+
+                            }
+
+                            relro = append(relro, s);
+
+                        }
+                        else
+                        {
+                            ro = append(ro, s);
+                        }
+
+                    } 
+
+                    // Check that we haven't made two symbols with the same .Outer into
+                    // different types (because references two symbols with non-nil Outer
+                    // become references to the outer symbol + offset it's vital that the
+                    // symbol and the outer end up in the same section).
+
+                    s = s__prev2;
+                }
+
+                {
+                    var s__prev2 = s;
+
+                    foreach (var (_, __s) in relro)
+                    {
+                        s = __s;
+                        {
+                            var outer__prev1 = outer;
+
+                            outer = ldr.OuterSym(s);
+
+                            if (outer != 0L)
+                            {
+                                var st = state.symType(s);
+                                var ost = state.symType(outer);
+                                if (st != ost)
+                                {
+                                    state.ctxt.Errorf(s, "inconsistent types for symbol and its Outer %s (%v != %v)", ldr.SymName(outer), st, ost);
+                                }
+
+                            }
+
+                            outer = outer__prev1;
+
+                        }
+
+                    }
+
+                    s = s__prev2;
+                }
+
+                state.data2[symnro] = ro;
+                state.data2[symnrelro] = relro;
+
+            }
+
+        }
+
+        // dodataState holds bits of state information needed by dodata() and the
+        // various helpers it calls. The lifetime of these items should not extend
+        // past the end of dodata().
+        private partial struct dodataState
+        {
+            public ptr<Link> ctxt; // Data symbols bucketed by type.
+            public array<slice<ptr<sym.Symbol>>> data; // Data symbols bucketed by type.
+            public array<slice<loader.Sym>> data2; // Max alignment for each flavor of data symbol.
+            public array<int> dataMaxAlign; // Overridden sym type
+            public slice<sym.SymKind> symGroupType; // Current data size so far.
+            public long datsize;
+        }
+
+        // A note on symType/setSymType below:
+        //
+        // In the legacy linker, the types of symbols (notably data symbols) are
+        // changed during the symtab() phase so as to insure that similar symbols
+        // are bucketed together, then their types are changed back again during
+        // dodata. Symbol to section assignment also plays tricks along these lines
+        // in the case where a relro segment is needed.
+        //
+        // The value returned from setType() below reflects the effects of
+        // any overrides made by symtab and/or dodata.
+
+        // symType returns the (possibly overridden) type of 's'.
+        private static sym.SymKind symType(this ptr<dodataState> _addr_state, loader.Sym s)
+        {
+            ref dodataState state = ref _addr_state.val;
+
+            if (int(s) < len(state.symGroupType))
+            {
+                {
+                    var @override = state.symGroupType[s];
+
+                    if (override != 0L)
+                    {
+                        return override;
+                    }
+
+                }
+
+            }
+
+            return state.ctxt.loader.SymType(s);
+
+        }
+
+        // setSymType sets a new override type for 's'.
+        private static void setSymType(this ptr<dodataState> _addr_state, loader.Sym s, sym.SymKind kind) => func((_, panic, __) =>
+        {
+            ref dodataState state = ref _addr_state.val;
+
+            if (s == 0L)
+            {
+                panic("bad");
+            }
+
+            if (int(s) < len(state.symGroupType))
+            {
+                state.symGroupType[s] = kind;
+            }
+            else
+            {
+                var su = state.ctxt.loader.MakeSymbolUpdater(s);
+                su.SetType(kind);
+            }
+
+        });
+
+        private static void dodata2(this ptr<Link> _addr_ctxt, slice<sym.SymKind> symGroupType)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            // Give zeros sized symbols space if necessary.
+            fixZeroSizedSymbols2(_addr_ctxt); 
+
             // Collect data symbols by type into data.
-            data = new array<slice<ref sym.Symbol>>(sym.SXREF);
+            dodataState state = new dodataState(ctxt:ctxt,symGroupType:symGroupType);
+            var ldr = ctxt.loader;
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in ctxt.Syms.Allsym)
+                for (var s = loader.Sym(1L); s < loader.Sym(ldr.NSym()); s++)
                 {
-                    s = __s;
-                    if (!s.Attr.Reachable() || s.Attr.Special() || s.Attr.SubSymbol())
+                    if (!ldr.AttrReachable(s) || ldr.AttrSpecial(s) || ldr.AttrSubSymbol(s) || !ldr.TopLevelSym(s))
                     {
                         continue;
                     }
-                    if (s.Type <= sym.STEXT || s.Type >= sym.SXREF)
+
+                    var st = state.symType(s);
+
+                    if (st <= sym.STEXT || st >= sym.SXREF)
                     {
                         continue;
                     }
-                    data[s.Type] = append(data[s.Type], s);
+
+                    state.data2[st] = append(state.data2[st], s); 
+
+                    // Similarly with checking the onlist attr.
+                    if (ldr.AttrOnList(s))
+                    {
+                        log.Fatalf("symbol %s listed multiple times", ldr.SymName(s));
+                    }
+
+                    ldr.SetAttrOnList(s, true);
+
                 } 
 
                 // Now that we have the data symbols, but before we start
@@ -1491,990 +2199,71 @@ namespace @internal
                 //
                 // On darwin, we need the symbol table numbers for dynreloc.
 
-                s = s__prev1;
-            }
 
+                s = s__prev1;
+            } 
+
+            // Now that we have the data symbols, but before we start
+            // to assign addresses, record all the necessary
+            // dynamic relocations. These will grow the relocation
+            // symbol, which is itself data.
+            //
+            // On darwin, we need the symbol table numbers for dynreloc.
             if (ctxt.HeadType == objabi.Hdarwin)
             {
                 machosymorder(ctxt);
             }
-            dynreloc(ctxt, ref data);
 
-            if (ctxt.UseRelro())
-            { 
-                // "read only" data with relocations needs to go in its own section
-                // when building a shared library. We do this by boosting objects of
-                // type SXXX with relocations to type SXXXRELRO.
-                {
-                    var symnro__prev1 = symnro;
+            state.dynreloc2(ctxt); 
 
-                    foreach (var (_, __symnro) in sym.ReadOnly)
-                    {
-                        symnro = __symnro;
-                        var symnrelro = sym.RelROMap[symnro];
+            // Move any RO data with relocations to a separate section.
+            state.makeRelroForSharedLib2(ctxt); 
 
-                        ref sym.Symbol ro = new slice<ref sym.Symbol>(new ref sym.Symbol[] {  });
-                        var relro = data[symnrelro];
-
-                        {
-                            var s__prev2 = s;
-
-                            foreach (var (_, __s) in data[symnro])
-                            {
-                                s = __s;
-                                var isRelro = len(s.R) > 0L;
-
-                                if (s.Type == sym.STYPE || s.Type == sym.STYPERELRO || s.Type == sym.SGOFUNCRELRO) 
-                                    // Symbols are not sorted yet, so it is possible
-                                    // that an Outer symbol has been changed to a
-                                    // relro Type before it reaches here.
-                                    isRelro = true;
-                                                                if (isRelro)
-                                {
-                                    s.Type = symnrelro;
-                                    if (s.Outer != null)
-                                    {
-                                        s.Outer.Type = s.Type;
-                                    }
-                                    relro = append(relro, s);
-                                }
-                                else
-                                {
-                                    ro = append(ro, s);
-                                }
-                            } 
-
-                            // Check that we haven't made two symbols with the same .Outer into
-                            // different types (because references two symbols with non-nil Outer
-                            // become references to the outer symbol + offset it's vital that the
-                            // symbol and the outer end up in the same section).
-
-                            s = s__prev2;
-                        }
-
-                        {
-                            var s__prev2 = s;
-
-                            foreach (var (_, __s) in relro)
-                            {
-                                s = __s;
-                                if (s.Outer != null && s.Outer.Type != s.Type)
-                                {
-                                    Errorf(s, "inconsistent types for symbol and its Outer %s (%v != %v)", s.Outer.Name, s.Type, s.Outer.Type);
-                                }
-                            }
-
-                            s = s__prev2;
-                        }
-
-                        data[symnro] = ro;
-                        data[symnrelro] = relro;
-                    }
-
-                    symnro = symnro__prev1;
-                }
-
-            } 
+            // Set alignment for the symbol with the largest known index,
+            // so as to trigger allocation of the loader's internal
+            // alignment array. This will avoid data races in the parallel
+            // section below.
+            var lastSym = loader.Sym(ldr.NSym() - 1L);
+            ldr.SetSymAlign(lastSym, ldr.SymAlign(lastSym)); 
 
             // Sort symbols.
-            array<int> dataMaxAlign = new array<int>(sym.SXREF);
             sync.WaitGroup wg = default;
             {
                 var symn__prev1 = symn;
 
-                foreach (var (__symn) in data)
+                foreach (var (__symn) in state.data2)
                 {
                     symn = __symn;
                     var symn = sym.SymKind(symn);
                     wg.Add(1L);
                     go_(() => () =>
                     {
-                        data[symn], dataMaxAlign[symn] = dodataSect(ctxt, symn, data[symn]);
+                        state.data2[symn], state.dataMaxAlign[symn] = state.dodataSect2(ctxt, symn, state.data2[symn]);
                         wg.Done();
                     }());
+
                 }
 
                 symn = symn__prev1;
             }
 
-            wg.Wait(); 
+            wg.Wait();
 
-            // Allocate sections.
-            // Data is processed before segtext, because we need
-            // to see all symbols in the .data and .bss sections in order
-            // to generate garbage collection information.
-            var datsize = int64(0L); 
-
-            // Writable data sections that do not need any specialized handling.
-            sym.SymKind writable = new slice<sym.SymKind>(new sym.SymKind[] { sym.SELFSECT, sym.SMACHO, sym.SMACHOGOT, sym.SWINDOWS });
-            {
-                var symn__prev1 = symn;
-
-                foreach (var (_, __symn) in writable)
-                {
-                    symn = __symn;
-                    {
-                        var s__prev2 = s;
-
-                        foreach (var (_, __s) in data[symn])
-                        {
-                            s = __s;
-                            var sect = addsection(ctxt.Arch, ref Segdata, s.Name, 06L);
-                            sect.Align = symalign(s);
-                            datsize = Rnd(datsize, int64(sect.Align));
-                            sect.Vaddr = uint64(datsize);
-                            s.Sect = sect;
-                            s.Type = sym.SDATA;
-                            s.Value = int64(uint64(datsize) - sect.Vaddr);
-                            datsize += s.Size;
-                            sect.Length = uint64(datsize) - sect.Vaddr;
-                        }
-
-                        s = s__prev2;
-                    }
-
-                    checkdatsize(ctxt, datsize, symn);
-                } 
-
-                // .got (and .toc on ppc64)
-
-                symn = symn__prev1;
-            }
-
-            if (len(data[sym.SELFGOT]) > 0L)
-            {
-                sect = addsection(ctxt.Arch, ref Segdata, ".got", 06L);
-                sect.Align = dataMaxAlign[sym.SELFGOT];
-                datsize = Rnd(datsize, int64(sect.Align));
-                sect.Vaddr = uint64(datsize);
-                ref sym.Symbol toc = default;
-                {
-                    var s__prev1 = s;
-
-                    foreach (var (_, __s) in data[sym.SELFGOT])
-                    {
-                        s = __s;
-                        datsize = aligndatsize(datsize, s);
-                        s.Sect = sect;
-                        s.Type = sym.SDATA;
-                        s.Value = int64(uint64(datsize) - sect.Vaddr); 
-
-                        // Resolve .TOC. symbol for this object file (ppc64)
-                        toc = ctxt.Syms.ROLookup(".TOC.", int(s.Version));
-                        if (toc != null)
-                        {
-                            toc.Sect = sect;
-                            toc.Outer = s;
-                            toc.Sub = s.Sub;
-                            s.Sub = toc;
-
-                            toc.Value = 0x8000UL;
-                        }
-                        datsize += s.Size;
-                    }
-
-                    s = s__prev1;
-                }
-
-                checkdatsize(ctxt, datsize, sym.SELFGOT);
-                sect.Length = uint64(datsize) - sect.Vaddr;
-            } 
-
-            /* pointer-free data */
-            sect = addsection(ctxt.Arch, ref Segdata, ".noptrdata", 06L);
-            sect.Align = dataMaxAlign[sym.SNOPTRDATA];
-            datsize = Rnd(datsize, int64(sect.Align));
-            sect.Vaddr = uint64(datsize);
-            ctxt.Syms.Lookup("runtime.noptrdata", 0L).Sect = sect;
-            ctxt.Syms.Lookup("runtime.enoptrdata", 0L).Sect = sect;
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SNOPTRDATA])
-                {
-                    s = __s;
-                    datsize = aligndatsize(datsize, s);
-                    s.Sect = sect;
-                    s.Type = sym.SDATA;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    datsize += s.Size;
-                }
-
-                s = s__prev1;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SNOPTRDATA);
-            sect.Length = uint64(datsize) - sect.Vaddr;
-
-            var hasinitarr = ctxt.linkShared; 
-
-            /* shared library initializer */
-
-            if (ctxt.BuildMode == BuildModeCArchive || ctxt.BuildMode == BuildModeCShared || ctxt.BuildMode == BuildModeShared || ctxt.BuildMode == BuildModePlugin) 
-                hasinitarr = true;
-                        if (hasinitarr)
-            {
-                sect = addsection(ctxt.Arch, ref Segdata, ".init_array", 06L);
-                sect.Align = dataMaxAlign[sym.SINITARR];
-                datsize = Rnd(datsize, int64(sect.Align));
-                sect.Vaddr = uint64(datsize);
-                {
-                    var s__prev1 = s;
-
-                    foreach (var (_, __s) in data[sym.SINITARR])
-                    {
-                        s = __s;
-                        datsize = aligndatsize(datsize, s);
-                        s.Sect = sect;
-                        s.Value = int64(uint64(datsize) - sect.Vaddr);
-                        datsize += s.Size;
-                    }
-
-                    s = s__prev1;
-                }
-
-                sect.Length = uint64(datsize) - sect.Vaddr;
-                checkdatsize(ctxt, datsize, sym.SINITARR);
-            } 
-
-            /* data */
-            sect = addsection(ctxt.Arch, ref Segdata, ".data", 06L);
-            sect.Align = dataMaxAlign[sym.SDATA];
-            datsize = Rnd(datsize, int64(sect.Align));
-            sect.Vaddr = uint64(datsize);
-            ctxt.Syms.Lookup("runtime.data", 0L).Sect = sect;
-            ctxt.Syms.Lookup("runtime.edata", 0L).Sect = sect;
-            GCProg gc = default;
-            gc.Init(ctxt, "runtime.gcdata");
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SDATA])
-                {
-                    s = __s;
-                    s.Sect = sect;
-                    s.Type = sym.SDATA;
-                    datsize = aligndatsize(datsize, s);
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    gc.AddSym(s);
-                    datsize += s.Size;
-                }
-
-                s = s__prev1;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SDATA);
-            sect.Length = uint64(datsize) - sect.Vaddr;
-            gc.End(int64(sect.Length)); 
-
-            /* bss */
-            sect = addsection(ctxt.Arch, ref Segdata, ".bss", 06L);
-            sect.Align = dataMaxAlign[sym.SBSS];
-            datsize = Rnd(datsize, int64(sect.Align));
-            sect.Vaddr = uint64(datsize);
-            ctxt.Syms.Lookup("runtime.bss", 0L).Sect = sect;
-            ctxt.Syms.Lookup("runtime.ebss", 0L).Sect = sect;
-            gc = new GCProg();
-            gc.Init(ctxt, "runtime.gcbss");
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SBSS])
-                {
-                    s = __s;
-                    s.Sect = sect;
-                    datsize = aligndatsize(datsize, s);
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    gc.AddSym(s);
-                    datsize += s.Size;
-                }
-
-                s = s__prev1;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SBSS);
-            sect.Length = uint64(datsize) - sect.Vaddr;
-            gc.End(int64(sect.Length)); 
-
-            /* pointer-free bss */
-            sect = addsection(ctxt.Arch, ref Segdata, ".noptrbss", 06L);
-            sect.Align = dataMaxAlign[sym.SNOPTRBSS];
-            datsize = Rnd(datsize, int64(sect.Align));
-            sect.Vaddr = uint64(datsize);
-            ctxt.Syms.Lookup("runtime.noptrbss", 0L).Sect = sect;
-            ctxt.Syms.Lookup("runtime.enoptrbss", 0L).Sect = sect;
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SNOPTRBSS])
-                {
-                    s = __s;
-                    datsize = aligndatsize(datsize, s);
-                    s.Sect = sect;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    datsize += s.Size;
-                }
-
-                s = s__prev1;
-            }
-
-            sect.Length = uint64(datsize) - sect.Vaddr;
-            ctxt.Syms.Lookup("runtime.end", 0L).Sect = sect;
-            checkdatsize(ctxt, datsize, sym.SNOPTRBSS);
-
-            if (len(data[sym.STLSBSS]) > 0L)
-            {
-                sect = default;
-                if (ctxt.IsELF && (ctxt.LinkMode == LinkExternal || !FlagD.Value))
-                {
-                    sect = addsection(ctxt.Arch, ref Segdata, ".tbss", 06L);
-                    sect.Align = int32(ctxt.Arch.PtrSize);
-                    sect.Vaddr = 0L;
-                }
-                datsize = 0L;
-
-                {
-                    var s__prev1 = s;
-
-                    foreach (var (_, __s) in data[sym.STLSBSS])
-                    {
-                        s = __s;
-                        datsize = aligndatsize(datsize, s);
-                        s.Sect = sect;
-                        s.Value = datsize;
-                        datsize += s.Size;
-                    }
-
-                    s = s__prev1;
-                }
-
-                checkdatsize(ctxt, datsize, sym.STLSBSS);
-
-                if (sect != null)
-                {
-                    sect.Length = uint64(datsize);
-                }
-            }
-
-            /*
-                 * We finished data, begin read-only data.
-                 * Not all systems support a separate read-only non-executable data section.
-                 * ELF systems do.
-                 * OS X and Plan 9 do not.
-                 * Windows PE may, but if so we have not implemented it.
-                 * And if we're using external linking mode, the point is moot,
-                 * since it's not our decision; that code expects the sections in
-                 * segtext.
-                 */
-            ref sym.Segment segro = default;
-            if (ctxt.IsELF && ctxt.LinkMode == LinkInternal)
-            {
-                segro = ref Segrodata;
-            }
-            else
-            {
-                segro = ref Segtext;
-            }
-            datsize = 0L; 
-
-            /* read-only executable ELF, Mach-O sections */
-            if (len(data[sym.STEXT]) != 0L)
-            {
-                Errorf(null, "dodata found an sym.STEXT symbol: %s", data[sym.STEXT][0L].Name);
-            }
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SELFRXSECT])
-                {
-                    s = __s;
-                    sect = addsection(ctxt.Arch, ref Segtext, s.Name, 04L);
-                    sect.Align = symalign(s);
-                    datsize = Rnd(datsize, int64(sect.Align));
-                    sect.Vaddr = uint64(datsize);
-                    s.Sect = sect;
-                    s.Type = sym.SRODATA;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    datsize += s.Size;
-                    sect.Length = uint64(datsize) - sect.Vaddr;
-                    checkdatsize(ctxt, datsize, sym.SELFRXSECT);
-                } 
-
-                /* read-only data */
-
-                s = s__prev1;
-            }
-
-            sect = addsection(ctxt.Arch, segro, ".rodata", 04L);
-
-            sect.Vaddr = 0L;
-            ctxt.Syms.Lookup("runtime.rodata", 0L).Sect = sect;
-            ctxt.Syms.Lookup("runtime.erodata", 0L).Sect = sect;
-            if (!ctxt.UseRelro())
-            {
-                ctxt.Syms.Lookup("runtime.types", 0L).Sect = sect;
-                ctxt.Syms.Lookup("runtime.etypes", 0L).Sect = sect;
-            }
-            {
-                var symn__prev1 = symn;
-
-                foreach (var (_, __symn) in sym.ReadOnly)
-                {
-                    symn = __symn;
-                    var align = dataMaxAlign[symn];
-                    if (sect.Align < align)
-                    {
-                        sect.Align = align;
-                    }
-                }
-
-                symn = symn__prev1;
-            }
-
-            datsize = Rnd(datsize, int64(sect.Align));
-            {
-                var symn__prev1 = symn;
-
-                foreach (var (_, __symn) in sym.ReadOnly)
-                {
-                    symn = __symn;
-                    {
-                        var s__prev2 = s;
-
-                        foreach (var (_, __s) in data[symn])
-                        {
-                            s = __s;
-                            datsize = aligndatsize(datsize, s);
-                            s.Sect = sect;
-                            s.Type = sym.SRODATA;
-                            s.Value = int64(uint64(datsize) - sect.Vaddr);
-                            datsize += s.Size;
-                        }
-
-                        s = s__prev2;
-                    }
-
-                    checkdatsize(ctxt, datsize, symn);
-                }
-
-                symn = symn__prev1;
-            }
-
-            sect.Length = uint64(datsize) - sect.Vaddr; 
-
-            /* read-only ELF, Mach-O sections */
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SELFROSECT])
-                {
-                    s = __s;
-                    sect = addsection(ctxt.Arch, segro, s.Name, 04L);
-                    sect.Align = symalign(s);
-                    datsize = Rnd(datsize, int64(sect.Align));
-                    sect.Vaddr = uint64(datsize);
-                    s.Sect = sect;
-                    s.Type = sym.SRODATA;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    datsize += s.Size;
-                    sect.Length = uint64(datsize) - sect.Vaddr;
-                }
-
-                s = s__prev1;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SELFROSECT);
-
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SMACHOPLT])
-                {
-                    s = __s;
-                    sect = addsection(ctxt.Arch, segro, s.Name, 04L);
-                    sect.Align = symalign(s);
-                    datsize = Rnd(datsize, int64(sect.Align));
-                    sect.Vaddr = uint64(datsize);
-                    s.Sect = sect;
-                    s.Type = sym.SRODATA;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    datsize += s.Size;
-                    sect.Length = uint64(datsize) - sect.Vaddr;
-                }
-
-                s = s__prev1;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SMACHOPLT); 
-
-            // There is some data that are conceptually read-only but are written to by
-            // relocations. On GNU systems, we can arrange for the dynamic linker to
-            // mprotect sections after relocations are applied by giving them write
-            // permissions in the object file and calling them ".data.rel.ro.FOO". We
-            // divide the .rodata section between actual .rodata and .data.rel.ro.rodata,
-            // but for the other sections that this applies to, we just write a read-only
-            // .FOO section or a read-write .data.rel.ro.FOO section depending on the
-            // situation.
-            // TODO(mwhudson): It would make sense to do this more widely, but it makes
-            // the system linker segfault on darwin.
-            Func<@string, ref sym.Section> addrelrosection = suffix =>
-            {
-                return addsection(ctxt.Arch, segro, suffix, 04L);
-            }
-;
-
-            if (ctxt.UseRelro())
-            {
-                addrelrosection = suffix =>
-                {
-                    var seg = ref Segrelrodata;
-                    if (ctxt.LinkMode == LinkExternal)
-                    { 
-                        // Using a separate segment with an external
-                        // linker results in some programs moving
-                        // their data sections unexpectedly, which
-                        // corrupts the moduledata. So we use the
-                        // rodata segment and let the external linker
-                        // sort out a rel.ro segment.
-                        seg = ref Segrodata;
-                    }
-                    return addsection(ctxt.Arch, seg, ".data.rel.ro" + suffix, 06L);
-                } 
-                /* data only written by relocations */
-; 
-                /* data only written by relocations */
-                sect = addrelrosection("");
-
-                sect.Vaddr = 0L;
-                ctxt.Syms.Lookup("runtime.types", 0L).Sect = sect;
-                ctxt.Syms.Lookup("runtime.etypes", 0L).Sect = sect;
-                {
-                    var symnro__prev1 = symnro;
-
-                    foreach (var (_, __symnro) in sym.ReadOnly)
-                    {
-                        symnro = __symnro;
-                        symn = sym.RelROMap[symnro];
-                        align = dataMaxAlign[symn];
-                        if (sect.Align < align)
-                        {
-                            sect.Align = align;
-                        }
-                    }
-
-                    symnro = symnro__prev1;
-                }
-
-                datsize = Rnd(datsize, int64(sect.Align));
-                {
-                    var symnro__prev1 = symnro;
-
-                    foreach (var (_, __symnro) in sym.ReadOnly)
-                    {
-                        symnro = __symnro;
-                        symn = sym.RelROMap[symnro];
-                        {
-                            var s__prev2 = s;
-
-                            foreach (var (_, __s) in data[symn])
-                            {
-                                s = __s;
-                                datsize = aligndatsize(datsize, s);
-                                if (s.Outer != null && s.Outer.Sect != null && s.Outer.Sect != sect)
-                                {
-                                    Errorf(s, "s.Outer (%s) in different section from s, %s != %s", s.Outer.Name, s.Outer.Sect.Name, sect.Name);
-                                }
-                                s.Sect = sect;
-                                s.Type = sym.SRODATA;
-                                s.Value = int64(uint64(datsize) - sect.Vaddr);
-                                datsize += s.Size;
-                            }
-
-                            s = s__prev2;
-                        }
-
-                        checkdatsize(ctxt, datsize, symn);
-                    }
-
-                    symnro = symnro__prev1;
-                }
-
-                sect.Length = uint64(datsize) - sect.Vaddr;
-            } 
-
-            /* typelink */
-            sect = addrelrosection(".typelink");
-            sect.Align = dataMaxAlign[sym.STYPELINK];
-            datsize = Rnd(datsize, int64(sect.Align));
-            sect.Vaddr = uint64(datsize);
-            var typelink = ctxt.Syms.Lookup("runtime.typelink", 0L);
-            typelink.Sect = sect;
-            typelink.Type = sym.SRODATA;
-            datsize += typelink.Size;
-            checkdatsize(ctxt, datsize, sym.STYPELINK);
-            sect.Length = uint64(datsize) - sect.Vaddr; 
-
-            /* itablink */
-            sect = addrelrosection(".itablink");
-            sect.Align = dataMaxAlign[sym.SITABLINK];
-            datsize = Rnd(datsize, int64(sect.Align));
-            sect.Vaddr = uint64(datsize);
-            ctxt.Syms.Lookup("runtime.itablink", 0L).Sect = sect;
-            ctxt.Syms.Lookup("runtime.eitablink", 0L).Sect = sect;
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SITABLINK])
-                {
-                    s = __s;
-                    datsize = aligndatsize(datsize, s);
-                    s.Sect = sect;
-                    s.Type = sym.SRODATA;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    datsize += s.Size;
-                }
-
-                s = s__prev1;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SITABLINK);
-            sect.Length = uint64(datsize) - sect.Vaddr; 
-
-            /* gosymtab */
-            sect = addrelrosection(".gosymtab");
-            sect.Align = dataMaxAlign[sym.SSYMTAB];
-            datsize = Rnd(datsize, int64(sect.Align));
-            sect.Vaddr = uint64(datsize);
-            ctxt.Syms.Lookup("runtime.symtab", 0L).Sect = sect;
-            ctxt.Syms.Lookup("runtime.esymtab", 0L).Sect = sect;
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SSYMTAB])
-                {
-                    s = __s;
-                    datsize = aligndatsize(datsize, s);
-                    s.Sect = sect;
-                    s.Type = sym.SRODATA;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    datsize += s.Size;
-                }
-
-                s = s__prev1;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SSYMTAB);
-            sect.Length = uint64(datsize) - sect.Vaddr; 
-
-            /* gopclntab */
-            sect = addrelrosection(".gopclntab");
-            sect.Align = dataMaxAlign[sym.SPCLNTAB];
-            datsize = Rnd(datsize, int64(sect.Align));
-            sect.Vaddr = uint64(datsize);
-            ctxt.Syms.Lookup("runtime.pclntab", 0L).Sect = sect;
-            ctxt.Syms.Lookup("runtime.epclntab", 0L).Sect = sect;
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in data[sym.SPCLNTAB])
-                {
-                    s = __s;
-                    datsize = aligndatsize(datsize, s);
-                    s.Sect = sect;
-                    s.Type = sym.SRODATA;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    datsize += s.Size;
-                }
-
-                s = s__prev1;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SRODATA);
-            sect.Length = uint64(datsize) - sect.Vaddr; 
-
-            // 6g uses 4-byte relocation offsets, so the entire segment must fit in 32 bits.
-            if (datsize != int64(uint32(datsize)))
-            {
-                Errorf(null, "read-only data segment too large: %d", datsize);
-            }
-            {
-                var symn__prev1 = symn;
-
-                for (symn = sym.SELFRXSECT; symn < sym.SXREF; symn++)
-                {
-                    datap = append(datap, data[symn]);
-                }
-
-
-                symn = symn__prev1;
-            }
-
-            dwarfgeneratedebugsyms(ctxt);
-
-            long i = default;
-            while (i < len(dwarfp))
-            {
-                var s = dwarfp[i];
-                if (s.Type != sym.SDWARFSECT)
-                {
-                    break;
-                i++;
-                }
-                sect = addsection(ctxt.Arch, ref Segdwarf, s.Name, 04L);
-                sect.Align = 1L;
-                datsize = Rnd(datsize, int64(sect.Align));
-                sect.Vaddr = uint64(datsize);
-                s.Sect = sect;
-                s.Type = sym.SRODATA;
-                s.Value = int64(uint64(datsize) - sect.Vaddr);
-                datsize += s.Size;
-                sect.Length = uint64(datsize) - sect.Vaddr;
-            }
-
-            checkdatsize(ctxt, datsize, sym.SDWARFSECT);
-
-            while (i < len(dwarfp))
-            {
-                var curType = dwarfp[i].Type;
-                sect = default;
-
-                if (curType == sym.SDWARFINFO) 
-                    sect = addsection(ctxt.Arch, ref Segdwarf, ".debug_info", 04L);
-                else if (curType == sym.SDWARFRANGE) 
-                    sect = addsection(ctxt.Arch, ref Segdwarf, ".debug_ranges", 04L);
-                else if (curType == sym.SDWARFLOC) 
-                    sect = addsection(ctxt.Arch, ref Segdwarf, ".debug_loc", 04L);
-                else 
-                    Errorf(dwarfp[i], "unknown DWARF section %v", curType);
-                                sect.Align = 1L;
-                datsize = Rnd(datsize, int64(sect.Align));
-                sect.Vaddr = uint64(datsize);
-                while (i < len(dwarfp))
-                {
-                    s = dwarfp[i];
-                    if (s.Type != curType)
-                    {
-                        break;
-                    i++;
-                    }
-                    s.Sect = sect;
-                    s.Type = sym.SRODATA;
-                    s.Value = int64(uint64(datsize) - sect.Vaddr);
-                    s.Attr |= sym.AttrLocal;
-                    datsize += s.Size;
-                }
-
-                sect.Length = uint64(datsize) - sect.Vaddr;
-                checkdatsize(ctxt, datsize, curType);
-            } 
-
-            /* number the sections */
- 
-
-            /* number the sections */
-            var n = int32(1L);
-
-            {
-                var sect__prev1 = sect;
-
-                foreach (var (_, __sect) in Segtext.Sections)
-                {
-                    sect = __sect;
-                    sect.Extnum = int16(n);
-                    n++;
-                }
-
-                sect = sect__prev1;
-            }
-
-            {
-                var sect__prev1 = sect;
-
-                foreach (var (_, __sect) in Segrodata.Sections)
-                {
-                    sect = __sect;
-                    sect.Extnum = int16(n);
-                    n++;
-                }
-
-                sect = sect__prev1;
-            }
-
-            {
-                var sect__prev1 = sect;
-
-                foreach (var (_, __sect) in Segrelrodata.Sections)
-                {
-                    sect = __sect;
-                    sect.Extnum = int16(n);
-                    n++;
-                }
-
-                sect = sect__prev1;
-            }
-
-            {
-                var sect__prev1 = sect;
-
-                foreach (var (_, __sect) in Segdata.Sections)
-                {
-                    sect = __sect;
-                    sect.Extnum = int16(n);
-                    n++;
-                }
-
-                sect = sect__prev1;
-            }
-
-            {
-                var sect__prev1 = sect;
-
-                foreach (var (_, __sect) in Segdwarf.Sections)
-                {
-                    sect = __sect;
-                    sect.Extnum = int16(n);
-                    n++;
-                }
-
-                sect = sect__prev1;
-            }
-
-        }
-
-        private static (slice<ref sym.Symbol>, int) dodataSect(ref Link ctxt, sym.SymKind symn, slice<ref sym.Symbol> syms)
-        {
-            if (ctxt.HeadType == objabi.Hdarwin)
-            { 
-                // Some symbols may no longer belong in syms
-                // due to movement in machosymorder.
-                var newSyms = make_slice<ref sym.Symbol>(0L, len(syms));
-                {
-                    var s__prev1 = s;
-
-                    foreach (var (_, __s) in syms)
-                    {
-                        s = __s;
-                        if (s.Type == symn)
-                        {
-                            newSyms = append(newSyms, s);
-                        }
-                    }
-
-                    s = s__prev1;
-                }
-
-                syms = newSyms;
-            }
-            ref sym.Symbol head = default;            ref sym.Symbol tail = default;
-
-            var symsSort = make_slice<dataSortKey>(0L, len(syms));
-            {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in syms)
-                {
-                    s = __s;
-                    if (s.Attr.OnList())
-                    {
-                        log.Fatalf("symbol %s listed multiple times", s.Name);
-                    }
-                    s.Attr |= sym.AttrOnList;
-
-                    if (s.Size < int64(len(s.P))) 
-                        Errorf(s, "initialize bounds (%d < %d)", s.Size, len(s.P));
-                    else if (s.Size < 0L) 
-                        Errorf(s, "negative size (%d bytes)", s.Size);
-                    else if (s.Size > cutoff) 
-                        Errorf(s, "symbol too large (%d bytes)", s.Size);
-                    // If the usually-special section-marker symbols are being laid
-                    // out as regular symbols, put them either at the beginning or
-                    // end of their section.
-                    if (ctxt.DynlinkingGo() && ctxt.HeadType == objabi.Hdarwin)
-                    {
-                        switch (s.Name)
-                        {
-                            case "runtime.text": 
-
-                            case "runtime.bss": 
-
-                            case "runtime.data": 
-
-                            case "runtime.types": 
-                                head = s;
-                                continue;
-                                break;
-                            case "runtime.etext": 
-
-                            case "runtime.ebss": 
-
-                            case "runtime.edata": 
-
-                            case "runtime.etypes": 
-                                tail = s;
-                                continue;
-                                break;
-                        }
-                    }
-                    dataSortKey key = new dataSortKey(size:s.Size,name:s.Name,sym:s,);
-
-
-                    if (s.Type == sym.SELFGOT) 
-                        // For ppc64, we want to interleave the .got and .toc sections
-                        // from input files. Both are type sym.SELFGOT, so in that case
-                        // we skip size comparison and fall through to the name
-                        // comparison (conveniently, .got sorts before .toc).
-                        key.size = 0L;
-                                        symsSort = append(symsSort, key);
-                }
-
-                s = s__prev1;
-            }
-
-            sort.Sort(bySizeAndName(symsSort));
-
-            long off = 0L;
-            if (head != null)
-            {
-                syms[0L] = head;
-                off++;
-            }
-            {
-                var i__prev1 = i;
-
-                foreach (var (__i, __symSort) in symsSort)
-                {
-                    i = __i;
-                    symSort = __symSort;
-                    syms[i + off] = symSort.sym;
-                    var align = symalign(symSort.sym);
-                    if (maxAlign < align)
-                    {
-                        maxAlign = align;
-                    }
-                }
-
-                i = i__prev1;
-            }
-
-            if (tail != null)
-            {
-                syms[len(syms) - 1L] = tail;
-            }
-            if (ctxt.IsELF && symn == sym.SELFROSECT)
+            if (ctxt.IsELF)
             { 
                 // Make .rela and .rela.plt contiguous, the ELF ABI requires this
                 // and Solaris actually cares.
+                var syms = state.data2[sym.SELFROSECT];
                 long reli = -1L;
                 long plti = -1L;
                 {
-                    var i__prev1 = i;
                     var s__prev1 = s;
 
                     foreach (var (__i, __s) in syms)
                     {
                         i = __i;
                         s = __s;
-                        switch (s.Name)
+                        switch (ldr.SymName(s))
                         {
                             case ".rel.plt": 
 
@@ -2487,9 +2276,9 @@ namespace @internal
                                 reli = i;
                                 break;
                         }
+
                     }
 
-                    i = i__prev1;
                     s = s__prev1;
                 }
 
@@ -2501,12 +2290,15 @@ namespace @internal
                     {
                         first = reli;
                         second = plti;
+
                     }
                     else
                     {
                         first = plti;
                         second = reli;
+
                     }
+
                     var rel = syms[reli];
                     var plt = syms[plti];
                     copy(syms[first + 2L..], syms[first + 1L..second]);
@@ -2517,11 +2309,872 @@ namespace @internal
                     // Setting the alignment explicitly prevents
                     // symalign from basing it on the size and
                     // getting it wrong.
-                    rel.Align = int32(ctxt.Arch.RegSize);
-                    plt.Align = int32(ctxt.Arch.RegSize);
+                    ldr.SetSymAlign(rel, int32(ctxt.Arch.RegSize));
+                    ldr.SetSymAlign(plt, int32(ctxt.Arch.RegSize));
+
                 }
+
+                state.data2[sym.SELFROSECT] = syms;
+
             }
+
+            if (ctxt.HeadType == objabi.Haix && ctxt.LinkMode == LinkExternal)
+            { 
+                // These symbols must have the same alignment as their section.
+                // Otherwize, ld might change the layout of Go sections.
+                ldr.SetSymAlign(ldr.Lookup("runtime.data", 0L), state.dataMaxAlign[sym.SDATA]);
+                ldr.SetSymAlign(ldr.Lookup("runtime.bss", 0L), state.dataMaxAlign[sym.SBSS]);
+
+            } 
+
+            // Create *sym.Section objects and assign symbols to sections for
+            // data/rodata (and related) symbols.
+            state.allocateDataSections2(ctxt); 
+
+            // Create *sym.Section objects and assign symbols to sections for
+            // DWARF symbols.
+            state.allocateDwarfSections2(ctxt); 
+
+            /* number the sections */
+            var n = int16(1L);
+
+            {
+                var sect__prev1 = sect;
+
+                foreach (var (_, __sect) in Segtext.Sections)
+                {
+                    sect = __sect;
+                    sect.Extnum = n;
+                    n++;
+                }
+
+                sect = sect__prev1;
+            }
+
+            {
+                var sect__prev1 = sect;
+
+                foreach (var (_, __sect) in Segrodata.Sections)
+                {
+                    sect = __sect;
+                    sect.Extnum = n;
+                    n++;
+                }
+
+                sect = sect__prev1;
+            }
+
+            {
+                var sect__prev1 = sect;
+
+                foreach (var (_, __sect) in Segrelrodata.Sections)
+                {
+                    sect = __sect;
+                    sect.Extnum = n;
+                    n++;
+                }
+
+                sect = sect__prev1;
+            }
+
+            {
+                var sect__prev1 = sect;
+
+                foreach (var (_, __sect) in Segdata.Sections)
+                {
+                    sect = __sect;
+                    sect.Extnum = n;
+                    n++;
+                }
+
+                sect = sect__prev1;
+            }
+
+            {
+                var sect__prev1 = sect;
+
+                foreach (var (_, __sect) in Segdwarf.Sections)
+                {
+                    sect = __sect;
+                    sect.Extnum = n;
+                    n++;
+                }
+
+                sect = sect__prev1;
+            }
+        }
+
+        // allocateDataSectionForSym creates a new sym.Section into which a a
+        // single symbol will be placed. Here "seg" is the segment into which
+        // the section will go, "s" is the symbol to be placed into the new
+        // section, and "rwx" contains permissions for the section.
+        private static ptr<sym.Section> allocateDataSectionForSym2(this ptr<dodataState> _addr_state, ptr<sym.Segment> _addr_seg, loader.Sym s, long rwx)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref sym.Segment seg = ref _addr_seg.val;
+
+            var ldr = state.ctxt.loader;
+            var sname = ldr.SymName(s);
+            var sect = addsection(ldr, state.ctxt.Arch, seg, sname, rwx);
+            sect.Align = state.symalign2(s);
+            state.datsize = Rnd(state.datsize, int64(sect.Align));
+            sect.Vaddr = uint64(state.datsize);
+            return _addr_sect!;
+        }
+
+        // allocateNamedDataSection creates a new sym.Section for a category
+        // of data symbols. Here "seg" is the segment into which the section
+        // will go, "sName" is the name to give to the section, "types" is a
+        // range of symbol types to be put into the section, and "rwx"
+        // contains permissions for the section.
+        private static ptr<sym.Section> allocateNamedDataSection(this ptr<dodataState> _addr_state, ptr<sym.Segment> _addr_seg, @string sName, slice<sym.SymKind> types, long rwx)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref sym.Segment seg = ref _addr_seg.val;
+
+            var sect = addsection(state.ctxt.loader, state.ctxt.Arch, seg, sName, rwx);
+            if (len(types) == 0L)
+            {
+                sect.Align = 1L;
+            }
+            else if (len(types) == 1L)
+            {
+                sect.Align = state.dataMaxAlign[types[0L]];
+            }
+            else
+            {
+                foreach (var (_, symn) in types)
+                {
+                    var align = state.dataMaxAlign[symn];
+                    if (sect.Align < align)
+                    {
+                        sect.Align = align;
+                    }
+
+                }
+
+            }
+
+            state.datsize = Rnd(state.datsize, int64(sect.Align));
+            sect.Vaddr = uint64(state.datsize);
+            return _addr_sect!;
+
+        }
+
+        // assignDsymsToSection assigns a collection of data symbols to a
+        // newly created section. "sect" is the section into which to place
+        // the symbols, "syms" holds the list of symbols to assign,
+        // "forceType" (if non-zero) contains a new sym type to apply to each
+        // sym during the assignment, and "aligner" is a hook to call to
+        // handle alignment during the assignment process.
+        private static long assignDsymsToSection2(this ptr<dodataState> _addr_state, ptr<sym.Section> _addr_sect, slice<loader.Sym> syms, sym.SymKind forceType, Func<ptr<dodataState>, long, loader.Sym, long> aligner)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref sym.Section sect = ref _addr_sect.val;
+
+            var ldr = state.ctxt.loader;
+            foreach (var (_, s) in syms)
+            {
+                state.datsize = aligner(state, state.datsize, s);
+                ldr.SetSymSect(s, sect);
+                if (forceType != sym.Sxxx)
+                {
+                    state.setSymType(s, forceType);
+                }
+
+                ldr.SetSymValue(s, int64(uint64(state.datsize) - sect.Vaddr));
+                state.datsize += ldr.SymSize(s);
+
+            }
+            sect.Length = uint64(state.datsize) - sect.Vaddr;
+
+        }
+
+        private static void assignToSection2(this ptr<dodataState> _addr_state, ptr<sym.Section> _addr_sect, sym.SymKind symn, sym.SymKind forceType)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref sym.Section sect = ref _addr_sect.val;
+
+            state.assignDsymsToSection2(sect, state.data2[symn], forceType, aligndatsize2);
+            state.checkdatsize(symn);
+        }
+
+        // allocateSingleSymSections walks through the bucketed data symbols
+        // with type 'symn', creates a new section for each sym, and assigns
+        // the sym to a newly created section. Section name is set from the
+        // symbol name. "Seg" is the segment into which to place the new
+        // section, "forceType" is the new sym.SymKind to assign to the symbol
+        // within the section, and "rwx" holds section permissions.
+        private static void allocateSingleSymSections2(this ptr<dodataState> _addr_state, ptr<sym.Segment> _addr_seg, sym.SymKind symn, sym.SymKind forceType, long rwx)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref sym.Segment seg = ref _addr_seg.val;
+
+            var ldr = state.ctxt.loader;
+            foreach (var (_, s) in state.data2[symn])
+            {
+                var sect = state.allocateDataSectionForSym2(seg, s, rwx);
+                ldr.SetSymSect(s, sect);
+                state.setSymType(s, forceType);
+                ldr.SetSymValue(s, int64(uint64(state.datsize) - sect.Vaddr));
+                state.datsize += ldr.SymSize(s);
+                sect.Length = uint64(state.datsize) - sect.Vaddr;
+            }
+            state.checkdatsize(symn);
+
+        }
+
+        // allocateNamedSectionAndAssignSyms creates a new section with the
+        // specified name, then walks through the bucketed data symbols with
+        // type 'symn' and assigns each of them to this new section. "Seg" is
+        // the segment into which to place the new section, "secName" is the
+        // name to give to the new section, "forceType" (if non-zero) contains
+        // a new sym type to apply to each sym during the assignment, and
+        // "rwx" holds section permissions.
+        private static ptr<sym.Section> allocateNamedSectionAndAssignSyms2(this ptr<dodataState> _addr_state, ptr<sym.Segment> _addr_seg, @string secName, sym.SymKind symn, sym.SymKind forceType, long rwx)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref sym.Segment seg = ref _addr_seg.val;
+
+            var sect = state.allocateNamedDataSection(seg, secName, new slice<sym.SymKind>(new sym.SymKind[] { symn }), rwx);
+            state.assignDsymsToSection2(sect, state.data2[symn], forceType, aligndatsize2);
+            return _addr_sect!;
+        }
+
+        // allocateDataSections allocates sym.Section objects for data/rodata
+        // (and related) symbols, and then assigns symbols to those sections.
+        private static void allocateDataSections2(this ptr<dodataState> _addr_state, ptr<Link> _addr_ctxt)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref Link ctxt = ref _addr_ctxt.val;
+ 
+            // Allocate sections.
+            // Data is processed before segtext, because we need
+            // to see all symbols in the .data and .bss sections in order
+            // to generate garbage collection information.
+
+            // Writable data sections that do not need any specialized handling.
+            sym.SymKind writable = new slice<sym.SymKind>(new sym.SymKind[] { sym.SBUILDINFO, sym.SELFSECT, sym.SMACHO, sym.SMACHOGOT, sym.SWINDOWS });
+            {
+                var symn__prev1 = symn;
+
+                foreach (var (_, __symn) in writable)
+                {
+                    symn = __symn;
+                    state.allocateSingleSymSections2(_addr_Segdata, symn, sym.SDATA, 06L);
+                }
+
+                symn = symn__prev1;
+            }
+
+            var ldr = ctxt.loader; 
+
+            // .got (and .toc on ppc64)
+            if (len(state.data2[sym.SELFGOT]) > 0L)
+            {
+                var sect = state.allocateNamedSectionAndAssignSyms2(_addr_Segdata, ".got", sym.SELFGOT, sym.SDATA, 06L);
+                if (ctxt.IsPPC64())
+                {
+                    {
+                        var s__prev1 = s;
+
+                        foreach (var (_, __s) in state.data2[sym.SELFGOT])
+                        {
+                            s = __s; 
+                            // Resolve .TOC. symbol for this object file (ppc64)
+
+                            var toc = ldr.Lookup(".TOC.", int(ldr.SymVersion(s)));
+                            if (toc != 0L)
+                            {
+                                ldr.SetSymSect(toc, sect);
+                                ldr.PrependSub(s, toc);
+                                ldr.SetSymValue(toc, 0x8000UL);
+                            }
+
+                        }
+
+                        s = s__prev1;
+                    }
+                }
+
+            } 
+
+            /* pointer-free data */
+            sect = state.allocateNamedSectionAndAssignSyms2(_addr_Segdata, ".noptrdata", sym.SNOPTRDATA, sym.SDATA, 06L);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.noptrdata", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.enoptrdata", 0L), sect);
+
+            var hasinitarr = ctxt.linkShared; 
+
+            /* shared library initializer */
+
+            if (ctxt.BuildMode == BuildModeCArchive || ctxt.BuildMode == BuildModeCShared || ctxt.BuildMode == BuildModeShared || ctxt.BuildMode == BuildModePlugin) 
+                hasinitarr = true;
+                        if (ctxt.HeadType == objabi.Haix)
+            {
+                if (len(state.data2[sym.SINITARR]) > 0L)
+                {
+                    Errorf(null, "XCOFF format doesn't allow .init_array section");
+                }
+
+            }
+
+            if (hasinitarr && len(state.data2[sym.SINITARR]) > 0L)
+            {
+                state.allocateNamedSectionAndAssignSyms2(_addr_Segdata, ".init_array", sym.SINITARR, sym.Sxxx, 06L);
+            } 
+
+            /* data */
+            sect = state.allocateNamedSectionAndAssignSyms2(_addr_Segdata, ".data", sym.SDATA, sym.SDATA, 06L);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.data", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.edata", 0L), sect);
+            var dataGcEnd = state.datsize - int64(sect.Vaddr); 
+
+            // On AIX, TOC entries must be the last of .data
+            // These aren't part of gc as they won't change during the runtime.
+            state.assignToSection2(sect, sym.SXCOFFTOC, sym.SDATA);
+            state.checkdatsize(sym.SDATA);
+            sect.Length = uint64(state.datsize) - sect.Vaddr; 
+
+            /* bss */
+            sect = state.allocateNamedSectionAndAssignSyms2(_addr_Segdata, ".bss", sym.SBSS, sym.Sxxx, 06L);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.bss", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.ebss", 0L), sect);
+            var bssGcEnd = state.datsize - int64(sect.Vaddr); 
+
+            // Emit gcdata for bcc symbols now that symbol values have been assigned.
+            foreach (var (_, g) in gcsToEmit)
+            {
+                GCProg2 gc = default;
+                gc.Init(ctxt, g.symName);
+                {
+                    var s__prev2 = s;
+
+                    foreach (var (_, __s) in state.data2[g.symKind])
+                    {
+                        s = __s;
+                        gc.AddSym(s);
+                    }
+
+                    s = s__prev2;
+                }
+
+                gc.End(g.gcEnd);
+
+            } 
+
+            /* pointer-free bss */
+            sect = state.allocateNamedSectionAndAssignSyms2(_addr_Segdata, ".noptrbss", sym.SNOPTRBSS, sym.Sxxx, 06L);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.noptrbss", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.enoptrbss", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.end", 0L), sect); 
+
+            // Coverage instrumentation counters for libfuzzer.
+            if (len(state.data2[sym.SLIBFUZZER_EXTRA_COUNTER]) > 0L)
+            {
+                state.allocateNamedSectionAndAssignSyms2(_addr_Segdata, "__libfuzzer_extra_counters", sym.SLIBFUZZER_EXTRA_COUNTER, sym.Sxxx, 06L);
+            }
+
+            if (len(state.data2[sym.STLSBSS]) > 0L)
+            {
+                sect = ; 
+                // FIXME: not clear why it is sometimes necessary to suppress .tbss section creation.
+                if ((ctxt.IsELF || ctxt.HeadType == objabi.Haix) && (ctxt.LinkMode == LinkExternal || !FlagD.val))
+                {
+                    sect = addsection(ldr, ctxt.Arch, _addr_Segdata, ".tbss", 06L);
+                    sect.Align = int32(ctxt.Arch.PtrSize); 
+                    // FIXME: why does this need to be set to zero?
+                    sect.Vaddr = 0L;
+
+                }
+
+                state.datsize = 0L;
+
+                {
+                    var s__prev1 = s;
+
+                    foreach (var (_, __s) in state.data2[sym.STLSBSS])
+                    {
+                        s = __s;
+                        state.datsize = aligndatsize2(_addr_state, state.datsize, s);
+                        if (sect != null)
+                        {
+                            ldr.SetSymSect(s, sect);
+                        }
+
+                        ldr.SetSymValue(s, state.datsize);
+                        state.datsize += ldr.SymSize(s);
+
+                    }
+
+                    s = s__prev1;
+                }
+
+                state.checkdatsize(sym.STLSBSS);
+
+                if (sect != null)
+                {
+                    sect.Length = uint64(state.datsize);
+                }
+
+            }
+
+            /*
+                 * We finished data, begin read-only data.
+                 * Not all systems support a separate read-only non-executable data section.
+                 * ELF and Windows PE systems do.
+                 * OS X and Plan 9 do not.
+                 * And if we're using external linking mode, the point is moot,
+                 * since it's not our decision; that code expects the sections in
+                 * segtext.
+                 */
+            ptr<sym.Segment> segro;
+            if (ctxt.IsELF && ctxt.LinkMode == LinkInternal)
+            {
+                segro = _addr_Segrodata;
+            }
+            else if (ctxt.HeadType == objabi.Hwindows)
+            {
+                segro = _addr_Segrodata;
+            }
+            else
+            {
+                segro = _addr_Segtext;
+            }
+
+            state.datsize = 0L; 
+
+            /* read-only executable ELF, Mach-O sections */
+            if (len(state.data2[sym.STEXT]) != 0L)
+            {
+                var culprit = ldr.SymName(state.data2[sym.STEXT][0L]);
+                Errorf(null, "dodata found an sym.STEXT symbol: %s", culprit);
+            }
+
+            state.allocateSingleSymSections2(_addr_Segtext, sym.SELFRXSECT, sym.SRODATA, 04L); 
+
+            /* read-only data */
+            sect = state.allocateNamedDataSection(segro, ".rodata", sym.ReadOnly, 04L);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.rodata", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.erodata", 0L), sect);
+            if (!ctxt.UseRelro())
+            {
+                ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.types", 0L), sect);
+                ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.etypes", 0L), sect);
+            }
+
+            {
+                var symn__prev1 = symn;
+
+                foreach (var (_, __symn) in sym.ReadOnly)
+                {
+                    symn = __symn;
+                    var symnStartValue = state.datsize;
+                    state.assignToSection2(sect, symn, sym.SRODATA);
+                    if (ctxt.HeadType == objabi.Haix)
+                    { 
+                        // Read-only symbols might be wrapped inside their outer
+                        // symbol.
+                        // XCOFF symbol table needs to know the size of
+                        // these outer symbols.
+                        xcoffUpdateOuterSize2(ctxt, state.datsize - symnStartValue, symn);
+
+                    }
+
+                } 
+
+                /* read-only ELF, Mach-O sections */
+
+                symn = symn__prev1;
+            }
+
+            state.allocateSingleSymSections2(segro, sym.SELFROSECT, sym.SRODATA, 04L);
+            state.allocateSingleSymSections2(segro, sym.SMACHOPLT, sym.SRODATA, 04L); 
+
+            // There is some data that are conceptually read-only but are written to by
+            // relocations. On GNU systems, we can arrange for the dynamic linker to
+            // mprotect sections after relocations are applied by giving them write
+            // permissions in the object file and calling them ".data.rel.ro.FOO". We
+            // divide the .rodata section between actual .rodata and .data.rel.ro.rodata,
+            // but for the other sections that this applies to, we just write a read-only
+            // .FOO section or a read-write .data.rel.ro.FOO section depending on the
+            // situation.
+            // TODO(mwhudson): It would make sense to do this more widely, but it makes
+            // the system linker segfault on darwin.
+            const long relroPerm = (long)06L;
+
+            const long fallbackPerm = (long)04L;
+
+            var relroSecPerm = fallbackPerm;
+            Func<@string, @string> genrelrosecname = suffix =>
+            {
+                return suffix;
+            }
+;
+            var seg = segro;
+
+            if (ctxt.UseRelro())
+            {
+                var segrelro = _addr_Segrelrodata;
+                if (ctxt.LinkMode == LinkExternal && ctxt.HeadType != objabi.Haix)
+                { 
+                    // Using a separate segment with an external
+                    // linker results in some programs moving
+                    // their data sections unexpectedly, which
+                    // corrupts the moduledata. So we use the
+                    // rodata segment and let the external linker
+                    // sort out a rel.ro segment.
+                    segrelro = segro;
+
+                }
+                else
+                { 
+                    // Reset datsize for new segment.
+                    state.datsize = 0L;
+
+                }
+
+                genrelrosecname = suffix =>
+                {
+                    return ".data.rel.ro" + suffix;
+                }
+;
+                sym.SymKind relroReadOnly = new slice<sym.SymKind>(new sym.SymKind[] {  });
+                {
+                    var symnro__prev1 = symnro;
+
+                    foreach (var (_, __symnro) in sym.ReadOnly)
+                    {
+                        symnro = __symnro;
+                        var symn = sym.RelROMap[symnro];
+                        relroReadOnly = append(relroReadOnly, symn);
+                    }
+
+                    symnro = symnro__prev1;
+                }
+
+                seg = segrelro;
+                relroSecPerm = relroPerm; 
+
+                /* data only written by relocations */
+                sect = state.allocateNamedDataSection(segrelro, genrelrosecname(""), relroReadOnly, relroSecPerm);
+
+                ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.types", 0L), sect);
+                ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.etypes", 0L), sect);
+
+                {
+                    var symnro__prev1 = symnro;
+
+                    foreach (var (__i, __symnro) in sym.ReadOnly)
+                    {
+                        i = __i;
+                        symnro = __symnro;
+                        if (i == 0L && symnro == sym.STYPE && ctxt.HeadType != objabi.Haix)
+                        { 
+                            // Skip forward so that no type
+                            // reference uses a zero offset.
+                            // This is unlikely but possible in small
+                            // programs with no other read-only data.
+                            state.datsize++;
+
+                        }
+
+                        symn = sym.RelROMap[symnro];
+                        symnStartValue = state.datsize;
+
+                        {
+                            var s__prev2 = s;
+
+                            foreach (var (_, __s) in state.data2[symn])
+                            {
+                                s = __s;
+                                var outer = ldr.OuterSym(s);
+                                if (s != 0L && ldr.SymSect(outer) != null && ldr.SymSect(outer) != sect)
+                                {
+                                    ctxt.Errorf(s, "s.Outer (%s) in different section from s, %s != %s", ldr.SymName(outer), ldr.SymSect(outer).Name, sect.Name);
+                                }
+
+                            }
+
+                            s = s__prev2;
+                        }
+
+                        state.assignToSection2(sect, symn, sym.SRODATA);
+                        if (ctxt.HeadType == objabi.Haix)
+                        { 
+                            // Read-only symbols might be wrapped inside their outer
+                            // symbol.
+                            // XCOFF symbol table needs to know the size of
+                            // these outer symbols.
+                            xcoffUpdateOuterSize2(ctxt, state.datsize - symnStartValue, symn);
+
+                        }
+
+                    }
+
+                    symnro = symnro__prev1;
+                }
+
+                sect.Length = uint64(state.datsize) - sect.Vaddr;
+
+            } 
+
+            /* typelink */
+            sect = state.allocateNamedDataSection(seg, genrelrosecname(".typelink"), new slice<sym.SymKind>(new sym.SymKind[] { sym.STYPELINK }), relroSecPerm);
+
+            var typelink = ldr.CreateSymForUpdate("runtime.typelink", 0L);
+            ldr.SetSymSect(typelink.Sym(), sect);
+            typelink.SetType(sym.SRODATA);
+            state.datsize += typelink.Size();
+            state.checkdatsize(sym.STYPELINK);
+            sect.Length = uint64(state.datsize) - sect.Vaddr; 
+
+            /* itablink */
+            sect = state.allocateNamedSectionAndAssignSyms2(seg, genrelrosecname(".itablink"), sym.SITABLINK, sym.Sxxx, relroSecPerm);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.itablink", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.eitablink", 0L), sect);
+            if (ctxt.HeadType == objabi.Haix)
+            { 
+                // Store .itablink size because its symbols are wrapped
+                // under an outer symbol: runtime.itablink.
+                xcoffUpdateOuterSize2(ctxt, int64(sect.Length), sym.SITABLINK);
+
+            } 
+
+            /* gosymtab */
+            sect = state.allocateNamedSectionAndAssignSyms2(seg, genrelrosecname(".gosymtab"), sym.SSYMTAB, sym.SRODATA, relroSecPerm);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.symtab", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.esymtab", 0L), sect); 
+
+            /* gopclntab */
+            sect = state.allocateNamedSectionAndAssignSyms2(seg, genrelrosecname(".gopclntab"), sym.SPCLNTAB, sym.SRODATA, relroSecPerm);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.pclntab", 0L), sect);
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.epclntab", 0L), sect); 
+
+            // 6g uses 4-byte relocation offsets, so the entire segment must fit in 32 bits.
+            if (state.datsize != int64(uint32(state.datsize)))
+            {
+                Errorf(null, "read-only data segment too large: %d", state.datsize);
+            }
+
+            long siz = 0L;
+            {
+                var symn__prev1 = symn;
+
+                for (symn = sym.SELFRXSECT; symn < sym.SXREF; symn++)
+                {
+                    siz += len(state.data2[symn]);
+                }
+
+
+                symn = symn__prev1;
+            }
+            ctxt.datap2 = make_slice<loader.Sym>(0L, siz);
+            {
+                var symn__prev1 = symn;
+
+                for (symn = sym.SELFRXSECT; symn < sym.SXREF; symn++)
+                {
+                    ctxt.datap2 = append(ctxt.datap2, state.data2[symn]);
+                }
+
+
+                symn = symn__prev1;
+            }
+
+        }
+
+        // allocateDwarfSections allocates sym.Section objects for DWARF
+        // symbols, and assigns symbols to sections.
+        private static void allocateDwarfSections2(this ptr<dodataState> _addr_state, ptr<Link> _addr_ctxt)
+        {
+            ref dodataState state = ref _addr_state.val;
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            Func<ptr<dodataState>, long, loader.Sym, long> alignOne = (state, datsize, s) => datsize;
+
+            var ldr = ctxt.loader;
+            for (long i = 0L; i < len(dwarfp2); i++)
+            { 
+                // First the section symbol.
+                var s = dwarfp2[i].secSym();
+                var sect = state.allocateNamedDataSection(_addr_Segdwarf, ldr.SymName(s), new slice<sym.SymKind>(new sym.SymKind[] {  }), 04L);
+                ldr.SetSymSect(s, sect);
+                sect.Sym2 = sym.LoaderSym(s);
+                var curType = ldr.SymType(s);
+                state.setSymType(s, sym.SRODATA);
+                ldr.SetSymValue(s, int64(uint64(state.datsize) - sect.Vaddr));
+                state.datsize += ldr.SymSize(s); 
+
+                // Then any sub-symbols for the section symbol.
+                var subSyms = dwarfp2[i].subSyms();
+                state.assignDsymsToSection2(sect, subSyms, sym.SRODATA, alignOne);
+
+                for (long j = 0L; j < len(subSyms); j++)
+                {
+                    s = subSyms[j];
+                    if (ctxt.HeadType == objabi.Haix && curType == sym.SDWARFLOC)
+                    { 
+                        // Update the size of .debug_loc for this symbol's
+                        // package.
+                        addDwsectCUSize(".debug_loc", ldr.SymPkg(s), uint64(ldr.SymSize(s)));
+
+                    }
+
+                }
+
+                sect.Length = uint64(state.datsize) - sect.Vaddr;
+                state.checkdatsize(curType);
+
+            }
+
+
+        }
+
+        private partial struct symNameSize
+        {
+            public @string name;
+            public long sz;
+            public loader.Sym sym;
+        }
+
+        private static (slice<loader.Sym>, int) dodataSect2(this ptr<dodataState> _addr_state, ptr<Link> _addr_ctxt, sym.SymKind symn, slice<loader.Sym> syms)
+        {
+            slice<loader.Sym> result = default;
+            int maxAlign = default;
+            ref dodataState state = ref _addr_state.val;
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            loader.Sym head = default;            loader.Sym tail = default;
+
+            var ldr = ctxt.loader;
+            var sl = make_slice<symNameSize>(len(syms));
+            {
+                var k__prev1 = k;
+                var s__prev1 = s;
+
+                foreach (var (__k, __s) in syms)
+                {
+                    k = __k;
+                    s = __s;
+                    var ss = ldr.SymSize(s);
+                    sl[k] = new symNameSize(name:ldr.SymName(s),sz:ss,sym:s);
+                    var ds = int64(len(ldr.Data(s)));
+
+                    if (ss < ds) 
+                        ctxt.Errorf(s, "initialize bounds (%d < %d)", ss, ds);
+                    else if (ss < 0L) 
+                        ctxt.Errorf(s, "negative size (%d bytes)", ss);
+                    else if (ss > cutoff) 
+                        ctxt.Errorf(s, "symbol too large (%d bytes)", ss);
+                    // If the usually-special section-marker symbols are being laid
+                    // out as regular symbols, put them either at the beginning or
+                    // end of their section.
+                    if ((ctxt.DynlinkingGo() && ctxt.HeadType == objabi.Hdarwin) || (ctxt.HeadType == objabi.Haix && ctxt.LinkMode == LinkExternal))
+                    {
+                        switch (ldr.SymName(s))
+                        {
+                            case "runtime.text": 
+
+                            case "runtime.bss": 
+
+                            case "runtime.data": 
+
+                            case "runtime.types": 
+
+                            case "runtime.rodata": 
+                                head = s;
+                                continue;
+                                break;
+                            case "runtime.etext": 
+
+                            case "runtime.ebss": 
+
+                            case "runtime.edata": 
+
+                            case "runtime.etypes": 
+
+                            case "runtime.erodata": 
+                                tail = s;
+                                continue;
+                                break;
+                        }
+
+                    }
+
+                } 
+
+                // For ppc64, we want to interleave the .got and .toc sections
+                // from input files. Both are type sym.SELFGOT, so in that case
+                // we skip size comparison and fall through to the name
+                // comparison (conveniently, .got sorts before .toc).
+
+                k = k__prev1;
+                s = s__prev1;
+            }
+
+            var checkSize = symn != sym.SELFGOT; 
+
+            // Perform the sort.
+            sort.Slice(sl, (i, j) =>
+            {
+                var si = sl[i].sym;
+                var sj = sl[j].sym;
+
+                if (si == head || sj == tail) 
+                    return true;
+                else if (sj == head || si == tail) 
+                    return false;
+                                if (checkSize)
+                {
+                    var isz = sl[i].sz;
+                    var jsz = sl[j].sz;
+                    if (isz != jsz)
+                    {
+                        return isz < jsz;
+                    }
+
+                }
+
+                var iname = sl[i].name;
+                var jname = sl[j].name;
+                if (iname != jname)
+                {
+                    return iname < jname;
+                }
+
+                return si < sj;
+
+            }); 
+
+            // Set alignment, construct result
+            syms = syms[..0L];
+            {
+                var k__prev1 = k;
+
+                foreach (var (__k) in sl)
+                {
+                    k = __k;
+                    var s = sl[k].sym;
+                    if (s != head && s != tail)
+                    {
+                        var align = state.symalign2(s);
+                        if (maxAlign < align)
+                        {
+                            maxAlign = align;
+                        }
+
+                    }
+
+                    syms = append(syms, s);
+
+                }
+
+                k = k__prev1;
+            }
+
             return (syms, maxAlign);
+
         }
 
         // Add buildid to beginning of text segment, on non-ELF systems.
@@ -2529,30 +3182,82 @@ namespace @internal
         // give us a place to put the Go build ID. On those systems, we put it
         // at the very beginning of the text segment.
         // This ``header'' is read by cmd/go.
-        private static void textbuildid(this ref Link ctxt)
+        private static void textbuildid(this ptr<Link> _addr_ctxt)
         {
-            if (ctxt.IsELF || ctxt.BuildMode == BuildModePlugin || flagBuildid == "".Value)
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            if (ctxt.IsELF || ctxt.BuildMode == BuildModePlugin || flagBuildid == "".val)
             {
-                return;
+                return ;
             }
-            var s = ctxt.Syms.Lookup("go.buildid", 0L);
-            s.Attr |= sym.AttrReachable; 
+
+            var ldr = ctxt.loader;
+            var s = ldr.CreateSymForUpdate("go.buildid", 0L);
+            s.SetReachable(true); 
             // The \xff is invalid UTF-8, meant to make it less likely
             // to find one of these accidentally.
-            @string data = "\xff Go build ID: " + strconv.Quote(flagBuildid.Value) + "\n \xff";
-            s.Type = sym.STEXT;
-            s.P = (slice<byte>)data;
-            s.Size = int64(len(s.P));
+            @string data = "\xff Go build ID: " + strconv.Quote(flagBuildid.val) + "\n \xff";
+            s.SetType(sym.STEXT);
+            s.SetData((slice<byte>)data);
+            s.SetSize(int64(len(data)));
 
-            ctxt.Textp = append(ctxt.Textp, null);
-            copy(ctxt.Textp[1L..], ctxt.Textp);
-            ctxt.Textp[0L] = s;
+            ctxt.Textp2 = append(ctxt.Textp2, 0L);
+            copy(ctxt.Textp2[1L..], ctxt.Textp2);
+            ctxt.Textp2[0L] = s.Sym();
+
+        }
+
+        private static void buildinfo(this ptr<Link> _addr_ctxt)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            if (ctxt.linkShared || ctxt.BuildMode == BuildModePlugin)
+            { 
+                // -linkshared and -buildmode=plugin get confused
+                // about the relocations in go.buildinfo
+                // pointing at the other data sections.
+                // The version information is only available in executables.
+                return ;
+
+            }
+
+            var ldr = ctxt.loader;
+            var s = ldr.CreateSymForUpdate(".go.buildinfo", 0L);
+            s.SetReachable(true);
+            s.SetType(sym.SBUILDINFO);
+            s.SetAlign(16L); 
+            // The \xff is invalid UTF-8, meant to make it less likely
+            // to find one of these accidentally.
+            const @string prefix = (@string)"\xff Go buildinf:"; // 14 bytes, plus 2 data bytes filled in below
+ // 14 bytes, plus 2 data bytes filled in below
+            var data = make_slice<byte>(32L);
+            copy(data, prefix);
+            data[len(prefix)] = byte(ctxt.Arch.PtrSize);
+            data[len(prefix) + 1L] = 0L;
+            if (ctxt.Arch.ByteOrder == binary.BigEndian)
+            {
+                data[len(prefix) + 1L] = 1L;
+            }
+
+            s.SetData(data);
+            s.SetSize(int64(len(data)));
+            var (r, _) = s.AddRel(objabi.R_ADDR);
+            r.SetOff(16L);
+            r.SetSiz(uint8(ctxt.Arch.PtrSize));
+            r.SetSym(ldr.LookupOrCreateSym("runtime.buildVersion", 0L));
+            r, _ = s.AddRel(objabi.R_ADDR);
+            r.SetOff(16L + int32(ctxt.Arch.PtrSize));
+            r.SetSiz(uint8(ctxt.Arch.PtrSize));
+            r.SetSym(ldr.LookupOrCreateSym("runtime.modinfo", 0L));
+
         }
 
         // assign addresses to text
-        private static void textaddress(this ref Link ctxt)
+        private static void textaddress(this ptr<Link> _addr_ctxt)
         {
-            addsection(ctxt.Arch, ref Segtext, ".text", 05L); 
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            addsection(ctxt.loader, ctxt.Arch, _addr_Segtext, ".text", 05L); 
 
             // Assign PCs in text segment.
             // Could parallelize, by assigning to text
@@ -2561,39 +3266,60 @@ namespace @internal
 
             sect.Align = int32(Funcalign);
 
-            var text = ctxt.Syms.Lookup("runtime.text", 0L);
-            text.Sect = sect;
+            var ldr = ctxt.loader;
+            var text = ldr.LookupOrCreateSym("runtime.text", 0L);
+            ldr.SetAttrReachable(text, true);
+            ldr.SetSymSect(text, sect);
+            if (ctxt.IsAIX() && ctxt.IsExternal())
+            { 
+                // Setting runtime.text has a real symbol prevents ld to
+                // change its base address resulting in wrong offsets for
+                // reflect methods.
+                var u = ldr.MakeSymbolUpdater(text);
+                u.SetAlign(sect.Align);
+                u.SetSize(8L);
 
-            if (ctxt.DynlinkingGo() && ctxt.HeadType == objabi.Hdarwin)
-            {
-                var etext = ctxt.Syms.Lookup("runtime.etext", 0L);
-                etext.Sect = sect;
-
-                ctxt.Textp = append(ctxt.Textp, etext, null);
-                copy(ctxt.Textp[1L..], ctxt.Textp);
-                ctxt.Textp[0L] = text;
             }
-            var va = uint64(FlagTextAddr.Value);
+
+            if ((ctxt.DynlinkingGo() && ctxt.IsDarwin()) || (ctxt.IsAIX() && ctxt.IsExternal()))
+            {
+                var etext = ldr.LookupOrCreateSym("runtime.etext", 0L);
+                ldr.SetSymSect(etext, sect);
+
+                ctxt.Textp2 = append(ctxt.Textp2, etext, 0L);
+                copy(ctxt.Textp2[1L..], ctxt.Textp2);
+                ctxt.Textp2[0L] = text;
+            }
+
+            var va = uint64(FlagTextAddr.val);
             long n = 1L;
             sect.Vaddr = va;
             long ntramps = 0L;
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in ctxt.Textp)
+                foreach (var (_, __s) in ctxt.Textp2)
                 {
                     s = __s;
-                    sect, n, va = assignAddress(ctxt, sect, n, s, va, false);
+                    sect, n, va = assignAddress(_addr_ctxt, _addr_sect, n, s, va, false);
 
-                    trampoline(ctxt, s); // resolve jumps, may add trampolines if jump too far
+                    trampoline(_addr_ctxt, s); // resolve jumps, may add trampolines if jump too far
 
                     // lay down trampolines after each function
                     while (ntramps < len(ctxt.tramps))
                     {
                         var tramp = ctxt.tramps[ntramps];
-                        sect, n, va = assignAddress(ctxt, sect, n, tramp, va, true);
+                        if (ctxt.IsAIX() && strings.HasPrefix(ldr.SymName(tramp), "runtime.text."))
+                        { 
+                            // Already set in assignAddress
+                            continue;
                         ntramps++;
+                        }
+
+                        sect, n, va = assignAddress(_addr_ctxt, _addr_sect, n, tramp, va, true);
+
                     }
+
 
                 }
 
@@ -2601,26 +3327,29 @@ namespace @internal
             }
 
             sect.Length = va - sect.Vaddr;
-            ctxt.Syms.Lookup("runtime.etext", 0L).Sect = sect; 
+            etext = ldr.LookupOrCreateSym("runtime.etext", 0L);
+            ldr.SetAttrReachable(etext, true);
+            ldr.SetSymSect(etext, sect); 
 
             // merge tramps into Textp, keeping Textp in address order
             if (ntramps != 0L)
             {
-                var newtextp = make_slice<ref sym.Symbol>(0L, len(ctxt.Textp) + ntramps);
+                var newtextp = make_slice<loader.Sym>(0L, len(ctxt.Textp2) + ntramps);
                 long i = 0L;
                 {
                     var s__prev1 = s;
 
-                    foreach (var (_, __s) in ctxt.Textp)
+                    foreach (var (_, __s) in ctxt.Textp2)
                     {
                         s = __s;
-                        while (i < ntramps && ctxt.tramps[i].Value < s.Value)
+                        while (i < ntramps && ldr.SymValue(ctxt.tramps[i]) < ldr.SymValue(s))
                         {
                             newtextp = append(newtextp, ctxt.tramps[i]);
                             i++;
                         }
 
                         newtextp = append(newtextp, s);
+
                     }
 
                     s = s__prev1;
@@ -2628,44 +3357,49 @@ namespace @internal
 
                 newtextp = append(newtextp, ctxt.tramps[i..ntramps]);
 
-                ctxt.Textp = newtextp;
+                ctxt.Textp2 = newtextp;
+
             }
+
         }
 
         // assigns address for a text symbol, returns (possibly new) section, its number, and the address
-        // Note: once we have trampoline insertion support for external linking, this function
-        // will not need to create new text sections, and so no need to return sect and n.
-        private static (ref sym.Section, long, ulong) assignAddress(ref Link ctxt, ref sym.Section sect, long n, ref sym.Symbol s, ulong va, bool isTramp)
+        private static (ptr<sym.Section>, long, ulong) assignAddress(ptr<Link> _addr_ctxt, ptr<sym.Section> _addr_sect, long n, loader.Sym s, ulong va, bool isTramp)
         {
-            s.Sect = sect;
-            if (s.Attr.SubSymbol())
-            {
-                return (sect, n, va);
-            }
-            if (s.Align != 0L)
-            {
-                va = uint64(Rnd(int64(va), int64(s.Align)));
-            }
-            else
-            {
-                va = uint64(Rnd(int64(va), int64(Funcalign)));
-            }
-            s.Value = 0L;
-            {
-                var sub = s;
+            ptr<sym.Section> _p0 = default!;
+            long _p0 = default;
+            ulong _p0 = default;
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref sym.Section sect = ref _addr_sect.val;
 
-                while (sub != null)
-                {
-                    sub.Value += int64(va);
-                    sub = sub.Sub;
-                }
+            var ldr = ctxt.loader;
+            if (thearch.AssignAddress != null)
+            {
+                return _addr_thearch.AssignAddress(ldr, sect, n, s, va, isTramp)!;
+            }
 
+            ldr.SetSymSect(s, sect);
+            if (ldr.AttrSubSymbol(s))
+            {
+                return (_addr_sect!, n, va);
+            }
+
+            var align = ldr.SymAlign(s);
+            if (align == 0L)
+            {
+                align = int32(Funcalign);
+            }
+
+            va = uint64(Rnd(int64(va), int64(align)));
+            if (sect.Align < align)
+            {
+                sect.Align = align;
             }
 
             var funcsize = uint64(MINFUNC); // spacing required for findfunctab
-            if (s.Size > MINFUNC)
+            if (ldr.SymSize(s) > MINFUNC)
             {
-                funcsize = uint64(s.Size);
+                funcsize = uint64(ldr.SymSize(s));
             } 
 
             // On ppc64x a text section should not be larger than 2^26 bytes due to the size of
@@ -2676,32 +3410,87 @@ namespace @internal
             // If this function doesn't fit in the current text section, then create a new one.
 
             // Only break at outermost syms.
-            if (ctxt.Arch.InFamily(sys.PPC64) && s.Outer == null && ctxt.IsELF && ctxt.LinkMode == LinkExternal && va - sect.Vaddr + funcsize + maxSizeTrampolinesPPC64(s, isTramp) > 0x1c00000UL)
-            {
+            if (ctxt.Arch.InFamily(sys.PPC64) && ldr.OuterSym(s) == 0L && ctxt.IsExternal() && va - sect.Vaddr + funcsize + maxSizeTrampolinesPPC64(_addr_ldr, s, isTramp) > 0x1c00000UL)
+            { 
                 // Set the length for the previous text section
                 sect.Length = va - sect.Vaddr; 
 
                 // Create new section, set the starting Vaddr
-                sect = addsection(ctxt.Arch, ref Segtext, ".text", 05L);
+                sect = addsection(ctxt.loader, ctxt.Arch, _addr_Segtext, ".text", 05L);
                 sect.Vaddr = va;
-                s.Sect = sect; 
+                ldr.SetSymSect(s, sect); 
 
                 // Create a symbol for the start of the secondary text sections
-                ctxt.Syms.Lookup(fmt.Sprintf("runtime.text.%d", n), 0L).Sect = sect;
+                var ntext = ldr.CreateSymForUpdate(fmt.Sprintf("runtime.text.%d", n), 0L);
+                ntext.SetReachable(true);
+                ntext.SetSect(sect);
+                if (ctxt.IsAIX())
+                { 
+                    // runtime.text.X must be a real symbol on AIX.
+                    // Assign its address directly in order to be the
+                    // first symbol of this new section.
+                    ntext.SetType(sym.STEXT);
+                    ntext.SetSize(int64(MINFUNC));
+                    ntext.SetOnList(true);
+                    ctxt.tramps = append(ctxt.tramps, ntext.Sym());
+
+                    ntext.SetValue(int64(va));
+                    va += uint64(ntext.Size());
+
+                    {
+                        var align__prev3 = align;
+
+                        align = ldr.SymAlign(s);
+
+                        if (align != 0L)
+                        {
+                            va = uint64(Rnd(int64(va), int64(align)));
+                        }
+                        else
+                        {
+                            va = uint64(Rnd(int64(va), int64(Funcalign)));
+                        }
+
+                        align = align__prev3;
+
+                    }
+
+                }
+
                 n++;
+
             }
+
+            ldr.SetSymValue(s, 0L);
+            {
+                var sub = s;
+
+                while (sub != 0L)
+                {
+                    ldr.SetSymValue(sub, ldr.SymValue(sub) + int64(va));
+                    sub = ldr.SubSym(sub);
+                }
+
+            }
+
             va += funcsize;
 
-            return (sect, n, va);
+            return (_addr_sect!, n, va);
+
         }
 
-        // assign addresses
-        private static void address(this ref Link ctxt)
+        // address assigns virtual addresses to all segments and sections and
+        // returns all segments in file order.
+        private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => func((_, panic, __) =>
         {
-            var va = uint64(FlagTextAddr.Value);
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            slice<ptr<sym.Segment>> order = default; // Layout order
+
+            var va = uint64(FlagTextAddr.val);
+            order = append(order, _addr_Segtext);
             Segtext.Rwx = 05L;
             Segtext.Vaddr = va;
-            Segtext.Fileoff = uint64(HEADR);
             {
                 var s__prev1 = s;
 
@@ -2716,12 +3505,8 @@ namespace @internal
                 s = s__prev1;
             }
 
-            Segtext.Length = va - uint64(FlagTextAddr.Value);
-            Segtext.Filelen = Segtext.Length;
-            if (ctxt.HeadType == objabi.Hnacl)
-            {
-                va += 32L; // room for the "halt sled"
-            }
+            Segtext.Length = va - uint64(FlagTextAddr.val);
+
             if (len(Segrodata.Sections) > 0L)
             { 
                 // align to page boundary so as not to mix
@@ -2737,12 +3522,11 @@ namespace @internal
                 //
                 // Ideally the last page of the text segment would not be
                 // writable even for this short period.
-                va = uint64(Rnd(int64(va), int64(FlagRound.Value)));
+                va = uint64(Rnd(int64(va), int64(FlagRound.val)));
 
+                order = append(order, _addr_Segrodata);
                 Segrodata.Rwx = 04L;
                 Segrodata.Vaddr = va;
-                Segrodata.Fileoff = va - Segtext.Vaddr + Segtext.Fileoff;
-                Segrodata.Filelen = 0L;
                 {
                     var s__prev1 = s;
 
@@ -2758,18 +3542,24 @@ namespace @internal
                 }
 
                 Segrodata.Length = va - Segrodata.Vaddr;
-                Segrodata.Filelen = Segrodata.Length;
+
             }
+
             if (len(Segrelrodata.Sections) > 0L)
             { 
                 // align to page boundary so as not to mix
                 // rodata, rel-ro data, and executable text.
-                va = uint64(Rnd(int64(va), int64(FlagRound.Value)));
+                va = uint64(Rnd(int64(va), int64(FlagRound.val)));
+                if (ctxt.HeadType == objabi.Haix)
+                { 
+                    // Relro data are inside data segment on AIX.
+                    va += uint64(XCOFFDATABASE) - uint64(XCOFFTEXTBASE);
 
+                }
+
+                order = append(order, _addr_Segrelrodata);
                 Segrelrodata.Rwx = 06L;
                 Segrelrodata.Vaddr = va;
-                Segrelrodata.Fileoff = va - Segrodata.Vaddr + Segrodata.Fileoff;
-                Segrelrodata.Filelen = 0L;
                 {
                     var s__prev1 = s;
 
@@ -2785,25 +3575,26 @@ namespace @internal
                 }
 
                 Segrelrodata.Length = va - Segrelrodata.Vaddr;
-                Segrelrodata.Filelen = Segrelrodata.Length;
+
             }
-            va = uint64(Rnd(int64(va), int64(FlagRound.Value)));
+
+            va = uint64(Rnd(int64(va), int64(FlagRound.val)));
+            if (ctxt.HeadType == objabi.Haix && len(Segrelrodata.Sections) == 0L)
+            { 
+                // Data sections are moved to an unreachable segment
+                // to ensure that they are position-independent.
+                // Already done if relro sections exist.
+                va += uint64(XCOFFDATABASE) - uint64(XCOFFTEXTBASE);
+
+            }
+
+            order = append(order, _addr_Segdata);
             Segdata.Rwx = 06L;
             Segdata.Vaddr = va;
-            Segdata.Fileoff = va - Segtext.Vaddr + Segtext.Fileoff;
-            Segdata.Filelen = 0L;
-            if (ctxt.HeadType == objabi.Hwindows)
-            {
-                Segdata.Fileoff = Segtext.Fileoff + uint64(Rnd(int64(Segtext.Length), PEFILEALIGN));
-            }
-            if (ctxt.HeadType == objabi.Hplan9)
-            {
-                Segdata.Fileoff = Segtext.Fileoff + Segtext.Filelen;
-            }
-            ref sym.Section data = default;
-            ref sym.Section noptr = default;
-            ref sym.Section bss = default;
-            ref sym.Section noptrbss = default;
+            ptr<sym.Section> data;
+            ptr<sym.Section> noptr;
+            ptr<sym.Section> bss;
+            ptr<sym.Section> noptrbss;
             {
                 var i__prev1 = i;
                 var s__prev1 = s;
@@ -2812,15 +3603,17 @@ namespace @internal
                 {
                     i = __i;
                     s = __s;
-                    if (ctxt.IsELF && s.Name == ".tbss")
+                    if ((ctxt.IsELF || ctxt.HeadType == objabi.Haix) && s.Name == ".tbss")
                     {
                         continue;
                     }
+
                     var vlen = int64(s.Length);
-                    if (i + 1L < len(Segdata.Sections) && !(ctxt.IsELF && Segdata.Sections[i + 1L].Name == ".tbss"))
+                    if (i + 1L < len(Segdata.Sections) && !((ctxt.IsELF || ctxt.HeadType == objabi.Haix) && Segdata.Sections[i + 1L].Name == ".tbss"))
                     {
                         vlen = int64(Segdata.Sections[i + 1L].Vaddr - s.Vaddr);
                     }
+
                     s.Vaddr = va;
                     va += uint64(vlen);
                     Segdata.Length = va - Segdata.Vaddr;
@@ -2828,19 +3621,26 @@ namespace @internal
                     {
                         data = s;
                     }
+
                     if (s.Name == ".noptrdata")
                     {
                         noptr = s;
                     }
+
                     if (s.Name == ".bss")
                     {
                         bss = s;
                     }
+
                     if (s.Name == ".noptrbss")
                     {
                         noptrbss = s;
                     }
-                }
+
+                } 
+
+                // Assign Segdata's Filelen omitting the BSS. We do this here
+                // simply because right now we know where the BSS starts.
 
                 i = i__prev1;
                 s = s__prev1;
@@ -2848,15 +3648,10 @@ namespace @internal
 
             Segdata.Filelen = bss.Vaddr - Segdata.Vaddr;
 
-            va = uint64(Rnd(int64(va), int64(FlagRound.Value)));
+            va = uint64(Rnd(int64(va), int64(FlagRound.val)));
+            order = append(order, _addr_Segdwarf);
             Segdwarf.Rwx = 06L;
             Segdwarf.Vaddr = va;
-            Segdwarf.Fileoff = Segdata.Fileoff + uint64(Rnd(int64(Segdata.Filelen), int64(FlagRound.Value)));
-            Segdwarf.Filelen = 0L;
-            if (ctxt.HeadType == objabi.Hwindows)
-            {
-                Segdwarf.Fileoff = Segdata.Fileoff + uint64(Rnd(int64(Segdata.Filelen), int64(PEFILEALIGN)));
-            }
             {
                 var i__prev1 = i;
                 var s__prev1 = s;
@@ -2870,22 +3665,24 @@ namespace @internal
                     {
                         vlen = int64(Segdwarf.Sections[i + 1L].Vaddr - s.Vaddr);
                     }
+
                     s.Vaddr = va;
                     va += uint64(vlen);
                     if (ctxt.HeadType == objabi.Hwindows)
                     {
                         va = uint64(Rnd(int64(va), PEFILEALIGN));
                     }
+
                     Segdwarf.Length = va - Segdwarf.Vaddr;
+
                 }
 
                 i = i__prev1;
                 s = s__prev1;
             }
 
-            Segdwarf.Filelen = va - Segdwarf.Vaddr;
-
-            var text = Segtext.Sections[0L];            var rodata = ctxt.Syms.Lookup("runtime.rodata", 0L).Sect;            var itablink = ctxt.Syms.Lookup("runtime.itablink", 0L).Sect;            var symtab = ctxt.Syms.Lookup("runtime.symtab", 0L).Sect;            var pclntab = ctxt.Syms.Lookup("runtime.pclntab", 0L).Sect;            var types = ctxt.Syms.Lookup("runtime.types", 0L).Sect;
+            var ldr = ctxt.loader;
+            var text = Segtext.Sections[0L];            var rodata = ldr.SymSect(ldr.LookupOrCreateSym("runtime.rodata", 0L));            var itablink = ldr.SymSect(ldr.LookupOrCreateSym("runtime.itablink", 0L));            var symtab = ldr.SymSect(ldr.LookupOrCreateSym("runtime.symtab", 0L));            var pclntab = ldr.SymSect(ldr.LookupOrCreateSym("runtime.pclntab", 0L));            var types = ldr.SymSect(ldr.LookupOrCreateSym("runtime.types", 0L));
             var lasttext = text; 
             // Could be multiple .text sections
             {
@@ -2898,6 +3695,7 @@ namespace @internal
                     {
                         lasttext = sect;
                     }
+
                 }
 
                 sect = sect__prev1;
@@ -2906,70 +3704,95 @@ namespace @internal
             {
                 var s__prev1 = s;
 
-                foreach (var (_, __s) in datap)
+                foreach (var (_, __s) in ctxt.datap2)
                 {
                     s = __s;
-                    if (s.Sect != null)
                     {
-                        s.Value += int64(s.Sect.Vaddr);
+                        var sect__prev1 = sect;
+
+                        var sect = ldr.SymSect(s);
+
+                        if (sect != null)
+                        {
+                            ldr.AddToSymValue(s, int64(sect.Vaddr));
+                        }
+
+                        sect = sect__prev1;
+
                     }
+
+                    var v = ldr.SymValue(s);
                     {
                         var sub__prev2 = sub;
 
-                        var sub = s.Sub;
+                        var sub = ldr.SubSym(s);
 
-                        while (sub != null)
+                        while (sub != 0L)
                         {
-                            sub.Value += s.Value;
-                            sub = sub.Sub;
+                            ldr.AddToSymValue(sub, v);
+                            sub = ldr.SubSym(sub);
                         }
 
 
                         sub = sub__prev2;
                     }
+
                 }
 
                 s = s__prev1;
             }
 
+            foreach (var (_, si) in dwarfp2)
             {
-                var s__prev1 = s;
-
-                foreach (var (_, __s) in dwarfp)
                 {
-                    s = __s;
-                    if (s.Sect != null)
-                    {
-                        s.Value += int64(s.Sect.Vaddr);
-                    }
-                    {
-                        var sub__prev2 = sub;
+                    var s__prev2 = s;
 
-                        sub = s.Sub;
-
-                        while (sub != null)
+                    foreach (var (_, __s) in si.syms)
+                    {
+                        s = __s;
                         {
-                            sub.Value += s.Value;
-                            sub = sub.Sub;
+                            var sect__prev1 = sect;
+
+                            sect = ldr.SymSect(s);
+
+                            if (sect != null)
+                            {
+                                ldr.AddToSymValue(s, int64(sect.Vaddr));
+                            }
+
+                            sect = sect__prev1;
+
+                        }
+
+                        sub = ldr.SubSym(s);
+                        if (sub != 0L)
+                        {
+                            panic(fmt.Sprintf("unexpected sub-sym for %s %s", ldr.SymName(s), ldr.SymType(s).String()));
+                        }
+
+                        v = ldr.SymValue(s);
+                        while (sub != 0L)
+                        {
+                            ldr.AddToSymValue(s, v);
+                            sub = ldr.SubSym(sub);
                         }
 
 
-                        sub = sub__prev2;
                     }
+
+                    s = s__prev2;
                 }
-
-                s = s__prev1;
             }
-
             if (ctxt.BuildMode == BuildModeShared)
             {
-                var s = ctxt.Syms.Lookup("go.link.abihashbytes", 0L);
-                var sectSym = ctxt.Syms.Lookup(".note.go.abihash", 0L);
-                s.Sect = sectSym.Sect;
-                s.Value = int64(sectSym.Sect.Vaddr + 16L);
+                var s = ldr.LookupOrCreateSym("go.link.abihashbytes", 0L);
+                sect = ldr.SymSect(ldr.LookupOrCreateSym(".note.go.abihash", 0L));
+                ldr.SetSymSect(s, sect);
+                ldr.SetSymValue(s, int64(sect.Vaddr + 16L));
             }
-            ctxt.xdefine("runtime.text", sym.STEXT, int64(text.Vaddr));
-            ctxt.xdefine("runtime.etext", sym.STEXT, int64(lasttext.Vaddr + lasttext.Length)); 
+
+            ctxt.xdefine2("runtime.text", sym.STEXT, int64(text.Vaddr));
+            ctxt.xdefine2("runtime.etext", sym.STEXT, int64(lasttext.Vaddr + lasttext.Length)); 
 
             // If there are multiple text sections, create runtime.text.n for
             // their section Vaddr, using n for index
@@ -2984,57 +3807,240 @@ namespace @internal
                     {
                         break;
                     }
+
                     var symname = fmt.Sprintf("runtime.text.%d", n);
-                    ctxt.xdefine(symname, sym.STEXT, int64(sect.Vaddr));
+                    if (ctxt.HeadType != objabi.Haix || ctxt.LinkMode != LinkExternal)
+                    { 
+                        // Addresses are already set on AIX with external linker
+                        // because these symbols are part of their sections.
+                        ctxt.xdefine2(symname, sym.STEXT, int64(sect.Vaddr));
+
+                    }
+
                     n++;
+
                 }
 
                 sect = sect__prev1;
             }
 
-            ctxt.xdefine("runtime.rodata", sym.SRODATA, int64(rodata.Vaddr));
-            ctxt.xdefine("runtime.erodata", sym.SRODATA, int64(rodata.Vaddr + rodata.Length));
-            ctxt.xdefine("runtime.types", sym.SRODATA, int64(types.Vaddr));
-            ctxt.xdefine("runtime.etypes", sym.SRODATA, int64(types.Vaddr + types.Length));
-            ctxt.xdefine("runtime.itablink", sym.SRODATA, int64(itablink.Vaddr));
-            ctxt.xdefine("runtime.eitablink", sym.SRODATA, int64(itablink.Vaddr + itablink.Length));
+            ctxt.xdefine2("runtime.rodata", sym.SRODATA, int64(rodata.Vaddr));
+            ctxt.xdefine2("runtime.erodata", sym.SRODATA, int64(rodata.Vaddr + rodata.Length));
+            ctxt.xdefine2("runtime.types", sym.SRODATA, int64(types.Vaddr));
+            ctxt.xdefine2("runtime.etypes", sym.SRODATA, int64(types.Vaddr + types.Length));
+            ctxt.xdefine2("runtime.itablink", sym.SRODATA, int64(itablink.Vaddr));
+            ctxt.xdefine2("runtime.eitablink", sym.SRODATA, int64(itablink.Vaddr + itablink.Length));
 
-            s = ctxt.Syms.Lookup("runtime.gcdata", 0L);
-            s.Attr |= sym.AttrLocal;
-            ctxt.xdefine("runtime.egcdata", sym.SRODATA, Symaddr(s) + s.Size);
-            ctxt.Syms.Lookup("runtime.egcdata", 0L).Sect = s.Sect;
+            s = ldr.Lookup("runtime.gcdata", 0L);
+            ldr.SetAttrLocal(s, true);
+            ctxt.xdefine2("runtime.egcdata", sym.SRODATA, ldr.SymAddr(s) + ldr.SymSize(s));
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.egcdata", 0L), ldr.SymSect(s));
 
-            s = ctxt.Syms.Lookup("runtime.gcbss", 0L);
-            s.Attr |= sym.AttrLocal;
-            ctxt.xdefine("runtime.egcbss", sym.SRODATA, Symaddr(s) + s.Size);
-            ctxt.Syms.Lookup("runtime.egcbss", 0L).Sect = s.Sect;
+            s = ldr.LookupOrCreateSym("runtime.gcbss", 0L);
+            ldr.SetAttrLocal(s, true);
+            ctxt.xdefine2("runtime.egcbss", sym.SRODATA, ldr.SymAddr(s) + ldr.SymSize(s));
+            ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.egcbss", 0L), ldr.SymSect(s));
 
-            ctxt.xdefine("runtime.symtab", sym.SRODATA, int64(symtab.Vaddr));
-            ctxt.xdefine("runtime.esymtab", sym.SRODATA, int64(symtab.Vaddr + symtab.Length));
-            ctxt.xdefine("runtime.pclntab", sym.SRODATA, int64(pclntab.Vaddr));
-            ctxt.xdefine("runtime.epclntab", sym.SRODATA, int64(pclntab.Vaddr + pclntab.Length));
-            ctxt.xdefine("runtime.noptrdata", sym.SNOPTRDATA, int64(noptr.Vaddr));
-            ctxt.xdefine("runtime.enoptrdata", sym.SNOPTRDATA, int64(noptr.Vaddr + noptr.Length));
-            ctxt.xdefine("runtime.bss", sym.SBSS, int64(bss.Vaddr));
-            ctxt.xdefine("runtime.ebss", sym.SBSS, int64(bss.Vaddr + bss.Length));
-            ctxt.xdefine("runtime.data", sym.SDATA, int64(data.Vaddr));
-            ctxt.xdefine("runtime.edata", sym.SDATA, int64(data.Vaddr + data.Length));
-            ctxt.xdefine("runtime.noptrbss", sym.SNOPTRBSS, int64(noptrbss.Vaddr));
-            ctxt.xdefine("runtime.enoptrbss", sym.SNOPTRBSS, int64(noptrbss.Vaddr + noptrbss.Length));
-            ctxt.xdefine("runtime.end", sym.SBSS, int64(Segdata.Vaddr + Segdata.Length));
+            ctxt.xdefine2("runtime.symtab", sym.SRODATA, int64(symtab.Vaddr));
+            ctxt.xdefine2("runtime.esymtab", sym.SRODATA, int64(symtab.Vaddr + symtab.Length));
+            ctxt.xdefine2("runtime.pclntab", sym.SRODATA, int64(pclntab.Vaddr));
+            ctxt.xdefine2("runtime.epclntab", sym.SRODATA, int64(pclntab.Vaddr + pclntab.Length));
+            ctxt.xdefine2("runtime.noptrdata", sym.SNOPTRDATA, int64(noptr.Vaddr));
+            ctxt.xdefine2("runtime.enoptrdata", sym.SNOPTRDATA, int64(noptr.Vaddr + noptr.Length));
+            ctxt.xdefine2("runtime.bss", sym.SBSS, int64(bss.Vaddr));
+            ctxt.xdefine2("runtime.ebss", sym.SBSS, int64(bss.Vaddr + bss.Length));
+            ctxt.xdefine2("runtime.data", sym.SDATA, int64(data.Vaddr));
+            ctxt.xdefine2("runtime.edata", sym.SDATA, int64(data.Vaddr + data.Length));
+            ctxt.xdefine2("runtime.noptrbss", sym.SNOPTRBSS, int64(noptrbss.Vaddr));
+            ctxt.xdefine2("runtime.enoptrbss", sym.SNOPTRBSS, int64(noptrbss.Vaddr + noptrbss.Length));
+            ctxt.xdefine2("runtime.end", sym.SBSS, int64(Segdata.Vaddr + Segdata.Length));
+
+            if (ctxt.IsSolaris())
+            { 
+                // On Solaris, in the runtime it sets the external names of the
+                // end symbols. Unset them and define separate symbols, so we
+                // keep both.
+                var etext = ldr.Lookup("runtime.etext", 0L);
+                var edata = ldr.Lookup("runtime.edata", 0L);
+                var end = ldr.Lookup("runtime.end", 0L);
+                ldr.SetSymExtname(etext, "runtime.etext");
+                ldr.SetSymExtname(edata, "runtime.edata");
+                ldr.SetSymExtname(end, "runtime.end");
+                ctxt.xdefine2("_etext", ldr.SymType(etext), ldr.SymValue(etext));
+                ctxt.xdefine2("_edata", ldr.SymType(edata), ldr.SymValue(edata));
+                ctxt.xdefine2("_end", ldr.SymType(end), ldr.SymValue(end));
+                ldr.SetSymSect(ldr.Lookup("_etext", 0L), ldr.SymSect(etext));
+                ldr.SetSymSect(ldr.Lookup("_edata", 0L), ldr.SymSect(edata));
+                ldr.SetSymSect(ldr.Lookup("_end", 0L), ldr.SymSect(end));
+
+            }
+
+            return order;
+
+        });
+
+        // layout assigns file offsets and lengths to the segments in order.
+        // Returns the file size containing all the segments.
+        private static ulong layout(this ptr<Link> _addr_ctxt, slice<ptr<sym.Segment>> order)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            ptr<sym.Segment> prev;
+            foreach (var (_, seg) in order)
+            {
+                if (prev == null)
+                {
+                    seg.Fileoff = uint64(HEADR);
+                }
+                else
+                {
+
+                    if (ctxt.HeadType == objabi.Hwindows) 
+                        seg.Fileoff = prev.Fileoff + uint64(Rnd(int64(prev.Filelen), PEFILEALIGN));
+                    else if (ctxt.HeadType == objabi.Hplan9) 
+                        seg.Fileoff = prev.Fileoff + prev.Filelen;
+                    else 
+                        // Assuming the previous segment was
+                        // aligned, the following rounding
+                        // should ensure that this segment's
+                        // VA ≡ Fileoff mod FlagRound.
+                        seg.Fileoff = uint64(Rnd(int64(prev.Fileoff + prev.Filelen), int64(FlagRound.val)));
+                        if (seg.Vaddr % uint64(FlagRound.val) != seg.Fileoff % uint64(FlagRound.val))
+                        {
+                            Exitf("bad segment rounding (Vaddr=%#x Fileoff=%#x FlagRound=%#x)", seg.Vaddr, seg.Fileoff, FlagRound.val);
+                        }
+
+                                    }
+
+                if (seg != _addr_Segdata)
+                { 
+                    // Link.address already set Segdata.Filelen to
+                    // account for BSS.
+                    seg.Filelen = seg.Length;
+
+                }
+
+                prev = seg;
+
+            }
+            return prev.Fileoff + prev.Filelen;
+
         }
 
         // add a trampoline with symbol s (to be laid down after the current function)
-        private static void AddTramp(this ref Link ctxt, ref sym.Symbol s)
+        private static void AddTramp(this ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_s)
         {
-            s.Type = sym.STEXT;
-            s.Attr |= sym.AttrReachable;
-            s.Attr |= sym.AttrOnList;
-            ctxt.tramps = append(ctxt.tramps, s);
-            if (FlagDebugTramp > 0L && ctxt.Debugvlog > 0L.Value)
+            ref Link ctxt = ref _addr_ctxt.val;
+            ref loader.SymbolBuilder s = ref _addr_s.val;
+
+            s.SetType(sym.STEXT);
+            s.SetReachable(true);
+            s.SetOnList(true);
+            ctxt.tramps = append(ctxt.tramps, s.Sym());
+            if (FlagDebugTramp > 0L && ctxt.Debugvlog > 0L.val)
             {
-                ctxt.Logf("trampoline %s inserted\n", s);
+                ctxt.Logf("trampoline %s inserted\n", s.Name());
             }
+
+        }
+
+        // compressSyms compresses syms and returns the contents of the
+        // compressed section. If the section would get larger, it returns nil.
+        private static slice<byte> compressSyms(ptr<Link> _addr_ctxt, slice<loader.Sym> syms)
+        {
+            ref Link ctxt = ref _addr_ctxt.val;
+
+            var ldr = ctxt.loader;
+            long total = default;
+            foreach (var (_, sym) in syms)
+            {
+                total += ldr.SymSize(sym);
+            }
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            buf.Write((slice<byte>)"ZLIB");
+            array<byte> sizeBytes = new array<byte>(8L);
+            binary.BigEndian.PutUint64(sizeBytes[..], uint64(total));
+            buf.Write(sizeBytes[..]);
+
+            slice<byte> relocbuf = default; // temporary buffer for applying relocations
+
+            // Using zlib.BestSpeed achieves very nearly the same
+            // compression levels of zlib.DefaultCompression, but takes
+            // substantially less time. This is important because DWARF
+            // compression can be a significant fraction of link time.
+            var (z, err) = zlib.NewWriterLevel(_addr_buf, zlib.BestSpeed);
+            if (err != null)
+            {
+                log.Fatalf("NewWriterLevel failed: %s", err);
+            }
+
+            var st = ctxt.makeRelocSymState();
+            foreach (var (_, s) in syms)
+            { 
+                // Symbol data may be read-only. Apply relocations in a
+                // temporary buffer, and immediately write it out.
+                var P = ldr.Data(s);
+                var relocs = ldr.Relocs(s);
+                if (relocs.Count() != 0L)
+                {
+                    relocbuf = append(relocbuf[..0L], P);
+                    P = relocbuf;
+                }
+
+                st.relocsym(s, P);
+                {
+                    var (_, err) = z.Write(P);
+
+                    if (err != null)
+                    {
+                        log.Fatalf("compression failed: %s", err);
+                    }
+
+                }
+
+                {
+                    var i = ldr.SymSize(s) - int64(len(P));
+
+                    while (i > 0L)
+                    {
+                        var b = zeros[..];
+                        if (i < int64(len(b)))
+                        {
+                            b = b[..i];
+                        }
+
+                        var (n, err) = z.Write(b);
+                        if (err != null)
+                        {
+                            log.Fatalf("compression failed: %s", err);
+                        }
+
+                        i -= int64(n);
+
+                    }
+
+                }
+
+            }
+            {
+                var err = z.Close();
+
+                if (err != null)
+                {
+                    log.Fatalf("compression failed: %s", err);
+                }
+
+            }
+
+            if (int64(buf.Len()) >= total)
+            { 
+                // Compression didn't save any space.
+                return null;
+
+            }
+
+            return buf.Bytes();
+
         }
     }
 }}}}

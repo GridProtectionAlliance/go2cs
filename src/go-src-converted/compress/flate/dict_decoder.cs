@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 August 29 08:23:25 UTC
+// package flate -- go2cs converted at 2020 October 08 03:30:56 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\dict_decoder.go
 
@@ -46,72 +46,92 @@ namespace compress
         // init initializes dictDecoder to have a sliding window dictionary of the given
         // size. If a preset dict is provided, it will initialize the dictionary with
         // the contents of dict.
-        private static void init(this ref dictDecoder dd, long size, slice<byte> dict)
+        private static void init(this ptr<dictDecoder> _addr_dd, long size, slice<byte> dict)
         {
-            dd.Value = new dictDecoder(hist:dd.hist);
+            ref dictDecoder dd = ref _addr_dd.val;
+
+            dd.val = new dictDecoder(hist:dd.hist);
 
             if (cap(dd.hist) < size)
             {
                 dd.hist = make_slice<byte>(size);
             }
+
             dd.hist = dd.hist[..size];
 
             if (len(dict) > len(dd.hist))
             {
                 dict = dict[len(dict) - len(dd.hist)..];
             }
+
             dd.wrPos = copy(dd.hist, dict);
             if (dd.wrPos == len(dd.hist))
             {
                 dd.wrPos = 0L;
                 dd.full = true;
             }
+
             dd.rdPos = dd.wrPos;
+
         }
 
         // histSize reports the total amount of historical data in the dictionary.
-        private static long histSize(this ref dictDecoder dd)
+        private static long histSize(this ptr<dictDecoder> _addr_dd)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             if (dd.full)
             {
                 return len(dd.hist);
             }
+
             return dd.wrPos;
+
         }
 
         // availRead reports the number of bytes that can be flushed by readFlush.
-        private static long availRead(this ref dictDecoder dd)
+        private static long availRead(this ptr<dictDecoder> _addr_dd)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             return dd.wrPos - dd.rdPos;
         }
 
         // availWrite reports the available amount of output buffer space.
-        private static long availWrite(this ref dictDecoder dd)
+        private static long availWrite(this ptr<dictDecoder> _addr_dd)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             return len(dd.hist) - dd.wrPos;
         }
 
         // writeSlice returns a slice of the available buffer to write data to.
         //
         // This invariant will be kept: len(s) <= availWrite()
-        private static slice<byte> writeSlice(this ref dictDecoder dd)
+        private static slice<byte> writeSlice(this ptr<dictDecoder> _addr_dd)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             return dd.hist[dd.wrPos..];
         }
 
         // writeMark advances the writer pointer by cnt.
         //
         // This invariant must be kept: 0 <= cnt <= availWrite()
-        private static void writeMark(this ref dictDecoder dd, long cnt)
+        private static void writeMark(this ptr<dictDecoder> _addr_dd, long cnt)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             dd.wrPos += cnt;
         }
 
         // writeByte writes a single byte to the dictionary.
         //
         // This invariant must be kept: 0 < availWrite()
-        private static void writeByte(this ref dictDecoder dd, byte c)
+        private static void writeByte(this ptr<dictDecoder> _addr_dd, byte c)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             dd.hist[dd.wrPos] = c;
             dd.wrPos++;
         }
@@ -121,8 +141,10 @@ namespace compress
         // length if the available space in the output buffer is too small.
         //
         // This invariant must be kept: 0 < dist <= histSize()
-        private static long writeCopy(this ref dictDecoder dd, long dist, long length)
+        private static long writeCopy(this ptr<dictDecoder> _addr_dd, long dist, long length)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             var dstBase = dd.wrPos;
             var dstPos = dstBase;
             var srcPos = dstPos - dist;
@@ -168,6 +190,7 @@ namespace compress
 
             dd.wrPos = dstPos;
             return dstPos - dstBase;
+
         }
 
         // tryWriteCopy tries to copy a string at a given (distance, length) to the
@@ -176,14 +199,17 @@ namespace compress
         // This method is designed to be inlined for performance reasons.
         //
         // This invariant must be kept: 0 < dist <= histSize()
-        private static long tryWriteCopy(this ref dictDecoder dd, long dist, long length)
+        private static long tryWriteCopy(this ptr<dictDecoder> _addr_dd, long dist, long length)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             var dstPos = dd.wrPos;
             var endPos = dstPos + length;
             if (dstPos < dist || endPos > len(dd.hist))
             {
                 return 0L;
             }
+
             var dstBase = dstPos;
             var srcPos = dstPos - dist; 
 
@@ -194,15 +220,19 @@ loop:
             {
                 goto loop; // Avoid for-loop so that this function can be inlined
             }
+
             dd.wrPos = dstPos;
             return dstPos - dstBase;
+
         }
 
         // readFlush returns a slice of the historical buffer that is ready to be
         // emitted to the user. The data returned by readFlush must be fully consumed
         // before calling any other dictDecoder methods.
-        private static slice<byte> readFlush(this ref dictDecoder dd)
+        private static slice<byte> readFlush(this ptr<dictDecoder> _addr_dd)
         {
+            ref dictDecoder dd = ref _addr_dd.val;
+
             var toRead = dd.hist[dd.rdPos..dd.wrPos];
             dd.rdPos = dd.wrPos;
             if (dd.wrPos == len(dd.hist))
@@ -210,8 +240,11 @@ loop:
                 dd.wrPos = 0L;
                 dd.rdPos = 0L;
                 dd.full = true;
+
             }
+
             return toRead;
+
         }
     }
 }}

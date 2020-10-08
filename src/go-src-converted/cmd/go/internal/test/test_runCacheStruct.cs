@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:46 UTC
+//     Generated on 2020 October 08 04:35:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,11 +17,7 @@ using bytes = go.bytes_package;
 using sha256 = go.crypto.sha256_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
-using ast = go.go.ast_package;
 using build = go.go.build_package;
-using doc = go.go.doc_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
@@ -33,14 +29,13 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using template = go.text.template_package;
 using time = go.time_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
+using lockedfile = go.cmd.go.@internal.lockedfile_package;
+using modload = go.cmd.go.@internal.modload_package;
 using str = go.cmd.go.@internal.str_package;
 using work = go.cmd.go.@internal.work_package;
 using test2json = go.cmd.@internal.test2json_package;

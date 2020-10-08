@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httputil -- go2cs converted at 2020 August 29 08:34:23 UTC
+// package httputil -- go2cs converted at 2020 October 08 03:41:34 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Go\src\net\http\httputil\persist.go
 using bufio = go.bufio_package;
@@ -23,7 +23,7 @@ namespace http
     {
  
         // Deprecated: No longer used.
-        public static http.ProtocolError ErrPersistEOF = ref new http.ProtocolError(ErrorString:"persistent connection closed");        public static http.ProtocolError ErrClosed = ref new http.ProtocolError(ErrorString:"connection closed by user");        public static http.ProtocolError ErrPipeline = ref new http.ProtocolError(ErrorString:"pipeline error");
+        public static ptr<http.ProtocolError> ErrPersistEOF = addr(new http.ProtocolError(ErrorString:"persistent connection closed"));        public static ptr<http.ProtocolError> ErrClosed = addr(new http.ProtocolError(ErrorString:"connection closed by user"));        public static ptr<http.ProtocolError> ErrPipeline = addr(new http.ProtocolError(ErrorString:"pipeline error"));
 
         // This is an API usage error - the local side is closed.
         // ErrPersistEOF (above) reports that the remote side is closed.
@@ -44,7 +44,7 @@ namespace http
             public io.ReadCloser lastbody;
             public long nread;
             public long nwritten;
-            public map<ref http.Request, ulong> pipereq;
+            public map<ptr<http.Request>, ulong> pipereq;
             public textproto.Pipeline pipe;
         }
 
@@ -53,49 +53,65 @@ namespace http
         // We should have deleted it before Go 1.
         //
         // Deprecated: Use the Server in package net/http instead.
-        public static ref ServerConn NewServerConn(net.Conn c, ref bufio.Reader r)
+        public static ptr<ServerConn> NewServerConn(net.Conn c, ptr<bufio.Reader> _addr_r)
         {
+            ref bufio.Reader r = ref _addr_r.val;
+
             if (r == null)
             {
                 r = bufio.NewReader(c);
             }
-            return ref new ServerConn(c:c,r:r,pipereq:make(map[*http.Request]uint));
+
+            return addr(new ServerConn(c:c,r:r,pipereq:make(map[*http.Request]uint)));
+
         }
 
         // Hijack detaches the ServerConn and returns the underlying connection as well
         // as the read-side bufio which may have some left over data. Hijack may be
         // called before Read has signaled the end of the keep-alive logic. The user
         // should not call Hijack while Read or Write is in progress.
-        private static (net.Conn, ref bufio.Reader) Hijack(this ref ServerConn _sc) => func(_sc, (ref ServerConn sc, Defer defer, Panic _, Recover __) =>
+        private static (net.Conn, ptr<bufio.Reader>) Hijack(this ptr<ServerConn> _addr_sc) => func((defer, _, __) =>
         {
+            net.Conn _p0 = default;
+            ptr<bufio.Reader> _p0 = default!;
+            ref ServerConn sc = ref _addr_sc.val;
+
             sc.mu.Lock();
             defer(sc.mu.Unlock());
             var c = sc.c;
             var r = sc.r;
             sc.c = null;
             sc.r = null;
-            return (c, r);
+            return (c, _addr_r!);
         });
 
         // Close calls Hijack and then also closes the underlying connection.
-        private static error Close(this ref ServerConn sc)
+        private static error Close(this ptr<ServerConn> _addr_sc)
         {
+            ref ServerConn sc = ref _addr_sc.val;
+
             var (c, _) = sc.Hijack();
             if (c != null)
             {
-                return error.As(c.Close());
+                return error.As(c.Close())!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Read returns the next request on the wire. An ErrPersistEOF is returned if
         // it is gracefully determined that there are no more requests (e.g. after the
         // first request on an HTTP/1.0 connection, or after a Connection:close on a
         // HTTP/1.1 connection).
-        private static (ref http.Request, error) Read(this ref ServerConn _sc) => func(_sc, (ref ServerConn sc, Defer defer, Panic _, Recover __) =>
+        private static (ptr<http.Request>, error) Read(this ptr<ServerConn> _addr_sc) => func((defer, _, __) =>
         {
-            ref http.Request req = default;
-            error err = default; 
+            ptr<http.Request> _p0 = default!;
+            error _p0 = default!;
+            ref ServerConn sc = ref _addr_sc.val;
+
+            ptr<http.Request> req;
+            error err = default!; 
 
             // Ensure ordered execution of Reads and Writes
             var id = sc.pipe.Next();
@@ -114,25 +130,32 @@ namespace http
                     sc.mu.Lock();
                     sc.pipereq[req] = id;
                     sc.mu.Unlock();
+
                 }
+
             }());
 
             sc.mu.Lock();
             if (sc.we != null)
             { // no point receiving if write-side broken or closed
                 defer(sc.mu.Unlock());
-                return (null, sc.we);
+                return (_addr_null!, error.As(sc.we)!);
+
             }
+
             if (sc.re != null)
             {
                 defer(sc.mu.Unlock());
-                return (null, sc.re);
+                return (_addr_null!, error.As(sc.re)!);
             }
+
             if (sc.r == null)
             { // connection closed by user in the meantime
                 defer(sc.mu.Unlock());
-                return (null, errClosed);
+                return (_addr_null!, error.As(errClosed)!);
+
             }
+
             var r = sc.r;
             var lastbody = sc.lastbody;
             sc.lastbody = null;
@@ -144,15 +167,17 @@ namespace http
                 // body.Close is assumed to be idempotent and multiple calls to
                 // it should return the error that its first invocation
                 // returned.
-                err = error.As(lastbody.Close());
+                err = error.As(lastbody.Close())!;
                 if (err != null)
                 {
                     sc.mu.Lock();
                     defer(sc.mu.Unlock());
                     sc.re = err;
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
             }
+
             req, err = http.ReadRequest(r);
             sc.mu.Lock();
             defer(sc.mu.Unlock());
@@ -164,28 +189,35 @@ namespace http
                     // graceful close, even if there was some unparse-able
                     // data before the close.
                     sc.re = ErrPersistEOF;
-                    return (null, sc.re);
+                    return (_addr_null!, error.As(sc.re)!);
+
                 }
                 else
                 {
                     sc.re = err;
-                    return (req, err);
+                    return (_addr_req!, error.As(err)!);
                 }
+
             }
+
             sc.lastbody = req.Body;
             sc.nread++;
             if (req.Close)
             {
                 sc.re = ErrPersistEOF;
-                return (req, sc.re);
+                return (_addr_req!, error.As(sc.re)!);
             }
-            return (req, err);
+
+            return (_addr_req!, error.As(err)!);
+
         });
 
         // Pending returns the number of unanswered requests
         // that have been received on the connection.
-        private static long Pending(this ref ServerConn _sc) => func(_sc, (ref ServerConn sc, Defer defer, Panic _, Recover __) =>
+        private static long Pending(this ptr<ServerConn> _addr_sc) => func((defer, _, __) =>
         {
+            ref ServerConn sc = ref _addr_sc.val;
+
             sc.mu.Lock();
             defer(sc.mu.Unlock());
             return sc.nread - sc.nwritten;
@@ -194,8 +226,12 @@ namespace http
         // Write writes resp in response to req. To close the connection gracefully, set the
         // Response.Close field to true. Write should be considered operational until
         // it returns an error, regardless of any errors returned on the Read side.
-        private static error Write(this ref ServerConn _sc, ref http.Request _req, ref http.Response _resp) => func(_sc, _req, _resp, (ref ServerConn sc, ref http.Request req, ref http.Response resp, Defer defer, Panic _, Recover __) =>
+        private static error Write(this ptr<ServerConn> _addr_sc, ptr<http.Request> _addr_req, ptr<http.Response> _addr_resp) => func((defer, _, __) =>
         {
+            ref ServerConn sc = ref _addr_sc.val;
+            ref http.Request req = ref _addr_req.val;
+            ref http.Response resp = ref _addr_resp.val;
+
             // Retrieve the pipeline ID of this request/response pair
             sc.mu.Lock();
             var (id, ok) = sc.pipereq[req];
@@ -203,8 +239,9 @@ namespace http
             if (!ok)
             {
                 sc.mu.Unlock();
-                return error.As(ErrPipeline);
+                return error.As(ErrPipeline)!;
             }
+
             sc.mu.Unlock(); 
 
             // Ensure pipeline order
@@ -215,26 +252,32 @@ namespace http
             if (sc.we != null)
             {
                 defer(sc.mu.Unlock());
-                return error.As(sc.we);
+                return error.As(sc.we)!;
             }
+
             if (sc.c == null)
             { // connection closed by user in the meantime
                 defer(sc.mu.Unlock());
-                return error.As(ErrClosed);
+                return error.As(ErrClosed)!;
+
             }
+
             var c = sc.c;
             if (sc.nread <= sc.nwritten)
             {
                 defer(sc.mu.Unlock());
-                return error.As(errors.New("persist server pipe count"));
+                return error.As(errors.New("persist server pipe count"))!;
             }
+
             if (resp.Close)
             { 
                 // After signaling a keep-alive close, any pipelined unread
                 // requests will be lost. It is up to the user to drain them
                 // before signaling.
                 sc.re = ErrPersistEOF;
+
             }
+
             sc.mu.Unlock();
 
             var err = resp.Write(c);
@@ -243,11 +286,13 @@ namespace http
             if (err != null)
             {
                 sc.we = err;
-                return error.As(err);
+                return error.As(err)!;
             }
+
             sc.nwritten++;
 
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // ClientConn is an artifact of Go's early HTTP implementation.
@@ -265,9 +310,9 @@ namespace http
             public io.ReadCloser lastbody;
             public long nread;
             public long nwritten;
-            public map<ref http.Request, ulong> pipereq;
+            public map<ptr<http.Request>, ulong> pipereq;
             public textproto.Pipeline pipe;
-            public Func<ref http.Request, io.Writer, error> writeReq;
+            public Func<ptr<http.Request>, io.Writer, error> writeReq;
         }
 
         // NewClientConn is an artifact of Go's early HTTP implementation.
@@ -275,13 +320,17 @@ namespace http
         // We should have deleted it before Go 1.
         //
         // Deprecated: Use the Client or Transport in package net/http instead.
-        public static ref ClientConn NewClientConn(net.Conn c, ref bufio.Reader r)
+        public static ptr<ClientConn> NewClientConn(net.Conn c, ptr<bufio.Reader> _addr_r)
         {
+            ref bufio.Reader r = ref _addr_r.val;
+
             if (r == null)
             {
                 r = bufio.NewReader(c);
             }
-            return ref new ClientConn(c:c,r:r,pipereq:make(map[*http.Request]uint),writeReq:(*http.Request).Write,);
+
+            return addr(new ClientConn(c:c,r:r,pipereq:make(map[*http.Request]uint),writeReq:(*http.Request).Write,));
+
         }
 
         // NewProxyClientConn is an artifact of Go's early HTTP implementation.
@@ -289,47 +338,60 @@ namespace http
         // We should have deleted it before Go 1.
         //
         // Deprecated: Use the Client or Transport in package net/http instead.
-        public static ref ClientConn NewProxyClientConn(net.Conn c, ref bufio.Reader r)
+        public static ptr<ClientConn> NewProxyClientConn(net.Conn c, ptr<bufio.Reader> _addr_r)
         {
-            var cc = NewClientConn(c, r);
-            cc.writeReq = ref http.Request;
-            return cc;
+            ref bufio.Reader r = ref _addr_r.val;
+
+            var cc = NewClientConn(c, _addr_r);
+            cc.writeReq = ptr<http.Request>;
+            return _addr_cc!;
         }
 
         // Hijack detaches the ClientConn and returns the underlying connection as well
         // as the read-side bufio which may have some left over data. Hijack may be
         // called before the user or Read have signaled the end of the keep-alive
         // logic. The user should not call Hijack while Read or Write is in progress.
-        private static (net.Conn, ref bufio.Reader) Hijack(this ref ClientConn _cc) => func(_cc, (ref ClientConn cc, Defer defer, Panic _, Recover __) =>
+        private static (net.Conn, ptr<bufio.Reader>) Hijack(this ptr<ClientConn> _addr_cc) => func((defer, _, __) =>
         {
+            net.Conn c = default;
+            ptr<bufio.Reader> r = default!;
+            ref ClientConn cc = ref _addr_cc.val;
+
             cc.mu.Lock();
             defer(cc.mu.Unlock());
             c = cc.c;
             r = cc.r;
             cc.c = null;
             cc.r = null;
-            return;
+            return ;
         });
 
         // Close calls Hijack and then also closes the underlying connection.
-        private static error Close(this ref ClientConn cc)
+        private static error Close(this ptr<ClientConn> _addr_cc)
         {
+            ref ClientConn cc = ref _addr_cc.val;
+
             var (c, _) = cc.Hijack();
             if (c != null)
             {
-                return error.As(c.Close());
+                return error.As(c.Close())!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Write writes a request. An ErrPersistEOF error is returned if the connection
-        // has been closed in an HTTP keepalive sense. If req.Close equals true, the
-        // keepalive connection is logically closed after this request and the opposing
+        // has been closed in an HTTP keep-alive sense. If req.Close equals true, the
+        // keep-alive connection is logically closed after this request and the opposing
         // server is informed. An ErrUnexpectedEOF indicates the remote closed the
         // underlying TCP connection, which is usually considered as graceful close.
-        private static error Write(this ref ClientConn _cc, ref http.Request _req) => func(_cc, _req, (ref ClientConn cc, ref http.Request req, Defer defer, Panic _, Recover __) =>
+        private static error Write(this ptr<ClientConn> _addr_cc, ptr<http.Request> _addr_req) => func((defer, _, __) =>
         {
-            error err = default; 
+            ref ClientConn cc = ref _addr_cc.val;
+            ref http.Request req = ref _addr_req.val;
+
+            error err = default!; 
 
             // Ensure ordered execution of Writes
             var id = cc.pipe.Next();
@@ -348,51 +410,64 @@ namespace http
                     cc.mu.Lock();
                     cc.pipereq[req] = id;
                     cc.mu.Unlock();
+
                 }
+
             }());
 
             cc.mu.Lock();
             if (cc.re != null)
             { // no point sending if read-side closed or broken
                 defer(cc.mu.Unlock());
-                return error.As(cc.re);
+                return error.As(cc.re)!;
+
             }
+
             if (cc.we != null)
             {
                 defer(cc.mu.Unlock());
-                return error.As(cc.we);
+                return error.As(cc.we)!;
             }
+
             if (cc.c == null)
             { // connection closed by user in the meantime
                 defer(cc.mu.Unlock());
-                return error.As(errClosed);
+                return error.As(errClosed)!;
+
             }
+
             var c = cc.c;
             if (req.Close)
             { 
                 // We write the EOF to the write-side error, because there
                 // still might be some pipelined reads
                 cc.we = ErrPersistEOF;
+
             }
+
             cc.mu.Unlock();
 
-            err = error.As(cc.writeReq(req, c));
+            err = error.As(cc.writeReq(req, c))!;
             cc.mu.Lock();
             defer(cc.mu.Unlock());
             if (err != null)
             {
                 cc.we = err;
-                return error.As(err);
+                return error.As(err)!;
             }
+
             cc.nwritten++;
 
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // Pending returns the number of unanswered requests
         // that have been sent on the connection.
-        private static long Pending(this ref ClientConn _cc) => func(_cc, (ref ClientConn cc, Defer defer, Panic _, Recover __) =>
+        private static long Pending(this ptr<ClientConn> _addr_cc) => func((defer, _, __) =>
         {
+            ref ClientConn cc = ref _addr_cc.val;
+
             cc.mu.Lock();
             defer(cc.mu.Unlock());
             return cc.nwritten - cc.nread;
@@ -402,8 +477,13 @@ namespace http
         // returned together with an ErrPersistEOF, which means that the remote
         // requested that this be the last request serviced. Read can be called
         // concurrently with Write, but not with another Read.
-        private static (ref http.Response, error) Read(this ref ClientConn _cc, ref http.Request _req) => func(_cc, _req, (ref ClientConn cc, ref http.Request req, Defer defer, Panic _, Recover __) =>
-        { 
+        private static (ptr<http.Response>, error) Read(this ptr<ClientConn> _addr_cc, ptr<http.Request> _addr_req) => func((defer, _, __) =>
+        {
+            ptr<http.Response> resp = default!;
+            error err = default!;
+            ref ClientConn cc = ref _addr_cc.val;
+            ref http.Request req = ref _addr_req.val;
+ 
             // Retrieve the pipeline ID of this request/response pair
             cc.mu.Lock();
             var (id, ok) = cc.pipereq[req];
@@ -411,8 +491,9 @@ namespace http
             if (!ok)
             {
                 cc.mu.Unlock();
-                return (null, ErrPipeline);
+                return (_addr_null!, error.As(ErrPipeline)!);
             }
+
             cc.mu.Unlock(); 
 
             // Ensure pipeline order
@@ -423,13 +504,16 @@ namespace http
             if (cc.re != null)
             {
                 defer(cc.mu.Unlock());
-                return (null, cc.re);
+                return (_addr_null!, error.As(cc.re)!);
             }
+
             if (cc.r == null)
             { // connection closed by user in the meantime
                 defer(cc.mu.Unlock());
-                return (null, errClosed);
+                return (_addr_null!, error.As(errClosed)!);
+
             }
+
             var r = cc.r;
             var lastbody = cc.lastbody;
             cc.lastbody = null;
@@ -447,17 +531,20 @@ namespace http
                     cc.mu.Lock();
                     defer(cc.mu.Unlock());
                     cc.re = err;
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 }
+
             }
+
             resp, err = http.ReadResponse(r, req);
             cc.mu.Lock();
             defer(cc.mu.Unlock());
             if (err != null)
             {
                 cc.re = err;
-                return (resp, err);
+                return (_addr_resp!, error.As(err)!);
             }
+
             cc.lastbody = resp.Body;
 
             cc.nread++;
@@ -465,20 +552,30 @@ namespace http
             if (resp.Close)
             {
                 cc.re = ErrPersistEOF; // don't send any more requests
-                return (resp, cc.re);
+                return (_addr_resp!, error.As(cc.re)!);
+
             }
-            return (resp, err);
+
+            return (_addr_resp!, error.As(err)!);
+
         });
 
         // Do is convenience method that writes a request and reads a response.
-        private static (ref http.Response, error) Do(this ref ClientConn cc, ref http.Request req)
+        private static (ptr<http.Response>, error) Do(this ptr<ClientConn> _addr_cc, ptr<http.Request> _addr_req)
         {
+            ptr<http.Response> _p0 = default!;
+            error _p0 = default!;
+            ref ClientConn cc = ref _addr_cc.val;
+            ref http.Request req = ref _addr_req.val;
+
             var err = cc.Write(req);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return cc.Read(req);
+
+            return _addr_cc.Read(req)!;
+
         }
     }
 }}}

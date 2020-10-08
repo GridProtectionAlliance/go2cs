@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 August 29 09:26:16 UTC
+// package syntax -- go2cs converted at 2020 October 08 04:28:18 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\parser.go
-using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
@@ -20,153 +19,327 @@ namespace @internal
 {
     public static partial class syntax_package
     {
-        private static readonly var debug = false;
+        private static readonly var debug = (var)false;
 
-        private static readonly var trace = false;
+        private static readonly var trace = (var)false;
 
 
 
         private partial struct parser
         {
-            public ptr<src.PosBase> @base;
+            public ptr<PosBase> file;
             public ErrorHandler errh;
-            public FilenameHandler fileh;
             public Mode mode;
+            public PragmaHandler pragh;
             public ref scanner scanner => ref scanner_val;
+            public ptr<PosBase> @base; // current position base
             public error first; // first error encountered
             public long errcnt; // number of errors encountered
-            public Pragma pragma; // pragma flags
+            public Pragma pragma; // pragmas
 
             public long fnest; // function nesting level (for error handling)
             public long xnest; // expression nesting level (for complit ambiguity resolution)
             public slice<byte> indent; // tracing support
         }
 
-        private static void init(this ref parser p, ref src.PosBase @base, io.Reader r, ErrorHandler errh, PragmaHandler pragh, FilenameHandler fileh, Mode mode)
+        private static void init(this ptr<parser> _addr_p, ptr<PosBase> _addr_file, io.Reader r, ErrorHandler errh, PragmaHandler pragh, Mode mode)
         {
-            p.@base = base;
+            ref parser p = ref _addr_p.val;
+            ref PosBase file = ref _addr_file.val;
+
+            p.file = file;
             p.errh = errh;
-            p.fileh = fileh;
             p.mode = mode;
+            p.pragh = pragh;
             p.scanner.init(r, (line, col, msg) =>
             {
-                p.error_at(p.pos_at(line, col), msg);
-            }, (line, col, text) =>
-            {
-                if (strings.HasPrefix(text, "line "))
+                if (msg[0L] != '/')
                 {
-                    p.updateBase(line, col + 5L, text[5L..]);
-                    return;
-                }
-                if (pragh != null)
-                {
-                    p.pragma |= pragh(p.pos_at(line, col), text);
-                }
-            });
+                    p.errorAt(p.posAt(line, col), msg);
+                    return ;
+                } 
 
+                // otherwise it must be a comment containing a line or go: directive.
+                // //line directives must be at the start of the line (column colbase).
+                // /*line*/ directives can be anywhere in the line.
+                var text = commentText(msg);
+                if ((col == colbase || msg[1L] == '*') && strings.HasPrefix(text, "line "))
+                {
+                    Pos pos = default; // position immediately following the comment
+                    if (msg[1L] == '/')
+                    { 
+                        // line comment (newline is part of the comment)
+                        pos = MakePos(p.file, line + 1L, colbase);
+
+                    }
+                    else
+                    { 
+                        // regular comment
+                        // (if the comment spans multiple lines it's not
+                        // a valid line directive and will be discarded
+                        // by updateBase)
+                        pos = MakePos(p.file, line, col + uint(len(msg)));
+
+                    }
+
+                    p.updateBase(pos, line, col + 2L + 5L, text[5L..]); // +2 to skip over // or /*
+                    return ;
+
+                } 
+
+                // go: directive (but be conservative and test)
+                if (pragh != null && strings.HasPrefix(text, "go:"))
+                {
+                    p.pragma = pragh(p.posAt(line, col + 2L), p.scanner.blank, text, p.pragma); // +2 to skip over // or /*
+                }
+
+            }, directives);
+
+            p.@base = file;
             p.first = null;
             p.errcnt = 0L;
-            p.pragma = 0L;
+            p.pragma = null;
 
             p.fnest = 0L;
             p.xnest = 0L;
             p.indent = null;
+
         }
 
-        private static readonly long lineMax = 1L << (int)(24L) - 1L; // TODO(gri) this limit is defined for src.Pos - fix
+        // takePragma returns the current parsed pragmas
+        // and clears them from the parser state.
+        private static Pragma takePragma(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
 
- // TODO(gri) this limit is defined for src.Pos - fix
+            var prag = p.pragma;
+            p.pragma = null;
+            return prag;
+        }
 
-        private static void updateBase(this ref parser p, ulong line, ulong col, @string text)
-        { 
+        // clearPragma is called at the end of a statement or
+        // other Go form that does NOT accept a pragma.
+        // It sends the pragma back to the pragma handler
+        // to be reported as unused.
+        private static void clearPragma(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
+
+            if (p.pragma != null)
+            {
+                p.pragh(p.pos(), p.scanner.blank, "", p.pragma);
+                p.pragma = null;
+            }
+
+        }
+
+        // updateBase sets the current position base to a new line base at pos.
+        // The base's filename, line, and column values are extracted from text
+        // which is positioned at (tline, tcol) (only needed for error messages).
+        private static void updateBase(this ptr<parser> _addr_p, Pos pos, ulong tline, ulong tcol, @string text)
+        {
+            ref parser p = ref _addr_p.val;
+
+            var (i, n, ok) = trailingDigits(text);
+            if (i == 0L)
+            {
+                return ; // ignore (not a line directive)
+            } 
+            // i > 0
+            if (!ok)
+            { 
+                // text has a suffix :xxx but xxx is not a number
+                p.errorAt(p.posAt(tline, tcol + i), "invalid line number: " + text[i..]);
+                return ;
+
+            }
+
+            ulong line = default;            ulong col = default;
+
+            var (i2, n2, ok2) = trailingDigits(text[..i - 1L]);
+            if (ok2)
+            { 
+                //line filename:line:col
+                i = i2;
+                i2 = i;
+                line = n2;
+                col = n;
+                if (col == 0L || col > PosMax)
+                {
+                    p.errorAt(p.posAt(tline, tcol + i2), "invalid column number: " + text[i2..]);
+                    return ;
+                }
+
+                text = text[..i2 - 1L]; // lop off ":col"
+            }
+            else
+            { 
+                //line filename:line
+                line = n;
+
+            }
+
+            if (line == 0L || line > PosMax)
+            {
+                p.errorAt(p.posAt(tline, tcol + i), "invalid line number: " + text[i..]);
+                return ;
+            } 
+
+            // If we have a column (//line filename:line:col form),
+            // an empty filename means to use the previous filename.
+            var filename = text[..i - 1L]; // lop off ":line"
+            if (filename == "" && ok2)
+            {
+                filename = p.@base.Filename();
+            }
+
+            p.@base = NewLineBase(pos, filename, line, col);
+
+        }
+
+        private static @string commentText(@string s)
+        {
+            if (s[..2L] == "/*")
+            {
+                return s[2L..len(s) - 2L]; // lop off /* and */
+            } 
+
+            // line comment (does not include newline)
+            // (on Windows, the line comment may end in \r\n)
+            var i = len(s);
+            if (s[i - 1L] == '\r')
+            {
+                i--;
+            }
+
+            return s[2L..i]; // lop off //, and \r at end, if any
+        }
+
+        private static (ulong, ulong, bool) trailingDigits(@string text)
+        {
+            ulong _p0 = default;
+            ulong _p0 = default;
+            bool _p0 = default;
+ 
             // Want to use LastIndexByte below but it's not defined in Go1.4 and bootstrap fails.
             var i = strings.LastIndex(text, ":"); // look from right (Windows filenames may contain ':')
             if (i < 0L)
             {
-                return; // ignore (not a line directive)
-            }
-            var nstr = text[i + 1L..];
-            var (n, err) = strconv.Atoi(nstr);
-            if (err != null || n <= 0L || n > lineMax)
-            {
-                p.error_at(p.pos_at(line, col + uint(i + 1L)), "invalid line number: " + nstr);
-                return;
-            }
-            var filename = text[..i];
-            var absFilename = filename;
-            if (p.fileh != null)
-            {
-                absFilename = p.fileh(filename);
-            }
-            p.@base = src.NewLinePragmaBase(src.MakePos(p.@base.Pos().Base(), line, col), filename, absFilename, uint(n));
+                return (0L, 0L, false); // no ":"
+            } 
+            // i >= 0
+            var (n, err) = strconv.ParseUint(text[i + 1L..], 10L, 0L);
+            return (uint(i + 1L), uint(n), err == null);
+
         }
 
-        private static bool got(this ref parser p, token tok)
+        private static bool got(this ptr<parser> _addr_p, token tok)
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.tok == tok)
             {
                 p.next();
                 return true;
             }
+
             return false;
+
         }
 
-        private static void want(this ref parser p, token tok)
+        private static void want(this ptr<parser> _addr_p, token tok)
         {
+            ref parser p = ref _addr_p.val;
+
             if (!p.got(tok))
             {
-                p.syntax_error("expecting " + tokstring(tok));
+                p.syntaxError("expecting " + tokstring(tok));
                 p.advance();
             }
+
+        }
+
+        // gotAssign is like got(_Assign) but it also accepts ":="
+        // (and reports an error) for better parser error recovery.
+        private static bool gotAssign(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
+
+
+            if (p.tok == _Define)
+            {
+                p.syntaxError("expecting =");
+                fallthrough = true;
+            }
+            if (fallthrough || p.tok == _Assign)
+            {
+                p.next();
+                return true;
+                goto __switch_break0;
+            }
+
+            __switch_break0:;
+            return false;
+
         }
 
         // ----------------------------------------------------------------------------
         // Error handling
 
-        // pos_at returns the Pos value for (line, col) and the current position base.
-        private static src.Pos pos_at(this ref parser p, ulong line, ulong col)
+        // posAt returns the Pos value for (line, col) and the current position base.
+        private static Pos posAt(this ptr<parser> _addr_p, ulong line, ulong col)
         {
-            return src.MakePos(p.@base, line, col);
+            ref parser p = ref _addr_p.val;
+
+            return MakePos(p.@base, line, col);
         }
 
         // error reports an error at the given position.
-        private static void error_at(this ref parser _p, src.Pos pos, @string msg) => func(_p, (ref parser p, Defer _, Panic panic, Recover __) =>
+        private static void errorAt(this ptr<parser> _addr_p, Pos pos, @string msg) => func((_, panic, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             Error err = new Error(pos,msg);
             if (p.first == null)
             {
                 p.first = err;
             }
+
             p.errcnt++;
             if (p.errh == null)
             {
                 panic(p.first);
             }
+
             p.errh(err);
+
         });
 
-        // syntax_error_at reports a syntax error at the given position.
-        private static void syntax_error_at(this ref parser p, src.Pos pos, @string msg)
+        // syntaxErrorAt reports a syntax error at the given position.
+        private static void syntaxErrorAt(this ptr<parser> _addr_p, Pos pos, @string msg)
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 p.print("syntax error: " + msg);
             }
+
             if (p.tok == _EOF && p.first != null)
             {
-                return; // avoid meaningless follow-up errors
+                return ; // avoid meaningless follow-up errors
             } 
 
             // add punctuation etc. as needed to msg
 
-            if (msg == "")             else if (strings.HasPrefix(msg, "in") || strings.HasPrefix(msg, "at") || strings.HasPrefix(msg, "after")) 
+            if (msg == "")             else if (strings.HasPrefix(msg, "in ") || strings.HasPrefix(msg, "at ") || strings.HasPrefix(msg, "after ")) 
                 msg = " " + msg;
-            else if (strings.HasPrefix(msg, "expecting")) 
+            else if (strings.HasPrefix(msg, "expecting ")) 
                 msg = ", " + msg;
             else 
                 // plain error - we don't care about current token
-                p.error_at(pos, "syntax error: " + msg);
-                return;
+                p.errorAt(pos, "syntax error: " + msg);
+                return ;
             // determine token string
             @string tok = default;
 
@@ -183,7 +356,8 @@ namespace @internal
                 tok += tok;
             else 
                 tok = tokstring(p.tok);
-                        p.error_at(pos, "syntax error: unexpected " + tok + msg);
+                        p.errorAt(pos, "syntax error: unexpected " + tok + msg);
+
         }
 
         // tokstring returns the English word for selected punctuation tokens
@@ -196,28 +370,27 @@ namespace @internal
             else if (tok == _Semi) 
                 return "semicolon or newline";
                         return tok.String();
+
         }
 
         // Convenience methods using the current token position.
-        private static src.Pos pos(this ref parser p)
+        private static Pos pos(this ptr<parser> _addr_p)
         {
-            return p.pos_at(p.line, p.col);
-        }
-        private static void error(this ref parser p, @string msg)
-        {
-            p.error_at(p.pos(), msg);
+            ref parser p = ref _addr_p.val;
 
+            return p.posAt(p.line, p.col);
         }
-        private static void syntax_error(this ref parser p, @string msg)
+        private static void syntaxError(this ptr<parser> _addr_p, @string msg)
         {
-            p.syntax_error_at(p.pos(), msg);
+            ref parser p = ref _addr_p.val;
 
+            p.syntaxErrorAt(p.pos(), msg);
         }
 
         // The stopset contains keywords that start a statement.
         // They are good synchronization points in case of syntax
         // errors and (usually) shouldn't be skipped over.
-        private static readonly ulong stopset = 1L << (int)(_Break) | 1L << (int)(_Const) | 1L << (int)(_Continue) | 1L << (int)(_Defer) | 1L << (int)(_Fallthrough) | 1L << (int)(_For) | 1L << (int)(_Go) | 1L << (int)(_Goto) | 1L << (int)(_If) | 1L << (int)(_Return) | 1L << (int)(_Select) | 1L << (int)(_Switch) | 1L << (int)(_Type) | 1L << (int)(_Var);
+        private static readonly ulong stopset = (ulong)1L << (int)(_Break) | 1L << (int)(_Const) | 1L << (int)(_Continue) | 1L << (int)(_Defer) | 1L << (int)(_Fallthrough) | 1L << (int)(_For) | 1L << (int)(_Go) | 1L << (int)(_Goto) | 1L << (int)(_If) | 1L << (int)(_Return) | 1L << (int)(_Select) | 1L << (int)(_Switch) | 1L << (int)(_Type) | 1L << (int)(_Var);
 
         // Advance consumes tokens until it finds a token of the stopset or followlist.
         // The stopset is only considered if we are inside a function (p.fnest > 0).
@@ -229,8 +402,11 @@ namespace @internal
         // The stopset is only considered if we are inside a function (p.fnest > 0).
         // The followlist is the list of valid tokens that can follow a production;
         // if it is empty, exactly one (non-EOF) token is consumed to ensure progress.
-        private static void advance(this ref parser p, params token[] followlist)
+        private static void advance(this ptr<parser> _addr_p, params token[] followlist)
         {
+            followlist = followlist.Clone();
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 p.print(fmt.Sprintf("advance %s", followlist));
@@ -245,22 +421,27 @@ namespace @internal
                 {
                     followset |= stopset;
                 }
+
                 foreach (var (_, tok) in followlist)
                 {
                     followset |= 1L << (int)(tok);
                 }
+
             }
+
             while (!contains(followset, p.tok))
             {
                 if (trace)
                 {
                     p.print("skip " + p.tok.String());
                 }
+
                 p.next();
                 if (len(followlist) == 0L)
                 {
                     break;
                 }
+
             }
 
 
@@ -268,13 +449,16 @@ namespace @internal
             {
                 p.print("next " + p.tok.String());
             }
+
         }
 
         // usage: defer p.trace(msg)()
-        private static Action trace(this ref parser _p, @string msg) => func(_p, (ref parser p, Defer _, Panic panic, Recover __) =>
+        private static Action trace(this ptr<parser> _addr_p, @string msg) => func((_, panic, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             p.print(msg + " (");
-            const @string tab = ". ";
+            const @string tab = (@string)". ";
 
             p.indent = append(p.indent, tab);
             return () =>
@@ -289,13 +473,17 @@ namespace @internal
                     }
 
                 }
+
                 p.print(")");
-            }
-;
+
+            };
+
         });
 
-        private static void print(this ref parser p, @string msg)
+        private static void print(this ptr<parser> _addr_p, @string msg)
         {
+            ref parser p = ref _addr_p.val;
+
             fmt.Printf("%5d: %s%s\n", p.line, p.indent, msg);
         }
 
@@ -310,28 +498,33 @@ namespace @internal
         // nil; all others are expected to return a valid non-nil node.
 
         // SourceFile = PackageClause ";" { ImportDecl ";" } { TopLevelDecl ";" } .
-        private static ref File fileOrNil(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<File> fileOrNil(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("file")());
             }
+
             ptr<File> f = @new<File>();
             f.pos = p.pos(); 
 
             // PackageClause
             if (!p.got(_Package))
             {
-                p.syntax_error("package statement must be first");
-                return null;
+                p.syntaxError("package statement must be first");
+                return _addr_null!;
             }
+
+            f.Pragma = p.takePragma();
             f.PkgName = p.name();
             p.want(_Semi); 
 
             // don't bother continuing if package clause has errors
             if (p.first != null)
             {
-                return null;
+                return _addr_null!;
             } 
 
             // { ImportDecl ";" }
@@ -368,40 +561,47 @@ namespace @internal
                         }
 
                     }
+
+
                 else 
                     if (p.tok == _Lbrace && len(f.DeclList) > 0L && isEmptyFuncDecl(f.DeclList[len(f.DeclList) - 1L]))
                     { 
                         // opening { of function declaration on next line
-                        p.syntax_error("unexpected semicolon or newline before {");
+                        p.syntaxError("unexpected semicolon or newline before {");
+
                     }
                     else
                     {
-                        p.syntax_error("non-declaration statement outside function body");
+                        p.syntaxError("non-declaration statement outside function body");
                     }
+
                     p.advance(_Const, _Type, _Var, _Func);
                     continue;
                 // Reset p.pragma BEFORE advancing to the next token (consuming ';')
                 // since comments before may set pragmas for the next function decl.
-                p.pragma = 0L;
+                p.clearPragma();
 
                 if (p.tok != _EOF && !p.got(_Semi))
                 {
-                    p.syntax_error("after top level declaration");
+                    p.syntaxError("after top level declaration");
                     p.advance(_Const, _Type, _Var, _Func);
                 }
+
             } 
             // p.tok == _EOF
  
             // p.tok == _EOF
 
-            f.Lines = p.source.line;
+            p.clearPragma();
+            f.Lines = p.line;
 
-            return f;
+            return _addr_f!;
+
         });
 
         private static bool isEmptyFuncDecl(Decl dcl)
         {
-            ref FuncDecl (f, ok) = dcl._<ref FuncDecl>();
+            ptr<FuncDecl> (f, ok) = dcl._<ptr<FuncDecl>>();
             return ok && f.Body == null;
         }
 
@@ -419,8 +619,10 @@ namespace @internal
         // list = "(" { f sep } ")" |
         //        "{" { f sep } "}" . // sep is optional before ")" or "}"
         //
-        private static src.Pos list(this ref parser p, token open, token sep, token close, Func<bool> f)
+        private static Pos list(this ptr<parser> _addr_p, token open, token sep, token close, Func<bool> f)
         {
+            ref parser p = ref _addr_p.val;
+
             p.want(open);
 
             bool done = default;
@@ -430,28 +632,35 @@ namespace @internal
                 // sep is optional before close
                 if (!p.got(sep) && p.tok != close)
                 {
-                    p.syntax_error(fmt.Sprintf("expecting %s or %s", tokstring(sep), tokstring(close)));
+                    p.syntaxError(fmt.Sprintf("expecting %s or %s", tokstring(sep), tokstring(close)));
                     p.advance(_Rparen, _Rbrack, _Rbrace);
                     if (p.tok != close)
                     { 
                         // position could be better but we had an error so we don't care
                         return p.pos();
+
                     }
+
                 }
+
             }
 
 
             var pos = p.pos();
             p.want(close);
             return pos;
+
         }
 
         // appendGroup(f) = f | "(" { f ";" } ")" . // ";" is optional before ")"
-        private static slice<Decl> appendGroup(this ref parser _p, slice<Decl> list, Func<ref Group, Decl> f) => func(_p, (ref parser p, Defer _, Panic panic, Recover __) =>
+        private static slice<Decl> appendGroup(this ptr<parser> _addr_p, slice<Decl> list, Func<ptr<Group>, Decl> f) => func((_, panic, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.tok == _Lparen)
             {
                 ptr<Group> g = @new<Group>();
+                p.clearPragma();
                 p.list(_Lparen, _Semi, _Rparen, () =>
                 {
                     list = append(list, f(g));
@@ -459,9 +668,11 @@ namespace @internal
                 }
             else
 );
+
             }            {
                 list = append(list, f(null));
             }
+
             if (debug)
             {
                 foreach (var (_, d) in list)
@@ -470,21 +681,31 @@ namespace @internal
                     {
                         panic("nil list entry");
                     }
+
                 }
+
             }
+
             return list;
+
         });
 
         // ImportSpec = [ "." | PackageName ] ImportPath .
         // ImportPath = string_lit .
-        private static Decl importDecl(this ref parser _p, ref Group _group) => func(_p, _group, (ref parser p, ref Group group, Defer defer, Panic _, Recover __) =>
+        private static Decl importDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref Group group = ref _addr_group.val;
+
             if (trace)
             {
                 defer(p.trace("importDecl")());
             }
+
             ptr<object> d = @new<ImportDecl>();
             d.pos = p.pos();
+            d.Group = group;
+            d.Pragma = p.takePragma();
 
 
             if (p.tok == _Name) 
@@ -495,90 +716,109 @@ namespace @internal
                         d.Path = p.oliteral();
             if (d.Path == null)
             {
-                p.syntax_error("missing import path");
+                p.syntaxError("missing import path");
                 p.advance(_Semi, _Rparen);
                 return null;
             }
-            d.Group = group;
 
             return d;
+
         });
 
         // ConstSpec = IdentifierList [ [ Type ] "=" ExpressionList ] .
-        private static Decl constDecl(this ref parser _p, ref Group _group) => func(_p, _group, (ref parser p, ref Group group, Defer defer, Panic _, Recover __) =>
+        private static Decl constDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref Group group = ref _addr_group.val;
+
             if (trace)
             {
                 defer(p.trace("constDecl")());
             }
+
             ptr<object> d = @new<ConstDecl>();
             d.pos = p.pos();
+            d.Group = group;
+            d.Pragma = p.takePragma();
 
             d.NameList = p.nameList(p.name());
             if (p.tok != _EOF && p.tok != _Semi && p.tok != _Rparen)
             {
                 d.Type = p.typeOrNil();
-                if (p.got(_Assign))
+                if (p.gotAssign())
                 {
                     d.Values = p.exprList();
                 }
+
             }
-            d.Group = group;
 
             return d;
+
         });
 
         // TypeSpec = identifier [ "=" ] Type .
-        private static Decl typeDecl(this ref parser _p, ref Group _group) => func(_p, _group, (ref parser p, ref Group group, Defer defer, Panic _, Recover __) =>
+        private static Decl typeDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref Group group = ref _addr_group.val;
+
             if (trace)
             {
                 defer(p.trace("typeDecl")());
             }
+
             ptr<object> d = @new<TypeDecl>();
             d.pos = p.pos();
+            d.Group = group;
+            d.Pragma = p.takePragma();
 
             d.Name = p.name();
-            d.Alias = p.got(_Assign);
+            d.Alias = p.gotAssign();
             d.Type = p.typeOrNil();
             if (d.Type == null)
             {
-                d.Type = p.bad();
-                p.syntax_error("in type declaration");
+                d.Type = p.badExpr();
+                p.syntaxError("in type declaration");
                 p.advance(_Semi, _Rparen);
             }
-            d.Group = group;
-            d.Pragma = p.pragma;
 
             return d;
+
         });
 
         // VarSpec = IdentifierList ( Type [ "=" ExpressionList ] | "=" ExpressionList ) .
-        private static Decl varDecl(this ref parser _p, ref Group _group) => func(_p, _group, (ref parser p, ref Group group, Defer defer, Panic _, Recover __) =>
+        private static Decl varDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref Group group = ref _addr_group.val;
+
             if (trace)
             {
                 defer(p.trace("varDecl")());
             }
+
             ptr<object> d = @new<VarDecl>();
             d.pos = p.pos();
+            d.Group = group;
+            d.Pragma = p.takePragma();
 
             d.NameList = p.nameList(p.name());
-            if (p.got(_Assign))
+            if (p.gotAssign())
             {
                 d.Values = p.exprList();
             }
             else
             {
                 d.Type = p.type_();
-                if (p.got(_Assign))
+                if (p.gotAssign())
                 {
                     d.Values = p.exprList();
                 }
+
             }
-            d.Group = group;
 
             return d;
+
         });
 
         // FunctionDecl = "func" FunctionName ( Function | Signature ) .
@@ -586,14 +826,18 @@ namespace @internal
         // Function     = Signature FunctionBody .
         // MethodDecl   = "func" Receiver MethodName ( Function | Signature ) .
         // Receiver     = Parameters .
-        private static ref FuncDecl funcDeclOrNil(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<FuncDecl> funcDeclOrNil(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("funcDecl")());
             }
+
             ptr<FuncDecl> f = @new<FuncDecl>();
             f.pos = p.pos();
+            f.Pragma = p.takePragma();
 
             if (p.tok == _Lparen)
             {
@@ -610,26 +854,31 @@ namespace @internal
                         p.error("method has multiple receivers");
                         break;
                 }
+
             }
+
             if (p.tok != _Name)
             {
-                p.syntax_error("expecting name or (");
+                p.syntaxError("expecting name or (");
                 p.advance(_Lbrace, _Semi);
-                return null;
+                return _addr_null!;
             }
+
             f.Name = p.name();
             f.Type = p.funcType();
             if (p.tok == _Lbrace)
             {
                 f.Body = p.funcBody();
             }
-            f.Pragma = p.pragma;
 
-            return f;
+            return _addr_f!;
+
         });
 
-        private static ref BlockStmt funcBody(this ref parser p)
+        private static ptr<BlockStmt> funcBody(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.fnest++;
             var errcnt = p.errcnt;
             var body = p.blockStmt("");
@@ -642,24 +891,32 @@ namespace @internal
             {
                 checkBranches(body, p.errh);
             }
-            return body;
+
+            return _addr_body!;
+
         }
 
         // ----------------------------------------------------------------------------
         // Expressions
 
-        private static Expr expr(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr expr(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("expr")());
             }
+
             return p.binaryExpr(0L);
+
         });
 
         // Expression = UnaryExpr | Expression binary_op Expression .
-        private static Expr binaryExpr(this ref parser p, long prec)
-        { 
+        private static Expr binaryExpr(this ptr<parser> _addr_p, long prec)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // don't trace binaryExpr - only leads to overly nested trace output
 
             var x = p.unaryExpr();
@@ -676,15 +933,19 @@ namespace @internal
             }
 
             return x;
+
         }
 
         // UnaryExpr = PrimaryExpr | unary_op UnaryExpr .
-        private static Expr unaryExpr(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr unaryExpr(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("unaryExpr")());
             }
+
 
             if (p.tok == _Operator || p.tok == _Star) 
 
@@ -727,7 +988,7 @@ namespace @internal
                 //   <-(chan<-E)  =>  (<-chan (<-E))
 
                 {
-                    ref ChanType (_, ok) = x._<ref ChanType>();
+                    ptr<ChanType> (_, ok) = x._<ptr<ChanType>>();
 
                     if (ok)
                     { 
@@ -736,31 +997,36 @@ namespace @internal
                         var t = x;
                         while (dir == SendOnly)
                         {
-                            ref ChanType (c, ok) = t._<ref ChanType>();
+                            ptr<ChanType> (c, ok) = t._<ptr<ChanType>>();
                             if (!ok)
                             {
                                 break;
                             }
+
                             dir = c.Dir;
                             if (dir == RecvOnly)
                             { 
                                 // t is type <-chan E but <-<-chan E is not permitted
                                 // (report same error as for "type _ <-<-chan E")
-                                p.syntax_error("unexpected <-, expecting chan"); 
+                                p.syntaxError("unexpected <-, expecting chan"); 
                                 // already progressed, no need to advance
                             }
+
                             c.Dir = RecvOnly;
                             t = c.Elem;
+
                         }
 
                         if (dir == SendOnly)
                         { 
                             // channel dir is <- but channel element E is not a channel
                             // (report same error as for "type _ <-chan<-E")
-                            p.syntax_error(fmt.Sprintf("unexpected %s, expecting chan", String(t))); 
+                            p.syntaxError(fmt.Sprintf("unexpected %s, expecting chan", String(t))); 
                             // already progressed, no need to advance
                         }
+
                         return x;
+
                     } 
 
                     // x is not a channel type => we have a receive op
@@ -777,15 +1043,19 @@ namespace @internal
             // error for "(x) := true". It should be possible to detect
             // and reject that more efficiently though.
             return p.pexpr(true);
+
         });
 
         // callStmt parses call-like statements that can be preceded by 'defer' and 'go'.
-        private static ref CallStmt callStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<CallStmt> callStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("callStmt")());
             }
+
             ptr<CallStmt> s = @new<CallStmt>();
             s.pos = p.pos();
             s.Tok = p.tok; // _Defer or _Go
@@ -797,36 +1067,43 @@ namespace @internal
 
                 if (t != x)
                 {
-                    p.error(fmt.Sprintf("expression in %s must not be parenthesized", s.Tok)); 
+                    p.errorAt(x.Pos(), fmt.Sprintf("expression in %s must not be parenthesized", s.Tok)); 
                     // already progressed, no need to advance
                     x = t;
+
                 }
 
             }
 
-            ref CallExpr (cx, ok) = x._<ref CallExpr>();
+
+            ptr<CallExpr> (cx, ok) = x._<ptr<CallExpr>>();
             if (!ok)
             {
-                p.error(fmt.Sprintf("expression in %s must be function call", s.Tok)); 
+                p.errorAt(x.Pos(), fmt.Sprintf("expression in %s must be function call", s.Tok)); 
                 // already progressed, no need to advance
                 cx = @new<CallExpr>();
                 cx.pos = x.Pos();
-                cx.Fun = p.bad();
+                cx.Fun = x; // assume common error of missing parentheses (function invocation)
             }
+
             s.Call = cx;
-            return s;
+            return _addr_s!;
+
         });
 
         // Operand     = Literal | OperandName | MethodExpr | "(" Expression ")" .
         // Literal     = BasicLit | CompositeLit | FunctionLit .
         // BasicLit    = int_lit | float_lit | imaginary_lit | rune_lit | string_lit .
         // OperandName = identifier | QualifiedIdent.
-        private static Expr operand(this ref parser _p, bool keep_parens) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr operand(this ptr<parser> _addr_p, bool keep_parens) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("operand " + p.tok.String())());
             }
+
 
             if (p.tok == _Name) 
                 return p.name();
@@ -869,6 +1146,7 @@ namespace @internal
                     px.X = x;
                     x = px;
                 }
+
                 return x;
             else if (p.tok == _Func) 
                 pos = p.pos();
@@ -886,13 +1164,14 @@ namespace @internal
                     p.xnest--;
                     return f;
                 }
+
                 return t;
             else if (p.tok == _Lbrack || p.tok == _Chan || p.tok == _Map || p.tok == _Struct || p.tok == _Interface) 
                 return p.type_(); // othertype
             else 
-                x = p.bad();
-                p.syntax_error("expecting expression");
-                p.advance();
+                x = p.badExpr();
+                p.syntaxError("expecting expression");
+                p.advance(_Rparen, _Rbrack, _Rbrace);
                 return x;
             // Syntactically, composite literals are operands. Because a complit
             // type may be a qualified identifier which is handled by pexpr
@@ -916,12 +1195,15 @@ namespace @internal
         //                  "]" .
         // TypeAssertion  = "." "(" Type ")" .
         // Arguments      = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." ] [ "," ] ] ")" .
-        private static Expr pexpr(this ref parser _p, bool keep_parens) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr pexpr(this ptr<parser> _addr_p, bool keep_parens) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("pexpr")());
             }
+
             var x = p.operand(keep_parens);
 
 loop:
@@ -944,22 +1226,25 @@ loop:
                         p.next();
                         if (p.got(_Type))
                         {
-                            t = @new<TypeSwitchGuard>();
+                            t = @new<TypeSwitchGuard>(); 
+                            // t.Lhs is filled in by parser.simpleStmt
                             t.pos = pos;
                             t.X = x;
                             x = t;
+
                         }
                         else
                         {
                             t = @new<AssertExpr>();
                             t.pos = pos;
                             t.X = x;
-                            t.Type = p.expr();
+                            t.Type = p.type_();
                             x = t;
                         }
+
                         p.want(_Rparen);
                     else 
-                        p.syntax_error("expecting name or (");
+                        p.syntaxError("expecting name or (");
                         p.advance(_Semi, _Rparen);
                                     else if (p.tok == _Lbrack) 
                     p.next();
@@ -979,7 +1264,9 @@ loop:
                             x = t;
                             p.xnest--;
                             break;
+
                         }
+
                     } 
 
                     // x[i:...
@@ -992,7 +1279,9 @@ loop:
                     { 
                         // x[i:j...
                         t.Index[1L] = p.expr();
+
                     }
+
                     if (p.got(_Colon))
                     {
                         t.Full = true; 
@@ -1001,16 +1290,20 @@ loop:
                         {
                             p.error("middle index required in 3-index slice");
                         }
+
                         if (p.tok != _Rbrack)
                         { 
                             // x[i:j:k...
                             t.Index[2L] = p.expr();
+
                         }
                         else
                         {
                             p.error("final index required in 3-index slice");
                         }
+
                     }
+
                     p.want(_Rbrack);
 
                     x = t;
@@ -1029,30 +1322,34 @@ loop:
                     var complit_ok = false;
                     switch (t.type())
                     {
-                        case ref Name _:
+                        case ptr<Name> _:
                             if (p.xnest >= 0L)
                             { 
                                 // x is considered a composite literal type
                                 complit_ok = true;
+
                             }
+
                             break;
-                        case ref SelectorExpr _:
+                        case ptr<SelectorExpr> _:
                             if (p.xnest >= 0L)
                             { 
                                 // x is considered a composite literal type
                                 complit_ok = true;
+
                             }
+
                             break;
-                        case ref ArrayType _:
+                        case ptr<ArrayType> _:
                             complit_ok = true;
                             break;
-                        case ref SliceType _:
+                        case ptr<SliceType> _:
                             complit_ok = true;
                             break;
-                        case ref StructType _:
+                        case ptr<StructType> _:
                             complit_ok = true;
                             break;
-                        case ref MapType _:
+                        case ptr<MapType> _:
                             complit_ok = true;
                             break;
                     }
@@ -1061,11 +1358,13 @@ loop:
                         _breakloop = true;
                         break;
                     }
+
                     if (t != x)
                     {
-                        p.syntax_error("cannot parenthesize type in composite literal"); 
+                        p.syntaxError("cannot parenthesize type in composite literal"); 
                         // already progressed, no need to advance
                     }
+
                     var n = p.complitexpr();
                     n.Type = x;
                     x = n;
@@ -1075,30 +1374,40 @@ loop:
                             }
 
             return x;
+
         });
 
         // Element = Expression | LiteralValue .
-        private static Expr bare_complitexpr(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr bare_complitexpr(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("bare_complitexpr")());
             }
+
             if (p.tok == _Lbrace)
             { 
                 // '{' start_complit braced_keyval_list '}'
                 return p.complitexpr();
+
             }
+
             return p.expr();
+
         });
 
         // LiteralValue = "{" [ ElementList [ "," ] ] "}" .
-        private static ref CompositeLit complitexpr(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<CompositeLit> complitexpr(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("complitexpr")());
             }
+
             ptr<CompositeLit> x = @new<CompositeLit>();
             x.pos = p.pos();
 
@@ -1117,35 +1426,44 @@ loop:
                     l.Value = p.bare_complitexpr();
                     e = l;
                     x.NKeys++;
+
                 }
+
                 x.ElemList = append(x.ElemList, e);
-                return false;
+                return _addr_false!;
+
             });
             p.xnest--;
 
-            return x;
+            return _addr_x!;
+
         });
 
         // ----------------------------------------------------------------------------
         // Types
 
-        private static Expr type_(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr type_(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("type_")());
             }
+
             var typ = p.typeOrNil();
             if (typ == null)
             {
-                typ = p.bad();
-                p.syntax_error("expecting type");
-                p.advance();
+                typ = p.badExpr();
+                p.syntaxError("expecting type");
+                p.advance(_Comma, _Colon, _Semi, _Rparen, _Rbrack, _Rbrace);
             }
+
             return typ;
+
         });
 
-        private static Expr newIndirect(src.Pos pos, Expr typ)
+        private static Expr newIndirect(Pos pos, Expr typ)
         {
             ptr<object> o = @new<Operation>();
             o.pos = pos;
@@ -1161,12 +1479,15 @@ loop:
         // TypeName = identifier | QualifiedIdent .
         // TypeLit  = ArrayType | StructType | PointerType | FunctionType | InterfaceType |
         //           SliceType | MapType | Channel_Type .
-        private static Expr typeOrNil(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr typeOrNil(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("typeOrNil")());
             }
+
             var pos = p.pos();
 
             if (p.tok == _Star) 
@@ -1199,6 +1520,7 @@ loop:
                     t.pos = pos;
                     t.Elem = p.type_();
                     return t;
+
                 } 
 
                 // [n]T
@@ -1208,6 +1530,7 @@ loop:
                 {
                     t.Len = p.expr();
                 }
+
                 p.want(_Rbrack);
                 p.xnest--;
                 t.Elem = p.type_();
@@ -1222,6 +1545,7 @@ loop:
                 {
                     t.Dir = SendOnly;
                 }
+
                 t.Elem = p.chanElem();
                 return t;
             else if (p.tok == _Map) 
@@ -1246,44 +1570,58 @@ loop:
                 p.want(_Rparen);
                 return t;
                         return null;
+
         });
 
-        private static ref FuncType funcType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<FuncType> funcType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("funcType")());
             }
+
             ptr<FuncType> typ = @new<FuncType>();
             typ.pos = p.pos();
             typ.ParamList = p.paramList();
             typ.ResultList = p.funcResult();
 
-            return typ;
+            return _addr_typ!;
+
         });
 
-        private static Expr chanElem(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr chanElem(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("chanElem")());
             }
+
             var typ = p.typeOrNil();
             if (typ == null)
             {
-                typ = p.bad();
-                p.syntax_error("missing channel element type"); 
+                typ = p.badExpr();
+                p.syntaxError("missing channel element type"); 
                 // assume element type is simply absent - don't advance
             }
+
             return typ;
+
         });
 
-        private static Expr dotname(this ref parser _p, ref Name _name) => func(_p, _name, (ref parser p, ref Name name, Defer defer, Panic _, Recover __) =>
+        private static Expr dotname(this ptr<parser> _addr_p, ptr<Name> _addr_name) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref Name name = ref _addr_name.val;
+
             if (trace)
             {
                 defer(p.trace("dotname")());
             }
+
             if (p.tok == _Dot)
             {
                 ptr<SelectorExpr> s = @new<SelectorExpr>();
@@ -1293,16 +1631,21 @@ loop:
                 s.Sel = p.name();
                 return s;
             }
+
             return name;
+
         });
 
         // StructType = "struct" "{" { FieldDecl ";" } "}" .
-        private static ref StructType structType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<StructType> structType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("structType")());
             }
+
             ptr<StructType> typ = @new<StructType>();
             typ.pos = p.pos();
 
@@ -1310,19 +1653,23 @@ loop:
             p.list(_Lbrace, _Semi, _Rbrace, () =>
             {
                 p.fieldDecl(typ);
-                return false;
+                return _addr_false!;
             });
 
-            return typ;
+            return _addr_typ!;
+
         });
 
         // InterfaceType = "interface" "{" { MethodSpec ";" } "}" .
-        private static ref InterfaceType interfaceType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<InterfaceType> interfaceType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("interfaceType")());
             }
+
             ptr<InterfaceType> typ = @new<InterfaceType>();
             typ.pos = p.pos();
 
@@ -1338,23 +1685,30 @@ loop:
                     }
 
                 }
-                return false;
+
+                return _addr_false!;
+
             });
 
-            return typ;
+            return _addr_typ!;
+
         });
 
         // Result = Parameters | Type .
-        private static slice<ref Field> funcResult(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static slice<ptr<Field>> funcResult(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("funcResult")());
             }
+
             if (p.tok == _Lparen)
             {
                 return p.paramList();
             }
+
             var pos = p.pos();
             {
                 var typ = p.typeOrNil();
@@ -1364,16 +1718,23 @@ loop:
                     ptr<Field> f = @new<Field>();
                     f.pos = pos;
                     f.Type = typ;
-                    return new slice<ref Field>(new ref Field[] { f });
+                    return new slice<ptr<Field>>(new ptr<Field>[] { f });
                 }
 
             }
 
+
             return null;
+
         });
 
-        private static void addField(this ref parser _p, ref StructType _styp, src.Pos pos, ref Name _name, Expr typ, ref BasicLit _tag) => func(_p, _styp, _name, _tag, (ref parser p, ref StructType styp, ref Name name, ref BasicLit tag, Defer _, Panic panic, Recover __) =>
+        private static void addField(this ptr<parser> _addr_p, ptr<StructType> _addr_styp, Pos pos, ptr<Name> _addr_name, Expr typ, ptr<BasicLit> _addr_tag) => func((_, panic, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref StructType styp = ref _addr_styp.val;
+            ref Name name = ref _addr_name.val;
+            ref BasicLit tag = ref _addr_tag.val;
+
             if (tag != null)
             {
                 for (var i = len(styp.FieldList) - len(styp.TagList); i > 0L; i--)
@@ -1382,7 +1743,9 @@ loop:
                 }
 
                 styp.TagList = append(styp.TagList, tag);
+
             }
+
             ptr<Field> f = @new<Field>();
             f.pos = pos;
             f.Name = name;
@@ -1393,17 +1756,22 @@ loop:
             {
                 panic("inconsistent struct field list");
             }
+
         });
 
         // FieldDecl      = (IdentifierList Type | AnonymousField) [ Tag ] .
         // AnonymousField = [ "*" ] TypeName .
         // Tag            = string_lit .
-        private static void fieldDecl(this ref parser _p, ref StructType _styp) => func(_p, _styp, (ref parser p, ref StructType styp, Defer defer, Panic _, Recover __) =>
+        private static void fieldDecl(this ptr<parser> _addr_p, ptr<StructType> _addr_styp) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref StructType styp = ref _addr_styp.val;
+
             if (trace)
             {
                 defer(p.trace("fieldDecl")());
             }
+
             var pos = p.pos();
 
             if (p.tok == _Name) 
@@ -1414,7 +1782,8 @@ loop:
                     var typ = p.qualifiedName(name);
                     var tag = p.oliteral();
                     p.addField(styp, pos, null, typ, tag);
-                    return;
+                    return ;
+
                 } 
 
                 // new_name_list ntype oliteral
@@ -1444,7 +1813,8 @@ loop:
                     p.want(_Rparen);
                     tag = p.oliteral();
                     p.addField(styp, pos, null, typ, tag);
-                    p.syntax_error("cannot parenthesize embedded type");
+                    p.syntaxError("cannot parenthesize embedded type");
+
 
                 }
                 else
@@ -1454,8 +1824,10 @@ loop:
                     p.want(_Rparen);
                     tag = p.oliteral();
                     p.addField(styp, pos, null, typ, tag);
-                    p.syntax_error("cannot parenthesize embedded type");
+                    p.syntaxError("cannot parenthesize embedded type");
+
                 }
+
             else if (p.tok == _Star) 
                 p.next();
                 if (p.got(_Lparen))
@@ -1465,7 +1837,8 @@ loop:
                     p.want(_Rparen);
                     tag = p.oliteral();
                     p.addField(styp, pos, null, typ, tag);
-                    p.syntax_error("cannot parenthesize embedded type");
+                    p.syntaxError("cannot parenthesize embedded type");
+
 
                 }
                 else
@@ -1474,35 +1847,46 @@ loop:
                     typ = newIndirect(pos, p.qualifiedName(null));
                     tag = p.oliteral();
                     p.addField(styp, pos, null, typ, tag);
-                }
-            else 
-                p.syntax_error("expecting field name or embedded type");
-                p.advance(_Semi, _Rbrace);
-                    });
 
-        private static ref BasicLit oliteral(this ref parser p)
+                }
+
+            else 
+                p.syntaxError("expecting field name or embedded type");
+                p.advance(_Semi, _Rbrace);
+            
+        });
+
+        private static ptr<BasicLit> oliteral(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.tok == _Literal)
             {
                 ptr<BasicLit> b = @new<BasicLit>();
                 b.pos = p.pos();
                 b.Value = p.lit;
                 b.Kind = p.kind;
+                b.Bad = p.bad;
                 p.next();
-                return b;
+                return _addr_b!;
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
         // MethodSpec        = MethodName Signature | InterfaceTypeName .
         // MethodName        = identifier .
         // InterfaceTypeName = TypeName .
-        private static ref Field methodDecl(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<Field> methodDecl(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("methodDecl")());
             }
+
 
             if (p.tok == _Name) 
                 var name = p.name(); 
@@ -1517,41 +1901,48 @@ loop:
 
                 if (hasNameList)
                 {
-                    p.syntax_error("name list not allowed in interface type"); 
+                    p.syntaxError("name list not allowed in interface type"); 
                     // already progressed, no need to advance
                 }
+
                 ptr<Field> f = @new<Field>();
                 f.pos = name.Pos();
                 if (p.tok != _Lparen)
                 { 
                     // packname
                     f.Type = p.qualifiedName(name);
-                    return f;
+                    return _addr_f!;
+
                 }
+
                 f.Name = name;
                 f.Type = p.funcType();
-                return f;
+                return _addr_f!;
             else if (p.tok == _Lparen) 
-                p.syntax_error("cannot parenthesize embedded type");
+                p.syntaxError("cannot parenthesize embedded type");
                 f = @new<Field>();
                 f.pos = p.pos();
                 p.next();
                 f.Type = p.qualifiedName(null);
                 p.want(_Rparen);
-                return f;
+                return _addr_f!;
             else 
-                p.syntax_error("expecting method or interface name");
+                p.syntaxError("expecting method or interface name");
                 p.advance(_Semi, _Rbrace);
-                return null;
-                    });
+                return _addr_null!;
+            
+        });
 
         // ParameterDecl = [ IdentifierList ] [ "..." ] Type .
-        private static ref Field paramDeclOrNil(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<Field> paramDeclOrNil(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("paramDecl")());
             }
+
             ptr<Field> f = @new<Field>();
             f.pos = p.pos();
 
@@ -1577,19 +1968,23 @@ loop:
                 // dotdotdot
                 f.Type = p.dotsType();
             else 
-                p.syntax_error("expecting )");
+                p.syntaxError("expecting )");
                 p.advance(_Comma, _Rparen);
-                return null;
-                        return f;
+                return _addr_null!;
+                        return _addr_f!;
+
         });
 
         // ...Type
-        private static ref DotsType dotsType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<DotsType> dotsType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("dotsType")());
             }
+
             ptr<DotsType> t = @new<DotsType>();
             t.pos = p.pos();
 
@@ -1597,20 +1992,26 @@ loop:
             t.Elem = p.typeOrNil();
             if (t.Elem == null)
             {
-                t.Elem = p.bad();
-                p.syntax_error("final argument in variadic function missing type");
+                t.Elem = p.badExpr();
+                p.syntaxError("final argument in variadic function missing type");
             }
-            return t;
+
+            return _addr_t!;
+
         });
 
         // Parameters    = "(" [ ParameterList [ "," ] ] ")" .
         // ParameterList = ParameterDecl { "," ParameterDecl } .
-        private static slice<ref Field> paramList(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic panic, Recover _) =>
+        private static slice<ptr<Field>> paramList(this ptr<parser> _addr_p) => func((defer, panic, _) =>
         {
+            slice<ptr<Field>> list = default;
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("paramList")());
             }
+
             var pos = p.pos();
 
             long named = default; // number of parameters that have an explicit name and type
@@ -1627,17 +2028,22 @@ loop:
                         {
                             panic("parameter without name or type");
                         }
+
                         if (par.Name != null && par.Type != null)
                         {
                             named++;
                         }
+
                         list = append(list, par);
+
                     }
 
                     par = par__prev1;
 
                 }
+
                 return false;
+
             }); 
 
             // distribute parameter types
@@ -1664,11 +2070,11 @@ loop:
                             typ = typ__prev2;
 
                         }
+
                     }
 
                     par = par__prev1;
                 }
-
             }
             else if (named != len(list))
             { 
@@ -1691,7 +2097,9 @@ loop:
                                 var n = p.newName("_");
                                 n.pos = typ.Pos(); // correct position
                                 par.Name = n;
+
                             }
+
                         }
                         else if (typ != null)
                         {
@@ -1701,29 +2109,37 @@ loop:
                         { 
                             // par.Type == nil && typ == nil => we only have a par.Name
                             ok = false;
-                            var t = p.bad();
+                            var t = p.badExpr();
                             t.pos = par.Name.Pos(); // correct position
                             par.Type = t;
+
                         }
+
 
                         par = par__prev3;
 
                     }
+
                 }
 
                 if (!ok)
                 {
-                    p.syntax_error_at(pos, "mixed named and unnamed function parameters");
+                    p.syntaxErrorAt(pos, "mixed named and unnamed function parameters");
                 }
+
             }
-            return;
+
+            return ;
+
         });
 
-        private static ref BadExpr bad(this ref parser p)
+        private static ptr<BadExpr> badExpr(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             ptr<BadExpr> b = @new<BadExpr>();
             b.pos = p.pos();
-            return b;
+            return _addr_b!;
         }
 
         // ----------------------------------------------------------------------------
@@ -1731,30 +2147,37 @@ loop:
 
         // We represent x++, x-- as assignments x += ImplicitOne, x -= ImplicitOne.
         // ImplicitOne should not be used elsewhere.
-        public static BasicLit ImplicitOne = ref new BasicLit(Value:"1");
+        public static ptr<BasicLit> ImplicitOne = addr(new BasicLit(Value:"1"));
 
         // SimpleStmt = EmptyStmt | ExpressionStmt | SendStmt | IncDecStmt | Assignment | ShortVarDecl .
-        private static SimpleStmt simpleStmt(this ref parser _p, Expr lhs, bool rangeOk) => func(_p, (ref parser p, Defer defer, Panic panic, Recover _) =>
+        private static SimpleStmt simpleStmt(this ptr<parser> _addr_p, Expr lhs, token keyword) => func((defer, panic, _) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("simpleStmt")());
             }
-            if (rangeOk && p.tok == _Range)
+
+            if (keyword == _For && p.tok == _Range)
             { 
                 // _Range expr
                 if (debug && lhs != null)
                 {
                     panic("invalid call of simpleStmt");
                 }
+
                 return p.newRangeClause(null, false);
+
             }
+
             if (lhs == null)
             {
                 lhs = p.exprList();
             }
+
             {
-                ref ListExpr (_, ok) = lhs._<ref ListExpr>();
+                ptr<ListExpr> (_, ok) = lhs._<ptr<ListExpr>>();
 
                 if (!ok && p.tok != _Assign && p.tok != _Define)
                 { 
@@ -1785,94 +2208,74 @@ loop:
                         s.pos = lhs.Pos();
                         s.X = lhs;
                         return s;
-                                    } 
+                    
+                } 
 
                 // expr_list
 
             } 
 
             // expr_list
-            pos = p.pos();
 
-            if (p.tok == _Assign) 
+            if (p.tok == _Assign || p.tok == _Define) 
+                pos = p.pos();
+                op = default;
+                if (p.tok == _Define)
+                {
+                    op = Def;
+                }
+
                 p.next();
 
-                if (rangeOk && p.tok == _Range)
+                if (keyword == _For && p.tok == _Range)
                 { 
-                    // expr_list '=' _Range expr
-                    return p.newRangeClause(lhs, false);
+                    // expr_list op= _Range expr
+                    return p.newRangeClause(lhs, op == Def);
+
                 } 
 
-                // expr_list '=' expr_list
-                return p.newAssignStmt(pos, 0L, lhs, p.exprList());
-            else if (p.tok == _Define) 
-                p.next();
-
-                if (rangeOk && p.tok == _Range)
-                { 
-                    // expr_list ':=' range expr
-                    return p.newRangeClause(lhs, true);
-                } 
-
-                // expr_list ':=' expr_list
+                // expr_list op= expr_list
                 var rhs = p.exprList();
 
                 {
-                    ref TypeSwitchGuard x__prev1 = x;
+                    ptr<TypeSwitchGuard> x__prev1 = x;
 
-                    ref TypeSwitchGuard (x, ok) = rhs._<ref TypeSwitchGuard>();
+                    ptr<TypeSwitchGuard> (x, ok) = rhs._<ptr<TypeSwitchGuard>>();
 
-                    if (ok)
+                    if (ok && keyword == _Switch && op == Def)
                     {
-                        switch (lhs.type())
                         {
-                            case ref Name lhs:
+                            ptr<Name> (lhs, ok) = lhs._<ptr<Name>>();
+
+                            if (ok)
+                            { 
+                                // switch … lhs := rhs.(type)
                                 x.Lhs = lhs;
-                                break;
-                            case ref ListExpr lhs:
-                                p.error_at(lhs.Pos(), fmt.Sprintf("cannot assign 1 value to %d variables", len(lhs.ElemList))); 
-                                // make the best of what we have
-                                {
-                                    var lhs__prev2 = lhs;
+                                s = @new<ExprStmt>();
+                                s.pos = x.Pos();
+                                s.X = x;
+                                return s;
 
-                                    ref Name (lhs, ok) = lhs.ElemList[0L]._<ref Name>();
-
-                                    if (ok)
-                                    {
-                                        x.Lhs = lhs;
-                                    }
-
-                                    lhs = lhs__prev2;
-
-                                }
-                                break;
-                            default:
-                            {
-                                var lhs = lhs.type();
-                                p.error_at(lhs.Pos(), fmt.Sprintf("invalid variable name %s in type switch", String(lhs)));
-                                break;
                             }
+
                         }
-                        s = @new<ExprStmt>();
-                        s.pos = x.Pos();
-                        s.X = x;
-                        return s;
+
                     }
 
                     x = x__prev1;
 
                 }
 
-                var @as = p.newAssignStmt(pos, Def, lhs, rhs);
-                return as;
+
+                return p.newAssignStmt(pos, op, lhs, rhs);
             else 
-                p.syntax_error("expecting := or = or comma");
+                p.syntaxError("expecting := or = or comma");
                 p.advance(_Semi, _Rbrace); 
                 // make the best of what we have
                 {
-                    ref TypeSwitchGuard x__prev1 = x;
+                    ptr<TypeSwitchGuard> x__prev1 = x;
 
-                    (x, ok) = lhs._<ref ListExpr>();
+                    (x, ok) = lhs._<ptr<ListExpr>>();
 
                     if (ok)
                     {
@@ -1882,39 +2285,50 @@ loop:
                     x = x__prev1;
 
                 }
+
                 s = @new<ExprStmt>();
                 s.pos = lhs.Pos();
                 s.X = lhs;
                 return s;
-                    });
+            
+        });
 
-        private static ref RangeClause newRangeClause(this ref parser p, Expr lhs, bool def)
+        private static ptr<RangeClause> newRangeClause(this ptr<parser> _addr_p, Expr lhs, bool def)
         {
+            ref parser p = ref _addr_p.val;
+
             ptr<RangeClause> r = @new<RangeClause>();
             r.pos = p.pos();
             p.next(); // consume _Range
             r.Lhs = lhs;
             r.Def = def;
             r.X = p.expr();
-            return r;
+            return _addr_r!;
+
         }
 
-        private static ref AssignStmt newAssignStmt(this ref parser p, src.Pos pos, Operator op, Expr lhs, Expr rhs)
+        private static ptr<AssignStmt> newAssignStmt(this ptr<parser> _addr_p, Pos pos, Operator op, Expr lhs, Expr rhs)
         {
+            ref parser p = ref _addr_p.val;
+
             ptr<AssignStmt> a = @new<AssignStmt>();
             a.pos = pos;
             a.Op = op;
             a.Lhs = lhs;
             a.Rhs = rhs;
-            return a;
+            return _addr_a!;
         }
 
-        private static Stmt labeledStmtOrNil(this ref parser _p, ref Name _label) => func(_p, _label, (ref parser p, ref Name label, Defer defer, Panic _, Recover __) =>
+        private static Stmt labeledStmtOrNil(this ptr<parser> _addr_p, ptr<Name> _addr_label) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref Name label = ref _addr_label.val;
+
             if (trace)
             {
                 defer(p.trace("labeledStmt")());
             }
+
             ptr<object> s = @new<LabeledStmt>();
             s.pos = p.pos();
             s.Label = label;
@@ -1930,7 +2344,9 @@ loop:
                 e.pos = p.pos();
                 s.Stmt = e;
                 return s;
+
             }
+
             s.Stmt = p.stmtOrNil();
             if (s.Stmt != null)
             {
@@ -1938,60 +2354,73 @@ loop:
             } 
 
             // report error at line of ':' token
-            p.syntax_error_at(s.pos, "missing statement after label"); 
+            p.syntaxErrorAt(s.pos, "missing statement after label"); 
             // we are already at the end of the labeled statement - no need to advance
             return null; // avoids follow-on errors (see e.g., fixedbugs/bug274.go)
         });
 
         // context must be a non-empty string unless we know that p.tok == _Lbrace.
-        private static ref BlockStmt blockStmt(this ref parser _p, @string context) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<BlockStmt> blockStmt(this ptr<parser> _addr_p, @string context) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("blockStmt")());
             }
+
             ptr<BlockStmt> s = @new<BlockStmt>();
             s.pos = p.pos(); 
 
             // people coming from C may forget that braces are mandatory in Go
             if (!p.got(_Lbrace))
             {
-                p.syntax_error("expecting { after " + context);
+                p.syntaxError("expecting { after " + context);
                 p.advance(_Name, _Rbrace);
                 s.Rbrace = p.pos(); // in case we found "}"
                 if (p.got(_Rbrace))
                 {
-                    return s;
+                    return _addr_s!;
                 }
+
             }
+
             s.List = p.stmtList();
             s.Rbrace = p.pos();
             p.want(_Rbrace);
 
-            return s;
+            return _addr_s!;
+
         });
 
-        private static ref DeclStmt declStmt(this ref parser _p, Func<ref Group, Decl> f) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<DeclStmt> declStmt(this ptr<parser> _addr_p, Func<ptr<Group>, Decl> f) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("declStmt")());
             }
+
             ptr<DeclStmt> s = @new<DeclStmt>();
             s.pos = p.pos();
 
             p.next(); // _Const, _Type, or _Var
             s.DeclList = p.appendGroup(null, f);
 
-            return s;
+            return _addr_s!;
+
         });
 
-        private static Stmt forStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Stmt forStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("forStmt")());
             }
+
             ptr<object> s = @new<ForStmt>();
             s.pos = p.pos();
 
@@ -1999,19 +2428,27 @@ loop:
             s.Body = p.blockStmt("for clause");
 
             return s;
+
         });
 
-        private static (SimpleStmt, Expr, SimpleStmt) header(this ref parser p, token keyword)
+        private static (SimpleStmt, Expr, SimpleStmt) header(this ptr<parser> _addr_p, token keyword)
         {
+            SimpleStmt init = default;
+            Expr cond = default;
+            SimpleStmt post = default;
+            ref parser p = ref _addr_p.val;
+
             p.want(keyword);
 
             if (p.tok == _Lbrace)
             {
                 if (keyword == _If)
                 {
-                    p.syntax_error("missing condition in if statement");
+                    p.syntaxError("missing condition in if statement");
                 }
-                return;
+
+                return ;
+
             } 
             // p.tok != _Lbrace
             var outer = p.xnest;
@@ -2022,21 +2459,24 @@ loop:
                 // accept potential varDecl but complain
                 if (p.got(_Var))
                 {
-                    p.syntax_error(fmt.Sprintf("var declaration not allowed in %s initializer", keyword.String()));
+                    p.syntaxError(fmt.Sprintf("var declaration not allowed in %s initializer", keyword.String()));
                 }
-                init = p.simpleStmt(null, keyword == _For); 
+
+                init = p.simpleStmt(null, keyword); 
                 // If we have a range clause, we are done (can only happen for keyword == _For).
                 {
-                    ref RangeClause (_, ok) = init._<ref RangeClause>();
+                    ptr<RangeClause> (_, ok) = init._<ptr<RangeClause>>();
 
                     if (ok)
                     {
                         p.xnest = outer;
-                        return;
+                        return ;
                     }
 
                 }
+
             }
+
             SimpleStmt condStmt = default;
             var semi = default;
             if (p.tok != _Lbrace)
@@ -2048,45 +2488,59 @@ loop:
                     p.next();
                 }
                 else
-                {
-                    p.want(_Semi);
+                { 
+                    // asking for a '{' rather than a ';' here leads to a better error message
+                    p.want(_Lbrace);
+                    if (p.tok != _Lbrace)
+                    {
+                        p.advance(_Lbrace, _Rbrace); // for better synchronization (e.g., issue #22581)
+                    }
+
                 }
+
                 if (keyword == _For)
                 {
                     if (p.tok != _Semi)
                     {
                         if (p.tok == _Lbrace)
                         {
-                            p.syntax_error("expecting for loop condition");
+                            p.syntaxError("expecting for loop condition");
                             goto done;
                         }
-                        condStmt = p.simpleStmt(null, false);
+
+                        condStmt = p.simpleStmt(null, 0L);
+
                     }
+
                     p.want(_Semi);
                     if (p.tok != _Lbrace)
                     {
-                        post = p.simpleStmt(null, false);
+                        post = p.simpleStmt(null, 0L);
                         {
-                            ref AssignStmt (a, _) = post._<ref AssignStmt>();
+                            ptr<AssignStmt> (a, _) = post._<ptr<AssignStmt>>();
 
                             if (a != null && a.Op == Def)
                             {
-                                p.syntax_error_at(a.Pos(), "cannot declare in post statement of for loop");
+                                p.syntaxErrorAt(a.Pos(), "cannot declare in post statement of for loop");
                             }
 
                         }
+
                     }
+
                 }
                 else if (p.tok != _Lbrace)
                 {
-                    condStmt = p.simpleStmt(null, false);
+                    condStmt = p.simpleStmt(null, keyword);
                 }
+
             }
             else
             {
                 condStmt = init;
                 init = null;
             }
+
 done:
 
             switch (condStmt.type())
@@ -2096,35 +2550,60 @@ done:
                     {
                         if (semi.lit != "semicolon")
                         {
-                            p.syntax_error_at(semi.pos, fmt.Sprintf("unexpected %s, expecting { after if clause", semi.lit));
+                            p.syntaxErrorAt(semi.pos, fmt.Sprintf("unexpected %s, expecting { after if clause", semi.lit));
                         }
                         else
                         {
-                            p.syntax_error_at(semi.pos, "missing condition in if statement");
+                            p.syntaxErrorAt(semi.pos, "missing condition in if statement");
                         }
+
                     }
+
                     break;
-                case ref ExprStmt s:
+                case ptr<ExprStmt> s:
                     cond = s.X;
                     break;
                 default:
                 {
                     var s = condStmt.type();
-                    p.syntax_error(fmt.Sprintf("%s used as value", String(s)));
+                    @string str = default;
+                    {
+                        ptr<AssignStmt> (as, ok) = s._<ptr<AssignStmt>>();
+
+                        if (ok && @as.Op == 0L)
+                        { 
+                            // Emphasize Lhs and Rhs of assignment with parentheses to highlight '='.
+                            // Do it always - it's not worth going through the trouble of doing it
+                            // only for "complex" left and right sides.
+                            str = "assignment (" + String(@as.Lhs) + ") = (" + String(@as.Rhs) + ")";
+
+                        }
+                        else
+                        {
+                            str = String(s);
+                        }
+
+                    }
+
+                    p.syntaxErrorAt(s.Pos(), fmt.Sprintf("cannot use %s as value", str));
                     break;
                 }
 
             }
             p.xnest = outer;
-            return;
+            return ;
+
         }
 
-        private static ref IfStmt ifStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<IfStmt> ifStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("ifStmt")());
             }
+
             ptr<IfStmt> s = @new<IfStmt>();
             s.pos = p.pos();
 
@@ -2139,18 +2618,24 @@ done:
                 else if (p.tok == _Lbrace) 
                     s.Else = p.blockStmt("");
                 else 
-                    p.syntax_error("else must be followed by if or statement block");
+                    p.syntaxError("else must be followed by if or statement block");
                     p.advance(_Name, _Rbrace);
-                            }
-            return s;
+                
+            }
+
+            return _addr_s!;
+
         });
 
-        private static ref SwitchStmt switchStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<SwitchStmt> switchStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("switchStmt")());
             }
+
             ptr<SwitchStmt> s = @new<SwitchStmt>();
             s.pos = p.pos();
 
@@ -2158,9 +2643,10 @@ done:
 
             if (!p.got(_Lbrace))
             {
-                p.syntax_error("missing { after switch clause");
+                p.syntaxError("missing { after switch clause");
                 p.advance(_Case, _Default, _Rbrace);
             }
+
             while (p.tok != _EOF && p.tok != _Rbrace)
             {
                 s.Body = append(s.Body, p.caseClause());
@@ -2169,24 +2655,29 @@ done:
             s.Rbrace = p.pos();
             p.want(_Rbrace);
 
-            return s;
+            return _addr_s!;
+
         });
 
-        private static ref SelectStmt selectStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<SelectStmt> selectStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("selectStmt")());
             }
+
             ptr<SelectStmt> s = @new<SelectStmt>();
             s.pos = p.pos();
 
             p.want(_Select);
             if (!p.got(_Lbrace))
             {
-                p.syntax_error("missing { after select clause");
+                p.syntaxError("missing { after select clause");
                 p.advance(_Case, _Default, _Rbrace);
             }
+
             while (p.tok != _EOF && p.tok != _Rbrace)
             {
                 s.Body = append(s.Body, p.commClause());
@@ -2195,15 +2686,19 @@ done:
             s.Rbrace = p.pos();
             p.want(_Rbrace);
 
-            return s;
+            return _addr_s!;
+
         });
 
-        private static ref CaseClause caseClause(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<CaseClause> caseClause(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("caseClause")());
             }
+
             ptr<CaseClause> c = @new<CaseClause>();
             c.pos = p.pos();
 
@@ -2214,28 +2709,32 @@ done:
             else if (p.tok == _Default) 
                 p.next();
             else 
-                p.syntax_error("expecting case or default or }");
+                p.syntaxError("expecting case or default or }");
                 p.advance(_Colon, _Case, _Default, _Rbrace);
                         c.Colon = p.pos();
             p.want(_Colon);
             c.Body = p.stmtList();
 
-            return c;
+            return _addr_c!;
+
         });
 
-        private static ref CommClause commClause(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<CommClause> commClause(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("commClause")());
             }
+
             ptr<CommClause> c = @new<CommClause>();
             c.pos = p.pos();
 
 
             if (p.tok == _Case) 
                 p.next();
-                c.Comm = p.simpleStmt(null, false); 
+                c.Comm = p.simpleStmt(null, 0L); 
 
                 // The syntax restricts the possible simple statements here to:
                 //
@@ -2251,13 +2750,14 @@ done:
             else if (p.tok == _Default) 
                 p.next();
             else 
-                p.syntax_error("expecting case or default or }");
+                p.syntaxError("expecting case or default or }");
                 p.advance(_Colon, _Case, _Default, _Rbrace);
                         c.Colon = p.pos();
             p.want(_Colon);
             c.Body = p.stmtList();
 
-            return c;
+            return _addr_c!;
+
         });
 
         // Statement =
@@ -2265,8 +2765,10 @@ done:
         //     GoStmt | ReturnStmt | BreakStmt | ContinueStmt | GotoStmt |
         //     FallthroughStmt | Block | IfStmt | SwitchStmt | SelectStmt | ForStmt |
         //     DeferStmt .
-        private static Stmt stmtOrNil(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Stmt stmtOrNil(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("stmt " + p.tok.String())());
@@ -2276,9 +2778,10 @@ done:
             // look for it first before doing anything more expensive.
             if (p.tok == _Name)
             {
+                p.clearPragma();
                 var lhs = p.exprList();
                 {
-                    ref Name (label, ok) = lhs._<ref Name>();
+                    ptr<Name> (label, ok) = lhs._<ptr<Name>>();
 
                     if (ok && p.tok == _Colon)
                     {
@@ -2286,23 +2789,29 @@ done:
                     }
 
                 }
-                return p.simpleStmt(lhs, false);
+
+                return p.simpleStmt(lhs, 0L);
+
             }
 
-            if (p.tok == _Lbrace) 
-                return p.blockStmt("");
-            else if (p.tok == _Var) 
+
+            if (p.tok == _Var) 
                 return p.declStmt(p.varDecl);
             else if (p.tok == _Const) 
                 return p.declStmt(p.constDecl);
             else if (p.tok == _Type) 
                 return p.declStmt(p.typeDecl);
+                        p.clearPragma();
+
+
+            if (p.tok == _Lbrace) 
+                return p.blockStmt("");
             else if (p.tok == _Operator || p.tok == _Star) 
 
                 if (p.op == Add || p.op == Sub || p.op == Mul || p.op == And || p.op == Xor || p.op == Not) 
-                    return p.simpleStmt(null, false); // unary operators
+                    return p.simpleStmt(null, 0L); // unary operators
                             else if (p.tok == _Literal || p.tok == _Func || p.tok == _Lparen || p.tok == _Lbrack || p.tok == _Struct || p.tok == _Map || p.tok == _Chan || p.tok == _Interface || p.tok == _Arrow) // receive operator
-                return p.simpleStmt(null, false);
+                return p.simpleStmt(null, 0L);
             else if (p.tok == _For) 
                 return p.forStmt();
             else if (p.tok == _Switch) 
@@ -2326,6 +2835,7 @@ done:
                 {
                     s.Label = p.name();
                 }
+
                 return s;
             else if (p.tok == _Go || p.tok == _Defer) 
                 return p.callStmt();
@@ -2344,48 +2854,63 @@ done:
                 {
                     s.Results = p.exprList();
                 }
+
                 return s;
             else if (p.tok == _Semi) 
                 s = @new<EmptyStmt>();
                 s.pos = p.pos();
                 return s;
                         return null;
+
         });
 
         // StatementList = { Statement ";" } .
-        private static slice<Stmt> stmtList(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static slice<Stmt> stmtList(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            slice<Stmt> l = default;
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("stmtList")());
             }
+
             while (p.tok != _EOF && p.tok != _Rbrace && p.tok != _Case && p.tok != _Default)
             {
                 var s = p.stmtOrNil();
+                p.clearPragma();
                 if (s == null)
                 {
                     break;
                 }
+
                 l = append(l, s); 
                 // ";" is optional before "}"
                 if (!p.got(_Semi) && p.tok != _Rbrace)
                 {
-                    p.syntax_error("at end of statement");
+                    p.syntaxError("at end of statement");
                     p.advance(_Semi, _Rbrace, _Case, _Default);
                     p.got(_Semi); // avoid spurious empty statement
                 }
+
             }
 
-            return;
+            return ;
+
         });
 
         // Arguments = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." ] [ "," ] ] ")" .
-        private static (slice<Expr>, bool) argList(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static (slice<Expr>, bool) argList(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            slice<Expr> list = default;
+            bool hasDots = default;
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("argList")());
             }
+
             p.xnest++;
             p.list(_Lparen, _Comma, _Rparen, () =>
             {
@@ -2395,49 +2920,61 @@ done:
             });
             p.xnest--;
 
-            return;
+            return ;
+
         });
 
         // ----------------------------------------------------------------------------
         // Common productions
 
-        private static ref Name newName(this ref parser p, @string value)
+        private static ptr<Name> newName(this ptr<parser> _addr_p, @string value)
         {
+            ref parser p = ref _addr_p.val;
+
             ptr<Name> n = @new<Name>();
             n.pos = p.pos();
             n.Value = value;
-            return n;
+            return _addr_n!;
         }
 
-        private static ref Name name(this ref parser p)
-        { 
+        private static ptr<Name> name(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // no tracing to avoid overly verbose output
 
             if (p.tok == _Name)
             {
                 var n = p.newName(p.lit);
                 p.next();
-                return n;
+                return _addr_n!;
             }
+
             n = p.newName("_");
-            p.syntax_error("expecting name");
+            p.syntaxError("expecting name");
             p.advance();
-            return n;
+            return _addr_n!;
+
         }
 
         // IdentifierList = identifier { "," identifier } .
         // The first name must be provided.
-        private static slice<ref Name> nameList(this ref parser _p, ref Name _first) => func(_p, _first, (ref parser p, ref Name first, Defer defer, Panic panic, Recover _) =>
+        private static slice<ptr<Name>> nameList(this ptr<parser> _addr_p, ptr<Name> _addr_first) => func((defer, panic, _) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref Name first = ref _addr_first.val;
+
             if (trace)
             {
                 defer(p.trace("nameList")());
             }
+
             if (debug && first == null)
             {
                 panic("first name not provided");
             }
-            ref Name l = new slice<ref Name>(new ref Name[] { first });
+
+            ptr<Name> l = new slice<ptr<Name>>(new ptr<Name>[] { first });
             while (p.got(_Comma))
             {
                 l = append(l, p.name());
@@ -2445,32 +2982,41 @@ done:
 
 
             return l;
+
         });
 
         // The first name may be provided, or nil.
-        private static Expr qualifiedName(this ref parser _p, ref Name _name) => func(_p, _name, (ref parser p, ref Name name, Defer defer, Panic _, Recover __) =>
+        private static Expr qualifiedName(this ptr<parser> _addr_p, ptr<Name> _addr_name) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref Name name = ref _addr_name.val;
+
             if (trace)
             {
                 defer(p.trace("qualifiedName")());
             }
 
+
             if (name != null)             else if (p.tok == _Name) 
                 name = p.name();
             else 
                 name = p.newName("_");
-                p.syntax_error("expecting name");
+                p.syntaxError("expecting name");
                 p.advance(_Dot, _Semi, _Rbrace);
                         return p.dotname(name);
+
         });
 
         // ExpressionList = Expression { "," Expression } .
-        private static Expr exprList(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static Expr exprList(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (trace)
             {
                 defer(p.trace("exprList")());
             }
+
             var x = p.expr();
             if (p.got(_Comma))
             {
@@ -2484,8 +3030,11 @@ done:
                 t.pos = x.Pos();
                 t.ElemList = list;
                 x = t;
+
             }
+
             return x;
+
         });
 
         // unparen removes all parentheses around an expression.
@@ -2493,15 +3042,18 @@ done:
         {
             while (true)
             {
-                ref ParenExpr (p, ok) = x._<ref ParenExpr>();
+                ptr<ParenExpr> (p, ok) = x._<ptr<ParenExpr>>();
                 if (!ok)
                 {
                     break;
                 }
+
                 x = p.X;
+
             }
 
             return x;
+
         }
     }
 }}}}

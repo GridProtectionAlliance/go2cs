@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:54:01 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:37 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\location.go
 using types = go.cmd.compile.@internal.types_package;
@@ -28,19 +28,33 @@ namespace @internal
         {
             public int num; // dense numbering
             public short objNum; // register number from cmd/internal/obj/$ARCH
+            public short gcNum; // GC register map number (dense numbering of registers that can contain pointers)
             public @string name;
         }
 
-        private static @string String(this ref Register r)
+        private static @string String(this ptr<Register> _addr_r)
         {
+            ref Register r = ref _addr_r.val;
+
             return r.name;
         }
 
         // ObjNum returns the register number from cmd/internal/obj/$ARCH that
         // corresponds to this register.
-        private static short ObjNum(this ref Register r)
+        private static short ObjNum(this ptr<Register> _addr_r)
         {
+            ref Register r = ref _addr_r.val;
+
             return r.objNum;
+        }
+
+        // GCNum returns the runtime GC register index of r, or -1 if this
+        // register can't contain pointers.
+        private static short GCNum(this ptr<Register> _addr_r)
+        {
+            ref Register r = ref _addr_r.val;
+
+            return r.gcNum;
         }
 
         // A LocalSlot is a location in the stack frame, which identifies and stores
@@ -78,7 +92,9 @@ namespace @internal
             {
                 return fmt.Sprintf("%v[%v]", s.N, s.Type);
             }
+
             return fmt.Sprintf("%v+%d[%v]", s.N, s.Off, s.Type);
+
         }
 
         public partial struct LocPair // : array<Location>
@@ -93,11 +109,14 @@ namespace @internal
             {
                 n0 = t[0L].String();
             }
+
             if (t[1L] != null)
             {
                 n1 = t[1L].String();
             }
+
             return fmt.Sprintf("<%s,%s>", n0, n1);
+
         }
     }
 }}}}

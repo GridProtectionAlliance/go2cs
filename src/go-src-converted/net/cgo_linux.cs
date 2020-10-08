@@ -4,7 +4,7 @@
 
 // +build !android,cgo,!netgo
 
-// package net -- go2cs converted at 2020 August 29 08:25:06 UTC
+// package net -- go2cs converted at 2020 October 08 03:31:09 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\cgo_linux.go
 /*
@@ -23,7 +23,7 @@ namespace go
         // and similarly for IPv6), but in practice setting it causes
         // getaddrinfo to return the wrong canonical name on Linux.
         // So definitely leave it out.
-        private static readonly var cgoAddrInfoFlags = C.AI_CANONNAME | C.AI_V4MAPPED | C.AI_ALL;
+        private static readonly var cgoAddrInfoFlags = (var)C.AI_CANONNAME | C.AI_V4MAPPED | C.AI_ALL;
 
     }
 }

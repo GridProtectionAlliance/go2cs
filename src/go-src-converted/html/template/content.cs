@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:34:29 UTC
+// package template -- go2cs converted at 2020 October 08 03:41:52 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\content.go
 using fmt = go.fmt_package;
@@ -21,7 +21,7 @@ namespace html
         //   2. The CSS3 rule production, such as `a[href=~"https:"].foo#bar`.
         //   3. CSS3 declaration productions, such as `color: red; margin: 2px`.
         //   4. The CSS3 value production, such as `rgba(0, 0, 255, 127)`.
-        // See http://www.w3.org/TR/css3-syntax/#parsing and
+        // See https://www.w3.org/TR/css3-syntax/#parsing and
         // https://web.archive.org/web/20090211114933/http://w3.org/TR/css3-syntax#style
         //
         // Use of this type presents a security risk:
@@ -102,29 +102,31 @@ namespace html
         } 
 
         // Srcset encapsulates a known safe srcset attribute
-        // (see http://w3c.github.io/html/semantics-embedded-content.html#element-attrdef-img-srcset).
+        // (see https://w3c.github.io/html/semantics-embedded-content.html#element-attrdef-img-srcset).
         //
         // Use of this type presents a security risk:
         // the encapsulated content should come from a trusted source,
         // as it will be included verbatim in the template output.
         public partial struct Srcset // : @string
         {
-        }        private partial struct contentType // : byte
+        }
+        private partial struct contentType // : byte
         {
         }
 
-        private static readonly contentType contentTypePlain = iota;
-        private static readonly var contentTypeCSS = 0;
-        private static readonly var contentTypeHTML = 1;
-        private static readonly var contentTypeHTMLAttr = 2;
-        private static readonly var contentTypeJS = 3;
-        private static readonly var contentTypeJSStr = 4;
-        private static readonly var contentTypeURL = 5;
-        private static readonly var contentTypeSrcset = 6; 
+        private static readonly contentType contentTypePlain = (contentType)iota;
+        private static readonly var contentTypeCSS = (var)0;
+        private static readonly var contentTypeHTML = (var)1;
+        private static readonly var contentTypeHTMLAttr = (var)2;
+        private static readonly var contentTypeJS = (var)3;
+        private static readonly var contentTypeJSStr = (var)4;
+        private static readonly var contentTypeURL = (var)5;
+        private static readonly var contentTypeSrcset = (var)6; 
         // contentTypeUnsafe is used in attr.go for values that affect how
         // embedded content and network messages are formed, vetted,
         // or interpreted; or which credentials network messages carry.
-        private static readonly var contentTypeUnsafe = 7;
+        private static readonly var contentTypeUnsafe = (var)7;
+
 
         // indirect returns the value, after dereferencing as many times
         // as necessary to reach the base type (or nil).
@@ -134,6 +136,7 @@ namespace html
             {
                 return null;
             }
+
             {
                 var t = reflect.TypeOf(a);
 
@@ -141,9 +144,11 @@ namespace html
                 { 
                     // Avoid creating a reflect.Value if it's not a pointer.
                     return a;
+
                 }
 
             }
+
             var v = reflect.ValueOf(a);
             while (v.Kind() == reflect.Ptr && !v.IsNil())
             {
@@ -151,9 +156,10 @@ namespace html
             }
 
             return v.Interface();
+
         }
 
-        private static var errorType = reflect.TypeOf((error.Value)(null)).Elem();        private static var fmtStringerType = reflect.TypeOf((fmt.Stringer.Value)(null)).Elem();
+        private static var errorType = reflect.TypeOf((error.val)(null)).Elem();        private static var fmtStringerType = reflect.TypeOf((fmt.Stringer.val)(null)).Elem();
 
         // indirectToStringerOrError returns the value, after dereferencing as many times
         // as necessary to reach the base type (or nil) or an implementation of fmt.Stringer
@@ -164,6 +170,7 @@ namespace html
             {
                 return null;
             }
+
             var v = reflect.ValueOf(a);
             while (!v.Type().Implements(fmtStringerType) && !v.Type().Implements(errorType) && v.Kind() == reflect.Ptr && !v.IsNil())
             {
@@ -171,12 +178,15 @@ namespace html
             }
 
             return v.Interface();
+
         }
 
         // stringify converts its arguments to a string and the type of the content.
         // All pointers are dereferenced, as in the text/template package.
         private static (@string, contentType) stringify(params object[] args)
         {
+            @string _p0 = default;
+            contentType _p0 = default;
             args = args.Clone();
 
             if (len(args) == 1L)
@@ -208,12 +218,26 @@ namespace html
                         return (string(s), contentTypeSrcset);
                         break;
                 }
+
             }
-            foreach (var (i, arg) in args)
-            {
+
+            long i = 0L;
+            foreach (var (_, arg) in args)
+            { 
+                // We skip untyped nil arguments for backward compatibility.
+                // Without this they would be output as <nil>, escaped.
+                // See issue 25875.
+                if (arg == null)
+                {
+                    continue;
+                }
+
                 args[i] = indirectToStringerOrError(arg);
+                i++;
+
             }
-            return (fmt.Sprint(args), contentTypePlain);
+            return (fmt.Sprint(args[..i]), contentTypePlain);
+
         }
     }
 }}

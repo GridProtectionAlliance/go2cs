@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:48 UTC
+//     Generated on 2020 October 08 03:42:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,12 +19,10 @@ using base64 = go.encoding.base64_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go;
@@ -42,12 +40,14 @@ namespace encoding
             {
                 this.Type = default;
                 this.Err = default;
+                this.sourceFunc = default;
             }
 
-            public MarshalerError(reflect.Type Type = default, error Err = default)
+            public MarshalerError(reflect.Type Type = default, error Err = default, @string sourceFunc = default)
             {
                 this.Type = Type;
                 this.Err = Err;
+                this.sourceFunc = sourceFunc;
             }
 
             // Enable comparisons between nil and MarshalerError struct
@@ -70,7 +70,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static MarshalerError MarshalerError_cast(dynamic value)
         {
-            return new MarshalerError(value.Type, value.Err);
+            return new MarshalerError(value.Type, value.Err, value.sourceFunc);
         }
     }
 }}

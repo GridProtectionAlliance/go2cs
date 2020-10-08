@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2020 August 29 10:05:21 UTC
+// package driver -- go2cs converted at 2020 October 08 04:42:59 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\driver_focus.go
 using fmt = go.fmt_package;
@@ -36,27 +36,34 @@ namespace @internal
 {
     public static partial class driver_package
     {
-        private static var tagFilterRangeRx = regexp.MustCompile("([[:digit:]]+)([[:alpha:]]+)");
+        private static var tagFilterRangeRx = regexp.MustCompile("([+-]?[[:digit:]]+)([[:alpha:]]+)?");
 
         // applyFocus filters samples based on the focus/ignore options
-        private static error applyFocus(ref profile.Profile prof, map<@string, @string> numLabelUnits, variables v, plugin.UI ui)
+        private static error applyFocus(ptr<profile.Profile> _addr_prof, map<@string, @string> numLabelUnits, variables v, plugin.UI ui)
         {
+            ref profile.Profile prof = ref _addr_prof.val;
+
             var (focus, err) = compileRegexOption("focus", v["focus"].value, null);
             var (ignore, err) = compileRegexOption("ignore", v["ignore"].value, err);
             var (hide, err) = compileRegexOption("hide", v["hide"].value, err);
             var (show, err) = compileRegexOption("show", v["show"].value, err);
+            var (showfrom, err) = compileRegexOption("show_from", v["show_from"].value, err);
             var (tagfocus, err) = compileTagFilter("tagfocus", v["tagfocus"].value, numLabelUnits, ui, err);
             var (tagignore, err) = compileTagFilter("tagignore", v["tagignore"].value, numLabelUnits, ui, err);
             var (prunefrom, err) = compileRegexOption("prune_from", v["prune_from"].value, err);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             var (fm, im, hm, hnm) = prof.FilterSamplesByName(focus, ignore, hide, show);
             warnNoMatches(focus == null || fm, "Focus", ui);
             warnNoMatches(ignore == null || im, "Ignore", ui);
             warnNoMatches(hide == null || hm, "Hide", ui);
             warnNoMatches(show == null || hnm, "Show", ui);
+
+            var sfm = prof.ShowFrom(showfrom);
+            warnNoMatches(showfrom == null || sfm, "ShowFrom", ui);
 
             var (tfm, tim) = prof.FilterSamplesByTag(tagfocus, tagignore);
             warnNoMatches(tagfocus == null || tfm, "TagFocus", ui);
@@ -72,29 +79,41 @@ namespace @internal
             {
                 prof.PruneFrom(prunefrom);
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
 
-        private static (ref regexp.Regexp, error) compileRegexOption(@string name, @string value, error err)
+        private static (ptr<regexp.Regexp>, error) compileRegexOption(@string name, @string value, error err)
         {
+            ptr<regexp.Regexp> _p0 = default!;
+            error _p0 = default!;
+
             if (value == "" || err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             var (rx, err) = regexp.Compile(value);
             if (err != null)
             {
-                return (null, fmt.Errorf("parsing %s regexp: %v", name, err));
+                return (_addr_null!, error.As(fmt.Errorf("parsing %s regexp: %v", name, err))!);
             }
-            return (rx, null);
+
+            return (_addr_rx!, error.As(null!)!);
+
         }
 
-        private static (Func<ref profile.Sample, bool>, error) compileTagFilter(@string name, @string value, map<@string, @string> numLabelUnits, plugin.UI ui, error err)
+        private static (Func<ptr<profile.Sample>, bool>, error) compileTagFilter(@string name, @string value, map<@string, @string> numLabelUnits, plugin.UI ui, error err)
         {
+            Func<ptr<profile.Sample>, bool> _p0 = default;
+            error _p0 = default!;
+
             if (value == "" || err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             var tagValuePair = strings.SplitN(value, "=", 2L);
             @string wantKey = default;
             if (len(tagValuePair) == 2L)
@@ -102,6 +121,7 @@ namespace @internal
                 wantKey = tagValuePair[0L];
                 value = tagValuePair[1L];
             }
+
             {
                 var numFilter = parseTagFilterRange(value);
 
@@ -120,12 +140,14 @@ namespace @internal
                                 {
                                     return true;
                                 }
+
                             }
 
                             val = val__prev1;
                         }
 
                         return false;
+
                     }
 ;
                     Func<@string, @string> numLabelUnit = key =>
@@ -149,6 +171,7 @@ namespace @internal
                                     {
                                         return true;
                                     }
+
                                 }
 
                                 key = key__prev1;
@@ -156,8 +179,11 @@ namespace @internal
                             }
 
                             return false;
-                        }, null);
+
+                        }, error.As(null!)!);
+
                     }
+
                     return (s =>
                     {
                         {
@@ -173,21 +199,27 @@ namespace @internal
                             vals = vals__prev2;
 
                         }
+
                         return false;
-                    }, null);
+
+                    }, error.As(null!)!);
+
                 }
 
             }
 
-            slice<ref regexp.Regexp> rfx = default;
+
+            slice<ptr<regexp.Regexp>> rfx = default;
             foreach (var (_, tagf) in strings.Split(value, ","))
             {
                 var (fx, err) = regexp.Compile(tagf);
                 if (err != null)
                 {
-                    return (null, fmt.Errorf("parsing %s regexp: %v", name, err));
+                    return (null, error.As(fmt.Errorf("parsing %s regexp: %v", name, err))!);
                 }
+
                 rfx = append(rfx, fx);
+
             }
             if (wantKey == "")
             {
@@ -220,11 +252,11 @@ matchedrx:
                                                 _continuematchedrx = true;
                                                 break;
                                             }
+
                                         }
 
                                         val = val__prev3;
                                     }
-
                                 }
 
                                 key = key__prev2;
@@ -232,13 +264,17 @@ matchedrx:
                             }
 
                             return false;
+
                         }
 
                         rx = rx__prev1;
                     }
                     return true;
-                }, null);
+
+                }, error.As(null!)!);
+
             }
+
             return (s =>
             {
                 {
@@ -264,23 +300,25 @@ matchedrx:
                                         {
                                             return true;
                                         }
+
                                     }
 
                                     val = val__prev2;
                                 }
-
                             }
 
                             rx = rx__prev1;
                         }
-
                     }
 
                     vals = vals__prev1;
 
                 }
+
                 return false;
-            }, null);
+
+            }, error.As(null!)!);
+
         }
 
         // parseTagFilterRange returns a function to checks if a value is
@@ -297,11 +335,13 @@ matchedrx:
             {
                 return null; // No ranges were identified
             }
+
             var (v, err) = strconv.ParseInt(ranges[0L][1L], 10L, 64L);
             if (err != null)
             {
-                panic(fmt.Errorf("Failed to parse int %s: %v", ranges[0L][1L], err));
+                panic(fmt.Errorf("failed to parse int %s: %v", ranges[0L][1L], err));
             }
+
             var (scaledValue, unit) = measurement.Scale(v, ranges[0L][2L], ranges[0L][2L]);
             if (len(ranges) == 1L)
             {
@@ -314,47 +354,49 @@ matchedrx:
                         {
                             var (sv, su) = measurement.Scale(v, u, unit);
                             return su == unit && sv == scaledValue;
-                        }
-;
+                        };
                     else if (filter == match + ":") 
                         return (v, u) =>
                         {
                             (sv, su) = measurement.Scale(v, u, unit);
                             return su == unit && sv >= scaledValue;
-                        }
-;
+                        };
                     else if (filter == ":" + match) 
                         return (v, u) =>
                         {
                             (sv, su) = measurement.Scale(v, u, unit);
                             return su == unit && sv <= scaledValue;
-                        }
-;
+                        };
 
                 }
                 return null;
+
             }
+
             if (filter != ranges[0L][0L] + ":" + ranges[1L][0L])
             {
                 return null;
             }
+
             v, err = strconv.ParseInt(ranges[1L][1L], 10L, 64L);
 
             if (err != null)
             {
-                panic(fmt.Errorf("Failed to parse int %s: %v", ranges[1L][1L], err));
+                panic(fmt.Errorf("failed to parse int %s: %v", ranges[1L][1L], err));
             }
+
             var (scaledValue2, unit2) = measurement.Scale(v, ranges[1L][2L], unit);
             if (unit != unit2)
             {
                 return null;
             }
+
             return (v, u) =>
             {
                 (sv, su) = measurement.Scale(v, u, unit);
                 return su == unit && sv >= scaledValue && sv <= scaledValue2;
-            }
-;
+            };
+
         });
 
         private static void warnNoMatches(bool match, @string option, plugin.UI ui)
@@ -363,6 +405,7 @@ matchedrx:
             {
                 ui.PrintErr(option + " expression matched no samples");
             }
+
         }
     }
 }}}}}}}

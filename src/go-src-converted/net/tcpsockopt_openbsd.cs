@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:27:50 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:44 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\tcpsockopt_openbsd.go
 using syscall = go.syscall_package;
@@ -13,11 +13,14 @@ namespace go
 {
     public static partial class net_package
     {
-        private static error setKeepAlivePeriod(ref netFD fd, time.Duration d)
-        { 
+        private static error setKeepAlivePeriod(ptr<netFD> _addr_fd, time.Duration d)
+        {
+            ref netFD fd = ref _addr_fd.val;
+ 
             // OpenBSD has no user-settable per-socket TCP keepalive
             // options.
-            return error.As(syscall.ENOPROTOOPT);
+            return error.As(syscall.ENOPROTOOPT)!;
+
         }
     }
 }

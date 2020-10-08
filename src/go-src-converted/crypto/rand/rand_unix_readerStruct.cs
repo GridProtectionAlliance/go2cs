@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:30:52 UTC
+//     Generated on 2020 October 08 03:35:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,10 +16,12 @@ using static go.builtin;
 using bufio = go.bufio_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
+using binary = go.encoding.binary_package;
 using io = go.io_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
 using go;
 

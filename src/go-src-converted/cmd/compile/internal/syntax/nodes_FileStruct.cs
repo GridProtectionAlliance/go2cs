@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:03 UTC
+//     Generated on 2020 October 08 04:28:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using src = go.cmd.@internal.src_package;
+
 using go;
 
 namespace go {
@@ -32,19 +31,21 @@ namespace @internal
 
             private ref node node_val => ref m_nodeRef.Value;
 
-            public ref src.Pos pos => ref m_nodeRef.Value.pos;
+            public ref Pos pos => ref m_nodeRef.Value.pos;
 
             // Constructors
             public File(NilType _)
             {
+                this.Pragma = default;
                 this.PkgName = default;
                 this.DeclList = default;
                 this.Lines = default;
                 this.m_nodeRef = new ptr<node>(new node(nil));
             }
 
-            public File(ref ptr<Name> PkgName = default, slice<Decl> DeclList = default, ulong Lines = default, node node = default)
+            public File(Pragma Pragma = default, ref ptr<Name> PkgName = default, slice<Decl> DeclList = default, ulong Lines = default, node node = default)
             {
+                this.Pragma = Pragma;
                 this.PkgName = PkgName;
                 this.DeclList = DeclList;
                 this.Lines = Lines;
@@ -71,7 +72,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static File File_cast(dynamic value)
         {
-            return new File(ref value.PkgName, value.DeclList, value.Lines, value.node);
+            return new File(value.Pragma, ref value.PkgName, value.DeclList, value.Lines, value.node);
         }
     }
 }}}}

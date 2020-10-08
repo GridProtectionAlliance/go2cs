@@ -4,7 +4,7 @@
 
 // This file implements printing of types.
 
-// package types -- go2cs converted at 2020 August 29 08:48:04 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:52 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\typestring.go
 using bytes = go.bytes_package;
@@ -28,25 +28,30 @@ namespace go
         // Using a nil Qualifier is equivalent to using (*Package).Path: the
         // object is qualified by the import path, e.g., "encoding/json.Marshal".
         //
-        public delegate  @string Qualifier(ref Package);
+        public delegate  @string Qualifier(ptr<Package>);
 
-        // RelativeTo(pkg) returns a Qualifier that fully qualifies members of
+        // RelativeTo returns a Qualifier that fully qualifies members of
         // all packages other than pkg.
-        public static Qualifier RelativeTo(ref Package pkg)
+        public static Qualifier RelativeTo(ptr<Package> _addr_pkg)
         {
+            ref Package pkg = ref _addr_pkg.val;
+
             if (pkg == null)
             {
                 return null;
             }
+
             return other =>
             {
                 if (pkg == other)
                 {
                     return ""; // same package; unqualified
                 }
+
                 return other.Path();
-            }
-;
+
+            };
+
         }
 
         // If gcCompatibilityMode is set, printing of types is modified
@@ -75,21 +80,25 @@ namespace go
         // package-level objects, and may be nil.
         public static @string TypeString(Type typ, Qualifier qf)
         {
-            bytes.Buffer buf = default;
-            WriteType(ref buf, typ, qf);
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            WriteType(_addr_buf, typ, qf);
             return buf.String();
         }
 
         // WriteType writes the string representation of typ to buf.
         // The Qualifier controls the printing of
         // package-level objects, and may be nil.
-        public static void WriteType(ref bytes.Buffer buf, Type typ, Qualifier qf)
+        public static void WriteType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier qf)
         {
-            writeType(buf, typ, qf, make_slice<Type>(0L, 8L));
+            ref bytes.Buffer buf = ref _addr_buf.val;
+
+            writeType(_addr_buf, typ, qf, make_slice<Type>(0L, 8L));
         }
 
-        private static void writeType(ref bytes.Buffer _buf, Type typ, Qualifier qf, slice<Type> visited) => func(_buf, (ref bytes.Buffer buf, Defer _, Panic panic, Recover __) =>
-        { 
+        private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier qf, slice<Type> visited) => func((_, panic, __) =>
+        {
+            ref bytes.Buffer buf = ref _addr_buf.val;
+ 
             // Theoretically, this is a quadratic lookup algorithm, but in
             // practice deeply nested composite types with unnamed component
             // types are uncommon. This code is likely more efficient than
@@ -103,8 +112,10 @@ namespace go
                     if (t == typ)
                     {
                         fmt.Fprintf(buf, "○%T", typ); // cycle to typ
-                        return;
+                        return ;
+
                     }
+
                 }
 
                 t = t__prev1;
@@ -117,11 +128,12 @@ namespace go
                 case 
                     buf.WriteString("<nil>");
                     break;
-                case ref Basic t:
+                case ptr<Basic> t:
                     if (t.kind == UnsafePointer)
                     {
                         buf.WriteString("unsafe.");
                     }
+
                     if (gcCompatibilityMode)
                     { 
                         // forget the alias names
@@ -130,18 +142,20 @@ namespace go
                             t = Typ[Uint8];
                         else if (t.kind == Rune) 
                             t = Typ[Int32];
-                                            }
+                        
+                    }
+
                     buf.WriteString(t.name);
                     break;
-                case ref Array t:
+                case ptr<Array> t:
                     fmt.Fprintf(buf, "[%d]", t.len);
-                    writeType(buf, t.elem, qf, visited);
+                    writeType(_addr_buf, t.elem, qf, visited);
                     break;
-                case ref Slice t:
+                case ptr<Slice> t:
                     buf.WriteString("[]");
-                    writeType(buf, t.elem, qf, visited);
+                    writeType(_addr_buf, t.elem, qf, visited);
                     break;
-                case ref Struct t:
+                case ptr<Struct> t:
                     buf.WriteString("struct{");
                     {
                         var i__prev1 = i;
@@ -154,12 +168,14 @@ namespace go
                             {
                                 buf.WriteString("; ");
                             }
-                            if (!f.anonymous)
+
+                            if (!f.embedded)
                             {
                                 buf.WriteString(f.name);
                                 buf.WriteByte(' ');
                             }
-                            writeType(buf, f.typ, qf, visited);
+
+                            writeType(_addr_buf, f.typ, qf, visited);
                             {
                                 var tag = t.Tag(i);
 
@@ -169,6 +185,7 @@ namespace go
                                 }
 
                             }
+
                         }
 
                         i = i__prev1;
@@ -176,18 +193,18 @@ namespace go
 
                     buf.WriteByte('}');
                     break;
-                case ref Pointer t:
+                case ptr<Pointer> t:
                     buf.WriteByte('*');
-                    writeType(buf, t.@base, qf, visited);
+                    writeType(_addr_buf, t.@base, qf, visited);
                     break;
-                case ref Tuple t:
-                    writeTuple(buf, t, false, qf, visited);
+                case ptr<Tuple> t:
+                    writeTuple(_addr_buf, _addr_t, false, qf, visited);
                     break;
-                case ref Signature t:
+                case ptr<Signature> t:
                     buf.WriteString("func");
-                    writeSignature(buf, t, qf, visited);
+                    writeSignature(_addr_buf, _addr_t, qf, visited);
                     break;
-                case ref Interface t:
+                case ptr<Interface> t:
                     buf.WriteString("interface{");
                     var empty = true;
                     if (gcCompatibilityMode)
@@ -206,16 +223,17 @@ namespace go
                                 {
                                     buf.WriteString("; ");
                                 }
+
                                 buf.WriteString(m.name);
-                                writeSignature(buf, m.typ._<ref Signature>(), qf, visited);
+                                writeSignature(_addr_buf, m.typ._<ptr<Signature>>(), qf, visited);
                                 empty = false;
+
                             }
                     else
 
                             i = i__prev1;
                             m = m__prev1;
                         }
-
                     }                    { 
                         // print explicit interface methods and embedded types
                         {
@@ -230,9 +248,11 @@ namespace go
                                 {
                                     buf.WriteString("; ");
                                 }
+
                                 buf.WriteString(m.name);
-                                writeSignature(buf, m.typ._<ref Signature>(), qf, visited);
+                                writeSignature(_addr_buf, m.typ._<ptr<Signature>>(), qf, visited);
                                 empty = false;
+
                             }
 
                             i = i__prev1;
@@ -250,31 +270,36 @@ namespace go
                                 {
                                     buf.WriteString("; ");
                                 }
-                                writeType(buf, typ, qf, visited);
+
+                                writeType(_addr_buf, typ, qf, visited);
                                 empty = false;
+
                             }
 
                             i = i__prev1;
                         }
-
                     }
+
                     if (t.allMethods == null || len(t.methods) > len(t.allMethods))
                     {
                         if (!empty)
                         {
                             buf.WriteByte(' ');
                         }
+
                         buf.WriteString("/* incomplete */");
+
                     }
+
                     buf.WriteByte('}');
                     break;
-                case ref Map t:
+                case ptr<Map> t:
                     buf.WriteString("map[");
-                    writeType(buf, t.key, qf, visited);
+                    writeType(_addr_buf, t.key, qf, visited);
                     buf.WriteByte(']');
-                    writeType(buf, t.elem, qf, visited);
+                    writeType(_addr_buf, t.elem, qf, visited);
                     break;
-                case ref Chan t:
+                case ptr<Chan> t:
                     @string s = default;
                     bool parens = default;
 
@@ -282,7 +307,7 @@ namespace go
                         s = "chan "; 
                         // chan (<-chan T) requires parentheses
                         {
-                            ref Chan (c, _) = t.elem._<ref Chan>();
+                            ptr<Chan> (c, _) = t.elem._<ptr<Chan>>();
 
                             if (c != null && c.dir == RecvOnly)
                             {
@@ -290,6 +315,7 @@ namespace go
                             }
 
                         }
+
                     else if (t.dir == SendOnly) 
                         s = "chan<- ";
                     else if (t.dir == RecvOnly) 
@@ -301,13 +327,15 @@ namespace go
                     {
                         buf.WriteByte('(');
                     }
-                    writeType(buf, t.elem, qf, visited);
+
+                    writeType(_addr_buf, t.elem, qf, visited);
                     if (parens)
                     {
                         buf.WriteByte(')');
                     }
+
                     break;
-                case ref Named t:
+                case ptr<Named> t:
                     s = "<Named w/o object>";
                     {
                         var obj = t.obj;
@@ -322,9 +350,11 @@ namespace go
                             // differently from named types at package level to avoid
                             // ambiguity.
                             s = obj.name;
+
                         }
 
                     }
+
                     buf.WriteString(s);
                     break;
                 default:
@@ -334,10 +364,14 @@ namespace go
                     break;
                 }
             }
+
         });
 
-        private static void writeTuple(ref bytes.Buffer _buf, ref Tuple _tup, bool variadic, Qualifier qf, slice<Type> visited) => func(_buf, _tup, (ref bytes.Buffer buf, ref Tuple tup, Defer _, Panic panic, Recover __) =>
+        private static void writeTuple(ptr<bytes.Buffer> _addr_buf, ptr<Tuple> _addr_tup, bool variadic, Qualifier qf, slice<Type> visited) => func((_, panic, __) =>
         {
+            ref bytes.Buffer buf = ref _addr_buf.val;
+            ref Tuple tup = ref _addr_tup.val;
+
             buf.WriteByte('(');
             if (tup != null)
             {
@@ -347,16 +381,18 @@ namespace go
                     {
                         buf.WriteString(", ");
                     }
+
                     if (v.name != "")
                     {
                         buf.WriteString(v.name);
                         buf.WriteByte(' ');
                     }
+
                     var typ = v.typ;
                     if (variadic && i == len(tup.vars) - 1L)
                     {
                         {
-                            ref Slice (s, ok) = typ._<ref Slice>();
+                            ptr<Slice> (s, ok) = typ._<ptr<Slice>>();
 
                             if (ok)
                             {
@@ -368,7 +404,7 @@ namespace go
                                 // special case:
                                 // append(s, "foo"...) leads to signature func([]byte, string...)
                                 {
-                                    ref Basic (t, ok) = typ.Underlying()._<ref Basic>();
+                                    ptr<Basic> (t, ok) = typ.Underlying()._<ptr<Basic>>();
 
                                     if (!ok || t.kind != String)
                                     {
@@ -376,48 +412,66 @@ namespace go
                                     }
 
                                 }
-                                writeType(buf, typ, qf, visited);
+
+                                writeType(_addr_buf, typ, qf, visited);
                                 buf.WriteString("...");
                                 continue;
+
                             }
 
                         }
+
                     }
-                    writeType(buf, typ, qf, visited);
+
+                    writeType(_addr_buf, typ, qf, visited);
+
                 }
+
             }
+
             buf.WriteByte(')');
+
         });
 
         // WriteSignature writes the representation of the signature sig to buf,
         // without a leading "func" keyword.
         // The Qualifier controls the printing of
         // package-level objects, and may be nil.
-        public static void WriteSignature(ref bytes.Buffer buf, ref Signature sig, Qualifier qf)
+        public static void WriteSignature(ptr<bytes.Buffer> _addr_buf, ptr<Signature> _addr_sig, Qualifier qf)
         {
-            writeSignature(buf, sig, qf, make_slice<Type>(0L, 8L));
+            ref bytes.Buffer buf = ref _addr_buf.val;
+            ref Signature sig = ref _addr_sig.val;
+
+            writeSignature(_addr_buf, _addr_sig, qf, make_slice<Type>(0L, 8L));
         }
 
-        private static void writeSignature(ref bytes.Buffer buf, ref Signature sig, Qualifier qf, slice<Type> visited)
+        private static void writeSignature(ptr<bytes.Buffer> _addr_buf, ptr<Signature> _addr_sig, Qualifier qf, slice<Type> visited)
         {
-            writeTuple(buf, sig.@params, sig.variadic, qf, visited);
+            ref bytes.Buffer buf = ref _addr_buf.val;
+            ref Signature sig = ref _addr_sig.val;
+
+            writeTuple(_addr_buf, _addr_sig.@params, sig.variadic, qf, visited);
 
             var n = sig.results.Len();
             if (n == 0L)
             { 
                 // no result
-                return;
+                return ;
+
             }
+
             buf.WriteByte(' ');
             if (n == 1L && sig.results.vars[0L].name == "")
             { 
                 // single unnamed result
-                writeType(buf, sig.results.vars[0L].typ, qf, visited);
-                return;
+                writeType(_addr_buf, sig.results.vars[0L].typ, qf, visited);
+                return ;
+
             } 
 
             // multiple or named result(s)
-            writeTuple(buf, sig.results, false, qf, visited);
+            writeTuple(_addr_buf, _addr_sig.results, false, qf, visited);
+
         }
     }
 }}

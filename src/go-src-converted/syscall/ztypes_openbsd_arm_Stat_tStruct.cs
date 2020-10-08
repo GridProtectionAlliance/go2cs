@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:17 UTC
+//     Generated on 2020 October 08 03:30:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ namespace go
                 this.Blksize = default;
                 this.Flags = default;
                 this.Gen = default;
+                this.Pad_cgo_0 = default;
                 this.X__st_birthtim = default;
             }
 
-            public Stat_t(uint Mode = default, int Dev = default, ulong Ino = default, uint Nlink = default, uint Uid = default, uint Gid = default, int Rdev = default, Timespec Atim = default, Timespec Mtim = default, Timespec Ctim = default, long Size = default, long Blocks = default, int Blksize = default, uint Flags = default, uint Gen = default, Timespec X__st_birthtim = default)
+            public Stat_t(uint Mode = default, int Dev = default, ulong Ino = default, uint Nlink = default, uint Uid = default, uint Gid = default, int Rdev = default, Timespec Atim = default, Timespec Mtim = default, Timespec Ctim = default, long Size = default, long Blocks = default, int Blksize = default, uint Flags = default, uint Gen = default, array<byte> Pad_cgo_0 = default, Timespec X__st_birthtim = default)
             {
                 this.Mode = Mode;
                 this.Dev = Dev;
@@ -59,6 +60,7 @@ namespace go
                 this.Blksize = Blksize;
                 this.Flags = Flags;
                 this.Gen = Gen;
+                this.Pad_cgo_0 = Pad_cgo_0;
                 this.X__st_birthtim = X__st_birthtim;
             }
 
@@ -82,7 +84,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Stat_t Stat_t_cast(dynamic value)
         {
-            return new Stat_t(value.Mode, value.Dev, value.Ino, value.Nlink, value.Uid, value.Gid, value.Rdev, value.Atim, value.Mtim, value.Ctim, value.Size, value.Blocks, value.Blksize, value.Flags, value.Gen, value.X__st_birthtim);
+            return new Stat_t(value.Mode, value.Dev, value.Ino, value.Nlink, value.Uid, value.Gid, value.Rdev, value.Atim, value.Mtim, value.Ctim, value.Size, value.Blocks, value.Blksize, value.Flags, value.Gen, value.Pad_cgo_0, value.X__st_birthtim);
         }
     }
 }

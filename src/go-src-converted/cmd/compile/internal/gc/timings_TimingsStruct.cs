@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:29 UTC
+//     Generated on 2020 October 08 04:31:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace @internal
                 this.events = default;
             }
 
-            public Timings(slice<timestamp> list = default, map<long, slice<ref event>> events = default)
+            public Timings(slice<timestamp> list = default, map<long, slice<ptr<event>>> events = default)
             {
                 this.list = list;
                 this.events = events;

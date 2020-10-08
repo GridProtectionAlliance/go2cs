@@ -6,7 +6,7 @@
 
 // Simple conversions to avoid depending on strconv.
 
-// package poll -- go2cs converted at 2020 August 29 08:25:47 UTC
+// package poll -- go2cs converted at 2020 October 08 03:32:52 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\strconv.go
 
@@ -25,6 +25,7 @@ namespace @internal
                 return "-" + uitoa(uint(-val));
             }
             return uitoa(uint(val));
+
         }
 
         // Convert unsigned integer to decimal string
@@ -33,7 +34,9 @@ namespace @internal
             if (val == 0L)
             { // avoid string allocation
                 return "0";
+
             }
+
             array<byte> buf = new array<byte>(20L); // big enough for 64bit value base 10
             var i = len(buf) - 1L;
             while (val >= 10L)
@@ -48,6 +51,7 @@ namespace @internal
             // val < 10
             buf[i] = byte('0' + val);
             return string(buf[i..]);
+
         }
 
         // stringsHasSuffix is strings.HasSuffix. It reports whether s ends in

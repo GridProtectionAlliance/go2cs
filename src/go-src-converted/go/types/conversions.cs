@@ -4,7 +4,7 @@
 
 // This file implements typechecking of conversions.
 
-// package types -- go2cs converted at 2020 August 29 08:47:25 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:05 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\conversions.go
 using constant = go.go.constant_package;
@@ -17,8 +17,11 @@ namespace go
     {
         // Conversion type-checks the conversion T(x).
         // The result is in x.
-        private static void conversion(this ref Checker check, ref operand x, Type T)
+        private static void conversion(this ptr<Checker> _addr_check, ptr<operand> _addr_x, Type T)
         {
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+
             var constArg = x.mode == constant_;
 
             bool ok = default;
@@ -26,10 +29,10 @@ namespace go
             if (constArg && isConstType(T)) 
                 // constant conversion
                 {
-                    ref Basic t = T.Underlying()._<ref Basic>();
+                    ptr<Basic> t = T.Underlying()._<ptr<Basic>>();
 
 
-                    if (representableConst(x.val, check.conf, t, ref x.val)) 
+                    if (representableConst(x.val, check, t, _addr_x.val)) 
                         ok = true;
                     else if (isInteger(x.typ) && isString(t)) 
                         var codepoint = int64(-1L);
@@ -44,11 +47,11 @@ namespace go
                         // If codepoint < 0 the absolute value is too large (or unknown) for
                         // conversion. This is the same as converting any other out-of-range
                         // value - let string(codepoint) do the work.
-                        x.val = constant.MakeString(string(codepoint));
+                        x.val = constant.MakeString(string(rune(codepoint)));
                         ok = true;
 
                 }
-            else if (x.convertibleTo(check.conf, T)) 
+            else if (x.convertibleTo(check, T)) 
                 // non-constant conversion
                 x.mode = value;
                 ok = true;
@@ -56,7 +59,7 @@ namespace go
             {
                 check.errorf(x.pos(), "cannot convert %s to %s", x, T);
                 x.mode = invalid;
-                return;
+                return ;
             }
             if (isUntyped(x.typ))
             {
@@ -77,8 +80,10 @@ namespace go
                     final = x.typ;
                 }
                 check.updateExprType(x.expr, final, true);
+
             }
             x.typ = T;
+
         }
 
         // TODO(gri) convertibleTo checks if T(x) is valid. It assumes that the type
@@ -91,10 +96,16 @@ namespace go
         // is tricky because we'd have to run updateExprType on the argument first.
         // (Issue #21982.)
 
-        private static bool convertibleTo(this ref operand x, ref Config conf, Type T)
-        { 
+        // convertibleTo reports whether T(x) is valid.
+        // The check parameter may be nil if convertibleTo is invoked through an
+        // exported API call, i.e., when all methods have been type-checked.
+        private static bool convertibleTo(this ptr<operand> _addr_x, ptr<Checker> _addr_check, Type T)
+        {
+            ref operand x = ref _addr_x.val;
+            ref Checker check = ref _addr_check.val;
+ 
             // "x is assignable to T"
-            if (x.assignableTo(conf, T, null))
+            if (x.assignableTo(check, T, null))
             {
                 return true;
             } 
@@ -103,7 +114,7 @@ namespace go
             var V = x.typ;
             var Vu = V.Underlying();
             var Tu = T.Underlying();
-            if (IdenticalIgnoreTags(Vu, Tu))
+            if (check.identicalIgnoreTags(Vu, Tu))
             {
                 return true;
             } 
@@ -113,22 +124,24 @@ namespace go
             {
                 var V__prev1 = V;
 
-                ref Pointer (V, ok) = V._<ref Pointer>();
+                ptr<Pointer> (V, ok) = V._<ptr<Pointer>>();
 
                 if (ok)
                 {
                     {
-                        ref Pointer (T, ok) = T._<ref Pointer>();
+                        ptr<Pointer> (T, ok) = T._<ptr<Pointer>>();
 
                         if (ok)
                         {
-                            if (IdenticalIgnoreTags(V.@base.Underlying(), T.@base.Underlying()))
+                            if (check.identicalIgnoreTags(V.@base.Underlying(), T.@base.Underlying()))
                             {
                                 return true;
                             }
+
                         }
 
                     }
+
                 } 
 
                 // "x's type and T are both integer or floating point types"
@@ -172,12 +185,14 @@ namespace go
             {
                 return true;
             }
+
             return false;
+
         }
 
         private static bool isUintptr(Type typ)
         {
-            ref Basic (t, ok) = typ.Underlying()._<ref Basic>();
+            ptr<Basic> (t, ok) = typ.Underlying()._<ptr<Basic>>();
             return ok && t.kind == Uintptr;
         }
 
@@ -186,29 +201,32 @@ namespace go
             // TODO(gri): Is this (typ.Underlying() instead of just typ) correct?
             //            The spec does not say so, but gc claims it is. See also
             //            issue 6326.
-            ref Basic (t, ok) = typ.Underlying()._<ref Basic>();
+            ptr<Basic> (t, ok) = typ.Underlying()._<ptr<Basic>>();
             return ok && t.kind == UnsafePointer;
+
         }
 
         private static bool isPointer(Type typ)
         {
-            ref Pointer (_, ok) = typ.Underlying()._<ref Pointer>();
+            ptr<Pointer> (_, ok) = typ.Underlying()._<ptr<Pointer>>();
             return ok;
         }
 
         private static bool isBytesOrRunes(Type typ)
         {
             {
-                ref Slice (s, ok) = typ._<ref Slice>();
+                ptr<Slice> (s, ok) = typ._<ptr<Slice>>();
 
                 if (ok)
                 {
-                    ref Basic (t, ok) = s.elem.Underlying()._<ref Basic>();
+                    ptr<Basic> (t, ok) = s.elem.Underlying()._<ptr<Basic>>();
                     return ok && (t.kind == Byte || t.kind == Rune);
                 }
 
             }
+
             return false;
+
         }
     }
 }}

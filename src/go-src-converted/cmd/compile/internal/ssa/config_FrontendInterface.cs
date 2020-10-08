@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:31 UTC
+//     Generated on 2020 October 08 04:10:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,8 +18,6 @@ using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -57,7 +55,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -71,29 +69,30 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate bool CanSSAByRef(ref T value, ref types.Type t);
-            private delegate bool CanSSAByVal(T value, ref types.Type t);
+            private delegate bool CanSSAByPtr(ptr<T> value, ptr<types.Type> t);
+            private delegate bool CanSSAByVal(T value, ptr<types.Type> t);
 
-            private static readonly CanSSAByRef s_CanSSAByRef;
+            private static readonly CanSSAByPtr s_CanSSAByPtr;
             private static readonly CanSSAByVal s_CanSSAByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool CanSSA(ref types.Type t)
+            public bool CanSSA(ptr<types.Type> t)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CanSSAByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CanSSAByPtr is null || !m_target_is_ptr)
                     return s_CanSSAByVal!(target, t);
 
-                return s_CanSSAByRef(ref target, t);
+                return s_CanSSAByPtr(m_target_ptr, t);
             }
 
-            private delegate bool StringDataByRef(ref T value, @string _p0);
+            private delegate bool StringDataByPtr(ptr<T> value, @string _p0);
             private delegate bool StringDataByVal(T value, @string _p0);
 
-            private static readonly StringDataByRef s_StringDataByRef;
+            private static readonly StringDataByPtr s_StringDataByPtr;
             private static readonly StringDataByVal s_StringDataByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,36 +101,38 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringDataByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringDataByPtr is null || !m_target_is_ptr)
                     return s_StringDataByVal!(target, _p0);
 
-                return s_StringDataByRef(ref target, _p0);
+                return s_StringDataByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool AutoByRef(ref T value, src.XPos _p0, ref types.Type _p0);
-            private delegate bool AutoByVal(T value, src.XPos _p0, ref types.Type _p0);
+            private delegate bool AutoByPtr(ptr<T> value, src.XPos _p0, ptr<types.Type> _p0);
+            private delegate bool AutoByVal(T value, src.XPos _p0, ptr<types.Type> _p0);
 
-            private static readonly AutoByRef s_AutoByRef;
+            private static readonly AutoByPtr s_AutoByPtr;
             private static readonly AutoByVal s_AutoByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Auto(src.XPos _p0, ref types.Type _p0)
+            public bool Auto(src.XPos _p0, ptr<types.Type> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AutoByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AutoByPtr is null || !m_target_is_ptr)
                     return s_AutoByVal!(target, _p0, _p0);
 
-                return s_AutoByRef(ref target, _p0, _p0);
+                return s_AutoByPtr(m_target_ptr, _p0, _p0);
             }
 
-            private delegate bool SplitStringByRef(ref T value, LocalSlot _p0);
+            private delegate bool SplitStringByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitStringByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitStringByRef s_SplitStringByRef;
+            private static readonly SplitStringByPtr s_SplitStringByPtr;
             private static readonly SplitStringByVal s_SplitStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,17 +141,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SplitStringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SplitStringByPtr is null || !m_target_is_ptr)
                     return s_SplitStringByVal!(target, _p0);
 
-                return s_SplitStringByRef(ref target, _p0);
+                return s_SplitStringByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool SplitInterfaceByRef(ref T value, LocalSlot _p0);
+            private delegate bool SplitInterfaceByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitInterfaceByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitInterfaceByRef s_SplitInterfaceByRef;
+            private static readonly SplitInterfaceByPtr s_SplitInterfaceByPtr;
             private static readonly SplitInterfaceByVal s_SplitInterfaceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -159,17 +161,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SplitInterfaceByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SplitInterfaceByPtr is null || !m_target_is_ptr)
                     return s_SplitInterfaceByVal!(target, _p0);
 
-                return s_SplitInterfaceByRef(ref target, _p0);
+                return s_SplitInterfaceByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool SplitSliceByRef(ref T value, LocalSlot _p0);
+            private delegate bool SplitSliceByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitSliceByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitSliceByRef s_SplitSliceByRef;
+            private static readonly SplitSliceByPtr s_SplitSliceByPtr;
             private static readonly SplitSliceByVal s_SplitSliceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -178,17 +181,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SplitSliceByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SplitSliceByPtr is null || !m_target_is_ptr)
                     return s_SplitSliceByVal!(target, _p0);
 
-                return s_SplitSliceByRef(ref target, _p0);
+                return s_SplitSliceByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool SplitComplexByRef(ref T value, LocalSlot _p0);
+            private delegate bool SplitComplexByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitComplexByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitComplexByRef s_SplitComplexByRef;
+            private static readonly SplitComplexByPtr s_SplitComplexByPtr;
             private static readonly SplitComplexByVal s_SplitComplexByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -197,17 +201,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SplitComplexByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SplitComplexByPtr is null || !m_target_is_ptr)
                     return s_SplitComplexByVal!(target, _p0);
 
-                return s_SplitComplexByRef(ref target, _p0);
+                return s_SplitComplexByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool SplitStructByRef(ref T value, LocalSlot _p0, long _p0);
+            private delegate bool SplitStructByPtr(ptr<T> value, LocalSlot _p0, long _p0);
             private delegate bool SplitStructByVal(T value, LocalSlot _p0, long _p0);
 
-            private static readonly SplitStructByRef s_SplitStructByRef;
+            private static readonly SplitStructByPtr s_SplitStructByPtr;
             private static readonly SplitStructByVal s_SplitStructByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -216,17 +221,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SplitStructByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SplitStructByPtr is null || !m_target_is_ptr)
                     return s_SplitStructByVal!(target, _p0, _p0);
 
-                return s_SplitStructByRef(ref target, _p0, _p0);
+                return s_SplitStructByPtr(m_target_ptr, _p0, _p0);
             }
 
-            private delegate bool SplitArrayByRef(ref T value, LocalSlot _p0);
+            private delegate bool SplitArrayByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitArrayByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitArrayByRef s_SplitArrayByRef;
+            private static readonly SplitArrayByPtr s_SplitArrayByPtr;
             private static readonly SplitArrayByVal s_SplitArrayByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -235,17 +241,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SplitArrayByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SplitArrayByPtr is null || !m_target_is_ptr)
                     return s_SplitArrayByVal!(target, _p0);
 
-                return s_SplitArrayByRef(ref target, _p0);
+                return s_SplitArrayByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool SplitInt64ByRef(ref T value, LocalSlot _p0);
+            private delegate bool SplitInt64ByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitInt64ByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitInt64ByRef s_SplitInt64ByRef;
+            private static readonly SplitInt64ByPtr s_SplitInt64ByPtr;
             private static readonly SplitInt64ByVal s_SplitInt64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -254,36 +261,38 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SplitInt64ByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SplitInt64ByPtr is null || !m_target_is_ptr)
                     return s_SplitInt64ByVal!(target, _p0);
 
-                return s_SplitInt64ByRef(ref target, _p0);
+                return s_SplitInt64ByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool DerefItabByRef(ref T value, ref obj.LSym sym, long offset);
-            private delegate bool DerefItabByVal(T value, ref obj.LSym sym, long offset);
+            private delegate bool DerefItabByPtr(ptr<T> value, ptr<obj.LSym> sym, long offset);
+            private delegate bool DerefItabByVal(T value, ptr<obj.LSym> sym, long offset);
 
-            private static readonly DerefItabByRef s_DerefItabByRef;
+            private static readonly DerefItabByPtr s_DerefItabByPtr;
             private static readonly DerefItabByVal s_DerefItabByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool DerefItab(ref obj.LSym sym, long offset)
+            public bool DerefItab(ptr<obj.LSym> sym, long offset)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DerefItabByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DerefItabByPtr is null || !m_target_is_ptr)
                     return s_DerefItabByVal!(target, sym, offset);
 
-                return s_DerefItabByRef(ref target, sym, offset);
+                return s_DerefItabByPtr(m_target_ptr, sym, offset);
             }
 
-            private delegate bool LineByRef(ref T value, src.XPos _p0);
+            private delegate bool LineByPtr(ptr<T> value, src.XPos _p0);
             private delegate bool LineByVal(T value, src.XPos _p0);
 
-            private static readonly LineByRef s_LineByRef;
+            private static readonly LineByPtr s_LineByPtr;
             private static readonly LineByVal s_LineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -292,36 +301,38 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LineByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LineByPtr is null || !m_target_is_ptr)
                     return s_LineByVal!(target, _p0);
 
-                return s_LineByRef(ref target, _p0);
+                return s_LineByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool AllocFrameByRef(ref T value, ref Func f);
-            private delegate bool AllocFrameByVal(T value, ref Func f);
+            private delegate bool AllocFrameByPtr(ptr<T> value, ptr<Func> f);
+            private delegate bool AllocFrameByVal(T value, ptr<Func> f);
 
-            private static readonly AllocFrameByRef s_AllocFrameByRef;
+            private static readonly AllocFrameByPtr s_AllocFrameByPtr;
             private static readonly AllocFrameByVal s_AllocFrameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool AllocFrame(ref Func f)
+            public bool AllocFrame(ptr<Func> f)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AllocFrameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AllocFrameByPtr is null || !m_target_is_ptr)
                     return s_AllocFrameByVal!(target, f);
 
-                return s_AllocFrameByRef(ref target, f);
+                return s_AllocFrameByPtr(m_target_ptr, f);
             }
 
-            private delegate bool SyslookByRef(ref T value, @string _p0);
+            private delegate bool SyslookByPtr(ptr<T> value, @string _p0);
             private delegate bool SyslookByVal(T value, @string _p0);
 
-            private static readonly SyslookByRef s_SyslookByRef;
+            private static readonly SyslookByPtr s_SyslookByPtr;
             private static readonly SyslookByVal s_SyslookByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -330,17 +341,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SyslookByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SyslookByPtr is null || !m_target_is_ptr)
                     return s_SyslookByVal!(target, _p0);
 
-                return s_SyslookByRef(ref target, _p0);
+                return s_SyslookByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool UseWriteBarrierByRef(ref T value);
+            private delegate bool UseWriteBarrierByPtr(ptr<T> value);
             private delegate bool UseWriteBarrierByVal(T value);
 
-            private static readonly UseWriteBarrierByRef s_UseWriteBarrierByRef;
+            private static readonly UseWriteBarrierByPtr s_UseWriteBarrierByPtr;
             private static readonly UseWriteBarrierByVal s_UseWriteBarrierByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -349,17 +361,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UseWriteBarrierByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UseWriteBarrierByPtr is null || !m_target_is_ptr)
                     return s_UseWriteBarrierByVal!(target);
 
-                return s_UseWriteBarrierByRef(ref target);
+                return s_UseWriteBarrierByPtr(m_target_ptr);
             }
 
-            private delegate bool SetWBPosByRef(ref T value, src.XPos pos);
+            private delegate bool SetWBPosByPtr(ptr<T> value, src.XPos pos);
             private delegate bool SetWBPosByVal(T value, src.XPos pos);
 
-            private static readonly SetWBPosByRef s_SetWBPosByRef;
+            private static readonly SetWBPosByPtr s_SetWBPosByPtr;
             private static readonly SetWBPosByVal s_SetWBPosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -368,17 +381,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetWBPosByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetWBPosByPtr is null || !m_target_is_ptr)
                     return s_SetWBPosByVal!(target, pos);
 
-                return s_SetWBPosByRef(ref target, pos);
+                return s_SetWBPosByPtr(m_target_ptr, pos);
             }
 
-            private delegate bool LogfByRef(ref T value, @string _p0, params object _p0);
+            private delegate bool LogfByPtr(ptr<T> value, @string _p0, params object _p0);
             private delegate bool LogfByVal(T value, @string _p0, params object _p0);
 
-            private static readonly LogfByRef s_LogfByRef;
+            private static readonly LogfByPtr s_LogfByPtr;
             private static readonly LogfByVal s_LogfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -387,17 +401,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LogfByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LogfByPtr is null || !m_target_is_ptr)
                     return s_LogfByVal!(target, _p0, _p0);
 
-                return s_LogfByRef(ref target, _p0, _p0);
+                return s_LogfByPtr(m_target_ptr, _p0, _p0);
             }
 
-            private delegate bool LogByRef(ref T value);
+            private delegate bool LogByPtr(ptr<T> value);
             private delegate bool LogByVal(T value);
 
-            private static readonly LogByRef s_LogByRef;
+            private static readonly LogByPtr s_LogByPtr;
             private static readonly LogByVal s_LogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -406,17 +421,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LogByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LogByPtr is null || !m_target_is_ptr)
                     return s_LogByVal!(target);
 
-                return s_LogByRef(ref target);
+                return s_LogByPtr(m_target_ptr);
             }
 
-            private delegate bool FatalfByRef(ref T value, src.XPos pos, @string msg, params object[] args);
+            private delegate bool FatalfByPtr(ptr<T> value, src.XPos pos, @string msg, params object[] args);
             private delegate bool FatalfByVal(T value, src.XPos pos, @string msg, params object[] args);
 
-            private static readonly FatalfByRef s_FatalfByRef;
+            private static readonly FatalfByPtr s_FatalfByPtr;
             private static readonly FatalfByVal s_FatalfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -425,17 +441,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FatalfByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FatalfByPtr is null || !m_target_is_ptr)
                     return s_FatalfByVal!(target, pos, msg, args);
 
-                return s_FatalfByRef(ref target, pos, msg, args);
+                return s_FatalfByPtr(m_target_ptr, pos, msg, args);
             }
 
-            private delegate bool WarnlByRef(ref T value, src.XPos pos, @string fmt_, params object[] args);
+            private delegate bool WarnlByPtr(ptr<T> value, src.XPos pos, @string fmt_, params object[] args);
             private delegate bool WarnlByVal(T value, src.XPos pos, @string fmt_, params object[] args);
 
-            private static readonly WarnlByRef s_WarnlByRef;
+            private static readonly WarnlByPtr s_WarnlByPtr;
             private static readonly WarnlByVal s_WarnlByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -444,17 +461,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WarnlByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WarnlByPtr is null || !m_target_is_ptr)
                     return s_WarnlByVal!(target, pos, fmt_, args);
 
-                return s_WarnlByRef(ref target, pos, fmt_, args);
+                return s_WarnlByPtr(m_target_ptr, pos, fmt_, args);
             }
 
-            private delegate bool Debug_checknilByRef(ref T value);
+            private delegate bool Debug_checknilByPtr(ptr<T> value);
             private delegate bool Debug_checknilByVal(T value);
 
-            private static readonly Debug_checknilByRef s_Debug_checknilByRef;
+            private static readonly Debug_checknilByPtr s_Debug_checknilByPtr;
             private static readonly Debug_checknilByVal s_Debug_checknilByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -463,30 +481,12 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Debug_checknilByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_Debug_checknilByPtr is null || !m_target_is_ptr)
                     return s_Debug_checknilByVal!(target);
 
-                return s_Debug_checknilByRef(ref target);
-            }
-
-            private delegate bool Debug_eagerwbByRef(ref T value);
-            private delegate bool Debug_eagerwbByVal(T value);
-
-            private static readonly Debug_eagerwbByRef s_Debug_eagerwbByRef;
-            private static readonly Debug_eagerwbByVal s_Debug_eagerwbByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Debug_eagerwb()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_Debug_eagerwbByRef is null)
-                    return s_Debug_eagerwbByVal!(target);
-
-                return s_Debug_eagerwbByRef(ref target);
+                return s_Debug_checknilByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -495,360 +495,281 @@ namespace @internal
             static Frontend()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CanSSA");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CanSSA");
 
                 if (!(extensionMethod is null))
-                    s_CanSSAByRef = extensionMethod.CreateStaticDelegate(typeof(CanSSAByRef)) as CanSSAByRef;
+                    s_CanSSAByPtr = extensionMethod.CreateStaticDelegate(typeof(CanSSAByPtr)) as CanSSAByPtr;
 
-                if (s_CanSSAByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CanSSA");
+                extensionMethod = targetType.GetExtensionMethod("CanSSA");
 
-                    if (!(extensionMethod is null))
-                        s_CanSSAByVal = extensionMethod.CreateStaticDelegate(typeof(CanSSAByVal)) as CanSSAByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CanSSAByVal = extensionMethod.CreateStaticDelegate(typeof(CanSSAByVal)) as CanSSAByVal;
 
-                if (s_CanSSAByRef is null && s_CanSSAByVal is null)
+                if (s_CanSSAByPtr is null && s_CanSSAByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.CanSSA method", new Exception("CanSSA"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StringData");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("StringData");
 
                 if (!(extensionMethod is null))
-                    s_StringDataByRef = extensionMethod.CreateStaticDelegate(typeof(StringDataByRef)) as StringDataByRef;
+                    s_StringDataByPtr = extensionMethod.CreateStaticDelegate(typeof(StringDataByPtr)) as StringDataByPtr;
 
-                if (s_StringDataByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StringData");
+                extensionMethod = targetType.GetExtensionMethod("StringData");
 
-                    if (!(extensionMethod is null))
-                        s_StringDataByVal = extensionMethod.CreateStaticDelegate(typeof(StringDataByVal)) as StringDataByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringDataByVal = extensionMethod.CreateStaticDelegate(typeof(StringDataByVal)) as StringDataByVal;
 
-                if (s_StringDataByRef is null && s_StringDataByVal is null)
+                if (s_StringDataByPtr is null && s_StringDataByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.StringData method", new Exception("StringData"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Auto");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Auto");
 
                 if (!(extensionMethod is null))
-                    s_AutoByRef = extensionMethod.CreateStaticDelegate(typeof(AutoByRef)) as AutoByRef;
+                    s_AutoByPtr = extensionMethod.CreateStaticDelegate(typeof(AutoByPtr)) as AutoByPtr;
 
-                if (s_AutoByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Auto");
+                extensionMethod = targetType.GetExtensionMethod("Auto");
 
-                    if (!(extensionMethod is null))
-                        s_AutoByVal = extensionMethod.CreateStaticDelegate(typeof(AutoByVal)) as AutoByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AutoByVal = extensionMethod.CreateStaticDelegate(typeof(AutoByVal)) as AutoByVal;
 
-                if (s_AutoByRef is null && s_AutoByVal is null)
+                if (s_AutoByPtr is null && s_AutoByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Auto method", new Exception("Auto"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SplitString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitString");
 
                 if (!(extensionMethod is null))
-                    s_SplitStringByRef = extensionMethod.CreateStaticDelegate(typeof(SplitStringByRef)) as SplitStringByRef;
+                    s_SplitStringByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitStringByPtr)) as SplitStringByPtr;
 
-                if (s_SplitStringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SplitString");
+                extensionMethod = targetType.GetExtensionMethod("SplitString");
 
-                    if (!(extensionMethod is null))
-                        s_SplitStringByVal = extensionMethod.CreateStaticDelegate(typeof(SplitStringByVal)) as SplitStringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SplitStringByVal = extensionMethod.CreateStaticDelegate(typeof(SplitStringByVal)) as SplitStringByVal;
 
-                if (s_SplitStringByRef is null && s_SplitStringByVal is null)
+                if (s_SplitStringByPtr is null && s_SplitStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitString method", new Exception("SplitString"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SplitInterface");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitInterface");
 
                 if (!(extensionMethod is null))
-                    s_SplitInterfaceByRef = extensionMethod.CreateStaticDelegate(typeof(SplitInterfaceByRef)) as SplitInterfaceByRef;
+                    s_SplitInterfaceByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitInterfaceByPtr)) as SplitInterfaceByPtr;
 
-                if (s_SplitInterfaceByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SplitInterface");
+                extensionMethod = targetType.GetExtensionMethod("SplitInterface");
 
-                    if (!(extensionMethod is null))
-                        s_SplitInterfaceByVal = extensionMethod.CreateStaticDelegate(typeof(SplitInterfaceByVal)) as SplitInterfaceByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SplitInterfaceByVal = extensionMethod.CreateStaticDelegate(typeof(SplitInterfaceByVal)) as SplitInterfaceByVal;
 
-                if (s_SplitInterfaceByRef is null && s_SplitInterfaceByVal is null)
+                if (s_SplitInterfaceByPtr is null && s_SplitInterfaceByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitInterface method", new Exception("SplitInterface"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SplitSlice");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitSlice");
 
                 if (!(extensionMethod is null))
-                    s_SplitSliceByRef = extensionMethod.CreateStaticDelegate(typeof(SplitSliceByRef)) as SplitSliceByRef;
+                    s_SplitSliceByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitSliceByPtr)) as SplitSliceByPtr;
 
-                if (s_SplitSliceByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SplitSlice");
+                extensionMethod = targetType.GetExtensionMethod("SplitSlice");
 
-                    if (!(extensionMethod is null))
-                        s_SplitSliceByVal = extensionMethod.CreateStaticDelegate(typeof(SplitSliceByVal)) as SplitSliceByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SplitSliceByVal = extensionMethod.CreateStaticDelegate(typeof(SplitSliceByVal)) as SplitSliceByVal;
 
-                if (s_SplitSliceByRef is null && s_SplitSliceByVal is null)
+                if (s_SplitSliceByPtr is null && s_SplitSliceByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitSlice method", new Exception("SplitSlice"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SplitComplex");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitComplex");
 
                 if (!(extensionMethod is null))
-                    s_SplitComplexByRef = extensionMethod.CreateStaticDelegate(typeof(SplitComplexByRef)) as SplitComplexByRef;
+                    s_SplitComplexByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitComplexByPtr)) as SplitComplexByPtr;
 
-                if (s_SplitComplexByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SplitComplex");
+                extensionMethod = targetType.GetExtensionMethod("SplitComplex");
 
-                    if (!(extensionMethod is null))
-                        s_SplitComplexByVal = extensionMethod.CreateStaticDelegate(typeof(SplitComplexByVal)) as SplitComplexByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SplitComplexByVal = extensionMethod.CreateStaticDelegate(typeof(SplitComplexByVal)) as SplitComplexByVal;
 
-                if (s_SplitComplexByRef is null && s_SplitComplexByVal is null)
+                if (s_SplitComplexByPtr is null && s_SplitComplexByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitComplex method", new Exception("SplitComplex"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SplitStruct");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitStruct");
 
                 if (!(extensionMethod is null))
-                    s_SplitStructByRef = extensionMethod.CreateStaticDelegate(typeof(SplitStructByRef)) as SplitStructByRef;
+                    s_SplitStructByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitStructByPtr)) as SplitStructByPtr;
 
-                if (s_SplitStructByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SplitStruct");
+                extensionMethod = targetType.GetExtensionMethod("SplitStruct");
 
-                    if (!(extensionMethod is null))
-                        s_SplitStructByVal = extensionMethod.CreateStaticDelegate(typeof(SplitStructByVal)) as SplitStructByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SplitStructByVal = extensionMethod.CreateStaticDelegate(typeof(SplitStructByVal)) as SplitStructByVal;
 
-                if (s_SplitStructByRef is null && s_SplitStructByVal is null)
+                if (s_SplitStructByPtr is null && s_SplitStructByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitStruct method", new Exception("SplitStruct"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SplitArray");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitArray");
 
                 if (!(extensionMethod is null))
-                    s_SplitArrayByRef = extensionMethod.CreateStaticDelegate(typeof(SplitArrayByRef)) as SplitArrayByRef;
+                    s_SplitArrayByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitArrayByPtr)) as SplitArrayByPtr;
 
-                if (s_SplitArrayByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SplitArray");
+                extensionMethod = targetType.GetExtensionMethod("SplitArray");
 
-                    if (!(extensionMethod is null))
-                        s_SplitArrayByVal = extensionMethod.CreateStaticDelegate(typeof(SplitArrayByVal)) as SplitArrayByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SplitArrayByVal = extensionMethod.CreateStaticDelegate(typeof(SplitArrayByVal)) as SplitArrayByVal;
 
-                if (s_SplitArrayByRef is null && s_SplitArrayByVal is null)
+                if (s_SplitArrayByPtr is null && s_SplitArrayByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitArray method", new Exception("SplitArray"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SplitInt64");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitInt64");
 
                 if (!(extensionMethod is null))
-                    s_SplitInt64ByRef = extensionMethod.CreateStaticDelegate(typeof(SplitInt64ByRef)) as SplitInt64ByRef;
+                    s_SplitInt64ByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitInt64ByPtr)) as SplitInt64ByPtr;
 
-                if (s_SplitInt64ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SplitInt64");
+                extensionMethod = targetType.GetExtensionMethod("SplitInt64");
 
-                    if (!(extensionMethod is null))
-                        s_SplitInt64ByVal = extensionMethod.CreateStaticDelegate(typeof(SplitInt64ByVal)) as SplitInt64ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SplitInt64ByVal = extensionMethod.CreateStaticDelegate(typeof(SplitInt64ByVal)) as SplitInt64ByVal;
 
-                if (s_SplitInt64ByRef is null && s_SplitInt64ByVal is null)
+                if (s_SplitInt64ByPtr is null && s_SplitInt64ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitInt64 method", new Exception("SplitInt64"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("DerefItab");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("DerefItab");
 
                 if (!(extensionMethod is null))
-                    s_DerefItabByRef = extensionMethod.CreateStaticDelegate(typeof(DerefItabByRef)) as DerefItabByRef;
+                    s_DerefItabByPtr = extensionMethod.CreateStaticDelegate(typeof(DerefItabByPtr)) as DerefItabByPtr;
 
-                if (s_DerefItabByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("DerefItab");
+                extensionMethod = targetType.GetExtensionMethod("DerefItab");
 
-                    if (!(extensionMethod is null))
-                        s_DerefItabByVal = extensionMethod.CreateStaticDelegate(typeof(DerefItabByVal)) as DerefItabByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DerefItabByVal = extensionMethod.CreateStaticDelegate(typeof(DerefItabByVal)) as DerefItabByVal;
 
-                if (s_DerefItabByRef is null && s_DerefItabByVal is null)
+                if (s_DerefItabByPtr is null && s_DerefItabByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.DerefItab method", new Exception("DerefItab"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Line");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Line");
 
                 if (!(extensionMethod is null))
-                    s_LineByRef = extensionMethod.CreateStaticDelegate(typeof(LineByRef)) as LineByRef;
+                    s_LineByPtr = extensionMethod.CreateStaticDelegate(typeof(LineByPtr)) as LineByPtr;
 
-                if (s_LineByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Line");
+                extensionMethod = targetType.GetExtensionMethod("Line");
 
-                    if (!(extensionMethod is null))
-                        s_LineByVal = extensionMethod.CreateStaticDelegate(typeof(LineByVal)) as LineByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LineByVal = extensionMethod.CreateStaticDelegate(typeof(LineByVal)) as LineByVal;
 
-                if (s_LineByRef is null && s_LineByVal is null)
+                if (s_LineByPtr is null && s_LineByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Line method", new Exception("Line"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AllocFrame");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AllocFrame");
 
                 if (!(extensionMethod is null))
-                    s_AllocFrameByRef = extensionMethod.CreateStaticDelegate(typeof(AllocFrameByRef)) as AllocFrameByRef;
+                    s_AllocFrameByPtr = extensionMethod.CreateStaticDelegate(typeof(AllocFrameByPtr)) as AllocFrameByPtr;
 
-                if (s_AllocFrameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AllocFrame");
+                extensionMethod = targetType.GetExtensionMethod("AllocFrame");
 
-                    if (!(extensionMethod is null))
-                        s_AllocFrameByVal = extensionMethod.CreateStaticDelegate(typeof(AllocFrameByVal)) as AllocFrameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AllocFrameByVal = extensionMethod.CreateStaticDelegate(typeof(AllocFrameByVal)) as AllocFrameByVal;
 
-                if (s_AllocFrameByRef is null && s_AllocFrameByVal is null)
+                if (s_AllocFrameByPtr is null && s_AllocFrameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.AllocFrame method", new Exception("AllocFrame"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Syslook");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Syslook");
 
                 if (!(extensionMethod is null))
-                    s_SyslookByRef = extensionMethod.CreateStaticDelegate(typeof(SyslookByRef)) as SyslookByRef;
+                    s_SyslookByPtr = extensionMethod.CreateStaticDelegate(typeof(SyslookByPtr)) as SyslookByPtr;
 
-                if (s_SyslookByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Syslook");
+                extensionMethod = targetType.GetExtensionMethod("Syslook");
 
-                    if (!(extensionMethod is null))
-                        s_SyslookByVal = extensionMethod.CreateStaticDelegate(typeof(SyslookByVal)) as SyslookByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SyslookByVal = extensionMethod.CreateStaticDelegate(typeof(SyslookByVal)) as SyslookByVal;
 
-                if (s_SyslookByRef is null && s_SyslookByVal is null)
+                if (s_SyslookByPtr is null && s_SyslookByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Syslook method", new Exception("Syslook"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UseWriteBarrier");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UseWriteBarrier");
 
                 if (!(extensionMethod is null))
-                    s_UseWriteBarrierByRef = extensionMethod.CreateStaticDelegate(typeof(UseWriteBarrierByRef)) as UseWriteBarrierByRef;
+                    s_UseWriteBarrierByPtr = extensionMethod.CreateStaticDelegate(typeof(UseWriteBarrierByPtr)) as UseWriteBarrierByPtr;
 
-                if (s_UseWriteBarrierByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UseWriteBarrier");
+                extensionMethod = targetType.GetExtensionMethod("UseWriteBarrier");
 
-                    if (!(extensionMethod is null))
-                        s_UseWriteBarrierByVal = extensionMethod.CreateStaticDelegate(typeof(UseWriteBarrierByVal)) as UseWriteBarrierByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UseWriteBarrierByVal = extensionMethod.CreateStaticDelegate(typeof(UseWriteBarrierByVal)) as UseWriteBarrierByVal;
 
-                if (s_UseWriteBarrierByRef is null && s_UseWriteBarrierByVal is null)
+                if (s_UseWriteBarrierByPtr is null && s_UseWriteBarrierByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.UseWriteBarrier method", new Exception("UseWriteBarrier"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SetWBPos");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SetWBPos");
 
                 if (!(extensionMethod is null))
-                    s_SetWBPosByRef = extensionMethod.CreateStaticDelegate(typeof(SetWBPosByRef)) as SetWBPosByRef;
+                    s_SetWBPosByPtr = extensionMethod.CreateStaticDelegate(typeof(SetWBPosByPtr)) as SetWBPosByPtr;
 
-                if (s_SetWBPosByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SetWBPos");
+                extensionMethod = targetType.GetExtensionMethod("SetWBPos");
 
-                    if (!(extensionMethod is null))
-                        s_SetWBPosByVal = extensionMethod.CreateStaticDelegate(typeof(SetWBPosByVal)) as SetWBPosByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetWBPosByVal = extensionMethod.CreateStaticDelegate(typeof(SetWBPosByVal)) as SetWBPosByVal;
 
-                if (s_SetWBPosByRef is null && s_SetWBPosByVal is null)
+                if (s_SetWBPosByPtr is null && s_SetWBPosByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SetWBPos method", new Exception("SetWBPos"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Logf");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Logf");
 
                 if (!(extensionMethod is null))
-                    s_LogfByRef = extensionMethod.CreateStaticDelegate(typeof(LogfByRef)) as LogfByRef;
+                    s_LogfByPtr = extensionMethod.CreateStaticDelegate(typeof(LogfByPtr)) as LogfByPtr;
 
-                if (s_LogfByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Logf");
+                extensionMethod = targetType.GetExtensionMethod("Logf");
 
-                    if (!(extensionMethod is null))
-                        s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
 
-                if (s_LogfByRef is null && s_LogfByVal is null)
+                if (s_LogfByPtr is null && s_LogfByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Logf method", new Exception("Logf"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Log");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Log");
 
                 if (!(extensionMethod is null))
-                    s_LogByRef = extensionMethod.CreateStaticDelegate(typeof(LogByRef)) as LogByRef;
+                    s_LogByPtr = extensionMethod.CreateStaticDelegate(typeof(LogByPtr)) as LogByPtr;
 
-                if (s_LogByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Log");
+                extensionMethod = targetType.GetExtensionMethod("Log");
 
-                    if (!(extensionMethod is null))
-                        s_LogByVal = extensionMethod.CreateStaticDelegate(typeof(LogByVal)) as LogByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LogByVal = extensionMethod.CreateStaticDelegate(typeof(LogByVal)) as LogByVal;
 
-                if (s_LogByRef is null && s_LogByVal is null)
+                if (s_LogByPtr is null && s_LogByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Log method", new Exception("Log"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Fatalf");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Fatalf");
 
                 if (!(extensionMethod is null))
-                    s_FatalfByRef = extensionMethod.CreateStaticDelegate(typeof(FatalfByRef)) as FatalfByRef;
+                    s_FatalfByPtr = extensionMethod.CreateStaticDelegate(typeof(FatalfByPtr)) as FatalfByPtr;
 
-                if (s_FatalfByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Fatalf");
+                extensionMethod = targetType.GetExtensionMethod("Fatalf");
 
-                    if (!(extensionMethod is null))
-                        s_FatalfByVal = extensionMethod.CreateStaticDelegate(typeof(FatalfByVal)) as FatalfByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FatalfByVal = extensionMethod.CreateStaticDelegate(typeof(FatalfByVal)) as FatalfByVal;
 
-                if (s_FatalfByRef is null && s_FatalfByVal is null)
+                if (s_FatalfByPtr is null && s_FatalfByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Fatalf method", new Exception("Fatalf"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Warnl");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Warnl");
 
                 if (!(extensionMethod is null))
-                    s_WarnlByRef = extensionMethod.CreateStaticDelegate(typeof(WarnlByRef)) as WarnlByRef;
+                    s_WarnlByPtr = extensionMethod.CreateStaticDelegate(typeof(WarnlByPtr)) as WarnlByPtr;
 
-                if (s_WarnlByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Warnl");
+                extensionMethod = targetType.GetExtensionMethod("Warnl");
 
-                    if (!(extensionMethod is null))
-                        s_WarnlByVal = extensionMethod.CreateStaticDelegate(typeof(WarnlByVal)) as WarnlByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WarnlByVal = extensionMethod.CreateStaticDelegate(typeof(WarnlByVal)) as WarnlByVal;
 
-                if (s_WarnlByRef is null && s_WarnlByVal is null)
+                if (s_WarnlByPtr is null && s_WarnlByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Warnl method", new Exception("Warnl"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Debug_checknil");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Debug_checknil");
 
                 if (!(extensionMethod is null))
-                    s_Debug_checknilByRef = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByRef)) as Debug_checknilByRef;
+                    s_Debug_checknilByPtr = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByPtr)) as Debug_checknilByPtr;
 
-                if (s_Debug_checknilByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Debug_checknil");
+                extensionMethod = targetType.GetExtensionMethod("Debug_checknil");
 
-                    if (!(extensionMethod is null))
-                        s_Debug_checknilByVal = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByVal)) as Debug_checknilByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_Debug_checknilByVal = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByVal)) as Debug_checknilByVal;
 
-                if (s_Debug_checknilByRef is null && s_Debug_checknilByVal is null)
+                if (s_Debug_checknilByPtr is null && s_Debug_checknilByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Debug_checknil method", new Exception("Debug_checknil"));
-
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Debug_eagerwb");
-
-                if (!(extensionMethod is null))
-                    s_Debug_eagerwbByRef = extensionMethod.CreateStaticDelegate(typeof(Debug_eagerwbByRef)) as Debug_eagerwbByRef;
-
-                if (s_Debug_eagerwbByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Debug_eagerwb");
-
-                    if (!(extensionMethod is null))
-                        s_Debug_eagerwbByVal = extensionMethod.CreateStaticDelegate(typeof(Debug_eagerwbByVal)) as Debug_eagerwbByVal;
-                }
-
-                if (s_Debug_eagerwbByRef is null && s_Debug_eagerwbByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Debug_eagerwb method", new Exception("Debug_eagerwb"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !386
-
-// package math -- go2cs converted at 2020 August 29 08:44:58 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:22 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\sincos.go
 
@@ -24,10 +22,12 @@ namespace go
         //    Sincos(NaN) = NaN, NaN
         public static (double, double) Sincos(double x)
         {
-            const float PI4A = 7.85398125648498535156E-1F; // 0x3fe921fb40000000, Pi/4 split into three parts
-            const float PI4B = 3.77489470793079817668E-8F; // 0x3e64442d00000000,
-            const float PI4C = 2.69515142907905952645E-15F; // 0x3ce8469898cc5170,
-            const float M4PI = 1.273239544735162542821171882678754627704620361328125F; // 4/pi 
+            double sin = default;
+            double cos = default;
+
+            const float PI4A = (float)7.85398125648498535156e-1F; // 0x3fe921fb40000000, Pi/4 split into three parts
+            const float PI4B = (float)3.77489470793079817668e-8F; // 0x3e64442d00000000,
+            const float PI4C = (float)2.69515142907905952645e-15F; // 0x3ce8469898cc5170, 
             // special cases
 
             if (x == 0L) 
@@ -42,26 +42,38 @@ namespace go
                 x = -x;
                 sinSign = true;
             }
-            var j = int64(x * M4PI); // integer part of x/(Pi/4), as integer for tests on the phase angle
-            var y = float64(j); // integer part of x/(Pi/4), as float
+            ulong j = default;
+            double y = default;            double z = default;
 
-            if (j & 1L == 1L)
-            { // map zeros to origin
-                j++;
-                y++;
+            if (x >= reduceThreshold)
+            {
+                j, z = trigReduce(x);
             }
-            j &= 7L; // octant modulo 2Pi radians (360 degrees)
+            else
+            {
+                j = uint64(x * (4L / Pi)); // integer part of x/(Pi/4), as integer for tests on the phase angle
+                y = float64(j); // integer part of x/(Pi/4), as float
+
+                if (j & 1L == 1L)
+                { // map zeros to origin
+                    j++;
+                    y++;
+
+                }
+                j &= 7L; // octant modulo 2Pi radians (360 degrees)
+                z = ((x - y * PI4A) - y * PI4B) - y * PI4C; // Extended precision modular arithmetic
+            }
             if (j > 3L)
             { // reflect in x axis
                 j -= 4L;
                 sinSign = !sinSign;
                 cosSign = !cosSign;
+
             }
             if (j > 1L)
             {
                 cosSign = !cosSign;
             }
-            var z = ((x - y * PI4A) - y * PI4B) - y * PI4C; // Extended precision modular arithmetic
             var zz = z * z;
             cos = 1.0F - 0.5F * zz + zz * zz * ((((((_cos[0L] * zz) + _cos[1L]) * zz + _cos[2L]) * zz + _cos[3L]) * zz + _cos[4L]) * zz + _cos[5L]);
             sin = z + z * zz * ((((((_sin[0L] * zz) + _sin[1L]) * zz + _sin[2L]) * zz + _sin[3L]) * zz + _sin[4L]) * zz + _sin[5L]);
@@ -69,6 +81,7 @@ namespace go
             {
                 sin = cos;
                 cos = sin;
+
             }
             if (cosSign)
             {
@@ -78,7 +91,8 @@ namespace go
             {
                 sin = -sin;
             }
-            return;
+            return ;
+
         }
     }
 }

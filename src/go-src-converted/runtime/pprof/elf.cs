@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2020 August 29 08:21:47 UTC
+// package pprof -- go2cs converted at 2020 October 08 03:24:29 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Go\src\runtime\pprof\elf.go
 using binary = go.encoding.binary_package;
@@ -22,12 +22,16 @@ namespace runtime
         // without introducing a dependency on debug/elf and its dependencies.
         private static (@string, error) elfBuildID(@string file) => func((defer, _, __) =>
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             var buf = make_slice<byte>(256L);
             var (f, err) = os.Open(file);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             defer(f.Close());
 
             {
@@ -35,7 +39,7 @@ namespace runtime
 
                 if (err != null)
                 {
-                    return ("", err);
+                    return ("", error.As(err)!);
                 } 
 
                 // ELF file begins with \x7F E L F.
@@ -45,8 +49,9 @@ namespace runtime
             // ELF file begins with \x7F E L F.
             if (buf[0L] != 0x7FUL || buf[1L] != 'E' || buf[2L] != 'L' || buf[3L] != 'F')
             {
-                return ("", errBadELF);
+                return ("", error.As(errBadELF)!);
             }
+
             binary.ByteOrder byteOrder = default;
             switch (buf[5L])
             {
@@ -57,7 +62,7 @@ namespace runtime
                     byteOrder = binary.BigEndian;
                     break;
                 default: 
-                    return ("", errBadELF);
+                    return ("", error.As(errBadELF)!);
                     break;
             }
 
@@ -71,8 +76,9 @@ namespace runtime
                     shentsize = int64(byteOrder.Uint16(buf[46L..]));
                     if (shentsize != 40L)
                     {
-                        return ("", errBadELF);
+                        return ("", error.As(errBadELF)!);
                     }
+
                     shnum = int(byteOrder.Uint16(buf[48L..]));
                     break;
                 case 2L: // 64-bit file header
@@ -80,12 +86,13 @@ namespace runtime
                     shentsize = int64(byteOrder.Uint16(buf[58L..]));
                     if (shentsize != 64L)
                     {
-                        return ("", errBadELF);
+                        return ("", error.As(errBadELF)!);
                     }
+
                     shnum = int(byteOrder.Uint16(buf[60L..]));
                     break;
                 default: 
-                    return ("", errBadELF);
+                    return ("", error.As(errBadELF)!);
                     break;
             }
 
@@ -96,19 +103,22 @@ namespace runtime
 
                     if (err != null)
                     {
-                        return ("", err);
+                        return ("", error.As(err)!);
                     }
 
                 }
+
                 {
                     var typ = byteOrder.Uint32(buf[4L..]);
 
                     if (typ != 7L)
                     { // SHT_NOTE
                         continue;
+
                     }
 
                 }
+
                 long off = default;                long size = default;
 
                 if (shentsize == 40L)
@@ -116,13 +126,16 @@ namespace runtime
                     // 32-bit section header
                     off = int64(byteOrder.Uint32(buf[16L..]));
                     size = int64(byteOrder.Uint32(buf[20L..]));
+
                 }
                 else
                 { 
                     // 64-bit section header
                     off = int64(byteOrder.Uint64(buf[24L..]));
                     size = int64(byteOrder.Uint64(buf[32L..]));
+
                 }
+
                 size += off;
                 while (off < size)
                 {
@@ -131,10 +144,12 @@ namespace runtime
 
                         if (err != null)
                         { // room for header + name GNU\x00
-                            return ("", err);
+                            return ("", error.As(err)!);
+
                         }
 
                     }
+
                     var nameSize = int(byteOrder.Uint32(buf[0L..]));
                     var descSize = int(byteOrder.Uint32(buf[4L..]));
                     var noteType = int(byteOrder.Uint32(buf[8L..]));
@@ -143,26 +158,33 @@ namespace runtime
                     if (nameSize != 4L || noteType != 3L || buf[12L] != 'G' || buf[13L] != 'N' || buf[14L] != 'U' || buf[15L] != '\x00')
                     { // want name GNU\x00 type 3 (NT_GNU_BUILD_ID)
                         continue;
+
                     }
+
                     if (descSize > len(buf))
                     {
-                        return ("", errBadELF);
+                        return ("", error.As(errBadELF)!);
                     }
+
                     {
                         (_, err) = f.ReadAt(buf[..descSize], descOff);
 
                         if (err != null)
                         {
-                            return ("", err);
+                            return ("", error.As(err)!);
                         }
 
                     }
-                    return (fmt.Sprintf("%x", buf[..descSize]), null);
+
+                    return (fmt.Sprintf("%x", buf[..descSize]), error.As(null!)!);
+
                 }
+
 
             }
 
-            return ("", errNoBuildID);
+            return ("", error.As(errNoBuildID)!);
+
         });
     }
 }}

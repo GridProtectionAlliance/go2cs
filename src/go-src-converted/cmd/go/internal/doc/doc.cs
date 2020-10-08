@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package doc implements the ``go doc'' command.
-// package doc -- go2cs converted at 2020 August 29 10:00:33 UTC
+// package doc -- go2cs converted at 2020 October 08 04:33:34 UTC
 // import "cmd/go/internal/doc" ==> using doc = go.cmd.go.@internal.doc_package
 // Original source: C:\Go\src\cmd\go\internal\doc\doc.go
 using @base = go.cmd.go.@internal.@base_package;
@@ -17,7 +17,7 @@ namespace @internal
 {
     public static partial class doc_package
     {
-        public static base.Command CmdDoc = ref new base.Command(Run:runDoc,UsageLine:"doc [-u] [-c] [package|[package.]symbol[.methodOrField]]",CustomFlags:true,Short:"show documentation for package or symbol",Long:`
+        public static ptr<base.Command> CmdDoc = addr(new base.Command(Run:runDoc,UsageLine:"go doc [-u] [-c] [package|[package.]symbol[.methodOrField]]",CustomFlags:true,Short:"show documentation for package or symbol",Long:`
 Doc prints the documentation comments associated with the item identified by its
 arguments (a package, const, func, type, var, method, or struct field)
 followed by a one-line summary of each of the first-level items "under"
@@ -108,19 +108,32 @@ Examples:
 	cd go/src/encoding/json; go doc decode
 
 Flags:
+	-all
+		Show all the documentation for the package.
 	-c
 		Respect case when matching symbols.
 	-cmd
 		Treat a command (package main) like a regular package.
 		Otherwise package main's exported symbols are hidden
 		when showing the package's top-level documentation.
+	-short
+		One-line representation for each symbol.
+	-src
+		Show the full source code for the symbol. This will
+		display the full Go source of its declaration and
+		definition, such as a function definition (including
+		the body), type declaration or enclosing const
+		block. The output may therefore include unexported
+		details.
 	-u
 		Show documentation for unexported as well as exported
 		symbols, methods, and fields.
-`,);
+`,));
 
-        private static void runDoc(ref base.Command cmd, slice<@string> args)
+        private static void runDoc(ptr<base.Command> _addr_cmd, slice<@string> args)
         {
+            ref base.Command cmd = ref _addr_cmd.val;
+
             @base.Run(cfg.BuildToolexec, @base.Tool("doc"), args);
         }
     }

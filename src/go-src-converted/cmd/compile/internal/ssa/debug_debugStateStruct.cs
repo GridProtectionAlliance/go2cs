@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:42 UTC
+//     Generated on 2020 October 08 04:10:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using dwarf = go.cmd.@internal.dwarf_package;
 using obj = go.cmd.@internal.obj_package;
+using hex = go.encoding.hex_package;
 using fmt = go.fmt_package;
+using bits = go.math.bits_package;
+using sort = go.sort_package;
 using strings = go.strings_package;
 using go;
 
@@ -31,24 +35,52 @@ namespace @internal
             // Constructors
             public debugState(NilType _)
             {
-                this.loggingEnabled = default;
                 this.slots = default;
+                this.vars = default;
                 this.varSlots = default;
+                this.lists = default;
+                this.slotVars = default;
                 this.f = default;
-                this.cache = default;
-                this.numRegisters = default;
-                this.registerContents = default;
+                this.loggingEnabled = default;
+                this.registers = default;
+                this.stackOffset = default;
+                this.ctxt = default;
+                this.valueNames = default;
+                this.currentState = default;
+                this.liveCount = default;
+                this.changedVars = default;
+                this.pendingEntries = default;
+                this.varParts = default;
+                this.blockDebug = default;
+                this.pendingSlotLocs = default;
+                this.liveSlots = default;
+                this.liveSlotSliceBegin = default;
+                this.partsByVarOffset = default;
             }
 
-            public debugState(bool loggingEnabled = default, slice<ref LocalSlot> slots = default, slice<ref LocalSlot> varSlots = default, ref ptr<Func> f = default, ref ptr<Cache> cache = default, long numRegisters = default, slice<slice<SlotID>> registerContents = default)
+            public debugState(slice<LocalSlot> slots = default, slice<GCNode> vars = default, slice<slice<SlotID>> varSlots = default, slice<slice<byte>> lists = default, slice<VarID> slotVars = default, ref ptr<Func> f = default, bool loggingEnabled = default, slice<Register> registers = default, Func<LocalSlot, int> stackOffset = default, ref ptr<obj.Link> ctxt = default, slice<slice<SlotID>> valueNames = default, stateAtPC currentState = default, slice<long> liveCount = default, ref ptr<sparseSet> changedVars = default, slice<pendingEntry> pendingEntries = default, map<GCNode, slice<SlotID>> varParts = default, slice<BlockDebug> blockDebug = default, slice<VarLoc> pendingSlotLocs = default, slice<liveSlot> liveSlots = default, long liveSlotSliceBegin = default, sort.Interface partsByVarOffset = default)
             {
-                this.loggingEnabled = loggingEnabled;
                 this.slots = slots;
+                this.vars = vars;
                 this.varSlots = varSlots;
+                this.lists = lists;
+                this.slotVars = slotVars;
                 this.f = f;
-                this.cache = cache;
-                this.numRegisters = numRegisters;
-                this.registerContents = registerContents;
+                this.loggingEnabled = loggingEnabled;
+                this.registers = registers;
+                this.stackOffset = stackOffset;
+                this.ctxt = ctxt;
+                this.valueNames = valueNames;
+                this.currentState = currentState;
+                this.liveCount = liveCount;
+                this.changedVars = changedVars;
+                this.pendingEntries = pendingEntries;
+                this.varParts = varParts;
+                this.blockDebug = blockDebug;
+                this.pendingSlotLocs = pendingSlotLocs;
+                this.liveSlots = liveSlots;
+                this.liveSlotSliceBegin = liveSlotSliceBegin;
+                this.partsByVarOffset = partsByVarOffset;
             }
 
             // Enable comparisons between nil and debugState struct
@@ -71,7 +103,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static debugState debugState_cast(dynamic value)
         {
-            return new debugState(value.loggingEnabled, value.slots, value.varSlots, ref value.f, ref value.cache, value.numRegisters, value.registerContents);
+            return new debugState(value.slots, value.vars, value.varSlots, value.lists, value.slotVars, ref value.f, value.loggingEnabled, value.registers, value.stackOffset, ref value.ctxt, value.valueNames, value.currentState, value.liveCount, ref value.changedVars, value.pendingEntries, value.varParts, value.blockDebug, value.pendingSlotLocs, value.liveSlots, value.liveSlotSliceBegin, value.partsByVarOffset);
         }
     }
 }}}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fmt -- go2cs converted at 2020 August 29 08:45:06 UTC
+// package fmt -- go2cs converted at 2020 October 08 03:25:58 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Go\src\fmt\format.go
 using strconv = go.strconv_package;
@@ -13,11 +13,13 @@ namespace go
 {
     public static partial class fmt_package
     {
-        private static readonly @string ldigits = "0123456789abcdefx";
-        private static readonly @string udigits = "0123456789ABCDEFX";
+        private static readonly @string ldigits = (@string)"0123456789abcdefx";
+        private static readonly @string udigits = (@string)"0123456789ABCDEFX";
 
-        private static readonly var signed = true;
-        private static readonly var unsigned = false;
+
+        private static readonly var signed = (var)true;
+        private static readonly var unsigned = (var)false;
+
 
         // flags placed in a separate struct for easy clearing.
         private partial struct fmtFlags
@@ -49,32 +51,41 @@ namespace go
             public array<byte> intbuf;
         }
 
-        private static void clearflags(this ref fmt f)
+        private static void clearflags(this ptr<fmt> _addr_f)
         {
+            ref fmt f = ref _addr_f.val;
+
             f.fmtFlags = new fmtFlags();
         }
 
-        private static void init(this ref fmt f, ref buffer buf)
+        private static void init(this ptr<fmt> _addr_f, ptr<buffer> _addr_buf)
         {
+            ref fmt f = ref _addr_f.val;
+            ref buffer buf = ref _addr_buf.val;
+
             f.buf = buf;
             f.clearflags();
         }
 
         // writePadding generates n bytes of padding.
-        private static void writePadding(this ref fmt f, long n)
+        private static void writePadding(this ptr<fmt> _addr_f, long n)
         {
+            ref fmt f = ref _addr_f.val;
+
             if (n <= 0L)
             { // No padding bytes needed.
-                return;
+                return ;
+
             }
-            var buf = f.buf.Value;
+
+            var buf = f.buf.val;
             var oldLen = len(buf);
             var newLen = oldLen + n; 
             // Make enough room for padding.
             if (newLen > cap(buf))
             {
                 buf = make(buffer, cap(buf) * 2L + n);
-                copy(buf, f.buf.Value);
+                copy(buf, f.buf.val);
             } 
             // Decide which byte the padding should be filled with.
             var padByte = byte(' ');
@@ -88,58 +99,73 @@ namespace go
             {
                 padding[i] = padByte;
             }
-            f.buf.Value = buf[..newLen];
+            f.buf.val = buf[..newLen];
+
         }
 
         // pad appends b to f.buf, padded on left (!f.minus) or right (f.minus).
-        private static void pad(this ref fmt f, slice<byte> b)
+        private static void pad(this ptr<fmt> _addr_f, slice<byte> b)
         {
+            ref fmt f = ref _addr_f.val;
+
             if (!f.widPresent || f.wid == 0L)
             {
-                f.buf.Write(b);
-                return;
+                f.buf.write(b);
+                return ;
             }
+
             var width = f.wid - utf8.RuneCount(b);
             if (!f.minus)
             { 
                 // left padding
                 f.writePadding(width);
-                f.buf.Write(b);
+                f.buf.write(b);
+
             }
             else
             { 
                 // right padding
-                f.buf.Write(b);
+                f.buf.write(b);
                 f.writePadding(width);
+
             }
+
         }
 
         // padString appends s to f.buf, padded on left (!f.minus) or right (f.minus).
-        private static void padString(this ref fmt f, @string s)
+        private static void padString(this ptr<fmt> _addr_f, @string s)
         {
+            ref fmt f = ref _addr_f.val;
+
             if (!f.widPresent || f.wid == 0L)
             {
-                f.buf.WriteString(s);
-                return;
+                f.buf.writeString(s);
+                return ;
             }
+
             var width = f.wid - utf8.RuneCountInString(s);
             if (!f.minus)
             { 
                 // left padding
                 f.writePadding(width);
-                f.buf.WriteString(s);
+                f.buf.writeString(s);
+
             }
             else
             { 
                 // right padding
-                f.buf.WriteString(s);
+                f.buf.writeString(s);
                 f.writePadding(width);
+
             }
+
         }
 
-        // fmt_boolean formats a boolean.
-        private static void fmt_boolean(this ref fmt f, bool v)
+        // fmtBoolean formats a boolean.
+        private static void fmtBoolean(this ptr<fmt> _addr_f, bool v)
         {
+            ref fmt f = ref _addr_f.val;
+
             if (v)
             {
                 f.padString("true");
@@ -148,11 +174,14 @@ namespace go
             {
                 f.padString("false");
             }
+
         }
 
-        // fmt_unicode formats a uint64 as "U+0078" or with f.sharp set as "U+0078 'x'".
-        private static void fmt_unicode(this ref fmt f, ulong u)
+        // fmtUnicode formats a uint64 as "U+0078" or with f.sharp set as "U+0078 'x'".
+        private static void fmtUnicode(this ptr<fmt> _addr_f, ulong u)
         {
+            ref fmt f = ref _addr_f.val;
+
             var buf = f.intbuf[0L..]; 
 
             // With default precision set the maximum needed buf length is 18
@@ -168,6 +197,7 @@ namespace go
                 {
                     buf = make_slice<byte>(width);
                 }
+
             } 
 
             // Format into buf, ending at buf[i]. Formatting numbers is easier right-to-left.
@@ -216,16 +246,20 @@ namespace go
             f.zero = false;
             f.pad(buf[i..]);
             f.zero = oldZero;
+
         }
 
-        // fmt_integer formats signed and unsigned integers.
-        private static void fmt_integer(this ref fmt _f, ulong u, long @base, bool isSigned, @string digits) => func(_f, (ref fmt f, Defer _, Panic panic, Recover __) =>
+        // fmtInteger formats signed and unsigned integers.
+        private static void fmtInteger(this ptr<fmt> _addr_f, ulong u, long @base, bool isSigned, int verb, @string digits) => func((_, panic, __) =>
         {
+            ref fmt f = ref _addr_f.val;
+
             var negative = isSigned && int64(u) < 0L;
             if (negative)
             {
                 u = -u;
             }
+
             var buf = f.intbuf[0L..]; 
             // The already allocated f.intbuf with a capacity of 68 bytes
             // is large enough for integer formatting when no precision or width is set.
@@ -237,7 +271,9 @@ namespace go
                 { 
                     // We're going to need a bigger boat.
                     buf = make_slice<byte>(width);
+
                 }
+
             } 
 
             // Two ways to ask for extra leading zero digits: %.3d or %03d.
@@ -254,8 +290,9 @@ namespace go
                     f.zero = false;
                     f.writePadding(f.wid);
                     f.zero = oldZero;
-                    return;
+                    return ;
                 }
+
             }
             else if (f.zero && f.widPresent)
             {
@@ -264,6 +301,7 @@ namespace go
                 {
                     prec--; // leave room for sign
                 }
+
             } 
 
             // Because printing is easier right-to-left: format u into buf, ending at buf[i].
@@ -327,12 +365,20 @@ namespace go
             {
                 switch (base)
                 {
+                    case 2L: 
+                        // Add a leading 0b.
+                        i--;
+                        buf[i] = 'b';
+                        i--;
+                        buf[i] = '0';
+                        break;
                     case 8L: 
                         if (buf[i] != '0')
                         {
                             i--;
                             buf[i] = '0';
                         }
+
                         break;
                     case 16L: 
                         // Add a leading 0x or 0X.
@@ -342,7 +388,17 @@ namespace go
                         buf[i] = '0';
                         break;
                 }
+
             }
+
+            if (verb == 'O')
+            {
+                i--;
+                buf[i] = 'o';
+                i--;
+                buf[i] = '0';
+            }
+
             if (negative)
             {
                 i--;
@@ -365,11 +421,14 @@ namespace go
             f.zero = false;
             f.pad(buf[i..]);
             f.zero = oldZero;
+
         });
 
-        // truncate truncates the string to the specified precision, if present.
-        private static @string truncate(this ref fmt f, @string s)
+        // truncate truncates the string s to the specified precision, if present.
+        private static @string truncateString(this ptr<fmt> _addr_f, @string s)
         {
+            ref fmt f = ref _addr_f.val;
+
             if (f.precPresent)
             {
                 var n = f.prec;
@@ -380,26 +439,81 @@ namespace go
                     {
                         return s[..i];
                     }
+
                 }
+
             }
+
             return s;
+
         }
 
-        // fmt_s formats a string.
-        private static void fmt_s(this ref fmt f, @string s)
+        // truncate truncates the byte slice b as a string of the specified precision, if present.
+        private static slice<byte> truncate(this ptr<fmt> _addr_f, slice<byte> b)
         {
-            s = f.truncate(s);
+            ref fmt f = ref _addr_f.val;
+
+            if (f.precPresent)
+            {
+                var n = f.prec;
+                {
+                    long i = 0L;
+
+                    while (i < len(b))
+                    {
+                        n--;
+                        if (n < 0L)
+                        {
+                            return b[..i];
+                        }
+
+                        long wid = 1L;
+                        if (b[i] >= utf8.RuneSelf)
+                        {
+                            _, wid = utf8.DecodeRune(b[i..]);
+                        }
+
+                        i += wid;
+
+                    }
+
+                }
+
+            }
+
+            return b;
+
+        }
+
+        // fmtS formats a string.
+        private static void fmtS(this ptr<fmt> _addr_f, @string s)
+        {
+            ref fmt f = ref _addr_f.val;
+
+            s = f.truncateString(s);
             f.padString(s);
         }
 
-        // fmt_sbx formats a string or byte slice as a hexadecimal encoding of its bytes.
-        private static void fmt_sbx(this ref fmt f, @string s, slice<byte> b, @string digits)
+        // fmtBs formats the byte slice b as if it was formatted as string with fmtS.
+        private static void fmtBs(this ptr<fmt> _addr_f, slice<byte> b)
         {
+            ref fmt f = ref _addr_f.val;
+
+            b = f.truncate(b);
+            f.pad(b);
+        }
+
+        // fmtSbx formats a string or byte slice as a hexadecimal encoding of its bytes.
+        private static void fmtSbx(this ptr<fmt> _addr_f, @string s, slice<byte> b, @string digits)
+        {
+            ref fmt f = ref _addr_f.val;
+
             var length = len(b);
             if (b == null)
             { 
                 // No byte slice present. Assume string s should be encoded.
                 length = len(s);
+
             } 
             // Set length to not process more bytes than the precision demands.
             if (f.precPresent && f.prec < length)
@@ -419,12 +533,15 @@ namespace go
                     } 
                     // Elements will be separated by a space.
                     width += length - 1L;
+
                 }
                 else if (f.sharp)
                 { 
                     // Only a leading 0x or 0X will be added for the whole string.
                     width += 2L;
+
                 }
+
             }
             else
             { // The byte slice or string that should be encoded is empty.
@@ -432,7 +549,9 @@ namespace go
                 {
                     f.writePadding(f.wid);
                 }
-                return;
+
+                return ;
+
             } 
             // Handle padding to the left.
             if (f.widPresent && f.wid > width && !f.minus)
@@ -440,12 +559,14 @@ namespace go
                 f.writePadding(f.wid - width);
             } 
             // Write the encoding directly into the output buffer.
-            var buf = f.buf.Value;
+            var buf = f.buf.val;
             if (f.sharp)
             { 
                 // Add leading 0x or 0X.
                 buf = append(buf, '0', digits[16L]);
+
             }
+
             byte c = default;
             for (long i = 0L; i < length; i++)
             {
@@ -457,8 +578,11 @@ namespace go
                     { 
                         // Add leading 0x or 0X for each element.
                         buf = append(buf, '0', digits[16L]);
+
                     }
+
                 }
+
                 if (b != null)
                 {
                     c = b[i]; // Take a byte from the input byte slice.
@@ -469,39 +593,48 @@ namespace go
                 } 
                 // Encode each byte as two hexadecimal digits.
                 buf = append(buf, digits[c >> (int)(4L)], digits[c & 0xFUL]);
+
             }
 
-            f.buf.Value = buf; 
+            f.buf.val = buf; 
             // Handle padding to the right.
             if (f.widPresent && f.wid > width && f.minus)
             {
                 f.writePadding(f.wid - width);
             }
+
         }
 
-        // fmt_sx formats a string as a hexadecimal encoding of its bytes.
-        private static void fmt_sx(this ref fmt f, @string s, @string digits)
+        // fmtSx formats a string as a hexadecimal encoding of its bytes.
+        private static void fmtSx(this ptr<fmt> _addr_f, @string s, @string digits)
         {
-            f.fmt_sbx(s, null, digits);
+            ref fmt f = ref _addr_f.val;
+
+            f.fmtSbx(s, null, digits);
         }
 
-        // fmt_bx formats a byte slice as a hexadecimal encoding of its bytes.
-        private static void fmt_bx(this ref fmt f, slice<byte> b, @string digits)
+        // fmtBx formats a byte slice as a hexadecimal encoding of its bytes.
+        private static void fmtBx(this ptr<fmt> _addr_f, slice<byte> b, @string digits)
         {
-            f.fmt_sbx("", b, digits);
+            ref fmt f = ref _addr_f.val;
+
+            f.fmtSbx("", b, digits);
         }
 
-        // fmt_q formats a string as a double-quoted, escaped Go string constant.
+        // fmtQ formats a string as a double-quoted, escaped Go string constant.
         // If f.sharp is set a raw (backquoted) string may be returned instead
         // if the string does not contain any control characters other than tab.
-        private static void fmt_q(this ref fmt f, @string s)
+        private static void fmtQ(this ptr<fmt> _addr_f, @string s)
         {
-            s = f.truncate(s);
+            ref fmt f = ref _addr_f.val;
+
+            s = f.truncateString(s);
             if (f.sharp && strconv.CanBackquote(s))
             {
                 f.padString("`" + s + "`");
-                return;
+                return ;
             }
+
             var buf = f.intbuf[..0L];
             if (f.plus)
             {
@@ -511,31 +644,39 @@ namespace go
             {
                 f.pad(strconv.AppendQuote(buf, s));
             }
+
         }
 
-        // fmt_c formats an integer as a Unicode character.
+        // fmtC formats an integer as a Unicode character.
         // If the character is not valid Unicode, it will print '\ufffd'.
-        private static void fmt_c(this ref fmt f, ulong c)
+        private static void fmtC(this ptr<fmt> _addr_f, ulong c)
         {
+            ref fmt f = ref _addr_f.val;
+
             var r = rune(c);
             if (c > utf8.MaxRune)
             {
                 r = utf8.RuneError;
             }
+
             var buf = f.intbuf[..0L];
             var w = utf8.EncodeRune(buf[..utf8.UTFMax], r);
             f.pad(buf[..w]);
+
         }
 
-        // fmt_qc formats an integer as a single-quoted, escaped Go character constant.
+        // fmtQc formats an integer as a single-quoted, escaped Go character constant.
         // If the character is not valid Unicode, it will print '\ufffd'.
-        private static void fmt_qc(this ref fmt f, ulong c)
+        private static void fmtQc(this ptr<fmt> _addr_f, ulong c)
         {
+            ref fmt f = ref _addr_f.val;
+
             var r = rune(c);
             if (c > utf8.MaxRune)
             {
                 r = utf8.RuneError;
             }
+
             var buf = f.intbuf[..0L];
             if (f.plus)
             {
@@ -545,12 +686,15 @@ namespace go
             {
                 f.pad(strconv.AppendQuoteRune(buf, r));
             }
+
         }
 
-        // fmt_float formats a float64. It assumes that verb is a valid format specifier
+        // fmtFloat formats a float64. It assumes that verb is a valid format specifier
         // for strconv.AppendFloat and therefore fits into a byte.
-        private static void fmt_float(this ref fmt f, double v, long size, int verb, long prec)
-        { 
+        private static void fmtFloat(this ptr<fmt> _addr_f, double v, long size, int verb, long prec)
+        {
+            ref fmt f = ref _addr_f.val;
+ 
             // Explicit precision in format specifier overrules default precision.
             if (f.precPresent)
             {
@@ -583,9 +727,11 @@ namespace go
                 {
                     num = num[1L..];
                 }
+
                 f.pad(num);
                 f.zero = oldZero;
-                return;
+                return ;
+
             } 
             // The sharp flag forces printing a decimal point for non-binary formats
             // and retains trailing zeros, which we may need to restore.
@@ -599,45 +745,78 @@ namespace go
                     case 'g': 
 
                     case 'G': 
+
+                    case 'x': 
                         digits = prec; 
                         // If no precision is set explicitly use a precision of 6.
                         if (digits == -1L)
                         {
                             digits = 6L;
                         }
+
                         break;
                 } 
 
                 // Buffer pre-allocated with enough room for
-                // exponent notations of the form "e+123".
-                array<byte> tailBuf = new array<byte>(5L);
+                // exponent notations of the form "e+123" or "p-1023".
+                array<byte> tailBuf = new array<byte>(6L);
                 var tail = tailBuf[..0L];
 
-                var hasDecimalPoint = false; 
+                var hasDecimalPoint = false;
+                var sawNonzeroDigit = false; 
                 // Starting from i = 1 to skip sign at num[0].
                 for (long i = 1L; i < len(num); i++)
                 {
-                    switch (num[i])
-                    {
-                        case '.': 
-                            hasDecimalPoint = true;
-                            break;
-                        case 'e': 
 
-                        case 'E': 
+                    if (num[i] == '.')
+                    {
+                        hasDecimalPoint = true;
+                        goto __switch_break0;
+                    }
+                    if (num[i] == 'p' || num[i] == 'P')
+                    {
+                        tail = append(tail, num[i..]);
+                        num = num[..i];
+                        goto __switch_break0;
+                    }
+                    if (num[i] == 'e' || num[i] == 'E')
+                    {
+                        if (verb != 'x' && verb != 'X')
+                        {
                             tail = append(tail, num[i..]);
                             num = num[..i];
                             break;
-                        default: 
-                            digits--;
-                            break;
+                        }
+
                     }
+                    // default: 
+                        if (num[i] != '0')
+                        {
+                            sawNonzeroDigit = true;
+                        } 
+                        // Count significant digits after the first non-zero digit.
+                        if (sawNonzeroDigit)
+                        {
+                            digits--;
+                        }
+
+
+                    __switch_break0:;
+
                 }
 
                 if (!hasDecimalPoint)
-                {
+                { 
+                    // Leading digit 0 should contribute once to digits.
+                    if (len(num) == 2L && num[1L] == '0')
+                    {
+                        digits--;
+                    }
+
                     num = append(num, '.');
+
                 }
+
                 while (digits > 0L)
                 {
                     num = append(num, '0');
@@ -645,6 +824,7 @@ namespace go
                 }
 
                 num = append(num, tail);
+
             } 
             // We want a sign if asked for and if the sign is not positive.
             if (f.plus || num[0L] != '+')
@@ -653,16 +833,19 @@ namespace go
                 // Achieve this by writing the sign out and then padding the unsigned number.
                 if (f.zero && f.widPresent && f.wid > len(num))
                 {
-                    f.buf.WriteByte(num[0L]);
+                    f.buf.writeByte(num[0L]);
                     f.writePadding(f.wid - len(num));
-                    f.buf.Write(num[1L..]);
-                    return;
+                    f.buf.write(num[1L..]);
+                    return ;
                 }
+
                 f.pad(num);
-                return;
+                return ;
+
             } 
             // No sign to show and the number is positive; just print the unsigned number.
             f.pad(num[1L..]);
+
         }
     }
 }

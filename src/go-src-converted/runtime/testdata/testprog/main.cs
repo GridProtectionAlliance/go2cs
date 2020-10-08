@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:28 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:38 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\main.go
 using os = go.os_package;
 using static go.builtin;
@@ -20,7 +20,9 @@ namespace go
             {
                 panic("duplicate registration: " + name);
             }
+
             cmds[name] = f;
+
         });
 
         private static void registerInit(@string name, Action f)
@@ -29,6 +31,7 @@ namespace go
             {
                 f();
             }
+
         }
 
         private static void Main()
@@ -36,15 +39,18 @@ namespace go
             if (len(os.Args) < 2L)
             {
                 println("usage: " + os.Args[0L] + " name-of-test");
-                return;
+                return ;
             }
+
             var f = cmds[os.Args[1L]];
             if (f == null)
             {
                 println("unknown function: " + os.Args[1L]);
-                return;
+                return ;
             }
+
             f();
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:40 UTC
+//     Generated on 2020 October 08 03:49:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using errors = go.errors_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
+using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
@@ -28,20 +29,12 @@ namespace archive
     public static partial class zip_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(header))]
         private partial struct fileWriter
         {
-            // header structure promotion - sourced from pointer
-            private readonly ptr<header> m_headerRef;
-
-            private ref header header_ptr => ref m_headerRef.Value;
-
-            public ref ulong offset => ref m_headerRef.Value.offset;
-
             // Constructors
             public fileWriter(NilType _)
             {
-                this.m_headerRef = new ptr<header>(new header(nil));
+                this.ptr<header> = default;
                 this.zipw = default;
                 this.rawCount = default;
                 this.comp = default;
@@ -50,9 +43,9 @@ namespace archive
                 this.closed = default;
             }
 
-            public fileWriter(ref header header = default, io.Writer zipw = default, ref ptr<countWriter> rawCount = default, io.WriteCloser comp = default, ref ptr<countWriter> compCount = default, hash.Hash32 crc32 = default, bool closed = default)
+            public fileWriter(ref ptr<header> ptr<header> = default, io.Writer zipw = default, ref ptr<countWriter> rawCount = default, io.WriteCloser comp = default, ref ptr<countWriter> compCount = default, hash.Hash32 crc32 = default, bool closed = default)
             {
-                this.m_headerRef = new ptr<header>(ref header);
+                this.ptr<header> = ptr<header>;
                 this.zipw = zipw;
                 this.rawCount = rawCount;
                 this.comp = comp;
@@ -81,7 +74,7 @@ namespace archive
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static fileWriter fileWriter_cast(dynamic value)
         {
-            return new fileWriter(ref value.header, value.zipw, ref value.rawCount, value.comp, ref value.compCount, value.crc32, value.closed);
+            return new fileWriter(ref value.ptr<header>, value.zipw, ref value.rawCount, value.comp, ref value.compCount, value.crc32, value.closed);
         }
     }
 }}

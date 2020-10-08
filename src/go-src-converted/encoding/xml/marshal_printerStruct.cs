@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:00 UTC
+//     Generated on 2020 October 08 03:42:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,26 +29,12 @@ namespace encoding
     public static partial class xml_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(bufio.Writer))]
         private partial struct printer
         {
-            // Writer structure promotion - sourced from pointer
-            private readonly ptr<Writer> m_WriterRef;
-
-            private ref Writer Writer_ptr => ref m_WriterRef.Value;
-
-            public ref error err => ref m_WriterRef.Value.err;
-
-            public ref slice<byte> buf => ref m_WriterRef.Value.buf;
-
-            public ref long n => ref m_WriterRef.Value.n;
-
-            public ref io.Writer wr => ref m_WriterRef.Value.wr;
-
             // Constructors
             public printer(NilType _)
             {
-                this.m_WriterRef = new ptr<bufio.Writer>(new bufio.Writer(nil));
+                this.Writer> = default;
                 this.encoder = default;
                 this.seq = default;
                 this.indent = default;
@@ -62,9 +48,9 @@ namespace encoding
                 this.tags = default;
             }
 
-            public printer(ref bufio.Writer Writer = default, ref ptr<Encoder> encoder = default, long seq = default, @string indent = default, @string prefix = default, long depth = default, bool indentedIn = default, bool putNewline = default, map<@string, @string> attrNS = default, map<@string, @string> attrPrefix = default, slice<@string> prefixes = default, slice<Name> tags = default)
+            public printer(ref ptr<bufio.Writer> Writer> = default, ref ptr<Encoder> encoder = default, long seq = default, @string indent = default, @string prefix = default, long depth = default, bool indentedIn = default, bool putNewline = default, map<@string, @string> attrNS = default, map<@string, @string> attrPrefix = default, slice<@string> prefixes = default, slice<Name> tags = default)
             {
-                this.m_WriterRef = new ptr<bufio.Writer>(ref Writer);
+                this.Writer> = Writer>;
                 this.encoder = encoder;
                 this.seq = seq;
                 this.indent = indent;
@@ -98,7 +84,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static printer printer_cast(dynamic value)
         {
-            return new printer(ref value.Writer, ref value.encoder, value.seq, value.indent, value.prefix, value.depth, value.indentedIn, value.putNewline, value.attrNS, value.attrPrefix, value.prefixes, value.tags);
+            return new printer(ref value.Writer>, ref value.encoder, value.seq, value.indent, value.prefix, value.depth, value.indentedIn, value.putNewline, value.attrNS, value.attrPrefix, value.prefixes, value.tags);
         }
     }
 }}

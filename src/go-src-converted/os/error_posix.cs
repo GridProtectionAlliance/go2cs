@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package os -- go2cs converted at 2020 August 29 08:43:36 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:22 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\error_posix.go
 using syscall = go.syscall_package;
@@ -26,7 +26,9 @@ namespace go
                     err = NewSyscallError(name, err);
                 }
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
         }
     }
 }

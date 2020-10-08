@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:17:22 UTC
+//     Generated on 2020 October 08 03:19:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace go
                 this.entries = default;
             }
 
-            public itabTableType(System.UIntPtr size = default, System.UIntPtr count = default, array<ref itab> entries = default)
+            public itabTableType(System.UIntPtr size = default, System.UIntPtr count = default, array<ptr<itab>> entries = default)
             {
                 this.size = size;
                 this.count = count;

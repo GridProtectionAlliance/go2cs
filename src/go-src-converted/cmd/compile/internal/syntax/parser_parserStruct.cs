@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:16 UTC
+//     Generated on 2020 October 08 04:28:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
@@ -33,11 +32,12 @@ namespace @internal
             // Constructors
             public parser(NilType _)
             {
-                this.@base = default;
+                this.file = default;
                 this.errh = default;
-                this.fileh = default;
                 this.mode = default;
+                this.pragh = default;
                 this.scanner = default;
+                this.@base = default;
                 this.first = default;
                 this.errcnt = default;
                 this.pragma = default;
@@ -46,13 +46,14 @@ namespace @internal
                 this.indent = default;
             }
 
-            public parser(ref ptr<src.PosBase> @base = default, ErrorHandler errh = default, FilenameHandler fileh = default, Mode mode = default, scanner scanner = default, error first = default, long errcnt = default, Pragma pragma = default, long fnest = default, long xnest = default, slice<byte> indent = default)
+            public parser(ref ptr<PosBase> file = default, ErrorHandler errh = default, Mode mode = default, PragmaHandler pragh = default, scanner scanner = default, ref ptr<PosBase> @base = default, error first = default, long errcnt = default, Pragma pragma = default, long fnest = default, long xnest = default, slice<byte> indent = default)
             {
-                this.@base = @base;
+                this.file = file;
                 this.errh = errh;
-                this.fileh = fileh;
                 this.mode = mode;
+                this.pragh = pragh;
                 this.scanner = scanner;
+                this.@base = @base;
                 this.first = first;
                 this.errcnt = errcnt;
                 this.pragma = pragma;
@@ -81,7 +82,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static parser parser_cast(dynamic value)
         {
-            return new parser(ref value.@base, value.errh, value.fileh, value.mode, value.scanner, value.first, value.errcnt, value.pragma, value.fnest, value.xnest, value.indent);
+            return new parser(ref value.file, value.errh, value.mode, value.pragh, value.scanner, ref value.@base, value.first, value.errcnt, value.pragma, value.fnest, value.xnest, value.indent);
         }
     }
 }}}}

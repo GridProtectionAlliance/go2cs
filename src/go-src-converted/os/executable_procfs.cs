@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build linux netbsd dragonfly nacl
+// +build linux netbsd dragonfly js,wasm
 
-// package os -- go2cs converted at 2020 August 29 08:43:44 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:27 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\executable_procfs.go
 using errors = go.errors_package;
@@ -23,7 +23,10 @@ namespace go
 
         private static (@string, error) executable()
         {
-            return (executablePath, executablePathErr);
+            @string _p0 = default;
+            error _p0 = default!;
+
+            return (executablePath, error.As(executablePathErr)!);
         }
     }
 }

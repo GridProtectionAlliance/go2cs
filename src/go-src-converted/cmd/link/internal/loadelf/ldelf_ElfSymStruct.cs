@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:00 UTC
+//     Generated on 2020 October 08 04:39:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,13 +17,13 @@ using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using elf = go.debug.elf_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using log = go.log_package;
-using sort = go.sort_package;
 using strings = go.strings_package;
 using go;
 
@@ -50,7 +50,7 @@ namespace @internal
                 this.sym = default;
             }
 
-            public ElfSym(@string name = default, ulong value = default, ulong size = default, byte bind = default, byte type_ = default, byte other = default, ushort shndx = default, ref ptr<sym.Symbol> sym = default)
+            public ElfSym(@string name = default, ulong value = default, ulong size = default, elf.SymBind bind = default, elf.SymType type_ = default, byte other = default, elf.SectionIndex shndx = default, loader.Sym sym = default)
             {
                 this.name = name;
                 this.value = value;
@@ -82,7 +82,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ElfSym ElfSym_cast(dynamic value)
         {
-            return new ElfSym(value.name, value.value, value.size, value.bind, value.type_, value.other, value.shndx, ref value.sym);
+            return new ElfSym(value.name, value.value, value.size, value.bind, value.type_, value.other, value.shndx, value.sym);
         }
     }
 }}}}

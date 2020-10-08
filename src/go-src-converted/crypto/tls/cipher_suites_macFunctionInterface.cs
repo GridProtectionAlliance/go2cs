@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:30 UTC
+//     Generated on 2020 October 08 03:36:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
 using des = go.crypto.des_package;
@@ -22,8 +23,9 @@ using rc4 = go.crypto.rc4_package;
 using sha1 = go.crypto.sha1_package;
 using sha256 = go.crypto.sha256_package;
 using x509 = go.crypto.x509_package;
+using fmt = go.fmt_package;
 using hash = go.hash_package;
-using chacha20poly1305 = go.golang_org.x.crypto.chacha20poly1305_package;
+using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -59,7 +61,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,10 +75,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate slice<byte> SizeByRef(ref T value);
+            private delegate slice<byte> SizeByPtr(ptr<T> value);
             private delegate slice<byte> SizeByVal(T value);
 
-            private static readonly SizeByRef s_SizeByRef;
+            private static readonly SizeByPtr s_SizeByPtr;
             private static readonly SizeByVal s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,30 +87,32 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SizeByPtr is null || !m_target_is_ptr)
                     return s_SizeByVal!(target);
 
-                return s_SizeByRef(ref target);
+                return s_SizeByPtr(m_target_ptr);
             }
 
-            private delegate slice<byte> MACByRef(ref T value, slice<byte> digestBuf, slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra);
-            private delegate slice<byte> MACByVal(T value, slice<byte> digestBuf, slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra);
+            private delegate slice<byte> MACByPtr(ptr<T> value, slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra);
+            private delegate slice<byte> MACByVal(T value, slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra);
 
-            private static readonly MACByRef s_MACByRef;
+            private static readonly MACByPtr s_MACByPtr;
             private static readonly MACByVal s_MACByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<byte> MAC(slice<byte> digestBuf, slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra)
+            public slice<byte> MAC(slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MACByRef is null)
-                    return s_MACByVal!(target, digestBuf, seq, header, data, extra);
+                    target = m_target_ptr.val;
 
-                return s_MACByRef(ref target, digestBuf, seq, header, data, extra);
+                if (s_MACByPtr is null || !m_target_is_ptr)
+                    return s_MACByVal!(target, seq, header, data, extra);
+
+                return s_MACByPtr(m_target_ptr, seq, header, data, extra);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -117,39 +121,33 @@ namespace crypto
             static macFunction()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Size");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Size");
 
                 if (!(extensionMethod is null))
-                    s_SizeByRef = extensionMethod.CreateStaticDelegate(typeof(SizeByRef)) as SizeByRef;
+                    s_SizeByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeByPtr)) as SizeByPtr;
 
-                if (s_SizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Size");
+                extensionMethod = targetType.GetExtensionMethod("Size");
 
-                    if (!(extensionMethod is null))
-                        s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
 
-                if (s_SizeByRef is null && s_SizeByVal is null)
+                if (s_SizeByPtr is null && s_SizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement macFunction.Size method", new Exception("Size"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("MAC");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MAC");
 
                 if (!(extensionMethod is null))
-                    s_MACByRef = extensionMethod.CreateStaticDelegate(typeof(MACByRef)) as MACByRef;
+                    s_MACByPtr = extensionMethod.CreateStaticDelegate(typeof(MACByPtr)) as MACByPtr;
 
-                if (s_MACByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("MAC");
+                extensionMethod = targetType.GetExtensionMethod("MAC");
 
-                    if (!(extensionMethod is null))
-                        s_MACByVal = extensionMethod.CreateStaticDelegate(typeof(MACByVal)) as MACByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MACByVal = extensionMethod.CreateStaticDelegate(typeof(MACByVal)) as MACByVal;
 
-                if (s_MACByRef is null && s_MACByVal is null)
+                if (s_MACByPtr is null && s_MACByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement macFunction.MAC method", new Exception("MAC"));
             }
 

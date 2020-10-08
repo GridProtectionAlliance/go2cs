@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:16 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:23 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\plugin.go
 using @unsafe = go.@unsafe_package;
@@ -15,7 +15,11 @@ namespace go
         //go:linkname plugin_lastmoduleinit plugin.lastmoduleinit
         private static (@string, object, @string) plugin_lastmoduleinit()
         {
-            ref moduledata md = default;
+            @string path = default;
+            object syms = default;
+            @string errstr = default;
+
+            ptr<moduledata> md;
             {
                 var pmd__prev1 = pmd;
 
@@ -30,6 +34,7 @@ namespace go
                     pmd = pmd.next;
                     }
                     md = pmd;
+
                 }
 
                 pmd = pmd__prev1;
@@ -76,7 +81,7 @@ namespace go
 
             foreach (var (_, pkghash) in md.pkghashes)
             {
-                if (pkghash.linktimehash != pkghash.runtimehash.Value)
+                if (pkghash.linktimehash != pkghash.runtimehash.val)
                 {
                     md.bad = true;
                     return ("", null, "plugin was built with a different version of package " + pkghash.modulename);
@@ -87,11 +92,11 @@ namespace go
             pluginftabverify(md);
             moduledataverify1(md);
 
-            lock(ref itabLock);
+            lock(_addr_itabLock);
             foreach (var (_, i) in md.itablinks)
             {
                 itabAdd(i);
-            }            unlock(ref itabLock); 
+            }            unlock(_addr_itabLock); 
 
             // Build a map of symbol names to symbols. Here in the runtime
             // we fill out the first word of the interface, the type. We
@@ -105,10 +110,10 @@ namespace go
             foreach (var (_, ptab) in md.ptab)
             {
                 var symName = resolveNameOff(@unsafe.Pointer(md.types), ptab.name);
-                var t = (_type.Value)(@unsafe.Pointer(md.types)).typeOff(ptab.typ);
-                var val = default;
-                ref array<unsafe.Pointer> valp = new ptr<ref array<unsafe.Pointer>>(@unsafe.Pointer(ref val));
-                (valp.Value)[0L] = @unsafe.Pointer(t);
+                var t = (_type.val)(@unsafe.Pointer(md.types)).typeOff(ptab.typ);
+                ref var val = ref heap(out ptr<var> _addr_val);
+                ptr<array<unsafe.Pointer>> valp = new ptr<ptr<array<unsafe.Pointer>>>(@unsafe.Pointer(_addr_val));
+                (valp.val)[0L] = @unsafe.Pointer(t);
 
                 var name = symName.name();
                 if (t.kind & kindMask == kindFunc)
@@ -116,11 +121,15 @@ namespace go
                     name = "." + name;
                 }
                 syms[name] = val;
+
             }            return (md.pluginpath, syms, "");
+
         }
 
-        private static void pluginftabverify(ref moduledata md)
+        private static void pluginftabverify(ptr<moduledata> _addr_md)
         {
+            ref moduledata md = ref _addr_md.val;
+
             var badtable = false;
             for (long i = 0L; i < len(md.ftab); i++)
             {
@@ -129,6 +138,7 @@ namespace go
                 {
                     continue;
                 }
+
                 funcInfo f = new funcInfo((*_func)(unsafe.Pointer(&md.pclntable[md.ftab[i].funcoff])),md);
                 var name = funcname(f); 
 
@@ -143,14 +153,17 @@ namespace go
                     name2 = funcname(f2);
                     entry2 = f2.entry;
                 }
+
                 badtable = true;
                 println("ftab entry outside pc range: ", hex(entry), "/", hex(entry2), ": ", name, "/", name2);
+
             }
 
             if (badtable)
             {
                 throw("runtime: plugin has bad symbol table");
             }
+
         }
 
         // inRange reports whether v0 or v1 are in the range [r0, r1].

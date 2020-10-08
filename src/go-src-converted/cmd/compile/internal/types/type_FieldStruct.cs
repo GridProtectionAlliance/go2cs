@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:18 UTC
+//     Generated on 2020 October 08 04:09:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,24 +33,24 @@ namespace @internal
             {
                 this.flags = default;
                 this.Embedded = default;
-                this.Funarg = default;
+                this.Pos = default;
                 this.Sym = default;
-                this.Nname = default;
                 this.Type = default;
-                this.Offset = default;
                 this.Note = default;
+                this.Nname = default;
+                this.Offset = default;
             }
 
-            public Field(bitset8 flags = default, byte Embedded = default, Funarg Funarg = default, ref ptr<Sym> Sym = default, ref ptr<Node> Nname = default, ref ptr<Type> Type = default, long Offset = default, @string Note = default)
+            public Field(bitset8 flags = default, byte Embedded = default, src.XPos Pos = default, ref ptr<Sym> Sym = default, ref ptr<Type> Type = default, @string Note = default, ref ptr<Node> Nname = default, long Offset = default)
             {
                 this.flags = flags;
                 this.Embedded = Embedded;
-                this.Funarg = Funarg;
+                this.Pos = Pos;
                 this.Sym = Sym;
-                this.Nname = Nname;
                 this.Type = Type;
-                this.Offset = Offset;
                 this.Note = Note;
+                this.Nname = Nname;
+                this.Offset = Offset;
             }
 
             // Enable comparisons between nil and Field struct
@@ -73,7 +73,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Field Field_cast(dynamic value)
         {
-            return new Field(value.flags, value.Embedded, value.Funarg, ref value.Sym, ref value.Nname, ref value.Type, value.Offset, value.Note);
+            return new Field(value.flags, value.Embedded, value.Pos, ref value.Sym, ref value.Type, value.Note, ref value.Nname, value.Offset);
         }
     }
 }}}}

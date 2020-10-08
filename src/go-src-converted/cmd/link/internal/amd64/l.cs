@@ -1,5 +1,5 @@
 // Inferno utils/6l/l.h
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/l.h
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/l.h
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package amd64 -- go2cs converted at 2020 August 29 10:04:42 UTC
+// package amd64 -- go2cs converted at 2020 October 08 04:39:54 UTC
 // import "cmd/link/internal/amd64" ==> using amd64 = go.cmd.link.@internal.amd64_package
 // Original source: C:\Go\src\cmd\link\internal\amd64\l.go
 
@@ -41,12 +41,14 @@ namespace @internal
 {
     public static partial class amd64_package
     {
-        private static readonly long maxAlign = 32L; // max data alignment
-        private static readonly long minAlign = 1L; // min data alignment
-        private static readonly long funcAlign = 16L;
+        private static readonly long maxAlign = (long)32L; // max data alignment
+        private static readonly long minAlign = (long)1L; // min data alignment
+        private static readonly long funcAlign = (long)16L;
+
 
         /* Used by ../internal/ld/dwarf.go */
-        private static readonly long dwarfRegSP = 7L;
-        private static readonly long dwarfRegLR = 16L;
+        private static readonly long dwarfRegSP = (long)7L;
+        private static readonly long dwarfRegLR = (long)16L;
+
     }
 }}}}

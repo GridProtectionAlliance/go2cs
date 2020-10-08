@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:24 UTC
+//     Generated on 2020 October 08 03:41:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,7 +46,7 @@ namespace http
                 this.pipe = default;
             }
 
-            public ServerConn(sync.Mutex mu = default, net.Conn c = default, ref ptr<bufio.Reader> r = default, error re = default, error we = default, io.ReadCloser lastbody = default, long nread = default, long nwritten = default, map<ref http.Request, ulong> pipereq = default, textproto.Pipeline pipe = default)
+            public ServerConn(sync.Mutex mu = default, net.Conn c = default, ref ptr<bufio.Reader> r = default, error re = default, error we = default, io.ReadCloser lastbody = default, long nread = default, long nwritten = default, map<ptr<http.Request>, ulong> pipereq = default, textproto.Pipeline pipe = default)
             {
                 this.mu = mu;
                 this.c = c;

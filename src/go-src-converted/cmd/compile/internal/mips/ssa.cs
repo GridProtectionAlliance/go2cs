@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mips -- go2cs converted at 2020 August 29 09:25:27 UTC
+// package mips -- go2cs converted at 2020 October 08 04:27:54 UTC
 // import "cmd/compile/internal/mips" ==> using mips = go.cmd.compile.@internal.mips_package
 // Original source: C:\Go\src\cmd\compile\internal\mips\ssa.go
 using math = go.math_package;
 
 using gc = go.cmd.compile.@internal.gc_package;
+using logopt = go.cmd.compile.@internal.logopt_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
@@ -21,31 +22,36 @@ namespace @internal
 {
     public static partial class mips_package
     {
-        // isFPreg returns whether r is an FP register
+        // isFPreg reports whether r is an FP register
         private static bool isFPreg(short r)
         {
             return mips.REG_F0 <= r && r <= mips.REG_F31;
         }
 
-        // isHILO returns whether r is HI or LO register
+        // isHILO reports whether r is HI or LO register
         private static bool isHILO(short r)
         {
             return r == mips.REG_HI || r == mips.REG_LO;
         }
 
         // loadByType returns the load instruction of the given type.
-        private static obj.As loadByType(ref types.Type _t, short r) => func(_t, (ref types.Type t, Defer _, Panic panic, Recover __) =>
+        private static obj.As loadByType(ptr<types.Type> _addr_t, short r) => func((_, panic, __) =>
         {
+            ref types.Type t = ref _addr_t.val;
+
             if (isFPreg(r))
             {
                 if (t.Size() == 4L)
                 { // float32 or int32
                     return mips.AMOVF;
+
                 }
                 else
                 { // float64 or int64
                     return mips.AMOVD;
+
                 }
+
             }
             else
             {
@@ -60,6 +66,7 @@ namespace @internal
                         {
                             return mips.AMOVBU;
                         }
+
                         break;
                     case 2L: 
                         if (t.IsSigned())
@@ -70,28 +77,37 @@ namespace @internal
                         {
                             return mips.AMOVHU;
                         }
+
                         break;
                     case 4L: 
                         return mips.AMOVW;
                         break;
                 }
+
             }
+
             panic("bad load type");
+
         });
 
         // storeByType returns the store instruction of the given type.
-        private static obj.As storeByType(ref types.Type _t, short r) => func(_t, (ref types.Type t, Defer _, Panic panic, Recover __) =>
+        private static obj.As storeByType(ptr<types.Type> _addr_t, short r) => func((_, panic, __) =>
         {
+            ref types.Type t = ref _addr_t.val;
+
             if (isFPreg(r))
             {
                 if (t.Size() == 4L)
                 { // float32 or int32
                     return mips.AMOVF;
+
                 }
                 else
                 { // float64 or int64
                     return mips.AMOVD;
+
                 }
+
             }
             else
             {
@@ -107,26 +123,34 @@ namespace @internal
                         return mips.AMOVW;
                         break;
                 }
+
             }
+
             panic("bad store type");
+
         });
 
-        private static void ssaGenValue(ref gc.SSAGenState s, ref ssa.Value v)
+        private static void ssaGenValue(ptr<gc.SSAGenState> _addr_s, ptr<ssa.Value> _addr_v)
         {
+            ref gc.SSAGenState s = ref _addr_s.val;
+            ref ssa.Value v = ref _addr_v.val;
 
-            if (v.Op == ssa.OpCopy || v.Op == ssa.OpMIPSMOVWconvert || v.Op == ssa.OpMIPSMOVWreg)
+
+            if (v.Op == ssa.OpCopy || v.Op == ssa.OpMIPSMOVWreg)
             {
                 var t = v.Type;
                 if (t.IsMemory())
                 {
-                    return;
+                    return ;
                 }
+
                 var x = v.Args[0L].Reg();
                 var y = v.Reg();
                 if (x == y)
                 {
-                    return;
+                    return ;
                 }
+
                 var @as = mips.AMOVW;
                 if (isFPreg(x) && isFPreg(y))
                 {
@@ -135,7 +159,9 @@ namespace @internal
                     {
                         as = mips.AMOVD;
                     }
+
                 }
+
                 var p = s.Prog(as);
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = x;
@@ -150,7 +176,9 @@ namespace @internal
                     p.From.Reg = mips.REGTMP;
                     p.To.Type = obj.TYPE_REG;
                     p.To.Reg = y;
+
                 }
+
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpMIPSMOVWnop)
@@ -167,11 +195,12 @@ namespace @internal
                 if (v.Type.IsFlags())
                 {
                     v.Fatalf("load flags not implemented: %v", v.LongString());
-                    return;
+                    return ;
                 }
+
                 var r = v.Reg();
-                p = s.Prog(loadByType(v.Type, r));
-                gc.AddrAuto(ref p.From, v.Args[0L]);
+                p = s.Prog(loadByType(_addr_v.Type, r));
+                gc.AddrAuto(_addr_p.From, v.Args[0L]);
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = r;
                 if (isHILO(r))
@@ -183,7 +212,9 @@ namespace @internal
                     p.From.Reg = mips.REGTMP;
                     p.To.Type = obj.TYPE_REG;
                     p.To.Reg = r;
+
                 }
+
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpStoreReg)
@@ -191,8 +222,9 @@ namespace @internal
                 if (v.Type.IsFlags())
                 {
                     v.Fatalf("store flags not implemented: %v", v.LongString());
-                    return;
+                    return ;
                 }
+
                 r = v.Args[0L].Reg();
                 if (isHILO(r))
                 { 
@@ -203,11 +235,13 @@ namespace @internal
                     p.To.Type = obj.TYPE_REG;
                     p.To.Reg = mips.REGTMP;
                     r = mips.REGTMP;
+
                 }
-                p = s.Prog(storeByType(v.Type, r));
+
+                p = s.Prog(storeByType(_addr_v.Type, r));
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = r;
-                gc.AddrAuto(ref p.To, v);
+                gc.AddrAuto(_addr_p.To, v);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpMIPSADD || v.Op == ssa.OpMIPSSUB || v.Op == ssa.OpMIPSAND || v.Op == ssa.OpMIPSOR || v.Op == ssa.OpMIPSXOR || v.Op == ssa.OpMIPSNOR || v.Op == ssa.OpMIPSSLL || v.Op == ssa.OpMIPSSRL || v.Op == ssa.OpMIPSSRA || v.Op == ssa.OpMIPSADDF || v.Op == ssa.OpMIPSADDD || v.Op == ssa.OpMIPSSUBF || v.Op == ssa.OpMIPSSUBD || v.Op == ssa.OpMIPSMULF || v.Op == ssa.OpMIPSMULD || v.Op == ssa.OpMIPSDIVF || v.Op == ssa.OpMIPSDIVD || v.Op == ssa.OpMIPSMUL)
@@ -276,7 +310,9 @@ namespace @internal
                     p.From.Reg = mips.REGTMP;
                     p.To.Type = obj.TYPE_REG;
                     p.To.Reg = r;
+
                 }
+
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpMIPSMOVFconst || v.Op == ssa.OpMIPSMOVDconst)
@@ -294,6 +330,7 @@ namespace @internal
                 {
                     v.Fatalf("input[0] and output not in same register %s", v.LongString());
                 }
+
                 p = s.Prog(v.Op.Asm());
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = v.Args[2L].Reg();
@@ -308,6 +345,7 @@ namespace @internal
                 {
                     v.Fatalf("input[0] and output not in same register %s", v.LongString());
                 }
+
                 p = s.Prog(v.Op.Asm());
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = v.Args[1L].Reg();
@@ -337,13 +375,13 @@ namespace @internal
                 // - base is SB: load external address with relocation
                 switch (v.Aux.type())
                 {
-                    case ref obj.LSym _:
+                    case ptr<obj.LSym> _:
                         wantreg = "SB";
-                        gc.AddAux(ref p.From, v);
+                        gc.AddAux(_addr_p.From, v);
                         break;
-                    case ref gc.Node _:
+                    case ptr<gc.Node> _:
                         wantreg = "SP";
-                        gc.AddAux(ref p.From, v);
+                        gc.AddAux(_addr_p.From, v);
                         break;
                     case 
                         wantreg = "SP";
@@ -364,6 +402,7 @@ namespace @internal
                     }
 
                 }
+
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = v.Reg();
                 goto __switch_break0;
@@ -373,7 +412,7 @@ namespace @internal
                 p = s.Prog(v.Op.Asm());
                 p.From.Type = obj.TYPE_MEM;
                 p.From.Reg = v.Args[0L].Reg();
-                gc.AddAux(ref p.From, v);
+                gc.AddAux(_addr_p.From, v);
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = v.Reg();
                 goto __switch_break0;
@@ -385,7 +424,7 @@ namespace @internal
                 p.From.Reg = v.Args[1L].Reg();
                 p.To.Type = obj.TYPE_MEM;
                 p.To.Reg = v.Args[0L].Reg();
-                gc.AddAux(ref p.To, v);
+                gc.AddAux(_addr_p.To, v);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpMIPSMOVBstorezero || v.Op == ssa.OpMIPSMOVHstorezero || v.Op == ssa.OpMIPSMOVWstorezero)
@@ -395,7 +434,7 @@ namespace @internal
                 p.From.Reg = mips.REGZERO;
                 p.To.Type = obj.TYPE_MEM;
                 p.To.Reg = v.Args[0L].Reg();
-                gc.AddAux(ref p.To, v);
+                gc.AddAux(_addr_p.To, v);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpMIPSMOVBreg || v.Op == ssa.OpMIPSMOVBUreg || v.Op == ssa.OpMIPSMOVHreg || v.Op == ssa.OpMIPSMOVHUreg)
@@ -414,16 +453,18 @@ namespace @internal
                         // arg is a proper-typed load, already zero/sign-extended, don't extend again
                         if (v.Reg() == v.Args[0L].Reg())
                         {
-                            return;
+                            return ;
                         }
+
                         p = s.Prog(mips.AMOVW);
                         p.From.Type = obj.TYPE_REG;
                         p.From.Reg = v.Args[0L].Reg();
                         p.To.Type = obj.TYPE_REG;
                         p.To.Reg = v.Reg();
-                        return;
+                        return ;
                     else                     
                 }
+
                 fallthrough = true;
             }
             if (fallthrough || v.Op == ssa.OpMIPSMOVWF || v.Op == ssa.OpMIPSMOVWD || v.Op == ssa.OpMIPSTRUNCFW || v.Op == ssa.OpMIPSTRUNCDW || v.Op == ssa.OpMIPSMOVFD || v.Op == ssa.OpMIPSMOVDF || v.Op == ssa.OpMIPSNEGF || v.Op == ssa.OpMIPSNEGD || v.Op == ssa.OpMIPSSQRTD || v.Op == ssa.OpMIPSCLZ)
@@ -549,11 +590,43 @@ namespace @internal
                 s.Call(v);
                 goto __switch_break0;
             }
-            if (v.Op == ssa.OpMIPSLoweredAtomicLoad)
+            if (v.Op == ssa.OpMIPSLoweredWB)
+            {
+                p = s.Prog(obj.ACALL);
+                p.To.Type = obj.TYPE_MEM;
+                p.To.Name = obj.NAME_EXTERN;
+                p.To.Sym = v.Aux._<ptr<obj.LSym>>();
+                goto __switch_break0;
+            }
+            if (v.Op == ssa.OpMIPSLoweredPanicBoundsA || v.Op == ssa.OpMIPSLoweredPanicBoundsB || v.Op == ssa.OpMIPSLoweredPanicBoundsC)
+            {
+                p = s.Prog(obj.ACALL);
+                p.To.Type = obj.TYPE_MEM;
+                p.To.Name = obj.NAME_EXTERN;
+                p.To.Sym = gc.BoundsCheckFunc[v.AuxInt];
+                s.UseArgs(8L); // space used in callee args area by assembly stubs
+                goto __switch_break0;
+            }
+            if (v.Op == ssa.OpMIPSLoweredPanicExtendA || v.Op == ssa.OpMIPSLoweredPanicExtendB || v.Op == ssa.OpMIPSLoweredPanicExtendC)
+            {
+                p = s.Prog(obj.ACALL);
+                p.To.Type = obj.TYPE_MEM;
+                p.To.Name = obj.NAME_EXTERN;
+                p.To.Sym = gc.ExtendCheckFunc[v.AuxInt];
+                s.UseArgs(12L); // space used in callee args area by assembly stubs
+                goto __switch_break0;
+            }
+            if (v.Op == ssa.OpMIPSLoweredAtomicLoad8 || v.Op == ssa.OpMIPSLoweredAtomicLoad32)
             {
                 s.Prog(mips.ASYNC);
 
-                p = s.Prog(mips.AMOVW);
+                obj.As op = default;
+
+                if (v.Op == ssa.OpMIPSLoweredAtomicLoad8) 
+                    op = mips.AMOVB;
+                else if (v.Op == ssa.OpMIPSLoweredAtomicLoad32) 
+                    op = mips.AMOVW;
+                                p = s.Prog(op);
                 p.From.Type = obj.TYPE_MEM;
                 p.From.Reg = v.Args[0L].Reg();
                 p.To.Type = obj.TYPE_REG;
@@ -562,11 +635,17 @@ namespace @internal
                 s.Prog(mips.ASYNC);
                 goto __switch_break0;
             }
-            if (v.Op == ssa.OpMIPSLoweredAtomicStore)
+            if (v.Op == ssa.OpMIPSLoweredAtomicStore8 || v.Op == ssa.OpMIPSLoweredAtomicStore32)
             {
                 s.Prog(mips.ASYNC);
 
-                p = s.Prog(mips.AMOVW);
+                op = default;
+
+                if (v.Op == ssa.OpMIPSLoweredAtomicStore8) 
+                    op = mips.AMOVB;
+                else if (v.Op == ssa.OpMIPSLoweredAtomicStore32) 
+                    op = mips.AMOVW;
+                                p = s.Prog(op);
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = v.Args[1L].Reg();
                 p.To.Type = obj.TYPE_MEM;
@@ -815,13 +894,20 @@ namespace @internal
                 p = s.Prog(mips.AMOVB);
                 p.From.Type = obj.TYPE_MEM;
                 p.From.Reg = v.Args[0L].Reg();
-                gc.AddAux(ref p.From, v);
+                gc.AddAux(_addr_p.From, v);
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = mips.REGTMP;
+                if (logopt.Enabled())
+                {
+                    logopt.LogOpt(v.Pos, "nilcheck", "genssa", v.Block.Func.Name);
+                }
+
                 if (gc.Debug_checknil != 0L && v.Pos.Line() > 1L)
                 { // v.Pos.Line()==1 in generated wrappers
                     gc.Warnl(v.Pos, "generated nil check");
+
                 }
+
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpMIPSFPFlagTrue || v.Op == ssa.OpMIPSFPFlagFalse) 
@@ -834,6 +920,7 @@ namespace @internal
                 {
                     cmov = mips.ACMOVT;
                 }
+
                 p = s.Prog(mips.AMOVW);
                 p.From.Type = obj.TYPE_CONST;
                 p.From.Offset = 1L;
@@ -863,6 +950,13 @@ namespace @internal
                 p.To.Reg = v.Reg();
                 goto __switch_break0;
             }
+            if (v.Op == ssa.OpMIPSLoweredGetCallerPC)
+            {
+                p = s.Prog(obj.AGETCALLERPC);
+                p.To.Type = obj.TYPE_REG;
+                p.To.Reg = v.Reg();
+                goto __switch_break0;
+            }
             if (v.Op == ssa.OpClobber)
             {
                 goto __switch_break0;
@@ -871,12 +965,17 @@ namespace @internal
                 v.Fatalf("genValue not implemented: %s", v.LongString());
 
             __switch_break0:;
+
         }
 
 
 
-        private static void ssaGenBlock(ref gc.SSAGenState s, ref ssa.Block b, ref ssa.Block next)
+        private static void ssaGenBlock(ptr<gc.SSAGenState> _addr_s, ptr<ssa.Block> _addr_b, ptr<ssa.Block> _addr_next)
         {
+            ref gc.SSAGenState s = ref _addr_s.val;
+            ref ssa.Block b = ref _addr_b.val;
+            ref ssa.Block next = ref _addr_next.val;
+
 
             if (b.Kind == ssa.BlockPlain) 
                 if (b.Succs[0L].Block() != next)
@@ -885,6 +984,7 @@ namespace @internal
                     p.To.Type = obj.TYPE_BRANCH;
                     s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[0].Block()));
                 }
+
             else if (b.Kind == ssa.BlockDefer) 
                 // defer returns in R1:
                 // 0 if we should continue executing
@@ -901,41 +1001,43 @@ namespace @internal
                     p.To.Type = obj.TYPE_BRANCH;
                     s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[0].Block()));
                 }
-            else if (b.Kind == ssa.BlockExit) 
-                s.Prog(obj.AUNDEF); // tell plive.go that we never reach here
-            else if (b.Kind == ssa.BlockRet) 
+
+            else if (b.Kind == ssa.BlockExit)             else if (b.Kind == ssa.BlockRet) 
                 s.Prog(obj.ARET);
             else if (b.Kind == ssa.BlockRetJmp) 
                 p = s.Prog(obj.ARET);
                 p.To.Type = obj.TYPE_MEM;
                 p.To.Name = obj.NAME_EXTERN;
-                p.To.Sym = b.Aux._<ref obj.LSym>();
+                p.To.Sym = b.Aux._<ptr<obj.LSym>>();
             else if (b.Kind == ssa.BlockMIPSEQ || b.Kind == ssa.BlockMIPSNE || b.Kind == ssa.BlockMIPSLTZ || b.Kind == ssa.BlockMIPSGEZ || b.Kind == ssa.BlockMIPSLEZ || b.Kind == ssa.BlockMIPSGTZ || b.Kind == ssa.BlockMIPSFPT || b.Kind == ssa.BlockMIPSFPF) 
                 var jmp = blockJump[b.Kind];
-                p = default;
+                p = ;
 
                 if (next == b.Succs[0L].Block()) 
-                    p = s.Prog(jmp.invasm);
-                    p.To.Type = obj.TYPE_BRANCH;
-                    s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[1].Block()));
+                    p = s.Br(jmp.invasm, b.Succs[1L].Block());
                 else if (next == b.Succs[1L].Block()) 
-                    p = s.Prog(jmp.asm);
-                    p.To.Type = obj.TYPE_BRANCH;
-                    s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[0].Block()));
+                    p = s.Br(jmp.asm, b.Succs[0L].Block());
                 else 
-                    p = s.Prog(jmp.asm);
-                    p.To.Type = obj.TYPE_BRANCH;
-                    s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[0].Block()));
-                    var q = s.Prog(obj.AJMP);
-                    q.To.Type = obj.TYPE_BRANCH;
-                    s.Branches = append(s.Branches, new gc.Branch(P:q,B:b.Succs[1].Block()));
-                                if (!b.Control.Type.IsFlags())
+                    if (b.Likely != ssa.BranchUnlikely)
+                    {
+                        p = s.Br(jmp.asm, b.Succs[0L].Block());
+                        s.Br(obj.AJMP, b.Succs[1L].Block());
+                    }
+                    else
+                    {
+                        p = s.Br(jmp.invasm, b.Succs[1L].Block());
+                        s.Br(obj.AJMP, b.Succs[0L].Block());
+                    }
+
+                                if (!b.Controls[0L].Type.IsFlags())
                 {
                     p.From.Type = obj.TYPE_REG;
-                    p.From.Reg = b.Control.Reg();
+                    p.From.Reg = b.Controls[0L].Reg();
                 }
+
             else 
-                b.Fatalf("branch not implemented: %s. Control: %s", b.LongString(), b.Control.LongString());
-                    }
+                b.Fatalf("branch not implemented: %s", b.LongString());
+            
+        }
     }
 }}}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:59 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:23 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\unsafe.go
 using @unsafe = go.@unsafe_package;
@@ -10,32 +10,40 @@ using static go.builtin;
 
 namespace go
 {
-    public static unsafe partial class math_package
+    public static partial class math_package
     {
-        // Float32bits returns the IEEE 754 binary representation of f.
+        // Float32bits returns the IEEE 754 binary representation of f,
+        // with the sign bit of f and the result in the same bit position.
+        // Float32bits(Float32frombits(x)) == x.
         public static uint Float32bits(float f)
         {
-            return @unsafe.Pointer(ref f).Value;
+            return new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(_addr_f));
         }
 
-        // Float32frombits returns the floating point number corresponding
-        // to the IEEE 754 binary representation b.
+        // Float32frombits returns the floating-point number corresponding
+        // to the IEEE 754 binary representation b, with the sign bit of b
+        // and the result in the same bit position.
+        // Float32frombits(Float32bits(x)) == x.
         public static float Float32frombits(uint b)
         {
-            return @unsafe.Pointer(ref b).Value;
+            return new ptr<ptr<ptr<float>>>(@unsafe.Pointer(_addr_b));
         }
 
-        // Float64bits returns the IEEE 754 binary representation of f.
+        // Float64bits returns the IEEE 754 binary representation of f,
+        // with the sign bit of f and the result in the same bit position,
+        // and Float64bits(Float64frombits(x)) == x.
         public static ulong Float64bits(double f)
         {
-            return @unsafe.Pointer(ref f).Value;
+            return new ptr<ptr<ptr<ulong>>>(@unsafe.Pointer(_addr_f));
         }
 
-        // Float64frombits returns the floating point number corresponding
-        // the IEEE 754 binary representation b.
+        // Float64frombits returns the floating-point number corresponding
+        // to the IEEE 754 binary representation b, with the sign bit of b
+        // and the result in the same bit position.
+        // Float64frombits(Float64bits(x)) == x.
         public static double Float64frombits(ulong b)
         {
-            return @unsafe.Pointer(ref b).Value;
+            return new ptr<ptr<ptr<double>>>(@unsafe.Pointer(_addr_b));
         }
     }
 }

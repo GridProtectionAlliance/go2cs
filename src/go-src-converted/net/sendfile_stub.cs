@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin nacl netbsd openbsd
+// +build aix darwin js,wasm netbsd openbsd
 
-// package net -- go2cs converted at 2020 August 29 08:27:18 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:11 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sendfile_stub.go
 using io = go.io_package;
@@ -14,9 +14,14 @@ namespace go
 {
     public static partial class net_package
     {
-        private static (long, error, bool) sendFile(ref netFD c, io.Reader r)
+        private static (long, error, bool) sendFile(ptr<netFD> _addr_c, io.Reader r)
         {
-            return (0L, null, false);
+            long n = default;
+            error err = default!;
+            bool handled = default;
+            ref netFD c = ref _addr_c.val;
+
+            return (0L, error.As(null!)!, false);
         }
     }
 }

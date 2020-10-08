@@ -29,7 +29,7 @@
 // Each stanza gives the disassembly for a contiguous range of addresses
 // all mapped to the same original source file and line number.
 // This mode is intended for use by pprof.
-// package main -- go2cs converted at 2020 August 29 10:04:45 UTC
+// package main -- go2cs converted at 2020 October 08 04:39:55 UTC
 // Original source: C:\Go\src\cmd\objdump\main.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;
@@ -46,18 +46,19 @@ namespace go
 {
     public static partial class main_package
     {
-        private static var printCode = flag.Bool("S", false, "print go code alongside assembly");
+        private static var printCode = flag.Bool("S", false, "print Go code alongside assembly");
         private static var symregexp = flag.String("s", "", "only dump symbols matching this regexp");
-        private static ref regexp.Regexp symRE = default;
+        private static var gnuAsm = flag.Bool("gnu", false, "print GNU assembly next to Go assembly (where supported)");
+        private static ptr<regexp.Regexp> symRE;
 
         private static void usage()
         {
-            fmt.Fprintf(os.Stderr, "usage: go tool objdump [-S] [-s symregexp] binary [start end]\n\n");
+            fmt.Fprintf(os.Stderr, "usage: go tool objdump [-S] [-gnu] [-s symregexp] binary [start end]\n\n");
             flag.PrintDefaults();
             os.Exit(2L);
         }
 
-        private static void Main()
+        private static void Main() => func((defer, _, __) =>
         {
             log.SetFlags(0L);
             log.SetPrefix("objdump: ");
@@ -68,31 +69,38 @@ namespace go
             {
                 usage();
             }
-            if (symregexp != "".Value)
+
+            if (symregexp != "".val)
             {
-                var (re, err) = regexp.Compile(symregexp.Value);
+                var (re, err) = regexp.Compile(symregexp.val);
                 if (err != null)
                 {
                     log.Fatalf("invalid -s regexp: %v", err);
                 }
+
                 symRE = re;
+
             }
+
             var (f, err) = objfile.Open(flag.Arg(0L));
             if (err != null)
             {
                 log.Fatal(err);
             }
+
+            defer(f.Close());
+
             var (dis, err) = f.Disasm();
             if (err != null)
             {
                 log.Fatalf("disassemble %s: %v", flag.Arg(0L), err);
             }
+
             switch (flag.NArg())
             {
                 case 1L: 
                     // disassembly of entire object
-                    dis.Print(os.Stdout, symRE, 0L, ~uint64(0L), printCode.Value);
-                    os.Exit(0L);
+                    dis.Print(os.Stdout, symRE, 0L, ~uint64(0L), printCode.val, gnuAsm.val);
                     break;
                 case 3L: 
                     // disassembly of PC range
@@ -101,18 +109,20 @@ namespace go
                     {
                         log.Fatalf("invalid start PC: %v", err);
                     }
+
                     var (end, err) = strconv.ParseUint(strings.TrimPrefix(flag.Arg(2L), "0x"), 16L, 64L);
                     if (err != null)
                     {
                         log.Fatalf("invalid end PC: %v", err);
                     }
-                    dis.Print(os.Stdout, symRE, start, end, printCode.Value);
-                    os.Exit(0L);
+
+                    dis.Print(os.Stdout, symRE, start, end, printCode.val, gnuAsm.val);
                     break;
                 default: 
                     usage();
                     break;
             }
-        }
+
+        });
     }
 }

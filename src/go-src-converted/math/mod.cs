@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:56 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:20 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\mod.go
 
@@ -35,18 +35,16 @@ namespace go
             {>>MARKER:FUNCTION_Mod_BLOCK_PREFIX<<
                 return NaN();
             }
-            if (y < 0L)
-            {
-                y = -y;
-            }
+
+            y = Abs(y);
+
             var (yfr, yexp) = Frexp(y);
-            var sign = false;
             var r = x;
             if (x < 0L)
             {
                 r = -x;
-                sign = true;
             }
+
             while (r >= y)
             {
                 var (rfr, rexp) = Frexp(r);
@@ -54,14 +52,18 @@ namespace go
                 {
                     rexp = rexp - 1L;
                 }
+
                 r = r - Ldexp(y, rexp - yexp);
+
             }
 
-            if (sign)
+            if (x < 0L)
             {
                 r = -r;
             }
+
             return r;
+
         }
     }
 }

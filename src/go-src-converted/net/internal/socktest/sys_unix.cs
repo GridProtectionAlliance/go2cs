@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package socktest -- go2cs converted at 2020 August 29 08:36:23 UTC
+// package socktest -- go2cs converted at 2020 October 08 03:43:16 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Go\src\net\internal\socktest\sys_unix.go
 using syscall = go.syscall_package;
@@ -17,11 +17,15 @@ namespace @internal
     public static partial class socktest_package
     {
         // Socket wraps syscall.Socket.
-        private static (long, error) Socket(this ref Switch _sw, long family, long sotype, long proto) => func(_sw, (ref Switch sw, Defer defer, Panic _, Recover __) =>
+        private static (long, error) Socket(this ptr<Switch> _addr_sw, long family, long sotype, long proto) => func((defer, _, __) =>
         {
+            long s = default;
+            error err = default!;
+            ref Switch sw = ref _addr_sw.val;
+
             sw.once.Do(sw.init);
 
-            Status so = ref new Status(Cookie:cookie(family,sotype,proto));
+            ptr<Status> so = addr(new Status(Cookie:cookie(family,sotype,proto)));
             sw.fmu.RLock();
             var f = sw.fltab[FilterSocket];
             sw.fmu.RUnlock();
@@ -29,7 +33,7 @@ namespace @internal
             var (af, err) = f.apply(so);
             if (err != null)
             {
-                return (-1L, err);
+                return (-1L, error.As(err)!);
             }
             s, so.Err = syscall.Socket(family, sotype, proto);
             err = af.apply(so);
@@ -40,7 +44,8 @@ namespace @internal
                 {
                     syscall.Close(s);
                 }
-                return (-1L, err);
+                return (-1L, error.As(err)!);
+
             }
             sw.smu.Lock();
             defer(sw.smu.Unlock());
@@ -48,22 +53,28 @@ namespace @internal
             {
                 sw.stats.getLocked(so.Cookie).OpenFailed;
 
-                return (-1L, so.Err);
+                return (-1L, error.As(so.Err)!);
+
             }
             var nso = sw.addLocked(s, family, sotype, proto);
             sw.stats.getLocked(nso.Cookie).Opened;
 
-            return (s, null);
+            return (s, error.As(null!)!);
+
         });
 
         // Close wraps syscall.Close.
-        private static error Close(this ref Switch _sw, long s) => func(_sw, (ref Switch sw, Defer defer, Panic _, Recover __) =>
+        private static error Close(this ptr<Switch> _addr_sw, long s) => func((defer, _, __) =>
         {
+            error err = default!;
+            ref Switch sw = ref _addr_sw.val;
+
             var so = sw.sockso(s);
             if (so == null)
             {
-                return error.As(syscall.Close(s));
+                return error.As(syscall.Close(s))!;
             }
+
             sw.fmu.RLock();
             var f = sw.fltab[FilterClose];
             sw.fmu.RUnlock();
@@ -71,37 +82,46 @@ namespace @internal
             var (af, err) = f.apply(so);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             so.Err = syscall.Close(s);
             err = af.apply(so);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             sw.smu.Lock();
             defer(sw.smu.Unlock());
             if (so.Err != null)
             {
                 sw.stats.getLocked(so.Cookie).CloseFailed;
 
-                return error.As(so.Err);
+                return error.As(so.Err)!;
+
             }
+
             delete(sw.sotab, s);
             sw.stats.getLocked(so.Cookie).Closed;
 
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // Connect wraps syscall.Connect.
-        private static error Connect(this ref Switch _sw, long s, syscall.Sockaddr sa) => func(_sw, (ref Switch sw, Defer defer, Panic _, Recover __) =>
+        private static error Connect(this ptr<Switch> _addr_sw, long s, syscall.Sockaddr sa) => func((defer, _, __) =>
         {
+            error err = default!;
+            ref Switch sw = ref _addr_sw.val;
+
             var so = sw.sockso(s);
             if (so == null)
             {
-                return error.As(syscall.Connect(s, sa));
+                return error.As(syscall.Connect(s, sa))!;
             }
+
             sw.fmu.RLock();
             var f = sw.fltab[FilterConnect];
             sw.fmu.RUnlock();
@@ -109,36 +129,45 @@ namespace @internal
             var (af, err) = f.apply(so);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             so.Err = syscall.Connect(s, sa);
             err = af.apply(so);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             sw.smu.Lock();
             defer(sw.smu.Unlock());
             if (so.Err != null)
             {
                 sw.stats.getLocked(so.Cookie).ConnectFailed;
 
-                return error.As(so.Err);
+                return error.As(so.Err)!;
+
             }
+
             sw.stats.getLocked(so.Cookie).Connected;
 
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // Listen wraps syscall.Listen.
-        private static error Listen(this ref Switch _sw, long s, long backlog) => func(_sw, (ref Switch sw, Defer defer, Panic _, Recover __) =>
+        private static error Listen(this ptr<Switch> _addr_sw, long s, long backlog) => func((defer, _, __) =>
         {
+            error err = default!;
+            ref Switch sw = ref _addr_sw.val;
+
             var so = sw.sockso(s);
             if (so == null)
             {
-                return error.As(syscall.Listen(s, backlog));
+                return error.As(syscall.Listen(s, backlog))!;
             }
+
             sw.fmu.RLock();
             var f = sw.fltab[FilterListen];
             sw.fmu.RUnlock();
@@ -146,36 +175,47 @@ namespace @internal
             var (af, err) = f.apply(so);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             so.Err = syscall.Listen(s, backlog);
             err = af.apply(so);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             sw.smu.Lock();
             defer(sw.smu.Unlock());
             if (so.Err != null)
             {
                 sw.stats.getLocked(so.Cookie).ListenFailed;
 
-                return error.As(so.Err);
+                return error.As(so.Err)!;
+
             }
+
             sw.stats.getLocked(so.Cookie).Listened;
 
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // Accept wraps syscall.Accept.
-        private static (long, syscall.Sockaddr, error) Accept(this ref Switch _sw, long s) => func(_sw, (ref Switch sw, Defer defer, Panic _, Recover __) =>
+        private static (long, syscall.Sockaddr, error) Accept(this ptr<Switch> _addr_sw, long s) => func((defer, _, __) =>
         {
+            long ns = default;
+            syscall.Sockaddr sa = default;
+            error err = default!;
+            ref Switch sw = ref _addr_sw.val;
+
             var so = sw.sockso(s);
             if (so == null)
             {
                 return syscall.Accept(s);
             }
+
             sw.fmu.RLock();
             var f = sw.fltab[FilterAccept];
             sw.fmu.RUnlock();
@@ -183,8 +223,9 @@ namespace @internal
             var (af, err) = f.apply(so);
             if (err != null)
             {
-                return (-1L, null, err);
+                return (-1L, null, error.As(err)!);
             }
+
             ns, sa, so.Err = syscall.Accept(s);
             err = af.apply(so);
 
@@ -194,30 +235,41 @@ namespace @internal
                 {
                     syscall.Close(ns);
                 }
-                return (-1L, null, err);
+
+                return (-1L, null, error.As(err)!);
+
             }
+
             sw.smu.Lock();
             defer(sw.smu.Unlock());
             if (so.Err != null)
             {
                 sw.stats.getLocked(so.Cookie).AcceptFailed;
 
-                return (-1L, null, so.Err);
+                return (-1L, null, error.As(so.Err)!);
+
             }
+
             var nso = sw.addLocked(ns, so.Cookie.Family(), so.Cookie.Type(), so.Cookie.Protocol());
             sw.stats.getLocked(nso.Cookie).Accepted;
 
-            return (ns, sa, null);
+            return (ns, sa, error.As(null!)!);
+
         });
 
         // GetsockoptInt wraps syscall.GetsockoptInt.
-        private static (long, error) GetsockoptInt(this ref Switch sw, long s, long level, long opt)
+        private static (long, error) GetsockoptInt(this ptr<Switch> _addr_sw, long s, long level, long opt)
         {
+            long soerr = default;
+            error err = default!;
+            ref Switch sw = ref _addr_sw.val;
+
             var so = sw.sockso(s);
             if (so == null)
             {
                 return syscall.GetsockoptInt(s, level, opt);
             }
+
             sw.fmu.RLock();
             var f = sw.fltab[FilterGetsockoptInt];
             sw.fmu.RUnlock();
@@ -225,28 +277,34 @@ namespace @internal
             var (af, err) = f.apply(so);
             if (err != null)
             {
-                return (-1L, err);
+                return (-1L, error.As(err)!);
             }
+
             soerr, so.Err = syscall.GetsockoptInt(s, level, opt);
             so.SocketErr = syscall.Errno(soerr);
             err = af.apply(so);
 
             if (err != null)
             {
-                return (-1L, err);
+                return (-1L, error.As(err)!);
             }
+
             if (so.Err != null)
             {
-                return (-1L, so.Err);
+                return (-1L, error.As(so.Err)!);
             }
+
             if (opt == syscall.SO_ERROR && (so.SocketErr == syscall.Errno(0L) || so.SocketErr == syscall.EISCONN))
             {
                 sw.smu.Lock();
                 sw.stats.getLocked(so.Cookie).Connected;
 
                 sw.smu.Unlock();
+
             }
-            return (soerr, null);
+
+            return (soerr, error.As(null!)!);
+
         }
     }
 }}}

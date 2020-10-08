@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:17:44 UTC
+//     Generated on 2020 October 08 03:20:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,15 +29,19 @@ namespace go
                 this.spanclass = default;
                 this.nonempty = default;
                 this.empty = default;
+                this.partial = default;
+                this.full = default;
                 this.nmalloc = default;
             }
 
-            public mcentral(mutex @lock = default, spanClass spanclass = default, mSpanList nonempty = default, mSpanList empty = default, ulong nmalloc = default)
+            public mcentral(mutex @lock = default, spanClass spanclass = default, mSpanList nonempty = default, mSpanList empty = default, array<spanSet> partial = default, array<spanSet> full = default, ulong nmalloc = default)
             {
                 this.@lock = @lock;
                 this.spanclass = spanclass;
                 this.nonempty = nonempty;
                 this.empty = empty;
+                this.partial = partial;
+                this.full = full;
                 this.nmalloc = nmalloc;
             }
 
@@ -61,7 +65,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mcentral mcentral_cast(dynamic value)
         {
-            return new mcentral(value.@lock, value.spanclass, value.nonempty, value.empty, value.nmalloc);
+            return new mcentral(value.@lock, value.spanclass, value.nonempty, value.empty, value.partial, value.full, value.nmalloc);
         }
     }
 }

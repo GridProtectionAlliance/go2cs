@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:02 UTC
+//     Generated on 2020 October 08 04:02:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
+using strings = go.strings_package;
 using go;
 
 namespace go {
@@ -34,9 +36,10 @@ namespace go
                 this.Recv = default;
                 this.Orig = default;
                 this.Level = default;
+                this.Examples = default;
             }
 
-            public Func(@string Doc = default, @string Name = default, ref ptr<ast.FuncDecl> Decl = default, @string Recv = default, @string Orig = default, long Level = default)
+            public Func(@string Doc = default, @string Name = default, ref ptr<ast.FuncDecl> Decl = default, @string Recv = default, @string Orig = default, long Level = default, slice<ptr<Example>> Examples = default)
             {
                 this.Doc = Doc;
                 this.Name = Name;
@@ -44,6 +47,7 @@ namespace go
                 this.Recv = Recv;
                 this.Orig = Orig;
                 this.Level = Level;
+                this.Examples = Examples;
             }
 
             // Enable comparisons between nil and Func struct
@@ -66,7 +70,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Func Func_cast(dynamic value)
         {
-            return new Func(value.Doc, value.Name, ref value.Decl, value.Recv, value.Orig, value.Level);
+            return new Func(value.Doc, value.Name, ref value.Decl, value.Recv, value.Orig, value.Level, value.Examples);
         }
     }
 }}

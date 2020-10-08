@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:18 UTC
+//     Generated on 2020 October 08 04:09:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,16 +35,18 @@ namespace @internal
                 this.Results = default;
                 this.Params = default;
                 this.Nname = default;
+                this.pkg = default;
                 this.Argwid = default;
                 this.Outnamed = default;
             }
 
-            public Func(ref ptr<Type> Receiver = default, ref ptr<Type> Results = default, ref ptr<Type> Params = default, ref ptr<Node> Nname = default, long Argwid = default, bool Outnamed = default)
+            public Func(ref ptr<Type> Receiver = default, ref ptr<Type> Results = default, ref ptr<Type> Params = default, ref ptr<Node> Nname = default, ref ptr<Pkg> pkg = default, long Argwid = default, bool Outnamed = default)
             {
                 this.Receiver = Receiver;
                 this.Results = Results;
                 this.Params = Params;
                 this.Nname = Nname;
+                this.pkg = pkg;
                 this.Argwid = Argwid;
                 this.Outnamed = Outnamed;
             }
@@ -69,7 +71,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Func Func_cast(dynamic value)
         {
-            return new Func(ref value.Receiver, ref value.Results, ref value.Params, ref value.Nname, value.Argwid, value.Outnamed);
+            return new Func(ref value.Receiver, ref value.Results, ref value.Params, ref value.Nname, ref value.pkg, value.Argwid, value.Outnamed);
         }
     }
 }}}}

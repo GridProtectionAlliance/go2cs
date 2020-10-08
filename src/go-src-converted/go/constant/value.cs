@@ -10,7 +10,7 @@
 // values produce unknown values unless specified
 // otherwise.
 //
-// package constant -- go2cs converted at 2020 August 29 08:47:02 UTC
+// package constant -- go2cs converted at 2020 October 08 04:02:39 UTC
 // import "go/constant" ==> using constant = go.go.constant_package
 // Original source: C:\Go\src\go\constant\value.go
 using fmt = go.fmt_package;
@@ -35,16 +35,17 @@ namespace go
 
  
         // unknown values
-        public static readonly Kind Unknown = iota; 
+        public static readonly Kind Unknown = (Kind)iota; 
 
         // non-numeric values
-        public static readonly var Bool = 0;
-        public static readonly var String = 1; 
+        public static readonly var Bool = (var)0;
+        public static readonly var String = (var)1; 
 
         // numeric values
-        public static readonly var Int = 2;
-        public static readonly var Float = 3;
-        public static readonly var Complex = 4;
+        public static readonly var Int = (var)2;
+        public static readonly var Float = (var)3;
+        public static readonly var Complex = (var)4;
+
 
         // A Value represents the value of a Go constant.
         public partial interface Value
@@ -64,7 +65,7 @@ namespace go
 
         // Maximum supported mantissa precision.
         // The spec requires at least 256 bits; typical implementations use 512 bits.
-        private static readonly long prec = 512L;
+        private static readonly long prec = (long)512L;
 
 
 
@@ -100,7 +101,8 @@ namespace go
         {
             public Value re;
             public Value im;
-        }        private static Kind Kind(this unknownVal _p0)
+        }
+        private static Kind Kind(this unknownVal _p0)
         {
             return Unknown;
         }
@@ -108,8 +110,10 @@ namespace go
         {
             return Bool;
         }
-        private static Kind Kind(this ref stringVal _p0)
+        private static Kind Kind(this ptr<stringVal> _addr__p0)
         {
+            ref stringVal _p0 = ref _addr__p0.val;
+
             return String;
         }
         private static Kind Kind(this int64Val _p0)
@@ -143,9 +147,11 @@ namespace go
         }
 
         // String returns a possibly shortened quoted form of the String value.
-        private static @string String(this ref stringVal x)
+        private static @string String(this ptr<stringVal> _addr_x)
         {
-            const long maxLen = 72L; // a reasonable length
+            ref stringVal x = ref _addr_x.val;
+
+            const long maxLen = (long)72L; // a reasonable length
  // a reasonable length
             var s = strconv.Quote(x.@string());
             if (utf8.RuneCountInString(s) > maxLen)
@@ -161,8 +167,11 @@ namespace go
                 }
 
                 s = s[..i] + "...";
+
             }
+
             return s;
+
         }
 
         // string constructs and returns the actual string literal value.
@@ -170,8 +179,10 @@ namespace go
         // string, to speed future calls. This lazy construction avoids
         // building different string values for all subpieces of a large
         // concatenation. See golang.org/issue/23348.
-        private static @string @string(this ref stringVal x)
+        private static @string @string(this ptr<stringVal> _addr_x)
         {
+            ref stringVal x = ref _addr_x.val;
+
             x.mu.Lock();
             if (x.l != null)
             {
@@ -179,10 +190,12 @@ namespace go
                 x.l = null;
                 x.r = null;
             }
+
             var s = x.s;
             x.mu.Unlock();
 
             return s;
+
         }
 
         // reverse reverses x in place and returns it.
@@ -193,9 +206,11 @@ namespace go
             {
                 x[i] = x[n - 1L - i];
                 x[n - 1L - i] = x[i];
+
             }
 
             return x;
+
         }
 
         // appendReverse appends to list all of x's subpieces, but in reverse,
@@ -204,8 +219,10 @@ namespace go
         // Because a chain like a + b + c + d + e is actually represented
         // as ((((a + b) + c) + d) + e), the left-side loop avoids deep recursion.
         // x must be locked.
-        private static slice<@string> appendReverse(this ref stringVal x, slice<@string> list)
+        private static slice<@string> appendReverse(this ptr<stringVal> _addr_x, slice<@string> list)
         {
+            ref stringVal x = ref _addr_x.val;
+
             var y = x;
             while (y.r != null)
             {
@@ -218,8 +235,10 @@ namespace go
                 {
                     y.mu.Unlock();
                 }
+
                 l.mu.Lock();
                 y = l;
+
             }
 
             var s = y.s;
@@ -227,7 +246,9 @@ namespace go
             {
                 y.mu.Unlock();
             }
+
             return append(list, s);
+
         }
 
         private static @string String(this int64Val x)
@@ -243,7 +264,7 @@ namespace go
             return rtof(x).String();
         }
 
-        // String returns returns a decimal approximation of the Float value.
+        // String returns a decimal approximation of the Float value.
         private static @string String(this floatVal x)
         {
             var f = x.val; 
@@ -275,8 +296,8 @@ namespace go
             // conversion to avoid precise but possibly slow Float
             // formatting.
             // f = mant * 2**exp
-            big.Float mant = default;
-            var exp = f.MantExp(ref mant); // 0.5 <= |mant| < 1.0
+            ref big.Float mant = ref heap(out ptr<big.Float> _addr_mant);
+            var exp = f.MantExp(_addr_mant); // 0.5 <= |mant| < 1.0
 
             // approximate float64 mantissa m and decimal exponent d
             // f ~ m * 10**d
@@ -305,6 +326,7 @@ namespace go
             }
 
             return fmt.Sprintf("%.6ge%+d", m, e);
+
         }
 
         private static @string String(this complexVal x)
@@ -320,8 +342,10 @@ namespace go
         {
             return x.String();
         }
-        private static @string ExactString(this ref stringVal x)
+        private static @string ExactString(this ptr<stringVal> _addr_x)
         {
+            ref stringVal x = ref _addr_x.val;
+
             return strconv.Quote(x.@string());
         }
         private static @string ExactString(this int64Val x)
@@ -340,7 +364,9 @@ namespace go
             {
                 return r.Num().String();
             }
+
             return r.String();
+
         }
 
         private static @string ExactString(this floatVal x)
@@ -359,8 +385,10 @@ namespace go
         private static void implementsValue(this boolVal _p0)
         {
         }
-        private static void implementsValue(this ref stringVal _p0)
+        private static void implementsValue(this ptr<stringVal> _addr__p0)
         {
+            ref stringVal _p0 = ref _addr__p0.val;
+
         }
         private static void implementsValue(this int64Val _p0)
         {
@@ -378,15 +406,15 @@ namespace go
         {
         }
 
-        private static ref big.Int newInt()
+        private static ptr<big.Int> newInt()
         {
             return @new<big.Int>();
         }
-        private static ref big.Rat newRat()
+        private static ptr<big.Rat> newRat()
         {
             return @new<big.Rat>();
         }
-        private static ref big.Float newFloat()
+        private static ptr<big.Float> newFloat()
         {
             return @new<big.Float>().SetPrec(prec);
         }
@@ -424,46 +452,58 @@ namespace go
             return new complexVal(x,int64Val(0));
         }
 
-        private static Value makeInt(ref big.Int x)
+        private static Value makeInt(ptr<big.Int> _addr_x)
         {
+            ref big.Int x = ref _addr_x.val;
+
             if (x.IsInt64())
             {
                 return int64Val(x.Int64());
             }
+
             return new intVal(x);
+
         }
 
         // Permit fractions with component sizes up to maxExp
         // before switching to using floating-point numbers.
-        private static readonly long maxExp = 4L << (int)(10L);
+        private static readonly long maxExp = (long)4L << (int)(10L);
 
 
 
-        private static Value makeRat(ref big.Rat x)
+        private static Value makeRat(ptr<big.Rat> _addr_x)
         {
+            ref big.Rat x = ref _addr_x.val;
+
             var a = x.Num();
             var b = x.Denom();
             if (a.BitLen() < maxExp && b.BitLen() < maxExp)
             { 
                 // ok to remain fraction
                 return new ratVal(x);
+
             } 
             // components too large => switch to float
             var fa = newFloat().SetInt(a);
             var fb = newFloat().SetInt(b);
             return new floatVal(fa.Quo(fa,fb));
+
         }
 
         private static floatVal floatVal0 = new floatVal(newFloat());
 
-        private static Value makeFloat(ref big.Float x)
-        { 
+        private static Value makeFloat(ptr<big.Float> _addr_x)
+        {
+            ref big.Float x = ref _addr_x.val;
+ 
             // convert -0
             if (x.Sign() == 0L)
             {
                 return floatVal0;
             }
+
             return new floatVal(x);
+
         }
 
         private static Value makeComplex(Value re, Value im)
@@ -478,7 +518,7 @@ namespace go
 
                 if (ok)
                 {
-                    if (smallRat(f))
+                    if (smallRat(_addr_f))
                     { 
                         // ok to use rationals
                         if (f.Sign() == 0L)
@@ -488,28 +528,45 @@ namespace go
                             // such as -6e-1886451601. As a float, that will underflow to 0,
                             // but it'll take forever to parse as a Rat.
                             lit = "0";
+
                         }
-                        var (r, _) = newRat().SetString(lit);
-                        return new ratVal(r);
+
+                        {
+                            var (r, ok) = newRat().SetString(lit);
+
+                            if (ok)
+                            {
+                                return new ratVal(r);
+                            }
+
+                        }
+
                     } 
                     // otherwise use floats
-                    return makeFloat(f);
+                    return makeFloat(_addr_f);
+
                 }
 
             }
+
             return null;
+
         }
 
         // smallRat reports whether x would lead to "reasonably"-sized fraction
         // if converted to a *big.Rat.
-        private static bool smallRat(ref big.Float x)
+        private static bool smallRat(ptr<big.Float> _addr_x)
         {
+            ref big.Float x = ref _addr_x.val;
+
             if (!x.IsInf())
             {
                 var e = x.MantExp(null);
                 return -maxExp < e && e < maxExp;
             }
+
             return false;
+
         }
 
         // ----------------------------------------------------------------------------
@@ -530,7 +587,7 @@ namespace go
         // MakeString returns the String value for s.
         public static Value MakeString(@string s)
         {
-            return ref new stringVal(s:s);
+            return addr(new stringVal(s:s));
         }
 
         // MakeInt64 returns the Int value for x.
@@ -546,7 +603,9 @@ namespace go
             {
                 return int64Val(int64(x));
             }
+
             return new intVal(newInt().SetUint64(x));
+
         }
 
         // MakeFloat64 returns the Float value for x.
@@ -562,7 +621,9 @@ namespace go
             {
                 return int64Val(0L);
             }
+
             return new ratVal(newRat().SetFloat64(x));
+
         }
 
         // MakeFromLiteral returns the corresponding integer, floating-point,
@@ -576,6 +637,7 @@ namespace go
             {
                 panic("MakeFromLiteral called with non-zero last argument");
             }
+
 
             if (tok == token.INT) 
                 {
@@ -591,6 +653,7 @@ namespace go
                     x = x__prev1;
 
                 }
+
                 {
                     var x__prev1 = x;
 
@@ -604,6 +667,8 @@ namespace go
                     x = x__prev1;
 
                 }
+
+
             else if (tok == token.FLOAT) 
                 {
                     var x__prev1 = x;
@@ -618,6 +683,8 @@ namespace go
                     x = x__prev1;
 
                 }
+
+
             else if (tok == token.IMAG) 
                 {
                     var n__prev1 = n;
@@ -635,11 +702,14 @@ namespace go
                             }
 
                         }
+
                     }
 
                     n = n__prev1;
 
                 }
+
+
             else if (tok == token.CHAR) 
                 {
                     var n__prev1 = n;
@@ -657,11 +727,14 @@ namespace go
                             }
 
                         }
+
                     }
 
                     n = n__prev1;
 
                 }
+
+
             else if (tok == token.STRING) 
                 {
                     var (s, err) = strconv.Unquote(lit);
@@ -672,9 +745,12 @@ namespace go
                     }
 
                 }
+
+
             else 
                 panic(fmt.Sprintf("%v is not a valid token", tok));
                         return new unknownVal();
+
         });
 
         // ----------------------------------------------------------------------------
@@ -702,6 +778,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // StringVal returns the Go string value of x, which must be a String or an Unknown.
@@ -710,7 +787,7 @@ namespace go
         {
             switch (x.type())
             {
-                case ref stringVal x:
+                case ptr<stringVal> x:
                     return x.@string();
                     break;
                 case unknownVal x:
@@ -723,6 +800,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // Int64Val returns the Go int64 value of x and whether the result is exact;
@@ -730,6 +808,9 @@ namespace go
         // If x is Unknown, the result is (0, false).
         public static (long, bool) Int64Val(Value x) => func((_, panic, __) =>
         {
+            long _p0 = default;
+            bool _p0 = default;
+
             switch (x.type())
             {
                 case int64Val x:
@@ -748,6 +829,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // Uint64Val returns the Go uint64 value of x and whether the result is exact;
@@ -755,6 +837,9 @@ namespace go
         // If x is Unknown, the result is (0, false).
         public static (ulong, bool) Uint64Val(Value x) => func((_, panic, __) =>
         {
+            ulong _p0 = default;
+            bool _p0 = default;
+
             switch (x.type())
             {
                 case int64Val x:
@@ -773,11 +858,15 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // Float32Val is like Float64Val but for float32 instead of float64.
         public static (float, bool) Float32Val(Value x) => func((_, panic, __) =>
         {
+            float _p0 = default;
+            bool _p0 = default;
+
             switch (x.type())
             {
                 case int64Val x:
@@ -805,6 +894,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // Float64Val returns the nearest Go float64 value of x and whether the result is exact;
@@ -814,6 +904,9 @@ namespace go
         // If x is Unknown, the result is (0, false).
         public static (double, bool) Float64Val(Value x) => func((_, panic, __) =>
         {
+            double _p0 = default;
+            bool _p0 = default;
+
             switch (x.type())
             {
                 case int64Val x:
@@ -841,7 +934,96 @@ namespace go
                     break;
                 }
             }
+
         });
+
+        // Val returns the underlying value for a given constant. Since it returns an
+        // interface, it is up to the caller to type assert the result to the expected
+        // type. The possible dynamic return types are:
+        //
+        //    x Kind             type of result
+        //    -----------------------------------------
+        //    Bool               bool
+        //    String             string
+        //    Int                int64 or *big.Int
+        //    Float              *big.Float or *big.Rat
+        //    everything else    nil
+        //
+        public static void Val(Value x)
+        {
+            switch (x.type())
+            {
+                case boolVal x:
+                    return bool(x);
+                    break;
+                case ptr<stringVal> x:
+                    return x.@string();
+                    break;
+                case int64Val x:
+                    return int64(x);
+                    break;
+                case intVal x:
+                    return x.val;
+                    break;
+                case ratVal x:
+                    return x.val;
+                    break;
+                case floatVal x:
+                    return x.val;
+                    break;
+                default:
+                {
+                    var x = x.type();
+                    return null;
+                    break;
+                }
+            }
+
+        }
+
+        // Make returns the Value for x.
+        //
+        //    type of x        result Kind
+        //    ----------------------------
+        //    bool             Bool
+        //    string           String
+        //    int64            Int
+        //    *big.Int         Int
+        //    *big.Float       Float
+        //    *big.Rat         Float
+        //    anything else    Unknown
+        //
+        public static Value Make(object x)
+        {
+            switch (x.type())
+            {
+                case bool x:
+                    return boolVal(x);
+                    break;
+                case @string x:
+                    return addr(new stringVal(s:x));
+                    break;
+                case long x:
+                    return int64Val(x);
+                    break;
+                case ptr<big.Int> x:
+                    return new intVal(x);
+                    break;
+                case ptr<big.Rat> x:
+                    return new ratVal(x);
+                    break;
+                case ptr<big.Float> x:
+                    return new floatVal(x);
+                    break;
+                default:
+                {
+                    var x = x.type();
+                    return new unknownVal();
+                    break;
+                }
+            }
+
+        }
 
         // BitLen returns the number of bits required to represent
         // the absolute value x in binary representation; x must be an Int or an Unknown.
@@ -866,6 +1048,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // Sign returns -1, 0, or 1 depending on whether x < 0, x == 0, or x > 0;
@@ -905,6 +1088,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // ----------------------------------------------------------------------------
@@ -912,9 +1096,10 @@ namespace go
 
  
         // Compute the size of a Word in bytes.
-        private static readonly var _m = ~big.Word(0L);
-        private static readonly var _log = _m >> (int)(8L) & 1L + _m >> (int)(16L) & 1L + _m >> (int)(32L) & 1L;
-        private static readonly long wordSize = 1L << (int)(_log);
+        private static readonly var _m = (var)~big.Word(0L);
+        private static readonly var _log = (var)_m >> (int)(8L) & 1L + _m >> (int)(16L) & 1L + _m >> (int)(32L) & 1L;
+        private static readonly long wordSize = (long)1L << (int)(_log);
+
 
         // Bytes returns the bytes for the absolute value of x in little-
         // endian binary representation; x must be an Int.
@@ -951,6 +1136,7 @@ namespace go
                     i++;
                 }
 
+
             } 
             // remove leading 0's
             while (i > 0L && bytes[i - 1L] == 0L)
@@ -960,6 +1146,7 @@ namespace go
 
 
             return bytes[..i];
+
         });
 
         // MakeFromBytes returns the Int value given the bytes of its little-endian
@@ -983,6 +1170,7 @@ namespace go
                     w = 0L;
                     s = 0L;
                 }
+
             } 
             // store last word
             if (i < len(words))
@@ -997,7 +1185,8 @@ namespace go
             }
 
 
-            return makeInt(newInt().SetBits(words[..i]));
+            return makeInt(_addr_newInt().SetBits(words[..i]));
+
         }
 
         // Num returns the numerator of x; x must be Int, Float, or Unknown.
@@ -1015,14 +1204,15 @@ namespace go
                     return x;
                     break;
                 case ratVal x:
-                    return makeInt(x.val.Num());
+                    return makeInt(_addr_x.val.Num());
                     break;
                 case floatVal x:
-                    if (smallRat(x.val))
+                    if (smallRat(_addr_x.val))
                     {
                         var (r, _) = x.val.Rat(null);
-                        return makeInt(r.Num());
+                        return makeInt(_addr_r.Num());
                     }
+
                     break;
                 case unknownVal x:
                     break;
@@ -1035,6 +1225,7 @@ namespace go
                 }
             }
             return new unknownVal();
+
         });
 
         // Denom returns the denominator of x; x must be Int, Float, or Unknown.
@@ -1051,14 +1242,15 @@ namespace go
                     return int64Val(1L);
                     break;
                 case ratVal x:
-                    return makeInt(x.val.Denom());
+                    return makeInt(_addr_x.val.Denom());
                     break;
                 case floatVal x:
-                    if (smallRat(x.val))
+                    if (smallRat(_addr_x.val))
                     {
                         var (r, _) = x.val.Rat(null);
-                        return makeInt(r.Denom());
+                        return makeInt(_addr_r.Denom());
                     }
+
                     break;
                 case unknownVal x:
                     break;
@@ -1071,6 +1263,7 @@ namespace go
                 }
             }
             return new unknownVal();
+
         });
 
         // MakeImag returns the Complex value x*i;
@@ -1101,6 +1294,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // Real returns the real part of x, which must be a numeric or unknown value.
@@ -1134,6 +1328,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // Imag returns the imaginary part of x, which must be a numeric or unknown value.
@@ -1167,6 +1362,7 @@ namespace go
                     break;
                 }
             }
+
         });
 
         // ----------------------------------------------------------------------------
@@ -1187,11 +1383,12 @@ namespace go
                 case ratVal x:
                     if (x.val.IsInt())
                     {
-                        return makeInt(x.val.Num());
+                        return makeInt(_addr_x.val.Num());
                     }
+
                     break;
                 case floatVal x:
-                    if (smallRat(x.val))
+                    if (smallRat(_addr_x.val))
                     {
                         var i = newInt();
                         {
@@ -1199,7 +1396,7 @@ namespace go
 
                             if (acc == big.Exact)
                             {
-                                return makeInt(i);
+                                return makeInt(_addr_i);
                             } 
 
                             // If we can get an integer by rounding up or down,
@@ -1212,7 +1409,7 @@ namespace go
                         // assume x is not an integer because of rounding
                         // errors in prior computations.
 
-                        const long delta = 4L; // a small number of bits > 0
+                        const long delta = (long)4L; // a small number of bits > 0
  // a small number of bits > 0
                         big.Float t = default;
                         t.SetPrec(prec - delta); 
@@ -1225,7 +1422,7 @@ namespace go
 
                             if (acc == big.Exact)
                             {
-                                return makeInt(i);
+                                return makeInt(_addr_i);
                             } 
 
                             // try rounding up a little
@@ -1240,11 +1437,13 @@ namespace go
 
                             if (acc == big.Exact)
                             {
-                                return makeInt(i);
+                                return makeInt(_addr_i);
                             }
 
                         }
+
                     }
+
                     break;
                 case complexVal x:
                     {
@@ -1256,11 +1455,13 @@ namespace go
                         }
 
                     }
+
                     break;
 
             }
 
             return new unknownVal();
+
         }
 
         // ToFloat converts x to a Float value if x is representable as a Float.
@@ -1289,12 +1490,15 @@ namespace go
                         { 
                             // imaginary component is 0
                             return ToFloat(x.re);
+
                         }
 
                     }
+
                     break;
             }
             return new unknownVal();
+
         }
 
         // ToComplex converts x to a Complex value if x is representable as a Complex.
@@ -1320,6 +1524,7 @@ namespace go
                     break;
             }
             return new unknownVal();
+
         }
 
         // ----------------------------------------------------------------------------
@@ -1328,7 +1533,7 @@ namespace go
         // is32bit reports whether x can be represented using 32 bits.
         private static bool is32bit(long x)
         {
-            const long s = 32L;
+            const long s = (long)32L;
 
             return -1L << (int)((s - 1L)) <= x && x <= 1L << (int)((s - 1L)) - 1L;
         }
@@ -1336,7 +1541,7 @@ namespace go
         // is63bit reports whether x can be represented using 63 bits.
         private static bool is63bit(long x)
         {
-            const long s = 63L;
+            const long s = (long)63L;
 
             return -1L << (int)((s - 1L)) <= x && x <= 1L << (int)((s - 1L)) - 1L;
         }
@@ -1392,16 +1597,17 @@ namespace go
                             z = z__prev1;
 
                         }
-                        return makeInt(newInt().Neg(big.NewInt(int64(y))));
+
+                        return makeInt(_addr_newInt().Neg(big.NewInt(int64(y))));
                         break;
                     case intVal y:
-                        return makeInt(newInt().Neg(y.val));
+                        return makeInt(_addr_newInt().Neg(y.val));
                         break;
                     case ratVal y:
-                        return makeRat(newRat().Neg(y.val));
+                        return makeRat(_addr_newRat().Neg(y.val));
                         break;
                     case floatVal y:
-                        return makeFloat(newFloat().Neg(y.val));
+                        return makeFloat(_addr_newFloat().Neg(y.val));
                         break;
                     case complexVal y:
                         var re = UnaryOp(token.SUB, y.re, 0L);
@@ -1440,7 +1646,8 @@ namespace go
                 {
                     z.AndNot(z, newInt().Lsh(big.NewInt(-1L), prec)); // z &^= (-1)<<prec
                 }
-                return makeInt(z);
+
+                return makeInt(_addr_z);
             else if (op == token.NOT) 
                 switch (y.type())
                 {
@@ -1453,6 +1660,7 @@ namespace go
                 }
             Error:
             panic(fmt.Sprintf("invalid unary operation %s%v", op, y));
+
         });
 
         private static long ord(Value x)
@@ -1465,7 +1673,7 @@ namespace go
                 case boolVal _:
                     return 1L;
                     break;
-                case ref stringVal _:
+                case ptr<stringVal> _:
                     return 1L;
                     break;
                 case int64Val _:
@@ -1489,6 +1697,7 @@ namespace go
                     break;
                 }
             }
+
         }
 
         // match returns the matching representation (same type) with the
@@ -1498,6 +1707,9 @@ namespace go
         //
         private static (Value, Value) match(Value x, Value y)
         {
+            Value _ = default;
+            Value _ = default;
+
             if (ord(x) > ord(y))
             {
                 y, x = match(y, x);
@@ -1509,7 +1721,7 @@ namespace go
                 case boolVal x:
                     return (x, y);
                     break;
-                case ref stringVal x:
+                case ptr<stringVal> x:
                     return (x, y);
                     break;
                 case complexVal x:
@@ -1588,6 +1800,7 @@ namespace go
             // force unknown and invalid values into "x position" in callers of match
             // (don't panic here so that callers can provide a better error message)
             return (x, x);
+
         }
 
         // BinaryOp returns the result of the binary expression x op y.
@@ -1625,23 +1838,26 @@ namespace go
                     if (op == token.ADD) 
                         if (!is63bit(a) || !is63bit(b))
                         {
-                            return makeInt(newInt().Add(big.NewInt(a), big.NewInt(b)));
+                            return makeInt(_addr_newInt().Add(big.NewInt(a), big.NewInt(b)));
                         }
+
                         c = a + b;
                     else if (op == token.SUB) 
                         if (!is63bit(a) || !is63bit(b))
                         {
-                            return makeInt(newInt().Sub(big.NewInt(a), big.NewInt(b)));
+                            return makeInt(_addr_newInt().Sub(big.NewInt(a), big.NewInt(b)));
                         }
+
                         c = a - b;
                     else if (op == token.MUL) 
                         if (!is32bit(a) || !is32bit(b))
                         {
-                            return makeInt(newInt().Mul(big.NewInt(a), big.NewInt(b)));
+                            return makeInt(_addr_newInt().Mul(big.NewInt(a), big.NewInt(b)));
                         }
+
                         c = a * b;
                     else if (op == token.QUO) 
-                        return makeRat(big.NewRat(a, b));
+                        return makeRat(_addr_big.NewRat(a, b));
                     else if (op == token.QUO_ASSIGN) // force integer division
                         c = a / b;
                     else if (op == token.REM) 
@@ -1670,7 +1886,7 @@ namespace go
                     else if (op == token.MUL) 
                         c.Mul(a, b);
                     else if (op == token.QUO) 
-                        return makeRat(newRat().SetFrac(a, b));
+                        return makeRat(_addr_newRat().SetFrac(a, b));
                     else if (op == token.QUO_ASSIGN) // force integer division
                         c.Quo(a, b);
                     else if (op == token.REM) 
@@ -1685,7 +1901,7 @@ namespace go
                         c.AndNot(a, b);
                     else 
                         goto Error;
-                                        return makeInt(c);
+                                        return makeInt(_addr_c);
                     break;
                 case ratVal x:
                     a = x.val;
@@ -1702,7 +1918,7 @@ namespace go
                         c.Quo(a, b);
                     else 
                         goto Error;
-                                        return makeRat(c);
+                                        return makeRat(_addr_c);
                     break;
                 case floatVal x:
                     a = x.val;
@@ -1719,7 +1935,7 @@ namespace go
                         c.Quo(a, b);
                     else 
                         goto Error;
-                                        return makeFloat(c);
+                                        return makeFloat(_addr_c);
                     break;
                 case complexVal x:
                     y = y._<complexVal>();
@@ -1727,25 +1943,25 @@ namespace go
                     b = x.im;
                     c = y.re;
                     var d = y.im;
-                    Value re = default;                    Value im = default;
+                    Value re = default!;                    Value im = default!;
 
 
                     if (op == token.ADD) 
                         // (a+c) + i(b+d)
-                        re = Value.As(add(a, c));
-                        im = Value.As(add(b, d));
+                        re = Value.As(add(a, c))!;
+                        im = Value.As(add(b, d))!;
                     else if (op == token.SUB) 
                         // (a-c) + i(b-d)
-                        re = Value.As(sub(a, c));
-                        im = Value.As(sub(b, d));
+                        re = Value.As(sub(a, c))!;
+                        im = Value.As(sub(b, d))!;
                     else if (op == token.MUL) 
                         // (ac-bd) + i(bc+ad)
                         var ac = mul(a, c);
                         var bd = mul(b, d);
                         var bc = mul(b, c);
                         var ad = mul(a, d);
-                        re = Value.As(sub(ac, bd));
-                        im = Value.As(add(bc, ad));
+                        re = Value.As(sub(ac, bd))!;
+                        im = Value.As(add(bc, ad))!;
                     else if (op == token.QUO) 
                         // (ac+bd)/s + i(bc-ad)/s, with s = cc + dd
                         ac = mul(a, c);
@@ -1755,25 +1971,27 @@ namespace go
                         var cc = mul(c, c);
                         var dd = mul(d, d);
                         var s = add(cc, dd);
-                        re = Value.As(add(ac, bd));
-                        re = Value.As(quo(re, s));
-                        im = Value.As(sub(bc, ad));
-                        im = Value.As(quo(im, s));
+                        re = Value.As(add(ac, bd))!;
+                        re = Value.As(quo(re, s))!;
+                        im = Value.As(sub(bc, ad))!;
+                        im = Value.As(quo(im, s))!;
                     else 
                         goto Error;
                                         return makeComplex(re, im);
                     break;
-                case ref stringVal x:
+                case ptr<stringVal> x:
                     if (op == token.ADD)
                     {
-                        return ref new stringVal(l:x,r:y.(*stringVal));
+                        return addr(new stringVal(l:x,r:y.(*stringVal)));
                     }
+
                     break;
 
             }
 
 Error:
             panic(fmt.Sprintf("invalid binary operation %v %s %v", x_, op, y_));
+
         });
 
         private static Value add(Value x, Value y)
@@ -1810,9 +2028,10 @@ Error:
                         return x;
                     }
 
+
                     if (op == token.SHL) 
                         var z = i64toi(x).val;
-                        return makeInt(z.Lsh(z, s));
+                        return makeInt(_addr_z.Lsh(z, s));
                     else if (op == token.SHR) 
                         return x >> (int)(s);
                                         break;
@@ -1821,17 +2040,19 @@ Error:
                     {
                         return x;
                     }
+
                     z = newInt();
 
                     if (op == token.SHL) 
-                        return makeInt(z.Lsh(x.val, s));
+                        return makeInt(_addr_z.Lsh(x.val, s));
                     else if (op == token.SHR) 
-                        return makeInt(z.Rsh(x.val, s));
+                        return makeInt(_addr_z.Rsh(x.val, s));
                                         break;
 
             }
 
             panic(fmt.Sprintf("invalid shift %v %s %d", x, op, s));
+
         });
 
         private static bool cmpZero(long x, token.Token op) => func((_, panic, __) =>
@@ -1850,6 +2071,7 @@ Error:
             else if (op == token.GEQ) 
                 return x >= 0L;
                         panic(fmt.Sprintf("invalid comparison %v %s 0", x, op));
+
         });
 
         // Compare returns the result of the comparison x op y.
@@ -1909,9 +2131,9 @@ Error:
                     else if (op == token.NEQ) 
                         return !re || !im;
                                         break;
-                case ref stringVal x:
+                case ptr<stringVal> x:
                     var xs = x.@string();
-                    ref stringVal ys = y._<ref stringVal>().@string();
+                    ptr<stringVal> ys = y._<ptr<stringVal>>().@string();
 
                     if (op == token.EQL) 
                         return xs == ys;
@@ -1930,6 +2152,7 @@ Error:
             }
 
             panic(fmt.Sprintf("invalid comparison %v %s %v", x_, op, y_));
+
         });
     }
 }}

@@ -4,7 +4,7 @@
 
 // This file implements printing of syntax tree structures.
 
-// package syntax -- go2cs converted at 2020 August 29 09:26:03 UTC
+// package syntax -- go2cs converted at 2020 October 08 04:28:07 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\dumper.go
 using fmt = go.fmt_package;
@@ -27,6 +27,8 @@ namespace @internal
         // is guaranteed.
         public static error Fdump(io.Writer w, Node n) => func((defer, _, __) =>
         {
+            error err = default!;
+
             dumper p = new dumper(output:w,ptrmap:make(map[Node]int),last:'\n',);
 
             defer(() =>
@@ -39,17 +41,19 @@ namespace @internal
                         err = e._<localError>().err; // re-panics if it's not a localError
                     }
                 }
+
             }());
 
             if (n == null)
             {
                 p.printf("nil\n");
-                return;
+                return ;
             }
             p.dump(reflect.ValueOf(n), n);
             p.printf("\n");
 
-            return;
+            return ;
+
         });
 
         private partial struct dumper
@@ -63,8 +67,12 @@ namespace @internal
 
         private static slice<byte> indentBytes = (slice<byte>)".  ";
 
-        private static (long, error) Write(this ref dumper p, slice<byte> data)
+        private static (long, error) Write(this ptr<dumper> _addr_p, slice<byte> data)
         {
+            long n = default;
+            error err = default!;
+            ref dumper p = ref _addr_p.val;
+
             long m = default;
             foreach (var (i, b) in data)
             { 
@@ -75,8 +83,9 @@ namespace @internal
                     n += m;
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
+
                 }
                 else if (p.last == '\n')
                 {
@@ -84,26 +93,33 @@ namespace @internal
                     _, err = fmt.Fprintf(p.output, "%6d  ", p.line);
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
+
                     for (var j = p.indent; j > 0L; j--)
                     {
                         _, err = p.output.Write(indentBytes);
                         if (err != null)
                         {
-                            return;
+                            return ;
                         }
+
                     }
 
+
                 }
+
                 p.last = b;
+
             }
             if (len(data) > n)
             {
                 m, err = p.output.Write(data[n..]);
                 n += m;
             }
-            return;
+
+            return ;
+
         }
 
         // localError wraps locally caught errors so we can distinguish
@@ -114,8 +130,11 @@ namespace @internal
         }
 
         // printf is a convenience wrapper that takes care of print errors.
-        private static void printf(this ref dumper _p, @string format, params object[] args) => func(_p, (ref dumper p, Defer _, Panic panic, Recover __) =>
+        private static void printf(this ptr<dumper> _addr_p, @string format, params object[] args) => func((_, panic, __) =>
         {
+            args = args.Clone();
+            ref dumper p = ref _addr_p.val;
+
             {
                 var (_, err) = fmt.Fprintf(p, format, args);
 
@@ -125,6 +144,7 @@ namespace @internal
                 }
 
             }
+
         });
 
         // dump prints the contents of x.
@@ -134,38 +154,42 @@ namespace @internal
         // comments fields of the embedded isNode field by
         // calling the Span() and Comment() instead of using
         // reflection.
-        private static void dump(this ref dumper p, reflect.Value x, Node n)
+        private static void dump(this ptr<dumper> _addr_p, reflect.Value x, Node n)
         {
+            ref dumper p = ref _addr_p.val;
+
 
             if (x.Kind() == reflect.Interface) 
                 if (x.IsNil())
                 {
                     p.printf("nil");
-                    return;
+                    return ;
                 }
+
                 p.dump(x.Elem(), null);
             else if (x.Kind() == reflect.Ptr) 
                 if (x.IsNil())
                 {
                     p.printf("nil");
-                    return;
+                    return ;
                 } 
 
                 // special cases for identifiers w/o attached comments (common case)
                 {
-                    ref Name x__prev1 = x;
+                    ptr<Name> x__prev1 = x;
 
-                    ref Name (x, ok) = x.Interface()._<ref Name>();
+                    ptr<Name> (x, ok) = x.Interface()._<ptr<Name>>();
 
                     if (ok)
                     {
                         p.printf("%s @ %v", x.Value, x.Pos());
-                        return;
+                        return ;
                     }
 
                     x = x__prev1;
 
                 }
+
 
                 p.printf("*"); 
                 // Fields may share type expressions, and declarations
@@ -182,22 +206,26 @@ namespace @internal
                             if (exists)
                             {
                                 p.printf("(Node @ %d)", line);
-                                return;
+                                return ;
                             }
 
                         }
+
                         p.ptrmap[ptr] = p.line;
                         n = ptr;
+
                     }
 
                 }
+
                 p.dump(x.Elem(), n);
             else if (x.Kind() == reflect.Slice) 
                 if (x.IsNil())
                 {
                     p.printf("nil");
-                    return;
+                    return ;
                 }
+
                 p.printf("%s (%d entries) {", x.Type(), x.Len());
                 if (x.Len() > 0L)
                 {
@@ -220,7 +248,9 @@ namespace @internal
                         n = n__prev1;
                     }
                     p.indent--;
+
                 }
+
                 p.printf("}");
             else if (x.Kind() == reflect.Struct) 
                 var typ = x.Type(); 
@@ -245,6 +275,7 @@ namespace @internal
                     //     p.printf("\n")
                     // }
                 }
+
                 {
                     long i__prev1 = i;
                     var n__prev1 = n;
@@ -264,12 +295,15 @@ namespace @internal
                                     p.printf("\n");
                                     first = false;
                                 }
+
                                 p.printf("%s: ", name);
                                 p.dump(x.Field(i), null);
                                 p.printf("\n");
+
                             }
 
                         }
+
                     }
 
 
@@ -292,7 +326,8 @@ namespace @internal
                         break;
                     }
                 }
-                    }
+            
+        }
 
         private static bool isExported(@string name)
         {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:03 UTC
+//     Generated on 2020 October 08 04:42:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,9 @@ using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
+using time = go.time_package;
 using profile = go.github.com.google.pprof.profile_package;
 
 namespace go
@@ -41,7 +43,7 @@ namespace go
                 this.time = default;
             }
 
-            public Record(slice<ref trace.Frame> stk = default, ulong n = default, long time = default)
+            public Record(slice<ptr<trace.Frame>> stk = default, ulong n = default, long time = default)
             {
                 this.stk = stk;
                 this.n = n;

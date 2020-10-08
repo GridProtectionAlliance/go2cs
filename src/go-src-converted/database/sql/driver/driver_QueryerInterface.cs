@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Rows, error) QueryByRef(ref T value, @string query, slice<Value> args);
+            private delegate (Rows, error) QueryByPtr(ptr<T> value, @string query, slice<Value> args);
             private delegate (Rows, error) QueryByVal(T value, @string query, slice<Value> args);
 
-            private static readonly QueryByRef s_QueryByRef;
+            private static readonly QueryByPtr s_QueryByPtr;
             private static readonly QueryByVal s_QueryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_QueryByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_QueryByPtr is null || !m_target_is_ptr)
                     return s_QueryByVal!(target, query, args);
 
-                return s_QueryByRef(ref target, query, args);
+                return s_QueryByPtr(m_target_ptr, query, args);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static Queryer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Query");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Query");
 
                 if (!(extensionMethod is null))
-                    s_QueryByRef = extensionMethod.CreateStaticDelegate(typeof(QueryByRef)) as QueryByRef;
+                    s_QueryByPtr = extensionMethod.CreateStaticDelegate(typeof(QueryByPtr)) as QueryByPtr;
 
-                if (s_QueryByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Query");
+                extensionMethod = targetType.GetExtensionMethod("Query");
 
-                    if (!(extensionMethod is null))
-                        s_QueryByVal = extensionMethod.CreateStaticDelegate(typeof(QueryByVal)) as QueryByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_QueryByVal = extensionMethod.CreateStaticDelegate(typeof(QueryByVal)) as QueryByVal;
 
-                if (s_QueryByRef is null && s_QueryByVal is null)
+                if (s_QueryByPtr is null && s_QueryByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Queryer.Query method", new Exception("Query"));
             }
 

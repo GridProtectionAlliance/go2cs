@@ -4,7 +4,7 @@
 
 // This file implements printing of syntax trees in source format.
 
-// package syntax -- go2cs converted at 2020 August 29 09:26:23 UTC
+// package syntax -- go2cs converted at 2020 October 08 04:28:28 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\printer.go
 using bytes = go.bytes_package;
@@ -25,6 +25,9 @@ namespace @internal
         // Its likely rarely used in common cases.
         public static (long, error) Fprint(io.Writer w, Node x, bool linebreaks) => func((defer, _, __) =>
         {
+            long n = default;
+            error err = default!;
+
             printer p = new printer(output:w,linebreaks:linebreaks,);
 
             defer(() =>
@@ -38,35 +41,39 @@ namespace @internal
                         err = e._<localError>().err; // re-panics if it's not a localError
                     }
                 }
+
             }());
 
             p.print(x);
             p.flush(_EOF);
 
-            return;
+            return ;
+
         });
 
         public static @string String(Node n) => func((_, panic, __) =>
         {
-            bytes.Buffer buf = default;
-            var (_, err) = Fprint(ref buf, n, false);
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            var (_, err) = Fprint(_addr_buf, n, false);
             if (err != null)
             {
                 panic(err); // TODO(gri) print something sensible into buf instead
             }
+
             return buf.String();
+
         });
 
         private partial struct ctrlSymbol // : long
         {
         }
 
-        private static readonly ctrlSymbol none = iota;
-        private static readonly var semi = 0;
-        private static readonly var blank = 1;
-        private static readonly var newline = 2;
-        private static readonly var indent = 3;
-        private static readonly var outdent = 4; 
+        private static readonly ctrlSymbol none = (ctrlSymbol)iota;
+        private static readonly var semi = (var)0;
+        private static readonly var blank = (var)1;
+        private static readonly var newline = (var)2;
+        private static readonly var indent = (var)3;
+        private static readonly var outdent = (var)4; 
         // comment
         // eolComment
 
@@ -91,24 +98,30 @@ namespace @internal
 
         // write is a thin wrapper around p.output.Write
         // that takes care of accounting and error handling.
-        private static void write(this ref printer _p, slice<byte> data) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
+        private static void write(this ptr<printer> _addr_p, slice<byte> data) => func((_, panic, __) =>
         {
+            ref printer p = ref _addr_p.val;
+
             var (n, err) = p.output.Write(data);
             p.written += n;
             if (err != null)
             {
                 panic(new localError(err));
             }
+
         });
 
         private static slice<byte> tabBytes = (slice<byte>)"\t\t\t\t\t\t\t\t";        private static slice<byte> newlineByte = (slice<byte>)"\n";        private static slice<byte> blankByte = (slice<byte>)" ";
 
-        private static void writeBytes(this ref printer _p, slice<byte> data) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
+        private static void writeBytes(this ptr<printer> _addr_p, slice<byte> data) => func((_, panic, __) =>
         {
+            ref printer p = ref _addr_p.val;
+
             if (len(data) == 0L)
             {
                 panic("expected non-empty []byte");
             }
+
             if (p.nlcount > 0L && p.indent > 0L)
             { 
                 // write indentation
@@ -120,13 +133,18 @@ namespace @internal
                 }
 
                 p.write(tabBytes[..n]);
+
             }
+
             p.write(data);
             p.nlcount = 0L;
+
         });
 
-        private static void writeString(this ref printer p, @string s)
+        private static void writeString(this ptr<printer> _addr_p, @string s)
         {
+            ref printer p = ref _addr_p.val;
+
             p.writeBytes((slice<byte>)s);
         }
 
@@ -139,6 +157,7 @@ namespace @internal
             if (tok == _Name || tok == _Break || tok == _Continue || tok == _Fallthrough || tok == _Return || tok == _Rparen || tok == _Rbrack || tok == _Rbrace) // TODO(gri) fix this
                 return true;
                         return false;
+
         }
 
         // TODO(gri) provide table of []byte values for all tokens to avoid repeated string conversion
@@ -148,8 +167,10 @@ namespace @internal
             return strings.HasPrefix(text, "//");
         }
 
-        private static void addWhitespace(this ref printer p, ctrlSymbol kind, @string text)
+        private static void addWhitespace(this ptr<printer> _addr_p, ctrlSymbol kind, @string text)
         {
+            ref printer p = ref _addr_p.val;
+
             p.pending = append(p.pending, new whitespace(p.lastTok,kind));
 
             if (kind == semi) 
@@ -159,8 +180,10 @@ namespace @internal
                 // TODO(gri) do we need to handle /*-style comments containing newlines here?
                     }
 
-        private static void flush(this ref printer _p, token next) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
-        { 
+        private static void flush(this ptr<printer> _addr_p, token next) => func((_, panic, __) =>
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // eliminate semis and redundant whitespace
             var sawNewline = next == _EOF;
             var sawParen = next == _Rparen || next == _Rbrace;
@@ -182,12 +205,14 @@ namespace @internal
                             sawNewline = false;
                             k = none; // eliminate semi
                         }
+
                         p.pending[i].kind = k;
                     else if (p.pending[i].kind == newline) 
                         sawNewline = true;
                     else if (p.pending[i].kind == blank || p.pending[i].kind == indent || p.pending[i].kind == outdent)                     else 
                         panic("unreachable");
-                                    } 
+                    
+                } 
 
                 // print pending
 
@@ -215,9 +240,11 @@ namespace @internal
                             p.writeBytes(blankByte);
                             p.nlcount = 0L;
                             prev = blank;
+
                         }
+
                     else if (p.pending[i].kind == newline) 
-                        const long maxEmptyLines = 1L;
+                        const long maxEmptyLines = (long)1L;
 
                         if (p.nlcount <= maxEmptyLines)
                         {
@@ -225,6 +252,7 @@ namespace @internal
                             p.nlcount++;
                             prev = newline;
                         }
+
                     else if (p.pending[i].kind == indent) 
                         p.indent++;
                     else if (p.pending[i].kind == outdent) 
@@ -242,7 +270,8 @@ namespace @internal
                         //     // TODO(gri) should check that line comments are always followed by newline
                     else 
                         panic("unreachable");
-                                    }
+                    
+                }
 
                 i = i__prev1;
             }
@@ -252,7 +281,9 @@ namespace @internal
 
         private static bool mayCombine(token prev, byte next)
         {
-            return; // for now
+            bool b = default;
+
+            return ; // for now
             // switch prev {
             // case lexical.Int:
             //     b = next == '.' // 1.
@@ -270,8 +301,11 @@ namespace @internal
             // return
         }
 
-        private static void print(this ref printer _p, params object[] args) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
+        private static void print(this ptr<printer> _addr_p, params object[] args) => func((_, panic, __) =>
         {
+            args = args.Clone();
+            ref printer p = ref _addr_p.val;
+
             for (long i = 0L; i < len(args); i++)
             {
                 switch (args[i].type())
@@ -290,7 +324,9 @@ namespace @internal
                             {
                                 panic("missing string argument after _Name");
                             }
+
                             s = args[i]._<@string>();
+
                         }
                         else
                         {
@@ -303,10 +339,12 @@ namespace @internal
                         {
                             panic("adjacent tokens combine without whitespace");
                         }
+
                         if (x == _Semi)
                         { 
                             // delay printing of semi
                             p.addWhitespace(semi, "");
+
                         }
                         else
                         {
@@ -315,6 +353,7 @@ namespace @internal
                             p.nlcount = 0L;
                             p.lastTok = x;
                         }
+
                         break;
                     case Operator x:
                         if (x != 0L)
@@ -322,6 +361,7 @@ namespace @internal
                             p.flush(_Operator);
                             p.writeString(x.String());
                         }
+
                         break;
                     case ctrlSymbol x:
 
@@ -333,6 +373,7 @@ namespace @internal
                             {
                                 x = blank;
                             }
+
                                                 p.addWhitespace(x, ""); 
 
                         // case *Comment: // comments are not Nodes
@@ -345,12 +386,16 @@ namespace @internal
                         break;
                     }
                 }
+
             }
+
 
         });
 
-        private static void printNode(this ref printer p, Node n)
-        { 
+        private static void printNode(this ptr<printer> _addr_p, Node n)
+        {
+            ref printer p = ref _addr_p.val;
+ 
             // ncom := *n.Comments()
             // if ncom != nil {
             //     // TODO(gri) in general we cannot make assumptions about whether
@@ -383,29 +428,32 @@ namespace @internal
             // }
         }
 
-        private static void printRawNode(this ref printer _p, Node n) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
+        private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, panic, __) =>
         {
+            ref printer p = ref _addr_p.val;
+
             switch (n.type())
             {
                 case 
                     break;
-                case ref BadExpr n:
+                case ptr<BadExpr> n:
                     p.print(_Name, "<bad expr>");
                     break;
-                case ref Name n:
+                case ptr<Name> n:
                     p.print(_Name, n.Value); // _Name requires actual value following immediately
                     break;
-                case ref BasicLit n:
+                case ptr<BasicLit> n:
                     p.print(_Name, n.Value); // _Name requires actual value following immediately
                     break;
-                case ref FuncLit n:
+                case ptr<FuncLit> n:
                     p.print(n.Type, blank, n.Body);
                     break;
-                case ref CompositeLit n:
+                case ptr<CompositeLit> n:
                     if (n.Type != null)
                     {
                         p.print(n.Type);
                     }
+
                     p.print(_Lbrace);
                     if (n.NKeys > 0L && n.NKeys == len(n.ElemList))
                     {
@@ -415,18 +463,19 @@ namespace @internal
                     {
                         p.printExprList(n.ElemList);
                     }
+
                     p.print(_Rbrace);
                     break;
-                case ref ParenExpr n:
+                case ptr<ParenExpr> n:
                     p.print(_Lparen, n.X, _Rparen);
                     break;
-                case ref SelectorExpr n:
+                case ptr<SelectorExpr> n:
                     p.print(n.X, _Dot, n.Sel);
                     break;
-                case ref IndexExpr n:
+                case ptr<IndexExpr> n:
                     p.print(n.X, _Lbrack, n.Index, _Rbrack);
                     break;
-                case ref SliceExpr n:
+                case ptr<SliceExpr> n:
                     p.print(n.X, _Lbrack);
                     {
                         var i = n.Index[0L];
@@ -437,6 +486,7 @@ namespace @internal
                         }
 
                     }
+
                     p.print(_Colon);
                     {
                         var j = n.Index[1L];
@@ -447,6 +497,7 @@ namespace @internal
                         }
 
                     }
+
                     {
                         var k = n.Index[2L];
 
@@ -456,30 +507,31 @@ namespace @internal
                         }
 
                     }
+
                     p.print(_Rbrack);
                     break;
-                case ref AssertExpr n:
-                    p.print(n.X, _Dot, _Lparen);
-                    if (n.Type != null)
-                    {
-                        p.printNode(n.Type);
-                    }
-                    else
-                    {
-                        p.print(_Type);
-                    }
-                    p.print(_Rparen);
+                case ptr<AssertExpr> n:
+                    p.print(n.X, _Dot, _Lparen, n.Type, _Rparen);
                     break;
-                case ref CallExpr n:
+                case ptr<TypeSwitchGuard> n:
+                    if (n.Lhs != null)
+                    {
+                        p.print(n.Lhs, blank, _Define, blank);
+                    }
+
+                    p.print(n.X, _Dot, _Lparen, _Type, _Rparen);
+                    break;
+                case ptr<CallExpr> n:
                     p.print(n.Fun, _Lparen);
                     p.printExprList(n.ArgList);
                     if (n.HasDots)
                     {
                         p.print(_DotDotDot);
                     }
+
                     p.print(_Rparen);
                     break;
-                case ref Operation n:
+                case ptr<Operation> n:
                     if (n.Y == null)
                     { 
                         // unary expr
@@ -488,6 +540,7 @@ namespace @internal
                         //     p.print(blank)
                         // }
                         p.print(n.X);
+
                     }
                     else
                     { 
@@ -495,34 +548,38 @@ namespace @internal
                         // TODO(gri) eventually take precedence into account
                         // to control possibly missing parentheses
                         p.print(n.X, blank, n.Op, blank, n.Y);
+
                     }
+
                     break;
-                case ref KeyValueExpr n:
+                case ptr<KeyValueExpr> n:
                     p.print(n.Key, _Colon, blank, n.Value);
                     break;
-                case ref ListExpr n:
+                case ptr<ListExpr> n:
                     p.printExprList(n.ElemList);
                     break;
-                case ref ArrayType n:
+                case ptr<ArrayType> n:
                     var len = _DotDotDot;
                     if (n.Len != null)
                     {
                         len = n.Len;
                     }
+
                     p.print(_Lbrack, len, _Rbrack, n.Elem);
                     break;
-                case ref SliceType n:
+                case ptr<SliceType> n:
                     p.print(_Lbrack, _Rbrack, n.Elem);
                     break;
-                case ref DotsType n:
+                case ptr<DotsType> n:
                     p.print(_DotDotDot, n.Elem);
                     break;
-                case ref StructType n:
+                case ptr<StructType> n:
                     p.print(_Struct);
                     if (len(n.FieldList) > 0L && p.linebreaks)
                     {
                         p.print(blank);
                     }
+
                     p.print(_Lbrace);
                     if (len(n.FieldList) > 0L)
                     {
@@ -530,18 +587,20 @@ namespace @internal
                         p.printFieldList(n.FieldList, n.TagList);
                         p.print(outdent, newline);
                     }
+
                     p.print(_Rbrace);
                     break;
-                case ref FuncType n:
+                case ptr<FuncType> n:
                     p.print(_Func);
                     p.printSignature(n);
                     break;
-                case ref InterfaceType n:
+                case ptr<InterfaceType> n:
                     p.print(_Interface);
                     if (len(n.MethodList) > 0L && p.linebreaks)
                     {
                         p.print(blank);
                     }
+
                     p.print(_Lbrace);
                     if (len(n.MethodList) > 0L)
                     {
@@ -549,40 +608,43 @@ namespace @internal
                         p.printMethodList(n.MethodList);
                         p.print(outdent, newline);
                     }
+
                     p.print(_Rbrace);
                     break;
-                case ref MapType n:
+                case ptr<MapType> n:
                     p.print(_Map, _Lbrack, n.Key, _Rbrack, n.Value);
                     break;
-                case ref ChanType n:
+                case ptr<ChanType> n:
                     if (n.Dir == RecvOnly)
                     {
                         p.print(_Arrow);
                     }
+
                     p.print(_Chan);
                     if (n.Dir == SendOnly)
                     {
                         p.print(_Arrow);
                     }
+
                     p.print(blank, n.Elem); 
 
                     // statements
                     break;
-                case ref DeclStmt n:
+                case ptr<DeclStmt> n:
                     p.printDecl(n.DeclList);
                     break;
-                case ref EmptyStmt n:
+                case ptr<EmptyStmt> n:
                     break;
-                case ref LabeledStmt n:
+                case ptr<LabeledStmt> n:
                     p.print(outdent, n.Label, _Colon, indent, newline, n.Stmt);
                     break;
-                case ref ExprStmt n:
+                case ptr<ExprStmt> n:
                     p.print(n.X);
                     break;
-                case ref SendStmt n:
+                case ptr<SendStmt> n:
                     p.print(n.Chan, blank, _Arrow, blank, n.Value);
                     break;
-                case ref AssignStmt n:
+                case ptr<AssignStmt> n:
                     p.print(n.Lhs);
                     if (n.Rhs == ImplicitOne)
                     { 
@@ -595,25 +657,28 @@ namespace @internal
                         p.print(blank, n.Op, _Assign, blank);
                         p.print(n.Rhs);
                     }
+
                     break;
-                case ref CallStmt n:
+                case ptr<CallStmt> n:
                     p.print(n.Tok, blank, n.Call);
                     break;
-                case ref ReturnStmt n:
+                case ptr<ReturnStmt> n:
                     p.print(_Return);
                     if (n.Results != null)
                     {
                         p.print(blank, n.Results);
                     }
+
                     break;
-                case ref BranchStmt n:
+                case ptr<BranchStmt> n:
                     p.print(n.Tok);
                     if (n.Label != null)
                     {
                         p.print(blank, n.Label);
                     }
+
                     break;
-                case ref BlockStmt n:
+                case ptr<BlockStmt> n:
                     p.print(_Lbrace);
                     if (len(n.List) > 0L)
                     {
@@ -621,44 +686,42 @@ namespace @internal
                         p.printStmtList(n.List, true);
                         p.print(outdent, newline);
                     }
+
                     p.print(_Rbrace);
                     break;
-                case ref IfStmt n:
+                case ptr<IfStmt> n:
                     p.print(_If, blank);
                     if (n.Init != null)
                     {
                         p.print(n.Init, _Semi, blank);
                     }
+
                     p.print(n.Cond, blank, n.Then);
                     if (n.Else != null)
                     {
                         p.print(blank, _Else, blank, n.Else);
                     }
+
                     break;
-                case ref SwitchStmt n:
+                case ptr<SwitchStmt> n:
                     p.print(_Switch, blank);
                     if (n.Init != null)
                     {
                         p.print(n.Init, _Semi, blank);
                     }
+
                     if (n.Tag != null)
                     {
                         p.print(n.Tag, blank);
                     }
+
                     p.printSwitchBody(n.Body);
                     break;
-                case ref TypeSwitchGuard n:
-                    if (n.Lhs != null)
-                    {
-                        p.print(n.Lhs, blank, _Define, blank);
-                    }
-                    p.print(n.X, _Dot, _Lparen, _Type, _Rparen);
-                    break;
-                case ref SelectStmt n:
+                case ptr<SelectStmt> n:
                     p.print(_Select, blank); // for now
                     p.printSelectBody(n.Body);
                     break;
-                case ref RangeClause n:
+                case ptr<RangeClause> n:
                     if (n.Lhs != null)
                     {
                         var tok = _Assign;
@@ -666,11 +729,14 @@ namespace @internal
                         {
                             tok = _Define;
                         }
+
                         p.print(n.Lhs, blank, tok, blank);
+
                     }
+
                     p.print(_Range, blank, n.X);
                     break;
-                case ref ForStmt n:
+                case ptr<ForStmt> n:
                     p.print(_For, blank);
                     if (n.Init == null && n.Post == null)
                     {
@@ -678,6 +744,7 @@ namespace @internal
                         {
                             p.print(n.Cond, blank);
                         }
+
                     }
                     else
                     {
@@ -686,7 +753,7 @@ namespace @internal
                             p.print(n.Init); 
                             // TODO(gri) clean this up
                             {
-                                ref RangeClause (_, ok) = n.Init._<ref RangeClause>();
+                                ptr<RangeClause> (_, ok) = n.Init._<ptr<RangeClause>>();
 
                                 if (ok)
                                 {
@@ -695,74 +762,89 @@ namespace @internal
                                 }
 
                             }
+
                         }
+
                         p.print(_Semi, blank);
                         if (n.Cond != null)
                         {
                             p.print(n.Cond);
                         }
+
                         p.print(_Semi, blank);
                         if (n.Post != null)
                         {
                             p.print(n.Post, blank);
                         }
+
                     }
+
                     p.print(n.Body);
                     break;
-                case ref ImportDecl n:
+                case ptr<ImportDecl> n:
                     if (n.Group == null)
                     {
                         p.print(_Import, blank);
                     }
+
                     if (n.LocalPkgName != null)
                     {
                         p.print(n.LocalPkgName, blank);
                     }
+
                     p.print(n.Path);
                     break;
-                case ref ConstDecl n:
+                case ptr<ConstDecl> n:
                     if (n.Group == null)
                     {
                         p.print(_Const, blank);
                     }
+
                     p.printNameList(n.NameList);
                     if (n.Type != null)
                     {
                         p.print(blank, n.Type);
                     }
+
                     if (n.Values != null)
                     {
                         p.print(blank, _Assign, blank, n.Values);
                     }
+
                     break;
-                case ref TypeDecl n:
+                case ptr<TypeDecl> n:
                     if (n.Group == null)
                     {
                         p.print(_Type, blank);
                     }
+
                     p.print(n.Name, blank);
                     if (n.Alias)
                     {
                         p.print(_Assign, blank);
                     }
+
                     p.print(n.Type);
                     break;
-                case ref VarDecl n:
+                case ptr<VarDecl> n:
                     if (n.Group == null)
                     {
                         p.print(_Var, blank);
                     }
+
                     p.printNameList(n.NameList);
                     if (n.Type != null)
                     {
                         p.print(blank, n.Type);
                     }
+
                     if (n.Values != null)
                     {
                         p.print(blank, _Assign, blank, n.Values);
                     }
+
                     break;
-                case ref FuncDecl n:
+                case ptr<FuncDecl> n:
                     p.print(_Func, blank);
                     {
                         var r = n.Recv;
@@ -774,19 +856,23 @@ namespace @internal
                             {
                                 p.print(r.Name, blank);
                             }
+
                             p.printNode(r.Type);
                             p.print(_Rparen, blank);
+
                         }
 
                     }
+
                     p.print(n.Name);
                     p.printSignature(n.Type);
                     if (n.Body != null)
                     {
                         p.print(blank, n.Body);
                     }
+
                     break;
-                case ref printGroup n:
+                case ptr<printGroup> n:
                     p.print(n.Tok, blank, _Lparen);
                     if (len(n.Decls) > 0L)
                     {
@@ -797,18 +883,21 @@ namespace @internal
                             p.print(_Semi, newline);
                         }
                         p.print(outdent);
+
                     }
+
                     p.print(_Rparen); 
 
                     // files
                     break;
-                case ref File n:
+                case ptr<File> n:
                     p.print(_Package, blank, n.PkgName);
                     if (len(n.DeclList) > 0L)
                     {
                         p.print(_Semi, newline, newline);
                         p.printDeclList(n.DeclList);
                     }
+
                     break;
                 default:
                 {
@@ -817,14 +906,18 @@ namespace @internal
                     break;
                 }
             }
+
         });
 
-        private static void printFields(this ref printer p, slice<ref Field> fields, slice<ref BasicLit> tags, long i, long j)
+        private static void printFields(this ptr<printer> _addr_p, slice<ptr<Field>> fields, slice<ptr<BasicLit>> tags, long i, long j)
         {
+            ref printer p = ref _addr_p.val;
+
             if (i + 1L == j && fields[i].Name == null)
             { 
                 // anonymous field
                 p.printNode(fields[i].Type);
+
             }
             else
             {
@@ -834,20 +927,27 @@ namespace @internal
                     {
                         p.print(_Comma, blank);
                     }
+
                     p.printNode(f.Name);
+
                 }
                 p.print(blank);
                 p.printNode(fields[i].Type);
+
             }
+
             if (i < len(tags) && tags[i] != null)
             {
                 p.print(blank);
                 p.printNode(tags[i]);
             }
+
         }
 
-        private static void printFieldList(this ref printer p, slice<ref Field> fields, slice<ref BasicLit> tags)
+        private static void printFieldList(this ptr<printer> _addr_p, slice<ptr<Field>> fields, slice<ptr<BasicLit>> tags)
         {
+            ref printer p = ref _addr_p.val;
+
             long i0 = 0L;
             Expr typ = default;
             foreach (var (i, f) in fields)
@@ -860,58 +960,79 @@ namespace @internal
                         p.print(_Semi, newline);
                         i0 = i;
                     }
+
                     typ = f.Type;
+
                 }
+
             }
             p.printFields(fields, tags, i0, len(fields));
+
         }
 
-        private static void printMethodList(this ref printer p, slice<ref Field> methods)
+        private static void printMethodList(this ptr<printer> _addr_p, slice<ptr<Field>> methods)
         {
+            ref printer p = ref _addr_p.val;
+
             foreach (var (i, m) in methods)
             {
                 if (i > 0L)
                 {
                     p.print(_Semi, newline);
                 }
+
                 if (m.Name != null)
                 {
                     p.printNode(m.Name);
-                    p.printSignature(m.Type._<ref FuncType>());
+                    p.printSignature(m.Type._<ptr<FuncType>>());
                 }
                 else
                 {
                     p.printNode(m.Type);
                 }
+
             }
+
         }
 
-        private static void printNameList(this ref printer p, slice<ref Name> list)
+        private static void printNameList(this ptr<printer> _addr_p, slice<ptr<Name>> list)
         {
+            ref printer p = ref _addr_p.val;
+
             foreach (var (i, x) in list)
             {
                 if (i > 0L)
                 {
                     p.print(_Comma, blank);
                 }
+
                 p.printNode(x);
+
             }
+
         }
 
-        private static void printExprList(this ref printer p, slice<Expr> list)
+        private static void printExprList(this ptr<printer> _addr_p, slice<Expr> list)
         {
+            ref printer p = ref _addr_p.val;
+
             foreach (var (i, x) in list)
             {
                 if (i > 0L)
                 {
                     p.print(_Comma, blank);
                 }
+
                 p.printNode(x);
+
             }
+
         }
 
-        private static void printExprLines(this ref printer p, slice<Expr> list)
+        private static void printExprLines(this ptr<printer> _addr_p, slice<Expr> list)
         {
+            ref printer p = ref _addr_p.val;
+
             if (len(list) > 0L)
             {
                 p.print(newline, indent);
@@ -920,27 +1041,32 @@ namespace @internal
                     p.print(x, _Comma, newline);
                 }
                 p.print(outdent);
+
             }
+
         }
 
-        private static (token, ref Group) groupFor(Decl d) => func((_, panic, __) =>
+        private static (token, ptr<Group>) groupFor(Decl d) => func((_, panic, __) =>
         {
+            token _p0 = default;
+            ptr<Group> _p0 = default!;
+
             switch (d.type())
             {
-                case ref ImportDecl d:
-                    return (_Import, d.Group);
+                case ptr<ImportDecl> d:
+                    return (_Import, _addr_d.Group!);
                     break;
-                case ref ConstDecl d:
-                    return (_Const, d.Group);
+                case ptr<ConstDecl> d:
+                    return (_Const, _addr_d.Group!);
                     break;
-                case ref TypeDecl d:
-                    return (_Type, d.Group);
+                case ptr<TypeDecl> d:
+                    return (_Type, _addr_d.Group!);
                     break;
-                case ref VarDecl d:
-                    return (_Var, d.Group);
+                case ptr<VarDecl> d:
+                    return (_Var, _addr_d.Group!);
                     break;
-                case ref FuncDecl d:
-                    return (_Func, null);
+                case ptr<FuncDecl> d:
+                    return (_Func, _addr_null!);
                     break;
                 default:
                 {
@@ -949,6 +1075,7 @@ namespace @internal
                     break;
                 }
             }
+
         });
 
         private partial struct printGroup
@@ -958,8 +1085,10 @@ namespace @internal
             public slice<Decl> Decls;
         }
 
-        private static void printDecl(this ref printer _p, slice<Decl> list) => func(_p, (ref printer p, Defer _, Panic panic, Recover __) =>
+        private static void printDecl(this ptr<printer> _addr_p, slice<Decl> list) => func((_, panic, __) =>
         {
+            ref printer p = ref _addr_p.val;
+
             var (tok, group) = groupFor(list[0L]);
 
             if (group == null)
@@ -968,8 +1097,10 @@ namespace @internal
                 {
                     panic("unreachable");
                 }
+
                 p.printNode(list[0L]);
-                return;
+                return ;
+
             } 
 
             // if _, ok := list[0].(*EmptyDecl); ok {
@@ -983,18 +1114,21 @@ namespace @internal
 
             // printGroup is here for consistent comment handling
             // (this is not yet used)
-            printGroup pg = default; 
+            ref printGroup pg = ref heap(out ptr<printGroup> _addr_pg); 
             // *pg.Comments() = *group.Comments()
             pg.Tok = tok;
             pg.Decls = list;
-            p.printNode(ref pg);
+            p.printNode(_addr_pg);
+
         });
 
-        private static void printDeclList(this ref printer p, slice<Decl> list)
+        private static void printDeclList(this ptr<printer> _addr_p, slice<Decl> list)
         {
+            ref printer p = ref _addr_p.val;
+
             long i0 = 0L;
             token tok = default;
-            ref Group group = default;
+            ptr<Group> group;
             foreach (var (i, x) in list)
             {
                 {
@@ -1012,19 +1146,28 @@ namespace @internal
                             {
                                 p.print(newline);
                             }
+
                             i0 = i;
+
                         }
+
                         tok = s;
                         group = g;
+
                     }
 
                 }
+
             }
             p.printDecl(list[i0..]);
+
         }
 
-        private static void printSignature(this ref printer p, ref FuncType sig)
+        private static void printSignature(this ptr<printer> _addr_p, ptr<FuncType> _addr_sig)
         {
+            ref printer p = ref _addr_p.val;
+            ref FuncType sig = ref _addr_sig.val;
+
             p.printParameterList(sig.ParamList);
             {
                 var list = sig.ResultList;
@@ -1040,13 +1183,17 @@ namespace @internal
                     {
                         p.printParameterList(list);
                     }
+
                 }
 
             }
+
         }
 
-        private static void printParameterList(this ref printer p, slice<ref Field> list)
+        private static void printParameterList(this ptr<printer> _addr_p, slice<ptr<Field>> list)
         {
+            ref printer p = ref _addr_p.val;
+
             p.print(_Lparen);
             if (len(list) > 0L)
             {
@@ -1056,6 +1203,7 @@ namespace @internal
                     {
                         p.print(_Comma, blank);
                     }
+
                     if (f.Name != null)
                     {
                         p.printNode(f.Name);
@@ -1066,17 +1214,27 @@ namespace @internal
                             {
                                 continue; // no need to print type
                             }
+
                         }
+
                         p.print(blank);
+
                     }
+
                     p.printNode(f.Type);
+
                 }
+
             }
+
             p.print(_Rparen);
+
         }
 
-        private static void printStmtList(this ref printer p, slice<Stmt> list, bool braces)
+        private static void printStmtList(this ptr<printer> _addr_p, slice<Stmt> list, bool braces)
         {
+            ref printer p = ref _addr_p.val;
+
             foreach (var (i, x) in list)
             {
                 p.print(x, _Semi);
@@ -1090,7 +1248,7 @@ namespace @internal
                     // an empty statement and we are in a braced block
                     // because one semicolon is automatically removed.
                     {
-                        ref EmptyStmt (_, ok) = x._<ref EmptyStmt>();
+                        ptr<EmptyStmt> (_, ok) = x._<ptr<EmptyStmt>>();
 
                         if (ok)
                         {
@@ -1098,12 +1256,17 @@ namespace @internal
                         }
 
                     }
+
                 }
+
             }
+
         }
 
-        private static void printSwitchBody(this ref printer p, slice<ref CaseClause> list)
+        private static void printSwitchBody(this ptr<printer> _addr_p, slice<ptr<CaseClause>> list)
         {
+            ref printer p = ref _addr_p.val;
+
             p.print(_Lbrace);
             if (len(list) > 0L)
             {
@@ -1113,12 +1276,17 @@ namespace @internal
                     p.printCaseClause(c, i + 1L == len(list));
                     p.print(newline);
                 }
+
             }
+
             p.print(_Rbrace);
+
         }
 
-        private static void printSelectBody(this ref printer p, slice<ref CommClause> list)
+        private static void printSelectBody(this ptr<printer> _addr_p, slice<ptr<CommClause>> list)
         {
+            ref printer p = ref _addr_p.val;
+
             p.print(_Lbrace);
             if (len(list) > 0L)
             {
@@ -1128,12 +1296,18 @@ namespace @internal
                     p.printCommClause(c, i + 1L == len(list));
                     p.print(newline);
                 }
+
             }
+
             p.print(_Rbrace);
+
         }
 
-        private static void printCaseClause(this ref printer p, ref CaseClause c, bool braces)
+        private static void printCaseClause(this ptr<printer> _addr_p, ptr<CaseClause> _addr_c, bool braces)
         {
+            ref printer p = ref _addr_p.val;
+            ref CaseClause c = ref _addr_c.val;
+
             if (c.Cases != null)
             {
                 p.print(_Case, blank, c.Cases);
@@ -1142,6 +1316,7 @@ namespace @internal
             {
                 p.print(_Default);
             }
+
             p.print(_Colon);
             if (len(c.Body) > 0L)
             {
@@ -1149,10 +1324,14 @@ namespace @internal
                 p.printStmtList(c.Body, braces);
                 p.print(outdent);
             }
+
         }
 
-        private static void printCommClause(this ref printer p, ref CommClause c, bool braces)
+        private static void printCommClause(this ptr<printer> _addr_p, ptr<CommClause> _addr_c, bool braces)
         {
+            ref printer p = ref _addr_p.val;
+            ref CommClause c = ref _addr_c.val;
+
             if (c.Comm != null)
             {
                 p.print(_Case, blank);
@@ -1162,6 +1341,7 @@ namespace @internal
             {
                 p.print(_Default);
             }
+
             p.print(_Colon);
             if (len(c.Body) > 0L)
             {
@@ -1169,6 +1349,7 @@ namespace @internal
                 p.printStmtList(c.Body, braces);
                 p.print(outdent);
             }
+
         }
     }
 }}}}

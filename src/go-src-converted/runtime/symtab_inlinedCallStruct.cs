@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:05 UTC
+//     Generated on 2020 October 08 03:23:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,17 +28,23 @@ namespace go
             public inlinedCall(NilType _)
             {
                 this.parent = default;
+                this.funcID = default;
+                this._ = default;
                 this.file = default;
                 this.line = default;
                 this.func_ = default;
+                this.parentPc = default;
             }
 
-            public inlinedCall(int parent = default, int file = default, int line = default, int func_ = default)
+            public inlinedCall(short parent = default, funcID funcID = default, byte _ = default, int file = default, int line = default, int func_ = default, int parentPc = default)
             {
                 this.parent = parent;
+                this.funcID = funcID;
+                this._ = _;
                 this.file = file;
                 this.line = line;
                 this.func_ = func_;
+                this.parentPc = parentPc;
             }
 
             // Enable comparisons between nil and inlinedCall struct
@@ -61,7 +67,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static inlinedCall inlinedCall_cast(dynamic value)
         {
-            return new inlinedCall(value.parent, value.file, value.line, value.func_);
+            return new inlinedCall(value.parent, value.funcID, value._, value.file, value.line, value.func_, value.parentPc);
         }
     }
 }

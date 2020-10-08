@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:43 UTC
+//     Generated on 2020 October 08 04:02:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,8 +15,6 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using token = go.go.token_package;
 using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go;
 
 namespace go {
@@ -36,7 +34,7 @@ namespace go
                 this.Files = default;
             }
 
-            public Package(@string Name = default, ref ptr<Scope> Scope = default, map<@string, ref Object> Imports = default, map<@string, ref File> Files = default)
+            public Package(@string Name = default, ref ptr<Scope> Scope = default, map<@string, ptr<Object>> Imports = default, map<@string, ptr<File>> Files = default)
             {
                 this.Name = Name;
                 this.Scope = Scope;

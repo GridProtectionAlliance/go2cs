@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:52 UTC
+//     Generated on 2020 October 08 04:03:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
@@ -42,7 +43,7 @@ namespace go
                 this.deps = default;
             }
 
-            public declInfo(ref ptr<Scope> file = default, slice<ref Var> lhs = default, ast.Expr typ = default, ast.Expr init = default, ref ptr<ast.FuncDecl> fdecl = default, bool alias = default, objSet deps = default)
+            public declInfo(ref ptr<Scope> file = default, slice<ptr<Var>> lhs = default, ast.Expr typ = default, ast.Expr init = default, ref ptr<ast.FuncDecl> fdecl = default, bool alias = default, map<Object, bool> deps = default)
             {
                 this.file = file;
                 this.lhs = lhs;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:43 UTC
+//     Generated on 2020 October 08 03:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,12 +29,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -70,7 +71,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -84,23 +85,24 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (net.Conn, ref bufio.ReadWriter, error) HijackByRef(ref T value);
-            private delegate (net.Conn, ref bufio.ReadWriter, error) HijackByVal(T value);
+            private delegate (net.Conn, ptr<bufio.ReadWriter>, error) HijackByPtr(ptr<T> value);
+            private delegate (net.Conn, ptr<bufio.ReadWriter>, error) HijackByVal(T value);
 
-            private static readonly HijackByRef s_HijackByRef;
+            private static readonly HijackByPtr s_HijackByPtr;
             private static readonly HijackByVal s_HijackByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (net.Conn, ref bufio.ReadWriter, error) Hijack()
+            public (net.Conn, ptr<bufio.ReadWriter>, error) Hijack()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_HijackByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_HijackByPtr is null || !m_target_is_ptr)
                     return s_HijackByVal!(target);
 
-                return s_HijackByRef(ref target);
+                return s_HijackByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -109,23 +111,20 @@ namespace net
             static Hijacker()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Hijack");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Hijack");
 
                 if (!(extensionMethod is null))
-                    s_HijackByRef = extensionMethod.CreateStaticDelegate(typeof(HijackByRef)) as HijackByRef;
+                    s_HijackByPtr = extensionMethod.CreateStaticDelegate(typeof(HijackByPtr)) as HijackByPtr;
 
-                if (s_HijackByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Hijack");
+                extensionMethod = targetType.GetExtensionMethod("Hijack");
 
-                    if (!(extensionMethod is null))
-                        s_HijackByVal = extensionMethod.CreateStaticDelegate(typeof(HijackByVal)) as HijackByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_HijackByVal = extensionMethod.CreateStaticDelegate(typeof(HijackByVal)) as HijackByVal;
 
-                if (s_HijackByRef is null && s_HijackByVal is null)
+                if (s_HijackByPtr is null && s_HijackByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Hijacker.Hijack method", new Exception("Hijack"));
             }
 

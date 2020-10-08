@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:57 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:35 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\lca.go
 
@@ -39,8 +39,10 @@ namespace @internal
             public int depth; // depth in dominator tree (root=0, its children=1, etc.)
         }
 
-        private static ref lcaRange makeLCArange(ref Func f)
+        private static ptr<lcaRange> makeLCArange(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             var dom = f.Idom(); 
 
             // Build tree
@@ -52,10 +54,12 @@ namespace @internal
                 {
                     continue; // entry or unreachable
                 }
+
                 var parent = dom[b.ID].ID;
                 blocks[b.ID].parent = parent;
                 blocks[b.ID].sibling = blocks[parent].firstChild;
                 blocks[parent].firstChild = b.ID;
+
             } 
 
             // Compute euler tour ordering.
@@ -85,16 +89,20 @@ namespace @internal
                     blocks[bid].depth = blocks[blocks[bid].parent].depth + 1L; 
                     // Then explore its first child.
                     cid = blocks[bid].firstChild;
+
                 }
                 else
                 { 
                     // We've seen b before. Explore the next child.
                     cid = blocks[cid].sibling;
+
                 }
+
                 if (cid != 0L)
                 {
                     q = append(q, new queueEntry(bid,cid), new queueEntry(cid,0));
                 }
+
             } 
 
             // Compute fast range-minimum query data structure
@@ -118,25 +126,32 @@ namespace @internal
                         {
                             bid = bid2;
                         }
+
                         r[i] = bid;
                     logS = logS + 1L;
                 s = s * 2L;
                     }
 
                     rangeMin = append(rangeMin, r);
+
                 }
 
             }
 
-            return ref new lcaRange(blocks:blocks,rangeMin:rangeMin);
+            return addr(new lcaRange(blocks:blocks,rangeMin:rangeMin));
+
         }
 
         // find returns the lowest common ancestor of a and b.
-        private static ref Block find(this ref lcaRange lca, ref Block a, ref Block b)
+        private static ptr<Block> find(this ptr<lcaRange> _addr_lca, ptr<Block> _addr_a, ptr<Block> _addr_b)
         {
+            ref lcaRange lca = ref _addr_lca.val;
+            ref Block a = ref _addr_a.val;
+            ref Block b = ref _addr_b.val;
+
             if (a == b)
             {
-                return a;
+                return _addr_a!;
             } 
             // Find the positions of a and bin the Euler tour.
             var p1 = lca.blocks[a.ID].pos;
@@ -145,6 +160,7 @@ namespace @internal
             {
                 p1 = p2;
                 p2 = p1;
+
             } 
 
             // The lowest common ancestor is the minimum depth block
@@ -156,9 +172,11 @@ namespace @internal
             var bid2 = lca.rangeMin[logS][p2 - 1L << (int)(logS) + 1L];
             if (lca.blocks[bid1].depth < lca.blocks[bid2].depth)
             {
-                return lca.blocks[bid1].b;
+                return _addr_lca.blocks[bid1].b!;
             }
-            return lca.blocks[bid2].b;
+
+            return _addr_lca.blocks[bid2].b!;
+
         }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:01 UTC
+//     Generated on 2020 October 08 04:36:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace testing
                 this.Values = default;
             }
 
-            public Config(long MaxCount = default, double MaxCountScale = default, ref ptr<rand.Rand> Rand = default, Action<slice<reflect.Value>, ref rand.Rand> Values = default)
+            public Config(long MaxCount = default, double MaxCountScale = default, ref ptr<rand.Rand> Rand = default, Action<slice<reflect.Value>, ptr<rand.Rand>> Values = default)
             {
                 this.MaxCount = MaxCount;
                 this.MaxCountScale = MaxCountScale;

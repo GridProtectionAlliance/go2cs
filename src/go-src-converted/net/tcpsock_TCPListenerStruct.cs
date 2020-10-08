@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:27:47 UTC
+//     Generated on 2020 October 08 03:34:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,11 +30,13 @@ namespace go
             public TCPListener(NilType _)
             {
                 this.fd = default;
+                this.lc = default;
             }
 
-            public TCPListener(ref ptr<netFD> fd = default)
+            public TCPListener(ref ptr<netFD> fd = default, ListenConfig lc = default)
             {
                 this.fd = fd;
+                this.lc = lc;
             }
 
             // Enable comparisons between nil and TCPListener struct
@@ -57,7 +59,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static TCPListener TCPListener_cast(dynamic value)
         {
-            return new TCPListener(ref value.fd);
+            return new TCPListener(ref value.fd, value.lc);
         }
     }
 }

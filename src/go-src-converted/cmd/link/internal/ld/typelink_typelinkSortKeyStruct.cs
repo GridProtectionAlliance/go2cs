@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:40 UTC
+//     Generated on 2020 October 08 04:39:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using objabi = go.cmd.@internal.objabi_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using sort = go.sort_package;
 using go;
@@ -35,7 +36,7 @@ namespace @internal
                 this.Type = default;
             }
 
-            public typelinkSortKey(@string TypeStr = default, ref ptr<sym.Symbol> Type = default)
+            public typelinkSortKey(@string TypeStr = default, loader.Sym Type = default)
             {
                 this.TypeStr = TypeStr;
                 this.Type = Type;
@@ -61,7 +62,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static typelinkSortKey typelinkSortKey_cast(dynamic value)
         {
-            return new typelinkSortKey(value.TypeStr, ref value.Type);
+            return new typelinkSortKey(value.TypeStr, value.Type);
         }
     }
 }}}}

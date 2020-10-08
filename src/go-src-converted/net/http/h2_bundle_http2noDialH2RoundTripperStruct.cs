@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:17 UTC
+//     Generated on 2020 October 08 03:39:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -55,12 +56,12 @@ namespace net
             // Constructors
             public http2noDialH2RoundTripper(NilType _)
             {
-                this.t = default;
+                this.ptr<http2Transport> = default;
             }
 
-            public http2noDialH2RoundTripper(ref ptr<http2Transport> t = default)
+            public http2noDialH2RoundTripper(ref ptr<http2Transport> ptr<http2Transport> = default)
             {
-                this.t = t;
+                this.ptr<http2Transport> = ptr<http2Transport>;
             }
 
             // Enable comparisons between nil and http2noDialH2RoundTripper struct
@@ -83,7 +84,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2noDialH2RoundTripper http2noDialH2RoundTripper_cast(dynamic value)
         {
-            return new http2noDialH2RoundTripper(ref value.t);
+            return new http2noDialH2RoundTripper(ref value.ptr<http2Transport>);
         }
     }
 }}

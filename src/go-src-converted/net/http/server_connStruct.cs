@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:43 UTC
+//     Generated on 2020 October 08 03:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,12 +28,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {
@@ -58,12 +59,11 @@ namespace net
                 this.bufw = default;
                 this.lastMethod = default;
                 this.curReq = default;
-                this.curState = default;
                 this.mu = default;
                 this.hijackedv = default;
             }
 
-            public conn(ref ptr<Server> server = default, context.CancelFunc cancelCtx = default, net.Conn rwc = default, @string remoteAddr = default, ref ptr<tls.ConnectionState> tlsState = default, error werr = default, ref ptr<connReader> r = default, ref ptr<bufio.Reader> bufr = default, ref ptr<bufio.Writer> bufw = default, @string lastMethod = default, atomic.Value curReq = default, atomic.Value curState = default, sync.Mutex mu = default, bool hijackedv = default)
+            public conn(ref ptr<Server> server = default, context.CancelFunc cancelCtx = default, net.Conn rwc = default, @string remoteAddr = default, ref ptr<tls.ConnectionState> tlsState = default, error werr = default, ref ptr<connReader> r = default, ref ptr<bufio.Reader> bufr = default, ref ptr<bufio.Writer> bufw = default, @string lastMethod = default, atomic.Value curReq = default, sync.Mutex mu = default, bool hijackedv = default)
             {
                 this.server = server;
                 this.cancelCtx = cancelCtx;
@@ -76,7 +76,6 @@ namespace net
                 this.bufw = bufw;
                 this.lastMethod = lastMethod;
                 this.curReq = curReq;
-                this.curState = curState;
                 this.mu = mu;
                 this.hijackedv = hijackedv;
             }
@@ -101,7 +100,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static conn conn_cast(dynamic value)
         {
-            return new conn(ref value.server, value.cancelCtx, value.rwc, value.remoteAddr, ref value.tlsState, value.werr, ref value.r, ref value.bufr, ref value.bufw, value.lastMethod, value.curReq, value.curState, value.mu, value.hijackedv);
+            return new conn(ref value.server, value.cancelCtx, value.rwc, value.remoteAddr, ref value.tlsState, value.werr, ref value.r, ref value.bufr, ref value.bufw, value.lastMethod, value.curReq, value.mu, value.hijackedv);
         }
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:36:16 UTC
+// package template -- go2cs converted at 2020 October 08 03:43:11 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\transition.go
 using bytes = go.bytes_package;
@@ -27,6 +27,9 @@ namespace html
         // tText is the context transition function for the text state.
         private static (context, long) tText(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             long k = 0L;
             while (true)
             {
@@ -39,6 +42,7 @@ namespace html
                 {
                     return (new context(state:stateHTMLCmt), i + 4L);
                 }
+
                 i++;
                 var end = false;
                 if (s[i] == '/')
@@ -47,9 +51,12 @@ namespace html
                     {
                         return (c, len(s));
                     }
+
                     end = true;
                     i = i + 1L;
+
                 }
+
                 var (j, e) = eatTagName(s, i);
                 if (j != i)
                 {
@@ -59,9 +66,13 @@ namespace html
                     } 
                     // We've found an HTML tag.
                     return (new context(state:stateTag,element:e), j);
+
                 }
+
                 k = j;
+
             }
+
 
         }
 
@@ -69,28 +80,35 @@ namespace html
 
         // tTag is the context transition function for the tag state.
         private static (context, long) tTag(context c, slice<byte> s)
-        { 
+        {
+            context _p0 = default;
+            long _p0 = default;
+ 
             // Find the attribute name.
             var i = eatWhiteSpace(s, 0L);
             if (i == len(s))
             {
                 return (c, len(s));
             }
+
             if (s[i] == '>')
             {
                 return (new context(state:elementContentType[c.element],element:c.element,), i + 1L);
             }
+
             var (j, err) = eatAttrName(s, i);
             if (err != null)
             {
                 return (new context(state:stateError,err:err), len(s));
             }
+
             var state = stateTag;
             var attr = attrNone;
             if (i == j)
             {
                 return (new context(state:stateError,err:errorf(ErrBadHTML,nil,0,"expected space, attr name, or end of tag, but got %q",s[i:]),), len(s));
             }
+
             var attrName = strings.ToLower(string(s[i..j]));
             if (c.element == elementScript && attrName == "type")
             {
@@ -107,7 +125,9 @@ namespace html
                     attr = attrScript;
                 else if (attrType(attrName) == contentTypeSrcset) 
                     attr = attrSrcset;
-                            }
+                
+            }
+
             if (j == len(s))
             {
                 state = stateAttrName;
@@ -116,12 +136,17 @@ namespace html
             {
                 state = stateAfterName;
             }
+
             return (new context(state:state,element:c.element,attr:attr), j);
+
         }
 
         // tAttrName is the context transition function for stateAttrName.
         private static (context, long) tAttrName(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             var (i, err) = eatAttrName(s, 0L);
             if (err != null)
             {
@@ -131,12 +156,17 @@ namespace html
             {
                 c.state = stateAfterName;
             }
+
             return (c, i);
+
         }
 
         // tAfterName is the context transition function for stateAfterName.
         private static (context, long) tAfterName(context c, slice<byte> s)
-        { 
+        {
+            context _p0 = default;
+            long _p0 = default;
+ 
             // Look for the start of the value.
             var i = eatWhiteSpace(s, 0L);
             if (i == len(s))
@@ -148,10 +178,13 @@ namespace html
                 // Occurs due to tag ending '>', and valueless attribute.
                 c.state = stateTag;
                 return (c, i);
+
             }
+
             c.state = stateBeforeValue; 
             // Consume the "=".
             return (c, i + 1L);
+
         }
 
         private static array<state> attrStartStates = new array<state>(InitKeyedValues<state>((attrNone, stateAttr), (attrScript, stateJS), (attrScriptType, stateAttr), (attrStyle, stateCSS), (attrURL, stateURL), (attrSrcset, stateSrcset)));
@@ -159,6 +192,9 @@ namespace html
         // tBeforeValue is the context transition function for stateBeforeValue.
         private static (context, long) tBeforeValue(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             var i = eatWhiteSpace(s, 0L);
             if (i == len(s))
             {
@@ -180,11 +216,15 @@ namespace html
             c.state = attrStartStates[c.attr];
             c.delim = delim;
             return (c, i);
+
         }
 
         // tHTMLCmt is the context transition function for stateHTMLCmt.
         private static (context, long) tHTMLCmt(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             {
                 var i = bytes.Index(s, commentEnd);
 
@@ -194,7 +234,9 @@ namespace html
                 }
 
             }
+
             return (c, len(s));
+
         }
 
         // specialTagEndMarkers maps element types to the character sequence that
@@ -207,6 +249,9 @@ namespace html
         // element states.
         private static (context, long) tSpecialTagEnd(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             if (c.element != elementNone)
             {
                 {
@@ -218,8 +263,11 @@ namespace html
                     }
 
                 }
+
             }
+
             return (c, len(s));
+
         }
 
         // indexTagEnd finds the index of a special tag end in a case insensitive way, or returns -1
@@ -235,6 +283,7 @@ namespace html
                 {
                     return i;
                 }
+
                 s = s[i + plen..]; 
                 // Try to match the actual tag if there is still space for it
                 if (len(tag) <= len(s) && bytes.EqualFold(tag, s[..len(tag)]))
@@ -245,23 +294,34 @@ namespace html
                     {
                         return res + i;
                     }
+
                     res += len(tag);
+
                 }
+
                 res += i + plen;
+
             }
 
             return -1L;
+
         }
 
         // tAttr is the context transition function for the attribute state.
         private static (context, long) tAttr(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             return (c, len(s));
         }
 
         // tURL is the context transition function for the URL state.
         private static (context, long) tURL(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             if (bytes.ContainsAny(s, "#?"))
             {
                 c.urlPart = urlPartQueryOrFrag;
@@ -269,22 +329,30 @@ namespace html
             else if (len(s) != eatWhiteSpace(s, 0L) && c.urlPart == urlPartNone)
             { 
                 // HTML5 uses "Valid URL potentially surrounded by spaces" for
-                // attrs: http://www.w3.org/TR/html5/index.html#attributes-1
+                // attrs: https://www.w3.org/TR/html5/index.html#attributes-1
                 c.urlPart = urlPartPreQuery;
+
             }
+
             return (c, len(s));
+
         }
 
         // tJS is the context transition function for the JS state.
         private static (context, long) tJS(context c, slice<byte> s) => func((_, panic, __) =>
         {
+            context _p0 = default;
+            long _p0 = default;
+
             var i = bytes.IndexAny(s, "\"\'/");
             if (i == -1L)
             { 
                 // Entire input is non string, comment, regexp tokens.
                 c.jsCtx = nextJSCtx(s, c.jsCtx);
                 return (c, len(s));
+
             }
+
             c.jsCtx = nextJSCtx(s[..i], c.jsCtx);
             switch (s[i])
             {
@@ -316,12 +384,16 @@ namespace html
                     break;
             }
             return (c, i + 1L);
+
         });
 
         // tJSDelimited is the context transition function for the JS string and regexp
         // states.
         private static (context, long) tJSDelimited(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             @string specials = "\\\"";
 
             if (c.state == stateJSSqStr) 
@@ -337,6 +409,7 @@ namespace html
                 {
                     break;
                 }
+
                 switch (s[i])
                 {
                     case '\\': 
@@ -345,6 +418,7 @@ namespace html
                         {
                             return (new context(state:stateError,err:errorf(ErrPartialEscape,nil,0,"unfinished escape sequence in JS string: %q",s),), len(s));
                         }
+
                         break;
                     case '[': 
                         inCharset = true;
@@ -359,10 +433,13 @@ namespace html
                             c.state = stateJS;
                             c.jsCtx = jsCtxDivOp;
                             return (c, i + 1L);
+
                         }
+
                         break;
                 }
                 k = i + 1L;
+
             }
 
 
@@ -371,8 +448,11 @@ namespace html
                 // This can be fixed by making context richer if interpolation
                 // into charsets is desired.
                 return (new context(state:stateError,err:errorf(ErrPartialCharset,nil,0,"unfinished JS regexp charset: %q",s),), len(s));
+
             }
+
             return (c, len(s));
+
         }
 
         private static slice<byte> blockCommentEnd = (slice<byte>)"*/";
@@ -380,11 +460,15 @@ namespace html
         // tBlockCmt is the context transition function for /*comment*/ states.
         private static (context, long) tBlockCmt(context c, slice<byte> s) => func((_, panic, __) =>
         {
+            context _p0 = default;
+            long _p0 = default;
+
             var i = bytes.Index(s, blockCommentEnd);
             if (i == -1L)
             {
                 return (c, len(s));
             }
+
 
             if (c.state == stateJSBlockCmt) 
                 c.state = stateJS;
@@ -393,11 +477,15 @@ namespace html
             else 
                 panic(c.state.String());
                         return (c, i + 2L);
+
         });
 
         // tLineCmt is the context transition function for //comment states.
         private static (context, long) tLineCmt(context c, slice<byte> s) => func((_, panic, __) =>
         {
+            context _p0 = default;
+            long _p0 = default;
+
             @string lineTerminators = default;
             state endState = default;
 
@@ -411,7 +499,7 @@ namespace html
                 // are supported by the 4 major browsers.
                 // This defines line comments as
                 //     LINECOMMENT ::= "//" [^\n\f\d]*
-                // since http://www.w3.org/TR/css3-syntax/#SUBTOK-nl defines
+                // since https://www.w3.org/TR/css3-syntax/#SUBTOK-nl defines
                 // newlines:
                 //     nl ::= #xA | #xD #xA | #xD | #xC
             else 
@@ -421,18 +509,23 @@ namespace html
             {
                 return (c, len(s));
             }
+
             c.state = endState; 
-            // Per section 7.4 of EcmaScript 5 : http://es5.github.com/#x7.4
+            // Per section 7.4 of EcmaScript 5 : https://es5.github.com/#x7.4
             // "However, the LineTerminator at the end of the line is not
             // considered to be part of the single-line comment; it is
             // recognized separately by the lexical grammar and becomes part
             // of the stream of input elements for the syntactic grammar."
             return (c, i);
+
         });
 
         // tCSS is the context transition function for the CSS state.
         private static (context, long) tCSS(context c, slice<byte> s)
-        { 
+        {
+            context _p0 = default;
+            long _p0 = default;
+ 
             // CSS quoted strings are almost never used except for:
             // (1) URLs as in background: "/foo.png"
             // (2) Multiword font-names as in font-family: "Times New Roman"
@@ -468,6 +561,7 @@ namespace html
                 {
                     return (c, len(s));
                 }
+
                 switch (s[i])
                 {
                     case '(': 
@@ -486,7 +580,9 @@ namespace html
                             else 
                                 c.state = stateCSSURL;
                                                     return (c, j);
+
                         }
+
                         break;
                     case '/': 
                         if (i + 1L < len(s))
@@ -502,7 +598,9 @@ namespace html
                                     return (c, i + 2L);
                                     break;
                             }
+
                         }
+
                         break;
                     case '"': 
                         c.state = stateCSSDqStr;
@@ -514,13 +612,18 @@ namespace html
                         break;
                 }
                 k = i + 1L;
+
             }
+
 
         }
 
         // tCSSStr is the context transition function for the CSS string and URL states.
         private static (context, long) tCSSStr(context c, slice<byte> s) => func((_, panic, __) =>
         {
+            context _p0 = default;
+            long _p0 = default;
+
             @string endAndEsc = default;
 
             if (c.state == stateCSSDqStr || c.state == stateCSSDqURL) 
@@ -542,6 +645,7 @@ namespace html
                     var (c, nread) = tURL(c, decodeCSS(s[k..]));
                     return (c, k + nread);
                 }
+
                 if (s[i] == '\\')
                 {
                     i++;
@@ -549,21 +653,28 @@ namespace html
                     {
                         return (new context(state:stateError,err:errorf(ErrPartialEscape,nil,0,"unfinished escape sequence in CSS string: %q",s),), len(s));
                     }
+
                 }
                 else
                 {
                     c.state = stateCSS;
                     return (c, i + 1L);
                 }
+
                 c, _ = tURL(c, decodeCSS(s[..i + 1L]));
                 k = i + 1L;
+
             }
+
 
         });
 
         // tError is the context transition function for the error state.
         private static (context, long) tError(context c, slice<byte> s)
         {
+            context _p0 = default;
+            long _p0 = default;
+
             return (c, len(s));
         }
 
@@ -571,8 +682,11 @@ namespace html
         // It returns an error if s[i:] does not look like it begins with an
         // attribute name, such as encountering a quote mark without a preceding
         // equals sign.
-        private static (long, ref Error) eatAttrName(slice<byte> s, long i)
+        private static (long, ptr<Error>) eatAttrName(slice<byte> s, long i)
         {
+            long _p0 = default;
+            ptr<Error> _p0 = default!;
+
             for (var j = i; j < len(s); j++)
             {
                 switch (s[j])
@@ -590,7 +704,7 @@ namespace html
                     case '=': 
 
                     case '>': 
-                        return (j, null);
+                        return (j, _addr_null!);
                         break;
                     case '\'': 
                         // These result in a parse warning in HTML5 and are
@@ -606,14 +720,16 @@ namespace html
                         // These result in a parse warning in HTML5 and are
                         // indicative of serious problems if seen in an attr
                         // name in a template.
-                        return (-1L, errorf(ErrBadHTML, null, 0L, "%q in attribute name: %.32q", s[j..j + 1L], s));
+                        return (-1L, _addr_errorf(ErrBadHTML, null, 0L, "%q in attribute name: %.32q", s[j..j + 1L], s)!);
                         break;
                     default: 
                         break;
                 }
+
             }
 
-            return (len(s), null);
+            return (len(s), _addr_null!);
+
         }
 
         private static map elementNameMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, element>{"script":elementScript,"style":elementStyle,"textarea":elementTextarea,"title":elementTitle,};
@@ -633,10 +749,14 @@ namespace html
         // eatTagName returns the largest j such that s[i:j] is a tag name and the tag type.
         private static (long, element) eatTagName(slice<byte> s, long i)
         {
+            long _p0 = default;
+            element _p0 = default;
+
             if (i == len(s) || !asciiAlpha(s[i]))
             {
                 return (i, elementNone);
             }
+
             var j = i + 1L;
             while (j < len(s))
             {
@@ -652,10 +772,13 @@ namespace html
                     j += 2L;
                     continue;
                 }
+
                 break;
+
             }
 
             return (j, elementNameMap[strings.ToLower(string(s[i..j]))]);
+
         }
 
         // eatWhiteSpace returns the largest j such that s[i:j] is white space.
@@ -679,9 +802,11 @@ namespace html
                         return j;
                         break;
                 }
+
             }
 
             return len(s);
+
         }
     }
 }}

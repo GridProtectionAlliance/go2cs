@@ -14,7 +14,7 @@
 // entries where the spec permits exactly one. Consequently, the corresponding
 // field in the AST (ast.FuncDecl.Recv) field is not restricted to one entry.
 //
-// package parser -- go2cs converted at 2020 August 29 08:48:22 UTC
+// package parser -- go2cs converted at 2020 October 08 04:04:11 UTC
 // import "go/parser" ==> using parser = go.go.parser_package
 // Original source: C:\Go\src\go\parser\parser.go
 using fmt = go.fmt_package;
@@ -43,7 +43,7 @@ namespace go
             public long indent; // indentation used for tracing output
 
 // Comments
-            public slice<ref ast.CommentGroup> comments;
+            public slice<ptr<ast.CommentGroup>> comments;
             public ptr<ast.CommentGroup> leadComment; // last lead comment
             public ptr<ast.CommentGroup> lineComment; // last line comment
 
@@ -53,11 +53,11 @@ namespace go
             public @string lit; // token literal
 
 // Error recovery
-// (used to limit the number of calls to syncXXX functions
+// (used to limit the number of calls to parser.advance
 // w/o making scanning progress - avoids potential endless
 // loops across multiple parser functions during error recovery)
             public token.Pos syncPos; // last synchronization position
-            public long syncCnt; // number of calls to syncXXX without progress
+            public long syncCnt; // number of parser.advance calls without progress
 
 // Non-syntactic parser control
             public long exprLev; // < 0: in control clause, >= 0: in expression
@@ -66,27 +66,30 @@ namespace go
 // Ordinary identifier scopes
             public ptr<ast.Scope> pkgScope; // pkgScope.Outer == nil
             public ptr<ast.Scope> topScope; // top-most scope; may be pkgScope
-            public slice<ref ast.Ident> unresolved; // unresolved identifiers
-            public slice<ref ast.ImportSpec> imports; // list of imports
+            public slice<ptr<ast.Ident>> unresolved; // unresolved identifiers
+            public slice<ptr<ast.ImportSpec>> imports; // list of imports
 
 // Label scopes
 // (maintained by open/close LabelScope)
             public ptr<ast.Scope> labelScope; // label scope for current function
-            public slice<slice<ref ast.Ident>> targetStack; // stack of unresolved labels
+            public slice<slice<ptr<ast.Ident>>> targetStack; // stack of unresolved labels
         }
 
-        private static void init(this ref parser p, ref token.FileSet fset, @string filename, slice<byte> src, Mode mode)
+        private static void init(this ptr<parser> _addr_p, ptr<token.FileSet> _addr_fset, @string filename, slice<byte> src, Mode mode)
         {
+            ref parser p = ref _addr_p.val;
+            ref token.FileSet fset = ref _addr_fset.val;
+
             p.file = fset.AddFile(filename, -1L, len(src));
             scanner.Mode m = default;
             if (mode & ParseComments != 0L)
             {
                 m = scanner.ScanComments;
             }
+
             Action<token.Position, @string> eh = (pos, msg) =>
             {
                 p.errors.Add(pos, msg);
-
             }
 ;
             p.scanner.Init(p.file, src, eh, m);
@@ -95,29 +98,38 @@ namespace go
             p.trace = mode & Trace != 0L; // for convenience (p.trace is used frequently)
 
             p.next();
+
         }
 
         // ----------------------------------------------------------------------------
         // Scoping support
 
-        private static void openScope(this ref parser p)
+        private static void openScope(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.topScope = ast.NewScope(p.topScope);
         }
 
-        private static void closeScope(this ref parser p)
+        private static void closeScope(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.topScope = p.topScope.Outer;
         }
 
-        private static void openLabelScope(this ref parser p)
+        private static void openLabelScope(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.labelScope = ast.NewScope(p.labelScope);
             p.targetStack = append(p.targetStack, null);
         }
 
-        private static void closeLabelScope(this ref parser p)
-        { 
+        private static void closeLabelScope(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // resolve labels
             var n = len(p.targetStack) - 1L;
             var scope = p.labelScope;
@@ -128,14 +140,21 @@ namespace go
                 {
                     p.error(ident.Pos(), fmt.Sprintf("label %s undefined", ident.Name));
                 }
+
             } 
             // pop label scope
             p.targetStack = p.targetStack[0L..n];
             p.labelScope = p.labelScope.Outer;
+
         }
 
-        private static void declare(this ref parser p, object decl, object data, ref ast.Scope scope, ast.ObjKind kind, params ptr<ast.Ident>[] idents)
+        private static void declare(this ptr<parser> _addr_p, object decl, object data, ptr<ast.Scope> _addr_scope, ast.ObjKind kind, params ptr<ptr<ast.Ident>>[] _addr_idents)
         {
+            idents = idents.Clone();
+            ref parser p = ref _addr_p.val;
+            ref ast.Scope scope = ref _addr_scope.val;
+            ref ast.Ident idents = ref _addr_idents.val;
+
             foreach (var (_, ident) in idents)
             {
                 assert(ident.Obj == null, "identifier already declared or resolved");
@@ -162,16 +181,24 @@ namespace go
                                 }
 
                             }
+
                             p.error(ident.Pos(), fmt.Sprintf("%s redeclared in this block%s", ident.Name, prevDecl));
+
                         }
 
                     }
+
                 }
+
             }
+
         }
 
-        private static void shortVarDecl(this ref parser p, ref ast.AssignStmt decl, slice<ast.Expr> list)
-        { 
+        private static void shortVarDecl(this ptr<parser> _addr_p, ptr<ast.AssignStmt> _addr_decl, slice<ast.Expr> list)
+        {
+            ref parser p = ref _addr_p.val;
+            ref ast.AssignStmt decl = ref _addr_decl.val;
+ 
             // Go spec: A short variable declaration may redeclare variables
             // provided they were originally declared in the same block with
             // the same type, and at least one of the non-blank variables is new.
@@ -179,7 +206,7 @@ namespace go
             foreach (var (_, x) in list)
             {
                 {
-                    ref ast.Ident (ident, isIdent) = x._<ref ast.Ident>();
+                    ptr<ast.Ident> (ident, isIdent) = x._<ptr<ast.Ident>>();
 
                     if (isIdent)
                     {
@@ -203,7 +230,9 @@ namespace go
                                 }
 
                             }
+
                         }
+
                     }
                     else
                     {
@@ -211,11 +240,13 @@ namespace go
                     }
 
                 }
+
             }
             if (n == 0L && p.mode & DeclarationErrors != 0L)
             {
                 p.error(list[0L].Pos(), "no new variables on left side of :=");
             }
+
         }
 
         // The unresolved object is a sentinel to mark identifiers that have been added
@@ -228,18 +259,21 @@ namespace go
         // set, x is marked as unresolved and collected in the list of unresolved
         // identifiers.
         //
-        private static void tryResolve(this ref parser p, ast.Expr x, bool collectUnresolved)
-        { 
+        private static void tryResolve(this ptr<parser> _addr_p, ast.Expr x, bool collectUnresolved)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // nothing to do if x is not an identifier or the blank identifier
-            ref ast.Ident (ident, _) = x._<ref ast.Ident>();
+            ptr<ast.Ident> (ident, _) = x._<ptr<ast.Ident>>();
             if (ident == null)
             {
-                return;
+                return ;
             }
+
             assert(ident.Obj == null, "identifier already declared or resolved");
             if (ident.Name == "_")
             {
-                return;
+                return ;
             } 
             // try to resolve the identifier
             {
@@ -253,11 +287,12 @@ namespace go
                         if (obj != null)
                         {
                             ident.Obj = obj;
-                            return;
+                            return ;
                     s = s.Outer;
                         }
 
                     }
+
                 } 
                 // all local scopes are known, so any unresolved identifier
                 // must be found either in the file scope, package scope
@@ -274,21 +309,27 @@ namespace go
                 ident.Obj = unresolved;
                 p.unresolved = append(p.unresolved, ident);
             }
+
         }
 
-        private static void resolve(this ref parser p, ast.Expr x)
+        private static void resolve(this ptr<parser> _addr_p, ast.Expr x)
         {
+            ref parser p = ref _addr_p.val;
+
             p.tryResolve(x, true);
         }
 
         // ----------------------------------------------------------------------------
         // Parsing support
 
-        private static void printTrace(this ref parser p, params object[] a)
+        private static void printTrace(this ptr<parser> _addr_p, params object[] a)
         {
-            const @string dots = ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ";
+            a = a.Clone();
+            ref parser p = ref _addr_p.val;
 
-            const var n = len(dots);
+            const @string dots = (@string)". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ";
+
+            const var n = (var)len(dots);
 
             var pos = p.file.Position(p.pos);
             fmt.Printf("%5d:%3d: ", pos.Line, pos.Column);
@@ -303,25 +344,32 @@ namespace go
             // i <= n
             fmt.Print(dots[0L..i]);
             fmt.Println(a);
+
         }
 
-        private static ref parser trace(ref parser p, @string msg)
+        private static ptr<parser> trace(ptr<parser> _addr_p, @string msg)
         {
+            ref parser p = ref _addr_p.val;
+
             p.printTrace(msg, "(");
             p.indent++;
-            return p;
+            return _addr_p!;
         }
 
         // Usage pattern: defer un(trace(p, "..."))
-        private static void un(ref parser p)
+        private static void un(ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.indent--;
             p.printTrace(")");
         }
 
         // Advance to the next token.
-        private static void next0(this ref parser p)
-        { 
+        private static void next0(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // Because of one-token look-ahead, print the previous token
             // when tracing as it provides a more readable output. The
             // very first token (!p.pos.IsValid()) is not initialized
@@ -336,13 +384,20 @@ namespace go
                     p.printTrace("\"" + s + "\"");
                 else 
                     p.printTrace(s);
-                            }
+                
+            }
+
             p.pos, p.tok, p.lit = p.scanner.Scan();
+
         }
 
         // Consume a comment and return it and the line on which it ends.
-        private static (ref ast.Comment, long) consumeComment(this ref parser p)
-        { 
+        private static (ptr<ast.Comment>, long) consumeComment(this ptr<parser> _addr_p)
+        {
+            ptr<ast.Comment> comment = default!;
+            long endline = default;
+            ref parser p = ref _addr_p.val;
+ 
             // /*-style comments may end on a different line than where they start.
             // Scan the comment for '\n' chars and adjust endline accordingly.
             endline = p.file.Line(p.pos);
@@ -355,13 +410,17 @@ namespace go
                     {
                         endline++;
                     }
+
                 }
 
+
             }
-            comment = ref new ast.Comment(Slash:p.pos,Text:p.lit);
+
+            comment = addr(new ast.Comment(Slash:p.pos,Text:p.lit));
             p.next0();
 
-            return;
+            return ;
+
         }
 
         // Consume a group of adjacent comments, add it to the parser's
@@ -369,13 +428,17 @@ namespace go
         // the last comment in the group ends. A non-comment token or n
         // empty lines terminate a comment group.
         //
-        private static (ref ast.CommentGroup, long) consumeCommentGroup(this ref parser p, long n)
+        private static (ptr<ast.CommentGroup>, long) consumeCommentGroup(this ptr<parser> _addr_p, long n)
         {
-            slice<ref ast.Comment> list = default;
+            ptr<ast.CommentGroup> comments = default!;
+            long endline = default;
+            ref parser p = ref _addr_p.val;
+
+            slice<ptr<ast.Comment>> list = default;
             endline = p.file.Line(p.pos);
             while (p.tok == token.COMMENT && p.file.Line(p.pos) <= endline + n)
             {
-                ref ast.Comment comment = default;
+                ptr<ast.Comment> comment;
                 comment, endline = p.consumeComment();
                 list = append(list, comment);
             } 
@@ -384,15 +447,16 @@ namespace go
  
 
             // add comment group to the comments list
-            comments = ref new ast.CommentGroup(List:list);
+            comments = addr(new ast.CommentGroup(List:list));
             p.comments = append(p.comments, comments);
 
-            return;
+            return ;
+
         }
 
         // Advance to the next non-comment token. In the process, collect
         // any comment groups encountered, and remember the last lead and
-        // and line comments.
+        // line comments.
         //
         // A lead comment is a comment group that starts and ends in a
         // line without any other tokens and that is followed by a non-comment
@@ -405,8 +469,10 @@ namespace go
         // Lead and line comments may be considered documentation that is
         // stored in the AST.
         //
-        private static void next(this ref parser p)
+        private static void next(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             p.leadComment = null;
             p.lineComment = null;
             var prev = p.pos;
@@ -414,7 +480,7 @@ namespace go
 
             if (p.tok == token.COMMENT)
             {
-                ref ast.CommentGroup comment = default;
+                ptr<ast.CommentGroup> comment;
                 long endline = default;
 
                 if (p.file.Line(p.pos) == p.file.Line(prev))
@@ -427,7 +493,9 @@ namespace go
                         // The next token is on a different line, thus
                         // the last comment group is a line comment.
                         p.lineComment = comment;
+
                     }
+
                 } 
 
                 // consume successor comments, if any
@@ -443,8 +511,11 @@ namespace go
                     // The next token is following on the line immediately after the
                     // comment group, thus the last comment group is a lead comment.
                     p.leadComment = comment;
+
                 }
+
             }
+
         }
 
         // A bailout panic is raised to indicate early termination.
@@ -452,8 +523,10 @@ namespace go
         {
         }
 
-        private static void error(this ref parser _p, token.Pos pos, @string msg) => func(_p, (ref parser p, Defer _, Panic panic, Recover __) =>
+        private static void error(this ptr<parser> _addr_p, token.Pos pos, @string msg) => func((_, panic, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             var epos = p.file.Position(pos); 
 
             // If AllErrors is not set, discard errors reported on the same line
@@ -464,65 +537,101 @@ namespace go
                 var n = len(p.errors);
                 if (n > 0L && p.errors[n - 1L].Pos.Line == epos.Line)
                 {
-                    return; // discard - likely a spurious error
+                    return ; // discard - likely a spurious error
                 }
+
                 if (n > 10L)
                 {
                     panic(new bailout());
                 }
+
             }
+
             p.errors.Add(epos, msg);
+
         });
 
-        private static void errorExpected(this ref parser p, token.Pos pos, @string msg)
+        private static void errorExpected(this ptr<parser> _addr_p, token.Pos pos, @string msg)
         {
+            ref parser p = ref _addr_p.val;
+
             msg = "expected " + msg;
             if (pos == p.pos)
             { 
                 // the error happened at the current position;
                 // make the error message more specific
-                if (p.tok == token.SEMICOLON && p.lit == "\n")
-                {
+
+                if (p.tok == token.SEMICOLON && p.lit == "\n") 
                     msg += ", found newline";
-                }
-                else
-                {
+                else if (p.tok.IsLiteral()) 
+                    // print 123 rather than 'INT', etc.
+                    msg += ", found " + p.lit;
+                else 
                     msg += ", found '" + p.tok.String() + "'";
-                    if (p.tok.IsLiteral())
-                    {
-                        msg += " " + p.lit;
-                    }
-                }
+                
             }
+
             p.error(pos, msg);
+
         }
 
-        private static token.Pos expect(this ref parser p, token.Token tok)
+        private static token.Pos expect(this ptr<parser> _addr_p, token.Token tok)
         {
+            ref parser p = ref _addr_p.val;
+
             var pos = p.pos;
             if (p.tok != tok)
             {
                 p.errorExpected(pos, "'" + tok.String() + "'");
             }
+
             p.next(); // make progress
             return pos;
+
+        }
+
+        // expect2 is like expect, but it returns an invalid position
+        // if the expected token is not found.
+        private static token.Pos expect2(this ptr<parser> _addr_p, token.Token tok)
+        {
+            token.Pos pos = default;
+            ref parser p = ref _addr_p.val;
+
+            if (p.tok == tok)
+            {
+                pos = p.pos;
+            }
+            else
+            {
+                p.errorExpected(p.pos, "'" + tok.String() + "'");
+            }
+
+            p.next(); // make progress
+            return ;
+
         }
 
         // expectClosing is like expect but provides a better error message
         // for the common case of a missing comma before a newline.
         //
-        private static token.Pos expectClosing(this ref parser p, token.Token tok, @string context)
+        private static token.Pos expectClosing(this ptr<parser> _addr_p, token.Token tok, @string context)
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.tok != tok && p.tok == token.SEMICOLON && p.lit == "\n")
             {
                 p.error(p.pos, "missing ',' before newline in " + context);
                 p.next();
             }
+
             return p.expect(tok);
+
         }
 
-        private static void expectSemi(this ref parser p)
-        { 
+        private static void expectSemi(this ptr<parser> _addr_p)
+        {
+            ref parser p = ref _addr_p.val;
+ 
             // semicolon is optional before a closing ')' or '}'
             if (p.tok != token.RPAREN && p.tok != token.RBRACE)
             {
@@ -540,18 +649,23 @@ namespace go
                 }
                 // default: 
                     p.errorExpected(p.pos, "';'");
-                    syncStmt(p);
+                    p.advance(stmtStart);
 
                 __switch_break0:;
+
             }
+
         }
 
-        private static bool atComma(this ref parser p, @string context, token.Token follow)
+        private static bool atComma(this ptr<parser> _addr_p, @string context, token.Token follow)
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.tok == token.COMMA)
             {
                 return true;
             }
+
             if (p.tok != follow)
             {
                 @string msg = "missing ','";
@@ -559,10 +673,13 @@ namespace go
                 {
                     msg += " before newline";
                 }
+
                 p.error(p.pos, msg + " in " + context);
                 return true; // "insert" comma and continue
             }
+
             return false;
+
         }
 
         private static void assert(bool cond, @string msg) => func((_, panic, __) =>
@@ -571,74 +688,56 @@ namespace go
             {
                 panic("go/parser internal error: " + msg);
             }
+
         });
 
-        // syncStmt advances to the next statement.
-        // Used for synchronization after an error.
-        //
-        private static void syncStmt(ref parser p)
+        // advance consumes tokens until the current token p.tok
+        // is in the 'to' set, or token.EOF. For error recovery.
+        private static void advance(this ptr<parser> _addr_p, map<token.Token, bool> to)
         {
-            while (true)
-            {
+            ref parser p = ref _addr_p.val;
 
-                if (p.tok == token.BREAK || p.tok == token.CONST || p.tok == token.CONTINUE || p.tok == token.DEFER || p.tok == token.FALLTHROUGH || p.tok == token.FOR || p.tok == token.GO || p.tok == token.GOTO || p.tok == token.IF || p.tok == token.RETURN || p.tok == token.SELECT || p.tok == token.SWITCH || p.tok == token.TYPE || p.tok == token.VAR) 
+            while (p.tok != token.EOF)
+            {
+                if (to[p.tok])
+                { 
                     // Return only if parser made some progress since last
-                    // sync or if it has not reached 10 sync calls without
+                    // sync or if it has not reached 10 advance calls without
                     // progress. Otherwise consume at least one token to
                     // avoid an endless parser loop (it is possible that
-                    // both parseOperand and parseStmt call syncStmt and
+                    // both parseOperand and parseStmt call advance and
                     // correctly do not advance, thus the need for the
                     // invocation limit p.syncCnt).
                     if (p.pos == p.syncPos && p.syncCnt < 10L)
                     {
                         p.syncCnt++;
-                        return;
+                        return ;
+                p.next();
                     }
+
                     if (p.pos > p.syncPos)
                     {
                         p.syncPos = p.pos;
                         p.syncCnt = 0L;
-                        return;
+                        return ;
                     } 
                     // Reaching here indicates a parser bug, likely an
                     // incorrect token list in this function, but it only
                     // leads to skipping of possibly correct code if a
                     // previous error is present, and thus is preferred
                     // over a non-terminating parse.
-                else if (p.tok == token.EOF) 
-                    return;
-                                p.next();
+                }
+
             }
+
 
         }
 
-        // syncDecl advances to the next declaration.
-        // Used for synchronization after an error.
-        //
-        private static void syncDecl(ref parser p)
-        {
-            while (true)
-            {
+        private static map stmtStart = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<token.Token, bool>{token.BREAK:true,token.CONST:true,token.CONTINUE:true,token.DEFER:true,token.FALLTHROUGH:true,token.FOR:true,token.GO:true,token.GOTO:true,token.IF:true,token.RETURN:true,token.SELECT:true,token.SWITCH:true,token.TYPE:true,token.VAR:true,};
 
-                if (p.tok == token.CONST || p.tok == token.TYPE || p.tok == token.VAR) 
-                    // see comments in syncStmt
-                    if (p.pos == p.syncPos && p.syncCnt < 10L)
-                    {
-                        p.syncCnt++;
-                        return;
-                    }
-                    if (p.pos > p.syncPos)
-                    {
-                        p.syncPos = p.pos;
-                        p.syncCnt = 0L;
-                        return;
-                    }
-                else if (p.tok == token.EOF) 
-                    return;
-                                p.next();
-            }
+        private static map declStart = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<token.Token, bool>{token.CONST:true,token.TYPE:true,token.VAR:true,};
 
-        }
+        private static map exprEnd = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<token.Token, bool>{token.COMMA:true,token.COLON:true,token.SEMICOLON:true,token.RPAREN:true,token.RBRACK:true,token.RBRACE:true,};
 
         // safePos returns a valid file position for a given position: If pos
         // is valid to begin with, safePos returns pos. If pos is out-of-range,
@@ -650,24 +749,31 @@ namespace go
         // may be past the file's EOF position, which would lead to panics if used
         // later on.
         //
-        private static token.Pos safePos(this ref parser _p, token.Pos pos) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static token.Pos safePos(this ptr<parser> _addr_p, token.Pos pos) => func((defer, _, __) =>
         {
+            token.Pos res = default;
+            ref parser p = ref _addr_p.val;
+
             defer(() =>
             {
                 if (recover() != null)
                 {
                     res = token.Pos(p.file.Base() + p.file.Size()); // EOF position
                 }
+
             }());
             _ = p.file.Offset(pos); // trigger a panic if position is out-of-range
             return pos;
+
         });
 
         // ----------------------------------------------------------------------------
         // Identifiers
 
-        private static ref ast.Ident parseIdent(this ref parser p)
+        private static ptr<ast.Ident> parseIdent(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             var pos = p.pos;
             @string name = "_";
             if (p.tok == token.IDENT)
@@ -679,15 +785,21 @@ namespace go
             {
                 p.expect(token.IDENT); // use expect() error handling
             }
-            return ref new ast.Ident(NamePos:pos,Name:name);
+
+            return addr(new ast.Ident(NamePos:pos,Name:name));
+
         }
 
-        private static slice<ref ast.Ident> parseIdentList(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static slice<ptr<ast.Ident>> parseIdentList(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            slice<ptr<ast.Ident>> list = default;
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "IdentList")));
+                defer(un(_addr_trace(_addr_p, "IdentList")));
             }
+
             list = append(list, p.parseIdent());
             while (p.tok == token.COMMA)
             {
@@ -696,19 +808,24 @@ namespace go
             }
 
 
-            return;
+            return ;
+
         });
 
         // ----------------------------------------------------------------------------
         // Common productions
 
         // If lhs is set, result list elements which are identifiers are not resolved.
-        private static slice<ast.Expr> parseExprList(this ref parser _p, bool lhs) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static slice<ast.Expr> parseExprList(this ptr<parser> _addr_p, bool lhs) => func((defer, _, __) =>
         {
+            slice<ast.Expr> list = default;
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "ExpressionList")));
+                defer(un(_addr_trace(_addr_p, "ExpressionList")));
             }
+
             list = append(list, p.checkExpr(p.parseExpr(lhs)));
             while (p.tok == token.COMMA)
             {
@@ -717,11 +834,14 @@ namespace go
             }
 
 
-            return;
+            return ;
+
         });
 
-        private static slice<ast.Expr> parseLhsList(this ref parser p)
+        private static slice<ast.Expr> parseLhsList(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             var old = p.inRhs;
             p.inRhs = false;
             var list = p.parseExprList(true);
@@ -734,10 +854,13 @@ namespace go
                 }
                         p.inRhs = old;
             return list;
+
         }
 
-        private static slice<ast.Expr> parseRhsList(this ref parser p)
+        private static slice<ast.Expr> parseRhsList(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             var old = p.inRhs;
             p.inRhs = true;
             var list = p.parseExprList(false);
@@ -748,31 +871,39 @@ namespace go
         // ----------------------------------------------------------------------------
         // Types
 
-        private static ast.Expr parseType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Type")));
+                defer(un(_addr_trace(_addr_p, "Type")));
             }
+
             var typ = p.tryType();
 
             if (typ == null)
             {
                 var pos = p.pos;
                 p.errorExpected(pos, "type");
-                p.next(); // make progress
-                return ref new ast.BadExpr(From:pos,To:p.pos);
+                p.advance(exprEnd);
+                return addr(new ast.BadExpr(From:pos,To:p.pos));
             }
+
             return typ;
+
         });
 
         // If the result is an identifier, it is not resolved.
-        private static ast.Expr parseTypeName(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseTypeName(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "TypeName")));
+                defer(un(_addr_trace(_addr_p, "TypeName")));
             }
+
             var ident = p.parseIdent(); 
             // don't resolve ident yet - it may be a parameter or field name
 
@@ -782,68 +913,88 @@ namespace go
                 p.next();
                 p.resolve(ident);
                 var sel = p.parseIdent();
-                return ref new ast.SelectorExpr(X:ident,Sel:sel);
+                return addr(new ast.SelectorExpr(X:ident,Sel:sel));
+
             }
+
             return ident;
+
         });
 
-        private static ast.Expr parseArrayType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseArrayType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "ArrayType")));
+                defer(un(_addr_trace(_addr_p, "ArrayType")));
             }
+
             var lbrack = p.expect(token.LBRACK);
             p.exprLev++;
             ast.Expr len = default; 
             // always permit ellipsis for more fault-tolerant parsing
             if (p.tok == token.ELLIPSIS)
             {
-                len = ref new ast.Ellipsis(Ellipsis:p.pos);
+                len = addr(new ast.Ellipsis(Ellipsis:p.pos));
                 p.next();
             }
             else if (p.tok != token.RBRACK)
             {
                 len = p.parseRhs();
             }
+
             p.exprLev--;
             p.expect(token.RBRACK);
             var elt = p.parseType();
 
-            return ref new ast.ArrayType(Lbrack:lbrack,Len:len,Elt:elt);
+            return addr(new ast.ArrayType(Lbrack:lbrack,Len:len,Elt:elt));
+
         });
 
-        private static slice<ref ast.Ident> makeIdentList(this ref parser p, slice<ast.Expr> list)
+        private static slice<ptr<ast.Ident>> makeIdentList(this ptr<parser> _addr_p, slice<ast.Expr> list)
         {
-            var idents = make_slice<ref ast.Ident>(len(list));
+            ref parser p = ref _addr_p.val;
+
+            var idents = make_slice<ptr<ast.Ident>>(len(list));
             foreach (var (i, x) in list)
             {
-                ref ast.Ident (ident, isIdent) = x._<ref ast.Ident>();
+                ptr<ast.Ident> (ident, isIdent) = x._<ptr<ast.Ident>>();
                 if (!isIdent)
                 {
                     {
-                        ref ast.BadExpr (_, isBad) = x._<ref ast.BadExpr>();
+                        ptr<ast.BadExpr> (_, isBad) = x._<ptr<ast.BadExpr>>();
 
                         if (!isBad)
                         { 
                             // only report error if it's a new one
                             p.errorExpected(x.Pos(), "identifier");
+
                         }
 
                     }
-                    ident = ref new ast.Ident(NamePos:x.Pos(),Name:"_");
+
+                    ident = addr(new ast.Ident(NamePos:x.Pos(),Name:"_"));
+
                 }
+
                 idents[i] = ident;
+
             }
             return idents;
+
         }
 
-        private static ref ast.Field parseFieldDecl(this ref parser _p, ref ast.Scope _scope) => func(_p, _scope, (ref parser p, ref ast.Scope scope, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.Field> parseFieldDecl(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref ast.Scope scope = ref _addr_scope.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "FieldDecl")));
+                defer(un(_addr_trace(_addr_p, "FieldDecl")));
             }
+
             var doc = p.leadComment; 
 
             // 1st FieldDecl
@@ -856,18 +1007,21 @@ namespace go
                 {
                     break;
                 }
+
                 p.next();
+
             }
 
 
             var typ = p.tryVarType(false); 
 
             // analyze case
-            slice<ref ast.Ident> idents = default;
+            slice<ptr<ast.Ident>> idents = default;
             if (typ != null)
             { 
                 // IdentifierList Type
                 idents = p.makeIdentList(list);
+
             }
             else
             { 
@@ -879,71 +1033,86 @@ namespace go
                     if (n > 1L)
                     {
                         p.errorExpected(p.pos, "type");
-                        typ = ref new ast.BadExpr(From:p.pos,To:p.pos);
+                        typ = addr(new ast.BadExpr(From:p.pos,To:p.pos));
                     }
                     else if (!isTypeName(deref(typ)))
                     {
                         p.errorExpected(typ.Pos(), "anonymous field");
-                        typ = ref new ast.BadExpr(From:typ.Pos(),To:p.safePos(typ.End()));
+                        typ = addr(new ast.BadExpr(From:typ.Pos(),To:p.safePos(typ.End())));
                     }
 
+
                 }
+
             } 
 
             // Tag
-            ref ast.BasicLit tag = default;
+            ptr<ast.BasicLit> tag;
             if (p.tok == token.STRING)
             {
-                tag = ref new ast.BasicLit(ValuePos:p.pos,Kind:p.tok,Value:p.lit);
+                tag = addr(new ast.BasicLit(ValuePos:p.pos,Kind:p.tok,Value:p.lit));
                 p.next();
             }
+
             p.expectSemi(); // call before accessing p.linecomment
 
-            ast.Field field = ref new ast.Field(Doc:doc,Names:idents,Type:typ,Tag:tag,Comment:p.lineComment);
+            ptr<ast.Field> field = addr(new ast.Field(Doc:doc,Names:idents,Type:typ,Tag:tag,Comment:p.lineComment));
             p.declare(field, null, scope, ast.Var, idents);
             p.resolve(typ);
 
-            return field;
+            return _addr_field!;
+
         });
 
-        private static ref ast.StructType parseStructType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.StructType> parseStructType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "StructType")));
+                defer(un(_addr_trace(_addr_p, "StructType")));
             }
+
             var pos = p.expect(token.STRUCT);
             var lbrace = p.expect(token.LBRACE);
             var scope = ast.NewScope(null); // struct scope
-            slice<ref ast.Field> list = default;
+            slice<ptr<ast.Field>> list = default;
             while (p.tok == token.IDENT || p.tok == token.MUL || p.tok == token.LPAREN)
             { 
                 // a field declaration cannot start with a '(' but we accept
                 // it here for more robust parsing and better error messages
                 // (parseFieldDecl will check and complain if necessary)
                 list = append(list, p.parseFieldDecl(scope));
+
             }
 
             var rbrace = p.expect(token.RBRACE);
 
-            return ref new ast.StructType(Struct:pos,Fields:&ast.FieldList{Opening:lbrace,List:list,Closing:rbrace,},);
+            return addr(new ast.StructType(Struct:pos,Fields:&ast.FieldList{Opening:lbrace,List:list,Closing:rbrace,},));
+
         });
 
-        private static ref ast.StarExpr parsePointerType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.StarExpr> parsePointerType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "PointerType")));
+                defer(un(_addr_trace(_addr_p, "PointerType")));
             }
+
             var star = p.expect(token.MUL);
             var @base = p.parseType();
 
-            return ref new ast.StarExpr(Star:star,X:base);
+            return addr(new ast.StarExpr(Star:star,X:base));
+
         });
 
         // If the result is an identifier, it is not resolved.
-        private static ast.Expr tryVarType(this ref parser p, bool isParam)
+        private static ast.Expr tryVarType(this ptr<parser> _addr_p, bool isParam)
         {
+            ref parser p = ref _addr_p.val;
+
             if (isParam && p.tok == token.ELLIPSIS)
             {
                 var pos = p.pos;
@@ -956,32 +1125,45 @@ namespace go
                 else
                 {
                     p.error(pos, "'...' parameter is missing type");
-                    typ = ref new ast.BadExpr(From:pos,To:p.pos);
+                    typ = addr(new ast.BadExpr(From:pos,To:p.pos));
                 }
-                return ref new ast.Ellipsis(Ellipsis:pos,Elt:typ);
+
+                return addr(new ast.Ellipsis(Ellipsis:pos,Elt:typ));
+
             }
+
             return p.tryIdentOrType();
+
         }
 
         // If the result is an identifier, it is not resolved.
-        private static ast.Expr parseVarType(this ref parser p, bool isParam)
+        private static ast.Expr parseVarType(this ptr<parser> _addr_p, bool isParam)
         {
+            ref parser p = ref _addr_p.val;
+
             var typ = p.tryVarType(isParam);
             if (typ == null)
             {
                 var pos = p.pos;
                 p.errorExpected(pos, "type");
                 p.next(); // make progress
-                typ = ref new ast.BadExpr(From:pos,To:p.pos);
+                typ = addr(new ast.BadExpr(From:pos,To:p.pos));
+
             }
+
             return typ;
+
         }
 
-        private static slice<ref ast.Field> parseParameterList(this ref parser _p, ref ast.Scope _scope, bool ellipsisOk) => func(_p, _scope, (ref parser p, ref ast.Scope scope, Defer defer, Panic _, Recover __) =>
+        private static slice<ptr<ast.Field>> parseParameterList(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope, bool ellipsisOk) => func((defer, _, __) =>
         {
+            slice<ptr<ast.Field>> @params = default;
+            ref parser p = ref _addr_p.val;
+            ref ast.Scope scope = ref _addr_scope.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "ParameterList")));
+                defer(un(_addr_trace(_addr_p, "ParameterList")));
             } 
 
             // 1st ParameterDecl
@@ -994,11 +1176,13 @@ namespace go
                 {
                     break;
                 }
+
                 p.next();
                 if (p.tok == token.RPAREN)
                 {
                     break;
                 }
+
             } 
 
             // analyze case
@@ -1014,7 +1198,7 @@ namespace go
                 { 
                     // IdentifierList Type
                     var idents = p.makeIdentList(list);
-                    ast.Field field = ref new ast.Field(Names:idents,Type:typ);
+                    ptr<ast.Field> field = addr(new ast.Field(Names:idents,Type:typ));
                     params = append(params, field); 
                     // Go spec: The scope of an identifier denoting a function
                     // parameter or result variable is the function body.
@@ -1022,14 +1206,15 @@ namespace go
                     p.resolve(typ);
                     if (!p.atComma("parameter list", token.RPAREN))
                     {
-                        return;
+                        return ;
                     }
+
                     p.next();
                     while (p.tok != token.RPAREN && p.tok != token.EOF)
                     {
                         idents = p.parseIdentList();
                         typ = p.parseVarType(ellipsisOk);
-                        field = ref new ast.Field(Names:idents,Type:typ);
+                        field = addr(new ast.Field(Names:idents,Type:typ));
                         params = append(params, field); 
                         // Go spec: The scope of an identifier denoting a function
                         // parameter or result variable is the function body.
@@ -1039,10 +1224,13 @@ namespace go
                         {
                             break;
                         }
+
                         p.next();
+
                     }
 
-                    return;
+                    return ;
+
                 } 
 
                 // Type { "," Type } (anonymous parameters)
@@ -1052,7 +1240,7 @@ namespace go
             } 
 
             // Type { "," Type } (anonymous parameters)
-            params = make_slice<ref ast.Field>(len(list));
+            params = make_slice<ptr<ast.Field>>(len(list));
             {
                 var typ__prev1 = typ;
 
@@ -1061,124 +1249,162 @@ namespace go
                     i = __i;
                     typ = __typ;
                     p.resolve(typ);
-                    params[i] = ref new ast.Field(Type:typ);
+                    params[i] = addr(new ast.Field(Type:typ));
                 }
 
                 typ = typ__prev1;
             }
 
-            return;
+            return ;
+
         });
 
-        private static ref ast.FieldList parseParameters(this ref parser _p, ref ast.Scope _scope, bool ellipsisOk) => func(_p, _scope, (ref parser p, ref ast.Scope scope, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.FieldList> parseParameters(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope, bool ellipsisOk) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref ast.Scope scope = ref _addr_scope.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Parameters")));
+                defer(un(_addr_trace(_addr_p, "Parameters")));
             }
-            slice<ref ast.Field> @params = default;
+
+            slice<ptr<ast.Field>> @params = default;
             var lparen = p.expect(token.LPAREN);
             if (p.tok != token.RPAREN)
             {
                 params = p.parseParameterList(scope, ellipsisOk);
             }
+
             var rparen = p.expect(token.RPAREN);
 
-            return ref new ast.FieldList(Opening:lparen,List:params,Closing:rparen);
+            return addr(new ast.FieldList(Opening:lparen,List:params,Closing:rparen));
+
         });
 
-        private static ref ast.FieldList parseResult(this ref parser _p, ref ast.Scope _scope) => func(_p, _scope, (ref parser p, ref ast.Scope scope, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.FieldList> parseResult(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref ast.Scope scope = ref _addr_scope.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Result")));
+                defer(un(_addr_trace(_addr_p, "Result")));
             }
+
             if (p.tok == token.LPAREN)
             {
-                return p.parseParameters(scope, false);
+                return _addr_p.parseParameters(scope, false)!;
             }
+
             var typ = p.tryType();
             if (typ != null)
             {
-                var list = make_slice<ref ast.Field>(1L);
-                list[0L] = ref new ast.Field(Type:typ);
-                return ref new ast.FieldList(List:list);
+                var list = make_slice<ptr<ast.Field>>(1L);
+                list[0L] = addr(new ast.Field(Type:typ));
+                return addr(new ast.FieldList(List:list));
             }
-            return null;
+
+            return _addr_null!;
+
         });
 
-        private static (ref ast.FieldList, ref ast.FieldList) parseSignature(this ref parser _p, ref ast.Scope _scope) => func(_p, _scope, (ref parser p, ref ast.Scope scope, Defer defer, Panic _, Recover __) =>
+        private static (ptr<ast.FieldList>, ptr<ast.FieldList>) parseSignature(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, __) =>
         {
+            ptr<ast.FieldList> @params = default!;
+            ptr<ast.FieldList> results = default!;
+            ref parser p = ref _addr_p.val;
+            ref ast.Scope scope = ref _addr_scope.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Signature")));
+                defer(un(_addr_trace(_addr_p, "Signature")));
             }
+
             params = p.parseParameters(scope, true);
             results = p.parseResult(scope);
 
-            return;
+            return ;
+
         });
 
-        private static (ref ast.FuncType, ref ast.Scope) parseFuncType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static (ptr<ast.FuncType>, ptr<ast.Scope>) parseFuncType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ptr<ast.FuncType> _p0 = default!;
+            ptr<ast.Scope> _p0 = default!;
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "FuncType")));
+                defer(un(_addr_trace(_addr_p, "FuncType")));
             }
+
             var pos = p.expect(token.FUNC);
             var scope = ast.NewScope(p.topScope); // function scope
             var (params, results) = p.parseSignature(scope);
 
-            return (ref new ast.FuncType(Func:pos,Params:params,Results:results), scope);
+            return (addr(new ast.FuncType(Func:pos,Params:params,Results:results)), _addr_scope!);
+
         });
 
-        private static ref ast.Field parseMethodSpec(this ref parser _p, ref ast.Scope _scope) => func(_p, _scope, (ref parser p, ref ast.Scope scope, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.Field> parseMethodSpec(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref ast.Scope scope = ref _addr_scope.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "MethodSpec")));
+                defer(un(_addr_trace(_addr_p, "MethodSpec")));
             }
+
             var doc = p.leadComment;
-            slice<ref ast.Ident> idents = default;
+            slice<ptr<ast.Ident>> idents = default;
             ast.Expr typ = default;
             var x = p.parseTypeName();
             {
-                ref ast.Ident (ident, isIdent) = x._<ref ast.Ident>();
+                ptr<ast.Ident> (ident, isIdent) = x._<ptr<ast.Ident>>();
 
                 if (isIdent && p.tok == token.LPAREN)
                 { 
                     // method
-                    idents = new slice<ref ast.Ident>(new ref ast.Ident[] { ident });
+                    idents = new slice<ptr<ast.Ident>>(new ptr<ast.Ident>[] { ident });
                     var scope = ast.NewScope(null); // method scope
                     var (params, results) = p.parseSignature(scope);
-                    typ = ref new ast.FuncType(Func:token.NoPos,Params:params,Results:results);
+                    typ = addr(new ast.FuncType(Func:token.NoPos,Params:params,Results:results));
+
                 }
                 else
                 { 
                     // embedded interface
                     typ = x;
                     p.resolve(typ);
+
                 }
 
             }
+
             p.expectSemi(); // call before accessing p.linecomment
 
-            ast.Field spec = ref new ast.Field(Doc:doc,Names:idents,Type:typ,Comment:p.lineComment);
+            ptr<ast.Field> spec = addr(new ast.Field(Doc:doc,Names:idents,Type:typ,Comment:p.lineComment));
             p.declare(spec, null, scope, ast.Fun, idents);
 
-            return spec;
+            return _addr_spec!;
+
         });
 
-        private static ref ast.InterfaceType parseInterfaceType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.InterfaceType> parseInterfaceType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "InterfaceType")));
+                defer(un(_addr_trace(_addr_p, "InterfaceType")));
             }
+
             var pos = p.expect(token.INTERFACE);
             var lbrace = p.expect(token.LBRACE);
             var scope = ast.NewScope(null); // interface scope
-            slice<ref ast.Field> list = default;
+            slice<ptr<ast.Field>> list = default;
             while (p.tok == token.IDENT)
             {
                 list = append(list, p.parseMethodSpec(scope));
@@ -1186,30 +1412,38 @@ namespace go
 
             var rbrace = p.expect(token.RBRACE);
 
-            return ref new ast.InterfaceType(Interface:pos,Methods:&ast.FieldList{Opening:lbrace,List:list,Closing:rbrace,},);
+            return addr(new ast.InterfaceType(Interface:pos,Methods:&ast.FieldList{Opening:lbrace,List:list,Closing:rbrace,},));
+
         });
 
-        private static ref ast.MapType parseMapType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.MapType> parseMapType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "MapType")));
+                defer(un(_addr_trace(_addr_p, "MapType")));
             }
+
             var pos = p.expect(token.MAP);
             p.expect(token.LBRACK);
             var key = p.parseType();
             p.expect(token.RBRACK);
             var value = p.parseType();
 
-            return ref new ast.MapType(Map:pos,Key:key,Value:value);
+            return addr(new ast.MapType(Map:pos,Key:key,Value:value));
+
         });
 
-        private static ref ast.ChanType parseChanType(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.ChanType> parseChanType(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "ChanType")));
+                defer(un(_addr_trace(_addr_p, "ChanType")));
             }
+
             var pos = p.pos;
             var dir = ast.SEND | ast.RECV;
             token.Pos arrow = default;
@@ -1222,6 +1456,7 @@ namespace go
                     p.next();
                     dir = ast.SEND;
                 }
+
             }
             else
             {
@@ -1229,14 +1464,18 @@ namespace go
                 p.expect(token.CHAN);
                 dir = ast.RECV;
             }
+
             var value = p.parseType();
 
-            return ref new ast.ChanType(Begin:pos,Arrow:arrow,Dir:dir,Value:value);
+            return addr(new ast.ChanType(Begin:pos,Arrow:arrow,Dir:dir,Value:value));
+
         });
 
         // If the result is an identifier, it is not resolved.
-        private static ast.Expr tryIdentOrType(this ref parser p)
+        private static ast.Expr tryIdentOrType(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
 
             if (p.tok == token.IDENT) 
                 return p.parseTypeName();
@@ -1260,103 +1499,131 @@ namespace go
                 p.next();
                 var typ = p.parseType();
                 var rparen = p.expect(token.RPAREN);
-                return ref new ast.ParenExpr(Lparen:lparen,X:typ,Rparen:rparen);
+                return addr(new ast.ParenExpr(Lparen:lparen,X:typ,Rparen:rparen));
             // no type found
             return null;
+
         }
 
-        private static ast.Expr tryType(this ref parser p)
+        private static ast.Expr tryType(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             var typ = p.tryIdentOrType();
             if (typ != null)
             {
                 p.resolve(typ);
             }
+
             return typ;
+
         }
 
         // ----------------------------------------------------------------------------
         // Blocks
 
-        private static slice<ast.Stmt> parseStmtList(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static slice<ast.Stmt> parseStmtList(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            slice<ast.Stmt> list = default;
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "StatementList")));
+                defer(un(_addr_trace(_addr_p, "StatementList")));
             }
+
             while (p.tok != token.CASE && p.tok != token.DEFAULT && p.tok != token.RBRACE && p.tok != token.EOF)
             {
                 list = append(list, p.parseStmt());
             }
 
 
-            return;
+            return ;
+
         });
 
-        private static ref ast.BlockStmt parseBody(this ref parser _p, ref ast.Scope _scope) => func(_p, _scope, (ref parser p, ref ast.Scope scope, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.BlockStmt> parseBody(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref ast.Scope scope = ref _addr_scope.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Body")));
+                defer(un(_addr_trace(_addr_p, "Body")));
             }
+
             var lbrace = p.expect(token.LBRACE);
             p.topScope = scope; // open function scope
             p.openLabelScope();
             var list = p.parseStmtList();
             p.closeLabelScope();
             p.closeScope();
-            var rbrace = p.expect(token.RBRACE);
+            var rbrace = p.expect2(token.RBRACE);
 
-            return ref new ast.BlockStmt(Lbrace:lbrace,List:list,Rbrace:rbrace);
+            return addr(new ast.BlockStmt(Lbrace:lbrace,List:list,Rbrace:rbrace));
+
         });
 
-        private static ref ast.BlockStmt parseBlockStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.BlockStmt> parseBlockStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "BlockStmt")));
+                defer(un(_addr_trace(_addr_p, "BlockStmt")));
             }
+
             var lbrace = p.expect(token.LBRACE);
             p.openScope();
             var list = p.parseStmtList();
             p.closeScope();
-            var rbrace = p.expect(token.RBRACE);
+            var rbrace = p.expect2(token.RBRACE);
 
-            return ref new ast.BlockStmt(Lbrace:lbrace,List:list,Rbrace:rbrace);
+            return addr(new ast.BlockStmt(Lbrace:lbrace,List:list,Rbrace:rbrace));
+
         });
 
         // ----------------------------------------------------------------------------
         // Expressions
 
-        private static ast.Expr parseFuncTypeOrLit(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseFuncTypeOrLit(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "FuncTypeOrLit")));
+                defer(un(_addr_trace(_addr_p, "FuncTypeOrLit")));
             }
+
             var (typ, scope) = p.parseFuncType();
             if (p.tok != token.LBRACE)
             { 
                 // function type only
                 return typ;
+
             }
+
             p.exprLev++;
             var body = p.parseBody(scope);
             p.exprLev--;
 
-            return ref new ast.FuncLit(Type:typ,Body:body);
+            return addr(new ast.FuncLit(Type:typ,Body:body));
+
         });
 
         // parseOperand may return an expression or a raw type (incl. array
         // types of the form [...]T. Callers must verify the result.
         // If lhs is set and the result is an identifier, it is not resolved.
         //
-        private static ast.Expr parseOperand(this ref parser _p, bool lhs) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseOperand(this ptr<parser> _addr_p, bool lhs) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Operand")));
+                defer(un(_addr_trace(_addr_p, "Operand")));
             }
+
 
             if (p.tok == token.IDENT) 
                 var x = p.parseIdent();
@@ -1364,9 +1631,10 @@ namespace go
                 {
                     p.resolve(x);
                 }
+
                 return x;
             else if (p.tok == token.INT || p.tok == token.FLOAT || p.tok == token.IMAG || p.tok == token.CHAR || p.tok == token.STRING) 
-                x = ref new ast.BasicLit(ValuePos:p.pos,Kind:p.tok,Value:p.lit);
+                x = addr(new ast.BasicLit(ValuePos:p.pos,Kind:p.tok,Value:p.lit));
                 p.next();
                 return x;
             else if (p.tok == token.LPAREN) 
@@ -1376,7 +1644,7 @@ namespace go
                 x = p.parseRhsOrType(); // types may be parenthesized: (some type)
                 p.exprLev--;
                 var rparen = p.expect(token.RPAREN);
-                return ref new ast.ParenExpr(Lparen:lparen,X:x,Rparen:rparen);
+                return addr(new ast.ParenExpr(Lparen:lparen,X:x,Rparen:rparen));
             else if (p.tok == token.FUNC) 
                 return p.parseFuncTypeOrLit();
                         {
@@ -1385,9 +1653,10 @@ namespace go
                 if (typ != null)
                 { 
                     // could be type for composite literal or conversion
-                    ref ast.Ident (_, isIdent) = typ._<ref ast.Ident>();
+                    ptr<ast.Ident> (_, isIdent) = typ._<ptr<ast.Ident>>();
                     assert(!isIdent, "type cannot be identifier");
                     return typ;
+
                 } 
 
                 // we have an error
@@ -1397,50 +1666,64 @@ namespace go
             // we have an error
             var pos = p.pos;
             p.errorExpected(pos, "operand");
-            syncStmt(p);
-            return ref new ast.BadExpr(From:pos,To:p.pos);
+            p.advance(stmtStart);
+            return addr(new ast.BadExpr(From:pos,To:p.pos));
+
         });
 
-        private static ast.Expr parseSelector(this ref parser _p, ast.Expr x) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseSelector(this ptr<parser> _addr_p, ast.Expr x) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Selector")));
+                defer(un(_addr_trace(_addr_p, "Selector")));
             }
+
             var sel = p.parseIdent();
 
-            return ref new ast.SelectorExpr(X:x,Sel:sel);
+            return addr(new ast.SelectorExpr(X:x,Sel:sel));
+
         });
 
-        private static ast.Expr parseTypeAssertion(this ref parser _p, ast.Expr x) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseTypeAssertion(this ptr<parser> _addr_p, ast.Expr x) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "TypeAssertion")));
+                defer(un(_addr_trace(_addr_p, "TypeAssertion")));
             }
+
             var lparen = p.expect(token.LPAREN);
             ast.Expr typ = default;
             if (p.tok == token.TYPE)
             { 
                 // type switch: typ == nil
                 p.next();
+
             }
             else
             {
                 typ = p.parseType();
             }
+
             var rparen = p.expect(token.RPAREN);
 
-            return ref new ast.TypeAssertExpr(X:x,Type:typ,Lparen:lparen,Rparen:rparen);
+            return addr(new ast.TypeAssertExpr(X:x,Type:typ,Lparen:lparen,Rparen:rparen));
+
         });
 
-        private static ast.Expr parseIndexOrSlice(this ref parser _p, ast.Expr x) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseIndexOrSlice(this ptr<parser> _addr_p, ast.Expr x) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "IndexOrSlice")));
+                defer(un(_addr_trace(_addr_p, "IndexOrSlice")));
             }
-            const long N = 3L; // change the 3 to 2 to disable 3-index slices
+
+            const long N = (long)3L; // change the 3 to 2 to disable 3-index slices
  // change the 3 to 2 to disable 3-index slices
             var lbrack = p.expect(token.LBRACK);
             p.exprLev++;
@@ -1450,6 +1733,7 @@ namespace go
             {
                 index[0L] = p.parseRhs();
             }
+
             long ncolons = 0L;
             while (p.tok == token.COLON && ncolons < len(colons))
             {
@@ -1460,6 +1744,7 @@ namespace go
                 {
                     index[ncolons] = p.parseRhs();
                 }
+
             }
 
             p.exprLev--;
@@ -1477,25 +1762,34 @@ namespace go
                     if (index[1L] == null)
                     {
                         p.error(colons[0L], "2nd index required in 3-index slice");
-                        index[1L] = ref new ast.BadExpr(From:colons[0]+1,To:colons[1]);
+                        index[1L] = addr(new ast.BadExpr(From:colons[0]+1,To:colons[1]));
                     }
+
                     if (index[2L] == null)
                     {
                         p.error(colons[1L], "3rd index required in 3-index slice");
-                        index[2L] = ref new ast.BadExpr(From:colons[1]+1,To:rbrack);
+                        index[2L] = addr(new ast.BadExpr(From:colons[1]+1,To:rbrack));
                     }
+
                 }
-                return ref new ast.SliceExpr(X:x,Lbrack:lbrack,Low:index[0],High:index[1],Max:index[2],Slice3:slice3,Rbrack:rbrack);
+
+                return addr(new ast.SliceExpr(X:x,Lbrack:lbrack,Low:index[0],High:index[1],Max:index[2],Slice3:slice3,Rbrack:rbrack));
+
             }
-            return ref new ast.IndexExpr(X:x,Lbrack:lbrack,Index:index[0],Rbrack:rbrack);
+
+            return addr(new ast.IndexExpr(X:x,Lbrack:lbrack,Index:index[0],Rbrack:rbrack));
+
         });
 
-        private static ref ast.CallExpr parseCallOrConversion(this ref parser _p, ast.Expr fun) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.CallExpr> parseCallOrConversion(this ptr<parser> _addr_p, ast.Expr fun) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "CallOrConversion")));
+                defer(un(_addr_trace(_addr_p, "CallOrConversion")));
             }
+
             var lparen = p.expect(token.LPAREN);
             p.exprLev++;
             slice<ast.Expr> list = default;
@@ -1508,25 +1802,32 @@ namespace go
                     ellipsis = p.pos;
                     p.next();
                 }
+
                 if (!p.atComma("argument list", token.RPAREN))
                 {
                     break;
                 }
+
                 p.next();
+
             }
 
             p.exprLev--;
             var rparen = p.expectClosing(token.RPAREN, "argument list");
 
-            return ref new ast.CallExpr(Fun:fun,Lparen:lparen,Args:list,Ellipsis:ellipsis,Rparen:rparen);
+            return addr(new ast.CallExpr(Fun:fun,Lparen:lparen,Args:list,Ellipsis:ellipsis,Rparen:rparen));
+
         });
 
-        private static ast.Expr parseValue(this ref parser _p, bool keyOk) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseValue(this ptr<parser> _addr_p, bool keyOk) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Element")));
+                defer(un(_addr_trace(_addr_p, "Element")));
             }
+
             if (p.tok == token.LBRACE)
             {
                 return p.parseLiteralValue(null);
@@ -1558,38 +1859,52 @@ namespace go
                     // we don't get (possibly false) errors about
                     // undeclared names.
                     p.tryResolve(x, false);
+
                 }
                 else
                 { 
                     // not a key
                     p.resolve(x);
+
                 }
+
             }
+
             return x;
+
         });
 
-        private static ast.Expr parseElement(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseElement(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Element")));
+                defer(un(_addr_trace(_addr_p, "Element")));
             }
+
             var x = p.parseValue(true);
             if (p.tok == token.COLON)
             {
                 var colon = p.pos;
                 p.next();
-                x = ref new ast.KeyValueExpr(Key:x,Colon:colon,Value:p.parseValue(false));
+                x = addr(new ast.KeyValueExpr(Key:x,Colon:colon,Value:p.parseValue(false)));
             }
+
             return x;
+
         });
 
-        private static slice<ast.Expr> parseElementList(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static slice<ast.Expr> parseElementList(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            slice<ast.Expr> list = default;
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "ElementList")));
+                defer(un(_addr_trace(_addr_p, "ElementList")));
             }
+
             while (p.tok != token.RBRACE && p.tok != token.EOF)
             {
                 list = append(list, p.parseElement());
@@ -1597,19 +1912,25 @@ namespace go
                 {
                     break;
                 }
+
                 p.next();
+
             }
 
 
-            return;
+            return ;
+
         });
 
-        private static ast.Expr parseLiteralValue(this ref parser _p, ast.Expr typ) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseLiteralValue(this ptr<parser> _addr_p, ast.Expr typ) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "LiteralValue")));
+                defer(un(_addr_trace(_addr_p, "LiteralValue")));
             }
+
             var lbrace = p.expect(token.LBRACE);
             slice<ast.Expr> elts = default;
             p.exprLev++;
@@ -1617,53 +1938,58 @@ namespace go
             {
                 elts = p.parseElementList();
             }
+
             p.exprLev--;
             var rbrace = p.expectClosing(token.RBRACE, "composite literal");
-            return ref new ast.CompositeLit(Type:typ,Lbrace:lbrace,Elts:elts,Rbrace:rbrace);
+            return addr(new ast.CompositeLit(Type:typ,Lbrace:lbrace,Elts:elts,Rbrace:rbrace));
+
         });
 
         // checkExpr checks that x is an expression (and not a type).
-        private static ast.Expr checkExpr(this ref parser _p, ast.Expr x) => func(_p, (ref parser p, Defer _, Panic panic, Recover __) =>
+        private static ast.Expr checkExpr(this ptr<parser> _addr_p, ast.Expr x) => func((_, panic, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             switch (unparen(x).type())
             {
-                case ref ast.BadExpr _:
+                case ptr<ast.BadExpr> _:
                     break;
-                case ref ast.Ident _:
+                case ptr<ast.Ident> _:
                     break;
-                case ref ast.BasicLit _:
+                case ptr<ast.BasicLit> _:
                     break;
-                case ref ast.FuncLit _:
+                case ptr<ast.FuncLit> _:
                     break;
-                case ref ast.CompositeLit _:
+                case ptr<ast.CompositeLit> _:
                     break;
-                case ref ast.ParenExpr _:
+                case ptr<ast.ParenExpr> _:
                     panic("unreachable");
                     break;
-                case ref ast.SelectorExpr _:
+                case ptr<ast.SelectorExpr> _:
                     break;
-                case ref ast.IndexExpr _:
+                case ptr<ast.IndexExpr> _:
                     break;
-                case ref ast.SliceExpr _:
+                case ptr<ast.SliceExpr> _:
                     break;
-                case ref ast.TypeAssertExpr _:
+                case ptr<ast.TypeAssertExpr> _:
                     break;
-                case ref ast.CallExpr _:
+                case ptr<ast.CallExpr> _:
                     break;
-                case ref ast.StarExpr _:
+                case ptr<ast.StarExpr> _:
                     break;
-                case ref ast.UnaryExpr _:
+                case ptr<ast.UnaryExpr> _:
                     break;
-                case ref ast.BinaryExpr _:
+                case ptr<ast.BinaryExpr> _:
                     break;
                 default:
                 {
                     p.errorExpected(x.Pos(), "expression");
-                    x = ref new ast.BadExpr(From:x.Pos(),To:p.safePos(x.End()));
+                    x = addr(new ast.BadExpr(From:x.Pos(),To:p.safePos(x.End())));
                     break;
                 }
             }
             return x;
+
         });
 
         // isTypeName reports whether x is a (qualified) TypeName.
@@ -1671,12 +1997,12 @@ namespace go
         {
             switch (x.type())
             {
-                case ref ast.BadExpr t:
+                case ptr<ast.BadExpr> t:
                     break;
-                case ref ast.Ident t:
+                case ptr<ast.Ident> t:
                     break;
-                case ref ast.SelectorExpr t:
-                    ref ast.Ident (_, isIdent) = t.X._<ref ast.Ident>();
+                case ptr<ast.SelectorExpr> t:
+                    ptr<ast.Ident> (_, isIdent) = t.X._<ptr<ast.Ident>>();
                     return isIdent;
                     break;
                 default:
@@ -1687,6 +2013,7 @@ namespace go
                 }
             }
             return true;
+
         }
 
         // isLiteralType reports whether x is a legal composite literal type.
@@ -1694,19 +2021,19 @@ namespace go
         {
             switch (x.type())
             {
-                case ref ast.BadExpr t:
+                case ptr<ast.BadExpr> t:
                     break;
-                case ref ast.Ident t:
+                case ptr<ast.Ident> t:
                     break;
-                case ref ast.SelectorExpr t:
-                    ref ast.Ident (_, isIdent) = t.X._<ref ast.Ident>();
+                case ptr<ast.SelectorExpr> t:
+                    ptr<ast.Ident> (_, isIdent) = t.X._<ptr<ast.Ident>>();
                     return isIdent;
                     break;
-                case ref ast.ArrayType t:
+                case ptr<ast.ArrayType> t:
                     break;
-                case ref ast.StructType t:
+                case ptr<ast.StructType> t:
                     break;
-                case ref ast.MapType t:
+                case ptr<ast.MapType> t:
                     break;
                 default:
                 {
@@ -1716,13 +2043,14 @@ namespace go
                 }
             }
             return true;
+
         }
 
         // If x is of the form *T, deref returns T, otherwise it returns x.
         private static ast.Expr deref(ast.Expr x)
         {
             {
-                ref ast.StarExpr (p, isPtr) = x._<ref ast.StarExpr>();
+                ptr<ast.StarExpr> (p, isPtr) = x._<ptr<ast.StarExpr>>();
 
                 if (isPtr)
                 {
@@ -1730,14 +2058,16 @@ namespace go
                 }
 
             }
+
             return x;
+
         }
 
         // If x is of the form (T), unparen returns unparen(T), otherwise it returns x.
         private static ast.Expr unparen(ast.Expr x)
         {
             {
-                ref ast.ParenExpr (p, isParen) = x._<ref ast.ParenExpr>();
+                ptr<ast.ParenExpr> (p, isParen) = x._<ptr<ast.ParenExpr>>();
 
                 if (isParen)
                 {
@@ -1745,32 +2075,35 @@ namespace go
                 }
 
             }
+
             return x;
+
         }
 
         // checkExprOrType checks that x is an expression or a type
         // (and not a raw type such as [...]T).
         //
-        private static ast.Expr checkExprOrType(this ref parser _p, ast.Expr x) => func(_p, (ref parser p, Defer _, Panic panic, Recover __) =>
+        private static ast.Expr checkExprOrType(this ptr<parser> _addr_p, ast.Expr x) => func((_, panic, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             switch (unparen(x).type())
             {
-                case ref ast.ParenExpr t:
+                case ptr<ast.ParenExpr> t:
                     panic("unreachable");
                     break;
-                case ref ast.UnaryExpr t:
-                    break;
-                case ref ast.ArrayType t:
+                case ptr<ast.ArrayType> t:
                     {
-                        ref ast.Ellipsis (len, isEllipsis) = t.Len._<ref ast.Ellipsis>();
+                        ptr<ast.Ellipsis> (len, isEllipsis) = t.Len._<ptr<ast.Ellipsis>>();
 
                         if (isEllipsis)
                         {
                             p.error(len.Pos(), "expected array length, found '...'");
-                            x = ref new ast.BadExpr(From:x.Pos(),To:p.safePos(x.End()));
+                            x = addr(new ast.BadExpr(From:x.Pos(),To:p.safePos(x.End())));
                         }
 
                     }
+
                     break; 
 
                 // all other nodes are expressions or types
@@ -1778,15 +2111,19 @@ namespace go
 
             // all other nodes are expressions or types
             return x;
+
         });
 
         // If lhs is set and the result is an identifier, it is not resolved.
-        private static ast.Expr parsePrimaryExpr(this ref parser _p, bool lhs) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parsePrimaryExpr(this ptr<parser> _addr_p, bool lhs) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "PrimaryExpr")));
+                defer(un(_addr_trace(_addr_p, "PrimaryExpr")));
             }
+
             var x = p.parseOperand(lhs);
 L:
 
@@ -1800,6 +2137,7 @@ L:
                         p.resolve(x);
                     }
 
+
                     if (p.tok == token.IDENT) 
                         x = p.parseSelector(p.checkExprOrType(x));
                     else if (p.tok == token.LPAREN) 
@@ -1808,19 +2146,21 @@ L:
                         var pos = p.pos;
                         p.errorExpected(pos, "selector or type assertion");
                         p.next(); // make progress
-                        ast.Ident sel = ref new ast.Ident(NamePos:pos,Name:"_");
-                        x = ref new ast.SelectorExpr(X:x,Sel:sel);
+                        ptr<ast.Ident> sel = addr(new ast.Ident(NamePos:pos,Name:"_"));
+                        x = addr(new ast.SelectorExpr(X:x,Sel:sel));
                                     else if (p.tok == token.LBRACK) 
                     if (lhs)
                     {
                         p.resolve(x);
                     }
+
                     x = p.parseIndexOrSlice(p.checkExpr(x));
                 else if (p.tok == token.LPAREN) 
                     if (lhs)
                     {
                         p.resolve(x);
                     }
+
                     x = p.parseCallOrConversion(p.checkExprOrType(x));
                 else if (p.tok == token.LBRACE) 
                     if (isLiteralType(x) && (p.exprLev >= 0L || !isTypeName(x)))
@@ -1829,13 +2169,16 @@ L:
                         {
                             p.resolve(x);
                         }
+
                         x = p.parseLiteralValue(x);
+
                     }
                     else
                     {
                         _breakL = true;
                         break;
                     }
+
                 else 
                     _breakL = true;
                     break;
@@ -1843,22 +2186,26 @@ L:
             }
 
             return x;
+
         });
 
         // If lhs is set and the result is an identifier, it is not resolved.
-        private static ast.Expr parseUnaryExpr(this ref parser _p, bool lhs) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseUnaryExpr(this ptr<parser> _addr_p, bool lhs) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "UnaryExpr")));
+                defer(un(_addr_trace(_addr_p, "UnaryExpr")));
             }
+
 
             if (p.tok == token.ADD || p.tok == token.SUB || p.tok == token.NOT || p.tok == token.XOR || p.tok == token.AND) 
                 var pos = p.pos;
                 var op = p.tok;
                 p.next();
                 var x = p.parseUnaryExpr(false);
-                return ref new ast.UnaryExpr(OpPos:pos,Op:op,X:p.checkExpr(x));
+                return addr(new ast.UnaryExpr(OpPos:pos,Op:op,X:p.checkExpr(x)));
             else if (p.tok == token.ARROW) 
                 // channel type or receive expression
                 var arrow = p.pos;
@@ -1882,7 +2229,7 @@ L:
 
                 // determine which case we have
                 {
-                    ref ast.ChanType (typ, ok) = x._<ref ast.ChanType>();
+                    ptr<ast.ChanType> (typ, ok) = x._<ptr<ast.ChanType>>();
 
                     if (ok)
                     { 
@@ -1896,20 +2243,25 @@ L:
                             { 
                                 // error: (<-type) is (<-(<-chan T))
                                 p.errorExpected(typ.Arrow, "'chan'");
+
                             }
+
                             arrow = typ.Arrow;
                             typ.Begin = arrow;
                             typ.Arrow = arrow;
                             dir = typ.Dir;
                             typ.Dir = ast.RECV;
-                            typ, ok = typ.Value._<ref ast.ChanType>();
+                            typ, ok = typ.Value._<ptr<ast.ChanType>>();
+
                         }
 
                         if (dir == ast.SEND)
                         {
                             p.errorExpected(arrow, "channel type");
                         }
+
                         return x;
+
                     } 
 
                     // <-(expr)
@@ -1917,33 +2269,43 @@ L:
                 } 
 
                 // <-(expr)
-                return ref new ast.UnaryExpr(OpPos:arrow,Op:token.ARROW,X:p.checkExpr(x));
+                return addr(new ast.UnaryExpr(OpPos:arrow,Op:token.ARROW,X:p.checkExpr(x)));
             else if (p.tok == token.MUL) 
                 // pointer type or unary "*" expression
                 pos = p.pos;
                 p.next();
                 x = p.parseUnaryExpr(false);
-                return ref new ast.StarExpr(Star:pos,X:p.checkExprOrType(x));
+                return addr(new ast.StarExpr(Star:pos,X:p.checkExprOrType(x)));
                         return p.parsePrimaryExpr(lhs);
+
         });
 
-        private static (token.Token, long) tokPrec(this ref parser p)
+        private static (token.Token, long) tokPrec(this ptr<parser> _addr_p)
         {
+            token.Token _p0 = default;
+            long _p0 = default;
+            ref parser p = ref _addr_p.val;
+
             var tok = p.tok;
             if (p.inRhs && tok == token.ASSIGN)
             {
                 tok = token.EQL;
             }
+
             return (tok, tok.Precedence());
+
         }
 
         // If lhs is set and the result is an identifier, it is not resolved.
-        private static ast.Expr parseBinaryExpr(this ref parser _p, bool lhs, long prec1) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseBinaryExpr(this ptr<parser> _addr_p, bool lhs, long prec1) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "BinaryExpr")));
+                defer(un(_addr_trace(_addr_p, "BinaryExpr")));
             }
+
             var x = p.parseUnaryExpr(lhs);
             while (true)
             {
@@ -1952,15 +2314,19 @@ L:
                 {
                     return x;
                 }
+
                 var pos = p.expect(op);
                 if (lhs)
                 {
                     p.resolve(x);
                     lhs = false;
                 }
+
                 var y = p.parseBinaryExpr(false, oprec + 1L);
-                x = ref new ast.BinaryExpr(X:p.checkExpr(x),OpPos:pos,Op:op,Y:p.checkExpr(y));
+                x = addr(new ast.BinaryExpr(X:p.checkExpr(x),OpPos:pos,Op:op,Y:p.checkExpr(y)));
+
             }
+
 
         });
 
@@ -1968,17 +2334,23 @@ L:
         // The result may be a type or even a raw type ([...]int). Callers must
         // check the result (using checkExpr or checkExprOrType), depending on
         // context.
-        private static ast.Expr parseExpr(this ref parser _p, bool lhs) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Expr parseExpr(this ptr<parser> _addr_p, bool lhs) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Expression")));
+                defer(un(_addr_trace(_addr_p, "Expression")));
             }
+
             return p.parseBinaryExpr(lhs, token.LowestPrec + 1L);
+
         });
 
-        private static ast.Expr parseRhs(this ref parser p)
+        private static ast.Expr parseRhs(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             var old = p.inRhs;
             p.inRhs = true;
             var x = p.checkExpr(p.parseExpr(false));
@@ -1986,8 +2358,10 @@ L:
             return x;
         }
 
-        private static ast.Expr parseRhsOrType(this ref parser p)
+        private static ast.Expr parseRhsOrType(this ptr<parser> _addr_p)
         {
+            ref parser p = ref _addr_p.val;
+
             var old = p.inRhs;
             p.inRhs = true;
             var x = p.checkExprOrType(p.parseExpr(false));
@@ -1999,20 +2373,26 @@ L:
         // Statements
 
         // Parsing modes for parseSimpleStmt.
-        private static readonly var basic = iota;
-        private static readonly var labelOk = 0;
-        private static readonly var rangeOk = 1;
+        private static readonly var basic = (var)iota;
+        private static readonly var labelOk = (var)0;
+        private static readonly var rangeOk = (var)1;
+
 
         // parseSimpleStmt returns true as 2nd result if it parsed the assignment
         // of a range clause (with mode == rangeOk). The returned statement is an
         // assignment with a right-hand side that is a single unary expression of
         // the form "range x". No guarantees are given for the left-hand side.
-        private static (ast.Stmt, bool) parseSimpleStmt(this ref parser _p, long mode) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static (ast.Stmt, bool) parseSimpleStmt(this ptr<parser> _addr_p, long mode) => func((defer, _, __) =>
         {
+            ast.Stmt _p0 = default;
+            bool _p0 = default;
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "SimpleStmt")));
+                defer(un(_addr_trace(_addr_p, "SimpleStmt")));
             }
+
             var x = p.parseLhsList();
 
 
@@ -2034,11 +2414,13 @@ L:
                 {
                     y = p.parseRhsList();
                 }
-                ast.AssignStmt @as = ref new ast.AssignStmt(Lhs:x,TokPos:pos,Tok:tok,Rhs:y);
+
+                ptr<ast.AssignStmt> @as = addr(new ast.AssignStmt(Lhs:x,TokPos:pos,Tok:tok,Rhs:y));
                 if (tok == token.DEFINE)
                 {
                     p.shortVarDecl(as, x);
                 }
+
                 return (as, isRange);
                         if (len(x) > 1L)
             {
@@ -2046,21 +2428,23 @@ L:
                 // continue with first expression
             }
 
+
             if (p.tok == token.COLON) 
                 // labeled statement
                 var colon = p.pos;
                 p.next();
                 {
-                    ref ast.Ident (label, isIdent) = x[0L]._<ref ast.Ident>();
+                    ptr<ast.Ident> (label, isIdent) = x[0L]._<ptr<ast.Ident>>();
 
                     if (mode == labelOk && isIdent)
                     { 
                         // Go spec: The scope of a label is the body of the function
                         // in which it is declared and excludes the body of any nested
                         // function.
-                        ast.LabeledStmt stmt = ref new ast.LabeledStmt(Label:label,Colon:colon,Stmt:p.parseStmt());
+                        ptr<ast.LabeledStmt> stmt = addr(new ast.LabeledStmt(Label:label,Colon:colon,Stmt:p.parseStmt()));
                         p.declare(stmt, null, p.labelScope, ast.Lbl, label);
                         return (stmt, false);
+
                     } 
                     // The label declaration typically starts at x[0].Pos(), but the label
                     // declaration may be erroneous due to a token after that position (and
@@ -2077,85 +2461,105 @@ L:
                 // before the ':' that caused the problem. Thus, use the (latest) colon
                 // position for error reporting.
                 p.error(colon, "illegal label declaration");
-                return (ref new ast.BadStmt(From:x[0].Pos(),To:colon+1), false);
+                return (addr(new ast.BadStmt(From:x[0].Pos(),To:colon+1)), false);
             else if (p.tok == token.ARROW) 
                 // send statement
                 var arrow = p.pos;
                 p.next();
                 y = p.parseRhs();
-                return (ref new ast.SendStmt(Chan:x[0],Arrow:arrow,Value:y), false);
+                return (addr(new ast.SendStmt(Chan:x[0],Arrow:arrow,Value:y)), false);
             else if (p.tok == token.INC || p.tok == token.DEC) 
                 // increment or decrement
-                ast.IncDecStmt s = ref new ast.IncDecStmt(X:x[0],TokPos:p.pos,Tok:p.tok);
+                ptr<ast.IncDecStmt> s = addr(new ast.IncDecStmt(X:x[0],TokPos:p.pos,Tok:p.tok));
                 p.next();
                 return (s, false);
             // expression
-            return (ref new ast.ExprStmt(X:x[0]), false);
+            return (addr(new ast.ExprStmt(X:x[0])), false);
+
         });
 
-        private static ref ast.CallExpr parseCallExpr(this ref parser p, @string callType)
+        private static ptr<ast.CallExpr> parseCallExpr(this ptr<parser> _addr_p, @string callType)
         {
+            ref parser p = ref _addr_p.val;
+
             var x = p.parseRhsOrType(); // could be a conversion: (some type)(x)
             {
-                ref ast.CallExpr (call, isCall) = x._<ref ast.CallExpr>();
+                ptr<ast.CallExpr> (call, isCall) = x._<ptr<ast.CallExpr>>();
 
                 if (isCall)
                 {
-                    return call;
+                    return _addr_call!;
                 }
 
             }
+
             {
-                ref ast.BadExpr (_, isBad) = x._<ref ast.BadExpr>();
+                ptr<ast.BadExpr> (_, isBad) = x._<ptr<ast.BadExpr>>();
 
                 if (!isBad)
                 { 
                     // only report error if it's a new one
                     p.error(p.safePos(x.End()), fmt.Sprintf("function must be invoked in %s statement", callType));
+
                 }
 
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
-        private static ast.Stmt parseGoStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Stmt parseGoStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "GoStmt")));
+                defer(un(_addr_trace(_addr_p, "GoStmt")));
             }
+
             var pos = p.expect(token.GO);
             var call = p.parseCallExpr("go");
             p.expectSemi();
             if (call == null)
             {
-                return ref new ast.BadStmt(From:pos,To:pos+2); // len("go")
+                return addr(new ast.BadStmt(From:pos,To:pos+2)); // len("go")
             }
-            return ref new ast.GoStmt(Go:pos,Call:call);
+
+            return addr(new ast.GoStmt(Go:pos,Call:call));
+
         });
 
-        private static ast.Stmt parseDeferStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Stmt parseDeferStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "DeferStmt")));
+                defer(un(_addr_trace(_addr_p, "DeferStmt")));
             }
+
             var pos = p.expect(token.DEFER);
             var call = p.parseCallExpr("defer");
             p.expectSemi();
             if (call == null)
             {
-                return ref new ast.BadStmt(From:pos,To:pos+5); // len("defer")
+                return addr(new ast.BadStmt(From:pos,To:pos+5)); // len("defer")
             }
-            return ref new ast.DeferStmt(Defer:pos,Call:call);
+
+            return addr(new ast.DeferStmt(Defer:pos,Call:call));
+
         });
 
-        private static ref ast.ReturnStmt parseReturnStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.ReturnStmt> parseReturnStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "ReturnStmt")));
+                defer(un(_addr_trace(_addr_p, "ReturnStmt")));
             }
+
             var pos = p.pos;
             p.expect(token.RETURN);
             slice<ast.Expr> x = default;
@@ -2163,39 +2567,50 @@ L:
             {
                 x = p.parseRhsList();
             }
+
             p.expectSemi();
 
-            return ref new ast.ReturnStmt(Return:pos,Results:x);
+            return addr(new ast.ReturnStmt(Return:pos,Results:x));
+
         });
 
-        private static ref ast.BranchStmt parseBranchStmt(this ref parser _p, token.Token tok) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.BranchStmt> parseBranchStmt(this ptr<parser> _addr_p, token.Token tok) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "BranchStmt")));
+                defer(un(_addr_trace(_addr_p, "BranchStmt")));
             }
+
             var pos = p.expect(tok);
-            ref ast.Ident label = default;
+            ptr<ast.Ident> label;
             if (tok != token.FALLTHROUGH && p.tok == token.IDENT)
             {
                 label = p.parseIdent(); 
                 // add to list of unresolved targets
                 var n = len(p.targetStack) - 1L;
                 p.targetStack[n] = append(p.targetStack[n], label);
+
             }
+
             p.expectSemi();
 
-            return ref new ast.BranchStmt(TokPos:pos,Tok:tok,Label:label);
+            return addr(new ast.BranchStmt(TokPos:pos,Tok:tok,Label:label));
+
         });
 
-        private static ast.Expr makeExpr(this ref parser p, ast.Stmt s, @string kind)
+        private static ast.Expr makeExpr(this ptr<parser> _addr_p, ast.Stmt s, @string want)
         {
+            ref parser p = ref _addr_p.val;
+
             if (s == null)
             {
                 return null;
             }
+
             {
-                ref ast.ExprStmt (es, isExpr) = s._<ref ast.ExprStmt>();
+                ptr<ast.ExprStmt> (es, isExpr) = s._<ptr<ast.ExprStmt>>();
 
                 if (isExpr)
                 {
@@ -2203,47 +2618,126 @@ L:
                 }
 
             }
-            p.error(s.Pos(), fmt.Sprintf("expected %s, found simple statement (missing parentheses around composite literal?)", kind));
-            return ref new ast.BadExpr(From:s.Pos(),To:p.safePos(s.End()));
+
+            @string found = "simple statement";
+            {
+                ptr<ast.AssignStmt> (_, isAss) = s._<ptr<ast.AssignStmt>>();
+
+                if (isAss)
+                {
+                    found = "assignment";
+                }
+
+            }
+
+            p.error(s.Pos(), fmt.Sprintf("expected %s, found %s (missing parentheses around composite literal?)", want, found));
+            return addr(new ast.BadExpr(From:s.Pos(),To:p.safePos(s.End())));
+
         }
 
-        private static ref ast.IfStmt parseIfStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        // parseIfHeader is an adjusted version of parser.header
+        // in cmd/compile/internal/syntax/parser.go, which has
+        // been tuned for better error handling.
+        private static (ast.Stmt, ast.Expr) parseIfHeader(this ptr<parser> _addr_p)
         {
+            ast.Stmt init = default;
+            ast.Expr cond = default;
+            ref parser p = ref _addr_p.val;
+
+            if (p.tok == token.LBRACE)
+            {
+                p.error(p.pos, "missing condition in if statement");
+                cond = addr(new ast.BadExpr(From:p.pos,To:p.pos));
+                return ;
+            } 
+            // p.tok != token.LBRACE
+            var outer = p.exprLev;
+            p.exprLev = -1L;
+
+            if (p.tok != token.SEMICOLON)
+            { 
+                // accept potential variable declaration but complain
+                if (p.tok == token.VAR)
+                {
+                    p.next();
+                    p.error(p.pos, fmt.Sprintf("var declaration not allowed in 'IF' initializer"));
+                }
+
+                init, _ = p.parseSimpleStmt(basic);
+
+            }
+
+            ast.Stmt condStmt = default;
+            var semi = default;
+            if (p.tok != token.LBRACE)
+            {
+                if (p.tok == token.SEMICOLON)
+                {
+                    semi.pos = p.pos;
+                    semi.lit = p.lit;
+                    p.next();
+                }
+                else
+                {
+                    p.expect(token.SEMICOLON);
+                }
+
+                if (p.tok != token.LBRACE)
+                {
+                    condStmt, _ = p.parseSimpleStmt(basic);
+                }
+
+            }
+            else
+            {
+                condStmt = init;
+                init = null;
+            }
+
+            if (condStmt != null)
+            {
+                cond = p.makeExpr(condStmt, "boolean expression");
+            }
+            else if (semi.pos.IsValid())
+            {
+                if (semi.lit == "\n")
+                {
+                    p.error(semi.pos, "unexpected newline, expecting { after if clause");
+                }
+                else
+                {
+                    p.error(semi.pos, "missing condition in if statement");
+                }
+
+            } 
+
+            // make sure we have a valid AST
+            if (cond == null)
+            {
+                cond = addr(new ast.BadExpr(From:p.pos,To:p.pos));
+            }
+
+            p.exprLev = outer;
+            return ;
+
+        }
+
+        private static ptr<ast.IfStmt> parseIfStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
+        {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "IfStmt")));
+                defer(un(_addr_trace(_addr_p, "IfStmt")));
             }
+
             var pos = p.expect(token.IF);
             p.openScope();
             defer(p.closeScope());
 
-            ast.Stmt s = default;
-            ast.Expr x = default;
-            {
-                var prevLev = p.exprLev;
-                p.exprLev = -1L;
-                if (p.tok == token.SEMICOLON)
-                {
-                    p.next();
-                    x = p.parseRhs();
-                }
-                else
-                {
-                    s, _ = p.parseSimpleStmt(basic);
-                    if (p.tok == token.SEMICOLON)
-                    {
-                        p.next();
-                        x = p.parseRhs();
-                    }
-                    else
-                    {
-                        x = p.makeExpr(s, "boolean expression");
-                        s = null;
-                    }
-                }
-                p.exprLev = prevLev;
-            }
+            var (init, cond) = p.parseIfHeader();
             var body = p.parseBlockStmt();
+
             ast.Stmt else_ = default;
             if (p.tok == token.ELSE)
             {
@@ -2256,21 +2750,28 @@ L:
                     p.expectSemi();
                 else 
                     p.errorExpected(p.pos, "if statement or block");
-                    else_ = ref new ast.BadStmt(From:p.pos,To:p.pos);
-                            }
+                    else_ = addr(new ast.BadStmt(From:p.pos,To:p.pos));
+                
+            }
             else
             {
                 p.expectSemi();
             }
-            return ref new ast.IfStmt(If:pos,Init:s,Cond:x,Body:body,Else:else_);
+
+            return addr(new ast.IfStmt(If:pos,Init:init,Cond:cond,Body:body,Else:else_));
+
         });
 
-        private static slice<ast.Expr> parseTypeList(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static slice<ast.Expr> parseTypeList(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            slice<ast.Expr> list = default;
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "TypeList")));
+                defer(un(_addr_trace(_addr_p, "TypeList")));
             }
+
             list = append(list, p.parseType());
             while (p.tok == token.COMMA)
             {
@@ -2279,15 +2780,19 @@ L:
             }
 
 
-            return;
+            return ;
+
         });
 
-        private static ref ast.CaseClause parseCaseClause(this ref parser _p, bool typeSwitch) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.CaseClause> parseCaseClause(this ptr<parser> _addr_p, bool typeSwitch) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "CaseClause")));
+                defer(un(_addr_trace(_addr_p, "CaseClause")));
             }
+
             var pos = p.pos;
             slice<ast.Expr> list = default;
             if (p.tok == token.CASE)
@@ -2301,33 +2806,38 @@ L:
                 {
                     list = p.parseRhsList();
                 }
+
             }
             else
             {
                 p.expect(token.DEFAULT);
             }
+
             var colon = p.expect(token.COLON);
             p.openScope();
             var body = p.parseStmtList();
             p.closeScope();
 
-            return ref new ast.CaseClause(Case:pos,List:list,Colon:colon,Body:body);
+            return addr(new ast.CaseClause(Case:pos,List:list,Colon:colon,Body:body));
+
         });
 
         private static bool isTypeSwitchAssert(ast.Expr x)
         {
-            ref ast.TypeAssertExpr (a, ok) = x._<ref ast.TypeAssertExpr>();
+            ptr<ast.TypeAssertExpr> (a, ok) = x._<ptr<ast.TypeAssertExpr>>();
             return ok && a.Type == null;
         }
 
-        private static bool isTypeSwitchGuard(this ref parser p, ast.Stmt s)
+        private static bool isTypeSwitchGuard(this ptr<parser> _addr_p, ast.Stmt s)
         {
+            ref parser p = ref _addr_p.val;
+
             switch (s.type())
             {
-                case ref ast.ExprStmt t:
+                case ptr<ast.ExprStmt> t:
                     return isTypeSwitchAssert(t.X);
                     break;
-                case ref ast.AssignStmt t:
+                case ptr<ast.AssignStmt> t:
                     if (len(t.Lhs) == 1L && len(t.Rhs) == 1L && isTypeSwitchAssert(t.Rhs[0L]))
                     {
 
@@ -2344,18 +2854,24 @@ L:
                         }
 
                         __switch_break1:;
+
                     }
+
                     break;
             }
             return false;
+
         }
 
-        private static ast.Stmt parseSwitchStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Stmt parseSwitchStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "SwitchStmt")));
+                defer(un(_addr_trace(_addr_p, "SwitchStmt")));
             }
+
             var pos = p.expect(token.SWITCH);
             p.openScope();
             defer(p.closeScope());
@@ -2370,6 +2886,7 @@ L:
                 {
                     s2, _ = p.parseSimpleStmt(basic);
                 }
+
                 if (p.tok == token.SEMICOLON)
                 {
                     p.next();
@@ -2392,10 +2909,15 @@ L:
                         p.openScope();
                         defer(p.closeScope());
                         s2, _ = p.parseSimpleStmt(basic);
+
                     }
+
                 }
+
                 p.exprLev = prevLev;
+
             }
+
             var typeSwitch = p.isTypeSwitchGuard(s2);
             var lbrace = p.expect(token.LBRACE);
             slice<ast.Stmt> list = default;
@@ -2406,21 +2928,26 @@ L:
 
             var rbrace = p.expect(token.RBRACE);
             p.expectSemi();
-            ast.BlockStmt body = ref new ast.BlockStmt(Lbrace:lbrace,List:list,Rbrace:rbrace);
+            ptr<ast.BlockStmt> body = addr(new ast.BlockStmt(Lbrace:lbrace,List:list,Rbrace:rbrace));
 
             if (typeSwitch)
             {
-                return ref new ast.TypeSwitchStmt(Switch:pos,Init:s1,Assign:s2,Body:body);
+                return addr(new ast.TypeSwitchStmt(Switch:pos,Init:s1,Assign:s2,Body:body));
             }
-            return ref new ast.SwitchStmt(Switch:pos,Init:s1,Tag:p.makeExpr(s2,"switch expression"),Body:body);
+
+            return addr(new ast.SwitchStmt(Switch:pos,Init:s1,Tag:p.makeExpr(s2,"switch expression"),Body:body));
+
         });
 
-        private static ref ast.CommClause parseCommClause(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.CommClause> parseCommClause(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "CommClause")));
+                defer(un(_addr_trace(_addr_p, "CommClause")));
             }
+
             p.openScope();
             var pos = p.pos;
             ast.Stmt comm = default;
@@ -2436,10 +2963,12 @@ L:
                         p.errorExpected(lhs[0L].Pos(), "1 expression"); 
                         // continue with first expression
                     }
+
                     var arrow = p.pos;
                     p.next();
                     var rhs = p.parseRhs();
-                    comm = ref new ast.SendStmt(Chan:lhs[0],Arrow:arrow,Value:rhs);
+                    comm = addr(new ast.SendStmt(Chan:lhs[0],Arrow:arrow,Value:rhs));
+
                 }
                 else
                 { 
@@ -2455,16 +2984,20 @@ L:
                                 p.errorExpected(lhs[0L].Pos(), "1 or 2 expressions"); 
                                 // continue with first two expressions
                                 lhs = lhs[0L..2L];
+
                             }
+
                             pos = p.pos;
                             p.next();
                             rhs = p.parseRhs();
-                            ast.AssignStmt @as = ref new ast.AssignStmt(Lhs:lhs,TokPos:pos,Tok:tok,Rhs:[]ast.Expr{rhs});
+                            ptr<ast.AssignStmt> @as = addr(new ast.AssignStmt(Lhs:lhs,TokPos:pos,Tok:tok,Rhs:[]ast.Expr{rhs}));
                             if (tok == token.DEFINE)
                             {
                                 p.shortVarDecl(as, lhs);
                             }
+
                             comm = as;
+
                         }
                         else
                         { 
@@ -2474,29 +3007,38 @@ L:
                                 p.errorExpected(lhs[0L].Pos(), "1 expression"); 
                                 // continue with first expression
                             }
-                            comm = ref new ast.ExprStmt(X:lhs[0]);
+
+                            comm = addr(new ast.ExprStmt(X:lhs[0]));
+
                         }
 
                     }
+
                 }
+
             }
             else
             {
                 p.expect(token.DEFAULT);
             }
+
             var colon = p.expect(token.COLON);
             var body = p.parseStmtList();
             p.closeScope();
 
-            return ref new ast.CommClause(Case:pos,Comm:comm,Colon:colon,Body:body);
+            return addr(new ast.CommClause(Case:pos,Comm:comm,Colon:colon,Body:body));
+
         });
 
-        private static ref ast.SelectStmt parseSelectStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.SelectStmt> parseSelectStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "SelectStmt")));
+                defer(un(_addr_trace(_addr_p, "SelectStmt")));
             }
+
             var pos = p.expect(token.SELECT);
             var lbrace = p.expect(token.LBRACE);
             slice<ast.Stmt> list = default;
@@ -2507,17 +3049,21 @@ L:
 
             var rbrace = p.expect(token.RBRACE);
             p.expectSemi();
-            ast.BlockStmt body = ref new ast.BlockStmt(Lbrace:lbrace,List:list,Rbrace:rbrace);
+            ptr<ast.BlockStmt> body = addr(new ast.BlockStmt(Lbrace:lbrace,List:list,Rbrace:rbrace));
 
-            return ref new ast.SelectStmt(Select:pos,Body:body);
+            return addr(new ast.SelectStmt(Select:pos,Body:body));
+
         });
 
-        private static ast.Stmt parseForStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Stmt parseForStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "ForStmt")));
+                defer(un(_addr_trace(_addr_p, "ForStmt")));
             }
+
             var pos = p.expect(token.FOR);
             p.openScope();
             defer(p.closeScope());
@@ -2537,14 +3083,17 @@ L:
                         pos = p.pos;
                         p.next();
                         ast.Expr y = new slice<ast.Expr>(new ast.Expr[] { &ast.UnaryExpr{OpPos:pos,Op:token.RANGE,X:p.parseRhs()} });
-                        s2 = ref new ast.AssignStmt(Rhs:y);
+                        s2 = addr(new ast.AssignStmt(Rhs:y));
                         isRange = true;
+
                     }
                     else
                     {
                         s2, isRange = p.parseSimpleStmt(rangeOk);
                     }
+
                 }
+
                 if (!isRange && p.tok == token.SEMICOLON)
                 {
                     p.next();
@@ -2554,20 +3103,25 @@ L:
                     {
                         s2, _ = p.parseSimpleStmt(basic);
                     }
+
                     p.expectSemi();
                     if (p.tok != token.LBRACE)
                     {
                         s3, _ = p.parseSimpleStmt(basic);
                     }
+
                 }
+
                 p.exprLev = prevLev;
+
             }
+
             var body = p.parseBlockStmt();
             p.expectSemi();
 
             if (isRange)
             {
-                ref ast.AssignStmt @as = s2._<ref ast.AssignStmt>(); 
+                ptr<ast.AssignStmt> @as = s2._<ptr<ast.AssignStmt>>(); 
                 // check lhs
                 ast.Expr key = default;                ast.Expr value = default;
 
@@ -2584,35 +3138,41 @@ L:
                         break;
                     default: 
                         p.errorExpected(@as.Lhs[len(@as.Lhs) - 1L].Pos(), "at most 2 expressions");
-                        return ref new ast.BadStmt(From:pos,To:p.safePos(body.End()));
+                        return addr(new ast.BadStmt(From:pos,To:p.safePos(body.End())));
                         break;
                 } 
                 // parseSimpleStmt returned a right-hand side that
                 // is a single unary expression of the form "range x"
-                ref ast.UnaryExpr x = @as.Rhs[0L]._<ref ast.UnaryExpr>().X;
-                return ref new ast.RangeStmt(For:pos,Key:key,Value:value,TokPos:as.TokPos,Tok:as.Tok,X:x,Body:body,);
+                ptr<ast.UnaryExpr> x = @as.Rhs[0L]._<ptr<ast.UnaryExpr>>().X;
+                return addr(new ast.RangeStmt(For:pos,Key:key,Value:value,TokPos:as.TokPos,Tok:as.Tok,X:x,Body:body,));
+
             } 
 
             // regular for statement
-            return ref new ast.ForStmt(For:pos,Init:s1,Cond:p.makeExpr(s2,"boolean or range expression"),Post:s3,Body:body,);
+            return addr(new ast.ForStmt(For:pos,Init:s1,Cond:p.makeExpr(s2,"boolean or range expression"),Post:s3,Body:body,));
+
         });
 
-        private static ast.Stmt parseStmt(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Stmt parseStmt(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ast.Stmt s = default;
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Statement")));
+                defer(un(_addr_trace(_addr_p, "Statement")));
             }
 
+
             if (p.tok == token.CONST || p.tok == token.TYPE || p.tok == token.VAR) 
-                s = ref new ast.DeclStmt(Decl:p.parseDecl(syncStmt));
+                s = addr(new ast.DeclStmt(Decl:p.parseDecl(stmtStart)));
             else if (p.tok == token.IDENT || p.tok == token.INT || p.tok == token.FLOAT || p.tok == token.IMAG || p.tok == token.CHAR || p.tok == token.STRING || p.tok == token.FUNC || p.tok == token.LPAREN || p.tok == token.LBRACK || p.tok == token.STRUCT || p.tok == token.MAP || p.tok == token.CHAN || p.tok == token.INTERFACE || p.tok == token.ADD || p.tok == token.SUB || p.tok == token.MUL || p.tok == token.AND || p.tok == token.XOR || p.tok == token.ARROW || p.tok == token.NOT) // unary operators
                 s, _ = p.parseSimpleStmt(labelOk); 
                 // because of the required look-ahead, labeled statements are
                 // parsed by parseSimpleStmt - don't expect a semicolon after
                 // them
                 {
-                    ref ast.LabeledStmt (_, isLabeledStmt) = s._<ref ast.LabeledStmt>();
+                    ptr<ast.LabeledStmt> (_, isLabeledStmt) = s._<ptr<ast.LabeledStmt>>();
 
                     if (!isLabeledStmt)
                     {
@@ -2620,6 +3180,7 @@ L:
                     }
 
                 }
+
             else if (p.tok == token.GO) 
                 s = p.parseGoStmt();
             else if (p.tok == token.DEFER) 
@@ -2643,28 +3204,29 @@ L:
                 // Is it ever possible to have an implicit semicolon
                 // producing an empty statement in a valid program?
                 // (handle correctly anyway)
-                s = ref new ast.EmptyStmt(Semicolon:p.pos,Implicit:p.lit=="\n");
+                s = addr(new ast.EmptyStmt(Semicolon:p.pos,Implicit:p.lit=="\n"));
                 p.next();
             else if (p.tok == token.RBRACE) 
                 // a semicolon may be omitted before a closing "}"
-                s = ref new ast.EmptyStmt(Semicolon:p.pos,Implicit:true);
+                s = addr(new ast.EmptyStmt(Semicolon:p.pos,Implicit:true));
             else 
                 // no statement found
                 var pos = p.pos;
                 p.errorExpected(pos, "statement");
-                syncStmt(p);
-                s = ref new ast.BadStmt(From:pos,To:p.pos);
-                        return;
+                p.advance(stmtStart);
+                s = addr(new ast.BadStmt(From:pos,To:p.pos));
+                        return ;
+
         });
 
         // ----------------------------------------------------------------------------
         // Declarations
 
-        public delegate  ast.Spec parseSpecFunction(ref ast.CommentGroup,  token.Token,  long);
+        public delegate  ast.Spec parseSpecFunction(ptr<ast.CommentGroup>,  token.Token,  long);
 
         private static bool isValidImport(@string lit)
         {
-            const @string illegalChars = "!\"#$%&\'()*,:;<=>?[\\]^{|}" + "`\uFFFD";
+            const @string illegalChars = (@string)"!\"#$%&\'()*,:;<=>?[\\]^{|}" + "`\uFFFD";
 
             var (s, _) = strconv.Unquote(lit); // go/scanner returns a legal string literal
             foreach (var (_, r) in s)
@@ -2673,20 +3235,26 @@ L:
                 {
                     return false;
                 }
+
             }
             return s != "";
+
         }
 
-        private static ast.Spec parseImportSpec(this ref parser _p, ref ast.CommentGroup _doc, token.Token _, long _) => func(_p, _doc, (ref parser p, ref ast.CommentGroup doc, Defer defer, Panic _, Recover __) =>
+        private static ast.Spec parseImportSpec(this ptr<parser> _addr_p, ptr<ast.CommentGroup> _addr_doc, token.Token _, long _) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref ast.CommentGroup doc = ref _addr_doc.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "ImportSpec")));
+                defer(un(_addr_trace(_addr_p, "ImportSpec")));
             }
-            ref ast.Ident ident = default;
+
+            ptr<ast.Ident> ident;
 
             if (p.tok == token.PERIOD) 
-                ident = ref new ast.Ident(NamePos:p.pos,Name:".");
+                ident = addr(new ast.Ident(NamePos:p.pos,Name:"."));
                 p.next();
             else if (p.tok == token.IDENT) 
                 ident = p.parseIdent();
@@ -2699,27 +3267,35 @@ L:
                 {
                     p.error(pos, "invalid import path: " + path);
                 }
+
                 p.next();
+
             }
             else
             {
                 p.expect(token.STRING); // use expect() error handling
             }
+
             p.expectSemi(); // call before accessing p.linecomment
 
             // collect imports
-            ast.ImportSpec spec = ref new ast.ImportSpec(Doc:doc,Name:ident,Path:&ast.BasicLit{ValuePos:pos,Kind:token.STRING,Value:path},Comment:p.lineComment,);
+            ptr<ast.ImportSpec> spec = addr(new ast.ImportSpec(Doc:doc,Name:ident,Path:&ast.BasicLit{ValuePos:pos,Kind:token.STRING,Value:path},Comment:p.lineComment,));
             p.imports = append(p.imports, spec);
 
             return spec;
+
         });
 
-        private static ast.Spec parseValueSpec(this ref parser _p, ref ast.CommentGroup _doc, token.Token keyword, long iota) => func(_p, _doc, (ref parser p, ref ast.CommentGroup doc, Defer defer, Panic _, Recover __) =>
+        private static ast.Spec parseValueSpec(this ptr<parser> _addr_p, ptr<ast.CommentGroup> _addr_doc, token.Token keyword, long iota) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref ast.CommentGroup doc = ref _addr_doc.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, keyword.String() + "Spec")));
+                defer(un(_addr_trace(_addr_p, keyword.String() + "Spec")));
             }
+
             var pos = p.pos;
             var idents = p.parseIdentList();
             var typ = p.tryType();
@@ -2730,6 +3306,7 @@ L:
                 p.next();
                 values = p.parseRhsList();
             }
+
             p.expectSemi(); // call before accessing p.linecomment
 
 
@@ -2738,58 +3315,71 @@ L:
                 {
                     p.error(pos, "missing variable type or initialization");
                 }
+
             else if (keyword == token.CONST) 
                 if (values == null && (iota == 0L || typ != null))
                 {
                     p.error(pos, "missing constant value");
                 }
+
             // Go spec: The scope of a constant or variable identifier declared inside
             // a function begins at the end of the ConstSpec or VarSpec and ends at
             // the end of the innermost containing block.
             // (Global identifiers are resolved in a separate phase after parsing.)
-            ast.ValueSpec spec = ref new ast.ValueSpec(Doc:doc,Names:idents,Type:typ,Values:values,Comment:p.lineComment,);
+            ptr<ast.ValueSpec> spec = addr(new ast.ValueSpec(Doc:doc,Names:idents,Type:typ,Values:values,Comment:p.lineComment,));
             var kind = ast.Con;
             if (keyword == token.VAR)
             {
                 kind = ast.Var;
             }
+
             p.declare(spec, iota, p.topScope, kind, idents);
 
             return spec;
+
         });
 
-        private static ast.Spec parseTypeSpec(this ref parser _p, ref ast.CommentGroup _doc, token.Token _, long _) => func(_p, _doc, (ref parser p, ref ast.CommentGroup doc, Defer defer, Panic _, Recover __) =>
+        private static ast.Spec parseTypeSpec(this ptr<parser> _addr_p, ptr<ast.CommentGroup> _addr_doc, token.Token _, long _) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+            ref ast.CommentGroup doc = ref _addr_doc.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "TypeSpec")));
+                defer(un(_addr_trace(_addr_p, "TypeSpec")));
             }
+
             var ident = p.parseIdent(); 
 
             // Go spec: The scope of a type identifier declared inside a function begins
             // at the identifier in the TypeSpec and ends at the end of the innermost
             // containing block.
             // (Global identifiers are resolved in a separate phase after parsing.)
-            ast.TypeSpec spec = ref new ast.TypeSpec(Doc:doc,Name:ident);
+            ptr<ast.TypeSpec> spec = addr(new ast.TypeSpec(Doc:doc,Name:ident));
             p.declare(spec, null, p.topScope, ast.Typ, ident);
             if (p.tok == token.ASSIGN)
             {
                 spec.Assign = p.pos;
                 p.next();
             }
+
             spec.Type = p.parseType();
             p.expectSemi(); // call before accessing p.linecomment
             spec.Comment = p.lineComment;
 
             return spec;
+
         });
 
-        private static ref ast.GenDecl parseGenDecl(this ref parser _p, token.Token keyword, parseSpecFunction f) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.GenDecl> parseGenDecl(this ptr<parser> _addr_p, token.Token keyword, parseSpecFunction f) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "GenDecl(" + keyword.String() + ")")));
+                defer(un(_addr_trace(_addr_p, "GenDecl(" + keyword.String() + ")")));
             }
+
             var doc = p.leadComment;
             var pos = p.expect(keyword);
             token.Pos lparen = default;            token.Pos rparen = default;
@@ -2807,39 +3397,63 @@ L:
 
                 rparen = p.expect(token.RPAREN);
                 p.expectSemi();
+
             }            {
                 list = append(list, f(null, keyword, 0L));
             }
-            return ref new ast.GenDecl(Doc:doc,TokPos:pos,Tok:keyword,Lparen:lparen,Specs:list,Rparen:rparen,);
+
+            return addr(new ast.GenDecl(Doc:doc,TokPos:pos,Tok:keyword,Lparen:lparen,Specs:list,Rparen:rparen,));
+
         });
 
-        private static ref ast.FuncDecl parseFuncDecl(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.FuncDecl> parseFuncDecl(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "FunctionDecl")));
+                defer(un(_addr_trace(_addr_p, "FunctionDecl")));
             }
+
             var doc = p.leadComment;
             var pos = p.expect(token.FUNC);
             var scope = ast.NewScope(p.topScope); // function scope
 
-            ref ast.FieldList recv = default;
+            ptr<ast.FieldList> recv;
             if (p.tok == token.LPAREN)
             {
                 recv = p.parseParameters(scope, false);
             }
+
             var ident = p.parseIdent();
 
             var (params, results) = p.parseSignature(scope);
 
-            ref ast.BlockStmt body = default;
+            ptr<ast.BlockStmt> body;
             if (p.tok == token.LBRACE)
             {
                 body = p.parseBody(scope);
+                p.expectSemi();
             }
-            p.expectSemi();
+            else if (p.tok == token.SEMICOLON)
+            {
+                p.next();
+                if (p.tok == token.LBRACE)
+                { 
+                    // opening { of function declaration on next line
+                    p.error(p.pos, "unexpected semicolon or newline before {");
+                    body = p.parseBody(scope);
+                    p.expectSemi();
 
-            ast.FuncDecl decl = ref new ast.FuncDecl(Doc:doc,Recv:recv,Name:ident,Type:&ast.FuncType{Func:pos,Params:params,Results:results,},Body:body,);
+                }
+
+            }
+            else
+            {
+                p.expectSemi();
+            }
+
+            ptr<ast.FuncDecl> decl = addr(new ast.FuncDecl(Doc:doc,Recv:recv,Name:ident,Type:&ast.FuncType{Func:pos,Params:params,Results:results,},Body:body,));
             if (recv == null)
             { 
                 // Go spec: The scope of an identifier denoting a constant, type,
@@ -2852,16 +3466,22 @@ L:
                 {
                     p.declare(decl, null, p.pkgScope, ast.Fun, ident);
                 }
+
             }
-            return decl;
+
+            return _addr_decl!;
+
         });
 
-        private static ast.Decl parseDecl(this ref parser _p, Action<ref parser> sync) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ast.Decl parseDecl(this ptr<parser> _addr_p, map<token.Token, bool> sync) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "Declaration")));
+                defer(un(_addr_trace(_addr_p, "Declaration")));
             }
+
             parseSpecFunction f = default;
 
             if (p.tok == token.CONST || p.tok == token.VAR) 
@@ -2873,26 +3493,29 @@ L:
             else 
                 var pos = p.pos;
                 p.errorExpected(pos, "declaration");
-                sync(p);
-                return ref new ast.BadDecl(From:pos,To:p.pos);
+                p.advance(sync);
+                return addr(new ast.BadDecl(From:pos,To:p.pos));
                         return p.parseGenDecl(p.tok, f);
+
         });
 
         // ----------------------------------------------------------------------------
         // Source files
 
-        private static ref ast.File parseFile(this ref parser _p) => func(_p, (ref parser p, Defer defer, Panic _, Recover __) =>
+        private static ptr<ast.File> parseFile(this ptr<parser> _addr_p) => func((defer, _, __) =>
         {
+            ref parser p = ref _addr_p.val;
+
             if (p.trace)
             {
-                defer(un(trace(p, "File")));
+                defer(un(_addr_trace(_addr_p, "File")));
             } 
 
             // Don't bother parsing the rest if we had errors scanning the first token.
             // Likely not a Go source file at all.
             if (p.errors.Len() != 0L)
             {
-                return null;
+                return _addr_null!;
             } 
 
             // package clause
@@ -2905,14 +3528,16 @@ L:
             {
                 p.error(p.pos, "invalid package name _");
             }
+
             p.expectSemi(); 
 
             // Don't bother parsing the rest if we had errors parsing the package clause.
             // Likely not a Go source file at all.
             if (p.errors.Len() != 0L)
             {
-                return null;
+                return _addr_null!;
             }
+
             p.openScope();
             p.pkgScope = p.topScope;
             slice<ast.Decl> decls = default;
@@ -2930,11 +3555,14 @@ L:
                     // rest of package body
                     while (p.tok != token.EOF)
                     {
-                        decls = append(decls, p.parseDecl(syncDecl));
+                        decls = append(decls, p.parseDecl(declStart));
                     }
 
+
                 }
+
             }
+
             p.closeScope();
             assert(p.topScope == null, "unbalanced scopes");
             assert(p.labelScope == null, "unbalanced label scopes"); 
@@ -2955,12 +3583,14 @@ L:
                         p.unresolved[i] = ident;
                         i++;
                     }
+
                 }
 
                 ident = ident__prev1;
             }
 
-            return ref new ast.File(Doc:doc,Package:pos,Name:ident,Decls:decls,Scope:p.pkgScope,Imports:p.imports,Unresolved:p.unresolved[0:i],Comments:p.comments,);
+            return addr(new ast.File(Doc:doc,Package:pos,Name:ident,Decls:decls,Scope:p.pkgScope,Imports:p.imports,Unresolved:p.unresolved[0:i],Comments:p.comments,));
+
         });
     }
 }}

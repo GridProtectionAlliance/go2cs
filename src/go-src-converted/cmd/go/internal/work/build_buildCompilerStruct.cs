@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:12 UTC
+//     Generated on 2020 October 08 04:34:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,13 +18,13 @@ using fmt = go.fmt_package;
 using build = go.go.build_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
-using path = go.path_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
+using search = go.cmd.go.@internal.search_package;
 using go;
 
 namespace go {

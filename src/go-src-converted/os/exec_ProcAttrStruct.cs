@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:41 UTC
+//     Generated on 2020 October 08 03:44:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace go
                 this.Sys = default;
             }
 
-            public ProcAttr(@string Dir = default, slice<@string> Env = default, slice<ref File> Files = default, ref ptr<syscall.SysProcAttr> Sys = default)
+            public ProcAttr(@string Dir = default, slice<@string> Env = default, slice<ptr<File>> Files = default, ref ptr<syscall.SysProcAttr> Sys = default)
             {
                 this.Dir = Dir;
                 this.Env = Env;

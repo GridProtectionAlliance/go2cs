@@ -3,10 +3,11 @@
 // license that can be found in the LICENSE file.
 
 // Package bio implements common I/O abstractions used within the Go toolchain.
-// package bio -- go2cs converted at 2020 August 29 08:48:52 UTC
+// package bio -- go2cs converted at 2020 October 08 03:50:12 UTC
 // import "cmd/internal/bio" ==> using bio = go.cmd.@internal.bio_package
 // Original source: C:\Go\src\cmd\internal\bio\buf.go
 using bufio = go.bufio_package;
+using io = go.io_package;
 using log = go.log_package;
 using os = go.os_package;
 using static go.builtin;
@@ -21,56 +22,73 @@ namespace @internal
         public partial struct Reader
         {
             public ptr<os.File> f;
-            public ref bufio.Reader Reader => ref Reader_ptr;
+            public ref ptr<bufio.Reader> Reader> => ref Reader>_ptr;
         }
 
         // Writer implements a seekable buffered io.Writer.
         public partial struct Writer
         {
             public ptr<os.File> f;
-            public ref bufio.Writer Writer => ref Writer_ptr;
+            public ref ptr<bufio.Writer> Writer> => ref Writer>_ptr;
         }
 
         // Create creates the file named name and returns a Writer
         // for that file.
-        public static (ref Writer, error) Create(@string name)
+        public static (ptr<Writer>, error) Create(@string name)
         {
+            ptr<Writer> _p0 = default!;
+            error _p0 = default!;
+
             var (f, err) = os.Create(name);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (ref new Writer(f:f,Writer:bufio.NewWriter(f)), null);
+
+            return (addr(new Writer(f:f,Writer:bufio.NewWriter(f))), error.As(null!)!);
+
         }
 
         // Open returns a Reader for the file named name.
-        public static (ref Reader, error) Open(@string name)
+        public static (ptr<Reader>, error) Open(@string name)
         {
+            ptr<Reader> _p0 = default!;
+            error _p0 = default!;
+
             var (f, err) = os.Open(name);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (ref new Reader(f:f,Reader:bufio.NewReader(f)), null);
+
+            return (addr(new Reader(f:f,Reader:bufio.NewReader(f))), error.As(null!)!);
+
         }
 
-        private static long Seek(this ref Reader r, long offset, long whence)
+        private static long MustSeek(this ptr<Reader> _addr_r, long offset, long whence)
         {
+            ref Reader r = ref _addr_r.val;
+
             if (whence == 1L)
             {
                 offset -= int64(r.Buffered());
             }
+
             var (off, err) = r.f.Seek(offset, whence);
             if (err != null)
             {
                 log.Fatalf("seeking in output: %v", err);
             }
+
             r.Reset(r.f);
             return off;
+
         }
 
-        private static long Seek(this ref Writer w, long offset, long whence)
+        private static long MustSeek(this ptr<Writer> _addr_w, long offset, long whence)
         {
+            ref Writer w = ref _addr_w.val;
+
             {
                 var err = w.Flush();
 
@@ -80,27 +98,36 @@ namespace @internal
                 }
 
             }
+
             var (off, err) = w.f.Seek(offset, whence);
             if (err != null)
             {
                 log.Fatalf("seeking in output: %v", err);
             }
+
             return off;
+
         }
 
-        private static long Offset(this ref Reader r)
+        private static long Offset(this ptr<Reader> _addr_r)
         {
+            ref Reader r = ref _addr_r.val;
+
             var (off, err) = r.f.Seek(0L, 1L);
             if (err != null)
             {
                 log.Fatalf("seeking in output [0, 1]: %v", err);
             }
+
             off -= int64(r.Buffered());
             return off;
+
         }
 
-        private static long Offset(this ref Writer w)
+        private static long Offset(this ptr<Writer> _addr_w)
         {
+            ref Writer w = ref _addr_w.val;
+
             {
                 var err = w.Flush();
 
@@ -110,28 +137,103 @@ namespace @internal
                 }
 
             }
+
             var (off, err) = w.f.Seek(0L, 1L);
             if (err != null)
             {
                 log.Fatalf("seeking in output [0, 1]: %v", err);
             }
+
             return off;
+
         }
 
-        private static error Close(this ref Reader r)
+        private static error Close(this ptr<Reader> _addr_r)
         {
-            return error.As(r.f.Close());
+            ref Reader r = ref _addr_r.val;
+
+            return error.As(r.f.Close())!;
         }
 
-        private static error Close(this ref Writer w)
+        private static error Close(this ptr<Writer> _addr_w)
         {
+            ref Writer w = ref _addr_w.val;
+
             var err = w.Flush();
             var err1 = w.f.Close();
             if (err == null)
             {
                 err = err1;
             }
-            return error.As(err);
+
+            return error.As(err)!;
+
+        }
+
+        private static ptr<os.File> File(this ptr<Reader> _addr_r)
+        {
+            ref Reader r = ref _addr_r.val;
+
+            return _addr_r.f!;
+        }
+
+        private static ptr<os.File> File(this ptr<Writer> _addr_w)
+        {
+            ref Writer w = ref _addr_w.val;
+
+            return _addr_w.f!;
+        }
+
+        // Slice reads the next length bytes of r into a slice.
+        //
+        // This slice may be backed by mmap'ed memory. Currently, this memory
+        // will never be unmapped. The second result reports whether the
+        // backing memory is read-only.
+        private static (slice<byte>, bool, error) Slice(this ptr<Reader> _addr_r, ulong length)
+        {
+            slice<byte> _p0 = default;
+            bool _p0 = default;
+            error _p0 = default!;
+            ref Reader r = ref _addr_r.val;
+
+            if (length == 0L)
+            {
+                return (new slice<byte>(new byte[] {  }), false, error.As(null!)!);
+            }
+
+            var (data, ok) = r.sliceOS(length);
+            if (ok)
+            {
+                return (data, true, error.As(null!)!);
+            }
+
+            data = make_slice<byte>(length);
+            var (_, err) = io.ReadFull(r, data);
+            if (err != null)
+            {
+                return (null, false, error.As(err)!);
+            }
+
+            return (data, false, error.As(null!)!);
+
+        }
+
+        // SliceRO returns a slice containing the next length bytes of r
+        // backed by a read-only mmap'd data. If the mmap cannot be
+        // established (limit exceeded, region too small, etc) a nil slice
+        // will be returned. If mmap succeeds, it will never be unmapped.
+        private static slice<byte> SliceRO(this ptr<Reader> _addr_r, ulong length)
+        {
+            ref Reader r = ref _addr_r.val;
+
+            var (data, ok) = r.sliceOS(length);
+            if (ok)
+            {
+                return data;
+            }
+
+            return null;
+
         }
     }
 }}}

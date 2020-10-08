@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:28 UTC
+//     Generated on 2020 October 08 04:34:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,9 +17,11 @@ using bytes = go.bytes_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
+using rand = go.math.rand_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;

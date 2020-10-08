@@ -18,12 +18,13 @@
 // Note that the examples in this package assume a Unix system.
 // They may not run on Windows, and they do not run in the Go Playground
 // used by golang.org and godoc.org.
-// package exec -- go2cs converted at 2020 August 29 08:24:36 UTC
+// package exec -- go2cs converted at 2020 October 08 03:40:54 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Go\src\os\exec\exec.go
 using bytes = go.bytes_package;
 using context = go.context_package;
 using errors = go.errors_package;
+using execenv = go.@internal.syscall.execenv_package;
 using io = go.io_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -41,17 +42,26 @@ namespace os
 {
     public static partial class exec_package
     {
-        // Error records the name of a binary that failed to be executed
-        // and the reason it failed.
+        // Error is returned by LookPath when it fails to classify a file as an
+        // executable.
         public partial struct Error
         {
-            public @string Name;
+            public @string Name; // Err is the underlying error.
             public error Err;
         }
 
-        private static @string Error(this ref Error e)
+        private static @string Error(this ptr<Error> _addr_e)
         {
+            ref Error e = ref _addr_e.val;
+
             return "exec: " + strconv.Quote(e.Name) + ": " + e.Err.Error();
+        }
+
+        private static error Unwrap(this ptr<Error> _addr_e)
+        {
+            ref Error e = ref _addr_e.val;
+
+            return error.As(e.Err)!;
         }
 
         // Cmd represents an external command being prepared or run.
@@ -70,6 +80,8 @@ namespace os
 // environment.
 // If Env contains duplicate environment keys, only the last
 // value in the slice for each duplicate key is used.
+// As a special case on Windows, SYSTEMROOT is always added if
+// missing and not explicitly set to the empty string.
             public slice<@string> Env; // Dir specifies the working directory of the command.
 // If Dir is the empty string, Run runs the command in the
 // calling process's current directory.
@@ -104,7 +116,9 @@ namespace os
             public io.Writer Stderr; // ExtraFiles specifies additional open files to be inherited by the
 // new process. It does not include standard input, standard output, or
 // standard error. If non-nil, entry i becomes file descriptor 3+i.
-            public slice<ref os.File> ExtraFiles; // SysProcAttr holds optional, operating system-specific attributes.
+//
+// ExtraFiles is not supported on Windows.
+            public slice<ptr<os.File>> ExtraFiles; // SysProcAttr holds optional, operating system-specific attributes.
 // Run passes it to os.StartProcess as the os.ProcAttr's Sys field.
             public ptr<syscall.SysProcAttr> SysProcAttr; // Process is the underlying process, once started.
             public ptr<os.Process> Process; // ProcessState contains information about an exited process,
@@ -113,7 +127,7 @@ namespace os
             public context.Context ctx; // nil means none
             public error lookPathErr; // LookPath error, if any.
             public bool finished; // when Wait was called
-            public slice<ref os.File> childFiles;
+            public slice<ptr<os.File>> childFiles;
             public slice<io.Closer> closeAfterStart;
             public slice<io.Closer> closeAfterWait;
             public slice<Func<error>> goroutine;
@@ -134,11 +148,20 @@ namespace os
         // followed by the elements of arg, so arg should not include the
         // command name itself. For example, Command("echo", "hello").
         // Args[0] is always name, not the possibly resolved Path.
-        public static ref Cmd Command(@string name, params @string[] arg)
+        //
+        // On Windows, processes receive the whole command line as a single string
+        // and do their own parsing. Command combines and quotes Args into a command
+        // line string with an algorithm compatible with applications using
+        // CommandLineToArgvW (which is the most common way). Notable exceptions are
+        // msiexec.exe and cmd.exe (and thus, all batch files), which have a different
+        // unquoting algorithm. In these or other similar cases, you can do the
+        // quoting yourself and provide the full command line in SysProcAttr.CmdLine,
+        // leaving Args empty.
+        public static ptr<Cmd> Command(@string name, params @string[] arg)
         {
             arg = arg.Clone();
 
-            Cmd cmd = ref new Cmd(Path:name,Args:append([]string{name},arg...),);
+            ptr<Cmd> cmd = addr(new Cmd(Path:name,Args:append([]string{name},arg...),));
             if (filepath.Base(name) == name)
             {
                 {
@@ -154,8 +177,11 @@ namespace os
                     }
 
                 }
+
             }
-            return cmd;
+
+            return _addr_cmd!;
+
         }
 
         // CommandContext is like Command but includes a context.
@@ -163,7 +189,7 @@ namespace os
         // The provided context is used to kill the process (by calling
         // os.Process.Kill) if the context becomes done before the command
         // completes on its own.
-        public static ref Cmd CommandContext(context.Context ctx, @string name, params @string[] arg) => func((_, panic, __) =>
+        public static ptr<Cmd> CommandContext(context.Context ctx, @string name, params @string[] arg) => func((_, panic, __) =>
         {
             arg = arg.Clone();
 
@@ -171,10 +197,38 @@ namespace os
             {
                 panic("nil Context");
             }
+
             var cmd = Command(name, arg);
             cmd.ctx = ctx;
-            return cmd;
+            return _addr_cmd!;
+
         });
+
+        // String returns a human-readable description of c.
+        // It is intended only for debugging.
+        // In particular, it is not suitable for use as input to a shell.
+        // The output of String may vary across Go releases.
+        private static @string String(this ptr<Cmd> _addr_c)
+        {
+            ref Cmd c = ref _addr_c.val;
+
+            if (c.lookPathErr != null)
+            { 
+                // failed to resolve path; report the original requested path (plus args)
+                return strings.Join(c.Args, " ");
+
+            } 
+            // report the exact executable path (plus args)
+            ptr<object> b = @new<strings.Builder>();
+            b.WriteString(c.Path);
+            foreach (var (_, a) in c.Args[1L..])
+            {
+                b.WriteByte(' ');
+                b.WriteString(a);
+            }
+            return b.String();
+
+        }
 
         // interfaceEqual protects against panics from doing equality tests on
         // two interfaces with non-comparable underlying types.
@@ -185,58 +239,77 @@ namespace os
                 recover();
             }());
             return a == b;
+
         });
 
-        private static slice<@string> envv(this ref Cmd c)
+        private static (slice<@string>, error) envv(this ptr<Cmd> _addr_c)
         {
+            slice<@string> _p0 = default;
+            error _p0 = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Env != null)
             {
-                return c.Env;
+                return (c.Env, error.As(null!)!);
             }
-            return os.Environ();
+
+            return execenv.Default(c.SysProcAttr);
+
         }
 
-        private static slice<@string> argv(this ref Cmd c)
+        private static slice<@string> argv(this ptr<Cmd> _addr_c)
         {
+            ref Cmd c = ref _addr_c.val;
+
             if (len(c.Args) > 0L)
             {
                 return c.Args;
             }
+
             return new slice<@string>(new @string[] { c.Path });
+
         }
 
         // skipStdinCopyError optionally specifies a function which reports
         // whether the provided stdin copy error should be ignored.
-        // It is non-nil everywhere but Plan 9, which lacks EPIPE. See exec_posix.go.
         private static Func<error, bool> skipStdinCopyError = default;
 
-        private static (ref os.File, error) stdin(this ref Cmd c)
+        private static (ptr<os.File>, error) stdin(this ptr<Cmd> _addr_c)
         {
+            ptr<os.File> f = default!;
+            error err = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Stdin == null)
             {
                 f, err = os.Open(os.DevNull);
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
                 c.closeAfterStart = append(c.closeAfterStart, f);
-                return;
+                return ;
+
             }
+
             {
-                ref os.File (f, ok) = c.Stdin._<ref os.File>();
+                ptr<os.File> (f, ok) = c.Stdin._<ptr<os.File>>();
 
                 if (ok)
                 {
-                    return (f, null);
+                    return (_addr_f!, error.As(null!)!);
                 }
 
             }
+
 
             var (pr, pw, err) = os.Pipe();
             if (err != null)
             {
-                return;
+                return ;
             }
+
             c.closeAfterStart = append(c.closeAfterStart, pr);
             c.closeAfterWait = append(c.closeAfterWait, pw);
             c.goroutine = append(c.goroutine, () =>
@@ -251,6 +324,7 @@ namespace os
                     }
 
                 }
+
                 {
                     var err1 = pw.Close();
 
@@ -260,69 +334,96 @@ namespace os
                     }
 
                 }
-                return err;
+
+                return _addr_err!;
+
             });
-            return (pr, null);
+            return (_addr_pr!, error.As(null!)!);
+
         }
 
-        private static (ref os.File, error) stdout(this ref Cmd c)
+        private static (ptr<os.File>, error) stdout(this ptr<Cmd> _addr_c)
         {
-            return c.writerDescriptor(c.Stdout);
+            ptr<os.File> f = default!;
+            error err = default!;
+            ref Cmd c = ref _addr_c.val;
+
+            return _addr_c.writerDescriptor(c.Stdout)!;
         }
 
-        private static (ref os.File, error) stderr(this ref Cmd c)
+        private static (ptr<os.File>, error) stderr(this ptr<Cmd> _addr_c)
         {
+            ptr<os.File> f = default!;
+            error err = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Stderr != null && interfaceEqual(c.Stderr, c.Stdout))
             {
-                return (c.childFiles[1L], null);
+                return (_addr_c.childFiles[1L]!, error.As(null!)!);
             }
-            return c.writerDescriptor(c.Stderr);
+
+            return _addr_c.writerDescriptor(c.Stderr)!;
+
         }
 
-        private static (ref os.File, error) writerDescriptor(this ref Cmd c, io.Writer w)
+        private static (ptr<os.File>, error) writerDescriptor(this ptr<Cmd> _addr_c, io.Writer w)
         {
+            ptr<os.File> f = default!;
+            error err = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (w == null)
             {
                 f, err = os.OpenFile(os.DevNull, os.O_WRONLY, 0L);
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
                 c.closeAfterStart = append(c.closeAfterStart, f);
-                return;
+                return ;
+
             }
+
             {
-                ref os.File (f, ok) = w._<ref os.File>();
+                ptr<os.File> (f, ok) = w._<ptr<os.File>>();
 
                 if (ok)
                 {
-                    return (f, null);
+                    return (_addr_f!, error.As(null!)!);
                 }
 
             }
+
 
             var (pr, pw, err) = os.Pipe();
             if (err != null)
             {
-                return;
+                return ;
             }
+
             c.closeAfterStart = append(c.closeAfterStart, pw);
             c.closeAfterWait = append(c.closeAfterWait, pr);
             c.goroutine = append(c.goroutine, () =>
             {
                 var (_, err) = io.Copy(w, pr);
                 pr.Close(); // in case io.Copy stopped due to write error
-                return err;
+                return _addr_err!;
+
             });
-            return (pw, null);
+            return (_addr_pw!, error.As(null!)!);
+
         }
 
-        private static void closeDescriptors(this ref Cmd c, slice<io.Closer> closers)
+        private static void closeDescriptors(this ptr<Cmd> _addr_c, slice<io.Closer> closers)
         {
+            ref Cmd c = ref _addr_c.val;
+
             foreach (var (_, fd) in closers)
             {
                 fd.Close();
             }
+
         }
 
         // Run starts the specified command and waits for it to complete.
@@ -338,18 +439,22 @@ namespace os
         // with runtime.LockOSThread and modified any inheritable OS-level
         // thread state (for example, Linux or Plan 9 name spaces), the new
         // process will inherit the caller's thread state.
-        private static error Run(this ref Cmd c)
+        private static error Run(this ptr<Cmd> _addr_c)
         {
+            ref Cmd c = ref _addr_c.val;
+
             {
                 var err = c.Start();
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
-            return error.As(c.Wait());
+
+            return error.As(c.Wait())!;
+
         }
 
         // lookExtensions finds windows executable by its dir and path.
@@ -357,45 +462,59 @@ namespace os
         // lookExtensions does not search PATH, instead it converts `prog` into `.\prog`.
         private static (@string, error) lookExtensions(@string path, @string dir)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             if (filepath.Base(path) == path)
             {
                 path = filepath.Join(".", path);
             }
+
             if (dir == "")
             {
                 return LookPath(path);
             }
+
             if (filepath.VolumeName(path) != "")
             {
                 return LookPath(path);
             }
+
             if (len(path) > 1L && os.IsPathSeparator(path[0L]))
             {
                 return LookPath(path);
             }
+
             var dirandpath = filepath.Join(dir, path); 
             // We assume that LookPath will only add file extension.
             var (lp, err) = LookPath(dirandpath);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             var ext = strings.TrimPrefix(lp, dirandpath);
-            return (path + ext, null);
+            return (path + ext, error.As(null!)!);
+
         }
 
         // Start starts the specified command but does not wait for it to complete.
         //
+        // If Start returns successfully, the c.Process field will be set.
+        //
         // The Wait method will return the exit code and release associated resources
         // once the command exits.
-        private static error Start(this ref Cmd c)
+        private static error Start(this ptr<Cmd> _addr_c)
         {
+            ref Cmd c = ref _addr_c.val;
+
             if (c.lookPathErr != null)
             {
                 c.closeDescriptors(c.closeAfterStart);
                 c.closeDescriptors(c.closeAfterWait);
-                return error.As(c.lookPathErr);
+                return error.As(c.lookPathErr)!;
             }
+
             if (runtime.GOOS == "windows")
             {
                 var (lp, err) = lookExtensions(c.Path, c.Dir);
@@ -403,21 +522,27 @@ namespace os
                 {
                     c.closeDescriptors(c.closeAfterStart);
                     c.closeDescriptors(c.closeAfterWait);
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 c.Path = lp;
+
             }
+
             if (c.Process != null)
             {
-                return error.As(errors.New("exec: already started"));
+                return error.As(errors.New("exec: already started"))!;
             }
+
             if (c.ctx != null)
             {
                 c.closeDescriptors(c.closeAfterStart);
                 c.closeDescriptors(c.closeAfterWait);
-                return error.As(c.ctx.Err());
+                return error.As(c.ctx.Err())!;
             }
-            public delegate  error) F(ref Cmd,  (ref os.File);
+
+            c.childFiles = make_slice<ptr<os.File>>(0L, 3L + len(c.ExtraFiles));
+            public delegate  error) F(ptr<Cmd>,  (ptr<os.File>);
             foreach (var (_, setupFd) in new slice<F>(new F[] { (*Cmd).stdin, (*Cmd).stdout, (*Cmd).stderr }))
             {
                 var (fd, err) = setupFd(c);
@@ -425,30 +550,45 @@ namespace os
                 {
                     c.closeDescriptors(c.closeAfterStart);
                     c.closeDescriptors(c.closeAfterWait);
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 c.childFiles = append(c.childFiles, fd);
+
             }
             c.childFiles = append(c.childFiles, c.ExtraFiles);
 
-            error err = default;
-            c.Process, err = os.StartProcess(c.Path, c.argv(), ref new os.ProcAttr(Dir:c.Dir,Files:c.childFiles,Env:dedupEnv(c.envv()),Sys:c.SysProcAttr,));
+            var (envv, err) = c.envv();
+            if (err != null)
+            {
+                return error.As(err)!;
+            }
+
+            c.Process, err = os.StartProcess(c.Path, c.argv(), addr(new os.ProcAttr(Dir:c.Dir,Files:c.childFiles,Env:addCriticalEnv(dedupEnv(envv)),Sys:c.SysProcAttr,)));
             if (err != null)
             {
                 c.closeDescriptors(c.closeAfterStart);
                 c.closeDescriptors(c.closeAfterWait);
-                return error.As(err);
+                return error.As(err)!;
             }
-            c.closeDescriptors(c.closeAfterStart);
 
-            c.errch = make_channel<error>(len(c.goroutine));
-            foreach (var (_, fn) in c.goroutine)
+            c.closeDescriptors(c.closeAfterStart); 
+
+            // Don't allocate the channel unless there are goroutines to fire.
+            if (len(c.goroutine) > 0L)
             {
-                go_(() => fn =>
+                c.errch = make_channel<error>(len(c.goroutine));
+                foreach (var (_, fn) in c.goroutine)
                 {
-                    c.errch.Send(fn());
-                }(fn));
+                    go_(() => fn =>
+                    {
+                        c.errch.Send(fn());
+                    }(fn));
+
+                }
+
             }
+
             if (c.ctx != null)
             {
                 c.waitDone = make_channel<object>();
@@ -456,14 +596,17 @@ namespace os
                 {
                     c.Process.Kill();
                 }());
+
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // An ExitError reports an unsuccessful exit by a command.
         public partial struct ExitError
         {
-            public ref os.ProcessState ProcessState => ref ProcessState_ptr; // Stderr holds a subset of the standard error output from the
+            public ref ptr<os.ProcessState> ProcessState> => ref ProcessState>_ptr; // Stderr holds a subset of the standard error output from the
 // Cmd.Output method if standard error was not otherwise being
 // collected.
 //
@@ -476,8 +619,10 @@ namespace os
             public slice<byte> Stderr;
         }
 
-        private static @string Error(this ref ExitError e)
+        private static @string Error(this ptr<ExitError> _addr_e)
         {
+            ref ExitError e = ref _addr_e.val;
+
             return e.ProcessState.String();
         }
 
@@ -498,16 +643,20 @@ namespace os
         // for the respective I/O loop copying to or from the process to complete.
         //
         // Wait releases any resources associated with the Cmd.
-        private static error Wait(this ref Cmd c)
+        private static error Wait(this ptr<Cmd> _addr_c)
         {
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Process == null)
             {
-                return error.As(errors.New("exec: not started"));
+                return error.As(errors.New("exec: not started"))!;
             }
+
             if (c.finished)
             {
-                return error.As(errors.New("exec: Wait was already called"));
+                return error.As(errors.New("exec: Wait was already called"))!;
             }
+
             c.finished = true;
 
             var (state, err) = c.Process.Wait();
@@ -515,9 +664,10 @@ namespace os
             {
                 close(c.waitDone);
             }
+
             c.ProcessState = state;
 
-            error copyError = default;
+            error copyError = default!;
             foreach (>>MARKER:FORRANGEEXPRESSIONS_LEVEL_1<< in c.goroutine)
             {>>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_1<<
                 {
@@ -525,74 +675,96 @@ namespace os
 
                     if (err != null && copyError == null)
                     {
-                        copyError = error.As(err);
+                        copyError = error.As(err)!;
                     }
 
                 }
+
             }
             c.closeDescriptors(c.closeAfterWait);
 
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
             else if (!state.Success())
             {
-                return error.As(ref new ExitError(ProcessState:state));
+                return error.As(addr(new ExitError(ProcessState:state))!)!;
             }
-            return error.As(copyError);
+
+            return error.As(copyError)!;
+
         }
 
         // Output runs the command and returns its standard output.
         // Any returned error will usually be of type *ExitError.
         // If c.Stderr was nil, Output populates ExitError.Stderr.
-        private static (slice<byte>, error) Output(this ref Cmd c)
+        private static (slice<byte>, error) Output(this ptr<Cmd> _addr_c)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Stdout != null)
             {
-                return (null, errors.New("exec: Stdout already set"));
+                return (null, error.As(errors.New("exec: Stdout already set"))!);
             }
-            bytes.Buffer stdout = default;
-            c.Stdout = ref stdout;
+
+            ref bytes.Buffer stdout = ref heap(out ptr<bytes.Buffer> _addr_stdout);
+            _addr_c.Stdout = _addr_stdout;
+            c.Stdout = ref _addr_c.Stdout.val;
 
             var captureErr = c.Stderr == null;
             if (captureErr)
             {
-                c.Stderr = ref new prefixSuffixSaver(N:32<<10);
+                c.Stderr = addr(new prefixSuffixSaver(N:32<<10));
             }
+
             var err = c.Run();
             if (err != null && captureErr)
             {
                 {
-                    ref ExitError (ee, ok) = err._<ref ExitError>();
+                    ptr<ExitError> (ee, ok) = err._<ptr<ExitError>>();
 
                     if (ok)
                     {
-                        ee.Stderr = c.Stderr._<ref prefixSuffixSaver>().Bytes();
+                        ee.Stderr = c.Stderr._<ptr<prefixSuffixSaver>>().Bytes();
                     }
 
                 }
+
             }
-            return (stdout.Bytes(), err);
+
+            return (stdout.Bytes(), error.As(err)!);
+
         }
 
         // CombinedOutput runs the command and returns its combined standard
         // output and standard error.
-        private static (slice<byte>, error) CombinedOutput(this ref Cmd c)
+        private static (slice<byte>, error) CombinedOutput(this ptr<Cmd> _addr_c)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Stdout != null)
             {
-                return (null, errors.New("exec: Stdout already set"));
+                return (null, error.As(errors.New("exec: Stdout already set"))!);
             }
+
             if (c.Stderr != null)
             {
-                return (null, errors.New("exec: Stderr already set"));
+                return (null, error.As(errors.New("exec: Stderr already set"))!);
             }
-            bytes.Buffer b = default;
-            c.Stdout = ref b;
-            c.Stderr = ref b;
+
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
+            _addr_c.Stdout = _addr_b;
+            c.Stdout = ref _addr_c.Stdout.val;
+            _addr_c.Stderr = _addr_b;
+            c.Stderr = ref _addr_c.Stderr.val;
             var err = c.Run();
-            return (b.Bytes(), err);
+            return (b.Bytes(), error.As(err)!);
+
         }
 
         // StdinPipe returns a pipe that will be connected to the command's
@@ -601,43 +773,55 @@ namespace os
         // A caller need only call Close to force the pipe to close sooner.
         // For example, if the command being run will not exit until standard input
         // is closed, the caller must close the pipe.
-        private static (io.WriteCloser, error) StdinPipe(this ref Cmd c)
+        private static (io.WriteCloser, error) StdinPipe(this ptr<Cmd> _addr_c)
         {
+            io.WriteCloser _p0 = default;
+            error _p0 = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Stdin != null)
             {
-                return (null, errors.New("exec: Stdin already set"));
+                return (null, error.As(errors.New("exec: Stdin already set"))!);
             }
+
             if (c.Process != null)
             {
-                return (null, errors.New("exec: StdinPipe after process started"));
+                return (null, error.As(errors.New("exec: StdinPipe after process started"))!);
             }
+
             var (pr, pw, err) = os.Pipe();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             c.Stdin = pr;
             c.closeAfterStart = append(c.closeAfterStart, pr);
-            closeOnce wc = ref new closeOnce(File:pw);
+            ptr<closeOnce> wc = addr(new closeOnce(File:pw));
             c.closeAfterWait = append(c.closeAfterWait, wc);
-            return (wc, null);
+            return (wc, error.As(null!)!);
+
         }
 
         private partial struct closeOnce
         {
-            public ref os.File File => ref File_ptr;
+            public ref ptr<os.File> File> => ref File>_ptr;
             public sync.Once once;
             public error err;
         }
 
-        private static error Close(this ref closeOnce c)
+        private static error Close(this ptr<closeOnce> _addr_c)
         {
+            ref closeOnce c = ref _addr_c.val;
+
             c.once.Do(c.close);
-            return error.As(c.err);
+            return error.As(c.err)!;
         }
 
-        private static void close(this ref closeOnce c)
+        private static void close(this ptr<closeOnce> _addr_c)
         {
+            ref closeOnce c = ref _addr_c.val;
+
             c.err = c.File.Close();
         }
 
@@ -645,58 +829,74 @@ namespace os
         // standard output when the command starts.
         //
         // Wait will close the pipe after seeing the command exit, so most callers
-        // need not close the pipe themselves; however, an implication is that
-        // it is incorrect to call Wait before all reads from the pipe have completed.
+        // need not close the pipe themselves. It is thus incorrect to call Wait
+        // before all reads from the pipe have completed.
         // For the same reason, it is incorrect to call Run when using StdoutPipe.
         // See the example for idiomatic usage.
-        private static (io.ReadCloser, error) StdoutPipe(this ref Cmd c)
+        private static (io.ReadCloser, error) StdoutPipe(this ptr<Cmd> _addr_c)
         {
+            io.ReadCloser _p0 = default;
+            error _p0 = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Stdout != null)
             {
-                return (null, errors.New("exec: Stdout already set"));
+                return (null, error.As(errors.New("exec: Stdout already set"))!);
             }
+
             if (c.Process != null)
             {
-                return (null, errors.New("exec: StdoutPipe after process started"));
+                return (null, error.As(errors.New("exec: StdoutPipe after process started"))!);
             }
+
             var (pr, pw, err) = os.Pipe();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             c.Stdout = pw;
             c.closeAfterStart = append(c.closeAfterStart, pw);
             c.closeAfterWait = append(c.closeAfterWait, pr);
-            return (pr, null);
+            return (pr, error.As(null!)!);
+
         }
 
         // StderrPipe returns a pipe that will be connected to the command's
         // standard error when the command starts.
         //
         // Wait will close the pipe after seeing the command exit, so most callers
-        // need not close the pipe themselves; however, an implication is that
-        // it is incorrect to call Wait before all reads from the pipe have completed.
+        // need not close the pipe themselves. It is thus incorrect to call Wait
+        // before all reads from the pipe have completed.
         // For the same reason, it is incorrect to use Run when using StderrPipe.
         // See the StdoutPipe example for idiomatic usage.
-        private static (io.ReadCloser, error) StderrPipe(this ref Cmd c)
+        private static (io.ReadCloser, error) StderrPipe(this ptr<Cmd> _addr_c)
         {
+            io.ReadCloser _p0 = default;
+            error _p0 = default!;
+            ref Cmd c = ref _addr_c.val;
+
             if (c.Stderr != null)
             {
-                return (null, errors.New("exec: Stderr already set"));
+                return (null, error.As(errors.New("exec: Stderr already set"))!);
             }
+
             if (c.Process != null)
             {
-                return (null, errors.New("exec: StderrPipe after process started"));
+                return (null, error.As(errors.New("exec: StderrPipe after process started"))!);
             }
+
             var (pr, pw, err) = os.Pipe();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             c.Stderr = pw;
             c.closeAfterStart = append(c.closeAfterStart, pw);
             c.closeAfterWait = append(c.closeAfterWait, pr);
-            return (pr, null);
+            return (pr, error.As(null!)!);
+
         }
 
         // prefixSuffixSaver is an io.Writer which retains the first N bytes
@@ -715,10 +915,14 @@ namespace os
 // now just for error messages. It's only ~64KB anyway.
         }
 
-        private static (long, error) Write(this ref prefixSuffixSaver w, slice<byte> p)
+        private static (long, error) Write(this ptr<prefixSuffixSaver> _addr_w, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref prefixSuffixSaver w = ref _addr_w.val;
+
             var lenp = len(p);
-            p = w.fill(ref w.prefix, p); 
+            p = w.fill(_addr_w.prefix, p); 
 
             // Only keep the last w.N bytes of suffix data.
             {
@@ -731,7 +935,8 @@ namespace os
                 }
 
             }
-            p = w.fill(ref w.suffix, p); 
+
+            p = w.fill(_addr_w.suffix, p); 
 
             // w.suffix is full now if p is non-empty. Overwrite it in a circle.
             while (len(p) > 0L)
@@ -744,39 +949,51 @@ namespace os
                 {
                     w.suffixOff = 0L;
                 }
+
             }
 
-            return (lenp, null);
+            return (lenp, error.As(null!)!);
+
         }
 
         // fill appends up to len(p) bytes of p to *dst, such that *dst does not
         // grow larger than w.N. It returns the un-appended suffix of p.
-        private static slice<byte> fill(this ref prefixSuffixSaver w, ref slice<byte> dst, slice<byte> p)
+        private static slice<byte> fill(this ptr<prefixSuffixSaver> _addr_w, ptr<slice<byte>> _addr_dst, slice<byte> p)
         {
+            slice<byte> pRemain = default;
+            ref prefixSuffixSaver w = ref _addr_w.val;
+            ref slice<byte> dst = ref _addr_dst.val;
+
             {
-                var remain = w.N - len(dst.Value);
+                var remain = w.N - len(dst);
 
                 if (remain > 0L)
                 {
                     var add = minInt(len(p), remain);
-                    dst.Value = append(dst.Value, p[..add]);
+                    dst = append(dst, p[..add]);
                     p = p[add..];
                 }
 
             }
+
             return p;
+
         }
 
-        private static slice<byte> Bytes(this ref prefixSuffixSaver w)
+        private static slice<byte> Bytes(this ptr<prefixSuffixSaver> _addr_w)
         {
+            ref prefixSuffixSaver w = ref _addr_w.val;
+
             if (w.suffix == null)
             {
                 return w.prefix;
             }
+
             if (w.skipped == 0L)
             {
                 return append(w.prefix, w.suffix);
             }
+
             bytes.Buffer buf = default;
             buf.Grow(len(w.prefix) + len(w.suffix) + 50L);
             buf.Write(w.prefix);
@@ -786,6 +1003,7 @@ namespace os
             buf.Write(w.suffix[w.suffixOff..]);
             buf.Write(w.suffix[..w.suffixOff]);
             return buf.Bytes();
+
         }
 
         private static long minInt(long a, long b)
@@ -794,7 +1012,9 @@ namespace os
             {
                 return a;
             }
+
             return b;
+
         }
 
         // dedupEnv returns a copy of env with any duplicates removed, in favor of
@@ -810,7 +1030,7 @@ namespace os
         private static slice<@string> dedupEnvCase(bool caseInsensitive, slice<@string> env)
         {
             var @out = make_slice<@string>(0L, len(env));
-            map saw = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, long>{}; // key => index into out
+            var saw = make_map<@string, long>(len(env)); // key => index into out
             foreach (var (_, kv) in env)
             {
                 var eq = strings.Index(kv, "=");
@@ -819,11 +1039,13 @@ namespace os
                     out = append(out, kv);
                     continue;
                 }
+
                 var k = kv[..eq];
                 if (caseInsensitive)
                 {
                     k = strings.ToLower(k);
                 }
+
                 {
                     var (dupIdx, isDup) = saw[k];
 
@@ -834,10 +1056,44 @@ namespace os
                     }
 
                 }
+
                 saw[k] = len(out);
                 out = append(out, kv);
+
             }
             return out;
+
+        }
+
+        // addCriticalEnv adds any critical environment variables that are required
+        // (or at least almost always required) on the operating system.
+        // Currently this is only used for Windows.
+        private static slice<@string> addCriticalEnv(slice<@string> env)
+        {
+            if (runtime.GOOS != "windows")
+            {
+                return env;
+            }
+
+            foreach (var (_, kv) in env)
+            {
+                var eq = strings.Index(kv, "=");
+                if (eq < 0L)
+                {
+                    continue;
+                }
+
+                var k = kv[..eq];
+                if (strings.EqualFold(k, "SYSTEMROOT"))
+                { 
+                    // We already have it.
+                    return env;
+
+                }
+
+            }
+            return append(env, "SYSTEMROOT=" + os.Getenv("SYSTEMROOT"));
+
         }
     }
 }}

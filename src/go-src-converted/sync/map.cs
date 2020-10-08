@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 August 29 08:16:23 UTC
+// package sync -- go2cs converted at 2020 October 08 00:34:03 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\map.go
 using atomic = go.sync.atomic_package;
@@ -71,16 +71,20 @@ namespace go
             public unsafe.Pointer p; // *interface{}
         }
 
-        private static ref entry newEntry(object i)
+        private static ptr<entry> newEntry(object i)
         {
-            return ref new entry(p:unsafe.Pointer(&i));
+            return addr(new entry(p:unsafe.Pointer(&i)));
         }
 
         // Load returns the value stored in the map for a key, or nil if no
         // value is present.
         // The ok result indicates whether value was found in the map.
-        private static (object, bool) Load(this ref Map m, object key)
+        private static (object, bool) Load(this ptr<Map> _addr_m, object key)
         {
+            object value = default;
+            bool ok = default;
+            ref Map m = ref _addr_m.val;
+
             readOnly (read, _) = m.read.Load()._<readOnly>();
             var (e, ok) = read.m[key];
             if (!ok && read.amended)
@@ -98,43 +102,58 @@ namespace go
                     // will take the slow path until the dirty map is promoted to the read
                     // map.
                     m.missLocked();
+
                 }
+
                 m.mu.Unlock();
+
             }
+
             if (!ok)
             {
                 return (null, false);
             }
+
             return e.load();
+
         }
 
-        private static (object, bool) load(this ref entry e)
+        private static (object, bool) load(this ptr<entry> _addr_e)
         {
-            var p = atomic.LoadPointer(ref e.p);
+            object value = default;
+            bool ok = default;
+            ref entry e = ref _addr_e.val;
+
+            var p = atomic.LoadPointer(_addr_e.p);
             if (p == null || p == expunged)
             {
                 return (null, false);
             }
+
             return true;
+
         }
 
         // Store sets the value for a key.
-        private static void Store(this ref Map m, object key, object value)
+        private static void Store(this ptr<Map> _addr_m, object key, object value)
         {
+            ref Map m = ref _addr_m.val;
+
             readOnly (read, _) = m.read.Load()._<readOnly>();
             {
                 var e__prev1 = e;
 
                 var (e, ok) = read.m[key];
 
-                if (ok && e.tryStore(ref value))
+                if (ok && e.tryStore(_addr_value))
                 {
-                    return;
+                    return ;
                 }
 
                 e = e__prev1;
 
             }
+
 
             m.mu.Lock();
             read, _ = m.read.Load()._<readOnly>();
@@ -150,8 +169,11 @@ namespace go
                         // The entry was previously expunged, which implies that there is a
                         // non-nil dirty map and this entry is not in it.
                         m.dirty[key] = e;
+
                     }
-                    e.storeLocked(ref value);
+
+                    e.storeLocked(_addr_value);
+
                 }                {
                     var e__prev2 = e;
 
@@ -160,7 +182,7 @@ namespace go
 
                     else if (ok)
                     {
-                        e.storeLocked(ref value);
+                        e.storeLocked(_addr_value);
                     }
                     else
                     {
@@ -170,43 +192,49 @@ namespace go
                             // Make sure it is allocated and mark the read-only map as incomplete.
                             m.dirtyLocked();
                             m.read.Store(new readOnly(m:read.m,amended:true));
+
                         }
+
                         m.dirty[key] = newEntry(value);
+
                     }
 
                     e = e__prev2;
 
                 }
 
+
                 e = e__prev1;
 
             }
+
             m.mu.Unlock();
+
         }
 
         // tryStore stores a value if the entry has not been expunged.
         //
         // If the entry is expunged, tryStore returns false and leaves the entry
         // unchanged.
-        private static bool tryStore(this ref entry e, object i)
+        private static bool tryStore(this ptr<entry> _addr_e, object i)
         {
-            var p = atomic.LoadPointer(ref e.p);
-            if (p == expunged)
-            {
-                return false;
-            }
+            ref entry e = ref _addr_e.val;
+
             while (true)
             {
-                if (atomic.CompareAndSwapPointer(ref e.p, p, @unsafe.Pointer(i)))
-                {
-                    return true;
-                }
-                p = atomic.LoadPointer(ref e.p);
+                var p = atomic.LoadPointer(_addr_e.p);
                 if (p == expunged)
                 {
                     return false;
                 }
+
+                if (atomic.CompareAndSwapPointer(_addr_e.p, p, @unsafe.Pointer(i)))
+                {
+                    return true;
+                }
+
             }
+
 
         }
 
@@ -214,24 +242,33 @@ namespace go
         //
         // If the entry was previously expunged, it must be added to the dirty map
         // before m.mu is unlocked.
-        private static bool unexpungeLocked(this ref entry e)
+        private static bool unexpungeLocked(this ptr<entry> _addr_e)
         {
-            return atomic.CompareAndSwapPointer(ref e.p, expunged, null);
+            bool wasExpunged = default;
+            ref entry e = ref _addr_e.val;
+
+            return atomic.CompareAndSwapPointer(_addr_e.p, expunged, null);
         }
 
         // storeLocked unconditionally stores a value to the entry.
         //
         // The entry must be known not to be expunged.
-        private static void storeLocked(this ref entry e, object i)
+        private static void storeLocked(this ptr<entry> _addr_e, object i)
         {
-            atomic.StorePointer(ref e.p, @unsafe.Pointer(i));
+            ref entry e = ref _addr_e.val;
+
+            atomic.StorePointer(_addr_e.p, @unsafe.Pointer(i));
         }
 
         // LoadOrStore returns the existing value for the key if present.
         // Otherwise, it stores and returns the given value.
         // The loaded result is true if the value was loaded, false if stored.
-        private static (object, bool) LoadOrStore(this ref Map m, object key, object value)
-        { 
+        private static (object, bool) LoadOrStore(this ptr<Map> _addr_m, object key, object value)
+        {
+            object actual = default;
+            bool loaded = default;
+            ref Map m = ref _addr_m.val;
+ 
             // Avoid locking if it's a clean hit.
             readOnly (read, _) = m.read.Load()._<readOnly>();
             {
@@ -246,11 +283,13 @@ namespace go
                     {
                         return (actual, loaded);
                     }
+
                 }
 
                 e = e__prev1;
 
             }
+
 
             m.mu.Lock();
             read, _ = m.read.Load()._<readOnly>();
@@ -265,7 +304,9 @@ namespace go
                     {
                         m.dirty[key] = e;
                     }
+
                     actual, loaded, _ = e.tryLoadOrStore(value);
+
                 }                {
                     var e__prev2 = e;
 
@@ -285,22 +326,28 @@ namespace go
                             // Make sure it is allocated and mark the read-only map as incomplete.
                             m.dirtyLocked();
                             m.read.Store(new readOnly(m:read.m,amended:true));
+
                         }
+
                         m.dirty[key] = newEntry(value);
                         actual = value;
                         loaded = false;
+
                     }
 
                     e = e__prev2;
 
                 }
 
+
                 e = e__prev1;
 
             }
+
             m.mu.Unlock();
 
             return (actual, loaded);
+
         }
 
         // tryLoadOrStore atomically loads or stores a value if the entry is not
@@ -308,13 +355,19 @@ namespace go
         //
         // If the entry is expunged, tryLoadOrStore leaves the entry unchanged and
         // returns with ok==false.
-        private static (object, bool, bool) tryLoadOrStore(this ref entry e, object i)
+        private static (object, bool, bool) tryLoadOrStore(this ptr<entry> _addr_e, object i)
         {
-            var p = atomic.LoadPointer(ref e.p);
+            object actual = default;
+            bool loaded = default;
+            bool ok = default;
+            ref entry e = ref _addr_e.val;
+
+            var p = atomic.LoadPointer(_addr_e.p);
             if (p == expunged)
             {
                 return (null, false, false);
             }
+
             if (p != null)
             {
                 return (true, true);
@@ -323,29 +376,38 @@ namespace go
             // Copy the interface after the first load to make this method more amenable
             // to escape analysis: if we hit the "load" path or the entry is expunged, we
             // shouldn't bother heap-allocating.
-            var ic = i;
+            ref var ic = ref heap(i, out ptr<var> _addr_ic);
             while (true)
             {
-                if (atomic.CompareAndSwapPointer(ref e.p, null, @unsafe.Pointer(ref ic)))
+                if (atomic.CompareAndSwapPointer(_addr_e.p, null, @unsafe.Pointer(_addr_ic)))
                 {
                     return (i, false, true);
                 }
-                p = atomic.LoadPointer(ref e.p);
+
+                p = atomic.LoadPointer(_addr_e.p);
                 if (p == expunged)
                 {
                     return (null, false, false);
                 }
+
                 if (p != null)
                 {
                     return (true, true);
                 }
+
             }
+
 
         }
 
-        // Delete deletes the value for a key.
-        private static void Delete(this ref Map m, object key)
+        // LoadAndDelete deletes the value for a key, returning the previous value if any.
+        // The loaded result reports whether the key was present.
+        private static (object, bool) LoadAndDelete(this ptr<Map> _addr_m, object key)
         {
+            object value = default;
+            bool loaded = default;
+            ref Map m = ref _addr_m.val;
+
             readOnly (read, _) = m.read.Load()._<readOnly>();
             var (e, ok) = read.m[key];
             if (!ok && read.amended)
@@ -355,30 +417,57 @@ namespace go
                 e, ok = read.m[key];
                 if (!ok && read.amended)
                 {
-                    delete(m.dirty, key);
+                    e, ok = m.dirty[key];
+                    delete(m.dirty, key); 
+                    // Regardless of whether the entry was present, record a miss: this key
+                    // will take the slow path until the dirty map is promoted to the read
+                    // map.
+                    m.missLocked();
+
                 }
+
                 m.mu.Unlock();
+
             }
+
             if (ok)
             {
-                e.delete();
+                return e.delete();
             }
+
+            return (null, false);
+
         }
 
-        private static bool delete(this ref entry e)
+        // Delete deletes the value for a key.
+        private static void Delete(this ptr<Map> _addr_m, object key)
         {
+            ref Map m = ref _addr_m.val;
+
+            m.LoadAndDelete(key);
+        }
+
+        private static (object, bool) delete(this ptr<entry> _addr_e)
+        {
+            object value = default;
+            bool ok = default;
+            ref entry e = ref _addr_e.val;
+
             while (true)
             {
-                var p = atomic.LoadPointer(ref e.p);
+                var p = atomic.LoadPointer(_addr_e.p);
                 if (p == null || p == expunged)
                 {
-                    return false;
+                    return (null, false);
                 }
-                if (atomic.CompareAndSwapPointer(ref e.p, p, null))
+
+                if (atomic.CompareAndSwapPointer(_addr_e.p, p, null))
                 {
                     return true;
                 }
+
             }
+
 
         }
 
@@ -392,8 +481,10 @@ namespace go
         //
         // Range may be O(N) with the number of elements in the map even if f returns
         // false after a constant number of calls.
-        private static bool Range(this ref Map m, Func<object, object, bool> f)
-        { 
+        private static bool Range(this ptr<Map> _addr_m, Func<object, object, bool> f)
+        {
+            ref Map m = ref _addr_m.val;
+ 
             // We need to be able to iterate over all of the keys that were already
             // present at the start of the call to Range.
             // If read.amended is false, then read.m satisfies that property without
@@ -414,8 +505,11 @@ namespace go
                     m.dirty = null;
                     m.misses = 0L;
                 }
+
                 m.mu.Unlock();
+
             }
+
             foreach (var (k, e) in read.m)
             {
                 var (v, ok) = e.load();
@@ -423,31 +517,41 @@ namespace go
                 {
                     continue;
                 }
+
                 if (!f(k, v))
                 {
                     break;
                 }
+
             }
+
         }
 
-        private static void missLocked(this ref Map m)
+        private static void missLocked(this ptr<Map> _addr_m)
         {
+            ref Map m = ref _addr_m.val;
+
             m.misses++;
             if (m.misses < len(m.dirty))
             {
-                return;
+                return ;
             }
+
             m.read.Store(new readOnly(m:m.dirty));
             m.dirty = null;
             m.misses = 0L;
+
         }
 
-        private static void dirtyLocked(this ref Map m)
+        private static void dirtyLocked(this ptr<Map> _addr_m)
         {
+            ref Map m = ref _addr_m.val;
+
             if (m.dirty != null)
             {
-                return;
+                return ;
             }
+
             readOnly (read, _) = m.read.Load()._<readOnly>();
             m.dirty = make(len(read.m));
             foreach (var (k, e) in read.m)
@@ -456,22 +560,30 @@ namespace go
                 {
                     m.dirty[k] = e;
                 }
+
             }
+
         }
 
-        private static bool tryExpungeLocked(this ref entry e)
+        private static bool tryExpungeLocked(this ptr<entry> _addr_e)
         {
-            var p = atomic.LoadPointer(ref e.p);
+            bool isExpunged = default;
+            ref entry e = ref _addr_e.val;
+
+            var p = atomic.LoadPointer(_addr_e.p);
             while (p == null)
             {
-                if (atomic.CompareAndSwapPointer(ref e.p, null, expunged))
+                if (atomic.CompareAndSwapPointer(_addr_e.p, null, expunged))
                 {
                     return true;
                 }
-                p = atomic.LoadPointer(ref e.p);
+
+                p = atomic.LoadPointer(_addr_e.p);
+
             }
 
             return p == expunged;
+
         }
     }
 }

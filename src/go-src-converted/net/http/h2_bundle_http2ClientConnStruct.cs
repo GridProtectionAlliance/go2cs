@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:19 UTC
+//     Generated on 2020 October 08 03:39:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -58,6 +59,7 @@ namespace net
                 this.t = default;
                 this.tconn = default;
                 this.tlsState = default;
+                this.reused = default;
                 this.singleUse = default;
                 this.readerDone = default;
                 this.readerErr = default;
@@ -67,6 +69,7 @@ namespace net
                 this.cond = default;
                 this.flow = default;
                 this.inflow = default;
+                this.closing = default;
                 this.closed = default;
                 this.wantSettingsAck = default;
                 this.goAway = default;
@@ -79,6 +82,7 @@ namespace net
                 this.br = default;
                 this.fr = default;
                 this.lastActive = default;
+                this.lastIdle = default;
                 this.maxFrameSize = default;
                 this.maxConcurrentStreams = default;
                 this.peerMaxHeaderListSize = default;
@@ -90,11 +94,12 @@ namespace net
                 this.werr = default;
             }
 
-            public http2ClientConn(ref ptr<http2Transport> t = default, net.Conn tconn = default, ref ptr<tls.ConnectionState> tlsState = default, bool singleUse = default, channel<object> readerDone = default, error readerErr = default, time.Duration idleTimeout = default, ref ptr<time.Timer> idleTimer = default, sync.Mutex mu = default, ref ptr<sync.Cond> cond = default, http2flow flow = default, http2flow inflow = default, bool closed = default, bool wantSettingsAck = default, ref ptr<http2GoAwayFrame> goAway = default, @string goAwayDebug = default, map<uint, ref http2clientStream> streams = default, uint nextStreamID = default, long pendingRequests = default, map<array<byte>, channel<object>> pings = default, ref ptr<bufio.Writer> bw = default, ref ptr<bufio.Reader> br = default, ref ptr<http2Framer> fr = default, time.Time lastActive = default, uint maxFrameSize = default, uint maxConcurrentStreams = default, ulong peerMaxHeaderListSize = default, uint initialWindowSize = default, bytes.Buffer hbuf = default, ref ptr<hpack.Encoder> henc = default, slice<slice<byte>> freeBuf = default, sync.Mutex wmu = default, error werr = default)
+            public http2ClientConn(ref ptr<http2Transport> t = default, net.Conn tconn = default, ref ptr<tls.ConnectionState> tlsState = default, uint reused = default, bool singleUse = default, channel<object> readerDone = default, error readerErr = default, time.Duration idleTimeout = default, ref ptr<time.Timer> idleTimer = default, sync.Mutex mu = default, ref ptr<sync.Cond> cond = default, http2flow flow = default, http2flow inflow = default, bool closing = default, bool closed = default, bool wantSettingsAck = default, ref ptr<http2GoAwayFrame> goAway = default, @string goAwayDebug = default, map<uint, ptr<http2clientStream>> streams = default, uint nextStreamID = default, long pendingRequests = default, map<array<byte>, channel<object>> pings = default, ref ptr<bufio.Writer> bw = default, ref ptr<bufio.Reader> br = default, ref ptr<http2Framer> fr = default, time.Time lastActive = default, time.Time lastIdle = default, uint maxFrameSize = default, uint maxConcurrentStreams = default, ulong peerMaxHeaderListSize = default, uint initialWindowSize = default, bytes.Buffer hbuf = default, ref ptr<hpack.Encoder> henc = default, slice<slice<byte>> freeBuf = default, sync.Mutex wmu = default, error werr = default)
             {
                 this.t = t;
                 this.tconn = tconn;
                 this.tlsState = tlsState;
+                this.reused = reused;
                 this.singleUse = singleUse;
                 this.readerDone = readerDone;
                 this.readerErr = readerErr;
@@ -104,6 +109,7 @@ namespace net
                 this.cond = cond;
                 this.flow = flow;
                 this.inflow = inflow;
+                this.closing = closing;
                 this.closed = closed;
                 this.wantSettingsAck = wantSettingsAck;
                 this.goAway = goAway;
@@ -116,6 +122,7 @@ namespace net
                 this.br = br;
                 this.fr = fr;
                 this.lastActive = lastActive;
+                this.lastIdle = lastIdle;
                 this.maxFrameSize = maxFrameSize;
                 this.maxConcurrentStreams = maxConcurrentStreams;
                 this.peerMaxHeaderListSize = peerMaxHeaderListSize;
@@ -147,7 +154,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2ClientConn http2ClientConn_cast(dynamic value)
         {
-            return new http2ClientConn(ref value.t, value.tconn, ref value.tlsState, value.singleUse, value.readerDone, value.readerErr, value.idleTimeout, ref value.idleTimer, value.mu, ref value.cond, value.flow, value.inflow, value.closed, value.wantSettingsAck, ref value.goAway, value.goAwayDebug, value.streams, value.nextStreamID, value.pendingRequests, value.pings, ref value.bw, ref value.br, ref value.fr, value.lastActive, value.maxFrameSize, value.maxConcurrentStreams, value.peerMaxHeaderListSize, value.initialWindowSize, value.hbuf, ref value.henc, value.freeBuf, value.wmu, value.werr);
+            return new http2ClientConn(ref value.t, value.tconn, ref value.tlsState, value.reused, value.singleUse, value.readerDone, value.readerErr, value.idleTimeout, ref value.idleTimer, value.mu, ref value.cond, value.flow, value.inflow, value.closing, value.closed, value.wantSettingsAck, ref value.goAway, value.goAwayDebug, value.streams, value.nextStreamID, value.pendingRequests, value.pings, ref value.bw, ref value.br, ref value.fr, value.lastActive, value.lastIdle, value.maxFrameSize, value.maxConcurrentStreams, value.peerMaxHeaderListSize, value.initialWindowSize, value.hbuf, ref value.henc, value.freeBuf, value.wmu, value.werr);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:43 UTC
+//     Generated on 2020 October 08 03:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,12 +29,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -70,7 +71,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -84,10 +85,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate void FlushByRef(ref T value);
+            private delegate void FlushByPtr(ptr<T> value);
             private delegate void FlushByVal(T value);
 
-            private static readonly FlushByRef s_FlushByRef;
+            private static readonly FlushByPtr s_FlushByPtr;
             private static readonly FlushByVal s_FlushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,14 +97,15 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FlushByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FlushByPtr is null || !m_target_is_ptr)
                 {
                     s_FlushByVal!(target);
                     return;
                 }
 
-                s_FlushByRef(ref target);
+                s_FlushByPtr(m_target_ptr);
                 return;
                 
             }
@@ -114,23 +116,20 @@ namespace net
             static Flusher()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Flush");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Flush");
 
                 if (!(extensionMethod is null))
-                    s_FlushByRef = extensionMethod.CreateStaticDelegate(typeof(FlushByRef)) as FlushByRef;
+                    s_FlushByPtr = extensionMethod.CreateStaticDelegate(typeof(FlushByPtr)) as FlushByPtr;
 
-                if (s_FlushByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Flush");
+                extensionMethod = targetType.GetExtensionMethod("Flush");
 
-                    if (!(extensionMethod is null))
-                        s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
 
-                if (s_FlushByRef is null && s_FlushByVal is null)
+                if (s_FlushByPtr is null && s_FlushByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Flusher.Flush method", new Exception("Flush"));
             }
 

@@ -4,7 +4,7 @@
 
 // This file implements FindExportData.
 
-// package gcimporter -- go2cs converted at 2020 August 29 10:09:11 UTC
+// package gcimporter -- go2cs converted at 2020 October 08 04:56:07 UTC
 // import "go/internal/gcimporter" ==> using gcimporter = go.go.@internal.gcimporter_package
 // Original source: C:\Go\src\go\internal\gcimporter\exportdata.go
 using bufio = go.bufio_package;
@@ -20,14 +20,19 @@ namespace @internal
 {
     public static partial class gcimporter_package
     {
-        private static (@string, long, error) readGopackHeader(ref bufio.Reader r)
-        { 
+        private static (@string, long, error) readGopackHeader(ptr<bufio.Reader> _addr_r)
+        {
+            @string name = default;
+            long size = default;
+            error err = default!;
+            ref bufio.Reader r = ref _addr_r.val;
+ 
             // See $GOROOT/include/ar.h.
             var hdr = make_slice<byte>(16L + 12L + 6L + 6L + 8L + 10L + 2L);
             _, err = io.ReadFull(r, hdr);
             if (err != null)
             {
-                return;
+                return ;
             }
             if (false)
             {
@@ -38,10 +43,11 @@ namespace @internal
             if (err != null || hdr[len(hdr) - 2L] != '`' || hdr[len(hdr) - 1L] != '\n')
             {
                 err = fmt.Errorf("invalid archive header");
-                return;
+                return ;
             }
             name = strings.TrimSpace(string(hdr[..16L]));
-            return;
+            return ;
+
         }
 
         // FindExportData positions the reader r at the beginning of the
@@ -50,31 +56,36 @@ namespace @internal
         // start of the file before calling this function. The hdr result
         // is the string before the export data, either "$$" or "$$B".
         //
-        public static (@string, error) FindExportData(ref bufio.Reader r)
-        { 
+        public static (@string, error) FindExportData(ptr<bufio.Reader> _addr_r)
+        {
+            @string hdr = default;
+            error err = default!;
+            ref bufio.Reader r = ref _addr_r.val;
+ 
             // Read first line to make sure this is an object file.
             var (line, err) = r.ReadSlice('\n');
             if (err != null)
             {
                 err = fmt.Errorf("can't find export data (%v)", err);
-                return;
+                return ;
             }
+
             if (string(line) == "!<arch>\n")
             { 
                 // Archive file. Scan to __.PKGDEF.
                 @string name = default;
-                name, _, err = readGopackHeader(r);
+                name, _, err = readGopackHeader(_addr_r);
 
                 if (err != null)
                 {
-                    return;
+                    return ;
                 } 
 
                 // First entry should be __.PKGDEF.
                 if (name != "__.PKGDEF")
                 {
                     err = fmt.Errorf("go archive is missing __.PKGDEF");
-                    return;
+                    return ;
                 } 
 
                 // Read first line of __.PKGDEF data, so that line
@@ -84,8 +95,9 @@ namespace @internal
                 if (err != null)
                 {
                     err = fmt.Errorf("can't find export data (%v)", err);
-                    return;
+                    return ;
                 }
+
             } 
 
             // Now at __.PKGDEF in archive or still at beginning of file.
@@ -93,7 +105,7 @@ namespace @internal
             if (!strings.HasPrefix(string(line), "go object "))
             {
                 err = fmt.Errorf("not a Go object file");
-                return;
+                return ;
             } 
 
             // Skip over object header to export data.
@@ -105,13 +117,15 @@ namespace @internal
                 if (err != null)
                 {
                     err = fmt.Errorf("can't find export data (%v)", err);
-                    return;
+                    return ;
                 }
+
             }
 
             hdr = string(line);
 
-            return;
+            return ;
+
         }
     }
 }}}

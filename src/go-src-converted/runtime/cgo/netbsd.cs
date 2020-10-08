@@ -4,7 +4,7 @@
 
 // +build netbsd
 
-// package cgo -- go2cs converted at 2020 August 29 08:21:41 UTC
+// package cgo -- go2cs converted at 2020 October 08 03:24:26 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Go\src\runtime\cgo\netbsd.go
 using _@unsafe_ = go.@unsafe_package;
@@ -22,7 +22,9 @@ namespace runtime
 
         //go:linkname _environ environ
         //go:linkname _progname __progname
+        //go:linkname ___ps_strings __ps_strings
         private static System.UIntPtr _environ = default;
         private static System.UIntPtr _progname = default;
+        private static System.UIntPtr ___ps_strings = default;
     }
 }}

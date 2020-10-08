@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:02:54 UTC
+//     Generated on 2020 October 08 04:37:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,25 +34,21 @@ namespace @internal
                 this.Off = default;
                 this.Siz = default;
                 this.Done = default;
-                this.Variant = default;
                 this.Type = default;
                 this.Add = default;
-                this.Xadd = default;
                 this.Sym = default;
-                this.Xsym = default;
+                this.ptr<RelocExt> = default;
             }
 
-            public Reloc(int Off = default, byte Siz = default, bool Done = default, RelocVariant Variant = default, objabi.RelocType Type = default, long Add = default, long Xadd = default, ref ptr<Symbol> Sym = default, ref ptr<Symbol> Xsym = default)
+            public Reloc(int Off = default, byte Siz = default, bool Done = default, objabi.RelocType Type = default, long Add = default, ref ptr<Symbol> Sym = default, ref ptr<RelocExt> ptr<RelocExt> = default)
             {
                 this.Off = Off;
                 this.Siz = Siz;
                 this.Done = Done;
-                this.Variant = Variant;
                 this.Type = Type;
                 this.Add = Add;
-                this.Xadd = Xadd;
                 this.Sym = Sym;
-                this.Xsym = Xsym;
+                this.ptr<RelocExt> = ptr<RelocExt>;
             }
 
             // Enable comparisons between nil and Reloc struct
@@ -75,7 +71,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Reloc Reloc_cast(dynamic value)
         {
-            return new Reloc(value.Off, value.Siz, value.Done, value.Variant, value.Type, value.Add, value.Xadd, ref value.Sym, ref value.Xsym);
+            return new Reloc(value.Off, value.Siz, value.Done, value.Type, value.Add, ref value.Sym, ref value.ptr<RelocExt>);
         }
     }
 }}}}

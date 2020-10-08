@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:43:32 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:17 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\dir_windows.go
 using io = go.io_package;
@@ -14,15 +14,19 @@ namespace go
 {
     public static partial class os_package
     {
-        private static (slice<FileInfo>, error) readdir(this ref File file, long n)
+        private static (slice<FileInfo>, error) readdir(this ptr<File> _addr_file, long n)
         {
+            slice<FileInfo> fi = default;
+            error err = default!;
+            ref File file = ref _addr_file.val;
+
             if (file == null)
             {
-                return (null, syscall.EINVAL);
+                return (null, error.As(syscall.EINVAL)!);
             }
             if (!file.isdir())
             {
-                return (null, ref new PathError("Readdir",file.name,syscall.ENOTDIR));
+                return (null, error.As(addr(new PathError("Readdir",file.name,syscall.ENOTDIR))!)!);
             }
             var wantAll = n <= 0L;
             var size = n;
@@ -32,7 +36,7 @@ namespace go
                 size = 100L;
             }
             fi = make_slice<FileInfo>(0L, size); // Empty with room to grow.
-            var d = ref file.dirinfo.data;
+            var d = _addr_file.dirinfo.data;
             while (n != 0L && !file.dirinfo.isempty)
             {
                 if (file.dirinfo.needdata)
@@ -47,12 +51,13 @@ namespace go
                         }
                         else
                         {
-                            err = ref new PathError("FindNextFile",file.name,e);
+                            err = addr(new PathError("FindNextFile",file.name,e));
                             if (!wantAll)
                             {
                                 fi = null;
                             }
-                            return;
+                            return ;
+
                         }
                     }
                 }
@@ -61,27 +66,38 @@ namespace go
                 if (name == "." || name == "..")
                 { // Useless names
                     continue;
+
                 }
-                fileStat f = ref new fileStat(name:name,sys:syscall.Win32FileAttributeData{FileAttributes:d.FileAttributes,CreationTime:d.CreationTime,LastAccessTime:d.LastAccessTime,LastWriteTime:d.LastWriteTime,FileSizeHigh:d.FileSizeHigh,FileSizeLow:d.FileSizeLow,},path:file.dirinfo.path,appendNameToPath:true,);
+                var f = newFileStatFromWin32finddata(d);
+                f.name = name;
+                f.path = file.dirinfo.path;
+                f.appendNameToPath = true;
                 n--;
                 fi = append(fi, f);
+
             }
             if (!wantAll && len(fi) == 0L)
             {
-                return (fi, io.EOF);
+                return (fi, error.As(io.EOF)!);
             }
-            return (fi, null);
+            return (fi, error.As(null!)!);
+
         }
 
-        private static (slice<@string>, error) readdirnames(this ref File file, long n)
+        private static (slice<@string>, error) readdirnames(this ptr<File> _addr_file, long n)
         {
+            slice<@string> names = default;
+            error err = default!;
+            ref File file = ref _addr_file.val;
+
             var (fis, err) = file.Readdir(n);
             names = make_slice<@string>(len(fis));
             foreach (var (i, fi) in fis)
             {
                 names[i] = fi.Name();
             }
-            return (names, err);
+            return (names, error.As(err)!);
+
         }
     }
 }

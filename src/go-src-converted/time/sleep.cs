@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package time -- go2cs converted at 2020 August 29 08:16:12 UTC
+// package time -- go2cs converted at 2020 October 08 03:45:40 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\sleep.go
 
@@ -19,20 +19,17 @@ namespace go
         public static void Sleep(Duration d)
 ;
 
-        // runtimeNano returns the current value of the runtime clock in nanoseconds.
-        private static long runtimeNano()
-;
-
         // Interface to timers implemented in package runtime.
         // Must be in sync with ../runtime/time.go:/^type timer
         private partial struct runtimeTimer
         {
-            public System.UIntPtr tb;
-            public long i;
+            public System.UIntPtr pp;
             public long when;
             public long period;
             public Action<object, System.UIntPtr> f; // NOTE: must not be closure
             public System.UIntPtr seq;
+            public long nextwhen;
+            public uint status;
         }
 
         // when is a helper function for setting the 'when' field of a runtimeTimer.
@@ -42,20 +39,27 @@ namespace go
         private static long when(Duration d)
         {
             if (d <= 0L)
-            {>>MARKER:FUNCTION_runtimeNano_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_Sleep_BLOCK_PREFIX<<
                 return runtimeNano();
             }
+
             var t = runtimeNano() + int64(d);
             if (t < 0L)
-            {>>MARKER:FUNCTION_Sleep_BLOCK_PREFIX<<
+            {
                 t = 1L << (int)(63L) - 1L; // math.MaxInt64
             }
+
             return t;
+
         }
 
-        private static void startTimer(ref runtimeTimer _p0)
+        private static void startTimer(ptr<runtimeTimer> _p0)
 ;
-        private static bool stopTimer(ref runtimeTimer _p0)
+        private static bool stopTimer(ptr<runtimeTimer> _p0)
+;
+        private static bool resetTimer(ptr<runtimeTimer> _p0, long _p0)
+;
+        private static void modTimer(ptr<runtimeTimer> t, long when, long period, Action<object, System.UIntPtr> f, object arg, System.UIntPtr seq)
 ;
 
         // The Timer type represents a single event.
@@ -74,8 +78,8 @@ namespace go
         // Stop does not close the channel, to prevent a read from the channel succeeding
         // incorrectly.
         //
-        // To prevent a timer created with NewTimer from firing after a call to Stop,
-        // check the return value and drain the channel.
+        // To ensure the channel is empty after a call to Stop, check the
+        // return value and drain the channel.
         // For example, assuming the program has not received from t.C already:
         //
         //     if !t.Stop() {
@@ -83,40 +87,43 @@ namespace go
         //     }
         //
         // This cannot be done concurrent to other receives from the Timer's
-        // channel.
+        // channel or other calls to the Timer's Stop method.
         //
         // For a timer created with AfterFunc(d, f), if t.Stop returns false, then the timer
         // has already expired and the function f has been started in its own goroutine;
         // Stop does not wait for f to complete before returning.
         // If the caller needs to know whether f is completed, it must coordinate
         // with f explicitly.
-        private static bool Stop(this ref Timer _t) => func(_t, (ref Timer t, Defer _, Panic panic, Recover __) =>
-        {>>MARKER:FUNCTION_stopTimer_BLOCK_PREFIX<<
+        private static bool Stop(this ptr<Timer> _addr_t) => func((_, panic, __) =>
+        {
+            ref Timer t = ref _addr_t.val;
+
             if (t.r.f == null)
-            {>>MARKER:FUNCTION_startTimer_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_modTimer_BLOCK_PREFIX<<
                 panic("time: Stop called on uninitialized Timer");
             }
-            return stopTimer(ref t.r);
+
+            return stopTimer(_addr_t.r);
+
         });
 
         // NewTimer creates a new Timer that will send
         // the current time on its channel after at least duration d.
-        public static ref Timer NewTimer(Duration d)
+        public static ptr<Timer> NewTimer(Duration d)
         {
             var c = make_channel<Time>(1L);
-            Timer t = ref new Timer(C:c,r:runtimeTimer{when:when(d),f:sendTime,arg:c,},);
-            startTimer(ref t.r);
-            return t;
+            ptr<Timer> t = addr(new Timer(C:c,r:runtimeTimer{when:when(d),f:sendTime,arg:c,},));
+            startTimer(_addr_t.r);
+            return _addr_t!;
         }
 
         // Reset changes the timer to expire after duration d.
         // It returns true if the timer had been active, false if the timer had
         // expired or been stopped.
         //
-        // Resetting a timer must take care not to race with the send into t.C
-        // that happens when the current timer expires.
+        // Reset should be invoked only on stopped or expired timers with drained channels.
         // If a program has already received a value from t.C, the timer is known
-        // to have expired, and t.Reset can be used directly.
+        // to have expired and the channel drained, so t.Reset can be used directly.
         // If a program has not yet received a value from t.C, however,
         // the timer must be stopped and—if Stop reports that the timer expired
         // before being stopped—the channel explicitly drained:
@@ -133,17 +140,18 @@ namespace go
         // is a race condition between draining the channel and the new timer expiring.
         // Reset should always be invoked on stopped or expired channels, as described above.
         // The return value exists to preserve compatibility with existing programs.
-        private static bool Reset(this ref Timer _t, Duration d) => func(_t, (ref Timer t, Defer _, Panic panic, Recover __) =>
+        private static bool Reset(this ptr<Timer> _addr_t, Duration d) => func((_, panic, __) =>
         {
+            ref Timer t = ref _addr_t.val;
+
             if (t.r.f == null)
-            {
+            {>>MARKER:FUNCTION_resetTimer_BLOCK_PREFIX<<
                 panic("time: Reset called on uninitialized Timer");
             }
+
             var w = when(d);
-            var active = stopTimer(ref t.r);
-            t.r.when = w;
-            startTimer(ref t.r);
-            return active;
+            return resetTimer(_addr_t.r, w);
+
         });
 
         private static void sendTime(object c, System.UIntPtr seq)
@@ -169,11 +177,11 @@ namespace go
         // AfterFunc waits for the duration to elapse and then calls f
         // in its own goroutine. It returns a Timer that can
         // be used to cancel the call using its Stop method.
-        public static ref Timer AfterFunc(Duration d, Action f)
+        public static ptr<Timer> AfterFunc(Duration d, Action f)
         {
-            Timer t = ref new Timer(r:runtimeTimer{when:when(d),f:goFunc,arg:f,},);
-            startTimer(ref t.r);
-            return t;
+            ptr<Timer> t = addr(new Timer(r:runtimeTimer{when:when(d),f:goFunc,arg:f,},));
+            startTimer(_addr_t.r);
+            return _addr_t!;
         }
 
         private static void goFunc(object arg, System.UIntPtr seq)

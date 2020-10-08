@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:44 UTC
+//     Generated on 2020 October 08 01:30:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,13 +29,11 @@ namespace go
             public poolLocalInternal(NilType _)
             {
                 this.shared = default;
-                this.Mutex = default;
             }
 
-            public poolLocalInternal(slice<object> shared = default, Mutex Mutex = default)
+            public poolLocalInternal(poolChain shared = default)
             {
                 this.shared = shared;
-                this.Mutex = Mutex;
             }
 
             // Enable comparisons between nil and poolLocalInternal struct
@@ -58,7 +56,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static poolLocalInternal poolLocalInternal_cast(dynamic value)
         {
-            return new poolLocalInternal(value.shared, value.Mutex);
+            return new poolLocalInternal(value.shared);
         }
     }
 }

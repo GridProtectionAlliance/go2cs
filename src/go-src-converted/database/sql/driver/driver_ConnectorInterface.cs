@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate Driver ConnectByRef(ref T value, context.Context _p0);
+            private delegate Driver ConnectByPtr(ptr<T> value, context.Context _p0);
             private delegate Driver ConnectByVal(T value, context.Context _p0);
 
-            private static readonly ConnectByRef s_ConnectByRef;
+            private static readonly ConnectByPtr s_ConnectByPtr;
             private static readonly ConnectByVal s_ConnectByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,17 +79,18 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ConnectByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ConnectByPtr is null || !m_target_is_ptr)
                     return s_ConnectByVal!(target, _p0);
 
-                return s_ConnectByRef(ref target, _p0);
+                return s_ConnectByPtr(m_target_ptr, _p0);
             }
 
-            private delegate Driver DriverByRef(ref T value);
+            private delegate Driver DriverByPtr(ptr<T> value);
             private delegate Driver DriverByVal(T value);
 
-            private static readonly DriverByRef s_DriverByRef;
+            private static readonly DriverByPtr s_DriverByPtr;
             private static readonly DriverByVal s_DriverByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,11 +99,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_DriverByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_DriverByPtr is null || !m_target_is_ptr)
                     return s_DriverByVal!(target);
 
-                return s_DriverByRef(ref target);
+                return s_DriverByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -111,39 +113,33 @@ namespace sql
             static Connector()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Connect");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Connect");
 
                 if (!(extensionMethod is null))
-                    s_ConnectByRef = extensionMethod.CreateStaticDelegate(typeof(ConnectByRef)) as ConnectByRef;
+                    s_ConnectByPtr = extensionMethod.CreateStaticDelegate(typeof(ConnectByPtr)) as ConnectByPtr;
 
-                if (s_ConnectByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Connect");
+                extensionMethod = targetType.GetExtensionMethod("Connect");
 
-                    if (!(extensionMethod is null))
-                        s_ConnectByVal = extensionMethod.CreateStaticDelegate(typeof(ConnectByVal)) as ConnectByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ConnectByVal = extensionMethod.CreateStaticDelegate(typeof(ConnectByVal)) as ConnectByVal;
 
-                if (s_ConnectByRef is null && s_ConnectByVal is null)
+                if (s_ConnectByPtr is null && s_ConnectByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Connector.Connect method", new Exception("Connect"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Driver");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Driver");
 
                 if (!(extensionMethod is null))
-                    s_DriverByRef = extensionMethod.CreateStaticDelegate(typeof(DriverByRef)) as DriverByRef;
+                    s_DriverByPtr = extensionMethod.CreateStaticDelegate(typeof(DriverByPtr)) as DriverByPtr;
 
-                if (s_DriverByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Driver");
+                extensionMethod = targetType.GetExtensionMethod("Driver");
 
-                    if (!(extensionMethod is null))
-                        s_DriverByVal = extensionMethod.CreateStaticDelegate(typeof(DriverByVal)) as DriverByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_DriverByVal = extensionMethod.CreateStaticDelegate(typeof(DriverByVal)) as DriverByVal;
 
-                if (s_DriverByRef is null && s_DriverByVal is null)
+                if (s_DriverByPtr is null && s_DriverByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Connector.Driver method", new Exception("Driver"));
             }
 

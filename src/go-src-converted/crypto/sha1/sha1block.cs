@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sha1 -- go2cs converted at 2020 August 29 08:31:01 UTC
+// package sha1 -- go2cs converted at 2020 October 08 03:36:41 UTC
 // import "crypto/sha1" ==> using sha1 = go.crypto.sha1_package
 // Original source: C:\Go\src\crypto\sha1\sha1block.go
-
+using bits = go.math.bits_package;
 using static go.builtin;
 
 namespace go {
@@ -13,15 +13,18 @@ namespace crypto
 {
     public static partial class sha1_package
     {
-        private static readonly ulong _K0 = 0x5A827999UL;
-        private static readonly ulong _K1 = 0x6ED9EBA1UL;
-        private static readonly ulong _K2 = 0x8F1BBCDCUL;
-        private static readonly ulong _K3 = 0xCA62C1D6UL;
+        private static readonly ulong _K0 = (ulong)0x5A827999UL;
+        private static readonly ulong _K1 = (ulong)0x6ED9EBA1UL;
+        private static readonly ulong _K2 = (ulong)0x8F1BBCDCUL;
+        private static readonly ulong _K3 = (ulong)0xCA62C1D6UL;
+
 
         // blockGeneric is a portable, pure Go version of the SHA-1 block step.
         // It's used by sha1block_generic.go and tests.
-        private static void blockGeneric(ref digest dig, slice<byte> p)
+        private static void blockGeneric(ptr<digest> _addr_dig, slice<byte> p)
         {
+            ref digest dig = ref _addr_dig.val;
+
             array<uint> w = new array<uint>(16L);
 
             var h0 = dig.h[0L];
@@ -59,12 +62,10 @@ namespace crypto
                 while (i < 16L)
                 {
                     var f = b & c | (~b) & d;
-                    var a5 = a << (int)(5L) | a >> (int)((32L - 5L));
-                    var b30 = b << (int)(30L) | b >> (int)((32L - 30L));
-                    var t = a5 + f + e + w[i & 0xfUL] + _K0;
+                    var t = bits.RotateLeft32(a, 5L) + f + e + w[i & 0xfUL] + _K0;
                     a = t;
                     b = a;
-                    c = b30;
+                    c = bits.RotateLeft32(b, 30L);
                     d = c;
                     e = d;
                     i++;
@@ -76,12 +77,10 @@ namespace crypto
                     w[i & 0xfUL] = tmp << (int)(1L) | tmp >> (int)((32L - 1L));
 
                     f = b & c | (~b) & d;
-                    a5 = a << (int)(5L) | a >> (int)((32L - 5L));
-                    b30 = b << (int)(30L) | b >> (int)((32L - 30L));
-                    t = a5 + f + e + w[i & 0xfUL] + _K0;
+                    t = bits.RotateLeft32(a, 5L) + f + e + w[i & 0xfUL] + _K0;
                     a = t;
                     b = a;
-                    c = b30;
+                    c = bits.RotateLeft32(b, 30L);
                     d = c;
                     e = d;
                     i++;
@@ -92,12 +91,10 @@ namespace crypto
                     tmp = w[(i - 3L) & 0xfUL] ^ w[(i - 8L) & 0xfUL] ^ w[(i - 14L) & 0xfUL] ^ w[(i) & 0xfUL];
                     w[i & 0xfUL] = tmp << (int)(1L) | tmp >> (int)((32L - 1L));
                     f = b ^ c ^ d;
-                    a5 = a << (int)(5L) | a >> (int)((32L - 5L));
-                    b30 = b << (int)(30L) | b >> (int)((32L - 30L));
-                    t = a5 + f + e + w[i & 0xfUL] + _K1;
+                    t = bits.RotateLeft32(a, 5L) + f + e + w[i & 0xfUL] + _K1;
                     a = t;
                     b = a;
-                    c = b30;
+                    c = bits.RotateLeft32(b, 30L);
                     d = c;
                     e = d;
                     i++;
@@ -108,13 +105,10 @@ namespace crypto
                     tmp = w[(i - 3L) & 0xfUL] ^ w[(i - 8L) & 0xfUL] ^ w[(i - 14L) & 0xfUL] ^ w[(i) & 0xfUL];
                     w[i & 0xfUL] = tmp << (int)(1L) | tmp >> (int)((32L - 1L));
                     f = ((b | c) & d) | (b & c);
-
-                    a5 = a << (int)(5L) | a >> (int)((32L - 5L));
-                    b30 = b << (int)(30L) | b >> (int)((32L - 30L));
-                    t = a5 + f + e + w[i & 0xfUL] + _K2;
+                    t = bits.RotateLeft32(a, 5L) + f + e + w[i & 0xfUL] + _K2;
                     a = t;
                     b = a;
-                    c = b30;
+                    c = bits.RotateLeft32(b, 30L);
                     d = c;
                     e = d;
                     i++;
@@ -125,12 +119,10 @@ namespace crypto
                     tmp = w[(i - 3L) & 0xfUL] ^ w[(i - 8L) & 0xfUL] ^ w[(i - 14L) & 0xfUL] ^ w[(i) & 0xfUL];
                     w[i & 0xfUL] = tmp << (int)(1L) | tmp >> (int)((32L - 1L));
                     f = b ^ c ^ d;
-                    a5 = a << (int)(5L) | a >> (int)((32L - 5L));
-                    b30 = b << (int)(30L) | b >> (int)((32L - 30L));
-                    t = a5 + f + e + w[i & 0xfUL] + _K3;
+                    t = bits.RotateLeft32(a, 5L) + f + e + w[i & 0xfUL] + _K3;
                     a = t;
                     b = a;
-                    c = b30;
+                    c = bits.RotateLeft32(b, 30L);
                     d = c;
                     e = d;
                     i++;
@@ -144,6 +136,7 @@ namespace crypto
                 h4 += e;
 
                 p = p[chunk..];
+
             }
 
 
@@ -152,6 +145,7 @@ namespace crypto
             dig.h[2L] = h2;
             dig.h[3L] = h3;
             dig.h[4L] = h4;
+
         }
     }
 }}

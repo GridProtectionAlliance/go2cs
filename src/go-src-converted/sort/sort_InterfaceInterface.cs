@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:45 UTC
+//     Generated on 2020 October 08 03:44:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -61,10 +61,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate bool LenByRef(ref T value);
+            private delegate bool LenByPtr(ptr<T> value);
             private delegate bool LenByVal(T value);
 
-            private static readonly LenByRef s_LenByRef;
+            private static readonly LenByPtr s_LenByPtr;
             private static readonly LenByVal s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,17 +73,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByRef(ref target);
+                return s_LenByPtr(m_target_ptr);
             }
 
-            private delegate bool LessByRef(ref T value, long i, long j);
+            private delegate bool LessByPtr(ptr<T> value, long i, long j);
             private delegate bool LessByVal(T value, long i, long j);
 
-            private static readonly LessByRef s_LessByRef;
+            private static readonly LessByPtr s_LessByPtr;
             private static readonly LessByVal s_LessByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -92,17 +93,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LessByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LessByPtr is null || !m_target_is_ptr)
                     return s_LessByVal!(target, i, j);
 
-                return s_LessByRef(ref target, i, j);
+                return s_LessByPtr(m_target_ptr, i, j);
             }
 
-            private delegate bool SwapByRef(ref T value, long i, long j);
+            private delegate bool SwapByPtr(ptr<T> value, long i, long j);
             private delegate bool SwapByVal(T value, long i, long j);
 
-            private static readonly SwapByRef s_SwapByRef;
+            private static readonly SwapByPtr s_SwapByPtr;
             private static readonly SwapByVal s_SwapByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -111,11 +113,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SwapByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SwapByPtr is null || !m_target_is_ptr)
                     return s_SwapByVal!(target, i, j);
 
-                return s_SwapByRef(ref target, i, j);
+                return s_SwapByPtr(m_target_ptr, i, j);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -124,55 +127,46 @@ namespace go
             static Interface()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Len");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
                 if (!(extensionMethod is null))
-                    s_LenByRef = extensionMethod.CreateStaticDelegate(typeof(LenByRef)) as LenByRef;
+                    s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
-                if (s_LenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Len");
+                extensionMethod = targetType.GetExtensionMethod("Len");
 
-                    if (!(extensionMethod is null))
-                        s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
-                if (s_LenByRef is null && s_LenByVal is null)
+                if (s_LenByPtr is null && s_LenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Len method", new Exception("Len"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Less");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Less");
 
                 if (!(extensionMethod is null))
-                    s_LessByRef = extensionMethod.CreateStaticDelegate(typeof(LessByRef)) as LessByRef;
+                    s_LessByPtr = extensionMethod.CreateStaticDelegate(typeof(LessByPtr)) as LessByPtr;
 
-                if (s_LessByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Less");
+                extensionMethod = targetType.GetExtensionMethod("Less");
 
-                    if (!(extensionMethod is null))
-                        s_LessByVal = extensionMethod.CreateStaticDelegate(typeof(LessByVal)) as LessByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LessByVal = extensionMethod.CreateStaticDelegate(typeof(LessByVal)) as LessByVal;
 
-                if (s_LessByRef is null && s_LessByVal is null)
+                if (s_LessByPtr is null && s_LessByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Less method", new Exception("Less"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Swap");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Swap");
 
                 if (!(extensionMethod is null))
-                    s_SwapByRef = extensionMethod.CreateStaticDelegate(typeof(SwapByRef)) as SwapByRef;
+                    s_SwapByPtr = extensionMethod.CreateStaticDelegate(typeof(SwapByPtr)) as SwapByPtr;
 
-                if (s_SwapByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Swap");
+                extensionMethod = targetType.GetExtensionMethod("Swap");
 
-                    if (!(extensionMethod is null))
-                        s_SwapByVal = extensionMethod.CreateStaticDelegate(typeof(SwapByVal)) as SwapByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SwapByVal = extensionMethod.CreateStaticDelegate(typeof(SwapByVal)) as SwapByVal;
 
-                if (s_SwapByRef is null && s_SwapByVal is null)
+                if (s_SwapByPtr is null && s_SwapByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Swap method", new Exception("Swap"));
             }
 

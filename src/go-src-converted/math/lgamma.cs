@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:54 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:19 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\lgamma.go
 
@@ -113,66 +113,79 @@ namespace go
         //    Lgamma(NaN) = NaN
         public static (double, long) Lgamma(double x)
         {
-            const float Ymin = 1.461632144968362245F;
-            const long Two52 = 1L << (int)(52L); // 0x4330000000000000 ~4.5036e+15
-            const long Two53 = 1L << (int)(53L); // 0x4340000000000000 ~9.0072e+15
-            const long Two58 = 1L << (int)(58L); // 0x4390000000000000 ~2.8823e+17
-            const float Tiny = 1.0F / (1L << (int)(70L)); // 0x3b90000000000000 ~8.47033e-22
-            const float Tc = 1.46163214496836224576e+00F; // 0x3FF762D86356BE3F
-            const float Tf = -1.21486290535849611461e-01F; // 0xBFBF19B9BCC38A42
+            double lgamma = default;
+            long sign = default;
+
+            const float Ymin = (float)1.461632144968362245F;
+            const long Two52 = (long)1L << (int)(52L); // 0x4330000000000000 ~4.5036e+15
+            const long Two53 = (long)1L << (int)(53L); // 0x4340000000000000 ~9.0072e+15
+            const long Two58 = (long)1L << (int)(58L); // 0x4390000000000000 ~2.8823e+17
+            const float Tiny = (float)1.0F / (1L << (int)(70L)); // 0x3b90000000000000 ~8.47033e-22
+            const float Tc = (float)1.46163214496836224576e+00F; // 0x3FF762D86356BE3F
+            const float Tf = (float)-1.21486290535849611461e-01F; // 0xBFBF19B9BCC38A42
             // Tt = -(tail of Tf)
-            const float Tt = -3.63867699703950536541e-18F; // 0xBC50C7CAA48A971F 
+            const float Tt = (float)-3.63867699703950536541e-18F; // 0xBC50C7CAA48A971F 
             // special cases
             sign = 1L;
 
             if (IsNaN(x)) 
                 lgamma = x;
-                return;
+                return ;
             else if (IsInf(x, 0L)) 
                 lgamma = x;
-                return;
+                return ;
             else if (x == 0L) 
                 lgamma = Inf(1L);
-                return;
+                return ;
                         var neg = false;
             if (x < 0L)
             {
                 x = -x;
                 neg = true;
             }
+
             if (x < Tiny)
             { // if |x| < 2**-70, return -log(|x|)
                 if (neg)
                 {
                     sign = -1L;
                 }
+
                 lgamma = -Log(x);
-                return;
+                return ;
+
             }
+
             double nadj = default;
             if (neg)
             {
                 if (x >= Two52)
                 { // |x| >= 2**52, must be -integer
                     lgamma = Inf(1L);
-                    return;
+                    return ;
+
                 }
+
                 var t = sinPi(x);
                 if (t == 0L)
                 {
                     lgamma = Inf(1L); // -integer
-                    return;
+                    return ;
+
                 }
+
                 nadj = Log(Pi / Abs(t * x));
                 if (t < 0L)
                 {
                     sign = -1L;
                 }
+
             }
+
 
             if (x == 1L || x == 2L) // purge off 1 and 2
                 lgamma = 0L;
-                return;
+                return ;
             else if (x < 2L) // use lgamma(x) = lgamma(x+1) - log(x)
                 double y = default;
                 long i = default;
@@ -189,7 +202,8 @@ namespace go
                     else // 0 < x < 0.2316
                         y = x;
                         i = 2L;
-                                    }
+                    
+                }
                 else
                 {
                     lgamma = 0L;
@@ -203,7 +217,9 @@ namespace go
                     else // 0.9 < x < 1.2316
                         y = x - 1L;
                         i = 2L;
-                                    }
+                    
+                }
+
                 switch (i)
                 {
                     case 0L: 
@@ -276,14 +292,16 @@ namespace go
             {
                 lgamma = nadj - lgamma;
             }
-            return;
+
+            return ;
+
         }
 
         // sinPi(x) is a helper function for negative x
         private static double sinPi(double x)
         {
-            const long Two52 = 1L << (int)(52L); // 0x4330000000000000 ~4.5036e+15
-            const long Two53 = 1L << (int)(53L); // 0x4340000000000000 ~9.0072e+15
+            const long Two52 = (long)1L << (int)(52L); // 0x4330000000000000 ~4.5036e+15
+            const long Two53 = (long)1L << (int)(53L); // 0x4340000000000000 ~9.0072e+15
             if (x < 0.25F)
             {
                 return -Sin(Pi * x);
@@ -296,6 +314,7 @@ namespace go
             { // inexact
                 x = Mod(x, 2L);
                 n = int(x * 4L);
+
             }
             else
             {
@@ -303,6 +322,7 @@ namespace go
                 { // x must be even
                     x = 0L;
                     n = 0L;
+
                 }
                 else
                 {
@@ -310,11 +330,15 @@ namespace go
                     {
                         z = x + Two52; // exact
                     }
+
                     n = int(1L & Float64bits(z));
                     x = float64(n);
                     n <<= 2L;
+
                 }
+
             }
+
             switch (n)
             {
                 case 0L: 
@@ -340,6 +364,7 @@ namespace go
                     break;
             }
             return -x;
+
         }
     }
 }

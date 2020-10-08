@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:18:32 UTC
+//     Generated on 2020 October 08 03:21:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -60,6 +60,8 @@ namespace go
                 this.debuggc = default;
                 this.last_gc_nanotime = default;
                 this.tinyallocs = default;
+                this.last_next_gc = default;
+                this.last_heap_inuse = default;
                 this.triggerRatio = default;
                 this.gc_trigger = default;
                 this.heap_live = default;
@@ -67,7 +69,7 @@ namespace go
                 this.heap_marked = default;
             }
 
-            public mstats(ulong alloc = default, ulong total_alloc = default, ulong sys = default, ulong nlookup = default, ulong nmalloc = default, ulong nfree = default, ulong heap_alloc = default, ulong heap_sys = default, ulong heap_idle = default, ulong heap_inuse = default, ulong heap_released = default, ulong heap_objects = default, ulong stacks_inuse = default, ulong stacks_sys = default, ulong mspan_inuse = default, ulong mspan_sys = default, ulong mcache_inuse = default, ulong mcache_sys = default, ulong buckhash_sys = default, ulong gc_sys = default, ulong other_sys = default, ulong next_gc = default, ulong last_gc_unix = default, ulong pause_total_ns = default, array<ulong> pause_ns = default, array<ulong> pause_end = default, uint numgc = default, uint numforcedgc = default, double gc_cpu_fraction = default, bool enablegc = default, bool debuggc = default, ulong last_gc_nanotime = default, ulong tinyallocs = default, double triggerRatio = default, ulong gc_trigger = default, ulong heap_live = default, ulong heap_scan = default, ulong heap_marked = default)
+            public mstats(ulong alloc = default, ulong total_alloc = default, ulong sys = default, ulong nlookup = default, ulong nmalloc = default, ulong nfree = default, ulong heap_alloc = default, ulong heap_sys = default, ulong heap_idle = default, ulong heap_inuse = default, ulong heap_released = default, ulong heap_objects = default, ulong stacks_inuse = default, ulong stacks_sys = default, ulong mspan_inuse = default, ulong mspan_sys = default, ulong mcache_inuse = default, ulong mcache_sys = default, ulong buckhash_sys = default, ulong gc_sys = default, ulong other_sys = default, ulong next_gc = default, ulong last_gc_unix = default, ulong pause_total_ns = default, array<ulong> pause_ns = default, array<ulong> pause_end = default, uint numgc = default, uint numforcedgc = default, double gc_cpu_fraction = default, bool enablegc = default, bool debuggc = default, ulong last_gc_nanotime = default, ulong tinyallocs = default, ulong last_next_gc = default, ulong last_heap_inuse = default, double triggerRatio = default, ulong gc_trigger = default, ulong heap_live = default, ulong heap_scan = default, ulong heap_marked = default)
             {
                 this.alloc = alloc;
                 this.total_alloc = total_alloc;
@@ -102,6 +104,8 @@ namespace go
                 this.debuggc = debuggc;
                 this.last_gc_nanotime = last_gc_nanotime;
                 this.tinyallocs = tinyallocs;
+                this.last_next_gc = last_next_gc;
+                this.last_heap_inuse = last_heap_inuse;
                 this.triggerRatio = triggerRatio;
                 this.gc_trigger = gc_trigger;
                 this.heap_live = heap_live;
@@ -129,7 +133,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mstats mstats_cast(dynamic value)
         {
-            return new mstats(value.alloc, value.total_alloc, value.sys, value.nlookup, value.nmalloc, value.nfree, value.heap_alloc, value.heap_sys, value.heap_idle, value.heap_inuse, value.heap_released, value.heap_objects, value.stacks_inuse, value.stacks_sys, value.mspan_inuse, value.mspan_sys, value.mcache_inuse, value.mcache_sys, value.buckhash_sys, value.gc_sys, value.other_sys, value.next_gc, value.last_gc_unix, value.pause_total_ns, value.pause_ns, value.pause_end, value.numgc, value.numforcedgc, value.gc_cpu_fraction, value.enablegc, value.debuggc, value.last_gc_nanotime, value.tinyallocs, value.triggerRatio, value.gc_trigger, value.heap_live, value.heap_scan, value.heap_marked);
+            return new mstats(value.alloc, value.total_alloc, value.sys, value.nlookup, value.nmalloc, value.nfree, value.heap_alloc, value.heap_sys, value.heap_idle, value.heap_inuse, value.heap_released, value.heap_objects, value.stacks_inuse, value.stacks_sys, value.mspan_inuse, value.mspan_sys, value.mcache_inuse, value.mcache_sys, value.buckhash_sys, value.gc_sys, value.other_sys, value.next_gc, value.last_gc_unix, value.pause_total_ns, value.pause_ns, value.pause_end, value.numgc, value.numforcedgc, value.gc_cpu_fraction, value.enablegc, value.debuggc, value.last_gc_nanotime, value.tinyallocs, value.last_next_gc, value.last_heap_inuse, value.triggerRatio, value.gc_trigger, value.heap_live, value.heap_scan, value.heap_marked);
         }
     }
 }

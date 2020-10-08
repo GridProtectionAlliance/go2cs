@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:51:31 UTC
+//     Generated on 2020 October 08 04:07:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,9 +14,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using exec = go.os.exec_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -54,7 +58,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,23 +72,24 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate long LenByRef(ref T value);
-            private delegate long LenByVal(T value);
+            private delegate long LengthByPtr(ptr<T> value, object dwarfContext);
+            private delegate long LengthByVal(T value, object dwarfContext);
 
-            private static readonly LenByRef s_LenByRef;
-            private static readonly LenByVal s_LenByVal;
+            private static readonly LengthByPtr s_LengthByPtr;
+            private static readonly LengthByVal s_LengthByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Len()
+            public long Length(object dwarfContext)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LenByRef is null)
-                    return s_LenByVal!(target);
+                    target = m_target_ptr.val;
 
-                return s_LenByRef(ref target);
+                if (s_LengthByPtr is null || !m_target_is_ptr)
+                    return s_LengthByVal!(target, dwarfContext);
+
+                return s_LengthByPtr(m_target_ptr, dwarfContext);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -93,24 +98,21 @@ namespace @internal
             static Sym()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Len");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Length");
 
                 if (!(extensionMethod is null))
-                    s_LenByRef = extensionMethod.CreateStaticDelegate(typeof(LenByRef)) as LenByRef;
+                    s_LengthByPtr = extensionMethod.CreateStaticDelegate(typeof(LengthByPtr)) as LengthByPtr;
 
-                if (s_LenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Len");
+                extensionMethod = targetType.GetExtensionMethod("Length");
 
-                    if (!(extensionMethod is null))
-                        s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LengthByVal = extensionMethod.CreateStaticDelegate(typeof(LengthByVal)) as LengthByVal;
 
-                if (s_LenByRef is null && s_LenByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Sym.Len method", new Exception("Len"));
+                if (s_LengthByPtr is null && s_LengthByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Sym.Length method", new Exception("Length"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

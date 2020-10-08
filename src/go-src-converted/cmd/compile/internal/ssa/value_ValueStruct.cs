@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:24:28 UTC
+//     Generated on 2020 October 08 04:26:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,10 +42,11 @@ namespace @internal
                 this.Block = default;
                 this.Pos = default;
                 this.Uses = default;
+                this.OnWasmStack = default;
                 this.argstorage = default;
             }
 
-            public Value(ID ID = default, Op Op = default, ref ptr<types.Type> Type = default, long AuxInt = default, slice<ref Value> Args = default, ref ptr<Block> Block = default, src.XPos Pos = default, int Uses = default, array<ref Value> argstorage = default)
+            public Value(ID ID = default, Op Op = default, ref ptr<types.Type> Type = default, long AuxInt = default, slice<ptr<Value>> Args = default, ref ptr<Block> Block = default, src.XPos Pos = default, int Uses = default, bool OnWasmStack = default, array<ptr<Value>> argstorage = default)
             {
                 this.ID = ID;
                 this.Op = Op;
@@ -55,6 +56,7 @@ namespace @internal
                 this.Block = Block;
                 this.Pos = Pos;
                 this.Uses = Uses;
+                this.OnWasmStack = OnWasmStack;
                 this.argstorage = argstorage;
             }
 
@@ -78,7 +80,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Value Value_cast(dynamic value)
         {
-            return new Value(value.ID, value.Op, ref value.Type, value.AuxInt, value.Args, ref value.Block, value.Pos, value.Uses, value.argstorage);
+            return new Value(value.ID, value.Op, ref value.Type, value.AuxInt, value.Args, ref value.Block, value.Pos, value.Uses, value.OnWasmStack, value.argstorage);
         }
     }
 }}}}

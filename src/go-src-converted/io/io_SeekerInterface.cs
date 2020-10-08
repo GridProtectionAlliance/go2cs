@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:53 UTC
+//     Generated on 2020 October 08 01:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) SeekByRef(ref T value, long offset, long whence);
+            private delegate (long, error) SeekByPtr(ptr<T> value, long offset, long whence);
             private delegate (long, error) SeekByVal(T value, long offset, long whence);
 
-            private static readonly SeekByRef s_SeekByRef;
+            private static readonly SeekByPtr s_SeekByPtr;
             private static readonly SeekByVal s_SeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,11 +74,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SeekByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SeekByPtr is null || !m_target_is_ptr)
                     return s_SeekByVal!(target, offset, whence);
 
-                return s_SeekByRef(ref target, offset, whence);
+                return s_SeekByPtr(m_target_ptr, offset, whence);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -87,23 +88,20 @@ namespace go
             static Seeker()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Seek");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Seek");
 
                 if (!(extensionMethod is null))
-                    s_SeekByRef = extensionMethod.CreateStaticDelegate(typeof(SeekByRef)) as SeekByRef;
+                    s_SeekByPtr = extensionMethod.CreateStaticDelegate(typeof(SeekByPtr)) as SeekByPtr;
 
-                if (s_SeekByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Seek");
+                extensionMethod = targetType.GetExtensionMethod("Seek");
 
-                    if (!(extensionMethod is null))
-                        s_SeekByVal = extensionMethod.CreateStaticDelegate(typeof(SeekByVal)) as SeekByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SeekByVal = extensionMethod.CreateStaticDelegate(typeof(SeekByVal)) as SeekByVal;
 
-                if (s_SeekByRef is null && s_SeekByVal is null)
+                if (s_SeekByPtr is null && s_SeekByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Seeker.Seek method", new Exception("Seek"));
             }
 

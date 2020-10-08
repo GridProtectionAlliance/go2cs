@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:23:04 UTC
+//     Generated on 2020 October 08 03:30:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,7 +19,6 @@ using fmt = go.fmt_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using runtime = go.runtime_package;
-using sort = go.sort_package;
 using strconv = go.strconv_package;
 using time = go.time_package;
 using @unsafe = go.@unsafe_package;
@@ -38,12 +37,22 @@ namespace runtime
             {
                 this.start = default;
                 this.end = default;
+                this.offset = default;
+                this.file = default;
+                this.buildID = default;
+                this.funcs = default;
+                this.fake = default;
             }
 
-            public memMap(System.UIntPtr start = default, System.UIntPtr end = default)
+            public memMap(System.UIntPtr start = default, System.UIntPtr end = default, ulong offset = default, @string file = default, @string buildID = default, symbolizeFlag funcs = default, bool fake = default)
             {
                 this.start = start;
                 this.end = end;
+                this.offset = offset;
+                this.file = file;
+                this.buildID = buildID;
+                this.funcs = funcs;
+                this.fake = fake;
             }
 
             // Enable comparisons between nil and memMap struct
@@ -66,7 +75,7 @@ namespace runtime
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static memMap memMap_cast(dynamic value)
         {
-            return new memMap(value.start, value.end);
+            return new memMap(value.start, value.end, value.offset, value.file, value.buildID, value.funcs, value.fake);
         }
     }
 }}

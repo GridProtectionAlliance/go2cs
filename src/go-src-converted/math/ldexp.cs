@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:53 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:19 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\ldexp.go
 
@@ -34,27 +34,33 @@ namespace go
             exp += e;
             var x = Float64bits(frac);
             exp += int(x >> (int)(shift)) & mask - bias;
-            if (exp < -1074L)
+            if (exp < -1075L)
             {>>MARKER:FUNCTION_Ldexp_BLOCK_PREFIX<<
                 return Copysign(0L, frac); // underflow
             }
+
             if (exp > 1023L)
             { // overflow
                 if (frac < 0L)
                 {
                     return Inf(-1L);
                 }
+
                 return Inf(1L);
+
             }
+
             double m = 1L;
             if (exp < -1022L)
             { // denormal
-                exp += 52L;
-                m = 1.0F / (1L << (int)(52L)); // 2**-52
+                exp += 53L;
+                m = 1.0F / (1L << (int)(53L)); // 2**-53
             }
+
             x &= mask << (int)(shift);
             x |= uint64(exp + bias) << (int)(shift);
             return m * Float64frombits(x);
+
         }
     }
 }

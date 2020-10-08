@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package profile -- go2cs converted at 2020 August 29 10:06:20 UTC
+// package profile -- go2cs converted at 2020 October 08 04:43:32 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\index.go
 using fmt = go.fmt_package;
@@ -32,8 +32,12 @@ namespace pprof
         // SampleIndexByName returns the appropriate index for a value of sample index.
         // If numeric, it returns the number, otherwise it looks up the text in the
         // profile sample types.
-        private static (long, error) SampleIndexByName(this ref Profile p, @string sampleIndex)
+        private static (long, error) SampleIndexByName(this ptr<Profile> _addr_p, @string sampleIndex)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref Profile p = ref _addr_p.val;
+
             if (sampleIndex == "")
             {
                 {
@@ -45,23 +49,23 @@ namespace pprof
                             var i__prev1 = i;
                             var t__prev1 = t;
 
-                            foreach (var (__i, __t) in sampleTypes(p))
+                            foreach (var (__i, __t) in sampleTypes(_addr_p))
                             {
                                 i = __i;
                                 t = __t;
                                 if (t == dst)
                                 {
-                                    return (i, null);
+                                    return (i, error.As(null!)!);
                                 }
                             }
                             i = i__prev1;
                             t = t__prev1;
                         }
-
                     }
                 } 
                 // By default select the last sample value
-                return (len(p.SampleType) - 1L, null);
+                return (len(p.SampleType) - 1L, error.As(null!)!);
+
             }
             {
                 var i__prev1 = i;
@@ -72,9 +76,10 @@ namespace pprof
                 {
                     if (i < 0L || i >= len(p.SampleType))
                     {
-                        return (0L, fmt.Errorf("sample_index %s is outside the range [0..%d]", sampleIndex, len(p.SampleType) - 1L));
+                        return (0L, error.As(fmt.Errorf("sample_index %s is outside the range [0..%d]", sampleIndex, len(p.SampleType) - 1L))!);
                     }
-                    return (i, null);
+                    return (i, error.As(null!)!);
+
                 }
                 i = i__prev1;
 
@@ -94,24 +99,28 @@ namespace pprof
                     t = __t;
                     if (t.Type == sampleIndex || t.Type == noInuse)
                     {
-                        return (i, null);
+                        return (i, error.As(null!)!);
                     }
                 }
                 i = i__prev1;
                 t = t__prev1;
             }
 
-            return (0L, fmt.Errorf("sample_index %q must be one of: %v", sampleIndex, sampleTypes(p)));
+            return (0L, error.As(fmt.Errorf("sample_index %q must be one of: %v", sampleIndex, sampleTypes(_addr_p)))!);
+
         }
 
-        private static slice<@string> sampleTypes(ref Profile p)
+        private static slice<@string> sampleTypes(ptr<Profile> _addr_p)
         {
+            ref Profile p = ref _addr_p.val;
+
             var types = make_slice<@string>(len(p.SampleType));
             foreach (var (i, t) in p.SampleType)
             {
                 types[i] = t.Type;
             }
             return types;
+
         }
     }
 }}}}}}

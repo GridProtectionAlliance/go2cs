@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:54 UTC
+//     Generated on 2020 October 08 03:25:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace math
                 this.src = default;
             }
 
-            public lockedSource(sync.Mutex lk = default, Source64 src = default)
+            public lockedSource(sync.Mutex lk = default, ref ptr<rngSource> src = default)
             {
                 this.lk = lk;
                 this.src = src;
@@ -57,7 +57,7 @@ namespace math
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static lockedSource lockedSource_cast(dynamic value)
         {
-            return new lockedSource(value.lk, value.src);
+            return new lockedSource(value.lk, ref value.src);
         }
     }
 }}

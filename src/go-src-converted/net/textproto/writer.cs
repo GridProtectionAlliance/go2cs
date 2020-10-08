@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2020 August 29 08:32:31 UTC
+// package textproto -- go2cs converted at 2020 October 08 03:38:29 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Go\src\net\textproto\writer.go
 using bufio = go.bufio_package;
@@ -24,21 +24,26 @@ namespace net
         }
 
         // NewWriter returns a new Writer writing to w.
-        public static ref Writer NewWriter(ref bufio.Writer w)
+        public static ptr<Writer> NewWriter(ptr<bufio.Writer> _addr_w)
         {
-            return ref new Writer(W:w);
+            ref bufio.Writer w = ref _addr_w.val;
+
+            return addr(new Writer(W:w));
         }
 
         private static byte crnl = new slice<byte>(new byte[] { '\r', '\n' });
         private static byte dotcrnl = new slice<byte>(new byte[] { '.', '\r', '\n' });
 
         // PrintfLine writes the formatted output followed by \r\n.
-        private static error PrintfLine(this ref Writer w, @string format, params object[] args)
+        private static error PrintfLine(this ptr<Writer> _addr_w, @string format, params object[] args)
         {
+            args = args.Clone();
+            ref Writer w = ref _addr_w.val;
+
             w.closeDot();
             fmt.Fprintf(w.W, format, args);
             w.W.Write(crnl);
-            return error.As(w.W.Flush());
+            return error.As(w.W.Flush())!;
         }
 
         // DotWriter returns a writer that can be used to write a dot-encoding to w.
@@ -48,19 +53,24 @@ namespace net
         // DotWriter before the next call to a method on w.
         //
         // See the documentation for Reader's DotReader method for details about dot-encoding.
-        private static io.WriteCloser DotWriter(this ref Writer w)
+        private static io.WriteCloser DotWriter(this ptr<Writer> _addr_w)
         {
+            ref Writer w = ref _addr_w.val;
+
             w.closeDot();
-            w.dot = ref new dotWriter(w:w);
+            w.dot = addr(new dotWriter(w:w));
             return w.dot;
         }
 
-        private static void closeDot(this ref Writer w)
+        private static void closeDot(this ptr<Writer> _addr_w)
         {
+            ref Writer w = ref _addr_w.val;
+
             if (w.dot != null)
             {
                 w.dot.Close(); // sets w.dot = nil
             }
+
         }
 
         private partial struct dotWriter
@@ -69,25 +79,32 @@ namespace net
             public long state;
         }
 
-        private static readonly var wstateBeginLine = iota; // beginning of line; initial state; must be zero
-        private static readonly var wstateCR = 0; // wrote \r (possibly at end of line)
-        private static readonly var wstateData = 1; // writing data in middle of line
+        private static readonly var wstateBegin = (var)iota; // initial state; must be zero
+        private static readonly var wstateBeginLine = (var)0; // beginning of line
+        private static readonly var wstateCR = (var)1; // wrote \r (possibly at end of line)
+        private static readonly var wstateData = (var)2; // writing data in middle of line
 
-        private static (long, error) Write(this ref dotWriter d, slice<byte> b)
+        private static (long, error) Write(this ptr<dotWriter> _addr_d, slice<byte> b)
         {
+            long n = default;
+            error err = default!;
+            ref dotWriter d = ref _addr_d.val;
+
             var bw = d.w.W;
             while (n < len(b))
             {
                 var c = b[n];
 
-                if (d.state == wstateBeginLine)
+                if (d.state == wstateBegin || d.state == wstateBeginLine)
                 {
                     d.state = wstateData;
                     if (c == '.')
                     { 
                         // escape leading dot
                         bw.WriteByte('.');
+
                     }
+
                     fallthrough = true;
 
                 }
@@ -97,11 +114,13 @@ namespace net
                     {
                         d.state = wstateCR;
                     }
+
                     if (c == '\n')
                     {
                         bw.WriteByte('\r');
                         d.state = wstateBeginLine;
                     }
+
                     goto __switch_break0;
                 }
                 if (d.state == wstateCR)
@@ -111,6 +130,7 @@ namespace net
                     {
                         d.state = wstateBeginLine;
                     }
+
                     goto __switch_break0;
                 }
 
@@ -121,18 +141,24 @@ namespace net
                 {
                     break;
                 }
+
                 n++;
+
             }
 
-            return;
+            return ;
+
         }
 
-        private static error Close(this ref dotWriter d)
+        private static error Close(this ptr<dotWriter> _addr_d)
         {
+            ref dotWriter d = ref _addr_d.val;
+
             if (d.w.dot == d)
             {
                 d.w.dot = null;
             }
+
             var bw = d.w.W;
 
             if (d.state == wstateCR)
@@ -149,7 +175,8 @@ namespace net
                 bw.WriteByte('\r');
 
             __switch_break1:;
-            return error.As(bw.Flush());
+            return error.As(bw.Flush())!;
+
         }
     }
 }}

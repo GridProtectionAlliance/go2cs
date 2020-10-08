@@ -11,9 +11,12 @@
 // The default Source is safe for concurrent use by multiple goroutines, but
 // Sources created by NewSource are not.
 //
+// Mathematical interval notation such as [0, n) is used throughout the
+// documentation for this package.
+//
 // For random numbers suitable for security-sensitive work, see the crypto/rand
 // package.
-// package rand -- go2cs converted at 2020 August 29 08:25:54 UTC
+// package rand -- go2cs converted at 2020 October 08 03:25:39 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Go\src\math\rand\rand.go
 using sync = go.sync_package;
@@ -49,9 +52,9 @@ namespace math
         // safe for concurrent use by multiple goroutines.
         public static Source NewSource(long seed)
         {
-            rngSource rng = default;
+            ref rngSource rng = ref heap(out ptr<rngSource> _addr_rng);
             rng.Seed(seed);
-            return ref rng;
+            return _addr_rng;
         }
 
         // A Rand is a source of random numbers.
@@ -71,78 +74,99 @@ namespace math
 
         // New returns a new Rand that uses random values from src
         // to generate other random values.
-        public static ref Rand New(Source src)
+        public static ptr<Rand> New(Source src)
         {
-            Source64 (s64, _) = src._<Source64>();
-            return ref new Rand(src:src,s64:s64);
+            Source64 (s64, _) = Source64.As(src._<Source64>())!;
+            return addr(new Rand(src:src,s64:s64));
         }
 
         // Seed uses the provided seed value to initialize the generator to a deterministic state.
         // Seed should not be called concurrently with any other Rand method.
-        private static void Seed(this ref Rand r, long seed)
+        private static void Seed(this ptr<Rand> _addr_r, long seed)
         {
+            ref Rand r = ref _addr_r.val;
+
             {
-                ref lockedSource (lk, ok) = r.src._<ref lockedSource>();
+                ptr<lockedSource> (lk, ok) = r.src._<ptr<lockedSource>>();
 
                 if (ok)
                 {
-                    lk.seedPos(seed, ref r.readPos);
-                    return;
+                    lk.seedPos(seed, _addr_r.readPos);
+                    return ;
                 }
 
             }
 
+
             r.src.Seed(seed);
             r.readPos = 0L;
+
         }
 
         // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
-        private static long Int63(this ref Rand r)
+        private static long Int63(this ptr<Rand> _addr_r)
         {
+            ref Rand r = ref _addr_r.val;
+
             return r.src.Int63();
         }
 
         // Uint32 returns a pseudo-random 32-bit value as a uint32.
-        private static uint Uint32(this ref Rand r)
+        private static uint Uint32(this ptr<Rand> _addr_r)
         {
+            ref Rand r = ref _addr_r.val;
+
             return uint32(r.Int63() >> (int)(31L));
         }
 
         // Uint64 returns a pseudo-random 64-bit value as a uint64.
-        private static ulong Uint64(this ref Rand r)
+        private static ulong Uint64(this ptr<Rand> _addr_r)
         {
+            ref Rand r = ref _addr_r.val;
+
             if (r.s64 != null)
             {
                 return r.s64.Uint64();
             }
+
             return uint64(r.Int63()) >> (int)(31L) | uint64(r.Int63()) << (int)(32L);
+
         }
 
         // Int31 returns a non-negative pseudo-random 31-bit integer as an int32.
-        private static int Int31(this ref Rand r)
+        private static int Int31(this ptr<Rand> _addr_r)
         {
+            ref Rand r = ref _addr_r.val;
+
             return int32(r.Int63() >> (int)(32L));
         }
 
         // Int returns a non-negative pseudo-random int.
-        private static long Int(this ref Rand r)
+        private static long Int(this ptr<Rand> _addr_r)
         {
+            ref Rand r = ref _addr_r.val;
+
             var u = uint(r.Int63());
             return int(u << (int)(1L) >> (int)(1L)); // clear sign bit if int == int32
         }
 
         // Int63n returns, as an int64, a non-negative pseudo-random number in [0,n).
         // It panics if n <= 0.
-        private static long Int63n(this ref Rand _r, long n) => func(_r, (ref Rand r, Defer _, Panic panic, Recover __) =>
+        private static long Int63n(this ptr<Rand> _addr_r, long n) => func((_, panic, __) =>
         {
+            ref Rand r = ref _addr_r.val;
+
             if (n <= 0L)
             {
                 panic("invalid argument to Int63n");
             }
+
             if (n & (n - 1L) == 0L)
             { // n is power of two, can mask
                 return r.Int63() & (n - 1L);
+
             }
+
             var max = int64((1L << (int)(63L)) - 1L - (1L << (int)(63L)) % uint64(n));
             var v = r.Int63();
             while (v > max)
@@ -151,20 +175,26 @@ namespace math
             }
 
             return v % n;
+
         });
 
         // Int31n returns, as an int32, a non-negative pseudo-random number in [0,n).
         // It panics if n <= 0.
-        private static int Int31n(this ref Rand _r, int n) => func(_r, (ref Rand r, Defer _, Panic panic, Recover __) =>
+        private static int Int31n(this ptr<Rand> _addr_r, int n) => func((_, panic, __) =>
         {
+            ref Rand r = ref _addr_r.val;
+
             if (n <= 0L)
             {
                 panic("invalid argument to Int31n");
             }
+
             if (n & (n - 1L) == 0L)
             { // n is power of two, can mask
                 return r.Int31() & (n - 1L);
+
             }
+
             var max = int32((1L << (int)(31L)) - 1L - (1L << (int)(31L)) % uint32(n));
             var v = r.Int31();
             while (v > max)
@@ -173,6 +203,7 @@ namespace math
             }
 
             return v % n;
+
         });
 
         // int31n returns, as an int32, a non-negative pseudo-random number in [0,n).
@@ -184,8 +215,10 @@ namespace math
         // For implementation details, see:
         // https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction
         // https://lemire.me/blog/2016/06/30/fast-random-shuffling
-        private static int int31n(this ref Rand r, int n)
+        private static int int31n(this ptr<Rand> _addr_r, int n)
         {
+            ref Rand r = ref _addr_r.val;
+
             var v = r.Uint32();
             var prod = uint64(v) * uint64(n);
             var low = uint32(prod);
@@ -199,28 +232,38 @@ namespace math
                     low = uint32(prod);
                 }
 
+
             }
+
             return int32(prod >> (int)(32L));
+
         }
 
         // Intn returns, as an int, a non-negative pseudo-random number in [0,n).
         // It panics if n <= 0.
-        private static long Intn(this ref Rand _r, long n) => func(_r, (ref Rand r, Defer _, Panic panic, Recover __) =>
+        private static long Intn(this ptr<Rand> _addr_r, long n) => func((_, panic, __) =>
         {
+            ref Rand r = ref _addr_r.val;
+
             if (n <= 0L)
             {
                 panic("invalid argument to Intn");
             }
+
             if (n <= 1L << (int)(31L) - 1L)
             {
                 return int(r.Int31n(int32(n)));
             }
+
             return int(r.Int63n(int64(n)));
+
         });
 
         // Float64 returns, as a float64, a pseudo-random number in [0.0,1.0).
-        private static double Float64(this ref Rand r)
-        { 
+        private static double Float64(this ptr<Rand> _addr_r)
+        {
+            ref Rand r = ref _addr_r.val;
+ 
             // A clearer, simpler implementation would be:
             //    return float64(r.Int63n(1<<53)) / (1<<53)
             // However, Go 1 shipped with
@@ -243,12 +286,16 @@ again:
             {
                 goto again; // resample; this branch is taken O(never)
             }
+
             return f;
+
         }
 
         // Float32 returns, as a float32, a pseudo-random number in [0.0,1.0).
-        private static float Float32(this ref Rand r)
-        { 
+        private static float Float32(this ptr<Rand> _addr_r)
+        {
+            ref Rand r = ref _addr_r.val;
+ 
             // Same rationale as in Float64: we want to preserve the Go 1 value
             // stream except we want to fix it not to return 1.0
             // This only happens 1/2²⁴ of the time (plus the 1/2⁵³ of the time in Float64).
@@ -258,12 +305,16 @@ again:
             {
                 goto again; // resample; this branch is taken O(very rarely)
             }
+
             return f;
+
         }
 
         // Perm returns, as a slice of n ints, a pseudo-random permutation of the integers [0,n).
-        private static slice<long> Perm(this ref Rand r, long n)
+        private static slice<long> Perm(this ptr<Rand> _addr_r, long n)
         {
+            ref Rand r = ref _addr_r.val;
+
             var m = make_slice<long>(n); 
             // In the following loop, the iteration when i=0 always swaps m[0] with m[0].
             // A change to remove this useless iteration is to assign 1 to i in the init
@@ -278,13 +329,16 @@ again:
             }
 
             return m;
+
         }
 
         // Shuffle pseudo-randomizes the order of elements.
         // n is the number of elements. Shuffle panics if n < 0.
         // swap swaps the elements with indexes i and j.
-        private static void Shuffle(this ref Rand _r, long n, Action<long, long> swap) => func(_r, (ref Rand r, Defer _, Panic panic, Recover __) =>
+        private static void Shuffle(this ptr<Rand> _addr_r, long n, Action<long, long> swap) => func((_, panic, __) =>
         {
+            ref Rand r = ref _addr_r.val;
+
             if (n < 0L)
             {
                 panic("invalid argument to Shuffle");
@@ -311,61 +365,88 @@ again:
                 i--;
             }
 
+
         });
 
         // Read generates len(p) random bytes and writes them into p. It
         // always returns len(p) and a nil error.
         // Read should not be called concurrently with any other Rand method.
-        private static (long, error) Read(this ref Rand r, slice<byte> p)
+        private static (long, error) Read(this ptr<Rand> _addr_r, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref Rand r = ref _addr_r.val;
+
             {
-                ref lockedSource (lk, ok) = r.src._<ref lockedSource>();
+                ptr<lockedSource> (lk, ok) = r.src._<ptr<lockedSource>>();
 
                 if (ok)
                 {
-                    return lk.read(p, ref r.readVal, ref r.readPos);
+                    return lk.read(p, _addr_r.readVal, _addr_r.readPos);
                 }
 
             }
-            return read(p, r.Int63, ref r.readVal, ref r.readPos);
+
+            return read(p, r.src, _addr_r.readVal, _addr_r.readPos);
+
         }
 
-        private static (long, error) read(slice<byte> p, Func<long> int63, ref long readVal, ref sbyte readPos)
+        private static (long, error) read(slice<byte> p, Source src, ptr<long> _addr_readVal, ptr<sbyte> _addr_readPos)
         {
-            var pos = readPos.Value;
-            var val = readVal.Value;
+            long n = default;
+            error err = default!;
+            ref long readVal = ref _addr_readVal.val;
+            ref sbyte readPos = ref _addr_readPos.val;
+
+            sbyte pos = readPos;
+            long val = readVal;
+            ptr<rngSource> (rng, _) = src._<ptr<rngSource>>();
             for (n = 0L; n < len(p); n++)
             {
                 if (pos == 0L)
                 {
-                    val = int63();
+                    if (rng != null)
+                    {
+                        val = rng.Int63();
+                    }
+                    else
+                    {
+                        val = src.Int63();
+                    }
+
                     pos = 7L;
+
                 }
+
                 p[n] = byte(val);
                 val >>= 8L;
                 pos--;
+
             }
 
-            readPos.Value = pos;
-            readVal.Value = val;
-            return;
+            readPos = pos;
+            readVal = val;
+            return ;
+
         }
 
         /*
          * Top-level convenience functions
          */
 
-        private static var globalRand = New(ref new lockedSource(src:NewSource(1).(Source64)));
+        private static var globalRand = New(addr(new lockedSource(src:NewSource(1).(*rngSource))));
+
+        // Type assert that globalRand's source is a lockedSource whose src is a *rngSource.
+        private static ptr<rngSource> _globalRand.src._<ptr<lockedSource>>().src;
 
         // Seed uses the provided seed value to initialize the default Source to a
         // deterministic state. If Seed is not called, the generator behaves as
         // if seeded by Seed(1). Seed values that have the same remainder when
-        // divided by 2^31-1 generate the same pseudo-random sequence.
+        // divided by 2³¹-1 generate the same pseudo-random sequence.
         // Seed, unlike the Rand.Seed method, is safe for concurrent use.
         public static void Seed(long seed)
         {
             globalRand.Seed(seed);
-
         }
 
         // Int63 returns a non-negative pseudo-random 63-bit integer as an int64
@@ -453,7 +534,6 @@ again:
         public static void Shuffle(long n, Action<long, long> swap)
         {
             globalRand.Shuffle(n, swap);
-
         }
 
         // Read generates len(p) random bytes from the default Source and
@@ -461,6 +541,9 @@ again:
         // Read, unlike the Rand.Read method, is safe for concurrent use.
         public static (long, error) Read(slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+
             return globalRand.Read(p);
         }
 
@@ -494,48 +577,65 @@ again:
         private partial struct lockedSource
         {
             public sync.Mutex lk;
-            public Source64 src;
+            public ptr<rngSource> src;
         }
 
-        private static long Int63(this ref lockedSource r)
+        private static long Int63(this ptr<lockedSource> _addr_r)
         {
+            long n = default;
+            ref lockedSource r = ref _addr_r.val;
+
             r.lk.Lock();
             n = r.src.Int63();
             r.lk.Unlock();
-            return;
+            return ;
         }
 
-        private static ulong Uint64(this ref lockedSource r)
+        private static ulong Uint64(this ptr<lockedSource> _addr_r)
         {
+            ulong n = default;
+            ref lockedSource r = ref _addr_r.val;
+
             r.lk.Lock();
             n = r.src.Uint64();
             r.lk.Unlock();
-            return;
+            return ;
         }
 
-        private static void Seed(this ref lockedSource r, long seed)
+        private static void Seed(this ptr<lockedSource> _addr_r, long seed)
         {
+            ref lockedSource r = ref _addr_r.val;
+
             r.lk.Lock();
             r.src.Seed(seed);
             r.lk.Unlock();
         }
 
         // seedPos implements Seed for a lockedSource without a race condition.
-        private static void seedPos(this ref lockedSource r, long seed, ref sbyte readPos)
+        private static void seedPos(this ptr<lockedSource> _addr_r, long seed, ptr<sbyte> _addr_readPos)
         {
+            ref lockedSource r = ref _addr_r.val;
+            ref sbyte readPos = ref _addr_readPos.val;
+
             r.lk.Lock();
             r.src.Seed(seed);
-            readPos.Value = 0L;
+            readPos = 0L;
             r.lk.Unlock();
         }
 
         // read implements Read for a lockedSource without a race condition.
-        private static (long, error) read(this ref lockedSource r, slice<byte> p, ref long readVal, ref sbyte readPos)
+        private static (long, error) read(this ptr<lockedSource> _addr_r, slice<byte> p, ptr<long> _addr_readVal, ptr<sbyte> _addr_readPos)
         {
+            long n = default;
+            error err = default!;
+            ref lockedSource r = ref _addr_r.val;
+            ref long readVal = ref _addr_readVal.val;
+            ref sbyte readPos = ref _addr_readPos.val;
+
             r.lk.Lock();
-            n, err = read(p, r.src.Int63, readVal, readPos);
+            n, err = read(p, r.src, _addr_readVal, _addr_readPos);
             r.lk.Unlock();
-            return;
+            return ;
         }
     }
 }}

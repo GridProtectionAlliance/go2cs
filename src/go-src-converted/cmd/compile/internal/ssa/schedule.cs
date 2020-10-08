@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 09:24:12 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:26:33 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\schedule.go
+using types = go.cmd.compile.@internal.types_package;
 using heap = go.container.heap_package;
+using sort = go.sort_package;
 using static go.builtin;
 
 namespace go {
@@ -15,18 +17,20 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        public static readonly var ScorePhi = iota; // towards top of block
-        public static readonly var ScoreNilCheck = 0;
-        public static readonly var ScoreReadTuple = 1;
-        public static readonly var ScoreVarDef = 2;
-        public static readonly var ScoreMemory = 3;
-        public static readonly var ScoreDefault = 4;
-        public static readonly var ScoreFlags = 5;
-        public static readonly var ScoreControl = 6; // towards bottom of block
+        public static readonly var ScorePhi = (var)iota; // towards top of block
+        public static readonly var ScoreArg = (var)0;
+        public static readonly var ScoreNilCheck = (var)1;
+        public static readonly var ScoreReadTuple = (var)2;
+        public static readonly var ScoreVarDef = (var)3;
+        public static readonly var ScoreMemory = (var)4;
+        public static readonly var ScoreReadFlags = (var)5;
+        public static readonly var ScoreDefault = (var)6;
+        public static readonly var ScoreFlags = (var)7;
+        public static readonly var ScoreControl = (var)8; // towards bottom of block
 
         public partial struct ValHeap
         {
-            public slice<ref Value> a;
+            public slice<ptr<Value>> a;
             public slice<sbyte> score;
         }
 
@@ -40,18 +44,22 @@ namespace @internal
 
             a[i] = a[j];
             a[j] = a[i];
-
         }
 
-        private static void Push(this ref ValHeap h, object x)
-        { 
+        private static void Push(this ptr<ValHeap> _addr_h, object x)
+        {
+            ref ValHeap h = ref _addr_h.val;
+ 
             // Push and Pop use pointer receivers because they modify the slice's length,
             // not just its contents.
-            ref Value v = x._<ref Value>();
+            ptr<Value> v = x._<ptr<Value>>();
             h.a = append(h.a, v);
+
         }
-        private static void Pop(this ref ValHeap h)
+        private static void Pop(this ptr<ValHeap> _addr_h)
         {
+            ref ValHeap h = ref _addr_h.val;
+
             var old = h.a;
             var n = len(old);
             var x = old[n - 1L];
@@ -77,10 +85,13 @@ namespace @internal
                 c = c__prev1;
 
             }
+
             if (x.Pos != y.Pos)
             { // Favor in-order line stepping
                 return x.Pos.After(y.Pos);
+
             }
+
             if (x.Op != OpPhi)
             {
                 {
@@ -96,8 +107,63 @@ namespace @internal
                     c = c__prev2;
 
                 }
+
             }
+
+            {
+                var c__prev1 = c;
+
+                c = x.Uses - y.Uses;
+
+                if (c != 0L)
+                {
+                    return c < 0L; // smaller uses come later
+                } 
+                // These comparisons are fairly arbitrary.
+                // The goal here is stability in the face
+                // of unrelated changes elsewhere in the compiler.
+
+                c = c__prev1;
+
+            } 
+            // These comparisons are fairly arbitrary.
+            // The goal here is stability in the face
+            // of unrelated changes elsewhere in the compiler.
+            {
+                var c__prev1 = c;
+
+                c = x.AuxInt - y.AuxInt;
+
+                if (c != 0L)
+                {
+                    return c > 0L;
+                }
+
+                c = c__prev1;
+
+            }
+
+            {
+                var cmp = x.Type.Compare(y.Type);
+
+                if (cmp != types.CMPeq)
+                {
+                    return cmp == types.CMPgt;
+                }
+
+            }
+
             return x.ID > y.ID;
+
+        }
+
+        public static bool isLoweredGetClosurePtr(this Op op)
+        {
+
+            if (op == OpAMD64LoweredGetClosurePtr || op == OpPPC64LoweredGetClosurePtr || op == OpARMLoweredGetClosurePtr || op == OpARM64LoweredGetClosurePtr || op == Op386LoweredGetClosurePtr || op == OpMIPS64LoweredGetClosurePtr || op == OpS390XLoweredGetClosurePtr || op == OpMIPSLoweredGetClosurePtr || op == OpRISCV64LoweredGetClosurePtr || op == OpWasmLoweredGetClosurePtr) 
+                return true;
+                        return false;
+
         }
 
         // Schedule the Values in each Block. After this phase returns, the
@@ -105,8 +171,10 @@ namespace @internal
         // will appear in the assembly output. For now it generates a
         // reasonable valid schedule using a priority queue. TODO(khr):
         // schedule smarter.
-        private static void schedule(ref Func f)
-        { 
+        private static void schedule(ptr<Func> _addr_f)
+        {
+            ref Func f = ref _addr_f.val;
+ 
             // For each value, the number of times it is used in the block
             // by values that have not been scheduled yet.
             var uses = make_slice<int>(f.NumValues()); 
@@ -118,12 +186,14 @@ namespace @internal
             var score = make_slice<sbyte>(f.NumValues()); 
 
             // scheduling order. We queue values in this list in reverse order.
-            slice<ref Value> order = default; 
+            // A constant bound allows this to be stack-allocated. 64 is
+            // enough to cover almost every schedule call.
+            var order = make_slice<ptr<Value>>(0L, 64L); 
 
             // maps mem values to the next live memory value
-            var nextMem = make_slice<ref Value>(f.NumValues()); 
+            var nextMem = make_slice<ptr<Value>>(f.NumValues()); 
             // additional pretend arguments for each Value. Used to enforce load/store ordering.
-            var additionalArgs = make_slice<slice<ref Value>>(f.NumValues());
+            var additionalArgs = make_slice<slice<ptr<Value>>>(f.NumValues());
 
             {
                 var b__prev1 = b;
@@ -139,7 +209,7 @@ namespace @internal
                         {
                             v = __v;
 
-                            if (v.Op == OpAMD64LoweredGetClosurePtr || v.Op == OpPPC64LoweredGetClosurePtr || v.Op == OpARMLoweredGetClosurePtr || v.Op == OpARM64LoweredGetClosurePtr || v.Op == Op386LoweredGetClosurePtr || v.Op == OpMIPS64LoweredGetClosurePtr || v.Op == OpS390XLoweredGetClosurePtr || v.Op == OpMIPSLoweredGetClosurePtr) 
+                            if (v.Op.isLoweredGetClosurePtr()) 
                                 // We also score GetLoweredClosurePtr as early as possible to ensure that the
                                 // context register is not stomped. GetLoweredClosurePtr should only appear
                                 // in the entry block where there are no phi functions, so there is no
@@ -148,8 +218,9 @@ namespace @internal
                                 {
                                     f.Fatalf("LoweredGetClosurePtr appeared outside of entry block, b=%s", b.String());
                                 }
+
                                 score[v.ID] = ScorePhi;
-                            else if (v.Op == OpAMD64LoweredNilCheck || v.Op == OpPPC64LoweredNilCheck || v.Op == OpARMLoweredNilCheck || v.Op == OpARM64LoweredNilCheck || v.Op == Op386LoweredNilCheck || v.Op == OpMIPS64LoweredNilCheck || v.Op == OpS390XLoweredNilCheck || v.Op == OpMIPSLoweredNilCheck) 
+                            else if (v.Op == OpAMD64LoweredNilCheck || v.Op == OpPPC64LoweredNilCheck || v.Op == OpARMLoweredNilCheck || v.Op == OpARM64LoweredNilCheck || v.Op == Op386LoweredNilCheck || v.Op == OpMIPS64LoweredNilCheck || v.Op == OpS390XLoweredNilCheck || v.Op == OpMIPSLoweredNilCheck || v.Op == OpRISCV64LoweredNilCheck || v.Op == OpWasmLoweredNilCheck) 
                                 // Nil checks must come before loads from the same address.
                                 score[v.ID] = ScoreNilCheck;
                             else if (v.Op == OpPhi) 
@@ -158,6 +229,9 @@ namespace @internal
                             else if (v.Op == OpVarDef) 
                                 // We want all the vardefs next.
                                 score[v.ID] = ScoreVarDef;
+                            else if (v.Op == OpArg) 
+                                // We want all the args as early as possible, for better debugging.
+                                score[v.ID] = ScoreArg;
                             else if (v.Type.IsMemory()) 
                                 // Schedule stores as early as possible. This tends to
                                 // reduce register pressure. It also helps make sure
@@ -170,18 +244,33 @@ namespace @internal
                                 // false dependency on the other part of the tuple.
                                 // Also ensures tuple is never spilled.
                                 score[v.ID] = ScoreReadTuple;
-                            else if (v.Type.IsFlags() || v.Type.IsTuple()) 
+                            else if (v.Type.IsFlags() || v.Type.IsTuple() && v.Type.FieldType(1L).IsFlags()) 
                                 // Schedule flag register generation as late as possible.
                                 // This makes sure that we only have one live flags
                                 // value at a time.
                                 score[v.ID] = ScoreFlags;
                             else 
-                                score[v.ID] = ScoreDefault;
+                                score[v.ID] = ScoreDefault; 
+                                // If we're reading flags, schedule earlier to keep flag lifetime short.
+                                {
+                                    var a__prev3 = a;
+
+                                    foreach (var (_, __a) in v.Args)
+                                    {
+                                        a = __a;
+                                        if (a.Type.IsFlags())
+                                        {
+                                            score[v.ID] = ScoreReadFlags;
+                                        }
+
+                                    }
+
+                                    a = a__prev3;
+                                }
                                                     }
 
                         v = v__prev2;
                     }
-
                 }
 
                 b = b__prev1;
@@ -214,12 +303,13 @@ namespace @internal
                                         {
                                             nextMem[w.ID] = v;
                                         }
+
                                     }
 
                                     w = w__prev3;
                                 }
-
                             }
+
                         } 
 
                         // Compute uses.
@@ -239,7 +329,9 @@ namespace @internal
                                 // a scheduling edge because that use is from the
                                 // previous iteration.
                                 continue;
+
                             }
+
                             {
                                 var w__prev3 = w;
 
@@ -259,51 +351,68 @@ namespace @internal
                                         {
                                             continue;
                                         }
+
                                         additionalArgs[s.ID] = append(additionalArgs[s.ID], v);
                                         uses[v.ID]++;
+
                                     }
+
                                 }
 
                                 w = w__prev3;
                             }
-
                         }
 
                         v = v__prev2;
                     }
 
-                    if (b.Control != null && b.Control.Op != OpPhi)
+                    foreach (var (_, c) in b.ControlValues())
                     { 
-                        // Force the control value to be scheduled at the end,
-                        // unless it is a phi value (which must be first).
-                        score[b.Control.ID] = ScoreControl; 
+                        // Force the control values to be scheduled at the end,
+                        // unless they are phi values (which must be first).
+                        // OpArg also goes first -- if it is stack it register allocates
+                        // to a LoadReg, if it is register it is from the beginning anyway.
+                        if (c.Op == OpPhi || c.Op == OpArg)
+                        {
+                            continue;
+                        }
 
-                        // Schedule values dependent on the control value at the end.
+                        score[c.ID] = ScoreControl; 
+
+                        // Schedule values dependent on the control values at the end.
                         // This reduces the number of register spills. We don't find
-                        // all values that depend on the control, just values with a
+                        // all values that depend on the controls, just values with a
                         // direct dependency. This is cheaper and in testing there
                         // was no difference in the number of spills.
                         {
-                            var v__prev2 = v;
+                            var v__prev3 = v;
 
                             foreach (var (_, __v) in b.Values)
                             {
                                 v = __v;
                                 if (v.Op != OpPhi)
                                 {
-                                    foreach (var (_, a) in v.Args)
                                     {
-                                        if (a == b.Control)
+                                        var a__prev4 = a;
+
+                                        foreach (var (_, __a) in v.Args)
                                         {
-                                            score[v.ID] = ScoreControl;
+                                            a = __a;
+                                            if (a == c)
+                                            {
+                                                score[v.ID] = ScoreControl;
+                                            }
+
                                         }
+
+                                        a = a__prev4;
                                     }
                                 }
+
                             }
 
-                            v = v__prev2;
+                            v = v__prev3;
                         }
-
                     } 
 
                     // To put things into a priority queue
@@ -322,6 +431,7 @@ namespace @internal
                             {
                                 heap.Push(priq, v);
                             }
+
                         } 
 
                         // Schedule highest priority value, update use counts, repeat.
@@ -330,17 +440,13 @@ namespace @internal
                     }
 
                     order = order[..0L];
-                    var tuples = make_map<ID, slice<ref Value>>();
-                    while (true)
+                    var tuples = make_map<ID, slice<ptr<Value>>>();
+                    while (priq.Len() > 0L)
                     { 
                         // Find highest priority schedulable value.
                         // Note that schedule is assembled backwards.
 
-                        if (priq.Len() == 0L)
-                        {
-                            break;
-                        }
-                        ref Value v = heap.Pop(priq)._<ref Value>(); 
+                        ptr<Value> v = heap.Pop(priq)._<ptr<Value>>(); 
 
                         // Add it to the schedule.
                         // Do not emit tuple-reading ops until we're ready to emit the tuple-generating op.
@@ -350,8 +456,9 @@ namespace @internal
                         {
                             if (tuples[v.Args[0L].ID] == null)
                             {
-                                tuples[v.Args[0L].ID] = make_slice<ref Value>(2L);
+                                tuples[v.Args[0L].ID] = make_slice<ptr<Value>>(2L);
                             }
+
                             tuples[v.Args[0L].ID][0L] = v;
                             goto __switch_break0;
                         }
@@ -359,8 +466,9 @@ namespace @internal
                         {
                             if (tuples[v.Args[0L].ID] == null)
                             {
-                                tuples[v.Args[0L].ID] = make_slice<ref Value>(2L);
+                                tuples[v.Args[0L].ID] = make_slice<ptr<Value>>(2L);
                             }
+
                             tuples[v.Args[0L].ID][1L] = v;
                             goto __switch_break0;
                         }
@@ -370,10 +478,12 @@ namespace @internal
                             {
                                 order = append(order, tuples[v.ID][1L]);
                             }
+
                             if (tuples[v.ID][0L] != null)
                             {
                                 order = append(order, tuples[v.ID][0L]);
                             }
+
                             delete(tuples, v.ID);
                         }
                         // default: 
@@ -392,12 +502,15 @@ namespace @internal
                                 {
                                     continue;
                                 }
+
                                 uses[w.ID]--;
                                 if (uses[w.ID] == 0L)
                                 { 
                                     // All uses scheduled, w is now schedulable.
                                     heap.Push(priq, w);
+
                                 }
+
                             }
 
                             w = w__prev3;
@@ -414,22 +527,25 @@ namespace @internal
                                 { 
                                     // All uses scheduled, w is now schedulable.
                                     heap.Push(priq, w);
+
                                 }
+
                             }
 
                             w = w__prev3;
                         }
-
                     }
 
                     if (len(order) != len(b.Values))
                     {
-                        f.Fatalf("schedule does not include all values");
+                        f.Fatalf("schedule does not include all values in block %s", b);
                     }
+
                     for (long i = 0L; i < len(b.Values); i++)
                     {
                         b.Values[i] = order[len(b.Values) - 1L - i];
                     }
+
 
                 }
 
@@ -437,6 +553,7 @@ namespace @internal
             }
 
             f.scheduled = true;
+
         }
 
         // storeOrder orders values with respect to stores. That is,
@@ -458,16 +575,23 @@ namespace @internal
         // Auxiliary data structures are passed in as arguments, so
         // that they can be allocated in the caller and be reused.
         // This function takes care of reset them.
-        private static slice<ref Value> storeOrder(slice<ref Value> values, ref sparseSet sset, slice<int> storeNumber)
+        private static slice<ptr<Value>> storeOrder(slice<ptr<Value>> values, ptr<sparseSet> _addr_sset, slice<int> storeNumber)
         {
+            ref sparseSet sset = ref _addr_sset.val;
+
             if (len(values) == 0L)
             {
                 return values;
             }
+
             var f = values[0L].Block.Func; 
 
             // find all stores
-            slice<ref Value> stores = default; // members of values that are store values
+
+            // Members of values that are store values.
+            // A constant bound allows this to be stack-allocated. 64 is
+            // enough to cover almost every storeOrder call.
+            var stores = make_slice<ptr<Value>>(0L, 64L);
             var hasNilCheck = false;
             sset.clear(); // sset is the set of stores that are used in other values
             {
@@ -483,12 +607,15 @@ namespace @internal
                         {
                             continue;
                         }
+
                         sset.add(v.MemoryArg().ID); // record that v's memory arg is used
                     }
+
                     if (v.Op == OpNilCheck)
                     {
                         hasNilCheck = true;
                     }
+
                 }
 
                 v = v__prev1;
@@ -498,10 +625,11 @@ namespace @internal
             { 
                 // there is no store, the order does not matter
                 return values;
+
             } 
 
             // find last store, which is the one that is not used by other stores
-            ref Value last = default;
+            ptr<Value> last;
             {
                 var v__prev1 = v;
 
@@ -514,8 +642,11 @@ namespace @internal
                         {
                             f.Fatalf("two stores live simultaneously: %v and %v", v, last);
                         }
+
                         last = v;
+
                     }
+
                 } 
 
                 // We assign a store number to each value. Store number is the
@@ -549,16 +680,20 @@ namespace @internal
                         {
                             f.Fatalf("store order is wrong: there are stores before %v", w);
                         }
+
                         break;
+
                     }
+
                     w = w.MemoryArg();
+
                 }
 
 
                 n = n__prev1;
                 w = w__prev1;
             }
-            slice<ref Value> stack = default;
+            slice<ptr<Value>> stack = default;
             {
                 var v__prev1 = v;
 
@@ -569,7 +704,9 @@ namespace @internal
                     { 
                         // in sset means v is a store, or already pushed to stack, or already assigned a store number
                         continue;
+
                     }
+
                     stack = append(stack, v);
                     sset.add(v.ID);
 
@@ -581,6 +718,7 @@ namespace @internal
                             stack = stack[..len(stack) - 1L];
                             continue;
                         }
+
                         if (w.Op == OpPhi)
                         { 
                             // Phi value doesn't depend on store in the current block.
@@ -589,7 +727,9 @@ namespace @internal
                             count[2L]++;
                             stack = stack[..len(stack) - 1L];
                             continue;
+
                         }
+
                         var max = int32(0L); // latest store dependency
                         var argsdone = true;
                         foreach (var (_, a) in w.Args)
@@ -598,6 +738,7 @@ namespace @internal
                             {
                                 continue;
                             }
+
                             if (!sset.contains(a.ID))
                             {
                                 stack = append(stack, a);
@@ -605,24 +746,30 @@ namespace @internal
                                 argsdone = false;
                                 break;
                             }
+
                             if (storeNumber[a.ID] / 3L > max)
                             {
                                 max = storeNumber[a.ID] / 3L;
                             }
+
                         }
                         if (!argsdone)
                         {
                             continue;
                         }
+
                         n = 3L * max + 2L;
                         if (w.Op == OpNilCheck)
                         {
                             n = 3L * max + 1L;
                         }
+
                         storeNumber[w.ID] = n;
                         count[n]++;
                         stack = stack[..len(stack) - 1L];
+
                     }
+
 
                 } 
 
@@ -631,21 +778,31 @@ namespace @internal
                 v = v__prev1;
             }
 
-            foreach (var (i) in count)
             {
-                if (i == 0L)
+                var i__prev1 = i;
+
+                foreach (var (__i) in count)
                 {
-                    continue;
+                    i = __i;
+                    if (i == 0L)
+                    {
+                        continue;
+                    }
+
+                    count[i] += count[i - 1L];
+
                 }
-                count[i] += count[i - 1L];
+
+                i = i__prev1;
             }
+
             if (count[len(count) - 1L] != int32(len(values)))
             {
                 f.Fatalf("storeOrder: value is missing, total count = %d, values = %v", count[len(count) - 1L], values);
             } 
 
             // place values in count-indexed bins, which are in the desired store order
-            var order = make_slice<ref Value>(len(values));
+            var order = make_slice<ptr<Value>>(len(values));
             {
                 var v__prev1 = v;
 
@@ -655,12 +812,77 @@ namespace @internal
                     var s = storeNumber[v.ID];
                     order[count[s - 1L]] = v;
                     count[s - 1L]++;
-                }
+                } 
+
+                // Order nil checks in source order. We want the first in source order to trigger.
+                // If two are on the same line, we don't really care which happens first.
+                // See issue 18169.
 
                 v = v__prev1;
             }
 
+            if (hasNilCheck)
+            {
+                long start = -1L;
+                {
+                    var i__prev1 = i;
+                    var v__prev1 = v;
+
+                    foreach (var (__i, __v) in order)
+                    {
+                        i = __i;
+                        v = __v;
+                        if (v.Op == OpNilCheck)
+                        {
+                            if (start == -1L)
+                            {
+                                start = i;
+                            }
+
+                        }
+                        else
+                        {
+                            if (start != -1L)
+                            {
+                                sort.Sort(bySourcePos(order[start..i]));
+                                start = -1L;
+                            }
+
+                        }
+
+                    }
+
+                    i = i__prev1;
+                    v = v__prev1;
+                }
+
+                if (start != -1L)
+                {
+                    sort.Sort(bySourcePos(order[start..]));
+                }
+
+            }
+
             return order;
+
+        }
+
+        private partial struct bySourcePos // : slice<ptr<Value>>
+        {
+        }
+
+        private static long Len(this bySourcePos s)
+        {
+            return len(s);
+        }
+        private static void Swap(this bySourcePos s, long i, long j)
+        {
+            s[i] = s[j];
+            s[j] = s[i];
+        }
+        private static bool Less(this bySourcePos s, long i, long j)
+        {
+            return s[i].Pos.Before(s[j].Pos);
         }
     }
 }}}}

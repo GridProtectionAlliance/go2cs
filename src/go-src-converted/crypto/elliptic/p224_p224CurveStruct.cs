@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:29:53 UTC
+//     Generated on 2020 October 08 03:35:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,15 +27,15 @@ namespace crypto
             // Constructors
             public p224Curve(NilType _)
             {
-                this.CurveParams = default;
+                this.ptr<CurveParams> = default;
                 this.gx = default;
                 this.gy = default;
                 this.b = default;
             }
 
-            public p224Curve(ref CurveParams CurveParams = default, p224FieldElement gx = default, p224FieldElement gy = default, p224FieldElement b = default)
+            public p224Curve(ref ptr<CurveParams> ptr<CurveParams> = default, p224FieldElement gx = default, p224FieldElement gy = default, p224FieldElement b = default)
             {
-                this.CurveParams = CurveParams;
+                this.ptr<CurveParams> = ptr<CurveParams>;
                 this.gx = gx;
                 this.gy = gy;
                 this.b = b;
@@ -61,7 +61,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static p224Curve p224Curve_cast(dynamic value)
         {
-            return new p224Curve(ref value.CurveParams, value.gx, value.gy, value.b);
+            return new p224Curve(ref value.ptr<CurveParams>, value.gx, value.gy, value.b);
         }
     }
 }}

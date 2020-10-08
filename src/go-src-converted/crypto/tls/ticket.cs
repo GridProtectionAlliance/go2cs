@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2020 August 29 08:31:37 UTC
+// package tls -- go2cs converted at 2020 October 08 03:38:24 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Go\src\crypto\tls\ticket.go
 using bytes = go.bytes_package;
@@ -13,7 +13,10 @@ using sha256 = go.crypto.sha256_package;
 using subtle = go.crypto.subtle_package;
 using errors = go.errors_package;
 using io = go.io_package;
+
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace crypto
@@ -26,139 +29,134 @@ namespace crypto
         {
             public ushort vers;
             public ushort cipherSuite;
-            public slice<byte> masterSecret;
-            public slice<slice<byte>> certificates; // usedOldKey is true if the ticket from which this session came from
+            public ulong createdAt;
+            public slice<byte> masterSecret; // opaque master_secret<1..2^16-1>;
+// struct { opaque certificate<1..2^24-1> } Certificate;
+            public slice<slice<byte>> certificates; // Certificate certificate_list<0..2^24-1>;
+
+// usedOldKey is true if the ticket from which this session came from
 // was encrypted with an older key and thus should be refreshed.
             public bool usedOldKey;
         }
 
-        private static bool equal(this ref sessionState s, object i)
+        private static slice<byte> marshal(this ptr<sessionState> _addr_m)
         {
-            ref sessionState (s1, ok) = i._<ref sessionState>();
-            if (!ok)
+            ref sessionState m = ref _addr_m.val;
+
+            ref cryptobyte.Builder b = ref heap(out ptr<cryptobyte.Builder> _addr_b);
+            b.AddUint16(m.vers);
+            b.AddUint16(m.cipherSuite);
+            addUint64(_addr_b, m.createdAt);
+            b.AddUint16LengthPrefixed(b =>
             {
-                return false;
-            }
-            if (s.vers != s1.vers || s.cipherSuite != s1.cipherSuite || !bytes.Equal(s.masterSecret, s1.masterSecret))
+                b.AddBytes(m.masterSecret);
+            });
+            b.AddUint24LengthPrefixed(b =>
             {
-                return false;
-            }
-            if (len(s.certificates) != len(s1.certificates))
-            {
-                return false;
-            }
-            foreach (var (i) in s.certificates)
-            {
-                if (!bytes.Equal(s.certificates[i], s1.certificates[i]))
+                foreach (var (_, cert) in m.certificates)
                 {
-                    return false;
+                    b.AddUint24LengthPrefixed(b =>
+                    {
+                        b.AddBytes(cert);
+                    });
+
                 }
-            }
-            return true;
+
+            });
+            return b.BytesOrPanic();
+
         }
 
-        private static slice<byte> marshal(this ref sessionState s)
+        private static bool unmarshal(this ptr<sessionState> _addr_m, slice<byte> data)
         {
-            long length = 2L + 2L + 2L + len(s.masterSecret) + 2L;
-            {
-                var cert__prev1 = cert;
+            ref sessionState m = ref _addr_m.val;
 
-                foreach (var (_, __cert) in s.certificates)
+            m.val = new sessionState(usedOldKey:m.usedOldKey);
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
+            {
+                var ok = s.ReadUint16(_addr_m.vers) && s.ReadUint16(_addr_m.cipherSuite) && readUint64(_addr_s, _addr_m.createdAt) && readUint16LengthPrefixed(_addr_s, _addr_m.masterSecret) && len(m.masterSecret) != 0L;
+
+                if (!ok)
                 {
-                    cert = __cert;
-                    length += 4L + len(cert);
+                    return false;
                 }
 
-                cert = cert__prev1;
             }
 
-            var ret = make_slice<byte>(length);
-            var x = ret;
-            x[0L] = byte(s.vers >> (int)(8L));
-            x[1L] = byte(s.vers);
-            x[2L] = byte(s.cipherSuite >> (int)(8L));
-            x[3L] = byte(s.cipherSuite);
-            x[4L] = byte(len(s.masterSecret) >> (int)(8L));
-            x[5L] = byte(len(s.masterSecret));
-            x = x[6L..];
-            copy(x, s.masterSecret);
-            x = x[len(s.masterSecret)..];
-
-            x[0L] = byte(len(s.certificates) >> (int)(8L));
-            x[1L] = byte(len(s.certificates));
-            x = x[2L..];
-
+            ref cryptobyte.String certList = ref heap(out ptr<cryptobyte.String> _addr_certList);
+            if (!s.ReadUint24LengthPrefixed(_addr_certList))
             {
-                var cert__prev1 = cert;
+                return false;
+            }
 
-                foreach (var (_, __cert) in s.certificates)
+            while (!certList.Empty())
+            {
+                ref slice<byte> cert = ref heap(out ptr<slice<byte>> _addr_cert);
+                if (!readUint24LengthPrefixed(_addr_certList, _addr_cert))
                 {
-                    cert = __cert;
-                    x[0L] = byte(len(cert) >> (int)(24L));
-                    x[1L] = byte(len(cert) >> (int)(16L));
-                    x[2L] = byte(len(cert) >> (int)(8L));
-                    x[3L] = byte(len(cert));
-                    copy(x[4L..], cert);
-                    x = x[4L + len(cert)..];
+                    return false;
                 }
 
-                cert = cert__prev1;
+                m.certificates = append(m.certificates, cert);
+
             }
 
-            return ret;
+            return s.Empty();
+
         }
 
-        private static bool unmarshal(this ref sessionState s, slice<byte> data)
+        // sessionStateTLS13 is the content of a TLS 1.3 session ticket. Its first
+        // version (revision = 0) doesn't carry any of the information needed for 0-RTT
+        // validation and the nonce is always empty.
+        private partial struct sessionStateTLS13
         {
-            if (len(data) < 8L)
-            {
-                return false;
-            }
-            s.vers = uint16(data[0L]) << (int)(8L) | uint16(data[1L]);
-            s.cipherSuite = uint16(data[2L]) << (int)(8L) | uint16(data[3L]);
-            var masterSecretLen = int(data[4L]) << (int)(8L) | int(data[5L]);
-            data = data[6L..];
-            if (len(data) < masterSecretLen)
-            {
-                return false;
-            }
-            s.masterSecret = data[..masterSecretLen];
-            data = data[masterSecretLen..];
-
-            if (len(data) < 2L)
-            {
-                return false;
-            }
-            var numCerts = int(data[0L]) << (int)(8L) | int(data[1L]);
-            data = data[2L..];
-
-            s.certificates = make_slice<slice<byte>>(numCerts);
-            foreach (var (i) in s.certificates)
-            {
-                if (len(data) < 4L)
-                {
-                    return false;
-                }
-                var certLen = int(data[0L]) << (int)(24L) | int(data[1L]) << (int)(16L) | int(data[2L]) << (int)(8L) | int(data[3L]);
-                data = data[4L..];
-                if (certLen < 0L)
-                {
-                    return false;
-                }
-                if (len(data) < certLen)
-                {
-                    return false;
-                }
-                s.certificates[i] = data[..certLen];
-                data = data[certLen..];
-            }
-            return len(data) == 0L;
+            public ushort cipherSuite;
+            public ulong createdAt;
+            public slice<byte> resumptionSecret; // opaque resumption_master_secret<1..2^8-1>;
+            public Certificate certificate; // CertificateEntry certificate_list<0..2^24-1>;
         }
 
-        private static (slice<byte>, error) encryptTicket(this ref Conn c, ref sessionState state)
+        private static slice<byte> marshal(this ptr<sessionStateTLS13> _addr_m)
         {
-            var serialized = state.marshal();
-            var encrypted = make_slice<byte>(ticketKeyNameLen + aes.BlockSize + len(serialized) + sha256.Size);
+            ref sessionStateTLS13 m = ref _addr_m.val;
+
+            ref cryptobyte.Builder b = ref heap(out ptr<cryptobyte.Builder> _addr_b);
+            b.AddUint16(VersionTLS13);
+            b.AddUint8(0L); // revision
+            b.AddUint16(m.cipherSuite);
+            addUint64(_addr_b, m.createdAt);
+            b.AddUint8LengthPrefixed(b =>
+            {
+                b.AddBytes(m.resumptionSecret);
+            });
+            marshalCertificate(_addr_b, m.certificate);
+            return b.BytesOrPanic();
+
+        }
+
+        private static bool unmarshal(this ptr<sessionStateTLS13> _addr_m, slice<byte> data)
+        {
+            ref sessionStateTLS13 m = ref _addr_m.val;
+
+            m.val = new sessionStateTLS13();
+            ref var s = ref heap(cryptobyte.String(data), out ptr<var> _addr_s);
+            ref ushort version = ref heap(out ptr<ushort> _addr_version);
+            ref byte revision = ref heap(out ptr<byte> _addr_revision);
+            return s.ReadUint16(_addr_version) && version == VersionTLS13 && s.ReadUint8(_addr_revision) && revision == 0L && s.ReadUint16(_addr_m.cipherSuite) && readUint64(_addr_s, _addr_m.createdAt) && readUint8LengthPrefixed(_addr_s, _addr_m.resumptionSecret) && len(m.resumptionSecret) != 0L && unmarshalCertificate(_addr_s, _addr_m.certificate) && s.Empty();
+        }
+
+        private static (slice<byte>, error) encryptTicket(this ptr<Conn> _addr_c, slice<byte> state)
+        {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Conn c = ref _addr_c.val;
+
+            if (len(c.ticketKeys) == 0L)
+            {
+                return (null, error.As(errors.New("tls: internal error: session ticket keys unavailable"))!);
+            }
+
+            var encrypted = make_slice<byte>(ticketKeyNameLen + aes.BlockSize + len(state) + sha256.Size);
             var keyName = encrypted[..ticketKeyNameLen];
             var iv = encrypted[ticketKeyNameLen..ticketKeyNameLen + aes.BlockSize];
             var macBytes = encrypted[len(encrypted) - sha256.Size..];
@@ -168,51 +166,61 @@ namespace crypto
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
             }
-            var key = c.config.ticketKeys()[0L];
+
+            var key = c.ticketKeys[0L];
             copy(keyName, key.keyName[..]);
             var (block, err) = aes.NewCipher(key.aesKey[..]);
             if (err != null)
             {
-                return (null, errors.New("tls: failed to create cipher while encrypting ticket: " + err.Error()));
+                return (null, error.As(errors.New("tls: failed to create cipher while encrypting ticket: " + err.Error()))!);
             }
-            cipher.NewCTR(block, iv).XORKeyStream(encrypted[ticketKeyNameLen + aes.BlockSize..], serialized);
+
+            cipher.NewCTR(block, iv).XORKeyStream(encrypted[ticketKeyNameLen + aes.BlockSize..], state);
 
             var mac = hmac.New(sha256.New, key.hmacKey[..]);
             mac.Write(encrypted[..len(encrypted) - sha256.Size]);
             mac.Sum(macBytes[..0L]);
 
-            return (encrypted, null);
+            return (encrypted, error.As(null!)!);
+
         }
 
-        private static (ref sessionState, bool) decryptTicket(this ref Conn c, slice<byte> encrypted)
+        private static (slice<byte>, bool) decryptTicket(this ptr<Conn> _addr_c, slice<byte> encrypted)
         {
-            if (c.config.SessionTicketsDisabled || len(encrypted) < ticketKeyNameLen + aes.BlockSize + sha256.Size)
+            slice<byte> plaintext = default;
+            bool usedOldKey = default;
+            ref Conn c = ref _addr_c.val;
+
+            if (len(encrypted) < ticketKeyNameLen + aes.BlockSize + sha256.Size)
             {
                 return (null, false);
             }
+
             var keyName = encrypted[..ticketKeyNameLen];
             var iv = encrypted[ticketKeyNameLen..ticketKeyNameLen + aes.BlockSize];
             var macBytes = encrypted[len(encrypted) - sha256.Size..];
+            var ciphertext = encrypted[ticketKeyNameLen + aes.BlockSize..len(encrypted) - sha256.Size];
 
-            var keys = c.config.ticketKeys();
             long keyIndex = -1L;
-            foreach (var (i, candidateKey) in keys)
+            foreach (var (i, candidateKey) in c.ticketKeys)
             {
                 if (bytes.Equal(keyName, candidateKey.keyName[..]))
                 {
                     keyIndex = i;
                     break;
                 }
+
             }
             if (keyIndex == -1L)
             {
                 return (null, false);
             }
-            var key = ref keys[keyIndex];
+
+            var key = _addr_c.ticketKeys[keyIndex];
 
             var mac = hmac.New(sha256.New, key.hmacKey[..]);
             mac.Write(encrypted[..len(encrypted) - sha256.Size]);
@@ -222,18 +230,18 @@ namespace crypto
             {
                 return (null, false);
             }
+
             var (block, err) = aes.NewCipher(key.aesKey[..]);
             if (err != null)
             {
                 return (null, false);
             }
-            var ciphertext = encrypted[ticketKeyNameLen + aes.BlockSize..len(encrypted) - sha256.Size];
-            var plaintext = ciphertext;
+
+            plaintext = make_slice<byte>(len(ciphertext));
             cipher.NewCTR(block, iv).XORKeyStream(plaintext, ciphertext);
 
-            sessionState state = ref new sessionState(usedOldKey:keyIndex>0);
-            var ok = state.unmarshal(plaintext);
-            return (state, ok);
+            return (plaintext, keyIndex > 0L);
+
         }
     }
 }}

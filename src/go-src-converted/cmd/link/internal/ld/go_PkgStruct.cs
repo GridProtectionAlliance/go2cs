@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:03:44 UTC
+//     Generated on 2020 October 08 04:38:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,10 @@ using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
 using objabi = go.cmd.@internal.objabi_package;
+using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -42,7 +45,7 @@ namespace @internal
                 this.impby = default;
             }
 
-            public Pkg(bool mark = default, bool @checked = default, @string path = default, slice<ref Pkg> impby = default)
+            public Pkg(bool mark = default, bool @checked = default, @string path = default, slice<ptr<Pkg>> impby = default)
             {
                 this.mark = mark;
                 this.@checked = @checked;

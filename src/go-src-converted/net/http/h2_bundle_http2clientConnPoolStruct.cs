@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:17 UTC
+//     Generated on 2020 October 08 03:39:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -63,7 +64,7 @@ namespace net
                 this.addConnCalls = default;
             }
 
-            public http2clientConnPool(ref ptr<http2Transport> t = default, sync.Mutex mu = default, map<@string, slice<ref http2ClientConn>> conns = default, map<@string, ref http2dialCall> dialing = default, map<ref http2ClientConn, slice<@string>> keys = default, map<@string, ref http2addConnCall> addConnCalls = default)
+            public http2clientConnPool(ref ptr<http2Transport> t = default, sync.Mutex mu = default, map<@string, slice<ptr<http2ClientConn>>> conns = default, map<@string, ptr<http2dialCall>> dialing = default, map<ptr<http2ClientConn>, slice<@string>> keys = default, map<@string, ptr<http2addConnCall>> addConnCalls = default)
             {
                 this.t = t;
                 this.mu = mu;

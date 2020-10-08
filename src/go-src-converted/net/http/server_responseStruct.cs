@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:43 UTC
+//     Generated on 2020 October 08 03:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,12 +28,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {
@@ -55,6 +56,8 @@ namespace net
                 this.wroteContinue = default;
                 this.wants10KeepAlive = default;
                 this.wantsClose = default;
+                this.canWriteContinue = default;
+                this.writeContinueMu = default;
                 this.w = default;
                 this.cw = default;
                 this.handlerHeader = default;
@@ -73,7 +76,7 @@ namespace net
                 this.didCloseNotify = default;
             }
 
-            public response(ref ptr<conn> conn = default, ref ptr<Request> req = default, io.ReadCloser reqBody = default, context.CancelFunc cancelCtx = default, bool wroteHeader = default, bool wroteContinue = default, bool wants10KeepAlive = default, bool wantsClose = default, ref ptr<bufio.Writer> w = default, chunkWriter cw = default, Header handlerHeader = default, bool calledHeader = default, long written = default, long contentLength = default, long status = default, bool closeAfterReply = default, bool requestBodyLimitHit = default, slice<@string> trailers = default, atomicBool handlerDone = default, array<byte> dateBuf = default, array<byte> clenBuf = default, array<byte> statusBuf = default, channel<bool> closeNotifyCh = default, int didCloseNotify = default)
+            public response(ref ptr<conn> conn = default, ref ptr<Request> req = default, io.ReadCloser reqBody = default, context.CancelFunc cancelCtx = default, bool wroteHeader = default, bool wroteContinue = default, bool wants10KeepAlive = default, bool wantsClose = default, atomicBool canWriteContinue = default, sync.Mutex writeContinueMu = default, ref ptr<bufio.Writer> w = default, chunkWriter cw = default, Header handlerHeader = default, bool calledHeader = default, long written = default, long contentLength = default, long status = default, bool closeAfterReply = default, bool requestBodyLimitHit = default, slice<@string> trailers = default, atomicBool handlerDone = default, array<byte> dateBuf = default, array<byte> clenBuf = default, array<byte> statusBuf = default, channel<bool> closeNotifyCh = default, int didCloseNotify = default)
             {
                 this.conn = conn;
                 this.req = req;
@@ -83,6 +86,8 @@ namespace net
                 this.wroteContinue = wroteContinue;
                 this.wants10KeepAlive = wants10KeepAlive;
                 this.wantsClose = wantsClose;
+                this.canWriteContinue = canWriteContinue;
+                this.writeContinueMu = writeContinueMu;
                 this.w = w;
                 this.cw = cw;
                 this.handlerHeader = handlerHeader;
@@ -121,7 +126,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static response response_cast(dynamic value)
         {
-            return new response(ref value.conn, ref value.req, value.reqBody, value.cancelCtx, value.wroteHeader, value.wroteContinue, value.wants10KeepAlive, value.wantsClose, ref value.w, value.cw, value.handlerHeader, value.calledHeader, value.written, value.contentLength, value.status, value.closeAfterReply, value.requestBodyLimitHit, value.trailers, value.handlerDone, value.dateBuf, value.clenBuf, value.statusBuf, value.closeNotifyCh, value.didCloseNotify);
+            return new response(ref value.conn, ref value.req, value.reqBody, value.cancelCtx, value.wroteHeader, value.wroteContinue, value.wants10KeepAlive, value.wantsClose, value.canWriteContinue, value.writeContinueMu, ref value.w, value.cw, value.handlerHeader, value.calledHeader, value.written, value.contentLength, value.status, value.closeAfterReply, value.requestBodyLimitHit, value.trailers, value.handlerDone, value.dateBuf, value.clenBuf, value.statusBuf, value.closeNotifyCh, value.didCloseNotify);
         }
     }
 }}

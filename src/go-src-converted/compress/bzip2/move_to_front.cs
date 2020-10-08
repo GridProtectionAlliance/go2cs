@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bzip2 -- go2cs converted at 2020 August 29 10:10:44 UTC
+// package bzip2 -- go2cs converted at 2020 October 08 04:58:42 UTC
 // import "compress/bzip2" ==> using bzip2 = go.compress.bzip2_package
 // Original source: C:\Go\src\compress\bzip2\move_to_front.go
 
@@ -32,7 +32,9 @@ namespace compress
             {
                 panic("too many symbols");
             }
+
             return moveToFrontDecoder(symbols);
+
         });
 
         // newMTFDecoderWithRange creates a move-to-front decoder with an initial
@@ -43,6 +45,7 @@ namespace compress
             {
                 panic("newMTFDecoderWithRange: cannot have > 256 symbols");
             }
+
             var m = make_slice<byte>(n);
             for (long i = 0L; i < n; i++)
             {
@@ -50,10 +53,13 @@ namespace compress
             }
 
             return moveToFrontDecoder(m);
+
         });
 
         private static byte Decode(this moveToFrontDecoder m, long n)
-        { 
+        {
+            byte b = default;
+ 
             // Implement move-to-front with a simple copy. This approach
             // beats more sophisticated approaches in benchmarking, probably
             // because it has high locality of reference inside of a
@@ -61,7 +67,8 @@ namespace compress
             b = m[n];
             copy(m[1L..], m[..n]);
             m[0L] = b;
-            return;
+            return ;
+
         }
 
         // First returns the symbol at the front of the list.

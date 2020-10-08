@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:35:04 UTC
+// package template -- go2cs converted at 2020 October 08 03:42:19 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\js.go
 using bytes = go.bytes_package;
@@ -29,7 +29,7 @@ namespace html
         // "x = ++/foo/i" which is quite different than "x++/foo/i", but is not known to
         // fail on any known useful programs. It is based on the draft
         // JavaScript 2.0 lexical grammar and requires one token of lookbehind:
-        // http://www.mozilla.org/js/language/js20-2000-07/rationale/syntax.html
+        // https://www.mozilla.org/js/language/js20-2000-07/rationale/syntax.html
         private static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding)
         {
             s = bytes.TrimRight(s, "\t\n\f\r \u2028\u2029");
@@ -61,6 +61,7 @@ namespace html
                             // Reached for trailing minus signs since "---" is the
                             // same as "-- -".
                             return jsCtxRegexp;
+
                         }
                         return jsCtxDivOp;
                         break;
@@ -151,18 +152,28 @@ namespace html
             // a string which precedes a div op, or an identifier
             // which precedes a div op.
             return jsCtxDivOp;
+
         }
 
         // regexpPrecederKeywords is a set of reserved JS keywords that can precede a
         // regular expression in JS source.
         private static map regexpPrecederKeywords = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"break":true,"case":true,"continue":true,"delete":true,"do":true,"else":true,"finally":true,"in":true,"instanceof":true,"return":true,"throw":true,"try":true,"typeof":true,"void":true,};
 
-        private static var jsonMarshalType = reflect.TypeOf((json.Marshaler.Value)(null)).Elem();
+        private static var jsonMarshalType = reflect.TypeOf((json.Marshaler.val)(null)).Elem();
 
         // indirectToJSONMarshaler returns the value, after dereferencing as many times
         // as necessary to reach the base type (or nil) or an implementation of json.Marshal.
         private static void indirectToJSONMarshaler(object a)
-        {
+        { 
+            // text/template now supports passing untyped nil as a func call
+            // argument, so we must support it. Otherwise we'd panic below, as one
+            // cannot call the Type or Interface methods on an invalid
+            // reflect.Value. See golang.org/issue/18716.
+            if (a == null)
+            {
+                return null;
+            }
+
             var v = reflect.ValueOf(a);
             while (!v.Type().Implements(jsonMarshalType) && v.Kind() == reflect.Ptr && !v.IsNil())
             {
@@ -170,6 +181,7 @@ namespace html
             }
 
             return v.Interface();
+
         }
 
         // jsValEscaper escapes its inputs to a JS Expression (section 11.14) that has
@@ -196,6 +208,7 @@ namespace html
                         a = t.String();
                         break;
                 }
+
             }
             else
             {
@@ -213,6 +226,7 @@ namespace html
                 }
 
                 a = fmt.Sprint(args);
+
             } 
             // TODO: detect cycles before calling Marshal which loops infinitely on
             // cyclic data. This may be an unacceptable DoS risk.
@@ -225,23 +239,26 @@ namespace html
                 // turning into
                 //     x//* error marshaling y:
                 //          second line of error message */null
-                return fmt.Sprintf(" /* %s */null ", strings.Replace(err.Error(), "*/", "* /", -1L));
+                return fmt.Sprintf(" /* %s */null ", strings.ReplaceAll(err.Error(), "*/", "* /"));
+
             } 
 
             // TODO: maybe post-process output to prevent it from containing
             // "<!--", "-->", "<![CDATA[", "]]>", or "</script"
             // in case custom marshalers produce output containing those.
-
-            // TODO: Maybe abbreviate \u00ab to \xab to produce more compact output.
+            // Note: Do not use \x escaping to save bytes because it is not JSON compatible and this escaper
+            // supports ld+json content-type.
             if (len(b) == 0L)
             { 
                 // In, `x=y/{{.}}*z` a json.Marshaler that produces "" should
                 // not cause the output `x=y/*z`.
                 return " null ";
+
             }
+
             var (first, _) = utf8.DecodeRune(b);
             var (last, _) = utf8.DecodeLastRune(b);
-            bytes.Buffer buf = default; 
+            strings.Builder buf = default; 
             // Prevent IdentifierNames and NumericLiterals from running into
             // keywords: in, instanceof, typeof, void
             var pad = isJSIdentPart(first) || isJSIdentPart(last);
@@ -249,6 +266,7 @@ namespace html
             {
                 buf.WriteByte(' ');
             }
+
             long written = 0L; 
             // Make sure that json.Marshal escapes codepoints U+2028 & U+2029
             // so it falls within the subset of JSON which is valid JS.
@@ -269,13 +287,16 @@ namespace html
                     {
                         repl = "\\u2029";
                     }
+
                     if (repl != "")
                     {
                         buf.Write(b[written..i]);
                         buf.WriteString(repl);
                         written = i + n;
                     }
+
                     i += n;
+
                 }
 
 
@@ -288,9 +309,13 @@ namespace html
                 {
                     buf.WriteByte(' ');
                 }
-                b = buf.Bytes();
+
+                return buf.String();
+
             }
+
             return string(b);
+
         }
 
         // jsStrEscaper produces a string that can be included between quotes in
@@ -305,7 +330,9 @@ namespace html
             {
                 return replace(s, jsStrNormReplacementTable);
             }
+
             return replace(s, jsStrReplacementTable);
+
         }
 
         // jsRegexpEscaper behaves like jsStrEscaper but escapes regular expression
@@ -322,8 +349,11 @@ namespace html
             { 
                 // /{{.X}}/ should not produce a line comment when .X == "".
                 return "(?:)";
+
             }
+
             return s;
+
         }
 
         // replace replaces each rune r of s with replacementTable[r], provided that
@@ -333,7 +363,7 @@ namespace html
         // `\u2029`.
         private static @string replace(@string s, slice<@string> replacementTable)
         {
-            bytes.Buffer b = default;
+            strings.Builder b = default;
             var r = rune(0L);
             long w = 0L;
             long written = 0L;
@@ -346,7 +376,9 @@ namespace html
                     r, w = utf8.DecodeRuneInString(s[i..]);
                     @string repl = default;
 
-                    if (int(r) < len(replacementTable) && replacementTable[r] != "") 
+                    if (int(r) < len(lowUnicodeReplacementTable)) 
+                        repl = lowUnicodeReplacementTable[r];
+                    else if (int(r) < len(replacementTable) && replacementTable[r] != "") 
                         repl = replacementTable[r];
                     else if (r == '\u2028') 
                         repl = "\\u2028";
@@ -354,10 +386,16 @@ namespace html
                         repl = "\\u2029";
                     else 
                         continue;
-                                        b.WriteString(s[written..i]);
+                                        if (written == 0L)
+                    {
+                        b.Grow(len(s));
+                    i += w;
+                    }
+
+                    b.WriteString(s[written..i]);
                     b.WriteString(repl);
                     written = i + w;
-                    i += w;
+
                 }
 
             }
@@ -365,17 +403,20 @@ namespace html
             {
                 return s;
             }
+
             b.WriteString(s[written..]);
             return b.String();
+
         }
 
-        private static @string jsStrReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\0`), ('\t', `\t`), ('\n', `\n`), ('\v', `\x0b`), ('\f', `\f`), ('\r', `\r`), ('"', `\x22`), ('&', `\x26`), ('\'', `\x27`), ('+', `\x2b`), ('/', `\/`), ('<', `\x3c`), ('>', `\x3e`), ('\\', `\\`)));
+        private static @string lowUnicodeReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\u0000`), (1, `\u0001`), (2, `\u0002`), (3, `\u0003`), (4, `\u0004`), (5, `\u0005`), (6, `\u0006`), ('\a', `\u0007`), ('\b', `\u0008`), ('\t', `\t`), ('\n', `\n`), ('\v', `\u000b`), ('\f', `\f`), ('\r', `\r`), (0xe, `\u000e`), (0xf, `\u000f`), (0x10, `\u0010`), (0x11, `\u0011`), (0x12, `\u0012`), (0x13, `\u0013`), (0x14, `\u0014`), (0x15, `\u0015`), (0x16, `\u0016`), (0x17, `\u0017`), (0x18, `\u0018`), (0x19, `\u0019`), (0x1a, `\u001a`), (0x1b, `\u001b`), (0x1c, `\u001c`), (0x1d, `\u001d`), (0x1e, `\u001e`), (0x1f, `\u001f`)));
+
+        private static @string jsStrReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\u0000`), ('\t', `\t`), ('\n', `\n`), ('\v', `\u000b`), ('\f', `\f`), ('\r', `\r`), ('"', `\u0022`), ('&', `\u0026`), ('\'', `\u0027`), ('+', `\u002b`), ('/', `\/`), ('<', `\u003c`), ('>', `\u003e`), ('\\', `\\`)));
 
         // jsStrNormReplacementTable is like jsStrReplacementTable but does not
         // overencode existing escapes since this table has no entry for `\`.
-        private static @string jsStrNormReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\0`), ('\t', `\t`), ('\n', `\n`), ('\v', `\x0b`), ('\f', `\f`), ('\r', `\r`), ('"', `\x22`), ('&', `\x26`), ('\'', `\x27`), ('+', `\x2b`), ('/', `\/`), ('<', `\x3c`), ('>', `\x3e`)));
-
-        private static @string jsRegexpReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\0`), ('\t', `\t`), ('\n', `\n`), ('\v', `\x0b`), ('\f', `\f`), ('\r', `\r`), ('"', `\x22`), ('$', `\$`), ('&', `\x26`), ('\'', `\x27`), ('(', `\(`), (')', `\)`), ('*', `\*`), ('+', `\x2b`), ('-', `\-`), ('.', `\.`), ('/', `\/`), ('<', `\x3c`), ('>', `\x3e`), ('?', `\?`), ('[', `\[`), ('\\', `\\`), (']', `\]`), ('^', `\^`), ('{', `\{`), ('|', `\|`), ('}', `\}`)));
+        private static @string jsStrNormReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\u0000`), ('\t', `\t`), ('\n', `\n`), ('\v', `\u000b`), ('\f', `\f`), ('\r', `\r`), ('"', `\u0022`), ('&', `\u0026`), ('\'', `\u0027`), ('+', `\u002b`), ('/', `\/`), ('<', `\u003c`), ('>', `\u003e`)));
+        private static @string jsRegexpReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\u0000`), ('\t', `\t`), ('\n', `\n`), ('\v', `\u000b`), ('\f', `\f`), ('\r', `\r`), ('"', `\u0022`), ('$', `\$`), ('&', `\u0026`), ('\'', `\u0027`), ('(', `\(`), (')', `\)`), ('*', `\*`), ('+', `\u002b`), ('-', `\-`), ('.', `\.`), ('/', `\/`), ('<', `\u003c`), ('>', `\u003e`), ('?', `\?`), ('[', `\[`), ('\\', `\\`), (']', `\]`), ('^', `\^`), ('{', `\{`), ('|', `\|`), ('}', `\}`)));
 
         // isJSIdentPart reports whether the given rune is a JS identifier part.
         // It does not handle all the non-Latin letters, joiners, and combining marks,
@@ -395,9 +436,10 @@ namespace html
             else if ('a' <= r && r <= 'z') 
                 return true;
                         return false;
+
         }
 
-        // isJSType returns true if the given MIME type should be considered JavaScript.
+        // isJSType reports whether the given MIME type should be considered JavaScript.
         //
         // It is used to determine whether a script tag with a type attribute is a javascript container.
         private static bool isJSType(@string mimeType)
@@ -407,7 +449,6 @@ namespace html
             //   https://tools.ietf.org/html/rfc7231#section-3.1.1
             //   https://tools.ietf.org/html/rfc4329#section-3
             //   https://www.ietf.org/rfc/rfc4627.txt
-            mimeType = strings.ToLower(mimeType); 
             // discard parameters
             {
                 var i = strings.Index(mimeType, ";");
@@ -418,6 +459,8 @@ namespace html
                 }
 
             }
+
+            mimeType = strings.ToLower(mimeType);
             mimeType = strings.TrimSpace(mimeType);
             switch (mimeType)
             {
@@ -427,9 +470,13 @@ namespace html
 
                 case "application/json": 
 
+                case "application/ld+json": 
+
                 case "application/x-ecmascript": 
 
                 case "application/x-javascript": 
+
+                case "module": 
 
                 case "text/ecmascript": 
 
@@ -460,6 +507,7 @@ namespace html
                     return false;
                     break;
             }
+
         }
     }
 }}

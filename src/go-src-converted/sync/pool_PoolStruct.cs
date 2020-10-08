@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:44 UTC
+//     Generated on 2020 October 08 01:30:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,14 +31,18 @@ namespace go
                 this.noCopy = default;
                 this.local = default;
                 this.localSize = default;
+                this.victim = default;
+                this.victimSize = default;
                 this.New = default;
             }
 
-            public Pool(noCopy noCopy = default, unsafe.Pointer local = default, System.UIntPtr localSize = default, Action New = default)
+            public Pool(noCopy noCopy = default, unsafe.Pointer local = default, System.UIntPtr localSize = default, unsafe.Pointer victim = default, System.UIntPtr victimSize = default, Action New = default)
             {
                 this.noCopy = noCopy;
                 this.local = local;
                 this.localSize = localSize;
+                this.victim = victim;
+                this.victimSize = victimSize;
                 this.New = New;
             }
 
@@ -62,7 +66,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Pool Pool_cast(dynamic value)
         {
-            return new Pool(value.noCopy, value.local, value.localSize, value.New);
+            return new Pool(value.noCopy, value.local, value.localSize, value.victim, value.victimSize, value.New);
         }
     }
 }

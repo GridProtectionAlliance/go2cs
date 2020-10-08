@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 09:24:19 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:26:40 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\sparsetreemap.go
 using fmt = go.fmt_package;
@@ -61,30 +61,34 @@ namespace @internal
         public partial struct SparseTreeHelper
         {
             public slice<SparseTreeNode> Sdom; // indexed by block.ID
-            public slice<ref Block> Po; // exported data; the blocks, in a post-order
-            public slice<ref Block> Dom; // exported data; the dominator of this block.
+            public slice<ptr<Block>> Po; // exported data; the blocks, in a post-order
+            public slice<ptr<Block>> Dom; // exported data; the dominator of this block.
             public slice<int> Ponums; // exported data; Po[Ponums[b.ID]] == b; the index of b in Po
         }
 
         // NewSparseTreeHelper returns a SparseTreeHelper for use
         // in the gc package, for example in phi-function placement.
-        public static ref SparseTreeHelper NewSparseTreeHelper(ref Func f)
+        public static ptr<SparseTreeHelper> NewSparseTreeHelper(ptr<Func> _addr_f)
         {
+            ref Func f = ref _addr_f.val;
+
             var dom = f.Idom();
             var ponums = make_slice<int>(f.NumBlocks());
             var po = postorderWithNumbering(f, ponums);
-            return makeSparseTreeHelper(newSparseTree(f, dom), dom, po, ponums);
+            return _addr_makeSparseTreeHelper(newSparseTree(f, dom), dom, po, ponums)!;
         }
 
-        private static ref SparseTreeMap NewTree(this ref SparseTreeHelper h)
+        private static ptr<SparseTreeMap> NewTree(this ptr<SparseTreeHelper> _addr_h)
         {
-            return ref new SparseTreeMap();
+            ref SparseTreeHelper h = ref _addr_h.val;
+
+            return addr(new SparseTreeMap());
         }
 
-        private static ref SparseTreeHelper makeSparseTreeHelper(SparseTree sdom, slice<ref Block> dom, slice<ref Block> po, slice<int> ponums)
+        private static ptr<SparseTreeHelper> makeSparseTreeHelper(SparseTree sdom, slice<ptr<Block>> dom, slice<ptr<Block>> po, slice<int> ponums)
         {
-            SparseTreeHelper helper = ref new SparseTreeHelper(Sdom:[]SparseTreeNode(sdom),Dom:dom,Po:po,Ponums:ponums,);
-            return helper;
+            ptr<SparseTreeHelper> helper = addr(new SparseTreeHelper(Sdom:[]SparseTreeNode(sdom),Dom:dom,Po:po,Ponums:ponums,));
+            return _addr_helper!;
         }
 
         // A sparseTreeMapEntry contains the data stored in a binary search
@@ -110,18 +114,23 @@ namespace @internal
         // AdjustBefore means defined at a phi function (visible Within or After in the same block)
         // AdjustWithin means defined within the block (visible After in the same block)
         // AdjustAfter means after the block (visible within child blocks)
-        private static void Insert(this ref SparseTreeMap m, ref Block b, int adjust, object x, ref SparseTreeHelper helper)
+        private static void Insert(this ptr<SparseTreeMap> _addr_m, ptr<Block> _addr_b, int adjust, object x, ptr<SparseTreeHelper> _addr_helper)
         {
-            var rbtree = (RBTint32.Value)(m);
-            var blockIndex = ref helper.Sdom[b.ID];
+            ref SparseTreeMap m = ref _addr_m.val;
+            ref Block b = ref _addr_b.val;
+            ref SparseTreeHelper helper = ref _addr_helper.val;
+
+            var rbtree = (RBTint32.val)(m);
+            var blockIndex = _addr_helper.Sdom[b.ID];
             if (blockIndex.entry == 0L)
             { 
                 // assert unreachable
-                return;
+                return ;
+
             } 
             // sp will be the sparse parent in this sparse tree (nearest ancestor in the larger tree that is also in this sparse tree)
             var sp = m.findEntry(b, adjust, helper);
-            sparseTreeMapEntry entry = ref new sparseTreeMapEntry(index:blockIndex,block:b,data:x,sparseParent:sp,adjust:adjust);
+            ptr<sparseTreeMapEntry> entry = addr(new sparseTreeMapEntry(index:blockIndex,block:b,data:x,sparseParent:sp,adjust:adjust));
 
             var right = blockIndex.exit - adjust;
             _ = rbtree.Insert(right, entry);
@@ -133,7 +142,7 @@ namespace @internal
             // Iterate over nodes bracketed by this new node to correct their parent, but not over the proper sparse descendants of those nodes.
             var (_, d) = rbtree.Lub(left); // Lub (not EQ) of left is either right or a sparse child
             {
-                ref sparseTreeMapEntry tme = d._<ref sparseTreeMapEntry>();
+                ptr<sparseTreeMapEntry> tme = d._<ptr<sparseTreeMapEntry>>();
 
                 while (tme != entry)
                 {
@@ -141,10 +150,11 @@ namespace @internal
                     // all descendants of tme are unchanged;
                     // next sparse sibling (or right-bracketing sparse parent == entry) is first node after tme.index.exit - tme.adjust
                     _, d = rbtree.Lub(tme.index.exit - tme.adjust);
-                    tme = d._<ref sparseTreeMapEntry>();
+                    tme = d._<ptr<sparseTreeMapEntry>>();
                 }
 
             }
+
         }
 
         // Find returns the definition visible from block b, or nil if none can be found.
@@ -158,24 +168,35 @@ namespace @internal
         // but m.Insert(b, AdjustBefore) followed by m.Find(b, AdjustWithin) will.
         //
         // Another way to think of this is that Find searches for inputs, Insert defines outputs.
-        private static void Find(this ref SparseTreeMap m, ref Block b, int adjust, ref SparseTreeHelper helper)
+        private static void Find(this ptr<SparseTreeMap> _addr_m, ptr<Block> _addr_b, int adjust, ptr<SparseTreeHelper> _addr_helper)
         {
+            ref SparseTreeMap m = ref _addr_m.val;
+            ref Block b = ref _addr_b.val;
+            ref SparseTreeHelper helper = ref _addr_helper.val;
+
             var v = m.findEntry(b, adjust, helper);
             if (v == null)
             {
                 return null;
             }
+
             return v.data;
+
         }
 
-        private static ref sparseTreeMapEntry findEntry(this ref SparseTreeMap m, ref Block b, int adjust, ref SparseTreeHelper helper)
+        private static ptr<sparseTreeMapEntry> findEntry(this ptr<SparseTreeMap> _addr_m, ptr<Block> _addr_b, int adjust, ptr<SparseTreeHelper> _addr_helper)
         {
-            var rbtree = (RBTint32.Value)(m);
+            ref SparseTreeMap m = ref _addr_m.val;
+            ref Block b = ref _addr_b.val;
+            ref SparseTreeHelper helper = ref _addr_helper.val;
+
+            var rbtree = (RBTint32.val)(m);
             if (rbtree == null)
             {
-                return null;
+                return _addr_null!;
             }
-            var blockIndex = ref helper.Sdom[b.ID]; 
+
+            var blockIndex = _addr_helper.Sdom[b.ID]; 
 
             // The Glb (not EQ) of this probe is either the entry-indexed end of a sparse parent
             // or the exit-indexed end of a sparse sibling
@@ -183,12 +204,14 @@ namespace @internal
 
             if (v == null)
             {
-                return null;
+                return _addr_null!;
             }
-            ref sparseTreeMapEntry otherEntry = v._<ref sparseTreeMapEntry>();
+
+            ptr<sparseTreeMapEntry> otherEntry = v._<ptr<sparseTreeMapEntry>>();
             if (otherEntry.index.exit >= blockIndex.exit)
             { // otherEntry exit after blockIndex exit; therefore, brackets
-                return otherEntry;
+                return _addr_otherEntry!;
+
             } 
             // otherEntry is a sparse Sibling, and shares the same sparse parent (nearest ancestor within larger tree)
             var sp = otherEntry.sparseParent;
@@ -196,26 +219,37 @@ namespace @internal
             {
                 if (sp.index.exit < blockIndex.exit)
                 { // no ancestor found
-                    return null;
+                    return _addr_null!;
+
                 }
-                return sp;
+
+                return _addr_sp!;
+
             }
-            return null;
+
+            return _addr_null!;
+
         }
 
-        private static @string String(this ref SparseTreeMap m)
+        private static @string String(this ptr<SparseTreeMap> _addr_m)
         {
-            var tree = (RBTint32.Value)(m);
+            ref SparseTreeMap m = ref _addr_m.val;
+
+            var tree = (RBTint32.val)(m);
             return tree.String();
         }
 
-        private static @string String(this ref sparseTreeMapEntry e)
+        private static @string String(this ptr<sparseTreeMapEntry> _addr_e)
         {
+            ref sparseTreeMapEntry e = ref _addr_e.val;
+
             if (e == null)
             {
                 return "nil";
             }
+
             return fmt.Sprintf("(index=%v, block=%v, data=%v)->%v", e.index, e.block, e.data, e.sparseParent);
+
         }
     }
 }}}}

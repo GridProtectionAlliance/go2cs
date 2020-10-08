@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:55 UTC
+//     Generated on 2020 October 08 04:10:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,9 @@ using fmt = go.fmt_package;
 using html = go.html_package;
 using io = go.io_package;
 using os = go.os_package;
+using exec = go.os.exec_package;
+using filepath = go.path.filepath_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -35,14 +38,24 @@ namespace @internal
             // Constructors
             public HTMLWriter(NilType _)
             {
-                this.Logger = default;
                 this.w = default;
+                this.Func = default;
+                this.path = default;
+                this.dot = default;
+                this.prevHash = default;
+                this.pendingPhases = default;
+                this.pendingTitles = default;
             }
 
-            public HTMLWriter(Logger Logger = default, io.WriteCloser w = default)
+            public HTMLWriter(io.WriteCloser w = default, ref ptr<Func> Func = default, @string path = default, ref ptr<dotWriter> dot = default, slice<byte> prevHash = default, slice<@string> pendingPhases = default, slice<@string> pendingTitles = default)
             {
-                this.Logger = Logger;
                 this.w = w;
+                this.Func = Func;
+                this.path = path;
+                this.dot = dot;
+                this.prevHash = prevHash;
+                this.pendingPhases = pendingPhases;
+                this.pendingTitles = pendingTitles;
             }
 
             // Enable comparisons between nil and HTMLWriter struct
@@ -65,7 +78,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static HTMLWriter HTMLWriter_cast(dynamic value)
         {
-            return new HTMLWriter(value.Logger, value.w);
+            return new HTMLWriter(value.w, ref value.Func, value.path, ref value.dot, value.prevHash, value.pendingPhases, value.pendingTitles);
         }
     }
 }}}}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2020 August 29 10:10:09 UTC
+// package jpeg -- go2cs converted at 2020 October 08 04:59:24 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\fdct.go
 
@@ -69,38 +69,44 @@ namespace image
         */
 
         // Trigonometric constants in 13-bit fixed point format.
-        private static readonly long fix_0_298631336 = 2446L;
-        private static readonly long fix_0_390180644 = 3196L;
-        private static readonly long fix_0_541196100 = 4433L;
-        private static readonly long fix_0_765366865 = 6270L;
-        private static readonly long fix_0_899976223 = 7373L;
-        private static readonly long fix_1_175875602 = 9633L;
-        private static readonly long fix_1_501321110 = 12299L;
-        private static readonly long fix_1_847759065 = 15137L;
-        private static readonly long fix_1_961570560 = 16069L;
-        private static readonly long fix_2_053119869 = 16819L;
-        private static readonly long fix_2_562915447 = 20995L;
-        private static readonly long fix_3_072711026 = 25172L;
+        private static readonly long fix_0_298631336 = (long)2446L;
+        private static readonly long fix_0_390180644 = (long)3196L;
+        private static readonly long fix_0_541196100 = (long)4433L;
+        private static readonly long fix_0_765366865 = (long)6270L;
+        private static readonly long fix_0_899976223 = (long)7373L;
+        private static readonly long fix_1_175875602 = (long)9633L;
+        private static readonly long fix_1_501321110 = (long)12299L;
+        private static readonly long fix_1_847759065 = (long)15137L;
+        private static readonly long fix_1_961570560 = (long)16069L;
+        private static readonly long fix_2_053119869 = (long)16819L;
+        private static readonly long fix_2_562915447 = (long)20995L;
+        private static readonly long fix_3_072711026 = (long)25172L;
 
-        private static readonly long constBits = 13L;
-        private static readonly long pass1Bits = 2L;
-        private static readonly long centerJSample = 128L;
+
+        private static readonly long constBits = (long)13L;
+        private static readonly long pass1Bits = (long)2L;
+        private static readonly long centerJSample = (long)128L;
+
 
         // fdct performs a forward DCT on an 8x8 block of coefficients, including a
         // level shift.
-        private static void fdct(ref block b)
-        { 
+        private static void fdct(ptr<block> _addr_b)
+        {
+            ref block b = ref _addr_b.val;
+ 
             // Pass 1: process rows.
             for (long y = 0L; y < 8L; y++)
             {
-                var x0 = b[y * 8L + 0L];
-                var x1 = b[y * 8L + 1L];
-                var x2 = b[y * 8L + 2L];
-                var x3 = b[y * 8L + 3L];
-                var x4 = b[y * 8L + 4L];
-                var x5 = b[y * 8L + 5L];
-                var x6 = b[y * 8L + 6L];
-                var x7 = b[y * 8L + 7L];
+                var y8 = y * 8L;
+                var s = b.slice(y8, y8 + 8L, y8 + 8L); // Small cap improves performance, see https://golang.org/issue/27857
+                var x0 = s[0L];
+                var x1 = s[1L];
+                var x2 = s[2L];
+                var x3 = s[3L];
+                var x4 = s[4L];
+                var x5 = s[5L];
+                var x6 = s[6L];
+                var x7 = s[7L];
 
                 var tmp0 = x0 + x7;
                 var tmp1 = x1 + x6;
@@ -117,12 +123,12 @@ namespace image
                 tmp2 = x2 - x5;
                 tmp3 = x3 - x4;
 
-                b[y * 8L + 0L] = (tmp10 + tmp11 - 8L * centerJSample) << (int)(pass1Bits);
-                b[y * 8L + 4L] = (tmp10 - tmp11) << (int)(pass1Bits);
+                s[0L] = (tmp10 + tmp11 - 8L * centerJSample) << (int)(pass1Bits);
+                s[4L] = (tmp10 - tmp11) << (int)(pass1Bits);
                 var z1 = (tmp12 + tmp13) * fix_0_541196100;
                 z1 += 1L << (int)((constBits - pass1Bits - 1L));
-                b[y * 8L + 2L] = (z1 + tmp12 * fix_0_765366865) >> (int)((constBits - pass1Bits));
-                b[y * 8L + 6L] = (z1 - tmp13 * fix_1_847759065) >> (int)((constBits - pass1Bits));
+                s[2L] = (z1 + tmp12 * fix_0_765366865) >> (int)((constBits - pass1Bits));
+                s[6L] = (z1 - tmp13 * fix_1_847759065) >> (int)((constBits - pass1Bits));
 
                 tmp10 = tmp0 + tmp3;
                 tmp11 = tmp1 + tmp2;
@@ -130,21 +136,22 @@ namespace image
                 tmp13 = tmp1 + tmp3;
                 z1 = (tmp12 + tmp13) * fix_1_175875602;
                 z1 += 1L << (int)((constBits - pass1Bits - 1L));
-                tmp0 = tmp0 * fix_1_501321110;
-                tmp1 = tmp1 * fix_3_072711026;
-                tmp2 = tmp2 * fix_2_053119869;
-                tmp3 = tmp3 * fix_0_298631336;
-                tmp10 = tmp10 * -fix_0_899976223;
-                tmp11 = tmp11 * -fix_2_562915447;
-                tmp12 = tmp12 * -fix_0_390180644;
-                tmp13 = tmp13 * -fix_1_961570560;
+                tmp0 *= fix_1_501321110;
+                tmp1 *= fix_3_072711026;
+                tmp2 *= fix_2_053119869;
+                tmp3 *= fix_0_298631336;
+                tmp10 *= -fix_0_899976223;
+                tmp11 *= -fix_2_562915447;
+                tmp12 *= -fix_0_390180644;
+                tmp13 *= -fix_1_961570560;
 
                 tmp12 += z1;
                 tmp13 += z1;
-                b[y * 8L + 1L] = (tmp0 + tmp10 + tmp12) >> (int)((constBits - pass1Bits));
-                b[y * 8L + 3L] = (tmp1 + tmp11 + tmp13) >> (int)((constBits - pass1Bits));
-                b[y * 8L + 5L] = (tmp2 + tmp11 + tmp12) >> (int)((constBits - pass1Bits));
-                b[y * 8L + 7L] = (tmp3 + tmp10 + tmp13) >> (int)((constBits - pass1Bits));
+                s[1L] = (tmp0 + tmp10 + tmp12) >> (int)((constBits - pass1Bits));
+                s[3L] = (tmp1 + tmp11 + tmp13) >> (int)((constBits - pass1Bits));
+                s[5L] = (tmp2 + tmp11 + tmp12) >> (int)((constBits - pass1Bits));
+                s[7L] = (tmp3 + tmp10 + tmp13) >> (int)((constBits - pass1Bits));
+
             } 
             // Pass 2: process columns.
             // We remove pass1Bits scaling, but leave results scaled up by an overall factor of 8.
@@ -182,14 +189,14 @@ namespace image
                 tmp13 = tmp1 + tmp3;
                 z1 = (tmp12 + tmp13) * fix_1_175875602;
                 z1 += 1L << (int)((constBits + pass1Bits - 1L));
-                tmp0 = tmp0 * fix_1_501321110;
-                tmp1 = tmp1 * fix_3_072711026;
-                tmp2 = tmp2 * fix_2_053119869;
-                tmp3 = tmp3 * fix_0_298631336;
-                tmp10 = tmp10 * -fix_0_899976223;
-                tmp11 = tmp11 * -fix_2_562915447;
-                tmp12 = tmp12 * -fix_0_390180644;
-                tmp13 = tmp13 * -fix_1_961570560;
+                tmp0 *= fix_1_501321110;
+                tmp1 *= fix_3_072711026;
+                tmp2 *= fix_2_053119869;
+                tmp3 *= fix_0_298631336;
+                tmp10 *= -fix_0_899976223;
+                tmp11 *= -fix_2_562915447;
+                tmp12 *= -fix_0_390180644;
+                tmp13 *= -fix_1_961570560;
 
                 tmp12 += z1;
                 tmp13 += z1;
@@ -198,6 +205,7 @@ namespace image
                 b[5L * 8L + x] = (tmp2 + tmp11 + tmp12) >> (int)((constBits + pass1Bits));
                 b[7L * 8L + x] = (tmp3 + tmp10 + tmp13) >> (int)((constBits + pass1Bits));
             }
+
 
         }
     }

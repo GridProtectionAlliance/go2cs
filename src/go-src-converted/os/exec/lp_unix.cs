@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package exec -- go2cs converted at 2020 August 29 08:24:40 UTC
+// package exec -- go2cs converted at 2020 October 08 03:41:19 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Go\src\os\exec\lp_unix.go
 using errors = go.errors_package;
@@ -26,26 +26,32 @@ namespace os
             var (d, err) = os.Stat(file);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             {
                 var m = d.Mode();
 
                 if (!m.IsDir() && m & 0111L != 0L)
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
 
             }
-            return error.As(os.ErrPermission);
+
+            return error.As(os.ErrPermission)!;
+
         }
 
-        // LookPath searches for an executable binary named file
-        // in the directories named by the PATH environment variable.
+        // LookPath searches for an executable named file in the
+        // directories named by the PATH environment variable.
         // If file contains a slash, it is tried directly and the PATH is not consulted.
         // The result may be an absolute path or a path relative to the current directory.
         public static (@string, error) LookPath(@string file)
-        { 
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+ 
             // NOTE(rsc): I wish we could use the Plan 9 behavior here
             // (only bypass the path if file begins with / or ./ or ../)
             // but that would not match all the Unix shells.
@@ -55,10 +61,13 @@ namespace os
                 var err = findExecutable(file);
                 if (err == null)
                 {
-                    return (file, null);
+                    return (file, error.As(null!)!);
                 }
-                return ("", ref new Error(file,err));
+
+                return ("", error.As(addr(new Error(file,err))!)!);
+
             }
+
             var path = os.Getenv("PATH");
             foreach (var (_, dir) in filepath.SplitList(path))
             {
@@ -66,7 +75,9 @@ namespace os
                 { 
                     // Unix shell semantics: path element "" means "."
                     dir = ".";
+
                 }
+
                 path = filepath.Join(dir, file);
                 {
                     var err__prev1 = err;
@@ -75,14 +86,16 @@ namespace os
 
                     if (err == null)
                     {
-                        return (path, null);
+                        return (path, error.As(null!)!);
                     }
 
                     err = err__prev1;
 
                 }
+
             }
-            return ("", ref new Error(file,ErrNotFound));
+            return ("", error.As(addr(new Error(file,ErrNotFound))!)!);
+
         }
     }
 }}

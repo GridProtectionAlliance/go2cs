@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:28:25 UTC
+// package gc -- go2cs converted at 2020 October 08 04:30:18 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\select.go
 using types = go.cmd.compile.@internal.types_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace cmd {
@@ -16,14 +17,16 @@ namespace @internal
     public static partial class gc_package
     {
         // select
-        private static void typecheckselect(ref Node sel)
+        private static void typecheckselect(ptr<Node> _addr_sel)
         {
-            ref Node def = default;
+            ref Node sel = ref _addr_sel.val;
+
+            ptr<Node> def;
             var lno = setlineno(sel);
-            typecheckslice(sel.Ninit.Slice(), Etop);
+            typecheckslice(sel.Ninit.Slice(), ctxStmt);
             foreach (var (_, ncase) in sel.List.Slice())
             {
-                if (ncase.Op != OXCASE)
+                if (ncase.Op != OCASE)
                 {
                     setlineno(ncase);
                     Fatalf("typecheckselect %v", ncase.Op);
@@ -46,7 +49,7 @@ namespace @internal
                 }
                 else
                 {
-                    ncase.List.SetFirst(typecheck(ncase.List.First(), Etop));
+                    ncase.List.SetFirst(typecheck(ncase.List.First(), ctxStmt));
                     var n = ncase.List.First();
                     ncase.Left = n;
                     ncase.List.Set(null);
@@ -65,16 +68,14 @@ namespace @internal
 
                         // convert x, ok = <-c into OSELRECV2(x, <-c) with ntest=ok
                     else if (n.Op == OAS2RECV) 
-                        if (n.Rlist.First().Op != ORECV)
+                        if (n.Right.Op != ORECV)
                         {
                             yyerrorl(n.Pos, "select assignment must have receive on right hand side");
                             break;
                         }
                         n.Op = OSELRECV2;
                         n.Left = n.List.First();
-                        n.List.Set1(n.List.Second());
-                        n.Right = n.Rlist.First();
-                        n.Rlist.Set(null); 
+                        n.List.Set1(n.List.Second()); 
 
                         // convert <-c into OSELRECV(N, <-c)
                     else if (n.Op == ORECV) 
@@ -85,44 +86,62 @@ namespace @internal
                     else if (n.Op == OSEND) 
                         break;
                     else 
-                        yyerrorl(n.Pos, "select case must be receive, send or assign recv"); 
+                        var pos = n.Pos;
+                        if (n.Op == ONAME)
+                        { 
+                            // We don't have the right position for ONAME nodes (see #15459 and
+                            // others). Using ncase.Pos for now as it will provide the correct
+                            // line number (assuming the expression follows the "case" keyword
+                            // on the same line). This matches the approach before 1.10.
+                            pos = ncase.Pos;
+
+                        }
+                        yyerrorl(pos, "select case must be receive, send or assign recv"); 
 
                         // convert x = <-c into OSELRECV(x, <-c).
                         // remove implicit conversions; the eventual assignment
                         // will reintroduce them.
                                     }
-                typecheckslice(ncase.Nbody.Slice(), Etop);
+                typecheckslice(ncase.Nbody.Slice(), ctxStmt);
+
             }            lineno = lno;
+
         }
 
-        private static void walkselect(ref Node sel)
+        private static void walkselect(ptr<Node> _addr_sel)
         {
+            ref Node sel = ref _addr_sel.val;
+
             var lno = setlineno(sel);
             if (sel.Nbody.Len() != 0L)
             {
                 Fatalf("double walkselect");
             }
+
             var init = sel.Ninit.Slice();
             sel.Ninit.Set(null);
 
-            init = append(init, walkselectcases(ref sel.List));
+            init = append(init, walkselectcases(_addr_sel.List));
             sel.List.Set(null);
 
             sel.Nbody.Set(init);
             walkstmtlist(sel.Nbody.Slice());
 
             lineno = lno;
+
         }
 
-        private static slice<ref Node> walkselectcases(ref Nodes cases)
+        private static slice<ptr<Node>> walkselectcases(ptr<Nodes> _addr_cases)
         {
+            ref Nodes cases = ref _addr_cases.val;
+
             var n = cases.Len();
             var sellineno = lineno; 
 
             // optimization: zero-case select
             if (n == 0L)
             {
-                return new slice<ref Node>(new ref Node[] { mkcall("block",nil,nil) });
+                return new slice<ptr<Node>>(new ptr<Node>[] { mkcall("block",nil,nil) });
             } 
 
             // optimization: one-case select: single op.
@@ -138,7 +157,7 @@ namespace @internal
                     n = cas.Left;
                     l = append(l, n.Ninit.Slice());
                     n.Ninit.Set(null);
-                    ref Node ch = default;
+                    ptr<Node> ch;
 
                     if (n.Op == OSEND) 
                         ch = n.Left;
@@ -154,20 +173,24 @@ namespace @internal
                             {
                                 n.Op = OAS;
                             }
+
                             break;
+
                         }
+
                         if (n.Left == null)
                         {
-                            nblank = typecheck(nblank, Erv | Easgn);
+                            nblank = typecheck(nblank, ctxExpr | ctxAssign);
                             n.Left = nblank;
                         }
+
                         n.Op = OAS2;
                         n.List.Prepend(n.Left);
                         n.Rlist.Set1(n.Right);
                         n.Right = null;
                         n.Left = null;
                         n.SetTypecheck(0L);
-                        n = typecheck(n, Etop);
+                        n = typecheck(n, ctxStmt);
                     else 
                         Fatalf("select %v", n.Op); 
 
@@ -176,16 +199,19 @@ namespace @internal
                     var a = nod(OIF, null, null);
 
                     a.Left = nod(OEQ, ch, nodnil());
-                    Nodes ln = default;
+                    ref Nodes ln = ref heap(out ptr<Nodes> _addr_ln);
                     ln.Set(l);
-                    a.Nbody.Set1(mkcall("block", null, ref ln));
+                    a.Nbody.Set1(mkcall("block", null, _addr_ln));
                     l = ln.Slice();
-                    a = typecheck(a, Etop);
+                    a = typecheck(a, ctxStmt);
                     l = append(l, a, n);
+
                 }
+
                 l = append(l, cas.Nbody.Slice());
                 l = append(l, nod(OBREAK, null, null));
                 return l;
+
             } 
 
             // convert case value arguments to addresses.
@@ -203,28 +229,22 @@ namespace @internal
                         continue;
                     }
 
+
                     if (n.Op == OSEND) 
                         n.Right = nod(OADDR, n.Right, null);
-                        n.Right = typecheck(n.Right, Erv);
+                        n.Right = typecheck(n.Right, ctxExpr);
                     else if (n.Op == OSELRECV || n.Op == OSELRECV2) 
                         if (n.Op == OSELRECV2 && n.List.Len() == 0L)
                         {
                             n.Op = OSELRECV;
                         }
-                        if (n.Op == OSELRECV2)
-                        {
-                            n.List.SetFirst(nod(OADDR, n.List.First(), null));
-                            n.List.SetFirst(typecheck(n.List.First(), Erv));
-                        }
-                        if (n.Left == null)
-                        {
-                            n.Left = nodnil();
-                        }
-                        else
+
+                        if (n.Left != null)
                         {
                             n.Left = nod(OADDR, n.Left, null);
-                            n.Left = typecheck(n.Left, Erv);
+                            n.Left = typecheck(n.Left, ctxExpr);
                         }
+
                                     } 
 
                 // optimization: two-case select but one is default: single non-blocking op.
@@ -234,8 +254,8 @@ namespace @internal
 
             if (n == 2L && (cases.First().Left == null || cases.Second().Left == null))
             {
-                cas = default;
-                ref Node dflt = default;
+                cas = ;
+                ptr<Node> dflt;
                 if (cases.First().Left == null)
                 {
                     cas = cases.Second();
@@ -246,6 +266,7 @@ namespace @internal
                     dflt = cases.Second();
                     cas = cases.First();
                 }
+
                 n = cas.Left;
                 setlineno(n);
                 var r = nod(OIF, null, null);
@@ -254,52 +275,81 @@ namespace @internal
                 if (n.Op == OSEND) 
                     // if selectnbsend(c, v) { body } else { default body }
                     ch = n.Left;
-                    r.Left = mkcall1(chanfn("selectnbsend", 2L, ch.Type), types.Types[TBOOL], ref r.Ninit, ch, n.Right);
+                    r.Left = mkcall1(chanfn("selectnbsend", 2L, ch.Type), types.Types[TBOOL], _addr_r.Ninit, ch, n.Right);
                 else if (n.Op == OSELRECV) 
-                    // if c != nil && selectnbrecv(&v, c) { body } else { default body }
+                    // if selectnbrecv(&v, c) { body } else { default body }
                     r = nod(OIF, null, null);
                     r.Ninit.Set(cas.Ninit.Slice());
                     ch = n.Right.Left;
-                    r.Left = mkcall1(chanfn("selectnbrecv", 2L, ch.Type), types.Types[TBOOL], ref r.Ninit, n.Left, ch);
+                    var elem = n.Left;
+                    if (elem == null)
+                    {
+                        elem = nodnil();
+                    }
+
+                    r.Left = mkcall1(chanfn("selectnbrecv", 2L, ch.Type), types.Types[TBOOL], _addr_r.Ninit, elem, ch);
                 else if (n.Op == OSELRECV2) 
-                    // if c != nil && selectnbrecv2(&v, c) { body } else { default body }
+                    // if selectnbrecv2(&v, &received, c) { body } else { default body }
                     r = nod(OIF, null, null);
                     r.Ninit.Set(cas.Ninit.Slice());
                     ch = n.Right.Left;
-                    r.Left = mkcall1(chanfn("selectnbrecv2", 2L, ch.Type), types.Types[TBOOL], ref r.Ninit, n.Left, n.List.First(), ch);
+                    elem = n.Left;
+                    if (elem == null)
+                    {
+                        elem = nodnil();
+                    }
+
+                    var receivedp = nod(OADDR, n.List.First(), null);
+                    receivedp = typecheck(receivedp, ctxExpr);
+                    r.Left = mkcall1(chanfn("selectnbrecv2", 2L, ch.Type), types.Types[TBOOL], _addr_r.Ninit, elem, receivedp, ch);
                 else 
                     Fatalf("select %v", n.Op);
-                                r.Left = typecheck(r.Left, Erv);
+                                r.Left = typecheck(r.Left, ctxExpr);
                 r.Nbody.Set(cas.Nbody.Slice());
                 r.Rlist.Set(append(dflt.Ninit.Slice(), dflt.Nbody.Slice()));
-                return new slice<ref Node>(new ref Node[] { r, nod(OBREAK,nil,nil) });
+                return new slice<ptr<Node>>(new ptr<Node>[] { r, nod(OBREAK,nil,nil) });
+
             }
-            slice<ref Node> init = default; 
+
+            slice<ptr<Node>> init = default; 
 
             // generate sel-struct
             lineno = sellineno;
-            var selv = temp(selecttype(int64(n)));
+            var selv = temp(types.NewArray(scasetype(), int64(n)));
             r = nod(OAS, selv, null);
-            r = typecheck(r, Etop);
+            r = typecheck(r, ctxStmt);
             init = append(init, r);
-            var var_ = conv(conv(nod(OADDR, selv, null), types.Types[TUNSAFEPTR]), types.NewPtr(types.Types[TUINT8]));
-            r = mkcall("newselect", null, null, var_, nodintconst(selv.Type.Width), nodintconst(int64(n)));
-            r = typecheck(r, Etop);
+
+            var order = temp(types.NewArray(types.Types[TUINT16], 2L * int64(n)));
+            r = nod(OAS, order, null);
+            r = typecheck(r, ctxStmt);
             init = append(init, r); 
 
             // register cases
             {
+                var i__prev1 = i;
                 var cas__prev1 = cas;
 
-                foreach (var (_, __cas) in cases.Slice())
+                foreach (var (__i, __cas) in cases.Slice())
                 {
+                    i = __i;
                     cas = __cas;
                     setlineno(cas);
 
                     init = append(init, cas.Ninit.Slice());
-                    cas.Ninit.Set(null);
+                    cas.Ninit.Set(null); 
 
-                    ref Node x = default;
+                    // Keep in sync with runtime/select.go.
+                    const var caseNil = (var)iota;
+                    const var caseRecv = (var)0;
+                    const var caseSend = (var)1;
+                    const var caseDefault = (var)2;
+
+
+                    ptr<Node> c;                    elem = ;
+
+                    long kind = caseDefault;
+
                     {
                         var n__prev1 = n;
 
@@ -311,46 +361,77 @@ namespace @internal
 
 
                             if (n.Op == OSEND) 
-                                // selectsend(sel *byte, hchan *chan any, elem *any)
-                                x = mkcall1(chanfn("selectsend", 2L, n.Left.Type), null, null, var_, n.Left, n.Right);
-                            else if (n.Op == OSELRECV) 
-                                // selectrecv(sel *byte, hchan *chan any, elem *any, received *bool)
-                                x = mkcall1(chanfn("selectrecv", 2L, n.Right.Left.Type), null, null, var_, n.Right.Left, n.Left, nodnil());
-                            else if (n.Op == OSELRECV2) 
-                                // selectrecv(sel *byte, hchan *chan any, elem *any, received *bool)
-                                x = mkcall1(chanfn("selectrecv", 2L, n.Right.Left.Type), null, null, var_, n.Right.Left, n.Left, n.List.First());
+                                kind = caseSend;
+                                c = n.Left;
+                                elem = n.Right;
+                            else if (n.Op == OSELRECV || n.Op == OSELRECV2) 
+                                kind = caseRecv;
+                                c = n.Right.Left;
+                                elem = n.Left;
                             else 
                                 Fatalf("select %v", n.Op);
-                                                    }
-                        else
-                        { 
-                            // selectdefault(sel *byte)
-                            x = mkcall("selectdefault", null, null, var_);
+                            
                         }
 
                         n = n__prev1;
 
                     }
 
-                    init = append(init, x);
+
+                    Action<@string, ptr<Node>> setField = (f, val) =>
+                    {
+                        r = nod(OAS, nodSym(ODOT, nod(OINDEX, selv, nodintconst(int64(i))), lookup(f)), val);
+                        r = typecheck(r, ctxStmt);
+                        init = append(init, r);
+                    }
+;
+
+                    setField("kind", nodintconst(kind));
+                    if (c != null)
+                    {
+                        c = convnop(c, types.Types[TUNSAFEPTR]);
+                        setField("c", c);
+                    }
+
+                    if (elem != null)
+                    {
+                        elem = convnop(elem, types.Types[TUNSAFEPTR]);
+                        setField("elem", elem);
+                    } 
+
+                    // TODO(mdempsky): There should be a cleaner way to
+                    // handle this.
+                    if (instrumenting)
+                    {
+                        r = mkcall("selectsetpc", null, null, bytePtrToIndex(_addr_selv, int64(i)));
+                        init = append(init, r);
+                    }
+
                 } 
 
                 // run the select
 
+                i = i__prev1;
                 cas = cas__prev1;
             }
 
             lineno = sellineno;
             var chosen = temp(types.Types[TINT]);
-            r = nod(OAS, chosen, mkcall("selectgo", types.Types[TINT], null, var_));
-            r = typecheck(r, Etop);
+            var recvOK = temp(types.Types[TBOOL]);
+            r = nod(OAS2, null, null);
+            r.List.Set2(chosen, recvOK);
+            var fn = syslook("selectgo");
+            r.Rlist.Set1(mkcall1(fn, fn.Type.Results(), null, bytePtrToIndex(_addr_selv, 0L), bytePtrToIndex(_addr_order, 0L), nodintconst(int64(n))));
+            r = typecheck(r, ctxStmt);
             init = append(init, r); 
 
-            // selv is no longer alive after selectgo.
-            init = append(init, nod(OVARKILL, selv, null)); 
+            // selv and order are no longer alive after selectgo.
+            init = append(init, nod(OVARKILL, selv, null));
+            init = append(init, nod(OVARKILL, order, null)); 
 
             // dispatch cases
             {
+                var i__prev1 = i;
                 var cas__prev1 = cas;
 
                 foreach (var (__i, __cas) in cases.Slice())
@@ -360,33 +441,65 @@ namespace @internal
                     setlineno(cas);
 
                     var cond = nod(OEQ, chosen, nodintconst(int64(i)));
-                    cond = typecheck(cond, Erv);
+                    cond = typecheck(cond, ctxExpr);
+                    cond = defaultlit(cond, null);
 
                     r = nod(OIF, cond, null);
-                    r.Nbody.AppendNodes(ref cas.Nbody);
+
+                    {
+                        var n__prev1 = n;
+
+                        n = cas.Left;
+
+                        if (n != null && n.Op == OSELRECV2)
+                        {
+                            var x = nod(OAS, n.List.First(), recvOK);
+                            x = typecheck(x, ctxStmt);
+                            r.Nbody.Append(x);
+                        }
+
+                        n = n__prev1;
+
+                    }
+
+
+                    r.Nbody.AppendNodes(_addr_cas.Nbody);
                     r.Nbody.Append(nod(OBREAK, null, null));
                     init = append(init, r);
+
                 }
 
+                i = i__prev1;
                 cas = cas__prev1;
             }
 
             return init;
+
         }
 
+        // bytePtrToIndex returns a Node representing "(*byte)(&n[i])".
+        private static ptr<Node> bytePtrToIndex(ptr<Node> _addr_n, long i)
+        {
+            ref Node n = ref _addr_n.val;
+
+            var s = nod(OADDR, nod(OINDEX, n, nodintconst(i)), null);
+            var t = types.NewPtr(types.Types[TUINT8]);
+            return _addr_convnop(s, t)!;
+        }
+
+        private static ptr<types.Type> scase;
+
         // Keep in sync with src/runtime/select.go.
-        private static ref types.Type selecttype(long size)
-        { 
-            // TODO(dvyukov): it's possible to generate Scase only once
-            // and then cache; and also cache Select per size.
+        private static ptr<types.Type> scasetype()
+        {
+            if (scase == null)
+            {
+                scase = tostruct(new slice<ptr<Node>>(new ptr<Node>[] { namedfield("c",types.Types[TUNSAFEPTR]), namedfield("elem",types.Types[TUNSAFEPTR]), namedfield("kind",types.Types[TUINT16]), namedfield("pc",types.Types[TUINTPTR]), namedfield("releasetime",types.Types[TINT64]) }));
+                scase.SetNoalg(true);
+            }
 
-            var scase = tostruct(new slice<ref Node>(new ref Node[] { namedfield("elem",types.NewPtr(types.Types[TUINT8])), namedfield("chan",types.NewPtr(types.Types[TUINT8])), namedfield("pc",types.Types[TUINTPTR]), namedfield("kind",types.Types[TUINT16]), namedfield("receivedp",types.NewPtr(types.Types[TUINT8])), namedfield("releasetime",types.Types[TUINT64]) }));
-            scase.SetNoalg(true);
+            return _addr_scase!;
 
-            var sel = tostruct(new slice<ref Node>(new ref Node[] { namedfield("tcase",types.Types[TUINT16]), namedfield("ncase",types.Types[TUINT16]), namedfield("pollorder",types.NewPtr(types.Types[TUINT8])), namedfield("lockorder",types.NewPtr(types.Types[TUINT8])), namedfield("scase",types.NewArray(scase,size)), namedfield("lockorderarr",types.NewArray(types.Types[TUINT16],size)), namedfield("pollorderarr",types.NewArray(types.Types[TUINT16],size)) }));
-            sel.SetNoalg(true);
-
-            return sel;
         }
     }
 }}}}

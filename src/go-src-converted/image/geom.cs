@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package image -- go2cs converted at 2020 August 29 10:09:39 UTC
+// package image -- go2cs converted at 2020 October 08 04:59:05 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Go\src\image\geom.go
 using color = go.image.color_package;
+using bits = go.math.bits_package;
 using strconv = go.strconv_package;
 using static go.builtin;
 
@@ -68,12 +69,15 @@ namespace go
             {
                 p.X += w;
             }
+
             p.Y = p.Y % h;
             if (p.Y < 0L)
             {
                 p.Y += h;
             }
+
             return p.Add(r.Min);
+
         }
 
         // Eq reports whether p and q are equal.
@@ -83,6 +87,8 @@ namespace go
         }
 
         // ZP is the zero Point.
+        //
+        // Deprecated: Use a literal image.Point{} instead.
         public static Point ZP = default;
 
         // Pt is shorthand for Point{X, Y}.
@@ -156,6 +162,7 @@ namespace go
                 r.Min.X += n;
                 r.Max.X -= n;
             }
+
             if (r.Dy() < 2L * n)
             {
                 r.Min.Y = (r.Min.Y + r.Max.Y) / 2L;
@@ -166,7 +173,9 @@ namespace go
                 r.Min.Y += n;
                 r.Max.Y -= n;
             }
+
             return r;
+
         }
 
         // Intersect returns the largest rectangle contained by both r and s. If the
@@ -177,14 +186,17 @@ namespace go
             {
                 r.Min.X = s.Min.X;
             }
+
             if (r.Min.Y < s.Min.Y)
             {
                 r.Min.Y = s.Min.Y;
             }
+
             if (r.Max.X > s.Max.X)
             {
                 r.Max.X = s.Max.X;
             }
+
             if (r.Max.Y > s.Max.Y)
             {
                 r.Max.Y = s.Max.Y;
@@ -197,7 +209,9 @@ namespace go
             {
                 return ZR;
             }
+
             return r;
+
         }
 
         // Union returns the smallest rectangle that contains both r and s.
@@ -207,27 +221,34 @@ namespace go
             {
                 return s;
             }
+
             if (s.Empty())
             {
                 return r;
             }
+
             if (r.Min.X > s.Min.X)
             {
                 r.Min.X = s.Min.X;
             }
+
             if (r.Min.Y > s.Min.Y)
             {
                 r.Min.Y = s.Min.Y;
             }
+
             if (r.Max.X < s.Max.X)
             {
                 r.Max.X = s.Max.X;
             }
+
             if (r.Max.Y < s.Max.Y)
             {
                 r.Max.Y = s.Max.Y;
             }
+
             return r;
+
         }
 
         // Empty reports whether the rectangle contains no points.
@@ -259,6 +280,7 @@ namespace go
             // Note that r.Max is an exclusive bound for r, so that r.In(s)
             // does not require that r.Max.In(s).
             return s.Min.X <= r.Min.X && r.Max.X <= s.Max.X && s.Min.Y <= r.Min.Y && r.Max.Y <= s.Max.Y;
+
         }
 
         // Canon returns the canonical version of r. The returned rectangle has minimum
@@ -269,13 +291,18 @@ namespace go
             {
                 r.Min.X = r.Max.X;
                 r.Max.X = r.Min.X;
+
             }
+
             if (r.Max.Y < r.Min.Y)
             {
                 r.Min.Y = r.Max.Y;
                 r.Max.Y = r.Min.Y;
+
             }
+
             return r;
+
         }
 
         // At implements the Image interface.
@@ -285,7 +312,9 @@ namespace go
             {
                 return color.Opaque;
             }
+
             return color.Transparent;
+
         }
 
         // Bounds implements the Image interface.
@@ -301,6 +330,8 @@ namespace go
         }
 
         // ZR is the zero Rectangle.
+        //
+        // Deprecated: Use a literal image.Rectangle{} instead.
         public static Rectangle ZR = default;
 
         // Rect is shorthand for Rectangle{Pt(x0, y0), Pt(x1, y1)}. The returned
@@ -312,13 +343,68 @@ namespace go
             {
                 x0 = x1;
                 x1 = x0;
+
             }
+
             if (y0 > y1)
             {
                 y0 = y1;
                 y1 = y0;
+
             }
+
             return new Rectangle(Point{x0,y0},Point{x1,y1});
+
+        }
+
+        // mul3NonNeg returns (x * y * z), unless at least one argument is negative or
+        // if the computation overflows the int type, in which case it returns -1.
+        private static long mul3NonNeg(long x, long y, long z)
+        {
+            if ((x < 0L) || (y < 0L) || (z < 0L))
+            {
+                return -1L;
+            }
+
+            var (hi, lo) = bits.Mul64(uint64(x), uint64(y));
+            if (hi != 0L)
+            {
+                return -1L;
+            }
+
+            hi, lo = bits.Mul64(lo, uint64(z));
+            if (hi != 0L)
+            {
+                return -1L;
+            }
+
+            var a = int(lo);
+            if ((a < 0L) || (uint64(a) != lo))
+            {
+                return -1L;
+            }
+
+            return a;
+
+        }
+
+        // add2NonNeg returns (x + y), unless at least one argument is negative or if
+        // the computation overflows the int type, in which case it returns -1.
+        private static long add2NonNeg(long x, long y)
+        {
+            if ((x < 0L) || (y < 0L))
+            {
+                return -1L;
+            }
+
+            var a = x + y;
+            if (a < 0L)
+            {
+                return -1L;
+            }
+
+            return a;
+
         }
     }
 }

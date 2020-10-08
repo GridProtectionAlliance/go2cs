@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:19:50 UTC
+//     Generated on 2020 October 08 03:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -40,18 +41,16 @@ namespace go
                 this.caughtsig = default;
                 this.p = default;
                 this.nextp = default;
+                this.oldp = default;
                 this.id = default;
                 this.mallocing = default;
                 this.throwing = default;
                 this.preemptoff = default;
                 this.locks = default;
-                this.softfloat = default;
                 this.dying = default;
                 this.profilehz = default;
-                this.helpgc = default;
                 this.spinning = default;
                 this.blocked = default;
-                this.inwb = default;
                 this.newSigstack = default;
                 this.printlock = default;
                 this.incgo = default;
@@ -66,12 +65,8 @@ namespace go
                 this.park = default;
                 this.alllink = default;
                 this.schedlink = default;
-                this.mcache = default;
                 this.lockedg = default;
                 this.createstack = default;
-                this.freglo = default;
-                this.freghi = default;
-                this.fflag = default;
                 this.lockedExt = default;
                 this.lockedInt = default;
                 this.nextwaitm = default;
@@ -81,17 +76,23 @@ namespace go
                 this.waittraceskip = default;
                 this.startingtrace = default;
                 this.syscalltick = default;
-                this.thread = default;
                 this.freelink = default;
                 this.libcall = default;
                 this.libcallpc = default;
                 this.libcallsp = default;
                 this.libcallg = default;
                 this.syscall = default;
+                this.vdsoSP = default;
+                this.vdsoPC = default;
+                this.preemptGen = default;
+                this.signalPending = default;
+                this.dlogPerM = default;
                 this.mOS = default;
+                this.locksHeldLen = default;
+                this.locksHeld = default;
             }
 
-            public m(ref ptr<g> g0 = default, gobuf morebuf = default, uint divmod = default, ulong procid = default, ref ptr<g> gsignal = default, gsignalStack goSigStack = default, sigset sigmask = default, array<System.UIntPtr> tls = default, Action mstartfn = default, ref ptr<g> curg = default, guintptr caughtsig = default, puintptr p = default, puintptr nextp = default, long id = default, int mallocing = default, int throwing = default, @string preemptoff = default, int locks = default, int softfloat = default, int dying = default, int profilehz = default, int helpgc = default, bool spinning = default, bool blocked = default, bool inwb = default, bool newSigstack = default, sbyte printlock = default, bool incgo = default, uint freeWait = default, array<uint> fastrand = default, bool needextram = default, byte traceback = default, ulong ncgocall = default, int ncgo = default, uint cgoCallersUse = default, ref ptr<cgoCallers> cgoCallers = default, note park = default, ref ptr<m> alllink = default, muintptr schedlink = default, ref ptr<mcache> mcache = default, guintptr lockedg = default, array<System.UIntPtr> createstack = default, array<uint> freglo = default, array<uint> freghi = default, uint fflag = default, uint lockedExt = default, uint lockedInt = default, muintptr nextwaitm = default, unsafe.Pointer waitunlockf = default, unsafe.Pointer waitlock = default, byte waittraceev = default, long waittraceskip = default, bool startingtrace = default, uint syscalltick = default, System.UIntPtr thread = default, ref ptr<m> freelink = default, libcall libcall = default, System.UIntPtr libcallpc = default, System.UIntPtr libcallsp = default, guintptr libcallg = default, libcall syscall = default, mOS mOS = default)
+            public m(ref ptr<g> g0 = default, gobuf morebuf = default, uint divmod = default, ulong procid = default, ref ptr<g> gsignal = default, gsignalStack goSigStack = default, sigset sigmask = default, array<System.UIntPtr> tls = default, Action mstartfn = default, ref ptr<g> curg = default, guintptr caughtsig = default, puintptr p = default, puintptr nextp = default, puintptr oldp = default, long id = default, int mallocing = default, int throwing = default, @string preemptoff = default, int locks = default, int dying = default, int profilehz = default, bool spinning = default, bool blocked = default, bool newSigstack = default, sbyte printlock = default, bool incgo = default, uint freeWait = default, array<uint> fastrand = default, bool needextram = default, byte traceback = default, ulong ncgocall = default, int ncgo = default, uint cgoCallersUse = default, ref ptr<cgoCallers> cgoCallers = default, note park = default, ref ptr<m> alllink = default, muintptr schedlink = default, guintptr lockedg = default, array<System.UIntPtr> createstack = default, uint lockedExt = default, uint lockedInt = default, muintptr nextwaitm = default, Func<ptr<g>, unsafe.Pointer, bool> waitunlockf = default, unsafe.Pointer waitlock = default, byte waittraceev = default, long waittraceskip = default, bool startingtrace = default, uint syscalltick = default, ref ptr<m> freelink = default, libcall libcall = default, System.UIntPtr libcallpc = default, System.UIntPtr libcallsp = default, guintptr libcallg = default, libcall syscall = default, System.UIntPtr vdsoSP = default, System.UIntPtr vdsoPC = default, uint preemptGen = default, uint signalPending = default, dlogPerM dlogPerM = default, mOS mOS = default, long locksHeldLen = default, array<heldLockInfo> locksHeld = default)
             {
                 this.g0 = g0;
                 this.morebuf = morebuf;
@@ -106,18 +107,16 @@ namespace go
                 this.caughtsig = caughtsig;
                 this.p = p;
                 this.nextp = nextp;
+                this.oldp = oldp;
                 this.id = id;
                 this.mallocing = mallocing;
                 this.throwing = throwing;
                 this.preemptoff = preemptoff;
                 this.locks = locks;
-                this.softfloat = softfloat;
                 this.dying = dying;
                 this.profilehz = profilehz;
-                this.helpgc = helpgc;
                 this.spinning = spinning;
                 this.blocked = blocked;
-                this.inwb = inwb;
                 this.newSigstack = newSigstack;
                 this.printlock = printlock;
                 this.incgo = incgo;
@@ -132,12 +131,8 @@ namespace go
                 this.park = park;
                 this.alllink = alllink;
                 this.schedlink = schedlink;
-                this.mcache = mcache;
                 this.lockedg = lockedg;
                 this.createstack = createstack;
-                this.freglo = freglo;
-                this.freghi = freghi;
-                this.fflag = fflag;
                 this.lockedExt = lockedExt;
                 this.lockedInt = lockedInt;
                 this.nextwaitm = nextwaitm;
@@ -147,14 +142,20 @@ namespace go
                 this.waittraceskip = waittraceskip;
                 this.startingtrace = startingtrace;
                 this.syscalltick = syscalltick;
-                this.thread = thread;
                 this.freelink = freelink;
                 this.libcall = libcall;
                 this.libcallpc = libcallpc;
                 this.libcallsp = libcallsp;
                 this.libcallg = libcallg;
                 this.syscall = syscall;
+                this.vdsoSP = vdsoSP;
+                this.vdsoPC = vdsoPC;
+                this.preemptGen = preemptGen;
+                this.signalPending = signalPending;
+                this.dlogPerM = dlogPerM;
                 this.mOS = mOS;
+                this.locksHeldLen = locksHeldLen;
+                this.locksHeld = locksHeld;
             }
 
             // Enable comparisons between nil and m struct
@@ -177,7 +178,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static m m_cast(dynamic value)
         {
-            return new m(ref value.g0, value.morebuf, value.divmod, value.procid, ref value.gsignal, value.goSigStack, value.sigmask, value.tls, value.mstartfn, ref value.curg, value.caughtsig, value.p, value.nextp, value.id, value.mallocing, value.throwing, value.preemptoff, value.locks, value.softfloat, value.dying, value.profilehz, value.helpgc, value.spinning, value.blocked, value.inwb, value.newSigstack, value.printlock, value.incgo, value.freeWait, value.fastrand, value.needextram, value.traceback, value.ncgocall, value.ncgo, value.cgoCallersUse, ref value.cgoCallers, value.park, ref value.alllink, value.schedlink, ref value.mcache, value.lockedg, value.createstack, value.freglo, value.freghi, value.fflag, value.lockedExt, value.lockedInt, value.nextwaitm, value.waitunlockf, value.waitlock, value.waittraceev, value.waittraceskip, value.startingtrace, value.syscalltick, value.thread, ref value.freelink, value.libcall, value.libcallpc, value.libcallsp, value.libcallg, value.syscall, value.mOS);
+            return new m(ref value.g0, value.morebuf, value.divmod, value.procid, ref value.gsignal, value.goSigStack, value.sigmask, value.tls, value.mstartfn, ref value.curg, value.caughtsig, value.p, value.nextp, value.oldp, value.id, value.mallocing, value.throwing, value.preemptoff, value.locks, value.dying, value.profilehz, value.spinning, value.blocked, value.newSigstack, value.printlock, value.incgo, value.freeWait, value.fastrand, value.needextram, value.traceback, value.ncgocall, value.ncgo, value.cgoCallersUse, ref value.cgoCallers, value.park, ref value.alllink, value.schedlink, value.lockedg, value.createstack, value.lockedExt, value.lockedInt, value.nextwaitm, value.waitunlockf, value.waitlock, value.waittraceev, value.waittraceskip, value.startingtrace, value.syscalltick, ref value.freelink, value.libcall, value.libcallpc, value.libcallsp, value.libcallg, value.syscall, value.vdsoSP, value.vdsoPC, value.preemptGen, value.signalPending, value.dlogPerM, value.mOS, value.locksHeldLen, value.locksHeld);
         }
     }
 }

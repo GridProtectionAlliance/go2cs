@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:37 UTC
+//     Generated on 2020 October 08 04:04:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -54,7 +54,7 @@ namespace pkg
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace pkg
                 m_target_is_ptr = true;
             }
 
-            private delegate void XByRef(ref T value);
+            private delegate void XByPtr(ptr<T> value);
             private delegate void XByVal(T value);
 
-            private static readonly XByRef s_XByRef;
+            private static readonly XByPtr s_XByPtr;
             private static readonly XByVal s_XByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,22 +80,23 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_XByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_XByPtr is null || !m_target_is_ptr)
                 {
                     s_XByVal!(target);
                     return;
                 }
 
-                s_XByRef(ref target);
+                s_XByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void YByRef(ref T value);
+            private delegate void YByPtr(ptr<T> value);
             private delegate void YByVal(T value);
 
-            private static readonly YByRef s_YByRef;
+            private static readonly YByPtr s_YByPtr;
             private static readonly YByVal s_YByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,14 +105,15 @@ namespace pkg
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_YByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_YByPtr is null || !m_target_is_ptr)
                 {
                     s_YByVal!(target);
                     return;
                 }
 
-                s_YByRef(ref target);
+                s_YByPtr(m_target_ptr);
                 return;
                 
             }
@@ -122,39 +124,33 @@ namespace pkg
             static Public()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("X");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("X");
 
                 if (!(extensionMethod is null))
-                    s_XByRef = extensionMethod.CreateStaticDelegate(typeof(XByRef)) as XByRef;
+                    s_XByPtr = extensionMethod.CreateStaticDelegate(typeof(XByPtr)) as XByPtr;
 
-                if (s_XByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("X");
+                extensionMethod = targetType.GetExtensionMethod("X");
 
-                    if (!(extensionMethod is null))
-                        s_XByVal = extensionMethod.CreateStaticDelegate(typeof(XByVal)) as XByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_XByVal = extensionMethod.CreateStaticDelegate(typeof(XByVal)) as XByVal;
 
-                if (s_XByRef is null && s_XByVal is null)
+                if (s_XByPtr is null && s_XByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Public.X method", new Exception("X"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Y");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Y");
 
                 if (!(extensionMethod is null))
-                    s_YByRef = extensionMethod.CreateStaticDelegate(typeof(YByRef)) as YByRef;
+                    s_YByPtr = extensionMethod.CreateStaticDelegate(typeof(YByPtr)) as YByPtr;
 
-                if (s_YByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Y");
+                extensionMethod = targetType.GetExtensionMethod("Y");
 
-                    if (!(extensionMethod is null))
-                        s_YByVal = extensionMethod.CreateStaticDelegate(typeof(YByVal)) as YByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_YByVal = extensionMethod.CreateStaticDelegate(typeof(YByVal)) as YByVal;
 
-                if (s_YByRef is null && s_YByVal is null)
+                if (s_YByPtr is null && s_YByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Public.Y method", new Exception("Y"));
             }
 

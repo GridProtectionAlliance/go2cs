@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:47 UTC
+//     Generated on 2020 October 08 04:31:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,6 @@ using static go.builtin;
 using types = go.cmd.compile.@internal.types_package;
 using objabi = go.cmd.@internal.objabi_package;
 using fmt = go.fmt_package;
-using math = go.math_package;
 using strings = go.strings_package;
 using go;
 

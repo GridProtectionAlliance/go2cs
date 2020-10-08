@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 August 29 08:31:44 UTC
+// package x509 -- go2cs converted at 2020 October 08 03:36:56 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\root.go
+//go:generate go run root_darwin_ios_gen.go -version 55161.80.1
+
 using sync = go.sync_package;
 using static go.builtin;
 
@@ -13,17 +15,22 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        private static sync.Once once = default;        private static ref CertPool systemRoots = default;        private static error systemRootsErr = default;
+        private static sync.Once once = default;        private static ptr<CertPool> systemRoots;        private static error systemRootsErr = default!;
 
-        private static ref CertPool systemRootsPool()
+        private static ptr<CertPool> systemRootsPool()
         {
             once.Do(initSystemRoots);
-            return systemRoots;
+            return _addr_systemRoots!;
         }
 
         private static void initSystemRoots()
         {
             systemRoots, systemRootsErr = loadSystemRoots();
+            if (systemRootsErr != null)
+            {
+                systemRoots = null;
+            }
+
         }
     }
 }}

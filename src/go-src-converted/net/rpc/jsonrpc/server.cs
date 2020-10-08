@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jsonrpc -- go2cs converted at 2020 August 29 08:36:37 UTC
+// package jsonrpc -- go2cs converted at 2020 October 08 03:43:29 UTC
 // import "net/rpc/jsonrpc" ==> using jsonrpc = go.net.rpc.jsonrpc_package
 // Original source: C:\Go\src\net\rpc\jsonrpc\server.go
 using json = go.encoding.json_package;
@@ -34,13 +34,13 @@ namespace rpc
 // the response to find the original request ID.
             public sync.Mutex mutex; // protects seq, pending
             public ulong seq;
-            public map<ulong, ref json.RawMessage> pending;
+            public map<ulong, ptr<json.RawMessage>> pending;
         }
 
         // NewServerCodec returns a new rpc.ServerCodec using JSON-RPC on conn.
         public static rpc.ServerCodec NewServerCodec(io.ReadWriteCloser conn)
         {
-            return ref new serverCodec(dec:json.NewDecoder(conn),enc:json.NewEncoder(conn),c:conn,pending:make(map[uint64]*json.RawMessage),);
+            return addr(new serverCodec(dec:json.NewDecoder(conn),enc:json.NewEncoder(conn),c:conn,pending:make(map[uint64]*json.RawMessage),));
         }
 
         private partial struct serverRequest
@@ -53,8 +53,10 @@ namespace rpc
             public ptr<json.RawMessage> Id;
         }
 
-        private static void reset(this ref serverRequest r)
+        private static void reset(this ptr<serverRequest> _addr_r)
         {
+            ref serverRequest r = ref _addr_r.val;
+
             r.Method = "";
             r.Params = null;
             r.Id = null;
@@ -66,18 +68,22 @@ namespace rpc
             public ptr<json.RawMessage> Id;
         }
 
-        private static error ReadRequestHeader(this ref serverCodec c, ref rpc.Request r)
+        private static error ReadRequestHeader(this ptr<serverCodec> _addr_c, ptr<rpc.Request> _addr_r)
         {
+            ref serverCodec c = ref _addr_c.val;
+            ref rpc.Request r = ref _addr_r.val;
+
             c.req.reset();
             {
-                var err = c.dec.Decode(ref c.req);
+                var err = c.dec.Decode(_addr_c.req);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
             r.ServiceMethod = c.req.Method; 
 
             // JSON request id can be any JSON value;
@@ -90,47 +96,58 @@ namespace rpc
             r.Seq = c.seq;
             c.mutex.Unlock();
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static error ReadRequestBody(this ref serverCodec c, object x)
+        private static error ReadRequestBody(this ptr<serverCodec> _addr_c, object x)
         {
+            ref serverCodec c = ref _addr_c.val;
+
             if (x == null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             if (c.req.Params == null)
             {
-                return error.As(errMissingParams);
+                return error.As(errMissingParams)!;
             } 
             // JSON params is array value.
             // RPC params is struct.
             // Unmarshal into array containing struct for now.
             // Should think about making RPC more general.
-            var @params = default;
+            ref var @params = ref heap(out ptr<var> _addr_@params);
             params[0L] = x;
-            return error.As(json.Unmarshal(c.req.Params.Value, ref params));
+            return error.As(json.Unmarshal(c.req.Params.val, _addr_params))!;
+
         }
 
         private static var @null = json.RawMessage((slice<byte>)"null");
 
-        private static error WriteResponse(this ref serverCodec c, ref rpc.Response r, object x)
+        private static error WriteResponse(this ptr<serverCodec> _addr_c, ptr<rpc.Response> _addr_r, object x)
         {
+            ref serverCodec c = ref _addr_c.val;
+            ref rpc.Response r = ref _addr_r.val;
+
             c.mutex.Lock();
             var (b, ok) = c.pending[r.Seq];
             if (!ok)
             {
                 c.mutex.Unlock();
-                return error.As(errors.New("invalid sequence number in response"));
+                return error.As(errors.New("invalid sequence number in response"))!;
             }
+
             delete(c.pending, r.Seq);
             c.mutex.Unlock();
 
             if (b == null)
             { 
                 // Invalid request so no id. Use JSON null.
-                b = ref null;
+                b = _addr_null;
+
             }
+
             serverResponse resp = new serverResponse(Id:b);
             if (r.Error == "")
             {
@@ -140,12 +157,16 @@ namespace rpc
             {
                 resp.Error = r.Error;
             }
-            return error.As(c.enc.Encode(resp));
+
+            return error.As(c.enc.Encode(resp))!;
+
         }
 
-        private static error Close(this ref serverCodec c)
+        private static error Close(this ptr<serverCodec> _addr_c)
         {
-            return error.As(c.c.Close());
+            ref serverCodec c = ref _addr_c.val;
+
+            return error.As(c.c.Close())!;
         }
 
         // ServeConn runs the JSON-RPC server on a single connection.

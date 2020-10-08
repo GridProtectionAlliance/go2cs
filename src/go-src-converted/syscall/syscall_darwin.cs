@@ -10,23 +10,27 @@
 // it in our own nicer implementation, either here or in
 // syscall_bsd.go or syscall_unix.go.
 
-// package syscall -- go2cs converted at 2020 August 29 08:37:46 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:27:12 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_darwin.go
 using errorspkg = go.errors_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
+using System;
 
 namespace go
 {
-    public static unsafe partial class syscall_package
+    public static partial class syscall_package
     {
-        public static readonly var ImplementsGetwd = true;
+        public static readonly var ImplementsGetwd = (var)true;
 
 
 
         public static (@string, error) Getwd()
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             var buf = make_slice<byte>(2048L);
             var (attrs, err) = getAttrList(".", new attrList(CommonAttr:attrCmnFullpath), buf, 0L);
             if (err == null && len(attrs) == 1L && len(attrs[0L]) >= 2L)
@@ -36,12 +40,14 @@ namespace go
                 // in a null byte, which we then strip.
                 if (wd[0L] == '/' && wd[len(wd) - 1L] == 0L)
                 {
-                    return (wd[..len(wd) - 1L], null);
+                    return (wd[..len(wd) - 1L], error.As(null!)!);
                 }
+
             } 
             // If pkg/os/getwd.go gets ENOTSUP, it will fall back to the
             // slow algorithm.
-            return ("", ENOTSUP);
+            return ("", error.As(ENOTSUP)!);
+
         }
 
         public partial struct SockaddrDatalink
@@ -60,7 +66,10 @@ namespace go
         // Translate "kern.hostname" to []_C_int{0,1,2,3}.
         private static (slice<_C_int>, error) nametomib(@string name)
         {
-            const var siz = @unsafe.Sizeof(mib[0L]); 
+            slice<_C_int> mib = default;
+            error err = default!;
+
+            const var siz = (var)@unsafe.Sizeof(mib[0L]); 
 
             // NOTE(rsc): It seems strange to set the buffer to have
             // size CTL_MAXNAME+2 but use only CTL_MAXNAME
@@ -79,55 +88,70 @@ namespace go
             // will silently write 2 words farther than we specify
             // and we'll get memory corruption.
             array<_C_int> buf = new array<_C_int>(CTL_MAXNAME + 2L);
-            var n = uintptr(CTL_MAXNAME) * siz;
+            ref var n = ref heap(uintptr(CTL_MAXNAME) * siz, out ptr<var> _addr_n);
 
-            var p = (byte.Value)(@unsafe.Pointer(ref buf[0L]));
+            var p = (byte.val)(@unsafe.Pointer(_addr_buf[0L]));
             var (bytes, err) = ByteSliceFromString(name);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             } 
 
             // Magic sysctl: "setting" 0.3 to a string name
             // lets you read back the array of integers form.
-            err = sysctl(new slice<_C_int>(new _C_int[] { 0, 3 }), p, ref n, ref bytes[0L], uintptr(len(name)));
+            err = sysctl(new slice<_C_int>(new _C_int[] { 0, 3 }), p, _addr_n, _addr_bytes[0L], uintptr(len(name)));
 
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (buf[0L..n / siz], null);
+
+            return (buf[0L..n / siz], error.As(null!)!);
+
         }
 
         private static (ulong, bool) direntIno(slice<byte> buf)
         {
+            ulong _p0 = default;
+            bool _p0 = default;
+
             return readInt(buf, @unsafe.Offsetof(new Dirent().Ino), @unsafe.Sizeof(new Dirent().Ino));
         }
 
         private static (ulong, bool) direntReclen(slice<byte> buf)
         {
+            ulong _p0 = default;
+            bool _p0 = default;
+
             return readInt(buf, @unsafe.Offsetof(new Dirent().Reclen), @unsafe.Sizeof(new Dirent().Reclen));
         }
 
         private static (ulong, bool) direntNamlen(slice<byte> buf)
         {
+            ulong _p0 = default;
+            bool _p0 = default;
+
             return readInt(buf, @unsafe.Offsetof(new Dirent().Namlen), @unsafe.Sizeof(new Dirent().Namlen));
         }
 
-        //sys   ptrace(request int, pid int, addr uintptr, data uintptr) (err error)
         public static error PtraceAttach(long pid)
         {
-            return error.As(ptrace(PT_ATTACH, pid, 0L, 0L));
+            error err = default!;
+
+            return error.As(ptrace(PT_ATTACH, pid, 0L, 0L))!;
         }
         public static error PtraceDetach(long pid)
         {
-            return error.As(ptrace(PT_DETACH, pid, 0L, 0L));
+            error err = default!;
+
+            return error.As(ptrace(PT_DETACH, pid, 0L, 0L))!;
         }
 
-        private static readonly long attrBitMapCount = 5L;
-        private static readonly ulong attrCmnModtime = 0x00000400UL;
-        private static readonly ulong attrCmnAcctime = 0x00001000UL;
-        private static readonly ulong attrCmnFullpath = 0x08000000UL;
+        private static readonly long attrBitMapCount = (long)5L;
+        private static readonly ulong attrCmnModtime = (ulong)0x00000400UL;
+        private static readonly ulong attrCmnAcctime = (ulong)0x00001000UL;
+        private static readonly ulong attrCmnFullpath = (ulong)0x08000000UL;
+
 
         private partial struct attrList
         {
@@ -142,24 +166,30 @@ namespace go
 
         private static (slice<slice<byte>>, error) getAttrList(@string path, attrList attrList, slice<byte> attrBuf, ulong options)
         {
+            slice<slice<byte>> attrs = default;
+            error err = default!;
+
             if (len(attrBuf) < 4L)
             {
-                return (null, errorspkg.New("attrBuf too small"));
+                return (null, error.As(errorspkg.New("attrBuf too small"))!);
             }
+
             attrList.bitmapCount = attrBitMapCount;
 
-            ref byte _p0 = default;
+            ptr<byte> _p0;
             _p0, err = BytePtrFromString(path);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            var (_, _, e1) = Syscall6(SYS_GETATTRLIST, uintptr(@unsafe.Pointer(_p0)), uintptr(@unsafe.Pointer(ref attrList)), uintptr(@unsafe.Pointer(ref attrBuf[0L])), uintptr(len(attrBuf)), uintptr(options), 0L);
+
+            var (_, _, e1) = syscall6(funcPC(libc_getattrlist_trampoline), uintptr(@unsafe.Pointer(_p0)), uintptr(@unsafe.Pointer(_addr_attrList)), uintptr(@unsafe.Pointer(_addr_attrBuf[0L])), uintptr(len(attrBuf)), uintptr(options), 0L);
             if (e1 != 0L)
             {
-                return (null, e1);
+                return (null, error.As(e1)!);
             }
-            *(*uint) size = @unsafe.Pointer(ref attrBuf[0L]).Value; 
+
+            ptr<ptr<uint>> size = new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(_addr_attrBuf[0L])); 
 
             // dat is the section of attrBuf that contains valid data,
             // without the 4 byte length header. All attribute offsets
@@ -169,6 +199,7 @@ namespace go
             {
                 dat = dat[..size];
             }
+
             dat = dat[4L..]; // remove length prefix
 
             {
@@ -179,14 +210,16 @@ namespace go
                     var header = dat[i..];
                     if (len(header) < 8L)
                     {
-                        return (attrs, errorspkg.New("truncated attribute header"));
+                        return (attrs, error.As(errorspkg.New("truncated attribute header"))!);
                     }
-                    *(*int) datOff = @unsafe.Pointer(ref header[0L]).Value;
-                    *(*uint) attrLen = @unsafe.Pointer(ref header[4L]).Value;
+
+                    ptr<ptr<int>> datOff = new ptr<ptr<ptr<int>>>(@unsafe.Pointer(_addr_header[0L]));
+                    ptr<ptr<uint>> attrLen = new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(_addr_header[4L]));
                     if (datOff < 0L || uint32(datOff) + attrLen > uint32(len(dat)))
                     {
-                        return (attrs, errorspkg.New("truncated results; attrBuf too small"));
+                        return (attrs, error.As(errorspkg.New("truncated results; attrBuf too small"))!);
                     }
+
                     var end = uint32(datOff) + attrLen;
                     attrs = append(attrs, dat[datOff..end]);
                     i = end;
@@ -199,69 +232,108 @@ namespace go
                         }
 
                     }
+
                 }
 
             }
-            return;
+            return ;
+
         }
 
-        //sysnb pipe() (r int, w int, err error)
+        private static void libc_getattrlist_trampoline()
+;
+
+        //go:linkname libc_getattrlist libc_getattrlist
+        //go:cgo_import_dynamic libc_getattrlist getattrlist "/usr/lib/libSystem.B.dylib"
+
+        //sysnb pipe(p *[2]int32) (err error)
 
         public static error Pipe(slice<long> p)
         {
+            error err = default!;
+
             if (len(p) != 2L)
-            {
-                return error.As(EINVAL);
+            {>>MARKER:FUNCTION_libc_getattrlist_trampoline_BLOCK_PREFIX<<
+                return error.As(EINVAL)!;
             }
-            p[0L], p[1L], err = pipe();
-            return;
+
+            ref array<int> q = ref heap(new array<int>(2L), out ptr<array<int>> _addr_q);
+            err = pipe(_addr_q);
+            p[0L] = int(q[0L]);
+            p[1L] = int(q[1L]);
+            return ;
+
         }
 
         public static (long, error) Getfsstat(slice<Statfs_t> buf, long flags)
         {
+            long n = default;
+            error err = default!;
+
             unsafe.Pointer _p0 = default;
             System.UIntPtr bufsize = default;
             if (len(buf) > 0L)
             {
-                _p0 = @unsafe.Pointer(ref buf[0L]);
+                _p0 = @unsafe.Pointer(_addr_buf[0L]);
                 bufsize = @unsafe.Sizeof(new Statfs_t()) * uintptr(len(buf));
             }
-            var (r0, _, e1) = Syscall(SYS_GETFSSTAT64, uintptr(_p0), bufsize, uintptr(flags));
+
+            var (r0, _, e1) = syscall(funcPC(libc_getfsstat_trampoline), uintptr(_p0), bufsize, uintptr(flags));
             n = int(r0);
             if (e1 != 0L)
             {
                 err = e1;
             }
-            return;
+
+            return ;
+
         }
+
+        private static void libc_getfsstat_trampoline()
+;
+
+        //go:linkname libc_getfsstat libc_getfsstat
+        //go:cgo_import_dynamic libc_getfsstat getfsstat "/usr/lib/libSystem.B.dylib"
 
         private static error setattrlistTimes(@string path, slice<Timespec> times)
         {
             var (_p0, err) = BytePtrFromString(path);
             if (err != null)
-            {
-                return error.As(err);
+            {>>MARKER:FUNCTION_libc_getfsstat_trampoline_BLOCK_PREFIX<<
+                return error.As(err)!;
             }
-            attrList attrList = default;
+
+            ref attrList attrList = ref heap(out ptr<attrList> _addr_attrList);
             attrList.bitmapCount = attrBitMapCount;
             attrList.CommonAttr = attrCmnModtime | attrCmnAcctime; 
 
             // order is mtime, atime: the opposite of Chtimes
-            array<Timespec> attributes = new array<Timespec>(new Timespec[] { times[1], times[0] });
-            const long options = 0L;
+            ref array<Timespec> attributes = ref heap(new array<Timespec>(new Timespec[] { times[1], times[0] }), out ptr<array<Timespec>> _addr_attributes);
+            const long options = (long)0L;
 
-            var (_, _, e1) = Syscall6(SYS_SETATTRLIST, uintptr(@unsafe.Pointer(_p0)), uintptr(@unsafe.Pointer(ref attrList)), uintptr(@unsafe.Pointer(ref attributes)), uintptr(@unsafe.Sizeof(attributes)), uintptr(options), 0L);
+            var (_, _, e1) = syscall6(funcPC(libc_setattrlist_trampoline), uintptr(@unsafe.Pointer(_p0)), uintptr(@unsafe.Pointer(_addr_attrList)), uintptr(@unsafe.Pointer(_addr_attributes)), uintptr(@unsafe.Sizeof(attributes)), uintptr(options), 0L);
             if (e1 != 0L)
             {
-                return error.As(e1);
+                return error.As(e1)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
-        private static error utimensat(long dirfd, @string path, ref array<Timespec> times, long flag)
-        { 
+        private static void libc_setattrlist_trampoline()
+;
+
+        //go:linkname libc_setattrlist libc_setattrlist
+        //go:cgo_import_dynamic libc_setattrlist setattrlist "/usr/lib/libSystem.B.dylib"
+
+        private static error utimensat(long dirfd, @string path, ptr<array<Timespec>> _addr_times, long flag)
+        {
+            ref array<Timespec> times = ref _addr_times.val;
+ 
             // Darwin doesn't support SYS_UTIMENSAT
-            return error.As(ENOSYS);
+            return error.As(ENOSYS)!;
+
         }
 
         /*
@@ -272,7 +344,9 @@ namespace go
 
         public static error Kill(long pid, Signal signum)
         {
-            return error.As(kill(pid, int(signum), 1L));
+            error err = default!;
+
+            return error.As(kill(pid, int(signum), 1L))!;
         }
 
         /*
@@ -286,6 +360,7 @@ namespace go
         //sys    Chown(path string, uid int, gid int) (err error)
         //sys    Chroot(path string) (err error)
         //sys    Close(fd int) (err error)
+        //sys    closedir(dir uintptr) (err error)
         //sys    Dup(fd int) (nfd int, err error)
         //sys    Dup2(from int, to int) (err error)
         //sys    Exchangedata(path1 string, path2 string, options int) (err error)
@@ -295,11 +370,9 @@ namespace go
         //sys    Fchown(fd int, uid int, gid int) (err error)
         //sys    Flock(fd int, how int) (err error)
         //sys    Fpathconf(fd int, name int) (val int, err error)
-        //sys    Fstat(fd int, stat *Stat_t) (err error) = SYS_FSTAT64
-        //sys    Fstatfs(fd int, stat *Statfs_t) (err error) = SYS_FSTATFS64
         //sys    Fsync(fd int) (err error)
+        //  Fsync is not called for os.File.Sync(). Please see internal/poll/fd_fsync_darwin.go
         //sys    Ftruncate(fd int, length int64) (err error)
-        //sys    Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) = SYS_GETDIRENTRIES64
         //sys    Getdtablesize() (size int)
         //sysnb    Getegid() (egid int)
         //sysnb    Geteuid() (uid int)
@@ -318,7 +391,6 @@ namespace go
         //sys    Lchown(path string, uid int, gid int) (err error)
         //sys    Link(path string, link string) (err error)
         //sys    Listen(s int, backlog int) (err error)
-        //sys    Lstat(path string, stat *Stat_t) (err error) = SYS_LSTAT64
         //sys    Mkdir(path string, mode uint32) (err error)
         //sys    Mkfifo(path string, mode uint32) (err error)
         //sys    Mknod(path string, mode uint32, dev int) (err error)
@@ -332,11 +404,12 @@ namespace go
         //sys    Pread(fd int, p []byte, offset int64) (n int, err error)
         //sys    Pwrite(fd int, p []byte, offset int64) (n int, err error)
         //sys    read(fd int, p []byte) (n int, err error)
+        //sys    readdir_r(dir uintptr, entry *Dirent, result **Dirent) (res Errno)
         //sys    Readlink(path string, buf []byte) (n int, err error)
         //sys    Rename(from string, to string) (err error)
         //sys    Revoke(path string) (err error)
         //sys    Rmdir(path string) (err error)
-        //sys    Seek(fd int, offset int64, whence int) (newoffset int64, err error) = SYS_LSEEK
+        //sys    Seek(fd int, offset int64, whence int) (newoffset int64, err error) = SYS_lseek
         //sys    Select(n int, r *FdSet, w *FdSet, e *FdSet, timeout *Timeval) (err error)
         //sys    Setegid(egid int) (err error)
         //sysnb    Seteuid(euid int) (err error)
@@ -351,8 +424,6 @@ namespace go
         //sysnb    Setsid() (pid int, err error)
         //sysnb    Settimeofday(tp *Timeval) (err error)
         //sysnb    Setuid(uid int) (err error)
-        //sys    Stat(path string, stat *Stat_t) (err error) = SYS_STAT64
-        //sys    Statfs(path string, stat *Statfs_t) (err error) = SYS_STATFS64
         //sys    Symlink(path string, link string) (err error)
         //sys    Sync() (err error)
         //sys    Truncate(path string, length int64) (err error)
@@ -361,214 +432,196 @@ namespace go
         //sys    Unlink(path string) (err error)
         //sys    Unmount(path string, flags int) (err error)
         //sys    write(fd int, p []byte) (n int, err error)
+        //sys    writev(fd int, iovecs []Iovec) (cnt uintptr, err error)
         //sys   mmap(addr uintptr, length uintptr, prot int, flag int, fd int, pos int64) (ret uintptr, err error)
         //sys   munmap(addr uintptr, length uintptr) (err error)
-        //sys    readlen(fd int, buf *byte, nbuf int) (n int, err error) = SYS_READ
-        //sys    writelen(fd int, buf *byte, nbuf int) (n int, err error) = SYS_WRITE
+        //sysnb fork() (pid int, err error)
+        //sysnb ioctl(fd int, req int, arg int) (err error)
+        //sysnb ioctlPtr(fd int, req uint, arg unsafe.Pointer) (err error) = SYS_ioctl
+        //sysnb execve(path *byte, argv **byte, envp **byte) (err error)
+        //sysnb exit(res int) (err error)
+        //sys    sysctl(mib []_C_int, old *byte, oldlen *uintptr, new *byte, newlen uintptr) (err error)
+        //sys    fcntlPtr(fd int, cmd int, arg unsafe.Pointer) (val int, err error) = SYS_fcntl
+        //sys   unlinkat(fd int, path string, flags int) (err error)
+        //sys   openat(fd int, path string, flags int, perm uint32) (fdret int, err error)
 
-        /*
-         * Unimplemented
-         */
-        // Profil
-        // Sigaction
-        // Sigprocmask
-        // Getlogin
-        // Sigpending
-        // Sigaltstack
-        // Ioctl
-        // Reboot
-        // Execve
-        // Vfork
-        // Sbrk
-        // Sstk
-        // Ovadvise
-        // Mincore
-        // Setitimer
-        // Swapon
-        // Select
-        // Sigsuspend
-        // Readv
-        // Writev
-        // Nfssvc
-        // Getfh
-        // Quotactl
-        // Mount
-        // Csops
-        // Waitid
-        // Add_profil
-        // Kdebug_trace
-        // Sigreturn
-        // Mmap
-        // Mlock
-        // Munlock
-        // Atsocket
-        // Kqueue_from_portset_np
-        // Kqueue_portset
-        // Getattrlist
-        // Setattrlist
-        // Getdirentriesattr
-        // Searchfs
-        // Delete
-        // Copyfile
-        // Poll
-        // Watchevent
-        // Waitevent
-        // Modwatch
-        // Getxattr
-        // Fgetxattr
-        // Setxattr
-        // Fsetxattr
-        // Removexattr
-        // Fremovexattr
-        // Listxattr
-        // Flistxattr
-        // Fsctl
-        // Initgroups
-        // Posix_spawn
-        // Nfsclnt
-        // Fhopen
-        // Minherit
-        // Semsys
-        // Msgsys
-        // Shmsys
-        // Semctl
-        // Semget
-        // Semop
-        // Msgctl
-        // Msgget
-        // Msgsnd
-        // Msgrcv
-        // Shmat
-        // Shmctl
-        // Shmdt
-        // Shmget
-        // Shm_open
-        // Shm_unlink
-        // Sem_open
-        // Sem_close
-        // Sem_unlink
-        // Sem_wait
-        // Sem_trywait
-        // Sem_post
-        // Sem_getvalue
-        // Sem_init
-        // Sem_destroy
-        // Open_extended
-        // Umask_extended
-        // Stat_extended
-        // Lstat_extended
-        // Fstat_extended
-        // Chmod_extended
-        // Fchmod_extended
-        // Access_extended
-        // Settid
-        // Gettid
-        // Setsgroups
-        // Getsgroups
-        // Setwgroups
-        // Getwgroups
-        // Mkfifo_extended
-        // Mkdir_extended
-        // Identitysvc
-        // Shared_region_check_np
-        // Shared_region_map_np
-        // __pthread_mutex_destroy
-        // __pthread_mutex_init
-        // __pthread_mutex_lock
-        // __pthread_mutex_trylock
-        // __pthread_mutex_unlock
-        // __pthread_cond_init
-        // __pthread_cond_destroy
-        // __pthread_cond_broadcast
-        // __pthread_cond_signal
-        // Setsid_with_pid
-        // __pthread_cond_timedwait
-        // Aio_fsync
-        // Aio_return
-        // Aio_suspend
-        // Aio_cancel
-        // Aio_error
-        // Aio_read
-        // Aio_write
-        // Lio_listio
-        // __pthread_cond_wait
-        // Iopolicysys
-        // Mlockall
-        // Munlockall
-        // __pthread_kill
-        // __pthread_sigmask
-        // __sigwait
-        // __disable_threadsignal
-        // __pthread_markcancel
-        // __pthread_canceled
-        // __semwait_signal
-        // Proc_info
-        // sendfile
-        // Stat64_extended
-        // Lstat64_extended
-        // Fstat64_extended
-        // __pthread_chdir
-        // __pthread_fchdir
-        // Audit
-        // Auditon
-        // Getauid
-        // Setauid
-        // Getaudit
-        // Setaudit
-        // Getaudit_addr
-        // Setaudit_addr
-        // Auditctl
-        // Bsdthread_create
-        // Bsdthread_terminate
-        // Stack_snapshot
-        // Bsdthread_register
-        // Workq_open
-        // Workq_ops
-        // __mac_execve
-        // __mac_syscall
-        // __mac_get_file
-        // __mac_set_file
-        // __mac_get_link
-        // __mac_set_link
-        // __mac_get_proc
-        // __mac_set_proc
-        // __mac_get_fd
-        // __mac_set_fd
-        // __mac_get_pid
-        // __mac_get_lcid
-        // __mac_get_lctx
-        // __mac_set_lctx
-        // Setlcid
-        // Read_nocancel
-        // Write_nocancel
-        // Open_nocancel
-        // Close_nocancel
-        // Wait4_nocancel
-        // Recvmsg_nocancel
-        // Sendmsg_nocancel
-        // Recvfrom_nocancel
-        // Accept_nocancel
-        // Msync_nocancel
-        // Fcntl_nocancel
-        // Select_nocancel
-        // Fsync_nocancel
-        // Connect_nocancel
-        // Sigsuspend_nocancel
-        // Readv_nocancel
-        // Writev_nocancel
-        // Sendto_nocancel
-        // Pread_nocancel
-        // Pwrite_nocancel
-        // Waitid_nocancel
-        // Poll_nocancel
-        // Msgsnd_nocancel
-        // Msgrcv_nocancel
-        // Sem_wait_nocancel
-        // Aio_suspend_nocancel
-        // __sigwait_nocancel
-        // __semwait_signal_nocancel
-        // __mac_mount
-        // __mac_get_mount
-        // __mac_getfsstat
+        private static void init()
+        {
+            execveDarwin = execve;
+        }
+
+        private static (System.UIntPtr, error) fdopendir(long fd)
+        {
+            System.UIntPtr dir = default;
+            error err = default!;
+
+            var (r0, _, e1) = syscallPtr(funcPC(libc_fdopendir_trampoline), uintptr(fd), 0L, 0L);
+            dir = uintptr(r0);
+            if (e1 != 0L)
+            {>>MARKER:FUNCTION_libc_setattrlist_trampoline_BLOCK_PREFIX<<
+                err = errnoErr(e1);
+            }
+
+            return ;
+
+        }
+
+        private static void libc_fdopendir_trampoline()
+;
+
+        //go:linkname libc_fdopendir libc_fdopendir
+        //go:cgo_import_dynamic libc_fdopendir fdopendir "/usr/lib/libSystem.B.dylib"
+
+        private static (long, error) readlen(long fd, ptr<byte> _addr_buf, long nbuf)
+        {
+            long n = default;
+            error err = default!;
+            ref byte buf = ref _addr_buf.val;
+
+            var (r0, _, e1) = syscall(funcPC(libc_read_trampoline), uintptr(fd), uintptr(@unsafe.Pointer(buf)), uintptr(nbuf));
+            n = int(r0);
+            if (e1 != 0L)
+            {>>MARKER:FUNCTION_libc_fdopendir_trampoline_BLOCK_PREFIX<<
+                err = errnoErr(e1);
+            }
+
+            return ;
+
+        }
+
+        private static (long, error) writelen(long fd, ptr<byte> _addr_buf, long nbuf)
+        {
+            long n = default;
+            error err = default!;
+            ref byte buf = ref _addr_buf.val;
+
+            var (r0, _, e1) = syscall(funcPC(libc_write_trampoline), uintptr(fd), uintptr(@unsafe.Pointer(buf)), uintptr(nbuf));
+            n = int(r0);
+            if (e1 != 0L)
+            {
+                err = errnoErr(e1);
+            }
+
+            return ;
+
+        }
+
+        public static (long, error) Getdirentries(long fd, slice<byte> buf, ptr<System.UIntPtr> _addr_basep) => func((defer, _, __) =>
+        {
+            long n = default;
+            error err = default!;
+            ref System.UIntPtr basep = ref _addr_basep.val;
+ 
+            // Simulate Getdirentries using fdopendir/readdir_r/closedir.
+            // We store the number of entries to skip in the seek
+            // offset of fd. See issue #31368.
+            // It's not the full required semantics, but should handle the case
+            // of calling Getdirentries or ReadDirent repeatedly.
+            // It won't handle assigning the results of lseek to *basep, or handle
+            // the directory being edited underfoot.
+            var (skip, err) = Seek(fd, 0L, 1L);
+            if (err != null)
+            {
+                return (0L, error.As(err)!);
+            } 
+
+            // We need to duplicate the incoming file descriptor
+            // because the caller expects to retain control of it, but
+            // fdopendir expects to take control of its argument.
+            // Just Dup'ing the file descriptor is not enough, as the
+            // result shares underlying state. Use openat to make a really
+            // new file descriptor referring to the same directory.
+            var (fd2, err) = openat(fd, ".", O_RDONLY, 0L);
+            if (err != null)
+            {
+                return (0L, error.As(err)!);
+            }
+
+            var (d, err) = fdopendir(fd2);
+            if (err != null)
+            {
+                Close(fd2);
+                return (0L, error.As(err)!);
+            }
+
+            defer(closedir(d));
+
+            long cnt = default;
+            while (true)
+            {
+                ref Dirent entry = ref heap(out ptr<Dirent> _addr_entry);
+                ptr<Dirent> entryp;
+                var e = readdir_r(d, _addr_entry, _addr_entryp);
+                if (e != 0L)
+                {
+                    return (n, error.As(errnoErr(e))!);
+                }
+
+                if (entryp == null)
+                {
+                    break;
+                }
+
+                if (skip > 0L)
+                {
+                    skip--;
+                    cnt++;
+                    continue;
+                }
+
+                var reclen = int(entry.Reclen);
+                if (reclen > len(buf))
+                { 
+                    // Not enough room. Return for now.
+                    // The counter will let us know where we should start up again.
+                    // Note: this strategy for suspending in the middle and
+                    // restarting is O(n^2) in the length of the directory. Oh well.
+                    break;
+
+                } 
+                // Copy entry into return buffer.
+                ref struct{ptrunsafe.Pointersizintcapint} s = ref heap(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{ptrunsafe.Pointersizintcapint}{ptr:unsafe.Pointer(&entry),siz:reclen,cap:reclen}, out ptr<struct{ptrunsafe.Pointersizintcapint}> _addr_s);
+                copy(buf, new ptr<ptr<ptr<slice<byte>>>>(@unsafe.Pointer(_addr_s)));
+                buf = buf[reclen..];
+                n += reclen;
+                cnt++;
+
+            } 
+            // Set the seek offset of the input fd to record
+            // how many files we've already returned.
+ 
+            // Set the seek offset of the input fd to record
+            // how many files we've already returned.
+            _, err = Seek(fd, cnt, 0L);
+            if (err != null)
+            {
+                return (n, error.As(err)!);
+            }
+
+            return (n, error.As(null!)!);
+
+        });
+
+        // Implemented in the runtime package (runtime/sys_darwin.go)
+        private static (System.UIntPtr, System.UIntPtr, Errno) syscall(System.UIntPtr fn, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3)
+;
+        private static (System.UIntPtr, System.UIntPtr, Errno) syscall6(System.UIntPtr fn, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3, System.UIntPtr a4, System.UIntPtr a5, System.UIntPtr a6)
+;
+        private static (System.UIntPtr, System.UIntPtr, Errno) syscall6X(System.UIntPtr fn, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3, System.UIntPtr a4, System.UIntPtr a5, System.UIntPtr a6)
+;
+        private static (System.UIntPtr, System.UIntPtr, Errno) rawSyscall(System.UIntPtr fn, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3)
+;
+        private static (System.UIntPtr, System.UIntPtr, Errno) rawSyscall6(System.UIntPtr fn, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3, System.UIntPtr a4, System.UIntPtr a5, System.UIntPtr a6)
+;
+        private static (System.UIntPtr, System.UIntPtr, Errno) syscallPtr(System.UIntPtr fn, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3)
+;
+
+        // Find the entry point for f. See comments in runtime/proc.go for the
+        // function of the same name.
+        //go:nosplit
+        private static System.UIntPtr funcPC(Action f)
+        {
+            return new ptr<ptr<ptr<ptr<ptr<System.UIntPtr>>>>>(@unsafe.Pointer(_addr_f));
+        }
     }
 }

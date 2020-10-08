@@ -5,7 +5,7 @@
 // Package quick implements utility functions to help with black box testing.
 //
 // The testing/quick package is frozen and is not accepting new features.
-// package quick -- go2cs converted at 2020 August 29 10:06:00 UTC
+// package quick -- go2cs converted at 2020 October 08 04:36:41 UTC
 // import "testing/quick" ==> using quick = go.testing.quick_package
 // Original source: C:\Go\src\testing\quick\quick.go
 using flag = go.flag_package;
@@ -23,45 +23,55 @@ namespace testing
 {
     public static partial class quick_package
     {
-        private static ref long defaultMaxCount = flag.Int("quickchecks", 100L, "The default number of iterations for each check");
+        private static ptr<long> defaultMaxCountflag.Int("quickchecks", 100L, "The default number of iterations for each check");
 
         // A Generator can generate random values of its own type.
         public partial interface Generator
         {
-            reflect.Value Generate(ref rand.Rand rand, long size);
+            reflect.Value Generate(ptr<rand.Rand> rand, long size);
         }
 
         // randFloat32 generates a random float taking the full range of a float32.
-        private static float randFloat32(ref rand.Rand rand)
+        private static float randFloat32(ptr<rand.Rand> _addr_rand)
         {
+            ref rand.Rand rand = ref _addr_rand.val;
+
             var f = rand.Float64() * math.MaxFloat32;
             if (rand.Int() & 1L == 1L)
             {
                 f = -f;
             }
+
             return float32(f);
+
         }
 
         // randFloat64 generates a random float taking the full range of a float64.
-        private static double randFloat64(ref rand.Rand rand)
+        private static double randFloat64(ptr<rand.Rand> _addr_rand)
         {
+            ref rand.Rand rand = ref _addr_rand.val;
+
             var f = rand.Float64() * math.MaxFloat64;
             if (rand.Int() & 1L == 1L)
             {
                 f = -f;
             }
+
             return f;
+
         }
 
         // randInt64 returns a random int64.
-        private static long randInt64(ref rand.Rand rand)
+        private static long randInt64(ptr<rand.Rand> _addr_rand)
         {
+            ref rand.Rand rand = ref _addr_rand.val;
+
             return int64(rand.Uint64());
         }
 
         // complexSize is the maximum length of arbitrary values that contain other
         // values.
-        private static readonly long complexSize = 50L;
+        private static readonly long complexSize = (long)50L;
 
         // Value returns an arbitrary value of the given type.
         // If the type implements the Generator interface, that will be used.
@@ -71,18 +81,26 @@ namespace testing
         // Value returns an arbitrary value of the given type.
         // If the type implements the Generator interface, that will be used.
         // Note: To create arbitrary values for structs, all the fields must be exported.
-        public static (reflect.Value, bool) Value(reflect.Type t, ref rand.Rand rand)
+        public static (reflect.Value, bool) Value(reflect.Type t, ptr<rand.Rand> _addr_rand)
         {
-            return sizedValue(t, rand, complexSize);
+            reflect.Value value = default;
+            bool ok = default;
+            ref rand.Rand rand = ref _addr_rand.val;
+
+            return sizedValue(t, _addr_rand, complexSize);
         }
 
         // sizedValue returns an arbitrary value of the given type. The size
         // hint is used for shrinking as a function of indirection level so
         // that recursive data structures will terminate.
-        private static (reflect.Value, bool) sizedValue(reflect.Type t, ref rand.Rand rand, long size)
+        private static (reflect.Value, bool) sizedValue(reflect.Type t, ptr<rand.Rand> _addr_rand, long size)
         {
+            reflect.Value value = default;
+            bool ok = default;
+            ref rand.Rand rand = ref _addr_rand.val;
+
             {
-                Generator (m, ok) = reflect.Zero(t).Interface()._<Generator>();
+                Generator (m, ok) = Generator.As(reflect.Zero(t).Interface()._<Generator>())!;
 
                 if (ok)
                 {
@@ -90,6 +108,7 @@ namespace testing
                 }
 
             }
+
 
             var v = reflect.New(t).Elem();
             {
@@ -99,35 +118,35 @@ namespace testing
                 if (concrete.Kind() == reflect.Bool) 
                     v.SetBool(rand.Int() & 1L == 0L);
                 else if (concrete.Kind() == reflect.Float32) 
-                    v.SetFloat(float64(randFloat32(rand)));
+                    v.SetFloat(float64(randFloat32(_addr_rand)));
                 else if (concrete.Kind() == reflect.Float64) 
-                    v.SetFloat(randFloat64(rand));
+                    v.SetFloat(randFloat64(_addr_rand));
                 else if (concrete.Kind() == reflect.Complex64) 
-                    v.SetComplex(complex(float64(randFloat32(rand)), float64(randFloat32(rand))));
+                    v.SetComplex(complex(float64(randFloat32(_addr_rand)), float64(randFloat32(_addr_rand))));
                 else if (concrete.Kind() == reflect.Complex128) 
-                    v.SetComplex(complex(randFloat64(rand), randFloat64(rand)));
+                    v.SetComplex(complex(randFloat64(_addr_rand), randFloat64(_addr_rand)));
                 else if (concrete.Kind() == reflect.Int16) 
-                    v.SetInt(randInt64(rand));
+                    v.SetInt(randInt64(_addr_rand));
                 else if (concrete.Kind() == reflect.Int32) 
-                    v.SetInt(randInt64(rand));
+                    v.SetInt(randInt64(_addr_rand));
                 else if (concrete.Kind() == reflect.Int64) 
-                    v.SetInt(randInt64(rand));
+                    v.SetInt(randInt64(_addr_rand));
                 else if (concrete.Kind() == reflect.Int8) 
-                    v.SetInt(randInt64(rand));
+                    v.SetInt(randInt64(_addr_rand));
                 else if (concrete.Kind() == reflect.Int) 
-                    v.SetInt(randInt64(rand));
+                    v.SetInt(randInt64(_addr_rand));
                 else if (concrete.Kind() == reflect.Uint16) 
-                    v.SetUint(uint64(randInt64(rand)));
+                    v.SetUint(uint64(randInt64(_addr_rand)));
                 else if (concrete.Kind() == reflect.Uint32) 
-                    v.SetUint(uint64(randInt64(rand)));
+                    v.SetUint(uint64(randInt64(_addr_rand)));
                 else if (concrete.Kind() == reflect.Uint64) 
-                    v.SetUint(uint64(randInt64(rand)));
+                    v.SetUint(uint64(randInt64(_addr_rand)));
                 else if (concrete.Kind() == reflect.Uint8) 
-                    v.SetUint(uint64(randInt64(rand)));
+                    v.SetUint(uint64(randInt64(_addr_rand)));
                 else if (concrete.Kind() == reflect.Uint) 
-                    v.SetUint(uint64(randInt64(rand)));
+                    v.SetUint(uint64(randInt64(_addr_rand)));
                 else if (concrete.Kind() == reflect.Uintptr) 
-                    v.SetUint(uint64(randInt64(rand)));
+                    v.SetUint(uint64(randInt64(_addr_rand)));
                 else if (concrete.Kind() == reflect.Map) 
                     var numElems = rand.Intn(size);
                     v.Set(reflect.MakeMap(concrete));
@@ -136,13 +155,15 @@ namespace testing
 
                         for (long i = 0L; i < numElems; i++)
                         {
-                            var (key, ok1) = sizedValue(concrete.Key(), rand, size);
-                            var (value, ok2) = sizedValue(concrete.Elem(), rand, size);
+                            var (key, ok1) = sizedValue(concrete.Key(), _addr_rand, size);
+                            var (value, ok2) = sizedValue(concrete.Elem(), _addr_rand, size);
                             if (!ok1 || !ok2)
                             {
                                 return (new reflect.Value(), false);
                             }
+
                             v.SetMapIndex(key, value);
+
                         }
 
 
@@ -155,14 +176,17 @@ namespace testing
                     }
                     else
                     {
-                        var (elem, ok) = sizedValue(concrete.Elem(), rand, size);
+                        var (elem, ok) = sizedValue(concrete.Elem(), _addr_rand, size);
                         if (!ok)
                         {
                             return (new reflect.Value(), false);
                         }
+
                         v.Set(reflect.New(concrete.Elem()));
                         v.Elem().Set(elem);
+
                     }
+
                 else if (concrete.Kind() == reflect.Slice) 
                     numElems = rand.Intn(size);
                     var sizeLeft = size - numElems;
@@ -172,12 +196,14 @@ namespace testing
 
                         for (i = 0L; i < numElems; i++)
                         {
-                            (elem, ok) = sizedValue(concrete.Elem(), rand, sizeLeft);
+                            (elem, ok) = sizedValue(concrete.Elem(), _addr_rand, sizeLeft);
                             if (!ok)
                             {
                                 return (new reflect.Value(), false);
                             }
+
                             v.Index(i).Set(elem);
+
                         }
 
 
@@ -189,12 +215,14 @@ namespace testing
 
                         for (i = 0L; i < v.Len(); i++)
                         {
-                            (elem, ok) = sizedValue(concrete.Elem(), rand, size);
+                            (elem, ok) = sizedValue(concrete.Elem(), _addr_rand, size);
                             if (!ok)
                             {
                                 return (new reflect.Value(), false);
                             }
+
                             v.Index(i).Set(elem);
+
                         }
 
 
@@ -227,17 +255,20 @@ namespace testing
                     {
                         sizeLeft /= n;
                     }
+
                     {
                         long i__prev1 = i;
 
                         for (i = 0L; i < n; i++)
                         {
-                            (elem, ok) = sizedValue(concrete.Field(i).Type, rand, sizeLeft);
+                            (elem, ok) = sizedValue(concrete.Field(i).Type, _addr_rand, sizeLeft);
                             if (!ok)
                             {
                                 return (new reflect.Value(), false);
                             }
+
                             v.Field(i).Set(elem);
+
                         }
 
 
@@ -249,6 +280,7 @@ namespace testing
             }
 
             return (v, true);
+
         }
 
         // A Config structure contains options for running a test.
@@ -256,45 +288,56 @@ namespace testing
         {
             public long MaxCount; // MaxCountScale is a non-negative scale factor applied to the
 // default maximum.
-// If zero, the default is unchanged.
+// A count of zero implies the default, which is usually 100
+// but can be set by the -quickchecks flag.
             public double MaxCountScale; // Rand specifies a source of random numbers.
 // If nil, a default pseudo-random source will be used.
             public ptr<rand.Rand> Rand; // Values specifies a function to generate a slice of
 // arbitrary reflect.Values that are congruent with the
 // arguments to the function being tested.
 // If nil, the top-level Value function is used to generate them.
-            public Action<slice<reflect.Value>, ref rand.Rand> Values;
+            public Action<slice<reflect.Value>, ptr<rand.Rand>> Values;
         }
 
         private static Config defaultConfig = default;
 
         // getRand returns the *rand.Rand to use for a given Config.
-        private static ref rand.Rand getRand(this ref Config c)
+        private static ptr<rand.Rand> getRand(this ptr<Config> _addr_c)
         {
+            ref Config c = ref _addr_c.val;
+
             if (c.Rand == null)
             {
-                return rand.New(rand.NewSource(time.Now().UnixNano()));
+                return _addr_rand.New(rand.NewSource(time.Now().UnixNano()))!;
             }
-            return c.Rand;
+
+            return _addr_c.Rand!;
+
         }
 
         // getMaxCount returns the maximum number of iterations to run for a given
         // Config.
-        private static long getMaxCount(this ref Config c)
+        private static long getMaxCount(this ptr<Config> _addr_c)
         {
+            long maxCount = default;
+            ref Config c = ref _addr_c.val;
+
             maxCount = c.MaxCount;
             if (maxCount == 0L)
             {
                 if (c.MaxCountScale != 0L)
                 {
-                    maxCount = int(c.MaxCountScale * float64(defaultMaxCount.Value));
+                    maxCount = int(c.MaxCountScale * float64(defaultMaxCount.val));
                 }
                 else
                 {
-                    maxCount = defaultMaxCount.Value;
+                    maxCount = defaultMaxCount.val;
                 }
+
             }
-            return;
+
+            return ;
+
         }
 
         // A SetupError is the result of an error in the way that check is being
@@ -315,8 +358,10 @@ namespace testing
             public slice<object> In;
         }
 
-        private static @string Error(this ref CheckError s)
+        private static @string Error(this ptr<CheckError> _addr_s)
         {
+            ref CheckError s = ref _addr_s.val;
+
             return fmt.Sprintf("#%d: failed on input %s", s.Count, toString(s.In));
         }
 
@@ -328,8 +373,10 @@ namespace testing
             public slice<object> Out2;
         }
 
-        private static @string Error(this ref CheckEqualError s)
+        private static @string Error(this ptr<CheckEqualError> _addr_s)
         {
+            ref CheckEqualError s = ref _addr_s.val;
+
             return fmt.Sprintf("#%d: failed on input %s. Output 1: %s. Output 2: %s", s.Count, toString(s.In), toString(s.Out1), toString(s.Out2));
         }
 
@@ -348,128 +395,159 @@ namespace testing
         //             t.Error(err)
         //         }
         //     }
-        public static error Check(object f, ref Config config)
+        public static error Check(object f, ptr<Config> _addr_config)
         {
+            ref Config config = ref _addr_config.val;
+
             if (config == null)
             {
-                config = ref defaultConfig;
+                config = _addr_defaultConfig;
             }
+
             var (fVal, fType, ok) = functionAndType(f);
             if (!ok)
             {
-                return error.As(SetupError("argument is not a function"));
+                return error.As(SetupError("argument is not a function"))!;
             }
+
             if (fType.NumOut() != 1L)
             {
-                return error.As(SetupError("function does not return one value"));
+                return error.As(SetupError("function does not return one value"))!;
             }
+
             if (fType.Out(0L).Kind() != reflect.Bool)
             {
-                return error.As(SetupError("function does not return a bool"));
+                return error.As(SetupError("function does not return a bool"))!;
             }
+
             var arguments = make_slice<reflect.Value>(fType.NumIn());
             var rand = config.getRand();
             var maxCount = config.getMaxCount();
 
             for (long i = 0L; i < maxCount; i++)
             {
-                var err = arbitraryValues(arguments, fType, config, rand);
+                var err = arbitraryValues(arguments, fType, _addr_config, _addr_rand);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 if (!fVal.Call(arguments)[0L].Bool())
                 {
-                    return error.As(ref new CheckError(i+1,toInterfaces(arguments)));
+                    return error.As(addr(new CheckError(i+1,toInterfaces(arguments)))!)!;
                 }
+
             }
 
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // CheckEqual looks for an input on which f and g return different results.
         // It calls f and g repeatedly with arbitrary values for each argument.
         // If f and g return different answers, CheckEqual returns a *CheckEqualError
         // describing the input and the outputs.
-        public static error CheckEqual(object f, object g, ref Config config)
+        public static error CheckEqual(object f, object g, ptr<Config> _addr_config)
         {
+            ref Config config = ref _addr_config.val;
+
             if (config == null)
             {
-                config = ref defaultConfig;
+                config = _addr_defaultConfig;
             }
+
             var (x, xType, ok) = functionAndType(f);
             if (!ok)
             {
-                return error.As(SetupError("f is not a function"));
+                return error.As(SetupError("f is not a function"))!;
             }
+
             var (y, yType, ok) = functionAndType(g);
             if (!ok)
             {
-                return error.As(SetupError("g is not a function"));
+                return error.As(SetupError("g is not a function"))!;
             }
+
             if (xType != yType)
             {
-                return error.As(SetupError("functions have different types"));
+                return error.As(SetupError("functions have different types"))!;
             }
+
             var arguments = make_slice<reflect.Value>(xType.NumIn());
             var rand = config.getRand();
             var maxCount = config.getMaxCount();
 
             for (long i = 0L; i < maxCount; i++)
             {
-                var err = arbitraryValues(arguments, xType, config, rand);
+                var err = arbitraryValues(arguments, xType, _addr_config, _addr_rand);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 var xOut = toInterfaces(x.Call(arguments));
                 var yOut = toInterfaces(y.Call(arguments));
 
                 if (!reflect.DeepEqual(xOut, yOut))
                 {
-                    return error.As(ref new CheckEqualError(CheckError{i+1,toInterfaces(arguments)},xOut,yOut));
+                    return error.As(addr(new CheckEqualError(CheckError{i+1,toInterfaces(arguments)},xOut,yOut))!)!;
                 }
+
             }
 
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // arbitraryValues writes Values to args such that args contains Values
         // suitable for calling f.
-        private static error arbitraryValues(slice<reflect.Value> args, reflect.Type f, ref Config config, ref rand.Rand rand)
+        private static error arbitraryValues(slice<reflect.Value> args, reflect.Type f, ptr<Config> _addr_config, ptr<rand.Rand> _addr_rand)
         {
+            error err = default!;
+            ref Config config = ref _addr_config.val;
+            ref rand.Rand rand = ref _addr_rand.val;
+
             if (config.Values != null)
             {
                 config.Values(args, rand);
-                return;
+                return ;
             }
+
             for (long j = 0L; j < len(args); j++)
             {
                 bool ok = default;
-                args[j], ok = Value(f.In(j), rand);
+                args[j], ok = Value(f.In(j), _addr_rand);
                 if (!ok)
                 {
                     err = SetupError(fmt.Sprintf("cannot create arbitrary value of type %s for argument %d", f.In(j), j));
-                    return;
+                    return ;
                 }
+
             }
 
 
-            return;
+            return ;
+
         }
 
         private static (reflect.Value, reflect.Type, bool) functionAndType(object f)
         {
+            reflect.Value v = default;
+            reflect.Type t = default;
+            bool ok = default;
+
             v = reflect.ValueOf(f);
             ok = v.Kind() == reflect.Func;
             if (!ok)
             {
-                return;
+                return ;
             }
+
             t = v.Type();
-            return;
+            return ;
+
         }
 
         private static slice<object> toInterfaces(slice<reflect.Value> values)
@@ -480,6 +558,7 @@ namespace testing
                 ret[i] = v.Interface();
             }
             return ret;
+
         }
 
         private static @string toString(slice<object> interfaces)
@@ -490,6 +569,7 @@ namespace testing
                 s[i] = fmt.Sprintf("%#v", v);
             }
             return strings.Join(s, ", ");
+
         }
     }
 }}

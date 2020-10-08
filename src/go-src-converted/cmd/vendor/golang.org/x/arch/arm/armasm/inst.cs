@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2020 August 29 10:07:10 UTC
+// package armasm -- go2cs converted at 2020 October 08 04:44:09 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\inst.go
 using bytes = go.bytes_package;
@@ -24,9 +24,10 @@ namespace arm
         {
         }
 
-        private static readonly Mode _ = iota;
-        public static readonly var ModeARM = 0;
-        public static readonly var ModeThumb = 1;
+        private static readonly Mode _ = (Mode)iota;
+        public static readonly var ModeARM = (var)0;
+        public static readonly var ModeThumb = (var)1;
+
 
         public static @string String(this Mode m)
         {
@@ -36,6 +37,7 @@ namespace arm
             else if (m == ModeThumb) 
                 return "Thumb";
                         return fmt.Sprintf("Mode(%d)", int(m));
+
         }
 
         // An Op is an ARM opcode.
@@ -54,7 +56,9 @@ namespace arm
             {
                 return fmt.Sprintf("Op(%d)", int(op));
             }
+
             return opstr[op];
+
         }
 
         // An Inst is a single instruction.
@@ -76,6 +80,7 @@ namespace arm
                 {
                     break;
                 }
+
                 if (j == 0L)
                 {
                     buf.WriteString(" ");
@@ -84,9 +89,12 @@ namespace arm
                 {
                     buf.WriteString(", ");
                 }
+
                 buf.WriteString(arg.String());
+
             }
             return buf.String();
+
         }
 
         // An Args holds the instruction arguments.
@@ -187,94 +195,95 @@ namespace arm
         {
         }
 
-        public static readonly Reg R0 = iota;
-        public static readonly var R1 = 0;
-        public static readonly var R2 = 1;
-        public static readonly var R3 = 2;
-        public static readonly var R4 = 3;
-        public static readonly var R5 = 4;
-        public static readonly var R6 = 5;
-        public static readonly var R7 = 6;
-        public static readonly var R8 = 7;
-        public static readonly var R9 = 8;
-        public static readonly var R10 = 9;
-        public static readonly var R11 = 10;
-        public static readonly var R12 = 11;
-        public static readonly var R13 = 12;
-        public static readonly var R14 = 13;
-        public static readonly var R15 = 14;
+        public static readonly Reg R0 = (Reg)iota;
+        public static readonly var R1 = (var)0;
+        public static readonly var R2 = (var)1;
+        public static readonly var R3 = (var)2;
+        public static readonly var R4 = (var)3;
+        public static readonly var R5 = (var)4;
+        public static readonly var R6 = (var)5;
+        public static readonly var R7 = (var)6;
+        public static readonly var R8 = (var)7;
+        public static readonly var R9 = (var)8;
+        public static readonly var R10 = (var)9;
+        public static readonly var R11 = (var)10;
+        public static readonly var R12 = (var)11;
+        public static readonly var R13 = (var)12;
+        public static readonly var R14 = (var)13;
+        public static readonly var R15 = (var)14;
 
-        public static readonly var S0 = 15;
-        public static readonly var S1 = 16;
-        public static readonly var S2 = 17;
-        public static readonly var S3 = 18;
-        public static readonly var S4 = 19;
-        public static readonly var S5 = 20;
-        public static readonly var S6 = 21;
-        public static readonly var S7 = 22;
-        public static readonly var S8 = 23;
-        public static readonly var S9 = 24;
-        public static readonly var S10 = 25;
-        public static readonly var S11 = 26;
-        public static readonly var S12 = 27;
-        public static readonly var S13 = 28;
-        public static readonly var S14 = 29;
-        public static readonly var S15 = 30;
-        public static readonly var S16 = 31;
-        public static readonly var S17 = 32;
-        public static readonly var S18 = 33;
-        public static readonly var S19 = 34;
-        public static readonly var S20 = 35;
-        public static readonly var S21 = 36;
-        public static readonly var S22 = 37;
-        public static readonly var S23 = 38;
-        public static readonly var S24 = 39;
-        public static readonly var S25 = 40;
-        public static readonly var S26 = 41;
-        public static readonly var S27 = 42;
-        public static readonly var S28 = 43;
-        public static readonly var S29 = 44;
-        public static readonly var S30 = 45;
-        public static readonly var S31 = 46;
+        public static readonly var S0 = (var)15;
+        public static readonly var S1 = (var)16;
+        public static readonly var S2 = (var)17;
+        public static readonly var S3 = (var)18;
+        public static readonly var S4 = (var)19;
+        public static readonly var S5 = (var)20;
+        public static readonly var S6 = (var)21;
+        public static readonly var S7 = (var)22;
+        public static readonly var S8 = (var)23;
+        public static readonly var S9 = (var)24;
+        public static readonly var S10 = (var)25;
+        public static readonly var S11 = (var)26;
+        public static readonly var S12 = (var)27;
+        public static readonly var S13 = (var)28;
+        public static readonly var S14 = (var)29;
+        public static readonly var S15 = (var)30;
+        public static readonly var S16 = (var)31;
+        public static readonly var S17 = (var)32;
+        public static readonly var S18 = (var)33;
+        public static readonly var S19 = (var)34;
+        public static readonly var S20 = (var)35;
+        public static readonly var S21 = (var)36;
+        public static readonly var S22 = (var)37;
+        public static readonly var S23 = (var)38;
+        public static readonly var S24 = (var)39;
+        public static readonly var S25 = (var)40;
+        public static readonly var S26 = (var)41;
+        public static readonly var S27 = (var)42;
+        public static readonly var S28 = (var)43;
+        public static readonly var S29 = (var)44;
+        public static readonly var S30 = (var)45;
+        public static readonly var S31 = (var)46;
 
-        public static readonly var D0 = 47;
-        public static readonly var D1 = 48;
-        public static readonly var D2 = 49;
-        public static readonly var D3 = 50;
-        public static readonly var D4 = 51;
-        public static readonly var D5 = 52;
-        public static readonly var D6 = 53;
-        public static readonly var D7 = 54;
-        public static readonly var D8 = 55;
-        public static readonly var D9 = 56;
-        public static readonly var D10 = 57;
-        public static readonly var D11 = 58;
-        public static readonly var D12 = 59;
-        public static readonly var D13 = 60;
-        public static readonly var D14 = 61;
-        public static readonly var D15 = 62;
-        public static readonly var D16 = 63;
-        public static readonly var D17 = 64;
-        public static readonly var D18 = 65;
-        public static readonly var D19 = 66;
-        public static readonly var D20 = 67;
-        public static readonly var D21 = 68;
-        public static readonly var D22 = 69;
-        public static readonly var D23 = 70;
-        public static readonly var D24 = 71;
-        public static readonly var D25 = 72;
-        public static readonly var D26 = 73;
-        public static readonly var D27 = 74;
-        public static readonly var D28 = 75;
-        public static readonly var D29 = 76;
-        public static readonly var D30 = 77;
-        public static readonly var D31 = 78;
+        public static readonly var D0 = (var)47;
+        public static readonly var D1 = (var)48;
+        public static readonly var D2 = (var)49;
+        public static readonly var D3 = (var)50;
+        public static readonly var D4 = (var)51;
+        public static readonly var D5 = (var)52;
+        public static readonly var D6 = (var)53;
+        public static readonly var D7 = (var)54;
+        public static readonly var D8 = (var)55;
+        public static readonly var D9 = (var)56;
+        public static readonly var D10 = (var)57;
+        public static readonly var D11 = (var)58;
+        public static readonly var D12 = (var)59;
+        public static readonly var D13 = (var)60;
+        public static readonly var D14 = (var)61;
+        public static readonly var D15 = (var)62;
+        public static readonly var D16 = (var)63;
+        public static readonly var D17 = (var)64;
+        public static readonly var D18 = (var)65;
+        public static readonly var D19 = (var)66;
+        public static readonly var D20 = (var)67;
+        public static readonly var D21 = (var)68;
+        public static readonly var D22 = (var)69;
+        public static readonly var D23 = (var)70;
+        public static readonly var D24 = (var)71;
+        public static readonly var D25 = (var)72;
+        public static readonly var D26 = (var)73;
+        public static readonly var D27 = (var)74;
+        public static readonly var D28 = (var)75;
+        public static readonly var D29 = (var)76;
+        public static readonly var D30 = (var)77;
+        public static readonly var D31 = (var)78;
 
-        public static readonly var APSR = 79;
-        public static readonly var APSR_nzcv = 80;
-        public static readonly SP FPSCR = R13;
-        public static readonly var LR = R14;
-        public static readonly var PC = R15;
+        public static readonly var APSR = (var)79;
+        public static readonly var APSR_nzcv = (var)80;
+        public static readonly SP FPSCR = (SP)R13;
+        public static readonly var LR = (var)R14;
+        public static readonly var PC = (var)R15;
+
 
         public static void IsArg(this Reg _p0)
         {
@@ -299,15 +308,19 @@ namespace arm
             {
                 return fmt.Sprintf("R%d", int(r - R0));
             }
+
             if (S0 <= r && r <= S31)
             {
                 return fmt.Sprintf("S%d", int(r - S0));
             }
+
             if (D0 <= r && r <= D31)
             {
                 return fmt.Sprintf("D%d", int(r - D0));
             }
+
             return fmt.Sprintf("Reg(%d)", int(r));
+
         }
 
         // A RegX represents a fraction of a multi-value register.
@@ -343,20 +356,22 @@ namespace arm
 
         public static @string String(this RegList r)
         {
-            bytes.Buffer buf = default;
-            fmt.Fprintf(ref buf, "{");
+            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+            fmt.Fprintf(_addr_buf, "{");
             @string sep = "";
             for (long i = 0L; i < 16L; i++)
             {
                 if (r & (1L << (int)(uint(i))) != 0L)
                 {
-                    fmt.Fprintf(ref buf, "%s%s", sep, Reg(i).String());
+                    fmt.Fprintf(_addr_buf, "%s%s", sep, Reg(i).String());
                     sep = ",";
                 }
+
             }
 
-            fmt.Fprintf(ref buf, "}");
+            fmt.Fprintf(_addr_buf, "}");
             return buf.String();
+
         }
 
         // An Endian is the argument to the SETEND instruction.
@@ -364,8 +379,9 @@ namespace arm
         {
         }
 
-        public static readonly Endian LittleEndian = 0L;
-        public static readonly Endian BigEndian = 1L;
+        public static readonly Endian LittleEndian = (Endian)0L;
+        public static readonly Endian BigEndian = (Endian)1L;
+
 
         public static void IsArg(this Endian _p0)
         {
@@ -377,7 +393,9 @@ namespace arm
             {
                 return "BE";
             }
+
             return "LE";
+
         }
 
         // A Shift describes an ARM shift operation.
@@ -385,11 +403,11 @@ namespace arm
         {
         }
 
-        public static readonly Shift ShiftLeft = 0L; // left shift
-        public static readonly Shift ShiftRight = 1L; // logical (unsigned) right shift
-        public static readonly Shift ShiftRightSigned = 2L; // arithmetic (signed) right shift
-        public static readonly Shift RotateRight = 3L; // right rotate
-        public static readonly Shift RotateRightExt = 4L; // right rotate through carry (Count will always be 1)
+        public static readonly Shift ShiftLeft = (Shift)0L; // left shift
+        public static readonly Shift ShiftRight = (Shift)1L; // logical (unsigned) right shift
+        public static readonly Shift ShiftRightSigned = (Shift)2L; // arithmetic (signed) right shift
+        public static readonly Shift RotateRight = (Shift)3L; // right rotate
+        public static readonly Shift RotateRightExt = (Shift)4L; // right rotate through carry (Count will always be 1)
 
         private static array<@string> shiftName = new array<@string>(new @string[] { "LSL", "LSR", "ASR", "ROR", "RRX" });
 
@@ -399,7 +417,9 @@ namespace arm
             {
                 return shiftName[s];
             }
+
             return fmt.Sprintf("Shift(%d)", int(s));
+
         }
 
         // A RegShift is a register shifted by a constant.
@@ -457,12 +477,12 @@ namespace arm
         {
         }
 
-        private static readonly AddrMode _ = iota;
-        public static readonly var AddrPostIndex = 0; // [R], X – use address R, set R = R + X
-        public static readonly var AddrPreIndex = 1; // [R, X]! – use address R + X, set R = R + X
-        public static readonly var AddrOffset = 2; // [R, X] – use address R + X
-        public static readonly var AddrLDM = 3; // R – [R] but formats as R, for LDM/STM only
-        public static readonly var AddrLDM_WB = 4; // R! - [R], X where X is instruction-specific amount, for LDM/STM only
+        private static readonly AddrMode _ = (AddrMode)iota;
+        public static readonly var AddrPostIndex = (var)0; // [R], X – use address R, set R = R + X
+        public static readonly var AddrPreIndex = (var)1; // [R, X]! – use address R + X, set R = R + X
+        public static readonly var AddrOffset = (var)2; // [R, X] – use address R + X
+        public static readonly var AddrLDM = (var)3; // R – [R] but formats as R, for LDM/STM only
+        public static readonly var AddrLDM_WB = (var)4; // R! - [R], X where X is instruction-specific amount, for LDM/STM only
 
         // A Mem is a memory reference made up of a base R and index expression X.
         // The effective memory address is R or R+X depending on AddrMode.
@@ -494,22 +514,26 @@ namespace arm
                 {
                     X = "-";
                 }
+
                 X += m.Index.String();
                 if (m.Shift != ShiftLeft || m.Count != 0L)
                 {
                     X += fmt.Sprintf(", %s #%d", m.Shift, m.Count);
                 }
+
             }
             else
             {
                 X = fmt.Sprintf("#%d", m.Offset);
             }
 
+
             if (m.Mode == AddrOffset) 
                 if (X == "#0")
                 {
                     return fmt.Sprintf("[%s]", R);
                 }
+
                 return fmt.Sprintf("[%s, %s]", R, X);
             else if (m.Mode == AddrPreIndex) 
                 return fmt.Sprintf("[%s, %s]!", R, X);
@@ -520,12 +544,15 @@ namespace arm
                 {
                     return R;
                 }
+
             else if (m.Mode == AddrLDM_WB) 
                 if (X == "#0")
                 {
                     return R + "!";
                 }
+
                         return fmt.Sprintf("[%s Mode(%d) %s]", R, int(m.Mode), X);
+
         }
     }
 }}}}}}}

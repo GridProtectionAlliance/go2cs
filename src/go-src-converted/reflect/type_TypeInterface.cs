@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:13 UTC
+//     Generated on 2020 October 08 03:24:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using runtime = go.runtime_package;
+using unsafeheader = go.@internal.unsafeheader_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using unicode = go.unicode_package;
@@ -53,7 +53,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,593 +67,624 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate ref uncommonType AlignByRef(ref T value);
-            private delegate ref uncommonType AlignByVal(T value);
+            private delegate ptr<uncommonType> AlignByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> AlignByVal(T value);
 
-            private static readonly AlignByRef s_AlignByRef;
+            private static readonly AlignByPtr s_AlignByPtr;
             private static readonly AlignByVal s_AlignByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Align()
+            public ptr<uncommonType> Align()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AlignByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AlignByPtr is null || !m_target_is_ptr)
                     return s_AlignByVal!(target);
 
-                return s_AlignByRef(ref target);
+                return s_AlignByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType FieldAlignByRef(ref T value);
-            private delegate ref uncommonType FieldAlignByVal(T value);
+            private delegate ptr<uncommonType> FieldAlignByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> FieldAlignByVal(T value);
 
-            private static readonly FieldAlignByRef s_FieldAlignByRef;
+            private static readonly FieldAlignByPtr s_FieldAlignByPtr;
             private static readonly FieldAlignByVal s_FieldAlignByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType FieldAlign()
+            public ptr<uncommonType> FieldAlign()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FieldAlignByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FieldAlignByPtr is null || !m_target_is_ptr)
                     return s_FieldAlignByVal!(target);
 
-                return s_FieldAlignByRef(ref target);
+                return s_FieldAlignByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType MethodByRef(ref T value, long _p0);
-            private delegate ref uncommonType MethodByVal(T value, long _p0);
+            private delegate ptr<uncommonType> MethodByPtr(ptr<T> value, long _p0);
+            private delegate ptr<uncommonType> MethodByVal(T value, long _p0);
 
-            private static readonly MethodByRef s_MethodByRef;
+            private static readonly MethodByPtr s_MethodByPtr;
             private static readonly MethodByVal s_MethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Method(long _p0)
+            public ptr<uncommonType> Method(long _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MethodByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MethodByPtr is null || !m_target_is_ptr)
                     return s_MethodByVal!(target, _p0);
 
-                return s_MethodByRef(ref target, _p0);
+                return s_MethodByPtr(m_target_ptr, _p0);
             }
 
-            private delegate ref uncommonType MethodByNameByRef(ref T value, @string _p0);
-            private delegate ref uncommonType MethodByNameByVal(T value, @string _p0);
+            private delegate ptr<uncommonType> MethodByNameByPtr(ptr<T> value, @string _p0);
+            private delegate ptr<uncommonType> MethodByNameByVal(T value, @string _p0);
 
-            private static readonly MethodByNameByRef s_MethodByNameByRef;
+            private static readonly MethodByNameByPtr s_MethodByNameByPtr;
             private static readonly MethodByNameByVal s_MethodByNameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType MethodByName(@string _p0)
+            public ptr<uncommonType> MethodByName(@string _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MethodByNameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MethodByNameByPtr is null || !m_target_is_ptr)
                     return s_MethodByNameByVal!(target, _p0);
 
-                return s_MethodByNameByRef(ref target, _p0);
+                return s_MethodByNameByPtr(m_target_ptr, _p0);
             }
 
-            private delegate ref uncommonType NumMethodByRef(ref T value);
-            private delegate ref uncommonType NumMethodByVal(T value);
+            private delegate ptr<uncommonType> NumMethodByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> NumMethodByVal(T value);
 
-            private static readonly NumMethodByRef s_NumMethodByRef;
+            private static readonly NumMethodByPtr s_NumMethodByPtr;
             private static readonly NumMethodByVal s_NumMethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType NumMethod()
+            public ptr<uncommonType> NumMethod()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NumMethodByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NumMethodByPtr is null || !m_target_is_ptr)
                     return s_NumMethodByVal!(target);
 
-                return s_NumMethodByRef(ref target);
+                return s_NumMethodByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType NameByRef(ref T value);
-            private delegate ref uncommonType NameByVal(T value);
+            private delegate ptr<uncommonType> NameByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> NameByVal(T value);
 
-            private static readonly NameByRef s_NameByRef;
+            private static readonly NameByPtr s_NameByPtr;
             private static readonly NameByVal s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Name()
+            public ptr<uncommonType> Name()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByRef(ref target);
+                return s_NameByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType PkgPathByRef(ref T value);
-            private delegate ref uncommonType PkgPathByVal(T value);
+            private delegate ptr<uncommonType> PkgPathByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> PkgPathByVal(T value);
 
-            private static readonly PkgPathByRef s_PkgPathByRef;
+            private static readonly PkgPathByPtr s_PkgPathByPtr;
             private static readonly PkgPathByVal s_PkgPathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType PkgPath()
+            public ptr<uncommonType> PkgPath()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PkgPathByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PkgPathByPtr is null || !m_target_is_ptr)
                     return s_PkgPathByVal!(target);
 
-                return s_PkgPathByRef(ref target);
+                return s_PkgPathByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType SizeByRef(ref T value);
-            private delegate ref uncommonType SizeByVal(T value);
+            private delegate ptr<uncommonType> SizeByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> SizeByVal(T value);
 
-            private static readonly SizeByRef s_SizeByRef;
+            private static readonly SizeByPtr s_SizeByPtr;
             private static readonly SizeByVal s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Size()
+            public ptr<uncommonType> Size()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SizeByPtr is null || !m_target_is_ptr)
                     return s_SizeByVal!(target);
 
-                return s_SizeByRef(ref target);
+                return s_SizeByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType StringByRef(ref T value);
-            private delegate ref uncommonType StringByVal(T value);
+            private delegate ptr<uncommonType> StringByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType String()
+            public ptr<uncommonType> String()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType KindByRef(ref T value);
-            private delegate ref uncommonType KindByVal(T value);
+            private delegate ptr<uncommonType> KindByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> KindByVal(T value);
 
-            private static readonly KindByRef s_KindByRef;
+            private static readonly KindByPtr s_KindByPtr;
             private static readonly KindByVal s_KindByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Kind()
+            public ptr<uncommonType> Kind()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_KindByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_KindByPtr is null || !m_target_is_ptr)
                     return s_KindByVal!(target);
 
-                return s_KindByRef(ref target);
+                return s_KindByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType ImplementsByRef(ref T value, Type u);
-            private delegate ref uncommonType ImplementsByVal(T value, Type u);
+            private delegate ptr<uncommonType> ImplementsByPtr(ptr<T> value, Type u);
+            private delegate ptr<uncommonType> ImplementsByVal(T value, Type u);
 
-            private static readonly ImplementsByRef s_ImplementsByRef;
+            private static readonly ImplementsByPtr s_ImplementsByPtr;
             private static readonly ImplementsByVal s_ImplementsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Implements(Type u)
+            public ptr<uncommonType> Implements(Type u)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ImplementsByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ImplementsByPtr is null || !m_target_is_ptr)
                     return s_ImplementsByVal!(target, u);
 
-                return s_ImplementsByRef(ref target, u);
+                return s_ImplementsByPtr(m_target_ptr, u);
             }
 
-            private delegate ref uncommonType AssignableToByRef(ref T value, Type u);
-            private delegate ref uncommonType AssignableToByVal(T value, Type u);
+            private delegate ptr<uncommonType> AssignableToByPtr(ptr<T> value, Type u);
+            private delegate ptr<uncommonType> AssignableToByVal(T value, Type u);
 
-            private static readonly AssignableToByRef s_AssignableToByRef;
+            private static readonly AssignableToByPtr s_AssignableToByPtr;
             private static readonly AssignableToByVal s_AssignableToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType AssignableTo(Type u)
+            public ptr<uncommonType> AssignableTo(Type u)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AssignableToByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AssignableToByPtr is null || !m_target_is_ptr)
                     return s_AssignableToByVal!(target, u);
 
-                return s_AssignableToByRef(ref target, u);
+                return s_AssignableToByPtr(m_target_ptr, u);
             }
 
-            private delegate ref uncommonType ConvertibleToByRef(ref T value, Type u);
-            private delegate ref uncommonType ConvertibleToByVal(T value, Type u);
+            private delegate ptr<uncommonType> ConvertibleToByPtr(ptr<T> value, Type u);
+            private delegate ptr<uncommonType> ConvertibleToByVal(T value, Type u);
 
-            private static readonly ConvertibleToByRef s_ConvertibleToByRef;
+            private static readonly ConvertibleToByPtr s_ConvertibleToByPtr;
             private static readonly ConvertibleToByVal s_ConvertibleToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType ConvertibleTo(Type u)
+            public ptr<uncommonType> ConvertibleTo(Type u)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ConvertibleToByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ConvertibleToByPtr is null || !m_target_is_ptr)
                     return s_ConvertibleToByVal!(target, u);
 
-                return s_ConvertibleToByRef(ref target, u);
+                return s_ConvertibleToByPtr(m_target_ptr, u);
             }
 
-            private delegate ref uncommonType ComparableByRef(ref T value);
-            private delegate ref uncommonType ComparableByVal(T value);
+            private delegate ptr<uncommonType> ComparableByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> ComparableByVal(T value);
 
-            private static readonly ComparableByRef s_ComparableByRef;
+            private static readonly ComparableByPtr s_ComparableByPtr;
             private static readonly ComparableByVal s_ComparableByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Comparable()
+            public ptr<uncommonType> Comparable()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ComparableByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ComparableByPtr is null || !m_target_is_ptr)
                     return s_ComparableByVal!(target);
 
-                return s_ComparableByRef(ref target);
+                return s_ComparableByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType BitsByRef(ref T value);
-            private delegate ref uncommonType BitsByVal(T value);
+            private delegate ptr<uncommonType> BitsByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> BitsByVal(T value);
 
-            private static readonly BitsByRef s_BitsByRef;
+            private static readonly BitsByPtr s_BitsByPtr;
             private static readonly BitsByVal s_BitsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Bits()
+            public ptr<uncommonType> Bits()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BitsByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BitsByPtr is null || !m_target_is_ptr)
                     return s_BitsByVal!(target);
 
-                return s_BitsByRef(ref target);
+                return s_BitsByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType ChanDirByRef(ref T value);
-            private delegate ref uncommonType ChanDirByVal(T value);
+            private delegate ptr<uncommonType> ChanDirByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> ChanDirByVal(T value);
 
-            private static readonly ChanDirByRef s_ChanDirByRef;
+            private static readonly ChanDirByPtr s_ChanDirByPtr;
             private static readonly ChanDirByVal s_ChanDirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType ChanDir()
+            public ptr<uncommonType> ChanDir()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ChanDirByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ChanDirByPtr is null || !m_target_is_ptr)
                     return s_ChanDirByVal!(target);
 
-                return s_ChanDirByRef(ref target);
+                return s_ChanDirByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType IsVariadicByRef(ref T value);
-            private delegate ref uncommonType IsVariadicByVal(T value);
+            private delegate ptr<uncommonType> IsVariadicByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> IsVariadicByVal(T value);
 
-            private static readonly IsVariadicByRef s_IsVariadicByRef;
+            private static readonly IsVariadicByPtr s_IsVariadicByPtr;
             private static readonly IsVariadicByVal s_IsVariadicByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType IsVariadic()
+            public ptr<uncommonType> IsVariadic()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_IsVariadicByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_IsVariadicByPtr is null || !m_target_is_ptr)
                     return s_IsVariadicByVal!(target);
 
-                return s_IsVariadicByRef(ref target);
+                return s_IsVariadicByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType ElemByRef(ref T value);
-            private delegate ref uncommonType ElemByVal(T value);
+            private delegate ptr<uncommonType> ElemByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> ElemByVal(T value);
 
-            private static readonly ElemByRef s_ElemByRef;
+            private static readonly ElemByPtr s_ElemByPtr;
             private static readonly ElemByVal s_ElemByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Elem()
+            public ptr<uncommonType> Elem()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ElemByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ElemByPtr is null || !m_target_is_ptr)
                     return s_ElemByVal!(target);
 
-                return s_ElemByRef(ref target);
+                return s_ElemByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType FieldByRef(ref T value, long i);
-            private delegate ref uncommonType FieldByVal(T value, long i);
+            private delegate ptr<uncommonType> FieldByPtr(ptr<T> value, long i);
+            private delegate ptr<uncommonType> FieldByVal(T value, long i);
 
-            private static readonly FieldByRef s_FieldByRef;
+            private static readonly FieldByPtr s_FieldByPtr;
             private static readonly FieldByVal s_FieldByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Field(long i)
+            public ptr<uncommonType> Field(long i)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FieldByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FieldByPtr is null || !m_target_is_ptr)
                     return s_FieldByVal!(target, i);
 
-                return s_FieldByRef(ref target, i);
+                return s_FieldByPtr(m_target_ptr, i);
             }
 
-            private delegate ref uncommonType FieldByIndexByRef(ref T value, slice<long> index);
-            private delegate ref uncommonType FieldByIndexByVal(T value, slice<long> index);
+            private delegate ptr<uncommonType> FieldByIndexByPtr(ptr<T> value, slice<long> index);
+            private delegate ptr<uncommonType> FieldByIndexByVal(T value, slice<long> index);
 
-            private static readonly FieldByIndexByRef s_FieldByIndexByRef;
+            private static readonly FieldByIndexByPtr s_FieldByIndexByPtr;
             private static readonly FieldByIndexByVal s_FieldByIndexByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType FieldByIndex(slice<long> index)
+            public ptr<uncommonType> FieldByIndex(slice<long> index)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FieldByIndexByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FieldByIndexByPtr is null || !m_target_is_ptr)
                     return s_FieldByIndexByVal!(target, index);
 
-                return s_FieldByIndexByRef(ref target, index);
+                return s_FieldByIndexByPtr(m_target_ptr, index);
             }
 
-            private delegate ref uncommonType FieldByNameByRef(ref T value, @string name);
-            private delegate ref uncommonType FieldByNameByVal(T value, @string name);
+            private delegate ptr<uncommonType> FieldByNameByPtr(ptr<T> value, @string name);
+            private delegate ptr<uncommonType> FieldByNameByVal(T value, @string name);
 
-            private static readonly FieldByNameByRef s_FieldByNameByRef;
+            private static readonly FieldByNameByPtr s_FieldByNameByPtr;
             private static readonly FieldByNameByVal s_FieldByNameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType FieldByName(@string name)
+            public ptr<uncommonType> FieldByName(@string name)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FieldByNameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FieldByNameByPtr is null || !m_target_is_ptr)
                     return s_FieldByNameByVal!(target, name);
 
-                return s_FieldByNameByRef(ref target, name);
+                return s_FieldByNameByPtr(m_target_ptr, name);
             }
 
-            private delegate ref uncommonType FieldByNameFuncByRef(ref T value, Func<@string, bool> match);
-            private delegate ref uncommonType FieldByNameFuncByVal(T value, Func<@string, bool> match);
+            private delegate ptr<uncommonType> FieldByNameFuncByPtr(ptr<T> value, Func<@string, bool> match);
+            private delegate ptr<uncommonType> FieldByNameFuncByVal(T value, Func<@string, bool> match);
 
-            private static readonly FieldByNameFuncByRef s_FieldByNameFuncByRef;
+            private static readonly FieldByNameFuncByPtr s_FieldByNameFuncByPtr;
             private static readonly FieldByNameFuncByVal s_FieldByNameFuncByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType FieldByNameFunc(Func<@string, bool> match)
+            public ptr<uncommonType> FieldByNameFunc(Func<@string, bool> match)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_FieldByNameFuncByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_FieldByNameFuncByPtr is null || !m_target_is_ptr)
                     return s_FieldByNameFuncByVal!(target, match);
 
-                return s_FieldByNameFuncByRef(ref target, match);
+                return s_FieldByNameFuncByPtr(m_target_ptr, match);
             }
 
-            private delegate ref uncommonType InByRef(ref T value, long i);
-            private delegate ref uncommonType InByVal(T value, long i);
+            private delegate ptr<uncommonType> InByPtr(ptr<T> value, long i);
+            private delegate ptr<uncommonType> InByVal(T value, long i);
 
-            private static readonly InByRef s_InByRef;
+            private static readonly InByPtr s_InByPtr;
             private static readonly InByVal s_InByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType In(long i)
+            public ptr<uncommonType> In(long i)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_InByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_InByPtr is null || !m_target_is_ptr)
                     return s_InByVal!(target, i);
 
-                return s_InByRef(ref target, i);
+                return s_InByPtr(m_target_ptr, i);
             }
 
-            private delegate ref uncommonType KeyByRef(ref T value);
-            private delegate ref uncommonType KeyByVal(T value);
+            private delegate ptr<uncommonType> KeyByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> KeyByVal(T value);
 
-            private static readonly KeyByRef s_KeyByRef;
+            private static readonly KeyByPtr s_KeyByPtr;
             private static readonly KeyByVal s_KeyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Key()
+            public ptr<uncommonType> Key()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_KeyByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_KeyByPtr is null || !m_target_is_ptr)
                     return s_KeyByVal!(target);
 
-                return s_KeyByRef(ref target);
+                return s_KeyByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType LenByRef(ref T value);
-            private delegate ref uncommonType LenByVal(T value);
+            private delegate ptr<uncommonType> LenByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> LenByVal(T value);
 
-            private static readonly LenByRef s_LenByRef;
+            private static readonly LenByPtr s_LenByPtr;
             private static readonly LenByVal s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Len()
+            public ptr<uncommonType> Len()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByRef(ref target);
+                return s_LenByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType NumFieldByRef(ref T value);
-            private delegate ref uncommonType NumFieldByVal(T value);
+            private delegate ptr<uncommonType> NumFieldByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> NumFieldByVal(T value);
 
-            private static readonly NumFieldByRef s_NumFieldByRef;
+            private static readonly NumFieldByPtr s_NumFieldByPtr;
             private static readonly NumFieldByVal s_NumFieldByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType NumField()
+            public ptr<uncommonType> NumField()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NumFieldByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NumFieldByPtr is null || !m_target_is_ptr)
                     return s_NumFieldByVal!(target);
 
-                return s_NumFieldByRef(ref target);
+                return s_NumFieldByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType NumInByRef(ref T value);
-            private delegate ref uncommonType NumInByVal(T value);
+            private delegate ptr<uncommonType> NumInByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> NumInByVal(T value);
 
-            private static readonly NumInByRef s_NumInByRef;
+            private static readonly NumInByPtr s_NumInByPtr;
             private static readonly NumInByVal s_NumInByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType NumIn()
+            public ptr<uncommonType> NumIn()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NumInByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NumInByPtr is null || !m_target_is_ptr)
                     return s_NumInByVal!(target);
 
-                return s_NumInByRef(ref target);
+                return s_NumInByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType NumOutByRef(ref T value);
-            private delegate ref uncommonType NumOutByVal(T value);
+            private delegate ptr<uncommonType> NumOutByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> NumOutByVal(T value);
 
-            private static readonly NumOutByRef s_NumOutByRef;
+            private static readonly NumOutByPtr s_NumOutByPtr;
             private static readonly NumOutByVal s_NumOutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType NumOut()
+            public ptr<uncommonType> NumOut()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NumOutByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NumOutByPtr is null || !m_target_is_ptr)
                     return s_NumOutByVal!(target);
 
-                return s_NumOutByRef(ref target);
+                return s_NumOutByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType OutByRef(ref T value, long i);
-            private delegate ref uncommonType OutByVal(T value, long i);
+            private delegate ptr<uncommonType> OutByPtr(ptr<T> value, long i);
+            private delegate ptr<uncommonType> OutByVal(T value, long i);
 
-            private static readonly OutByRef s_OutByRef;
+            private static readonly OutByPtr s_OutByPtr;
             private static readonly OutByVal s_OutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType Out(long i)
+            public ptr<uncommonType> Out(long i)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OutByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OutByPtr is null || !m_target_is_ptr)
                     return s_OutByVal!(target, i);
 
-                return s_OutByRef(ref target, i);
+                return s_OutByPtr(m_target_ptr, i);
             }
 
-            private delegate ref uncommonType commonByRef(ref T value);
-            private delegate ref uncommonType commonByVal(T value);
+            private delegate ptr<uncommonType> commonByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> commonByVal(T value);
 
-            private static readonly commonByRef s_commonByRef;
+            private static readonly commonByPtr s_commonByPtr;
             private static readonly commonByVal s_commonByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType common()
+            public ptr<uncommonType> common()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_commonByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_commonByPtr is null || !m_target_is_ptr)
                     return s_commonByVal!(target);
 
-                return s_commonByRef(ref target);
+                return s_commonByPtr(m_target_ptr);
             }
 
-            private delegate ref uncommonType uncommonByRef(ref T value);
-            private delegate ref uncommonType uncommonByVal(T value);
+            private delegate ptr<uncommonType> uncommonByPtr(ptr<T> value);
+            private delegate ptr<uncommonType> uncommonByVal(T value);
 
-            private static readonly uncommonByRef s_uncommonByRef;
+            private static readonly uncommonByPtr s_uncommonByPtr;
             private static readonly uncommonByVal s_uncommonByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref uncommonType uncommon()
+            public ptr<uncommonType> uncommon()
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_uncommonByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_uncommonByPtr is null || !m_target_is_ptr)
                     return s_uncommonByVal!(target);
 
-                return s_uncommonByRef(ref target);
+                return s_uncommonByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -662,503 +693,410 @@ namespace go
             static Type()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Align");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Align");
 
                 if (!(extensionMethod is null))
-                    s_AlignByRef = extensionMethod.CreateStaticDelegate(typeof(AlignByRef)) as AlignByRef;
+                    s_AlignByPtr = extensionMethod.CreateStaticDelegate(typeof(AlignByPtr)) as AlignByPtr;
 
-                if (s_AlignByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Align");
+                extensionMethod = targetType.GetExtensionMethod("Align");
 
-                    if (!(extensionMethod is null))
-                        s_AlignByVal = extensionMethod.CreateStaticDelegate(typeof(AlignByVal)) as AlignByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AlignByVal = extensionMethod.CreateStaticDelegate(typeof(AlignByVal)) as AlignByVal;
 
-                if (s_AlignByRef is null && s_AlignByVal is null)
+                if (s_AlignByPtr is null && s_AlignByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Align method", new Exception("Align"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("FieldAlign");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("FieldAlign");
 
                 if (!(extensionMethod is null))
-                    s_FieldAlignByRef = extensionMethod.CreateStaticDelegate(typeof(FieldAlignByRef)) as FieldAlignByRef;
+                    s_FieldAlignByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldAlignByPtr)) as FieldAlignByPtr;
 
-                if (s_FieldAlignByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("FieldAlign");
+                extensionMethod = targetType.GetExtensionMethod("FieldAlign");
 
-                    if (!(extensionMethod is null))
-                        s_FieldAlignByVal = extensionMethod.CreateStaticDelegate(typeof(FieldAlignByVal)) as FieldAlignByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FieldAlignByVal = extensionMethod.CreateStaticDelegate(typeof(FieldAlignByVal)) as FieldAlignByVal;
 
-                if (s_FieldAlignByRef is null && s_FieldAlignByVal is null)
+                if (s_FieldAlignByPtr is null && s_FieldAlignByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.FieldAlign method", new Exception("FieldAlign"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Method");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Method");
 
                 if (!(extensionMethod is null))
-                    s_MethodByRef = extensionMethod.CreateStaticDelegate(typeof(MethodByRef)) as MethodByRef;
+                    s_MethodByPtr = extensionMethod.CreateStaticDelegate(typeof(MethodByPtr)) as MethodByPtr;
 
-                if (s_MethodByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Method");
+                extensionMethod = targetType.GetExtensionMethod("Method");
 
-                    if (!(extensionMethod is null))
-                        s_MethodByVal = extensionMethod.CreateStaticDelegate(typeof(MethodByVal)) as MethodByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MethodByVal = extensionMethod.CreateStaticDelegate(typeof(MethodByVal)) as MethodByVal;
 
-                if (s_MethodByRef is null && s_MethodByVal is null)
+                if (s_MethodByPtr is null && s_MethodByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Method method", new Exception("Method"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("MethodByName");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MethodByName");
 
                 if (!(extensionMethod is null))
-                    s_MethodByNameByRef = extensionMethod.CreateStaticDelegate(typeof(MethodByNameByRef)) as MethodByNameByRef;
+                    s_MethodByNameByPtr = extensionMethod.CreateStaticDelegate(typeof(MethodByNameByPtr)) as MethodByNameByPtr;
 
-                if (s_MethodByNameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("MethodByName");
+                extensionMethod = targetType.GetExtensionMethod("MethodByName");
 
-                    if (!(extensionMethod is null))
-                        s_MethodByNameByVal = extensionMethod.CreateStaticDelegate(typeof(MethodByNameByVal)) as MethodByNameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MethodByNameByVal = extensionMethod.CreateStaticDelegate(typeof(MethodByNameByVal)) as MethodByNameByVal;
 
-                if (s_MethodByNameByRef is null && s_MethodByNameByVal is null)
+                if (s_MethodByNameByPtr is null && s_MethodByNameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.MethodByName method", new Exception("MethodByName"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NumMethod");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NumMethod");
 
                 if (!(extensionMethod is null))
-                    s_NumMethodByRef = extensionMethod.CreateStaticDelegate(typeof(NumMethodByRef)) as NumMethodByRef;
+                    s_NumMethodByPtr = extensionMethod.CreateStaticDelegate(typeof(NumMethodByPtr)) as NumMethodByPtr;
 
-                if (s_NumMethodByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NumMethod");
+                extensionMethod = targetType.GetExtensionMethod("NumMethod");
 
-                    if (!(extensionMethod is null))
-                        s_NumMethodByVal = extensionMethod.CreateStaticDelegate(typeof(NumMethodByVal)) as NumMethodByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NumMethodByVal = extensionMethod.CreateStaticDelegate(typeof(NumMethodByVal)) as NumMethodByVal;
 
-                if (s_NumMethodByRef is null && s_NumMethodByVal is null)
+                if (s_NumMethodByPtr is null && s_NumMethodByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.NumMethod method", new Exception("NumMethod"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Name");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
                 if (!(extensionMethod is null))
-                    s_NameByRef = extensionMethod.CreateStaticDelegate(typeof(NameByRef)) as NameByRef;
+                    s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
-                if (s_NameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Name");
+                extensionMethod = targetType.GetExtensionMethod("Name");
 
-                    if (!(extensionMethod is null))
-                        s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
-                if (s_NameByRef is null && s_NameByVal is null)
+                if (s_NameByPtr is null && s_NameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Name method", new Exception("Name"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PkgPath");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PkgPath");
 
                 if (!(extensionMethod is null))
-                    s_PkgPathByRef = extensionMethod.CreateStaticDelegate(typeof(PkgPathByRef)) as PkgPathByRef;
+                    s_PkgPathByPtr = extensionMethod.CreateStaticDelegate(typeof(PkgPathByPtr)) as PkgPathByPtr;
 
-                if (s_PkgPathByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PkgPath");
+                extensionMethod = targetType.GetExtensionMethod("PkgPath");
 
-                    if (!(extensionMethod is null))
-                        s_PkgPathByVal = extensionMethod.CreateStaticDelegate(typeof(PkgPathByVal)) as PkgPathByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PkgPathByVal = extensionMethod.CreateStaticDelegate(typeof(PkgPathByVal)) as PkgPathByVal;
 
-                if (s_PkgPathByRef is null && s_PkgPathByVal is null)
+                if (s_PkgPathByPtr is null && s_PkgPathByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.PkgPath method", new Exception("PkgPath"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Size");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Size");
 
                 if (!(extensionMethod is null))
-                    s_SizeByRef = extensionMethod.CreateStaticDelegate(typeof(SizeByRef)) as SizeByRef;
+                    s_SizeByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeByPtr)) as SizeByPtr;
 
-                if (s_SizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Size");
+                extensionMethod = targetType.GetExtensionMethod("Size");
 
-                    if (!(extensionMethod is null))
-                        s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
 
-                if (s_SizeByRef is null && s_SizeByVal is null)
+                if (s_SizeByPtr is null && s_SizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Size method", new Exception("Size"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Kind");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Kind");
 
                 if (!(extensionMethod is null))
-                    s_KindByRef = extensionMethod.CreateStaticDelegate(typeof(KindByRef)) as KindByRef;
+                    s_KindByPtr = extensionMethod.CreateStaticDelegate(typeof(KindByPtr)) as KindByPtr;
 
-                if (s_KindByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Kind");
+                extensionMethod = targetType.GetExtensionMethod("Kind");
 
-                    if (!(extensionMethod is null))
-                        s_KindByVal = extensionMethod.CreateStaticDelegate(typeof(KindByVal)) as KindByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_KindByVal = extensionMethod.CreateStaticDelegate(typeof(KindByVal)) as KindByVal;
 
-                if (s_KindByRef is null && s_KindByVal is null)
+                if (s_KindByPtr is null && s_KindByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Kind method", new Exception("Kind"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Implements");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Implements");
 
                 if (!(extensionMethod is null))
-                    s_ImplementsByRef = extensionMethod.CreateStaticDelegate(typeof(ImplementsByRef)) as ImplementsByRef;
+                    s_ImplementsByPtr = extensionMethod.CreateStaticDelegate(typeof(ImplementsByPtr)) as ImplementsByPtr;
 
-                if (s_ImplementsByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Implements");
+                extensionMethod = targetType.GetExtensionMethod("Implements");
 
-                    if (!(extensionMethod is null))
-                        s_ImplementsByVal = extensionMethod.CreateStaticDelegate(typeof(ImplementsByVal)) as ImplementsByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ImplementsByVal = extensionMethod.CreateStaticDelegate(typeof(ImplementsByVal)) as ImplementsByVal;
 
-                if (s_ImplementsByRef is null && s_ImplementsByVal is null)
+                if (s_ImplementsByPtr is null && s_ImplementsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Implements method", new Exception("Implements"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AssignableTo");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AssignableTo");
 
                 if (!(extensionMethod is null))
-                    s_AssignableToByRef = extensionMethod.CreateStaticDelegate(typeof(AssignableToByRef)) as AssignableToByRef;
+                    s_AssignableToByPtr = extensionMethod.CreateStaticDelegate(typeof(AssignableToByPtr)) as AssignableToByPtr;
 
-                if (s_AssignableToByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AssignableTo");
+                extensionMethod = targetType.GetExtensionMethod("AssignableTo");
 
-                    if (!(extensionMethod is null))
-                        s_AssignableToByVal = extensionMethod.CreateStaticDelegate(typeof(AssignableToByVal)) as AssignableToByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AssignableToByVal = extensionMethod.CreateStaticDelegate(typeof(AssignableToByVal)) as AssignableToByVal;
 
-                if (s_AssignableToByRef is null && s_AssignableToByVal is null)
+                if (s_AssignableToByPtr is null && s_AssignableToByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.AssignableTo method", new Exception("AssignableTo"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ConvertibleTo");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ConvertibleTo");
 
                 if (!(extensionMethod is null))
-                    s_ConvertibleToByRef = extensionMethod.CreateStaticDelegate(typeof(ConvertibleToByRef)) as ConvertibleToByRef;
+                    s_ConvertibleToByPtr = extensionMethod.CreateStaticDelegate(typeof(ConvertibleToByPtr)) as ConvertibleToByPtr;
 
-                if (s_ConvertibleToByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ConvertibleTo");
+                extensionMethod = targetType.GetExtensionMethod("ConvertibleTo");
 
-                    if (!(extensionMethod is null))
-                        s_ConvertibleToByVal = extensionMethod.CreateStaticDelegate(typeof(ConvertibleToByVal)) as ConvertibleToByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ConvertibleToByVal = extensionMethod.CreateStaticDelegate(typeof(ConvertibleToByVal)) as ConvertibleToByVal;
 
-                if (s_ConvertibleToByRef is null && s_ConvertibleToByVal is null)
+                if (s_ConvertibleToByPtr is null && s_ConvertibleToByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.ConvertibleTo method", new Exception("ConvertibleTo"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Comparable");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Comparable");
 
                 if (!(extensionMethod is null))
-                    s_ComparableByRef = extensionMethod.CreateStaticDelegate(typeof(ComparableByRef)) as ComparableByRef;
+                    s_ComparableByPtr = extensionMethod.CreateStaticDelegate(typeof(ComparableByPtr)) as ComparableByPtr;
 
-                if (s_ComparableByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Comparable");
+                extensionMethod = targetType.GetExtensionMethod("Comparable");
 
-                    if (!(extensionMethod is null))
-                        s_ComparableByVal = extensionMethod.CreateStaticDelegate(typeof(ComparableByVal)) as ComparableByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ComparableByVal = extensionMethod.CreateStaticDelegate(typeof(ComparableByVal)) as ComparableByVal;
 
-                if (s_ComparableByRef is null && s_ComparableByVal is null)
+                if (s_ComparableByPtr is null && s_ComparableByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Comparable method", new Exception("Comparable"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Bits");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Bits");
 
                 if (!(extensionMethod is null))
-                    s_BitsByRef = extensionMethod.CreateStaticDelegate(typeof(BitsByRef)) as BitsByRef;
+                    s_BitsByPtr = extensionMethod.CreateStaticDelegate(typeof(BitsByPtr)) as BitsByPtr;
 
-                if (s_BitsByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Bits");
+                extensionMethod = targetType.GetExtensionMethod("Bits");
 
-                    if (!(extensionMethod is null))
-                        s_BitsByVal = extensionMethod.CreateStaticDelegate(typeof(BitsByVal)) as BitsByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BitsByVal = extensionMethod.CreateStaticDelegate(typeof(BitsByVal)) as BitsByVal;
 
-                if (s_BitsByRef is null && s_BitsByVal is null)
+                if (s_BitsByPtr is null && s_BitsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Bits method", new Exception("Bits"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ChanDir");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ChanDir");
 
                 if (!(extensionMethod is null))
-                    s_ChanDirByRef = extensionMethod.CreateStaticDelegate(typeof(ChanDirByRef)) as ChanDirByRef;
+                    s_ChanDirByPtr = extensionMethod.CreateStaticDelegate(typeof(ChanDirByPtr)) as ChanDirByPtr;
 
-                if (s_ChanDirByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ChanDir");
+                extensionMethod = targetType.GetExtensionMethod("ChanDir");
 
-                    if (!(extensionMethod is null))
-                        s_ChanDirByVal = extensionMethod.CreateStaticDelegate(typeof(ChanDirByVal)) as ChanDirByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ChanDirByVal = extensionMethod.CreateStaticDelegate(typeof(ChanDirByVal)) as ChanDirByVal;
 
-                if (s_ChanDirByRef is null && s_ChanDirByVal is null)
+                if (s_ChanDirByPtr is null && s_ChanDirByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.ChanDir method", new Exception("ChanDir"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("IsVariadic");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("IsVariadic");
 
                 if (!(extensionMethod is null))
-                    s_IsVariadicByRef = extensionMethod.CreateStaticDelegate(typeof(IsVariadicByRef)) as IsVariadicByRef;
+                    s_IsVariadicByPtr = extensionMethod.CreateStaticDelegate(typeof(IsVariadicByPtr)) as IsVariadicByPtr;
 
-                if (s_IsVariadicByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("IsVariadic");
+                extensionMethod = targetType.GetExtensionMethod("IsVariadic");
 
-                    if (!(extensionMethod is null))
-                        s_IsVariadicByVal = extensionMethod.CreateStaticDelegate(typeof(IsVariadicByVal)) as IsVariadicByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_IsVariadicByVal = extensionMethod.CreateStaticDelegate(typeof(IsVariadicByVal)) as IsVariadicByVal;
 
-                if (s_IsVariadicByRef is null && s_IsVariadicByVal is null)
+                if (s_IsVariadicByPtr is null && s_IsVariadicByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.IsVariadic method", new Exception("IsVariadic"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Elem");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Elem");
 
                 if (!(extensionMethod is null))
-                    s_ElemByRef = extensionMethod.CreateStaticDelegate(typeof(ElemByRef)) as ElemByRef;
+                    s_ElemByPtr = extensionMethod.CreateStaticDelegate(typeof(ElemByPtr)) as ElemByPtr;
 
-                if (s_ElemByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Elem");
+                extensionMethod = targetType.GetExtensionMethod("Elem");
 
-                    if (!(extensionMethod is null))
-                        s_ElemByVal = extensionMethod.CreateStaticDelegate(typeof(ElemByVal)) as ElemByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ElemByVal = extensionMethod.CreateStaticDelegate(typeof(ElemByVal)) as ElemByVal;
 
-                if (s_ElemByRef is null && s_ElemByVal is null)
+                if (s_ElemByPtr is null && s_ElemByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Elem method", new Exception("Elem"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Field");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Field");
 
                 if (!(extensionMethod is null))
-                    s_FieldByRef = extensionMethod.CreateStaticDelegate(typeof(FieldByRef)) as FieldByRef;
+                    s_FieldByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldByPtr)) as FieldByPtr;
 
-                if (s_FieldByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Field");
+                extensionMethod = targetType.GetExtensionMethod("Field");
 
-                    if (!(extensionMethod is null))
-                        s_FieldByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByVal)) as FieldByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FieldByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByVal)) as FieldByVal;
 
-                if (s_FieldByRef is null && s_FieldByVal is null)
+                if (s_FieldByPtr is null && s_FieldByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Field method", new Exception("Field"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("FieldByIndex");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("FieldByIndex");
 
                 if (!(extensionMethod is null))
-                    s_FieldByIndexByRef = extensionMethod.CreateStaticDelegate(typeof(FieldByIndexByRef)) as FieldByIndexByRef;
+                    s_FieldByIndexByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldByIndexByPtr)) as FieldByIndexByPtr;
 
-                if (s_FieldByIndexByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("FieldByIndex");
+                extensionMethod = targetType.GetExtensionMethod("FieldByIndex");
 
-                    if (!(extensionMethod is null))
-                        s_FieldByIndexByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByIndexByVal)) as FieldByIndexByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FieldByIndexByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByIndexByVal)) as FieldByIndexByVal;
 
-                if (s_FieldByIndexByRef is null && s_FieldByIndexByVal is null)
+                if (s_FieldByIndexByPtr is null && s_FieldByIndexByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.FieldByIndex method", new Exception("FieldByIndex"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("FieldByName");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("FieldByName");
 
                 if (!(extensionMethod is null))
-                    s_FieldByNameByRef = extensionMethod.CreateStaticDelegate(typeof(FieldByNameByRef)) as FieldByNameByRef;
+                    s_FieldByNameByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldByNameByPtr)) as FieldByNameByPtr;
 
-                if (s_FieldByNameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("FieldByName");
+                extensionMethod = targetType.GetExtensionMethod("FieldByName");
 
-                    if (!(extensionMethod is null))
-                        s_FieldByNameByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByNameByVal)) as FieldByNameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FieldByNameByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByNameByVal)) as FieldByNameByVal;
 
-                if (s_FieldByNameByRef is null && s_FieldByNameByVal is null)
+                if (s_FieldByNameByPtr is null && s_FieldByNameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.FieldByName method", new Exception("FieldByName"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("FieldByNameFunc");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("FieldByNameFunc");
 
                 if (!(extensionMethod is null))
-                    s_FieldByNameFuncByRef = extensionMethod.CreateStaticDelegate(typeof(FieldByNameFuncByRef)) as FieldByNameFuncByRef;
+                    s_FieldByNameFuncByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldByNameFuncByPtr)) as FieldByNameFuncByPtr;
 
-                if (s_FieldByNameFuncByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("FieldByNameFunc");
+                extensionMethod = targetType.GetExtensionMethod("FieldByNameFunc");
 
-                    if (!(extensionMethod is null))
-                        s_FieldByNameFuncByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByNameFuncByVal)) as FieldByNameFuncByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_FieldByNameFuncByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByNameFuncByVal)) as FieldByNameFuncByVal;
 
-                if (s_FieldByNameFuncByRef is null && s_FieldByNameFuncByVal is null)
+                if (s_FieldByNameFuncByPtr is null && s_FieldByNameFuncByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.FieldByNameFunc method", new Exception("FieldByNameFunc"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("In");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("In");
 
                 if (!(extensionMethod is null))
-                    s_InByRef = extensionMethod.CreateStaticDelegate(typeof(InByRef)) as InByRef;
+                    s_InByPtr = extensionMethod.CreateStaticDelegate(typeof(InByPtr)) as InByPtr;
 
-                if (s_InByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("In");
+                extensionMethod = targetType.GetExtensionMethod("In");
 
-                    if (!(extensionMethod is null))
-                        s_InByVal = extensionMethod.CreateStaticDelegate(typeof(InByVal)) as InByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_InByVal = extensionMethod.CreateStaticDelegate(typeof(InByVal)) as InByVal;
 
-                if (s_InByRef is null && s_InByVal is null)
+                if (s_InByPtr is null && s_InByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.In method", new Exception("In"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Key");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Key");
 
                 if (!(extensionMethod is null))
-                    s_KeyByRef = extensionMethod.CreateStaticDelegate(typeof(KeyByRef)) as KeyByRef;
+                    s_KeyByPtr = extensionMethod.CreateStaticDelegate(typeof(KeyByPtr)) as KeyByPtr;
 
-                if (s_KeyByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Key");
+                extensionMethod = targetType.GetExtensionMethod("Key");
 
-                    if (!(extensionMethod is null))
-                        s_KeyByVal = extensionMethod.CreateStaticDelegate(typeof(KeyByVal)) as KeyByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_KeyByVal = extensionMethod.CreateStaticDelegate(typeof(KeyByVal)) as KeyByVal;
 
-                if (s_KeyByRef is null && s_KeyByVal is null)
+                if (s_KeyByPtr is null && s_KeyByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Key method", new Exception("Key"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Len");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
                 if (!(extensionMethod is null))
-                    s_LenByRef = extensionMethod.CreateStaticDelegate(typeof(LenByRef)) as LenByRef;
+                    s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
-                if (s_LenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Len");
+                extensionMethod = targetType.GetExtensionMethod("Len");
 
-                    if (!(extensionMethod is null))
-                        s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
-                if (s_LenByRef is null && s_LenByVal is null)
+                if (s_LenByPtr is null && s_LenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Len method", new Exception("Len"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NumField");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NumField");
 
                 if (!(extensionMethod is null))
-                    s_NumFieldByRef = extensionMethod.CreateStaticDelegate(typeof(NumFieldByRef)) as NumFieldByRef;
+                    s_NumFieldByPtr = extensionMethod.CreateStaticDelegate(typeof(NumFieldByPtr)) as NumFieldByPtr;
 
-                if (s_NumFieldByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NumField");
+                extensionMethod = targetType.GetExtensionMethod("NumField");
 
-                    if (!(extensionMethod is null))
-                        s_NumFieldByVal = extensionMethod.CreateStaticDelegate(typeof(NumFieldByVal)) as NumFieldByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NumFieldByVal = extensionMethod.CreateStaticDelegate(typeof(NumFieldByVal)) as NumFieldByVal;
 
-                if (s_NumFieldByRef is null && s_NumFieldByVal is null)
+                if (s_NumFieldByPtr is null && s_NumFieldByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.NumField method", new Exception("NumField"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NumIn");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NumIn");
 
                 if (!(extensionMethod is null))
-                    s_NumInByRef = extensionMethod.CreateStaticDelegate(typeof(NumInByRef)) as NumInByRef;
+                    s_NumInByPtr = extensionMethod.CreateStaticDelegate(typeof(NumInByPtr)) as NumInByPtr;
 
-                if (s_NumInByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NumIn");
+                extensionMethod = targetType.GetExtensionMethod("NumIn");
 
-                    if (!(extensionMethod is null))
-                        s_NumInByVal = extensionMethod.CreateStaticDelegate(typeof(NumInByVal)) as NumInByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NumInByVal = extensionMethod.CreateStaticDelegate(typeof(NumInByVal)) as NumInByVal;
 
-                if (s_NumInByRef is null && s_NumInByVal is null)
+                if (s_NumInByPtr is null && s_NumInByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.NumIn method", new Exception("NumIn"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NumOut");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NumOut");
 
                 if (!(extensionMethod is null))
-                    s_NumOutByRef = extensionMethod.CreateStaticDelegate(typeof(NumOutByRef)) as NumOutByRef;
+                    s_NumOutByPtr = extensionMethod.CreateStaticDelegate(typeof(NumOutByPtr)) as NumOutByPtr;
 
-                if (s_NumOutByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NumOut");
+                extensionMethod = targetType.GetExtensionMethod("NumOut");
 
-                    if (!(extensionMethod is null))
-                        s_NumOutByVal = extensionMethod.CreateStaticDelegate(typeof(NumOutByVal)) as NumOutByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NumOutByVal = extensionMethod.CreateStaticDelegate(typeof(NumOutByVal)) as NumOutByVal;
 
-                if (s_NumOutByRef is null && s_NumOutByVal is null)
+                if (s_NumOutByPtr is null && s_NumOutByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.NumOut method", new Exception("NumOut"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Out");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Out");
 
                 if (!(extensionMethod is null))
-                    s_OutByRef = extensionMethod.CreateStaticDelegate(typeof(OutByRef)) as OutByRef;
+                    s_OutByPtr = extensionMethod.CreateStaticDelegate(typeof(OutByPtr)) as OutByPtr;
 
-                if (s_OutByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Out");
+                extensionMethod = targetType.GetExtensionMethod("Out");
 
-                    if (!(extensionMethod is null))
-                        s_OutByVal = extensionMethod.CreateStaticDelegate(typeof(OutByVal)) as OutByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OutByVal = extensionMethod.CreateStaticDelegate(typeof(OutByVal)) as OutByVal;
 
-                if (s_OutByRef is null && s_OutByVal is null)
+                if (s_OutByPtr is null && s_OutByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.Out method", new Exception("Out"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("common");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("common");
 
                 if (!(extensionMethod is null))
-                    s_commonByRef = extensionMethod.CreateStaticDelegate(typeof(commonByRef)) as commonByRef;
+                    s_commonByPtr = extensionMethod.CreateStaticDelegate(typeof(commonByPtr)) as commonByPtr;
 
-                if (s_commonByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("common");
+                extensionMethod = targetType.GetExtensionMethod("common");
 
-                    if (!(extensionMethod is null))
-                        s_commonByVal = extensionMethod.CreateStaticDelegate(typeof(commonByVal)) as commonByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_commonByVal = extensionMethod.CreateStaticDelegate(typeof(commonByVal)) as commonByVal;
 
-                if (s_commonByRef is null && s_commonByVal is null)
+                if (s_commonByPtr is null && s_commonByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.common method", new Exception("common"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("uncommon");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("uncommon");
 
                 if (!(extensionMethod is null))
-                    s_uncommonByRef = extensionMethod.CreateStaticDelegate(typeof(uncommonByRef)) as uncommonByRef;
+                    s_uncommonByPtr = extensionMethod.CreateStaticDelegate(typeof(uncommonByPtr)) as uncommonByPtr;
 
-                if (s_uncommonByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("uncommon");
+                extensionMethod = targetType.GetExtensionMethod("uncommon");
 
-                    if (!(extensionMethod is null))
-                        s_uncommonByVal = extensionMethod.CreateStaticDelegate(typeof(uncommonByVal)) as uncommonByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_uncommonByVal = extensionMethod.CreateStaticDelegate(typeof(uncommonByVal)) as uncommonByVal;
 
-                if (s_uncommonByRef is null && s_uncommonByVal is null)
+                if (s_uncommonByPtr is null && s_uncommonByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Type.uncommon method", new Exception("uncommon"));
             }
 

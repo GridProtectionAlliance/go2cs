@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflect -- go2cs converted at 2020 August 29 08:43:26 UTC
+// package reflect -- go2cs converted at 2020 October 08 03:25:08 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\value.go
+using unsafeheader = go.@internal.unsafeheader_package;
 using math = go.math_package;
 using runtime = go.runtime_package;
 using @unsafe = go.@unsafe_package;
@@ -13,9 +14,9 @@ using System;
 
 namespace go
 {
-    public static unsafe partial class reflect_package
+    public static partial class reflect_package
     {
-        private static readonly long ptrSize = 4L << (int)((~uintptr(0L) >> (int)(63L))); // unsafe.Sizeof(uintptr(0)) but an ideal const
+        private static readonly long ptrSize = (long)4L << (int)((~uintptr(0L) >> (int)(63L))); // unsafe.Sizeof(uintptr(0)) but an ideal const
 
         // Value is the reflection interface to a Go value.
         //
@@ -88,15 +89,16 @@ namespace go
         {
         }
 
-        private static readonly long flagKindWidth = 5L; // there are 27 kinds
-        private static readonly flag flagKindMask = 1L << (int)(flagKindWidth) - 1L;
-        private static readonly flag flagStickyRO = 1L << (int)(5L);
-        private static readonly flag flagEmbedRO = 1L << (int)(6L);
-        private static readonly flag flagIndir = 1L << (int)(7L);
-        private static readonly flag flagAddr = 1L << (int)(8L);
-        private static readonly flag flagMethod = 1L << (int)(9L);
-        private static readonly long flagMethodShift = 10L;
-        private static readonly flag flagRO = flagStickyRO | flagEmbedRO;
+        private static readonly long flagKindWidth = (long)5L; // there are 27 kinds
+        private static readonly flag flagKindMask = (flag)1L << (int)(flagKindWidth) - 1L;
+        private static readonly flag flagStickyRO = (flag)1L << (int)(5L);
+        private static readonly flag flagEmbedRO = (flag)1L << (int)(6L);
+        private static readonly flag flagIndir = (flag)1L << (int)(7L);
+        private static readonly flag flagAddr = (flag)1L << (int)(8L);
+        private static readonly flag flagMethod = (flag)1L << (int)(9L);
+        private static readonly long flagMethodShift = (long)10L;
+        private static readonly flag flagRO = (flag)flagStickyRO | flagEmbedRO;
+
 
         private static Kind kind(this flag f)
         {
@@ -109,7 +111,9 @@ namespace go
             {
                 return flagStickyRO;
             }
+
             return 0L;
+
         }
 
         // pointer returns the underlying pointer represented by v.
@@ -120,19 +124,22 @@ namespace go
             {
                 panic("can't call pointer on a non-pointer Value");
             }
+
             if (v.flag & flagIndir != 0L)
             {
-                return v.ptr.Value;
+                return new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr);
             }
+
             return v.ptr;
+
         });
 
         // packEface converts v to the empty interface.
         private static void packEface(Value v) => func((_, panic, __) =>
         {
             var t = v.typ;
-            var i = default;
-            var e = (emptyInterface.Value)(@unsafe.Pointer(ref i)); 
+            ref var i = ref heap(out ptr<var> _addr_i);
+            var e = (emptyInterface.val)(@unsafe.Pointer(_addr_i)); 
             // First, fill in the data portion of the interface.
 
             if (ifaceIndir(t)) 
@@ -146,15 +153,17 @@ namespace go
                 { 
                     // TODO: pass safe boolean from valueInterface so
                     // we don't need to copy if safe==true?
-                    var c = unsafe_New(t);
-                    typedmemmove(t, c, ptr);
+                    var c = unsafe_New(_addr_t);
+                    typedmemmove(_addr_t, c, ptr);
                     ptr = c;
+
                 }
+
                 e.word = ptr;
             else if (v.flag & flagIndir != 0L) 
                 // Value is indirect, but interface is direct. We need
                 // to load the data at v.ptr into the interface data word.
-                e.word = v.ptr.Value;
+                e.word = new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr);
             else 
                 // Value is direct, and so is the interface.
                 e.word = v.ptr;
@@ -164,24 +173,28 @@ namespace go
             // interface value.
             e.typ = t;
             return i;
+
         });
 
         // unpackEface converts the empty interface i to a Value.
         private static Value unpackEface(object i)
         {
-            var e = (emptyInterface.Value)(@unsafe.Pointer(ref i)); 
+            var e = (emptyInterface.val)(@unsafe.Pointer(_addr_i)); 
             // NOTE: don't read e.word until we know whether it is really a pointer or not.
             var t = e.typ;
             if (t == null)
             {
                 return new Value();
             }
+
             var f = flag(t.Kind());
             if (ifaceIndir(t))
             {
                 f |= flagIndir;
             }
+
             return new Value(t,e.word,f);
+
         }
 
         // A ValueError occurs when a Value method is invoked on
@@ -193,13 +206,17 @@ namespace go
             public Kind Kind;
         }
 
-        private static @string Error(this ref ValueError e)
+        private static @string Error(this ptr<ValueError> _addr_e)
         {
+            ref ValueError e = ref _addr_e.val;
+
             if (e.Kind == 0L)
             {
                 return "reflect: call of " + e.Method + " on zero Value";
             }
+
             return "reflect: call of " + e.Method + " on " + e.Kind.String() + " Value";
+
         }
 
         // methodName returns the name of the calling method,
@@ -212,7 +229,24 @@ namespace go
             {
                 return "unknown method";
             }
+
             return f.Name();
+
+        }
+
+        // methodNameSkip is like methodName, but skips another stack frame.
+        // This is a separate function so that reflect.flag.mustBe will be inlined.
+        private static @string methodNameSkip()
+        {
+            var (pc, _, _, _) = runtime.Caller(3L);
+            var f = runtime.FuncForPC(pc);
+            if (f == null)
+            {
+                return "unknown method";
+            }
+
+            return f.Name();
+
         }
 
         // emptyInterface is the header for an interface{} value.
@@ -235,45 +269,69 @@ namespace go
         // v.flag.mustBe(Bool), which will only bother to copy the
         // single important word for the receiver.
         private static void mustBe(this flag f, Kind expected) => func((_, panic, __) =>
-        {
-            if (f.kind() != expected)
+        { 
+            // TODO(mvdan): use f.kind() again once mid-stack inlining gets better
+            if (Kind(f & flagKindMask) != expected)
             {
-                panic(ref new ValueError(methodName(),f.kind()));
+                panic(addr(new ValueError(methodName(),f.kind())));
             }
+
         });
 
         // mustBeExported panics if f records that the value was obtained using
         // an unexported field.
-        private static void mustBeExported(this flag f) => func((_, panic, __) =>
+        private static void mustBeExported(this flag f)
+        {
+            if (f == 0L || f & flagRO != 0L)
+            {
+                f.mustBeExportedSlow();
+            }
+
+        }
+
+        private static void mustBeExportedSlow(this flag f) => func((_, panic, __) =>
         {
             if (f == 0L)
             {
-                panic(ref new ValueError(methodName(),0));
+                panic(addr(new ValueError(methodNameSkip(),Invalid)));
             }
+
             if (f & flagRO != 0L)
             {
-                panic("reflect: " + methodName() + " using value obtained using unexported field");
+                panic("reflect: " + methodNameSkip() + " using value obtained using unexported field");
             }
+
         });
 
         // mustBeAssignable panics if f records that the value is not assignable,
         // which is to say that either it was obtained using an unexported field
         // or it is not addressable.
-        private static void mustBeAssignable(this flag f) => func((_, panic, __) =>
+        private static void mustBeAssignable(this flag f)
+        {
+            if (f & flagRO != 0L || f & flagAddr == 0L)
+            {
+                f.mustBeAssignableSlow();
+            }
+
+        }
+
+        private static void mustBeAssignableSlow(this flag f) => func((_, panic, __) =>
         {
             if (f == 0L)
             {
-                panic(ref new ValueError(methodName(),Invalid));
+                panic(addr(new ValueError(methodNameSkip(),Invalid)));
             } 
             // Assignable if addressable and not read-only.
             if (f & flagRO != 0L)
             {
-                panic("reflect: " + methodName() + " using value obtained using unexported field");
+                panic("reflect: " + methodNameSkip() + " using value obtained using unexported field");
             }
+
             if (f & flagAddr == 0L)
             {
-                panic("reflect: " + methodName() + " using unaddressable value");
+                panic("reflect: " + methodNameSkip() + " using unaddressable value");
             }
+
         });
 
         // Addr returns a pointer value representing the address of v.
@@ -286,8 +344,12 @@ namespace go
             if (v.flag & flagAddr == 0L)
             {
                 panic("reflect.Value.Addr of unaddressable value");
-            }
-            return new Value(v.typ.ptrTo(),v.ptr,v.flag.ro()|flag(Ptr));
+            } 
+            // Preserve flagRO instead of using v.flag.ro() so that
+            // v.Addr().Elem() is equivalent to v (#32772)
+            var fl = v.flag & flagRO;
+            return new Value(v.typ.ptrTo(),v.ptr,fl|flag(Ptr));
+
         });
 
         // Bool returns v's underlying value.
@@ -295,7 +357,7 @@ namespace go
         public static bool Bool(this Value v)
         {
             v.mustBe(Bool);
-            return v.ptr.Value;
+            return new ptr<ptr<ptr<bool>>>(v.ptr);
         }
 
         // Bytes returns v's underlying value.
@@ -308,7 +370,8 @@ namespace go
                 panic("reflect.Value.Bytes of non-byte slice");
             } 
             // Slice is always bigger than a word; assume flagIndir.
-            return v.ptr.Value;
+            return new ptr<ptr<ptr<slice<byte>>>>(v.ptr);
+
         });
 
         // runes returns v's underlying value.
@@ -321,7 +384,8 @@ namespace go
                 panic("reflect.Value.Bytes of non-rune slice");
             } 
             // Slice is always bigger than a word; assume flagIndir.
-            return v.ptr.Value;
+            return new ptr<ptr<ptr<slice<int>>>>(v.ptr);
+
         });
 
         // CanAddr reports whether the value's address can be obtained with Addr.
@@ -378,8 +442,8 @@ namespace go
         public static slice<Value> call(this Value v, @string op, slice<Value> @in) => func((_, panic, __) =>
         { 
             // Get function pointer, type.
-            var t = v.typ;
-            unsafe.Pointer fn = default;            Value rcvr = default;            ref rtype rcvrtype = default;
+            var t = (funcType.val)(@unsafe.Pointer(v.typ));
+            unsafe.Pointer fn = default;            Value rcvr = default;            ptr<rtype> rcvrtype;
             if (v.flag & flagMethod != 0L)
             {
                 rcvr = v;
@@ -387,16 +451,18 @@ namespace go
             }
             else if (v.flag & flagIndir != 0L)
             {
-                fn = v.ptr.Value;
+                fn = new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr);
             }
             else
             {
                 fn = v.ptr;
             }
+
             if (fn == null)
             {
                 panic("reflect.Value.Call: call of nil function");
             }
+
             var isSlice = op == "CallSlice";
             var n = t.NumIn();
             if (isSlice)
@@ -405,14 +471,17 @@ namespace go
                 {
                     panic("reflect: CallSlice of non-variadic function");
                 }
+
                 if (len(in) < n)
                 {
                     panic("reflect: CallSlice with too few input arguments");
                 }
+
                 if (len(in) > n)
                 {
                     panic("reflect: CallSlice with too many input arguments");
                 }
+
             }
             else
             {
@@ -420,15 +489,19 @@ namespace go
                 {
                     n--;
                 }
+
                 if (len(in) < n)
                 {
                     panic("reflect: Call with too few input arguments");
                 }
+
                 if (!t.IsVariadic() && len(in) > n)
                 {
                     panic("reflect: Call with too many input arguments");
                 }
+
             }
+
             {
                 var x__prev1 = x;
 
@@ -439,6 +512,7 @@ namespace go
                     {
                         panic("reflect: " + op + " using zero Value argument");
                     }
+
                 }
 
                 x = x__prev1;
@@ -465,6 +539,7 @@ namespace go
                         targ = targ__prev1;
 
                     }
+
                 }
 
 
@@ -495,7 +570,9 @@ namespace go
                             xt = xt__prev2;
 
                         }
+
                         slice.Index(i).Set(x);
+
                     }
 
 
@@ -505,12 +582,15 @@ namespace go
                 in = make_slice<Value>(n + 1L);
                 copy(in[..n], origIn);
                 in[n] = slice;
+
             }
+
             var nin = len(in);
             if (nin != t.NumIn())
             {
                 panic("reflect.Value.Call: wrong argument count");
             }
+
             var nout = t.NumOut(); 
 
             // Compute frame type.
@@ -526,8 +606,10 @@ namespace go
             { 
                 // Can't use pool if the function has return values.
                 // We will leak pointer to args in ret, so its lifetime is not scoped.
-                args = unsafe_New(frametype);
+                args = unsafe_New(_addr_frametype);
+
             }
+
             var off = uintptr(0L); 
 
             // Copy inputs into args.
@@ -536,6 +618,7 @@ namespace go
                 storeRcvr(rcvr, args);
                 off = ptrSize;
             }
+
             {
                 long i__prev1 = i;
 
@@ -544,7 +627,7 @@ namespace go
                     i = __i;
                     v = __v;
                     v.mustBeExported();
-                    targ = t.In(i)._<ref rtype>();
+                    targ = t.In(i)._<ptr<rtype>>();
                     var a = uintptr(targ.align);
                     off = (off + a - 1L) & ~(a - 1L);
                     n = targ.size;
@@ -555,20 +638,25 @@ namespace go
                         // but we still need to call assignTo to check assignability.
                         v.assignTo("reflect.Value.Call", targ, null);
                         continue;
+
                     }
+
                     var addr = add(args, off, "n > 0");
                     v = v.assignTo("reflect.Value.Call", targ, addr);
                     if (v.flag & flagIndir != 0L)
                     {
-                        typedmemmove(targ, addr, v.ptr);
+                        typedmemmove(_addr_targ, addr, v.ptr);
                     }
                     else
                     {
-                        (@unsafe.Pointer.Value)(addr).Value;
+                        (@unsafe.Pointer.val)(addr).val;
 
                         v.ptr;
+
                     }
+
                     off += n;
+
                 } 
 
                 // Call.
@@ -576,19 +664,18 @@ namespace go
                 i = i__prev1;
             }
 
-            call(frametype, fn, args, uint32(frametype.size), uint32(retOffset)); 
+            call(_addr_frametype, fn, args, uint32(frametype.size), uint32(retOffset)); 
 
             // For testing; see TestCallMethodJump.
             if (callGC)
             {
                 runtime.GC();
             }
+
             slice<Value> ret = default;
             if (nout == 0L)
-            { 
-                // This is untyped because the frame is really a
-                // stack, even though it's a heap object.
-                memclrNoHeapPointers(args, frametype.size);
+            {
+                typedmemclr(_addr_frametype, args);
                 framePool.Put(args);
             }
             else
@@ -596,7 +683,8 @@ namespace go
                 // Zero the now unused input area of args,
                 // because the Values returned by this function contain pointers to the args object,
                 // and will thus keep the args object alive indefinitely.
-                memclrNoHeapPointers(args, retOffset); 
+                typedmemclrpartial(_addr_frametype, args, 0L, retOffset); 
+
                 // Wrap Values around return values in args.
                 ret = make_slice<Value>(nout);
                 off = retOffset;
@@ -611,22 +699,32 @@ namespace go
                         if (tv.Size() != 0L)
                         {
                             var fl = flagIndir | flag(tv.Kind());
-                            ret[i] = new Value(tv.common(),add(args,off,"tv.Size() != 0"),fl);
+                            ret[i] = new Value(tv.common(),add(args,off,"tv.Size() != 0"),fl); 
+                            // Note: this does introduce false sharing between results -
+                            // if any result is live, they are all live.
+                            // (And the space for the args is live as well, but as we've
+                            // cleared that space it isn't as big a deal.)
                         }
                         else
                         { 
                             // For zero-sized return value, args+off may point to the next object.
                             // In this case, return the zero value instead.
                             ret[i] = Zero(tv);
+
                         }
+
                         off += tv.Size();
+
                     }
 
 
                     i = i__prev1;
                 }
+
             }
+
             return ret;
+
         });
 
         // callReflect is the call implementation used by a function
@@ -641,9 +739,17 @@ namespace go
         // NOTE: This function must be marked as a "wrapper" in the generated code,
         // so that the linker can make it work correctly for panic and recover.
         // The gc compilers know to do that for the name "reflect.callReflect".
-        private static void callReflect(ref makeFuncImpl _ctxt, unsafe.Pointer frame) => func(_ctxt, (ref makeFuncImpl ctxt, Defer _, Panic panic, Recover __) =>
+        //
+        // ctxt is the "closure" generated by MakeFunc.
+        // frame is a pointer to the arguments to that closure on the stack.
+        // retValid points to a boolean which should be set when the results
+        // section of frame is set.
+        private static void callReflect(ptr<makeFuncImpl> _addr_ctxt, unsafe.Pointer frame, ptr<bool> _addr_retValid) => func((_, panic, __) =>
         {
-            var ftyp = ctxt.typ;
+            ref makeFuncImpl ctxt = ref _addr_ctxt.val;
+            ref bool retValid = ref _addr_retValid.val;
+
+            var ftyp = ctxt.ftyp;
             var f = ctxt.fn; 
 
             // Copy argument frame into Values.
@@ -664,19 +770,23 @@ namespace go
                         // Must make a copy, because f might keep a reference to it,
                         // and we cannot let f keep a reference to the stack frame
                         // after this function returns, not even a read-only reference.
-                        v.ptr = unsafe_New(typ);
+                        v.ptr = unsafe_New(_addr_typ);
                         if (typ.size > 0L)
                         {
-                            typedmemmove(typ, v.ptr, add(ptr, off, "typ.size > 0"));
+                            typedmemmove(_addr_typ, v.ptr, add(ptr, off, "typ.size > 0"));
                         }
+
                         v.flag |= flagIndir;
+
                     }
                     else
                     {
-                        v.ptr = add(ptr, off, "1-ptr").Value;
+                        v.ptr = new ptr<ptr<ptr<unsafe.Pointer>>>(add(ptr, off, "1-ptr"));
                     }
+
                     in = append(in, v);
                     off += typ.size;
+
                 } 
 
                 // Call underlying function.
@@ -695,10 +805,6 @@ namespace go
             if (numOut > 0L)
             {
                 off += -off & (ptrSize - 1L);
-                if (runtime.GOARCH == "amd64p32")
-                {
-                    off = align(off, 8L);
-                }
                 {
                     var typ__prev1 = typ;
 
@@ -707,42 +813,78 @@ namespace go
                         i = __i;
                         typ = __typ;
                         v = out[i];
-                        if (v.typ != typ)
+                        if (v.typ == null)
                         {
-                            panic("reflect: function created by MakeFunc using " + funcName(f) + " returned wrong type: have " + out[i].typ.String() + " for " + typ.String());
+                            panic("reflect: function created by MakeFunc using " + funcName(f) + " returned zero Value");
                         }
+
                         if (v.flag & flagRO != 0L)
                         {
                             panic("reflect: function created by MakeFunc using " + funcName(f) + " returned value obtained from unexported field");
                         }
+
                         off += -off & uintptr(typ.align - 1L);
                         if (typ.size == 0L)
                         {
                             continue;
                         }
-                        var addr = add(ptr, off, "typ.size > 0");
+
+                        var addr = add(ptr, off, "typ.size > 0"); 
+
+                        // Convert v to type typ if v is assignable to a variable
+                        // of type t in the language spec.
+                        // See issue 28761.
+                        if (typ.Kind() == Interface)
+                        { 
+                            // We must clear the destination before calling assignTo,
+                            // in case assignTo writes (with memory barriers) to the
+                            // target location used as scratch space. See issue 39541.
+                            (uintptr.val)(addr).val;
+
+                            0L * (uintptr.val)(add(addr, ptrSize, "typ.size == 2*ptrSize"));
+
+                            0L;
+
+                        }
+
+                        v = v.assignTo("reflect.MakeFunc", typ, addr); 
+
+                        // We are writing to stack. No write barrier.
                         if (v.flag & flagIndir != 0L)
                         {
-                            typedmemmove(typ, addr, v.ptr);
+                            memmove(addr, v.ptr, typ.size);
                         }
                         else
                         {
-                            (@unsafe.Pointer.Value)(addr).Value;
+                            (uintptr.val)(addr).val;
 
-                            v.ptr;
+                            uintptr(v.ptr);
+
                         }
+
                         off += typ.size;
+
                     }
 
                     typ = typ__prev1;
                 }
-
             } 
+
+            // Announce that the return values are valid.
+            // After this point the runtime can depend on the return values being valid.
+            retValid = true; 
+
+            // We have to make sure that the out slice lives at least until
+            // the runtime knows the return values are valid. Otherwise, the
+            // return values might not be scanned by anyone during a GC.
+            // (out would be dead, and the return slots not yet alive.)
+            runtime.KeepAlive(out); 
 
             // runtime.getArgInfo expects to be able to find ctxt on the
             // stack when it finds our caller, makeFuncStub. Make sure it
             // doesn't get garbage collected.
             runtime.KeepAlive(ctxt);
+
         });
 
         // methodReceiver returns information about the receiver
@@ -752,29 +894,37 @@ namespace go
         // The return value rcvrtype gives the method's actual receiver type.
         // The return value t gives the method type signature (without the receiver).
         // The return value fn is a pointer to the method code.
-        private static (ref rtype, ref rtype, unsafe.Pointer) methodReceiver(@string op, Value v, long methodIndex) => func((_, panic, __) =>
+        private static (ptr<rtype>, ptr<funcType>, unsafe.Pointer) methodReceiver(@string op, Value v, long methodIndex) => func((_, panic, __) =>
         {
+            ptr<rtype> rcvrtype = default!;
+            ptr<funcType> t = default!;
+            unsafe.Pointer fn = default;
+
             var i = methodIndex;
             if (v.typ.Kind() == Interface)
             {
-                var tt = (interfaceType.Value)(@unsafe.Pointer(v.typ));
+                var tt = (interfaceType.val)(@unsafe.Pointer(v.typ));
                 if (uint(i) >= uint(len(tt.methods)))
                 {
                     panic("reflect: internal error: invalid method index");
                 }
-                var m = ref tt.methods[i];
+
+                var m = _addr_tt.methods[i];
                 if (!tt.nameOff(m.name).isExported())
                 {
                     panic("reflect: " + op + " of unexported method");
                 }
-                var iface = (nonEmptyInterface.Value)(v.ptr);
+
+                var iface = (nonEmptyInterface.val)(v.ptr);
                 if (iface.itab == null)
                 {
                     panic("reflect: " + op + " of method on nil interface value");
                 }
+
                 rcvrtype = iface.itab.typ;
-                fn = @unsafe.Pointer(ref iface.itab.fun[i]);
-                t = tt.typeOff(m.typ);
+                fn = @unsafe.Pointer(_addr_iface.itab.fun[i]);
+                t = (funcType.val)(@unsafe.Pointer(tt.typeOff(m.typ)));
+
             }
             else
             {
@@ -784,16 +934,21 @@ namespace go
                 {
                     panic("reflect: internal error: invalid method index");
                 }
+
                 m = ms[i];
                 if (!v.typ.nameOff(m.name).isExported())
                 {
                     panic("reflect: " + op + " of unexported method");
                 }
-                var ifn = v.typ.textOff(m.ifn);
-                fn = @unsafe.Pointer(ref ifn);
-                t = v.typ.typeOff(m.mtyp);
+
+                ref var ifn = ref heap(v.typ.textOff(m.ifn), out ptr<var> _addr_ifn);
+                fn = @unsafe.Pointer(_addr_ifn);
+                t = (funcType.val)(@unsafe.Pointer(v.typ.typeOff(m.mtyp)));
+
             }
-            return;
+
+            return ;
+
         });
 
         // v is a method receiver. Store at p the word which is used to
@@ -806,22 +961,26 @@ namespace go
             if (t.Kind() == Interface)
             { 
                 // the interface data word becomes the receiver word
-                var iface = (nonEmptyInterface.Value)(v.ptr) * (@unsafe.Pointer.Value)(p);
+                var iface = (nonEmptyInterface.val)(v.ptr) * (@unsafe.Pointer.val)(p);
 
                 iface.word;
+
             }
             else if (v.flag & flagIndir != 0L && !ifaceIndir(t))
             {
-                (@unsafe.Pointer.Value)(p).Value;
+                (@unsafe.Pointer.val)(p).val;
 
-                v.ptr.Value;
+                new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr);
+
             }
             else
             {
-                (@unsafe.Pointer.Value)(p).Value;
+                (@unsafe.Pointer.val)(p).val;
 
                 v.ptr;
+
             }
+
         }
 
         // align returns the result of rounding x up to a multiple of n.
@@ -842,61 +1001,81 @@ namespace go
         // NOTE: This function must be marked as a "wrapper" in the generated code,
         // so that the linker can make it work correctly for panic and recover.
         // The gc compilers know to do that for the name "reflect.callMethod".
-        private static void callMethod(ref methodValue ctxt, unsafe.Pointer frame)
+        //
+        // ctxt is the "closure" generated by makeVethodValue.
+        // frame is a pointer to the arguments to that closure on the stack.
+        // retValid points to a boolean which should be set when the results
+        // section of frame is set.
+        private static void callMethod(ptr<methodValue> _addr_ctxt, unsafe.Pointer frame, ptr<bool> _addr_retValid)
         {
+            ref methodValue ctxt = ref _addr_ctxt.val;
+            ref bool retValid = ref _addr_retValid.val;
+
             var rcvr = ctxt.rcvr;
             var (rcvrtype, t, fn) = methodReceiver("call", rcvr, ctxt.method);
             var (frametype, argSize, retOffset, _, framePool) = funcLayout(t, rcvrtype); 
 
             // Make a new frame that is one word bigger so we can store the receiver.
-            unsafe.Pointer args = framePool.Get()._<unsafe.Pointer>(); 
+            // This space is used for both arguments and return values.
+            unsafe.Pointer scratch = framePool.Get()._<unsafe.Pointer>(); 
 
             // Copy in receiver and rest of args.
-            // Avoid constructing out-of-bounds pointers if there are no args.
-            storeRcvr(rcvr, args);
-            if (argSize - ptrSize > 0L)
+            storeRcvr(rcvr, scratch); 
+            // Align the first arg. The alignment can't be larger than ptrSize.
+            var argOffset = uintptr(ptrSize);
+            if (len(t.@in()) > 0L)
             {
-                typedmemmovepartial(frametype, add(args, ptrSize, "argSize > ptrSize"), frame, ptrSize, argSize - ptrSize);
+                argOffset = align(argOffset, uintptr(t.@in()[0L].align));
+            } 
+            // Avoid constructing out-of-bounds pointers if there are no args.
+            if (argSize - argOffset > 0L)
+            {
+                typedmemmovepartial(_addr_frametype, add(scratch, argOffset, "argSize > argOffset"), frame, argOffset, argSize - argOffset);
             } 
 
             // Call.
-            call(frametype, fn, args, uint32(frametype.size), uint32(retOffset)); 
+            // Call copies the arguments from scratch to the stack, calls fn,
+            // and then copies the results back into scratch.
+            call(_addr_frametype, fn, scratch, uint32(frametype.size), uint32(retOffset)); 
 
-            // Copy return values. On amd64p32, the beginning of return values
-            // is 64-bit aligned, so the caller's frame layout (which doesn't have
-            // a receiver) is different from the layout of the fn call, which has
-            // a receiver.
+            // Copy return values.
             // Ignore any changes to args and just copy return values.
             // Avoid constructing out-of-bounds pointers if there are no return values.
             if (frametype.size - retOffset > 0L)
             {
-                var callerRetOffset = retOffset - ptrSize;
-                if (runtime.GOARCH == "amd64p32")
-                {
-                    callerRetOffset = align(argSize - ptrSize, 8L);
-                }
-                typedmemmovepartial(frametype, add(frame, callerRetOffset, "frametype.size > retOffset"), add(args, retOffset, "frametype.size > retOffset"), retOffset, frametype.size - retOffset);
+                var callerRetOffset = retOffset - argOffset; 
+                // This copies to the stack. Write barriers are not needed.
+                memmove(add(frame, callerRetOffset, "frametype.size > retOffset"), add(scratch, retOffset, "frametype.size > retOffset"), frametype.size - retOffset);
+
             } 
 
-            // This is untyped because the frame is really a stack, even
-            // though it's a heap object.
-            memclrNoHeapPointers(args, frametype.size);
-            framePool.Put(args); 
+            // Tell the runtime it can now depend on the return values
+            // being properly initialized.
+            retValid = true; 
+
+            // Clear the scratch space and put it back in the pool.
+            // This must happen after the statement above, so that the return
+            // values will always be scanned by someone.
+            typedmemclr(_addr_frametype, scratch);
+            framePool.Put(scratch); 
 
             // See the comment in callReflect.
             runtime.KeepAlive(ctxt);
+
         }
 
         // funcName returns the name of f, for use in error messages.
         private static @string funcName(Func<slice<Value>, slice<Value>> f)
         {
-            *(*System.UIntPtr) pc = @unsafe.Pointer(ref f).Value;
+            ptr<ptr<System.UIntPtr>> pc = new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(_addr_f));
             var rf = runtime.FuncForPC(pc);
             if (rf != null)
             {
                 return rf.Name();
             }
+
             return "closure";
+
         }
 
         // Cap returns v's capacity.
@@ -911,8 +1090,9 @@ namespace go
                 return chancap(v.pointer());
             else if (k == Slice) 
                 // Slice is always bigger than a word; assume flagIndir.
-                return (sliceHeader.Value)(v.ptr).Cap;
-                        panic(ref new ValueError("reflect.Value.Cap",v.kind()));
+                return (unsafeheader.Slice.val)(v.ptr).Cap;
+                        panic(addr(new ValueError("reflect.Value.Cap",v.kind())));
+
         });
 
         // Close closes the channel v.
@@ -931,10 +1111,11 @@ namespace go
             var k = v.kind();
 
             if (k == Complex64) 
-                return complex128(v.ptr.Value);
+                return complex128(new ptr<ptr<ptr<complex64>>>(v.ptr));
             else if (k == Complex128) 
-                return v.ptr.Value;
-                        panic(ref new ValueError("reflect.Value.Complex",v.kind()));
+                return new ptr<ptr<ptr<System.Numerics.Complex128>>>(v.ptr);
+                        panic(addr(new ValueError("reflect.Value.Complex",v.kind())));
+
         });
 
         // Elem returns the value that the interface v contains
@@ -953,29 +1134,33 @@ namespace go
                 else
                 {
                 }
+
                 var x = unpackEface(eface);
                 if (x.flag != 0L)
                 {
                     x.flag |= v.flag.ro();
                 }
+
                 return x;
             else if (k == Ptr) 
                 var ptr = v.ptr;
                 if (v.flag & flagIndir != 0L)
                 {
-                    ptr = ptr.Value;
+                    ptr = new ptr<ptr<ptr<unsafe.Pointer>>>(ptr);
                 } 
                 // The returned value's address is v's value.
                 if (ptr == null)
                 {
                     return new Value();
                 }
-                var tt = (ptrType.Value)(@unsafe.Pointer(v.typ));
+
+                var tt = (ptrType.val)(@unsafe.Pointer(v.typ));
                 var typ = tt.elem;
                 var fl = v.flag & flagRO | flagIndir | flagAddr;
                 fl |= flag(typ.Kind());
                 return new Value(typ,ptr,fl);
-                        panic(ref new ValueError("reflect.Value.Elem",v.kind()));
+                        panic(addr(new ValueError("reflect.Value.Elem",v.kind())));
+
         });
 
         // Field returns the i'th field of the struct v.
@@ -984,14 +1169,16 @@ namespace go
         {
             if (v.kind() != Struct)
             {
-                panic(ref new ValueError("reflect.Value.Field",v.kind()));
+                panic(addr(new ValueError("reflect.Value.Field",v.kind())));
             }
-            var tt = (structType.Value)(@unsafe.Pointer(v.typ));
+
+            var tt = (structType.val)(@unsafe.Pointer(v.typ));
             if (uint(i) >= uint(len(tt.fields)))
             {
                 panic("reflect: Field index out of range");
             }
-            var field = ref tt.fields[i];
+
+            var field = _addr_tt.fields[i];
             var typ = field.typ; 
 
             // Inherit permission bits from v, but clear flagEmbedRO.
@@ -999,7 +1186,7 @@ namespace go
             // Using an unexported field forces flagRO.
             if (!field.name.isExported())
             {
-                if (field.anon())
+                if (field.embedded())
                 {
                     fl |= flagEmbedRO;
                 }
@@ -1007,6 +1194,7 @@ namespace go
                 {
                     fl |= flagStickyRO;
                 }
+
             } 
             // Either flagIndir is set and v.ptr points at struct,
             // or flagIndir is not set and v.ptr is the actual struct data.
@@ -1015,6 +1203,7 @@ namespace go
             // so v.ptr + field.offset is still the correct address.
             var ptr = add(v.ptr, field.offset(), "same as non-reflect &v.field");
             return new Value(typ,ptr,fl);
+
         });
 
         // FieldByIndex returns the nested field corresponding to index.
@@ -1025,6 +1214,7 @@ namespace go
             {
                 return v.Field(index[0L]);
             }
+
             v.mustBe(Struct);
             foreach (var (i, x) in index)
             {
@@ -1036,12 +1226,18 @@ namespace go
                         {
                             panic("reflect: indirection through nil pointer to embedded struct");
                         }
+
                         v = v.Elem();
+
                     }
+
                 }
+
                 v = v.Field(x);
+
             }
             return v;
+
         });
 
         // FieldByName returns the struct field with the given name.
@@ -1059,7 +1255,9 @@ namespace go
                 }
 
             }
+
             return new Value();
+
         }
 
         // FieldByNameFunc returns the struct field with a name
@@ -1077,7 +1275,9 @@ namespace go
                 }
 
             }
+
             return new Value();
+
         }
 
         // Float returns v's underlying value, as a float64.
@@ -1087,13 +1287,14 @@ namespace go
             var k = v.kind();
 
             if (k == Float32) 
-                return float64(v.ptr.Value);
+                return float64(new ptr<ptr<ptr<float>>>(v.ptr));
             else if (k == Float64) 
-                return v.ptr.Value;
-                        panic(ref new ValueError("reflect.Value.Float",v.kind()));
+                return new ptr<ptr<ptr<double>>>(v.ptr);
+                        panic(addr(new ValueError("reflect.Value.Float",v.kind())));
+
         });
 
-        private static ref rtype uint8Type = TypeOf(uint8(0L))._<ref rtype>();
+        private static ptr<rtype> uint8Type = TypeOf(uint8(0L))._<ptr<rtype>>();
 
         // Index returns v's i'th element.
         // It panics if v's Kind is not Array, Slice, or String or i is out of range.
@@ -1101,11 +1302,12 @@ namespace go
         {
 
             if (v.kind() == Array) 
-                var tt = (arrayType.Value)(@unsafe.Pointer(v.typ));
+                var tt = (arrayType.val)(@unsafe.Pointer(v.typ));
                 if (uint(i) >= uint(tt.len))
                 {
                     panic("reflect: array index out of range");
                 }
+
                 var typ = tt.elem;
                 var offset = uintptr(i) * typ.size; 
 
@@ -1120,26 +1322,29 @@ namespace go
             else if (v.kind() == Slice) 
                 // Element flag same as Elem of Ptr.
                 // Addressable, indirect, possibly read-only.
-                var s = (sliceHeader.Value)(v.ptr);
+                var s = (unsafeheader.Slice.val)(v.ptr);
                 if (uint(i) >= uint(s.Len))
                 {
                     panic("reflect: slice index out of range");
                 }
-                tt = (sliceType.Value)(@unsafe.Pointer(v.typ));
+
+                tt = (sliceType.val)(@unsafe.Pointer(v.typ));
                 typ = tt.elem;
                 val = arrayAt(s.Data, i, typ.size, "i < s.Len");
                 fl = flagAddr | flagIndir | v.flag.ro() | flag(typ.Kind());
                 return new Value(typ,val,fl);
             else if (v.kind() == String) 
-                s = (stringHeader.Value)(v.ptr);
+                s = (unsafeheader.String.val)(v.ptr);
                 if (uint(i) >= uint(s.Len))
                 {
                     panic("reflect: string index out of range");
                 }
+
                 var p = arrayAt(s.Data, i, 1L, "i < s.Len");
                 fl = v.flag.ro() | flag(Uint8) | flagIndir;
                 return new Value(uint8Type,p,fl);
-                        panic(ref new ValueError("reflect.Value.Index",v.kind()));
+                        panic(addr(new ValueError("reflect.Value.Index",v.kind())));
+
         });
 
         // Int returns v's underlying value, as an int64.
@@ -1150,16 +1355,17 @@ namespace go
             var p = v.ptr;
 
             if (k == Int) 
-                return int64(p.Value);
+                return int64(new ptr<ptr<ptr<long>>>(p));
             else if (k == Int8) 
-                return int64(p.Value);
+                return int64(new ptr<ptr<ptr<sbyte>>>(p));
             else if (k == Int16) 
-                return int64(p.Value);
+                return int64(new ptr<ptr<ptr<short>>>(p));
             else if (k == Int32) 
-                return int64(p.Value);
+                return int64(new ptr<ptr<ptr<int>>>(p));
             else if (k == Int64) 
-                return p.Value;
-                        panic(ref new ValueError("reflect.Value.Int",v.kind()));
+                return new ptr<ptr<ptr<long>>>(p);
+                        panic(addr(new ValueError("reflect.Value.Int",v.kind())));
+
         });
 
         // CanInterface reports whether Interface can be used without panicking.
@@ -1167,9 +1373,11 @@ namespace go
         {
             if (v.flag == 0L)
             {
-                panic(ref new ValueError("reflect.Value.CanInterface",Invalid));
+                panic(addr(new ValueError("reflect.Value.CanInterface",Invalid)));
             }
+
             return v.flag & flagRO == 0L;
+
         });
 
         // Interface returns v's current value as an interface{}.
@@ -1179,6 +1387,8 @@ namespace go
         // unexported struct fields.
         public static object Interface(this Value v)
         {
+            object i = default;
+
             return valueInterface(v, true);
         }
 
@@ -1186,19 +1396,23 @@ namespace go
         {
             if (v.flag == 0L)
             {
-                panic(ref new ValueError("reflect.Value.Interface",0));
+                panic(addr(new ValueError("reflect.Value.Interface",Invalid)));
             }
+
             if (safe && v.flag & flagRO != 0L)
             { 
                 // Do not allow access to unexported values via Interface,
                 // because they might be pointers that should not be
                 // writable or methods or function that should not be callable.
                 panic("reflect.Value.Interface: cannot return value obtained from unexported field or method");
+
             }
+
             if (v.flag & flagMethod != 0L)
             {
                 v = makeMethodValue("Interface", v);
             }
+
             if (v.kind() == Interface)
             { 
                 // Special case: return the element inside the interface.
@@ -1206,13 +1420,16 @@ namespace go
                 // methods have a second layout.
                 if (v.NumMethod() == 0L)
                 {
-                    return;
+                    return ;
                 }
-                return;
+
+                return ;
+
             } 
 
             // TODO: pass safe to packEface so we don't need to copy if safe==true?
             return packEface(v);
+
         });
 
         // InterfaceData returns the interface v's value as a uintptr pair.
@@ -1226,7 +1443,8 @@ namespace go
             // has to import "unsafe" to turn it into something
             // that can be abused.
             // Interface value is always bigger than a word; assume flagIndir.
-            return v.ptr.Value;
+            return new ptr<ptr<ptr<array<System.UIntPtr>>>>(v.ptr);
+
         }
 
         // IsNil reports whether its argument v is nil. The argument must be
@@ -1240,33 +1458,97 @@ namespace go
         {
             var k = v.kind();
 
-            if (k == Chan || k == Func || k == Map || k == Ptr) 
+            if (k == Chan || k == Func || k == Map || k == Ptr || k == UnsafePointer) 
                 if (v.flag & flagMethod != 0L)
                 {
                     return false;
                 }
+
                 var ptr = v.ptr;
                 if (v.flag & flagIndir != 0L)
                 {
-                    ptr = ptr.Value;
+                    ptr = new ptr<ptr<ptr<unsafe.Pointer>>>(ptr);
                 }
+
                 return ptr == null;
             else if (k == Interface || k == Slice) 
                 // Both interface and slice are nil if first word is 0.
                 // Both are always bigger than a word; assume flagIndir.
-                return v.ptr.Value == null;
-                        panic(ref new ValueError("reflect.Value.IsNil",v.kind()));
+                return new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr) == null;
+                        panic(addr(new ValueError("reflect.Value.IsNil",v.kind())));
+
         });
 
         // IsValid reports whether v represents a value.
         // It returns false if v is the zero Value.
         // If IsValid returns false, all other methods except String panic.
-        // Most functions and methods never return an invalid value.
+        // Most functions and methods never return an invalid Value.
         // If one does, its documentation states the conditions explicitly.
         public static bool IsValid(this Value v)
         {
             return v.flag != 0L;
         }
+
+        // IsZero reports whether v is the zero value for its type.
+        // It panics if the argument is invalid.
+        public static bool IsZero(this Value v) => func((_, panic, __) =>
+        {
+
+            if (v.kind() == Bool) 
+                return !v.Bool();
+            else if (v.kind() == Int || v.kind() == Int8 || v.kind() == Int16 || v.kind() == Int32 || v.kind() == Int64) 
+                return v.Int() == 0L;
+            else if (v.kind() == Uint || v.kind() == Uint8 || v.kind() == Uint16 || v.kind() == Uint32 || v.kind() == Uint64 || v.kind() == Uintptr) 
+                return v.Uint() == 0L;
+            else if (v.kind() == Float32 || v.kind() == Float64) 
+                return math.Float64bits(v.Float()) == 0L;
+            else if (v.kind() == Complex64 || v.kind() == Complex128) 
+                var c = v.Complex();
+                return math.Float64bits(real(c)) == 0L && math.Float64bits(imag(c)) == 0L;
+            else if (v.kind() == Array) 
+                {
+                    long i__prev1 = i;
+
+                    for (long i = 0L; i < v.Len(); i++)
+                    {
+                        if (!v.Index(i).IsZero())
+                        {
+                            return false;
+                        }
+
+                    }
+
+
+                    i = i__prev1;
+                }
+                return true;
+            else if (v.kind() == Chan || v.kind() == Func || v.kind() == Interface || v.kind() == Map || v.kind() == Ptr || v.kind() == Slice || v.kind() == UnsafePointer) 
+                return v.IsNil();
+            else if (v.kind() == String) 
+                return v.Len() == 0L;
+            else if (v.kind() == Struct) 
+                {
+                    long i__prev1 = i;
+
+                    for (i = 0L; i < v.NumField(); i++)
+                    {
+                        if (!v.Field(i).IsZero())
+                        {
+                            return false;
+                        }
+
+                    }
+
+
+                    i = i__prev1;
+                }
+                return true;
+            else 
+                // This should never happens, but will act as a safeguard for
+                // later, as a default value doesn't makes sense here.
+                panic(addr(new ValueError("reflect.Value.IsZero",v.Kind())));
+            
+        });
 
         // Kind returns v's Kind.
         // If v is the zero Value (IsValid returns false), Kind returns Invalid.
@@ -1282,7 +1564,7 @@ namespace go
             var k = v.kind();
 
             if (k == Array) 
-                var tt = (arrayType.Value)(@unsafe.Pointer(v.typ));
+                var tt = (arrayType.val)(@unsafe.Pointer(v.typ));
                 return int(tt.len);
             else if (k == Chan) 
                 return chanlen(v.pointer());
@@ -1290,11 +1572,12 @@ namespace go
                 return maplen(v.pointer());
             else if (k == Slice) 
                 // Slice is bigger than a word; assume flagIndir.
-                return (sliceHeader.Value)(v.ptr).Len;
+                return (unsafeheader.Slice.val)(v.ptr).Len;
             else if (k == String) 
                 // String is bigger than a word; assume flagIndir.
-                return (stringHeader.Value)(v.ptr).Len;
-                        panic(ref new ValueError("reflect.Value.Len",v.kind()));
+                return (unsafeheader.String.val)(v.ptr).Len;
+                        panic(addr(new ValueError("reflect.Value.Len",v.kind())));
+
         });
 
         // MapIndex returns the value associated with key in the map v.
@@ -1304,7 +1587,7 @@ namespace go
         public static Value MapIndex(this Value v, Value key)
         {
             v.mustBe(Map);
-            var tt = (mapType.Value)(@unsafe.Pointer(v.typ)); 
+            var tt = (mapType.val)(@unsafe.Pointer(v.typ)); 
 
             // Do not require key to be exported, so that DeepEqual
             // and other programs can use all the keys returned by
@@ -1322,25 +1605,20 @@ namespace go
             }
             else
             {
-                k = @unsafe.Pointer(ref key.ptr);
+                k = @unsafe.Pointer(_addr_key.ptr);
             }
-            var e = mapaccess(v.typ, v.pointer(), k);
+
+            var e = mapaccess(_addr_v.typ, v.pointer(), k);
             if (e == null)
             {
                 return new Value();
             }
+
             var typ = tt.elem;
             var fl = (v.flag | key.flag).ro();
             fl |= flag(typ.Kind());
-            if (!ifaceIndir(typ))
-            {
-                return new Value(typ,*(*unsafe.Pointer)(e),fl);
-            } 
-            // Copy result so future changes to the map
-            // won't change the underlying value.
-            var c = unsafe_New(typ);
-            typedmemmove(typ, c, e);
-            return new Value(typ,c,fl|flagIndir);
+            return copyVal(_addr_typ, fl, e);
+
         }
 
         // MapKeys returns a slice containing all the keys present in the map,
@@ -1350,7 +1628,7 @@ namespace go
         public static slice<Value> MapKeys(this Value v)
         {
             v.mustBe(Map);
-            var tt = (mapType.Value)(@unsafe.Pointer(v.typ));
+            var tt = (mapType.val)(@unsafe.Pointer(v.typ));
             var keyType = tt.key;
 
             var fl = v.flag.ro() | flag(keyType.Kind());
@@ -1361,7 +1639,8 @@ namespace go
             {
                 mlen = maplen(m);
             }
-            var it = mapiterinit(v.typ, m);
+
+            var it = mapiterinit(_addr_v.typ, m);
             var a = make_slice<Value>(mlen);
             long i = default;
             for (i = 0L; i < len(a); i++)
@@ -1373,23 +1652,134 @@ namespace go
                     // called maplen above. It's a data race, but nothing
                     // we can do about it.
                     break;
+
                 }
-                if (ifaceIndir(keyType))
-                { 
-                    // Copy result so future changes to the map
-                    // won't change the underlying value.
-                    var c = unsafe_New(keyType);
-                    typedmemmove(keyType, c, key);
-                    a[i] = new Value(keyType,c,fl|flagIndir);
-                }
-                else
-                {
-                    a[i] = new Value(keyType,*(*unsafe.Pointer)(key),fl);
-                }
+
+                a[i] = copyVal(_addr_keyType, fl, key);
                 mapiternext(it);
+
             }
 
             return a[..i];
+
+        }
+
+        // A MapIter is an iterator for ranging over a map.
+        // See Value.MapRange.
+        public partial struct MapIter
+        {
+            public Value m;
+            public unsafe.Pointer it;
+        }
+
+        // Key returns the key of the iterator's current map entry.
+        private static Value Key(this ptr<MapIter> _addr_it) => func((_, panic, __) =>
+        {
+            ref MapIter it = ref _addr_it.val;
+
+            if (it.it == null)
+            {
+                panic("MapIter.Key called before Next");
+            }
+
+            if (mapiterkey(it.it) == null)
+            {
+                panic("MapIter.Key called on exhausted iterator");
+            }
+
+            var t = (mapType.val)(@unsafe.Pointer(it.m.typ));
+            var ktype = t.key;
+            return copyVal(_addr_ktype, it.m.flag.ro() | flag(ktype.Kind()), mapiterkey(it.it));
+
+        });
+
+        // Value returns the value of the iterator's current map entry.
+        private static Value Value(this ptr<MapIter> _addr_it) => func((_, panic, __) =>
+        {
+            ref MapIter it = ref _addr_it.val;
+
+            if (it.it == null)
+            {
+                panic("MapIter.Value called before Next");
+            }
+
+            if (mapiterkey(it.it) == null)
+            {
+                panic("MapIter.Value called on exhausted iterator");
+            }
+
+            var t = (mapType.val)(@unsafe.Pointer(it.m.typ));
+            var vtype = t.elem;
+            return copyVal(_addr_vtype, it.m.flag.ro() | flag(vtype.Kind()), mapiterelem(it.it));
+
+        });
+
+        // Next advances the map iterator and reports whether there is another
+        // entry. It returns false when the iterator is exhausted; subsequent
+        // calls to Key, Value, or Next will panic.
+        private static bool Next(this ptr<MapIter> _addr_it) => func((_, panic, __) =>
+        {
+            ref MapIter it = ref _addr_it.val;
+
+            if (it.it == null)
+            {
+                it.it = mapiterinit(_addr_it.m.typ, it.m.pointer());
+            }
+            else
+            {
+                if (mapiterkey(it.it) == null)
+                {
+                    panic("MapIter.Next called on exhausted iterator");
+                }
+
+                mapiternext(it.it);
+
+            }
+
+            return mapiterkey(it.it) != null;
+
+        });
+
+        // MapRange returns a range iterator for a map.
+        // It panics if v's Kind is not Map.
+        //
+        // Call Next to advance the iterator, and Key/Value to access each entry.
+        // Next returns false when the iterator is exhausted.
+        // MapRange follows the same iteration semantics as a range statement.
+        //
+        // Example:
+        //
+        //    iter := reflect.ValueOf(m).MapRange()
+        //     for iter.Next() {
+        //        k := iter.Key()
+        //        v := iter.Value()
+        //        ...
+        //    }
+        //
+        public static ptr<MapIter> MapRange(this Value v)
+        {
+            v.mustBe(Map);
+            return addr(new MapIter(m:v));
+        }
+
+        // copyVal returns a Value containing the map key or value at ptr,
+        // allocating a new variable as needed.
+        private static Value copyVal(ptr<rtype> _addr_typ, flag fl, unsafe.Pointer ptr)
+        {
+            ref rtype typ = ref _addr_typ.val;
+
+            if (ifaceIndir(typ))
+            { 
+                // Copy result so future changes to the map
+                // won't change the underlying value.
+                var c = unsafe_New(_addr_typ);
+                typedmemmove(_addr_typ, c, ptr);
+                return new Value(typ,c,fl|flagIndir);
+
+            }
+
+            return new Value(typ,*(*unsafe.Pointer)(ptr),fl);
+
         }
 
         // Method returns a function value corresponding to v's i'th method.
@@ -1400,20 +1790,24 @@ namespace go
         {
             if (v.typ == null)
             {
-                panic(ref new ValueError("reflect.Value.Method",Invalid));
+                panic(addr(new ValueError("reflect.Value.Method",Invalid)));
             }
+
             if (v.flag & flagMethod != 0L || uint(i) >= uint(v.typ.NumMethod()))
             {
                 panic("reflect: Method index out of range");
             }
+
             if (v.typ.Kind() == Interface && v.IsNil())
             {
                 panic("reflect: Method on nil interface value");
             }
-            var fl = v.flag & (flagStickyRO | flagIndir); // Clear flagEmbedRO
+
+            var fl = v.flag.ro() | (v.flag & flagIndir);
             fl |= flag(Func);
             fl |= flag(i) << (int)(flagMethodShift) | flagMethod;
             return new Value(v.typ,v.ptr,fl);
+
         });
 
         // NumMethod returns the number of exported methods in the value's method set.
@@ -1421,13 +1815,16 @@ namespace go
         {
             if (v.typ == null)
             {
-                panic(ref new ValueError("reflect.Value.NumMethod",Invalid));
+                panic(addr(new ValueError("reflect.Value.NumMethod",Invalid)));
             }
+
             if (v.flag & flagMethod != 0L)
             {
                 return 0L;
             }
+
             return v.typ.NumMethod();
+
         });
 
         // MethodByName returns a function value corresponding to the method
@@ -1439,18 +1836,22 @@ namespace go
         {
             if (v.typ == null)
             {
-                panic(ref new ValueError("reflect.Value.MethodByName",Invalid));
+                panic(addr(new ValueError("reflect.Value.MethodByName",Invalid)));
             }
+
             if (v.flag & flagMethod != 0L)
             {
                 return new Value();
             }
+
             var (m, ok) = v.typ.MethodByName(name);
             if (!ok)
             {
                 return new Value();
             }
+
             return v.Method(m.Index);
+
         });
 
         // NumField returns the number of fields in the struct v.
@@ -1458,7 +1859,7 @@ namespace go
         public static long NumField(this Value v)
         {
             v.mustBe(Struct);
-            var tt = (structType.Value)(@unsafe.Pointer(v.typ));
+            var tt = (structType.val)(@unsafe.Pointer(v.typ));
             return len(tt.fields);
         }
 
@@ -1472,7 +1873,8 @@ namespace go
                 return overflowFloat32(real(x)) || overflowFloat32(imag(x));
             else if (k == Complex128) 
                 return false;
-                        panic(ref new ValueError("reflect.Value.OverflowComplex",v.kind()));
+                        panic(addr(new ValueError("reflect.Value.OverflowComplex",v.kind())));
+
         });
 
         // OverflowFloat reports whether the float64 x cannot be represented by v's type.
@@ -1485,7 +1887,8 @@ namespace go
                 return overflowFloat32(x);
             else if (k == Float64) 
                 return false;
-                        panic(ref new ValueError("reflect.Value.OverflowFloat",v.kind()));
+                        panic(addr(new ValueError("reflect.Value.OverflowFloat",v.kind())));
+
         });
 
         private static bool overflowFloat32(double x)
@@ -1494,11 +1897,13 @@ namespace go
             {
                 x = -x;
             }
+
             return math.MaxFloat32 < x && x <= math.MaxFloat64;
+
         }
 
         // OverflowInt reports whether the int64 x cannot be represented by v's type.
-        // It panics if v's Kind is not Int, Int8, int16, Int32, or Int64.
+        // It panics if v's Kind is not Int, Int8, Int16, Int32, or Int64.
         public static bool OverflowInt(this Value v, long x) => func((_, panic, __) =>
         {
             var k = v.kind();
@@ -1507,7 +1912,8 @@ namespace go
                 var bitSize = v.typ.size * 8L;
                 var trunc = (x << (int)((64L - bitSize))) >> (int)((64L - bitSize));
                 return x != trunc;
-                        panic(ref new ValueError("reflect.Value.OverflowInt",v.kind()));
+                        panic(addr(new ValueError("reflect.Value.OverflowInt",v.kind())));
+
         });
 
         // OverflowUint reports whether the uint64 x cannot be represented by v's type.
@@ -1520,8 +1926,14 @@ namespace go
                 var bitSize = v.typ.size * 8L;
                 var trunc = (x << (int)((64L - bitSize))) >> (int)((64L - bitSize));
                 return x != trunc;
-                        panic(ref new ValueError("reflect.Value.OverflowUint",v.kind()));
+                        panic(addr(new ValueError("reflect.Value.OverflowUint",v.kind())));
+
         });
+
+        //go:nocheckptr
+        // This prevents inlining Value.Pointer when -d=checkptr is enabled,
+        // which ensures cmd/compile can recognize unsafe.Pointer(v.Pointer())
+        // and make an exception.
 
         // Pointer returns v's value as a uintptr.
         // It returns uintptr instead of unsafe.Pointer so that
@@ -1553,20 +1965,24 @@ namespace go
                     // created via reflect have the same underlying code pointer,
                     // so their Pointers are equal. The function used here must
                     // match the one used in makeMethodValue.
-                    var f = methodValueCall;
-                    return new ptr<ptr<ptr<*(ptr<ptr<System.UIntPtr>>)>>>(@unsafe.Pointer(ref f));
+                    ref var f = ref heap(methodValueCall, out ptr<var> _addr_f);
+                    return new ptr<ptr<ptr<ptr<ptr<System.UIntPtr>>>>>(@unsafe.Pointer(_addr_f));
+
                 }
+
                 var p = v.pointer(); 
                 // Non-nil func value points at data block.
                 // First word of data block is actual code.
                 if (p != null)
                 {
-                    p = p.Value;
+                    p = new ptr<ptr<ptr<unsafe.Pointer>>>(p);
                 }
+
                 return uintptr(p);
             else if (k == Slice) 
-                return (SliceHeader.Value)(v.ptr).Data;
-                        panic(ref new ValueError("reflect.Value.Pointer",v.kind()));
+                return (SliceHeader.val)(v.ptr).Data;
+                        panic(addr(new ValueError("reflect.Value.Pointer",v.kind())));
+
         });
 
         // Recv receives and returns a value from the channel v.
@@ -1576,6 +1992,9 @@ namespace go
         // on the channel, false if it is a zero value received because the channel is closed.
         public static (Value, bool) Recv(this Value v)
         {
+            Value x = default;
+            bool ok = default;
+
             v.mustBe(Chan);
             v.mustBeExported();
             return v.recv(false);
@@ -1585,30 +2004,37 @@ namespace go
         // v is known to be a channel.
         public static (Value, bool) recv(this Value v, bool nb) => func((_, panic, __) =>
         {
-            var tt = (chanType.Value)(@unsafe.Pointer(v.typ));
+            Value val = default;
+            bool ok = default;
+
+            var tt = (chanType.val)(@unsafe.Pointer(v.typ));
             if (ChanDir(tt.dir) & RecvDir == 0L)
             {
                 panic("reflect: recv on send-only channel");
             }
+
             var t = tt.elem;
             val = new Value(t,nil,flag(t.Kind()));
             unsafe.Pointer p = default;
             if (ifaceIndir(t))
             {
-                p = unsafe_New(t);
+                p = unsafe_New(_addr_t);
                 val.ptr = p;
                 val.flag |= flagIndir;
             }
             else
             {
-                p = @unsafe.Pointer(ref val.ptr);
+                p = @unsafe.Pointer(_addr_val.ptr);
             }
+
             var (selected, ok) = chanrecv(v.pointer(), nb, p);
             if (!selected)
             {
                 val = new Value();
             }
-            return;
+
+            return ;
+
         });
 
         // Send sends x on the channel v.
@@ -1625,11 +2051,14 @@ namespace go
         // v is known to be a channel.
         public static bool send(this Value v, Value x, bool nb) => func((_, panic, __) =>
         {
-            var tt = (chanType.Value)(@unsafe.Pointer(v.typ));
+            bool selected = default;
+
+            var tt = (chanType.val)(@unsafe.Pointer(v.typ));
             if (ChanDir(tt.dir) & SendDir == 0L)
             {
                 panic("reflect: send on recv-only channel");
             }
+
             x.mustBeExported();
             x = x.assignTo("reflect.Value.Send", tt.elem, null);
             unsafe.Pointer p = default;
@@ -1639,9 +2068,11 @@ namespace go
             }
             else
             {
-                p = @unsafe.Pointer(ref x.ptr);
+                p = @unsafe.Pointer(_addr_x.ptr);
             }
+
             return chansend(v.pointer(), p, nb);
+
         });
 
         // Set assigns x to the value v.
@@ -1656,17 +2087,20 @@ namespace go
             {
                 target = v.ptr;
             }
+
             x = x.assignTo("reflect.Set", v.typ, target);
             if (x.flag & flagIndir != 0L)
             {
-                typedmemmove(v.typ, v.ptr, x.ptr);
+                typedmemmove(_addr_v.typ, v.ptr, x.ptr);
             }
             else
             {
-                (@unsafe.Pointer.Value)(v.ptr).Value;
+                (@unsafe.Pointer.val)(v.ptr).val;
 
                 x.ptr;
+
             }
+
         }
 
         // SetBool sets v's underlying value.
@@ -1674,9 +2108,10 @@ namespace go
         public static void SetBool(this Value v, bool x)
         {
             v.mustBeAssignable();
-            v.mustBe(Bool) * (bool.Value)(v.ptr);
+            v.mustBe(Bool) * (bool.val)(v.ptr);
 
             x;
+
         }
 
         // SetBytes sets v's underlying value.
@@ -1689,7 +2124,9 @@ namespace go
             {
                 panic("reflect.Value.SetBytes of non-byte slice");
             }
-            v.ptr.Value = x;
+
+            new ptr<ptr<ptr<slice<byte>>>>(v.ptr) = x;
+
         });
 
         // setRunes sets v's underlying value.
@@ -1702,7 +2139,9 @@ namespace go
             {
                 panic("reflect.Value.setRunes of non-rune slice");
             }
-            v.ptr.Value = x;
+
+            new ptr<ptr<ptr<slice<int>>>>(v.ptr) = x;
+
         });
 
         // SetComplex sets v's underlying value to x.
@@ -1715,17 +2154,18 @@ namespace go
 
 
                 if (k == Complex64) 
-                    (complex64.Value)(v.ptr).Value;
+                    (complex64.val)(v.ptr).val;
 
                     complex64(x);
                 else if (k == Complex128) 
-                    (complex128.Value)(v.ptr).Value;
+                    (complex128.val)(v.ptr).val;
 
                     x;
                 else 
-                    panic(ref new ValueError("reflect.Value.SetComplex",v.kind()));
+                    panic(addr(new ValueError("reflect.Value.SetComplex",v.kind())));
 
             }
+
         });
 
         // SetFloat sets v's underlying value to x.
@@ -1738,17 +2178,18 @@ namespace go
 
 
                 if (k == Float32) 
-                    (float32.Value)(v.ptr).Value;
+                    (float32.val)(v.ptr).val;
 
                     float32(x);
                 else if (k == Float64) 
-                    (float64.Value)(v.ptr).Value;
+                    (float64.val)(v.ptr).val;
 
                     x;
                 else 
-                    panic(ref new ValueError("reflect.Value.SetFloat",v.kind()));
+                    panic(addr(new ValueError("reflect.Value.SetFloat",v.kind())));
 
             }
+
         });
 
         // SetInt sets v's underlying value to x.
@@ -1761,29 +2202,30 @@ namespace go
 
 
                 if (k == Int) 
-                    (int.Value)(v.ptr).Value;
+                    (int.val)(v.ptr).val;
 
                     int(x);
                 else if (k == Int8) 
-                    (int8.Value)(v.ptr).Value;
+                    (int8.val)(v.ptr).val;
 
                     int8(x);
                 else if (k == Int16) 
-                    (int16.Value)(v.ptr).Value;
+                    (int16.val)(v.ptr).val;
 
                     int16(x);
                 else if (k == Int32) 
-                    (int32.Value)(v.ptr).Value;
+                    (int32.val)(v.ptr).val;
 
                     int32(x);
                 else if (k == Int64) 
-                    (int64.Value)(v.ptr).Value;
+                    (int64.val)(v.ptr).val;
 
                     x;
                 else 
-                    panic(ref new ValueError("reflect.Value.SetInt",v.kind()));
+                    panic(addr(new ValueError("reflect.Value.SetInt",v.kind())));
 
             }
+
         });
 
         // SetLen sets v's length to n.
@@ -1793,12 +2235,14 @@ namespace go
         {
             v.mustBeAssignable();
             v.mustBe(Slice);
-            var s = (sliceHeader.Value)(v.ptr);
+            var s = (unsafeheader.Slice.val)(v.ptr);
             if (uint(n) > uint(s.Cap))
             {
                 panic("reflect: slice length out of range in SetLen");
             }
+
             s.Len = n;
+
         });
 
         // SetCap sets v's capacity to n.
@@ -1808,26 +2252,28 @@ namespace go
         {
             v.mustBeAssignable();
             v.mustBe(Slice);
-            var s = (sliceHeader.Value)(v.ptr);
+            var s = (unsafeheader.Slice.val)(v.ptr);
             if (n < s.Len || n > s.Cap)
             {
                 panic("reflect: slice capacity out of range in SetCap");
             }
+
             s.Cap = n;
+
         });
 
-        // SetMapIndex sets the value associated with key in the map v to val.
+        // SetMapIndex sets the element associated with key in the map v to elem.
         // It panics if v's Kind is not Map.
-        // If val is the zero Value, SetMapIndex deletes the key from the map.
+        // If elem is the zero Value, SetMapIndex deletes the key from the map.
         // Otherwise if v holds a nil map, SetMapIndex will panic.
-        // As in Go, key's value must be assignable to the map's key type,
-        // and val's value must be assignable to the map's value type.
-        public static void SetMapIndex(this Value v, Value key, Value val)
+        // As in Go, key's elem must be assignable to the map's key type,
+        // and elem's value must be assignable to the map's elem type.
+        public static void SetMapIndex(this Value v, Value key, Value elem)
         {
             v.mustBe(Map);
             v.mustBeExported();
             key.mustBeExported();
-            var tt = (mapType.Value)(@unsafe.Pointer(v.typ));
+            var tt = (mapType.val)(@unsafe.Pointer(v.typ));
             key = key.assignTo("reflect.Value.SetMapIndex", tt.key, null);
             unsafe.Pointer k = default;
             if (key.flag & flagIndir != 0L)
@@ -1836,25 +2282,29 @@ namespace go
             }
             else
             {
-                k = @unsafe.Pointer(ref key.ptr);
+                k = @unsafe.Pointer(_addr_key.ptr);
             }
-            if (val.typ == null)
+
+            if (elem.typ == null)
             {
-                mapdelete(v.typ, v.pointer(), k);
-                return;
+                mapdelete(_addr_v.typ, v.pointer(), k);
+                return ;
             }
-            val.mustBeExported();
-            val = val.assignTo("reflect.Value.SetMapIndex", tt.elem, null);
+
+            elem.mustBeExported();
+            elem = elem.assignTo("reflect.Value.SetMapIndex", tt.elem, null);
             unsafe.Pointer e = default;
-            if (val.flag & flagIndir != 0L)
+            if (elem.flag & flagIndir != 0L)
             {
-                e = val.ptr;
+                e = elem.ptr;
             }
             else
             {
-                e = @unsafe.Pointer(ref val.ptr);
+                e = @unsafe.Pointer(_addr_elem.ptr);
             }
-            mapassign(v.typ, v.pointer(), k, e);
+
+            mapassign(_addr_v.typ, v.pointer(), k, e);
+
         }
 
         // SetUint sets v's underlying value to x.
@@ -1867,33 +2317,34 @@ namespace go
 
 
                 if (k == Uint) 
-                    (uint.Value)(v.ptr).Value;
+                    (uint.val)(v.ptr).val;
 
                     uint(x);
                 else if (k == Uint8) 
-                    (uint8.Value)(v.ptr).Value;
+                    (uint8.val)(v.ptr).val;
 
                     uint8(x);
                 else if (k == Uint16) 
-                    (uint16.Value)(v.ptr).Value;
+                    (uint16.val)(v.ptr).val;
 
                     uint16(x);
                 else if (k == Uint32) 
-                    (uint32.Value)(v.ptr).Value;
+                    (uint32.val)(v.ptr).val;
 
                     uint32(x);
                 else if (k == Uint64) 
-                    (uint64.Value)(v.ptr).Value;
+                    (uint64.val)(v.ptr).val;
 
                     x;
                 else if (k == Uintptr) 
-                    (uintptr.Value)(v.ptr).Value;
+                    (uintptr.val)(v.ptr).val;
 
                     uintptr(x);
                 else 
-                    panic(ref new ValueError("reflect.Value.SetUint",v.kind()));
+                    panic(addr(new ValueError("reflect.Value.SetUint",v.kind())));
 
             }
+
         });
 
         // SetPointer sets the unsafe.Pointer value v to x.
@@ -1901,9 +2352,10 @@ namespace go
         public static void SetPointer(this Value v, unsafe.Pointer x)
         {
             v.mustBeAssignable();
-            v.mustBe(UnsafePointer) * (@unsafe.Pointer.Value)(v.ptr);
+            v.mustBe(UnsafePointer) * (@unsafe.Pointer.val)(v.ptr);
 
             x;
+
         }
 
         // SetString sets v's underlying value to x.
@@ -1911,9 +2363,10 @@ namespace go
         public static void SetString(this Value v, @string x)
         {
             v.mustBeAssignable();
-            v.mustBe(String) * (string.Value)(v.ptr);
+            v.mustBe(String) * (string.val)(v.ptr);
 
             x;
+
         }
 
         // Slice returns v[i:j].
@@ -1921,7 +2374,7 @@ namespace go
         // or if the indexes are out of bounds.
         public static Value Slice(this Value v, long i, long j) => func((_, panic, __) =>
         {
-            long cap = default;            ref sliceType typ = default;            unsafe.Pointer @base = default;
+            long cap = default;            ptr<sliceType> typ;            unsafe.Pointer @base = default;
             {
                 var kind = v.kind();
 
@@ -1931,29 +2384,32 @@ namespace go
                     {
                         panic("reflect.Value.Slice: slice of unaddressable array");
                     }
-                    var tt = (arrayType.Value)(@unsafe.Pointer(v.typ));
+
+                    var tt = (arrayType.val)(@unsafe.Pointer(v.typ));
                     cap = int(tt.len);
-                    typ = (sliceType.Value)(@unsafe.Pointer(tt.slice));
+                    typ = (sliceType.val)(@unsafe.Pointer(tt.slice));
                     base = v.ptr;
                 else if (kind == Slice) 
-                    typ = (sliceType.Value)(@unsafe.Pointer(v.typ));
-                    var s = (sliceHeader.Value)(v.ptr);
+                    typ = (sliceType.val)(@unsafe.Pointer(v.typ));
+                    var s = (unsafeheader.Slice.val)(v.ptr);
                     base = s.Data;
                     cap = s.Cap;
                 else if (kind == String) 
-                    s = (stringHeader.Value)(v.ptr);
+                    s = (unsafeheader.String.val)(v.ptr);
                     if (i < 0L || j < i || j > s.Len)
                     {
                         panic("reflect.Value.Slice: string slice index out of bounds");
                     }
-                    stringHeader t = default;
+
+                    ref unsafeheader.String t = ref heap(out ptr<unsafeheader.String> _addr_t);
                     if (i < s.Len)
                     {
-                        t = new stringHeader(arrayAt(s.Data,i,1,"i < s.Len"),j-i);
+                        t = new unsafeheader.String(Data:arrayAt(s.Data,i,1,"i < s.Len"),Len:j-i);
                     }
+
                     return new Value(v.typ,unsafe.Pointer(&t),v.flag);
                 else 
-                    panic(ref new ValueError("reflect.Value.Slice",v.kind()));
+                    panic(addr(new ValueError("reflect.Value.Slice",v.kind())));
 
             }
 
@@ -1963,10 +2419,10 @@ namespace go
             } 
 
             // Declare slice so that gc can see the base pointer in it.
-            slice<unsafe.Pointer> x = default; 
+            ref slice<unsafe.Pointer> x = ref heap(out ptr<slice<unsafe.Pointer>> _addr_x); 
 
-            // Reinterpret as *sliceHeader to edit.
-            s = (sliceHeader.Value)(@unsafe.Pointer(ref x));
+            // Reinterpret as *unsafeheader.Slice to edit.
+            s = (unsafeheader.Slice.val)(@unsafe.Pointer(_addr_x));
             s.Len = j - i;
             s.Cap = cap - i;
             if (cap - i > 0L)
@@ -1977,9 +2433,12 @@ namespace go
             { 
                 // do not advance pointer, to avoid pointing beyond end of slice
                 s.Data = base;
+
             }
+
             var fl = v.flag.ro() | flagIndir | flag(Slice);
             return new Value(typ.common(),unsafe.Pointer(&x),fl);
+
         });
 
         // Slice3 is the 3-index form of the slice operation: it returns v[i:j:k].
@@ -1987,7 +2446,7 @@ namespace go
         // or if the indexes are out of bounds.
         public static Value Slice3(this Value v, long i, long j, long k) => func((_, panic, __) =>
         {
-            long cap = default;            ref sliceType typ = default;            unsafe.Pointer @base = default;
+            long cap = default;            ptr<sliceType> typ;            unsafe.Pointer @base = default;
             {
                 var kind = v.kind();
 
@@ -1997,17 +2456,18 @@ namespace go
                     {
                         panic("reflect.Value.Slice3: slice of unaddressable array");
                     }
-                    var tt = (arrayType.Value)(@unsafe.Pointer(v.typ));
+
+                    var tt = (arrayType.val)(@unsafe.Pointer(v.typ));
                     cap = int(tt.len);
-                    typ = (sliceType.Value)(@unsafe.Pointer(tt.slice));
+                    typ = (sliceType.val)(@unsafe.Pointer(tt.slice));
                     base = v.ptr;
                 else if (kind == Slice) 
-                    typ = (sliceType.Value)(@unsafe.Pointer(v.typ));
-                    var s = (sliceHeader.Value)(v.ptr);
+                    typ = (sliceType.val)(@unsafe.Pointer(v.typ));
+                    var s = (unsafeheader.Slice.val)(v.ptr);
                     base = s.Data;
                     cap = s.Cap;
                 else 
-                    panic(ref new ValueError("reflect.Value.Slice3",v.kind()));
+                    panic(addr(new ValueError("reflect.Value.Slice3",v.kind())));
 
             }
 
@@ -2018,10 +2478,10 @@ namespace go
 
             // Declare slice so that the garbage collector
             // can see the base pointer in it.
-            slice<unsafe.Pointer> x = default; 
+            ref slice<unsafe.Pointer> x = ref heap(out ptr<slice<unsafe.Pointer>> _addr_x); 
 
-            // Reinterpret as *sliceHeader to edit.
-            s = (sliceHeader.Value)(@unsafe.Pointer(ref x));
+            // Reinterpret as *unsafeheader.Slice to edit.
+            s = (unsafeheader.Slice.val)(@unsafe.Pointer(_addr_x));
             s.Len = j - i;
             s.Cap = k - i;
             if (k - i > 0L)
@@ -2032,9 +2492,12 @@ namespace go
             { 
                 // do not advance pointer, to avoid pointing beyond end of slice
                 s.Data = base;
+
             }
+
             var fl = v.flag.ro() | flagIndir | flag(Slice);
             return new Value(typ.common(),unsafe.Pointer(&x),fl);
+
         });
 
         // String returns the string v's underlying value, as a string.
@@ -2052,12 +2515,13 @@ namespace go
                 if (k == Invalid) 
                     return "<invalid Value>";
                 else if (k == String) 
-                    return v.ptr.Value;
+                    return new ptr<ptr<ptr<@string>>>(v.ptr);
 
             } 
             // If you call String on a reflect.Value of other type, it's better to
             // print something than to panic. Useful in debugging.
             return "<" + v.Type().String() + " Value>";
+
         }
 
         // TryRecv attempts to receive a value from the channel v but will not block.
@@ -2067,6 +2531,9 @@ namespace go
         // If the channel is closed, x is the zero value for the channel's element type and ok is false.
         public static (Value, bool) TryRecv(this Value v)
         {
+            Value x = default;
+            bool ok = default;
+
             v.mustBe(Chan);
             v.mustBeExported();
             return v.recv(true);
@@ -2089,12 +2556,14 @@ namespace go
             var f = v.flag;
             if (f == 0L)
             {
-                panic(ref new ValueError("reflect.Value.Type",Invalid));
+                panic(addr(new ValueError("reflect.Value.Type",Invalid)));
             }
+
             if (f & flagMethod == 0L)
             { 
                 // Easy case
                 return v.typ;
+
             } 
 
             // Method value.
@@ -2103,13 +2572,15 @@ namespace go
             if (v.typ.Kind() == Interface)
             { 
                 // Method on interface.
-                var tt = (interfaceType.Value)(@unsafe.Pointer(v.typ));
+                var tt = (interfaceType.val)(@unsafe.Pointer(v.typ));
                 if (uint(i) >= uint(len(tt.methods)))
                 {
                     panic("reflect: internal error: invalid method index");
                 }
-                var m = ref tt.methods[i];
+
+                var m = _addr_tt.methods[i];
                 return v.typ.typeOff(m.typ);
+
             } 
             // Method on concrete type.
             var ms = v.typ.exportedMethods();
@@ -2117,8 +2588,10 @@ namespace go
             {
                 panic("reflect: internal error: invalid method index");
             }
+
             m = ms[i];
             return v.typ.typeOff(m.mtyp);
+
         });
 
         // Uint returns v's underlying value, as a uint64.
@@ -2129,19 +2602,25 @@ namespace go
             var p = v.ptr;
 
             if (k == Uint) 
-                return uint64(p.Value);
+                return uint64(new ptr<ptr<ptr<ulong>>>(p));
             else if (k == Uint8) 
-                return uint64(p.Value);
+                return uint64(new ptr<ptr<ptr<byte>>>(p));
             else if (k == Uint16) 
-                return uint64(p.Value);
+                return uint64(new ptr<ptr<ptr<ushort>>>(p));
             else if (k == Uint32) 
-                return uint64(p.Value);
+                return uint64(new ptr<ptr<ptr<uint>>>(p));
             else if (k == Uint64) 
-                return p.Value;
+                return new ptr<ptr<ptr<ulong>>>(p);
             else if (k == Uintptr) 
-                return uint64(p.Value);
-                        panic(ref new ValueError("reflect.Value.Uint",v.kind()));
+                return uint64(new ptr<ptr<ptr<System.UIntPtr>>>(p));
+                        panic(addr(new ValueError("reflect.Value.Uint",v.kind())));
+
         });
+
+        //go:nocheckptr
+        // This prevents inlining Value.UnsafeAddr when -d=checkptr is enabled,
+        // which ensures cmd/compile can recognize unsafe.Pointer(v.UnsafeAddr())
+        // and make an exception.
 
         // UnsafeAddr returns a pointer to v's data.
         // It is for advanced clients that also import the "unsafe" package.
@@ -2151,13 +2630,16 @@ namespace go
             // TODO: deprecate
             if (v.typ == null)
             {
-                panic(ref new ValueError("reflect.Value.UnsafeAddr",Invalid));
+                panic(addr(new ValueError("reflect.Value.UnsafeAddr",Invalid)));
             }
+
             if (v.flag & flagAddr == 0L)
             {
                 panic("reflect.Value.UnsafeAddr of unaddressable value");
             }
+
             return uintptr(v.ptr);
+
         });
 
         // StringHeader is the runtime representation of a string.
@@ -2169,13 +2651,6 @@ namespace go
         public partial struct StringHeader
         {
             public System.UIntPtr Data;
-            public long Len;
-        }
-
-        // stringHeader is a safe version of StringHeader used within this package.
-        private partial struct stringHeader
-        {
-            public unsafe.Pointer Data;
             public long Len;
         }
 
@@ -2192,20 +2667,13 @@ namespace go
             public long Cap;
         }
 
-        // sliceHeader is a safe version of SliceHeader used within this package.
-        private partial struct sliceHeader
-        {
-            public unsafe.Pointer Data;
-            public long Len;
-            public long Cap;
-        }
-
         private static void typesMustMatch(@string what, Type t1, Type t2) => func((_, panic, __) =>
         {
             if (t1 != t2)
             {
                 panic(what + ": " + t1.String() + " != " + t2.String());
             }
+
         });
 
         // arrayAt returns the i-th element of p,
@@ -2224,17 +2692,23 @@ namespace go
         // more capacity if needed. It also returns the old and new slice lengths.
         private static (Value, long, long) grow(Value s, long extra) => func((_, panic, __) =>
         {
+            Value _p0 = default;
+            long _p0 = default;
+            long _p0 = default;
+
             var i0 = s.Len();
             var i1 = i0 + extra;
             if (i1 < i0)
             {
                 panic("reflect.Append: slice overflow");
             }
+
             var m = s.Cap();
             if (i1 <= m)
             {
                 return (s.Slice(0L, i1), i0, i1);
             }
+
             if (m == 0L)
             {
                 m = extra;
@@ -2251,12 +2725,16 @@ namespace go
                     {
                         m += m / 4L;
                     }
+
                 }
 
+
             }
+
             var t = MakeSlice(s.Type(), i1, m);
             Copy(t, s);
             return (t, i0, i1);
+
         });
 
         // Append appends the values x to a slice s and returns the resulting slice.
@@ -2280,6 +2758,7 @@ namespace go
 
             }
             return s;
+
         }
 
         // AppendSlice appends a slice t to a slice s and returns the resulting slice.
@@ -2306,12 +2785,14 @@ namespace go
             var dk = dst.kind();
             if (dk != Array && dk != Slice)
             {
-                panic(ref new ValueError("reflect.Copy",dk));
+                panic(addr(new ValueError("reflect.Copy",dk)));
             }
+
             if (dk == Array)
             {
                 dst.mustBeAssignable();
             }
+
             dst.mustBeExported();
 
             var sk = src.kind();
@@ -2321,9 +2802,11 @@ namespace go
                 stringCopy = sk == String && dst.typ.Elem().Kind() == Uint8;
                 if (!stringCopy)
                 {
-                    panic(ref new ValueError("reflect.Copy",sk));
+                    panic(addr(new ValueError("reflect.Copy",sk)));
                 }
+
             }
+
             src.mustBeExported();
 
             var de = dst.typ.Elem();
@@ -2332,7 +2815,8 @@ namespace go
                 var se = src.typ.Elem();
                 typesMustMatch("reflect.Copy", de, se);
             }
-            sliceHeader ds = default;            sliceHeader ss = default;
+
+            unsafeheader.Slice ds = default;            unsafeheader.Slice ss = default;
 
             if (dk == Array)
             {
@@ -2342,8 +2826,9 @@ namespace go
             }
             else
             {
-                ds = dst.ptr.Value;
+                ds = new ptr<ptr<ptr<unsafeheader.Slice>>>(dst.ptr);
             }
+
             if (sk == Array)
             {
                 ss.Data = src.ptr;
@@ -2352,16 +2837,18 @@ namespace go
             }
             else if (sk == Slice)
             {
-                ss = src.ptr.Value;
+                ss = new ptr<ptr<ptr<unsafeheader.Slice>>>(src.ptr);
             }
             else
             {
-                *(*stringHeader) sh = src.ptr.Value;
+                ptr<ptr<unsafeheader.String>> sh = new ptr<ptr<ptr<unsafeheader.String>>>(src.ptr);
                 ss.Data = sh.Data;
                 ss.Len = sh.Len;
                 ss.Cap = sh.Len;
             }
-            return typedslicecopy(de.common(), ds, ss);
+
+            return typedslicecopy(_addr_de.common(), ds, ss);
+
         });
 
         // A runtimeSelect is a single case passed to rselect.
@@ -2389,10 +2876,10 @@ namespace go
 
         // NOTE: These values must match ../runtime/select.go:/selectDir.
 
-        private static readonly SelectDir _ = iota;
-        public static readonly var SelectSend = 0; // case Chan <- Send
-        public static readonly var SelectRecv = 1; // case <-Chan:
-        public static readonly var SelectDefault = 2; // default
+        private static readonly SelectDir _ = (SelectDir)iota;
+        public static readonly var SelectSend = (var)0; // case Chan <- Send
+        public static readonly var SelectRecv = (var)1; // case <-Chan:
+        public static readonly var SelectDefault = (var)2; // default
 
         // A SelectCase describes a single case in a select operation.
         // The kind of case depends on Dir, the communication direction.
@@ -2425,52 +2912,80 @@ namespace go
         // and, if that case was a receive operation, the value received and a
         // boolean indicating whether the value corresponds to a send on the channel
         // (as opposed to a zero value received because the channel is closed).
+        // Select supports a maximum of 65536 cases.
         public static (long, Value, bool) Select(slice<SelectCase> cases) => func((_, panic, __) =>
-        { 
+        {
+            long chosen = default;
+            Value recv = default;
+            bool recvOK = default;
+
+            if (len(cases) > 65536L)
+            {>>MARKER:FUNCTION_rselect_BLOCK_PREFIX<<
+                panic("reflect.Select: too many cases (max 65536)");
+            } 
             // NOTE: Do not trust that caller is not modifying cases data underfoot.
             // The range is safe because the caller cannot modify our copy of the len
             // and each iteration makes its own copy of the value c.
-            var runcases = make_slice<runtimeSelect>(len(cases));
+            slice<runtimeSelect> runcases = default;
+            if (len(cases) > 4L)
+            { 
+                // Slice is heap allocated due to runtime dependent capacity.
+                runcases = make_slice<runtimeSelect>(len(cases));
+
+            }
+            else
+            { 
+                // Slice can be stack allocated due to constant capacity.
+                runcases = make_slice<runtimeSelect>(len(cases), 4L);
+
+            }
+
             var haveDefault = false;
             foreach (var (i, c) in cases)
             {
-                var rc = ref runcases[i];
+                var rc = _addr_runcases[i];
                 rc.dir = c.Dir;
 
                 if (c.Dir == SelectDefault) // default
                     if (haveDefault)
-                    {>>MARKER:FUNCTION_rselect_BLOCK_PREFIX<<
+                    {
                         panic("reflect.Select: multiple default cases");
                     }
+
                     haveDefault = true;
                     if (c.Chan.IsValid())
                     {
                         panic("reflect.Select: default case has Chan value");
                     }
+
                     if (c.Send.IsValid())
                     {
                         panic("reflect.Select: default case has Send value");
                     }
+
                 else if (c.Dir == SelectSend) 
                     var ch = c.Chan;
                     if (!ch.IsValid())
                     {
                         break;
                     }
+
                     ch.mustBe(Chan);
                     ch.mustBeExported();
-                    var tt = (chanType.Value)(@unsafe.Pointer(ch.typ));
+                    var tt = (chanType.val)(@unsafe.Pointer(ch.typ));
                     if (ChanDir(tt.dir) & SendDir == 0L)
                     {
                         panic("reflect.Select: SendDir case using recv-only channel");
                     }
+
                     rc.ch = ch.pointer();
-                    rc.typ = ref tt.rtype;
+                    rc.typ = _addr_tt.rtype;
                     var v = c.Send;
                     if (!v.IsValid())
                     {
                         panic("reflect.Select: SendDir case missing Send value");
                     }
+
                     v.mustBeExported();
                     v = v.assignTo("reflect.Select", tt.elem, null);
                     if (v.flag & flagIndir != 0L)
@@ -2479,35 +2994,40 @@ namespace go
                     }
                     else
                     {
-                        rc.val = @unsafe.Pointer(ref v.ptr);
+                        rc.val = @unsafe.Pointer(_addr_v.ptr);
                     }
+
                 else if (c.Dir == SelectRecv) 
                     if (c.Send.IsValid())
                     {
                         panic("reflect.Select: RecvDir case has Send value");
                     }
+
                     ch = c.Chan;
                     if (!ch.IsValid())
                     {
                         break;
                     }
+
                     ch.mustBe(Chan);
                     ch.mustBeExported();
-                    tt = (chanType.Value)(@unsafe.Pointer(ch.typ));
+                    tt = (chanType.val)(@unsafe.Pointer(ch.typ));
                     if (ChanDir(tt.dir) & RecvDir == 0L)
                     {
                         panic("reflect.Select: RecvDir case using send-only channel");
                     }
+
                     rc.ch = ch.pointer();
-                    rc.typ = ref tt.rtype;
-                    rc.val = unsafe_New(tt.elem);
+                    rc.typ = _addr_tt.rtype;
+                    rc.val = unsafe_New(_addr_tt.elem);
                 else 
                     panic("reflect.Select: invalid Dir");
-                            }
+                
+            }
             chosen, recvOK = rselect(runcases);
             if (runcases[chosen].dir == SelectRecv)
             {
-                tt = (chanType.Value)(@unsafe.Pointer(runcases[chosen].typ));
+                tt = (chanType.val)(@unsafe.Pointer(runcases[chosen].typ));
                 var t = tt.elem;
                 var p = runcases[chosen].val;
                 var fl = flag(t.Kind());
@@ -2519,8 +3039,11 @@ namespace go
                 {
                     recv = new Value(t,*(*unsafe.Pointer)(p),fl);
                 }
+
             }
+
             return (chosen, recv, recvOK);
+
         });
 
         /*
@@ -2528,9 +3051,9 @@ namespace go
          */
 
         // implemented in package runtime
-        private static unsafe.Pointer unsafe_New(ref rtype _p0)
+        private static unsafe.Pointer unsafe_New(ptr<rtype> _p0)
 ;
-        private static unsafe.Pointer unsafe_NewArray(ref rtype _p0, long _p0)
+        private static unsafe.Pointer unsafe_NewArray(ptr<rtype> _p0, long _p0)
 ;
 
         // MakeSlice creates a new zero-initialized slice value
@@ -2541,20 +3064,25 @@ namespace go
             {>>MARKER:FUNCTION_unsafe_NewArray_BLOCK_PREFIX<<
                 panic("reflect.MakeSlice of non-slice type");
             }
+
             if (len < 0L)
             {>>MARKER:FUNCTION_unsafe_New_BLOCK_PREFIX<<
                 panic("reflect.MakeSlice: negative len");
             }
+
             if (cap < 0L)
             {
                 panic("reflect.MakeSlice: negative cap");
             }
+
             if (len > cap)
             {
                 panic("reflect.MakeSlice: len > cap");
             }
-            sliceHeader s = new sliceHeader(unsafe_NewArray(typ.Elem().(*rtype),cap),len,cap);
-            return new Value(typ.common(),unsafe.Pointer(&s),flagIndir|flag(Slice));
+
+            ref unsafeheader.Slice s = ref heap(new unsafeheader.Slice(Data:unsafe_NewArray(typ.Elem().(*rtype),cap),Len:len,Cap:cap), out ptr<unsafeheader.Slice> _addr_s);
+            return new Value(typ.(*rtype),unsafe.Pointer(&s),flagIndir|flag(Slice));
+
         });
 
         // MakeChan creates a new channel with the specified type and buffer size.
@@ -2564,16 +3092,21 @@ namespace go
             {
                 panic("reflect.MakeChan of non-chan type");
             }
+
             if (buffer < 0L)
             {
                 panic("reflect.MakeChan: negative buffer size");
             }
+
             if (typ.ChanDir() != BothDir)
             {
                 panic("reflect.MakeChan: unidirectional channel type");
             }
-            var ch = makechan(typ._<ref rtype>(), buffer);
-            return new Value(typ.common(),ch,flag(Chan));
+
+            ptr<rtype> t = typ._<ptr<rtype>>();
+            var ch = makechan(t, buffer);
+            return new Value(t,ch,flag(Chan));
+
         });
 
         // MakeMap creates a new map with the specified type.
@@ -2590,8 +3123,11 @@ namespace go
             {
                 panic("reflect.MakeMapWithSize of non-map type");
             }
-            var m = makemap(typ._<ref rtype>(), n);
-            return new Value(typ.common(),m,flag(Map));
+
+            ptr<rtype> t = typ._<ptr<rtype>>();
+            var m = makemap(t, n);
+            return new Value(t,m,flag(Map));
+
         });
 
         // Indirect returns the value that v points to.
@@ -2603,7 +3139,9 @@ namespace go
             {
                 return v;
             }
+
             return v.Elem();
+
         }
 
         // ValueOf returns a new Value initialized to the concrete value
@@ -2622,6 +3160,7 @@ namespace go
             escapes(i);
 
             return unpackEface(i);
+
         }
 
         // Zero returns a Value representing the zero value for the specified type.
@@ -2635,13 +3174,16 @@ namespace go
             {
                 panic("reflect: Zero(nil)");
             }
-            var t = typ.common();
+
+            ptr<rtype> t = typ._<ptr<rtype>>();
             var fl = flag(t.Kind());
             if (ifaceIndir(t))
             {
-                return new Value(t,unsafe_New(typ.(*rtype)),fl|flagIndir);
+                return new Value(t,unsafe_New(t),fl|flagIndir);
             }
+
             return new Value(t,nil,fl);
+
         });
 
         // New returns a Value representing a pointer to a new zero value
@@ -2652,9 +3194,12 @@ namespace go
             {
                 panic("reflect: New(nil)");
             }
-            var ptr = unsafe_New(typ._<ref rtype>());
+
+            ptr<rtype> t = typ._<ptr<rtype>>();
+            var ptr = unsafe_New(t);
             var fl = flag(Ptr);
-            return new Value(typ.common().ptrTo(),ptr,fl);
+            return new Value(t.ptrTo(),ptr,fl);
+
         });
 
         // NewAt returns a Value representing a pointer to a value of the
@@ -2662,18 +3207,23 @@ namespace go
         public static Value NewAt(Type typ, unsafe.Pointer p)
         {
             var fl = flag(Ptr);
-            return new Value(typ.common().ptrTo(),p,fl);
+            ptr<rtype> t = typ._<ptr<rtype>>();
+            return new Value(t.ptrTo(),p,fl);
         }
 
         // assignTo returns a value v that can be assigned directly to typ.
         // It panics if v is not assignable to typ.
         // For a conversion to an interface type, target is a suggested scratch space to use.
-        public static Value assignTo(this Value v, @string context, ref rtype _dst, unsafe.Pointer target) => func(_dst, (ref rtype dst, Defer _, Panic panic, Recover __) =>
+        // target must be initialized memory (or nil).
+        public static Value assignTo(this Value v, @string context, ptr<rtype> _addr_dst, unsafe.Pointer target) => func((_, panic, __) =>
         {
+            ref rtype dst = ref _addr_dst.val;
+
             if (v.flag & flagMethod != 0L)
             {
                 v = makeMethodValue(context, v);
             }
+
 
             if (directlyAssignable(dst, v.typ)) 
                 // Overwrite type so that they match.
@@ -2684,26 +3234,31 @@ namespace go
             else if (implements(dst, v.typ)) 
                 if (target == null)
                 {
-                    target = unsafe_New(dst);
+                    target = unsafe_New(_addr_dst);
                 }
+
                 if (v.Kind() == Interface && v.IsNil())
                 { 
                     // A nil ReadWriter passed to nil Reader is OK,
                     // but using ifaceE2I below will panic.
                     // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
                     return new Value(dst,nil,flag(Interface));
+
                 }
+
                 var x = valueInterface(v, false);
                 if (dst.NumMethod() == 0L)
                 {
                 }
                 else
                 {
-                    ifaceE2I(dst, x, target);
+                    ifaceE2I(_addr_dst, x, target);
                 }
+
                 return new Value(dst,target,flagIndir|flag(Interface));
             // Failed.
             panic(context + ": value of type " + v.typ.String() + " is not assignable to type " + dst.String());
+
         });
 
         // Convert returns the value v converted to type t.
@@ -2715,18 +3270,24 @@ namespace go
             {
                 v = makeMethodValue("Convert", v);
             }
-            var op = convertOp(t.common(), v.typ);
+
+            var op = convertOp(_addr_t.common(), _addr_v.typ);
             if (op == null)
             {
                 panic("reflect.Value.Convert: value of type " + v.typ.String() + " cannot be converted to type " + t.String());
             }
+
             return op(v, t);
+
         });
 
         // convertOp returns the function to convert a value of type src
         // to a value of type dst. If the conversion is illegal, convertOp returns nil.
-        private static Func<Value, Type, Value> convertOp(ref rtype dst, ref rtype src)
+        private static Func<Value, Type, Value> convertOp(ptr<rtype> _addr_dst, ptr<rtype> _addr_src)
         {
+            ref rtype dst = ref _addr_dst.val;
+            ref rtype src = ref _addr_src.val;
+
 
             if (src.Kind() == Int || src.Kind() == Int8 || src.Kind() == Int16 || src.Kind() == Int32 || src.Kind() == Int64) 
 
@@ -2764,7 +3325,9 @@ namespace go
                         return cvtStringBytes;
                     else if (dst.Elem().Kind() == Int32) 
                         return cvtStringRunes;
-                                    }
+                    
+                }
+
             else if (src.Kind() == Slice) 
                 if (dst.Kind() == String && src.Elem().PkgPath() == "")
                 {
@@ -2773,27 +3336,40 @@ namespace go
                         return cvtBytesString;
                     else if (src.Elem().Kind() == Int32) 
                         return cvtRunesString;
-                                    }
+                    
+                }
+
+            else if (src.Kind() == Chan) 
+                if (dst.Kind() == Chan && specialChannelAssignability(dst, src))
+                {
+                    return cvtDirect;
+                }
+
             // dst and src have same underlying type.
             if (haveIdenticalUnderlyingType(dst, src, false))
             {
                 return cvtDirect;
             } 
 
-            // dst and src are unnamed pointer types with same underlying base type.
+            // dst and src are non-defined pointer types with same underlying base type.
             if (dst.Kind() == Ptr && dst.Name() == "" && src.Kind() == Ptr && src.Name() == "" && haveIdenticalUnderlyingType(dst.Elem().common(), src.Elem().common(), false))
             {
                 return cvtDirect;
             }
+
             if (implements(dst, src))
             {
                 if (src.Kind() == Interface)
                 {
                     return cvtI2I;
                 }
+
                 return cvtT2I;
+
             }
+
             return null;
+
         }
 
         // makeInt returns a Value of type t equal to bits (possibly truncated),
@@ -2801,31 +3377,32 @@ namespace go
         private static Value makeInt(flag f, ulong bits, Type t)
         {
             var typ = t.common();
-            var ptr = unsafe_New(typ);
+            var ptr = unsafe_New(_addr_typ);
             switch (typ.size)
             {
                 case 1L: 
-                    (uint8.Value)(ptr).Value;
+                    (uint8.val)(ptr).val;
 
                     uint8(bits);
                     break;
                 case 2L: 
-                    (uint16.Value)(ptr).Value;
+                    (uint16.val)(ptr).val;
 
                     uint16(bits);
                     break;
                 case 4L: 
-                    (uint32.Value)(ptr).Value;
+                    (uint32.val)(ptr).val;
 
                     uint32(bits);
                     break;
                 case 8L: 
-                    (uint64.Value)(ptr).Value;
+                    (uint64.val)(ptr).val;
 
                     bits;
                     break;
             }
             return new Value(typ,ptr,f|flagIndir|flag(typ.Kind()));
+
         }
 
         // makeFloat returns a Value of type t equal to v (possibly truncated to float32),
@@ -2833,21 +3410,33 @@ namespace go
         private static Value makeFloat(flag f, double v, Type t)
         {
             var typ = t.common();
-            var ptr = unsafe_New(typ);
+            var ptr = unsafe_New(_addr_typ);
             switch (typ.size)
             {
                 case 4L: 
-                    (float32.Value)(ptr).Value;
+                    (float32.val)(ptr).val;
 
                     float32(v);
                     break;
                 case 8L: 
-                    (float64.Value)(ptr).Value;
+                    (float64.val)(ptr).val;
 
                     v;
                     break;
             }
             return new Value(typ,ptr,f|flagIndir|flag(typ.Kind()));
+
+        }
+
+        // makeFloat returns a Value of type t equal to v, where t is a float32 type.
+        private static Value makeFloat32(flag f, float v, Type t)
+        {
+            var typ = t.common();
+            var ptr = unsafe_New(_addr_typ) * (float32.val)(ptr);
+
+            v;
+            return new Value(typ,ptr,f|flagIndir|flag(typ.Kind()));
+
         }
 
         // makeComplex returns a Value of type t equal to v (possibly truncated to complex64),
@@ -2855,21 +3444,22 @@ namespace go
         private static Value makeComplex(flag f, System.Numerics.Complex128 v, Type t)
         {
             var typ = t.common();
-            var ptr = unsafe_New(typ);
+            var ptr = unsafe_New(_addr_typ);
             switch (typ.size)
             {
                 case 8L: 
-                    (complex64.Value)(ptr).Value;
+                    (complex64.val)(ptr).val;
 
                     complex64(v);
                     break;
                 case 16L: 
-                    (complex128.Value)(ptr).Value;
+                    (complex128.val)(ptr).val;
 
                     v;
                     break;
             }
             return new Value(typ,ptr,f|flagIndir|flag(typ.Kind()));
+
         }
 
         private static Value makeString(flag f, @string v, Type t)
@@ -2940,7 +3530,17 @@ namespace go
         // convertOp: floatXX -> floatXX
         private static Value cvtFloat(Value v, Type t)
         {
+            if (v.Type().Kind() == Float32 && t.Kind() == Float32)
+            { 
+                // Don't do any conversion if both types have underlying type float32.
+                // This avoids converting to float64 and back, which will
+                // convert a signaling NaN to a quiet NaN. See issue 36400.
+                return makeFloat32(v.flag.ro(), new ptr<ptr<ptr<float>>>(v.ptr), t);
+
+            }
+
             return makeFloat(v.flag.ro(), v.Float(), t);
+
         }
 
         // convertOp: complexXX -> complexXX
@@ -2952,13 +3552,13 @@ namespace go
         // convertOp: intXX -> string
         private static Value cvtIntString(Value v, Type t)
         {
-            return makeString(v.flag.ro(), string(v.Int()), t);
+            return makeString(v.flag.ro(), string(rune(v.Int())), t);
         }
 
         // convertOp: uintXX -> string
         private static Value cvtUintString(Value v, Type t)
         {
-            return makeString(v.flag.ro(), string(v.Uint()), t);
+            return makeString(v.flag.ro(), string(rune(v.Uint())), t);
         }
 
         // convertOp: []byte -> string
@@ -2994,27 +3594,31 @@ namespace go
             if (f & flagAddr != 0L)
             { 
                 // indirect, mutable word - make a copy
-                var c = unsafe_New(t);
-                typedmemmove(t, c, ptr);
+                var c = unsafe_New(_addr_t);
+                typedmemmove(_addr_t, c, ptr);
                 ptr = c;
                 f &= flagAddr;
+
             }
+
             return new Value(t,ptr,v.flag.ro()|f); // v.flag.ro()|f == f?
         }
 
         // convertOp: concrete -> interface
         private static Value cvtT2I(Value v, Type typ)
         {
-            var target = unsafe_New(typ.common());
+            var target = unsafe_New(_addr_typ.common());
             var x = valueInterface(v, false);
             if (typ.NumMethod() == 0L)
             {
             }
             else
             {
-                ifaceE2I(typ._<ref rtype>(), x, target);
+                ifaceE2I(typ._<ptr<rtype>>(), x, target);
             }
+
             return new Value(typ.common(),target,v.flag.ro()|flagIndir|flag(Interface));
+
         }
 
         // convertOp: interface -> interface
@@ -3026,7 +3630,9 @@ namespace go
                 ret.flag |= v.flag.ro();
                 return ret;
             }
+
             return cvtT2I(v.Elem(), typ);
+
         }
 
         // implemented in ../runtime
@@ -3053,31 +3659,35 @@ namespace go
         private static bool chansend(unsafe.Pointer ch, unsafe.Pointer val, bool nb)
 ;
 
-        private static unsafe.Pointer makechan(ref rtype typ, long size)
+        private static unsafe.Pointer makechan(ptr<rtype> typ, long size)
 ;
-        private static unsafe.Pointer makemap(ref rtype t, long cap)
-;
-
-        //go:noescape
-        private static unsafe.Pointer mapaccess(ref rtype t, unsafe.Pointer m, unsafe.Pointer key)
+        private static unsafe.Pointer makemap(ptr<rtype> t, long cap)
 ;
 
         //go:noescape
-        private static void mapassign(ref rtype t, unsafe.Pointer m, unsafe.Pointer key, unsafe.Pointer val)
+        private static unsafe.Pointer mapaccess(ptr<rtype> t, unsafe.Pointer m, unsafe.Pointer key)
 ;
 
         //go:noescape
-        private static void mapdelete(ref rtype t, unsafe.Pointer m, unsafe.Pointer key)
+        private static void mapassign(ptr<rtype> t, unsafe.Pointer m, unsafe.Pointer key, unsafe.Pointer val)
+;
+
+        //go:noescape
+        private static void mapdelete(ptr<rtype> t, unsafe.Pointer m, unsafe.Pointer key)
 ;
 
         // m escapes into the return value, but the caller of mapiterinit
         // doesn't let the return value escape.
         //go:noescape
-        private static unsafe.Pointer mapiterinit(ref rtype t, unsafe.Pointer m)
+        private static unsafe.Pointer mapiterinit(ptr<rtype> t, unsafe.Pointer m)
 ;
 
         //go:noescape
         private static unsafe.Pointer mapiterkey(unsafe.Pointer it)
+;
+
+        //go:noescape
+        private static unsafe.Pointer mapiterelem(unsafe.Pointer it)
 ;
 
         //go:noescape
@@ -3093,31 +3703,49 @@ namespace go
         // back into arg+retoffset before returning. If copying result bytes back,
         // the caller must pass the argument frame type as argtype, so that
         // call can execute appropriate write barriers during the copy.
-        private static void call(ref rtype argtype, unsafe.Pointer fn, unsafe.Pointer arg, uint n, uint retoffset)
+        //
+        //go:linkname call runtime.reflectcall
+        private static void call(ptr<rtype> argtype, unsafe.Pointer fn, unsafe.Pointer arg, uint n, uint retoffset)
 ;
 
-        private static void ifaceE2I(ref rtype t, object src, unsafe.Pointer dst)
+        private static void ifaceE2I(ptr<rtype> t, object src, unsafe.Pointer dst)
+;
+
+        // memmove copies size bytes to dst from src. No write barriers are used.
+        //go:noescape
+        private static void memmove(unsafe.Pointer dst, unsafe.Pointer src, System.UIntPtr size)
 ;
 
         // typedmemmove copies a value of type t to dst from src.
         //go:noescape
-        private static void typedmemmove(ref rtype t, unsafe.Pointer dst, unsafe.Pointer src)
+        private static void typedmemmove(ptr<rtype> t, unsafe.Pointer dst, unsafe.Pointer src)
 ;
 
         // typedmemmovepartial is like typedmemmove but assumes that
         // dst and src point off bytes into the value and only copies size bytes.
         //go:noescape
-        private static void typedmemmovepartial(ref rtype t, unsafe.Pointer dst, unsafe.Pointer src, System.UIntPtr off, System.UIntPtr size)
+        private static void typedmemmovepartial(ptr<rtype> t, unsafe.Pointer dst, unsafe.Pointer src, System.UIntPtr off, System.UIntPtr size)
+;
+
+        // typedmemclr zeros the value at ptr of type t.
+        //go:noescape
+        private static void typedmemclr(ptr<rtype> t, unsafe.Pointer ptr)
+;
+
+        // typedmemclrpartial is like typedmemclr but assumes that
+        // dst points off bytes into the value and only clears size bytes.
+        //go:noescape
+        private static void typedmemclrpartial(ptr<rtype> t, unsafe.Pointer ptr, System.UIntPtr off, System.UIntPtr size)
 ;
 
         // typedslicecopy copies a slice of elemType values from src to dst,
         // returning the number of elements copied.
         //go:noescape
-        private static long typedslicecopy(ref rtype elemType, sliceHeader dst, sliceHeader src)
+        private static long typedslicecopy(ptr<rtype> elemType, unsafeheader.Slice dst, unsafeheader.Slice src)
 ;
 
         //go:noescape
-        private static void memclrNoHeapPointers(unsafe.Pointer ptr, System.UIntPtr n)
+        private static System.UIntPtr typehash(ptr<rtype> t, unsafe.Pointer p, System.UIntPtr h)
 ;
 
         // Dummy annotation marking that the value x escapes,
@@ -3126,9 +3754,10 @@ namespace go
         private static void escapes(object x)
         {
             if (dummy.b)
-            {>>MARKER:FUNCTION_memclrNoHeapPointers_BLOCK_PREFIX<<
+            {>>MARKER:FUNCTION_typehash_BLOCK_PREFIX<<
                 dummy.x = x;
             }
+
         }
 
         private static var dummy = default;

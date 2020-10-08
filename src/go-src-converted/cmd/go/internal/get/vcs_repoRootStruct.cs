@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:58 UTC
+//     Generated on 2020 October 08 04:36:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,13 +13,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using lazyregexp = go.@internal.lazyregexp_package;
 using singleflight = go.@internal.singleflight_package;
 using log = go.log_package;
-using url = go.net.url_package;
+using urlpkg = go.net.url_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
@@ -28,6 +28,7 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using load = go.cmd.go.@internal.load_package;
 using web = go.cmd.go.@internal.web_package;
 using go;
 
@@ -39,46 +40,48 @@ namespace @internal
     public static partial class get_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct repoRoot
+        public partial struct RepoRoot
         {
             // Constructors
-            public repoRoot(NilType _)
+            public RepoRoot(NilType _)
             {
+                this.Repo = default;
+                this.Root = default;
+                this.IsCustom = default;
+                this.VCS = default;
                 this.vcs = default;
-                this.repo = default;
-                this.root = default;
-                this.isCustom = default;
             }
 
-            public repoRoot(ref ptr<vcsCmd> vcs = default, @string repo = default, @string root = default, bool isCustom = default)
+            public RepoRoot(@string Repo = default, @string Root = default, bool IsCustom = default, @string VCS = default, ref ptr<vcsCmd> vcs = default)
             {
+                this.Repo = Repo;
+                this.Root = Root;
+                this.IsCustom = IsCustom;
+                this.VCS = VCS;
                 this.vcs = vcs;
-                this.repo = repo;
-                this.root = root;
-                this.isCustom = isCustom;
             }
 
-            // Enable comparisons between nil and repoRoot struct
+            // Enable comparisons between nil and RepoRoot struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(repoRoot value, NilType nil) => value.Equals(default(repoRoot));
+            public static bool operator ==(RepoRoot value, NilType nil) => value.Equals(default(RepoRoot));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(repoRoot value, NilType nil) => !(value == nil);
+            public static bool operator !=(RepoRoot value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, repoRoot value) => value == nil;
+            public static bool operator ==(NilType nil, RepoRoot value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, repoRoot value) => value != nil;
+            public static bool operator !=(NilType nil, RepoRoot value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator repoRoot(NilType nil) => default(repoRoot);
+            public static implicit operator RepoRoot(NilType nil) => default(RepoRoot);
         }
 
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private static repoRoot repoRoot_cast(dynamic value)
+        public static RepoRoot RepoRoot_cast(dynamic value)
         {
-            return new repoRoot(ref value.vcs, value.repo, value.root, value.isCustom);
+            return new RepoRoot(value.Repo, value.Root, value.IsCustom, value.VCS, ref value.vcs);
         }
     }
 }}}}

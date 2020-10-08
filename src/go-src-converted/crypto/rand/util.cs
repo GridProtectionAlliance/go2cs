@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2020 August 29 08:30:54 UTC
+// package rand -- go2cs converted at 2020 October 08 03:35:34 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\util.go
 using errors = go.errors_package;
@@ -31,18 +31,23 @@ namespace crypto
         // Prime returns a number, p, of the given size, such that p is prime
         // with high probability.
         // Prime will return error for any error returned by rand.Read or if bits < 2.
-        public static (ref big.Int, error) Prime(io.Reader rand, long bits)
+        public static (ptr<big.Int>, error) Prime(io.Reader rand, long bits)
         {
+            ptr<big.Int> p = default!;
+            error err = default!;
+
             if (bits < 2L)
             {
                 err = errors.New("crypto/rand: prime size must be at least 2-bit");
-                return;
+                return ;
             }
+
             var b = uint(bits % 8L);
             if (b == 0L)
             {
                 b = 8L;
             }
+
             var bytes = make_slice<byte>((bits + 7L) / 8L);
             p = @new<big.Int>();
 
@@ -53,7 +58,7 @@ namespace crypto
                 _, err = io.ReadFull(rand, bytes);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 } 
 
                 // Clear bits in the first byte to make sure the candidate has a size <= bits.
@@ -74,6 +79,7 @@ namespace crypto
                     {
                         bytes[1L] |= 0x80UL;
                     }
+
                 } 
                 // Make the value odd since an even number this large certainly isn't prime.
                 bytes[len(bytes) - 1L] |= 1L;
@@ -105,6 +111,7 @@ NextDelta:
                                 _continueNextDelta = true;
                                 break;
                             }
+
                         delta += 2L;
                         }
                         if (delta > 0L)
@@ -112,7 +119,9 @@ NextDelta:
                             bigMod.SetUint64(delta);
                             p.Add(p, bigMod);
                         }
+
                         break;
+
                     } 
 
                     // There is a tiny possibility that, by adding delta, we caused
@@ -126,19 +135,26 @@ NextDelta:
                 // here.
                 if (p.ProbablyPrime(20L) && p.BitLen() == bits)
                 {
-                    return;
+                    return ;
                 }
+
             }
+
 
         }
 
         // Int returns a uniform random value in [0, max). It panics if max <= 0.
-        public static (ref big.Int, error) Int(io.Reader rand, ref big.Int _max) => func(_max, (ref big.Int max, Defer _, Panic panic, Recover __) =>
+        public static (ptr<big.Int>, error) Int(io.Reader rand, ptr<big.Int> _addr_max) => func((_, panic, __) =>
         {
+            ptr<big.Int> n = default!;
+            error err = default!;
+            ref big.Int max = ref _addr_max.val;
+
             if (max.Sign() <= 0L)
             {
                 panic("crypto/rand: argument to Int is <= 0");
             }
+
             n = @new<big.Int>();
             n.Sub(max, n.SetUint64(1L)); 
             // bitLen is the maximum bit length needed to encode a value < max.
@@ -146,7 +162,8 @@ NextDelta:
             if (bitLen == 0L)
             { 
                 // the only valid result is 0
-                return;
+                return ;
+
             } 
             // k is the maximum byte length needed to encode a value < max.
             var k = (bitLen + 7L) / 8L; 
@@ -156,6 +173,7 @@ NextDelta:
             {
                 b = 8L;
             }
+
             var bytes = make_slice<byte>(k);
 
             while (true)
@@ -163,7 +181,7 @@ NextDelta:
                 _, err = io.ReadFull(rand, bytes);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (_addr_null!, error.As(err)!);
                 } 
 
                 // Clear bits in the first byte to increase the probability
@@ -173,9 +191,11 @@ NextDelta:
                 n.SetBytes(bytes);
                 if (n.Cmp(max) < 0L)
                 {
-                    return;
+                    return ;
                 }
+
             }
+
 
         });
     }

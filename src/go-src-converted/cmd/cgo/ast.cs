@@ -4,7 +4,7 @@
 
 // Parse input AST and prepare Prog structure.
 
-// package main -- go2cs converted at 2020 August 29 08:52:02 UTC
+// package main -- go2cs converted at 2020 October 08 04:08:27 UTC
 // Original source: C:\Go\src\cmd\cgo\ast.go
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class main_package
     {
-        private static ref ast.File parse(@string name, slice<byte> src, parser.Mode flags)
+        private static ptr<ast.File> parse(@string name, slice<byte> src, parser.Mode flags)
         {
             var (ast1, err) = parser.ParseFile(fset, name, src, flags);
             if (err != null)
@@ -39,11 +39,15 @@ namespace go
                         {
                             fmt.Fprintln(os.Stderr, e);
                         }                        os.Exit(2L);
+
                     }
                 }
+
                 fatalf("parsing %s: %s", name, err);
+
             }
-            return ast1;
+            return _addr_ast1!;
+
         }
 
         private static long sourceLine(ast.Node n)
@@ -56,8 +60,10 @@ namespace go
         // attached to the import "C" comment, a list of references to C.xxx,
         // a list of exported functions, and the actual AST, to be rewritten and
         // printed.
-        private static void ParseGo(this ref File f, @string name, slice<byte> src)
-        { 
+        private static void ParseGo(this ptr<File> _addr_f, @string name, slice<byte> src)
+        {
+            ref File f = ref _addr_f.val;
+ 
             // Create absolute path for file, so that it will be used in error
             // messages and recorded in debug line number information.
             // This matches the rest of the toolchain. See golang.org/issue/5122.
@@ -92,8 +98,8 @@ namespace go
             var ast2 = parse(name, src, 0L);
 
             f.Package = ast1.Name.Name;
-            f.Name = make_map<@string, ref Name>();
-            f.NamePos = make_map<ref Name, token.Pos>(); 
+            f.Name = make_map<@string, ptr<Name>>();
+            f.NamePos = make_map<ptr<Name>, token.Pos>(); 
 
             // In ast1, find the import "C" line and get any extra C preamble.
             var sawC = false;
@@ -103,43 +109,47 @@ namespace go
                 foreach (var (_, __decl) in ast1.Decls)
                 {
                     decl = __decl;
-                    ref ast.GenDecl (d, ok) = decl._<ref ast.GenDecl>();
+                    ptr<ast.GenDecl> (d, ok) = decl._<ptr<ast.GenDecl>>();
                     if (!ok)
                     {
                         continue;
                     }
+
                     {
                         var spec__prev2 = spec;
 
                         foreach (var (_, __spec) in d.Specs)
                         {
                             spec = __spec;
-                            ref ast.ImportSpec (s, ok) = spec._<ref ast.ImportSpec>();
+                            ptr<ast.ImportSpec> (s, ok) = spec._<ptr<ast.ImportSpec>>();
                             if (!ok || s.Path.Value != "\"C\"")
                             {
                                 continue;
                             }
+
                             sawC = true;
                             if (s.Name != null)
                             {
                                 error_(s.Path.Pos(), "cannot rename import \"C\"");
                             }
+
                             var cg = s.Doc;
                             if (cg == null && len(d.Specs) == 1L)
                             {
                                 cg = d.Doc;
                             }
+
                             if (cg != null)
                             {
                                 f.Preamble += fmt.Sprintf("#line %d %q\n", sourceLine(cg), name);
-                                f.Preamble += commentText(cg) + "\n";
+                                f.Preamble += commentText(_addr_cg) + "\n";
                                 f.Preamble += "#line 1 \"cgo-generated-wrapper\"\n";
                             }
+
                         }
 
                         spec = spec__prev2;
                     }
-
                 }
 
                 decl = decl__prev1;
@@ -147,11 +157,11 @@ namespace go
 
             if (!sawC)
             {
-                error_(token.NoPos, "cannot find import \"C\"");
+                error_(ast1.Package, "cannot find import \"C\"");
             } 
 
             // In ast2, strip the import "C" line.
-            if (godefs.Value)
+            if (godefs.val)
             {
                 long w = 0L;
                 {
@@ -160,13 +170,14 @@ namespace go
                     foreach (var (_, __decl) in ast2.Decls)
                     {
                         decl = __decl;
-                        (d, ok) = decl._<ref ast.GenDecl>();
+                        (d, ok) = decl._<ptr<ast.GenDecl>>();
                         if (!ok)
                         {
                             ast2.Decls[w] = decl;
                             w++;
                             continue;
                         }
+
                         long ws = 0L;
                         {
                             var spec__prev2 = spec;
@@ -174,12 +185,13 @@ namespace go
                             foreach (var (_, __spec) in d.Specs)
                             {
                                 spec = __spec;
-                                (s, ok) = spec._<ref ast.ImportSpec>();
+                                (s, ok) = spec._<ptr<ast.ImportSpec>>();
                                 if (!ok || s.Path.Value != "\"C\"")
                                 {
                                     d.Specs[ws] = spec;
                                     ws++;
                                 }
+
                             }
             else
 
@@ -190,15 +202,18 @@ namespace go
                         {
                             continue;
                         }
+
                         d.Specs = d.Specs[0L..ws];
                         ast2.Decls[w] = d;
                         w++;
+
                     }
 
                     decl = decl__prev1;
                 }
 
                 ast2.Decls = ast2.Decls[0L..w];
+
             }            {
                 {
                     var decl__prev1 = decl;
@@ -206,11 +221,12 @@ namespace go
                     foreach (var (_, __decl) in ast2.Decls)
                     {
                         decl = __decl;
-                        (d, ok) = decl._<ref ast.GenDecl>();
+                        (d, ok) = decl._<ptr<ast.GenDecl>>();
                         if (!ok)
                         {
                             continue;
                         }
+
                         {
                             var spec__prev2 = spec;
 
@@ -218,9 +234,9 @@ namespace go
                             {
                                 spec = __spec;
                                 {
-                                    ref ast.ImportSpec s__prev2 = s;
+                                    ptr<ast.ImportSpec> s__prev2 = s;
 
-                                    (s, ok) = spec._<ref ast.ImportSpec>();
+                                    (s, ok) = spec._<ptr<ast.ImportSpec>>();
 
                                     if (ok && s.Path.Value == "\"C\"")
                                     { 
@@ -228,29 +244,31 @@ namespace go
                                         // (Deleting import statement or clause is not safe if it is followed
                                         // in the source by an explicit semicolon.)
                                         f.Edit.Replace(f.offset(s.Path.Pos()), f.offset(s.Path.End()), "_ \"unsafe\"");
+
                                     }
 
                                     s = s__prev2;
 
                                 }
+
                             }
 
                             spec = spec__prev2;
                         }
-
                     }
 
                     decl = decl__prev1;
                 }
-
             } 
 
             // Accumulate pointers to uses of C.x.
             if (f.Ref == null)
             {
-                f.Ref = make_slice<ref Ref>(0L, 8L);
+                f.Ref = make_slice<ptr<Ref>>(0L, 8L);
             }
-            f.walk(ast2, ctxProg, ref File); 
+
+            f.walk(ast2, ctxProg, ptr<File>);
+            f.walk(ast2, ctxProg, ptr<File>); 
 
             // Accumulate exported functions.
             // The comments are only on ast1 but we need to
@@ -258,17 +276,20 @@ namespace go
             // The first walk fills in ExpFunc, and the
             // second walk changes the entries to
             // refer to ast2 instead.
-            f.walk(ast1, ctxProg, ref File);
-            f.walk(ast2, ctxProg, ref File);
+            f.walk(ast1, ctxProg, ptr<File>);
+            f.walk(ast2, ctxProg, ptr<File>);
 
             f.Comments = ast1.Comments;
             f.AST = ast2;
+
         }
 
         // Like ast.CommentGroup's Text method but preserves
         // leading blank lines, so that line numbers line up.
-        private static @string commentText(ref ast.CommentGroup g)
+        private static @string commentText(ptr<ast.CommentGroup> _addr_g)
         {
+            ref ast.CommentGroup g = ref _addr_g.val;
+
             slice<@string> pieces = default;
             foreach (var (_, com) in g.List)
             {
@@ -287,128 +308,177 @@ namespace go
                         break;
                 }
                 pieces = append(pieces, c);
+
             }
             return strings.Join(pieces, "");
+
+        }
+
+        private static void validateIdents(this ptr<File> _addr_f, object x, astContext context)
+        {
+            ref File f = ref _addr_f.val;
+
+            {
+                ptr<ast.Ident> (x, ok) = x._<ptr<ast.Ident>>();
+
+                if (ok)
+                {
+                    if (f.isMangledName(x.Name))
+                    {
+                        error_(x.Pos(), "identifier %q may conflict with identifiers generated by cgo", x.Name);
+                    }
+
+                }
+
+            }
+
         }
 
         // Save various references we are going to need later.
-        private static void saveExprs(this ref File f, object x, astContext context)
+        private static void saveExprs(this ptr<File> _addr_f, object x, astContext context)
         {
+            ref File f = ref _addr_f.val;
+
             switch (x.type())
             {
-                case ref ast.Expr x:
-                    switch ((x.Value).type())
+                case ptr<ast.Expr> x:
+                    switch ((x.val).type())
                     {
-                        case ref ast.SelectorExpr _:
+                        case ptr<ast.SelectorExpr> _:
                             f.saveRef(x, context);
                             break;
                     }
                     break;
-                case ref ast.CallExpr x:
+                case ptr<ast.CallExpr> x:
                     f.saveCall(x, context);
                     break;
             }
+
         }
 
         // Save references to C.xxx for later processing.
-        private static void saveRef(this ref File f, ref ast.Expr n, astContext context)
+        private static void saveRef(this ptr<File> _addr_f, ptr<ast.Expr> _addr_n, astContext context)
         {
-            ref ast.SelectorExpr sel = (n.Value)._<ref ast.SelectorExpr>(); 
+            ref File f = ref _addr_f.val;
+            ref ast.Expr n = ref _addr_n.val;
+
+            ptr<ast.SelectorExpr> sel = (n)._<ptr<ast.SelectorExpr>>(); 
             // For now, assume that the only instance of capital C is when
             // used as the imported package identifier.
             // The parser should take care of scoping in the future, so
             // that we will be able to distinguish a "top-level C" from a
             // local C.
             {
-                ref ast.Ident (l, ok) = sel.X._<ref ast.Ident>();
+                ptr<ast.Ident> (l, ok) = sel.X._<ptr<ast.Ident>>();
 
                 if (!ok || l.Name != "C")
                 {
-                    return;
+                    return ;
                 }
 
             }
+
             if (context == ctxAssign2)
             {
                 context = ctxExpr;
             }
+
             if (context == ctxEmbedType)
             {
                 error_(sel.Pos(), "cannot embed C type");
             }
+
             var goname = sel.Sel.Name;
             if (goname == "errno")
             {
                 error_(sel.Pos(), "cannot refer to errno directly; see documentation");
-                return;
+                return ;
             }
+
             if (goname == "_CMalloc")
             {
                 error_(sel.Pos(), "cannot refer to C._CMalloc; use C.malloc");
-                return;
+                return ;
             }
+
             if (goname == "malloc")
             {
                 goname = "_CMalloc";
             }
+
             var name = f.Name[goname];
             if (name == null)
             {
-                name = ref new Name(Go:goname,);
+                name = addr(new Name(Go:goname,));
                 f.Name[goname] = name;
                 f.NamePos[name] = sel.Pos();
             }
-            f.Ref = append(f.Ref, ref new Ref(Name:name,Expr:n,Context:context,));
+
+            f.Ref = append(f.Ref, addr(new Ref(Name:name,Expr:n,Context:context,)));
+
         }
 
         // Save calls to C.xxx for later processing.
-        private static void saveCall(this ref File f, ref ast.CallExpr call, astContext context)
+        private static void saveCall(this ptr<File> _addr_f, ptr<ast.CallExpr> _addr_call, astContext context)
         {
-            ref ast.SelectorExpr (sel, ok) = call.Fun._<ref ast.SelectorExpr>();
+            ref File f = ref _addr_f.val;
+            ref ast.CallExpr call = ref _addr_call.val;
+
+            ptr<ast.SelectorExpr> (sel, ok) = call.Fun._<ptr<ast.SelectorExpr>>();
             if (!ok)
             {
-                return;
+                return ;
             }
+
             {
-                ref ast.Ident (l, ok) = sel.X._<ref ast.Ident>();
+                ptr<ast.Ident> (l, ok) = sel.X._<ptr<ast.Ident>>();
 
                 if (!ok || l.Name != "C")
                 {
-                    return;
+                    return ;
                 }
 
             }
-            Call c = ref new Call(Call:call,Deferred:context==ctxDefer);
+
+            ptr<Call> c = addr(new Call(Call:call,Deferred:context==ctxDefer));
             f.Calls = append(f.Calls, c);
+
         }
 
         // If a function should be exported add it to ExpFunc.
-        private static void saveExport(this ref File f, object x, astContext context)
+        private static void saveExport(this ptr<File> _addr_f, object x, astContext context)
         {
-            ref ast.FuncDecl (n, ok) = x._<ref ast.FuncDecl>();
+            ref File f = ref _addr_f.val;
+
+            ptr<ast.FuncDecl> (n, ok) = x._<ptr<ast.FuncDecl>>();
             if (!ok)
             {
-                return;
+                return ;
             }
+
             if (n.Doc == null)
             {
-                return;
+                return ;
             }
+
             foreach (var (_, c) in n.Doc.List)
             {
                 if (!strings.HasPrefix(c.Text, "//export "))
                 {
                     continue;
                 }
+
                 var name = strings.TrimSpace(c.Text[9L..]);
                 if (name == "")
                 {
                     error_(c.Pos(), "export missing name");
                 }
+
                 if (name != n.Name.Name)
                 {
                     error_(c.Pos(), "export comment has wrong name %q, want %q", name, n.Name.Name);
                 }
+
                 @string doc = "";
                 foreach (var (_, c1) in n.Doc.List)
                 {
@@ -416,20 +486,26 @@ namespace go
                     {
                         doc += c1.Text + "\n";
                     }
+
                 }
-                f.ExpFunc = append(f.ExpFunc, ref new ExpFunc(Func:n,ExpName:name,Doc:doc,));
+                f.ExpFunc = append(f.ExpFunc, addr(new ExpFunc(Func:n,ExpName:name,Doc:doc,)));
                 break;
+
             }
+
         }
 
         // Make f.ExpFunc[i] point at the Func from this AST instead of the other one.
-        private static void saveExport2(this ref File f, object x, astContext context)
+        private static void saveExport2(this ptr<File> _addr_f, object x, astContext context)
         {
-            ref ast.FuncDecl (n, ok) = x._<ref ast.FuncDecl>();
+            ref File f = ref _addr_f.val;
+
+            ptr<ast.FuncDecl> (n, ok) = x._<ptr<ast.FuncDecl>>();
             if (!ok)
             {
-                return;
+                return ;
             }
+
             foreach (var (_, exp) in f.ExpFunc)
             {
                 if (exp.Func.Name.Name == n.Name.Name)
@@ -437,175 +513,187 @@ namespace go
                     exp.Func = n;
                     break;
                 }
+
             }
+
         }
 
         private partial struct astContext // : long
         {
         }
 
-        private static readonly astContext ctxProg = iota;
-        private static readonly var ctxEmbedType = 0;
-        private static readonly var ctxType = 1;
-        private static readonly var ctxStmt = 2;
-        private static readonly var ctxExpr = 3;
-        private static readonly var ctxField = 4;
-        private static readonly var ctxParam = 5;
-        private static readonly var ctxAssign2 = 6; // assignment of a single expression to two variables
-        private static readonly var ctxSwitch = 7;
-        private static readonly var ctxTypeSwitch = 8;
-        private static readonly var ctxFile = 9;
-        private static readonly var ctxDecl = 10;
-        private static readonly var ctxSpec = 11;
-        private static readonly var ctxDefer = 12;
-        private static readonly var ctxCall = 13; // any function call other than ctxCall2
-        private static readonly var ctxCall2 = 14; // function call whose result is assigned to two variables
-        private static readonly var ctxSelector = 15;
+        private static readonly astContext ctxProg = (astContext)iota;
+        private static readonly var ctxEmbedType = (var)0;
+        private static readonly var ctxType = (var)1;
+        private static readonly var ctxStmt = (var)2;
+        private static readonly var ctxExpr = (var)3;
+        private static readonly var ctxField = (var)4;
+        private static readonly var ctxParam = (var)5;
+        private static readonly var ctxAssign2 = (var)6; // assignment of a single expression to two variables
+        private static readonly var ctxSwitch = (var)7;
+        private static readonly var ctxTypeSwitch = (var)8;
+        private static readonly var ctxFile = (var)9;
+        private static readonly var ctxDecl = (var)10;
+        private static readonly var ctxSpec = (var)11;
+        private static readonly var ctxDefer = (var)12;
+        private static readonly var ctxCall = (var)13; // any function call other than ctxCall2
+        private static readonly var ctxCall2 = (var)14; // function call whose result is assigned to two variables
+        private static readonly var ctxSelector = (var)15;
+
 
         // walk walks the AST x, calling visit(f, x, context) for each node.
-        private static void walk(this ref File _f, object x, astContext context, Action<ref File, object, astContext> visit) => func(_f, (ref File f, Defer _, Panic panic, Recover __) =>
+        private static void walk(this ptr<File> _addr_f, object x, astContext context, Action<ptr<File>, object, astContext> visit) => func((_, panic, __) =>
         {
+            ref File f = ref _addr_f.val;
+
             visit(f, x, context);
             switch (x.type())
             {
-                case ref ast.Expr n:
-                    f.walk(n.Value, context, visit); 
+                case ptr<ast.Expr> n:
+                    f.walk(n.val, context, visit); 
 
                     // everything else just recurs
                     break;
                 case 
                     break;
-                case ref ast.Field n:
+                case ptr<ast.Field> n:
                     if (len(n.Names) == 0L && context == ctxField)
                     {
-                        f.walk(ref n.Type, ctxEmbedType, visit);
+                        f.walk(_addr_n.Type, ctxEmbedType, visit);
                     }
                     else
                     {
-                        f.walk(ref n.Type, ctxType, visit);
+                        f.walk(_addr_n.Type, ctxType, visit);
                     }
+
                     break;
-                case ref ast.FieldList n:
+                case ptr<ast.FieldList> n:
                     foreach (var (_, field) in n.List)
                     {
                         f.walk(field, context, visit);
                     }
                     break;
-                case ref ast.BadExpr n:
+                case ptr<ast.BadExpr> n:
                     break;
-                case ref ast.Ident n:
+                case ptr<ast.Ident> n:
                     break;
-                case ref ast.Ellipsis n:
+                case ptr<ast.Ellipsis> n:
+                    f.walk(_addr_n.Elt, ctxType, visit);
                     break;
-                case ref ast.BasicLit n:
+                case ptr<ast.BasicLit> n:
                     break;
-                case ref ast.FuncLit n:
+                case ptr<ast.FuncLit> n:
                     f.walk(n.Type, ctxType, visit);
                     f.walk(n.Body, ctxStmt, visit);
                     break;
-                case ref ast.CompositeLit n:
-                    f.walk(ref n.Type, ctxType, visit);
+                case ptr<ast.CompositeLit> n:
+                    f.walk(_addr_n.Type, ctxType, visit);
                     f.walk(n.Elts, ctxExpr, visit);
                     break;
-                case ref ast.ParenExpr n:
-                    f.walk(ref n.X, context, visit);
+                case ptr<ast.ParenExpr> n:
+                    f.walk(_addr_n.X, context, visit);
                     break;
-                case ref ast.SelectorExpr n:
-                    f.walk(ref n.X, ctxSelector, visit);
+                case ptr<ast.SelectorExpr> n:
+                    f.walk(_addr_n.X, ctxSelector, visit);
                     break;
-                case ref ast.IndexExpr n:
-                    f.walk(ref n.X, ctxExpr, visit);
-                    f.walk(ref n.Index, ctxExpr, visit);
+                case ptr<ast.IndexExpr> n:
+                    f.walk(_addr_n.X, ctxExpr, visit);
+                    f.walk(_addr_n.Index, ctxExpr, visit);
                     break;
-                case ref ast.SliceExpr n:
-                    f.walk(ref n.X, ctxExpr, visit);
+                case ptr<ast.SliceExpr> n:
+                    f.walk(_addr_n.X, ctxExpr, visit);
                     if (n.Low != null)
                     {
-                        f.walk(ref n.Low, ctxExpr, visit);
+                        f.walk(_addr_n.Low, ctxExpr, visit);
                     }
+
                     if (n.High != null)
                     {
-                        f.walk(ref n.High, ctxExpr, visit);
+                        f.walk(_addr_n.High, ctxExpr, visit);
                     }
+
                     if (n.Max != null)
                     {
-                        f.walk(ref n.Max, ctxExpr, visit);
+                        f.walk(_addr_n.Max, ctxExpr, visit);
                     }
+
                     break;
-                case ref ast.TypeAssertExpr n:
-                    f.walk(ref n.X, ctxExpr, visit);
-                    f.walk(ref n.Type, ctxType, visit);
+                case ptr<ast.TypeAssertExpr> n:
+                    f.walk(_addr_n.X, ctxExpr, visit);
+                    f.walk(_addr_n.Type, ctxType, visit);
                     break;
-                case ref ast.CallExpr n:
+                case ptr<ast.CallExpr> n:
                     if (context == ctxAssign2)
                     {
-                        f.walk(ref n.Fun, ctxCall2, visit);
+                        f.walk(_addr_n.Fun, ctxCall2, visit);
                     }
                     else
                     {
-                        f.walk(ref n.Fun, ctxCall, visit);
+                        f.walk(_addr_n.Fun, ctxCall, visit);
                     }
+
                     f.walk(n.Args, ctxExpr, visit);
                     break;
-                case ref ast.StarExpr n:
-                    f.walk(ref n.X, context, visit);
+                case ptr<ast.StarExpr> n:
+                    f.walk(_addr_n.X, context, visit);
                     break;
-                case ref ast.UnaryExpr n:
-                    f.walk(ref n.X, ctxExpr, visit);
+                case ptr<ast.UnaryExpr> n:
+                    f.walk(_addr_n.X, ctxExpr, visit);
                     break;
-                case ref ast.BinaryExpr n:
-                    f.walk(ref n.X, ctxExpr, visit);
-                    f.walk(ref n.Y, ctxExpr, visit);
+                case ptr<ast.BinaryExpr> n:
+                    f.walk(_addr_n.X, ctxExpr, visit);
+                    f.walk(_addr_n.Y, ctxExpr, visit);
                     break;
-                case ref ast.KeyValueExpr n:
-                    f.walk(ref n.Key, ctxExpr, visit);
-                    f.walk(ref n.Value, ctxExpr, visit);
+                case ptr<ast.KeyValueExpr> n:
+                    f.walk(_addr_n.Key, ctxExpr, visit);
+                    f.walk(_addr_n.Value, ctxExpr, visit);
                     break;
-                case ref ast.ArrayType n:
-                    f.walk(ref n.Len, ctxExpr, visit);
-                    f.walk(ref n.Elt, ctxType, visit);
+                case ptr<ast.ArrayType> n:
+                    f.walk(_addr_n.Len, ctxExpr, visit);
+                    f.walk(_addr_n.Elt, ctxType, visit);
                     break;
-                case ref ast.StructType n:
+                case ptr<ast.StructType> n:
                     f.walk(n.Fields, ctxField, visit);
                     break;
-                case ref ast.FuncType n:
+                case ptr<ast.FuncType> n:
                     f.walk(n.Params, ctxParam, visit);
                     if (n.Results != null)
                     {
                         f.walk(n.Results, ctxParam, visit);
                     }
+
                     break;
-                case ref ast.InterfaceType n:
+                case ptr<ast.InterfaceType> n:
                     f.walk(n.Methods, ctxField, visit);
                     break;
-                case ref ast.MapType n:
-                    f.walk(ref n.Key, ctxType, visit);
-                    f.walk(ref n.Value, ctxType, visit);
+                case ptr<ast.MapType> n:
+                    f.walk(_addr_n.Key, ctxType, visit);
+                    f.walk(_addr_n.Value, ctxType, visit);
                     break;
-                case ref ast.ChanType n:
-                    f.walk(ref n.Value, ctxType, visit);
+                case ptr<ast.ChanType> n:
+                    f.walk(_addr_n.Value, ctxType, visit);
                     break;
-                case ref ast.BadStmt n:
+                case ptr<ast.BadStmt> n:
                     break;
-                case ref ast.DeclStmt n:
+                case ptr<ast.DeclStmt> n:
                     f.walk(n.Decl, ctxDecl, visit);
                     break;
-                case ref ast.EmptyStmt n:
+                case ptr<ast.EmptyStmt> n:
                     break;
-                case ref ast.LabeledStmt n:
+                case ptr<ast.LabeledStmt> n:
                     f.walk(n.Stmt, ctxStmt, visit);
                     break;
-                case ref ast.ExprStmt n:
-                    f.walk(ref n.X, ctxExpr, visit);
+                case ptr<ast.ExprStmt> n:
+                    f.walk(_addr_n.X, ctxExpr, visit);
                     break;
-                case ref ast.SendStmt n:
-                    f.walk(ref n.Chan, ctxExpr, visit);
-                    f.walk(ref n.Value, ctxExpr, visit);
+                case ptr<ast.SendStmt> n:
+                    f.walk(_addr_n.Chan, ctxExpr, visit);
+                    f.walk(_addr_n.Value, ctxExpr, visit);
                     break;
-                case ref ast.IncDecStmt n:
-                    f.walk(ref n.X, ctxExpr, visit);
+                case ptr<ast.IncDecStmt> n:
+                    f.walk(_addr_n.X, ctxExpr, visit);
                     break;
-                case ref ast.AssignStmt n:
+                case ptr<ast.AssignStmt> n:
                     f.walk(n.Lhs, ctxExpr, visit);
                     if (len(n.Lhs) == 2L && len(n.Rhs) == 1L)
                     {
@@ -615,28 +703,29 @@ namespace go
                     {
                         f.walk(n.Rhs, ctxExpr, visit);
                     }
+
                     break;
-                case ref ast.GoStmt n:
+                case ptr<ast.GoStmt> n:
                     f.walk(n.Call, ctxExpr, visit);
                     break;
-                case ref ast.DeferStmt n:
+                case ptr<ast.DeferStmt> n:
                     f.walk(n.Call, ctxDefer, visit);
                     break;
-                case ref ast.ReturnStmt n:
+                case ptr<ast.ReturnStmt> n:
                     f.walk(n.Results, ctxExpr, visit);
                     break;
-                case ref ast.BranchStmt n:
+                case ptr<ast.BranchStmt> n:
                     break;
-                case ref ast.BlockStmt n:
+                case ptr<ast.BlockStmt> n:
                     f.walk(n.List, context, visit);
                     break;
-                case ref ast.IfStmt n:
+                case ptr<ast.IfStmt> n:
                     f.walk(n.Init, ctxStmt, visit);
-                    f.walk(ref n.Cond, ctxExpr, visit);
+                    f.walk(_addr_n.Cond, ctxExpr, visit);
                     f.walk(n.Body, ctxStmt, visit);
                     f.walk(n.Else, ctxStmt, visit);
                     break;
-                case ref ast.CaseClause n:
+                case ptr<ast.CaseClause> n:
                     if (context == ctxTypeSwitch)
                     {
                         context = ctxType;
@@ -645,74 +734,78 @@ namespace go
                     {
                         context = ctxExpr;
                     }
+
                     f.walk(n.List, context, visit);
                     f.walk(n.Body, ctxStmt, visit);
                     break;
-                case ref ast.SwitchStmt n:
+                case ptr<ast.SwitchStmt> n:
                     f.walk(n.Init, ctxStmt, visit);
-                    f.walk(ref n.Tag, ctxExpr, visit);
+                    f.walk(_addr_n.Tag, ctxExpr, visit);
                     f.walk(n.Body, ctxSwitch, visit);
                     break;
-                case ref ast.TypeSwitchStmt n:
+                case ptr<ast.TypeSwitchStmt> n:
                     f.walk(n.Init, ctxStmt, visit);
                     f.walk(n.Assign, ctxStmt, visit);
                     f.walk(n.Body, ctxTypeSwitch, visit);
                     break;
-                case ref ast.CommClause n:
+                case ptr<ast.CommClause> n:
                     f.walk(n.Comm, ctxStmt, visit);
                     f.walk(n.Body, ctxStmt, visit);
                     break;
-                case ref ast.SelectStmt n:
+                case ptr<ast.SelectStmt> n:
                     f.walk(n.Body, ctxStmt, visit);
                     break;
-                case ref ast.ForStmt n:
+                case ptr<ast.ForStmt> n:
                     f.walk(n.Init, ctxStmt, visit);
-                    f.walk(ref n.Cond, ctxExpr, visit);
+                    f.walk(_addr_n.Cond, ctxExpr, visit);
                     f.walk(n.Post, ctxStmt, visit);
                     f.walk(n.Body, ctxStmt, visit);
                     break;
-                case ref ast.RangeStmt n:
-                    f.walk(ref n.Key, ctxExpr, visit);
-                    f.walk(ref n.Value, ctxExpr, visit);
-                    f.walk(ref n.X, ctxExpr, visit);
+                case ptr<ast.RangeStmt> n:
+                    f.walk(_addr_n.Key, ctxExpr, visit);
+                    f.walk(_addr_n.Value, ctxExpr, visit);
+                    f.walk(_addr_n.X, ctxExpr, visit);
                     f.walk(n.Body, ctxStmt, visit);
                     break;
-                case ref ast.ImportSpec n:
+                case ptr<ast.ImportSpec> n:
                     break;
-                case ref ast.ValueSpec n:
-                    f.walk(ref n.Type, ctxType, visit);
+                case ptr<ast.ValueSpec> n:
+                    f.walk(_addr_n.Type, ctxType, visit);
                     if (len(n.Names) == 2L && len(n.Values) == 1L)
                     {
-                        f.walk(ref n.Values[0L], ctxAssign2, visit);
+                        f.walk(_addr_n.Values[0L], ctxAssign2, visit);
                     }
                     else
                     {
                         f.walk(n.Values, ctxExpr, visit);
                     }
+
                     break;
-                case ref ast.TypeSpec n:
-                    f.walk(ref n.Type, ctxType, visit);
+                case ptr<ast.TypeSpec> n:
+                    f.walk(_addr_n.Type, ctxType, visit);
                     break;
-                case ref ast.BadDecl n:
+                case ptr<ast.BadDecl> n:
                     break;
-                case ref ast.GenDecl n:
+                case ptr<ast.GenDecl> n:
                     f.walk(n.Specs, ctxSpec, visit);
                     break;
-                case ref ast.FuncDecl n:
+                case ptr<ast.FuncDecl> n:
                     if (n.Recv != null)
                     {
                         f.walk(n.Recv, ctxParam, visit);
                     }
+
                     f.walk(n.Type, ctxType, visit);
                     if (n.Body != null)
                     {
                         f.walk(n.Body, ctxStmt, visit);
                     }
+
                     break;
-                case ref ast.File n:
+                case ptr<ast.File> n:
                     f.walk(n.Decls, ctxDecl, visit);
                     break;
-                case ref ast.Package n:
+                case ptr<ast.Package> n:
                     foreach (var (_, file) in n.Files)
                     {
                         f.walk(file, ctxFile, visit);
@@ -727,7 +820,7 @@ namespace go
                 case slice<ast.Expr> n:
                     foreach (var (i) in n)
                     {
-                        f.walk(ref n[i], context, visit);
+                        f.walk(_addr_n[i], context, visit);
                     }
                     break;
                 case slice<ast.Stmt> n:
@@ -764,6 +857,7 @@ namespace go
                     break;
                 }
             }
+
         });
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:27 UTC
+//     Generated on 2020 October 08 03:25:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using unsafeheader = go.@internal.unsafeheader_package;
 using math = go.math_package;
 using runtime = go.runtime_package;
 using @unsafe = go.@unsafe_package;
@@ -22,42 +23,42 @@ namespace go
     public static partial class reflect_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct stringHeader
+        public partial struct StringHeader
         {
             // Constructors
-            public stringHeader(NilType _)
+            public StringHeader(NilType _)
             {
                 this.Data = default;
                 this.Len = default;
             }
 
-            public stringHeader(unsafe.Pointer Data = default, long Len = default)
+            public StringHeader(System.UIntPtr Data = default, long Len = default)
             {
                 this.Data = Data;
                 this.Len = Len;
             }
 
-            // Enable comparisons between nil and stringHeader struct
+            // Enable comparisons between nil and StringHeader struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(stringHeader value, NilType nil) => value.Equals(default(stringHeader));
+            public static bool operator ==(StringHeader value, NilType nil) => value.Equals(default(StringHeader));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(stringHeader value, NilType nil) => !(value == nil);
+            public static bool operator !=(StringHeader value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, stringHeader value) => value == nil;
+            public static bool operator ==(NilType nil, StringHeader value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, stringHeader value) => value != nil;
+            public static bool operator !=(NilType nil, StringHeader value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator stringHeader(NilType nil) => default(stringHeader);
+            public static implicit operator StringHeader(NilType nil) => default(StringHeader);
         }
 
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private static stringHeader stringHeader_cast(dynamic value)
+        public static StringHeader StringHeader_cast(dynamic value)
         {
-            return new stringHeader(value.Data, value.Len);
+            return new StringHeader(value.Data, value.Len);
         }
     }
 }

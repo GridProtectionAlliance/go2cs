@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:59:58 UTC
+//     Generated on 2020 October 08 04:32:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,13 +14,13 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytes = go.bytes_package;
-using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
+using path = go.path_package;
 using filepath = go.path.filepath_package;
 using reflect = go.reflect_package;
 using regexp = go.regexp_package;
@@ -45,7 +45,7 @@ namespace go
                 this.fn = default;
             }
 
-            public distTest(@string name = default, @string heading = default, Func<ref distTest, error> fn = default)
+            public distTest(@string name = default, @string heading = default, Func<ptr<distTest>, error> fn = default)
             {
                 this.name = name;
                 this.heading = heading;

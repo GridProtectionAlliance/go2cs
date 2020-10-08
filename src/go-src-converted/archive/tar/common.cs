@@ -8,7 +8,7 @@
 // can be read and written in a streaming manner.
 // This package aims to cover most variations of the format,
 // including those produced by GNU and BSD tar tools.
-// package tar -- go2cs converted at 2020 August 29 08:16:02 UTC
+// package tar -- go2cs converted at 2020 October 08 00:33:47 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\common.go
 using errors = go.errors_package;
@@ -39,7 +39,7 @@ namespace archive
 
         private static @string Error(this headerError he)
         {
-            const @string prefix = "archive/tar: cannot encode header";
+            const @string prefix = (@string)"archive/tar: cannot encode header";
 
             slice<@string> ss = default;
             foreach (var (_, s) in he)
@@ -48,79 +48,84 @@ namespace archive
                 {
                     ss = append(ss, s);
                 }
+
             }
             if (len(ss) == 0L)
             {
                 return prefix;
             }
+
             return fmt.Sprintf("%s: %v", prefix, strings.Join(ss, "; and "));
+
         }
 
         // Type flags for Header.Typeflag.
  
         // Type '0' indicates a regular file.
-        public static readonly char TypeReg = '0';
-        public static readonly char TypeRegA = '\x00'; // For legacy support; use TypeReg instead
+        public static readonly char TypeReg = (char)'0';
+        public static readonly char TypeRegA = (char)'\x00'; // Deprecated: Use TypeReg instead.
 
         // Type '1' to '6' are header-only flags and may not have a data body.
-        public static readonly char TypeLink = '1'; // Hard link
-        public static readonly char TypeSymlink = '2'; // Symbolic link
-        public static readonly char TypeChar = '3'; // Character device node
-        public static readonly char TypeBlock = '4'; // Block device node
-        public static readonly char TypeDir = '5'; // Directory
-        public static readonly char TypeFifo = '6'; // FIFO node
+        public static readonly char TypeLink = (char)'1'; // Hard link
+        public static readonly char TypeSymlink = (char)'2'; // Symbolic link
+        public static readonly char TypeChar = (char)'3'; // Character device node
+        public static readonly char TypeBlock = (char)'4'; // Block device node
+        public static readonly char TypeDir = (char)'5'; // Directory
+        public static readonly char TypeFifo = (char)'6'; // FIFO node
 
         // Type '7' is reserved.
-        public static readonly char TypeCont = '7'; 
+        public static readonly char TypeCont = (char)'7'; 
 
         // Type 'x' is used by the PAX format to store key-value records that
         // are only relevant to the next file.
         // This package transparently handles these types.
-        public static readonly char TypeXHeader = 'x'; 
+        public static readonly char TypeXHeader = (char)'x'; 
 
         // Type 'g' is used by the PAX format to store key-value records that
         // are relevant to all subsequent files.
         // This package only supports parsing and composing such headers,
         // but does not currently support persisting the global state across files.
-        public static readonly char TypeXGlobalHeader = 'g'; 
+        public static readonly char TypeXGlobalHeader = (char)'g'; 
 
         // Type 'S' indicates a sparse file in the GNU format.
-        public static readonly char TypeGNUSparse = 'S'; 
+        public static readonly char TypeGNUSparse = (char)'S'; 
 
         // Types 'L' and 'K' are used by the GNU format for a meta file
         // used to store the path or link name for the next file.
         // This package transparently handles these types.
-        public static readonly char TypeGNULongName = 'L';
-        public static readonly char TypeGNULongLink = 'K';
+        public static readonly char TypeGNULongName = (char)'L';
+        public static readonly char TypeGNULongLink = (char)'K';
+
 
         // Keywords for PAX extended header records.
-        private static readonly @string paxNone = ""; // Indicates that no PAX key is suitable
-        private static readonly @string paxPath = "path";
-        private static readonly @string paxLinkpath = "linkpath";
-        private static readonly @string paxSize = "size";
-        private static readonly @string paxUid = "uid";
-        private static readonly @string paxGid = "gid";
-        private static readonly @string paxUname = "uname";
-        private static readonly @string paxGname = "gname";
-        private static readonly @string paxMtime = "mtime";
-        private static readonly @string paxAtime = "atime";
-        private static readonly @string paxCtime = "ctime"; // Removed from later revision of PAX spec, but was valid
-        private static readonly @string paxCharset = "charset"; // Currently unused
-        private static readonly @string paxComment = "comment"; // Currently unused
+        private static readonly @string paxNone = (@string)""; // Indicates that no PAX key is suitable
+        private static readonly @string paxPath = (@string)"path";
+        private static readonly @string paxLinkpath = (@string)"linkpath";
+        private static readonly @string paxSize = (@string)"size";
+        private static readonly @string paxUid = (@string)"uid";
+        private static readonly @string paxGid = (@string)"gid";
+        private static readonly @string paxUname = (@string)"uname";
+        private static readonly @string paxGname = (@string)"gname";
+        private static readonly @string paxMtime = (@string)"mtime";
+        private static readonly @string paxAtime = (@string)"atime";
+        private static readonly @string paxCtime = (@string)"ctime"; // Removed from later revision of PAX spec, but was valid
+        private static readonly @string paxCharset = (@string)"charset"; // Currently unused
+        private static readonly @string paxComment = (@string)"comment"; // Currently unused
 
-        private static readonly @string paxSchilyXattr = "SCHILY.xattr."; 
+        private static readonly @string paxSchilyXattr = (@string)"SCHILY.xattr."; 
 
         // Keywords for GNU sparse files in a PAX extended header.
-        private static readonly @string paxGNUSparse = "GNU.sparse.";
-        private static readonly @string paxGNUSparseNumBlocks = "GNU.sparse.numblocks";
-        private static readonly @string paxGNUSparseOffset = "GNU.sparse.offset";
-        private static readonly @string paxGNUSparseNumBytes = "GNU.sparse.numbytes";
-        private static readonly @string paxGNUSparseMap = "GNU.sparse.map";
-        private static readonly @string paxGNUSparseName = "GNU.sparse.name";
-        private static readonly @string paxGNUSparseMajor = "GNU.sparse.major";
-        private static readonly @string paxGNUSparseMinor = "GNU.sparse.minor";
-        private static readonly @string paxGNUSparseSize = "GNU.sparse.size";
-        private static readonly @string paxGNUSparseRealSize = "GNU.sparse.realsize";
+        private static readonly @string paxGNUSparse = (@string)"GNU.sparse.";
+        private static readonly @string paxGNUSparseNumBlocks = (@string)"GNU.sparse.numblocks";
+        private static readonly @string paxGNUSparseOffset = (@string)"GNU.sparse.offset";
+        private static readonly @string paxGNUSparseNumBytes = (@string)"GNU.sparse.numbytes";
+        private static readonly @string paxGNUSparseMap = (@string)"GNU.sparse.map";
+        private static readonly @string paxGNUSparseName = (@string)"GNU.sparse.name";
+        private static readonly @string paxGNUSparseMajor = (@string)"GNU.sparse.major";
+        private static readonly @string paxGNUSparseMinor = (@string)"GNU.sparse.minor";
+        private static readonly @string paxGNUSparseSize = (@string)"GNU.sparse.size";
+        private static readonly @string paxGNUSparseRealSize = (@string)"GNU.sparse.realsize";
+
 
         // basicKeys is a set of the PAX keys for which we have built-in support.
         // This does not contain "charset" or "comment", which are both PAX-specific,
@@ -137,8 +142,7 @@ namespace archive
         // that they are interested in preserving.
         public partial struct Header
         {
-            public byte Typeflag; // Type of header entry (should be TypeReg for most files)
-
+            public byte Typeflag;
             public @string Name; // Name of file entry
             public @string Linkname; // Target name of link (valid for TypeLink or TypeSymlink)
 
@@ -181,7 +185,7 @@ namespace archive
 // The key and value should be non-empty UTF-8 strings.
 //
 // When Writer.WriteHeader is called, PAX records derived from the
-// the other fields in Header take precedence over PAXRecords.
+// other fields in Header take precedence over PAXRecords.
             public map<@string, @string> PAXRecords; // Format specifies the format of the tar header.
 //
 // This is set by Reader.Next as a best-effort guess at the format.
@@ -240,7 +244,8 @@ namespace archive
         }
         private partial struct sparseHoles // : slice<sparseEntry>
         {
-        }        private static bool validateSparseEntries(slice<sparseEntry> sp, long size)
+        }
+        private static bool validateSparseEntries(slice<sparseEntry> sp, long size)
         { 
             // Validate all sparse entries. These are the same checks as performed by
             // the BSD tar utility.
@@ -248,6 +253,7 @@ namespace archive
             {
                 return false;
             }
+
             sparseEntry pre = default;
             foreach (var (_, cur) in sp)
             {
@@ -261,8 +267,10 @@ namespace archive
                 else if (pre.endOffset() > cur.Offset) 
                     return false; // Regions cannot overlap and must be in order
                                 pre = cur;
+
             }
             return true;
+
         }
 
         // alignSparseEntries mutates src and returns dst where each fragment's
@@ -284,12 +292,15 @@ namespace archive
                 {
                     end -= blockPadding(-end); // Round-down to nearest blockSize
                 }
+
                 if (pos < end)
                 {
                     dst = append(dst, new sparseEntry(Offset:pos,Length:end-pos));
                 }
+
             }
             return dst;
+
         }
 
         // invertSparseEntries converts a sparse map from one form to the other.
@@ -310,15 +321,19 @@ namespace archive
                 {
                     continue; // Skip empty fragments
                 }
+
                 pre.Length = cur.Offset - pre.Offset;
                 if (pre.Length > 0L)
                 {
                     dst = append(dst, pre); // Only add non-empty fragments
                 }
+
                 pre.Offset = cur.endOffset();
+
             }
             pre.Length = size - pre.Offset; // Possibly the only empty fragment
             return append(dst, pre);
+
         }
 
         // fileState tracks the number of logical (includes sparse holes) and physical
@@ -341,6 +356,10 @@ namespace archive
         // A value receiver ensures that this method does not mutate the source Header.
         public static (Format, map<@string, @string>, error) allowedFormats(this Header h)
         {
+            Format format = default;
+            map<@string, @string> paxHdrs = default;
+            error err = default!;
+
             format = FormatUSTAR | FormatPAX | FormatGNU;
             paxHdrs = make_map<@string, @string>();
 
@@ -359,6 +378,7 @@ namespace archive
                     whyNoGNU = fmt.Sprintf("GNU cannot encode %s=%q", name, s);
                     format.mustNotBe(FormatGNU);
                 }
+
                 if (!isASCII(s) || tooLong)
                 {
                     var canSplitUSTAR = paxKey == paxPath;
@@ -372,6 +392,7 @@ namespace archive
                         }
 
                     }
+
                     if (paxKey == paxNone)
                     {
                         whyNoPAX = fmt.Sprintf("PAX cannot encode %s=%q", name, s);
@@ -381,7 +402,9 @@ namespace archive
                     {
                         paxHdrs[paxKey] = s;
                     }
+
                 }
+
                 {
                     var v__prev1 = v;
 
@@ -395,6 +418,7 @@ namespace archive
                     v = v__prev1;
 
                 }
+
             }
 ;
             Action<long, long, @string, @string> verifyNumeric = (n, size, name, paxKey) =>
@@ -404,6 +428,7 @@ namespace archive
                     whyNoGNU = fmt.Sprintf("GNU cannot encode %s=%d", name, n);
                     format.mustNotBe(FormatGNU);
                 }
+
                 if (!fitsInOctal(size, n))
                 {
                     whyNoUSTAR = fmt.Sprintf("USTAR cannot encode %s=%d", name, n);
@@ -417,7 +442,9 @@ namespace archive
                     {
                         paxHdrs[paxKey] = strconv.FormatInt(n, 10L);
                     }
+
                 }
+
                 {
                     var v__prev1 = v;
 
@@ -431,19 +458,22 @@ namespace archive
                     v = v__prev1;
 
                 }
+
             }
 ;
             Action<time.Time, long, @string, @string> verifyTime = (ts, size, name, paxKey) =>
             {
                 if (ts.IsZero())
                 {
-                    return; // Always okay
+                    return ; // Always okay
                 }
+
                 if (!fitsInBase256(size, ts.Unix()))
                 {
                     whyNoGNU = fmt.Sprintf("GNU cannot encode %s=%v", name, ts);
                     format.mustNotBe(FormatGNU);
                 }
+
                 var isMtime = paxKey == paxMtime;
                 var fitsOctal = fitsInOctal(size, ts.Unix());
                 if ((isMtime && !fitsOctal) || !isMtime)
@@ -451,6 +481,7 @@ namespace archive
                     whyNoUSTAR = fmt.Sprintf("USTAR cannot encode %s=%v", name, ts);
                     format.mustNotBe(FormatUSTAR);
                 }
+
                 var needsNano = ts.Nanosecond() != 0L;
                 if (!isMtime || !fitsOctal || needsNano)
                 {
@@ -464,7 +495,9 @@ namespace archive
                     {
                         paxHdrs[paxKey] = formatPAXTime(ts);
                     }
+
                 }
+
                 {
                     var v__prev1 = v;
 
@@ -478,6 +511,7 @@ namespace archive
                     v = v__prev1;
 
                 }
+
             } 
 
             // Check basic fields.
@@ -510,21 +544,23 @@ namespace archive
                 // Exclude TypeLink and TypeSymlink, since they may reference directories.
                 if (strings.HasSuffix(h.Name, "/"))
                 {
-                    return (FormatUnknown, null, new headerError("filename may not have trailing slash"));
+                    return (FormatUnknown, null, error.As(new headerError("filename may not have trailing slash"))!);
                 }
+
             else if (h.Typeflag == TypeXHeader || h.Typeflag == TypeGNULongName || h.Typeflag == TypeGNULongLink) 
-                return (FormatUnknown, null, new headerError("cannot manually encode TypeXHeader, TypeGNULongName, or TypeGNULongLink headers"));
+                return (FormatUnknown, null, error.As(new headerError("cannot manually encode TypeXHeader, TypeGNULongName, or TypeGNULongLink headers"))!);
             else if (h.Typeflag == TypeXGlobalHeader) 
                 Header h2 = new Header(Name:h.Name,Typeflag:h.Typeflag,Xattrs:h.Xattrs,PAXRecords:h.PAXRecords,Format:h.Format);
                 if (!reflect.DeepEqual(h, h2))
                 {
-                    return (FormatUnknown, null, new headerError("only PAXRecords should be set for TypeXGlobalHeader"));
+                    return (FormatUnknown, null, error.As(new headerError("only PAXRecords should be set for TypeXGlobalHeader"))!);
                 }
+
                 whyOnlyPAX = "only PAX supports TypeXGlobalHeader";
                 format.mayOnlyBe(FormatPAX);
                         if (!isHeaderOnlyType(h.Typeflag) && h.Size < 0L)
             {
-                return (FormatUnknown, null, new headerError("negative size on header-only type"));
+                return (FormatUnknown, null, error.As(new headerError("negative size on header-only type"))!);
             } 
 
             // Check PAX records.
@@ -547,7 +583,9 @@ namespace archive
 
                 whyOnlyPAX = "only PAX supports Xattrs";
                 format.mayOnlyBe(FormatPAX);
+
             }
+
             if (len(h.PAXRecords) > 0L)
             {
                 {
@@ -570,6 +608,7 @@ namespace archive
                                 paxHdrs[k] = v; // Ignore local records that may conflict
 
                         }
+
                     }
 
                     k = k__prev1;
@@ -578,7 +617,9 @@ namespace archive
 
                 whyOnlyPAX = "only PAX supports PAXRecords";
                 format.mayOnlyBe(FormatPAX);
+
             }
+
             {
                 var k__prev1 = k;
                 var v__prev1 = v;
@@ -589,8 +630,9 @@ namespace archive
                     v = __v;
                     if (!validPAXRecord(k, v))
                     {
-                        return (FormatUnknown, null, new headerError(fmt.Sprintf("invalid PAX record: %q",k+" = "+v)));
+                        return (FormatUnknown, null, error.As(new headerError(fmt.Sprintf("invalid PAX record: %q",k+" = "+v)))!);
                     }
+
                 } 
 
                 // TODO(dsnet): Re-enable this when adding sparse support.
@@ -631,10 +673,12 @@ namespace archive
                     {
                         wantFormat.mayBe(FormatUSTAR); // PAX implies USTAR allowed too
                     }
+
                     format.mayOnlyBe(wantFormat); // Set union of formats allowed and format wanted
                 }
 
             }
+
             if (format == FormatUnknown)
             {
 
@@ -646,13 +690,18 @@ namespace archive
                     err = new headerError("Format specifies GNU",whyNoGNU,whyOnlyPAX);
                 else 
                     err = new headerError(whyNoUSTAR,whyNoPAX,whyNoGNU,whyOnlyPAX,whyOnlyGNU);
-                            }
-            return (format, paxHdrs, err);
+                
+            }
+
+            return (format, paxHdrs, error.As(err)!);
+
         }
 
         // FileInfo returns an os.FileInfo for the Header.
-        private static os.FileInfo FileInfo(this ref Header h)
+        private static os.FileInfo FileInfo(this ptr<Header> _addr_h)
         {
+            ref Header h = ref _addr_h.val;
+
             return new headerFileInfo(h);
         }
 
@@ -686,12 +735,16 @@ namespace archive
             {
                 return path.Base(path.Clean(fi.h.Name));
             }
+
             return path.Base(fi.h.Name);
+
         }
 
         // Mode returns the permission and mode bits for the headerFileInfo.
         private static os.FileMode Mode(this headerFileInfo fi)
-        { 
+        {
+            os.FileMode mode = default;
+ 
             // Set file permission bits.
             mode = os.FileMode(fi.h.Mode).Perm(); 
 
@@ -700,10 +753,12 @@ namespace archive
             {
                 mode |= os.ModeSetuid;
             }
+
             if (fi.h.Mode & c_ISGID != 0L)
             {
                 mode |= os.ModeSetgid;
             }
+
             if (fi.h.Mode & c_ISVTX != 0L)
             {
                 mode |= os.ModeSticky;
@@ -743,27 +798,28 @@ namespace archive
             else if (fi.h.Typeflag == TypeFifo) 
                 mode |= os.ModeNamedPipe;
                         return mode;
+
         }
 
         // sysStat, if non-nil, populates h from system-dependent fields of fi.
-        private static Func<os.FileInfo, ref Header, error> sysStat = default;
+        private static Func<os.FileInfo, ptr<Header>, error> sysStat = default;
 
  
         // Mode constants from the USTAR spec:
         // See http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06
-        private static readonly long c_ISUID = 04000L; // Set uid
-        private static readonly long c_ISGID = 02000L; // Set gid
-        private static readonly long c_ISVTX = 01000L; // Save text (sticky bit)
+        private static readonly long c_ISUID = (long)04000L; // Set uid
+        private static readonly long c_ISGID = (long)02000L; // Set gid
+        private static readonly long c_ISVTX = (long)01000L; // Save text (sticky bit)
 
         // Common Unix mode constants; these are not defined in any common tar standard.
         // Header.FileInfo understands these, but FileInfoHeader will never produce these.
-        private static readonly long c_ISDIR = 040000L; // Directory
-        private static readonly long c_ISFIFO = 010000L; // FIFO
-        private static readonly long c_ISREG = 0100000L; // Regular file
-        private static readonly long c_ISLNK = 0120000L; // Symbolic link
-        private static readonly long c_ISBLK = 060000L; // Block special file
-        private static readonly long c_ISCHR = 020000L; // Character special file
-        private static readonly long c_ISSOCK = 0140000L; // Socket
+        private static readonly long c_ISDIR = (long)040000L; // Directory
+        private static readonly long c_ISFIFO = (long)010000L; // FIFO
+        private static readonly long c_ISREG = (long)0100000L; // Regular file
+        private static readonly long c_ISLNK = (long)0120000L; // Symbolic link
+        private static readonly long c_ISBLK = (long)060000L; // Block special file
+        private static readonly long c_ISCHR = (long)020000L; // Character special file
+        private static readonly long c_ISSOCK = (long)0140000L; // Socket
 
         // FileInfoHeader creates a partially-populated Header from fi.
         // If fi describes a symlink, FileInfoHeader records link as the link target.
@@ -772,14 +828,18 @@ namespace archive
         // Since os.FileInfo's Name method only returns the base name of
         // the file it describes, it may be necessary to modify Header.Name
         // to provide the full path name of the file.
-        public static (ref Header, error) FileInfoHeader(os.FileInfo fi, @string link)
+        public static (ptr<Header>, error) FileInfoHeader(os.FileInfo fi, @string link)
         {
+            ptr<Header> _p0 = default!;
+            error _p0 = default!;
+
             if (fi == null)
             {
-                return (null, errors.New("archive/tar: FileInfo is nil"));
+                return (_addr_null!, error.As(errors.New("archive/tar: FileInfo is nil"))!);
             }
+
             var fm = fi.Mode();
-            Header h = ref new Header(Name:fi.Name(),ModTime:fi.ModTime(),Mode:int64(fm.Perm()),);
+            ptr<Header> h = addr(new Header(Name:fi.Name(),ModTime:fi.ModTime(),Mode:int64(fm.Perm()),));
 
             if (fm.IsRegular()) 
                 h.Typeflag = TypeReg;
@@ -799,20 +859,23 @@ namespace archive
                 {
                     h.Typeflag = TypeBlock;
                 }
+
             else if (fm & os.ModeNamedPipe != 0L) 
                 h.Typeflag = TypeFifo;
             else if (fm & os.ModeSocket != 0L) 
-                return (null, fmt.Errorf("archive/tar: sockets not supported"));
+                return (_addr_null!, error.As(fmt.Errorf("archive/tar: sockets not supported"))!);
             else 
-                return (null, fmt.Errorf("archive/tar: unknown file mode %v", fm));
+                return (_addr_null!, error.As(fmt.Errorf("archive/tar: unknown file mode %v", fm))!);
                         if (fm & os.ModeSetuid != 0L)
             {
                 h.Mode |= c_ISUID;
             }
+
             if (fm & os.ModeSetgid != 0L)
             {
                 h.Mode |= c_ISGID;
             }
+
             if (fm & os.ModeSticky != 0L)
             {
                 h.Mode |= c_ISVTX;
@@ -820,7 +883,7 @@ namespace archive
             // If possible, populate additional fields from OS-specific
             // FileInfo fields.
             {
-                ref Header (sys, ok) = fi.Sys()._<ref Header>();
+                ptr<Header> (sys, ok) = fi.Sys()._<ptr<Header>>();
 
                 if (ok)
                 { 
@@ -849,15 +912,17 @@ namespace archive
                             k = k__prev1;
                             v = v__prev1;
                         }
-
                     }
+
                     if (sys.Typeflag == TypeLink)
                     { 
                         // hard link
                         h.Typeflag = TypeLink;
                         h.Size = 0L;
                         h.Linkname = sys.Linkname;
+
                     }
+
                     if (sys.PAXRecords != null)
                     {
                         h.PAXRecords = make_map<@string, @string>();
@@ -875,16 +940,19 @@ namespace archive
                             k = k__prev1;
                             v = v__prev1;
                         }
-
                     }
+
                 }
 
             }
+
             if (sysStat != null)
             {
-                return (h, sysStat(fi, h));
+                return (_addr_h!, error.As(sysStat(fi, h))!);
             }
-            return (h, null);
+
+            return (_addr_h!, error.As(null!)!);
+
         }
 
         // isHeaderOnlyType checks if the given type flag is of the type that has no
@@ -896,7 +964,8 @@ namespace archive
                 return true;
             else 
                 return false;
-                    }
+            
+        }
 
         private static long min(long a, long b)
         {
@@ -904,7 +973,9 @@ namespace archive
             {
                 return a;
             }
+
             return b;
+
         }
     }
 }}

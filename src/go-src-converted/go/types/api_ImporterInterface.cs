@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:54 UTC
+//     Generated on 2020 October 08 04:02:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -54,7 +54,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,23 +68,24 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (ref Package, error) ImportByRef(ref T value, @string path);
-            private delegate (ref Package, error) ImportByVal(T value, @string path);
+            private delegate (ptr<Package>, error) ImportByPtr(ptr<T> value, @string path);
+            private delegate (ptr<Package>, error) ImportByVal(T value, @string path);
 
-            private static readonly ImportByRef s_ImportByRef;
+            private static readonly ImportByPtr s_ImportByPtr;
             private static readonly ImportByVal s_ImportByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ref Package, error) Import(@string path)
+            public (ptr<Package>, error) Import(@string path)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ImportByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ImportByPtr is null || !m_target_is_ptr)
                     return s_ImportByVal!(target, path);
 
-                return s_ImportByRef(ref target, path);
+                return s_ImportByPtr(m_target_ptr, path);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -93,23 +94,20 @@ namespace go
             static Importer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Import");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Import");
 
                 if (!(extensionMethod is null))
-                    s_ImportByRef = extensionMethod.CreateStaticDelegate(typeof(ImportByRef)) as ImportByRef;
+                    s_ImportByPtr = extensionMethod.CreateStaticDelegate(typeof(ImportByPtr)) as ImportByPtr;
 
-                if (s_ImportByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Import");
+                extensionMethod = targetType.GetExtensionMethod("Import");
 
-                    if (!(extensionMethod is null))
-                        s_ImportByVal = extensionMethod.CreateStaticDelegate(typeof(ImportByVal)) as ImportByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ImportByVal = extensionMethod.CreateStaticDelegate(typeof(ImportByVal)) as ImportByVal;
 
-                if (s_ImportByRef is null && s_ImportByVal is null)
+                if (s_ImportByPtr is null && s_ImportByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Importer.Import method", new Exception("Import"));
             }
 

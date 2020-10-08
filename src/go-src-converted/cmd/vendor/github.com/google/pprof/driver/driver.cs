@@ -13,10 +13,11 @@
 // limitations under the License.
 
 // Package driver provides an external entry point to the pprof driver.
-// package driver -- go2cs converted at 2020 August 29 10:05:09 UTC
+// package driver -- go2cs converted at 2020 October 08 04:42:48 UTC
 // import "cmd/vendor/github.com/google/pprof/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\driver\driver.go
 using io = go.io_package;
+using http = go.net.http_package;
 using regexp = go.regexp_package;
 using time = go.time_package;
 
@@ -38,24 +39,48 @@ namespace pprof
         // PProf acquires a profile, and symbolizes it using a profile
         // manager. Then it generates a report formatted according to the
         // options selected through the flags package.
-        public static error PProf(ref Options o)
+        public static error PProf(ptr<Options> _addr_o)
         {
-            return error.As(internaldriver.PProf(o.internalOptions()));
+            ref Options o = ref _addr_o.val;
+
+            return error.As(internaldriver.PProf(o.internalOptions()))!;
         }
 
-        private static ref plugin.Options internalOptions(this ref Options o)
+        private static ptr<plugin.Options> internalOptions(this ptr<Options> _addr_o)
         {
+            ref Options o = ref _addr_o.val;
+
             plugin.ObjTool obj = default;
             if (o.Obj != null)
             {
-                obj = ref new internalObjTool(o.Obj);
+                obj = addr(new internalObjTool(o.Obj));
             }
+
             plugin.Symbolizer sym = default;
             if (o.Sym != null)
             {
-                sym = ref new internalSymbolizer(o.Sym);
+                sym = addr(new internalSymbolizer(o.Sym));
             }
-            return ref new plugin.Options(Writer:o.Writer,Flagset:o.Flagset,Fetch:o.Fetch,Sym:sym,Obj:obj,UI:o.UI,);
+
+            Func<ptr<plugin.HTTPServerArgs>, error> httpServer = default;
+            if (o.HTTPServer != null)
+            {
+                httpServer = args =>
+                {
+                    return _addr_o.HTTPServer(((HTTPServerArgs.val)(args)))!;
+                }
+;
+
+            }
+
+            return addr(new plugin.Options(Writer:o.Writer,Flagset:o.Flagset,Fetch:o.Fetch,Sym:sym,Obj:obj,UI:o.UI,HTTPServer:httpServer,HTTPTransport:o.HTTPTransport,));
+
+        }
+
+        // HTTPServerArgs contains arguments needed by an HTTP server that
+        // is exporting a pprof web interface.
+        public partial struct HTTPServerArgs // : plugin.HTTPServerArgs
+        {
         }
 
         // Options groups all the optional plugins into pprof.
@@ -67,6 +92,8 @@ namespace pprof
             public Symbolizer Sym;
             public ObjTool Obj;
             public UI UI;
+            public Func<ptr<HTTPServerArgs>, error> HTTPServer;
+            public http.RoundTripper HTTPTransport;
         }
 
         // Writer provides a mechanism to write data under a certain name,
@@ -83,18 +110,15 @@ namespace pprof
             slice<@string> Bool(@string name, bool def, @string usage);
             slice<@string> Int(@string name, long def, @string usage);
             slice<@string> Float64(@string name, double def, @string usage);
-            slice<@string> String(@string name, @string def, @string usage); // BoolVar, IntVar, Float64Var, and StringVar define new flags referencing
-// a given pointer, like the functions of the same name in package flag.
-            slice<@string> BoolVar(ref bool pointer, @string name, bool def, @string usage);
-            slice<@string> IntVar(ref long pointer, @string name, long def, @string usage);
-            slice<@string> Float64Var(ref double pointer, @string name, double def, @string usage);
-            slice<@string> StringVar(ref @string pointer, @string name, @string def, @string usage); // StringList is similar to String but allows multiple values for a
+            slice<@string> String(@string name, @string def, @string usage); // StringList is similar to String but allows multiple values for a
 // single flag
-            slice<@string> StringList(@string name, @string def, @string usage); // ExtraUsage returns any additional text that should be
-// printed after the standard usage message.
-// The typical use of ExtraUsage is to show any custom flags
-// defined by the specific pprof plugins being used.
-            slice<@string> ExtraUsage(); // Parse initializes the flags with their values for this run
+            slice<@string> StringList(@string name, @string def, @string usage); // ExtraUsage returns any additional text that should be printed after the
+// standard usage message. The extra usage message returned includes all text
+// added with AddExtraUsage().
+// The typical use of ExtraUsage is to show any custom flags defined by the
+// specific pprof plugins being used.
+            slice<@string> ExtraUsage(); // AddExtraUsage appends additional text to the end of the extra usage message.
+            slice<@string> AddExtraUsage(@string eu); // Parse initializes the flags with their values for this run
 // and returns the non-flag command line arguments.
 // If an unknown flag is encountered or there are no arguments,
 // Parse should call usage and return nil.
@@ -107,13 +131,13 @@ namespace pprof
         // was fetched, which may be different than src.
         public partial interface Fetcher
         {
-            (ref profile.Profile, @string, error) Fetch(@string src, time.Duration duration, time.Duration timeout);
+            (ptr<profile.Profile>, @string, error) Fetch(@string src, time.Duration duration, time.Duration timeout);
         }
 
         // A Symbolizer introduces symbol information into a profile.
         public partial interface Symbolizer
         {
-            error Symbolize(@string mode, MappingSources srcs, ref profile.Profile prof);
+            error Symbolize(@string mode, MappingSources srcs, ptr<profile.Profile> prof);
         }
 
         // MappingSources map each profile.Mapping to the source of the profile.
@@ -154,7 +178,7 @@ namespace pprof
 // with names matching the regular expression.
 // If addr is not zero, Symbols restricts the list to symbols
 // containing that address.
-            error Symbols(ref regexp.Regexp r, ulong addr); // Close closes the file, releasing associated resources.
+            error Symbols(ptr<regexp.Regexp> r, ulong addr); // Close closes the file, releasing associated resources.
             error Close();
         }
 
@@ -187,7 +211,8 @@ namespace pprof
 // For line-based UI, PrintErr writes to standard error.
             @string PrintErr(params object _p0); // IsTerminal returns whether the UI is known to be tied to an
 // interactive terminal (as opposed to being redirected to a file).
-            @string IsTerminal(); // SetAutoComplete instructs the UI to call complete(cmd) to obtain
+            @string IsTerminal(); // WantBrowser indicates whether browser should be opened with the -http option.
+            @string WantBrowser(); // SetAutoComplete instructs the UI to call complete(cmd) to obtain
 // the auto-completion of cmd, if the UI supports auto-completion at all.
             @string SetAutoComplete(Func<@string, @string> complete);
         }
@@ -199,14 +224,20 @@ namespace pprof
             public ObjTool ObjTool;
         }
 
-        private static (plugin.ObjFile, error) Open(this ref internalObjTool o, @string file, ulong start, ulong limit, ulong offset)
+        private static (plugin.ObjFile, error) Open(this ptr<internalObjTool> _addr_o, @string file, ulong start, ulong limit, ulong offset)
         {
+            plugin.ObjFile _p0 = default;
+            error _p0 = default!;
+            ref internalObjTool o = ref _addr_o.val;
+
             var (f, err) = o.ObjTool.Open(file, start, limit, offset);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (ref new internalObjFile(f), err);
+
+            return (addr(new internalObjFile(f)), error.As(err)!);
+
         }
 
         private partial struct internalObjFile : ObjFile
@@ -214,50 +245,69 @@ namespace pprof
             public ObjFile ObjFile;
         }
 
-        private static (slice<plugin.Frame>, error) SourceLine(this ref internalObjFile f, ulong frame)
+        private static (slice<plugin.Frame>, error) SourceLine(this ptr<internalObjFile> _addr_f, ulong frame)
         {
+            slice<plugin.Frame> _p0 = default;
+            error _p0 = default!;
+            ref internalObjFile f = ref _addr_f.val;
+
             var (frames, err) = f.ObjFile.SourceLine(frame);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             slice<plugin.Frame> pluginFrames = default;
             foreach (var (_, f) in frames)
             {
                 pluginFrames = append(pluginFrames, plugin.Frame(f));
             }
-            return (pluginFrames, null);
+            return (pluginFrames, error.As(null!)!);
+
         }
 
-        private static (slice<ref plugin.Sym>, error) Symbols(this ref internalObjFile f, ref regexp.Regexp r, ulong addr)
+        private static (slice<ptr<plugin.Sym>>, error) Symbols(this ptr<internalObjFile> _addr_f, ptr<regexp.Regexp> _addr_r, ulong addr)
         {
+            slice<ptr<plugin.Sym>> _p0 = default;
+            error _p0 = default!;
+            ref internalObjFile f = ref _addr_f.val;
+            ref regexp.Regexp r = ref _addr_r.val;
+
             var (syms, err) = f.ObjFile.Symbols(r, addr);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            slice<ref plugin.Sym> pluginSyms = default;
+
+            slice<ptr<plugin.Sym>> pluginSyms = default;
             foreach (var (_, s) in syms)
             {
-                var ps = plugin.Sym(s.Value);
-                pluginSyms = append(pluginSyms, ref ps);
+                ref var ps = ref heap(plugin.Sym(s.val), out ptr<var> _addr_ps);
+                pluginSyms = append(pluginSyms, _addr_ps);
             }
-            return (pluginSyms, null);
+            return (pluginSyms, error.As(null!)!);
+
         }
 
-        private static (slice<plugin.Inst>, error) Disasm(this ref internalObjTool o, @string file, ulong start, ulong end)
+        private static (slice<plugin.Inst>, error) Disasm(this ptr<internalObjTool> _addr_o, @string file, ulong start, ulong end)
         {
+            slice<plugin.Inst> _p0 = default;
+            error _p0 = default!;
+            ref internalObjTool o = ref _addr_o.val;
+
             var (insts, err) = o.ObjTool.Disasm(file, start, end);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             slice<plugin.Inst> pluginInst = default;
             foreach (var (_, inst) in insts)
             {
                 pluginInst = append(pluginInst, plugin.Inst(inst));
             }
-            return (pluginInst, null);
+            return (pluginInst, error.As(null!)!);
+
         }
 
         // internalSymbolizer is a wrapper to map from the pprof external
@@ -267,14 +317,18 @@ namespace pprof
             public Symbolizer Symbolizer;
         }
 
-        private static error Symbolize(this ref internalSymbolizer s, @string mode, plugin.MappingSources srcs, ref profile.Profile prof)
+        private static error Symbolize(this ptr<internalSymbolizer> _addr_s, @string mode, plugin.MappingSources srcs, ptr<profile.Profile> _addr_prof)
         {
+            ref internalSymbolizer s = ref _addr_s.val;
+            ref profile.Profile prof = ref _addr_prof.val;
+
             MappingSources isrcs = new MappingSources();
             foreach (var (m, s) in srcs)
             {
                 isrcs[m] = s;
             }
-            return error.As(s.Symbolizer.Symbolize(mode, isrcs, prof));
+            return error.As(s.Symbolizer.Symbolize(mode, isrcs, prof))!;
+
         }
     }
 }}}}}}

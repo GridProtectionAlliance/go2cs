@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:59 UTC
+//     Generated on 2020 October 08 03:24:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,15 +27,17 @@ namespace go
             {
                 this.code = default;
                 this.stack = default;
-                this.typ = default;
+                this.argLen = default;
+                this.ftyp = default;
                 this.fn = default;
             }
 
-            public makeFuncImpl(System.UIntPtr code = default, ref ptr<bitVector> stack = default, ref ptr<funcType> typ = default, Func<slice<Value>, slice<Value>> fn = default)
+            public makeFuncImpl(System.UIntPtr code = default, ref ptr<bitVector> stack = default, System.UIntPtr argLen = default, ref ptr<funcType> ftyp = default, Func<slice<Value>, slice<Value>> fn = default)
             {
                 this.code = code;
                 this.stack = stack;
-                this.typ = typ;
+                this.argLen = argLen;
+                this.ftyp = ftyp;
                 this.fn = fn;
             }
 
@@ -59,7 +61,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static makeFuncImpl makeFuncImpl_cast(dynamic value)
         {
-            return new makeFuncImpl(value.code, ref value.stack, ref value.typ, value.fn);
+            return new makeFuncImpl(value.code, ref value.stack, value.argLen, ref value.ftyp, value.fn);
         }
     }
 }

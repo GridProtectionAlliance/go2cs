@@ -1,5 +1,5 @@
 // Derived from Inferno utils/6l/l.h and related files.
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/l.h
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/l.h
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2020 August 29 08:46:20 UTC
+// package objabi -- go2cs converted at 2020 October 08 03:50:14 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Go\src\cmd\internal\objabi\head.go
 using fmt = go.fmt_package;
@@ -45,85 +45,100 @@ namespace @internal
         {
         }
 
-        public static readonly HeadType Hunknown = iota;
-        public static readonly var Hdarwin = 0;
-        public static readonly var Hdragonfly = 1;
-        public static readonly var Hfreebsd = 2;
-        public static readonly var Hlinux = 3;
-        public static readonly var Hnacl = 4;
-        public static readonly var Hnetbsd = 5;
-        public static readonly var Hopenbsd = 6;
-        public static readonly var Hplan9 = 7;
-        public static readonly var Hsolaris = 8;
-        public static readonly var Hwindows = 9;
+        public static readonly HeadType Hunknown = (HeadType)iota;
+        public static readonly var Hdarwin = (var)0;
+        public static readonly var Hdragonfly = (var)1;
+        public static readonly var Hfreebsd = (var)2;
+        public static readonly var Hjs = (var)3;
+        public static readonly var Hlinux = (var)4;
+        public static readonly var Hnetbsd = (var)5;
+        public static readonly var Hopenbsd = (var)6;
+        public static readonly var Hplan9 = (var)7;
+        public static readonly var Hsolaris = (var)8;
+        public static readonly var Hwindows = (var)9;
+        public static readonly var Haix = (var)10;
 
-        private static error Set(this ref HeadType h, @string s)
+
+        private static error Set(this ptr<HeadType> _addr_h, @string s)
         {
+            ref HeadType h = ref _addr_h.val;
+
             switch (s)
             {
+                case "aix": 
+                    h.val = Haix;
+                    break;
                 case "darwin": 
-                    h.Value = Hdarwin;
+                    h.val = Hdarwin;
                     break;
                 case "dragonfly": 
-                    h.Value = Hdragonfly;
+                    h.val = Hdragonfly;
                     break;
                 case "freebsd": 
-                    h.Value = Hfreebsd;
+                    h.val = Hfreebsd;
+                    break;
+                case "js": 
+                    h.val = Hjs;
                     break;
                 case "linux": 
 
                 case "android": 
-                    h.Value = Hlinux;
-                    break;
-                case "nacl": 
-                    h.Value = Hnacl;
+                    h.val = Hlinux;
                     break;
                 case "netbsd": 
-                    h.Value = Hnetbsd;
+                    h.val = Hnetbsd;
                     break;
                 case "openbsd": 
-                    h.Value = Hopenbsd;
+                    h.val = Hopenbsd;
                     break;
                 case "plan9": 
-                    h.Value = Hplan9;
+                    h.val = Hplan9;
                     break;
+                case "illumos": 
+
                 case "solaris": 
-                    h.Value = Hsolaris;
+                    h.val = Hsolaris;
                     break;
                 case "windows": 
-                    h.Value = Hwindows;
+                    h.val = Hwindows;
                     break;
                 default: 
-                    return error.As(fmt.Errorf("invalid headtype: %q", s));
+                    return error.As(fmt.Errorf("invalid headtype: %q", s))!;
                     break;
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static @string String(this ref HeadType h)
+        private static @string String(this ptr<HeadType> _addr_h)
         {
+            ref HeadType h = ref _addr_h.val;
 
-            if (h.Value == Hdarwin) 
+
+            if (h.val == Haix) 
+                return "aix";
+            else if (h.val == Hdarwin) 
                 return "darwin";
-            else if (h.Value == Hdragonfly) 
+            else if (h.val == Hdragonfly) 
                 return "dragonfly";
-            else if (h.Value == Hfreebsd) 
+            else if (h.val == Hfreebsd) 
                 return "freebsd";
-            else if (h.Value == Hlinux) 
+            else if (h.val == Hjs) 
+                return "js";
+            else if (h.val == Hlinux) 
                 return "linux";
-            else if (h.Value == Hnacl) 
-                return "nacl";
-            else if (h.Value == Hnetbsd) 
+            else if (h.val == Hnetbsd) 
                 return "netbsd";
-            else if (h.Value == Hopenbsd) 
+            else if (h.val == Hopenbsd) 
                 return "openbsd";
-            else if (h.Value == Hplan9) 
+            else if (h.val == Hplan9) 
                 return "plan9";
-            else if (h.Value == Hsolaris) 
+            else if (h.val == Hsolaris) 
                 return "solaris";
-            else if (h.Value == Hwindows) 
+            else if (h.val == Hwindows) 
                 return "windows";
-                        return fmt.Sprintf("HeadType(%d)", h.Value);
+                        return fmt.Sprintf("HeadType(%d)", h.val);
+
         }
     }
 }}}

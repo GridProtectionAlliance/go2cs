@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:19 UTC
+//     Generated on 2020 October 08 03:41:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace go
                 this.output = default;
             }
 
-            public FlagSet(Action Usage = default, @string name = default, bool parsed = default, map<@string, ref Flag> actual = default, map<@string, ref Flag> formal = default, slice<@string> args = default, ErrorHandling errorHandling = default, io.Writer output = default)
+            public FlagSet(Action Usage = default, @string name = default, bool parsed = default, map<@string, ptr<Flag>> actual = default, map<@string, ptr<Flag>> formal = default, slice<@string> args = default, ErrorHandling errorHandling = default, io.Writer output = default)
             {
                 this.Usage = Usage;
                 this.name = name;

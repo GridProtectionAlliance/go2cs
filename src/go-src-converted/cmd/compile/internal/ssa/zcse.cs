@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 09:24:32 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:26:52 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\zcse.go
 using types = go.cmd.compile.@internal.types_package;
@@ -20,9 +20,11 @@ namespace @internal
         // to begin with a reduced number of values. Values are just relinked,
         // nothing is deleted. A subsequent deadcode pass is required to actually
         // remove duplicate expressions.
-        private static void zcse(ref Func f)
+        private static void zcse(ptr<Func> _addr_f)
         {
-            var vals = make_map<vkey, ref Value>();
+            ref Func f = ref _addr_f.val;
+
+            var vals = make_map<vkey, ptr<Value>>();
 
             {
                 var b__prev1 = b;
@@ -33,12 +35,9 @@ namespace @internal
                     {
                         long i__prev2 = i;
 
-                        long i = 0L;
-
-                        while (i < len(b.Values))
+                        for (long i = 0L; i < len(b.Values); i++)
                         {
                             var v = b.Values[i];
-                            var next = true;
                             if (opcodeTable[v.Op].argLen == 0L)
                             {
                                 vkey key = new vkey(v.Op,keyFor(v),v.Aux,v.Type);
@@ -55,21 +54,17 @@ namespace @internal
                                         var last = len(b.Values) - 1L;
                                         b.Values[i] = b.Values[last];
                                         b.Values[last] = null;
-                                        b.Values = b.Values[..last]; 
+                                        b.Values = b.Values[..last];
 
-                                        // process b.Values[i] again
-                                        next = false;
+                                        i--; // process b.Values[i] again
                                     }
                                 }
-                            }
-                            if (next)
-                            {
-                                i++;
                             }
                         }
 
                         i = i__prev2;
                     }
+
                 }
                 b = b__prev1;
             }
@@ -104,19 +99,17 @@ namespace @internal
                                                 v.SetArg(i, rv);
                                             }
                                         }
+
                                     }
                                 }
                                 i = i__prev3;
                             }
-
                         }
                         v = v__prev2;
                     }
-
                 }
                 b = b__prev1;
             }
-
         }
 
         // vkey is a type used to uniquely identify a zero arg value.
@@ -129,8 +122,10 @@ namespace @internal
 
         // keyFor returns the AuxInt portion of a  key structure uniquely identifying a
         // zero arg value for the supported ops.
-        private static long keyFor(ref Value v)
+        private static long keyFor(ptr<Value> _addr_v)
         {
+            ref Value v = ref _addr_v.val;
+
 
             if (v.Op == OpConst64 || v.Op == OpConst64F || v.Op == OpConst32F) 
                 return v.AuxInt;
@@ -142,6 +137,7 @@ namespace @internal
                 return int64(int8(v.AuxInt));
             else 
                 return v.AuxInt;
-                    }
+            
+        }
     }
 }}}}

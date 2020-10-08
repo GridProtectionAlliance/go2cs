@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:59 UTC
+//     Generated on 2020 October 08 04:10:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,10 +36,10 @@ namespace @internal
                 this.nBlocks = default;
                 this.depth = default;
                 this.isInner = default;
-                this.containsCall = default;
+                this.containsUnavoidableCall = default;
             }
 
-            public loop(ref ptr<Block> header = default, ref ptr<loop> outer = default, slice<ref loop> children = default, slice<ref Block> exits = default, int nBlocks = default, short depth = default, bool isInner = default, bool containsCall = default)
+            public loop(ref ptr<Block> header = default, ref ptr<loop> outer = default, slice<ptr<loop>> children = default, slice<ptr<Block>> exits = default, int nBlocks = default, short depth = default, bool isInner = default, bool containsUnavoidableCall = default)
             {
                 this.header = header;
                 this.outer = outer;
@@ -48,7 +48,7 @@ namespace @internal
                 this.nBlocks = nBlocks;
                 this.depth = depth;
                 this.isInner = isInner;
-                this.containsCall = containsCall;
+                this.containsUnavoidableCall = containsUnavoidableCall;
             }
 
             // Enable comparisons between nil and loop struct
@@ -71,7 +71,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static loop loop_cast(dynamic value)
         {
-            return new loop(ref value.header, ref value.outer, value.children, value.exits, value.nBlocks, value.depth, value.isInner, value.containsCall);
+            return new loop(ref value.header, ref value.outer, value.children, value.exits, value.nBlocks, value.depth, value.isInner, value.containsUnavoidableCall);
         }
     }
 }}}}

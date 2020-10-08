@@ -6,7 +6,7 @@
 // It knows the coverage counter is called
 // "thisNameMustBeVeryLongToCauseOverflowOfCounterIncrementStatementOntoNextLineForTest".
 
-// package main -- go2cs converted at 2020 August 29 09:59:31 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:37 UTC
 // Original source: C:\Go\src\cmd\cover\testdata\main.go
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -31,7 +31,7 @@ namespace go
         private static var counters = make_map<block, bool>();
 
         // shorthand for the long counter variable.
-        private static var coverTest = ref thisNameMustBeVeryLongToCauseOverflowOfCounterIncrementStatementOntoNextLineForTest;
+        private static var coverTest = _addr_thisNameMustBeVeryLongToCauseOverflowOfCounterIncrementStatementOntoNextLineForTest;
 
         // check records the location and expected value for a counter.
         private static void check(uint line, uint count)
@@ -61,11 +61,13 @@ namespace go
                 {
                     got = anything;
                 }
+
                 if (got != b.count)
                 {
                     fmt.Fprintf(os.Stderr, "test_go:%d expected count %d got %d [counter %d]\n", b.line, b.count, got, index);
                     PASS = false;
                 }
+
             }
             verifyPanic();
             if (!PASS)
@@ -73,6 +75,7 @@ namespace go
                 fmt.Fprintf(os.Stderr, "FAIL\n");
                 os.Exit(2L);
             }
+
         }
 
         // verifyPanic is a special check for the known counter that should be
@@ -84,22 +87,29 @@ namespace go
                 // Sanity check for test before panic.
                 fmt.Fprintf(os.Stderr, "bad before panic");
                 PASS = false;
+
             }
+
             if (coverTest.Count[panicIndex] != 0L)
             {
                 fmt.Fprintf(os.Stderr, "bad at panic: %d should be 0\n", coverTest.Count[panicIndex]);
                 PASS = false;
             }
+
             if (coverTest.Count[panicIndex + 1L] != 1L)
             {
                 fmt.Fprintf(os.Stderr, "bad after panic");
                 PASS = false;
             }
+
         }
 
         // count returns the count and index for the counter at the specified line.
         private static (uint, long) count(uint line)
-        { 
+        {
+            uint _p0 = default;
+            long _p0 = default;
+ 
             // Linear search is fine. Choose perfect fit over approximate.
             // We can have a closing brace for a range on the same line as a condition for an "else if"
             // and we don't want that brace to steal the count for the condition on the "if".
@@ -121,6 +131,7 @@ namespace go
                     index = i;
                     indexLo = lo;
                 }
+
             }
             if (index == -1L)
             {
@@ -128,7 +139,9 @@ namespace go
                 PASS = false;
                 return (0L, 0L);
             }
+
             return (coverTest.Count[index], index);
+
         }
     }
 }

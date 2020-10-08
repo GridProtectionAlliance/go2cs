@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:37 UTC
+//     Generated on 2020 October 08 04:04:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,23 +26,17 @@ namespace pkg
     public static partial class p1_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(Embedded))]
         public partial struct TPtrExported
         {
-            // Embedded structure promotion - sourced from pointer
-            private readonly ptr<Embedded> m_EmbeddedRef;
-
-            private ref Embedded Embedded_ptr => ref m_EmbeddedRef.Value;
-
             // Constructors
             public TPtrExported(NilType _)
             {
-                this.m_EmbeddedRef = new ptr<Embedded>(new Embedded(nil));
+                this.ptr<Embedded> = default;
             }
 
-            public TPtrExported(ref Embedded Embedded = default)
+            public TPtrExported(ref ptr<Embedded> ptr<Embedded> = default)
             {
-                this.m_EmbeddedRef = new ptr<Embedded>(ref Embedded);
+                this.ptr<Embedded> = ptr<Embedded>;
             }
 
             // Enable comparisons between nil and TPtrExported struct
@@ -65,7 +59,7 @@ namespace pkg
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static TPtrExported TPtrExported_cast(dynamic value)
         {
-            return new TPtrExported(ref value.Embedded);
+            return new TPtrExported(ref value.ptr<Embedded>);
         }
     }
 }}}}}}

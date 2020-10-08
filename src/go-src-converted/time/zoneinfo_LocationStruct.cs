@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:27 UTC
+//     Generated on 2020 October 08 03:45:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,16 +30,18 @@ namespace go
                 this.name = default;
                 this.zone = default;
                 this.tx = default;
+                this.extend = default;
                 this.cacheStart = default;
                 this.cacheEnd = default;
                 this.cacheZone = default;
             }
 
-            public Location(@string name = default, slice<zone> zone = default, slice<zoneTrans> tx = default, long cacheStart = default, long cacheEnd = default, ref ptr<zone> cacheZone = default)
+            public Location(@string name = default, slice<zone> zone = default, slice<zoneTrans> tx = default, @string extend = default, long cacheStart = default, long cacheEnd = default, ref ptr<zone> cacheZone = default)
             {
                 this.name = name;
                 this.zone = zone;
                 this.tx = tx;
+                this.extend = extend;
                 this.cacheStart = cacheStart;
                 this.cacheEnd = cacheEnd;
                 this.cacheZone = cacheZone;
@@ -65,7 +67,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Location Location_cast(dynamic value)
         {
-            return new Location(value.name, value.zone, value.tx, value.cacheStart, value.cacheEnd, ref value.cacheZone);
+            return new Location(value.name, value.zone, value.tx, value.extend, value.cacheStart, value.cacheEnd, ref value.cacheZone);
         }
     }
 }

@@ -4,7 +4,7 @@
 
 // +build linux
 
-// package main -- go2cs converted at 2020 August 29 09:59:58 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:59 UTC
 // Original source: C:\Go\src\cmd\dist\test_linux.go
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
@@ -15,7 +15,7 @@ namespace go
 {
     public static partial class main_package
     {
-        private static readonly var ioctlReadTermios = syscall.TCGETS;
+        private static readonly var ioctlReadTermios = (var)syscall.TCGETS;
 
         // isTerminal reports whether fd is a terminal.
 
@@ -23,8 +23,8 @@ namespace go
         // isTerminal reports whether fd is a terminal.
         private static bool isTerminal(System.UIntPtr fd)
         {
-            syscall.Termios termios = default;
-            var (_, _, err) = syscall.Syscall6(syscall.SYS_IOCTL, fd, ioctlReadTermios, uintptr(@unsafe.Pointer(ref termios)), 0L, 0L, 0L);
+            ref syscall.Termios termios = ref heap(out ptr<syscall.Termios> _addr_termios);
+            var (_, _, err) = syscall.Syscall6(syscall.SYS_IOCTL, fd, ioctlReadTermios, uintptr(@unsafe.Pointer(_addr_termios)), 0L, 0L, 0L);
             return err == 0L;
         }
 
@@ -35,6 +35,7 @@ namespace go
                 return isTerminal(1L) && isTerminal(2L);
             }
 ;
+
         }
     }
 }

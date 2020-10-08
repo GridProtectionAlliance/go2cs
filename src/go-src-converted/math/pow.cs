@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:57 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:21 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\pow.go
 
@@ -63,12 +63,14 @@ namespace go
                     {>>MARKER:FUNCTION_Pow_BLOCK_PREFIX<<
                         return Copysign(Inf(1L), x);
                     }
+
                     return Inf(1L);
                 else if (y > 0L) 
                     if (isOddInt(y))
                     {
                         return x;
                     }
+
                     return 0L;
                             else if (IsInf(y, 0L)) 
 
@@ -84,6 +86,7 @@ namespace go
                     return Pow(1L / x, -y); // Pow(-0, -y)
                 }
 
+
                 if (y < 0L) 
                     return 0L;
                 else if (y > 0L) 
@@ -92,18 +95,12 @@ namespace go
                 return Sqrt(x);
             else if (y == -0.5F) 
                 return 1L / Sqrt(x);
-                        var absy = y;
-            var flip = false;
-            if (absy < 0L)
-            {
-                absy = -absy;
-                flip = true;
-            }
-            var (yi, yf) = Modf(absy);
+                        var (yi, yf) = Modf(Abs(y));
             if (yf != 0L && x < 0L)
             {
                 return NaN();
             }
+
             if (yi >= 1L << (int)(63L))
             { 
                 // yi is a large even int that will lead to overflow (or underflow to 0)
@@ -115,7 +112,8 @@ namespace go
                     return 0L;
                 else 
                     return Inf(1L);
-                            } 
+                
+            } 
 
             // ans = a1 * 2**ae (= 1 for now).
             float a1 = 1.0F;
@@ -129,7 +127,9 @@ namespace go
                     yf--;
                     yi++;
                 }
+
                 a1 = Exp(yf * Log(x));
+
             } 
 
             // ans *= x**yi
@@ -153,11 +153,13 @@ namespace go
                         break;
                     i >>= 1L;
                     }
+
                     if (i & 1L == 1L)
                     {
                         a1 *= x1;
                         ae += xe;
                     }
+
                     x1 *= x1;
                     xe <<= 1L;
                     if (x1 < .5F)
@@ -165,23 +167,26 @@ namespace go
                         x1 += x1;
                         xe--;
                     }
+
                 } 
 
                 // ans = a1*2**ae
-                // if flip { ans = 1 / ans }
+                // if y < 0 { ans = 1 / ans }
                 // but in the opposite order
 
             } 
 
             // ans = a1*2**ae
-            // if flip { ans = 1 / ans }
+            // if y < 0 { ans = 1 / ans }
             // but in the opposite order
-            if (flip)
+            if (y < 0L)
             {
                 a1 = 1L / a1;
                 ae = -ae;
             }
+
             return Ldexp(a1, ae);
+
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:43 UTC
+//     Generated on 2020 October 08 04:43:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,9 +43,10 @@ namespace @internal
                 this.Obj = default;
                 this.UI = default;
                 this.HTTPServer = default;
+                this.HTTPTransport = default;
             }
 
-            public Options(Writer Writer = default, FlagSet Flagset = default, Fetcher Fetch = default, Symbolizer Sym = default, ObjTool Obj = default, UI UI = default, Func<ref HTTPServerArgs, error> HTTPServer = default)
+            public Options(Writer Writer = default, FlagSet Flagset = default, Fetcher Fetch = default, Symbolizer Sym = default, ObjTool Obj = default, UI UI = default, Func<ptr<HTTPServerArgs>, error> HTTPServer = default, http.RoundTripper HTTPTransport = default)
             {
                 this.Writer = Writer;
                 this.Flagset = Flagset;
@@ -54,6 +55,7 @@ namespace @internal
                 this.Obj = Obj;
                 this.UI = UI;
                 this.HTTPServer = HTTPServer;
+                this.HTTPTransport = HTTPTransport;
             }
 
             // Enable comparisons between nil and Options struct
@@ -76,7 +78,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Options Options_cast(dynamic value)
         {
-            return new Options(value.Writer, value.Flagset, value.Fetch, value.Sym, value.Obj, value.UI, value.HTTPServer);
+            return new Options(value.Writer, value.Flagset, value.Fetch, value.Sym, value.Obj, value.UI, value.HTTPServer, value.HTTPTransport);
         }
     }
 }}}}}}}

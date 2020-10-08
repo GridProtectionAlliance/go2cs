@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 August 29 08:47:28 UTC
+// package types -- go2cs converted at 2020 October 08 04:03:11 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\eval.go
 using fmt = go.fmt_package;
+using ast = go.go.ast_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
 using static go.builtin;
@@ -21,8 +22,32 @@ namespace go
         // complete position information relative to the provided file
         // set.
         //
-        // If the expression contains function literals, their bodies
-        // are ignored (i.e., the bodies are not type-checked).
+        // The meaning of the parameters fset, pkg, and pos is the
+        // same as in CheckExpr. An error is returned if expr cannot
+        // be parsed successfully, or the resulting expr AST cannot be
+        // type-checked.
+        public static (TypeAndValue, error) Eval(ptr<token.FileSet> _addr_fset, ptr<Package> _addr_pkg, token.Pos pos, @string expr)
+        {
+            TypeAndValue _ = default;
+            error err = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
+            ref Package pkg = ref _addr_pkg.val;
+ 
+            // parse expressions
+            var (node, err) = parser.ParseExprFrom(fset, "eval", expr, 0L);
+            if (err != null)
+            {
+                return (new TypeAndValue(), error.As(err)!);
+            }
+            ptr<Info> info = addr(new Info(Types:make(map[ast.Expr]TypeAndValue),));
+            err = CheckExpr(_addr_fset, _addr_pkg, pos, node, _addr_info);
+            return (info.Types[node], error.As(err)!);
+
+        }
+
+        // CheckExpr type checks the expression expr as if it had appeared at
+        // position pos of package pkg. Type information about the expression
+        // is recorded in info.
         //
         // If pkg == nil, the Universe scope is used and the provided
         // position pos is ignored. If pkg != nil, and pos is invalid,
@@ -30,19 +55,23 @@ namespace go
         // package.
         //
         // An error is returned if pos is not within the package or
-        // if the node cannot be evaluated.
+        // if the node cannot be type-checked.
         //
-        // Note: Eval should not be used instead of running Check to compute
-        // types and values, but in addition to Check. Eval will re-evaluate
-        // its argument each time, and it also does not know about the context
-        // in which an expression is used (e.g., an assignment). Thus, top-
-        // level untyped constants will return an untyped type rather then the
-        // respective context-specific type.
+        // Note: Eval and CheckExpr should not be used instead of running Check
+        // to compute types and values, but in addition to Check, as these
+        // functions ignore the context in which an expression is used (e.g., an
+        // assignment). Thus, top-level untyped constants will return an
+        // untyped type rather then the respective context-specific type.
         //
-        public static (TypeAndValue, error) Eval(ref token.FileSet _fset, ref Package _pkg, token.Pos pos, @string expr) => func(_fset, _pkg, (ref token.FileSet fset, ref Package pkg, Defer defer, Panic _, Recover __) =>
-        { 
+        public static error CheckExpr(ptr<token.FileSet> _addr_fset, ptr<Package> _addr_pkg, token.Pos pos, ast.Expr expr, ptr<Info> _addr_info) => func((defer, _, __) =>
+        {
+            error err = default!;
+            ref token.FileSet fset = ref _addr_fset.val;
+            ref Package pkg = ref _addr_pkg.val;
+            ref Info info = ref _addr_info.val;
+ 
             // determine scope
-            ref Scope scope = default;
+            ptr<Scope> scope;
             if (pkg == null)
             {
                 scope = Universe;
@@ -66,7 +95,9 @@ namespace go
                     {
                         break;
                     }
-                }                if (scope == null || debug)
+
+                }
+                if (scope == null || debug)
                 {
                     var s = scope;
                     while (s != null && s != pkg.scope)
@@ -74,26 +105,31 @@ namespace go
                         s = s.parent;
                     } 
                     // s == nil || s == pkg.scope
+ 
+                    // s == nil || s == pkg.scope
                     if (s == null)
                     {
-                        return (new TypeAndValue(), fmt.Errorf("no position %s found in package %s", fset.Position(pos), pkg.name));
+                        return error.As(fmt.Errorf("no position %s found in package %s", fset.Position(pos), pkg.name))!;
                     }
+
                 }
-            }
-            var (node, err) = parser.ParseExprFrom(fset, "eval", expr, 0L);
-            if (err != null)
-            {
-                return (new TypeAndValue(), err);
-            }
-            var check = NewChecker(null, fset, pkg, null);
+
+            } 
+
+            // initialize checker
+            var check = NewChecker(null, fset, pkg, info);
             check.scope = scope;
             check.pos = pos;
-            defer(check.handleBailout(ref err)); 
+            defer(check.handleBailout(_addr_err)); 
 
             // evaluate node
-            operand x = default;
-            check.rawExpr(ref x, node, null);
-            return (new TypeAndValue(x.mode,x.typ,x.val), err);
+            ref operand x = ref heap(out ptr<operand> _addr_x);
+            check.rawExpr(_addr_x, expr, null);
+            check.processDelayed(0L); // incl. all functions
+            check.recordUntyped();
+
+            return error.As(null!)!;
+
         });
     }
 }}

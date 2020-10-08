@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:06:08 UTC
+//     Generated on 2020 October 08 04:43:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,6 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using math = go.math_package;
 using filepath = go.path.filepath_package;
 using regexp = go.regexp_package;
 using sort = go.sort_package;
@@ -49,7 +48,6 @@ namespace @internal
                 this.CumSort = default;
                 this.CallTree = default;
                 this.DropNegative = default;
-                this.PositivePercentages = default;
                 this.CompactLabels = default;
                 this.Ratio = default;
                 this.Title = default;
@@ -66,15 +64,15 @@ namespace @internal
                 this.OutputUnit = default;
                 this.Symbol = default;
                 this.SourcePath = default;
+                this.TrimPath = default;
             }
 
-            public Options(long OutputFormat = default, bool CumSort = default, bool CallTree = default, bool DropNegative = default, bool PositivePercentages = default, bool CompactLabels = default, double Ratio = default, @string Title = default, slice<@string> ProfileLabels = default, slice<@string> ActiveFilters = default, map<@string, @string> NumLabelUnits = default, long NodeCount = default, double NodeFraction = default, double EdgeFraction = default, Func<slice<long>, long> SampleValue = default, Func<slice<long>, long> SampleMeanDivisor = default, @string SampleType = default, @string SampleUnit = default, @string OutputUnit = default, ref ptr<regexp.Regexp> Symbol = default, @string SourcePath = default)
+            public Options(long OutputFormat = default, bool CumSort = default, bool CallTree = default, bool DropNegative = default, bool CompactLabels = default, double Ratio = default, @string Title = default, slice<@string> ProfileLabels = default, slice<@string> ActiveFilters = default, map<@string, @string> NumLabelUnits = default, long NodeCount = default, double NodeFraction = default, double EdgeFraction = default, Func<slice<long>, long> SampleValue = default, Func<slice<long>, long> SampleMeanDivisor = default, @string SampleType = default, @string SampleUnit = default, @string OutputUnit = default, ref ptr<regexp.Regexp> Symbol = default, @string SourcePath = default, @string TrimPath = default)
             {
                 this.OutputFormat = OutputFormat;
                 this.CumSort = CumSort;
                 this.CallTree = CallTree;
                 this.DropNegative = DropNegative;
-                this.PositivePercentages = PositivePercentages;
                 this.CompactLabels = CompactLabels;
                 this.Ratio = Ratio;
                 this.Title = Title;
@@ -91,6 +89,7 @@ namespace @internal
                 this.OutputUnit = OutputUnit;
                 this.Symbol = Symbol;
                 this.SourcePath = SourcePath;
+                this.TrimPath = TrimPath;
             }
 
             // Enable comparisons between nil and Options struct
@@ -113,7 +112,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Options Options_cast(dynamic value)
         {
-            return new Options(value.OutputFormat, value.CumSort, value.CallTree, value.DropNegative, value.PositivePercentages, value.CompactLabels, value.Ratio, value.Title, value.ProfileLabels, value.ActiveFilters, value.NumLabelUnits, value.NodeCount, value.NodeFraction, value.EdgeFraction, value.SampleValue, value.SampleMeanDivisor, value.SampleType, value.SampleUnit, value.OutputUnit, ref value.Symbol, value.SourcePath);
+            return new Options(value.OutputFormat, value.CumSort, value.CallTree, value.DropNegative, value.CompactLabels, value.Ratio, value.Title, value.ProfileLabels, value.ActiveFilters, value.NumLabelUnits, value.NodeCount, value.NodeFraction, value.EdgeFraction, value.SampleValue, value.SampleMeanDivisor, value.SampleType, value.SampleUnit, value.OutputUnit, ref value.Symbol, value.SourcePath, value.TrimPath);
         }
     }
 }}}}}}}

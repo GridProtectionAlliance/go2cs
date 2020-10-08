@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 08:24:47 UTC
+// package main -- go2cs converted at 2020 October 08 03:43:51 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\dll_windows.go
 /*
 #include <windows.h>
@@ -19,7 +19,7 @@ DWORD getthread() {
 }
 */
 
-using windows = go...windows_package;
+using windows = go.runtime.testdata.testprogcgo.windows_package;
 using static go.builtin;
 
 namespace go

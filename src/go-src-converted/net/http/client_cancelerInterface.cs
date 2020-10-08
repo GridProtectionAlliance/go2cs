@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:18 UTC
+//     Generated on 2020 October 08 03:35:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using context = go.context_package;
 using tls = go.crypto.tls_package;
 using base64 = go.encoding.base64_package;
 using errors = go.errors_package;
@@ -22,6 +23,7 @@ using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using url = go.net.url_package;
+using reflect = go.reflect_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -61,7 +63,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -75,26 +77,27 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate void CancelRequestByRef(ref T value, ref Request _p0);
-            private delegate void CancelRequestByVal(T value, ref Request _p0);
+            private delegate void CancelRequestByPtr(ptr<T> value, ptr<Request> _p0);
+            private delegate void CancelRequestByVal(T value, ptr<Request> _p0);
 
-            private static readonly CancelRequestByRef s_CancelRequestByRef;
+            private static readonly CancelRequestByPtr s_CancelRequestByPtr;
             private static readonly CancelRequestByVal s_CancelRequestByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CancelRequest(ref Request _p0)
+            public void CancelRequest(ptr<Request> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CancelRequestByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CancelRequestByPtr is null || !m_target_is_ptr)
                 {
                     s_CancelRequestByVal!(target, _p0);
                     return;
                 }
 
-                s_CancelRequestByRef(ref target, _p0);
+                s_CancelRequestByPtr(m_target_ptr, _p0);
                 return;
                 
             }
@@ -105,23 +108,20 @@ namespace net
             static canceler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CancelRequest");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CancelRequest");
 
                 if (!(extensionMethod is null))
-                    s_CancelRequestByRef = extensionMethod.CreateStaticDelegate(typeof(CancelRequestByRef)) as CancelRequestByRef;
+                    s_CancelRequestByPtr = extensionMethod.CreateStaticDelegate(typeof(CancelRequestByPtr)) as CancelRequestByPtr;
 
-                if (s_CancelRequestByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CancelRequest");
+                extensionMethod = targetType.GetExtensionMethod("CancelRequest");
 
-                    if (!(extensionMethod is null))
-                        s_CancelRequestByVal = extensionMethod.CreateStaticDelegate(typeof(CancelRequestByVal)) as CancelRequestByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_CancelRequestByVal = extensionMethod.CreateStaticDelegate(typeof(CancelRequestByVal)) as CancelRequestByVal;
 
-                if (s_CancelRequestByRef is null && s_CancelRequestByVal is null)
+                if (s_CancelRequestByPtr is null && s_CancelRequestByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement canceler.CancelRequest method", new Exception("CancelRequest"));
             }
 

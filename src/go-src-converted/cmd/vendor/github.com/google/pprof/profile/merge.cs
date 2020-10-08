@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package profile -- go2cs converted at 2020 August 29 10:06:29 UTC
+// package profile -- go2cs converted at 2020 October 08 04:43:37 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\merge.go
 using fmt = go.fmt_package;
@@ -33,10 +33,12 @@ namespace pprof
         // Compact performs garbage collection on a profile to remove any
         // unreferenced fields. This is useful to reduce the size of a profile
         // after samples or locations have been removed.
-        private static ref Profile Compact(this ref Profile p)
+        private static ptr<Profile> Compact(this ptr<Profile> _addr_p)
         {
-            p, _ = Merge(new slice<ref Profile>(new ref Profile[] { p }));
-            return p;
+            ref Profile p = ref _addr_p.val;
+
+            p, _ = Merge(new slice<ptr<Profile>>(new ptr<Profile>[] { p }));
+            return _addr_p!;
         }
 
         // Merge merges all the profiles in profs into a single Profile.
@@ -46,24 +48,29 @@ namespace pprof
         // and period types or the merge will fail. profile.Period of the
         // resulting profile will be the maximum of all profiles, and
         // profile.TimeNanos will be the earliest nonzero one.
-        public static (ref Profile, error) Merge(slice<ref Profile> srcs)
+        public static (ptr<Profile>, error) Merge(slice<ptr<Profile>> srcs)
         {
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
             if (len(srcs) == 0L)
             {
-                return (null, fmt.Errorf("no profiles to merge"));
+                return (_addr_null!, error.As(fmt.Errorf("no profiles to merge"))!);
             }
+
             var (p, err) = combineHeaders(srcs);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            profileMerger pm = ref new profileMerger(p:p,samples:make(map[sampleKey]*Sample,len(srcs[0].Sample)),locations:make(map[locationKey]*Location,len(srcs[0].Location)),functions:make(map[functionKey]*Function,len(srcs[0].Function)),mappings:make(map[mappingKey]*Mapping,len(srcs[0].Mapping)),);
+
+            ptr<profileMerger> pm = addr(new profileMerger(p:p,samples:make(map[sampleKey]*Sample,len(srcs[0].Sample)),locations:make(map[locationKey]*Location,len(srcs[0].Location)),functions:make(map[functionKey]*Function,len(srcs[0].Function)),mappings:make(map[mappingKey]*Mapping,len(srcs[0].Mapping)),));
 
             foreach (var (_, src) in srcs)
             { 
                 // Clear the profile-specific hash tables
-                pm.locationsByID = make_map<ulong, ref Location>(len(src.Location));
-                pm.functionsByID = make_map<ulong, ref Function>(len(src.Function));
+                pm.locationsByID = make_map<ulong, ptr<Location>>(len(src.Location));
+                pm.functionsByID = make_map<ulong, ptr<Function>>(len(src.Function));
                 pm.mappingsByID = make_map<ulong, mapInfo>(len(src.Mapping));
 
                 if (len(pm.mappings) == 0L && len(src.Mapping) > 0L)
@@ -72,23 +79,25 @@ namespace pprof
                     // represents the main binary. Take the first Mapping we see,
                     // otherwise the operations below will add mappings in an
                     // arbitrary order.
-                    pm.mapMapping(srcs[0L].Mapping[0L]);
+                    pm.mapMapping(src.Mapping[0L]);
+
                 }
+
                 {
                     var s__prev2 = s;
 
                     foreach (var (_, __s) in src.Sample)
                     {
                         s = __s;
-                        if (!isZeroSample(s))
+                        if (!isZeroSample(_addr_s))
                         {
                             pm.mapSample(s);
                         }
+
                     }
 
                     s = s__prev2;
                 }
-
             }
             {
                 var s__prev1 = s;
@@ -96,34 +105,41 @@ namespace pprof
                 foreach (var (_, __s) in p.Sample)
                 {
                     s = __s;
-                    if (isZeroSample(s))
+                    if (isZeroSample(_addr_s))
                     { 
                         // If there are any zero samples, re-merge the profile to GC
                         // them.
-                        return Merge(new slice<ref Profile>(new ref Profile[] { p }));
+                        return _addr_Merge(new slice<ptr<Profile>>(new ptr<Profile>[] { p }))!;
+
                     }
+
                 }
 
                 s = s__prev1;
             }
 
-            return (p, null);
+            return (_addr_p!, error.As(null!)!);
+
         }
 
         // Normalize normalizes the source profile by multiplying each value in profile by the
         // ratio of the sum of the base profile's values of that sample type to the sum of the
         // source profile's value of that sample type.
-        private static error Normalize(this ref Profile p, ref Profile pb)
+        private static error Normalize(this ptr<Profile> _addr_p, ptr<Profile> _addr_pb)
         {
+            ref Profile p = ref _addr_p.val;
+            ref Profile pb = ref _addr_pb.val;
+
             {
                 var err = p.compatible(pb);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
 
             }
+
 
             var baseVals = make_slice<long>(len(p.SampleType));
             {
@@ -146,7 +162,6 @@ namespace pprof
                         i = i__prev2;
                         v = v__prev2;
                     }
-
                 }
 
                 s = s__prev1;
@@ -173,7 +188,6 @@ namespace pprof
                         i = i__prev2;
                         v = v__prev2;
                     }
-
                 }
 
                 s = s__prev1;
@@ -194,37 +208,43 @@ namespace pprof
                     {
                         normScale[i] = float64(baseVals[i]) / float64(srcVals[i]);
                     }
+
                 }
 
                 i = i__prev1;
             }
 
             p.ScaleN(normScale);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static bool isZeroSample(ref Sample s)
+        private static bool isZeroSample(ptr<Sample> _addr_s)
         {
+            ref Sample s = ref _addr_s.val;
+
             foreach (var (_, v) in s.Value)
             {
                 if (v != 0L)
                 {
                     return false;
                 }
+
             }
             return true;
+
         }
 
         private partial struct profileMerger
         {
             public ptr<Profile> p; // Memoization tables within a profile.
-            public map<ulong, ref Location> locationsByID;
-            public map<ulong, ref Function> functionsByID;
+            public map<ulong, ptr<Location>> locationsByID;
+            public map<ulong, ptr<Function>> functionsByID;
             public map<ulong, mapInfo> mappingsByID; // Memoization tables for profile entities.
-            public map<sampleKey, ref Sample> samples;
-            public map<locationKey, ref Location> locations;
-            public map<functionKey, ref Function> functions;
-            public map<mappingKey, ref Mapping> mappings;
+            public map<sampleKey, ptr<Sample>> samples;
+            public map<locationKey, ptr<Location>> locations;
+            public map<functionKey, ptr<Function>> functions;
+            public map<mappingKey, ptr<Mapping>> mappings;
         }
 
         private partial struct mapInfo
@@ -233,9 +253,12 @@ namespace pprof
             public long offset;
         }
 
-        private static ref Sample mapSample(this ref profileMerger pm, ref Sample src)
+        private static ptr<Sample> mapSample(this ptr<profileMerger> _addr_pm, ptr<Sample> _addr_src)
         {
-            Sample s = ref new Sample(Location:make([]*Location,len(src.Location)),Value:make([]int64,len(src.Value)),Label:make(map[string][]string,len(src.Label)),NumLabel:make(map[string][]int64,len(src.NumLabel)),NumUnit:make(map[string][]string,len(src.NumLabel)),);
+            ref profileMerger pm = ref _addr_pm.val;
+            ref Sample src = ref _addr_src.val;
+
+            ptr<Sample> s = addr(new Sample(Location:make([]*Location,len(src.Location)),Value:make([]int64,len(src.Value)),Label:make(map[string][]string,len(src.Label)),NumLabel:make(map[string][]int64,len(src.NumLabel)),NumUnit:make(map[string][]string,len(src.NumLabel)),));
             {
                 var i__prev1 = i;
 
@@ -311,19 +334,24 @@ namespace pprof
                         v = v__prev1;
                     }
 
-                    return ss;
+                    return _addr_ss!;
+
                 }
 
             }
+
             copy(s.Value, src.Value);
             pm.samples[k] = s;
             pm.p.Sample = append(pm.p.Sample, s);
-            return s;
+            return _addr_s!;
+
         }
 
         // key generates sampleKey to be used as a key for maps.
-        private static sampleKey key(this ref Sample sample)
+        private static sampleKey key(this ptr<Sample> _addr_sample)
         {
+            ref Sample sample = ref _addr_sample.val;
+
             var ids = make_slice<@string>(len(sample.Location));
             foreach (var (i, l) in sample.Location)
             {
@@ -366,6 +394,7 @@ namespace pprof
             sort.Strings(numlabels);
 
             return new sampleKey(strings.Join(ids,"|"),strings.Join(labels,""),strings.Join(numlabels,""),);
+
         }
 
         private partial struct sampleKey
@@ -375,12 +404,16 @@ namespace pprof
             public @string numlabels;
         }
 
-        private static ref Location mapLocation(this ref profileMerger pm, ref Location src)
+        private static ptr<Location> mapLocation(this ptr<profileMerger> _addr_pm, ptr<Location> _addr_src)
         {
+            ref profileMerger pm = ref _addr_pm.val;
+            ref Location src = ref _addr_src.val;
+
             if (src == null)
             {
-                return null;
+                return _addr_null!;
             }
+
             {
                 var l__prev1 = l;
 
@@ -389,15 +422,16 @@ namespace pprof
                 if (ok)
                 {
                     pm.locationsByID[src.ID] = l;
-                    return l;
+                    return _addr_l!;
                 }
 
                 l = l__prev1;
 
             }
 
+
             var mi = pm.mapMapping(src.Mapping);
-            Location l = ref new Location(ID:uint64(len(pm.p.Location)+1),Mapping:mi.m,Address:uint64(int64(src.Address)+mi.offset),Line:make([]Line,len(src.Line)),);
+            ptr<Location> l = addr(new Location(ID:uint64(len(pm.p.Location)+1),Mapping:mi.m,Address:uint64(int64(src.Address)+mi.offset),Line:make([]Line,len(src.Line)),IsFolded:src.IsFolded,));
             foreach (var (i, ln) in src.Line)
             {
                 l.Line[i] = pm.mapLine(ln);
@@ -411,26 +445,32 @@ namespace pprof
                 if (ok)
                 {
                     pm.locationsByID[src.ID] = ll;
-                    return ll;
+                    return _addr_ll!;
                 }
 
             }
+
             pm.locationsByID[src.ID] = l;
             pm.locations[k] = l;
             pm.p.Location = append(pm.p.Location, l);
-            return l;
+            return _addr_l!;
+
         }
 
         // key generates locationKey to be used as a key for maps.
-        private static locationKey key(this ref Location l)
+        private static locationKey key(this ptr<Location> _addr_l)
         {
-            locationKey key = new locationKey(addr:l.Address,);
+            ref Location l = ref _addr_l.val;
+
+            locationKey key = new locationKey(addr:l.Address,isFolded:l.IsFolded,);
             if (l.Mapping != null)
             { 
                 // Normalizes address to handle address space randomization.
                 key.addr -= l.Mapping.Start;
                 key.mappingID = l.Mapping.ID;
+
             }
+
             var lines = make_slice<@string>(len(l.Line) * 2L);
             foreach (var (i, line) in l.Line)
             {
@@ -438,10 +478,13 @@ namespace pprof
                 {
                     lines[i * 2L] = strconv.FormatUint(line.Function.ID, 16L);
                 }
+
                 lines[i * 2L + 1L] = strconv.FormatInt(line.Line, 16L);
+
             }
             key.lines = strings.Join(lines, "|");
             return key;
+
         }
 
         private partial struct locationKey
@@ -449,14 +492,19 @@ namespace pprof
             public ulong addr;
             public ulong mappingID;
             public @string lines;
+            public bool isFolded;
         }
 
-        private static mapInfo mapMapping(this ref profileMerger pm, ref Mapping src)
+        private static mapInfo mapMapping(this ptr<profileMerger> _addr_pm, ptr<Mapping> _addr_src)
         {
+            ref profileMerger pm = ref _addr_pm.val;
+            ref Mapping src = ref _addr_src.val;
+
             if (src == null)
             {
                 return new mapInfo();
             }
+
             {
                 var mi__prev1 = mi;
 
@@ -474,100 +522,85 @@ namespace pprof
             } 
 
             // Check memoization tables.
-            var (bk, pk) = src.key();
-            if (src.BuildID != "")
+            var mk = src.key();
             {
+                var m__prev1 = m;
+
+                var (m, ok) = pm.mappings[mk];
+
+                if (ok)
                 {
-                    var m__prev2 = m;
-
-                    var (m, ok) = pm.mappings[bk];
-
-                    if (ok)
-                    {
-                        mapInfo mi = new mapInfo(m,int64(m.Start)-int64(src.Start));
-                        pm.mappingsByID[src.ID] = mi;
-                        return mi;
-                    }
-
-                    m = m__prev2;
-
+                    mapInfo mi = new mapInfo(m,int64(m.Start)-int64(src.Start));
+                    pm.mappingsByID[src.ID] = mi;
+                    return mi;
                 }
+
+                m = m__prev1;
+
             }
-            if (src.File != "")
-            {
-                {
-                    var m__prev2 = m;
 
-                    (m, ok) = pm.mappings[pk];
-
-                    if (ok)
-                    {
-                        mi = new mapInfo(m,int64(m.Start)-int64(src.Start));
-                        pm.mappingsByID[src.ID] = mi;
-                        return mi;
-                    }
-
-                    m = m__prev2;
-
-                }
-            }
-            Mapping m = ref new Mapping(ID:uint64(len(pm.p.Mapping)+1),Start:src.Start,Limit:src.Limit,Offset:src.Offset,File:src.File,BuildID:src.BuildID,HasFunctions:src.HasFunctions,HasFilenames:src.HasFilenames,HasLineNumbers:src.HasLineNumbers,HasInlineFrames:src.HasInlineFrames,);
+            ptr<Mapping> m = addr(new Mapping(ID:uint64(len(pm.p.Mapping)+1),Start:src.Start,Limit:src.Limit,Offset:src.Offset,File:src.File,BuildID:src.BuildID,HasFunctions:src.HasFunctions,HasFilenames:src.HasFilenames,HasLineNumbers:src.HasLineNumbers,HasInlineFrames:src.HasInlineFrames,));
             pm.p.Mapping = append(pm.p.Mapping, m); 
 
             // Update memoization tables.
-            if (m.BuildID != "")
-            {
-                pm.mappings[bk] = m;
-            }
-            if (m.File != "")
-            {
-                pm.mappings[pk] = m;
-            }
+            pm.mappings[mk] = m;
             mi = new mapInfo(m,0);
             pm.mappingsByID[src.ID] = mi;
             return mi;
+
         }
 
         // key generates encoded strings of Mapping to be used as a key for
-        // maps. The first key represents only the build id, while the second
-        // represents only the file path.
-        private static (mappingKey, mappingKey) key(this ref Mapping m)
-        { 
+        // maps.
+        private static mappingKey key(this ptr<Mapping> _addr_m)
+        {
+            ref Mapping m = ref _addr_m.val;
+ 
             // Normalize addresses to handle address space randomization.
             // Round up to next 4K boundary to avoid minor discrepancies.
-            const ulong mapsizeRounding = 0x1000UL;
+            const ulong mapsizeRounding = (ulong)0x1000UL;
 
 
 
             var size = m.Limit - m.Start;
             size = size + mapsizeRounding - 1L;
             size = size - (size % mapsizeRounding);
+            mappingKey key = new mappingKey(size:size,offset:m.Offset,);
 
-            buildIDKey = new mappingKey(size,m.Offset,m.BuildID,);
 
-            pathKey = new mappingKey(size,m.Offset,m.File,);
-            return;
+            if (m.BuildID != "") 
+                key.buildIDOrFile = m.BuildID;
+            else if (m.File != "") 
+                key.buildIDOrFile = m.File;
+            else                         return key;
+
         }
 
         private partial struct mappingKey
         {
             public ulong size;
             public ulong offset;
-            public @string buildidIDOrFile;
+            public @string buildIDOrFile;
         }
 
-        private static Line mapLine(this ref profileMerger pm, Line src)
+        private static Line mapLine(this ptr<profileMerger> _addr_pm, Line src)
         {
+            ref profileMerger pm = ref _addr_pm.val;
+
             Line ln = new Line(Function:pm.mapFunction(src.Function),Line:src.Line,);
             return ln;
         }
 
-        private static ref Function mapFunction(this ref profileMerger pm, ref Function src)
+        private static ptr<Function> mapFunction(this ptr<profileMerger> _addr_pm, ptr<Function> _addr_src)
         {
+            ref profileMerger pm = ref _addr_pm.val;
+            ref Function src = ref _addr_src.val;
+
             if (src == null)
             {
-                return null;
+                return _addr_null!;
             }
+
             {
                 var f__prev1 = f;
 
@@ -575,12 +608,13 @@ namespace pprof
 
                 if (ok)
                 {
-                    return f;
+                    return _addr_f!;
                 }
 
                 f = f__prev1;
 
             }
+
             var k = src.key();
             {
                 var f__prev1 = f;
@@ -590,22 +624,26 @@ namespace pprof
                 if (ok)
                 {
                     pm.functionsByID[src.ID] = f;
-                    return f;
+                    return _addr_f!;
                 }
 
                 f = f__prev1;
 
             }
-            Function f = ref new Function(ID:uint64(len(pm.p.Function)+1),Name:src.Name,SystemName:src.SystemName,Filename:src.Filename,StartLine:src.StartLine,);
+
+            ptr<Function> f = addr(new Function(ID:uint64(len(pm.p.Function)+1),Name:src.Name,SystemName:src.SystemName,Filename:src.Filename,StartLine:src.StartLine,));
             pm.functions[k] = f;
             pm.functionsByID[src.ID] = f;
             pm.p.Function = append(pm.p.Function, f);
-            return f;
+            return _addr_f!;
+
         }
 
         // key generates a struct to be used as a key for maps.
-        private static functionKey key(this ref Function f)
+        private static functionKey key(this ptr<Function> _addr_f)
         {
+            ref Function f = ref _addr_f.val;
+
             return new functionKey(f.StartLine,f.Name,f.SystemName,f.Filename,);
         }
 
@@ -619,8 +657,11 @@ namespace pprof
 
         // combineHeaders checks that all profiles can be merged and returns
         // their combined profile.
-        private static (ref Profile, error) combineHeaders(slice<ref Profile> srcs)
+        private static (ptr<Profile>, error) combineHeaders(slice<ptr<Profile>> srcs)
         {
+            ptr<Profile> _p0 = default!;
+            error _p0 = default!;
+
             {
                 var s__prev1 = s;
 
@@ -632,10 +673,11 @@ namespace pprof
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
 
                     }
+
                 }
 
                 s = s__prev1;
@@ -644,6 +686,7 @@ namespace pprof
             long timeNanos = default;            long durationNanos = default;            long period = default;
 
             slice<@string> comments = default;
+            map seenComments = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{};
             @string defaultSampleType = default;
             {
                 var s__prev1 = s;
@@ -655,53 +698,80 @@ namespace pprof
                     {
                         timeNanos = s.TimeNanos;
                     }
+
                     durationNanos += s.DurationNanos;
                     if (period == 0L || period < s.Period)
                     {
                         period = s.Period;
                     }
-                    comments = append(comments, s.Comments);
+
+                    foreach (var (_, c) in s.Comments)
+                    {
+                        {
+                            var seen = seenComments[c];
+
+                            if (!seen)
+                            {
+                                comments = append(comments, c);
+                                seenComments[c] = true;
+                            }
+
+                        }
+
+                    }
                     if (defaultSampleType == "")
                     {
                         defaultSampleType = s.DefaultSampleType;
                     }
+
                 }
 
                 s = s__prev1;
             }
 
-            Profile p = ref new Profile(SampleType:make([]*ValueType,len(srcs[0].SampleType)),DropFrames:srcs[0].DropFrames,KeepFrames:srcs[0].KeepFrames,TimeNanos:timeNanos,DurationNanos:durationNanos,PeriodType:srcs[0].PeriodType,Period:period,Comments:comments,DefaultSampleType:defaultSampleType,);
+            ptr<Profile> p = addr(new Profile(SampleType:make([]*ValueType,len(srcs[0].SampleType)),DropFrames:srcs[0].DropFrames,KeepFrames:srcs[0].KeepFrames,TimeNanos:timeNanos,DurationNanos:durationNanos,PeriodType:srcs[0].PeriodType,Period:period,Comments:comments,DefaultSampleType:defaultSampleType,));
             copy(p.SampleType, srcs[0L].SampleType);
-            return (p, null);
+            return (_addr_p!, error.As(null!)!);
+
         }
 
         // compatible determines if two profiles can be compared/merged.
         // returns nil if the profiles are compatible; otherwise an error with
         // details on the incompatibility.
-        private static error compatible(this ref Profile p, ref Profile pb)
+        private static error compatible(this ptr<Profile> _addr_p, ptr<Profile> _addr_pb)
         {
-            if (!equalValueType(p.PeriodType, pb.PeriodType))
+            ref Profile p = ref _addr_p.val;
+            ref Profile pb = ref _addr_pb.val;
+
+            if (!equalValueType(_addr_p.PeriodType, _addr_pb.PeriodType))
             {
-                return error.As(fmt.Errorf("incompatible period types %v and %v", p.PeriodType, pb.PeriodType));
+                return error.As(fmt.Errorf("incompatible period types %v and %v", p.PeriodType, pb.PeriodType))!;
             }
+
             if (len(p.SampleType) != len(pb.SampleType))
             {
-                return error.As(fmt.Errorf("incompatible sample types %v and %v", p.SampleType, pb.SampleType));
+                return error.As(fmt.Errorf("incompatible sample types %v and %v", p.SampleType, pb.SampleType))!;
             }
+
             foreach (var (i) in p.SampleType)
             {
-                if (!equalValueType(p.SampleType[i], pb.SampleType[i]))
+                if (!equalValueType(_addr_p.SampleType[i], _addr_pb.SampleType[i]))
                 {
-                    return error.As(fmt.Errorf("incompatible sample types %v and %v", p.SampleType, pb.SampleType));
+                    return error.As(fmt.Errorf("incompatible sample types %v and %v", p.SampleType, pb.SampleType))!;
                 }
+
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // equalValueType returns true if the two value types are semantically
         // equal. It ignores the internal fields used during encode/decode.
-        private static bool equalValueType(ref ValueType st1, ref ValueType st2)
+        private static bool equalValueType(ptr<ValueType> _addr_st1, ptr<ValueType> _addr_st2)
         {
+            ref ValueType st1 = ref _addr_st1.val;
+            ref ValueType st2 = ref _addr_st2.val;
+
             return st1.Type == st2.Type && st1.Unit == st2.Unit;
         }
     }

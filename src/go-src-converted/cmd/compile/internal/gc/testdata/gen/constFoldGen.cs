@@ -8,7 +8,7 @@
 // launch with `go run constFoldGen.go` a file called constFold_test.go
 // will be written into the grandparent directory containing the tests.
 
-// package main -- go2cs converted at 2020 August 29 09:58:49 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:03 UTC
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\gen\constFoldGen.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
@@ -58,12 +58,14 @@ namespace go
                     {
                         ans = i / j;
                     }
+
                     break;
                 case "%": 
                     if (j != 0L)
                     {
                         ans = i % j;
                     }
+
                     break;
                 case "<<": 
                     ans = i << (int)(j);
@@ -85,6 +87,7 @@ namespace go
                     break;
             }
             return fmt.Sprintf("%d", ans);
+
         }
 
         // compute the result of i op j, cast as type t.
@@ -107,12 +110,14 @@ namespace go
                     {
                         ans = i / j;
                     }
+
                     break;
                 case "%": 
                     if (j != 0L)
                     {
                         ans = i % j;
                     }
+
                     break;
                 case "<<": 
                     ans = i << (int)(uint64(j));
@@ -134,6 +139,7 @@ namespace go
                     break;
             }
             return fmt.Sprintf("%d", ans);
+
         }
 
         private static void Main() => func((_, panic, __) =>
@@ -161,7 +167,9 @@ namespace go
                                 // shifts handled separately below, as they can have
                                 // different types on the LHS and RHS.
                                 continue;
+
                             }
+
                             fmt.Fprintf(w, "func TestConstFold%s%s(t *testing.T) {\n", s.name, o.name);
                             fmt.Fprintf(w, "\tvar x, y, r %s\n", s.name); 
                             // unsigned test cases
@@ -182,17 +190,18 @@ namespace go
                                             {
                                                 continue;
                                             }
+
                                             fmt.Fprintf(w, "\ty = %d\n", d);
                                             fmt.Fprintf(w, "\tr = x %s y\n", o.symbol);
                                             var want = ansU(c, d, s.name, o.symbol);
                                             fmt.Fprintf(w, "\tif r != %s {\n", want);
                                             fmt.Fprintf(w, "\t\tt.Errorf(\"%d %%s %d = %%d, want %s\", %q, r)\n", c, d, want, o.symbol);
                                             fmt.Fprintf(w, "\t}\n");
+
                                         }
 
                                         d = d__prev4;
                                     }
-
                                 } 
                                 // signed test cases
 
@@ -216,28 +225,29 @@ namespace go
                                             {
                                                 continue;
                                             }
+
                                             fmt.Fprintf(w, "\ty = %d\n", d);
                                             fmt.Fprintf(w, "\tr = x %s y\n", o.symbol);
                                             want = ansS(c, d, s.name, o.symbol);
                                             fmt.Fprintf(w, "\tif r != %s {\n", want);
                                             fmt.Fprintf(w, "\t\tt.Errorf(\"%d %%s %d = %%d, want %s\", %q, r)\n", c, d, want, o.symbol);
                                             fmt.Fprintf(w, "\t}\n");
+
                                         }
 
                                         d = d__prev4;
                                     }
-
                                 }
 
                                 c = c__prev3;
                             }
 
                             fmt.Fprintf(w, "}\n");
+
                         }
 
                         o = o__prev2;
                     }
-
                 } 
 
                 // Special signed/unsigned cases for shifts
@@ -253,6 +263,7 @@ namespace go
                     {
                         continue;
                     }
+
                     {
                         var o__prev3 = o;
 
@@ -263,6 +274,7 @@ namespace go
                             {
                                 continue;
                             }
+
                             fmt.Fprintf(w, "func TestConstFold%s%s%s(t *testing.T) {\n", ls.name, rs.name, o.name);
                             fmt.Fprintf(w, "\tvar x, r %s\n", ls.name);
                             fmt.Fprintf(w, "\tvar y %s\n", rs.name); 
@@ -290,7 +302,6 @@ namespace go
 
                                         d = d__prev5;
                                     }
-
                                 } 
                                 // signed LHS
 
@@ -320,19 +331,19 @@ namespace go
 
                                         d = d__prev5;
                                     }
-
                                 }
 
                                 c = c__prev4;
                             }
 
                             fmt.Fprintf(w, "}\n");
+
                         }
 
                         o = o__prev3;
                     }
-
                 }
+
             } 
 
             // Constant folding for comparisons
@@ -366,6 +377,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x == y { t.Errorf(\"%%d == %%d\", x, y) }\n");
                                     }
+
                                     if (x != y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x != y) { t.Errorf(\"!(%%d != %%d)\", x, y) }\n");
@@ -374,6 +386,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x != y { t.Errorf(\"%%d != %%d\", x, y) }\n");
                                     }
+
                                     if (x < y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x < y) { t.Errorf(\"!(%%d < %%d)\", x, y) }\n");
@@ -382,6 +395,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x < y { t.Errorf(\"%%d < %%d\", x, y) }\n");
                                     }
+
                                     if (x > y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x > y) { t.Errorf(\"!(%%d > %%d)\", x, y) }\n");
@@ -390,6 +404,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x > y { t.Errorf(\"%%d > %%d\", x, y) }\n");
                                     }
+
                                     if (x <= y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x <= y) { t.Errorf(\"!(%%d <= %%d)\", x, y) }\n");
@@ -398,6 +413,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x <= y { t.Errorf(\"%%d <= %%d\", x, y) }\n");
                                     }
+
                                     if (x >= y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x >= y) { t.Errorf(\"!(%%d >= %%d)\", x, y) }\n");
@@ -406,12 +422,13 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x >= y { t.Errorf(\"%%d >= %%d\", x, y) }\n");
                                     }
+
                                     fmt.Fprintf(w, "\t}\n");
+
                                 }
 
                                 y = y__prev3;
                             }
-
                         }
 
                         x = x__prev2;
@@ -440,6 +457,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x == y { t.Errorf(\"%%d == %%d\", x, y) }\n");
                                     }
+
                                     if (x != y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x != y) { t.Errorf(\"!(%%d != %%d)\", x, y) }\n");
@@ -448,6 +466,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x != y { t.Errorf(\"%%d != %%d\", x, y) }\n");
                                     }
+
                                     if (x < y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x < y) { t.Errorf(\"!(%%d < %%d)\", x, y) }\n");
@@ -456,6 +475,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x < y { t.Errorf(\"%%d < %%d\", x, y) }\n");
                                     }
+
                                     if (x > y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x > y) { t.Errorf(\"!(%%d > %%d)\", x, y) }\n");
@@ -464,6 +484,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x > y { t.Errorf(\"%%d > %%d\", x, y) }\n");
                                     }
+
                                     if (x <= y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x <= y) { t.Errorf(\"!(%%d <= %%d)\", x, y) }\n");
@@ -472,6 +493,7 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x <= y { t.Errorf(\"%%d <= %%d\", x, y) }\n");
                                     }
+
                                     if (x >= y)
                                     {
                                         fmt.Fprintf(w, "\t\tif !(x >= y) { t.Errorf(\"!(%%d >= %%d)\", x, y) }\n");
@@ -480,18 +502,20 @@ namespace go
                                     {
                                         fmt.Fprintf(w, "\t\tif x >= y { t.Errorf(\"%%d >= %%d\", x, y) }\n");
                                     }
+
                                     fmt.Fprintf(w, "\t}\n");
+
                                 }
 
                                 y = y__prev3;
                             }
-
                         }
 
                         x = x__prev2;
                     }
 
                     fmt.Fprintf(w, "}\n");
+
                 } 
 
                 // gofmt result
@@ -513,6 +537,7 @@ namespace go
             {
                 log.Fatalf("can't write output: %v\n", err);
             }
+
         });
     }
 }

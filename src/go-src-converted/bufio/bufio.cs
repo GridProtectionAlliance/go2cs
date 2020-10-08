@@ -5,12 +5,13 @@
 // Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer
 // object, creating another object (Reader or Writer) that also implements
 // the interface but provides buffering and some help for textual I/O.
-// package bufio -- go2cs converted at 2020 August 29 08:22:53 UTC
+// package bufio -- go2cs converted at 2020 October 08 03:26:17 UTC
 // import "bufio" ==> using bufio = go.bufio_package
 // Original source: C:\Go\src\bufio\bufio.go
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using io = go.io_package;
+using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 using static go.builtin;
 
@@ -18,7 +19,8 @@ namespace go
 {
     public static partial class bufio_package
     {
-        private static readonly long defaultBufSize = 4096L;
+        private static readonly long defaultBufSize = (long)4096L;
+
 
         public static var ErrInvalidUnreadByte = errors.New("bufio: invalid use of UnreadByte");        public static var ErrInvalidUnreadRune = errors.New("bufio: invalid use of UnreadRune");        public static var ErrBufferFull = errors.New("bufio: buffer full");        public static var ErrNegativeCount = errors.New("bufio: negative count");
 
@@ -32,68 +34,79 @@ namespace go
             public long r; // buf read and write positions
             public long w; // buf read and write positions
             public error err;
-            public long lastByte;
-            public long lastRuneSize;
+            public long lastByte; // last byte read for UnreadByte; -1 means invalid
+            public long lastRuneSize; // size of last rune read for UnreadRune; -1 means invalid
         }
 
-        private static readonly long minReadBufferSize = 16L;
+        private static readonly long minReadBufferSize = (long)16L;
 
-        private static readonly long maxConsecutiveEmptyReads = 100L;
-
-        // NewReaderSize returns a new Reader whose buffer has at least the specified
-        // size. If the argument io.Reader is already a Reader with large enough
-        // size, it returns the underlying Reader.
-
+        private static readonly long maxConsecutiveEmptyReads = (long)100L;
 
         // NewReaderSize returns a new Reader whose buffer has at least the specified
         // size. If the argument io.Reader is already a Reader with large enough
         // size, it returns the underlying Reader.
-        public static ref Reader NewReaderSize(io.Reader rd, long size)
+
+
+        // NewReaderSize returns a new Reader whose buffer has at least the specified
+        // size. If the argument io.Reader is already a Reader with large enough
+        // size, it returns the underlying Reader.
+        public static ptr<Reader> NewReaderSize(io.Reader rd, long size)
         { 
             // Is it already a Reader?
-            ref Reader (b, ok) = rd._<ref Reader>();
+            ptr<Reader> (b, ok) = rd._<ptr<Reader>>();
             if (ok && len(b.buf) >= size)
             {
-                return b;
+                return _addr_b!;
             }
+
             if (size < minReadBufferSize)
             {
                 size = minReadBufferSize;
             }
+
             ptr<Reader> r = @new<Reader>();
             r.reset(make_slice<byte>(size), rd);
-            return r;
+            return _addr_r!;
+
         }
 
         // NewReader returns a new Reader whose buffer has the default size.
-        public static ref Reader NewReader(io.Reader rd)
+        public static ptr<Reader> NewReader(io.Reader rd)
         {
-            return NewReaderSize(rd, defaultBufSize);
+            return _addr_NewReaderSize(rd, defaultBufSize)!;
         }
 
         // Size returns the size of the underlying buffer in bytes.
-        private static long Size(this ref Reader r)
+        private static long Size(this ptr<Reader> _addr_b)
         {
-            return len(r.buf);
+            ref Reader b = ref _addr_b.val;
+
+            return len(b.buf);
         }
 
         // Reset discards any buffered data, resets all state, and switches
         // the buffered reader to read from r.
-        private static void Reset(this ref Reader b, io.Reader r)
+        private static void Reset(this ptr<Reader> _addr_b, io.Reader r)
         {
+            ref Reader b = ref _addr_b.val;
+
             b.reset(b.buf, r);
         }
 
-        private static void reset(this ref Reader b, slice<byte> buf, io.Reader r)
+        private static void reset(this ptr<Reader> _addr_b, slice<byte> buf, io.Reader r)
         {
-            b.Value = new Reader(buf:buf,rd:r,lastByte:-1,lastRuneSize:-1,);
+            ref Reader b = ref _addr_b.val;
+
+            b.val = new Reader(buf:buf,rd:r,lastByte:-1,lastRuneSize:-1,);
         }
 
         private static var errNegativeRead = errors.New("bufio: reader returned negative count from Read");
 
         // fill reads a new chunk into the buffer.
-        private static void fill(this ref Reader _b) => func(_b, (ref Reader b, Defer _, Panic panic, Recover __) =>
-        { 
+        private static void fill(this ptr<Reader> _addr_b) => func((_, panic, __) =>
+        {
+            ref Reader b = ref _addr_b.val;
+ 
             // Slide existing data to beginning.
             if (b.r > 0L)
             {
@@ -101,6 +114,7 @@ namespace go
                 b.w -= b.r;
                 b.r = 0L;
             }
+
             if (b.w >= len(b.buf))
             {
                 panic("bufio: tried to fill full buffer");
@@ -114,38 +128,55 @@ namespace go
                 {
                     panic(errNegativeRead);
                 }
+
                 b.w += n;
                 if (err != null)
                 {
                     b.err = err;
-                    return;
+                    return ;
                 }
+
                 if (n > 0L)
                 {
-                    return;
+                    return ;
                 }
+
             }
 
             b.err = io.ErrNoProgress;
+
         });
 
-        private static error readErr(this ref Reader b)
+        private static error readErr(this ptr<Reader> _addr_b)
         {
+            ref Reader b = ref _addr_b.val;
+
             var err = b.err;
             b.err = null;
-            return error.As(err);
+            return error.As(err)!;
         }
 
         // Peek returns the next n bytes without advancing the reader. The bytes stop
         // being valid at the next read call. If Peek returns fewer than n bytes, it
         // also returns an error explaining why the read is short. The error is
         // ErrBufferFull if n is larger than b's buffer size.
-        private static (slice<byte>, error) Peek(this ref Reader b, long n)
+        //
+        // Calling Peek prevents a UnreadByte or UnreadRune call from succeeding
+        // until the next read operation.
+        private static (slice<byte>, error) Peek(this ptr<Reader> _addr_b, long n)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Reader b = ref _addr_b.val;
+
             if (n < 0L)
             {
-                return (null, ErrNegativeCount);
+                return (null, error.As(ErrNegativeCount)!);
             }
+
+            b.lastByte = -1L;
+            b.lastRuneSize = -1L;
+
             while (b.w - b.r < n && b.w - b.r < len(b.buf) && b.err == null)
             {
                 b.fill(); // b.w-b.r < len(b.buf) => buffer is not full
@@ -154,11 +185,11 @@ namespace go
 
             if (n > len(b.buf))
             {
-                return (b.buf[b.r..b.w], ErrBufferFull);
+                return (b.buf[b.r..b.w], error.As(ErrBufferFull)!);
             } 
 
             // 0 <= n <= len(b.buf)
-            error err = default;
+            error err = default!;
             {
                 var avail = b.w - b.r;
 
@@ -166,15 +197,18 @@ namespace go
                 { 
                     // not enough data in buffer
                     n = avail;
-                    err = error.As(b.readErr());
+                    err = error.As(b.readErr())!;
                     if (err == null)
                     {
-                        err = error.As(ErrBufferFull);
+                        err = error.As(ErrBufferFull)!;
                     }
+
                 }
 
             }
-            return (b.buf[b.r..b.r + n], err);
+
+            return (b.buf[b.r..b.r + n], error.As(err)!);
+
         }
 
         // Discard skips the next n bytes, returning the number of bytes discarded.
@@ -182,16 +216,22 @@ namespace go
         // If Discard skips fewer than n bytes, it also returns an error.
         // If 0 <= n <= b.Buffered(), Discard is guaranteed to succeed without
         // reading from the underlying io.Reader.
-        private static (long, error) Discard(this ref Reader b, long n)
+        private static (long, error) Discard(this ptr<Reader> _addr_b, long n)
         {
+            long discarded = default;
+            error err = default!;
+            ref Reader b = ref _addr_b.val;
+
             if (n < 0L)
             {
-                return (0L, ErrNegativeCount);
+                return (0L, error.As(ErrNegativeCount)!);
             }
+
             if (n == 0L)
             {
-                return;
+                return ;
             }
+
             var remain = n;
             while (true)
             {
@@ -201,21 +241,26 @@ namespace go
                     b.fill();
                     skip = b.Buffered();
                 }
+
                 if (skip > remain)
                 {
                     skip = remain;
                 }
+
                 b.r += skip;
                 remain -= skip;
                 if (remain == 0L)
                 {
-                    return (n, null);
+                    return (n, error.As(null!)!);
                 }
+
                 if (b.err != null)
                 {
-                    return (n - remain, b.readErr());
+                    return (n - remain, error.As(b.readErr())!);
                 }
+
             }
+
 
         }
 
@@ -223,20 +268,33 @@ namespace go
         // It returns the number of bytes read into p.
         // The bytes are taken from at most one Read on the underlying Reader,
         // hence n may be less than len(p).
+        // To read exactly len(p) bytes, use io.ReadFull(b, p).
         // At EOF, the count will be zero and err will be io.EOF.
-        private static (long, error) Read(this ref Reader _b, slice<byte> p) => func(_b, (ref Reader b, Defer _, Panic panic, Recover __) =>
+        private static (long, error) Read(this ptr<Reader> _addr_b, slice<byte> p) => func((_, panic, __) =>
         {
+            long n = default;
+            error err = default!;
+            ref Reader b = ref _addr_b.val;
+
             n = len(p);
             if (n == 0L)
             {
-                return (0L, b.readErr());
+                if (b.Buffered() > 0L)
+                {
+                    return (0L, error.As(null!)!);
+                }
+
+                return (0L, error.As(b.readErr())!);
+
             }
+
             if (b.r == b.w)
             {
                 if (b.err != null)
                 {
-                    return (0L, b.readErr());
+                    return (0L, error.As(b.readErr())!);
                 }
+
                 if (len(p) >= len(b.buf))
                 { 
                     // Large read, empty buffer.
@@ -246,12 +304,15 @@ namespace go
                     {
                         panic(errNegativeRead);
                     }
+
                     if (n > 0L)
                     {
                         b.lastByte = int(p[n - 1L]);
                         b.lastRuneSize = -1L;
                     }
-                    return (n, b.readErr());
+
+                    return (n, error.As(b.readErr())!);
+
                 } 
                 // One read.
                 // Do not use b.fill, which will loop.
@@ -262,11 +323,14 @@ namespace go
                 {
                     panic(errNegativeRead);
                 }
+
                 if (n == 0L)
                 {
-                    return (0L, b.readErr());
+                    return (0L, error.As(b.readErr())!);
                 }
+
                 b.w += n;
+
             } 
 
             // copy as much as we can
@@ -274,35 +338,48 @@ namespace go
             b.r += n;
             b.lastByte = int(b.buf[b.r - 1L]);
             b.lastRuneSize = -1L;
-            return (n, null);
+            return (n, error.As(null!)!);
+
         });
 
         // ReadByte reads and returns a single byte.
         // If no byte is available, returns an error.
-        private static (byte, error) ReadByte(this ref Reader b)
+        private static (byte, error) ReadByte(this ptr<Reader> _addr_b)
         {
+            byte _p0 = default;
+            error _p0 = default!;
+            ref Reader b = ref _addr_b.val;
+
             b.lastRuneSize = -1L;
             while (b.r == b.w)
             {
                 if (b.err != null)
                 {
-                    return (0L, b.readErr());
+                    return (0L, error.As(b.readErr())!);
                 }
+
                 b.fill(); // buffer is empty
             }
 
             var c = b.buf[b.r];
             b.r++;
             b.lastByte = int(c);
-            return (c, null);
+            return (c, error.As(null!)!);
+
         }
 
         // UnreadByte unreads the last byte. Only the most recently read byte can be unread.
-        private static error UnreadByte(this ref Reader b)
+        //
+        // UnreadByte returns an error if the most recent method called on the
+        // Reader was not a read operation. Notably, Peek is not considered a
+        // read operation.
+        private static error UnreadByte(this ptr<Reader> _addr_b)
         {
+            ref Reader b = ref _addr_b.val;
+
             if (b.lastByte < 0L || b.r == 0L && b.w > 0L)
             {
-                return error.As(ErrInvalidUnreadByte);
+                return error.As(ErrInvalidUnreadByte)!;
             } 
             // b.r > 0 || b.w == 0
             if (b.r > 0L)
@@ -313,18 +390,26 @@ namespace go
             { 
                 // b.r == 0 && b.w == 0
                 b.w = 1L;
+
             }
+
             b.buf[b.r] = byte(b.lastByte);
             b.lastByte = -1L;
             b.lastRuneSize = -1L;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // ReadRune reads a single UTF-8 encoded Unicode character and returns the
         // rune and its size in bytes. If the encoded rune is invalid, it consumes one byte
         // and returns unicode.ReplacementChar (U+FFFD) with a size of 1.
-        private static (int, long, error) ReadRune(this ref Reader b)
+        private static (int, long, error) ReadRune(this ptr<Reader> _addr_b)
         {
+            int r = default;
+            long size = default;
+            error err = default!;
+            ref Reader b = ref _addr_b.val;
+
             while (b.r + utf8.UTFMax > b.w && !utf8.FullRune(b.buf[b.r..b.w]) && b.err == null && b.w - b.r < len(b.buf))
             {
                 b.fill(); // b.w-b.r < len(buf) => buffer is not full
@@ -333,39 +418,48 @@ namespace go
             b.lastRuneSize = -1L;
             if (b.r == b.w)
             {
-                return (0L, 0L, b.readErr());
+                return (0L, 0L, error.As(b.readErr())!);
             }
+
             r = rune(b.buf[b.r]);
             size = 1L;
             if (r >= utf8.RuneSelf)
             {
                 r, size = utf8.DecodeRune(b.buf[b.r..b.w]);
             }
+
             b.r += size;
             b.lastByte = int(b.buf[b.r - 1L]);
             b.lastRuneSize = size;
-            return (r, size, null);
+            return (r, size, error.As(null!)!);
+
         }
 
-        // UnreadRune unreads the last rune. If the most recent read operation on
-        // the buffer was not a ReadRune, UnreadRune returns an error.  (In this
+        // UnreadRune unreads the last rune. If the most recent method called on
+        // the Reader was not a ReadRune, UnreadRune returns an error. (In this
         // regard it is stricter than UnreadByte, which will unread the last byte
         // from any read operation.)
-        private static error UnreadRune(this ref Reader b)
+        private static error UnreadRune(this ptr<Reader> _addr_b)
         {
+            ref Reader b = ref _addr_b.val;
+
             if (b.lastRuneSize < 0L || b.r < b.lastRuneSize)
             {
-                return error.As(ErrInvalidUnreadRune);
+                return error.As(ErrInvalidUnreadRune)!;
             }
+
             b.r -= b.lastRuneSize;
             b.lastByte = -1L;
             b.lastRuneSize = -1L;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Buffered returns the number of bytes that can be read from the current buffer.
-        private static long Buffered(this ref Reader b)
+        private static long Buffered(this ptr<Reader> _addr_b)
         {
+            ref Reader b = ref _addr_b.val;
+
             return b.w - b.r;
         }
 
@@ -379,18 +473,24 @@ namespace go
         // by the next I/O operation, most clients should use
         // ReadBytes or ReadString instead.
         // ReadSlice returns err != nil if and only if line does not end in delim.
-        private static (slice<byte>, error) ReadSlice(this ref Reader b, byte delim)
+        private static (slice<byte>, error) ReadSlice(this ptr<Reader> _addr_b, byte delim)
         {
+            slice<byte> line = default;
+            error err = default!;
+            ref Reader b = ref _addr_b.val;
+
+            long s = 0L; // search start index
             while (true)
             { 
                 // Search buffer.
                 {
                     var i__prev1 = i;
 
-                    var i = bytes.IndexByte(b.buf[b.r..b.w], delim);
+                    var i = bytes.IndexByte(b.buf[b.r + s..b.w], delim);
 
                     if (i >= 0L)
                     {
+                        i += s;
                         line = b.buf[b.r..b.r + i + 1L];
                         b.r += i + 1L;
                         break;
@@ -419,6 +519,9 @@ namespace go
                     err = ErrBufferFull;
                     break;
                 }
+
+                s = b.w - b.r; // do not rescan area we scanned before
+
                 b.fill(); // buffer is not full
             } 
 
@@ -441,7 +544,9 @@ namespace go
 
             }
 
-            return;
+
+            return ;
+
         }
 
         // ReadLine is a low-level line-reading primitive. Most callers should use
@@ -460,8 +565,13 @@ namespace go
         // Calling UnreadByte after ReadLine will always unread the last byte read
         // (possibly a character belonging to the line end) even if that byte is not
         // part of the line returned by ReadLine.
-        private static (slice<byte>, bool, error) ReadLine(this ref Reader _b) => func(_b, (ref Reader b, Defer _, Panic panic, Recover __) =>
+        private static (slice<byte>, bool, error) ReadLine(this ptr<Reader> _addr_b) => func((_, panic, __) =>
         {
+            slice<byte> line = default;
+            bool isPrefix = default;
+            error err = default!;
+            ref Reader b = ref _addr_b.val;
+
             line, err = b.ReadSlice('\n');
             if (err == ErrBufferFull)
             { 
@@ -474,20 +584,29 @@ namespace go
                     { 
                         // should be unreachable
                         panic("bufio: tried to rewind past start of buffer");
+
                     }
+
                     b.r--;
                     line = line[..len(line) - 1L];
+
                 }
-                return (line, true, null);
+
+                return (line, true, error.As(null!)!);
+
             }
+
             if (len(line) == 0L)
             {
                 if (err != null)
                 {
                     line = null;
                 }
-                return;
+
+                return ;
+
             }
+
             err = null;
 
             if (line[len(line) - 1L] == '\n')
@@ -497,10 +616,62 @@ namespace go
                 {
                     drop = 2L;
                 }
+
                 line = line[..len(line) - drop];
+
             }
-            return;
+
+            return ;
+
         });
+
+        // collectFragments reads until the first occurrence of delim in the input. It
+        // returns (slice of full buffers, remaining bytes before delim, total number
+        // of bytes in the combined first two elements, error).
+        // The complete result is equal to
+        // `bytes.Join(append(fullBuffers, finalFragment), nil)`, which has a
+        // length of `totalLen`. The result is strucured in this way to allow callers
+        // to minimize allocations and copies.
+        private static (slice<slice<byte>>, slice<byte>, long, error) collectFragments(this ptr<Reader> _addr_b, byte delim)
+        {
+            slice<slice<byte>> fullBuffers = default;
+            slice<byte> finalFragment = default;
+            long totalLen = default;
+            error err = default!;
+            ref Reader b = ref _addr_b.val;
+
+            slice<byte> frag = default; 
+            // Use ReadSlice to look for delim, accumulating full buffers.
+            while (true)
+            {
+                error e = default!;
+                frag, e = b.ReadSlice(delim);
+                if (e == null)
+                { // got final fragment
+                    break;
+
+                }
+
+                if (e != ErrBufferFull)
+                { // unexpected error
+                    err = e;
+                    break;
+
+                } 
+
+                // Make a copy of the buffer.
+                var buf = make_slice<byte>(len(frag));
+                copy(buf, frag);
+                fullBuffers = append(fullBuffers, buf);
+                totalLen += len(buf);
+
+            }
+
+
+            totalLen += len(frag);
+            return (fullBuffers, frag, totalLen, error.As(err)!);
+
+        }
 
         // ReadBytes reads until the first occurrence of delim in the input,
         // returning a slice containing the data up to and including the delimiter.
@@ -509,69 +680,24 @@ namespace go
         // ReadBytes returns err != nil if and only if the returned data does not end in
         // delim.
         // For simple uses, a Scanner may be more convenient.
-        private static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim)
-        { 
-            // Use ReadSlice to look for array,
-            // accumulating full buffers.
-            slice<byte> frag = default;
-            slice<slice<byte>> full = default;
-            error err = default;
-            while (true)
-            {
-                error e = default;
-                frag, e = b.ReadSlice(delim);
-                if (e == null)
-                { // got final fragment
-                    break;
-                }
-                if (e != ErrBufferFull)
-                { // unexpected error
-                    err = error.As(e);
-                    break;
-                } 
+        private static (slice<byte>, error) ReadBytes(this ptr<Reader> _addr_b, byte delim)
+        {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref Reader b = ref _addr_b.val;
 
-                // Make a copy of the buffer.
-                var buf = make_slice<byte>(len(frag));
-                copy(buf, frag);
-                full = append(full, buf);
-            } 
-
+            var (full, frag, n, err) = b.collectFragments(delim); 
             // Allocate new buffer to hold the full pieces and the fragment.
- 
-
-            // Allocate new buffer to hold the full pieces and the fragment.
-            long n = 0L;
-            {
-                var i__prev1 = i;
-
-                foreach (var (__i) in full)
-                {
-                    i = __i;
-                    n += len(full[i]);
-                }
-
-                i = i__prev1;
-            }
-
-            n += len(frag); 
-
+            var buf = make_slice<byte>(n);
+            n = 0L; 
             // Copy full pieces and fragment in.
-            buf = make_slice<byte>(n);
-            n = 0L;
+            foreach (var (i) in full)
             {
-                var i__prev1 = i;
-
-                foreach (var (__i) in full)
-                {
-                    i = __i;
-                    n += copy(buf[n..], full[i]);
-                }
-
-                i = i__prev1;
+                n += copy(buf[n..], full[i]);
             }
-
             copy(buf[n..], frag);
-            return (buf, err);
+            return (buf, error.As(err)!);
+
         }
 
         // ReadString reads until the first occurrence of delim in the input,
@@ -581,21 +707,42 @@ namespace go
         // ReadString returns err != nil if and only if the returned data does not end in
         // delim.
         // For simple uses, a Scanner may be more convenient.
-        private static (@string, error) ReadString(this ref Reader b, byte delim)
+        private static (@string, error) ReadString(this ptr<Reader> _addr_b, byte delim)
         {
-            var (bytes, err) = b.ReadBytes(delim);
-            return (string(bytes), err);
+            @string _p0 = default;
+            error _p0 = default!;
+            ref Reader b = ref _addr_b.val;
+
+            var (full, frag, n, err) = b.collectFragments(delim); 
+            // Allocate new buffer to hold the full pieces and the fragment.
+            strings.Builder buf = default;
+            buf.Grow(n); 
+            // Copy full pieces and fragment in.
+            foreach (var (_, fb) in full)
+            {
+                buf.Write(fb);
+            }
+            buf.Write(frag);
+            return (buf.String(), error.As(err)!);
+
         }
 
         // WriteTo implements io.WriterTo.
         // This may make multiple calls to the Read method of the underlying Reader.
-        private static (long, error) WriteTo(this ref Reader b, io.Writer w)
+        // If the underlying reader supports the WriteTo method,
+        // this calls the underlying WriteTo without buffering.
+        private static (long, error) WriteTo(this ptr<Reader> _addr_b, io.Writer w)
         {
+            long n = default;
+            error err = default!;
+            ref Reader b = ref _addr_b.val;
+
             n, err = b.writeBuf(w);
             if (err != null)
             {
-                return;
+                return ;
             }
+
             {
                 io.WriterTo (r, ok) = b.rd._<io.WriterTo>();
 
@@ -603,10 +750,11 @@ namespace go
                 {
                     var (m, err) = r.WriteTo(w);
                     n += m;
-                    return (n, err);
+                    return (n, error.As(err)!);
                 }
 
             }
+
 
             {
                 io.ReaderFrom (w, ok) = w._<io.ReaderFrom>();
@@ -615,15 +763,17 @@ namespace go
                 {
                     (m, err) = w.ReadFrom(b.rd);
                     n += m;
-                    return (n, err);
+                    return (n, error.As(err)!);
                 }
 
             }
+
 
             if (b.w - b.r < len(b.buf))
             {
                 b.fill(); // buffer not full
             }
+
             while (b.r < b.w)
             { 
                 // b.r < b.w => buffer is not empty
@@ -631,8 +781,9 @@ namespace go
                 n += m;
                 if (err != null)
                 {
-                    return (n, err);
+                    return (n, error.As(err)!);
                 }
+
                 b.fill(); // buffer is empty
             }
 
@@ -641,21 +792,29 @@ namespace go
             {
                 b.err = null;
             }
-            return (n, b.readErr());
+
+            return (n, error.As(b.readErr())!);
+
         }
 
         private static var errNegativeWrite = errors.New("bufio: writer returned negative count from Write");
 
         // writeBuf writes the Reader's buffer to the writer.
-        private static (long, error) writeBuf(this ref Reader _b, io.Writer w) => func(_b, (ref Reader b, Defer _, Panic panic, Recover __) =>
+        private static (long, error) writeBuf(this ptr<Reader> _addr_b, io.Writer w) => func((_, panic, __) =>
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref Reader b = ref _addr_b.val;
+
             var (n, err) = w.Write(b.buf[b.r..b.w]);
             if (n < 0L)
             {
                 panic(errNegativeWrite);
             }
+
             b.r += n;
-            return (int64(n), err);
+            return (int64(n), error.As(err)!);
+
         });
 
         // buffered output
@@ -677,81 +836,101 @@ namespace go
         // NewWriterSize returns a new Writer whose buffer has at least the specified
         // size. If the argument io.Writer is already a Writer with large enough
         // size, it returns the underlying Writer.
-        public static ref Writer NewWriterSize(io.Writer w, long size)
+        public static ptr<Writer> NewWriterSize(io.Writer w, long size)
         { 
             // Is it already a Writer?
-            ref Writer (b, ok) = w._<ref Writer>();
+            ptr<Writer> (b, ok) = w._<ptr<Writer>>();
             if (ok && len(b.buf) >= size)
             {
-                return b;
+                return _addr_b!;
             }
+
             if (size <= 0L)
             {
                 size = defaultBufSize;
             }
-            return ref new Writer(buf:make([]byte,size),wr:w,);
+
+            return addr(new Writer(buf:make([]byte,size),wr:w,));
+
         }
 
         // NewWriter returns a new Writer whose buffer has the default size.
-        public static ref Writer NewWriter(io.Writer w)
+        public static ptr<Writer> NewWriter(io.Writer w)
         {
-            return NewWriterSize(w, defaultBufSize);
+            return _addr_NewWriterSize(w, defaultBufSize)!;
         }
 
         // Size returns the size of the underlying buffer in bytes.
-        private static long Size(this ref Writer b)
+        private static long Size(this ptr<Writer> _addr_b)
         {
+            ref Writer b = ref _addr_b.val;
+
             return len(b.buf);
         }
 
         // Reset discards any unflushed buffered data, clears any error, and
         // resets b to write its output to w.
-        private static void Reset(this ref Writer b, io.Writer w)
+        private static void Reset(this ptr<Writer> _addr_b, io.Writer w)
         {
+            ref Writer b = ref _addr_b.val;
+
             b.err = null;
             b.n = 0L;
             b.wr = w;
         }
 
         // Flush writes any buffered data to the underlying io.Writer.
-        private static error Flush(this ref Writer b)
+        private static error Flush(this ptr<Writer> _addr_b)
         {
+            ref Writer b = ref _addr_b.val;
+
             if (b.err != null)
             {
-                return error.As(b.err);
+                return error.As(b.err)!;
             }
+
             if (b.n == 0L)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             var (n, err) = b.wr.Write(b.buf[0L..b.n]);
             if (n < b.n && err == null)
             {
                 err = io.ErrShortWrite;
             }
+
             if (err != null)
             {
                 if (n > 0L && n < b.n)
                 {
                     copy(b.buf[0L..b.n - n], b.buf[n..b.n]);
                 }
+
                 b.n -= n;
                 b.err = err;
-                return error.As(err);
+                return error.As(err)!;
+
             }
+
             b.n = 0L;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // Available returns how many bytes are unused in the buffer.
-        private static long Available(this ref Writer b)
+        private static long Available(this ptr<Writer> _addr_b)
         {
+            ref Writer b = ref _addr_b.val;
+
             return len(b.buf) - b.n;
         }
 
         // Buffered returns the number of bytes that have been written into the current buffer.
-        private static long Buffered(this ref Writer b)
+        private static long Buffered(this ptr<Writer> _addr_b)
         {
+            ref Writer b = ref _addr_b.val;
+
             return b.n;
         }
 
@@ -759,8 +938,12 @@ namespace go
         // It returns the number of bytes written.
         // If nn < len(p), it also returns an error explaining
         // why the write is short.
-        private static (long, error) Write(this ref Writer b, slice<byte> p)
+        private static (long, error) Write(this ptr<Writer> _addr_b, slice<byte> p)
         {
+            long nn = default;
+            error err = default!;
+            ref Writer b = ref _addr_b.val;
+
             while (len(p) > b.Available() && b.err == null)
             {
                 long n = default;
@@ -769,6 +952,7 @@ namespace go
                     // Large write, empty buffer.
                     // Write directly from p to avoid copy.
                     n, b.err = b.wr.Write(p);
+
                 }
                 else
                 {
@@ -776,53 +960,70 @@ namespace go
                     b.n += n;
                     b.Flush();
                 }
+
                 nn += n;
                 p = p[n..];
+
             }
 
             if (b.err != null)
             {
-                return (nn, b.err);
+                return (nn, error.As(b.err)!);
             }
+
             n = copy(b.buf[b.n..], p);
             b.n += n;
             nn += n;
-            return (nn, null);
+            return (nn, error.As(null!)!);
+
         }
 
         // WriteByte writes a single byte.
-        private static error WriteByte(this ref Writer b, byte c)
+        private static error WriteByte(this ptr<Writer> _addr_b, byte c)
         {
+            ref Writer b = ref _addr_b.val;
+
             if (b.err != null)
             {
-                return error.As(b.err);
+                return error.As(b.err)!;
             }
+
             if (b.Available() <= 0L && b.Flush() != null)
             {
-                return error.As(b.err);
+                return error.As(b.err)!;
             }
+
             b.buf[b.n] = c;
             b.n++;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // WriteRune writes a single Unicode code point, returning
         // the number of bytes written and any error.
-        private static (long, error) WriteRune(this ref Writer b, int r)
+        private static (long, error) WriteRune(this ptr<Writer> _addr_b, int r)
         {
+            long size = default;
+            error err = default!;
+            ref Writer b = ref _addr_b.val;
+
             if (r < utf8.RuneSelf)
             {
                 err = b.WriteByte(byte(r));
                 if (err != null)
                 {
-                    return (0L, err);
+                    return (0L, error.As(err)!);
                 }
-                return (1L, null);
+
+                return (1L, error.As(null!)!);
+
             }
+
             if (b.err != null)
             {
-                return (0L, b.err);
+                return (0L, error.As(b.err)!);
             }
+
             var n = b.Available();
             if (n < utf8.UTFMax)
             {
@@ -830,26 +1031,35 @@ namespace go
 
                 if (b.err != null)
                 {
-                    return (0L, b.err);
+                    return (0L, error.As(b.err)!);
                 }
+
                 n = b.Available();
                 if (n < utf8.UTFMax)
                 { 
                     // Can only happen if buffer is silly small.
                     return b.WriteString(string(r));
+
                 }
+
             }
+
             size = utf8.EncodeRune(b.buf[b.n..], r);
             b.n += size;
-            return (size, null);
+            return (size, error.As(null!)!);
+
         }
 
         // WriteString writes a string.
         // It returns the number of bytes written.
         // If the count is less than len(s), it also returns an error explaining
         // why the write is short.
-        private static (long, error) WriteString(this ref Writer b, @string s)
+        private static (long, error) WriteString(this ptr<Writer> _addr_b, @string s)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref Writer b = ref _addr_b.val;
+
             long nn = 0L;
             while (len(s) > b.Available() && b.err == null)
             {
@@ -862,17 +1072,30 @@ namespace go
 
             if (b.err != null)
             {
-                return (nn, b.err);
+                return (nn, error.As(b.err)!);
             }
+
             n = copy(b.buf[b.n..], s);
             b.n += n;
             nn += n;
-            return (nn, null);
+            return (nn, error.As(null!)!);
+
         }
 
-        // ReadFrom implements io.ReaderFrom.
-        private static (long, error) ReadFrom(this ref Writer b, io.Reader r)
+        // ReadFrom implements io.ReaderFrom. If the underlying writer
+        // supports the ReadFrom method, and b has no buffered data yet,
+        // this calls the underlying ReadFrom without buffering.
+        private static (long, error) ReadFrom(this ptr<Writer> _addr_b, io.Reader r)
         {
+            long n = default;
+            error err = default!;
+            ref Writer b = ref _addr_b.val;
+
+            if (b.err != null)
+            {
+                return (0L, error.As(b.err)!);
+            }
+
             if (b.Buffered() == 0L)
             {
                 {
@@ -880,11 +1103,15 @@ namespace go
 
                     if (ok)
                     {
-                        return w.ReadFrom(r);
+                        n, err = w.ReadFrom(r);
+                        b.err = err;
+                        return (n, error.As(err)!);
                     }
 
                 }
+
             }
+
             long m = default;
             while (true)
             {
@@ -895,11 +1122,13 @@ namespace go
 
                         if (err1 != null)
                         {
-                            return (n, err1);
+                            return (n, error.As(err1)!);
                         }
 
                     }
+
                 }
+
                 long nr = 0L;
                 while (nr < maxConsecutiveEmptyReads)
                 {
@@ -908,19 +1137,23 @@ namespace go
                     {
                         break;
                     }
+
                     nr++;
+
                 }
 
                 if (nr == maxConsecutiveEmptyReads)
                 {
-                    return (n, io.ErrNoProgress);
+                    return (n, error.As(io.ErrNoProgress)!);
                 }
+
                 b.n += m;
                 n += int64(m);
                 if (err != null)
                 {
                     break;
                 }
+
             }
 
             if (err == io.EOF)
@@ -934,24 +1167,30 @@ namespace go
                 {
                     err = null;
                 }
+
             }
-            return (n, err);
+
+            return (n, error.As(err)!);
+
         }
 
         // buffered input and output
 
         // ReadWriter stores pointers to a Reader and a Writer.
         // It implements io.ReadWriter.
-        public partial struct ReadWriter : Reader, Writer
+        public partial struct ReadWriter
         {
-            public Reader Reader;
-            public Writer Writer;
+            public ref ptr<Reader> ptr<Reader> => ref ptr<Reader>_ptr;
+            public ref ptr<Writer> ptr<Writer> => ref ptr<Writer>_ptr;
         }
 
         // NewReadWriter allocates a new ReadWriter that dispatches to r and w.
-        public static ref ReadWriter NewReadWriter(ref Reader r, ref Writer w)
+        public static ptr<ReadWriter> NewReadWriter(ptr<Reader> _addr_r, ptr<Writer> _addr_w)
         {
-            return ref new ReadWriter(r,w);
+            ref Reader r = ref _addr_r.val;
+            ref Writer w = ref _addr_w.val;
+
+            return addr(new ReadWriter(r,w));
         }
     }
 }

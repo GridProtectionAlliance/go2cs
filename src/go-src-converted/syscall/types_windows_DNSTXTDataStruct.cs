@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:38:32 UTC
+//     Generated on 2020 October 08 03:27:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace go
                 this.StringArray = default;
             }
 
-            public DNSTXTData(ushort StringCount = default, array<ref ushort> StringArray = default)
+            public DNSTXTData(ushort StringCount = default, array<ptr<ushort>> StringArray = default)
             {
                 this.StringCount = StringCount;
                 this.StringArray = StringArray;

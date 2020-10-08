@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 10:05:00 UTC
+// package main -- go2cs converted at 2020 October 08 04:42:36 UTC
 // Original source: C:\Go\src\cmd\trace\main.go
 using bufio = go.bufio_package;
 using browser = go.cmd.@internal.browser_package;
@@ -15,7 +15,11 @@ using log = go.log_package;
 using net = go.net_package;
 using http = go.net.http_package;
 using os = go.os_package;
+using runtime = go.runtime_package;
+using debug = go.runtime.debug_package;
 using sync = go.sync_package;
+
+using _pprof_ = go.net.http.pprof_package;
 using static go.builtin;
 using System;
 
@@ -23,7 +27,7 @@ namespace go
 {
     public static partial class main_package
     {
-        private static readonly @string usageMessage = "" + @"Usage of 'go tool trace':
+        private static readonly @string usageMessage = (@string)"" + @"Usage of 'go tool trace':
 Given a trace file produced by 'go test':
 	go test -trace=trace.out pkg
 
@@ -83,26 +87,26 @@ and is only actively tested on that browser.
                     break;
             }
 
-            Func<io.Writer, @string, error> pprofFunc = default;
-            switch (pprofFlag.Value)
+            Func<io.Writer, ptr<http.Request>, error> pprofFunc = default;
+            switch (pprofFlag.val)
             {
                 case "net": 
-                    pprofFunc = pprofIO;
+                    pprofFunc = pprofByGoroutine(computePprofIO);
                     break;
                 case "sync": 
-                    pprofFunc = pprofBlock;
+                    pprofFunc = pprofByGoroutine(computePprofBlock);
                     break;
                 case "syscall": 
-                    pprofFunc = pprofSyscall;
+                    pprofFunc = pprofByGoroutine(computePprofSyscall);
                     break;
                 case "sched": 
-                    pprofFunc = pprofSched;
+                    pprofFunc = pprofByGoroutine(computePprofSched);
                     break;
             }
             if (pprofFunc != null)
             {
                 {
-                    var err = pprofFunc(os.Stdout, "");
+                    var err = pprofFunc(os.Stdout, addr(new http.Request()));
 
                     if (err != null)
                     {
@@ -110,37 +114,42 @@ and is only actively tested on that browser.
                     }
 
                 }
+
                 os.Exit(0L);
+
             }
-            if (pprofFlag != "".Value)
+
+            if (pprofFlag != "".val)
             {
-                dief("unknown pprof type %s\n", pprofFlag.Value);
+                dief("unknown pprof type %s\n", pprofFlag.val);
             }
-            var (ln, err) = net.Listen("tcp", httpFlag.Value);
+
+            var (ln, err) = net.Listen("tcp", httpFlag.val);
             if (err != null)
             {
                 dief("failed to create server socket: %v\n", err);
             }
+
             log.Print("Parsing trace...");
             var (res, err) = parseTrace();
             if (err != null)
             {
                 dief("%v\n", err);
             }
-            if (debugFlag.Value)
+
+            if (debugFlag.val)
             {
                 trace.Print(res.Events);
                 os.Exit(0L);
             }
-            log.Print("Serializing trace...");
-            traceParams @params = ref new traceParams(parsed:res,endTime:int64(1<<63-1),);
-            var (data, err) = generateTrace(params);
-            if (err != null)
-            {
-                dief("%v\n", err);
-            }
+
+            reportMemoryUsage("after parsing trace");
+            debug.FreeOSMemory();
+
             log.Print("Splitting trace...");
-            ranges = splitTrace(data);
+            ranges = splitTrace(res);
+            reportMemoryUsage("after spliting trace");
+            debug.FreeOSMemory();
 
             @string addr = "http://" + ln.Addr().String();
             log.Printf("Opening browser. Trace viewer is listening on %s", addr);
@@ -150,6 +159,7 @@ and is only actively tested on that browser.
             http.HandleFunc("/", httpMain);
             err = http.Serve(ln, null);
             dief("failed to start http server: %v\n", err);
+
         }
 
         private static slice<Range> ranges = default;
@@ -158,26 +168,35 @@ and is only actively tested on that browser.
 
         // parseEvents is a compatibility wrapper that returns only
         // the Events part of trace.ParseResult returned by parseTrace.
-        private static (slice<ref trace.Event>, error) parseEvents()
+        private static (slice<ptr<trace.Event>>, error) parseEvents()
         {
+            slice<ptr<trace.Event>> _p0 = default;
+            error _p0 = default!;
+
             var (res, err) = parseTrace();
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            return (res.Events, err);
+
+            return (res.Events, error.As(err)!);
+
         }
 
         private static (trace.ParseResult, error) parseTrace() => func((defer, _, __) =>
         {
+            trace.ParseResult _p0 = default;
+            error _p0 = default!;
+
             loader.once.Do(() =>
             {
                 var (tracef, err) = os.Open(traceFile);
                 if (err != null)
                 {
                     loader.err = fmt.Errorf("failed to open trace file: %v", err);
-                    return;
+                    return ;
                 }
+
                 defer(tracef.Close()); 
 
                 // Parse and symbolize.
@@ -185,26 +204,32 @@ and is only actively tested on that browser.
                 if (err != null)
                 {
                     loader.err = fmt.Errorf("failed to parse trace: %v", err);
-                    return;
+                    return ;
                 }
+
                 loader.res = res;
+
             });
-            return (loader.res, loader.err);
+            return (loader.res, error.As(loader.err)!);
+
         });
 
         // httpMain serves the starting page.
-        private static void httpMain(http.ResponseWriter w, ref http.Request r)
+        private static void httpMain(http.ResponseWriter w, ptr<http.Request> _addr_r)
         {
+            ref http.Request r = ref _addr_r.val;
+
             {
                 var err = templMain.Execute(w, ranges);
 
                 if (err != null)
                 {
                     http.Error(w, err.Error(), http.StatusInternalServerError);
-                    return;
+                    return ;
                 }
 
             }
+
         }
 
         private static var templMain = template.Must(template.New("").Parse(@"
@@ -212,7 +237,7 @@ and is only actively tested on that browser.
 <body>
 {{if $}}
 	{{range $e := $}}
-		<a href=""/trace?start={{$e.Start}}&end={{$e.End}}"">View trace ({{$e.Name}})</a><br>
+		<a href=""{{$e.URL}}"">View trace ({{$e.Name}})</a><br>
 	{{end}}
 	<br>
 {{else}}
@@ -223,6 +248,9 @@ and is only actively tested on that browser.
 <a href=""/block"">Synchronization blocking profile</a> (<a href=""/block?raw=1"" download=""block.profile"">⬇</a>)<br>
 <a href=""/syscall"">Syscall blocking profile</a> (<a href=""/syscall?raw=1"" download=""syscall.profile"">⬇</a>)<br>
 <a href=""/sched"">Scheduler latency profile</a> (<a href=""/sche?raw=1"" download=""sched.profile"">⬇</a>)<br>
+<a href=""/usertasks"">User-defined tasks</a><br>
+<a href=""/userregions"">User-defined regions</a><br>
+<a href=""/mmu"">Minimum mutator utilization</a><br>
 </body>
 </html>
 "));
@@ -233,6 +261,37 @@ and is only actively tested on that browser.
 
             fmt.Fprintf(os.Stderr, msg, args);
             os.Exit(1L);
+        }
+
+        private static bool debugMemoryUsage = default;
+
+        private static void init()
+        {
+            var v = os.Getenv("DEBUG_MEMORY_USAGE");
+            debugMemoryUsage = v != "";
+        }
+
+        private static void reportMemoryUsage(@string msg)
+        {
+            if (!debugMemoryUsage)
+            {
+                return ;
+            }
+
+            ref runtime.MemStats s = ref heap(out ptr<runtime.MemStats> _addr_s);
+            runtime.ReadMemStats(_addr_s);
+            var w = os.Stderr;
+            fmt.Fprintf(w, "%s\n", msg);
+            fmt.Fprintf(w, " Alloc:\t%d Bytes\n", s.Alloc);
+            fmt.Fprintf(w, " Sys:\t%d Bytes\n", s.Sys);
+            fmt.Fprintf(w, " HeapReleased:\t%d Bytes\n", s.HeapReleased);
+            fmt.Fprintf(w, " HeapSys:\t%d Bytes\n", s.HeapSys);
+            fmt.Fprintf(w, " HeapInUse:\t%d Bytes\n", s.HeapInuse);
+            fmt.Fprintf(w, " HeapAlloc:\t%d Bytes\n", s.HeapAlloc);
+            ref @string dummy = ref heap(out ptr<@string> _addr_dummy);
+            fmt.Printf("Enter to continue...");
+            fmt.Scanf("%s", _addr_dummy);
+
         }
     }
 }

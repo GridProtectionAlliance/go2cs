@@ -3,13 +3,13 @@
 // license that can be found in the LICENSE file.
 
 // Package hex implements hexadecimal encoding and decoding.
-// package hex -- go2cs converted at 2020 August 29 08:31:42 UTC
+// package hex -- go2cs converted at 2020 October 08 03:36:48 UTC
 // import "encoding/hex" ==> using hex = go.encoding.hex_package
 // Original source: C:\Go\src\encoding\hex\hex.go
-using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using strings = go.strings_package;
 using static go.builtin;
 
 namespace go {
@@ -17,7 +17,7 @@ namespace encoding
 {
     public static partial class hex_package
     {
-        private static readonly @string hextable = "0123456789abcdef";
+        private static readonly @string hextable = (@string)"0123456789abcdef";
 
         // EncodedLen returns the length of an encoding of n source bytes.
         // Specifically, it returns n * 2.
@@ -36,12 +36,15 @@ namespace encoding
         // Encode implements hexadecimal encoding.
         public static long Encode(slice<byte> dst, slice<byte> src)
         {
-            foreach (var (i, v) in src)
+            long j = 0L;
+            foreach (var (_, v) in src)
             {
-                dst[i * 2L] = hextable[v >> (int)(4L)];
-                dst[i * 2L + 1L] = hextable[v & 0x0fUL];
+                dst[j] = hextable[v >> (int)(4L)];
+                dst[j + 1L] = hextable[v & 0x0fUL];
+                j += 2L;
             }
             return len(src) * 2L;
+
         }
 
         // ErrLength reports an attempt to decode an odd-length input
@@ -69,26 +72,35 @@ namespace encoding
         // Decode decodes src into DecodedLen(len(src)) bytes,
         // returning the actual number of bytes written to dst.
         //
-        // Decode expects that src contain only hexadecimal
-        // characters and that src should have an even length.
+        // Decode expects that src contains only hexadecimal
+        // characters and that src has even length.
         // If the input is malformed, Decode returns the number
         // of bytes decoded before the error.
         public static (long, error) Decode(slice<byte> dst, slice<byte> src)
         {
-            long i = default;
-            for (i = 0L; i < len(src) / 2L; i++)
+            long _p0 = default;
+            error _p0 = default!;
+
+            long i = 0L;
+            long j = 1L;
+            while (j < len(src))
             {
-                var (a, ok) = fromHexChar(src[i * 2L]);
+                var (a, ok) = fromHexChar(src[j - 1L]);
                 if (!ok)
                 {
-                    return (i, InvalidByteError(src[i * 2L]));
+                    return (i, error.As(InvalidByteError(src[j - 1L]))!);
+                j += 2L;
                 }
-                var (b, ok) = fromHexChar(src[i * 2L + 1L]);
+
+                var (b, ok) = fromHexChar(src[j]);
                 if (!ok)
                 {
-                    return (i, InvalidByteError(src[i * 2L + 1L]));
+                    return (i, error.As(InvalidByteError(src[j]))!);
                 }
+
                 dst[i] = (a << (int)(4L)) | b;
+                i++;
+
             }
 
             if (len(src) % 2L == 1L)
@@ -96,22 +108,29 @@ namespace encoding
                 // Check for invalid char before reporting bad length,
                 // since the invalid char (if present) is an earlier problem.
                 {
-                    var (_, ok) = fromHexChar(src[i * 2L]);
+                    var (_, ok) = fromHexChar(src[j - 1L]);
 
                     if (!ok)
                     {
-                        return (i, InvalidByteError(src[i * 2L]));
+                        return (i, error.As(InvalidByteError(src[j - 1L]))!);
                     }
 
                 }
-                return (i, ErrLength);
+
+                return (i, error.As(ErrLength)!);
+
             }
-            return (i, null);
+
+            return (i, error.As(null!)!);
+
         }
 
         // fromHexChar converts a hex character into its value and a success flag.
         private static (byte, bool) fromHexChar(byte c)
         {
+            byte _p0 = default;
+            bool _p0 = default;
+
 
             if ('0' <= c && c <= '9') 
                 return (c - '0', true);
@@ -120,6 +139,7 @@ namespace encoding
             else if ('A' <= c && c <= 'F') 
                 return (c - 'A' + 10L, true);
                         return (0L, false);
+
         }
 
         // EncodeToString returns the hexadecimal encoding of src.
@@ -132,32 +152,47 @@ namespace encoding
 
         // DecodeString returns the bytes represented by the hexadecimal string s.
         //
-        // DecodeString expects that src contain only hexadecimal
-        // characters and that src should have an even length.
-        // If the input is malformed, DecodeString returns a string
-        // containing the bytes decoded before the error.
+        // DecodeString expects that src contains only hexadecimal
+        // characters and that src has even length.
+        // If the input is malformed, DecodeString returns
+        // the bytes decoded before the error.
         public static (slice<byte>, error) DecodeString(@string s)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             slice<byte> src = (slice<byte>)s; 
             // We can use the source slice itself as the destination
             // because the decode loop increments by one and then the 'seen' byte is not used anymore.
             var (n, err) = Decode(src, src);
-            return (src[..n], err);
+            return (src[..n], error.As(err)!);
+
         }
 
         // Dump returns a string that contains a hex dump of the given data. The format
         // of the hex dump matches the output of `hexdump -C` on the command line.
         public static @string Dump(slice<byte> data)
         {
-            bytes.Buffer buf = default;
-            var dumper = Dumper(ref buf);
+            if (len(data) == 0L)
+            {
+                return "";
+            }
+
+            ref strings.Builder buf = ref heap(out ptr<strings.Builder> _addr_buf); 
+            // Dumper will write 79 bytes per complete 16 byte chunk, and at least
+            // 64 bytes for whatever remains. Round the allocation up, since only a
+            // maximum of 15 bytes will be wasted.
+            buf.Grow((1L + ((len(data) - 1L) / 16L)) * 79L);
+
+            var dumper = Dumper(_addr_buf);
             dumper.Write(data);
             dumper.Close();
             return buf.String();
+
         }
 
         // bufferSize is the number of hexadecimal characters to buffer in encoder and decoder.
-        private static readonly long bufferSize = 1024L;
+        private static readonly long bufferSize = (long)1024L;
 
 
 
@@ -171,11 +206,15 @@ namespace encoding
         // NewEncoder returns an io.Writer that writes lowercase hexadecimal characters to w.
         public static io.Writer NewEncoder(io.Writer w)
         {
-            return ref new encoder(w:w);
+            return addr(new encoder(w:w));
         }
 
-        private static (long, error) Write(this ref encoder e, slice<byte> p)
+        private static (long, error) Write(this ptr<encoder> _addr_e, slice<byte> p)
         {
+            long n = default;
+            error err = default!;
+            ref encoder e = ref _addr_e.val;
+
             while (len(p) > 0L && e.err == null)
             {
                 var chunkSize = bufferSize / 2L;
@@ -183,14 +222,17 @@ namespace encoding
                 {
                     chunkSize = len(p);
                 }
+
                 long written = default;
                 var encoded = Encode(e.@out[..], p[..chunkSize]);
                 written, e.err = e.w.Write(e.@out[..encoded]);
                 n += written / 2L;
                 p = p[chunkSize..];
+
             }
 
-            return (n, e.err);
+            return (n, error.As(e.err)!);
+
         }
 
         private partial struct decoder
@@ -205,11 +247,15 @@ namespace encoding
         // NewDecoder expects that r contain only an even number of hexadecimal characters.
         public static io.Reader NewDecoder(io.Reader r)
         {
-            return ref new decoder(r:r);
+            return addr(new decoder(r:r));
         }
 
-        private static (long, error) Read(this ref decoder d, slice<byte> p)
-        { 
+        private static (long, error) Read(this ptr<decoder> _addr_d, slice<byte> p)
+        {
+            long n = default;
+            error err = default!;
+            ref decoder d = ref _addr_d.val;
+ 
             // Fill internal buffer with sufficient bytes to decode
             if (len(d.@in) < 2L && d.err == null)
             {
@@ -233,7 +279,9 @@ namespace encoding
                         }
 
                     }
+
                 }
+
             } 
 
             // Decode internal buffer into output buffer
@@ -246,6 +294,7 @@ namespace encoding
                 }
 
             }
+
             var (numDec, err) = Decode(p, d.@in[..len(p) * 2L]);
             d.@in = d.@in[2L * numDec..];
             if (err != null)
@@ -253,11 +302,14 @@ namespace encoding
                 d.@in = null;
                 d.err = err; // Decode error; discard input remainder
             }
+
             if (len(d.@in) < 2L)
             {
-                return (numDec, d.err); // Only expose errors when buffer fully consumed
+                return (numDec, error.As(d.err)!); // Only expose errors when buffer fully consumed
             }
-            return (numDec, null);
+
+            return (numDec, error.As(null!)!);
+
         }
 
         // Dumper returns a WriteCloser that writes a hex dump of all written data to
@@ -265,7 +317,7 @@ namespace encoding
         // line.
         public static io.WriteCloser Dumper(io.Writer w)
         {
-            return ref new dumper(w:w);
+            return addr(new dumper(w:w));
         }
 
         private partial struct dumper
@@ -275,6 +327,7 @@ namespace encoding
             public array<byte> buf;
             public long used; // number of bytes in the current line
             public ulong n; // number of bytes, total
+            public bool closed;
         }
 
         private static byte toChar(byte b)
@@ -283,11 +336,22 @@ namespace encoding
             {
                 return '.';
             }
+
             return b;
+
         }
 
-        private static (long, error) Write(this ref dumper h, slice<byte> data)
-        { 
+        private static (long, error) Write(this ptr<dumper> _addr_h, slice<byte> data)
+        {
+            long n = default;
+            error err = default!;
+            ref dumper h = ref _addr_h.val;
+
+            if (h.closed)
+            {
+                return (0L, error.As(errors.New("encoding/hex: dumper closed"))!);
+            } 
+
             // Output lines look like:
             // 00000010  2e 2f 30 31 32 33 34 35  36 37 38 39 3a 3b 3c 3d  |./0123456789:;<=|
             // ^ offset                          ^ extra space              ^ ASCII of line.
@@ -307,9 +371,11 @@ namespace encoding
                     _, err = h.w.Write(h.buf[4L..]);
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
+
                 }
+
                 Encode(h.buf[..], data[i..i + 1L]);
                 h.buf[2L] = ' ';
                 long l = 3L;
@@ -318,6 +384,7 @@ namespace encoding
                     // There's an additional space after the 8th byte.
                     h.buf[3L] = ' ';
                     l = 4L;
+
                 }
                 else if (h.used == 15L)
                 { 
@@ -326,12 +393,15 @@ namespace encoding
                     h.buf[3L] = ' ';
                     h.buf[4L] = '|';
                     l = 5L;
+
                 }
+
                 _, err = h.w.Write(h.buf[..l]);
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
                 n++;
                 h.rightChars[h.used] = toChar(data[i]);
                 h.used++;
@@ -343,21 +413,35 @@ namespace encoding
                     _, err = h.w.Write(h.rightChars[..]);
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
+
                     h.used = 0L;
+
                 }
+
             }
-            return;
+            return ;
+
         }
 
-        private static error Close(this ref dumper h)
-        { 
+        private static error Close(this ptr<dumper> _addr_h)
+        {
+            error err = default!;
+            ref dumper h = ref _addr_h.val;
+ 
             // See the comments in Write() for the details of this format.
+            if (h.closed)
+            {
+                return ;
+            }
+
+            h.closed = true;
             if (h.used == 0L)
             {
-                return;
+                return ;
             }
+
             h.buf[0L] = ' ';
             h.buf[1L] = ' ';
             h.buf[2L] = ' ';
@@ -375,18 +459,22 @@ namespace encoding
                 {
                     l = 5L;
                 }
+
                 _, err = h.w.Write(h.buf[..l]);
                 if (err != null)
                 {
-                    return;
+                    return ;
                 }
+
                 h.used++;
+
             }
 
             h.rightChars[nBytes] = '|';
             h.rightChars[nBytes + 1L] = '\n';
             _, err = h.w.Write(h.rightChars[..nBytes + 2L]);
-            return;
+            return ;
+
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:07 UTC
+//     Generated on 2020 October 08 03:41:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -59,7 +59,7 @@ namespace http
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -73,10 +73,10 @@ namespace http
                 m_target_is_ptr = true;
             }
 
-            private delegate @string PublicSuffixByRef(ref T value, @string domain);
+            private delegate @string PublicSuffixByPtr(ptr<T> value, @string domain);
             private delegate @string PublicSuffixByVal(T value, @string domain);
 
-            private static readonly PublicSuffixByRef s_PublicSuffixByRef;
+            private static readonly PublicSuffixByPtr s_PublicSuffixByPtr;
             private static readonly PublicSuffixByVal s_PublicSuffixByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,17 +85,18 @@ namespace http
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PublicSuffixByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PublicSuffixByPtr is null || !m_target_is_ptr)
                     return s_PublicSuffixByVal!(target, domain);
 
-                return s_PublicSuffixByRef(ref target, domain);
+                return s_PublicSuffixByPtr(m_target_ptr, domain);
             }
 
-            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,11 +105,12 @@ namespace http
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -117,39 +119,33 @@ namespace http
             static PublicSuffixList()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PublicSuffix");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PublicSuffix");
 
                 if (!(extensionMethod is null))
-                    s_PublicSuffixByRef = extensionMethod.CreateStaticDelegate(typeof(PublicSuffixByRef)) as PublicSuffixByRef;
+                    s_PublicSuffixByPtr = extensionMethod.CreateStaticDelegate(typeof(PublicSuffixByPtr)) as PublicSuffixByPtr;
 
-                if (s_PublicSuffixByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PublicSuffix");
+                extensionMethod = targetType.GetExtensionMethod("PublicSuffix");
 
-                    if (!(extensionMethod is null))
-                        s_PublicSuffixByVal = extensionMethod.CreateStaticDelegate(typeof(PublicSuffixByVal)) as PublicSuffixByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PublicSuffixByVal = extensionMethod.CreateStaticDelegate(typeof(PublicSuffixByVal)) as PublicSuffixByVal;
 
-                if (s_PublicSuffixByRef is null && s_PublicSuffixByVal is null)
+                if (s_PublicSuffixByPtr is null && s_PublicSuffixByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement PublicSuffixList.PublicSuffix method", new Exception("PublicSuffix"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement PublicSuffixList.String method", new Exception("String"));
             }
 

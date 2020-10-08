@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:52:43 UTC
+//     Generated on 2020 October 08 04:09:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using printer = go.go.printer_package;
 using token = go.go.token_package;
+using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -53,9 +54,11 @@ namespace go
                 this.GoFiles = default;
                 this.GccFiles = default;
                 this.Preamble = default;
+                this.typedefs = default;
+                this.typedefList = default;
             }
 
-            public Package(@string PackageName = default, @string PackagePath = default, long PtrSize = default, long IntSize = default, slice<@string> GccOptions = default, bool GccIsClang = default, map<@string, slice<@string>> CgoFlags = default, map<@string, bool> Written = default, map<@string, ref Name> Name = default, slice<ref ExpFunc> ExpFunc = default, slice<ast.Decl> Decl = default, slice<@string> GoFiles = default, slice<@string> GccFiles = default, @string Preamble = default)
+            public Package(@string PackageName = default, @string PackagePath = default, long PtrSize = default, long IntSize = default, slice<@string> GccOptions = default, bool GccIsClang = default, map<@string, slice<@string>> CgoFlags = default, map<@string, bool> Written = default, map<@string, ptr<Name>> Name = default, slice<ptr<ExpFunc>> ExpFunc = default, slice<ast.Decl> Decl = default, slice<@string> GoFiles = default, slice<@string> GccFiles = default, @string Preamble = default, map<@string, bool> typedefs = default, slice<typedefInfo> typedefList = default)
             {
                 this.PackageName = PackageName;
                 this.PackagePath = PackagePath;
@@ -71,6 +74,8 @@ namespace go
                 this.GoFiles = GoFiles;
                 this.GccFiles = GccFiles;
                 this.Preamble = Preamble;
+                this.typedefs = typedefs;
+                this.typedefList = typedefList;
             }
 
             // Enable comparisons between nil and Package struct
@@ -93,7 +98,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Package Package_cast(dynamic value)
         {
-            return new Package(value.PackageName, value.PackagePath, value.PtrSize, value.IntSize, value.GccOptions, value.GccIsClang, value.CgoFlags, value.Written, value.Name, value.ExpFunc, value.Decl, value.GoFiles, value.GccFiles, value.Preamble);
+            return new Package(value.PackageName, value.PackagePath, value.PtrSize, value.IntSize, value.GccOptions, value.GccIsClang, value.CgoFlags, value.Written, value.Name, value.ExpFunc, value.Decl, value.GoFiles, value.GccFiles, value.Preamble, value.typedefs, value.typedefList);
         }
     }
 }

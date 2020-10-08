@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:50 UTC
+//     Generated on 2020 October 08 03:35:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,8 +14,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using cipher = go.crypto.cipher_package;
+using subtleoverlap = go.crypto.@internal.subtle_package;
 using subtle = go.crypto.subtle_package;
+using binary = go.encoding.binary_package;
 using errors = go.errors_package;
+using cpu = go.@internal.cpu_package;
 using go;
 
 namespace go {
@@ -32,13 +35,15 @@ namespace crypto
                 this.block = default;
                 this.hashKey = default;
                 this.nonceSize = default;
+                this.tagSize = default;
             }
 
-            public gcmAsm(ref ptr<aesCipherAsm> block = default, gcmHashKey hashKey = default, long nonceSize = default)
+            public gcmAsm(ref ptr<aesCipherAsm> block = default, gcmHashKey hashKey = default, long nonceSize = default, long tagSize = default)
             {
                 this.block = block;
                 this.hashKey = hashKey;
                 this.nonceSize = nonceSize;
+                this.tagSize = tagSize;
             }
 
             // Enable comparisons between nil and gcmAsm struct
@@ -61,7 +66,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static gcmAsm gcmAsm_cast(dynamic value)
         {
-            return new gcmAsm(ref value.block, value.hashKey, value.nonceSize);
+            return new gcmAsm(ref value.block, value.hashKey, value.nonceSize, value.tagSize);
         }
     }
 }}

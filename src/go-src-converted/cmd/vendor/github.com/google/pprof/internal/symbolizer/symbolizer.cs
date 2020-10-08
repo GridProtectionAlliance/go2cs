@@ -15,10 +15,9 @@
 // Package symbolizer provides a routine to populate a profile with
 // symbol, file and line number information. It relies on the
 // addr2liner and demangle packages to do the actual work.
-// package symbolizer -- go2cs converted at 2020 August 29 10:06:13 UTC
+// package symbolizer -- go2cs converted at 2020 October 08 04:43:26 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/symbolizer" ==> using symbolizer = go.cmd.vendor.github.com.google.pprof.@internal.symbolizer_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\symbolizer\symbolizer.go
-using tls = go.crypto.tls_package;
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using http = go.net.http_package;
@@ -32,6 +31,7 @@ using symbolz = go.github.com.google.pprof.@internal.symbolz_package;
 using profile = go.github.com.google.pprof.profile_package;
 using demangle = go.github.com.ianlancetaylor.demangle_package;
 using static go.builtin;
+using System;
 
 namespace go {
 namespace cmd {
@@ -48,6 +48,7 @@ namespace @internal
         {
             public plugin.ObjTool Obj;
             public plugin.UI UI;
+            public http.RoundTripper Transport;
         }
 
         // test taps for dependency injection
@@ -58,8 +59,11 @@ namespace @internal
         // Symbolize attempts to symbolize profile p. First uses binutils on
         // local binaries; if the source is a URL it attempts to get any
         // missed entries using symbolz.
-        private static error Symbolize(this ref Symbolizer s, @string mode, plugin.MappingSources sources, ref profile.Profile p)
+        private static error Symbolize(this ptr<Symbolizer> _addr_s, @string mode, plugin.MappingSources sources, ptr<profile.Profile> _addr_p)
         {
+            ref Symbolizer s = ref _addr_s.val;
+            ref profile.Profile p = ref _addr_p.val;
+
             var remote = true;
             var local = true;
             var fast = false;
@@ -75,7 +79,7 @@ namespace @internal
                     case "none": 
 
                     case "no": 
-                        return error.As(null);
+                        return error.As(null!)!;
                         break;
                     case "local": 
                         remote = false;
@@ -117,62 +121,69 @@ namespace @internal
                         s.UI.PrintErr("expecting -symbolize=[local|fastlocal|remote|none][:force][:demangle=[none|full|templates|default]");
                         break;
                 }
+
             }
-            error err = default;
+            error err = default!;
             if (local)
             { 
                 // Symbolize locally using binutils.
-                err = error.As(localSymbolize(p, fast, force, s.Obj, s.UI));
+                err = error.As(localSymbolize(p, fast, force, s.Obj, s.UI))!;
 
                 if (err != null)
                 {
                     s.UI.PrintErr("local symbolization: " + err.Error());
                 }
+
             }
+
             if (remote)
             {
-                err = error.As(symbolzSymbolize(p, force, sources, postURL, s.UI));
+                Func<@string, @string, (slice<byte>, error)> post = (source, post) =>
+                {
+                    return error.As(postURL(source, post, s.Transport))!;
+                }
+;
+                err = error.As(symbolzSymbolize(p, force, sources, post, s.UI))!;
 
                 if (err != null)
                 {
-                    return error.As(err); // Ran out of options.
+                    return error.As(err)!; // Ran out of options.
                 }
+
             }
+
             demangleFunction(p, force, demanglerMode);
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // postURL issues a POST to a URL over HTTP.
-        private static (slice<byte>, error) postURL(@string source, @string post) => func((defer, _, __) =>
+        private static (slice<byte>, error) postURL(@string source, @string post, http.RoundTripper tr) => func((defer, _, __) =>
         {
-            var (url, err) = url.Parse(source);
-            if (err != null)
-            {
-                return (null, err);
-            }
-            ref tls.Config tlsConfig = default;
-            if (url.Scheme == "https+insecure")
-            {
-                tlsConfig = ref new tls.Config(InsecureSkipVerify:true,);
-                url.Scheme = "https";
-                source = url.String();
-            }
-            http.Client client = ref new http.Client(Transport:&http.Transport{TLSClientConfig:tlsConfig,},);
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
+            ptr<http.Client> client = addr(new http.Client(Transport:tr,));
             var (resp, err) = client.Post(source, "application/octet-stream", strings.NewReader(post));
             if (err != null)
             {
-                return (null, fmt.Errorf("http post %s: %v", source, err));
+                return (null, error.As(fmt.Errorf("http post %s: %v", source, err))!);
             }
+
             defer(resp.Body.Close());
             if (resp.StatusCode != http.StatusOK)
             {
-                return (null, fmt.Errorf("http post %s: %v", source, statusCodeError(resp)));
+                return (null, error.As(fmt.Errorf("http post %s: %v", source, statusCodeError(_addr_resp)))!);
             }
+
             return ioutil.ReadAll(resp.Body);
+
         });
 
-        private static error statusCodeError(ref http.Response resp)
+        private static error statusCodeError(ptr<http.Response> _addr_resp)
         {
+            ref http.Response resp = ref _addr_resp.val;
+
             if (resp.Header.Get("X-Go-Pprof") != "" && strings.Contains(resp.Header.Get("Content-Type"), "text/plain"))
             { 
                 // error is from pprof endpoint
@@ -181,23 +192,28 @@ namespace @internal
 
                     if (err == null)
                     {
-                        return error.As(fmt.Errorf("server response: %s - %s", resp.Status, body));
+                        return error.As(fmt.Errorf("server response: %s - %s", resp.Status, body))!;
                     }
 
                 }
+
             }
-            return error.As(fmt.Errorf("server response: %s", resp.Status));
+
+            return error.As(fmt.Errorf("server response: %s", resp.Status))!;
+
         }
 
         // doLocalSymbolize adds symbol and line number information to all locations
         // in a profile. mode enables some options to control
         // symbolization.
-        private static error doLocalSymbolize(ref profile.Profile _prof, bool fast, bool force, plugin.ObjTool obj, plugin.UI ui) => func(_prof, (ref profile.Profile prof, Defer defer, Panic _, Recover __) =>
+        private static error doLocalSymbolize(ptr<profile.Profile> _addr_prof, bool fast, bool force, plugin.ObjTool obj, plugin.UI ui) => func((defer, _, __) =>
         {
+            ref profile.Profile prof = ref _addr_prof.val;
+
             if (fast)
             {
                 {
-                    ref binutils.Binutils (bu, ok) = obj._<ref binutils.Binutils>();
+                    ptr<binutils.Binutils> (bu, ok) = obj._<ptr<binutils.Binutils>>();
 
                     if (ok)
                     {
@@ -205,15 +221,18 @@ namespace @internal
                     }
 
                 }
+
             }
-            var (mt, err) = newMapping(prof, obj, ui, force);
+
+            var (mt, err) = newMapping(_addr_prof, obj, ui, force);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             defer(mt.close());
 
-            var functions = make_map<profile.Function, ref profile.Function>();
+            var functions = make_map<profile.Function, ptr<profile.Function>>();
             foreach (var (_, l) in mt.prof.Location)
             {
                 var m = l.Mapping;
@@ -222,31 +241,39 @@ namespace @internal
                 { 
                     // Nothing to do.
                     continue;
+
                 }
+
                 var (stack, err) = segment.SourceLine(l.Address);
                 if (err != null || len(stack) == 0L)
                 { 
                     // No answers from addr2line.
                     continue;
+
                 }
+
                 l.Line = make_slice<profile.Line>(len(stack));
+                l.IsFolded = false;
                 foreach (var (i, frame) in stack)
                 {
                     if (frame.Func != "")
                     {
                         m.HasFunctions = true;
                     }
+
                     if (frame.File != "")
                     {
                         m.HasFilenames = true;
                     }
+
                     if (frame.Line != 0L)
                     {
                         m.HasLineNumbers = true;
                     }
-                    profile.Function f = ref new profile.Function(Name:frame.Func,SystemName:frame.Func,Filename:frame.File,);
+
+                    ptr<profile.Function> f = addr(new profile.Function(Name:frame.Func,SystemName:frame.Func,Filename:frame.File,));
                     {
-                        var fp = functions[f.Value];
+                        var fp = functions[f.val];
 
                         if (fp != null)
                         {
@@ -254,27 +281,33 @@ namespace @internal
                         }
                         else
                         {
-                            functions[f.Value] = f;
+                            functions[f.val] = f;
                             f.ID = uint64(len(mt.prof.Function)) + 1L;
                             mt.prof.Function = append(mt.prof.Function, f);
                         }
 
                     }
+
                     l.Line[i] = new profile.Line(Function:f,Line:int64(frame.Line),);
+
                 }
                 if (len(stack) > 0L)
                 {
                     m.HasInlineFrames = true;
                 }
+
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         });
 
         // Demangle updates the function names in a profile with demangled C++
         // names, simplified according to demanglerMode. If force is set,
         // overwrite any names that appear already demangled.
-        public static void Demangle(ref profile.Profile prof, bool force, @string demanglerMode)
+        public static void Demangle(ptr<profile.Profile> _addr_prof, bool force, @string demanglerMode)
         {
+            ref profile.Profile prof = ref _addr_prof.val;
+
             if (force)
             { 
                 // Remove the current demangled names to force demangling
@@ -284,8 +317,11 @@ namespace @internal
                     {
                         f.Name = f.SystemName;
                     }
+
                 }
+
             }
+
             slice<demangle.Option> options = default;
             switch (demanglerMode)
             {
@@ -299,7 +335,7 @@ namespace @internal
                     options = new slice<demangle.Option>(new demangle.Option[] { demangle.NoClones });
                     break;
                 case "none": // no demangling
-                    return;
+                    return ;
                     break;
             } 
 
@@ -311,6 +347,7 @@ namespace @internal
                 {
                     continue; // Already demangled.
                 }
+
                 copy(o, options);
                 {
                     var demangled = demangle.Filter(fn.SystemName, o);
@@ -333,13 +370,18 @@ namespace @internal
                     {
                         name = removeMatching(name, '(', ')');
                     }
+
                     if (demanglerMode == "")
                     {
                         name = removeMatching(name, '<', '>');
                     }
+
                 }
+
                 fn.Name = name;
+
             }
+
         }
 
         // looksLikeDemangledCPlusPlus is a heuristic to decide if a name is
@@ -350,8 +392,11 @@ namespace @internal
             if (strings.Contains(demangled, ".<"))
             { // Skip java names of the form "class.<init>"
                 return false;
+
             }
+
             return strings.ContainsAny(demangled, "<>[]") || strings.Contains(demangled, "::");
+
         }
 
         // removeMatching removes nested instances of start..end from name.
@@ -375,6 +420,7 @@ namespace @internal
                             first = current;
                     index = strings.IndexAny(name[current..], s);
                         }
+
                     else if (name[current] == end) 
                         nesting--;
 
@@ -385,19 +431,25 @@ namespace @internal
                             current = first - 1L;
                         
                     current++;
+
                 }
 
             }
             return name;
+
         }
 
         // newMapping creates a mappingTable for a profile.
-        private static (ref mappingTable, error) newMapping(ref profile.Profile prof, plugin.ObjTool obj, plugin.UI ui, bool force)
+        private static (ptr<mappingTable>, error) newMapping(ptr<profile.Profile> _addr_prof, plugin.ObjTool obj, plugin.UI ui, bool force)
         {
-            mappingTable mt = ref new mappingTable(prof:prof,segments:make(map[*profile.Mapping]plugin.ObjFile),); 
+            ptr<mappingTable> _p0 = default!;
+            error _p0 = default!;
+            ref profile.Profile prof = ref _addr_prof.val;
+
+            ptr<mappingTable> mt = addr(new mappingTable(prof:prof,segments:make(map[*profile.Mapping]plugin.ObjFile),)); 
 
             // Identify used mappings
-            var mappings = make_map<ref profile.Mapping, bool>();
+            var mappings = make_map<ptr<profile.Mapping>, bool>();
             foreach (var (_, l) in prof.Location)
             {
                 mappings[l.Mapping] = true;
@@ -415,6 +467,7 @@ namespace @internal
                 {
                     continue;
                 }
+
                 if (m.File == "")
                 {
                     if (midx == 0L)
@@ -422,8 +475,10 @@ namespace @internal
                         ui.PrintErr("Main binary filename not available.");
                         continue;
                     }
+
                     missingBinaries = true;
                     continue;
+
                 } 
 
                 // Skip well-known system mappings
@@ -444,7 +499,9 @@ namespace @internal
                         }
 
                     }
+
                 }
+
                 var name = filepath.Base(m.File);
                 var (f, err) = obj.Open(m.File, m.Start, m.Limit, m.Offset);
                 if (err != null)
@@ -453,6 +510,7 @@ namespace @internal
                     missingBinaries = true;
                     continue;
                 }
+
                 {
                     var fid = f.BuildID();
 
@@ -465,13 +523,17 @@ namespace @internal
 
                 }
 
+
                 mt.segments[m] = f;
+
             }
             if (missingBinaries)
             {
                 ui.PrintErr("Some binary filenames not available. Symbolization may be incomplete.\n" + "Try setting PPROF_BINARY_PATH to the search path for local binaries.");
             }
-            return (mt, null);
+
+            return (_addr_mt!, error.As(null!)!);
+
         }
 
         // mappingTable contains the mechanisms for symbolization of a
@@ -479,16 +541,19 @@ namespace @internal
         private partial struct mappingTable
         {
             public ptr<profile.Profile> prof;
-            public map<ref profile.Mapping, plugin.ObjFile> segments;
+            public map<ptr<profile.Mapping>, plugin.ObjFile> segments;
         }
 
         // Close releases any external processes being used for the mapping.
-        private static void close(this ref mappingTable mt)
+        private static void close(this ptr<mappingTable> _addr_mt)
         {
+            ref mappingTable mt = ref _addr_mt.val;
+
             foreach (var (_, segment) in mt.segments)
             {
                 segment.Close();
             }
+
         }
     }
 }}}}}}}

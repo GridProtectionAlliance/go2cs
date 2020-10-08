@@ -4,13 +4,14 @@
 
 // Package httptrace provides mechanisms to trace the events within
 // HTTP client requests.
-// package httptrace -- go2cs converted at 2020 August 29 08:33:22 UTC
+// package httptrace -- go2cs converted at 2020 October 08 03:39:22 UTC
 // import "net/http/httptrace" ==> using httptrace = go.net.http.httptrace_package
 // Original source: C:\Go\src\net\http\httptrace\trace.go
 using context = go.context_package;
 using tls = go.crypto.tls_package;
 using nettrace = go.@internal.nettrace_package;
 using net = go.net_package;
+using textproto = go.net.textproto_package;
 using reflect = go.reflect_package;
 using time = go.time_package;
 using static go.builtin;
@@ -29,10 +30,10 @@ namespace http
 
         // ContextClientTrace returns the ClientTrace associated with the
         // provided context. If none, it returns nil.
-        public static ref ClientTrace ContextClientTrace(context.Context ctx)
+        public static ptr<ClientTrace> ContextClientTrace(context.Context ctx)
         {
-            ref ClientTrace (trace, _) = ctx.Value(new clientEventContextKey())._<ref ClientTrace>();
-            return trace;
+            ptr<ClientTrace> (trace, _) = ctx.Value(new clientEventContextKey())._<ptr<ClientTrace>>();
+            return _addr_trace!;
         }
 
         // WithClientTrace returns a new context based on the provided parent
@@ -40,19 +41,22 @@ namespace http
         // the provided trace hooks, in addition to any previous hooks
         // registered with ctx. Any hooks defined in the provided trace will
         // be called first.
-        public static context.Context WithClientTrace(context.Context ctx, ref ClientTrace _trace) => func(_trace, (ref ClientTrace trace, Defer _, Panic panic, Recover __) =>
+        public static context.Context WithClientTrace(context.Context ctx, ptr<ClientTrace> _addr_trace) => func((_, panic, __) =>
         {
+            ref ClientTrace trace = ref _addr_trace.val;
+
             if (trace == null)
             {
                 panic("nil trace");
             }
+
             var old = ContextClientTrace(ctx);
             trace.compose(old);
 
             ctx = context.WithValue(ctx, new clientEventContextKey(), trace);
             if (trace.hasNetHooks())
             {
-                nettrace.Trace nt = ref new nettrace.Trace(ConnectStart:trace.ConnectStart,ConnectDone:trace.ConnectDone,);
+                ptr<nettrace.Trace> nt = addr(new nettrace.Trace(ConnectStart:trace.ConnectStart,ConnectDone:trace.ConnectDone,));
                 if (trace.DNSStart != null)
                 {
                     nt.DNSStart = name =>
@@ -60,7 +64,9 @@ namespace http
                         trace.DNSStart(new DNSStartInfo(Host:name));
                     }
 ;
+
                 }
+
                 if (trace.DNSDone != null)
                 {
                     nt.DNSDone = (netIPs, coalesced, err) =>
@@ -71,12 +77,18 @@ namespace http
                             addrs[i] = ip._<net.IPAddr>();
                         }
                         trace.DNSDone(new DNSDoneInfo(Addrs:addrs,Coalesced:coalesced,Err:err,));
+
                     }
 ;
+
                 }
+
                 ctx = context.WithValue(ctx, new nettrace.TraceKey(), nt);
+
             }
+
             return ctx;
+
         });
 
         // ClientTrace is a set of hooks to run at various stages of an outgoing
@@ -107,7 +119,11 @@ namespace http
 // headers is available.
             public Action GotFirstResponseByte; // Got100Continue is called if the server replies with a "100
 // Continue" response.
-            public Action Got100Continue; // DNSStart is called when a DNS lookup begins.
+            public Action Got100Continue; // Got1xxResponse is called for each 1xx informational response header
+// returned before the final non-1xx response. Got1xxResponse is called
+// for "100 Continue" responses, even if Got100Continue is also defined.
+// If it returns an error, the client request is aborted with that error value.
+            public Func<long, textproto.MIMEHeader, error> Got1xxResponse; // DNSStart is called when a DNS lookup begins.
             public Action<DNSStartInfo> DNSStart; // DNSDone is called when a DNS lookup ends.
             public Action<DNSDoneInfo> DNSDone; // ConnectStart is called when a new connection's Dial begins.
 // If net.Dialer.DualStack (IPv6 "Happy Eyeballs") support is
@@ -118,15 +134,18 @@ namespace http
 // If net.Dialer.DualStack ("Happy Eyeballs") support is
 // enabled, this may be called multiple times.
             public Action<@string, @string, error> ConnectDone; // TLSHandshakeStart is called when the TLS handshake is started. When
-// connecting to a HTTPS site via a HTTP proxy, the handshake happens after
-// the CONNECT request is processed by the proxy.
+// connecting to an HTTPS site via an HTTP proxy, the handshake happens
+// after the CONNECT request is processed by the proxy.
             public Action TLSHandshakeStart; // TLSHandshakeDone is called after the TLS handshake with either the
 // successful handshake's connection state, or a non-nil error on handshake
 // failure.
-            public Action<tls.ConnectionState, error> TLSHandshakeDone; // WroteHeaders is called after the Transport has written
-// the request headers.
+            public Action<tls.ConnectionState, error> TLSHandshakeDone; // WroteHeaderField is called after the Transport has written
+// each request header. At the time of this call the values
+// might be buffered and not yet written to the network.
+            public Action<@string, slice<@string>> WroteHeaderField; // WroteHeaders is called after the Transport has written
+// all request headers.
             public Action WroteHeaders; // Wait100Continue is called if the Request specified
-// "Expected: 100-continue" and the Transport has written the
+// "Expect: 100-continue" and the Transport has written the
 // request headers but is waiting for "100 Continue" from the
 // server before writing the request body.
             public Action Wait100Continue; // WroteRequest is called with the result of writing the
@@ -144,12 +163,16 @@ namespace http
 
         // compose modifies t such that it respects the previously-registered hooks in old,
         // subject to the composition policy requested in t.Compose.
-        private static void compose(this ref ClientTrace t, ref ClientTrace old)
+        private static void compose(this ptr<ClientTrace> _addr_t, ptr<ClientTrace> _addr_old)
         {
+            ref ClientTrace t = ref _addr_t.val;
+            ref ClientTrace old = ref _addr_old.val;
+
             if (old == null)
             {
-                return;
+                return ;
             }
+
             var tv = reflect.ValueOf(t).Elem();
             var ov = reflect.ValueOf(old).Elem();
             var structType = tv.Type();
@@ -161,11 +184,13 @@ namespace http
                 {
                     continue;
                 }
+
                 var of = ov.Field(i);
                 if (of.IsNil())
                 {
                     continue;
                 }
+
                 if (tf.IsNil())
                 {
                     tf.Set(of);
@@ -183,7 +208,9 @@ namespace http
                     return of.Call(args);
                 });
                 tv.Field(i).Set(newFunc);
+
             }
+
 
         }
 
@@ -202,13 +229,17 @@ namespace http
             public bool Coalesced;
         }
 
-        private static bool hasNetHooks(this ref ClientTrace t)
+        private static bool hasNetHooks(this ptr<ClientTrace> _addr_t)
         {
+            ref ClientTrace t = ref _addr_t.val;
+
             if (t == null)
             {
                 return false;
             }
+
             return t.DNSStart != null || t.DNSDone != null || t.ConnectStart != null || t.ConnectDone != null;
+
         }
 
         // GotConnInfo is the argument to the ClientTrace.GotConn function and

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:01:01 UTC
+//     Generated on 2020 October 08 04:34:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,19 +13,28 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using json = go.encoding.json_package;
+using errors = go.errors_package;
 using fmt = go.fmt_package;
 using build = go.go.build_package;
+using scanner = go.go.scanner_package;
 using token = go.go.token_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using pathpkg = go.path_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using modinfo = go.cmd.go.@internal.modinfo_package;
+using par = go.cmd.go.@internal.par_package;
+using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
 using go;
 
@@ -44,10 +53,12 @@ namespace @internal
             {
                 this.Build = default;
                 this.Imports = default;
+                this.CompiledImports = default;
                 this.RawImports = default;
                 this.ForceLibrary = default;
                 this.CmdlineFiles = default;
                 this.CmdlinePkg = default;
+                this.CmdlinePkgLiteral = default;
                 this.Local = default;
                 this.LocalPrefix = default;
                 this.ExeName = default;
@@ -55,20 +66,24 @@ namespace @internal
                 this.CoverVars = default;
                 this.OmitDebug = default;
                 this.GobinSubdir = default;
+                this.BuildInfo = default;
+                this.TestmainGo = default;
                 this.Asmflags = default;
                 this.Gcflags = default;
                 this.Ldflags = default;
                 this.Gccgoflags = default;
             }
 
-            public PackageInternal(ref ptr<build.Package> Build = default, slice<ref Package> Imports = default, slice<@string> RawImports = default, bool ForceLibrary = default, bool CmdlineFiles = default, bool CmdlinePkg = default, bool Local = default, @string LocalPrefix = default, @string ExeName = default, @string CoverMode = default, map<@string, ref CoverVar> CoverVars = default, bool OmitDebug = default, bool GobinSubdir = default, slice<@string> Asmflags = default, slice<@string> Gcflags = default, slice<@string> Ldflags = default, slice<@string> Gccgoflags = default)
+            public PackageInternal(ref ptr<build.Package> Build = default, slice<ptr<Package>> Imports = default, slice<@string> CompiledImports = default, slice<@string> RawImports = default, bool ForceLibrary = default, bool CmdlineFiles = default, bool CmdlinePkg = default, bool CmdlinePkgLiteral = default, bool Local = default, @string LocalPrefix = default, @string ExeName = default, @string CoverMode = default, map<@string, ptr<CoverVar>> CoverVars = default, bool OmitDebug = default, bool GobinSubdir = default, @string BuildInfo = default, ref ptr<slice<byte>> TestmainGo = default, slice<@string> Asmflags = default, slice<@string> Gcflags = default, slice<@string> Ldflags = default, slice<@string> Gccgoflags = default)
             {
                 this.Build = Build;
                 this.Imports = Imports;
+                this.CompiledImports = CompiledImports;
                 this.RawImports = RawImports;
                 this.ForceLibrary = ForceLibrary;
                 this.CmdlineFiles = CmdlineFiles;
                 this.CmdlinePkg = CmdlinePkg;
+                this.CmdlinePkgLiteral = CmdlinePkgLiteral;
                 this.Local = Local;
                 this.LocalPrefix = LocalPrefix;
                 this.ExeName = ExeName;
@@ -76,6 +91,8 @@ namespace @internal
                 this.CoverVars = CoverVars;
                 this.OmitDebug = OmitDebug;
                 this.GobinSubdir = GobinSubdir;
+                this.BuildInfo = BuildInfo;
+                this.TestmainGo = TestmainGo;
                 this.Asmflags = Asmflags;
                 this.Gcflags = Gcflags;
                 this.Ldflags = Ldflags;
@@ -102,7 +119,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static PackageInternal PackageInternal_cast(dynamic value)
         {
-            return new PackageInternal(ref value.Build, value.Imports, value.RawImports, value.ForceLibrary, value.CmdlineFiles, value.CmdlinePkg, value.Local, value.LocalPrefix, value.ExeName, value.CoverMode, value.CoverVars, value.OmitDebug, value.GobinSubdir, value.Asmflags, value.Gcflags, value.Ldflags, value.Gccgoflags);
+            return new PackageInternal(ref value.Build, value.Imports, value.CompiledImports, value.RawImports, value.ForceLibrary, value.CmdlineFiles, value.CmdlinePkg, value.CmdlinePkgLiteral, value.Local, value.LocalPrefix, value.ExeName, value.CoverMode, value.CoverVars, value.OmitDebug, value.GobinSubdir, value.BuildInfo, ref value.TestmainGo, value.Asmflags, value.Gcflags, value.Ldflags, value.Gccgoflags);
         }
     }
 }}}}

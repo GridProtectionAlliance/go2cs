@@ -4,7 +4,7 @@
 
 // +build go1.7
 
-// package gc -- go2cs converted at 2020 August 29 09:29:30 UTC
+// package gc -- go2cs converted at 2020 October 08 04:31:21 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\trace.go
 using os = go.os_package;
@@ -30,6 +30,7 @@ namespace @internal
             {
                 Fatalf("%v", err);
             }
+
             {
                 var err = tracepkg.Start(f);
 
@@ -39,7 +40,9 @@ namespace @internal
                 }
 
             }
+
             atExit(tracepkg.Stop);
+
         }
     }
 }}}}

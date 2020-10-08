@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:17 UTC
+//     Generated on 2020 October 08 03:26:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,10 +69,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ReadRuneByRef(ref T value);
+            private delegate (long, error) ReadRuneByPtr(ptr<T> value);
             private delegate (long, error) ReadRuneByVal(T value);
 
-            private static readonly ReadRuneByRef s_ReadRuneByRef;
+            private static readonly ReadRuneByPtr s_ReadRuneByPtr;
             private static readonly ReadRuneByVal s_ReadRuneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -81,17 +81,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadRuneByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadRuneByPtr is null || !m_target_is_ptr)
                     return s_ReadRuneByVal!(target);
 
-                return s_ReadRuneByRef(ref target);
+                return s_ReadRuneByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) UnreadRuneByRef(ref T value);
+            private delegate (long, error) UnreadRuneByPtr(ptr<T> value);
             private delegate (long, error) UnreadRuneByVal(T value);
 
-            private static readonly UnreadRuneByRef s_UnreadRuneByRef;
+            private static readonly UnreadRuneByPtr s_UnreadRuneByPtr;
             private static readonly UnreadRuneByVal s_UnreadRuneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,17 +101,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnreadRuneByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnreadRuneByPtr is null || !m_target_is_ptr)
                     return s_UnreadRuneByVal!(target);
 
-                return s_UnreadRuneByRef(ref target);
+                return s_UnreadRuneByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) SkipSpaceByRef(ref T value);
+            private delegate (long, error) SkipSpaceByPtr(ptr<T> value);
             private delegate (long, error) SkipSpaceByVal(T value);
 
-            private static readonly SkipSpaceByRef s_SkipSpaceByRef;
+            private static readonly SkipSpaceByPtr s_SkipSpaceByPtr;
             private static readonly SkipSpaceByVal s_SkipSpaceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -119,17 +121,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SkipSpaceByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SkipSpaceByPtr is null || !m_target_is_ptr)
                     return s_SkipSpaceByVal!(target);
 
-                return s_SkipSpaceByRef(ref target);
+                return s_SkipSpaceByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) TokenByRef(ref T value, bool skipSpace, Func<int, bool> f);
+            private delegate (long, error) TokenByPtr(ptr<T> value, bool skipSpace, Func<int, bool> f);
             private delegate (long, error) TokenByVal(T value, bool skipSpace, Func<int, bool> f);
 
-            private static readonly TokenByRef s_TokenByRef;
+            private static readonly TokenByPtr s_TokenByPtr;
             private static readonly TokenByVal s_TokenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -138,17 +141,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TokenByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TokenByPtr is null || !m_target_is_ptr)
                     return s_TokenByVal!(target, skipSpace, f);
 
-                return s_TokenByRef(ref target, skipSpace, f);
+                return s_TokenByPtr(m_target_ptr, skipSpace, f);
             }
 
-            private delegate (long, error) WidthByRef(ref T value);
+            private delegate (long, error) WidthByPtr(ptr<T> value);
             private delegate (long, error) WidthByVal(T value);
 
-            private static readonly WidthByRef s_WidthByRef;
+            private static readonly WidthByPtr s_WidthByPtr;
             private static readonly WidthByVal s_WidthByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -157,17 +161,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WidthByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WidthByPtr is null || !m_target_is_ptr)
                     return s_WidthByVal!(target);
 
-                return s_WidthByRef(ref target);
+                return s_WidthByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> buf);
+            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> buf);
             private delegate (long, error) ReadByVal(T value, slice<byte> buf);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -176,11 +181,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, buf);
 
-                return s_ReadByRef(ref target, buf);
+                return s_ReadByPtr(m_target_ptr, buf);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -189,103 +195,85 @@ namespace go
             static ScanState()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("ReadRune");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadRune");
 
                 if (!(extensionMethod is null))
-                    s_ReadRuneByRef = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByRef)) as ReadRuneByRef;
+                    s_ReadRuneByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByPtr)) as ReadRuneByPtr;
 
-                if (s_ReadRuneByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("ReadRune");
+                extensionMethod = targetType.GetExtensionMethod("ReadRune");
 
-                    if (!(extensionMethod is null))
-                        s_ReadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByVal)) as ReadRuneByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByVal)) as ReadRuneByVal;
 
-                if (s_ReadRuneByRef is null && s_ReadRuneByVal is null)
+                if (s_ReadRuneByPtr is null && s_ReadRuneByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ScanState.ReadRune method", new Exception("ReadRune"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UnreadRune");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UnreadRune");
 
                 if (!(extensionMethod is null))
-                    s_UnreadRuneByRef = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByRef)) as UnreadRuneByRef;
+                    s_UnreadRuneByPtr = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByPtr)) as UnreadRuneByPtr;
 
-                if (s_UnreadRuneByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UnreadRune");
+                extensionMethod = targetType.GetExtensionMethod("UnreadRune");
 
-                    if (!(extensionMethod is null))
-                        s_UnreadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByVal)) as UnreadRuneByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnreadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByVal)) as UnreadRuneByVal;
 
-                if (s_UnreadRuneByRef is null && s_UnreadRuneByVal is null)
+                if (s_UnreadRuneByPtr is null && s_UnreadRuneByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ScanState.UnreadRune method", new Exception("UnreadRune"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("SkipSpace");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SkipSpace");
 
                 if (!(extensionMethod is null))
-                    s_SkipSpaceByRef = extensionMethod.CreateStaticDelegate(typeof(SkipSpaceByRef)) as SkipSpaceByRef;
+                    s_SkipSpaceByPtr = extensionMethod.CreateStaticDelegate(typeof(SkipSpaceByPtr)) as SkipSpaceByPtr;
 
-                if (s_SkipSpaceByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("SkipSpace");
+                extensionMethod = targetType.GetExtensionMethod("SkipSpace");
 
-                    if (!(extensionMethod is null))
-                        s_SkipSpaceByVal = extensionMethod.CreateStaticDelegate(typeof(SkipSpaceByVal)) as SkipSpaceByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SkipSpaceByVal = extensionMethod.CreateStaticDelegate(typeof(SkipSpaceByVal)) as SkipSpaceByVal;
 
-                if (s_SkipSpaceByRef is null && s_SkipSpaceByVal is null)
+                if (s_SkipSpaceByPtr is null && s_SkipSpaceByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ScanState.SkipSpace method", new Exception("SkipSpace"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Token");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Token");
 
                 if (!(extensionMethod is null))
-                    s_TokenByRef = extensionMethod.CreateStaticDelegate(typeof(TokenByRef)) as TokenByRef;
+                    s_TokenByPtr = extensionMethod.CreateStaticDelegate(typeof(TokenByPtr)) as TokenByPtr;
 
-                if (s_TokenByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Token");
+                extensionMethod = targetType.GetExtensionMethod("Token");
 
-                    if (!(extensionMethod is null))
-                        s_TokenByVal = extensionMethod.CreateStaticDelegate(typeof(TokenByVal)) as TokenByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TokenByVal = extensionMethod.CreateStaticDelegate(typeof(TokenByVal)) as TokenByVal;
 
-                if (s_TokenByRef is null && s_TokenByVal is null)
+                if (s_TokenByPtr is null && s_TokenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ScanState.Token method", new Exception("Token"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Width");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Width");
 
                 if (!(extensionMethod is null))
-                    s_WidthByRef = extensionMethod.CreateStaticDelegate(typeof(WidthByRef)) as WidthByRef;
+                    s_WidthByPtr = extensionMethod.CreateStaticDelegate(typeof(WidthByPtr)) as WidthByPtr;
 
-                if (s_WidthByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Width");
+                extensionMethod = targetType.GetExtensionMethod("Width");
 
-                    if (!(extensionMethod is null))
-                        s_WidthByVal = extensionMethod.CreateStaticDelegate(typeof(WidthByVal)) as WidthByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WidthByVal = extensionMethod.CreateStaticDelegate(typeof(WidthByVal)) as WidthByVal;
 
-                if (s_WidthByRef is null && s_WidthByVal is null)
+                if (s_WidthByPtr is null && s_WidthByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ScanState.Width method", new Exception("Width"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ScanState.Read method", new Exception("Read"));
             }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package buildid -- go2cs converted at 2020 August 29 08:51:59 UTC
+// package buildid -- go2cs converted at 2020 October 08 04:08:25 UTC
 // import "cmd/internal/buildid" ==> using buildid = go.cmd.@internal.buildid_package
 // Original source: C:\Go\src\cmd\internal\buildid\rewrite.go
 using bytes = go.bytes_package;
@@ -24,13 +24,17 @@ namespace @internal
         // If bufSize == 0, FindAndHash uses a reasonable default.
         public static (slice<long>, array<byte>, error) FindAndHash(io.Reader r, @string id, long bufSize)
         {
+            slice<long> matches = default;
+            array<byte> hash = default;
+            error err = default!;
+
             if (bufSize == 0L)
             {
                 bufSize = 31L * 1024L; // bufSize+little will likely fit in 32 kB
             }
             if (len(id) > bufSize)
             {
-                return (null, new array<byte>(new byte[] {  }), fmt.Errorf("buildid.FindAndHash: buffer too small"));
+                return (null, new array<byte>(new byte[] {  }), error.As(fmt.Errorf("buildid.FindAndHash: buffer too small"))!);
             }
             var zeros = make_slice<byte>(len(id));
             slice<byte> idBytes = (slice<byte>)id; 
@@ -57,7 +61,7 @@ namespace @internal
                     var (n, err) = io.ReadFull(r, buf[tiny..]);
                     if (err != io.ErrUnexpectedEOF && err != io.EOF && err != null)
                     {
-                        return (null, new array<byte>(new byte[] {  }), err);
+                        return (null, new array<byte>(new byte[] {  }), error.As(err)!);
                     }
                     while (true)
                     {
@@ -70,12 +74,14 @@ namespace @internal
                         h.Write(buf[start..start + i]);
                         h.Write(zeros);
                         start += i + len(id);
+
                     }
                     if (n < bufSize)
                     { 
                         // Did not fill buffer, must be at end of file.
                         h.Write(buf[start..tiny + n]);
                         break;
+
                     }
                     if (start < len(buf) - tiny)
                     {
@@ -85,10 +91,12 @@ namespace @internal
                     copy(buf[0L..], buf[bufSize..]);
                     start -= bufSize;
                     offset += int64(bufSize);
+
                 }
             }
             h.Sum(hash[..0L]);
-            return (matches, hash, null);
+            return (matches, hash, error.As(null!)!);
+
         }
 
         public static error Rewrite(io.WriterAt w, slice<long> pos, @string id)
@@ -101,12 +109,14 @@ namespace @internal
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             }
-            return error.As(null);
+            return error.As(null!)!;
+
         }
     }
 }}}

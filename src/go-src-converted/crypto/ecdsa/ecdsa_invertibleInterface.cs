@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:29:35 UTC
+//     Generated on 2020 October 08 03:35:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,11 +18,13 @@ using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
 using elliptic = go.crypto.elliptic_package;
+using randutil = go.crypto.@internal.randutil_package;
 using sha512 = go.crypto.sha512_package;
-using asn1 = go.encoding.asn1_package;
 using errors = go.errors_package;
 using io = go.io_package;
 using big = go.math.big_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
+using asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -58,7 +60,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -72,23 +74,24 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate ref big.Int InverseByRef(ref T value, ref big.Int k);
-            private delegate ref big.Int InverseByVal(T value, ref big.Int k);
+            private delegate ptr<big.Int> InverseByPtr(ptr<T> value, ptr<big.Int> k);
+            private delegate ptr<big.Int> InverseByVal(T value, ptr<big.Int> k);
 
-            private static readonly InverseByRef s_InverseByRef;
+            private static readonly InverseByPtr s_InverseByPtr;
             private static readonly InverseByVal s_InverseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref big.Int Inverse(ref big.Int k)
+            public ptr<big.Int> Inverse(ptr<big.Int> k)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_InverseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_InverseByPtr is null || !m_target_is_ptr)
                     return s_InverseByVal!(target, k);
 
-                return s_InverseByRef(ref target, k);
+                return s_InverseByPtr(m_target_ptr, k);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -97,23 +100,20 @@ namespace crypto
             static invertible()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Inverse");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Inverse");
 
                 if (!(extensionMethod is null))
-                    s_InverseByRef = extensionMethod.CreateStaticDelegate(typeof(InverseByRef)) as InverseByRef;
+                    s_InverseByPtr = extensionMethod.CreateStaticDelegate(typeof(InverseByPtr)) as InverseByPtr;
 
-                if (s_InverseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Inverse");
+                extensionMethod = targetType.GetExtensionMethod("Inverse");
 
-                    if (!(extensionMethod is null))
-                        s_InverseByVal = extensionMethod.CreateStaticDelegate(typeof(InverseByVal)) as InverseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_InverseByVal = extensionMethod.CreateStaticDelegate(typeof(InverseByVal)) as InverseByVal;
 
-                if (s_InverseByRef is null && s_InverseByVal is null)
+                if (s_InverseByPtr is null && s_InverseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement invertible.Inverse method", new Exception("Inverse"));
             }
 

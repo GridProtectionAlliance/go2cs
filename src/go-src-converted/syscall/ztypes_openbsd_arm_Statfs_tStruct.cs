@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:17 UTC
+//     Generated on 2020 October 08 03:30:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,6 +27,7 @@ namespace go
                 this.F_flags = default;
                 this.F_bsize = default;
                 this.F_iosize = default;
+                this.Pad_cgo_0 = default;
                 this.F_blocks = default;
                 this.F_bfree = default;
                 this.F_bavail = default;
@@ -45,15 +46,16 @@ namespace go
                 this.F_mntonname = default;
                 this.F_mntfromname = default;
                 this.F_mntfromspec = default;
-                this.Pad_cgo_0 = default;
+                this.Pad_cgo_1 = default;
                 this.Mount_info = default;
             }
 
-            public Statfs_t(uint F_flags = default, uint F_bsize = default, uint F_iosize = default, ulong F_blocks = default, ulong F_bfree = default, long F_bavail = default, ulong F_files = default, ulong F_ffree = default, long F_favail = default, ulong F_syncwrites = default, ulong F_syncreads = default, ulong F_asyncwrites = default, ulong F_asyncreads = default, Fsid F_fsid = default, uint F_namemax = default, uint F_owner = default, ulong F_ctime = default, array<byte> F_fstypename = default, array<byte> F_mntonname = default, array<byte> F_mntfromname = default, array<byte> F_mntfromspec = default, array<byte> Pad_cgo_0 = default, array<byte> Mount_info = default)
+            public Statfs_t(uint F_flags = default, uint F_bsize = default, uint F_iosize = default, array<byte> Pad_cgo_0 = default, ulong F_blocks = default, ulong F_bfree = default, long F_bavail = default, ulong F_files = default, ulong F_ffree = default, long F_favail = default, ulong F_syncwrites = default, ulong F_syncreads = default, ulong F_asyncwrites = default, ulong F_asyncreads = default, Fsid F_fsid = default, uint F_namemax = default, uint F_owner = default, ulong F_ctime = default, array<sbyte> F_fstypename = default, array<sbyte> F_mntonname = default, array<sbyte> F_mntfromname = default, array<sbyte> F_mntfromspec = default, array<byte> Pad_cgo_1 = default, array<byte> Mount_info = default)
             {
                 this.F_flags = F_flags;
                 this.F_bsize = F_bsize;
                 this.F_iosize = F_iosize;
+                this.Pad_cgo_0 = Pad_cgo_0;
                 this.F_blocks = F_blocks;
                 this.F_bfree = F_bfree;
                 this.F_bavail = F_bavail;
@@ -72,7 +74,7 @@ namespace go
                 this.F_mntonname = F_mntonname;
                 this.F_mntfromname = F_mntfromname;
                 this.F_mntfromspec = F_mntfromspec;
-                this.Pad_cgo_0 = Pad_cgo_0;
+                this.Pad_cgo_1 = Pad_cgo_1;
                 this.Mount_info = Mount_info;
             }
 
@@ -96,7 +98,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Statfs_t Statfs_t_cast(dynamic value)
         {
-            return new Statfs_t(value.F_flags, value.F_bsize, value.F_iosize, value.F_blocks, value.F_bfree, value.F_bavail, value.F_files, value.F_ffree, value.F_favail, value.F_syncwrites, value.F_syncreads, value.F_asyncwrites, value.F_asyncreads, value.F_fsid, value.F_namemax, value.F_owner, value.F_ctime, value.F_fstypename, value.F_mntonname, value.F_mntfromname, value.F_mntfromspec, value.Pad_cgo_0, value.Mount_info);
+            return new Statfs_t(value.F_flags, value.F_bsize, value.F_iosize, value.Pad_cgo_0, value.F_blocks, value.F_bfree, value.F_bavail, value.F_files, value.F_ffree, value.F_favail, value.F_syncwrites, value.F_syncreads, value.F_asyncwrites, value.F_asyncreads, value.F_fsid, value.F_namemax, value.F_owner, value.F_ctime, value.F_fstypename, value.F_mntonname, value.F_mntfromname, value.F_mntfromspec, value.Pad_cgo_1, value.Mount_info);
         }
     }
 }

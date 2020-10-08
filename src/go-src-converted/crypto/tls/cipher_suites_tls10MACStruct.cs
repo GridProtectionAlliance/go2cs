@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:31 UTC
+//     Generated on 2020 October 08 03:36:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
 using des = go.crypto.des_package;
@@ -21,8 +22,9 @@ using rc4 = go.crypto.rc4_package;
 using sha1 = go.crypto.sha1_package;
 using sha256 = go.crypto.sha256_package;
 using x509 = go.crypto.x509_package;
+using fmt = go.fmt_package;
 using hash = go.hash_package;
-using chacha20poly1305 = go.golang_org.x.crypto.chacha20poly1305_package;
+using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
 using go;
 
 namespace go {
@@ -37,11 +39,13 @@ namespace crypto
             public tls10MAC(NilType _)
             {
                 this.h = default;
+                this.buf = default;
             }
 
-            public tls10MAC(hash.Hash h = default)
+            public tls10MAC(hash.Hash h = default, slice<byte> buf = default)
             {
                 this.h = h;
+                this.buf = buf;
             }
 
             // Enable comparisons between nil and tls10MAC struct
@@ -64,7 +68,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static tls10MAC tls10MAC_cast(dynamic value)
         {
-            return new tls10MAC(value.h);
+            return new tls10MAC(value.h, value.buf);
         }
     }
 }}

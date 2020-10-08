@@ -37,7 +37,7 @@
 // functions, are the atomic equivalents of "return *addr" and
 // "*addr = val".
 //
-// package atomic -- go2cs converted at 2020 August 29 08:16:21 UTC
+// package atomic -- go2cs converted at 2020 October 08 00:34:01 UTC
 // import "sync/atomic" ==> using atomic = go.sync.atomic_package
 // Original source: C:\Go\src\sync\atomic\doc.go
 using @unsafe = go.@unsafe_package;
@@ -52,135 +52,130 @@ namespace sync
         //
         // On non-Linux ARM, the 64-bit functions use instructions unavailable before the ARMv6k core.
         //
-        // On both ARM and x86-32, it is the caller's responsibility to arrange for 64-bit
+        // On ARM, x86-32, and 32-bit MIPS,
+        // it is the caller's responsibility to arrange for 64-bit
         // alignment of 64-bit words accessed atomically. The first word in a
         // variable or in an allocated struct, array, or slice can be relied upon to be
         // 64-bit aligned.
 
         // SwapInt32 atomically stores new into *addr and returns the previous *addr value.
-        public static int SwapInt32(ref int addr, int @new)
+        public static int SwapInt32(ptr<int> addr, int @new)
 ;
 
         // SwapInt64 atomically stores new into *addr and returns the previous *addr value.
-        public static long SwapInt64(ref long addr, long @new)
+        public static long SwapInt64(ptr<long> addr, long @new)
 ;
 
         // SwapUint32 atomically stores new into *addr and returns the previous *addr value.
-        public static uint SwapUint32(ref uint addr, uint @new)
+        public static uint SwapUint32(ptr<uint> addr, uint @new)
 ;
 
         // SwapUint64 atomically stores new into *addr and returns the previous *addr value.
-        public static ulong SwapUint64(ref ulong addr, ulong @new)
+        public static ulong SwapUint64(ptr<ulong> addr, ulong @new)
 ;
 
         // SwapUintptr atomically stores new into *addr and returns the previous *addr value.
-        public static System.UIntPtr SwapUintptr(ref System.UIntPtr addr, System.UIntPtr @new)
+        public static System.UIntPtr SwapUintptr(ptr<System.UIntPtr> addr, System.UIntPtr @new)
 ;
 
         // SwapPointer atomically stores new into *addr and returns the previous *addr value.
-        public static unsafe.Pointer SwapPointer(ref unsafe.Pointer addr, unsafe.Pointer @new)
+        public static unsafe.Pointer SwapPointer(ptr<unsafe.Pointer> addr, unsafe.Pointer @new)
 ;
 
         // CompareAndSwapInt32 executes the compare-and-swap operation for an int32 value.
-        public static bool CompareAndSwapInt32(ref int addr, int old, int @new)
+        public static bool CompareAndSwapInt32(ptr<int> addr, int old, int @new)
 ;
 
         // CompareAndSwapInt64 executes the compare-and-swap operation for an int64 value.
-        public static bool CompareAndSwapInt64(ref long addr, long old, long @new)
+        public static bool CompareAndSwapInt64(ptr<long> addr, long old, long @new)
 ;
 
         // CompareAndSwapUint32 executes the compare-and-swap operation for a uint32 value.
-        public static bool CompareAndSwapUint32(ref uint addr, uint old, uint @new)
+        public static bool CompareAndSwapUint32(ptr<uint> addr, uint old, uint @new)
 ;
 
         // CompareAndSwapUint64 executes the compare-and-swap operation for a uint64 value.
-        public static bool CompareAndSwapUint64(ref ulong addr, ulong old, ulong @new)
+        public static bool CompareAndSwapUint64(ptr<ulong> addr, ulong old, ulong @new)
 ;
 
         // CompareAndSwapUintptr executes the compare-and-swap operation for a uintptr value.
-        public static bool CompareAndSwapUintptr(ref System.UIntPtr addr, System.UIntPtr old, System.UIntPtr @new)
+        public static bool CompareAndSwapUintptr(ptr<System.UIntPtr> addr, System.UIntPtr old, System.UIntPtr @new)
 ;
 
         // CompareAndSwapPointer executes the compare-and-swap operation for a unsafe.Pointer value.
-        public static bool CompareAndSwapPointer(ref unsafe.Pointer addr, unsafe.Pointer old, unsafe.Pointer @new)
+        public static bool CompareAndSwapPointer(ptr<unsafe.Pointer> addr, unsafe.Pointer old, unsafe.Pointer @new)
 ;
 
         // AddInt32 atomically adds delta to *addr and returns the new value.
-        public static int AddInt32(ref int addr, int delta)
+        public static int AddInt32(ptr<int> addr, int delta)
 ;
 
         // AddUint32 atomically adds delta to *addr and returns the new value.
         // To subtract a signed positive constant value c from x, do AddUint32(&x, ^uint32(c-1)).
         // In particular, to decrement x, do AddUint32(&x, ^uint32(0)).
-        public static uint AddUint32(ref uint addr, uint delta)
+        public static uint AddUint32(ptr<uint> addr, uint delta)
 ;
 
         // AddInt64 atomically adds delta to *addr and returns the new value.
-        public static long AddInt64(ref long addr, long delta)
+        public static long AddInt64(ptr<long> addr, long delta)
 ;
 
         // AddUint64 atomically adds delta to *addr and returns the new value.
         // To subtract a signed positive constant value c from x, do AddUint64(&x, ^uint64(c-1)).
         // In particular, to decrement x, do AddUint64(&x, ^uint64(0)).
-        public static ulong AddUint64(ref ulong addr, ulong delta)
+        public static ulong AddUint64(ptr<ulong> addr, ulong delta)
 ;
 
         // AddUintptr atomically adds delta to *addr and returns the new value.
-        public static System.UIntPtr AddUintptr(ref System.UIntPtr addr, System.UIntPtr delta)
+        public static System.UIntPtr AddUintptr(ptr<System.UIntPtr> addr, System.UIntPtr delta)
 ;
 
         // LoadInt32 atomically loads *addr.
-        public static int LoadInt32(ref int addr)
+        public static int LoadInt32(ptr<int> addr)
 ;
 
         // LoadInt64 atomically loads *addr.
-        public static long LoadInt64(ref long addr)
+        public static long LoadInt64(ptr<long> addr)
 ;
 
         // LoadUint32 atomically loads *addr.
-        public static uint LoadUint32(ref uint addr)
+        public static uint LoadUint32(ptr<uint> addr)
 ;
 
         // LoadUint64 atomically loads *addr.
-        public static ulong LoadUint64(ref ulong addr)
+        public static ulong LoadUint64(ptr<ulong> addr)
 ;
 
         // LoadUintptr atomically loads *addr.
-        public static System.UIntPtr LoadUintptr(ref System.UIntPtr addr)
+        public static System.UIntPtr LoadUintptr(ptr<System.UIntPtr> addr)
 ;
 
         // LoadPointer atomically loads *addr.
-        public static unsafe.Pointer LoadPointer(ref unsafe.Pointer addr)
+        public static unsafe.Pointer LoadPointer(ptr<unsafe.Pointer> addr)
 ;
 
         // StoreInt32 atomically stores val into *addr.
-        public static void StoreInt32(ref int addr, int val)
+        public static void StoreInt32(ptr<int> addr, int val)
 ;
 
         // StoreInt64 atomically stores val into *addr.
-        public static void StoreInt64(ref long addr, long val)
+        public static void StoreInt64(ptr<long> addr, long val)
 ;
 
         // StoreUint32 atomically stores val into *addr.
-        public static void StoreUint32(ref uint addr, uint val)
+        public static void StoreUint32(ptr<uint> addr, uint val)
 ;
 
         // StoreUint64 atomically stores val into *addr.
-        public static void StoreUint64(ref ulong addr, ulong val)
+        public static void StoreUint64(ptr<ulong> addr, ulong val)
 ;
 
         // StoreUintptr atomically stores val into *addr.
-        public static void StoreUintptr(ref System.UIntPtr addr, System.UIntPtr val)
+        public static void StoreUintptr(ptr<System.UIntPtr> addr, System.UIntPtr val)
 ;
 
         // StorePointer atomically stores val into *addr.
-        public static void StorePointer(ref unsafe.Pointer addr, unsafe.Pointer val)
+        public static void StorePointer(ptr<unsafe.Pointer> addr, unsafe.Pointer val)
 ;
-
-        // Helper for ARM.  Linker will discard on other systems
-        private static void panic64() => func((_, panic, __) =>
-        {
-            panic("sync/atomic: broken 64-bit atomic operations (buggy QEMU)");
-        });
     }
 }}

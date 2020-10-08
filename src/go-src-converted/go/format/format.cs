@@ -3,7 +3,16 @@
 // license that can be found in the LICENSE file.
 
 // Package format implements standard formatting of Go source.
-// package format -- go2cs converted at 2020 August 29 09:24:38 UTC
+//
+// Note that formatting of Go source code changes over time, so tools relying on
+// consistent formatting should execute a specific version of the gofmt binary
+// instead of using this package. That way, the formatting will be stable, and
+// the tools won't need to be recompiled each time gofmt changes.
+//
+// For example, pre-submit checks that use this package directly would behave
+// differently depending on what Go version each developer uses, causing the
+// check to be inherently fragile.
+// package format -- go2cs converted at 2020 October 08 04:27:02 UTC
 // import "go/format" ==> using format = go.go.format_package
 // Original source: C:\Go\src\go\format\format.go
 using bytes = go.bytes_package;
@@ -20,22 +29,20 @@ namespace go
 {
     public static partial class format_package
     {
-        private static printer.Config config = new printer.Config(Mode:printer.UseSpaces|printer.TabIndent,Tabwidth:8);
+        // Keep these in sync with cmd/gofmt/gofmt.go.
+        private static readonly long tabWidth = (long)8L;
+        private static readonly var printerMode = (var)printer.UseSpaces | printer.TabIndent | printerNormalizeNumbers; 
 
-        private static readonly var parserMode = parser.ParseComments;
+        // printerNormalizeNumbers means to canonicalize number literal prefixes
+        // and exponents while printing. See https://golang.org/doc/go1.13#gofmt.
+        //
+        // This value is defined in go/printer specifically for go/format and cmd/gofmt.
+        private static readonly long printerNormalizeNumbers = (long)1L << (int)(30L);
 
-        // Node formats node in canonical gofmt style and writes the result to dst.
-        //
-        // The node type must be *ast.File, *printer.CommentedNode, []ast.Decl,
-        // []ast.Stmt, or assignment-compatible to ast.Expr, ast.Decl, ast.Spec,
-        // or ast.Stmt. Node does not modify node. Imports are not sorted for
-        // nodes representing partial source files (for instance, if the node is
-        // not an *ast.File or a *printer.CommentedNode not wrapping an *ast.File).
-        //
-        // The function may return early (before the entire result is written)
-        // and return a formatting error, for instance due to an incorrect AST.
-        //
 
+        private static printer.Config config = new printer.Config(Mode:printerMode,Tabwidth:tabWidth);
+
+        private static readonly var parserMode = (var)parser.ParseComments;
 
         // Node formats node in canonical gofmt style and writes the result to dst.
         //
@@ -48,19 +55,34 @@ namespace go
         // The function may return early (before the entire result is written)
         // and return a formatting error, for instance due to an incorrect AST.
         //
-        public static error Node(io.Writer dst, ref token.FileSet fset, object node)
-        { 
+
+
+        // Node formats node in canonical gofmt style and writes the result to dst.
+        //
+        // The node type must be *ast.File, *printer.CommentedNode, []ast.Decl,
+        // []ast.Stmt, or assignment-compatible to ast.Expr, ast.Decl, ast.Spec,
+        // or ast.Stmt. Node does not modify node. Imports are not sorted for
+        // nodes representing partial source files (for instance, if the node is
+        // not an *ast.File or a *printer.CommentedNode not wrapping an *ast.File).
+        //
+        // The function may return early (before the entire result is written)
+        // and return a formatting error, for instance due to an incorrect AST.
+        //
+        public static error Node(io.Writer dst, ptr<token.FileSet> _addr_fset, object node)
+        {
+            ref token.FileSet fset = ref _addr_fset.val;
+ 
             // Determine if we have a complete source file (file != nil).
-            ref ast.File file = default;
-            ref printer.CommentedNode cnode = default;
+            ptr<ast.File> file;
+            ptr<printer.CommentedNode> cnode;
             switch (node.type())
             {
-                case ref ast.File n:
+                case ptr<ast.File> n:
                     file = n;
                     break;
-                case ref printer.CommentedNode n:
+                case ptr<printer.CommentedNode> n:
                     {
-                        ref ast.File (f, ok) = n.Node._<ref ast.File>();
+                        ptr<ast.File> (f, ok) = n.Node._<ptr<ast.File>>();
 
                         if (ok)
                         {
@@ -69,6 +91,7 @@ namespace go
                         }
 
                     }
+
                     break; 
 
                 // Sort imports if necessary.
@@ -79,28 +102,34 @@ namespace go
             { 
                 // Make a copy of the AST because ast.SortImports is destructive.
                 // TODO(gri) Do this more efficiently.
-                bytes.Buffer buf = default;
-                var err = config.Fprint(ref buf, fset, file);
+                ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+                var err = config.Fprint(_addr_buf, fset, file);
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 file, err = parser.ParseFile(fset, "", buf.Bytes(), parserMode);
                 if (err != null)
                 { 
                     // We should never get here. If we do, provide good diagnostic.
-                    return error.As(fmt.Errorf("format.Node internal error (%s)", err));
+                    return error.As(fmt.Errorf("format.Node internal error (%s)", err))!;
+
                 }
+
                 ast.SortImports(fset, file); 
 
                 // Use new file with sorted imports.
                 node = file;
                 if (cnode != null)
                 {
-                    node = ref new printer.CommentedNode(Node:file,Comments:cnode.Comments);
+                    node = addr(new printer.CommentedNode(Node:file,Comments:cnode.Comments));
                 }
+
             }
-            return error.As(config.Fprint(dst, fset, node));
+
+            return error.As(config.Fprint(dst, fset, node))!;
+
         }
 
         // Source formats src in canonical gofmt style and returns the result
@@ -112,47 +141,55 @@ namespace go
         // space as src), and the result is indented by the same amount as the first
         // line of src containing code. Imports are not sorted for partial source files.
         //
-        // Caution: Tools relying on consistent formatting based on the installed
-        // version of gofmt (for instance, such as for presubmit checks) should
-        // execute that gofmt binary instead of calling Source.
-        //
         public static (slice<byte>, error) Source(slice<byte> src)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
             var fset = token.NewFileSet();
             var (file, sourceAdj, indentAdj, err) = parse(fset, "", src, true);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             if (sourceAdj == null)
             { 
                 // Complete source file.
                 // TODO(gri) consider doing this always.
                 ast.SortImports(fset, file);
+
             }
+
             return format(fset, file, sourceAdj, indentAdj, src, config);
+
         }
 
-        private static bool hasUnsortedImports(ref ast.File file)
+        private static bool hasUnsortedImports(ptr<ast.File> _addr_file)
         {
+            ref ast.File file = ref _addr_file.val;
+
             {
                 var d__prev1 = d;
 
                 foreach (var (_, __d) in file.Decls)
                 {
                     d = __d;
-                    ref ast.GenDecl (d, ok) = d._<ref ast.GenDecl>();
+                    ptr<ast.GenDecl> (d, ok) = d._<ptr<ast.GenDecl>>();
                     if (!ok || d.Tok != token.IMPORT)
                     { 
                         // Not an import declaration, so we're done.
                         // Imports are always first.
                         return false;
+
                     }
+
                     if (d.Lparen.IsValid())
                     { 
                         // For now assume all grouped imports are unsorted.
                         // TODO(gri) Should check if they are sorted already.
                         return true;
+
                     } 
                     // Ungrouped imports are sorted by default.
                 }
@@ -161,6 +198,7 @@ namespace go
             }
 
             return false;
+
         }
     }
 }}

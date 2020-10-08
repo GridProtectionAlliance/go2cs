@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2020 August 29 10:07:52 UTC
+// package ppc64asm -- go2cs converted at 2020 October 08 04:44:43 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\field.go
 using fmt = go.fmt_package;
@@ -41,6 +41,7 @@ namespace ppc64
             {
                 return fmt.Sprintf("[%d, len=0]", b.Offs);
             }
+
         }
 
         // Parse extracts the bitfield b from i, and return it as an unsigned integer.
@@ -51,7 +52,9 @@ namespace ppc64
             {
                 panic(fmt.Sprintf("invalid bitfiled %v", b));
             }
+
             return (i >> (int)((32L - b.Offs - b.Bits))) & ((1L << (int)(b.Bits)) - 1L);
+
         });
 
         // ParseSigned extracts the bitfield b from i, and return it as a signed integer.
@@ -75,11 +78,14 @@ namespace ppc64
                 ss[i] = bf.String();
             }
             return fmt.Sprintf("<%s>", strings.Join(ss, "|"));
+
         }
 
-        private static void Append(this ref BitFields bs, BitField b)
+        private static void Append(this ptr<BitFields> _addr_bs, BitField b)
         {
-            bs.Value = append(bs.Value, b);
+            ref BitFields bs = ref _addr_bs.val;
+
+            bs.val = append(bs.val, b);
         }
 
         // parse extracts the bitfields from i, concatenate them and return the result
@@ -88,12 +94,16 @@ namespace ppc64
         // the sequence of bitfields is reasonable.
         public static (uint, byte) parse(this BitFields bs, uint i)
         {
+            uint u = default;
+            byte Bits = default;
+
             foreach (var (_, b) in bs)
             {
                 u = (u << (int)(b.Bits)) | b.Parse(i);
                 Bits += b.Bits;
             }
             return (u, Bits);
+
         }
 
         // Parse extracts the bitfields from i, concatenate them and return the result

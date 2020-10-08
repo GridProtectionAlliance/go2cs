@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2020 August 29 10:01:12 UTC
+// package work -- go2cs converted at 2020 October 08 04:34:41 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\build.go
 using errors = go.errors_package;
@@ -10,7 +10,6 @@ using fmt = go.fmt_package;
 using build = go.go.build_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
-using path = go.path_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;
@@ -18,6 +17,7 @@ using strings = go.strings_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
+using search = go.cmd.go.@internal.search_package;
 using static go.builtin;
 using System;
 
@@ -28,12 +28,14 @@ namespace @internal
 {
     public static partial class work_package
     {
-        public static base.Command CmdBuild = ref new base.Command(UsageLine:"build [-o output] [-i] [build flags] [packages]",Short:"compile packages and dependencies",Long:`
+        public static ptr<base.Command> CmdBuild = addr(new base.Command(UsageLine:"go build [-o output] [-i] [build flags] [packages]",Short:"compile packages and dependencies",Long:`
 Build compiles the packages named by the import paths,
 along with their dependencies, but it does not install the results.
 
-If the arguments to build are a list of .go files, build treats
-them as a list of source files specifying a single package.
+If the arguments to build are a list of .go files from a single directory,
+build treats them as a list of source files specifying a single package.
+
+When compiling packages, build ignores files that end in '_test.go'.
 
 When compiling a single main package, build writes
 the resulting executable to an output file named after
@@ -45,12 +47,10 @@ When compiling multiple packages or a single non-main package,
 build compiles the packages but discards the resulting object,
 serving only as a check that the packages can be built.
 
-When compiling packages, build ignores files that end in '_test.go'.
-
-The -o flag, only allowed when compiling a single package,
-forces build to write the resulting executable or object
-to the named output file, instead of the default behavior described
-in the last two paragraphs.
+The -o flag forces build to write the resulting executable or object
+to the named output file or directory, instead of the default behavior described
+in the last two paragraphs. If the named output is a directory that exists,
+then any resulting executables will be written to that directory.
 
 The -i flag installs the packages that are dependencies of the target.
 
@@ -67,11 +67,13 @@ and test commands:
 		The default is the number of CPUs available.
 	-race
 		enable data race detection.
-		Supported only on linux/amd64, freebsd/amd64, darwin/amd64 and windows/amd64.
+		Supported only on linux/amd64, freebsd/amd64, darwin/amd64, windows/amd64,
+		linux/ppc64le and linux/arm64 (only for 48-bit VMA).
 	-msan
 		enable interoperation with memory sanitizer.
-		Supported only on linux/amd64,
+		Supported only on linux/amd64, linux/arm64
 		and only with Clang/LLVM as the host C compiler.
+		On linux/arm64, pie build mode will be used.
 	-v
 		print the names of packages as they are compiled.
 	-work
@@ -100,16 +102,37 @@ and test commands:
 	-ldflags '[pattern=]arg list'
 		arguments to pass on each go tool link invocation.
 	-linkshared
-		link against shared libraries previously created with
-		-buildmode=shared.
+		build code that will be linked against shared libraries previously
+		created with -buildmode=shared.
+	-mod mode
+		module download mode to use: readonly, vendor, or mod.
+		See 'go help modules' for more.
+	-modcacherw
+		leave newly-created directories in the module cache read-write
+		instead of making them read-only.
+	-modfile file
+		in module aware mode, read (and possibly write) an alternate go.mod
+		file instead of the one in the module root directory. A file named
+		"go.mod" must still be present in order to determine the module root
+		directory, but it is not accessed. When -modfile is specified, an
+		alternate go.sum file is also used: its path is derived from the
+		-modfile flag by trimming the ".mod" extension and appending ".sum".
 	-pkgdir dir
 		install and load all packages from dir instead of the usual locations.
 		For example, when building with a non-standard configuration,
 		use -pkgdir to keep generated packages in a separate location.
-	-tags 'tag list'
-		a space-separated list of build tags to consider satisfied during the
+	-tags tag,list
+		a comma-separated list of build tags to consider satisfied during the
 		build. For more information about build tags, see the description of
 		build constraints in the documentation for the go/build package.
+		(Earlier versions of Go used a space-separated list, and that form
+		is deprecated but still recognized.)
+	-trimpath
+		remove all file system paths from the resulting executable.
+		Instead of absolute file system paths, the recorded file names
+		will begin with either "go" (for the standard library),
+		or a module path@version (when using modules),
+		or a plain import path (when using GOPATH).
 	-toolexec 'cmd args'
 		a program to use to invoke toolchain programs like vet and asm.
 		For example, instead of running asm, the go command will run
@@ -144,9 +167,9 @@ invocations such as 'go tool compile' and 'go tool link' to avoid
 some of the overheads and design decisions of the build tool.
 
 See also: go install, go get, go clean.
-	`,);
+	`,));
 
-        private static readonly var concurrentGCBackendCompilationEnabledByDefault = true;
+        private static readonly var concurrentGCBackendCompilationEnabledByDefault = (var)true;
 
 
 
@@ -156,13 +179,14 @@ See also: go install, go get, go clean.
             CmdBuild.Run = runBuild;
             CmdInstall.Run = runInstall;
 
-            CmdBuild.Flag.BoolVar(ref cfg.BuildI, "i", false, "");
-            CmdBuild.Flag.StringVar(ref cfg.BuildO, "o", "", "output file");
+            CmdBuild.Flag.BoolVar(_addr_cfg.BuildI, "i", false, "");
+            CmdBuild.Flag.StringVar(_addr_cfg.BuildO, "o", "", "output file or directory");
 
-            CmdInstall.Flag.BoolVar(ref cfg.BuildI, "i", false, "");
+            CmdInstall.Flag.BoolVar(_addr_cfg.BuildI, "i", false, "");
 
-            AddBuildFlags(CmdBuild);
-            AddBuildFlags(CmdInstall);
+            AddBuildFlags(_addr_CmdBuild, DefaultBuildFlags);
+            AddBuildFlags(_addr_CmdInstall, DefaultBuildFlags);
+
         }
 
         // Note that flags consulted by other parts of the code
@@ -191,14 +215,15 @@ See also: go install, go get, go clean.
                     BuildToolchain = new gccgoToolchain();
                     break;
                 default: 
-                    return error.As(fmt.Errorf("unknown compiler %q", value));
+                    return error.As(fmt.Errorf("unknown compiler %q", value))!;
                     break;
             }
             cfg.BuildToolchainName = value;
             cfg.BuildToolchainCompiler = BuildToolchain.compiler;
             cfg.BuildToolchainLinker = BuildToolchain.linker;
             cfg.BuildContext.Compiler = value;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         private static @string String(this buildCompiler c)
@@ -216,36 +241,110 @@ See also: go install, go get, go clean.
                     new buildCompiler().Set(build.Default.Compiler);
                     break;
             }
+
         }
 
-        // addBuildFlags adds the flags common to the build, clean, get,
-        // install, list, run, and test commands.
-        public static void AddBuildFlags(ref base.Command cmd)
+        public partial struct BuildFlagMask // : long
         {
-            cmd.Flag.BoolVar(ref cfg.BuildA, "a", false, "");
-            cmd.Flag.BoolVar(ref cfg.BuildN, "n", false, "");
-            cmd.Flag.IntVar(ref cfg.BuildP, "p", cfg.BuildP, "");
-            cmd.Flag.BoolVar(ref cfg.BuildV, "v", false, "");
-            cmd.Flag.BoolVar(ref cfg.BuildX, "x", false, "");
+        }
 
-            cmd.Flag.Var(ref load.BuildAsmflags, "asmflags", "");
+        public static readonly BuildFlagMask DefaultBuildFlags = (BuildFlagMask)0L;
+        public static readonly BuildFlagMask OmitModFlag = (BuildFlagMask)1L << (int)(iota);
+        public static readonly var OmitModCommonFlags = (var)0;
+        public static readonly var OmitVFlag = (var)1;
+
+
+        // AddBuildFlags adds the flags common to the build, clean, get,
+        // install, list, run, and test commands.
+        public static void AddBuildFlags(ptr<base.Command> _addr_cmd, BuildFlagMask mask)
+        {
+            ref base.Command cmd = ref _addr_cmd.val;
+
+            cmd.Flag.BoolVar(_addr_cfg.BuildA, "a", false, "");
+            cmd.Flag.BoolVar(_addr_cfg.BuildN, "n", false, "");
+            cmd.Flag.IntVar(_addr_cfg.BuildP, "p", cfg.BuildP, "");
+            if (mask & OmitVFlag == 0L)
+            {
+                cmd.Flag.BoolVar(_addr_cfg.BuildV, "v", false, "");
+            }
+
+            cmd.Flag.BoolVar(_addr_cfg.BuildX, "x", false, "");
+
+            cmd.Flag.Var(_addr_load.BuildAsmflags, "asmflags", "");
             cmd.Flag.Var(new buildCompiler(), "compiler", "");
-            cmd.Flag.StringVar(ref cfg.BuildBuildmode, "buildmode", "default", "");
-            cmd.Flag.Var(ref load.BuildGcflags, "gcflags", "");
-            cmd.Flag.Var(ref load.BuildGccgoflags, "gccgoflags", "");
-            cmd.Flag.StringVar(ref cfg.BuildContext.InstallSuffix, "installsuffix", "", "");
-            cmd.Flag.Var(ref load.BuildLdflags, "ldflags", "");
-            cmd.Flag.BoolVar(ref cfg.BuildLinkshared, "linkshared", false, "");
-            cmd.Flag.StringVar(ref cfg.BuildPkgdir, "pkgdir", "", "");
-            cmd.Flag.BoolVar(ref cfg.BuildRace, "race", false, "");
-            cmd.Flag.BoolVar(ref cfg.BuildMSan, "msan", false, "");
-            cmd.Flag.Var((@base.StringsFlag.Value)(ref cfg.BuildContext.BuildTags), "tags", "");
-            cmd.Flag.Var((@base.StringsFlag.Value)(ref cfg.BuildToolexec), "toolexec", "");
-            cmd.Flag.BoolVar(ref cfg.BuildWork, "work", false, ""); 
+            cmd.Flag.StringVar(_addr_cfg.BuildBuildmode, "buildmode", "default", "");
+            cmd.Flag.Var(_addr_load.BuildGcflags, "gcflags", "");
+            cmd.Flag.Var(_addr_load.BuildGccgoflags, "gccgoflags", "");
+            if (mask & OmitModFlag == 0L)
+            {
+                cmd.Flag.StringVar(_addr_cfg.BuildMod, "mod", "", "");
+            }
+
+            if (mask & OmitModCommonFlags == 0L)
+            {
+                AddModCommonFlags(_addr_cmd);
+            }
+
+            cmd.Flag.StringVar(_addr_cfg.BuildContext.InstallSuffix, "installsuffix", "", "");
+            cmd.Flag.Var(_addr_load.BuildLdflags, "ldflags", "");
+            cmd.Flag.BoolVar(_addr_cfg.BuildLinkshared, "linkshared", false, "");
+            cmd.Flag.StringVar(_addr_cfg.BuildPkgdir, "pkgdir", "", "");
+            cmd.Flag.BoolVar(_addr_cfg.BuildRace, "race", false, "");
+            cmd.Flag.BoolVar(_addr_cfg.BuildMSan, "msan", false, "");
+            cmd.Flag.Var((tagsFlag.val)(_addr_cfg.BuildContext.BuildTags), "tags", "");
+            cmd.Flag.Var((@base.StringsFlag.val)(_addr_cfg.BuildToolexec), "toolexec", "");
+            cmd.Flag.BoolVar(_addr_cfg.BuildTrimpath, "trimpath", false, "");
+            cmd.Flag.BoolVar(_addr_cfg.BuildWork, "work", false, ""); 
 
             // Undocumented, unstable debugging flags.
-            cmd.Flag.StringVar(ref cfg.DebugActiongraph, "debug-actiongraph", "", "");
-            cmd.Flag.Var(ref load.DebugDeprecatedImportcfg, "debug-deprecated-importcfg", "");
+            cmd.Flag.StringVar(_addr_cfg.DebugActiongraph, "debug-actiongraph", "", "");
+
+        }
+
+        // AddModCommonFlags adds the module-related flags common to build commands
+        // and 'go mod' subcommands.
+        public static void AddModCommonFlags(ptr<base.Command> _addr_cmd)
+        {
+            ref base.Command cmd = ref _addr_cmd.val;
+
+            cmd.Flag.BoolVar(_addr_cfg.ModCacheRW, "modcacherw", false, "");
+            cmd.Flag.StringVar(_addr_cfg.ModFile, "modfile", "", "");
+        }
+
+        // tagsFlag is the implementation of the -tags flag.
+        private partial struct tagsFlag // : slice<@string>
+        {
+        }
+
+        private static error Set(this ptr<tagsFlag> _addr_v, @string s)
+        {
+            ref tagsFlag v = ref _addr_v.val;
+ 
+            // For compatibility with Go 1.12 and earlier, allow "-tags='a b c'" or even just "-tags='a'".
+            if (strings.Contains(s, " ") || strings.Contains(s, "'"))
+            {
+                return error.As((@base.StringsFlag.val)(v).Set(s))!;
+            } 
+
+            // Split on commas, ignore empty strings.
+            v.val = new slice<@string>(new @string[] {  });
+            foreach (var (_, s) in strings.Split(s, ","))
+            {
+                if (s != "")
+                {
+                    v.val = append(v.val, s);
+                }
+
+            }
+            return error.As(null!)!;
+
+        }
+
+        private static @string String(this ptr<tagsFlag> _addr_v)
+        {
+            ref tagsFlag v = ref _addr_v.val;
+
+            return "<TagsFlag>";
         }
 
         // fileExtSplit expects a filename and returns the name
@@ -253,70 +352,83 @@ See also: go install, go get, go clean.
         // extension, ext will be empty.
         private static (@string, @string) fileExtSplit(@string file)
         {
+            @string name = default;
+            @string ext = default;
+
             var dotExt = filepath.Ext(file);
             name = file[..len(file) - len(dotExt)];
             if (dotExt != "")
             {
                 ext = dotExt[1L..];
             }
-            return;
+
+            return ;
+
         }
 
-        private static slice<ref load.Package> pkgsMain(slice<ref load.Package> pkgs)
+        private static slice<ptr<load.Package>> pkgsMain(slice<ptr<load.Package>> pkgs)
         {
+            slice<ptr<load.Package>> res = default;
+
             foreach (var (_, p) in pkgs)
             {
                 if (p.Name == "main")
                 {
                     res = append(res, p);
                 }
+
             }
             return res;
+
         }
 
-        private static slice<ref load.Package> pkgsNotMain(slice<ref load.Package> pkgs)
+        private static slice<ptr<load.Package>> pkgsNotMain(slice<ptr<load.Package>> pkgs)
         {
+            slice<ptr<load.Package>> res = default;
+
             foreach (var (_, p) in pkgs)
             {
                 if (p.Name != "main")
                 {
                     res = append(res, p);
                 }
+
             }
             return res;
+
         }
 
-        private static slice<ref load.Package> oneMainPkg(slice<ref load.Package> pkgs)
+        private static slice<ptr<load.Package>> oneMainPkg(slice<ptr<load.Package>> pkgs)
         {
             if (len(pkgs) != 1L || pkgs[0L].Name != "main")
             {
                 @base.Fatalf("-buildmode=%s requires exactly one main package", cfg.BuildBuildmode);
             }
+
             return pkgs;
+
         }
 
-        private static Func<slice<ref load.Package>, slice<ref load.Package>> pkgsFilter = pkgs => pkgs;
+        private static Func<slice<ptr<load.Package>>, slice<ptr<load.Package>>> pkgsFilter = pkgs => pkgs;
 
         private static var runtimeVersion = runtime.Version();
 
-        private static void runBuild(ref base.Command cmd, slice<@string> args)
+        private static void runBuild(ptr<base.Command> _addr_cmd, slice<@string> args)
         {
+            ref base.Command cmd = ref _addr_cmd.val;
+
             BuildInit();
             Builder b = default;
             b.Init();
 
             var pkgs = load.PackagesForBuild(args);
 
+            var explicitO = len(cfg.BuildO) > 0L;
+
             if (len(pkgs) == 1L && pkgs[0L].Name == "main" && cfg.BuildO == "")
             {
-                _, cfg.BuildO = path.Split(pkgs[0L].ImportPath);
+                cfg.BuildO = pkgs[0L].DefaultExecName();
                 cfg.BuildO += cfg.ExeSuffix;
-            } 
-
-            // Special case -o /dev/null by not writing at all.
-            if (cfg.BuildO == os.DevNull)
-            {
-                cfg.BuildO = "";
             } 
 
             // sanity check some often mis-used options
@@ -327,16 +439,19 @@ See also: go install, go get, go clean.
                     {
                         fmt.Println("go build: when using gccgo toolchain, please pass compiler flags using -gccgoflags, not -gcflags");
                     }
+
                     if (load.BuildLdflags.Present())
                     {
                         fmt.Println("go build: when using gccgo toolchain, please pass linker flags using -gccgoflags, not -ldflags");
                     }
+
                     break;
                 case "gc": 
                     if (load.BuildGccgoflags.Present())
                     {
                         fmt.Println("go build: when using gc toolchain, please pass compile flags using -gcflags, and linker flags using -ldflags");
                     }
+
                     break;
             }
 
@@ -345,27 +460,85 @@ See also: go install, go get, go clean.
             {
                 depMode = ModeInstall;
             }
-            pkgs = pkgsFilter(load.Packages(args));
+
+            pkgs = omitTestOnly(pkgsFilter(load.Packages(args))); 
+
+            // Special case -o /dev/null by not writing at all.
+            if (cfg.BuildO == os.DevNull)
+            {
+                cfg.BuildO = "";
+            }
 
             if (cfg.BuildO != "")
-            {
+            { 
+                // If the -o name exists and is a directory, then
+                // write all main packages to that directory.
+                // Otherwise require only a single package be built.
+                {
+                    var (fi, err) = os.Stat(cfg.BuildO);
+
+                    if (err == null && fi.IsDir())
+                    {
+                        if (!explicitO)
+                        {
+                            @base.Fatalf("go build: build output %q already exists and is a directory", cfg.BuildO);
+                        }
+
+                        ptr<Action> a = addr(new Action(Mode:"go build"));
+                        {
+                            var p__prev1 = p;
+
+                            foreach (var (_, __p) in pkgs)
+                            {
+                                p = __p;
+                                if (p.Name != "main")
+                                {
+                                    continue;
+                                }
+
+                                p.Target = filepath.Join(cfg.BuildO, p.DefaultExecName());
+                                p.Target += cfg.ExeSuffix;
+                                p.Stale = true;
+                                p.StaleReason = "build -o flag in use";
+                                a.Deps = append(a.Deps, b.AutoAction(ModeInstall, depMode, p));
+
+                            }
+
+                            p = p__prev1;
+                        }
+
+                        if (len(a.Deps) == 0L)
+                        {
+                            @base.Fatalf("go build: no main packages to build");
+                        }
+
+                        b.Do(a);
+                        return ;
+
+                    }
+
+                }
+
                 if (len(pkgs) > 1L)
                 {
-                    @base.Fatalf("go build: cannot use -o with multiple packages");
+                    @base.Fatalf("go build: cannot write multiple packages to non-directory %s", cfg.BuildO);
                 }
                 else if (len(pkgs) == 0L)
                 {
                     @base.Fatalf("no packages to build");
                 }
+
                 var p = pkgs[0L];
                 p.Target = cfg.BuildO;
                 p.Stale = true; // must build - not up to date
                 p.StaleReason = "build -o flag in use";
-                var a = b.AutoAction(ModeInstall, depMode, p);
+                a = b.AutoAction(ModeInstall, depMode, p);
                 b.Do(a);
-                return;
+                return ;
+
             }
-            a = ref new Action(Mode:"go build");
+
+            a = addr(new Action(Mode:"go build"));
             {
                 var p__prev1 = p;
 
@@ -382,11 +555,22 @@ See also: go install, go get, go clean.
             {
                 a = b.buildmodeShared(ModeBuild, depMode, args, pkgs, a);
             }
+
             b.Do(a);
+
         }
 
-        public static base.Command CmdInstall = ref new base.Command(UsageLine:"install [-i] [build flags] [packages]",Short:"compile and install packages and dependencies",Long:`
+        public static ptr<base.Command> CmdInstall = addr(new base.Command(UsageLine:"go install [-i] [build flags] [packages]",Short:"compile and install packages and dependencies",Long:`
 Install compiles and installs the packages named by the import paths.
+
+Executables are installed in the directory named by the GOBIN environment
+variable, which defaults to $GOPATH/bin or $HOME/go/bin if the GOPATH
+environment variable is not set. Executables in $GOROOT
+are installed in $GOROOT/bin or $GOTOOLDIR instead of $GOBIN.
+
+When module-aware mode is disabled, other packages are installed in the
+directory $GOPATH/pkg/$GOOS_$GOARCH. When module-aware mode is enabled,
+other packages are built and cached but not installed.
 
 The -i flag installs the dependencies of the named packages as well.
 
@@ -394,7 +578,7 @@ For more about the build flags, see 'go help build'.
 For more about specifying packages, see 'go help packages'.
 
 See also: go build, go get, go clean.
-	`,);
+	`,));
 
         // libname returns the filename to use for the shared library when using
         // -buildmode=shared. The rules we use are:
@@ -410,8 +594,11 @@ See also: go build, go get, go clean.
         //    gopkg.in/tomb.v2 -> libgopkg.in-tomb.v2.so
         //    a/... b/... ---> liba/c,b/d.so - all matching import paths
         // Name parts are joined with ','.
-        private static (@string, error) libname(slice<@string> args, slice<ref load.Package> pkgs)
+        private static (@string, error) libname(slice<@string> args, slice<ptr<load.Package>> pkgs)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             @string libname = default;
             Action<@string> appendName = arg =>
             {
@@ -423,6 +610,7 @@ See also: go build, go get, go clean.
                 {
                     libname += "," + arg;
                 }
+
             }
 ;
             bool haveNonMeta = default;
@@ -432,7 +620,7 @@ See also: go build, go get, go clean.
                 foreach (var (_, __arg) in args)
                 {
                     arg = __arg;
-                    if (load.IsMetaPackage(arg))
+                    if (search.IsMetaPackage(arg))
                     {
                         appendName(arg);
                     }
@@ -440,6 +628,7 @@ See also: go build, go get, go clean.
                     {
                         haveNonMeta = true;
                     }
+
                 }
 
                 arg = arg__prev1;
@@ -459,50 +648,83 @@ See also: go build, go get, go clean.
                         {
                             arg = bp.ImportPath;
                         }
+
                     }
-                    appendName(strings.Replace(arg, "/", "-", -1L));
+
+                    appendName(strings.ReplaceAll(arg, "/", "-"));
+
                 }
                 else
                 {
                     foreach (var (_, pkg) in pkgs)
                     {
-                        appendName(strings.Replace(pkg.ImportPath, "/", "-", -1L));
+                        appendName(strings.ReplaceAll(pkg.ImportPath, "/", "-"));
                     }
+
                 }
+
             }
             else if (haveNonMeta)
             { // have both meta package and a non-meta one
-                return ("", errors.New("mixing of meta and non-meta packages is not allowed"));
+                return ("", error.As(errors.New("mixing of meta and non-meta packages is not allowed"))!);
+
             } 
             // TODO(mwhudson): Needs to change for platforms that use different naming
             // conventions...
-            return ("lib" + libname + ".so", null);
+            return ("lib" + libname + ".so", error.As(null!)!);
+
         }
 
-        private static void runInstall(ref base.Command cmd, slice<@string> args)
+        private static void runInstall(ptr<base.Command> _addr_cmd, slice<@string> args)
         {
+            ref base.Command cmd = ref _addr_cmd.val;
+
             BuildInit();
-            InstallPackages(args, false);
+            InstallPackages(args, load.PackagesForBuild(args));
         }
 
-        public static void InstallPackages(slice<@string> args, bool forGet)
+        // omitTestOnly returns pkgs with test-only packages removed.
+        private static slice<ptr<load.Package>> omitTestOnly(slice<ptr<load.Package>> pkgs)
+        {
+            slice<ptr<load.Package>> list = default;
+            foreach (var (_, p) in pkgs)
+            {
+                if (len(p.GoFiles) + len(p.CgoFiles) == 0L && !p.Internal.CmdlinePkgLiteral)
+                { 
+                    // Package has no source files,
+                    // perhaps due to build tags or perhaps due to only having *_test.go files.
+                    // Also, it is only being processed as the result of a wildcard match
+                    // like ./..., not because it was listed as a literal path on the command line.
+                    // Ignore it.
+                    continue;
+
+                }
+
+                list = append(list, p);
+
+            }
+            return list;
+
+        }
+
+        public static void InstallPackages(slice<@string> patterns, slice<ptr<load.Package>> pkgs)
         {
             if (cfg.GOBIN != "" && !filepath.IsAbs(cfg.GOBIN))
             {
                 @base.Fatalf("cannot install, GOBIN must be an absolute path");
             }
-            var pkgs = pkgsFilter(load.PackagesForBuild(args));
 
+            pkgs = omitTestOnly(pkgsFilter(pkgs));
             {
                 var p__prev1 = p;
 
                 foreach (var (_, __p) in pkgs)
                 {
                     p = __p;
-                    if (p.Target == "" && (!p.Standard || p.ImportPath != "unsafe"))
+                    if (p.Target == "")
                     {
 
-                        if (p.Internal.GobinSubdir) 
+                        if (p.Standard && p.ImportPath == "unsafe")                         else if (p.Name != "main" && p.Internal.Local && p.ConflictDir == "")                         else if (p.Name != "main" && p.Module != null)                         else if (p.Internal.GobinSubdir) 
                             @base.Errorf("go %s: cannot install cross-compiled binaries when GOBIN is set", cfg.CmdName);
                         else if (p.Internal.CmdlineFiles) 
                             @base.Errorf("go %s: no install location for .go files listed on command line (GOBIN not set)", cfg.CmdName);
@@ -510,7 +732,9 @@ See also: go build, go get, go clean.
                             @base.Errorf("go %s: no install location for %s: hidden by %s", cfg.CmdName, p.Dir, p.ConflictDir);
                         else 
                             @base.Errorf("go %s: no install location for directory %s outside GOPATH\n" + "\tFor more details see: 'go help gopath'", cfg.CmdName, p.Dir);
-                                            }
+                        
+                    }
+
                 }
 
                 p = p__prev1;
@@ -525,20 +749,15 @@ See also: go build, go get, go clean.
             {
                 depMode = ModeInstall;
             }
-            Action a = ref new Action(Mode:"go install");
-            slice<ref Action> tools = default;
+
+            ptr<Action> a = addr(new Action(Mode:"go install"));
+            slice<ptr<Action>> tools = default;
             {
                 var p__prev1 = p;
 
                 foreach (var (_, __p) in pkgs)
                 {
                     p = __p; 
-                    // During 'go get', don't attempt (and fail) to install packages with only tests.
-                    // TODO(rsc): It's not clear why 'go get' should be different from 'go install' here. See #20760.
-                    if (forGet && len(p.GoFiles) + len(p.CgoFiles) == 0L && len(p.TestGoFiles) + len(p.XTestGoFiles) > 0L)
-                    {
-                        continue;
-                    } 
                     // If p is a tool, delay the installation until the end of the build.
                     // This avoids installing assemblers/compilers that are being executed
                     // by other steps in the build.
@@ -550,7 +769,9 @@ See also: go build, go get, go clean.
                         tools = append(tools, a1);
                         continue;
                     }
+
                     a.Deps = append(a.Deps, a1);
+
                 }
 
                 p = p__prev1;
@@ -558,8 +779,9 @@ See also: go build, go get, go clean.
 
             if (len(tools) > 0L)
             {
-                a = ref new Action(Mode:"go install (tools)",Deps:tools,);
+                a = addr(new Action(Mode:"go install (tools)",Deps:tools,));
             }
+
             if (cfg.BuildBuildmode == "shared")
             { 
                 // Note: If buildmode=shared then only non-main packages
@@ -567,8 +789,10 @@ See also: go build, go get, go clean.
                 // tools above did not apply, and a is just a simple Action
                 // with a list of Deps, one per package named in pkgs,
                 // the same as in runBuild.
-                a = b.buildmodeShared(ModeInstall, ModeInstall, args, pkgs, a);
+                a = b.buildmodeShared(ModeInstall, ModeInstall, patterns, pkgs, a);
+
             }
+
             b.Do(a);
             @base.ExitIfErrors(); 
 
@@ -581,11 +805,11 @@ See also: go build, go get, go clean.
             // One way to view this behavior is that it is as if 'go install' first
             // runs 'go build' and the moves the generated file to the install dir.
             // See issue 9645.
-            if (len(args) == 0L && len(pkgs) == 1L && pkgs[0L].Name == "main")
+            if (len(patterns) == 0L && len(pkgs) == 1L && pkgs[0L].Name == "main")
             { 
                 // Compute file 'go build' would have created.
                 // If it exists and is an executable file, remove it.
-                var (_, targ) = filepath.Split(pkgs[0L].ImportPath);
+                var targ = pkgs[0L].DefaultExecName();
                 targ += cfg.ExeSuffix;
                 if (filepath.Join(pkgs[0L].Dir, targ) != pkgs[0L].Target)
                 { // maybe $GOBIN is the current directory
@@ -598,11 +822,17 @@ See also: go build, go get, go clean.
                             if (m & 0111L != 0L || cfg.Goos == "windows")
                             { // windows never sets executable bit
                                 os.Remove(targ);
+
                             }
+
                         }
+
                     }
+
                 }
+
             }
+
         }
 
         // ExecCmd is the command to use to run user binaries.
@@ -621,17 +851,21 @@ See also: go build, go get, go clean.
             {
                 return ExecCmd;
             }
+
             ExecCmd = new slice<@string>(new @string[] {  }); // avoid work the second time
             if (cfg.Goos == runtime.GOOS && cfg.Goarch == runtime.GOARCH)
             {
                 return ExecCmd;
             }
+
             var (path, err) = exec.LookPath(fmt.Sprintf("go_%s_%s_exec", cfg.Goos, cfg.Goarch));
             if (err == null)
             {
                 ExecCmd = new slice<@string>(new @string[] { path });
             }
+
             return ExecCmd;
+
         }
     }
 }}}}

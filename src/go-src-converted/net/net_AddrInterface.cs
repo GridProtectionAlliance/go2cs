@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:27:07 UTC
+//     Generated on 2020 October 08 03:34:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,9 +16,9 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
-using poll = go.@internal.poll_package;
 using io = go.io_package;
 using os = go.os_package;
+using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
 
@@ -54,7 +54,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +68,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate @string NetworkByRef(ref T value);
+            private delegate @string NetworkByPtr(ptr<T> value);
             private delegate @string NetworkByVal(T value);
 
-            private static readonly NetworkByRef s_NetworkByRef;
+            private static readonly NetworkByPtr s_NetworkByPtr;
             private static readonly NetworkByVal s_NetworkByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,17 +80,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NetworkByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NetworkByPtr is null || !m_target_is_ptr)
                     return s_NetworkByVal!(target);
 
-                return s_NetworkByRef(ref target);
+                return s_NetworkByPtr(m_target_ptr);
             }
 
-            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,11 +100,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -112,39 +114,33 @@ namespace go
             static Addr()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Network");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Network");
 
                 if (!(extensionMethod is null))
-                    s_NetworkByRef = extensionMethod.CreateStaticDelegate(typeof(NetworkByRef)) as NetworkByRef;
+                    s_NetworkByPtr = extensionMethod.CreateStaticDelegate(typeof(NetworkByPtr)) as NetworkByPtr;
 
-                if (s_NetworkByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Network");
+                extensionMethod = targetType.GetExtensionMethod("Network");
 
-                    if (!(extensionMethod is null))
-                        s_NetworkByVal = extensionMethod.CreateStaticDelegate(typeof(NetworkByVal)) as NetworkByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NetworkByVal = extensionMethod.CreateStaticDelegate(typeof(NetworkByVal)) as NetworkByVal;
 
-                if (s_NetworkByRef is null && s_NetworkByVal is null)
+                if (s_NetworkByPtr is null && s_NetworkByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Addr.Network method", new Exception("Network"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Addr.String method", new Exception("String"));
             }
 

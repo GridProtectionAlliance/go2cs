@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:24:37 UTC
+//     Generated on 2020 October 08 03:40:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using static go.builtin;
 using bytes = go.bytes_package;
 using context = go.context_package;
 using errors = go.errors_package;
+using execenv = go.@internal.syscall.execenv_package;
 using io = go.io_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
@@ -59,7 +60,7 @@ namespace os
                 this.waitDone = default;
             }
 
-            public Cmd(@string Path = default, slice<@string> Args = default, slice<@string> Env = default, @string Dir = default, io.Reader Stdin = default, io.Writer Stdout = default, io.Writer Stderr = default, slice<ref os.File> ExtraFiles = default, ref ptr<syscall.SysProcAttr> SysProcAttr = default, ref ptr<os.Process> Process = default, ref ptr<os.ProcessState> ProcessState = default, context.Context ctx = default, error lookPathErr = default, bool finished = default, slice<ref os.File> childFiles = default, slice<io.Closer> closeAfterStart = default, slice<io.Closer> closeAfterWait = default, slice<Func<error>> goroutine = default, channel<error> errch = default, channel<object> waitDone = default)
+            public Cmd(@string Path = default, slice<@string> Args = default, slice<@string> Env = default, @string Dir = default, io.Reader Stdin = default, io.Writer Stdout = default, io.Writer Stderr = default, slice<ptr<os.File>> ExtraFiles = default, ref ptr<syscall.SysProcAttr> SysProcAttr = default, ref ptr<os.Process> Process = default, ref ptr<os.ProcessState> ProcessState = default, context.Context ctx = default, error lookPathErr = default, bool finished = default, slice<ptr<os.File>> childFiles = default, slice<io.Closer> closeAfterStart = default, slice<io.Closer> closeAfterWait = default, slice<Func<error>> goroutine = default, channel<error> errch = default, channel<object> waitDone = default)
             {
                 this.Path = Path;
                 this.Args = Args;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package socktest -- go2cs converted at 2020 August 29 08:36:19 UTC
+// package socktest -- go2cs converted at 2020 October 08 03:43:13 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Go\src\net\internal\socktest\switch_windows.go
 using syscall = go.syscall_package;
@@ -19,26 +19,32 @@ namespace @internal
         {
         }
 
-        private static ref Status sockso(this ref Switch _sw, syscall.Handle s) => func(_sw, (ref Switch sw, Defer defer, Panic _, Recover __) =>
+        private static ptr<Status> sockso(this ptr<Switch> _addr_sw, syscall.Handle s) => func((defer, _, __) =>
         {
+            ref Switch sw = ref _addr_sw.val;
+
             sw.smu.RLock();
             defer(sw.smu.RUnlock());
             var (so, ok) = sw.sotab[s];
             if (!ok)
             {
-                return null;
+                return _addr_null!;
             }
-            return ref so;
+
+            return _addr__addr_so!;
+
         });
 
         // addLocked returns a new Status without locking.
         // sw.smu must be held before call.
-        private static ref Status addLocked(this ref Switch sw, syscall.Handle s, long family, long sotype, long proto)
+        private static ptr<Status> addLocked(this ptr<Switch> _addr_sw, syscall.Handle s, long family, long sotype, long proto)
         {
+            ref Switch sw = ref _addr_sw.val;
+
             sw.once.Do(sw.init);
-            Status so = new Status(Cookie:cookie(family,sotype,proto));
+            ref Status so = ref heap(new Status(Cookie:cookie(family,sotype,proto)), out ptr<Status> _addr_so);
             sw.sotab[s] = so;
-            return ref so;
+            return _addr__addr_so!;
         }
     }
 }}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:39 UTC
+//     Generated on 2020 October 08 03:36:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace crypto
                 this.certs = default;
             }
 
-            public CertPool(map<@string, slice<long>> bySubjectKeyId = default, map<@string, slice<long>> byName = default, slice<ref Certificate> certs = default)
+            public CertPool(map<@string, slice<long>> bySubjectKeyId = default, map<@string, slice<long>> byName = default, slice<ptr<Certificate>> certs = default)
             {
                 this.bySubjectKeyId = bySubjectKeyId;
                 this.byName = byName;

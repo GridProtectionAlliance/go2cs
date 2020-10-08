@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package html provides functions for escaping and unescaping HTML text.
-// package html -- go2cs converted at 2020 August 29 08:35:02 UTC
+// package html -- go2cs converted at 2020 October 08 03:42:17 UTC
 // import "html" ==> using html = go.html_package
 // Original source: C:\Go\src\html\escape.go
 using strings = go.strings_package;
@@ -16,7 +16,7 @@ namespace go
     {
         // These replacements permit compatibility with old numeric entities that
         // assumed Windows-1252 encoding.
-        // http://www.whatwg.org/specs/web-apps/current-work/multipage/tokenization.html#consume-a-character-reference
+        // https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state
         private static array<int> replacementTable = new array<int>(new int[] { '\u20AC', '\u0081', '\u201A', '\u0192', '\u201E', '\u2026', '\u2020', '\u2021', '\u02C6', '\u2030', '\u0160', '\u2039', '\u0152', '\u008D', '\u017D', '\u008F', '\u0090', '\u2018', '\u2019', '\u201C', '\u201D', '\u2022', '\u2013', '\u2014', '\u02DC', '\u2122', '\u0161', '\u203A', '\u0153', '\u009D', '\u017E', '\u0178' });
 
         // unescapeEntity reads an entity like "&lt;" from b[src:] and writes the
@@ -24,7 +24,10 @@ namespace go
         // Precondition: b[src] == '&' && dst <= src.
         private static (long, long) unescapeEntity(slice<byte> b, long dst, long src)
         {
-            const var attribute = false; 
+            long dst1 = default;
+            long src1 = default;
+
+            const var attribute = (var)false; 
 
             // http://www.whatwg.org/specs/web-apps/current-work/multipage/tokenization.html#consume-a-character-reference
 
@@ -42,13 +45,16 @@ namespace go
                 b[dst] = b[src];
                 return (dst + 1L, src + 1L);
             }
+
             if (s[i] == '#')
             {
                 if (len(s) <= 3L)
                 { // We need to have at least "&#.".
                     b[dst] = b[src];
                     return (dst + 1L, src + 1L);
+
                 }
+
                 i++;
                 var c = s[i];
                 var hex = false;
@@ -57,6 +63,7 @@ namespace go
                     hex = true;
                     i++;
                 }
+
                 char x = '\x00';
                 while (i < len(s))
                 {
@@ -79,17 +86,21 @@ namespace go
                             x = 16L * x + rune(c) - 'A' + 10L;
                             continue;
                         }
+
                     }
                     else if ('0' <= c && c <= '9')
                     {
                         x = 10L * x + rune(c) - '0';
                         continue;
                     }
+
                     if (c != ';')
                     {
                         i--;
                     }
+
                     break;
+
                 }
 
 
@@ -97,18 +108,24 @@ namespace go
                 { // No characters matched.
                     b[dst] = b[src];
                     return (dst + 1L, src + 1L);
+
                 }
+
                 if (0x80UL <= x && x <= 0x9FUL)
                 { 
                     // Replace characters from Windows-1252 with UTF-8 equivalents.
                     x = replacementTable[x - 0x80UL];
+
                 }
                 else if (x == 0L || (0xD800UL <= x && x <= 0xDFFFUL) || x > 0x10FFFFUL)
                 { 
                     // Replace invalid characters with the replacement character.
                     x = '\uFFFD';
+
                 }
+
                 return (dst + utf8.EncodeRune(b[dst..], x), src + i);
+
             } 
 
             // Consume the maximum number of characters possible, with the
@@ -122,11 +139,14 @@ namespace go
                 {
                     continue;
                 }
+
                 if (c != ';')
                 {
                     i--;
                 }
+
                 break;
+
             }
 
 
@@ -165,6 +185,7 @@ namespace go
                         {
                             maxLen = longestEntityWithoutSemicolon;
                         }
+
                         for (var j = maxLen; j > 1L; j--)
                         {
                             {
@@ -180,23 +201,29 @@ namespace go
                                 x = x__prev6;
 
                             }
+
                         }
 
+
                     }
+
 
                     x = x__prev4;
 
                 }
 
 
+
                 x = x__prev3;
 
             }
+
 
             dst1 = dst + i;
             src1 = src + i;
             copy(b[dst..dst1], b[src..src1]);
             return (dst1, src1);
+
         }
 
         private static var htmlEscaper = strings.NewReplacer("&", "&amp;", "\'", "&#39;", "<", "&lt;", ">", "&gt;", "\"", "&#34;");
@@ -217,12 +244,14 @@ namespace go
         // always true.
         public static @string UnescapeString(@string s)
         {
+            populateMapsOnce.Do(populateMaps);
             var i = strings.IndexByte(s, '&');
 
             if (i < 0L)
             {
                 return s;
             }
+
             slice<byte> b = (slice<byte>)s;
             var (dst, src) = unescapeEntity(b, i, i);
             while (len(s[src..]) > 0L)
@@ -235,19 +264,24 @@ namespace go
                 {
                     i = strings.IndexByte(s[src..], '&');
                 }
+
                 if (i < 0L)
                 {
                     dst += copy(b[dst..], s[src..]);
                     break;
                 }
+
                 if (i > 0L)
                 {
                     copy(b[dst..], s[src..src + i]);
                 }
+
                 dst, src = unescapeEntity(b, dst + i, src + i);
+
             }
 
             return string(b[..dst]);
+
         }
     }
 }

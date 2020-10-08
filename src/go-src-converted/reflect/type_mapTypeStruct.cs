@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:43:13 UTC
+//     Generated on 2020 October 08 03:24:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using runtime = go.runtime_package;
+using unsafeheader = go.@internal.unsafeheader_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using unicode = go.unicode_package;
@@ -47,7 +47,7 @@ namespace go
 
             public ref byte kind => ref m_rtypeRef.Value.kind;
 
-            public ref ptr<typeAlg> alg => ref m_rtypeRef.Value.alg;
+            public ref Func<unsafe.Pointer, unsafe.Pointer, bool> equal => ref m_rtypeRef.Value.equal;
 
             public ref ptr<byte> gcdata => ref m_rtypeRef.Value.gcdata;
 
@@ -62,30 +62,24 @@ namespace go
                 this.key = default;
                 this.elem = default;
                 this.bucket = default;
-                this.hmap = default;
+                this.hasher = default;
                 this.keysize = default;
-                this.indirectkey = default;
                 this.valuesize = default;
-                this.indirectvalue = default;
                 this.bucketsize = default;
-                this.reflexivekey = default;
-                this.needkeyupdate = default;
+                this.flags = default;
             }
 
-            public mapType(rtype rtype = default, ref ptr<rtype> key = default, ref ptr<rtype> elem = default, ref ptr<rtype> bucket = default, ref ptr<rtype> hmap = default, byte keysize = default, byte indirectkey = default, byte valuesize = default, byte indirectvalue = default, ushort bucketsize = default, bool reflexivekey = default, bool needkeyupdate = default)
+            public mapType(rtype rtype = default, ref ptr<rtype> key = default, ref ptr<rtype> elem = default, ref ptr<rtype> bucket = default, Func<unsafe.Pointer, System.UIntPtr, System.UIntPtr> hasher = default, byte keysize = default, byte valuesize = default, ushort bucketsize = default, uint flags = default)
             {
                 this.m_rtypeRef = new ptr<rtype>(rtype);
                 this.key = key;
                 this.elem = elem;
                 this.bucket = bucket;
-                this.hmap = hmap;
+                this.hasher = hasher;
                 this.keysize = keysize;
-                this.indirectkey = indirectkey;
                 this.valuesize = valuesize;
-                this.indirectvalue = indirectvalue;
                 this.bucketsize = bucketsize;
-                this.reflexivekey = reflexivekey;
-                this.needkeyupdate = needkeyupdate;
+                this.flags = flags;
             }
 
             // Enable comparisons between nil and mapType struct
@@ -108,7 +102,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mapType mapType_cast(dynamic value)
         {
-            return new mapType(value.rtype, ref value.key, ref value.elem, ref value.bucket, ref value.hmap, value.keysize, value.indirectkey, value.valuesize, value.indirectvalue, value.bucketsize, value.reflexivekey, value.needkeyupdate);
+            return new mapType(value.rtype, ref value.key, ref value.elem, ref value.bucket, value.hasher, value.keysize, value.valuesize, value.bucketsize, value.flags);
         }
     }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:43:41 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:25 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\executable.go
 
@@ -23,10 +23,11 @@ namespace go
         //
         // The main use case is finding resources located relative to an
         // executable.
-        //
-        // Executable is not supported on nacl.
         public static (@string, error) Executable()
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             return executable();
         }
     }

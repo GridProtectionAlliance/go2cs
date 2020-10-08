@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:04:21 UTC
+//     Generated on 2020 October 08 04:39:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,11 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bufio = go.bufio_package;
 using sys = go.cmd.@internal.sys_package;
+using loader = go.cmd.link.@internal.loader_package;
 using binary = go.encoding.binary_package;
+using errors = go.errors_package;
+using log = go.log_package;
 using os = go.os_package;
 using go;
 
@@ -34,18 +36,24 @@ namespace @internal
             {
                 this.arch = default;
                 this.off = default;
-                this.w = default;
+                this.buf = default;
+                this.heap = default;
+                this.name = default;
                 this.f = default;
                 this.encbuf = default;
+                this.isView = default;
             }
 
-            public OutBuf(ref ptr<sys.Arch> arch = default, long off = default, ref ptr<bufio.Writer> w = default, ref ptr<os.File> f = default, array<byte> encbuf = default)
+            public OutBuf(ref ptr<sys.Arch> arch = default, long off = default, slice<byte> buf = default, slice<byte> heap = default, @string name = default, ref ptr<os.File> f = default, array<byte> encbuf = default, bool isView = default)
             {
                 this.arch = arch;
                 this.off = off;
-                this.w = w;
+                this.buf = buf;
+                this.heap = heap;
+                this.name = name;
                 this.f = f;
                 this.encbuf = encbuf;
+                this.isView = isView;
             }
 
             // Enable comparisons between nil and OutBuf struct
@@ -68,7 +76,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static OutBuf OutBuf_cast(dynamic value)
         {
-            return new OutBuf(ref value.arch, value.off, ref value.w, ref value.f, value.encbuf);
+            return new OutBuf(ref value.arch, value.off, value.buf, value.heap, value.name, ref value.f, value.encbuf, value.isView);
         }
     }
 }}}}

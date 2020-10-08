@@ -4,7 +4,7 @@
 
 // HTTP Response reading and parsing.
 
-// package http -- go2cs converted at 2020 August 29 08:33:30 UTC
+// package http -- go2cs converted at 2020 October 08 03:40:17 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\response.go
 using bufio = go.bufio_package;
@@ -17,6 +17,8 @@ using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
+
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using static go.builtin;
 
 namespace go {
@@ -41,7 +43,7 @@ namespace net
 
 // Header maps header keys to values. If the response had multiple
 // headers with the same key, they may be concatenated, with comma
-// delimiters.  (Section 4.2 of RFC 2616 requires that multiple headers
+// delimiters.  (RFC 7230, section 3.2.2 requires that multiple headers
 // be semantically equivalent to a comma-delimited sequence.) When
 // Header values are duplicated by other fields in this struct (e.g.,
 // ContentLength, TransferEncoding, Trailer), the field values are
@@ -63,6 +65,10 @@ namespace net
 //
 // The Body is automatically dechunked if the server replied
 // with a "chunked" Transfer-Encoding.
+//
+// As of Go 1.12, the Body will also implement io.Writer
+// on a successful "101 Switching Protocols" response,
+// as used by WebSockets and HTTP/2's "h2c" mode.
             public io.ReadCloser Body; // ContentLength records the length of the associated content. The
 // value -1 indicates that the length is unknown. Unless Request.Method
 // is "HEAD", values >= 0 indicate that the given number of bytes may
@@ -102,8 +108,10 @@ namespace net
         }
 
         // Cookies parses and returns the cookies set in the Set-Cookie headers.
-        private static slice<ref Cookie> Cookies(this ref Response r)
+        private static slice<ptr<Cookie>> Cookies(this ptr<Response> _addr_r)
         {
+            ref Response r = ref _addr_r.val;
+
             return readSetCookies(r.Header);
         }
 
@@ -115,18 +123,25 @@ namespace net
         // if present. Relative redirects are resolved relative to
         // the Response's Request. ErrNoLocation is returned if no
         // Location header is present.
-        private static (ref url.URL, error) Location(this ref Response r)
+        private static (ptr<url.URL>, error) Location(this ptr<Response> _addr_r)
         {
+            ptr<url.URL> _p0 = default!;
+            error _p0 = default!;
+            ref Response r = ref _addr_r.val;
+
             var lv = r.Header.Get("Location");
             if (lv == "")
             {
-                return (null, ErrNoLocation);
+                return (_addr_null!, error.As(ErrNoLocation)!);
             }
+
             if (r.Request != null && r.Request.URL != null)
             {
-                return r.Request.URL.Parse(lv);
+                return _addr_r.Request.URL.Parse(lv)!;
             }
-            return url.Parse(lv);
+
+            return _addr_url.Parse(lv)!;
+
         }
 
         // ReadResponse reads and returns an HTTP response from r.
@@ -135,10 +150,15 @@ namespace net
         // Clients must call resp.Body.Close when finished reading resp.Body.
         // After that call, clients can inspect resp.Trailer to find key/value
         // pairs included in the response trailer.
-        public static (ref Response, error) ReadResponse(ref bufio.Reader r, ref Request req)
+        public static (ptr<Response>, error) ReadResponse(ptr<bufio.Reader> _addr_r, ptr<Request> _addr_req)
         {
+            ptr<Response> _p0 = default!;
+            error _p0 = default!;
+            ref bufio.Reader r = ref _addr_r.val;
+            ref Request req = ref _addr_req.val;
+
             var tp = textproto.NewReader(r);
-            Response resp = ref new Response(Request:req,); 
+            ptr<Response> resp = addr(new Response(Request:req,)); 
 
             // Parse the first line of the response.
             var (line, err) = tp.ReadLine();
@@ -148,8 +168,11 @@ namespace net
                 {
                     err = io.ErrUnexpectedEOF;
                 }
-                return (null, err);
+
+                return (_addr_null!, error.As(err)!);
+
             }
+
             {
                 var i__prev1 = i;
 
@@ -157,7 +180,7 @@ namespace net
 
                 if (i == -1L)
                 {
-                    return (null, ref new badStringError("malformed HTTP response",line));
+                    return (_addr_null!, error.As(badStringError("malformed HTTP response", line))!);
                 }
                 else
                 {
@@ -168,6 +191,7 @@ namespace net
                 i = i__prev1;
 
             }
+
             var statusCode = resp.Status;
             {
                 var i__prev1 = i;
@@ -182,21 +206,24 @@ namespace net
                 i = i__prev1;
 
             }
+
             if (len(statusCode) != 3L)
             {
-                return (null, ref new badStringError("malformed HTTP status code",statusCode));
+                return (_addr_null!, error.As(badStringError("malformed HTTP status code", statusCode))!);
             }
+
             resp.StatusCode, err = strconv.Atoi(statusCode);
             if (err != null || resp.StatusCode < 0L)
             {
-                return (null, ref new badStringError("malformed HTTP status code",statusCode));
+                return (_addr_null!, error.As(badStringError("malformed HTTP status code", statusCode))!);
             }
+
             bool ok = default;
             resp.ProtoMajor, resp.ProtoMinor, ok = ParseHTTPVersion(resp.Proto);
 
             if (!ok)
             {
-                return (null, ref new badStringError("malformed HTTP version",resp.Proto));
+                return (_addr_null!, error.As(badStringError("malformed HTTP version", resp.Proto))!);
             } 
 
             // Parse the response headers.
@@ -207,8 +234,11 @@ namespace net
                 {
                     err = io.ErrUnexpectedEOF;
                 }
-                return (null, err);
+
+                return (_addr_null!, error.As(err)!);
+
             }
+
             resp.Header = Header(mimeHeader);
 
             fixPragmaCacheControl(resp.Header);
@@ -216,12 +246,14 @@ namespace net
             err = readTransfer(resp, r);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (resp, null);
+
+            return (_addr_resp!, error.As(null!)!);
+
         }
 
-        // RFC 2616: Should treat
+        // RFC 7234, section 5.4: Should treat
         //    Pragma: no-cache
         // like
         //    Cache-Control: no-cache
@@ -241,15 +273,19 @@ namespace net
                         }
 
                     }
+
                 }
 
             }
+
         }
 
         // ProtoAtLeast reports whether the HTTP protocol used
         // in the response is at least major.minor.
-        private static bool ProtoAtLeast(this ref Response r, long major, long minor)
+        private static bool ProtoAtLeast(this ptr<Response> _addr_r, long major, long minor)
         {
+            ref Response r = ref _addr_r.val;
+
             return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
         }
 
@@ -269,8 +305,10 @@ namespace net
         //  Header, values for non-canonical keys will have unpredictable behavior
         //
         // The Response Body is closed after it is sent.
-        private static error Write(this ref Response r, io.Writer w)
-        { 
+        private static error Write(this ptr<Response> _addr_r, io.Writer w)
+        {
+            ref Response r = ref _addr_r.val;
+ 
             // Status line
             var text = r.Status;
             if (text == "")
@@ -281,19 +319,22 @@ namespace net
                 {
                     text = "status code " + strconv.Itoa(r.StatusCode);
                 }
+
             }
             else
             { 
                 // Just to reduce stutter, if user set r.Status to "200 OK" and StatusCode to 200.
                 // Not important.
                 text = strings.TrimPrefix(text, strconv.Itoa(r.StatusCode) + " ");
+
             }
+
             {
                 var (_, err) = fmt.Fprintf(w, "HTTP/%d.%d %03d %s\r\n", r.ProtoMajor, r.ProtoMinor, r.StatusCode, text);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // Clone it, so we can modify r1 as needed.
@@ -302,7 +343,7 @@ namespace net
 
             // Clone it, so we can modify r1 as needed.
             ptr<Response> r1 = @new<Response>();
-            r1.Value = r.Value;
+            r1.val = r.val;
             if (r1.ContentLength == 0L && r1.Body != null)
             { 
                 // Is it actually 0 length? Or just unknown?
@@ -310,19 +351,22 @@ namespace net
                 var (n, err) = r1.Body.Read(buf[..]);
                 if (err != null && err != io.EOF)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 }
+
                 if (n == 0L)
                 { 
                     // Reset it to a known zero reader, in case underlying one
                     // is unhappy being read repeatedly.
                     r1.Body = NoBody;
+
                 }
                 else
                 {
                     r1.ContentLength = -1L;
                     r1.Body = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{io.Readerio.Closer}{io.MultiReader(bytes.NewReader(buf[:1]),r.Body),r.Body,};
                 }
+
             } 
             // If we're sending a non-chunked HTTP/1.1 response without a
             // content-length, the only way to do that is the old HTTP/1.0
@@ -337,19 +381,20 @@ namespace net
             var (tw, err) = newTransferWriter(r1);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
-            err = tw.WriteHeader(w);
+
+            err = tw.writeHeader(w, null);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             } 
 
             // Rest of header
             err = r.Header.WriteSubset(w, respExcludeHeader);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             } 
 
             // contentLengthAlreadySent may have been already sent for
@@ -362,10 +407,11 @@ namespace net
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
             } 
 
             // End-of-header
@@ -374,7 +420,7 @@ namespace net
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // Write body and trailer
@@ -382,22 +428,50 @@ namespace net
             } 
 
             // Write body and trailer
-            err = tw.WriteBody(w);
+            err = tw.writeBody(w);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             } 
 
             // Success
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
-        private static void closeBody(this ref Response r)
+        private static void closeBody(this ptr<Response> _addr_r)
         {
+            ref Response r = ref _addr_r.val;
+
             if (r.Body != null)
             {
                 r.Body.Close();
             }
+
+        }
+
+        // bodyIsWritable reports whether the Body supports writing. The
+        // Transport returns Writable bodies for 101 Switching Protocols
+        // responses.
+        // The Transport uses this method to determine whether a persistent
+        // connection is done being managed from its perspective. Once we
+        // return a writable response body to a user, the net/http package is
+        // done managing that connection.
+        private static bool bodyIsWritable(this ptr<Response> _addr_r)
+        {
+            ref Response r = ref _addr_r.val;
+
+            io.Writer (_, ok) = r.Body._<io.Writer>();
+            return ok;
+        }
+
+        // isProtocolSwitch reports whether r is a response to a successful
+        // protocol upgrade.
+        private static bool isProtocolSwitch(this ptr<Response> _addr_r)
+        {
+            ref Response r = ref _addr_r.val;
+
+            return r.StatusCode == StatusSwitchingProtocols && r.Header.Get("Upgrade") != "" && httpguts.HeaderValuesContainsToken(r.Header["Connection"], "Upgrade");
         }
     }
 }}

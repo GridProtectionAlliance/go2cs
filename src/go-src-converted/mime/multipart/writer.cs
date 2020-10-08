@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package multipart -- go2cs converted at 2020 August 29 08:32:35 UTC
+// package multipart -- go2cs converted at 2020 October 08 03:38:36 UTC
 // import "mime/multipart" ==> using multipart = go.mime.multipart_package
 // Original source: C:\Go\src\mime\multipart\writer.go
 using bytes = go.bytes_package;
@@ -30,14 +30,16 @@ namespace mime
 
         // NewWriter returns a new multipart Writer with a random boundary,
         // writing to w.
-        public static ref Writer NewWriter(io.Writer w)
+        public static ptr<Writer> NewWriter(io.Writer w)
         {
-            return ref new Writer(w:w,boundary:randomBoundary(),);
+            return addr(new Writer(w:w,boundary:randomBoundary(),));
         }
 
         // Boundary returns the Writer's boundary.
-        private static @string Boundary(this ref Writer w)
+        private static @string Boundary(this ptr<Writer> _addr_w)
         {
+            ref Writer w = ref _addr_w.val;
+
             return w.boundary;
         }
 
@@ -47,17 +49,20 @@ namespace mime
         // SetBoundary must be called before any parts are created, may only
         // contain certain ASCII characters, and must be non-empty and
         // at most 70 bytes long.
-        private static error SetBoundary(this ref Writer w, @string boundary)
+        private static error SetBoundary(this ptr<Writer> _addr_w, @string boundary)
         {
+            ref Writer w = ref _addr_w.val;
+
             if (w.lastpart != null)
             {
-                return error.As(errors.New("mime: SetBoundary called after write"));
+                return error.As(errors.New("mime: SetBoundary called after write"))!;
             } 
             // rfc2046#section-5.1.1
             if (len(boundary) < 1L || len(boundary) > 70L)
             {
-                return error.As(errors.New("mime: invalid boundary length"));
+                return error.As(errors.New("mime: invalid boundary length"))!;
             }
+
             var end = len(boundary) - 1L;
             foreach (var (i, b) in boundary)
             {
@@ -65,6 +70,7 @@ namespace mime
                 {
                     continue;
                 }
+
                 switch (b)
                 {
                     case '\'': 
@@ -97,19 +103,33 @@ namespace mime
                         {
                             continue;
                         }
+
                         break;
                 }
-                return error.As(errors.New("mime: invalid boundary character"));
+                return error.As(errors.New("mime: invalid boundary character"))!;
+
             }
             w.boundary = boundary;
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // FormDataContentType returns the Content-Type for an HTTP
         // multipart/form-data with this Writer's Boundary.
-        private static @string FormDataContentType(this ref Writer w)
+        private static @string FormDataContentType(this ptr<Writer> _addr_w)
         {
-            return "multipart/form-data; boundary=" + w.boundary;
+            ref Writer w = ref _addr_w.val;
+
+            var b = w.boundary; 
+            // We must quote the boundary if it contains any of the
+            // tspecials characters defined by RFC 2045, or space.
+            if (strings.ContainsAny(b, "()<>@,;:\\\"/[]?= "))
+            {
+                b = "\"" + b + "\"";
+            }
+
+            return "multipart/form-data; boundary=" + b;
+
         }
 
         private static @string randomBoundary() => func((_, panic, __) =>
@@ -120,15 +140,21 @@ namespace mime
             {
                 panic(err);
             }
+
             return fmt.Sprintf("%x", buf[..]);
+
         });
 
         // CreatePart creates a new multipart section with the provided
         // header. The body of the part should be written to the returned
         // Writer. After calling CreatePart, any previous part may no longer
         // be written to.
-        private static (io.Writer, error) CreatePart(this ref Writer w, textproto.MIMEHeader header)
+        private static (io.Writer, error) CreatePart(this ptr<Writer> _addr_w, textproto.MIMEHeader header)
         {
+            io.Writer _p0 = default;
+            error _p0 = default!;
+            ref Writer w = ref _addr_w.val;
+
             if (w.lastpart != null)
             {
                 {
@@ -136,20 +162,23 @@ namespace mime
 
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
 
                 }
+
             }
-            bytes.Buffer b = default;
+
+            ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
             if (w.lastpart != null)
             {
-                fmt.Fprintf(ref b, "\r\n--%s\r\n", w.boundary);
+                fmt.Fprintf(_addr_b, "\r\n--%s\r\n", w.boundary);
             }
             else
             {
-                fmt.Fprintf(ref b, "--%s\r\n", w.boundary);
+                fmt.Fprintf(_addr_b, "--%s\r\n", w.boundary);
             }
+
             var keys = make_slice<@string>(0L, len(header));
             {
                 var k__prev1 = k;
@@ -172,22 +201,25 @@ namespace mime
                     k = __k;
                     foreach (var (_, v) in header[k])
                     {
-                        fmt.Fprintf(ref b, "%s: %s\r\n", k, v);
+                        fmt.Fprintf(_addr_b, "%s: %s\r\n", k, v);
                     }
+
                 }
 
                 k = k__prev1;
             }
 
-            fmt.Fprintf(ref b, "\r\n");
-            var (_, err) = io.Copy(w.w, ref b);
+            fmt.Fprintf(_addr_b, "\r\n");
+            var (_, err) = io.Copy(w.w, _addr_b);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
-            part p = ref new part(mw:w,);
+
+            ptr<part> p = addr(new part(mw:w,));
             w.lastpart = p;
-            return (p, null);
+            return (p, error.As(null!)!);
+
         }
 
         private static var quoteEscaper = strings.NewReplacer("\\", "\\\\", "\"", "\\\"");
@@ -199,8 +231,12 @@ namespace mime
 
         // CreateFormFile is a convenience wrapper around CreatePart. It creates
         // a new form-data header with the provided field name and file name.
-        private static (io.Writer, error) CreateFormFile(this ref Writer w, @string fieldname, @string filename)
+        private static (io.Writer, error) CreateFormFile(this ptr<Writer> _addr_w, @string fieldname, @string filename)
         {
+            io.Writer _p0 = default;
+            error _p0 = default!;
+            ref Writer w = ref _addr_w.val;
+
             var h = make(textproto.MIMEHeader);
             h.Set("Content-Disposition", fmt.Sprintf("form-data; name=\"%s\"; filename=\"%s\"", escapeQuotes(fieldname), escapeQuotes(filename)));
             h.Set("Content-Type", "application/octet-stream");
@@ -209,29 +245,39 @@ namespace mime
 
         // CreateFormField calls CreatePart with a header using the
         // given field name.
-        private static (io.Writer, error) CreateFormField(this ref Writer w, @string fieldname)
+        private static (io.Writer, error) CreateFormField(this ptr<Writer> _addr_w, @string fieldname)
         {
+            io.Writer _p0 = default;
+            error _p0 = default!;
+            ref Writer w = ref _addr_w.val;
+
             var h = make(textproto.MIMEHeader);
             h.Set("Content-Disposition", fmt.Sprintf("form-data; name=\"%s\"", escapeQuotes(fieldname)));
             return w.CreatePart(h);
         }
 
         // WriteField calls CreateFormField and then writes the given value.
-        private static error WriteField(this ref Writer w, @string fieldname, @string value)
+        private static error WriteField(this ptr<Writer> _addr_w, @string fieldname, @string value)
         {
+            ref Writer w = ref _addr_w.val;
+
             var (p, err) = w.CreateFormField(fieldname);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             _, err = p.Write((slice<byte>)value);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         // Close finishes the multipart message and writes the trailing
         // boundary end line to the output.
-        private static error Close(this ref Writer w)
+        private static error Close(this ptr<Writer> _addr_w)
         {
+            ref Writer w = ref _addr_w.val;
+
             if (w.lastpart != null)
             {
                 {
@@ -239,14 +285,18 @@ namespace mime
 
                     if (err != null)
                     {
-                        return error.As(err);
+                        return error.As(err)!;
                     }
 
                 }
+
                 w.lastpart = null;
+
             }
+
             var (_, err) = fmt.Fprintf(w.w, "\r\n--%s--\r\n", w.boundary);
-            return error.As(err);
+            return error.As(err)!;
+
         }
 
         private partial struct part
@@ -256,24 +306,33 @@ namespace mime
             public error we; // last error that occurred writing
         }
 
-        private static error close(this ref part p)
+        private static error close(this ptr<part> _addr_p)
         {
+            ref part p = ref _addr_p.val;
+
             p.closed = true;
-            return error.As(p.we);
+            return error.As(p.we)!;
         }
 
-        private static (long, error) Write(this ref part p, slice<byte> d)
+        private static (long, error) Write(this ptr<part> _addr_p, slice<byte> d)
         {
+            long n = default;
+            error err = default!;
+            ref part p = ref _addr_p.val;
+
             if (p.closed)
             {
-                return (0L, errors.New("multipart: can't write to finished part"));
+                return (0L, error.As(errors.New("multipart: can't write to finished part"))!);
             }
+
             n, err = p.mw.w.Write(d);
             if (err != null)
             {
                 p.we = err;
             }
-            return;
+
+            return ;
+
         }
     }
 }}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xml -- go2cs converted at 2020 August 29 08:36:05 UTC
+// package xml -- go2cs converted at 2020 October 08 03:43:04 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Go\src\encoding\xml\typeinfo.go
 using fmt = go.fmt_package;
@@ -37,17 +37,18 @@ namespace encoding
         {
         }
 
-        private static readonly fieldFlags fElement = 1L << (int)(iota);
-        private static readonly var fAttr = 0;
-        private static readonly var fCDATA = 1;
-        private static readonly var fCharData = 2;
-        private static readonly var fInnerXml = 3;
-        private static readonly var fComment = 4;
-        private static readonly var fAny = 5;
+        private static readonly fieldFlags fElement = (fieldFlags)1L << (int)(iota);
+        private static readonly var fAttr = (var)0;
+        private static readonly var fCDATA = (var)1;
+        private static readonly var fCharData = (var)2;
+        private static readonly var fInnerXML = (var)3;
+        private static readonly var fComment = (var)4;
+        private static readonly var fAny = (var)5;
 
-        private static readonly fMode fOmitEmpty = fElement | fAttr | fCDATA | fCharData | fInnerXml | fComment | fAny;
+        private static readonly fMode fOmitEmpty = (fMode)fElement | fAttr | fCDATA | fCharData | fInnerXML | fComment | fAny;
 
-        private static readonly @string xmlName = "XMLName";
+        private static readonly @string xmlName = (@string)"XMLName";
+
 
         private static sync.Map tinfoMap = default; // map[reflect.Type]*typeInfo
 
@@ -55,8 +56,11 @@ namespace encoding
 
         // getTypeInfo returns the typeInfo structure with details necessary
         // for marshaling and unmarshaling typ.
-        private static (ref typeInfo, error) getTypeInfo(reflect.Type typ)
+        private static (ptr<typeInfo>, error) getTypeInfo(reflect.Type typ)
         {
+            ptr<typeInfo> _p0 = default!;
+            error _p0 = default!;
+
             {
                 var ti__prev1 = ti;
 
@@ -64,20 +68,21 @@ namespace encoding
 
                 if (ok)
                 {
-                    return (ti._<ref typeInfo>(), null);
+                    return (ti._<ptr<typeInfo>>(), error.As(null!)!);
                 }
 
                 ti = ti__prev1;
 
             }
 
-            typeInfo tinfo = ref new typeInfo();
+
+            ptr<typeInfo> tinfo = addr(new typeInfo());
             if (typ.Kind() == reflect.Struct && typ != nameType)
             {
                 var n = typ.NumField();
                 for (long i = 0L; i < n; i++)
                 {
-                    var f = typ.Field(i);
+                    ref var f = ref heap(typ.Field(i), out ptr<var> _addr_f);
                     if ((f.PkgPath != "" && !f.Anonymous) || f.Tag.Get("xml") == "-")
                     {
                         continue; // Private field
@@ -91,17 +96,20 @@ namespace encoding
                         {
                             t = t.Elem();
                         }
+
                         if (t.Kind() == reflect.Struct)
                         {
                             var (inner, err) = getTypeInfo(t);
                             if (err != null)
                             {
-                                return (null, err);
+                                return (_addr_null!, error.As(err)!);
                             }
+
                             if (tinfo.xmlname == null)
                             {
                                 tinfo.xmlname = inner.xmlname;
                             }
+
                             {
                                 var finfo__prev2 = finfo;
 
@@ -112,29 +120,34 @@ namespace encoding
                                     {
                                         var err__prev4 = err;
 
-                                        var err = addFieldInfo(typ, tinfo, ref finfo);
+                                        var err = addFieldInfo(typ, _addr_tinfo, _addr_finfo);
 
                                         if (err != null)
                                         {
-                                            return (null, err);
+                                            return (_addr_null!, error.As(err)!);
                                         }
 
                                         err = err__prev4;
 
                                     }
+
                                 }
 
                                 finfo = finfo__prev2;
                             }
 
                             continue;
+
                         }
+
                     }
-                    var (finfo, err) = structFieldInfo(typ, ref f);
+
+                    var (finfo, err) = structFieldInfo(typ, _addr_f);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (_addr_null!, error.As(err)!);
                     }
+
                     if (f.Name == xmlName)
                     {
                         tinfo.xmlname = finfo;
@@ -145,27 +158,35 @@ namespace encoding
                     {
                         var err__prev2 = err;
 
-                        err = addFieldInfo(typ, tinfo, finfo);
+                        err = addFieldInfo(typ, _addr_tinfo, _addr_finfo);
 
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
 
                         err = err__prev2;
 
                     }
+
                 }
 
+
             }
+
             var (ti, _) = tinfoMap.LoadOrStore(typ, tinfo);
-            return (ti._<ref typeInfo>(), null);
+            return (ti._<ptr<typeInfo>>(), error.As(null!)!);
+
         }
 
         // structFieldInfo builds and returns a fieldInfo for f.
-        private static (ref fieldInfo, error) structFieldInfo(reflect.Type typ, ref reflect.StructField f)
+        private static (ptr<fieldInfo>, error) structFieldInfo(reflect.Type typ, ptr<reflect.StructField> _addr_f)
         {
-            fieldInfo finfo = ref new fieldInfo(idx:f.Index); 
+            ptr<fieldInfo> _p0 = default!;
+            error _p0 = default!;
+            ref reflect.StructField f = ref _addr_f.val;
+
+            ptr<fieldInfo> finfo = addr(new fieldInfo(idx:f.Index)); 
 
             // Split the tag from the xml namespace if necessary.
             var tag = f.Tag.Get("xml");
@@ -176,6 +197,7 @@ namespace encoding
                 {
                     finfo.xmlns = tag[..i];
                     tag = tag[i + 1L..];
+
                 } 
 
                 // Parse flags.
@@ -205,7 +227,7 @@ namespace encoding
                             finfo.flags |= fCharData;
                             break;
                         case "innerxml": 
-                            finfo.flags |= fInnerXml;
+                            finfo.flags |= fInnerXML;
                             break;
                         case "comment": 
                             finfo.flags |= fComment;
@@ -217,6 +239,7 @@ namespace encoding
                             finfo.flags |= fOmitEmpty;
                             break;
                     }
+
                 } 
 
                 // Validate the flags used.
@@ -227,11 +250,12 @@ namespace encoding
 
                     if (mode == 0L) 
                         finfo.flags |= fElement;
-                    else if (mode == fAttr || mode == fCDATA || mode == fCharData || mode == fInnerXml || mode == fComment || mode == fAny || mode == fAny | fAttr) 
+                    else if (mode == fAttr || mode == fCDATA || mode == fCharData || mode == fInnerXML || mode == fComment || mode == fAny || mode == fAny | fAttr) 
                         if (f.Name == xmlName || tag != "" && mode != fAttr)
                         {
                             valid = false;
                         }
+
                     else 
                         // This will also catch multiple modes in a single field.
                         valid = false;
@@ -241,29 +265,35 @@ namespace encoding
                 {
                     finfo.flags |= fElement;
                 }
+
                 if (finfo.flags & fOmitEmpty != 0L && finfo.flags & (fElement | fAttr) == 0L)
                 {
                     valid = false;
                 }
+
                 if (!valid)
                 {
-                    return (null, fmt.Errorf("xml: invalid tag in field %s of type %s: %q", f.Name, typ, f.Tag.Get("xml")));
+                    return (_addr_null!, error.As(fmt.Errorf("xml: invalid tag in field %s of type %s: %q", f.Name, typ, f.Tag.Get("xml")))!);
                 }
+
             } 
 
             // Use of xmlns without a name is not allowed.
             if (finfo.xmlns != "" && tag == "")
             {
-                return (null, fmt.Errorf("xml: namespace without name in field %s of type %s: %q", f.Name, typ, f.Tag.Get("xml")));
+                return (_addr_null!, error.As(fmt.Errorf("xml: namespace without name in field %s of type %s: %q", f.Name, typ, f.Tag.Get("xml")))!);
             }
+
             if (f.Name == xmlName)
             { 
                 // The XMLName field records the XML element name. Don't
                 // process it as usual because its name should default to
                 // empty rather than to the field name.
                 finfo.name = tag;
-                return (finfo, null);
+                return (_addr_finfo!, error.As(null!)!);
+
             }
+
             if (tag == "")
             { 
                 // If the name part of the tag is completely empty, get
@@ -278,6 +308,7 @@ namespace encoding
                     {
                         finfo.xmlns = xmlname.xmlns;
                         finfo.name = xmlname.name;
+
                     }
                     else
                     {
@@ -287,7 +318,9 @@ namespace encoding
                     xmlname = xmlname__prev2;
 
                 }
-                return (finfo, null);
+
+                return (_addr_finfo!, error.As(null!)!);
+
             } 
 
             // Prepare field name and parents.
@@ -296,18 +329,22 @@ namespace encoding
             {
                 parents[0L] = f.Name;
             }
+
             if (parents[len(parents) - 1L] == "")
             {
-                return (null, fmt.Errorf("xml: trailing '>' in field %s of type %s", f.Name, typ));
+                return (_addr_null!, error.As(fmt.Errorf("xml: trailing '>' in field %s of type %s", f.Name, typ))!);
             }
+
             finfo.name = parents[len(parents) - 1L];
             if (len(parents) > 1L)
             {
                 if ((finfo.flags & fElement) == 0L)
                 {
-                    return (null, fmt.Errorf("xml: %s chain not valid with %s flag", tag, strings.Join(tokens[1L..], ",")));
+                    return (_addr_null!, error.As(fmt.Errorf("xml: %s chain not valid with %s flag", tag, strings.Join(tokens[1L..], ",")))!);
                 }
+
                 finfo.parents = parents[..len(parents) - 1L];
+
             } 
 
             // If the field type has an XMLName field, the names must match
@@ -319,17 +356,22 @@ namespace encoding
                 xmlname = lookupXMLName(ftyp);
                 if (xmlname != null && xmlname.name != finfo.name)
                 {
-                    return (null, fmt.Errorf("xml: name %q in tag of %s.%s conflicts with name %q in %s.XMLName", finfo.name, typ, f.Name, xmlname.name, ftyp));
+                    return (_addr_null!, error.As(fmt.Errorf("xml: name %q in tag of %s.%s conflicts with name %q in %s.XMLName", finfo.name, typ, f.Name, xmlname.name, ftyp))!);
                 }
+
             }
-            return (finfo, null);
+
+            return (_addr_finfo!, error.As(null!)!);
+
         }
 
         // lookupXMLName returns the fieldInfo for typ's XMLName field
         // in case it exists and has a valid xml field tag, otherwise
         // it returns nil.
-        private static ref fieldInfo lookupXMLName(reflect.Type typ)
+        private static ptr<fieldInfo> lookupXMLName(reflect.Type typ)
         {
+            ptr<fieldInfo> xmlname = default!;
+
             while (typ.Kind() == reflect.Ptr)
             {
                 typ = typ.Elem();
@@ -337,27 +379,31 @@ namespace encoding
 
             if (typ.Kind() != reflect.Struct)
             {
-                return null;
+                return _addr_null!;
             }
+
             for (long i = 0L;
             var n = typ.NumField(); i < n; i++)
             {
-                var f = typ.Field(i);
+                ref var f = ref heap(typ.Field(i), out ptr<var> _addr_f);
                 if (f.Name != xmlName)
                 {
                     continue;
                 }
-                var (finfo, err) = structFieldInfo(typ, ref f);
+
+                var (finfo, err) = structFieldInfo(typ, _addr_f);
                 if (err == null && finfo.name != "")
                 {
-                    return finfo;
+                    return _addr_finfo!;
                 } 
                 // Also consider errors as a non-existent field tag
                 // and let getTypeInfo itself report the error.
                 break;
+
             }
 
-            return null;
+            return _addr_null!;
+
         }
 
         private static long min(long a, long b)
@@ -366,7 +412,9 @@ namespace encoding
             {
                 return a;
             }
+
             return b;
+
         }
 
         // addFieldInfo adds finfo to tinfo.fields if there are no
@@ -376,8 +424,11 @@ namespace encoding
         // A conflict occurs when the path (parent + name) to a field is
         // itself a prefix of another path, or when two paths match exactly.
         // It is okay for field paths to share a common, shorter prefix.
-        private static error addFieldInfo(reflect.Type typ, ref typeInfo tinfo, ref fieldInfo newf)
+        private static error addFieldInfo(reflect.Type typ, ptr<typeInfo> _addr_tinfo, ptr<fieldInfo> _addr_newf)
         {
+            ref typeInfo tinfo = ref _addr_tinfo.val;
+            ref fieldInfo newf = ref _addr_newf.val;
+
             slice<long> conflicts = default;
 Loop: 
             // Without conflicts, add the new field and return.
@@ -387,15 +438,17 @@ Loop:
                 foreach (var (__i) in tinfo.fields)
                 {
                     i = __i;
-                    var oldf = ref tinfo.fields[i];
+                    var oldf = _addr_tinfo.fields[i];
                     if (oldf.flags & fMode != newf.flags & fMode)
                     {
                         continue;
                     }
+
                     if (oldf.xmlns != "" && newf.xmlns != "" && oldf.xmlns != newf.xmlns)
                     {
                         continue;
                     }
+
                     var minl = min(len(newf.parents), len(oldf.parents));
                     for (long p = 0L; p < minl; p++)
                     {
@@ -404,6 +457,7 @@ Loop:
                             _continueLoop = true;
                             break;
                         }
+
                     }
 
                     if (len(oldf.parents) > len(newf.parents))
@@ -412,6 +466,7 @@ Loop:
                         {
                             conflicts = append(conflicts, i);
                         }
+
                     }
                     else if (len(oldf.parents) < len(newf.parents))
                     {
@@ -419,6 +474,7 @@ Loop:
                         {
                             conflicts = append(conflicts, i);
                         }
+
                     }
                     else
                     {
@@ -426,7 +482,9 @@ Loop:
                         {
                             conflicts = append(conflicts, i);
                         }
+
                     }
+
                 } 
                 // Without conflicts, add the new field and return.
 
@@ -434,8 +492,8 @@ Loop:
             }
             if (conflicts == null)
             {
-                tinfo.fields = append(tinfo.fields, newf.Value);
-                return error.As(null);
+                tinfo.fields = append(tinfo.fields, newf);
+                return error.As(null!)!;
             } 
 
             // If any conflict is shallower, ignore the new field.
@@ -448,8 +506,9 @@ Loop:
                     i = __i;
                     if (len(tinfo.fields[i].idx) < len(newf.idx))
                     {
-                        return error.As(null);
+                        return error.As(null!)!;
                     }
+
                 } 
 
                 // Otherwise, if any of them is at the same depth level, it's an error.
@@ -463,13 +522,14 @@ Loop:
                 foreach (var (_, __i) in conflicts)
                 {
                     i = __i;
-                    oldf = ref tinfo.fields[i];
+                    oldf = _addr_tinfo.fields[i];
                     if (len(oldf.idx) == len(newf.idx))
                     {
                         var f1 = typ.FieldByIndex(oldf.idx);
                         var f2 = typ.FieldByIndex(newf.idx);
-                        return error.As(ref new TagPathError(typ,f1.Name,f1.Tag.Get("xml"),f2.Name,f2.Tag.Get("xml")));
+                        return error.As(addr(new TagPathError(typ,f1.Name,f1.Tag.Get("xml"),f2.Name,f2.Tag.Get("xml")))!)!;
                     }
+
                 } 
 
                 // Otherwise, the new field is shallower, and thus takes precedence,
@@ -485,8 +545,9 @@ Loop:
                 tinfo.fields = tinfo.fields[..len(tinfo.fields) - 1L];
             }
 
-            tinfo.fields = append(tinfo.fields, newf.Value);
-            return error.As(null);
+            tinfo.fields = append(tinfo.fields, newf);
+            return error.As(null!)!;
+
         }
 
         // A TagPathError represents an error in the unmarshaling process
@@ -500,16 +561,26 @@ Loop:
             public @string Tag2;
         }
 
-        private static @string Error(this ref TagPathError e)
+        private static @string Error(this ptr<TagPathError> _addr_e)
         {
+            ref TagPathError e = ref _addr_e.val;
+
             return fmt.Sprintf("%s field %q with tag %q conflicts with field %q with tag %q", e.Struct, e.Field1, e.Tag1, e.Field2, e.Tag2);
         }
 
+        private static readonly var initNilPointers = (var)true;
+        private static readonly var dontInitNilPointers = (var)false;
+
+
         // value returns v's field value corresponding to finfo.
-        // It's equivalent to v.FieldByIndex(finfo.idx), but initializes
-        // and dereferences pointers as necessary.
-        private static reflect.Value value(this ref fieldInfo finfo, reflect.Value v)
+        // It's equivalent to v.FieldByIndex(finfo.idx), but when passed
+        // initNilPointers, it initializes and dereferences pointers as necessary.
+        // When passed dontInitNilPointers and a nil pointer is reached, the function
+        // returns a zero reflect.Value.
+        private static reflect.Value value(this ptr<fieldInfo> _addr_finfo, reflect.Value v, bool shouldInitNilPointers)
         {
+            ref fieldInfo finfo = ref _addr_finfo.val;
+
             foreach (var (i, x) in finfo.idx)
             {
                 if (i > 0L)
@@ -519,14 +590,26 @@ Loop:
                     {
                         if (v.IsNil())
                         {
+                            if (!shouldInitNilPointers)
+                            {
+                                return new reflect.Value();
+                            }
+
                             v.Set(reflect.New(v.Type().Elem()));
+
                         }
+
                         v = v.Elem();
+
                     }
+
                 }
+
                 v = v.Field(x);
+
             }
             return v;
+
         }
     }
 }}

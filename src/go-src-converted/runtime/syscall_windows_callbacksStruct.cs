@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:21:09 UTC
+//     Generated on 2020 October 08 03:23:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
                 this.n = default;
             }
 
-            public callbacks(mutex @lock = default, array<ref wincallbackcontext> ctxt = default, long n = default)
+            public callbacks(mutex @lock = default, array<ptr<wincallbackcontext>> ctxt = default, long n = default)
             {
                 this.@lock = @lock;
                 this.ctxt = ctxt;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:44 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:09 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\asin.go
 
@@ -33,16 +33,19 @@ namespace go
             {>>MARKER:FUNCTION_Asin_BLOCK_PREFIX<<
                 return x; // special case
             }
+
             var sign = false;
             if (x < 0L)
             {
                 x = -x;
                 sign = true;
             }
+
             if (x > 1L)
             {
                 return NaN(); // special case
             }
+
             var temp = Sqrt(1L - x * x);
             if (x > 0.7F)
             {
@@ -52,11 +55,14 @@ namespace go
             {
                 temp = satan(x / temp);
             }
+
             if (sign)
             {
                 temp = -temp;
             }
+
             return temp;
+
         }
 
         // Acos returns the arccosine, in radians, of x.

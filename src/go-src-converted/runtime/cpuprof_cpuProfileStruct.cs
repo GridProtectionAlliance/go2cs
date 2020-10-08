@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:16:40 UTC
+//     Generated on 2020 October 08 03:19:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,9 +33,10 @@ namespace go
                 this.extra = default;
                 this.numExtra = default;
                 this.lostExtra = default;
+                this.lostAtomic = default;
             }
 
-            public cpuProfile(mutex @lock = default, bool on = default, ref ptr<profBuf> log = default, array<System.UIntPtr> extra = default, long numExtra = default, ulong lostExtra = default)
+            public cpuProfile(mutex @lock = default, bool on = default, ref ptr<profBuf> log = default, array<System.UIntPtr> extra = default, long numExtra = default, ulong lostExtra = default, ulong lostAtomic = default)
             {
                 this.@lock = @lock;
                 this.on = on;
@@ -43,6 +44,7 @@ namespace go
                 this.extra = extra;
                 this.numExtra = numExtra;
                 this.lostExtra = lostExtra;
+                this.lostAtomic = lostAtomic;
             }
 
             // Enable comparisons between nil and cpuProfile struct
@@ -65,7 +67,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static cpuProfile cpuProfile_cast(dynamic value)
         {
-            return new cpuProfile(value.@lock, value.on, ref value.log, value.extra, value.numExtra, value.lostExtra);
+            return new cpuProfile(value.@lock, value.on, ref value.log, value.extra, value.numExtra, value.lostExtra, value.lostAtomic);
         }
     }
 }

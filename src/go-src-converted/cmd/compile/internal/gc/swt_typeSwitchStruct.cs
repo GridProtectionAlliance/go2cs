@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:24 UTC
+//     Generated on 2020 October 08 04:31:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,7 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using types = go.cmd.compile.@internal.types_package;
-using fmt = go.fmt_package;
+using src = go.cmd.@internal.src_package;
 using sort = go.sort_package;
 using go;
 
@@ -31,16 +31,20 @@ namespace @internal
             // Constructors
             public typeSwitch(NilType _)
             {
-                this.hashname = default;
                 this.facename = default;
+                this.hashname = default;
                 this.okname = default;
+                this.done = default;
+                this.clauses = default;
             }
 
-            public typeSwitch(ref ptr<Node> hashname = default, ref ptr<Node> facename = default, ref ptr<Node> okname = default)
+            public typeSwitch(ref ptr<Node> facename = default, ref ptr<Node> hashname = default, ref ptr<Node> okname = default, Nodes done = default, slice<typeClause> clauses = default)
             {
-                this.hashname = hashname;
                 this.facename = facename;
+                this.hashname = hashname;
                 this.okname = okname;
+                this.done = done;
+                this.clauses = clauses;
             }
 
             // Enable comparisons between nil and typeSwitch struct
@@ -63,7 +67,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static typeSwitch typeSwitch_cast(dynamic value)
         {
-            return new typeSwitch(ref value.hashname, ref value.facename, ref value.okname);
+            return new typeSwitch(ref value.facename, ref value.hashname, ref value.okname, value.done, value.clauses);
         }
     }
 }}}}

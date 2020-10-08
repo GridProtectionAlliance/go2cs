@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:26:40 UTC
+//     Generated on 2020 October 08 04:28:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace @internal
                 this.curfn = default;
             }
 
-            public nowritebarrierrecChecker(map<ref Node, slice<nowritebarrierrecCall>> extraCalls = default, ref ptr<Node> curfn = default)
+            public nowritebarrierrecChecker(map<ptr<Node>, slice<nowritebarrierrecCall>> extraCalls = default, ref ptr<Node> curfn = default)
             {
                 this.extraCalls = extraCalls;
                 this.curfn = curfn;

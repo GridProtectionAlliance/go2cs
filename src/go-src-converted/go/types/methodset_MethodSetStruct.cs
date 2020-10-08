@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:43 UTC
+//     Generated on 2020 October 08 04:03:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
+using strings = go.strings_package;
 using go;
 
 namespace go {
@@ -32,7 +32,7 @@ namespace go
                 this.list = default;
             }
 
-            public MethodSet(slice<ref Selection> list = default)
+            public MethodSet(slice<ptr<Selection>> list = default)
             {
                 this.list = list;
             }

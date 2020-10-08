@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lex -- go2cs converted at 2020 August 29 08:51:46 UTC
+// package lex -- go2cs converted at 2020 October 08 04:08:10 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Go\src\cmd\asm\internal\lex\tokenizer.go
 using io = go.io_package;
@@ -35,9 +35,11 @@ namespace @internal
             public ptr<os.File> file; // If non-nil, file descriptor to close.
         }
 
-        public static ref Tokenizer NewTokenizer(@string name, io.Reader r, ref os.File file)
+        public static ptr<Tokenizer> NewTokenizer(@string name, io.Reader r, ptr<os.File> _addr_file)
         {
-            scanner.Scanner s = default;
+            ref os.File file = ref _addr_file.val;
+
+            ref scanner.Scanner s = ref heap(out ptr<scanner.Scanner> _addr_s);
             s.Init(r); 
             // Newline is like a semicolon; other space characters are fine.
             s.Whitespace = 1L << (int)('\t') | 1L << (int)('\r') | 1L << (int)(' '); 
@@ -45,7 +47,8 @@ namespace @internal
             s.Mode = scanner.ScanChars | scanner.ScanFloats | scanner.ScanIdents | scanner.ScanInts | scanner.ScanStrings | scanner.ScanComments;
             s.Position.Filename = name;
             s.IsIdentRune = isIdentRune;
-            return ref new Tokenizer(s:&s,base:src.NewFileBase(name,objabi.AbsFile(objabi.WorkingDir(),name,*flags.TrimPath)),line:1,file:file,);
+            return addr(new Tokenizer(s:&s,base:src.NewFileBase(name,objabi.AbsFile(objabi.WorkingDir(),name,*flags.TrimPath)),line:1,file:file,));
+
         }
 
         // We want center dot (·) and division slash (∕) to work as identifier characters.
@@ -55,6 +58,7 @@ namespace @internal
             {
                 return true;
             }
+
             switch (ch)
             {
                 case '_': // Underscore; traditional.
@@ -69,10 +73,13 @@ namespace @internal
             } 
             // Digits are OK only after the first character.
             return i > 0L && unicode.IsDigit(ch);
+
         }
 
-        private static @string Text(this ref Tokenizer t)
+        private static @string Text(this ptr<Tokenizer> _addr_t)
         {
+            ref Tokenizer t = ref _addr_t.val;
+
 
             if (t.tok == LSH) 
                 return "<<";
@@ -83,35 +90,49 @@ namespace @internal
             else if (t.tok == ROT) 
                 return "@>";
                         return t.s.TokenText();
+
         }
 
-        private static @string File(this ref Tokenizer t)
+        private static @string File(this ptr<Tokenizer> _addr_t)
         {
+            ref Tokenizer t = ref _addr_t.val;
+
             return t.@base.Filename();
         }
 
-        private static ref src.PosBase Base(this ref Tokenizer t)
+        private static ptr<src.PosBase> Base(this ptr<Tokenizer> _addr_t)
         {
-            return t.@base;
+            ref Tokenizer t = ref _addr_t.val;
+
+            return _addr_t.@base!;
         }
 
-        private static void SetBase(this ref Tokenizer t, ref src.PosBase @base)
+        private static void SetBase(this ptr<Tokenizer> _addr_t, ptr<src.PosBase> _addr_@base)
         {
+            ref Tokenizer t = ref _addr_t.val;
+            ref src.PosBase @base = ref _addr_@base.val;
+
             t.@base = base;
         }
 
-        private static long Line(this ref Tokenizer t)
+        private static long Line(this ptr<Tokenizer> _addr_t)
         {
+            ref Tokenizer t = ref _addr_t.val;
+
             return t.line;
         }
 
-        private static long Col(this ref Tokenizer t)
+        private static long Col(this ptr<Tokenizer> _addr_t)
         {
+            ref Tokenizer t = ref _addr_t.val;
+
             return t.s.Pos().Column;
         }
 
-        private static ScanToken Next(this ref Tokenizer t)
+        private static ScanToken Next(this ptr<Tokenizer> _addr_t)
         {
+            ref Tokenizer t = ref _addr_t.val;
+
             var s = t.s;
             while (true)
             {
@@ -120,6 +141,7 @@ namespace @internal
                 {
                     break;
                 }
+
                 var length = strings.Count(s.TokenText(), "\n");
                 t.line += length; 
                 // TODO: If we ever have //go: comments in assembly, will need to keep them here.
@@ -138,6 +160,7 @@ namespace @internal
                         t.tok = ARR;
                         return ARR;
                     }
+
                     break;
                 case '@': 
                     if (s.Peek() == '>')
@@ -146,6 +169,7 @@ namespace @internal
                         t.tok = ROT;
                         return ROT;
                     }
+
                     break;
                 case '<': 
                     if (s.Peek() == '<')
@@ -154,6 +178,7 @@ namespace @internal
                         t.tok = LSH;
                         return LSH;
                     }
+
                     break;
                 case '>': 
                     if (s.Peek() == '>')
@@ -162,17 +187,22 @@ namespace @internal
                         t.tok = RSH;
                         return RSH;
                     }
+
                     break;
             }
             return t.tok;
+
         }
 
-        private static void Close(this ref Tokenizer t)
+        private static void Close(this ptr<Tokenizer> _addr_t)
         {
+            ref Tokenizer t = ref _addr_t.val;
+
             if (t.file != null)
             {
                 t.file.Close();
             }
+
         }
     }
 }}}}

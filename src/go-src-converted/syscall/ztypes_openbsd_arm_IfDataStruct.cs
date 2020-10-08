@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:17 UTC
+//     Generated on 2020 October 08 03:30:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
                 this.Link_state = default;
                 this.Mtu = default;
                 this.Metric = default;
-                this.Pad = default;
+                this.Rdomain = default;
                 this.Baudrate = default;
                 this.Ipackets = default;
                 this.Ierrors = default;
@@ -42,12 +42,14 @@ namespace go
                 this.Imcasts = default;
                 this.Omcasts = default;
                 this.Iqdrops = default;
+                this.Oqdrops = default;
                 this.Noproto = default;
                 this.Capabilities = default;
+                this.Pad_cgo_0 = default;
                 this.Lastchange = default;
             }
 
-            public IfData(byte Type = default, byte Addrlen = default, byte Hdrlen = default, byte Link_state = default, uint Mtu = default, uint Metric = default, uint Pad = default, ulong Baudrate = default, ulong Ipackets = default, ulong Ierrors = default, ulong Opackets = default, ulong Oerrors = default, ulong Collisions = default, ulong Ibytes = default, ulong Obytes = default, ulong Imcasts = default, ulong Omcasts = default, ulong Iqdrops = default, ulong Noproto = default, uint Capabilities = default, Timeval Lastchange = default)
+            public IfData(byte Type = default, byte Addrlen = default, byte Hdrlen = default, byte Link_state = default, uint Mtu = default, uint Metric = default, uint Rdomain = default, ulong Baudrate = default, ulong Ipackets = default, ulong Ierrors = default, ulong Opackets = default, ulong Oerrors = default, ulong Collisions = default, ulong Ibytes = default, ulong Obytes = default, ulong Imcasts = default, ulong Omcasts = default, ulong Iqdrops = default, ulong Oqdrops = default, ulong Noproto = default, uint Capabilities = default, array<byte> Pad_cgo_0 = default, Timeval Lastchange = default)
             {
                 this.Type = Type;
                 this.Addrlen = Addrlen;
@@ -55,7 +57,7 @@ namespace go
                 this.Link_state = Link_state;
                 this.Mtu = Mtu;
                 this.Metric = Metric;
-                this.Pad = Pad;
+                this.Rdomain = Rdomain;
                 this.Baudrate = Baudrate;
                 this.Ipackets = Ipackets;
                 this.Ierrors = Ierrors;
@@ -67,8 +69,10 @@ namespace go
                 this.Imcasts = Imcasts;
                 this.Omcasts = Omcasts;
                 this.Iqdrops = Iqdrops;
+                this.Oqdrops = Oqdrops;
                 this.Noproto = Noproto;
                 this.Capabilities = Capabilities;
+                this.Pad_cgo_0 = Pad_cgo_0;
                 this.Lastchange = Lastchange;
             }
 
@@ -92,7 +96,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static IfData IfData_cast(dynamic value)
         {
-            return new IfData(value.Type, value.Addrlen, value.Hdrlen, value.Link_state, value.Mtu, value.Metric, value.Pad, value.Baudrate, value.Ipackets, value.Ierrors, value.Opackets, value.Oerrors, value.Collisions, value.Ibytes, value.Obytes, value.Imcasts, value.Omcasts, value.Iqdrops, value.Noproto, value.Capabilities, value.Lastchange);
+            return new IfData(value.Type, value.Addrlen, value.Hdrlen, value.Link_state, value.Mtu, value.Metric, value.Rdomain, value.Baudrate, value.Ipackets, value.Ierrors, value.Opackets, value.Oerrors, value.Collisions, value.Ibytes, value.Obytes, value.Imcasts, value.Omcasts, value.Iqdrops, value.Oqdrops, value.Noproto, value.Capabilities, value.Pad_cgo_0, value.Lastchange);
         }
     }
 }

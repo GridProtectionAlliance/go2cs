@@ -4,7 +4,7 @@
 
 // Netlink sockets and messages
 
-// package syscall -- go2cs converted at 2020 August 29 08:37:19 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:26:49 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\netlink_linux.go
 using @unsafe = go.@unsafe_package;
@@ -35,26 +35,29 @@ namespace go
             public RtGenmsg Data;
         }
 
-        private static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr)
+        private static slice<byte> toWireFormat(this ptr<NetlinkRouteRequest> _addr_rr)
         {
-            var b = make_slice<byte>(rr.Header.Len) * (uint32.Value)(@unsafe.Pointer(ref b[0L..4L][0L]));
+            ref NetlinkRouteRequest rr = ref _addr_rr.val;
 
-            rr.Header.Len * (uint16.Value)(@unsafe.Pointer(ref b[4L..6L][0L]));
+            var b = make_slice<byte>(rr.Header.Len) * (uint32.val)(@unsafe.Pointer(_addr_b[0L..4L][0L]));
 
-            rr.Header.Type * (uint16.Value)(@unsafe.Pointer(ref b[6L..8L][0L]));
+            rr.Header.Len * (uint16.val)(@unsafe.Pointer(_addr_b[4L..6L][0L]));
 
-            rr.Header.Flags * (uint32.Value)(@unsafe.Pointer(ref b[8L..12L][0L]));
+            rr.Header.Type * (uint16.val)(@unsafe.Pointer(_addr_b[6L..8L][0L]));
 
-            rr.Header.Seq * (uint32.Value)(@unsafe.Pointer(ref b[12L..16L][0L]));
+            rr.Header.Flags * (uint32.val)(@unsafe.Pointer(_addr_b[8L..12L][0L]));
+
+            rr.Header.Seq * (uint32.val)(@unsafe.Pointer(_addr_b[12L..16L][0L]));
 
             rr.Header.Pid;
             b[16L] = byte(rr.Data.Family);
             return b;
+
         }
 
         private static slice<byte> newNetlinkRouteRequest(long proto, long seq, long family)
         {
-            NetlinkRouteRequest rr = ref new NetlinkRouteRequest();
+            ptr<NetlinkRouteRequest> rr = addr(new NetlinkRouteRequest());
             rr.Header.Len = uint32(NLMSG_HDRLEN + SizeofRtGenmsg);
             rr.Header.Type = uint16(proto);
             rr.Header.Flags = NLM_F_DUMP | NLM_F_REQUEST;
@@ -67,13 +70,17 @@ namespace go
         // consists of network facility information, states and parameters.
         public static (slice<byte>, error) NetlinkRIB(long proto, long family) => func((defer, _, __) =>
         {
-            var (s, err) = Socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+
+            var (s, err) = cloexecSocket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             defer(Close(s));
-            SockaddrNetlink lsa = ref new SockaddrNetlink(Family:AF_NETLINK);
+            ptr<SockaddrNetlink> lsa = addr(new SockaddrNetlink(Family:AF_NETLINK));
             {
                 var err__prev1 = err;
 
@@ -81,12 +88,13 @@ namespace go
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
             var wb = newNetlinkRouteRequest(proto, 1L, family);
             {
                 var err__prev1 = err;
@@ -95,12 +103,13 @@ namespace go
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
                 err = err__prev1;
 
             }
+
             slice<byte> tab = default;
             var rbNew = make_slice<byte>(Getpagesize());
 done:
@@ -110,38 +119,43 @@ done:
                 var (nr, _, err) = Recvfrom(s, rb, 0L);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
                 if (nr < NLMSG_HDRLEN)
                 {
-                    return (null, EINVAL);
+                    return (null, error.As(EINVAL)!);
                 }
+
                 rb = rb[..nr];
                 tab = append(tab, rb);
                 var (msgs, err) = ParseNetlinkMessage(rb);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
                 foreach (var (_, m) in msgs)
                 {
                     var (lsa, err) = Getsockname(s);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     switch (lsa.type())
                     {
-                        case ref SockaddrNetlink v:
+                        case ptr<SockaddrNetlink> v:
                             if (m.Header.Seq != 1L || m.Header.Pid != v.Pid)
                             {
-                                return (null, EINVAL);
+                                return (null, error.As(EINVAL)!);
                             }
+
                             break;
                         default:
                         {
                             var v = lsa.type();
-                            return (null, EINVAL);
+                            return (null, error.As(EINVAL)!);
                             break;
                         }
                     }
@@ -150,13 +164,17 @@ done:
                         _breakdone = true;
                         break;
                     }
+
                     if (m.Header.Type == NLMSG_ERROR)
                     {
-                        return (null, EINVAL);
+                        return (null, error.As(EINVAL)!);
                     }
+
                 }
+
             }
-            return (tab, null);
+            return (tab, error.As(null!)!);
+
         });
 
         // NetlinkMessage represents a netlink message.
@@ -170,31 +188,44 @@ done:
         // returns the slice containing the NetlinkMessage structures.
         public static (slice<NetlinkMessage>, error) ParseNetlinkMessage(slice<byte> b)
         {
+            slice<NetlinkMessage> _p0 = default;
+            error _p0 = default!;
+
             slice<NetlinkMessage> msgs = default;
             while (len(b) >= NLMSG_HDRLEN)
             {
                 var (h, dbuf, dlen, err) = netlinkMessageHeaderAndData(b);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
                 NetlinkMessage m = new NetlinkMessage(Header:*h,Data:dbuf[:int(h.Len)-NLMSG_HDRLEN]);
                 msgs = append(msgs, m);
                 b = b[dlen..];
+
             }
 
-            return (msgs, null);
+            return (msgs, error.As(null!)!);
+
         }
 
-        private static (ref NlMsghdr, slice<byte>, long, error) netlinkMessageHeaderAndData(slice<byte> b)
+        private static (ptr<NlMsghdr>, slice<byte>, long, error) netlinkMessageHeaderAndData(slice<byte> b)
         {
-            var h = (NlMsghdr.Value)(@unsafe.Pointer(ref b[0L]));
+            ptr<NlMsghdr> _p0 = default!;
+            slice<byte> _p0 = default;
+            long _p0 = default;
+            error _p0 = default!;
+
+            var h = (NlMsghdr.val)(@unsafe.Pointer(_addr_b[0L]));
             var l = nlmAlignOf(int(h.Len));
             if (int(h.Len) < NLMSG_HDRLEN || l > len(b))
             {
-                return (null, null, 0L, EINVAL);
+                return (_addr_null!, null, 0L, error.As(EINVAL)!);
             }
-            return (h, b[NLMSG_HDRLEN..], l, null);
+
+            return (_addr_h!, b[NLMSG_HDRLEN..], l, error.As(null!)!);
+
         }
 
         // NetlinkRouteAttr represents a netlink route attribute.
@@ -207,8 +238,12 @@ done:
         // ParseNetlinkRouteAttr parses m's payload as an array of netlink
         // route attributes and returns the slice containing the
         // NetlinkRouteAttr structures.
-        public static (slice<NetlinkRouteAttr>, error) ParseNetlinkRouteAttr(ref NetlinkMessage m)
+        public static (slice<NetlinkRouteAttr>, error) ParseNetlinkRouteAttr(ptr<NetlinkMessage> _addr_m)
         {
+            slice<NetlinkRouteAttr> _p0 = default;
+            error _p0 = default!;
+            ref NetlinkMessage m = ref _addr_m.val;
+
             slice<byte> b = default;
 
             if (m.Header.Type == RTM_NEWLINK || m.Header.Type == RTM_DELLINK) 
@@ -218,31 +253,41 @@ done:
             else if (m.Header.Type == RTM_NEWROUTE || m.Header.Type == RTM_DELROUTE) 
                 b = m.Data[SizeofRtMsg..];
             else 
-                return (null, EINVAL);
+                return (null, error.As(EINVAL)!);
                         slice<NetlinkRouteAttr> attrs = default;
             while (len(b) >= SizeofRtAttr)
             {
                 var (a, vbuf, alen, err) = netlinkRouteAttrAndValue(b);
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
+
                 NetlinkRouteAttr ra = new NetlinkRouteAttr(Attr:*a,Value:vbuf[:int(a.Len)-SizeofRtAttr]);
                 attrs = append(attrs, ra);
                 b = b[alen..];
+
             }
 
-            return (attrs, null);
+            return (attrs, error.As(null!)!);
+
         }
 
-        private static (ref RtAttr, slice<byte>, long, error) netlinkRouteAttrAndValue(slice<byte> b)
+        private static (ptr<RtAttr>, slice<byte>, long, error) netlinkRouteAttrAndValue(slice<byte> b)
         {
-            var a = (RtAttr.Value)(@unsafe.Pointer(ref b[0L]));
+            ptr<RtAttr> _p0 = default!;
+            slice<byte> _p0 = default;
+            long _p0 = default;
+            error _p0 = default!;
+
+            var a = (RtAttr.val)(@unsafe.Pointer(_addr_b[0L]));
             if (int(a.Len) < SizeofRtAttr || int(a.Len) > len(b))
             {
-                return (null, null, 0L, EINVAL);
+                return (_addr_null!, null, 0L, error.As(EINVAL)!);
             }
-            return (a, b[SizeofRtAttr..], rtaAlignOf(int(a.Len)), null);
+
+            return (_addr_a!, b[SizeofRtAttr..], rtaAlignOf(int(a.Len)), error.As(null!)!);
+
         }
     }
 }

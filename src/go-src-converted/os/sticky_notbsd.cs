@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build !aix
 // +build !darwin
 // +build !dragonfly
 // +build !freebsd
+// +build !js !wasm
 // +build !netbsd
 // +build !openbsd
 // +build !solaris
 
-// package os -- go2cs converted at 2020 August 29 08:44:30 UTC
+// package os -- go2cs converted at 2020 October 08 03:45:15 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\sticky_notbsd.go
 
@@ -19,7 +21,7 @@ namespace go
 {
     public static partial class os_package
     {
-        private static readonly var supportsCreateWithStickyBit = true;
+        private static readonly var supportsCreateWithStickyBit = (var)true;
 
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:26:50 UTC
+//     Generated on 2020 October 08 03:33:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
+using bytealg = go.@internal.bytealg_package;
 using sync = go.sync_package;
 
 namespace go
@@ -29,9 +30,9 @@ namespace go
 
             private ref Once Once_val => ref m_OnceRef.Value;
 
-            public ref Mutex m => ref m_OnceRef.Value.m;
-
             public ref uint done => ref m_OnceRef.Value.done;
+
+            public ref Mutex m => ref m_OnceRef.Value.m;
 
             // Constructors
             public ipStackCapabilities(NilType _)

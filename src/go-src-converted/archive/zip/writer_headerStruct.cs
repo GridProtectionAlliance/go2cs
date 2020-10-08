@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:40 UTC
+//     Generated on 2020 October 08 03:49:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using errors = go.errors_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
+using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
@@ -33,13 +34,13 @@ namespace archive
             // Constructors
             public header(NilType _)
             {
-                this.FileHeader = default;
+                this.ptr<FileHeader> = default;
                 this.offset = default;
             }
 
-            public header(ref FileHeader FileHeader = default, ulong offset = default)
+            public header(ref ptr<FileHeader> ptr<FileHeader> = default, ulong offset = default)
             {
-                this.FileHeader = FileHeader;
+                this.ptr<FileHeader> = ptr<FileHeader>;
                 this.offset = offset;
             }
 
@@ -63,7 +64,7 @@ namespace archive
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static header header_cast(dynamic value)
         {
-            return new header(ref value.FileHeader, value.offset);
+            return new header(ref value.ptr<FileHeader>, value.offset);
         }
     }
 }}

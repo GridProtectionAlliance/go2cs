@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:11:01 UTC
+//     Generated on 2020 October 08 04:58:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using io = go.io_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -60,7 +61,7 @@ namespace database
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -74,10 +75,10 @@ namespace database
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) LastInsertIdByRef(ref T value);
+            private delegate (long, error) LastInsertIdByPtr(ptr<T> value);
             private delegate (long, error) LastInsertIdByVal(T value);
 
-            private static readonly LastInsertIdByRef s_LastInsertIdByRef;
+            private static readonly LastInsertIdByPtr s_LastInsertIdByPtr;
             private static readonly LastInsertIdByVal s_LastInsertIdByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,17 +87,18 @@ namespace database
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LastInsertIdByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LastInsertIdByPtr is null || !m_target_is_ptr)
                     return s_LastInsertIdByVal!(target);
 
-                return s_LastInsertIdByRef(ref target);
+                return s_LastInsertIdByPtr(m_target_ptr);
             }
 
-            private delegate (long, error) RowsAffectedByRef(ref T value);
+            private delegate (long, error) RowsAffectedByPtr(ptr<T> value);
             private delegate (long, error) RowsAffectedByVal(T value);
 
-            private static readonly RowsAffectedByRef s_RowsAffectedByRef;
+            private static readonly RowsAffectedByPtr s_RowsAffectedByPtr;
             private static readonly RowsAffectedByVal s_RowsAffectedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -105,11 +107,12 @@ namespace database
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_RowsAffectedByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_RowsAffectedByPtr is null || !m_target_is_ptr)
                     return s_RowsAffectedByVal!(target);
 
-                return s_RowsAffectedByRef(ref target);
+                return s_RowsAffectedByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -118,39 +121,33 @@ namespace database
             static Result()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("LastInsertId");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("LastInsertId");
 
                 if (!(extensionMethod is null))
-                    s_LastInsertIdByRef = extensionMethod.CreateStaticDelegate(typeof(LastInsertIdByRef)) as LastInsertIdByRef;
+                    s_LastInsertIdByPtr = extensionMethod.CreateStaticDelegate(typeof(LastInsertIdByPtr)) as LastInsertIdByPtr;
 
-                if (s_LastInsertIdByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("LastInsertId");
+                extensionMethod = targetType.GetExtensionMethod("LastInsertId");
 
-                    if (!(extensionMethod is null))
-                        s_LastInsertIdByVal = extensionMethod.CreateStaticDelegate(typeof(LastInsertIdByVal)) as LastInsertIdByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LastInsertIdByVal = extensionMethod.CreateStaticDelegate(typeof(LastInsertIdByVal)) as LastInsertIdByVal;
 
-                if (s_LastInsertIdByRef is null && s_LastInsertIdByVal is null)
+                if (s_LastInsertIdByPtr is null && s_LastInsertIdByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Result.LastInsertId method", new Exception("LastInsertId"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("RowsAffected");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("RowsAffected");
 
                 if (!(extensionMethod is null))
-                    s_RowsAffectedByRef = extensionMethod.CreateStaticDelegate(typeof(RowsAffectedByRef)) as RowsAffectedByRef;
+                    s_RowsAffectedByPtr = extensionMethod.CreateStaticDelegate(typeof(RowsAffectedByPtr)) as RowsAffectedByPtr;
 
-                if (s_RowsAffectedByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("RowsAffected");
+                extensionMethod = targetType.GetExtensionMethod("RowsAffected");
 
-                    if (!(extensionMethod is null))
-                        s_RowsAffectedByVal = extensionMethod.CreateStaticDelegate(typeof(RowsAffectedByVal)) as RowsAffectedByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_RowsAffectedByVal = extensionMethod.CreateStaticDelegate(typeof(RowsAffectedByVal)) as RowsAffectedByVal;
 
-                if (s_RowsAffectedByRef is null && s_RowsAffectedByVal is null)
+                if (s_RowsAffectedByPtr is null && s_RowsAffectedByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Result.RowsAffected method", new Exception("RowsAffected"));
             }
 

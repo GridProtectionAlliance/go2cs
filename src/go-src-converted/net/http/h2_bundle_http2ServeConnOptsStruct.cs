@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:18 UTC
+//     Generated on 2020 October 08 03:39:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -55,12 +56,14 @@ namespace net
             // Constructors
             public http2ServeConnOpts(NilType _)
             {
+                this.Context = default;
                 this.BaseConfig = default;
                 this.Handler = default;
             }
 
-            public http2ServeConnOpts(ref ptr<Server> BaseConfig = default, Handler Handler = default)
+            public http2ServeConnOpts(context.Context Context = default, ref ptr<Server> BaseConfig = default, Handler Handler = default)
             {
+                this.Context = Context;
                 this.BaseConfig = BaseConfig;
                 this.Handler = Handler;
             }
@@ -85,7 +88,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2ServeConnOpts http2ServeConnOpts_cast(dynamic value)
         {
-            return new http2ServeConnOpts(ref value.BaseConfig, value.Handler);
+            return new http2ServeConnOpts(value.Context, ref value.BaseConfig, value.Handler);
         }
     }
 }}

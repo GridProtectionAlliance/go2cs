@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Plan 9-specific
-
-// package os -- go2cs converted at 2020 August 29 08:44:33 UTC
+// package os -- go2cs converted at 2020 October 08 03:45:19 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\sys_plan9.go
 
@@ -16,10 +14,13 @@ namespace go
     {
         private static (@string, error) hostname() => func((defer, _, __) =>
         {
+            @string name = default;
+            error err = default!;
+
             var (f, err) = Open("#c/sysname");
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
             defer(f.Close());
 
@@ -28,13 +29,14 @@ namespace go
 
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
             if (n > 0L)
             {
                 buf[n] = 0L;
             }
-            return (string(buf[0L..n]), null);
+            return (string(buf[0L..n]), error.As(null!)!);
+
         });
     }
 }

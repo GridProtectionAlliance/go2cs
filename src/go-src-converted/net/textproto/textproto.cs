@@ -23,7 +23,7 @@
 // Conn, a convenient packaging of Reader, Writer, and Pipeline for use
 // with a single network connection.
 //
-// package textproto -- go2cs converted at 2020 August 29 08:32:31 UTC
+// package textproto -- go2cs converted at 2020 October 08 03:38:29 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Go\src\net\textproto\textproto.go
 using bufio = go.bufio_package;
@@ -44,8 +44,10 @@ namespace net
             public @string Msg;
         }
 
-        private static @string Error(this ref Error e)
+        private static @string Error(this ptr<Error> _addr_e)
         {
+            ref Error e = ref _addr_e.val;
+
             return fmt.Sprintf("%03d %s", e.Code, e.Msg);
         }
 
@@ -74,27 +76,34 @@ namespace net
         }
 
         // NewConn returns a new Conn using conn for I/O.
-        public static ref Conn NewConn(io.ReadWriteCloser conn)
+        public static ptr<Conn> NewConn(io.ReadWriteCloser conn)
         {
-            return ref new Conn(Reader:Reader{R:bufio.NewReader(conn)},Writer:Writer{W:bufio.NewWriter(conn)},conn:conn,);
+            return addr(new Conn(Reader:Reader{R:bufio.NewReader(conn)},Writer:Writer{W:bufio.NewWriter(conn)},conn:conn,));
         }
 
         // Close closes the connection.
-        private static error Close(this ref Conn c)
+        private static error Close(this ptr<Conn> _addr_c)
         {
-            return error.As(c.conn.Close());
+            ref Conn c = ref _addr_c.val;
+
+            return error.As(c.conn.Close())!;
         }
 
         // Dial connects to the given address on the given network using net.Dial
         // and then returns a new Conn for the connection.
-        public static (ref Conn, error) Dial(@string network, @string addr)
+        public static (ptr<Conn>, error) Dial(@string network, @string addr)
         {
+            ptr<Conn> _p0 = default!;
+            error _p0 = default!;
+
             var (c, err) = net.Dial(network, addr);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (NewConn(c), null);
+
+            return (_addr_NewConn(c)!, error.As(null!)!);
+
         }
 
         // Cmd is a convenience method that sends a command after
@@ -122,17 +131,24 @@ namespace net
         //    }
         //    return c.ReadCodeLine(250)
         //
-        private static (ulong, error) Cmd(this ref Conn c, @string format, params object[] args)
+        private static (ulong, error) Cmd(this ptr<Conn> _addr_c, @string format, params object[] args)
         {
+            ulong id = default;
+            error err = default!;
+            args = args.Clone();
+            ref Conn c = ref _addr_c.val;
+
             id = c.Next();
             c.StartRequest(id);
             err = c.PrintfLine(format, args);
             c.EndRequest(id);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
-            return (id, null);
+
+            return (id, error.As(null!)!);
+
         }
 
         // TrimString returns s without leading and trailing ASCII space.
@@ -149,6 +165,7 @@ namespace net
             }
 
             return s;
+
         }
 
         // TrimBytes returns b without leading and trailing ASCII space.
@@ -165,6 +182,7 @@ namespace net
             }
 
             return b;
+
         }
 
         private static bool isASCIISpace(byte b)
@@ -176,6 +194,7 @@ namespace net
         {
             b |= 0x20UL; // make lower case
             return 'a' <= b && b <= 'z';
+
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:29:11 UTC
+//     Generated on 2020 October 08 04:31:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,15 +13,17 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using html = go.html_package;
 using os = go.os_package;
 using sort = go.sort_package;
+using bufio = go.bufio_package;
+using bytes = go.bytes_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
+using x86 = go.cmd.@internal.obj.x86_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
@@ -40,7 +42,7 @@ namespace @internal
             // Constructors
             public u642fcvtTab(NilType _)
             {
-                this.geq = default;
+                this.leq = default;
                 this.cvt2F = default;
                 this.and = default;
                 this.rsh = default;
@@ -49,9 +51,9 @@ namespace @internal
                 this.one = default;
             }
 
-            public u642fcvtTab(ssa.Op geq = default, ssa.Op cvt2F = default, ssa.Op and = default, ssa.Op rsh = default, ssa.Op or = default, ssa.Op add = default, Func<ref state, ref types.Type, long, ref ssa.Value> one = default)
+            public u642fcvtTab(ssa.Op leq = default, ssa.Op cvt2F = default, ssa.Op and = default, ssa.Op rsh = default, ssa.Op or = default, ssa.Op add = default, Func<ptr<state>, ptr<types.Type>, long, ptr<ssa.Value>> one = default)
             {
-                this.geq = geq;
+                this.leq = leq;
                 this.cvt2F = cvt2F;
                 this.and = and;
                 this.rsh = rsh;
@@ -80,7 +82,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static u642fcvtTab u642fcvtTab_cast(dynamic value)
         {
-            return new u642fcvtTab(value.geq, value.cvt2F, value.and, value.rsh, value.or, value.add, value.one);
+            return new u642fcvtTab(value.leq, value.cvt2F, value.and, value.rsh, value.or, value.add, value.one);
         }
     }
 }}}}

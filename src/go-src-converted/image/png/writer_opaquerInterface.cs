@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:30 UTC
+//     Generated on 2020 October 08 04:59:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using bufio = go.bufio_package;
 using zlib = go.compress.zlib_package;
+using binary = go.encoding.binary_package;
 using crc32 = go.hash.crc32_package;
 using image = go.image_package;
 using color = go.image.color_package;
@@ -56,7 +57,7 @@ namespace image
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -70,10 +71,10 @@ namespace image
                 m_target_is_ptr = true;
             }
 
-            private delegate bool OpaqueByRef(ref T value);
+            private delegate bool OpaqueByPtr(ptr<T> value);
             private delegate bool OpaqueByVal(T value);
 
-            private static readonly OpaqueByRef s_OpaqueByRef;
+            private static readonly OpaqueByPtr s_OpaqueByPtr;
             private static readonly OpaqueByVal s_OpaqueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -82,11 +83,12 @@ namespace image
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_OpaqueByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_OpaqueByPtr is null || !m_target_is_ptr)
                     return s_OpaqueByVal!(target);
 
-                return s_OpaqueByRef(ref target);
+                return s_OpaqueByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -95,23 +97,20 @@ namespace image
             static opaquer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Opaque");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Opaque");
 
                 if (!(extensionMethod is null))
-                    s_OpaqueByRef = extensionMethod.CreateStaticDelegate(typeof(OpaqueByRef)) as OpaqueByRef;
+                    s_OpaqueByPtr = extensionMethod.CreateStaticDelegate(typeof(OpaqueByPtr)) as OpaqueByPtr;
 
-                if (s_OpaqueByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Opaque");
+                extensionMethod = targetType.GetExtensionMethod("Opaque");
 
-                    if (!(extensionMethod is null))
-                        s_OpaqueByVal = extensionMethod.CreateStaticDelegate(typeof(OpaqueByVal)) as OpaqueByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_OpaqueByVal = extensionMethod.CreateStaticDelegate(typeof(OpaqueByVal)) as OpaqueByVal;
 
-                if (s_OpaqueByRef is null && s_OpaqueByVal is null)
+                if (s_OpaqueByPtr is null && s_OpaqueByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement opaquer.Opaque method", new Exception("Opaque"));
             }
 

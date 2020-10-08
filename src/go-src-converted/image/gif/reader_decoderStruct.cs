@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:02 UTC
+//     Generated on 2020 October 08 04:59:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace image
                 this.tmp = default;
             }
 
-            public decoder(reader r = default, @string vers = default, long width = default, long height = default, long loopCount = default, long delayTime = default, byte backgroundIndex = default, byte disposalMethod = default, byte imageFields = default, byte transparentIndex = default, bool hasTransparentIndex = default, color.Palette globalColorTable = default, slice<long> delay = default, slice<byte> disposal = default, slice<ref image.Paletted> image = default, array<byte> tmp = default)
+            public decoder(reader r = default, @string vers = default, long width = default, long height = default, long loopCount = default, long delayTime = default, byte backgroundIndex = default, byte disposalMethod = default, byte imageFields = default, byte transparentIndex = default, bool hasTransparentIndex = default, color.Palette globalColorTable = default, slice<long> delay = default, slice<byte> disposal = default, slice<ptr<image.Paletted>> image = default, array<byte> tmp = default)
             {
                 this.r = r;
                 this.vers = vers;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:44 UTC
+//     Generated on 2020 October 08 01:30:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace go
 
             private ref poolLocalInternal poolLocalInternal_val => ref m_poolLocalInternalRef.Value;
 
-            public ref slice<object> shared => ref m_poolLocalInternalRef.Value.shared;
+            public ref poolChain shared => ref m_poolLocalInternalRef.Value.shared;
 
             // Constructors
             public poolLocal(NilType _)

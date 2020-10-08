@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package driver -- go2cs converted at 2020 August 29 10:10:48 UTC
+// package driver -- go2cs converted at 2020 October 08 04:58:47 UTC
 // import "database/sql/driver" ==> using driver = go.database.sql.driver_package
 // Original source: C:\Go\src\database\sql\driver\types.go
 using fmt = go.fmt_package;
@@ -63,7 +63,7 @@ namespace sql
         {
         }
 
-        private static ValueConverter _ = ValueConverter.As(new boolType());
+        private static ValueConverter _ = ValueConverter.As(new boolType())!;
 
         private static @string String(this boolType _p0)
         {
@@ -72,26 +72,31 @@ namespace sql
 
         private static (Value, error) ConvertValue(this boolType _p0, object src)
         {
+            Value _p0 = default;
+            error _p0 = default!;
+
             switch (src.type())
             {
                 case bool s:
-                    return (s, null);
+                    return (s, error.As(null!)!);
                     break;
                 case @string s:
                     var (b, err) = strconv.ParseBool(s);
                     if (err != null)
                     {
-                        return (null, fmt.Errorf("sql/driver: couldn't convert %q into type bool", s));
+                        return (null, error.As(fmt.Errorf("sql/driver: couldn't convert %q into type bool", s))!);
                     }
-                    return (b, null);
+
+                    return (b, error.As(null!)!);
                     break;
                 case slice<byte> s:
                     (b, err) = strconv.ParseBool(string(s));
                     if (err != null)
                     {
-                        return (null, fmt.Errorf("sql/driver: couldn't convert %q into type bool", s));
+                        return (null, error.As(fmt.Errorf("sql/driver: couldn't convert %q into type bool", s))!);
                     }
-                    return (b, null);
+
+                    return (b, error.As(null!)!);
                     break;
 
             }
@@ -102,17 +107,20 @@ namespace sql
                 var iv = sv.Int();
                 if (iv == 1L || iv == 0L)
                 {
-                    return (iv == 1L, null);
+                    return (iv == 1L, error.As(null!)!);
                 }
-                return (null, fmt.Errorf("sql/driver: couldn't convert %d into type bool", iv));
+
+                return (null, error.As(fmt.Errorf("sql/driver: couldn't convert %d into type bool", iv))!);
             else if (sv.Kind() == reflect.Uint || sv.Kind() == reflect.Uint8 || sv.Kind() == reflect.Uint16 || sv.Kind() == reflect.Uint32 || sv.Kind() == reflect.Uint64) 
                 var uv = sv.Uint();
                 if (uv == 1L || uv == 0L)
                 {
-                    return (uv == 1L, null);
+                    return (uv == 1L, error.As(null!)!);
                 }
-                return (null, fmt.Errorf("sql/driver: couldn't convert %d into type bool", uv));
-                        return (null, fmt.Errorf("sql/driver: couldn't convert %v (%T) into type bool", src, src));
+
+                return (null, error.As(fmt.Errorf("sql/driver: couldn't convert %d into type bool", uv))!);
+                        return (null, error.As(fmt.Errorf("sql/driver: couldn't convert %v (%T) into type bool", src, src))!);
+
         }
 
         // Int32 is a ValueConverter that converts input values to int64,
@@ -123,34 +131,41 @@ namespace sql
         {
         }
 
-        private static ValueConverter _ = ValueConverter.As(new int32Type());
+        private static ValueConverter _ = ValueConverter.As(new int32Type())!;
 
         private static (Value, error) ConvertValue(this int32Type _p0, object v)
         {
+            Value _p0 = default;
+            error _p0 = default!;
+
             var rv = reflect.ValueOf(v);
 
             if (rv.Kind() == reflect.Int || rv.Kind() == reflect.Int8 || rv.Kind() == reflect.Int16 || rv.Kind() == reflect.Int32 || rv.Kind() == reflect.Int64) 
                 var i64 = rv.Int();
                 if (i64 > (1L << (int)(31L)) - 1L || i64 < -(1L << (int)(31L)))
                 {
-                    return (null, fmt.Errorf("sql/driver: value %d overflows int32", v));
+                    return (null, error.As(fmt.Errorf("sql/driver: value %d overflows int32", v))!);
                 }
-                return (i64, null);
+
+                return (i64, error.As(null!)!);
             else if (rv.Kind() == reflect.Uint || rv.Kind() == reflect.Uint8 || rv.Kind() == reflect.Uint16 || rv.Kind() == reflect.Uint32 || rv.Kind() == reflect.Uint64) 
                 var u64 = rv.Uint();
                 if (u64 > (1L << (int)(31L)) - 1L)
                 {
-                    return (null, fmt.Errorf("sql/driver: value %d overflows int32", v));
+                    return (null, error.As(fmt.Errorf("sql/driver: value %d overflows int32", v))!);
                 }
-                return (int64(u64), null);
+
+                return (int64(u64), error.As(null!)!);
             else if (rv.Kind() == reflect.String) 
                 var (i, err) = strconv.Atoi(rv.String());
                 if (err != null)
                 {
-                    return (null, fmt.Errorf("sql/driver: value %q can't be converted to int32", v));
+                    return (null, error.As(fmt.Errorf("sql/driver: value %q can't be converted to int32", v))!);
                 }
-                return (int64(i), null);
-                        return (null, fmt.Errorf("sql/driver: unsupported value %v (type %T) converting to int32", v, v));
+
+                return (int64(i), error.As(null!)!);
+                        return (null, error.As(fmt.Errorf("sql/driver: unsupported value %v (type %T) converting to int32", v, v))!);
+
         }
 
         // String is a ValueConverter that converts its input to a string.
@@ -165,16 +180,20 @@ namespace sql
 
         private static (Value, error) ConvertValue(this stringType _p0, object v)
         {
+            Value _p0 = default;
+            error _p0 = default!;
+
             switch (v.type())
             {
                 case @string _:
-                    return (v, null);
+                    return (v, error.As(null!)!);
                     break;
                 case slice<byte> _:
-                    return (v, null);
+                    return (v, error.As(null!)!);
                     break;
             }
-            return (fmt.Sprintf("%v", v), null);
+            return (fmt.Sprintf("%v", v), error.As(null!)!);
+
         }
 
         // Null is a type that implements ValueConverter by allowing nil
@@ -186,11 +205,16 @@ namespace sql
 
         public static (Value, error) ConvertValue(this Null n, object v)
         {
+            Value _p0 = default;
+            error _p0 = default!;
+
             if (v == null)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
+
             return n.Converter.ConvertValue(v);
+
         }
 
         // NotNull is a type that implements ValueConverter by disallowing nil
@@ -202,11 +226,16 @@ namespace sql
 
         public static (Value, error) ConvertValue(this NotNull n, object v)
         {
+            Value _p0 = default;
+            error _p0 = default!;
+
             if (v == null)
             {
-                return (null, fmt.Errorf("nil value not allowed"));
+                return (null, error.As(fmt.Errorf("nil value not allowed"))!);
             }
+
             return n.Converter.ConvertValue(v);
+
         }
 
         // IsValue reports whether v is a valid Value parameter type.
@@ -216,6 +245,7 @@ namespace sql
             {
                 return true;
             }
+
             switch (v.type())
             {
                 case slice<byte> _:
@@ -236,8 +266,12 @@ namespace sql
                 case time.Time _:
                     return true;
                     break;
+                case decimalDecompose _:
+                    return true;
+                    break;
             }
             return false;
+
         }
 
         // IsScanValue is equivalent to IsValue.
@@ -266,9 +300,9 @@ namespace sql
         {
         }
 
-        private static ValueConverter _ = ValueConverter.As(new defaultConverter());
+        private static ValueConverter _ = ValueConverter.As(new defaultConverter())!;
 
-        private static var valuerReflectType = reflect.TypeOf((Valuer.Value)(null)).Elem();
+        private static var valuerReflectType = reflect.TypeOf((Valuer.val)(null)).Elem();
 
         // callValuerValue returns vr.Value(), with one exception:
         // If vr.Value is an auto-generated method on a pointer type and the
@@ -283,40 +317,54 @@ namespace sql
         // This function is mirrored in the database/sql package.
         private static (Value, error) callValuerValue(Valuer vr)
         {
+            Value v = default;
+            error err = default!;
+
             {
                 var rv = reflect.ValueOf(vr);
 
                 if (rv.Kind() == reflect.Ptr && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType))
                 {
-                    return (null, null);
+                    return (null, error.As(null!)!);
                 }
 
             }
+
             return vr.Value();
+
         }
 
         private static (Value, error) ConvertValue(this defaultConverter _p0, object v)
         {
+            Value _p0 = default;
+            error _p0 = default!;
+
             if (IsValue(v))
             {
-                return (v, null);
+                return (v, error.As(null!)!);
             }
-            {
-                Valuer (vr, ok) = v._<Valuer>();
 
-                if (ok)
-                {
+            switch (v.type())
+            {
+                case Valuer vr:
                     var (sv, err) = callValuerValue(vr);
                     if (err != null)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     if (!IsValue(sv))
                     {
-                        return (null, fmt.Errorf("non-Value type %T returned from Value", sv));
+                        return (null, error.As(fmt.Errorf("non-Value type %T returned from Value", sv))!);
                     }
-                    return (sv, null);
-                }
+
+                    return (sv, error.As(null!)!); 
+
+                    // For now, continue to prefer the Valuer interface over the decimal decompose interface.
+                    break;
+                case decimalDecompose vr:
+                    return (vr, error.As(null!)!);
+                    break;
 
             }
 
@@ -326,37 +374,46 @@ namespace sql
                 // indirect pointers
                 if (rv.IsNil())
                 {
-                    return (null, null);
+                    return (null, error.As(null!)!);
                 }
                 else
                 {
                     return new defaultConverter().ConvertValue(rv.Elem().Interface());
                 }
+
             else if (rv.Kind() == reflect.Int || rv.Kind() == reflect.Int8 || rv.Kind() == reflect.Int16 || rv.Kind() == reflect.Int32 || rv.Kind() == reflect.Int64) 
-                return (rv.Int(), null);
+                return (rv.Int(), error.As(null!)!);
             else if (rv.Kind() == reflect.Uint || rv.Kind() == reflect.Uint8 || rv.Kind() == reflect.Uint16 || rv.Kind() == reflect.Uint32) 
-                return (int64(rv.Uint()), null);
+                return (int64(rv.Uint()), error.As(null!)!);
             else if (rv.Kind() == reflect.Uint64) 
                 var u64 = rv.Uint();
                 if (u64 >= 1L << (int)(63L))
                 {
-                    return (null, fmt.Errorf("uint64 values with high bit set are not supported"));
+                    return (null, error.As(fmt.Errorf("uint64 values with high bit set are not supported"))!);
                 }
-                return (int64(u64), null);
+
+                return (int64(u64), error.As(null!)!);
             else if (rv.Kind() == reflect.Float32 || rv.Kind() == reflect.Float64) 
-                return (rv.Float(), null);
+                return (rv.Float(), error.As(null!)!);
             else if (rv.Kind() == reflect.Bool) 
-                return (rv.Bool(), null);
+                return (rv.Bool(), error.As(null!)!);
             else if (rv.Kind() == reflect.Slice) 
                 var ek = rv.Type().Elem().Kind();
                 if (ek == reflect.Uint8)
                 {
-                    return (rv.Bytes(), null);
+                    return (rv.Bytes(), error.As(null!)!);
                 }
-                return (null, fmt.Errorf("unsupported type %T, a slice of %s", v, ek));
+
+                return (null, error.As(fmt.Errorf("unsupported type %T, a slice of %s", v, ek))!);
             else if (rv.Kind() == reflect.String) 
-                return (rv.String(), null);
-                        return (null, fmt.Errorf("unsupported type %T, a %s", v, rv.Kind()));
+                return (rv.String(), error.As(null!)!);
+                        return (null, error.As(fmt.Errorf("unsupported type %T, a %s", v, rv.Kind()))!);
+
+        }
+
+        private partial interface decimalDecompose
+        {
+            (byte, bool, slice<byte>, int) Decompose(slice<byte> buf);
         }
     }
 }}}

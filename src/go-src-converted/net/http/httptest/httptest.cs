@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package httptest provides utilities for HTTP testing.
-// package httptest -- go2cs converted at 2020 August 29 08:34:11 UTC
+// package httptest -- go2cs converted at 2020 October 08 03:41:25 UTC
 // import "net/http/httptest" ==> using httptest = go.net.http.httptest_package
 // Original source: C:\Go\src\net\http\httptest\httptest.go
 using bufio = go.bufio_package;
@@ -44,7 +44,7 @@ namespace http
         //
         // To generate a client HTTP request instead of a server request, see
         // the NewRequest function in the net/http package.
-        public static ref http.Request NewRequest(@string method, @string target, io.Reader body) => func((_, panic, __) =>
+        public static ptr<http.Request> NewRequest(@string method, @string target, io.Reader body) => func((_, panic, __) =>
         {
             if (method == "")
             {
@@ -63,13 +63,13 @@ namespace http
             {
                 switch (body.type())
                 {
-                    case ref bytes.Buffer v:
+                    case ptr<bytes.Buffer> v:
                         req.ContentLength = int64(v.Len());
                         break;
-                    case ref bytes.Reader v:
+                    case ptr<bytes.Reader> v:
                         req.ContentLength = int64(v.Len());
                         break;
-                    case ref strings.Reader v:
+                    case ptr<strings.Reader> v:
                         req.ContentLength = int64(v.Len());
                         break;
                     default:
@@ -91,6 +91,7 @@ namespace http
                         req.Body = ioutil.NopCloser(body);
                     }
                 }
+
             }
             req.RemoteAddr = "192.0.2.1:1234";
 
@@ -100,9 +101,10 @@ namespace http
             }
             if (strings.HasPrefix(target, "https://"))
             {
-                req.TLS = ref new tls.ConnectionState(Version:tls.VersionTLS12,HandshakeComplete:true,ServerName:req.Host,);
+                req.TLS = addr(new tls.ConnectionState(Version:tls.VersionTLS12,HandshakeComplete:true,ServerName:req.Host,));
             }
-            return req;
+            return _addr_req!;
+
         });
     }
 }}}

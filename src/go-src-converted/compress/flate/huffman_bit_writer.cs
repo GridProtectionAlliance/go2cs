@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 August 29 08:23:28 UTC
+// package flate -- go2cs converted at 2020 October 08 03:30:59 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\huffman_bit_writer.go
 using io = go.io_package;
@@ -15,28 +15,29 @@ namespace compress
     {
  
         // The largest offset code.
-        private static readonly long offsetCodeCount = 30L; 
+        private static readonly long offsetCodeCount = (long)30L; 
 
         // The special code used to mark the end of a block.
-        private static readonly long endBlockMarker = 256L; 
+        private static readonly long endBlockMarker = (long)256L; 
 
         // The first length code.
-        private static readonly long lengthCodesStart = 257L; 
+        private static readonly long lengthCodesStart = (long)257L; 
 
         // The number of codegen codes.
-        private static readonly long codegenCodeCount = 19L;
-        private static readonly long badCode = 255L; 
+        private static readonly long codegenCodeCount = (long)19L;
+        private static readonly long badCode = (long)255L; 
 
         // bufferFlushSize indicates the buffer size
         // after which bytes are flushed to the writer.
         // Should preferably be a multiple of 6, since
         // we accumulate 6 bytes between writes to the buffer.
-        private static readonly long bufferFlushSize = 240L; 
+        private static readonly long bufferFlushSize = (long)240L; 
 
         // bufferSize is the actual output byte buffer size.
         // It must have additional headroom for a flush
         // which can contain up to 8 bytes.
-        private static readonly var bufferSize = bufferFlushSize + 8L;
+        private static readonly var bufferSize = (var)bufferFlushSize + 8L;
+
 
         // The number of extra bits needed by length code X - LENGTH_CODES_START.
         private static sbyte lengthExtraBits = new slice<sbyte>(new sbyte[] { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0 });
@@ -70,28 +71,34 @@ namespace compress
             public error err;
         }
 
-        private static ref huffmanBitWriter newHuffmanBitWriter(io.Writer w)
+        private static ptr<huffmanBitWriter> newHuffmanBitWriter(io.Writer w)
         {
-            return ref new huffmanBitWriter(writer:w,literalFreq:make([]int32,maxNumLit),offsetFreq:make([]int32,offsetCodeCount),codegen:make([]uint8,maxNumLit+offsetCodeCount+1),literalEncoding:newHuffmanEncoder(maxNumLit),codegenEncoding:newHuffmanEncoder(codegenCodeCount),offsetEncoding:newHuffmanEncoder(offsetCodeCount),);
+            return addr(new huffmanBitWriter(writer:w,literalFreq:make([]int32,maxNumLit),offsetFreq:make([]int32,offsetCodeCount),codegen:make([]uint8,maxNumLit+offsetCodeCount+1),literalEncoding:newHuffmanEncoder(maxNumLit),codegenEncoding:newHuffmanEncoder(codegenCodeCount),offsetEncoding:newHuffmanEncoder(offsetCodeCount),));
         }
 
-        private static void reset(this ref huffmanBitWriter w, io.Writer writer)
+        private static void reset(this ptr<huffmanBitWriter> _addr_w, io.Writer writer)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             w.writer = writer;
             w.bits = 0L;
             w.nbits = 0L;
             w.nbytes = 0L;
             w.err = null;
             w.bytes = new array<byte>(new byte[] {  });
+
         }
 
-        private static void flush(this ref huffmanBitWriter w)
+        private static void flush(this ptr<huffmanBitWriter> _addr_w)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
                 w.nbits = 0L;
-                return;
+                return ;
             }
+
             var n = w.nbytes;
             while (w.nbits != 0L)
             {
@@ -100,34 +107,45 @@ namespace compress
                 if (w.nbits > 8L)
                 { // Avoid underflow
                     w.nbits -= 8L;
+
                 }
                 else
                 {
                     w.nbits = 0L;
                 }
+
                 n++;
+
             }
 
             w.bits = 0L;
             w.write(w.bytes[..n]);
             w.nbytes = 0L;
+
         }
 
-        private static void write(this ref huffmanBitWriter w, slice<byte> b)
+        private static void write(this ptr<huffmanBitWriter> _addr_w, slice<byte> b)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             _, w.err = w.writer.Write(b);
+
         }
 
-        private static void writeBits(this ref huffmanBitWriter w, int b, ulong nb)
+        private static void writeBits(this ptr<huffmanBitWriter> _addr_w, int b, ulong nb)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             w.bits |= uint64(b) << (int)(w.nbits);
             w.nbits += nb;
             if (w.nbits >= 48L)
@@ -149,22 +167,29 @@ namespace compress
                     w.write(w.bytes[..n]);
                     n = 0L;
                 }
+
                 w.nbytes = n;
+
             }
+
         }
 
-        private static void writeBytes(this ref huffmanBitWriter w, slice<byte> bytes)
+        private static void writeBytes(this ptr<huffmanBitWriter> _addr_w, slice<byte> bytes)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             var n = w.nbytes;
             if (w.nbits & 7L != 0L)
             {
                 w.err = InternalError("writeBytes with unfinished bits");
-                return;
+                return ;
             }
+
             while (w.nbits != 0L)
             {
                 w.bytes[n] = byte(w.bits);
@@ -177,8 +202,10 @@ namespace compress
             {
                 w.write(w.bytes[..n]);
             }
+
             w.nbytes = 0L;
             w.write(bytes);
+
         }
 
         // RFC 1951 3.2.7 specifies a special run-length encoding for specifying
@@ -193,8 +220,12 @@ namespace compress
         //  numLiterals      The number of literals in literalEncoding
         //  numOffsets       The number of offsets in offsetEncoding
         //  litenc, offenc   The literal and offset encoder to use
-        private static void generateCodegen(this ref huffmanBitWriter w, long numLiterals, long numOffsets, ref huffmanEncoder litEnc, ref huffmanEncoder offEnc)
+        private static void generateCodegen(this ptr<huffmanBitWriter> _addr_w, long numLiterals, long numOffsets, ptr<huffmanEncoder> _addr_litEnc, ptr<huffmanEncoder> _addr_offEnc)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+            ref huffmanEncoder litEnc = ref _addr_litEnc.val;
+            ref huffmanEncoder offEnc = ref _addr_offEnc.val;
+
             {
                 var i__prev1 = i;
 
@@ -268,14 +299,17 @@ namespace compress
                         {
                             n = count;
                         }
+
                         codegen[outIndex] = 16L;
                         outIndex++;
                         codegen[outIndex] = uint8(n - 3L);
                         outIndex++;
                         w.codegenFreq[16L]++;
                         count -= n;
+
                     }
                 else
+
 
                 }                {
                     while (count >= 11L)
@@ -285,12 +319,14 @@ namespace compress
                         {
                             n = count;
                         }
+
                         codegen[outIndex] = 18L;
                         outIndex++;
                         codegen[outIndex] = uint8(n - 11L);
                         outIndex++;
                         w.codegenFreq[18L]++;
                         count -= n;
+
                     }
 
                     if (count >= 3L)
@@ -302,8 +338,11 @@ namespace compress
                         outIndex++;
                         w.codegenFreq[17L]++;
                         count = 0L;
+
                     }
+
                 }
+
                 count--;
                 while (count >= 0L)
                 {
@@ -317,16 +356,24 @@ namespace compress
                 // Set up invariant for next time through the loop.
                 size = nextSize;
                 count = 1L;
+
             } 
             // Marker indicating the end of the codegen.
  
             // Marker indicating the end of the codegen.
             codegen[outIndex] = badCode;
+
         }
 
         // dynamicSize returns the size of dynamically encoded data in bits.
-        private static (long, long) dynamicSize(this ref huffmanBitWriter w, ref huffmanEncoder litEnc, ref huffmanEncoder offEnc, long extraBits)
+        private static (long, long) dynamicSize(this ptr<huffmanBitWriter> _addr_w, ptr<huffmanEncoder> _addr_litEnc, ptr<huffmanEncoder> _addr_offEnc, long extraBits)
         {
+            long size = default;
+            long numCodegens = default;
+            ref huffmanBitWriter w = ref _addr_w.val;
+            ref huffmanEncoder litEnc = ref _addr_litEnc.val;
+            ref huffmanEncoder offEnc = ref _addr_offEnc.val;
+
             numCodegens = len(w.codegenFreq);
             while (numCodegens > 4L && w.codegenFreq[codegenOrder[numCodegens - 1L]] == 0L)
             {
@@ -337,36 +384,49 @@ namespace compress
             size = header + litEnc.bitLength(w.literalFreq) + offEnc.bitLength(w.offsetFreq) + extraBits;
 
             return (size, numCodegens);
+
         }
 
         // fixedSize returns the size of dynamically encoded data in bits.
-        private static long fixedSize(this ref huffmanBitWriter w, long extraBits)
+        private static long fixedSize(this ptr<huffmanBitWriter> _addr_w, long extraBits)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             return 3L + fixedLiteralEncoding.bitLength(w.literalFreq) + fixedOffsetEncoding.bitLength(w.offsetFreq) + extraBits;
         }
 
         // storedSize calculates the stored size, including header.
         // The function returns the size in bits and whether the block
         // fits inside a single block.
-        private static (long, bool) storedSize(this ref huffmanBitWriter w, slice<byte> @in)
+        private static (long, bool) storedSize(this ptr<huffmanBitWriter> _addr_w, slice<byte> @in)
         {
+            long _p0 = default;
+            bool _p0 = default;
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (in == null)
             {
                 return (0L, false);
             }
+
             if (len(in) <= maxStoreBlockSize)
             {
                 return ((len(in) + 5L) * 8L, true);
             }
+
             return (0L, false);
+
         }
 
-        private static void writeCode(this ref huffmanBitWriter w, hcode c)
+        private static void writeCode(this ptr<huffmanBitWriter> _addr_w, hcode c)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             w.bits |= uint64(c.code) << (int)(w.nbits);
             w.nbits += uint(c.len);
             if (w.nbits >= 48L)
@@ -388,8 +448,11 @@ namespace compress
                     w.write(w.bytes[..n]);
                     n = 0L;
                 }
+
                 w.nbytes = n;
+
             }
+
         }
 
         // Write the header of a dynamic Huffman block to the output stream.
@@ -397,17 +460,21 @@ namespace compress
         //  numLiterals  The number of literals specified in codegen
         //  numOffsets   The number of offsets specified in codegen
         //  numCodegens  The number of codegens used in codegen
-        private static void writeDynamicHeader(this ref huffmanBitWriter w, long numLiterals, long numOffsets, long numCodegens, bool isEof)
+        private static void writeDynamicHeader(this ptr<huffmanBitWriter> _addr_w, long numLiterals, long numOffsets, long numCodegens, bool isEof)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             int firstBits = 4L;
             if (isEof)
             {
                 firstBits = 5L;
             }
+
             w.writeBits(firstBits, 3L);
             w.writeBits(int32(numLiterals - 257L), 5L);
             w.writeBits(int32(numOffsets - 1L), 5L);
@@ -435,6 +502,7 @@ namespace compress
                 {
                     break;
                 }
+
                 w.writeCode(w.codegenEncoding.codes[uint32(codeWord)]);
 
                 switch (codeWord)
@@ -455,32 +523,41 @@ namespace compress
                         break;
                         break;
                 }
+
             }
+
 
         }
 
-        private static void writeStoredHeader(this ref huffmanBitWriter w, long length, bool isEof)
+        private static void writeStoredHeader(this ptr<huffmanBitWriter> _addr_w, long length, bool isEof)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             int flag = default;
             if (isEof)
             {
                 flag = 1L;
             }
+
             w.writeBits(flag, 3L);
             w.flush();
             w.writeBits(int32(length), 16L);
             w.writeBits(int32(~uint16(length)), 16L);
+
         }
 
-        private static void writeFixedHeader(this ref huffmanBitWriter w, bool isEof)
+        private static void writeFixedHeader(this ptr<huffmanBitWriter> _addr_w, bool isEof)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             } 
             // Indicate that we are a fixed Huffman block
             int value = 2L;
@@ -488,7 +565,9 @@ namespace compress
             {
                 value = 3L;
             }
+
             w.writeBits(value, 3L);
+
         }
 
         // writeBlock will write a block of tokens with the smallest encoding.
@@ -496,12 +575,15 @@ namespace compress
         // is larger than the original bytes, the data will be written as a
         // stored block.
         // If the input is nil, the tokens will always be Huffman encoded.
-        private static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input)
+        private static void writeBlock(this ptr<huffmanBitWriter> _addr_w, slice<token> tokens, bool eof, slice<byte> input)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             tokens = append(tokens, endBlockMarker);
             var (numLiterals, numOffsets) = w.indexTokens(tokens);
 
@@ -517,13 +599,16 @@ namespace compress
                 { 
                     // First eight length codes have extra size = 0.
                     extraBits += int(w.literalFreq[lengthCode]) * int(lengthExtraBits[lengthCode - lengthCodesStart]);
+
                 }
 
                 for (long offsetCode = 4L; offsetCode < numOffsets; offsetCode++)
                 { 
                     // First four offset codes have extra size = 0.
                     extraBits += int(w.offsetFreq[offsetCode]) * int(offsetExtraBits[offsetCode]);
+
                 }
+
 
             } 
 
@@ -554,7 +639,7 @@ namespace compress
             {
                 w.writeStoredHeader(len(input), eof);
                 w.writeBytes(input);
-                return;
+                return ;
             } 
 
             // Huffman.
@@ -569,6 +654,7 @@ namespace compress
 
             // Write the tokens.
             w.writeTokens(tokens, literalEncoding.codes, offsetEncoding.codes);
+
         }
 
         // writeBlockDynamic encodes a block using a dynamic Huffman table.
@@ -576,12 +662,15 @@ namespace compress
         // histogram distribution.
         // If input is supplied and the compression savings are below 1/16th of the
         // input size the block is stored.
-        private static void writeBlockDynamic(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input)
+        private static void writeBlockDynamic(this ptr<huffmanBitWriter> _addr_w, slice<token> tokens, bool eof, slice<byte> input)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             tokens = append(tokens, endBlockMarker);
             var (numLiterals, numOffsets) = w.indexTokens(tokens); 
 
@@ -599,7 +688,7 @@ namespace compress
                 {
                     w.writeStoredHeader(len(input), eof);
                     w.writeBytes(input);
-                    return;
+                    return ;
                 } 
 
                 // Write Huffman table.
@@ -611,14 +700,19 @@ namespace compress
 
             // Write the tokens.
             w.writeTokens(tokens, w.literalEncoding.codes, w.offsetEncoding.codes);
+
         }
 
         // indexTokens indexes a slice of tokens, and updates
         // literalFreq and offsetFreq, and generates literalEncoding
         // and offsetEncoding.
         // The number of literal and offset tokens is returned.
-        private static (long, long) indexTokens(this ref huffmanBitWriter w, slice<token> tokens)
+        private static (long, long) indexTokens(this ptr<huffmanBitWriter> _addr_w, slice<token> tokens)
         {
+            long numLiterals = default;
+            long numOffsets = default;
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             {
                 var i__prev1 = i;
 
@@ -650,10 +744,12 @@ namespace compress
                     w.literalFreq[t.literal()]++;
                     continue;
                 }
+
                 var length = t.length();
                 var offset = t.offset();
                 w.literalFreq[lengthCodesStart + lengthCode(length)]++;
                 w.offsetFreq[offsetCode(offset)]++;
+
             } 
 
             // get the number of literals
@@ -677,20 +773,26 @@ namespace compress
                 // we should count at least one offset to be sure that the offset huffman tree could be encoded.
                 w.offsetFreq[0L] = 1L;
                 numOffsets = 1L;
+
             }
+
             w.literalEncoding.generate(w.literalFreq, 15L);
             w.offsetEncoding.generate(w.offsetFreq, 15L);
-            return;
+            return ;
+
         }
 
         // writeTokens writes a slice of tokens to the output.
         // codes for literal and offset encoding must be supplied.
-        private static void writeTokens(this ref huffmanBitWriter w, slice<token> tokens, slice<hcode> leCodes, slice<hcode> oeCodes)
+        private static void writeTokens(this ptr<huffmanBitWriter> _addr_w, slice<token> tokens, slice<hcode> leCodes, slice<hcode> oeCodes)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             }
+
             foreach (var (_, t) in tokens)
             {
                 if (t < matchType)
@@ -718,29 +820,33 @@ namespace compress
                     var extraOffset = int32(offset - offsetBase[offsetCode]);
                     w.writeBits(extraOffset, extraOffsetBits);
                 }
+
             }
+
         }
 
         // huffOffset is a static offset encoder used for huffman only encoding.
         // It can be reused since we will not be encoding offset values.
-        private static ref huffmanEncoder huffOffset = default;
+        private static ptr<huffmanEncoder> huffOffset;
 
         private static void init()
         {
-            var w = newHuffmanBitWriter(null);
-            w.offsetFreq[0L] = 1L;
+            var offsetFreq = make_slice<int>(offsetCodeCount);
+            offsetFreq[0L] = 1L;
             huffOffset = newHuffmanEncoder(offsetCodeCount);
-            huffOffset.generate(w.offsetFreq, 15L);
+            huffOffset.generate(offsetFreq, 15L);
         }
 
         // writeBlockHuff encodes a block of bytes as either
         // Huffman encoded literals or uncompressed bytes if the
         // results only gains very little from compression.
-        private static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice<byte> input)
+        private static void writeBlockHuff(this ptr<huffmanBitWriter> _addr_w, bool eof, slice<byte> input)
         {
+            ref huffmanBitWriter w = ref _addr_w.val;
+
             if (w.err != null)
             {
-                return;
+                return ;
             } 
 
             // Clear histogram
@@ -754,9 +860,10 @@ namespace compress
 
             w.literalFreq[endBlockMarker] = 1L;
 
-            const var numLiterals = endBlockMarker + 1L;
+            const var numLiterals = (var)endBlockMarker + 1L;
 
-            const long numOffsets = 1L;
+            w.offsetFreq[0L] = 1L;
+            const long numOffsets = (long)1L;
 
 
 
@@ -780,7 +887,7 @@ namespace compress
                 {
                     w.writeStoredHeader(len(input), eof);
                     w.writeBytes(input);
-                    return;
+                    return ;
                 } 
 
                 // Huffman.
@@ -817,15 +924,19 @@ namespace compress
                 {
                     continue;
                 }
+
                 w.write(w.bytes[..n]);
                 if (w.err != null)
                 {
-                    return; // Return early in the event of write failures
+                    return ; // Return early in the event of write failures
                 }
+
                 n = 0L;
+
             }
             w.nbytes = n;
             w.writeCode(encoding[endBlockMarker]);
+
         }
 
         // histogram accumulates a histogram of b in h.
@@ -838,6 +949,7 @@ namespace compress
             {
                 h[t]++;
             }
+
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:44 UTC
+//     Generated on 2020 October 08 03:40:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,12 +28,13 @@ using url = go.net.url_package;
 using os = go.os_package;
 using path = go.path_package;
 using runtime = go.runtime_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {
@@ -50,17 +51,19 @@ namespace net
                 this.w = default;
                 this.h = default;
                 this.wbuf = default;
+                this.req = default;
                 this.mu = default;
                 this.timedOut = default;
                 this.wroteHeader = default;
                 this.code = default;
             }
 
-            public timeoutWriter(ResponseWriter w = default, Header h = default, bytes.Buffer wbuf = default, sync.Mutex mu = default, bool timedOut = default, bool wroteHeader = default, long code = default)
+            public timeoutWriter(ResponseWriter w = default, Header h = default, bytes.Buffer wbuf = default, ref ptr<Request> req = default, sync.Mutex mu = default, bool timedOut = default, bool wroteHeader = default, long code = default)
             {
                 this.w = w;
                 this.h = h;
                 this.wbuf = wbuf;
+                this.req = req;
                 this.mu = mu;
                 this.timedOut = timedOut;
                 this.wroteHeader = wroteHeader;
@@ -87,7 +90,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static timeoutWriter timeoutWriter_cast(dynamic value)
         {
-            return new timeoutWriter(value.w, value.h, value.wbuf, value.mu, value.timedOut, value.wroteHeader, value.code);
+            return new timeoutWriter(value.w, value.h, value.wbuf, ref value.req, value.mu, value.timedOut, value.wroteHeader, value.code);
         }
     }
 }}

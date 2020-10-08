@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:19 UTC
+//     Generated on 2020 October 08 03:41:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -56,7 +56,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -70,10 +70,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void GetByRef(ref T value);
+            private delegate void GetByPtr(ptr<T> value);
             private delegate void GetByVal(T value);
 
-            private static readonly GetByRef s_GetByRef;
+            private static readonly GetByPtr s_GetByPtr;
             private static readonly GetByVal s_GetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -82,22 +82,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_GetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_GetByPtr is null || !m_target_is_ptr)
                 {
                     s_GetByVal!(target);
                     return;
                 }
 
-                s_GetByRef(ref target);
+                s_GetByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate error StringByRef(ref T value);
+            private delegate error StringByPtr(ptr<T> value);
             private delegate error StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -106,17 +107,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
 
-            private delegate error SetByRef(ref T value, @string _p0);
+            private delegate error SetByPtr(ptr<T> value, @string _p0);
             private delegate error SetByVal(T value, @string _p0);
 
-            private static readonly SetByRef s_SetByRef;
+            private static readonly SetByPtr s_SetByPtr;
             private static readonly SetByVal s_SetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -125,11 +127,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SetByPtr is null || !m_target_is_ptr)
                     return s_SetByVal!(target, _p0);
 
-                return s_SetByRef(ref target, _p0);
+                return s_SetByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -138,55 +141,46 @@ namespace go
             static Getter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Get");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Get");
 
                 if (!(extensionMethod is null))
-                    s_GetByRef = extensionMethod.CreateStaticDelegate(typeof(GetByRef)) as GetByRef;
+                    s_GetByPtr = extensionMethod.CreateStaticDelegate(typeof(GetByPtr)) as GetByPtr;
 
-                if (s_GetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Get");
+                extensionMethod = targetType.GetExtensionMethod("Get");
 
-                    if (!(extensionMethod is null))
-                        s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
 
-                if (s_GetByRef is null && s_GetByVal is null)
+                if (s_GetByPtr is null && s_GetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Getter.Get method", new Exception("Get"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Getter.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Set");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Set");
 
                 if (!(extensionMethod is null))
-                    s_SetByRef = extensionMethod.CreateStaticDelegate(typeof(SetByRef)) as SetByRef;
+                    s_SetByPtr = extensionMethod.CreateStaticDelegate(typeof(SetByPtr)) as SetByPtr;
 
-                if (s_SetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Set");
+                extensionMethod = targetType.GetExtensionMethod("Set");
 
-                    if (!(extensionMethod is null))
-                        s_SetByVal = extensionMethod.CreateStaticDelegate(typeof(SetByVal)) as SetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SetByVal = extensionMethod.CreateStaticDelegate(typeof(SetByVal)) as SetByVal;
 
-                if (s_SetByRef is null && s_SetByVal is null)
+                if (s_SetByPtr is null && s_SetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Getter.Set method", new Exception("Set"));
             }
 

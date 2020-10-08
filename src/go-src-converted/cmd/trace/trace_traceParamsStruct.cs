@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:08 UTC
+//     Generated on 2020 October 08 04:42:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,10 +16,14 @@ using static go.builtin;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using trace = go.@internal.trace_package;
+using io = go.io_package;
 using log = go.log_package;
+using math = go.math_package;
 using http = go.net.http_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
+using debug = go.runtime.debug_package;
+using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
@@ -35,21 +39,23 @@ namespace go
             public traceParams(NilType _)
             {
                 this.parsed = default;
-                this.gtrace = default;
+                this.mode = default;
                 this.startTime = default;
                 this.endTime = default;
                 this.maing = default;
                 this.gs = default;
+                this.tasks = default;
             }
 
-            public traceParams(trace.ParseResult parsed = default, bool gtrace = default, long startTime = default, long endTime = default, ulong maing = default, map<ulong, bool> gs = default)
+            public traceParams(trace.ParseResult parsed = default, traceviewMode mode = default, long startTime = default, long endTime = default, ulong maing = default, map<ulong, bool> gs = default, slice<ptr<taskDesc>> tasks = default)
             {
                 this.parsed = parsed;
-                this.gtrace = gtrace;
+                this.mode = mode;
                 this.startTime = startTime;
                 this.endTime = endTime;
                 this.maing = maing;
                 this.gs = gs;
+                this.tasks = tasks;
             }
 
             // Enable comparisons between nil and traceParams struct
@@ -72,7 +78,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static traceParams traceParams_cast(dynamic value)
         {
-            return new traceParams(value.parsed, value.gtrace, value.startTime, value.endTime, value.maing, value.gs);
+            return new traceParams(value.parsed, value.mode, value.startTime, value.endTime, value.maing, value.gs, value.tasks);
         }
     }
 }

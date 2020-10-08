@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:24:19 UTC
+//     Generated on 2020 October 08 04:26:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace @internal
                 this.Ponums = default;
             }
 
-            public SparseTreeHelper(slice<SparseTreeNode> Sdom = default, slice<ref Block> Po = default, slice<ref Block> Dom = default, slice<int> Ponums = default)
+            public SparseTreeHelper(slice<SparseTreeNode> Sdom = default, slice<ptr<Block>> Po = default, slice<ptr<Block>> Dom = default, slice<int> Ponums = default)
             {
                 this.Sdom = Sdom;
                 this.Po = Po;

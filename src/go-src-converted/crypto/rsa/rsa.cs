@@ -2,25 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package rsa implements RSA encryption as specified in PKCS#1.
+// Package rsa implements RSA encryption as specified in PKCS #1 and RFC 8017.
 //
 // RSA is a single, fundamental operation that is used in this package to
 // implement either public-key encryption or public-key signatures.
 //
-// The original specification for encryption and signatures with RSA is PKCS#1
+// The original specification for encryption and signatures with RSA is PKCS #1
 // and the terms "RSA encryption" and "RSA signatures" by default refer to
-// PKCS#1 version 1.5. However, that specification has flaws and new designs
-// should use version two, usually called by just OAEP and PSS, where
+// PKCS #1 version 1.5. However, that specification has flaws and new designs
+// should use version 2, usually called by just OAEP and PSS, where
 // possible.
 //
 // Two sets of interfaces are included in this package. When a more abstract
 // interface isn't necessary, there are functions for encrypting/decrypting
 // with v1.5/OAEP and signing/verifying with v1.5/PSS. If one needs to abstract
-// over the public-key primitive, the PrivateKey struct implements the
+// over the public key primitive, the PrivateKey type implements the
 // Decrypter and Signer interfaces from the crypto package.
 //
 // The RSA operations in this package are not implemented using constant-time algorithms.
-// package rsa -- go2cs converted at 2020 August 29 08:30:59 UTC
+// package rsa -- go2cs converted at 2020 October 08 03:35:55 UTC
 // import "crypto/rsa" ==> using rsa = go.crypto.rsa_package
 // Original source: C:\Go\src\crypto\rsa\rsa.go
 using crypto = go.crypto_package;
@@ -31,6 +31,8 @@ using hash = go.hash_package;
 using io = go.io_package;
 using math = go.math_package;
 using big = go.math.big_package;
+
+using randutil = go.crypto.@internal.randutil_package;
 using static go.builtin;
 
 namespace go {
@@ -48,6 +50,33 @@ namespace crypto
             public long E; // public exponent
         }
 
+        // Any methods implemented on PublicKey might need to also be implemented on
+        // PrivateKey, as the latter embeds the former and will expose its methods.
+
+        // Size returns the modulus size in bytes. Raw signatures and ciphertexts
+        // for or by this public key will have the same size.
+        private static long Size(this ptr<PublicKey> _addr_pub)
+        {
+            ref PublicKey pub = ref _addr_pub.val;
+
+            return (pub.N.BitLen() + 7L) / 8L;
+        }
+
+        // Equal reports whether pub and x have the same value.
+        private static bool Equal(this ptr<PublicKey> _addr_pub, crypto.PublicKey x)
+        {
+            ref PublicKey pub = ref _addr_pub.val;
+
+            ptr<PublicKey> (xx, ok) = x._<ptr<PublicKey>>();
+            if (!ok)
+            {
+                return false;
+            }
+
+            return pub.N.Cmp(xx.N) == 0L && pub.E == xx.E;
+
+        }
+
         // OAEPOptions is an interface for passing options to OAEP decryption using the
         // crypto.Decrypter interface.
         public partial struct OAEPOptions
@@ -63,22 +92,28 @@ namespace crypto
         // We require pub.E to fit into a 32-bit integer so that we
         // do not have different behavior depending on whether
         // int is 32 or 64 bits. See also
-        // http://www.imperialviolet.org/2012/03/16/rsae.html.
-        private static error checkPub(ref PublicKey pub)
+        // https://www.imperialviolet.org/2012/03/16/rsae.html.
+        private static error checkPub(ptr<PublicKey> _addr_pub)
         {
+            ref PublicKey pub = ref _addr_pub.val;
+
             if (pub.N == null)
             {
-                return error.As(errPublicModulus);
+                return error.As(errPublicModulus)!;
             }
+
             if (pub.E < 2L)
             {
-                return error.As(errPublicExponentSmall);
+                return error.As(errPublicExponentSmall)!;
             }
+
             if (pub.E > 1L << (int)(31L) - 1L)
             {
-                return error.As(errPublicExponentLarge);
+                return error.As(errPublicExponentLarge)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // A PrivateKey represents an RSA key
@@ -86,7 +121,7 @@ namespace crypto
         {
             public PublicKey PublicKey; // public part.
             public ptr<big.Int> D; // private exponent
-            public slice<ref big.Int> Primes; // prime factors of N, has >= 2 elements.
+            public slice<ptr<big.Int>> Primes; // prime factors of N, has >= 2 elements.
 
 // Precomputed contains precomputed values that speed up private
 // operations, if available.
@@ -94,22 +129,63 @@ namespace crypto
         }
 
         // Public returns the public key corresponding to priv.
-        private static crypto.PublicKey Public(this ref PrivateKey priv)
+        private static crypto.PublicKey Public(this ptr<PrivateKey> _addr_priv)
         {
-            return ref priv.PublicKey;
+            ref PrivateKey priv = ref _addr_priv.val;
+
+            return _addr_priv.PublicKey;
+        }
+
+        // Equal reports whether priv and x have equivalent values. It ignores
+        // Precomputed values.
+        private static bool Equal(this ptr<PrivateKey> _addr_priv, crypto.PrivateKey x)
+        {
+            ref PrivateKey priv = ref _addr_priv.val;
+
+            ptr<PrivateKey> (xx, ok) = x._<ptr<PrivateKey>>();
+            if (!ok)
+            {
+                return false;
+            }
+
+            if (!priv.PublicKey.Equal(_addr_xx.PublicKey) || priv.D.Cmp(xx.D) != 0L)
+            {
+                return false;
+            }
+
+            if (len(priv.Primes) != len(xx.Primes))
+            {
+                return false;
+            }
+
+            foreach (var (i) in priv.Primes)
+            {
+                if (priv.Primes[i].Cmp(xx.Primes[i]) != 0L)
+                {
+                    return false;
+                }
+
+            }
+            return true;
+
         }
 
         // Sign signs digest with priv, reading randomness from rand. If opts is a
-        // *PSSOptions then the PSS algorithm will be used, otherwise PKCS#1 v1.5 will
-        // be used.
+        // *PSSOptions then the PSS algorithm will be used, otherwise PKCS #1 v1.5 will
+        // be used. digest must be the result of hashing the input message using
+        // opts.HashFunc().
         //
         // This method implements crypto.Signer, which is an interface to support keys
         // where the private part is kept in, for example, a hardware module. Common
         // uses should use the Sign* functions in this package directly.
-        private static (slice<byte>, error) Sign(this ref PrivateKey priv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts)
+        private static (slice<byte>, error) Sign(this ptr<PrivateKey> _addr_priv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref PrivateKey priv = ref _addr_priv.val;
+
             {
-                ref PSSOptions (pssOpts, ok) = opts._<ref PSSOptions>();
+                ptr<PSSOptions> (pssOpts, ok) = opts._<ptr<PSSOptions>>();
 
                 if (ok)
                 {
@@ -118,24 +194,31 @@ namespace crypto
 
             }
 
+
             return SignPKCS1v15(rand, priv, opts.HashFunc(), digest);
+
         }
 
         // Decrypt decrypts ciphertext with priv. If opts is nil or of type
-        // *PKCS1v15DecryptOptions then PKCS#1 v1.5 decryption is performed. Otherwise
+        // *PKCS1v15DecryptOptions then PKCS #1 v1.5 decryption is performed. Otherwise
         // opts must have type *OAEPOptions and OAEP decryption is done.
-        private static (slice<byte>, error) Decrypt(this ref PrivateKey priv, io.Reader rand, slice<byte> ciphertext, crypto.DecrypterOpts opts)
+        private static (slice<byte>, error) Decrypt(this ptr<PrivateKey> _addr_priv, io.Reader rand, slice<byte> ciphertext, crypto.DecrypterOpts opts)
         {
+            slice<byte> plaintext = default;
+            error err = default!;
+            ref PrivateKey priv = ref _addr_priv.val;
+
             if (opts == null)
             {
                 return DecryptPKCS1v15(rand, priv, ciphertext);
             }
+
             switch (opts.type())
             {
-                case ref OAEPOptions opts:
-                    return DecryptOAEP(opts.Hash.New(), rand, priv, ciphertext, opts.Label);
+                case ptr<OAEPOptions> opts:
+                    return DecryptOAEP(opts.Hash.New(), rand, _addr_priv, ciphertext, opts.Label);
                     break;
-                case ref PKCS1v15DecryptOptions opts:
+                case ptr<PKCS1v15DecryptOptions> opts:
                     {
                         var l = opts.SessionKeyLen;
 
@@ -147,20 +230,23 @@ namespace crypto
 
                                 if (err != null)
                                 {
-                                    return (null, err);
+                                    return (null, error.As(err)!);
                                 }
 
                             }
+
                             {
                                 var err = DecryptPKCS1v15SessionKey(rand, priv, ciphertext, plaintext);
 
                                 if (err != null)
                                 {
-                                    return (null, err);
+                                    return (null, error.As(err)!);
                                 }
 
                             }
-                            return (plaintext, null);
+
+                            return (plaintext, error.As(null!)!);
+
                         }
                         else
                         {
@@ -168,14 +254,17 @@ namespace crypto
                         }
 
                     }
+
+
                     break;
                 default:
                 {
                     var opts = opts.type();
-                    return (null, errors.New("crypto/rsa: invalid options for Decrypt"));
+                    return (null, error.As(errors.New("crypto/rsa: invalid options for Decrypt"))!);
                     break;
                 }
             }
+
         }
 
         public partial struct PrecomputedValues
@@ -186,7 +275,7 @@ namespace crypto
 
 // CRTValues is used for the 3rd and subsequent primes. Due to a
 // historical accident, the CRT for the first two primes is handled
-// differently in PKCS#1 and interoperability is sufficiently
+// differently in PKCS #1 and interoperability is sufficiently
 // important that we mirror this.
             public slice<CRTValue> CRTValues;
         }
@@ -201,14 +290,16 @@ namespace crypto
 
         // Validate performs basic sanity checks on the key.
         // It returns nil if the key is valid, or else an error describing a problem.
-        private static error Validate(this ref PrivateKey priv)
+        private static error Validate(this ptr<PrivateKey> _addr_priv)
         {
+            ref PrivateKey priv = ref _addr_priv.val;
+
             {
-                var err = checkPub(ref priv.PublicKey);
+                var err = checkPub(_addr_priv.PublicKey);
 
                 if (err != null)
                 {
-                    return error.As(err);
+                    return error.As(err)!;
                 } 
 
                 // Check that Πprimes == n.
@@ -226,9 +317,11 @@ namespace crypto
                     // Any primes ≤ 1 will cause divide-by-zero panics later.
                     if (prime.Cmp(bigOne) <= 0L)
                     {
-                        return error.As(errors.New("crypto/rsa: invalid prime value"));
+                        return error.As(errors.New("crypto/rsa: invalid prime value"))!;
                     }
+
                     modulus.Mul(modulus, prime);
+
                 }
 
                 prime = prime__prev1;
@@ -236,7 +329,7 @@ namespace crypto
 
             if (modulus.Cmp(priv.N) != 0L)
             {
-                return error.As(errors.New("crypto/rsa: invalid modulus"));
+                return error.As(errors.New("crypto/rsa: invalid modulus"))!;
             } 
 
             // Check that de ≡ 1 mod p-1, for each prime.
@@ -257,21 +350,26 @@ namespace crypto
                     congruence.Mod(de, pminus1);
                     if (congruence.Cmp(bigOne) != 0L)
                     {
-                        return error.As(errors.New("crypto/rsa: invalid exponents"));
+                        return error.As(errors.New("crypto/rsa: invalid exponents"))!;
                     }
+
                 }
 
                 prime = prime__prev1;
             }
 
-            return error.As(null);
+            return error.As(null!)!;
+
         }
 
         // GenerateKey generates an RSA keypair of the given bit size using the
         // random source random (for example, crypto/rand.Reader).
-        public static (ref PrivateKey, error) GenerateKey(io.Reader random, long bits)
+        public static (ptr<PrivateKey>, error) GenerateKey(io.Reader random, long bits)
         {
-            return GenerateMultiPrimeKey(random, 2L, bits);
+            ptr<PrivateKey> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_GenerateMultiPrimeKey(random, 2L, bits)!;
         }
 
         // GenerateMultiPrimeKey generates a multi-prime RSA keypair of the given bit
@@ -285,15 +383,21 @@ namespace crypto
         //
         // [1] US patent 4405829 (1972, expired)
         // [2] http://www.cacr.math.uwaterloo.ca/techreports/2006/cacr2006-16.pdf
-        public static (ref PrivateKey, error) GenerateMultiPrimeKey(io.Reader random, long nprimes, long bits)
+        public static (ptr<PrivateKey>, error) GenerateMultiPrimeKey(io.Reader random, long nprimes, long bits)
         {
+            ptr<PrivateKey> _p0 = default!;
+            error _p0 = default!;
+
+            randutil.MaybeReadByte(random);
+
             ptr<PrivateKey> priv = @new<PrivateKey>();
             priv.E = 65537L;
 
             if (nprimes < 2L)
             {
-                return (null, errors.New("crypto/rsa: GenerateMultiPrimeKey: nprimes must be >= 2"));
+                return (_addr_null!, error.As(errors.New("crypto/rsa: GenerateMultiPrimeKey: nprimes must be >= 2"))!);
             }
+
             if (bits < 64L)
             {
                 var primeLimit = float64(uint64(1L) << (int)(uint(bits / nprimes))); 
@@ -307,10 +411,12 @@ namespace crypto
                 pi /= 2L;
                 if (pi <= float64(nprimes))
                 {
-                    return (null, errors.New("crypto/rsa: too few primes of given length to generate an RSA key"));
+                    return (_addr_null!, error.As(errors.New("crypto/rsa: too few primes of given length to generate an RSA key"))!);
                 }
+
             }
-            var primes = make_slice<ref big.Int>(nprimes);
+
+            var primes = make_slice<ptr<big.Int>>(nprimes);
 
 NextSetOfPrimes:
 
@@ -332,18 +438,21 @@ NextSetOfPrimes:
                 {
                     todo += (nprimes - 2L) / 5L;
                 }
+
                 {
                     long i__prev2 = i;
 
                     for (long i = 0L; i < nprimes; i++)
                     {
-                        error err = default;
+                        error err = default!;
                         primes[i], err = rand.Prime(random, todo / (nprimes - i));
                         if (err != null)
                         {
-                            return (null, err);
+                            return (_addr_null!, error.As(err)!);
                         }
+
                         todo -= primes[i].BitLen();
+
                     } 
 
                     // Make sure that primes is pairwise unequal.
@@ -368,7 +477,9 @@ NextSetOfPrimes:
                                 _continueNextSetOfPrimes = true;
                                 break;
                             }
+
                         }
+
 
                     }
 
@@ -401,57 +512,60 @@ NextSetOfPrimes:
                     _continueNextSetOfPrimes = true;
                     break;
                 }
-                ptr<big.Int> g = @new<big.Int>();
+
                 priv.D = @new<big.Int>();
                 var e = big.NewInt(int64(priv.E));
-                g.GCD(priv.D, null, e, totient);
+                var ok = priv.D.ModInverse(e, totient);
 
-                if (g.Cmp(bigOne) == 0L)
+                if (ok != null)
                 {
-                    if (priv.D.Sign() < 0L)
-                    {
-                        priv.D.Add(priv.D, totient);
-                    }
                     priv.Primes = primes;
                     priv.N = n;
-
                     break;
                 }
+
             }
 
             priv.Precompute();
-            return (priv, null);
+            return (_addr_priv!, error.As(null!)!);
+
         }
 
         // incCounter increments a four byte, big-endian counter.
-        private static void incCounter(ref array<byte> c)
+        private static void incCounter(ptr<array<byte>> _addr_c)
         {
+            ref array<byte> c = ref _addr_c.val;
+
             c[3L]++;
 
             if (c[3L] != 0L)
             {
-                return;
+                return ;
             }
+
             c[2L]++;
 
             if (c[2L] != 0L)
             {
-                return;
+                return ;
             }
+
             c[1L]++;
 
             if (c[1L] != 0L)
             {
-                return;
+                return ;
             }
+
             c[0L]++;
+
         }
 
         // mgf1XOR XORs the bytes in out with a mask generated using the MGF1 function
-        // specified in PKCS#1 v2.1.
+        // specified in PKCS #1 v2.1.
         private static void mgf1XOR(slice<byte> @out, hash.Hash hash, slice<byte> seed)
         {
-            array<byte> counter = new array<byte>(4L);
+            ref array<byte> counter = ref heap(new array<byte>(4L), out ptr<array<byte>> _addr_counter);
             slice<byte> digest = default;
 
             long done = 0L;
@@ -468,8 +582,10 @@ NextSetOfPrimes:
                     done++;
                 }
 
-                incCounter(ref counter);
+                incCounter(_addr_counter);
+
             }
+
 
         }
 
@@ -477,11 +593,15 @@ NextSetOfPrimes:
         // too large for the size of the public key.
         public static var ErrMessageTooLong = errors.New("crypto/rsa: message too long for RSA public key size");
 
-        private static ref big.Int encrypt(ref big.Int c, ref PublicKey pub, ref big.Int m)
+        private static ptr<big.Int> encrypt(ptr<big.Int> _addr_c, ptr<PublicKey> _addr_pub, ptr<big.Int> _addr_m)
         {
+            ref big.Int c = ref _addr_c.val;
+            ref PublicKey pub = ref _addr_pub.val;
+            ref big.Int m = ref _addr_m.val;
+
             var e = big.NewInt(int64(pub.E));
             c.Exp(m, e, pub.N);
-            return c;
+            return _addr_c!;
         }
 
         // EncryptOAEP encrypts the given message with RSA-OAEP.
@@ -501,23 +621,29 @@ NextSetOfPrimes:
         //
         // The message must be no longer than the length of the public modulus minus
         // twice the hash length, minus a further 2.
-        public static (slice<byte>, error) EncryptOAEP(hash.Hash hash, io.Reader random, ref PublicKey pub, slice<byte> msg, slice<byte> label)
+        public static (slice<byte>, error) EncryptOAEP(hash.Hash hash, io.Reader random, ptr<PublicKey> _addr_pub, slice<byte> msg, slice<byte> label)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref PublicKey pub = ref _addr_pub.val;
+
             {
-                var err = checkPub(pub);
+                var err = checkPub(_addr_pub);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
             }
+
             hash.Reset();
-            var k = (pub.N.BitLen() + 7L) / 8L;
+            var k = pub.Size();
             if (len(msg) > k - 2L * hash.Size() - 2L)
             {
-                return (null, ErrMessageTooLong);
+                return (null, error.As(ErrMessageTooLong)!);
             }
+
             hash.Write(label);
             var lHash = hash.Sum(null);
             hash.Reset();
@@ -533,24 +659,19 @@ NextSetOfPrimes:
             var (_, err) = io.ReadFull(random, seed);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             mgf1XOR(db, hash, seed);
             mgf1XOR(seed, hash, db);
 
             ptr<big.Int> m = @new<big.Int>();
             m.SetBytes(em);
-            var c = encrypt(@new<big.Int>(), pub, m);
-            var @out = c.Bytes();
+            var c = encrypt(@new<big.Int>(), _addr_pub, m);
 
-            if (len(out) < k)
-            { 
-                // If the output is too small, we need to left-pad with zeros.
-                var t = make_slice<byte>(k);
-                copy(t[k - len(out)..], out);
-                out = t;
-            }
-            return (out, null);
+            var @out = make_slice<byte>(k);
+            return (c.FillBytes(out), error.As(null!)!);
+
         }
 
         // ErrDecryption represents a failure to decrypt a message.
@@ -561,38 +682,17 @@ NextSetOfPrimes:
         // It is deliberately vague to avoid adaptive attacks.
         public static var ErrVerification = errors.New("crypto/rsa: verification error");
 
-        // modInverse returns ia, the inverse of a in the multiplicative group of prime
-        // order n. It requires that a be a member of the group (i.e. less than n).
-        private static (ref big.Int, bool) modInverse(ref big.Int a, ref big.Int n)
-        {
-            ptr<big.Int> g = @new<big.Int>();
-            ptr<big.Int> x = @new<big.Int>();
-            g.GCD(x, null, a, n);
-            if (g.Cmp(bigOne) != 0L)
-            { 
-                // In this case, a and n aren't coprime and we cannot calculate
-                // the inverse. This happens because the values of n are nearly
-                // prime (being the product of two primes) rather than truly
-                // prime.
-                return;
-            }
-            if (x.Cmp(bigOne) < 0L)
-            { 
-                // 0 is not the multiplicative inverse of any element so, if x
-                // < 1, then x is negative.
-                x.Add(x, n);
-            }
-            return (x, true);
-        }
-
         // Precompute performs some calculations that speed up private key operations
         // in the future.
-        private static void Precompute(this ref PrivateKey priv)
+        private static void Precompute(this ptr<PrivateKey> _addr_priv)
         {
+            ref PrivateKey priv = ref _addr_priv.val;
+
             if (priv.Precomputed.Dp != null)
             {
-                return;
+                return ;
             }
+
             priv.Precomputed.Dp = @new<big.Int>().Sub(priv.Primes[0L], bigOne);
             priv.Precomputed.Dp.Mod(priv.D, priv.Precomputed.Dp);
 
@@ -606,7 +706,7 @@ NextSetOfPrimes:
             for (long i = 2L; i < len(priv.Primes); i++)
             {
                 var prime = priv.Primes[i];
-                var values = ref priv.Precomputed.CRTValues[i - 2L];
+                var values = _addr_priv.Precomputed.CRTValues[i - 2L];
 
                 values.Exp = @new<big.Int>().Sub(prime, bigOne);
                 values.Exp.Mod(priv.D, values.Exp);
@@ -617,49 +717,61 @@ NextSetOfPrimes:
                 r.Mul(r, prime);
             }
 
+
         }
 
         // decrypt performs an RSA decryption, resulting in a plaintext integer. If a
         // random source is given, RSA blinding is used.
-        private static (ref big.Int, error) decrypt(io.Reader random, ref PrivateKey priv, ref big.Int c)
-        { 
+        private static (ptr<big.Int>, error) decrypt(io.Reader random, ptr<PrivateKey> _addr_priv, ptr<big.Int> _addr_c)
+        {
+            ptr<big.Int> m = default!;
+            error err = default!;
+            ref PrivateKey priv = ref _addr_priv.val;
+            ref big.Int c = ref _addr_c.val;
+ 
             // TODO(agl): can we get away with reusing blinds?
             if (c.Cmp(priv.N) > 0L)
             {
                 err = ErrDecryption;
-                return;
+                return ;
             }
+
             if (priv.N.Sign() == 0L)
             {
-                return (null, ErrDecryption);
+                return (_addr_null!, error.As(ErrDecryption)!);
             }
-            ref big.Int ir = default;
+
+            ptr<big.Int> ir;
             if (random != null)
-            { 
+            {
+                randutil.MaybeReadByte(random); 
+
                 // Blinding enabled. Blinding involves multiplying c by r^e.
                 // Then the decryption operation performs (m^e * r^e)^d mod n
                 // which equals mr mod n. The factor of r can then be removed
                 // by multiplying by the multiplicative inverse of r.
 
-                ref big.Int r = default;
-
+                ptr<big.Int> r;
+                ir = @new<big.Int>();
                 while (true)
                 {
                     r, err = rand.Int(random, priv.N);
                     if (err != null)
                     {
-                        return;
+                        return ;
                     }
+
                     if (r.Cmp(bigZero) == 0L)
                     {
                         r = bigOne;
                     }
-                    bool ok = default;
-                    ir, ok = modInverse(r, priv.N);
-                    if (ok)
+
+                    var ok = ir.ModInverse(r, priv.N);
+                    if (ok != null)
                     {
                         break;
                     }
+
                 }
 
                 var bigE = big.NewInt(int64(priv.E));
@@ -668,7 +780,9 @@ NextSetOfPrimes:
                 cCopy.Mul(cCopy, rpowe);
                 cCopy.Mod(cCopy, priv.N);
                 c = cCopy;
+
             }
+
             if (priv.Precomputed.Dp == null)
             {
                 m = @new<big.Int>().Exp(c, priv.D, priv.N);
@@ -683,6 +797,7 @@ NextSetOfPrimes:
                 {
                     m.Add(m, priv.Primes[0L]);
                 }
+
                 m.Mul(m, priv.Precomputed.Qinv);
                 m.Mod(m, priv.Primes[0L]);
                 m.Mul(m, priv.Primes[1L]);
@@ -699,39 +814,53 @@ NextSetOfPrimes:
                     {
                         m2.Add(m2, prime);
                     }
+
                     m2.Mul(m2, values.R);
                     m.Add(m, m2);
+
                 }
+
             }
+
             if (ir != null)
             { 
                 // Unblind.
                 m.Mul(m, ir);
                 m.Mod(m, priv.N);
+
             }
-            return;
+
+            return ;
+
         }
 
-        private static (ref big.Int, error) decryptAndCheck(io.Reader random, ref PrivateKey priv, ref big.Int c)
+        private static (ptr<big.Int>, error) decryptAndCheck(io.Reader random, ptr<PrivateKey> _addr_priv, ptr<big.Int> _addr_c)
         {
-            m, err = decrypt(random, priv, c);
+            ptr<big.Int> m = default!;
+            error err = default!;
+            ref PrivateKey priv = ref _addr_priv.val;
+            ref big.Int c = ref _addr_c.val;
+
+            m, err = decrypt(random, _addr_priv, _addr_c);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             } 
 
             // In order to defend against errors in the CRT computation, m^e is
             // calculated, which should match the original ciphertext.
-            var check = encrypt(@new<big.Int>(), ref priv.PublicKey, m);
+            var check = encrypt(@new<big.Int>(), _addr_priv.PublicKey, _addr_m);
             if (c.Cmp(check) != 0L)
             {
-                return (null, errors.New("rsa: internal error"));
+                return (_addr_null!, error.As(errors.New("rsa: internal error"))!);
             }
-            return (m, null);
+
+            return (_addr_m!, error.As(null!)!);
+
         }
 
         // DecryptOAEP decrypts ciphertext using RSA-OAEP.
-
+        //
         // OAEP is parameterised by a hash function that is used as a random oracle.
         // Encryption and decryption of a given message must use the same hash function
         // and sha256.New() is a reasonable choice.
@@ -742,39 +871,43 @@ NextSetOfPrimes:
         //
         // The label parameter must match the value given when encrypting. See
         // EncryptOAEP for details.
-        public static (slice<byte>, error) DecryptOAEP(hash.Hash hash, io.Reader random, ref PrivateKey priv, slice<byte> ciphertext, slice<byte> label)
+        public static (slice<byte>, error) DecryptOAEP(hash.Hash hash, io.Reader random, ptr<PrivateKey> _addr_priv, slice<byte> ciphertext, slice<byte> label)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref PrivateKey priv = ref _addr_priv.val;
+
             {
-                var err = checkPub(ref priv.PublicKey);
+                var err = checkPub(_addr_priv.PublicKey);
 
                 if (err != null)
                 {
-                    return (null, err);
+                    return (null, error.As(err)!);
                 }
 
             }
-            var k = (priv.N.BitLen() + 7L) / 8L;
+
+            var k = priv.Size();
             if (len(ciphertext) > k || k < hash.Size() * 2L + 2L)
             {
-                return (null, ErrDecryption);
+                return (null, error.As(ErrDecryption)!);
             }
+
             ptr<big.Int> c = @new<big.Int>().SetBytes(ciphertext);
 
-            var (m, err) = decrypt(random, priv, c);
+            var (m, err) = decrypt(random, _addr_priv, c);
             if (err != null)
             {
-                return (null, err);
+                return (null, error.As(err)!);
             }
+
             hash.Write(label);
             var lHash = hash.Sum(null);
             hash.Reset(); 
 
-            // Converting the plaintext number to bytes will strip any
-            // leading zeros so we may have to left pad. We do this unconditionally
-            // to avoid leaking timing information. (Although we still probably
-            // leak the number of leading zeros. It's not clear that we can do
-            // anything about this.)
-            var em = leftPad(m.Bytes(), k);
+            // We probably leak the number of leading zeros.
+            // It's not clear that we can do anything about this.
+            var em = m.FillBytes(make_slice<byte>(k));
 
             var firstByteIsZero = subtle.ConstantTimeByteEq(em[0L], 0L);
 
@@ -814,23 +947,11 @@ NextSetOfPrimes:
 
             if (firstByteIsZero & lHash2Good & ~invalid & ~lookingForIndex != 1L)
             {
-                return (null, ErrDecryption);
+                return (null, error.As(ErrDecryption)!);
             }
-            return (rest[index + 1L..], null);
-        }
 
-        // leftPad returns a new slice of length size. The contents of input are right
-        // aligned in the new slice.
-        private static slice<byte> leftPad(slice<byte> input, long size)
-        {
-            var n = len(input);
-            if (n > size)
-            {
-                n = size;
-            }
-            out = make_slice<byte>(size);
-            copy(out[len(out) - n..], input);
-            return;
+            return (rest[index + 1L..], error.As(null!)!);
+
         }
     }
 }}

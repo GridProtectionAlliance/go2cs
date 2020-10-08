@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:58:44 UTC
+//     Generated on 2020 October 08 04:32:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,14 +35,16 @@ namespace go
                 this.sn = default;
                 this.u = default;
                 this.i = default;
+                this.oponly = default;
             }
 
-            public szD(@string name = default, @string sn = default, slice<ulong> u = default, slice<long> i = default)
+            public szD(@string name = default, @string sn = default, slice<ulong> u = default, slice<long> i = default, @string oponly = default)
             {
                 this.name = name;
                 this.sn = sn;
                 this.u = u;
                 this.i = i;
+                this.oponly = oponly;
             }
 
             // Enable comparisons between nil and szD struct
@@ -65,7 +67,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static szD szD_cast(dynamic value)
         {
-            return new szD(value.name, value.sn, value.u, value.i);
+            return new szD(value.name, value.sn, value.u, value.i, value.oponly);
         }
     }
 }

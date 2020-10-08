@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm -- go2cs converted at 2020 August 29 09:59:09 UTC
+// package arm -- go2cs converted at 2020 October 08 04:32:18 UTC
 // import "cmd/compile/internal/arm" ==> using arm = go.cmd.compile.@internal.arm_package
 // Original source: C:\Go\src\cmd\compile\internal\arm\ssa.go
 using fmt = go.fmt_package;
 using math = go.math_package;
+using bits = go.math.bits_package;
 
 using gc = go.cmd.compile.@internal.gc_package;
+using logopt = go.cmd.compile.@internal.logopt_package;
 using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
@@ -24,8 +26,10 @@ namespace @internal
     public static partial class arm_package
     {
         // loadByType returns the load instruction of the given type.
-        private static obj.As loadByType(ref types.Type _t) => func(_t, (ref types.Type t, Defer _, Panic panic, Recover __) =>
+        private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, __) =>
         {
+            ref types.Type t = ref _addr_t.val;
+
             if (t.IsFloat())
             {
                 switch (t.Size())
@@ -37,6 +41,7 @@ namespace @internal
                         return arm.AMOVD;
                         break;
                 }
+
             }
             else
             {
@@ -66,13 +71,17 @@ namespace @internal
                         return arm.AMOVW;
                         break;
                 }
+
             }
             panic("bad load type");
+
         });
 
         // storeByType returns the store instruction of the given type.
-        private static obj.As storeByType(ref types.Type _t) => func(_t, (ref types.Type t, Defer _, Panic panic, Recover __) =>
+        private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, __) =>
         {
+            ref types.Type t = ref _addr_t.val;
+
             if (t.IsFloat())
             {
                 switch (t.Size())
@@ -84,6 +93,7 @@ namespace @internal
                         return arm.AMOVD;
                         break;
                 }
+
             }
             else
             {
@@ -99,8 +109,11 @@ namespace @internal
                         return arm.AMOVW;
                         break;
                 }
+
             }
+
             panic("bad store type");
+
         });
 
         // shift type is used as Offset in obj.TYPE_SHIFT operands to encode shifted register operands
@@ -116,12 +129,15 @@ namespace @internal
             { 
                 // register shift
                 return fmt.Sprintf("R%d%c%cR%d", v & 15L, op[0L], op[1L], (v >> (int)(8L)) & 15L);
+
             }
             else
             { 
                 // constant shift
                 return fmt.Sprintf("R%d%c%c%d", v & 15L, op[0L], op[1L], (v >> (int)(7L)) & 31L);
+
             }
+
         }
 
         // makeshift encodes a register shifted by a constant
@@ -131,8 +147,10 @@ namespace @internal
         }
 
         // genshift generates a Prog for r = r0 op (r1 shifted by n)
-        private static ref obj.Prog genshift(ref gc.SSAGenState s, obj.As @as, short r0, short r1, short r, long typ, long n)
+        private static ptr<obj.Prog> genshift(ptr<gc.SSAGenState> _addr_s, obj.As @as, short r0, short r1, short r, long typ, long n)
         {
+            ref gc.SSAGenState s = ref _addr_s.val;
+
             var p = s.Prog(as);
             p.From.Type = obj.TYPE_SHIFT;
             p.From.Offset = int64(makeshift(r1, typ, n));
@@ -142,7 +160,9 @@ namespace @internal
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = r;
             }
-            return p;
+
+            return _addr_p!;
+
         }
 
         // makeregshift encodes a register shifted by a register
@@ -152,8 +172,10 @@ namespace @internal
         }
 
         // genregshift generates a Prog for r = r0 op (r1 shifted by r2)
-        private static ref obj.Prog genregshift(ref gc.SSAGenState s, obj.As @as, short r0, short r1, short r2, short r, long typ)
+        private static ptr<obj.Prog> genregshift(ptr<gc.SSAGenState> _addr_s, obj.As @as, short r0, short r1, short r2, short r, long typ)
         {
+            ref gc.SSAGenState s = ref _addr_s.val;
+
             var p = s.Prog(as);
             p.From.Type = obj.TYPE_SHIFT;
             p.From.Offset = int64(makeregshift(r1, typ, r2));
@@ -163,24 +185,63 @@ namespace @internal
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = r;
             }
-            return p;
+
+            return _addr_p!;
+
         }
 
-        private static void ssaGenValue(ref gc.SSAGenState _s, ref ssa.Value _v) => func(_s, _v, (ref gc.SSAGenState s, ref ssa.Value v, Defer _, Panic panic, Recover __) =>
+        // find a (lsb, width) pair for BFC
+        // lsb must be in [0, 31], width must be in [1, 32 - lsb]
+        // return (0xffffffff, 0) if v is not a binary like 0...01...10...0
+        private static (uint, uint) getBFC(uint v)
         {
+            uint _p0 = default;
+            uint _p0 = default;
 
-            if (v.Op == ssa.OpCopy || v.Op == ssa.OpARMMOVWconvert || v.Op == ssa.OpARMMOVWreg)
+            uint m = default;            uint l = default; 
+            // BFC is not applicable with zero
+ 
+            // BFC is not applicable with zero
+            if (v == 0L)
+            {
+                return (0xffffffffUL, 0L);
+            } 
+            // find the lowest set bit, for example l=2 for 0x3ffffffc
+            l = uint32(bits.TrailingZeros32(v)); 
+            // m-1 represents the highest set bit index, for example m=30 for 0x3ffffffc
+            m = 32L - uint32(bits.LeadingZeros32(v)); 
+            // check if v is a binary like 0...01...10...0
+            if ((1L << (int)(m)) - (1L << (int)(l)) == v)
+            { 
+                // it must be m > l for non-zero v
+                return (l, m - l);
+
+            } 
+            // invalid
+            return (0xffffffffUL, 0L);
+
+        }
+
+        private static void ssaGenValue(ptr<gc.SSAGenState> _addr_s, ptr<ssa.Value> _addr_v) => func((_, panic, __) =>
+        {
+            ref gc.SSAGenState s = ref _addr_s.val;
+            ref ssa.Value v = ref _addr_v.val;
+
+
+            if (v.Op == ssa.OpCopy || v.Op == ssa.OpARMMOVWreg)
             {
                 if (v.Type.IsMemory())
                 {
-                    return;
+                    return ;
                 }
+
                 var x = v.Args[0L].Reg();
                 var y = v.Reg();
                 if (x == y)
                 {
-                    return;
+                    return ;
                 }
+
                 var @as = arm.AMOVW;
                 if (v.Type.IsFloat())
                 {
@@ -196,7 +257,9 @@ namespace @internal
                             panic("bad float size");
                             break;
                     }
+
                 }
+
                 var p = s.Prog(as);
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = x;
@@ -218,10 +281,11 @@ namespace @internal
                 if (v.Type.IsFlags())
                 {
                     v.Fatalf("load flags not implemented: %v", v.LongString());
-                    return;
+                    return ;
                 }
-                p = s.Prog(loadByType(v.Type));
-                gc.AddrAuto(ref p.From, v.Args[0L]);
+
+                p = s.Prog(loadByType(_addr_v.Type));
+                gc.AddrAuto(_addr_p.From, v.Args[0L]);
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = v.Reg();
                 goto __switch_break0;
@@ -231,15 +295,16 @@ namespace @internal
                 if (v.Type.IsFlags())
                 {
                     v.Fatalf("store flags not implemented: %v", v.LongString());
-                    return;
+                    return ;
                 }
-                p = s.Prog(storeByType(v.Type));
+
+                p = s.Prog(storeByType(_addr_v.Type));
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = v.Args[0L].Reg();
-                gc.AddrAuto(ref p.To, v);
+                gc.AddrAuto(_addr_p.To, v);
                 goto __switch_break0;
             }
-            if (v.Op == ssa.OpARMADD || v.Op == ssa.OpARMADC || v.Op == ssa.OpARMSUB || v.Op == ssa.OpARMSBC || v.Op == ssa.OpARMRSB || v.Op == ssa.OpARMAND || v.Op == ssa.OpARMOR || v.Op == ssa.OpARMXOR || v.Op == ssa.OpARMBIC || v.Op == ssa.OpARMMUL || v.Op == ssa.OpARMADDF || v.Op == ssa.OpARMADDD || v.Op == ssa.OpARMSUBF || v.Op == ssa.OpARMSUBD || v.Op == ssa.OpARMMULF || v.Op == ssa.OpARMMULD || v.Op == ssa.OpARMNMULF || v.Op == ssa.OpARMNMULD || v.Op == ssa.OpARMDIVF || v.Op == ssa.OpARMDIVD)
+            if (v.Op == ssa.OpARMADD || v.Op == ssa.OpARMADC || v.Op == ssa.OpARMSUB || v.Op == ssa.OpARMSBC || v.Op == ssa.OpARMRSB || v.Op == ssa.OpARMAND || v.Op == ssa.OpARMOR || v.Op == ssa.OpARMXOR || v.Op == ssa.OpARMBIC || v.Op == ssa.OpARMMUL || v.Op == ssa.OpARMADDF || v.Op == ssa.OpARMADDD || v.Op == ssa.OpARMSUBF || v.Op == ssa.OpARMSUBD || v.Op == ssa.OpARMSLL || v.Op == ssa.OpARMSRL || v.Op == ssa.OpARMSRA || v.Op == ssa.OpARMMULF || v.Op == ssa.OpARMMULD || v.Op == ssa.OpARMNMULF || v.Op == ssa.OpARMNMULD || v.Op == ssa.OpARMDIVF || v.Op == ssa.OpARMDIVD)
             {
                 var r = v.Reg();
                 var r1 = v.Args[0L].Reg();
@@ -252,7 +317,12 @@ namespace @internal
                 p.To.Reg = r;
                 goto __switch_break0;
             }
-            if (v.Op == ssa.OpARMMULAF || v.Op == ssa.OpARMMULAD || v.Op == ssa.OpARMMULSF || v.Op == ssa.OpARMMULSD)
+            if (v.Op == ssa.OpARMSRR)
+            {
+                genregshift(_addr_s, arm.AMOVW, 0L, v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_RR);
+                goto __switch_break0;
+            }
+            if (v.Op == ssa.OpARMMULAF || v.Op == ssa.OpARMMULAD || v.Op == ssa.OpARMMULSF || v.Op == ssa.OpARMMULSD || v.Op == ssa.OpARMFMULAD)
             {
                 r = v.Reg();
                 var r0 = v.Args[0L].Reg();
@@ -262,6 +332,7 @@ namespace @internal
                 {
                     v.Fatalf("result and addend are not in the same register: %v", v.LongString());
                 }
+
                 p = s.Prog(v.Op.Asm());
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = r2;
@@ -277,19 +348,6 @@ namespace @internal
                 r2 = v.Args[1L].Reg();
                 p = s.Prog(v.Op.Asm());
                 p.Scond = arm.C_SBIT;
-                p.From.Type = obj.TYPE_REG;
-                p.From.Reg = r2;
-                p.Reg = r1;
-                p.To.Type = obj.TYPE_REG;
-                p.To.Reg = r;
-                goto __switch_break0;
-            }
-            if (v.Op == ssa.OpARMSLL || v.Op == ssa.OpARMSRL || v.Op == ssa.OpARMSRA)
-            {
-                r = v.Reg();
-                r1 = v.Args[0L].Reg();
-                r2 = v.Args[1L].Reg();
-                p = s.Prog(v.Op.Asm());
                 p.From.Type = obj.TYPE_REG;
                 p.From.Reg = r2;
                 p.Reg = r1;
@@ -334,7 +392,41 @@ namespace @internal
                 p.To.Reg = v.Reg();
                 goto __switch_break0;
             }
-            if (v.Op == ssa.OpARMADDconst || v.Op == ssa.OpARMADCconst || v.Op == ssa.OpARMSUBconst || v.Op == ssa.OpARMSBCconst || v.Op == ssa.OpARMRSBconst || v.Op == ssa.OpARMRSCconst || v.Op == ssa.OpARMANDconst || v.Op == ssa.OpARMORconst || v.Op == ssa.OpARMXORconst || v.Op == ssa.OpARMBICconst || v.Op == ssa.OpARMSLLconst || v.Op == ssa.OpARMSRLconst || v.Op == ssa.OpARMSRAconst)
+            if (v.Op == ssa.OpARMANDconst || v.Op == ssa.OpARMBICconst) 
+            {
+                // try to optimize ANDconst and BICconst to BFC, which saves bytes and ticks
+                // BFC is only available on ARMv7, and its result and source are in the same register
+                if (objabi.GOARM == 7L && v.Reg() == v.Args[0L].Reg())
+                {
+                    uint val = default;
+                    if (v.Op == ssa.OpARMANDconst)
+                    {
+                        val = ~uint32(v.AuxInt);
+                    }
+                    else
+                    { // BICconst
+                        val = uint32(v.AuxInt);
+
+                    }
+
+                    var (lsb, width) = getBFC(val); 
+                    // omit BFC for ARM's imm12
+                    if (8L < width && width < 24L)
+                    {
+                        p = s.Prog(arm.ABFC);
+                        p.From.Type = obj.TYPE_CONST;
+                        p.From.Offset = int64(width);
+                        p.SetFrom3(new obj.Addr(Type:obj.TYPE_CONST,Offset:int64(lsb)));
+                        p.To.Type = obj.TYPE_REG;
+                        p.To.Reg = v.Reg();
+                        break;
+                    }
+
+                } 
+                // fall back to ordinary form
+                fallthrough = true;
+            }
+            if (fallthrough || v.Op == ssa.OpARMADDconst || v.Op == ssa.OpARMADCconst || v.Op == ssa.OpARMSUBconst || v.Op == ssa.OpARMSBCconst || v.Op == ssa.OpARMRSBconst || v.Op == ssa.OpARMRSCconst || v.Op == ssa.OpARMORconst || v.Op == ssa.OpARMXORconst || v.Op == ssa.OpARMSLLconst || v.Op == ssa.OpARMSRLconst || v.Op == ssa.OpARMSRAconst)
             {
                 p = s.Prog(v.Op.Asm());
                 p.From.Type = obj.TYPE_CONST;
@@ -357,107 +449,107 @@ namespace @internal
             }
             if (v.Op == ssa.OpARMSRRconst)
             {
-                genshift(s, arm.AMOVW, 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_RR, v.AuxInt);
+                genshift(_addr_s, arm.AMOVW, 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_RR, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDshiftLL || v.Op == ssa.OpARMADCshiftLL || v.Op == ssa.OpARMSUBshiftLL || v.Op == ssa.OpARMSBCshiftLL || v.Op == ssa.OpARMRSBshiftLL || v.Op == ssa.OpARMRSCshiftLL || v.Op == ssa.OpARMANDshiftLL || v.Op == ssa.OpARMORshiftLL || v.Op == ssa.OpARMXORshiftLL || v.Op == ssa.OpARMBICshiftLL)
             {
-                genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LL, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LL, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDSshiftLL || v.Op == ssa.OpARMSUBSshiftLL || v.Op == ssa.OpARMRSBSshiftLL)
             {
-                p = genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg0(), arm.SHIFT_LL, v.AuxInt);
+                p = genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg0(), arm.SHIFT_LL, v.AuxInt);
                 p.Scond = arm.C_SBIT;
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDshiftRL || v.Op == ssa.OpARMADCshiftRL || v.Op == ssa.OpARMSUBshiftRL || v.Op == ssa.OpARMSBCshiftRL || v.Op == ssa.OpARMRSBshiftRL || v.Op == ssa.OpARMRSCshiftRL || v.Op == ssa.OpARMANDshiftRL || v.Op == ssa.OpARMORshiftRL || v.Op == ssa.OpARMXORshiftRL || v.Op == ssa.OpARMBICshiftRL)
             {
-                genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LR, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LR, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDSshiftRL || v.Op == ssa.OpARMSUBSshiftRL || v.Op == ssa.OpARMRSBSshiftRL)
             {
-                p = genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg0(), arm.SHIFT_LR, v.AuxInt);
+                p = genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg0(), arm.SHIFT_LR, v.AuxInt);
                 p.Scond = arm.C_SBIT;
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDshiftRA || v.Op == ssa.OpARMADCshiftRA || v.Op == ssa.OpARMSUBshiftRA || v.Op == ssa.OpARMSBCshiftRA || v.Op == ssa.OpARMRSBshiftRA || v.Op == ssa.OpARMRSCshiftRA || v.Op == ssa.OpARMANDshiftRA || v.Op == ssa.OpARMORshiftRA || v.Op == ssa.OpARMXORshiftRA || v.Op == ssa.OpARMBICshiftRA)
             {
-                genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_AR, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_AR, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDSshiftRA || v.Op == ssa.OpARMSUBSshiftRA || v.Op == ssa.OpARMRSBSshiftRA)
             {
-                p = genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg0(), arm.SHIFT_AR, v.AuxInt);
+                p = genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg0(), arm.SHIFT_AR, v.AuxInt);
                 p.Scond = arm.C_SBIT;
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMXORshiftRR)
             {
-                genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_RR, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_RR, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMVNshiftLL)
             {
-                genshift(s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_LL, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_LL, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMVNshiftRL)
             {
-                genshift(s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_LR, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_LR, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMVNshiftRA)
             {
-                genshift(s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_AR, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_AR, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMVNshiftLLreg)
             {
-                genregshift(s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LL);
+                genregshift(_addr_s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LL);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMVNshiftRLreg)
             {
-                genregshift(s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LR);
+                genregshift(_addr_s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LR);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMVNshiftRAreg)
             {
-                genregshift(s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_AR);
+                genregshift(_addr_s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Args[1L].Reg(), v.Reg(), arm.SHIFT_AR);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDshiftLLreg || v.Op == ssa.OpARMADCshiftLLreg || v.Op == ssa.OpARMSUBshiftLLreg || v.Op == ssa.OpARMSBCshiftLLreg || v.Op == ssa.OpARMRSBshiftLLreg || v.Op == ssa.OpARMRSCshiftLLreg || v.Op == ssa.OpARMANDshiftLLreg || v.Op == ssa.OpARMORshiftLLreg || v.Op == ssa.OpARMXORshiftLLreg || v.Op == ssa.OpARMBICshiftLLreg)
             {
-                genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg(), arm.SHIFT_LL);
+                genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg(), arm.SHIFT_LL);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDSshiftLLreg || v.Op == ssa.OpARMSUBSshiftLLreg || v.Op == ssa.OpARMRSBSshiftLLreg)
             {
-                p = genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg0(), arm.SHIFT_LL);
+                p = genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg0(), arm.SHIFT_LL);
                 p.Scond = arm.C_SBIT;
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDshiftRLreg || v.Op == ssa.OpARMADCshiftRLreg || v.Op == ssa.OpARMSUBshiftRLreg || v.Op == ssa.OpARMSBCshiftRLreg || v.Op == ssa.OpARMRSBshiftRLreg || v.Op == ssa.OpARMRSCshiftRLreg || v.Op == ssa.OpARMANDshiftRLreg || v.Op == ssa.OpARMORshiftRLreg || v.Op == ssa.OpARMXORshiftRLreg || v.Op == ssa.OpARMBICshiftRLreg)
             {
-                genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg(), arm.SHIFT_LR);
+                genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg(), arm.SHIFT_LR);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDSshiftRLreg || v.Op == ssa.OpARMSUBSshiftRLreg || v.Op == ssa.OpARMRSBSshiftRLreg)
             {
-                p = genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg0(), arm.SHIFT_LR);
+                p = genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg0(), arm.SHIFT_LR);
                 p.Scond = arm.C_SBIT;
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDshiftRAreg || v.Op == ssa.OpARMADCshiftRAreg || v.Op == ssa.OpARMSUBshiftRAreg || v.Op == ssa.OpARMSBCshiftRAreg || v.Op == ssa.OpARMRSBshiftRAreg || v.Op == ssa.OpARMRSCshiftRAreg || v.Op == ssa.OpARMANDshiftRAreg || v.Op == ssa.OpARMORshiftRAreg || v.Op == ssa.OpARMXORshiftRAreg || v.Op == ssa.OpARMBICshiftRAreg)
             {
-                genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg(), arm.SHIFT_AR);
+                genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg(), arm.SHIFT_AR);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMADDSshiftRAreg || v.Op == ssa.OpARMSUBSshiftRAreg || v.Op == ssa.OpARMRSBSshiftRAreg)
             {
-                p = genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg0(), arm.SHIFT_AR);
+                p = genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), v.Reg0(), arm.SHIFT_AR);
                 p.Scond = arm.C_SBIT;
                 goto __switch_break0;
             }
@@ -542,32 +634,32 @@ namespace @internal
             }
             if (v.Op == ssa.OpARMCMPshiftLL || v.Op == ssa.OpARMCMNshiftLL || v.Op == ssa.OpARMTSTshiftLL || v.Op == ssa.OpARMTEQshiftLL)
             {
-                genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), 0L, arm.SHIFT_LL, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), 0L, arm.SHIFT_LL, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMCMPshiftRL || v.Op == ssa.OpARMCMNshiftRL || v.Op == ssa.OpARMTSTshiftRL || v.Op == ssa.OpARMTEQshiftRL)
             {
-                genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), 0L, arm.SHIFT_LR, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), 0L, arm.SHIFT_LR, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMCMPshiftRA || v.Op == ssa.OpARMCMNshiftRA || v.Op == ssa.OpARMTSTshiftRA || v.Op == ssa.OpARMTEQshiftRA)
             {
-                genshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), 0L, arm.SHIFT_AR, v.AuxInt);
+                genshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), 0L, arm.SHIFT_AR, v.AuxInt);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMCMPshiftLLreg || v.Op == ssa.OpARMCMNshiftLLreg || v.Op == ssa.OpARMTSTshiftLLreg || v.Op == ssa.OpARMTEQshiftLLreg)
             {
-                genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), 0L, arm.SHIFT_LL);
+                genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), 0L, arm.SHIFT_LL);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMCMPshiftRLreg || v.Op == ssa.OpARMCMNshiftRLreg || v.Op == ssa.OpARMTSTshiftRLreg || v.Op == ssa.OpARMTEQshiftRLreg)
             {
-                genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), 0L, arm.SHIFT_LR);
+                genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), 0L, arm.SHIFT_LR);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMCMPshiftRAreg || v.Op == ssa.OpARMCMNshiftRAreg || v.Op == ssa.OpARMTSTshiftRAreg || v.Op == ssa.OpARMTEQshiftRAreg)
             {
-                genregshift(s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), 0L, arm.SHIFT_AR);
+                genregshift(_addr_s, v.Op.Asm(), v.Args[0L].Reg(), v.Args[1L].Reg(), v.Args[2L].Reg(), 0L, arm.SHIFT_AR);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMOVWaddr)
@@ -586,13 +678,13 @@ namespace @internal
                 // - base is SB: load external address from constant pool (use relocation)
                 switch (v.Aux.type())
                 {
-                    case ref obj.LSym _:
+                    case ptr<obj.LSym> _:
                         wantreg = "SB";
-                        gc.AddAux(ref p.From, v);
+                        gc.AddAux(_addr_p.From, v);
                         break;
-                    case ref gc.Node _:
+                    case ptr<gc.Node> _:
                         wantreg = "SP";
-                        gc.AddAux(ref p.From, v);
+                        gc.AddAux(_addr_p.From, v);
                         break;
                     case 
                         wantreg = "SP";
@@ -613,6 +705,8 @@ namespace @internal
                     }
 
                 }
+
+
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMOVBload || v.Op == ssa.OpARMMOVBUload || v.Op == ssa.OpARMMOVHload || v.Op == ssa.OpARMMOVHUload || v.Op == ssa.OpARMMOVWload || v.Op == ssa.OpARMMOVFload || v.Op == ssa.OpARMMOVDload)
@@ -620,7 +714,7 @@ namespace @internal
                 p = s.Prog(v.Op.Asm());
                 p.From.Type = obj.TYPE_MEM;
                 p.From.Reg = v.Args[0L].Reg();
-                gc.AddAux(ref p.From, v);
+                gc.AddAux(_addr_p.From, v);
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = v.Reg();
                 goto __switch_break0;
@@ -632,7 +726,7 @@ namespace @internal
                 p.From.Reg = v.Args[1L].Reg();
                 p.To.Type = obj.TYPE_MEM;
                 p.To.Reg = v.Args[0L].Reg();
-                gc.AddAux(ref p.To, v);
+                gc.AddAux(_addr_p.To, v);
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMOVWloadidx || v.Op == ssa.OpARMMOVBUloadidx || v.Op == ssa.OpARMMOVBloadidx || v.Op == ssa.OpARMMOVHUloadidx || v.Op == ssa.OpARMMOVHloadidx) 
@@ -642,19 +736,19 @@ namespace @internal
             }
             if (fallthrough || v.Op == ssa.OpARMMOVWloadshiftLL)
             {
-                p = genshift(s, v.Op.Asm(), 0L, v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LL, v.AuxInt);
+                p = genshift(_addr_s, v.Op.Asm(), 0L, v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LL, v.AuxInt);
                 p.From.Reg = v.Args[0L].Reg();
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMOVWloadshiftRL)
             {
-                p = genshift(s, v.Op.Asm(), 0L, v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LR, v.AuxInt);
+                p = genshift(_addr_s, v.Op.Asm(), 0L, v.Args[1L].Reg(), v.Reg(), arm.SHIFT_LR, v.AuxInt);
                 p.From.Reg = v.Args[0L].Reg();
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMMOVWloadshiftRA)
             {
-                p = genshift(s, v.Op.Asm(), 0L, v.Args[1L].Reg(), v.Reg(), arm.SHIFT_AR, v.AuxInt);
+                p = genshift(_addr_s, v.Op.Asm(), 0L, v.Args[1L].Reg(), v.Reg(), arm.SHIFT_AR, v.AuxInt);
                 p.From.Reg = v.Args[0L].Reg();
                 goto __switch_break0;
             }
@@ -709,25 +803,29 @@ namespace @internal
                         // arg is a proper-typed load, already zero/sign-extended, don't extend again
                         if (v.Reg() == v.Args[0L].Reg())
                         {
-                            return;
+                            return ;
                         }
+
                         p = s.Prog(arm.AMOVW);
                         p.From.Type = obj.TYPE_REG;
                         p.From.Reg = v.Args[0L].Reg();
                         p.To.Type = obj.TYPE_REG;
                         p.To.Reg = v.Reg();
-                        return;
+                        return ;
                     else                     
                 }
+
                 if (objabi.GOARM >= 6L)
                 { 
                     // generate more efficient "MOVB/MOVBU/MOVH/MOVHU Reg@>0, Reg" on ARMv6 & ARMv7
-                    genshift(s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_RR, 0L);
-                    return;
+                    genshift(_addr_s, v.Op.Asm(), 0L, v.Args[0L].Reg(), v.Reg(), arm.SHIFT_RR, 0L);
+                    return ;
+
                 }
+
                 fallthrough = true;
             }
-            if (fallthrough || v.Op == ssa.OpARMMVN || v.Op == ssa.OpARMCLZ || v.Op == ssa.OpARMREV || v.Op == ssa.OpARMRBIT || v.Op == ssa.OpARMSQRTD || v.Op == ssa.OpARMNEGF || v.Op == ssa.OpARMNEGD || v.Op == ssa.OpARMMOVWF || v.Op == ssa.OpARMMOVWD || v.Op == ssa.OpARMMOVFW || v.Op == ssa.OpARMMOVDW || v.Op == ssa.OpARMMOVFD || v.Op == ssa.OpARMMOVDF)
+            if (fallthrough || v.Op == ssa.OpARMMVN || v.Op == ssa.OpARMCLZ || v.Op == ssa.OpARMREV || v.Op == ssa.OpARMREV16 || v.Op == ssa.OpARMRBIT || v.Op == ssa.OpARMSQRTD || v.Op == ssa.OpARMNEGF || v.Op == ssa.OpARMNEGD || v.Op == ssa.OpARMABSD || v.Op == ssa.OpARMMOVWF || v.Op == ssa.OpARMMOVWD || v.Op == ssa.OpARMMOVFW || v.Op == ssa.OpARMMOVDW || v.Op == ssa.OpARMMOVFD || v.Op == ssa.OpARMMOVDF)
             {
                 p = s.Prog(v.Op.Asm());
                 p.From.Type = obj.TYPE_REG;
@@ -779,6 +877,32 @@ namespace @internal
                 p.To.Sym = gc.Udiv;
                 goto __switch_break0;
             }
+            if (v.Op == ssa.OpARMLoweredWB)
+            {
+                p = s.Prog(obj.ACALL);
+                p.To.Type = obj.TYPE_MEM;
+                p.To.Name = obj.NAME_EXTERN;
+                p.To.Sym = v.Aux._<ptr<obj.LSym>>();
+                goto __switch_break0;
+            }
+            if (v.Op == ssa.OpARMLoweredPanicBoundsA || v.Op == ssa.OpARMLoweredPanicBoundsB || v.Op == ssa.OpARMLoweredPanicBoundsC)
+            {
+                p = s.Prog(obj.ACALL);
+                p.To.Type = obj.TYPE_MEM;
+                p.To.Name = obj.NAME_EXTERN;
+                p.To.Sym = gc.BoundsCheckFunc[v.AuxInt];
+                s.UseArgs(8L); // space used in callee args area by assembly stubs
+                goto __switch_break0;
+            }
+            if (v.Op == ssa.OpARMLoweredPanicExtendA || v.Op == ssa.OpARMLoweredPanicExtendB || v.Op == ssa.OpARMLoweredPanicExtendC)
+            {
+                p = s.Prog(obj.ACALL);
+                p.To.Type = obj.TYPE_MEM;
+                p.To.Name = obj.NAME_EXTERN;
+                p.To.Sym = gc.ExtendCheckFunc[v.AuxInt];
+                s.UseArgs(12L); // space used in callee args area by assembly stubs
+                goto __switch_break0;
+            }
             if (v.Op == ssa.OpARMDUFFZERO)
             {
                 p = s.Prog(obj.ADUFFZERO);
@@ -803,13 +927,20 @@ namespace @internal
                 p = s.Prog(arm.AMOVB);
                 p.From.Type = obj.TYPE_MEM;
                 p.From.Reg = v.Args[0L].Reg();
-                gc.AddAux(ref p.From, v);
+                gc.AddAux(_addr_p.From, v);
                 p.To.Type = obj.TYPE_REG;
                 p.To.Reg = arm.REGTMP;
+                if (logopt.Enabled())
+                {
+                    logopt.LogOpt(v.Pos, "nilcheck", "genssa", v.Block.Func.Name);
+                }
+
                 if (gc.Debug_checknil != 0L && v.Pos.Line() > 1L)
                 { // v.Pos.Line()==1 in generated wrappers
                     gc.Warnl(v.Pos, "generated nil check");
+
                 }
+
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMLoweredZero) 
@@ -925,9 +1056,16 @@ namespace @internal
                 p.To.Reg = v.Reg();
                 goto __switch_break0;
             }
-            if (v.Op == ssa.OpARMFlagEQ || v.Op == ssa.OpARMFlagLT_ULT || v.Op == ssa.OpARMFlagLT_UGT || v.Op == ssa.OpARMFlagGT_ULT || v.Op == ssa.OpARMFlagGT_UGT)
+            if (v.Op == ssa.OpARMLoweredGetCallerPC)
             {
-                v.Fatalf("Flag* ops should never make it to codegen %v", v.LongString());
+                p = s.Prog(obj.AGETCALLERPC);
+                p.To.Type = obj.TYPE_REG;
+                p.To.Reg = v.Reg();
+                goto __switch_break0;
+            }
+            if (v.Op == ssa.OpARMFlagConstant)
+            {
+                v.Fatalf("FlagConstant op should never make it to codegen %v", v.LongString());
                 goto __switch_break0;
             }
             if (v.Op == ssa.OpARMInvertFlags)
@@ -943,14 +1081,25 @@ namespace @internal
                 v.Fatalf("genValue not implemented: %s", v.LongString());
 
             __switch_break0:;
+
         });
 
         private static map condBits = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ssa.Op, byte>{ssa.OpARMEqual:arm.C_SCOND_EQ,ssa.OpARMNotEqual:arm.C_SCOND_NE,ssa.OpARMLessThan:arm.C_SCOND_LT,ssa.OpARMLessThanU:arm.C_SCOND_LO,ssa.OpARMLessEqual:arm.C_SCOND_LE,ssa.OpARMLessEqualU:arm.C_SCOND_LS,ssa.OpARMGreaterThan:arm.C_SCOND_GT,ssa.OpARMGreaterThanU:arm.C_SCOND_HI,ssa.OpARMGreaterEqual:arm.C_SCOND_GE,ssa.OpARMGreaterEqualU:arm.C_SCOND_HS,};
 
 
 
-        private static void ssaGenBlock(ref gc.SSAGenState s, ref ssa.Block b, ref ssa.Block next)
+        // To model a 'LEnoov' ('<=' without overflow checking) branching
+        private static array<array<gc.IndexJump>> leJumps = new array<array<gc.IndexJump>>(new array<gc.IndexJump>[] { {{Jump:arm.ABEQ,Index:0},{Jump:arm.ABPL,Index:1}}, {{Jump:arm.ABMI,Index:0},{Jump:arm.ABEQ,Index:0}} });
+
+        // To model a 'GTnoov' ('>' without overflow checking) branching
+        private static array<array<gc.IndexJump>> gtJumps = new array<array<gc.IndexJump>>(new array<gc.IndexJump>[] { {{Jump:arm.ABMI,Index:1},{Jump:arm.ABEQ,Index:1}}, {{Jump:arm.ABEQ,Index:1},{Jump:arm.ABPL,Index:0}} });
+
+        private static void ssaGenBlock(ptr<gc.SSAGenState> _addr_s, ptr<ssa.Block> _addr_b, ptr<ssa.Block> _addr_next)
         {
+            ref gc.SSAGenState s = ref _addr_s.val;
+            ref ssa.Block b = ref _addr_b.val;
+            ref ssa.Block next = ref _addr_next.val;
+
 
             if (b.Kind == ssa.BlockPlain) 
                 if (b.Succs[0L].Block() != next)
@@ -959,6 +1108,7 @@ namespace @internal
                     p.To.Type = obj.TYPE_BRANCH;
                     s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[0].Block()));
                 }
+
             else if (b.Kind == ssa.BlockDefer) 
                 // defer returns in R0:
                 // 0 if we should continue executing
@@ -976,36 +1126,40 @@ namespace @internal
                     p.To.Type = obj.TYPE_BRANCH;
                     s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[0].Block()));
                 }
-            else if (b.Kind == ssa.BlockExit) 
-                s.Prog(obj.AUNDEF); // tell plive.go that we never reach here
-            else if (b.Kind == ssa.BlockRet) 
+
+            else if (b.Kind == ssa.BlockExit)             else if (b.Kind == ssa.BlockRet) 
                 s.Prog(obj.ARET);
             else if (b.Kind == ssa.BlockRetJmp) 
                 p = s.Prog(obj.ARET);
                 p.To.Type = obj.TYPE_MEM;
                 p.To.Name = obj.NAME_EXTERN;
-                p.To.Sym = b.Aux._<ref obj.LSym>();
-            else if (b.Kind == ssa.BlockARMEQ || b.Kind == ssa.BlockARMNE || b.Kind == ssa.BlockARMLT || b.Kind == ssa.BlockARMGE || b.Kind == ssa.BlockARMLE || b.Kind == ssa.BlockARMGT || b.Kind == ssa.BlockARMULT || b.Kind == ssa.BlockARMUGT || b.Kind == ssa.BlockARMULE || b.Kind == ssa.BlockARMUGE) 
+                p.To.Sym = b.Aux._<ptr<obj.LSym>>();
+            else if (b.Kind == ssa.BlockARMEQ || b.Kind == ssa.BlockARMNE || b.Kind == ssa.BlockARMLT || b.Kind == ssa.BlockARMGE || b.Kind == ssa.BlockARMLE || b.Kind == ssa.BlockARMGT || b.Kind == ssa.BlockARMULT || b.Kind == ssa.BlockARMUGT || b.Kind == ssa.BlockARMULE || b.Kind == ssa.BlockARMUGE || b.Kind == ssa.BlockARMLTnoov || b.Kind == ssa.BlockARMGEnoov) 
                 var jmp = blockJump[b.Kind];
-                p = default;
 
                 if (next == b.Succs[0L].Block()) 
-                    p = s.Prog(jmp.invasm);
-                    p.To.Type = obj.TYPE_BRANCH;
-                    s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[1].Block()));
+                    s.Br(jmp.invasm, b.Succs[1L].Block());
                 else if (next == b.Succs[1L].Block()) 
-                    p = s.Prog(jmp.asm);
-                    p.To.Type = obj.TYPE_BRANCH;
-                    s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[0].Block()));
+                    s.Br(jmp.asm, b.Succs[0L].Block());
                 else 
-                    p = s.Prog(jmp.asm);
-                    p.To.Type = obj.TYPE_BRANCH;
-                    s.Branches = append(s.Branches, new gc.Branch(P:p,B:b.Succs[0].Block()));
-                    var q = s.Prog(obj.AJMP);
-                    q.To.Type = obj.TYPE_BRANCH;
-                    s.Branches = append(s.Branches, new gc.Branch(P:q,B:b.Succs[1].Block()));
-                            else 
-                b.Fatalf("branch not implemented: %s. Control: %s", b.LongString(), b.Control.LongString());
+                    if (b.Likely != ssa.BranchUnlikely)
+                    {
+                        s.Br(jmp.asm, b.Succs[0L].Block());
+                        s.Br(obj.AJMP, b.Succs[1L].Block());
                     }
+                    else
+                    {
+                        s.Br(jmp.invasm, b.Succs[1L].Block());
+                        s.Br(obj.AJMP, b.Succs[0L].Block());
+                    }
+
+                            else if (b.Kind == ssa.BlockARMLEnoov) 
+                s.CombJump(b, next, _addr_leJumps);
+            else if (b.Kind == ssa.BlockARMGTnoov) 
+                s.CombJump(b, next, _addr_gtJumps);
+            else 
+                b.Fatalf("branch not implemented: %s", b.LongString());
+            
+        }
     }
 }}}}

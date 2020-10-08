@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:00:51 UTC
+//     Generated on 2020 October 08 04:33:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using filepath = go.path.filepath_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
+using renameio = go.cmd.go.@internal.renameio_package;
 using go;
 
 namespace go {

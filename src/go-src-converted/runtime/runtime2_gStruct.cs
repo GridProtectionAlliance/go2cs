@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:19:50 UTC
+//     Generated on 2020 October 08 03:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -41,15 +42,17 @@ namespace go
                 this.atomicstatus = default;
                 this.stackLock = default;
                 this.goid = default;
+                this.schedlink = default;
                 this.waitsince = default;
                 this.waitreason = default;
-                this.schedlink = default;
                 this.preempt = default;
+                this.preemptStop = default;
+                this.preemptShrink = default;
+                this.asyncSafePoint = default;
                 this.paniconfault = default;
-                this.preemptscan = default;
                 this.gcscandone = default;
-                this.gcscanvalid = default;
                 this.throwsplit = default;
+                this.activeStackChans = default;
                 this.raceignore = default;
                 this.sysblocktraced = default;
                 this.sysexitticks = default;
@@ -62,6 +65,7 @@ namespace go
                 this.sigcode1 = default;
                 this.sigpc = default;
                 this.gopc = default;
+                this.ancestors = default;
                 this.startpc = default;
                 this.racectx = default;
                 this.waiting = default;
@@ -72,7 +76,7 @@ namespace go
                 this.gcAssistBytes = default;
             }
 
-            public g(stack stack = default, System.UIntPtr stackguard0 = default, System.UIntPtr stackguard1 = default, ref ptr<_panic> _panic = default, ref ptr<_defer> _defer = default, ref ptr<m> m = default, gobuf sched = default, System.UIntPtr syscallsp = default, System.UIntPtr syscallpc = default, System.UIntPtr stktopsp = default, unsafe.Pointer param = default, uint atomicstatus = default, uint stackLock = default, long goid = default, long waitsince = default, @string waitreason = default, guintptr schedlink = default, bool preempt = default, bool paniconfault = default, bool preemptscan = default, bool gcscandone = default, bool gcscanvalid = default, bool throwsplit = default, sbyte raceignore = default, bool sysblocktraced = default, long sysexitticks = default, ulong traceseq = default, puintptr tracelastp = default, muintptr lockedm = default, uint sig = default, slice<byte> writebuf = default, System.UIntPtr sigcode0 = default, System.UIntPtr sigcode1 = default, System.UIntPtr sigpc = default, System.UIntPtr gopc = default, System.UIntPtr startpc = default, System.UIntPtr racectx = default, ref ptr<sudog> waiting = default, slice<System.UIntPtr> cgoCtxt = default, unsafe.Pointer labels = default, ref ptr<timer> timer = default, uint selectDone = default, long gcAssistBytes = default)
+            public g(stack stack = default, System.UIntPtr stackguard0 = default, System.UIntPtr stackguard1 = default, ref ptr<_panic> _panic = default, ref ptr<_defer> _defer = default, ref ptr<m> m = default, gobuf sched = default, System.UIntPtr syscallsp = default, System.UIntPtr syscallpc = default, System.UIntPtr stktopsp = default, unsafe.Pointer param = default, uint atomicstatus = default, uint stackLock = default, long goid = default, guintptr schedlink = default, long waitsince = default, waitReason waitreason = default, bool preempt = default, bool preemptStop = default, bool preemptShrink = default, bool asyncSafePoint = default, bool paniconfault = default, bool gcscandone = default, bool throwsplit = default, bool activeStackChans = default, sbyte raceignore = default, bool sysblocktraced = default, long sysexitticks = default, ulong traceseq = default, puintptr tracelastp = default, muintptr lockedm = default, uint sig = default, slice<byte> writebuf = default, System.UIntPtr sigcode0 = default, System.UIntPtr sigcode1 = default, System.UIntPtr sigpc = default, System.UIntPtr gopc = default, ref ptr<slice<ancestorInfo>> ancestors = default, System.UIntPtr startpc = default, System.UIntPtr racectx = default, ref ptr<sudog> waiting = default, slice<System.UIntPtr> cgoCtxt = default, unsafe.Pointer labels = default, ref ptr<timer> timer = default, uint selectDone = default, long gcAssistBytes = default)
             {
                 this.stack = stack;
                 this.stackguard0 = stackguard0;
@@ -88,15 +92,17 @@ namespace go
                 this.atomicstatus = atomicstatus;
                 this.stackLock = stackLock;
                 this.goid = goid;
+                this.schedlink = schedlink;
                 this.waitsince = waitsince;
                 this.waitreason = waitreason;
-                this.schedlink = schedlink;
                 this.preempt = preempt;
+                this.preemptStop = preemptStop;
+                this.preemptShrink = preemptShrink;
+                this.asyncSafePoint = asyncSafePoint;
                 this.paniconfault = paniconfault;
-                this.preemptscan = preemptscan;
                 this.gcscandone = gcscandone;
-                this.gcscanvalid = gcscanvalid;
                 this.throwsplit = throwsplit;
+                this.activeStackChans = activeStackChans;
                 this.raceignore = raceignore;
                 this.sysblocktraced = sysblocktraced;
                 this.sysexitticks = sysexitticks;
@@ -109,6 +115,7 @@ namespace go
                 this.sigcode1 = sigcode1;
                 this.sigpc = sigpc;
                 this.gopc = gopc;
+                this.ancestors = ancestors;
                 this.startpc = startpc;
                 this.racectx = racectx;
                 this.waiting = waiting;
@@ -139,7 +146,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static g g_cast(dynamic value)
         {
-            return new g(value.stack, value.stackguard0, value.stackguard1, ref value._panic, ref value._defer, ref value.m, value.sched, value.syscallsp, value.syscallpc, value.stktopsp, value.param, value.atomicstatus, value.stackLock, value.goid, value.waitsince, value.waitreason, value.schedlink, value.preempt, value.paniconfault, value.preemptscan, value.gcscandone, value.gcscanvalid, value.throwsplit, value.raceignore, value.sysblocktraced, value.sysexitticks, value.traceseq, value.tracelastp, value.lockedm, value.sig, value.writebuf, value.sigcode0, value.sigcode1, value.sigpc, value.gopc, value.startpc, value.racectx, ref value.waiting, value.cgoCtxt, value.labels, ref value.timer, value.selectDone, value.gcAssistBytes);
+            return new g(value.stack, value.stackguard0, value.stackguard1, ref value._panic, ref value._defer, ref value.m, value.sched, value.syscallsp, value.syscallpc, value.stktopsp, value.param, value.atomicstatus, value.stackLock, value.goid, value.schedlink, value.waitsince, value.waitreason, value.preempt, value.preemptStop, value.preemptShrink, value.asyncSafePoint, value.paniconfault, value.gcscandone, value.throwsplit, value.activeStackChans, value.raceignore, value.sysblocktraced, value.sysexitticks, value.traceseq, value.tracelastp, value.lockedm, value.sig, value.writebuf, value.sigcode0, value.sigcode1, value.sigpc, value.gopc, ref value.ancestors, value.startpc, value.racectx, ref value.waiting, value.cgoCtxt, value.labels, ref value.timer, value.selectDone, value.gcAssistBytes);
         }
     }
 }

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fmt -- go2cs converted at 2020 August 29 08:45:11 UTC
+// package fmt -- go2cs converted at 2020 October 08 03:26:03 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Go\src\fmt\print.go
-using errors = go.errors_package;
+using fmtsort = go.@internal.fmtsort_package;
 using io = go.io_package;
 using os = go.os_package;
 using reflect = go.reflect_package;
@@ -20,20 +20,21 @@ namespace go
     {
         // Strings for use with buffer.WriteString.
         // This is less overhead than using buffer.Write with byte arrays.
-        private static readonly @string commaSpaceString = ", ";
-        private static readonly @string nilAngleString = "<nil>";
-        private static readonly @string nilParenString = "(nil)";
-        private static readonly @string nilString = "nil";
-        private static readonly @string mapString = "map[";
-        private static readonly @string percentBangString = "%!";
-        private static readonly @string missingString = "(MISSING)";
-        private static readonly @string badIndexString = "(BADINDEX)";
-        private static readonly @string panicString = "(PANIC=";
-        private static readonly @string extraString = "%!(EXTRA ";
-        private static readonly @string badWidthString = "%!(BADWIDTH)";
-        private static readonly @string badPrecString = "%!(BADPREC)";
-        private static readonly @string noVerbString = "%!(NOVERB)";
-        private static readonly @string invReflectString = "<invalid reflect.Value>";
+        private static readonly @string commaSpaceString = (@string)", ";
+        private static readonly @string nilAngleString = (@string)"<nil>";
+        private static readonly @string nilParenString = (@string)"(nil)";
+        private static readonly @string nilString = (@string)"nil";
+        private static readonly @string mapString = (@string)"map[";
+        private static readonly @string percentBangString = (@string)"%!";
+        private static readonly @string missingString = (@string)"(MISSING)";
+        private static readonly @string badIndexString = (@string)"(BADINDEX)";
+        private static readonly @string panicString = (@string)"(PANIC=";
+        private static readonly @string extraString = (@string)"%!(EXTRA ";
+        private static readonly @string badWidthString = (@string)"%!(BADWIDTH)";
+        private static readonly @string badPrecString = (@string)"%!(BADPREC)";
+        private static readonly @string noVerbString = (@string)"%!(NOVERB)";
+        private static readonly @string invReflectString = (@string)"<invalid reflect.Value>";
+
 
         // State represents the printer state passed to custom formatters.
         // It provides access to the io.Writer interface plus information about
@@ -78,29 +79,38 @@ namespace go
         {
         }
 
-        private static void Write(this ref buffer b, slice<byte> p)
+        private static void write(this ptr<buffer> _addr_b, slice<byte> p)
         {
-            b.Value = append(b.Value, p);
+            ref buffer b = ref _addr_b.val;
+
+            b.val = append(b.val, p);
         }
 
-        private static void WriteString(this ref buffer b, @string s)
+        private static void writeString(this ptr<buffer> _addr_b, @string s)
         {
-            b.Value = append(b.Value, s);
+            ref buffer b = ref _addr_b.val;
+
+            b.val = append(b.val, s);
         }
 
-        private static void WriteByte(this ref buffer b, byte c)
+        private static void writeByte(this ptr<buffer> _addr_b, byte c)
         {
-            b.Value = append(b.Value, c);
+            ref buffer b = ref _addr_b.val;
+
+            b.val = append(b.val, c);
         }
 
-        private static void WriteRune(this ref buffer bp, int r)
+        private static void writeRune(this ptr<buffer> _addr_bp, int r)
         {
+            ref buffer bp = ref _addr_bp.val;
+
             if (r < utf8.RuneSelf)
             {
-                bp.Value = append(bp.Value, byte(r));
-                return;
+                bp.val = append(bp.val, byte(r));
+                return ;
             }
-            var b = bp.Value;
+
+            var b = bp.val;
             var n = len(b);
             while (n + utf8.UTFMax > cap(b))
             {
@@ -108,7 +118,8 @@ namespace go
             }
 
             var w = utf8.EncodeRune(b[n..n + utf8.UTFMax], r);
-            bp.Value = b[..n + w];
+            bp.val = b[..n + w];
+
         }
 
         // pp is used to store a printer's state and is reused with sync.Pool to avoid allocations.
@@ -120,42 +131,70 @@ namespace go
             public bool reordered; // goodArgNum records whether the most recent reordering directive was valid.
             public bool goodArgNum; // panicking is set by catchPanic to avoid infinite panic, recover, panic, ... recursion.
             public bool panicking; // erroring is set when printing an error string to guard against calling handleMethods.
-            public bool erroring;
+            public bool erroring; // wrapErrs is set when the format string may contain a %w verb.
+            public bool wrapErrs; // wrappedErr records the target of the %w verb.
+            public error wrappedErr;
         }
 
         private static sync.Pool ppFree = new sync.Pool(New:func()interface{}{returnnew(pp)},);
 
         // newPrinter allocates a new pp struct or grabs a cached one.
-        private static ref pp newPrinter()
+        private static ptr<pp> newPrinter()
         {
-            ref pp p = ppFree.Get()._<ref pp>();
+            ptr<pp> p = ppFree.Get()._<ptr<pp>>();
             p.panicking = false;
             p.erroring = false;
-            p.fmt.init(ref p.buf);
-            return p;
+            p.wrapErrs = false;
+            p.fmt.init(_addr_p.buf);
+            return _addr_p!;
         }
 
         // free saves used pp structs in ppFree; avoids an allocation per invocation.
-        private static void free(this ref pp p)
+        private static void free(this ptr<pp> _addr_p)
         {
+            ref pp p = ref _addr_p.val;
+ 
+            // Proper usage of a sync.Pool requires each entry to have approximately
+            // the same memory cost. To obtain this property when the stored type
+            // contains a variably-sized buffer, we add a hard limit on the maximum buffer
+            // to place back in the pool.
+            //
+            // See https://golang.org/issue/23199
+            if (cap(p.buf) > 64L << (int)(10L))
+            {
+                return ;
+            }
+
             p.buf = p.buf[..0L];
             p.arg = null;
             p.value = new reflect.Value();
+            p.wrappedErr = null;
             ppFree.Put(p);
+
         }
 
-        private static (long, bool) Width(this ref pp p)
+        private static (long, bool) Width(this ptr<pp> _addr_p)
         {
+            long wid = default;
+            bool ok = default;
+            ref pp p = ref _addr_p.val;
+
             return (p.fmt.wid, p.fmt.widPresent);
         }
 
-        private static (long, bool) Precision(this ref pp p)
+        private static (long, bool) Precision(this ptr<pp> _addr_p)
         {
+            long prec = default;
+            bool ok = default;
+            ref pp p = ref _addr_p.val;
+
             return (p.fmt.prec, p.fmt.precPresent);
         }
 
-        private static bool Flag(this ref pp p, long b)
+        private static bool Flag(this ptr<pp> _addr_p, long b)
         {
+            ref pp p = ref _addr_p.val;
+
             switch (b)
             {
                 case '-': 
@@ -175,22 +214,31 @@ namespace go
                     break;
             }
             return false;
+
         }
 
         // Implement Write so we can call Fprintf on a pp (through State), for
         // recursive use in custom verbs.
-        private static (long, error) Write(this ref pp p, slice<byte> b)
+        private static (long, error) Write(this ptr<pp> _addr_p, slice<byte> b)
         {
-            p.buf.Write(b);
-            return (len(b), null);
+            long ret = default;
+            error err = default!;
+            ref pp p = ref _addr_p.val;
+
+            p.buf.write(b);
+            return (len(b), error.As(null!)!);
         }
 
         // Implement WriteString so that we can call io.WriteString
         // on a pp (through state), for efficiency.
-        private static (long, error) WriteString(this ref pp p, @string s)
+        private static (long, error) WriteString(this ptr<pp> _addr_p, @string s)
         {
-            p.buf.WriteString(s);
-            return (len(s), null);
+            long ret = default;
+            error err = default!;
+            ref pp p = ref _addr_p.val;
+
+            p.buf.writeString(s);
+            return (len(s), error.As(null!)!);
         }
 
         // These routines end in 'f' and take a format string.
@@ -199,19 +247,23 @@ namespace go
         // It returns the number of bytes written and any write error encountered.
         public static (long, error) Fprintf(io.Writer w, @string format, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             var p = newPrinter();
             p.doPrintf(format, a);
             n, err = w.Write(p.buf);
             p.free();
-            return;
+            return ;
         }
 
         // Printf formats according to a format specifier and writes to standard output.
         // It returns the number of bytes written and any write error encountered.
         public static (long, error) Printf(@string format, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             return Fprintf(os.Stdout, format, a);
@@ -229,15 +281,6 @@ namespace go
             return s;
         }
 
-        // Errorf formats according to a format specifier and returns the string
-        // as a value that satisfies error.
-        public static error Errorf(@string format, params object[] a)
-        {
-            a = a.Clone();
-
-            return error.As(errors.New(Sprintf(format, a)));
-        }
-
         // These routines do not take a format string
 
         // Fprint formats using the default formats for its operands and writes to w.
@@ -245,13 +288,15 @@ namespace go
         // It returns the number of bytes written and any write error encountered.
         public static (long, error) Fprint(io.Writer w, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             var p = newPrinter();
             p.doPrint(a);
             n, err = w.Write(p.buf);
             p.free();
-            return;
+            return ;
         }
 
         // Print formats using the default formats for its operands and writes to standard output.
@@ -259,6 +304,8 @@ namespace go
         // It returns the number of bytes written and any write error encountered.
         public static (long, error) Print(params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             return Fprint(os.Stdout, a);
@@ -286,13 +333,15 @@ namespace go
         // It returns the number of bytes written and any write error encountered.
         public static (long, error) Fprintln(io.Writer w, params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             var p = newPrinter();
             p.doPrintln(a);
             n, err = w.Write(p.buf);
             p.free();
-            return;
+            return ;
         }
 
         // Println formats using the default formats for its operands and writes to standard output.
@@ -300,6 +349,8 @@ namespace go
         // It returns the number of bytes written and any write error encountered.
         public static (long, error) Println(params object[] a)
         {
+            long n = default;
+            error err = default!;
             a = a.Clone();
 
             return Fprintln(os.Stdout, a);
@@ -328,14 +379,16 @@ namespace go
             {
                 val = val.Elem();
             }
+
             return val;
+
         }
 
         // tooLarge reports whether the magnitude of the integer is
         // too large to be used as a formatting width or precision.
         private static bool tooLarge(long x)
         {
-            const long max = 1e6F;
+            const long max = (long)1e6F;
 
             return x > max || x < -max;
         }
@@ -343,84 +396,106 @@ namespace go
         // parsenum converts ASCII to integer.  num is 0 (and isnum is false) if no number present.
         private static (long, bool, long) parsenum(@string s, long start, long end)
         {
+            long num = default;
+            bool isnum = default;
+            long newi = default;
+
             if (start >= end)
             {
                 return (0L, false, end);
             }
+
             for (newi = start; newi < end && '0' <= s[newi] && s[newi] <= '9'; newi++)
             {
                 if (tooLarge(num))
                 {
                     return (0L, false, end); // Overflow; crazy long number most likely.
                 }
+
                 num = num * 10L + int(s[newi] - '0');
                 isnum = true;
+
             }
 
-            return;
+            return ;
+
         }
 
-        private static void unknownType(this ref pp p, reflect.Value v)
+        private static void unknownType(this ptr<pp> _addr_p, reflect.Value v)
         {
+            ref pp p = ref _addr_p.val;
+
             if (!v.IsValid())
             {
-                p.buf.WriteString(nilAngleString);
-                return;
+                p.buf.writeString(nilAngleString);
+                return ;
             }
-            p.buf.WriteByte('?');
-            p.buf.WriteString(v.Type().String());
-            p.buf.WriteByte('?');
+
+            p.buf.writeByte('?');
+            p.buf.writeString(v.Type().String());
+            p.buf.writeByte('?');
+
         }
 
-        private static void badVerb(this ref pp p, int verb)
+        private static void badVerb(this ptr<pp> _addr_p, int verb)
         {
+            ref pp p = ref _addr_p.val;
+
             p.erroring = true;
-            p.buf.WriteString(percentBangString);
-            p.buf.WriteRune(verb);
-            p.buf.WriteByte('(');
+            p.buf.writeString(percentBangString);
+            p.buf.writeRune(verb);
+            p.buf.writeByte('(');
 
             if (p.arg != null) 
-                p.buf.WriteString(reflect.TypeOf(p.arg).String());
-                p.buf.WriteByte('=');
+                p.buf.writeString(reflect.TypeOf(p.arg).String());
+                p.buf.writeByte('=');
                 p.printArg(p.arg, 'v');
             else if (p.value.IsValid()) 
-                p.buf.WriteString(p.value.Type().String());
-                p.buf.WriteByte('=');
+                p.buf.writeString(p.value.Type().String());
+                p.buf.writeByte('=');
                 p.printValue(p.value, 'v', 0L);
             else 
-                p.buf.WriteString(nilAngleString);
-                        p.buf.WriteByte(')');
+                p.buf.writeString(nilAngleString);
+                        p.buf.writeByte(')');
             p.erroring = false;
+
         }
 
-        private static void fmtBool(this ref pp p, bool v, int verb)
+        private static void fmtBool(this ptr<pp> _addr_p, bool v, int verb)
         {
+            ref pp p = ref _addr_p.val;
+
             switch (verb)
             {
                 case 't': 
 
                 case 'v': 
-                    p.fmt.fmt_boolean(v);
+                    p.fmt.fmtBoolean(v);
                     break;
                 default: 
                     p.badVerb(verb);
                     break;
             }
+
         }
 
         // fmt0x64 formats a uint64 in hexadecimal and prefixes it with 0x or
         // not, as requested, by temporarily setting the sharp flag.
-        private static void fmt0x64(this ref pp p, ulong v, bool leading0x)
+        private static void fmt0x64(this ptr<pp> _addr_p, ulong v, bool leading0x)
         {
+            ref pp p = ref _addr_p.val;
+
             var sharp = p.fmt.sharp;
             p.fmt.sharp = leading0x;
-            p.fmt.fmt_integer(v, 16L, unsigned, ldigits);
+            p.fmt.fmtInteger(v, 16L, unsigned, 'v', ldigits);
             p.fmt.sharp = sharp;
         }
 
         // fmtInteger formats a signed or unsigned integer.
-        private static void fmtInteger(this ref pp p, ulong v, bool isSigned, int verb)
+        private static void fmtInteger(this ptr<pp> _addr_p, ulong v, bool isSigned, int verb)
         {
+            ref pp p = ref _addr_p.val;
+
             switch (verb)
             {
                 case 'v': 
@@ -430,83 +505,97 @@ namespace go
                     }
                     else
                     {
-                        p.fmt.fmt_integer(v, 10L, isSigned, ldigits);
+                        p.fmt.fmtInteger(v, 10L, isSigned, verb, ldigits);
                     }
+
                     break;
                 case 'd': 
-                    p.fmt.fmt_integer(v, 10L, isSigned, ldigits);
+                    p.fmt.fmtInteger(v, 10L, isSigned, verb, ldigits);
                     break;
                 case 'b': 
-                    p.fmt.fmt_integer(v, 2L, isSigned, ldigits);
+                    p.fmt.fmtInteger(v, 2L, isSigned, verb, ldigits);
                     break;
                 case 'o': 
-                    p.fmt.fmt_integer(v, 8L, isSigned, ldigits);
+
+                case 'O': 
+                    p.fmt.fmtInteger(v, 8L, isSigned, verb, ldigits);
                     break;
                 case 'x': 
-                    p.fmt.fmt_integer(v, 16L, isSigned, ldigits);
+                    p.fmt.fmtInteger(v, 16L, isSigned, verb, ldigits);
                     break;
                 case 'X': 
-                    p.fmt.fmt_integer(v, 16L, isSigned, udigits);
+                    p.fmt.fmtInteger(v, 16L, isSigned, verb, udigits);
                     break;
                 case 'c': 
-                    p.fmt.fmt_c(v);
+                    p.fmt.fmtC(v);
                     break;
                 case 'q': 
                     if (v <= utf8.MaxRune)
                     {
-                        p.fmt.fmt_qc(v);
+                        p.fmt.fmtQc(v);
                     }
                     else
                     {
                         p.badVerb(verb);
                     }
+
                     break;
                 case 'U': 
-                    p.fmt.fmt_unicode(v);
+                    p.fmt.fmtUnicode(v);
                     break;
                 default: 
                     p.badVerb(verb);
                     break;
             }
+
         }
 
         // fmtFloat formats a float. The default precision for each verb
         // is specified as last argument in the call to fmt_float.
-        private static void fmtFloat(this ref pp p, double v, long size, int verb)
+        private static void fmtFloat(this ptr<pp> _addr_p, double v, long size, int verb)
         {
+            ref pp p = ref _addr_p.val;
+
             switch (verb)
             {
                 case 'v': 
-                    p.fmt.fmt_float(v, size, 'g', -1L);
+                    p.fmt.fmtFloat(v, size, 'g', -1L);
                     break;
                 case 'b': 
 
                 case 'g': 
 
                 case 'G': 
-                    p.fmt.fmt_float(v, size, verb, -1L);
+
+                case 'x': 
+
+                case 'X': 
+                    p.fmt.fmtFloat(v, size, verb, -1L);
                     break;
                 case 'f': 
 
                 case 'e': 
 
                 case 'E': 
-                    p.fmt.fmt_float(v, size, verb, 6L);
+                    p.fmt.fmtFloat(v, size, verb, 6L);
                     break;
                 case 'F': 
-                    p.fmt.fmt_float(v, size, 'f', 6L);
+                    p.fmt.fmtFloat(v, size, 'f', 6L);
                     break;
                 default: 
                     p.badVerb(verb);
                     break;
             }
+
         }
 
         // fmtComplex formats a complex number v with
         // r = real(v) and j = imag(v) as (r+ji) using
         // fmtFloat for r and j formatting.
-        private static void fmtComplex(this ref pp p, System.Numerics.Complex128 v, long size, int verb)
-        { 
+        private static void fmtComplex(this ptr<pp> _addr_p, System.Numerics.Complex128 v, long size, int verb)
+        {
+            ref pp p = ref _addr_p.val;
+ 
             // Make sure any unsupported verbs are found before the
             // calls to fmtFloat to not generate an incorrect error string.
             switch (verb)
@@ -519,6 +608,10 @@ namespace go
 
                 case 'G': 
 
+                case 'x': 
+
+                case 'X': 
+
                 case 'f': 
 
                 case 'F': 
@@ -527,54 +620,61 @@ namespace go
 
                 case 'E': 
                     var oldPlus = p.fmt.plus;
-                    p.buf.WriteByte('(');
+                    p.buf.writeByte('(');
                     p.fmtFloat(real(v), size / 2L, verb); 
                     // Imaginary part always has a sign.
                     p.fmt.plus = true;
                     p.fmtFloat(imag(v), size / 2L, verb);
-                    p.buf.WriteString("i)");
+                    p.buf.writeString("i)");
                     p.fmt.plus = oldPlus;
                     break;
                 default: 
                     p.badVerb(verb);
                     break;
             }
+
         }
 
-        private static void fmtString(this ref pp p, @string v, int verb)
+        private static void fmtString(this ptr<pp> _addr_p, @string v, int verb)
         {
+            ref pp p = ref _addr_p.val;
+
             switch (verb)
             {
                 case 'v': 
                     if (p.fmt.sharpV)
                     {
-                        p.fmt.fmt_q(v);
+                        p.fmt.fmtQ(v);
                     }
                     else
                     {
-                        p.fmt.fmt_s(v);
+                        p.fmt.fmtS(v);
                     }
+
                     break;
                 case 's': 
-                    p.fmt.fmt_s(v);
+                    p.fmt.fmtS(v);
                     break;
                 case 'x': 
-                    p.fmt.fmt_sx(v, ldigits);
+                    p.fmt.fmtSx(v, ldigits);
                     break;
                 case 'X': 
-                    p.fmt.fmt_sx(v, udigits);
+                    p.fmt.fmtSx(v, udigits);
                     break;
                 case 'q': 
-                    p.fmt.fmt_q(v);
+                    p.fmt.fmtQ(v);
                     break;
                 default: 
                     p.badVerb(verb);
                     break;
             }
+
         }
 
-        private static void fmtBytes(this ref pp p, slice<byte> v, int verb, @string typeString)
+        private static void fmtBytes(this ptr<pp> _addr_p, slice<byte> v, int verb, @string typeString)
         {
+            ref pp p = ref _addr_p.val;
+
             switch (verb)
             {
                 case 'v': 
@@ -582,13 +682,14 @@ namespace go
                 case 'd': 
                     if (p.fmt.sharpV)
                     {
-                        p.buf.WriteString(typeString);
+                        p.buf.writeString(typeString);
                         if (v == null)
                         {
-                            p.buf.WriteString(nilParenString);
-                            return;
+                            p.buf.writeString(nilParenString);
+                            return ;
                         }
-                        p.buf.WriteByte('{');
+
+                        p.buf.writeByte('{');
                         {
                             var i__prev1 = i;
                             var c__prev1 = c;
@@ -599,9 +700,11 @@ namespace go
                                 c = __c;
                                 if (i > 0L)
                                 {
-                                    p.buf.WriteString(commaSpaceString);
+                                    p.buf.writeString(commaSpaceString);
                                 }
+
                                 p.fmt0x64(uint64(c), true);
+
                             }
                     else
 
@@ -609,9 +712,10 @@ namespace go
                             c = c__prev1;
                         }
 
-                        p.buf.WriteByte('}');
+                        p.buf.writeByte('}');
+
                     }                {
-                        p.buf.WriteByte('[');
+                        p.buf.writeByte('[');
                         {
                             var i__prev1 = i;
                             var c__prev1 = c;
@@ -622,62 +726,71 @@ namespace go
                                 c = __c;
                                 if (i > 0L)
                                 {
-                                    p.buf.WriteByte(' ');
+                                    p.buf.writeByte(' ');
                                 }
-                                p.fmt.fmt_integer(uint64(c), 10L, unsigned, ldigits);
+
+                                p.fmt.fmtInteger(uint64(c), 10L, unsigned, verb, ldigits);
+
                             }
 
                             i = i__prev1;
                             c = c__prev1;
                         }
 
-                        p.buf.WriteByte(']');
+                        p.buf.writeByte(']');
+
                     }
+
                     break;
                 case 's': 
-                    p.fmt.fmt_s(string(v));
+                    p.fmt.fmtBs(v);
                     break;
                 case 'x': 
-                    p.fmt.fmt_bx(v, ldigits);
+                    p.fmt.fmtBx(v, ldigits);
                     break;
                 case 'X': 
-                    p.fmt.fmt_bx(v, udigits);
+                    p.fmt.fmtBx(v, udigits);
                     break;
                 case 'q': 
-                    p.fmt.fmt_q(string(v));
+                    p.fmt.fmtQ(string(v));
                     break;
                 default: 
                     p.printValue(reflect.ValueOf(v), verb, 0L);
                     break;
             }
+
         }
 
-        private static void fmtPointer(this ref pp p, reflect.Value value, int verb)
+        private static void fmtPointer(this ptr<pp> _addr_p, reflect.Value value, int verb)
         {
+            ref pp p = ref _addr_p.val;
+
             System.UIntPtr u = default;
 
             if (value.Kind() == reflect.Chan || value.Kind() == reflect.Func || value.Kind() == reflect.Map || value.Kind() == reflect.Ptr || value.Kind() == reflect.Slice || value.Kind() == reflect.UnsafePointer) 
                 u = value.Pointer();
             else 
                 p.badVerb(verb);
-                return;
+                return ;
                         switch (verb)
             {
                 case 'v': 
                     if (p.fmt.sharpV)
                     {
-                        p.buf.WriteByte('(');
-                        p.buf.WriteString(value.Type().String());
-                        p.buf.WriteString(")(");
+                        p.buf.writeByte('(');
+                        p.buf.writeString(value.Type().String());
+                        p.buf.writeString(")(");
                         if (u == 0L)
                         {
-                            p.buf.WriteString(nilString);
+                            p.buf.writeString(nilString);
                         }
                         else
                         {
                             p.fmt0x64(uint64(u), true);
                         }
-                        p.buf.WriteByte(')');
+
+                        p.buf.writeByte(')');
+
                     }
                     else
                     {
@@ -689,7 +802,9 @@ namespace go
                         {
                             p.fmt0x64(uint64(u), !p.fmt.sharp);
                         }
+
                     }
+
                     break;
                 case 'p': 
                     p.fmt0x64(uint64(u), !p.fmt.sharp);
@@ -709,10 +824,13 @@ namespace go
                     p.badVerb(verb);
                     break;
             }
+
         }
 
-        private static void catchPanic(this ref pp _p, object arg, int verb) => func(_p, (ref pp p, Defer _, Panic panic, Recover __) =>
+        private static void catchPanic(this ptr<pp> _addr_p, object arg, int verb, @string method) => func((_, panic, __) =>
         {
+            ref pp p = ref _addr_p.val;
+
             {
                 var err = recover();
 
@@ -726,8 +844,8 @@ namespace go
 
                         if (v.Kind() == reflect.Ptr && v.IsNil())
                         {
-                            p.buf.WriteString(nilAngleString);
-                            return;
+                            p.buf.writeString(nilAngleString);
+                            return ;
                         } 
                         // Otherwise print a concise panic message. Most of the time the panic
                         // value will print itself nicely.
@@ -739,41 +857,70 @@ namespace go
                     { 
                         // Nested panics; the recursion in printArg cannot succeed.
                         panic(err);
+
                     }
+
                     var oldFlags = p.fmt.fmtFlags; 
                     // For this output we want default behavior.
                     p.fmt.clearflags();
 
-                    p.buf.WriteString(percentBangString);
-                    p.buf.WriteRune(verb);
-                    p.buf.WriteString(panicString);
+                    p.buf.writeString(percentBangString);
+                    p.buf.writeRune(verb);
+                    p.buf.writeString(panicString);
+                    p.buf.writeString(method);
+                    p.buf.writeString(" method: ");
                     p.panicking = true;
                     p.printArg(err, 'v');
                     p.panicking = false;
-                    p.buf.WriteByte(')');
+                    p.buf.writeByte(')');
 
                     p.fmt.fmtFlags = oldFlags;
+
                 }
 
             }
+
         });
 
-        private static bool handleMethods(this ref pp _p, int verb) => func(_p, (ref pp p, Defer defer, Panic _, Recover __) =>
+        private static bool handleMethods(this ptr<pp> _addr_p, int verb) => func((defer, _, __) =>
         {
+            bool handled = default;
+            ref pp p = ref _addr_p.val;
+
             if (p.erroring)
             {
-                return;
+                return ;
+            }
+
+            if (verb == 'w')
+            { 
+                // It is invalid to use %w other than with Errorf, more than once,
+                // or with a non-error arg.
+                error (err, ok) = error.As(p.arg._<error>())!;
+                if (!ok || !p.wrapErrs || p.wrappedErr != null)
+                {
+                    p.wrappedErr = null;
+                    p.wrapErrs = false;
+                    p.badVerb(verb);
+                    return true;
+                }
+
+                p.wrappedErr = err; 
+                // If the arg is a Formatter, pass 'v' as the verb to it.
+                verb = 'v';
+
             } 
+
             // Is it a Formatter?
             {
-                Formatter (formatter, ok) = p.arg._<Formatter>();
+                Formatter (formatter, ok) = Formatter.As(p.arg._<Formatter>())!;
 
                 if (ok)
                 {
                     handled = true;
-                    defer(p.catchPanic(p.arg, verb));
+                    defer(p.catchPanic(p.arg, verb, "Format"));
                     formatter.Format(p, verb);
-                    return;
+                    return ;
                 } 
 
                 // If we're doing Go syntax and the argument knows how to supply it, take care of it now.
@@ -784,18 +931,20 @@ namespace go
             if (p.fmt.sharpV)
             {
                 {
-                    GoStringer (stringer, ok) = p.arg._<GoStringer>();
+                    GoStringer (stringer, ok) = GoStringer.As(p.arg._<GoStringer>())!;
 
                     if (ok)
                     {
                         handled = true;
-                        defer(p.catchPanic(p.arg, verb)); 
+                        defer(p.catchPanic(p.arg, verb, "GoString")); 
                         // Print the result of GoString unadorned.
-                        p.fmt.fmt_s(stringer.GoString());
-                        return;
+                        p.fmt.fmtS(stringer.GoString());
+                        return ;
+
                     }
 
                 }
+
             }
             else
             { 
@@ -837,25 +986,30 @@ namespace go
                         {
                             case error v:
                                 handled = true;
-                                defer(p.catchPanic(p.arg, verb));
+                                defer(p.catchPanic(p.arg, verb, "Error"));
                                 p.fmtString(v.Error(), verb);
-                                return;
+                                return ;
                                 break;
                             case Stringer v:
                                 handled = true;
-                                defer(p.catchPanic(p.arg, verb));
+                                defer(p.catchPanic(p.arg, verb, "String"));
                                 p.fmtString(v.String(), verb);
-                                return;
+                                return ;
                                 break;
                         }
                         break;
                 }
+
             }
+
             return false;
+
         });
 
-        private static void printArg(this ref pp p, object arg, int verb)
+        private static void printArg(this ptr<pp> _addr_p, object arg, int verb)
         {
+            ref pp p = ref _addr_p.val;
+
             p.arg = arg;
             p.value = new reflect.Value();
 
@@ -872,7 +1026,8 @@ namespace go
                         p.badVerb(verb);
                         break;
                 }
-                return;
+                return ;
+
             } 
 
             // Special processing considerations.
@@ -880,12 +1035,12 @@ namespace go
             switch (verb)
             {
                 case 'T': 
-                    p.fmt.fmt_s(reflect.TypeOf(arg).String());
-                    return;
+                    p.fmt.fmtS(reflect.TypeOf(arg).String());
+                    return ;
                     break;
                 case 'p': 
                     p.fmtPointer(reflect.ValueOf(arg), 'p');
-                    return;
+                    return ;
                     break;
             } 
 
@@ -952,9 +1107,11 @@ namespace go
                         p.arg = f.Interface();
                         if (p.handleMethods(verb))
                         {
-                            return;
+                            return ;
                         }
+
                     }
+
                     p.printValue(f, verb, 0L);
                     break;
                 default:
@@ -965,25 +1122,32 @@ namespace go
                         // Need to use reflection, since the type had no
                         // interface methods that could be used for formatting.
                         p.printValue(reflect.ValueOf(f), verb, 0L);
+
                     }
+
                     break;
                 }
             }
+
         }
 
         // printValue is similar to printArg but starts with a reflect value, not an interface{} value.
         // It does not handle 'p' and 'T' verbs because these should have been already handled by printArg.
-        private static void printValue(this ref pp p, reflect.Value value, int verb, long depth)
-        { 
+        private static void printValue(this ptr<pp> _addr_p, reflect.Value value, int verb, long depth)
+        {
+            ref pp p = ref _addr_p.val;
+ 
             // Handle values with special methods if not already handled by printArg (depth == 0).
             if (depth > 0L && value.IsValid() && value.CanInterface())
             {
                 p.arg = value.Interface();
                 if (p.handleMethods(verb))
                 {
-                    return;
+                    return ;
                 }
+
             }
+
             p.arg = null;
             p.value = value;
 
@@ -995,20 +1159,22 @@ namespace go
                 {
                     if (depth == 0L)
                     {
-                        p.buf.WriteString(invReflectString);
+                        p.buf.writeString(invReflectString);
                     }
                     else
                     {
                         switch (verb)
                         {
                             case 'v': 
-                                p.buf.WriteString(nilAngleString);
+                                p.buf.writeString(nilAngleString);
                                 break;
                             default: 
                                 p.badVerb(verb);
                                 break;
                         }
+
                     }
+
                     goto __switch_break0;
                 }
                 if (value.Kind() == reflect.Bool)
@@ -1055,23 +1221,26 @@ namespace go
                 {
                     if (p.fmt.sharpV)
                     {
-                        p.buf.WriteString(f.Type().String());
+                        p.buf.writeString(f.Type().String());
                         if (f.IsNil())
                         {
-                            p.buf.WriteString(nilParenString);
-                            return;
+                            p.buf.writeString(nilParenString);
+                            return ;
                         }
-                        p.buf.WriteByte('{');
+
+                        p.buf.writeByte('{');
+
                     }
                     else
                     {
-                        p.buf.WriteString(mapString);
+                        p.buf.writeString(mapString);
                     }
-                    var keys = f.MapKeys();
+
+                    var sorted = fmtsort.Sort(f);
                     {
                         var i__prev1 = i;
 
-                        foreach (var (__i, __key) in keys)
+                        foreach (var (__i, __key) in sorted.Key)
                         {
                             i = __i;
                             key = __key;
@@ -1079,16 +1248,19 @@ namespace go
                             {
                                 if (p.fmt.sharpV)
                                 {
-                                    p.buf.WriteString(commaSpaceString);
+                                    p.buf.writeString(commaSpaceString);
                                 }
                                 else
                                 {
-                                    p.buf.WriteByte(' ');
+                                    p.buf.writeByte(' ');
                                 }
+
                             }
+
                             p.printValue(key, verb, depth + 1L);
-                            p.buf.WriteByte(':');
-                            p.printValue(f.MapIndex(key), verb, depth + 1L);
+                            p.buf.writeByte(':');
+                            p.printValue(sorted.Value[i], verb, depth + 1L);
+
                         }
 
                         i = i__prev1;
@@ -1096,21 +1268,23 @@ namespace go
 
                     if (p.fmt.sharpV)
                     {
-                        p.buf.WriteByte('}');
+                        p.buf.writeByte('}');
                     }
                     else
                     {
-                        p.buf.WriteByte(']');
+                        p.buf.writeByte(']');
                     }
+
                     goto __switch_break0;
                 }
                 if (value.Kind() == reflect.Struct)
                 {
                     if (p.fmt.sharpV)
                     {
-                        p.buf.WriteString(f.Type().String());
+                        p.buf.writeString(f.Type().String());
                     }
-                    p.buf.WriteByte('{');
+
+                    p.buf.writeByte('{');
                     {
                         var i__prev1 = i;
 
@@ -1120,13 +1294,15 @@ namespace go
                             {
                                 if (p.fmt.sharpV)
                                 {
-                                    p.buf.WriteString(commaSpaceString);
+                                    p.buf.writeString(commaSpaceString);
                                 }
                                 else
                                 {
-                                    p.buf.WriteByte(' ');
+                                    p.buf.writeByte(' ');
                                 }
+
                             }
+
                             if (p.fmt.plusV || p.fmt.sharpV)
                             {
                                 {
@@ -1134,19 +1310,22 @@ namespace go
 
                                     if (name != "")
                                     {
-                                        p.buf.WriteString(name);
-                                        p.buf.WriteByte(':');
+                                        p.buf.writeString(name);
+                                        p.buf.writeByte(':');
                                     }
 
                                 }
+
                             }
+
                             p.printValue(getField(f, i), verb, depth + 1L);
+
                         }
 
 
                         i = i__prev1;
                     }
-                    p.buf.WriteByte('}');
+                    p.buf.writeByte('}');
                     goto __switch_break0;
                 }
                 if (value.Kind() == reflect.Interface)
@@ -1156,18 +1335,20 @@ namespace go
                     {
                         if (p.fmt.sharpV)
                         {
-                            p.buf.WriteString(f.Type().String());
-                            p.buf.WriteString(nilParenString);
+                            p.buf.writeString(f.Type().String());
+                            p.buf.writeString(nilParenString);
                         }
                         else
                         {
-                            p.buf.WriteString(nilAngleString);
+                            p.buf.writeString(nilAngleString);
                         }
+
                     }
                     else
                     {
                         p.printValue(value, verb, depth + 1L);
                     }
+
                     goto __switch_break0;
                 }
                 if (value.Kind() == reflect.Array || value.Kind() == reflect.Slice)
@@ -1214,22 +1395,25 @@ namespace go
 
                                         i = i__prev1;
                                     }
-
                                 }
+
                                 p.fmtBytes(bytes, verb, t.String());
-                                return;
+                                return ;
+
                             }
+
                             break;
                     }
                     if (p.fmt.sharpV)
                     {
-                        p.buf.WriteString(f.Type().String());
+                        p.buf.writeString(f.Type().String());
                         if (f.Kind() == reflect.Slice && f.IsNil())
                         {
-                            p.buf.WriteString(nilParenString);
-                            return;
+                            p.buf.writeString(nilParenString);
+                            return ;
                         }
-                        p.buf.WriteByte('{');
+
+                        p.buf.writeByte('{');
                         {
                             var i__prev1 = i;
 
@@ -1237,18 +1421,21 @@ namespace go
                             {
                                 if (i > 0L)
                                 {
-                                    p.buf.WriteString(commaSpaceString);
+                                    p.buf.writeString(commaSpaceString);
                                 }
+
                                 p.printValue(f.Index(i), verb, depth + 1L);
+
                             }
                     else
 
 
                             i = i__prev1;
                         }
-                        p.buf.WriteByte('}');
+                        p.buf.writeByte('}');
+
                     }                    {
-                        p.buf.WriteByte('[');
+                        p.buf.writeByte('[');
                         {
                             var i__prev1 = i;
 
@@ -1256,16 +1443,20 @@ namespace go
                             {
                                 if (i > 0L)
                                 {
-                                    p.buf.WriteByte(' ');
+                                    p.buf.writeByte(' ');
                                 }
+
                                 p.printValue(f.Index(i), verb, depth + 1L);
+
                             }
 
 
                             i = i__prev1;
                         }
-                        p.buf.WriteByte(']');
+                        p.buf.writeByte(']');
+
                     }
+
                     goto __switch_break0;
                 }
                 if (value.Kind() == reflect.Ptr) 
@@ -1279,12 +1470,14 @@ namespace go
 
 
                             if (a.Kind() == reflect.Array || a.Kind() == reflect.Slice || a.Kind() == reflect.Struct || a.Kind() == reflect.Map) 
-                                p.buf.WriteByte('&');
+                                p.buf.writeByte('&');
                                 p.printValue(a, verb, depth + 1L);
-                                return;
+                                return ;
 
                         }
+
                     }
+
                     fallthrough = true;
                 }
                 if (fallthrough || value.Kind() == reflect.Chan || value.Kind() == reflect.Func || value.Kind() == reflect.UnsafePointer)
@@ -1297,11 +1490,16 @@ namespace go
 
                 __switch_break0:;
             }
+
         }
 
         // intFromArg gets the argNumth element of a. On return, isInt reports whether the argument has integer type.
         private static (long, bool, long) intFromArg(slice<object> a, long argNum)
         {
+            long num = default;
+            bool isInt = default;
+            long newArgNum = default;
+
             newArgNum = argNum;
             if (argNum < len(a))
             {
@@ -1320,6 +1518,7 @@ namespace go
                                 num = int(n);
                                 isInt = true;
                             }
+
                         else if (v.Kind() == reflect.Uint || v.Kind() == reflect.Uint8 || v.Kind() == reflect.Uint16 || v.Kind() == reflect.Uint32 || v.Kind() == reflect.Uint64 || v.Kind() == reflect.Uintptr) 
                             n = v.Uint();
                             if (int64(n) >= 0L && uint64(int(n)) == n)
@@ -1327,17 +1526,23 @@ namespace go
                                 num = int(n);
                                 isInt = true;
                             }
+
                         else 
                     }
+
                 }
+
                 newArgNum = argNum + 1L;
                 if (tooLarge(num))
                 {
                     num = 0L;
                     isInt = false;
                 }
+
             }
-            return;
+
+            return ;
+
         }
 
         // parseArgNumber returns the value of the bracketed number, minus 1
@@ -1347,7 +1552,11 @@ namespace go
         // up to the closing paren, if present, and whether the number parsed
         // ok. The bytes to consume will be 1 if no closing paren is present.
         private static (long, long, bool) parseArgNumber(@string format)
-        { 
+        {
+            long index = default;
+            long wid = default;
+            bool ok = default;
+ 
             // There must be at least 3 bytes: [n].
             if (len(format) < 3L)
             {
@@ -1364,48 +1573,65 @@ namespace go
                     {
                         return (0L, i + 1L, false);
                     }
+
                     return (width - 1L, i + 1L, true); // arg numbers are one-indexed and skip paren.
                 }
+
             }
 
             return (0L, 1L, false);
+
         }
 
         // argNumber returns the next argument to evaluate, which is either the value of the passed-in
         // argNum or the value of the bracketed integer that begins format[i:]. It also returns
         // the new value of i, that is, the index of the next byte of the format to process.
-        private static (long, long, bool) argNumber(this ref pp p, long argNum, @string format, long i, long numArgs)
+        private static (long, long, bool) argNumber(this ptr<pp> _addr_p, long argNum, @string format, long i, long numArgs)
         {
+            long newArgNum = default;
+            long newi = default;
+            bool found = default;
+            ref pp p = ref _addr_p.val;
+
             if (len(format) <= i || format[i] != '[')
             {
                 return (argNum, i, false);
             }
+
             p.reordered = true;
             var (index, wid, ok) = parseArgNumber(format[i..]);
             if (ok && 0L <= index && index < numArgs)
             {
                 return (index, i + wid, true);
             }
+
             p.goodArgNum = false;
             return (argNum, i + wid, ok);
+
         }
 
-        private static void badArgNum(this ref pp p, int verb)
+        private static void badArgNum(this ptr<pp> _addr_p, int verb)
         {
-            p.buf.WriteString(percentBangString);
-            p.buf.WriteRune(verb);
-            p.buf.WriteString(badIndexString);
+            ref pp p = ref _addr_p.val;
+
+            p.buf.writeString(percentBangString);
+            p.buf.writeRune(verb);
+            p.buf.writeString(badIndexString);
         }
 
-        private static void missingArg(this ref pp p, int verb)
+        private static void missingArg(this ptr<pp> _addr_p, int verb)
         {
-            p.buf.WriteString(percentBangString);
-            p.buf.WriteRune(verb);
-            p.buf.WriteString(missingString);
+            ref pp p = ref _addr_p.val;
+
+            p.buf.writeString(percentBangString);
+            p.buf.writeRune(verb);
+            p.buf.writeString(missingString);
         }
 
-        private static void doPrintf(this ref pp p, @string format, slice<object> a)
+        private static void doPrintf(this ptr<pp> _addr_p, @string format, slice<object> a)
         {
+            ref pp p = ref _addr_p.val;
+
             var end = len(format);
             long argNum = 0L; // we process one argument per non-trivial format
             var afterIndex = false; // previous item in format was an index like [3].
@@ -1431,12 +1657,14 @@ formatLoop:
 
                     if (i > lasti)
                     {
-                        p.buf.WriteString(format[lasti..i]);
+                        p.buf.writeString(format[lasti..i]);
                     }
+
                     if (i >= end)
                     { 
                         // done processing format string
                         break;
+
                     } 
 
                     // Process one verb
@@ -1483,6 +1711,7 @@ simpleFormat:
                                                                 p.fmt.plus = false;
                                                     i++;
                                                             }
+
                                                             p.printArg(a[argNum], rune(c));
                                                             argNum++;
                                                             i++;
@@ -1494,6 +1723,7 @@ simpleFormat:
                                                         break;
                                 break;
                         }
+
                     } 
 
                     // Do we have an explicit argument index?
@@ -1510,7 +1740,7 @@ simpleFormat:
 
                         if (!p.fmt.widPresent)
                         {
-                            p.buf.WriteString(badWidthString);
+                            p.buf.writeString(badWidthString);
                         } 
 
                         // We have a negative width, so take its value and ensure
@@ -1521,7 +1751,9 @@ simpleFormat:
                             p.fmt.minus = true;
                             p.fmt.zero = false; // Do not pad with zeros to the right.
                         }
+
                         afterIndex = false;
+
                     }
                     else
                     {
@@ -1529,7 +1761,9 @@ simpleFormat:
                         if (afterIndex && p.fmt.widPresent)
                         { // "%[3]2d"
                             p.goodArgNum = false;
+
                         }
+
                     } 
 
                     // Do we have precision?
@@ -1539,7 +1773,9 @@ simpleFormat:
                         if (afterIndex)
                         { // "%[3].2d"
                             p.goodArgNum = false;
+
                         }
+
                         argNum, i, afterIndex = p.argNumber(argNum, format, i, len(a));
                         if (i < end && format[i] == '*')
                         {
@@ -1551,11 +1787,14 @@ simpleFormat:
                                 p.fmt.prec = 0L;
                                 p.fmt.precPresent = false;
                             }
+
                             if (!p.fmt.precPresent)
                             {
-                                p.buf.WriteString(badPrecString);
+                                p.buf.writeString(badPrecString);
                             }
+
                             afterIndex = false;
+
                         }
                         else
                         {
@@ -1565,29 +1804,35 @@ simpleFormat:
                                 p.fmt.prec = 0L;
                                 p.fmt.precPresent = true;
                             }
+
                         }
+
                     }
+
                     if (!afterIndex)
                     {
                         argNum, i, afterIndex = p.argNumber(argNum, format, i, len(a));
                     }
+
                     if (i >= end)
                     {
-                        p.buf.WriteString(noVerbString);
+                        p.buf.writeString(noVerbString);
                         break;
                     }
+
                     var verb = rune(format[i]);
                     long size = 1L;
                     if (verb >= utf8.RuneSelf)
                     {
                         verb, size = utf8.DecodeRuneInString(format[i..]);
                     }
+
                     i += size;
 
 
                     if (verb == '%') // Percent does not absorb operands and ignores f.wid and f.prec.
                     {
-                        p.buf.WriteByte('%');
+                        p.buf.writeByte('%');
                         goto __switch_break1;
                     }
                     if (!p.goodArgNum)
@@ -1614,6 +1859,7 @@ simpleFormat:
                         argNum++;
 
                     __switch_break1:;
+
                 } 
 
                 // Check for extra arguments unless the call accessed the arguments
@@ -1630,7 +1876,7 @@ simpleFormat:
             if (!p.reordered && argNum < len(a))
             {
                 p.fmt.clearflags();
-                p.buf.WriteString(extraString);
+                p.buf.writeString(extraString);
                 {
                     long i__prev1 = i;
 
@@ -1640,29 +1886,35 @@ simpleFormat:
                         arg = __arg;
                         if (i > 0L)
                         {
-                            p.buf.WriteString(commaSpaceString);
+                            p.buf.writeString(commaSpaceString);
                         }
+
                         if (arg == null)
                         {
-                            p.buf.WriteString(nilAngleString);
+                            p.buf.writeString(nilAngleString);
                         }
                         else
                         {
-                            p.buf.WriteString(reflect.TypeOf(arg).String());
-                            p.buf.WriteByte('=');
+                            p.buf.writeString(reflect.TypeOf(arg).String());
+                            p.buf.writeByte('=');
                             p.printArg(arg, 'v');
                         }
+
                     }
 
                     i = i__prev1;
                 }
 
-                p.buf.WriteByte(')');
+                p.buf.writeByte(')');
+
             }
+
         }
 
-        private static void doPrint(this ref pp p, slice<object> a)
+        private static void doPrint(this ptr<pp> _addr_p, slice<object> a)
         {
+            ref pp p = ref _addr_p.val;
+
             var prevString = false;
             foreach (var (argNum, arg) in a)
             {
@@ -1670,26 +1922,34 @@ simpleFormat:
                 // Add a space between two non-string arguments.
                 if (argNum > 0L && !isString && !prevString)
                 {
-                    p.buf.WriteByte(' ');
+                    p.buf.writeByte(' ');
                 }
+
                 p.printArg(arg, 'v');
                 prevString = isString;
+
             }
+
         }
 
         // doPrintln is like doPrint but always adds a space between arguments
         // and a newline after the last argument.
-        private static void doPrintln(this ref pp p, slice<object> a)
+        private static void doPrintln(this ptr<pp> _addr_p, slice<object> a)
         {
+            ref pp p = ref _addr_p.val;
+
             foreach (var (argNum, arg) in a)
             {
                 if (argNum > 0L)
                 {
-                    p.buf.WriteByte(' ');
+                    p.buf.writeByte(' ');
                 }
+
                 p.printArg(arg, 'v');
+
             }
-            p.buf.WriteByte('\n');
+            p.buf.writeByte('\n');
+
         }
     }
 }

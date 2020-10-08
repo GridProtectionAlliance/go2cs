@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:20 UTC
+//     Generated on 2020 October 08 03:39:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,10 +39,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -78,7 +79,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -92,10 +93,10 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate bool writeFrameByRef(ref T value, http2writeContext _p0);
+            private delegate bool writeFrameByPtr(ptr<T> value, http2writeContext _p0);
             private delegate bool writeFrameByVal(T value, http2writeContext _p0);
 
-            private static readonly writeFrameByRef s_writeFrameByRef;
+            private static readonly writeFrameByPtr s_writeFrameByPtr;
             private static readonly writeFrameByVal s_writeFrameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,17 +105,18 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_writeFrameByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_writeFrameByPtr is null || !m_target_is_ptr)
                     return s_writeFrameByVal!(target, _p0);
 
-                return s_writeFrameByRef(ref target, _p0);
+                return s_writeFrameByPtr(m_target_ptr, _p0);
             }
 
-            private delegate bool staysWithinBufferByRef(ref T value, long size);
+            private delegate bool staysWithinBufferByPtr(ptr<T> value, long size);
             private delegate bool staysWithinBufferByVal(T value, long size);
 
-            private static readonly staysWithinBufferByRef s_staysWithinBufferByRef;
+            private static readonly staysWithinBufferByPtr s_staysWithinBufferByPtr;
             private static readonly staysWithinBufferByVal s_staysWithinBufferByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,11 +125,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_staysWithinBufferByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_staysWithinBufferByPtr is null || !m_target_is_ptr)
                     return s_staysWithinBufferByVal!(target, size);
 
-                return s_staysWithinBufferByRef(ref target, size);
+                return s_staysWithinBufferByPtr(m_target_ptr, size);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -136,39 +139,33 @@ namespace net
             static http2writeFramer()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("writeFrame");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("writeFrame");
 
                 if (!(extensionMethod is null))
-                    s_writeFrameByRef = extensionMethod.CreateStaticDelegate(typeof(writeFrameByRef)) as writeFrameByRef;
+                    s_writeFrameByPtr = extensionMethod.CreateStaticDelegate(typeof(writeFrameByPtr)) as writeFrameByPtr;
 
-                if (s_writeFrameByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("writeFrame");
+                extensionMethod = targetType.GetExtensionMethod("writeFrame");
 
-                    if (!(extensionMethod is null))
-                        s_writeFrameByVal = extensionMethod.CreateStaticDelegate(typeof(writeFrameByVal)) as writeFrameByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_writeFrameByVal = extensionMethod.CreateStaticDelegate(typeof(writeFrameByVal)) as writeFrameByVal;
 
-                if (s_writeFrameByRef is null && s_writeFrameByVal is null)
+                if (s_writeFrameByPtr is null && s_writeFrameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2writeFramer.writeFrame method", new Exception("writeFrame"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("staysWithinBuffer");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("staysWithinBuffer");
 
                 if (!(extensionMethod is null))
-                    s_staysWithinBufferByRef = extensionMethod.CreateStaticDelegate(typeof(staysWithinBufferByRef)) as staysWithinBufferByRef;
+                    s_staysWithinBufferByPtr = extensionMethod.CreateStaticDelegate(typeof(staysWithinBufferByPtr)) as staysWithinBufferByPtr;
 
-                if (s_staysWithinBufferByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("staysWithinBuffer");
+                extensionMethod = targetType.GetExtensionMethod("staysWithinBuffer");
 
-                    if (!(extensionMethod is null))
-                        s_staysWithinBufferByVal = extensionMethod.CreateStaticDelegate(typeof(staysWithinBufferByVal)) as staysWithinBufferByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_staysWithinBufferByVal = extensionMethod.CreateStaticDelegate(typeof(staysWithinBufferByVal)) as staysWithinBufferByVal;
 
-                if (s_staysWithinBufferByRef is null && s_staysWithinBufferByVal is null)
+                if (s_staysWithinBufferByPtr is null && s_staysWithinBufferByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2writeFramer.staysWithinBuffer method", new Exception("staysWithinBuffer"));
             }
 

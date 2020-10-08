@@ -1,5 +1,5 @@
 // Inferno utils/5l/asm.c
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/5l/asm.c
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/5l/asm.c
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ppc64 -- go2cs converted at 2020 August 29 10:02:57 UTC
+// package ppc64 -- go2cs converted at 2020 October 08 04:37:58 UTC
 // import "cmd/link/internal/ppc64" ==> using ppc64 = go.cmd.link.@internal.ppc64_package
 // Original source: C:\Go\src\cmd\link\internal\ppc64\l.go
 
@@ -71,12 +71,14 @@ namespace @internal
         // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
         // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         // THE SOFTWARE.
-        private static readonly long maxAlign = 32L; // max data alignment
-        private static readonly long minAlign = 1L; // min data alignment
-        private static readonly long funcAlign = 16L;
+        private static readonly long maxAlign = (long)32L; // max data alignment
+        private static readonly long minAlign = (long)1L; // min data alignment
+        private static readonly long funcAlign = (long)16L;
+
 
         /* Used by ../internal/ld/dwarf.go */
-        private static readonly long dwarfRegSP = 1L;
-        private static readonly long dwarfRegLR = 65L;
+        private static readonly long dwarfRegSP = (long)1L;
+        private static readonly long dwarfRegLR = (long)65L;
+
     }
 }}}}

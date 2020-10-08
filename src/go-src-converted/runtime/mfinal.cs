@@ -4,7 +4,7 @@
 
 // Garbage collector: finalizers and block profiling.
 
-// package runtime -- go2cs converted at 2020 August 29 08:17:52 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:20:41 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mfinal.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -16,7 +16,7 @@ using System.Threading;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         // finblock is an array of finalizers to be executed. finblocks are
         // arranged in a linked list for the finalizer queue.
@@ -36,13 +36,13 @@ namespace go
         }
 
         private static mutex finlock = default; // protects the following variables
-        private static ref g fing = default; // goroutine that runs finalizers
-        private static ref finblock finq = default; // list of finalizers that are to be executed
-        private static ref finblock finc = default; // cache of free blocks
+        private static ptr<g> fing; // goroutine that runs finalizers
+        private static ptr<finblock> finq; // list of finalizers that are to be executed
+        private static ptr<finblock> finc; // cache of free blocks
         private static array<byte> finptrmask = new array<byte>(_FinBlockSize / sys.PtrSize / 8L);
         private static bool fingwait = default;
         private static bool fingwake = default;
-        private static ref finblock allfin = default; // list of all blocks
+        private static ptr<finblock> allfin; // list of all blocks
 
         // NOTE: Layout known to queuefinalizer.
         private partial struct finalizer
@@ -56,8 +56,12 @@ namespace go
 
         private static array<byte> finalizer1 = new array<byte>(new byte[] { 1<<0|1<<1|0<<2|1<<3|1<<4|1<<5|1<<6|0<<7, 1<<0|1<<1|1<<2|1<<3|0<<4|1<<5|1<<6|1<<7, 1<<0|0<<1|1<<2|1<<3|1<<4|1<<5|0<<6|1<<7, 1<<0|1<<1|1<<2|0<<3|1<<4|1<<5|1<<6|1<<7, 0<<0|1<<1|1<<2|1<<3|1<<4|0<<5|1<<6|1<<7 });
 
-        private static void queuefinalizer(unsafe.Pointer p, ref funcval fn, System.UIntPtr nret, ref _type fint, ref ptrtype ot)
+        private static void queuefinalizer(unsafe.Pointer p, ptr<funcval> _addr_fn, System.UIntPtr nret, ptr<_type> _addr_fint, ptr<ptrtype> _addr_ot)
         {
+            ref funcval fn = ref _addr_fn.val;
+            ref _type fint = ref _addr_fint.val;
+            ref ptrtype ot = ref _addr_ot.val;
+
             if (gcphase != _GCoff)
             { 
                 // Currently we assume that the finalizer queue won't
@@ -67,13 +71,15 @@ namespace go
                 // necessary barriers to queuefinalizer (which it may
                 // have automatically).
                 throw("queuefinalizer during GC");
+
             }
-            lock(ref finlock);
+
+            lock(_addr_finlock);
             if (finq == null || finq.cnt == uint32(len(finq.fin)))
             {
                 if (finc == null)
                 {
-                    finc = (finblock.Value)(persistentalloc(_FinBlockSize, 0L, ref memstats.gc_sys));
+                    finc = (finblock.val)(persistentalloc(_FinBlockSize, 0L, _addr_memstats.gc_sys));
                     finc.alllink = allfin;
                     allfin = finc;
                     if (finptrmask[0L] == 0L)
@@ -84,30 +90,37 @@ namespace go
                         {
                             throw("finalizer out of sync");
                         }
+
                         foreach (var (i) in finptrmask)
                         {
                             finptrmask[i] = finalizer1[i % len(finalizer1)];
                         }
+
                     }
+
                 }
+
                 var block = finc;
                 finc = block.next;
                 block.next = finq;
                 finq = block;
+
             }
-            var f = ref finq.fin[finq.cnt];
-            atomic.Xadd(ref finq.cnt, +1L); // Sync with markroots
+
+            var f = _addr_finq.fin[finq.cnt];
+            atomic.Xadd(_addr_finq.cnt, +1L); // Sync with markroots
             f.fn = fn;
             f.nret = nret;
             f.fint = fint;
             f.ot = ot;
             f.arg = p;
             fingwake = true;
-            unlock(ref finlock);
+            unlock(_addr_finlock);
+
         }
 
         //go:nowritebarrier
-        private static void iterate_finq(Action<ref funcval, unsafe.Pointer, System.UIntPtr, ref _type, ref ptrtype> callback)
+        private static void iterate_finq(Action<ptr<funcval>, unsafe.Pointer, System.UIntPtr, ptr<_type>, ptr<ptrtype>> callback)
         {
             {
                 var fb = allfin;
@@ -116,7 +129,7 @@ namespace go
                 {
                     for (var i = uint32(0L); i < fb.cnt; i++)
                     {
-                        var f = ref fb.fin[i];
+                        var f = _addr_fb.fin[i];
                         callback(f.fn, f.arg, f.nret, f.fint, f.ot);
                     }
 
@@ -124,20 +137,23 @@ namespace go
                 }
 
             }
+
         }
 
-        private static ref g wakefing()
+        private static ptr<g> wakefing()
         {
-            ref g res = default;
-            lock(ref finlock);
+            ptr<g> res;
+            lock(_addr_finlock);
             if (fingwait && fingwake)
             {
                 fingwait = false;
                 fingwake = false;
                 res = fing;
             }
-            unlock(ref finlock);
-            return res;
+
+            unlock(_addr_finlock);
+            return _addr_res!;
+
         }
 
         private static uint fingCreate = default;        private static bool fingRunning = default;
@@ -145,10 +161,11 @@ namespace go
         private static void createfing()
         { 
             // start the finalizer goroutine exactly once
-            if (fingCreate == 0L && atomic.Cas(ref fingCreate, 0L, 1L))
+            if (fingCreate == 0L && atomic.Cas(_addr_fingCreate, 0L, 1L))
             {
                 go_(() => runfinq());
             }
+
         }
 
         // This is the goroutine that runs all of the finalizers
@@ -158,7 +175,7 @@ namespace go
 
             while (true)
             {
-                lock(ref finlock);
+                lock(_addr_finlock);
                 var fb = finq;
                 finq = null;
                 if (fb == null)
@@ -166,19 +183,21 @@ namespace go
                     var gp = getg();
                     fing = gp;
                     fingwait = true;
-                    goparkunlock(ref finlock, "finalizer wait", traceEvGoBlock, 1L);
+                    goparkunlock(_addr_finlock, waitReasonFinalizerWait, traceEvGoBlock, 1L);
                     continue;
                 }
-                unlock(ref finlock);
+
+                unlock(_addr_finlock);
                 if (raceenabled)
                 {
                     racefingo();
                 }
+
                 while (fb != null)
                 {
                     for (var i = fb.cnt; i > 0L; i--)
                     {
-                        var f = ref fb.fin[i - 1L];
+                        var f = _addr_fb.fin[i - 1L];
 
                         var framesz = @unsafe.Sizeof() + f.nret;
                         if (framecap < framesz)
@@ -189,7 +208,9 @@ namespace go
                             // the last finalized object is not collected.
                             frame = mallocgc(framesz, null, true);
                             framecap = framesz;
+
                         }
+
                         if (f.fint == null)
                         {
                             throw("missing type in runfinq");
@@ -198,27 +219,29 @@ namespace go
                         // memory. That means we have to clear
                         // it before writing to it to avoid
                         // confusing the write barrier.
-                        frame.Value = new array<System.UIntPtr>(new System.UIntPtr[] {  });
+                        new ptr<ptr<ptr<array<System.UIntPtr>>>>(frame) = new array<System.UIntPtr>(new System.UIntPtr[] {  });
 
                         if (f.fint.kind & kindMask == kindPtr) 
                             // direct use of pointer
-                            (@unsafe.Pointer.Value)(frame).Value;
+                            (@unsafe.Pointer.val)(frame).val;
 
                             f.arg;
                         else if (f.fint.kind & kindMask == kindInterface) 
-                            var ityp = (interfacetype.Value)(@unsafe.Pointer(f.fint))(eface.Value)(frame)._type;
+                            var ityp = (interfacetype.val)(@unsafe.Pointer(f.fint))(eface.val)(frame)._type;
 
-                            ref f.ot.typ(eface.Value)(frame).data;
+                            _addr_f.ot.typ(eface.val)(frame).data;
 
                             f.arg;
                             if (len(ityp.mhdr) != 0L)
                             { 
                                 // convert to interface with methods
                                 // this conversion is guaranteed to succeed - we checked in SetFinalizer
-                                (iface.Value)(frame).Value;
+                                (iface.val)(frame).val;
 
-                                assertE2I(ityp, frame.Value);
+                                assertE2I(ityp, new ptr<ptr<ptr<eface>>>(frame));
+
                             }
+
                         else 
                             throw("bad kind in runfinq");
                                                 fingRunning = true;
@@ -232,18 +255,22 @@ namespace go
                         f.fn = null;
                         f.arg = null;
                         f.ot = null;
-                        atomic.Store(ref fb.cnt, i - 1L);
+                        atomic.Store(_addr_fb.cnt, i - 1L);
+
                     }
 
                     var next = fb.next;
-                    lock(ref finlock);
+                    lock(_addr_finlock);
                     fb.next = finc;
                     finc = fb;
-                    unlock(ref finlock);
+                    unlock(_addr_finlock);
                     fb = next;
+
                 }
 
+
             }
+
 
         }
 
@@ -273,8 +300,8 @@ namespace go
         // is not guaranteed to run, because there is no ordering that
         // respects the dependencies.
         //
-        // The finalizer for obj is scheduled to run at some arbitrary time after
-        // obj becomes unreachable.
+        // The finalizer is scheduled to run at some arbitrary time after the
+        // program can no longer reach the object to which obj points.
         // There is no guarantee that finalizers will run before a program exits,
         // so typically they are useful only for releasing non-memory resources
         // associated with an object during a long-running program.
@@ -318,33 +345,37 @@ namespace go
             { 
                 // debug.sbrk never frees memory, so no finalizers run
                 // (and we don't have the data structures to record them).
-                return;
+                return ;
+
             }
-            var e = efaceOf(ref obj);
+
+            var e = efaceOf(_addr_obj);
             var etyp = e._type;
             if (etyp == null)
             {
                 throw("runtime.SetFinalizer: first argument is nil");
             }
+
             if (etyp.kind & kindMask != kindPtr)
             {
                 throw("runtime.SetFinalizer: first argument is " + etyp.@string() + ", not pointer");
             }
-            var ot = (ptrtype.Value)(@unsafe.Pointer(etyp));
+
+            var ot = (ptrtype.val)(@unsafe.Pointer(etyp));
             if (ot.elem == null)
             {
                 throw("nil elem type!");
             } 
 
             // find the containing object
-            var (_, base, _) = findObject(e.data);
+            var (base, _, _) = findObject(uintptr(e.data), 0L, 0L);
 
-            if (base == null)
+            if (base == 0L)
             { 
                 // 0-length objects are okay.
-                if (e.data == @unsafe.Pointer(ref zerobase))
+                if (e.data == @unsafe.Pointer(_addr_zerobase))
                 {
-                    return;
+                    return ;
                 } 
 
                 // Global initializers might be linker-allocated.
@@ -356,30 +387,35 @@ namespace go
                 // We cannot assume they are in any order or even contiguous,
                 // due to external linking.
                 {
-                    var datap = ref firstmoduledata;
+                    var datap = _addr_firstmoduledata;
 
                     while (datap != null)
                     {
                         if (datap.noptrdata <= uintptr(e.data) && uintptr(e.data) < datap.enoptrdata || datap.data <= uintptr(e.data) && uintptr(e.data) < datap.edata || datap.bss <= uintptr(e.data) && uintptr(e.data) < datap.ebss || datap.noptrbss <= uintptr(e.data) && uintptr(e.data) < datap.enoptrbss)
                         {
-                            return;
+                            return ;
                         datap = datap.next;
                         }
+
                     }
 
                 }
                 throw("runtime.SetFinalizer: pointer not in allocated block");
+
             }
-            if (e.data != base)
+
+            if (uintptr(e.data) != base)
             { 
                 // As an implementation detail we allow to set finalizers for an inner byte
                 // of an object if it could come from tiny alloc (see mallocgc for details).
-                if (ot.elem == null || ot.elem.kind & kindNoPointers == 0L || ot.elem.size >= maxTinySize)
+                if (ot.elem == null || ot.elem.ptrdata != 0L || ot.elem.size >= maxTinySize)
                 {
                     throw("runtime.SetFinalizer: pointer not at beginning of allocated block");
                 }
+
             }
-            var f = efaceOf(ref finalizer);
+
+            var f = efaceOf(_addr_finalizer);
             var ftyp = f._type;
             if (ftyp == null)
             { 
@@ -388,42 +424,51 @@ namespace go
                 {
                     removefinalizer(e.data);
                 });
-                return;
+                return ;
+
             }
+
             if (ftyp.kind & kindMask != kindFunc)
             {
                 throw("runtime.SetFinalizer: second argument is " + ftyp.@string() + ", not a function");
             }
-            var ft = (functype.Value)(@unsafe.Pointer(ftyp));
+
+            var ft = (functype.val)(@unsafe.Pointer(ftyp));
             if (ft.dotdotdot())
             {
                 throw("runtime.SetFinalizer: cannot pass " + etyp.@string() + " to finalizer " + ftyp.@string() + " because dotdotdot");
             }
+
             if (ft.inCount != 1L)
             {
                 throw("runtime.SetFinalizer: cannot pass " + etyp.@string() + " to finalizer " + ftyp.@string());
             }
+
             var fint = ft.@in()[0L];
 
             if (fint == etyp) 
                 // ok - same type
                 goto okarg;
             else if (fint.kind & kindMask == kindPtr) 
-                if ((fint.uncommon() == null || etyp.uncommon() == null) && (ptrtype.Value)(@unsafe.Pointer(fint)).elem == ot.elem)
+                if ((fint.uncommon() == null || etyp.uncommon() == null) && (ptrtype.val)(@unsafe.Pointer(fint)).elem == ot.elem)
                 { 
                     // ok - not same type, but both pointers,
                     // one or the other is unnamed, and same element type, so assignable.
                     goto okarg;
+
                 }
+
             else if (fint.kind & kindMask == kindInterface) 
-                var ityp = (interfacetype.Value)(@unsafe.Pointer(fint));
+                var ityp = (interfacetype.val)(@unsafe.Pointer(fint));
                 if (len(ityp.mhdr) == 0L)
                 { 
                     // ok - satisfies empty interface
                     goto okarg;
+
                 }
+
                 {
-                    var (_, ok) = assertE2I2(ityp, new ptr<ref efaceOf>(ref obj));
+                    var (_, ok) = assertE2I2(ityp, new ptr<ptr<efaceOf>>(_addr_obj));
 
                     if (ok)
                     {
@@ -431,70 +476,28 @@ namespace go
                     }
 
                 }
+
                         throw("runtime.SetFinalizer: cannot pass " + etyp.@string() + " to finalizer " + ftyp.@string());
 okarg:
             var nret = uintptr(0L);
             foreach (var (_, t) in ft.@out())
             {
-                nret = round(nret, uintptr(t.align)) + uintptr(t.size);
+                nret = alignUp(nret, uintptr(t.align)) + uintptr(t.size);
             }
-            nret = round(nret, sys.PtrSize); 
+            nret = alignUp(nret, sys.PtrSize); 
 
             // make sure we have a finalizer goroutine
             createfing();
 
             systemstack(() =>
             {
-                if (!addfinalizer(e.data, (funcval.Value)(f.data), nret, fint, ot))
+                if (!addfinalizer(e.data, (funcval.val)(f.data), nret, fint, ot))
                 {
                     throw("runtime.SetFinalizer: finalizer already set");
                 }
+
             });
-        }
 
-        // Look up pointer v in heap. Return the span containing the object,
-        // the start of the object, and the size of the object. If the object
-        // does not exist, return nil, nil, 0.
-        private static (ref mspan, unsafe.Pointer, System.UIntPtr) findObject(unsafe.Pointer v)
-        {
-            var c = gomcache();
-            c.local_nlookup++;
-            if (sys.PtrSize == 4L && c.local_nlookup >= 1L << (int)(30L))
-            { 
-                // purge cache stats to prevent overflow
-                lock(ref mheap_.@lock);
-                purgecachedstats(c);
-                unlock(ref mheap_.@lock);
-            } 
-
-            // find span
-            var arena_start = mheap_.arena_start;
-            var arena_used = mheap_.arena_used;
-            if (uintptr(v) < arena_start || uintptr(v) >= arena_used)
-            {
-                return;
-            }
-            var p = uintptr(v) >> (int)(pageShift);
-            var q = p - arena_start >> (int)(pageShift);
-            s = mheap_.spans[q];
-            if (s == null)
-            {
-                return;
-            }
-            x = @unsafe.Pointer(s.@base());
-
-            if (uintptr(v) < uintptr(x) || uintptr(v) >= uintptr(@unsafe.Pointer(s.limit)) || s.state != mSpanInUse)
-            {
-                s = null;
-                x = null;
-                return;
-            }
-            n = s.elemsize;
-            if (s.spanclass.sizeclass() != 0L)
-            {
-                x = add(x, (uintptr(v) - uintptr(x)) / n * n);
-            }
-            return;
         }
 
         // Mark KeepAlive as noinline so that it is easily detectable as an intrinsic.
@@ -528,6 +531,7 @@ okarg:
             {
                 println(x);
             }
+
         }
     }
 }

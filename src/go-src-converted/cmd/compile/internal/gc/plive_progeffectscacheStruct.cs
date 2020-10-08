@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:28:05 UTC
+//     Generated on 2020 October 08 04:30:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,11 +17,8 @@ using ssa = go.cmd.compile.@internal.ssa_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
 using md5 = go.crypto.md5_package;
-using sha1 = go.crypto.sha1_package;
 using fmt = go.fmt_package;
-using os = go.os_package;
 using strings = go.strings_package;
 using go;
 
@@ -38,15 +35,13 @@ namespace @internal
             // Constructors
             public progeffectscache(NilType _)
             {
-                this.textavarinit = default;
                 this.retuevar = default;
                 this.tailuevar = default;
                 this.initialized = default;
             }
 
-            public progeffectscache(slice<int> textavarinit = default, slice<int> retuevar = default, slice<int> tailuevar = default, bool initialized = default)
+            public progeffectscache(slice<int> retuevar = default, slice<int> tailuevar = default, bool initialized = default)
             {
-                this.textavarinit = textavarinit;
                 this.retuevar = retuevar;
                 this.tailuevar = tailuevar;
                 this.initialized = initialized;
@@ -72,7 +67,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static progeffectscache progeffectscache_cast(dynamic value)
         {
-            return new progeffectscache(value.textavarinit, value.retuevar, value.tailuevar, value.initialized);
+            return new progeffectscache(value.retuevar, value.tailuevar, value.initialized);
         }
     }
 }}}}

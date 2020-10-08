@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mime -- go2cs converted at 2020 August 29 08:32:35 UTC
+// package mime -- go2cs converted at 2020 October 08 03:38:32 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Go\src\mime\grammar.go
 using strings = go.strings_package;
@@ -26,6 +26,7 @@ namespace go
             // token := 1*<any (US-ASCII) CHAR except SPACE, CTLs,
             //             or tspecials>
             return r > 0x20UL && r < 0x7fUL && !isTSpecial(r);
+
         }
 
         // isToken reports whether s is a 'token' as defined by RFC 1521
@@ -36,7 +37,9 @@ namespace go
             {
                 return false;
             }
+
             return strings.IndexFunc(s, isNotTokenChar) < 0L;
+
         }
     }
 }

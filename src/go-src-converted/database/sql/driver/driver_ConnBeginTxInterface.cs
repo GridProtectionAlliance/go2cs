@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate (Tx, error) BeginTxByRef(ref T value, context.Context ctx, TxOptions opts);
+            private delegate (Tx, error) BeginTxByPtr(ptr<T> value, context.Context ctx, TxOptions opts);
             private delegate (Tx, error) BeginTxByVal(T value, context.Context ctx, TxOptions opts);
 
-            private static readonly BeginTxByRef s_BeginTxByRef;
+            private static readonly BeginTxByPtr s_BeginTxByPtr;
             private static readonly BeginTxByVal s_BeginTxByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_BeginTxByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_BeginTxByPtr is null || !m_target_is_ptr)
                     return s_BeginTxByVal!(target, ctx, opts);
 
-                return s_BeginTxByRef(ref target, ctx, opts);
+                return s_BeginTxByPtr(m_target_ptr, ctx, opts);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static ConnBeginTx()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("BeginTx");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("BeginTx");
 
                 if (!(extensionMethod is null))
-                    s_BeginTxByRef = extensionMethod.CreateStaticDelegate(typeof(BeginTxByRef)) as BeginTxByRef;
+                    s_BeginTxByPtr = extensionMethod.CreateStaticDelegate(typeof(BeginTxByPtr)) as BeginTxByPtr;
 
-                if (s_BeginTxByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("BeginTx");
+                extensionMethod = targetType.GetExtensionMethod("BeginTx");
 
-                    if (!(extensionMethod is null))
-                        s_BeginTxByVal = extensionMethod.CreateStaticDelegate(typeof(BeginTxByVal)) as BeginTxByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_BeginTxByVal = extensionMethod.CreateStaticDelegate(typeof(BeginTxByVal)) as BeginTxByVal;
 
-                if (s_BeginTxByRef is null && s_BeginTxByVal is null)
+                if (s_BeginTxByPtr is null && s_BeginTxByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ConnBeginTx.BeginTx method", new Exception("BeginTx"));
             }
 

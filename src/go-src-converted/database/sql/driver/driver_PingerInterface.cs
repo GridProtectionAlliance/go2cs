@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:47 UTC
+//     Generated on 2020 October 08 04:58:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace sql
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,10 +67,10 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate error PingByRef(ref T value, context.Context ctx);
+            private delegate error PingByPtr(ptr<T> value, context.Context ctx);
             private delegate error PingByVal(T value, context.Context ctx);
 
-            private static readonly PingByRef s_PingByRef;
+            private static readonly PingByPtr s_PingByPtr;
             private static readonly PingByVal s_PingByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,11 +79,12 @@ namespace sql
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PingByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PingByPtr is null || !m_target_is_ptr)
                     return s_PingByVal!(target, ctx);
 
-                return s_PingByRef(ref target, ctx);
+                return s_PingByPtr(m_target_ptr, ctx);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -92,23 +93,20 @@ namespace sql
             static Pinger()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Ping");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Ping");
 
                 if (!(extensionMethod is null))
-                    s_PingByRef = extensionMethod.CreateStaticDelegate(typeof(PingByRef)) as PingByRef;
+                    s_PingByPtr = extensionMethod.CreateStaticDelegate(typeof(PingByPtr)) as PingByPtr;
 
-                if (s_PingByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Ping");
+                extensionMethod = targetType.GetExtensionMethod("Ping");
 
-                    if (!(extensionMethod is null))
-                        s_PingByVal = extensionMethod.CreateStaticDelegate(typeof(PingByVal)) as PingByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PingByVal = extensionMethod.CreateStaticDelegate(typeof(PingByVal)) as PingByVal;
 
-                if (s_PingByRef is null && s_PingByVal is null)
+                if (s_PingByPtr is null && s_PingByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Pinger.Ping method", new Exception("Ping"));
             }
 

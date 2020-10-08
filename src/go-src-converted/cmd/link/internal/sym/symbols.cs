@@ -1,5 +1,5 @@
 // Derived from Inferno utils/6l/l.h and related files.
-// https://bitbucket.org/inferno-os/inferno-os/src/default/utils/6l/l.h
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/l.h
 //
 //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
 //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
@@ -28,11 +28,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package sym -- go2cs converted at 2020 August 29 10:02:56 UTC
+// package sym -- go2cs converted at 2020 October 08 04:37:54 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Go\src\cmd\link\internal\sym\symbols.go
 
 using static go.builtin;
+using System;
 
 namespace go {
 namespace cmd {
@@ -43,94 +44,35 @@ namespace @internal
     {
         public partial struct Symbols
         {
-            public slice<Symbol> symbolBatch; // Symbol lookup based on name and indexed by version.
-            public slice<map<@string, ref Symbol>> hash;
-            public slice<ref Symbol> Allsym;
+            public long versions; // Provided by the loader
+
+// Look up the symbol with the given name and version, creating the
+// symbol if it is not found.
+            public Func<@string, long, ptr<Symbol>> Lookup; // Look up the symbol with the given name and version, returning nil
+// if it is not found.
+            public Func<@string, long, ptr<Symbol>> ROLookup;
         }
 
-        public static ref Symbols NewSymbols()
+        public static ptr<Symbols> NewSymbols()
         {
-            return ref new Symbols(hash:[]map[string]*Symbol{make(map[string]*Symbol,100000),},Allsym:make([]*Symbol,0,100000),);
-        }
-
-        private static ref Symbol Newsym(this ref Symbols syms, @string name, long v)
-        {
-            var batch = syms.symbolBatch;
-            if (len(batch) == 0L)
-            {
-                batch = make_slice<Symbol>(1000L);
-            }
-            var s = ref batch[0L];
-            syms.symbolBatch = batch[1L..];
-
-            s.Dynid = -1L;
-            s.Plt = -1L;
-            s.Got = -1L;
-            s.Name = name;
-            s.Version = int16(v);
-            syms.Allsym = append(syms.Allsym, s);
-
-            return s;
-        }
-
-        // Look up the symbol with the given name and version, creating the
-        // symbol if it is not found.
-        private static ref Symbol Lookup(this ref Symbols syms, @string name, long v)
-        {
-            var m = syms.hash[v];
-            var s = m[name];
-            if (s != null)
-            {
-                return s;
-            }
-            s = syms.Newsym(name, v);
-            s.Extname = s.Name;
-            m[name] = s;
-            return s;
-        }
-
-        // Look up the symbol with the given name and version, returning nil
-        // if it is not found.
-        private static ref Symbol ROLookup(this ref Symbols syms, @string name, long v)
-        {
-            return syms.hash[v][name];
+            return addr(new Symbols(versions:SymVerStatic,));
         }
 
         // Allocate a new version (i.e. symbol namespace).
-        private static long IncVersion(this ref Symbols syms)
+        private static long IncVersion(this ptr<Symbols> _addr_syms)
         {
-            syms.hash = append(syms.hash, make_map<@string, ref Symbol>());
-            return len(syms.hash) - 1L;
+            ref Symbols syms = ref _addr_syms.val;
+
+            syms.versions++;
+            return syms.versions - 1L;
         }
 
-        // Rename renames a symbol.
-        private static void Rename(this ref Symbols syms, @string old, @string @new, long v)
+        // returns the maximum version number
+        private static long MaxVersion(this ptr<Symbols> _addr_syms)
         {
-            var s = syms.hash[v][old];
-            s.Name = new;
-            if (s.Extname == old)
-            {
-                s.Extname = new;
-            }
-            delete(syms.hash[v], old);
+            ref Symbols syms = ref _addr_syms.val;
 
-            var dup = syms.hash[v][new];
-            if (dup == null)
-            {
-                syms.hash[v][new] = s;
-            }
-            else
-            {
-                if (s.Type == 0L)
-                {
-                    s.Value = dup.Value;
-                }
-                else if (dup.Type == 0L)
-                {
-                    dup.Value = s.Value;
-                    syms.hash[v][new] = s;
-                }
-            }
+            return syms.versions;
         }
     }
 }}}}

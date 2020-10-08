@@ -4,7 +4,7 @@
 
 // +build 386
 
-// package sys -- go2cs converted at 2020 August 29 08:16:27 UTC
+// package sys -- go2cs converted at 2020 October 08 03:19:07 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Go\src\runtime\internal\sys\intrinsics_stubs.go
 
@@ -19,6 +19,8 @@ namespace @internal
         public static long Ctz64(ulong x)
 ;
         public static long Ctz32(uint x)
+;
+        public static long Ctz8(byte x)
 ;
         public static ulong Bswap64(ulong x)
 ;

@@ -4,17 +4,18 @@
 
 // +build !testtag
 
-// package main -- go2cs converted at 2020 August 29 10:10:41 UTC
+// package main -- go2cs converted at 2020 October 08 04:58:39 UTC
 // Original source: C:\Go\src\cmd\vet\testdata\tagtest\file2.go
-
+using fmt = go.fmt_package;
 using static go.builtin;
 
 namespace go
 {
     public static partial class main_package
     {
-        private static void ignore()
+        private static void Main()
         {
+            fmt.Printf("%s", 0L);
         }
     }
 }

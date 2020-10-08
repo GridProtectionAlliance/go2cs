@@ -5,6 +5,9 @@
 // This implements the write barrier buffer. The write barrier itself
 // is gcWriteBarrier and is implemented in assembly.
 //
+// See mbarrier.go for algorithmic details on the write barrier. This
+// file deals only with the buffer.
+//
 // The write barrier has a fast path and a slow path. The fast path
 // simply enqueues to a per-P write barrier buffer. It's written in
 // assembly and doesn't clobber any general purpose registers, so it
@@ -17,9 +20,10 @@
 // stack frame (since we don't know the types of the spilled
 // registers).
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:33 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mwbbuf.go
+using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 using static go.builtin;
@@ -31,7 +35,7 @@ namespace go
     {
         // testSmallBuf forces a small write barrier buffer to stress write
         // barrier flushing.
-        private static readonly var testSmallBuf = false;
+        private static readonly var testSmallBuf = (var)false;
 
         // wbBuf is a per-P buffer of pointers queued by the write barrier.
         // This buffer is flushed to the GC workbufs when it fills up and on
@@ -57,7 +61,11 @@ namespace go
             public System.UIntPtr end; // buf stores a series of pointers to execute write barriers
 // on. This must be a multiple of wbBufEntryPointers because
 // the write barrier only checks for overflow once per entry.
-            public array<System.UIntPtr> buf;
+            public array<System.UIntPtr> buf; // debugGen causes the write barrier buffer to flush after
+// every write barrier if equal to gcWorkPauseGen. This is for
+// debugging #27993. This is only set if debugCachedWork is
+// set.
+            public uint debugGen;
         }
 
  
@@ -70,22 +78,26 @@ namespace go
         // footprint of the buffer.
         //
         // TODO: What is the latency cost of this? Tune this value.
-        private static readonly long wbBufEntries = 256L; 
+        private static readonly long wbBufEntries = (long)256L; 
 
         // wbBufEntryPointers is the number of pointers added to the
         // buffer by each write barrier.
-        private static readonly long wbBufEntryPointers = 2L;
+        private static readonly long wbBufEntryPointers = (long)2L;
+
 
         // reset empties b by resetting its next and end pointers.
-        private static void reset(this ref wbBuf b)
+        private static void reset(this ptr<wbBuf> _addr_b)
         {
-            var start = uintptr(@unsafe.Pointer(ref b.buf[0L]));
+            ref wbBuf b = ref _addr_b.val;
+
+            var start = uintptr(@unsafe.Pointer(_addr_b.buf[0L]));
             b.next = start;
-            if (gcBlackenPromptly || writeBarrier.cgo)
+            if (writeBarrier.cgo || (debugCachedWork && (throwOnGCWork || b.debugGen == atomic.Load(_addr_gcWorkPauseGen))))
             { 
                 // Effectively disable the buffer by forcing a flush
                 // on every barrier.
-                b.end = uintptr(@unsafe.Pointer(ref b.buf[wbBufEntryPointers]));
+                b.end = uintptr(@unsafe.Pointer(_addr_b.buf[wbBufEntryPointers]));
+
             }
             else if (testSmallBuf)
             { 
@@ -93,16 +105,19 @@ namespace go
                 // we only did one, then barriers of non-heap pointers
                 // would be no-ops. This lets us combine a buffered
                 // barrier with a flush at a later time.
-                b.end = uintptr(@unsafe.Pointer(ref b.buf[2L * wbBufEntryPointers]));
+                b.end = uintptr(@unsafe.Pointer(_addr_b.buf[2L * wbBufEntryPointers]));
+
             }
             else
             {
                 b.end = start + uintptr(len(b.buf)) * @unsafe.Sizeof(b.buf[0L]);
             }
+
             if ((b.end - b.next) % (wbBufEntryPointers * @unsafe.Sizeof(b.buf[0L])) != 0L)
             {
                 throw("bad write barrier buffer bounds");
             }
+
         }
 
         // discard resets b's next pointer, but not its end pointer.
@@ -110,9 +125,19 @@ namespace go
         // This must be nosplit because it's called by wbBufFlush.
         //
         //go:nosplit
-        private static void discard(this ref wbBuf b)
+        private static void discard(this ptr<wbBuf> _addr_b)
         {
-            b.next = uintptr(@unsafe.Pointer(ref b.buf[0L]));
+            ref wbBuf b = ref _addr_b.val;
+
+            b.next = uintptr(@unsafe.Pointer(_addr_b.buf[0L]));
+        }
+
+        // empty reports whether b contains no pointers.
+        private static bool empty(this ptr<wbBuf> _addr_b)
+        {
+            ref wbBuf b = ref _addr_b.val;
+
+            return b.next == uintptr(@unsafe.Pointer(_addr_b.buf[0L]));
         }
 
         // putFast adds old and new to the write barrier buffer and returns
@@ -122,25 +147,32 @@ namespace go
         //     if !buf.putFast(old, new) {
         //         wbBufFlush(...)
         //     }
+        //     ... actual memory write ...
         //
         // The arguments to wbBufFlush depend on whether the caller is doing
         // its own cgo pointer checks. If it is, then this can be
         // wbBufFlush(nil, 0). Otherwise, it must pass the slot address and
         // new.
         //
-        // Since buf is a per-P resource, the caller must ensure there are no
-        // preemption points while buf is in use.
+        // The caller must ensure there are no preemption points during the
+        // above sequence. There must be no preemption points while buf is in
+        // use because it is a per-P resource. There must be no preemption
+        // points between the buffer put and the write to memory because this
+        // could allow a GC phase change, which could result in missed write
+        // barriers.
         //
-        // It must be nowritebarrierrec to because write barriers here would
+        // putFast must be nowritebarrierrec to because write barriers here would
         // corrupt the write barrier buffer. It (and everything it calls, if
         // it called anything) has to be nosplit to avoid scheduling on to a
         // different P and a different buffer.
         //
         //go:nowritebarrierrec
         //go:nosplit
-        private static bool putFast(this ref wbBuf b, System.UIntPtr old, System.UIntPtr @new)
+        private static bool putFast(this ptr<wbBuf> _addr_b, System.UIntPtr old, System.UIntPtr @new)
         {
-            ref array<System.UIntPtr> p = new ptr<ref array<System.UIntPtr>>(@unsafe.Pointer(b.next));
+            ref wbBuf b = ref _addr_b.val;
+
+            ptr<array<System.UIntPtr>> p = new ptr<ptr<array<System.UIntPtr>>>(@unsafe.Pointer(b.next));
             p[0L] = old;
             p[1L] = new;
             b.next += 2L * sys.PtrSize;
@@ -163,10 +195,19 @@ namespace go
         //
         //go:nowritebarrierrec
         //go:nosplit
-        private static void wbBufFlush(ref System.UIntPtr dst, System.UIntPtr src)
-        { 
+        private static void wbBufFlush(ptr<System.UIntPtr> _addr_dst, System.UIntPtr src)
+        {
+            ref System.UIntPtr dst = ref _addr_dst.val;
+ 
             // Note: Every possible return from this function must reset
             // the buffer's next pointer to prevent buffer overflow.
+
+            // This *must not* modify its arguments because this
+            // function's argument slots do double duty in gcWriteBarrier
+            // as register spill slots. Currently, not modifying the
+            // arguments is sufficient to keep the spill slots unmodified
+            // (which seems unlikely to change since it costs little and
+            // helps with debugging).
 
             if (getg().m.dying > 0L)
             { 
@@ -174,8 +215,10 @@ namespace go
                 // and this way we can allow write barriers in the
                 // panic path.
                 getg().m.p.ptr().wbBuf.discard();
-                return;
+                return ;
+
             }
+
             if (writeBarrier.cgo && dst != null)
             { 
                 // This must be called from the stack that did the
@@ -185,16 +228,52 @@ namespace go
                 { 
                     // We were only called for cgocheck.
                     getg().m.p.ptr().wbBuf.discard();
-                    return;
+                    return ;
+
                 }
+
             } 
 
             // Switch to the system stack so we don't have to worry about
             // the untyped stack slots or safe points.
             systemstack(() =>
             {
-                wbBufFlush1(getg().m.p.ptr());
+                if (debugCachedWork)
+                { 
+                    // For debugging, include the old value of the
+                    // slot and some other data in the traceback.
+                    var wbBuf = _addr_getg().m.p.ptr().wbBuf;
+                    System.UIntPtr old = default;
+                    if (dst != null)
+                    { 
+                        // dst may be nil in direct calls to wbBufFlush.
+                        old = dst;
+
+                    }
+
+                    wbBufFlush1Debug(old, wbBuf.buf[0L], wbBuf.buf[1L], _addr_wbBuf.buf[0L], wbBuf.next);
+
+                }
+                else
+                {
+                    wbBufFlush1(_addr_getg().m.p.ptr());
+                }
+
             });
+
+        }
+
+        // wbBufFlush1Debug is a temporary function for debugging issue
+        // #27993. It exists solely to add some context to the traceback.
+        //
+        //go:nowritebarrierrec
+        //go:systemstack
+        //go:noinline
+        private static void wbBufFlush1Debug(System.UIntPtr old, System.UIntPtr buf1, System.UIntPtr buf2, ptr<System.UIntPtr> _addr_start, System.UIntPtr next)
+        {
+            ref System.UIntPtr start = ref _addr_start.val;
+
+            wbBufFlush1(_addr_getg().m.p.ptr());
         }
 
         // wbBufFlush1 flushes p's write barrier buffer to the GC work queue.
@@ -207,15 +286,18 @@ namespace go
         //
         //go:nowritebarrierrec
         //go:systemstack
-        private static void wbBufFlush1(ref p _p_)
-        { 
+        private static void wbBufFlush1(ptr<p> _addr__p_)
+        {
+            ref p _p_ = ref _addr__p_.val;
+ 
             // Get the buffered pointers.
-            var start = uintptr(@unsafe.Pointer(ref _p_.wbBuf.buf[0L]));
+            var start = uintptr(@unsafe.Pointer(_addr__p_.wbBuf.buf[0L]));
             var n = (_p_.wbBuf.next - start) / @unsafe.Sizeof(_p_.wbBuf.buf[0L]);
             var ptrs = _p_.wbBuf.buf[..n]; 
 
-            // Reset the buffer.
-            _p_.wbBuf.reset();
+            // Poison the buffer to make extra sure nothing is enqueued
+            // while we're processing the buffer.
+            _p_.wbBuf.next = 0L;
 
             if (useCheckmark)
             { 
@@ -232,7 +314,9 @@ namespace go
                     ptr = ptr__prev1;
                 }
 
-                return;
+                _p_.wbBuf.reset();
+                return ;
+
             } 
 
             // Mark all of the pointers in the buffer and record only the
@@ -241,16 +325,23 @@ namespace go
             //
             // TODO: Should scanobject/scanblock just stuff pointers into
             // the wbBuf? Then this would become the sole greying path.
-            var gcw = ref _p_.gcw;
+            //
+            // TODO: We could avoid shading any of the "new" pointers in
+            // the buffer if the stack has been shaded, or even avoid
+            // putting them in the buffer at all (which would double its
+            // capacity). This is slightly complicated with the buffer; we
+            // could track whether any un-shaded goroutine has used the
+            // buffer, or just track globally whether there are any
+            // un-shaded stacks and flush after each stack scan.
+            var gcw = _addr__p_.gcw;
             long pos = 0L;
-            var arenaStart = mheap_.arena_start;
             {
                 var ptr__prev1 = ptr;
 
                 foreach (var (_, __ptr) in ptrs)
                 {
                     ptr = __ptr;
-                    if (ptr < arenaStart)
+                    if (ptr < minLegalPointer)
                     { 
                         // nil pointers are very common, especially
                         // for the "old" values. Filter out these and
@@ -259,12 +350,10 @@ namespace go
                         // TODO: Should we filter out nils in the fast
                         // path to reduce the rate of flushes?
                         continue;
-                    } 
-                    // TODO: This doesn't use hbits, so calling
-                    // heapBitsForObject seems a little silly. We could
-                    // easily separate this out since heapBitsForObject
-                    // just calls heapBitsForAddr(obj) to get hbits.
-                    var (obj, _, span, objIndex) = heapBitsForObject(ptr, 0L, 0L);
+
+                    }
+
+                    var (obj, span, objIndex) = findObject(ptr, 0L, 0L);
                     if (obj == 0L)
                     {
                         continue;
@@ -276,14 +365,25 @@ namespace go
                     {
                         continue;
                     }
-                    mbits.setMarked();
+
+                    mbits.setMarked(); 
+
+                    // Mark span.
+                    var (arena, pageIdx, pageMask) = pageIndexOf(span.@base());
+                    if (arena.pageMarks[pageIdx] & pageMask == 0L)
+                    {
+                        atomic.Or8(_addr_arena.pageMarks[pageIdx], pageMask);
+                    }
+
                     if (span.spanclass.noscan())
                     {
                         gcw.bytesMarked += uint64(span.elemsize);
                         continue;
                     }
+
                     ptrs[pos] = obj;
                     pos++;
+
                 } 
 
                 // Enqueue the greyed objects.
@@ -292,12 +392,9 @@ namespace go
             }
 
             gcw.putBatch(ptrs[..pos]);
-            if (gcphase == _GCmarktermination || gcBlackenPromptly)
-            { 
-                // Ps aren't allowed to cache work during mark
-                // termination.
-                gcw.dispose();
-            }
+
+            _p_.wbBuf.reset();
+
         }
     }
 }

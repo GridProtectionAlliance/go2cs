@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:51:31 UTC
+//     Generated on 2020 October 08 04:07:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,9 +14,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using bytes = go.bytes_package;
+using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using exec = go.os.exec_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -54,7 +58,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,10 +72,10 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate void PtrSizeByRef(ref T value);
+            private delegate void PtrSizeByPtr(ptr<T> value);
             private delegate void PtrSizeByVal(T value);
 
-            private static readonly PtrSizeByRef s_PtrSizeByRef;
+            private static readonly PtrSizeByPtr s_PtrSizeByPtr;
             private static readonly PtrSizeByVal s_PtrSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,22 +84,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_PtrSizeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_PtrSizeByPtr is null || !m_target_is_ptr)
                 {
                     s_PtrSizeByVal!(target);
                     return;
                 }
 
-                s_PtrSizeByRef(ref target);
+                s_PtrSizeByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void AddIntByRef(ref T value, Sym s, long size, long i);
+            private delegate void AddIntByPtr(ptr<T> value, Sym s, long size, long i);
             private delegate void AddIntByVal(T value, Sym s, long size, long i);
 
-            private static readonly AddIntByRef s_AddIntByRef;
+            private static readonly AddIntByPtr s_AddIntByPtr;
             private static readonly AddIntByVal s_AddIntByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,22 +109,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AddIntByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AddIntByPtr is null || !m_target_is_ptr)
                 {
                     s_AddIntByVal!(target, s, size, i);
                     return;
                 }
 
-                s_AddIntByRef(ref target, s, size, i);
+                s_AddIntByPtr(m_target_ptr, s, size, i);
                 return;
                 
             }
 
-            private delegate void AddBytesByRef(ref T value, Sym s, slice<byte> b);
+            private delegate void AddBytesByPtr(ptr<T> value, Sym s, slice<byte> b);
             private delegate void AddBytesByVal(T value, Sym s, slice<byte> b);
 
-            private static readonly AddBytesByRef s_AddBytesByRef;
+            private static readonly AddBytesByPtr s_AddBytesByPtr;
             private static readonly AddBytesByVal s_AddBytesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -128,22 +134,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AddBytesByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AddBytesByPtr is null || !m_target_is_ptr)
                 {
                     s_AddBytesByVal!(target, s, b);
                     return;
                 }
 
-                s_AddBytesByRef(ref target, s, b);
+                s_AddBytesByPtr(m_target_ptr, s, b);
                 return;
                 
             }
 
-            private delegate void AddAddressByRef(ref T value, Sym s, object t, long ofs);
+            private delegate void AddAddressByPtr(ptr<T> value, Sym s, object t, long ofs);
             private delegate void AddAddressByVal(T value, Sym s, object t, long ofs);
 
-            private static readonly AddAddressByRef s_AddAddressByRef;
+            private static readonly AddAddressByPtr s_AddAddressByPtr;
             private static readonly AddAddressByVal s_AddAddressByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -152,22 +159,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AddAddressByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AddAddressByPtr is null || !m_target_is_ptr)
                 {
                     s_AddAddressByVal!(target, s, t, ofs);
                     return;
                 }
 
-                s_AddAddressByRef(ref target, s, t, ofs);
+                s_AddAddressByPtr(m_target_ptr, s, t, ofs);
                 return;
                 
             }
 
-            private delegate void AddCURelativeAddressByRef(ref T value, Sym s, object t, long ofs);
+            private delegate void AddCURelativeAddressByPtr(ptr<T> value, Sym s, object t, long ofs);
             private delegate void AddCURelativeAddressByVal(T value, Sym s, object t, long ofs);
 
-            private static readonly AddCURelativeAddressByRef s_AddCURelativeAddressByRef;
+            private static readonly AddCURelativeAddressByPtr s_AddCURelativeAddressByPtr;
             private static readonly AddCURelativeAddressByVal s_AddCURelativeAddressByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -176,22 +184,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AddCURelativeAddressByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AddCURelativeAddressByPtr is null || !m_target_is_ptr)
                 {
                     s_AddCURelativeAddressByVal!(target, s, t, ofs);
                     return;
                 }
 
-                s_AddCURelativeAddressByRef(ref target, s, t, ofs);
+                s_AddCURelativeAddressByPtr(m_target_ptr, s, t, ofs);
                 return;
                 
             }
 
-            private delegate void AddSectionOffsetByRef(ref T value, Sym s, long size, object t, long ofs);
+            private delegate void AddSectionOffsetByPtr(ptr<T> value, Sym s, long size, object t, long ofs);
             private delegate void AddSectionOffsetByVal(T value, Sym s, long size, object t, long ofs);
 
-            private static readonly AddSectionOffsetByRef s_AddSectionOffsetByRef;
+            private static readonly AddSectionOffsetByPtr s_AddSectionOffsetByPtr;
             private static readonly AddSectionOffsetByVal s_AddSectionOffsetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -200,22 +209,48 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AddSectionOffsetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AddSectionOffsetByPtr is null || !m_target_is_ptr)
                 {
                     s_AddSectionOffsetByVal!(target, s, size, t, ofs);
                     return;
                 }
 
-                s_AddSectionOffsetByRef(ref target, s, size, t, ofs);
+                s_AddSectionOffsetByPtr(m_target_ptr, s, size, t, ofs);
                 return;
                 
             }
 
-            private delegate void CurrentOffsetByRef(ref T value, Sym s);
+            private delegate void AddDWARFAddrSectionOffsetByPtr(ptr<T> value, Sym s, object t, long ofs);
+            private delegate void AddDWARFAddrSectionOffsetByVal(T value, Sym s, object t, long ofs);
+
+            private static readonly AddDWARFAddrSectionOffsetByPtr s_AddDWARFAddrSectionOffsetByPtr;
+            private static readonly AddDWARFAddrSectionOffsetByVal s_AddDWARFAddrSectionOffsetByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void AddDWARFAddrSectionOffset(Sym s, object t, long ofs)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_AddDWARFAddrSectionOffsetByPtr is null || !m_target_is_ptr)
+                {
+                    s_AddDWARFAddrSectionOffsetByVal!(target, s, t, ofs);
+                    return;
+                }
+
+                s_AddDWARFAddrSectionOffsetByPtr(m_target_ptr, s, t, ofs);
+                return;
+                
+            }
+
+            private delegate void CurrentOffsetByPtr(ptr<T> value, Sym s);
             private delegate void CurrentOffsetByVal(T value, Sym s);
 
-            private static readonly CurrentOffsetByRef s_CurrentOffsetByRef;
+            private static readonly CurrentOffsetByPtr s_CurrentOffsetByPtr;
             private static readonly CurrentOffsetByVal s_CurrentOffsetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -224,22 +259,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_CurrentOffsetByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_CurrentOffsetByPtr is null || !m_target_is_ptr)
                 {
                     s_CurrentOffsetByVal!(target, s);
                     return;
                 }
 
-                s_CurrentOffsetByRef(ref target, s);
+                s_CurrentOffsetByPtr(m_target_ptr, s);
                 return;
                 
             }
 
-            private delegate void RecordDclReferenceByRef(ref T value, Sym from, Sym to, long dclIdx, long inlIndex);
+            private delegate void RecordDclReferenceByPtr(ptr<T> value, Sym from, Sym to, long dclIdx, long inlIndex);
             private delegate void RecordDclReferenceByVal(T value, Sym from, Sym to, long dclIdx, long inlIndex);
 
-            private static readonly RecordDclReferenceByRef s_RecordDclReferenceByRef;
+            private static readonly RecordDclReferenceByPtr s_RecordDclReferenceByPtr;
             private static readonly RecordDclReferenceByVal s_RecordDclReferenceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -248,46 +284,48 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_RecordDclReferenceByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_RecordDclReferenceByPtr is null || !m_target_is_ptr)
                 {
                     s_RecordDclReferenceByVal!(target, from, to, dclIdx, inlIndex);
                     return;
                 }
 
-                s_RecordDclReferenceByRef(ref target, from, to, dclIdx, inlIndex);
+                s_RecordDclReferenceByPtr(m_target_ptr, from, to, dclIdx, inlIndex);
                 return;
                 
             }
 
-            private delegate void RecordChildDieOffsetsByRef(ref T value, Sym s, slice<ref Var> vars, slice<int> offsets);
-            private delegate void RecordChildDieOffsetsByVal(T value, Sym s, slice<ref Var> vars, slice<int> offsets);
+            private delegate void RecordChildDieOffsetsByPtr(ptr<T> value, Sym s, slice<ptr<Var>> vars, slice<int> offsets);
+            private delegate void RecordChildDieOffsetsByVal(T value, Sym s, slice<ptr<Var>> vars, slice<int> offsets);
 
-            private static readonly RecordChildDieOffsetsByRef s_RecordChildDieOffsetsByRef;
+            private static readonly RecordChildDieOffsetsByPtr s_RecordChildDieOffsetsByPtr;
             private static readonly RecordChildDieOffsetsByVal s_RecordChildDieOffsetsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RecordChildDieOffsets(Sym s, slice<ref Var> vars, slice<int> offsets)
+            public void RecordChildDieOffsets(Sym s, slice<ptr<Var>> vars, slice<int> offsets)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_RecordChildDieOffsetsByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_RecordChildDieOffsetsByPtr is null || !m_target_is_ptr)
                 {
                     s_RecordChildDieOffsetsByVal!(target, s, vars, offsets);
                     return;
                 }
 
-                s_RecordChildDieOffsetsByRef(ref target, s, vars, offsets);
+                s_RecordChildDieOffsetsByPtr(m_target_ptr, s, vars, offsets);
                 return;
                 
             }
 
-            private delegate void AddStringByRef(ref T value, Sym s, @string v);
+            private delegate void AddStringByPtr(ptr<T> value, Sym s, @string v);
             private delegate void AddStringByVal(T value, Sym s, @string v);
 
-            private static readonly AddStringByRef s_AddStringByRef;
+            private static readonly AddStringByPtr s_AddStringByPtr;
             private static readonly AddStringByVal s_AddStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -296,22 +334,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AddStringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AddStringByPtr is null || !m_target_is_ptr)
                 {
                     s_AddStringByVal!(target, s, v);
                     return;
                 }
 
-                s_AddStringByRef(ref target, s, v);
+                s_AddStringByPtr(m_target_ptr, s, v);
                 return;
                 
             }
 
-            private delegate void AddFileRefByRef(ref T value, Sym s, object f);
+            private delegate void AddFileRefByPtr(ptr<T> value, Sym s, object f);
             private delegate void AddFileRefByVal(T value, Sym s, object f);
 
-            private static readonly AddFileRefByRef s_AddFileRefByRef;
+            private static readonly AddFileRefByPtr s_AddFileRefByPtr;
             private static readonly AddFileRefByVal s_AddFileRefByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -320,22 +359,23 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_AddFileRefByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_AddFileRefByPtr is null || !m_target_is_ptr)
                 {
                     s_AddFileRefByVal!(target, s, f);
                     return;
                 }
 
-                s_AddFileRefByRef(ref target, s, f);
+                s_AddFileRefByPtr(m_target_ptr, s, f);
                 return;
                 
             }
 
-            private delegate void LogfByRef(ref T value, @string format, params object[] args);
+            private delegate void LogfByPtr(ptr<T> value, @string format, params object[] args);
             private delegate void LogfByVal(T value, @string format, params object[] args);
 
-            private static readonly LogfByRef s_LogfByRef;
+            private static readonly LogfByPtr s_LogfByPtr;
             private static readonly LogfByVal s_LogfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -344,14 +384,15 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_LogfByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_LogfByPtr is null || !m_target_is_ptr)
                 {
                     s_LogfByVal!(target, format, args);
                     return;
                 }
 
-                s_LogfByRef(ref target, format, args);
+                s_LogfByPtr(m_target_ptr, format, args);
                 return;
                 
             }
@@ -362,199 +403,176 @@ namespace @internal
             static Context()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("PtrSize");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("PtrSize");
 
                 if (!(extensionMethod is null))
-                    s_PtrSizeByRef = extensionMethod.CreateStaticDelegate(typeof(PtrSizeByRef)) as PtrSizeByRef;
+                    s_PtrSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(PtrSizeByPtr)) as PtrSizeByPtr;
 
-                if (s_PtrSizeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("PtrSize");
+                extensionMethod = targetType.GetExtensionMethod("PtrSize");
 
-                    if (!(extensionMethod is null))
-                        s_PtrSizeByVal = extensionMethod.CreateStaticDelegate(typeof(PtrSizeByVal)) as PtrSizeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_PtrSizeByVal = extensionMethod.CreateStaticDelegate(typeof(PtrSizeByVal)) as PtrSizeByVal;
 
-                if (s_PtrSizeByRef is null && s_PtrSizeByVal is null)
+                if (s_PtrSizeByPtr is null && s_PtrSizeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.PtrSize method", new Exception("PtrSize"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AddInt");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddInt");
 
                 if (!(extensionMethod is null))
-                    s_AddIntByRef = extensionMethod.CreateStaticDelegate(typeof(AddIntByRef)) as AddIntByRef;
+                    s_AddIntByPtr = extensionMethod.CreateStaticDelegate(typeof(AddIntByPtr)) as AddIntByPtr;
 
-                if (s_AddIntByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AddInt");
+                extensionMethod = targetType.GetExtensionMethod("AddInt");
 
-                    if (!(extensionMethod is null))
-                        s_AddIntByVal = extensionMethod.CreateStaticDelegate(typeof(AddIntByVal)) as AddIntByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddIntByVal = extensionMethod.CreateStaticDelegate(typeof(AddIntByVal)) as AddIntByVal;
 
-                if (s_AddIntByRef is null && s_AddIntByVal is null)
+                if (s_AddIntByPtr is null && s_AddIntByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.AddInt method", new Exception("AddInt"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AddBytes");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddBytes");
 
                 if (!(extensionMethod is null))
-                    s_AddBytesByRef = extensionMethod.CreateStaticDelegate(typeof(AddBytesByRef)) as AddBytesByRef;
+                    s_AddBytesByPtr = extensionMethod.CreateStaticDelegate(typeof(AddBytesByPtr)) as AddBytesByPtr;
 
-                if (s_AddBytesByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AddBytes");
+                extensionMethod = targetType.GetExtensionMethod("AddBytes");
 
-                    if (!(extensionMethod is null))
-                        s_AddBytesByVal = extensionMethod.CreateStaticDelegate(typeof(AddBytesByVal)) as AddBytesByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddBytesByVal = extensionMethod.CreateStaticDelegate(typeof(AddBytesByVal)) as AddBytesByVal;
 
-                if (s_AddBytesByRef is null && s_AddBytesByVal is null)
+                if (s_AddBytesByPtr is null && s_AddBytesByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.AddBytes method", new Exception("AddBytes"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AddAddress");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddAddress");
 
                 if (!(extensionMethod is null))
-                    s_AddAddressByRef = extensionMethod.CreateStaticDelegate(typeof(AddAddressByRef)) as AddAddressByRef;
+                    s_AddAddressByPtr = extensionMethod.CreateStaticDelegate(typeof(AddAddressByPtr)) as AddAddressByPtr;
 
-                if (s_AddAddressByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AddAddress");
+                extensionMethod = targetType.GetExtensionMethod("AddAddress");
 
-                    if (!(extensionMethod is null))
-                        s_AddAddressByVal = extensionMethod.CreateStaticDelegate(typeof(AddAddressByVal)) as AddAddressByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddAddressByVal = extensionMethod.CreateStaticDelegate(typeof(AddAddressByVal)) as AddAddressByVal;
 
-                if (s_AddAddressByRef is null && s_AddAddressByVal is null)
+                if (s_AddAddressByPtr is null && s_AddAddressByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.AddAddress method", new Exception("AddAddress"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AddCURelativeAddress");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddCURelativeAddress");
 
                 if (!(extensionMethod is null))
-                    s_AddCURelativeAddressByRef = extensionMethod.CreateStaticDelegate(typeof(AddCURelativeAddressByRef)) as AddCURelativeAddressByRef;
+                    s_AddCURelativeAddressByPtr = extensionMethod.CreateStaticDelegate(typeof(AddCURelativeAddressByPtr)) as AddCURelativeAddressByPtr;
 
-                if (s_AddCURelativeAddressByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AddCURelativeAddress");
+                extensionMethod = targetType.GetExtensionMethod("AddCURelativeAddress");
 
-                    if (!(extensionMethod is null))
-                        s_AddCURelativeAddressByVal = extensionMethod.CreateStaticDelegate(typeof(AddCURelativeAddressByVal)) as AddCURelativeAddressByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddCURelativeAddressByVal = extensionMethod.CreateStaticDelegate(typeof(AddCURelativeAddressByVal)) as AddCURelativeAddressByVal;
 
-                if (s_AddCURelativeAddressByRef is null && s_AddCURelativeAddressByVal is null)
+                if (s_AddCURelativeAddressByPtr is null && s_AddCURelativeAddressByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.AddCURelativeAddress method", new Exception("AddCURelativeAddress"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AddSectionOffset");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddSectionOffset");
 
                 if (!(extensionMethod is null))
-                    s_AddSectionOffsetByRef = extensionMethod.CreateStaticDelegate(typeof(AddSectionOffsetByRef)) as AddSectionOffsetByRef;
+                    s_AddSectionOffsetByPtr = extensionMethod.CreateStaticDelegate(typeof(AddSectionOffsetByPtr)) as AddSectionOffsetByPtr;
 
-                if (s_AddSectionOffsetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AddSectionOffset");
+                extensionMethod = targetType.GetExtensionMethod("AddSectionOffset");
 
-                    if (!(extensionMethod is null))
-                        s_AddSectionOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(AddSectionOffsetByVal)) as AddSectionOffsetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddSectionOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(AddSectionOffsetByVal)) as AddSectionOffsetByVal;
 
-                if (s_AddSectionOffsetByRef is null && s_AddSectionOffsetByVal is null)
+                if (s_AddSectionOffsetByPtr is null && s_AddSectionOffsetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.AddSectionOffset method", new Exception("AddSectionOffset"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("CurrentOffset");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddDWARFAddrSectionOffset");
 
                 if (!(extensionMethod is null))
-                    s_CurrentOffsetByRef = extensionMethod.CreateStaticDelegate(typeof(CurrentOffsetByRef)) as CurrentOffsetByRef;
+                    s_AddDWARFAddrSectionOffsetByPtr = extensionMethod.CreateStaticDelegate(typeof(AddDWARFAddrSectionOffsetByPtr)) as AddDWARFAddrSectionOffsetByPtr;
 
-                if (s_CurrentOffsetByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("CurrentOffset");
+                extensionMethod = targetType.GetExtensionMethod("AddDWARFAddrSectionOffset");
 
-                    if (!(extensionMethod is null))
-                        s_CurrentOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(CurrentOffsetByVal)) as CurrentOffsetByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddDWARFAddrSectionOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(AddDWARFAddrSectionOffsetByVal)) as AddDWARFAddrSectionOffsetByVal;
 
-                if (s_CurrentOffsetByRef is null && s_CurrentOffsetByVal is null)
+                if (s_AddDWARFAddrSectionOffsetByPtr is null && s_AddDWARFAddrSectionOffsetByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Context.AddDWARFAddrSectionOffset method", new Exception("AddDWARFAddrSectionOffset"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CurrentOffset");
+
+                if (!(extensionMethod is null))
+                    s_CurrentOffsetByPtr = extensionMethod.CreateStaticDelegate(typeof(CurrentOffsetByPtr)) as CurrentOffsetByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("CurrentOffset");
+
+                if (!(extensionMethod is null))
+                    s_CurrentOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(CurrentOffsetByVal)) as CurrentOffsetByVal;
+
+                if (s_CurrentOffsetByPtr is null && s_CurrentOffsetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.CurrentOffset method", new Exception("CurrentOffset"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("RecordDclReference");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("RecordDclReference");
 
                 if (!(extensionMethod is null))
-                    s_RecordDclReferenceByRef = extensionMethod.CreateStaticDelegate(typeof(RecordDclReferenceByRef)) as RecordDclReferenceByRef;
+                    s_RecordDclReferenceByPtr = extensionMethod.CreateStaticDelegate(typeof(RecordDclReferenceByPtr)) as RecordDclReferenceByPtr;
 
-                if (s_RecordDclReferenceByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("RecordDclReference");
+                extensionMethod = targetType.GetExtensionMethod("RecordDclReference");
 
-                    if (!(extensionMethod is null))
-                        s_RecordDclReferenceByVal = extensionMethod.CreateStaticDelegate(typeof(RecordDclReferenceByVal)) as RecordDclReferenceByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_RecordDclReferenceByVal = extensionMethod.CreateStaticDelegate(typeof(RecordDclReferenceByVal)) as RecordDclReferenceByVal;
 
-                if (s_RecordDclReferenceByRef is null && s_RecordDclReferenceByVal is null)
+                if (s_RecordDclReferenceByPtr is null && s_RecordDclReferenceByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.RecordDclReference method", new Exception("RecordDclReference"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("RecordChildDieOffsets");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("RecordChildDieOffsets");
 
                 if (!(extensionMethod is null))
-                    s_RecordChildDieOffsetsByRef = extensionMethod.CreateStaticDelegate(typeof(RecordChildDieOffsetsByRef)) as RecordChildDieOffsetsByRef;
+                    s_RecordChildDieOffsetsByPtr = extensionMethod.CreateStaticDelegate(typeof(RecordChildDieOffsetsByPtr)) as RecordChildDieOffsetsByPtr;
 
-                if (s_RecordChildDieOffsetsByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("RecordChildDieOffsets");
+                extensionMethod = targetType.GetExtensionMethod("RecordChildDieOffsets");
 
-                    if (!(extensionMethod is null))
-                        s_RecordChildDieOffsetsByVal = extensionMethod.CreateStaticDelegate(typeof(RecordChildDieOffsetsByVal)) as RecordChildDieOffsetsByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_RecordChildDieOffsetsByVal = extensionMethod.CreateStaticDelegate(typeof(RecordChildDieOffsetsByVal)) as RecordChildDieOffsetsByVal;
 
-                if (s_RecordChildDieOffsetsByRef is null && s_RecordChildDieOffsetsByVal is null)
+                if (s_RecordChildDieOffsetsByPtr is null && s_RecordChildDieOffsetsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.RecordChildDieOffsets method", new Exception("RecordChildDieOffsets"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AddString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddString");
 
                 if (!(extensionMethod is null))
-                    s_AddStringByRef = extensionMethod.CreateStaticDelegate(typeof(AddStringByRef)) as AddStringByRef;
+                    s_AddStringByPtr = extensionMethod.CreateStaticDelegate(typeof(AddStringByPtr)) as AddStringByPtr;
 
-                if (s_AddStringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AddString");
+                extensionMethod = targetType.GetExtensionMethod("AddString");
 
-                    if (!(extensionMethod is null))
-                        s_AddStringByVal = extensionMethod.CreateStaticDelegate(typeof(AddStringByVal)) as AddStringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddStringByVal = extensionMethod.CreateStaticDelegate(typeof(AddStringByVal)) as AddStringByVal;
 
-                if (s_AddStringByRef is null && s_AddStringByVal is null)
+                if (s_AddStringByPtr is null && s_AddStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.AddString method", new Exception("AddString"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("AddFileRef");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("AddFileRef");
 
                 if (!(extensionMethod is null))
-                    s_AddFileRefByRef = extensionMethod.CreateStaticDelegate(typeof(AddFileRefByRef)) as AddFileRefByRef;
+                    s_AddFileRefByPtr = extensionMethod.CreateStaticDelegate(typeof(AddFileRefByPtr)) as AddFileRefByPtr;
 
-                if (s_AddFileRefByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("AddFileRef");
+                extensionMethod = targetType.GetExtensionMethod("AddFileRef");
 
-                    if (!(extensionMethod is null))
-                        s_AddFileRefByVal = extensionMethod.CreateStaticDelegate(typeof(AddFileRefByVal)) as AddFileRefByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_AddFileRefByVal = extensionMethod.CreateStaticDelegate(typeof(AddFileRefByVal)) as AddFileRefByVal;
 
-                if (s_AddFileRefByRef is null && s_AddFileRefByVal is null)
+                if (s_AddFileRefByPtr is null && s_AddFileRefByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.AddFileRef method", new Exception("AddFileRef"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Logf");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Logf");
 
                 if (!(extensionMethod is null))
-                    s_LogfByRef = extensionMethod.CreateStaticDelegate(typeof(LogfByRef)) as LogfByRef;
+                    s_LogfByPtr = extensionMethod.CreateStaticDelegate(typeof(LogfByPtr)) as LogfByPtr;
 
-                if (s_LogfByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Logf");
+                extensionMethod = targetType.GetExtensionMethod("Logf");
 
-                    if (!(extensionMethod is null))
-                        s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
 
-                if (s_LogfByRef is null && s_LogfByVal is null)
+                if (s_LogfByPtr is null && s_LogfByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Context.Logf method", new Exception("Logf"));
             }
 

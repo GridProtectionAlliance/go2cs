@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2020 August 29 08:38:21 UTC
+// package syscall -- go2cs converted at 2020 October 08 03:27:44 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_solaris_amd64.go
 
@@ -22,13 +22,17 @@ namespace go
             return new Timeval(Sec:sec,Usec:usec);
         }
 
-        private static void SetLen(this ref Iovec iov, long length)
+        private static void SetLen(this ptr<Iovec> _addr_iov, long length)
         {
+            ref Iovec iov = ref _addr_iov.val;
+
             iov.Len = uint64(length);
         }
 
-        private static void SetLen(this ref Cmsghdr cmsg, long length)
+        private static void SetLen(this ptr<Cmsghdr> _addr_cmsg, long length)
         {
+            ref Cmsghdr cmsg = ref _addr_cmsg.val;
+
             cmsg.Len = uint32(length);
         }
     }

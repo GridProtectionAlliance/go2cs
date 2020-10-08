@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2020 August 29 10:05:13 UTC
+// package binutils -- go2cs converted at 2020 October 08 04:42:53 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\disasm.go
 using bytes = go.bytes_package;
@@ -36,59 +36,108 @@ namespace @internal
     {
         private static var nmOutputRE = regexp.MustCompile("^\\s*([[:xdigit:]]+)\\s+(.)\\s+(.*)");        private static var objdumpAsmOutputRE = regexp.MustCompile("^\\s*([[:xdigit:]]+):\\s+(.*)");        private static var objdumpOutputFileLine = regexp.MustCompile("^(.*):([0-9]+)");        private static var objdumpOutputFunction = regexp.MustCompile("^(\\S.*)\\(\\):");
 
-        private static (slice<ref plugin.Sym>, error) findSymbols(slice<byte> syms, @string file, ref regexp.Regexp r, ulong address)
-        { 
+        private static (slice<ptr<plugin.Sym>>, error) findSymbols(slice<byte> syms, @string file, ptr<regexp.Regexp> _addr_r, ulong address)
+        {
+            slice<ptr<plugin.Sym>> _p0 = default;
+            error _p0 = default!;
+            ref regexp.Regexp r = ref _addr_r.val;
+ 
             // Collect all symbols from the nm output, grouping names mapped to
             // the same address into a single symbol.
-            slice<ref plugin.Sym> symbols = default;
+
+            // The symbols to return.
+            slice<ptr<plugin.Sym>> symbols = default; 
+
+            // The current group of symbol names, and the address they are all at.
             @string names = new slice<@string>(new @string[] {  });
             var start = uint64(0L);
+
             var buf = bytes.NewBuffer(syms);
+
+            while (true)
             {
-                var (symAddr, name, err) = nextSymbol(buf);
-
-                while (err == null)
-                {
-                    if (err != null)
+                var (symAddr, name, err) = nextSymbol(_addr_buf);
+                if (err == io.EOF)
+                { 
+                    // Done. If there was an unfinished group, append it.
+                    if (len(names) != 0L)
                     {
-                        return (null, err);
-                    symAddr, name, err = nextSymbol(buf);
-                    }
-                    if (start == symAddr)
-                    {
-                        names = append(names, name);
-                        continue;
-                    }
-                    {
-                        var match = matchSymbol(names, start, symAddr - 1L, r, address);
-
-                        if (match != null)
                         {
-                            symbols = append(symbols, ref new plugin.Sym(Name:match,File:file,Start:start,End:symAddr-1));
+                            var match__prev3 = match;
+
+                            var match = matchSymbol(names, start, symAddr - 1L, _addr_r, address);
+
+                            if (match != null)
+                            {
+                                symbols = append(symbols, addr(new plugin.Sym(Name:match,File:file,Start:start,End:symAddr-1)));
+                            }
+
+                            match = match__prev3;
+
                         }
 
-                    }
-                    names = new slice<@string>(new @string[] { name });
-                    start = symAddr;
+                    } 
+
+                    // And return the symbols.
+                    return (symbols, error.As(null!)!);
+
                 }
+
+                if (err != null)
+                { 
+                    // There was some kind of serious error reading nm's output.
+                    return (null, error.As(err)!);
+
+                } 
+
+                // If this symbol is at the same address as the current group, add it to the group.
+                if (symAddr == start)
+                {
+                    names = append(names, name);
+                    continue;
+                } 
+
+                // Otherwise append the current group to the list of symbols.
+                {
+                    var match__prev1 = match;
+
+                    match = matchSymbol(names, start, symAddr - 1L, _addr_r, address);
+
+                    if (match != null)
+                    {
+                        symbols = append(symbols, addr(new plugin.Sym(Name:match,File:file,Start:start,End:symAddr-1)));
+                    } 
+
+                    // And start a new group.
+
+                    match = match__prev1;
+
+                } 
+
+                // And start a new group.
+                names = new slice<@string>(new @string[] { name });
+                start = symAddr;
 
             }
 
-            return (symbols, null);
+
         }
 
         // matchSymbol checks if a symbol is to be selected by checking its
         // name to the regexp and optionally its address. It returns the name(s)
         // to be used for the matched symbol, or nil if no match
-        private static slice<@string> matchSymbol(slice<@string> names, ulong start, ulong end, ref regexp.Regexp r, ulong address)
+        private static slice<@string> matchSymbol(slice<@string> names, ulong start, ulong end, ptr<regexp.Regexp> _addr_r, ulong address)
         {
+            ref regexp.Regexp r = ref _addr_r.val;
+
             if (address != 0L && address >= start && address <= end)
             {
                 return names;
             }
+
             foreach (var (_, name) in names)
             {
-                if (r.MatchString(name))
+                if (r == null || r.MatchString(name))
                 {
                     return new slice<@string>(new @string[] { name });
                 } 
@@ -105,15 +154,21 @@ namespace @internal
                         }
 
                     }
+
                 }
+
             }
             return null;
+
         }
 
         // disassemble parses the output of the objdump command and returns
         // the assembly instructions in a slice.
         private static (slice<plugin.Inst>, error) disassemble(slice<byte> asm)
         {
+            slice<plugin.Inst> _p0 = default;
+            error _p0 = default!;
+
             var buf = bytes.NewBuffer(asm);
             @string function = "";
             @string file = "";
@@ -126,13 +181,16 @@ namespace @internal
                 {
                     if (err != io.EOF)
                     {
-                        return (null, err);
+                        return (null, error.As(err)!);
                     }
+
                     if (input == "")
                     {
                         break;
                     }
+
                 }
+
                 {
                     var fields__prev1 = fields;
 
@@ -150,11 +208,13 @@ namespace @internal
                             }
 
                         }
+
                     }
 
                     fields = fields__prev1;
 
                 }
+
                 {
                     var fields__prev1 = fields;
 
@@ -169,15 +229,19 @@ namespace @internal
                             {
                                 file = fields[1L];
                                 line = int(l);
+
                             }
 
                         }
+
                         continue;
+
                     }
 
                     fields = fields__prev1;
 
                 }
+
                 {
                     var fields__prev1 = fields;
 
@@ -197,16 +261,23 @@ namespace @internal
                 function = "";
                 file = "";
                 line = 0L;
+
             }
 
 
-            return (assembly, null);
+            return (assembly, error.As(null!)!);
+
         }
 
         // nextSymbol parses the nm output to find the next symbol listed.
         // Skips over any output it cannot recognize.
-        private static (ulong, @string, error) nextSymbol(ref bytes.Buffer buf)
+        private static (ulong, @string, error) nextSymbol(ptr<bytes.Buffer> _addr_buf)
         {
+            ulong _p0 = default;
+            @string _p0 = default;
+            error _p0 = default!;
+            ref bytes.Buffer buf = ref _addr_buf.val;
+
             while (true)
             {
                 var (line, err) = buf.ReadString('\n');
@@ -214,9 +285,11 @@ namespace @internal
                 {
                     if (err != io.EOF || line == "")
                     {
-                        return (0L, "", err);
+                        return (0L, "", error.As(err)!);
                     }
+
                 }
+
                 {
                     var fields = nmOutputRE.FindStringSubmatch(line);
 
@@ -227,14 +300,17 @@ namespace @internal
 
                             if (err == null)
                             {
-                                return (address, fields[3L], null);
+                                return (address, fields[3L], error.As(null!)!);
                             }
 
                         }
+
                     }
 
                 }
+
             }
+
 
         }
     }

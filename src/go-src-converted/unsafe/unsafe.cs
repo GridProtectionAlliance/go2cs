@@ -8,7 +8,7 @@
     Packages that import unsafe may be non-portable and are not protected by the
     Go 1 compatibility guidelines.
 */
-// package @unsafe -- go2cs converted at 2020 August 29 08:16:12 UTC
+// package @unsafe -- go2cs converted at 2020 October 08 00:33:52 UTC
 // import "unsafe" ==> using @unsafe = go.@unsafe_package
 // Original source: C:\Go\src\unsafe\unsafe.go
 
@@ -109,6 +109,12 @@ namespace go
         //    u := uintptr(p)
         //    p = unsafe.Pointer(u + offset)
         //
+        // Note that the pointer must point into an allocated object, so it may not be nil.
+        //
+        //    // INVALID: conversion of nil pointer
+        //    u := unsafe.Pointer(nil)
+        //    p := unsafe.Pointer(uintptr(u) + offset)
+        //
         // (4) Conversion of a Pointer to a uintptr when calling syscall.Syscall.
         //
         // The Syscall functions in package syscall pass their uintptr arguments directly
@@ -168,7 +174,7 @@ namespace go
         //    hdr.Len = n
         //
         // In this usage hdr.Data is really an alternate way to refer to the underlying
-        // pointer in the slice header, not a uintptr variable itself.
+        // pointer in the string header, not a uintptr variable itself.
         //
         // In general, reflect.SliceHeader and reflect.StringHeader should be used
         // only as *reflect.SliceHeader and *reflect.StringHeader pointing at actual
@@ -181,7 +187,7 @@ namespace go
         //    hdr.Len = n
         //    s := *(*string)(unsafe.Pointer(&hdr)) // p possibly already lost
         //
-        public partial struct Pointer // : ref ArbitraryType
+        public partial struct Pointer // : ptr<ArbitraryType>
         {
         }
 
@@ -190,12 +196,14 @@ namespace go
         // The size does not include any memory possibly referenced by x.
         // For instance, if x is a slice, Sizeof returns the size of the slice
         // descriptor, not the size of the memory referenced by the slice.
+        // The return value of Sizeof is a Go constant.
         public static System.UIntPtr Sizeof(ArbitraryType x)
 ;
 
         // Offsetof returns the offset within the struct of the field represented by x,
         // which must be of the form structValue.field. In other words, it returns the
         // number of bytes between the start of the struct and the start of the field.
+        // The return value of Offsetof is a Go constant.
         public static System.UIntPtr Offsetof(ArbitraryType x)
 ;
 
@@ -207,6 +215,7 @@ namespace go
         // within that struct, then Alignof(s.f) will return the required alignment
         // of a field of that type within a struct. This case is the same as the
         // value returned by reflect.TypeOf(s.f).FieldAlign().
+        // The return value of Alignof is a Go constant.
         public static System.UIntPtr Alignof(ArbitraryType x)
 ;
     }

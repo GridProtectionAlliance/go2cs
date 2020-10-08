@@ -4,7 +4,7 @@
 
 // +build cgo
 
-// package testenv -- go2cs converted at 2020 August 29 10:11:08 UTC
+// package testenv -- go2cs converted at 2020 October 08 04:59:48 UTC
 // import "internal/testenv" ==> using testenv = go.@internal.testenv_package
 // Original source: C:\Go\src\internal\testenv\testenv_cgo.go
 

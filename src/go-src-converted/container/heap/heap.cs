@@ -14,7 +14,7 @@
 // highest-priority item from the queue. The Examples include such an
 // implementation; the file example_pq_test.go has the complete source.
 //
-// package heap -- go2cs converted at 2020 August 29 08:47:39 UTC
+// package heap -- go2cs converted at 2020 October 08 04:03:26 UTC
 // import "container/heap" ==> using heap = go.container.heap_package
 // Original source: C:\Go\src\container\heap\heap.go
 using sort = go.sort_package;
@@ -25,7 +25,9 @@ namespace container
 {
     public static partial class heap_package
     {
-        // Any type that implements heap.Interface may be used as a
+        // The Interface type describes the requirements
+        // for a type using the routines in this package.
+        // Any type that implements it may be used as a
         // min-heap with the following invariants (established after
         // Init has been called or if the data is empty or sorted):
         //
@@ -40,11 +42,10 @@ namespace container
             void Pop(); // remove and return element Len() - 1.
         }
 
-        // A heap must be initialized before any of the heap operations
-        // can be used. Init is idempotent with respect to the heap invariants
+        // Init establishes the heap invariants required by the other routines in this package.
+        // Init is idempotent with respect to the heap invariants
         // and may be called whenever the heap invariants may have been invalidated.
-        // Its complexity is O(n) where n = h.Len().
-        //
+        // The complexity is O(n) where n = h.Len().
         public static void Init(Interface h)
         { 
             // heapify
@@ -54,21 +55,20 @@ namespace container
                 down(h, i, n);
             }
 
+
         }
 
-        // Push pushes the element x onto the heap. The complexity is
-        // O(log(n)) where n = h.Len().
-        //
+        // Push pushes the element x onto the heap.
+        // The complexity is O(log n) where n = h.Len().
         public static void Push(Interface h, object x)
         {
             h.Push(x);
             up(h, h.Len() - 1L);
         }
 
-        // Pop removes the minimum element (according to Less) from the heap
-        // and returns it. The complexity is O(log(n)) where n = h.Len().
-        // It is equivalent to Remove(h, 0).
-        //
+        // Pop removes and returns the minimum element (according to Less) from the heap.
+        // The complexity is O(log n) where n = h.Len().
+        // Pop is equivalent to Remove(h, 0).
         public static void Pop(Interface h)
         {
             var n = h.Len() - 1L;
@@ -77,9 +77,8 @@ namespace container
             return h.Pop();
         }
 
-        // Remove removes the element at index i from the heap.
-        // The complexity is O(log(n)) where n = h.Len().
-        //
+        // Remove removes and returns the element at index i from the heap.
+        // The complexity is O(log n) where n = h.Len().
         public static void Remove(Interface h, long i)
         {
             var n = h.Len() - 1L;
@@ -90,20 +89,24 @@ namespace container
                 {
                     up(h, i);
                 }
+
             }
+
             return h.Pop();
+
         }
 
         // Fix re-establishes the heap ordering after the element at index i has changed its value.
         // Changing the value of the element at index i and then calling Fix is equivalent to,
         // but less expensive than, calling Remove(h, i) followed by a Push of the new value.
-        // The complexity is O(log(n)) where n = h.Len().
+        // The complexity is O(log n) where n = h.Len().
         public static void Fix(Interface h, long i)
         {
             if (!down(h, i, h.Len()))
             {
                 up(h, i);
             }
+
         }
 
         private static void up(Interface h, long j)
@@ -115,9 +118,12 @@ namespace container
                 {
                     break;
                 }
+
                 h.Swap(i, j);
                 j = i;
+
             }
+
 
         }
 
@@ -130,7 +136,9 @@ namespace container
                 if (j1 >= n || j1 < 0L)
                 { // j1 < 0 after int overflow
                     break;
+
                 }
+
                 var j = j1; // left child
                 {
                     var j2 = j1 + 1L;
@@ -141,15 +149,19 @@ namespace container
                     }
 
                 }
+
                 if (!h.Less(j, i))
                 {
                     break;
                 }
+
                 h.Swap(i, j);
                 i = j;
+
             }
 
             return i > i0;
+
         }
     }
 }}

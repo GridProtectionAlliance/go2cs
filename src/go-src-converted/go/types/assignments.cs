@@ -4,7 +4,7 @@
 
 // This file implements initialization and assignment checks.
 
-// package types -- go2cs converted at 2020 August 29 08:47:17 UTC
+// package types -- go2cs converted at 2020 October 08 04:02:57 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\assignments.go
 using ast = go.go.ast_package;
@@ -22,14 +22,17 @@ namespace go
         // type. context describes the context in which the assignment takes place.
         // Use T == nil to indicate assignment to an untyped blank identifier.
         // x.mode is set to invalid if the assignment failed.
-        private static void assignment(this ref Checker check, ref operand x, Type T, @string context)
+        private static void assignment(this ptr<Checker> _addr_check, ptr<operand> _addr_x, Type T, @string context)
         {
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+
             check.singleValue(x);
 
 
             if (x.mode == invalid) 
-                return; // error reported before
-            else if (x.mode == constant_ || x.mode == variable || x.mode == mapindex || x.mode == value || x.mode == commaok)             else 
+                return ; // error reported before
+            else if (x.mode == constant_ || x.mode == variable || x.mode == mapindex || x.mode == value || x.mode == commaok || x.mode == commaerr)             else 
                 unreachable();
                         if (isUntyped(x.typ))
             {
@@ -45,24 +48,25 @@ namespace go
                     {
                         check.errorf(x.pos(), "use of untyped nil in %s", context);
                         x.mode = invalid;
-                        return;
+                        return ;
                     }
                     target = Default(x.typ);
+
                 }
                 check.convertUntyped(x, target);
                 if (x.mode == invalid)
                 {
-                    return;
+                    return ;
                 }
             }
             if (T == null)
             {
-                return;
+                return ;
             }
             {
-                @string reason = "";
+                ref @string reason = ref heap("", out ptr<@string> _addr_reason);
 
-                if (!x.assignableTo(check.conf, T, ref reason))
+                if (!x.assignableTo(check, T, _addr_reason))
                 {
                     if (reason != "")
                     {
@@ -73,19 +77,27 @@ namespace go
                         check.errorf(x.pos(), "cannot use %s as %s value in %s", x, T, context);
                     }
                     x.mode = invalid;
+
                 }
             }
+
         }
 
-        private static void initConst(this ref Checker check, ref Const lhs, ref operand x)
+        private static void initConst(this ptr<Checker> _addr_check, ptr<Const> _addr_lhs, ptr<operand> _addr_x)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Const lhs = ref _addr_lhs.val;
+            ref operand x = ref _addr_x.val;
+
             if (x.mode == invalid || x.typ == Typ[Invalid] || lhs.typ == Typ[Invalid])
             {
                 if (lhs.typ == null)
                 {
                     lhs.typ = Typ[Invalid];
                 }
-                return;
+
+                return ;
+
             } 
 
             // rhs must be a constant
@@ -96,8 +108,11 @@ namespace go
                 {
                     lhs.typ = Typ[Invalid];
                 }
-                return;
+
+                return ;
+
             }
+
             assert(isConstType(x.typ)); 
 
             // If the lhs doesn't have a type yet, use the type of x.
@@ -105,23 +120,32 @@ namespace go
             {
                 lhs.typ = x.typ;
             }
+
             check.assignment(x, lhs.typ, "constant declaration");
             if (x.mode == invalid)
             {
-                return;
+                return ;
             }
+
             lhs.val = x.val;
+
         }
 
-        private static Type initVar(this ref Checker check, ref Var lhs, ref operand x, @string context)
+        private static Type initVar(this ptr<Checker> _addr_check, ptr<Var> _addr_lhs, ptr<operand> _addr_x, @string context)
         {
+            ref Checker check = ref _addr_check.val;
+            ref Var lhs = ref _addr_lhs.val;
+            ref operand x = ref _addr_x.val;
+
             if (x.mode == invalid || x.typ == Typ[Invalid] || lhs.typ == Typ[Invalid])
             {
                 if (lhs.typ == null)
                 {
                     lhs.typ = Typ[Invalid];
                 }
+
                 return null;
+
             } 
 
             // If the lhs doesn't have a type yet, use the type of x.
@@ -137,27 +161,37 @@ namespace go
                         lhs.typ = Typ[Invalid];
                         return null;
                     }
+
                     typ = Default(typ);
+
                 }
+
                 lhs.typ = typ;
+
             }
+
             check.assignment(x, lhs.typ, context);
             if (x.mode == invalid)
             {
                 return null;
             }
+
             return x.typ;
+
         }
 
-        private static Type assignVar(this ref Checker check, ast.Expr lhs, ref operand x)
+        private static Type assignVar(this ptr<Checker> _addr_check, ast.Expr lhs, ptr<operand> _addr_x)
         {
+            ref Checker check = ref _addr_check.val;
+            ref operand x = ref _addr_x.val;
+
             if (x.mode == invalid || x.typ == Typ[Invalid])
             {
                 return null;
             } 
 
             // Determine if the lhs is a (possibly parenthesized) identifier.
-            ref ast.Ident (ident, _) = unparen(lhs)._<ref ast.Ident>(); 
+            ptr<ast.Ident> (ident, _) = unparen(lhs)._<ptr<ast.Ident>>(); 
 
             // Don't evaluate lhs if it is the blank identifier.
             if (ident != null && ident.Name == "_")
@@ -168,18 +202,20 @@ namespace go
                 {
                     return null;
                 }
+
                 return x.typ;
+
             } 
 
             // If the lhs is an identifier denoting a variable v, this assignment
             // is not a 'use' of v. Remember current value of v.used and restore
             // after evaluating the lhs via check.expr.
-            ref Var v = default;
+            ptr<Var> v;
             bool v_used = default;
             if (ident != null)
             {
                 {
-                    var (_, obj) = check.scope.LookupParent(ident.Name, token.NoPos);
+                    var obj = check.lookup(ident.Name);
 
                     if (obj != null)
                     { 
@@ -187,7 +223,7 @@ namespace go
                         // from other packages to avoid potential race conditions with
                         // dot-imported variables.
                         {
-                            ref Var (w, _) = obj._<ref Var>();
+                            ptr<Var> (w, _) = obj._<ptr<Var>>();
 
                             if (w != null && w.pkg == check.pkg)
                             {
@@ -196,16 +232,20 @@ namespace go
                             }
 
                         }
+
                     }
 
                 }
+
             }
-            operand z = default;
-            check.expr(ref z, lhs);
+
+            ref operand z = ref heap(out ptr<operand> _addr_z);
+            check.expr(_addr_z, lhs);
             if (v != null)
             {
                 v.used = v_used; // restore v.used
             }
+
             if (z.mode == invalid || z.typ == Typ[Invalid])
             {
                 return null;
@@ -218,39 +258,44 @@ namespace go
                 return null;
             else if (z.mode == variable || z.mode == mapindex)             else 
                 {
-                    ref ast.SelectorExpr (sel, ok) = z.expr._<ref ast.SelectorExpr>();
+                    ptr<ast.SelectorExpr> (sel, ok) = z.expr._<ptr<ast.SelectorExpr>>();
 
                     if (ok)
                     {
-                        operand op = default;
-                        check.expr(ref op, sel.X);
+                        ref operand op = ref heap(out ptr<operand> _addr_op);
+                        check.expr(_addr_op, sel.X);
                         if (op.mode == mapindex)
                         {
                             check.errorf(z.pos(), "cannot assign to struct field %s in map", ExprString(z.expr));
                             return null;
                         }
+
                     }
 
                 }
-                check.errorf(z.pos(), "cannot assign to %s", ref z);
+
+                check.errorf(z.pos(), "cannot assign to %s", _addr_z);
                 return null;
                         check.assignment(x, z.typ, "assignment");
             if (x.mode == invalid)
             {
                 return null;
             }
+
             return x.typ;
+
         }
 
         // If returnPos is valid, initVars is called to type-check the assignment of
         // return expressions, and returnPos is the position of the return statement.
-        private static void initVars(this ref Checker check, slice<ref Var> lhs, slice<ast.Expr> rhs, token.Pos returnPos)
+        private static void initVars(this ptr<Checker> _addr_check, slice<ptr<Var>> lhs, slice<ast.Expr> rhs, token.Pos returnPos)
         {
+            ref Checker check = ref _addr_check.val;
+
             var l = len(lhs);
             var (get, r, commaOk) = unpack((x, i) =>
             {
                 check.multiExpr(x, rhs[i]);
-
             }, len(rhs), l == 2L && !returnPos.IsValid());
             if (get == null || l != r)
             { 
@@ -261,26 +306,32 @@ namespace go
                     {
                         obj.typ = Typ[Invalid];
                     }
+
                 }
                 if (get == null)
                 {
-                    return; // error reported by unpack
+                    return ; // error reported by unpack
                 }
+
                 check.useGetter(get, r);
                 if (returnPos.IsValid())
                 {
                     check.errorf(returnPos, "wrong number of return values (want %d, got %d)", l, r);
-                    return;
+                    return ;
                 }
+
                 check.errorf(rhs[0L].Pos(), "cannot initialize %d variables with %d values", l, r);
-                return;
+                return ;
+
             }
+
             @string context = "assignment";
             if (returnPos.IsValid())
             {
                 context = "return statement";
             }
-            operand x = default;
+
+            ref operand x = ref heap(out ptr<operand> _addr_x);
             if (commaOk)
             {
                 array<Type> a = new array<Type>(2L);
@@ -290,16 +341,18 @@ namespace go
                     foreach (var (__i) in a)
                     {
                         i = __i;
-                        get(ref x, i);
-                        a[i] = check.initVar(lhs[i], ref x, context);
+                        get(_addr_x, i);
+                        a[i] = check.initVar(lhs[i], _addr_x, context);
                     }
 
                     i = i__prev1;
                 }
 
                 check.recordCommaOkTypes(rhs[0L], a);
-                return;
+                return ;
+
             }
+
             {
                 var i__prev1 = i;
 
@@ -307,35 +360,37 @@ namespace go
                 {
                     i = __i;
                     lhs = __lhs;
-                    get(ref x, i);
-                    check.initVar(lhs, ref x, context);
+                    get(_addr_x, i);
+                    check.initVar(lhs, _addr_x, context);
                 }
 
                 i = i__prev1;
             }
-
         }
 
-        private static void assignVars(this ref Checker check, slice<ast.Expr> lhs, slice<ast.Expr> rhs)
+        private static void assignVars(this ptr<Checker> _addr_check, slice<ast.Expr> lhs, slice<ast.Expr> rhs)
         {
+            ref Checker check = ref _addr_check.val;
+
             var l = len(lhs);
             var (get, r, commaOk) = unpack((x, i) =>
             {
                 check.multiExpr(x, rhs[i]);
-
             }, len(rhs), l == 2L);
             if (get == null)
             {
                 check.useLHS(lhs);
-                return; // error reported by unpack
+                return ; // error reported by unpack
             }
+
             if (l != r)
             {
                 check.useGetter(get, r);
                 check.errorf(rhs[0L].Pos(), "cannot assign %d values to %d variables", r, l);
-                return;
+                return ;
             }
-            operand x = default;
+
+            ref operand x = ref heap(out ptr<operand> _addr_x);
             if (commaOk)
             {
                 array<Type> a = new array<Type>(2L);
@@ -345,16 +400,18 @@ namespace go
                     foreach (var (__i) in a)
                     {
                         i = __i;
-                        get(ref x, i);
-                        a[i] = check.assignVar(lhs[i], ref x);
+                        get(_addr_x, i);
+                        a[i] = check.assignVar(lhs[i], _addr_x);
                     }
 
                     i = i__prev1;
                 }
 
                 check.recordCommaOkTypes(rhs[0L], a);
-                return;
+                return ;
+
             }
+
             {
                 var i__prev1 = i;
 
@@ -362,27 +419,29 @@ namespace go
                 {
                     i = __i;
                     lhs = __lhs;
-                    get(ref x, i);
-                    check.assignVar(lhs, ref x);
+                    get(_addr_x, i);
+                    check.assignVar(lhs, _addr_x);
                 }
 
                 i = i__prev1;
             }
-
         }
 
-        private static void shortVarDecl(this ref Checker check, token.Pos pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs)
+        private static void shortVarDecl(this ptr<Checker> _addr_check, token.Pos pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs)
         {
+            ref Checker check = ref _addr_check.val;
+
+            var top = len(check.delayed);
             var scope = check.scope; 
 
             // collect lhs variables
-            slice<ref Var> newVars = default;
-            var lhsVars = make_slice<ref Var>(len(lhs));
+            slice<ptr<Var>> newVars = default;
+            var lhsVars = make_slice<ptr<Var>>(len(lhs));
             foreach (var (i, lhs) in lhs)
             {
-                ref Var obj = default;
+                ptr<Var> obj;
                 {
-                    ref ast.Ident (ident, _) = lhs._<ref ast.Ident>();
+                    ptr<ast.Ident> (ident, _) = lhs._<ptr<ast.Ident>>();
 
                     if (ident != null)
                     { 
@@ -402,7 +461,7 @@ namespace go
                                 {
                                     var alt__prev3 = alt;
 
-                                    ref Var (alt, _) = alt._<ref Var>();
+                                    ptr<Var> (alt, _) = alt._<ptr<Var>>();
 
                                     if (alt != null)
                                     {
@@ -416,7 +475,9 @@ namespace go
                                     alt = alt__prev3;
 
                                 }
+
                                 check.recordUse(ident, alt);
+
                             }
                             else
                             { 
@@ -426,26 +487,36 @@ namespace go
                                 {
                                     newVars = append(newVars, obj);
                                 }
+
                                 check.recordDef(ident, obj);
+
                             }
 
                             alt = alt__prev2;
 
                         }
+
                     }
                     else
                     {
+                        check.useLHS(lhs);
                         check.errorf(lhs.Pos(), "cannot declare %s", lhs);
                     }
 
                 }
+
                 if (obj == null)
                 {
                     obj = NewVar(lhs.Pos(), check.pkg, "_", null); // dummy variable
                 }
+
                 lhsVars[i] = obj;
+
             }
             check.initVars(lhsVars, rhs, token.NoPos); 
+
+            // process function literals in rhs expressions before scope changes
+            check.processDelayed(top); 
 
             // declare new variables
             if (len(newVars) > 0L)
@@ -456,7 +527,7 @@ namespace go
                 // containing block."
                 var scopePos = rhs[len(rhs) - 1L].End();
                 {
-                    ref Var obj__prev1 = obj;
+                    ptr<Var> obj__prev1 = obj;
 
                     foreach (var (_, __obj) in newVars)
                     {
@@ -467,10 +538,10 @@ namespace go
 
                     obj = obj__prev1;
                 }
-
             }            {
                 check.softErrorf(pos, "no new variables on left side of :=");
             }
+
         }
     }
 }}

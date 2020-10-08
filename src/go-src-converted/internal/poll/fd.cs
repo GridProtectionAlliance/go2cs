@@ -7,7 +7,7 @@
 // This is used by the net and os packages.
 // It uses a poller built into the runtime, with support from the
 // runtime scheduler.
-// package poll -- go2cs converted at 2020 August 29 08:25:16 UTC
+// package poll -- go2cs converted at 2020 October 08 03:32:08 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fd.go
 using errors = go.errors_package;
@@ -38,47 +38,68 @@ namespace @internal
         {
             if (isFile)
             {
-                return error.As(ErrFileClosing);
+                return error.As(ErrFileClosing)!;
             }
-            return error.As(ErrNetClosing);
+
+            return error.As(ErrNetClosing)!;
+
         }
 
-        // ErrTimeout is returned for an expired deadline.
-        public static error ErrTimeout = error.As(ref new TimeoutError());
+        // ErrDeadlineExceeded is returned for an expired deadline.
+        // This is exported by the os package as os.ErrDeadlineExceeded.
+        public static error ErrDeadlineExceeded = error.As(addr(new DeadlineExceededError()))!;
 
-        // TimeoutError is returned for an expired deadline.
-        public partial struct TimeoutError
+        // DeadlineExceededError is returned for an expired deadline.
+        public partial struct DeadlineExceededError
         {
         }
 
         // Implement the net.Error interface.
-        private static @string Error(this ref TimeoutError e)
+        // The string is "i/o timeout" because that is what was returned
+        // by earlier Go versions. Changing it may break programs that
+        // match on error strings.
+        private static @string Error(this ptr<DeadlineExceededError> _addr_e)
         {
+            ref DeadlineExceededError e = ref _addr_e.val;
+
             return "i/o timeout";
         }
-        private static bool Timeout(this ref TimeoutError e)
+        private static bool Timeout(this ptr<DeadlineExceededError> _addr_e)
         {
+            ref DeadlineExceededError e = ref _addr_e.val;
+
             return true;
         }
-        private static bool Temporary(this ref TimeoutError e)
+        private static bool Temporary(this ptr<DeadlineExceededError> _addr_e)
         {
+            ref DeadlineExceededError e = ref _addr_e.val;
+
             return true;
         }
 
+        // ErrNotPollable is returned when the file or socket is not suitable
+        // for event notification.
+        public static var ErrNotPollable = errors.New("not pollable");
+
         // consume removes data from a slice of byte slices, for writev.
-        private static void consume(ref slice<slice<byte>> v, long n)
+        private static void consume(ptr<slice<slice<byte>>> _addr_v, long n)
         {
-            while (len(v.Value) > 0L)
+            ref slice<slice<byte>> v = ref _addr_v.val;
+
+            while (len(v) > 0L)
             {
-                var ln0 = int64(len((v.Value)[0L]));
+                var ln0 = int64(len((v)[0L]));
                 if (ln0 > n)
                 {
-                    (v.Value)[0L] = (v.Value)[0L][n..];
-                    return;
+                    (v)[0L] = (v)[0L][n..];
+                    return ;
                 }
+
                 n -= ln0;
-                v.Value = (v.Value)[1L..];
+                v = (v)[1L..];
+
             }
+
 
         }
 

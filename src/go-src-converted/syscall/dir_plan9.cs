@@ -4,7 +4,7 @@
 
 // Plan 9 directory marshaling. See intro(5).
 
-// package syscall -- go2cs converted at 2020 August 29 08:16:19 UTC
+// package syscall -- go2cs converted at 2020 October 08 00:33:59 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\dir_plan9.go
 using errors = go.errors_package;
@@ -46,28 +46,35 @@ namespace go
 
         // Null assigns special "don't touch" values to members of d to
         // avoid modifying them during syscall.Wstat.
-        private static void Null(this ref Dir d)
+        private static void Null(this ptr<Dir> _addr_d)
         {
-            d.Value = nullDir;
+            ref Dir d = ref _addr_d.val;
 
+            d.val = nullDir;
         }
 
         // Marshal encodes a 9P stat message corresponding to d into b
         //
         // If there isn't enough space in b for a stat message, ErrShortStat is returned.
-        private static (long, error) Marshal(this ref Dir d, slice<byte> b)
+        private static (long, error) Marshal(this ptr<Dir> _addr_d, slice<byte> b)
         {
+            long n = default;
+            error err = default!;
+            ref Dir d = ref _addr_d.val;
+
             n = STATFIXLEN + len(d.Name) + len(d.Uid) + len(d.Gid) + len(d.Muid);
             if (n > len(b))
             {
-                return (n, ErrShortStat);
+                return (n, error.As(ErrShortStat)!);
             }
+
             foreach (var (_, c) in d.Name)
             {
                 if (c == '/')
                 {
-                    return (n, ErrBadName);
+                    return (n, error.As(ErrBadName)!);
                 }
+
             }
             b = pbit16(b, uint16(n) - 2L);
             b = pbit16(b, d.Type);
@@ -84,7 +91,8 @@ namespace go
             b = pstring(b, d.Gid);
             b = pstring(b, d.Muid);
 
-            return (n, null);
+            return (n, error.As(null!)!);
+
         }
 
         // UnmarshalDir decodes a single 9P stat message from b and returns the resulting Dir.
@@ -92,20 +100,25 @@ namespace go
         // If b is too small to hold a valid stat message, ErrShortStat is returned.
         //
         // If the stat message itself is invalid, ErrBadStat is returned.
-        public static (ref Dir, error) UnmarshalDir(slice<byte> b)
+        public static (ptr<Dir>, error) UnmarshalDir(slice<byte> b)
         {
+            ptr<Dir> _p0 = default!;
+            error _p0 = default!;
+
             if (len(b) < STATFIXLEN)
             {
-                return (null, ErrShortStat);
+                return (_addr_null!, error.As(ErrShortStat)!);
             }
+
             var (size, buf) = gbit16(b);
             if (len(b) != int(size) + 2L)
             {
-                return (null, ErrBadStat);
+                return (_addr_null!, error.As(ErrBadStat)!);
             }
+
             b = buf;
 
-            Dir d = default;
+            ref Dir d = ref heap(out ptr<Dir> _addr_d);
             d.Type, b = gbit16(b);
             d.Dev, b = gbit32(b);
             d.Qid.Type, b = gbit8(b);
@@ -123,27 +136,32 @@ namespace go
 
             if (!ok)
             {
-                return (null, ErrBadStat);
+                return (_addr_null!, error.As(ErrBadStat)!);
             }
+
             d.Uid, b, ok = gstring(b);
 
             if (!ok)
             {
-                return (null, ErrBadStat);
+                return (_addr_null!, error.As(ErrBadStat)!);
             }
+
             d.Gid, b, ok = gstring(b);
 
             if (!ok)
             {
-                return (null, ErrBadStat);
+                return (_addr_null!, error.As(ErrBadStat)!);
             }
+
             d.Muid, b, ok = gstring(b);
 
             if (!ok)
             {
-                return (null, ErrBadStat);
+                return (_addr_null!, error.As(ErrBadStat)!);
             }
-            return (ref d, null);
+
+            return (_addr__addr_d!, error.As(null!)!);
+
         }
 
         // pbit8 copies the 8-bit number v to b and returns the remaining slice of b.
@@ -197,6 +215,9 @@ namespace go
         // gbit8 reads an 8-bit number from b and returns it with the remaining slice of b.
         private static (byte, slice<byte>) gbit8(slice<byte> b)
         {
+            byte _p0 = default;
+            slice<byte> _p0 = default;
+
             return (uint8(b[0L]), b[1L..]);
         }
 
@@ -204,18 +225,27 @@ namespace go
         //go:nosplit
         private static (ushort, slice<byte>) gbit16(slice<byte> b)
         {
+            ushort _p0 = default;
+            slice<byte> _p0 = default;
+
             return (uint16(b[0L]) | uint16(b[1L]) << (int)(8L), b[2L..]);
         }
 
         // gbit32 reads a 32-bit number in little-endian order from b and returns it with the remaining slice of b.
         private static (uint, slice<byte>) gbit32(slice<byte> b)
         {
+            uint _p0 = default;
+            slice<byte> _p0 = default;
+
             return (uint32(b[0L]) | uint32(b[1L]) << (int)(8L) | uint32(b[2L]) << (int)(16L) | uint32(b[3L]) << (int)(24L), b[4L..]);
         }
 
         // gbit64 reads a 64-bit number in little-endian order from b and returns it with the remaining slice of b.
         private static (ulong, slice<byte>) gbit64(slice<byte> b)
         {
+            ulong _p0 = default;
+            slice<byte> _p0 = default;
+
             var lo = uint32(b[0L]) | uint32(b[1L]) << (int)(8L) | uint32(b[2L]) << (int)(16L) | uint32(b[3L]) << (int)(24L);
             var hi = uint32(b[4L]) | uint32(b[5L]) << (int)(8L) | uint32(b[6L]) << (int)(16L) | uint32(b[7L]) << (int)(24L);
             return (uint64(lo) | uint64(hi) << (int)(32L), b[8L..]);
@@ -226,12 +256,18 @@ namespace go
         // greater than the number of bytes in b, the boolean will be false.
         private static (@string, slice<byte>, bool) gstring(slice<byte> b)
         {
+            @string _p0 = default;
+            slice<byte> _p0 = default;
+            bool _p0 = default;
+
             var (n, b) = gbit16(b);
             if (int(n) > len(b))
             {
                 return ("", b, false);
             }
+
             return (string(b[..n]), b[n..], true);
+
         }
     }
 }

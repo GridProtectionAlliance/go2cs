@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:55:01 UTC
+//     Generated on 2020 October 08 04:11:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,9 @@ using static go.builtin;
 using types = go.cmd.compile.@internal.types_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using sys = go.cmd.@internal.sys_package;
 using fmt = go.fmt_package;
+using bits = go.math.bits_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
@@ -44,9 +46,10 @@ namespace @internal
                 this.usedRegs = default;
                 this.uniqueRegs = default;
                 this.finalRegs = default;
+                this.rematerializeableRegs = default;
             }
 
-            public edgeState(ref ptr<regAllocState> s = default, ref ptr<Block> p = default, ref ptr<Block> b = default, map<ID, slice<ref Value>> cache = default, slice<ID> cachedVals = default, map<Location, contentRecord> contents = default, slice<dstRecord> destinations = default, slice<dstRecord> extra = default, regMask usedRegs = default, regMask uniqueRegs = default, regMask finalRegs = default)
+            public edgeState(ref ptr<regAllocState> s = default, ref ptr<Block> p = default, ref ptr<Block> b = default, map<ID, slice<ptr<Value>>> cache = default, slice<ID> cachedVals = default, map<Location, contentRecord> contents = default, slice<dstRecord> destinations = default, slice<dstRecord> extra = default, regMask usedRegs = default, regMask uniqueRegs = default, regMask finalRegs = default, regMask rematerializeableRegs = default)
             {
                 this.s = s;
                 this.p = p;
@@ -59,6 +62,7 @@ namespace @internal
                 this.usedRegs = usedRegs;
                 this.uniqueRegs = uniqueRegs;
                 this.finalRegs = finalRegs;
+                this.rematerializeableRegs = rematerializeableRegs;
             }
 
             // Enable comparisons between nil and edgeState struct
@@ -81,7 +85,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static edgeState edgeState_cast(dynamic value)
         {
-            return new edgeState(ref value.s, ref value.p, ref value.b, value.cache, value.cachedVals, value.contents, value.destinations, value.extra, value.usedRegs, value.uniqueRegs, value.finalRegs);
+            return new edgeState(ref value.s, ref value.p, ref value.b, value.cache, value.cachedVals, value.contents, value.destinations, value.extra, value.usedRegs, value.uniqueRegs, value.finalRegs, value.rematerializeableRegs);
         }
     }
 }}}}

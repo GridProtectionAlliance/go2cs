@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:37 UTC
+//     Generated on 2020 October 08 04:04:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,25 +26,17 @@ namespace pkg
     public static partial class p1_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        [PromotedStruct(typeof(common))]
         public partial struct TPtrUnexported
         {
-            // common structure promotion - sourced from pointer
-            private readonly ptr<common> m_commonRef;
-
-            private ref common common_ptr => ref m_commonRef.Value;
-
-            public ref long i => ref m_commonRef.Value.i;
-
             // Constructors
             public TPtrUnexported(NilType _)
             {
-                this.m_commonRef = new ptr<common>(new common(nil));
+                this.ptr<common> = default;
             }
 
-            public TPtrUnexported(ref common common = default)
+            public TPtrUnexported(ref ptr<common> ptr<common> = default)
             {
-                this.m_commonRef = new ptr<common>(ref common);
+                this.ptr<common> = ptr<common>;
             }
 
             // Enable comparisons between nil and TPtrUnexported struct
@@ -67,7 +59,7 @@ namespace pkg
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static TPtrUnexported TPtrUnexported_cast(dynamic value)
         {
-            return new TPtrUnexported(ref value.common);
+            return new TPtrUnexported(ref value.ptr<common>);
         }
     }
 }}}}}}

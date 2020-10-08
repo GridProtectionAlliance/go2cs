@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:27:07 UTC
+//     Generated on 2020 October 08 03:34:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,9 +16,9 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
-using poll = go.@internal.poll_package;
 using io = go.io_package;
 using os = go.os_package;
+using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
 
@@ -54,7 +54,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -68,23 +68,24 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) writeBuffersByRef(ref T value, ref Buffers _p0);
-            private delegate (long, error) writeBuffersByVal(T value, ref Buffers _p0);
+            private delegate (long, error) writeBuffersByPtr(ptr<T> value, ptr<Buffers> _p0);
+            private delegate (long, error) writeBuffersByVal(T value, ptr<Buffers> _p0);
 
-            private static readonly writeBuffersByRef s_writeBuffersByRef;
+            private static readonly writeBuffersByPtr s_writeBuffersByPtr;
             private static readonly writeBuffersByVal s_writeBuffersByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) writeBuffers(ref Buffers _p0)
+            public (long, error) writeBuffers(ptr<Buffers> _p0)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_writeBuffersByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_writeBuffersByPtr is null || !m_target_is_ptr)
                     return s_writeBuffersByVal!(target, _p0);
 
-                return s_writeBuffersByRef(ref target, _p0);
+                return s_writeBuffersByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -93,23 +94,20 @@ namespace go
             static buffersWriter()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("writeBuffers");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("writeBuffers");
 
                 if (!(extensionMethod is null))
-                    s_writeBuffersByRef = extensionMethod.CreateStaticDelegate(typeof(writeBuffersByRef)) as writeBuffersByRef;
+                    s_writeBuffersByPtr = extensionMethod.CreateStaticDelegate(typeof(writeBuffersByPtr)) as writeBuffersByPtr;
 
-                if (s_writeBuffersByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("writeBuffers");
+                extensionMethod = targetType.GetExtensionMethod("writeBuffers");
 
-                    if (!(extensionMethod is null))
-                        s_writeBuffersByVal = extensionMethod.CreateStaticDelegate(typeof(writeBuffersByVal)) as writeBuffersByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_writeBuffersByVal = extensionMethod.CreateStaticDelegate(typeof(writeBuffersByVal)) as writeBuffersByVal;
 
-                if (s_writeBuffersByRef is null && s_writeBuffersByVal is null)
+                if (s_writeBuffersByPtr is null && s_writeBuffersByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement buffersWriter.writeBuffers method", new Exception("writeBuffers"));
             }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2020 August 29 08:35:55 UTC
+// package json -- go2cs converted at 2020 October 08 03:42:55 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\tags.go
 using strings = go.strings_package;
@@ -23,6 +23,9 @@ namespace encoding
         // comma-separated options.
         private static (@string, tagOptions) parseTag(@string tag)
         {
+            @string _p0 = default;
+            tagOptions _p0 = default;
+
             {
                 var idx = strings.Index(tag, ",");
 
@@ -32,7 +35,9 @@ namespace encoding
                 }
 
             }
+
             return (tag, tagOptions(""));
+
         }
 
         // Contains reports whether a comma-separated list of options
@@ -44,6 +49,7 @@ namespace encoding
             {
                 return false;
             }
+
             var s = string(o);
             while (s != "")
             {
@@ -53,15 +59,20 @@ namespace encoding
                 {
                     s = s[..i];
                     next = s[i + 1L..];
+
                 }
+
                 if (s == optionName)
                 {
                     return true;
                 }
+
                 s = next;
+
             }
 
             return false;
+
         }
     }
 }}

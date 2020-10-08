@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:47:41 UTC
+//     Generated on 2020 October 08 04:03:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace go
                 this.labels = default;
             }
 
-            public block(ref ptr<block> parent = default, ref ptr<ast.LabeledStmt> lstmt = default, map<@string, ref ast.LabeledStmt> labels = default)
+            public block(ref ptr<block> parent = default, ref ptr<ast.LabeledStmt> lstmt = default, map<@string, ptr<ast.LabeledStmt>> labels = default)
             {
                 this.parent = parent;
                 this.lstmt = lstmt;

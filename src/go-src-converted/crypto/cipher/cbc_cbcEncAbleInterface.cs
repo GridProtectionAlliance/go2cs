@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:28:32 UTC
+//     Generated on 2020 October 08 03:35:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using static go.builtin;
+using subtle = go.crypto.@internal.subtle_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -49,7 +50,7 @@ namespace crypto
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -63,10 +64,10 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate BlockMode NewCBCEncrypterByRef(ref T value, slice<byte> iv);
+            private delegate BlockMode NewCBCEncrypterByPtr(ptr<T> value, slice<byte> iv);
             private delegate BlockMode NewCBCEncrypterByVal(T value, slice<byte> iv);
 
-            private static readonly NewCBCEncrypterByRef s_NewCBCEncrypterByRef;
+            private static readonly NewCBCEncrypterByPtr s_NewCBCEncrypterByPtr;
             private static readonly NewCBCEncrypterByVal s_NewCBCEncrypterByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,11 +76,12 @@ namespace crypto
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NewCBCEncrypterByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NewCBCEncrypterByPtr is null || !m_target_is_ptr)
                     return s_NewCBCEncrypterByVal!(target, iv);
 
-                return s_NewCBCEncrypterByRef(ref target, iv);
+                return s_NewCBCEncrypterByPtr(m_target_ptr, iv);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -88,23 +90,20 @@ namespace crypto
             static cbcEncAble()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("NewCBCEncrypter");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("NewCBCEncrypter");
 
                 if (!(extensionMethod is null))
-                    s_NewCBCEncrypterByRef = extensionMethod.CreateStaticDelegate(typeof(NewCBCEncrypterByRef)) as NewCBCEncrypterByRef;
+                    s_NewCBCEncrypterByPtr = extensionMethod.CreateStaticDelegate(typeof(NewCBCEncrypterByPtr)) as NewCBCEncrypterByPtr;
 
-                if (s_NewCBCEncrypterByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("NewCBCEncrypter");
+                extensionMethod = targetType.GetExtensionMethod("NewCBCEncrypter");
 
-                    if (!(extensionMethod is null))
-                        s_NewCBCEncrypterByVal = extensionMethod.CreateStaticDelegate(typeof(NewCBCEncrypterByVal)) as NewCBCEncrypterByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NewCBCEncrypterByVal = extensionMethod.CreateStaticDelegate(typeof(NewCBCEncrypterByVal)) as NewCBCEncrypterByVal;
 
-                if (s_NewCBCEncrypterByRef is null && s_NewCBCEncrypterByVal is null)
+                if (s_NewCBCEncrypterByPtr is null && s_NewCBCEncrypterByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement cbcEncAble.NewCBCEncrypter method", new Exception("NewCBCEncrypter"));
             }
 

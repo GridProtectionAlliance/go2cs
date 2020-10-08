@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 August 29 08:44:44 UTC
+// package math -- go2cs converted at 2020 October 08 03:25:10 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\atan2.go
 
@@ -48,6 +48,7 @@ namespace go
                 {>>MARKER:FUNCTION_Atan2_BLOCK_PREFIX<<
                     return Copysign(0L, y);
                 }
+
                 return Copysign(Pi, y);
             else if (x == 0L) 
                 return Copysign(Pi / 2L, y);
@@ -59,7 +60,9 @@ namespace go
                         return Copysign(Pi / 4L, y);
                     else 
                         return Copysign(0L, y);
-                                    }
+                    
+                }
+
 
                 if (IsInf(y, 0L)) 
                     return Copysign(3L * Pi / 4L, y);
@@ -75,9 +78,13 @@ namespace go
                 {
                     return q + Pi;
                 }
+
                 return q - Pi;
+
             }
+
             return q;
+
         }
     }
 }

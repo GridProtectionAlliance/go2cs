@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris windows
+// +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 August 29 08:26:48 UTC
+// package net -- go2cs converted at 2020 October 08 03:33:45 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\iprawsock_posix.go
 using context = go.context_package;
@@ -19,60 +19,80 @@ namespace go
         {
             switch (sa.type())
             {
-                case ref syscall.SockaddrInet4 sa:
-                    return ref new IPAddr(IP:sa.Addr[0:]);
+                case ptr<syscall.SockaddrInet4> sa:
+                    return addr(new IPAddr(IP:sa.Addr[0:]));
                     break;
-                case ref syscall.SockaddrInet6 sa:
-                    return ref new IPAddr(IP:sa.Addr[0:],Zone:zoneCache.name(int(sa.ZoneId)));
+                case ptr<syscall.SockaddrInet6> sa:
+                    return addr(new IPAddr(IP:sa.Addr[0:],Zone:zoneCache.name(int(sa.ZoneId))));
                     break;
             }
             return null;
+
         }
 
-        private static long family(this ref IPAddr a)
+        private static long family(this ptr<IPAddr> _addr_a)
         {
+            ref IPAddr a = ref _addr_a.val;
+
             if (a == null || len(a.IP) <= IPv4len)
             {
                 return syscall.AF_INET;
             }
+
             if (a.IP.To4() != null)
             {
                 return syscall.AF_INET;
             }
+
             return syscall.AF_INET6;
+
         }
 
-        private static (syscall.Sockaddr, error) sockaddr(this ref IPAddr a, long family)
+        private static (syscall.Sockaddr, error) sockaddr(this ptr<IPAddr> _addr_a, long family)
         {
+            syscall.Sockaddr _p0 = default;
+            error _p0 = default!;
+            ref IPAddr a = ref _addr_a.val;
+
             if (a == null)
             {
-                return (null, null);
+                return (null, error.As(null!)!);
             }
+
             return ipToSockaddr(family, a.IP, 0L, a.Zone);
+
         }
 
-        private static sockaddr toLocal(this ref IPAddr a, @string net)
+        private static sockaddr toLocal(this ptr<IPAddr> _addr_a, @string net)
         {
-            return ref new IPAddr(loopbackIP(net),a.Zone);
+            ref IPAddr a = ref _addr_a.val;
+
+            return addr(new IPAddr(loopbackIP(net),a.Zone));
         }
 
-        private static (long, ref IPAddr, error) readFrom(this ref IPConn c, slice<byte> b)
-        { 
+        private static (long, ptr<IPAddr>, error) readFrom(this ptr<IPConn> _addr_c, slice<byte> b)
+        {
+            long _p0 = default;
+            ptr<IPAddr> _p0 = default!;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+ 
             // TODO(cw,rsc): consider using readv if we know the family
             // type to avoid the header trim/copy
-            ref IPAddr addr = default;
+            ptr<IPAddr> addr;
             var (n, sa, err) = c.fd.readFrom(b);
             switch (sa.type())
             {
-                case ref syscall.SockaddrInet4 sa:
-                    addr = ref new IPAddr(IP:sa.Addr[0:]);
+                case ptr<syscall.SockaddrInet4> sa:
+                    addr = addr(new IPAddr(IP:sa.Addr[0:]));
                     n = stripIPv4Header(n, b);
                     break;
-                case ref syscall.SockaddrInet6 sa:
-                    addr = ref new IPAddr(IP:sa.Addr[0:],Zone:zoneCache.name(int(sa.ZoneId)));
+                case ptr<syscall.SockaddrInet6> sa:
+                    addr = addr(new IPAddr(IP:sa.Addr[0:],Zone:zoneCache.name(int(sa.ZoneId))));
                     break;
             }
-            return (n, addr, err);
+            return (n, _addr_addr!, error.As(err)!);
+
         }
 
         private static long stripIPv4Header(long n, slice<byte> b)
@@ -81,78 +101,116 @@ namespace go
             {
                 return n;
             }
+
             var l = int(b[0L] & 0x0fUL) << (int)(2L);
             if (20L > l || l > len(b))
             {
                 return n;
             }
+
             if (b[0L] >> (int)(4L) != 4L)
             {
                 return n;
             }
+
             copy(b, b[l..]);
             return n - l;
+
         }
 
-        private static (long, long, long, ref IPAddr, error) readMsg(this ref IPConn c, slice<byte> b, slice<byte> oob)
+        private static (long, long, long, ptr<IPAddr>, error) readMsg(this ptr<IPConn> _addr_c, slice<byte> b, slice<byte> oob)
         {
+            long n = default;
+            long oobn = default;
+            long flags = default;
+            ptr<IPAddr> addr = default!;
+            error err = default!;
+            ref IPConn c = ref _addr_c.val;
+
             syscall.Sockaddr sa = default;
             n, oobn, flags, sa, err = c.fd.readMsg(b, oob);
             switch (sa.type())
             {
-                case ref syscall.SockaddrInet4 sa:
-                    addr = ref new IPAddr(IP:sa.Addr[0:]);
+                case ptr<syscall.SockaddrInet4> sa:
+                    addr = addr(new IPAddr(IP:sa.Addr[0:]));
                     break;
-                case ref syscall.SockaddrInet6 sa:
-                    addr = ref new IPAddr(IP:sa.Addr[0:],Zone:zoneCache.name(int(sa.ZoneId)));
+                case ptr<syscall.SockaddrInet6> sa:
+                    addr = addr(new IPAddr(IP:sa.Addr[0:],Zone:zoneCache.name(int(sa.ZoneId))));
                     break;
             }
-            return;
+            return ;
+
         }
 
-        private static (long, error) writeTo(this ref IPConn c, slice<byte> b, ref IPAddr addr)
+        private static (long, error) writeTo(this ptr<IPConn> _addr_c, slice<byte> b, ptr<IPAddr> _addr_addr)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref IPConn c = ref _addr_c.val;
+            ref IPAddr addr = ref _addr_addr.val;
+
             if (c.fd.isConnected)
             {
-                return (0L, ErrWriteToConnected);
+                return (0L, error.As(ErrWriteToConnected)!);
             }
+
             if (addr == null)
             {
-                return (0L, errMissingAddress);
+                return (0L, error.As(errMissingAddress)!);
             }
+
             var (sa, err) = addr.sockaddr(c.fd.family);
             if (err != null)
             {
-                return (0L, err);
+                return (0L, error.As(err)!);
             }
+
             return c.fd.writeTo(b, sa);
+
         }
 
-        private static (long, long, error) writeMsg(this ref IPConn c, slice<byte> b, slice<byte> oob, ref IPAddr addr)
+        private static (long, long, error) writeMsg(this ptr<IPConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<IPAddr> _addr_addr)
         {
+            long n = default;
+            long oobn = default;
+            error err = default!;
+            ref IPConn c = ref _addr_c.val;
+            ref IPAddr addr = ref _addr_addr.val;
+
             if (c.fd.isConnected)
             {
-                return (0L, 0L, ErrWriteToConnected);
+                return (0L, 0L, error.As(ErrWriteToConnected)!);
             }
+
             if (addr == null)
             {
-                return (0L, 0L, errMissingAddress);
+                return (0L, 0L, error.As(errMissingAddress)!);
             }
+
             var (sa, err) = addr.sockaddr(c.fd.family);
             if (err != null)
             {
-                return (0L, 0L, err);
+                return (0L, 0L, error.As(err)!);
             }
+
             return c.fd.writeMsg(b, oob, sa);
+
         }
 
-        private static (ref IPConn, error) dialIP(context.Context ctx, @string netProto, ref IPAddr laddr, ref IPAddr raddr)
+        private static (ptr<IPConn>, error) dialIP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<IPAddr> _addr_laddr, ptr<IPAddr> _addr_raddr)
         {
-            var (network, proto, err) = parseNetwork(ctx, netProto, true);
+            ptr<IPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysDialer sd = ref _addr_sd.val;
+            ref IPAddr laddr = ref _addr_laddr.val;
+            ref IPAddr raddr = ref _addr_raddr.val;
+
+            var (network, proto, err) = parseNetwork(ctx, sd.network, true);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             switch (network)
             {
                 case "ip": 
@@ -162,28 +220,32 @@ namespace go
                 case "ip6": 
                     break;
                 default: 
-                    return (null, UnknownNetworkError(netProto));
+                    return (_addr_null!, error.As(UnknownNetworkError(sd.network))!);
                     break;
             }
-            if (raddr == null)
-            {
-                return (null, errMissingAddress);
-            }
-            var (fd, err) = internetSocket(ctx, network, laddr, raddr, syscall.SOCK_RAW, proto, "dial");
+            var (fd, err) = internetSocket(ctx, network, laddr, raddr, syscall.SOCK_RAW, proto, "dial", sd.Dialer.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newIPConn(fd), null);
+
+            return (_addr_newIPConn(fd)!, error.As(null!)!);
+
         }
 
-        private static (ref IPConn, error) listenIP(context.Context ctx, @string netProto, ref IPAddr laddr)
+        private static (ptr<IPConn>, error) listenIP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<IPAddr> _addr_laddr)
         {
-            var (network, proto, err) = parseNetwork(ctx, netProto, true);
+            ptr<IPConn> _p0 = default!;
+            error _p0 = default!;
+            ref sysListener sl = ref _addr_sl.val;
+            ref IPAddr laddr = ref _addr_laddr.val;
+
+            var (network, proto, err) = parseNetwork(ctx, sl.network, true);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
+
             switch (network)
             {
                 case "ip": 
@@ -193,15 +255,17 @@ namespace go
                 case "ip6": 
                     break;
                 default: 
-                    return (null, UnknownNetworkError(netProto));
+                    return (_addr_null!, error.As(UnknownNetworkError(sl.network))!);
                     break;
             }
-            var (fd, err) = internetSocket(ctx, network, laddr, null, syscall.SOCK_RAW, proto, "listen");
+            var (fd, err) = internetSocket(ctx, network, laddr, null, syscall.SOCK_RAW, proto, "listen", sl.ListenConfig.Control);
             if (err != null)
             {
-                return (null, err);
+                return (_addr_null!, error.As(err)!);
             }
-            return (newIPConn(fd), null);
+
+            return (_addr_newIPConn(fd)!, error.As(null!)!);
+
         }
     }
 }

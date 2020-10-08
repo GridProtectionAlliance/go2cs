@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:35:03 UTC
+// package template -- go2cs converted at 2020 October 08 03:42:18 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\html.go
 using bytes = go.bytes_package;
@@ -27,6 +27,7 @@ namespace html
                 return htmlReplacer(stripTags(s), htmlNospaceNormReplacementTable, false);
             }
             return htmlReplacer(s, htmlNospaceReplacementTable, false);
+
         }
 
         // attrEscaper escapes for inclusion in quoted attribute values.
@@ -39,7 +40,9 @@ namespace html
             {
                 return htmlReplacer(stripTags(s), htmlNormReplacementTable, true);
             }
+
             return htmlReplacer(s, htmlReplacementTable, true);
+
         }
 
         // rcdataEscaper escapes for inclusion in an RCDATA element body.
@@ -52,7 +55,9 @@ namespace html
             {
                 return htmlReplacer(s, htmlNormReplacementTable, true);
             }
+
             return htmlReplacer(s, htmlReplacementTable, true);
+
         }
 
         // htmlEscaper escapes for inclusion in HTML text.
@@ -65,7 +70,9 @@ namespace html
             {
                 return s;
             }
+
             return htmlReplacer(s, htmlReplacementTable, true);
+
         }
 
         // htmlReplacementTable contains the runes that need to be escaped
@@ -102,7 +109,7 @@ namespace html
         private static @string htmlReplacer(@string s, slice<@string> replacementTable, bool badRunes)
         {
             long written = 0L;
-            ptr<object> b = @new<bytes.Buffer>();
+            ptr<object> b = @new<strings.Builder>();
             var r = rune(0L);
             long w = 0L;
             {
@@ -121,13 +128,20 @@ namespace html
 
                             if (len(repl) != 0L)
                             {
+                                if (written == 0L)
+                                {
+                                    b.Grow(len(s));
+                    i += w;
+                                }
+
                                 b.WriteString(s[written..i]);
                                 b.WriteString(repl);
                                 written = i + w;
-                    i += w;
+
                             }
 
                         }
+
                     }
                     else if (badRunes)
                     { 
@@ -136,9 +150,16 @@ namespace html
                     }
                     else if (0xfdd0UL <= r && r <= 0xfdefUL || 0xfff0UL <= r && r <= 0xffffUL)
                     {
+                        if (written == 0L)
+                        {
+                            b.Grow(len(s));
+                        }
+
                         fmt.Fprintf(b, "%s&#x%x;", s[written..i], r);
                         written = i + w;
+
                     }
+
                 }
 
             }
@@ -146,8 +167,10 @@ namespace html
             {
                 return s;
             }
+
             b.WriteString(s[written..]);
             return b.String();
+
         }
 
         // stripTags takes a snippet of HTML and returns only the text content.
@@ -171,6 +194,7 @@ namespace html
                     {
                         st = stateRCDATA;
                     }
+
                     var (d, nread) = transitionFunc[st](c, s[i..]);
                     var i1 = i + nread;
                     if (c.state == stateText || c.state == stateRCDATA)
@@ -186,30 +210,40 @@ namespace html
                                     j = j1;
                                     break;
                                 }
+
                             }
+
 
                         }
                     else
                         b.Write(s[i..j]);
+
                     }                    {
                         allText = false;
                     }
+
                     c = d;
                     i = i1;
                     continue;
+
                 }
+
                 i1 = i + bytes.IndexAny(s[i..], delimEnds[c.delim]);
                 if (i1 < i)
                 {
                     break;
                 }
+
                 if (c.delim != delimSpaceOrTagEnd)
                 { 
                     // Consume any quote.
                     i1++;
+
                 }
+
                 c = new context(state:stateTag,element:c.element);
                 i = i1;
+
             }
 
             if (allText)
@@ -220,7 +254,9 @@ namespace html
             {
                 b.Write(s[i..]);
             }
+
             return b.String();
+
         }
 
         // htmlNameFilter accepts valid parts of an HTML attribute or tag name or
@@ -234,6 +270,7 @@ namespace html
             {
                 return s;
             }
+
             if (len(s) == 0L)
             { 
                 // Avoid violation of structure preservation.
@@ -242,26 +279,31 @@ namespace html
                 // checked, but otherwise .V is the value of the attribute
                 // named .K.
                 return filterFailsafe;
+
             }
+
             s = strings.ToLower(s);
             {
                 var t = attrType(s);
 
                 if (t != contentTypePlain)
                 { 
-                    // TODO: Split attr and element name part filters so we can whitelist
-                    // attributes.
+                    // TODO: Split attr and element name part filters so we can recognize known attributes.
                     return filterFailsafe;
+
                 }
 
             }
+
             foreach (var (_, r) in s)
             {
 
                 if ('0' <= r && r <= '9')                 else if ('a' <= r && r <= 'z')                 else 
                     return filterFailsafe;
-                            }
+                
+            }
             return s;
+
         }
 
         // commentEscaper returns the empty string regardless of input.

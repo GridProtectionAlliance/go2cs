@@ -36,7 +36,7 @@
 //             big.Len()
 //         }
 //     }
-// package testing -- go2cs converted at 2020 August 29 08:47:15 UTC
+// package testing -- go2cs converted at 2020 October 08 04:02:55 UTC
 // import "go/doc.testing" ==> using testing = go.go.doc.testing_package
 // Original source: C:\Go\src\go\doc\testdata\testing.go
 using flag = go.flag_package;
@@ -78,7 +78,7 @@ namespace go
         // Short reports whether the -test.short flag is set.
         public static bool Short()
         {
-            return short.Value;
+            return short.val;
         }
 
         // decorate inserts the final newline if needed and indentation tabs for formatting.
@@ -105,15 +105,20 @@ namespace go
                             file = file[index + 1L..];
                         }
 
+
                     }
+
                 }
                 else
                 {
                     file = "???";
                     line = 1L;
                 }
+
                 s = fmt.Sprintf("%s:%d: %s", file, line, s);
+
             }
+
             s = "\t" + s; // Every line is indented at least one tab.
             var n = len(s);
             if (n > 0L && s[n - 1L] != '\n')
@@ -121,16 +126,20 @@ namespace go
                 s += "\n";
                 n++;
             }
+
             for (long i = 0L; i < n - 1L; i++)
             { // -1 to avoid final newline
                 if (s[i] == '\n')
                 { 
                     // Second and subsequent lines are indented an extra tab.
                     return s[0L..i + 1L] + "\t" + decorate(s[i + 1L..n], false);
+
                 }
+
             }
 
             return s;
+
         }
 
         // T is a type passed to Test functions to manage test state and support formatted test logs.
@@ -143,22 +152,27 @@ namespace go
         }
 
         // Fail marks the function as having failed but continues execution.
-        private static void Fail(this ref common c)
+        private static void Fail(this ptr<common> _addr_c)
         {
-            c.failed = true;
+            ref common c = ref _addr_c.val;
 
+            c.failed = true;
         }
 
         // Failed reports whether the function has failed.
-        private static bool Failed(this ref common c)
+        private static bool Failed(this ptr<common> _addr_c)
         {
+            ref common c = ref _addr_c.val;
+
             return c.failed;
         }
 
         // FailNow marks the function as having failed and stops its execution.
         // Execution will continue at the next Test.
-        private static void FailNow(this ref common c)
+        private static void FailNow(this ptr<common> _addr_c)
         {
+            ref common c = ref _addr_c.val;
+
             c.Fail(); 
 
             // Calling runtime.Goexit will exit the goroutine, which
@@ -181,63 +195,84 @@ namespace go
             // a top-of-stack deferred function now, we know that the send
             // only happens after any other stacked defers have completed.
             runtime.Goexit();
+
         }
 
         // log generates the output. It's always at the same stack depth.
-        private static void log(this ref common c, @string s)
+        private static void log(this ptr<common> _addr_c, @string s)
         {
+            ref common c = ref _addr_c.val;
+
             c.output = append(c.output, decorate(s, true));
         }
 
         // Log formats its arguments using default formatting, analogous to Println(),
         // and records the text in the error log.
-        private static void Log(this ref common c, params object[] args)
+        private static void Log(this ptr<common> _addr_c, params object[] args)
         {
-            c.log(fmt.Sprintln(args));
+            args = args.Clone();
+            ref common c = ref _addr_c.val;
 
+            c.log(fmt.Sprintln(args));
         }
 
         // Logf formats its arguments according to the format, analogous to Printf(),
         // and records the text in the error log.
-        private static void Logf(this ref common c, @string format, params object[] args)
+        private static void Logf(this ptr<common> _addr_c, @string format, params object[] args)
         {
-            c.log(fmt.Sprintf(format, args));
+            args = args.Clone();
+            ref common c = ref _addr_c.val;
 
+            c.log(fmt.Sprintf(format, args));
         }
 
         // Error is equivalent to Log() followed by Fail().
-        private static void Error(this ref common c, params object[] args)
+        private static void Error(this ptr<common> _addr_c, params object[] args)
         {
+            args = args.Clone();
+            ref common c = ref _addr_c.val;
+
             c.log(fmt.Sprintln(args));
             c.Fail();
         }
 
         // Errorf is equivalent to Logf() followed by Fail().
-        private static void Errorf(this ref common c, @string format, params object[] args)
+        private static void Errorf(this ptr<common> _addr_c, @string format, params object[] args)
         {
+            args = args.Clone();
+            ref common c = ref _addr_c.val;
+
             c.log(fmt.Sprintf(format, args));
             c.Fail();
         }
 
         // Fatal is equivalent to Log() followed by FailNow().
-        private static void Fatal(this ref common c, params object[] args)
+        private static void Fatal(this ptr<common> _addr_c, params object[] args)
         {
+            args = args.Clone();
+            ref common c = ref _addr_c.val;
+
             c.log(fmt.Sprintln(args));
             c.FailNow();
         }
 
         // Fatalf is equivalent to Logf() followed by FailNow().
-        private static void Fatalf(this ref common c, @string format, params object[] args)
+        private static void Fatalf(this ptr<common> _addr_c, @string format, params object[] args)
         {
+            args = args.Clone();
+            ref common c = ref _addr_c.val;
+
             c.log(fmt.Sprintf(format, args));
             c.FailNow();
         }
 
         // Parallel signals that this test is to be run in parallel with (and only with)
         // other parallel tests in this CPU group.
-        private static void Parallel(this ref T t)
+        private static void Parallel(this ptr<T> _addr_t)
         {
-            t.signal.Send((T.Value)(null)); // Release main testing loop
+            ref T t = ref _addr_t.val;
+
+            t.signal.Send((T.val)(null)); // Release main testing loop
             t.startParallel.Receive(); // Wait for serial tests to finish
         }
 
@@ -246,11 +281,14 @@ namespace go
         public partial struct InternalTest
         {
             public @string Name;
-            public Action<ref T> F;
+            public Action<ptr<T>> F;
         }
 
-        private static void tRunner(ref T _t, ref InternalTest _test) => func(_t, _test, (ref T t, ref InternalTest test, Defer defer, Panic _, Recover __) =>
+        private static void tRunner(ptr<T> _addr_t, ptr<InternalTest> _addr_test) => func((defer, _, __) =>
         {
+            ref T t = ref _addr_t.val;
+            ref InternalTest test = ref _addr_test.val;
+
             t.start = time.Now(); 
 
             // When this goroutine is done, either because test.F(t)
@@ -264,12 +302,16 @@ namespace go
             }());
 
             test.F(t);
+
         });
 
         // An internal function but exported because it is cross-package; part of the implementation
         // of go test.
         public static (bool, error) Main(Func<@string, @string, (bool, error)> matchString, slice<InternalTest> tests, slice<InternalBenchmark> benchmarks, slice<InternalExample> examples)
         {
+            bool _p0 = default;
+            error _p0 = default!;
+
             flag.Parse();
             parseCpuList();
 
@@ -282,34 +324,42 @@ namespace go
                 fmt.Println("FAIL");
                 os.Exit(1L);
             }
+
             fmt.Println("PASS");
             stopAlarm();
             RunBenchmarks(matchString, benchmarks);
             after();
+
         }
 
-        private static void report(this ref T t)
+        private static void report(this ptr<T> _addr_t)
         {
+            ref T t = ref _addr_t.val;
+
             var tstr = fmt.Sprintf("(%.2f seconds)", t.duration.Seconds());
             @string format = "--- %s: %s %s\n%s";
             if (t.failed)
             {
                 fmt.Printf(format, "FAIL", t.name, tstr, t.output);
             }
-            else if (chatty.Value)
+            else if (chatty.val)
             {
                 fmt.Printf(format, "PASS", t.name, tstr, t.output);
             }
+
         }
 
         public static bool RunTests(Func<@string, @string, (bool, error)> matchString, slice<InternalTest> tests)
         {
+            bool ok = default;
+
             ok = true;
             if (len(tests) == 0L)
             {
                 fmt.Fprintln(os.Stderr, "testing: warning: no tests to run");
-                return;
+                return ;
             }
+
             foreach (var (_, procs) in cpuList)
             {
                 runtime.GOMAXPROCS(procs); 
@@ -325,29 +375,33 @@ namespace go
 
                 for (long i = 0L; i < len(tests); i++)
                 {
-                    var (matched, err) = matchString(match.Value, tests[i].Name);
+                    var (matched, err) = matchString(match.val, tests[i].Name);
                     if (err != null)
                     {
                         fmt.Fprintf(os.Stderr, "testing: invalid regexp for -test.run: %s\n", err);
                         os.Exit(1L);
                     }
+
                     if (!matched)
                     {
                         continue;
                     }
+
                     var testName = tests[i].Name;
                     if (procs != 1L)
                     {
                         testName = fmt.Sprintf("%s-%d", tests[i].Name, procs);
                     }
-                    T t = ref new T(common:common{signal:make(chaninterface{}),},name:testName,startParallel:startParallel,);
+
+                    ptr<T> t = addr(new T(common:common{signal:make(chaninterface{}),},name:testName,startParallel:startParallel,));
                     t.self = t;
-                    if (chatty.Value)
+                    if (chatty.val)
                     {
                         fmt.Printf("=== RUN %s\n", t.name);
                     }
-                    go_(() => tRunner(t, ref tests[i]));
-                    ref T @out = (t.signal.Receive())._<ref T>();
+
+                    go_(() => tRunner(_addr_t, _addr_tests[i]));
+                    ptr<T> @out = (t.signal.Receive())._<ptr<T>>();
                     if (out == null)
                     { // Parallel run.
                         go_(() => () =>
@@ -356,47 +410,56 @@ namespace go
                         }());
                         numParallel++;
                         continue;
+
                     }
+
                     t.report();
                     ok = ok && !@out.failed;
+
                 }
 
 
                 long running = 0L;
                 while (numParallel + running > 0L)
                 {
-                    if (running < parallel && numParallel > 0L.Value)
+                    if (running < parallel && numParallel > 0L.val)
                     {
                         startParallel.Send(true);
                         running++;
                         numParallel--;
                         continue;
                     }
-                    t = (collector.Receive())._<ref T>();
+
+                    t = (collector.Receive())._<ptr<T>>();
                     t.report();
                     ok = ok && !t.failed;
                     running--;
+
                 }
 
+
             }
-            return;
+            return ;
+
         }
 
         // before runs before all testing.
         private static void before()
         {
-            if (memProfileRate > 0L.Value)
+            if (memProfileRate > 0L.val)
             {
-                runtime.MemProfileRate = memProfileRate.Value;
+                runtime.MemProfileRate = memProfileRate.val;
             }
-            if (cpuProfile != "".Value)
+
+            if (cpuProfile != "".val)
             {
-                var (f, err) = os.Create(cpuProfile.Value);
+                var (f, err) = os.Create(cpuProfile.val);
                 if (err != null)
                 {
                     fmt.Fprintf(os.Stderr, "testing: %s", err);
-                    return;
+                    return ;
                 }
+
                 {
                     var err = pprof.StartCPUProfile(f);
 
@@ -404,58 +467,66 @@ namespace go
                     {
                         fmt.Fprintf(os.Stderr, "testing: can't start cpu profile: %s", err);
                         f.Close();
-                        return;
+                        return ;
                     } 
                     // Could save f so after can call f.Close; not worth the effort.
 
                 } 
                 // Could save f so after can call f.Close; not worth the effort.
             }
+
         }
 
         // after runs after all testing.
         private static void after()
         {
-            if (cpuProfile != "".Value)
+            if (cpuProfile != "".val)
             {
                 pprof.StopCPUProfile(); // flushes profile to disk
             }
-            if (memProfile != "".Value)
+
+            if (memProfile != "".val)
             {
-                var (f, err) = os.Create(memProfile.Value);
+                var (f, err) = os.Create(memProfile.val);
                 if (err != null)
                 {
                     fmt.Fprintf(os.Stderr, "testing: %s", err);
-                    return;
+                    return ;
                 }
+
                 err = pprof.WriteHeapProfile(f);
 
                 if (err != null)
                 {
-                    fmt.Fprintf(os.Stderr, "testing: can't write %s: %s", memProfile.Value, err);
+                    fmt.Fprintf(os.Stderr, "testing: can't write %s: %s", memProfile.val, err);
                 }
+
                 f.Close();
+
             }
+
         }
 
-        private static ref time.Timer timer = default;
+        private static ptr<time.Timer> timer;
 
         // startAlarm starts an alarm if requested.
         private static void startAlarm()
         {
-            if (timeout > 0L.Value)
+            if (timeout > 0L.val)
             {
-                timer = time.AfterFunc(timeout.Value, alarm);
+                timer = time.AfterFunc(timeout.val, alarm);
             }
+
         }
 
         // stopAlarm turns off the alarm.
         private static void stopAlarm()
         {
-            if (timeout > 0L.Value)
+            if (timeout > 0L.val)
             {
                 timer.Stop();
             }
+
         }
 
         // alarm is called if the timeout expires.
@@ -466,13 +537,13 @@ namespace go
 
         private static void parseCpuList()
         {
-            if (len(cpuListStr.Value) == 0L)
+            if (len(cpuListStr.val) == 0L)
             {
                 cpuList = append(cpuList, runtime.GOMAXPROCS(-1L));
             }
             else
             {
-                foreach (var (_, val) in strings.Split(cpuListStr.Value, ","))
+                foreach (var (_, val) in strings.Split(cpuListStr.val, ","))
                 {
                     var (cpu, err) = strconv.Atoi(val);
                     if (err != null || cpu <= 0L)
@@ -480,9 +551,13 @@ namespace go
                         fmt.Fprintf(os.Stderr, "testing: invalid value %q for -test.cpu", val);
                         os.Exit(1L);
                     }
+
                     cpuList = append(cpuList, cpu);
+
                 }
+
             }
+
         }
     }
 }}

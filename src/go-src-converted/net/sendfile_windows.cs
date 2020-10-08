@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 August 29 08:27:18 UTC
+// package net -- go2cs converted at 2020 October 08 03:34:11 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sendfile_windows.go
 using poll = go.@internal.poll_package;
@@ -22,38 +22,39 @@ namespace go
         // non-EOF error.
         //
         // if handled == false, sendFile performed no work.
-        //
-        // Note that sendfile for windows does not support >2GB file.
-        private static (long, error, bool) sendFile(ref netFD fd, io.Reader r)
+        private static (long, error, bool) sendFile(ptr<netFD> _addr_fd, io.Reader r)
         {
-            long n = 0L; // by default, copy until EOF
+            long written = default;
+            error err = default!;
+            bool handled = default;
+            ref netFD fd = ref _addr_fd.val;
 
-            ref io.LimitedReader (lr, ok) = r._<ref io.LimitedReader>();
+            long n = 0L; // by default, copy until EOF.
+
+            ptr<io.LimitedReader> (lr, ok) = r._<ptr<io.LimitedReader>>();
             if (ok)
             {
                 n = lr.N;
                 r = lr.R;
                 if (n <= 0L)
                 {
-                    return (0L, null, true);
+                    return (0L, error.As(null!)!, true);
                 }
             }
-            ref os.File (f, ok) = r._<ref os.File>();
+            ptr<os.File> (f, ok) = r._<ptr<os.File>>();
             if (!ok)
             {
-                return (0L, null, false);
+                return (0L, error.As(null!)!, false);
             }
-            var (done, err) = poll.SendFile(ref fd.pfd, syscall.Handle(f.Fd()), n);
-
+            written, err = poll.SendFile(_addr_fd.pfd, syscall.Handle(f.Fd()), n);
             if (err != null)
             {
-                return (0L, wrapSyscallError("transmitfile", err), false);
+                err = wrapSyscallError("transmitfile", err);
             }
-            if (lr != null)
-            {
-                lr.N -= int64(done);
-            }
-            return (int64(done), null, true);
+            handled = written > 0L;
+
+            return ;
+
         }
     }
 }

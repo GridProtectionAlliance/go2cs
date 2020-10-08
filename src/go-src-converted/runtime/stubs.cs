@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:21:01 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:23:46 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\stubs.go
 using @unsafe = go.@unsafe_package;
@@ -11,7 +11,7 @@ using System;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         // Should be a built-in for unsafe.Pointer?
         //go:nosplit
@@ -23,7 +23,7 @@ namespace go
         // getg returns the pointer to the current g.
         // The compiler rewrites calls to this function into instructions
         // that fetch the g directly (from TLS or from the dedicated register).
-        private static ref g getg()
+        private static ptr<g> getg()
 ;
 
         // mcall switches from the g to the g0 stack and invokes fn(g),
@@ -40,7 +40,7 @@ namespace go
         // This must NOT be go:noescape: if fn is a stack-allocated closure,
         // fn puts g on a run queue, and g executes before fn returns, the
         // closure will be invalidated while it is still executing.
-        private static void mcall(Action<ref g> fn)
+        private static void mcall(Action<ptr<g>> fn)
 ;
 
         // systemstack runs fn on a system stack.
@@ -64,9 +64,14 @@ namespace go
         private static void systemstack(Action fn)
 ;
 
+        private static @string badsystemstackMsg = "fatal: systemstack called from unexpected goroutine";
+
+        //go:nosplit
+        //go:nowritebarrierrec
         private static void badsystemstack()
         {
-            throw("systemstack called from unexpected goroutine");
+            var sp = stringStructOf(_addr_badsystemstackMsg);
+            write(2L, sp.str, int32(sp.len));
         }
 
         // memclrNoHeapPointers clears n bytes starting at ptr.
@@ -75,12 +80,12 @@ namespace go
         // used only when the caller knows that *ptr contains no heap pointers
         // because either:
         //
-        // 1. *ptr is initialized memory and its type is pointer-free.
+        // *ptr is initialized memory and its type is pointer-free, or
         //
-        // 2. *ptr is uninitialized memory (e.g., memory that's being reused
-        //    for a new allocation) and hence contains only "junk".
+        // *ptr is uninitialized memory (e.g., memory that's being reused
+        // for a new allocation) and hence contains only "junk".
         //
-        // in memclr_*.s
+        // The (CPU-specific) implementations of this function are in memclr_*.s.
         //go:noescape
         private static void memclrNoHeapPointers(unsafe.Pointer ptr, System.UIntPtr n)
 ;
@@ -92,7 +97,17 @@ namespace go
         }
 
         // memmove copies n bytes from "from" to "to".
-        // in memmove_*.s
+        //
+        // memmove ensures that any pointer in "from" is written to "to" with
+        // an indivisible write, so that racy reads cannot observe a
+        // half-written pointer. This is necessary to prevent the garbage
+        // collector from observing invalid pointers, and differs from memmove
+        // in unmanaged languages. However, memmove is only required to do
+        // this if "from" and "to" may contain pointers, which can only be the
+        // case if "from", "to", and "n" are all be word-aligned.
+        //
+        // Implementations are in memmove_*.s.
+        //
         //go:noescape
         private static void memmove(unsafe.Pointer to, unsafe.Pointer from, System.UIntPtr n)
 ;
@@ -122,14 +137,16 @@ namespace go
             mp.fastrand[0L] = s0;
             mp.fastrand[1L] = s1;
             return s0 + s1;
+
         }
 
         //go:nosplit
         private static uint fastrandn(uint n)
         { 
             // This is similar to fastrand() % n, but faster.
-            // See http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
+            // See https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
             return uint32(uint64(fastrand()) * uint64(n) >> (int)(32L));
+
         }
 
         //go:linkname sync_fastrand sync.fastrand
@@ -138,7 +155,7 @@ namespace go
             return fastrand();
         }
 
-        // in asm_*.s
+        // in internal/bytealg/equal_*.s
         //go:noescape
         private static bool memequal(unsafe.Pointer a, unsafe.Pointer b, System.UIntPtr size)
 ;
@@ -157,17 +174,17 @@ namespace go
 
         private static void cgocallback(unsafe.Pointer fn, unsafe.Pointer frame, System.UIntPtr framesize, System.UIntPtr ctxt)
 ;
-        private static void gogo(ref gobuf buf)
+        private static void gogo(ptr<gobuf> buf)
 ;
-        private static void gosave(ref gobuf buf)
+        private static void gosave(ptr<gobuf> buf)
 ;
 
         //go:noescape
-        private static void jmpdefer(ref funcval fv, System.UIntPtr argp)
+        private static void jmpdefer(ptr<funcval> fv, System.UIntPtr argp)
 ;
         private static void asminit()
 ;
-        private static void setg(ref g gg)
+        private static void setg(ptr<g> gg)
 ;
         private static void breakpoint()
 ;
@@ -181,7 +198,9 @@ namespace go
         // one call that copies results back, in cgocallbackg1, and it does NOT pass a
         // frame type, meaning there are no write barriers invoked. See that call
         // site for justification.
-        private static void reflectcall(ref _type argtype, unsafe.Pointer fn, unsafe.Pointer arg, uint argsize, uint retoffset)
+        //
+        // Package reflect accesses this symbol through a linkname.
+        private static void reflectcall(ptr<_type> argtype, unsafe.Pointer fn, unsafe.Pointer arg, uint argsize, uint retoffset)
 ;
 
         private static void procyield(uint cycles)
@@ -233,27 +252,21 @@ namespace go
 
         // getcallerpc returns the program counter (PC) of its caller's caller.
         // getcallersp returns the stack pointer (SP) of its caller's caller.
-        // argp must be a pointer to the caller's first function argument.
-        // The implementation may or may not use argp, depending on
-        // the architecture. The implementation may be a compiler
-        // intrinsic; there is not necessarily code implementing this
-        // on every platform.
+        // The implementation may be a compiler intrinsic; there is not
+        // necessarily code implementing this on every platform.
         //
         // For example:
         //
         //    func f(arg1, arg2, arg3 int) {
         //        pc := getcallerpc()
-        //        sp := getcallersp(unsafe.Pointer(&arg1))
+        //        sp := getcallersp()
         //    }
         //
         // These two lines find the PC and SP immediately following
         // the call to f (where f will return).
         //
         // The call to getcallerpc and getcallersp must be done in the
-        // frame being asked about. It would not be correct for f to pass &arg1
-        // to another function g and let g call getcallerpc/getcallersp.
-        // The call inside g might return information about g's caller or
-        // information about f's caller or complete garbage.
+        // frame being asked about.
         //
         // The result of getcallersp is correct at the time of the return,
         // but it may be invalidated by any subsequent call to a function
@@ -266,7 +279,7 @@ namespace go
 ;
 
         //go:noescape
-        private static System.UIntPtr getcallersp(unsafe.Pointer argp)
+        private static System.UIntPtr getcallersp()
 ; // implemented as an intrinsic on all platforms
 
         // getclosureptr returns the pointer to the current closure.
@@ -289,11 +302,6 @@ namespace go
         //go:noescape
         private static int asmcgocall(unsafe.Pointer fn, unsafe.Pointer arg)
 ;
-
-        // argp used in Defer structs when there is no argp.
-        private static readonly var _NoArgs = ~uintptr(0L);
-
-
 
         private static void morestack()
 ;
@@ -368,13 +376,28 @@ namespace go
         private static void systemstack_switch()
 ;
 
-        // round n up to a multiple of a.  a must be a power of 2.
-        private static System.UIntPtr round(System.UIntPtr n, System.UIntPtr a)
+        // alignUp rounds n up to a multiple of a. a must be a power of 2.
+        private static System.UIntPtr alignUp(System.UIntPtr n, System.UIntPtr a)
         {
             return (n + a - 1L) & ~(a - 1L);
         }
 
-        // checkASM returns whether assembly runtime checks have passed.
+        // alignDown rounds n down to a multiple of a. a must be a power of 2.
+        private static System.UIntPtr alignDown(System.UIntPtr n, System.UIntPtr a)
+        {
+            return n & ~(a - 1L);
+        }
+
+        // divRoundUp returns ceil(n / a).
+        private static System.UIntPtr divRoundUp(System.UIntPtr n, System.UIntPtr a)
+        { 
+            // a is generally a power of two. This will get inlined and
+            // the compiler will optimize the division.
+            return (n + a - 1L) / a;
+
+        }
+
+        // checkASM reports whether assembly runtime checks have passed.
         private static bool checkASM()
 ;
 
@@ -386,7 +409,28 @@ namespace go
         { 
             // Avoid branches. In the SSA compiler, this compiles to
             // exactly what you would want it to.
-            return int(uint8(@unsafe.Pointer(ref x).Value));
+            return int(uint8(new ptr<ptr<ptr<byte>>>(@unsafe.Pointer(_addr_x))));
+
         }
+
+        // abort crashes the runtime in situations where even throw might not
+        // work. In general it should do something a debugger will recognize
+        // (e.g., an INT3 on x86). A crash in abort is recognized by the
+        // signal handler, which will attempt to tear down the runtime
+        // immediately.
+        private static void abort()
+;
+
+        // Called from compiled code; declared for vet; do NOT call from Go.
+        private static void gcWriteBarrier()
+;
+        private static void duffzero()
+;
+        private static void duffcopy()
+;
+
+        // Called from linker-generated .initarray; declared for go vet; do NOT call from Go.
+        private static void addmoduledata()
+;
     }
 }

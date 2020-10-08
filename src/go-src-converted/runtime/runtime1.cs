@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:19:49 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:22:51 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\runtime1.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -12,15 +12,16 @@ using static go.builtin;
 
 namespace go
 {
-    public static unsafe partial class runtime_package
+    public static partial class runtime_package
     {
         // Keep a cached value to make gotraceback fast,
         // since we call it on every call to gentraceback.
         // The cached value is a uint32 in which the low bits
         // are the "crash" and "all" settings and the remaining
         // bits are the traceback value (0 off, 1 on, 2 include system).
-        private static readonly long tracebackCrash = 1L << (int)(iota);
-        private static readonly tracebackShift tracebackAll = iota;
+        private static readonly long tracebackCrash = (long)1L << (int)(iota);
+        private static readonly tracebackShift tracebackAll = (tracebackShift)iota;
+
 
         private static uint traceback_cache = 2L << (int)(tracebackShift);
         private static uint traceback_env = default;
@@ -36,8 +37,12 @@ namespace go
         //go:nosplit
         private static (int, bool, bool) gotraceback()
         {
+            int level = default;
+            bool all = default;
+            bool crash = default;
+
             var _g_ = getg();
-            var t = atomic.Load(ref traceback_cache);
+            var t = atomic.Load(_addr_traceback_cache);
             crash = t & tracebackCrash != 0L;
             all = _g_.m.throwing > 0L || t & tracebackAll != 0L;
             if (_g_.m.traceback != 0L)
@@ -48,20 +53,26 @@ namespace go
             {
                 level = int32(t >> (int)(tracebackShift));
             }
-            return;
+
+            return ;
+
         }
 
-        private static int argc = default;        private static ptr<ptr<byte>> argv = default;
+        private static int argc = default;        private static ptr<ptr<byte>> argv;
 
         // nosplit for use in linux startup sysargs
         //go:nosplit
-        private static ref byte argv_index(ptr<ptr<byte>> argv, int i)
+        private static ptr<byte> argv_index(ptr<ptr<byte>> _addr_argv, int i)
         {
-            return new ptr<*(ptr<ptr<byte>>)>(add(@unsafe.Pointer(argv), uintptr(i) * sys.PtrSize));
+            ref ptr<byte> argv = ref _addr_argv.val;
+
+            return new ptr<ptr<ptr<ptr<byte>>>>(add(@unsafe.Pointer(argv), uintptr(i) * sys.PtrSize));
         }
 
-        private static void args(int c, ptr<ptr<byte>> v)
+        private static void args(int c, ptr<ptr<byte>> _addr_v)
         {
+            ref ptr<byte> v = ref _addr_v.val;
+
             argc = c;
             argv = v;
             sysargs(c, v);
@@ -71,13 +82,15 @@ namespace go
         {
             if (GOOS == "windows")
             {
-                return;
+                return ;
             }
+
             argslice = make_slice<@string>(argc);
             for (var i = int32(0L); i < argc; i++)
             {
-                argslice[i] = gostringnocopy(argv_index(argv, i));
+                argslice[i] = gostringnocopy(argv_index(_addr_argv, i));
             }
+
 
         }
 
@@ -87,7 +100,7 @@ namespace go
             // guarantee env[] will immediately follow argv. Might cause
             // problems.
             var n = int32(0L);
-            while (argv_index(argv, argc + 1L + n) != null)
+            while (argv_index(_addr_argv, argc + 1L + n) != null)
             {
                 n++;
             }
@@ -96,8 +109,9 @@ namespace go
             envs = make_slice<@string>(n);
             for (var i = int32(0L); i < n; i++)
             {
-                envs[i] = gostring(argv_index(argv, argc + 1L + i));
+                envs[i] = gostring(argv_index(_addr_argv, argc + 1L + i));
             }
+
 
         }
 
@@ -116,56 +130,65 @@ namespace go
         {
             test_z64 = 42L;
             test_x64 = 0L;
-            if (atomic.Cas64(ref test_z64, test_x64, 1L))
+            if (atomic.Cas64(_addr_test_z64, test_x64, 1L))
             {
                 throw("cas64 failed");
             }
+
             if (test_x64 != 0L)
             {
                 throw("cas64 failed");
             }
+
             test_x64 = 42L;
-            if (!atomic.Cas64(ref test_z64, test_x64, 1L))
+            if (!atomic.Cas64(_addr_test_z64, test_x64, 1L))
             {
                 throw("cas64 failed");
             }
+
             if (test_x64 != 42L || test_z64 != 1L)
             {
                 throw("cas64 failed");
             }
-            if (atomic.Load64(ref test_z64) != 1L)
+
+            if (atomic.Load64(_addr_test_z64) != 1L)
             {
                 throw("load64 failed");
             }
-            atomic.Store64(ref test_z64, (1L << (int)(40L)) + 1L);
-            if (atomic.Load64(ref test_z64) != (1L << (int)(40L)) + 1L)
+
+            atomic.Store64(_addr_test_z64, (1L << (int)(40L)) + 1L);
+            if (atomic.Load64(_addr_test_z64) != (1L << (int)(40L)) + 1L)
             {
                 throw("store64 failed");
             }
-            if (atomic.Xadd64(ref test_z64, (1L << (int)(40L)) + 1L) != (2L << (int)(40L)) + 2L)
+
+            if (atomic.Xadd64(_addr_test_z64, (1L << (int)(40L)) + 1L) != (2L << (int)(40L)) + 2L)
             {
                 throw("xadd64 failed");
             }
-            if (atomic.Load64(ref test_z64) != (2L << (int)(40L)) + 2L)
+
+            if (atomic.Load64(_addr_test_z64) != (2L << (int)(40L)) + 2L)
             {
                 throw("xadd64 failed");
             }
-            if (atomic.Xchg64(ref test_z64, (3L << (int)(40L)) + 3L) != (2L << (int)(40L)) + 2L)
+
+            if (atomic.Xchg64(_addr_test_z64, (3L << (int)(40L)) + 3L) != (2L << (int)(40L)) + 2L)
             {
                 throw("xchg64 failed");
             }
-            if (atomic.Load64(ref test_z64) != (3L << (int)(40L)) + 3L)
+
+            if (atomic.Load64(_addr_test_z64) != (3L << (int)(40L)) + 3L)
             {
                 throw("xchg64 failed");
             }
+
         }
 
         private static void check()
         {
-            sbyte a = default;            byte b = default;            short c = default;            ushort d = default;            int e = default;            uint f = default;            long g = default;            ulong h = default;            float i = default;            float i1 = default;
-            double j = default;            double j1 = default;
-            unsafe.Pointer k = default;            unsafe.Pointer k1 = default;
-            ref ushort l = default;            array<byte> m = new array<byte>(4L);
+            sbyte a = default;            byte b = default;            short c = default;            ushort d = default;            ref int e = ref heap(out ptr<int> _addr_e);            uint f = default;            long g = default;            ulong h = default;            ref float i = ref heap(out ptr<float> _addr_i);            ref float i1 = ref heap(out ptr<float> _addr_i1);
+            ref double j = ref heap(out ptr<double> _addr_j);            ref double j1 = ref heap(out ptr<double> _addr_j1);
+            unsafe.Pointer k = default;            ptr<ushort> l;            array<byte> m = new array<byte>(4L);
             private partial struct x1t
             {
                 public byte x;
@@ -182,178 +205,194 @@ namespace go
             {
                 throw("bad a");
             }
+
             if (@unsafe.Sizeof(b) != 1L)
             {
                 throw("bad b");
             }
+
             if (@unsafe.Sizeof(c) != 2L)
             {
                 throw("bad c");
             }
+
             if (@unsafe.Sizeof(d) != 2L)
             {
                 throw("bad d");
             }
+
             if (@unsafe.Sizeof(e) != 4L)
             {
                 throw("bad e");
             }
+
             if (@unsafe.Sizeof(f) != 4L)
             {
                 throw("bad f");
             }
+
             if (@unsafe.Sizeof(g) != 8L)
             {
                 throw("bad g");
             }
+
             if (@unsafe.Sizeof(h) != 8L)
             {
                 throw("bad h");
             }
+
             if (@unsafe.Sizeof(i) != 4L)
             {
                 throw("bad i");
             }
+
             if (@unsafe.Sizeof(j) != 8L)
             {
                 throw("bad j");
             }
+
             if (@unsafe.Sizeof(k) != sys.PtrSize)
             {
                 throw("bad k");
             }
+
             if (@unsafe.Sizeof(l) != sys.PtrSize)
             {
                 throw("bad l");
             }
+
             if (@unsafe.Sizeof(x1) != 1L)
             {
                 throw("bad unsafe.Sizeof x1");
             }
+
             if (@unsafe.Offsetof(y1.y) != 1L)
             {
                 throw("bad offsetof y1.y");
             }
+
             if (@unsafe.Sizeof(y1) != 2L)
             {
                 throw("bad unsafe.Sizeof y1");
             }
-            if (timediv(12345L * 1000000000L + 54321L, 1000000000L, ref e) != 12345L || e != 54321L)
+
+            if (timediv(12345L * 1000000000L + 54321L, 1000000000L, _addr_e) != 12345L || e != 54321L)
             {
                 throw("bad timediv");
             }
-            uint z = default;
+
+            ref uint z = ref heap(out ptr<uint> _addr_z);
             z = 1L;
-            if (!atomic.Cas(ref z, 1L, 2L))
+            if (!atomic.Cas(_addr_z, 1L, 2L))
             {
                 throw("cas1");
             }
+
             if (z != 2L)
             {
                 throw("cas2");
             }
+
             z = 4L;
-            if (atomic.Cas(ref z, 5L, 6L))
+            if (atomic.Cas(_addr_z, 5L, 6L))
             {
                 throw("cas3");
             }
+
             if (z != 4L)
             {
                 throw("cas4");
             }
+
             z = 0xffffffffUL;
-            if (!atomic.Cas(ref z, 0xffffffffUL, 0xfffffffeUL))
+            if (!atomic.Cas(_addr_z, 0xffffffffUL, 0xfffffffeUL))
             {
                 throw("cas5");
             }
+
             if (z != 0xfffffffeUL)
             {
                 throw("cas6");
             }
-            k = @unsafe.Pointer(uintptr(0xfedcb123UL));
-            if (sys.PtrSize == 8L)
-            {
-                k = @unsafe.Pointer(uintptr(k) << (int)(10L));
-            }
-            if (casp(ref k, null, null))
-            {
-                throw("casp1");
-            }
-            k1 = add(k, 1L);
-            if (!casp(ref k, k, k1))
-            {
-                throw("casp2");
-            }
-            if (k != k1)
-            {
-                throw("casp3");
-            }
+
             m = new array<byte>(new byte[] { 1, 1, 1, 1 });
-            atomic.Or8(ref m[1L], 0xf0UL);
+            atomic.Or8(_addr_m[1L], 0xf0UL);
             if (m[0L] != 1L || m[1L] != 0xf1UL || m[2L] != 1L || m[3L] != 1L)
             {
                 throw("atomicor8");
             }
+
             m = new array<byte>(new byte[] { 0xff, 0xff, 0xff, 0xff });
-            atomic.And8(ref m[1L], 0x1UL);
+            atomic.And8(_addr_m[1L], 0x1UL);
             if (m[0L] != 0xffUL || m[1L] != 0x1UL || m[2L] != 0xffUL || m[3L] != 0xffUL)
             {
                 throw("atomicand8");
             }
-            (uint64.Value)(@unsafe.Pointer(ref j)).Value;
+
+            (uint64.val)(@unsafe.Pointer(_addr_j)).val;
 
             ~uint64(0L);
             if (j == j)
             {
                 throw("float64nan");
             }
+
             if (!(j != j))
             {
                 throw("float64nan1");
             }
-            (uint64.Value)(@unsafe.Pointer(ref j1)).Value;
+
+            (uint64.val)(@unsafe.Pointer(_addr_j1)).val;
 
             ~uint64(1L);
             if (j == j1)
             {
                 throw("float64nan2");
             }
+
             if (!(j != j1))
             {
                 throw("float64nan3");
             }
-            (uint32.Value)(@unsafe.Pointer(ref i)).Value;
+
+            (uint32.val)(@unsafe.Pointer(_addr_i)).val;
 
             ~uint32(0L);
             if (i == i)
             {
                 throw("float32nan");
             }
+
             if (i == i)
             {
                 throw("float32nan1");
             }
-            (uint32.Value)(@unsafe.Pointer(ref i1)).Value;
+
+            (uint32.val)(@unsafe.Pointer(_addr_i1)).val;
 
             ~uint32(1L);
             if (i == i1)
             {
                 throw("float32nan2");
             }
+
             if (i == i1)
             {
                 throw("float32nan3");
             }
+
             testAtomic64();
 
             if (_FixedStack != round2(_FixedStack))
             {
                 throw("FixedStack is not power-of-2");
             }
+
             if (!checkASM())
             {
                 throw("assembly checks failed");
             }
+
         }
 
         private partial struct dbgVar
@@ -368,7 +407,7 @@ namespace go
         // already have an initial value.
         private static var debug = default;
 
-        private static dbgVar dbgvars = new slice<dbgVar>(new dbgVar[] { {"allocfreetrace",&debug.allocfreetrace}, {"cgocheck",&debug.cgocheck}, {"efence",&debug.efence}, {"gccheckmark",&debug.gccheckmark}, {"gcpacertrace",&debug.gcpacertrace}, {"gcshrinkstackoff",&debug.gcshrinkstackoff}, {"gcrescanstacks",&debug.gcrescanstacks}, {"gcstoptheworld",&debug.gcstoptheworld}, {"gctrace",&debug.gctrace}, {"invalidptr",&debug.invalidptr}, {"sbrk",&debug.sbrk}, {"scavenge",&debug.scavenge}, {"scheddetail",&debug.scheddetail}, {"schedtrace",&debug.schedtrace} });
+        private static dbgVar dbgvars = new slice<dbgVar>(new dbgVar[] { {"allocfreetrace",&debug.allocfreetrace}, {"clobberfree",&debug.clobberfree}, {"cgocheck",&debug.cgocheck}, {"efence",&debug.efence}, {"gccheckmark",&debug.gccheckmark}, {"gcpacertrace",&debug.gcpacertrace}, {"gcshrinkstackoff",&debug.gcshrinkstackoff}, {"gcstoptheworld",&debug.gcstoptheworld}, {"gctrace",&debug.gctrace}, {"invalidptr",&debug.invalidptr}, {"madvdontneed",&debug.madvdontneed}, {"sbrk",&debug.sbrk}, {"scavenge",&debug.scavenge}, {"scavtrace",&debug.scavtrace}, {"scheddetail",&debug.scheddetail}, {"schedtrace",&debug.schedtrace}, {"tracebackancestors",&debug.tracebackancestors}, {"asyncpreemptoff",&debug.asyncpreemptoff} });
 
         private static void parsedebugvars()
         { 
@@ -387,17 +426,21 @@ namespace go
                     {
                         field = p;
                         p = "";
+
                     }
                     else
                     {
                         field = p[..i];
                         p = p[i + 1L..];
+
                     }
+
                     i = index(field, "=");
                     if (i < 0L)
                     {
                         continue;
                     }
+
                     var key = field[..i];
                     var value = field[i + 1L..]; 
 
@@ -419,6 +462,7 @@ namespace go
                             n = n__prev2;
 
                         }
+
                     }
                     else
                     {
@@ -433,21 +477,26 @@ namespace go
 
                                     if (ok)
                                     {
-                                        v.value.Value = n;
+                                        v.value.val = n;
                                     }
 
                                     n = n__prev3;
 
                                 }
+
                             }
+
                         }
+
                     }
+
                 }
 
             }
 
             setTraceback(gogetenv("GOTRACEBACK"));
             traceback_env = traceback_cache;
+
         }
 
         //go:linkname setTraceback runtime/debug.SetTraceback
@@ -484,6 +533,7 @@ namespace go
                         }
 
                     }
+
                     break;
             } 
             // when C owns the process, simply exit'ing the process on fatal errors
@@ -492,74 +542,89 @@ namespace go
             {
                 t |= tracebackCrash;
             }
+
             t |= traceback_env;
 
-            atomic.Store(ref traceback_cache, t);
+            atomic.Store(_addr_traceback_cache, t);
+
         }
 
         // Poor mans 64-bit division.
         // This is a very special function, do not use it if you are not sure what you are doing.
         // int64 division is lowered into _divv() call on 386, which does not fit into nosplit functions.
         // Handles overflow in a time-specific manner.
+        // This keeps us within no-split stack limits on 32-bit processors.
         //go:nosplit
-        private static int timediv(long v, int div, ref int rem)
+        private static int timediv(long v, int div, ptr<int> _addr_rem)
         {
+            ref int rem = ref _addr_rem.val;
+
             var res = int32(0L);
             for (long bit = 30L; bit >= 0L; bit--)
             {
                 if (v >= int64(div) << (int)(uint(bit)))
                 {
-                    v = v - (int64(div) << (int)(uint(bit)));
-                    res += 1L << (int)(uint(bit));
+                    v = v - (int64(div) << (int)(uint(bit))); 
+                    // Before this for loop, res was 0, thus all these
+                    // power of 2 increments are now just bitsets.
+                    res |= 1L << (int)(uint(bit));
+
                 }
+
             }
 
             if (v >= int64(div))
             {
                 if (rem != null)
                 {
-                    rem.Value = 0L;
+                    rem = 0L;
                 }
+
                 return 0x7fffffffUL;
+
             }
+
             if (rem != null)
             {
-                rem.Value = int32(v);
+                rem = int32(v);
             }
+
             return res;
+
         }
 
         // Helpers for Go. Must be NOSPLIT, must only call NOSPLIT functions, and must not block.
 
         //go:nosplit
-        private static ref m acquirem()
+        private static ptr<m> acquirem()
         {
             var _g_ = getg();
             _g_.m.locks++;
-            return _g_.m;
+            return _addr__g_.m!;
         }
 
         //go:nosplit
-        private static void releasem(ref m mp)
+        private static void releasem(ptr<m> _addr_mp)
         {
+            ref m mp = ref _addr_mp.val;
+
             var _g_ = getg();
             mp.locks--;
             if (mp.locks == 0L && _g_.preempt)
             { 
                 // restore the preemption request in case we've cleared it in newstack
                 _g_.stackguard0 = stackPreempt;
-            }
-        }
 
-        //go:nosplit
-        private static ref mcache gomcache()
-        {
-            return getg().m.mcache;
+            }
+
         }
 
         //go:linkname reflect_typelinks reflect.typelinks
         private static (slice<unsafe.Pointer>, slice<slice<int>>) reflect_typelinks()
         {
+            slice<unsafe.Pointer> _p0 = default;
+            slice<slice<int>> _p0 = default;
+
             var modules = activeModules();
             unsafe.Pointer sections = new slice<unsafe.Pointer>(new unsafe.Pointer[] { unsafe.Pointer(modules[0].types) });
             slice<int> ret = new slice<slice<int>>(new slice<int>[] { modules[0].typelinks });
@@ -569,6 +634,7 @@ namespace go
                 ret = append(ret, md.typelinks);
             }
             return (sections, ret);
+
         }
 
         // reflect_resolveNameOff resolves a name offset from a base pointer.
@@ -582,15 +648,28 @@ namespace go
         //go:linkname reflect_resolveTypeOff reflect.resolveTypeOff
         private static unsafe.Pointer reflect_resolveTypeOff(unsafe.Pointer rtype, int off)
         {
-            return @unsafe.Pointer((_type.Value)(rtype).typeOff(typeOff(off)));
+            return @unsafe.Pointer((_type.val)(rtype).typeOff(typeOff(off)));
         }
 
-        // reflect_resolveTextOff resolves an function pointer offset from a base type.
+        // reflect_resolveTextOff resolves a function pointer offset from a base type.
         //go:linkname reflect_resolveTextOff reflect.resolveTextOff
         private static unsafe.Pointer reflect_resolveTextOff(unsafe.Pointer rtype, int off)
         {
-            return (_type.Value)(rtype).textOff(textOff(off));
+            return (_type.val)(rtype).textOff(textOff(off));
+        }
 
+        // reflectlite_resolveNameOff resolves a name offset from a base pointer.
+        //go:linkname reflectlite_resolveNameOff internal/reflectlite.resolveNameOff
+        private static unsafe.Pointer reflectlite_resolveNameOff(unsafe.Pointer ptrInModule, int off)
+        {
+            return @unsafe.Pointer(resolveNameOff(ptrInModule, nameOff(off)).bytes);
+        }
+
+        // reflectlite_resolveTypeOff resolves an *rtype offset from a base type.
+        //go:linkname reflectlite_resolveTypeOff internal/reflectlite.resolveTypeOff
+        private static unsafe.Pointer reflectlite_resolveTypeOff(unsafe.Pointer rtype, int off)
+        {
+            return @unsafe.Pointer((_type.val)(rtype).typeOff(typeOff(off)));
         }
 
         // reflect_addReflectOff adds a pointer to the reflection offset lookup map.
@@ -604,6 +683,7 @@ namespace go
                 reflectOffs.minv = make_map<unsafe.Pointer, int>();
                 reflectOffs.next = -1L;
             }
+
             var (id, found) = reflectOffs.minv[ptr];
             if (!found)
             {
@@ -611,9 +691,12 @@ namespace go
                 reflectOffs.next--; // use negative offsets as IDs to aid debugging
                 reflectOffs.m[id] = ptr;
                 reflectOffs.minv[ptr] = id;
+
             }
+
             reflectOffsUnlock();
             return id;
+
         }
     }
 }

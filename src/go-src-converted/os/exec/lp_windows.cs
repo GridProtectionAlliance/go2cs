@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package exec -- go2cs converted at 2020 August 29 08:24:40 UTC
+// package exec -- go2cs converted at 2020 October 08 03:41:19 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Go\src\os\exec\lp_windows.go
 using errors = go.errors_package;
@@ -24,13 +24,16 @@ namespace os
             var (d, err) = os.Stat(file);
             if (err != null)
             {
-                return error.As(err);
+                return error.As(err)!;
             }
+
             if (d.IsDir())
             {
-                return error.As(os.ErrPermission);
+                return error.As(os.ErrPermission)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         private static bool hasExt(@string file)
@@ -40,22 +43,30 @@ namespace os
             {
                 return false;
             }
+
             return strings.LastIndexAny(file, ":\\/") < i;
+
         }
 
         private static (@string, error) findExecutable(@string file, slice<@string> exts)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             if (len(exts) == 0L)
             {
-                return (file, chkStat(file));
+                return (file, error.As(chkStat(file))!);
             }
+
             if (hasExt(file))
             {
                 if (chkStat(file) == null)
                 {
-                    return (file, null);
+                    return (file, error.As(null!)!);
                 }
+
             }
+
             foreach (var (_, e) in exts)
             {
                 {
@@ -63,22 +74,27 @@ namespace os
 
                     if (chkStat(f) == null)
                     {
-                        return (f, null);
+                        return (f, error.As(null!)!);
                     }
 
                 }
+
             }
-            return ("", os.ErrNotExist);
+            return ("", error.As(os.ErrNotExist)!);
+
         }
 
-        // LookPath searches for an executable binary named file
-        // in the directories named by the PATH environment variable.
+        // LookPath searches for an executable named file in the
+        // directories named by the PATH environment variable.
         // If file contains a slash, it is tried directly and the PATH is not consulted.
         // LookPath also uses PATHEXT environment variable to match
         // a suitable candidate.
         // The result may be an absolute path or a path relative to the current directory.
         public static (@string, error) LookPath(@string file)
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             slice<@string> exts = default;
             var x = os.Getenv("PATHEXT");
             if (x != "")
@@ -89,16 +105,20 @@ namespace os
                     {
                         continue;
                     }
+
                     if (e[0L] != '.')
                     {
                         e = "." + e;
                     }
+
                     exts = append(exts, e);
+
                 }
             else
             }            {
                 exts = new slice<@string>(new @string[] { ".com", ".exe", ".bat", ".cmd" });
             }
+
             if (strings.ContainsAny(file, ":\\/"))
             {
                 {
@@ -108,17 +128,19 @@ namespace os
 
                     if (err == null)
                     {
-                        return (f, null);
+                        return (f, error.As(null!)!);
                     }
                     else
                     {
-                        return ("", ref new Error(file,err));
+                        return ("", error.As(addr(new Error(file,err))!)!);
                     }
 
                     f = f__prev2;
 
                 }
+
             }
+
             {
                 var f__prev1 = f;
 
@@ -126,12 +148,13 @@ namespace os
 
                 if (err == null)
                 {
-                    return (f, null);
+                    return (f, error.As(null!)!);
                 }
 
                 f = f__prev1;
 
             }
+
             var path = os.Getenv("path");
             foreach (var (_, dir) in filepath.SplitList(path))
             {
@@ -142,14 +165,16 @@ namespace os
 
                     if (err == null)
                     {
-                        return (f, null);
+                        return (f, error.As(null!)!);
                     }
 
                     f = f__prev1;
 
                 }
+
             }
-            return ("", ref new Error(file,ErrNotFound));
+            return ("", error.As(addr(new Error(file,ErrNotFound))!)!);
+
         }
     }
 }}

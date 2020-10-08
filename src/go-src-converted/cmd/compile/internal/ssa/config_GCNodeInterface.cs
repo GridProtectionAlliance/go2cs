@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:53:31 UTC
+//     Generated on 2020 October 08 04:10:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,8 +18,6 @@ using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
 using go;
 
 #pragma warning disable CS0660, CS0661
@@ -57,7 +55,7 @@ namespace @internal
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -71,10 +69,10 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate StorageClass TypByRef(ref T value);
+            private delegate StorageClass TypByPtr(ptr<T> value);
             private delegate StorageClass TypByVal(T value);
 
-            private static readonly TypByRef s_TypByRef;
+            private static readonly TypByPtr s_TypByPtr;
             private static readonly TypByVal s_TypByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,17 +81,18 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TypByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TypByPtr is null || !m_target_is_ptr)
                     return s_TypByVal!(target);
 
-                return s_TypByRef(ref target);
+                return s_TypByPtr(m_target_ptr);
             }
 
-            private delegate StorageClass StringByRef(ref T value);
+            private delegate StorageClass StringByPtr(ptr<T> value);
             private delegate StorageClass StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,17 +101,58 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
 
-            private delegate StorageClass StorageClassByRef(ref T value);
+            private delegate StorageClass IsSyntheticByPtr(ptr<T> value);
+            private delegate StorageClass IsSyntheticByVal(T value);
+
+            private static readonly IsSyntheticByPtr s_IsSyntheticByPtr;
+            private static readonly IsSyntheticByVal s_IsSyntheticByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public StorageClass IsSynthetic()
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_IsSyntheticByPtr is null || !m_target_is_ptr)
+                    return s_IsSyntheticByVal!(target);
+
+                return s_IsSyntheticByPtr(m_target_ptr);
+            }
+
+            private delegate StorageClass IsAutoTmpByPtr(ptr<T> value);
+            private delegate StorageClass IsAutoTmpByVal(T value);
+
+            private static readonly IsAutoTmpByPtr s_IsAutoTmpByPtr;
+            private static readonly IsAutoTmpByVal s_IsAutoTmpByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public StorageClass IsAutoTmp()
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_IsAutoTmpByPtr is null || !m_target_is_ptr)
+                    return s_IsAutoTmpByVal!(target);
+
+                return s_IsAutoTmpByPtr(m_target_ptr);
+            }
+
+            private delegate StorageClass StorageClassByPtr(ptr<T> value);
             private delegate StorageClass StorageClassByVal(T value);
 
-            private static readonly StorageClassByRef s_StorageClassByRef;
+            private static readonly StorageClassByPtr s_StorageClassByPtr;
             private static readonly StorageClassByVal s_StorageClassByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,11 +161,12 @@ namespace @internal
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StorageClassByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StorageClassByPtr is null || !m_target_is_ptr)
                     return s_StorageClassByVal!(target);
 
-                return s_StorageClassByRef(ref target);
+                return s_StorageClassByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -134,55 +175,72 @@ namespace @internal
             static GCNode()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Typ");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Typ");
 
                 if (!(extensionMethod is null))
-                    s_TypByRef = extensionMethod.CreateStaticDelegate(typeof(TypByRef)) as TypByRef;
+                    s_TypByPtr = extensionMethod.CreateStaticDelegate(typeof(TypByPtr)) as TypByPtr;
 
-                if (s_TypByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Typ");
+                extensionMethod = targetType.GetExtensionMethod("Typ");
 
-                    if (!(extensionMethod is null))
-                        s_TypByVal = extensionMethod.CreateStaticDelegate(typeof(TypByVal)) as TypByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TypByVal = extensionMethod.CreateStaticDelegate(typeof(TypByVal)) as TypByVal;
 
-                if (s_TypByRef is null && s_TypByVal is null)
+                if (s_TypByPtr is null && s_TypByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement GCNode.Typ method", new Exception("Typ"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement GCNode.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("StorageClass");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("IsSynthetic");
 
                 if (!(extensionMethod is null))
-                    s_StorageClassByRef = extensionMethod.CreateStaticDelegate(typeof(StorageClassByRef)) as StorageClassByRef;
+                    s_IsSyntheticByPtr = extensionMethod.CreateStaticDelegate(typeof(IsSyntheticByPtr)) as IsSyntheticByPtr;
 
-                if (s_StorageClassByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("StorageClass");
+                extensionMethod = targetType.GetExtensionMethod("IsSynthetic");
 
-                    if (!(extensionMethod is null))
-                        s_StorageClassByVal = extensionMethod.CreateStaticDelegate(typeof(StorageClassByVal)) as StorageClassByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_IsSyntheticByVal = extensionMethod.CreateStaticDelegate(typeof(IsSyntheticByVal)) as IsSyntheticByVal;
 
-                if (s_StorageClassByRef is null && s_StorageClassByVal is null)
+                if (s_IsSyntheticByPtr is null && s_IsSyntheticByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement GCNode.IsSynthetic method", new Exception("IsSynthetic"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("IsAutoTmp");
+
+                if (!(extensionMethod is null))
+                    s_IsAutoTmpByPtr = extensionMethod.CreateStaticDelegate(typeof(IsAutoTmpByPtr)) as IsAutoTmpByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("IsAutoTmp");
+
+                if (!(extensionMethod is null))
+                    s_IsAutoTmpByVal = extensionMethod.CreateStaticDelegate(typeof(IsAutoTmpByVal)) as IsAutoTmpByVal;
+
+                if (s_IsAutoTmpByPtr is null && s_IsAutoTmpByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement GCNode.IsAutoTmp method", new Exception("IsAutoTmp"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("StorageClass");
+
+                if (!(extensionMethod is null))
+                    s_StorageClassByPtr = extensionMethod.CreateStaticDelegate(typeof(StorageClassByPtr)) as StorageClassByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("StorageClass");
+
+                if (!(extensionMethod is null))
+                    s_StorageClassByVal = extensionMethod.CreateStaticDelegate(typeof(StorageClassByVal)) as StorageClassByVal;
+
+                if (s_StorageClassByPtr is null && s_StorageClassByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement GCNode.StorageClass method", new Exception("StorageClass"));
             }
 

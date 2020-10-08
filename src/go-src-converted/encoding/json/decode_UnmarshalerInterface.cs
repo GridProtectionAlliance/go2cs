@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:35:12 UTC
+//     Generated on 2020 October 08 03:42:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,14 +14,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
 using encoding = go.encoding_package;
 using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
 using fmt = go.fmt_package;
 using reflect = go.reflect_package;
-using runtime = go.runtime_package;
 using strconv = go.strconv_package;
+using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf16 = go.unicode.utf16_package;
 using utf8 = go.unicode.utf8_package;
@@ -60,7 +58,7 @@ namespace encoding
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -74,10 +72,10 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate error UnmarshalJSONByRef(ref T value, slice<byte> _p0);
+            private delegate error UnmarshalJSONByPtr(ptr<T> value, slice<byte> _p0);
             private delegate error UnmarshalJSONByVal(T value, slice<byte> _p0);
 
-            private static readonly UnmarshalJSONByRef s_UnmarshalJSONByRef;
+            private static readonly UnmarshalJSONByPtr s_UnmarshalJSONByPtr;
             private static readonly UnmarshalJSONByVal s_UnmarshalJSONByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,11 +84,12 @@ namespace encoding
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_UnmarshalJSONByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_UnmarshalJSONByPtr is null || !m_target_is_ptr)
                     return s_UnmarshalJSONByVal!(target, _p0);
 
-                return s_UnmarshalJSONByRef(ref target, _p0);
+                return s_UnmarshalJSONByPtr(m_target_ptr, _p0);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -99,23 +98,20 @@ namespace encoding
             static Unmarshaler()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("UnmarshalJSON");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("UnmarshalJSON");
 
                 if (!(extensionMethod is null))
-                    s_UnmarshalJSONByRef = extensionMethod.CreateStaticDelegate(typeof(UnmarshalJSONByRef)) as UnmarshalJSONByRef;
+                    s_UnmarshalJSONByPtr = extensionMethod.CreateStaticDelegate(typeof(UnmarshalJSONByPtr)) as UnmarshalJSONByPtr;
 
-                if (s_UnmarshalJSONByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("UnmarshalJSON");
+                extensionMethod = targetType.GetExtensionMethod("UnmarshalJSON");
 
-                    if (!(extensionMethod is null))
-                        s_UnmarshalJSONByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalJSONByVal)) as UnmarshalJSONByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_UnmarshalJSONByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalJSONByVal)) as UnmarshalJSONByVal;
 
-                if (s_UnmarshalJSONByRef is null && s_UnmarshalJSONByVal is null)
+                if (s_UnmarshalJSONByPtr is null && s_UnmarshalJSONByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Unmarshaler.UnmarshalJSON method", new Exception("UnmarshalJSON"));
             }
 

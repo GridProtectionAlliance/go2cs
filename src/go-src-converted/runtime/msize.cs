@@ -7,7 +7,7 @@
 // See malloc.go for overview.
 // See also mksizeclasses.go for how we decide what size classes to use.
 
-// package runtime -- go2cs converted at 2020 August 29 08:18:30 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:21:29 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\msize.go
 
@@ -24,18 +24,19 @@ namespace go
             {
                 if (size <= smallSizeMax - 8L)
                 {
-                    return uintptr(class_to_size[size_to_class8[(size + smallSizeDiv - 1L) / smallSizeDiv]]);
+                    return uintptr(class_to_size[size_to_class8[divRoundUp(size, smallSizeDiv)]]);
                 }
                 else
                 {
-                    return uintptr(class_to_size[size_to_class128[(size - smallSizeMax + largeSizeDiv - 1L) / largeSizeDiv]]);
+                    return uintptr(class_to_size[size_to_class128[divRoundUp(size - smallSizeMax, largeSizeDiv)]]);
                 }
             }
             if (size + _PageSize < size)
             {
                 return size;
             }
-            return round(size, _PageSize);
+            return alignUp(size, _PageSize);
+
         }
     }
 }

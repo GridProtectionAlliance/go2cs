@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:18:15 UTC
+//     Generated on 2020 October 08 03:21:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,14 +31,22 @@ namespace go
                 this.wbuf2 = default;
                 this.bytesMarked = default;
                 this.scanWork = default;
+                this.flushedWork = default;
+                this.pauseGen = default;
+                this.putGen = default;
+                this.pauseStack = default;
             }
 
-            public gcWork(ref ptr<workbuf> wbuf1 = default, ref ptr<workbuf> wbuf2 = default, ulong bytesMarked = default, long scanWork = default)
+            public gcWork(ref ptr<workbuf> wbuf1 = default, ref ptr<workbuf> wbuf2 = default, ulong bytesMarked = default, long scanWork = default, bool flushedWork = default, uint pauseGen = default, uint putGen = default, array<System.UIntPtr> pauseStack = default)
             {
                 this.wbuf1 = wbuf1;
                 this.wbuf2 = wbuf2;
                 this.bytesMarked = bytesMarked;
                 this.scanWork = scanWork;
+                this.flushedWork = flushedWork;
+                this.pauseGen = pauseGen;
+                this.putGen = putGen;
+                this.pauseStack = pauseStack;
             }
 
             // Enable comparisons between nil and gcWork struct
@@ -61,7 +69,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static gcWork gcWork_cast(dynamic value)
         {
-            return new gcWork(ref value.wbuf1, ref value.wbuf2, value.bytesMarked, value.scanWork);
+            return new gcWork(ref value.wbuf1, ref value.wbuf2, value.bytesMarked, value.scanWork, value.flushedWork, value.pauseGen, value.putGen, value.pauseStack);
         }
     }
 }

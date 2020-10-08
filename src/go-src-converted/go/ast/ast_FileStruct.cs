@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:46:43 UTC
+//     Generated on 2020 October 08 04:02:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,8 +15,6 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using token = go.go.token_package;
 using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go;
 
 namespace go {
@@ -40,7 +38,7 @@ namespace go
                 this.Comments = default;
             }
 
-            public File(ref ptr<CommentGroup> Doc = default, token.Pos Package = default, ref ptr<Ident> Name = default, slice<Decl> Decls = default, ref ptr<Scope> Scope = default, slice<ref ImportSpec> Imports = default, slice<ref Ident> Unresolved = default, slice<ref CommentGroup> Comments = default)
+            public File(ref ptr<CommentGroup> Doc = default, token.Pos Package = default, ref ptr<Ident> Name = default, slice<Decl> Decls = default, ref ptr<Scope> Scope = default, slice<ptr<ImportSpec>> Imports = default, slice<ptr<Ident>> Unresolved = default, slice<ptr<CommentGroup>> Comments = default)
             {
                 this.Doc = Doc;
                 this.Package = Package;

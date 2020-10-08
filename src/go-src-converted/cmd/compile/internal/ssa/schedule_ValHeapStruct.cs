@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:24:12 UTC
+//     Generated on 2020 October 08 04:26:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using types = go.cmd.compile.@internal.types_package;
 using heap = go.container.heap_package;
+using sort = go.sort_package;
 using go;
 
 namespace go {
@@ -33,7 +35,7 @@ namespace @internal
                 this.score = default;
             }
 
-            public ValHeap(slice<ref Value> a = default, slice<sbyte> score = default)
+            public ValHeap(slice<ptr<Value>> a = default, slice<sbyte> score = default)
             {
                 this.a = a;
                 this.score = score;

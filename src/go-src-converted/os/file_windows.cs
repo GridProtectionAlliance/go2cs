@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:44:05 UTC
+// package os -- go2cs converted at 2020 October 08 03:44:48 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\file_windows.go
+using errors = go.errors_package;
 using poll = go.@internal.poll_package;
 using windows = go.@internal.syscall.windows_package;
 using runtime = go.runtime_package;
@@ -26,59 +27,79 @@ namespace go
             public poll.FD pfd;
             public @string name;
             public ptr<dirInfo> dirinfo; // nil unless directory being read
+            public bool appendMode; // whether file is opened for appending
         }
 
         // Fd returns the Windows handle referencing the open file.
         // The handle is valid only until f.Close is called or f is garbage collected.
         // On Unix systems this will cause the SetDeadline methods to stop working.
-        private static System.UIntPtr Fd(this ref File file)
+        private static System.UIntPtr Fd(this ptr<File> _addr_file)
         {
+            ref File file = ref _addr_file.val;
+
             if (file == null)
             {
                 return uintptr(syscall.InvalidHandle);
             }
+
             return uintptr(file.pfd.Sysfd);
+
         }
 
         // newFile returns a new File with the given file handle and name.
         // Unlike NewFile, it does not check that h is syscall.InvalidHandle.
-        private static ref File newFile(syscall.Handle h, @string name, @string kind)
+        private static ptr<File> newFile(syscall.Handle h, @string name, @string kind)
         {
             if (kind == "file")
             {
-                uint m = default;
-                if (syscall.GetConsoleMode(h, ref m) == null)
+                ref uint m = ref heap(out ptr<uint> _addr_m);
+                if (syscall.GetConsoleMode(h, _addr_m) == null)
                 {
                     kind = "console";
                 }
+
+                {
+                    var (t, err) = syscall.GetFileType(h);
+
+                    if (err == null && t == syscall.FILE_TYPE_PIPE)
+                    {
+                        kind = "pipe";
+                    }
+
+                }
+
             }
-            File f = ref new File(&file{pfd:poll.FD{Sysfd:h,IsStream:true,ZeroReadIsEOF:true,},name:name,});
-            runtime.SetFinalizer(f.file, ref file); 
+
+            ptr<File> f = addr(new File(&file{pfd:poll.FD{Sysfd:h,IsStream:true,ZeroReadIsEOF:true,},name:name,}));
+            runtime.SetFinalizer(f.file, ptr<file>); 
 
             // Ignore initialization errors.
             // Assume any problems will show up in later I/O.
             f.pfd.Init(kind, false);
 
-            return f;
+            return _addr_f!;
+
         }
 
         // newConsoleFile creates new File that will be used as console.
-        private static ref File newConsoleFile(syscall.Handle h, @string name)
+        private static ptr<File> newConsoleFile(syscall.Handle h, @string name)
         {
-            return newFile(h, name, "console");
+            return _addr_newFile(h, name, "console")!;
         }
 
         // NewFile returns a new File with the given file descriptor and
         // name. The returned value will be nil if fd is not a valid file
         // descriptor.
-        public static ref File NewFile(System.UIntPtr fd, @string name)
+        public static ptr<File> NewFile(System.UIntPtr fd, @string name)
         {
             var h = syscall.Handle(fd);
             if (h == syscall.InvalidHandle)
             {
-                return null;
+                return _addr_null!;
             }
-            return newFile(h, name, "file");
+
+            return _addr_newFile(h, name, "file")!;
+
         }
 
         // Auxiliary information if the File describes a directory
@@ -90,50 +111,80 @@ namespace go
             public bool isempty; // set if FindFirstFile returns ERROR_FILE_NOT_FOUND
         }
 
-        private static void epipecheck(ref File file, error e)
+        private static void epipecheck(ptr<File> _addr_file, error e)
         {
+            ref File file = ref _addr_file.val;
+
         }
 
-        public static readonly @string DevNull = "NUL";
+        // DevNull is the name of the operating system's ``null device.''
+        // On Unix-like systems, it is "/dev/null"; on Windows, "NUL".
+        public static readonly @string DevNull = (@string)"NUL";
 
 
 
-        private static bool isdir(this ref file f)
+        private static bool isdir(this ptr<file> _addr_f)
         {
+            ref file f = ref _addr_f.val;
+
             return f != null && f.dirinfo != null;
         }
 
-        private static (ref File, error) openFile(@string name, long flag, FileMode perm)
+        private static (ptr<File>, error) openFile(@string name, long flag, FileMode perm)
         {
+            ptr<File> file = default!;
+            error err = default!;
+
             var (r, e) = syscall.Open(fixLongPath(name), flag | syscall.O_CLOEXEC, syscallMode(perm));
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
-            return (newFile(r, name, "file"), null);
+
+            return (_addr_newFile(r, name, "file")!, error.As(null!)!);
+
         }
 
-        private static (ref File, error) openDir(@string name)
+        private static (ptr<File>, error) openDir(@string name)
         {
+            ptr<File> file = default!;
+            error err = default!;
+
             @string mask = default;
 
             var path = fixLongPath(name);
 
-            if (len(path) == 2L && path[1L] == ':' || (len(path) > 0L && path[len(path) - 1L] == '\\'))
+            if (len(path) == 2L && path[1L] == ':')
             { // it is a drive letter, like C:
                 mask = path + "*";
+
+            }
+            else if (len(path) > 0L)
+            {
+                var lc = path[len(path) - 1L];
+                if (lc == '/' || lc == '\\')
+                {
+                    mask = path + "*";
+                }
+                else
+                {
+                    mask = path + "\\*";
+                }
+
             }
             else
             {
-                mask = path + "\\*";
+                mask = "\\*";
             }
+
             var (maskp, e) = syscall.UTF16PtrFromString(mask);
             if (e != null)
             {
-                return (null, e);
+                return (_addr_null!, error.As(e)!);
             }
+
             ptr<dirInfo> d = @new<dirInfo>();
-            var (r, e) = syscall.FindFirstFile(maskp, ref d.data);
+            var (r, e) = syscall.FindFirstFile(maskp, _addr_d.data);
             if (e != null)
             { 
                 // FindFirstFile returns ERROR_FILE_NOT_FOUND when
@@ -141,87 +192,99 @@ namespace go
                 // exists, we should proceed.
                 if (e != syscall.ERROR_FILE_NOT_FOUND)
                 {
-                    return (null, e);
+                    return (_addr_null!, error.As(e)!);
                 }
-                syscall.Win32FileAttributeData fa = default;
+
+                ref syscall.Win32FileAttributeData fa = ref heap(out ptr<syscall.Win32FileAttributeData> _addr_fa);
                 var (pathp, e) = syscall.UTF16PtrFromString(path);
                 if (e != null)
                 {
-                    return (null, e);
+                    return (_addr_null!, error.As(e)!);
                 }
-                e = syscall.GetFileAttributesEx(pathp, syscall.GetFileExInfoStandard, (byte.Value)(@unsafe.Pointer(ref fa)));
+
+                e = syscall.GetFileAttributesEx(pathp, syscall.GetFileExInfoStandard, (byte.val)(@unsafe.Pointer(_addr_fa)));
                 if (e != null)
                 {
-                    return (null, e);
+                    return (_addr_null!, error.As(e)!);
                 }
+
                 if (fa.FileAttributes & syscall.FILE_ATTRIBUTE_DIRECTORY == 0L)
                 {
-                    return (null, e);
+                    return (_addr_null!, error.As(e)!);
                 }
+
                 d.isempty = true;
+
             }
+
             d.path = path;
             if (!isAbs(d.path))
             {
                 d.path, e = syscall.FullPath(d.path);
                 if (e != null)
                 {
-                    return (null, e);
+                    return (_addr_null!, error.As(e)!);
                 }
+
             }
+
             var f = newFile(r, name, "dir");
             f.dirinfo = d;
-            return (f, null);
+            return (_addr_f!, error.As(null!)!);
+
         }
 
         // openFileNolog is the Windows implementation of OpenFile.
-        private static (ref File, error) openFileNolog(@string name, long flag, FileMode perm)
+        private static (ptr<File>, error) openFileNolog(@string name, long flag, FileMode perm)
         {
+            ptr<File> _p0 = default!;
+            error _p0 = default!;
+
             if (name == "")
             {
-                return (null, ref new PathError("open",name,syscall.ENOENT));
+                return (_addr_null!, error.As(addr(new PathError("open",name,syscall.ENOENT))!)!);
             }
+
             var (r, errf) = openFile(name, flag, perm);
             if (errf == null)
             {
-                return (r, null);
+                return (_addr_r!, error.As(null!)!);
             }
+
             var (r, errd) = openDir(name);
             if (errd == null)
             {
                 if (flag & O_WRONLY != 0L || flag & O_RDWR != 0L)
                 {
                     r.Close();
-                    return (null, ref new PathError("open",name,syscall.EISDIR));
+                    return (_addr_null!, error.As(addr(new PathError("open",name,syscall.EISDIR))!)!);
                 }
-                return (r, null);
+
+                return (_addr_r!, error.As(null!)!);
+
             }
-            return (null, ref new PathError("open",name,errf));
+
+            return (_addr_null!, error.As(addr(new PathError("open",name,errf))!)!);
+
         }
 
-        // Close closes the File, rendering it unusable for I/O.
-        // It returns an error, if any.
-        private static error Close(this ref File file)
+        private static error close(this ptr<file> _addr_file)
         {
-            if (file == null)
-            {
-                return error.As(ErrInvalid);
-            }
-            return error.As(file.file.close());
-        }
+            ref file file = ref _addr_file.val;
 
-        private static error close(this ref file file)
-        {
             if (file == null)
             {
-                return error.As(syscall.EINVAL);
+                return error.As(syscall.EINVAL)!;
             }
+
             if (file.isdir() && file.dirinfo.isempty)
             { 
                 // "special" empty directories
-                return error.As(null);
+                return error.As(null!)!;
+
             }
-            error err = default;
+
+            error err = default!;
             {
                 var e = file.pfd.Close();
 
@@ -231,7 +294,9 @@ namespace go
                     {
                         e = ErrClosed;
                     }
-                    err = error.As(ref new PathError("close",file.name,e));
+
+                    err = error.As(addr(new PathError("close",file.name,e)))!;
+
                 } 
 
                 // no need for a finalizer anymore
@@ -240,55 +305,23 @@ namespace go
 
             // no need for a finalizer anymore
             runtime.SetFinalizer(file, null);
-            return error.As(err);
-        }
+            return error.As(err)!;
 
-        // read reads up to len(b) bytes from the File.
-        // It returns the number of bytes read and an error, if any.
-        private static (long, error) read(this ref File f, slice<byte> b)
-        {
-            n, err = f.pfd.Read(b);
-            runtime.KeepAlive(f);
-            return (n, err);
-        }
-
-        // pread reads len(b) bytes from the File starting at byte offset off.
-        // It returns the number of bytes read and the error, if any.
-        // EOF is signaled by a zero count with err set to 0.
-        private static (long, error) pread(this ref File f, slice<byte> b, long off)
-        {
-            n, err = f.pfd.Pread(b, off);
-            runtime.KeepAlive(f);
-            return (n, err);
-        }
-
-        // write writes len(b) bytes to the File.
-        // It returns the number of bytes written and an error, if any.
-        private static (long, error) write(this ref File f, slice<byte> b)
-        {
-            n, err = f.pfd.Write(b);
-            runtime.KeepAlive(f);
-            return (n, err);
-        }
-
-        // pwrite writes len(b) bytes to the File starting at byte offset off.
-        // It returns the number of bytes written and an error, if any.
-        private static (long, error) pwrite(this ref File f, slice<byte> b, long off)
-        {
-            n, err = f.pfd.Pwrite(b, off);
-            runtime.KeepAlive(f);
-            return (n, err);
         }
 
         // seek sets the offset for the next Read or Write on file to offset, interpreted
         // according to whence: 0 means relative to the origin of the file, 1 means
         // relative to the current offset, and 2 means relative to the end.
         // It returns the new offset and an error, if any.
-        private static (long, error) seek(this ref File f, long offset, long whence)
+        private static (long, error) seek(this ptr<File> _addr_f, long offset, long whence)
         {
+            long ret = default;
+            error err = default!;
+            ref File f = ref _addr_f.val;
+
             ret, err = f.pfd.Seek(offset, whence);
             runtime.KeepAlive(f);
-            return (ret, err);
+            return (ret, error.As(err)!);
         }
 
         // Truncate changes the size of the named file.
@@ -298,15 +331,18 @@ namespace go
             var (f, e) = OpenFile(name, O_WRONLY | O_CREATE, 0666L);
             if (e != null)
             {
-                return error.As(e);
+                return error.As(e)!;
             }
+
             defer(f.Close());
             var e1 = f.Truncate(size);
             if (e1 != null)
             {
-                return error.As(e1);
+                return error.As(e1)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         });
 
         // Remove removes the named file or directory.
@@ -316,7 +352,7 @@ namespace go
             var (p, e) = syscall.UTF16PtrFromString(fixLongPath(name));
             if (e != null)
             {
-                return error.As(ref new PathError("remove",name,e));
+                return error.As(addr(new PathError("remove",name,e))!)!;
             } 
 
             // Go file interface forces us to know whether
@@ -324,12 +360,13 @@ namespace go
             e = syscall.DeleteFile(p);
             if (e == null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
+
             var e1 = syscall.RemoveDirectory(p);
             if (e1 == null)
             {
-                return error.As(null);
+                return error.As(null!)!;
             } 
 
             // Both failed: figure out which error to return.
@@ -356,13 +393,19 @@ namespace go
 
                             if (e == null)
                             {
-                                return error.As(null);
+                                return error.As(null!)!;
                             }
+
                         }
+
                     }
+
                 }
+
             }
-            return error.As(ref new PathError("remove",name,e));
+
+            return error.As(addr(new PathError("remove",name,e))!)!;
+
         }
 
         private static error rename(@string oldname, @string newname)
@@ -370,22 +413,30 @@ namespace go
             var e = windows.Rename(fixLongPath(oldname), fixLongPath(newname));
             if (e != null)
             {
-                return error.As(ref new LinkError("rename",oldname,newname,e));
+                return error.As(addr(new LinkError("rename",oldname,newname,e))!)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Pipe returns a connected pair of Files; reads from r return bytes written to w.
         // It returns the files and an error, if any.
-        public static (ref File, ref File, error) Pipe()
+        public static (ptr<File>, ptr<File>, error) Pipe()
         {
+            ptr<File> r = default!;
+            ptr<File> w = default!;
+            error err = default!;
+
             array<syscall.Handle> p = new array<syscall.Handle>(2L);
-            var e = syscall.CreatePipe(ref p[0L], ref p[1L], null, 0L);
+            var e = syscall.CreatePipe(_addr_p[0L], _addr_p[1L], null, 0L);
             if (e != null)
             {
-                return (null, null, NewSyscallError("pipe", e));
+                return (_addr_null!, _addr_null!, error.As(NewSyscallError("pipe", e))!);
             }
-            return (newFile(p[0L], "|0", "file"), newFile(p[1L], "|1", "file"), null);
+
+            return (_addr_newFile(p[0L], "|0", "pipe")!, _addr_newFile(p[1L], "|1", "pipe")!, error.As(null!)!);
+
         }
 
         private static @string tempDir()
@@ -394,17 +445,27 @@ namespace go
             while (true)
             {
                 var b = make_slice<ushort>(n);
-                n, _ = syscall.GetTempPath(uint32(len(b)), ref b[0L]);
+                n, _ = syscall.GetTempPath(uint32(len(b)), _addr_b[0L]);
                 if (n > uint32(len(b)))
                 {
                     continue;
                 }
-                if (n > 0L && b[n - 1L] == '\\')
-                {
-                    n--;
+
+                if (n == 3L && b[1L] == ':' && b[2L] == '\\')
+                { 
+                    // Do nothing for path, like C:\.
                 }
+                else if (n > 0L && b[n - 1L] == '\\')
+                { 
+                    // Otherwise remove terminating \.
+                    n--;
+
+                }
+
                 return string(utf16.Decode(b[..n]));
+
             }
+
 
         }
 
@@ -415,64 +476,271 @@ namespace go
             var (n, err) = syscall.UTF16PtrFromString(fixLongPath(newname));
             if (err != null)
             {
-                return error.As(ref new LinkError("link",oldname,newname,err));
+                return error.As(addr(new LinkError("link",oldname,newname,err))!)!;
             }
+
             var (o, err) = syscall.UTF16PtrFromString(fixLongPath(oldname));
             if (err != null)
             {
-                return error.As(ref new LinkError("link",oldname,newname,err));
+                return error.As(addr(new LinkError("link",oldname,newname,err))!)!;
             }
+
             err = syscall.CreateHardLink(n, o, 0L);
             if (err != null)
             {
-                return error.As(ref new LinkError("link",oldname,newname,err));
+                return error.As(addr(new LinkError("link",oldname,newname,err))!)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
         }
 
         // Symlink creates newname as a symbolic link to oldname.
         // If there is an error, it will be of type *LinkError.
         public static error Symlink(@string oldname, @string newname)
         { 
-            // CreateSymbolicLink is not supported before Windows Vista
-            if (syscall.LoadCreateSymbolicLink() != null)
-            {
-                return error.As(ref new LinkError("symlink",oldname,newname,syscall.EWINDOWS));
-            } 
-
             // '/' does not work in link's content
             oldname = fromSlash(oldname); 
 
-            // need the exact location of the oldname when its relative to determine if its a directory
+            // need the exact location of the oldname when it's relative to determine if it's a directory
             var destpath = oldname;
-            if (!isAbs(oldname))
             {
-                destpath = dirname(newname) + "\\" + oldname;
+                var v = volumeName(oldname);
+
+                if (v == "")
+                {
+                    if (len(oldname) > 0L && IsPathSeparator(oldname[0L]))
+                    { 
+                        // oldname is relative to the volume containing newname.
+                        v = volumeName(newname);
+
+                        if (v != "")
+                        { 
+                            // Prepend the volume explicitly, because it may be different from the
+                            // volume of the current working directory.
+                            destpath = v + oldname;
+
+                        }
+
+                    }
+                    else
+                    { 
+                        // oldname is relative to newname.
+                        destpath = dirname(newname) + "\\" + oldname;
+
+                    }
+
+                }
+
             }
-            var (fi, err) = Lstat(destpath);
+
+
+            var (fi, err) = Stat(destpath);
             var isdir = err == null && fi.IsDir();
 
             var (n, err) = syscall.UTF16PtrFromString(fixLongPath(newname));
             if (err != null)
             {
-                return error.As(ref new LinkError("symlink",oldname,newname,err));
+                return error.As(addr(new LinkError("symlink",oldname,newname,err))!)!;
             }
+
             var (o, err) = syscall.UTF16PtrFromString(fixLongPath(oldname));
             if (err != null)
             {
-                return error.As(ref new LinkError("symlink",oldname,newname,err));
+                return error.As(addr(new LinkError("symlink",oldname,newname,err))!)!;
             }
-            uint flags = default;
+
+            uint flags = windows.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
             if (isdir)
             {
                 flags |= syscall.SYMBOLIC_LINK_FLAG_DIRECTORY;
             }
+
             err = syscall.CreateSymbolicLink(n, o, flags);
+
+            if (err != null)
+            { 
+                // the unprivileged create flag is unsupported
+                // below Windows 10 (1703, v10.0.14972). retry without it.
+                flags &= windows.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
+
+                err = syscall.CreateSymbolicLink(n, o, flags);
+
+            }
+
             if (err != null)
             {
-                return error.As(ref new LinkError("symlink",oldname,newname,err));
+                return error.As(addr(new LinkError("symlink",oldname,newname,err))!)!;
             }
-            return error.As(null);
+
+            return error.As(null!)!;
+
+        }
+
+        // openSymlink calls CreateFile Windows API with FILE_FLAG_OPEN_REPARSE_POINT
+        // parameter, so that Windows does not follow symlink, if path is a symlink.
+        // openSymlink returns opened file handle.
+        private static (syscall.Handle, error) openSymlink(@string path)
+        {
+            syscall.Handle _p0 = default;
+            error _p0 = default!;
+
+            var (p, err) = syscall.UTF16PtrFromString(path);
+            if (err != null)
+            {
+                return (0L, error.As(err)!);
+            }
+
+            var attrs = uint32(syscall.FILE_FLAG_BACKUP_SEMANTICS); 
+            // Use FILE_FLAG_OPEN_REPARSE_POINT, otherwise CreateFile will follow symlink.
+            // See https://docs.microsoft.com/en-us/windows/desktop/FileIO/symbolic-link-effects-on-file-systems-functions#createfile-and-createfiletransacted
+            attrs |= syscall.FILE_FLAG_OPEN_REPARSE_POINT;
+            var (h, err) = syscall.CreateFile(p, 0L, 0L, null, syscall.OPEN_EXISTING, attrs, 0L);
+            if (err != null)
+            {
+                return (0L, error.As(err)!);
+            }
+
+            return (h, error.As(null!)!);
+
+        }
+
+        // normaliseLinkPath converts absolute paths returned by
+        // DeviceIoControl(h, FSCTL_GET_REPARSE_POINT, ...)
+        // into paths acceptable by all Windows APIs.
+        // For example, it coverts
+        //  \??\C:\foo\bar into C:\foo\bar
+        //  \??\UNC\foo\bar into \\foo\bar
+        //  \??\Volume{abc}\ into C:\
+        private static (@string, error) normaliseLinkPath(@string path) => func((defer, _, __) =>
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+
+            if (len(path) < 4L || path[..4L] != "\\??\\")
+            { 
+                // unexpected path, return it as is
+                return (path, error.As(null!)!);
+
+            } 
+            // we have path that start with \??\
+            var s = path[4L..];
+
+            if (len(s) >= 2L && s[1L] == ':') // \??\C:\foo\bar
+                return (s, error.As(null!)!);
+            else if (len(s) >= 4L && s[..4L] == "UNC\\") // \??\UNC\foo\bar
+                return ("\\\\" + s[4L..], error.As(null!)!);
+            // handle paths, like \??\Volume{abc}\...
+
+            var err = windows.LoadGetFinalPathNameByHandle();
+            if (err != null)
+            { 
+                // we must be using old version of Windows
+                return ("", error.As(err)!);
+
+            }
+
+            var (h, err) = openSymlink(path);
+            if (err != null)
+            {
+                return ("", error.As(err)!);
+            }
+
+            defer(syscall.CloseHandle(h));
+
+            var buf = make_slice<ushort>(100L);
+            while (true)
+            {
+                var (n, err) = windows.GetFinalPathNameByHandle(h, _addr_buf[0L], uint32(len(buf)), windows.VOLUME_NAME_DOS);
+                if (err != null)
+                {
+                    return ("", error.As(err)!);
+                }
+
+                if (n < uint32(len(buf)))
+                {
+                    break;
+                }
+
+                buf = make_slice<ushort>(n);
+
+            }
+
+            s = syscall.UTF16ToString(buf);
+            if (len(s) > 4L && s[..4L] == "\\\\?\\")
+            {
+                s = s[4L..];
+                if (len(s) > 3L && s[..3L] == "UNC")
+                { 
+                    // return path like \\server\share\...
+                    return ("\\" + s[3L..], error.As(null!)!);
+
+                }
+
+                return (s, error.As(null!)!);
+
+            }
+
+            return ("", error.As(errors.New("GetFinalPathNameByHandle returned unexpected path: " + s))!);
+
+        });
+
+        private static (@string, error) readlink(@string path) => func((defer, _, __) =>
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+
+            var (h, err) = openSymlink(path);
+            if (err != null)
+            {
+                return ("", error.As(err)!);
+            }
+
+            defer(syscall.CloseHandle(h));
+
+            var rdbbuf = make_slice<byte>(syscall.MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
+            ref uint bytesReturned = ref heap(out ptr<uint> _addr_bytesReturned);
+            err = syscall.DeviceIoControl(h, syscall.FSCTL_GET_REPARSE_POINT, null, 0L, _addr_rdbbuf[0L], uint32(len(rdbbuf)), _addr_bytesReturned, null);
+            if (err != null)
+            {
+                return ("", error.As(err)!);
+            }
+
+            var rdb = (windows.REPARSE_DATA_BUFFER.val)(@unsafe.Pointer(_addr_rdbbuf[0L]));
+
+            if (rdb.ReparseTag == syscall.IO_REPARSE_TAG_SYMLINK) 
+                var rb = (windows.SymbolicLinkReparseBuffer.val)(@unsafe.Pointer(_addr_rdb.DUMMYUNIONNAME));
+                var s = rb.Path();
+                if (rb.Flags & windows.SYMLINK_FLAG_RELATIVE != 0L)
+                {
+                    return (s, error.As(null!)!);
+                }
+
+                return normaliseLinkPath(s);
+            else if (rdb.ReparseTag == windows.IO_REPARSE_TAG_MOUNT_POINT) 
+                return normaliseLinkPath((windows.MountPointReparseBuffer.val)(@unsafe.Pointer(_addr_rdb.DUMMYUNIONNAME)).Path());
+            else 
+                // the path is not a symlink or junction but another type of reparse
+                // point
+                return ("", error.As(syscall.ENOENT)!);
+            
+        });
+
+        // Readlink returns the destination of the named symbolic link.
+        // If there is an error, it will be of type *PathError.
+        public static (@string, error) Readlink(@string name)
+        {
+            @string _p0 = default;
+            error _p0 = default!;
+
+            var (s, err) = readlink(fixLongPath(name));
+            if (err != null)
+            {
+                return ("", error.As(addr(new PathError("readlink",name,err))!)!);
+            }
+
+            return (s, error.As(null!)!);
+
         }
     }
 }

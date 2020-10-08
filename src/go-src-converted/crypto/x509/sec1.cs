@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 August 29 08:31:58 UTC
+// package x509 -- go2cs converted at 2020 October 08 03:37:08 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\sec1.go
 using ecdsa = go.crypto.ecdsa_package;
@@ -19,7 +19,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        private static readonly long ecPrivKeyVersion = 1L;
+        private static readonly long ecPrivKeyVersion = (long)1L;
 
         // ecPrivateKey reflects an ASN.1 Elliptic Curve Private Key Structure.
         // References:
@@ -45,73 +45,119 @@ namespace crypto
             public asn1.BitString PublicKey;
         }
 
-        // ParseECPrivateKey parses an ASN.1 Elliptic Curve Private Key Structure.
-        public static (ref ecdsa.PrivateKey, error) ParseECPrivateKey(slice<byte> der)
+        // ParseECPrivateKey parses an EC private key in SEC 1, ASN.1 DER form.
+        //
+        // This kind of key is commonly encoded in PEM blocks of type "EC PRIVATE KEY".
+        public static (ptr<ecdsa.PrivateKey>, error) ParseECPrivateKey(slice<byte> der)
         {
-            return parseECPrivateKey(null, der);
+            ptr<ecdsa.PrivateKey> _p0 = default!;
+            error _p0 = default!;
+
+            return _addr_parseECPrivateKey(_addr_null, der)!;
         }
 
-        // MarshalECPrivateKey marshals an EC private key into ASN.1, DER format.
-        public static (slice<byte>, error) MarshalECPrivateKey(ref ecdsa.PrivateKey key)
+        // MarshalECPrivateKey converts an EC private key to SEC 1, ASN.1 DER form.
+        //
+        // This kind of key is commonly encoded in PEM blocks of type "EC PRIVATE KEY".
+        // For a more flexible key format which is not EC specific, use
+        // MarshalPKCS8PrivateKey.
+        public static (slice<byte>, error) MarshalECPrivateKey(ptr<ecdsa.PrivateKey> _addr_key)
         {
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref ecdsa.PrivateKey key = ref _addr_key.val;
+
             var (oid, ok) = oidFromNamedCurve(key.Curve);
             if (!ok)
             {
-                return (null, errors.New("x509: unknown elliptic curve"));
+                return (null, error.As(errors.New("x509: unknown elliptic curve"))!);
             }
-            return marshalECPrivateKeyWithOID(key, oid);
+
+            return marshalECPrivateKeyWithOID(_addr_key, oid);
+
         }
 
         // marshalECPrivateKey marshals an EC private key into ASN.1, DER format and
         // sets the curve ID to the given OID, or omits it if OID is nil.
-        private static (slice<byte>, error) marshalECPrivateKeyWithOID(ref ecdsa.PrivateKey key, asn1.ObjectIdentifier oid)
+        private static (slice<byte>, error) marshalECPrivateKeyWithOID(ptr<ecdsa.PrivateKey> _addr_key, asn1.ObjectIdentifier oid)
         {
-            var privateKeyBytes = key.D.Bytes();
-            var paddedPrivateKey = make_slice<byte>((key.Curve.Params().N.BitLen() + 7L) / 8L);
-            copy(paddedPrivateKey[len(paddedPrivateKey) - len(privateKeyBytes)..], privateKeyBytes);
+            slice<byte> _p0 = default;
+            error _p0 = default!;
+            ref ecdsa.PrivateKey key = ref _addr_key.val;
 
-            return asn1.Marshal(new ecPrivateKey(Version:1,PrivateKey:paddedPrivateKey,NamedCurveOID:oid,PublicKey:asn1.BitString{Bytes:elliptic.Marshal(key.Curve,key.X,key.Y)},));
+            var privateKey = make_slice<byte>((key.Curve.Params().N.BitLen() + 7L) / 8L);
+            return asn1.Marshal(new ecPrivateKey(Version:1,PrivateKey:key.D.FillBytes(privateKey),NamedCurveOID:oid,PublicKey:asn1.BitString{Bytes:elliptic.Marshal(key.Curve,key.X,key.Y)},));
         }
 
         // parseECPrivateKey parses an ASN.1 Elliptic Curve Private Key Structure.
         // The OID for the named curve may be provided from another source (such as
         // the PKCS8 container) - if it is provided then use this instead of the OID
         // that may exist in the EC private key structure.
-        private static (ref ecdsa.PrivateKey, error) parseECPrivateKey(ref asn1.ObjectIdentifier namedCurveOID, slice<byte> der)
+        private static (ptr<ecdsa.PrivateKey>, error) parseECPrivateKey(ptr<asn1.ObjectIdentifier> _addr_namedCurveOID, slice<byte> der)
         {
-            ecPrivateKey privKey = default;
+            ptr<ecdsa.PrivateKey> key = default!;
+            error err = default!;
+            ref asn1.ObjectIdentifier namedCurveOID = ref _addr_namedCurveOID.val;
+
+            ref ecPrivateKey privKey = ref heap(out ptr<ecPrivateKey> _addr_privKey);
             {
-                var (_, err) = asn1.Unmarshal(der, ref privKey);
+                var (_, err) = asn1.Unmarshal(der, _addr_privKey);
 
                 if (err != null)
                 {
-                    return (null, errors.New("x509: failed to parse EC private key: " + err.Error()));
+                    {
+                        (_, err) = asn1.Unmarshal(der, addr(new pkcs8()));
+
+                        if (err == null)
+                        {
+                            return (_addr_null!, error.As(errors.New("x509: failed to parse private key (use ParsePKCS8PrivateKey instead for this key format)"))!);
+                        }
+
+                    }
+
+                    {
+                        (_, err) = asn1.Unmarshal(der, addr(new pkcs1PrivateKey()));
+
+                        if (err == null)
+                        {
+                            return (_addr_null!, error.As(errors.New("x509: failed to parse private key (use ParsePKCS1PrivateKey instead for this key format)"))!);
+                        }
+
+                    }
+
+                    return (_addr_null!, error.As(errors.New("x509: failed to parse EC private key: " + err.Error()))!);
+
                 }
 
             }
+
             if (privKey.Version != ecPrivKeyVersion)
             {
-                return (null, fmt.Errorf("x509: unknown EC private key version %d", privKey.Version));
+                return (_addr_null!, error.As(fmt.Errorf("x509: unknown EC private key version %d", privKey.Version))!);
             }
+
             elliptic.Curve curve = default;
             if (namedCurveOID != null)
             {
-                curve = namedCurveFromOID(namedCurveOID.Value);
+                curve = namedCurveFromOID(namedCurveOID);
             }
             else
             {
                 curve = namedCurveFromOID(privKey.NamedCurveOID);
             }
+
             if (curve == null)
             {
-                return (null, errors.New("x509: unknown elliptic curve"));
+                return (_addr_null!, error.As(errors.New("x509: unknown elliptic curve"))!);
             }
+
             ptr<object> k = @new<big.Int>().SetBytes(privKey.PrivateKey);
             var curveOrder = curve.Params().N;
             if (k.Cmp(curveOrder) >= 0L)
             {
-                return (null, errors.New("x509: invalid elliptic curve private key value"));
+                return (_addr_null!, error.As(errors.New("x509: invalid elliptic curve private key value"))!);
             }
+
             ptr<ecdsa.PrivateKey> priv = @new<ecdsa.PrivateKey>();
             priv.Curve = curve;
             priv.D = k;
@@ -124,9 +170,11 @@ namespace crypto
             {
                 if (privKey.PrivateKey[0L] != 0L)
                 {
-                    return (null, errors.New("x509: invalid private key length"));
+                    return (_addr_null!, error.As(errors.New("x509: invalid private key length"))!);
                 }
+
                 privKey.PrivateKey = privKey.PrivateKey[1L..];
+
             } 
 
             // Some private keys remove all leading zeros, this is also invalid
@@ -140,7 +188,8 @@ namespace crypto
             copy(privateKey[len(privateKey) - len(privKey.PrivateKey)..], privKey.PrivateKey);
             priv.X, priv.Y = curve.ScalarBaseMult(privateKey);
 
-            return (priv, null);
+            return (_addr_priv!, error.As(null!)!);
+
         }
     }
 }}

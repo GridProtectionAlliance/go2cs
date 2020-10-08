@@ -4,7 +4,7 @@
 
 //go:generate go run encgen.go -output enc_helpers.go
 
-// package gob -- go2cs converted at 2020 August 29 08:35:33 UTC
+// package gob -- go2cs converted at 2020 October 08 03:42:40 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\encode.go
 using encoding = go.encoding_package;
@@ -21,11 +21,11 @@ namespace encoding
 {
     public static partial class gob_package
     {
-        private static readonly long uint64Size = 8L;
+        private static readonly long uint64Size = (long)8L;
 
 
 
-        public delegate  bool encHelper(ref encoderState,  reflect.Value);
+        public delegate  bool encHelper(ptr<encoderState>,  reflect.Value);
 
         // encoderState is the global execution state of an instance of the encoder.
         // Field numbers are delta encoded and always increase. The field
@@ -51,34 +51,48 @@ namespace encoding
 
         private static sync.Pool encBufferPool = new sync.Pool(New:func()interface{}{e:=new(encBuffer)e.data=e.scratch[0:0]returne},);
 
-        private static void WriteByte(this ref encBuffer e, byte c)
+        private static void writeByte(this ptr<encBuffer> _addr_e, byte c)
         {
+            ref encBuffer e = ref _addr_e.val;
+
             e.data = append(e.data, c);
         }
 
-        private static (long, error) Write(this ref encBuffer e, slice<byte> p)
+        private static (long, error) Write(this ptr<encBuffer> _addr_e, slice<byte> p)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref encBuffer e = ref _addr_e.val;
+
             e.data = append(e.data, p);
-            return (len(p), null);
+            return (len(p), error.As(null!)!);
         }
 
-        private static void WriteString(this ref encBuffer e, @string s)
+        private static void WriteString(this ptr<encBuffer> _addr_e, @string s)
         {
+            ref encBuffer e = ref _addr_e.val;
+
             e.data = append(e.data, s);
         }
 
-        private static long Len(this ref encBuffer e)
+        private static long Len(this ptr<encBuffer> _addr_e)
         {
+            ref encBuffer e = ref _addr_e.val;
+
             return len(e.data);
         }
 
-        private static slice<byte> Bytes(this ref encBuffer e)
+        private static slice<byte> Bytes(this ptr<encBuffer> _addr_e)
         {
+            ref encBuffer e = ref _addr_e.val;
+
             return e.data;
         }
 
-        private static void Reset(this ref encBuffer e)
+        private static void Reset(this ptr<encBuffer> _addr_e)
         {
+            ref encBuffer e = ref _addr_e.val;
+
             if (len(e.data) >= tooBig)
             {
                 e.data = e.scratch[0L..0L];
@@ -87,10 +101,14 @@ namespace encoding
             {
                 e.data = e.data[0L..0L];
             }
+
         }
 
-        private static ref encoderState newEncoderState(this ref Encoder enc, ref encBuffer b)
+        private static ptr<encoderState> newEncoderState(this ptr<Encoder> _addr_enc, ptr<encBuffer> _addr_b)
         {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+
             var e = enc.freeList;
             if (e == null)
             {
@@ -101,6 +119,7 @@ namespace encoding
             {
                 enc.freeList = e.next;
             }
+
             e.sendZero = false;
             e.fieldnum = 0L;
             e.b = b;
@@ -108,11 +127,16 @@ namespace encoding
             {
                 b.data = b.scratch[0L..0L];
             }
-            return e;
+
+            return _addr_e!;
+
         }
 
-        private static void freeEncoderState(this ref Encoder enc, ref encoderState e)
+        private static void freeEncoderState(this ptr<Encoder> _addr_enc, ptr<encoderState> _addr_e)
         {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encoderState e = ref _addr_e.val;
+
             e.next = enc.freeList;
             enc.freeList = e;
         }
@@ -123,25 +147,31 @@ namespace encoding
         // by the byte length, negated.
 
         // encodeUint writes an encoded unsigned integer to state.b.
-        private static void encodeUint(this ref encoderState state, ulong x)
+        private static void encodeUint(this ptr<encoderState> _addr_state, ulong x)
         {
+            ref encoderState state = ref _addr_state.val;
+
             if (x <= 0x7FUL)
             {
-                state.b.WriteByte(uint8(x));
-                return;
+                state.b.writeByte(uint8(x));
+                return ;
             }
+
             binary.BigEndian.PutUint64(state.buf[1L..], x);
             var bc = bits.LeadingZeros64(x) >> (int)(3L); // 8 - bytelen(x)
             state.buf[bc] = uint8(bc - uint64Size); // and then we subtract 8 to get -bytelen(x)
 
             state.b.Write(state.buf[bc..uint64Size + 1L]);
+
         }
 
         // encodeInt writes an encoded signed integer to state.w.
         // The low bit of the encoding says whether to bit complement the (other bits of the)
         // uint to recover the int.
-        private static void encodeInt(this ref encoderState state, long i)
+        private static void encodeInt(this ptr<encoderState> _addr_state, long i)
         {
+            ref encoderState state = ref _addr_state.val;
+
             ulong x = default;
             if (i < 0L)
             {
@@ -151,11 +181,13 @@ namespace encoding
             {
                 x = uint64(i << (int)(1L));
             }
+
             state.encodeUint(x);
+
         }
 
         // encOp is the signature of an encoding operator for a given type.
-        public delegate void encOp(ref encInstr, ref encoderState, reflect.Value);
+        public delegate void encOp(ptr<encInstr>, ptr<encoderState>, reflect.Value);
 
         // The 'instructions' of the encoding machine
         private partial struct encInstr
@@ -168,13 +200,17 @@ namespace encoding
 
         // update emits a field number and updates the state to record its value for delta encoding.
         // If the instruction pointer is nil, it does nothing
-        private static void update(this ref encoderState state, ref encInstr instr)
+        private static void update(this ptr<encoderState> _addr_state, ptr<encInstr> _addr_instr)
         {
+            ref encoderState state = ref _addr_state.val;
+            ref encInstr instr = ref _addr_instr.val;
+
             if (instr != null)
             {
                 state.encodeUint(uint64(instr.field - state.fieldnum));
                 state.fieldnum = instr.field;
             }
+
         }
 
         // Each encoder for a composite is responsible for handling any
@@ -196,15 +232,21 @@ namespace encoding
                     break;
                 indir--;
                 }
+
                 pv = pv.Elem();
+
             }
 
             return pv;
+
         }
 
         // encBool encodes the bool referenced by v as an unsigned 0 or 1.
-        private static void encBool(ref encInstr i, ref encoderState state, reflect.Value v)
+        private static void encBool(ptr<encInstr> _addr_i, ptr<encoderState> _addr_state, reflect.Value v)
         {
+            ref encInstr i = ref _addr_i.val;
+            ref encoderState state = ref _addr_state.val;
+
             var b = v.Bool();
             if (b || state.sendZero)
             {
@@ -217,29 +259,39 @@ namespace encoding
                 {
                     state.encodeUint(0L);
                 }
+
             }
+
         }
 
         // encInt encodes the signed integer (int int8 int16 int32 int64) referenced by v.
-        private static void encInt(ref encInstr i, ref encoderState state, reflect.Value v)
+        private static void encInt(ptr<encInstr> _addr_i, ptr<encoderState> _addr_state, reflect.Value v)
         {
+            ref encInstr i = ref _addr_i.val;
+            ref encoderState state = ref _addr_state.val;
+
             var value = v.Int();
             if (value != 0L || state.sendZero)
             {
                 state.update(i);
                 state.encodeInt(value);
             }
+
         }
 
         // encUint encodes the unsigned integer (uint uint8 uint16 uint32 uint64 uintptr) referenced by v.
-        private static void encUint(ref encInstr i, ref encoderState state, reflect.Value v)
+        private static void encUint(ptr<encInstr> _addr_i, ptr<encoderState> _addr_state, reflect.Value v)
         {
+            ref encInstr i = ref _addr_i.val;
+            ref encoderState state = ref _addr_state.val;
+
             var value = v.Uint();
             if (value != 0L || state.sendZero)
             {
                 state.update(i);
                 state.encodeUint(value);
             }
+
         }
 
         // floatBits returns a uint64 holding the bits of a floating-point number.
@@ -255,8 +307,11 @@ namespace encoding
         }
 
         // encFloat encodes the floating point value (float32 float64) referenced by v.
-        private static void encFloat(ref encInstr i, ref encoderState state, reflect.Value v)
+        private static void encFloat(ptr<encInstr> _addr_i, ptr<encoderState> _addr_state, reflect.Value v)
         {
+            ref encInstr i = ref _addr_i.val;
+            ref encoderState state = ref _addr_state.val;
+
             var f = v.Float();
             if (f != 0L || state.sendZero)
             {
@@ -264,12 +319,16 @@ namespace encoding
                 state.update(i);
                 state.encodeUint(bits);
             }
+
         }
 
         // encComplex encodes the complex value (complex64 complex128) referenced by v.
         // Complex numbers are just a pair of floating-point numbers, real part first.
-        private static void encComplex(ref encInstr i, ref encoderState state, reflect.Value v)
+        private static void encComplex(ptr<encInstr> _addr_i, ptr<encoderState> _addr_state, reflect.Value v)
         {
+            ref encInstr i = ref _addr_i.val;
+            ref encoderState state = ref _addr_state.val;
+
             var c = v.Complex();
             if (c != 0L + 0iUL || state.sendZero)
             {
@@ -279,12 +338,16 @@ namespace encoding
                 state.encodeUint(rpart);
                 state.encodeUint(ipart);
             }
+
         }
 
         // encUint8Array encodes the byte array referenced by v.
         // Byte arrays are encoded as an unsigned count followed by the raw bytes.
-        private static void encUint8Array(ref encInstr i, ref encoderState state, reflect.Value v)
+        private static void encUint8Array(ptr<encInstr> _addr_i, ptr<encoderState> _addr_state, reflect.Value v)
         {
+            ref encInstr i = ref _addr_i.val;
+            ref encoderState state = ref _addr_state.val;
+
             var b = v.Bytes();
             if (len(b) > 0L || state.sendZero)
             {
@@ -292,12 +355,16 @@ namespace encoding
                 state.encodeUint(uint64(len(b)));
                 state.b.Write(b);
             }
+
         }
 
         // encString encodes the string referenced by v.
         // Strings are encoded as an unsigned count followed by the raw bytes.
-        private static void encString(ref encInstr i, ref encoderState state, reflect.Value v)
+        private static void encString(ptr<encInstr> _addr_i, ptr<encoderState> _addr_state, reflect.Value v)
         {
+            ref encInstr i = ref _addr_i.val;
+            ref encoderState state = ref _addr_state.val;
+
             var s = v.String();
             if (len(s) > 0L || state.sendZero)
             {
@@ -305,12 +372,16 @@ namespace encoding
                 state.encodeUint(uint64(len(s)));
                 state.b.WriteString(s);
             }
+
         }
 
         // encStructTerminator encodes the end of an encoded struct
         // as delta field number of 0.
-        private static void encStructTerminator(ref encInstr i, ref encoderState state, reflect.Value v)
+        private static void encStructTerminator(ptr<encInstr> _addr_i, ptr<encoderState> _addr_state, reflect.Value v)
         {
+            ref encInstr i = ref _addr_i.val;
+            ref encoderState state = ref _addr_state.val;
+
             state.encodeUint(0L);
         }
 
@@ -323,7 +394,7 @@ namespace encoding
             public slice<encInstr> instr;
         }
 
-        private static readonly long singletonField = 0L;
+        private static readonly long singletonField = (long)0L;
 
         // valid reports whether the value is valid and a non-nil pointer.
         // (Slices, maps, and chans take care of themselves.)
@@ -339,47 +410,61 @@ namespace encoding
             else if (v.Kind() == reflect.Ptr) 
                 return !v.IsNil();
                         return true;
+
         }
 
         // encodeSingle encodes a single top-level non-struct value.
-        private static void encodeSingle(this ref Encoder _enc, ref encBuffer _b, ref encEngine _engine, reflect.Value value) => func(_enc, _b, _engine, (ref Encoder enc, ref encBuffer b, ref encEngine engine, Defer defer, Panic _, Recover __) =>
+        private static void encodeSingle(this ptr<Encoder> _addr_enc, ptr<encBuffer> _addr_b, ptr<encEngine> _addr_engine, reflect.Value value) => func((defer, _, __) =>
         {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+            ref encEngine engine = ref _addr_engine.val;
+
             var state = enc.newEncoderState(b);
             defer(enc.freeEncoderState(state));
             state.fieldnum = singletonField; 
             // There is no surrounding struct to frame the transmission, so we must
             // generate data even if the item is zero. To do this, set sendZero.
             state.sendZero = true;
-            var instr = ref engine.instr[singletonField];
+            var instr = _addr_engine.instr[singletonField];
             if (instr.indir > 0L)
             {
                 value = encIndirect(value, instr.indir);
             }
+
             if (valid(value))
             {
                 instr.op(instr, state, value);
             }
+
         });
 
         // encodeStruct encodes a single struct value.
-        private static void encodeStruct(this ref Encoder _enc, ref encBuffer _b, ref encEngine _engine, reflect.Value value) => func(_enc, _b, _engine, (ref Encoder enc, ref encBuffer b, ref encEngine engine, Defer defer, Panic _, Recover __) =>
+        private static void encodeStruct(this ptr<Encoder> _addr_enc, ptr<encBuffer> _addr_b, ptr<encEngine> _addr_engine, reflect.Value value) => func((defer, _, __) =>
         {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+            ref encEngine engine = ref _addr_engine.val;
+
             if (!valid(value))
             {
-                return;
+                return ;
             }
+
             var state = enc.newEncoderState(b);
             defer(enc.freeEncoderState(state));
             state.fieldnum = -1L;
             for (long i = 0L; i < len(engine.instr); i++)
             {
-                var instr = ref engine.instr[i];
+                var instr = _addr_engine.instr[i];
                 if (i >= value.NumField())
                 { 
                     // encStructTerminator
                     instr.op(instr, state, new reflect.Value());
                     break;
+
                 }
+
                 var field = value.FieldByIndex(instr.index);
                 if (instr.indir > 0L)
                 {
@@ -389,15 +474,22 @@ namespace encoding
                     {
                         continue;
                     }
+
                 }
+
                 instr.op(instr, state, field);
+
             }
+
 
         });
 
         // encodeArray encodes an array.
-        private static void encodeArray(this ref Encoder _enc, ref encBuffer _b, reflect.Value value, encOp op, long elemIndir, long length, encHelper helper) => func(_enc, _b, (ref Encoder enc, ref encBuffer b, Defer defer, Panic _, Recover __) =>
+        private static void encodeArray(this ptr<Encoder> _addr_enc, ptr<encBuffer> _addr_b, reflect.Value value, encOp op, long elemIndir, long length, encHelper helper) => func((defer, _, __) =>
         {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+
             var state = enc.newEncoderState(b);
             defer(enc.freeEncoderState(state));
             state.fieldnum = -1L;
@@ -405,8 +497,9 @@ namespace encoding
             state.encodeUint(uint64(length));
             if (helper != null && helper(state, value))
             {
-                return;
+                return ;
             }
+
             for (long i = 0L; i < length; i++)
             {
                 var elem = value.Index(i);
@@ -418,15 +511,21 @@ namespace encoding
                     {
                         errorf("encodeArray: nil element");
                     }
+
                 }
+
                 op(null, state, elem);
+
             }
+
 
         });
 
         // encodeReflectValue is a helper for maps. It encodes the value v.
-        private static void encodeReflectValue(ref encoderState state, reflect.Value v, encOp op, long indir)
+        private static void encodeReflectValue(ptr<encoderState> _addr_state, reflect.Value v, encOp op, long indir)
         {
+            ref encoderState state = ref _addr_state.val;
+
             for (long i = 0L; i < indir && v.IsValid(); i++)
             {
                 v = reflect.Indirect(v);
@@ -436,12 +535,17 @@ namespace encoding
             {
                 errorf("encodeReflectValue: nil element");
             }
+
             op(null, state, v);
+
         }
 
         // encodeMap encodes a map as unsigned count followed by key:value pairs.
-        private static void encodeMap(this ref Encoder enc, ref encBuffer b, reflect.Value mv, encOp keyOp, encOp elemOp, long keyIndir, long elemIndir)
+        private static void encodeMap(this ptr<Encoder> _addr_enc, ptr<encBuffer> _addr_b, reflect.Value mv, encOp keyOp, encOp elemOp, long keyIndir, long elemIndir)
         {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+
             var state = enc.newEncoderState(b);
             state.fieldnum = -1L;
             state.sendZero = true;
@@ -449,10 +553,11 @@ namespace encoding
             state.encodeUint(uint64(len(keys)));
             foreach (var (_, key) in keys)
             {
-                encodeReflectValue(state, key, keyOp, keyIndir);
-                encodeReflectValue(state, mv.MapIndex(key), elemOp, elemIndir);
+                encodeReflectValue(_addr_state, key, keyOp, keyIndir);
+                encodeReflectValue(_addr_state, mv.MapIndex(key), elemOp, elemIndir);
             }
             enc.freeEncoderState(state);
+
         }
 
         // encodeInterface encodes the interface value iv.
@@ -460,8 +565,11 @@ namespace encoding
         // by the type identifier (which might require defining that type right now), followed
         // by the concrete value. A nil value gets sent as the empty string for the name,
         // followed by no value.
-        private static void encodeInterface(this ref Encoder enc, ref encBuffer b, reflect.Value iv)
-        { 
+        private static void encodeInterface(this ptr<Encoder> _addr_enc, ptr<encBuffer> _addr_b, reflect.Value iv)
+        {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+ 
             // Gobs can encode nil interface values but not typed interface
             // values holding nil pointers, since nil pointers point to no value.
             var elem = iv.Elem();
@@ -469,20 +577,23 @@ namespace encoding
             {
                 errorf("gob: cannot encode nil pointer of type %s inside interface", iv.Elem().Type());
             }
+
             var state = enc.newEncoderState(b);
             state.fieldnum = -1L;
             state.sendZero = true;
             if (iv.IsNil())
             {
                 state.encodeUint(0L);
-                return;
+                return ;
             }
+
             var ut = userType(iv.Elem().Type());
             var (namei, ok) = concreteTypeToName.Load(ut.@base);
             if (!ok)
             {
                 errorf("type not registered for interface: %s", ut.@base);
             }
+
             @string name = namei._<@string>(); 
 
             // Send the name.
@@ -495,13 +606,14 @@ namespace encoding
             // Encode the value into a new buffer. Any nested type definitions
             // should be written to b, before the encoded value.
             enc.pushWriter(b);
-            ref encBuffer data = encBufferPool.Get()._<ref encBuffer>();
+            ptr<encBuffer> data = encBufferPool.Get()._<ptr<encBuffer>>();
             data.Write(spaceForLength);
             enc.encode(data, elem, ut);
             if (enc.err != null)
             {
                 error_(enc.err);
             }
+
             enc.popWriter();
             enc.writeMessage(b, data);
             data.Reset();
@@ -510,7 +622,9 @@ namespace encoding
             {
                 error_(enc.err);
             }
+
             enc.freeEncoderState(state);
+
         }
 
         // isZero reports whether the value is the zero of its type.
@@ -527,6 +641,7 @@ namespace encoding
                         {
                             return false;
                         }
+
                     }
 
 
@@ -557,6 +672,7 @@ namespace encoding
                         {
                             return false;
                         }
+
                     }
 
 
@@ -564,16 +680,21 @@ namespace encoding
                 }
                 return true;
                         panic("unknown type in isZero " + val.Type().String());
+
         });
 
         // encGobEncoder encodes a value that implements the GobEncoder interface.
         // The data is sent as a byte array.
-        private static void encodeGobEncoder(this ref Encoder enc, ref encBuffer b, ref userTypeInfo ut, reflect.Value v)
-        { 
+        private static void encodeGobEncoder(this ptr<Encoder> _addr_enc, ptr<encBuffer> _addr_b, ptr<userTypeInfo> _addr_ut, reflect.Value v)
+        {
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+            ref userTypeInfo ut = ref _addr_ut.val;
+ 
             // TODO: should we catch panics from the called method?
 
             slice<byte> data = default;
-            error err = default; 
+            error err = default!; 
             // We know it's one of these.
 
             if (ut.externalEnc == xGob) 
@@ -586,24 +707,29 @@ namespace encoding
             {
                 error_(err);
             }
+
             var state = enc.newEncoderState(b);
             state.fieldnum = -1L;
             state.encodeUint(uint64(len(data)));
             state.b.Write(data);
             enc.freeEncoderState(state);
+
         }
 
         private static array<encOp> encOpTable = new array<encOp>(InitKeyedValues<encOp>((reflect.Bool, encBool), (reflect.Int, encInt), (reflect.Int8, encInt), (reflect.Int16, encInt), (reflect.Int32, encInt), (reflect.Int64, encInt), (reflect.Uint, encUint), (reflect.Uint8, encUint), (reflect.Uint16, encUint), (reflect.Uint32, encUint), (reflect.Uint64, encUint), (reflect.Uintptr, encUint), (reflect.Float32, encFloat), (reflect.Float64, encFloat), (reflect.Complex64, encComplex), (reflect.Complex128, encComplex), (reflect.String, encString)));
 
         // encOpFor returns (a pointer to) the encoding op for the base type under rt and
         // the indirection count to reach it.
-        private static (ref encOp, long) encOpFor(reflect.Type rt, map<reflect.Type, ref encOp> inProgress, map<ref typeInfo, bool> building)
+        private static (ptr<encOp>, long) encOpFor(reflect.Type rt, map<reflect.Type, ptr<encOp>> inProgress, map<ptr<typeInfo>, bool> building)
         {
+            ptr<encOp> _p0 = default!;
+            long _p0 = default;
+
             var ut = userType(rt); 
             // If the type implements GobEncoder, we handle it without further processing.
             if (ut.externalEnc != 0L)
             {
-                return gobEncodeOpFor(ut);
+                return _addr_gobEncodeOpFor(_addr_ut)!;
             } 
             // If this type is already in progress, it's a recursive type (e.g. map[string]*T).
             // Return the pointer to the op we're already building.
@@ -612,21 +738,24 @@ namespace encoding
 
                 if (opPtr != null)
                 {
-                    return (opPtr, ut.indir);
+                    return (_addr_opPtr!, ut.indir);
                 }
 
             }
+
             var typ = ut.@base;
             var indir = ut.indir;
             var k = typ.Kind();
-            encOp op = default;
+            ref encOp op = ref heap(out ptr<encOp> _addr_op);
             if (int(k) < len(encOpTable))
             {
                 op = encOpTable[k];
             }
+
             if (op == null)
             {
-                inProgress[rt] = ref op; 
+                _addr_inProgress[rt] = _addr_op;
+                inProgress[rt] = ref _addr_inProgress[rt].val; 
                 // Special cases
                 {
                     var t = typ;
@@ -645,10 +774,12 @@ namespace encoding
                         {
                             if (!state.sendZero && slice.Len() == 0L)
                             {
-                                return;
+                                return ;
                             }
+
                             state.update(i);
-                            state.enc.encodeArray(state.b, slice, elemOp.Value, elemIndir, slice.Len(), helper);
+                            state.enc.encodeArray(state.b, slice, elemOp.val, elemIndir, slice.Len(), helper);
+
                         }
 ;
                     else if (t.Kind() == reflect.Array) 
@@ -658,7 +789,7 @@ namespace encoding
                         op = (i, state, array) =>
                         {
                             state.update(i);
-                            state.enc.encodeArray(state.b, array, elemOp.Value, elemIndir, array.Len(), helper);
+                            state.enc.encodeArray(state.b, array, elemOp.val, elemIndir, array.Len(), helper);
                         }
 ;
                     else if (t.Kind() == reflect.Map) 
@@ -670,22 +801,25 @@ namespace encoding
                             // receiver might want to use the map.  (Maps don't use append.)
                             if (!state.sendZero && mv.IsNil())
                             {
-                                return;
+                                return ;
                             }
+
                             state.update(i);
-                            state.enc.encodeMap(state.b, mv, keyOp.Value, elemOp.Value, keyIndir, elemIndir);
+                            state.enc.encodeMap(state.b, mv, keyOp.val, elemOp.val, keyIndir, elemIndir);
+
                         }
 ;
                     else if (t.Kind() == reflect.Struct) 
                         // Generate a closure that calls out to the engine for the nested type.
-                        getEncEngine(userType(typ), building);
+                        getEncEngine(_addr_userType(typ), building);
                         var info = mustGetTypeInfo(typ);
                         op = (i, state, sv) =>
                         {
                             state.update(i); 
                             // indirect through info to delay evaluation for recursive structs
-                            ref encEngine enc = info.encoder.Load()._<ref encEngine>();
+                            ptr<encEngine> enc = info.encoder.Load()._<ptr<encEngine>>();
                             state.enc.encodeStruct(state.b, enc, sv);
+
                         }
 ;
                     else if (t.Kind() == reflect.Interface) 
@@ -693,25 +827,35 @@ namespace encoding
                         {
                             if (!state.sendZero && (!iv.IsValid() || iv.IsNil()))
                             {
-                                return;
+                                return ;
                             }
+
                             state.update(i);
                             state.enc.encodeInterface(state.b, iv);
+
                         }
 ;
 
                 }
+
             }
+
             if (op == null)
             {
                 errorf("can't happen: encode type %s", rt);
             }
-            return (ref op, indir);
+
+            return (_addr__addr_op!, indir);
+
         }
 
         // gobEncodeOpFor returns the op for a type that is known to implement GobEncoder.
-        private static (ref encOp, long) gobEncodeOpFor(ref userTypeInfo ut)
+        private static (ptr<encOp>, long) gobEncodeOpFor(ptr<userTypeInfo> _addr_ut)
         {
+            ptr<encOp> _p0 = default!;
+            long _p0 = default;
+            ref userTypeInfo ut = ref _addr_ut.val;
+
             var rt = ut.user;
             if (ut.encIndir == -1L)
             {
@@ -724,8 +868,10 @@ namespace encoding
                     rt = rt.Elem();
                 }
 
+
             }
-            encOp op = default;
+
+            ref encOp op = ref heap(out ptr<encOp> _addr_op);
             op = (i, state, v) =>
             {
                 if (ut.encIndir == -1L)
@@ -735,43 +881,53 @@ namespace encoding
                     {
                         errorf("unaddressable value of type %s", rt);
                     }
+
                     v = v.Addr();
+
                 }
+
                 if (!state.sendZero && isZero(v))
                 {
-                    return;
+                    return ;
                 }
+
                 state.update(i);
                 state.enc.encodeGobEncoder(state.b, ut, v);
+
             }
 ;
-            return (ref op, int(ut.encIndir)); // encIndir: op will get called with p == address of receiver.
+            return (_addr__addr_op!, int(ut.encIndir)); // encIndir: op will get called with p == address of receiver.
         }
 
         // compileEnc returns the engine to compile the type.
-        private static ref encEngine compileEnc(ref userTypeInfo ut, map<ref typeInfo, bool> building)
+        private static ptr<encEngine> compileEnc(ptr<userTypeInfo> _addr_ut, map<ptr<typeInfo>, bool> building)
         {
+            ref userTypeInfo ut = ref _addr_ut.val;
+
             var srt = ut.@base;
             ptr<encEngine> engine = @new<encEngine>();
-            var seen = make_map<reflect.Type, ref encOp>();
+            var seen = make_map<reflect.Type, ptr<encOp>>();
             var rt = ut.@base;
             if (ut.externalEnc != 0L)
             {
                 rt = ut.user;
             }
+
             if (ut.externalEnc == 0L && srt.Kind() == reflect.Struct)
             {
                 for (long fieldNum = 0L;
                 long wireFieldNum = 0L; fieldNum < srt.NumField(); fieldNum++)
                 {
-                    var f = srt.Field(fieldNum);
-                    if (!isSent(ref f))
+                    ref var f = ref heap(srt.Field(fieldNum), out ptr<var> _addr_f);
+                    if (!isSent(_addr_f))
                     {
                         continue;
                     }
+
                     var (op, indir) = encOpFor(f.Type, seen, building);
                     engine.instr = append(engine.instr, new encInstr(*op,wireFieldNum,f.Index,indir));
                     wireFieldNum++;
+
                 }
             else
 
@@ -779,63 +935,85 @@ namespace encoding
                 {
                     errorf("type %s has no exported fields", rt);
                 }
+
                 engine.instr = append(engine.instr, new encInstr(encStructTerminator,0,nil,0));
+
             }            {
                 engine.instr = make_slice<encInstr>(1L);
                 (op, indir) = encOpFor(rt, seen, building);
                 engine.instr[0L] = new encInstr(*op,singletonField,nil,indir);
             }
-            return engine;
+
+            return _addr_engine!;
+
         }
 
         // getEncEngine returns the engine to compile the type.
-        private static ref encEngine getEncEngine(ref userTypeInfo ut, map<ref typeInfo, bool> building)
+        private static ptr<encEngine> getEncEngine(ptr<userTypeInfo> _addr_ut, map<ptr<typeInfo>, bool> building)
         {
+            ref userTypeInfo ut = ref _addr_ut.val;
+
             var (info, err) = getTypeInfo(ut);
             if (err != null)
             {
                 error_(err);
             }
-            ref encEngine (enc, ok) = info.encoder.Load()._<ref encEngine>();
+
+            ptr<encEngine> (enc, ok) = info.encoder.Load()._<ptr<encEngine>>();
             if (!ok)
             {
-                enc = buildEncEngine(info, ut, building);
+                enc = buildEncEngine(_addr_info, _addr_ut, building);
             }
-            return enc;
+
+            return _addr_enc!;
+
         }
 
-        private static ref encEngine buildEncEngine(ref typeInfo _info, ref userTypeInfo _ut, map<ref typeInfo, bool> building) => func(_info, _ut, (ref typeInfo info, ref userTypeInfo ut, Defer defer, Panic _, Recover __) =>
-        { 
+        private static ptr<encEngine> buildEncEngine(ptr<typeInfo> _addr_info, ptr<userTypeInfo> _addr_ut, map<ptr<typeInfo>, bool> building) => func((defer, _, __) =>
+        {
+            ref typeInfo info = ref _addr_info.val;
+            ref userTypeInfo ut = ref _addr_ut.val;
+ 
             // Check for recursive types.
             if (building != null && building[info])
             {
-                return null;
+                return _addr_null!;
             }
+
             info.encInit.Lock();
             defer(info.encInit.Unlock());
-            ref encEngine (enc, ok) = info.encoder.Load()._<ref encEngine>();
+            ptr<encEngine> (enc, ok) = info.encoder.Load()._<ptr<encEngine>>();
             if (!ok)
             {
                 if (building == null)
                 {
-                    building = make_map<ref typeInfo, bool>();
+                    building = make_map<ptr<typeInfo>, bool>();
                 }
+
                 building[info] = true;
-                enc = compileEnc(ut, building);
+                enc = compileEnc(_addr_ut, building);
                 info.encoder.Store(enc);
+
             }
-            return enc;
+
+            return _addr_enc!;
+
         });
 
-        private static void encode(this ref Encoder _enc, ref encBuffer _b, reflect.Value value, ref userTypeInfo _ut) => func(_enc, _b, _ut, (ref Encoder enc, ref encBuffer b, ref userTypeInfo ut, Defer defer, Panic _, Recover __) =>
+        private static void encode(this ptr<Encoder> _addr_enc, ptr<encBuffer> _addr_b, reflect.Value value, ptr<userTypeInfo> _addr_ut) => func((defer, _, __) =>
         {
-            defer(catchError(ref enc.err));
-            var engine = getEncEngine(ut, null);
+            ref Encoder enc = ref _addr_enc.val;
+            ref encBuffer b = ref _addr_b.val;
+            ref userTypeInfo ut = ref _addr_ut.val;
+
+            defer(catchError(_addr_enc.err));
+            var engine = getEncEngine(_addr_ut, null);
             var indir = ut.indir;
             if (ut.externalEnc != 0L)
             {
                 indir = int(ut.encIndir);
             }
+
             for (long i = 0L; i < indir; i++)
             {
                 value = reflect.Indirect(value);
@@ -849,6 +1027,7 @@ namespace encoding
             {
                 enc.encodeSingle(b, engine, value);
             }
+
         });
     }
 }}

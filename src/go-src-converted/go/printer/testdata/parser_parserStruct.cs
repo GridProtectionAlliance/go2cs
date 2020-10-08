@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:52:41 UTC
+//     Generated on 2020 October 08 04:09:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace go
                 this.targetStack = default;
             }
 
-            public parser(ref ptr<token.File> file = default, scanner.ErrorVector ErrorVector = default, scanner.Scanner scanner = default, ulong mode = default, bool trace = default, ulong indent = default, slice<ref ast.CommentGroup> comments = default, ref ptr<ast.CommentGroup> leadComment = default, ref ptr<ast.CommentGroup> lineComment = default, token.Pos pos = default, token.Token tok = default, @string lit = default, long exprLev = default, ref ptr<ast.Scope> pkgScope = default, ref ptr<ast.Scope> topScope = default, slice<ref ast.Ident> unresolved = default, slice<ref ast.ImportSpec> imports = default, ref ptr<ast.Scope> labelScope = default, slice<slice<ref ast.Ident>> targetStack = default)
+            public parser(ref ptr<token.File> file = default, scanner.ErrorVector ErrorVector = default, scanner.Scanner scanner = default, ulong mode = default, bool trace = default, ulong indent = default, slice<ptr<ast.CommentGroup>> comments = default, ref ptr<ast.CommentGroup> leadComment = default, ref ptr<ast.CommentGroup> lineComment = default, token.Pos pos = default, token.Token tok = default, @string lit = default, long exprLev = default, ref ptr<ast.Scope> pkgScope = default, ref ptr<ast.Scope> topScope = default, slice<ptr<ast.Ident>> unresolved = default, slice<ptr<ast.ImportSpec>> imports = default, ref ptr<ast.Scope> labelScope = default, slice<slice<ptr<ast.Ident>>> targetStack = default)
             {
                 this.file = file;
                 this.ErrorVector = ErrorVector;

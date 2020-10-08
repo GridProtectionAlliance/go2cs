@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cache -- go2cs converted at 2020 August 29 10:01:07 UTC
+// package cache -- go2cs converted at 2020 October 08 04:34:35 UTC
 // import "cmd/go/internal/cache" ==> using cache = go.cmd.go.@internal.cache_package
 // Original source: C:\Go\src\cmd\go\internal\cache\hash.go
 using bytes = go.bytes_package;
@@ -25,7 +25,7 @@ namespace @internal
         private static var debugHash = false; // set when GODEBUG=gocachehash=1
 
         // HashSize is the number of bytes in a hash.
-        public static readonly long HashSize = 32L;
+        public static readonly long HashSize = (long)32L;
 
         // A Hash provides access to the canonical hash function used to index the cache.
         // The current implementation uses salted SHA256, but clients must not assume this.
@@ -64,55 +64,71 @@ namespace @internal
             {
                 fmt.Fprintf(os.Stderr, "HASH subkey %x %q = %x\n", parent, desc, out);
             }
+
             if (verify)
             {
                 hashDebug.Lock();
                 hashDebug.m[out] = fmt.Sprintf("subkey %x %q", parent, desc);
                 hashDebug.Unlock();
             }
+
             return out;
+
         }
 
         // NewHash returns a new Hash.
         // The caller is expected to Write data to it and then call Sum.
-        public static ref Hash NewHash(@string name)
+        public static ptr<Hash> NewHash(@string name)
         {
-            Hash h = ref new Hash(h:sha256.New(),name:name);
+            ptr<Hash> h = addr(new Hash(h:sha256.New(),name:name));
             if (debugHash)
             {
                 fmt.Fprintf(os.Stderr, "HASH[%s]\n", h.name);
             }
+
             h.Write(hashSalt);
             if (verify)
             {
                 h.buf = @new<bytes.Buffer>();
             }
-            return h;
+
+            return _addr_h!;
+
         }
 
         // Write writes data to the running hash.
-        private static (long, error) Write(this ref Hash h, slice<byte> b)
+        private static (long, error) Write(this ptr<Hash> _addr_h, slice<byte> b)
         {
+            long _p0 = default;
+            error _p0 = default!;
+            ref Hash h = ref _addr_h.val;
+
             if (debugHash)
             {
                 fmt.Fprintf(os.Stderr, "HASH[%s]: %q\n", h.name, b);
             }
+
             if (h.buf != null)
             {
                 h.buf.Write(b);
             }
+
             return h.h.Write(b);
+
         }
 
         // Sum returns the hash of the data written previously.
-        private static array<byte> Sum(this ref Hash h)
+        private static array<byte> Sum(this ptr<Hash> _addr_h)
         {
+            ref Hash h = ref _addr_h.val;
+
             array<byte> @out = new array<byte>(HashSize);
             h.h.Sum(out[..0L]);
             if (debugHash)
             {
                 fmt.Fprintf(os.Stderr, "HASH[%s]: %x\n", h.name, out);
             }
+
             if (h.buf != null)
             {
                 hashDebug.Lock();
@@ -120,10 +136,14 @@ namespace @internal
                 {
                     hashDebug.m = make_map<array<byte>, @string>();
                 }
+
                 hashDebug.m[out] = h.buf.String();
                 hashDebug.Unlock();
+
             }
+
             return out;
+
         }
 
         // In GODEBUG=gocacheverify=1 mode,
@@ -145,7 +165,7 @@ namespace @internal
 
         private static var hashFileCache = default;
 
-        // HashFile returns the hash of the named file.
+        // FileHash returns the hash of the named file.
         // It caches repeated lookups for a given file,
         // and the cache entry for a file can be initialized
         // using SetFileHash.
@@ -153,14 +173,18 @@ namespace @internal
         // the hash used by NewHash.
         public static (array<byte>, error) FileHash(@string file)
         {
+            array<byte> _p0 = default;
+            error _p0 = default!;
+
             hashFileCache.Lock();
             var (out, ok) = hashFileCache.m[file];
             hashFileCache.Unlock();
 
             if (ok)
             {
-                return (out, null);
+                return (out, error.As(null!)!);
             }
+
             var h = sha256.New();
             var (f, err) = os.Open(file);
             if (err != null)
@@ -169,8 +193,11 @@ namespace @internal
                 {
                     fmt.Fprintf(os.Stderr, "HASH %s: %v\n", file, err);
                 }
-                return (new array<byte>(new byte[] {  }), err);
+
+                return (new array<byte>(new byte[] {  }), error.As(err)!);
+
             }
+
             _, err = io.Copy(h, f);
             f.Close();
             if (err != null)
@@ -179,15 +206,20 @@ namespace @internal
                 {
                     fmt.Fprintf(os.Stderr, "HASH %s: %v\n", file, err);
                 }
-                return (new array<byte>(new byte[] {  }), err);
+
+                return (new array<byte>(new byte[] {  }), error.As(err)!);
+
             }
+
             h.Sum(out[..0L]);
             if (debugHash)
             {
                 fmt.Fprintf(os.Stderr, "HASH %s: %x\n", file, out);
             }
+
             SetFileHash(file, out);
-            return (out, null);
+            return (out, error.As(null!)!);
+
         }
 
         // SetFileHash sets the hash returned by FileHash for file.
@@ -200,8 +232,10 @@ namespace @internal
             {
                 hashFileCache.m = make_map<@string, array<byte>>();
             }
+
             hashFileCache.m[file] = sum;
             hashFileCache.Unlock();
+
         }
     }
 }}}}

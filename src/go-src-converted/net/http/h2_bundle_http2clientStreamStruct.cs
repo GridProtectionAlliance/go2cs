@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:33:19 UTC
+//     Generated on 2020 October 08 03:39:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,10 +38,11 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using time = go.time_package;
-using hpack = go.golang_org.x.net.http2.hpack_package;
-using idna = go.golang_org.x.net.idna_package;
-using httplex = go.golang_org.x.net.lex.httplex_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
+using hpack = go.golang.org.x.net.http2.hpack_package;
+using idna = go.golang.org.x.net.idna_package;
 using go;
 
 namespace go {
@@ -76,11 +77,12 @@ namespace net
                 this.firstByte = default;
                 this.pastHeaders = default;
                 this.pastTrailers = default;
+                this.num1xx = default;
                 this.trailer = default;
                 this.resTrailer = default;
             }
 
-            public http2clientStream(ref ptr<http2ClientConn> cc = default, ref ptr<Request> req = default, ref ptr<http2clientTrace> trace = default, uint ID = default, channel<http2resAndError> resc = default, http2pipe bufPipe = default, bool startedWrite = default, bool requestedGzip = default, Action on100 = default, http2flow flow = default, http2flow inflow = default, long bytesRemain = default, error readErr = default, error stopReqBody = default, bool didReset = default, channel<object> peerReset = default, error resetErr = default, channel<object> done = default, bool firstByte = default, bool pastHeaders = default, bool pastTrailers = default, Header trailer = default, ref ptr<Header> resTrailer = default)
+            public http2clientStream(ref ptr<http2ClientConn> cc = default, ref ptr<Request> req = default, ref ptr<httptrace.ClientTrace> trace = default, uint ID = default, channel<http2resAndError> resc = default, http2pipe bufPipe = default, bool startedWrite = default, bool requestedGzip = default, Action on100 = default, http2flow flow = default, http2flow inflow = default, long bytesRemain = default, error readErr = default, error stopReqBody = default, bool didReset = default, channel<object> peerReset = default, error resetErr = default, channel<object> done = default, bool firstByte = default, bool pastHeaders = default, bool pastTrailers = default, byte num1xx = default, Header trailer = default, ref ptr<Header> resTrailer = default)
             {
                 this.cc = cc;
                 this.req = req;
@@ -103,6 +105,7 @@ namespace net
                 this.firstByte = firstByte;
                 this.pastHeaders = pastHeaders;
                 this.pastTrailers = pastTrailers;
+                this.num1xx = num1xx;
                 this.trailer = trailer;
                 this.resTrailer = resTrailer;
             }
@@ -127,7 +130,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2clientStream http2clientStream_cast(dynamic value)
         {
-            return new http2clientStream(ref value.cc, ref value.req, ref value.trace, value.ID, value.resc, value.bufPipe, value.startedWrite, value.requestedGzip, value.on100, value.flow, value.inflow, value.bytesRemain, value.readErr, value.stopReqBody, value.didReset, value.peerReset, value.resetErr, value.done, value.firstByte, value.pastHeaders, value.pastTrailers, value.trailer, ref value.resTrailer);
+            return new http2clientStream(ref value.cc, ref value.req, ref value.trace, value.ID, value.resc, value.bufPipe, value.startedWrite, value.requestedGzip, value.on100, value.flow, value.inflow, value.bytesRemain, value.readErr, value.stopReqBody, value.didReset, value.peerReset, value.resetErr, value.done, value.firstByte, value.pastHeaders, value.pastTrailers, value.num1xx, value.trailer, ref value.resTrailer);
         }
     }
 }}

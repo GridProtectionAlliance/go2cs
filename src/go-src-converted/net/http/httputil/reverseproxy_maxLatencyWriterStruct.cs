@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:26 UTC
+//     Generated on 2020 October 08 03:41:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,14 +14,17 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
+using fmt = go.fmt_package;
 using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using http = go.net.http_package;
+using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using time = go.time_package;
+using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
 namespace go {
@@ -39,15 +42,17 @@ namespace http
                 this.dst = default;
                 this.latency = default;
                 this.mu = default;
-                this.done = default;
+                this.t = default;
+                this.flushPending = default;
             }
 
-            public maxLatencyWriter(writeFlusher dst = default, time.Duration latency = default, sync.Mutex mu = default, channel<bool> done = default)
+            public maxLatencyWriter(writeFlusher dst = default, time.Duration latency = default, sync.Mutex mu = default, ref ptr<time.Timer> t = default, bool flushPending = default)
             {
                 this.dst = dst;
                 this.latency = latency;
                 this.mu = mu;
-                this.done = done;
+                this.t = t;
+                this.flushPending = flushPending;
             }
 
             // Enable comparisons between nil and maxLatencyWriter struct
@@ -70,7 +75,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static maxLatencyWriter maxLatencyWriter_cast(dynamic value)
         {
-            return new maxLatencyWriter(value.dst, value.latency, value.mu, value.done);
+            return new maxLatencyWriter(value.dst, value.latency, value.mu, ref value.t, value.flushPending);
         }
     }
 }}}

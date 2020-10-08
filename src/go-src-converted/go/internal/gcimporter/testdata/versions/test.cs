@@ -11,12 +11,15 @@
 //
 // go build -o test_go1.$X_$Y.a test.go
 //
-// with $X = Go version and $Y = export format version.
+// with $X = Go version and $Y = export format version
+// (add 'b' or 'i' to distinguish between binary and
+// indexed format starting with 1.11 as long as both
+// formats are supported).
 //
 // Make sure this source is extended such that it exercises
 // whatever export format change has taken place.
 
-// package test -- go2cs converted at 2020 August 29 10:09:14 UTC
+// package test -- go2cs converted at 2020 October 08 04:56:12 UTC
 // import "go/internal/gcimporter/testdata.test" ==> using test = go.go.@internal.gcimporter.testdata.test_package
 // Original source: C:\Go\src\go\internal\gcimporter\testdata\versions\test.go
 

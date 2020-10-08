@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 August 29 08:16:30 UTC
+// package runtime -- go2cs converted at 2020 October 08 03:19:04 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\cgo.go
 using @unsafe = go.@unsafe_package;
@@ -42,7 +42,6 @@ namespace go
         private static void cgoUse(object _p0)
         {
             throw("cgoUse should not be called");
-
         }
 
         // cgoAlwaysFalse is a boolean value that is always false.
@@ -52,6 +51,6 @@ namespace go
         // escape analysis result. The test is cheaper than the call.
         private static bool cgoAlwaysFalse = default;
 
-        private static var cgo_yield = ref _cgo_yield;
+        private static var cgo_yield = _addr__cgo_yield;
     }
 }

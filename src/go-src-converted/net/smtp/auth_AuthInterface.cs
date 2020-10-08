@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:36:38 UTC
+//     Generated on 2020 October 08 03:43:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace net
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -67,29 +67,30 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, error) StartByRef(ref T value, ref ServerInfo server);
-            private delegate (slice<byte>, error) StartByVal(T value, ref ServerInfo server);
+            private delegate (slice<byte>, error) StartByPtr(ptr<T> value, ptr<ServerInfo> server);
+            private delegate (slice<byte>, error) StartByVal(T value, ptr<ServerInfo> server);
 
-            private static readonly StartByRef s_StartByRef;
+            private static readonly StartByPtr s_StartByPtr;
             private static readonly StartByVal s_StartByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (slice<byte>, error) Start(ref ServerInfo server)
+            public (slice<byte>, error) Start(ptr<ServerInfo> server)
             {
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StartByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StartByPtr is null || !m_target_is_ptr)
                     return s_StartByVal!(target, server);
 
-                return s_StartByRef(ref target, server);
+                return s_StartByPtr(m_target_ptr, server);
             }
 
-            private delegate (slice<byte>, error) NextByRef(ref T value, slice<byte> fromServer, bool more);
+            private delegate (slice<byte>, error) NextByPtr(ptr<T> value, slice<byte> fromServer, bool more);
             private delegate (slice<byte>, error) NextByVal(T value, slice<byte> fromServer, bool more);
 
-            private static readonly NextByRef s_NextByRef;
+            private static readonly NextByPtr s_NextByPtr;
             private static readonly NextByVal s_NextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,11 +99,12 @@ namespace net
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NextByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NextByPtr is null || !m_target_is_ptr)
                     return s_NextByVal!(target, fromServer, more);
 
-                return s_NextByRef(ref target, fromServer, more);
+                return s_NextByPtr(m_target_ptr, fromServer, more);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -111,39 +113,33 @@ namespace net
             static Auth()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Start");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Start");
 
                 if (!(extensionMethod is null))
-                    s_StartByRef = extensionMethod.CreateStaticDelegate(typeof(StartByRef)) as StartByRef;
+                    s_StartByPtr = extensionMethod.CreateStaticDelegate(typeof(StartByPtr)) as StartByPtr;
 
-                if (s_StartByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Start");
+                extensionMethod = targetType.GetExtensionMethod("Start");
 
-                    if (!(extensionMethod is null))
-                        s_StartByVal = extensionMethod.CreateStaticDelegate(typeof(StartByVal)) as StartByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StartByVal = extensionMethod.CreateStaticDelegate(typeof(StartByVal)) as StartByVal;
 
-                if (s_StartByRef is null && s_StartByVal is null)
+                if (s_StartByPtr is null && s_StartByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Auth.Start method", new Exception("Start"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Next");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Next");
 
                 if (!(extensionMethod is null))
-                    s_NextByRef = extensionMethod.CreateStaticDelegate(typeof(NextByRef)) as NextByRef;
+                    s_NextByPtr = extensionMethod.CreateStaticDelegate(typeof(NextByPtr)) as NextByPtr;
 
-                if (s_NextByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Next");
+                extensionMethod = targetType.GetExtensionMethod("Next");
 
-                    if (!(extensionMethod is null))
-                        s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
 
-                if (s_NextByRef is null && s_NextByVal is null)
+                if (s_NextByPtr is null && s_NextByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Auth.Next method", new Exception("Next"));
             }
 

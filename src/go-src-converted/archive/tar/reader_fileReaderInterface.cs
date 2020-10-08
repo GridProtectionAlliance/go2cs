@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:45:23 UTC
+//     Generated on 2020 October 08 03:18:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace archive
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -69,10 +69,10 @@ namespace archive
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) WriteToByRef(ref T value, io.Writer _p0);
+            private delegate (long, error) WriteToByPtr(ptr<T> value, io.Writer _p0);
             private delegate (long, error) WriteToByVal(T value, io.Writer _p0);
 
-            private static readonly WriteToByRef s_WriteToByRef;
+            private static readonly WriteToByPtr s_WriteToByPtr;
             private static readonly WriteToByVal s_WriteToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -81,17 +81,18 @@ namespace archive
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_WriteToByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_WriteToByPtr is null || !m_target_is_ptr)
                     return s_WriteToByVal!(target, _p0);
 
-                return s_WriteToByRef(ref target, _p0);
+                return s_WriteToByPtr(m_target_ptr, _p0);
             }
 
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByRef s_ReadByRef;
+            private static readonly ReadByPtr s_ReadByPtr;
             private static readonly ReadByVal s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,11 +101,12 @@ namespace archive
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ReadByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, p);
 
-                return s_ReadByRef(ref target, p);
+                return s_ReadByPtr(m_target_ptr, p);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -113,39 +115,33 @@ namespace archive
             static fileReader()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("WriteTo");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteTo");
 
                 if (!(extensionMethod is null))
-                    s_WriteToByRef = extensionMethod.CreateStaticDelegate(typeof(WriteToByRef)) as WriteToByRef;
+                    s_WriteToByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteToByPtr)) as WriteToByPtr;
 
-                if (s_WriteToByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("WriteTo");
+                extensionMethod = targetType.GetExtensionMethod("WriteTo");
 
-                    if (!(extensionMethod is null))
-                        s_WriteToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteToByVal)) as WriteToByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_WriteToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteToByVal)) as WriteToByVal;
 
-                if (s_WriteToByRef is null && s_WriteToByVal is null)
+                if (s_WriteToByPtr is null && s_WriteToByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement fileReader.WriteTo method", new Exception("WriteTo"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
                 if (!(extensionMethod is null))
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
-                if (s_ReadByRef is null && s_ReadByVal is null)
+                if (s_ReadByPtr is null && s_ReadByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement fileReader.Read method", new Exception("Read"));
             }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 August 29 09:27:49 UTC
+// package gc -- go2cs converted at 2020 October 08 04:29:49 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\order.go
 using types = go.cmd.compile.@internal.types_package;
@@ -22,7 +22,7 @@ namespace @internal
         // order of evaluation. Makes walk easier, because it
         // can (after this runs) reorder at will within an expression.
         //
-        // Rewrite x op= y into x = x op y.
+        // Rewrite m[k] op= r into m[k] = m[k] op r if op is / or %.
         //
         // Introduce temporaries as needed by runtime routines.
         // For example, the map runtime routines take the map key
@@ -51,39 +51,70 @@ namespace @internal
         // Order holds state during the ordering process.
         public partial struct Order
         {
-            public slice<ref Node> @out; // list of generated statements
-            public slice<ref Node> temp; // stack of temporary variables
+            public slice<ptr<Node>> @out; // list of generated statements
+            public slice<ptr<Node>> temp; // stack of temporary variables
+            public map<@string, slice<ptr<Node>>> free; // free list of unused temporaries, by type.LongString().
         }
 
-        // Order rewrites fn->nbody to apply the ordering constraints
+        // Order rewrites fn.Nbody to apply the ordering constraints
         // described in the comment at the top of the file.
-        private static void order(ref Node fn)
+        private static void order(ptr<Node> _addr_fn)
         {
+            ref Node fn = ref _addr_fn.val;
+
             if (Debug['W'] > 1L)
             {
                 var s = fmt.Sprintf("\nbefore order %v", fn.Func.Nname.Sym);
                 dumplist(s, fn.Nbody);
             }
-            orderblockNodes(ref fn.Nbody);
+
+            orderBlock(_addr_fn.Nbody, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<ptr<Node>>>{});
+
         }
 
-        // Ordertemp allocates a new temporary with the given type,
+        // newTemp allocates a new temporary with the given type,
         // pushes it onto the temp stack, and returns it.
-        // If clear is true, ordertemp emits code to zero the temporary.
-        private static ref Node ordertemp(ref types.Type t, ref Order order, bool clear)
+        // If clear is true, newTemp emits code to zero the temporary.
+        private static ptr<Node> newTemp(this ptr<Order> _addr_o, ptr<types.Type> _addr_t, bool clear)
         {
-            var var_ = temp(t);
+            ref Order o = ref _addr_o.val;
+            ref types.Type t = ref _addr_t.val;
+
+            ptr<Node> v; 
+            // Note: LongString is close to the type equality we want,
+            // but not exactly. We still need to double-check with types.Identical.
+            var key = t.LongString();
+            var a = o.free[key];
+            foreach (var (i, n) in a)
+            {
+                if (types.Identical(t, n.Type))
+                {
+                    v = a[i];
+                    a[i] = a[len(a) - 1L];
+                    a = a[..len(a) - 1L];
+                    o.free[key] = a;
+                    break;
+                }
+
+            }
+            if (v == null)
+            {
+                v = temp(t);
+            }
+
             if (clear)
             {
-                var a = nod(OAS, var_, null);
-                a = typecheck(a, Etop);
-                order.@out = append(order.@out, a);
+                a = nod(OAS, v, null);
+                a = typecheck(a, ctxStmt);
+                o.@out = append(o.@out, a);
             }
-            order.temp = append(order.temp, var_);
-            return var_;
+
+            o.temp = append(o.temp, v);
+            return _addr_v!;
+
         }
 
-        // Ordercopyexpr behaves like ordertemp but also emits
+        // copyExpr behaves like newTemp but also emits
         // code to initialize the temporary to the value n.
         //
         // The clear argument is provided for use when the evaluation
@@ -95,397 +126,604 @@ namespace @internal
         // (The other candidate would be map access, but map access
         // returns a pointer to the result data instead of taking a pointer
         // to be filled in.)
-        private static ref Node ordercopyexpr(ref Node n, ref types.Type t, ref Order order, long clear)
+        private static ptr<Node> copyExpr(this ptr<Order> _addr_o, ptr<Node> _addr_n, ptr<types.Type> _addr_t, bool clear)
         {
-            var var_ = ordertemp(t, order, clear != 0L);
-            var a = nod(OAS, var_, n);
-            a = typecheck(a, Etop);
-            order.@out = append(order.@out, a);
-            return var_;
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
+            ref types.Type t = ref _addr_t.val;
+
+            var v = o.newTemp(t, clear);
+            var a = nod(OAS, v, n);
+            a = typecheck(a, ctxStmt);
+            o.@out = append(o.@out, a);
+            return _addr_v!;
         }
 
-        // Ordercheapexpr returns a cheap version of n.
+        // cheapExpr returns a cheap version of n.
         // The definition of cheap is that n is a variable or constant.
-        // If not, ordercheapexpr allocates a new tmp, emits tmp = n,
+        // If not, cheapExpr allocates a new tmp, emits tmp = n,
         // and then returns tmp.
-        private static ref Node ordercheapexpr(ref Node n, ref Order order)
+        private static ptr<Node> cheapExpr(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
+
             if (n == null)
             {
-                return null;
+                return _addr_null!;
             }
 
+
             if (n.Op == ONAME || n.Op == OLITERAL) 
-                return n;
+                return _addr_n!;
             else if (n.Op == OLEN || n.Op == OCAP) 
-                var l = ordercheapexpr(n.Left, order);
+                var l = o.cheapExpr(n.Left);
                 if (l == n.Left)
                 {
-                    return n;
+                    return _addr_n!;
                 }
-                var a = n.Value;
-                a.Orig = ref a;
+
+                var a = n.sepcopy();
                 a.Left = l;
-                return typecheck(ref a, Erv);
-                        return ordercopyexpr(n, n.Type, order, 0L);
+                return _addr_typecheck(a, ctxExpr)!;
+                        return _addr_o.copyExpr(n, n.Type, false)!;
+
         }
 
-        // Ordersafeexpr returns a safe version of n.
+        // safeExpr returns a safe version of n.
         // The definition of safe is that n can appear multiple times
         // without violating the semantics of the original program,
         // and that assigning to the safe version has the same effect
         // as assigning to the original n.
         //
         // The intended use is to apply to x when rewriting x += y into x = x + y.
-        private static ref Node ordersafeexpr(ref Node n, ref Order order)
+        private static ptr<Node> safeExpr(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
+
 
             if (n.Op == ONAME || n.Op == OLITERAL) 
-                return n;
+                return _addr_n!;
             else if (n.Op == ODOT || n.Op == OLEN || n.Op == OCAP) 
-                var l = ordersafeexpr(n.Left, order);
+                var l = o.safeExpr(n.Left);
                 if (l == n.Left)
                 {
-                    return n;
+                    return _addr_n!;
                 }
-                var a = n.Value;
-                a.Orig = ref a;
+
+                var a = n.sepcopy();
                 a.Left = l;
-                return typecheck(ref a, Erv);
-            else if (n.Op == ODOTPTR || n.Op == OIND) 
-                l = ordercheapexpr(n.Left, order);
+                return _addr_typecheck(a, ctxExpr)!;
+            else if (n.Op == ODOTPTR || n.Op == ODEREF) 
+                l = o.cheapExpr(n.Left);
                 if (l == n.Left)
                 {
-                    return n;
+                    return _addr_n!;
                 }
-                a = n.Value;
-                a.Orig = ref a;
+
+                a = n.sepcopy();
                 a.Left = l;
-                return typecheck(ref a, Erv);
+                return _addr_typecheck(a, ctxExpr)!;
             else if (n.Op == OINDEX || n.Op == OINDEXMAP) 
-                l = default;
+                l = ;
                 if (n.Left.Type.IsArray())
                 {
-                    l = ordersafeexpr(n.Left, order);
+                    l = o.safeExpr(n.Left);
                 }
                 else
                 {
-                    l = ordercheapexpr(n.Left, order);
+                    l = o.cheapExpr(n.Left);
                 }
-                var r = ordercheapexpr(n.Right, order);
+
+                var r = o.cheapExpr(n.Right);
                 if (l == n.Left && r == n.Right)
                 {
-                    return n;
+                    return _addr_n!;
                 }
-                a = n.Value;
-                a.Orig = ref a;
+
+                a = n.sepcopy();
                 a.Left = l;
                 a.Right = r;
-                return typecheck(ref a, Erv);
+                return _addr_typecheck(a, ctxExpr)!;
             else 
-                Fatalf("ordersafeexpr %v", n.Op);
-                return null; // not reached
+                Fatalf("order.safeExpr %v", n.Op);
+                return _addr_null!; // not reached
                     }
 
-        // Isaddrokay reports whether it is okay to pass n's address to runtime routines.
+        // isaddrokay reports whether it is okay to pass n's address to runtime routines.
         // Taking the address of a variable makes the liveness and optimization analyses
         // lose track of where the variable's lifetime ends. To avoid hurting the analyses
         // of ordinary stack variables, those are not 'isaddrokay'. Temporaries are okay,
         // because we emit explicit VARKILL instructions marking the end of those
         // temporaries' lifetimes.
-        private static bool isaddrokay(ref Node n)
+        private static bool isaddrokay(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
             return islvalue(n) && (n.Op != ONAME || n.Class() == PEXTERN || n.IsAutoTmp());
         }
 
-        // Orderaddrtemp ensures that n is okay to pass by address to runtime routines.
-        // If the original argument n is not okay, orderaddrtemp creates a tmp, emits
+        // addrTemp ensures that n is okay to pass by address to runtime routines.
+        // If the original argument n is not okay, addrTemp creates a tmp, emits
         // tmp = n, and then returns tmp.
-        // The result of orderaddrtemp MUST be assigned back to n, e.g.
-        //     n.Left = orderaddrtemp(n.Left, order)
-        private static ref Node orderaddrtemp(ref Node n, ref Order order)
+        // The result of addrTemp MUST be assigned back to n, e.g.
+        //     n.Left = o.addrTemp(n.Left)
+        private static ptr<Node> addrTemp(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
-            if (consttype(n) > 0L)
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
+
+            if (consttype(n) != CTxxx)
             { 
                 // TODO: expand this to all static composite literal nodes?
                 n = defaultlit(n, null);
                 dowidth(n.Type);
                 var vstat = staticname(n.Type);
-                vstat.Name.SetReadonly(true);
-                slice<ref Node> @out = default;
-                staticassign(vstat, n, ref out);
-                if (out != null)
+                vstat.MarkReadonly();
+                InitSchedule s = default;
+                s.staticassign(vstat, n);
+                if (s.@out != null)
                 {
                     Fatalf("staticassign of const generated code: %+v", n);
                 }
-                vstat = typecheck(vstat, Erv);
-                return vstat;
+
+                vstat = typecheck(vstat, ctxExpr);
+                return _addr_vstat!;
+
             }
-            if (isaddrokay(n))
+
+            if (isaddrokay(_addr_n))
             {
-                return n;
+                return _addr_n!;
             }
-            return ordercopyexpr(n, n.Type, order, 0L);
+
+            return _addr_o.copyExpr(n, n.Type, false)!;
+
         }
 
-        // ordermapkeytemp prepares n to be a key in a map runtime call and returns n.
+        // mapKeyTemp prepares n to be a key in a map runtime call and returns n.
         // It should only be used for map runtime calls which have *_fast* versions.
-        private static ref Node ordermapkeytemp(ref types.Type t, ref Node n, ref Order order)
-        { 
+        private static ptr<Node> mapKeyTemp(this ptr<Order> _addr_o, ptr<types.Type> _addr_t, ptr<Node> _addr_n)
+        {
+            ref Order o = ref _addr_o.val;
+            ref types.Type t = ref _addr_t.val;
+            ref Node n = ref _addr_n.val;
+ 
             // Most map calls need to take the address of the key.
             // Exception: map*_fast* calls. See golang.org/issue/19015.
             if (mapfast(t) == mapslow)
             {
-                return orderaddrtemp(n, order);
+                return _addr_o.addrTemp(n)!;
             }
-            return n;
+
+            return _addr_n!;
+
+        }
+
+        // mapKeyReplaceStrConv replaces OBYTES2STR by OBYTES2STRTMP
+        // in n to avoid string allocations for keys in map lookups.
+        // Returns a bool that signals if a modification was made.
+        //
+        // For:
+        //  x = m[string(k)]
+        //  x = m[T1{... Tn{..., string(k), ...}]
+        // where k is []byte, T1 to Tn is a nesting of struct and array literals,
+        // the allocation of backing bytes for the string can be avoided
+        // by reusing the []byte backing array. These are special cases
+        // for avoiding allocations when converting byte slices to strings.
+        // It would be nice to handle these generally, but because
+        // []byte keys are not allowed in maps, the use of string(k)
+        // comes up in important cases in practice. See issue 3512.
+        private static bool mapKeyReplaceStrConv(ptr<Node> _addr_n)
+        {
+            ref Node n = ref _addr_n.val;
+
+            bool replaced = default;
+
+            if (n.Op == OBYTES2STR) 
+                n.Op = OBYTES2STRTMP;
+                replaced = true;
+            else if (n.Op == OSTRUCTLIT) 
+                {
+                    var elem__prev1 = elem;
+
+                    foreach (var (_, __elem) in n.List.Slice())
+                    {
+                        elem = __elem;
+                        if (mapKeyReplaceStrConv(_addr_elem.Left))
+                        {
+                            replaced = true;
+                        }
+
+                    }
+
+                    elem = elem__prev1;
+                }
+            else if (n.Op == OARRAYLIT) 
+                {
+                    var elem__prev1 = elem;
+
+                    foreach (var (_, __elem) in n.List.Slice())
+                    {
+                        elem = __elem;
+                        if (elem.Op == OKEY)
+                        {
+                            elem = elem.Right;
+                        }
+
+                        if (mapKeyReplaceStrConv(_addr_elem))
+                        {
+                            replaced = true;
+                        }
+
+                    }
+
+                    elem = elem__prev1;
+                }
+                        return replaced;
+
         }
 
         private partial struct ordermarker // : long
         {
         }
 
-        // Marktemp returns the top of the temporary variable stack.
-        private static ordermarker marktemp(ref Order order)
+        // markTemp returns the top of the temporary variable stack.
+        private static ordermarker markTemp(this ptr<Order> _addr_o)
         {
-            return ordermarker(len(order.temp));
+            ref Order o = ref _addr_o.val;
+
+            return ordermarker(len(o.temp));
         }
 
-        // Poptemp pops temporaries off the stack until reaching the mark,
-        // which must have been returned by marktemp.
-        private static void poptemp(ordermarker mark, ref Order order)
+        // popTemp pops temporaries off the stack until reaching the mark,
+        // which must have been returned by markTemp.
+        private static void popTemp(this ptr<Order> _addr_o, ordermarker mark)
         {
-            order.temp = order.temp[..mark];
-        }
+            ref Order o = ref _addr_o.val;
 
-        // Cleantempnopop emits to *out VARKILL instructions for each temporary
-        // above the mark on the temporary stack, but it does not pop them
-        // from the stack.
-        private static void cleantempnopop(ordermarker mark, ref Order order, ref slice<ref Node> @out)
-        {
-            for (var i = len(order.temp) - 1L; i >= int(mark); i--)
+            foreach (var (_, n) in o.temp[mark..])
             {
-                var n = order.temp[i];
+                var key = n.Type.LongString();
+                o.free[key] = append(o.free[key], n);
+            }
+            o.temp = o.temp[..mark];
+
+        }
+
+        // cleanTempNoPop emits VARKILL and if needed VARLIVE instructions
+        // to *out for each temporary above the mark on the temporary stack.
+        // It does not pop the temporaries from the stack.
+        private static slice<ptr<Node>> cleanTempNoPop(this ptr<Order> _addr_o, ordermarker mark)
+        {
+            ref Order o = ref _addr_o.val;
+
+            slice<ptr<Node>> @out = default;
+            for (var i = len(o.temp) - 1L; i >= int(mark); i--)
+            {
+                var n = o.temp[i];
                 if (n.Name.Keepalive())
                 {
                     n.Name.SetKeepalive(false);
-                    n.SetAddrtaken(true); // ensure SSA keeps the n variable
-                    var kill = nod(OVARLIVE, n, null);
-                    kill = typecheck(kill, Etop);
-                    out.Value = append(out.Value, kill);
+                    n.Name.SetAddrtaken(true); // ensure SSA keeps the n variable
+                    var live = nod(OVARLIVE, n, null);
+                    live = typecheck(live, ctxStmt);
+                    out = append(out, live);
+
                 }
-                kill = nod(OVARKILL, n, null);
-                kill = typecheck(kill, Etop);
-                out.Value = append(out.Value, kill);
+
+                var kill = nod(OVARKILL, n, null);
+                kill = typecheck(kill, ctxStmt);
+                out = append(out, kill);
+
             }
+
+            return out;
 
         }
 
-        // Cleantemp emits VARKILL instructions for each temporary above the
+        // cleanTemp emits VARKILL instructions for each temporary above the
         // mark on the temporary stack and removes them from the stack.
-        private static void cleantemp(ordermarker top, ref Order order)
+        private static void cleanTemp(this ptr<Order> _addr_o, ordermarker top)
         {
-            cleantempnopop(top, order, ref order.@out);
-            poptemp(top, order);
+            ref Order o = ref _addr_o.val;
+
+            o.@out = append(o.@out, o.cleanTempNoPop(top));
+            o.popTemp(top);
         }
 
-        // Orderstmtlist orders each of the statements in the list.
-        private static void orderstmtlist(Nodes l, ref Order order)
+        // stmtList orders each of the statements in the list.
+        private static void stmtList(this ptr<Order> _addr_o, Nodes l)
         {
-            foreach (var (_, n) in l.Slice())
+            ref Order o = ref _addr_o.val;
+
+            var s = l.Slice();
+            foreach (var (i) in s)
             {
-                orderstmt(n, order);
+                orderMakeSliceCopy(s[i..]);
+                o.stmt(s[i]);
             }
+
         }
 
-        // Orderblock orders the block of statements l onto a new list,
-        // and returns the ordered list.
-        private static slice<ref Node> orderblock(Nodes l)
+        // orderMakeSliceCopy matches the pattern:
+        //  m = OMAKESLICE([]T, x); OCOPY(m, s)
+        // and rewrites it to:
+        //  m = OMAKESLICECOPY([]T, x, s); nil
+        private static void orderMakeSliceCopy(slice<ptr<Node>> s)
         {
-            Order order = default;
-            var mark = marktemp(ref order);
-            orderstmtlist(l, ref order);
-            cleantemp(mark, ref order);
-            return order.@out;
+            const var go115makeslicecopy = (var)true;
+
+            if (!go115makeslicecopy)
+            {
+                return ;
+            }
+
+            if (Debug['N'] != 0L || instrumenting)
+            {
+                return ;
+            }
+
+            if (len(s) < 2L)
+            {
+                return ;
+            }
+
+            var asn = s[0L];
+            var copyn = s[1L];
+
+            if (asn == null || asn.Op != OAS)
+            {
+                return ;
+            }
+
+            if (asn.Left.Op != ONAME)
+            {
+                return ;
+            }
+
+            if (asn.Left.isBlank())
+            {
+                return ;
+            }
+
+            var maken = asn.Right;
+            if (maken == null || maken.Op != OMAKESLICE)
+            {
+                return ;
+            }
+
+            if (maken.Esc == EscNone)
+            {
+                return ;
+            }
+
+            if (maken.Left == null || maken.Right != null)
+            {
+                return ;
+            }
+
+            if (copyn.Op != OCOPY)
+            {
+                return ;
+            }
+
+            if (copyn.Left.Op != ONAME)
+            {
+                return ;
+            }
+
+            if (asn.Left.Sym != copyn.Left.Sym)
+            {
+                return ;
+            }
+
+            if (copyn.Right.Op != ONAME)
+            {
+                return ;
+            }
+
+            if (copyn.Left.Sym == copyn.Right.Sym)
+            {
+                return ;
+            }
+
+            maken.Op = OMAKESLICECOPY;
+            maken.Right = copyn.Right; 
+            // Set bounded when m = OMAKESLICE([]T, len(s)); OCOPY(m, s)
+            maken.SetBounded(maken.Left.Op == OLEN && samesafeexpr(maken.Left.Left, copyn.Right));
+
+            maken = typecheck(maken, ctxExpr);
+
+            s[1L] = null; // remove separate copy call
+
+            return ;
+
         }
 
-        // OrderblockNodes orders the block of statements in n into a new slice,
+        // edge inserts coverage instrumentation for libfuzzer.
+        private static void edge(this ptr<Order> _addr_o)
+        {
+            ref Order o = ref _addr_o.val;
+
+            if (Debug_libfuzzer == 0L)
+            {
+                return ;
+            } 
+
+            // Create a new uint8 counter to be allocated in section
+            // __libfuzzer_extra_counters.
+            var counter = staticname(types.Types[TUINT8]);
+            counter.Name.SetLibfuzzerExtraCounter(true); 
+
+            // counter += 1
+            var incr = nod(OASOP, counter, nodintconst(1L));
+            incr.SetSubOp(OADD);
+            incr = typecheck(incr, ctxStmt);
+
+            o.@out = append(o.@out, incr);
+
+        }
+
+        // orderBlock orders the block of statements in n into a new slice,
         // and then replaces the old slice in n with the new slice.
-        private static void orderblockNodes(ref Nodes n)
+        // free is a map that can be used to obtain temporary variables by type.
+        private static void orderBlock(ptr<Nodes> _addr_n, map<@string, slice<ptr<Node>>> free)
         {
+            ref Nodes n = ref _addr_n.val;
+
             Order order = default;
-            var mark = marktemp(ref order);
-            orderstmtlist(n.Value, ref order);
-            cleantemp(mark, ref order);
+            order.free = free;
+            var mark = order.markTemp();
+            order.edge();
+            order.stmtList(n);
+            order.cleanTemp(mark);
             n.Set(order.@out);
         }
 
-        // Orderexprinplace orders the side effects in *np and
+        // exprInPlace orders the side effects in *np and
         // leaves them as the init list of the final *np.
-        // The result of orderexprinplace MUST be assigned back to n, e.g.
-        //     n.Left = orderexprinplace(n.Left, outer)
-        private static ref Node orderexprinplace(ref Node n, ref Order outer)
+        // The result of exprInPlace MUST be assigned back to n, e.g.
+        //     n.Left = o.exprInPlace(n.Left)
+        private static ptr<Node> exprInPlace(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
+
             Order order = default;
-            n = orderexpr(n, ref order, null);
+            order.free = o.free;
+            n = order.expr(n, null);
             n = addinit(n, order.@out); 
 
             // insert new temporaries from order
             // at head of outer list.
-            outer.temp = append(outer.temp, order.temp);
-            return n;
+            o.temp = append(o.temp, order.temp);
+            return _addr_n!;
+
         }
 
-        // Orderstmtinplace orders the side effects of the single statement *np
+        // orderStmtInPlace orders the side effects of the single statement *np
         // and replaces it with the resulting statement list.
-        // The result of orderstmtinplace MUST be assigned back to n, e.g.
-        //     n.Left = orderstmtinplace(n.Left)
-        private static ref Node orderstmtinplace(ref Node n)
+        // The result of orderStmtInPlace MUST be assigned back to n, e.g.
+        //     n.Left = orderStmtInPlace(n.Left)
+        // free is a map that can be used to obtain temporary variables by type.
+        private static ptr<Node> orderStmtInPlace(ptr<Node> _addr_n, map<@string, slice<ptr<Node>>> free)
         {
+            ref Node n = ref _addr_n.val;
+
             Order order = default;
-            var mark = marktemp(ref order);
-            orderstmt(n, ref order);
-            cleantemp(mark, ref order);
-            return liststmt(order.@out);
+            order.free = free;
+            var mark = order.markTemp();
+            order.stmt(n);
+            order.cleanTemp(mark);
+            return _addr_liststmt(order.@out)!;
         }
 
-        // Orderinit moves n's init list to order->out.
-        private static void orderinit(ref Node n, ref Order order)
+        // init moves n's init list to o.out.
+        private static void init(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
+
             if (n.mayBeShared())
             { 
                 // For concurrency safety, don't mutate potentially shared nodes.
                 // First, ensure that no work is required here.
                 if (n.Ninit.Len() > 0L)
                 {
-                    Fatalf("orderinit shared node with ninit");
+                    Fatalf("order.init shared node with ninit");
                 }
-                return;
+
+                return ;
+
             }
-            orderstmtlist(n.Ninit, order);
+
+            o.stmtList(n.Ninit);
             n.Ninit.Set(null);
+
         }
 
-        // Ismulticall reports whether the list l is f() for a multi-value function.
-        // Such an f() could appear as the lone argument to a multi-arg function.
-        private static bool ismulticall(Nodes l)
-        { 
-            // one arg only
-            if (l.Len() != 1L)
-            {
-                return false;
-            }
-            var n = l.First(); 
-
-            // must be call
-
-            if (n.Op == OCALLFUNC || n.Op == OCALLMETH || n.Op == OCALLINTER) 
-                break;
-            else 
-                return false;
-            // call must return multiple values
-            return n.Left.Type.NumResults() > 1L;
-        }
-
-        // Copyret emits t1, t2, ... = n, where n is a function call,
-        // and then returns the list t1, t2, ....
-        private static slice<ref Node> copyret(ref Node n, ref Order order)
+        // call orders the call expression n.
+        // n.Op is OCALLMETH/OCALLFUNC/OCALLINTER or a builtin like OCOPY.
+        private static void call(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
-            if (!n.Type.IsFuncArgStruct())
-            {
-                Fatalf("copyret %v %d", n.Type, n.Left.Type.NumResults());
-            }
-            slice<ref Node> l1 = default;
-            slice<ref Node> l2 = default;
-            foreach (var (_, t) in n.Type.Fields().Slice())
-            {
-                var tmp = temp(t.Type);
-                l1 = append(l1, tmp);
-                l2 = append(l2, tmp);
-            }
-            var @as = nod(OAS2, null, null);
-            @as.List.Set(l1);
-            @as.Rlist.Set1(n);
-            as = typecheck(as, Etop);
-            orderstmt(as, order);
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
 
-            return l2;
-        }
-
-        // Ordercallargs orders the list of call arguments *l.
-        private static void ordercallargs(ref Nodes l, ref Order order)
-        {
-            if (ismulticall(l.Value))
+            if (n.Ninit.Len() > 0L)
             { 
-                // return f() where f() is multiple values.
-                l.Set(copyret(l.First(), order));
-            }
-            else
+                // Caller should have already called o.init(n).
+                Fatalf("%v with unexpected ninit", n.Op);
+
+            } 
+
+            // Builtin functions.
+            if (n.Op != OCALLFUNC && n.Op != OCALLMETH && n.Op != OCALLINTER)
             {
-                orderexprlist(l.Value, order);
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, null);
+                o.exprList(n.List);
+                return ;
             }
-        }
 
-        // Ordercall orders the call expression n.
-        // n->op is OCALLMETH/OCALLFUNC/OCALLINTER or a builtin like OCOPY.
-        private static void ordercall(ref Node n, ref Order order)
-        {
-            n.Left = orderexpr(n.Left, order, null);
-            n.Right = orderexpr(n.Right, order, null); // ODDDARG temp
-            ordercallargs(ref n.List, order);
+            fixVariadicCall(n);
+            n.Left = o.expr(n.Left, null);
+            o.exprList(n.List);
 
-            if (n.Op == OCALLFUNC)
+            if (n.Op == OCALLINTER)
             {
-                Action<long> keepAlive = i =>
-                { 
-                    // If the argument is really a pointer being converted to uintptr,
-                    // arrange for the pointer to be kept alive until the call returns,
-                    // by copying it into a temp and marking that temp
-                    // still alive when we pop the temp stack.
-                    var xp = n.List.Addr(i);
-                    while (ref xp == OCONVNOP && !ref xp.IsUnsafePtr())
-                    {
-                        xp = ref ref xp;
-                    }
+                return ;
+            }
 
-                    var x = xp.Value;
-                    if (x.Type.IsUnsafePtr())
-                    {
-                        x = ordercopyexpr(x, x.Type, order, 0L);
-                        x.Name.SetKeepalive(true);
-                        xp.Value = x;
-                    }
+            Action<ptr<Node>> keepAlive = arg =>
+            { 
+                // If the argument is really a pointer being converted to uintptr,
+                // arrange for the pointer to be kept alive until the call returns,
+                // by copying it into a temp and marking that temp
+                // still alive when we pop the temp stack.
+                if (arg.Op == OCONVNOP && arg.Left.Type.IsUnsafePtr())
+                {
+                    var x = o.copyExpr(arg.Left, arg.Left.Type, false);
+                    x.Name.SetKeepalive(true);
+                    arg.Left = x;
                 }
-;
 
-                foreach (var (i, t) in n.Left.Type.Params().FieldSlice())
-                { 
-                    // Check for "unsafe-uintptr" tag provided by escape analysis.
-                    if (t.Isddd() && !n.Isddd())
+            } 
+
+            // Check for "unsafe-uintptr" tag provided by escape analysis.
+; 
+
+            // Check for "unsafe-uintptr" tag provided by escape analysis.
+            foreach (var (i, param) in n.Left.Type.Params().FieldSlice())
+            {
+                if (param.Note == unsafeUintptrTag || param.Note == uintptrEscapesTag)
+                {
                     {
-                        if (t.Note == uintptrEscapesTag)
+                        var arg = n.List.Index(i);
+
+                        if (arg.Op == OSLICELIT)
                         {
-                            while (i < n.List.Len())
+                            foreach (var (_, elt) in arg.List.Slice())
                             {
-                                keepAlive(i);
-                                i++;
+                                keepAlive(elt);
                             }
+                        else
+                        }                        {
+                            keepAlive(arg);
+                        }
 
-                        }
-                    else
-                    }                    {
-                        if (t.Note == unsafeUintptrTag || t.Note == uintptrEscapesTag)
-                        {
-                            keepAlive(i);
-                        }
                     }
+
                 }
+
             }
+
         }
 
-        // Ordermapassign appends n to order->out, introducing temporaries
+        // mapAssign appends n to o.out, introducing temporaries
         // to make sure that all map assignments have the form m[k] = x.
-        // (Note: orderexpr has already been called on n, so we know k is addressable.)
+        // (Note: expr has already been called on n, so we know k is addressable.)
         //
         // If n is the multiple assignment form ..., m[k], ... = ..., x, ..., the rewrite is
         //    t1 = m
@@ -498,260 +736,268 @@ namespace @internal
         // cases they are also typically registerizable, so not much harm done.
         // And this only applies to the multiple-assignment form.
         // We could do a more precise analysis if needed, like in walk.go.
-        private static void ordermapassign(ref Node n, ref Order order)
+        private static void mapAssign(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
 
-            if (n.Op == OAS) 
+
+            if (n.Op == OAS || n.Op == OASOP) 
                 if (n.Left.Op == OINDEXMAP)
                 { 
                     // Make sure we evaluate the RHS before starting the map insert.
                     // We need to make sure the RHS won't panic.  See issue 22881.
-                    n.Right = ordercheapexpr(n.Right, order);
+                    if (n.Right.Op == OAPPEND)
+                    {
+                        var s = n.Right.List.Slice()[1L..];
+                        {
+                            var i__prev1 = i;
+
+                            foreach (var (__i, __n) in s)
+                            {
+                                i = __i;
+                                n = __n;
+                                s[i] = o.cheapExpr(n);
+                            }
+                    else
+
+                            i = i__prev1;
+                        }
+                    }                    {
+                        n.Right = o.cheapExpr(n.Right);
+                    }
+
                 }
-                order.@out = append(order.@out, n);
+
+                o.@out = append(o.@out, n);
             else if (n.Op == OAS2 || n.Op == OAS2DOTTYPE || n.Op == OAS2MAPR || n.Op == OAS2FUNC) 
-                slice<ref Node> post = default;
-                foreach (var (i, m) in n.List.Slice())
+                slice<ptr<Node>> post = default;
                 {
+                    var i__prev1 = i;
 
-                    if (m.Op == OINDEXMAP)
+                    foreach (var (__i, __m) in n.List.Slice())
                     {
-                        if (!m.Left.IsAutoTmp())
+                        i = __i;
+                        m = __m;
+
+                        if (m.Op == OINDEXMAP)
                         {
-                            m.Left = ordercopyexpr(m.Left, m.Left.Type, order, 0L);
+                            if (!m.Left.IsAutoTmp())
+                            {
+                                m.Left = o.copyExpr(m.Left, m.Left.Type, false);
+                            }
+
+                            if (!m.Right.IsAutoTmp())
+                            {
+                                m.Right = o.copyExpr(m.Right, m.Right.Type, false);
+                            }
+
+                            fallthrough = true;
                         }
-                        if (!m.Right.IsAutoTmp())
+                        if (fallthrough || instrumenting && n.Op == OAS2FUNC && !m.isBlank())
                         {
-                            m.Right = ordercopyexpr(m.Right, m.Right.Type, order, 0L);
+                            var t = o.newTemp(m.Type, false);
+                            n.List.SetIndex(i, t);
+                            var a = nod(OAS, m, t);
+                            a = typecheck(a, ctxStmt);
+                            post = append(post, a);
+                            goto __switch_break0;
                         }
-                        fallthrough = true;
-                    }
-                    if (fallthrough || instrumenting && n.Op == OAS2FUNC && !isblank(m))
-                    {
-                        var t = ordertemp(m.Type, order, false);
-                        n.List.SetIndex(i, t);
-                        var a = nod(OAS, m, t);
-                        a = typecheck(a, Etop);
-                        post = append(post, a);
-                        goto __switch_break0;
+
+                        __switch_break0:;
+
                     }
 
-                    __switch_break0:;
+                    i = i__prev1;
                 }
-                order.@out = append(order.@out, n);
-                order.@out = append(order.@out, post);
-            else 
-                Fatalf("ordermapassign %v", n.Op);
-                    }
 
-        // Orderstmt orders the statement n, appending to order->out.
+                o.@out = append(o.@out, n);
+                o.@out = append(o.@out, post);
+            else 
+                Fatalf("order.mapAssign %v", n.Op);
+            
+        }
+
+        // stmt orders the statement n, appending to o.out.
         // Temporaries created during the statement are cleaned
         // up using VARKILL instructions as possible.
-        private static void orderstmt(ref Node n, ref Order order)
+        private static void stmt(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
+
             if (n == null)
             {
-                return;
+                return ;
             }
+
             var lno = setlineno(n);
+            o.init(n);
 
-            orderinit(n, order);
 
-
-            if (n.Op == OVARKILL || n.Op == OVARLIVE) 
-                order.@out = append(order.@out, n);
+            if (n.Op == OVARKILL || n.Op == OVARLIVE || n.Op == OINLMARK) 
+                o.@out = append(o.@out, n);
             else if (n.Op == OAS) 
-                var t = marktemp(order);
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, n.Left);
-                ordermapassign(n, order);
-                cleantemp(t, order);
-            else if (n.Op == OAS2 || n.Op == OCLOSE || n.Op == OCOPY || n.Op == OPRINT || n.Op == OPRINTN || n.Op == ORECOVER || n.Op == ORECV) 
-                t = marktemp(order);
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, null);
-                orderexprlist(n.List, order);
-                orderexprlist(n.Rlist, order);
-
-                if (n.Op == OAS2) 
-                    ordermapassign(n, order);
-                else 
-                    order.@out = append(order.@out, n);
-                                cleantemp(t, order);
+                var t = o.markTemp();
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, n.Left);
+                o.mapAssign(n);
+                o.cleanTemp(t);
             else if (n.Op == OASOP) 
-                // Special: rewrite l op= r into l = l op r.
-                // This simplifies quite a few operations;
-                // most important is that it lets us separate
-                // out map read from map write when l is
-                // a map index expression.
-                t = marktemp(order);
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, null);
+                t = o.markTemp();
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, null);
 
-                n.Left = ordersafeexpr(n.Left, order);
-                var tmp1 = treecopy(n.Left, src.NoXPos);
-                if (tmp1.Op == OINDEXMAP)
-                {
-                    tmp1.Etype = 0L; // now an rvalue not an lvalue
+                if (instrumenting || n.Left.Op == OINDEXMAP && (n.SubOp() == ODIV || n.SubOp() == OMOD))
+                { 
+                    // Rewrite m[k] op= r into m[k] = m[k] op r so
+                    // that we can ensure that if op panics
+                    // because r is zero, the panic happens before
+                    // the map assignment.
+
+                    n.Left = o.safeExpr(n.Left);
+
+                    var l = treecopy(n.Left, src.NoXPos);
+                    if (l.Op == OINDEXMAP)
+                    {
+                        l.SetIndexMapLValue(false);
+                    }
+
+                    l = o.copyExpr(l, n.Left.Type, false);
+                    n.Right = nod(n.SubOp(), l, n.Right);
+                    n.Right = typecheck(n.Right, ctxExpr);
+                    n.Right = o.expr(n.Right, null);
+
+                    n.Op = OAS;
+                    n.ResetAux();
+
                 }
-                tmp1 = ordercopyexpr(tmp1, n.Left.Type, order, 0L); 
-                // TODO(marvin): Fix Node.EType type union.
-                n.Right = nod(Op(n.Etype), tmp1, n.Right);
-                n.Right = typecheck(n.Right, Erv);
-                n.Right = orderexpr(n.Right, order, null);
-                n.Etype = 0L;
-                n.Op = OAS;
-                ordermapassign(n, order);
-                cleantemp(t, order); 
 
-                // Special: make sure key is addressable if needed,
-                // and make sure OINDEXMAP is not copied out.
-            else if (n.Op == OAS2MAPR) 
-                t = marktemp(order);
+                o.mapAssign(n);
+                o.cleanTemp(t);
+            else if (n.Op == OAS2) 
+                t = o.markTemp();
+                o.exprList(n.List);
+                o.exprList(n.Rlist);
+                o.mapAssign(n);
+                o.cleanTemp(t); 
 
-                orderexprlist(n.List, order);
-                var r = n.Rlist.First();
-                r.Left = orderexpr(r.Left, order, null);
-                r.Right = orderexpr(r.Right, order, null); 
-
-                // See case OINDEXMAP below.
-                if (r.Right.Op == OARRAYBYTESTR)
-                {
-                    r.Right.Op = OARRAYBYTESTRTMP;
-                }
-                r.Right = ordermapkeytemp(r.Left.Type, r.Right, order);
-                orderokas2(n, order);
-                cleantemp(t, order); 
-
-                // Special: avoid copy of func call n->rlist->n.
+                // Special: avoid copy of func call n.Right
             else if (n.Op == OAS2FUNC) 
-                t = marktemp(order);
-
-                orderexprlist(n.List, order);
-                ordercall(n.Rlist.First(), order);
-                orderas2(n, order);
-                cleantemp(t, order); 
+                t = o.markTemp();
+                o.exprList(n.List);
+                o.init(n.Right);
+                o.call(n.Right);
+                o.as2(n);
+                o.cleanTemp(t); 
 
                 // Special: use temporary variables to hold result,
-                // so that assertI2Tetc can take address of temporary.
+                // so that runtime can take address of temporary.
                 // No temporary for blank assignment.
-            else if (n.Op == OAS2DOTTYPE) 
-                t = marktemp(order);
+                //
+                // OAS2MAPR: make sure key is addressable if needed,
+                //           and make sure OINDEXMAP is not copied out.
+            else if (n.Op == OAS2DOTTYPE || n.Op == OAS2RECV || n.Op == OAS2MAPR) 
+                t = o.markTemp();
+                o.exprList(n.List);
 
-                orderexprlist(n.List, order);
-                n.Rlist.First().Left = orderexpr(n.Rlist.First().Left, order, null); // i in i.(T)
-                orderokas2(n, order);
-                cleantemp(t, order); 
+                {
+                    var r__prev2 = r;
 
-                // Special: use temporary variables to hold result,
-                // so that chanrecv can take address of temporary.
-            else if (n.Op == OAS2RECV) 
-                t = marktemp(order);
+                    var r = n.Right;
 
-                orderexprlist(n.List, order);
-                n.Rlist.First().Left = orderexpr(n.Rlist.First().Left, order, null); // arg to recv
-                var ch = n.Rlist.First().Left.Type;
-                tmp1 = ordertemp(ch.Elem(), order, types.Haspointers(ch.Elem()));
-                var tmp2 = ordertemp(types.Types[TBOOL], order, false);
-                order.@out = append(order.@out, n);
-                r = nod(OAS, n.List.First(), tmp1);
-                r = typecheck(r, Etop);
-                ordermapassign(r, order);
-                r = okas(n.List.Second(), tmp2);
-                r = typecheck(r, Etop);
-                ordermapassign(r, order);
-                n.List.Set2(tmp1, tmp2);
-                cleantemp(t, order); 
+
+                    if (r.Op == ODOTTYPE2 || r.Op == ORECV) 
+                        r.Left = o.expr(r.Left, null);
+                    else if (r.Op == OINDEXMAP) 
+                        r.Left = o.expr(r.Left, null);
+                        r.Right = o.expr(r.Right, null); 
+                        // See similar conversion for OINDEXMAP below.
+                        _ = mapKeyReplaceStrConv(_addr_r.Right);
+                        r.Right = o.mapKeyTemp(r.Left.Type, r.Right);
+                    else 
+                        Fatalf("order.stmt: %v", r.Op);
+
+
+                    r = r__prev2;
+                }
+
+                o.okAs2(n);
+                o.cleanTemp(t); 
 
                 // Special: does not save n onto out.
             else if (n.Op == OBLOCK || n.Op == OEMPTY) 
-                orderstmtlist(n.List, order); 
+                o.stmtList(n.List); 
 
                 // Special: n->left is not an expression; save as is.
             else if (n.Op == OBREAK || n.Op == OCONTINUE || n.Op == ODCL || n.Op == ODCLCONST || n.Op == ODCLTYPE || n.Op == OFALL || n.Op == OGOTO || n.Op == OLABEL || n.Op == ORETJMP) 
-                order.@out = append(order.@out, n); 
+                o.@out = append(o.@out, n); 
 
                 // Special: handle call arguments.
             else if (n.Op == OCALLFUNC || n.Op == OCALLINTER || n.Op == OCALLMETH) 
-                t = marktemp(order);
-
-                ordercall(n, order);
-                order.@out = append(order.@out, n);
-                cleantemp(t, order); 
+                t = o.markTemp();
+                o.call(n);
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t);
+            else if (n.Op == OCLOSE || n.Op == OCOPY || n.Op == OPRINT || n.Op == OPRINTN || n.Op == ORECOVER || n.Op == ORECV) 
+                t = o.markTemp();
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, null);
+                o.exprList(n.List);
+                o.exprList(n.Rlist);
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t); 
 
                 // Special: order arguments to inner call but not call itself.
-            else if (n.Op == ODEFER || n.Op == OPROC) 
-                t = marktemp(order);
-
-
-                // Delete will take the address of the key.
-                // Copy key into new temp and do not clean it
-                // (it persists beyond the statement).
-                if (n.Left.Op == ODELETE) 
-                    orderexprlist(n.Left.List, order);
-
-                    if (mapfast(n.Left.List.First().Type) == mapslow)
-                    {
-                        var t1 = marktemp(order);
-                        var np = n.Left.List.Addr(1L); // map key
-                        np.Value = ordercopyexpr(np.Value, ref np, order, 0L);
-                        poptemp(t1, order);
-                    }
-                else 
-                    ordercall(n.Left, order);
-                                order.@out = append(order.@out, n);
-                cleantemp(t, order);
+            else if (n.Op == ODEFER || n.Op == OGO) 
+                t = o.markTemp();
+                o.init(n.Left);
+                o.call(n.Left);
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t);
             else if (n.Op == ODELETE) 
-                t = marktemp(order);
-                n.List.SetFirst(orderexpr(n.List.First(), order, null));
-                n.List.SetSecond(orderexpr(n.List.Second(), order, null));
-                n.List.SetSecond(ordermapkeytemp(n.List.First().Type, n.List.Second(), order));
-                order.@out = append(order.@out, n);
-                cleantemp(t, order); 
+                t = o.markTemp();
+                n.List.SetFirst(o.expr(n.List.First(), null));
+                n.List.SetSecond(o.expr(n.List.Second(), null));
+                n.List.SetSecond(o.mapKeyTemp(n.List.First().Type, n.List.Second()));
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t); 
 
                 // Clean temporaries from condition evaluation at
                 // beginning of loop body and after for statement.
             else if (n.Op == OFOR) 
-                t = marktemp(order);
-
-                n.Left = orderexprinplace(n.Left, order);
-                slice<ref Node> l = default;
-                cleantempnopop(t, order, ref l);
-                n.Nbody.Prepend(l);
-                orderblockNodes(ref n.Nbody);
-                n.Right = orderstmtinplace(n.Right);
-                order.@out = append(order.@out, n);
-                cleantemp(t, order); 
+                t = o.markTemp();
+                n.Left = o.exprInPlace(n.Left);
+                n.Nbody.Prepend(o.cleanTempNoPop(t));
+                orderBlock(_addr_n.Nbody, o.free);
+                n.Right = orderStmtInPlace(_addr_n.Right, o.free);
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t); 
 
                 // Clean temporaries from condition at
                 // beginning of both branches.
             else if (n.Op == OIF) 
-                t = marktemp(order);
-
-                n.Left = orderexprinplace(n.Left, order);
-                l = default;
-                cleantempnopop(t, order, ref l);
-                n.Nbody.Prepend(l);
-                l = null;
-                cleantempnopop(t, order, ref l);
-                n.Rlist.Prepend(l);
-                poptemp(t, order);
-                orderblockNodes(ref n.Nbody);
-                n.Rlist.Set(orderblock(n.Rlist));
-                order.@out = append(order.@out, n); 
+                t = o.markTemp();
+                n.Left = o.exprInPlace(n.Left);
+                n.Nbody.Prepend(o.cleanTempNoPop(t));
+                n.Rlist.Prepend(o.cleanTempNoPop(t));
+                o.popTemp(t);
+                orderBlock(_addr_n.Nbody, o.free);
+                orderBlock(_addr_n.Rlist, o.free);
+                o.@out = append(o.@out, n); 
 
                 // Special: argument will be converted to interface using convT2E
                 // so make sure it is an addressable temporary.
             else if (n.Op == OPANIC) 
-                t = marktemp(order);
-
-                n.Left = orderexpr(n.Left, order, null);
+                t = o.markTemp();
+                n.Left = o.expr(n.Left, null);
                 if (!n.Left.Type.IsInterface())
                 {
-                    n.Left = orderaddrtemp(n.Left, order);
+                    n.Left = o.addrTemp(n.Left);
                 }
-                order.@out = append(order.@out, n);
-                cleantemp(t, order);
+
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t);
             else if (n.Op == ORANGE) 
                 // n.Right is the expression being ranged over.
                 // order it, and then make a copy if we need one.
@@ -766,21 +1012,26 @@ namespace @internal
 
                 // Mark []byte(str) range expression to reuse string backing storage.
                 // It is safe because the storage cannot be mutated.
-                if (n.Right.Op == OSTRARRAYBYTE)
+                if (n.Right.Op == OSTR2BYTES)
                 {
-                    n.Right.Op = OSTRARRAYBYTETMP;
+                    n.Right.Op = OSTR2BYTESTMP;
                 }
-                t = marktemp(order);
-                n.Right = orderexpr(n.Right, order, null);
+
+                t = o.markTemp();
+                n.Right = o.expr(n.Right, null);
+
+                var orderBody = true;
 
                 if (n.Type.Etype == TARRAY || n.Type.Etype == TSLICE)
                 {
-                    if (n.List.Len() < 2L || isblank(n.List.Second()))
+                    if (n.List.Len() < 2L || n.List.Second().isBlank())
                     { 
                         // for i := range x will only use x once, to compute len(x).
                         // No need to copy it.
                         break;
+
                     }
+
                     fallthrough = true;
 
                 }
@@ -794,47 +1045,50 @@ namespace @internal
                     {
                         r = nod(OCONV, r, null);
                         r.Type = types.Types[TSTRING];
-                        r = typecheck(r, Erv);
+                        r = typecheck(r, ctxExpr);
                     }
-                    n.Right = ordercopyexpr(r, r.Type, order, 0L);
+
+                    n.Right = o.copyExpr(r, r.Type, false);
                     goto __switch_break1;
                 }
-                if (n.Type.Etype == TMAP) 
+                if (n.Type.Etype == TMAP)
                 {
+                    if (isMapClear(n))
+                    { 
+                        // Preserve the body of the map clear pattern so it can
+                        // be detected during walk. The loop body will not be used
+                        // when optimizing away the range loop to a runtime call.
+                        orderBody = false;
+                        break;
+
+                    } 
+
                     // copy the map value in case it is a map literal.
                     // TODO(rsc): Make tmp = literal expressions reuse tmp.
                     // For maps tmp is just one word so it hardly matters.
                     r = n.Right;
-                    n.Right = ordercopyexpr(r, r.Type, order, 0L); 
+                    n.Right = o.copyExpr(r, r.Type, false); 
 
                     // prealloc[n] is the temp for the iterator.
                     // hiter contains pointers and needs to be zeroed.
-                    prealloc[n] = ordertemp(hiter(n.Type), order, true);
+                    prealloc[n] = o.newTemp(hiter(n.Type), true);
                     goto __switch_break1;
                 }
                 // default: 
-                    Fatalf("orderstmt range %v", n.Type);
+                    Fatalf("order.stmt range %v", n.Type);
 
                 __switch_break1:;
+                o.exprListInPlace(n.List);
+                if (orderBody)
                 {
-                    var i__prev1 = i;
-
-                    foreach (var (__i, __n1) in n.List.Slice())
-                    {
-                        i = __i;
-                        n1 = __n1;
-                        n.List.SetIndex(i, orderexprinplace(n1, order));
-                    }
-
-                    i = i__prev1;
+                    orderBlock(_addr_n.Nbody, o.free);
                 }
 
-                orderblockNodes(ref n.Nbody);
-                order.@out = append(order.@out, n);
-                cleantemp(t, order);
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t);
             else if (n.Op == ORETURN) 
-                ordercallargs(ref n.List, order);
-                order.@out = append(order.@out, n); 
+                o.exprList(n.List);
+                o.@out = append(o.@out, n); 
 
                 // Special: clean case temporaries in each block entry.
                 // Select must enter one of its blocks, so there is no
@@ -846,14 +1100,15 @@ namespace @internal
                 // case (if p were nil, then the timing of the fault would
                 // give this away).
             else if (n.Op == OSELECT) 
-                t = marktemp(order);
+                t = o.markTemp();
 
                 foreach (var (_, n2) in n.List.Slice())
                 {
-                    if (n2.Op != OXCASE)
+                    if (n2.Op != OCASE)
                     {
                         Fatalf("order select case %v", n2.Op);
                     }
+
                     r = n2.Left;
                     setlineno(n2); 
 
@@ -863,229 +1118,291 @@ namespace @internal
                     {
                         Fatalf("order select ninit");
                     }
-                    if (r != null)
-                    {
 
-                        if (r.Op == OSELRECV || r.Op == OSELRECV2) 
+                    if (r == null)
+                    {
+                        continue;
+                    }
+
+
+                    if (r.Op == OSELRECV || r.Op == OSELRECV2) 
+                        if (r.Colas())
+                        {
+                            long i = 0L;
+                            if (r.Ninit.Len() != 0L && r.Ninit.First().Op == ODCL && r.Ninit.First().Left == r.Left)
+                            {
+                                i++;
+                            }
+
+                            if (i < r.Ninit.Len() && r.Ninit.Index(i).Op == ODCL && r.List.Len() != 0L && r.Ninit.Index(i).Left == r.List.First())
+                            {
+                                i++;
+                            }
+
+                            if (i >= r.Ninit.Len())
+                            {
+                                r.Ninit.Set(null);
+                            }
+
+                        }
+
+                        if (r.Ninit.Len() != 0L)
+                        {
+                            dumplist("ninit", r.Ninit);
+                            Fatalf("ninit on select recv");
+                        } 
+
+                        // case x = <-c
+                        // case x, ok = <-c
+                        // r->left is x, r->ntest is ok, r->right is ORECV, r->right->left is c.
+                        // r->left == N means 'case <-c'.
+                        // c is always evaluated; x and ok are only evaluated when assigned.
+                        r.Right.Left = o.expr(r.Right.Left, null);
+
+                        if (r.Right.Left.Op != ONAME)
+                        {
+                            r.Right.Left = o.copyExpr(r.Right.Left, r.Right.Left.Type, false);
+                        } 
+
+                        // Introduce temporary for receive and move actual copy into case body.
+                        // avoids problems with target being addressed, as usual.
+                        // NOTE: If we wanted to be clever, we could arrange for just one
+                        // temporary per distinct type, sharing the temp among all receives
+                        // with that temp. Similarly one ok bool could be shared among all
+                        // the x,ok receives. Not worth doing until there's a clear need.
+                        if (r.Left != null && r.Left.isBlank())
+                        {
+                            r.Left = null;
+                        }
+
+                        if (r.Left != null)
+                        { 
+                            // use channel element type for temporary to avoid conversions,
+                            // such as in case interfacevalue = <-intchan.
+                            // the conversion happens in the OAS instead.
+                            var tmp1 = r.Left;
+
                             if (r.Colas())
                             {
-                                long i = 0L;
-                                if (r.Ninit.Len() != 0L && r.Ninit.First().Op == ODCL && r.Ninit.First().Left == r.Left)
-                                {
-                                    i++;
-                                }
-                                if (i < r.Ninit.Len() && r.Ninit.Index(i).Op == ODCL && r.List.Len() != 0L && r.Ninit.Index(i).Left == r.List.First())
-                                {
-                                    i++;
-                                }
-                                if (i >= r.Ninit.Len())
-                                {
-                                    r.Ninit.Set(null);
-                                }
-                            }
-                            if (r.Ninit.Len() != 0L)
-                            {
-                                dumplist("ninit", r.Ninit);
-                                Fatalf("ninit on select recv");
-                            } 
-
-                            // case x = <-c
-                            // case x, ok = <-c
-                            // r->left is x, r->ntest is ok, r->right is ORECV, r->right->left is c.
-                            // r->left == N means 'case <-c'.
-                            // c is always evaluated; x and ok are only evaluated when assigned.
-                            r.Right.Left = orderexpr(r.Right.Left, order, null);
-
-                            if (r.Right.Left.Op != ONAME)
-                            {
-                                r.Right.Left = ordercopyexpr(r.Right.Left, r.Right.Left.Type, order, 0L);
-                            } 
-
-                            // Introduce temporary for receive and move actual copy into case body.
-                            // avoids problems with target being addressed, as usual.
-                            // NOTE: If we wanted to be clever, we could arrange for just one
-                            // temporary per distinct type, sharing the temp among all receives
-                            // with that temp. Similarly one ok bool could be shared among all
-                            // the x,ok receives. Not worth doing until there's a clear need.
-                            if (r.Left != null && isblank(r.Left))
-                            {
-                                r.Left = null;
-                            }
-                            if (r.Left != null)
-                            { 
-                                // use channel element type for temporary to avoid conversions,
-                                // such as in case interfacevalue = <-intchan.
-                                // the conversion happens in the OAS instead.
-                                tmp1 = r.Left;
-
-                                if (r.Colas())
-                                {
-                                    tmp2 = nod(ODCL, tmp1, null);
-                                    tmp2 = typecheck(tmp2, Etop);
-                                    n2.Ninit.Append(tmp2);
-                                }
-                                r.Left = ordertemp(r.Right.Left.Type.Elem(), order, types.Haspointers(r.Right.Left.Type.Elem()));
-                                tmp2 = nod(OAS, tmp1, r.Left);
-                                tmp2 = typecheck(tmp2, Etop);
+                                var tmp2 = nod(ODCL, tmp1, null);
+                                tmp2 = typecheck(tmp2, ctxStmt);
                                 n2.Ninit.Append(tmp2);
                             }
-                            if (r.List.Len() != 0L && isblank(r.List.First()))
+
+                            r.Left = o.newTemp(r.Right.Left.Type.Elem(), types.Haspointers(r.Right.Left.Type.Elem()));
+                            tmp2 = nod(OAS, tmp1, r.Left);
+                            tmp2 = typecheck(tmp2, ctxStmt);
+                            n2.Ninit.Append(tmp2);
+
+                        }
+
+                        if (r.List.Len() != 0L && r.List.First().isBlank())
+                        {
+                            r.List.Set(null);
+                        }
+
+                        if (r.List.Len() != 0L)
+                        {
+                            tmp1 = r.List.First();
+                            if (r.Colas())
                             {
-                                r.List.Set(null);
-                            }
-                            if (r.List.Len() != 0L)
-                            {
-                                tmp1 = r.List.First();
-                                if (r.Colas())
-                                {
-                                    tmp2 = nod(ODCL, tmp1, null);
-                                    tmp2 = typecheck(tmp2, Etop);
-                                    n2.Ninit.Append(tmp2);
-                                }
-                                r.List.Set1(ordertemp(types.Types[TBOOL], order, false));
-                                tmp2 = okas(tmp1, r.List.First());
-                                tmp2 = typecheck(tmp2, Etop);
+                                tmp2 = nod(ODCL, tmp1, null);
+                                tmp2 = typecheck(tmp2, ctxStmt);
                                 n2.Ninit.Append(tmp2);
                             }
-                            n2.Ninit.Set(orderblock(n2.Ninit));
-                        else if (r.Op == OSEND) 
-                            if (r.Ninit.Len() != 0L)
-                            {
-                                dumplist("ninit", r.Ninit);
-                                Fatalf("ninit on select send");
-                            } 
 
-                            // case c <- x
-                            // r->left is c, r->right is x, both are always evaluated.
-                            r.Left = orderexpr(r.Left, order, null);
+                            r.List.Set1(o.newTemp(types.Types[TBOOL], false));
+                            tmp2 = okas(_addr_tmp1, _addr_r.List.First());
+                            tmp2 = typecheck(tmp2, ctxStmt);
+                            n2.Ninit.Append(tmp2);
 
-                            if (!r.Left.IsAutoTmp())
-                            {
-                                r.Left = ordercopyexpr(r.Left, r.Left.Type, order, 0L);
-                            }
-                            r.Right = orderexpr(r.Right, order, null);
-                            if (!r.Right.IsAutoTmp())
-                            {
-                                r.Right = ordercopyexpr(r.Right, r.Right.Type, order, 0L);
-                            }
-                        else 
-                            Dump("select case", r);
-                            Fatalf("unknown op in select %v", r.Op); 
+                        }
 
-                            // If this is case x := <-ch or case x, y := <-ch, the case has
-                            // the ODCL nodes to declare x and y. We want to delay that
-                            // declaration (and possible allocation) until inside the case body.
-                            // Delete the ODCL nodes here and recreate them inside the body below.
-                                            }
-                    orderblockNodes(ref n2.Nbody);
-                } 
+                        orderBlock(_addr_n2.Ninit, o.free);
+                    else if (r.Op == OSEND) 
+                        if (r.Ninit.Len() != 0L)
+                        {
+                            dumplist("ninit", r.Ninit);
+                            Fatalf("ninit on select send");
+                        } 
+
+                        // case c <- x
+                        // r->left is c, r->right is x, both are always evaluated.
+                        r.Left = o.expr(r.Left, null);
+
+                        if (!r.Left.IsAutoTmp())
+                        {
+                            r.Left = o.copyExpr(r.Left, r.Left.Type, false);
+                        }
+
+                        r.Right = o.expr(r.Right, null);
+                        if (!r.Right.IsAutoTmp())
+                        {
+                            r.Right = o.copyExpr(r.Right, r.Right.Type, false);
+                        }
+
+                    else 
+                        Dump("select case", r);
+                        Fatalf("unknown op in select %v", r.Op); 
+
+                        // If this is case x := <-ch or case x, y := <-ch, the case has
+                        // the ODCL nodes to declare x and y. We want to delay that
+                        // declaration (and possible allocation) until inside the case body.
+                        // Delete the ODCL nodes here and recreate them inside the body below.
+                                    } 
                 // Now that we have accumulated all the temporaries, clean them.
                 // Also insert any ninit queued during the previous loop.
                 // (The temporary cleaning must follow that ninit work.)
                 foreach (var (_, n3) in n.List.Slice())
                 {
-                    var s = n3.Ninit.Slice();
-                    cleantempnopop(t, order, ref s);
-                    n3.Nbody.Prepend(s);
+                    orderBlock(_addr_n3.Nbody, o.free);
+                    n3.Nbody.Prepend(o.cleanTempNoPop(t)); 
+
+                    // TODO(mdempsky): Is this actually necessary?
+                    // walkselect appears to walk Ninit.
+                    n3.Nbody.Prepend(n3.Ninit.Slice());
                     n3.Ninit.Set(null);
+
                 }
-                order.@out = append(order.@out, n);
-                poptemp(t, order); 
+                o.@out = append(o.@out, n);
+                o.popTemp(t); 
 
                 // Special: value being sent is passed as a pointer; make it addressable.
             else if (n.Op == OSEND) 
-                t = marktemp(order);
-
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, null);
+                t = o.markTemp();
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, null);
                 if (instrumenting)
                 { 
                     // Force copying to the stack so that (chan T)(nil) <- x
                     // is still instrumented as a read of x.
-                    n.Right = ordercopyexpr(n.Right, n.Right.Type, order, 0L);
+                    n.Right = o.copyExpr(n.Right, n.Right.Type, false);
+
                 }
                 else
                 {
-                    n.Right = orderaddrtemp(n.Right, order);
+                    n.Right = o.addrTemp(n.Right);
                 }
-                order.@out = append(order.@out, n);
-                cleantemp(t, order); 
+
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t); 
 
                 // TODO(rsc): Clean temporaries more aggressively.
                 // Note that because walkswitch will rewrite some of the
                 // switch into a binary search, this is not as easy as it looks.
-                // (If we ran that code here we could invoke orderstmt on
+                // (If we ran that code here we could invoke order.stmt on
                 // the if-else chain instead.)
                 // For now just clean all the temporaries at the end.
                 // In practice that's fine.
             else if (n.Op == OSWITCH) 
-                t = marktemp(order);
+                if (Debug_libfuzzer != 0L && !hasDefaultCase(_addr_n))
+                { 
+                    // Add empty "default:" case for instrumentation.
+                    n.List.Append(nod(OCASE, null, null));
 
-                n.Left = orderexpr(n.Left, order, null);
-                foreach (var (_, n4) in n.List.Slice())
-                {
-                    if (n4.Op != OXCASE)
-                    {
-                        Fatalf("order switch case %v", n4.Op);
-                    }
-                    orderexprlistinplace(n4.List, order);
-                    orderblockNodes(ref n4.Nbody);
                 }
-                order.@out = append(order.@out, n);
-                cleantemp(t, order);
+
+                t = o.markTemp();
+                n.Left = o.expr(n.Left, null);
+                foreach (var (_, ncas) in n.List.Slice())
+                {
+                    if (ncas.Op != OCASE)
+                    {
+                        Fatalf("order switch case %v", ncas.Op);
+                    }
+
+                    o.exprListInPlace(ncas.List);
+                    orderBlock(_addr_ncas.Nbody, o.free);
+
+                }
+                o.@out = append(o.@out, n);
+                o.cleanTemp(t);
             else 
-                Fatalf("orderstmt %v", n.Op);
+                Fatalf("order.stmt %v", n.Op);
                         lineno = lno;
+
         }
 
-        // Orderexprlist orders the expression list l into order.
-        private static void orderexprlist(Nodes l, ref Order order)
+        private static bool hasDefaultCase(ptr<Node> _addr_n)
         {
+            ref Node n = ref _addr_n.val;
+
+            foreach (var (_, ncas) in n.List.Slice())
+            {
+                if (ncas.Op != OCASE)
+                {
+                    Fatalf("expected case, found %v", ncas.Op);
+                }
+
+                if (ncas.List.Len() == 0L)
+                {
+                    return true;
+                }
+
+            }
+            return false;
+
+        }
+
+        // exprList orders the expression list l into o.
+        private static void exprList(this ptr<Order> _addr_o, Nodes l)
+        {
+            ref Order o = ref _addr_o.val;
+
             var s = l.Slice();
             foreach (var (i) in s)
             {
-                s[i] = orderexpr(s[i], order, null);
+                s[i] = o.expr(s[i], null);
             }
+
         }
 
-        // Orderexprlist orders the expression list l but saves
+        // exprListInPlace orders the expression list l but saves
         // the side effects on the individual expression ninit lists.
-        private static void orderexprlistinplace(Nodes l, ref Order order)
+        private static void exprListInPlace(this ptr<Order> _addr_o, Nodes l)
         {
+            ref Order o = ref _addr_o.val;
+
             var s = l.Slice();
             foreach (var (i) in s)
             {
-                s[i] = orderexprinplace(s[i], order);
+                s[i] = o.exprInPlace(s[i]);
             }
+
         }
 
         // prealloc[x] records the allocation to use for x.
-        private static map prealloc = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ref Node, ref Node>{};
+        private static map prealloc = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<Node>, ptr<Node>>{};
 
-        // Orderexpr orders a single expression, appending side
-        // effects to order->out as needed.
+        // expr orders a single expression, appending side
+        // effects to o.out as needed.
         // If this is part of an assignment lhs = *np, lhs is given.
         // Otherwise lhs == nil. (When lhs != nil it may be possible
         // to avoid copying the result of the expression to a temporary.)
-        // The result of orderexpr MUST be assigned back to n, e.g.
-        //     n.Left = orderexpr(n.Left, order, lhs)
-        private static ref Node orderexpr(ref Node n, ref Order order, ref Node lhs)
+        // The result of expr MUST be assigned back to n, e.g.
+        //     n.Left = o.expr(n.Left, lhs)
+        private static ptr<Node> expr(this ptr<Order> _addr_o, ptr<Node> _addr_n, ptr<Node> _addr_lhs)
         {
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
+            ref Node lhs = ref _addr_lhs.val;
+
             if (n == null)
             {
-                return n;
+                return _addr_n!;
             }
+
             var lno = setlineno(n);
-            orderinit(n, order);
+            o.init(n);
 
 
             if (n.Op == OADDSTR) 
-                orderexprlist(n.List, order);
+                o.exprList(n.List);
 
                 if (n.List.Len() > 5L)
                 {
                     var t = types.NewArray(types.Types[TSTRING], int64(n.List.Len()));
-                    prealloc[n] = ordertemp(t, order, false);
+                    prealloc[n] = o.newTemp(t, false);
                 } 
 
                 // Mark string(byteSlice) arguments to reuse byteSlice backing
@@ -1100,291 +1417,428 @@ namespace @internal
                 var haslit = false;
                 foreach (var (_, n1) in n.List.Slice())
                 {
-                    hasbyte = hasbyte || n1.Op == OARRAYBYTESTR;
-                    haslit = haslit || n1.Op == OLITERAL && len(n1.Val().U._<@string>()) != 0L;
+                    hasbyte = hasbyte || n1.Op == OBYTES2STR;
+                    haslit = haslit || n1.Op == OLITERAL && len(strlit(n1)) != 0L;
                 }
                 if (haslit && hasbyte)
                 {
                     foreach (var (_, n2) in n.List.Slice())
                     {
-                        if (n2.Op == OARRAYBYTESTR)
+                        if (n2.Op == OBYTES2STR)
                         {
-                            n2.Op = OARRAYBYTESTRTMP;
+                            n2.Op = OBYTES2STRTMP;
                         }
-                    }
-                }
-            else if (n.Op == OCMPSTR) 
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, null); 
 
-                // Mark string(byteSlice) arguments to reuse byteSlice backing
-                // buffer during conversion. String comparison does not
-                // memorize the strings for later use, so it is safe.
-                if (n.Left.Op == OARRAYBYTESTR)
-                {
-                    n.Left.Op = OARRAYBYTESTRTMP;
+                    }
+
                 }
-                if (n.Right.Op == OARRAYBYTESTR)
-                {
-                    n.Right.Op = OARRAYBYTESTRTMP;
+
+            else if (n.Op == OINDEXMAP) 
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, null);
+                var needCopy = false;
+
+                if (!n.IndexMapLValue())
+                { 
+                    // Enforce that any []byte slices we are not copying
+                    // can not be changed before the map index by forcing
+                    // the map index to happen immediately following the
+                    // conversions. See copyExpr a few lines below.
+                    needCopy = mapKeyReplaceStrConv(_addr_n.Right);
+
+                    if (instrumenting)
+                    { 
+                        // Race detector needs the copy so it can
+                        // call treecopy on the result.
+                        needCopy = true;
+
+                    }
+
                 } 
 
                 // key must be addressable
-            else if (n.Op == OINDEXMAP) 
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, null);
-                var needCopy = false;
-
-                if (n.Etype == 0L && instrumenting)
-                { 
-                    // Race detector needs the copy so it can
-                    // call treecopy on the result.
-                    needCopy = true;
-                } 
-
-                // For x = m[string(k)] where k is []byte, the allocation of
-                // backing bytes for the string can be avoided by reusing
-                // the []byte backing array. This is a special case that it
-                // would be nice to handle more generally, but because
-                // there are no []byte-keyed maps, this specific case comes
-                // up in important cases in practice. See issue 3512.
-                // Nothing can change the []byte we are not copying before
-                // the map index, because the map access is going to
-                // be forced to happen immediately following this
-                // conversion (by the ordercopyexpr a few lines below).
-                if (n.Etype == 0L && n.Right.Op == OARRAYBYTESTR)
-                {
-                    n.Right.Op = OARRAYBYTESTRTMP;
-                    needCopy = true;
-                }
-                n.Right = ordermapkeytemp(n.Left.Type, n.Right, order);
+                n.Right = o.mapKeyTemp(n.Left.Type, n.Right);
                 if (needCopy)
                 {
-                    n = ordercopyexpr(n, n.Type, order, 0L);
+                    n = o.copyExpr(n, n.Type, false);
                 } 
 
-                // concrete type (not interface) argument must be addressable
-                // temporary to pass to runtime.
+                // concrete type (not interface) argument might need an addressable
+                // temporary to pass to the runtime conversion routine.
             else if (n.Op == OCONVIFACE) 
-                n.Left = orderexpr(n.Left, order, null);
-
-                if (!n.Left.Type.IsInterface())
+                n.Left = o.expr(n.Left, null);
+                if (n.Left.Type.IsInterface())
                 {
-                    n.Left = orderaddrtemp(n.Left, order);
+                    break;
                 }
+
+                {
+                    var (_, needsaddr) = convFuncName(n.Left.Type, n.Type);
+
+                    if (needsaddr || isStaticCompositeLiteral(n.Left))
+                    { 
+                        // Need a temp if we need to pass the address to the conversion function.
+                        // We also process static composite literal node here, making a named static global
+                        // whose address we can put directly in an interface (see OCONVIFACE case in walk).
+                        n.Left = o.addrTemp(n.Left);
+
+                    }
+
+                }
+
+
             else if (n.Op == OCONVNOP) 
                 if (n.Type.IsKind(TUNSAFEPTR) && n.Left.Type.IsKind(TUINTPTR) && (n.Left.Op == OCALLFUNC || n.Left.Op == OCALLINTER || n.Left.Op == OCALLMETH))
                 { 
                     // When reordering unsafe.Pointer(f()) into a separate
                     // statement, the conversion and function call must stay
                     // together. See golang.org/issue/15329.
-                    orderinit(n.Left, order);
-                    ordercall(n.Left, order);
+                    o.init(n.Left);
+                    o.call(n.Left);
                     if (lhs == null || lhs.Op != ONAME || instrumenting)
                     {
-                        n = ordercopyexpr(n, n.Type, order, 0L);
+                        n = o.copyExpr(n, n.Type, false);
                     }
+
                 }
                 else
                 {
-                    n.Left = orderexpr(n.Left, order, null);
+                    n.Left = o.expr(n.Left, null);
                 }
+
             else if (n.Op == OANDAND || n.Op == OOROR) 
-                var mark = marktemp(order);
-                n.Left = orderexpr(n.Left, order, null); 
+                // ... = LHS && RHS
+                //
+                // var r bool
+                // r = LHS
+                // if r {       // or !r, for OROR
+                //     r = RHS
+                // }
+                // ... = r
 
-                // Clean temporaries from first branch at beginning of second.
-                // Leave them on the stack so that they can be killed in the outer
-                // context in case the short circuit is taken.
-                slice<ref Node> s = default;
+                var r = o.newTemp(n.Type, false); 
 
-                cleantempnopop(mark, order, ref s);
-                n.Right = addinit(n.Right, s);
-                n.Right = orderexprinplace(n.Right, order);
-            else if (n.Op == OCALLFUNC || n.Op == OCALLINTER || n.Op == OCALLMETH || n.Op == OCAP || n.Op == OCOMPLEX || n.Op == OCOPY || n.Op == OIMAG || n.Op == OLEN || n.Op == OMAKECHAN || n.Op == OMAKEMAP || n.Op == OMAKESLICE || n.Op == ONEW || n.Op == OREAL || n.Op == ORECOVER || n.Op == OSTRARRAYBYTE || n.Op == OSTRARRAYBYTETMP || n.Op == OSTRARRAYRUNE) 
-                ordercall(n, order);
+                // Evaluate left-hand side.
+                var lhs = o.expr(n.Left, null);
+                o.@out = append(o.@out, typecheck(nod(OAS, r, lhs), ctxStmt)); 
+
+                // Evaluate right-hand side, save generated code.
+                var saveout = o.@out;
+                o.@out = null;
+                t = o.markTemp();
+                o.edge();
+                var rhs = o.expr(n.Right, null);
+                o.@out = append(o.@out, typecheck(nod(OAS, r, rhs), ctxStmt));
+                o.cleanTemp(t);
+                var gen = o.@out;
+                o.@out = saveout; 
+
+                // If left-hand side doesn't cause a short-circuit, issue right-hand side.
+                var nif = nod(OIF, r, null);
+                if (n.Op == OANDAND)
+                {
+                    nif.Nbody.Set(gen);
+                }
+                else
+                {
+                    nif.Rlist.Set(gen);
+                }
+
+                o.@out = append(o.@out, nif);
+                n = r;
+            else if (n.Op == OCALLFUNC || n.Op == OCALLINTER || n.Op == OCALLMETH || n.Op == OCAP || n.Op == OCOMPLEX || n.Op == OCOPY || n.Op == OIMAG || n.Op == OLEN || n.Op == OMAKECHAN || n.Op == OMAKEMAP || n.Op == OMAKESLICE || n.Op == OMAKESLICECOPY || n.Op == ONEW || n.Op == OREAL || n.Op == ORECOVER || n.Op == OSTR2BYTES || n.Op == OSTR2BYTESTMP || n.Op == OSTR2RUNES) 
+
+                if (isRuneCount(n))
+                { 
+                    // len([]rune(s)) is rewritten to runtime.countrunes(s) later.
+                    n.Left.Left = o.expr(n.Left.Left, null);
+
+                }
+                else
+                {
+                    o.call(n);
+                }
+
                 if (lhs == null || lhs.Op != ONAME || instrumenting)
                 {
-                    n = ordercopyexpr(n, n.Type, order, 0L);
+                    n = o.copyExpr(n, n.Type, false);
                 }
+
             else if (n.Op == OAPPEND) 
-                ordercallargs(ref n.List, order);
+                // Check for append(x, make([]T, y)...) .
+                if (isAppendOfMake(n))
+                {
+                    n.List.SetFirst(o.expr(n.List.First(), null)); // order x
+                    n.List.Second().Left = o.expr(n.List.Second().Left, null); // order y
+                }
+                else
+                {
+                    o.exprList(n.List);
+                }
+
                 if (lhs == null || lhs.Op != ONAME && !samesafeexpr(lhs, n.List.First()))
                 {
-                    n = ordercopyexpr(n, n.Type, order, 0L);
+                    n = o.copyExpr(n, n.Type, false);
                 }
+
             else if (n.Op == OSLICE || n.Op == OSLICEARR || n.Op == OSLICESTR || n.Op == OSLICE3 || n.Op == OSLICE3ARR) 
-                n.Left = orderexpr(n.Left, order, null);
+                n.Left = o.expr(n.Left, null);
                 var (low, high, max) = n.SliceBounds();
-                low = orderexpr(low, order, null);
-                low = ordercheapexpr(low, order);
-                high = orderexpr(high, order, null);
-                high = ordercheapexpr(high, order);
-                max = orderexpr(max, order, null);
-                max = ordercheapexpr(max, order);
+                low = o.expr(low, null);
+                low = o.cheapExpr(low);
+                high = o.expr(high, null);
+                high = o.cheapExpr(high);
+                max = o.expr(max, null);
+                max = o.cheapExpr(max);
                 n.SetSliceBounds(low, high, max);
                 if (lhs == null || lhs.Op != ONAME && !samesafeexpr(lhs, n.Left))
                 {
-                    n = ordercopyexpr(n, n.Type, order, 0L);
+                    n = o.copyExpr(n, n.Type, false);
                 }
+
             else if (n.Op == OCLOSURE) 
-                if (n.Noescape() && n.Func.Cvars.Len() > 0L)
+                if (n.Transient() && n.Func.Closure.Func.Cvars.Len() > 0L)
                 {
-                    prealloc[n] = ordertemp(types.Types[TUINT8], order, false); // walk will fill in correct type
+                    prealloc[n] = o.newTemp(closureType(n), false);
                 }
-            else if (n.Op == OARRAYLIT || n.Op == OSLICELIT || n.Op == OCALLPART) 
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, null);
-                orderexprlist(n.List, order);
-                orderexprlist(n.Rlist, order);
-                if (n.Noescape())
+
+            else if (n.Op == OSLICELIT || n.Op == OCALLPART) 
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, null);
+                o.exprList(n.List);
+                o.exprList(n.Rlist);
+                if (n.Transient())
                 {
-                    prealloc[n] = ordertemp(types.Types[TUINT8], order, false); // walk will fill in correct type
+                    t = ;
+
+                    if (n.Op == OSLICELIT) 
+                        t = types.NewArray(n.Type.Elem(), n.Right.Int64());
+                    else if (n.Op == OCALLPART) 
+                        t = partialCallType(n);
+                                        prealloc[n] = o.newTemp(t, false);
+
                 }
-            else if (n.Op == ODDDARG) 
-                if (n.Noescape())
-                { 
-                    // The ddd argument does not live beyond the call it is created for.
-                    // Allocate a temporary that will be cleaned up when this statement
-                    // completes. We could be more aggressive and try to arrange for it
-                    // to be cleaned up when the call completes.
-                    prealloc[n] = ordertemp(n.Type.Elem(), order, false);
-                }
+
             else if (n.Op == ODOTTYPE || n.Op == ODOTTYPE2) 
-                n.Left = orderexpr(n.Left, order, null); 
-                // TODO(rsc): The isfat is for consistency with componentgen and walkexpr.
-                // It needs to be removed in all three places.
-                // That would allow inlining x.(struct{*int}) the same as x.(*int).
-                if (!isdirectiface(n.Type) || isfat(n.Type) || instrumenting)
+                n.Left = o.expr(n.Left, null);
+                if (!isdirectiface(n.Type) || instrumenting)
                 {
-                    n = ordercopyexpr(n, n.Type, order, 1L);
+                    n = o.copyExpr(n, n.Type, true);
                 }
+
             else if (n.Op == ORECV) 
-                n.Left = orderexpr(n.Left, order, null);
-                n = ordercopyexpr(n, n.Type, order, 1L);
-            else if (n.Op == OEQ || n.Op == ONE) 
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, null);
+                n.Left = o.expr(n.Left, null);
+                n = o.copyExpr(n, n.Type, true);
+            else if (n.Op == OEQ || n.Op == ONE || n.Op == OLT || n.Op == OLE || n.Op == OGT || n.Op == OGE) 
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, null);
+
                 t = n.Left.Type;
-                if (t.IsStruct() || t.IsArray())
-                { 
+
+                if (t.IsString()) 
+                    // Mark string(byteSlice) arguments to reuse byteSlice backing
+                    // buffer during conversion. String comparison does not
+                    // memorize the strings for later use, so it is safe.
+                    if (n.Left.Op == OBYTES2STR)
+                    {
+                        n.Left.Op = OBYTES2STRTMP;
+                    }
+
+                    if (n.Right.Op == OBYTES2STR)
+                    {
+                        n.Right.Op = OBYTES2STRTMP;
+                    }
+
+                else if (t.IsStruct() || t.IsArray()) 
                     // for complex comparisons, we need both args to be
                     // addressable so we can pass them to the runtime.
-                    n.Left = orderaddrtemp(n.Left, order);
-                    n.Right = orderaddrtemp(n.Right, order);
+                    n.Left = o.addrTemp(n.Left);
+                    n.Right = o.addrTemp(n.Right);
+                            else if (n.Op == OMAPLIT) 
+                // Order map by converting:
+                //   map[int]int{
+                //     a(): b(),
+                //     c(): d(),
+                //     e(): f(),
+                //   }
+                // to
+                //   m := map[int]int{}
+                //   m[a()] = b()
+                //   m[c()] = d()
+                //   m[e()] = f()
+                // Then order the result.
+                // Without this special case, order would otherwise compute all
+                // the keys and values before storing any of them to the map.
+                // See issue 26552.
+                var entries = n.List.Slice();
+                var statics = entries[..0L];
+                slice<ptr<Node>> dynamics = default;
+                {
+                    var r__prev1 = r;
+
+                    foreach (var (_, __r) in entries)
+                    {
+                        r = __r;
+                        if (r.Op != OKEY)
+                        {
+                            Fatalf("OMAPLIT entry not OKEY: %v\n", r);
+                        }
+
+                        if (!isStaticCompositeLiteral(r.Left) || !isStaticCompositeLiteral(r.Right))
+                        {
+                            dynamics = append(dynamics, r);
+                            continue;
+                        } 
+
+                        // Recursively ordering some static entries can change them to dynamic;
+                        // e.g., OCONVIFACE nodes. See #31777.
+                        r = o.expr(r, null);
+                        if (!isStaticCompositeLiteral(r.Left) || !isStaticCompositeLiteral(r.Right))
+                        {
+                            dynamics = append(dynamics, r);
+                            continue;
+                        }
+
+                        statics = append(statics, r);
+
+                    }
+
+                    r = r__prev1;
+                }
+
+                n.List.Set(statics);
+
+                if (len(dynamics) == 0L)
+                {
+                    break;
+                } 
+
+                // Emit the creation of the map (with all its static entries).
+                var m = o.newTemp(n.Type, false);
+                var @as = nod(OAS, m, n);
+                typecheck(as, ctxStmt);
+                o.stmt(as);
+                n = m; 
+
+                // Emit eval+insert of dynamic entries, one at a time.
+                {
+                    var r__prev1 = r;
+
+                    foreach (var (_, __r) in dynamics)
+                    {
+                        r = __r;
+                        @as = nod(OAS, nod(OINDEX, n, r.Left), r.Right);
+                        typecheck(as, ctxStmt); // Note: this converts the OINDEX to an OINDEXMAP
+                        o.stmt(as);
+
+                    }
+
+                    r = r__prev1;
                 }
             else 
-                n.Left = orderexpr(n.Left, order, null);
-                n.Right = orderexpr(n.Right, order, null);
-                orderexprlist(n.List, order);
-                orderexprlist(n.Rlist, order); 
+                n.Left = o.expr(n.Left, null);
+                n.Right = o.expr(n.Right, null);
+                o.exprList(n.List);
+                o.exprList(n.Rlist); 
 
                 // Addition of strings turns into a function call.
                 // Allocate a temporary to hold the strings.
                 // Fewer than 5 strings use direct runtime helpers.
                         lineno = lno;
-            return n;
+            return _addr_n!;
+
         }
 
         // okas creates and returns an assignment of val to ok,
         // including an explicit conversion if necessary.
-        private static ref Node okas(ref Node ok, ref Node val)
+        private static ptr<Node> okas(ptr<Node> _addr_ok, ptr<Node> _addr_val)
         {
-            if (!isblank(ok))
+            ref Node ok = ref _addr_ok.val;
+            ref Node val = ref _addr_val.val;
+
+            if (!ok.isBlank())
             {
                 val = conv(val, ok.Type);
             }
-            return nod(OAS, ok, val);
+
+            return _addr_nod(OAS, ok, val)!;
+
         }
 
-        // orderas2 orders OAS2XXXX nodes. It creates temporaries to ensure left-to-right assignment.
-        // The caller should order the right-hand side of the assignment before calling orderas2.
+        // as2 orders OAS2XXXX nodes. It creates temporaries to ensure left-to-right assignment.
+        // The caller should order the right-hand side of the assignment before calling order.as2.
         // It rewrites,
         //     a, b, a = ...
         // as
         //    tmp1, tmp2, tmp3 = ...
         //     a, b, a = tmp1, tmp2, tmp3
         // This is necessary to ensure left to right assignment order.
-        private static void orderas2(ref Node n, ref Order order)
+        private static void as2(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
-            ref Node tmplist = new slice<ref Node>(new ref Node[] {  });
-            ref Node left = new slice<ref Node>(new ref Node[] {  });
-            {
-                var l__prev1 = l;
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
 
-                foreach (var (_, __l) in n.List.Slice())
+            ptr<Node> tmplist = new slice<ptr<Node>>(new ptr<Node>[] {  });
+            ptr<Node> left = new slice<ptr<Node>>(new ptr<Node>[] {  });
+            foreach (var (ni, l) in n.List.Slice())
+            {
+                if (!l.isBlank())
                 {
-                    l = __l;
-                    if (!isblank(l))
-                    {
-                        var tmp = ordertemp(l.Type, order, types.Haspointers(l.Type));
-                        tmplist = append(tmplist, tmp);
-                        left = append(left, l);
-                    }
+                    var tmp = o.newTemp(l.Type, types.Haspointers(l.Type));
+                    n.List.SetIndex(ni, tmp);
+                    tmplist = append(tmplist, tmp);
+                    left = append(left, l);
                 }
 
-                l = l__prev1;
             }
-
-            order.@out = append(order.@out, n);
+            o.@out = append(o.@out, n);
 
             var @as = nod(OAS2, null, null);
             @as.List.Set(left);
             @as.Rlist.Set(tmplist);
-            as = typecheck(as, Etop);
-            orderstmt(as, order);
-
-            long ti = 0L;
-            {
-                var l__prev1 = l;
-
-                foreach (var (__ni, __l) in n.List.Slice())
-                {
-                    ni = __ni;
-                    l = __l;
-                    if (!isblank(l))
-                    {
-                        n.List.SetIndex(ni, tmplist[ti]);
-                        ti++;
-                    }
-                }
-
-                l = l__prev1;
-            }
+            as = typecheck(as, ctxStmt);
+            o.stmt(as);
 
         }
 
-        // orderokas2 orders OAS2 with ok.
-        // Just like orderas2(), this also adds temporaries to ensure left-to-right assignment.
-        private static void orderokas2(ref Node n, ref Order order)
+        // okAs2 orders OAS2XXX with ok.
+        // Just like as2, this also adds temporaries to ensure left-to-right assignment.
+        private static void okAs2(this ptr<Order> _addr_o, ptr<Node> _addr_n)
         {
-            ref Node tmp1 = default;            ref Node tmp2 = default;
+            ref Order o = ref _addr_o.val;
+            ref Node n = ref _addr_n.val;
 
-            if (!isblank(n.List.First()))
+            ptr<Node> tmp1;            ptr<Node> tmp2;
+
+            if (!n.List.First().isBlank())
             {
-                var typ = n.Rlist.First().Type;
-                tmp1 = ordertemp(typ, order, types.Haspointers(typ));
+                var typ = n.Right.Type;
+                tmp1 = o.newTemp(typ, types.Haspointers(typ));
             }
-            if (!isblank(n.List.Second()))
+
+            if (!n.List.Second().isBlank())
             {
-                tmp2 = ordertemp(types.Types[TBOOL], order, false);
+                tmp2 = o.newTemp(types.Types[TBOOL], false);
             }
-            order.@out = append(order.@out, n);
+
+            o.@out = append(o.@out, n);
 
             if (tmp1 != null)
             {
                 var r = nod(OAS, n.List.First(), tmp1);
-                r = typecheck(r, Etop);
-                ordermapassign(r, order);
+                r = typecheck(r, ctxStmt);
+                o.mapAssign(r);
                 n.List.SetFirst(tmp1);
             }
+
             if (tmp2 != null)
             {
-                r = okas(n.List.Second(), tmp2);
-                r = typecheck(r, Etop);
-                ordermapassign(r, order);
+                r = okas(_addr_n.List.Second(), tmp2);
+                r = typecheck(r, ctxStmt);
+                o.mapAssign(r);
                 n.List.SetSecond(tmp2);
             }
+
         }
     }
 }}}}

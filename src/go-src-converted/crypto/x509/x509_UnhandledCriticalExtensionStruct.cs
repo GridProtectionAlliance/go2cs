@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:32:14 UTC
+//     Generated on 2020 October 08 03:37:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,9 +17,10 @@ using bytes = go.bytes_package;
 using crypto = go.crypto_package;
 using dsa = go.crypto.dsa_package;
 using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
 using elliptic = go.crypto.elliptic_package;
 using rsa = go.crypto.rsa_package;
-using _sha1_ = go.crypto.sha1_package;
+using sha1 = go.crypto.sha1_package;
 using _sha256_ = go.crypto.sha256_package;
 using _sha512_ = go.crypto.sha512_package;
 using pkix = go.crypto.x509.pkix_package;
@@ -35,8 +36,8 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
-using cryptobyte = go.golang_org.x.crypto.cryptobyte_package;
-using cryptobyte_asn1 = go.golang_org.x.crypto.cryptobyte.asn1_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
+using cryptobyte_asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
 using go;
 
 namespace go {

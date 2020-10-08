@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:54:03 UTC
+//     Generated on 2020 October 08 04:10:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using static go.builtin;
+using fmt = go.fmt_package;
+using math = go.math_package;
 using go;
 
 namespace go {
@@ -29,21 +31,19 @@ namespace @internal
             public indVar(NilType _)
             {
                 this.ind = default;
-                this.inc = default;
-                this.nxt = default;
                 this.min = default;
                 this.max = default;
                 this.entry = default;
+                this.flags = default;
             }
 
-            public indVar(ref ptr<Value> ind = default, ref ptr<Value> inc = default, ref ptr<Value> nxt = default, ref ptr<Value> min = default, ref ptr<Value> max = default, ref ptr<Block> entry = default)
+            public indVar(ref ptr<Value> ind = default, ref ptr<Value> min = default, ref ptr<Value> max = default, ref ptr<Block> entry = default, indVarFlags flags = default)
             {
                 this.ind = ind;
-                this.inc = inc;
-                this.nxt = nxt;
                 this.min = min;
                 this.max = max;
                 this.entry = entry;
+                this.flags = flags;
             }
 
             // Enable comparisons between nil and indVar struct
@@ -66,7 +66,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static indVar indVar_cast(dynamic value)
         {
-            return new indVar(ref value.ind, ref value.inc, ref value.nxt, ref value.min, ref value.max, ref value.entry);
+            return new indVar(ref value.ind, ref value.min, ref value.max, ref value.entry, value.flags);
         }
     }
 }}}}

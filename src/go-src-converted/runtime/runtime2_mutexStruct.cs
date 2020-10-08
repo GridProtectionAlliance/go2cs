@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:19:49 UTC
+//     Generated on 2020 October 08 03:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -27,11 +28,13 @@ namespace go
             // Constructors
             public mutex(NilType _)
             {
+                this.lockRankStruct = default;
                 this.key = default;
             }
 
-            public mutex(System.UIntPtr key = default)
+            public mutex(lockRankStruct lockRankStruct = default, System.UIntPtr key = default)
             {
+                this.lockRankStruct = lockRankStruct;
                 this.key = key;
             }
 
@@ -55,7 +58,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mutex mutex_cast(dynamic value)
         {
-            return new mutex(value.key);
+            return new mutex(value.lockRankStruct, value.key);
         }
     }
 }

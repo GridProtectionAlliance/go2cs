@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 August 29 08:23:47 UTC
+// package syntax -- go2cs converted at 2020 October 08 03:40:58 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\compile.go
 using unicode = go.unicode_package;
@@ -16,78 +16,74 @@ namespace regexp
         // A patchList is a list of instruction pointers that need to be filled in (patched).
         // Because the pointers haven't been filled in yet, we can reuse their storage
         // to hold the list. It's kind of sleazy, but works well in practice.
-        // See http://swtch.com/~rsc/regexp/regexp1.html for inspiration.
+        // See https://swtch.com/~rsc/regexp/regexp1.html for inspiration.
         //
         // These aren't really pointers: they're integers, so we can reinterpret them
-        // this way without using package unsafe. A value l denotes
-        // p.inst[l>>1].Out (l&1==0) or .Arg (l&1==1).
-        // l == 0 denotes the empty list, okay because we start every program
+        // this way without using package unsafe. A value l.head denotes
+        // p.inst[l.head>>1].Out (l.head&1==0) or .Arg (l.head&1==1).
+        // head == 0 denotes the empty list, okay because we start every program
         // with a fail instruction, so we'll never want to point at its output link.
-        private partial struct patchList // : uint
+        private partial struct patchList
         {
+            public uint head;
+            public uint tail;
         }
 
-        private static patchList next(this patchList l, ref Prog p)
+        private static patchList makePatchList(uint n)
         {
-            var i = ref p.Inst[l >> (int)(1L)];
-            if (l & 1L == 0L)
-            {
-                return patchList(i.Out);
-            }
-            return patchList(i.Arg);
+            return new patchList(n,n);
         }
 
-        private static void patch(this patchList l, ref Prog p, uint val)
+        private static void patch(this patchList l, ptr<Prog> _addr_p, uint val)
         {
-            while (l != 0L)
+            ref Prog p = ref _addr_p.val;
+
+            var head = l.head;
+            while (head != 0L)
             {
-                var i = ref p.Inst[l >> (int)(1L)];
-                if (l & 1L == 0L)
+                var i = _addr_p.Inst[head >> (int)(1L)];
+                if (head & 1L == 0L)
                 {
-                    l = patchList(i.Out);
+                    head = i.Out;
                     i.Out = val;
                 }
                 else
                 {
-                    l = patchList(i.Arg);
+                    head = i.Arg;
                     i.Arg = val;
                 }
+
             }
+
 
         }
 
-        private static patchList append(this patchList l1, ref Prog p, patchList l2)
+        private static patchList append(this patchList l1, ptr<Prog> _addr_p, patchList l2)
         {
-            if (l1 == 0L)
+            ref Prog p = ref _addr_p.val;
+
+            if (l1.head == 0L)
             {
                 return l2;
             }
-            if (l2 == 0L)
+
+            if (l2.head == 0L)
             {
                 return l1;
             }
-            var last = l1;
-            while (true)
-            {
-                var next = last.next(p);
-                if (next == 0L)
-                {
-                    break;
-                }
-                last = next;
-            }
 
-
-            var i = ref p.Inst[last >> (int)(1L)];
-            if (last & 1L == 0L)
+            var i = _addr_p.Inst[l1.tail >> (int)(1L)];
+            if (l1.tail & 1L == 0L)
             {
-                i.Out = uint32(l2);
+                i.Out = l2.head;
             }
             else
             {
-                i.Arg = uint32(l2);
+                i.Arg = l2.head;
             }
-            return l1;
+
+            return new patchList(l1.head,l2.tail);
+
         }
 
         // A frag represents a compiled program fragment.
@@ -104,28 +100,38 @@ namespace regexp
 
         // Compile compiles the regexp into a program to be executed.
         // The regexp should have been simplified already (returned from re.Simplify).
-        public static (ref Prog, error) Compile(ref Regexp re)
+        public static (ptr<Prog>, error) Compile(ptr<Regexp> _addr_re)
         {
+            ptr<Prog> _p0 = default!;
+            error _p0 = default!;
+            ref Regexp re = ref _addr_re.val;
+
             compiler c = default;
             c.init();
             var f = c.compile(re);
             f.@out.patch(c.p, c.inst(InstMatch).i);
             c.p.Start = int(f.i);
-            return (c.p, null);
+            return (_addr_c.p!, error.As(null!)!);
         }
 
-        private static void init(this ref compiler c)
+        private static void init(this ptr<compiler> _addr_c)
         {
+            ref compiler c = ref _addr_c.val;
+
             c.p = @new<Prog>();
             c.p.NumCap = 2L; // implicit ( and ) for whole match $0
             c.inst(InstFail);
+
         }
 
         private static int anyRuneNotNL = new slice<int>(new int[] { 0, '\n'-1, '\n'+1, unicode.MaxRune });
         private static int anyRune = new slice<int>(new int[] { 0, unicode.MaxRune });
 
-        private static frag compile(this ref compiler _c, ref Regexp _re) => func(_c, _re, (ref compiler c, ref Regexp re, Defer _, Panic panic, Recover __) =>
+        private static frag compile(this ptr<compiler> _addr_c, ptr<Regexp> _addr_re) => func((_, panic, __) =>
         {
+            ref compiler c = ref _addr_c.val;
+            ref Regexp re = ref _addr_re.val;
+
 
             if (re.Op == OpNoMatch) 
                 return c.fail();
@@ -136,6 +142,7 @@ namespace regexp
                 {
                     return c.nop();
                 }
+
                 frag f = default;
                 foreach (var (j) in re.Rune)
                 {
@@ -148,6 +155,7 @@ namespace regexp
                     {
                         f = c.cat(f, f1);
                     }
+
                 }
                 return f;
             else if (re.Op == OpCharClass) 
@@ -184,6 +192,7 @@ namespace regexp
                 {
                     return c.nop();
                 }
+
                 f = default;
                 {
                     var sub__prev1 = sub;
@@ -200,6 +209,7 @@ namespace regexp
                         {
                             f = c.cat(f, c.compile(sub));
                         }
+
                     }
 
                     sub = sub__prev1;
@@ -222,43 +232,57 @@ namespace regexp
 
                 return f;
                         panic("regexp: unhandled case in compile");
+
         });
 
-        private static frag inst(this ref compiler c, InstOp op)
-        { 
+        private static frag inst(this ptr<compiler> _addr_c, InstOp op)
+        {
+            ref compiler c = ref _addr_c.val;
+ 
             // TODO: impose length limit
             frag f = new frag(i:uint32(len(c.p.Inst)));
             c.p.Inst = append(c.p.Inst, new Inst(Op:op));
             return f;
+
         }
 
-        private static frag nop(this ref compiler c)
+        private static frag nop(this ptr<compiler> _addr_c)
         {
+            ref compiler c = ref _addr_c.val;
+
             var f = c.inst(InstNop);
-            f.@out = patchList(f.i << (int)(1L));
+            f.@out = makePatchList(f.i << (int)(1L));
             return f;
         }
 
-        private static frag fail(this ref compiler c)
+        private static frag fail(this ptr<compiler> _addr_c)
         {
+            ref compiler c = ref _addr_c.val;
+
             return new frag();
         }
 
-        private static frag cap(this ref compiler c, uint arg)
+        private static frag cap(this ptr<compiler> _addr_c, uint arg)
         {
+            ref compiler c = ref _addr_c.val;
+
             var f = c.inst(InstCapture);
-            f.@out = patchList(f.i << (int)(1L));
+            f.@out = makePatchList(f.i << (int)(1L));
             c.p.Inst[f.i].Arg = arg;
 
             if (c.p.NumCap < int(arg) + 1L)
             {
                 c.p.NumCap = int(arg) + 1L;
             }
+
             return f;
+
         }
 
-        private static frag cat(this ref compiler c, frag f1, frag f2)
-        { 
+        private static frag cat(this ptr<compiler> _addr_c, frag f1, frag f2)
+        {
+            ref compiler c = ref _addr_c.val;
+ 
             // concat of failure is failure
             if (f1.i == 0L || f2.i == 0L)
             {
@@ -268,89 +292,111 @@ namespace regexp
             // TODO: elide nop
             f1.@out.patch(c.p, f2.i);
             return new frag(f1.i,f2.out);
+
         }
 
-        private static frag alt(this ref compiler c, frag f1, frag f2)
-        { 
+        private static frag alt(this ptr<compiler> _addr_c, frag f1, frag f2)
+        {
+            ref compiler c = ref _addr_c.val;
+ 
             // alt of failure is other
             if (f1.i == 0L)
             {
                 return f2;
             }
+
             if (f2.i == 0L)
             {
                 return f1;
             }
+
             var f = c.inst(InstAlt);
-            var i = ref c.p.Inst[f.i];
+            var i = _addr_c.p.Inst[f.i];
             i.Out = f1.i;
             i.Arg = f2.i;
             f.@out = f1.@out.append(c.p, f2.@out);
             return f;
+
         }
 
-        private static frag quest(this ref compiler c, frag f1, bool nongreedy)
+        private static frag quest(this ptr<compiler> _addr_c, frag f1, bool nongreedy)
         {
+            ref compiler c = ref _addr_c.val;
+
             var f = c.inst(InstAlt);
-            var i = ref c.p.Inst[f.i];
+            var i = _addr_c.p.Inst[f.i];
             if (nongreedy)
             {
                 i.Arg = f1.i;
-                f.@out = patchList(f.i << (int)(1L));
+                f.@out = makePatchList(f.i << (int)(1L));
             }
             else
             {
                 i.Out = f1.i;
-                f.@out = patchList(f.i << (int)(1L) | 1L);
+                f.@out = makePatchList(f.i << (int)(1L) | 1L);
             }
+
             f.@out = f.@out.append(c.p, f1.@out);
             return f;
+
         }
 
-        private static frag star(this ref compiler c, frag f1, bool nongreedy)
+        private static frag star(this ptr<compiler> _addr_c, frag f1, bool nongreedy)
         {
+            ref compiler c = ref _addr_c.val;
+
             var f = c.inst(InstAlt);
-            var i = ref c.p.Inst[f.i];
+            var i = _addr_c.p.Inst[f.i];
             if (nongreedy)
             {
                 i.Arg = f1.i;
-                f.@out = patchList(f.i << (int)(1L));
+                f.@out = makePatchList(f.i << (int)(1L));
             }
             else
             {
                 i.Out = f1.i;
-                f.@out = patchList(f.i << (int)(1L) | 1L);
+                f.@out = makePatchList(f.i << (int)(1L) | 1L);
             }
+
             f1.@out.patch(c.p, f.i);
             return f;
+
         }
 
-        private static frag plus(this ref compiler c, frag f1, bool nongreedy)
+        private static frag plus(this ptr<compiler> _addr_c, frag f1, bool nongreedy)
         {
+            ref compiler c = ref _addr_c.val;
+
             return new frag(f1.i,c.star(f1,nongreedy).out);
         }
 
-        private static frag empty(this ref compiler c, EmptyOp op)
+        private static frag empty(this ptr<compiler> _addr_c, EmptyOp op)
         {
+            ref compiler c = ref _addr_c.val;
+
             var f = c.inst(InstEmptyWidth);
             c.p.Inst[f.i].Arg = uint32(op);
-            f.@out = patchList(f.i << (int)(1L));
+            f.@out = makePatchList(f.i << (int)(1L));
             return f;
         }
 
-        private static frag rune(this ref compiler c, slice<int> r, Flags flags)
+        private static frag rune(this ptr<compiler> _addr_c, slice<int> r, Flags flags)
         {
+            ref compiler c = ref _addr_c.val;
+
             var f = c.inst(InstRune);
-            var i = ref c.p.Inst[f.i];
+            var i = _addr_c.p.Inst[f.i];
             i.Rune = r;
             flags &= FoldCase; // only relevant flag is FoldCase
             if (len(r) != 1L || unicode.SimpleFold(r[0L]) == r[0L])
             { 
                 // and sometimes not even that
                 flags &= FoldCase;
+
             }
+
             i.Arg = uint32(flags);
-            f.@out = patchList(f.i << (int)(1L)); 
+            f.@out = makePatchList(f.i << (int)(1L)); 
 
             // Special cases for exec machine.
 
@@ -361,6 +407,7 @@ namespace regexp
             else if (len(r) == 4L && r[0L] == 0L && r[1L] == '\n' - 1L && r[2L] == '\n' + 1L && r[3L] == unicode.MaxRune) 
                 i.Op = InstRuneAnyNotNL;
                         return f;
+
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:31:25 UTC
+//     Generated on 2020 October 08 03:38:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
-using bytes = go.bytes_package;
+using fmt = go.fmt_package;
 using strings = go.strings_package;
+using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using go;
 
 namespace go {
@@ -29,16 +30,16 @@ namespace crypto
             public certificateRequestMsg(NilType _)
             {
                 this.raw = default;
-                this.hasSignatureAndHash = default;
+                this.hasSignatureAlgorithm = default;
                 this.certificateTypes = default;
                 this.supportedSignatureAlgorithms = default;
                 this.certificateAuthorities = default;
             }
 
-            public certificateRequestMsg(slice<byte> raw = default, bool hasSignatureAndHash = default, slice<byte> certificateTypes = default, slice<SignatureScheme> supportedSignatureAlgorithms = default, slice<slice<byte>> certificateAuthorities = default)
+            public certificateRequestMsg(slice<byte> raw = default, bool hasSignatureAlgorithm = default, slice<byte> certificateTypes = default, slice<SignatureScheme> supportedSignatureAlgorithms = default, slice<slice<byte>> certificateAuthorities = default)
             {
                 this.raw = raw;
-                this.hasSignatureAndHash = hasSignatureAndHash;
+                this.hasSignatureAlgorithm = hasSignatureAlgorithm;
                 this.certificateTypes = certificateTypes;
                 this.supportedSignatureAlgorithms = supportedSignatureAlgorithms;
                 this.certificateAuthorities = certificateAuthorities;
@@ -64,7 +65,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static certificateRequestMsg certificateRequestMsg_cast(dynamic value)
         {
-            return new certificateRequestMsg(value.raw, value.hasSignatureAndHash, value.certificateTypes, value.supportedSignatureAlgorithms, value.certificateAuthorities);
+            return new certificateRequestMsg(value.raw, value.hasSignatureAlgorithm, value.certificateTypes, value.supportedSignatureAlgorithms, value.certificateAuthorities);
         }
     }
 }}

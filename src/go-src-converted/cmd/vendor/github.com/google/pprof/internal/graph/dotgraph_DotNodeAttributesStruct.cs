@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:05:35 UTC
+//     Generated on 2020 October 08 04:43:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace @internal
                 this.Formatter = default;
             }
 
-            public DotNodeAttributes(@string Shape = default, bool Bold = default, long Peripheries = default, @string URL = default, Func<ref NodeInfo, @string> Formatter = default)
+            public DotNodeAttributes(@string Shape = default, bool Bold = default, long Peripheries = default, @string URL = default, Func<ptr<NodeInfo>, @string> Formatter = default)
             {
                 this.Shape = Shape;
                 this.Bold = Bold;

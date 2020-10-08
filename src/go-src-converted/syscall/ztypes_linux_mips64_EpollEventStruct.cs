@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:42:11 UTC
+//     Generated on 2020 October 08 03:30:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,13 +25,15 @@ namespace go
             public EpollEvent(NilType _)
             {
                 this.Events = default;
+                this._ = default;
                 this.Fd = default;
                 this.Pad = default;
             }
 
-            public EpollEvent(uint Events = default, int Fd = default, int Pad = default)
+            public EpollEvent(uint Events = default, int _ = default, int Fd = default, int Pad = default)
             {
                 this.Events = Events;
+                this._ = _;
                 this.Fd = Fd;
                 this.Pad = Pad;
             }
@@ -56,7 +58,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static EpollEvent EpollEvent_cast(dynamic value)
         {
-            return new EpollEvent(value.Events, value.Fd, value.Pad);
+            return new EpollEvent(value.Events, value._, value.Fd, value.Pad);
         }
     }
 }

@@ -97,7 +97,7 @@ When invoked with -s gofmt will make the following source transformations where 
 
 This may result in changes that are incompatible with earlier versions of Go.
 */
-// package main -- go2cs converted at 2020 August 29 10:02:05 UTC
+// package main -- go2cs converted at 2020 October 08 04:37:00 UTC
 // Original source: C:\Go\src\cmd\gofmt\doc.go
     }
 

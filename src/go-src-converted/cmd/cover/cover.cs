@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 August 29 09:59:26 UTC
+// package main -- go2cs converted at 2020 October 08 04:32:32 UTC
 // Original source: C:\Go\src\cmd\cover\cover.go
 using bytes = go.bytes_package;
 using flag = go.flag_package;
@@ -15,7 +15,6 @@ using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
 using sort = go.sort_package;
-using strconv = go.strconv_package;
 
 using edit = go.cmd.@internal.edit_package;
 using objabi = go.cmd.@internal.objabi_package;
@@ -26,7 +25,7 @@ namespace go
 {
     public static partial class main_package
     {
-        private static readonly @string usageMessage = "" + @"Usage of 'go tool cover':
+        private static readonly @string usageMessage = (@string)"" + @"Usage of 'go tool cover':
 Given a coverage profile produced by 'go test':
 	go test -coverprofile=c.out
 
@@ -59,10 +58,11 @@ Finally, to generate modified source code with coverage annotations
 
         private static @string profile = default; // The profile to read; the value of -html or -func
 
-        private static Func<ref File, @string, @string> counterStmt = default;
+        private static Func<ptr<File>, @string, @string> counterStmt = default;
 
-        private static readonly @string atomicPackagePath = "sync/atomic";
-        private static readonly @string atomicPackageName = "_cover_atomic_";
+        private static readonly @string atomicPackagePath = (@string)"sync/atomic";
+        private static readonly @string atomicPackageName = (@string)"_cover_atomic_";
+
 
         private static void Main()
         {
@@ -75,6 +75,7 @@ Finally, to generate modified source code with coverage annotations
             {
                 flag.Usage();
             }
+
             var err = parseFlags();
             if (err != null)
             {
@@ -84,49 +85,59 @@ Finally, to generate modified source code with coverage annotations
             } 
 
             // Generate coverage-annotated source.
-            if (mode != "".Value)
+            if (mode != "".val)
             {
                 annotate(flag.Arg(0L));
-                return;
+                return ;
             } 
 
             // Output HTML or function coverage information.
-            if (htmlOut != "".Value)
+            if (htmlOut != "".val)
             {
-                err = htmlOutput(profile, output.Value);
+                err = htmlOutput(profile, output.val);
             }
             else
             {
-                err = funcOutput(profile, output.Value);
+                err = funcOutput(profile, output.val);
             }
+
             if (err != null)
             {
                 fmt.Fprintf(os.Stderr, "cover: %v\n", err);
                 os.Exit(2L);
             }
+
         }
 
         // parseFlags sets the profile and counterStmt globals and performs validations.
         private static error parseFlags()
         {
-            profile = htmlOut.Value;
-            if (funcOut != "".Value)
+            profile = htmlOut.val;
+            if (funcOut != "".val)
             {
                 if (profile != "")
                 {
-                    return error.As(fmt.Errorf("too many options"));
+                    return error.As(fmt.Errorf("too many options"))!;
                 }
-                profile = funcOut.Value;
+
+                profile = funcOut.val;
+
             } 
 
             // Must either display a profile or rewrite Go source.
-            if ((profile == "") == (mode == "".Value))
+            if ((profile == "") == (mode == "".val))
             {
-                return error.As(fmt.Errorf("too many options"));
+                return error.As(fmt.Errorf("too many options"))!;
             }
-            if (mode != "".Value)
+
+            if (varVar != "" && !token.IsIdentifier(varVar.val).val)
             {
-                switch (mode.Value)
+                return error.As(fmt.Errorf("-var: %q is not a valid identifier", varVar.val))!;
+            }
+
+            if (mode != "".val)
+            {
+                switch (mode.val)
                 {
                     case "set": 
                         counterStmt = setCounterStmt;
@@ -138,24 +149,27 @@ Finally, to generate modified source code with coverage annotations
                         counterStmt = atomicCounterStmt;
                         break;
                     default: 
-                        return error.As(fmt.Errorf("unknown -mode %v", mode.Value));
+                        return error.As(fmt.Errorf("unknown -mode %v", mode.val))!;
                         break;
                 }
 
                 if (flag.NArg() == 0L)
                 {
-                    return error.As(fmt.Errorf("missing source file"));
+                    return error.As(fmt.Errorf("missing source file"))!;
                 }
                 else if (flag.NArg() == 1L)
                 {
-                    return error.As(null);
+                    return error.As(null!)!;
                 }
+
             }
             else if (flag.NArg() == 0L)
             {
-                return error.As(null);
+                return error.As(null!)!;
             }
-            return error.As(fmt.Errorf("too many arguments"));
+
+            return error.As(fmt.Errorf("too many arguments"))!;
+
         }
 
         // Block represents the information about a basic block to be recorded in the analysis.
@@ -184,8 +198,10 @@ Finally, to generate modified source code with coverage annotations
         // It correctly skips over comments and assumes it need not
         // handle quoted strings.
         // It returns a byte offset within f.src.
-        private static long findText(this ref File f, token.Pos pos, @string text)
+        private static long findText(this ptr<File> _addr_f, token.Pos pos, @string text)
         {
+            ref File f = ref _addr_f.val;
+
             slice<byte> b = (slice<byte>)text;
             var start = f.offset(pos);
             var i = start;
@@ -196,6 +212,7 @@ Finally, to generate modified source code with coverage annotations
                 {
                     return i;
                 }
+
                 if (i + 2L <= len(s) && s[i] == '/' && s[i + 1L] == '/')
                 {
                     while (i < len(s) && s[i] != '\n')
@@ -204,7 +221,9 @@ Finally, to generate modified source code with coverage annotations
                     }
 
                     continue;
+
                 }
+
                 if (i + 2L <= len(s) && s[i] == '/' && s[i + 1L] == '*')
                 {
                     for (i += 2L; >>MARKER:FOREXPRESSION_LEVEL_2<<; i++)
@@ -213,39 +232,47 @@ Finally, to generate modified source code with coverage annotations
                         {
                             return 0L;
                         }
+
                         if (s[i] == '*' && s[i + 1L] == '/')
                         {
                             i += 2L;
                             break;
                         }
+
                     }
 
                     continue;
+
                 }
+
                 i++;
+
             }
 
             return -1L;
+
         }
 
         // Visit implements the ast.Visitor interface.
-        private static ast.Visitor Visit(this ref File _f, ast.Node node) => func(_f, (ref File f, Defer _, Panic panic, Recover __) =>
+        private static ast.Visitor Visit(this ptr<File> _addr_f, ast.Node node) => func((_, panic, __) =>
         {
+            ref File f = ref _addr_f.val;
+
             switch (node.type())
             {
-                case ref ast.BlockStmt n:
+                case ptr<ast.BlockStmt> n:
                     if (len(n.List) > 0L)
                     {
                         switch (n.List[0L].type())
                         {
-                            case ref ast.CaseClause _:
+                            case ptr<ast.CaseClause> _:
                                 {
                                     var n__prev1 = n;
 
                                     foreach (var (_, __n) in n.List)
                                     {
                                         n = __n;
-                                        ref ast.CaseClause clause = n._<ref ast.CaseClause>();
+                                        ptr<ast.CaseClause> clause = n._<ptr<ast.CaseClause>>();
                                         f.addCounters(clause.Colon + 1L, clause.Colon + 1L, clause.End(), clause.Body, false);
                                     }
 
@@ -254,14 +281,14 @@ Finally, to generate modified source code with coverage annotations
 
                                 return f;
                                 break;
-                            case ref ast.CommClause _:
+                            case ptr<ast.CommClause> _:
                                 {
                                     var n__prev1 = n;
 
                                     foreach (var (_, __n) in n.List)
                                     {
                                         n = __n;
-                                        clause = n._<ref ast.CommClause>();
+                                        clause = n._<ptr<ast.CommClause>>();
                                         f.addCounters(clause.Colon + 1L, clause.Colon + 1L, clause.End(), clause.Body, false);
                                     }
 
@@ -271,14 +298,17 @@ Finally, to generate modified source code with coverage annotations
                                 return f;
                                 break;
                         }
+
                     }
+
                     f.addCounters(n.Lbrace, n.Lbrace + 1L, n.Rbrace + 1L, n.List, true); // +1 to step past closing brace.
                     break;
-                case ref ast.IfStmt n:
+                case ptr<ast.IfStmt> n:
                     if (n.Init != null)
                     {
                         ast.Walk(f, n.Init);
                     }
+
                     ast.Walk(f, n.Cond);
                     ast.Walk(f, n.Body);
                     if (n.Else == null)
@@ -301,6 +331,7 @@ Finally, to generate modified source code with coverage annotations
                     {
                         panic("lost else");
                     }
+
                     f.edit.Insert(elseOffset + 4L, "{");
                     f.edit.Insert(f.offset(n.Else.End()), "}"); 
 
@@ -311,11 +342,11 @@ Finally, to generate modified source code with coverage annotations
                     var pos = f.fset.File(n.Body.End()).Pos(elseOffset + 4L);
                     switch (n.Else.type())
                     {
-                        case ref ast.IfStmt stmt:
-                            ast.BlockStmt block = ref new ast.BlockStmt(Lbrace:pos,List:[]ast.Stmt{stmt},Rbrace:stmt.End(),);
+                        case ptr<ast.IfStmt> stmt:
+                            ptr<ast.BlockStmt> block = addr(new ast.BlockStmt(Lbrace:pos,List:[]ast.Stmt{stmt},Rbrace:stmt.End(),));
                             n.Else = block;
                             break;
-                        case ref ast.BlockStmt stmt:
+                        case ptr<ast.BlockStmt> stmt:
                             stmt.Lbrace = pos;
                             break;
                         default:
@@ -328,53 +359,56 @@ Finally, to generate modified source code with coverage annotations
                     ast.Walk(f, n.Else);
                     return null;
                     break;
-                case ref ast.SelectStmt n:
+                case ptr<ast.SelectStmt> n:
                     if (n.Body == null || len(n.Body.List) == 0L)
                     {
                         return null;
                     }
+
                     break;
-                case ref ast.SwitchStmt n:
+                case ptr<ast.SwitchStmt> n:
                     if (n.Body == null || len(n.Body.List) == 0L)
                     {
                         if (n.Init != null)
                         {
                             ast.Walk(f, n.Init);
                         }
+
                         if (n.Tag != null)
                         {
                             ast.Walk(f, n.Tag);
                         }
+
                         return null;
+
                     }
+
                     break;
-                case ref ast.TypeSwitchStmt n:
+                case ptr<ast.TypeSwitchStmt> n:
                     if (n.Body == null || len(n.Body.List) == 0L)
                     {
                         if (n.Init != null)
                         {
                             ast.Walk(f, n.Init);
                         }
+
                         ast.Walk(f, n.Assign);
                         return null;
+
                     }
+
+                    break;
+                case ptr<ast.FuncDecl> n:
+                    if (n.Name.Name == "_")
+                    {
+                        return null;
+                    }
+
                     break;
             }
             return f;
+
         });
-
-        // unquote returns the unquoted string.
-        private static @string unquote(@string s)
-        {
-            var (t, err) = strconv.Unquote(s);
-            if (err != null)
-            {
-                log.Fatalf("cover: improperly quoted string %q\n", s);
-            }
-            return t;
-        }
-
-        private static slice<byte> slashslash = (slice<byte>)"//";
 
         private static void annotate(@string name)
         {
@@ -384,13 +418,15 @@ Finally, to generate modified source code with coverage annotations
             {
                 log.Fatalf("cover: %s: %s", name, err);
             }
+
             var (parsedFile, err) = parser.ParseFile(fset, name, content, parser.ParseComments);
             if (err != null)
             {
                 log.Fatalf("cover: %s: %s", name, err);
             }
-            File file = ref new File(fset:fset,name:name,content:content,edit:edit.NewBuffer(content),astFile:parsedFile,);
-            if (mode == "atomic".Value)
+
+            ptr<File> file = addr(new File(fset:fset,name:name,content:content,edit:edit.NewBuffer(content),astFile:parsedFile,));
+            if (mode == "atomic".val)
             { 
                 // Add import of sync/atomic immediately after package clause.
                 // We do this even if there is an existing import, because the
@@ -398,50 +434,63 @@ Finally, to generate modified source code with coverage annotations
                 // to refer to it, and our name (_cover_atomic_) is less likely to
                 // be shadowed.
                 file.edit.Insert(file.offset(file.astFile.Name.End()), fmt.Sprintf("; import %s %q", atomicPackageName, atomicPackagePath));
+
             }
+
             ast.Walk(file, file.astFile);
             var newContent = file.edit.Bytes();
 
             var fd = os.Stdout;
-            if (output != "".Value)
+            if (output != "".val)
             {
-                error err = default;
-                fd, err = os.Create(output.Value);
+                error err = default!;
+                fd, err = os.Create(output.val);
                 if (err != null)
                 {
                     log.Fatalf("cover: %s", err);
                 }
+
             }
+
             fmt.Fprintf(fd, "//line %s:1\n", name);
             fd.Write(newContent); 
 
             // After printing the source tree, add some declarations for the counters etc.
             // We could do this by adding to the tree, but it's easier just to print the text.
             file.addVariables(fd);
+
         }
 
         // setCounterStmt returns the expression: __count[23] = 1.
-        private static @string setCounterStmt(ref File f, @string counter)
+        private static @string setCounterStmt(ptr<File> _addr_f, @string counter)
         {
+            ref File f = ref _addr_f.val;
+
             return fmt.Sprintf("%s = 1", counter);
         }
 
         // incCounterStmt returns the expression: __count[23]++.
-        private static @string incCounterStmt(ref File f, @string counter)
+        private static @string incCounterStmt(ptr<File> _addr_f, @string counter)
         {
+            ref File f = ref _addr_f.val;
+
             return fmt.Sprintf("%s++", counter);
         }
 
         // atomicCounterStmt returns the expression: atomic.AddUint32(&__count[23], 1)
-        private static @string atomicCounterStmt(ref File f, @string counter)
+        private static @string atomicCounterStmt(ptr<File> _addr_f, @string counter)
         {
+            ref File f = ref _addr_f.val;
+
             return fmt.Sprintf("%s.AddUint32(&%s, 1)", atomicPackageName, counter);
         }
 
         // newCounter creates a new counter expression of the appropriate form.
-        private static @string newCounter(this ref File f, token.Pos start, token.Pos end, long numStmt)
+        private static @string newCounter(this ptr<File> _addr_f, token.Pos start, token.Pos end, long numStmt)
         {
-            var stmt = counterStmt(f, fmt.Sprintf("%s.Count[%d]", varVar.Value, len(f.blocks)));
+            ref File f = ref _addr_f.val;
+
+            var stmt = counterStmt(f, fmt.Sprintf("%s.Count[%d]", varVar.val, len(f.blocks)));
             f.blocks = append(f.blocks, new Block(start,end,numStmt));
             return stmt;
         }
@@ -458,15 +507,20 @@ Finally, to generate modified source code with coverage annotations
         // counters will be added before S1 and before S3. The block containing S2
         // will be visited in a separate call.
         // TODO: Nested simple blocks get unnecessary (but correct) counters
-        private static void addCounters(this ref File f, token.Pos pos, token.Pos insertPos, token.Pos blockEnd, slice<ast.Stmt> list, bool extendToClosingBrace)
-        { 
+        private static void addCounters(this ptr<File> _addr_f, token.Pos pos, token.Pos insertPos, token.Pos blockEnd, slice<ast.Stmt> list, bool extendToClosingBrace)
+        {
+            ref File f = ref _addr_f.val;
+ 
             // Special case: make sure we add a counter to an empty block. Can't do this below
             // or we will add a counter to an empty statement list after, say, a return statement.
             if (len(list) == 0L)
             {
                 f.edit.Insert(f.offset(insertPos), f.newCounter(insertPos, blockEnd, 0L) + ";");
-                return;
+                return ;
             } 
+            // Make a copy of the list, as we may mutate it and should leave the
+            // existing list intact.
+            list = append((slice<ast.Stmt>)null, list); 
             // We have a block (statement list), but it may have several basic blocks due to the
             // appearance of statements that affect the flow of control.
             while (true)
@@ -493,43 +547,54 @@ Finally, to generate modified source code with coverage annotations
                         // However, we can't do this if the labeled statement is already
                         // a control statement, such as a labeled for.
                         {
-                            ref ast.LabeledStmt (label, isLabel) = stmt._<ref ast.LabeledStmt>();
+                            ptr<ast.LabeledStmt> (label, isLabel) = stmt._<ptr<ast.LabeledStmt>>();
 
                             if (isLabel && !f.isControl(label.Stmt))
                             {
-                                var newLabel = label.Value;
-                                newLabel.Stmt = ref new ast.EmptyStmt(Semicolon:label.Stmt.Pos(),Implicit:true,);
+                                ref var newLabel = ref heap(label.val, out ptr<var> _addr_newLabel);
+                                newLabel.Stmt = addr(new ast.EmptyStmt(Semicolon:label.Stmt.Pos(),Implicit:true,));
                                 end = label.Pos(); // Previous block ends before the label.
-                                list[last] = ref newLabel; 
+                                _addr_list[last] = _addr_newLabel;
+                                list[last] = ref _addr_list[last].val; 
                                 // Open a gap and drop in the old statement, now without a label.
                                 list = append(list, null);
                                 copy(list[last + 1L..], list[last..]);
                                 list[last + 1L] = label.Stmt;
+
                             }
 
                         }
+
                         last++;
                         extendToClosingBrace = false; // Block is broken up now.
                         break;
+
                     }
+
                 }
 
                 if (extendToClosingBrace)
                 {
                     end = blockEnd;
                 }
+
                 if (pos != end)
                 { // Can have no source to cover if e.g. blocks abut.
                     f.edit.Insert(f.offset(insertPos), f.newCounter(pos, end, last) + ";");
+
                 }
+
                 list = list[last..];
                 if (len(list) == 0L)
                 {
                     break;
                 }
+
                 pos = list[0L].Pos();
                 insertPos = pos;
+
             }
+
 
         }
 
@@ -540,89 +605,105 @@ Finally, to generate modified source code with coverage annotations
         // TODO: what if there's more than one? Probably doesn't matter much.
         private static (bool, token.Pos) hasFuncLiteral(ast.Node n)
         {
+            bool _p0 = default;
+            token.Pos _p0 = default;
+
             if (n == null)
             {
                 return (false, 0L);
             }
-            funcLitFinder literal = default;
-            ast.Walk(ref literal, n);
+
+            ref funcLitFinder literal = ref heap(out ptr<funcLitFinder> _addr_literal);
+            ast.Walk(_addr_literal, n);
             return (literal.found(), token.Pos(literal));
+
         }
 
         // statementBoundary finds the location in s that terminates the current basic
         // block in the source.
-        private static token.Pos statementBoundary(this ref File f, ast.Stmt s)
-        { 
+        private static token.Pos statementBoundary(this ptr<File> _addr_f, ast.Stmt s)
+        {
+            ref File f = ref _addr_f.val;
+ 
             // Control flow statements are easy.
             switch (s.type())
             {
-                case ref ast.BlockStmt s:
+                case ptr<ast.BlockStmt> s:
                     return s.Lbrace;
                     break;
-                case ref ast.IfStmt s:
+                case ptr<ast.IfStmt> s:
                     var (found, pos) = hasFuncLiteral(s.Init);
                     if (found)
                     {
                         return pos;
                     }
+
                     found, pos = hasFuncLiteral(s.Cond);
                     if (found)
                     {
                         return pos;
                     }
+
                     return s.Body.Lbrace;
                     break;
-                case ref ast.ForStmt s:
+                case ptr<ast.ForStmt> s:
                     (found, pos) = hasFuncLiteral(s.Init);
                     if (found)
                     {
                         return pos;
                     }
+
                     found, pos = hasFuncLiteral(s.Cond);
                     if (found)
                     {
                         return pos;
                     }
+
                     found, pos = hasFuncLiteral(s.Post);
                     if (found)
                     {
                         return pos;
                     }
+
                     return s.Body.Lbrace;
                     break;
-                case ref ast.LabeledStmt s:
+                case ptr<ast.LabeledStmt> s:
                     return f.statementBoundary(s.Stmt);
                     break;
-                case ref ast.RangeStmt s:
+                case ptr<ast.RangeStmt> s:
                     (found, pos) = hasFuncLiteral(s.X);
                     if (found)
                     {
                         return pos;
                     }
+
                     return s.Body.Lbrace;
                     break;
-                case ref ast.SwitchStmt s:
+                case ptr<ast.SwitchStmt> s:
                     (found, pos) = hasFuncLiteral(s.Init);
                     if (found)
                     {
                         return pos;
                     }
+
                     found, pos = hasFuncLiteral(s.Tag);
                     if (found)
                     {
                         return pos;
                     }
+
                     return s.Body.Lbrace;
                     break;
-                case ref ast.SelectStmt s:
+                case ptr<ast.SelectStmt> s:
                     return s.Body.Lbrace;
                     break;
-                case ref ast.TypeSwitchStmt s:
+                case ptr<ast.TypeSwitchStmt> s:
                     (found, pos) = hasFuncLiteral(s.Init);
                     if (found)
                     {
                         return pos;
                     }
+
                     return s.Body.Lbrace;
                     break; 
                 // If not a control flow statement, it is a declaration, expression, call, etc. and it may have a function literal.
@@ -639,51 +720,55 @@ Finally, to generate modified source code with coverage annotations
             {
                 return pos;
             }
+
             return s.End();
+
         }
 
         // endsBasicSourceBlock reports whether s changes the flow of control: break, if, etc.,
         // or if it's just problematic, for instance contains a function literal, which will complicate
         // accounting due to the block-within-an expression.
-        private static bool endsBasicSourceBlock(this ref File f, ast.Stmt s)
+        private static bool endsBasicSourceBlock(this ptr<File> _addr_f, ast.Stmt s)
         {
+            ref File f = ref _addr_f.val;
+
             switch (s.type())
             {
-                case ref ast.BlockStmt s:
+                case ptr<ast.BlockStmt> s:
                     return true;
                     break;
-                case ref ast.BranchStmt s:
+                case ptr<ast.BranchStmt> s:
                     return true;
                     break;
-                case ref ast.ForStmt s:
+                case ptr<ast.ForStmt> s:
                     return true;
                     break;
-                case ref ast.IfStmt s:
+                case ptr<ast.IfStmt> s:
                     return true;
                     break;
-                case ref ast.LabeledStmt s:
+                case ptr<ast.LabeledStmt> s:
                     return true; // A goto may branch here, starting a new basic block.
                     break;
-                case ref ast.RangeStmt s:
+                case ptr<ast.RangeStmt> s:
                     return true;
                     break;
-                case ref ast.SwitchStmt s:
+                case ptr<ast.SwitchStmt> s:
                     return true;
                     break;
-                case ref ast.SelectStmt s:
+                case ptr<ast.SelectStmt> s:
                     return true;
                     break;
-                case ref ast.TypeSwitchStmt s:
+                case ptr<ast.TypeSwitchStmt> s:
                     return true;
                     break;
-                case ref ast.ExprStmt s:
+                case ptr<ast.ExprStmt> s:
                     {
-                        ref ast.CallExpr (call, ok) = s.X._<ref ast.CallExpr>();
+                        ptr<ast.CallExpr> (call, ok) = s.X._<ptr<ast.CallExpr>>();
 
                         if (ok)
                         {
                             {
-                                ref ast.Ident (ident, ok) = call.Fun._<ref ast.Ident>();
+                                ptr<ast.Ident> (ident, ok) = call.Fun._<ptr<ast.Ident>>();
 
                                 if (ok && ident.Name == "panic" && len(call.Args) == 1L)
                                 {
@@ -691,38 +776,44 @@ Finally, to generate modified source code with coverage annotations
                                 }
 
                             }
+
                         }
 
                     }
+
                     break;
             }
             var (found, _) = hasFuncLiteral(s);
             return found;
+
         }
 
         // isControl reports whether s is a control statement that, if labeled, cannot be
         // separated from its label.
-        private static bool isControl(this ref File f, ast.Stmt s)
+        private static bool isControl(this ptr<File> _addr_f, ast.Stmt s)
         {
+            ref File f = ref _addr_f.val;
+
             switch (s.type())
             {
-                case ref ast.ForStmt _:
+                case ptr<ast.ForStmt> _:
                     return true;
                     break;
-                case ref ast.RangeStmt _:
+                case ptr<ast.RangeStmt> _:
                     return true;
                     break;
-                case ref ast.SwitchStmt _:
+                case ptr<ast.SwitchStmt> _:
                     return true;
                     break;
-                case ref ast.SelectStmt _:
+                case ptr<ast.SelectStmt> _:
                     return true;
                     break;
-                case ref ast.TypeSwitchStmt _:
+                case ptr<ast.TypeSwitchStmt> _:
                     return true;
                     break;
             }
             return false;
+
         }
 
         // funcLitFinder implements the ast.Visitor pattern to find the location of any
@@ -731,25 +822,32 @@ Finally, to generate modified source code with coverage annotations
         {
         }
 
-        private static ast.Visitor Visit(this ref funcLitFinder f, ast.Node node)
+        private static ast.Visitor Visit(this ptr<funcLitFinder> _addr_f, ast.Node node)
         {
+            ast.Visitor w = default;
+            ref funcLitFinder f = ref _addr_f.val;
+
             if (f.found())
             {
                 return null; // Prune search.
             }
+
             switch (node.type())
             {
-                case ref ast.FuncLit n:
-                    f.Value = funcLitFinder(n.Body.Lbrace);
+                case ptr<ast.FuncLit> n:
+                    f.val = funcLitFinder(n.Body.Lbrace);
                     return null; // Prune search.
                     break;
             }
             return f;
+
         }
 
-        private static bool found(this ref funcLitFinder f)
+        private static bool found(this ptr<funcLitFinder> _addr_f)
         {
-            return token.Pos(f.Value) != token.NoPos;
+            ref funcLitFinder f = ref _addr_f.val;
+
+            return token.Pos(f.val) != token.NoPos;
         }
 
         // Sort interface for []block1; used for self-check in addVariables.
@@ -776,18 +874,21 @@ Finally, to generate modified source code with coverage annotations
         {
             b[i] = b[j];
             b[j] = b[i];
-
         }
 
         // offset translates a token position into a 0-indexed byte offset.
-        private static long offset(this ref File f, token.Pos pos)
+        private static long offset(this ptr<File> _addr_f, token.Pos pos)
         {
+            ref File f = ref _addr_f.val;
+
             return f.fset.Position(pos).Offset;
         }
 
         // addVariables adds to the end of the file the declarations to set up the counter and position variables.
-        private static void addVariables(this ref File f, io.Writer w)
-        { 
+        private static void addVariables(this ptr<File> _addr_f, io.Writer w)
+        {
+            ref File f = ref _addr_f.val;
+ 
             // Self-check: Verify that the instrumented basic blocks are disjoint.
             var t = make_slice<block1>(len(f.blocks));
             {
@@ -814,7 +915,9 @@ Finally, to generate modified source code with coverage annotations
                         fmt.Fprintf(os.Stderr, "cover: internal error: block %d overlaps block %d\n", t[i - 1L].index, t[i].index); 
                         // Note: error message is in byte positions, not token positions.
                         fmt.Fprintf(os.Stderr, "\t%s:#%d,#%d %s:#%d,#%d\n", f.name, f.offset(t[i - 1L].startByte), f.offset(t[i - 1L].endByte), f.name, f.offset(t[i].startByte), f.offset(t[i].endByte));
+
                     }
+
                 } 
 
                 // Declare the coverage struct as a package-level variable.
@@ -824,7 +927,7 @@ Finally, to generate modified source code with coverage annotations
             } 
 
             // Declare the coverage struct as a package-level variable.
-            fmt.Fprintf(w, "\nvar %s = struct {\n", varVar.Value);
+            fmt.Fprintf(w, "\nvar %s = struct {\n", varVar.val);
             fmt.Fprintf(w, "\tCount     [%d]uint32\n", len(f.blocks));
             fmt.Fprintf(w, "\tPos       [3 * %d]uint32\n", len(f.blocks));
             fmt.Fprintf(w, "\tNumStmt   [%d]uint16\n", len(f.blocks));
@@ -847,6 +950,9 @@ Finally, to generate modified source code with coverage annotations
                     block = __block;
                     var start = f.fset.Position(block.startByte);
                     var end = f.fset.Position(block.endByte);
+
+                    start, end = dedup(start, end);
+
                     fmt.Fprintf(w, "\t\t%d, %d, %#x, // [%d]\n", start.Line, end.Line, (end.Column & 0xFFFFUL) << (int)(16L) | (start.Column & 0xFFFFUL), i);
                 } 
 
@@ -877,7 +983,9 @@ Finally, to generate modified source code with coverage annotations
                     {
                         n = 1L << (int)(16L) - 1L;
                     }
+
                     fmt.Fprintf(w, "\t\t%d, // %d\n", n, i);
+
                 } 
 
                 // Close the statements-per-block array.
@@ -893,10 +1001,54 @@ Finally, to generate modified source code with coverage annotations
 
             // Emit a reference to the atomic package to avoid
             // import and not used error when there's no code in a file.
-            if (mode == "atomic".Value)
+            if (mode == "atomic".val)
             {
                 fmt.Fprintf(w, "var _ = %s.LoadUint32\n", atomicPackageName);
             }
+
+        }
+
+        // It is possible for positions to repeat when there is a line
+        // directive that does not specify column information and the input
+        // has not been passed through gofmt.
+        // See issues #27530 and #30746.
+        // Tests are TestHtmlUnformatted and TestLineDup.
+        // We use a map to avoid duplicates.
+
+        // pos2 is a pair of token.Position values, used as a map key type.
+        private partial struct pos2
+        {
+            public token.Position p1;
+            public token.Position p2;
+        }
+
+        // seenPos2 tracks whether we have seen a token.Position pair.
+        private static var seenPos2 = make_map<pos2, bool>();
+
+        // dedup takes a token.Position pair and returns a pair that does not
+        // duplicate any existing pair. The returned pair will have the Offset
+        // fields cleared.
+        private static (token.Position, token.Position) dedup(token.Position p1, token.Position p2)
+        {
+            token.Position r1 = default;
+            token.Position r2 = default;
+
+            pos2 key = new pos2(p1:p1,p2:p2,); 
+
+            // We want to ignore the Offset fields in the map,
+            // since cover uses only file/line/column.
+            key.p1.Offset = 0L;
+            key.p2.Offset = 0L;
+
+            while (seenPos2[key])
+            {
+                key.p2.Column++;
+            }
+
+            seenPos2[key] = true;
+
+            return (key.p1, key.p2);
+
         }
     }
 }

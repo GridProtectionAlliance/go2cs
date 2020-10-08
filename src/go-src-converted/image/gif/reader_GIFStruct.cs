@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:10:02 UTC
+//     Generated on 2020 October 08 04:59:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace image
                 this.BackgroundIndex = default;
             }
 
-            public GIF(slice<ref image.Paletted> Image = default, slice<long> Delay = default, long LoopCount = default, slice<byte> Disposal = default, image.Config Config = default, byte BackgroundIndex = default)
+            public GIF(slice<ptr<image.Paletted>> Image = default, slice<long> Delay = default, long LoopCount = default, slice<byte> Disposal = default, image.Config Config = default, byte BackgroundIndex = default)
             {
                 this.Image = Image;
                 this.Delay = Delay;

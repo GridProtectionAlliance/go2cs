@@ -4,7 +4,7 @@
 
 // +build cgo,!netgo
 
-// package net -- go2cs converted at 2020 August 29 08:25:06 UTC
+// package net -- go2cs converted at 2020 October 08 03:31:09 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\cgo_openbsd.go
 /*
@@ -17,7 +17,7 @@ namespace go
 {
     public static partial class net_package
     {
-        private static readonly var cgoAddrInfoFlags = C.AI_CANONNAME;
+        private static readonly var cgoAddrInfoFlags = (var)C.AI_CANONNAME;
 
     }
 }

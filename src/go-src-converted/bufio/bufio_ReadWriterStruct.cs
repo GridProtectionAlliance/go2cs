@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:22:53 UTC
+//     Generated on 2020 October 08 03:26:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using io = go.io_package;
+using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 
 namespace go
@@ -25,64 +26,17 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public partial struct ReadWriter
         {
-            // Reader.Read function promotion
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
-
-            private static readonly ReadByVal s_ReadByVal;
-            private static readonly ReadByRef s_ReadByRef;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p) => s_ReadByRef?.Invoke(ref this, p) ?? s_ReadByVal?.Invoke(this, p) ?? Reader?.Read(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
-
-            // Writer.Write function promotion
-            private delegate (long, error) WriteByVal(T value, slice<byte> p);
-            private delegate (long, error) WriteByRef(ref T value, slice<byte> p);
-
-            private static readonly WriteByVal s_WriteByVal;
-            private static readonly WriteByRef s_WriteByRef;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> p) => s_WriteByRef?.Invoke(ref this, p) ?? s_WriteByVal?.Invoke(this, p) ?? Writer?.Write(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
-            
-            [DebuggerStepperBoundary]
-            static ReadWriter()
-            {
-                Type targetType = typeof(ReadWriter);
-                MethodInfo extensionMethod;
-                
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Read");
-
-                if ((object)extensionMethod != null)
-                {
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
-
-                    if ((object)s_ReadByRef == null)
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
-                
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Write");
-
-                if ((object)extensionMethod != null)
-                {
-                    s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
-
-                    if ((object)s_WriteByRef == null)
-                        s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-                }
-            }
-
             // Constructors
             public ReadWriter(NilType _)
             {
-                this.Reader = default;
-                this.Writer = default;
+                this.ptr<Reader> = default;
+                this.ptr<Writer> = default;
             }
 
-            public ReadWriter(ref Reader Reader = default, ref Writer Writer = default)
+            public ReadWriter(ref ptr<Reader> ptr<Reader> = default, ref ptr<Writer> ptr<Writer> = default)
             {
-                this.Reader = Reader;
-                this.Writer = Writer;
+                this.ptr<Reader> = ptr<Reader>;
+                this.ptr<Writer> = ptr<Writer>;
             }
 
             // Enable comparisons between nil and ReadWriter struct
@@ -105,7 +59,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ReadWriter ReadWriter_cast(dynamic value)
         {
-            return new ReadWriter(ref value.Reader, ref value.Writer);
+            return new ReadWriter(ref value.ptr<Reader>, ref value.ptr<Writer>);
         }
     }
 }

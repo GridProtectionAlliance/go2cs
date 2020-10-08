@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:34:02 UTC
+//     Generated on 2020 October 08 03:40:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,16 +41,20 @@ namespace http
             {
                 this.req = default;
                 this.header = default;
+                this.code = default;
+                this.wroteHeader = default;
+                this.wroteCGIHeader = default;
                 this.bufw = default;
-                this.headerSent = default;
             }
 
-            public response(ref ptr<http.Request> req = default, http.Header header = default, ref ptr<bufio.Writer> bufw = default, bool headerSent = default)
+            public response(ref ptr<http.Request> req = default, http.Header header = default, long code = default, bool wroteHeader = default, bool wroteCGIHeader = default, ref ptr<bufio.Writer> bufw = default)
             {
                 this.req = req;
                 this.header = header;
+                this.code = code;
+                this.wroteHeader = wroteHeader;
+                this.wroteCGIHeader = wroteCGIHeader;
                 this.bufw = bufw;
-                this.headerSent = headerSent;
             }
 
             // Enable comparisons between nil and response struct
@@ -73,7 +77,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static response response_cast(dynamic value)
         {
-            return new response(ref value.req, value.header, ref value.bufw, value.headerSent);
+            return new response(ref value.req, value.header, value.code, value.wroteHeader, value.wroteCGIHeader, ref value.bufw);
         }
     }
 }}}

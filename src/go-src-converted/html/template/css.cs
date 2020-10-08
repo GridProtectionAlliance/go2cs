@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 August 29 08:34:32 UTC
+// package template -- go2cs converted at 2020 October 08 03:41:53 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\css.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
+using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using static go.builtin;
@@ -25,6 +26,7 @@ namespace html
             { 
                 // Too short.
                 return false;
+
             }
             if (i != 0L)
             {
@@ -33,9 +35,11 @@ namespace html
                 { 
                     // Too long.
                     return false;
+
                 }
             }
             return string(bytes.ToLower(b[i..])) == kw;
+
         }
 
         // isCSSNmchar reports whether rune is allowed anywhere in a CSS identifier.
@@ -43,14 +47,15 @@ namespace html
         { 
             // Based on the CSS3 nmchar production but ignores multi-rune escape
             // sequences.
-            // http://www.w3.org/TR/css3-syntax/#SUBTOK-nmchar
+            // https://www.w3.org/TR/css3-syntax/#SUBTOK-nmchar
             return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || '0' <= r && r <= '9' || r == '-' || r == '_' || 0x80UL <= r && r <= 0xd7ffUL || 0xe000UL <= r && r <= 0xfffdUL || 0x10000UL <= r && r <= 0x10ffffUL;
+
         }
 
         // decodeCSS decodes CSS3 escapes given a sequence of stringchars.
         // If there is no change, it returns the input, otherwise it returns a slice
         // backed by a new array.
-        // http://www.w3.org/TR/css3-syntax/#SUBTOK-stringchar defines stringchar.
+        // https://www.w3.org/TR/css3-syntax/#SUBTOK-stringchar defines stringchar.
         private static slice<byte> decodeCSS(slice<byte> s)
         {
             var i = bytes.IndexByte(s, '\\');
@@ -69,17 +74,18 @@ namespace html
                 {
                     i = len(s);
                 }
+
                 b = append(b, s[..i]);
                 s = s[i..];
                 if (len(s) < 2L)
                 {
                     break;
                 } 
-                // http://www.w3.org/TR/css3-syntax/#SUBTOK-escape
+                // https://www.w3.org/TR/css3-syntax/#SUBTOK-escape
                 // escape ::= unicode | '\' [#x20-#x7E#x80-#xD7FF#xE000-#xFFFD#x10000-#x10FFFF]
                 if (isHex(s[1L]))
                 { 
-                    // http://www.w3.org/TR/css3-syntax/#SUBTOK-unicode
+                    // https://www.w3.org/TR/css3-syntax/#SUBTOK-unicode
                     //   unicode ::= '\' [0-9a-fA-F]{1,6} wc?
                     long j = 2L;
                     while (j < len(s) && j < 7L && isHex(s[j]))
@@ -93,22 +99,28 @@ namespace html
                     {
                         r = r / 16L;
                         j = j - 1L;
+
                     }
+
                     var n = utf8.EncodeRune(b[len(b)..cap(b)], r); 
                     // The optional space at the end allows a hex
                     // sequence to be followed by a literal hex.
                     // string(decodeCSS([]byte(`\A B`))) == "\nB"
                     b = b[..len(b) + n];
                     s = skipCSSSpace(s[j..]);
+
                 }                { 
                     // `\\` decodes to `\` and `\"` to `"`.
                     var (_, n) = utf8.DecodeRune(s[1L..]);
                     b = append(b, s[1L..1L + n]);
                     s = s[1L + n..];
+
                 }
+
             }
 
             return b;
+
         }
 
         // isHex reports whether the given character is a hex digit.
@@ -133,8 +145,10 @@ namespace html
                     n |= rune(c - 'A') + 10L;
                 else 
                     panic(fmt.Sprintf("Bad hex digit in %q", s));
-                            }
+                
+            }
             return n;
+
         });
 
         // skipCSSSpace returns a suffix of c, skipping over a single space.
@@ -164,10 +178,12 @@ namespace html
                     {
                         return c[2L..];
                     }
+
                     return c[1L..];
                     break;
             }
             return c;
+
         }
 
         // isCSSSpace reports whether b is a CSS space char as defined in wc.
@@ -188,6 +204,7 @@ namespace html
                     break;
             }
             return false;
+
         }
 
         // cssEscaper escapes HTML and CSS special characters using \<hex>+ escapes.
@@ -196,7 +213,7 @@ namespace html
             args = args.Clone();
 
             var (s, _) = stringify(args);
-            bytes.Buffer b = default;
+            strings.Builder b = default;
             var r = rune(0L);
             long w = 0L;
             long written = 0L;
@@ -213,14 +230,20 @@ namespace html
                         repl = cssReplacementTable[r];
                     else 
                         continue;
-                                        b.WriteString(s[written..i]);
+                                        if (written == 0L)
+                    {
+                        b.Grow(len(s));
+                    i += w;
+                    }
+
+                    b.WriteString(s[written..i]);
                     b.WriteString(repl);
                     written = i + w;
                     if (repl != "\\\\" && (written == len(s) || isHex(s[written]) || isCSSSpace(s[written])))
                     {
                         b.WriteByte(' ');
-                    i += w;
                     }
+
                 }
 
             }
@@ -228,8 +251,10 @@ namespace html
             {
                 return s;
             }
+
             b.WriteString(s[written..]);
             return b.String();
+
         }
 
         private static @string cssReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\0`), ('\t', `\9`), ('\n', `\a`), ('\f', `\c`), ('\r', `\d`), ('"', `\22`), ('&', `\26`), ('\'', `\27`), ('(', `\28`), (')', `\29`), ('+', `\2b`), ('/', `\2f`), (':', `\3a`), (';', `\3b`), ('<', `\3c`), ('>', `\3e`), ('\\', `\\`), ('{', `\7b`), ('}', `\7d`)));
@@ -251,11 +276,12 @@ namespace html
             {
                 return s;
             }
+
             var b = decodeCSS((slice<byte>)s);
             var id = make_slice<byte>(0L, 64L); 
 
             // CSS3 error handling is specified as honoring string boundaries per
-            // http://www.w3.org/TR/css3-syntax/#error-handling :
+            // https://www.w3.org/TR/css3-syntax/#error-handling :
             //     Malformed declarations. User agents must handle unexpected
             //     tokens encountered while parsing a declaration by reading until
             //     the end of the declaration, while observing the rules for
@@ -305,21 +331,26 @@ namespace html
                         {
                             return filterFailsafe;
                         }
+
                         break;
                     default: 
                         if (c < utf8.RuneSelf && isCSSNmchar(rune(c)))
                         {
                             id = append(id, c);
                         }
+
                         break;
                 }
+
             }
             id = bytes.ToLower(id);
             if (bytes.Contains(id, expressionBytes) || bytes.Contains(id, mozBindingBytes))
             {
                 return filterFailsafe;
             }
+
             return string(b);
+
         }
     }
 }}

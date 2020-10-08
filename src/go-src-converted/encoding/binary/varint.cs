@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package binary -- go2cs converted at 2020 August 29 08:22:43 UTC
+// package binary -- go2cs converted at 2020 October 08 03:26:08 UTC
 // import "encoding/binary" ==> using binary = go.encoding.binary_package
 // Original source: C:\Go\src\encoding\binary\varint.go
 // This file implements "varint" encoding of 64-bit integers.
@@ -35,9 +35,10 @@ namespace encoding
     public static partial class binary_package
     {
         // MaxVarintLenN is the maximum length of a varint-encoded N-bit integer.
-        public static readonly long MaxVarintLen16 = 3L;
-        public static readonly long MaxVarintLen32 = 5L;
-        public static readonly long MaxVarintLen64 = 10L;
+        public static readonly long MaxVarintLen16 = (long)3L;
+        public static readonly long MaxVarintLen32 = (long)5L;
+        public static readonly long MaxVarintLen64 = (long)10L;
+
 
         // PutUvarint encodes a uint64 into buf and returns the number of bytes written.
         // If the buffer is too small, PutUvarint will panic.
@@ -53,6 +54,7 @@ namespace encoding
 
             buf[i] = byte(x);
             return i + 1L;
+
         }
 
         // Uvarint decodes a uint64 from buf and returns that value and the
@@ -65,6 +67,9 @@ namespace encoding
         //
         public static (ulong, long) Uvarint(slice<byte> buf)
         {
+            ulong _p0 = default;
+            long _p0 = default;
+
             ulong x = default;
             ulong s = default;
             foreach (var (i, b) in buf)
@@ -75,12 +80,17 @@ namespace encoding
                     {
                         return (0L, -(i + 1L)); // overflow
                     }
+
                     return (x | uint64(b) << (int)(s), i + 1L);
+
                 }
+
                 x |= uint64(b & 0x7fUL) << (int)(s);
                 s += 7L;
+
             }
             return (0L, 0L);
+
         }
 
         // PutVarint encodes an int64 into buf and returns the number of bytes written.
@@ -92,7 +102,9 @@ namespace encoding
             {
                 ux = ~ux;
             }
+
             return PutUvarint(buf, ux);
+
         }
 
         // Varint decodes an int64 from buf and returns that value and the
@@ -105,13 +117,18 @@ namespace encoding
         //
         public static (long, long) Varint(slice<byte> buf)
         {
+            long _p0 = default;
+            long _p0 = default;
+
             var (ux, n) = Uvarint(buf); // ok to continue in presence of error
             var x = int64(ux >> (int)(1L));
             if (ux & 1L != 0L)
             {
                 x = ~x;
             }
+
             return (x, n);
+
         }
 
         private static var overflow = errors.New("binary: varint overflows a 64-bit integer");
@@ -119,39 +136,54 @@ namespace encoding
         // ReadUvarint reads an encoded unsigned integer from r and returns it as a uint64.
         public static (ulong, error) ReadUvarint(io.ByteReader r)
         {
+            ulong _p0 = default;
+            error _p0 = default!;
+
             ulong x = default;
             ulong s = default;
-            for (long i = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
+            for (long i = 0L; i < MaxVarintLen64; i++)
             {
                 var (b, err) = r.ReadByte();
                 if (err != null)
                 {
-                    return (x, err);
+                    return (x, error.As(err)!);
                 }
+
                 if (b < 0x80UL)
                 {
-                    if (i > 9L || i == 9L && b > 1L)
+                    if (i == 9L && b > 1L)
                     {
-                        return (x, overflow);
+                        return (x, error.As(overflow)!);
                     }
-                    return (x | uint64(b) << (int)(s), null);
+
+                    return (x | uint64(b) << (int)(s), error.As(null!)!);
+
                 }
+
                 x |= uint64(b & 0x7fUL) << (int)(s);
                 s += 7L;
+
             }
+
+            return (x, error.As(overflow)!);
 
         }
 
         // ReadVarint reads an encoded signed integer from r and returns it as an int64.
         public static (long, error) ReadVarint(io.ByteReader r)
         {
+            long _p0 = default;
+            error _p0 = default!;
+
             var (ux, err) = ReadUvarint(r); // ok to continue in presence of error
             var x = int64(ux >> (int)(1L));
             if (ux & 1L != 0L)
             {
                 x = ~x;
             }
-            return (x, err);
+
+            return (x, error.As(err)!);
+
         }
     }
 }}

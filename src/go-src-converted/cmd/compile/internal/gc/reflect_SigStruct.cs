@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 09:28:20 UTC
+//     Generated on 2020 October 08 04:30:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,23 +39,19 @@ namespace @internal
             public Sig(NilType _)
             {
                 this.name = default;
-                this.pkg = default;
                 this.isym = default;
                 this.tsym = default;
                 this.type_ = default;
                 this.mtype = default;
-                this.offset = default;
             }
 
-            public Sig(@string name = default, ref ptr<types.Pkg> pkg = default, ref ptr<types.Sym> isym = default, ref ptr<types.Sym> tsym = default, ref ptr<types.Type> type_ = default, ref ptr<types.Type> mtype = default, int offset = default)
+            public Sig(ref ptr<types.Sym> name = default, ref ptr<types.Sym> isym = default, ref ptr<types.Sym> tsym = default, ref ptr<types.Type> type_ = default, ref ptr<types.Type> mtype = default)
             {
                 this.name = name;
-                this.pkg = pkg;
                 this.isym = isym;
                 this.tsym = tsym;
                 this.type_ = type_;
                 this.mtype = mtype;
-                this.offset = offset;
             }
 
             // Enable comparisons between nil and Sig struct
@@ -78,7 +74,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Sig Sig_cast(dynamic value)
         {
-            return new Sig(value.name, ref value.pkg, ref value.isym, ref value.tsym, ref value.type_, ref value.mtype, value.offset);
+            return new Sig(ref value.name, ref value.isym, ref value.tsym, ref value.type_, ref value.mtype);
         }
     }
 }}}}

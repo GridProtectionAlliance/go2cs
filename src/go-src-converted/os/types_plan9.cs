@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 August 29 08:44:36 UTC
+// package os -- go2cs converted at 2020 October 08 03:45:22 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\types_plan9.go
 using syscall = go.syscall_package;
@@ -22,31 +22,42 @@ namespace go
             public time.Time modTime;
         }
 
-        private static long Size(this ref fileStat fs)
+        private static long Size(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.size;
         }
-        private static FileMode Mode(this ref fileStat fs)
+        private static FileMode Mode(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.mode;
         }
-        private static time.Time ModTime(this ref fileStat fs)
+        private static time.Time ModTime(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.modTime;
         }
-        private static void Sys(this ref fileStat fs)
+        private static void Sys(this ptr<fileStat> _addr_fs)
         {
+            ref fileStat fs = ref _addr_fs.val;
+
             return fs.sys;
         }
 
-        private static bool sameFile(ref fileStat fs1, ref fileStat fs2)
+        private static bool sameFile(ptr<fileStat> _addr_fs1, ptr<fileStat> _addr_fs2)
         {
-            ref syscall.Dir a = fs1.sys._<ref syscall.Dir>();
-            ref syscall.Dir b = fs2.sys._<ref syscall.Dir>();
+            ref fileStat fs1 = ref _addr_fs1.val;
+            ref fileStat fs2 = ref _addr_fs2.val;
+
+            ptr<syscall.Dir> a = fs1.sys._<ptr<syscall.Dir>>();
+            ptr<syscall.Dir> b = fs2.sys._<ptr<syscall.Dir>>();
             return a.Qid.Path == b.Qid.Path && a.Type == b.Type && a.Dev == b.Dev;
         }
 
-        private static readonly long badFd = -1L;
+        private static readonly long badFd = (long)-1L;
 
     }
 }

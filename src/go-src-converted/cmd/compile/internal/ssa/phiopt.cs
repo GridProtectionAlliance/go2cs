@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:54:42 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:11:23 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\phiopt.go
 
@@ -34,15 +34,18 @@ namespace @internal
         //   x = (OpPhi (ConstBool [true]) (ConstBool [false]))
         //
         // In this case we can replace x with a copy of b.
-        private static void phiopt(ref Func f)
+        private static void phiopt(ptr<Func> _addr_f)
         {
-            var sdom = f.sdom();
+            ref Func f = ref _addr_f.val;
+
+            var sdom = f.Sdom();
             foreach (var (_, b) in f.Blocks)
             {
                 if (len(b.Preds) != 2L || len(b.Values) == 0L)
                 { 
                     // TODO: handle more than 2 predecessors, e.g. a || b || c.
                     continue;
+
                 }
                 var pb0 = b;
                 var b0 = b.Preds[0L].b;
@@ -50,6 +53,7 @@ namespace @internal
                 {
                     pb0 = b0;
                     b0 = b0.Preds[0L].b;
+
                 }
                 if (b0.Kind != BlockIf)
                 {
@@ -61,6 +65,7 @@ namespace @internal
                 {
                     pb1 = b1;
                     b1 = b1.Preds[0L].b;
+
                 }
                 if (b1 != b0)
                 {
@@ -87,7 +92,7 @@ namespace @internal
                     }
                     if (v.Type.IsInteger())
                     {
-                        phioptint(v, b0, reverse);
+                        phioptint(_addr_v, _addr_b0, reverse);
                     }
                     if (!v.Type.IsBoolean())
                     {
@@ -99,12 +104,13 @@ namespace @internal
                         {
                             array<Op> ops = new array<Op>(new Op[] { OpNot, OpCopy });
                             v.reset(ops[v.Args[reverse].AuxInt]);
-                            v.AddArg(b0.Control);
+                            v.AddArg(b0.Controls[0L]);
                             if (f.pass.debug > 0L)
                             {
                                 f.Warnl(b.Pos, "converted OpPhi to %v", v.Op);
                             }
                             continue;
+
                         }
                     }
                     if (v.Args[reverse].Op == OpConstBool && v.Args[reverse].AuxInt == 1L)
@@ -114,19 +120,21 @@ namespace @internal
 
                             var tmp = v.Args[1L - reverse];
 
-                            if (sdom.isAncestorEq(tmp.Block, b))
+                            if (sdom.IsAncestorEq(tmp.Block, b))
                             {
                                 v.reset(OpOrB);
-                                v.SetArgs2(b0.Control, tmp);
+                                v.SetArgs2(b0.Controls[0L], tmp);
                                 if (f.pass.debug > 0L)
                                 {
                                     f.Warnl(b.Pos, "converted OpPhi to %v", v.Op);
                                 }
                                 continue;
+
                             }
                             tmp = tmp__prev2;
 
                         }
+
                     }
                     if (v.Args[1L - reverse].Op == OpConstBool && v.Args[1L - reverse].AuxInt == 0L)
                     {
@@ -135,45 +143,61 @@ namespace @internal
 
                             tmp = v.Args[reverse];
 
-                            if (sdom.isAncestorEq(tmp.Block, b))
+                            if (sdom.IsAncestorEq(tmp.Block, b))
                             {
                                 v.reset(OpAndB);
-                                v.SetArgs2(b0.Control, tmp);
+                                v.SetArgs2(b0.Controls[0L], tmp);
                                 if (f.pass.debug > 0L)
                                 {
                                     f.Warnl(b.Pos, "converted OpPhi to %v", v.Op);
                                 }
                                 continue;
+
                             }
                             tmp = tmp__prev2;
 
                         }
+
                     }
                 }
             }
         }
 
-        private static void phioptint(ref Value v, ref Block b0, long reverse)
+        private static void phioptint(ptr<Value> _addr_v, ptr<Block> _addr_b0, long reverse)
         {
+            ref Value v = ref _addr_v.val;
+            ref Block b0 = ref _addr_b0.val;
+
             var a0 = v.Args[0L];
             var a1 = v.Args[1L];
             if (a0.Op != a1.Op)
             {
-                return;
+                return ;
             }
 
+
             if (a0.Op == OpConst8 || a0.Op == OpConst16 || a0.Op == OpConst32 || a0.Op == OpConst64)             else 
-                return;
+                return ;
                         var negate = false;
 
             if (a0.AuxInt == 0L && a1.AuxInt == 1L) 
                 negate = true;
             else if (a0.AuxInt == 1L && a1.AuxInt == 0L)             else 
-                return;
+                return ;
                         if (reverse == 1L)
             {
                 negate = !negate;
             }
+
+            var a = b0.Controls[0L];
+            if (negate)
+            {
+                a = v.Block.NewValue1(v.Pos, OpNot, a.Type, a);
+            }
+
+            v.AddArg(a);
+
+            var cvt = v.Block.NewValue1(v.Pos, OpCvtBoolToUint8, v.Block.Func.Config.Types.UInt8, a);
             switch (v.Type.Size())
             {
                 case 1L: 
@@ -192,19 +216,14 @@ namespace @internal
                     v.Fatalf("bad int size %d", v.Type.Size());
                     break;
             }
-
-            var a = b0.Control;
-            if (negate)
-            {
-                a = v.Block.NewValue1(v.Pos, OpNot, a.Type, a);
-            }
-            v.AddArg(a);
+            v.AddArg(cvt);
 
             var f = b0.Func;
             if (f.pass.debug > 0L)
             {
                 f.Warnl(v.Block.Pos, "converted OpPhi bool -> int%d", v.Type.Size() * 8L);
             }
+
         }
     }
 }}}}

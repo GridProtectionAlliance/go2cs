@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:48:02 UTC
+//     Generated on 2020 October 08 04:03:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
                 this.vars = default;
             }
 
-            public Tuple(slice<ref Var> vars = default)
+            public Tuple(slice<ptr<Var>> vars = default)
             {
                 this.vars = vars;
             }

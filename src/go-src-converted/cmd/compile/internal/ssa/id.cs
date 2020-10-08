@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 August 29 08:53:56 UTC
+// package ssa -- go2cs converted at 2020 October 08 04:10:34 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\id.go
 
@@ -26,21 +26,27 @@ namespace @internal
         }
 
         // get allocates an ID and returns it. IDs are always > 0.
-        private static ID get(this ref idAlloc _a) => func(_a, (ref idAlloc a, Defer _, Panic panic, Recover __) =>
+        private static ID get(this ptr<idAlloc> _addr_a) => func((_, panic, __) =>
         {
+            ref idAlloc a = ref _addr_a.val;
+
             var x = a.last;
             x++;
             if (x == 1L << (int)(31L) - 1L)
             {
                 panic("too many ids for this function");
             }
+
             a.last = x;
             return x;
+
         });
 
         // num returns the maximum ID ever returned + 1.
-        private static long num(this ref idAlloc a)
+        private static long num(this ptr<idAlloc> _addr_a)
         {
+            ref idAlloc a = ref _addr_a.val;
+
             return int(a.last + 1L);
         }
     }

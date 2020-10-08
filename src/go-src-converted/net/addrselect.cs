@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
 // Minimal RFC 6724 address selection.
 
-// package net -- go2cs converted at 2020 August 29 08:25:06 UTC
+// package net -- go2cs converted at 2020 October 08 03:31:09 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\addrselect.go
 using sort = go.sort_package;
@@ -20,9 +20,10 @@ namespace go
         {
             if (len(addrs) < 2L)
             {
-                return;
+                return ;
             }
             sortByRFC6724withSrcs(addrs, srcAddrs(addrs));
+
         }
 
         private static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<IP> srcs) => func((_, panic, __) =>
@@ -31,6 +32,7 @@ namespace go
             {
                 panic("internal error");
             }
+
             var addrAttr = make_slice<ipAttr>(len(addrs));
             var srcAttr = make_slice<ipAttr>(len(srcs));
             foreach (var (i, v) in addrs)
@@ -38,7 +40,8 @@ namespace go
                 addrAttr[i] = ipAttrOf(v.IP);
                 srcAttr[i] = ipAttrOf(srcs[i]);
             }
-            sort.Stable(ref new byRFC6724(addrs:addrs,addrAttr:addrAttr,srcs:srcs,srcAttr:srcAttr,));
+            sort.Stable(addr(new byRFC6724(addrs:addrs,addrAttr:addrAttr,srcs:srcs,srcAttr:srcAttr,)));
+
         });
 
         // srcsAddrs tries to UDP-connect to each address to see if it has a
@@ -47,16 +50,16 @@ namespace go
         private static slice<IP> srcAddrs(slice<IPAddr> addrs)
         {
             var srcs = make_slice<IP>(len(addrs));
-            UDPAddr dst = new UDPAddr(Port:9);
+            ref UDPAddr dst = ref heap(new UDPAddr(Port:9), out ptr<UDPAddr> _addr_dst);
             foreach (var (i) in addrs)
             {
                 dst.IP = addrs[i].IP;
                 dst.Zone = addrs[i].Zone;
-                var (c, err) = DialUDP("udp", null, ref dst);
+                var (c, err) = DialUDP("udp", null, _addr_dst);
                 if (err == null)
                 {
                     {
-                        ref UDPAddr (src, ok) = c.LocalAddr()._<ref UDPAddr>();
+                        ptr<UDPAddr> (src, ok) = c.LocalAddr()._<ptr<UDPAddr>>();
 
                         if (ok)
                         {
@@ -64,10 +67,14 @@ namespace go
                         }
 
                     }
+
                     c.Close();
+
                 }
+
             }
             return srcs;
+
         }
 
         private partial struct ipAttr
@@ -83,8 +90,10 @@ namespace go
             {
                 return new ipAttr();
             }
+
             var match = rfc6724policyTable.Classify(ip);
             return new ipAttr(Scope:classifyScope(ip),Precedence:match.Precedence,Label:match.Label,);
+
         }
 
         private partial struct byRFC6724
@@ -95,13 +104,17 @@ namespace go
             public slice<ipAttr> srcAttr;
         }
 
-        private static long Len(this ref byRFC6724 s)
+        private static long Len(this ptr<byRFC6724> _addr_s)
         {
+            ref byRFC6724 s = ref _addr_s.val;
+
             return len(s.addrs);
         }
 
-        private static void Swap(this ref byRFC6724 s, long i, long j)
+        private static void Swap(this ptr<byRFC6724> _addr_s, long i, long j)
         {
+            ref byRFC6724 s = ref _addr_s.val;
+
             s.addrs[i] = s.addrs[j];
             s.addrs[j] = s.addrs[i];
             s.srcs[i] = s.srcs[j];
@@ -110,26 +123,29 @@ namespace go
             s.addrAttr[j] = s.addrAttr[i];
             s.srcAttr[i] = s.srcAttr[j];
             s.srcAttr[j] = s.srcAttr[i];
+
         }
 
         // Less reports whether i is a better destination address for this
         // host than j.
         //
         // The algorithm and variable names comes from RFC 6724 section 6.
-        private static bool Less(this ref byRFC6724 s, long i, long j)
+        private static bool Less(this ptr<byRFC6724> _addr_s, long i, long j)
         {
+            ref byRFC6724 s = ref _addr_s.val;
+
             var DA = s.addrs[i].IP;
             var DB = s.addrs[j].IP;
             var SourceDA = s.srcs[i];
             var SourceDB = s.srcs[j];
-            var attrDA = ref s.addrAttr[i];
-            var attrDB = ref s.addrAttr[j];
-            var attrSourceDA = ref s.srcAttr[i];
-            var attrSourceDB = ref s.srcAttr[j];
+            var attrDA = _addr_s.addrAttr[i];
+            var attrDB = _addr_s.addrAttr[j];
+            var attrSourceDA = _addr_s.srcAttr[i];
+            var attrSourceDB = _addr_s.srcAttr[j];
 
-            const var preferDA = true;
+            const var preferDA = (var)true;
 
-            const var preferDB = false; 
+            const var preferDB = (var)false; 
 
             // Rule 1: Avoid unusable destinations.
             // If DB is known to be unreachable or if Source(DB) is undefined, then
@@ -145,10 +161,12 @@ namespace go
             {
                 return false; // "equal"
             }
+
             if (SourceDB == null)
             {
                 return preferDA;
             }
+
             if (SourceDA == null)
             {
                 return preferDB;
@@ -162,6 +180,7 @@ namespace go
             {
                 return preferDA;
             }
+
             if (attrDA.Scope != attrSourceDA.Scope && attrDB.Scope == attrSourceDB.Scope)
             {
                 return preferDB;
@@ -190,6 +209,7 @@ namespace go
             {
                 return preferDA;
             }
+
             if (attrSourceDA.Label != attrDA.Label && attrSourceDB.Label == attrDB.Label)
             {
                 return preferDB;
@@ -202,6 +222,7 @@ namespace go
             {
                 return preferDA;
             }
+
             if (attrDA.Precedence < attrDB.Precedence)
             {
                 return preferDB;
@@ -221,6 +242,7 @@ namespace go
             {
                 return preferDA;
             }
+
             if (attrDA.Scope > attrDB.Scope)
             {
                 return preferDB;
@@ -244,10 +266,12 @@ namespace go
                 {
                     return preferDA;
                 }
+
                 if (commonA < commonB)
                 {
                     return preferDB;
                 }
+
             } 
 
             // Rule 10: Otherwise, leave the order unchanged.
@@ -289,7 +313,6 @@ namespace go
         {
             s[i] = s[j];
             s[j] = s[i];
-
         }
         private static bool Less(this byMaskLength s, long i, long j)
         {
@@ -300,18 +323,21 @@ namespace go
 
         // mustCIDR calls ParseCIDR and panics on any error, or if the network
         // is not IPv6.
-        private static ref IPNet mustCIDR(@string s) => func((_, panic, __) =>
+        private static ptr<IPNet> mustCIDR(@string s) => func((_, panic, __) =>
         {
             var (ip, ipNet, err) = ParseCIDR(s);
             if (err != null)
             {
                 panic(err.Error());
             }
+
             if (len(ip) != IPv6len)
             {
                 panic("unexpected IP length");
             }
-            return ipNet;
+
+            return _addr_ipNet!;
+
         });
 
         // Classify returns the policyTableEntry of the entry with the longest
@@ -325,8 +351,10 @@ namespace go
                 {
                     return ent;
                 }
+
             }
             return new policyTableEntry();
+
         }
 
         // RFC 6724 section 3.1.
@@ -334,12 +362,13 @@ namespace go
         {
         }
 
-        private static readonly scope scopeInterfaceLocal = 0x1UL;
-        private static readonly scope scopeLinkLocal = 0x2UL;
-        private static readonly scope scopeAdminLocal = 0x4UL;
-        private static readonly scope scopeSiteLocal = 0x5UL;
-        private static readonly scope scopeOrgLocal = 0x8UL;
-        private static readonly scope scopeGlobal = 0xeUL;
+        private static readonly scope scopeInterfaceLocal = (scope)0x1UL;
+        private static readonly scope scopeLinkLocal = (scope)0x2UL;
+        private static readonly scope scopeAdminLocal = (scope)0x4UL;
+        private static readonly scope scopeSiteLocal = (scope)0x5UL;
+        private static readonly scope scopeOrgLocal = (scope)0x8UL;
+        private static readonly scope scopeGlobal = (scope)0xeUL;
+
 
         private static scope classifyScope(IP ip)
         {
@@ -347,6 +376,7 @@ namespace go
             {
                 return scopeLinkLocal;
             }
+
             var ipv6 = len(ip) == IPv6len && ip.To4() == null;
             if (ipv6 && ip.IsMulticast())
             {
@@ -358,7 +388,9 @@ namespace go
             {
                 return scopeSiteLocal;
             }
+
             return scopeGlobal;
+
         }
 
         // commonPrefixLen reports the length of the longest prefix (looking
@@ -373,6 +405,8 @@ namespace go
         // See https://tools.ietf.org/html/rfc6724#section-2.2
         private static long commonPrefixLen(IP a, IP b)
         {
+            long cpl = default;
+
             {
                 var a4 = a.To4();
 
@@ -382,6 +416,7 @@ namespace go
                 }
 
             }
+
             {
                 var b4 = b.To4();
 
@@ -391,6 +426,7 @@ namespace go
                 }
 
             }
+
             if (len(a) != len(b))
             {
                 return 0L;
@@ -401,6 +437,7 @@ namespace go
                 a = a[..8L];
                 b = b[..8L];
             }
+
             while (len(a) > 0L)
             {
                 if (a[0L] == b[0L])
@@ -410,6 +447,7 @@ namespace go
                     b = b[1L..];
                     continue;
                 }
+
                 long bits = 8L;
                 var ab = a[0L];
                 var bb = b[0L];
@@ -421,13 +459,16 @@ namespace go
                     if (ab == bb)
                     {
                         cpl += bits;
-                        return;
+                        return ;
                     }
+
                 }
+
 
             }
 
-            return;
+            return ;
+
         }
     }
 }

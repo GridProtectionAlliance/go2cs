@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 08:25:16 UTC
+//     Generated on 2020 October 08 03:31:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,7 +15,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using context = go.context_package;
 using nettrace = go.@internal.nettrace_package;
-using poll = go.@internal.poll_package;
+using syscall = go.syscall_package;
 using time = go.time_package;
 
 namespace go
@@ -25,6 +25,16 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private partial struct dialResult
         {
+            // Conn.SyscallConn function promotion
+            private delegate (RawConn, error) SyscallConnByVal(T value);
+            private delegate (RawConn, error) SyscallConnByRef(ref T value);
+
+            private static readonly SyscallConnByVal s_SyscallConnByVal;
+            private static readonly SyscallConnByRef s_SyscallConnByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public (RawConn, error) SyscallConn() => s_SyscallConnByRef?.Invoke(ref this) ?? s_SyscallConnByVal?.Invoke(this) ?? Conn?.SyscallConn() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+
             // error.Error function promotion
             private delegate @string ErrorByVal(T value);
             private delegate @string ErrorByRef(ref T value);
@@ -40,6 +50,16 @@ namespace go
             {
                 Type targetType = typeof(dialResult);
                 MethodInfo extensionMethod;
+                
+                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("SyscallConn");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_SyscallConnByRef = extensionMethod.CreateStaticDelegate(typeof(SyscallConnByRef)) as SyscallConnByRef;
+
+                    if ((object)s_SyscallConnByRef == null)
+                        s_SyscallConnByVal = extensionMethod.CreateStaticDelegate(typeof(SyscallConnByVal)) as SyscallConnByVal;
+                }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Error");
 

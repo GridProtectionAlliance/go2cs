@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package time -- go2cs converted at 2020 August 29 08:42:37 UTC
+// package time -- go2cs converted at 2020 October 08 03:46:00 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\zoneinfo_windows.go
 using errors = go.errors_package;
@@ -29,11 +29,15 @@ namespace go
         // from Vista) in the kname key stored under the open registry key zones.
         private static (bool, error) matchZoneKey(registry.Key zones, @string kname, @string stdname, @string dstname) => func((defer, _, __) =>
         {
+            bool matched = default;
+            error err2 = default!;
+
             var (k, err) = registry.OpenKey(zones, kname, registry.READ);
             if (err != null)
             {
-                return (false, err);
+                return (false, error.As(err)!);
             }
+
             defer(k.Close());
 
             @string std = default;            @string dlt = default;
@@ -48,58 +52,73 @@ namespace go
                 {
                     dlt, err = k.GetMUIStringValue("MUI_Dlt");
                 }
+
             }
+
             if (err != null)
             { // Fallback to Std and Dlt
                 std, _, err = k.GetStringValue("Std");
 
                 if (err != null)
                 {
-                    return (false, err);
+                    return (false, error.As(err)!);
                 }
+
                 dlt, _, err = k.GetStringValue("Dlt");
 
                 if (err != null)
                 {
-                    return (false, err);
+                    return (false, error.As(err)!);
                 }
+
             }
+
             if (std != stdname)
             {
-                return (false, null);
+                return (false, error.As(null!)!);
             }
+
             if (dlt != dstname && dstname != stdname)
             {
-                return (false, null);
+                return (false, error.As(null!)!);
             }
-            return (true, null);
+
+            return (true, error.As(null!)!);
+
         });
 
         // toEnglishName searches the registry for an English name of a time zone
         // whose zone names are stdname and dstname and returns the English name.
         private static (@string, error) toEnglishName(@string stdname, @string dstname) => func((defer, _, __) =>
         {
+            @string _p0 = default;
+            error _p0 = default!;
+
             var (k, err) = registry.OpenKey(registry.LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones", registry.ENUMERATE_SUB_KEYS | registry.QUERY_VALUE);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             defer(k.Close());
 
             var (names, err) = k.ReadSubKeyNames(-1L);
             if (err != null)
             {
-                return ("", err);
+                return ("", error.As(err)!);
             }
+
             foreach (var (_, name) in names)
             {
                 var (matched, err) = matchZoneKey(k, name, stdname, dstname);
                 if (err == null && matched)
                 {
-                    return (name, null);
+                    return (name, error.As(null!)!);
                 }
+
             }
-            return ("", errors.New("English name for time zone \"" + stdname + "\" not found in registry"));
+            return ("", error.As(errors.New("English name for time zone \"" + stdname + "\" not found in registry"))!);
+
         });
 
         // extractCAPS extracts capital letters from description desc.
@@ -112,13 +131,19 @@ namespace go
                 {
                     short = append(short, c);
                 }
+
             }
             return string(short);
+
         }
 
         // abbrev returns the abbreviations to use for the given zone z.
-        private static (@string, @string) abbrev(ref syscall.Timezoneinformation z)
+        private static (@string, @string) abbrev(ptr<syscall.Timezoneinformation> _addr_z)
         {
+            @string std = default;
+            @string dst = default;
+            ref syscall.Timezoneinformation z = ref _addr_z.val;
+
             var stdName = syscall.UTF16ToString(z.StandardName[..]);
             var (a, ok) = abbrs[stdName];
             if (!ok)
@@ -133,18 +158,24 @@ namespace go
                     {
                         return (a.std, a.dst);
                     }
+
                 } 
                 // fallback to using capital letters
                 return (extractCAPS(stdName), extractCAPS(dstName));
+
             }
+
             return (a.std, a.dst);
+
         }
 
         // pseudoUnix returns the pseudo-Unix time (seconds since Jan 1 1970 *LOCAL TIME*)
         // denoted by the system date+time d in the given year.
         // It is up to the caller to convert this local time into a UTC-based time.
-        private static long pseudoUnix(long year, ref syscall.Systemtime d)
-        { 
+        private static long pseudoUnix(long year, ptr<syscall.Systemtime> _addr_d)
+        {
+            ref syscall.Systemtime d = ref _addr_d.val;
+ 
             // Windows specifies daylight savings information in "day in month" format:
             // d.Month is month number (1-12)
             // d.DayOfWeek is appropriate weekday (Sunday=0 to Saturday=6)
@@ -157,6 +188,7 @@ namespace go
             {
                 i += 7L;
             }
+
             day += i;
             {
                 var week = int(d.Day) - 1L;
@@ -173,15 +205,20 @@ namespace go
                     {
                         day -= 7L;
                     }
+
                 }
 
             }
+
             return t.sec() + int64(day - 1L) * secondsPerDay + internalToUnix;
+
         }
 
-        private static void initLocalFromTZI(ref syscall.Timezoneinformation i)
+        private static void initLocalFromTZI(ptr<syscall.Timezoneinformation> _addr_i)
         {
-            var l = ref localLoc;
+            ref syscall.Timezoneinformation i = ref _addr_i.val;
+
+            var l = _addr_localLoc;
 
             l.name = "Local";
 
@@ -190,11 +227,12 @@ namespace go
             {
                 nzone++;
             }
+
             l.zone = make_slice<zone>(nzone);
 
-            var (stdname, dstname) = abbrev(i);
+            var (stdname, dstname) = abbrev(_addr_i);
 
-            var std = ref l.zone[0L];
+            var std = _addr_l.zone[0L];
             std.name = stdname;
             if (nzone == 1L)
             { 
@@ -206,7 +244,8 @@ namespace go
                 l.tx = make_slice<zoneTrans>(1L);
                 l.tx[0L].when = l.cacheStart;
                 l.tx[0L].index = 0L;
-                return;
+                return ;
+
             } 
 
             // StandardBias must be ignored if StandardDate is not set,
@@ -214,15 +253,15 @@ namespace go
             // return above.
             std.offset = -int(i.Bias + i.StandardBias) * 60L;
 
-            var dst = ref l.zone[1L];
+            var dst = _addr_l.zone[1L];
             dst.name = dstname;
             dst.offset = -int(i.Bias + i.DaylightBias) * 60L;
             dst.isDST = true; 
 
             // Arrange so that d0 is first transition date, d1 second,
             // i0 is index of zone after first transition, i1 second.
-            var d0 = ref i.StandardDate;
-            var d1 = ref i.DaylightDate;
+            var d0 = _addr_i.StandardDate;
+            var d1 = _addr_i.DaylightDate;
             long i0 = 0L;
             long i1 = 1L;
             if (d0.Month > d1.Month)
@@ -231,6 +270,7 @@ namespace go
                 d1 = d0;
                 i0 = i1;
                 i1 = i0;
+
             } 
 
             // 2 tx per year, 100 years on each side of this year
@@ -241,16 +281,17 @@ namespace go
             long txi = 0L;
             for (var y = year - 100L; y < year + 100L; y++)
             {
-                var tx = ref l.tx[txi];
-                tx.when = pseudoUnix(y, d0) - int64(l.zone[i1].offset);
+                var tx = _addr_l.tx[txi];
+                tx.when = pseudoUnix(y, _addr_d0) - int64(l.zone[i1].offset);
                 tx.index = uint8(i0);
                 txi++;
 
-                tx = ref l.tx[txi];
-                tx.when = pseudoUnix(y, d1) - int64(l.zone[i0].offset);
+                tx = _addr_l.tx[txi];
+                tx.when = pseudoUnix(y, _addr_d1) - int64(l.zone[i0].offset);
                 tx.index = uint8(i1);
                 txi++;
             }
+
 
         }
 
@@ -260,18 +301,20 @@ namespace go
 
         private static void initLocal()
         {
-            syscall.Timezoneinformation i = default;
+            ref syscall.Timezoneinformation i = ref heap(out ptr<syscall.Timezoneinformation> _addr_i);
             {
-                var (_, err) = syscall.GetTimeZoneInformation(ref i);
+                var (_, err) = syscall.GetTimeZoneInformation(_addr_i);
 
                 if (err != null)
                 {
                     localLoc.name = "UTC";
-                    return;
+                    return ;
                 }
 
             }
-            initLocalFromTZI(ref i);
+
+            initLocalFromTZI(_addr_i);
+
         }
     }
 }

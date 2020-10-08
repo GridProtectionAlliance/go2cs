@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 August 29 08:45:00 UTC
+// package cmplx -- go2cs converted at 2020 October 08 03:25:54 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\polar.go
 
@@ -18,6 +18,9 @@ namespace math
         // The phase is in the range [-Pi, Pi].
         public static (double, double) Polar(System.Numerics.Complex128 x)
         {
+            double r = default;
+            double θ = default;
+
             return (Abs(x), Phase(x));
         }
     }

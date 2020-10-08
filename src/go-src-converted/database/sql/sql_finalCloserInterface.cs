@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 29 10:11:00 UTC
+//     Generated on 2020 October 08 04:58:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using io = go.io_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
+using strconv = go.strconv_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -60,7 +61,7 @@ namespace database
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -74,10 +75,10 @@ namespace database
                 m_target_is_ptr = true;
             }
 
-            private delegate error finalCloseByRef(ref T value);
+            private delegate error finalCloseByPtr(ptr<T> value);
             private delegate error finalCloseByVal(T value);
 
-            private static readonly finalCloseByRef s_finalCloseByRef;
+            private static readonly finalCloseByPtr s_finalCloseByPtr;
             private static readonly finalCloseByVal s_finalCloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,11 +87,12 @@ namespace database
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_finalCloseByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_finalCloseByPtr is null || !m_target_is_ptr)
                     return s_finalCloseByVal!(target);
 
-                return s_finalCloseByRef(ref target);
+                return s_finalCloseByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -99,23 +101,20 @@ namespace database
             static finalCloser()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("finalClose");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("finalClose");
 
                 if (!(extensionMethod is null))
-                    s_finalCloseByRef = extensionMethod.CreateStaticDelegate(typeof(finalCloseByRef)) as finalCloseByRef;
+                    s_finalCloseByPtr = extensionMethod.CreateStaticDelegate(typeof(finalCloseByPtr)) as finalCloseByPtr;
 
-                if (s_finalCloseByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("finalClose");
+                extensionMethod = targetType.GetExtensionMethod("finalClose");
 
-                    if (!(extensionMethod is null))
-                        s_finalCloseByVal = extensionMethod.CreateStaticDelegate(typeof(finalCloseByVal)) as finalCloseByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_finalCloseByVal = extensionMethod.CreateStaticDelegate(typeof(finalCloseByVal)) as finalCloseByVal;
 
-                if (s_finalCloseByRef is null && s_finalCloseByVal is null)
+                if (s_finalCloseByPtr is null && s_finalCloseByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement finalCloser.finalClose method", new Exception("finalClose"));
             }
 
